@@ -74,7 +74,6 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Config.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DatabaseConfig.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ArtProvider.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_CodeTemplateManager.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_CodeTemplateProcessor.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FRError.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Observer.obj \
@@ -156,6 +155,7 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemURIHandlerHelper.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemVisitor.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataTemplateCmdHandler.obj \
+	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataTemplateManager.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_parameter.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_privilege.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_procedure.obj \
@@ -370,9 +370,6 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DatabaseConfig.obj: .\src
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ArtProvider.obj: .\src\core\ArtProvider.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\core\ArtProvider.cpp
-
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_CodeTemplateManager.obj: .\src\core\CodeTemplateManager.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\core\CodeTemplateManager.cpp
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_CodeTemplateProcessor.obj: .\src\core\CodeTemplateProcessor.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\core\CodeTemplateProcessor.cpp
@@ -616,6 +613,9 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemVisitor.obj: 
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataTemplateCmdHandler.obj: .\src\metadata\MetadataTemplateCmdHandler.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\MetadataTemplateCmdHandler.cpp
+
+vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataTemplateManager.obj: .\src\metadata\MetadataTemplateManager.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\MetadataTemplateManager.cpp
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_parameter.obj: .\src\metadata\parameter.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\parameter.cpp

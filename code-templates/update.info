@@ -1,5 +1,5 @@
 [templateInfo]
-menuCaption=Update ... set ...
+menuCaption=Update {%object_name%} set ...
 menuPosition=30
 matchesType=TABLE
-matchesName=^((?!RDB\$).)*$
+matchesWhen={%ifeq:{%is_system%}:true:false:true%}

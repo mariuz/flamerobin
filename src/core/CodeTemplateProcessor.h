@@ -39,7 +39,7 @@ protected:
         const TemplateCmdParams& cmdParams, ProcessableObject* object,
         wxString& processedText);
 public:
-    CodeTemplateProcessor(ProcessableObject *object, wxWindow *window);
+    CodeTemplateProcessor(ProcessableObject* object, wxWindow* window);
     virtual wxString escapeChars(const wxString& input,
         bool processNewlines = true);
 };

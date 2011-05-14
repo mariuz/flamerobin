@@ -1,5 +1,5 @@
 [templateInfo]
-menuCaption=Select ... from ...
+menuCaption=Select ... from {%object_name%}
 menuPosition=10
 matchesType=TABLE
-matchesName=.*
+

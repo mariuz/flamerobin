@@ -39,7 +39,6 @@
 #include <wx/menu.h>
 
 #include "config/Config.h"
-#include "core/CodeTemplateManager.h"
 #include "gui/CommandIds.h"
 #include "gui/ContextMenuMetadataItemVisitor.h"
 #include "metadata/column.h"
@@ -48,6 +47,7 @@
 #include "metadata/exception.h"
 #include "metadata/function.h"
 #include "metadata/generator.h"
+#include "metadata/MetadataTemplateManager.h"
 #include "metadata/procedure.h"
 #include "metadata/role.h"
 #include "metadata/root.h"
@@ -384,7 +384,7 @@ void ContextMenuMetadataItemVisitor::addDropItem(MetadataItem& metadataItem)
 void ContextMenuMetadataItemVisitor::addGenerateCodeMenu(
     MetadataItem& metadataItem)
 {
-    CodeTemplateManager tm(metadataItem);
+    MetadataTemplateManager tm(&metadataItem);
     if (tm.descriptorsBegin() == tm.descriptorsEnd())
         return;
 

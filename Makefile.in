@@ -48,7 +48,6 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_Config.o \
 	flamerobin_DatabaseConfig.o \
 	flamerobin_ArtProvider.o \
-	flamerobin_CodeTemplateManager.o \
 	flamerobin_CodeTemplateProcessor.o \
 	flamerobin_FRError.o \
 	flamerobin_Observer.o \
@@ -130,6 +129,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_MetadataItemURIHandlerHelper.o \
 	flamerobin_MetadataItemVisitor.o \
 	flamerobin_MetadataTemplateCmdHandler.o \
+	flamerobin_MetadataTemplateManager.o \
 	flamerobin_parameter.o \
 	flamerobin_privilege.o \
 	flamerobin_procedure.o \
@@ -326,9 +326,6 @@ flamerobin_DatabaseConfig.o: $(srcdir)/src/config/DatabaseConfig.cpp $(FLAMEROBI
 
 flamerobin_ArtProvider.o: $(srcdir)/src/core/ArtProvider.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/ArtProvider.cpp
-
-flamerobin_CodeTemplateManager.o: $(srcdir)/src/core/CodeTemplateManager.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/CodeTemplateManager.cpp
 
 flamerobin_CodeTemplateProcessor.o: $(srcdir)/src/core/CodeTemplateProcessor.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/core/CodeTemplateProcessor.cpp
@@ -572,6 +569,9 @@ flamerobin_MetadataItemVisitor.o: $(srcdir)/src/metadata/MetadataItemVisitor.cpp
 
 flamerobin_MetadataTemplateCmdHandler.o: $(srcdir)/src/metadata/MetadataTemplateCmdHandler.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/MetadataTemplateCmdHandler.cpp
+
+flamerobin_MetadataTemplateManager.o: $(srcdir)/src/metadata/MetadataTemplateManager.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/MetadataTemplateManager.cpp
 
 flamerobin_parameter.o: $(srcdir)/src/metadata/parameter.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/parameter.cpp

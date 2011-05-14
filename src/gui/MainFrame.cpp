@@ -47,7 +47,6 @@
 #include "config/Config.h"
 #include "config/DatabaseConfig.h"
 #include "core/ArtProvider.h"
-#include "core/CodeTemplateManager.h"
 #include "core/CodeTemplateProcessor.h"
 #include "core/FRError.h"
 #include "core/URIProcessor.h"
@@ -76,6 +75,7 @@
 #include "metadata/domain.h"
 #include "metadata/generator.h"
 #include "metadata/MetadataItemCreateStatementVisitor.h"
+#include "metadata/MetadataTemplateManager.h"
 #include "metadata/procedure.h"
 #include "metadata/root.h"
 #include "metadata/server.h"
@@ -834,7 +834,7 @@ void MainFrame::OnMenuGenerateScript(wxCommandEvent& event)
     if (!checkValidDatabase(database))
         return;
 
-    CodeTemplateManager tm(*mi);
+    MetadataTemplateManager tm(mi);
 
     int i = (int)Cmds::Menu_TemplateFirst;
     for (TemplateDescriptorList::const_iterator it = tm.descriptorsBegin();

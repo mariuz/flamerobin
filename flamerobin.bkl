@@ -238,7 +238,6 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/config/Config.h
         $(SOURCEDIR)/config/DatabaseConfig.h
         $(SOURCEDIR)/core/ArtProvider.h
-        $(SOURCEDIR)/core/CodeTemplateManager.h
         $(SOURCEDIR)/core/CodeTemplateProcessor.h
         $(SOURCEDIR)/core/FRError.h
         $(SOURCEDIR)/core/ObjectWithHandle.h
@@ -323,6 +322,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/metadata/MetadataItemDescriptionVisitor.h
         $(SOURCEDIR)/metadata/MetadataItemURIHandlerHelper.h
         $(SOURCEDIR)/metadata/MetadataItemVisitor.h
+        $(SOURCEDIR)/metadata/MetadataTemplateManager.h
         $(SOURCEDIR)/metadata/parameter.h
         $(SOURCEDIR)/metadata/privilege.h
         $(SOURCEDIR)/metadata/procedure.h
@@ -361,7 +361,6 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/config/Config.cpp
         $(SOURCEDIR)/config/DatabaseConfig.cpp
         $(SOURCEDIR)/core/ArtProvider.cpp
-        $(SOURCEDIR)/core/CodeTemplateManager.cpp
         $(SOURCEDIR)/core/CodeTemplateProcessor.cpp
         $(SOURCEDIR)/core/FRError.cpp
         $(SOURCEDIR)/core/Observer.cpp
@@ -443,6 +442,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/metadata/MetadataItemURIHandlerHelper.cpp
         $(SOURCEDIR)/metadata/MetadataItemVisitor.cpp
         $(SOURCEDIR)/metadata/MetadataTemplateCmdHandler.cpp
+        $(SOURCEDIR)/metadata/MetadataTemplateManager.cpp
         $(SOURCEDIR)/metadata/parameter.cpp
         $(SOURCEDIR)/metadata/privilege.cpp
         $(SOURCEDIR)/metadata/procedure.cpp

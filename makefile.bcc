@@ -81,7 +81,6 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Config.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ArtProvider.obj \
-	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CodeTemplateManager.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CodeTemplateProcessor.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRError.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Observer.obj \
@@ -163,6 +162,7 @@ FLAMEROBIN_OBJECTS =  \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemURIHandlerHelper.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemVisitor.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataTemplateCmdHandler.obj \
+	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataTemplateManager.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_parameter.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_privilege.obj \
 	bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_procedure.obj \
@@ -314,9 +314,6 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.obj: .\src\config\Database
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ArtProvider.obj: .\src\core\ArtProvider.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\core\ArtProvider.cpp
-
-bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CodeTemplateManager.obj: .\src\core\CodeTemplateManager.cpp
-	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\core\CodeTemplateManager.cpp
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CodeTemplateProcessor.obj: .\src\core\CodeTemplateProcessor.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\core\CodeTemplateProcessor.cpp
@@ -560,6 +557,9 @@ bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemVisitor.obj: .\src\metadata\M
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataTemplateCmdHandler.obj: .\src\metadata\MetadataTemplateCmdHandler.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\MetadataTemplateCmdHandler.cpp
+
+bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataTemplateManager.obj: .\src\metadata\MetadataTemplateManager.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\MetadataTemplateManager.cpp
 
 bcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_parameter.obj: .\src\metadata\parameter.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\parameter.cpp

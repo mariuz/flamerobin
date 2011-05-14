@@ -1560,10 +1560,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\core\CodeTemplateManager.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\core\CodeTemplateProcessor.cpp"
 				>
 			</File>
@@ -1729,6 +1725,10 @@
 			</File>
 			<File
 				RelativePath=".\src\metadata\MetadataTemplateCmdHandler.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\metadata\MetadataTemplateManager.cpp"
 				>
 			</File>
 			<File
@@ -2122,10 +2122,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\core\CodeTemplateManager.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\core\CodeTemplateProcessor.h"
 				>
 			</File>
@@ -2299,6 +2295,10 @@
 			</File>
 			<File
 				RelativePath=".\src\engine\MetadataLoader.h"
+				>
+			</File>
+			<File
+				RelativePath=".\src\metadata\MetadataTemplateManager.h"
 				>
 			</File>
 			<File

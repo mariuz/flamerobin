@@ -1,5 +1,5 @@
 [templateInfo]
-menuCaption=Extract full DDL
+menuCaption=Extract full DDL for {%object_name%}
 menuPosition=70
 matchesType=TABLE
-matchesName=^((?!RDB\$).)*$
+matchesWhen={%ifeq:{%is_system%}:true:false:true%}

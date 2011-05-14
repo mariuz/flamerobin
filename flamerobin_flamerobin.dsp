@@ -500,10 +500,6 @@ SOURCE=.\src\gui\BaseFrame.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\core\CodeTemplateManager.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\core\CodeTemplateProcessor.cpp
 # End Source File
 # Begin Source File
@@ -669,6 +665,10 @@ SOURCE=.\src\engine\MetadataLoader.cpp
 # Begin Source File
 
 SOURCE=.\src\metadata\MetadataTemplateCmdHandler.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\metadata\MetadataTemplateManager.cpp
 # End Source File
 # Begin Source File
 
@@ -938,10 +938,6 @@ SOURCE=.\src\gui\BaseFrame.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\core\CodeTemplateManager.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\core\CodeTemplateProcessor.h
 # End Source File
 # Begin Source File
@@ -1115,6 +1111,10 @@ SOURCE=.\src\metadata\MetadataItemVisitor.h
 # Begin Source File
 
 SOURCE=.\src\engine\MetadataLoader.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\metadata\MetadataTemplateManager.h
 # End Source File
 # Begin Source File
 

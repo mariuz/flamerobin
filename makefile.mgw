@@ -56,7 +56,6 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Config.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ArtProvider.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CodeTemplateManager.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CodeTemplateProcessor.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRError.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Observer.o \
@@ -138,6 +137,7 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemURIHandlerHelper.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemVisitor.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataTemplateCmdHandler.o \
+	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataTemplateManager.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_parameter.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_privilege.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_procedure.o \
@@ -273,9 +273,6 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.o: ./src/config/DatabaseCo
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ArtProvider.o: ./src/core/ArtProvider.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
-
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CodeTemplateManager.o: ./src/core/CodeTemplateManager.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CodeTemplateProcessor.o: ./src/core/CodeTemplateProcessor.cpp
@@ -519,6 +516,9 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemVisitor.o: ./src/metadata/Met
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataTemplateCmdHandler.o: ./src/metadata/MetadataTemplateCmdHandler.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataTemplateManager.o: ./src/metadata/MetadataTemplateManager.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_parameter.o: ./src/metadata/parameter.cpp

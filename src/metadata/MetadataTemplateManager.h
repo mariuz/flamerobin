@@ -37,6 +37,7 @@
 
 #include "config/Config.h"
 #include "metadata/metadataitem.h"
+
 //-----------------------------------------------------------------------------
 //! Holds information about a single template.
 class TemplateDescriptor
@@ -44,18 +45,22 @@ class TemplateDescriptor
 private:
     wxFileName templateFileNameM;
     Config configM;
+    MetadataItem* metadataItemM;
     void loadDescriptionFromConfigFile();
     wxString menuCaptionM;
     int menuPositionM;
     wxString matchesTypeM;
     wxString matchesNameM;
+    wxString matchesWhenM;
+    wxString expandTemplateCommands(const wxString& inputText) const;
 public:
-    TemplateDescriptor(const wxFileName& templateFileName);
+    TemplateDescriptor(const wxFileName& templateFileName,
+        MetadataItem* metadataItem);
     wxString getMenuCaption() const;
     int getMenuPosition() const { return menuPositionM; }
     bool operator<(const TemplateDescriptor& right) const;
     //! returns true if the template can be run on the specified metadata item.
-    bool matches(const MetadataItem& metadataItem) const;
+    bool matches(const MetadataItem* metadataItem) const;
     wxFileName getTemplateFileName() const { return templateFileNameM; }
     void setTemplateFileName(const wxFileName& value) { templateFileNameM = value; }
     wxString getBaseFileName() const { return templateFileNameM.GetName(); }
@@ -64,17 +69,17 @@ public:
 typedef boost::shared_ptr<TemplateDescriptor> TemplateDescriptorPtr;
 typedef std::list<TemplateDescriptorPtr> TemplateDescriptorList;
 //-----------------------------------------------------------------------------
-class CodeTemplateManager
+class MetadataTemplateManager
 {
 private:
-    const MetadataItem& metadataItemM;
+    MetadataItem* metadataItemM;
     TemplateDescriptorList descriptorsM;
 
     void collectDescriptors();
     // Returns a pointer to the first descriptor with the specified base name, or 0.
     TemplateDescriptorPtr findDescriptor(const wxString& baseFileName) const;
 public:
-    CodeTemplateManager(const MetadataItem& metadataItem);
+    MetadataTemplateManager(MetadataItem* metadataItem);
     TemplateDescriptorList::const_iterator descriptorsBegin() const;
     TemplateDescriptorList::const_iterator descriptorsEnd() const;
 };

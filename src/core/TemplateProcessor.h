@@ -117,11 +117,11 @@ class TemplateCmdHandlerRepository
 {
 public:
     // interface for handler providers.
-    void addHandler(TemplateCmdHandler *handler);
-    void removeHandler(TemplateCmdHandler *handler);
+    void addHandler(TemplateCmdHandler* handler);
+    void removeHandler(TemplateCmdHandler* handler);
 
     // interface for consumers.
-    void handleTemplateCmd(TemplateProcessor *tp, const wxString& cmdName,
+    void handleTemplateCmd(TemplateProcessor* tp, const wxString& cmdName,
         const TemplateCmdParams& cmdParams, ProcessableObject* object,
         wxString& processedText);
 
@@ -151,7 +151,7 @@ public:
     TemplateCmdHandler();
     virtual ~TemplateCmdHandler();
 
-    virtual void handleTemplateCmd(TemplateProcessor *tp,
+    virtual void handleTemplateCmd(TemplateProcessor* tp,
         const wxString& cmdName, const TemplateCmdParams& cmdParams,
         ProcessableObject* object, wxString& processedText) = 0;
 

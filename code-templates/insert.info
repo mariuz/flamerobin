@@ -1,5 +1,5 @@
 [templateInfo]
-menuCaption=Insert into ...
+menuCaption=Insert into {%object_name%} (...) values (...)
 menuPosition=20
 matchesType=TABLE
-matchesName=^((?!RDB\$).)*$
+matchesWhen={%ifeq:{%is_system%}:true:false:true%}

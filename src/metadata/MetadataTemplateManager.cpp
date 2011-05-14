@@ -43,13 +43,16 @@
 #include <wx/regex.h>
 
 #include "config/Config.h"
-#include "core/CodeTemplateManager.h"
+#include "core/CodeTemplateProcessor.h"
 #include "core/FRError.h"
 #include "metadata/metadataitem.h"
+#include "metadata/MetadataTemplateManager.h"
 
 //-----------------------------------------------------------------------------
-TemplateDescriptor::TemplateDescriptor(const wxFileName& templateFileName)
-    : templateFileNameM(templateFileName), menuPositionM(0)
+TemplateDescriptor::TemplateDescriptor(const wxFileName& templateFileName,
+    MetadataItem* metadataItem)
+    : templateFileNameM(templateFileName), metadataItemM(metadataItem),
+    menuPositionM(0)
 {
     loadDescriptionFromConfigFile();
 }
@@ -61,13 +64,22 @@ void TemplateDescriptor::loadDescriptionFromConfigFile()
     if (confFileName.FileExists())
     {
         configM.setConfigFileName(confFileName);
-        menuCaptionM = configM.get(wxT("templateInfo/menuCaption"),
-            templateFileNameM.GetName());
+        menuCaptionM = expandTemplateCommands(
+            configM.get(wxT("templateInfo/menuCaption"),
+            templateFileNameM.GetName()));
         menuPositionM = configM.get(wxT("templateInfo/menuPosition"), 0);
-        if (!configM.getValue(wxT("templateInfo/matchesType"), matchesTypeM))
+        matchesTypeM = expandTemplateCommands(
+            configM.get(wxT("templateInfo/matchesType"), matchesTypeM));
+        if (!matchesTypeM)
             matchesTypeM = wxT(".*");
-        if (!configM.getValue(wxT("templateInfo/matchesName"), matchesNameM))
+        matchesNameM = expandTemplateCommands(
+            configM.get(wxT("templateInfo/matchesName"), matchesNameM));
+        if (!matchesNameM)
             matchesNameM = wxT(".*");
+        matchesWhenM = expandTemplateCommands(
+            configM.get(wxT("templateInfo/matchesWhen"), matchesWhenM));
+        if (!matchesWhenM)
+            matchesWhenM = wxT("true");
     }
     else
     {
@@ -75,8 +87,17 @@ void TemplateDescriptor::loadDescriptionFromConfigFile()
         menuPositionM = 0;
         matchesTypeM = wxT(".*");
         matchesNameM = wxT(".*");
+        matchesWhenM = wxT("true");
     }
 }
+//-----------------------------------------------------------------------------
+wxString TemplateDescriptor::expandTemplateCommands(const wxString& inputText) const
+{
+    wxString result = wxEmptyString;
+    CodeTemplateProcessor tp(metadataItemM, 0);
+    tp.processTemplateText(result, inputText, metadataItemM);
+    return result;
+ }
 //-----------------------------------------------------------------------------
 bool TemplateDescriptor::operator<(const TemplateDescriptor& right) const
 {
@@ -95,18 +116,21 @@ wxString TemplateDescriptor::getMenuCaption() const
     return templateFileNameM.GetName();
 }
 //-----------------------------------------------------------------------------
- bool TemplateDescriptor::matches(const MetadataItem& metadataItem) const
+ bool TemplateDescriptor::matches(const MetadataItem* metadataItem) const
 {
     wxRegEx typeRegEx(matchesTypeM, wxRE_ADVANCED);
     if (!typeRegEx.IsValid())
         throw FRError(_("Invalid regex"));
-    if (typeRegEx.Matches(metadataItem.getTypeName()))
+    if (typeRegEx.Matches(metadataItem->getTypeName()))
     {
         wxRegEx nameRegEx(matchesNameM, wxRE_ADVANCED);
         if (!nameRegEx.IsValid())
             throw FRError(_("Invalid regex"));
-        if (nameRegEx.Matches(metadataItem.getName_()))
-            return true;
+        if (nameRegEx.Matches(metadataItem->getName_()))
+        {
+            if (matchesWhenM == wxT("true"))
+                return true;
+        }
     }
     return false;
 }
@@ -118,13 +142,13 @@ bool templateDescriptorPointerLT(const TemplateDescriptorPtr left,
     return *left < *right;
 }
 //-----------------------------------------------------------------------------
-CodeTemplateManager::CodeTemplateManager(const MetadataItem& metadataItem)
+MetadataTemplateManager::MetadataTemplateManager(MetadataItem* metadataItem)
     : metadataItemM(metadataItem)
 {
     collectDescriptors();
 }
 //-----------------------------------------------------------------------------
-void CodeTemplateManager::collectDescriptors()
+void MetadataTemplateManager::collectDescriptors()
 {
     wxArrayString fileNames;
     // Collect predefined and user-defined template descriptors.
@@ -151,7 +175,7 @@ void CodeTemplateManager::collectDescriptors()
         }
         else
         {
-            tdp.reset(new TemplateDescriptor(fileName));
+            tdp.reset(new TemplateDescriptor(fileName, metadataItemM));
             if (tdp->matches(metadataItemM))
                 descriptorsM.push_back(tdp);
         }
@@ -160,7 +184,7 @@ void CodeTemplateManager::collectDescriptors()
     descriptorsM.sort(templateDescriptorPointerLT);
 }
 //-----------------------------------------------------------------------------
-TemplateDescriptorPtr CodeTemplateManager::findDescriptor(
+TemplateDescriptorPtr MetadataTemplateManager::findDescriptor(
     const wxString& baseFileName) const
 {
     for (TemplateDescriptorList::const_iterator it = descriptorsBegin();
@@ -172,12 +196,12 @@ TemplateDescriptorPtr CodeTemplateManager::findDescriptor(
     return TemplateDescriptorPtr();
 }
 //-----------------------------------------------------------------------------
-TemplateDescriptorList::const_iterator CodeTemplateManager::descriptorsBegin() const
+TemplateDescriptorList::const_iterator MetadataTemplateManager::descriptorsBegin() const
 {
     return descriptorsM.begin();
 }
 //-----------------------------------------------------------------------------
-TemplateDescriptorList::const_iterator CodeTemplateManager::descriptorsEnd() const
+TemplateDescriptorList::const_iterator MetadataTemplateManager::descriptorsEnd() const
 {
     return descriptorsM.end();
 }
