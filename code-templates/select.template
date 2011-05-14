@@ -1,2 +1,4 @@
-{%--:Uncomment to edit template info visually.%}{%--:{%edit_info%}{%abort%}%}{%edit_conf%}select {%getconf:{%object_path%}/columnNames:{%foreach:column:, :{%object_name%}%}%}
+{%--:Uncomment to edit template info visually.%}{%--:{%edit_info%}{%abort%}%}{%edit_conf%}select {%getconf:{%object_path%}/columnNames%}
 from {%object_name%}
+where{%forall:{%getconf:{%object_path%}/whereColumnNames%}: and :
+  %%current_value%% = '?'%};
