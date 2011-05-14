@@ -1,5 +1,5 @@
 [templateInfo]
-menuCaption=Update {%object_name%} set ...
+menuCaption=Update {%object_name%} set ... where ...
 menuPosition=30
 matchesType=TABLE
-matchesWhen={%ifeq:{%is_system%}:true:false:true%}
+matchesWhen={%!:{%is_system%}%}

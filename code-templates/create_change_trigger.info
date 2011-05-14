@@ -2,4 +2,4 @@
 menuCaption=Create change trigger
 menuPosition=40
 matchesType=TABLE
-matchesWhen={%ifeq:{%is_system%}:true:false:true%}
+matchesWhen={%!:{%is_system%}%}

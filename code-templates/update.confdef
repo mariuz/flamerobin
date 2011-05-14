@@ -3,9 +3,15 @@
     <node>
         <caption>Update table</caption>
         <setting type="relation_columns">
-            <caption>Columns to insert</caption>
+            <caption>Columns to update</caption>
             <key>{%object_path%}/columnNames</key>
             <default>{%foreach:column:, :{%object_name%}%}</default>
+            <relation>{%object_handle%}</relation>
+        </setting>
+        <setting type="relation_columns">
+            <caption>Which columns would you like to filter on?</caption>
+            <key>{%object_path%}/whereColumnNames</key>
+            <default>{%primary_key:{%constraintinfo:columns:, %}%}</default>
             <relation>{%object_handle%}</relation>
         </setting>
     </node>

@@ -169,6 +169,23 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
             processedText += falseText;
     }
 
+    // {%!:<input>%} or {%not:<input>%}
+    // If <input> equals "true" returns "false";
+    // if <input> equals "false" returns "true";
+    // otherwise returns <input>.
+    // Always expands the argument before evaluating it.
+    else if ((cmdName == wxT("!") || (cmdName == wxT("not"))) && (cmdParams.Count()))
+    {
+        wxString input;
+        internalProcessTemplateText(input, cmdParams[0], object);
+        if (input == wxT("true"))
+            processedText += wxT("false");
+        else if (input == wxT("false"))
+            processedText += wxT("true");
+        else
+            processedText += input;
+    }
+
     // {%ifcontains:<list>:<term>:<true output>[:<false output>]%}
     // If <list> contains <term> expands to <true output>, otherwise
     // expands to <false output> (or an empty string).

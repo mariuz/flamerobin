@@ -2,4 +2,4 @@
 menuCaption=Insert into {%object_name%} (...) values (...)
 menuPosition=20
 matchesType=TABLE
-matchesWhen={%ifeq:{%is_system%}:true:false:true%}
+matchesWhen={%!:{%is_system%}%}
