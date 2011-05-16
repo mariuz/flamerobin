@@ -82,9 +82,6 @@ public:
     std::vector<UniqueConstraint> *getUniqueConstraints();
     std::vector<Index> *getIndices();
 
-    wxString getInsertStatement();
-    //wxString getUpdateStatement();        // use primary key info
-    //wxString getDeleteStatement();
     wxString getProcedureTemplate();
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);

@@ -423,7 +423,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(Cmds::Menu_DatabaseProperties, MainFrame::OnMenuDatabaseProperties)
     EVT_UPDATE_UI(Cmds::Menu_DatabaseProperties, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
 
-    EVT_MENU(Cmds::Menu_Insert, MainFrame::OnMenuInsert)
     EVT_MENU(Cmds::Menu_BrowseColumns, MainFrame::OnMenuBrowseColumns)
     EVT_MENU(Cmds::Menu_LoadColumnsInfo, MainFrame::OnMenuLoadColumnsInfo)
     EVT_MENU(Cmds::Menu_AddColumn, MainFrame::OnMenuAddColumn)
@@ -781,20 +780,6 @@ void MainFrame::OnMenuDatabasePreferences(wxCommandEvent& WXUNUSED(event))
         pd.selectPage(0);
         pd.ShowModal();
     }
-}
-//-----------------------------------------------------------------------------
-void MainFrame::OnMenuInsert(wxCommandEvent& WXUNUSED(event))
-{
-    MetadataItem* mi = treeMainM->getSelectedMetadataItem();
-    DatabasePtr db = getDatabase(mi);
-    if (!checkValidDatabase(db))
-        return;
-    Table* t = dynamic_cast<Table*>(mi);
-    if (!t)
-        return;
-
-    showSql(this, wxString(_("Execute SQL statements")), db,
-        t->getInsertStatement());
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateTriggerForTable(wxCommandEvent& WXUNUSED(event))

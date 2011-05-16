@@ -85,7 +85,7 @@ namespace Cmds
         Menu_ExecuteProcedure, Menu_UnRegisterDatabase, Menu_Backup,
         Menu_Restore, Menu_Connect, Menu_Disconnect, Menu_ExecuteStatements,
         Menu_CreateObject, Menu_DatabasePreferences,
-        Menu_ShowAllGeneratorValues, Menu_BrowseColumns, Menu_Insert,
+        Menu_ShowAllGeneratorValues, Menu_BrowseColumns,
         Menu_LoadColumnsInfo, Menu_ObjectProperties, Menu_ObjectRefresh,
         Menu_DropObject, Menu_ShowGeneratorValue, Menu_SetGeneratorValue,
         Menu_AddColumn, Menu_CreateTriggerForTable, Menu_RestoreIntoNew,

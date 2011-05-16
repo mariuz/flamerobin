@@ -276,9 +276,6 @@ void ContextMenuMetadataItemVisitor::visitServer(Server& server)
 void ContextMenuMetadataItemVisitor::visitTable(Table& table)
 {
     addSelectItem();
-    if (!table.isSystem())
-        menuM->Append(Cmds::Menu_Insert, _("&Insert into"));
-    addSeparator();
     addGenerateCodeMenu(table);
     addSeparator();
     if (!table.isSystem())

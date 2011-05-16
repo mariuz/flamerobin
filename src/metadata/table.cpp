@@ -147,36 +147,6 @@ wxString Table::getProcedureTemplate()
     return sql;
 }
 //-----------------------------------------------------------------------------
-wxString Table::getInsertStatement()
-{
-    ensureChildrenLoaded();
-    wxString sql = wxT("INSERT INTO ") + getQuotedName() + wxT(" (");
-    wxString collist, valist;
-    for (ColumnPtrs::const_iterator i = columnsM.begin();
-        i != columnsM.end(); ++i)
-    {
-        if (!(*i)->getComputedSource().empty())
-            continue;
-        if (!collist.empty())
-        {
-            valist += wxT(", \n");
-            collist += wxT(", ");
-        }
-        collist += (*i)->getQuotedName();
-
-        if (!(*i)->isNullable() && (!(*i)->hasDefault()))
-            valist += wxT("*");
-
-        if (!(*i)->hasDefault())
-            valist += (*i)->getName_();
-        else
-            valist += (*i)->getDefault();
-
-    }
-    sql += collist + wxT(")\n VALUES (\n") + valist + wxT("\n)");
-    return sql;
-}
-//-----------------------------------------------------------------------------
 //! reads checks info from database
 void Table::loadCheckConstraints()
 {
