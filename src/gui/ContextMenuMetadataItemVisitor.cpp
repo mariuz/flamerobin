@@ -107,7 +107,7 @@ void ContextMenuMetadataItemVisitor::visitDatabase(Database& database)
         _("Database registration &info"));
     menuM->Append(Cmds::Menu_UnRegisterDatabase, _("&Unregister database"));
     menuM->Append(Cmds::Menu_DatabasePreferences,
-        _("Database &preferences..."));
+        _("Database &preferences"));
     addSeparator();
     addRefreshItem();
     menuM->Append(Cmds::Menu_DatabaseProperties, _("P&roperties"));
@@ -174,7 +174,7 @@ void ContextMenuMetadataItemVisitor::visitFunctions(Functions& functions)
 void ContextMenuMetadataItemVisitor::visitGenerator(Generator& generator)
 {
     menuM->Append(Cmds::Menu_ShowGeneratorValue, _("Show &value"));
-    menuM->Append(Cmds::Menu_SetGeneratorValue, _("&Set value..."));
+    menuM->Append(Cmds::Menu_SetGeneratorValue, _("&Set value"));
     addSeparator();
     addDropItem(generator);
     addSeparator();
@@ -250,7 +250,7 @@ void ContextMenuMetadataItemVisitor::visitRoot(Root& root)
     addGenerateCodeMenu(root);
     addSeparator();
     menuM->Append(wxID_ABOUT, _("&About FlameRobin"));
-    menuM->Append(wxID_PREFERENCES, _("&Preferences..."));
+    menuM->Append(wxID_PREFERENCES, _("&Preferences"));
     addSeparator();
     menuM->Append(wxID_EXIT, _("&Quit"));
 }
@@ -275,11 +275,11 @@ void ContextMenuMetadataItemVisitor::visitServer(Server& server)
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitTable(Table& table)
 {
-    addSelectItem();
+    addBrowseDataItem();
     addGenerateCodeMenu(table);
     addSeparator();
     if (!table.isSystem())
-        menuM->Append(Cmds::Menu_AddColumn, _("&Add column..."));
+        menuM->Append(Cmds::Menu_AddColumn, _("&Add column"));
     addShowColumnsItem();
     if (!table.isSystem())
     {
@@ -332,7 +332,7 @@ void ContextMenuMetadataItemVisitor::visitTriggers(Triggers& triggers)
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::visitView(View& view)
 {
-    addSelectItem();
+    addBrowseDataItem();
     addShowColumnsItem();
     addGenerateCodeMenu(view);
     addSeparator();
@@ -398,9 +398,9 @@ void ContextMenuMetadataItemVisitor::addRefreshItem()
     menuM->Append(Cmds::Menu_ObjectRefresh, _("Re&fresh"));
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addSelectItem()
+void ContextMenuMetadataItemVisitor::addBrowseDataItem()
 {
-    menuM->Append(Cmds::Menu_BrowseColumns, _("&Select from"));
+    menuM->Append(Cmds::Menu_BrowseColumns, _("Brow&se data"));
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::addShowColumnsItem()
