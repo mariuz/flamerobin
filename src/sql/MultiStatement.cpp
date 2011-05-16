@@ -40,7 +40,6 @@
 
 #include <algorithm>
 
-#include "core/StringUtils.h"
 #include "sql/MultiStatement.h"
 #include "sql/SqlTokenizer.h"
 //-----------------------------------------------------------------------------

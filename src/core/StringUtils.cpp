@@ -205,11 +205,6 @@ wxString escapeXmlChars(const wxString& input)
     return result;
 }
 //-----------------------------------------------------------------------------
-wxString getBooleanAsString(bool value)
-{
-    return (value) ? wxT("true") : wxT("false");
-}
-//-----------------------------------------------------------------------------
 wxString wxArrayToString(const wxArrayString& arrayStr, const wxString& delimiter)
 {
     wxString result;
