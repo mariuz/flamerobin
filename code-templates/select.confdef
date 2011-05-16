@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <root>
     <node>
-        <caption>Select from table</caption>
-        <setting type="relation_columns">
-            <caption>Which columns would you like to select?</caption>
+        <caption>Select From Table</caption>
+        <setting type="relation_columns" style="list">
+            <caption>Columns to &amp;select:</caption>
             <key>{%object_path%}/columnNames</key>
             <default>{%foreach:column:, :{%object_name%}%}</default>
             <relation>{%object_handle%}</relation>
+            <aligngroup>1</aligngroup>
+            <proportion>1</proportion>
         </setting>
-        <setting type="relation_columns">
-            <caption>Which columns would you like to filter on?</caption>
+        <setting type="relation_columns" style="list">
+            <caption>Columns to &amp;filter on:</caption>
             <key>{%object_path%}/whereColumnNames</key>
             <default>{%primary_key:{%constraintinfo:columns:, %}%}</default>
             <relation>{%object_handle%}</relation>
+            <aligngroup>1</aligngroup>
+            <proportion>1</proportion>
         </setting>
     </node>
 </root>

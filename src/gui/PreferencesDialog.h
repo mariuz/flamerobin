@@ -43,14 +43,14 @@
 class Optionbook;
 class wxXmlNode;
 //-----------------------------------------------------------------------------
-class PrefDlgSetting: public wxEvtHandler
+class PrefDlgSetting
 {
 protected:
     PrefDlgSetting(wxPanel* page, PrefDlgSetting* parent);
 public:
     // factory
     static PrefDlgSetting* createPrefDlgSetting(wxPanel* page,
-        const wxString& type, PrefDlgSetting* parent);
+        const wxString& type, const wxString& style, PrefDlgSetting* parent);
 
     virtual ~PrefDlgSetting();
 

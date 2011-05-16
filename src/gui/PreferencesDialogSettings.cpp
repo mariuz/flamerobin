@@ -38,6 +38,7 @@
     #include "wx/wx.h"
 #endif
 //-----------------------------------------------------------------------------
+#include <wx/checklst.h>
 #include <wx/filedlg.h>
 #include <wx/filename.h>
 #include <wx/fontdlg.h>
@@ -47,11 +48,15 @@
 
 #include <vector>
 
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
+#include <boost/scoped_ptr.hpp>
+
 #include "config/Config.h"
 #include "frutils.h"
 #include "gui/PreferencesDialog.h"
 #include "gui/StyleGuide.h"
-#include "metadata/database.h"
+#include "metadata/column.h"
 #include "metadata/relation.h"
 //-----------------------------------------------------------------------------
 static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)
@@ -176,10 +181,7 @@ wxStaticText* PrefDlgSetting::getLabel()
 //-----------------------------------------------------------------------------
 int PrefDlgSetting::getLevel() const
 {
-    if (parentM)
-        return parentM->getLevel() + 1;
-    else
-        return 0;
+    return (parentM != 0) ? parentM->getLevel() + 1 : 0;
 }
 //-----------------------------------------------------------------------------
 wxPanel* PrefDlgSetting::getPage() const
@@ -201,8 +203,7 @@ bool PrefDlgSetting::isRelatedTo(PrefDlgSetting* prevSetting) const
     int prevLevel = prevSetting->getLevel();
     int level = getLevel();
 
-    return (level > prevLevel)
-        || (level > 0 && level == prevLevel);
+    return (level > prevLevel) || (level > 0 && level == prevLevel);
 }
 //-----------------------------------------------------------------------------
 bool PrefDlgSetting::parseProperty(wxXmlNode* xmln)
@@ -242,6 +243,26 @@ void PrefDlgSetting::setDefault(const wxString& WXUNUSED(defValue))
 {
 }
 //-----------------------------------------------------------------------------
+// PrefDlgEventHandler helper
+typedef boost::function<void (wxCommandEvent&)> CommandEventHandler;
+
+class PrefDlgEventHandler: public wxEvtHandler
+{
+public:
+    PrefDlgEventHandler(CommandEventHandler handler)
+        : wxEvtHandler(), handlerM(handler)
+    {
+    }
+
+    void OnCommandEvent(wxCommandEvent& event)
+    {
+        if (handlerM)
+            handlerM(event);
+    }
+private:
+    CommandEventHandler handlerM;
+};
+//-----------------------------------------------------------------------------
 // PrefDlgCheckboxSetting class
 class PrefDlgCheckboxSetting: public PrefDlgSetting
 {
@@ -252,57 +273,61 @@ public:
     virtual bool createControl(bool ignoreerrors);
     virtual bool loadFromTargetConfig(Config& config);
     virtual bool saveToTargetConfig(Config& config);
-
-    void OnCheckbox(wxCommandEvent& event);
 protected:
     virtual void addControlsToSizer(wxSizer* sizer);
     virtual void enableControls(bool enabled);
     virtual bool hasControls() const;
     virtual void setDefault(const wxString& defValue);
 private:
-    wxCheckBox* checkboxM;
+    wxCheckBox* checkBoxM;
     bool defaultM;
 
-    DECLARE_EVENT_TABLE()
+    boost::scoped_ptr<wxEvtHandler> checkBoxHandlerM;
+    void OnCheckBox(wxCommandEvent& event);
 };
 //-----------------------------------------------------------------------------
-PrefDlgCheckboxSetting::PrefDlgCheckboxSetting(wxPanel* page, PrefDlgSetting* parent)
-    : PrefDlgSetting(page, parent)
+PrefDlgCheckboxSetting::PrefDlgCheckboxSetting(wxPanel* page,
+        PrefDlgSetting* parent)
+    : PrefDlgSetting(page, parent), checkBoxM(0), defaultM(false)
 {
-    checkboxM = 0;
-    defaultM = false;
 }
 //-----------------------------------------------------------------------------
 PrefDlgCheckboxSetting::~PrefDlgCheckboxSetting()
 {
-    if (checkboxM)
-        checkboxM->PopEventHandler();
+    if (checkBoxM && checkBoxHandlerM.get())
+        checkBoxM->PopEventHandler();
 }
 //-----------------------------------------------------------------------------
 void PrefDlgCheckboxSetting::addControlsToSizer(wxSizer* sizer)
 {
-    if (checkboxM)
-        sizer->Add(checkboxM, 1, wxFIXED_MINSIZE);
+    if (checkBoxM)
+        sizer->Add(checkBoxM, 0, wxFIXED_MINSIZE);
 }
 //-----------------------------------------------------------------------------
 bool PrefDlgCheckboxSetting::createControl(bool WXUNUSED(ignoreerrors))
 {
-    checkboxM = new wxCheckBox(getPage(), wxID_ANY, captionM);
+    checkBoxM = new wxCheckBox(getPage(), wxID_ANY, captionM);
     if (!descriptionM.empty())
-        checkboxM->SetToolTip(descriptionM);
-    checkboxM->PushEventHandler(this);
+        checkBoxM->SetToolTip(descriptionM);
+
+    checkBoxHandlerM.reset(new PrefDlgEventHandler(
+        boost::bind(&PrefDlgCheckboxSetting::OnCheckBox, this, _1)));
+    checkBoxM->PushEventHandler(checkBoxHandlerM.get());
+    checkBoxHandlerM->Connect(checkBoxM->GetId(),
+        wxEVT_COMMAND_CHECKBOX_CLICKED,
+        wxCommandEventHandler(PrefDlgEventHandler::OnCommandEvent));
     return true;
 }
 //-----------------------------------------------------------------------------
 void PrefDlgCheckboxSetting::enableControls(bool enabled)
 {
-    if (checkboxM)
-        checkboxM->Enable(enabled);
+    if (checkBoxM)
+        checkBoxM->Enable(enabled);
 }
 //-----------------------------------------------------------------------------
 bool PrefDlgCheckboxSetting::hasControls() const
 {
-    return checkboxM != 0;
+    return checkBoxM != 0;
 }
 //-----------------------------------------------------------------------------
 bool PrefDlgCheckboxSetting::loadFromTargetConfig(Config& config)
@@ -310,10 +335,10 @@ bool PrefDlgCheckboxSetting::loadFromTargetConfig(Config& config)
     if (!checkTargetConfigProperties())
         return false;
     bool checked = defaultM;
-    if (checkboxM)
+    if (checkBoxM)
     {
         config.getValue(keyM, checked);
-        checkboxM->SetValue(checked);
+        checkBoxM->SetValue(checked);
     }
     enableEnabledSettings(checked);
     return true;
@@ -323,8 +348,8 @@ bool PrefDlgCheckboxSetting::saveToTargetConfig(Config& config)
 {
     if (!checkTargetConfigProperties())
         return false;
-    if (checkboxM)
-        config.setValue(keyM, checkboxM->GetValue());
+    if (checkBoxM)
+        config.setValue(keyM, checkBoxM->GetValue());
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -336,11 +361,7 @@ void PrefDlgCheckboxSetting::setDefault(const wxString& defValue)
         defaultM = true;
 }
 //-----------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(PrefDlgCheckboxSetting, wxEvtHandler)
-    EVT_CHECKBOX(wxID_ANY, PrefDlgCheckboxSetting::OnCheckbox)
-END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
-void PrefDlgCheckboxSetting::OnCheckbox(wxCommandEvent& event)
+void PrefDlgCheckboxSetting::OnCheckBox(wxCommandEvent& event)
 {
     enableEnabledSettings(event.IsChecked());
 }
@@ -361,22 +382,21 @@ protected:
     virtual bool hasControls() const;
     virtual void setDefault(const wxString& defValue);
 private:
-    wxRadioBox* radioboxM;
+    wxRadioBox* radioBoxM;
     wxArrayString choicesM;
     int defaultM;
 };
 //-----------------------------------------------------------------------------
-PrefDlgRadioboxSetting::PrefDlgRadioboxSetting(wxPanel* page, PrefDlgSetting* parent)
-    : PrefDlgSetting(page, parent)
+PrefDlgRadioboxSetting::PrefDlgRadioboxSetting(wxPanel* page,
+        PrefDlgSetting* parent)
+    : PrefDlgSetting(page, parent), radioBoxM(0), defaultM(wxNOT_FOUND)
 {
-    radioboxM = 0;
-    defaultM = wxNOT_FOUND;
 }
 //-----------------------------------------------------------------------------
 void PrefDlgRadioboxSetting::addControlsToSizer(wxSizer* sizer)
 {
-    if (radioboxM)
-        sizer->Add(radioboxM, 1, wxFIXED_MINSIZE);
+    if (radioBoxM)
+        sizer->Add(radioBoxM, 1, wxFIXED_MINSIZE);
 }
 //-----------------------------------------------------------------------------
 bool PrefDlgRadioboxSetting::createControl(bool ignoreerrors)
@@ -387,34 +407,34 @@ bool PrefDlgRadioboxSetting::createControl(bool ignoreerrors)
             wxLogError(_("Radiobox \"%s\" has no options"), captionM.c_str());
         return ignoreerrors;
     }
-    radioboxM = new wxRadioBox(getPage(), wxID_ANY, captionM,
+    radioBoxM = new wxRadioBox(getPage(), wxID_ANY, captionM,
         wxDefaultPosition, wxDefaultSize, choicesM, 1);
     if (!descriptionM.empty())
-        radioboxM->SetToolTip(descriptionM);
+        radioBoxM->SetToolTip(descriptionM);
     return true;
 }
 //-----------------------------------------------------------------------------
 void PrefDlgRadioboxSetting::enableControls(bool enabled)
 {
-    if (radioboxM)
-        radioboxM->Enable(enabled);
+    if (radioBoxM)
+        radioBoxM->Enable(enabled);
 }
 //-----------------------------------------------------------------------------
 bool PrefDlgRadioboxSetting::hasControls() const
 {
-    return radioboxM != 0;
+    return radioBoxM != 0;
 }
 //-----------------------------------------------------------------------------
 bool PrefDlgRadioboxSetting::loadFromTargetConfig(Config& config)
 {
     if (!checkTargetConfigProperties())
         return false;
-    if (radioboxM)
+    if (radioBoxM)
     {
         int value = defaultM;
         config.getValue(keyM, value);
         if (value >= 0 && value < (int)choicesM.GetCount())
-            radioboxM->SetSelection(value);
+            radioBoxM->SetSelection(value);
     }
     return true;
 }
@@ -426,7 +446,8 @@ bool PrefDlgRadioboxSetting::parseProperty(wxXmlNode* xmln)
     {
         wxString optcaption;
 
-        for (wxXmlNode* xmlc = xmln->GetChildren(); (xmlc); xmlc = xmlc->GetNext())
+        for (wxXmlNode* xmlc = xmln->GetChildren(); xmlc != 0;
+            xmlc = xmlc->GetNext())
         {
             if (xmlc->GetType() != wxXML_ELEMENT_NODE)
                 continue;
@@ -449,8 +470,8 @@ bool PrefDlgRadioboxSetting::saveToTargetConfig(Config& config)
 {
     if (!checkTargetConfigProperties())
         return false;
-    if (radioboxM)
-        config.setValue(keyM, radioboxM->GetSelection());
+    if (radioBoxM)
+        config.setValue(keyM, radioBoxM->GetSelection());
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -486,15 +507,11 @@ private:
     int defaultM;
 };
 //-----------------------------------------------------------------------------
-PrefDlgIntEditSetting::PrefDlgIntEditSetting(wxPanel* page, PrefDlgSetting* parent)
-    : PrefDlgSetting(page, parent)
+PrefDlgIntEditSetting::PrefDlgIntEditSetting(wxPanel* page,
+        PrefDlgSetting* parent)
+    : PrefDlgSetting(page, parent), captionAfterM(0), captionBeforeM(0),
+        spinctrlM(0), maxValueM(100), minValueM(0), defaultM(0)
 {
-    captionAfterM = 0;
-    captionBeforeM = 0;
-    spinctrlM = 0;
-    maxValueM = 100;
-    minValueM = 0;
-    defaultM = 0;
 }
 //-----------------------------------------------------------------------------
 void PrefDlgIntEditSetting::addControlsToSizer(wxSizer* sizer)
@@ -503,14 +520,16 @@ void PrefDlgIntEditSetting::addControlsToSizer(wxSizer* sizer)
     {
         if (captionBeforeM)
         {
-            sizer->Add(captionBeforeM, 0, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
+            sizer->Add(captionBeforeM, 0,
+                wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
             sizer->Add(styleguide().getControlLabelMargin(), 0);
         }
         sizer->Add(spinctrlM, 0, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
         if (captionAfterM)
         {
             sizer->Add(styleguide().getControlLabelMargin(), 0);
-            sizer->Add(captionAfterM, 0, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
+            sizer->Add(captionAfterM, 0,
+                wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
         }
     }
 }
@@ -559,7 +578,7 @@ wxStaticText* PrefDlgIntEditSetting::getLabel()
 //-----------------------------------------------------------------------------
 bool PrefDlgIntEditSetting::hasControls() const
 {
-    return (captionBeforeM) || (spinctrlM) || (captionAfterM);
+    return captionBeforeM != 0 || spinctrlM != 0 || captionAfterM != 0;
 }
 //-----------------------------------------------------------------------------
 bool PrefDlgIntEditSetting::loadFromTargetConfig(Config& config)
@@ -636,34 +655,35 @@ protected:
 private:
     wxStaticText* captionAfterM;
     wxStaticText* captionBeforeM;
-    wxTextCtrl* textctrlM;
+    wxTextCtrl* textCtrlM;
     wxString defaultM;
     int expandM;
 };
 //-----------------------------------------------------------------------------
-PrefDlgStringEditSetting::PrefDlgStringEditSetting(wxPanel* page, PrefDlgSetting* parent)
-    : PrefDlgSetting(page, parent)
+PrefDlgStringEditSetting::PrefDlgStringEditSetting(wxPanel* page,
+        PrefDlgSetting* parent)
+    : PrefDlgSetting(page, parent), captionAfterM(0), captionBeforeM(0),
+        textCtrlM(0), expandM(0)
 {
-    captionAfterM = 0;
-    captionBeforeM = 0;
-    textctrlM = 0;
-    expandM = 0;
 }
 //-----------------------------------------------------------------------------
 void PrefDlgStringEditSetting::addControlsToSizer(wxSizer* sizer)
 {
-    if (textctrlM)
+    if (textCtrlM)
     {
         if (captionBeforeM)
         {
-            sizer->Add(captionBeforeM, 0, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
+            sizer->Add(captionBeforeM, 0,
+                wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
             sizer->Add(styleguide().getControlLabelMargin(), 0);
         }
-        sizer->Add(textctrlM, expandM, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
+        sizer->Add(textCtrlM, expandM,
+            wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
         if (captionAfterM)
         {
             sizer->Add(styleguide().getControlLabelMargin(), 0);
-            sizer->Add(captionAfterM, 0, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
+            sizer->Add(captionAfterM, 0,
+                wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
         }
     }
 }
@@ -683,13 +703,13 @@ bool PrefDlgStringEditSetting::createControl(bool WXUNUSED(ignoreerrors))
 
     if (!caption1.empty())
         captionBeforeM = new wxStaticText(getPage(), wxID_ANY, caption1);
-    textctrlM = new wxTextCtrl(getPage(), wxID_ANY);
+    textCtrlM = new wxTextCtrl(getPage(), wxID_ANY);
     if (!caption2.empty())
         captionAfterM = new wxStaticText(getPage(), wxID_ANY, caption2);
 
     if (!descriptionM.empty())
     {
-        textctrlM->SetToolTip(descriptionM);
+        textCtrlM->SetToolTip(descriptionM);
         if (captionBeforeM)
             captionBeforeM->SetToolTip(descriptionM);
         if (captionAfterM)
@@ -700,8 +720,8 @@ bool PrefDlgStringEditSetting::createControl(bool WXUNUSED(ignoreerrors))
 //-----------------------------------------------------------------------------
 void PrefDlgStringEditSetting::enableControls(bool enabled)
 {
-    if (textctrlM)
-        textctrlM->Enable(enabled);
+    if (textCtrlM)
+        textCtrlM->Enable(enabled);
 }
 //-----------------------------------------------------------------------------
 wxStaticText* PrefDlgStringEditSetting::getLabel()
@@ -711,18 +731,18 @@ wxStaticText* PrefDlgStringEditSetting::getLabel()
 //-----------------------------------------------------------------------------
 bool PrefDlgStringEditSetting::hasControls() const
 {
-    return (captionBeforeM) || (textctrlM) || (captionAfterM);
+    return (captionBeforeM) || (textCtrlM) || (captionAfterM);
 }
 //-----------------------------------------------------------------------------
 bool PrefDlgStringEditSetting::loadFromTargetConfig(Config& config)
 {
     if (!checkTargetConfigProperties())
         return false;
-    if (textctrlM)
+    if (textCtrlM)
     {
         wxString value = defaultM;
         config.getValue(keyM, value);
-        textctrlM->SetValue(value);
+        textCtrlM->SetValue(value);
     }
     return true;
 }
@@ -747,8 +767,8 @@ bool PrefDlgStringEditSetting::saveToTargetConfig(Config& config)
 {
     if (!checkTargetConfigProperties())
         return false;
-    if (textctrlM)
-        config.setValue(keyM, textctrlM->GetValue());
+    if (textCtrlM)
+        config.setValue(keyM, textCtrlM->GetValue());
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -769,7 +789,7 @@ public:
     virtual bool loadFromTargetConfig(Config& config);
     virtual bool saveToTargetConfig(Config& config);
 protected:
-    wxTextCtrl* textctrlM;
+    wxTextCtrl* textCtrlM;
     wxButton* browsebtnM;
 
     virtual void addControlsToSizer(wxSizer* sizer);
@@ -783,38 +803,39 @@ private:
 
     virtual void choose() = 0;
 
-private:
-    // event handling
+    boost::scoped_ptr<wxEvtHandler> buttonHandlerM;
     void OnBrowseButton(wxCommandEvent& event);
 };
 //-----------------------------------------------------------------------------
 PrefDlgChooserSetting::PrefDlgChooserSetting(wxPanel* page,
         PrefDlgSetting* parent)
     : PrefDlgSetting(page, parent), browsebtnM(0), captionBeforeM(0),
-        textctrlM(0)
+        textCtrlM(0)
 {
 }
 //-----------------------------------------------------------------------------
 PrefDlgChooserSetting::~PrefDlgChooserSetting()
 {
-    if (browsebtnM)
+    if (browsebtnM && buttonHandlerM.get())
         browsebtnM->PopEventHandler();
 }
 //-----------------------------------------------------------------------------
 void PrefDlgChooserSetting::addControlsToSizer(wxSizer* sizer)
 {
-    if (textctrlM)
+    if (textCtrlM)
     {
         if (captionBeforeM)
         {
-            sizer->Add(captionBeforeM, 0, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
+            sizer->Add(captionBeforeM, 0,
+                wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
             sizer->Add(styleguide().getControlLabelMargin(), 0);
         }
-        sizer->Add(textctrlM, 1, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
+        sizer->Add(textCtrlM, 1, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
         if (browsebtnM)
         {
             sizer->Add(styleguide().getBrowseButtonMargin(), 0);
-            sizer->Add(browsebtnM, 0, wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
+            sizer->Add(browsebtnM, 0,
+                wxFIXED_MINSIZE | wxALIGN_CENTER_VERTICAL);
         }
     }
 }
@@ -823,18 +844,21 @@ bool PrefDlgChooserSetting::createControl(bool WXUNUSED(ignoreerrors))
 {
     if (!captionM.empty())
         captionBeforeM = new wxStaticText(getPage(), wxID_ANY, captionM);
-    textctrlM = new wxTextCtrl(getPage(), wxID_ANY);
+    textCtrlM = new wxTextCtrl(getPage(), wxID_ANY);
     browsebtnM = new wxButton(getPage(), wxID_ANY, _("Select..."));
-    browsebtnM->PushEventHandler(this);
 
-    Connect(browsebtnM->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
-        wxCommandEventHandler(PrefDlgChooserSetting::OnBrowseButton));
+    buttonHandlerM.reset(new PrefDlgEventHandler(
+        boost::bind(&PrefDlgChooserSetting::OnBrowseButton, this, _1)));
+    browsebtnM->PushEventHandler(buttonHandlerM.get());
+    buttonHandlerM->Connect(browsebtnM->GetId(),
+        wxEVT_COMMAND_BUTTON_CLICKED,
+        wxCommandEventHandler(PrefDlgEventHandler::OnCommandEvent));
 
     if (!descriptionM.empty())
     {
         if (captionBeforeM)
             captionBeforeM->SetToolTip(descriptionM);
-        textctrlM->SetToolTip(descriptionM);
+        textCtrlM->SetToolTip(descriptionM);
         if (browsebtnM)
             browsebtnM->SetToolTip(descriptionM);
     }
@@ -843,8 +867,8 @@ bool PrefDlgChooserSetting::createControl(bool WXUNUSED(ignoreerrors))
 //-----------------------------------------------------------------------------
 void PrefDlgChooserSetting::enableControls(bool enabled)
 {
-    if (textctrlM)
-        textctrlM->Enable(enabled);
+    if (textCtrlM)
+        textCtrlM->Enable(enabled);
     if (browsebtnM)
         browsebtnM->Enable(enabled);
 }
@@ -856,18 +880,18 @@ wxStaticText* PrefDlgChooserSetting::getLabel()
 //-----------------------------------------------------------------------------
 bool PrefDlgChooserSetting::hasControls() const
 {
-    return (captionBeforeM) || (textctrlM) ||(browsebtnM);
+    return (captionBeforeM) || (textCtrlM) ||(browsebtnM);
 }
 //-----------------------------------------------------------------------------
 bool PrefDlgChooserSetting::loadFromTargetConfig(Config& config)
 {
     if (!checkTargetConfigProperties())
         return false;
-    if (textctrlM)
+    if (textCtrlM)
     {
         wxString value = defaultM;
         config.getValue(keyM, value);
-        textctrlM->SetValue(value);
+        textCtrlM->SetValue(value);
     }
     enableControls(true);
     return true;
@@ -877,8 +901,8 @@ bool PrefDlgChooserSetting::saveToTargetConfig(Config& config)
 {
     if (!checkTargetConfigProperties())
         return false;
-    if (textctrlM)
-        config.setValue(keyM, textctrlM->GetValue());
+    if (textCtrlM)
+        config.setValue(keyM, textCtrlM->GetValue());
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -889,7 +913,7 @@ void PrefDlgChooserSetting::setDefault(const wxString& defValue)
 //-----------------------------------------------------------------------------
 void PrefDlgChooserSetting::OnBrowseButton(wxCommandEvent& WXUNUSED(event))
 {
-    if (textctrlM)
+    if (textCtrlM)
         choose();
 }
 //-----------------------------------------------------------------------------
@@ -911,13 +935,13 @@ PrefDlgFileChooserSetting::PrefDlgFileChooserSetting(wxPanel* page,
 void PrefDlgFileChooserSetting::choose()
 {
     wxString path;
-    wxFileName::SplitPath(textctrlM->GetValue(), &path, 0, 0);
+    wxFileName::SplitPath(textCtrlM->GetValue(), &path, 0, 0);
 
     wxString filename = ::wxFileSelector(_("Select File"), path,
         wxEmptyString, wxEmptyString, _("All files (*.*)|*.*"),
-        wxFD_SAVE, ::wxGetTopLevelParent(textctrlM));
+        wxFD_SAVE, ::wxGetTopLevelParent(textCtrlM));
     if (!filename.empty())
-        textctrlM->SetValue(filename);
+        textCtrlM->SetValue(filename);
 }
 //-----------------------------------------------------------------------------
 // PrefDlgFontChooserSetting class
@@ -938,12 +962,12 @@ PrefDlgFontChooserSetting::PrefDlgFontChooserSetting(wxPanel* page,
 void PrefDlgFontChooserSetting::choose()
 {
     wxFont font;
-    wxString fontdesc = textctrlM->GetValue();
+    wxString fontdesc = textCtrlM->GetValue();
     if (!fontdesc.empty())
         font.SetNativeFontInfo(fontdesc);
-    wxFont font2 = ::wxGetFontFromUser(::wxGetTopLevelParent(textctrlM), font);
+    wxFont font2 = ::wxGetFontFromUser(::wxGetTopLevelParent(textCtrlM), font);
     if (font2.Ok())
-        textctrlM->SetValue(font2.GetNativeFontInfoDesc());
+        textCtrlM->SetValue(font2.GetNativeFontInfoDesc());
 }
 //-----------------------------------------------------------------------------
 // PrefDlgRelationColumnsChooserSetting class
@@ -968,7 +992,7 @@ PrefDlgRelationColumnsChooserSetting::PrefDlgRelationColumnsChooserSetting(
 //-----------------------------------------------------------------------------
 void PrefDlgRelationColumnsChooserSetting::choose()
 {
-    wxArrayString defaultNames = ::wxStringTokenize(textctrlM->GetValue(),
+    wxArrayString defaultNames = ::wxStringTokenize(textCtrlM->GetValue(),
         wxT(","));
     std::vector<wxString> list;
     for (size_t i = 0; i < defaultNames.Count(); i++)
@@ -980,14 +1004,14 @@ void PrefDlgRelationColumnsChooserSetting::choose()
         wxString retval(*it);
         while ((++it) != list.end())
             retval += wxT(", ") + (*it);
-        textctrlM->SetValue(retval);
+        textCtrlM->SetValue(retval);
     }
 }
 //-----------------------------------------------------------------------------
 void PrefDlgRelationColumnsChooserSetting::enableControls(bool enabled)
 {
-    if (textctrlM)
-        textctrlM->Enable(enabled);
+    if (textCtrlM)
+        textCtrlM->Enable(enabled);
     if (browsebtnM)
         browsebtnM->Enable(enabled && relationM);
 }
@@ -1004,10 +1028,271 @@ bool PrefDlgRelationColumnsChooserSetting::parseProperty(wxXmlNode* xmln)
     return PrefDlgChooserSetting::parseProperty(xmln);
 }
 //-----------------------------------------------------------------------------
+// PrefDlgCheckListBoxSetting class
+class PrefDlgCheckListBoxSetting: public PrefDlgSetting
+{
+public:
+    PrefDlgCheckListBoxSetting(wxPanel* page, PrefDlgSetting* parent);
+    ~PrefDlgCheckListBoxSetting();
+
+    virtual bool createControl(bool ignoreerrors);
+    virtual bool loadFromTargetConfig(Config& config);
+    virtual bool saveToTargetConfig(Config& config);
+protected:
+    wxString defaultM;
+    virtual void addControlsToSizer(wxSizer* sizer);
+    virtual void enableControls(bool enabled);
+    virtual wxArrayString getCheckListBoxItems() = 0;
+    void getItemsCheckState(bool& uncheckedItems, bool& checkedItems);
+    virtual wxStaticText* getLabel();
+    virtual bool hasControls() const;
+    virtual void setDefault(const wxString& defValue);
+private:
+    wxStaticText* captionBeforeM;
+    wxCheckListBox* checkListBoxM;
+    wxCheckBox* checkBoxM;
+    bool ignoreEventsM;
+
+    boost::scoped_ptr<wxEvtHandler> checkListBoxHandlerM;
+    boost::scoped_ptr<wxEvtHandler> checkBoxHandlerM;
+    void OnCheckListBox(wxCommandEvent& event);
+    void OnCheckBox(wxCommandEvent& event);
+};
+//-----------------------------------------------------------------------------
+PrefDlgCheckListBoxSetting::PrefDlgCheckListBoxSetting(wxPanel* page,
+        PrefDlgSetting* parent)
+    : PrefDlgSetting(page, parent), captionBeforeM(0), checkListBoxM(0),
+        checkBoxM(0), ignoreEventsM(true)
+{
+}
+//-----------------------------------------------------------------------------
+PrefDlgCheckListBoxSetting::~PrefDlgCheckListBoxSetting()
+{
+    if (checkListBoxM && checkListBoxHandlerM.get())
+        checkListBoxM->PopEventHandler();
+    if (checkBoxM && checkBoxHandlerM.get())
+        checkBoxM->PopEventHandler();
+}
+//-----------------------------------------------------------------------------
+void PrefDlgCheckListBoxSetting::addControlsToSizer(wxSizer* sizer)
+{
+    if (checkListBoxM)
+    {
+        if (captionBeforeM)
+        {
+            sizer->Add(captionBeforeM, 0, wxFIXED_MINSIZE | wxALIGN_TOP);
+            sizer->Add(styleguide().getControlLabelMargin(), 0);
+        }
+
+        wxSizer* sizerVert = new wxBoxSizer(wxVERTICAL);
+        sizerVert->Add(checkListBoxM, 1, wxEXPAND);
+        sizerVert->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+        sizerVert->Add(checkBoxM, 0, wxFIXED_MINSIZE | wxALIGN_LEFT);
+
+        sizer->Add(sizerVert, 1, wxEXPAND | wxFIXED_MINSIZE | wxALIGN_TOP);
+    }
+}
+//-----------------------------------------------------------------------------
+bool PrefDlgCheckListBoxSetting::createControl(bool WXUNUSED(ignoreerrors))
+{
+    if (!captionM.empty())
+        captionBeforeM = new wxStaticText(getPage(), wxID_ANY, captionM);
+    checkListBoxM = new wxCheckListBox(getPage(), wxID_ANY, wxDefaultPosition,
+        wxDefaultSize, getCheckListBoxItems());
+    // default minimum size is too high
+    checkListBoxM->SetMinSize(wxSize(150, 64));
+    checkBoxM = new wxCheckBox(getPage(), wxID_ANY,
+        _("Select / deselect &all"), wxDefaultPosition, wxDefaultSize,
+        wxCHK_3STATE);
+
+    checkListBoxHandlerM.reset(new PrefDlgEventHandler(
+        boost::bind(&PrefDlgCheckListBoxSetting::OnCheckListBox, this, _1)));
+    checkListBoxM->PushEventHandler(checkListBoxHandlerM.get());
+    checkListBoxHandlerM->Connect(checkListBoxM->GetId(),
+        wxEVT_COMMAND_CHECKLISTBOX_TOGGLED,
+        wxCommandEventHandler(PrefDlgEventHandler::OnCommandEvent));
+    checkBoxHandlerM.reset(new PrefDlgEventHandler(
+        boost::bind(&PrefDlgCheckListBoxSetting::OnCheckBox, this, _1)));
+    checkBoxM->PushEventHandler(checkBoxHandlerM.get());
+    checkBoxHandlerM->Connect(checkBoxM->GetId(),
+        wxEVT_COMMAND_CHECKBOX_CLICKED,
+        wxCommandEventHandler(PrefDlgEventHandler::OnCommandEvent));
+    ignoreEventsM = false;
+
+    if (!descriptionM.empty())
+    {
+        if (captionBeforeM)
+            captionBeforeM->SetToolTip(descriptionM);
+        checkListBoxM->SetToolTip(descriptionM);
+    }
+    return true;
+}
+//-----------------------------------------------------------------------------
+void PrefDlgCheckListBoxSetting::enableControls(bool enabled)
+{
+    if (checkListBoxM)
+        checkListBoxM->Enable(enabled);
+    if (checkBoxM)
+        checkBoxM->Enable(enabled);
+}
+//-----------------------------------------------------------------------------
+void PrefDlgCheckListBoxSetting::getItemsCheckState(bool& uncheckedItems,
+    bool& checkedItems)
+{
+    uncheckedItems = false;
+    checkedItems = false;
+    for (size_t i = 0; i < checkListBoxM->GetCount(); i++)
+    {
+        if (checkListBoxM->IsChecked(i))
+            checkedItems = true;
+        else
+            uncheckedItems = true;
+        if (checkedItems && uncheckedItems)
+            return;
+    }
+}
+//-----------------------------------------------------------------------------
+wxStaticText* PrefDlgCheckListBoxSetting::getLabel()
+{
+    return captionBeforeM;
+}
+//-----------------------------------------------------------------------------
+bool PrefDlgCheckListBoxSetting::hasControls() const
+{
+    return captionBeforeM != 0 || checkListBoxM != 0 || checkBoxM != 0;
+}
+//-----------------------------------------------------------------------------
+bool PrefDlgCheckListBoxSetting::loadFromTargetConfig(Config& config)
+{
+    if (!checkTargetConfigProperties())
+        return false;
+    if (checkListBoxM)
+    {
+        wxString value = defaultM;
+        config.getValue(keyM, value);
+        wxArrayString checked(::wxStringTokenize(value, wxT(", \t\r\n"),
+            wxTOKEN_STRTOK));
+
+        ignoreEventsM = true;
+        for (size_t i = 0; i < checked.GetCount(); i++)
+        {
+            int idx = checkListBoxM->FindString(checked[i]);
+            if (idx >= 0)
+                checkListBoxM->Check(idx);
+        }
+        ignoreEventsM = false;
+    }
+    enableControls(true);
+    return true;
+}
+//-----------------------------------------------------------------------------
+bool PrefDlgCheckListBoxSetting::saveToTargetConfig(Config& config)
+{
+    if (!checkTargetConfigProperties())
+        return false;
+    size_t itemCount = checkListBoxM ? checkListBoxM->GetCount() : 0;
+    if (itemCount)
+    {
+        wxString value;
+        bool first = true;
+        for (size_t i = 0; i < itemCount; i++)
+        {
+            if (checkListBoxM->IsChecked(i))
+            {
+                if (!first)
+                    value += wxString(wxT(", "));
+                first = false;
+                value += checkListBoxM->GetString(i);
+            }
+        }
+        config.setValue(keyM, value);
+    }
+    return true;
+}
+//-----------------------------------------------------------------------------
+void PrefDlgCheckListBoxSetting::setDefault(const wxString& defValue)
+{
+    defaultM = defValue;
+}
+//-----------------------------------------------------------------------------
+// event handler
+void PrefDlgCheckListBoxSetting::OnCheckListBox(
+    wxCommandEvent& WXUNUSED(event))
+{
+    if (!ignoreEventsM && checkBoxM)
+    {
+        bool checkedItems = false, uncheckedItems = false;
+        getItemsCheckState(checkedItems, uncheckedItems);
+
+        if (checkedItems && !uncheckedItems)
+            checkBoxM->Set3StateValue(wxCHK_CHECKED);
+        else if (!checkedItems && uncheckedItems)
+            checkBoxM->Set3StateValue(wxCHK_UNCHECKED);
+        else
+            checkBoxM->Set3StateValue(wxCHK_UNDETERMINED);
+    }
+}
+//-----------------------------------------------------------------------------
+void PrefDlgCheckListBoxSetting::OnCheckBox(wxCommandEvent& event)
+{
+    if (!ignoreEventsM && checkListBoxM && checkListBoxM->GetCount())
+    {
+        ignoreEventsM = true;
+        for (size_t i = 0; i < checkListBoxM->GetCount(); i++)
+            checkListBoxM->Check(i, event.IsChecked());
+        ignoreEventsM = false;
+    }
+}
+//-----------------------------------------------------------------------------
+// PrefDlgRelationColumnsListSetting class
+class PrefDlgRelationColumnsListSetting: public PrefDlgCheckListBoxSetting
+{
+public:
+    PrefDlgRelationColumnsListSetting(wxPanel* page, PrefDlgSetting* parent);
+protected:
+    virtual wxArrayString getCheckListBoxItems();
+    virtual bool parseProperty(wxXmlNode* xmln);
+private:
+    Relation* relationM;
+};
+//-----------------------------------------------------------------------------
+PrefDlgRelationColumnsListSetting::PrefDlgRelationColumnsListSetting(
+        wxPanel* page, PrefDlgSetting* parent)
+    : PrefDlgCheckListBoxSetting(page, parent), relationM(0)
+{
+}
+//-----------------------------------------------------------------------------
+wxArrayString PrefDlgRelationColumnsListSetting::getCheckListBoxItems()
+{
+    wxArrayString columns;
+    if (relationM)
+    {
+        columns.Alloc(relationM->getColumnCount());
+        for (ColumnPtrs::const_iterator it = relationM->begin();
+            it != relationM->end(); it++)
+        {
+            columns.Add((*it)->getName_());
+        }
+    }
+    return columns;
+}
+//-----------------------------------------------------------------------------
+bool PrefDlgRelationColumnsListSetting::parseProperty(wxXmlNode* xmln)
+{
+    if (xmln->GetType() == wxXML_ELEMENT_NODE
+        && xmln->GetName() == wxT("relation"))
+    {
+        wxString handle(getNodeContent(xmln, wxEmptyString));
+        MetadataItem* mi = MetadataItem::getObjectFromHandle(handle);
+        relationM = dynamic_cast<Relation*>(mi);
+    }
+    return PrefDlgCheckListBoxSetting::parseProperty(xmln);
+}
+//-----------------------------------------------------------------------------
 // PrefDlgSetting factory
 /* static */
 PrefDlgSetting* PrefDlgSetting::createPrefDlgSetting(wxPanel* page,
-    const wxString& type, PrefDlgSetting* parent)
+    const wxString& type, const wxString& style, PrefDlgSetting* parent)
 {
     if (type == wxT("checkbox"))
         return new PrefDlgCheckboxSetting(page, parent);
@@ -1022,7 +1307,11 @@ PrefDlgSetting* PrefDlgSetting::createPrefDlgSetting(wxPanel* page,
     if (type == wxT("font"))
         return new PrefDlgFontChooserSetting(page, parent);
     if (type == wxT("relation_columns"))
+    {
+        if (style == wxT("list"))
+            return new PrefDlgRelationColumnsListSetting(page, parent);
         return new PrefDlgRelationColumnsChooserSetting(page, parent);
+    }
     return 0;
 }
 //-----------------------------------------------------------------------------
