@@ -422,8 +422,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_UPDATE_UI(Cmds::Menu_DatabasePreferences, MainFrame::OnMenuUpdateIfDatabaseSelected)
     EVT_MENU(Cmds::Menu_DatabaseProperties, MainFrame::OnMenuDatabaseProperties)
     EVT_UPDATE_UI(Cmds::Menu_DatabaseProperties, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
-    EVT_MENU(Cmds::Menu_ExtractDatabaseDDL, MainFrame::OnMenuDatabaseExtractDDL)
-    EVT_UPDATE_UI(Cmds::Menu_ExtractDatabaseDDL, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
 
     EVT_MENU(Cmds::Menu_Insert, MainFrame::OnMenuInsert)
     EVT_MENU(Cmds::Menu_BrowseColumns, MainFrame::OnMenuBrowseColumns)
@@ -758,20 +756,6 @@ void MainFrame::OnMenuConfigure(wxCommandEvent& WXUNUSED(event))
     }
 }
 //-----------------------------------------------------------------------------
-void MainFrame::OnMenuDatabaseExtractDDL(wxCommandEvent& WXUNUSED(event))
-{
-    MetadataItemPtr db = getDatabase(treeMainM->getSelectedMetadataItem());
-    if (!db)
-        return;
-    if (!tryAutoConnectDatabase())
-        return;
-
-    URI uri(wxT("fr://edit_ddl"));
-    uri.addParam(wxString::Format(wxT("parent_window=%ld"), (uintptr_t)this));
-    uri.addParam(wxString::Format(wxT("object_handle=%d"), db->getHandle()));
-    getURIProcessor().handleURI(uri);
-}
- //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDatabaseProperties(wxCommandEvent& WXUNUSED(event))
 {
     DatabasePtr db = getDatabase(treeMainM->getSelectedMetadataItem());

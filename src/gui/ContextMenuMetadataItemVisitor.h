@@ -70,7 +70,7 @@ private:
     void addAlterItem(MetadataItem& metadataItem);
     void addCreateItem();
     void addDropItem(MetadataItem& metadataItem);
-    void addGenerateCodeMenu(MetadataItem& metadataItem);
+    void addGenerateCodeMenu(MetadataItem& metadataItem, wxMenu* parent = 0);
     void addPropertiesItem();
     void addRefreshItem();
     void addSelectItem();

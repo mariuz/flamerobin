@@ -96,7 +96,6 @@ public:
     void OnMenuReconnect(wxCommandEvent& event);
     void OnMenuDatabasePreferences(wxCommandEvent& event);
     void OnMenuDatabaseProperties(wxCommandEvent& event);
-    void OnMenuDatabaseExtractDDL(wxCommandEvent& event);
 
     // create new object
     void showCreateTemplate(const wxString& statement);

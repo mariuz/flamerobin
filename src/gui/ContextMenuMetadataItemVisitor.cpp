@@ -89,36 +89,28 @@ void ContextMenuMetadataItemVisitor::visitDatabase(Database& database)
     menuM->Append(Cmds::Menu_ExecuteStatements, _("Execute &SQL statements"));
     addSeparator();
 
-    wxMenu* actions = new wxMenu();
-    menuM->Append(0, _("Acti&ons"), actions);
+    wxMenu* toolsMenu = new wxMenu();
+    menuM->Append(0, _("T&ools"), toolsMenu);
+    // Tools submenu
+    toolsMenu->Append(Cmds::Menu_Backup, _("&Backup database"));
+    toolsMenu->Append(Cmds::Menu_Restore, _("Rest&ore database"));
+    addSeparator();
+    toolsMenu->Append(Cmds::Menu_RecreateDatabase, _("Recreate empty database"));
+    addSeparator();
+    addGenerateCodeMenu(database, toolsMenu);
+    toolsMenu->Append(Cmds::Menu_MonitorEvents, _("&Monitor events"));
+    toolsMenu->Append(Cmds::Menu_GenerateData, _("&Test data generator"));
 
-    wxMenu* advanced = new wxMenu();
-    menuM->Append(0, _("Ad&vanced"), advanced);
-
+    menuM->Append(Cmds::Menu_DropDatabase, _("Drop database"));
+    addSeparator();
     menuM->Append(Cmds::Menu_DatabaseRegistrationInfo,
         _("Database registration &info"));
     menuM->Append(Cmds::Menu_UnRegisterDatabase, _("&Unregister database"));
 
-    // the actions submenu
-    actions->Append(Cmds::Menu_Backup, _("&Backup database"));
-    actions->Append(Cmds::Menu_Restore, _("Rest&ore database"));
-    addSeparator();
-    actions->Append(Cmds::Menu_RecreateDatabase, _("Recreate empty database"));
-    addSeparator();
-    addGenerateCodeMenu(database);
-    addSeparator();
-    actions->Append(Cmds::Menu_DropDatabase, _("Drop database"));
-
-    // the advanced submenu
-    advanced->Append(Cmds::Menu_MonitorEvents, _("&Monitor events"));
-    advanced->Append(Cmds::Menu_DatabasePreferences,
-        _("Database &preferences..."));
-    advanced->Append(Cmds::Menu_GenerateData, _("&Test data generator"));
-    advanced->Append(Cmds::Menu_ExtractDatabaseDDL,
-        _("&Extract metadata DDL"));
-
     addSeparator();
     addRefreshItem();
+    menuM->Append(Cmds::Menu_DatabasePreferences,
+        _("Database &preferences..."));
     menuM->Append(Cmds::Menu_DatabaseProperties, _("P&roperties"));
 }
 //-----------------------------------------------------------------------------
@@ -382,7 +374,7 @@ void ContextMenuMetadataItemVisitor::addDropItem(MetadataItem& metadataItem)
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::addGenerateCodeMenu(
-    MetadataItem& metadataItem)
+    MetadataItem& metadataItem, wxMenu* parent)
 {
     MetadataTemplateManager tm(&metadataItem);
     if (tm.descriptorsBegin() == tm.descriptorsEnd())
@@ -395,7 +387,9 @@ void ContextMenuMetadataItemVisitor::addGenerateCodeMenu(
     {
         templateMenu->Append(i, (*it)->getMenuCaption());
     }
-    menuM->Append(Cmds::Menu_TemplateFirst, _("&Generate code"), templateMenu);
+    if (!parent)
+        parent = menuM;
+    parent->Append(Cmds::Menu_TemplateFirst, _("&Generate code"), templateMenu);
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::addPropertiesItem()
