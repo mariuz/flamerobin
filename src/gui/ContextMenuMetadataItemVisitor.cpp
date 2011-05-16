@@ -90,7 +90,7 @@ void ContextMenuMetadataItemVisitor::visitDatabase(Database& database)
     addSeparator();
 
     wxMenu* toolsMenu = new wxMenu();
-    menuM->Append(0, _("T&ools"), toolsMenu);
+    menuM->Append(0, _("&Tools"), toolsMenu);
     // Tools submenu
     toolsMenu->Append(Cmds::Menu_Backup, _("&Backup database"));
     toolsMenu->Append(Cmds::Menu_Restore, _("Rest&ore database"));
@@ -101,16 +101,15 @@ void ContextMenuMetadataItemVisitor::visitDatabase(Database& database)
     toolsMenu->Append(Cmds::Menu_MonitorEvents, _("&Monitor events"));
     toolsMenu->Append(Cmds::Menu_GenerateData, _("&Test data generator"));
 
-    menuM->Append(Cmds::Menu_DropDatabase, _("Drop database"));
+    menuM->Append(Cmds::Menu_DropDatabase, _("Dr&op database"));
     addSeparator();
     menuM->Append(Cmds::Menu_DatabaseRegistrationInfo,
         _("Database registration &info"));
     menuM->Append(Cmds::Menu_UnRegisterDatabase, _("&Unregister database"));
-
-    addSeparator();
-    addRefreshItem();
     menuM->Append(Cmds::Menu_DatabasePreferences,
         _("Database &preferences..."));
+    addSeparator();
+    addRefreshItem();
     menuM->Append(Cmds::Menu_DatabaseProperties, _("P&roperties"));
 }
 //-----------------------------------------------------------------------------

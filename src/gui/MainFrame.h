@@ -167,6 +167,7 @@ private:
     void buildMainMenu();
 
     bool confirmDropItem(MetadataItem* item);
+    bool confirmDropDatabase(Database* db);
 
 protected:
     DBHTreeControl* treeMainM;

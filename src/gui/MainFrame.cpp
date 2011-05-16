@@ -1592,7 +1592,7 @@ void MainFrame::OnMenuDropDatabase(wxCommandEvent& WXUNUSED(event))
     DatabasePtr db = getDatabase(treeMainM->getSelectedMetadataItem());
     if (!checkValidDatabase(db) || !tryAutoConnectDatabase(db))
         return;
-    if (!confirmDropItem(db.get()))
+    if (!confirmDropDatabase(db.get()))
         return;
 
     int result = wxMessageBox(
@@ -1695,6 +1695,16 @@ bool MainFrame::confirmDropItem(MetadataItem* item)
         _("Once you drop the object it is permanently removed from database."),
         AdvancedMessageDialogButtonsOkCancel(_("&Drop")),
         config(), wxT("DIALOG_ConfirmDrop"), _("Always drop without asking"));
+}
+//-----------------------------------------------------------------------------
+bool MainFrame::confirmDropDatabase(Database* db)
+{
+    wxString msg(wxString::Format(
+        _("Are you sure you wish to drop database %s?"),
+        db->getName_().c_str()));
+    return wxOK == showQuestionDialog(this, msg,
+        _("Once you drop the database, all data is lost."),
+        AdvancedMessageDialogButtonsOkCancel(_("&Drop")));
 }
 //-----------------------------------------------------------------------------
 bool MainFrame::openUnregisteredDatabase(const wxString& dbpath)
