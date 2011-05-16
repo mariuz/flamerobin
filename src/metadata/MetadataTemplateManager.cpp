@@ -45,6 +45,7 @@
 #include "config/Config.h"
 #include "core/CodeTemplateProcessor.h"
 #include "core/FRError.h"
+#include "core/StringUtils.h"
 #include "metadata/metadataitem.h"
 #include "metadata/MetadataTemplateManager.h"
 
@@ -76,10 +77,9 @@ void TemplateDescriptor::loadDescriptionFromConfigFile()
             configM.get(wxT("templateInfo/matchesName"), matchesNameM));
         if (!matchesNameM)
             matchesNameM = wxT(".*");
-        matchesWhenM = expandTemplateCommands(
-            configM.get(wxT("templateInfo/matchesWhen"), matchesWhenM));
-        if (!matchesWhenM)
-            matchesWhenM = wxT("true");
+        wxString matchesWhen = getBooleanAsString(true);
+        matchesWhenM = getStringAsBoolean(expandTemplateCommands(
+            configM.get(wxT("templateInfo/matchesWhen"), matchesWhen)));
     }
     else
     {
@@ -87,7 +87,7 @@ void TemplateDescriptor::loadDescriptionFromConfigFile()
         menuPositionM = 0;
         matchesTypeM = wxT(".*");
         matchesNameM = wxT(".*");
-        matchesWhenM = wxT("true");
+        matchesWhenM = true;
     }
 }
 //-----------------------------------------------------------------------------
@@ -127,10 +127,7 @@ wxString TemplateDescriptor::getMenuCaption() const
         if (!nameRegEx.IsValid())
             throw FRError(_("Invalid regex"));
         if (nameRegEx.Matches(metadataItem->getName_()))
-        {
-            if (matchesWhenM == wxT("true"))
-                return true;
-        }
+            return matchesWhenM;
     }
     return false;
 }

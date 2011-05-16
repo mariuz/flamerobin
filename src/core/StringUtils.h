@@ -49,7 +49,9 @@ wxString escapeXmlChars(const wxString& input);
 wxString getHtmlCharset();
 //-----------------------------------------------------------------------------
 // Standard way to confert a boolean to a string ("true"/"false").
-inline wxString getBooleanAsString(bool value) { return (value) ? wxT("true") : wxT("false"); }
+inline wxString getBooleanAsString(bool value) { return value ? wxT("true") : wxT("false"); }
+// Standard way to confert a string ("true"/"false") to a boolean.
+inline bool getStringAsBoolean(wxString value) { return value == wxT("true") ? true : false; }
 //-----------------------------------------------------------------------------
 // Converts a wxArrayString to a delimited string of values.
 wxString wxArrayToString(const wxArrayString& arrayStr, const wxString& delimiter);

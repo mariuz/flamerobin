@@ -51,7 +51,7 @@ private:
     int menuPositionM;
     wxString matchesTypeM;
     wxString matchesNameM;
-    wxString matchesWhenM;
+    bool matchesWhenM;
     wxString expandTemplateCommands(const wxString& inputText) const;
 public:
     TemplateDescriptor(const wxFileName& templateFileName,
