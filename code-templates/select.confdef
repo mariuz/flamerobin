@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <root>
     <node>
-        <caption>Select From Table</caption>
+        <caption>Select ... from {%object_name%} where ...</caption>
         <setting type="relation_columns" style="list">
             <caption>Columns to &amp;select:</caption>
             <key>{%object_path%}/columnNames</key>

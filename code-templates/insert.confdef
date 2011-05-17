@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <root>
     <node>
-        <caption>Insert Into Table</caption>
+        <caption>Insert into {%object_name%} (...) values (...)</caption>
         <setting type="relation_columns" style="list">
             <caption>Columns to &amp;insert into:</caption>
             <key>{%object_path%}/columnNames</key>

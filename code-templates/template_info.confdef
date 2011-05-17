@@ -25,5 +25,11 @@
             <default>.*</default>
             <expand>1</expand>
         </setting>
+        <setting type="string">
+            <caption>Matches objects when (true/false)</caption>
+            <key>templateInfo/matchesWhen</key>
+            <default>true</default>
+            <expand>1</expand>
+        </setting>
     </node>
 </root>

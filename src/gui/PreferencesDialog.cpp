@@ -752,7 +752,7 @@ void PreferencesDialogTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *t
     {
         wxFileName defFileName = tp->getCurrentTemplateFileName();
         defFileName.SetExt(wxT("confdef"));
-        if (cmdName == wxT("infogui"))
+        if (cmdName == wxT("edit_info"))
             defFileName.SetName(wxT("template_info"));
 
         // Expand commands in confdef file.
@@ -761,11 +761,11 @@ void PreferencesDialogTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *t
         ctp.processTemplateFile(confDefData, defFileName, object, tp->getProgressIndicator());
         
         // Show dialog for expanded confdef data.
-        wxString dialogTitle(_("Set template metadata"));
+        wxString dialogTitle(_("Set parameters"));
         Config& config(tp->getConfig());
-        if (cmdName == wxT("infogui"))
+        if (cmdName == wxT("edit_info"))
         {
-            dialogTitle = _("Set template metadata");
+            dialogTitle = _("Set template info");
             config = tp->getInfo(); 
         }
         PreferencesDialog pd(tp->getWindow(), dialogTitle,
