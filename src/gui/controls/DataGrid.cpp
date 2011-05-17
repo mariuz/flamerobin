@@ -828,12 +828,12 @@ void DataGrid::OnEditorCreated(wxGridEditorCreatedEvent& event)
 //-----------------------------------------------------------------------------
 void DataGrid::OnEditorKeyDown(wxKeyEvent& event)
 {
-    if (event.GetKeyCode() == WXK_DELETE)
+    if (event.GetKeyCode() == WXK_DELETE || event.GetKeyCode() == WXK_BACK)
     {
-        wxTextCtrl *editor = dynamic_cast<wxTextCtrl *>(
+        wxTextCtrl* editor = dynamic_cast<wxTextCtrl *>(
             event.GetEventObject());
-        DataGridTable *table = getDataGridTable();
-        if (editor && table && editor->GetValue().IsEmpty())
+        DataGridTable* table = getDataGridTable();
+        if (editor && table && editor->GetValue().empty())
         {
             table->setNullFlag(true);
             editor->SetValue(wxT("[null]"));
