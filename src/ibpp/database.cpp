@@ -114,7 +114,7 @@ void DatabaseImpl::Connect()
     // OR FireBird 1.x Server.
 
     char items[] = {isc_info_ods_version,
-                    isc_info_db_SQL_dialect,
+                    isc_info_db_sql_dialect,
                     isc_info_end};
     RB result(100);
 
@@ -139,7 +139,7 @@ void DatabaseImpl::Connect()
             _("Unsupported Server : wrong ODS version (%d), at least '10' required."), ODS);
     }
 
-    mDialect = result.GetValue(isc_info_db_SQL_dialect);
+    mDialect = result.GetValue(isc_info_db_sql_dialect);
     if (mDialect != 1 && mDialect != 3)
     {
         status.Reset();
