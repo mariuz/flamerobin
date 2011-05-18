@@ -1221,14 +1221,6 @@ BSTREAM* ISC_EXPORT Bopen(ISC_QUAD*,
 								  isc_tr_handle,
 								  const ISC_SCHAR*);
 
-/* Disabled, not found anywhere.
-BSTREAM* ISC_EXPORT Bopen2(ISC_QUAD*,
-								   isc_db_handle,
-								   isc_tr_handle,
-								   const ISC_SCHAR*,
-								   unsigned short);
-*/
-
 
 /******************************/
 /* Other Misc functions       */
@@ -2396,11 +2388,6 @@ enum  info_db_implementations
 
         isc_info_db_impl_last_value   
 };
-
-#define isc_info_db_impl_isc_a            isc_info_db_impl_isc_apl_68K
-#define isc_info_db_impl_isc_u            isc_info_db_impl_isc_vax_ultr
-#define isc_info_db_impl_isc_v            isc_info_db_impl_isc_vms
-#define isc_info_db_impl_isc_s            isc_info_db_impl_isc_sun_68k
 
 enum info_db_class
 {

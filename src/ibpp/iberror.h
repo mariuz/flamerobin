@@ -5,7 +5,7 @@
  * The contents of this file are subject to the Interbase Public
  * License Version 1.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy
- * of the License at http://www.Inprise.com/IPL.html
+ * of the License at http://www.firebirdsql.org/index.php?op=doc&id=ipl
  * 
  * Software distributed under the License is distributed on an
  * "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express
@@ -48,10 +48,7 @@ const ISC_STATUS isc_arg_vms			= 6;	// VAX/VMS status code (long)
 const ISC_STATUS isc_arg_unix			= 7;	// UNIX error code 
 const ISC_STATUS isc_arg_domain		= 8;	// Apollo/Domain error code 
 const ISC_STATUS isc_arg_dos			= 9;	// MSDOS/OS2 error code 
-const ISC_STATUS isc_arg_mpexl			= 10;	// HP MPE/XL error code 
-const ISC_STATUS isc_arg_mpexl_ipc		= 11;	// HP MPE/XL IPC error code 
 const ISC_STATUS isc_arg_next_mach		= 15;	// NeXT/Mach error code 
-const ISC_STATUS isc_arg_netware		= 16;	// NetWare error code 
 const ISC_STATUS isc_arg_win32			= 17;	// Win32 error code 
 const ISC_STATUS isc_arg_warning		= 18;	// warning argument 
 
