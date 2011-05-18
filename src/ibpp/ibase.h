@@ -86,10 +86,14 @@ typedef unsigned long uintptr_t;
 
 #endif
 
-#if defined(_LP64) || defined(__LP64__) || defined(__arch64__) || defined(_WIN64) 
-typedef unsigned int    FB_API_HANDLE;
+/******************************************************************/
+/* API handles                                                    */
+/******************************************************************/
+
+#if defined(_LP64) || defined(__LP64__) || defined(__arch64__) || defined(_WIN64)
+typedef unsigned int	FB_API_HANDLE;
 #else
-typedef void*           FB_API_HANDLE;
+typedef void*		FB_API_HANDLE;
 #endif
 
 /******************************************************************/
@@ -98,7 +102,7 @@ typedef void*           FB_API_HANDLE;
 
 typedef intptr_t ISC_STATUS;
 
-#define ISC_STATUS_LENGTH       20
+#define ISC_STATUS_LENGTH	20
 typedef ISC_STATUS ISC_STATUS_ARRAY[ISC_STATUS_LENGTH];
 
 /* SQL State as defined in the SQL Standard. */
@@ -110,11 +114,11 @@ typedef char FB_SQLSTATE_STRING[FB_SQLSTATE_SIZE];
 /* Define type, export and other stuff based on c/c++ and Windows */
 /******************************************************************/
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
-        #define  ISC_EXPORT     __stdcall
-        #define  ISC_EXPORT_VARARG      __cdecl
+	#define  ISC_EXPORT	__stdcall
+	#define  ISC_EXPORT_VARARG	__cdecl
 #else
-        #define  ISC_EXPORT
-        #define  ISC_EXPORT_VARARG
+	#define  ISC_EXPORT
+	#define  ISC_EXPORT_VARARG
 #endif
 
 /*
@@ -127,29 +131,29 @@ typedef char FB_SQLSTATE_STRING[FB_SQLSTATE_SIZE];
  */
 
 #if defined(_LP64) || defined(__LP64__) || defined(__arch64__)
-typedef int             ISC_LONG;
-typedef unsigned int    ISC_ULONG;
+typedef	int		ISC_LONG;
+typedef	unsigned int	ISC_ULONG;
 #else
-typedef signed long     ISC_LONG;
-typedef unsigned long   ISC_ULONG;
+typedef	signed long	ISC_LONG;
+typedef	unsigned long	ISC_ULONG;
 #endif
 
-typedef signed short    ISC_SHORT;
-typedef unsigned short  ISC_USHORT;
+typedef	signed short	ISC_SHORT;
+typedef	unsigned short	ISC_USHORT;
 
-typedef unsigned char   ISC_UCHAR;
-typedef char            ISC_SCHAR;
+typedef	unsigned char	ISC_UCHAR;
+typedef char		ISC_SCHAR;
 
 /*******************************************************************/
 /* 64 bit Integers                                                 */
 /*******************************************************************/
 
 #if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__)) && !defined(__GNUC__)
-typedef __int64                         ISC_INT64;
-typedef unsigned __int64        ISC_UINT64;
+typedef __int64				ISC_INT64;
+typedef unsigned __int64	ISC_UINT64;
 #else
-typedef long long int                   ISC_INT64;
-typedef unsigned long long int  ISC_UINT64;
+typedef long long int			ISC_INT64;
+typedef unsigned long long int	ISC_UINT64;
 #endif
 
 /*******************************************************************/
@@ -157,12 +161,12 @@ typedef unsigned long long int  ISC_UINT64;
 /*******************************************************************/
 
 #ifndef ISC_TIMESTAMP_DEFINED
-typedef int                     ISC_DATE;
-typedef unsigned int    ISC_TIME;
+typedef int			ISC_DATE;
+typedef unsigned int	ISC_TIME;
 typedef struct
 {
-        ISC_DATE timestamp_date;
-        ISC_TIME timestamp_time;
+	ISC_DATE timestamp_date;
+	ISC_TIME timestamp_time;
 } ISC_TIMESTAMP;
 #define ISC_TIMESTAMP_DEFINED
 #endif	/* ISC_TIMESTAMP_DEFINED */
@@ -172,8 +176,8 @@ typedef struct
 /*******************************************************************/
 
 struct GDS_QUAD_t {
-        ISC_LONG gds_quad_high;
-        ISC_ULONG gds_quad_low;
+	ISC_LONG gds_quad_high;
+	ISC_ULONG gds_quad_low;
 };
 
 typedef struct GDS_QUAD_t GDS_QUAD;
@@ -276,8 +280,8 @@ typedef struct bstream
 
 /* Three ugly macros, one even using octal radix... sigh... */
 #define getb(p)	(--(p)->bstr_cnt >= 0 ? *(p)->bstr_ptr++ & 0377: BLOB_get (p))
-#define putb(x,p) (((x) == '\n' || (!(--(p)->bstr_cnt))) ? BLOB_put ((x),p) : ((int) (*(p)->bstr_ptr++ = (unsigned) (x))))
-#define putbx(x,p) ((!(--(p)->bstr_cnt)) ? BLOB_put ((x),p) : ((int) (*(p)->bstr_ptr++ = (unsigned) (x))))
+#define putb(x, p) (((x) == '\n' || (!(--(p)->bstr_cnt))) ? BLOB_put ((x),p) : ((int) (*(p)->bstr_ptr++ = (unsigned) (x))))
+#define putbx(x, p) ((!(--(p)->bstr_cnt)) ? BLOB_put ((x),p) : ((int) (*(p)->bstr_ptr++ = (unsigned) (x))))
 
 /********************************************************************/
 /* CVC: Public blob interface definition held in val.h.             */
@@ -391,8 +395,13 @@ typedef struct paramvary {
 #ifndef DSQL_SQLDA_PUB_H
 #define DSQL_SQLDA_PUB_H
 
-#define DSQL_close      1
-#define DSQL_drop       2
+/* Definitions for DSQL free_statement routine */
+
+#define DSQL_close		1
+#define DSQL_drop		2
+#define DSQL_unprepare	4
+
+/* Declare the extended SQLDA */
 
 typedef struct
 {
@@ -1257,6 +1266,7 @@ BSTREAM* ISC_EXPORT Bopen(ISC_QUAD*,
 								  const ISC_SCHAR*);
 
 
+
 /******************************/
 /* Other Misc functions       */
 /******************************/
@@ -1332,6 +1342,9 @@ ISC_STATUS ISC_EXPORT isc_service_start(ISC_STATUS*,
 										unsigned short,
 										const ISC_SCHAR*);
 
+/***********************/
+/* Shutdown and cancel */
+/***********************/
 
 /********************************/
 /* Client information functions */
@@ -1635,7 +1648,13 @@ int  ISC_EXPORT isc_get_client_minor_version ();
 #ifndef INCLUDE_CONSTS_PUB_H
 #define INCLUDE_CONSTS_PUB_H
 
+/**********************************/
+/* Database parameter block stuff */
+/**********************************/
+
 #define isc_dpb_version1                  1
+#define isc_dpb_version2                  2
+
 #define isc_dpb_cdd_pathname              1
 #define isc_dpb_allocation                2
 #define isc_dpb_journal                   3
@@ -1708,7 +1727,7 @@ int  ISC_EXPORT isc_get_client_minor_version ();
 #define isc_dpb_address_path              70
 #define isc_dpb_process_id                71
 #define isc_dpb_no_db_triggers            72
-#define isc_dpb_trusted_auth                      73
+#define isc_dpb_trusted_auth			  73
 #define isc_dpb_process_name              74
 
 #define isc_dpb_address 1
@@ -1776,6 +1795,11 @@ int  ISC_EXPORT isc_get_client_minor_version ();
 #define isc_bpb_type_stream               0x1
 #define isc_bpb_storage_main              0x0
 #define isc_bpb_storage_temp              0x2
+
+
+/*********************************/
+/* Service parameter block stuff */
+/*********************************/
 
 #define isc_spb_version1                  1
 #define isc_spb_current_version           2
@@ -2268,42 +2292,49 @@ int  ISC_EXPORT isc_get_client_minor_version ();
 #ifndef JRD_INF_PUB_H
 #define JRD_INF_PUB_H
 
-#define isc_info_end                    1
-#define isc_info_truncated              2
-#define isc_info_error                  3
-#define isc_info_data_not_ready           4
-#define isc_info_length                 126
-#define isc_info_flag_end               127
+/* Common, structural codes */
+/****************************/
+
+#define isc_info_end			1
+#define isc_info_truncated		2
+#define isc_info_error			3
+#define isc_info_data_not_ready	          4
+#define isc_info_length			126
+#define isc_info_flag_end		127
+
+/******************************/
+/* Database information items */
+/******************************/
 
 enum db_info_types
 {
-        isc_info_db_id                  = 4,
-        isc_info_reads                  = 5,
-        isc_info_writes             = 6,
-        isc_info_fetches                = 7,
-        isc_info_marks                  = 8,
+	isc_info_db_id			= 4,
+	isc_info_reads			= 5,
+	isc_info_writes		    = 6,
+	isc_info_fetches		= 7,
+	isc_info_marks			= 8,
 
-        isc_info_implementation = 11,
-        isc_info_isc_version            = 12,
-        isc_info_base_level             = 13,
-        isc_info_page_size              = 14,
-        isc_info_num_buffers    = 15,
-        isc_info_limbo                  = 16,
-        isc_info_current_memory = 17,
-        isc_info_max_memory             = 18,
-        isc_info_window_turns   = 19,
-        isc_info_license                = 20,
+	isc_info_implementation = 11,
+	isc_info_isc_version		= 12,
+	isc_info_base_level		= 13,
+	isc_info_page_size		= 14,
+	isc_info_num_buffers	= 15,
+	isc_info_limbo			= 16,
+	isc_info_current_memory	= 17,
+	isc_info_max_memory		= 18,
+	isc_info_window_turns	= 19,
+	isc_info_license		= 20,
 
-        isc_info_allocation             = 21,
-        isc_info_attachment_id   = 22,
-        isc_info_read_seq_count = 23,
-        isc_info_read_idx_count = 24,
-        isc_info_insert_count           = 25,
-        isc_info_update_count           = 26,
-        isc_info_delete_count           = 27,
-        isc_info_backout_count          = 28,
-        isc_info_purge_count            = 29,
-        isc_info_expunge_count          = 30,
+	isc_info_allocation		= 21,
+	isc_info_attachment_id	 = 22,
+	isc_info_read_seq_count	= 23,
+	isc_info_read_idx_count	= 24,
+	isc_info_insert_count		= 25,
+	isc_info_update_count		= 26,
+	isc_info_delete_count		= 27,
+	isc_info_backout_count	 	= 28,
+	isc_info_purge_count		= 29,
+	isc_info_expunge_count		= 30,
 
         isc_info_sweep_interval = 31,
         isc_info_ods_version            = 32,
@@ -2368,53 +2399,53 @@ enum db_info_types
 
 enum  info_db_implementations
 {
-        isc_info_db_impl_rdb_vms = 1,
-        isc_info_db_impl_rdb_eln = 2,
-        isc_info_db_impl_rdb_eln_dev = 3,
-        isc_info_db_impl_rdb_vms_y = 4,
-        isc_info_db_impl_rdb_eln_y = 5,
-        isc_info_db_impl_jri = 6,
-        isc_info_db_impl_jsv = 7,
+	isc_info_db_impl_rdb_vms = 1,
+	isc_info_db_impl_rdb_eln = 2,
+	isc_info_db_impl_rdb_eln_dev = 3,
+	isc_info_db_impl_rdb_vms_y = 4,
+	isc_info_db_impl_rdb_eln_y = 5,
+	isc_info_db_impl_jri = 6,
+	isc_info_db_impl_jsv = 7,
 
-        isc_info_db_impl_isc_apl_68K = 25,
-        isc_info_db_impl_isc_vax_ultr = 26,
-        isc_info_db_impl_isc_vms = 27,
-        isc_info_db_impl_isc_sun_68k = 28,
-        isc_info_db_impl_isc_os2 = 29,
-        isc_info_db_impl_isc_sun4 = 30,    
+	isc_info_db_impl_isc_apl_68K = 25,
+	isc_info_db_impl_isc_vax_ultr = 26,
+	isc_info_db_impl_isc_vms = 27,
+	isc_info_db_impl_isc_sun_68k = 28,
+	isc_info_db_impl_isc_os2 = 29,
+	isc_info_db_impl_isc_sun4 = 30,	   /* 30 */
 
-        isc_info_db_impl_isc_hp_ux = 31,
-        isc_info_db_impl_isc_sun_386i = 32,
-        isc_info_db_impl_isc_vms_orcl = 33,
-        isc_info_db_impl_isc_mac_aux = 34,
-        isc_info_db_impl_isc_rt_aix = 35,
-        isc_info_db_impl_isc_mips_ult = 36,
-        isc_info_db_impl_isc_xenix = 37,
-        isc_info_db_impl_isc_dg = 38,
-        isc_info_db_impl_isc_hp_mpexl = 39,
-        isc_info_db_impl_isc_hp_ux68K = 40,       
+	isc_info_db_impl_isc_hp_ux = 31,
+	isc_info_db_impl_isc_sun_386i = 32,
+	isc_info_db_impl_isc_vms_orcl = 33,
+	isc_info_db_impl_isc_mac_aux = 34,
+	isc_info_db_impl_isc_rt_aix = 35,
+	isc_info_db_impl_isc_mips_ult = 36,
+	isc_info_db_impl_isc_xenix = 37,
+	isc_info_db_impl_isc_dg = 38,
+	isc_info_db_impl_isc_hp_mpexl = 39,
+	isc_info_db_impl_isc_hp_ux68K = 40,	  /* 40 */
 
-        isc_info_db_impl_isc_sgi = 41,
-        isc_info_db_impl_isc_sco_unix = 42,
-        isc_info_db_impl_isc_cray = 43,
-        isc_info_db_impl_isc_imp = 44,
-        isc_info_db_impl_isc_delta = 45,
-        isc_info_db_impl_isc_next = 46,
-        isc_info_db_impl_isc_dos = 47,
-        isc_info_db_impl_m88K = 48,
-        isc_info_db_impl_unixware = 49,
-        isc_info_db_impl_isc_winnt_x86 = 50,
+	isc_info_db_impl_isc_sgi = 41,
+	isc_info_db_impl_isc_sco_unix = 42,
+	isc_info_db_impl_isc_cray = 43,
+	isc_info_db_impl_isc_imp = 44,
+	isc_info_db_impl_isc_delta = 45,
+	isc_info_db_impl_isc_next = 46,
+	isc_info_db_impl_isc_dos = 47,
+	isc_info_db_impl_m88K = 48,
+	isc_info_db_impl_unixware = 49,
+	isc_info_db_impl_isc_winnt_x86 = 50,
 
-        isc_info_db_impl_isc_epson = 51,
-        isc_info_db_impl_alpha_osf = 52,
-        isc_info_db_impl_alpha_vms = 53,
-        isc_info_db_impl_netware_386 = 54, 
-        isc_info_db_impl_win_only = 55,
-        isc_info_db_impl_ncr_3000 = 56,
-        isc_info_db_impl_winnt_ppc = 57,
-        isc_info_db_impl_dg_x86 = 58,
-        isc_info_db_impl_sco_ev = 59,
-        isc_info_db_impl_i386 = 60,
+	isc_info_db_impl_isc_epson = 51,
+	isc_info_db_impl_alpha_osf = 52,
+	isc_info_db_impl_alpha_vms = 53,
+	isc_info_db_impl_netware_386 = 54,
+	isc_info_db_impl_win_only = 55,
+	isc_info_db_impl_ncr_3000 = 56,
+	isc_info_db_impl_winnt_ppc = 57,
+	isc_info_db_impl_dg_x86 = 58,
+	isc_info_db_impl_sco_ev = 59,
+	isc_info_db_impl_i386 = 60,
 
         isc_info_db_impl_freebsd = 61,
         isc_info_db_impl_netbsd = 62,
