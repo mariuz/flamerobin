@@ -1047,6 +1047,7 @@ protected:
     virtual wxStaticText* getLabel();
     virtual bool hasControls() const;
     virtual void setDefault(const wxString& defValue);
+    void updateCheckBoxState();
 private:
     wxStaticText* captionBeforeM;
     wxCheckListBox* checkListBoxM;
@@ -1180,6 +1181,7 @@ bool PrefDlgCheckListBoxSetting::loadFromTargetConfig(Config& config)
             if (idx >= 0)
                 checkListBoxM->Check(idx);
         }
+        updateCheckBoxState();
         ignoreEventsM = false;
     }
     enableControls(true);
@@ -1215,22 +1217,25 @@ void PrefDlgCheckListBoxSetting::setDefault(const wxString& defValue)
     defaultM = defValue;
 }
 //-----------------------------------------------------------------------------
+void PrefDlgCheckListBoxSetting::updateCheckBoxState()
+{
+    bool uncheckedItems = false, checkedItems = false;
+    getItemsCheckState(uncheckedItems, checkedItems);
+
+    if (checkedItems && !uncheckedItems)
+        checkBoxM->Set3StateValue(wxCHK_CHECKED);
+    else if (!checkedItems && uncheckedItems)
+        checkBoxM->Set3StateValue(wxCHK_UNCHECKED);
+    else
+        checkBoxM->Set3StateValue(wxCHK_UNDETERMINED);
+}
+//-----------------------------------------------------------------------------
 // event handler
 void PrefDlgCheckListBoxSetting::OnCheckListBox(
     wxCommandEvent& WXUNUSED(event))
 {
     if (!ignoreEventsM && checkBoxM)
-    {
-        bool checkedItems = false, uncheckedItems = false;
-        getItemsCheckState(checkedItems, uncheckedItems);
-
-        if (checkedItems && !uncheckedItems)
-            checkBoxM->Set3StateValue(wxCHK_CHECKED);
-        else if (!checkedItems && uncheckedItems)
-            checkBoxM->Set3StateValue(wxCHK_UNCHECKED);
-        else
-            checkBoxM->Set3StateValue(wxCHK_UNDETERMINED);
-    }
+        updateCheckBoxState();
 }
 //-----------------------------------------------------------------------------
 void PrefDlgCheckListBoxSetting::OnCheckBox(wxCommandEvent& event)
