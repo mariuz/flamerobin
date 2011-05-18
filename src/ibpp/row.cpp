@@ -1078,18 +1078,6 @@ void* RowImpl::GetValue(int varnum, IITYPE ivType, void* retvalue)
 	switch (var->sqltype & ~1)
 	{
 		
-			case SQL_BOOLEAN :
-			if (ivType == ivString)
-			{
-				// In case of ivString, 'void* retvalue' points to a std::string where we
-				// will directly store the data.
-				std::string* str = (std::string*)retvalue;
-				str->erase();
-				str->append(var->sqldata, var->sqllen);
-				value = retvalue;	// value != 0 means 'not null'
-			}
-			break;
-			
 			case SQL_TEXT :
 			if (ivType == ivString)
 			{
@@ -1475,10 +1463,6 @@ void RowImpl::AllocVariables()
 								memset(var->sqldata, 0, sizeof(ISC_DATE));
 								break;
 			case SQL_TEXT :		var->sqldata = new char[var->sqllen+1];
-								memset(var->sqldata, ' ', var->sqllen);
-								var->sqldata[var->sqllen] = '\0';
-								break;
-			case SQL_BOOLEAN :		var->sqldata = new char[var->sqllen+1];
 								memset(var->sqldata, ' ', var->sqllen);
 								var->sqldata[var->sqllen] = '\0';
 								break;
