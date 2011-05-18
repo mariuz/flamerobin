@@ -70,7 +70,7 @@
 
 #include <stddef.h>
 
-#if defined(__GNUC__)
+#if defined(__GNUC__) || defined (__HP_cc) || defined (__HP_aCC)
 #include <inttypes.h>
 #else
 
@@ -92,11 +92,23 @@ typedef unsigned int    FB_API_HANDLE;
 typedef void*           FB_API_HANDLE;
 #endif
 
+/******************************************************************/
+/* Status vector                                                  */
+/******************************************************************/
+
 typedef intptr_t ISC_STATUS;
 
 #define ISC_STATUS_LENGTH       20
 typedef ISC_STATUS ISC_STATUS_ARRAY[ISC_STATUS_LENGTH];
 
+/* SQL State as defined in the SQL Standard. */
+#define FB_SQLSTATE_LENGTH	5
+#define FB_SQLSTATE_SIZE	(FB_SQLSTATE_LENGTH + 1)
+typedef char FB_SQLSTATE_STRING[FB_SQLSTATE_SIZE];
+
+/******************************************************************/
+/* Define type, export and other stuff based on c/c++ and Windows */
+/******************************************************************/
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
         #define  ISC_EXPORT     __stdcall
         #define  ISC_EXPORT_VARARG      __cdecl
@@ -104,6 +116,15 @@ typedef ISC_STATUS ISC_STATUS_ARRAY[ISC_STATUS_LENGTH];
         #define  ISC_EXPORT
         #define  ISC_EXPORT_VARARG
 #endif
+
+/*
+ * It is difficult to detect 64-bit long from the redistributable header
+ * we do not care of 16-bit platforms anymore thus we may use plain "int"
+ * which is 32-bit on all platforms we support
+ *
+ * We'll move to this definition in future API releases.
+ *
+ */
 
 #if defined(_LP64) || defined(__LP64__) || defined(__arch64__)
 typedef int             ISC_LONG;
@@ -119,6 +140,10 @@ typedef unsigned short  ISC_USHORT;
 typedef unsigned char   ISC_UCHAR;
 typedef char            ISC_SCHAR;
 
+/*******************************************************************/
+/* 64 bit Integers                                                 */
+/*******************************************************************/
+
 #if (defined(WIN32) || defined(_WIN32) || defined(__WIN32__)) && !defined(__GNUC__)
 typedef __int64                         ISC_INT64;
 typedef unsigned __int64        ISC_UINT64;
@@ -126,6 +151,10 @@ typedef unsigned __int64        ISC_UINT64;
 typedef long long int                   ISC_INT64;
 typedef unsigned long long int  ISC_UINT64;
 #endif
+
+/*******************************************************************/
+/* Time & Date support                                             */
+/*******************************************************************/
 
 #ifndef ISC_TIMESTAMP_DEFINED
 typedef int                     ISC_DATE;
@@ -136,7 +165,11 @@ typedef struct
         ISC_TIME timestamp_time;
 } ISC_TIMESTAMP;
 #define ISC_TIMESTAMP_DEFINED
-#endif  
+#endif	/* ISC_TIMESTAMP_DEFINED */
+
+/*******************************************************************/
+/* Blob Id support                                                 */
+/*******************************************************************/
 
 struct GDS_QUAD_t {
         ISC_LONG gds_quad_high;
@@ -408,7 +441,9 @@ typedef struct
 #define SQL_TYPE_DATE                      570
 #define SQL_INT64                          580
 #define SQL_BOOLEAN                      32764
+#define SQL_NULL                         32766
 
+/* Historical alias for pre v6 code */
 #define SQL_DATE                           SQL_TIMESTAMP
 
 #define SQL_DIALECT_V5                          1       
@@ -2154,32 +2189,44 @@ int  ISC_EXPORT isc_get_client_minor_version ();
 #define isc_sdl_subtract                  14
 #define isc_sdl_multiply                  15
 #define isc_sdl_divide                    16
-#define isc_sdl_negate                    17
-#define isc_sdl_eql                       18
-#define isc_sdl_neq                       19
-#define isc_sdl_gtr                       20
-#define isc_sdl_geq                       21
-#define isc_sdl_lss                       22
-#define isc_sdl_leq                       23
-#define isc_sdl_and                       24
-#define isc_sdl_or                        25
-#define isc_sdl_not                       26
-#define isc_sdl_while                     27
-#define isc_sdl_assignment                28
-#define isc_sdl_label                     29
-#define isc_sdl_leave                     30
-#define isc_sdl_begin                     31
+#define isc_sdl_negate                    17 // only used in pretty.cpp; nobody generates it
+//#define isc_sdl_eql                       18
+//#define isc_sdl_neq                       19
+//#define isc_sdl_gtr                       20
+//#define isc_sdl_geq                       21
+//#define isc_sdl_lss                       22
+//#define isc_sdl_leq                       23
+//#define isc_sdl_and                       24
+//#define isc_sdl_or                        25
+//#define isc_sdl_not                       26
+//#define isc_sdl_while                     27
+//#define isc_sdl_assignment                28
+//#define isc_sdl_label                     29
+//#define isc_sdl_leave                     30
+#define isc_sdl_begin                     31 // only used in pretty.cpp; nobody generates it
 #define isc_sdl_end                       32
 #define isc_sdl_do3                       33
 #define isc_sdl_do2                       34
 #define isc_sdl_do1                       35
 #define isc_sdl_element                   36
 
-#define isc_interp_eng_ascii              0
-#define isc_interp_jpn_sjis               5
-#define isc_interp_jpn_euc                6
+/********************************************/
+/* International text interpretation values */
+/********************************************/
+
+//#define isc_interp_eng_ascii              0
+//#define isc_interp_jpn_sjis               5
+//#define isc_interp_jpn_euc                6
+
+/*****************/
+/* Blob Subtypes */
+/*****************/
+
+/* types less than zero are reserved for customer use */
 
 #define isc_blob_untyped                  0
+
+/* internal subtypes */
 
 #define isc_blob_text                     1
 #define isc_blob_blr                      2
@@ -2314,6 +2361,11 @@ enum db_info_types
 
 #define isc_info_version isc_info_isc_version
 
+
+/**************************************/
+/* Database information return values */
+/**************************************/
+
 enum  info_db_implementations
 {
         isc_info_db_impl_rdb_vms = 1,
@@ -2383,10 +2435,17 @@ enum  info_db_implementations
         isc_info_db_impl_darwin_x64 = 73,
         isc_info_db_impl_sun_amd64 = 74,
 
-        isc_info_db_impl_linux_arm = 75,
-        isc_info_db_impl_linux_ia64 = 76,
+	isc_info_db_impl_linux_arm = 75,
+	isc_info_db_impl_linux_ia64 = 76,
 
-        isc_info_db_impl_last_value   
+	isc_info_db_impl_darwin_ppc64 = 77,
+	isc_info_db_impl_linux_s390x = 78,
+	isc_info_db_impl_linux_s390 = 79,
+
+	isc_info_db_impl_linux_sh = 80,
+	isc_info_db_impl_linux_sheb = 81,
+
+	isc_info_db_impl_last_value   // Leave this LAST!
 };
 
 enum info_db_class
@@ -2519,6 +2578,10 @@ enum info_db_provider
 #define isc_info_sql_records              23
 #define isc_info_sql_batch_fetch          24
 #define isc_info_sql_relation_alias             25
+
+/*********************************/
+/* SQL information return values */
+/*********************************/
 
 #define isc_info_sql_stmt_select          1
 #define isc_info_sql_stmt_insert          2
