@@ -495,21 +495,24 @@ void MainFrame::OnMainMenuOpen(wxMenuEvent& event)
         return;
     }
 
-    // rebuild object menu
-    while (objectMenuM->GetMenuItemCount() > 2)
-        objectMenuM->Destroy(objectMenuM->FindItemByPosition(2));
-    if (objectMenuM->GetMenuItemCount() == 1)
-        objectMenuM->AppendSeparator();
-
-    // object has to be subitem of database
-    DatabasePtr db = m->getDatabase();
-    if (db && db.get() != m)
+    if (event.GetMenu() == objectMenuM)
     {
-        ContextMenuMetadataItemVisitor cmv(objectMenuM);
-        m->acceptVisitor(&cmv);
+        // rebuild object menu
+        while (objectMenuM->GetMenuItemCount() > 2)
+            objectMenuM->Destroy(objectMenuM->FindItemByPosition(2));
+        if (objectMenuM->GetMenuItemCount() == 1)
+            objectMenuM->AppendSeparator();
+
+        // object has to be subitem of database
+        DatabasePtr db = m->getDatabase();
+        if (db && db.get() != m)
+        {
+            ContextMenuMetadataItemVisitor cmv(objectMenuM);
+            m->acceptVisitor(&cmv);
+        }
+        if (objectMenuM->GetMenuItemCount() == 2)   // separator
+            objectMenuM->Destroy(objectMenuM->FindItemByPosition(1));
     }
-    if (objectMenuM->GetMenuItemCount() == 2)   // separator
-        objectMenuM->Destroy(objectMenuM->FindItemByPosition(1));
 
     event.Skip();
 }

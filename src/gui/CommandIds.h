@@ -110,6 +110,7 @@ namespace Cmds
 
         // 100 templates
         Menu_TemplateFirst = 700, Menu_TemplateLast = 799,
+        Menu_TemplateMenu,
 
         // for easier copy/paste of above items (no need to mess with comma)
         Last_menu

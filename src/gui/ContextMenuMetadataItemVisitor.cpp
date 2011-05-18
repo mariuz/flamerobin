@@ -385,7 +385,7 @@ void ContextMenuMetadataItemVisitor::addGenerateCodeMenu(
     }
     if (!parent)
         parent = menuM;
-    parent->Append(Cmds::Menu_TemplateFirst, _("&Generate code"), templateMenu);
+    parent->Append(Cmds::Menu_TemplateMenu, _("&Generate code"), templateMenu);
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::addPropertiesItem()
