@@ -147,7 +147,7 @@ public:
     // predefined implementation just returns getId().
     virtual const wxString getPathId() const;
     // returns the id of the item (to be saved in config files, etc.).
-    // The predefined implementation just returns getName().
+    // The predefined implementation just returns getName_().
     virtual const wxString getId() const;
 
     // returns true if the metadata item is a system (as opposed to user-defined) item.
