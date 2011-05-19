@@ -945,7 +945,7 @@ ISC_STATUS ISC_EXPORT isc_compile_request2(ISC_STATUS*,
 										   short,
 										   const ISC_SCHAR*);
 
-ISC_STATUS ISC_EXPORT isc_ddl(ISC_STATUS*,
+ISC_STATUS FB_API_DEPRECATED ISC_EXPORT isc_ddl(ISC_STATUS*,
 							  isc_db_handle*,
 							  isc_tr_handle*,
 							  short,
@@ -1461,69 +1461,74 @@ int  ISC_EXPORT isc_get_client_minor_version ();
 #define blr_eoc			(unsigned char)76
 #define blr_end			(unsigned char)255
 
-#define blr_assignment          (unsigned char)1
-#define blr_begin               (unsigned char)2
-#define blr_dcl_variable        (unsigned char)3        
-#define blr_message             (unsigned char)4
-#define blr_erase               (unsigned char)5
-#define blr_fetch               (unsigned char)6
-#define blr_for                 (unsigned char)7
-#define blr_if                  (unsigned char)8
-#define blr_loop                (unsigned char)9
-#define blr_modify              (unsigned char)10
-#define blr_handler             (unsigned char)11
-#define blr_receive             (unsigned char)12
-#define blr_select              (unsigned char)13
-#define blr_send                (unsigned char)14
-#define blr_store               (unsigned char)15
-#define blr_label               (unsigned char)17
-#define blr_leave               (unsigned char)18
-#define blr_store2              (unsigned char)19
-#define blr_post                (unsigned char)20
-#define blr_literal             (unsigned char)21
-#define blr_dbkey               (unsigned char)22
-#define blr_field               (unsigned char)23
-#define blr_fid                 (unsigned char)24
-#define blr_parameter           (unsigned char)25
-#define blr_variable            (unsigned char)26
-#define blr_average             (unsigned char)27
-#define blr_count               (unsigned char)28
-#define blr_maximum             (unsigned char)29
-#define blr_minimum             (unsigned char)30
-#define blr_total               (unsigned char)31
+#define blr_assignment		(unsigned char)1
+#define blr_begin		(unsigned char)2
+#define blr_dcl_variable  	(unsigned char)3	/* added from gds.h */
+#define blr_message		(unsigned char)4
+#define blr_erase		(unsigned char)5
+#define blr_fetch		(unsigned char)6
+#define blr_for			(unsigned char)7
+#define blr_if			(unsigned char)8
+#define blr_loop		(unsigned char)9
+#define blr_modify		(unsigned char)10
+#define blr_handler		(unsigned char)11
+#define blr_receive		(unsigned char)12
+#define blr_select		(unsigned char)13
+#define blr_send		(unsigned char)14
+#define blr_store		(unsigned char)15
+#define blr_label		(unsigned char)17
+#define blr_leave		(unsigned char)18
+#define blr_store2		(unsigned char)19
+#define blr_post		(unsigned char)20
+#define blr_literal		(unsigned char)21
+#define blr_dbkey		(unsigned char)22
+#define blr_field		(unsigned char)23
+#define blr_fid			(unsigned char)24
+#define blr_parameter		(unsigned char)25
+#define blr_variable		(unsigned char)26
+#define blr_average		(unsigned char)27
+#define blr_count		(unsigned char)28
+#define blr_maximum		(unsigned char)29
+#define blr_minimum		(unsigned char)30
+#define blr_total		(unsigned char)31
+/* count 2
+#define blr_count2		32
+*/
+#define blr_add			(unsigned char)34
+#define blr_subtract		(unsigned char)35
+#define blr_multiply		(unsigned char)36
+#define blr_divide		(unsigned char)37
+#define blr_negate		(unsigned char)38
+#define blr_concatenate		(unsigned char)39
+#define blr_substring		(unsigned char)40
+#define blr_parameter2		(unsigned char)41
+#define blr_from		(unsigned char)42
+#define blr_via			(unsigned char)43
+#define blr_parameter2_old	(unsigned char)44	/* Confusion */
+#define blr_user_name   	(unsigned char)44	/* added from gds.h */
+#define blr_null		(unsigned char)45
 
-#define blr_add                 (unsigned char)34
-#define blr_subtract            (unsigned char)35
-#define blr_multiply            (unsigned char)36
-#define blr_divide              (unsigned char)37
-#define blr_negate              (unsigned char)38
-#define blr_concatenate         (unsigned char)39
-#define blr_substring           (unsigned char)40
-#define blr_parameter2          (unsigned char)41
-#define blr_from                (unsigned char)42
-#define blr_via                 (unsigned char)43
-#define blr_parameter2_old      (unsigned char)44       
-#define blr_user_name           (unsigned char)44       
-#define blr_null                (unsigned char)45
+#define blr_equiv			(unsigned char)46
+#define blr_eql			(unsigned char)47
+#define blr_neq			(unsigned char)48
+#define blr_gtr			(unsigned char)49
+#define blr_geq			(unsigned char)50
+#define blr_lss			(unsigned char)51
+#define blr_leq			(unsigned char)52
+#define blr_containing		(unsigned char)53
+#define blr_matching		(unsigned char)54
+#define blr_starting		(unsigned char)55
+#define blr_between		(unsigned char)56
+#define blr_or			(unsigned char)57
+#define blr_and			(unsigned char)58
+#define blr_not			(unsigned char)59
+#define blr_any			(unsigned char)60
+#define blr_missing		(unsigned char)61
+#define blr_unique		(unsigned char)62
+#define blr_like		(unsigned char)63
 
-#define blr_equiv                       (unsigned char)46
-#define blr_eql                 (unsigned char)47
-#define blr_neq                 (unsigned char)48
-#define blr_gtr                 (unsigned char)49
-#define blr_geq                 (unsigned char)50
-#define blr_lss                 (unsigned char)51
-#define blr_leq                 (unsigned char)52
-#define blr_containing          (unsigned char)53
-#define blr_matching            (unsigned char)54
-#define blr_starting            (unsigned char)55
-#define blr_between             (unsigned char)56
-#define blr_or                  (unsigned char)57
-#define blr_and                 (unsigned char)58
-#define blr_not                 (unsigned char)59
-#define blr_any                 (unsigned char)60
-#define blr_missing             (unsigned char)61
-#define blr_unique              (unsigned char)62
-#define blr_like                (unsigned char)63
+//#define blr_stream      	(unsigned char)65
+//#define blr_set_index   	(unsigned char)66
 
 #define blr_rse			(unsigned char)67
 #define blr_first		(unsigned char)68
@@ -1555,129 +1560,160 @@ int  ISC_EXPORT isc_get_client_minor_version ();
 #define blr_agg_total_distinct	(unsigned char)95
 #define blr_agg_average_distinct (unsigned char)96
 
-#define blr_function            (unsigned char)100
-#define blr_gen_id              (unsigned char)101
-#define blr_prot_mask           (unsigned char)102
-#define blr_upcase              (unsigned char)103
-#define blr_lock_state          (unsigned char)104
-#define blr_value_if            (unsigned char)105
-#define blr_matching2           (unsigned char)106
-#define blr_index               (unsigned char)107
-#define blr_ansi_like           (unsigned char)108
+#define blr_function		(unsigned char)100
+#define blr_gen_id		(unsigned char)101
+#define blr_prot_mask		(unsigned char)102
+#define blr_upcase		(unsigned char)103
+#define blr_lock_state		(unsigned char)104
+#define blr_value_if		(unsigned char)105
+#define blr_matching2		(unsigned char)106
+#define blr_index		(unsigned char)107
+#define blr_ansi_like		(unsigned char)108
+//#define blr_bookmark		(unsigned char)109
+//#define blr_crack		(unsigned char)110
+//#define blr_force_crack		(unsigned char)111
+#define blr_seek		(unsigned char)112
+//#define blr_find		(unsigned char)113
 
-#define blr_seek                (unsigned char)112
+/* these indicate directions for blr_seek and blr_find */
 
-#define blr_continue            (unsigned char)0
-#define blr_forward             (unsigned char)1
-#define blr_backward            (unsigned char)2
-#define blr_bof_forward         (unsigned char)3
-#define blr_eof_backward        (unsigned char)4
+#define blr_continue		(unsigned char)0
+#define blr_forward		(unsigned char)1
+#define blr_backward		(unsigned char)2
+#define blr_bof_forward		(unsigned char)3
+#define blr_eof_backward	(unsigned char)4
 
-#define blr_run_count           (unsigned char)118      
-#define blr_rs_stream           (unsigned char)119
-#define blr_exec_proc           (unsigned char)120
+//#define blr_lock_relation 	(unsigned char)114
+//#define blr_lock_record		(unsigned char)115
+//#define blr_set_bookmark 	(unsigned char)116
+//#define blr_get_bookmark 	(unsigned char)117
 
-#define blr_procedure           (unsigned char)124
-#define blr_pid                 (unsigned char)125
-#define blr_exec_pid            (unsigned char)126
-#define blr_singular            (unsigned char)127
-#define blr_abort               (unsigned char)128
-#define blr_block               (unsigned char)129
-#define blr_error_handler       (unsigned char)130
+#define blr_run_count		(unsigned char)118	/* changed from 88 to avoid conflict with blr_parameter3 */
+#define blr_rs_stream		(unsigned char)119
+#define blr_exec_proc		(unsigned char)120
+//#define blr_begin_range 	(unsigned char)121
+//#define blr_end_range 		(unsigned char)122
+//#define blr_delete_range 	(unsigned char)123
+#define blr_procedure		(unsigned char)124
+#define blr_pid			(unsigned char)125
+#define blr_exec_pid		(unsigned char)126
+#define blr_singular		(unsigned char)127
+#define blr_abort		(unsigned char)128
+#define blr_block	 	(unsigned char)129
+#define blr_error_handler	(unsigned char)130
 
-#define blr_cast                (unsigned char)131
+#define blr_cast		(unsigned char)131
+//#define blr_release_lock	(unsigned char)132
+//#define blr_release_locks	(unsigned char)133
+#define blr_start_savepoint	(unsigned char)134
+#define blr_end_savepoint	(unsigned char)135
+//#define blr_find_dbkey		(unsigned char)136
+//#define blr_range_relation	(unsigned char)137
+//#define blr_delete_ranges	(unsigned char)138
 
-#define blr_start_savepoint     (unsigned char)134
-#define blr_end_savepoint       (unsigned char)135
+#define blr_plan		(unsigned char)139	/* access plan items */
+#define blr_merge		(unsigned char)140
+#define blr_join		(unsigned char)141
+#define blr_sequential		(unsigned char)142
+#define blr_navigational	(unsigned char)143
+#define blr_indices		(unsigned char)144
+#define blr_retrieve		(unsigned char)145
 
-#define blr_plan                (unsigned char)139      
-#define blr_merge               (unsigned char)140
-#define blr_join                (unsigned char)141
-#define blr_sequential          (unsigned char)142
-#define blr_navigational        (unsigned char)143
-#define blr_indices             (unsigned char)144
-#define blr_retrieve            (unsigned char)145
+#define blr_relation2		(unsigned char)146
+#define blr_rid2		(unsigned char)147
+//#define blr_reset_stream	(unsigned char)148
+//#define blr_release_bookmark	(unsigned char)149
 
 #define blr_relation2           (unsigned char)146
 #define blr_rid2                (unsigned char)147
 
 #define blr_set_generator       (unsigned char)150
 
-#define blr_ansi_any            (unsigned char)151   
-#define blr_exists              (unsigned char)152   
+#define blr_ansi_any		(unsigned char)151   /* required for NULL handling */
+#define blr_exists		(unsigned char)152   /* required for NULL handling */
+//#define blr_cardinality		(unsigned char)153
 
-#define blr_record_version      (unsigned char)154      
-#define blr_stall               (unsigned char)155      
+#define blr_record_version	(unsigned char)154	/* get tid of record */
+#define blr_stall		(unsigned char)155	/* fake server stall */
 
-#define blr_ansi_all            (unsigned char)158   
+//#define blr_seek_no_warn	(unsigned char)156
+//#define blr_find_dbkey_version	(unsigned char)157   /* find dbkey with record version */
+#define blr_ansi_all		(unsigned char)158   /* required for NULL handling */
 
-#define blr_extract             (unsigned char)159
+#define blr_extract		(unsigned char)159
 
-#define blr_extract_year                (unsigned char)0
-#define blr_extract_month               (unsigned char)1
-#define blr_extract_day                 (unsigned char)2
-#define blr_extract_hour                (unsigned char)3
-#define blr_extract_minute              (unsigned char)4
-#define blr_extract_second              (unsigned char)5
-#define blr_extract_weekday             (unsigned char)6
-#define blr_extract_yearday             (unsigned char)7
-#define blr_extract_millisecond (unsigned char)8
-#define blr_extract_week                (unsigned char)9
+/* sub parameters for blr_extract */
 
-#define blr_current_date        (unsigned char)160
-#define blr_current_timestamp   (unsigned char)161
-#define blr_current_time        (unsigned char)162
+#define blr_extract_year		(unsigned char)0
+#define blr_extract_month		(unsigned char)1
+#define blr_extract_day			(unsigned char)2
+#define blr_extract_hour		(unsigned char)3
+#define blr_extract_minute		(unsigned char)4
+#define blr_extract_second		(unsigned char)5
+#define blr_extract_weekday		(unsigned char)6
+#define blr_extract_yearday		(unsigned char)7
+#define blr_extract_millisecond	(unsigned char)8
+#define blr_extract_week		(unsigned char)9
 
-#define blr_post_arg            (unsigned char)163
-#define blr_exec_into           (unsigned char)164
-#define blr_user_savepoint      (unsigned char)165
-#define blr_dcl_cursor          (unsigned char)166
-#define blr_cursor_stmt         (unsigned char)167
-#define blr_current_timestamp2  (unsigned char)168
-#define blr_current_time2       (unsigned char)169
-#define blr_agg_list            (unsigned char)170
-#define blr_agg_list_distinct   (unsigned char)171
-#define blr_modify2                     (unsigned char)172
+#define blr_current_date	(unsigned char)160
+#define blr_current_timestamp	(unsigned char)161
+#define blr_current_time	(unsigned char)162
 
-#define blr_current_role        (unsigned char)174
-#define blr_skip                (unsigned char)175
+/* These codes reuse BLR code space */
 
-#define blr_exec_sql            (unsigned char)176
-#define blr_internal_info       (unsigned char)177
-#define blr_nullsfirst          (unsigned char)178
-#define blr_writelock           (unsigned char)179
+#define blr_post_arg		(unsigned char)163
+#define blr_exec_into		(unsigned char)164
+#define blr_user_savepoint	(unsigned char)165
+#define blr_dcl_cursor		(unsigned char)166
+#define blr_cursor_stmt		(unsigned char)167
+#define blr_current_timestamp2	(unsigned char)168
+#define blr_current_time2	(unsigned char)169
+#define blr_agg_list		(unsigned char)170
+#define blr_agg_list_distinct	(unsigned char)171
+#define blr_modify2			(unsigned char)172
+
+/* FB 1.0 specific BLR */
+
+#define blr_current_role	(unsigned char)174
+#define blr_skip		(unsigned char)175
+
+/* FB 1.5 specific BLR */
+
+#define blr_exec_sql		(unsigned char)176
+#define blr_internal_info	(unsigned char)177
+#define blr_nullsfirst		(unsigned char)178
+#define blr_writelock		(unsigned char)179
 #define blr_nullslast       (unsigned char)180
 
-#define blr_lowcase                     (unsigned char)181
-#define blr_strlen                      (unsigned char)182
+/* FB 2.0 specific BLR */
 
-#define blr_strlen_bit          (unsigned char)0
-#define blr_strlen_char         (unsigned char)1
-#define blr_strlen_octet        (unsigned char)2
+#define blr_lowcase			(unsigned char)181
+#define blr_strlen			(unsigned char)182
 
-#define blr_trim                        (unsigned char)183
+/* sub parameter for blr_strlen */
+#define blr_strlen_bit		(unsigned char)0
+#define blr_strlen_char		(unsigned char)1
+#define blr_strlen_octet	(unsigned char)2
 
-#define blr_trim_both           (unsigned char)0
-#define blr_trim_leading        (unsigned char)1
-#define blr_trim_trailing       (unsigned char)2
+#define blr_trim			(unsigned char)183
 
-#define blr_trim_spaces         (unsigned char)0
-#define blr_trim_characters     (unsigned char)1
+/* first sub parameter for blr_trim */
+#define blr_trim_both		(unsigned char)0
+#define blr_trim_leading	(unsigned char)1
+#define blr_trim_trailing	(unsigned char)2
 
-#define blr_savepoint_set       (unsigned char)0
-#define blr_savepoint_release   (unsigned char)1
-#define blr_savepoint_undo      (unsigned char)2
-#define blr_savepoint_release_single    (unsigned char)3
+/* second sub parameter for blr_trim */
+#define blr_trim_spaces		(unsigned char)0
+#define blr_trim_characters	(unsigned char)1
 
-#define blr_cursor_open                 (unsigned char)0
-#define blr_cursor_close                (unsigned char)1
-#define blr_cursor_fetch                (unsigned char)2
+/* These codes are actions for user-defined savepoints */
 
-#define blr_init_variable       (unsigned char)184
-#define blr_recurse                     (unsigned char)185
-#define blr_sys_function        (unsigned char)186
+#define blr_savepoint_set	(unsigned char)0
+#define blr_savepoint_release	(unsigned char)1
+#define blr_savepoint_undo	(unsigned char)2
+#define blr_savepoint_release_single	(unsigned char)3
 
-#endif 
+/* These codes are actions for cursors */
 
 #define blr_cursor_open			(unsigned char)0
 #define blr_cursor_close		(unsigned char)1
@@ -1962,39 +1998,62 @@ int  ISC_EXPORT isc_get_client_minor_version ();
 #define isc_spb_dummy_packet_interval     isc_dpb_dummy_packet_interval
 #define isc_spb_sql_role_name             isc_dpb_sql_role_name
 
-#define isc_action_svc_backup          1        
-#define isc_action_svc_restore         2        
-#define isc_action_svc_repair          3        
-#define isc_action_svc_add_user        4        
-#define isc_action_svc_delete_user     5        
-#define isc_action_svc_modify_user     6        
-#define isc_action_svc_display_user    7        
-#define isc_action_svc_properties      8        
-#define isc_action_svc_add_license     9        
-#define isc_action_svc_remove_license 10        
-#define isc_action_svc_db_stats       11        
-#define isc_action_svc_get_ib_log     12        
-#define isc_action_svc_get_fb_log     12        
+/*****************************
+ * Service action items      *
+ *****************************/
 
-#define isc_info_svc_svr_db_info      50        
-#define isc_info_svc_get_license      51        
-#define isc_info_svc_get_license_mask 52        
-#define isc_info_svc_get_config       53        
-#define isc_info_svc_version          54        
-#define isc_info_svc_server_version   55        
-#define isc_info_svc_implementation   56        
-#define isc_info_svc_capabilities     57        
-#define isc_info_svc_user_dbpath      58        
-#define isc_info_svc_get_env          59        
-#define isc_info_svc_get_env_lock     60        
-#define isc_info_svc_get_env_msg      61        
-#define isc_info_svc_line             62        
-#define isc_info_svc_to_eof           63        
-#define isc_info_svc_timeout          64        
-#define isc_info_svc_get_licensed_users 65      
-#define isc_info_svc_limbo_trans        66      
-#define isc_info_svc_running            67      
-#define isc_info_svc_get_users          68      
+#define isc_action_svc_backup          1	/* Starts database backup process on the server */
+#define isc_action_svc_restore         2	/* Starts database restore process on the server */
+#define isc_action_svc_repair          3	/* Starts database repair process on the server */
+#define isc_action_svc_add_user        4	/* Adds a new user to the security database */
+#define isc_action_svc_delete_user     5	/* Deletes a user record from the security database */
+#define isc_action_svc_modify_user     6	/* Modifies a user record in the security database */
+#define isc_action_svc_display_user    7	/* Displays a user record from the security database */
+#define isc_action_svc_properties      8	/* Sets database properties */
+#define isc_action_svc_add_license     9	/* Adds a license to the license file */
+#define isc_action_svc_remove_license 10	/* Removes a license from the license file */
+#define isc_action_svc_db_stats	      11	/* Retrieves database statistics */
+#define isc_action_svc_get_ib_log     12	/* Retrieves the InterBase log file from the server */
+#define isc_action_svc_get_fb_log     12	/* Retrieves the Firebird log file from the server */
+#define isc_action_svc_nbak           20	/* Incremental nbackup */
+#define isc_action_svc_nrest          21	/* Incremental database restore */
+#define isc_action_svc_trace_start    22	// Start trace session
+#define isc_action_svc_trace_stop     23	// Stop trace session
+#define isc_action_svc_trace_suspend  24	// Suspend trace session
+#define isc_action_svc_trace_resume   25	// Resume trace session
+#define isc_action_svc_trace_list     26	// List existing sessions
+#define isc_action_svc_set_mapping    27	// Set auto admins mapping in security database
+#define isc_action_svc_drop_mapping   28	// Drop auto admins mapping in security database
+#define isc_action_svc_display_user_adm 29	// Displays user(s) from security database with admin info
+#define isc_action_svc_last			  30	// keep it last !
+
+/*****************************
+ * Service information items *
+ *****************************/
+
+#define isc_info_svc_svr_db_info      50	/* Retrieves the number of attachments and databases */
+#define isc_info_svc_get_license      51	/* Retrieves all license keys and IDs from the license file */
+#define isc_info_svc_get_license_mask 52	/* Retrieves a bitmask representing licensed options on the server */
+#define isc_info_svc_get_config       53	/* Retrieves the parameters and values for IB_CONFIG */
+#define isc_info_svc_version          54	/* Retrieves the version of the services manager */
+#define isc_info_svc_server_version   55	/* Retrieves the version of the Firebird server */
+#define isc_info_svc_implementation   56	/* Retrieves the implementation of the Firebird server */
+#define isc_info_svc_capabilities     57	/* Retrieves a bitmask representing the server's capabilities */
+#define isc_info_svc_user_dbpath      58	/* Retrieves the path to the security database in use by the server */
+#define isc_info_svc_get_env	      59	/* Retrieves the setting of $FIREBIRD */
+#define isc_info_svc_get_env_lock     60	/* Retrieves the setting of $FIREBIRD_LCK */
+#define isc_info_svc_get_env_msg      61	/* Retrieves the setting of $FIREBIRD_MSG */
+#define isc_info_svc_line             62	/* Retrieves 1 line of service output per call */
+#define isc_info_svc_to_eof           63	/* Retrieves as much of the server output as will fit in the supplied buffer */
+#define isc_info_svc_timeout          64	/* Sets / signifies a timeout value for reading service information */
+#define isc_info_svc_get_licensed_users 65	/* Retrieves the number of users licensed for accessing the server */
+#define isc_info_svc_limbo_trans	66	/* Retrieve the limbo transactions */
+#define isc_info_svc_running		67	/* Checks to see if a service is running on an attachment */
+#define isc_info_svc_get_users		68	/* Returns the user information from isc_action_svc_display_users */
+
+/******************************************************
+ * Parameters for isc_action_{add|del|mod|disp)_user  *
+ ******************************************************/
 
 #define isc_spb_sec_userid            5
 #define isc_spb_sec_groupid           6
@@ -2030,83 +2089,167 @@ int  ISC_EXPORT isc_get_client_minor_version ();
 #define isc_spb_bkp_old_descriptions     0x10
 #define isc_spb_bkp_non_transportable    0x20
 #define isc_spb_bkp_convert              0x40
-#define isc_spb_bkp_expand               0x80
+#define isc_spb_bkp_expand				 0x80
+#define isc_spb_bkp_no_triggers			 0x8000
 
-#define isc_spb_prp_page_buffers                5
-#define isc_spb_prp_sweep_interval              6
-#define isc_spb_prp_shutdown_db                 7
-#define isc_spb_prp_deny_new_attachments        9
-#define isc_spb_prp_deny_new_transactions       10
-#define isc_spb_prp_reserve_space               11
-#define isc_spb_prp_write_mode                  12
-#define isc_spb_prp_access_mode                 13
-#define isc_spb_prp_set_sql_dialect             14
-#define isc_spb_prp_activate                    0x0100
-#define isc_spb_prp_db_online                   0x0200
+/********************************************
+ * Parameters for isc_action_svc_properties *
+ ********************************************/
 
-#define isc_spb_prp_res_use_full        35
-#define isc_spb_prp_res                 36
+#define isc_spb_prp_page_buffers		5
+#define isc_spb_prp_sweep_interval		6
+#define isc_spb_prp_shutdown_db			7
+#define isc_spb_prp_deny_new_attachments	9
+#define isc_spb_prp_deny_new_transactions	10
+#define isc_spb_prp_reserve_space		11
+#define isc_spb_prp_write_mode			12
+#define isc_spb_prp_access_mode			13
+#define isc_spb_prp_set_sql_dialect		14
+#define isc_spb_prp_activate			0x0100
+#define isc_spb_prp_db_online			0x0200
+#define isc_spb_prp_force_shutdown			41
+#define isc_spb_prp_attachments_shutdown	42
+#define isc_spb_prp_transactions_shutdown	43
+#define isc_spb_prp_shutdown_mode		44
+#define isc_spb_prp_online_mode			45
 
-#define isc_spb_prp_wm_async            37
-#define isc_spb_prp_wm_sync                     38
+/********************************************
+ * Parameters for isc_spb_prp_shutdown_mode *
+ *            and isc_spb_prp_online_mode   *
+ ********************************************/
+#define isc_spb_prp_sm_normal		0
+#define isc_spb_prp_sm_multi		1
+#define isc_spb_prp_sm_single		2
+#define isc_spb_prp_sm_full			3
 
-#define isc_spb_prp_am_readonly         39
-#define isc_spb_prp_am_readwrite        40
+/********************************************
+ * Parameters for isc_spb_prp_reserve_space *
+ ********************************************/
 
-#define isc_spb_rpr_commit_trans                15
-#define isc_spb_rpr_rollback_trans              34
-#define isc_spb_rpr_recover_two_phase   17
-#define isc_spb_tra_id                                  18
-#define isc_spb_single_tra_id                   19
-#define isc_spb_multi_tra_id                    20
-#define isc_spb_tra_state                               21
-#define isc_spb_tra_state_limbo                 22
-#define isc_spb_tra_state_commit                23
-#define isc_spb_tra_state_rollback              24
-#define isc_spb_tra_state_unknown               25
-#define isc_spb_tra_host_site                   26
-#define isc_spb_tra_remote_site                 27
-#define isc_spb_tra_db_path                             28
-#define isc_spb_tra_advise                              29
-#define isc_spb_tra_advise_commit               30
-#define isc_spb_tra_advise_rollback             31
-#define isc_spb_tra_advise_unknown              33
+#define isc_spb_prp_res_use_full	35
+#define isc_spb_prp_res				36
 
-#define isc_spb_rpr_validate_db                 0x01
-#define isc_spb_rpr_sweep_db                    0x02
-#define isc_spb_rpr_mend_db                             0x04
-#define isc_spb_rpr_list_limbo_trans    0x08
-#define isc_spb_rpr_check_db                    0x10
-#define isc_spb_rpr_ignore_checksum             0x20
-#define isc_spb_rpr_kill_shadows                0x40
-#define isc_spb_rpr_full                                0x80
+/******************************************
+ * Parameters for isc_spb_prp_write_mode  *
+ ******************************************/
 
-#define isc_spb_res_buffers                             9
-#define isc_spb_res_page_size                   10
-#define isc_spb_res_length                              11
-#define isc_spb_res_access_mode                 12
-#define isc_spb_res_deactivate_idx              0x0100
-#define isc_spb_res_no_shadow                   0x0200
-#define isc_spb_res_no_validity                 0x0400
-#define isc_spb_res_one_at_a_time               0x0800
-#define isc_spb_res_replace                             0x1000
-#define isc_spb_res_create                              0x2000
-#define isc_spb_res_use_all_space               0x4000
+#define isc_spb_prp_wm_async		37
+#define isc_spb_prp_wm_sync			38
 
-#define isc_spb_res_am_readonly                 isc_spb_prp_am_readonly
-#define isc_spb_res_am_readwrite                isc_spb_prp_am_readwrite
+/******************************************
+ * Parameters for isc_spb_prp_access_mode *
+ ******************************************/
 
-#define isc_spb_num_att                 5
-#define isc_spb_num_db                  6
+#define isc_spb_prp_am_readonly		39
+#define isc_spb_prp_am_readwrite	40
 
-#define isc_spb_sts_data_pages          0x01
-#define isc_spb_sts_db_log                      0x02
-#define isc_spb_sts_hdr_pages           0x04
-#define isc_spb_sts_idx_pages           0x08
-#define isc_spb_sts_sys_relations       0x10
-#define isc_spb_sts_record_versions     0x20
-#define isc_spb_sts_table                       0x40
-#define isc_spb_sts_nocreation          0x80
+/*****************************************
+ * Parameters for isc_action_svc_repair  *
+ *****************************************/
+
+#define isc_spb_rpr_commit_trans		15
+#define isc_spb_rpr_rollback_trans		34
+#define isc_spb_rpr_recover_two_phase	17
+#define isc_spb_tra_id					18
+#define isc_spb_single_tra_id			19
+#define isc_spb_multi_tra_id			20
+#define isc_spb_tra_state				21
+#define isc_spb_tra_state_limbo			22
+#define isc_spb_tra_state_commit		23
+#define isc_spb_tra_state_rollback		24
+#define isc_spb_tra_state_unknown		25
+#define isc_spb_tra_host_site			26
+#define isc_spb_tra_remote_site			27
+#define isc_spb_tra_db_path				28
+#define isc_spb_tra_advise				29
+#define isc_spb_tra_advise_commit		30
+#define isc_spb_tra_advise_rollback		31
+#define isc_spb_tra_advise_unknown		33
+
+#define isc_spb_rpr_validate_db			0x01
+#define isc_spb_rpr_sweep_db			0x02
+#define isc_spb_rpr_mend_db				0x04
+#define isc_spb_rpr_list_limbo_trans	0x08
+#define isc_spb_rpr_check_db			0x10
+#define isc_spb_rpr_ignore_checksum		0x20
+#define isc_spb_rpr_kill_shadows		0x40
+#define isc_spb_rpr_full				0x80
+
+/*****************************************
+ * Parameters for isc_action_svc_restore *
+ *****************************************/
+
+#define isc_spb_res_buffers				9
+#define isc_spb_res_page_size			10
+#define isc_spb_res_length				11
+#define isc_spb_res_access_mode			12
+#define isc_spb_res_fix_fss_data		13
+#define isc_spb_res_fix_fss_metadata	14
+#define isc_spb_res_deactivate_idx		0x0100
+#define isc_spb_res_no_shadow			0x0200
+#define isc_spb_res_no_validity			0x0400
+#define isc_spb_res_one_at_a_time		0x0800
+#define isc_spb_res_replace				0x1000
+#define isc_spb_res_create				0x2000
+#define isc_spb_res_use_all_space		0x4000
+
+/******************************************
+ * Parameters for isc_spb_res_access_mode  *
+ ******************************************/
+
+#define isc_spb_res_am_readonly			isc_spb_prp_am_readonly
+#define isc_spb_res_am_readwrite		isc_spb_prp_am_readwrite
+
+/*******************************************
+ * Parameters for isc_info_svc_svr_db_info *
+ *******************************************/
+
+#define isc_spb_num_att			5
+#define isc_spb_num_db			6
+
+/*****************************************
+ * Parameters for isc_info_svc_db_stats  *
+ *****************************************/
+
+#define isc_spb_sts_data_pages		0x01
+#define isc_spb_sts_db_log			0x02
+#define isc_spb_sts_hdr_pages		0x04
+#define isc_spb_sts_idx_pages		0x08
+#define isc_spb_sts_sys_relations	0x10
+#define isc_spb_sts_record_versions	0x20
+#define isc_spb_sts_table			0x40
+#define isc_spb_sts_nocreation		0x80
+
+/***********************************/
+/* Server configuration key values */
+/***********************************/
+
+/* Not available in Firebird 1.5 */
+
+/***************************************
+ * Parameters for isc_action_svc_nbak  *
+ ***************************************/
+
+#define isc_spb_nbk_level			5
+#define isc_spb_nbk_file			6
+#define isc_spb_nbk_direct			7
+#define isc_spb_nbk_no_triggers		0x01
+
+/***************************************
+ * Parameters for isc_action_svc_trace *
+ ***************************************/
+
+#define isc_spb_trc_id				1
+#define isc_spb_trc_name			2
+#define isc_spb_trc_cfg				3
+
+/**********************************************/
+/* Dynamic Data Definition Language operators */
+/**********************************************/
+
+/******************/
+/* Version number */
+/******************/
 
 #define isc_dyn_version_1                 1
 #define isc_dyn_eoc                       255
@@ -2457,7 +2600,39 @@ int  ISC_EXPORT isc_get_client_minor_version ();
 #define isc_dyn_coll_specific_attributes			236
 #define isc_dyn_del_collation						237
 
-#define isc_dyn_last_dyn_value            242
+/******************************************/
+/* Mapping OS security objects to DB ones */
+/******************************************/
+#define isc_dyn_mapping								243
+#define isc_dyn_map_role							1
+#define isc_dyn_unmap_role							2
+#define isc_dyn_map_user							3
+#define isc_dyn_unmap_user							4
+#define isc_dyn_automap_role						5
+#define isc_dyn_autounmap_role						6
+
+/********************/
+/* Users control    */
+/********************/
+#define isc_dyn_user								244
+#define isc_dyn_user_add							1
+#define isc_dyn_user_mod							2
+#define isc_dyn_user_del							3
+#define isc_dyn_user_passwd							4
+#define isc_dyn_user_first							5
+#define isc_dyn_user_middle							6
+#define isc_dyn_user_last							7
+#define isc_dyn_user_admin							8
+#define isc_user_end								0
+
+/****************************/
+/* Last $dyn value assigned */
+/****************************/
+#define isc_dyn_last_dyn_value            247
+
+/******************************************/
+/* Array slice description language (SDL) */
+/******************************************/
 
 #define isc_sdl_version1                  1
 #define isc_sdl_eoc                       255
@@ -2540,14 +2715,14 @@ int  ISC_EXPORT isc_get_client_minor_version ();
 #define isc_dpb_SQL_dialect               63
 #define isc_dpb_set_db_SQL_dialect        65
 
-#define fb_dbg_version                          1
-#define fb_dbg_end                                      255
-#define fb_dbg_map_src2blr                      2
-#define fb_dbg_map_varname                      3
-#define fb_dbg_map_argument                     4
+/***********************************/
+/* Masks for fb_shutdown_callback  */
+/***********************************/
 
-#define fb_dbg_arg_input                        0
-#define fb_dbg_arg_output                       1
+#define fb_shut_confirmation			  1
+#define fb_shut_preproviders			  2
+#define fb_shut_postproviders			  4
+#define fb_shut_finish					  8
 
 /****************************************/
 /* Shutdown reasons, used by engine     */
