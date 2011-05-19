@@ -87,6 +87,7 @@ void ContextMenuMetadataItemVisitor::visitDatabase(Database& database)
     menuM->Append(Cmds::Menu_Reconnect, _("Reconnec&t"));
     addSeparator();
     menuM->Append(Cmds::Menu_ExecuteStatements, _("Execute &SQL statements"));
+    addGenerateCodeMenu(database);
     addSeparator();
 
     wxMenu* toolsMenu = new wxMenu();
@@ -97,7 +98,6 @@ void ContextMenuMetadataItemVisitor::visitDatabase(Database& database)
     addSeparator();
     toolsMenu->Append(Cmds::Menu_RecreateDatabase, _("Recreate empty database"));
     addSeparator();
-    addGenerateCodeMenu(database, toolsMenu);
     toolsMenu->Append(Cmds::Menu_MonitorEvents, _("&Monitor events"));
     toolsMenu->Append(Cmds::Menu_GenerateData, _("&Test data generator"));
 
