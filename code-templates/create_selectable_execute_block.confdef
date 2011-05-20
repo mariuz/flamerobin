@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <root>
     <node>
-        <caption>Select from table</caption>
+        <caption>Create selectable block</caption>
         <setting type="relation_columns">
             <caption>Selected columns</caption>
             <key>{%object_path%}/columnNames</key>

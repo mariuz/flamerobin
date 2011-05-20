@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <root>
     <node>
-        <caption>Select from table</caption>
+        <caption>Create change log trigger</caption>
         <setting type="relation_columns">
             <caption>Which column changes would you like to log?</caption>
             <key>{%object_path%}/columnNames</key>
