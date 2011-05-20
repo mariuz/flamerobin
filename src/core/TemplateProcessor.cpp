@@ -230,8 +230,11 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
         bool firstItem = true;
         for (wxArrayString::iterator it = list.begin(); it != list.end(); ++it)
         {
+            wxString param = cmdParams.from(2);
+            // Try to replace %%current_value%% both before and after expansion.
+            param.Replace(wxT("%%current_value%%"), *(it));
             wxString newText;
-            internalProcessTemplateText(newText, cmdParams.from(2), object);
+            internalProcessTemplateText(newText, param, object);
             newText.Replace(wxT("%%current_value%%"), *(it));
             if ((!firstItem) && (!newText.IsEmpty()))
                 processedText += escapeChars(separator);
@@ -241,8 +244,9 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
         }
     }
 
-    // {%alternate:text1:text2%}
-    // Alternates expanding to text1 and text2 at each call, starting with text1.
+    // {%alternate:<text1>:<text2>%}
+    // Alternates expanding to <text1> and <text2> at each call,
+    // starting with <text1>.
     // Used to alternate table row colours, for example.
     else if (cmdName == wxT("alternate") && (cmdParams.Count() >= 2))
     {
@@ -252,6 +256,48 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
             processedText += cmdParams[0];
         else
             processedText += cmdParams[1];
+    }
+
+    // {%substr:<text>:<from>:<for>%}
+    // Extracts a substring of <for> characters from <text>
+    // starting at character <from>.
+    // <from> defaults to 0. <for> defaults to <text>'s length minus 1.
+    else if (cmdName == wxT("substr") && (cmdParams.Count() >= 3))
+    {
+        wxString text;
+        internalProcessTemplateText(text, cmdParams[0], object);
+        wxString from;
+        internalProcessTemplateText(from, cmdParams[1], object);
+        long fromI;
+        if (!from.ToLong(&fromI))
+            fromI = 0;
+        wxString for_;
+        internalProcessTemplateText(for_, cmdParams.from(2), object);
+        long forI;
+        if (!for_.ToLong(&forI))
+            forI = text.Length() - 1;
+
+        processedText += text.SubString(fromI, fromI + forI - 1);
+    }
+
+    // {%uppercase:<text>%}
+    // Converts <text> to upper case.
+    else if (cmdName == wxT("uppercase") && (cmdParams.Count() >= 1))
+    {
+        wxString text;
+        internalProcessTemplateText(text, cmdParams.all(), object);
+
+        processedText += text.Upper();
+    }
+
+    // {%lowercase:<text>%}
+    // Converts <text> to lower case.
+    else if (cmdName == wxT("lowercase") && (cmdParams.Count() >= 1))
+    {
+        wxString text;
+        internalProcessTemplateText(text, cmdParams.all(), object);
+
+        processedText += text.Lower();
     }
 
     // Only if no internal commands are recognized, call external command handlers.
