@@ -1,5 +1,5 @@
 [templateInfo]
 menuCaption=Extract full DDL for {%object_name%}
 menuPosition=70
-matchesType=TABLE
+matchesType=^TABLE$
 matchesWhen={%!:{%is_system%}%}

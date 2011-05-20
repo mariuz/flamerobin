@@ -1,5 +1,5 @@
 [templateInfo]
 menuCaption=Insert into {%object_name%} (...) values (...)
 menuPosition=20
-matchesType=TABLE
+matchesType=^TABLE$
 matchesWhen={%!:{%is_system%}%}
