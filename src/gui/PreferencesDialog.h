@@ -105,10 +105,12 @@ public:
 
     PreferencesDialog(wxWindow* parent, const wxString& title,
         Config& targetConfig, const wxFileName& confDefFileName,
-        const wxString& saveButtonCaption = _("Save"));
+        const wxString& saveButtonCaption = _("Save"),
+        const wxString& dialogName = wxEmptyString);
     PreferencesDialog(wxWindow* parent, const wxString& title,
         Config& targetConfig, const wxString& confDefData,
-        const wxString& saveButtonCaption = _("Save"));
+        const wxString& saveButtonCaption = _("Save"),
+        const wxString& dialogName = wxEmptyString);
     ~PreferencesDialog();
 
     int getSelectedPage();
@@ -123,6 +125,7 @@ public:
 private:
     bool debugDescriptionM;
     bool loadSuccessM;
+    wxString dialogNameM;
     Config& targetConfigM;
 
     wxImageList imageListM;

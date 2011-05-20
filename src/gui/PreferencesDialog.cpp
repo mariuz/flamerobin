@@ -321,8 +321,9 @@ void Optionbook::OnSize(wxSizeEvent& event)
 // PreferencesDialog class
 PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
         Config& targetConfig, const wxFileName& confDefFileName,
-        const wxString& saveButtonCaption)
-    : BaseDialog(parent, -1, title), targetConfigM(targetConfig)
+        const wxString& saveButtonCaption, const wxString& dialogName)
+    : BaseDialog(parent, -1, title), targetConfigM(targetConfig),
+    dialogNameM(dialogName)
 {
     initControls(saveButtonCaption);
     loadConfDefFile(confDefFileName);
@@ -331,8 +332,9 @@ PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
 //-----------------------------------------------------------------------------
 PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
         Config& targetConfig, const wxString& confDefData,
-        const wxString& saveButtonCaption)
-    : BaseDialog(parent, -1, title), targetConfigM(targetConfig)
+        const wxString& saveButtonCaption, const wxString& dialogName)
+    : BaseDialog(parent, -1, title), targetConfigM(targetConfig),
+    dialogNameM(dialogName)
 {
     initControls(saveButtonCaption);
     loadConfDef(confDefData);
@@ -433,7 +435,10 @@ bool PreferencesDialog::createControlsAndAddToSizer(wxPanel* page, wxSizer* size
 //-----------------------------------------------------------------------------
 const wxString PreferencesDialog::getName() const
 {
-    return wxT("PreferencesDialog");
+    if (!dialogNameM.IsEmpty())
+        return dialogNameM;
+    else
+        return wxT("PreferencesDialog");
 }
 //-----------------------------------------------------------------------------
 int PreferencesDialog::getSelectedPage()
@@ -753,6 +758,7 @@ void PreferencesDialogTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *t
     if (cmdName == wxT("edit_conf") || cmdName == wxT("edit_info"))
     {
         wxFileName defFileName = tp->getCurrentTemplateFileName();
+        wxString dialogName = defFileName.GetName();
         defFileName.SetExt(wxT("confdef"));
         if (cmdName == wxT("edit_info"))
             defFileName.SetName(wxT("template_info"));
@@ -771,7 +777,7 @@ void PreferencesDialogTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *t
             config = tp->getInfo(); 
         }
         PreferencesDialog pd(tp->getWindow(), dialogTitle,
-            config, confDefData, _("Continue"));
+            config, confDefData, _("Continue"), dialogName);
 
         if (pd.isOk() && pd.loadFromTargetConfig())
             if (pd.ShowModal() != wxID_OK)
