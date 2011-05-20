@@ -88,7 +88,7 @@ public:
     void OnMenuDropObject(wxCommandEvent& event);
     void OnMenuAlterObject(wxCommandEvent& event);
     void OnMenuCreateTriggerForTable(wxCommandEvent& event);
-    void OnMenuGenerateScript(wxCommandEvent& event);
+    void OnMenuGenerateCode(wxCommandEvent& event);
     void OnMenuExecuteProcedure(wxCommandEvent& event);
     void OnMenuDisconnect(wxCommandEvent& event);
     void OnMenuConnect(wxCommandEvent& event);
@@ -174,6 +174,7 @@ protected:
     wxMenuBar* menuBarM;
     wxMenu* windowMenuM;        // dynamic menu
     wxMenu* objectMenuM;
+    wxMenu* databaseMenuM;
     wxPanel* mainPanelM;
     wxPanel* searchPanelM;
     wxBoxSizer* searchPanelSizerM;

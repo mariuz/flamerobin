@@ -190,17 +190,12 @@ void MainFrame::buildMainMenu()
 {
     menuBarM = new wxMenuBar();
 
-    wxMenu* databaseMenu = new wxMenu();                    // dynamic menus, created at runtime
-    databaseMenu->Append(Cmds::Menu_RegisterDatabase, _("R&egister existing database..."));
-    databaseMenu->Append(Cmds::Menu_CreateDatabase, _("Create &new database..."));
-    databaseMenu->Append(Cmds::Menu_RestoreIntoNew, _("Restore bac&kup into new database..."));
-    databaseMenu->AppendSeparator();
-    ContextMenuMetadataItemVisitor cmvd(databaseMenu);
-    Database dummy;
-    dummy.acceptVisitor(&cmvd);
-    databaseMenu->AppendSeparator();
-    databaseMenu->Append(wxID_EXIT, _("&Quit"));
-    menuBarM->Append(databaseMenu, _("&Database"));
+    databaseMenuM = new wxMenu();
+    databaseMenuM->Append(Cmds::Menu_RegisterDatabase, _("R&egister existing database..."));
+    databaseMenuM->Append(Cmds::Menu_CreateDatabase, _("Create &new database..."));
+    databaseMenuM->Append(Cmds::Menu_RestoreIntoNew, _("Restore bac&kup into new database..."));
+    databaseMenuM->AppendSeparator();
+    menuBarM->Append(databaseMenuM, _("&Database"));
 
 #ifdef __WXMAC__
     wxMenu* editMenu = new wxMenu();
@@ -463,7 +458,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(Cmds::Menu_CreateView,       MainFrame::OnMenuCreateView)
 
     EVT_MENU_RANGE(Cmds::Menu_TemplateFirst, Cmds::Menu_TemplateLast,
-        MainFrame::OnMenuGenerateScript)
+        MainFrame::OnMenuGenerateCode)
 
     EVT_MENU_OPEN(MainFrame::OnMainMenuOpen)
     EVT_TREE_SEL_CHANGED(DBHTreeControl::ID_tree_ctrl, MainFrame::OnTreeSelectionChanged)
@@ -512,6 +507,21 @@ void MainFrame::OnMainMenuOpen(wxMenuEvent& event)
         }
         if (objectMenuM->GetMenuItemCount() == 2)   // separator
             objectMenuM->Destroy(objectMenuM->FindItemByPosition(1));
+    }
+    else if (event.GetMenu() == databaseMenuM)
+    {
+        // rebuild database menu
+        while (databaseMenuM->GetMenuItemCount() > 4)
+            databaseMenuM->Destroy(databaseMenuM->FindItemByPosition(4));
+        // current object has to be subitem of database
+        DatabasePtr db = m->getDatabase();
+        if (db && db.get())
+        {
+            ContextMenuMetadataItemVisitor cmvd(databaseMenuM);
+            db.get()->acceptVisitor(&cmvd);
+            databaseMenuM->AppendSeparator();
+        }
+        databaseMenuM->Append(wxID_EXIT, _("&Quit"));
     }
 
     event.Skip();
@@ -797,7 +807,7 @@ void MainFrame::OnMenuCreateTriggerForTable(wxCommandEvent& WXUNUSED(event))
     getURIProcessor().handleURI(uri);
 }
 //-----------------------------------------------------------------------------
-void MainFrame::OnMenuGenerateScript(wxCommandEvent& event)
+void MainFrame::OnMenuGenerateCode(wxCommandEvent& event)
 {
     MetadataItem* mi = treeMainM->getSelectedMetadataItem();
     if (!mi)
@@ -805,6 +815,10 @@ void MainFrame::OnMenuGenerateScript(wxCommandEvent& event)
     DatabasePtr database = getDatabase(mi);
     if (!checkValidDatabase(database))
         return;
+    if (!tryAutoConnectDatabase(database))
+        return;
+
+    wxBusyCursor bc;
 
     MetadataTemplateManager tm(mi);
 

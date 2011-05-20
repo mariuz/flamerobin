@@ -99,8 +99,16 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
     // processes the specified text. If the object has no parent,
     // expands to a blank string.
     if ((cmdName == wxT("parent")) && metadataItem && metadataItem->getParent())
-            tp->internalProcessTemplateText(processedText, cmdParams.all(),
-                metadataItem->getParent());
+        tp->internalProcessTemplateText(processedText, cmdParams.all(),
+            metadataItem->getParent());
+
+    // {%database:text%}
+    // Switches the current object to the object's database, if any, and
+    // processes the specified text. If the object has no database,
+    // expands to a blank string.
+    if ((cmdName == wxT("database")) && metadataItem && metadataItem->getDatabase())
+        tp->internalProcessTemplateText(processedText, cmdParams.all(),
+            metadataItem->getDatabase().get());
 
     // {%object_handle%}
     // Expands to the current object's unique numeric handle.
