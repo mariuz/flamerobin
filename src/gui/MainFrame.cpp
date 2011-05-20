@@ -833,8 +833,13 @@ void MainFrame::OnMenuGenerateCode(wxCommandEvent& event)
             CodeTemplateProcessor tp(mi, this);
             tp.processTemplateFile(sql, (*it)->getTemplateFileName(),
                 mi, &pd);
-            showSql(this, wxString(_("Execute SQL statements")),
-                database, sql);
+            
+            if (getStringAsBoolean(tp.getVar(wxT("output.autoexec"))))
+                execSql(this, wxString(_("Execute SQL statements")),
+                    database, sql, false);
+            else
+                showSql(this, wxString(_("Execute SQL statements")),
+                    database, sql);
             break;
         }
     }
