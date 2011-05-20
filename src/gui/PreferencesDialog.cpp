@@ -365,6 +365,7 @@ void PreferencesDialog::setControlLayout()
     // their properties (may affect min size), then create sizer layout
     setProperties();
     layout();
+    bookctrl_1->SetFocus();
     // do this last, otherwise default button style may be lost on MSW
     button_save->SetDefault();
 }
@@ -664,6 +665,7 @@ void PreferencesDialog::selectPage(int index)
     {
         treectrl_1->SelectItem(treeItemsM[index]);
         bookctrl_1->SetSelection(index);
+        bookctrl_1->SetFocus();
     }
 }
 //-----------------------------------------------------------------------------
