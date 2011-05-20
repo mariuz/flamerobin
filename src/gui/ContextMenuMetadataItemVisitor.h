@@ -33,11 +33,11 @@
 //-----------------------------------------------------------------------------
 class wxMenu;
 //-----------------------------------------------------------------------------
-class ContextMenuMetadataItemVisitor : public MetadataItemVisitor
+class MainObjectMenuMetadataItemVisitor : public MetadataItemVisitor
 {
 public:
-    explicit ContextMenuMetadataItemVisitor(wxMenu* menu);
-    virtual ~ContextMenuMetadataItemVisitor();
+    explicit MainObjectMenuMetadataItemVisitor(wxMenu* menu);
+    virtual ~MainObjectMenuMetadataItemVisitor();
 
     virtual void visitColumn(Column& column);
     virtual void visitDatabase(Database& database);
@@ -63,19 +63,30 @@ public:
     virtual void visitTriggers(Triggers& triggers);
     virtual void visitView(View& view);
     virtual void visitViews(Views& views);
-
-private:
+protected:
     wxMenu* menuM;
+    virtual void addCreateItem();
+    virtual void addDeclareItem();
+private:
     // helper member functions to add menu items and separators
     void addAlterItem(MetadataItem& metadataItem);
     void addBrowseDataItem();
-    void addCreateItem();
     void addDropItem(MetadataItem& metadataItem);
     void addGenerateCodeMenu(MetadataItem& metadataItem, wxMenu* parent = 0);
     void addPropertiesItem();
     void addRefreshItem();
     void addShowColumnsItem();
     void addSeparator();
+};
+//-----------------------------------------------------------------------------
+class ContextMenuMetadataItemVisitor : public MainObjectMenuMetadataItemVisitor
+{
+public:
+    explicit ContextMenuMetadataItemVisitor(wxMenu* menu);
+    virtual ~ContextMenuMetadataItemVisitor();
+protected:
+    virtual void addCreateItem();
+    virtual void addDeclareItem();
 };
 //-----------------------------------------------------------------------------
 #endif //FR_CONTEXTMENUMETADATAITEMVISITOR_H

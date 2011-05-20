@@ -57,16 +57,17 @@
 #include "metadata/view.h"
 
 //-----------------------------------------------------------------------------
-ContextMenuMetadataItemVisitor::ContextMenuMetadataItemVisitor(wxMenu* menu)
+MainObjectMenuMetadataItemVisitor::MainObjectMenuMetadataItemVisitor(
+    wxMenu* menu)
     : MetadataItemVisitor(), menuM(menu)
 {
 }
 //-----------------------------------------------------------------------------
-ContextMenuMetadataItemVisitor::~ContextMenuMetadataItemVisitor()
+MainObjectMenuMetadataItemVisitor::~MainObjectMenuMetadataItemVisitor()
 {
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitColumn(Column& column)
+void MainObjectMenuMetadataItemVisitor::visitColumn(Column& column)
 {
     addGenerateCodeMenu(column);
     if (!column.isSystem())
@@ -79,7 +80,7 @@ void ContextMenuMetadataItemVisitor::visitColumn(Column& column)
     }
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitDatabase(Database& database)
+void MainObjectMenuMetadataItemVisitor::visitDatabase(Database& database)
 {
     menuM->Append(Cmds::Menu_Connect, _("&Connect"));
     menuM->Append(Cmds::Menu_ConnectAs, _("Connect &as..."));
@@ -113,7 +114,7 @@ void ContextMenuMetadataItemVisitor::visitDatabase(Database& database)
     menuM->Append(Cmds::Menu_DatabaseProperties, _("P&roperties"));
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitDomain(Domain& domain)
+void MainObjectMenuMetadataItemVisitor::visitDomain(Domain& domain)
 {
     addAlterItem(domain);
     addDropItem(domain);
@@ -124,7 +125,7 @@ void ContextMenuMetadataItemVisitor::visitDomain(Domain& domain)
     addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitDomains(Domains& domains)
+void MainObjectMenuMetadataItemVisitor::visitDomains(Domains& domains)
 {
     addCreateItem();
     addSeparator();
@@ -133,7 +134,7 @@ void ContextMenuMetadataItemVisitor::visitDomains(Domains& domains)
     addRefreshItem();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitException(Exception& exception)
+void MainObjectMenuMetadataItemVisitor::visitException(Exception& exception)
 {
     addDropItem(exception);
     addSeparator();
@@ -143,7 +144,7 @@ void ContextMenuMetadataItemVisitor::visitException(Exception& exception)
     addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitExceptions(Exceptions& exceptions)
+void MainObjectMenuMetadataItemVisitor::visitExceptions(Exceptions& exceptions)
 {
     addCreateItem();
     addSeparator();
@@ -152,7 +153,7 @@ void ContextMenuMetadataItemVisitor::visitExceptions(Exceptions& exceptions)
     addRefreshItem();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitFunction(Function& function)
+void MainObjectMenuMetadataItemVisitor::visitFunction(Function& function)
 {
     addDropItem(function);
     addSeparator();
@@ -162,16 +163,16 @@ void ContextMenuMetadataItemVisitor::visitFunction(Function& function)
     addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitFunctions(Functions& functions)
+void MainObjectMenuMetadataItemVisitor::visitFunctions(Functions& functions)
 {
-    menuM->Append(Cmds::Menu_CreateObject, _("Declare &new"));
+    addDeclareItem();
     addSeparator();
     addGenerateCodeMenu(functions);
     addSeparator();
     addRefreshItem();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitGenerator(Generator& generator)
+void MainObjectMenuMetadataItemVisitor::visitGenerator(Generator& generator)
 {
     menuM->Append(Cmds::Menu_ShowGeneratorValue, _("Show &value"));
     menuM->Append(Cmds::Menu_SetGeneratorValue, _("&Set value"));
@@ -184,7 +185,7 @@ void ContextMenuMetadataItemVisitor::visitGenerator(Generator& generator)
     addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitGenerators(Generators& generators)
+void MainObjectMenuMetadataItemVisitor::visitGenerators(Generators& generators)
 {
     menuM->Append(Cmds::Menu_ShowAllGeneratorValues, _("Show &all values"));
     addSeparator();
@@ -195,7 +196,7 @@ void ContextMenuMetadataItemVisitor::visitGenerators(Generators& generators)
     addRefreshItem();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitProcedure(Procedure& procedure)
+void MainObjectMenuMetadataItemVisitor::visitProcedure(Procedure& procedure)
 {
     menuM->Append(Cmds::Menu_ExecuteProcedure, _("&Execute"));
     addShowColumnsItem();
@@ -208,7 +209,7 @@ void ContextMenuMetadataItemVisitor::visitProcedure(Procedure& procedure)
     addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitProcedures(Procedures& procedures)
+void MainObjectMenuMetadataItemVisitor::visitProcedures(Procedures& procedures)
 {
     addCreateItem();
     addSeparator();
@@ -217,7 +218,7 @@ void ContextMenuMetadataItemVisitor::visitProcedures(Procedures& procedures)
     addRefreshItem();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitRole(Role& role)
+void MainObjectMenuMetadataItemVisitor::visitRole(Role& role)
 {
     addDropItem(role);
     addSeparator();
@@ -227,7 +228,7 @@ void ContextMenuMetadataItemVisitor::visitRole(Role& role)
     addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitRoles(Roles& roles)
+void MainObjectMenuMetadataItemVisitor::visitRoles(Roles& roles)
 {
     addCreateItem();
     addSeparator();
@@ -236,14 +237,14 @@ void ContextMenuMetadataItemVisitor::visitRoles(Roles& roles)
     addRefreshItem();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitSysRoles(SysRoles& sysRoles)
+void MainObjectMenuMetadataItemVisitor::visitSysRoles(SysRoles& sysRoles)
 {
     addGenerateCodeMenu(sysRoles);
     addSeparator();
     addRefreshItem();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitRoot(Root& root)
+void MainObjectMenuMetadataItemVisitor::visitRoot(Root& root)
 {
     menuM->Append(Cmds::Menu_RegisterServer, _("&Register server"));
     addSeparator();
@@ -255,7 +256,7 @@ void ContextMenuMetadataItemVisitor::visitRoot(Root& root)
     menuM->Append(wxID_EXIT, _("&Quit"));
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitServer(Server& server)
+void MainObjectMenuMetadataItemVisitor::visitServer(Server& server)
 {
     menuM->Append(Cmds::Menu_RegisterDatabase, 
         _("&Register existing database"));
@@ -273,7 +274,7 @@ void ContextMenuMetadataItemVisitor::visitServer(Server& server)
         _("Server registration &info"));
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitTable(Table& table)
+void MainObjectMenuMetadataItemVisitor::visitTable(Table& table)
 {
     addBrowseDataItem();
     addGenerateCodeMenu(table);
@@ -292,7 +293,7 @@ void ContextMenuMetadataItemVisitor::visitTable(Table& table)
     addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitTables(Tables& tables)
+void MainObjectMenuMetadataItemVisitor::visitTables(Tables& tables)
 {
     addCreateItem();
     addSeparator();
@@ -301,14 +302,14 @@ void ContextMenuMetadataItemVisitor::visitTables(Tables& tables)
     addRefreshItem();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitSysTables(SysTables& sysTables)
+void MainObjectMenuMetadataItemVisitor::visitSysTables(SysTables& sysTables)
 {
     addGenerateCodeMenu(sysTables);
     addSeparator();
     addRefreshItem();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitTrigger(Trigger& trigger)
+void MainObjectMenuMetadataItemVisitor::visitTrigger(Trigger& trigger)
 {
     addGenerateCodeMenu(trigger);
     addSeparator();
@@ -321,7 +322,7 @@ void ContextMenuMetadataItemVisitor::visitTrigger(Trigger& trigger)
     addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitTriggers(Triggers& triggers)
+void MainObjectMenuMetadataItemVisitor::visitTriggers(Triggers& triggers)
 {
     addCreateItem();
     addSeparator();
@@ -330,7 +331,7 @@ void ContextMenuMetadataItemVisitor::visitTriggers(Triggers& triggers)
     addRefreshItem();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitView(View& view)
+void MainObjectMenuMetadataItemVisitor::visitView(View& view)
 {
     addBrowseDataItem();
     addShowColumnsItem();
@@ -343,7 +344,7 @@ void ContextMenuMetadataItemVisitor::visitView(View& view)
     addPropertiesItem();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::visitViews(Views& views)
+void MainObjectMenuMetadataItemVisitor::visitViews(Views& views)
 {
     addCreateItem();
     addSeparator();
@@ -352,24 +353,29 @@ void ContextMenuMetadataItemVisitor::visitViews(Views& views)
     addRefreshItem();
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addAlterItem(MetadataItem& metadataItem)
+void MainObjectMenuMetadataItemVisitor::addAlterItem(MetadataItem& metadataItem)
 {
     if (!metadataItem.isSystem())
         menuM->Append(Cmds::Menu_AlterObject, _("&Alter"));
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addCreateItem()
+void MainObjectMenuMetadataItemVisitor::addCreateItem()
 {
-    menuM->Append(Cmds::Menu_CreateObject, _("Create &new"));
+    // This menu command is redundant in the main Object menu.
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addDropItem(MetadataItem& metadataItem)
+void MainObjectMenuMetadataItemVisitor::addDeclareItem()
+{
+    // This menu command is redundant in the main Object menu.
+}
+//-----------------------------------------------------------------------------
+void MainObjectMenuMetadataItemVisitor::addDropItem(MetadataItem& metadataItem)
 {
     if (!metadataItem.isSystem())
         menuM->Append(Cmds::Menu_DropObject, _("Dr&op"));
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addGenerateCodeMenu(
+void MainObjectMenuMetadataItemVisitor::addGenerateCodeMenu(
     MetadataItem& metadataItem, wxMenu* parent)
 {
     MetadataTemplateManager tm(&metadataItem);
@@ -388,31 +394,51 @@ void ContextMenuMetadataItemVisitor::addGenerateCodeMenu(
     parent->Append(Cmds::Menu_TemplateMenu, _("&Generate code"), templateMenu);
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addPropertiesItem()
+void MainObjectMenuMetadataItemVisitor::addPropertiesItem()
 {
     menuM->Append(Cmds::Menu_ObjectProperties, _("P&roperties"));
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addRefreshItem()
+void MainObjectMenuMetadataItemVisitor::addRefreshItem()
 {
     menuM->Append(Cmds::Menu_ObjectRefresh, _("Re&fresh"));
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addBrowseDataItem()
+void MainObjectMenuMetadataItemVisitor::addBrowseDataItem()
 {
     menuM->Append(Cmds::Menu_BrowseColumns, _("Brow&se data"));
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addShowColumnsItem()
+void MainObjectMenuMetadataItemVisitor::addShowColumnsItem()
 {
     if (config().get(wxT("ShowColumnsInTree"), true))
         menuM->Append(Cmds::Menu_LoadColumnsInfo, _("Show columns in&fo"));
 }
 //-----------------------------------------------------------------------------
-void ContextMenuMetadataItemVisitor::addSeparator()
+void MainObjectMenuMetadataItemVisitor::addSeparator()
 {
     size_t count = menuM->GetMenuItemCount();
     if (count > 0 && !menuM->FindItemByPosition(count - 1)->IsSeparator())
         menuM->AppendSeparator();
+}
+//-----------------------------------------------------------------------------
+ContextMenuMetadataItemVisitor::ContextMenuMetadataItemVisitor(
+    wxMenu* menu)
+    : MainObjectMenuMetadataItemVisitor(menu)
+{
+}
+//-----------------------------------------------------------------------------
+ContextMenuMetadataItemVisitor::~ContextMenuMetadataItemVisitor()
+{
+}
+//-----------------------------------------------------------------------------
+void ContextMenuMetadataItemVisitor::addCreateItem()
+{
+        menuM->Append(Cmds::Menu_CreateObject, _("Create &new"));
+}
+//-----------------------------------------------------------------------------
+void ContextMenuMetadataItemVisitor::addDeclareItem()
+{
+    menuM->Append(Cmds::Menu_CreateObject, _("Declare &new"));
 }
 //-----------------------------------------------------------------------------

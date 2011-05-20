@@ -502,8 +502,8 @@ void MainFrame::OnMainMenuOpen(wxMenuEvent& event)
         DatabasePtr db = m->getDatabase();
         if (db && db.get() != m)
         {
-            ContextMenuMetadataItemVisitor cmv(objectMenuM);
-            m->acceptVisitor(&cmv);
+            MainObjectMenuMetadataItemVisitor visitor(objectMenuM);
+            m->acceptVisitor(&visitor);
         }
         if (objectMenuM->GetMenuItemCount() == 2)   // separator
             objectMenuM->Destroy(objectMenuM->FindItemByPosition(1));
