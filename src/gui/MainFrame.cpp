@@ -596,7 +596,6 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
     if (!m)
         return;
 
-    wxBusyCursor wait;
     NodeType nt = m->getType();
 
     enum { showProperties = 0, showColumnInfo, selectFromOrExecute };
@@ -817,8 +816,6 @@ void MainFrame::OnMenuGenerateCode(wxCommandEvent& event)
         return;
     if (!tryAutoConnectDatabase(database))
         return;
-
-    wxBusyCursor bc;
 
     MetadataTemplateManager tm(mi);
 
@@ -1111,7 +1108,7 @@ void MainFrame::OnMenuReconnect(wxCommandEvent& WXUNUSED(event))
     if (!checkValidDatabase(db))
         return;
 
-    wxBusyCursor cur;
+    wxBusyCursor bc;
     db->reconnect();
 }
 //-----------------------------------------------------------------------------
@@ -1640,7 +1637,6 @@ void MainFrame::OnMenuExecuteStatements(wxCommandEvent& WXUNUSED(event))
     if (!tryAutoConnectDatabase(db))
         return;
 
-    wxBusyCursor bc;
     showSql(this, wxString(_("Execute SQL statements")), db, wxEmptyString);
 }
 //-----------------------------------------------------------------------------
