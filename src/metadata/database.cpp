@@ -352,6 +352,7 @@ void Database::resetCredentials()
 //----------------------------------------------------------------------------
 void Database::getIdentifiers(std::vector<Identifier>& temp)
 {
+    checkConnected(_("getIdentifiers"));
     std::transform(tablesM->begin(), tablesM->end(),
         std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
     std::transform(sysTablesM->begin(), sysTablesM->end(),
@@ -1683,5 +1684,11 @@ void Database::getConnectedUsers(wxArrayString& users) const
             users.Add(name);
         }
     }
+}
+//-----------------------------------------------------------------------------
+void Database::checkConnected(const wxString& operation) const
+{
+    if (!connectedM)
+        throw FRError(wxString::Format(_("Operation \"%s\" not allowed on a disconnected database."), operation));
 }
 //-----------------------------------------------------------------------------

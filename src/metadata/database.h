@@ -203,6 +203,7 @@ private:
     bool showSystemRoles();
     bool showSystemTables();
 
+    inline void Database::checkConnected(const wxString& operation) const;
 protected:
     virtual void loadChildren();
     virtual void lockChildren();
