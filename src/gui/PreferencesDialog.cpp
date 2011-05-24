@@ -731,8 +731,10 @@ void PreferencesDialog::OnTreeSelChanged(wxTreeEvent& event)
 bool PreferencesDialog::Show(bool show)
 {
     bool r = BaseDialog::Show(show);
-    if ((show) && (bookctrl_1->GetPageCount() <= 1))
+    if (show && bookctrl_1->GetPageCount() <= 1)
         treectrl_1->Hide();
+    if (bookctrl_1->GetPageCount())
+        static_text_categ->SetLabel(bookctrl_1->GetPageText(0));
     return r;
 }
 //-----------------------------------------------------------------------------
