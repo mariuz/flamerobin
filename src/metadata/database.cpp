@@ -1689,6 +1689,9 @@ void Database::getConnectedUsers(wxArrayString& users) const
 void Database::checkConnected(const wxString& operation) const
 {
     if (!connectedM)
-        throw FRError(wxString::Format(_("Operation \"%s\" not allowed on a disconnected database."), operation));
+    {
+        throw FRError(wxString::Format(_("Operation \"%s\" not allowed on a disconnected database."),
+            operation.c_str()));
+    }
 }
 //-----------------------------------------------------------------------------
