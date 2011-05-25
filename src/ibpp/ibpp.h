@@ -225,7 +225,7 @@ namespace IBPP
         int mDate;  // The date : 1 == 1 Jan 1900
 
     public:
-        void Clear()    { mDate = MinDate - 1; };
+        void Clear()    { mDate = MinDate - 1; }
         void Today();
         void SetDate(int year, int month, int day);
         void SetDate(int dt);
@@ -238,7 +238,7 @@ namespace IBPP
         void StartOfMonth();
         void EndOfMonth();
 
-        Date()          { Clear(); };
+        Date()          { Clear(); }
         Date(int dt)    { SetDate(dt); }
         Date(int year, int month, int day);
         Date(const Date&);                          // Copy Constructor
@@ -248,7 +248,7 @@ namespace IBPP
         bool operator==(const Date& rv) { return mDate == rv.GetDate(); }
         bool operator<(const Date& rv) { return mDate < rv.GetDate(); }
 
-        virtual ~Date() { };
+        virtual ~Date() { }
     };
 
     /* Class Time represent purely a Time. It is usefull in interactions
@@ -377,7 +377,7 @@ namespace IBPP
         User& operator=(const User& r)  { copyfrom(r); return *this; }
         User(const User& r)             { copyfrom(r); }
         User() : userid(0), groupid(0)  { }
-        ~User() { };
+        ~User() { }
     };
 
     //  Interface Wrapper
@@ -497,7 +497,7 @@ namespace IBPP
         virtual IArray* AddRef() = 0;
         virtual void Release() = 0;
 
-        virtual ~IArray() { };
+        virtual ~IArray() { }
     };
 
     /* IService is the interface to the service capabilities of IBPP. Service is
@@ -542,7 +542,7 @@ namespace IBPP
         virtual IService* AddRef() = 0;
         virtual void Release() = 0;
 
-        virtual ~IService() { };
+        virtual ~IService() { }
     };
 
     /*  IDatabase is the interface to the database connections in IBPP. Database
