@@ -334,7 +334,7 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
     wxString charset(databaseM->getConnectionCharset());
     if (charset.empty())
         charset = wxT("NONE");
-    combobox_charset->SetStringSelection(charset);
+    combobox_charset->SetValue(charset);
     // see whether the database has an empty or default name; knowing that will be
     // useful to keep the name in sync when other attributes change.
     updateIsDefaultDatabaseName();
