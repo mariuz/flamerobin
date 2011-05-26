@@ -1,20 +1,20 @@
-{%--:Uncomment to edit template info visually.%}{%--:{%edit_info%}{%abort%}%}{%edit_conf%}set term !! ;
+{%--:Uncomment to edit template info visually.%}{%--:{%edit_info%}{%abort%}%}{%edit_conf%}{%kw:set term !! ;
 
 execute block
-returns ( {%foreach:column:, :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:
-    {%object_name%} {%columninfo:datatype%}%}%}
+returns%} ( {%foreach:column:, :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:
+{%tab%}{%object_name%} {%columninfo:datatype%}%}%}
 )
-as
+{%kw:as
 begin
-    for select {%foreach:column:, :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:
-        a.{%object_name%}%}%}
-    from {%object_name%} a
-    into {%foreach:column:, :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:
-        {%object_name%}%}%} 
-    do
-    begin
-        suspend;
-    end
+{%tab%}for select%} {%foreach:column:, :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:
+{%tab%}{%tab%}a.{%object_name%}%}%}
+{%tab%}{%kw:from%} {%object_name%} a
+{%tab%}{%kw:into%} {%foreach:column:, :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:
+{%tab%}{%tab%}{%object_name%}%}%} 
+{%tab%}{%kw:do
+{%tab%}begin
+{%tab%}{%tab%}suspend;
+{%tab%}end
 end!!
 
-set term ; !!
+set term%} ; !!

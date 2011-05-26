@@ -1,4 +1,4 @@
-{%--:Uncomment to edit template info visually.%}{%--:{%edit_info%}{%abort%}%}{%edit_conf%}insert into {%object_name%} ({%getconf:{%object_path%}/columnNames%})
-values ({%foreach:column:, :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:
-    '{%object_name%}{%ifeq:{%columninfo:is_nullable%}:false:*%}'%}%}
+{%--:Uncomment to edit template info visually.%}{%--:{%edit_info%}{%abort%}%}{%edit_conf%}{%wrap:{%kw:insert into%} {%object_name%} ({%getconf:{%object_path%}/columnNames%})%}
+{%kw:values%} ({%foreach:column:, :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:
+{%tab%}'{%object_name%}{%if:{%columninfo:is_nullable%}::*%}'%}%}
 );

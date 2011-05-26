@@ -368,6 +368,15 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
             processedText += text.Lower();
     }
 
+    // {%tab%}
+    // Expands to a number of spaces defined by config item
+    // sqlEditorTabSize.
+    else if (cmdName == wxT("tab"))
+    {
+        wxString tab;
+        processedText += tab.Pad(config().get(wxT("sqlEditorTabSize"), 4));
+    }
+
     // Only if no internal commands are recognized, call external command handlers.
     else
     {

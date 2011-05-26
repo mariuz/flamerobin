@@ -2,11 +2,12 @@
 <root>
     <node>
         <caption>Create selectable block</caption>
-        <setting type="relation_columns">
+        <setting type="relation_columns" style="list">
             <caption>Selected columns</caption>
             <key>{%object_path%}/columnNames</key>
             <default>{%foreach:column:, :{%object_name%}%}</default>
             <relation>{%object_handle%}</relation>
+            <proportion>1</proportion>
         </setting>
     </node>
 </root>

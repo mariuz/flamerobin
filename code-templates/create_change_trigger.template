@@ -1,15 +1,15 @@
-{%--:Uncomment to edit template info visually.%}{%--:{%edit_info%}{%abort%}%}{%edit_conf%}set term !! ;
+{%--:Uncomment to edit template info visually.%}{%--:{%edit_info%}{%abort%}%}{%edit_conf%}{%kw:set term !! ;
 
-create trigger CT_{%object_name%} for {%object_name%}
-active after update position {%getconf:{%object_path%}/triggerPosition:99%}
+create trigger%} CT_{%object_name%} {%kw:for%} {%object_name%}
+{%kw:active after update position {%getconf:{%object_path%}/triggerPosition:99%}
 as
 begin
-    if ({%foreach:column:
-        or :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:old.{%object_name%} is distinct from new.{%object_name%}%}%})
-    then
-    begin
-        /* do something */
-    end
+{%tab%}if%} ({%foreach:column:
+{%tab%}{%tab%}{%kw:or%} :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:{%kw:old%}.{%object_name%} {%kw:is distinct from new%}.{%object_name%}%}%})
+{%tab%}{%kw:then
+{%tab%}begin%}
+{%tab%}{%tab%}/* do something */
+{%tab%}{%kw:end
 end!!
 
-set term ; !!
+set term%} ; !!

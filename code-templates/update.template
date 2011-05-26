@@ -1,6 +1,5 @@
-{%--:Uncomment to edit template info visually.%}{%--:{%edit_info%}{%abort%}%}{%edit_conf%}update
-  {%object_name%}
-set {%foreach:column:, :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:
-  {%object_name%} = '{%object_name%}{%ifeq:{%columninfo:is_nullable%}:false:*%}'%}%}
-where{%forall:{%getconf:{%object_path%}/whereColumnNames%}: and :
-  %%current_value%% = '?'%};
+{%--:Uncomment to edit template info visually.%}{%--:{%edit_info%}{%abort%}%}{%edit_conf%}{%kw:update%} {%object_name%}
+{%kw:set%} {%foreach:column:, :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:
+{%tab%}{%object_name%} = '{%object_name%}{%ifeq:{%columninfo:is_nullable%}:false:*%}'%}%}
+{%kw:where%}{%forall:{%getconf:{%object_path%}/whereColumnNames%}: {%kw:and%} :
+{%tab%}%%current_value%% = '?'%};
