@@ -299,7 +299,6 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/SimpleHtmlFrame.h
         $(SOURCEDIR)/gui/StatementHistoryDialog.h
         $(SOURCEDIR)/gui/StyleGuide.h
-        $(SOURCEDIR)/gui/TriggerWizardDialog.h
         $(SOURCEDIR)/gui/UserDialog.h
         $(SOURCEDIR)/gui/UsernamePasswordDialog.h
         $(SOURCEDIR)/Isaac.h
@@ -421,7 +420,6 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/SimpleHtmlFrame.cpp
         $(SOURCEDIR)/gui/StatementHistoryDialog.cpp
         $(SOURCEDIR)/gui/StyleGuide.cpp
-        $(SOURCEDIR)/gui/TriggerWizardDialog.cpp
         $(SOURCEDIR)/gui/UserDialog.cpp
         $(SOURCEDIR)/gui/UsernamePasswordDialog.cpp
         $(SOURCEDIR)/logger.cpp
@@ -492,6 +490,9 @@ Accepted values: AMD64, IA64.
         <if cond="FORMAT!='autoconf'">code-templates</if>
     </set>
     <set var="CODETEMPLATEFILES">
+        create_trigger.confdef
+        create_trigger.info
+        create_trigger.template
         create_change_trigger.confdef
         create_change_trigger.info
         create_change_trigger.template
@@ -509,7 +510,7 @@ Accepted values: AMD64, IA64.
         select.confdef
         select.info
         select.template
-		template_info.confdef
+        template_info.confdef
         update.confdef
         update.info
         update.template
@@ -557,6 +558,13 @@ Accepted values: AMD64, IA64.
         <if cond="FORMAT!='autoconf'">res</if>
     </set>
 
+    <set var="SYSTEMPLATEDIR">
+        <if cond="FORMAT=='autoconf'">$(DOLLAR)(srcdir)/sys-templates</if>
+        <if cond="FORMAT!='autoconf'">sys-templates</if>
+    </set>
+    <set var="SYSTEMPLATEFILES">
+        browse_data.template
+    </set>
 
     <define-tag name="mac-app-bundle" rules="exe">
         <!-- bundle directory: -->
@@ -716,6 +724,11 @@ Accepted values: AMD64, IA64.
             <srcdir>$(RESOURCEDIR)</srcdir>
             <files>flamerobin.png</files>
             <install-to>$(DATADIR)/pixmaps</install-to>
+        </data-files>
+        <data-files>
+            <srcdir>$(SYSTEMPLATEDIR)</srcdir>
+            <files>$(SYSTEMPLATEFILES)</files>
+            <install-to>$(DATADIR)/flamerobin/sys-templates</install-to>
         </data-files>
     </if>
 

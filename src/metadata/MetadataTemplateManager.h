@@ -61,7 +61,7 @@ public:
     bool operator<(const TemplateDescriptor& right) const;
     //! returns true if the template can be run on the specified metadata item.
     bool matches(const MetadataItem* metadataItem) const;
-    wxFileName getTemplateFileName() const { return templateFileNameM; }
+    const wxFileName& getTemplateFileName() const { return templateFileNameM; }
     void setTemplateFileName(const wxFileName& value) { templateFileNameM = value; }
     wxString getBaseFileName() const { return templateFileNameM.GetName(); }
 };

@@ -138,6 +138,10 @@ public:
     wxString getCodeTemplatesPath() const;
     // returns the path from which to load user code templates and overrides.
     wxString getUserCodeTemplatesPath() const;
+    // returns the path from which to load system templates.
+    wxString getSysTemplatesPath() const;
+    // returns the path from which to load user overrides of system templates.
+    wxString getUserSysTemplatesPath() const;
     // returns the path containing the docs.
     wxString getDocsPath() const;
     // returns the path containing the confdefs.
@@ -147,6 +151,9 @@ public:
     // returns the file name (with full path) of the file containing
     // registered databases.
     wxString getDBHFileName() const;
+    // Returns the full pathname of the specified system template, giving
+    // precedence to any existing user override.
+    const wxString getSysTemplateFileName(const wxString& templateName);
 };
 //-----------------------------------------------------------------------------
 FRConfig& config();

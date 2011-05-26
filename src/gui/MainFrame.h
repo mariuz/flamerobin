@@ -36,12 +36,16 @@
 #include <vector>
 
 #include "gui/BaseFrame.h"
+#include "gui/GUIURIHandlerHelper.h"
 #include "metadata/MetadataClasses.h"
+#include "metadata/MetadataItemURIHandlerHelper.h"
 //-----------------------------------------------------------------------------
 class DBHTreeControl;
 class LabelPanel;
+class TemplateProcessor;
 //-----------------------------------------------------------------------------
-class MainFrame: public BaseFrame
+class MainFrame: public BaseFrame, private URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
     // menu handling events
@@ -72,7 +76,7 @@ public:
     void OnMenuBackup(wxCommandEvent& event);
     void OnMenuExecuteStatements(wxCommandEvent& event);
     void OnMenuInsert(wxCommandEvent& event);
-    void OnMenuBrowseColumns(wxCommandEvent& event);
+    void OnMenuBrowseData(wxCommandEvent& event);
     void OnMenuRestore(wxCommandEvent& event);
     void OnMenuShowAllGeneratorValues(wxCommandEvent& event);
     void OnMenuShowGeneratorValue(wxCommandEvent& event);
@@ -143,6 +147,7 @@ public:
         const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE);
 
     bool openUnregisteredDatabase(const wxString& dbpath);
+    bool handleURI(URI& uri);
 private:
     RootPtr rootM;
 
@@ -169,6 +174,12 @@ private:
     bool confirmDropItem(MetadataItem* item);
     bool confirmDropDatabase(Database* db);
 
+    void executeSysTemplate(const wxString& name, MetadataItem* item,
+        wxWindow* parentWindow);
+    void handleTemplateOutput(TemplateProcessor& tp,
+        DatabasePtr database, const wxString& code);
+    void executeCodeTemplate(const wxFileName& fileName,
+        MetadataItem* item, DatabasePtr database);
 protected:
     DBHTreeControl* treeMainM;
     wxMenuBar* menuBarM;

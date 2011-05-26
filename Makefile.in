@@ -108,7 +108,6 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_SimpleHtmlFrame.o \
 	flamerobin_StatementHistoryDialog.o \
 	flamerobin_StyleGuide.o \
-	flamerobin_TriggerWizardDialog.o \
 	flamerobin_UserDialog.o \
 	flamerobin_UsernamePasswordDialog.o \
 	flamerobin_logger.o \
@@ -226,7 +225,7 @@ install:
 	$(INSTALL_DIR) $(DESTDIR)$(bindir)
 	(cd . ; $(INSTALL_PROGRAM)  flamerobin$(EXEEXT) $(DESTDIR)$(bindir))
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/code-templates
-	(cd $(srcdir)/code-templates ; $(INSTALL_DATA)  create_change_trigger.confdef create_change_trigger.info create_change_trigger.template create_selectable_execute_block.confdef create_selectable_execute_block.info create_selectable_execute_block.template create_selectable_procedure.confdef create_selectable_procedure.info create_selectable_procedure.template extract_full_ddl.info extract_full_ddl.template insert.confdef insert.info insert.template select.confdef select.info select.template template_info.confdef update.confdef update.info update.template $(DESTDIR)$(datadir)/flamerobin/code-templates)
+	(cd $(srcdir)/code-templates ; $(INSTALL_DATA)  create_trigger.confdef create_trigger.info create_trigger.template create_change_trigger.confdef create_change_trigger.info create_change_trigger.template create_selectable_execute_block.confdef create_selectable_execute_block.info create_selectable_execute_block.template create_selectable_procedure.confdef create_selectable_procedure.info create_selectable_procedure.template extract_full_ddl.info extract_full_ddl.template insert.confdef insert.info insert.template select.confdef select.info select.template template_info.confdef update.confdef update.info update.template $(DESTDIR)$(datadir)/flamerobin/code-templates)
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/conf-defs
 	(cd $(srcdir)/conf-defs ; $(INSTALL_DATA)  fr_settings.confdef db_settings.confdef $(DESTDIR)$(datadir)/flamerobin/conf-defs)
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/docs
@@ -239,16 +238,19 @@ install:
 	(cd $(srcdir)/res ; $(INSTALL_DATA)  flamerobin.desktop $(DESTDIR)$(datadir)/applications)
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/pixmaps
 	(cd $(srcdir)/res ; $(INSTALL_DATA)  flamerobin.png $(DESTDIR)$(datadir)/pixmaps)
+	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/sys-templates
+	(cd $(srcdir)/sys-templates ; $(INSTALL_DATA)  browse_data.template $(DESTDIR)$(datadir)/flamerobin/sys-templates)
 
 uninstall: 
 	(cd $(DESTDIR)$(bindir) ; rm -f flamerobin$(EXEEXT))
-	(cd $(DESTDIR)$(datadir)/flamerobin/code-templates ; rm -f create_change_trigger.confdef create_change_trigger.info create_change_trigger.template create_selectable_execute_block.confdef create_selectable_execute_block.info create_selectable_execute_block.template create_selectable_procedure.confdef create_selectable_procedure.info create_selectable_procedure.template extract_full_ddl.info extract_full_ddl.template insert.confdef insert.info insert.template select.confdef select.info select.template template_info.confdef update.confdef update.info update.template)
+	(cd $(DESTDIR)$(datadir)/flamerobin/code-templates ; rm -f create_trigger.confdef create_trigger.info create_trigger.template create_change_trigger.confdef create_change_trigger.info create_change_trigger.template create_selectable_execute_block.confdef create_selectable_execute_block.info create_selectable_execute_block.template create_selectable_procedure.confdef create_selectable_procedure.info create_selectable_procedure.template extract_full_ddl.info extract_full_ddl.template insert.confdef insert.info insert.template select.confdef select.info select.template template_info.confdef update.confdef update.info update.template)
 	(cd $(DESTDIR)$(datadir)/flamerobin/conf-defs ; rm -f fr_settings.confdef db_settings.confdef)
 	(cd $(DESTDIR)$(datadir)/flamerobin/docs ; rm -f fr_license.html fr_manual.html fr_whatsnew.html html.css)
 	(cd $(DESTDIR)@mandir@/man1 ; rm -f flamerobin.1)
 	(cd $(DESTDIR)$(datadir)/flamerobin/html-templates ; rm -f ALLloading.html DATABASE.html DATABASEtriggers.html DDL.html DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html PROCEDUREprivileges.html ROLE.html ROLEprivileges.html SERVER.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TABLEprivileges.html TRIGGER.html VIEW.html VIEWprivileges.html VIEWtriggers.html dependencies.html header.html compute.png drop.png ok.png ok2.png redx.png view.png)
 	(cd $(DESTDIR)$(datadir)/applications ; rm -f flamerobin.desktop)
 	(cd $(DESTDIR)$(datadir)/pixmaps ; rm -f flamerobin.png)
+	(cd $(DESTDIR)$(datadir)/flamerobin/sys-templates ; rm -f browse_data.template)
 
 install-strip: install
 
@@ -506,9 +508,6 @@ flamerobin_StatementHistoryDialog.o: $(srcdir)/src/gui/StatementHistoryDialog.cp
 
 flamerobin_StyleGuide.o: $(srcdir)/src/gui/StyleGuide.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/StyleGuide.cpp
-
-flamerobin_TriggerWizardDialog.o: $(srcdir)/src/gui/TriggerWizardDialog.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/TriggerWizardDialog.cpp
 
 flamerobin_UserDialog.o: $(srcdir)/src/gui/UserDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/UserDialog.cpp

@@ -1,5 +1,5 @@
 [templateInfo]
 menuCaption=Create trigger for {%object_name%}
-menuPosition=1
+menuPosition=35
 matchesType=^TABLE$
 matchesWhen={%!:{%is_system%}%}

@@ -450,6 +450,21 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         tp->internalProcessTemplateText(processedText, cmdParams.all(), pk);
     }
 
+    // {%no_pk_or_unique%}
+    // Expands to true if the current object is a table without a primary
+    // key or at least one unique constraint, false otherwise.
+    else if (cmdName == wxT("no_pk_or_unique"))
+    {
+        Table* t = dynamic_cast<Table*>(object);
+        if (!t)
+            return;
+
+        if (!t->getPrimaryKey() && t->getUniqueConstraints()->size() == 0)
+            processedText += getBooleanAsString(true);
+        else
+            processedText += getBooleanAsString(false);
+    }
+
     // {%checkconstraintinfo:<property>%}
     // If the current object is a check constraint, expands to the constraint's
     // requested property.

@@ -63,4 +63,10 @@ bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
 //! loads the file into wxString
 wxString loadEntireFile(const wxFileName& filename);
 //-----------------------------------------------------------------------------
+//! wraps <text> into lines of maximum <maxWidth> characters, inserting a line
+//  break after each line. All lines after the first are also indented by
+//  <indent> spaces.
+//  Code adapted from wxWidgets' wxTextWrapper function.
+wxString wrapText(const wxString& text, size_t maxWidth, size_t indent);
+//-----------------------------------------------------------------------------
 #endif // FRUTILS_H

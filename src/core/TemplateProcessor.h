@@ -90,7 +90,7 @@ public:
     // To clear a variable, set it to an empty string.
     void setVar(const wxString& varName, const wxString& varValue);
     // Gets a variable value. If the variable doesn't exist, an empty string is returned.
-    wxString getVar(const wxString& varName);
+    const wxString& getVar(const wxString& varName);
     // Clears the specified variable.
     void clearVar(const wxString& varName);
     // Clears all variables.

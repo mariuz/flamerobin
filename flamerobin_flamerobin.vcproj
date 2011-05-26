@@ -1828,10 +1828,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\gui\TriggerWizardDialog.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\core\URIProcessor.cpp"
 				>
 			</File>
@@ -2395,10 +2391,6 @@
 			</File>
 			<File
 				RelativePath=".\src\gui\controls\TextControl.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\gui\TriggerWizardDialog.h"
 				>
 			</File>
 			<File

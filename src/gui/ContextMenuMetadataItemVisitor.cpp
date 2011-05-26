@@ -282,11 +282,6 @@ void MainObjectMenuMetadataItemVisitor::visitTable(Table& table)
     if (!table.isSystem())
         menuM->Append(Cmds::Menu_AddColumn, _("&Add column"));
     addShowColumnsItem();
-    if (!table.isSystem())
-    {
-        menuM->Append(Cmds::Menu_CreateTriggerForTable, 
-        _("Create new &trigger"));
-    }
     addDropItem(table);
     addSeparator();
     // TODO: addRefreshItem();
@@ -406,7 +401,7 @@ void MainObjectMenuMetadataItemVisitor::addRefreshItem()
 //-----------------------------------------------------------------------------
 void MainObjectMenuMetadataItemVisitor::addBrowseDataItem()
 {
-    menuM->Append(Cmds::Menu_BrowseColumns, _("Brow&se data"));
+    menuM->Append(Cmds::Menu_BrowseData, _("Brow&se data"));
 }
 //-----------------------------------------------------------------------------
 void MainObjectMenuMetadataItemVisitor::addShowColumnsItem()

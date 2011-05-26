@@ -768,10 +768,6 @@ SOURCE=.\src\gui\controls\TextControl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gui\TriggerWizardDialog.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\core\URIProcessor.cpp
 # End Source File
 # Begin Source File
@@ -1211,10 +1207,6 @@ SOURCE=.\src\core\TemplateProcessor.h
 # Begin Source File
 
 SOURCE=.\src\gui\controls\TextControl.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\gui\TriggerWizardDialog.h
 # End Source File
 # Begin Source File
 

@@ -116,7 +116,6 @@ FLAMEROBIN_OBJECTS =  \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SimpleHtmlFrame.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementHistoryDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StyleGuide.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TriggerWizardDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_UserDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_UsernamePasswordDialog.o \
 	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_logger.o \
@@ -453,9 +452,6 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementHistoryDialog.o: ./src/gui/State
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StyleGuide.o: ./src/gui/StyleGuide.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
-
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TriggerWizardDialog.o: ./src/gui/TriggerWizardDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_UserDialog.o: ./src/gui/UserDialog.cpp

@@ -46,6 +46,8 @@
 #ifdef HAVE_FRCONFIG_H
     #include "frconfig.h"
 #endif
+#include "core/FRError.h"
+
 //-----------------------------------------------------------------------------
 const wxString Config::pathSeparator = wxT("/");
 //-----------------------------------------------------------------------------
@@ -361,6 +363,18 @@ wxString FRConfig::getUserCodeTemplatesPath() const
         + wxFileName::GetPathSeparator();
 }
 //-----------------------------------------------------------------------------
+wxString FRConfig::getSysTemplatesPath() const
+{
+    return getHomePath() + wxT("sys-templates")
+        + wxFileName::GetPathSeparator();
+}
+//-----------------------------------------------------------------------------
+wxString FRConfig::getUserSysTemplatesPath() const
+{
+    return getUserHomePath() + wxT("sys-templates")
+        + wxFileName::GetPathSeparator();
+}
+//-----------------------------------------------------------------------------
 wxString FRConfig::getDocsPath() const
 {
     return getHomePath() + wxT("docs") + wxFileName::GetPathSeparator();
@@ -384,5 +398,21 @@ wxString FRConfig::getDBHFileName() const
 wxFileName FRConfig::getConfigFileName() const
 {
     return wxFileName(getUserHomePath(), wxT("fr_settings.conf"));
+}
+//-----------------------------------------------------------------------------
+const wxString FRConfig::getSysTemplateFileName(const wxString& templateName)
+{
+    wxFileName fileName = getUserSysTemplatesPath() + templateName
+        + wxT(".template");
+    if (!fileName.FileExists())
+    {
+        fileName = getSysTemplatesPath() + templateName + wxT(".template");
+        if (!fileName.FileExists())
+        {
+            throw FRError(wxString::Format(_("Template \"%s\" not found."),
+                fileName.GetFullPath()));
+        }
+    }
+    return fileName.GetFullPath();
 }
 //-----------------------------------------------------------------------------

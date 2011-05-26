@@ -418,10 +418,9 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(Cmds::Menu_DatabaseProperties, MainFrame::OnMenuDatabaseProperties)
     EVT_UPDATE_UI(Cmds::Menu_DatabaseProperties, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
 
-    EVT_MENU(Cmds::Menu_BrowseColumns, MainFrame::OnMenuBrowseColumns)
+    EVT_MENU(Cmds::Menu_BrowseData, MainFrame::OnMenuBrowseData)
     EVT_MENU(Cmds::Menu_LoadColumnsInfo, MainFrame::OnMenuLoadColumnsInfo)
     EVT_MENU(Cmds::Menu_AddColumn, MainFrame::OnMenuAddColumn)
-    EVT_MENU(Cmds::Menu_CreateTriggerForTable, MainFrame::OnMenuCreateTriggerForTable)
     EVT_MENU(Cmds::Menu_ExecuteProcedure, MainFrame::OnMenuExecuteProcedure)
 
     EVT_MENU(Cmds::Menu_ShowAllGeneratorValues, MainFrame::OnMenuShowAllGeneratorValues)
@@ -616,7 +615,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
         && (nt == ntTable || nt == ntSysTable || nt == ntView))
     {
         wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
-            Cmds::Menu_BrowseColumns);
+            Cmds::Menu_BrowseData);
         AddPendingEvent(event);
     }
     else if (treeActivateAction == selectFromOrExecute && (nt == ntProcedure))
@@ -794,18 +793,6 @@ void MainFrame::OnMenuDatabasePreferences(wxCommandEvent& WXUNUSED(event))
     }
 }
 //-----------------------------------------------------------------------------
-void MainFrame::OnMenuCreateTriggerForTable(wxCommandEvent& WXUNUSED(event))
-{
-    MetadataItem* i = treeMainM->getSelectedMetadataItem();
-    if (!i)
-        return;
-
-    URI uri(wxT("fr://create_trigger"));
-    uri.addParam(wxString::Format(wxT("parent_window=%ld"), (uintptr_t)this));
-    uri.addParam(wxString::Format(wxT("object_handle=%d"), i->getHandle()));
-    getURIProcessor().handleURI(uri);
-}
-//-----------------------------------------------------------------------------
 void MainFrame::OnMenuGenerateCode(wxCommandEvent& event)
 {
     MetadataItem* mi = treeMainM->getSelectedMetadataItem();
@@ -825,18 +812,7 @@ void MainFrame::OnMenuGenerateCode(wxCommandEvent& event)
     {
         if (i == event.GetId())
         {
-            ProgressDialog pd(this, _("Processing template..."));
-            wxString sql;
-            CodeTemplateProcessor tp(mi, this);
-            tp.processTemplateFile(sql, (*it)->getTemplateFileName(),
-                mi, &pd);
-            
-            if (getStringAsBoolean(tp.getVar(wxT("output.autoexec"))))
-                execSql(this, wxString(_("Execute SQL statements")),
-                    database, sql, false);
-            else
-                showSql(this, wxString(_("Execute SQL statements")),
-                    database, sql);
+            executeCodeTemplate((*it)->getTemplateFileName(), mi, database);
             break;
         }
     }
@@ -853,18 +829,10 @@ void MainFrame::OnMenuExecuteProcedure(wxCommandEvent& WXUNUSED(event))
         p->getExecuteStatement());
 }
 //-----------------------------------------------------------------------------
-void MainFrame::OnMenuBrowseColumns(wxCommandEvent& WXUNUSED(event))
+void MainFrame::OnMenuBrowseData(wxCommandEvent& WXUNUSED(event))
 {
-    Relation* r = dynamic_cast<Relation*>(
-        treeMainM->getSelectedMetadataItem());
-    if (!r)
-        return;
-    DatabasePtr d = r->getDatabase();
-    if (!d)
-        return;
-
-    execSql(this, wxString(_("Executing select statement")), d,
-        r->getSelectStatement(), false);
+    executeSysTemplate(wxT("browse_data"),
+        treeMainM->getSelectedMetadataItem(), this);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))
@@ -1742,5 +1710,58 @@ void MainFrame::OnSetFocus(wxFocusEvent& event)
     // focus the main frame instead of its previously focused control
     mainPanelM->SetFocus();
     event.Skip();
+}
+//-----------------------------------------------------------------------------
+void MainFrame::executeSysTemplate(const wxString& name, MetadataItem* item,
+    wxWindow* parentWindow)
+{
+    DatabasePtr database = getDatabase(item);
+    if (!checkValidDatabase(database))
+        return;
+    if (!tryAutoConnectDatabase(database))
+        return;
+
+    wxString code;
+    ProgressDialog pd(parentWindow, _("Processing template..."));
+    CodeTemplateProcessor tp(item, parentWindow);
+    tp.processTemplateFile(code, config().getSysTemplateFileName(name),
+        item, &pd);
+    handleTemplateOutput(tp, database, code);
+}
+//-----------------------------------------------------------------------------
+void MainFrame::executeCodeTemplate(const wxFileName& fileName,
+    MetadataItem* item, DatabasePtr database)
+{
+    wxString code;
+    ProgressDialog pd(this, _("Processing template..."));
+    CodeTemplateProcessor tp(item, this);
+    tp.processTemplateFile(code, fileName, item, &pd);
+    handleTemplateOutput(tp, database, code);
+}
+//-----------------------------------------------------------------------------
+void MainFrame::handleTemplateOutput(TemplateProcessor& tp,
+    DatabasePtr database, const wxString& code)
+{
+    if (getStringAsBoolean(tp.getVar(wxT("output.autoexec"))))
+        execSql(this, wxString(_("Execute SQL statements")),
+            database, code, false);
+    else
+        showSql(this, wxString(_("Execute SQL statements")),
+            database, code);
+}
+//-----------------------------------------------------------------------------
+bool MainFrame::handleURI(URI& uri)
+{
+    if (uri.action == wxT("create_trigger"))
+    {
+        Relation* r = extractMetadataItemFromURI<Relation>(uri);
+        wxWindow* w = getParentWindow(uri);
+        if (!r || !w)
+            return true;
+        executeSysTemplate(wxT("create_trigger"), r, w);
+        return true;
+    }
+    else
+        return false;
 }
 //-----------------------------------------------------------------------------

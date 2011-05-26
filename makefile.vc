@@ -134,7 +134,6 @@ FLAMEROBIN_OBJECTS =  \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_SimpleHtmlFrame.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StatementHistoryDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StyleGuide.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_TriggerWizardDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_UserDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_UsernamePasswordDialog.obj \
 	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_logger.obj \
@@ -550,9 +549,6 @@ vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StatementHistoryDialog.ob
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StyleGuide.obj: .\src\gui\StyleGuide.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\StyleGuide.cpp
-
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_TriggerWizardDialog.obj: .\src\gui\TriggerWizardDialog.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\TriggerWizardDialog.cpp
 
 vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_UserDialog.obj: .\src\gui\UserDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\UserDialog.cpp

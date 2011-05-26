@@ -149,6 +149,25 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
     else if (cmdName == wxT("parent_window"))
         processedText += wxString::Format(wxT("%ld"), (uintptr_t)windowM);
 
+    // {%if:<term>:<true output>[:<false output>]%}
+    // If <term> equals true expands to <true output>, otherwise
+    // expands to <false output> (or an empty string).
+    else if (cmdName == wxT("if") && (cmdParams.Count() >= 2))
+    {
+        wxString val;
+        internalProcessTemplateText(val, cmdParams[0], object);
+
+        wxString trueText;
+        internalProcessTemplateText(trueText, cmdParams[1], object);
+        wxString falseText;
+        if (cmdParams.Count() >= 3)
+            internalProcessTemplateText(falseText, cmdParams.from(2), object);
+        if (getStringAsBoolean(val))
+            processedText += trueText;
+        else
+            processedText += falseText;
+    }
+
     // {%ifeq:<left term>:<right term>:<true output>[:<false output>]%}
     // If <left term> equals <right term> expands to <true output>, otherwise
     // expands to <false output> (or an empty string).
@@ -300,6 +319,55 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
         processedText += text.Lower();
     }
 
+    // {%wrap:<text>[:<width>[:<indent>]]%}
+    // Wraps <text> to lines fo maximum <width> chars, indenting all
+    // resulting lines after the first one by <indent> chars.
+    // <width> defaults to config item sqlEditorEdgeColumn, or 80.
+    // <indent> defaults to config item sqlEditorTabSize, or 4.
+    else if (cmdName == wxT("wrap") && (cmdParams.Count() >= 1))
+    {
+        wxString text;
+        internalProcessTemplateText(text, cmdParams[0], object);
+
+        long widthI;
+        if (cmdParams.Count() >= 2)
+        {
+            wxString width;
+            internalProcessTemplateText(width, cmdParams[1], object);
+            if (!width.ToLong(&widthI))
+                widthI = config().get(wxT("sqlEditorEdgeColumn"), 80);
+        }
+        else
+            widthI = config().get(wxT("sqlEditorEdgeColumn"), 80);
+
+        long indentI;
+        if (cmdParams.Count() >= 3)
+        {
+            wxString indent;
+            internalProcessTemplateText(indent, cmdParams[2], object);
+            if (!indent.ToLong(&indentI))
+                indentI = config().get(wxT("sqlEditorTabSize"), 4);
+        }
+        else
+            indentI = config().get(wxT("sqlEditorTabSize"), 4);
+
+        processedText += wrapText(text, widthI, indentI);
+    }
+
+    // {%kw:<text>%}
+    // Formats <text> as a keyword (upper or lower case)
+    // according to config item SQLKeywordsUpperCase.
+    else if (cmdName == wxT("kw") && (cmdParams.Count() >= 1))
+    {
+        wxString text;
+        internalProcessTemplateText(text, cmdParams.all(), object);
+
+        if (config().get(wxT("SQLKeywordsUpperCase"), true))
+            processedText += text.Upper();
+        else
+            processedText += text.Lower();
+    }
+
     // Only if no internal commands are recognized, call external command handlers.
     else
     {
@@ -441,7 +509,7 @@ void TemplateProcessor::setVar(const wxString& varName,
     varsM[varName] = varValue;
 }
 //-----------------------------------------------------------------------------
-wxString TemplateProcessor::getVar(const wxString& varName)
+const wxString& TemplateProcessor::getVar(const wxString& varName)
 {
     return varsM[varName];
 }
