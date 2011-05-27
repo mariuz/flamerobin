@@ -38,6 +38,10 @@
     #include "wx/wx.h"
 #endif
 
+#include <fstream>
+#include <sstream>
+
+#include "core/FRError.h"
 #include "core/StringUtils.h"
 //-----------------------------------------------------------------------------
 std::string wx2std(const wxString& input, wxMBConv* conv)
@@ -217,5 +221,90 @@ wxString wxArrayToString(const wxArrayString& arrayStr, const wxString& delimite
             result << delimiter << *(it);
     }
     return result;
+}
+//-----------------------------------------------------------------------------
+wxString loadEntireFile(const wxFileName& filename)
+{
+    if (!filename.FileExists())
+    {
+        wxString msg;
+        msg.Printf(_("The file \"%s\" does not exist."),
+            filename.GetFullPath().c_str());
+        throw FRError(msg);
+    }
+
+    // read entire file into wxString buffer
+    std::ifstream filex(wx2std(filename.GetFullPath()).c_str());
+    if (!filex)
+    {
+        wxString msg;
+        msg.Printf(_("The file \"%s\" cannot be opened."),
+            filename.GetFullPath().c_str());
+        throw FRError(msg);
+    }
+
+    std::stringstream ss;
+    ss << filex.rdbuf();
+    wxString s(std2wx(ss.str()));
+    filex.close();
+    return s;
+}
+//-----------------------------------------------------------------------------
+wxString wrapText(const wxString& text, size_t maxWidth, size_t indent)
+{
+    wxString indentStr;
+    bool eol(false);
+    wxString wrappedText;
+    wxString line;
+
+    wxString::const_iterator lastSpace = text.end();
+    wxString::const_iterator lineStart = text.begin();
+    for (wxString::const_iterator it = lineStart; ; ++it)
+    {
+        if (eol)
+        {
+            wrappedText += wxT('\n');
+            if (indentStr.IsEmpty())
+                indentStr.Pad(indent);
+
+            lastSpace = text.end();
+            line.clear();
+            lineStart = it;
+        }
+        eol = false;
+
+        if (it == text.end() || *it == wxT('\n'))
+        {
+            wrappedText << indentStr << line;
+            eol = true;
+            if (it == text.end())
+                break;
+        }
+        else // not EOL
+        {
+            if (*it == wxT(' '))
+                lastSpace = it;
+
+            line += *it;
+
+            if (maxWidth >= 0 && lastSpace != text.end())
+            {
+                size_t width = line.Length();
+                if (width > maxWidth - indentStr.Length())
+                {
+                    // remove the last word from this line
+                    line.erase(lastSpace - lineStart, it + 1 - lineStart);
+                    wrappedText << indentStr << line;
+                    eol = true;
+
+                    // go back to the last word of this line which we didn't
+                    // output yet
+                    it = lastSpace;
+                }
+            }
+            // else: no wrapping at all or impossible to wrap
+        }
+    }
+    return wrappedText;
 }
 //-----------------------------------------------------------------------------

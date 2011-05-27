@@ -51,7 +51,7 @@
 #include "config/Config.h"
 #include "core/ArtProvider.h"
 #include "core/FRError.h"
-#include "frutils.h"
+#include "core/StringUtils.h"
 #include "gui/ConfdefTemplateProcessor.h"
 #include "gui/PreferencesDialog.h"
 #include "gui/StyleGuide.h"

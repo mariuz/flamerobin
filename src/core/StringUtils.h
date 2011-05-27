@@ -28,6 +28,7 @@
 #ifndef FR_STRINGUTILS_H
 #define FR_STRINGUTILS_H
 //-----------------------------------------------------------------------------
+#include <wx/filename.h>
 #include <wx/string.h>
 
 #include <string>
@@ -56,5 +57,13 @@ inline bool getStringAsBoolean(wxString value) { return value == wxT("true") ? t
 // Converts a wxArrayString to a delimited string of values.
 wxString wxArrayToString(const wxArrayString& arrayStr, const wxString& delimiter);
 //-----------------------------------------------------------------------------
-
+//! loads the file into wxString
+wxString loadEntireFile(const wxFileName& filename);
+//-----------------------------------------------------------------------------
+//! wraps <text> into lines of maximum <maxWidth> characters, inserting a line
+//  break after each line. All lines after the first are also indented by
+//  <indent> spaces.
+//  Code adapted from wxWidgets' wxTextWrapper function.
+wxString wrapText(const wxString& text, size_t maxWidth, size_t indent);
+//-----------------------------------------------------------------------------
 #endif // FR_STRINGUTILS_H

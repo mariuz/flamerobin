@@ -43,6 +43,7 @@
 class DBHTreeControl;
 class LabelPanel;
 class TemplateProcessor;
+class wxFileName;
 //-----------------------------------------------------------------------------
 class MainFrame: public BaseFrame, private URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper

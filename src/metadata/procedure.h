@@ -49,8 +49,6 @@ public:
 
     bool getChildren(std::vector<MetadataItem *>& temp);
 
-    wxString getExecuteStatement();
-
     ParameterPtrs::iterator begin();
     ParameterPtrs::iterator end();
     ParameterPtrs::const_iterator begin() const;

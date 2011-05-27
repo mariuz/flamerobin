@@ -820,13 +820,8 @@ void MainFrame::OnMenuGenerateCode(wxCommandEvent& event)
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuExecuteProcedure(wxCommandEvent& WXUNUSED(event))
 {
-    Procedure* p = dynamic_cast<Procedure*>(
-        treeMainM->getSelectedMetadataItem());
-    if (!p)
-        return;
-
-    showSql(this, wxString(_("Executing procedure")), p->getDatabase(),
-        p->getExecuteStatement());
+    executeSysTemplate(wxT("execute_procedure"),
+        treeMainM->getSelectedMetadataItem(), this);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuBrowseData(wxCommandEvent& WXUNUSED(event))

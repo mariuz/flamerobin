@@ -56,7 +56,6 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/parameter.h"
 #include "metadata/procedure.h"
-#include "sql/StatementBuilder.h"
 //-----------------------------------------------------------------------------
 Procedure::Procedure(DatabasePtr database, const wxString& name)
     : MetadataItem(ntProcedure, database.get(), name)
@@ -157,61 +156,6 @@ void Procedure::unlockChildren()
 {
     std::for_each(parametersM.begin(), parametersM.end(),
         boost::mem_fn(&Parameter::unlockSubject));
-}
-//-----------------------------------------------------------------------------
-wxString Procedure::getExecuteStatement()
-{
-    ensureChildrenLoaded();
-
-    wxArrayString columns, params;
-    columns.Alloc(parametersM.size());
-    params.Alloc(parametersM.size());
-
-    for (ParameterPtrs::iterator it = parametersM.begin();
-        it != parametersM.end(); ++it)
-    {
-        if ((*it)->isOutputParameter())
-            columns.Add((*it)->getQuotedName());
-        else
-            params.Add((*it)->getQuotedName());
-    }
-
-    StatementBuilder sb;
-    if (!columns.empty())
-    {
-        sb << kwSELECT << ' ' << StatementBuilder::IncIndent;
-
-        // use "<<" only after concatenating everything
-        // that shouldn't be split apart in line wrapping calculation
-        for (size_t i = 0; i < columns.size() - 1; ++i)
-            sb << wxT("p.") + columns[i] + wxT(", ");
-        sb << wxT("p.") + columns.Last();
-
-        sb << StatementBuilder::DecIndent << StatementBuilder::NewLine
-            << kwFROM << ' ' << getQuotedName();
-    }
-    else
-    {
-        sb << kwEXECUTE << ' ' << kwPROCEDURE << ' ' << getQuotedName();
-    }
-
-    if (!params.empty())
-    {
-        sb << wxT(" (") << StatementBuilder::IncIndent;
-
-        // use "<<" only after concatenating everything
-        // that shouldn't be split apart in line wrapping calculation
-        for (size_t i = 0; i < params.size() - 1; ++i)
-            sb << params[i] + wxT(", ");
-        sb << params.Last() + wxT(")");
-
-        sb << StatementBuilder::DecIndent;
-    }
-    
-    if (!columns.empty())
-        sb << wxT(" p");
-
-    return sb;
 }
 //-----------------------------------------------------------------------------
 ParameterPtrs::iterator Procedure::begin()

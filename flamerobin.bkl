@@ -564,6 +564,7 @@ Accepted values: AMD64, IA64.
     </set>
     <set var="SYSTEMPLATEFILES">
         browse_data.template
+        execute_procedure.template
     </set>
 
     <define-tag name="mac-app-bundle" rules="exe">

@@ -239,7 +239,7 @@ install:
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/pixmaps
 	(cd $(srcdir)/res ; $(INSTALL_DATA)  flamerobin.png $(DESTDIR)$(datadir)/pixmaps)
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/sys-templates
-	(cd $(srcdir)/sys-templates ; $(INSTALL_DATA)  browse_data.template $(DESTDIR)$(datadir)/flamerobin/sys-templates)
+	(cd $(srcdir)/sys-templates ; $(INSTALL_DATA)  browse_data.template execute_procedure.template $(DESTDIR)$(datadir)/flamerobin/sys-templates)
 
 uninstall: 
 	(cd $(DESTDIR)$(bindir) ; rm -f flamerobin$(EXEEXT))
@@ -250,7 +250,7 @@ uninstall:
 	(cd $(DESTDIR)$(datadir)/flamerobin/html-templates ; rm -f ALLloading.html DATABASE.html DATABASEtriggers.html DDL.html DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html PROCEDUREprivileges.html ROLE.html ROLEprivileges.html SERVER.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TABLEprivileges.html TRIGGER.html VIEW.html VIEWprivileges.html VIEWtriggers.html dependencies.html header.html compute.png drop.png ok.png ok2.png redx.png view.png)
 	(cd $(DESTDIR)$(datadir)/applications ; rm -f flamerobin.desktop)
 	(cd $(DESTDIR)$(datadir)/pixmaps ; rm -f flamerobin.png)
-	(cd $(DESTDIR)$(datadir)/flamerobin/sys-templates ; rm -f browse_data.template)
+	(cd $(DESTDIR)$(datadir)/flamerobin/sys-templates ; rm -f browse_data.template execute_procedure.template)
 
 install-strip: install
 

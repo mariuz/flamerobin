@@ -576,6 +576,29 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
 
         if (cmdParams[0] == wxT("source"))
             processedText += tp->escapeChars(p->getSource(), false);
+        // {%procedureinfo:paramcount[:input|output]%}
+        // Expands to the number of input or output parameters.
+        // If no argument is specified, expands to the total number of
+        // parameters.
+        else if (cmdParams[0] == wxT("paramcount"))
+        {
+            size_t paramCount(0);
+            p->ensureChildrenLoaded();
+            if (cmdParams.Count() >= 2)
+            {
+                bool isOut = (cmdParams[1] == wxT("output"));
+                for (ParameterPtrs::iterator it = p->begin(); it != p->end(); ++it)
+                {
+                    if ((*it)->isOutputParameter() == isOut)
+                        paramCount++;
+                }
+            }
+            else
+                paramCount = p->getParamCount();
+            
+            processedText += tp->escapeChars(
+                wxString::Format(wxT("%d"), paramCount), false);
+        }
     }
 
     // {%triggerinfo:<property>%}

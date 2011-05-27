@@ -40,7 +40,7 @@
 
 #include "config/Config.h"
 #include "core/ArtProvider.h"
-#include "frutils.h"
+#include "core/StringUtils.h"
 #include "gui/controls/PrintableHtmlWindow.h"
 #include "gui/SimpleHtmlFrame.h"
 //-----------------------------------------------------------------------------
