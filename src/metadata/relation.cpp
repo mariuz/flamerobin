@@ -646,39 +646,6 @@ void Relation::getTriggers(std::vector<Trigger *>& list,
     }
 }
 //-----------------------------------------------------------------------------
-wxString Relation::getSelectStatement()
-{
-    // get list of columns to SELECT
-    ensureChildrenLoaded();
-    wxArrayString cols;
-    cols.Alloc(columnsM.size());
-    for (ColumnPtrs::const_iterator it = columnsM.begin();
-        it != columnsM.end(); ++it)
-    {
-        cols.Add((*it)->getQuotedName());
-    }
-    if (addRdbKeyToSelect())
-        cols.Add(wxT("RDB$DB_KEY"));
-
-    StatementBuilder sb;
-    sb << kwSELECT << ' ' << StatementBuilder::IncIndent;
-
-    // use "<<" only after concatenating everything
-    // that shouldn't be split apart in line wrapping calculation
-    for (size_t i = 0; i < cols.size() - 1; ++i)
-        sb << wxT("r.") + cols[i] + wxT(", ");
-    sb << wxT("r.") + cols.Last();
-
-    sb << StatementBuilder::DecIndent << StatementBuilder::NewLine
-        << kwFROM << ' ' << getQuotedName() << wxT(" r");
-    return sb;
-}
-//-----------------------------------------------------------------------------
-bool Relation::addRdbKeyToSelect()
-{
-    return false;
-}
-//-----------------------------------------------------------------------------
 bool Relation::getChildren(std::vector<MetadataItem*>& temp)
 {
     if (columnsM.empty())

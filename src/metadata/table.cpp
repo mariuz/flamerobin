@@ -507,12 +507,6 @@ const wxString Table::getTypeName() const
     return wxT("TABLE");
 }
 //-----------------------------------------------------------------------------
-bool Table::addRdbKeyToSelect()
-{
-    // add DB_KEY only when table doesn't have a PK/UNQ constraint
-    return !getPrimaryKey() && getUniqueConstraints()->size() == 0;
-}
-//-----------------------------------------------------------------------------
 // find all tables from "tables" which have foreign keys with "table"
 // and return them in "list"
 bool Table::tablesRelate(const std::vector<wxString>& tables, Table* table,

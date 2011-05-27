@@ -64,8 +64,6 @@ protected:
 
     virtual void loadChildren();
 
-    virtual bool addRdbKeyToSelect();
-
 public:
     Table(DatabasePtr database, const wxString& name);
 

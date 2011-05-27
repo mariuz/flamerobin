@@ -61,14 +61,11 @@ protected:
     virtual void setExternalFilePath(const wxString& value);
     virtual void setSource(const wxString& value);
 
-    virtual bool addRdbKeyToSelect();
 public:
     Relation(NodeType type, DatabasePtr database, const wxString& name);
 
     wxString getOwner();
     int getRelationType();
-
-    wxString getSelectStatement();
 
     ColumnPtrs::iterator begin();
     ColumnPtrs::iterator end();
