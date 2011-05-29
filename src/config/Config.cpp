@@ -410,7 +410,7 @@ const wxString FRConfig::getSysTemplateFileName(const wxString& templateName)
         if (!fileName.FileExists())
         {
             throw FRError(wxString::Format(_("Template \"%s\" not found."),
-                fileName.GetFullPath()));
+                fileName.GetFullPath().c_str()));
         }
     }
     return fileName.GetFullPath();
