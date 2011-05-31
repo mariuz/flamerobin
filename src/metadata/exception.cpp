@@ -81,7 +81,7 @@ void Exception::loadProperties()
     st1->Fetch();
     std::string message;
     st1->Get(1, message);
-    messageM = std2wx(message);
+    messageM = std2wx(message, db->getCharsetConverter());
     st1->Get(2, numberM);
 
     setPropertiesLoaded(true);
