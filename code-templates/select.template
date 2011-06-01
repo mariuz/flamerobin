@@ -1,4 +1,4 @@
-{%--:Uncomment to edit template info visually.%}{%--:{%edit_info%}{%abort%}%}{%edit_conf%}{%wrap:{%kw:select%} {%getconf:{%object_path%}/columnNames%}%}
-{%kw:from%} {%object_name%}
+{%edit_conf%}{%wrap:{%kw:select%} {%getconf:{%object_path%}/columnNames%}%}
+{%kw:from%} {%object_name%}{%ifeq:{%countall:{%getconf:{%object_path%}/whereColumnNames%}%}:0:;:
 {%kw:where%}{%forall:{%getconf:{%object_path%}/whereColumnNames%}: {%kw:and%} :
-{%tab%}%%current_value%% = '?'%};
+{%tab%}%%current_value%% = '?'%};%}

@@ -1,5 +1,5 @@
-{%--:Uncomment to edit template info visually.%}{%--:{%edit_info%}{%abort%}%}{%edit_conf%}{%kw:update%} {%object_name%}
+{%edit_conf%}{%kw:update%} {%object_name%}
 {%kw:set%} {%foreach:column:, :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:
-{%tab%}{%object_name%} = '{%object_name%}{%ifeq:{%columninfo:is_nullable%}:false:*%}'%}%}
+{%tab%}{%object_name%} = '{%object_name%}{%ifeq:{%columninfo:is_nullable%}:false:*%}'%}%}{%ifeq:{%countall:{%getconf:{%object_path%}/whereColumnNames%}%}:0:;:
 {%kw:where%}{%forall:{%getconf:{%object_path%}/whereColumnNames%}: {%kw:and%} :
-{%tab%}%%current_value%% = '?'%};
+{%tab%}%%current_value%% = '?'%};%}

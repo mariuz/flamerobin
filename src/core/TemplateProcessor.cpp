@@ -263,6 +263,17 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
         }
     }
 
+    // {%countall:<list>%}
+    // Expands to the number of strings in <list>.
+    // <list> is a list of comma-separated values.
+    else if (cmdName == wxT("countall") && (cmdParams.Count() >= 1))
+    {
+        wxString listStr;
+        internalProcessTemplateText(listStr, cmdParams.all(), object);
+        wxArrayString list(wxStringTokenize(listStr, wxT(",")));
+        processedText << list.Count();
+    }
+
     // {%alternate:<text1>:<text2>%}
     // Alternates expanding to <text1> and <text2> at each call,
     // starting with <text1>.

@@ -1,3 +1,3 @@
-{%edit_conf%}{%kw:delete from%} {%object_name%}
+{%edit_conf%}{%kw:delete from%} {%object_name%}{%ifeq:{%countall:{%getconf:{%object_path%}/whereColumnNames%}%}:0:;:
 {%kw:where%}{%forall:{%getconf:{%object_path%}/whereColumnNames%}: {%kw:and%} :
-{%tab%}%%current_value%% = '?'%};
+{%tab%}%%current_value%% = '?'%};%}
