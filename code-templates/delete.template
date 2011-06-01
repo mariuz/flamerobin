@@ -1,0 +1,3 @@
+{%edit_conf%}{%kw:delete from%} {%object_name%}
+{%kw:where%}{%forall:{%getconf:{%object_path%}/whereColumnNames%}: {%kw:and%} :
+{%tab%}%%current_value%% = '?'%};

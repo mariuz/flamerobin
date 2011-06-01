@@ -502,6 +502,9 @@ Accepted values: AMD64, IA64.
         create_selectable_procedure.confdef
         create_selectable_procedure.info
         create_selectable_procedure.template
+        delete.confdef
+        delete.info
+        delete.template
         extract_full_ddl.info
         extract_full_ddl.template
         insert.confdef

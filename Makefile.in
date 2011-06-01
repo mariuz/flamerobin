@@ -225,7 +225,7 @@ install:
 	$(INSTALL_DIR) $(DESTDIR)$(bindir)
 	(cd . ; $(INSTALL_PROGRAM)  flamerobin$(EXEEXT) $(DESTDIR)$(bindir))
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/code-templates
-	(cd $(srcdir)/code-templates ; $(INSTALL_DATA)  create_trigger.confdef create_trigger.info create_trigger.template create_change_trigger.confdef create_change_trigger.info create_change_trigger.template create_selectable_execute_block.confdef create_selectable_execute_block.info create_selectable_execute_block.template create_selectable_procedure.confdef create_selectable_procedure.info create_selectable_procedure.template extract_full_ddl.info extract_full_ddl.template insert.confdef insert.info insert.template select.confdef select.info select.template template_info.confdef update.confdef update.info update.template $(DESTDIR)$(datadir)/flamerobin/code-templates)
+	(cd $(srcdir)/code-templates ; $(INSTALL_DATA)  create_trigger.confdef create_trigger.info create_trigger.template create_change_trigger.confdef create_change_trigger.info create_change_trigger.template create_selectable_execute_block.confdef create_selectable_execute_block.info create_selectable_execute_block.template create_selectable_procedure.confdef create_selectable_procedure.info create_selectable_procedure.template delete.confdef delete.info delete.template extract_full_ddl.info extract_full_ddl.template insert.confdef insert.info insert.template select.confdef select.info select.template template_info.confdef update.confdef update.info update.template $(DESTDIR)$(datadir)/flamerobin/code-templates)
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/conf-defs
 	(cd $(srcdir)/conf-defs ; $(INSTALL_DATA)  fr_settings.confdef db_settings.confdef $(DESTDIR)$(datadir)/flamerobin/conf-defs)
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/docs
@@ -243,7 +243,7 @@ install:
 
 uninstall: 
 	(cd $(DESTDIR)$(bindir) ; rm -f flamerobin$(EXEEXT))
-	(cd $(DESTDIR)$(datadir)/flamerobin/code-templates ; rm -f create_trigger.confdef create_trigger.info create_trigger.template create_change_trigger.confdef create_change_trigger.info create_change_trigger.template create_selectable_execute_block.confdef create_selectable_execute_block.info create_selectable_execute_block.template create_selectable_procedure.confdef create_selectable_procedure.info create_selectable_procedure.template extract_full_ddl.info extract_full_ddl.template insert.confdef insert.info insert.template select.confdef select.info select.template template_info.confdef update.confdef update.info update.template)
+	(cd $(DESTDIR)$(datadir)/flamerobin/code-templates ; rm -f create_trigger.confdef create_trigger.info create_trigger.template create_change_trigger.confdef create_change_trigger.info create_change_trigger.template create_selectable_execute_block.confdef create_selectable_execute_block.info create_selectable_execute_block.template create_selectable_procedure.confdef create_selectable_procedure.info create_selectable_procedure.template delete.confdef delete.info delete.template extract_full_ddl.info extract_full_ddl.template insert.confdef insert.info insert.template select.confdef select.info select.template template_info.confdef update.confdef update.info update.template)
 	(cd $(DESTDIR)$(datadir)/flamerobin/conf-defs ; rm -f fr_settings.confdef db_settings.confdef)
 	(cd $(DESTDIR)$(datadir)/flamerobin/docs ; rm -f fr_license.html fr_manual.html fr_whatsnew.html html.css)
 	(cd $(DESTDIR)@mandir@/man1 ; rm -f flamerobin.1)

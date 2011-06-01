@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+    <node>
+        <caption>Delete from {%object_name%} where ...</caption>
+        <setting type="relation_columns" style="list">
+            <caption>Columns to &amp;filter on:</caption>
+            <key>{%object_path%}/whereColumnNames</key>
+            <default>{%primary_key:{%constraintinfo:columns:, %}%}</default>
+            <relation>{%object_handle%}</relation>
+            <aligngroup>1</aligngroup>
+            <proportion>1</proportion>
+        </setting>
+    </node>
+</root>

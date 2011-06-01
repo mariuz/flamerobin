@@ -771,11 +771,11 @@ void PreferencesDialogTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *t
         ctp.processTemplateFile(confDefData, defFileName, object, tp->getProgressIndicator());
         
         // Show dialog for expanded confdef data.
-        wxString dialogTitle(_("Set parameters"));
+        wxString dialogTitle(_("Code generation"));
         Config& config(tp->getConfig());
         if (cmdName == wxT("edit_info"))
         {
-            dialogTitle = _("Set template info");
+            dialogTitle = _("Code template metadata");
             config = tp->getInfo(); 
         }
         PreferencesDialog pd(tp->getWindow(), dialogTitle,

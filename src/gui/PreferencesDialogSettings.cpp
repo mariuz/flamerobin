@@ -658,6 +658,7 @@ private:
     wxTextCtrl* textCtrlM;
     wxString defaultM;
     int expandM;
+    wxString toolTipM;
 };
 //-----------------------------------------------------------------------------
 PrefDlgStringEditSetting::PrefDlgStringEditSetting(wxPanel* page,
@@ -715,6 +716,8 @@ bool PrefDlgStringEditSetting::createControl(bool WXUNUSED(ignoreerrors))
         if (captionAfterM)
             captionAfterM->SetToolTip(descriptionM);
     }
+    textCtrlM->SetToolTip(toolTipM);
+
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -759,6 +762,8 @@ bool PrefDlgStringEditSetting::parseProperty(wxXmlNode* xmln)
             if (!value.empty() && value.ToLong(&l))
                 expandM = l;
         }
+        else if (name == wxT("hint"))
+            toolTipM = getNodeContent(xmln, wxEmptyString);
     }
     return PrefDlgSetting::parseProperty(xmln);
 }
@@ -1272,6 +1277,7 @@ wxArrayString PrefDlgRelationColumnsListSetting::getCheckListBoxItems()
     wxArrayString columns;
     if (relationM)
     {
+        relationM->ensureChildrenLoaded();
         columns.Alloc(relationM->getColumnCount());
         for (ColumnPtrs::const_iterator it = relationM->begin();
             it != relationM->end(); it++)
