@@ -1,5 +1,5 @@
 [templateInfo]
 menuCaption=Create selectable EXECUTE BLOCK statement
 menuPosition=60
-matchesType=^TABLE$
+matchesType=^TABLE$|^VIEW$
 
