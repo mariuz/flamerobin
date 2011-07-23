@@ -69,6 +69,7 @@ namespace Cmds
         DataGrid_ExportBlob,
         DataGrid_ImportBlob,
         DataGrid_Copy_as_insert,
+        DataGrid_Copy_as_inList,
         DataGrid_Copy_as_update,
         DataGrid_Save_as_html,
         DataGrid_Save_as_csv,

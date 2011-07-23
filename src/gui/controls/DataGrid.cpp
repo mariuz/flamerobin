@@ -212,6 +212,7 @@ void DataGrid::showPopupMenu(wxPoint cursorPos)
     m.Append(wxID_COPY, _("Copy"));
     m.Append(Cmds::DataGrid_Copy_as_insert, _("Copy as INSERT statements"));
     m.Append(Cmds::DataGrid_Copy_as_update, _("Copy as UPDATE statements"));
+    m.Append(Cmds::DataGrid_Copy_as_inList, _("Copy as IN list"));
     m.Append(Cmds::DataGrid_Save_as_html, _("Save as HTML file..."));
     m.Append(Cmds::DataGrid_Save_as_csv, _("Save as CSV file..."));
     m.AppendSeparator();
@@ -374,6 +375,52 @@ void DataGrid::copyToClipboardAsInsert()
         }
         if (!sRows.IsEmpty())
             copyToClipboard(sRows);
+    }   // end busy cursor
+    if (all)
+        notifyIfUnfetchedData();
+}
+//-----------------------------------------------------------------------------
+void DataGrid::copyToClipboardAsInList()
+{
+    DataGridTable* table = getDataGridTable();
+    if (!table)
+        return;
+
+    if (!IsSelection()) // no selection -> select the current cell
+    {
+        SelectBlock(GetGridCursorRow(), GetGridCursorCol(),
+            GetGridCursorRow(), GetGridCursorCol());
+    }
+
+    bool all = true;
+    {   // begin busy cursor
+        wxBusyCursor cr;
+
+        wxString s, sLine;
+        for (int i = 0; i < GetNumberRows(); i++)
+        {
+            for (int j = 0; j < GetNumberCols(); j++)
+            {
+                if (IsInSelection(i, j))
+                {
+                    if (!sLine.IsEmpty())
+                        sLine += wxT(", ");
+                    wxString v(table->getCellValueForInsert(i, j));
+                    if (sLine.Length() + v.Length() > 80)   // new line
+                    {
+                        s += sLine + wxTextBuffer::GetEOL();
+                        sLine = v;
+                    }
+                    else
+                        sLine += v;
+                }
+                else
+                    all = false;
+            }
+        }
+        s += sLine;   // add the last line
+        if (!s.IsEmpty())
+            copyToClipboard(s);
     }   // end busy cursor
     if (all)
         notifyIfUnfetchedData();

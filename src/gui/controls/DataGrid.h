@@ -74,6 +74,7 @@ private:
 public:
     void copyToClipboard();
     void copyToClipboardAsInsert();
+    void copyToClipboardAsInList();
     void copyToClipboardAsUpdate();
     void saveAsHTML();
     void saveAsCSV();

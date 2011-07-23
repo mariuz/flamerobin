@@ -963,6 +963,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_MENU(Cmds::DataGrid_Delete_row,      ExecuteSqlFrame::OnMenuGridDeleteRow)
     EVT_MENU(Cmds::DataGrid_SetFieldToNULL,  ExecuteSqlFrame::OnMenuGridSetFieldToNULL)
     EVT_MENU(Cmds::DataGrid_Copy_as_insert,  ExecuteSqlFrame::OnMenuGridCopyAsInsert)
+    EVT_MENU(Cmds::DataGrid_Copy_as_inList,  ExecuteSqlFrame::OnMenuGridCopyAsInList)
     EVT_MENU(Cmds::DataGrid_Copy_as_update,  ExecuteSqlFrame::OnMenuGridCopyAsUpdate)
     EVT_MENU(Cmds::DataGrid_EditBlob,        ExecuteSqlFrame::OnMenuGridEditBlob)
     EVT_MENU(Cmds::DataGrid_ImportBlob,      ExecuteSqlFrame::OnMenuGridImportBlob)
@@ -1839,6 +1840,11 @@ void ExecuteSqlFrame::OnMenuGridCopyAsInsert(wxCommandEvent& WXUNUSED(event))
     grid_data->copyToClipboardAsInsert();
 }
 //-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnMenuGridCopyAsInList(wxCommandEvent& WXUNUSED(event))
+{
+    grid_data->copyToClipboardAsInList();
+}
+//-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuGridCopyAsUpdate(wxCommandEvent& WXUNUSED(event))
 {
     grid_data->copyToClipboardAsUpdate();
@@ -2204,7 +2210,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             if (transactionM != 0 && !transactionM->Started())
             {
                 try
-                { 
+                {
                     transactionM->Start();
                 }
                 catch (IBPP::LogicException&)
