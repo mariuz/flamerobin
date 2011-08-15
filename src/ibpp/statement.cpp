@@ -387,7 +387,7 @@ int StatementImpl::AffectedRows()
 	if (mDatabase->GetHandle() == 0)
 		throw LogicExceptionImpl("Statement::AffectedRows", _("Database must be connected."));
 
-	int count;
+	int count(0);
 	IBS status;
 	RB result;
 	char itemsReq[] = {isc_info_sql_records};
@@ -397,10 +397,12 @@ int StatementImpl::AffectedRows()
 	if (status.Errors()) throw SQLExceptionImpl(status,
 			"Statement::AffectedRows", _("isc_dsql_sql_info failed."));
 
-	if (mType == IBPP::stInsert)
-			count = result.GetValue(isc_info_sql_records, isc_info_req_insert_count);
-	else if (mType == IBPP::stUpdate)
-			count = result.GetValue(isc_info_sql_records, isc_info_req_update_count);
+	// Cover the INSERT or UPDATE case
+	if (mType == IBPP::stInsert || mType == IBPP::stUpdate)
+	{
+		count += result.GetValue(isc_info_sql_records, isc_info_req_insert_count);
+		count += result.GetValue(isc_info_sql_records, isc_info_req_update_count);
+	}
 	else if (mType == IBPP::stDelete)
 			count = result.GetValue(isc_info_sql_records, isc_info_req_delete_count);
 	else if (mType == IBPP::stSelect)
