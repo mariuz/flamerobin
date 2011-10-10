@@ -41,10 +41,10 @@
   <tbody>
     <tr bgcolor="navy">
       <td></td>
-      <td nowrap><font color=white><b>Name</b></font></td>
-      <td bgcolor="navy"><font color="white"><b>Active</b></font></td>
-      <td bgcolor="navy"><font color="white"><b>Position</b></font></td>
-      <td bgcolor="navy"><font color="white"><b>Type</b></font></td>
+      <td nowrap bgcolor="navy"><font color=white><b>Name</b></font></td>
+      <td nowrap bgcolor="navy"><font color="white"><b>Active</b></font></td>
+      <td nowrap bgcolor="navy"><font color="white"><b>Position</b></font></td>
+      <td nowrap bgcolor="navy"><font color="white"><b>Type</b></font></td>
     </tr>
     {%foreach:trigger::after:
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
@@ -65,15 +65,15 @@
   </tbody>
 </table>
 <br><br>
-<table border=0 cellspacing=1 cellpadding=2 bgcolor="#CCCCCC">
+<table border=0 cellspacing=1 cellpadding=3 bgcolor="#999999">
     <tr bgcolor="#CCCCFF">
-        <td><B>Icon</B></td>
-        <td nowrap><B>Click to...</B></td>
+        <td>Icon</td>
+        <td nowrap>click to...</td>
     </tr>
-    <tr><td><img src="{%template_root%}drop.png"></td><td>Drop trigger</td></tr>
-    <tr><td><img src="{%template_root%}view.png"></td><td>Alter trigger</td></tr>
-    <tr><td><img src="{%template_root%}ok.png"></td><td>Deactivate trigger</td></tr>
-    <tr><td><img src="{%template_root%}redx.png"></td><td>Activate trigger</td></tr>
+    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}drop.png"></td><td>Drop trigger</td></tr>
+    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}view.png"></td><td>Alter trigger</td></tr>
+    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}ok.png"></td><td>Deactivate trigger</td></tr>
+    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}redx.png"></td><td>Activate trigger</td></tr>
 </table>
 <br>
 <br>

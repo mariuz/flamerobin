@@ -32,6 +32,8 @@
 #include "BaseDialog.h"
 
 class StatementHistory;
+class wxStyledTextCtrl;
+class wxSplitter;
 //-----------------------------------------------------------------------------
 class StatementHistoryDialog : public BaseDialog
 {
@@ -41,6 +43,7 @@ private:
     StatementHistory *historyM;
     wxStaticText *m_staticText2;
     wxTextCtrl *textctrl_search;
+    wxStyledTextCtrl *textctrl_statement;
     wxButton *button_search;
     wxButton *button_delete;
     wxButton *button_copy;
@@ -48,6 +51,9 @@ private:
     wxListBox *listbox_search;
     wxGauge *gauge_progress;
     void setSearching(bool searching);
+    wxSplitterWindow* mainSplitter;
+    wxPanel* leftSplitterPanel;
+    wxPanel* rightSplitterPanel;
 
     enum    // event handling
     {

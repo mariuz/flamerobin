@@ -35,6 +35,9 @@
 #include <wx/wx.h>
 #endif //WX_PRECOMP
 
+#include <wx/splitter.h>
+#include <wx/stc/stc.h>
+
 #include "statementHistory.h"
 #include "gui/StatementHistoryDialog.h"
 #include "gui/StyleGuide.h"
@@ -70,10 +73,37 @@ StatementHistoryDialog::StatementHistoryDialog(wxWindow *parent,
     innerSizer->Add(gauge_progress, 0, wxTOP|wxEXPAND,
         styleguide().getRelatedControlMargin(wxVERTICAL));
 
-    listbox_search = new wxListBox(getControlsPanel(), ID_listbox_search,
+	mainSplitter = new wxSplitterWindow( getControlsPanel(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_3D );
+	leftSplitterPanel = new wxPanel( mainSplitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* leftSplitterSizer = new wxBoxSizer( wxVERTICAL );
+
+	leftSplitterPanel->SetSizer( leftSplitterSizer );
+	rightSplitterPanel = new wxPanel( mainSplitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* rightSplitterSizer = new wxBoxSizer( wxVERTICAL );
+	rightSplitterPanel->SetSizer( rightSplitterSizer );
+
+	mainSplitter->SplitVertically( leftSplitterPanel, rightSplitterPanel, 0 );
+
+    listbox_search = new wxListBox(leftSplitterPanel, ID_listbox_search,
         wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_MULTIPLE);
-    innerSizer->Add(listbox_search, 1, wxTOP|wxEXPAND,
+    leftSplitterSizer->Add(listbox_search, 1, wxTOP|wxEXPAND,
         styleguide().getRelatedControlMargin(wxVERTICAL));
+
+    textctrl_statement = new wxStyledTextCtrl(rightSplitterPanel, wxID_ANY,
+        wxDefaultPosition, wxDefaultSize, wxBORDER_THEME|wxSUNKEN_BORDER);
+    textctrl_statement->SetWrapMode(wxSTC_WRAP_WORD);
+    textctrl_statement->SetMarginWidth(1, 0);  // turn off the folding margin
+    textctrl_statement->StyleSetForeground(1, *wxWHITE);
+    textctrl_statement->StyleSetBackground(1, *wxRED);
+    textctrl_statement->SetText(_("Selected SQL statement"));
+    rightSplitterSizer->Add(textctrl_statement, 1, wxTOP|wxEXPAND,
+        styleguide().getRelatedControlMargin(wxVERTICAL));
+
+	leftSplitterPanel->Layout();
+	leftSplitterSizer->Fit( leftSplitterPanel );
+	rightSplitterPanel->Layout();
+	rightSplitterSizer->Fit( rightSplitterPanel );
+	innerSizer->Add( mainSplitter, 1, wxEXPAND, 0 );
 
     button_copy = new wxButton(getControlsPanel(), ID_button_copy,
         _("C&opy Selection To Editor"), wxDefaultPosition, wxDefaultSize, 0);
@@ -134,6 +164,33 @@ void StatementHistoryDialog::OnListBoxSelect(wxCommandEvent& WXUNUSED(event))
     bool hasSelection = (listbox_search->GetSelections(sels) > 0);
     button_copy->Enable(hasSelection);
     button_delete->Enable(hasSelection);
+
+    textctrl_statement->ClearAll();
+    if (!hasSelection)
+        return;
+
+    for (size_t i=0; i<sels.GetCount(); ++i)
+    {
+        textctrl_statement->AddText(historyM->get(
+            (StatementHistory::Position)listbox_search->GetClientData(
+                sels.Item(i))) + wxT("\n"));
+    }
+
+    wxString searchString = textctrl_search->GetValue().Upper();
+    if (searchString.IsEmpty())
+        return;
+
+    wxString sql(textctrl_statement->GetText().Upper());
+
+    int p = -1;
+    while (true)
+    {
+        p = sql.find(searchString, p+1);
+        if (p == int(wxString::npos))
+            break;
+        textctrl_statement->StartStyling(p, 255);
+        textctrl_statement->SetStyling(searchString.Length(), 1);
+    }
 }
 //-----------------------------------------------------------------------------
 void StatementHistoryDialog::OnButtonSearchClick(wxCommandEvent&
@@ -151,6 +208,7 @@ void StatementHistoryDialog::OnButtonSearchClick(wxCommandEvent&
     setSearching(true);
     StatementHistory::Position total = historyM->size();
     gauge_progress->SetRange((int)total);
+    wxString last = wxEmptyString;
     for (StatementHistory::Position p = total - 1; (int)p >= 0; --p)
     {
         wxYield();
@@ -161,7 +219,10 @@ void StatementHistoryDialog::OnButtonSearchClick(wxCommandEvent&
         }
 
         gauge_progress->SetValue((int)(total - p - 1));
-        wxString s = historyM->get(p);
+        wxString s(historyM->get(p));
+        if (s == last)  // ignore duplicates
+            continue;
+        last = s;
         if (searchString.IsEmpty() || s.Upper().Contains(searchString))
         {
             wxString entry;

@@ -1047,10 +1047,11 @@ protected:
     wxString defaultM;
     virtual void addControlsToSizer(wxSizer* sizer);
     virtual void enableControls(bool enabled);
-    virtual wxArrayString getCheckListBoxItems() = 0;
+    virtual wxArrayString getCheckListBoxItems();
     void getItemsCheckState(bool& uncheckedItems, bool& checkedItems);
     virtual wxStaticText* getLabel();
     virtual bool hasControls() const;
+    virtual bool parseProperty(wxXmlNode* xmln);
     virtual void setDefault(const wxString& defValue);
     void updateCheckBoxState();
 private:
@@ -1058,6 +1059,7 @@ private:
     wxCheckListBox* checkListBoxM;
     wxCheckBox* checkBoxM;
     bool ignoreEventsM;
+    wxArrayString itemsM;
 
     boost::scoped_ptr<wxEvtHandler> checkListBoxHandlerM;
     boost::scoped_ptr<wxEvtHandler> checkBoxHandlerM;
@@ -1105,8 +1107,8 @@ bool PrefDlgCheckListBoxSetting::createControl(bool WXUNUSED(ignoreerrors))
         captionBeforeM = new wxStaticText(getPage(), wxID_ANY, captionM);
     checkListBoxM = new wxCheckListBox(getPage(), wxID_ANY, wxDefaultPosition,
         wxDefaultSize, getCheckListBoxItems());
-    // default minimum size is too high
-    checkListBoxM->SetMinSize(wxSize(150, 64));
+    // height needs to be at least 100 on Linux
+    checkListBoxM->SetMinSize(wxSize(150, 100));
     checkBoxM = new wxCheckBox(getPage(), wxID_ANY,
         _("Select / deselect &all"), wxDefaultPosition, wxDefaultSize,
         wxCHK_3STATE);
@@ -1140,6 +1142,37 @@ void PrefDlgCheckListBoxSetting::enableControls(bool enabled)
         checkListBoxM->Enable(enabled);
     if (checkBoxM)
         checkBoxM->Enable(enabled);
+}
+//-----------------------------------------------------------------------------
+bool PrefDlgCheckListBoxSetting::parseProperty(wxXmlNode* xmln)
+{
+    if (xmln->GetType() == wxXML_ELEMENT_NODE
+        && xmln->GetName() == wxT("option"))
+    {
+        wxString optcaption;
+        for (wxXmlNode* xmlc = xmln->GetChildren(); xmlc != 0;
+            xmlc = xmlc->GetNext())
+        {
+            if (xmlc->GetType() != wxXML_ELEMENT_NODE)
+                continue;
+            wxString value(getNodeContent(xmlc, wxEmptyString));
+            if (xmlc->GetName() == wxT("caption"))
+                optcaption = value;
+/*
+            else if (xmlc->GetName() == wxT("value"))
+                optvalue = value;
+*/
+        }
+        // for the time being values are the index of the caption in the array
+        if (!optcaption.empty())
+            itemsM.Add(optcaption);
+    }
+    return PrefDlgSetting::parseProperty(xmln);
+}
+//-----------------------------------------------------------------------------
+wxArrayString PrefDlgCheckListBoxSetting::getCheckListBoxItems()
+{
+    return itemsM;
 }
 //-----------------------------------------------------------------------------
 void PrefDlgCheckListBoxSetting::getItemsCheckState(bool& uncheckedItems,
@@ -1307,6 +1340,8 @@ PrefDlgSetting* PrefDlgSetting::createPrefDlgSetting(wxPanel* page,
 {
     if (type == wxT("checkbox"))
         return new PrefDlgCheckboxSetting(page, parent);
+    if (type == wxT("checklistbox"))
+        return new PrefDlgCheckListBoxSetting(page, parent);
     if (type == wxT("radiobox"))
         return new PrefDlgRadioboxSetting(page, parent);
     if (type == wxT("int"))

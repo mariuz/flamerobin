@@ -405,6 +405,12 @@ const wxString FRConfig::getSysTemplateFileName(const wxString& templateName)
     wxFileName fileName = getUserSysTemplatesPath() + templateName
         + wxT(".template");
     if (!fileName.FileExists())
+        fileName = getSysTemplatesPath() + templateName + wxT(".template");
+    if (!fileName.FileExists())
+        fileName = getUserCodeTemplatesPath() + templateName + wxT(".template");
+    if (!fileName.FileExists())
+        fileName = getCodeTemplatesPath() + templateName + wxT(".template");
+    if (!fileName.FileExists())
     {
         fileName = getSysTemplatesPath() + templateName + wxT(".template");
         if (!fileName.FileExists())

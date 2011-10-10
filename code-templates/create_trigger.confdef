@@ -24,14 +24,21 @@
                 <caption>After</caption>
             </option>
         </setting>
-        <!--TODO change to a checklistbox-->
-        <setting type="string">
+        <setting type="checklistbox">
             <caption>&amp;Actions:</caption>
             <key>{%object_path%}/triggerActions</key>
             <default>insert,update,delete</default>
             <aligngroup>2</aligngroup>
             <expand>1</expand>
-            <!--TODO add support for checks-->
+            <option>
+                <caption>insert</caption>
+            </option>
+            <option>
+                <caption>update</caption>
+            </option>
+            <option>
+                <caption>delete</caption>
+            </option>
             <validity-checks>
                 <validity-check><non-empty /></validity-check>
             </validity-checks>
