@@ -61,7 +61,7 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
     if (cmdName == wxT("--"))
         // Comment.
         ;
-    
+
     // {%template_root%}
     // Expands to the full path of the folder containing the currently
     // processed template, including the final path separator.
@@ -142,12 +142,16 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
     // Expands to a blank string.
     else if (cmdName == wxT("abort"))
         throw FRAbort();
-    
+
     // {%parent_window%}
     // Expands to the current window's numeric memory address.
     // Used to call FR's commands through URIs.
     else if (cmdName == wxT("parent_window"))
         processedText += wxString::Format(wxT("%ld"), (uintptr_t)windowM);
+
+    // {%colon%}
+    else if (cmdName == wxT("colon"))
+        processedText += wxT(":");
 
     // {%if:<term>:<true output>[:<false output>]%}
     // If <term> equals true expands to <true output>, otherwise
@@ -440,11 +444,11 @@ void TemplateProcessor::internalProcessTemplateText(wxString& processedText,
 
         processedText += inputText.substr(oldpos, pos - oldpos);
         wxString cmd = inputText.substr(pos + 2, endpos - pos - 2); // 2 = start_marker_len = end_marker_len
-        
+
         // parse command name and params.
         wxString cmdName;
         TemplateCmdParams cmdParams;
-        
+
         enum TemplateCmdState
         {
             inText,
@@ -457,7 +461,7 @@ void TemplateProcessor::internalProcessTemplateText(wxString& processedText,
         for (wxString::size_type i = 0; i < cmd.Length(); i++)
         {
             wxChar c = cmd[i];
-            
+
             if (c == wxT(':'))
             {
                 if ((nestLevel == 0) && (state == inText))
@@ -468,7 +472,7 @@ void TemplateProcessor::internalProcessTemplateText(wxString& processedText,
                 }
             }
             buffer += c;
-            
+
             if ((c == wxT('{')) && (i < cmd.Length() - 1) && (cmd[i + 1] == wxT('%')))
                 nestLevel++;
             else if ((c == wxT('}')) && (i > 0) && (cmd[i - 1] == wxT('%')))
@@ -497,7 +501,7 @@ void TemplateProcessor::processTemplateFile(wxString& processedText,
     ProgressIndicator* progressIndicator)
 {
     fileNameM = inputFileName;
-    
+
     wxFileName infoFileName(inputFileName);
     infoFileName.SetExt(wxT("info"));
     infoM.setConfigFileName(infoFileName);
