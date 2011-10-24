@@ -163,16 +163,27 @@ GDS* GDS::Call()
 			// that Firebird Server version > 1.5 might introduce.
 
 			if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, REG_KEY_ROOT_INSTANCES, 0,
-				KEY_READ, &hkey_instances) == ERROR_SUCCESS)
+					KEY_READ, &hkey_instances) == ERROR_SUCCESS
+				// try 64 bit registry view for 32 bit client program with 64 bit server
+				|| RegOpenKeyEx(HKEY_LOCAL_MACHINE, REG_KEY_ROOT_INSTANCES, 0,
+					KEY_READ | KEY_WOW64_64KEY, &hkey_instances) == ERROR_SUCCESS)
 			{
 				DWORD keytype;
 				DWORD buflen = sizeof(fbdll);
 				if (RegQueryValueEx(hkey_instances, FB_DEFAULT_INSTANCE, 0,
 						&keytype, reinterpret_cast<UCHAR*>(fbdll),
-							&buflen) == ERROR_SUCCESS && keytype == REG_SZ)
+						&buflen) == ERROR_SUCCESS
+					&& keytype == REG_SZ)
 				{
+					int len = lstrlen(fbdll);
 					lstrcat(fbdll, "bin\\fbclient.dll");
 					mHandle = LoadLibrary(fbdll);
+					// try 32 bit client library of 64 bit server too
+					if (mHandle == 0)
+					{
+						lstrcpy(fbdll + len, "WOW64\\fbclient.dll");
+						mHandle = LoadLibrary(fbdll);
+					}
 				}
 				RegCloseKey(hkey_instances);
 			}
