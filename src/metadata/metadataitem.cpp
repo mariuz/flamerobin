@@ -273,13 +273,14 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
     for (int i = 0; i < type_count; i++)
         if (typeM == dep_types[i])
             mytype = i;
-
-    // views count as relations(tables) when other object refer to them
-    if (mytype == 1 && !ofObject)
-        mytype = 0;
     // system tables should be treated as tables
     if (typeM == ntSysTable)
         mytype = 0;
+
+    int mytype2 = mytype;
+    // views count as relations(tables) when other object refer to them
+    if (mytype == 1 && !ofObject)
+        mytype2 = 0;
 
     if (typeM == ntUnknown || mytype == -1)
         throw FRError(_("Unsupported type"));
@@ -293,7 +294,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
     wxString sql =
         wxT("select RDB$") + o2 + wxT("_TYPE, RDB$") + o2 + wxT("_NAME, RDB$FIELD_NAME \n ")
         wxT(" from RDB$DEPENDENCIES \n ")
-        wxT(" where RDB$") + o1 + wxT("_TYPE = ? and RDB$") + o1 + wxT("_NAME = ? \n ");
+        wxT(" where RDB$") + o1 + wxT("_TYPE in (?,?) and RDB$") + o1 + wxT("_NAME = ? \n ");
     int params = 1;
     if ((typeM == ntTable || typeM == ntSysTable || typeM == ntView) && ofObject)  // get deps for computed columns
     {                                                       // view needed to bind with generators
@@ -342,8 +343,9 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
     sql += wxT(" order by 1, 2, 3");
     st1->Prepare(wx2std(sql, d->getCharsetConverter()));
     st1->Set(1, mytype);
+    st1->Set(2, mytype2);
     for (int i = 0; i < params; i++)
-        st1->Set(2 + i, wx2std(getName_(), d->getCharsetConverter()));
+        st1->Set(3 + i, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
     MetadataItem* last = 0;
     Dependency* dep = 0;
@@ -556,7 +558,7 @@ void MetadataItem::loadDescription()
     LoadDescriptionVisitor ldv;
     acceptVisitor(&ldv);
     // don't call notifyObservers() !
-    // since descriptions are loaded on-demand, doing so would result in 
+    // since descriptions are loaded on-demand, doing so would result in
     // additional activity at best, and crashes or infinite loops at worst
     if (ldv.descriptionAvailable())
     {
