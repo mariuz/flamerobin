@@ -42,6 +42,7 @@ private:
     bool isSearchingM;
     StatementHistory *historyM;
     wxStaticText *m_staticText2;
+    wxStaticText *dateTimeTextM;
     wxTextCtrl *textctrl_search;
     wxStyledTextCtrl *textctrl_statement;
     wxButton *button_search;

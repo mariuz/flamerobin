@@ -52,6 +52,7 @@ public:
     static StatementHistory& get(Database *db);
 
     wxString get(Position position);
+    wxDateTime getDateTime(Position position);
     void add(const wxString&);
     void deleteItems(const std::vector<Position>& items);
     Position size();

@@ -39,6 +39,7 @@
 #include <wx/stc/stc.h>
 
 #include "statementHistory.h"
+#include "config/Config.h"
 #include "gui/StatementHistoryDialog.h"
 #include "gui/StyleGuide.h"
 //-----------------------------------------------------------------------------
@@ -87,6 +88,10 @@ StatementHistoryDialog::StatementHistoryDialog(wxWindow *parent,
     listbox_search = new wxListBox(leftSplitterPanel, ID_listbox_search,
         wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_MULTIPLE);
     leftSplitterSizer->Add(listbox_search, 1, wxTOP|wxEXPAND,
+        styleguide().getRelatedControlMargin(wxVERTICAL));
+    dateTimeTextM = new wxStaticText(leftSplitterPanel, wxID_ANY,
+        _("Date and time of selected item"), wxDefaultPosition, wxDefaultSize, 0);
+    leftSplitterSizer->Add(dateTimeTextM, 0, wxTOP|wxEXPAND,
         styleguide().getRelatedControlMargin(wxVERTICAL));
 
     textctrl_statement = new wxStyledTextCtrl(rightSplitterPanel, wxID_ANY,
@@ -171,9 +176,14 @@ void StatementHistoryDialog::OnListBoxSelect(wxCommandEvent& WXUNUSED(event))
 
     for (size_t i=0; i<sels.GetCount(); ++i)
     {
-        textctrl_statement->AddText(historyM->get(
-            (StatementHistory::Position)listbox_search->GetClientData(
-                sels.Item(i))) + wxT("\n"));
+        StatementHistory::Position p = (StatementHistory::Position)
+            listbox_search->GetClientData(sels.Item(i));
+        textctrl_statement->AddText(historyM->get(p) + wxT("\n"));
+        if (i == 0)
+        {
+            dateTimeTextM->SetLabel(historyM->getDateTime(p).Format(
+                wxT("%Y-%m-%d %H:%M:%S")));
+        }
     }
 
     wxString searchString = textctrl_search->GetValue().Upper();

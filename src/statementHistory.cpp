@@ -110,6 +110,15 @@ StatementHistory& StatementHistory::get(Database* db)
     }
 }
 //-----------------------------------------------------------------------------
+wxDateTime StatementHistory::getDateTime(StatementHistory::Position pos)
+{
+    if (pos < sizeM)
+    {
+        return wxDateTime(::wxFileModificationTime(getFilename(pos)));
+    }
+    return wxInvalidDateTime;
+}
+//-----------------------------------------------------------------------------
 wxString StatementHistory::get(StatementHistory::Position pos)
 {
     if (pos < sizeM)
