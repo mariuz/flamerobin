@@ -510,7 +510,7 @@ private:
 PrefDlgIntEditSetting::PrefDlgIntEditSetting(wxPanel* page,
         PrefDlgSetting* parent)
     : PrefDlgSetting(page, parent), captionAfterM(0), captionBeforeM(0),
-        spinctrlM(0), maxValueM(100), minValueM(0), defaultM(0)
+        spinctrlM(0), maxValueM(32767), minValueM(0), defaultM(0)
 {
 }
 //-----------------------------------------------------------------------------
