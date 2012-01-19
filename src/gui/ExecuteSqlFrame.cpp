@@ -2156,11 +2156,13 @@ wxString millisToTimeString(long millis)
 {
     if (millis >= 60 * 1000)
     {
+		// round to nearest second by adding 500 millis before truncating
+		millis += 500;
         int hh = millis / (60 * 60 * 1000);
         millis -= 60 * 60 * 1000 * hh;
         int mm = millis / (60 * 1000);
         millis -= 60 * 1000 * mm;
-        int ss = (millis + 500) / 1000;
+        int ss = millis / 1000;
         return wxString::Format(wxT("%d:%.2d:%.2d (hh:mm:ss)"), hh, mm, ss);
     }
     else
