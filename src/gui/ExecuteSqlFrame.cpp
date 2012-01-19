@@ -1225,16 +1225,11 @@ void ExecuteSqlFrame::OnMenuFindSelectedObject(wxCommandEvent& WXUNUSED(event))
 //! handle function keys
 void ExecuteSqlFrame::OnKeyDown(wxKeyEvent& event)
 {
-    wxCommandEvent e;
     int key = event.GetKeyCode();
-    if (!event.HasModifiers())
+    if (!event.HasModifiers() && key == WXK_F3)
     {
-        switch (key)
-        {
-            case WXK_F3:
-                styled_text_ctrl_sql->find(false);
-                return;
-        };
+        styled_text_ctrl_sql->find(false);
+        return;
     }
 
     if (wxWindow::FindFocus() == styled_text_ctrl_sql)
@@ -2156,8 +2151,8 @@ wxString millisToTimeString(long millis)
 {
     if (millis >= 60 * 1000)
     {
-		// round to nearest second by adding 500 millis before truncating
-		millis += 500;
+        // round to nearest second by adding 500 millis before truncating
+        millis += 500;
         int hh = millis / (60 * 60 * 1000);
         millis -= 60 * 60 * 1000 * hh;
         int mm = millis / (60 * 1000);

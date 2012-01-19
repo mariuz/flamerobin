@@ -122,6 +122,9 @@ public:
     FindDialog(SearchableEditor *editor, wxWindow* parent,
         const wxString& title = _("Find and replace"),
         FindFlags* allowedFlags = 0);
+
+	void SetFindText(const wxString& text);
+
     DECLARE_EVENT_TABLE()
 };
 //-----------------------------------------------------------------------------

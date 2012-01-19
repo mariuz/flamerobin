@@ -153,11 +153,28 @@ bool SearchableEditor::find(bool newSearch)
 {
     if (!fd)
         fd = new FindDialog(this, ::wxGetTopLevelParent(this));
-    if (newSearch || findTextM.IsEmpty())
+    if (newSearch || findTextM.empty())
     {
+        if (newSearch)
+        {
+            // find selected text
+            wxString findText(GetSelectedText());
+            // failing that initialize with the word at the caret
+            if (findText.empty())
+            {
+                int pos = GetCurrentPos();
+                int start = WordStartPosition(pos, true);
+                int end = WordEndPosition(pos, true);
+                if (end > start)
+                    findText = GetTextRange(start, end);
+            }
+            fd->SetFindText(findText);
+        }
+
         // do not re-center dialog if it is already visible
         if (!fd->IsShown())
             fd->Show();
+        fd->SetFocus();
         return false;    // <- caller shouldn't care about this
     }
 
@@ -404,6 +421,15 @@ void FindDialog::setup()
     parentEditorM->setupSearch(find, replace, flags);
     if (flags.has(se::FROM_TOP))
         checkbox_fromtop->SetValue(false);
+}
+//-----------------------------------------------------------------------------
+void FindDialog::SetFindText(const wxString& text)
+{
+    // don't overwrite search text with empty or multiline text
+    if (text.empty() || text.find_first_of('\n') != wxString::npos)
+        return;
+    text_ctrl_find->ChangeValue(text);
+    text_ctrl_find->SelectAll();
 }
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(FindDialog, BaseDialog)
