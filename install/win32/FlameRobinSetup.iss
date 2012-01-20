@@ -1,4 +1,4 @@
-;Copyright (c) 2004-2011 The FlameRobin Development Team
+;Copyright (c) 2004-2012 The FlameRobin Development Team
 ;
 ;Permission is hereby granted, free of charge, to any person obtaining
 ;a copy of this software and associated documentation files (the
@@ -19,6 +19,8 @@
 ;TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 ;SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ;
+
+; $Id$
 
 ;#define DEBUG
 ;#define X64VERSION
