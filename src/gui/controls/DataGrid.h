@@ -32,6 +32,8 @@
 #include <wx/grid.h>
 #include <wx/listimpl.cpp>
 
+#include <vector>
+
 class DataGridTable;
 //-----------------------------------------------------------------------------
 BEGIN_DECLARE_EVENT_TYPES()
@@ -85,6 +87,9 @@ public:
     void cancelFetchAll();
     void fetchAll();
 
+    std::vector<bool> getColumnsWithSelectedCells();
+    std::vector<bool> getRowsWithSelectedCells();
+    std::vector<bool> getSelectedCellsInRow(int row);
     wxGridCellCoordsArray getSelectedCells();
 };
 //----------------------------------------------------------------------

@@ -1888,21 +1888,13 @@ void ExecuteSqlFrame::OnMenuUpdateGridCanSetFieldToNULL(wxUpdateUIEvent& event)
 {
     if (DataGridTable* dgt = grid_data->getDataGridTable())
     {
-        // get selection into array (cells)
-        wxGridCellCoordsArray cells = grid_data->getSelectedCells();
-        // loop through cells, remember for each column whether it is r/o
-        std::set<int> readOnlyCols;
-        for (size_t i = 0; i < cells.size(); i++)
+        std::vector<bool> selCols(grid_data->getColumnsWithSelectedCells());
+        for (size_t i = 0; i < selCols.size(); i++)
         {
-            int col = cells[i].GetCol();
-            if (readOnlyCols.find(col) == readOnlyCols.end())
+            if (selCols[i] && !dgt->isReadonlyColumn(i, false))
             {
-                if (!dgt->isReadonlyColumn(col, false))
-                {
-                    event.Enable(true);
-                    return;
-                }
-                readOnlyCols.insert(col);
+                event.Enable(true);
+                return;
             }
         }
     }

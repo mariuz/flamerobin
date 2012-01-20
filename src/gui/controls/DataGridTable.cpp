@@ -283,6 +283,11 @@ wxString DataGridTable::getCellValueForCSV(int row, int col)
     if (rowsM.isColumnNumeric(col))
         return s;
 
+    // wxTextOutputStream (which is used to write the CSV file) will convert
+    // '\n' to the proper EOL sequence while writing the stream
+    // so make sure '\r' isn't doubled on Windows
+    s.Replace(wxT("\r\n"), wxT("\n"));
+
     // return quoted text, but escape embedded quotes
     s.Replace(wxT("\""), wxT("\"\""));
     return wxT("\"") + s + wxT("\"");

@@ -563,25 +563,14 @@ void DataGrid::saveAsCSV()
     {
         wxBusyCursor cr;
         // find all columns that have at least one cell selected
-        std::vector<bool> selCols;
-        int cols = GetNumberCols();
-        selCols.reserve(cols);
-        for (int j = 0; j < cols; j++)
-            selCols.push_back(false);
-
-        int rows = GetNumberRows();
-        for (int i = 0; i < rows; i++)
-        {
-            for (int j = 0; j < cols; j++)
-            {
-                if (IsInSelection(i, j))
-                    selCols[j] = true;
-            }
-        }
+        std::vector<bool> selCols(getColumnsWithSelectedCells());
+        if (std::find(selCols.begin(), selCols.end(), false) != selCols.end())
+            all = false;
 
         const wxString sCOMMA(wxT(","));
         const wxString sTAB(wxT("\t"));
         const wxString sAPS(wxT("\""));
+        // wxTextOutputStream will convert '\n' to proper EOL sequence
         const wxString sEOL(wxT("\n"));
         wxString sDLM = sTAB;
 
@@ -597,6 +586,7 @@ void DataGrid::saveAsCSV()
         wxTextOutputStream outStr(fos);
 
         wxString sHeader;
+        int cols = GetNumberCols();
         for (int j = 0; j < cols; j++)
         {
             if (selCols[j])
@@ -612,8 +602,15 @@ void DataGrid::saveAsCSV()
         if (!sHeader.IsEmpty())
             outStr.WriteString(sHeader + sEOL);
 
-        for (int i = 0; i < rows; i++)
+        // find all rows that have at least one cell selected
+        std::vector<bool> selRows(getRowsWithSelectedCells());
+        if (std::find(selRows.begin(), selRows.end(), false) != selRows.end())
+            all = false;
+        for (int i = 0; i < selRows.size(); i++)
         {
+            // export only selected rows
+            if (!selRows[i])
+                continue;
             wxString sRow;
             for (int j = 0; j < cols; j++)
             {
@@ -626,14 +623,11 @@ void DataGrid::saveAsCSV()
                     else
                         sRow += GetCellValue(i, j);
                 }
-                else
-                    all = false;
             }
             if (!sRow.IsEmpty())
-                outStr.WriteString(sRow + sEOL); // wxTextBuffer::GetEOL();
+                outStr.WriteString(sRow + sEOL);
         }
     }
-
     if (all)
         notifyIfUnfetchedData();
 }
@@ -648,21 +642,7 @@ void DataGrid::saveAsHTML()
         return;
 
     // find all columns that have at least one cell selected
-    std::vector<bool> selCols;
-    int cols = GetNumberCols();
-    selCols.reserve(cols);
-    for (int i = 0; i < cols; i++)
-        selCols.push_back(false);
-
-    int rows = GetNumberRows();
-    for (int i = 0; i < rows; i++)
-    {
-        for (int j = 0; j < cols; j++)
-        {
-            if (IsInSelection(i, j))
-                selCols[j] = true;
-        }
-    }
+    std::vector<bool> selCols(getColumnsWithSelectedCells());
 
     // write HTML file
     wxFileOutputStream fos(fname);
@@ -680,6 +660,7 @@ void DataGrid::saveAsHTML()
             <tr>\n"));
     // write table header
     outStr.WriteString(wxT("<tr>"));
+    int cols = GetNumberCols();
     for (int i = 0; i < cols; i++)
     {
         if (selCols[i])
@@ -693,19 +674,11 @@ void DataGrid::saveAsHTML()
 
     DataGridTable* table = getDataGridTable();
     // write table data
+    int rows = GetNumberRows();
     for (int i = 0; i < rows; i++)
     {
-        // check if at least one cell in this row selected
-        int selcnt = 0;
-        std::vector<bool> selCells(selCols);
-        for (int j = 0; j < cols; j++)
-        {
-            if (IsInSelection(i, j))
-                selcnt++;
-            else // skip cell even if selection contains this column
-                selCells[j] = false;
-        }
-        if (!selcnt)
+        std::vector<bool> selCells(getSelectedCellsInRow(i));
+        if (std::count(selCells.begin(), selCells.end(), true) == 0)
             continue;
 
         outStr.WriteString(wxT("<tr bgcolor=white>"));
@@ -747,6 +720,116 @@ void DataGrid::cancelFetchAll()
     DataGridTable* table = getDataGridTable();
     if (table)
         table->setFetchAllRecords(false);
+}
+//-----------------------------------------------------------------------------
+std::vector<bool> DataGrid::getColumnsWithSelectedCells()
+{
+    // fully selected rows cause all columns to have selected cells
+    if (GetSelectedRows().size() > 0)
+        return std::vector<bool>(GetCols(), true);
+
+    std::vector<bool> ret(GetCols(), false);
+    // first mark all completely selected columns
+    wxArrayInt cols(GetSelectedCols());
+    for (size_t i = 0; i < cols.size(); i++)
+        ret[cols[i]] = true;
+
+    // now mark all columns contained in selected blocks
+    wxGridCellCoordsArray blocksTL(GetSelectionBlockTopLeft());
+    wxGridCellCoordsArray blocksBR(GetSelectionBlockBottomRight());
+    for (size_t i = 0; i < blocksTL.size(); i++)
+    {
+        const wxGridCellCoords& tl = blocksTL[i];
+        const wxGridCellCoords& br = blocksBR[i];
+        for (int c = tl.GetCol(); c <= br.GetCol(); c++)
+            ret[c] = true;
+    }
+
+    // now mark all columns of selected single cells 
+    wxGridCellCoordsArray cells(GetSelectedCells());
+    for (size_t i = 0; i < cells.size(); i++)
+    {
+        const wxGridCellCoords& c = cells[i];
+        ret[c.GetCol()] = true;
+    }
+
+    return ret;
+}
+//-----------------------------------------------------------------------------
+std::vector<bool> DataGrid::getRowsWithSelectedCells()
+{
+    // fully selected columns cause all rows to have selected cells
+    if (GetSelectedCols().size() > 0)
+        return std::vector<bool>(GetCols(), true);
+
+    std::vector<bool> ret(GetRows(), false);
+    // first mark all completely selected rows
+    wxArrayInt rows(GetSelectedRows());
+    for (size_t i = 0; i < rows.size(); i++)
+        ret[rows[i]] = true;
+
+    // now mark all rows contained in selected blocks
+    wxGridCellCoordsArray blocksTL(GetSelectionBlockTopLeft());
+    wxGridCellCoordsArray blocksBR(GetSelectionBlockBottomRight());
+    for (size_t i = 0; i < blocksTL.size(); i++)
+    {
+        const wxGridCellCoords& tl = blocksTL[i];
+        const wxGridCellCoords& br = blocksBR[i];
+        for (int r = tl.GetRow(); r <= br.GetRow(); r++)
+            ret[r] = true;
+    }
+
+    // now mark all columns of selected single cells 
+    wxGridCellCoordsArray cells(GetSelectedCells());
+    for (size_t i = 0; i < cells.size(); i++)
+    {
+        const wxGridCellCoords& c = cells[i];
+        ret[c.GetRow()] = true;
+    }
+
+    return ret;
+}
+//-----------------------------------------------------------------------------
+std::vector<bool> DataGrid::getSelectedCellsInRow(int row)
+{
+    // check whether row is fully selected
+    wxArrayInt rows(GetSelectedRows());
+    for (size_t i = 0; i < rows.size(); i++)
+    {
+        if (rows[i] == row)
+            return std::vector<bool>(GetCols(), true);
+    }
+
+    std::vector<bool> ret(GetCols(), false);
+    // first mark cells of all completely selected columns
+    wxArrayInt cols(GetSelectedCols());
+    for (size_t i = 0; i < cols.size(); i++)
+        ret[cols[i]] = true;
+
+    // now mark all columns contained in selected blocks
+    wxGridCellCoordsArray blocksTL(GetSelectionBlockTopLeft());
+    wxGridCellCoordsArray blocksBR(GetSelectionBlockBottomRight());
+    for (size_t i = 0; i < blocksTL.size(); i++)
+    {
+        const wxGridCellCoords& tl = blocksTL[i];
+        const wxGridCellCoords& br = blocksBR[i];
+        if (tl.GetRow() <= row && row <= br.GetRow())
+        {
+            for (int c = tl.GetCol(); c <= br.GetCol(); c++)
+                ret[c] = true;
+        }
+    }
+
+    // now mark all selected single cells 
+    wxGridCellCoordsArray cells(GetSelectedCells());
+    for (size_t i = 0; i < cells.size(); i++)
+    {
+        const wxGridCellCoords& c = cells[i];
+        if (c.GetRow() == row)
+            ret[c.GetCol()] = true;
+    }
+
+    return ret;
 }
 //-----------------------------------------------------------------------------
 wxGridCellCoordsArray DataGrid::getSelectedCells()
