@@ -279,7 +279,7 @@ wxString DataGridTable::getCellValueForCSV(int row, int col,
         return wxEmptyString;
 
     const wxString sTextDelim =
-        (textDelimiter != '\0') ? wxString(textDelimiter) : wxEmptyString;
+        (textDelimiter != '\0') ? wxString(textDelimiter) : wxT("");
 
     if (rowsM.isFieldNull(row, col))
         return sTextDelim + wxT("NULL") + sTextDelim;
