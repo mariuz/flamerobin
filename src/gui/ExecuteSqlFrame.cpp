@@ -2209,7 +2209,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     if (styled_text_ctrl_sql->AutoCompActive())
         styled_text_ctrl_sql->AutoCompCancel();    // remove the list if needed
     notebook_1->SetSelection(0);
-    wxStopWatch stopwatch;
+    wxStopWatch swTotal;
     bool retval = true;
 
     try
@@ -2260,11 +2260,14 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         }
         grid_data->ClearGrid(); // statement object will be invalidated, so clear the grid
         statementM = IBPP::StatementFactory(databaseM->getIBPPDatabase(), transactionM);
-        log(_("Preparing query: " + sql), ttSql);
+        log(_("Preparing statement: " + sql), ttSql);
         sae.scroll();
-        statementM->Prepare(wx2std(sql, databaseM->getCharsetConverter()));
-        log(wxString::Format(_("Prepare time: %s"),
-            millisToTimeString(stopwatch.Time()).c_str()));
+        {
+            wxStopWatch sw;
+            statementM->Prepare(wx2std(sql, databaseM->getCharsetConverter()));
+            log(wxString::Format(_("Statement prepared (elapsed time: %s)."),
+                millisToTimeString(sw.Time()).c_str()));
+        }
 
         // we don't check IBPP::Select since Firebird 2.0 has a new feature
         // INSERT ... RETURNING which isn't detected as stSelect by IBPP
@@ -2318,11 +2321,14 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
 
         log(wxEmptyString);
         log(wxEmptyString);
-        log(_("Executing..."));
+        log(_("Executing statement..."));
         sae.scroll();
-        statementM->Execute();
-        log(_("Done."));
-
+        {
+            wxStopWatch sw;
+            statementM->Execute();
+            log(wxString::Format(_("Statement executed (elapsed time: %s)."),
+                millisToTimeString(sw.Time()).c_str()));
+        }
         IBPP::STT type = statementM->Type();
         if (hasColumns)            // for select statements: show data
         {
@@ -2405,7 +2411,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     }
 
     log(wxString::Format(_("Total execution time: %s"),
-        millisToTimeString(stopwatch.Time()).c_str()));
+        millisToTimeString(swTotal.Time()).c_str()));
     return retval;
 }
 //-----------------------------------------------------------------------------
@@ -2508,9 +2514,13 @@ bool ExecuteSqlFrame::commitTransaction()
     {
         log(_("Commiting transaction..."));
         sae.scroll();
-        statementM->Close();
-        transactionM->Commit();
-        log(_("Done."));
+        {
+            wxStopWatch sw;
+            statementM->Close();
+            transactionM->Commit();
+            log(wxString::Format(_("Transaction committed (elapsed time: %s)."),
+                millisToTimeString(sw.Time()).c_str()));
+        }
         statusbar_1->SetStatusText(_("Transaction commited"), 3);
         inTransaction(false);
 
@@ -2599,9 +2609,13 @@ bool ExecuteSqlFrame::rollbackTransaction()
     {
         log(_("Rolling back the transaction..."));
         sae.scroll();
-        statementM->Close();
-        transactionM->Rollback();
-        log(_("Done."));
+        {
+            wxStopWatch sw;
+            statementM->Close();
+            transactionM->Rollback();
+            log(wxString::Format(_("Transaction rolled back (elapsed time: %s)."),
+                millisToTimeString(sw.Time()).c_str()));
+        }
         statusbar_1->SetStatusText(_("Transaction rolled back"), 3);
         inTransaction(false);
         executedStatementsM.clear();
