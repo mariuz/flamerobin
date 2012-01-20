@@ -80,7 +80,7 @@ public:
     void addRow(DataGridRowBuffer *buffer, const wxString& sql);
     wxString getCellValue(int row, int col);
     wxString getCellValueForInsert(int row, int col);
-    wxString getCellValueForCSV(int row, int col);
+    wxString getCellValueForCSV(int row, int col, const wxChar& textDelimiter);
     bool getFetchAllRows();
 
     // TODO: these should be replaced with a better function that covers all

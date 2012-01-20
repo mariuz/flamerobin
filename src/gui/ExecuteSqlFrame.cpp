@@ -51,6 +51,7 @@
 
 #include "config/Config.h"
 #include "core/ArtProvider.h"
+#include "core/CodeTemplateProcessor.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "core/URIProcessor.h"
@@ -1852,7 +1853,31 @@ void ExecuteSqlFrame::OnMenuGridSaveAsHtml(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuGridSaveAsCsv(wxCommandEvent& WXUNUSED(event))
 {
-    grid_data->saveAsCSV();
+    CodeTemplateProcessor ctp(0, this);
+    wxString code;
+    ctp.processTemplateFile(code,
+        config().getSysTemplateFileName(wxT("save_as_csv")), 0);
+
+    wxString fileName;
+    if (!ctp.getConfig().getValue(wxT("CSVExportFileName"), fileName))
+        return;
+
+    int i;
+    if (!ctp.getConfig().getValue(wxT("CSVFieldDelimiter"), i))
+        return;
+    static const wxChar fieldDelimiters[] = { '\t', ',', ';' };
+    if (i < 0 || i >= sizeof(fieldDelimiters) / sizeof(wxChar))
+        return;
+    wxChar fieldDelimiter(fieldDelimiters[i]);
+
+    if (!ctp.getConfig().getValue(wxT("CSVTextDelimiter"), i))
+        return;
+    static const wxChar textDelimiters[] = { '\0', '"', '\'' };
+    if (i < 0 || i >= sizeof(textDelimiters) / sizeof(wxChar))
+        return;
+    wxChar textDelimiter(textDelimiters[i]);
+
+    grid_data->saveAsCSV(fileName, fieldDelimiter, textDelimiter);
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuGridGridHeaderFont(wxCommandEvent& WXUNUSED(event))

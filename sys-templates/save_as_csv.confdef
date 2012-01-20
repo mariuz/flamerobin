@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+    <node>
+        <caption>Export Selected Data to CSV File</caption>
+        <setting type="file">
+            <caption>CSV file name:</caption>
+            <key>CSVExportFileName</key>
+            <dlg_filter>CSV files (*.csv)|*.csv|All files (*.*)|*.*</dlg_filter>
+        </setting>
+        <setting type="radiobox">
+            <caption>Field delimiter</caption>
+            <key>CSVFieldDelimiter</key>
+            <default>0</default>
+            <option>
+                <caption>Use the tabulator character (\t, character code 9)</caption>
+            </option>
+            <option>
+                <caption>Use commas (,)</caption>
+            </option>
+            <option>
+                <caption>Use semicolons (;)</caption>
+            </option>
+        </setting>
+        <setting type="radiobox">
+            <caption>Text delimiter</caption>
+            <key>CSVTextDelimiter</key>
+            <default>0</default>
+            <option>
+                <caption>Don't use any</caption>
+            </option>
+            <option>
+                <caption>Use quotation marks (")</caption>
+            </option>
+            <option>
+                <caption>Use single quotes (')</caption>
+            </option>
+        </setting>
+    </node>
+</root>

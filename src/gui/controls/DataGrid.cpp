@@ -546,17 +546,14 @@ void DataGrid::setHeaderFont()
     }
 }
 //-----------------------------------------------------------------------------
-void DataGrid::saveAsCSV()
+void DataGrid::saveAsCSV(const wxString& fileName,
+    const wxChar& fieldDelimiter, const wxChar& textDelimiter)
 {
     DataGridTable* table = getDataGridTable();
     if (!table)
         return;
 
-    wxString fname = ::wxFileSelector(_("Save data in selected cells as"),
-        wxEmptyString, wxEmptyString, wxT("*.csv"),
-        _("CSV files (*.csv)|*.csv|All files (*.*)|*.*"),
-        wxFD_SAVE | wxFD_CHANGE_DIR | wxFD_OVERWRITE_PROMPT, this);
-    if (fname.empty())
+    if (fileName.empty())
         return;
 
     bool all = true;
@@ -567,64 +564,49 @@ void DataGrid::saveAsCSV()
         if (std::find(selCols.begin(), selCols.end(), false) != selCols.end())
             all = false;
 
-        const wxString sCOMMA(wxT(","));
-        const wxString sTAB(wxT("\t"));
-        const wxString sAPS(wxT("\""));
-        // wxTextOutputStream will convert '\n' to proper EOL sequence
-        const wxString sEOL(wxT("\n"));
-        wxString sDLM = sTAB;
-
-        bool dlmiscomma = false;
-        config().getValue(wxT("CSVDelimiterIsComma"), dlmiscomma);
-        if (dlmiscomma)
-            sDLM = sCOMMA;
-
         // write CSV file
-        wxFileOutputStream fos(fname);
+        wxFileOutputStream fos(fileName);
         if (!fos.Ok()) // TODO: report error
             return;
         wxTextOutputStream outStr(fos);
 
+        // wxTextOutputStream (which is used to write the CSV file) will
+        // convert '\n' to the proper EOL sequence while writing the stream
+        const wxString sEOL(wxT("\n"));
+        const wxString sFieldDelim(fieldDelimiter);
+        const wxString sTextDelim =
+            (textDelimiter != '\0') ? wxString(textDelimiter) : wxEmptyString;
+
         wxString sHeader;
-        int cols = GetNumberCols();
-        for (int j = 0; j < cols; j++)
+        for (int col = 0; col < selCols.size(); col++)
         {
-            if (selCols[j])
-            {
-                if (!sHeader.IsEmpty())
-                    sHeader += sDLM;
-                if (sDLM == sCOMMA)
-                    sHeader += sAPS + GetColLabelValue(j) + sAPS;
-                else
-                    sHeader += GetColLabelValue(j);
-            }
+            if (!sHeader.empty())
+                sHeader += sFieldDelim;
+            sHeader += sTextDelim + GetColLabelValue(col) + sTextDelim;
         }
-        if (!sHeader.IsEmpty())
+        if (!sHeader.empty())
             outStr.WriteString(sHeader + sEOL);
 
         // find all rows that have at least one cell selected
         std::vector<bool> selRows(getRowsWithSelectedCells());
         if (std::find(selRows.begin(), selRows.end(), false) != selRows.end())
             all = false;
-        for (int i = 0; i < selRows.size(); i++)
+        for (int row = 0; row < selRows.size(); row++)
         {
             // export only selected rows
-            if (!selRows[i])
+            if (!selRows[row])
                 continue;
             wxString sRow;
-            for (int j = 0; j < cols; j++)
+            for (int col = 0; col < selCols.size(); col++)
             {
-                if (selCols[j])
+                if (selCols[col])
                 {
-                    if (!sRow.IsEmpty())
-                        sRow += sDLM;
-                    if (sDLM == sCOMMA)
-                        sRow += table->getCellValueForCSV(i, j);
-                    else
-                        sRow += GetCellValue(i, j);
+                    if (!sRow.empty())
+                        sRow += sFieldDelim;
+                    sRow += table->getCellValueForCSV(row, col, textDelimiter);
                 }
             }
-            if (!sRow.IsEmpty())
+            if (!sRow.empty())
                 outStr.WriteString(sRow + sEOL);
         }
     }

@@ -272,13 +272,17 @@ wxString DataGridTable::getCellValueForInsert(int row, int col)
     return wxT("'") + s + wxT("'");
 }
 //-----------------------------------------------------------------------------
-wxString DataGridTable::getCellValueForCSV(int row, int col)
+wxString DataGridTable::getCellValueForCSV(int row, int col,
+    const wxChar& textDelimiter)
 {
     if (!isValidCellPos(row, col) || rowsM.isFieldNA(row, col))
         return wxEmptyString;
 
+    const wxString sTextDelim =
+        (textDelimiter != '\0') ? wxString(textDelimiter) : wxEmptyString;
+
     if (rowsM.isFieldNull(row, col))
-        return wxT("\"NULL\"");
+        return sTextDelim + wxT("NULL") + sTextDelim;
     wxString s(rowsM.getFieldValue(row, col));
     if (rowsM.isColumnNumeric(col))
         return s;
@@ -288,9 +292,11 @@ wxString DataGridTable::getCellValueForCSV(int row, int col)
     // so make sure '\r' isn't doubled on Windows
     s.Replace(wxT("\r\n"), wxT("\n"));
 
+    if (textDelimiter == '\0')
+        return s;
     // return quoted text, but escape embedded quotes
-    s.Replace(wxT("\""), wxT("\"\""));
-    return wxT("\"") + s + wxT("\"");
+    s.Replace(sTextDelim, sTextDelim + sTextDelim);
+    return sTextDelim + s + sTextDelim;
 }
 //-----------------------------------------------------------------------------
 wxString DataGridTable::GetColLabelValue(int col)

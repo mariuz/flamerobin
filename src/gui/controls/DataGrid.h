@@ -79,7 +79,8 @@ public:
     void copyToClipboardAsInList();
     void copyToClipboardAsUpdate();
     void saveAsHTML();
-    void saveAsCSV();
+    void saveAsCSV(const wxString& fileName,
+        const wxChar& fieldDelimiter, const wxChar& textDelimiter);
 
     void setHeaderFont();
     void setCellFont();

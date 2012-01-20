@@ -927,7 +927,10 @@ class PrefDlgFileChooserSetting: public PrefDlgChooserSetting
 {
 public:
     PrefDlgFileChooserSetting(wxPanel* page, PrefDlgSetting* parent);
+protected:
+    virtual bool parseProperty(wxXmlNode* xmln);
 private:
+    wxString dlgFilterM;
     virtual void choose();
 };
 //-----------------------------------------------------------------------------
@@ -935,6 +938,7 @@ PrefDlgFileChooserSetting::PrefDlgFileChooserSetting(wxPanel* page,
         PrefDlgSetting* parent)
     : PrefDlgChooserSetting(page, parent)
 {
+    dlgFilterM = _("All files (*.*)|*.*");
 }
 //-----------------------------------------------------------------------------
 void PrefDlgFileChooserSetting::choose()
@@ -943,10 +947,20 @@ void PrefDlgFileChooserSetting::choose()
     wxFileName::SplitPath(textCtrlM->GetValue(), &path, 0, 0);
 
     wxString filename = ::wxFileSelector(_("Select File"), path,
-        wxEmptyString, wxEmptyString, _("All files (*.*)|*.*"),
-        wxFD_SAVE, ::wxGetTopLevelParent(textCtrlM));
+        wxEmptyString, wxEmptyString, dlgFilterM, wxFD_SAVE,
+        ::wxGetTopLevelParent(textCtrlM));
     if (!filename.empty())
         textCtrlM->SetValue(filename);
+}
+//-----------------------------------------------------------------------------
+bool PrefDlgFileChooserSetting::parseProperty(wxXmlNode* xmln)
+{
+    if (xmln->GetType() == wxXML_ELEMENT_NODE
+        && xmln->GetName() == wxT("dlg_filter"))
+    {
+        dlgFilterM = getNodeContent(xmln, wxEmptyString);
+    }
+    return PrefDlgChooserSetting::parseProperty(xmln);
 }
 //-----------------------------------------------------------------------------
 // PrefDlgFontChooserSetting class
