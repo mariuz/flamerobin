@@ -111,12 +111,20 @@ DomainPtr ColumnBase::getDomain() const
 //-----------------------------------------------------------------------------
 wxString ColumnBase::getDefault() const
 {
-    return defaultM;
+    if (hasDefaultM)
+        return defaultM;
+    if (DomainPtr d = getDomain())
+        return d->getDefault();
+    return wxEmptyString;
 }
 //-----------------------------------------------------------------------------
 bool ColumnBase::hasDefault() const
 {
-    return hasDefaultM;
+    if (hasDefaultM)
+        return true;
+    if (DomainPtr d = getDomain())
+        return d->hasDefault();
+    return false;
 }
 //-----------------------------------------------------------------------------
 wxString ColumnBase::getSource() const
@@ -201,15 +209,6 @@ bool Column::hasNotNullConstraint() const
     return notnullM;
 }
 //-----------------------------------------------------------------------------
-bool Column::hasDefault() const
-{
-    if (ColumnBase::hasDefault())
-        return true;
-    if (DomainPtr d = getDomain())
-        return d->hasDefault();
-    return false;
-}
-//-----------------------------------------------------------------------------
 bool Column::isPrimaryKey() const
 {
     Table* t = getTable();
@@ -267,16 +266,6 @@ wxString Column::getComputedSource() const
 wxString Column::getCollation() const
 {
     return collationM;
-}
-//-----------------------------------------------------------------------------
-wxString Column::getDefault() const
-{
-    if (!ColumnBase::hasDefault())
-    {
-        if (DomainPtr d = getDomain())
-            return d->getDefault();
-    }
-    return ColumnBase::getDefault();
 }
 //-----------------------------------------------------------------------------
 const wxString Column::getTypeName() const

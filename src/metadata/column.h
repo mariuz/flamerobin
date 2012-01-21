@@ -46,8 +46,8 @@ public:
 
     wxString getDatatype(bool useConfig = true);
     DomainPtr getDomain() const;
-    virtual wxString getDefault() const;
-    virtual bool hasDefault() const;
+    wxString getDefault() const;
+    bool hasDefault() const;
     wxString getSource() const;
     virtual bool isNullable() const;
 };
@@ -70,13 +70,11 @@ public:
     // while hasNotNullConstraint() doesn't (necessary for DDL creation)
     virtual bool isNullable() const;
     bool hasNotNullConstraint() const;
-    virtual bool hasDefault() const;
     bool isForeignKey() const;
     bool isPrimaryKey() const;
     bool isString() const;
     virtual wxString getComputedSource() const;
     wxString getCollation() const;
-    virtual wxString getDefault() const;
     Table* getTable() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
