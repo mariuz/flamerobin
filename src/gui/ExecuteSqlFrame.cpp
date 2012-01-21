@@ -2041,18 +2041,24 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
             if (newTerminator.empty())
             {
                 ::wxMessageBox(_("SET TERM command found without terminator.\nStopping further execution."),
-                    _("Warning."), wxOK | wxICON_WARNING);
+                    _("Warning"), wxOK | wxICON_WARNING);
                 return false;
             }
         }
         else if (ss.isSetAutoDDLStatement(autoDDLSetting))
         {
-            if (autoDDLSetting == wxT("ON"))
+            if (autoDDLSetting.CmpNoCase(wxT("ON")) == 0)
                 autoCommitM = true;
-            else if (autoDDLSetting == wxT("OFF"))
+            else if (autoDDLSetting.CmpNoCase(wxT("OFF")) == 0)
                 autoCommitM = false;
-            else
+            else if (autoDDLSetting.empty())
                 autoCommitM = !autoCommitM;
+            else
+            {
+                ::wxMessageBox(_("SET AUTODDL command found with invalid parameter (has to be \"ON\" or \"OFF\").\nStopping further execution."),
+                    _("Warning"), wxOK | wxICON_WARNING);
+                return false;
+            }
         }
         else if (ss.getSql().length() && !execute(ss.getSql(),
             ms.getTerminator(), prepareOnly))
@@ -2823,7 +2829,7 @@ void ExecuteSqlFrame::setKeywords()
     // The list has to be sorted for autocomplete to work properly
     as.Sort(CaseUnsensitiveCompare);
 
-    keywordsM.Empty();                          // create final wxString from array
+    keywordsM.clear();                          // create final wxString from array
     keywordsM.Alloc(20480);     // preallocate 20kB
     for (size_t i = 0; i < as.GetCount(); ++i)  // separate words with spaces
         keywordsM += as.Item(i) + wxT(" ");

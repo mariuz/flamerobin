@@ -33,9 +33,8 @@ class SingleStatement
 private:
     wxString sqlM;
     wxString thirdStringM;
-    bool isValidM;
-    enum StatementType { stCommit, stRollback, stSetTerm, stSetAutoDDL,
-         stOther } typeM;
+    enum StatementType { stInvalid,
+        stCommit, stRollback, stSetTerm, stSetAutoDDL, stOther } typeM;
 
 public:
     SingleStatement();

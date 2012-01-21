@@ -277,7 +277,7 @@ void StatementHistoryDialog::OnButtonCopyClick(wxCommandEvent& WXUNUSED(event))
     if (listbox_search->GetSelections(temp) == 0)
         return;
 
-    sqlM.Empty();
+    sqlM.clear();
     for (size_t i=0; i<temp.GetCount(); ++i)
     {
         sqlM += historyM->get(

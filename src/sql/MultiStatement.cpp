@@ -44,50 +44,73 @@
 #include "sql/SqlTokenizer.h"
 //-----------------------------------------------------------------------------
 SingleStatement::SingleStatement()
-    : isValidM(false), typeM(stOther)
+    : typeM(stInvalid)
 {
 }
 //-----------------------------------------------------------------------------
 SingleStatement::SingleStatement(const wxString& sql)
-    : sqlM(sql), isValidM(true), typeM(stOther)
+    : sqlM(sql), typeM(stOther)
 {
     SqlTokenizer tk(sql);
-    for (int i = 0; i < 3; tk.nextToken())
+    // set stt1 and stt2 to first and second relevant token
+    SqlTokenType stt1 = tk.getCurrentToken();
+    while (stt1 == tkCOMMENT || stt1 == tkWHITESPACE)
     {
-        SqlTokenType stt = tk.getCurrentToken();
-        if (stt == tkWHITESPACE || stt == tkCOMMENT)
-            continue;
-        if (stt == tkEOF)
+        tk.nextToken();
+        stt1 = tk.getCurrentToken();
+    }
+    tk.jumpToken(false);
+    SqlTokenType stt2 = tk.getCurrentToken();
+
+    // make sure that only exact forms of the statements are recognized
+    // pass everything else to the engine, to allow for stuff like
+    // "ROLLBACK WORK TO SAVEPOINT SP23"
+    // and to catch missing terminators (which would silently swallow the
+    // next statement, see SF.net tracker #3375476)
+    switch (stt1)
+    {
+        case kwCOMMIT:
+            // allow for "COMMIT" or "COMMIT WORK" only
+            if (stt2 == kwWORK)
+            {
+                tk.jumpToken(false);
+                stt2 = tk.getCurrentToken();
+            }
+            if (stt2 == tkEOF)
+                typeM = stCommit;
             break;
 
-        switch (i)
-        {
-            case 0:
-                // exit as soon as possible if token type not recognized
-                if (stt != kwSET)
-                {
-                    if (stt == kwCOMMIT)
-                        typeM = stCommit;
-                    else if (stt == kwROLLBACK)
-                        typeM = stRollback;
-                    return;
-                }
-                break;
-            case 1:
-                if (stt == kwTERMINATOR)
-                    typeM = stSetTerm;
-                else if (stt == kwAUTO || stt == kwAUTODDL)
-                    typeM = stSetAutoDDL;
-                else
-                    return;
-                break;
-            case 2:
+        case kwROLLBACK:
+            // allow for "ROLLBACK" or "ROLLBACK WORK" only
+            if (stt2 == kwWORK)
+            {
+                tk.jumpToken(false);
+                stt2 = tk.getCurrentToken();
+            }
+            if (stt2 == tkEOF)
+                typeM = stRollback;
+            break;
+
+        case kwSET:
+            // allow for "SET TERM", "SET AUTO" or "SET AUTODDL" only
+            // with an (optional) parameter that the calling code can access
+            if (stt2 == kwTERMINATOR || stt2 == kwAUTO || stt2 == kwAUTODDL)
+            {
+                tk.jumpToken(false);
                 thirdStringM = tk.getCurrentTokenString();
-                break;
-            default:
-                break;
-        }
-        ++i;
+                tk.jumpToken(false);
+                if (tk.getCurrentToken() == tkEOF)
+                {
+                    if (stt2 == kwTERMINATOR)
+                        typeM = stSetTerm;
+                    else
+                        typeM = stSetAutoDDL;
+                }
+            }
+            break;
+
+        default:
+            break;
     }
 }
 //-----------------------------------------------------------------------------
@@ -121,13 +144,11 @@ bool SingleStatement::isSetAutoDDLStatement(wxString& newSetting) const
 //-----------------------------------------------------------------------------
 bool SingleStatement::isValid() const
 {
-    return isValidM && !sqlM.Strip().IsEmpty();
+    return typeM != stInvalid && !sqlM.Strip().empty();
 }
 //-----------------------------------------------------------------------------
 wxString SingleStatement::getSql() const
 {
-    if (!isValidM)
-        return wxEmptyString;
     return sqlM;
 }
 //-----------------------------------------------------------------------------
