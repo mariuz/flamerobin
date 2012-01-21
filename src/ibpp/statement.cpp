@@ -126,7 +126,10 @@ void StatementImpl::Prepare(const std::string& sql)
 			case isc_info_sql_stmt_update :		mType = IBPP::stUpdate; break;
 			case isc_info_sql_stmt_delete :		mType = IBPP::stDelete; break;
 			case isc_info_sql_stmt_ddl :		mType = IBPP::stDDL; break;
-			case isc_info_sql_stmt_exec_procedure : mType = IBPP::stExecProcedure; break;
+			case isc_info_sql_stmt_exec_procedure :	mType = IBPP::stExecProcedure; break;
+			case isc_info_sql_stmt_start_trans:	mType = IBPP::stStartTransaction; break;
+			case isc_info_sql_stmt_commit:		mType = IBPP::stCommitTransaction; break;
+			case isc_info_sql_stmt_rollback:	mType = IBPP::stRollbackTransaction; break;
 			case isc_info_sql_stmt_select_for_upd : mType = IBPP::stSelectUpdate; break;
 			case isc_info_sql_stmt_set_generator :	mType = IBPP::stSetGenerator; break;
 			case isc_info_sql_stmt_savepoint :	mType = IBPP::stSavePoint; break;
