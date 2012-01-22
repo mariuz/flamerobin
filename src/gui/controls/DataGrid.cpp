@@ -742,7 +742,7 @@ std::vector<bool> DataGrid::getRowsWithSelectedCells()
 {
     // fully selected columns cause all rows to have selected cells
     if (GetSelectedCols().size() > 0)
-        return std::vector<bool>(GetCols(), true);
+        return std::vector<bool>(GetRows(), true);
 
     std::vector<bool> ret(GetRows(), false);
     // first mark all completely selected rows
