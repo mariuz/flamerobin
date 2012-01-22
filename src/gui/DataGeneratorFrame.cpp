@@ -486,9 +486,8 @@ const wxRect DataGeneratorFrame::getDefaultRect() const
 }
 //-----------------------------------------------------------------------------
 //! closes window if database is removed (unregistered)
-void DataGeneratorFrame::removeSubject(Subject* subject)
+void DataGeneratorFrame::subjectRemoved(Subject* subject)
 {
-    Observer::removeSubject(subject);
     if (subject == databaseM)
         Close();
 }

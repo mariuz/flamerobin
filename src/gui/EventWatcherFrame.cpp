@@ -286,9 +286,8 @@ void EventWatcherFrame::ibppEventHandler(IBPP::Events events,
 }
 //-----------------------------------------------------------------------------
 //! closes window if database is removed (unregistered)
-void EventWatcherFrame::removeSubject(Subject* subject)
+void EventWatcherFrame::subjectRemoved(Subject* subject)
 {
-    Observer::removeSubject(subject);
     DatabasePtr db = getDatabase();
     if (!db || !db->isConnected() || subject == db.get())
         Close();

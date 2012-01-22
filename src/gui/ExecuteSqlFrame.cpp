@@ -2781,9 +2781,8 @@ void ExecuteSqlFrame::update()
 }
 //-----------------------------------------------------------------------------
 //! closes window if database is removed (unregistered)
-void ExecuteSqlFrame::removeSubject(Subject* subject)
+void ExecuteSqlFrame::subjectRemoved(Subject* subject)
 {
-    Observer::removeSubject(subject);
     if (subject == databaseM)
         Close();
 }

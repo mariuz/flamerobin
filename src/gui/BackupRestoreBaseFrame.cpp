@@ -153,9 +153,8 @@ bool BackupRestoreBaseFrame::getThreadRunning() const
     return threadM != 0;
 }
 //-----------------------------------------------------------------------------
-void BackupRestoreBaseFrame::removeSubject(Subject* subject)
+void BackupRestoreBaseFrame::subjectRemoved(Subject* subject)
 {
-    Observer::removeSubject(subject);
     DatabasePtr db = getDatabase();
     if (!db || !db->isConnected() || subject == db.get())
         Close();

@@ -58,14 +58,12 @@ public:
 
     // make sure that thread gets deleted
     virtual bool Destroy();
-    virtual void removeSubject(Subject* subject);
 protected:
     wxArrayString msgsM;
     wxArrayInt msgKindsM;
     bool verboseMsgsM;
 
     DatabasePtr getDatabase() const;
-    virtual void update();
 
     void cancelBackupRestore();
     void clearLog();
@@ -89,6 +87,11 @@ private:
     wxLongLong threadMsgTimeMillisM;
     void addThreadMsg(const wxString msg, bool& notificationNeeded);
     void updateMessages(size_t firstmsg, size_t lastmsg);
+
+    // observer stuff
+    virtual void subjectRemoved(Subject* subject);
+    virtual void update();
+
 protected:
     enum {
         ID_text_ctrl_filename = 101,

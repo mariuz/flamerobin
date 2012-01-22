@@ -78,8 +78,8 @@ private:
     void requestLoadPage(bool showLoadingPage);
     void loadPage();
 
-protected:
-    virtual void removeSubject(Subject* subject);
+    // observer stuff
+    virtual void subjectRemoved(Subject* subject);
     virtual void update();
 public:
     MetadataItemPropertiesPanel(MetadataItemPropertiesFrame* parent,
@@ -229,9 +229,8 @@ void MetadataItemPropertiesPanel::loadPage()
 }
 //-----------------------------------------------------------------------------
 //! closes window if observed object gets removed (disconnecting, dropping, etc)
-void MetadataItemPropertiesPanel::removeSubject(Subject* subject)
+void MetadataItemPropertiesPanel::subjectRemoved(Subject* subject)
 {
-    Observer::removeSubject(subject);
     // main observed object is getting destroyed
     if (subject == objectM)
     {

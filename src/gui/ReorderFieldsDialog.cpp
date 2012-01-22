@@ -141,9 +141,8 @@ void ReorderFieldsDialog::moveSelected(int moveby)
 }
 //-----------------------------------------------------------------------------
 //! closes window if table is removed (dropped/disconnected,etc.)
-void ReorderFieldsDialog::removeSubject(Subject* subject)
+void ReorderFieldsDialog::subjectRemoved(Subject* subject)
 {
-    Observer::removeSubject(subject);
     if (subject == tableM)
         Close();
 }

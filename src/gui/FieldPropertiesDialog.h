@@ -90,10 +90,12 @@ private:
     void updateDomainControls();
     void updateDomainInfo(const wxString& domain);
     void updateSqlStatement();
+
+    // observer stuff
+    virtual void subjectRemoved(Subject* subject);
+    virtual void update();
 protected:
     virtual const wxString getName() const;
-    virtual void removeSubject(Subject* subject);
-    virtual void update();
 public:
     // Database is required so that domains, charsets, generators can be loaded
     FieldPropertiesDialog(wxWindow* parent, Table* table, Column* column = 0);

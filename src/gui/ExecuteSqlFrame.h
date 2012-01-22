@@ -248,14 +248,16 @@ private:
     void set_properties();
     void do_layout();
 
+private:
+    // observer stuff
+    virtual void subjectRemoved(Subject* subject);
+    virtual void update();
+
 protected:
     enum {
         ID_grid_data = 101,
         ID_stc_sql
     };
-
-    virtual void removeSubject(Subject* subject);
-    virtual void update();
 
     bool closeWhenTransactionDoneM;
     bool loadingM;

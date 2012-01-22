@@ -663,6 +663,7 @@ class DBHTreeItemData: public wxTreeItemData, public Observer
 {
 private:
     DBHTreeControl* treeM;
+    MetadataItem* observedItemM;
 protected:
     virtual void update();
 public:
@@ -670,10 +671,11 @@ public:
 
     wxTreeItemId findSubNode(MetadataItem* item);
     MetadataItem* getObservedMetadata();
+    void setObservedMetadata(MetadataItem* item);
 };
 //-----------------------------------------------------------------------------
 DBHTreeItemData::DBHTreeItemData(DBHTreeControl* tree)
-    : Observer(), treeM(tree)
+    : Observer(), treeM(tree), observedItemM(0)
 {
 }
 //-----------------------------------------------------------------------------
@@ -693,8 +695,19 @@ wxTreeItemId DBHTreeItemData::findSubNode(MetadataItem* item)
 //-----------------------------------------------------------------------------
 MetadataItem* DBHTreeItemData::getObservedMetadata()
 {
-    // first observed Subject is always the represented MetadataItem*
-    return (dynamic_cast<MetadataItem*>(getFirstSubject()));
+    return observedItemM;
+}
+//-----------------------------------------------------------------------------
+void DBHTreeItemData::setObservedMetadata(MetadataItem* item)
+{
+    if (observedItemM != item)
+    {
+        if (observedItemM)
+            observedItemM->detachObserver(this);
+        observedItemM = item;
+        if (observedItemM)
+            observedItemM->attachObserver(this, true);
+    }
 }
 //-----------------------------------------------------------------------------
 struct MetadataItemSorter
@@ -842,9 +855,10 @@ void DBHTreeItemData::update()
                     childId = treeM->PrependItem(id, tivChild.getNodeText(),
                         tivChild.getNodeImage(), -1, newItem);
                 }
-                // attachObserver() will call update() on the newly created
-                // child node.  This will correctly populate the tree
-                (*itChild)->attachObserver(newItem, true);
+                // setObservedMetadata() calls attachObserver(), which
+                // calls update() on the newly created child node
+                // this will correctly populate the tree
+                newItem->setObservedMetadata(*itChild);
                 // tree node data objects may optionally observe the settings
                 // cache object, for example to create / delete column and
                 // parameter nodes if the "ShowColumnsInTree" setting changes
@@ -1025,7 +1039,7 @@ wxTreeItemId DBHTreeControl::addRootNode(MetadataItem* rootItem)
     wxTreeItemId id = AddRoot(wxEmptyString);
     DBHTreeItemData* rootdata = new DBHTreeItemData(this);
     SetItemData(id, rootdata);
-    rootItem->attachObserver(rootdata, true);
+    rootdata->setObservedMetadata(rootItem);
     // server nodes may need to be reordered
     DBHTreeConfigCache::get().attachObserver(rootdata, false);
     return id;
@@ -1040,11 +1054,12 @@ MetadataItem* DBHTreeControl::getSelectedMetadataItem()
 //! returns the object that some wxTree node observes
 MetadataItem* DBHTreeControl::getMetadataItem(wxTreeItemId item)
 {
-    if (!item.IsOk())
-        return 0;
-
-    DBHTreeItemData* tid = (DBHTreeItemData*)GetItemData(item);
-    return (tid) ? tid->getObservedMetadata() : 0;
+    if (item.IsOk())
+    {
+        if (DBHTreeItemData* tid = (DBHTreeItemData*)GetItemData(item))
+            return tid->getObservedMetadata();
+    }
+    return 0;
 }
 //-----------------------------------------------------------------------------
 // recursively searches children for item

@@ -127,12 +127,13 @@ protected:
     void OnTableValueChoiceChange(wxCommandEvent& event);
     void OnTableCopyChoiceChange(wxCommandEvent& event);
     void OnTreeSelectionChanged(wxTreeEvent& event);
-protected:
+private:
+    // observer stuff
+    virtual void subjectRemoved(Subject* subject);
     virtual void update();
 public:
     DataGeneratorFrame(wxWindow* parent, Database* db);
     ~DataGeneratorFrame();
-    void removeSubject(Subject* subject);
 };
 //-----------------------------------------------------------------------------
 #endif

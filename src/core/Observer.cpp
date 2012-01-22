@@ -88,13 +88,6 @@ void Observer::doUpdate()
         update();
 }
 //-----------------------------------------------------------------------------
-Subject* Observer::getFirstSubject()
-{
-    if (subjectsM.empty())
-        return 0;
-    return *(subjectsM.begin());
-}
-//-----------------------------------------------------------------------------
 void Observer::addSubject(Subject* subject)
 {
     if (subject)
@@ -106,6 +99,13 @@ void Observer::removeSubject(Subject* subject)
     std::list<Subject*>::iterator it = find(subjectsM.begin(),
         subjectsM.end(), subject);
     if (it != subjectsM.end())
+    {
         subjectsM.erase(it);
+        subjectRemoved(subject);
+    }
+}
+//-----------------------------------------------------------------------------
+void Observer::subjectRemoved(Subject* subject)
+{
 }
 //-----------------------------------------------------------------------------

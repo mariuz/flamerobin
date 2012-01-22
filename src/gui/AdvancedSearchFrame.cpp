@@ -343,10 +343,8 @@ void AdvancedSearchFrame::update()
 {
 }
 //-----------------------------------------------------------------------------
-void AdvancedSearchFrame::removeSubject(Subject* subject)
+void AdvancedSearchFrame::subjectRemoved(Subject* subject)
 {
-    Observer::removeSubject(subject);
-
     // NOTE: we can't do this dynamic_cast, since this function is called
     //       from ~Subject() and ~Database() has already been called. So we
     //       can't cast to Database (and not even MetadataItem)

@@ -86,10 +86,9 @@ private:
     void addResult(Database* db, MetadataItem* item);
     bool match(CriteriaItem::Type type, const wxString& text);
 
-protected:
     // observer stuff
+    virtual void subjectRemoved(Subject* subject);
     virtual void update();
-    virtual void removeSubject(Subject* subject);
 
 protected:
     wxPanel *mainPanel;

@@ -78,15 +78,18 @@ private:
 
     virtual void ibppEventHandler(IBPP::Events events,
         const std::string& name, int count);
+
+    // observer stuff
+    virtual void subjectRemoved(Subject* subject);
+    virtual void update();
+
 protected:
     virtual void doReadConfigSettings(const wxString& prefix);
     virtual void doWriteConfigSettings(const wxString& prefix) const;
     virtual const wxString getName() const;
-    virtual void update();
 public:
     EventWatcherFrame(wxWindow* parent, DatabasePtr db);
 
-    void removeSubject(Subject* subject);
     static EventWatcherFrame* findFrameFor(DatabasePtr db);
 private:
     // event handling

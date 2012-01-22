@@ -252,9 +252,8 @@ const wxString FieldPropertiesDialog::getName() const
     return wxT("FieldPropertiesDialog");
 }
 //-----------------------------------------------------------------------------
-void FieldPropertiesDialog::removeSubject(Subject* subject)
+void FieldPropertiesDialog::subjectRemoved(Subject* subject)
 {
-    Observer::removeSubject(subject);
     if ((subject) && ((subject == tableM) || (subject == columnM)))
     {
         subject->detachObserver(this);

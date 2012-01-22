@@ -36,27 +36,27 @@ class Observer
 {
 private:
     unsigned updateLockM;
-protected:
     // pointer to objects that it is watching
     std::list<Subject*> subjectsM;
+
+    // following methods are only called from Subject
+    friend class Subject;
+
+    void addSubject(Subject* subject);
+    void removeSubject(Subject* subject);
+    // BE CAREFUL: if function gets called when subject is destroyed
+    //             its derived-class destructor has already been called so
+    //             you can't, for example, dynamic_cast it to MetadataItem*
+    virtual void subjectRemoved(Subject* subject);
+
     // call doUpdate() instead of update() from Subject
     // to prevent recursive calls
-    friend class Subject;
     void doUpdate();
-    // protected since only Subject and descending classes have to call it
+    // only Subject calls it, descending classes can still override it
     virtual void update() = 0;
 public:
     Observer();
     virtual ~Observer();
-
-    Subject* getFirstSubject();
-    void addSubject(Subject* subject);
-
-    // virtual so some controls can do something extra
-    // BE CAREFUL: if function gets called when subject is destroyed
-    //             its derived-class destructor has already been called so
-    //             you can't, for example, dynamic_cast it to MetadataItem*
-    virtual void removeSubject(Subject* subject);
 };
 //-----------------------------------------------------------------------------
 #endif

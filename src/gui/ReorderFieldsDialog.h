@@ -52,10 +52,12 @@ private:
 
     void moveSelected(int moveby);
     void updateButtons();
+
+    // observer stuff
+    virtual void subjectRemoved(Subject* subject);
+    virtual void update();
 protected:
     virtual const wxString getName() const;
-    virtual void removeSubject(Subject* subject);
-    virtual void update();
 public:
     ReorderFieldsDialog(wxWindow* parent, Table *table);
     // creation of statement execution frame outside of dialog class
