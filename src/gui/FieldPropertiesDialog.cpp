@@ -374,7 +374,10 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
                 statements += wxT("NULL");
             else
                 statements += wxT("1");
-            wxString fnm = textctrl_fieldname->GetValue();
+            // direct change in RDB$RELATION_FIELDS needs unquoted field name
+            Identifier id;
+            id.setFromSql(colNameSql);
+            wxString fnm = id.get();
             fnm.Replace(wxT("'"), wxT("''"));
             statements += wxT("\nWHERE RDB$FIELD_NAME = '") + fnm
                 + wxT("' AND RDB$RELATION_NAME = '") + tableM->getName_()
