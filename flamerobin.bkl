@@ -568,6 +568,8 @@ Accepted values: AMD64, IA64.
     <set var="SYSTEMPLATEFILES">
         browse_data.template
         execute_procedure.template
+        save_as_csv.confdef
+        save_as_csv.template
     </set>
 
     <define-tag name="mac-app-bundle" rules="exe">
