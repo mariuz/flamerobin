@@ -63,6 +63,7 @@ class GridCellFormats: public ConfigCache
 private:
     int floatingPointPrecisionM;
     wxString dateFormatM;
+    int maxBlobKBytesM;
     bool showBinaryBlobContentM;
     bool showBlobContentM;
     wxString timeFormatM;
@@ -80,6 +81,7 @@ public:
     wxString formatTime(int hour, int minute, int second, int milliSecond);
     wxString formatTimestamp(int year, int month, int day,
         int hour, int minute, int second, int milliSecond);
+    int maxBlobBytesToFetch();
     bool parseDate(wxString::iterator& start, wxString::iterator end,
         bool consumeAll, int& year, int& month, int& day);
     bool parseTime(wxString::iterator& start, wxString::iterator end,
@@ -112,6 +114,7 @@ void GridCellFormats::loadFromConfig()
     timestampFormatM = config().get(wxT("TimestampFormat"),
         wxString(wxT("D.N.Y, H:M:S.T")));
 
+    maxBlobKBytesM = config().get(wxT("DataGridFetchBlobAmount"), 1);
     showBinaryBlobContentM = config().get(wxT("GridShowBinaryBlobs"), false);
     showBlobContentM = config().get(wxT("DataGridFetchBlobs"), true);
 }
@@ -280,6 +283,12 @@ wxString GridCellFormats::formatTime(int hour, int minute, int second,
         }
     }
     return result;
+}
+//-----------------------------------------------------------------------------
+int GridCellFormats::maxBlobBytesToFetch()
+{
+    ensureCacheValid();
+    return (maxBlobKBytesM > 0) ? 1024 * maxBlobKBytesM : INT_MAX;
 }
 //-----------------------------------------------------------------------------
 bool GridCellFormats::parseTime(wxString::iterator& start,
@@ -1219,29 +1228,35 @@ unsigned BlobColumnDef::getIndex()
 wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
 {
     wxASSERT(buffer);
-    if (!GridCellFormats::get().showBlobContent())
-        return wxT("[BLOB]");
-    if (!textualM && !GridCellFormats::get().showBinaryBlobContent())
-        return wxT("[BINARY]");
-
     if (buffer->isStringLoaded(stringIndexM))
         return buffer->getString(stringIndexM);
+    if (!GridCellFormats::get().showBlobContent())
+        return _("[BLOB]");
+    if (!textualM && !GridCellFormats::get().showBinaryBlobContent())
+        return _("[BINARY]");
 
-    int kb = 1024 * config().get(wxT("DataGridFetchBlobAmount"), 1);
-    std::string result;
     IBPP::Blob *b0 = buffer->getBlob(indexM);
     if (!b0)
         return wxT("");
     IBPP::Blob b = *b0;
-    b->Open();
+    try
+    {
+        b->Open();
+    }
+    catch(...)
+    {
+        return _("[ERROR]");
+    }
 
-    while (kb > 0)
+    std::string result;
+    int bytesToFetch = GridCellFormats::get().maxBlobBytesToFetch();
+    while (bytesToFetch > 0)
     {
         char buffer[1025];
         int size = b->Read((void*)buffer, 1024);
         if (size < 1)
             break;
-        kb -= size;
+        bytesToFetch -= size;
         if (textualM)
         {
             std::string s(buffer, size);
@@ -1267,7 +1282,7 @@ wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
     }
     b->Close();
     wxString wxs(std2wx(result, converterM));
-    if (kb <= 0)    // there was more data to fetch
+    if (bytesToFetch <= 0)    // there was more data to fetch
     {               // incomplete strings might not get translated properly
         while (wxs.IsEmpty() && result.length() > 0)
         {
