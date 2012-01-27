@@ -44,11 +44,39 @@
 
 #include <ibpp.h>
 
+#include <boost/version.hpp>
+
 #include "frversion.h"
 #include "gui/AboutBox.h"
 //-----------------------------------------------------------------------------
 void showAboutBox(wxWindow* parent)
 {
+    wxString libs;
+    libs.Printf(_("This tool uses IBPP library version %d.%d.%d.%d\nwxWidgets library version %d.%d.%d\nand Boost library version %d.%d.%d"),
+        (IBPP::Version & 0xFF000000) >> 24,
+        (IBPP::Version & 0x00FF0000) >> 16,
+        (IBPP::Version & 0x0000FF00) >> 8,
+        (IBPP::Version & 0x000000FF),
+        wxMAJOR_VERSION,
+        wxMINOR_VERSION,
+        wxRELEASE_NUMBER,
+        BOOST_VERSION / 100000,
+        BOOST_VERSION / 100 % 1000,
+        BOOST_VERSION % 100
+    );
+
+    wxString ver;
+#ifdef FR_VERSION_SVN
+    ver.Printf(wxT("%d.%d.%d.%d"),
+        FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RLS, FR_VERSION_SVN);
+#else
+    ver.Printf(wxT("%d.%d.%d"),
+        FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RLS);
+#endif
+#if wxUSE_UNICODE
+    ver += wxT(" Unicode");
+#endif
+
 #if defined wxUSE_ABOUTDLG && (defined __WXMAC__ || defined __WXGTK__)
 
     wxUnusedVar(parent);
@@ -59,32 +87,11 @@ void showAboutBox(wxWindow* parent)
 
     info.SetCopyright(_("Copyright (c) 2004-2012 FlameRobin Development Team"));
 
-    wxString ver;
-#ifdef FR_VERSION_SVN
-    ver.Printf(_("%d.%d.%d.%d"),
-        FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RLS, FR_VERSION_SVN);
-#else
-    ver.Printf(_("%d.%d.%d"),
-        FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RLS);
-#endif
-#if wxUSE_UNICODE
-    ver += wxT(" Unicode");
-#endif
     info.SetVersion(ver);
 
-    wxString ib;
-    ib.Printf(_("This tool uses IBPP library version %d.%d.%d.%d\nand wxWidgets library version %d.%d.%d"),
-        (IBPP::Version & 0xFF000000) >> 24,
-        (IBPP::Version & 0x00FF0000) >> 16,
-        (IBPP::Version & 0x0000FF00) >> 8,
-        (IBPP::Version & 0x000000FF),
-        wxMAJOR_VERSION,
-        wxMINOR_VERSION,
-        wxRELEASE_NUMBER
-    );
     wxString msg(_("Database Administration Tool for Firebird RDBMS"));
     msg += wxT("\n\n");
-    msg += ib;
+    msg += libs;
     info.SetDescription(msg);
 
     // the following would prohibit the native dialog on Mac OS X
@@ -102,29 +109,7 @@ void showAboutBox(wxWindow* parent)
 
 #else
 
-    wxString ib;
-    ib.Printf(_("This tool uses IBPP library version %d.%d.%d.%d\nand wxWidgets library version %d.%d.%d"),
-        (IBPP::Version & 0xFF000000) >> 24,
-        (IBPP::Version & 0x00FF0000) >> 16,
-        (IBPP::Version & 0x0000FF00) >> 8,
-        (IBPP::Version & 0x000000FF),
-        wxMAJOR_VERSION,
-        wxMINOR_VERSION,
-        wxRELEASE_NUMBER
-    );
-
-    wxString msg;
-#ifdef FR_VERSION_SVN
-    msg.Printf(_("FlameRobin %d.%d.%d.%d"),
-        FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RLS, FR_VERSION_SVN);
-#else
-    msg.Printf(_("FlameRobin %d.%d.%d"),
-        FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RLS);
-#endif
-
-#if wxUSE_UNICODE
-    msg += _(" Unicode");
-#endif
+    wxString msg(wxT("FlameRobin ") + ver);
 
 #if defined(_WIN64)
     msg += wxT(" (x64)");
@@ -133,7 +118,7 @@ void showAboutBox(wxWindow* parent)
     msg += wxT("\n");
     msg += _("Database administration tool for Firebird RDBMS");
     msg += wxT("\n\n");
-    msg += ib;
+    msg += libs;
     msg += wxT("\n\n");
     msg += _("Copyright (c) 2004-2012  FlameRobin Development Team");
     msg += wxT("\n");
