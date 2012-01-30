@@ -392,6 +392,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_UPDATE_UI(Cmds::Menu_MonitorEvents, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
     EVT_MENU(Cmds::Menu_GenerateData, MainFrame::OnMenuGenerateData)
     EVT_UPDATE_UI(Cmds::Menu_GenerateData, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
+    EVT_MENU(Cmds::Menu_CloneDatabase, MainFrame::OnMenuCloneDatabase)
+    EVT_UPDATE_UI(Cmds::Menu_CloneDatabase, MainFrame::OnMenuUpdateIfDatabaseSelected)
     EVT_MENU(Cmds::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuDatabaseRegistrationInfo)
     EVT_UPDATE_UI(Cmds::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuUpdateIfDatabaseSelected)
     EVT_MENU(Cmds::Menu_Backup, MainFrame::OnMenuBackup)
@@ -867,6 +869,35 @@ void MainFrame::OnMenuRestoreIntoNewDatabase(wxCommandEvent& WXUNUSED(event))
     treeMainM->selectMetadataItem(db.get());
     RestoreFrame* f = new RestoreFrame(this, db);
     f->Show();
+}
+//-----------------------------------------------------------------------------
+void MainFrame::OnMenuCloneDatabase(wxCommandEvent& WXUNUSED(event))
+{
+    ServerPtr s = getServer(treeMainM->getSelectedMetadataItem());
+    if (!checkValidServer(s))
+        return;
+
+    DatabasePtr d = getDatabase(treeMainM->getSelectedMetadataItem());
+    if (!checkValidDatabase(d))
+        return;
+
+    DatabasePtr db(new Database());
+    db->setName_(d->getName_()+_(" clone"));
+    db->getAuthenticationMode().setMode(db->getAuthenticationMode().getMode());
+    db->setPath(d->getPath());
+    db->setUsername(d->getUsername());
+    db->setEncryptedPassword(d->getDecryptedPassword());
+    db->setConnectionCharset(d->getConnectionCharset());
+    db->setRole(d->getRole());
+
+    DatabaseRegistrationDialog drd(this, _("Clone Registration Info"));
+    drd.setDatabase(db);
+    if (drd.ShowModal())
+    {
+        s->addDatabase(db);
+        rootM->save();
+        treeMainM->selectMetadataItem(db.get());
+    }
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuDatabaseRegistrationInfo(wxCommandEvent& WXUNUSED(event))

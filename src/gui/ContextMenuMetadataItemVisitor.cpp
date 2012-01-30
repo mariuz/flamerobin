@@ -106,6 +106,7 @@ void MainObjectMenuMetadataItemVisitor::visitDatabase(Database& database)
     addSeparator();
     menuM->Append(Cmds::Menu_DatabaseRegistrationInfo,
         _("Database registration &info"));
+    menuM->Append(Cmds::Menu_CloneDatabase, _("C&lone registration info"));
     menuM->Append(Cmds::Menu_UnRegisterDatabase, _("&Unregister database"));
     menuM->Append(Cmds::Menu_DatabasePreferences,
         _("Database &preferences"));
@@ -258,7 +259,7 @@ void MainObjectMenuMetadataItemVisitor::visitRoot(Root& root)
 //-----------------------------------------------------------------------------
 void MainObjectMenuMetadataItemVisitor::visitServer(Server& server)
 {
-    menuM->Append(Cmds::Menu_RegisterDatabase, 
+    menuM->Append(Cmds::Menu_RegisterDatabase,
         _("&Register existing database"));
     menuM->Append(Cmds::Menu_CreateDatabase, _("Create &new database"));
     menuM->Append(Cmds::Menu_RestoreIntoNew,

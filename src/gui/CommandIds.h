@@ -92,7 +92,7 @@ namespace Cmds
         Menu_AddColumn, Menu_RestoreIntoNew,
         Menu_MonitorEvents, Menu_GetServerVersion, Menu_AlterObject,
         Menu_DropDatabase, Menu_RecreateDatabase, Menu_DatabaseProperties,
-        Menu_GenerateData,
+        Menu_GenerateData, Menu_CloneDatabase,
 
         // view menu
         Menu_ToggleStatusBar, Menu_ToggleSearchBar, Menu_ToggleDisconnected,
