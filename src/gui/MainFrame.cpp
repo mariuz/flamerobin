@@ -892,7 +892,7 @@ void MainFrame::OnMenuCloneDatabase(wxCommandEvent& WXUNUSED(event))
 
     DatabaseRegistrationDialog drd(this, _("Clone Registration Info"));
     drd.setDatabase(db);
-    if (drd.ShowModal())
+    if (drd.ShowModal() == wxID_OK)
     {
         s->addDatabase(db);
         rootM->save();
@@ -908,7 +908,7 @@ void MainFrame::OnMenuDatabaseRegistrationInfo(wxCommandEvent& WXUNUSED(event))
 
     DatabaseRegistrationDialog drd(this, _("Database Registration Info"));
     drd.setDatabase(d);
-    if (drd.ShowModal())
+    if (drd.ShowModal() == wxID_OK)
         rootM->save();
 }
 //-----------------------------------------------------------------------------
