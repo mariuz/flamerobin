@@ -163,6 +163,7 @@ private:
     void OnChildFocus(wxChildFocusEvent& event);
     void OnKeyDown(wxKeyEvent& event);
     void OnGridCellChange(wxGridEvent& event);
+    void OnGridInvalidateAttributeCache(wxCommandEvent& event);
     void OnGridRowCountChanged(wxCommandEvent& event);
     void OnGridStatementExecuted(wxCommandEvent& event);
     void OnGridSum(wxCommandEvent& event);

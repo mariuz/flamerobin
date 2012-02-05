@@ -158,7 +158,7 @@ void DataGrid::fetchData(bool readonly)
         ca->SetAlignment(
             (table->isNumericColumn(i)) ? wxALIGN_RIGHT : wxALIGN_LEFT,
             wxALIGN_TOP);
-        if (readonly || table->isReadonlyColumn(i,true))
+        if (readonly || table->isReadonlyColumn(i) || table->isBlobColumn(i))
         {
             ca->SetReadOnly(true);
             ca->SetBackgroundColour(frlayoutconfig().getReadonlyColour());
@@ -251,6 +251,12 @@ void DataGrid::updateRowHeights()
     SetRowMinimalAcceptableHeight(h);
     SetDefaultRowSize(h, true);
     SetScrollLineY(h);
+}
+//-----------------------------------------------------------------------------
+void DataGrid::refreshAndInvalidateAttributes()
+{
+    ClearAttrCache();
+    Refresh();
 }
 //-----------------------------------------------------------------------------
 void DataGrid::setCellFont()

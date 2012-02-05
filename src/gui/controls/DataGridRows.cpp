@@ -1821,15 +1821,11 @@ bool DataGridRows::isColumnNumeric(unsigned col)
     return columnDefsM[col]->isNumeric();
 }
 //-----------------------------------------------------------------------------
-bool DataGridRows::isColumnReadonly(unsigned col, bool inGrid)
+bool DataGridRows::isColumnReadonly(unsigned col)
 {
     if (col >= columnDefsM.size())
         return false;
-    // amaier: BLOB columns in grid are always readonly 
-    bool res = columnDefsM[col]->isReadOnly();
-    if (inGrid)
-        res = res || isBlobColumn(col,0);
-    return res;
+    return columnDefsM[col]->isReadOnly();
 }
 //-----------------------------------------------------------------------------
 bool DataGridRows::getFieldInfo(unsigned row, unsigned col,
@@ -1840,12 +1836,13 @@ bool DataGridRows::getFieldInfo(unsigned row, unsigned col,
     info.rowInserted = buffersM[row]->isInserted();
     info.rowDeleted = buffersM[row]->isDeleted();
     info.fieldReadOnly = readOnlyM || info.rowDeleted
-        || isColumnReadonly(col, true) || isFieldReadonly(row, col);
+        || isColumnReadonly(col) || isFieldReadonly(row, col);
     info.fieldModified = !info.rowDeleted
         && buffersM[row]->isFieldModified(col);
     info.fieldNull = buffersM[row]->isFieldNull(col);
     info.fieldNA = buffersM[row]->isFieldNA(col);
     info.fieldNumeric = isColumnNumeric(col);
+    info.fieldBlob = isBlobColumn(col);
     return true;
 }
 //-----------------------------------------------------------------------------

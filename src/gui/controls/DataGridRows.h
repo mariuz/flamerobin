@@ -76,6 +76,7 @@ struct DataGridFieldInfo
     bool fieldNull;
     bool fieldNA;
     bool fieldNumeric;
+    bool fieldBlob;
 };
 struct DataGridRowsBlob
 {
@@ -115,7 +116,7 @@ public:
 
     bool isColumnNullable(unsigned col);
     bool isColumnNumeric(unsigned col);
-    bool isColumnReadonly(unsigned col, bool inGrid);
+    bool isColumnReadonly(unsigned col);
     bool isBlobColumn(unsigned col, bool* pIsTextual = 0);
     bool getFieldInfo(unsigned row, unsigned col, DataGridFieldInfo& info);
     bool isFieldReadonly(unsigned row, unsigned col);

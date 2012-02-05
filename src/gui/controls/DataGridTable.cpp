@@ -207,7 +207,7 @@ wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
 
     bool useAttri = readOnlyM || info.rowInserted || info.rowDeleted
         || info.fieldReadOnly || info.fieldModified || info.fieldNull
-        || info.fieldNA || info.fieldNumeric;
+        || info.fieldNA || info.fieldNumeric || info.fieldBlob;
     if (!useAttri)
         return wxGridTableBase::GetAttr(row, col, kind);
 
@@ -227,7 +227,7 @@ wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
         bgCol = wxColour(255, 208, 208);
     else if (info.rowInserted)
         bgCol = wxColour(235, 255, 200);
-    else if (readOnlyM || info.fieldReadOnly)
+    else if (readOnlyM || info.fieldReadOnly || info.fieldBlob)
         bgCol = frlayoutconfig().getReadonlyColour();
     else
         bgCol = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
@@ -239,7 +239,7 @@ wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
     else
         cellAttriM->SetAlignment(wxALIGN_LEFT, wxALIGN_TOP);
 
-    cellAttriM->SetReadOnly(info.fieldReadOnly);
+    cellAttriM->SetReadOnly(info.fieldReadOnly || info.fieldBlob);
 
     cellAttriM->SetOverflow(false);
 
@@ -508,9 +508,9 @@ bool DataGridTable::isNumericColumn(int col)
     return rowsM.isColumnNumeric(col);
 }
 //-----------------------------------------------------------------------------
-bool DataGridTable::isReadonlyColumn(int col, bool inGrid)
+bool DataGridTable::isReadonlyColumn(int col)
 {
-    return readOnlyM || rowsM.isColumnReadonly(col,inGrid);
+    return readOnlyM || rowsM.isColumnReadonly(col);
 }
 //-----------------------------------------------------------------------------
 bool DataGridTable::isValidCellPos(int row, int col)
@@ -603,13 +603,16 @@ void DataGridTable::SetValue(int row, int col, const wxString& value)
             nullFlagM);
         nullFlagM = false;  // reset
 
-        // used in frame to show executed statements
-        if (GetView())
+        if (wxGrid* grid = GetView())
         {
-            wxCommandEvent evt(wxEVT_FRDG_STATEMENT,
-                GetView()->GetId());
+            // used in frame to show executed statements
+            wxCommandEvent evt(wxEVT_FRDG_STATEMENT, grid->GetId());
             evt.SetString(statement);
-            wxPostEvent(GetView(), evt);
+            wxPostEvent(grid, evt);
+
+            // used in frame to repaint cell (text color may have changed)
+            wxCommandEvent evt2(wxEVT_FRDG_INVALIDATEATTR, grid->GetId());
+            wxPostEvent(grid, evt2);
         }
     }
     catch (const FRError& err)
@@ -659,12 +662,13 @@ bool DataGridTable::DeleteRows(size_t pos, size_t numRows)
             return false;
 
         // used in frame to show executed statements
-        wxCommandEvent evt2(wxEVT_FRDG_STATEMENT, GetView()->GetId());
+        wxGrid* grid = GetView();
+        wxCommandEvent evt2(wxEVT_FRDG_STATEMENT, grid->GetId());
         evt2.SetString(statement);
-        wxPostEvent(GetView(), evt2);
+        wxPostEvent(grid, evt2);
 
-        if (GetView() && numRows > 0)
-            GetView()->ForceRefresh();
+        if (numRows > 0)
+            grid->ForceRefresh();
         return true;
     }
     catch (const IBPP::Exception& e)
@@ -684,4 +688,5 @@ bool DataGridTable::DeleteRows(size_t pos, size_t numRows)
 //-----------------------------------------------------------------------------
 DEFINE_EVENT_TYPE(wxEVT_FRDG_ROWCOUNT_CHANGED)
 DEFINE_EVENT_TYPE(wxEVT_FRDG_STATEMENT)
+DEFINE_EVENT_TYPE(wxEVT_FRDG_INVALIDATEATTR)
 //-----------------------------------------------------------------------------

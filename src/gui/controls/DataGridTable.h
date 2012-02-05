@@ -47,6 +47,9 @@ BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_LOCAL_EVENT_TYPE(wxEVT_FRDG_ROWCOUNT_CHANGED, 42)
     // this event is sent when statement is executed because of user edits
     DECLARE_LOCAL_EVENT_TYPE(wxEVT_FRDG_STATEMENT, 43)
+    // this event is sent to cause the attribute cache to be invalidated
+    // after a field value has changed
+    DECLARE_LOCAL_EVENT_TYPE(wxEVT_FRDG_INVALIDATEATTR, 44)
 END_DECLARE_EVENT_TYPES()
 //-----------------------------------------------------------------------------
 class DataGridTable: public wxGridTableBase
@@ -94,7 +97,7 @@ public:
     bool isNullableColumn(int col);
     bool isNullCell(int row, int col);
     bool isNumericColumn(int col);
-    bool isReadonlyColumn(int col, bool inGrid);
+    bool isReadonlyColumn(int col);
     bool isBlobColumn(int col, bool* pIsTextual = 0);
     bool needsMoreRowsFetched();
     void setFetchAllRecords(bool fetchall);

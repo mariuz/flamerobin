@@ -82,6 +82,7 @@ public:
     void saveAsCSV(const wxString& fileName,
         const wxChar& fieldDelimiter, const wxChar& textDelimiter);
 
+    void refreshAndInvalidateAttributes();
     void setHeaderFont();
     void setCellFont();
 

@@ -41,7 +41,6 @@
 #include <wx/clipbrd.h>
 #include <wx/dir.h>
 #include <wx/dnd.h>
-#include <wx/tokenzr.h>
 #include <wx/arrstr.h>
 
 #include "config/Config.h"

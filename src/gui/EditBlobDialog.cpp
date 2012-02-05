@@ -547,7 +547,7 @@ bool EditBlobDialog::setBlob(DataGrid* dg, DataGridTable* dgt,
     statementM = st;
     rowM = row;
     colM = col;
-    readonlyM = dataGridTableM->isReadonlyColumn(colM,false);
+    readonlyM = dataGridTableM->isReadonlyColumn(colM);
 
     // generator blob fieldname
     wxString tableName = dgt->getTableName();
@@ -1057,17 +1057,17 @@ void EditBlobDialog::saveBlob()
     }
     blobM = b.blob;
 
-    // update GUI (datagrid) due tu force a update (in GUI) of the changed blob-value
+    // update datagrid to force an update (in GUI) of the changed blob-value
     // NOTE: There are two reasons to call it
     // 1) The data grid has to be updated to show the new blob value
-    // 2) There will be a error if user changes to a other blob and
+    // 2) There will be a error if user changes to another blob and
     //    then again to the same. If the blob is selected again the
     //    cell will be updated and opens the blob. This will happen
     //    while the cancel-dialog in loadBlob is shown. (wxYieldIfNeeded)
     //    At this moment the blob is already opend by loadBlob and
-    //    the IBBP::LocicalException - blob already open will occur.
+    //    the IBPP::LocicalException - blob already open will occur.
     // amaier/2009-07-19
-    dataGridM->ForceRefresh();
+    dataGridM->refreshAndInvalidateAttributes();
 
     cacheDelete();
 

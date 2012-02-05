@@ -994,6 +994,8 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
         ExecuteSqlFrame::OnGridRowCountChanged)
     EVT_COMMAND(ExecuteSqlFrame::ID_grid_data, wxEVT_FRDG_STATEMENT, \
         ExecuteSqlFrame::OnGridStatementExecuted)
+    EVT_COMMAND(ExecuteSqlFrame::ID_grid_data, wxEVT_FRDG_INVALIDATEATTR, \
+        ExecuteSqlFrame::OnGridInvalidateAttributeCache)
     EVT_COMMAND(ExecuteSqlFrame::ID_grid_data, wxEVT_FRDG_SUM, \
         ExecuteSqlFrame::OnGridSum)
 
@@ -1763,19 +1765,23 @@ void ExecuteSqlFrame::OnMenuGridSetFieldToNULL(wxCommandEvent& WXUNUSED(event))
 
     int count = cells.size();
     if (count == 0)
-        return;
+    {
+        wxGridCellCoords curCell(grid_data->GetGridCursorRow(),
+            grid_data->GetGridCursorCol());
+        cells.push_back(curCell);
+    }
     if (count > 1)
     {
         bool agreed = wxOK == showQuestionDialog(this,
-            _("Do you really want to set multiple rows to NULL?"),
-            wxString::Format(_("You have more than one row selected. Are you sure you wish to set all %d selected rows to NULL?"), count),
+            _("Do you really want to set multiple fields to NULL?"),
+            wxString::Format(_("You have more than one data field selected. Are you sure you wish to set all %d selected fields to NULL?"), count),
             AdvancedMessageDialogButtonsOkCancel(_("Set to NULL")));
         if (!agreed)
             return;
     }
 
     // check, if a selected column is readonly
-    // -> perpare - get distinct list of columns
+    // -> prepare - get distinct list of columns
     std::set<int> colsReadonly;
     for (int i = 0; i < count; i++)
         colsReadonly.insert(cells[i].GetCol());
@@ -1783,12 +1789,12 @@ void ExecuteSqlFrame::OnMenuGridSetFieldToNULL(wxCommandEvent& WXUNUSED(event))
     std::set<int>::iterator col;
     for (col = colsReadonly.begin(); col != colsReadonly.end();)
     {
-        if (!dgt->isReadonlyColumn(*col, false)&& dgt->isNullableColumn(*col))
+        if (!dgt->isReadonlyColumn(*col) && dgt->isNullableColumn(*col))
             colsReadonly.erase(col++);
         else
             ++col;
     }
-    // generate a string for message with columnnames
+    // generate a string for message with column names
     wxString colNames = wxEmptyString;
     for (col = colsReadonly.begin(); col != colsReadonly.end(); col++)
     {
@@ -1827,8 +1833,8 @@ void ExecuteSqlFrame::OnMenuGridSetFieldToNULL(wxCommandEvent& WXUNUSED(event))
         }
     }
 
-    // update GUI
-    grid_data->ForceRefresh();
+    // fields that change from NOT NULL to NULL need to update the text color
+    grid_data->refreshAndInvalidateAttributes();
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuGridCopyAsInsert(wxCommandEvent& WXUNUSED(event))
@@ -1916,11 +1922,16 @@ void ExecuteSqlFrame::OnMenuUpdateGridCanSetFieldToNULL(wxUpdateUIEvent& event)
         std::vector<bool> selCols(grid_data->getColumnsWithSelectedCells());
         for (size_t i = 0; i < selCols.size(); i++)
         {
-            if (selCols[i] && !dgt->isReadonlyColumn(i, false))
+            if (selCols[i] && !dgt->isReadonlyColumn(i))
             {
                 event.Enable(true);
                 return;
             }
+        }
+        if (!dgt->isReadonlyColumn(grid_data->GetGridCursorRow()))
+        {
+            event.Enable(true);
+            return;
         }
     }
     event.Enable(false);
@@ -2699,6 +2710,12 @@ void ExecuteSqlFrame::OnGridCellChange(wxGridEvent& event)
         ((event.GetCol() != grid_data->GetGridCursorCol()) ||
          (event.GetRow() != grid_data->GetGridCursorRow())))
         timerBlobEditorM.Start(500, true);
+}
+//-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnGridInvalidateAttributeCache(wxCommandEvent& event)
+{
+    event.Skip();
+    grid_data->refreshAndInvalidateAttributes();
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent& event)
