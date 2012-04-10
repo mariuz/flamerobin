@@ -584,7 +584,7 @@ void DataGrid::saveAsCSV(const wxString& fileName,
             (textDelimiter != '\0') ? wxString(textDelimiter) : wxT("");
 
         wxString sHeader;
-        for (int col = 0; col < selCols.size(); col++)
+        for (size_t col = 0; col < selCols.size(); col++)
         {
             if (!sHeader.empty())
                 sHeader += sFieldDelim;
@@ -597,13 +597,13 @@ void DataGrid::saveAsCSV(const wxString& fileName,
         std::vector<bool> selRows(getRowsWithSelectedCells());
         if (std::find(selRows.begin(), selRows.end(), false) != selRows.end())
             all = false;
-        for (int row = 0; row < selRows.size(); row++)
+        for (size_t row = 0; row < selRows.size(); row++)
         {
             // export only selected rows
             if (!selRows[row])
                 continue;
             wxString sRow;
-            for (int col = 0; col < selCols.size(); col++)
+            for (size_t col = 0; col < selCols.size(); col++)
             {
                 if (selCols[col])
                 {

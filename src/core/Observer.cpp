@@ -105,7 +105,7 @@ void Observer::removeSubject(Subject* subject)
     }
 }
 //-----------------------------------------------------------------------------
-void Observer::subjectRemoved(Subject* subject)
+void Observer::subjectRemoved(Subject* /*subject*/)
 {
 }
 //-----------------------------------------------------------------------------
