@@ -271,7 +271,7 @@ void ServiceImpl::GetUser(IBPP::User& user)
 			}
 			p += (3 + len);
 		}
-    }
+	}
 }
 
 void ServiceImpl::GetUsers(std::vector<IBPP::User>& users)
@@ -287,7 +287,7 @@ void ServiceImpl::GetUsers(std::vector<IBPP::User>& users)
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "Service::GetUsers", _("isc_service_start failed"));
 
-	RB result(8000);
+	RB result(0xFFFF);
 	char request[] = {isc_info_svc_get_users};
 	status.Reset();
 	(*gds.Call()->m_service_query)(status.Self(), &mHandle, 0, 0, 0,
@@ -300,9 +300,10 @@ void ServiceImpl::GetUsers(std::vector<IBPP::User>& users)
 	if (*p != isc_info_svc_get_users)
 		throw SQLExceptionImpl(status, "Service::GetUsers", _("isc_service_query returned unexpected answer"));
 
+	char* pEnd = p + (unsigned short)(*gds.Call()->m_vax_integer)(p+1, 2);
 	p += 3;	// Skips the 'isc_info_svc_get_users' and its total length
 	IBPP::User user;
-	while (*p != isc_info_end)
+	while (p < pEnd && *p != isc_info_end)
 	{
 		if (*p == isc_spb_sec_userid)
 		{
@@ -340,7 +341,7 @@ void ServiceImpl::GetUsers(std::vector<IBPP::User>& users)
 			}
 			p += (3 + len);
 		}
-    }
+	}
 	if (! user.username.empty()) users.push_back(user);	// Flush last user
 }
 
