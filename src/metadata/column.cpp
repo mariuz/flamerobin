@@ -275,7 +275,10 @@ const wxString Column::getTypeName() const
 //-----------------------------------------------------------------------------
 wxString Column::getDropSqlStatement() const
 {
-    return wxT("ALTER TABLE ") + getTable()->getQuotedName() + wxT(" DROP ") + getQuotedName();
+    Table* t = getTable();
+    if (t == 0)
+        return wxEmptyString;
+    return wxT("ALTER TABLE ") + t->getQuotedName() + wxT(" DROP ") + getQuotedName();
 }
 //-----------------------------------------------------------------------------
 void Column::acceptVisitor(MetadataItemVisitor* visitor)

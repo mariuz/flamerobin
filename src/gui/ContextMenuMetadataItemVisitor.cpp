@@ -70,7 +70,8 @@ MainObjectMenuMetadataItemVisitor::~MainObjectMenuMetadataItemVisitor()
 void MainObjectMenuMetadataItemVisitor::visitColumn(Column& column)
 {
     addGenerateCodeMenu(column);
-    if (!column.isSystem())
+    // do not show for system tables or views
+    if (!column.isSystem() && column.getTable() != 0)
     {
         addSeparator();
         addDropItem(column);

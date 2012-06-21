@@ -1618,7 +1618,9 @@ void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
     //       and offer the user to either drop dependencies, or drop those
     //       objects too.
     //       Then we should create a bunch of sql statements that do it.
-    execSql(this, wxEmptyString, db, mi->getDropSqlStatement(), true);
+    wxString stmt(mi->getDropSqlStatement());
+    if (!stmt.empty())
+        execSql(this, wxEmptyString, db, stmt, true);
 }
 //-----------------------------------------------------------------------------
 //! create new ExecSqlFrame and attach database object to it
