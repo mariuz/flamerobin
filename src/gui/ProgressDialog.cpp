@@ -46,10 +46,8 @@
 ProgressDialog::ProgressDialog(wxWindow* parent, const wxString& title,
         size_t levelCount)
     : BaseDialog(parent, wxID_ANY, title, wxDefaultPosition, wxDefaultSize,
-        wxDEFAULT_DIALOG_STYLE)
+        wxDEFAULT_DIALOG_STYLE), canceledM(false), winDisablerM(0)
 {
-    canceledM = false;
-    winDisablerM = 0;
     SetExtraStyle(GetExtraStyle() | wxWS_EX_TRANSIENT);
     setProgressLevelCount(levelCount);
 }
@@ -162,15 +160,6 @@ void ProgressDialog::setCanceled()
     }
 }
 //-----------------------------------------------------------------------------
-void ProgressDialog::setGaugeIndeterminate(wxGauge* gauge,
-    bool /* indeterminate */ )
-{
-    if (gauge)
-    {
-    // TODO
-    }
-}
-//-----------------------------------------------------------------------------
 bool ProgressDialog::Show(bool show)
 {
     if (!show)
@@ -194,8 +183,8 @@ void ProgressDialog::initProgress(wxString progressMsg, size_t maxPosition,
     wxGauge* gauge = getGaugeForLevel(progressLevel);
     if (label && gauge)
     {
+        indeterminateM[progressLevel - 1] = false;
         label->SetLabel(progressMsg);
-        setGaugeIndeterminate(gauge, false);
         gauge->SetRange(static_cast<int>(maxPosition));
         gauge->SetValue(static_cast<int>(startingPosition));
         doUpdate();
@@ -211,8 +200,9 @@ void ProgressDialog::initProgressIndeterminate(wxString progressMsg,
     wxGauge* gauge = getGaugeForLevel(progressLevel);
     if (label && gauge)
     {
+        indeterminateM[progressLevel - 1] = true;
         label->SetLabel(progressMsg);
-        setGaugeIndeterminate(gauge, true);
+        gauge->Pulse();
         doUpdate();
     }
 }
@@ -224,8 +214,10 @@ void ProgressDialog::setProgressMessage(wxString progressMsg,
 
     wxStaticText* label = getLabelForLevel(progressLevel);
     if (label)
+    {
         label->SetLabel(progressMsg);
-    doUpdate();
+        doUpdate();
+    }
 }
 //-----------------------------------------------------------------------------
 void ProgressDialog::setProgressPosition(size_t currentPosition,
@@ -235,8 +227,11 @@ void ProgressDialog::setProgressPosition(size_t currentPosition,
 
     wxGauge* gauge = getGaugeForLevel(progressLevel);
     if (gauge)
+    {
+        indeterminateM[progressLevel - 1] = false;
         gauge->SetValue(static_cast<int>(currentPosition));
-    doUpdate();
+        doUpdate();
+    }
 }
 //-----------------------------------------------------------------------------
 void ProgressDialog::stepProgress(int stepAmount, size_t progressLevel)
@@ -246,9 +241,14 @@ void ProgressDialog::stepProgress(int stepAmount, size_t progressLevel)
     wxGauge* gauge = getGaugeForLevel(progressLevel);
     if (gauge)
     {
-        int pos = gauge->GetValue() + stepAmount;
-        int maxPos = gauge->GetRange();
-        gauge->SetValue((pos < 0) ? 0 : (pos > maxPos ? maxPos : pos));
+        if (indeterminateM[progressLevel - 1])
+            gauge->Pulse();
+        else
+        {
+            int pos = gauge->GetValue() + stepAmount;
+            int maxPos = gauge->GetRange();
+            gauge->SetValue((pos < 0) ? 0 : (pos > maxPos ? maxPos : pos));
+        }
         doUpdate();
     }
 }
@@ -272,6 +272,7 @@ void ProgressDialog::setProgressLevelCount(size_t levelCount)
     if (levelCountM != levelCount)
     {
         levelCountM = levelCount;
+        indeterminateM.resize(levelCount);
         destroyControls();
         createControls();
         layoutControls();

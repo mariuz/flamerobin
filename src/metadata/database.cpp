@@ -45,6 +45,7 @@
 #include <functional>
 
 #include <boost/function.hpp>
+#include <boost/thread.hpp>
 
 #include "config/Config.h"
 #include "config/DatabaseConfig.h"
@@ -950,6 +951,75 @@ void Database::reconnect()
     databaseM->Connect();
 }
 //-----------------------------------------------------------------------------
+class BackgroundTask;
+typedef boost::shared_ptr<BackgroundTask> SharedBackgroundTask;
+
+class BackgroundTask
+{
+private:
+    boost::mutex lockM;
+    wxString errorMsgM;
+
+    virtual void doExecute() {};
+protected:
+    BackgroundTask() {}
+
+public:
+    void checkForErrors()
+    {
+        wxASSERT(wxIsMainThread());
+        if (!errorMsgM.empty())
+            throw FRError(errorMsgM);
+    }
+
+    void execute()
+    {
+        try
+        {
+            doExecute();
+        }
+        catch (std::exception& e)
+        {
+            boost::lock_guard<boost::mutex> guard(lockM);
+            errorMsgM = std2wx(e.what());
+        }
+    }
+};
+//-----------------------------------------------------------------------------
+void runTask(SharedBackgroundTask task)
+{
+    if (task != 0)
+        task->execute();
+}
+//-----------------------------------------------------------------------------
+static boost::thread startTask(SharedBackgroundTask task)
+{
+    wxASSERT(task != 0);
+    return boost::thread(boost::bind(&::runTask, task));
+}
+//-----------------------------------------------------------------------------
+class BackgroundDatabaseConnection: public BackgroundTask
+{
+private:
+    IBPP::Database databaseM;
+
+    BackgroundDatabaseConnection(IBPP::Database database)
+        : databaseM(database)
+    {
+    }
+
+    virtual void doExecute()
+    {
+        databaseM->Connect();
+    }
+public:
+    static SharedBackgroundTask create(IBPP::Database database)
+    {
+        wxASSERT(database != 0);
+        return SharedBackgroundTask(new BackgroundDatabaseConnection(database));
+    }
+};
+//-----------------------------------------------------------------------------
 // the caller of this function should check whether the database object has the
 // password set, and if it does not, it should provide the password
 //               and if it does, just provide that password
@@ -960,77 +1030,109 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
 
     try
     {
-        createCharsetConverter();
-
         if (indicator)
         {
             indicator->doShow();
             indicator->initProgressIndeterminate(wxT("Establishing connection..."));
         }
 
-        DatabasePtr me(shared_from_this());
-        userDomainsM.reset(new Domains(me));
-        sysDomainsM.reset(new SysDomains(me));
-        exceptionsM.reset(new Exceptions(me));
-        functionsM.reset(new Functions(me));
-        generatorsM.reset(new Generators(me));
-        proceduresM.reset(new Procedures(me));
-        rolesM.reset(new Roles(me));
-        sysRolesM.reset(new SysRoles(me));
-        triggersM.reset(new Triggers(me));
-        tablesM.reset(new Tables(me));
-        sysTablesM.reset(new SysTables(me));
-        viewsM.reset(new Views(me));
-
+        databaseM.clear();
         bool useUserNamePwd = !authenticationModeM.getIgnoreUsernamePassword();
-        databaseM = IBPP::DatabaseFactory("", wx2std(getConnectionString()),
+        IBPP::Database db = IBPP::DatabaseFactory("",
+            wx2std(getConnectionString()),
             (useUserNamePwd ? wx2std(getUsername()) : ""),
             (useUserNamePwd ? wx2std(password) : ""),
             wx2std(getRole()), wx2std(getConnectionCharset()), "");
 
-        databaseM->Connect();
-        connectedM = true;
-
-        // first start a transaction for metadata loading, then lock the
-        // database
-        // when objects go out of scope and are destroyed, database will be
-        // unlocked before the transaction is committed - any update() calls
-        // on observers can possibly use the same transaction
-        MetadataLoader* loader = getMetadataLoader();
-        MetadataLoaderTransaction tr(loader);
-        SubjectLocker lock(this);
-
-        try
+        if (indicator)
         {
-            checkProgressIndicatorCanceled(indicator);
-            // load database charset
-            IBPP::Statement& st1 = loader->getStatement(
-                "select rdb$character_set_name from rdb$database");
-            st1->Execute();
-            if (st1->Fetch())
+            SharedBackgroundTask sbt(BackgroundDatabaseConnection::create(db));
+            boost::thread t = startTask(sbt);
+            while (!t.timed_join(boost::posix_time::milliseconds(50)))
             {
-                std::string s;
-                st1->Get(1, s);
-                databaseCharsetM = std2wxIdentifier(s, getCharsetConverter());
+                indicator->stepProgress();
+                if (indicator->isCanceled())
+                {
+                    t.detach();
+                    break;
+                }
             }
-            checkProgressIndicatorCanceled(indicator);
-            // load database information
-            setPropertiesLoaded(false);
-            databaseInfoM.load(databaseM);
-            setPropertiesLoaded(true);
+            if (!indicator->isCanceled())
+            {
+                // throw exception in this thread context if Connect() call failed
+                sbt->checkForErrors();
+                if (db->Connected())
+                    databaseM = db;
+            }
+        }
+        else
+        { 
+            db->Connect();
+            databaseM = db;
+        }
+        db.clear();
 
-            // load collections of metadata objects
-            setChildrenLoaded(false);
-            loadCollections(indicator);
-            setChildrenLoaded(true);
-            if (indicator)
-                indicator->initProgress(_("Complete"), 100, 100);
-        }
-        catch (CancelProgressException&)
+        if (databaseM != 0 && databaseM->Connected())
         {
-            disconnect();
+            connectedM = true;
+
+            createCharsetConverter();
+
+            DatabasePtr me(shared_from_this());
+            userDomainsM.reset(new Domains(me));
+            sysDomainsM.reset(new SysDomains(me));
+            exceptionsM.reset(new Exceptions(me));
+            functionsM.reset(new Functions(me));
+            generatorsM.reset(new Generators(me));
+            proceduresM.reset(new Procedures(me));
+            rolesM.reset(new Roles(me));
+            sysRolesM.reset(new SysRoles(me));
+            triggersM.reset(new Triggers(me));
+            tablesM.reset(new Tables(me));
+            sysTablesM.reset(new SysTables(me));
+            viewsM.reset(new Views(me));
+
+            // first start a transaction for metadata loading, then lock the
+            // database
+            // when objects go out of scope and are destroyed, database will be
+            // unlocked before the transaction is committed - any update() calls
+            // on observers can possibly use the same transaction
+            MetadataLoader* loader = getMetadataLoader();
+            MetadataLoaderTransaction tr(loader);
+            SubjectLocker lock(this);
+
+            try
+            {
+                checkProgressIndicatorCanceled(indicator);
+                // load database charset
+                IBPP::Statement& st1 = loader->getStatement(
+                    "select rdb$character_set_name from rdb$database");
+                st1->Execute();
+                if (st1->Fetch())
+                {
+                    std::string s;
+                    st1->Get(1, s);
+                    databaseCharsetM = std2wxIdentifier(s, getCharsetConverter());
+                }
+                checkProgressIndicatorCanceled(indicator);
+                // load database information
+                setPropertiesLoaded(false);
+                databaseInfoM.load(databaseM);
+                setPropertiesLoaded(true);
+
+                // load collections of metadata objects
+                setChildrenLoaded(false);
+                loadCollections(indicator);
+                setChildrenLoaded(true);
+                if (indicator)
+                    indicator->initProgress(_("Complete"), 100, 100);
+            }
+            catch (CancelProgressException&)
+            {
+                disconnect();
+            }
+            notifyObservers();
         }
-        notifyObservers();
     }
     catch (...)
     {

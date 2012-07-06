@@ -40,6 +40,7 @@ class ProgressDialog: public BaseDialog, public ProgressIndicator
 {
 private:
     bool canceledM;
+    std::vector<bool> indeterminateM;
     size_t levelCountM;
     std::vector<wxStaticText*> labelsM;
     std::vector<wxGauge*> gaugesM;
@@ -58,7 +59,6 @@ private:
     wxGauge* getGaugeForLevel(size_t progressLevel);
     wxStaticText* getLabelForLevel(size_t progressLevel);
     bool isValidProgressLevel(size_t progressLevel);
-    void setGaugeIndeterminate(wxGauge* gauge, bool indeterminate);
 
 public:
     ProgressDialog(wxWindow* parent, const wxString& title,

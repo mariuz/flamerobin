@@ -30,13 +30,24 @@ If you are using Windows98, you can set the variable from the command line,
 using the "set" command.
 
 For Windows you must also set a BOOST_ROOT environment variable which points
-to the Boost root directory, see the previous section for how to do this. For
-other systems the configure script needs to be amended to search for
-installed Boost libraries and add the necessary directories to the compiler
-invocation, but unfortunately this hasn't been done yet.
-For Debian and Ubuntu at least installing Boost should make the headers
-available without any more work. But if you have problems building FR on
-platforms other than Windows, please post to the development list.
+to the Boost root directory, see the previous section for how to do this.
+You also need to set a BOOST_LIB_DIR environment variable which points to
+the directory where the Boost libraries are. The default location would be
+$(BOOST_ROOT)/stage/lib, but you may have changed that. For systems where
+both 32 and 64 bit versions of FlameRobin are to be built consider the
+following Stack Overflow post about how to build Boost in both versions:
+
+  http://stackoverflow.com/a/2326485/30568
+  (accepted answer to "64-bit version of Boost for 64-bit windows")
+
+For other systems the configure script checks for the used header files and
+libraries of Boost. On Debian and Ubuntu use the following commands to
+install the headers and thread library:
+
+  sudo apt-get install libboost-dev
+  sudo apt-get install libboost-thread-dev
+
+If you have problems building FR, please post to the development list.
 
 -----------------------------------------
 -- MSW - Visual C++ Build Instructions --
