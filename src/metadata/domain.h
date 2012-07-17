@@ -29,8 +29,11 @@
 #ifndef FR_DOMAIN_H
 #define FR_DOMAIN_H
 
+#include <ibpp.h>
+
 #include "metadata/collection.h"
 
+class Domains;
 class ProgressIndicator;
 //-----------------------------------------------------------------------------
 class Domain: public MetadataItem
@@ -39,6 +42,9 @@ private:
     short datatypeM, subtypeM, lengthM, precisionM, scaleM;
     bool isNotNullM, hasDefaultM;
     wxString charsetM, defaultM, collationM, checkM;
+
+    void loadProperties(IBPP::Statement& statement, wxMBConv* converter);
+    friend class Domains;
 protected:
     virtual void loadProperties();
 public:

@@ -33,6 +33,7 @@
 #include <vector>
 
 #include <boost/function.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "metadata/database.h"
@@ -135,6 +136,7 @@ public:
 
     void setItems(wxArrayString names)
     {
+        DatabasePtr database = getDatabase();
         CollectionType newItems;
         for (size_t i = 0; i < names.size(); ++i)
         {
@@ -142,7 +144,7 @@ public:
             iterator oldPos = getPosition(itemName);
             if (oldPos == itemsM.end())
             {
-                ItemType item(new T(getDatabase(), names[i]));
+                ItemType item = boost::make_shared<T>(database, names[i]);
                 newItems.push_back(item);
                 for (unsigned int j = getLockCount(); j > 0; j--)
                     item->lockSubject();
@@ -150,10 +152,14 @@ public:
             else
                 newItems.push_back(*oldPos);
         }
+        setItems(newItems);
+    }
 
-        if (itemsM != newItems)
+    void setItems(CollectionType items)
+    {
+        if (itemsM != items)
         {
-            itemsM = newItems;
+            itemsM = items;
             notifyObservers();
         }
         setChildrenLoaded(true);

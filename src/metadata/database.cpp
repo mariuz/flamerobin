@@ -1125,7 +1125,7 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
                 loadCollections(indicator);
                 setChildrenLoaded(true);
                 if (indicator)
-                    indicator->initProgress(_("Complete"), 100, 100);
+                    indicator->initProgress(_("Complete"), 1, 1);
             }
             catch (CancelProgressException&)
             {

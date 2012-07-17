@@ -39,9 +39,10 @@
     #pragma hdrstop
 #endif
 
-#include <ibpp.h>
+#include <boost/make_shared.hpp>
 
 #include "core/FRError.h"
+#include "core/ProgressIndicator.h"
 #include "core/StringUtils.h"
 #include "engine/MetadataLoader.h"
 #include "frutils.h"
@@ -66,29 +67,43 @@ void Domain::loadProperties()
     wxMBConv* converter = db->getCharsetConverter();
 
     IBPP::Statement& st1 = loader->getStatement(
-        "select f.rdb$field_type, f.rdb$field_sub_type, f.rdb$field_length,"
-        " f.rdb$field_precision, f.rdb$field_scale, c.rdb$character_set_name, "
-        " f.rdb$character_length, f.rdb$null_flag, f.rdb$default_source, "
-        " l.rdb$collation_name, f.rdb$validation_source, f.rdb$computed_blr, "
-        " c.rdb$bytes_per_character "
+        "select f.rdb$field_name,"   //  1
+        " f.rdb$field_type,"            //  2
+        " f.rdb$field_sub_type,"        //  3
+        " f.rdb$field_length,"          //  4
+        " f.rdb$field_precision,"       //  5
+        " f.rdb$field_scale,"           //  6
+        " c.rdb$character_set_name,"    //  7
+        " f.rdb$character_length,"      //  8
+        " f.rdb$null_flag,"             //  9
+        " f.rdb$default_source,"        // 10
+        " l.rdb$collation_name,"        // 11
+        " f.rdb$validation_source,"     // 12
+        " f.rdb$computed_blr,"          // 13
+        " c.rdb$bytes_per_character"    // 14
         " from rdb$fields f"
-        " left outer join rdb$character_sets c "
+        " left outer join rdb$character_sets c"
             " on c.rdb$character_set_id = f.rdb$character_set_id"
-        " left outer join rdb$collations l "
-            " on l.rdb$collation_id = f.rdb$collation_id "
+        " left outer join rdb$collations l"
+            " on l.rdb$collation_id = f.rdb$collation_id"
             " and l.rdb$character_set_id = f.rdb$character_set_id"
-        " where f.rdb$field_name = ?"
-    );
+        " where rdb$field_name = ?");
 
     st1->Set(1, wx2std(getName_(), converter));
     st1->Execute();
     if (!st1->Fetch())
         throw FRError(_("Domain not found: ") + getName_());
-    st1->Get(1, &datatypeM);
-    if (st1->IsNull(2))
+
+    loadProperties(st1, converter);
+}
+//-----------------------------------------------------------------------------
+void Domain::loadProperties(IBPP::Statement& statement, wxMBConv* converter)
+{
+    statement->Get(2, &datatypeM);
+    if (statement->IsNull(3))
         subtypeM = 0;
     else
-        st1->Get(2, &subtypeM);
+        statement->Get(3, &subtypeM);
 
     // determine the (var)char field length
     // - system tables use field_len and char_len is null
@@ -96,35 +111,35 @@ void Domain::loadProperties()
     // - view columns have field_len/bytes_per_char, char_len is null
     // - regular table columns and SP params have field_len/bytes_per_char
     //   they also have proper char_len, but we don't use it now
-    st1->Get(3, &lengthM);
+    statement->Get(4, &lengthM);
     int bpc = 0;   // bytes per char
-    if (!st1->IsNull(13))
-        st1->Get(13, &bpc);
-    if (bpc && (!st1->IsNull(7) || !st1->IsNull(12)))
+    if (!statement->IsNull(14))
+        statement->Get(14, &bpc);
+    if (bpc && (!statement->IsNull(8) || !statement->IsNull(13)))
         lengthM /= bpc;
 
-    if (st1->IsNull(4))
+    if (statement->IsNull(5))
         precisionM = 0;
     else
-        st1->Get(4, &precisionM);
-    if (st1->IsNull(5))
+        statement->Get(5, &precisionM);
+    if (statement->IsNull(6))
         scaleM = 0;
     else
-        st1->Get(5, &scaleM);
-    if (st1->IsNull(6))
+        statement->Get(6, &scaleM);
+    if (statement->IsNull(7))
         charsetM = wxT("");
     else
     {
         std::string s;
-        st1->Get(6, s);
+        statement->Get(7, s);
         charsetM = std2wxIdentifier(s, converter);
     }
-    isNotNullM = !st1->IsNull(8);
+    isNotNullM = !statement->IsNull(9);
 
-    hasDefaultM = !st1->IsNull(9);
+    hasDefaultM = !statement->IsNull(10);
     if (hasDefaultM)
     {
-        readBlob(st1, 9, defaultM, converter);
+        readBlob(statement, 10, defaultM, converter);
 
         // Some users reported two spaces before DEFAULT word in source
         // Also, equals sign is also allowed in newer FB versions
@@ -135,15 +150,15 @@ void Domain::loadProperties()
             defaultM.Remove(0, 1).Trim(false);
     }
 
-    if (st1->IsNull(10))
+    if (statement->IsNull(11))
         collationM = wxEmptyString;
     else
     {
         std::string s;
-        st1->Get(10, s);
+        statement->Get(11, s);
         collationM = std2wxIdentifier(s, converter);
     }
-    readBlob(st1, 11, checkM, converter);
+    readBlob(statement, 12, checkM, converter);
 
     setPropertiesLoaded(true);
 }
@@ -351,7 +366,64 @@ void Domains::load(ProgressIndicator* progressIndicator)
         wxT(" where t.rdb$field_name='RDB$FIELD_TYPE'")
         wxT(" and f.rdb$field_name not starting with 'RDB$'")
         wxT(" order by 1");
-    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+
+
+    DatabasePtr db = getDatabase();
+    MetadataLoader* loader = db->getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+    wxMBConv* converter = db->getCharsetConverter();
+
+    IBPP::Statement& st1 = loader->getStatement(
+        "select f.rdb$field_name,"   //  1
+        " f.rdb$field_type,"            //  2
+        " f.rdb$field_sub_type,"        //  3
+        " f.rdb$field_length,"          //  4
+        " f.rdb$field_precision,"       //  5
+        " f.rdb$field_scale,"           //  6
+        " c.rdb$character_set_name,"    //  7
+        " f.rdb$character_length,"      //  8
+        " f.rdb$null_flag,"             //  9
+        " f.rdb$default_source,"        // 10
+        " l.rdb$collation_name,"        // 11
+        " f.rdb$validation_source,"     // 12
+        " f.rdb$computed_blr,"          // 13
+        " c.rdb$bytes_per_character"    // 14
+        " from rdb$fields f"
+        " left outer join rdb$character_sets c"
+            " on c.rdb$character_set_id = f.rdb$character_set_id"
+        " left outer join rdb$collations l"
+            " on l.rdb$collation_id = f.rdb$collation_id"
+            " and l.rdb$character_set_id = f.rdb$character_set_id"
+        " left outer join rdb$types t on f.rdb$field_type=t.rdb$type"
+        " where t.rdb$field_name='RDB$FIELD_TYPE'"
+        " and f.rdb$field_name not starting with 'RDB$'"
+        " order by 1");
+
+    CollectionType domains;
+    st1->Execute();
+    while (st1->Fetch())
+    {
+        checkProgressIndicatorCanceled(progressIndicator);
+        if (!st1->IsNull(1))
+        {
+            std::string s;
+            st1->Get(1, s);
+            wxString name(std2wxIdentifier(s, converter));
+
+            DomainPtr domain = findByName(name);
+            if (!domain)
+            {
+                domain = boost::make_shared<Domain>(db, name);
+                for (unsigned int j = getLockCount(); j > 0; j--)
+                    domain->lockSubject();
+            }
+            domains.push_back(domain);
+            domain->loadProperties(st1, converter);
+            checkProgressIndicatorCanceled(progressIndicator);
+        }
+    }
+
+    setItems(domains);
 }
 //-----------------------------------------------------------------------------
 void Domains::loadChildren()
