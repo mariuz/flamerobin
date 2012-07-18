@@ -33,7 +33,7 @@ class SingleStatement
 private:
     wxString sqlM;
     wxString thirdStringM;
-    enum StatementType { stInvalid,
+    enum StatementType { stInvalid, stEmpty,
         stCommit, stRollback, stSetTerm, stSetAutoDDL, stOther } typeM;
 
 public:
@@ -41,6 +41,7 @@ public:
     SingleStatement(const wxString& sql);
 
     bool isCommitStatement() const;
+    bool isEmptyStatement() const;
     bool isRollbackStatement() const;
     bool isSetTermStatement(wxString& newTerm) const;
     bool isSetAutoDDLStatement(wxString& newSetting) const;

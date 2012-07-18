@@ -109,6 +109,10 @@ SingleStatement::SingleStatement(const wxString& sql)
             }
             break;
 
+        case tkEOF:
+            typeM = stEmpty;
+            break;
+
         default:
             break;
     }
@@ -117,6 +121,11 @@ SingleStatement::SingleStatement(const wxString& sql)
 bool SingleStatement::isCommitStatement() const
 {
     return typeM == stCommit;
+}
+//-----------------------------------------------------------------------------
+bool SingleStatement::isEmptyStatement() const
+{
+    return typeM == stEmpty;
 }
 //-----------------------------------------------------------------------------
 bool SingleStatement::isRollbackStatement() const
@@ -144,7 +153,7 @@ bool SingleStatement::isSetAutoDDLStatement(wxString& newSetting) const
 //-----------------------------------------------------------------------------
 bool SingleStatement::isValid() const
 {
-    return typeM != stInvalid && !sqlM.Strip().empty();
+    return typeM != stInvalid;
 }
 //-----------------------------------------------------------------------------
 wxString SingleStatement::getSql() const

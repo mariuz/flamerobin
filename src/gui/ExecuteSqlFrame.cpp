@@ -2071,8 +2071,8 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
                 return false;
             }
         }
-        else if (ss.getSql().length() && !execute(ss.getSql(),
-            ms.getTerminator(), prepareOnly))
+        else if (!ss.isEmptyStatement()
+            && !execute(ss.getSql(), ms.getTerminator(), prepareOnly))
         {
             int stmtStart = selectionOffset + ms.getStart();
 #if wxUSE_UNICODE
@@ -2218,7 +2218,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     while (tk.nextToken());
     if (!hasStatements)
     {
-        log(_("Parsed query: " + sql), ttSql);
+        log(_("Parsed statement: " + sql), ttSql);
         log(_("Empty statement detected, bailing out..."));
         return true;
     }
