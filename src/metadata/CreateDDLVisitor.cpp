@@ -224,9 +224,8 @@ void CreateDDLVisitor::visitDatabase(Database& d)
     sqlM = preSqlM + wxT("\n") + postSqlM + grantSqlM;
     if (progressIndicatorM)
     {
-        progressIndicatorM->setProgressMessage(_("Extraction complete."));
-        progressIndicatorM->setProgressPosition(10);
-        progressIndicatorM->setProgressMessage(_("Done."), 2);
+        progressIndicatorM->initProgress(_("Extraction complete."), 1, 1);
+        progressIndicatorM->initProgress(_("Done."), 1, 1, 2);
     }
 }
 //-----------------------------------------------------------------------------
