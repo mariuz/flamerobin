@@ -420,7 +420,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_UPDATE_UI(Cmds::Menu_DatabaseProperties, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
 
     EVT_MENU(Cmds::Menu_BrowseData, MainFrame::OnMenuBrowseData)
-    EVT_MENU(Cmds::Menu_LoadColumnsInfo, MainFrame::OnMenuLoadColumnsInfo)
     EVT_MENU(Cmds::Menu_AddColumn, MainFrame::OnMenuAddColumn)
     EVT_MENU(Cmds::Menu_ExecuteProcedure, MainFrame::OnMenuExecuteProcedure)
 
@@ -605,12 +604,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
     if (treeActivateAction == showColumnInfo && (nt == ntTable
         || nt == ntSysTable || nt == ntView || nt == ntProcedure))
     {
-        if (!treeMainM->ItemHasChildren(item))
-        {
-            wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
-                Cmds::Menu_LoadColumnsInfo);
-            AddPendingEvent(event);
-        }
+        m->ensureChildrenLoaded();
     }
     else if (treeActivateAction == selectFromOrExecute
         && (nt == ntTable || nt == ntSysTable || nt == ntView))
@@ -1340,26 +1334,6 @@ void MainFrame::showCreateTemplate(const wxString& statement)
         return;
 
     showSql(this, wxEmptyString, db, statement);
-}
-//-----------------------------------------------------------------------------
-void MainFrame::OnMenuLoadColumnsInfo(wxCommandEvent& WXUNUSED(event))
-{
-    MetadataItem* m = treeMainM->getSelectedMetadataItem();
-    if (!m)
-        return;
-
-    m->ensureChildrenLoaded();
-    Procedure* p = dynamic_cast<Procedure*>(m);
-    if (p && !p->getParamCount())
-    {
-        ::wxMessageBox(
-            _("This procedure doesn't have any input or output parameters."),
-           _("Information"), wxOK | wxICON_INFORMATION, this);
-    }
-
-    wxTreeItemId id = treeMainM->GetSelection();
-    if (id.IsOk() && treeMainM->ItemHasChildren(id))
-        treeMainM->Expand(id);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuAddColumn(wxCommandEvent& WXUNUSED(event))

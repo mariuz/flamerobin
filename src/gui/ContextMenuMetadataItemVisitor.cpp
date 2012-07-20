@@ -201,7 +201,6 @@ void MainObjectMenuMetadataItemVisitor::visitGenerators(Generators& generators)
 void MainObjectMenuMetadataItemVisitor::visitProcedure(Procedure& procedure)
 {
     menuM->Append(Cmds::Menu_ExecuteProcedure, _("&Execute"));
-    addShowColumnsItem();
     addAlterItem(procedure);
     addDropItem(procedure);
     addSeparator();
@@ -283,7 +282,6 @@ void MainObjectMenuMetadataItemVisitor::visitTable(Table& table)
     addSeparator();
     if (!table.isSystem())
         menuM->Append(Cmds::Menu_AddColumn, _("&Add column"));
-    addShowColumnsItem();
     addDropItem(table);
     addSeparator();
     // TODO: addRefreshItem();
@@ -331,7 +329,6 @@ void MainObjectMenuMetadataItemVisitor::visitTriggers(Triggers& triggers)
 void MainObjectMenuMetadataItemVisitor::visitView(View& view)
 {
     addBrowseDataItem();
-    addShowColumnsItem();
     addGenerateCodeMenu(view);
     addSeparator();
     addAlterItem(view);
@@ -404,12 +401,6 @@ void MainObjectMenuMetadataItemVisitor::addRefreshItem()
 void MainObjectMenuMetadataItemVisitor::addBrowseDataItem()
 {
     menuM->Append(Cmds::Menu_BrowseData, _("Brow&se data"));
-}
-//-----------------------------------------------------------------------------
-void MainObjectMenuMetadataItemVisitor::addShowColumnsItem()
-{
-    if (config().get(wxT("ShowColumnsInTree"), true))
-        menuM->Append(Cmds::Menu_LoadColumnsInfo, _("Show columns in&fo"));
 }
 //-----------------------------------------------------------------------------
 void MainObjectMenuMetadataItemVisitor::addSeparator()

@@ -64,6 +64,7 @@ Procedure::Procedure(DatabasePtr database, const wxString& name)
 //-----------------------------------------------------------------------------
 void Procedure::loadChildren()
 {
+    bool childrenWereLoaded = childrenLoaded();
     // in case an exception is thrown this should be repeated
     setChildrenLoaded(false);
 
@@ -130,7 +131,7 @@ void Procedure::loadChildren()
     }
 
     setChildrenLoaded(true);
-    if (parametersM != parameters)
+    if (!childrenWereLoaded || parametersM != parameters)
     {
         parametersM.swap(parameters);
         notifyObservers();

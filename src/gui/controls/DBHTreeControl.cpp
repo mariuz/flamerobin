@@ -252,6 +252,7 @@ private:
     wxString nodeTextM;
     int nodeImageIndexM;
     bool showChildrenM;
+    bool showNodeExpanderM;
     bool sortChildrenM;
     bool nodeConfigSensitiveM;
 
@@ -266,6 +267,7 @@ public:
     bool getNodeTextBold() { return nodeTextBoldM; };
     int getNodeImage() { return nodeImageIndexM; };
     bool getShowChildren() { return showChildrenM; };
+    bool getShowNodeExpander() { return showNodeExpanderM; }
     bool getSortChildren() { return sortChildrenM; };
     bool isConfigSensitive() { return nodeConfigSensitiveM; };
 
@@ -299,8 +301,8 @@ public:
 DBHTreeItemVisitor::DBHTreeItemVisitor(DBHTreeControl* tree)
     : MetadataItemVisitor(), treeM(tree), nodeVisibleM(true),
         nodeTextBoldM(false), nodeTextM(), nodeImageIndexM(-1),
-        showChildrenM(false), sortChildrenM(false),
-        nodeConfigSensitiveM(false)
+        showChildrenM(false), showNodeExpanderM(false),
+        sortChildrenM(false), nodeConfigSensitiveM(false)
 {
 }
 //-----------------------------------------------------------------------------
@@ -482,6 +484,7 @@ void DBHTreeItemVisitor::visitProcedure(Procedure& procedure)
     }
     // show Parameter nodes if Config setting is on
     showChildrenM = DBHTreeConfigCache::get().getShowColumns();
+    showNodeExpanderM = showChildrenM && !procedure.childrenLoaded();
     // update if settings change
     nodeConfigSensitiveM = true;
 }
@@ -554,6 +557,7 @@ void DBHTreeItemVisitor::visitTable(Table& table)
     }
     // show Column nodes if Config setting is on
     showChildrenM = DBHTreeConfigCache::get().getShowColumns();
+    showNodeExpanderM = showChildrenM && !table.childrenLoaded();
     // update if settings change
     nodeConfigSensitiveM = true;
 }
@@ -589,6 +593,7 @@ void DBHTreeItemVisitor::visitView(View& view)
     }
     // show Column nodes if Config setting is on
     showChildrenM = DBHTreeConfigCache::get().getShowColumns();
+    showNodeExpanderM = showChildrenM && !view.childrenLoaded();
     // update if settings change
     nodeConfigSensitiveM = true;
 }
@@ -809,71 +814,77 @@ void DBHTreeItemData::update()
     // check subitems
     std::vector<MetadataItem*> children;
     std::vector<MetadataItem*>::iterator itChild;
-    if (tivObject.getShowChildren() && object->getChildren(children))
+    if (tivObject.getShowChildren())
     {
-        // sort child nodes if necessary
-        if (tivObject.getSortChildren())
+        bool showExpander = tivObject.getShowNodeExpander();
+        if (object->getChildren(children))
         {
-            MetadataItemSorter sorter;
-            std::sort(children.begin(), children.end(), sorter);
+            showExpander = true;
+            // sort child nodes if necessary
+            if (tivObject.getSortChildren())
+            {
+                MetadataItemSorter sorter;
+                std::sort(children.begin(), children.end(), sorter);
+            }
+
+            wxTreeItemId prevId;
+            // create or update child nodes
+            for (itChild = children.begin(); itChild != children.end(); ++itChild)
+            {
+                DBHTreeItemVisitor tivChild(treeM);
+                (*itChild)->loadPendingData();
+                (*itChild)->acceptVisitor(&tivChild);
+                if (!tivChild.getNodeVisible())
+                    continue;
+
+                wxTreeItemId childId = findSubNode(*itChild);
+                // order of child nodes may have changed
+                // since nodes can't be moved they have to be recreated
+                if (childId.IsOk())
+                {
+                    wxTreeItemId prevChildId = treeM->GetPrevSibling(childId);
+                    if (prevChildId != prevId)
+                    {
+                        treeM->Delete(childId);
+                        childId.Unset();
+                    }
+                }
+
+                if (!childId.IsOk())
+                {
+                    DBHTreeItemData* newItem = new DBHTreeItemData(treeM);
+                    if (prevId.IsOk())
+                    {
+                        childId = treeM->InsertItem(id, prevId,
+                            tivChild.getNodeText(), tivChild.getNodeImage(),
+                            -1, newItem);
+                    }
+                    else // first
+                    {
+                        childId = treeM->PrependItem(id, tivChild.getNodeText(),
+                            tivChild.getNodeImage(), -1, newItem);
+                    }
+                    // setObservedMetadata() calls attachObserver(), which
+                    // calls update() on the newly created child node
+                    // this will correctly populate the tree
+                    newItem->setObservedMetadata(*itChild);
+                    // tree node data objects may optionally observe the settings
+                    // cache object, for example to create / delete column and
+                    // parameter nodes if the "ShowColumnsInTree" setting changes
+                    if (tivChild.isConfigSensitive())
+                        DBHTreeConfigCache::get().attachObserver(newItem, false);
+                }
+                else
+                {
+                    if (treeM->GetItemText(childId) != tivChild.getNodeText())
+                        treeM->SetItemText(childId, tivChild.getNodeText());
+                    if (treeM->GetItemImage(childId) != tivChild.getNodeImage())
+                        treeM->SetItemImage(childId, tivChild.getNodeImage());
+                }
+                prevId = childId;
+            }
         }
-
-        wxTreeItemId prevId;
-        // create or update child nodes
-        for (itChild = children.begin(); itChild != children.end(); ++itChild)
-        {
-            DBHTreeItemVisitor tivChild(treeM);
-            (*itChild)->loadPendingData();
-            (*itChild)->acceptVisitor(&tivChild);
-            if (!tivChild.getNodeVisible())
-                continue;
-
-            wxTreeItemId childId = findSubNode(*itChild);
-            // order of child nodes may have changed
-            // since nodes can't be moved they have to be recreated
-            if (childId.IsOk())
-            {
-                wxTreeItemId prevChildId = treeM->GetPrevSibling(childId);
-                if (prevChildId != prevId)
-                {
-                    treeM->Delete(childId);
-                    childId.Unset();
-                }
-            }
-
-            if (!childId.IsOk())
-            {
-                DBHTreeItemData* newItem = new DBHTreeItemData(treeM);
-                if (prevId.IsOk())
-                {
-                    childId = treeM->InsertItem(id, prevId,
-                        tivChild.getNodeText(), tivChild.getNodeImage(),
-                        -1, newItem);
-                }
-                else // first
-                {
-                    childId = treeM->PrependItem(id, tivChild.getNodeText(),
-                        tivChild.getNodeImage(), -1, newItem);
-                }
-                // setObservedMetadata() calls attachObserver(), which
-                // calls update() on the newly created child node
-                // this will correctly populate the tree
-                newItem->setObservedMetadata(*itChild);
-                // tree node data objects may optionally observe the settings
-                // cache object, for example to create / delete column and
-                // parameter nodes if the "ShowColumnsInTree" setting changes
-                if (tivChild.isConfigSensitive())
-                    DBHTreeConfigCache::get().attachObserver(newItem, false);
-            }
-            else
-            {
-                if (treeM->GetItemText(childId) != tivChild.getNodeText())
-                    treeM->SetItemText(childId, tivChild.getNodeText());
-                if (treeM->GetItemImage(childId) != tivChild.getNodeImage())
-                    treeM->SetItemImage(childId, tivChild.getNodeImage());
-            }
-            prevId = childId;
-        }
+        treeM->SetItemHasChildren(id, showExpander);
     }
 
     bool canCollapseNode = id != treeM->GetRootItem()
@@ -932,7 +943,8 @@ void DBHTreeItemData::update()
 //-----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(DBHTreeControl, wxTreeCtrl)
     EVT_CONTEXT_MENU(DBHTreeControl::OnContextMenu)
-    EVT_TREE_BEGIN_DRAG(DBHTreeControl::ID_tree_ctrl, DBHTreeControl::OnBeginDrag)
+    EVT_TREE_BEGIN_DRAG(wxID_ANY, DBHTreeControl::OnBeginDrag)
+    EVT_TREE_ITEM_EXPANDING(wxID_ANY, DBHTreeControl::OnTreeItemExpanding)
 END_EVENT_TABLE()
 //-----------------------------------------------------------------------------
 void DBHTreeControl::OnBeginDrag(wxTreeEvent& event)
@@ -1003,6 +1015,14 @@ void DBHTreeControl::OnContextMenu(wxContextMenuEvent& event)
 
     if (MyMenu.GetMenuItemCount())
         PopupMenu(&MyMenu, pos);
+}
+//-----------------------------------------------------------------------------
+void DBHTreeControl::OnTreeItemExpanding(wxTreeEvent& event)
+{
+    MetadataItem* mi = getMetadataItem(event.GetItem());
+    if (mi)
+        mi->ensureChildrenLoaded();
+    event.Skip();
 }
 //-----------------------------------------------------------------------------
 DBHTreeControl::DBHTreeControl(wxWindow* parent, const wxPoint& pos,

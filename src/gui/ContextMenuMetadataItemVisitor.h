@@ -75,7 +75,6 @@ private:
     void addGenerateCodeMenu(MetadataItem& metadataItem, wxMenu* parent = 0);
     void addPropertiesItem();
     void addRefreshItem();
-    void addShowColumnsItem();
     void addSeparator();
 };
 //-----------------------------------------------------------------------------

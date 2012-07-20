@@ -49,9 +49,9 @@ public:
     short GetSpacing() const { return m_spacing; }
     void SetSpacing(short spacing);
 
-    void OnBeginDrag(wxTreeEvent &event);
-    //void OnMouse(wxMouseEvent &event);
+    void OnBeginDrag(wxTreeEvent& event);
     void OnContextMenu(wxContextMenuEvent& event);
+    void OnTreeItemExpanding(wxTreeEvent& event);
 
     wxTreeItemId addRootNode(MetadataItem* rootItem);
 
