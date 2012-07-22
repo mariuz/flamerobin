@@ -893,12 +893,9 @@ void DBHTreeItemData::update()
     // remove all children at once
     if (!children.size())
     {
-        if (treeM->ItemHasChildren(id))
-        {
-            if (canCollapseNode)
-                treeM->Collapse(id);
-            treeM->DeleteChildren(id);
-        }
+        if (canCollapseNode)
+            treeM->Collapse(id);
+        treeM->DeleteChildren(id);
         treeM->SetItemBold(id, tivObject.getNodeTextBold());
         return;
     }
