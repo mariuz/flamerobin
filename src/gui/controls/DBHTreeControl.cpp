@@ -811,15 +811,15 @@ void DBHTreeItemData::update()
     if (treeM->GetItemImage(id) != tivObject.getNodeImage())
         treeM->SetItemImage(id, tivObject.getNodeImage());
 
+    // track number of visible child nodes for SetItemHasChildren() calls
+    unsigned numVisibleChildren = 0;
     // check subitems
     std::vector<MetadataItem*> children;
     std::vector<MetadataItem*>::iterator itChild;
     if (tivObject.getShowChildren())
     {
-        bool showExpander = tivObject.getShowNodeExpander();
         if (object->getChildren(children))
         {
-            showExpander = true;
             // sort child nodes if necessary
             if (tivObject.getSortChildren())
             {
@@ -836,6 +836,7 @@ void DBHTreeItemData::update()
                 (*itChild)->acceptVisitor(&tivChild);
                 if (!tivChild.getNodeVisible())
                     continue;
+                ++numVisibleChildren;
 
                 wxTreeItemId childId = findSubNode(*itChild);
                 // order of child nodes may have changed
@@ -884,21 +885,26 @@ void DBHTreeItemData::update()
                 prevId = childId;
             }
         }
-        treeM->SetItemHasChildren(id, showExpander);
     }
 
     bool canCollapseNode = id != treeM->GetRootItem()
         || (treeM->GetWindowStyle() & wxTR_HIDE_ROOT) == 0;
 
     // remove all children at once
-    if (!children.size())
+    if (numVisibleChildren == 0)
     {
-        if (canCollapseNode)
-            treeM->Collapse(id);
-        treeM->DeleteChildren(id);
+        if (treeM->ItemHasChildren(id))
+        {
+            if (canCollapseNode)
+                treeM->Collapse(id);
+            treeM->DeleteChildren(id);
+        }
+        // allow for on-demand-loading of children
+        treeM->SetItemHasChildren(id, tivObject.getShowNodeExpander());
         treeM->SetItemBold(id, tivObject.getNodeTextBold());
         return;
     }
+    treeM->SetItemHasChildren(id, true);
 
     // remove delete items - one by one
     bool itemsDeleted = false;
