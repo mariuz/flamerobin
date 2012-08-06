@@ -360,12 +360,6 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
     updateColors();
 }
 //-----------------------------------------------------------------------------
-void DatabaseRegistrationDialog::setServer(ServerPtr s)
-{
-    wxASSERT(s);
-    serverM = s;
-}
-//-----------------------------------------------------------------------------
 void DatabaseRegistrationDialog::updateAuthenticationMode()
 {
     bool isConnected = databaseM->isConnected();
@@ -423,11 +417,6 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
 //-----------------------------------------------------------------------------
 void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    // FIXME: implement a better interface than separate setServer()
-    // and setDatabase() methods
-    if (serverM)
-        databaseM->setServer(serverM);
-
     // TODO: This needs to be reworked. If the order of method calls is important
     //       then they must not be provided as independent methods !!!
 
@@ -468,7 +457,7 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
             long dialect = 3;
             if (choice_dialect->GetStringSelection() == wxT("1"))
                 dialect = 1;
-            serverM->createDatabase(databaseM, ps, dialect);
+            databaseM->create(ps, dialect);
         }
         EndModal(wxID_OK);
     }

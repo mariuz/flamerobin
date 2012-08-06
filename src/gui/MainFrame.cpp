@@ -831,11 +831,11 @@ void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))
     if (!checkValidServer(s))
         return;
 
-    DatabaseRegistrationDialog drd(this, _("Register Existing Database"));
-    drd.setServer(s);
     DatabasePtr db(new Database());
-    drd.setDatabase(db);
+    db->setServer(s);
 
+    DatabaseRegistrationDialog drd(this, _("Register Existing Database"));
+    drd.setDatabase(db);
     if (drd.ShowModal() == wxID_OK)
     {
         s->addDatabase(db);
@@ -850,9 +850,10 @@ void MainFrame::OnMenuRestoreIntoNewDatabase(wxCommandEvent& WXUNUSED(event))
     if (!checkValidServer(s))
         return;
 
-    DatabaseRegistrationDialog drd(this, _("New database parameters"));
-    drd.setServer(s);
     DatabasePtr db(new Database());
+    db->setServer(s);
+
+    DatabaseRegistrationDialog drd(this, _("New database parameters"));
     drd.setDatabase(db);
     if (drd.ShowModal() != wxID_OK)
         return;
@@ -911,11 +912,11 @@ void MainFrame::OnMenuCreateDatabase(wxCommandEvent& WXUNUSED(event))
     if (!checkValidServer(s))
         return;
 
-    DatabaseRegistrationDialog drd(this, _("Create New Database"), true);
-    drd.setServer(s);
     DatabasePtr db(new Database());
-    drd.setDatabase(db);
+    db->setServer(s);
 
+    DatabaseRegistrationDialog drd(this, _("Create New Database"), true);
+    drd.setDatabase(db);
     if (drd.ShowModal() == wxID_OK)
     {
         s->addDatabase(db);
@@ -1552,7 +1553,6 @@ void MainFrame::OnMenuRecreateDatabase(wxCommandEvent& WXUNUSED(event))
         // not necessarily available, and the user may want to change it too
         DatabaseRegistrationDialog drd(this, _("Recreate Database"), true);
         drd.setDatabase(db);
-        drd.setServer(db->getServer());
         if (drd.ShowModal() == wxID_OK)
             treeMainM->selectMetadataItem(db.get());
     }

@@ -935,6 +935,24 @@ void Database::parseCommitedSql(const SqlStatement& stm)
     }
 }
 //-----------------------------------------------------------------------------
+void Database::create(int pagesize, int dialect)
+{
+    wxString extra_params;
+    if (pagesize)
+        extra_params << wxT(" PAGE_SIZE ") << pagesize;
+
+    wxString charset(getConnectionCharset());
+    if (!charset.empty())
+        extra_params << wxT(" DEFAULT CHARACTER SET ") << charset;
+
+    IBPP::Database db1;
+    db1 = IBPP::DatabaseFactory(wx2std(getConnectionString()),
+        wx2std(getPath()), wx2std(getUsername()),
+        wx2std(getDecryptedPassword()), "", wx2std(charset),
+        wx2std(extra_params));
+    db1->Create(dialect);
+}
+//-----------------------------------------------------------------------------
 void Database::drop()
 {
     databaseM->Drop();

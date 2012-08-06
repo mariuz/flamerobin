@@ -41,22 +41,23 @@ private:
     unsigned int locksCountM;
     std::list<Observer*> observersM;
     bool needsNotifyObjectsM;
+
+    void detachAllObservers();
+    bool isObservedBy(Observer* observer) const;
 protected:
     // make these protected, as instances of this class are bogus...
     Subject();
     virtual ~Subject();
 
-    virtual void lockedChanged(bool locked);
-public:
     unsigned int getLockCount();
     virtual bool isLocked();
+    virtual void lockedChanged(bool locked);
+public:
     virtual void lockSubject();
     virtual void unlockSubject();
 
     void attachObserver(Observer* observer, bool callUpdate);
     void detachObserver(Observer* observer);
-    void detachAllObservers();
-    bool isObservedBy(Observer* observer) const;
     void notifyObservers();
 };
 //-----------------------------------------------------------------------------

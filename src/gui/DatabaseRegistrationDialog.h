@@ -37,7 +37,6 @@ class FileTextControl;
 //-----------------------------------------------------------------------------
 class DatabaseRegistrationDialog: public BaseDialog {
 private:
-    ServerPtr serverM;
     DatabasePtr databaseM;
     bool createM;
     bool connectAsM;
@@ -88,7 +87,6 @@ public:
         // a temporary solution, as we'll change the entire login scheme soon
         bool connectAs = false);
 
-    void setServer(ServerPtr s); // needed to create new db
     void setDatabase(DatabasePtr db);
 private:
     // event handling

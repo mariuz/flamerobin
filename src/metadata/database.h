@@ -230,6 +230,7 @@ public:
     ViewsPtr getViews();
 
     bool isConnected() const;
+    void create(int pagesize, int dialect);
     void connect(const wxString& password, ProgressIndicator* indicator = 0);
     void disconnect();
     void reconnect();

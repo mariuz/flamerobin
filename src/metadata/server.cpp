@@ -110,24 +110,6 @@ void Server::removeDatabase(DatabasePtr database)
     }
 }
 //-----------------------------------------------------------------------------
-void Server::createDatabase(DatabasePtr db, int pagesize, int dialect)
-{
-    wxString extra_params;
-    if (pagesize)
-        extra_params << wxT(" PAGE_SIZE ") << pagesize;
-
-    wxString charset(db->getConnectionCharset());
-    if (!charset.empty())
-        extra_params << wxT(" DEFAULT CHARACTER SET ") << charset;
-
-    IBPP::Database db1;
-    db1 = IBPP::DatabaseFactory(wx2std(getConnectionString()),
-        wx2std(db->getPath()), wx2std(db->getUsername()),
-        wx2std(db->getDecryptedPassword()), "", wx2std(charset),
-        wx2std(extra_params));
-    db1->Create(dialect);
-}
-//-----------------------------------------------------------------------------
 wxString Server::getHostname() const
 {
     return hostnameM;
