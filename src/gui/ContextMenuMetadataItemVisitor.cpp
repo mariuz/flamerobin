@@ -313,7 +313,7 @@ void MainObjectMenuMetadataItemVisitor::visitTrigger(Trigger& trigger)
     addSeparator();
     addGenerateCodeMenu(trigger);
     addSeparator();
-    // TODO: addRefreshItem();
+    addRefreshItem();
     addPropertiesItem();
 }
 //-----------------------------------------------------------------------------

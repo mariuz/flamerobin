@@ -584,31 +584,24 @@ void CreateDDLVisitor::visitTable(Table& t)
 //-----------------------------------------------------------------------------
 void CreateDDLVisitor::visitTrigger(Trigger& t)
 {
-    wxString object, type;
-    bool active, db;
-    int position;
-    t.getTriggerInfo(object, active, position, type, db);
-    wxString source = t.getSource();
-    wxString relation = t.getTriggerRelation();
-
     preSqlM << wxT("SET TERM ^ ;\nCREATE TRIGGER ") << t.getQuotedName();
-    if (!db)
+    if (!t.isDatabaseTrigger())
     {
-        Identifier id(relation);
+        Identifier id(t.getRelationName());
         preSqlM << wxT(" FOR ") << id.getQuoted();
     }
-    if (active)
+    if (t.getActive())
         preSqlM << wxT(" ACTIVE\n");
     else
         preSqlM << wxT(" INACTIVE\n");
-    preSqlM << type;
+    preSqlM << t.getFiringEvent();
     preSqlM << wxT(" POSITION ");
-    preSqlM << position << wxT("\n");
-    preSqlM << source;
+    preSqlM << t.getPosition() << wxT("\n");
+    preSqlM << t.getSource();
     preSqlM << wxT("^\nSET TERM ; ^\n");
 
     wxString description = t.getDescription();
-    if (!description.IsEmpty())
+    if (!description.empty())
     {
         wxString name(t.getName_());
         description.Replace(wxT("'"), wxT("''"));

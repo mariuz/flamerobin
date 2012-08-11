@@ -1505,20 +1505,19 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
     }
 
     DatabasePtr db = getDatabase(mi);
-    View* v = dynamic_cast<View*>(mi);
-    Trigger* t = dynamic_cast<Trigger*>(mi);
-    Domain *dm = dynamic_cast<Domain*>(mi);
-    if (!db || !p && !v && !t && !dm)
+    if (!db)
         return;
 
     wxString sql;
-    if (v)
+    if (View* v = dynamic_cast<View*>(mi))
         sql = v->getRebuildSql();
-    else if (t)
+    else if (Trigger* t = dynamic_cast<Trigger*>(mi))
         sql = t->getAlterSql();
-    else if (dm)
+    else if (Domain* dm = dynamic_cast<Domain*>(mi))
         sql = dm->getAlterSqlTemplate();
-    showSql(this, wxString(_("Alter object")), db, sql);
+
+    if (!sql.empty())
+        showSql(this, wxString(_("Alter object")), db, sql);
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRecreateDatabase(wxCommandEvent& WXUNUSED(event))

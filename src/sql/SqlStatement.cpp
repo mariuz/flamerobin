@@ -184,17 +184,9 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
                 {
                     if (!databaseM)
                         return;
-                    objectM = databaseM->findByNameAndType(ntTable,
-                        nameM.get());
+                    objectM = databaseM->findRelation(nameM);
                     if (objectM)
-                        objectTypeM = ntTable;
-                    else
-                    {
-                        objectM = databaseM->findByNameAndType(ntView,
-                            nameM.get());
-                        if (objectM)
-                            objectTypeM = ntView;
-                    }
+                        objectTypeM = objectM->getType();
                 }
                 return;
             }
@@ -215,9 +207,7 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
         Identifier child(tokenStringsM[4]);
         if (tokensM[2] == kwCOLUMN)
         {
-            Relation *r = dynamic_cast<Relation *>(
-                databaseM->findByNameAndType(ntTable, parent.get()));
-            if (r)
+            if (Relation* r = databaseM->findRelation(parent))
             {
                 r->ensureChildrenLoaded();
                 if (ColumnPtr c = r->findColumn(child.get()))

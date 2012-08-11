@@ -38,7 +38,6 @@
     #pragma hdrstop
 #endif
 
-//-----------------------------------------------------------------------------
 #include <ibpp.h>
 
 #include "core/FRError.h"
@@ -48,28 +47,118 @@
 #include "metadata/database.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/trigger.h"
+#include "sql/StatementBuilder.h"
+//-----------------------------------------------------------------------------
+/* static */
+Trigger::FiringTime Trigger::getFiringTime(int type)
+{
+    if (type == 8192)
+        return databaseConnect;
+    if (type == 8193)
+        return databaseDisconnect;
+    if (type == 8194)
+        return transactionStart;
+    if (type == 8195)
+        return transactionCommit;
+    if (type == 8196)
+        return transactionRollback;
+    if (type % 2)
+        return beforeIUD;
+    if (type)
+        return afterIUD;
+    return invalid;
+}
 //-----------------------------------------------------------------------------
 Trigger::Trigger(DatabasePtr database, const wxString& name)
     : MetadataItem(ntTrigger, database.get(), name)
 {
 }
 //-----------------------------------------------------------------------------
-void Trigger::getTriggerInfo(wxString& object, bool& active, int& position,
-    wxString& type, bool& isDatabaseTrigger)
+bool Trigger::getActive()
 {
     ensurePropertiesLoaded();
-    isDatabaseTrigger = isDatabaseTriggerM;
-    object = objectM;
-    active = activeM;
-    position = positionM;
-    type = triggerTypeM;
+    return activeM;
 }
 //-----------------------------------------------------------------------------
-wxString Trigger::getTriggerRelation()
+wxString Trigger::getFiringEvent()
 {
     ensurePropertiesLoaded();
-    // gcc 4.4.3 on Ubuntu didn't accept wxEmptyString
-    return (isDatabaseTriggerM ? wxT("") : objectM);
+
+    StatementBuilder sb;
+    wxString result;
+    FiringTime time = getFiringTime(typeM);
+    switch (time)
+    {
+        case databaseConnect:
+            sb << kwON << ' ' << kwCONNECT;
+            break;
+        case databaseDisconnect:
+            sb << kwON << ' ' << kwDISCONNECT;
+            break;
+        case transactionStart:
+            sb << kwON << ' ' << kwTRANSACTION << ' ' << kwSTART;
+            break;
+        case transactionCommit:
+            sb << kwON << ' ' << kwTRANSACTION << ' ' << kwCOMMIT;
+            break;
+        case transactionRollback:
+            sb << kwON << ' ' << kwTRANSACTION << ' ' << kwROLLBACK;
+            break;
+        default:
+            break;
+    }
+
+    if (time == beforeIUD || time == afterIUD)
+    {
+        if (time == beforeIUD)
+            sb << kwBEFORE;
+        else
+            sb << kwAFTER;
+        sb << ' ';
+        // For explanation: read README.universal_triggers file in Firebird's
+        //                  doc/sql.extensions directory
+        wxString types[] = { SqlTokenizer::getKeyword(kwINSERT),
+            SqlTokenizer::getKeyword(kwUPDATE),
+            SqlTokenizer::getKeyword(kwDELETE) };
+        int type = typeM + 1;    // compensate for decrement
+        type >>= 1;              // remove bit 0
+        for (int i = 0; i < 3; ++i, type >>= 2)
+        {
+            if (type % 4)
+            {
+                if (i)
+                    sb << ' ' << kwOR << ' ';
+                sb << types[ (type%4) - 1 ];
+            }
+        }
+    }
+    return sb;
+}
+//-----------------------------------------------------------------------------
+Trigger::FiringTime Trigger::getFiringTime()
+{
+    ensurePropertiesLoaded();
+    return getFiringTime(typeM);
+}
+//-----------------------------------------------------------------------------
+int Trigger::getPosition()
+{
+    ensurePropertiesLoaded();
+    return positionM;
+}
+//-----------------------------------------------------------------------------
+wxString Trigger::getRelationName()
+{
+    ensurePropertiesLoaded();
+    if (!isDatabaseTrigger())
+        return relationNameM;
+    return wxEmptyString;
+}
+//-----------------------------------------------------------------------------
+wxString Trigger::getSource()
+{
+    ensurePropertiesLoaded();
+    return sourceM;
 }
 //-----------------------------------------------------------------------------
 void Trigger::loadProperties()
@@ -82,7 +171,7 @@ void Trigger::loadProperties()
 
     IBPP::Statement& st1 = loader->getStatement(
         "select t.rdb$relation_name, t.rdb$trigger_sequence, "
-        "t.rdb$trigger_inactive, t.rdb$trigger_type "
+        "t.rdb$trigger_inactive, t.rdb$trigger_type, rdb$trigger_source "
         "from rdb$triggers t where rdb$trigger_name = ? "
     );
 
@@ -90,12 +179,13 @@ void Trigger::loadProperties()
     st1->Execute();
     if (st1->Fetch())
     {
-        isDatabaseTriggerM = st1->IsNull(1);
-        if (!isDatabaseTriggerM)
+        if (st1->IsNull(1))
+            relationNameM.clear();
+        else
         {
             std::string objname;
             st1->Get(1, objname);
-            objectM = std2wxIdentifier(objname, db->getCharsetConverter());
+            relationNameM = std2wxIdentifier(objname, db->getCharsetConverter());
         }
         st1->Get(2, &positionM);
 
@@ -106,95 +196,58 @@ void Trigger::loadProperties()
             st1->Get(3, &temp);
         activeM = (temp == 0);
 
-        int ttype;
-        st1->Get(4, &ttype);
-        triggerTypeM = getTriggerType(ttype);
+        st1->Get(4, &typeM);
+
+        readBlob(st1, 5, sourceM, db->getCharsetConverter());
     }
-    else    // maybe trigger was dropped?
+    else // maybe trigger was dropped?
     {
-        //wxMessageBox("Trigger does not exist in database");
-        objectM = wxEmptyString;
+        relationNameM.clear();
+        activeM = false;
+        positionM = -1;
+        sourceM.clear();
+        typeM = 0;
     }
 
     setPropertiesLoaded(true);
 }
 //-----------------------------------------------------------------------------
-wxString Trigger::getSource() const
-{
-    DatabasePtr db = getDatabase();
-    MetadataLoader* loader = db->getMetadataLoader();
-    MetadataLoaderTransaction tr(loader);
-
-    IBPP::Statement& st1 = loader->getStatement(
-        "select rdb$trigger_source from rdb$triggers"
-        " where rdb$trigger_name = ?");
-    st1->Set(1, wx2std(getName_(), db->getCharsetConverter()));
-    st1->Execute();
-    st1->Fetch();
-    wxString source;
-    readBlob(st1, 1, source, db->getCharsetConverter());
-    return source;
-}
-//-----------------------------------------------------------------------------
-wxString Trigger::getTriggerType(int type)
-{
-    if (type >= 8192 && type <= 8196)   // database triggers
-    {
-        wxString ttype[] = {
-            wxT("CONNECT"), wxT("DISCONNECT"), wxT("TRANSACTION START"),
-            wxT("TRANSACTION COMMIT"), wxT("TRANSACTION ROLLBACK") };
-        return wxString(wxT("ON ")) + ttype[type - 8192];
-    }
-
-    // For explanation: read README.universal_triggers file in Firebird's
-    //                  doc/sql.extensions directory
-    wxString result(type % 2 ? wxT("BEFORE ") : wxT("AFTER "));
-    wxString types[] = { wxT("INSERT"), wxT("UPDATE"), wxT("DELETE") };
-    type++;         // compensate for decrement
-    type >>= 1;     // remove bit 0
-    for (int i = 0; i < 3; ++i, type >>= 2)
-    {
-        if (type % 4)
-        {
-            if (i)
-                result += wxT(" OR ");
-            result += types[ (type%4) - 1 ];
-        }
-    }
-    return result;
-}
-//-----------------------------------------------------------------------------
-Trigger::fireTimeType Trigger::getFiringTime()
-{
-    ensurePropertiesLoaded();
-    if (isDatabaseTriggerM)
-        return databaseTrigger;
-    if (triggerTypeM.substr(0, 6) == wxT("BEFORE"))
-        return beforeTrigger;
-    else
-        return afterTrigger;
-}
-//-----------------------------------------------------------------------------
 wxString Trigger::getAlterSql()
 {
-    wxString object, type;
-    bool active, db;
-    int position;
+    ensurePropertiesLoaded();
 
-    getTriggerInfo(object, active, position, type, db);
-    wxString source = getSource();
-    wxString sql;
-    sql << wxT("SET TERM ^ ;\nALTER TRIGGER ") << getQuotedName();
-    if (active)
-        sql << wxT(" ACTIVE\n");
+    StatementBuilder sb;
+    sb << StatementBuilder::DisableLineWrapping;
+
+    sb << kwSET << ' ' << kwTERMINATOR << wxT(" ^ ;")
+        << StatementBuilder::NewLine;
+
+    sb << kwALTER << ' ' << kwTRIGGER << ' ' << getQuotedName() << ' ';
+    if (activeM)
+        sb << kwACTIVE;
     else
-        sql << wxT(" INACTIVE\n");
-    sql << type;
-    sql << wxT(" POSITION ");
-    sql << position << wxT("\n");
-    sql << source;
-    sql << wxT("^\nSET TERM ; ^");
-    return sql;
+        sb << kwINACTIVE;
+    sb << StatementBuilder::NewLine << getFiringEvent()
+        << ' ' << kwPOSITION << ' ' << wxString::Format(wxT("%d"), positionM)
+        << StatementBuilder::NewLine;
+    sb << sourceM + wxT("^") << StatementBuilder::NewLine;
+
+    sb << kwSET << ' ' << kwTERMINATOR << wxT(" ; ^")
+        << StatementBuilder::NewLine;
+    return sb;
+}
+//-----------------------------------------------------------------------------
+bool Trigger::isDatabaseTrigger()
+{
+    ensurePropertiesLoaded();
+    switch (getFiringTime(typeM))
+    {
+        case databaseConnect:
+        case databaseDisconnect:
+            return true;
+        default:
+            return false;
+    }
 }
 //-----------------------------------------------------------------------------
 const wxString Trigger::getTypeName() const

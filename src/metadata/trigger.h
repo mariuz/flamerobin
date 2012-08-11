@@ -36,26 +36,37 @@ class ProgressIndicator;
 //-----------------------------------------------------------------------------
 class Trigger: public MetadataItem
 {
+public:
+    enum FiringTime
+    {
+        invalid,
+        // relation triggers
+        beforeIUD, afterIUD,
+        // database triggers
+        databaseConnect, databaseDisconnect,
+        transactionStart, transactionCommit, transactionRollback
+    };
 private:
-    bool isDatabaseTriggerM;
-    wxString objectM;
+    wxString relationNameM;
     bool activeM;
     int positionM;
-    wxString triggerTypeM;
+    wxString sourceM;
+    int typeM;
+
+    static FiringTime getFiringTime(int type);
 protected:
     virtual void loadProperties();
 public:
     Trigger(DatabasePtr database, const wxString& name);
 
-    enum fireTimeType { afterTrigger, beforeTrigger, databaseTrigger };
-
-    void getTriggerInfo(wxString& object, bool& active, int& position,
-        wxString& type, bool& isDatabaseTrigger);
-    wxString getSource() const;
-    wxString getTriggerRelation();
-    static wxString getTriggerType(int flags);
-    fireTimeType getFiringTime();
+    bool getActive();
+    wxString getFiringEvent();
+    FiringTime getFiringTime();
+    int getPosition();
+    wxString getRelationName();
+    wxString getSource();
     wxString getAlterSql();
+    bool isDatabaseTrigger();
 
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);

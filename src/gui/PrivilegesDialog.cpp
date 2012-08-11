@@ -550,7 +550,7 @@ void PrivilegesDialog::OnButtonRemoveClick(wxCommandEvent& WXUNUSED(event))
 void PrivilegesDialog::OnButtonBrowseClick(wxCommandEvent& event)
 {
     Identifier id(choice_relations->GetStringSelection());
-    Relation *r = databaseM->findRelation(id);
+    Relation* r = databaseM->findRelation(id);
     if (!r)
         return;
     // load list of columns and let user select

@@ -652,8 +652,8 @@ Relation* Database::getRelationForTrigger(Trigger* trigger)
 {
     if (!trigger)
         return 0;
-    wxString relName = trigger->getTriggerRelation();
-    if (relName.IsEmpty())
+    wxString relName = trigger->getRelationName();
+    if (relName.empty())
         return 0;
     return findRelation(Identifier(relName));
 }

@@ -90,7 +90,10 @@ StatementBuilder& StatementBuilder::operator<< (const ControlToken ct)
 StatementBuilder& StatementBuilder::operator<< (const char c)
 {
     if (lineWrappingM && currentLineM.Length() + 1 > maxLineLengthM)
-        addNewLine();
+    {
+        if (c != ' ')
+            addNewLine();
+    }
     currentLineM += c;
     return (*this);
 }

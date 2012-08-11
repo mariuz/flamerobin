@@ -192,7 +192,7 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
     if (!fields.empty()) // not empty
     {
         Table *t = (*(fields.begin())).second.second->getTable();
-        t->getTriggers(triggers, Trigger::beforeTrigger);
+        t->getTriggers(triggers, Trigger::beforeIUD);
     }
 
     // columns 0, 1: gray, read-only

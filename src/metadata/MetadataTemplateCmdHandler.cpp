@@ -251,9 +251,9 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             if (r)
             {
                 if (cmdParams[2] == wxT("after"))
-                    r->getTriggers(triggers, Trigger::afterTrigger);
+                    r->getTriggers(triggers, Trigger::afterIUD);
                 else if (cmdParams[2] == wxT("before"))
-                    r->getTriggers(triggers, Trigger::beforeTrigger);
+                    r->getTriggers(triggers, Trigger::beforeIUD);
             }
             else
             {
@@ -610,25 +610,18 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         if (!t)
             return;
 
-        if (cmdParams[0] == wxT("source"))
+        if (cmdParams[0] == wxT("name"))
+            processedText += tp->escapeChars(t->getRelationName());
+        else if (cmdParams[0] == wxT("source"))
             processedText += tp->escapeChars(t->getSource(), false);
-        else
-        {
-            wxString object, type;
-            bool isActive, isDBTrigger;
-            int position;
-            t->getTriggerInfo(object, isActive, position, type, isDBTrigger);
-            if (cmdParams[0] == wxT("name"))
-                processedText += tp->escapeChars(object);
-            else if (cmdParams[0] == wxT("is_active"))
-                processedText += tp->escapeChars(getBooleanAsString(isActive));
-            else if (cmdParams[0] == wxT("position"))
-                processedText << position;
-            else if (cmdParams[0] == wxT("type"))
-                processedText += tp->escapeChars(type);
-            else if (cmdParams[0] == wxT("is_db_trigger"))
-                processedText += tp->escapeChars(getBooleanAsString(isDBTrigger));
-        }
+        else if (cmdParams[0] == wxT("position"))
+            processedText << t->getPosition();
+        else if (cmdParams[0] == wxT("type"))
+            processedText += tp->escapeChars(t->getFiringEvent());
+        else if (cmdParams[0] == wxT("is_active"))
+            processedText += tp->escapeChars(getBooleanAsString(t->getActive()));
+        else if (cmdParams[0] == wxT("is_db_trigger"))
+            processedText += tp->escapeChars(getBooleanAsString(t->isDatabaseTrigger()));
     }
 
     // {%generatorinfo:<property>%}

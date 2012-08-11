@@ -137,17 +137,11 @@ Relation *IncompleteStatement::getCreateTriggerRelation(const wxString& sql)
             }
         }
     }
-    if (!relName.IsEmpty())
+    if (!relName.empty())
     {
         Identifier id;
         id.setFromSql(relName);
-        r = dynamic_cast<Relation *>(databaseM->findByNameAndType(ntTable,
-            id.get()));
-        if (!r)
-        {
-            r = dynamic_cast<Relation *>(databaseM->findByNameAndType(ntView,
-                id.get()));
-        }
+        r = databaseM->findRelation(id);
     }
     return r;
 }
@@ -179,24 +173,17 @@ Relation *IncompleteStatement::getAlterTriggerRelation(const wxString& sql)
             }
         }
     }
-    if (!trigName.IsEmpty())
+    if (!trigName.empty())
     {
         Identifier id;
         id.setFromSql(trigName);
-        Trigger *t = dynamic_cast<Trigger *>(databaseM->findByNameAndType(
+        Trigger* t = dynamic_cast<Trigger *>(databaseM->findByNameAndType(
             ntTrigger, id.get()));
         if (!t)
             return 0;
-        wxString relName = t->getTriggerRelation();
-        if (relName.IsEmpty())  // database trigger
+        if (t->isDatabaseTrigger())
             return 0;
-        r = dynamic_cast<Relation *>(databaseM->findByNameAndType(ntTable,
-            relName));
-        if (!r)
-        {
-            r = dynamic_cast<Relation *>(databaseM->findByNameAndType(
-                ntView, relName));
-        }
+        r = databaseM->findRelation(t->getRelationName());
     }
     return r;
 }

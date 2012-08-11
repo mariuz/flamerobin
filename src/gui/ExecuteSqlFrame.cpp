@@ -3520,8 +3520,8 @@ bool ActivateTriggersHandler::handleURI(URI& uri)
     std::vector<Trigger*> list;
     if (r)
     {
-        r->getTriggers(list, Trigger::afterTrigger);
-        r->getTriggers(list, Trigger::beforeTrigger);
+        r->getTriggers(list, Trigger::afterIUD);
+        r->getTriggers(list, Trigger::beforeIUD);
     }
     else
         d->getDatabaseTriggers(list);
