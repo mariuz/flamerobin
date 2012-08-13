@@ -449,41 +449,10 @@ wxArrayString Database::getCollations(const wxString& charset)
 //-----------------------------------------------------------------------------
 DomainPtr Database::getDomain(const wxString& name)
 {
-    // return domain if already loaded
     if (MetadataItem::hasSystemPrefix(name))
-    {
-        if (DomainPtr domain = sysDomainsM->findByName(name))
-            return domain;
-    }
+        return sysDomainsM->getDomain(name);
     else
-    {
-        if (DomainPtr domain = userDomainsM->findByName(name))
-            return domain;
-    }
-
-    MetadataLoader* loader = getMetadataLoader();
-    MetadataLoaderTransaction tr(loader);
-
-    IBPP::Statement& st1 = loader->getStatement(
-        "select count(*) from rdb$fields f"
-        " left outer join rdb$types t on f.rdb$field_type=t.rdb$type"
-        " where t.rdb$field_name='RDB$FIELD_TYPE' and f.rdb$field_name = ?"
-    );
-    st1->Set(1, wx2std(name, getCharsetConverter()));
-    st1->Execute();
-    if (st1->Fetch())
-    {
-        int c;
-        st1->Get(1, c);
-        if (c > 0)
-        {
-            if (MetadataItem::hasSystemPrefix(name))
-                return sysDomainsM->insert(name);
-            else
-                return userDomainsM->insert(name);
-        }
-    }
-    return DomainPtr();
+        return userDomainsM->getDomain(name);
 }
 //-----------------------------------------------------------------------------
 bool Database::isDefaultCollation(const wxString& charset,

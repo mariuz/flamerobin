@@ -31,6 +31,7 @@
 
 #include "metadata/collection.h"
 
+class DomainCollectionBase;
 class Domains;
 class ProgressIndicator;
 //-----------------------------------------------------------------------------
@@ -41,7 +42,9 @@ private:
     bool isNotNullM, hasDefaultM;
     wxString charsetM, defaultM, collationM, checkM;
 
+    static std::string getLoadStatement(bool allUserDomains);
     void loadProperties(IBPP::Statement& statement, wxMBConv* converter);
+    friend class DomainCollectionBase;
     friend class Domains;
 protected:
     virtual void loadProperties();
@@ -66,7 +69,16 @@ public:
     virtual void acceptVisitor(MetadataItemVisitor* v);
 };
 //-----------------------------------------------------------------------------
-class Domains: public MetadataCollection<Domain>
+class DomainCollectionBase: public MetadataCollection<Domain>
+{
+protected:
+    DomainCollectionBase(NodeType type, DatabasePtr database,
+        const wxString& name);
+public:
+    DomainPtr getDomain(const wxString& name);
+};
+//-----------------------------------------------------------------------------
+class Domains: public DomainCollectionBase
 {
 protected:
     virtual void loadChildren();
@@ -78,7 +90,7 @@ public:
     virtual const wxString getTypeName() const;
 };
 //-----------------------------------------------------------------------------
-class SysDomains: public MetadataCollection<Domain>
+class SysDomains: public DomainCollectionBase
 {
 public:
     SysDomains(DatabasePtr database);

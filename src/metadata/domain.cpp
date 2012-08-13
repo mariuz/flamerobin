@@ -51,6 +51,39 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "sql/SqlTokenizer.h"
 //-----------------------------------------------------------------------------
+/*static*/
+std::string Domain::getLoadStatement(bool allUserDomains)
+{
+    std::string stmt("select "
+            " f.rdb$field_name,"            //  1
+            " f.rdb$field_type,"            //  2
+            " f.rdb$field_sub_type,"        //  3
+            " f.rdb$field_length,"          //  4
+            " f.rdb$field_precision,"       //  5
+            " f.rdb$field_scale,"           //  6
+            " c.rdb$character_set_name,"    //  7
+            " f.rdb$character_length,"      //  8
+            " f.rdb$null_flag,"             //  9
+            " f.rdb$default_source,"        // 10
+            " l.rdb$collation_name,"        // 11
+            " f.rdb$validation_source,"     // 12
+            " f.rdb$computed_blr,"          // 13
+            " c.rdb$bytes_per_character"    // 14
+        " from rdb$fields f"
+        " left outer join rdb$character_sets c"
+            " on c.rdb$character_set_id = f.rdb$character_set_id"
+        " left outer join rdb$collations l"
+            " on l.rdb$collation_id = f.rdb$collation_id"
+            " and l.rdb$character_set_id = f.rdb$character_set_id"
+        " left outer join rdb$types t on f.rdb$field_type=t.rdb$type"
+        " where t.rdb$field_name='RDB$FIELD_TYPE' and f.rdb$field_name ");
+    if (allUserDomains)
+        stmt += "not starting with 'RDB$' order by 1";
+    else
+        stmt += "= ?";
+    return stmt;
+}
+//-----------------------------------------------------------------------------
 Domain::Domain(DatabasePtr database, const wxString& name)
     : MetadataItem((hasSystemPrefix(name) ? ntSysDomain : ntDomain),
         database.get(), name)
@@ -66,29 +99,7 @@ void Domain::loadProperties()
     MetadataLoaderTransaction tr(loader);
     wxMBConv* converter = db->getCharsetConverter();
 
-    IBPP::Statement& st1 = loader->getStatement(
-        "select f.rdb$field_name,"   //  1
-        " f.rdb$field_type,"            //  2
-        " f.rdb$field_sub_type,"        //  3
-        " f.rdb$field_length,"          //  4
-        " f.rdb$field_precision,"       //  5
-        " f.rdb$field_scale,"           //  6
-        " c.rdb$character_set_name,"    //  7
-        " f.rdb$character_length,"      //  8
-        " f.rdb$null_flag,"             //  9
-        " f.rdb$default_source,"        // 10
-        " l.rdb$collation_name,"        // 11
-        " f.rdb$validation_source,"     // 12
-        " f.rdb$computed_blr,"          // 13
-        " c.rdb$bytes_per_character"    // 14
-        " from rdb$fields f"
-        " left outer join rdb$character_sets c"
-            " on c.rdb$character_set_id = f.rdb$character_set_id"
-        " left outer join rdb$collations l"
-            " on l.rdb$collation_id = f.rdb$collation_id"
-            " and l.rdb$character_set_id = f.rdb$character_set_id"
-        " where rdb$field_name = ?");
-
+    IBPP::Statement& st1 = loader->getStatement(getLoadStatement(false));
     st1->Set(1, wx2std(getName_(), converter));
     st1->Execute();
     if (!st1->Fetch())
@@ -348,9 +359,41 @@ void Domain::acceptVisitor(MetadataItemVisitor* visitor)
     visitor->visitDomain(*this);
 }
 //-----------------------------------------------------------------------------
+// DomainCollectionBase
+DomainCollectionBase::DomainCollectionBase(NodeType type,
+        DatabasePtr database, const wxString& name)
+    : MetadataCollection<Domain>(type, database, name)
+{
+}
+//-----------------------------------------------------------------------------
+DomainPtr DomainCollectionBase::getDomain(const wxString& name)
+{
+    DomainPtr domain = findByName(name);
+    if (!domain)
+    {
+        SubjectLocker lock(this);
+
+        DatabasePtr db = getDatabase();
+        MetadataLoader* loader = db->getMetadataLoader();
+        MetadataLoaderTransaction tr(loader);
+        wxMBConv* converter = db->getCharsetConverter();
+
+        IBPP::Statement& st1 = loader->getStatement(
+            Domain::getLoadStatement(false));
+        st1->Set(1, wx2std(name, converter));
+        st1->Execute();
+        if (st1->Fetch())
+        {
+            domain = insert(name);
+            domain->loadProperties(st1, converter);
+        }
+    }
+    return domain;
+}
+//-----------------------------------------------------------------------------
 // Domains collection
 Domains::Domains(DatabasePtr database)
-    : MetadataCollection<Domain>(ntDomains, database, _("Domains"))
+    : DomainCollectionBase(ntDomains, database, _("Domains"))
 {
 }
 //-----------------------------------------------------------------------------
@@ -367,30 +410,7 @@ void Domains::load(ProgressIndicator* progressIndicator)
     wxMBConv* converter = db->getCharsetConverter();
 
     IBPP::Statement& st1 = loader->getStatement(
-        "select f.rdb$field_name,"   //  1
-        " f.rdb$field_type,"            //  2
-        " f.rdb$field_sub_type,"        //  3
-        " f.rdb$field_length,"          //  4
-        " f.rdb$field_precision,"       //  5
-        " f.rdb$field_scale,"           //  6
-        " c.rdb$character_set_name,"    //  7
-        " f.rdb$character_length,"      //  8
-        " f.rdb$null_flag,"             //  9
-        " f.rdb$default_source,"        // 10
-        " l.rdb$collation_name,"        // 11
-        " f.rdb$validation_source,"     // 12
-        " f.rdb$computed_blr,"          // 13
-        " c.rdb$bytes_per_character"    // 14
-        " from rdb$fields f"
-        " left outer join rdb$character_sets c"
-            " on c.rdb$character_set_id = f.rdb$character_set_id"
-        " left outer join rdb$collations l"
-            " on l.rdb$collation_id = f.rdb$collation_id"
-            " and l.rdb$character_set_id = f.rdb$character_set_id"
-        " left outer join rdb$types t on f.rdb$field_type=t.rdb$type"
-        " where t.rdb$field_name='RDB$FIELD_TYPE'"
-        " and f.rdb$field_name not starting with 'RDB$'"
-        " order by 1");
+        Domain::getLoadStatement(true));
 
     CollectionType domains;
     st1->Execute();
@@ -431,7 +451,7 @@ const wxString Domains::getTypeName() const
 //-----------------------------------------------------------------------------
 // System domains collection
 SysDomains::SysDomains(DatabasePtr database)
-    : MetadataCollection<Domain>(ntSysDomains, database, _("System domains"))
+    : DomainCollectionBase(ntSysDomains, database, _("System domains"))
 {
 }
 //-----------------------------------------------------------------------------

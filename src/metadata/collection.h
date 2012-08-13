@@ -42,13 +42,13 @@ class MetadataCollectionBase : public MetadataItem
 {
 private:
     DatabaseWeakPtr databaseM;
-public:
+protected:
     MetadataCollectionBase(NodeType type, DatabasePtr database,
             const wxString& name)
         : MetadataItem(type, database.get(), name), databaseM(database)
     {
     }
-
+public:
     virtual DatabasePtr getDatabase() const
     {
         return DatabasePtr(databaseM);
@@ -99,13 +99,14 @@ private:
         }
     };
 
-public:
+protected:
     MetadataCollection<T>(NodeType type, DatabasePtr database,
             const wxString& name)
         : MetadataCollectionBase(type, database, name)
     {
     }
 
+public:
     // inserts new item into list at correct position to preserve alphabetical
     // order of item names, and returns pointer to it
     ItemType insert(const wxString& name)
