@@ -566,10 +566,7 @@ void MetadataItem::loadDescription()
         descriptionM = ldv.getDescription();
     }
     else
-    {
-        descriptionLoadedM = lsNotAvailable;
-        descriptionM = wxEmptyString;
-    }
+        setNoDescriptionAvailable();
 }
 //-----------------------------------------------------------------------------
 void MetadataItem::saveDescription(const wxString& WXUNUSED(description))
@@ -592,6 +589,12 @@ void MetadataItem::setDescription(const wxString& description)
         // the description has been edited by the user
         notifyObservers();
     }
+}
+//-----------------------------------------------------------------------------
+void MetadataItem::setNoDescriptionAvailable()
+{
+    descriptionLoadedM = lsNotAvailable;
+    descriptionM = wxEmptyString;
 }
 //-----------------------------------------------------------------------------
 MetadataItem* MetadataItem::getParent() const

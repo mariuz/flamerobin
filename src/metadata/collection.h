@@ -186,7 +186,7 @@ public:
 
     inline void clear()
     {
-        if (itemsM.size())
+        if (!itemsM.empty())
         {
             itemsM.clear();
             notifyObservers();

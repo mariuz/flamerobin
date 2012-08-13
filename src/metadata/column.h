@@ -40,7 +40,7 @@ private:
 protected:
     virtual wxString getComputedSource() const;
     void initialize(const wxString& source, const wxString& defaultValue,
-        bool hasDefault);
+        bool hasDefault, bool hasDescription);
 public:
     ColumnBase(NodeType type, MetadataItem* parent, const wxString& name);
 
@@ -62,7 +62,7 @@ public:
 
     void initialize(bool notnull, const wxString& source,
         const wxString& computedSource, const wxString& collation,
-        const wxString& defaultValue, bool hasDefault);
+        const wxString& defaultValue, bool hasDefault, bool hasDescription);
     virtual const wxString getTypeName() const;
     virtual wxString getDropSqlStatement() const;
 

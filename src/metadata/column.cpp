@@ -133,7 +133,7 @@ wxString ColumnBase::getSource() const
 }
 //-----------------------------------------------------------------------------
 void ColumnBase::initialize(const wxString& source,
-    const wxString& defaultValue, bool hasDefault)
+    const wxString& defaultValue, bool hasDefault, bool hasDescription)
 {
     bool changed = false;
     wxString strippedSrc = source.Strip(wxString::both);
@@ -152,6 +152,8 @@ void ColumnBase::initialize(const wxString& source,
         hasDefaultM = hasDefault;
         changed = true;
     }
+    if (!hasDescription)
+        setNoDescriptionAvailable();
     if (changed)
         notifyObservers();
 }
@@ -168,11 +170,11 @@ Column::Column(Relation* relation, const wxString& name)
 //-----------------------------------------------------------------------------
 void Column::initialize(bool notnull, const wxString& source,
     const wxString& computedSource, const wxString& collation,
-    const wxString& defaultValue, bool hasDefault)
+    const wxString& defaultValue, bool hasDefault, bool hasDescription)
 {
     SubjectLocker lock(this);
 
-    ColumnBase::initialize(source, defaultValue, hasDefault);
+    ColumnBase::initialize(source, defaultValue, hasDefault, hasDescription);
 
     bool changed = false;
     if (notnullM != notnull)

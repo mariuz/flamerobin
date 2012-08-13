@@ -422,7 +422,7 @@ ContextMenuMetadataItemVisitor::~ContextMenuMetadataItemVisitor()
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::addCreateItem()
 {
-        menuM->Append(Cmds::Menu_CreateObject, _("Create &new"));
+    menuM->Append(Cmds::Menu_CreateObject, _("Create &new"));
 }
 //-----------------------------------------------------------------------------
 void ContextMenuMetadataItemVisitor::addDeclareItem()

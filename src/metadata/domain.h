@@ -29,8 +29,6 @@
 #ifndef FR_DOMAIN_H
 #define FR_DOMAIN_H
 
-#include <ibpp.h>
-
 #include "metadata/collection.h"
 
 class Domains;

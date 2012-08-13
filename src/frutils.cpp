@@ -166,7 +166,7 @@ bool connectDatabase(Database* db, wxWindow* parent,
         // don't allow different username here
         UsernamePasswordDialog upd(wxGetActiveWindow(),
             _("Database Credentials"), db->getUsername(), true,
-            _("Please enter the the database user's password:"));
+            _("Please enter the database user's password:"));
         if (upd.ShowModal() != wxID_OK)
             return false;
         pass = upd.getPassword();

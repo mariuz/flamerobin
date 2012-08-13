@@ -75,7 +75,7 @@ void Generator::loadProperties()
     // do not use cached statements, because this can not be reused
     IBPP::Statement st1 = loader->createStatement(
         "select gen_id(" + sqlName + ", 0) from rdb$database");
-        
+
     st1->Execute();
     st1->Fetch();
     st1->Get(1, &valueM);

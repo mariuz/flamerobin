@@ -361,13 +361,6 @@ void Domains::acceptVisitor(MetadataItemVisitor* visitor)
 //-----------------------------------------------------------------------------
 void Domains::load(ProgressIndicator* progressIndicator)
 {
-    wxString stmt = wxT("select f.rdb$field_name from rdb$fields f")
-        wxT(" left outer join rdb$types t on f.rdb$field_type=t.rdb$type")
-        wxT(" where t.rdb$field_name='RDB$FIELD_TYPE'")
-        wxT(" and f.rdb$field_name not starting with 'RDB$'")
-        wxT(" order by 1");
-
-
     DatabasePtr db = getDatabase();
     MetadataLoader* loader = db->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);

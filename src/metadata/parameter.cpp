@@ -53,11 +53,12 @@ Parameter::Parameter(Procedure* procedure, const wxString& name)
 }
 //-----------------------------------------------------------------------------
 void Parameter::initialize(const wxString& source, int parameterType,
-    int mechanism, const wxString& defaultValue, bool hasDefault)
+    int mechanism, const wxString& defaultValue, bool hasDefault,
+    bool hasDescription)
 {
     SubjectLocker lock(this);
 
-    ColumnBase::initialize(source, defaultValue, hasDefault);
+    ColumnBase::initialize(source, defaultValue, hasDefault, hasDescription);
 
     bool changed = false;
     if (parameterMechanismM != mechanism)

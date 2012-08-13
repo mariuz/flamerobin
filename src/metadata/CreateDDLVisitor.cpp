@@ -131,8 +131,8 @@ void CreateDDLVisitor::visitColumn(Column& c)
     {
         preSqlM << wxT(" COLLATE ") << collate;
     }
-    wxString description = c.getDescription();
-    if (!description.IsEmpty())
+    wxString description;
+    if (c.getDescription(description))
     {
         wxString colname(c.getName_());
         wxString tabname(c.getTable()->getName_());
@@ -179,6 +179,13 @@ void CreateDDLVisitor::visitDatabase(Database& d)
 
     try
     {
+
+
+// TODO: REMOVE ME
+        wxStopWatch sw;
+        sw.Start();
+
+
         preSqlM << wxT("/********************* ROLES **********************/\n\n");
         iterateit<RolesPtr, Role>(this, d.getRoles(), progressIndicatorM);
 
@@ -213,6 +220,12 @@ void CreateDDLVisitor::visitDatabase(Database& d)
         preSqlM << wxT("/******************** TRIGGERS ********************/\n\n");
         iterateit<TriggersPtr, Trigger>(this, d.getTriggers(),
             progressIndicatorM);
+
+
+// TODO: REMOVE ME
+        wxLogDebug(wxT("DDL extraction took %.3f s"), 0.001 * sw.Time());
+
+
     }
     catch (CancelProgressException&)
     {
@@ -251,8 +264,8 @@ void CreateDDLVisitor::visitDomain(Domain& d)
         preSqlM += wxT(" COLLATE ") + collate;
     preSqlM += wxT(";\n");
 
-    wxString description = d.getDescription();
-    if (!description.IsEmpty())
+    wxString description;
+    if (d.getDescription(description))
     {
         wxString colname(d.getName_());
         description.Replace(wxT("'"), wxT("''"));
@@ -271,8 +284,8 @@ void CreateDDLVisitor::visitException(Exception& e)
     preSqlM += wxT("CREATE EXCEPTION ") + e.getQuotedName() + wxT("\n'") +
         ms + wxT("';\n");
 
-    wxString description = e.getDescription();
-    if (!description.IsEmpty())
+    wxString description;
+    if (e.getDescription(description))
     {
         wxString name(e.getName_());
         description.Replace(wxT("'"), wxT("''"));
@@ -322,8 +335,8 @@ void CreateDDLVisitor::visitForeignKey(ForeignKey& fk)
 void CreateDDLVisitor::visitFunction(Function& f)
 {
     preSqlM << f.getCreateSql() << wxT("\n");
-    wxString description = f.getDescription();
-    if (!description.IsEmpty())
+    wxString description;
+    if (f.getDescription(description))
     {
         wxString name(f.getName_());
         description.Replace(wxT("'"), wxT("''"));
@@ -338,8 +351,8 @@ void CreateDDLVisitor::visitFunction(Function& f)
 void CreateDDLVisitor::visitGenerator(Generator& g)
 {
     preSqlM += wxT("CREATE GENERATOR ") + g.getQuotedName() + wxT(";\n");
-    wxString description = g.getDescription();
-    if (!description.IsEmpty())
+    wxString description;
+    if (g.getDescription(description))
     {
         wxString name(g.getName_());
         description.Replace(wxT("'"), wxT("''"));
@@ -391,8 +404,8 @@ void CreateDDLVisitor::visitProcedure(Procedure& p)
     /* description of procedure and parameters */
     wxString name(p.getName_());
     name.Replace(wxT("'"), wxT("''"));
-    wxString description = p.getDescription();
-    if (!description.IsEmpty())
+    wxString description;
+    if (p.getDescription(description))
     {
         description.Replace(wxT("'"), wxT("''"));
         temp << wxT("UPDATE RDB$PROCEDURES set\n  RDB$DESCRIPTION = '")
@@ -401,8 +414,7 @@ void CreateDDLVisitor::visitProcedure(Procedure& p)
     }
     for (ParameterPtrs::iterator it = p.begin(); it != p.end(); ++it)
     {
-        wxString description = (*it)->getDescription();
-        if (!description.IsEmpty())
+        if ((*it)->getDescription(description))
         {
             wxString pname((*it)->getName_());
             description.Replace(wxT("'"), wxT("''"));
@@ -439,8 +451,8 @@ void CreateDDLVisitor::visitRole(Role& r)
             grantSqlM += (*ci).getSql();
         }
     }
-    wxString description = r.getDescription();
-    if (!description.IsEmpty())
+    wxString description;
+    if (r.getDescription(description))
     {
         wxString name(r.getName_());
         description.Replace(wxT("'"), wxT("''"));
@@ -568,8 +580,8 @@ void CreateDDLVisitor::visitTable(Table& t)
         preSqlM += wxT("\nON COMMIT PRESERVE ROWS");
     preSqlM += wxT(";\n");
 
-    wxString description = t.getDescription();
-    if (!description.IsEmpty())
+    wxString description;
+    if (t.getDescription(description))
     {
         wxString name(t.getName_());
         description.Replace(wxT("'"), wxT("''"));
@@ -600,8 +612,8 @@ void CreateDDLVisitor::visitTrigger(Trigger& t)
     preSqlM << t.getSource();
     preSqlM << wxT("^\nSET TERM ; ^\n");
 
-    wxString description = t.getDescription();
-    if (!description.empty())
+    wxString description;
+    if (t.getDescription(description))
     {
         wxString name(t.getName_());
         description.Replace(wxT("'"), wxT("''"));
@@ -649,8 +661,8 @@ void CreateDDLVisitor::visitView(View& v)
     }
     wxString name(v.getName_());
     name.Replace(wxT("'"), wxT("''"));
-    wxString description = v.getDescription();
-    if (!description.IsEmpty())
+    wxString description;
+    if (v.getDescription(description))
     {
         description.Replace(wxT("'"), wxT("''"));
         postSqlM << wxT("UPDATE RDB$RELATIONS set\n  RDB$DESCRIPTION = '")
@@ -662,8 +674,7 @@ void CreateDDLVisitor::visitView(View& v)
     for (ColumnPtrs::iterator it = v.begin(); it != v.end();
         ++it)
     {
-        wxString description = (*it)->getDescription();
-        if (!description.IsEmpty())
+        if ((*it)->getDescription(description))
         {
             wxString cname((*it)->getName_());
             description.Replace(wxT("'"), wxT("''"));

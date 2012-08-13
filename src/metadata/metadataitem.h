@@ -78,6 +78,7 @@ protected:
     virtual void saveDescription(const wxString& description);
     void saveDescription(const wxString& saveStatement,
         const wxString& description);
+    void setNoDescriptionAvailable();
 
     virtual void loadProperties();
     void setPropertiesLoaded(bool loaded);

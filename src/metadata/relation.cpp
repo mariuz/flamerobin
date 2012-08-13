@@ -193,8 +193,9 @@ void Relation::loadChildren()
     wxMBConv* converter = db->getCharsetConverter();
 
     IBPP::Statement& st1 = loader->getStatement(
-        "select r.rdb$field_name, r.rdb$null_flag, r.rdb$field_source, "
-        " l.rdb$collation_name,f.rdb$computed_source,r.rdb$default_source"
+        "select r.rdb$field_name, r.rdb$null_flag, r.rdb$field_source,"
+        " l.rdb$collation_name, f.rdb$computed_source, r.rdb$default_source,"
+        " r.rdb$description"
         " from rdb$fields f"
         " join rdb$relation_fields r "
         "     on f.rdb$field_name=r.rdb$field_source"
@@ -213,6 +214,7 @@ void Relation::loadChildren()
         std::string s, coll;
         st1->Get(1, s);
         wxString fname(std2wxIdentifier(s, converter));
+        bool notnull = !st1->IsNull(2);
         st1->Get(3, s);
         wxString source(std2wxIdentifier(s, converter));
         if (!st1->IsNull(4))
@@ -220,7 +222,8 @@ void Relation::loadChildren()
         wxString collation(std2wxIdentifier(coll, converter));
         wxString computedSrc, defaultSrc;
         readBlob(st1, 5, computedSrc, converter);
-        if (!st1->IsNull(6))
+        bool hasDefault = !st1->IsNull(6);
+        if (hasDefault)
         {
             readBlob(st1, 6, defaultSrc, converter);
             // Some users reported two spaces before DEFAULT word in source
@@ -228,6 +231,7 @@ void Relation::loadChildren()
             // parse it as SQL to clean up comments, whitespace, etc?
             defaultSrc.Trim(false).Remove(0, 8);
         }
+        bool hasDescription = !st1->IsNull(7);
 
         ColumnPtr col = findColumn(fname);
         if (!col)
@@ -237,8 +241,8 @@ void Relation::loadChildren()
                 col->lockSubject();
         }
         columns.push_back(col);
-        col->initialize(!st1->IsNull(2), source, computedSrc, collation,
-            defaultSrc, !st1->IsNull(6));
+        col->initialize(notnull, source, computedSrc, collation,
+            defaultSrc, hasDefault, hasDescription);
     }
 
     setChildrenLoaded(true);
