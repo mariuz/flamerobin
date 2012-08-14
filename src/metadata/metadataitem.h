@@ -78,7 +78,8 @@ protected:
     virtual void saveDescription(const wxString& description);
     void saveDescription(const wxString& saveStatement,
         const wxString& description);
-    void setNoDescriptionAvailable();
+    // used internally if rdb$description column (a blob) is null
+    void setDescriptionIsEmpty();
 
     virtual void loadProperties();
     void setPropertiesLoaded(bool loaded);

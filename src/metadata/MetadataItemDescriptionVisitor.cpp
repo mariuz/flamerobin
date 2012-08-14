@@ -109,10 +109,10 @@ void LoadDescriptionVisitor::loadDescription(MetadataItem* object,
             st1->Get(1, b);
             b->Load(value);
             descriptionM = std2wx(value, csConverter);
-            availableM = true;
         }
         else
             descriptionM = wxEmptyString;
+        availableM = true;
     }
     catch (IBPP::SQLException &e)
     {

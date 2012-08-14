@@ -52,7 +52,7 @@
 #include "sql/SqlTokenizer.h"
 //-----------------------------------------------------------------------------
 /*static*/
-std::string Domain::getLoadStatement(bool allUserDomains)
+std::string Domain::getLoadStatement(bool list)
 {
     std::string stmt("select "
             " f.rdb$field_name,"            //  1
@@ -77,7 +77,7 @@ std::string Domain::getLoadStatement(bool allUserDomains)
             " and l.rdb$character_set_id = f.rdb$character_set_id"
         " left outer join rdb$types t on f.rdb$field_type=t.rdb$type"
         " where t.rdb$field_name='RDB$FIELD_TYPE' and f.rdb$field_name ");
-    if (allUserDomains)
+    if (list)
         stmt += "not starting with 'RDB$' order by 1";
     else
         stmt += "= ?";
@@ -110,6 +110,8 @@ void Domain::loadProperties()
 //-----------------------------------------------------------------------------
 void Domain::loadProperties(IBPP::Statement& statement, wxMBConv* converter)
 {
+    setPropertiesLoaded(false);
+
     statement->Get(2, &datatypeM);
     if (statement->IsNull(3))
         subtypeM = 0;

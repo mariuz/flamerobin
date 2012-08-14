@@ -153,7 +153,7 @@ void ColumnBase::initialize(const wxString& source,
         changed = true;
     }
     if (!hasDescription)
-        setNoDescriptionAvailable();
+        setDescriptionIsEmpty();
     if (changed)
         notifyObservers();
 }

@@ -415,7 +415,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         wxString desc;
         if (metadataItem->getDescription(desc))
         {
-            if (desc.IsEmpty())
+            if (desc.empty())
                 desc = _("No description");
             processedText += tp->escapeChars(desc);
         }

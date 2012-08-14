@@ -42,7 +42,7 @@ private:
     bool isNotNullM, hasDefaultM;
     wxString charsetM, defaultM, collationM, checkM;
 
-    static std::string getLoadStatement(bool allUserDomains);
+    static std::string getLoadStatement(bool list);
     void loadProperties(IBPP::Statement& statement, wxMBConv* converter);
     friend class DomainCollectionBase;
     friend class Domains;

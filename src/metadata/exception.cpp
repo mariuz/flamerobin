@@ -41,12 +41,32 @@
 #include <ibpp.h>
 
 #include "core/FRError.h"
+#include "core/ProgressIndicator.h"
 #include "core/StringUtils.h"
 #include "engine/MetadataLoader.h"
 #include "metadata/database.h"
 #include "metadata/exception.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "sql/StatementBuilder.h"
+//-----------------------------------------------------------------------------
+/*static*/
+std::string Exception::getLoadStatement(bool list)
+{
+    std::string stmt("select"
+            " rdb$exception_name,"          // 1
+            " rdb$message,"                 // 2
+            " rdb$exception_number,"        // 3
+            " rdb$description"              // 4
+        " from rdb$exceptions");
+    if (list)
+    {
+        stmt += " where rdb$system_flag is null or rdb$system_flag = 0"
+            " order by 1";
+    }
+    else
+        stmt += " where rdb$exception_name = ?";
+    return stmt;
+}
 //-----------------------------------------------------------------------------
 Exception::Exception(DatabasePtr database, const wxString& name)
     : MetadataItem(ntException, database.get(), name), numberM(0)
@@ -72,17 +92,27 @@ void Exception::loadProperties()
     DatabasePtr db = getDatabase();
     MetadataLoader* loader = db->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
+    wxMBConv* converter = db->getCharsetConverter();
 
-    IBPP::Statement& st1 = loader->getStatement(
-        "select RDB$MESSAGE, RDB$EXCEPTION_NUMBER from RDB$EXCEPTIONS"
-        " where RDB$EXCEPTION_NAME = ?");
-    st1->Set(1, wx2std(getName_(), db->getCharsetConverter()));
+    IBPP::Statement& st1 = loader->getStatement(getLoadStatement(false));
+    st1->Set(1, wx2std(getName_(), converter));
     st1->Execute();
-    st1->Fetch();
+    if (!st1->Fetch())
+        throw FRError(_("Exception not found: ") + getName_());
+
+    loadProperties(st1, converter);
+}
+//-----------------------------------------------------------------------------
+void Exception::loadProperties(IBPP::Statement& statement, wxMBConv* converter)
+{
+    setPropertiesLoaded(false);
+
     std::string message;
-    st1->Get(1, message);
-    messageM = std2wx(message, db->getCharsetConverter());
-    st1->Get(2, numberM);
+    statement->Get(2, message);
+    messageM = std2wx(message, converter);
+    statement->Get(3, numberM);
+    if (statement->IsNull(4))
+        setDescriptionIsEmpty();
 
     setPropertiesLoaded(true);
 }
@@ -121,9 +151,39 @@ void Exceptions::acceptVisitor(MetadataItemVisitor* visitor)
 //-----------------------------------------------------------------------------
 void Exceptions::load(ProgressIndicator* progressIndicator)
 {
-    wxString stmt = wxT("select rdb$exception_name from rdb$exceptions")
-        wxT(" order by 1");
-    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+    DatabasePtr db = getDatabase();
+    MetadataLoader* loader = db->getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+    wxMBConv* converter = db->getCharsetConverter();
+
+    IBPP::Statement& st1 = loader->getStatement(
+        Exception::getLoadStatement(true));
+
+    CollectionType exceptions;
+    st1->Execute();
+    checkProgressIndicatorCanceled(progressIndicator);
+    while (st1->Fetch())
+    {
+        if (!st1->IsNull(1))
+        {
+            std::string s;
+            st1->Get(1, s);
+            wxString name(std2wxIdentifier(s, converter));
+
+            ExceptionPtr exception = findByName(name);
+            if (!exception)
+            {
+                exception = boost::make_shared<Exception>(db, name);
+                for (unsigned int j = getLockCount(); j > 0; j--)
+                    exception->lockSubject();
+            }
+            exceptions.push_back(exception);
+            exception->loadProperties(st1, converter);
+        }
+        checkProgressIndicatorCanceled(progressIndicator);
+    }
+
+    setItems(exceptions);
 }
 //-----------------------------------------------------------------------------
 void Exceptions::loadChildren()

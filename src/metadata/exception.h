@@ -31,6 +31,7 @@
 
 #include "metadata/collection.h"
 
+class Exceptions;
 class ProgressIndicator;
 //-----------------------------------------------------------------------------
 class Exception: public MetadataItem
@@ -38,6 +39,9 @@ class Exception: public MetadataItem
 private:
     wxString messageM;
     int numberM;
+    static std::string getLoadStatement(bool list);
+    void loadProperties(IBPP::Statement& statement, wxMBConv* converter);
+    friend class Exceptions;
 protected:
     virtual void loadProperties();
 public:
