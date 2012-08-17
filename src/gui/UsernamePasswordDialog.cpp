@@ -40,44 +40,55 @@
 
 #include "gui/StyleGuide.h"
 #include "gui/UsernamePasswordDialog.h"
+#include "metadata/database.h"
 //-----------------------------------------------------------------------------
-UsernamePasswordDialog::UsernamePasswordDialog(wxWindow* parent,
-        const wxString& title, const wxString& username, bool usernameIsFixed,
-        const wxString& description)
-    : BaseDialog(parent, wxID_ANY, title)
+UsernamePasswordDialog::UsernamePasswordDialog(wxWindow* parentWindow,
+    const wxString& description, const wxString& username, int flags)
+    : BaseDialog(parentWindow, wxID_ANY, _("Connection Credentials"))
 {
     wxWindow* panel = getControlsPanel();
     // create controls
-    if (description.size())
+    if (!description.empty())
         labelDescriptionM = new wxStaticText(panel, wxID_ANY, description);
     else
         labelDescriptionM = 0;
+    radioUsernamePasswordM = new wxRadioButton(panel, wxID_ANY,
+        _("Connect with the following &username and password"));
     labelUsernameM = new wxStaticText(panel, wxID_ANY, _("&Username:"));
     textUsernameM = new wxTextCtrl(panel, wxID_ANY, username);
-    textUsernameM->SetEditable(!usernameIsFixed);
+    textUsernameM->SetEditable((flags & AllowOtherUsername) != 0);
     labelPasswordM = new wxStaticText(panel, wxID_ANY, _("&Password:"));
     textPasswordM = new wxTextCtrl(panel, wxID_ANY, wxEmptyString,
         wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
+    radioTrustedUserM = new wxRadioButton(panel, wxID_ANY,
+        _("Connect as me (&trusted user authentication"));
+    radioTrustedUserM->Enable((flags & AllowTrustedUser) != 0);
     buttonOkM = new wxButton(panel, wxID_OK, _("Connect"));
     buttonCancelM = new wxButton(panel, wxID_CANCEL, _("Cancel"));
     layoutControls();
-    if (!usernameIsFixed && username.size() == 0)
+    if (textUsernameM->IsEditable() && username.size() == 0)
         textUsernameM->SetFocus();
     else
         textPasswordM->SetFocus();
     updateColors();
     updateButton();
+    Connect(wxEVT_COMMAND_RADIOBUTTON_SELECTED,
+        wxCommandEventHandler(UsernamePasswordDialog::OnSettingsChange));
     Connect(wxEVT_COMMAND_TEXT_UPDATED,
         wxCommandEventHandler(UsernamePasswordDialog::OnSettingsChange));
 }
 //-----------------------------------------------------------------------------
 wxString UsernamePasswordDialog::getUsername()
 {
+    if (radioTrustedUserM->GetValue())
+        return wxEmptyString;
     return textUsernameM->GetValue();
 }
 //-----------------------------------------------------------------------------
 wxString UsernamePasswordDialog::getPassword()
 {
+    if (radioTrustedUserM->GetValue())
+        return wxEmptyString;
     return textPasswordM->GetValue();
 }
 //-----------------------------------------------------------------------------
@@ -92,16 +103,26 @@ void UsernamePasswordDialog::layoutControls()
             styleguide().getUnrelatedControlMargin(wxVERTICAL));
     }
 
-    wxFlexGridSizer* sizerGrid = new wxFlexGridSizer(2, 2,
+    sizerControls->Add(radioUsernamePasswordM, 0, wxEXPAND);
+    sizerControls->AddSpacer(
+        styleguide().getRelatedControlMargin(wxVERTICAL));
+
+    wxFlexGridSizer* sizerGrid = new wxFlexGridSizer(2, 3,
         styleguide().getRelatedControlMargin(wxVERTICAL),
         styleguide().getControlLabelMargin());
-    sizerGrid->AddGrowableCol(1);
+    sizerGrid->AddGrowableCol(2);
 
-    sizerGrid->Add(labelUsernameM, 0, wxALIGN_CENTER_VERTICAL);
-    sizerGrid->Add(textUsernameM, 1, wxEXPAND | wxALIGN_CENTER_VERTICAL);
-    sizerGrid->Add(labelPasswordM, 0, wxALIGN_CENTER_VERTICAL);
-    sizerGrid->Add(textPasswordM, 1, wxEXPAND | wxALIGN_CENTER_VERTICAL);
+    sizerGrid->AddSpacer(textUsernameM->GetSize().GetHeight());
+    sizerGrid->Add(labelUsernameM, 1, wxALIGN_CENTER_VERTICAL);
+    sizerGrid->Add(textUsernameM, 2, wxEXPAND | wxALIGN_CENTER_VERTICAL);
+    sizerGrid->AddSpacer(textPasswordM->GetSize().GetHeight());
+    sizerGrid->Add(labelPasswordM, 1, wxALIGN_CENTER_VERTICAL);
+    sizerGrid->Add(textPasswordM, 2, wxEXPAND | wxALIGN_CENTER_VERTICAL);
     sizerControls->Add(sizerGrid, 0, wxEXPAND);
+    sizerControls->AddSpacer(
+        styleguide().getUnrelatedControlMargin(wxVERTICAL));
+
+    sizerControls->Add(radioTrustedUserM, 0, wxEXPAND);
 
     // create sizer for buttons -> styleguide class will align it correctly
     wxSizer* sizerButtons = styleguide().createButtonSizer(buttonOkM,
@@ -113,8 +134,9 @@ void UsernamePasswordDialog::layoutControls()
 void UsernamePasswordDialog::updateButton()
 {
     bool oldEnabled = buttonOkM->IsEnabled();
-    bool newEnabled = (textUsernameM->GetValue().size() > 0)
-        && (textPasswordM->GetValue().size() > 0);
+    bool newEnabled = ((textUsernameM->GetValue().size() > 0)
+        && (textPasswordM->GetValue().size() > 0))
+        || radioTrustedUserM->GetValue();
     buttonOkM->Enable(newEnabled);
     if (!oldEnabled && newEnabled)
         buttonOkM->SetDefault();
@@ -123,5 +145,35 @@ void UsernamePasswordDialog::updateButton()
 void UsernamePasswordDialog::OnSettingsChange(wxCommandEvent& WXUNUSED(event))
 {
     updateButton();
+}
+//-----------------------------------------------------------------------------
+bool getConnectionCredentials(wxWindow* parentWindow, DatabasePtr database,
+    wxString& username, wxString& password, int flags)
+{
+    wxASSERT(database);
+    username.clear();
+    password.clear();
+    DatabaseAuthenticationMode dam = database->getAuthenticationMode();
+    if (dam.getIgnoreUsernamePassword())
+        return true;
+
+    username = database->getUsername();
+    password = database->getDecryptedPassword();
+    if (!dam.getAlwaysAskForPassword() && !password.empty())
+        return true;
+    return getConnectionCredentials(parentWindow, wxEmptyString,
+        username, password, flags);
+}
+//-----------------------------------------------------------------------------
+bool getConnectionCredentials(wxWindow* parentWindow,
+    const wxString& description, wxString& username, wxString& password,
+    int flags)
+{
+    UsernamePasswordDialog upd(parentWindow, description, username, flags);
+    if (upd.ShowModal() != wxID_OK)
+        return false;
+    username = upd.getUsername();
+    password = upd.getPassword();
+    return true;
 }
 //-----------------------------------------------------------------------------

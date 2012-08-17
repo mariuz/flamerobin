@@ -914,11 +914,13 @@ void Database::create(int pagesize, int dialect)
     if (!charset.empty())
         extra_params << wxT(" DEFAULT CHARACTER SET ") << charset;
 
-    IBPP::Database db1;
-    db1 = IBPP::DatabaseFactory("", wx2std(getConnectionString()),
-        wx2std(getUsername()), wx2std(getDecryptedPassword()), "",
-        wx2std(charset), wx2std(extra_params));
-    db1->Create(dialect);
+    bool useUserNamePwd = !authenticationModeM.getIgnoreUsernamePassword();
+    IBPP::Database db = IBPP::DatabaseFactory("",
+        wx2std(getConnectionString()),
+        (useUserNamePwd ? wx2std(getUsername()) : ""),
+        (useUserNamePwd ? wx2std(getDecryptedPassword()) : ""),
+        "", wx2std(charset), wx2std(extra_params));
+    db->Create(dialect);
 }
 //-----------------------------------------------------------------------------
 void Database::drop()

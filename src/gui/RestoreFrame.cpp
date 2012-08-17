@@ -426,20 +426,9 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     wxCHECK_RET(server,
         wxT("Cannot restore database without assigned server"));
 
-    wxString username = database->getUsername();
-    wxString password = database->getDecryptedPassword();
-    if (password.empty())
-    {
-        UsernamePasswordDialog upd(this, _("Database Credentials"),
-            username, false, // allow different username
-            _("Please enter a valid username and password:"));
-        if (upd.ShowModal() == wxID_OK)
-        {
-            username = upd.getUsername();
-            password = upd.getPassword();
-        }
-    }
-    if (password.empty())
+    wxString username;
+    wxString password;
+    if (!getConnectionCredentials(this, database, username, password))
         return;
 
     int flags = (int)IBPP::brVerbose; // this will be ORed in anyway

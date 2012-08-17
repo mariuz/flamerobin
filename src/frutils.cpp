@@ -163,10 +163,8 @@ bool connectDatabase(Database* db, wxWindow* parent,
     wxString pass(db->getDecryptedPassword());
     if (db->getAuthenticationMode().getAlwaysAskForPassword())
     {
-        // don't allow different username here
-        UsernamePasswordDialog upd(wxGetActiveWindow(),
-            _("Database Credentials"), db->getUsername(), true,
-            _("Please enter the database user's password:"));
+        UsernamePasswordDialog upd(parent, wxEmptyString,
+            db->getUsername(), UsernamePasswordDialog::Default);
         if (upd.ShowModal() != wxID_OK)
             return false;
         pass = upd.getPassword();
@@ -193,19 +191,17 @@ bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
     if (!s->getService(svc, p, sysdba))
     {
         wxString msg;
-        if (sysdba)
-            msg = _("Please enter the database administrator password:");
+        if (p->isCanceled())
+            msg = _("You have canceled the search for usable existing connection credentials.");
         else
-        {
-            if (p->isCanceled())
-                msg = _("You have canceled the search for a usable username and password.");
-            else
-                msg = _("None of the known database credentials could be used.");
-            msg = msg + wxT("\n") + _("Please enter a valid username and password:");
-        }
+            msg = _("None of the known database connection credentials could be used.");
+        if (sysdba)
+            msg = msg = msg + wxT("\n") + _("Please enter connection credentials with administrative rights.");
 
-        UsernamePasswordDialog upd(wxGetActiveWindow(),
-            _("Database Credentials"), wxT("SYSDBA"), sysdba, msg);
+        int flags = UsernamePasswordDialog::AllowTrustedUser
+            | (sysdba ? 0 : UsernamePasswordDialog::AllowOtherUsername);
+        UsernamePasswordDialog upd(wxGetActiveWindow(), msg, wxT("SYSDBA"),
+            flags);
         if (upd.ShowModal() != wxID_OK)
             return false;
         wxString username(upd.getUsername());

@@ -31,14 +31,24 @@
 #include <wx/wx.h>
 
 #include "gui/BaseDialog.h"
+#include "metadata/MetadataClasses.h"
 //-----------------------------------------------------------------------------
 class UsernamePasswordDialog: public BaseDialog {
+public:
+    enum Flags
+    {
+        Default             = 0x00,
+        AllowOtherUsername  = 0x01,
+        AllowTrustedUser    = 0x02,
+    };
 private:
     wxStaticText* labelDescriptionM;
+    wxRadioButton* radioUsernamePasswordM;
     wxStaticText* labelUsernameM;
     wxTextCtrl* textUsernameM;
     wxStaticText* labelPasswordM;
     wxTextCtrl* textPasswordM;
+    wxRadioButton* radioTrustedUserM;
     wxButton* buttonOkM;
     wxButton* buttonCancelM;
 
@@ -47,12 +57,18 @@ private:
 
     void OnSettingsChange(wxCommandEvent& event);
 public:
-    UsernamePasswordDialog(wxWindow* parent, const wxString& title,
-        const wxString& username, bool usernameIsFixed,
-        const wxString& description);
+    UsernamePasswordDialog(wxWindow* parentWindow, const wxString& description,
+        const wxString& username, int flags);
 
     wxString getUsername();
     wxString getPassword();
 };
+//-----------------------------------------------------------------------------
+bool getConnectionCredentials(wxWindow* parentWindow, DatabasePtr database,
+    wxString& username, wxString& password,
+    int flags = UsernamePasswordDialog::Default);
+bool getConnectionCredentials(wxWindow* parentWindow,
+    const wxString& description, wxString& username, wxString& password,
+    int flags = UsernamePasswordDialog::Default);
 //-----------------------------------------------------------------------------
 #endif // USERNAMEPASSWORDDIALOG_H

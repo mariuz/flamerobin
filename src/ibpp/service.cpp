@@ -49,11 +49,6 @@ using namespace ibpp_internals;
 void ServiceImpl::Connect()
 {
 	if (mHandle	!= 0) return;	// Already connected
-	
-	if (mUserName.empty())
-		throw LogicExceptionImpl("Service::Connect", _("Unspecified user name."));
-	if (mUserPassword.empty())
-		throw LogicExceptionImpl("Service::Connect", _("Unspecified user password."));
 
 	// Attach to the Service Manager
 	IBS status;
@@ -63,8 +58,13 @@ void ServiceImpl::Connect()
 	// Build a SPB based on	the	properties
 	spb.Insert(isc_spb_version);
 	spb.Insert(isc_spb_current_version);
-	spb.InsertString(isc_spb_user_name, 1, mUserName.c_str());
-	spb.InsertString(isc_spb_password, 1, mUserPassword.c_str());
+	if (!mUserName.empty())
+	{
+		spb.InsertString(isc_spb_user_name, 1, mUserName.c_str());
+		spb.InsertString(isc_spb_password, 1, mUserPassword.c_str());
+	}
+	else
+		spb.InsertString(isc_spb_trusted_auth, 1, "");
 
 	if (! mServerName.empty())
 	{
