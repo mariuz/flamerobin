@@ -217,6 +217,10 @@ void DatabaseRegistrationDialog::doReadConfigSettings(const wxString& prefix)
             empty);
         if (!selection.empty())
             choice_dialect->SetStringSelection(selection);
+
+        updateAuthenticationMode();
+        updateButtons();
+        updateColors();
     }
 }
 //-----------------------------------------------------------------------------
