@@ -56,6 +56,9 @@ typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
 NodeType getTypeByName(const wxString& name);
 wxString getNameOfType(NodeType type);
 //-----------------------------------------------------------------------------
+void initializeLockCount(MetadataItem* item, unsigned count);
+void initializeLockCount(MetadataItemPtr item, unsigned count);
+//-----------------------------------------------------------------------------
 class MetadataItem: public Subject, public ObjectWithHandle<MetadataItem>,
     public ProcessableObject
 {

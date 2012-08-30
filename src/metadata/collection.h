@@ -33,7 +33,6 @@
 #include <vector>
 
 #include <boost/function.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "metadata/database.h"
@@ -48,6 +47,32 @@ protected:
         : MetadataItem(type, database.get(), name), databaseM(database)
     {
     }
+
+    // helper structs for find_if()
+    struct FindByAddress
+    {
+        MetadataItem* itemM;
+
+        FindByAddress(MetadataItem* item) : itemM(item) {}
+        bool operator()(const MetadataItemPtr item)
+        {
+            wxASSERT(item);
+            return item.get() == itemM;
+        }
+    };
+
+    struct InsertionPosByName
+    {
+        wxString nameM;
+
+        InsertionPosByName(const wxString& name) : nameM(name) {}
+        bool operator()(const MetadataItemPtr item)
+        {
+            wxASSERT(item);
+            return item->getName_() > nameM;
+        }
+    };
+
 public:
     virtual DatabasePtr getDatabase() const
     {
@@ -79,26 +104,6 @@ private:
         return itemsM.end();
     }
 
-    // helper structs for find_if()
-    struct FindByAddress
-    {
-        MetadataItem* itemM;
-
-        FindByAddress(MetadataItem* item) : itemM(item) {}
-        bool operator()(const ItemType& item) { return item.get() == itemM; }
-    };
-
-    struct InsertionPosByName
-    {
-        wxString nameM;
-
-        InsertionPosByName(const wxString& name) : nameM(name) {}
-        bool operator()(const ItemType item)
-        {
-            return item->getName_() > nameM;
-        }
-    };
-
 protected:
     MetadataCollection<T>(NodeType type, DatabasePtr database,
             const wxString& name)
@@ -114,8 +119,7 @@ public:
         iterator pos = std::find_if(itemsM.begin(), itemsM.end(),
             InsertionPosByName(name));
         ItemType item(new T(getDatabase(), name));
-        for (unsigned int i = getLockCount(); i > 0; i--)
-            item->lockSubject();
+        initializeLockCount(item, getLockCount());
         itemsM.insert(pos, item);
         notifyObservers();
         return item;
@@ -145,10 +149,9 @@ public:
             iterator oldPos = getPosition(itemName);
             if (oldPos == itemsM.end())
             {
-                ItemType item = boost::make_shared<T>(database, names[i]);
+                ItemType item(new T(database, names[i]));
                 newItems.push_back(item);
-                for (unsigned int j = getLockCount(); j > 0; j--)
-                    item->lockSubject();
+                initializeLockCount(item, getLockCount());
             }
             else
                 newItems.push_back(*oldPos);

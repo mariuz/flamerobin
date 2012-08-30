@@ -39,8 +39,6 @@
     #pragma hdrstop
 #endif
 
-#include <boost/make_shared.hpp>
-
 #include "core/FRError.h"
 #include "core/ProgressIndicator.h"
 #include "core/StringUtils.h"
@@ -428,9 +426,8 @@ void Domains::load(ProgressIndicator* progressIndicator)
             DomainPtr domain = findByName(name);
             if (!domain)
             {
-                domain = boost::make_shared<Domain>(db, name);
-                for (unsigned int j = getLockCount(); j > 0; j--)
-                    domain->lockSubject();
+                domain.reset(new Domain(db, name));
+                initializeLockCount(domain, getLockCount());
             }
             domains.push_back(domain);
             domain->loadProperties(st1, converter);

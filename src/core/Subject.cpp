@@ -122,7 +122,7 @@ void Subject::notifyObservers()
 //-----------------------------------------------------------------------------
 void Subject::lockSubject()
 {
-    if (!locksCountM)
+    if (!isLocked())
         lockedChanged(true);
     ++locksCountM;
 }

@@ -52,6 +52,20 @@
 #include "metadata/trigger.h"
 #include "metadata/view.h"
 //-----------------------------------------------------------------------------
+void initializeLockCount(MetadataItem* item, unsigned count)
+{
+    if (item != 0 && count > 0)
+    {
+        for (unsigned i = 0; i < count; ++i)
+            item->lockSubject();
+    }
+}
+//-----------------------------------------------------------------------------
+void initializeLockCount(MetadataItemPtr item, unsigned count)
+{
+    initializeLockCount(item.get(), count);
+}
+//-----------------------------------------------------------------------------
 template<>
 ObjectWithHandle<MetadataItem>::HandleMap ObjectWithHandle<MetadataItem>::handleMap = ObjectWithHandle<MetadataItem>::HandleMap();
 template<>

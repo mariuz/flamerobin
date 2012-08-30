@@ -237,8 +237,7 @@ void Relation::loadChildren()
         if (!col)
         {
             col.reset(new Column(this, fname));
-            for (unsigned i = getLockCount(); i > 0; i--)
-                col->lockSubject();
+            initializeLockCount(col, getLockCount());
         }
         columns.push_back(col);
         col->initialize(notnull, source, computedSrc, collation,

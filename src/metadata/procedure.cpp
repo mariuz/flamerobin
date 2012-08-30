@@ -124,8 +124,7 @@ void Procedure::loadChildren()
         if (!par)
         {
             par.reset(new Parameter(this, param_name));
-            for (unsigned i = getLockCount(); i > 0; i--)
-                par->lockSubject();
+            initializeLockCount(par, getLockCount());
         }
         parameters.push_back(par);
         par->initialize(source, partype, mechanism, defaultSrc, hasDefault,

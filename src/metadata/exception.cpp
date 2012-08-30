@@ -173,9 +173,8 @@ void Exceptions::load(ProgressIndicator* progressIndicator)
             ExceptionPtr exception = findByName(name);
             if (!exception)
             {
-                exception = boost::make_shared<Exception>(db, name);
-                for (unsigned int j = getLockCount(); j > 0; j--)
-                    exception->lockSubject();
+                exception.reset(new Exception(db, name));
+                initializeLockCount(exception, getLockCount());
             }
             exceptions.push_back(exception);
             exception->loadProperties(st1, converter);

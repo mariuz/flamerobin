@@ -1016,6 +1016,7 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
     if (connectedM)
         return;
 
+    SubjectLocker lock(this);
     try
     {
         if (indicator)
@@ -1067,18 +1068,32 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             createCharsetConverter();
 
             DatabasePtr me(shared_from_this());
+            unsigned lockCount = getLockCount();
+
             userDomainsM.reset(new Domains(me));
+            initializeLockCount(userDomainsM, lockCount);
             sysDomainsM.reset(new SysDomains(me));
+            initializeLockCount(sysDomainsM, lockCount);
             exceptionsM.reset(new Exceptions(me));
+            initializeLockCount(exceptionsM, lockCount);
             functionsM.reset(new Functions(me));
+            initializeLockCount(functionsM, lockCount);
             generatorsM.reset(new Generators(me));
+            initializeLockCount(generatorsM, lockCount);
             proceduresM.reset(new Procedures(me));
+            initializeLockCount(proceduresM, lockCount);
             rolesM.reset(new Roles(me));
+            initializeLockCount(rolesM, lockCount);
             sysRolesM.reset(new SysRoles(me));
+            initializeLockCount(sysRolesM, lockCount);
             triggersM.reset(new Triggers(me));
+            initializeLockCount(triggersM, lockCount);
             tablesM.reset(new Tables(me));
+            initializeLockCount(tablesM, lockCount);
             sysTablesM.reset(new SysTables(me));
+            initializeLockCount(sysTablesM, lockCount);
             viewsM.reset(new Views(me));
+            initializeLockCount(viewsM, lockCount);
 
             // first start a transaction for metadata loading, then lock the
             // database
