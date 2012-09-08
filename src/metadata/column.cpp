@@ -109,21 +109,14 @@ DomainPtr ColumnBase::getDomain() const
     return (db) ? db->getDomain(sourceM) : DomainPtr();
 }
 //-----------------------------------------------------------------------------
-wxString ColumnBase::getDefault() const
+bool ColumnBase::getDefault(wxString& value) const
 {
     if (hasDefaultM)
-        return defaultM;
-    if (DomainPtr d = getDomain())
-        return d->getDefault();
-    return wxEmptyString;
-}
-//-----------------------------------------------------------------------------
-bool ColumnBase::hasDefault() const
-{
-    if (hasDefaultM)
+    {
+        value = defaultM;
         return true;
-    if (DomainPtr d = getDomain())
-        return d->hasDefault();
+    }
+    value = wxEmptyString;
     return false;
 }
 //-----------------------------------------------------------------------------

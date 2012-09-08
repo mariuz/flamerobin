@@ -46,8 +46,7 @@ public:
 
     wxString getDatatype(bool useConfig = true);
     DomainPtr getDomain() const;
-    wxString getDefault() const;
-    bool hasDefault() const;
+    bool getDefault(wxString& value) const;
     wxString getSource() const;
     virtual bool isNullable() const;
 };

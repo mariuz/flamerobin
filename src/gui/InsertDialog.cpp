@@ -51,6 +51,7 @@
 #include "gui/StyleGuide.h"
 #include "metadata/column.h"
 #include "metadata/database.h"
+#include "metadata/domain.h"
 #include "metadata/generator.h"
 #include "metadata/procedure.h"
 #include "metadata/table.h"
@@ -113,6 +114,22 @@ namespace InsertOptions
 
 };
 using namespace InsertOptions;
+//-----------------------------------------------------------------------------
+inline bool getColumnOrDomainDefault(Column* column, wxString& defaultValue)
+{
+    defaultValue = wxEmptyString;
+    if (column)
+    {
+        bool hasDefault = column->getDefault(defaultValue);
+        if (!hasDefault)
+        {
+            if (DomainPtr dom = column->getDomain())
+                hasDefault = dom->getDefault(defaultValue);
+        }
+        return hasDefault;
+    }
+    return false;
+}
 //-----------------------------------------------------------------------------
 Generator *findAutoincGenerator(std::vector<Trigger *>& triggers, Column *c)
 {
@@ -233,10 +250,11 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
         gridM->SetCellAlignment(
             def->isNumeric() ? wxALIGN_RIGHT : wxALIGN_LEFT, row, 3);
 
-        if (c->hasDefault())
+        wxString defaultValue;
+        if (getColumnOrDomainDefault(c, defaultValue))
         {
             gridM->SetCellValue(row, 2, insertOptionStrings[ioDefault]);
-            gridM->SetCellValue(row, 3, c->getDefault());
+            gridM->SetCellValue(row, 3, defaultValue);
             updateControls(row);
         }
         else
@@ -691,7 +709,11 @@ void InsertDialog::OnGridCellChange(wxGridEvent& event)
             setStringOption(columnsM[row], ::wxFileSelector(_("Select a file")));
 
         if (option == ioDefault)
-            setStringOption(columnsM[row], columnsM[row].column->getDefault());
+        {
+            wxString defaultValue;
+            getColumnOrDomainDefault(columnsM[row].column, defaultValue);
+            setStringOption(columnsM[row], defaultValue);
+        }
 
         if (option == ioGenerator)
         {

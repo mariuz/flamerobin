@@ -275,12 +275,6 @@ wxString Domain::dataTypeToString(short datatype, short scale, short precision,
     return retval;
 }
 //-----------------------------------------------------------------------------
-wxString Domain::getDefault()
-{
-    ensurePropertiesLoaded();
-    return defaultM;
-}
-//-----------------------------------------------------------------------------
 wxString Domain::getCollation()
 {
     ensurePropertiesLoaded();
@@ -293,16 +287,22 @@ wxString Domain::getCheckConstraint()
     return checkM;
 }
 //-----------------------------------------------------------------------------
+bool Domain::getDefault(wxString& value)
+{
+    ensurePropertiesLoaded();
+    if (hasDefaultM)
+    {
+        value = defaultM;
+        return true;
+    }
+    value = wxEmptyString;
+    return false;
+}
+//-----------------------------------------------------------------------------
 bool Domain::isNullable()
 {
     ensurePropertiesLoaded();
     return !isNotNullM;
-}
-//-----------------------------------------------------------------------------
-bool Domain::hasDefault()
-{
-    ensurePropertiesLoaded();
-    return hasDefaultM;
 }
 //-----------------------------------------------------------------------------
 void Domain::getDatatypeParts(wxString& type, wxString& size, wxString& scale)

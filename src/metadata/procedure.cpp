@@ -292,7 +292,6 @@ wxString Procedure::getAlterSql(bool full)
         for (ParameterPtrs::const_iterator it = parametersM.begin();
             it != parametersM.end(); ++it)
         {
-            bool mechanismIsTypeOf = false;
             wxString charset;
             wxString param = (*it)->getQuotedName() + wxT(" ");
             if (DomainPtr dm = (*it)->getDomain())
@@ -311,8 +310,7 @@ wxString Procedure::getAlterSql(bool full)
                 }
                 else
                 {
-                    mechanismIsTypeOf = (*it)->getMechanism() == 1;
-                    if (mechanismIsTypeOf)
+                    if ((*it)->getMechanism() == 1)
                         param += wxT("TYPE OF ");
                     param += dm->getQuotedName();
                 }
@@ -335,8 +333,9 @@ wxString Procedure::getAlterSql(bool full)
                 else
                     input += wxT(",\n    ");
                 input += param;
-                if ((*it)->hasDefault() && !mechanismIsTypeOf)
-                    input += wxT(" DEFAULT ") + (*it)->getDefault();
+                wxString defaultValue;
+                if ((*it)->getDefault(defaultValue))
+                    input += wxT(" DEFAULT ") + defaultValue;
                 input += charset;
             }
         }

@@ -122,9 +122,9 @@ void CreateDDLVisitor::visitColumn(Column& c)
     else
         preSqlM <<  c.getSource();  // shouldn't happen
 
-    wxString defaultVal = c.getDefault();
-    if (!defaultVal.IsEmpty())
-        preSqlM << wxT(" DEFAULT ") << defaultVal;
+    wxString defaultValue;
+    if (c.getDefault(defaultValue))
+        preSqlM << wxT(" DEFAULT ") << defaultValue;
     if (c.hasNotNullConstraint())
         preSqlM << wxT(" NOT NULL");
     if (!collate.IsEmpty())
@@ -238,9 +238,9 @@ void CreateDDLVisitor::visitDomain(Domain& d)
     if (!charset.IsEmpty() && (!db || db->getDatabaseCharset() != charset))
         preSqlM += wxT(" CHARACTER SET ") + charset;
     preSqlM += wxT("\n");
-    wxString dflt(d.getDefault());
-    if (!dflt.IsEmpty())
-        preSqlM += wxT(" DEFAULT ") + dflt + wxT("\n");
+    wxString defaultValue;
+    if (d.getDefault(defaultValue))
+        preSqlM += wxT(" DEFAULT ") + defaultValue + wxT("\n");
     if (!d.isNullable())
         preSqlM += wxT(" NOT NULL\n");
     wxString check = d.getCheckConstraint();

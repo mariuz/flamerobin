@@ -56,12 +56,11 @@ public:
 
     void getDatatypeParts(wxString& type, wxString& size, wxString& scale);
     wxString getDatatypeAsString();
-    wxString getDefault();
     wxString getCollation();
     wxString getCheckConstraint();
     wxString getCharset();
+    bool getDefault(wxString& value);
     bool isNullable();
-    bool hasDefault();
     bool isString();
     bool isSystem() const;
     wxString getAlterSqlTemplate() const;

@@ -541,14 +541,17 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         }
         else if (cmdParams[0] == wxT("default_expression"))
         {
-            wxString def(cb->getDefault());
-            def.Trim(false);
-            if (def.Upper().StartsWith(wxT("DEFAULT")))
+            wxString defaultValue;
+            if (cb->getDefault(defaultValue))
             {
-                def.Remove(0, 7);
-                def.Trim(false);
+                defaultValue.Trim(false);
+                if (defaultValue.Upper().StartsWith(wxT("DEFAULT")))
+                {
+                    defaultValue.Remove(0, 7);
+                    defaultValue.Trim(false);
+                }
+                processedText += tp->escapeChars(defaultValue, false);
             }
-            processedText += tp->escapeChars(def, false);
         }
     }
 
