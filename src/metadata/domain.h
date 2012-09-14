@@ -54,7 +54,7 @@ public:
     static wxString dataTypeToString(short datatype, short scale,
         short precision, short subtype, short length);
 
-    static wxString trimDefaultValue(const wxString& default);
+    static wxString trimDefaultValue(const wxString& value);
 
     void getDatatypeParts(wxString& type, wxString& size, wxString& scale);
     wxString getDatatypeAsString();
