@@ -106,6 +106,22 @@ void Domain::loadProperties()
     loadProperties(st1, converter);
 }
 //-----------------------------------------------------------------------------
+/*static*/
+wxString Domain::trimDefaultValue(const wxString& value)
+{
+    // Some users reported two spaces before DEFAULT word in source
+    // Also, equals sign is also allowed in newer FB versions
+    // Trim(false) is trim-left
+    wxString defValue(value);
+    defValue.Trim(false);
+    if (defValue.Upper().StartsWith(wxT("DEFAULT")))
+        defValue.Remove(0, 7);
+    else if (defValue.StartsWith(wxT("=")))
+        defValue.Remove(0, 1);
+    defValue.Trim(false);
+    return defValue;
+}
+//-----------------------------------------------------------------------------
 void Domain::loadProperties(IBPP::Statement& statement, wxMBConv* converter)
 {
     setPropertiesLoaded(false);
@@ -151,15 +167,10 @@ void Domain::loadProperties(IBPP::Statement& statement, wxMBConv* converter)
     if (hasDefaultM)
     {
         readBlob(statement, 10, defaultM, converter);
-
-        // Some users reported two spaces before DEFAULT word in source
-        // Also, equals sign is also allowed in newer FB versions
-        // Trim(false) is trim-left
-        if (defaultM.Trim(false).Upper().StartsWith(wxT("DEFAULT")))
-            defaultM.Remove(0, 8);
-        else if (defaultM.StartsWith(wxT("="))) // "=" or "= "
-            defaultM.Remove(0, 1).Trim(false);
+        defaultM = trimDefaultValue(defaultM);
     }
+    else
+        defaultM = wxEmptyString;
 
     if (statement->IsNull(11))
         collationM = wxEmptyString;

@@ -125,26 +125,23 @@ wxString ColumnBase::getSource() const
     return sourceM;
 }
 //-----------------------------------------------------------------------------
+template<typename T>
+inline void setIfChanged(T& value, const T& newValue, bool& changed)
+{
+    if (value != newValue)
+    {
+        value = newValue;
+        changed = true;
+    }
+}
+//-----------------------------------------------------------------------------
 void ColumnBase::initialize(const wxString& source,
     const wxString& defaultValue, bool hasDefault, bool hasDescription)
 {
     bool changed = false;
-    wxString strippedSrc = source.Strip(wxString::both);
-    if (sourceM != strippedSrc)
-    {
-        sourceM = strippedSrc;
-        changed = true;
-    }
-    if (defaultM != defaultValue)
-    {
-        defaultM = defaultValue;
-        changed = true;
-    }
-    if (hasDefaultM != hasDefault)
-    {
-        hasDefaultM = hasDefault;
-        changed = true;
-    }
+    setIfChanged(sourceM, source.Strip(wxString::both), changed);
+    setIfChanged(defaultM, Domain::trimDefaultValue(defaultValue), changed);
+    setIfChanged(hasDefaultM, hasDefault, changed);
     if (!hasDescription)
         setDescriptionIsEmpty();
     if (changed)

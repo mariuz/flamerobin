@@ -54,6 +54,8 @@ public:
     static wxString dataTypeToString(short datatype, short scale,
         short precision, short subtype, short length);
 
+    static wxString trimDefaultValue(const wxString& default);
+
     void getDatatypeParts(wxString& type, wxString& size, wxString& scale);
     wxString getDatatypeAsString();
     wxString getCollation();

@@ -44,6 +44,7 @@
 #include "metadata/CreateDDLVisitor.h"
 #include "metadata/column.h"
 #include "metadata/database.h"
+#include "metadata/domain.h"
 #include "metadata/exception.h"
 #include "metadata/function.h"
 #include "metadata/generator.h"
@@ -544,12 +545,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             wxString defaultValue;
             if (cb->getDefault(defaultValue))
             {
-                defaultValue.Trim(false);
-                if (defaultValue.Upper().StartsWith(wxT("DEFAULT")))
-                {
-                    defaultValue.Remove(0, 7);
-                    defaultValue.Trim(false);
-                }
+                defaultValue = Domain::trimDefaultValue(defaultValue);
                 processedText += tp->escapeChars(defaultValue, false);
             }
         }
@@ -598,7 +594,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             }
             else
                 paramCount = p->getParamCount();
-            
+
             processedText += tp->escapeChars(
                 wxString::Format(wxT("%d"), paramCount), false);
         }
