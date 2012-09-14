@@ -259,7 +259,7 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
         }
         else
         {
-            if (c->isNullable())
+            if (c->isNullable(CheckDomainNullability))
             {
                 gridM->SetCellValue(row, 2, insertOptionStrings[ioNull]);
                 updateControls(row);

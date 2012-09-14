@@ -39,7 +39,7 @@ class Domain: public MetadataItem
 {
 private:
     short datatypeM, subtypeM, lengthM, precisionM, scaleM;
-    bool isNotNullM, hasDefaultM;
+    bool nullableM, hasDefaultM;
     wxString charsetM, defaultM, collationM, checkM;
 
     static std::string getLoadStatement(bool list);

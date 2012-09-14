@@ -364,7 +364,7 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
         }
 
         // not null option changed ?
-        if (isNullable != columnM->isNullable())
+        if (isNullable != columnM->isNullable(CheckDomainNullability))
         {
             if (!isNullable) // change from NULL to NOT NULL
                 update_not_null = unnBefore;
@@ -554,7 +554,8 @@ void FieldPropertiesDialog::updateColumnControls()
     if (columnM)
     {
         textctrl_fieldname->SetValue(columnM->getQuotedName());
-        checkbox_notnull->SetValue(!columnM->isNullable());
+        checkbox_notnull->SetValue(
+            !columnM->isNullable(CheckDomainNullability));
         choice_domain->SetSelection(
             choice_domain->FindString(columnM->getSource()));
         updateDomainControls();

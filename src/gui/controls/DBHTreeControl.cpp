@@ -345,7 +345,7 @@ void DBHTreeItemVisitor::visitColumn(Column& column)
         nodeTextM.Truncate(nl);
         nodeTextM += wxT("...");
     }
-    if (!column.isNullable())
+    if (!column.isNullable(CheckDomainNullability))
     {
         nodeTextM << wxT(" ") << SqlTokenizer::getKeyword(kwNOT)
             << wxT(" ") << SqlTokenizer::getKeyword(kwNULL);
@@ -454,6 +454,11 @@ void DBHTreeItemVisitor::visitParameter(Parameter& parameter)
     bool isOutput = parameter.isOutputParameter();
     nodeTextM = (isOutput ? wxT("out ") : wxT("in "))
         + parameter.getName_() + wxT(" ") + parameter.getDatatype();
+    if (!parameter.isNullable(CheckDomainNullability))
+    {
+        nodeTextM << wxT(" ") << SqlTokenizer::getKeyword(kwNOT)
+            << wxT(" ") << SqlTokenizer::getKeyword(kwNULL);
+    }
     // set remaining default properties, nodeTextM will not be touched
     setNodeProperties(&parameter,
         isOutput ? ART_ParameterOutput : ART_ParameterInput);

@@ -161,7 +161,7 @@ void Domain::loadProperties(IBPP::Statement& statement, wxMBConv* converter)
         statement->Get(7, s);
         charsetM = std2wxIdentifier(s, converter);
     }
-    isNotNullM = !statement->IsNull(9);
+    nullableM = statement->IsNull(9);
 
     hasDefaultM = !statement->IsNull(10);
     if (hasDefaultM)
@@ -313,7 +313,7 @@ bool Domain::getDefault(wxString& value)
 bool Domain::isNullable()
 {
     ensurePropertiesLoaded();
-    return !isNotNullM;
+    return nullableM;
 }
 //-----------------------------------------------------------------------------
 void Domain::getDatatypeParts(wxString& type, wxString& size, wxString& scale)

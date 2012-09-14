@@ -135,21 +135,29 @@ inline void setIfChanged(T& value, const T& newValue, bool& changed)
     }
 }
 //-----------------------------------------------------------------------------
-void ColumnBase::initialize(const wxString& source,
+void ColumnBase::initialize(const wxString& source, bool nullable,
     const wxString& defaultValue, bool hasDefault, bool hasDescription)
 {
     bool changed = false;
     setIfChanged(sourceM, source.Strip(wxString::both), changed);
     setIfChanged(defaultM, Domain::trimDefaultValue(defaultValue), changed);
     setIfChanged(hasDefaultM, hasDefault, changed);
+    setIfChanged(nullableM, nullable, changed);
     if (!hasDescription)
         setDescriptionIsEmpty();
     if (changed)
         notifyObservers();
 }
 //-----------------------------------------------------------------------------
-bool ColumnBase::isNullable() const
+bool ColumnBase::isNullable(NullabilityCheckType checkDomain) const
 {
+    if (!nullableM)
+        return false;
+    if (checkDomain == CheckDomainNullability)
+    {
+        if (DomainPtr d = getDomain())
+            return d->isNullable();
+    }
     return true;
 }
 //-----------------------------------------------------------------------------
@@ -158,47 +166,20 @@ Column::Column(Relation* relation, const wxString& name)
 {
 }
 //-----------------------------------------------------------------------------
-void Column::initialize(bool notnull, const wxString& source,
-    const wxString& computedSource, const wxString& collation,
+void Column::initialize(const wxString& source, const wxString& computedSource,
+    const wxString& collation, bool nullable,
     const wxString& defaultValue, bool hasDefault, bool hasDescription)
 {
     SubjectLocker lock(this);
 
-    ColumnBase::initialize(source, defaultValue, hasDefault, hasDescription);
+    ColumnBase::initialize(source, nullable, defaultValue, hasDefault,
+        hasDescription);
 
     bool changed = false;
-    if (notnullM != notnull)
-    {
-        notnullM = notnull;
-        changed = true;
-    }
-    if (computedSourceM != computedSource)
-    {
-        computedSourceM = computedSource;
-        changed = true;
-    }
-    wxString strippedColl = collation.Strip(wxString::both);
-    if (collationM != strippedColl)
-    {
-        collationM = strippedColl;
-        changed = true;
-    }
+    setIfChanged(computedSourceM, computedSource, changed);
+    setIfChanged(collationM, collation.Strip(wxString::both), changed);
     if (changed)
         notifyObservers();
-}
-//-----------------------------------------------------------------------------
-bool Column::isNullable() const
-{
-    if (notnullM)
-        return false;
-    if (DomainPtr d = getDomain())
-        return d->isNullable();
-    return true;
-}
-//-----------------------------------------------------------------------------
-bool Column::hasNotNullConstraint() const
-{
-    return notnullM;
 }
 //-----------------------------------------------------------------------------
 bool Column::isPrimaryKey() const

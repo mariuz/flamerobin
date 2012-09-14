@@ -533,11 +533,11 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         else if (cmdParams[0] == wxT("is_nullable"))
         {
             processedText += tp->escapeChars(getBooleanAsString(
-                cb->isNullable()));
+                cb->isNullable(CheckDomainNullability)));
         }
         else if (cmdParams[0] == wxT("null_option"))
         {
-            if (!cb->isNullable())
+            if (!cb->isNullable(CheckDomainNullability))
                 processedText += tp->escapeChars(wxT("not null"));
         }
         else if (cmdParams[0] == wxT("default_expression"))

@@ -31,16 +31,19 @@
 
 #include "metadata/metadataitem.h"
 //-----------------------------------------------------------------------------
+enum NullabilityCheckType { CheckDomainNullability, IgnoreDomainNullability };
+//-----------------------------------------------------------------------------
 class ColumnBase: public MetadataItem
 {
 private:
-    bool hasDefaultM;
     wxString defaultM;
+    bool hasDefaultM;
+    bool nullableM;
     wxString sourceM;
 protected:
     virtual wxString getComputedSource() const;
-    void initialize(const wxString& source, const wxString& defaultValue,
-        bool hasDefault, bool hasDescription);
+    void initialize(const wxString& source, bool nullable,
+        const wxString& defaultValue, bool hasDefault, bool hasDescription);
 public:
     ColumnBase(NodeType type, MetadataItem* parent, const wxString& name);
 
@@ -48,27 +51,23 @@ public:
     DomainPtr getDomain() const;
     bool getDefault(wxString& value) const;
     wxString getSource() const;
-    virtual bool isNullable() const;
+    bool isNullable(NullabilityCheckType checkDomain) const;
 };
 //-----------------------------------------------------------------------------
 class Column: public ColumnBase
 {
 private:
-    bool notnullM, computedM;
+    bool computedM;
     wxString sourceM, computedSourceM, collationM;
 public:
     Column(Relation* relation, const wxString& name);
 
-    void initialize(bool notnull, const wxString& source,
-        const wxString& computedSource, const wxString& collation,
+    void initialize(const wxString& source, const wxString& computedSource,
+        const wxString& collation, bool nullable,
         const wxString& defaultValue, bool hasDefault, bool hasDescription);
     virtual const wxString getTypeName() const;
     virtual wxString getDropSqlStatement() const;
 
-    // isNullable() checks the underlying domain (if any) as well,
-    // while hasNotNullConstraint() doesn't (necessary for DDL creation)
-    virtual bool isNullable() const;
-    bool hasNotNullConstraint() const;
     bool isForeignKey() const;
     bool isPrimaryKey() const;
     bool isString() const;

@@ -40,7 +40,9 @@ public:
     Parameter(Procedure* procedure, const wxString& name);
 
     void initialize(const wxString& source, int parameterType, int mechanism,
-        const wxString& defaultValue, bool hasDefault, bool hasDescription);
+        bool nullable, const wxString& defaultValue, bool hasDefault,
+        bool hasDescription);
+
     int getMechanism() const;
     bool isOutputParameter() const;
 

@@ -1702,7 +1702,7 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
         Column* c = t->findColumn(cn).get();
         readOnly = (c == 0 || !c->getComputedSource().empty());
         if (!readOnly)  // it is editable, so check if nullable
-            nullable = c->isNullable();
+            nullable = c->isNullable(CheckDomainNullability);
     }
 
     /* wxMessageBox(wxString::Format(wxT("TABLE: %s (RO=%d), COLUMN: %s (RO=%d, NULL=%d)"),

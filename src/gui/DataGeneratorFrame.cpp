@@ -626,7 +626,7 @@ GeneratorSettings* DataGeneratorFrame::getSettings(Column *c)
     GeneratorSettings *gs = new GeneratorSettings;
     settingsM.insert(std::pair<wxString, GeneratorSettings*>(s, gs));
     gs->randomValues = !isUnique;
-    gs->nullPercent = (c->isNullable() ? 50 : 0);
+    gs->nullPercent = (c->isNullable(CheckDomainNullability) ? 50 : 0);
     gs->valueType = GeneratorSettings::vtRange;
     gs->range = getDefaultRange(c->getDomain().get());
     if (!c->getComputedSource().IsEmpty())
