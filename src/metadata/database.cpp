@@ -1109,13 +1109,20 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
                 checkProgressIndicatorCanceled(indicator);
                 // load database charset
                 IBPP::Statement& st1 = loader->getStatement(
-                    "select rdb$character_set_name from rdb$database");
+                    "select rdb$character_set_name, current_user, current_role "
+                    "from rdb$database");
                 st1->Execute();
                 if (st1->Fetch())
                 {
                     std::string s;
                     st1->Get(1, s);
                     databaseCharsetM = std2wxIdentifier(s, getCharsetConverter());
+                    st1->Get(2, s);
+                    connectionUserM = std2wxIdentifier(s, getCharsetConverter());
+                    st1->Get(3, s);
+                    connectionRoleM = std2wxIdentifier(s, getCharsetConverter());
+                    if (connectionRoleM == wxT("NONE"))
+                        connectionRoleM.clear();
                 }
                 checkProgressIndicatorCanceled(indicator);
                 // load database information
@@ -1469,20 +1476,27 @@ wxString Database::getConnectionCharset() const
 //-----------------------------------------------------------------------------
 wxString Database::getConnectionInfoString() const
 {
-    wxString info;
+    wxString username(getUsername());
     if (authenticationModeM.getIgnoreUsernamePassword())
-        info = _("[Trusted user]");
-    else
-        info = getUsername();
-    info += wxT("@") + getConnectionString() + wxT(" (")
-        + getConnectionCharset() + wxT(")");
-    return info;
+    {
+        if (connectedM)
+        {
+            username = wxT("[") + connectionUserM;
+            if (!connectionRoleM.empty())
+                username += wxT(" (") + connectionRoleM + wxT(")");
+            username += wxT("]");
+        }
+        else
+            username = _("[Trusted user]");
+    }
+    return wxString(username + wxT("@") + getConnectionString() + wxT(" (")
+        + getConnectionCharset() + wxT(")"));
 }
 //-----------------------------------------------------------------------------
 bool Database::usesDifferentConnectionCharset() const
 {
     wxString charset(getConnectionCharset().Upper());
-    if (databaseCharsetM.IsEmpty() && charset == wxT("NONE"))
+    if (databaseCharsetM.empty() && charset == wxT("NONE"))
         return false;
     return (charset.compare(databaseCharsetM.Upper()) != 0);
 }

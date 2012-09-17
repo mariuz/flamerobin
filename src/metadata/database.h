@@ -160,6 +160,8 @@ private:
 
     bool connectedM;
     wxString databaseCharsetM;
+    wxString connectionUserM;
+    wxString connectionRoleM;
 
     wxString pathM;
     Credentials credentialsM;

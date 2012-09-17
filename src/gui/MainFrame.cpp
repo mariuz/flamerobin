@@ -903,7 +903,10 @@ void MainFrame::OnMenuDatabaseRegistrationInfo(wxCommandEvent& WXUNUSED(event))
     DatabaseRegistrationDialog drd(this, _("Database Registration Info"));
     drd.setDatabase(d);
     if (drd.ShowModal() == wxID_OK)
+    {
         rootM->save();
+        updateStatusbarText();
+    }
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuCreateDatabase(wxCommandEvent& WXUNUSED(event))
@@ -1146,7 +1149,10 @@ bool MainFrame::tryAutoConnectDatabase(DatabasePtr database)
         AdvancedMessageDialogButtonsYesNoCancel(_("C&onnect"), _("Do&n't connect")),
         config(), wxT("DIALOG_ConfirmAutoConnect"), _("Don't ask again, &always (don't) connect"));
     if (res == wxYES)
+    {
         connect();
+        updateStatusbarText();
+    }
     return database->isConnected();
 }
 //-----------------------------------------------------------------------------
