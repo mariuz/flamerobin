@@ -426,13 +426,21 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
         wxString s = ::wxGetTextFromUser(
             _("Enter value for existing fields containing NULL"),
             _("Update Existing NULL Values"), wxT(""), this);
-        wxString sqlAdd = wxT("UPDATE ") + tableM->getQuotedName()
-            + wxT(" \nSET ") + colNameSql + wxT(" = '") + s
-            + wxT("' \nWHERE ") + colNameSql + wxT(" IS NULL;\n");
         if (update_not_null == unnBefore)
-            statements = sqlAdd + statements;
-        else
-            statements += wxT("COMMIT;\n") + sqlAdd;
+		{
+			wxString origColumnName = columnM->getQuotedName();
+	        statements = wxT("UPDATE ") + tableM->getQuotedName()
+		        + wxT(" \nSET ") + origColumnName + wxT(" = '") + s
+				+ wxT("' \nWHERE ") + origColumnName + wxT(" IS NULL;\n")
+				+ statements;
+		}
+		else
+		{
+			statements = statements + wxT("COMMIT;\n")
+				+ wxT("UPDATE ") + tableM->getQuotedName()
+		        + wxT(" \nSET ") + colNameSql + wxT(" = '") + s
+				+ wxT("' \nWHERE ") + colNameSql + wxT(" IS NULL;\n");
+		}
     }
     statements += textctrl_sql->GetValue();
     return !statements.IsEmpty();
