@@ -214,7 +214,9 @@ void Relation::loadChildren()
         std::string s, coll;
         st1->Get(1, s);
         wxString fname(std2wxIdentifier(s, converter));
-        bool nullable = st1->IsNull(2);
+        bool notNull = false;
+        if (!st1->IsNull(2))
+            st1->Get(2, &notNull);
         st1->Get(3, s);
         wxString source(std2wxIdentifier(s, converter));
         if (!st1->IsNull(4))
@@ -240,7 +242,7 @@ void Relation::loadChildren()
             initializeLockCount(col, getLockCount());
         }
         columns.push_back(col);
-        col->initialize(source, computedSrc, collation, nullable,
+        col->initialize(source, computedSrc, collation, !notNull,
             defaultSrc, hasDefault, hasDescription);
     }
 

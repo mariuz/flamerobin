@@ -116,7 +116,9 @@ void Procedure::loadChildren()
             st1->Get(4, s);
             defaultSrc = std2wxIdentifier(s, converter);
         }
-        bool nullable = st1->IsNull(5);
+        bool notNull = false;
+        if (!st1->IsNull(5))
+            st1->Get(5, &notNull);
         if (!st1->IsNull(6))
             st1->Get(6, mechanism);
         bool hasDescription = !st1->IsNull(7);
@@ -128,7 +130,7 @@ void Procedure::loadChildren()
             initializeLockCount(par, getLockCount());
         }
         parameters.push_back(par);
-        par->initialize(source, partype, mechanism, nullable, defaultSrc,
+        par->initialize(source, partype, mechanism, !notNull, defaultSrc,
             hasDefault, hasDescription);
     }
 
