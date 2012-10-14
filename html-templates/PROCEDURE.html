@@ -11,34 +11,42 @@ Owner: {%owner_name%}<br>
 {%object_description%} [<a
  href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=PROCEDURE&amp;object_name={%object_name%}">edit</a>]
 <br><br>
-<table cellspacing=1 cellpadding=2 border=0 bgcolor=black width="98%">
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=black>
   <tbody>
     <tr bgcolor="navy">
       <td nowrap><b><font color=white>Input parameter</font></b></td>
       <td nowrap><b><font color=white>Type</font></b></td>
+      <td><b><font color=white>Not Null</font></b></td>
+      <td><b><font color=white>Default</font></b></td>
       <td nowrap><b><font color=white>Description</font></b></td>
     </tr>
     {%foreach:parameter::input:
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
       <td nowrap valign="top">{%object_name%}</td>
       <td nowrap valign="top">{%columninfo:datatype%}</td>
+      <td nowrap valign="top"><center>{%ifeq:{%columninfo:is_nullable%}:false:<img src="{%template_root%}ok.png">%}</center></td>
+      <td nowrap valign="top">{%columninfo:default_expression%}</td>
       <td valign="top"><font size=-1>{%object_description%} [<a
         href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=COLUMN&amp;object_name={%object_name%}">edit</a>]</font></td>
     </tr>%}
   </tbody>
 </table>
 <br><br>
-<table cellspacing=1 cellpadding=2 border=0 bgcolor=black width="98%">
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=black>
   <tbody>
     <tr bgcolor="navy">
       <td nowrap><b><font color=white>Output parameter</font></b></td>
       <td nowrap><b><font color=white>Type</font></b></td>
+      <td><b><font color=white>Not Null</font></b></td>
+      <td><b><font color=white>Default</font></b></td>
       <td nowrap><b><font color=white>Description</font></b></td>
     </tr>
     {%foreach:parameter::output:
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
       <td nowrap valign="top">{%object_name%}</td>
       <td nowrap valign="top">{%columninfo:datatype%}</td>
+      <td nowrap valign="top"><center>{%ifeq:{%columninfo:is_nullable%}:false:<img src="{%template_root%}ok.png">%}</center></td>
+      <td nowrap valign="top">{%columninfo:default_expression%}</td>
       <td valign="top"><font size=-1>{%object_description%} [<a
         href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=COLUMN&amp;object_name={%object_name%}">edit</a>]</font></td>
     </tr>%}
