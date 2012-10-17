@@ -161,8 +161,12 @@ void Domain::loadProperties(IBPP::Statement& statement, wxMBConv* converter)
         statement->Get(7, s);
         charsetM = std2wxIdentifier(s, converter);
     }
-    nullableM = statement->IsNull(9);
-
+    bool notNull = false;
+    if (!statement->IsNull(9))
+    {
+        statement->Get(9, notNull);
+    }
+    nullableM = !notNull;
     hasDefaultM = !statement->IsNull(10);
     if (hasDefaultM)
     {
