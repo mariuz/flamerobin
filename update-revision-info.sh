@@ -18,7 +18,10 @@ fi
 # this will already contain the quotes needed in the header file
 GITHASH="";
 if [ -x "$(command -v git 2>/dev/null)" ]; then
-    GITHASH="\""`git log -1 --pretty=format:%h $FRDIR 2>/dev/null`"\""
+    GITHASH=`git log -1 --pretty=format:%h $FRDIR 2>/dev/null`
+    if [ "$GITHASH" != "" ]; then
+        GITHASH="\"$GITHASH\""
+    fi
 fi
 #if [ "$GITHASH" != "" ]; then
 #    echo "git hash $GITHASH"
