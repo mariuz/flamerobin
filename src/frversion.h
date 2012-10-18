@@ -4,4 +4,5 @@
 #define FR_VERSION_MINOR    9
 #define FR_VERSION_RLS      3
 
-#include "frsvnrev.h"
+// if this file can't be found you need to run the update-revision-info script
+#include "revisioninfo.h"

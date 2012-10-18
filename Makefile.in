@@ -219,7 +219,7 @@ COND_PLATFORM_OS2_1___flamerobin___os2_emxbindcmd = $(NM) flamerobin$(EXEEXT) \
 
 ### Targets: ###
 
-all: svn-rev flamerobin$(EXEEXT) $(__flamerobin_bundle___depname) $(LIBPREFIX)ibpp$(LIBEXT)
+all: revision-info flamerobin$(EXEEXT) $(__flamerobin_bundle___depname) $(LIBPREFIX)ibpp$(LIBEXT)
 
 install: 
 	$(INSTALL_DIR) $(DESTDIR)$(bindir)
@@ -264,8 +264,8 @@ clean:
 distclean: clean
 	rm -f config.cache config.log config.status bk-deps bk-make-pch shared-ld-sh Makefile
 
-svn-rev: 
-	cd $(srcdir) && ./update-svn-rev.sh
+revision-info: 
+	cd $(srcdir) && ./update-revision-info.sh
 
 flamerobin$(EXEEXT): $(FLAMEROBIN_OBJECTS) $(LIBPREFIX)ibpp$(LIBEXT) $(__flamerobin___win32rc) $(LIBPREFIX)ibpp$(LIBEXT)
 	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS) -L.    $(LDFLAGS_GUI) $(LDFLAGS)  -libpp $(LIBS)

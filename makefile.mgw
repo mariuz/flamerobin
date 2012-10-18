@@ -243,7 +243,7 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT):
 
 ### Targets: ###
 
-all: svn-rev gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a
+all: revision-info gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a
 
 clean: 
 	-if exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\*.o del gcc$(U_OPT)$(R_OPT)$(D_OPT)\*.o
@@ -251,8 +251,8 @@ clean:
 	-if exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe del gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe
 	-if exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a del gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a
 
-svn-rev: 
-	update-svn-rev.cmd
+revision-info: 
+	update-revision-info.cmd
 
 gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe: $(FLAMEROBIN_OBJECTS) gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin_rc.o gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a
 	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS)  -mthreads $(__DEBUGINFO) $(______flamerobin_WX_LIB_DIR_FILENAMES_1_p) -L$(BOOST_LIB_DIR) -Wl,--subsystem,windows -mwindows $(LDFLAGS)  -lwxmsw28$(U_OPT)$(D_OPT)_aui -lwxmsw28$(U_OPT)$(D_OPT)_stc -lwxmsw28$(U_OPT)$(D_OPT)_html -lwxmsw28$(U_OPT)$(D_OPT)_adv -lwxmsw28$(U_OPT)$(D_OPT)_core -lwxbase28$(U_OPT)$(D_OPT)_xml -lwxbase28$(U_OPT)$(D_OPT) -lwxexpat$(D_OPT) -lwxtiff$(D_OPT) -lwxjpeg$(D_OPT) -lwxpng$(D_OPT) -lwxzlib$(D_OPT) -lwxregex$(U_OPT)$(D_OPT) -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lcomctl32 -lrpcrt4 -lwsock32 gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a

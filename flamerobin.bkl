@@ -640,12 +640,12 @@ Accepted values: AMD64, IA64.
     </define-tag>
 
     <if cond="not (FORMAT in ['msvc6prj','msvs2008prj'])">
-        <set var="SVN_REV_SCRIPT">
-            <if cond="FORMAT=='autoconf'">cd $(DOLLAR)(srcdir) &amp;&amp; ./update-svn-rev.sh</if>
-            <if cond="FORMAT!='autoconf'">update-svn-rev.cmd</if>
+        <set var="REVISION_INFO_SCRIPT">
+            <if cond="FORMAT=='autoconf'">cd $(DOLLAR)(srcdir) &amp;&amp; ./update-revision-info.sh</if>
+            <if cond="FORMAT!='autoconf'">update-revision-info.cmd</if>
         </set>
-        <action id="svn-rev">
-            <command>$(SVN_REV_SCRIPT)</command>
+        <action id="revision-info">
+            <command>$(REVISION_INFO_SCRIPT)</command>
             <dependency-of>all</dependency-of>
         </action>
     </if>

@@ -66,7 +66,11 @@ void showAboutBox(wxWindow* parent)
     );
 
     wxString ver;
-#ifdef FR_VERSION_SVN
+#if defined FR_GIT_HASH
+    wxString githash(wxT(FR_GIT_HASH));
+    ver.Printf(wxT("%d.%d.%d (git hash %s)"),
+        FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RLS, githash.c_str());
+#elif defined FR_VERSION_SVN
     ver.Printf(wxT("%d.%d.%d.%d"),
         FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RLS, FR_VERSION_SVN);
 #else
