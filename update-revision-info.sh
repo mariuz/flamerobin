@@ -34,7 +34,7 @@ if test -f $REVISIONINFOFILE ; then
     HEADER_SVNVERSION=`awk '/FR_VERSION_SVN/{print $3}' $REVISIONINFOFILE`
     HEADER_GITHASH=`awk '/FR_GIT_HASH/{print $3}' $REVISIONINFOFILE`
     if [ "$HEADER_SVNVERSION" != "$SVNVERSION" ]; then
-        echo "svn revision has changed from \"$HEADER_SVNVERSION\" to \"$SVNVERSION\""
+        echo "svn revision has changed from $HEADER_SVNVERSION to $SVNVERSION"
         WRITE_HEADER="y"
     fi
     if [ "$HEADER_GITHASH" != "$GITHASH" ]; then
@@ -54,7 +54,7 @@ if [ "$WRITE_HEADER" == "y" ]; then
         echo "#define FR_VERSION_SVN $SVNVERSION" >> $REVISIONINFOFILE
     else
         echo "Writing no svn revision to $REVISIONINFOFILE"
-        echo "#undefine FR_VERSION_SVN" >> $REVISIONINFOFILE
+        echo "#undef FR_VERSION_SVN" >> $REVISIONINFOFILE
     fi
 
     if [ "$GITHASH" != "" ]; then
@@ -62,6 +62,6 @@ if [ "$WRITE_HEADER" == "y" ]; then
         echo "#define FR_GIT_HASH $GITHASH" >> $REVISIONINFOFILE
     else
         echo "Writing no git hash to $REVISIONINFOFILE"
-        echo "#undefine FR_GIT_HASH" >> $REVISIONINFOFILE
+        echo "#undef FR_GIT_HASH" >> $REVISIONINFOFILE
     fi
 fi
