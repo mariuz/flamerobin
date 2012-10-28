@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-  $Id$
+  $Id: CreateDDLVisitor.cpp 2246 2012-10-17 21:06:11Z mghie $
 
 */
 //-----------------------------------------------------------------------------
@@ -123,7 +123,7 @@ void CreateDDLVisitor::visitColumn(Column& c)
         preSqlM <<  c.getSource();  // shouldn't happen
 
     wxString defaultValue;
-    if (c.getDefault(defaultValue))
+    if (c.getDefault(IgnoreDomainDefault, defaultValue))
         preSqlM << wxT(" DEFAULT ") << defaultValue;
     if (!c.isNullable(IgnoreDomainNullability))
         preSqlM << wxT(" NOT NULL");

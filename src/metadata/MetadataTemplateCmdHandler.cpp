@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-  $Id$
+  $Id: MetadataTemplateCmdHandler.cpp 2240 2012-09-14 20:03:30Z mghie $
 
 */
 
@@ -543,7 +543,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         else if (cmdParams[0] == wxT("default_expression"))
         {
             wxString defaultValue;
-            if (cb->getDefault(defaultValue))
+            if (cb->getDefault(ReturnDomainDefault, defaultValue))
             {
                 defaultValue = Domain::trimDefaultValue(defaultValue);
                 processedText += tp->escapeChars(defaultValue, false);

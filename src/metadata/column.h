@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-  $Id$
+  $Id: column.h 2240 2012-09-14 20:03:30Z mghie $
 
 */
 
@@ -31,7 +31,8 @@
 
 #include "metadata/metadataitem.h"
 //-----------------------------------------------------------------------------
-enum NullabilityCheckType { CheckDomainNullability, IgnoreDomainNullability };
+enum GetColumnDefaultType { ReturnDomainDefault, IgnoreDomainDefault };
+enum GetColumnNullabilityType { CheckDomainNullability, IgnoreDomainNullability };
 //-----------------------------------------------------------------------------
 class ColumnBase: public MetadataItem
 {
@@ -49,9 +50,9 @@ public:
 
     wxString getDatatype(bool useConfig = true);
     DomainPtr getDomain() const;
-    bool getDefault(wxString& value) const;
+    bool getDefault(GetColumnDefaultType type, wxString& value) const;
     wxString getSource() const;
-    bool isNullable(NullabilityCheckType checkDomain) const;
+    bool isNullable(GetColumnNullabilityType type) const;
 };
 //-----------------------------------------------------------------------------
 class Column: public ColumnBase

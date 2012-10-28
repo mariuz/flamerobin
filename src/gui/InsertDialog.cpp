@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-  $Id$
+  $Id: InsertDialog.cpp 2240 2012-09-14 20:03:30Z mghie $
 
 */
 
@@ -114,22 +114,6 @@ namespace InsertOptions
 
 };
 using namespace InsertOptions;
-//-----------------------------------------------------------------------------
-inline bool getColumnOrDomainDefault(Column* column, wxString& defaultValue)
-{
-    defaultValue = wxEmptyString;
-    if (column)
-    {
-        bool hasDefault = column->getDefault(defaultValue);
-        if (!hasDefault)
-        {
-            if (DomainPtr dom = column->getDomain())
-                hasDefault = dom->getDefault(defaultValue);
-        }
-        return hasDefault;
-    }
-    return false;
-}
 //-----------------------------------------------------------------------------
 Generator *findAutoincGenerator(std::vector<Trigger *>& triggers, Column *c)
 {
@@ -251,7 +235,7 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
             def->isNumeric() ? wxALIGN_RIGHT : wxALIGN_LEFT, row, 3);
 
         wxString defaultValue;
-        if (getColumnOrDomainDefault(c, defaultValue))
+        if (c->getDefault(ReturnDomainDefault, defaultValue))
         {
             gridM->SetCellValue(row, 2, insertOptionStrings[ioDefault]);
             gridM->SetCellValue(row, 3, defaultValue);
@@ -711,7 +695,7 @@ void InsertDialog::OnGridCellChange(wxGridEvent& event)
         if (option == ioDefault)
         {
             wxString defaultValue;
-            getColumnOrDomainDefault(columnsM[row].column, defaultValue);
+            columnsM[row].column->getDefault(ReturnDomainDefault, defaultValue);
             setStringOption(columnsM[row], defaultValue);
         }
 

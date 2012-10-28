@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-  $Id$
+  $Id: column.cpp 2240 2012-09-14 20:03:30Z mghie $
 
 */
 
@@ -109,12 +109,20 @@ DomainPtr ColumnBase::getDomain() const
     return (db) ? db->getDomain(sourceM) : DomainPtr();
 }
 //-----------------------------------------------------------------------------
-bool ColumnBase::getDefault(wxString& value) const
+bool ColumnBase::getDefault(GetColumnDefaultType type, wxString& value) const
 {
     if (hasDefaultM)
     {
         value = defaultM;
         return true;
+    }
+    if (type == ReturnDomainDefault)
+    {
+        if (DomainPtr d = getDomain())
+        {
+            if (d->getDefault(value))
+                return true;
+        }
     }
     value = wxEmptyString;
     return false;
@@ -149,11 +157,11 @@ void ColumnBase::initialize(const wxString& source, bool nullable,
         notifyObservers();
 }
 //-----------------------------------------------------------------------------
-bool ColumnBase::isNullable(NullabilityCheckType checkDomain) const
+bool ColumnBase::isNullable(GetColumnNullabilityType type) const
 {
     if (!nullableM)
         return false;
-    if (checkDomain == CheckDomainNullability)
+    if (type == CheckDomainNullability)
     {
         if (DomainPtr d = getDomain())
             return d->isNullable();
