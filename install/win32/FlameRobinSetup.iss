@@ -23,13 +23,16 @@
 ; $Id$
 
 ;#define DEBUG
-;#define X64VERSION
 
 #include "..\..\src\frversion.h"
 #define FR_VERSION_STRING Str(FR_VERSION_MAJOR) + "." + Str(FR_VERSION_MINOR) + "." + Str(FR_VERSION_RLS)
 
-#if defined(FR_VERSION_SVN) && (FR_VERSION_RLS % 2 == 1)
-  #define FR_VERSION_STRING FR_VERSION_STRING + "." + Str(FR_VERSION_SVN)
+#if (FR_VERSION_RLS % 2 == 1)
+  #if defined(FR_VERSION_SVN)
+    #define FR_VERSION_STRING FR_VERSION_STRING + "." + Str(FR_VERSION_SVN)
+  #elif defined(FR_GIT_HASH)
+    #define FR_VERSION_STRING FR_VERSION_STRING + "." + FR_GIT_HASH
+  #endif
 #endif
 
 [Setup]
