@@ -737,8 +737,8 @@ struct MetadataItemSorter
         while (start1 < len1 || start2 < len2)
         {
             // partial strings from consecutive non-digits
-            size_t end1 = name1.find_first_of(digits, start1);
-            size_t end2 = name2.find_first_of(digits, start2);
+            size_t end1 = wxMin(name1.find_first_of(digits, start1), len1);
+            size_t end2 = wxMin(name2.find_first_of(digits, start2), len2);
             if (end1 > 0 || end2 > 0)
             {
                 wxString chunk1(name1, start1, end1);
@@ -758,8 +758,8 @@ struct MetadataItemSorter
             }
 
             // partial strings from consecutive digits
-            end1 = name1.find_first_not_of(digits, start1);
-            end2 = name2.find_first_not_of(digits, start2);
+            end1 = wxMin(name1.find_first_not_of(digits, start1), len1);
+            end2 = wxMin(name2.find_first_not_of(digits, start2), len2);
             if (end1 > 0 || end2 > 0)
             {
                 wxString chunk1(name1, start1, end1);
