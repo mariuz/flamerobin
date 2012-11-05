@@ -80,7 +80,6 @@ public:
     std::vector<UniqueConstraint> *getUniqueConstraints();
     std::vector<Index> *getIndices();
 
-    wxString getProcedureTemplate();
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
