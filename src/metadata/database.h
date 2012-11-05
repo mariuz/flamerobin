@@ -83,7 +83,6 @@ class DatabaseInfo
 private:
     int odsM;
     int odsMinorM;
-    int dialectM;
 
     int pageSizeM;
     int buffersM;
@@ -108,8 +107,6 @@ public:
     int getODSMinor() const;
     bool getODSVersionIsHigherOrEqualTo(int versionMajor) const;
     bool getODSVersionIsHigherOrEqualTo(int versionMajor, int versionMinor) const;
-
-    int getDialect() const;
 
     int getPageSize() const;
     int getBuffers() const;
@@ -164,6 +161,7 @@ private:
     wxString connectionRoleM;
 
     wxString pathM;
+    int dialectM;
     Credentials credentialsM;
     Credentials* connectionCredentialsM;
     DatabaseAuthenticationMode authenticationModeM;
@@ -271,6 +269,7 @@ public:
     void getDatabaseTriggers(std::vector<Trigger *>& list);
 
     wxString getPath() const;
+    int getSqlDialect() const;
     wxString getDatabaseCharset() const;
     wxString getConnectionCharset() const;
     wxString getConnectionInfoString() const;

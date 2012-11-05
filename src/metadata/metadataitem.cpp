@@ -631,6 +631,12 @@ wxString MetadataItem::getName_() const
 //-----------------------------------------------------------------------------
 wxString MetadataItem::getQuotedName() const
 {
+    if (DatabasePtr db = getDatabase())
+    {
+        // dialect 1 does not support quoted identifiers
+        if (db->getSqlDialect() == 1)
+            return identifierM.get();
+    }
     return identifierM.getQuoted();
 }
 //-----------------------------------------------------------------------------

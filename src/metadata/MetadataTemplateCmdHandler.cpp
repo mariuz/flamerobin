@@ -751,7 +751,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         else if (cmdParams[0] == wxT("is_read_only"))
             processedText += getBooleanAsString(db->getInfo().getReadOnly());
         else if (cmdParams[0] == wxT("sql_dialect"))
-            processedText += wxString() << db->getInfo().getDialect();
+            processedText += wxString() << db->getSqlDialect();
         else if (cmdParams[0] == wxT("default_charset"))
             processedText += db->getDatabaseCharset();
         else if (cmdParams[0] == wxT("sweep_interval"))

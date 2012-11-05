@@ -144,11 +144,6 @@ int DatabaseInfo::getBuffers() const
     return buffersM;
 }
 //-----------------------------------------------------------------------------
-int DatabaseInfo::getDialect() const
-{
-    return dialectM;
-}
-//-----------------------------------------------------------------------------
 bool DatabaseInfo::getForcedWrites() const
 {
     return forcedWritesM;
@@ -232,7 +227,6 @@ void DatabaseInfo::load(const IBPP::Database database)
         &buffersM, &sweepM, &forcedWritesM, &reserveM, &readOnlyM);
     database->TransactionInfo(&oldestTransactionM, &oldestActiveTransactionM,
         &oldestSnapshotM, &nextTransactionM);
-    dialectM = database->Dialect();
     loadTimeMillisM = ::wxGetLocalTimeMillis();
 }
 //-----------------------------------------------------------------------------
@@ -326,7 +320,7 @@ bool DatabaseAuthenticationMode::getUseEncryptedPassword() const
 // Database class
 Database::Database()
     : MetadataItem(ntDatabase), metadataLoaderM(0), connectedM(false),
-        connectionCredentialsM(0), charsetConverterM(0), idM(0)
+        connectionCredentialsM(0), charsetConverterM(0), dialectM(3), idM(0)
 {
 }
 //-----------------------------------------------------------------------------
@@ -1127,6 +1121,7 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
                 checkProgressIndicatorCanceled(indicator);
                 // load database information
                 setPropertiesLoaded(false);
+                dialectM = databaseM->Dialect();
                 databaseInfoM.load(databaseM);
                 setPropertiesLoaded(true);
 
@@ -1459,6 +1454,11 @@ void Database::unlockChildren()
 wxString Database::getPath() const
 {
     return pathM;
+}
+//-----------------------------------------------------------------------------
+int Database::getSqlDialect() const
+{
+    return dialectM;
 }
 //-----------------------------------------------------------------------------
 wxString Database::getDatabaseCharset() const
