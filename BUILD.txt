@@ -26,8 +26,7 @@ points to your wxWidgets root directory (unless you use MinGW and configure
 script to build a Makefile). To do this, go to:
 Start->Control Panel->System and select the "Advanced" tab. Then, click the
 "Environment Variables" button and add WXDIR to the user or system env vars.
-If you are using Windows98, you can set the variable from the command line,
-using the "set" command.
+You can set the variable from the command line, using the "set" command
 
 For Windows you must also set a BOOST_ROOT environment variable which points
 to the Boost root directory, see the previous section for how to do this.
@@ -85,7 +84,7 @@ WXDIR *must* be specified (or set as an environment variable), but the rest
 default to 0 and are optional.
 
 ------------------------------------------------------
--- MSW - Visual C++ 2005 Express Build Instructions --
+-- MSW - Visual C++ 20xx Express Build Instructions --
 ------------------------------------------------------
 
 Microsoft Visual C++ Express is a freeware version of MS Visual Studio.
@@ -115,7 +114,7 @@ WXDIR *must* be specified (or set as an environment variable), but the rest
 default to 0 and are optional.
 
 -----------------------------------------------------------
--- MSW - Building wxWidgets with Visual C++ 2005 Express --
+-- MSW - Building wxWidgets with Visual C++ 20xx Express --
 -----------------------------------------------------------
 
 Unpack the archive somewhere, for example c:\wxWin286:
@@ -132,7 +131,7 @@ configuration" and then picking a config, then build!
 
 
 * Using the makefiles *
-Open MS-DOS prompt and go into "build\msw" directory:
+Open cmd.exe  prompt and go into "build\msw" directory:
 set WXWIN=c:\wxWin286
 set WXDIR=c:\wxWin286
 nmake -f makefile.vc BUILD=release RUNTIME_LIBS=static
@@ -147,42 +146,6 @@ If you wish to build an executable that is small in size (just like the
 official one), you need to build wx from the command line using modified
 makefile.vc. Just edit the makefile.vc and change the __OPTIMIZEFLAG setting
 from /O2 to /O1.
-
-
--------------------------------------------------
--- MSW - Borland's Free C++ Build Instructions --
--------------------------------------------------
-
-Borland's Free C++ Compiler (in short BCC) is a freeware version of
-Borland's C++ compiler used in C++ Builder product:
-
-http://www.borland.com/bcppbuilder/freecompiler/
-
-I have used version 5.5.1.
-
-Borland's command line linker (ilink32) has bugs that sometime make is crash
-when linking FlameRobin executable. We haven't been able to determine the
-cause of this. Since version 0.4.0, build was brome, then after 0.4.5 it
-started to work until 0.7.0. Since 0.7.2 it works again. This build is NOT
-OFFICIALLY SUPPORTED by our team, although it may work for you. In case you
-want to give it a shot, here's how:
-
-Assuming that you have wxWidgets installed in c:\wxwin286, you should open
-MS-DOS prompt, cd to flamerobin root directory, and execute:
-
-set WXDIR=c:\wxwin286
-make -f makefile.bcc STATICRTL=1 FINAL=1
-
-for release build, or
-
-set WXDIR=c:\wxwin286
-make -f makefile.bcc STATICRTL=1 FINAL=0
-
-for debug build. Explanantion:
-
-WXDIR=<dir>     - tells the makefile where to find the root wx directory
-FINAL=<0,1>     - tells to build debug(0) or release(1) build
-STATICRTL=<0,1> - tells to link against wx static(1) or dynamic(0) libs
 
 
 ----------------------------------------
