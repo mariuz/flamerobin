@@ -34,10 +34,6 @@
     #include "wx/wx.h"
 #endif
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
-
 #include <wx/filefn.h>
 #include <wx/filename.h>
 #include <wx/wfstream.h>

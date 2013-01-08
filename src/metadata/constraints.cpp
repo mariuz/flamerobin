@@ -34,10 +34,6 @@
     #include "wx/wx.h"
 #endif
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
-
 #include <vector>
 
 #include "metadata/constraints.h"

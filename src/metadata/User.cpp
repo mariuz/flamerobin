@@ -34,10 +34,6 @@
     #include "wx/wx.h"
 #endif
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
-
 #include "core/StringUtils.h"
 #include "metadata/server.h"
 #include "metadata/User.h"

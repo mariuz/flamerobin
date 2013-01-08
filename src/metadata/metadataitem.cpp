@@ -34,10 +34,6 @@
     #include "wx/wx.h"
 #endif
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
-
 #include "config/Config.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"

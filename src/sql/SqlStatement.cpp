@@ -34,10 +34,6 @@
     #include "wx/wx.h"
 #endif
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
-
 #include "metadata/database.h"
 #include "SqlStatement.h"
 #include "metadata/parameter.h"

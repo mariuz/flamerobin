@@ -34,10 +34,6 @@
     #include "wx/wx.h"
 #endif
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
-
 #include "config/Config.h"
 #include "metadata/database.h"
 #include "metadata/domain.h"
