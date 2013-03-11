@@ -37,7 +37,7 @@
 #pragma hdrstop
 #endif
 
-#include <time.h>		// Can't use <ctime> thanks to MSVC6 buggy library
+#include <ctime>
 
 using namespace ibpp_internals;
 
