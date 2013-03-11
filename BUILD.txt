@@ -78,7 +78,7 @@ Build options can be any of the following:
 WXDIR=<dir> - tells the makefile where to find the root wxWidgets directory
 FINAL=<0,1> - tells whether to build debug (0) or release (1) build
 USEDLL=<0,1> - tells whether to link against wx static or dynamic libs
-UNICODE=<0,1> - tells whether to link against wx ansi or unicode build
+UNICODE=1 - always link against wx unicode build (this is how wx is build on Linux and default in wx)
 
 WXDIR *must* be specified (or set as an environment variable), but the rest
 default to 0 and are optional.
@@ -108,7 +108,7 @@ Build options can be any of the following:
 WXDIR=<dir> - tells the makefile where to find the root wxWidgets directory
 FINAL=<0,1> - tells whether to build debug (0) or release (1) build
 USEDLL=<0,1> - tells whether to link against wx static or dynamic libs
-UNICODE=<0,1> - tells whether to link against wx ansi or unicode build
+UNICODE=1 - always link against wx unicode build (this is how wx is build on Linux and default in wx)
 
 WXDIR *must* be specified (or set as an environment variable), but the rest
 default to 0 and are optional.
