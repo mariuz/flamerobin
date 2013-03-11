@@ -37,8 +37,8 @@
 #pragma hdrstop
 #endif
 
-#include <math.h>
-#include <time.h>
+#include <cmath>
+#include <ctime>
 
 using namespace ibpp_internals;
 
