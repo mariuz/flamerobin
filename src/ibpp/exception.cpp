@@ -37,8 +37,8 @@
 #pragma hdrstop
 #endif
 
-#include <stdarg.h>
-#include <stdio.h>
+#include <cstdarg>
+#include <cstdio>
 
 using namespace ibpp_internals;
 
