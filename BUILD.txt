@@ -117,7 +117,7 @@ default to 0 and are optional.
 -- MSW - Building wxWidgets with Visual C++ 20xx Express --
 -----------------------------------------------------------
 
-Unpack the archive somewhere, for example c:\wxWin286:
+Unpack the archive somewhere, for example c:\wxWin28x:
 
 * Using the dsp/dsw/sln projects *
 
@@ -132,8 +132,8 @@ configuration" and then picking a config, then build!
 
 * Using the makefiles *
 Open cmd.exe  prompt and go into "build\msw" directory:
-set WXWIN=c:\wxWin286
-set WXDIR=c:\wxWin286
+set WXWIN=c:\wxWin28x
+set WXDIR=c:\wxWin28x
 nmake -f makefile.vc BUILD=release RUNTIME_LIBS=static
 cd ..\..
 cd contrib\build\stc
@@ -212,23 +212,6 @@ make
 The resulting bundles differ only in the flamerobin executable, the lipo
 tool can be used to make a Universal Build out of them.
 
-
----------------------------------------------------------------
--- MSW - Building wxWidgets with Borland's Free C++ Compiler --
----------------------------------------------------------------
-
-Unpack the archive somewhere, for example c:\wxWin286, open MS-DOS prompt
-and go into "build\msw" directory:
-
-set WXWIN=c:\wxWin286
-set WXDIR=c:\wxWin286
-make -f makefile.bcc BUILD=release RUNTIME_LIBS=static
-cd ..\..
-cd contrib\build\stc
-make -f makefile.bcc BUILD=release RUNTIME_LIBS=static
-
-As you can see, it is important to build STC package too. It is for
-wxStyledTextControl which is used in many places in FlameRobin.
 
 
 ----------------------------------------------
