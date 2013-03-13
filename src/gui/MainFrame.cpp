@@ -731,12 +731,12 @@ void MainFrame::OnMenuURLProjectPage(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuURLFeatureRequest(wxCommandEvent& WXUNUSED(event))
 {
-    showUrl(wxT("http://sourceforge.net/tracker/?atid=699237&group_id=124340"));
+    showUrl(wxT("http://sourceforge.net/p/flamerobin/feature-requests/"));
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuURLBugReport(wxCommandEvent& WXUNUSED(event))
 {
-    showUrl(wxT("http://sourceforge.net/tracker/?atid=699234&group_id=124340"));
+    showUrl(wxT("http://sourceforge.net/p/flamerobin/bugs/"));
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuConfigure(wxCommandEvent& WXUNUSED(event))
