@@ -631,9 +631,6 @@ int RowImpl::ColumnNum(const std::string& name)
 	}
 
 	throw LogicExceptionImpl("Row::ColumnNum", _("Could not find matching column."));
-#ifdef __DMC__
-	return 0;	// DMC errronously warns here about a missing return
-#endif
 }
 
 /*

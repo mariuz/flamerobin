@@ -86,7 +86,7 @@ void ExceptionBase::raise(const std::string& context, const char* message, va_li
 	if (message != 0)
 	{
 		char buffer[1024];
-#if defined(_MSC_VER) || defined(__DMC__)
+#if defined(_MSC_VER) 
 		_vsnprintf(buffer, sizeof(buffer)-1, message, argptr);
 #else
 		vsnprintf(buffer, sizeof(buffer)-1, message, argptr);

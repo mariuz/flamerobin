@@ -57,19 +57,10 @@ namespace ibpp_internals
 #undef min
 #undef max
 
-#ifdef __DMC__ // Needs to break-down the declaration else compiler crash (!)
-	const std::numeric_limits<int16_t> i16_limits;
-	const std::numeric_limits<int32_t> i32_limits;
-	const int16_t consts::min16 = i16_limits.min();
-	const int16_t consts::max16 = i16_limits.max();
-	const int32_t consts::min32 = i32_limits.min();
-	const int32_t consts::max32 = i32_limits.max();
-#else
 	const int16_t consts::min16 = std::numeric_limits<int16_t>::min();
 	const int16_t consts::max16 = std::numeric_limits<int16_t>::max();
 	const int32_t consts::min32 = std::numeric_limits<int32_t>::min();
 	const int32_t consts::max32 = std::numeric_limits<int32_t>::max();
-#endif
 
 	GDS gds;	// Global unique GDS instance
 

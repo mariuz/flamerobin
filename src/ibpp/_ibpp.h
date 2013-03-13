@@ -32,7 +32,7 @@
 
 #include "ibpp.h"
 
-#if defined(__BCPLUSPLUS__) || defined(_MSC_VER) || defined(__DMC__)
+#if defined(__BCPLUSPLUS__) || defined(_MSC_VER) 
 #define HAS_HDRSTOP
 #endif
 

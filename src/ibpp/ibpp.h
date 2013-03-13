@@ -52,7 +52,7 @@
 #endif
 
 #if !defined(__BCPLUSPLUS__) && !defined(__GNUC__) \
-    && !defined(_MSC_VER) && !defined(__DMC__)
+    && !defined(_MSC_VER) 
 #error Your compiler is not recognized.
 #endif
 
@@ -67,7 +67,7 @@
 // the standard type 'int' is used. And where an exact integer size is required
 // the standard exact precision types definitions of C 99 standard are used.
 
-#if defined(_MSC_VER) || defined(__DMC__) || defined(__BCPLUSPLUS__)
+#if defined(_MSC_VER) || defined(__BCPLUSPLUS__)
 // C99 §7.18.1.1 Exact-width integer types (only those used by IBPP)
 #if defined(_MSC_VER) && (_MSC_VER < 1300)  // MSVC 6 should be < 1300
     typedef short int16_t;
