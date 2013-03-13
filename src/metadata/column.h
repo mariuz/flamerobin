@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-  $Id: column.h 2240 2012-09-14 20:03:30Z mghie $
+  $Id: column.h 2240 2013-09-14 20:03:30Z mghie $
 
 */
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2012 The FlameRobin Development Team
+  Copyright (c) 2004-2013 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-  $Id: column.cpp 2240 2012-09-14 20:03:30Z mghie $
+  $Id: column.cpp 2240 2013-09-14 20:03:30Z mghie $
 
 */
 
