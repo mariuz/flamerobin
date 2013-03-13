@@ -225,7 +225,6 @@ GDS* GDS::Call()
 		IB_ENTRYPOINT(vax_integer);
 		IB_ENTRYPOINT(sqlcode);
 		IB_ENTRYPOINT(sql_interprete);
-		IB_ENTRYPOINT(interprete);
 		IB_ENTRYPOINT(que_events);
 		IB_ENTRYPOINT(cancel_events);
 		IB_ENTRYPOINT(start_multiple);
