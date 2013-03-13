@@ -280,11 +280,6 @@ void MainFrame::set_properties()
 {
     SetTitle(_("FlameRobin Database Admin"));
 
-    // Default (generic) tree looks pretty ugly on GTK 1
-#if defined(__WXGTK__) && !defined(__WXGTK20__)
-    treeMainM->SetIndent(12);
-#endif
-
     if (!rootM->load())
     {
         wxString confile = config().getDBHFileName();
