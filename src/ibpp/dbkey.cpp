@@ -20,7 +20,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //	COMMENTS
-//	* Tabulations should be set every four characters when editing this file.
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -114,7 +113,3 @@ IBPP::DBKey& IBPP::DBKey::operator=(const IBPP::DBKey& assigned)
 	mString = assigned.mString;
 	return *this;
 }
-
-//
-//	EOF
-//

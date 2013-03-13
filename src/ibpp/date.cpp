@@ -37,7 +37,7 @@
 #pragma hdrstop
 #endif
 
-#include <time.h>		// Can't use <ctime> thanks to MSVC6 buggy library
+#include <ctime>
 
 using namespace ibpp_internals;
 
@@ -205,5 +205,3 @@ bool IBPP::itod (int *pdate, int year, int month, int day)
 	*pdate = result;
 	return true;
 }
-
-//	Eof

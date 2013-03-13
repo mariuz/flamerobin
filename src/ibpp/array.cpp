@@ -1039,7 +1039,3 @@ ArrayImpl::~ArrayImpl()
 	try { if (mBuffer != 0) delete [] (char*)mBuffer; }
 		catch (...) {}
 }
-
-//
-//	EOF
-//

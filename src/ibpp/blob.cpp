@@ -373,7 +373,3 @@ BlobImpl::~BlobImpl()
 	try { if (mDatabase != 0) mDatabase->DetachBlobImpl(this); }
 		catch (...) { }
 }
-
-//
-//	EOF
-//

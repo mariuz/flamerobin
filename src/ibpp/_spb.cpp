@@ -21,7 +21,6 @@
 //
 //	COMMENTS
 //	* SPB == Service Parameter Block/Buffer, see Interbase 6.0 C-API
-//	* Tabulations should be set every four characters when editing this file.
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -127,7 +126,3 @@ void SPB::Insert(char type, bool data)
 	mBuffer[mSize++] = char(data ? 1 : 0);
 }
 */
-
-//
-//	EOF
-//

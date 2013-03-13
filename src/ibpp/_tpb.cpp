@@ -21,7 +21,6 @@
 //
 //	COMMENTS
 //	* TPB == Transaction Parameter Block/Buffer, see Interbase 6.0 C-API
-//	* Tabulations should be set every four characters when editing this file.
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -92,7 +91,3 @@ void TPB::Reset()
 		mAlloc = 0;
 	}
 }
-
-//
-//	EOF
-//

@@ -20,7 +20,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //	COMMENTS
-//	* Tabulations should be set every four characters when editing this file.
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -64,7 +63,3 @@ void IBPP::User::clear()
 	firstname.erase(); middlename.erase(); lastname.erase();
 	userid = groupid = 0;
 }
-
-//
-//	EOF
-//

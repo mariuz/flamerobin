@@ -20,7 +20,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //	COMMENTS
-//	* Tabulations should be set every four characters when editing this file.
 //
 //	SPECIAL WARNING COMMENT (by Olivier Mascia, 2000 Nov 12)
 //	The way this source file handles events is not publicly documented, in
@@ -366,7 +365,3 @@ EventsImpl::~EventsImpl()
 	try { if (mDatabase != 0) mDatabase->DetachEventsImpl(this); }
 		catch (...) { }
 }
-
-//
-//	EOF
-//

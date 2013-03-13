@@ -24,7 +24,6 @@
 //  * 'Internal declarations' means everything used to implement ibpp. This
 //    file and its contents is NOT needed by users of the library. All those
 //    declarations are wrapped in a namespace : 'ibpp_internals'.
-//  * Tabulations should be set every four characters when editing this file.
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1411,7 +1410,3 @@ struct consts   // See _ibpp.cpp for initializations of these constants
 }   // namespace ibpp_internal
 
 #endif // __INTERNAL_IBPP_H__
-
-//
-//  Eof
-//

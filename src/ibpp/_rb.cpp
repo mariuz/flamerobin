@@ -21,7 +21,6 @@
 //
 //	COMMENTS
 //	* RB == Result Block/Buffer, see Interbase 6.0 C-API
-//	* Tabulations should be set every four characters when editing this file.
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -232,7 +231,3 @@ RB::~RB()
 	try { delete [] mBuffer; }
 		catch (...) { }
 }
-
-//
-//	EOF
-//
