@@ -54,8 +54,8 @@ namespace ibpp_internals
 	const int consts::Dec31_1899 = 693595;
 
 // Many compilers confuses those following min/max with macros min and max !
-#undef min
-#undef max
+//#undef min
+//#undef max
 
 	const int16_t consts::min16 = std::numeric_limits<int16_t>::min();
 	const int16_t consts::max16 = std::numeric_limits<int16_t>::max();
@@ -224,7 +224,7 @@ GDS* GDS::Call()
 		IB_ENTRYPOINT(array_put_slice);
 		IB_ENTRYPOINT(vax_integer);
 		IB_ENTRYPOINT(sqlcode);
-		IB_ENTRYPOINT(sql_interprete);
+        IB_ENTRYPOINT(sql_interprete);
         IB_ENTRYPOINT(interprete);
 		IB_ENTRYPOINT(que_events);
 		IB_ENTRYPOINT(cancel_events);

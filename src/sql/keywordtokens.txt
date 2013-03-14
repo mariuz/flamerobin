@@ -20,7 +20,6 @@
 { wxT("BACKUP"), kwBACKUP },            // fb2.0
 { wxT("BASED"), kwBASED },
 { wxT("BASENAME"), kwBASENAME },
-{ wxT("BASE_NAME"), kwBASE_NAME },
 { wxT("BEFORE"), kwBEFORE },
 { wxT("BEGIN"), kwBEGIN },
 { wxT("BETWEEN"), kwBETWEEN },
@@ -44,7 +43,6 @@
 { wxT("CHAR_LENGTH"), kwCHAR_LENGTH },
 { wxT("CHECK"), kwCHECK },
 { wxT("CHECK_POINT_LEN"), kwCHECK_POINT_LEN },
-{ wxT("CHECK_POINT_LENGTH"), kwCHECK_POINT_LENGTH },
 { wxT("CLOSE"), kwCLOSE },                              // fb2.0
 { wxT("COALESCE"), kwCOALESCE },
 { wxT("COLLATE"), kwCOLLATE },
@@ -77,7 +75,6 @@
 { wxT("DATE"), kwDATE },
 { wxT("DAY"), kwDAY },
 { wxT("DB_KEY"), kwDB_KEY },
-{ wxT("DEBUG"), kwDEBUG },
 { wxT("DEC"), kwDEC },
 { wxT("DECIMAL"), kwDECIMAL },
 { wxT("DECLARE"), kwDECLARE },
@@ -168,7 +165,6 @@
 { wxT("LIKE"), kwLIKE },
 { wxT("LOCK"), kwLOCK },
 { wxT("LOGFILE"), kwLOGFILE },
-{ wxT("LOG_BUFFER_SIZE"), kwLOG_BUFFER_SIZE },
 { wxT("LOG_BUF_SIZE"), kwLOG_BUF_SIZE },
 { wxT("LONG"), kwLONG },
 { wxT("LOWER"), kwLOWER },              // fb2.0
@@ -178,7 +174,6 @@
 { wxT("MAXIMUM_SEGMENT"), kwMAXIMUM_SEGMENT },
 { wxT("MAX_SEGMENT"), kwMAX_SEGMENT },
 { wxT("MERGE"), kwMERGE },
-{ wxT("MESSAGE"), kwMESSAGE },
 { wxT("MIN"), kwMIN },
 { wxT("MINIMUM"), kwMINIMUM },
 { wxT("MINUTE"), kwMINUTE },
@@ -196,7 +191,6 @@
 { wxT("NULLIF"), kwNULLIF },
 { wxT("NULLS"), kwNULLS },
 { wxT("NUMERIC"), kwNUMERIC },
-{ wxT("NUM_LOG_BUFFERS"), kwNUM_LOG_BUFFERS },
 { wxT("NUM_LOG_BUFS"), kwNUM_LOG_BUFS },
 { wxT("OCTET_LENGTH"), kwOCTET_LENGTH },        // fb2.0
 { wxT("OF"), kwOF },
