@@ -67,7 +67,7 @@
     </set>
 
 <!-- this option allows to build the application for WIN64 -->
-    <if cond="FORMAT in ['msvc','msvc6prj','msvs2008prj']">
+    <if cond="FORMAT in ['msvc','msvs2008prj']">
         <option name="TARGET_CPU">
             <default-value>$(DOLLAR)(CPU)</default-value>
             <description>
@@ -81,7 +81,7 @@ Accepted values: AMD64, IA64.
             </description>
         </option>
     </if>
-    <if cond="not (FORMAT in ['msvc','msvc6prj','msvs2008'])">
+    <if cond="not (FORMAT in ['msvc','msvs2008'])">
         <set var="TARGET_CPU"/>
     </if>
     <set var="DIR_SUFFIX_CPU">
@@ -99,7 +99,7 @@ Accepted values: AMD64, IA64.
 
 
     <define-tag name="headers" rules="dll,lib,exe">
-        <if cond="FORMAT in ['msvc6prj','msvs2008prj']">
+        <if cond="FORMAT in ['msvs2008prj']">
             <msvc-project-files>
                 $(value)
             </msvc-project-files>
@@ -116,7 +116,7 @@ Accepted values: AMD64, IA64.
         <debug-info>$(DEBUGINFO)</debug-info>
         <optimize>$(OPTIMIZE)</optimize>
 
-        <if cond="FORMAT in ['msvc6prj','msvc','msvs2008prj']">
+        <if cond="FORMAT in ['msvc','msvs2008prj']">
             <ldflags>/nologo</ldflags>
             <ldflags>/subsystem:windows</ldflags>
             <ldflags>$(LINK_TARGET_CPU)</ldflags>
@@ -169,7 +169,7 @@ Accepted values: AMD64, IA64.
             <define>HAVE_W32API_H</define>
         </if>
 
-        <if cond="FORMAT in ['borland','mingw','msvc6prj','msvc','msvs2008prj']">
+        <if cond="FORMAT in ['mingw','msvc','msvs2008prj']">
             <define>_WINDOWS</define>
             <define>__WINDOWS__</define>
             <define>WINVER=0x400</define>
@@ -639,7 +639,7 @@ Accepted values: AMD64, IA64.
         </modify-target>
     </define-tag>
 
-    <if cond="not (FORMAT in ['msvc6prj','msvs2008prj'])">
+    <if cond="not (FORMAT in ['msvs2008prj'])">
         <set var="REVISION_INFO_SCRIPT">
             <if cond="FORMAT=='autoconf'">cd $(DOLLAR)(srcdir) &amp;&amp; ./update-revision-info.sh</if>
             <if cond="FORMAT!='autoconf'">update-revision-info.cmd</if>
