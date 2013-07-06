@@ -283,7 +283,7 @@ wxString wrapText(const wxString& text, size_t maxWidth, size_t indent)
 
             line += *it;
 
-            if (maxWidth >= 0 && lastSpace != text.end())
+            if (lastSpace != text.end())
             {
                 size_t width = line.Length();
                 if (width > maxWidth - indentStr.Length())
