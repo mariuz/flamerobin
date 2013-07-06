@@ -2070,7 +2070,7 @@ void DataGridRows::importBlobFile(const wxString& filename, unsigned row,
     while (!fl.Eof())
     {
         size_t len = fl.Read(buffer, 32767);    // slow when not 32k
-        if (len < 1 || pi && pi->isCanceled())
+        if (len < 1 || (pi && pi->isCanceled()))
             break;
         b.blob->Write(buffer, len);
         if (pi)
@@ -2094,7 +2094,7 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
     // user wants to store null
     bool newIsNull = (
         !dynamic_cast<StringColumnDef*>(columnDefsM[col]) && value.IsEmpty()
-        || setNull && value == wxT("[null]") );
+        || (setNull && value == wxT("[null]")) );
     if (newIsNull && !columnDefsM[col]->isNullable())
         throw FRError(_("This column does not accept NULLs."));
 
