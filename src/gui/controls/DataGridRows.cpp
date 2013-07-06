@@ -1975,9 +1975,9 @@ bool DataGridRows::isBlobColumn(unsigned col, bool* pIsTextual)
 //-----------------------------------------------------------------------------
 IBPP::Blob* DataGridRows::getBlob(unsigned row, unsigned col, bool validateBlob)
 {
-    if ((row < 0) || (row >= buffersM.size()))
+    if (row >= buffersM.size())
       throw FRError(_("Invalid row index."));
-    if ((col < 0) || (col >= columnDefsM.size()))
+    if (col >= columnDefsM.size())
       throw FRError(_("Invalid col index."));
     IBPP::Blob* b0 = buffersM[row]->getBlob(columnDefsM[col]->getIndex());
     if ((validateBlob) && (!b0))
