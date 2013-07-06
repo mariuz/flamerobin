@@ -2093,7 +2093,7 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
 
     // user wants to store null
     bool newIsNull = (
-        !dynamic_cast<StringColumnDef*>(columnDefsM[col]) && value.IsEmpty()
+        (!dynamic_cast<StringColumnDef*>(columnDefsM[col]) && value.IsEmpty())
         || (setNull && value == wxT("[null]")) );
     if (newIsNull && !columnDefsM[col]->isNullable())
         throw FRError(_("This column does not accept NULLs."));

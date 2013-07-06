@@ -308,7 +308,7 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
             continue;
         wxString user = (*ci)->getUsername();
         wxString pwd = (*ci)->getDecryptedPassword();
-        if (pwd.IsEmpty() || sysdba && user.Upper() != wxT("SYSDBA"))
+        if (pwd.IsEmpty() || (sysdba && user.Upper() != wxT("SYSDBA")))
             continue;
         if (progressind)
         {

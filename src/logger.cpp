@@ -112,7 +112,7 @@ bool Logger::log2file(Config *cfg, const SqlStatement& st,
     bool logSetTerm = false;
     cfg->getValue(wxT("LogSetTerm"), logSetTerm);
     // add term. to statement if missing
-    if (logToFileType == singleFile || logSetTerm && st.getTerminator() != wxT(";"))
+    if (logToFileType == singleFile || (logSetTerm && st.getTerminator() != wxT(";")))
     {
         sql.Trim();
         wxString::size_type pos = sql.rfind(st.getTerminator());
