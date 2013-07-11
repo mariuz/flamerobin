@@ -706,7 +706,7 @@ void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuManual(wxCommandEvent& WXUNUSED(event))
 {
-    showDocsHtmlFile(wxT("fr_manual.html"));
+    showUrl(wxT("http://flamerobin.org/dokuwiki/wiki/manual"));
 }
 //-----------------------------------------------------------------------------
 void MainFrame::OnMenuRelNotes(wxCommandEvent& WXUNUSED(event))
