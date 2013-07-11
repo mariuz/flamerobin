@@ -229,7 +229,7 @@ install:
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/conf-defs
 	(cd $(srcdir)/conf-defs ; $(INSTALL_DATA)  fr_settings.confdef db_settings.confdef $(DESTDIR)$(datadir)/flamerobin/conf-defs)
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/docs
-	(cd $(srcdir)/docs ; $(INSTALL_DATA)  fr_license.html fr_manual.html fr_whatsnew.html html.css $(DESTDIR)$(datadir)/flamerobin/docs)
+	(cd $(srcdir)/docs ; $(INSTALL_DATA)  fr_license.html fr_whatsnew.html html.css $(DESTDIR)$(datadir)/flamerobin/docs)
 	$(INSTALL_DIR) $(DESTDIR)@mandir@/man1
 	(cd $(srcdir)/docs ; $(INSTALL_DATA)  flamerobin.1 $(DESTDIR)@mandir@/man1)
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/html-templates
@@ -245,7 +245,7 @@ uninstall:
 	(cd $(DESTDIR)$(bindir) ; rm -f flamerobin$(EXEEXT))
 	(cd $(DESTDIR)$(datadir)/flamerobin/code-templates ; rm -f create_trigger.confdef create_trigger.info create_trigger.template create_change_trigger.confdef create_change_trigger.info create_change_trigger.template create_selectable_execute_block.confdef create_selectable_execute_block.info create_selectable_execute_block.template create_selectable_procedure.confdef create_selectable_procedure.info create_selectable_procedure.template delete.confdef delete.info delete.template extract_full_ddl.info extract_full_ddl.template insert.confdef insert.info insert.template select.confdef select.info select.template template_info.confdef update.confdef update.info update.template)
 	(cd $(DESTDIR)$(datadir)/flamerobin/conf-defs ; rm -f fr_settings.confdef db_settings.confdef)
-	(cd $(DESTDIR)$(datadir)/flamerobin/docs ; rm -f fr_license.html fr_manual.html fr_whatsnew.html html.css)
+	(cd $(DESTDIR)$(datadir)/flamerobin/docs ; rm -f fr_license.html fr_whatsnew.html html.css)
 	(cd $(DESTDIR)@mandir@/man1 ; rm -f flamerobin.1)
 	(cd $(DESTDIR)$(datadir)/flamerobin/html-templates ; rm -f ALLloading.html DATABASE.html DATABASEtriggers.html DDL.html DOMAIN.html EXCEPTION.html FUNCTION.html GENERATOR.html PROCEDURE.html PROCEDUREprivileges.html ROLE.html ROLEprivileges.html SERVER.html TABLE.html TABLEconstraints.html TABLEtriggers.html TABLEindices.html TABLEprivileges.html TRIGGER.html VIEW.html VIEWprivileges.html VIEWtriggers.html dependencies.html header.html compute.png drop.png ok.png ok2.png redx.png view.png)
 	(cd $(DESTDIR)$(datadir)/applications ; rm -f flamerobin.desktop)
