@@ -2,11 +2,11 @@ FlameRobin: support & config file paths roundup
 
 Files needed by FR:
 
-- $conf - a config file (config.ini, to be renamed fr_settings.conf)
+- $conf - a config file (renamed fr_settings.conf)
 - $db - a database connection definition file (servers.xml, to be renamed fr_databases.conf)
 - $templ - the html-templates directory
 - $confdef - the confdefs directory, containing the main config settings definition file (config_options.xml, to be renamed fr_settings.confdef) and possibly other confdef files for scoped (database-level, for example, to be named database_settings.confdef or DATABASE_settings.confdef) configuration (preferences) dialogs
-- $docfiles - the files docs/fr_manual.html, docs/fr_changes.html and docs/fr_license.html that are displayed from the main menu
+- $docfiles - the files docs/fr_changes.html and docs/fr_license.html that are displayed from the main menu
 
 Locations:
 

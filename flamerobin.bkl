@@ -481,7 +481,6 @@ Accepted values: AMD64, IA64.
     </set>
     <set var="HTMLDOCFILES">
         fr_license.html
-        fr_manual.html
         fr_whatsnew.html
         html.css
     </set>
