@@ -129,7 +129,6 @@ Filename: {app}\flamerobin.url; Section: InternetShortcut; Key: URL; String: htt
 [Icons]
 Name: {group}\FlameRobin; Filename: {app}\flamerobin.exe; WorkingDir: {app}
 Name: {group}\License; Filename: {app}\docs\fr_license.html
-Name: {group}\Manual; Filename: {app}\docs\fr_manual.html
 Name: {group}\What's new; Filename: {app}\docs\fr_whatsnew.html
 Name: {group}\{cm:ProgramOnTheWeb,FlameRobin}; Filename: {app}\flamerobin.url
 Name: {group}\{cm:UninstallProgram,FlameRobin}; Filename: {uninstallexe}
