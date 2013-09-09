@@ -8,10 +8,11 @@ Nando Dessena
 Michael Hieke
 Gregory Sapunkov
 Bart Bakker
+Marius Popa
+
 
 The following people also made a significant non-coding contributions:
 
-Marius Popa
 Alex Stanciu
 Barbara Del Vecchio
 

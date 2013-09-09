@@ -115,7 +115,7 @@ default to 0 and are optional.
 -- MSW - Building wxWidgets with Visual C++ 20xx Express --
 -----------------------------------------------------------
 
-Unpack the archive somewhere, for example c:\wxWin28x:
+Unpack the archive somewhere, for example c:\wxWin:
 
 * Using the dsp/dsw/sln projects *
 
@@ -130,8 +130,8 @@ configuration" and then picking a config, then build!
 
 * Using the makefiles *
 Open cmd.exe  prompt and go into "build\msw" directory:
-set WXWIN=c:\wxWin28x
-set WXDIR=c:\wxWin28x
+set WXWIN=c:\wxWin
+set WXDIR=c:\wxWin
 nmake -f makefile.vc BUILD=release RUNTIME_LIBS=static
 cd ..\..
 cd contrib\build\stc
@@ -218,7 +218,7 @@ tool can be used to make a Universal Build out of them.
 
 Unpack the sources, enter "build" directory and run "./configure". There
 are many options you may like to set, run "./configure --help" to find about
-them. We assume Gtk2 static release build with Unicode support:
+them. We assume Gtk static release build with Unicode support:
 
 ./configure --disable-shared --disable-debug --enable-unicode --prefix=/opt/wxwidgets
 make
