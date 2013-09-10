@@ -220,15 +220,23 @@ Unpack the sources, enter "build" directory and run "./configure". There
 are many options you may like to set, run "./configure --help" to find about
 them. We assume Gtk static release build with Unicode support:
 
+for wx 2.8.x
 ./configure --disable-shared --disable-debug --enable-unicode --prefix=/opt/wxwidgets
-make
+
+for wx 3.x
+./configure --disable-shared --enable-unicode --enable-monolithic --prefix=/opt/wxwidgets
+
+make -j4
 make install
 
-Now, you have to compile STC library. It is needed for wxStyledTextControl which
+
+In wx2.8.x: you have to compile STC library. It is needed for wxStyledTextControl which
 is used in many places in FlameRobin. Enter "contrib/src/stc" directory:
 
-make
+make j4
 make install
+
+(STC library is already included in wx3.x and is better to build wx as monolithic library)
 
 Depending on your --prefix setting, you might need to run 'make install' as
 superuser (root).
