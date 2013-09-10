@@ -56,8 +56,8 @@ FRConfig& config()
 Config::Config()
     : configM(0), needsFlushM(false)
 {
-#ifdef FR_CONFIG_USE_PRIVATE_STDPATHS
-    standardPathsM.SetInstallPrefix(wxT(FR_INSTALL_PREFIX));
+#ifdef FR_CONFIG_USE_PRIVATE_STDPATHS    
+    wxStandardPaths::Get().SetInstallPrefix(wxT(FR_INSTALL_PREFIX));
 #endif
 }
 //-----------------------------------------------------------------------------
@@ -280,29 +280,17 @@ void Config::setConfigFileName(const wxFileName& fileName)
 //-----------------------------------------------------------------------------
 wxString Config::getDataDir() const
 {
-#ifdef FR_CONFIG_USE_PRIVATE_STDPATHS
-    return standardPathsM.GetDataDir();
-#else
     return wxStandardPaths::Get().GetDataDir();
-#endif
 }
 //-----------------------------------------------------------------------------
 wxString Config::getLocalDataDir() const
-{
-#ifdef FR_CONFIG_USE_PRIVATE_STDPATHS
-    return standardPathsM.GetLocalDataDir();
-#else
+{    
     return wxStandardPaths::Get().GetLocalDataDir();
-#endif
 }
 //-----------------------------------------------------------------------------
 wxString Config::getUserLocalDataDir() const
 {
-#ifdef FR_CONFIG_USE_PRIVATE_STDPATHS
-    return standardPathsM.GetUserLocalDataDir();
-#else
     return wxStandardPaths::Get().GetUserLocalDataDir();
-#endif
 }
 //-----------------------------------------------------------------------------
 void Config::setHomePath(const wxString& homePath)

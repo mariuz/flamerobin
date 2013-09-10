@@ -61,9 +61,6 @@ private:
     bool needsFlushM;
     // performs lazy initialization of configM.
     wxFileConfig* getConfig() const;
-#ifdef FR_CONFIG_USE_PRIVATE_STDPATHS
-    wxStandardPaths standardPathsM;
-#endif
     wxString homePathM;
     wxString userHomePathM;
     wxFileName configFileNameM;
