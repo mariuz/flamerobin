@@ -2718,7 +2718,7 @@ void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent& event)
 {
     wxString s;
     long rowsFetched = event.GetExtraLong();
-    s.Printf(_("%d row(s) fetched"), rowsFetched);
+    s.Printf(_("%ld row(s) fetched"), rowsFetched);
     statusbar_1->SetStatusText(s, 1);
 
     // TODO: we could make some bool flag, so that this happens only once per execute()
