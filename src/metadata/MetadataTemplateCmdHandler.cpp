@@ -111,7 +111,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
     // Expands to the current object's unique numeric handle.
     // Used to call FR's commands through URIs.
     else if ((cmdName == wxT("object_handle")) && metadataItem)
-        processedText += wxString::Format(wxT("%d"), metadataItem->getHandle());
+        processedText += wxString::Format(wxT("%ld"), metadataItem->getHandle());
 
     // {%object_name%}
     // Expands to the current object's (non quoted) name.
