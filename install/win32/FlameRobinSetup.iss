@@ -28,9 +28,7 @@
 #define FR_VERSION_STRING Str(FR_VERSION_MAJOR) + "." + Str(FR_VERSION_MINOR) + "." + Str(FR_VERSION_RLS)
 
 #if (FR_VERSION_RLS % 2 == 1)
-  #if defined(FR_VERSION_SVN)
-    #define FR_VERSION_STRING FR_VERSION_STRING + "." + Str(FR_VERSION_SVN)
-  #elif defined(FR_GIT_HASH)
+  #if defined(FR_GIT_HASH)
     #define FR_VERSION_STRING FR_VERSION_STRING + "." + FR_GIT_HASH
   #endif
 #endif
