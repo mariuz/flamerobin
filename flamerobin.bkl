@@ -151,6 +151,9 @@ Accepted values: AMD64, IA64.
         </if>
         <if cond="FORMAT=='autoconf'">
             <define>HAVE_FRCONFIG_H</define>
+            <set var="WX_VERSION">2.9</set>
+	    <sys-lib>wx_gtk2u_aui-$(WX_VERSION)</sys-lib>
+            <sys-lib>wx_gtk2u_stc-$(WX_VERSION)</sys-lib>
         </if>
 
         <!-- Set debug info here -->
@@ -185,8 +188,8 @@ Accepted values: AMD64, IA64.
             <define>WIN32_LEAN_AND_MEAN</define>
 
             <set var="WX_PORT">wxmsw</set>
-<!-- set this to 28 for wxWidgets 2.8.X, to 29 for wxWidgets CVS HEAD -->
-            <set var="WX_VERSION">28</set>
+<!-- set this to 28 for wxWidgets 2.8.X, to 29 for wxWidgets 2.9.x-->
+            <set var="WX_VERSION">29</set>
 
             <set var="WX_LIB_DIR" make_var="1">
                 <if cond="USEDLL=='1'">$(WXDIR)/lib/$(COMPILER)$(DIR_SUFFIX_CPU)_dll</if>

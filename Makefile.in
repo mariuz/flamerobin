@@ -268,7 +268,7 @@ revision-info:
 	cd $(srcdir) && ./update-revision-info.sh
 
 flamerobin$(EXEEXT): $(FLAMEROBIN_OBJECTS) $(LIBPREFIX)ibpp$(LIBEXT) $(__flamerobin___win32rc) $(LIBPREFIX)ibpp$(LIBEXT)
-	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS) -L.    $(LDFLAGS_GUI) $(LDFLAGS)  -libpp $(LIBS)
+	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS) -L.    $(LDFLAGS_GUI) $(LDFLAGS)  -lwx_gtk2u_aui-2.9 -lwx_gtk2u_stc-2.9 -libpp $(LIBS)
 	
 	$(__flamerobin___mac_setfilecmd)
 	$(__flamerobin___os2_emxbindcmd)
