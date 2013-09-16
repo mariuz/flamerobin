@@ -56,7 +56,7 @@ private:
 
     void isaac(randctx* ctx)
     {
-       register ub4 a,b,x,y,*m,*mm,*m2,*r,*mend;
+       ub4 a,b,x,y,*m,*mm,*m2,*r,*mend;
        mm=ctx->randmem; r=ctx->randrsl;
        a = ctx->randa; b = (ctx->randb + (++ctx->randc)) & 0xffffffff;
        for (m = mm, mend = m2 = m+128; m<mend; )
