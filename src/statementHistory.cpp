@@ -135,9 +135,8 @@ wxString StatementHistory::get(StatementHistory::Position pos)
 void StatementHistory::add(const wxString& str)
 {
     if (str.Strip().IsEmpty() ||    // empty or too big string
-        config().get(wxT("limitHistoryItemSize"), false) &&
-        int(str.Length()) >
-        1024 * config().get(wxT("statementHistoryItemSize"), 500))
+        (config().get(wxT("limitHistoryItemSize"), false) &&
+        int(str.Length()) > 1024 * config().get(wxT("statementHistoryItemSize"), 500)))
     {
         return;
     }
