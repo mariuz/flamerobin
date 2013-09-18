@@ -39,41 +39,41 @@
 //-----------------------------------------------------------------------------
 MetadataItemVisitor::MetadataItemVisitor()
 {
-};
+}
 //-----------------------------------------------------------------------------
 MetadataItemVisitor::~MetadataItemVisitor()
 {
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitColumn(Column&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitDatabase(Database&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitDomain(Domain&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitDomains(Domains&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitException(Exception&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitExceptions(Exceptions&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitForeignKey(ForeignKey&)
 {
@@ -83,125 +83,125 @@ void MetadataItemVisitor::visitForeignKey(ForeignKey&)
 void MetadataItemVisitor::visitFunction(Function&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitFunctions(Functions&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitGenerator(Generator&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitGenerators(Generators&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitIndex(Index&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitParameter(Parameter&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitPrimaryKeyConstraint(PrimaryKeyConstraint&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitProcedure(Procedure&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitProcedures(Procedures&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitRelation(Relation&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitRole(Role&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitRoles(Roles&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitRoot(Root&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitServer(Server&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitSysDomains(SysDomains&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitSysRoles(SysRoles&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitSysTables(SysTables&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitTable(Table& table)
 {
     visitRelation(*(Relation*)&table);
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitTables(Tables&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitTrigger(Trigger&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitTriggers(Triggers&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitUniqueConstraint(UniqueConstraint&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitView(View& view)
 {
     visitRelation(*(Relation*)&view);
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitViews(Views&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------
 void MetadataItemVisitor::visitMetadataItem(MetadataItem&)
 {
     defaultAction();
-};
+}
 //-----------------------------------------------------------------------------

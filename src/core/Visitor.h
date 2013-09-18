@@ -35,8 +35,8 @@
 class Visitor
 {
 protected:
-    Visitor() {};
-    virtual ~Visitor() {};
+    Visitor() {}
+    virtual ~Visitor() {}
     virtual void defaultAction();
 };
 //-----------------------------------------------------------------------------

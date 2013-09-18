@@ -45,7 +45,7 @@ class ObjectDescriptionHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
-    ObjectDescriptionHandler() {};
+    ObjectDescriptionHandler() {}
     bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
