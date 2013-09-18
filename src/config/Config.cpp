@@ -57,7 +57,7 @@ Config::Config()
     : configM(0), needsFlushM(false)
 {
 #ifdef FR_CONFIG_USE_PRIVATE_STDPATHS    
-    wxStandardPaths::Get().SetInstallPrefix(wxT(FR_INSTALL_PREFIX));
+    ((wxStandardPaths&)wxStandardPaths::Get()).SetInstallPrefix(wxT(FR_INSTALL_PREFIX));
 #endif
 }
 //-----------------------------------------------------------------------------
