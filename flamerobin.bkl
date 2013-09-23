@@ -151,9 +151,12 @@ Accepted values: AMD64, IA64.
         </if>
         <if cond="FORMAT=='autoconf'">
             <define>HAVE_FRCONFIG_H</define>
-            <set var="WX_VERSION">2.9</set>
-	    <sys-lib>wx_gtk2u_aui-$(WX_VERSION)</sys-lib>
+            <set var="WX_VERSION">2.8</set>
+            <if cond="WX_VERSION>='2.9'">
+            <sys-lib>wx_gtk2u_aui-$(WX_VERSION)</sys-lib>
             <sys-lib>wx_gtk2u_stc-$(WX_VERSION)</sys-lib>
+            </if>
+
         </if>
 
         <!-- Set debug info here -->
