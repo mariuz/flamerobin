@@ -7346,6 +7346,10 @@ _lt_linker_boilerplate=`cat conftest.err`
 $RM -r conftest*
 
 
+## CAVEAT EMPTOR:
+## There is no encapsulation within the following macros, do not change
+## the running order or otherwise move them around unless you know exactly
+## what you are doing...
 if test -n "$compiler"; then
 
 lt_prog_compiler_no_builtin_flag=
@@ -14658,7 +14662,7 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 # Check for Boost headers and libraries
 
-echo "$as_me: this is boost.m4 serial 16" >&5
+echo "$as_me: this is boost.m4 serial 18" >&5
 boost_save_IFS=$IFS
 boost_version_req=
 IFS=.
@@ -15359,7 +15363,69 @@ rm -f core conftest.err conftest_ipa8_conftest.oo \
       LDFLAGS=$boost_save_LDFLAGS
       LIBS=$boost_save_LIBS
       if test x"$boost_cv_lib_system" = xyes; then
-        boost_cv_lib_system_LDFLAGS="-L$boost_ldpath -Wl,-R$boost_ldpath"
+        # Check or used cached result of whether or not using -R or -rpath makes sense.
+        # Some implementations of ld, such as for Mac OSX, require -rpath but
+        # -R is the flag known to work on other systems.
+        # https://github.com/tsuna/boost.m4/issues/19
+        if ${boost_cv_rpath_link_ldflag+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  for boost_cv_rpath_link_ldflag in -Wl,-R, -Wl,-rpath,; do
+            LDFLAGS="$boost_save_LDFLAGS -L$boost_ldpath $boost_cv_rpath_link_ldflag$boost_ldpath"
+            LIBS="$boost_save_LIBS $boost_cv_lib_system_LIBS"
+            rm -f conftest$ac_exeext
+boost_save_ac_ext=$ac_ext
+boost_use_source=:
+# If we already have a .o, re-use it.  We change $ac_ext so that $ac_link
+# tries to link the existing object file instead of compiling from source.
+test -f conftest.$ac_objext && ac_ext=$ac_objext && boost_use_source=false &&
+  $as_echo "$as_me:${as_lineno-$LINENO}: re-using the existing conftest.$ac_objext" >&5
+if { { ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+$as_echo "$ac_try_echo"; } >&5
+  (eval "$ac_link") 2>conftest.err
+  ac_status=$?
+  if test -s conftest.err; then
+    grep -v '^ *+' conftest.err >conftest.er1
+    cat conftest.er1 >&5
+    mv -f conftest.er1 conftest.err
+  fi
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } && {
+	 test -z "$ac_cxx_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_executable_p conftest$ac_exeext
+       }; then :
+  boost_rpath_link_ldflag_found=yes
+              break
+else
+  if $boost_use_source; then
+         $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+       fi
+       boost_rpath_link_ldflag_found=no
+fi
+ac_objext=$boost_save_ac_objext
+ac_ext=$boost_save_ac_ext
+rm -f core conftest.err conftest_ipa8_conftest.oo \
+      conftest$ac_exeext
+          done
+          if test "x$boost_rpath_link_ldflag_found" != "xyes"; then :
+  as_fn_error $? "Unable to determine whether to use -R or -rpath" "$LINENO" 5
+fi
+          LDFLAGS=$boost_save_LDFLAGS
+          LIBS=$boost_save_LIBS
+
+fi
+
+        boost_cv_lib_system_LDFLAGS="-L$boost_ldpath $boost_cv_rpath_link_ldflag$boost_ldpath"
         boost_cv_lib_system_LDPATH="$boost_ldpath"
         break 6
       else
@@ -15591,7 +15657,69 @@ rm -f core conftest.err conftest_ipa8_conftest.oo \
       LDFLAGS=$boost_save_LDFLAGS
       LIBS=$boost_save_LIBS
       if test x"$boost_cv_lib_thread_win32" = xyes; then
-        boost_cv_lib_thread_win32_LDFLAGS="-L$boost_ldpath -Wl,-R$boost_ldpath"
+        # Check or used cached result of whether or not using -R or -rpath makes sense.
+        # Some implementations of ld, such as for Mac OSX, require -rpath but
+        # -R is the flag known to work on other systems.
+        # https://github.com/tsuna/boost.m4/issues/19
+        if ${boost_cv_rpath_link_ldflag+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  for boost_cv_rpath_link_ldflag in -Wl,-R, -Wl,-rpath,; do
+            LDFLAGS="$boost_save_LDFLAGS -L$boost_ldpath $boost_cv_rpath_link_ldflag$boost_ldpath"
+            LIBS="$boost_save_LIBS $boost_cv_lib_thread_win32_LIBS"
+            rm -f conftest$ac_exeext
+boost_save_ac_ext=$ac_ext
+boost_use_source=:
+# If we already have a .o, re-use it.  We change $ac_ext so that $ac_link
+# tries to link the existing object file instead of compiling from source.
+test -f conftest.$ac_objext && ac_ext=$ac_objext && boost_use_source=false &&
+  $as_echo "$as_me:${as_lineno-$LINENO}: re-using the existing conftest.$ac_objext" >&5
+if { { ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+$as_echo "$ac_try_echo"; } >&5
+  (eval "$ac_link") 2>conftest.err
+  ac_status=$?
+  if test -s conftest.err; then
+    grep -v '^ *+' conftest.err >conftest.er1
+    cat conftest.er1 >&5
+    mv -f conftest.er1 conftest.err
+  fi
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } && {
+	 test -z "$ac_cxx_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_executable_p conftest$ac_exeext
+       }; then :
+  boost_rpath_link_ldflag_found=yes
+              break
+else
+  if $boost_use_source; then
+         $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+       fi
+       boost_rpath_link_ldflag_found=no
+fi
+ac_objext=$boost_save_ac_objext
+ac_ext=$boost_save_ac_ext
+rm -f core conftest.err conftest_ipa8_conftest.oo \
+      conftest$ac_exeext
+          done
+          if test "x$boost_rpath_link_ldflag_found" != "xyes"; then :
+  as_fn_error $? "Unable to determine whether to use -R or -rpath" "$LINENO" 5
+fi
+          LDFLAGS=$boost_save_LDFLAGS
+          LIBS=$boost_save_LIBS
+
+fi
+
+        boost_cv_lib_thread_win32_LDFLAGS="-L$boost_ldpath $boost_cv_rpath_link_ldflag$boost_ldpath"
         boost_cv_lib_thread_win32_LDPATH="$boost_ldpath"
         break 6
       else
@@ -15812,7 +15940,69 @@ rm -f core conftest.err conftest_ipa8_conftest.oo \
       LDFLAGS=$boost_save_LDFLAGS
       LIBS=$boost_save_LIBS
       if test x"$boost_cv_lib_thread" = xyes; then
-        boost_cv_lib_thread_LDFLAGS="-L$boost_ldpath -Wl,-R$boost_ldpath"
+        # Check or used cached result of whether or not using -R or -rpath makes sense.
+        # Some implementations of ld, such as for Mac OSX, require -rpath but
+        # -R is the flag known to work on other systems.
+        # https://github.com/tsuna/boost.m4/issues/19
+        if ${boost_cv_rpath_link_ldflag+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  for boost_cv_rpath_link_ldflag in -Wl,-R, -Wl,-rpath,; do
+            LDFLAGS="$boost_save_LDFLAGS -L$boost_ldpath $boost_cv_rpath_link_ldflag$boost_ldpath"
+            LIBS="$boost_save_LIBS $boost_cv_lib_thread_LIBS"
+            rm -f conftest$ac_exeext
+boost_save_ac_ext=$ac_ext
+boost_use_source=:
+# If we already have a .o, re-use it.  We change $ac_ext so that $ac_link
+# tries to link the existing object file instead of compiling from source.
+test -f conftest.$ac_objext && ac_ext=$ac_objext && boost_use_source=false &&
+  $as_echo "$as_me:${as_lineno-$LINENO}: re-using the existing conftest.$ac_objext" >&5
+if { { ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+$as_echo "$ac_try_echo"; } >&5
+  (eval "$ac_link") 2>conftest.err
+  ac_status=$?
+  if test -s conftest.err; then
+    grep -v '^ *+' conftest.err >conftest.er1
+    cat conftest.er1 >&5
+    mv -f conftest.er1 conftest.err
+  fi
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } && {
+	 test -z "$ac_cxx_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_executable_p conftest$ac_exeext
+       }; then :
+  boost_rpath_link_ldflag_found=yes
+              break
+else
+  if $boost_use_source; then
+         $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+       fi
+       boost_rpath_link_ldflag_found=no
+fi
+ac_objext=$boost_save_ac_objext
+ac_ext=$boost_save_ac_ext
+rm -f core conftest.err conftest_ipa8_conftest.oo \
+      conftest$ac_exeext
+          done
+          if test "x$boost_rpath_link_ldflag_found" != "xyes"; then :
+  as_fn_error $? "Unable to determine whether to use -R or -rpath" "$LINENO" 5
+fi
+          LDFLAGS=$boost_save_LDFLAGS
+          LIBS=$boost_save_LIBS
+
+fi
+
+        boost_cv_lib_thread_LDFLAGS="-L$boost_ldpath $boost_cv_rpath_link_ldflag$boost_ldpath"
         boost_cv_lib_thread_LDPATH="$boost_ldpath"
         break 6
       else
