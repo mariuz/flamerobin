@@ -6,7 +6,7 @@ Instructions assume that you have already compiled wxWidgets.
 There are some tips regarding that at the end of this file.
 
 To build FR a recent installation of the Boost libraries is also necessary,
-at the time of writing version 1.44 is the current one, but 1.43 should
+at the time of writing version 1.54 is the current one, but 1.53 should
 work just as well. FR uses the header-only libraries, so building the Boost
 libraries for the used compiler isn't necessary, adding the directories to
 the list of includes will be enough.
