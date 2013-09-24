@@ -145,8 +145,8 @@ IBPP::Date& IBPP::Date::operator=(const IBPP::Date& assigned)
 }
 
 // The following date calculations were inspired by web pages found on
-// Peter Baum web homepage at 'http://www.capecod.net/~pbaum/'.
-// His contact info is at : 'http://home.capecod.net/~pbaum/contact.htm'.
+// Peter Baum web homepage at 'http://mysite.verizon.net/aesir_research/date/date0.htm'.
+// His contact info is at : 'http://mysite.verizon.net/aesir_research/contact.htm'.
 // Please, understand that Peter Baum is not related to this IBPP project.
 // So __please__, do not contact him regarding IBPP matters.
 

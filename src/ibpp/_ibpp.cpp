@@ -53,10 +53,6 @@ namespace ibpp_internals
 
 	const int consts::Dec31_1899 = 693595;
 
-// Many compilers confuses those following min/max with macros min and max !
-//#undef min
-//#undef max
-
 	const int16_t consts::min16 = std::numeric_limits<int16_t>::min();
 	const int16_t consts::max16 = std::numeric_limits<int16_t>::max();
 	const int32_t consts::min32 = std::numeric_limits<int32_t>::min();
