@@ -32,7 +32,7 @@
 
 #include "ibpp.h"
 
-#if defined(__BCPLUSPLUS__) || defined(_MSC_VER) 
+#if defined(_MSC_VER) 
 #define HAS_HDRSTOP
 #endif
 
@@ -46,7 +46,7 @@
 #endif
 #endif
 
-#include "ibase.h"      // From Firebird 1.x or InterBase 6.x installation
+#include "ibase.h"      // From Firebird installation
 
 #if (defined(__GNUC__) && defined(IBPP_WINDOWS))
 //  UNSETTING flags used above for ibase.h -- Huge conflicts with libstdc++ !
@@ -71,11 +71,6 @@
                                 __FILE__, __LINE__);}}
 #else
 #define ASSERTION(x)    /* x */
-#endif
-
-// Fix to famous MSVC 6 variable scope bug
-#if defined(_MSC_VER) && (_MSC_VER < 1300)  // MSVC 6 should be < 1300
-#define for if(true)for
 #endif
 
 namespace ibpp_internals
