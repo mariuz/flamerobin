@@ -1,7 +1,5 @@
 @echo off
 
-rem $Id$
-
 setlocal
 
 set REVISIONINFOFILE=src/revisioninfo.h
@@ -13,17 +11,16 @@ rem @echo git hash "%GITHASH%"
 
 rem extract "#define FR_GIT_HASH \"abcd123\"" line, and take header git hash from it
 if exist %REVISIONINFOFILE% for /F " usebackq tokens=2,3 " %%i in (%REVISIONINFOFILE%) do set name=%%i&set value=%%j&call :read-header-info
-rem @echo Header git hash "%HEADER_GITHASH%"
+rem @echo Header git hash %HEADER_GITHASH%
 
 if not exist %REVISIONINFOFILE% goto :write_header_file
-if "%HEADER_GITHASH%" NEQ "%GITHASH%" goto :write_header_file
+if %HEADER_GITHASH% NEQ "%GITHASH%" goto :write_header_file
 goto :EOF
 
 
 :read-header-info
 if "%name%" EQU "FR_GIT_HASH" set HEADER_GITHASH=%value%&
 goto :EOF
-
 
 
 :write_header_file
@@ -40,7 +37,6 @@ goto :EOF
 @echo Writing no git hash to %REVISIONINFOFILE%
 @echo #undef FR_GIT_HASH>> %REVISIONINFOFILE%
 goto :EOF
-
 
 
 endlocal

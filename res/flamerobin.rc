@@ -4,9 +4,6 @@
 // wxWidgets resources
 ////////////////////////////////////////////////////////////////////////
 
-// set this to 1 for Visual C++ 2005 
-// (build fails with duplicate manifest resources error)
-// #define wxUSE_NO_MANIFEST 1
 #include "wx/msw/wx.rc"
 
 
@@ -29,18 +26,18 @@ aaaa     ICON "../res/fricon.ico"
 
 #include "../src/frversion.h"
 #define STRINGIZE(x) #x
-#define STR(x)  STRINGIZE(x)
+#define STR(x) STRINGIZE(x)
 
 #ifndef FR_GIT_HASH
     #define FR_GIT_HASH 0
 #endif
 
 #define FR_VERSION_STRING STR(FR_VERSION_MAJOR) "." \
-        STR(FR_VERSION_MINOR) "." STR(FR_VERSION_RLS) "." \
-        STR(FR_GIT_HASH)
+        STR(FR_VERSION_MINOR) "." STR(FR_VERSION_RLS)
+		
 1 VERSIONINFO
-    FILEVERSION FR_VERSION_MAJOR,FR_VERSION_MINOR,FR_VERSION_RLS,FR_GIT_HASH
-    PRODUCTVERSION FR_VERSION_MAJOR,FR_VERSION_MINOR,FR_VERSION_RLS,FR_GIT_HASH
+    FILEVERSION FR_VERSION_MAJOR,FR_VERSION_MINOR,FR_VERSION_RLS,0
+    PRODUCTVERSION FR_VERSION_MAJOR,FR_VERSION_MINOR,FR_VERSION_RLS,0
     FILEFLAGSMASK 0x3fL
     FILEFLAGS 0
     FILEOS 0x40004L // VOS_NT_WINDOWS32
@@ -55,7 +52,7 @@ BEGIN
             VALUE "Comments", "FlameRobin: Multi platform Database Manager for Firebird Database Server\0"
             VALUE "CompanyName", "FlameRobin Development Team\0"
             VALUE "FileDescription", "FlameRobin Database Manager\0"
-            VALUE "FileVersion", "FlameRobin " FR_VERSION_STRING "\0"
+            VALUE "FileVersion", "FlameRobin " FR_VERSION_STRING " git hash " FR_GIT_HASH "\0"
             VALUE "InternalName", "FlameRobin\0"
             VALUE "LegalCopyright", "Copyright © 2004-2013 FlameRobin Development Team\0"
             VALUE "LegalTrademarks", "\0"
