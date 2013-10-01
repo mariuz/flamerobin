@@ -39,9 +39,15 @@
 #include <limits>
 
 #ifdef IBPP_WINDOWS
+
 // New (optional) Registry Keys introduced by Firebird Server 1.5
 #define REG_KEY_ROOT_INSTANCES	"SOFTWARE\\Firebird Project\\Firebird Server\\Instances"
 #define FB_DEFAULT_INSTANCE	  	"DefaultInstance"
+
+// Many compilers confuses those following min/max with macros min and max !
+#undef min
+#undef max
+
 #endif
 
 namespace ibpp_internals
