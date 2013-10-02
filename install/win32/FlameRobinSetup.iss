@@ -20,8 +20,6 @@
 ;SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ;
 
-; $Id$
-
 ;#define DEBUG
 
 #include "..\..\src\frversion.h"

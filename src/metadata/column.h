@@ -19,10 +19,6 @@
   CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-
-  $Id: column.h 2240 2013-09-14 20:03:30Z mghie $
-
 */
 
 //-----------------------------------------------------------------------------
