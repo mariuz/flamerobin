@@ -34,7 +34,9 @@
 #include <wx/wupdlock.h>
 
 #include "core/ArtProvider.h"
+#include "core/StringUtils.h"
 #include "core/URIProcessor.h"
+#include "engine/MetadataLoader.h"
 #include "gui/ExecuteSql.h"
 #include "gui/FieldPropertiesDialog.h"
 #include "gui/GUIURIHandlerHelper.h"
@@ -282,6 +284,38 @@ bool FieldPropertiesDialog::getIsNewDomainSelected()
     return choice_domain->GetStringSelection() == _("[Create new]");
 }
 //-----------------------------------------------------------------------------
+bool FieldPropertiesDialog::getNotNullConstraintName(const wxString& fieldName,
+    wxString& constraintName)
+{
+    if (DatabasePtr db = tableM->getDatabase())
+    {
+        wxMBConv* conv = db->getCharsetConverter();
+        MetadataLoader* loader = db->getMetadataLoader();
+        MetadataLoaderTransaction tr(loader);
+
+        IBPP::Statement& st1 = loader->getStatement(
+            "SELECT rc.RDB$CONSTRAINT_NAME FROM RDB$RELATION_CONSTRAINTS rc "
+            "JOIN RDB$CHECK_CONSTRAINTS cc "
+            "ON rc.RDB$CONSTRAINT_NAME = cc.RDB$CONSTRAINT_NAME "
+            "WHERE rc.RDB$CONSTRAINT_TYPE = 'NOT NULL' "
+            "AND rc.RDB$RELATION_NAME = ?"
+            "AND cc.RDB$TRIGGER_NAME = ?");
+
+        st1->Set(1, wx2std(tableM->getName_(), conv));
+        st1->Set(2, wx2std(fieldName, conv));
+        st1->Execute();
+        if (st1->Fetch())
+        {
+            std::string s;
+            st1->Get(1, s);
+            constraintName = std2wxIdentifier(s, conv);
+            return true;
+        }
+    }
+
+    return false;
+}
+//-----------------------------------------------------------------------------
 // UDD = user defined domain
 // AGD = auto generated domain (those starting with RDB$)
 bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
@@ -371,9 +405,20 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
             id.setFromSql(colNameSql);
             wxString fnm = id.get();
             fnm.Replace(wxT("'"), wxT("''"));
+            wxString tnm = tableM->getName_();
             statements += wxT("\nWHERE RDB$FIELD_NAME = '") + fnm
-                + wxT("' AND RDB$RELATION_NAME = '") + tableM->getName_()
+                + wxT("' AND RDB$RELATION_NAME = '") + tnm
                 + wxT("';\n\n");
+
+            if (isNullable) // change from NOT NULL to NULL
+            {
+                wxString constraintName;
+                if (getNotNullConstraintName(fnm, constraintName))
+                {
+                    statements += alterTable + wxT("DROP CONSTRAINT ")
+                        + constraintName + wxT(";\n\n");
+                }
+            }
         }
     }
     else // create new field
@@ -419,20 +464,20 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
             _("Enter value for existing fields containing NULL"),
             _("Update Existing NULL Values"), wxT(""), this);
         if (update_not_null == unnBefore)
-		{
-			wxString origColumnName = columnM->getQuotedName();
-	        statements = wxT("UPDATE ") + tableM->getQuotedName()
-		        + wxT(" \nSET ") + origColumnName + wxT(" = '") + s
-				+ wxT("' \nWHERE ") + origColumnName + wxT(" IS NULL;\n")
-				+ statements;
-		}
-		else
-		{
-			statements = statements + wxT("COMMIT;\n")
-				+ wxT("UPDATE ") + tableM->getQuotedName()
-		        + wxT(" \nSET ") + colNameSql + wxT(" = '") + s
-				+ wxT("' \nWHERE ") + colNameSql + wxT(" IS NULL;\n");
-		}
+        {
+            wxString origColumnName = columnM->getQuotedName();
+            statements = wxT("UPDATE ") + tableM->getQuotedName()
+                + wxT(" \nSET ") + origColumnName + wxT(" = '") + s
+                + wxT("' \nWHERE ") + origColumnName + wxT(" IS NULL;\n")
+                + statements;
+        }
+        else
+        {
+            statements = statements + wxT("COMMIT;\n")
+                + wxT("UPDATE ") + tableM->getQuotedName()
+                + wxT(" \nSET ") + colNameSql + wxT(" = '") + s
+                + wxT("' \nWHERE ") + colNameSql + wxT(" IS NULL;\n");
+        }
     }
     statements += textctrl_sql->GetValue();
     return !statements.IsEmpty();

@@ -73,6 +73,8 @@ private:
     bool getDomainInfo(const wxString& domain,
         wxString& type, wxString& size, wxString& scale, wxString& charset);
     bool getIsNewDomainSelected();
+    bool getNotNullConstraintName(const wxString& fieldName,
+        wxString& constraintName);
     bool getStatementsToExecute(wxString& statements, bool justCheck);
     void layoutControls();
     void loadCharsets();
