@@ -92,12 +92,6 @@ dnl ### begin block 20_COND_STATICRTL_1[flamerobin.bkl] ###
         COND_STATICRTL_1=""
     fi
     AC_SUBST(COND_STATICRTL_1)
-dnl ### begin block 20_COND_UNICODE_1[flamerobin.bkl] ###
-    COND_UNICODE_1="#"
-    if test "x$UNICODE" = "x1" ; then
-        COND_UNICODE_1=""
-    fi
-    AC_SUBST(COND_UNICODE_1)
 dnl ### begin block 20_COND_USEDLL_1[flamerobin.bkl] ###
     COND_USEDLL_1="#"
     if test "x$USEDLL" = "x1" ; then

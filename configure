@@ -634,7 +634,6 @@ LIBOBJS
 WX_INCLUDES
 COND_USE_PCH_1
 COND_USEDLL_1
-COND_UNICODE_1
 COND_STATICRTL_1
 COND_STATICRTL_0
 COND_PLATFORM_WIN32_1
@@ -19901,11 +19900,6 @@ EOF
     COND_STATICRTL_1="#"
     if test "x$STATICRTL" = "x1" ; then
         COND_STATICRTL_1=""
-    fi
-
-    COND_UNICODE_1="#"
-    if test "x$UNICODE" = "x1" ; then
-        COND_UNICODE_1=""
     fi
 
     COND_USEDLL_1="#"
