@@ -56,6 +56,7 @@ LicenseFile=..\..\docs-src\fr_license.txt
 InfoBeforeFile=info_before_win64.rtf
 #endif
 InfoAfterFile=
+MinVersion=0,5.0.2195
 #ifdef DEBUG
 Compression=lzma/ultra
 #ifdef X64VERSION
@@ -95,16 +96,14 @@ Name: quicklaunchicon; Description: {cm:CreateQuickLaunchIcon}; GroupDescription
 Source: ..\..\vcud_amd64\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; Check: Is64BitInstallMode
 Source: ..\..\vcud_amd64\flamerobin.exe.manifest; DestDir: {app}; Flags: ignoreversion; Check: Is64BitInstallMode
 #else
-Source: ..\..\vcd\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; MinVersion: 4.0.950,0; Check: not Is64BitInstallMode
-Source: ..\..\vcud\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; MinVersion: 0,4.0.1381; Check: not Is64BitInstallMode
+Source: ..\..\vcud\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; Check: not Is64BitInstallMode
 #endif
 #else
 #ifdef X64VERSION
 Source: ..\..\vcu_amd64\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; Check: Is64BitInstallMode
 Source: ..\..\vcu_amd64\flamerobin.exe.manifest; DestDir: {app}; Flags: ignoreversion; Check: Is64BitInstallMode
 #else
-Source: ..\..\vc\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; MinVersion: 4.0.950,0; Check: not Is64BitInstallMode
-Source: ..\..\vcu\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; MinVersion: 0,4.0.1381; Check: not Is64BitInstallMode
+Source: ..\..\vcu\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; Check: not Is64BitInstallMode
 #endif
 #endif
 Source: ..\..\docs\*.*; Excludes: flamerobin.1; DestDir: {app}\docs; Flags: ignoreversion
@@ -113,10 +112,8 @@ Source: ..\..\code-templates\*.*; DestDir: {app}\code-templates; Flags: ignoreve
 Source: ..\..\html-templates\*.*; DestDir: {app}\html-templates; Flags: ignoreversion
 Source: ..\..\sys-templates\*.*; DestDir: {app}\sys-templates; Flags: ignoreversion
 #ifndef X64VERSION
-Source: ..\..\res\system32\msvcr71.dll; DestDir: {app}; MinVersion: 0,5.0.2195
-Source: ..\..\res\system32\msvcr71.dll; DestDir: {sys}; Flags: sharedfile uninsneveruninstall; OnlyBelowVersion: 0,5.0.2195
-Source: ..\..\res\system32\msvcp71.dll; DestDir: {app}; MinVersion: 0,5.0.2195
-Source: ..\..\res\system32\msvcp71.dll; DestDir: {sys}; Flags: sharedfile uninsneveruninstall; OnlyBelowVersion: 0,5.0.2195
+Source: ..\..\res\system32\msvcr71.dll; DestDir: {app}
+Source: ..\..\res\system32\msvcp71.dll; DestDir: {app}
 #endif
 
 [INI]

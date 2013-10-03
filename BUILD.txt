@@ -39,6 +39,18 @@ following Stack Overflow post about how to build Boost in both versions:
   http://stackoverflow.com/a/2326485/30568
   (accepted answer to "64-bit version of Boost for 64-bit windows")
 
+For the sole purpose of building FlameRobin only a few libraries are needed,
+and only the version for static linking, so the following invocations are
+all that is needed:
+
+  bjam link=static --with-thread --with-date_time --with-system stage
+
+(for 32 bit build) and
+
+  bjam address-model=64 link=static --with-thread --with-date_time --with-system stage
+
+(for 64 bit build).
+
 For other systems the configure script checks for the used header files and
 libraries of Boost. On Debian and Ubuntu use the following commands to
 install the headers and thread library:

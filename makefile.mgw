@@ -26,9 +26,6 @@ LDFLAGS ?=
 USEDLL ?= 0
 
 #  [0,1]
-UNICODE ?= 0
-
-#  [0,1]
 FINAL ?= 0
 
 #  [0,1]
@@ -46,141 +43,141 @@ CPPDEPS = -MT$@ -MF$@.d -MD -MP
 FLAMEROBIN_CXXFLAGS = -mthreads $(__DEBUGINFO) $(__OPTIMIZE) -W -Wall \
 	$(____flamerobin_WXDEBUG_p) $(____flamerobin_DEBUGFLAG_p) -DHAVE_W32API_H \
 	-D_WINDOWS -D__WINDOWS__ -DWINVER=0x400 -DWIN32 -D__WIN32__ -D__WIN95__ \
-	-DSTRICT -D__WXMSW__ -DwxUSE_GUI=1 -DwxUSE_REGEX=1 \
-	-DwxUSE_UNICODE=$(UNICODE) -DWIN32_LEAN_AND_MEAN \
-	-I$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(U_OPT)$(D_OPT) \
+	-DSTRICT -D__WXMSW__ -DwxUSE_GUI=1 -DwxUSE_REGEX=1 -DwxUSE_UNICODE=1 \
+	-DWIN32_LEAN_AND_MEAN \
+	-I$(____flamerobin_WX_LIB_DIR_FILENAMES)\mswu$(D_OPT) \
 	-I$(WXDIR)\contrib\include -I$(WXDIR)\include -I$(BOOST_ROOT) \
 	-DIBPP_WINDOWS -I. -I.\src -I.\src\ibpp -I.\res $(CPPFLAGS) $(CXXFLAGS)
 FLAMEROBIN_OBJECTS =  \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Config.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ArtProvider.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CodeTemplateProcessor.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRError.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Observer.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ProgressIndicator.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StringUtils.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Subject.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TemplateProcessor.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_URIProcessor.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Visitor.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_databasehandler.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataLoader.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frprec.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frutils.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_AboutBox.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_AdvancedMessageDialog.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_AdvancedSearchFrame.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupFrame.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupRestoreBaseFrame.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BaseDialog.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BaseFrame.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CommandManager.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ConfdefTemplateProcessor.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ContextMenuMetadataItemVisitor.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ControlUtils.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGrid.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridRowBuffer.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridRows.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridTable.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DBHTreeControl.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DndTextControls.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_LogTextControl.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TextControl.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CreateIndexDialog.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGeneratorFrame.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseRegistrationDialog.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_EditBlobDialog.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_EventWatcherFrame.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ExecuteSqlFrame.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ExecuteSql.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesDialog.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FindDialog.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRLayoutConfig.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_GUIURIHandlerHelper.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_HtmlHeaderMetadataItemVisitor.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_HtmlTemplateProcessor.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_InsertDialog.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MainFrame.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemPropertiesFrame.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MultilineEnterDialog.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialog.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogSettings.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrivilegesDialog.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ProgressDialog.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ReorderFieldsDialog.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_RestoreFrame.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SimpleHtmlFrame.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementHistoryDialog.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StyleGuide.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_UserDialog.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_UsernamePasswordDialog.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_logger.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MasterPassword.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_column.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_constraints.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CreateDDLVisitor.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_database.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_domain.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_exception.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_function.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_generator.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Index.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_metadataitem.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemCreateStatementVisitor.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemDescriptionVisitor.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemURIHandlerHelper.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemVisitor.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataTemplateCmdHandler.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataTemplateManager.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_parameter.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_privilege.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_procedure.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_relation.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_role.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_root.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_server.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_table.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_trigger.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_User.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_view.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_objectdescriptionhandler.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Identifier.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_IncompleteStatement.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MultiStatement.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SelectStatement.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlStatement.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementBuilder.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMSW.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin_rc.o
+	gccu$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_Config.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_ArtProvider.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_CodeTemplateProcessor.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_FRError.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_Observer.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_ProgressIndicator.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_StringUtils.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_Subject.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_TemplateProcessor.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_URIProcessor.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_Visitor.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_databasehandler.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_MetadataLoader.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_frprec.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_frutils.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_AboutBox.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_AdvancedMessageDialog.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_AdvancedSearchFrame.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_BackupFrame.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_BackupRestoreBaseFrame.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_BaseDialog.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_BaseFrame.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_CommandManager.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_ConfdefTemplateProcessor.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_ContextMenuMetadataItemVisitor.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_ControlUtils.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_DataGrid.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_DataGridRowBuffer.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_DataGridRows.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_DataGridTable.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_DBHTreeControl.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_DndTextControls.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_LogTextControl.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_TextControl.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_CreateIndexDialog.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_DataGeneratorFrame.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_DatabaseRegistrationDialog.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_EditBlobDialog.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_EventWatcherFrame.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_ExecuteSqlFrame.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_ExecuteSql.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesDialog.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_FindDialog.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_FRLayoutConfig.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_GUIURIHandlerHelper.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_HtmlHeaderMetadataItemVisitor.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_HtmlTemplateProcessor.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_InsertDialog.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_MainFrame.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_MetadataItemPropertiesFrame.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_MultilineEnterDialog.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialog.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogSettings.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_PrivilegesDialog.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_ProgressDialog.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_ReorderFieldsDialog.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_RestoreFrame.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_SimpleHtmlFrame.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_StatementHistoryDialog.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_StyleGuide.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_UserDialog.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_UsernamePasswordDialog.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_logger.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_main.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_MasterPassword.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_column.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_constraints.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_CreateDDLVisitor.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_database.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_domain.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_exception.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_function.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_generator.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_Index.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_metadataitem.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_MetadataItemCreateStatementVisitor.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_MetadataItemDescriptionVisitor.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_MetadataItemURIHandlerHelper.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_MetadataItemVisitor.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_MetadataTemplateCmdHandler.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_MetadataTemplateManager.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_parameter.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_privilege.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_procedure.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_relation.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_role.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_root.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_server.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_table.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_trigger.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_User.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_view.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_objectdescriptionhandler.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_Identifier.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_IncompleteStatement.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_MultiStatement.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_SelectStatement.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_SqlStatement.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_StatementBuilder.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_statementHistory.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMSW.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_flamerobin_rc.o
 IBPP_CXXFLAGS = -mthreads $(__DEBUGINFO) $(__OPTIMIZE) -W -Wall -DIBPP_WINDOWS \
 	-I.\src\ibpp $(CPPFLAGS) $(CXXFLAGS)
 IBPP_OBJECTS =  \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__dpb.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__ibpp.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__ibs.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__rb.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__spb.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__tpb.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_array.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_blob.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_database.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_date.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_dbkey.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_events.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_exception.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_row.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_service.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_statement.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_time.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_transaction.o \
-	gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_user.o
+	gccu$(R_OPT)$(D_OPT)\ibpp__dpb.o \
+	gccu$(R_OPT)$(D_OPT)\ibpp__ibpp.o \
+	gccu$(R_OPT)$(D_OPT)\ibpp__ibs.o \
+	gccu$(R_OPT)$(D_OPT)\ibpp__rb.o \
+	gccu$(R_OPT)$(D_OPT)\ibpp__spb.o \
+	gccu$(R_OPT)$(D_OPT)\ibpp__tpb.o \
+	gccu$(R_OPT)$(D_OPT)\ibpp_array.o \
+	gccu$(R_OPT)$(D_OPT)\ibpp_blob.o \
+	gccu$(R_OPT)$(D_OPT)\ibpp_database.o \
+	gccu$(R_OPT)$(D_OPT)\ibpp_date.o \
+	gccu$(R_OPT)$(D_OPT)\ibpp_dbkey.o \
+	gccu$(R_OPT)$(D_OPT)\ibpp_events.o \
+	gccu$(R_OPT)$(D_OPT)\ibpp_exception.o \
+	gccu$(R_OPT)$(D_OPT)\ibpp_row.o \
+	gccu$(R_OPT)$(D_OPT)\ibpp_service.o \
+	gccu$(R_OPT)$(D_OPT)\ibpp_statement.o \
+	gccu$(R_OPT)$(D_OPT)\ibpp_time.o \
+	gccu$(R_OPT)$(D_OPT)\ibpp_transaction.o \
+	gccu$(R_OPT)$(D_OPT)\ibpp_user.o
 
 ### Conditionally set variables: ###
 
@@ -217,9 +214,6 @@ endif
 ifeq ($(USEDLL),1)
 ______flamerobin_WX_LIB_DIR_FILENAMES_1_p = -L$(WXDIR)\lib\gcc_dll
 endif
-ifeq ($(UNICODE),1)
-U_OPT = u
-endif
 ifeq ($(FINAL),0)
 D_OPT = d
 endif
@@ -237,407 +231,407 @@ __OPTIMIZE = -Os
 endif
 
 
-all: gcc$(U_OPT)$(R_OPT)$(D_OPT)
-gcc$(U_OPT)$(R_OPT)$(D_OPT):
-	-if not exist gcc$(U_OPT)$(R_OPT)$(D_OPT) mkdir gcc$(U_OPT)$(R_OPT)$(D_OPT)
+all: gccu$(R_OPT)$(D_OPT)
+gccu$(R_OPT)$(D_OPT):
+	-if not exist gccu$(R_OPT)$(D_OPT) mkdir gccu$(R_OPT)$(D_OPT)
 
 ### Targets: ###
 
-all: revision-info gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a
+all: revision-info gccu$(R_OPT)$(D_OPT)\flamerobin.exe gccu$(R_OPT)$(D_OPT)\libibpp.a
 
 clean: 
-	-if exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\*.o del gcc$(U_OPT)$(R_OPT)$(D_OPT)\*.o
-	-if exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\*.d del gcc$(U_OPT)$(R_OPT)$(D_OPT)\*.d
-	-if exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe del gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe
-	-if exist gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a del gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a
+	-if exist gccu$(R_OPT)$(D_OPT)\*.o del gccu$(R_OPT)$(D_OPT)\*.o
+	-if exist gccu$(R_OPT)$(D_OPT)\*.d del gccu$(R_OPT)$(D_OPT)\*.d
+	-if exist gccu$(R_OPT)$(D_OPT)\flamerobin.exe del gccu$(R_OPT)$(D_OPT)\flamerobin.exe
+	-if exist gccu$(R_OPT)$(D_OPT)\libibpp.a del gccu$(R_OPT)$(D_OPT)\libibpp.a
 
 revision-info: 
 	update-revision-info.cmd
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin.exe: $(FLAMEROBIN_OBJECTS) gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin_rc.o gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a
-	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS)  -mthreads $(__DEBUGINFO) $(______flamerobin_WX_LIB_DIR_FILENAMES_1_p) -L$(BOOST_LIB_DIR) -Wl,--subsystem,windows -mwindows $(LDFLAGS)  -lwxmsw28$(U_OPT)$(D_OPT)_aui -lwxmsw28$(U_OPT)$(D_OPT)_stc -lwxmsw28$(U_OPT)$(D_OPT)_html -lwxmsw28$(U_OPT)$(D_OPT)_adv -lwxmsw28$(U_OPT)$(D_OPT)_core -lwxbase28$(U_OPT)$(D_OPT)_xml -lwxbase28$(U_OPT)$(D_OPT) -lwxexpat$(D_OPT) -lwxtiff$(D_OPT) -lwxjpeg$(D_OPT) -lwxpng$(D_OPT) -lwxzlib$(D_OPT) -lwxregex$(U_OPT)$(D_OPT) -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lcomctl32 -lrpcrt4 -lwsock32 gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a
+gccu$(R_OPT)$(D_OPT)\flamerobin.exe: $(FLAMEROBIN_OBJECTS) gccu$(R_OPT)$(D_OPT)\libibpp.a gccu$(R_OPT)$(D_OPT)\flamerobin_flamerobin_rc.o gccu$(R_OPT)$(D_OPT)\libibpp.a
+	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS)  -mthreads $(__DEBUGINFO) $(______flamerobin_WX_LIB_DIR_FILENAMES_1_p) -L$(BOOST_LIB_DIR) -Wl,--subsystem,windows -mwindows $(LDFLAGS)  -lwxmsw28u$(D_OPT)_aui -lwxmsw28u$(D_OPT)_stc -lwxmsw28u$(D_OPT)_html -lwxmsw28u$(D_OPT)_adv -lwxmsw28u$(D_OPT)_core -lwxbase28u$(D_OPT)_xml -lwxbase28u$(D_OPT) -lwxexpat$(D_OPT) -lwxtiff$(D_OPT) -lwxjpeg$(D_OPT) -lwxpng$(D_OPT) -lwxzlib$(D_OPT) -lwxregexu$(D_OPT) -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lcomctl32 -lrpcrt4 -lwsock32 gccu$(R_OPT)$(D_OPT)\libibpp.a
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\libibpp.a: $(IBPP_OBJECTS)
+gccu$(R_OPT)$(D_OPT)\libibpp.a: $(IBPP_OBJECTS)
 	if exist $@ del $@
 	ar rcu $@ $(IBPP_OBJECTS)
 	ranlib $@
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.o: ./src/addconstrainthandler.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.o: ./src/addconstrainthandler.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Config.o: ./src/config/Config.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_Config.o: ./src/config/Config.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.o: ./src/config/DatabaseConfig.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.o: ./src/config/DatabaseConfig.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ArtProvider.o: ./src/core/ArtProvider.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_ArtProvider.o: ./src/core/ArtProvider.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CodeTemplateProcessor.o: ./src/core/CodeTemplateProcessor.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_CodeTemplateProcessor.o: ./src/core/CodeTemplateProcessor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRError.o: ./src/core/FRError.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_FRError.o: ./src/core/FRError.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Observer.o: ./src/core/Observer.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_Observer.o: ./src/core/Observer.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ProgressIndicator.o: ./src/core/ProgressIndicator.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_ProgressIndicator.o: ./src/core/ProgressIndicator.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StringUtils.o: ./src/core/StringUtils.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_StringUtils.o: ./src/core/StringUtils.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Subject.o: ./src/core/Subject.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_Subject.o: ./src/core/Subject.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TemplateProcessor.o: ./src/core/TemplateProcessor.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_TemplateProcessor.o: ./src/core/TemplateProcessor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_URIProcessor.o: ./src/core/URIProcessor.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_URIProcessor.o: ./src/core/URIProcessor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Visitor.o: ./src/core/Visitor.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_Visitor.o: ./src/core/Visitor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_databasehandler.o: ./src/databasehandler.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_databasehandler.o: ./src/databasehandler.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataLoader.o: ./src/engine/MetadataLoader.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_MetadataLoader.o: ./src/engine/MetadataLoader.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frprec.o: ./src/frprec.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_frprec.o: ./src/frprec.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_frutils.o: ./src/frutils.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_frutils.o: ./src/frutils.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_AboutBox.o: ./src/gui/AboutBox.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_AboutBox.o: ./src/gui/AboutBox.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_AdvancedMessageDialog.o: ./src/gui/AdvancedMessageDialog.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_AdvancedMessageDialog.o: ./src/gui/AdvancedMessageDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_AdvancedSearchFrame.o: ./src/gui/AdvancedSearchFrame.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_AdvancedSearchFrame.o: ./src/gui/AdvancedSearchFrame.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupFrame.o: ./src/gui/BackupFrame.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_BackupFrame.o: ./src/gui/BackupFrame.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BackupRestoreBaseFrame.o: ./src/gui/BackupRestoreBaseFrame.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_BackupRestoreBaseFrame.o: ./src/gui/BackupRestoreBaseFrame.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BaseDialog.o: ./src/gui/BaseDialog.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_BaseDialog.o: ./src/gui/BaseDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_BaseFrame.o: ./src/gui/BaseFrame.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_BaseFrame.o: ./src/gui/BaseFrame.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CommandManager.o: ./src/gui/CommandManager.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_CommandManager.o: ./src/gui/CommandManager.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ConfdefTemplateProcessor.o: ./src/gui/ConfdefTemplateProcessor.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_ConfdefTemplateProcessor.o: ./src/gui/ConfdefTemplateProcessor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ContextMenuMetadataItemVisitor.o: ./src/gui/ContextMenuMetadataItemVisitor.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_ContextMenuMetadataItemVisitor.o: ./src/gui/ContextMenuMetadataItemVisitor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ControlUtils.o: ./src/gui/controls/ControlUtils.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_ControlUtils.o: ./src/gui/controls/ControlUtils.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGrid.o: ./src/gui/controls/DataGrid.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_DataGrid.o: ./src/gui/controls/DataGrid.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridRowBuffer.o: ./src/gui/controls/DataGridRowBuffer.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_DataGridRowBuffer.o: ./src/gui/controls/DataGridRowBuffer.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridRows.o: ./src/gui/controls/DataGridRows.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_DataGridRows.o: ./src/gui/controls/DataGridRows.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGridTable.o: ./src/gui/controls/DataGridTable.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_DataGridTable.o: ./src/gui/controls/DataGridTable.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DBHTreeControl.o: ./src/gui/controls/DBHTreeControl.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_DBHTreeControl.o: ./src/gui/controls/DBHTreeControl.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DndTextControls.o: ./src/gui/controls/DndTextControls.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_DndTextControls.o: ./src/gui/controls/DndTextControls.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_LogTextControl.o: ./src/gui/controls/LogTextControl.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_LogTextControl.o: ./src/gui/controls/LogTextControl.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.o: ./src/gui/controls/PrintableHtmlWindow.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.o: ./src/gui/controls/PrintableHtmlWindow.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_TextControl.o: ./src/gui/controls/TextControl.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_TextControl.o: ./src/gui/controls/TextControl.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CreateIndexDialog.o: ./src/gui/CreateIndexDialog.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_CreateIndexDialog.o: ./src/gui/CreateIndexDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DataGeneratorFrame.o: ./src/gui/DataGeneratorFrame.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_DataGeneratorFrame.o: ./src/gui/DataGeneratorFrame.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_DatabaseRegistrationDialog.o: ./src/gui/DatabaseRegistrationDialog.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_DatabaseRegistrationDialog.o: ./src/gui/DatabaseRegistrationDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_EditBlobDialog.o: ./src/gui/EditBlobDialog.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_EditBlobDialog.o: ./src/gui/EditBlobDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_EventWatcherFrame.o: ./src/gui/EventWatcherFrame.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_EventWatcherFrame.o: ./src/gui/EventWatcherFrame.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ExecuteSqlFrame.o: ./src/gui/ExecuteSqlFrame.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_ExecuteSqlFrame.o: ./src/gui/ExecuteSqlFrame.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ExecuteSql.o: ./src/gui/ExecuteSql.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_ExecuteSql.o: ./src/gui/ExecuteSql.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesDialog.o: ./src/gui/FieldPropertiesDialog.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesDialog.o: ./src/gui/FieldPropertiesDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FindDialog.o: ./src/gui/FindDialog.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_FindDialog.o: ./src/gui/FindDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_FRLayoutConfig.o: ./src/gui/FRLayoutConfig.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_FRLayoutConfig.o: ./src/gui/FRLayoutConfig.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_GUIURIHandlerHelper.o: ./src/gui/GUIURIHandlerHelper.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_GUIURIHandlerHelper.o: ./src/gui/GUIURIHandlerHelper.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_HtmlHeaderMetadataItemVisitor.o: ./src/gui/HtmlHeaderMetadataItemVisitor.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_HtmlHeaderMetadataItemVisitor.o: ./src/gui/HtmlHeaderMetadataItemVisitor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_HtmlTemplateProcessor.o: ./src/gui/HtmlTemplateProcessor.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_HtmlTemplateProcessor.o: ./src/gui/HtmlTemplateProcessor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_InsertDialog.o: ./src/gui/InsertDialog.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_InsertDialog.o: ./src/gui/InsertDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MainFrame.o: ./src/gui/MainFrame.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_MainFrame.o: ./src/gui/MainFrame.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemPropertiesFrame.o: ./src/gui/MetadataItemPropertiesFrame.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_MetadataItemPropertiesFrame.o: ./src/gui/MetadataItemPropertiesFrame.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MultilineEnterDialog.o: ./src/gui/MultilineEnterDialog.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_MultilineEnterDialog.o: ./src/gui/MultilineEnterDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialog.o: ./src/gui/PreferencesDialog.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialog.o: ./src/gui/PreferencesDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogSettings.o: ./src/gui/PreferencesDialogSettings.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogSettings.o: ./src/gui/PreferencesDialogSettings.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_PrivilegesDialog.o: ./src/gui/PrivilegesDialog.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_PrivilegesDialog.o: ./src/gui/PrivilegesDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ProgressDialog.o: ./src/gui/ProgressDialog.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_ProgressDialog.o: ./src/gui/ProgressDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ReorderFieldsDialog.o: ./src/gui/ReorderFieldsDialog.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_ReorderFieldsDialog.o: ./src/gui/ReorderFieldsDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_RestoreFrame.o: ./src/gui/RestoreFrame.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_RestoreFrame.o: ./src/gui/RestoreFrame.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.o: ./src/gui/ServerRegistrationDialog.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.o: ./src/gui/ServerRegistrationDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SimpleHtmlFrame.o: ./src/gui/SimpleHtmlFrame.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_SimpleHtmlFrame.o: ./src/gui/SimpleHtmlFrame.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementHistoryDialog.o: ./src/gui/StatementHistoryDialog.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_StatementHistoryDialog.o: ./src/gui/StatementHistoryDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StyleGuide.o: ./src/gui/StyleGuide.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_StyleGuide.o: ./src/gui/StyleGuide.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_UserDialog.o: ./src/gui/UserDialog.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_UserDialog.o: ./src/gui/UserDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_UsernamePasswordDialog.o: ./src/gui/UsernamePasswordDialog.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_UsernamePasswordDialog.o: ./src/gui/UsernamePasswordDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_logger.o: ./src/logger.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_logger.o: ./src/logger.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_main.o: ./src/main.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_main.o: ./src/main.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MasterPassword.o: ./src/MasterPassword.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_MasterPassword.o: ./src/MasterPassword.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_column.o: ./src/metadata/column.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_column.o: ./src/metadata/column.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_constraints.o: ./src/metadata/constraints.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_constraints.o: ./src/metadata/constraints.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_CreateDDLVisitor.o: ./src/metadata/CreateDDLVisitor.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_CreateDDLVisitor.o: ./src/metadata/CreateDDLVisitor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_database.o: ./src/metadata/database.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_database.o: ./src/metadata/database.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_domain.o: ./src/metadata/domain.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_domain.o: ./src/metadata/domain.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_exception.o: ./src/metadata/exception.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_exception.o: ./src/metadata/exception.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_function.o: ./src/metadata/function.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_function.o: ./src/metadata/function.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_generator.o: ./src/metadata/generator.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_generator.o: ./src/metadata/generator.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Index.o: ./src/metadata/Index.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_Index.o: ./src/metadata/Index.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_metadataitem.o: ./src/metadata/metadataitem.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_metadataitem.o: ./src/metadata/metadataitem.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemCreateStatementVisitor.o: ./src/metadata/MetadataItemCreateStatementVisitor.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_MetadataItemCreateStatementVisitor.o: ./src/metadata/MetadataItemCreateStatementVisitor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemDescriptionVisitor.o: ./src/metadata/MetadataItemDescriptionVisitor.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_MetadataItemDescriptionVisitor.o: ./src/metadata/MetadataItemDescriptionVisitor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemURIHandlerHelper.o: ./src/metadata/MetadataItemURIHandlerHelper.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_MetadataItemURIHandlerHelper.o: ./src/metadata/MetadataItemURIHandlerHelper.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataItemVisitor.o: ./src/metadata/MetadataItemVisitor.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_MetadataItemVisitor.o: ./src/metadata/MetadataItemVisitor.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataTemplateCmdHandler.o: ./src/metadata/MetadataTemplateCmdHandler.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_MetadataTemplateCmdHandler.o: ./src/metadata/MetadataTemplateCmdHandler.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MetadataTemplateManager.o: ./src/metadata/MetadataTemplateManager.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_MetadataTemplateManager.o: ./src/metadata/MetadataTemplateManager.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_parameter.o: ./src/metadata/parameter.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_parameter.o: ./src/metadata/parameter.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_privilege.o: ./src/metadata/privilege.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_privilege.o: ./src/metadata/privilege.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_procedure.o: ./src/metadata/procedure.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_procedure.o: ./src/metadata/procedure.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_relation.o: ./src/metadata/relation.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_relation.o: ./src/metadata/relation.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_role.o: ./src/metadata/role.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_role.o: ./src/metadata/role.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_root.o: ./src/metadata/root.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_root.o: ./src/metadata/root.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_server.o: ./src/metadata/server.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_server.o: ./src/metadata/server.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_table.o: ./src/metadata/table.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_table.o: ./src/metadata/table.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_trigger.o: ./src/metadata/trigger.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_trigger.o: ./src/metadata/trigger.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_User.o: ./src/metadata/User.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_User.o: ./src/metadata/User.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_view.o: ./src/metadata/view.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_view.o: ./src/metadata/view.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_objectdescriptionhandler.o: ./src/objectdescriptionhandler.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_objectdescriptionhandler.o: ./src/objectdescriptionhandler.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_Identifier.o: ./src/sql/Identifier.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_Identifier.o: ./src/sql/Identifier.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_IncompleteStatement.o: ./src/sql/IncompleteStatement.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_IncompleteStatement.o: ./src/sql/IncompleteStatement.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_MultiStatement.o: ./src/sql/MultiStatement.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_MultiStatement.o: ./src/sql/MultiStatement.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SelectStatement.o: ./src/sql/SelectStatement.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_SelectStatement.o: ./src/sql/SelectStatement.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlStatement.o: ./src/sql/SqlStatement.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_SqlStatement.o: ./src/sql/SqlStatement.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.o: ./src/sql/SqlTokenizer.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.o: ./src/sql/SqlTokenizer.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StatementBuilder.o: ./src/sql/StatementBuilder.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_StatementBuilder.o: ./src/sql/StatementBuilder.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_statementHistory.o: ./src/statementHistory.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_statementHistory.o: ./src/statementHistory.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMSW.o: ./src/gui/msw/StyleGuideMSW.cpp
+gccu$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMSW.o: ./src/gui/msw/StyleGuideMSW.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\flamerobin_flamerobin_rc.o: ./res/flamerobin.rc
-	windres --use-temp-file -i$< -o$@  $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) --define HAVE_W32API_H --define _WINDOWS --define __WINDOWS__ --define WINVER=0x400 --define WIN32 --define __WIN32__ --define __WIN95__ --define STRICT --define __WXMSW__ --define wxUSE_GUI=1 --define wxUSE_REGEX=1 --define wxUSE_UNICODE=$(UNICODE) --define WIN32_LEAN_AND_MEAN --include-dir $(__flamerobin_WX_LIB_DIR)/msw$(U_OPT)$(D_OPT) --include-dir $(WXDIR)/contrib/include --include-dir $(WXDIR)/include --include-dir $(BOOST_ROOT) --define IBPP_WINDOWS --include-dir . --include-dir ./src --include-dir ./src/ibpp --include-dir ./res
+gccu$(R_OPT)$(D_OPT)\flamerobin_flamerobin_rc.o: ./res/flamerobin.rc
+	windres --use-temp-file -i$< -o$@  $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) --define HAVE_W32API_H --define _WINDOWS --define __WINDOWS__ --define WINVER=0x400 --define WIN32 --define __WIN32__ --define __WIN95__ --define STRICT --define __WXMSW__ --define wxUSE_GUI=1 --define wxUSE_REGEX=1 --define wxUSE_UNICODE=1 --define WIN32_LEAN_AND_MEAN --include-dir $(__flamerobin_WX_LIB_DIR)/mswu$(D_OPT) --include-dir $(WXDIR)/contrib/include --include-dir $(WXDIR)/include --include-dir $(BOOST_ROOT) --define IBPP_WINDOWS --include-dir . --include-dir ./src --include-dir ./src/ibpp --include-dir ./res
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__dpb.o: ./src/ibpp/_dpb.cpp
+gccu$(R_OPT)$(D_OPT)\ibpp__dpb.o: ./src/ibpp/_dpb.cpp
 	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__ibpp.o: ./src/ibpp/_ibpp.cpp
+gccu$(R_OPT)$(D_OPT)\ibpp__ibpp.o: ./src/ibpp/_ibpp.cpp
 	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__ibs.o: ./src/ibpp/_ibs.cpp
+gccu$(R_OPT)$(D_OPT)\ibpp__ibs.o: ./src/ibpp/_ibs.cpp
 	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__rb.o: ./src/ibpp/_rb.cpp
+gccu$(R_OPT)$(D_OPT)\ibpp__rb.o: ./src/ibpp/_rb.cpp
 	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__spb.o: ./src/ibpp/_spb.cpp
+gccu$(R_OPT)$(D_OPT)\ibpp__spb.o: ./src/ibpp/_spb.cpp
 	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp__tpb.o: ./src/ibpp/_tpb.cpp
+gccu$(R_OPT)$(D_OPT)\ibpp__tpb.o: ./src/ibpp/_tpb.cpp
 	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_array.o: ./src/ibpp/array.cpp
+gccu$(R_OPT)$(D_OPT)\ibpp_array.o: ./src/ibpp/array.cpp
 	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_blob.o: ./src/ibpp/blob.cpp
+gccu$(R_OPT)$(D_OPT)\ibpp_blob.o: ./src/ibpp/blob.cpp
 	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_database.o: ./src/ibpp/database.cpp
+gccu$(R_OPT)$(D_OPT)\ibpp_database.o: ./src/ibpp/database.cpp
 	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_date.o: ./src/ibpp/date.cpp
+gccu$(R_OPT)$(D_OPT)\ibpp_date.o: ./src/ibpp/date.cpp
 	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_dbkey.o: ./src/ibpp/dbkey.cpp
+gccu$(R_OPT)$(D_OPT)\ibpp_dbkey.o: ./src/ibpp/dbkey.cpp
 	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_events.o: ./src/ibpp/events.cpp
+gccu$(R_OPT)$(D_OPT)\ibpp_events.o: ./src/ibpp/events.cpp
 	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_exception.o: ./src/ibpp/exception.cpp
+gccu$(R_OPT)$(D_OPT)\ibpp_exception.o: ./src/ibpp/exception.cpp
 	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_row.o: ./src/ibpp/row.cpp
+gccu$(R_OPT)$(D_OPT)\ibpp_row.o: ./src/ibpp/row.cpp
 	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_service.o: ./src/ibpp/service.cpp
+gccu$(R_OPT)$(D_OPT)\ibpp_service.o: ./src/ibpp/service.cpp
 	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_statement.o: ./src/ibpp/statement.cpp
+gccu$(R_OPT)$(D_OPT)\ibpp_statement.o: ./src/ibpp/statement.cpp
 	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_time.o: ./src/ibpp/time.cpp
+gccu$(R_OPT)$(D_OPT)\ibpp_time.o: ./src/ibpp/time.cpp
 	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_transaction.o: ./src/ibpp/transaction.cpp
+gccu$(R_OPT)$(D_OPT)\ibpp_transaction.o: ./src/ibpp/transaction.cpp
 	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<
 
-gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_user.o: ./src/ibpp/user.cpp
+gccu$(R_OPT)$(D_OPT)\ibpp_user.o: ./src/ibpp/user.cpp
 	$(CXX) -c -o $@ $(IBPP_CXXFLAGS) $(CPPDEPS) $<
 
 .PHONY: all clean
@@ -646,4 +640,4 @@ gcc$(U_OPT)$(R_OPT)$(D_OPT)\ibpp_user.o: ./src/ibpp/user.cpp
 SHELL := $(COMSPEC)
 
 # Dependencies tracking:
--include gcc$(U_OPT)$(R_OPT)$(D_OPT)/*.d
+-include gccu$(R_OPT)$(D_OPT)/*.d

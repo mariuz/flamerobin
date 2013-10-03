@@ -27,10 +27,6 @@ LDFLAGS =
 USEDLL = 0
 
 #  [0,1]
-#   1 - Unicode
-UNICODE = 0
-
-#  [0,1]
 #   0 - Debug
 #   1 - Release
 FINAL = 0
@@ -58,151 +54,149 @@ TARGET_CPU = $(CPU)
 ### Variables: ###
 
 FLAMEROBIN_CXXFLAGS = /M$(__RTL_TYPE)$(__DEBUGINFO_0) /DWIN32 $(__DEBUGINFO) \
-	$(____DEBUGINFO) \
-	/Fdvc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.pdb \
+	$(____DEBUGINFO) /Fdvcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.pdb \
 	$(__OPTIMIZE) /W4 $(____flamerobin_WXDEBUG_p) $(____flamerobin_DEBUGFLAG_p) \
 	/D_WINDOWS /D__WINDOWS__ /DWINVER=0x400 /DWIN32 /D__WIN32__ /D__WIN95__ \
-	/DSTRICT /D__WXMSW__ /DwxUSE_GUI=1 /DwxUSE_REGEX=1 \
-	/DwxUSE_UNICODE=$(UNICODE) /DWIN32_LEAN_AND_MEAN \
-	/I$(____flamerobin_WX_LIB_DIR_FILENAMES)\msw$(U_OPT)$(D_OPT) \
+	/DSTRICT /D__WXMSW__ /DwxUSE_GUI=1 /DwxUSE_REGEX=1 /DwxUSE_UNICODE=1 \
+	/DWIN32_LEAN_AND_MEAN \
+	/I$(____flamerobin_WX_LIB_DIR_FILENAMES)\mswu$(D_OPT) \
 	/I$(WXDIR)\contrib\include /I$(WXDIR)\include /I$(BOOST_ROOT) /D_WINDOWS \
 	/DIBPP_WINDOWS /I. /I.\src /I.\src\ibpp /I.\res /GR /EHsc /Yu"wx/wxprec.h" \
-	/Fp"vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.pch" \
-	$(CPPFLAGS) $(CXXFLAGS)
-FLAMEROBIN_OBJECTS =  \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_addconstrainthandler.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Config.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DatabaseConfig.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ArtProvider.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_CodeTemplateProcessor.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FRError.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Observer.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ProgressIndicator.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StringUtils.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Subject.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_TemplateProcessor.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_URIProcessor.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Visitor.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_databasehandler.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataLoader.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_frprec.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_frutils.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_AboutBox.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_AdvancedMessageDialog.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_AdvancedSearchFrame.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_BackupFrame.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_BackupRestoreBaseFrame.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_BaseDialog.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_BaseFrame.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_CommandManager.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ConfdefTemplateProcessor.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ContextMenuMetadataItemVisitor.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ControlUtils.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DataGrid.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DataGridRowBuffer.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DataGridRows.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DataGridTable.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DBHTreeControl.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DndTextControls.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_LogTextControl.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_PrintableHtmlWindow.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_TextControl.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_CreateIndexDialog.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DataGeneratorFrame.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DatabaseRegistrationDialog.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_EditBlobDialog.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_EventWatcherFrame.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ExecuteSqlFrame.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ExecuteSql.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FieldPropertiesDialog.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FindDialog.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FRLayoutConfig.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_GUIURIHandlerHelper.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_HtmlHeaderMetadataItemVisitor.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_HtmlTemplateProcessor.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_InsertDialog.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MainFrame.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemPropertiesFrame.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MultilineEnterDialog.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_PreferencesDialog.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_PreferencesDialogSettings.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_PrivilegesDialog.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ProgressDialog.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ReorderFieldsDialog.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_RestoreFrame.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ServerRegistrationDialog.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_SimpleHtmlFrame.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StatementHistoryDialog.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StyleGuide.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_UserDialog.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_UsernamePasswordDialog.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_logger.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_main.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MasterPassword.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_column.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_constraints.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_CreateDDLVisitor.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_database.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_domain.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_exception.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_function.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_generator.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Index.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_metadataitem.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemCreateStatementVisitor.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemDescriptionVisitor.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemURIHandlerHelper.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemVisitor.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataTemplateCmdHandler.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataTemplateManager.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_parameter.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_privilege.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_procedure.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_relation.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_role.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_root.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_server.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_table.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_trigger.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_User.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_view.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_objectdescriptionhandler.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Identifier.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_IncompleteStatement.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MultiStatement.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_SelectStatement.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_SqlStatement.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_SqlTokenizer.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StatementBuilder.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_statementHistory.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StyleGuideMSW.obj
-FLAMEROBIN_RESOURCES =  \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_flamerobin.res
-IBPP_CXXFLAGS = /M$(__RTL_TYPE)$(__DEBUGINFO_0) /DWIN32 $(__DEBUGINFO) \
-	$(____DEBUGINFO) /Fdvc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp.pdb \
-	$(__OPTIMIZE) /W4 /DIBPP_WINDOWS /I.\src\ibpp /GR /EHsc /Yu"_ibpp.h" \
-	/Fp"vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp.pch" $(CPPFLAGS) \
+	/Fp"vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.pch" $(CPPFLAGS) \
 	$(CXXFLAGS)
+FLAMEROBIN_OBJECTS =  \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_addconstrainthandler.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Config.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DatabaseConfig.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ArtProvider.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_CodeTemplateProcessor.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FRError.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Observer.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ProgressIndicator.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StringUtils.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Subject.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_TemplateProcessor.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_URIProcessor.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Visitor.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_databasehandler.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataLoader.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_frprec.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_frutils.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_AboutBox.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_AdvancedMessageDialog.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_AdvancedSearchFrame.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_BackupFrame.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_BackupRestoreBaseFrame.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_BaseDialog.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_BaseFrame.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_CommandManager.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ConfdefTemplateProcessor.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ContextMenuMetadataItemVisitor.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ControlUtils.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DataGrid.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DataGridRowBuffer.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DataGridRows.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DataGridTable.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DBHTreeControl.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DndTextControls.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_LogTextControl.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_PrintableHtmlWindow.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_TextControl.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_CreateIndexDialog.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DataGeneratorFrame.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DatabaseRegistrationDialog.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_EditBlobDialog.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_EventWatcherFrame.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ExecuteSqlFrame.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ExecuteSql.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FieldPropertiesDialog.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FindDialog.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FRLayoutConfig.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_GUIURIHandlerHelper.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_HtmlHeaderMetadataItemVisitor.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_HtmlTemplateProcessor.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_InsertDialog.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MainFrame.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemPropertiesFrame.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MultilineEnterDialog.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_PreferencesDialog.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_PreferencesDialogSettings.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_PrivilegesDialog.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ProgressDialog.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ReorderFieldsDialog.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_RestoreFrame.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ServerRegistrationDialog.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_SimpleHtmlFrame.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StatementHistoryDialog.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StyleGuide.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_UserDialog.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_UsernamePasswordDialog.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_logger.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_main.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MasterPassword.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_column.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_constraints.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_CreateDDLVisitor.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_database.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_domain.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_exception.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_function.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_generator.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Index.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_metadataitem.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemCreateStatementVisitor.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemDescriptionVisitor.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemURIHandlerHelper.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemVisitor.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataTemplateCmdHandler.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataTemplateManager.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_parameter.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_privilege.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_procedure.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_relation.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_role.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_root.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_server.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_table.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_trigger.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_User.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_view.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_objectdescriptionhandler.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Identifier.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_IncompleteStatement.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MultiStatement.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_SelectStatement.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_SqlStatement.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_SqlTokenizer.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StatementBuilder.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_statementHistory.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StyleGuideMSW.obj
+FLAMEROBIN_RESOURCES =  \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_flamerobin.res
+IBPP_CXXFLAGS = /M$(__RTL_TYPE)$(__DEBUGINFO_0) /DWIN32 $(__DEBUGINFO) \
+	$(____DEBUGINFO) /Fdvcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp.pdb \
+	$(__OPTIMIZE) /W4 /DIBPP_WINDOWS /I.\src\ibpp /GR /EHsc /Yu"_ibpp.h" \
+	/Fp"vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp.pch" $(CPPFLAGS) $(CXXFLAGS)
 IBPP_OBJECTS =  \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__dpb.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__ibpp.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__ibs.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__rb.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__spb.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__tpb.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_array.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_blob.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_database.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_date.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_dbkey.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_events.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_exception.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_row.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_service.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_statement.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_time.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_transaction.obj \
-	vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_user.obj
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__dpb.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__ibpp.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__ibs.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__rb.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__spb.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__tpb.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_array.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_blob.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_database.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_date.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_dbkey.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_events.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_exception.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_row.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_service.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_statement.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_time.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_transaction.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_user.obj
 
 ### Conditionally set variables: ###
 
@@ -307,9 +301,6 @@ __OPTIMIZE = /Od
 !if "$(FINAL)" == "1"
 __OPTIMIZE = /O1
 !endif
-!if "$(UNICODE)" == "1"
-U_OPT = u
-!endif
 !if "$(FINAL)" == "0"
 D_OPT = d
 !endif
@@ -327,412 +318,412 @@ DIR_SUFFIX_CPU = _ia64
 !endif
 
 
-all: vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU):
-	-if not exist vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU) mkdir vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)
+all: vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU):
+	-if not exist vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU) mkdir vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)
 
 ### Targets: ###
 
-all: revision-info vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.exe vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp.lib
+all: revision-info vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.exe vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp.lib
 
 clean: 
-	-if exist vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\*.obj del vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\*.obj
-	-if exist vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\*.res del vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\*.res
-	-if exist vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\*.pch del vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\*.pch
-	-if exist vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.exe del vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.exe
-	-if exist vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.ilk del vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.ilk
-	-if exist vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.pdb del vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.pdb
-	-if exist vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp.lib del vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp.lib
+	-if exist vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\*.obj del vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\*.obj
+	-if exist vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\*.res del vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\*.res
+	-if exist vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\*.pch del vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\*.pch
+	-if exist vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.exe del vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.exe
+	-if exist vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.ilk del vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.ilk
+	-if exist vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.pdb del vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.pdb
+	-if exist vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp.lib del vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp.lib
 
 revision-info: 
 	update-revision-info.cmd
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.exe: vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_frprec.obj  $(FLAMEROBIN_OBJECTS) vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp.lib vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_flamerobin.res vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp.lib
-	link /NOLOGO /OUT:$@   $(__DEBUGINFO_5) /pdb:"vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.pdb" $(__DEBUGINFO_9) /nologo /subsystem:windows $(LINK_TARGET_CPU) $(______flamerobin_WX_LIB_DIR_FILENAMES_2_p) /LIBPATH:$(BOOST_LIB_DIR) /SUBSYSTEM:WINDOWS $(LDFLAGS) @<<
-	$(FLAMEROBIN_OBJECTS) $(FLAMEROBIN_RESOURCES)  wxmsw28$(U_OPT)$(D_OPT)_aui.lib wxmsw28$(U_OPT)$(D_OPT)_stc.lib wxmsw28$(U_OPT)$(D_OPT)_html.lib wxmsw28$(U_OPT)$(D_OPT)_adv.lib wxmsw28$(U_OPT)$(D_OPT)_core.lib wxbase28$(U_OPT)$(D_OPT)_xml.lib wxbase28$(U_OPT)$(D_OPT).lib wxexpat$(D_OPT).lib wxtiff$(D_OPT).lib wxjpeg$(D_OPT).lib wxpng$(D_OPT).lib wxzlib$(D_OPT).lib wxregex$(U_OPT)$(D_OPT).lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp.lib
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.exe: vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_frprec.obj  $(FLAMEROBIN_OBJECTS) vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp.lib vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_flamerobin.res vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp.lib
+	link /NOLOGO /OUT:$@   $(__DEBUGINFO_5) /pdb:"vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.pdb" $(__DEBUGINFO_9) /nologo /subsystem:windows $(LINK_TARGET_CPU) $(______flamerobin_WX_LIB_DIR_FILENAMES_2_p) /LIBPATH:$(BOOST_LIB_DIR) /SUBSYSTEM:WINDOWS $(LDFLAGS) @<<
+	$(FLAMEROBIN_OBJECTS) $(FLAMEROBIN_RESOURCES)  wxmsw28u$(D_OPT)_aui.lib wxmsw28u$(D_OPT)_stc.lib wxmsw28u$(D_OPT)_html.lib wxmsw28u$(D_OPT)_adv.lib wxmsw28u$(D_OPT)_core.lib wxbase28u$(D_OPT)_xml.lib wxbase28u$(D_OPT).lib wxexpat$(D_OPT).lib wxtiff$(D_OPT).lib wxjpeg$(D_OPT).lib wxpng$(D_OPT).lib wxzlib$(D_OPT).lib wxregexu$(D_OPT).lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp.lib
 <<
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp.lib: vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__ibpp.obj  $(IBPP_OBJECTS)
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp.lib: vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__ibpp.obj  $(IBPP_OBJECTS)
 	if exist $@ del $@
 	link /LIB /NOLOGO /OUT:$@ @<<
 	$(IBPP_OBJECTS)
 <<
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_addconstrainthandler.obj: .\src\addconstrainthandler.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_addconstrainthandler.obj: .\src\addconstrainthandler.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\addconstrainthandler.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Config.obj: .\src\config\Config.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Config.obj: .\src\config\Config.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\config\Config.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DatabaseConfig.obj: .\src\config\DatabaseConfig.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DatabaseConfig.obj: .\src\config\DatabaseConfig.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\config\DatabaseConfig.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ArtProvider.obj: .\src\core\ArtProvider.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ArtProvider.obj: .\src\core\ArtProvider.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\core\ArtProvider.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_CodeTemplateProcessor.obj: .\src\core\CodeTemplateProcessor.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_CodeTemplateProcessor.obj: .\src\core\CodeTemplateProcessor.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\core\CodeTemplateProcessor.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FRError.obj: .\src\core\FRError.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FRError.obj: .\src\core\FRError.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\core\FRError.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Observer.obj: .\src\core\Observer.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Observer.obj: .\src\core\Observer.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\core\Observer.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ProgressIndicator.obj: .\src\core\ProgressIndicator.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ProgressIndicator.obj: .\src\core\ProgressIndicator.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\core\ProgressIndicator.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StringUtils.obj: .\src\core\StringUtils.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StringUtils.obj: .\src\core\StringUtils.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\core\StringUtils.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Subject.obj: .\src\core\Subject.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Subject.obj: .\src\core\Subject.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\core\Subject.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_TemplateProcessor.obj: .\src\core\TemplateProcessor.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_TemplateProcessor.obj: .\src\core\TemplateProcessor.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\core\TemplateProcessor.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_URIProcessor.obj: .\src\core\URIProcessor.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_URIProcessor.obj: .\src\core\URIProcessor.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\core\URIProcessor.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Visitor.obj: .\src\core\Visitor.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Visitor.obj: .\src\core\Visitor.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\core\Visitor.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_databasehandler.obj: .\src\databasehandler.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_databasehandler.obj: .\src\databasehandler.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\databasehandler.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataLoader.obj: .\src\engine\MetadataLoader.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataLoader.obj: .\src\engine\MetadataLoader.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\engine\MetadataLoader.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_frprec.obj: .\src\frprec.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_frprec.obj: .\src\frprec.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) /Ycwx/wxprec.h .\src\frprec.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_frutils.obj: .\src\frutils.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_frutils.obj: .\src\frutils.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\frutils.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_AboutBox.obj: .\src\gui\AboutBox.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_AboutBox.obj: .\src\gui\AboutBox.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\AboutBox.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_AdvancedMessageDialog.obj: .\src\gui\AdvancedMessageDialog.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_AdvancedMessageDialog.obj: .\src\gui\AdvancedMessageDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\AdvancedMessageDialog.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_AdvancedSearchFrame.obj: .\src\gui\AdvancedSearchFrame.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_AdvancedSearchFrame.obj: .\src\gui\AdvancedSearchFrame.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\AdvancedSearchFrame.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_BackupFrame.obj: .\src\gui\BackupFrame.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_BackupFrame.obj: .\src\gui\BackupFrame.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\BackupFrame.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_BackupRestoreBaseFrame.obj: .\src\gui\BackupRestoreBaseFrame.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_BackupRestoreBaseFrame.obj: .\src\gui\BackupRestoreBaseFrame.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\BackupRestoreBaseFrame.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_BaseDialog.obj: .\src\gui\BaseDialog.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_BaseDialog.obj: .\src\gui\BaseDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\BaseDialog.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_BaseFrame.obj: .\src\gui\BaseFrame.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_BaseFrame.obj: .\src\gui\BaseFrame.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\BaseFrame.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_CommandManager.obj: .\src\gui\CommandManager.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_CommandManager.obj: .\src\gui\CommandManager.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\CommandManager.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ConfdefTemplateProcessor.obj: .\src\gui\ConfdefTemplateProcessor.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ConfdefTemplateProcessor.obj: .\src\gui\ConfdefTemplateProcessor.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\ConfdefTemplateProcessor.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ContextMenuMetadataItemVisitor.obj: .\src\gui\ContextMenuMetadataItemVisitor.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ContextMenuMetadataItemVisitor.obj: .\src\gui\ContextMenuMetadataItemVisitor.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\ContextMenuMetadataItemVisitor.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ControlUtils.obj: .\src\gui\controls\ControlUtils.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ControlUtils.obj: .\src\gui\controls\ControlUtils.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\controls\ControlUtils.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DataGrid.obj: .\src\gui\controls\DataGrid.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DataGrid.obj: .\src\gui\controls\DataGrid.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\controls\DataGrid.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DataGridRowBuffer.obj: .\src\gui\controls\DataGridRowBuffer.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DataGridRowBuffer.obj: .\src\gui\controls\DataGridRowBuffer.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\controls\DataGridRowBuffer.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DataGridRows.obj: .\src\gui\controls\DataGridRows.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DataGridRows.obj: .\src\gui\controls\DataGridRows.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\controls\DataGridRows.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DataGridTable.obj: .\src\gui\controls\DataGridTable.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DataGridTable.obj: .\src\gui\controls\DataGridTable.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\controls\DataGridTable.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DBHTreeControl.obj: .\src\gui\controls\DBHTreeControl.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DBHTreeControl.obj: .\src\gui\controls\DBHTreeControl.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\controls\DBHTreeControl.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DndTextControls.obj: .\src\gui\controls\DndTextControls.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DndTextControls.obj: .\src\gui\controls\DndTextControls.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\controls\DndTextControls.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_LogTextControl.obj: .\src\gui\controls\LogTextControl.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_LogTextControl.obj: .\src\gui\controls\LogTextControl.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\controls\LogTextControl.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_PrintableHtmlWindow.obj: .\src\gui\controls\PrintableHtmlWindow.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_PrintableHtmlWindow.obj: .\src\gui\controls\PrintableHtmlWindow.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\controls\PrintableHtmlWindow.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_TextControl.obj: .\src\gui\controls\TextControl.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_TextControl.obj: .\src\gui\controls\TextControl.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\controls\TextControl.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_CreateIndexDialog.obj: .\src\gui\CreateIndexDialog.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_CreateIndexDialog.obj: .\src\gui\CreateIndexDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\CreateIndexDialog.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DataGeneratorFrame.obj: .\src\gui\DataGeneratorFrame.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DataGeneratorFrame.obj: .\src\gui\DataGeneratorFrame.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\DataGeneratorFrame.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DatabaseRegistrationDialog.obj: .\src\gui\DatabaseRegistrationDialog.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DatabaseRegistrationDialog.obj: .\src\gui\DatabaseRegistrationDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\DatabaseRegistrationDialog.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_EditBlobDialog.obj: .\src\gui\EditBlobDialog.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_EditBlobDialog.obj: .\src\gui\EditBlobDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\EditBlobDialog.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_EventWatcherFrame.obj: .\src\gui\EventWatcherFrame.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_EventWatcherFrame.obj: .\src\gui\EventWatcherFrame.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\EventWatcherFrame.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ExecuteSqlFrame.obj: .\src\gui\ExecuteSqlFrame.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ExecuteSqlFrame.obj: .\src\gui\ExecuteSqlFrame.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\ExecuteSqlFrame.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ExecuteSql.obj: .\src\gui\ExecuteSql.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ExecuteSql.obj: .\src\gui\ExecuteSql.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\ExecuteSql.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FieldPropertiesDialog.obj: .\src\gui\FieldPropertiesDialog.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FieldPropertiesDialog.obj: .\src\gui\FieldPropertiesDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\FieldPropertiesDialog.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FindDialog.obj: .\src\gui\FindDialog.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FindDialog.obj: .\src\gui\FindDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\FindDialog.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FRLayoutConfig.obj: .\src\gui\FRLayoutConfig.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FRLayoutConfig.obj: .\src\gui\FRLayoutConfig.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\FRLayoutConfig.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_GUIURIHandlerHelper.obj: .\src\gui\GUIURIHandlerHelper.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_GUIURIHandlerHelper.obj: .\src\gui\GUIURIHandlerHelper.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\GUIURIHandlerHelper.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_HtmlHeaderMetadataItemVisitor.obj: .\src\gui\HtmlHeaderMetadataItemVisitor.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_HtmlHeaderMetadataItemVisitor.obj: .\src\gui\HtmlHeaderMetadataItemVisitor.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\HtmlHeaderMetadataItemVisitor.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_HtmlTemplateProcessor.obj: .\src\gui\HtmlTemplateProcessor.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_HtmlTemplateProcessor.obj: .\src\gui\HtmlTemplateProcessor.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\HtmlTemplateProcessor.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_InsertDialog.obj: .\src\gui\InsertDialog.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_InsertDialog.obj: .\src\gui\InsertDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\InsertDialog.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MainFrame.obj: .\src\gui\MainFrame.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MainFrame.obj: .\src\gui\MainFrame.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\MainFrame.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemPropertiesFrame.obj: .\src\gui\MetadataItemPropertiesFrame.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemPropertiesFrame.obj: .\src\gui\MetadataItemPropertiesFrame.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\MetadataItemPropertiesFrame.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MultilineEnterDialog.obj: .\src\gui\MultilineEnterDialog.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MultilineEnterDialog.obj: .\src\gui\MultilineEnterDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\MultilineEnterDialog.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_PreferencesDialog.obj: .\src\gui\PreferencesDialog.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_PreferencesDialog.obj: .\src\gui\PreferencesDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\PreferencesDialog.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_PreferencesDialogSettings.obj: .\src\gui\PreferencesDialogSettings.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_PreferencesDialogSettings.obj: .\src\gui\PreferencesDialogSettings.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\PreferencesDialogSettings.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_PrivilegesDialog.obj: .\src\gui\PrivilegesDialog.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_PrivilegesDialog.obj: .\src\gui\PrivilegesDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\PrivilegesDialog.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ProgressDialog.obj: .\src\gui\ProgressDialog.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ProgressDialog.obj: .\src\gui\ProgressDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\ProgressDialog.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ReorderFieldsDialog.obj: .\src\gui\ReorderFieldsDialog.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ReorderFieldsDialog.obj: .\src\gui\ReorderFieldsDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\ReorderFieldsDialog.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_RestoreFrame.obj: .\src\gui\RestoreFrame.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_RestoreFrame.obj: .\src\gui\RestoreFrame.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\RestoreFrame.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ServerRegistrationDialog.obj: .\src\gui\ServerRegistrationDialog.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ServerRegistrationDialog.obj: .\src\gui\ServerRegistrationDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\ServerRegistrationDialog.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_SimpleHtmlFrame.obj: .\src\gui\SimpleHtmlFrame.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_SimpleHtmlFrame.obj: .\src\gui\SimpleHtmlFrame.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\SimpleHtmlFrame.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StatementHistoryDialog.obj: .\src\gui\StatementHistoryDialog.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StatementHistoryDialog.obj: .\src\gui\StatementHistoryDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\StatementHistoryDialog.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StyleGuide.obj: .\src\gui\StyleGuide.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StyleGuide.obj: .\src\gui\StyleGuide.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\StyleGuide.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_UserDialog.obj: .\src\gui\UserDialog.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_UserDialog.obj: .\src\gui\UserDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\UserDialog.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_UsernamePasswordDialog.obj: .\src\gui\UsernamePasswordDialog.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_UsernamePasswordDialog.obj: .\src\gui\UsernamePasswordDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\UsernamePasswordDialog.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_logger.obj: .\src\logger.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_logger.obj: .\src\logger.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\logger.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_main.obj: .\src\main.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_main.obj: .\src\main.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\main.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MasterPassword.obj: .\src\MasterPassword.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MasterPassword.obj: .\src\MasterPassword.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\MasterPassword.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_column.obj: .\src\metadata\column.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_column.obj: .\src\metadata\column.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\column.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_constraints.obj: .\src\metadata\constraints.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_constraints.obj: .\src\metadata\constraints.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\constraints.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_CreateDDLVisitor.obj: .\src\metadata\CreateDDLVisitor.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_CreateDDLVisitor.obj: .\src\metadata\CreateDDLVisitor.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\CreateDDLVisitor.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_database.obj: .\src\metadata\database.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_database.obj: .\src\metadata\database.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\database.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_domain.obj: .\src\metadata\domain.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_domain.obj: .\src\metadata\domain.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\domain.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_exception.obj: .\src\metadata\exception.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_exception.obj: .\src\metadata\exception.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\exception.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_function.obj: .\src\metadata\function.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_function.obj: .\src\metadata\function.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\function.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_generator.obj: .\src\metadata\generator.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_generator.obj: .\src\metadata\generator.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\generator.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Index.obj: .\src\metadata\Index.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Index.obj: .\src\metadata\Index.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\Index.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_metadataitem.obj: .\src\metadata\metadataitem.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_metadataitem.obj: .\src\metadata\metadataitem.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\metadataitem.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemCreateStatementVisitor.obj: .\src\metadata\MetadataItemCreateStatementVisitor.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemCreateStatementVisitor.obj: .\src\metadata\MetadataItemCreateStatementVisitor.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\MetadataItemCreateStatementVisitor.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemDescriptionVisitor.obj: .\src\metadata\MetadataItemDescriptionVisitor.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemDescriptionVisitor.obj: .\src\metadata\MetadataItemDescriptionVisitor.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\MetadataItemDescriptionVisitor.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemURIHandlerHelper.obj: .\src\metadata\MetadataItemURIHandlerHelper.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemURIHandlerHelper.obj: .\src\metadata\MetadataItemURIHandlerHelper.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\MetadataItemURIHandlerHelper.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemVisitor.obj: .\src\metadata\MetadataItemVisitor.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemVisitor.obj: .\src\metadata\MetadataItemVisitor.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\MetadataItemVisitor.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataTemplateCmdHandler.obj: .\src\metadata\MetadataTemplateCmdHandler.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataTemplateCmdHandler.obj: .\src\metadata\MetadataTemplateCmdHandler.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\MetadataTemplateCmdHandler.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataTemplateManager.obj: .\src\metadata\MetadataTemplateManager.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataTemplateManager.obj: .\src\metadata\MetadataTemplateManager.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\MetadataTemplateManager.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_parameter.obj: .\src\metadata\parameter.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_parameter.obj: .\src\metadata\parameter.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\parameter.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_privilege.obj: .\src\metadata\privilege.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_privilege.obj: .\src\metadata\privilege.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\privilege.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_procedure.obj: .\src\metadata\procedure.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_procedure.obj: .\src\metadata\procedure.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\procedure.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_relation.obj: .\src\metadata\relation.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_relation.obj: .\src\metadata\relation.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\relation.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_role.obj: .\src\metadata\role.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_role.obj: .\src\metadata\role.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\role.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_root.obj: .\src\metadata\root.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_root.obj: .\src\metadata\root.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\root.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_server.obj: .\src\metadata\server.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_server.obj: .\src\metadata\server.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\server.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_table.obj: .\src\metadata\table.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_table.obj: .\src\metadata\table.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\table.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_trigger.obj: .\src\metadata\trigger.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_trigger.obj: .\src\metadata\trigger.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\trigger.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_User.obj: .\src\metadata\User.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_User.obj: .\src\metadata\User.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\User.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_view.obj: .\src\metadata\view.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_view.obj: .\src\metadata\view.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\view.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_objectdescriptionhandler.obj: .\src\objectdescriptionhandler.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_objectdescriptionhandler.obj: .\src\objectdescriptionhandler.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\objectdescriptionhandler.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Identifier.obj: .\src\sql\Identifier.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Identifier.obj: .\src\sql\Identifier.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\sql\Identifier.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_IncompleteStatement.obj: .\src\sql\IncompleteStatement.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_IncompleteStatement.obj: .\src\sql\IncompleteStatement.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\sql\IncompleteStatement.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MultiStatement.obj: .\src\sql\MultiStatement.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MultiStatement.obj: .\src\sql\MultiStatement.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\sql\MultiStatement.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_SelectStatement.obj: .\src\sql\SelectStatement.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_SelectStatement.obj: .\src\sql\SelectStatement.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\sql\SelectStatement.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_SqlStatement.obj: .\src\sql\SqlStatement.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_SqlStatement.obj: .\src\sql\SqlStatement.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\sql\SqlStatement.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_SqlTokenizer.obj: .\src\sql\SqlTokenizer.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_SqlTokenizer.obj: .\src\sql\SqlTokenizer.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\sql\SqlTokenizer.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StatementBuilder.obj: .\src\sql\StatementBuilder.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StatementBuilder.obj: .\src\sql\StatementBuilder.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\sql\StatementBuilder.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_statementHistory.obj: .\src\statementHistory.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_statementHistory.obj: .\src\statementHistory.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\statementHistory.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StyleGuideMSW.obj: .\src\gui\msw\StyleGuideMSW.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StyleGuideMSW.obj: .\src\gui\msw\StyleGuideMSW.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\msw\StyleGuideMSW.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_flamerobin.res: .\res\flamerobin.rc
-	rc /fo$@  /d WIN32 $(____DEBUGINFO_6_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) /d _WINDOWS /d __WINDOWS__ /d WINVER=0x400 /d WIN32 /d __WIN32__ /d __WIN95__ /d STRICT /d __WXMSW__ /d wxUSE_GUI=1 /d wxUSE_REGEX=1 /d wxUSE_UNICODE=$(UNICODE) /d WIN32_LEAN_AND_MEAN /i $(____flamerobin_WX_LIB_DIR_FILENAMES_1)\msw$(U_OPT)$(D_OPT) /i $(WXDIR)\contrib\include /i $(WXDIR)\include /i $(BOOST_ROOT) /d _WINDOWS /d IBPP_WINDOWS /i . /i .\src /i .\src\ibpp /i .\res .\res\flamerobin.rc
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_flamerobin.res: .\res\flamerobin.rc
+	rc /fo$@  /d WIN32 $(____DEBUGINFO_6_p_1) $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) /d _WINDOWS /d __WINDOWS__ /d WINVER=0x400 /d WIN32 /d __WIN32__ /d __WIN95__ /d STRICT /d __WXMSW__ /d wxUSE_GUI=1 /d wxUSE_REGEX=1 /d wxUSE_UNICODE=1 /d WIN32_LEAN_AND_MEAN /i $(____flamerobin_WX_LIB_DIR_FILENAMES_1)\mswu$(D_OPT) /i $(WXDIR)\contrib\include /i $(WXDIR)\include /i $(BOOST_ROOT) /d _WINDOWS /d IBPP_WINDOWS /i . /i .\src /i .\src\ibpp /i .\res .\res\flamerobin.rc
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__dpb.obj: .\src\ibpp\_dpb.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__dpb.obj: .\src\ibpp\_dpb.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(IBPP_CXXFLAGS) .\src\ibpp\_dpb.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__ibpp.obj: .\src\ibpp\_ibpp.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__ibpp.obj: .\src\ibpp\_ibpp.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(IBPP_CXXFLAGS) /Yc_ibpp.h .\src\ibpp\_ibpp.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__ibs.obj: .\src\ibpp\_ibs.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__ibs.obj: .\src\ibpp\_ibs.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(IBPP_CXXFLAGS) .\src\ibpp\_ibs.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__rb.obj: .\src\ibpp\_rb.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__rb.obj: .\src\ibpp\_rb.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(IBPP_CXXFLAGS) .\src\ibpp\_rb.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__spb.obj: .\src\ibpp\_spb.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__spb.obj: .\src\ibpp\_spb.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(IBPP_CXXFLAGS) .\src\ibpp\_spb.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__tpb.obj: .\src\ibpp\_tpb.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__tpb.obj: .\src\ibpp\_tpb.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(IBPP_CXXFLAGS) .\src\ibpp\_tpb.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_array.obj: .\src\ibpp\array.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_array.obj: .\src\ibpp\array.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(IBPP_CXXFLAGS) .\src\ibpp\array.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_blob.obj: .\src\ibpp\blob.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_blob.obj: .\src\ibpp\blob.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(IBPP_CXXFLAGS) .\src\ibpp\blob.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_database.obj: .\src\ibpp\database.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_database.obj: .\src\ibpp\database.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(IBPP_CXXFLAGS) .\src\ibpp\database.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_date.obj: .\src\ibpp\date.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_date.obj: .\src\ibpp\date.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(IBPP_CXXFLAGS) .\src\ibpp\date.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_dbkey.obj: .\src\ibpp\dbkey.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_dbkey.obj: .\src\ibpp\dbkey.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(IBPP_CXXFLAGS) .\src\ibpp\dbkey.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_events.obj: .\src\ibpp\events.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_events.obj: .\src\ibpp\events.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(IBPP_CXXFLAGS) .\src\ibpp\events.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_exception.obj: .\src\ibpp\exception.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_exception.obj: .\src\ibpp\exception.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(IBPP_CXXFLAGS) .\src\ibpp\exception.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_row.obj: .\src\ibpp\row.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_row.obj: .\src\ibpp\row.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(IBPP_CXXFLAGS) .\src\ibpp\row.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_service.obj: .\src\ibpp\service.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_service.obj: .\src\ibpp\service.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(IBPP_CXXFLAGS) .\src\ibpp\service.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_statement.obj: .\src\ibpp\statement.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_statement.obj: .\src\ibpp\statement.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(IBPP_CXXFLAGS) .\src\ibpp\statement.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_time.obj: .\src\ibpp\time.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_time.obj: .\src\ibpp\time.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(IBPP_CXXFLAGS) .\src\ibpp\time.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_transaction.obj: .\src\ibpp\transaction.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_transaction.obj: .\src\ibpp\transaction.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(IBPP_CXXFLAGS) .\src\ibpp\transaction.cpp
 
-vc$(U_OPT)$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_user.obj: .\src\ibpp\user.cpp
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp_user.obj: .\src\ibpp\user.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(IBPP_CXXFLAGS) .\src\ibpp\user.cpp
 
