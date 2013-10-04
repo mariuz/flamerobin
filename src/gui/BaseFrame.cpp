@@ -30,6 +30,8 @@
     #include "wx/wx.h"
 #endif
 
+#include "wx/display.h"
+
 #if defined(__WXMSW__)
     #include "wx/msw/wrapwin.h" // for "windows.h"
 #endif
@@ -84,7 +86,8 @@ void BaseFrame::doBeforeDestroy()
 void BaseFrame::readConfigSettings()
 {
     // load position and size from config; it values are not set, they will be untouched
-    wxRect r = getDefaultRect();
+    wxRect rcDefault = getDefaultRect();
+    wxRect rc = rcDefault;
     bool enabled = false;
     bool maximized = false;
     if (config().getValue(wxT("FrameStorage"), enabled) && enabled)
@@ -93,16 +96,29 @@ void BaseFrame::readConfigSettings()
         if (!itemPrefix.empty())
         {
             config().getValue(itemPrefix + Config::pathSeparator + wxT("maximized"), maximized);
-            config().getValue(itemPrefix + Config::pathSeparator + wxT("x"), r.x);
-            config().getValue(itemPrefix + Config::pathSeparator + wxT("y"), r.y);
-            config().getValue(itemPrefix + Config::pathSeparator + wxT("width"), r.width);
-            config().getValue(itemPrefix + Config::pathSeparator + wxT("height"), r.height);
+            config().getValue(itemPrefix + Config::pathSeparator + wxT("x"), rc.x);
+            config().getValue(itemPrefix + Config::pathSeparator + wxT("y"), rc.y);
+            config().getValue(itemPrefix + Config::pathSeparator + wxT("width"), rc.width);
+            config().getValue(itemPrefix + Config::pathSeparator + wxT("height"), rc.height);
             doReadConfigSettings(itemPrefix);
         }
     }
-    SetSize(r);
-    if (maximized)
-        Maximize();
+
+    // check whether rect intersects at least one monitor rect
+    // otherwise (for example because monitor is not attached any more
+    // or a remote desktop connection is active) use the default size and position
+    for (unsigned i = 0; i < wxDisplay::GetCount(); ++i)
+    {
+        wxDisplay dsp(i);
+        if (dsp.IsOk() && rc.Intersects(dsp.GetClientArea()))
+        {
+            SetSize(rc);
+            if (maximized)
+                Maximize();
+            return;
+        }
+    }
+    SetSize(rcDefault);
 }
 void BaseFrame::doReadConfigSettings(const wxString& WXUNUSED(prefix))
 {
