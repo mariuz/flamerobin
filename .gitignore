@@ -1,7 +1,7 @@
 src/revisioninfo.h
 flamerobin_vs2010.*
 flamerobin.ncb
-flamerobin.suo
+flamerobin*.suo
 *.vcxproj
 Debug
 Release

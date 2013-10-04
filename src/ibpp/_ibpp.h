@@ -80,6 +80,11 @@ enum flush_debug_stream_type {fds};
 
 #ifdef _DEBUG
 
+#if defined (_MSC_VER) && (_MSC_VER >= 1700)
+#pragma warning ( push )
+#pragma warning ( disable: 4250 )
+#endif
+
 struct DebugStream : public std::stringstream
 {
     // next two operators fix some g++ and vc++ related problems
@@ -94,6 +99,10 @@ struct DebugStream : public std::stringstream
     DebugStream() {}
 };
 std::ostream& operator<< (std::ostream& a, flush_debug_stream_type);
+
+#if defined (_MSC_VER) && (_MSC_VER >= 1700)
+#pragma warning ( pop )
+#endif
 
 #else
 
