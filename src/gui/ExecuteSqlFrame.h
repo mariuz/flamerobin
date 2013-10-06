@@ -94,6 +94,7 @@ private:
 
     std::vector<SqlStatement> executedStatementsM;
     wxFileName filenameM;
+    wxDateTime filenameModificationTimeM;
 
     void compareCounts(IBPP::DatabaseCounts& one, IBPP::DatabaseCounts& two);
 
@@ -156,6 +157,7 @@ private:
     void updateBlobEditor();
 
     // events
+    void OnActivate(wxActivateEvent& event);
     void OnChildFocus(wxChildFocusEvent& event);
     void OnKeyDown(wxKeyEvent& event);
     void OnGridCellChange(wxGridEvent& event);

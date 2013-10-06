@@ -891,6 +891,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_CHAR_HOOK(ExecuteSqlFrame::OnKeyDown)
     EVT_CHILD_FOCUS(ExecuteSqlFrame::OnChildFocus)
     EVT_IDLE(ExecuteSqlFrame::OnIdle)
+    EVT_ACTIVATE(ExecuteSqlFrame::OnActivate)
 
     EVT_MENU(wxID_NEW,      ExecuteSqlFrame::OnMenuNew)
     EVT_MENU(wxID_OPEN,     ExecuteSqlFrame::OnMenuOpen)
@@ -1291,6 +1292,28 @@ void ExecuteSqlFrame::OnIdle(wxIdleEvent& event)
     event.Skip();
 }
 //-----------------------------------------------------------------------------
+void ExecuteSqlFrame::OnActivate(wxActivateEvent& event)
+{
+    if (event.GetActive() && filenameM.FileExists())
+    {
+        wxDateTime modified = filenameM.GetModificationTime();
+        if (filenameModificationTimeM != modified)
+        {
+            filenameModificationTimeM = modified;
+
+            Raise();
+            int res = showQuestionDialog(this,
+                _("Do you want to load external modifications to this file?"),
+                wxString::Format(_("The file\n\n%s\n\nhas been modified by another program. Do you want to reload it?\nIf you reload the file now your own modifications will be lost."),
+                filenameM.GetFullPath().c_str()),
+                AdvancedMessageDialogButtonsOkCancel(_("&Reload"), _("Do&n't Reload")));
+            if (res == wxOK)
+                loadSqlFile(filenameM.GetFullPath());
+        }
+    }
+    event.Skip();
+}
+//-----------------------------------------------------------------------------
 void ExecuteSqlFrame::OnMenuNew(wxCommandEvent& WXUNUSED(event))
 {
     ExecuteSqlFrame *eff = new ExecuteSqlFrame(GetParent(), -1,
@@ -1326,6 +1349,7 @@ void ExecuteSqlFrame::OnMenuSaveOrSaveAs(wxCommandEvent& event)
     if (styled_text_ctrl_sql->SaveFile(filename))
     {
         filenameM = filename;
+        filenameModificationTimeM = wxFileName(filenameM).GetModificationTime();
         updateFrameTitleM = true;
         statusbar_1->SetStatusText((_("File saved")), 2);
     }
@@ -1934,6 +1958,7 @@ bool ExecuteSqlFrame::loadSqlFile(const wxString& filename)
     if (!styled_text_ctrl_sql->LoadFile(filename))
         return false;
     filenameM = filename;
+    filenameModificationTimeM = wxFileName(filenameM).GetModificationTime();
     updateFrameTitleM = true;
     return true;
 }
