@@ -244,6 +244,11 @@ wxString loadEntireFile(const wxFileName& filename)
 //-----------------------------------------------------------------------------
 wxString wrapText(const wxString& text, size_t maxWidth, size_t indent)
 {
+    if (text.Length() <= maxWidth)
+        return text;
+
+    enum { none, insideSingle, insideDouble, } wrapState = none;
+
     wxString indentStr;
     bool eol(false);
     wxString wrappedText;
@@ -253,6 +258,12 @@ wxString wrapText(const wxString& text, size_t maxWidth, size_t indent)
     wxString::const_iterator lineStart = text.begin();
     for (wxString::const_iterator it = lineStart; ; ++it)
     {
+        if (it == text.end())
+        {
+            wrappedText << indentStr << line;
+            break;
+        }
+
         if (eol)
         {
             wrappedText += wxT('\n');
@@ -262,20 +273,35 @@ wxString wrapText(const wxString& text, size_t maxWidth, size_t indent)
             lastSpace = text.end();
             line.clear();
             lineStart = it;
+            eol = false;
         }
-        eol = false;
 
-        if (it == text.end() || *it == wxT('\n'))
+        if (*it == wxT('\n'))
         {
             wrappedText << indentStr << line;
             eol = true;
-            if (it == text.end())
-                break;
         }
-        else // not EOL
+        else
         {
-            if (*it == wxT(' '))
-                lastSpace = it;
+            if (wrapState == insideSingle)
+            {
+                if (*it == wxT('\''))
+                    wrapState = none;
+            }
+            else if (wrapState == insideDouble)
+            {
+                if (*it == wxT('"'))
+                    wrapState = none;
+            }
+            else
+            {
+                if (*it == wxT(' '))
+                    lastSpace = it;
+                else if (*it == wxT('\''))
+                    wrapState = insideSingle;
+                else if (*it == wxT('"'))
+                    wrapState = insideDouble;
+            }
 
             line += *it;
 
