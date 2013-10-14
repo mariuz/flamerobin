@@ -7,3 +7,4 @@ Icon=/usr/share/pixmaps/flamerobin.png
 Type=Application
 Terminal=false
 Categories=Development;Database;GTK
+Keywords=firebird
