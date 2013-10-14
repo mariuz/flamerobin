@@ -57,7 +57,6 @@ protected:
         handleMap.insert(HandlePair(handleM, this));
     }
 public:
-    // destructor declared as abstract to make this an abstract base class
     virtual ~ObjectWithHandle()
     {
         handleMap.erase(handleM);
