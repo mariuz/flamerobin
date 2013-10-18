@@ -1958,6 +1958,19 @@ void ExecuteSqlFrame::OnMenuUpdateGridCanSetFieldToNULL(wxUpdateUIEvent& event)
 //-----------------------------------------------------------------------------
 bool ExecuteSqlFrame::loadSqlFile(const wxString& filename)
 {
+    if (filenameM.IsOk() && styled_text_ctrl_sql->GetModify())
+    {
+        Raise();
+        int res = showQuestionDialog(this, _("Do you want to save changes to the file?"),
+            wxString::Format(_("You have made changes to the file\n\n%s\n\nwhich will be lost if you load another file."),
+            filenameM.GetFullPath().c_str()),
+            AdvancedMessageDialogButtonsYesNoCancel(_("&Save"), _("Do&n't Save")));
+        if (res != wxYES && res != wxNO)
+            return false;
+        if (res == wxYES && !styled_text_ctrl_sql->SaveFile(filenameM.GetFullPath()))
+            return false;
+    }
+
     if (!styled_text_ctrl_sql->LoadFile(filename))
         return false;
     filenameM = filename;
