@@ -1502,11 +1502,10 @@ void ExecuteSqlFrame::OnMenuHistoryNext(wxCommandEvent& WXUNUSED(event))
     StatementHistory& sh = StatementHistory::get(databaseM);
     if (historyPositionM != sh.size())  // we're already at the end?
     {
-        historyPositionM++;
-        if (historyPositionM == sh.size())
-            setSql(localBuffer);
-        else
-            setSql(sh.get(historyPositionM));
+        StatementHistory::Position pos = historyPositionM + 1;
+        wxString sql(pos == sh.size() ? localBuffer : sh.get(pos));
+        if (setSql(sql))
+            historyPositionM = pos;
     }
 }
 //-----------------------------------------------------------------------------
@@ -1515,10 +1514,14 @@ void ExecuteSqlFrame::OnMenuHistoryPrev(wxCommandEvent& WXUNUSED(event))
     StatementHistory& sh = StatementHistory::get(databaseM);
     if (historyPositionM > 0 && sh.size() > 0)
     {
-        if (historyPositionM == sh.size())  // we're on local buffer => store it
+        if (historyPositionM == sh.size())
+        {
+            // we're on local buffer => store it
             localBuffer = styled_text_ctrl_sql->GetText();
-        historyPositionM--;
-        setSql(sh.get(historyPositionM));
+        }
+        StatementHistory::Position pos = historyPositionM - 1;
+        if (setSql(sh.get(pos)))
+            historyPositionM = pos;
     }
 }
 //-----------------------------------------------------------------------------
@@ -1977,9 +1980,28 @@ void ExecuteSqlFrame::inTransaction(bool started)
     }
 }
 //-----------------------------------------------------------------------------
-void ExecuteSqlFrame::setSql(wxString sql)
+bool ExecuteSqlFrame::setSql(wxString sql)
 {
+    if (filenameM.IsOk() && styled_text_ctrl_sql->GetModify())
+    {
+        Raise();
+        int res = showQuestionDialog(this, _("Do you want to save changes to the file?"),
+            wxString::Format(_("You have made changes to the file\n\n%s\n\nwhich will be lost if you set a different statement."),
+            filenameM.GetFullPath().c_str()),
+            AdvancedMessageDialogButtonsYesNoCancel(_("&Save"), _("Do&n't Save")));
+        if (res != wxYES && res != wxNO)
+            return false;
+        if (res == wxYES && !styled_text_ctrl_sql->SaveFile(filenameM.GetFullPath()))
+            return false;
+    }
+
     styled_text_ctrl_sql->SetText(sql);
+    styled_text_ctrl_sql->EmptyUndoBuffer();
+
+    filenameM = wxEmptyString;
+    filenameModificationTimeM = wxDateTime();
+    updateFrameTitleM = true;
+    return true;
 }
 //-----------------------------------------------------------------------------
 void ExecuteSqlFrame::clearLogBeforeExecution()

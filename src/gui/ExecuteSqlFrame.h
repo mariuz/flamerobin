@@ -74,7 +74,7 @@ public:
         long style = wxDEFAULT_FRAME_STYLE);
 
     bool loadSqlFile(const wxString& filename);
-    void setSql(wxString sql);
+    bool setSql(wxString sql);
 
     void executeAllStatements(bool autoExecute = false);
 
