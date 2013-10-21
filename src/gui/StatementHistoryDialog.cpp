@@ -66,16 +66,16 @@ StatementHistoryDialog::StatementHistoryDialog(wxWindow *parent,
     innerSizer->Add(gauge_progress, 0, wxTOP|wxEXPAND,
         styleguide().getRelatedControlMargin(wxVERTICAL));
 
-	mainSplitter = new wxSplitterWindow( getControlsPanel(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_3D );
-	leftSplitterPanel = new wxPanel( mainSplitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	wxBoxSizer* leftSplitterSizer = new wxBoxSizer( wxVERTICAL );
+    mainSplitter = new wxSplitterWindow( getControlsPanel(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_3D );
+    leftSplitterPanel = new wxPanel( mainSplitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    wxBoxSizer* leftSplitterSizer = new wxBoxSizer( wxVERTICAL );
 
-	leftSplitterPanel->SetSizer( leftSplitterSizer );
-	rightSplitterPanel = new wxPanel( mainSplitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	wxBoxSizer* rightSplitterSizer = new wxBoxSizer( wxVERTICAL );
-	rightSplitterPanel->SetSizer( rightSplitterSizer );
+    leftSplitterPanel->SetSizer( leftSplitterSizer );
+    rightSplitterPanel = new wxPanel( mainSplitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    wxBoxSizer* rightSplitterSizer = new wxBoxSizer( wxVERTICAL );
+    rightSplitterPanel->SetSizer( rightSplitterSizer );
 
-	mainSplitter->SplitVertically( leftSplitterPanel, rightSplitterPanel, 0 );
+    mainSplitter->SplitVertically( leftSplitterPanel, rightSplitterPanel, 0 );
 
     listbox_search = new wxListBox(leftSplitterPanel, ID_listbox_search,
         wxDefaultPosition, wxDefaultSize, 0, NULL, wxLB_MULTIPLE);
@@ -87,7 +87,7 @@ StatementHistoryDialog::StatementHistoryDialog(wxWindow *parent,
         styleguide().getRelatedControlMargin(wxVERTICAL));
 
     textctrl_statement = new wxStyledTextCtrl(rightSplitterPanel, wxID_ANY,
-        wxDefaultPosition, wxDefaultSize, wxBORDER_THEME|wxSUNKEN_BORDER);
+        wxDefaultPosition, wxDefaultSize, wxBORDER_THEME);
     textctrl_statement->SetWrapMode(wxSTC_WRAP_WORD);
     textctrl_statement->SetMarginWidth(1, 0);  // turn off the folding margin
     textctrl_statement->StyleSetForeground(1, *wxWHITE);
@@ -96,11 +96,11 @@ StatementHistoryDialog::StatementHistoryDialog(wxWindow *parent,
     rightSplitterSizer->Add(textctrl_statement, 1, wxTOP|wxEXPAND,
         styleguide().getRelatedControlMargin(wxVERTICAL));
 
-	leftSplitterPanel->Layout();
-	leftSplitterSizer->Fit( leftSplitterPanel );
-	rightSplitterPanel->Layout();
-	rightSplitterSizer->Fit( rightSplitterPanel );
-	innerSizer->Add( mainSplitter, 1, wxEXPAND, 0 );
+    leftSplitterPanel->Layout();
+    leftSplitterSizer->Fit( leftSplitterPanel );
+    rightSplitterPanel->Layout();
+    rightSplitterSizer->Fit( rightSplitterPanel );
+    innerSizer->Add( mainSplitter, 1, wxEXPAND, 0 );
 
     button_copy = new wxButton(getControlsPanel(), ID_button_copy,
         _("C&opy Selection To Editor"), wxDefaultPosition, wxDefaultSize, 0);
@@ -295,4 +295,3 @@ wxString StatementHistoryDialog::getSql() const
     return sqlM;
 }
 //-----------------------------------------------------------------------------
-
