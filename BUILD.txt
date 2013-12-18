@@ -15,8 +15,8 @@ the list of includes will be enough.
 -- Common to all builds --
 --------------------------
 
-FR must be built with the same settings for debug/release, Unicode etc.
-as the wxWidgets library.  Failing to do so will usually lead to compile or
+FR must be built with the same settings for debug/release etc.
+as the wxWidgets library.( Unicode build is required )  Failing to do so will usually lead to compile or
 link errors. This does not apply completely to Linux/GCC build, as you can
 build wx in release mode and FlameRobin in debug mode - in case you just want
 to debug FR code, and not code of wxWidgets.
