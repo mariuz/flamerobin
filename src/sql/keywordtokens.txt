@@ -322,7 +322,7 @@
 { wxT("WRITE"), kwWRITE },
 { wxT("YEAR"), kwYEAR },
 { wxT("YEARDAY"), kwYEARDAY },
-{ wxT("SIMILAR"), kwSIMILAR},
+{ wxT("SIMILAR"), kwSIMILAR },
 { wxT("DETERMINISTIC", kwDETERMINISTIC },
 { wxT("OVER", kwOVER },
 { wxT("RETURN", kwRETURN },
