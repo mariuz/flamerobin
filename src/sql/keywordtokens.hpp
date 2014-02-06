@@ -1,5 +1,3 @@
-// $Id$
-
 { wxT("ABS"), kwABS },
 { wxT("ACTION"), kwACTION },
 { wxT("ACTIVE"), kwACTIVE },
@@ -324,3 +322,9 @@
 { wxT("WRITE"), kwWRITE },
 { wxT("YEAR"), kwYEAR },
 { wxT("YEARDAY"), kwYEARDAY },
+{ wxT("SIMILAR"), kwSIMILAR },
+{ wxT("DETERMINISTIC"), kwDETERMINISTIC },
+{ wxT("OVER"), kwOVER },
+{ wxT("RETURN"), kwRETURN },
+{ wxT("SCROLL"), kwSCROLL },
+{ wxT("SQLSTATE"), kwSQLSTATE },

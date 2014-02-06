@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2013 The FlameRobin Development Team
+  Copyright (c) 2004-2014 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -47,7 +47,7 @@ protected:
             false);
     }
 public:
-    SqlTokenizerConfigCache() : ConfigCache(config()) {};
+    SqlTokenizerConfigCache() : ConfigCache(config()) {}
 
     static SqlTokenizerConfigCache& get()
     {
@@ -129,7 +129,7 @@ const SqlTokenizer::KeywordToTokenMap& SqlTokenizer::getKeywordToTokenMap()
     {
         static const struct {const wxChar* name; SqlTokenType type; } entries[] =
         {
-            #include "keywordtokens.txt"
+            #include "keywordtokens.hpp"
             // this element makes for simpler code: all lines in the file can
             // end with a comma, and it is used as the stop marker
             { wxT(""), tkUNKNOWN }

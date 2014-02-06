@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2013 The FlameRobin Development Team
+  Copyright (c) 2004-2014 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -78,7 +78,7 @@ void showAboutBox(wxWindow* parent)
 
     info.SetName(wxT("FlameRobin"));
 
-    info.SetCopyright(_("Copyright (c) 2004-2013 FlameRobin Development Team"));
+    info.SetCopyright(_("Copyright (c) 2004-2014 FlameRobin Development Team"));
 
     info.SetVersion(ver);
 
@@ -113,7 +113,7 @@ void showAboutBox(wxWindow* parent)
     msg += wxT("\n\n");
     msg += libs;
     msg += wxT("\n\n");
-    msg += _("Copyright (c) 2004-2013  FlameRobin Development Team");
+    msg += _("Copyright (c) 2004-2014  FlameRobin Development Team");
     msg += wxT("\n");
     msg += _("http://www.flamerobin.org");
 
