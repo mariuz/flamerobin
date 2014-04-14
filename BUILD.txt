@@ -55,8 +55,7 @@ For other systems the configure script checks for the used header files and
 libraries of Boost. On Debian and Ubuntu use the following commands to
 install the headers and thread library:
 
-  sudo apt-get install libboost-dev
-  sudo apt-get install libboost-thread-dev
+  sudo apt-get install libboost-dev libboost-thread-dev
 
 If you have problems building FR, please post to the development list.
 
