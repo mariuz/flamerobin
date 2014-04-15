@@ -31,7 +31,7 @@
 #endif
 
 #include "gui/GUIURIHandlerHelper.h"
--
+
 wxWindow* GUIURIHandlerHelper::getParentWindow(const URI& uri)
 {
     wxString ms = uri.getParam(wxT("parent_window"));
@@ -40,4 +40,3 @@ wxWindow* GUIURIHandlerHelper::getParentWindow(const URI& uri)
         return 0;
     return (wxWindow*)mo;
 }
--

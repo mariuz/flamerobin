@@ -35,7 +35,7 @@
 #endif
 
 #include "gui/StyleGuide.h"
--
+
 class StyleGuideGTK: public StyleGuide
 {
 public:
@@ -53,11 +53,11 @@ public:
     virtual int getRelatedControlMargin(wxOrientation orientation);
     virtual int getUnrelatedControlMargin(wxOrientation orientation);
 };
--
+
 StyleGuideGTK::StyleGuideGTK()
 {
 }
--
+
 wxSizer* StyleGuideGTK::createButtonSizer(wxButton* affirmativeButton,
     wxButton* negativeButton, wxButton* alternateButton)
 {
@@ -77,47 +77,47 @@ wxSizer* StyleGuideGTK::createButtonSizer(wxButton* affirmativeButton,
         sizer->Add(affirmativeButton);
     return sizer;
 }
--
+
 int StyleGuideGTK::getBetweenButtonsMargin(wxOrientation /*orientation*/)
 {
     return 6;
 }
--
+
 int StyleGuideGTK::getBrowseButtonMargin()
 {
     return 6;
 }
--
+
 int StyleGuideGTK::getCheckboxSpacing()
 {
     return 6;
 }
--
+
 int StyleGuideGTK::getControlLabelMargin()
 {
     return 12;
 }
--
+
 int StyleGuideGTK::getDialogMargin(wxDirection /*direction*/)
 {
     return 12;
 }
--
+
 int StyleGuideGTK::getFrameMargin(wxDirection /*direction*/)
 {
     return 12;
 }
--
+
 int StyleGuideGTK::getMessageBoxIconMargin()
 {
     return 12;
 }
--
+
 int StyleGuideGTK::getMessageBoxBetweenTextMargin()
 {
     return 24;
 }
--
+
 int StyleGuideGTK::getRelatedControlMargin(wxOrientation orientation)
 {
     switch (orientation)
@@ -130,15 +130,14 @@ int StyleGuideGTK::getRelatedControlMargin(wxOrientation orientation)
             return 0;
     }
 }
--
+
 int StyleGuideGTK::getUnrelatedControlMargin(wxOrientation /*orientation*/)
 {
     return 18;
 }
--
+
 StyleGuide& styleguide()
 {
     static StyleGuideGTK guide;
     return guide;
 }
--
