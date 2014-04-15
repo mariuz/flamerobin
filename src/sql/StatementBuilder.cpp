@@ -34,7 +34,7 @@
 
 #include "config/Config.h"
 #include "sql/StatementBuilder.h"
-//-----------------------------------------------------------------------------
+
 StatementBuilder::StatementBuilder()
     : indentCharsM(0), indentLevelM(0), lineWrappingM(false), maxLineLengthM(0)
 {
@@ -50,7 +50,7 @@ StatementBuilder::StatementBuilder()
         indentCharsM = config().get(wxT("sqlEditorTabSize"), 4);
     }
 }
-//-----------------------------------------------------------------------------
+
 StatementBuilder& StatementBuilder::operator<< (const ControlToken ct)
 {
     switch (ct)
@@ -78,7 +78,7 @@ StatementBuilder& StatementBuilder::operator<< (const ControlToken ct)
     }
     return (*this);
 }
-//-----------------------------------------------------------------------------
+
 StatementBuilder& StatementBuilder::operator<< (const char c)
 {
     if (lineWrappingM && currentLineM.Length() + 1 > maxLineLengthM)
@@ -89,7 +89,7 @@ StatementBuilder& StatementBuilder::operator<< (const char c)
     currentLineM += c;
     return (*this);
 }
-//-----------------------------------------------------------------------------
+
 StatementBuilder& StatementBuilder::operator<< (const wxString& s)
 {
     if (lineWrappingM && currentLineM.Length() + s.Length() > maxLineLengthM)
@@ -97,7 +97,7 @@ StatementBuilder& StatementBuilder::operator<< (const wxString& s)
     currentLineM += s;
     return (*this);
 }
-//-----------------------------------------------------------------------------
+
 StatementBuilder& StatementBuilder::operator<< (const SqlTokenType stt)
 {
     wxString kw(SqlTokenizer::getKeyword(stt, keywordsUpperCaseM));
@@ -106,23 +106,23 @@ StatementBuilder& StatementBuilder::operator<< (const SqlTokenType stt)
     currentLineM += kw;
     return (*this);
 }
-//-----------------------------------------------------------------------------
+
 StatementBuilder::operator wxString() const
 {
     return completedLinesM + currentLineM;
 }
-//-----------------------------------------------------------------------------
+
 void StatementBuilder::addNewLine()
 {
     completedLinesM += currentLineM;
     completedLinesM += wxTextBuffer::GetEOL();
     currentLineM = wxString(wxChar(' '), indentLevelM * indentCharsM);
 }
-//-----------------------------------------------------------------------------
+
 void StatementBuilder::reset()
 {
     completedLinesM.clear();
     currentLineM.clear();
     indentLevelM = 0;
 }
-//-----------------------------------------------------------------------------
+

@@ -84,7 +84,7 @@
 #include "sql/SqlStatement.h"
 #include "sql/StatementBuilder.h"
 #include "statementHistory.h"
-//-----------------------------------------------------------------------------
+
 class SqlEditorDropTarget : public wxDropTarget
 {
 public:
@@ -102,7 +102,7 @@ private:
     wxFileDataObject* fileDataM;
     wxTextDataObject* textDataM;
 };
-//-----------------------------------------------------------------------------
+
 SqlEditorDropTarget::SqlEditorDropTarget(ExecuteSqlFrame* frame,
         SqlEditor* editor, Database* database)
     : frameM(frame), editorM(editor), databaseM(database)
@@ -112,7 +112,7 @@ SqlEditorDropTarget::SqlEditorDropTarget(ExecuteSqlFrame* frame,
     dataobj->Add(textDataM = new wxTextDataObject);
     SetDataObject(dataobj);
 }
-//-----------------------------------------------------------------------------
+
 wxDragResult SqlEditorDropTarget::OnData(wxCoord x, wxCoord y,
     wxDragResult def)
 {
@@ -132,13 +132,13 @@ wxDragResult SqlEditorDropTarget::OnData(wxCoord x, wxCoord y,
         return def;
     return wxDragNone;
 }
-//-----------------------------------------------------------------------------
+
 bool SqlEditorDropTarget::OnDropFiles(wxCoord, wxCoord,
     const wxArrayString& filenames)
 {
     return (filenames.GetCount() == 1 && frameM->loadSqlFile(filenames[0]));
 }
-//-----------------------------------------------------------------------------
+
 // TODO: This needs to be reworked to use the tokenizer
 //       Perhaps we could have a SelectStatement class, that would be able to:
 //       - load the select statement
@@ -247,7 +247,7 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
     editorM->SetText(sstm.getStatement());
     return true;
 }
-//-----------------------------------------------------------------------------
+
 // Setup the Scintilla editor
 SqlEditor::SqlEditor(wxWindow *parent, wxWindowID id)
     : SearchableEditor(parent, id)
@@ -272,12 +272,12 @@ SqlEditor::SqlEditor(wxWindow *parent, wxWindowID id)
 
     setup();
 }
-//-----------------------------------------------------------------------------
+
 bool SqlEditor::hasSelection()
 {
     return GetSelectionStart() != GetSelectionEnd();
 }
-//-----------------------------------------------------------------------------
+
 
 void SqlEditor::markText(int start, int end)
 {
@@ -288,7 +288,7 @@ void SqlEditor::markText(int start, int end)
     SetSelectionEnd(end);
     centerCaret(false);
 }
-//-----------------------------------------------------------------------------
+
 void SqlEditor::setChars(bool firebirdIdentifierOnly)
 {
     SetKeyWords(0, SqlTokenizer::getKeywordsString(SqlTokenizer::kwLowerCase));
@@ -303,7 +303,7 @@ void SqlEditor::setChars(bool firebirdIdentifierOnly)
     }
     SetWordChars(chars);
 }
-//-----------------------------------------------------------------------------
+
 //! This code has to be called each time the font has changed, so that the control updates
 void SqlEditor::setup()
 {
@@ -353,12 +353,12 @@ void SqlEditor::setup()
 
     centerCaret(false);
 }
-//-----------------------------------------------------------------------------
+
 BEGIN_EVENT_TABLE(SqlEditor, wxStyledTextCtrl)
     EVT_CONTEXT_MENU(SqlEditor::OnContextMenu)
     EVT_KILL_FOCUS(SqlEditor::OnKillFocus)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 void SqlEditor::OnContextMenu(wxContextMenuEvent& event)
 {
     if (AutoCompActive() || CallTipActive())
@@ -390,7 +390,7 @@ void SqlEditor::OnContextMenu(wxContextMenuEvent& event)
     }
     PopupMenu(&m, calcContextMenuPosition(event.GetPosition(), this));
 }
-//-----------------------------------------------------------------------------
+
 void SqlEditor::OnKillFocus(wxFocusEvent& event)
 {
     if (AutoCompActive())
@@ -399,7 +399,7 @@ void SqlEditor::OnKillFocus(wxFocusEvent& event)
         CallTipCancel();
     event.Skip();   // let the STC do it's job
 }
-//-----------------------------------------------------------------------------
+
 void SqlEditor::setFont()
 {
     // step 1 of 2: set font
@@ -469,7 +469,7 @@ void SqlEditor::setFont()
         _("This setting affects only the SQL editor font. The font used in the result set data grid has to be changed separately."),
         AdvancedMessageDialogButtonsOk(), config(), wxT("DIALOG_WarnFont"), _("Do not show this information again"));
 }
-//-----------------------------------------------------------------------------
+
 class ScrollAtEnd
 {
 private:
@@ -493,7 +493,7 @@ public:
             controlM->ScrollToLine(controlM->GetLineCount()-1);
     }
 };
-//-----------------------------------------------------------------------------
+
 // MB: we don't use the 'parent' parameter here, because of some ugly bugs.
 //     For example, if user clicks the 'drop trigger' link on the trigger
 //     property page, it creates new ExecuteSqlFrame with trigger property
@@ -574,12 +574,12 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     setViewMode(false, vmEditor);
     loadingM = false;
 }
-//-----------------------------------------------------------------------------
+
 Database* ExecuteSqlFrame::getDatabase() const
 {
     return databaseM;
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::buildToolbar(CommandManager& cm)
 {
     //toolBarM = CreateToolBar( wxTB_FLAT|wxTB_HORIZONTAL|wxTB_TEXT, wxID_ANY );
@@ -645,7 +645,7 @@ void ExecuteSqlFrame::buildToolbar(CommandManager& cm)
 
     toolBarM->Realize();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
 {
     menuBarM = new wxMenuBar();
@@ -779,7 +779,7 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
     // logging is always enabled by default
     menuBarM->Check(Cmds::History_EnableLogging, true);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::set_properties()
 {
     SetSize(wxSize(628, 488));
@@ -801,7 +801,7 @@ void ExecuteSqlFrame::set_properties()
     closeWhenTransactionDoneM = false;
     autoCommitM = config().get(wxT("autoCommitDDL"), false);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::do_layout()
 {
     // log control notebook pane
@@ -821,7 +821,7 @@ void ExecuteSqlFrame::do_layout()
     sizerContents->Fit(this);
     sizerContents->SetSizeHints(this);
 }
-//-----------------------------------------------------------------------------
+
 bool ExecuteSqlFrame::doCanClose()
 {
     bool saveFile = false;
@@ -854,7 +854,7 @@ bool ExecuteSqlFrame::doCanClose()
         return false;
     return true;
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::doBeforeDestroy()
 {
     // prevent editor from updating the invalid dataset
@@ -863,7 +863,7 @@ void ExecuteSqlFrame::doBeforeDestroy()
     // make sure that further calls to update() will not call Close() again
     databaseM = 0;
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::showProperties(wxString objectName)
 {
     MetadataItem *m = databaseM->findByName(objectName);
@@ -881,7 +881,7 @@ void ExecuteSqlFrame::showProperties(wxString objectName)
             objectName.c_str()),
         _("Search failed."), wxOK | wxICON_INFORMATION);
 }
-//-----------------------------------------------------------------------------
+
 BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_STC_UPDATEUI(ExecuteSqlFrame::ID_stc_sql, ExecuteSqlFrame::OnSqlEditUpdateUI)
     EVT_STC_CHARADDED(ExecuteSqlFrame::ID_stc_sql, ExecuteSqlFrame::OnSqlEditCharAdded)
@@ -997,7 +997,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
 
     EVT_TIMER(ExecuteSqlFrame::TIMER_ID_UPDATE_BLOB, ExecuteSqlFrame::OnBlobEditorUpdate)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 // Avoiding the annoying thing that you cannot click inside the selection and have it deselected and have caret there
 void ExecuteSqlFrame::OnSqlEditStartDrag(wxStyledTextEvent& event)
 {
@@ -1009,7 +1009,7 @@ void ExecuteSqlFrame::OnSqlEditStartDrag(wxStyledTextEvent& event)
     // by our own SqlEditorDropTarget anyway
     event.SetDragText(wxEmptyString);
 }
-//-----------------------------------------------------------------------------
+
 //! display editor col:row in StatusBar and do highlighting of braces ()
 void ExecuteSqlFrame::OnSqlEditUpdateUI(wxStyledTextEvent& WXUNUSED(event))
 {
@@ -1045,7 +1045,7 @@ void ExecuteSqlFrame::OnSqlEditUpdateUI(wxStyledTextEvent& WXUNUSED(event))
     else
         styled_text_ctrl_sql->BraceBadLight(wxSTC_INVALID_POSITION);    // remove light
 }
-//-----------------------------------------------------------------------------
+
 //! returns true if there is a word in "wordlist" that starts with "word"
 bool HasWord(wxString word, wxString& wordlist)
 {
@@ -1059,7 +1059,7 @@ bool HasWord(wxString word, wxString& wordlist)
     }
     return false;
 }
-//-----------------------------------------------------------------------------
+
 //! autocomplete stuff
 void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& event)
 {
@@ -1147,12 +1147,12 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& event)
         //    add "join" to sql editor
     }
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnSqlEditChanged(wxStyledTextEvent& WXUNUSED(event))
 {
     updateFrameTitleM = true;
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::autoCompleteColumns(int pos, int len)
 {
     int start;
@@ -1178,7 +1178,7 @@ void ExecuteSqlFrame::autoCompleteColumns(int pos, int len)
     if (HasWord(styled_text_ctrl_sql->GetTextRange(pos, pos+len), columns))
         styled_text_ctrl_sql->AutoCompShow(len, columns);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::autoComplete(bool force)
 {
     if (styled_text_ctrl_sql->AutoCompActive())
@@ -1208,7 +1208,7 @@ void ExecuteSqlFrame::autoComplete(bool force)
             styled_text_ctrl_sql->AutoCompShow(pos-start, keywordsM);
     }
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuFindSelectedObject(wxCommandEvent& WXUNUSED(event))
 {
     wxString sel = styled_text_ctrl_sql->GetSelectedText();
@@ -1217,7 +1217,7 @@ void ExecuteSqlFrame::OnMenuFindSelectedObject(wxCommandEvent& WXUNUSED(event))
         sel.Remove(p);
     showProperties(sel);
 }
-//-----------------------------------------------------------------------------
+
 //! handle function keys
 void ExecuteSqlFrame::OnKeyDown(wxKeyEvent& event)
 {
@@ -1264,12 +1264,12 @@ void ExecuteSqlFrame::OnKeyDown(wxKeyEvent& event)
     }
     event.Skip();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnChildFocus(wxChildFocusEvent& WXUNUSED(event))
 {
     doUpdateFocusedControlM = true;
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnIdle(wxIdleEvent& event)
 {
     if (doUpdateFocusedControlM)
@@ -1291,7 +1291,7 @@ void ExecuteSqlFrame::OnIdle(wxIdleEvent& event)
     }
     event.Skip();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnActivate(wxActivateEvent& event)
 {
     if (event.GetActive() && filenameM.FileExists())
@@ -1313,7 +1313,7 @@ void ExecuteSqlFrame::OnActivate(wxActivateEvent& event)
     }
     event.Skip();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuNew(wxCommandEvent& WXUNUSED(event))
 {
     ExecuteSqlFrame *eff = new ExecuteSqlFrame(GetParent(), -1,
@@ -1321,7 +1321,7 @@ void ExecuteSqlFrame::OnMenuNew(wxCommandEvent& WXUNUSED(event))
     eff->setSql(styled_text_ctrl_sql->GetSelectedText());
     eff->Show();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuOpen(wxCommandEvent& WXUNUSED(event))
 {
     wxFileDialog fd(this, _("Open File"),
@@ -1331,7 +1331,7 @@ void ExecuteSqlFrame::OnMenuOpen(wxCommandEvent& WXUNUSED(event))
     if (wxID_OK == fd.ShowModal())
         loadSqlFile(fd.GetPath());
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuSaveOrSaveAs(wxCommandEvent& event)
 {
     wxString filename(filenameM.GetFullPath());
@@ -1354,34 +1354,34 @@ void ExecuteSqlFrame::OnMenuSaveOrSaveAs(wxCommandEvent& event)
         statusbar_1->SetStatusText((_("File saved")), 2);
     }
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuClose(wxCommandEvent& WXUNUSED(event))
 {
     Close();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuUndo(wxCommandEvent& WXUNUSED(event))
 {
     if (viewModeM == vmEditor)
         styled_text_ctrl_sql->Undo();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuUpdateUndo(wxUpdateUIEvent& event)
 {
     event.Enable(viewModeM == vmEditor && styled_text_ctrl_sql->CanUndo());
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuRedo(wxCommandEvent& WXUNUSED(event))
 {
     if (viewModeM == vmEditor)
         styled_text_ctrl_sql->Redo();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuUpdateRedo(wxUpdateUIEvent& event)
 {
     event.Enable(viewModeM == vmEditor && styled_text_ctrl_sql->CanRedo());
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
 {
     if (viewModeM == vmEditor)
@@ -1389,7 +1389,7 @@ void ExecuteSqlFrame::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
     else if (viewModeM == vmGrid)
         grid_data->copyToClipboard();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuUpdateCopy(wxUpdateUIEvent& event)
 {
     bool enableCmd = false;
@@ -1399,40 +1399,40 @@ void ExecuteSqlFrame::OnMenuUpdateCopy(wxUpdateUIEvent& event)
         enableCmd = grid_data->getDataGridTable() && grid_data->GetNumberRows();
     event.Enable(enableCmd);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuCut(wxCommandEvent& WXUNUSED(event))
 {
     if (viewModeM == vmEditor)
         styled_text_ctrl_sql->Cut();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuUpdateCut(wxUpdateUIEvent& event)
 {
     event.Enable(viewModeM == vmEditor && styled_text_ctrl_sql->hasSelection());
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuDelete(wxCommandEvent& WXUNUSED(event))
 {
     if (viewModeM == vmEditor)
         styled_text_ctrl_sql->Clear();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuUpdateDelete(wxUpdateUIEvent& event)
 {
     event.Enable(viewModeM == vmEditor && styled_text_ctrl_sql->hasSelection());
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuPaste(wxCommandEvent& WXUNUSED(event))
 {
     if (viewModeM == vmEditor)
         styled_text_ctrl_sql->Paste();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuUpdatePaste(wxUpdateUIEvent& event)
 {
     event.Enable(viewModeM == vmEditor && styled_text_ctrl_sql->CanPaste());
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuSelectAll(wxCommandEvent& WXUNUSED(event))
 {
     if (viewModeM == vmEditor)
@@ -1442,17 +1442,17 @@ void ExecuteSqlFrame::OnMenuSelectAll(wxCommandEvent& WXUNUSED(event))
     else if (viewModeM == vmGrid)
         grid_data->SelectAll();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuReplace(wxCommandEvent &WXUNUSED(event))
 {
     styled_text_ctrl_sql->find(true);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuUpdateWhenInTransaction(wxUpdateUIEvent& event)
 {
     event.Enable(inTransactionM && !grid_data->IsCellEditControlEnabled());
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuSelectView(wxCommandEvent& event)
 {
     if (event.GetId() == Cmds::View_Editor)
@@ -1464,7 +1464,7 @@ void ExecuteSqlFrame::OnMenuSelectView(wxCommandEvent& event)
     else
         wxCHECK_RET(false, wxT("event id not handled"));
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuUpdateSelectView(wxUpdateUIEvent& event)
 {
     if (event.GetId() == Cmds::View_Editor && viewModeM == vmEditor)
@@ -1474,29 +1474,29 @@ void ExecuteSqlFrame::OnMenuUpdateSelectView(wxUpdateUIEvent& event)
     else if (event.GetId() == Cmds::View_Data && viewModeM == vmGrid)
         event.Check(true);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuSplitView(wxCommandEvent& WXUNUSED(event))
 {
     setViewMode(!splitter_window_1->IsSplit(), viewModeM);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuUpdateSplitView(wxUpdateUIEvent& event)
 {
     event.Check(splitter_window_1->IsSplit());
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuSetEditorFont(wxCommandEvent& WXUNUSED(event))
 {
     styled_text_ctrl_sql->setFont();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuToggleWrap(wxCommandEvent& WXUNUSED(event))
 {
     const int mode = styled_text_ctrl_sql->GetWrapMode();
     styled_text_ctrl_sql->SetWrapMode(
         (mode == wxSTC_WRAP_WORD) ? wxSTC_WRAP_NONE : wxSTC_WRAP_WORD);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuHistoryNext(wxCommandEvent& WXUNUSED(event))
 {
     StatementHistory& sh = StatementHistory::get(databaseM);
@@ -1508,7 +1508,7 @@ void ExecuteSqlFrame::OnMenuHistoryNext(wxCommandEvent& WXUNUSED(event))
             historyPositionM = pos;
     }
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuHistoryPrev(wxCommandEvent& WXUNUSED(event))
 {
     StatementHistory& sh = StatementHistory::get(databaseM);
@@ -1524,7 +1524,7 @@ void ExecuteSqlFrame::OnMenuHistoryPrev(wxCommandEvent& WXUNUSED(event))
             historyPositionM = pos;
     }
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuHistorySearch(wxCommandEvent& WXUNUSED(event))
 {
     StatementHistory& sh = StatementHistory::get(databaseM);
@@ -1532,30 +1532,30 @@ void ExecuteSqlFrame::OnMenuHistorySearch(wxCommandEvent& WXUNUSED(event))
     if (shf->ShowModal() == wxID_OK)
         setSql(shf->getSql());
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuUpdateHistoryNext(wxUpdateUIEvent& event)
 {
     StatementHistory& sh = StatementHistory::get(databaseM);
     event.Enable(sh.size() > historyPositionM);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuUpdateHistoryPrev(wxUpdateUIEvent& event)
 {
     StatementHistory& sh = StatementHistory::get(databaseM);
     event.Enable(historyPositionM > 0 && sh.size() > 0);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuExecute(wxCommandEvent& WXUNUSED(event))
 {
     clearLogBeforeExecution();
     prepareAndExecute(false);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuShowPlan(wxCommandEvent& WXUNUSED(event))
 {
     prepareAndExecute(true);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuExecuteFromCursor(wxCommandEvent& WXUNUSED(event))
 {
     clearLogBeforeExecution();
@@ -1568,7 +1568,7 @@ void ExecuteSqlFrame::OnMenuExecuteFromCursor(wxCommandEvent& WXUNUSED(event))
     );
     parseStatements(sql, false, false, styled_text_ctrl_sql->GetCurrentPos());
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuExecuteSelection(wxCommandEvent& WXUNUSED(event))
 {
     clearLogBeforeExecution();
@@ -1581,24 +1581,24 @@ void ExecuteSqlFrame::OnMenuExecuteSelection(wxCommandEvent& WXUNUSED(event))
             styled_text_ctrl_sql->GetSelectionStart()
             );
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuGridFetchAll(wxCommandEvent& WXUNUSED(event))
 {
     grid_data->fetchAll();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuGridCancelFetchAll(wxCommandEvent& WXUNUSED(event))
 {
     grid_data->cancelFetchAll();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuUpdateGridCellIsBlob(wxUpdateUIEvent& event)
 {
     DataGridTable* dgt = grid_data->getDataGridTable();
     event.Enable(dgt && grid_data->GetNumberRows() &&
         dgt->isBlobColumn(grid_data->GetGridCursorCol()));
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::closeBlobEditor(bool saveBlobValue)
 {
     if ((editBlobDlgM) && (editBlobDlgM->IsShown()))
@@ -1609,7 +1609,7 @@ void ExecuteSqlFrame::closeBlobEditor(bool saveBlobValue)
             editBlobDlgM->closeDontSave();
     }
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::updateBlobEditor()
 {
     DataGridTable* dgt = grid_data->getDataGridTable();
@@ -1628,7 +1628,7 @@ void ExecuteSqlFrame::updateBlobEditor()
     SetFocus();
     grid_data->SetFocus();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuGridEditBlob(wxCommandEvent& WXUNUSED(event))
 {
     if (!editBlobDlgM)
@@ -1637,7 +1637,7 @@ void ExecuteSqlFrame::OnMenuGridEditBlob(wxCommandEvent& WXUNUSED(event))
     }
     updateBlobEditor();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuGridExportBlob(wxCommandEvent& WXUNUSED(event))
 {
     DataGridTable* dgt = grid_data->getDataGridTable();
@@ -1656,7 +1656,7 @@ void ExecuteSqlFrame::OnMenuGridExportBlob(wxCommandEvent& WXUNUSED(event))
     dgt->exportBlobFile(filename, grid_data->GetGridCursorRow(),
         grid_data->GetGridCursorCol(), &pd);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuGridImportBlob(wxCommandEvent& WXUNUSED(event))
 {
     DataGridTable* dgt = grid_data->getDataGridTable();
@@ -1675,7 +1675,7 @@ void ExecuteSqlFrame::OnMenuGridImportBlob(wxCommandEvent& WXUNUSED(event))
     dgt->importBlobFile(filename, grid_data->GetGridCursorRow(),
         grid_data->GetGridCursorCol(), &pd);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuGridInsertRow(wxCommandEvent& WXUNUSED(event))
 {
     DataGridTable *tb = grid_data->getDataGridTable();
@@ -1703,7 +1703,7 @@ void ExecuteSqlFrame::OnMenuGridInsertRow(wxCommandEvent& WXUNUSED(event))
         Disable();
     }
 }
-//-----------------------------------------------------------------------------
+
 // this returns an array of row numbers of fully selected rows, or the number
 // of the active row
 wxArrayInt getSelectedGridRows(DataGrid* grid)
@@ -1737,7 +1737,7 @@ wxArrayInt getSelectedGridRows(DataGrid* grid)
     }
     return rows;
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuGridDeleteRow(wxCommandEvent& WXUNUSED(event))
 {
     if (!grid_data->getDataGridTable() || !grid_data->GetNumberRows())
@@ -1772,7 +1772,7 @@ void ExecuteSqlFrame::OnMenuGridDeleteRow(wxCommandEvent& WXUNUSED(event))
 
     // grid_data->EndBatch();   // see comment for BeginBatch above
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuGridSetFieldToNULL(wxCommandEvent& WXUNUSED(event))
 {
     DataGridTable* dgt = grid_data->getDataGridTable();
@@ -1855,27 +1855,27 @@ void ExecuteSqlFrame::OnMenuGridSetFieldToNULL(wxCommandEvent& WXUNUSED(event))
     // fields that change from NOT NULL to NULL need to update the text color
     grid_data->refreshAndInvalidateAttributes();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuGridCopyAsInsert(wxCommandEvent& WXUNUSED(event))
 {
     grid_data->copyToClipboardAsInsert();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuGridCopyAsInList(wxCommandEvent& WXUNUSED(event))
 {
     grid_data->copyToClipboardAsInList();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuGridCopyAsUpdate(wxCommandEvent& WXUNUSED(event))
 {
     grid_data->copyToClipboardAsUpdate();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuGridSaveAsHtml(wxCommandEvent& WXUNUSED(event))
 {
     grid_data->saveAsHTML();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuGridSaveAsCsv(wxCommandEvent& WXUNUSED(event))
 {
     CodeTemplateProcessor ctp(0, this);
@@ -1904,36 +1904,36 @@ void ExecuteSqlFrame::OnMenuGridSaveAsCsv(wxCommandEvent& WXUNUSED(event))
 
     grid_data->saveAsCSV(fileName, fieldDelimiter, textDelimiter);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuGridGridHeaderFont(wxCommandEvent& WXUNUSED(event))
 {
     grid_data->setHeaderFont();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuGridGridCellFont(wxCommandEvent& WXUNUSED(event))
 {
     grid_data->setCellFont();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuUpdateGridHasSelection(wxUpdateUIEvent& event)
 {
     event.Enable(grid_data->IsSelection());
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuUpdateGridFetchAll(wxUpdateUIEvent& event)
 {
     DataGridTable* table = grid_data->getDataGridTable();
     event.Enable(table && table->canFetchMoreRows()
         && !table->getFetchAllRows());
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuUpdateGridCancelFetchAll(wxUpdateUIEvent& event)
 {
     DataGridTable* table = grid_data->getDataGridTable();
     event.Enable(table && table->canFetchMoreRows()
         && table->getFetchAllRows());
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuUpdateGridCanSetFieldToNULL(wxUpdateUIEvent& event)
 {
     if (DataGridTable* dgt = grid_data->getDataGridTable())
@@ -1955,7 +1955,7 @@ void ExecuteSqlFrame::OnMenuUpdateGridCanSetFieldToNULL(wxUpdateUIEvent& event)
     }
     event.Enable(false);
 }
-//-----------------------------------------------------------------------------
+
 bool ExecuteSqlFrame::loadSqlFile(const wxString& filename)
 {
     if (filenameM.IsOk() && styled_text_ctrl_sql->GetModify())
@@ -1978,7 +1978,7 @@ bool ExecuteSqlFrame::loadSqlFile(const wxString& filename)
     updateFrameTitleM = true;
     return true;
 }
-//-----------------------------------------------------------------------------
+
 //! enable/disable and show/hide controls depending of transaction status
 void ExecuteSqlFrame::inTransaction(bool started)
 {
@@ -1992,7 +1992,7 @@ void ExecuteSqlFrame::inTransaction(bool started)
         statusbar_1->SetStatusText(wxEmptyString, 1);
     }
 }
-//-----------------------------------------------------------------------------
+
 bool ExecuteSqlFrame::setSql(wxString sql)
 {
     if (filenameM.IsOk() && styled_text_ctrl_sql->GetModify())
@@ -2016,13 +2016,13 @@ bool ExecuteSqlFrame::setSql(wxString sql)
     updateFrameTitleM = true;
     return true;
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::clearLogBeforeExecution()
 {
     if (config().get(wxT("SQLEditorExecuteClears"), false))
         styled_text_ctrl_stats->ClearAll();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
 {
     bool hasSelection = styled_text_ctrl_sql->GetSelectionStart()
@@ -2058,7 +2058,7 @@ void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
     if (!inTransactionM)
         setViewMode(false, vmEditor);
 }
-//-----------------------------------------------------------------------------
+
 //! adapted so we don't have to change all the other code that utilizes SQL editor
 void ExecuteSqlFrame::executeAllStatements(bool closeWhenDone)
 {
@@ -2076,7 +2076,7 @@ void ExecuteSqlFrame::executeAllStatements(bool closeWhenDone)
     if (closeWhenDone && autoCommitM && !inTransactionM)
         Close();
 }
-//-----------------------------------------------------------------------------
+
 //! Parses all sql statements in STC
 //! when autoexecute is TRUE, program just waits user to click Commit/Rollback and closes window
 //! when autocommit DDL is also set then frame is closed at once if commit was successful
@@ -2152,12 +2152,12 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
     log(_("Script execution finished."));
     return true;
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible(wxUpdateUIEvent& event)
 {
     event.Enable(!closeWhenTransactionDoneM);
 }
-//-----------------------------------------------------------------------------
+
 wxString IBPPtype2string(Database *db, IBPP::SDT t, int subtype, int size,
     int scale)
 {
@@ -2184,7 +2184,7 @@ wxString IBPPtype2string(Database *db, IBPP::SDT t, int subtype, int size,
         default:                return wxT("UNKNOWN");
     }
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::compareCounts(IBPP::DatabaseCounts& one,
     IBPP::DatabaseCounts& two)
 {
@@ -2232,7 +2232,7 @@ void ExecuteSqlFrame::compareCounts(IBPP::DatabaseCounts& one,
         }
     }
 }
-//-----------------------------------------------------------------------------
+
 wxString millisToTimeString(long millis)
 {
     if (millis >= 60 * 1000)
@@ -2249,7 +2249,7 @@ wxString millisToTimeString(long millis)
     else
         return wxString::Format(wxT("%.3fs"), 0.001 * millis);
 }
-//-----------------------------------------------------------------------------
+
 bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     bool prepareOnly)
 {
@@ -2483,7 +2483,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         millisToTimeString(swTotal.Time()).c_str()));
     return retval;
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::splitScreen()
 {
     if (!splitter_window_1->IsSplit()) // split screen if needed
@@ -2492,7 +2492,7 @@ void ExecuteSqlFrame::splitScreen()
         ::wxYield();
     }
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuTransactionIsolationLevel(wxCommandEvent& event)
 {
     if (event.GetId() == Cmds::Query_TransactionConcurrency)
@@ -2508,7 +2508,7 @@ void ExecuteSqlFrame::OnMenuTransactionIsolationLevel(wxCommandEvent& event)
         wxT("Can't change transaction isolation level while started"));
     transactionM = 0;
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuUpdateTransactionIsolationLevel(
     wxUpdateUIEvent& event)
 {
@@ -2522,7 +2522,7 @@ void ExecuteSqlFrame::OnMenuUpdateTransactionIsolationLevel(
     else if (event.GetId() == Cmds::Query_TransactionReadDirty)
         event.Check(transactionIsolationLevelM == IBPP::ilReadDirty);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuTransactionLockResolution(wxCommandEvent& event)
 {
     transactionLockResolutionM =
@@ -2532,14 +2532,14 @@ void ExecuteSqlFrame::OnMenuTransactionLockResolution(wxCommandEvent& event)
         wxT("Can't change transaction lock resolution while started"));
     transactionM = 0;
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuUpdateTransactionLockResolution(
     wxUpdateUIEvent& event)
 {
     event.Enable(transactionM == 0 || !transactionM->Started());
     event.Check(transactionLockResolutionM == IBPP::lrWait);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuTransactionReadOnly(wxCommandEvent& event)
 {
     transactionAccessModeM = event.IsChecked() ? IBPP::amRead : IBPP::amWrite;
@@ -2548,13 +2548,13 @@ void ExecuteSqlFrame::OnMenuTransactionReadOnly(wxCommandEvent& event)
         wxT("Can't change transaction access mode while started"));
     transactionM = 0;
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuUpdateTransactionReadOnly(wxUpdateUIEvent& event)
 {
     event.Enable(transactionM == 0 || !transactionM->Started());
     event.Check(transactionAccessModeM == IBPP::amRead);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuCommit(wxCommandEvent& WXUNUSED(event))
 {
     // we need this because sometimes, somehow, Close() which is called in
@@ -2565,7 +2565,7 @@ void ExecuteSqlFrame::OnMenuCommit(wxCommandEvent& WXUNUSED(event))
     if (commitTransaction() && !doClose)
         setViewMode(false, vmEditor);
 }
-//-----------------------------------------------------------------------------
+
 bool ExecuteSqlFrame::commitTransaction()
 {
     if (transactionM == 0 || !transactionM->Started())    // check
@@ -2651,7 +2651,7 @@ bool ExecuteSqlFrame::commitTransaction()
     setViewMode(vmEditor);
     return true;
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuRollback(wxCommandEvent& WXUNUSED(event))
 {
     wxBusyCursor cr;
@@ -2660,7 +2660,7 @@ void ExecuteSqlFrame::OnMenuRollback(wxCommandEvent& WXUNUSED(event))
     if (rollbackTransaction() && !closeIt)
         setViewMode(false, vmEditor);
 }
-//-----------------------------------------------------------------------------
+
 bool ExecuteSqlFrame::rollbackTransaction()
 {
     if (transactionM == 0 || !transactionM->Started())    // check
@@ -2714,19 +2714,19 @@ bool ExecuteSqlFrame::rollbackTransaction()
     setViewMode(vmEditor);
     return true;
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuUpdateGridInsertRow(wxUpdateUIEvent& event)
 {
     DataGridTable* tb = grid_data->getDataGridTable();
     event.Enable(inTransactionM && tb && tb->canInsertRows());
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuUpdateGridHasData(wxUpdateUIEvent& event)
 {
     event.Enable(grid_data->getDataGridTable()
         && grid_data->GetNumberRows());
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnMenuUpdateGridDeleteRow(wxUpdateUIEvent& event)
 {
     DataGridTable *tb = grid_data->getDataGridTable();
@@ -2751,7 +2751,7 @@ void ExecuteSqlFrame::OnMenuUpdateGridDeleteRow(wxUpdateUIEvent& event)
 
     event.Enable(!colsSelected && deletableRows);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnGridCellChange(wxGridEvent& event)
 {
     event.Skip();
@@ -2763,13 +2763,13 @@ void ExecuteSqlFrame::OnGridCellChange(wxGridEvent& event)
          (event.GetRow() != grid_data->GetGridCursorRow())))
         timerBlobEditorM.Start(500, true);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnGridInvalidateAttributeCache(wxCommandEvent& event)
 {
     event.Skip();
     grid_data->refreshAndInvalidateAttributes();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent& event)
 {
     wxString s;
@@ -2795,7 +2795,7 @@ void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent& event)
         }
     }
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnGridStatementExecuted(wxCommandEvent& event)
 {
     ScrollAtEnd sae(styled_text_ctrl_stats);
@@ -2806,12 +2806,12 @@ void ExecuteSqlFrame::OnGridStatementExecuted(wxCommandEvent& event)
         executedStatementsM.push_back(stm);
     }
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnGridSum(wxCommandEvent& event)
 {
     statusbar_1->SetStatusText(event.GetString(), 3);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnGridLabelLeftDClick(wxGridEvent& event)
 {
     DataGridTable* table = grid_data->getDataGridTable();
@@ -2829,7 +2829,7 @@ void ExecuteSqlFrame::OnGridLabelLeftDClick(wxGridEvent& event)
 
     execute(sstm.getStatement(), wxEmptyString);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnSplitterUnsplit(wxSplitterEvent& WXUNUSED(event))
 {
     if (splitter_window_1->GetWindow1() == styled_text_ctrl_sql)
@@ -2842,20 +2842,20 @@ void ExecuteSqlFrame::OnSplitterUnsplit(wxSplitterEvent& WXUNUSED(event))
             setViewMode(vmGrid);
     }
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::update()
 {
     if (databaseM && !databaseM->isConnected())
         Close();
 }
-//-----------------------------------------------------------------------------
+
 //! closes window if database is removed (unregistered)
 void ExecuteSqlFrame::subjectRemoved(Subject* subject)
 {
     if (subject == databaseM)
         Close();
 }
-//-----------------------------------------------------------------------------
+
 static int CaseUnsensitiveCompare(const wxString& one, const wxString& two)
 {
     // this would be the right solution, but it doesn't work well as it
@@ -2902,7 +2902,7 @@ void ExecuteSqlFrame::setKeywords()
     for (size_t i = 0; i < as.GetCount(); ++i)  // separate words with spaces
         keywordsM += as.Item(i) + wxT(" ");
 }
-//-----------------------------------------------------------------------------
+
 //! logs all activity to text control
 // this is made a separate function, so we can change the control to any other
 // or we can also log to some .txt file, etc.
@@ -2922,12 +2922,12 @@ void ExecuteSqlFrame::log(wxString s, TextType type)
     styled_text_ctrl_stats->StartStyling(startpos, 255);
     styled_text_ctrl_stats->SetStyling(endpos-startpos-1, style);
 }
-//-----------------------------------------------------------------------------
+
 const wxString ExecuteSqlFrame::getName() const
 {
     return wxT("ExecuteSqlFrame");
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::doReadConfigSettings(const wxString& prefix)
 {
     BaseFrame::doReadConfigSettings(prefix);
@@ -2935,19 +2935,19 @@ void ExecuteSqlFrame::doReadConfigSettings(const wxString& prefix)
     if (config().getValue(prefix + Config::pathSeparator + wxT("zoom"), zoom))
         styled_text_ctrl_sql->SetZoom(zoom);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::doWriteConfigSettings(const wxString& prefix) const
 {
     BaseFrame::doWriteConfigSettings(prefix);
     config().setValue(prefix + Config::pathSeparator + wxT("zoom"),
         styled_text_ctrl_sql->GetZoom());
 }
-//-----------------------------------------------------------------------------
+
 const wxRect ExecuteSqlFrame::getDefaultRect() const
 {
     return wxRect(-1, -1, 528, 486);
 }
-//-----------------------------------------------------------------------------
+
 bool ExecuteSqlFrame::Show(bool show)
 {
     bool retval = BaseFrame::Show(show);
@@ -2957,12 +2957,12 @@ bool ExecuteSqlFrame::Show(bool show)
         SendSizeEvent();
     return retval;
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::setViewMode(ViewMode mode)
 {
     setViewMode(splitter_window_1->IsSplit(), mode);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::setViewMode(bool splitView, ViewMode mode)
 {
     wxCHECK_RET(mode == vmEditor || mode == vmLogCtrl || mode == vmGrid,
@@ -3020,7 +3020,7 @@ void ExecuteSqlFrame::setViewMode(bool splitView, ViewMode mode)
     else if (mode == vmGrid)
         grid_data->SetFocus();
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::updateViewMode()
 {
     doUpdateFocusedControlM = false;
@@ -3039,7 +3039,7 @@ void ExecuteSqlFrame::updateViewMode()
         viewModeM = vmGrid;
     }
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::updateFrameTitle()
 {
     if (filenameM.IsOk())
@@ -3136,12 +3136,12 @@ void ExecuteSqlFrame::updateFrameTitle()
     while (cnt < 2 && tk.jumpToken(true /* skip parenthesis */));
     SetTitle(title);
 }
-//-----------------------------------------------------------------------------
+
 void ExecuteSqlFrame::OnBlobEditorUpdate(wxTimerEvent& WXUNUSED(event))
 {
     updateBlobEditor();
 }
-//-----------------------------------------------------------------------------
+
 //! also used to drop constraints
 class DropColumnHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
@@ -3152,9 +3152,9 @@ public:
 private:
     static const DropColumnHandler handlerInstance;
 };
-//-----------------------------------------------------------------------------
+
 const DropColumnHandler DropColumnHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 bool DropColumnHandler::handleURI(URI& uri)
 {
     if (uri.action != wxT("drop_field") && uri.action != wxT("drop_constraint"))
@@ -3198,7 +3198,7 @@ bool DropColumnHandler::handleURI(URI& uri)
     execSql(w, _("Dropping field"), c->getDatabase(), sql, true);
     return true;
 }
-//-----------------------------------------------------------------------------
+
 //! drop multiple columns
 class DropColumnsHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
@@ -3209,9 +3209,9 @@ public:
 private:
     static const DropColumnsHandler handlerInstance;
 };
-//-----------------------------------------------------------------------------
+
 const DropColumnsHandler DropColumnsHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 bool DropColumnsHandler::handleURI(URI& uri)
 {
     if (uri.action != wxT("drop_fields"))
@@ -3238,7 +3238,7 @@ bool DropColumnsHandler::handleURI(URI& uri)
     }
     return true;
 }
-//-----------------------------------------------------------------------------
+
 //! drop any metadata item
 class DropObjectHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
@@ -3249,9 +3249,9 @@ public:
 private:
     static const DropObjectHandler handlerInstance;
 };
-//-----------------------------------------------------------------------------
+
 const DropObjectHandler DropObjectHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 bool DropObjectHandler::handleURI(URI& uri)
 {
     if (uri.action != wxT("drop_object"))
@@ -3276,7 +3276,7 @@ bool DropObjectHandler::handleURI(URI& uri)
     execSql(w, _("DROP"), m->getDatabase(), m->getDropSqlStatement(), true);
     return true;
 }
-//-----------------------------------------------------------------------------
+
 //! show DDL in SQL editor
 class EditDDLHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
@@ -3287,9 +3287,9 @@ public:
 private:
     static const EditDDLHandler handlerInstance;
 };
-//-----------------------------------------------------------------------------
+
 const EditDDLHandler EditDDLHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 bool EditDDLHandler::handleURI(URI& uri)
 {
     if (uri.action != wxT("edit_ddl"))
@@ -3321,7 +3321,7 @@ bool EditDDLHandler::handleURI(URI& uri)
     eff->Show();
     return true;
 }
-//-----------------------------------------------------------------------------
+
 class EditProcedureHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
@@ -3332,9 +3332,9 @@ private:
     // singleton; registers itself on creation.
     static const EditProcedureHandler handlerInstance;
 };
-//-----------------------------------------------------------------------------
+
 const EditProcedureHandler EditProcedureHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 bool EditProcedureHandler::handleURI(URI& uri)
 {
     if (uri.action != wxT("edit_procedure"))
@@ -3351,7 +3351,7 @@ bool EditProcedureHandler::handleURI(URI& uri)
         cdv.getSuffixSql());
     return true;
 }
-//-----------------------------------------------------------------------------
+
 class AlterViewHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
@@ -3362,9 +3362,9 @@ private:
     // singleton; registers itself on creation.
     static const AlterViewHandler handlerInstance;
 };
-//-----------------------------------------------------------------------------
+
 const AlterViewHandler AlterViewHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 bool AlterViewHandler::handleURI(URI& uri)
 {
     if (uri.action != wxT("alter_relation")
@@ -3391,7 +3391,7 @@ bool AlterViewHandler::handleURI(URI& uri)
         r->getRebuildSql(column));
     return true;
 }
-//-----------------------------------------------------------------------------
+
 class EditTriggerHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
@@ -3402,9 +3402,9 @@ private:
     // singleton; registers itself on creation.
     static const EditTriggerHandler handlerInstance;
 };
-//-----------------------------------------------------------------------------
+
 const EditTriggerHandler EditTriggerHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 bool EditTriggerHandler::handleURI(URI& uri)
 {
     if (uri.action != wxT("edit_trigger"))
@@ -3419,7 +3419,7 @@ bool EditTriggerHandler::handleURI(URI& uri)
         t->getAlterSql());
     return true;
 }
-//-----------------------------------------------------------------------------
+
 class EditGeneratorValueHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
@@ -3430,9 +3430,9 @@ private:
     // singleton; registers itself on creation.
     static const EditGeneratorValueHandler handlerInstance;
 };
-//-----------------------------------------------------------------------------
+
 const EditGeneratorValueHandler EditGeneratorValueHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 bool EditGeneratorValueHandler::handleURI(URI& uri)
 {
     if (uri.action != wxT("edit_generator_value"))
@@ -3465,7 +3465,7 @@ bool EditGeneratorValueHandler::handleURI(URI& uri)
     }
     return true;
 }
-//-----------------------------------------------------------------------------
+
 class EditExceptionHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
@@ -3476,9 +3476,9 @@ private:
     // singleton; registers itself on creation.
     static const EditExceptionHandler handlerInstance;
 };
-//-----------------------------------------------------------------------------
+
 const EditExceptionHandler EditExceptionHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 bool EditExceptionHandler::handleURI(URI& uri)
 {
     if (uri.action != wxT("edit_exception"))
@@ -3493,7 +3493,7 @@ bool EditExceptionHandler::handleURI(URI& uri)
         e->getAlterSql());
     return true;
 }
-//-----------------------------------------------------------------------------
+
 class IndexActionHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
@@ -3504,9 +3504,9 @@ private:
     // singleton; registers itself on creation.
     static const IndexActionHandler handlerInstance;
 };
-//-----------------------------------------------------------------------------
+
 const IndexActionHandler IndexActionHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 bool IndexActionHandler::handleURI(URI& uri)
 {
     if (uri.action != wxT("index_action"))
@@ -3541,7 +3541,7 @@ bool IndexActionHandler::handleURI(URI& uri)
     execSql(w, wxEmptyString, i->getDatabase(), sql, true);
     return true;
 }
-//-----------------------------------------------------------------------------
+
 class ActivateTriggersHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
@@ -3551,9 +3551,9 @@ public:
 private:
     static const ActivateTriggersHandler handlerInstance;
 };
-//-----------------------------------------------------------------------------
+
 const ActivateTriggersHandler ActivateTriggersHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 bool ActivateTriggersHandler::handleURI(URI& uri)
 {
     if (uri.action != wxT("activate_triggers")
@@ -3594,7 +3594,7 @@ bool ActivateTriggersHandler::handleURI(URI& uri)
     execSql(w, wxEmptyString, mi->getDatabase(), sql, true);
     return true;
 }
-//-----------------------------------------------------------------------------
+
 class ActivateTriggerHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
@@ -3604,9 +3604,9 @@ public:
 private:
     static const ActivateTriggerHandler handlerInstance;
 };
-//-----------------------------------------------------------------------------
+
 const ActivateTriggerHandler ActivateTriggerHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 bool ActivateTriggerHandler::handleURI(URI& uri)
 {
     if (uri.action != wxT("activate_trigger") && uri.action != wxT("deactivate_trigger"))
@@ -3625,4 +3625,4 @@ bool ActivateTriggerHandler::handleURI(URI& uri)
     execSql(w, wxEmptyString, t->getDatabase(), sql, true);
     return true;
 }
-//-----------------------------------------------------------------------------
+

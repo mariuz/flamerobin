@@ -35,7 +35,7 @@
 #endif
 
 #include "gui/StyleGuide.h"
-//------------------------------------------------------------------------------
+-
 class StyleGuideMAC: public StyleGuide
 {
 public:
@@ -53,11 +53,11 @@ public:
     virtual int getRelatedControlMargin(wxOrientation orientation);
     virtual int getUnrelatedControlMargin(wxOrientation orientation);
 };
-//------------------------------------------------------------------------------
+-
 StyleGuideMAC::StyleGuideMAC()
 {
 }
-//------------------------------------------------------------------------------
+-
 wxSizer* StyleGuideMAC::createButtonSizer(wxButton* affirmativeButton,
     wxButton* negativeButton, wxButton* alternateButton)
 {
@@ -76,27 +76,27 @@ wxSizer* StyleGuideMAC::createButtonSizer(wxButton* affirmativeButton,
         sizer->Add(affirmativeButton);
     return sizer;
 }
-//------------------------------------------------------------------------------
+-
 int StyleGuideMAC::getBetweenButtonsMargin(wxOrientation /*orientation*/)
 {
     return 12;
 }
-//------------------------------------------------------------------------------
+-
 int StyleGuideMAC::getBrowseButtonMargin()
 {
     return 10;
 }
-//------------------------------------------------------------------------------
+-
 int StyleGuideMAC::getCheckboxSpacing()
 {
     return 7;
 }
-//------------------------------------------------------------------------------
+-
 int StyleGuideMAC::getControlLabelMargin()
 {
     return 5;
 }
-//------------------------------------------------------------------------------
+-
 int StyleGuideMAC::getDialogMargin(wxDirection direction)
 {
     switch (direction)
@@ -111,35 +111,35 @@ int StyleGuideMAC::getDialogMargin(wxDirection direction)
             return 0;
     }
 }
-//------------------------------------------------------------------------------
+-
 int StyleGuideMAC::getFrameMargin(wxDirection /*direction*/)
 {
     return 16;
 }
-//------------------------------------------------------------------------------
+-
 int StyleGuideMAC::getMessageBoxIconMargin()
 {
     return 16;
 }
-//------------------------------------------------------------------------------
+-
 int StyleGuideMAC::getMessageBoxBetweenTextMargin()
 {
     return 8;
 }
-//------------------------------------------------------------------------------
+-
 int StyleGuideMAC::getRelatedControlMargin(wxOrientation /*orientation*/)
 {
     return 12;
 }
-//------------------------------------------------------------------------------
+-
 int StyleGuideMAC::getUnrelatedControlMargin(wxOrientation /*orientation*/)
 {
     return 16;
 }
-//------------------------------------------------------------------------------
+-
 StyleGuide& styleguide()
 {
     static StyleGuideMAC guide;
     return guide;
 }
-//------------------------------------------------------------------------------
+-

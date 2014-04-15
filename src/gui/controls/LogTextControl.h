@@ -25,7 +25,7 @@
 #define LOGTEXTCONTROL_H
 
 #include "gui/controls/TextControl.h"
-//-----------------------------------------------------------------------------
+
 class LogTextControl: public TextControl
 {
 private:
@@ -49,5 +49,5 @@ protected:
 
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 #endif

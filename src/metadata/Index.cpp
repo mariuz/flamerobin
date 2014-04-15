@@ -34,7 +34,7 @@
 
 #include "metadata/Index.h"
 #include "metadata/MetadataItemVisitor.h"
-//-----------------------------------------------------------------------------
+
 Index::Index(bool unique, bool active, bool ascending, double statistics,
         bool system, wxString expression)
     : MetadataItem(ntIndex), isSystemM(system), uniqueFlagM(unique),
@@ -42,32 +42,32 @@ Index::Index(bool unique, bool active, bool ascending, double statistics,
         statisticsM(statistics), segmentsM(), expressionM(expression)
 {
 }
-//-----------------------------------------------------------------------------
+
 bool Index::isSystem() const
 {
     return isSystemM;
 }
-//-----------------------------------------------------------------------------
+
 bool Index::isActive() const
 {
     return activeM;
 }
-//-----------------------------------------------------------------------------
+
 bool Index::isUnique() const
 {
     return uniqueFlagM;
 }
-//-----------------------------------------------------------------------------
+
 double Index::getStatistics()
 {
     return statisticsM;
 }
-//-----------------------------------------------------------------------------
+
 std::vector<wxString> *Index::getSegments()
 {
     return &segmentsM;
 }
-//-----------------------------------------------------------------------------
+
 wxString Index::getFieldsAsString()
 {
     if (!expressionM.IsEmpty())
@@ -85,19 +85,19 @@ wxString Index::getFieldsAsString()
         return retval;
     }
 }
-//-----------------------------------------------------------------------------
+
 Index::IndexType Index::getIndexType()
 {
     return indexTypeM;
 }
-//-----------------------------------------------------------------------------
+
 wxString Index::getExpression() const
 {
     return expressionM;
 }
-//-----------------------------------------------------------------------------
+
 void Index::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitIndex(*this);
 }
-//-----------------------------------------------------------------------------
+

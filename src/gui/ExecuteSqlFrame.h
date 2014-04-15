@@ -23,7 +23,7 @@
 
 #ifndef EXECUTESQLFRAME_H
 #define EXECUTESQLFRAME_H
-//-----------------------------------------------------------------------------
+
 #include <wx/wx.h>
 #include <wx/filename.h>
 #include <wx/grid.h>
@@ -42,12 +42,12 @@
 #include "gui/FindDialog.h"
 #include "sql/SqlStatement.h"
 #include "statementHistory.h"
-//-----------------------------------------------------------------------------
+
 class CommandManager;
 class Database;
 class DataGrid;
 class ExecuteSqlFrame;
-//-----------------------------------------------------------------------------
+
 class SqlEditor: public SearchableEditor
 {
 private:
@@ -64,7 +64,7 @@ public:
     void OnKillFocus(wxFocusEvent& event);
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 class ExecuteSqlFrame: public BaseFrame, public Observer
 {
 public:
@@ -283,5 +283,5 @@ protected:
 
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 #endif // EXECUTESQLFRAME_H

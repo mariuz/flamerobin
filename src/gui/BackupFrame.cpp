@@ -46,7 +46,7 @@
 #include "gui/UsernamePasswordDialog.h"
 #include "metadata/database.h"
 #include "metadata/server.h"
-//-----------------------------------------------------------------------------
+
 // worker thread class to perform database backup
 class BackupThread: public wxThread {
 public:
@@ -68,7 +68,7 @@ private:
     void logImportant(wxString& msg);
     void logProgress(wxString& msg);
 };
-//-----------------------------------------------------------------------------
+
 BackupThread::BackupThread(BackupFrame* frame, wxString server,
         wxString username, wxString password, wxString dbfilename,
         wxString bkfilename, IBPP::BRF flags)
@@ -83,7 +83,7 @@ BackupThread::BackupThread(BackupFrame* frame, wxString server,
     // always use verbose flag
     brfM = (IBPP::BRF)((int)flags | (int)IBPP::brVerbose);
 }
-//-----------------------------------------------------------------------------
+
 void* BackupThread::Entry()
 {
     wxDateTime now;
@@ -142,7 +142,7 @@ void* BackupThread::Entry()
     }
     return 0;
 }
-//-----------------------------------------------------------------------------
+
 void BackupThread::OnExit()
 {
     if (frameM != 0)
@@ -152,25 +152,25 @@ void BackupThread::OnExit()
         wxPostEvent(frameM, event);
     }
 }
-//-----------------------------------------------------------------------------
+
 void BackupThread::logError(wxString& msg)
 {
     if (frameM != 0)
         frameM->threadOutputMsg(msg, BackupRestoreBaseFrame::error_message);
 }
-//-----------------------------------------------------------------------------
+
 void BackupThread::logImportant(wxString& msg)
 {
     if (frameM != 0)
         frameM->threadOutputMsg(msg, BackupRestoreBaseFrame::important_message);
 }
-//-----------------------------------------------------------------------------
+
 void BackupThread::logProgress(wxString& msg)
 {
     if (frameM != 0)
         frameM->threadOutputMsg(msg, BackupRestoreBaseFrame::progress_message);
 }
-//-----------------------------------------------------------------------------
+
 BackupFrame::BackupFrame(wxWindow* parent, DatabasePtr db)
     : BackupRestoreBaseFrame(parent, db)
 {
@@ -187,7 +187,7 @@ BackupFrame::BackupFrame(wxWindow* parent, DatabasePtr db)
 
     text_ctrl_filename->SetFocus();
 }
-//-----------------------------------------------------------------------------
+
 //! implementation details
 void BackupFrame::createControls()
 {
@@ -220,7 +220,7 @@ void BackupFrame::createControls()
 
     text_ctrl_log = new LogTextControl(this, ID_text_ctrl_log);
 }
-//-----------------------------------------------------------------------------
+
 void BackupFrame::layoutControls()
 {
     int wh = text_ctrl_filename->GetMinHeight();
@@ -271,7 +271,7 @@ void BackupFrame::layoutControls()
         -1, 3 * text_ctrl_filename->GetSize().GetHeight());
     SetSizerAndFit(sizerMain);
 }
-//-----------------------------------------------------------------------------
+
 void BackupFrame::updateControls()
 {
     bool running = getThreadRunning();
@@ -285,7 +285,7 @@ void BackupFrame::updateControls()
     checkbox_extern->Enable(!running);
     button_start->Enable(!running && !text_ctrl_filename->GetValue().empty());
 }
-//-----------------------------------------------------------------------------
+
 void BackupFrame::doReadConfigSettings(const wxString& prefix)
 {
     BackupRestoreBaseFrame::doReadConfigSettings(prefix);
@@ -308,7 +308,7 @@ void BackupFrame::doReadConfigSettings(const wxString& prefix)
     }
     updateControls();
 }
-//-----------------------------------------------------------------------------
+
 void BackupFrame::doWriteConfigSettings(const wxString& prefix) const
 {
     BackupRestoreBaseFrame::doWriteConfigSettings(prefix);
@@ -327,12 +327,12 @@ void BackupFrame::doWriteConfigSettings(const wxString& prefix) const
         flags.push_back(wxT("external_tables"));
     config().setValue(prefix + Config::pathSeparator + wxT("options"), flags);
 }
-//-----------------------------------------------------------------------------
+
 const wxString BackupFrame::getName() const
 {
     return wxT("BackupFrame");
 }
-//-----------------------------------------------------------------------------
+
 /*static*/
 wxString BackupFrame::getFrameId(DatabasePtr db)
 {
@@ -341,7 +341,7 @@ wxString BackupFrame::getFrameId(DatabasePtr db)
     else
         return wxEmptyString;
 }
-//-----------------------------------------------------------------------------
+
 BackupFrame* BackupFrame::findFrameFor(DatabasePtr db)
 {
     BaseFrame* bf = frameFromIdString(getFrameId(db));
@@ -349,13 +349,13 @@ BackupFrame* BackupFrame::findFrameFor(DatabasePtr db)
         return 0;
     return dynamic_cast<BackupFrame*>(bf);
 }
-//-----------------------------------------------------------------------------
+
 //! event handlers
 BEGIN_EVENT_TABLE(BackupFrame, BackupRestoreBaseFrame)
     EVT_BUTTON(BackupRestoreBaseFrame::ID_button_browse, BackupFrame::OnBrowseButtonClick)
     EVT_BUTTON(BackupRestoreBaseFrame::ID_button_start, BackupFrame::OnStartButtonClick)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 void BackupFrame::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     wxFileName origName(text_ctrl_filename->GetValue());
@@ -366,7 +366,7 @@ void BackupFrame::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
     if (!filename.empty())
         text_ctrl_filename->SetValue(filename);
 }
-//-----------------------------------------------------------------------------
+
 void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     verboseMsgsM = checkbox_showlog->IsChecked();
@@ -405,4 +405,4 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     startThread(thread);
     updateControls();
 }
-//-----------------------------------------------------------------------------
+

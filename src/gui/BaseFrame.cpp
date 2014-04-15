@@ -38,9 +38,9 @@
 
 #include "config/Config.h"
 #include "gui/BaseFrame.h"
-//-----------------------------------------------------------------------------
+
 BaseFrame::FrameIdMap BaseFrame::frameIdsM;
-//-----------------------------------------------------------------------------
+
 BaseFrame::BaseFrame(wxWindow* parent, int id, const wxString& title,
         const wxPoint& pos, const wxSize& size, long style,
         const wxString& name)
@@ -50,39 +50,39 @@ BaseFrame::BaseFrame(wxWindow* parent, int id, const wxString& title,
 
     Connect(wxEVT_CLOSE_WINDOW, wxCloseEventHandler(BaseFrame::OnClose));
 }
-//-----------------------------------------------------------------------------
+
 BaseFrame::~BaseFrame()
 {
     frameIdsM.erase(this);
 }
-//-----------------------------------------------------------------------------
+
 bool BaseFrame::Show(bool show)
 {
     if (show && !IsShown())
          readConfigSettings();
     return wxFrame::Show(show);
 }
-//-----------------------------------------------------------------------------
+
 bool BaseFrame::Destroy()
 {
     writeConfigSettings();
     return wxFrame::Destroy();
 }
-//-----------------------------------------------------------------------------
+
 bool BaseFrame::canClose()
 {
     return doCanClose();
 }
-//-----------------------------------------------------------------------------
+
 bool BaseFrame::doCanClose()
 {
     return true;
 }
-//-----------------------------------------------------------------------------
+
 void BaseFrame::doBeforeDestroy()
 {
 }
-//-----------------------------------------------------------------------------
+
 void BaseFrame::readConfigSettings()
 {
     // load position and size from config; it values are not set, they will be untouched
@@ -123,7 +123,7 @@ void BaseFrame::readConfigSettings()
 void BaseFrame::doReadConfigSettings(const wxString& WXUNUSED(prefix))
 {
 }
-//-----------------------------------------------------------------------------
+
 void BaseFrame::writeConfigSettings() const
 {
     // wxFileConfig::Flush() should only be called once
@@ -167,11 +167,11 @@ void BaseFrame::writeConfigSettings() const
         }
     }
 }
-//-----------------------------------------------------------------------------
+
 void BaseFrame::doWriteConfigSettings(const wxString& WXUNUSED(prefix)) const
 {
 }
-//-----------------------------------------------------------------------------
+
 const wxString BaseFrame::getName() const
 {
     // Couldn't find a reliable (meaning supportable and cross-platform) way
@@ -179,17 +179,17 @@ const wxString BaseFrame::getName() const
     // if it needs to use features that depend on it.
     return wxT("");
 }
-//-----------------------------------------------------------------------------
+
 const wxString BaseFrame::getStorageName() const
 {
     return getName();
 }
-//-----------------------------------------------------------------------------
+
 const wxRect BaseFrame::getDefaultRect() const
 {
     return wxRect(wxDefaultPosition, wxDefaultSize);
 }
-//-----------------------------------------------------------------------------
+
 /* static */
 void BaseFrame::setIdString(BaseFrame* frame, const wxString& id)
 {
@@ -197,7 +197,7 @@ void BaseFrame::setIdString(BaseFrame* frame, const wxString& id)
     if (it != frameIdsM.end())
         (*it).second = id;
 }
-//-----------------------------------------------------------------------------
+
 /* static */
 BaseFrame* BaseFrame::frameFromIdString(const wxString& id)
 {
@@ -212,7 +212,7 @@ BaseFrame* BaseFrame::frameFromIdString(const wxString& id)
     }
     return 0;
 }
-//-----------------------------------------------------------------------------
+
 /* static */
 std::vector<BaseFrame*> BaseFrame::getFrames()
 {
@@ -222,7 +222,7 @@ std::vector<BaseFrame*> BaseFrame::getFrames()
         frames.push_back((*it).first);
     return frames;
 }
-//-----------------------------------------------------------------------------
+
 // event handling
 void BaseFrame::OnClose(wxCloseEvent& event)
 {
@@ -234,4 +234,4 @@ void BaseFrame::OnClose(wxCloseEvent& event)
     doBeforeDestroy();
     Destroy();
 }
-//-----------------------------------------------------------------------------
+

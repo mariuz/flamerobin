@@ -33,7 +33,7 @@
 #include "gui/ServerRegistrationDialog.h"
 #include "gui/StyleGuide.h"
 #include "metadata/server.h"
-//-----------------------------------------------------------------------------
+
 // constructor for registration of a new server
 ServerRegistrationDialog::ServerRegistrationDialog(wxWindow* parent,
         const wxString& title)
@@ -44,7 +44,7 @@ ServerRegistrationDialog::ServerRegistrationDialog(wxWindow* parent,
     layoutControls();
     connectEvents();
 }
-//-----------------------------------------------------------------------------
+
 // constructor for showing / editing the registration of a registered server
 ServerRegistrationDialog::ServerRegistrationDialog(wxWindow* parent,
         const wxString& title, ServerPtr server)
@@ -55,19 +55,19 @@ ServerRegistrationDialog::ServerRegistrationDialog(wxWindow* parent,
     layoutControls();
     connectEvents();
 }
-//-----------------------------------------------------------------------------
+
 ServerPtr ServerRegistrationDialog::getServer() const
 {
     return serverM;
 }
-//-----------------------------------------------------------------------------
+
 //! implementation details
 const wxString ServerRegistrationDialog::buildDefaultName() const
 {
     return Server::makeConnectionString(text_ctrl_hostname->GetValue(),
         text_ctrl_portnumber->GetValue());
 }
-//-----------------------------------------------------------------------------
+
 void ServerRegistrationDialog::connectEvents()
 {
     Connect(text_ctrl_name->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
@@ -79,7 +79,7 @@ void ServerRegistrationDialog::connectEvents()
     Connect(button_ok->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
         wxCommandEventHandler(ServerRegistrationDialog::OnOkButtonClick));
 }
-//-----------------------------------------------------------------------------
+
 void ServerRegistrationDialog::createControls(bool registerServer)
 {
     label_name = new wxStaticText(getControlsPanel(), wxID_ANY,
@@ -96,12 +96,12 @@ void ServerRegistrationDialog::createControls(bool registerServer)
         (registerServer) ? _("Register") : _("Save"));
     button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL, _("Cancel"));
 }
-//-----------------------------------------------------------------------------
+
 const wxString ServerRegistrationDialog::getName() const
 {
     return wxT("ServerRegistrationDialog");
 }
-//-----------------------------------------------------------------------------
+
 void ServerRegistrationDialog::layoutControls()
 {
     // create sizer for controls
@@ -125,7 +125,7 @@ void ServerRegistrationDialog::layoutControls()
     // use method in base class to set everything up
     layoutSizers(sizerControls, sizerButtons);
 }
-//-----------------------------------------------------------------------------
+
 void ServerRegistrationDialog::setControlsProperties()
 {
     text_ctrl_name->SetValue(serverM->getName_());
@@ -145,24 +145,24 @@ void ServerRegistrationDialog::setControlsProperties()
 
     button_ok->SetDefault();
 }
-//-----------------------------------------------------------------------------
+
 void ServerRegistrationDialog::updateButtons()
 {
     button_ok->Enable(!text_ctrl_name->GetValue().IsEmpty());
 }
-//-----------------------------------------------------------------------------
+
 void ServerRegistrationDialog::updateIsDefaultName()
 {
     wxString name(text_ctrl_name->GetValue());
     isDefaultNameM = (name.empty() || name == buildDefaultName());
 }
-//-----------------------------------------------------------------------------
+
 void ServerRegistrationDialog::OnNameChange(wxCommandEvent& WXUNUSED(event))
 {
     updateIsDefaultName();
     updateButtons();
 }
-//-----------------------------------------------------------------------------
+
 void ServerRegistrationDialog::OnSettingsChange(wxCommandEvent& WXUNUSED(event))
 {
     if (isDefaultNameM)
@@ -170,7 +170,7 @@ void ServerRegistrationDialog::OnSettingsChange(wxCommandEvent& WXUNUSED(event))
     updateIsDefaultName();
     updateButtons();
 }
-//-----------------------------------------------------------------------------
+
 void ServerRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     serverM->setName_(text_ctrl_name->GetValue());
@@ -178,4 +178,4 @@ void ServerRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
     serverM->setPort(text_ctrl_portnumber->GetValue());
     EndModal(wxID_OK);
 }
-//-----------------------------------------------------------------------------
+

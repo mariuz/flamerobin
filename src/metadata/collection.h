@@ -23,7 +23,7 @@
 
 #ifndef FR_COLLECTION_H
 #define FR_COLLECTION_H
-//-----------------------------------------------------------------------------
+
 #include <algorithm>
 #include <iterator>
 #include <vector>
@@ -32,7 +32,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "metadata/database.h"
-//-----------------------------------------------------------------------------
+
 class MetadataCollectionBase : public MetadataItem
 {
 private:
@@ -77,7 +77,7 @@ public:
 
     virtual bool isSystem() const { return false; }
 };
-//-----------------------------------------------------------------------------
+
 template <class T>
 class MetadataCollection : public MetadataCollectionBase
 {
@@ -229,5 +229,5 @@ protected:
             (*it)->unlockSubject();
     }
 };
-//-----------------------------------------------------------------------------
+
 #endif

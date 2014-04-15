@@ -23,7 +23,7 @@
 
 #ifndef FR_METADATAITEMPROPERTIESFRAME_H
 #define FR_METADATAITEMPROPERTIESFRAME_H
-//-----------------------------------------------------------------------------
+
 #include <wx/wx.h>
 #include <wx/wxhtml.h>
 #include <wx/aui/aui.h>
@@ -35,7 +35,7 @@
 
 class MetadataItem;
 class MetadataItemPropertiesPanel;
-//-----------------------------------------------------------------------------
+
 class MetadataItemPropertiesFrame: public BaseFrame
 {
 private:
@@ -77,5 +77,5 @@ private:
     void OnNotebookPageClose(wxAuiNotebookEvent& event);
     void OnNotebookPageChanged(wxAuiNotebookEvent& event);
 };
-//-----------------------------------------------------------------------------
+
 #endif // FR_METADATAITEMPROPERTIESFRAME_H

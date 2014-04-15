@@ -29,13 +29,13 @@
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
-//-----------------------------------------------------------------------------
+
 #include <algorithm>
 #include <list>
 
 #include "core/Observer.h"
 #include "core/Subject.h"
-//-----------------------------------------------------------------------------
+
 class ObserverLocker
 {
 private:
@@ -44,25 +44,25 @@ public:
     ObserverLocker(unsigned* lock);
     ~ObserverLocker();
 };
-//-----------------------------------------------------------------------------
+
 ObserverLocker::ObserverLocker(unsigned* lock)
     : lockPtrM(lock)
 {
     if (lockPtrM)
         ++(*lockPtrM);
 }
-//-----------------------------------------------------------------------------
+
 ObserverLocker::~ObserverLocker()
 {
     if (lockPtrM)
         --(*lockPtrM);
 }
-//-----------------------------------------------------------------------------
+
 Observer::Observer()
     : updateLockM(0)
 {
 }
-//-----------------------------------------------------------------------------
+
 Observer::~Observer()
 {
     while (!subjectsM.empty())
@@ -72,20 +72,20 @@ Observer::~Observer()
         (*it)->detachObserver(this);
     }
 }
-//-----------------------------------------------------------------------------
+
 void Observer::doUpdate()
 {
     ObserverLocker lock(&updateLockM);
     if (updateLockM == 1)
         update();
 }
-//-----------------------------------------------------------------------------
+
 void Observer::addSubject(Subject* subject)
 {
     if (subject)
         subjectsM.push_back(subject);
 }
-//-----------------------------------------------------------------------------
+
 void Observer::removeSubject(Subject* subject)
 {
     std::list<Subject*>::iterator it = find(subjectsM.begin(),
@@ -96,8 +96,8 @@ void Observer::removeSubject(Subject* subject)
         subjectRemoved(subject);
     }
 }
-//-----------------------------------------------------------------------------
+
 void Observer::subjectRemoved(Subject* /*subject*/)
 {
 }
-//-----------------------------------------------------------------------------
+

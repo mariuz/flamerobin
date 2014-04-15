@@ -23,10 +23,10 @@
 
 #ifndef FR_MASTERPASSWORD_H
 #define FR_MASTERPASSWORD_H
-//-----------------------------------------------------------------------------
+
 wxString encryptPassword(const wxString& password, const wxString& context);
 wxString decryptPassword(const wxString& cipher, const wxString& context);
-//-----------------------------------------------------------------------------
+
 class MasterPassword
 {
 private:
@@ -41,5 +41,5 @@ public:
     // databases and change them as well
     static void setMasterPassword(const wxString& str);
 };
-//-----------------------------------------------------------------------------
+
 #endif

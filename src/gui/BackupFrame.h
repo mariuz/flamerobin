@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef BACKUPFRAME_H
 #define BACKUPFRAME_H
 
@@ -30,7 +30,7 @@
 #include "BackupRestoreBaseFrame.h"
 
 class BackupThread;
-//-----------------------------------------------------------------------------
+
 class BackupFrame: public BackupRestoreBaseFrame {
     friend class BackupThread;
 private:
@@ -60,5 +60,5 @@ private:
 
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 #endif // BACKUPFRAME_H

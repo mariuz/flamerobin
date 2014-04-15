@@ -34,23 +34,23 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/view.h"
 #include "sql/StatementBuilder.h"
-//-----------------------------------------------------------------------------
+
 View::View(DatabasePtr database, const wxString& name)
     : Relation(ntView, database, name)
 {
 }
-//-----------------------------------------------------------------------------
+
 wxString View::getSource()
 {
     ensurePropertiesLoaded();
     return sourceM;
 }
-//-----------------------------------------------------------------------------
+
 void View::setSource(const wxString& value)
 {
     sourceM = value;
 }
-//-----------------------------------------------------------------------------
+
 wxString View::getCreateSql()
 {
     ensureChildrenLoaded();
@@ -74,28 +74,28 @@ wxString View::getCreateSql()
         << getSource() << ';' << StatementBuilder::NewLine;
     return sb;
 }
-//-----------------------------------------------------------------------------
+
 const wxString View::getTypeName() const
 {
     return wxT("VIEW");
 }
-//-----------------------------------------------------------------------------
+
 void View::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitView(*this);
 }
-//-----------------------------------------------------------------------------
+
 // Views collection
 Views::Views(DatabasePtr database)
     : MetadataCollection<View>(ntViews, database, _("Views"))
 {
 }
-//-----------------------------------------------------------------------------
+
 void Views::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitViews(*this);
 }
-//-----------------------------------------------------------------------------
+
 void Views::load(ProgressIndicator* progressIndicator)
 {
     wxString stmt = wxT("select rdb$relation_name from rdb$relations")
@@ -103,14 +103,14 @@ void Views::load(ProgressIndicator* progressIndicator)
         wxT(" and rdb$view_source is not null order by 1");
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
-//-----------------------------------------------------------------------------
+
 void Views::loadChildren()
 {
     load(0);
 }
-//-----------------------------------------------------------------------------
+
 const wxString Views::getTypeName() const
 {
     return wxT("VIEW_COLLECTION");
 }
-//-----------------------------------------------------------------------------
+

@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef FR_ROLE_H
 #define FR_ROLE_H
 
@@ -32,7 +32,7 @@
 #include "metadata/privilege.h"
 
 class ProgressIndicator;
-//-----------------------------------------------------------------------------
+
 class Role: public MetadataItem
 {
 private:
@@ -44,7 +44,7 @@ public:
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
-//-----------------------------------------------------------------------------
+
 class SysRoles: public MetadataCollection<Role>
 {
 protected:
@@ -57,7 +57,7 @@ public:
     void load(ProgressIndicator* progressIndicator);
     virtual const wxString getTypeName() const;
 };
-//-----------------------------------------------------------------------------
+
 class Roles: public MetadataCollection<Role>
 {
 protected:
@@ -69,5 +69,5 @@ public:
     void load(ProgressIndicator* progressIndicator);
     virtual const wxString getTypeName() const;
 };
-//-----------------------------------------------------------------------------
+
 #endif // FR_ROLE_H

@@ -35,11 +35,11 @@
 #include "gui/BaseDialog.h"
 #include "gui/CommandManager.h"
 
-//-----------------------------------------------------------------------------
+
 class EditBlobDialogProgressSizer; // declared in cpp
 class EditBlobDialogSTCText; // declared in cpp
 class EditBlobDialogSTC;     // declared in cpp
-//-----------------------------------------------------------------------------
+
 // Main Class: EditBlobDialog
 class EditBlobDialog : public BaseDialog
 {
@@ -152,5 +152,5 @@ protected:
     wxMenu* menu_blob;
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 #endif // FR_EDITBLOBDIALOG_H

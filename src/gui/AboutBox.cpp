@@ -40,7 +40,7 @@
 
 #include "frversion.h"
 #include "gui/AboutBox.h"
-//-----------------------------------------------------------------------------
+
 void showAboutBox(wxWindow* parent)
 {
     wxString libs;
@@ -121,4 +121,4 @@ void showAboutBox(wxWindow* parent)
 
 #endif
 }
-//-----------------------------------------------------------------------------
+

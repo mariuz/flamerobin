@@ -23,13 +23,13 @@
 
 #ifndef FR_ADVANCEDMESSAGEDIALOG_H
 #define FR_ADVANCEDMESSAGEDIALOG_H
-//-----------------------------------------------------------------------------
+
 #include <wx/wx.h>
 #include <wx/artprov.h>
 
 #include "config/Config.h"
 #include "gui/BaseDialog.h"
-//-----------------------------------------------------------------------------
+
 class AdvancedMessageDialogButtons
 {
 private:
@@ -54,20 +54,20 @@ public:
 
     int getNumberOfButtons();
 };
-//-----------------------------------------------------------------------------
+
 class AdvancedMessageDialogButtonsOk: public AdvancedMessageDialogButtons
 {
 public:
     AdvancedMessageDialogButtonsOk(const wxString buttonOkCaption = _("OK"));
 };
-//-----------------------------------------------------------------------------
+
 class AdvancedMessageDialogButtonsOkCancel: public AdvancedMessageDialogButtons
 {
 public:
     AdvancedMessageDialogButtonsOkCancel(const wxString buttonOkCaption,
         const wxString buttonCancelCaption = _("&Cancel"));
 };
-//-----------------------------------------------------------------------------
+
 class AdvancedMessageDialogButtonsYesNoCancel:
     public AdvancedMessageDialogButtons
 {
@@ -76,7 +76,7 @@ public:
         const wxString buttonNoCaption = _("&No"),
         const wxString buttonCancelCaption = _("&Cancel"));
 };
-//-----------------------------------------------------------------------------
+
 class AdvancedMessageDialog: public BaseDialog
 {
 private:
@@ -94,7 +94,7 @@ private:
     // event handling
     void OnButtonClick(wxCommandEvent& event);
 };
-//-----------------------------------------------------------------------------
+
 int showInformationDialog(wxWindow* parent, const wxString& primaryText,
     const wxString& secondaryText, AdvancedMessageDialogButtons buttons);
 int showInformationDialog(wxWindow* parent, const wxString& primaryText,
@@ -122,5 +122,5 @@ int showErrorDialog(wxWindow* parent, const wxString& primaryText,
     const wxString& secondaryText, AdvancedMessageDialogButtons buttons,
     Config& config, const wxString& configKey,
     const wxString& dontShowAgainText);
-//-----------------------------------------------------------------------------
+
 #endif // FR_ADVANCEDMESSAGEDIALOG_H

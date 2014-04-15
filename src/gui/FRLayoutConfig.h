@@ -29,7 +29,7 @@
 
 #include <wx/wx.h>
 
-//-----------------------------------------------------------------------------
+
 class FRLayoutConfig
 {
 public:
@@ -41,7 +41,7 @@ public:
     /* returns the colour for "read-only" controls */
     wxColour getReadonlyColour();
 };
-//--------------------------------------------------------------------------------------
+---------
 FRLayoutConfig& frlayoutconfig();
-//--------------------------------------------------------------------------------------
+---------
 #endif // FR_FRLAYOUTCONFIG_H

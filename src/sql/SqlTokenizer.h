@@ -23,10 +23,10 @@
 
 #ifndef FR_SQLTOKENIZER_H
 #define FR_SQLTOKENIZER_H
-//-----------------------------------------------------------------------------
+
 #include <wx/string.h>
 #include <map>
-//-----------------------------------------------------------------------------
+
 enum SqlTokenType {
     /*
      * these are token types used by SqlTokenizer class
@@ -123,7 +123,7 @@ enum SqlTokenType {
 
     kwYEAR, kwYEARDAY
 };
-//-----------------------------------------------------------------------------
+
 // This tokenizer class returns only "important" tokens - it skips whitespace,
 // comments and the like
 class SqlTokenizer
@@ -178,5 +178,5 @@ public:
     static SqlTokenType getKeywordTokenType(const wxString& word);
     static bool isReservedWord(const wxString& word);
 };
-//-----------------------------------------------------------------------------
+
 #endif // FR_SQLTOKENIZER_H

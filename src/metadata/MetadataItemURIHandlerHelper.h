@@ -23,11 +23,11 @@
 
 #ifndef FR_METADATAITEMURIHANDLERHELPER_H
 #define FR_METADATAITEMURIHANDLERHELPER_H
-//-----------------------------------------------------------------------------
+
 #include "core/URIProcessor.h"
 #include "metadata/MetadataClasses.h"
 #include "metadata/metadataitem.h"
-//-----------------------------------------------------------------------------
+
 // URI parsing helper for metadata-related URIHandlers.
 class MetadataItemURIHandlerHelper
 {
@@ -48,7 +48,7 @@ protected:
         return boost::shared_ptr<T>();
     }
 };
-//-----------------------------------------------------------------------------
+
 template<>
 inline MetadataItem*
 MetadataItemURIHandlerHelper::extractMetadataItemFromURI<MetadataItem>(
@@ -56,5 +56,5 @@ MetadataItemURIHandlerHelper::extractMetadataItemFromURI<MetadataItem>(
 {
     return doExtractMetadataItemFromURI(uri);
 }
-//-----------------------------------------------------------------------------
+
 #endif // FR_METADATAITEMURIHANDLERHELPER_H

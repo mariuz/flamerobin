@@ -23,12 +23,12 @@
 
 #ifndef FR_PRINTABLE_HTML_WINDOW_H
 #define FR_PRINTABLE_HTML_WINDOW_H
-//-----------------------------------------------------------------------------
+
 #include <wx/wx.h>
 #include <wx/wxhtml.h>
 
 class wxHtmlEasyPrinting;
-//-----------------------------------------------------------------------------
+
 class HtmlPrinter
 {
 private:
@@ -38,7 +38,7 @@ public:
     static wxHtmlEasyPrinting *getHEP();
     ~HtmlPrinter();
 };
-//-----------------------------------------------------------------------------
+
 class PrintableHtmlWindow: public wxHtmlWindow
 {
 private:
@@ -60,5 +60,5 @@ protected:
     void OnMenuPreview(wxCommandEvent& event);
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 #endif

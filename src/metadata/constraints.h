@@ -23,14 +23,14 @@
 
 #ifndef FR_CONSTRAINTS_H
 #define FR_CONSTRAINTS_H
-//-----------------------------------------------------------------------------
+
 #include <vector>
 
 #include "metadata/metadataitem.h"
 
 class Relation;
 class Table;
-//-----------------------------------------------------------------------------
+
 class Constraint: public MetadataItem
 {
 public:
@@ -38,7 +38,7 @@ public:
     virtual bool isSystem() const;
     virtual const wxString getTypeName() const;
 };
-//-----------------------------------------------------------------------------
+
 class ColumnConstraint: public Constraint
 {
     friend class Relation;
@@ -57,21 +57,21 @@ protected:
 private:
     wxString indexNameM;
 };
-//-----------------------------------------------------------------------------
+
 //! uniques
 class UniqueConstraint: public ColumnConstraint
 {
 public:
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
-//-----------------------------------------------------------------------------
+
 //! primary keys
 class PrimaryKeyConstraint: public UniqueConstraint
 {
 public:
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
-//-----------------------------------------------------------------------------
+
 //! checks
 class CheckConstraint: public ColumnConstraint
 {
@@ -82,7 +82,7 @@ public:
 private:
     wxString sourceM;
 };
-//-----------------------------------------------------------------------------
+
 //! foreign keys
 class ForeignKey: public ColumnConstraint
 {
@@ -102,5 +102,5 @@ private:
     wxString updateActionM;
     wxString deleteActionM;
 };
-//-----------------------------------------------------------------------------
+
 #endif

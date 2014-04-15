@@ -20,7 +20,7 @@
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//-----------------------------------------------------------------------------
+
 #include "wx/wxprec.h"
 
 #ifndef WX_PRECOMP
@@ -30,17 +30,17 @@
 #include "gui/HtmlHeaderMetadataItemVisitor.h"
 #include "metadata/database.h"
 
-//-----------------------------------------------------------------------------
+
 HtmlHeaderMetadataItemVisitor::HtmlHeaderMetadataItemVisitor(
     std::vector<wxString>& titles)
     : MetadataItemVisitor(), titlesM(titles)
 {
 }
-//-----------------------------------------------------------------------------
+
 HtmlHeaderMetadataItemVisitor::~HtmlHeaderMetadataItemVisitor()
 {
 }
-//-----------------------------------------------------------------------------
+
 void HtmlHeaderMetadataItemVisitor::visitDatabase(Database& database)
 {
     emptyTitles();
@@ -50,7 +50,7 @@ void HtmlHeaderMetadataItemVisitor::visitDatabase(Database& database)
         addTriggers();
     addDDL();
 }
-//-----------------------------------------------------------------------------
+
 void HtmlHeaderMetadataItemVisitor::visitDomain(Domain& /*domain*/)
 {
     emptyTitles();
@@ -59,7 +59,7 @@ void HtmlHeaderMetadataItemVisitor::visitDomain(Domain& /*domain*/)
     //addDependencies();
     addDDL();
 }
-//-----------------------------------------------------------------------------
+
 void HtmlHeaderMetadataItemVisitor::visitException(Exception& /*exception*/)
 {
     emptyTitles();
@@ -67,7 +67,7 @@ void HtmlHeaderMetadataItemVisitor::visitException(Exception& /*exception*/)
     addDependencies();
     addDDL();
 }
-//-----------------------------------------------------------------------------
+
 void HtmlHeaderMetadataItemVisitor::visitFunction(Function& /*function*/)
 {
     emptyTitles();
@@ -75,7 +75,7 @@ void HtmlHeaderMetadataItemVisitor::visitFunction(Function& /*function*/)
     addDependencies();
     addDDL();
 }
-//-----------------------------------------------------------------------------
+
 void HtmlHeaderMetadataItemVisitor::visitGenerator(Generator& /*generator*/)
 {
     emptyTitles();
@@ -83,7 +83,7 @@ void HtmlHeaderMetadataItemVisitor::visitGenerator(Generator& /*generator*/)
     addDependencies();
     addDDL();
 }
-//-----------------------------------------------------------------------------
+
 void HtmlHeaderMetadataItemVisitor::visitProcedure(Procedure& /*procedure*/)
 {
     emptyTitles();
@@ -92,7 +92,7 @@ void HtmlHeaderMetadataItemVisitor::visitProcedure(Procedure& /*procedure*/)
     addDependencies();
     addDDL();
 }
-//-----------------------------------------------------------------------------
+
 void HtmlHeaderMetadataItemVisitor::visitRole(Role& /*role*/)
 {
     emptyTitles();
@@ -100,7 +100,7 @@ void HtmlHeaderMetadataItemVisitor::visitRole(Role& /*role*/)
     addPrivileges();
     addDDL();
 }
-//-----------------------------------------------------------------------------
+
 void HtmlHeaderMetadataItemVisitor::visitTable(Table& /*table*/)
 {
     emptyTitles();
@@ -112,7 +112,7 @@ void HtmlHeaderMetadataItemVisitor::visitTable(Table& /*table*/)
     addDependencies();
     addDDL();
 }
-//-----------------------------------------------------------------------------
+
 void HtmlHeaderMetadataItemVisitor::visitTrigger(Trigger& /*trigger*/)
 {
     emptyTitles();
@@ -120,7 +120,7 @@ void HtmlHeaderMetadataItemVisitor::visitTrigger(Trigger& /*trigger*/)
     addDependencies();
     addDDL();
 }
-//-----------------------------------------------------------------------------
+
 void HtmlHeaderMetadataItemVisitor::visitView(View& /*view*/)
 {
     emptyTitles();
@@ -130,9 +130,9 @@ void HtmlHeaderMetadataItemVisitor::visitView(View& /*view*/)
     addDependencies();
     addDDL();
 }
-//-----------------------------------------------------------------------------
+
 void HtmlHeaderMetadataItemVisitor::defaultAction()
 {
     emptyTitles();
 } 
-//-----------------------------------------------------------------------------
+

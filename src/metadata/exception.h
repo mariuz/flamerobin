@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef FR_EXCEPTION_H
 #define FR_EXCEPTION_H
 
@@ -29,7 +29,7 @@
 
 class Exceptions;
 class ProgressIndicator;
-//-----------------------------------------------------------------------------
+
 class Exception: public MetadataItem
 {
 private:
@@ -50,7 +50,7 @@ public:
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
-//-----------------------------------------------------------------------------
+
 class Exceptions : public MetadataCollection<Exception>
 {
 protected:
@@ -62,5 +62,5 @@ public:
     void load(ProgressIndicator* progressIndicator);
     virtual const wxString getTypeName() const;
 };
-//-----------------------------------------------------------------------------
+
 #endif // FR_EXCEPTION_H

@@ -23,7 +23,7 @@
 
 #ifndef FR_PROCESSABLEOBJECT_H
 #define FR_PROCESSABLEOBJECT_H
-//-----------------------------------------------------------------------------
+
 // base class for objects handled by template processors.
 class ProcessableObject
 {
@@ -31,5 +31,5 @@ public:
     // virtual destructor makes this a polymorphic type.
     virtual ~ProcessableObject() {}
 };
-//-----------------------------------------------------------------------------
+
 #endif // FR_PROCESSABLEOBJECT_H

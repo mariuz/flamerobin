@@ -20,7 +20,7 @@
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//-----------------------------------------------------------------------------
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -34,12 +34,12 @@
 
 #include "sql/MultiStatement.h"
 #include "sql/SqlTokenizer.h"
-//-----------------------------------------------------------------------------
+
 SingleStatement::SingleStatement()
     : typeM(stInvalid)
 {
 }
-//-----------------------------------------------------------------------------
+
 SingleStatement::SingleStatement(const wxString& sql)
     : sqlM(sql), typeM(stOther)
 {
@@ -109,22 +109,22 @@ SingleStatement::SingleStatement(const wxString& sql)
             break;
     }
 }
-//-----------------------------------------------------------------------------
+
 bool SingleStatement::isCommitStatement() const
 {
     return typeM == stCommit;
 }
-//-----------------------------------------------------------------------------
+
 bool SingleStatement::isEmptyStatement() const
 {
     return typeM == stEmpty;
 }
-//-----------------------------------------------------------------------------
+
 bool SingleStatement::isRollbackStatement() const
 {
     return typeM == stRollback;
 }
-//-----------------------------------------------------------------------------
+
 bool SingleStatement::isSetTermStatement(wxString& newTerm) const
 {
     if (typeM != stSetTerm)
@@ -133,7 +133,7 @@ bool SingleStatement::isSetTermStatement(wxString& newTerm) const
     newTerm = thirdStringM;
     return true;
 }
-//-----------------------------------------------------------------------------
+
 bool SingleStatement::isSetAutoDDLStatement(wxString& newSetting) const
 {
     if (typeM != stSetAutoDDL)
@@ -142,24 +142,24 @@ bool SingleStatement::isSetAutoDDLStatement(wxString& newSetting) const
     newSetting = thirdStringM;
     return true;
 }
-//-----------------------------------------------------------------------------
+
 bool SingleStatement::isValid() const
 {
     return typeM != stInvalid;
 }
-//-----------------------------------------------------------------------------
+
 wxString SingleStatement::getSql() const
 {
     return sqlM;
 }
-//-----------------------------------------------------------------------------
+
 //! MultiStatement class
 MultiStatement::MultiStatement(const wxString& sql, const wxString& terminator)
     : sqlM(sql), terminatorM(terminator), atEndM(false)
 {
     oldPosM = searchPosM = sqlM.begin();
 }
-//-----------------------------------------------------------------------------
+
 SingleStatement MultiStatement::getNextStatement()
 {
     if (atEndM)    // end marked in previous iteration
@@ -258,7 +258,7 @@ SingleStatement MultiStatement::getNextStatement()
         return ss;
     }
 }
-//-----------------------------------------------------------------------------
+
 SingleStatement MultiStatement::getStatementAt(int position, int& offset)
 {
     oldPosM = searchPosM = sqlM.begin();
@@ -272,24 +272,24 @@ SingleStatement MultiStatement::getStatementAt(int position, int& offset)
         }
     }
 }
-//-----------------------------------------------------------------------------
+
 void MultiStatement::setTerminator(const wxString& newTerm)
 {
     terminatorM = newTerm;
 }
-//-----------------------------------------------------------------------------
+
 wxString MultiStatement::getTerminator() const
 {
     return terminatorM;
 }
-//-----------------------------------------------------------------------------
+
 int MultiStatement::getStart() const
 {
     return oldPosM - sqlM.begin();
 }
-//-----------------------------------------------------------------------------
+
 int MultiStatement::getEnd() const
 {
     return lastPosM - sqlM.begin();
 }
-//-----------------------------------------------------------------------------
+

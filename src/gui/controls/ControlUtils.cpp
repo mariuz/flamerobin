@@ -30,7 +30,7 @@
     #include "wx/wx.h"
 #endif
 
-//-----------------------------------------------------------------------------
+
 wxPoint calcContextMenuPosition(const wxPoint& eventPos, wxControl* control)
 {
     // use mouse coordinates if event is response to keyboard action
@@ -43,4 +43,4 @@ wxPoint calcContextMenuPosition(const wxPoint& eventPos, wxControl* control)
         menuPosClient = wxPoint(0, 0);
     return menuPosClient;
 }
-//-----------------------------------------------------------------------------
+

@@ -31,7 +31,7 @@
 
 #include "core/Observer.h"
 #include "gui/BaseFrame.h"
-//-----------------------------------------------------------------------------
+
 class CriteriaItem
 {
 public:
@@ -61,7 +61,7 @@ public:
         return wxEmptyString;
     }
 };
-//-----------------------------------------------------------------------------
+
 class Database;
 class MetadataItem;
 class Root;
@@ -69,7 +69,7 @@ class Root;
 class AdjustableListCtrl;   // declaration in cpp file
 class MainFrame;
 class wxStyledTextCtrl;
-//-----------------------------------------------------------------------------
+
 class AdvancedSearchFrame : public BaseFrame, public Observer
 {
 private:
@@ -149,5 +149,5 @@ public:
     void OnListCtrlCriteriaActivate(wxListEvent& event);
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 #endif

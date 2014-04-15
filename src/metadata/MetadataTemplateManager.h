@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef FR_SQLTEMPLATEMANAGER_H
 #define FR_SQLTEMPLATEMANAGER_H
 
@@ -34,7 +34,7 @@
 #include "config/Config.h"
 #include "metadata/metadataitem.h"
 
-//-----------------------------------------------------------------------------
+
 //! Holds information about a single template.
 class TemplateDescriptor
 {
@@ -61,10 +61,10 @@ public:
     void setTemplateFileName(const wxFileName& value) { templateFileNameM = value; }
     wxString getBaseFileName() const { return templateFileNameM.GetName(); }
 };
-//-----------------------------------------------------------------------------
+
 typedef boost::shared_ptr<TemplateDescriptor> TemplateDescriptorPtr;
 typedef std::list<TemplateDescriptorPtr> TemplateDescriptorList;
-//-----------------------------------------------------------------------------
+
 class MetadataTemplateManager
 {
 private:
@@ -79,5 +79,5 @@ public:
     TemplateDescriptorList::const_iterator descriptorsBegin() const;
     TemplateDescriptorList::const_iterator descriptorsEnd() const;
 };
-//-----------------------------------------------------------------------------
+
 #endif // FR_SQLTEMPLATEMANAGER_H

@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef FR_STATEMENTHISTORYDIALOG_H
 #define FR_STATEMENTHISTORYDIALOG_H
 
@@ -30,7 +30,7 @@
 class StatementHistory;
 class wxStyledTextCtrl;
 class wxSplitter;
-//-----------------------------------------------------------------------------
+
 class StatementHistoryDialog : public BaseDialog
 {
 private:
@@ -71,5 +71,5 @@ public:
 
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 #endif

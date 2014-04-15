@@ -26,7 +26,7 @@
 
 #include "metadata/metadataitem.h"
 #include "metadata/MetadataItemVisitor.h"
-//-----------------------------------------------------------------------------
+
 class HtmlHeaderMetadataItemVisitor: public MetadataItemVisitor
 {
 public:
@@ -57,5 +57,5 @@ private:
     void addDependencies() { titlesM.push_back(wxT("Dependencies")); };
     void addDDL()          { titlesM.push_back(wxT("DDL")); };
 };
-//-----------------------------------------------------------------------------
+
 #endif // FR_HTMLHEADERMETADATAITEMVISITOR_H

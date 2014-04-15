@@ -36,7 +36,7 @@
 #include "metadata/database.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/table.h"
-//-----------------------------------------------------------------------------
+
 bool Constraint::isSystem() const
 {
     Table* t = getTable();
@@ -45,12 +45,12 @@ bool Constraint::isSystem() const
     else
         return false;
 }
-//-----------------------------------------------------------------------------
+
 const wxString Constraint::getTypeName() const
 {
     return wxT("CONSTRAINT");
 }
-//-----------------------------------------------------------------------------
+
 wxString ColumnConstraint::getColumnList(const wxString& separator,
     const wxString& suffix) const
 {
@@ -63,13 +63,13 @@ wxString ColumnConstraint::getColumnList(const wxString& separator,
     }
     return result;
 };
-//-----------------------------------------------------------------------------
+
 bool ColumnConstraint::hasColumn(const wxString& column) const
 {
     return columnsM.end() != std::find(columnsM.begin(), columnsM.end(),
         column);
 }
-//-----------------------------------------------------------------------------
+
 wxString ForeignKey::getReferencedColumnList() const
 {
     wxString result;
@@ -82,7 +82,7 @@ wxString ForeignKey::getReferencedColumnList() const
     }
     return result;
 };
-//-----------------------------------------------------------------------------
+
 wxString ForeignKey::getJoin(bool quoted) const
 {
     Identifier reftab(referencedTableM);
@@ -103,22 +103,22 @@ wxString ForeignKey::getJoin(bool quoted) const
     }
     return result;
 }
-//-----------------------------------------------------------------------------
+
 void ForeignKey::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitForeignKey(*this);
 }
-//-----------------------------------------------------------------------------
+
 void UniqueConstraint::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitUniqueConstraint(*this);
 }
-//-----------------------------------------------------------------------------
+
 void PrimaryKeyConstraint::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitPrimaryKeyConstraint(*this);
 }
-//-----------------------------------------------------------------------------
+
 Table* Constraint::getTable() const
 {
     MetadataItem* m = getParent();
@@ -130,4 +130,4 @@ Table* Constraint::getTable() const
     }
     return 0;
 }
-//-----------------------------------------------------------------------------
+

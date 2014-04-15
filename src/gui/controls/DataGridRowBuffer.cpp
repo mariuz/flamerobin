@@ -31,7 +31,7 @@
 #endif
 
 #include "gui/controls/DataGridRowBuffer.h"
-//-----------------------------------------------------------------------------
+
 DataGridRowBuffer::DataGridRowBuffer(unsigned fieldCount)
 {
     isModifiedM = 0;
@@ -45,7 +45,7 @@ DataGridRowBuffer::DataGridRowBuffer(unsigned fieldCount)
     initValue.isNull = true;
     fieldAttrM.resize(fieldCount, initValue);
 }
-//-----------------------------------------------------------------------------
+
 DataGridRowBuffer::DataGridRowBuffer(const DataGridRowBuffer* other)
 {
     fieldAttrM = other->fieldAttrM;
@@ -58,21 +58,21 @@ DataGridRowBuffer::DataGridRowBuffer(const DataGridRowBuffer* other)
     isDeletableIsSetM = other->isDeletableIsSetM;
     isDeletableM = other->isDeletableM;
 }
-//-----------------------------------------------------------------------------
+
 wxString DataGridRowBuffer::getString(unsigned index)
 {
     if (index >= stringsM.size())
         return wxEmptyString;
     return stringsM[index];
 }
-//-----------------------------------------------------------------------------
+
 IBPP::Blob* DataGridRowBuffer::getBlob(unsigned index)
 {
     if (index >= blobsM.size())
         return 0;
     return &(blobsM[index]);
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridRowBuffer::getValue(unsigned offset, double& value)
 {
     if (offset + sizeof(double) > dataM.size())
@@ -80,7 +80,7 @@ bool DataGridRowBuffer::getValue(unsigned offset, double& value)
     value = *((double*)&dataM[offset]);
     return true;
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridRowBuffer::getValue(unsigned offset, float& value)
 {
     if (offset + sizeof(float) > dataM.size())
@@ -88,7 +88,7 @@ bool DataGridRowBuffer::getValue(unsigned offset, float& value)
     value = *((float*)&dataM[offset]);
     return true;
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridRowBuffer::getValue(unsigned offset, int& value)
 {
     if (offset + sizeof(int) > dataM.size())
@@ -96,7 +96,7 @@ bool DataGridRowBuffer::getValue(unsigned offset, int& value)
     value = *((int*)&dataM[offset]);
     return true;
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridRowBuffer::getValue(unsigned offset, int64_t& value)
 {
     if (offset + sizeof(int64_t) > dataM.size())
@@ -104,7 +104,7 @@ bool DataGridRowBuffer::getValue(unsigned offset, int64_t& value)
     value = *((int64_t*)&dataM[offset]);
     return true;
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridRowBuffer::getValue(unsigned offset, IBPP::DBKey& value,
     unsigned size)
 {
@@ -113,23 +113,23 @@ bool DataGridRowBuffer::getValue(unsigned offset, IBPP::DBKey& value,
     value.SetKey(&dataM[offset], size);
     return true;
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridRowBuffer::isFieldNA(unsigned /*num*/)
 {
     return false;
 }
-//-----------------------------------------------------------------------------
+
 void DataGridRowBuffer::setFieldNA(unsigned /* num */, bool /* isNA */)
 {
     // should never happen
     invalidateIsDeletable();
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridRowBuffer::isFieldNull(unsigned num)
 {
     return (num < fieldAttrM.size() && fieldAttrM[num].isNull);
 }
-//-----------------------------------------------------------------------------
+
 void DataGridRowBuffer::setFieldNull(unsigned num, bool isNull)
 {
     if (num < fieldAttrM.size())
@@ -138,12 +138,12 @@ void DataGridRowBuffer::setFieldNull(unsigned num, bool isNull)
         invalidateIsDeletable();
     }
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridRowBuffer::isStringLoaded(unsigned num)
 {
     return (num < fieldAttrM.size() && fieldAttrM[num].isStringLoaded);
 }
-//-----------------------------------------------------------------------------
+
 void DataGridRowBuffer::setStringLoaded(unsigned num, bool isLoaded)
 {
     if (num < fieldAttrM.size())
@@ -152,7 +152,7 @@ void DataGridRowBuffer::setStringLoaded(unsigned num, bool isLoaded)
         invalidateIsDeletable();
     }
 }
-//-----------------------------------------------------------------------------
+
 void DataGridRowBuffer::setString(unsigned num, const wxString& value)
 {
     if (num >= stringsM.size())
@@ -161,7 +161,7 @@ void DataGridRowBuffer::setString(unsigned num, const wxString& value)
     fieldAttrM[num].isStringLoaded = true;
     invalidateIsDeletable();
 }
-//-----------------------------------------------------------------------------
+
 void DataGridRowBuffer::setBlob(unsigned num, IBPP::Blob value)
 {
     if (num >= blobsM.size())
@@ -169,7 +169,7 @@ void DataGridRowBuffer::setBlob(unsigned num, IBPP::Blob value)
     blobsM[num] = value;
     invalidateIsDeletable();
 }
-//-----------------------------------------------------------------------------
+
 void DataGridRowBuffer::setValue(unsigned offset, double value)
 {
     if (offset + sizeof(double) > dataM.size())
@@ -177,7 +177,7 @@ void DataGridRowBuffer::setValue(unsigned offset, double value)
     *((double*)&dataM[offset]) = value;
     invalidateIsDeletable();
 }
-//-----------------------------------------------------------------------------
+
 void DataGridRowBuffer::setValue(unsigned offset, float value)
 {
     if (offset + sizeof(float) > dataM.size())
@@ -185,7 +185,7 @@ void DataGridRowBuffer::setValue(unsigned offset, float value)
     *((float*)&dataM[offset]) = value;
     invalidateIsDeletable();
 }
-//-----------------------------------------------------------------------------
+
 void DataGridRowBuffer::setValue(unsigned offset, int value)
 {
     if (offset + sizeof(int) > dataM.size())
@@ -193,7 +193,7 @@ void DataGridRowBuffer::setValue(unsigned offset, int value)
     *((int*)&dataM[offset]) = value;
     invalidateIsDeletable();
 }
-//-----------------------------------------------------------------------------
+
 void DataGridRowBuffer::setValue(unsigned offset, int64_t value)
 {
     if (offset + sizeof(int64_t) > dataM.size())
@@ -201,7 +201,7 @@ void DataGridRowBuffer::setValue(unsigned offset, int64_t value)
     *((int64_t*)&dataM[offset]) = value;
     invalidateIsDeletable();
 }
-//-----------------------------------------------------------------------------
+
 void DataGridRowBuffer::setValue(unsigned offset, IBPP::DBKey value)
 {
     if (offset + value.Size() > dataM.size())
@@ -209,77 +209,77 @@ void DataGridRowBuffer::setValue(unsigned offset, IBPP::DBKey value)
     value.GetKey(&dataM[offset], value.Size());
     invalidateIsDeletable();
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridRowBuffer::isInserted()
 {
     return false;
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridRowBuffer::isFieldModified(unsigned /*num*/)
 {
     // TODO: maintain on a per-field basis
     return isModifiedM != 0;
 }
-//-----------------------------------------------------------------------------
+
 void DataGridRowBuffer::setIsModified(bool value)
 {
     isModifiedM = (value) ? 1 : 0;
 }
-//-----------------------------------------------------------------------------
+
 void DataGridRowBuffer::invalidateIsDeletable()
 {
     isDeletableIsSetM = 0;
     isDeletableM = 0;
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridRowBuffer::isDeletable()
 {
     wxASSERT(isDeletableIsSetM);
     return isDeletableM != 0;
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridRowBuffer::isDeletableIsSet()
 {
     return isDeletableIsSetM != 0;
 }
-//-----------------------------------------------------------------------------
+
 void DataGridRowBuffer::setIsDeletable(bool value)
 {
     isDeletableIsSetM = 1;
     isDeletableM = value;
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridRowBuffer::isDeleted()
 {
     return isDeletedM != 0;
 }
-//-----------------------------------------------------------------------------
+
 void DataGridRowBuffer::setIsDeleted(bool value)
 {
     isDeletedM = (value) ? 1 : 0;
 }
-//-----------------------------------------------------------------------------
+
 InsertedGridRowBuffer::InsertedGridRowBuffer(unsigned fieldCount)
     :DataGridRowBuffer(fieldCount)
 {
 }
-//-----------------------------------------------------------------------------
+
 InsertedGridRowBuffer::InsertedGridRowBuffer(const InsertedGridRowBuffer* b2)
     :DataGridRowBuffer(b2)
 {
     naFieldsM = b2->naFieldsM;
 }
-//-----------------------------------------------------------------------------
+
 bool InsertedGridRowBuffer::isInserted()
 {
     return true;
 }
-//-----------------------------------------------------------------------------
+
 bool InsertedGridRowBuffer::isFieldNA(unsigned num)
 {
     return (num < naFieldsM.size() && naFieldsM[num]);
 }
-//-----------------------------------------------------------------------------
+
 void InsertedGridRowBuffer::setFieldNA(unsigned num, bool isNA)
 {
     if (num < naFieldsM.size())
@@ -291,4 +291,4 @@ void InsertedGridRowBuffer::setFieldNA(unsigned num, bool isNA)
     }
     invalidateIsDeletable();
 }
-//-----------------------------------------------------------------------------
+

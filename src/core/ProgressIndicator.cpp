@@ -31,18 +31,18 @@
 #endif
 
 #include "core/ProgressIndicator.h"
-//-----------------------------------------------------------------------------
+
 CancelProgressException::CancelProgressException()
 {
 }
-//-----------------------------------------------------------------------------
+
 ProgressIndicator::~ProgressIndicator()
 {
 }
-//-----------------------------------------------------------------------------
+
 void checkProgressIndicatorCanceled(ProgressIndicator* progressIndicator)
 {
     if (progressIndicator && progressIndicator->isCanceled())
         throw CancelProgressException();
 }
-//-----------------------------------------------------------------------------
+

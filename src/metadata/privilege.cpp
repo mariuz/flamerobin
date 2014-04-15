@@ -36,7 +36,7 @@
 #include "metadata/relation.h"
 #include "metadata/role.h"
 
-//-----------------------------------------------------------------------------
+
 PrivilegeItem::PrivilegeItem(const wxString& grantorName,
     bool withGrantOption, const wxString& fieldName)
     :grantor(grantorName), grantOption(withGrantOption)
@@ -44,14 +44,14 @@ PrivilegeItem::PrivilegeItem(const wxString& grantorName,
     if (!fieldName.IsEmpty())
         columns.push_back(fieldName);
 }
-//-----------------------------------------------------------------------------
+
 Privilege::Privilege(MetadataItem *parent, const wxString& grantee,
     int granteeType)
     : parentObjectM(parent), granteeM(grantee), granteeTypeM(granteeType),
      ProcessableObject()
 {
 }
-//-----------------------------------------------------------------------------
+
 void Privilege::addPrivilege(char privilege, const wxString& grantor,
     bool withGrantOption, const wxString& field)
 {
@@ -93,7 +93,7 @@ void Privilege::addPrivilege(char privilege, const wxString& grantor,
     PrivilegeItem pi(grantor, withGrantOption, field);
     privilegeItemsM.insert(std::pair<wxString,PrivilegeItem>(p,pi));
 }
-//-----------------------------------------------------------------------------
+
 wxString granteeTypeToString(int type)
 {
     if (type == 1)
@@ -106,7 +106,7 @@ wxString granteeTypeToString(int type)
         return wxT("ROLE");
     return wxEmptyString;
 }
-//-----------------------------------------------------------------------------
+
 wxString Privilege::getSql(bool withGrantOption) const
 {
     wxString ret;
@@ -149,7 +149,7 @@ wxString Privilege::getSql(bool withGrantOption) const
     ret += wxT(";\n");
     return ret;
 }
-//-----------------------------------------------------------------------------
+
 wxString Privilege::getSql() const
 {
     Role *r = dynamic_cast<Role *>(parentObjectM);
@@ -169,7 +169,7 @@ wxString Privilege::getSql() const
     ret += wxT(";\n");
     return ret;
 }
-//-----------------------------------------------------------------------------
+
 wxString Privilege::getGrantee() const
 {
     wxString gt = granteeTypeToString(granteeTypeM);
@@ -177,7 +177,7 @@ wxString Privilege::getGrantee() const
         gt += wxT(" ");
     return gt + granteeM;
 }
-//-----------------------------------------------------------------------------
+
 void Privilege::getPrivilegeItems(const wxString& type,
     std::vector<PrivilegeItem>& list) const
 {
@@ -188,4 +188,4 @@ void Privilege::getPrivilegeItems(const wxString& type,
         list.push_back((*it).second);
     }
 }
-//-----------------------------------------------------------------------------
+

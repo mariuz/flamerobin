@@ -35,7 +35,7 @@
 
 #include "core/FRError.h"
 #include "core/StringUtils.h"
-//-----------------------------------------------------------------------------
+
 std::string wx2std(const wxString& input, wxMBConv* conv)
 {
     if (input.empty())
@@ -49,7 +49,7 @@ std::string wx2std(const wxString& input, wxMBConv* conv)
         return "";
     return std::string(buf);
 }
-//-----------------------------------------------------------------------------
+
 wxString std2wx(const std::string& input, wxMBConv* conv)
 {
     if (input.empty())
@@ -58,7 +58,7 @@ wxString std2wx(const std::string& input, wxMBConv* conv)
         conv = wxConvCurrent;
     return wxString(input.c_str(), *conv);
 }
-//-----------------------------------------------------------------------------
+
 wxString std2wxIdentifier(const std::string& input, wxMBConv* conv)
 {
     if (input.empty())
@@ -70,7 +70,7 @@ wxString std2wxIdentifier(const std::string& input, wxMBConv* conv)
     return wxString(input.c_str(), *conv,
         (last == std::string::npos) ? std::string::npos : last + 1);
 }
-//-----------------------------------------------------------------------------
+
 wxString getHtmlCharset()
 {
 #if !wxUSE_UNICODE
@@ -115,7 +115,7 @@ wxString getHtmlCharset()
 #endif
     return wxT("UTF-8");
 }
-//-----------------------------------------------------------------------------
+
 wxString escapeHtmlChars(const wxString& input, bool processNewlines)
 {
     if (input.empty())
@@ -160,7 +160,7 @@ wxString escapeHtmlChars(const wxString& input, bool processNewlines)
     }
     return result;
 }
-//-----------------------------------------------------------------------------
+
 wxString escapeXmlChars(const wxString& input)
 {
     if (input.empty())
@@ -200,7 +200,7 @@ wxString escapeXmlChars(const wxString& input)
     }
     return result;
 }
-//-----------------------------------------------------------------------------
+
 wxString wxArrayToString(const wxArrayString& arrayStr, const wxString& delimiter)
 {
     wxString result;
@@ -214,7 +214,7 @@ wxString wxArrayToString(const wxArrayString& arrayStr, const wxString& delimite
     }
     return result;
 }
-//-----------------------------------------------------------------------------
+
 wxString loadEntireFile(const wxFileName& filename)
 {
     if (!filename.FileExists())
@@ -241,7 +241,7 @@ wxString loadEntireFile(const wxFileName& filename)
     filex.close();
     return s;
 }
-//-----------------------------------------------------------------------------
+
 wxString wrapText(const wxString& text, size_t maxWidth, size_t indent)
 {
     if (text.Length() <= maxWidth)
@@ -325,4 +325,4 @@ wxString wrapText(const wxString& text, size_t maxWidth, size_t indent)
     }
     return wrappedText;
 }
-//-----------------------------------------------------------------------------
+

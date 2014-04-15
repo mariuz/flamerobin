@@ -20,7 +20,7 @@
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//-----------------------------------------------------------------------------
+
 
 #ifndef FR_PROGRESSDIALOG_H
 #define FR_PROGRESSDIALOG_H
@@ -31,7 +31,7 @@
 
 #include "core/ProgressIndicator.h"
 #include "gui/BaseDialog.h"
-//-----------------------------------------------------------------------------
+
 class ProgressDialog: public BaseDialog, public ProgressIndicator
 {
 private:
@@ -86,5 +86,5 @@ private:
 
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 #endif // FR_PROGRESSDIALOG_H

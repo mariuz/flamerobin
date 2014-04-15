@@ -23,18 +23,18 @@
 
 #ifndef FR_GUIURIHANDLERHELPER_H
 #define FR_GUIURIHANDLERHELPER_H
-//-----------------------------------------------------------------------------
+
 
 #include <wx/wx.h>
 
 #include "core/URIProcessor.h"
 
-//-----------------------------------------------------------------------------
+
 // URI parsing helper for GUI-related URIHandlers.
 class GUIURIHandlerHelper
 {
 protected:
     wxWindow* getParentWindow(const URI& uri);
 };
-//-----------------------------------------------------------------------------
+
 #endif // FR_GUIURIHANDLERHELPER_H

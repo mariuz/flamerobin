@@ -22,7 +22,7 @@
 */
 #ifndef FR_DATAGENERATORFRAME_H
 #define FR_DATAGENERATORFRAME_H
-//-----------------------------------------------------------------------------
+
 #include <wx/wx.h>
 #include <wx/spinctrl.h>
 #include <wx/splitter.h>
@@ -40,7 +40,7 @@ class Column;
 class Table;
 class DBHTreeControl;
 class GeneratorSettings;
-//-----------------------------------------------------------------------------
+
 class DataGeneratorFrame: public BaseFrame, public Observer
 {
     DECLARE_EVENT_TABLE()
@@ -131,5 +131,5 @@ public:
     DataGeneratorFrame(wxWindow* parent, Database* db);
     ~DataGeneratorFrame();
 };
-//-----------------------------------------------------------------------------
+
 #endif

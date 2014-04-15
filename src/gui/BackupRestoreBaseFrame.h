@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef BACKUPRESTOREBASEFRAME_H
 #define BACKUPRESTOREBASEFRAME_H
 
@@ -37,7 +37,7 @@
 
 class FileTextControl;
 class LogTextControl;
-//-----------------------------------------------------------------------------
+
 class BackupRestoreBaseFrame: public BaseFrame, public Observer
 {
 public:
@@ -115,5 +115,5 @@ private:
 
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 #endif // BACKUPRESTOREBASEFRAME_H

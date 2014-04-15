@@ -40,7 +40,7 @@
 #include "metadata/exception.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "sql/StatementBuilder.h"
-//-----------------------------------------------------------------------------
+
 /*static*/
 std::string Exception::getLoadStatement(bool list)
 {
@@ -59,24 +59,24 @@ std::string Exception::getLoadStatement(bool list)
         stmt += " where rdb$exception_name = ?";
     return stmt;
 }
-//-----------------------------------------------------------------------------
+
 Exception::Exception(DatabasePtr database, const wxString& name)
     : MetadataItem(ntException, database.get(), name), numberM(0)
 {
 }
-//-----------------------------------------------------------------------------
+
 wxString Exception::getMessage()
 {
     ensurePropertiesLoaded();
     return messageM;
 }
-//-----------------------------------------------------------------------------
+
 int Exception::getNumber()
 {
     ensurePropertiesLoaded();
     return numberM;
 }
-//-----------------------------------------------------------------------------
+
 void Exception::loadProperties()
 {
     setPropertiesLoaded(false);
@@ -94,7 +94,7 @@ void Exception::loadProperties()
 
     loadProperties(st1, converter);
 }
-//-----------------------------------------------------------------------------
+
 void Exception::loadProperties(IBPP::Statement& statement, wxMBConv* converter)
 {
     setPropertiesLoaded(false);
@@ -108,7 +108,7 @@ void Exception::loadProperties(IBPP::Statement& statement, wxMBConv* converter)
 
     setPropertiesLoaded(true);
 }
-//-----------------------------------------------------------------------------
+
 wxString Exception::getAlterSql()
 {
     wxString message = getMessage();
@@ -119,28 +119,28 @@ wxString Exception::getAlterSql()
         << message << wxT("';");
     return sb;
 }
-//-----------------------------------------------------------------------------
+
 const wxString Exception::getTypeName() const
 {
     return wxT("EXCEPTION");
 }
-//-----------------------------------------------------------------------------
+
 void Exception::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitException(*this);
 }
-//-----------------------------------------------------------------------------
+
 // Exceptions collection
 Exceptions::Exceptions(DatabasePtr database)
     : MetadataCollection<Exception>(ntExceptions, database, _("Exceptions"))
 {
 }
-//-----------------------------------------------------------------------------
+
 void Exceptions::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitExceptions(*this);
 }
-//-----------------------------------------------------------------------------
+
 void Exceptions::load(ProgressIndicator* progressIndicator)
 {
     DatabasePtr db = getDatabase();
@@ -176,14 +176,14 @@ void Exceptions::load(ProgressIndicator* progressIndicator)
 
     setItems(exceptions);
 }
-//-----------------------------------------------------------------------------
+
 void Exceptions::loadChildren()
 {
     load(0);
 }
-//-----------------------------------------------------------------------------
+
 const wxString Exceptions::getTypeName() const
 {
     return wxT("EXCEPTION_COLLECTION");
 }
-//-----------------------------------------------------------------------------
+

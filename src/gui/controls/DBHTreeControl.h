@@ -28,7 +28,7 @@
 #include <wx/treectrl.h>
 
 class MetadataItem;
-//-----------------------------------------------------------------------------
+
 class DBHTreeControl: public wxTreeCtrl
 {
 private:
@@ -72,5 +72,5 @@ public:
 
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 #endif // FR_DBHTREECONTROL_H

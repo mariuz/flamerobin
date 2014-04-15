@@ -26,7 +26,7 @@
 
 #include "metadata/MetadataClasses.h"
 #include "metadata/MetadataItemVisitor.h"
-//-----------------------------------------------------------------------------
+
 class LoadDescriptionVisitor : public MetadataItemVisitor
 {
 private:
@@ -53,7 +53,7 @@ public:
     bool descriptionAvailable() const;
     wxString getDescription() const;
 };
-//-----------------------------------------------------------------------------
+
 class SaveDescriptionVisitor : public MetadataItemVisitor
 {
 private:
@@ -76,5 +76,5 @@ public:
     virtual void visitRole(Role& role);
     virtual void visitTrigger(Trigger& trigger);
 };
-//-----------------------------------------------------------------------------
+
 #endif // FR_DESCRIPTIONVISITOR_H

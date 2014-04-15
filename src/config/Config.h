@@ -30,17 +30,17 @@
 
 #include "core/Observer.h"
 #include "core/Subject.h"
-//-----------------------------------------------------------------------------
+
 enum StorageGranularity
 {
     sgFrame,        // Store settings per frame type.
     sgObjectType,   // Store settings per object type.
     sgObject,       // Store settings per object.
 };
-//-----------------------------------------------------------------------------
+
 // forward declarations
 class wxFileConfig;
-//-----------------------------------------------------------------------------
+
 //! Do not instantiate objects of this class. Use config() function (see below).
 
 #if defined(__UNIX__) && !defined(__WXMAC_OSX__)
@@ -117,7 +117,7 @@ public:
     bool setValue(const wxString& key, StorageGranularity value);
     bool setValue(const wxString& key, const wxArrayString& value);
 };
-//-----------------------------------------------------------------------------
+
 //! Class used to contain all FlameRobin and database configuration info sets.
 class FRConfig: public Config
 {
@@ -148,9 +148,9 @@ public:
     // precedence to any existing user override.
     const wxString getSysTemplateFileName(const wxString& templateName);
 };
-//-----------------------------------------------------------------------------
+
 FRConfig& config();
-//-----------------------------------------------------------------------------
+
 // class ConfigCache
 // used to cache settings in a Config instance, observes the instance to
 // reload the information when necessary (reloads on-demand)
@@ -165,5 +165,5 @@ protected:
 public:
     ConfigCache(Config& config);
 };
-//-----------------------------------------------------------------------------
+
 #endif

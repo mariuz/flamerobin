@@ -21,12 +21,12 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef CONTROLUTILS_H
 #define CONTROLUTILS_H
 
 #include <wx/wx.h>
-//-----------------------------------------------------------------------------
+
 wxPoint calcContextMenuPosition(const wxPoint& eventPos, wxControl* control);
-//-----------------------------------------------------------------------------
+
 #endif

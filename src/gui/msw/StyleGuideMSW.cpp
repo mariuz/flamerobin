@@ -38,7 +38,7 @@
 #ifdef __GNUWIN32__
 #include "wx/msw/wrapwin.h" // for "windows.h"
 #endif
-//-----------------------------------------------------------------------------
+
 class StyleGuideMSW: public StyleGuide
 {
 private:
@@ -63,14 +63,14 @@ public:
     virtual int getRelatedControlMargin(wxOrientation orientation);
     virtual int getUnrelatedControlMargin(wxOrientation orientation);
 };
-//-----------------------------------------------------------------------------
+
 StyleGuideMSW::StyleGuideMSW()
 {
     dbuHorzM = 0;
     dbuVertM = 0;
     dbuValidM = false;
 }
-//-----------------------------------------------------------------------------
+
 void StyleGuideMSW::dbuNeeded()
 {
     if (!dbuValidM)
@@ -91,19 +91,19 @@ void StyleGuideMSW::dbuNeeded()
         dbuValidM = true;
     }
 }
-//-----------------------------------------------------------------------------
+
 int StyleGuideMSW::dbuToPixelHorz(int dbu)
 {
     dbuNeeded();
     return dbu * dbuHorzM / 4;
 }
-//-----------------------------------------------------------------------------
+
 int StyleGuideMSW::dbuToPixelVert(int dbu)
 {
     dbuNeeded();
     return dbu * dbuVertM / 8;
 }
-//-----------------------------------------------------------------------------
+
 wxSizer* StyleGuideMSW::createButtonSizer(wxButton* affirmativeButton,
     wxButton* negativeButton, wxButton* alternateButton)
 {
@@ -122,7 +122,7 @@ wxSizer* StyleGuideMSW::createButtonSizer(wxButton* affirmativeButton,
         sizer->Add(negativeButton);
     return sizer;
 }
-//-----------------------------------------------------------------------------
+
 int StyleGuideMSW::getBetweenButtonsMargin(wxOrientation orientation)
 {
     switch (orientation)
@@ -135,22 +135,22 @@ int StyleGuideMSW::getBetweenButtonsMargin(wxOrientation orientation)
             return 0;
     }
 }
-//-----------------------------------------------------------------------------
+
 int StyleGuideMSW::getBrowseButtonMargin()
 {
     return dbuToPixelHorz(1);
 }
-//-----------------------------------------------------------------------------
+
 int StyleGuideMSW::getCheckboxSpacing()
 {
     return dbuToPixelVert(3);
 }
-//-----------------------------------------------------------------------------
+
 int StyleGuideMSW::getControlLabelMargin()
 {
     return dbuToPixelHorz(3);
 }
-//-----------------------------------------------------------------------------
+
 int StyleGuideMSW::getDialogMargin(wxDirection direction)
 {
     switch (direction)
@@ -165,7 +165,7 @@ int StyleGuideMSW::getDialogMargin(wxDirection direction)
             return 0;
     }
 }
-//-----------------------------------------------------------------------------
+
 int StyleGuideMSW::getFrameMargin(wxDirection direction)
 {
     switch (direction)
@@ -180,17 +180,17 @@ int StyleGuideMSW::getFrameMargin(wxDirection direction)
             return 0;
     }
 }
-//-----------------------------------------------------------------------------
+
 int StyleGuideMSW::getMessageBoxIconMargin()
 {
     return dbuToPixelHorz(12);
 }
-//-----------------------------------------------------------------------------
+
 int StyleGuideMSW::getMessageBoxBetweenTextMargin()
 {
     return dbuToPixelVert(8);
 }
-//-----------------------------------------------------------------------------
+
 int StyleGuideMSW::getRelatedControlMargin(wxOrientation orientation)
 {
     switch (orientation)
@@ -203,7 +203,7 @@ int StyleGuideMSW::getRelatedControlMargin(wxOrientation orientation)
             return 0;
     }
 }
-//-----------------------------------------------------------------------------
+
 int StyleGuideMSW::getUnrelatedControlMargin(wxOrientation orientation)
 {
     switch (orientation)
@@ -216,10 +216,10 @@ int StyleGuideMSW::getUnrelatedControlMargin(wxOrientation orientation)
             return 0;
     }
 }
-//-----------------------------------------------------------------------------
+
 StyleGuide& styleguide()
 {
     static StyleGuideMSW guide;
     return guide;
 }
-//-----------------------------------------------------------------------------
+

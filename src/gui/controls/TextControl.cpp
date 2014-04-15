@@ -33,7 +33,7 @@
 #include "gui/CommandManager.h"
 #include "gui/controls/ControlUtils.h"
 #include "gui/controls/TextControl.h"
-//-----------------------------------------------------------------------------
+
 TextControl::TextControl(wxWindow *parent, wxWindowID id)
     : wxStyledTextCtrl(parent, id, wxDefaultPosition, wxDefaultSize,
         wxBORDER_THEME)
@@ -45,7 +45,7 @@ TextControl::TextControl(wxWindow *parent, wxWindowID id)
     SetMarginWidth(1, 0);
     SetMarginWidth(0, 0);
 }
-//-----------------------------------------------------------------------------
+
 void TextControl::resetStyles()
 {
     StyleClearAll();
@@ -62,7 +62,7 @@ void TextControl::resetStyles()
     // Make all other styles use these default colours
     StyleClearAll();
 }
-//-----------------------------------------------------------------------------
+
 //! event handling
 BEGIN_EVENT_TABLE(TextControl, wxStyledTextCtrl)
     EVT_CONTEXT_MENU(TextControl::OnContextMenu)
@@ -81,72 +81,72 @@ BEGIN_EVENT_TABLE(TextControl, wxStyledTextCtrl)
     EVT_UPDATE_UI(wxID_PASTE, TextControl::OnCommandUpdatePaste)
     EVT_UPDATE_UI(wxID_DELETE, TextControl::OnCommandUpdateDelete)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 void TextControl::OnCommandUndo(wxCommandEvent& WXUNUSED(event))
 {
     Undo();
 }
-//-----------------------------------------------------------------------------
+
 void TextControl::OnCommandRedo(wxCommandEvent& WXUNUSED(event))
 {
     Redo();
 }
-//-----------------------------------------------------------------------------
+
 void TextControl::OnCommandCut(wxCommandEvent& WXUNUSED(event))
 {
     Cut();
 }
-//-----------------------------------------------------------------------------
+
 void TextControl::OnCommandCopy(wxCommandEvent& WXUNUSED(event))
 {
     Copy();
 }
-//-----------------------------------------------------------------------------
+
 void TextControl::OnCommandPaste(wxCommandEvent& WXUNUSED(event))
 {
     Paste();
 }
-//-----------------------------------------------------------------------------
+
 void TextControl::OnCommandDelete(wxCommandEvent& WXUNUSED(event))
 {
     Clear();
 }
-//-----------------------------------------------------------------------------
+
 void TextControl::OnCommandSelectAll(wxCommandEvent& WXUNUSED(event))
 {
     SelectAll();
 }
-//-----------------------------------------------------------------------------
+
 void TextControl::OnCommandUpdateUndo(wxUpdateUIEvent& event)
 {
     event.Enable(CanUndo());
 }
-//-----------------------------------------------------------------------------
+
 void TextControl::OnCommandUpdateRedo(wxUpdateUIEvent& event)
 {
     event.Enable(CanRedo());
 }
-//-----------------------------------------------------------------------------
+
 void TextControl::OnCommandUpdateCut(wxUpdateUIEvent& event)
 {
     event.Enable(!GetReadOnly() && GetSelectionStart() != GetSelectionEnd());
 }
-//-----------------------------------------------------------------------------
+
 void TextControl::OnCommandUpdateCopy(wxUpdateUIEvent& event)
 {
     event.Enable(GetSelectionStart() != GetSelectionEnd());
 }
-//-----------------------------------------------------------------------------
+
 void TextControl::OnCommandUpdatePaste(wxUpdateUIEvent& event)
 {
     event.Enable(!GetReadOnly());
 }
-//-----------------------------------------------------------------------------
+
 void TextControl::OnCommandUpdateDelete(wxUpdateUIEvent& event)
 {
     event.Enable(!GetReadOnly() && GetSelectionStart() != GetSelectionEnd());
 }
-//-----------------------------------------------------------------------------
+
 void TextControl::OnContextMenu(wxContextMenuEvent& event)
 {
     SetFocus();
@@ -166,4 +166,4 @@ void TextControl::OnContextMenu(wxContextMenuEvent& event)
 
     PopupMenu(&m, calcContextMenuPosition(event.GetPosition(), this));
 }
-//-----------------------------------------------------------------------------
+

@@ -35,7 +35,7 @@
 #include "core/StringUtils.h"
 #include "gui/controls/PrintableHtmlWindow.h"
 #include "gui/SimpleHtmlFrame.h"
-//-----------------------------------------------------------------------------
+
 bool showHtmlFile(wxWindow* parent, const wxFileName& fileName)
 {
     if (!fileName.FileExists())
@@ -57,7 +57,7 @@ bool showHtmlFile(wxWindow* parent, const wxFileName& fileName)
     shf->Show();
     return true;
 }
-//-----------------------------------------------------------------------------
+
 SimpleHtmlFrame::SimpleHtmlFrame(wxWindow* parent, const wxFileName& fileName)
     : BaseFrame(parent, -1, wxEmptyString)
 {
@@ -75,17 +75,17 @@ SimpleHtmlFrame::SimpleHtmlFrame(wxWindow* parent, const wxFileName& fileName)
 
     SetIcon(wxArtProvider::GetIcon(ART_FlameRobin, wxART_FRAME_ICON));
 }
-//-----------------------------------------------------------------------------
+
 const wxRect SimpleHtmlFrame::getDefaultRect() const
 {
     return wxRect(-1, -1, 600, 420);
 }
-//-----------------------------------------------------------------------------
+
 const wxString SimpleHtmlFrame::getName() const
 {
     return wxT("SimpleHtmlFrameFrame");
 }
-//-----------------------------------------------------------------------------
+
 const wxString SimpleHtmlFrame::getStorageName() const
 {
     wxString name(getName());
@@ -93,7 +93,7 @@ const wxString SimpleHtmlFrame::getStorageName() const
         name += Config::pathSeparator + fileNameM;
     return name;
 }
-//-----------------------------------------------------------------------------
+
 wxString SimpleHtmlFrame::getFrameId(const wxFileName& fileName)
 {
     if (fileName.HasName())
@@ -101,7 +101,7 @@ wxString SimpleHtmlFrame::getFrameId(const wxFileName& fileName)
     else
         return wxEmptyString;
 }
-//-----------------------------------------------------------------------------
+
 SimpleHtmlFrame* SimpleHtmlFrame::findFrameFor(const wxFileName& fileName)
 {
     BaseFrame* bf = frameFromIdString(getFrameId(fileName));
@@ -109,4 +109,4 @@ SimpleHtmlFrame* SimpleHtmlFrame::findFrameFor(const wxFileName& fileName)
         return 0;
     return dynamic_cast<SimpleHtmlFrame*>(bf);
 }
-//-----------------------------------------------------------------------------
+

@@ -38,13 +38,13 @@
 #include "metadata/database.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/role.h"
-//-----------------------------------------------------------------------------
+
 Role::Role(DatabasePtr database, const wxString& name)
     : MetadataItem(hasSystemPrefix(name) ? ntSysRole : ntRole, database.get(),
         name)
 {
 }
-//-----------------------------------------------------------------------------
+
 std::vector<Privilege>* Role::getPrivileges()
 {
     // load privileges from database and return the pointer to collection
@@ -94,7 +94,7 @@ std::vector<Privilege>* Role::getPrivileges()
     }
     return &privilegesM;
 }
-//-----------------------------------------------------------------------------
+
 wxString Role::getOwner()
 {
     DatabasePtr db = getDatabase();
@@ -110,33 +110,33 @@ wxString Role::getOwner()
     st1->Get(1, name);
     return std2wx(name).Trim();
 }
-//-----------------------------------------------------------------------------
+
 const wxString Role::getTypeName() const
 {
     return wxT("ROLE");
 }
-//-----------------------------------------------------------------------------
+
 void Role::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitRole(*this);
 }
-//-----------------------------------------------------------------------------
+
 // System roles collection
 SysRoles::SysRoles(DatabasePtr database)
     : MetadataCollection<Role>(ntSysRoles, database, _("System roles"))
 {
 }
-//-----------------------------------------------------------------------------
+
 void SysRoles::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitSysRoles(*this);
 }
-//-----------------------------------------------------------------------------
+
 bool SysRoles::isSystem() const
 {
     return true;
 }
-//-----------------------------------------------------------------------------
+
 void SysRoles::load(ProgressIndicator* progressIndicator)
 {
     DatabasePtr db = getDatabase();
@@ -147,28 +147,28 @@ void SysRoles::load(ProgressIndicator* progressIndicator)
         setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
     }
 }
-//-----------------------------------------------------------------------------
+
 void SysRoles::loadChildren()
 {
     load(0);
 }
-//-----------------------------------------------------------------------------
+
 const wxString SysRoles::getTypeName() const
 {
     return wxT("SYSROLE_COLLECTION");
 }
-//-----------------------------------------------------------------------------
+
 // Roles collection
 Roles::Roles(DatabasePtr database)
     : MetadataCollection<Role>(ntRoles, database, _("Roles"))
 {
 }
-//-----------------------------------------------------------------------------
+
 void Roles::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitRoles(*this);
 }
-//-----------------------------------------------------------------------------
+
 void Roles::load(ProgressIndicator* progressIndicator)
 {
     wxString stmt = wxT("select rdb$role_name from rdb$roles");
@@ -178,14 +178,14 @@ void Roles::load(ProgressIndicator* progressIndicator)
     stmt += wxT(" order by 1");
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
-//-----------------------------------------------------------------------------
+
 void Roles::loadChildren()
 {
     load(0);
 }
-//-----------------------------------------------------------------------------
+
 const wxString Roles::getTypeName() const
 {
     return wxT("ROLE_COLLECTION");
 }
-//-----------------------------------------------------------------------------
+

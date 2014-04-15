@@ -20,7 +20,7 @@
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//-----------------------------------------------------------------------------
+
 
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
@@ -51,32 +51,32 @@
 
 // forward declaration to keep compilers happy
 void addIndex(std::vector<Index> *ix, wxString& sql, ColumnConstraint *cc);
-//-----------------------------------------------------------------------------
+
 CreateDDLVisitor::CreateDDLVisitor(ProgressIndicator* progressIndicator)
     : MetadataItemVisitor()
 {
     progressIndicatorM = progressIndicator;
 }
-//-----------------------------------------------------------------------------
+
 CreateDDLVisitor::~CreateDDLVisitor()
 {
 }
-//-----------------------------------------------------------------------------
+
 wxString CreateDDLVisitor::getSql() const
 {
     return sqlM;
 }
-//-----------------------------------------------------------------------------
+
 wxString CreateDDLVisitor::getPrefixSql() const
 {
     return preSqlM;
 }
-//-----------------------------------------------------------------------------
+
 wxString CreateDDLVisitor::getSuffixSql() const
 {
     return postSqlM + grantSqlM;
 }
-//-----------------------------------------------------------------------------
+
 // this one is not called from "outside", but from visit(Table) function
 void CreateDDLVisitor::visitColumn(Column& c)
 {
@@ -137,7 +137,7 @@ void CreateDDLVisitor::visitColumn(Column& c)
                  << wxT("';\n");
     }
 }
-//-----------------------------------------------------------------------------
+
 template <class C, class M>
 void iterateit(CreateDDLVisitor* v, C mc, ProgressIndicator* pi)
 {
@@ -162,7 +162,7 @@ void iterateit(CreateDDLVisitor* v, C mc, ProgressIndicator* pi)
         (*it)->acceptVisitor(v);
     }
 }
-//-----------------------------------------------------------------------------
+
 // build the sql script for entire database
 void CreateDDLVisitor::visitDatabase(Database& d)
 {
@@ -220,7 +220,7 @@ void CreateDDLVisitor::visitDatabase(Database& d)
         progressIndicatorM->initProgress(_("Done."), 1, 1, 2);
     }
 }
-//-----------------------------------------------------------------------------
+
 void CreateDDLVisitor::visitDomain(Domain& d)
 {
     preSqlM += wxT("CREATE DOMAIN ") + d.getQuotedName() + wxT("\n AS ") +
@@ -255,7 +255,7 @@ void CreateDDLVisitor::visitDomain(Domain& d)
     }
     sqlM = preSqlM + postSqlM;
 }
-//-----------------------------------------------------------------------------
+
 void CreateDDLVisitor::visitException(Exception& e)
 {
     wxString ms(e.getMessage());
@@ -275,7 +275,7 @@ void CreateDDLVisitor::visitException(Exception& e)
     }
     sqlM = preSqlM + postSqlM;
 }
-//-----------------------------------------------------------------------------
+
 void CreateDDLVisitor::visitForeignKey(ForeignKey& fk)
 {
     Identifier reftab(fk.getReferencedTable());
@@ -310,7 +310,7 @@ void CreateDDLVisitor::visitForeignKey(ForeignKey& fk)
     postSqlM += wxT(";\n");
     sqlM = postSqlM;
 }
-//-----------------------------------------------------------------------------
+
 void CreateDDLVisitor::visitFunction(Function& f)
 {
     preSqlM << f.getCreateSql() << wxT("\n");
@@ -326,7 +326,7 @@ void CreateDDLVisitor::visitFunction(Function& f)
     }
     sqlM = preSqlM + postSqlM;
 }
-//-----------------------------------------------------------------------------
+
 void CreateDDLVisitor::visitGenerator(Generator& g)
 {
     preSqlM += wxT("CREATE GENERATOR ") + g.getQuotedName() + wxT(";\n");
@@ -342,7 +342,7 @@ void CreateDDLVisitor::visitGenerator(Generator& g)
     }
     sqlM = preSqlM + postSqlM;
 }
-//-----------------------------------------------------------------------------
+
 void CreateDDLVisitor::visitPrimaryKeyConstraint(PrimaryKeyConstraint& pk)
 {
     wxString sql;
@@ -363,7 +363,7 @@ void CreateDDLVisitor::visitPrimaryKeyConstraint(PrimaryKeyConstraint& pk)
     sqlM = wxT("ALTER TABLE ") + pk.getTable()->getQuotedName() + wxT(" ADD") +
         sql + wxT(";\n");
 }
-//-----------------------------------------------------------------------------
+
 void CreateDDLVisitor::visitProcedure(Procedure& p)
 {
     wxString temp(p.getAlterSql());
@@ -416,7 +416,7 @@ void CreateDDLVisitor::visitProcedure(Procedure& p)
     temp.Replace(wxT("ALTER"), wxT("CREATE"), false);   // just first
     preSqlM << temp << wxT("\n");
 }
-//-----------------------------------------------------------------------------
+
 void CreateDDLVisitor::visitRole(Role& r)
 {
     preSqlM += wxT("CREATE ROLE ") + r.getQuotedName() + wxT(";\n");
@@ -443,7 +443,7 @@ void CreateDDLVisitor::visitRole(Role& r)
     }
     sqlM = preSqlM + wxT("\n") + postSqlM + grantSqlM;
 }
-//-----------------------------------------------------------------------------
+
 // used by visit(Table)
 void addIndex(std::vector<Index> *ix, wxString& sql, ColumnConstraint *cc)
 {
@@ -461,7 +461,7 @@ void addIndex(std::vector<Index> *ix, wxString& sql, ColumnConstraint *cc)
         }
     }
 }
-//-----------------------------------------------------------------------------
+
 void CreateDDLVisitor::visitTable(Table& t)
 {
     int type = t.getRelationType();
@@ -573,7 +573,7 @@ void CreateDDLVisitor::visitTable(Table& t)
 
     sqlM = preSqlM + wxT("\n") + postSqlM + grantSqlM;
 }
-//-----------------------------------------------------------------------------
+
 void CreateDDLVisitor::visitTrigger(Trigger& t)
 {
     preSqlM << wxT("SET TERM ^ ;\nCREATE TRIGGER ") << t.getQuotedName();
@@ -604,7 +604,7 @@ void CreateDDLVisitor::visitTrigger(Trigger& t)
     }
     sqlM = preSqlM + postSqlM;
 }
-//-----------------------------------------------------------------------------
+
 void CreateDDLVisitor::visitUniqueConstraint(UniqueConstraint& unq)
 {
     wxString sql;
@@ -624,7 +624,7 @@ void CreateDDLVisitor::visitUniqueConstraint(UniqueConstraint& unq)
     sqlM = wxT("ALTER TABLE ") + unq.getTable()->getQuotedName()
         + wxT(" ADD") + sql + wxT(";\n");
 }
-//-----------------------------------------------------------------------------
+
 void CreateDDLVisitor::visitView(View& v)
 {
     preSqlM << v.getCreateSql();
@@ -670,4 +670,4 @@ void CreateDDLVisitor::visitView(View& v)
 
     sqlM += preSqlM + wxT("\n") + postSqlM + grantSqlM;
 }
-//-----------------------------------------------------------------------------
+

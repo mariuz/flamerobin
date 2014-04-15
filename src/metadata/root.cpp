@@ -45,7 +45,7 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/root.h"
 #include "metadata/server.h"
-//-----------------------------------------------------------------------------
+
 static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)
 {
     for (wxXmlNode* n = node->GetChildren(); (n); n = n->GetNext())
@@ -58,13 +58,13 @@ static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)
     }
     return defvalue;
 }
-//-----------------------------------------------------------------------------
+
 Root::Root()
     : MetadataItem(ntRoot, 0, _("Home"))
 {
     setChildrenLoaded(true);
 }
-//-----------------------------------------------------------------------------
+
 void Root::disconnectAllDatabases()
 {
     for (ServerPtrs::iterator its = serversM.begin();
@@ -75,11 +75,11 @@ void Root::disconnectAllDatabases()
             boost::mem_fn(&Database::disconnect));
     }
 }
-//-----------------------------------------------------------------------------
+
 Root::~Root()
 {
 }
-//-----------------------------------------------------------------------------
+
 //! loads fr_databases.conf file and:
 //! creates server nodes, fills their properties
 //! creates database nodes for server nodes, fills their properties
@@ -124,7 +124,7 @@ bool Root::load()
     }
     return true;
 }
-//-----------------------------------------------------------------------------
+
 bool Root::parseDatabase(ServerPtr server, wxXmlNode* xmln)
 {
     wxASSERT(server);
@@ -168,7 +168,7 @@ bool Root::parseDatabase(ServerPtr server, wxXmlNode* xmln)
     database->getId();
     return true;
 }
-//-----------------------------------------------------------------------------
+
 bool Root::parseServer(wxXmlNode* xmln)
 {
     wxASSERT(xmln);
@@ -199,14 +199,14 @@ bool Root::parseServer(wxXmlNode* xmln)
     server->setChildrenLoaded(true);
     return true;
 }
-//-----------------------------------------------------------------------------
+
 ServerPtr Root::addServer()
 {
     ServerPtr server(new Server());
     addServer(server);
     return server;
 }
-//-----------------------------------------------------------------------------
+
 void Root::addServer(ServerPtr server)
 {
     if (server)
@@ -216,7 +216,7 @@ void Root::addServer(ServerPtr server)
         notifyObservers();
     }
 }
-//-----------------------------------------------------------------------------
+
 void Root::removeServer(ServerPtr server)
 {
     if (unregLocalDatabasesM == server)
@@ -230,7 +230,7 @@ void Root::removeServer(ServerPtr server)
         notifyObservers();
     }
 }
-//-----------------------------------------------------------------------------
+
 void Root::addUnregisteredDatabase(DatabasePtr database)
 {
     // on-demand creation of parent node for unregistered databases
@@ -248,7 +248,7 @@ void Root::addUnregisteredDatabase(DatabasePtr database)
 
     unregLocalDatabasesM->addDatabase(database);
 }
-//-----------------------------------------------------------------------------
+
 // helper for Root::save()
 void rsAddChildNode(wxXmlNode* parentNode, const wxString nodeName,
     const wxString nodeContent)
@@ -261,7 +261,7 @@ void rsAddChildNode(wxXmlNode* parentNode, const wxString nodeName,
             nodeContent));
     } 
 }
-//-----------------------------------------------------------------------------
+
 // browses the server nodes, and their database nodes
 // saves everything to fr_databases.conf file
 // returns: false if file cannot be opened for writing, true otherwise
@@ -320,12 +320,12 @@ bool Root::save()
     }
     return doc.Save(getFileName());
 }
-//-----------------------------------------------------------------------------
+
 ServerPtrs Root::getServers() const
 {
     return serversM;
 }
-//-----------------------------------------------------------------------------
+
 bool Root::getChildren(std::vector<MetadataItem *>& temp)
 {
     if (serversM.empty())
@@ -334,39 +334,39 @@ bool Root::getChildren(std::vector<MetadataItem *>& temp)
         boost::mem_fn(&ServerPtr::get));
     return !serversM.empty();
 }
-//-----------------------------------------------------------------------------
+
 void Root::lockChildren()
 {
     std::for_each(serversM.begin(), serversM.end(),
         boost::mem_fn(&Server::lockSubject));
 }
-//-----------------------------------------------------------------------------
+
 void Root::unlockChildren()
 {
     std::for_each(serversM.begin(), serversM.end(),
         boost::mem_fn(&Server::unlockSubject));
 }
-//-----------------------------------------------------------------------------
+
 const wxString Root::getItemPath() const
 {
     // Root is root, don't make the path strings any longer than needed.
     return wxT("");
 }
-//-----------------------------------------------------------------------------
+
 wxString Root::getFileName()
 {
     if (fileNameM.empty())
         fileNameM = config().getDBHFileName();
     return fileNameM;
 }
-//-----------------------------------------------------------------------------
+
 void Root::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitRoot(*this);
 }
-//-----------------------------------------------------------------------------
+
 const wxString Root::getTypeName() const
 {
     return wxT("ROOT");
 }
-//-----------------------------------------------------------------------------
+

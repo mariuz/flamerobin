@@ -33,7 +33,7 @@
 #include "gui/StyleGuide.h"
 #include "gui/UsernamePasswordDialog.h"
 #include "metadata/database.h"
-//-----------------------------------------------------------------------------
+
 UsernamePasswordDialog::UsernamePasswordDialog(wxWindow* parentWindow,
     const wxString& description, const wxString& username, int flags)
     : BaseDialog(parentWindow, wxID_ANY, _("Connection Credentials"))
@@ -69,21 +69,21 @@ UsernamePasswordDialog::UsernamePasswordDialog(wxWindow* parentWindow,
     Connect(wxEVT_COMMAND_TEXT_UPDATED,
         wxCommandEventHandler(UsernamePasswordDialog::OnSettingsChange));
 }
-//-----------------------------------------------------------------------------
+
 wxString UsernamePasswordDialog::getUsername()
 {
     if (radioTrustedUserM->GetValue())
         return wxEmptyString;
     return textUsernameM->GetValue();
 }
-//-----------------------------------------------------------------------------
+
 wxString UsernamePasswordDialog::getPassword()
 {
     if (radioTrustedUserM->GetValue())
         return wxEmptyString;
     return textPasswordM->GetValue();
 }
-//-----------------------------------------------------------------------------
+
 void UsernamePasswordDialog::layoutControls()
 {
     // create sizer for controls
@@ -122,7 +122,7 @@ void UsernamePasswordDialog::layoutControls()
     // use method in base class to set everything up
     layoutSizers(sizerControls, sizerButtons);
 }
-//-----------------------------------------------------------------------------
+
 void UsernamePasswordDialog::updateButton()
 {
     bool oldEnabled = buttonOkM->IsEnabled();
@@ -133,12 +133,12 @@ void UsernamePasswordDialog::updateButton()
     if (!oldEnabled && newEnabled)
         buttonOkM->SetDefault();
 }
-//-----------------------------------------------------------------------------
+
 void UsernamePasswordDialog::OnSettingsChange(wxCommandEvent& WXUNUSED(event))
 {
     updateButton();
 }
-//-----------------------------------------------------------------------------
+
 bool getConnectionCredentials(wxWindow* parentWindow, DatabasePtr database,
     wxString& username, wxString& password, int flags)
 {
@@ -156,7 +156,7 @@ bool getConnectionCredentials(wxWindow* parentWindow, DatabasePtr database,
     return getConnectionCredentials(parentWindow, wxEmptyString,
         username, password, flags);
 }
-//-----------------------------------------------------------------------------
+
 bool getConnectionCredentials(wxWindow* parentWindow,
     const wxString& description, wxString& username, wxString& password,
     int flags)
@@ -168,4 +168,4 @@ bool getConnectionCredentials(wxWindow* parentWindow,
     password = upd.getPassword();
     return true;
 }
-//-----------------------------------------------------------------------------
+

@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef FR_VIEW_H
 #define FR_VIEW_H
 
@@ -29,7 +29,7 @@
 #include "metadata/relation.h"
 
 class ProgressIndicator;
-//-----------------------------------------------------------------------------
+
 class View: public Relation
 {
 private:
@@ -44,7 +44,7 @@ public:
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
-//-----------------------------------------------------------------------------
+
 class Views: public MetadataCollection<View>
 {
 protected:
@@ -56,5 +56,5 @@ public:
     void load(ProgressIndicator* progressIndicator);
     virtual const wxString getTypeName() const;
 };
-//-----------------------------------------------------------------------------
+
 #endif

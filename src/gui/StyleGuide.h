@@ -29,7 +29,7 @@
 
 #include <wx/wx.h>
 
-//-----------------------------------------------------------------------------
+
 //! There will be exactly one static object of descendent class, returned by
 //! styleguide() (see below).
 class StyleGuide
@@ -70,7 +70,7 @@ protected:
     StyleGuide();
     virtual ~StyleGuide();
 };
-//--------------------------------------------------------------------------------------
+---------
 StyleGuide& styleguide();
-//--------------------------------------------------------------------------------------
+---------
 #endif

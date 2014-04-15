@@ -23,7 +23,7 @@
 
 #ifndef MAINFRAME_H
 #define MAINFRAME_H
-//--------------------------------------------------------------------------------------
+---------
 #include <wx/wx.h>
 #include <wx/image.h>
 #include <wx/treectrl.h>
@@ -35,12 +35,12 @@
 #include "gui/GUIURIHandlerHelper.h"
 #include "metadata/MetadataClasses.h"
 #include "metadata/MetadataItemURIHandlerHelper.h"
-//-----------------------------------------------------------------------------
+
 class DBHTreeControl;
 class LabelPanel;
 class TemplateProcessor;
 class wxFileName;
-//-----------------------------------------------------------------------------
+
 class MainFrame: public BaseFrame, private URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
@@ -195,5 +195,5 @@ protected:
     virtual const wxRect getDefaultRect() const;
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 #endif // MAINFRAME_H

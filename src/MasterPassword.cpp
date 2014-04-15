@@ -34,7 +34,7 @@
 #include "gui/AdvancedMessageDialog.h"
 #include "Isaac.h"
 #include "MasterPassword.h"
-//-----------------------------------------------------------------------------
+
 wxString encryptPassword(const wxString& password, const wxString& context)
 {
     wxString mpw = MasterPassword::getMasterPassword();
@@ -43,7 +43,7 @@ wxString encryptPassword(const wxString& password, const wxString& context)
     Isaac isc(mpw+context);
     return isc.getCipher(password);
 }
-//-----------------------------------------------------------------------------
+
 wxString decryptPassword(const wxString& cipher, const wxString& context)
 {
     wxString mpw = MasterPassword::getMasterPassword();
@@ -52,17 +52,17 @@ wxString decryptPassword(const wxString& cipher, const wxString& context)
     Isaac isc(mpw+context);
     return isc.deCipher(cipher);
 }
-//-----------------------------------------------------------------------------
+
 MasterPassword::MasterPassword()
 {
 }
-//-----------------------------------------------------------------------------
+
 MasterPassword& MasterPassword::getInstance()
 {
     static MasterPassword mps;
     return mps;
 }
-//-----------------------------------------------------------------------------
+
 wxString MasterPassword::getMasterPassword()
 {
     wxString& mp = getInstance().mpw;
@@ -82,10 +82,10 @@ wxString MasterPassword::getMasterPassword()
     }
     return mp;
 }
-//-----------------------------------------------------------------------------
+
 void MasterPassword::setMasterPassword(const wxString& str)
 {
     wxString& mp = getInstance().mpw;
     mp = str;
 }
-//-----------------------------------------------------------------------------
+

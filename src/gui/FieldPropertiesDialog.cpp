@@ -47,7 +47,7 @@
 #include "metadata/generator.h"
 #include "metadata/MetadataItemURIHandlerHelper.h"
 #include "metadata/table.h"
-//-----------------------------------------------------------------------------
+
 struct DatatypeProperties
 {
     //wxString name;    // doesn't work with Borland
@@ -76,7 +76,7 @@ static const DatatypeProperties datatypes[] = {
 };
 
 const size_t datatypescnt = sizeof(datatypes) / sizeof(DatatypeProperties);
-//-----------------------------------------------------------------------------
+
 FieldPropertiesDialog::FieldPropertiesDialog(wxWindow* parent, Table* table,
         Column* column)
     : BaseDialog(parent, wxID_ANY, wxEmptyString), columnM(column),
@@ -97,7 +97,7 @@ FieldPropertiesDialog::FieldPropertiesDialog(wxWindow* parent, Table* table,
 
     SetIcon(wxArtProvider::GetIcon(ART_Column, wxART_FRAME_ICON));
 }
-//-----------------------------------------------------------------------------
+
 void FieldPropertiesDialog::createControls()
 {
     label_fieldname = new wxStaticText(getControlsPanel(), wxID_ANY,
@@ -159,7 +159,7 @@ void FieldPropertiesDialog::createControls()
     button_ok = new wxButton(getControlsPanel(), wxID_OK, _("Execute"));
     button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL, _("Cancel"));
 }
-//-----------------------------------------------------------------------------
+
 void FieldPropertiesDialog::layoutControls()
 {
     // create sizer for controls
@@ -240,12 +240,12 @@ void FieldPropertiesDialog::layoutControls()
     // use method in base class to set everything up
     layoutSizers(sizerControls, sizerButtons, true);
 }
-//-----------------------------------------------------------------------------
+
 const wxString FieldPropertiesDialog::getName() const
 {
     return wxT("FieldPropertiesDialog");
 }
-//-----------------------------------------------------------------------------
+
 void FieldPropertiesDialog::subjectRemoved(Subject* subject)
 {
     if ((subject) && ((subject == tableM) || (subject == columnM)))
@@ -254,12 +254,12 @@ void FieldPropertiesDialog::subjectRemoved(Subject* subject)
         EndModal(wxID_CANCEL);
     }
 }
-//-----------------------------------------------------------------------------
+
 void FieldPropertiesDialog::update()
 {
     updateControls();
 }
-//-----------------------------------------------------------------------------
+
 bool FieldPropertiesDialog::getDomainInfo(const wxString& domain,
     wxString& type, wxString& size, wxString& scale, wxString& charset)
 {
@@ -274,7 +274,7 @@ bool FieldPropertiesDialog::getDomainInfo(const wxString& domain,
     }
     return false;
 }
-//-----------------------------------------------------------------------------
+
 bool FieldPropertiesDialog::getIsNewDomainSelected()
 {
     // first item is "[Create new]"
@@ -283,7 +283,7 @@ bool FieldPropertiesDialog::getIsNewDomainSelected()
     // return choice_domain->GetSelection() == 0;
     return choice_domain->GetStringSelection() == _("[Create new]");
 }
-//-----------------------------------------------------------------------------
+
 bool FieldPropertiesDialog::getNotNullConstraintName(const wxString& fieldName,
     wxString& constraintName)
 {
@@ -315,7 +315,7 @@ bool FieldPropertiesDialog::getNotNullConstraintName(const wxString& fieldName,
 
     return false;
 }
-//-----------------------------------------------------------------------------
+
 // UDD = user defined domain
 // AGD = auto generated domain (those starting with RDB$)
 bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
@@ -482,14 +482,14 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
     statements += textctrl_sql->GetValue();
     return !statements.IsEmpty();
 }
-//-----------------------------------------------------------------------------
+
 const wxString FieldPropertiesDialog::getStatementsToExecute()
 {
     wxString statements;
     getStatementsToExecute(statements, false);
     return statements;
 }
-//-----------------------------------------------------------------------------
+
 void FieldPropertiesDialog::loadCharsets()
 {
     wxWindowUpdateLocker freeze(choice_charset);
@@ -505,7 +505,7 @@ void FieldPropertiesDialog::loadCharsets()
         choice_charset->Append(charsets);
     }
 }
-//-----------------------------------------------------------------------------
+
 void FieldPropertiesDialog::loadCollations()
 {
     wxWindowUpdateLocker freeze(choice_collate);
@@ -517,7 +517,7 @@ void FieldPropertiesDialog::loadCollations()
         choice_collate->Append(db->getCollations(charset));
     }
 }
-//-----------------------------------------------------------------------------
+
 void FieldPropertiesDialog::loadDomains()
 {
     wxWindowUpdateLocker freeze(choice_domain);
@@ -544,7 +544,7 @@ void FieldPropertiesDialog::loadDomains()
             choice_domain->Append((*it)->getName_());
     }
 }
-//-----------------------------------------------------------------------------
+
 void FieldPropertiesDialog::loadGeneratorNames()
 {
     wxWindowUpdateLocker freeze(choice_generator);
@@ -560,7 +560,7 @@ void FieldPropertiesDialog::loadGeneratorNames()
         }
     }
 }
-//-----------------------------------------------------------------------------
+
 void FieldPropertiesDialog::setControlsProperties()
 {
     // set dialog title
@@ -593,7 +593,7 @@ void FieldPropertiesDialog::setControlsProperties()
     button_ok->SetDefault();
     button_cancel->SetFocus();
 }
-//-----------------------------------------------------------------------------
+
 void FieldPropertiesDialog::updateColumnControls()
 {
     if (columnM)
@@ -610,7 +610,7 @@ void FieldPropertiesDialog::updateColumnControls()
     }
     updateDatatypeInfo();
 }
-//-----------------------------------------------------------------------------
+
 void FieldPropertiesDialog::updateControls()
 {
     button_ok->Enable(!textctrl_fieldname->GetValue().IsEmpty());
@@ -625,7 +625,7 @@ void FieldPropertiesDialog::updateControls()
     loadDomains();
     updateColumnControls();
 }
-//-----------------------------------------------------------------------------
+
 void FieldPropertiesDialog::updateDatatypeInfo()
 {
     int n = choice_datatype->GetSelection();
@@ -644,7 +644,7 @@ void FieldPropertiesDialog::updateDatatypeInfo()
         choice_collate->SetSelection(wxNOT_FOUND);
     updateColors();
 }
-//-----------------------------------------------------------------------------
+
 void FieldPropertiesDialog::updateDomainControls()
 {
     wxString domain = choice_domain->GetStringSelection();
@@ -668,7 +668,7 @@ void FieldPropertiesDialog::updateDomainControls()
         choice_charset->Enable(columnM == 0 && newDomain);
     }
 }
-//-----------------------------------------------------------------------------
+
 void FieldPropertiesDialog::updateDomainInfo(const wxString& domain)
 {
     wxString type, size, scale, charset;
@@ -679,7 +679,7 @@ void FieldPropertiesDialog::updateDomainInfo(const wxString& domain)
     choice_datatype->SetSelection(choice_datatype->FindString(type));
     choice_charset->SetSelection(choice_charset->FindString(charset));
 }
-//-----------------------------------------------------------------------------
+
 void FieldPropertiesDialog::updateSqlStatement()
 {
     wxString fNameSql(Identifier::userString(textctrl_fieldname->GetValue()));
@@ -714,7 +714,7 @@ void FieldPropertiesDialog::updateSqlStatement()
 
     textctrl_sql->SetValue(sql);
 }
-//-----------------------------------------------------------------------------
+
 //! event handling
 BEGIN_EVENT_TABLE(FieldPropertiesDialog, BaseDialog)
     EVT_BUTTON(FieldPropertiesDialog::ID_button_edit_domain,
@@ -739,7 +739,7 @@ BEGIN_EVENT_TABLE(FieldPropertiesDialog, BaseDialog)
     EVT_TEXT(FieldPropertiesDialog::ID_textctrl_generator_name,
         FieldPropertiesDialog::OnNeedsUpdateSql)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 void FieldPropertiesDialog::OnButtonEditDomainClick(wxCommandEvent&
     WXUNUSED(event))
 {
@@ -768,7 +768,7 @@ void FieldPropertiesDialog::OnButtonEditDomainClick(wxCommandEvent&
         }
     }
 }
-//-----------------------------------------------------------------------------
+
 void FieldPropertiesDialog::OnButtonOkClick(wxCommandEvent& WXUNUSED(event))
 {
     updateSqlStatement();
@@ -776,7 +776,7 @@ void FieldPropertiesDialog::OnButtonOkClick(wxCommandEvent& WXUNUSED(event))
     if (getStatementsToExecute(statements, true))
         EndModal(wxID_OK);
 }
-//-----------------------------------------------------------------------------
+
 wxString FieldPropertiesDialog::getStatementTitle() const
 {
     if (columnM)
@@ -784,7 +784,7 @@ wxString FieldPropertiesDialog::getStatementTitle() const
     else
         return _("Executing Field Creation Script");
 }
-//-----------------------------------------------------------------------------
+
 void FieldPropertiesDialog::OnChoiceCharsetClick(wxCommandEvent&
     WXUNUSED(event))
 {
@@ -792,24 +792,24 @@ void FieldPropertiesDialog::OnChoiceCharsetClick(wxCommandEvent&
     loadCollations();
     choice_collate->SetSelection(choice_collate->FindString(oldCol));
 }
-//-----------------------------------------------------------------------------
+
 void FieldPropertiesDialog::OnChoiceDatatypeClick(wxCommandEvent&
     WXUNUSED(event))
 {
     updateDatatypeInfo();
 }
-//-----------------------------------------------------------------------------
+
 void FieldPropertiesDialog::OnChoiceDomainClick(wxCommandEvent&
     WXUNUSED(event))
 {
     updateDomainControls();
 }
-//-----------------------------------------------------------------------------
+
 void FieldPropertiesDialog::OnNeedsUpdateSql(wxCommandEvent& WXUNUSED(event))
 {
     updateSqlStatement();
 }
-//-----------------------------------------------------------------------------
+
 void FieldPropertiesDialog::OnRadioGeneratorClick(wxCommandEvent&
     WXUNUSED(event))
 {
@@ -818,14 +818,14 @@ void FieldPropertiesDialog::OnRadioGeneratorClick(wxCommandEvent&
     choice_generator->Enable(radio_generator_existing->GetValue());
     updateSqlStatement();
 }
-//-----------------------------------------------------------------------------
+
 void FieldPropertiesDialog::OnTextFieldnameUpdate(wxCommandEvent&
     WXUNUSED(event))
 {
     button_ok->Enable(!textctrl_fieldname->GetValue().IsEmpty());
     updateSqlStatement();
 }
-//-----------------------------------------------------------------------------
+
 class ColumnPropertiesHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
@@ -836,9 +836,9 @@ private:
     // singleton; registers itself on creation.
     static const ColumnPropertiesHandler handlerInstance;
 };
-//-----------------------------------------------------------------------------
+
 const ColumnPropertiesHandler ColumnPropertiesHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 bool ColumnPropertiesHandler::handleURI(URI& uri)
 {
     bool addField = uri.action == wxT("add_field");
@@ -882,4 +882,4 @@ bool ColumnPropertiesHandler::handleURI(URI& uri)
         execSql(w, title, t->getDatabase(), statements, true);
     return true;
 }
-//-----------------------------------------------------------------------------
+

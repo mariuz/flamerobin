@@ -63,156 +63,156 @@
 #include "metadata/view.h"
 #include "sql/SqlStatement.h"
 #include "sql/SqlTokenizer.h"
-//-----------------------------------------------------------------------------
+
 // CharacterSet class
 CharacterSet::CharacterSet(const wxString& name, int id, int bytesPerChar)
     : nameM(name), idM(id), bytesPerCharM(bytesPerChar)
 {
 }
-//-----------------------------------------------------------------------------
+
 bool CharacterSet::operator< (const CharacterSet& other) const
 {
     return nameM < other.nameM;
 }
-//-----------------------------------------------------------------------------
+
 int CharacterSet::getBytesPerChar() const
 {
     return bytesPerCharM;
 }
-//-----------------------------------------------------------------------------
+
 int CharacterSet::getId() const
 {
     return idM;
 }
-//-----------------------------------------------------------------------------
+
 wxString CharacterSet::getName() const
 {
     return nameM;
 }
-//-----------------------------------------------------------------------------
+
 // Credentials class
 void Credentials::setCharset(const wxString& value)
 {
     charsetM = value;
 }
-//-----------------------------------------------------------------------------
+
 void Credentials::setUsername(const wxString& value)
 {
     usernameM = value;
 }
-//-----------------------------------------------------------------------------
+
 void Credentials::setPassword(const wxString& value)
 {
     passwordM = value;
 }
-//-----------------------------------------------------------------------------
+
 void Credentials::setRole(const wxString& value)
 {
     roleM = value;
 }
-//-----------------------------------------------------------------------------
+
 wxString Credentials::getCharset() const
 {
     return charsetM;
 }
-//-----------------------------------------------------------------------------
+
 wxString Credentials::getUsername() const
 {
     return usernameM;
 }
-//-----------------------------------------------------------------------------
+
 wxString Credentials::getPassword() const
 {
     return passwordM;
 }
-//-----------------------------------------------------------------------------
+
 wxString Credentials::getRole() const
 {
     return roleM;
 }
-//-----------------------------------------------------------------------------
+
 int DatabaseInfo::getBuffers() const
 {
     return buffersM;
 }
-//-----------------------------------------------------------------------------
+
 bool DatabaseInfo::getForcedWrites() const
 {
     return forcedWritesM;
 }
-//-----------------------------------------------------------------------------
+
 bool DatabaseInfo::getReserve() const
 {
     return reserveM;
 }
-//-----------------------------------------------------------------------------
+
 int DatabaseInfo::getNextTransaction() const
 {
     return nextTransactionM;
 }
-//-----------------------------------------------------------------------------
+
 int DatabaseInfo::getODS() const
 {
     return odsM;
 }
-//-----------------------------------------------------------------------------
+
 int DatabaseInfo::getODSMinor() const
 {
     return odsMinorM;
 }
-//-----------------------------------------------------------------------------
+
 bool DatabaseInfo::getODSVersionIsHigherOrEqualTo(int versionMajor) const
 {
     return odsM >= versionMajor;
 }
-//-----------------------------------------------------------------------------
+
 bool DatabaseInfo::getODSVersionIsHigherOrEqualTo(int versionMajor,
     int versionMinor) const
 {
     return odsM > versionMajor
         || (odsM == versionMajor && odsMinorM >= versionMinor);
 }
-//-----------------------------------------------------------------------------
+
 int DatabaseInfo::getOldestActiveTransaction() const
 {
     return oldestActiveTransactionM;
 }
-//-----------------------------------------------------------------------------
+
 int DatabaseInfo::getOldestSnapshot() const
 {
     return oldestSnapshotM;
 }
-//-----------------------------------------------------------------------------
+
 int DatabaseInfo::getOldestTransaction() const
 {
     return oldestTransactionM;
 }
-//-----------------------------------------------------------------------------
+
 int DatabaseInfo::getPageSize() const
 {
     return pageSizeM;
 }
-//-----------------------------------------------------------------------------
+
 int DatabaseInfo::getPages() const
 {
     return pagesM;
 }
-//-----------------------------------------------------------------------------
+
 bool DatabaseInfo::getReadOnly() const
 {
     return readOnlyM;
 }
-//-----------------------------------------------------------------------------
+
 int64_t DatabaseInfo::getSizeInBytes() const
 {
     return static_cast<int64_t>(getPages()) * getPageSize();
 }
-//-----------------------------------------------------------------------------
+
 int DatabaseInfo::getSweep() const
 {
     return sweepM;
 }
-//-----------------------------------------------------------------------------
+
 void DatabaseInfo::load(const IBPP::Database database)
 {
     database->Info(&odsM, &odsMinorM, &pageSizeM, &pagesM,
@@ -221,7 +221,7 @@ void DatabaseInfo::load(const IBPP::Database database)
         &oldestSnapshotM, &nextTransactionM);
     loadTimeMillisM = ::wxGetLocalTimeMillis();
 }
-//-----------------------------------------------------------------------------
+
 void DatabaseInfo::reloadIfNecessary(const IBPP::Database database)
 {
     wxLongLong millisNow = ::wxGetLocalTimeMillis();
@@ -231,18 +231,18 @@ void DatabaseInfo::reloadIfNecessary(const IBPP::Database database)
     if (millisDelta >= 1000 || millisDelta <= -1000)
         load(database);
 }
-//-----------------------------------------------------------------------------
+
 // DatabaseAuthenticationMode class
 DatabaseAuthenticationMode::DatabaseAuthenticationMode()
     : modeM(UseSavedPassword)
 {
 }
-//-----------------------------------------------------------------------------
+
 int DatabaseAuthenticationMode::getMode() const
 {
     return int(modeM);
 }
-//-----------------------------------------------------------------------------
+
 void DatabaseAuthenticationMode::setMode(int mode)
 {
     switch (mode)
@@ -257,7 +257,7 @@ void DatabaseAuthenticationMode::setMode(int mode)
             wxASSERT(false);
     }
 }
-//-----------------------------------------------------------------------------
+
 wxString DatabaseAuthenticationMode::getConfigValue() const
 {
     switch (modeM)
@@ -272,7 +272,7 @@ wxString DatabaseAuthenticationMode::getConfigValue() const
             return wxT("pwd");
     }
 }
-//-----------------------------------------------------------------------------
+
 void DatabaseAuthenticationMode::setConfigValue(const wxString& value)
 {
     if (value == wxT("pwd"))
@@ -286,48 +286,48 @@ void DatabaseAuthenticationMode::setConfigValue(const wxString& value)
     else
         wxASSERT(false);
 }
-//-----------------------------------------------------------------------------
+
 void DatabaseAuthenticationMode::setStoreEncryptedPassword()
 {
     // ignore if old setting found after new mode has been set already
     if (modeM == UseSavedPassword)
         modeM = UseSavedEncryptedPwd;
 }
-//-----------------------------------------------------------------------------
+
 bool DatabaseAuthenticationMode::getAlwaysAskForPassword() const
 {
     return modeM == AlwaysEnterPassword;
 }
-//-----------------------------------------------------------------------------
+
 bool DatabaseAuthenticationMode::getIgnoreUsernamePassword() const
 {
     return modeM == TrustedUser;
 }
-//-----------------------------------------------------------------------------
+
 bool DatabaseAuthenticationMode::getUseEncryptedPassword() const
 {
     return modeM == UseSavedEncryptedPwd;
 }
-//-----------------------------------------------------------------------------
+
 // Database class
 Database::Database()
     : MetadataItem(ntDatabase), metadataLoaderM(0), connectedM(false),
         connectionCredentialsM(0), charsetConverterM(0), dialectM(3), idM(0)
 {
 }
-//-----------------------------------------------------------------------------
+
 Database::~Database()
 {
     resetCredentials();
 }
-//-----------------------------------------------------------------------------
+
 void Database::prepareTemporaryCredentials()
 {
     resetCredentials();
     connectionCredentialsM = new Credentials;
     connectionCredentialsM->setCharset(credentialsM.getCharset()); // default to database charset
 }
-//-----------------------------------------------------------------------------
+
 void Database::resetCredentials()
 {
     if (connectionCredentialsM)  // i.e. there is some other
@@ -336,7 +336,7 @@ void Database::resetCredentials()
         connectionCredentialsM = 0;
     }
 }
-//----------------------------------------------------------------------------
+
 void Database::getIdentifiers(std::vector<Identifier>& temp)
 {
     checkConnected(_("getIdentifiers"));
@@ -361,7 +361,7 @@ void Database::getIdentifiers(std::vector<Identifier>& temp)
     std::transform(exceptionsM->begin(), exceptionsM->end(),
         std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
 }
-//-----------------------------------------------------------------------------
+
 // This could be moved to Column class
 wxString Database::loadDomainNameForColumn(const wxString& table,
     const wxString& field)
@@ -382,7 +382,7 @@ wxString Database::loadDomainNameForColumn(const wxString& table,
     st1->Get(1, domain);
     return std2wxIdentifier(domain, converter);
 }
-//-----------------------------------------------------------------------------
+
 void Database::getDatabaseTriggers(std::vector<Trigger *>& list)
 {
     MetadataLoader* loader = getMetadataLoader();
@@ -405,7 +405,7 @@ void Database::getDatabaseTriggers(std::vector<Trigger *>& list)
             list.push_back(t);
     }
 }
-//-----------------------------------------------------------------------------
+
 CharacterSet Database::getCharsetById(int id)
 {
     // if it contains both charset and collation as 2 bytes
@@ -420,7 +420,7 @@ CharacterSet Database::getCharsetById(int id)
     }
     throw FRError(wxString::Format(_("Character set ID %d not found."), id));
 }
-//-----------------------------------------------------------------------------
+
 //! returns all collations for a given charset
 wxArrayString Database::getCollations(const wxString& charset)
 {
@@ -432,7 +432,7 @@ wxArrayString Database::getCollations(const wxString& charset)
         collations.push_back((*low).second);
     return collations;
 }
-//-----------------------------------------------------------------------------
+
 DomainPtr Database::getDomain(const wxString& name)
 {
     if (MetadataItem::hasSystemPrefix(name))
@@ -440,7 +440,7 @@ DomainPtr Database::getDomain(const wxString& name)
     else
         return userDomainsM->getDomain(name);
 }
-//-----------------------------------------------------------------------------
+
 bool Database::isDefaultCollation(const wxString& charset,
     const wxString& collate)
 {
@@ -450,7 +450,7 @@ bool Database::isDefaultCollation(const wxString& charset,
         return false;
     return ((*(collationsM.lower_bound(charset))).second == collate);
 }
-//-----------------------------------------------------------------------------
+
 //! load charset-collation pairs if needed
 void Database::loadCollations()
 {
@@ -484,7 +484,7 @@ void Database::loadCollations()
             cs, collation));
     }
 }
-//-----------------------------------------------------------------------------
+
 wxString Database::getTableForIndex(const wxString& indexName)
 {
     MetadataLoader* loader = getMetadataLoader();
@@ -504,7 +504,7 @@ wxString Database::getTableForIndex(const wxString& indexName)
     }
     return tableName;
 }
-//-----------------------------------------------------------------------------
+
 void Database::loadGeneratorValues()
 {
     MetadataLoader* loader = getMetadataLoader();
@@ -523,12 +523,12 @@ void Database::loadGeneratorValues()
         (*it)->ensurePropertiesLoaded();
     }
 }
-//-----------------------------------------------------------------------------
+
 DatabasePtr Database::getDatabase() const
 {
     return (const_cast<Database*>(this))->shared_from_this();
 }
-//-----------------------------------------------------------------------------
+
 MetadataItem* Database::findByName(const wxString& name)
 {
     if (!isConnected())
@@ -542,7 +542,7 @@ MetadataItem* Database::findByName(const wxString& name)
     }
     return 0;
 }
-//-----------------------------------------------------------------------------
+
 MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
 {
     if (!isConnected())
@@ -590,7 +590,7 @@ MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
             return 0;
     };
 }
-//-----------------------------------------------------------------------------
+
 Relation* Database::findRelation(const Identifier& name)
 {
     wxString s(name.get());
@@ -602,7 +602,7 @@ Relation* Database::findRelation(const Identifier& name)
         return t.get();
     return 0;
 }
-//-----------------------------------------------------------------------------
+
 Relation* Database::getRelationForTrigger(Trigger* trigger)
 {
     if (!trigger)
@@ -612,7 +612,7 @@ Relation* Database::getRelationForTrigger(Trigger* trigger)
         return 0;
     return findRelation(Identifier(relName));
 }
-//-----------------------------------------------------------------------------
+
 void Database::dropObject(MetadataItem* object)
 {
     // find the collection that contains it, and remove it
@@ -659,7 +659,7 @@ void Database::dropObject(MetadataItem* object)
             return;
     };
 }
-//-----------------------------------------------------------------------------
+
 void Database::addObject(NodeType type, const wxString& name)
 {
     switch (type)
@@ -704,7 +704,7 @@ void Database::addObject(NodeType type, const wxString& name)
             break;
     }
 }
-//-----------------------------------------------------------------------------
+
 //! reads a DDL statement and acts accordingly
 //
 // drop [object_type] [name]
@@ -889,7 +889,7 @@ void Database::parseCommitedSql(const SqlStatement& stm)
         }
     }
 }
-//-----------------------------------------------------------------------------
+
 void Database::create(int pagesize, int dialect)
 {
     wxString extra_params;
@@ -908,13 +908,13 @@ void Database::create(int pagesize, int dialect)
         "", wx2std(charset), wx2std(extra_params));
     db->Create(dialect);
 }
-//-----------------------------------------------------------------------------
+
 void Database::drop()
 {
     databaseM->Drop();
     setDisconnected();
 }
-//-----------------------------------------------------------------------------
+
 void Database::reconnect()
 {
     // must recreate, because IBPP::Database member will become invalid
@@ -924,7 +924,7 @@ void Database::reconnect()
     databaseM->Disconnect();
     databaseM->Connect();
 }
-//-----------------------------------------------------------------------------
+
 class BackgroundTask;
 typedef boost::shared_ptr<BackgroundTask> SharedBackgroundTask;
 
@@ -959,19 +959,19 @@ public:
         }
     }
 };
-//-----------------------------------------------------------------------------
+
 void runTask(SharedBackgroundTask task)
 {
     if (task != 0)
         task->execute();
 }
-//-----------------------------------------------------------------------------
+
 static boost::thread startTask(SharedBackgroundTask task)
 {
     wxASSERT(task != 0);
     return boost::thread(boost::bind(&::runTask, task));
 }
-//-----------------------------------------------------------------------------
+
 class BackgroundDatabaseConnection: public BackgroundTask
 {
 private:
@@ -993,7 +993,7 @@ public:
         return SharedBackgroundTask(new BackgroundDatabaseConnection(database));
     }
 };
-//-----------------------------------------------------------------------------
+
 // the caller of this function should check whether the database object has the
 // password set, and if it does not, it should provide the password
 //               and if it does, just provide that password
@@ -1144,7 +1144,7 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
         throw;
     }
 }
-//-----------------------------------------------------------------------------
+
 void Database::loadCollections(ProgressIndicator* progressIndicator)
 {
     // use a small helper to cut down on the repetition...
@@ -1208,7 +1208,7 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
     pih.init(_("exceptions"), collectionCount, 10);
     exceptionsM->load(progressIndicator);
 }
-//-----------------------------------------------------------------------------
+
 wxArrayString Database::loadIdentifiers(const wxString& loadStatement,
     ProgressIndicator* progressIndicator)
 {
@@ -1233,7 +1233,7 @@ wxArrayString Database::loadIdentifiers(const wxString& loadStatement,
     }
     return names;
 }
-//-----------------------------------------------------------------------------
+
 void Database::disconnect()
 {
     if (connectedM)
@@ -1242,7 +1242,7 @@ void Database::disconnect()
         setDisconnected();
     }
 }
-//-----------------------------------------------------------------------------
+
 void Database::setDisconnected()
 {
     delete metadataLoaderM;
@@ -1268,19 +1268,19 @@ void Database::setDisconnected()
         getServer()->notifyObservers();
     notifyObservers();
 }
-//-----------------------------------------------------------------------------
+
 bool Database::isConnected() const
 {
     return connectedM;
 }
-//-----------------------------------------------------------------------------
+
 MetadataLoader* Database::getMetadataLoader()
 {
     if (metadataLoaderM == 0)
         metadataLoaderM = new MetadataLoader(*this, 8);
     return metadataLoaderM;
 }
-//-----------------------------------------------------------------------------
+
 bool Database::getChildren(std::vector<MetadataItem*>& temp)
 {
     if (!connectedM)
@@ -1289,91 +1289,91 @@ bool Database::getChildren(std::vector<MetadataItem*>& temp)
     getCollections(temp, true);
     return true;
 }
-//-----------------------------------------------------------------------------
+
 DomainsPtr Database::getDomains()
 {
     wxASSERT(userDomainsM);
     userDomainsM->ensureChildrenLoaded();
     return userDomainsM;
 }
-//-----------------------------------------------------------------------------
+
 SysDomainsPtr Database::getSysDomains()
 {
     wxASSERT(sysDomainsM);
     sysDomainsM->ensureChildrenLoaded();
     return sysDomainsM;
 }
-//-----------------------------------------------------------------------------
+
 ExceptionsPtr Database::getExceptions()
 {
     wxASSERT(exceptionsM);
     exceptionsM->ensureChildrenLoaded();
     return exceptionsM;
 }
-//-----------------------------------------------------------------------------
+
 FunctionsPtr Database::getFunctions()
 {
     wxASSERT(functionsM);
     functionsM->ensureChildrenLoaded();
     return functionsM;
 }
-//-----------------------------------------------------------------------------
+
 GeneratorsPtr Database::getGenerators()
 {
     wxASSERT(generatorsM);
     generatorsM->ensureChildrenLoaded();
     return generatorsM;
 }
-//-----------------------------------------------------------------------------
+
 ProceduresPtr Database::getProcedures()
 {
     wxASSERT(proceduresM);
     proceduresM->ensureChildrenLoaded();
     return proceduresM;
 }
-//-----------------------------------------------------------------------------
+
 RolesPtr Database::getRoles()
 {
     wxASSERT(rolesM);
     rolesM->ensureChildrenLoaded();
     return rolesM;
 }
-//-----------------------------------------------------------------------------
+
 SysRolesPtr Database::getSysRoles()
 {
     wxASSERT(sysRolesM);
     sysRolesM->ensureChildrenLoaded();
     return sysRolesM;
 }
-//-----------------------------------------------------------------------------
+
 SysTablesPtr Database::getSysTables()
 {
     wxASSERT(sysTablesM);
     sysTablesM->ensureChildrenLoaded();
     return sysTablesM;
 }
-//-----------------------------------------------------------------------------
+
 TablesPtr Database::getTables()
 {
     wxASSERT(tablesM);
     tablesM->ensureChildrenLoaded();
     return tablesM;
 }
-//-----------------------------------------------------------------------------
+
 TriggersPtr Database::getTriggers()
 {
     wxASSERT(triggersM);
     triggersM->ensureChildrenLoaded();
     return triggersM;
 }
-//-----------------------------------------------------------------------------
+
 ViewsPtr Database::getViews()
 {
     wxASSERT(viewsM);
     viewsM->ensureChildrenLoaded();
     return viewsM;
 }
-//-----------------------------------------------------------------------------
+
 // returns vector of all subitems
 void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
 {
@@ -1397,13 +1397,13 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
     temp.push_back(triggersM.get());
     temp.push_back(viewsM.get());
 }
-//-----------------------------------------------------------------------------
+
 void Database::loadChildren()
 {
     // TODO: show progress dialog while reloading child object collections?
     loadCollections(0);
 }
-//-----------------------------------------------------------------------------
+
 void Database::lockChildren()
 {
     if (isConnected())
@@ -1421,7 +1421,7 @@ void Database::lockChildren()
         viewsM->lockSubject();
     }
 }
-//-----------------------------------------------------------------------------
+
 void Database::unlockChildren()
 {
     // unlock in reverse order of locking - that way domains will still
@@ -1442,22 +1442,22 @@ void Database::unlockChildren()
         userDomainsM->unlockSubject();
     }
 }
-//-----------------------------------------------------------------------------
+
 wxString Database::getPath() const
 {
     return pathM;
 }
-//-----------------------------------------------------------------------------
+
 int Database::getSqlDialect() const
 {
     return dialectM;
 }
-//-----------------------------------------------------------------------------
+
 wxString Database::getDatabaseCharset() const
 {
     return databaseCharsetM;
 }
-//-----------------------------------------------------------------------------
+
 wxString Database::getConnectionCharset() const
 {
     if (connectionCredentialsM)
@@ -1465,7 +1465,7 @@ wxString Database::getConnectionCharset() const
     else
         return credentialsM.getCharset();
 }
-//-----------------------------------------------------------------------------
+
 wxString Database::getConnectionInfoString() const
 {
     wxString username(getUsername());
@@ -1484,7 +1484,7 @@ wxString Database::getConnectionInfoString() const
     return wxString(username + wxT("@") + getConnectionString() + wxT(" (")
         + getConnectionCharset() + wxT(")"));
 }
-//-----------------------------------------------------------------------------
+
 bool Database::usesDifferentConnectionCharset() const
 {
     wxString charset(getConnectionCharset().Upper());
@@ -1492,7 +1492,7 @@ bool Database::usesDifferentConnectionCharset() const
         return false;
     return (charset.compare(databaseCharsetM.Upper()) != 0);
 }
-//-----------------------------------------------------------------------------
+
 wxString Database::getUsername() const
 {
     if (connectionCredentialsM)
@@ -1500,7 +1500,7 @@ wxString Database::getUsername() const
     else
         return credentialsM.getUsername();
 }
-//-----------------------------------------------------------------------------
+
 wxString Database::getRawPassword() const
 {
     if (connectionCredentialsM)
@@ -1508,7 +1508,7 @@ wxString Database::getRawPassword() const
     else
         return credentialsM.getPassword();
 }
-//-----------------------------------------------------------------------------
+
 wxString Database::getDecryptedPassword() const
 {
     // if we already have an established connection return that password
@@ -1527,12 +1527,12 @@ wxString Database::getDecryptedPassword() const
     else
         return raw;
 }
-//-----------------------------------------------------------------------------
+
 DatabaseAuthenticationMode& Database::getAuthenticationMode()
 {
     return authenticationModeM;
 }
-//-----------------------------------------------------------------------------
+
 wxString Database::getRole() const
 {
     if (connectionCredentialsM)
@@ -1540,17 +1540,17 @@ wxString Database::getRole() const
     else
         return credentialsM.getRole();
 }
-//-----------------------------------------------------------------------------
+
 IBPP::Database& Database::getIBPPDatabase()
 {
     return databaseM;
 }
-//-----------------------------------------------------------------------------
+
 void Database::setPath(const wxString& value)
 {
     pathM = value;
 }
-//-----------------------------------------------------------------------------
+
 void Database::setConnectionCharset(const wxString& value)
 {
     if (connectionCredentialsM)
@@ -1558,7 +1558,7 @@ void Database::setConnectionCharset(const wxString& value)
     else
         credentialsM.setCharset(value);
 }
-//-----------------------------------------------------------------------------
+
 void Database::setUsername(const wxString& value)
 {
     if (connectionCredentialsM)
@@ -1566,7 +1566,7 @@ void Database::setUsername(const wxString& value)
     else
         credentialsM.setUsername(value);
 }
-//-----------------------------------------------------------------------------
+
 void Database::setRawPassword(const wxString& value)
 {
     if (connectionCredentialsM)
@@ -1574,7 +1574,7 @@ void Database::setRawPassword(const wxString& value)
     else
         credentialsM.setPassword(value);
 }
-//-----------------------------------------------------------------------------
+
 void Database::setEncryptedPassword(const wxString& value)
 {
     // temporary credentials -> use password as entered
@@ -1596,7 +1596,7 @@ void Database::setEncryptedPassword(const wxString& value)
         credentialsM.setPassword(value);
     }
 }
-//-----------------------------------------------------------------------------
+
 void Database::setRole(const wxString& value)
 {
     if (connectionCredentialsM)
@@ -1604,29 +1604,29 @@ void Database::setRole(const wxString& value)
     else
         credentialsM.setRole(value);
 }
-//-----------------------------------------------------------------------------
+
 const wxString Database::getTypeName() const
 {
     return wxT("DATABASE");
 }
-//-----------------------------------------------------------------------------
+
 void Database::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitDatabase(*this);
 }
-//-----------------------------------------------------------------------------
+
 ServerPtr Database::getServer() const
 {
     return ServerPtr(serverM);
 }
-//-----------------------------------------------------------------------------
+
 void Database::setServer(ServerPtr server)
 {
     wxASSERT(server);
     serverM = server;
     setParent(server.get());
 }
-//-----------------------------------------------------------------------------
+
 wxString Database::getConnectionString() const
 {
     wxString serverConnStr = getServer()->getConnectionString();
@@ -1635,7 +1635,7 @@ wxString Database::getConnectionString() const
     else
         return pathM;
 }
-//-----------------------------------------------------------------------------
+
 /* static */
 wxString Database::extractNameFromConnectionString(const wxString& path)
 {
@@ -1648,7 +1648,7 @@ wxString Database::extractNameFromConnectionString(const wxString& path)
         name.erase(p, name.length());
     return name;
 }
-//-----------------------------------------------------------------------------
+
 const wxString Database::getId() const
 {
     if (idM == 0)
@@ -1656,9 +1656,9 @@ const wxString Database::getId() const
     wxString result = wxString::Format(wxT("%d"), idM);
     return result;
 }
-//-----------------------------------------------------------------------------
+
 unsigned uniqueDatabaseId = 1;
-//-----------------------------------------------------------------------------
+
 void Database::setId(unsigned id)
 {
     idM = id;
@@ -1666,37 +1666,37 @@ void Database::setId(unsigned id)
     if (id >= uniqueDatabaseId)
         uniqueDatabaseId = id + 1;
 }
-//-----------------------------------------------------------------------------
+
 /*static*/
 unsigned Database::getUniqueId()
 {
     return uniqueDatabaseId++;
 }
-//-----------------------------------------------------------------------------
+
 /*static*/
 unsigned Database::getUIDGeneratorValue()
 {
     return uniqueDatabaseId;
 }
-//-----------------------------------------------------------------------------
+
 /*static*/
 void Database::setUIDGeneratorValue(unsigned value)
 {
     uniqueDatabaseId = value;
 }
-//-----------------------------------------------------------------------------
+
 const DatabaseInfo& Database::getInfo()
 {
     databaseInfoM.reloadIfNecessary(databaseM);
     return databaseInfoM;
 }
-//-----------------------------------------------------------------------------
+
 void Database::loadInfo()
 {
     databaseInfoM.load(databaseM);
     notifyObservers();
 }
-//-----------------------------------------------------------------------------
+
 bool Database::showSystemRoles()
 {
     if (!getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
@@ -1710,7 +1710,7 @@ bool Database::showSystemRoles()
 
     return b;
 }
-//-----------------------------------------------------------------------------
+
 bool Database::showSystemTables()
 {
     const wxString SHOW_SYSTABLES = wxT("ShowSystemTables");
@@ -1721,7 +1721,7 @@ bool Database::showSystemTables()
 
     return b;
 }
-//-----------------------------------------------------------------------------
+
 wxString mapConnectionCharsetToSystemCharset(const wxString& connectionCharset)
 {
     wxString charset(connectionCharset.Upper().Trim(true).Trim(false));
@@ -1753,7 +1753,7 @@ wxString mapConnectionCharsetToSystemCharset(const wxString& connectionCharset)
 
     return charset;
 }
-//-----------------------------------------------------------------------------
+
 void Database::createCharsetConverter()
 {
     charsetConverterM.reset();
@@ -1763,14 +1763,14 @@ void Database::createCharsetConverter()
     if (fe != wxFONTENCODING_SYSTEM)
         charsetConverterM.reset(new wxCSConv(fe));
 }
-//-----------------------------------------------------------------------------
+
 wxMBConv* Database::getCharsetConverter() const
 {
     if (wxMBConv* conv = charsetConverterM.get())
         return conv;
     return wxConvCurrent;
 }
-//-----------------------------------------------------------------------------
+
 void Database::getConnectedUsers(wxArrayString& users) const
 {
     if (databaseM != 0 && databaseM->Connected())
@@ -1796,7 +1796,7 @@ void Database::getConnectedUsers(wxArrayString& users) const
         }
     }
 }
-//-----------------------------------------------------------------------------
+
 void Database::checkConnected(const wxString& operation) const
 {
     if (!connectedM)
@@ -1805,4 +1805,4 @@ void Database::checkConnected(const wxString& operation) const
             operation.c_str()));
     }
 }
-//-----------------------------------------------------------------------------
+

@@ -20,7 +20,7 @@
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//-----------------------------------------------------------------------------
+
 #include "wx/wxprec.h"
 
 #ifndef WX_PRECOMP
@@ -48,7 +48,7 @@
 #include "metadata/server.h"
 #include "metadata/table.h"
 #include "metadata/view.h"
-//-----------------------------------------------------------------------------
+
 // derived class since we need to catch size event
 class AdjustableListCtrl: public wxListCtrl
 {
@@ -88,11 +88,11 @@ public:
     };
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 BEGIN_EVENT_TABLE(AdjustableListCtrl, wxListCtrl)
     EVT_SIZE(AdjustableListCtrl::OnSize)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent, RootPtr root)
     : BaseFrame(parent, -1, _("Advanced Metadata Search"))
 {
@@ -256,7 +256,7 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent, RootPtr root)
     icon.CopyFromBitmap(bmp);
     SetIcon(icon);
 }
-//-----------------------------------------------------------------------------
+
 void AdvancedSearchFrame::addCriteria(CriteriaItem::Type type, wxString
     value, Database *db)
 {
@@ -282,7 +282,7 @@ void AdvancedSearchFrame::addCriteria(CriteriaItem::Type type, wxString
         std::pair<CriteriaItem::Type, CriteriaItem>(type, c));
     rebuildList();
 }
-//-----------------------------------------------------------------------------
+
 void AdvancedSearchFrame::rebuildList()
 {
     listctrl_criteria->DeleteAllItems();
@@ -301,7 +301,7 @@ void AdvancedSearchFrame::rebuildList()
     wxSizeEvent ev(listctrl_criteria->GetSize());
     listctrl_criteria->GetEventHandler()->AddPendingEvent(ev);
 }
-//-----------------------------------------------------------------------------
+
 void AdvancedSearchFrame::addResult(Database* db, MetadataItem* item)
 {
     int index = listctrl_results->GetItemCount();
@@ -316,7 +316,7 @@ void AdvancedSearchFrame::addResult(Database* db, MetadataItem* item)
     wxSizeEvent ev(listctrl_results->GetSize());
     listctrl_results->GetEventHandler()->AddPendingEvent(ev);
 }
-//-----------------------------------------------------------------------------
+
 // returns true if "text" matches all criteria of type "type"
 bool AdvancedSearchFrame::match(CriteriaItem::Type type, const wxString& text)
 {
@@ -329,12 +329,12 @@ bool AdvancedSearchFrame::match(CriteriaItem::Type type, const wxString& text)
     }
     return false;
 }
-//-----------------------------------------------------------------------------
+
 // OBSERVER functions
 void AdvancedSearchFrame::update()
 {
 }
-//-----------------------------------------------------------------------------
+
 void AdvancedSearchFrame::subjectRemoved(Subject* subject)
 {
     // NOTE: we can't do this dynamic_cast, since this function is called
@@ -386,7 +386,7 @@ void AdvancedSearchFrame::subjectRemoved(Subject* subject)
         }
     }
 }
-//-----------------------------------------------------------------------------
+
 BEGIN_EVENT_TABLE(AdvancedSearchFrame, wxFrame)
     EVT_LIST_ITEM_ACTIVATED(AdvancedSearchFrame::ID_listctrl_criteria,
         AdvancedSearchFrame::OnListCtrlCriteriaActivate)
@@ -413,7 +413,7 @@ BEGIN_EVENT_TABLE(AdvancedSearchFrame, wxFrame)
     EVT_BUTTON(AdvancedSearchFrame::ID_button_add_database,
         AdvancedSearchFrame::OnButtonAddDatabaseClick)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 // remove item on double-click/Enter
 void AdvancedSearchFrame::OnListCtrlCriteriaActivate(wxListEvent& event)
 {
@@ -429,7 +429,7 @@ void AdvancedSearchFrame::OnListCtrlCriteriaActivate(wxListEvent& event)
     }
     rebuildList();
 }
-//-----------------------------------------------------------------------------
+
 // show DDL for selected item, and select it in main tree
 void AdvancedSearchFrame::OnListCtrlResultsItemSelected(wxListEvent& event)
 {
@@ -468,7 +468,7 @@ void AdvancedSearchFrame::OnListCtrlResultsItemSelected(wxListEvent& event)
             tree->selectMetadataItem(m);
     }
 }
-//-----------------------------------------------------------------------------
+
 void AdvancedSearchFrame::OnListCtrlResultsRightClick(wxListEvent& event)
 {
     MetadataItem *m = results[event.GetIndex()];
@@ -477,7 +477,7 @@ void AdvancedSearchFrame::OnListCtrlResultsRightClick(wxListEvent& event)
     m->acceptVisitor(&cmv);
     PopupMenu(&MyMenu, ScreenToClient(wxGetMousePosition()));
 }
-//-----------------------------------------------------------------------------
+
 void AdvancedSearchFrame::OnCheckboxDdlToggle(wxCommandEvent& event)
 {
     if (event.IsChecked())
@@ -485,7 +485,7 @@ void AdvancedSearchFrame::OnCheckboxDdlToggle(wxCommandEvent& event)
     else
         splitter1->Unsplit();
 }
-//-----------------------------------------------------------------------------
+
 void AdvancedSearchFrame::OnButtonRemoveClick(wxCommandEvent& WXUNUSED(event))
 {
     // iterate all selected items and remove them from searchCriteriaM
@@ -511,7 +511,7 @@ void AdvancedSearchFrame::OnButtonRemoveClick(wxCommandEvent& WXUNUSED(event))
     while (item != -1);
     rebuildList();
 }
-//-----------------------------------------------------------------------------
+
 void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& WXUNUSED(event))
 {
     // build list of databases to search from
@@ -648,36 +648,36 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& WXUNUSED(event))
         }
     }
 }
-//-----------------------------------------------------------------------------
+
 void AdvancedSearchFrame::OnButtonAddTypeClick(wxCommandEvent& WXUNUSED(event))
 {
     addCriteria(CriteriaItem::ctType, choice_type->GetStringSelection());
 }
-//-----------------------------------------------------------------------------
+
 void AdvancedSearchFrame::OnButtonAddNameClick(wxCommandEvent& WXUNUSED(event))
 {
     addCriteria(CriteriaItem::ctName, textctrl_name->GetValue());
     textctrl_name->Clear();
 }
-//-----------------------------------------------------------------------------
+
 void AdvancedSearchFrame::OnButtonAddDescriptionClick(wxCommandEvent& WXUNUSED(event))
 {
     addCriteria(CriteriaItem::ctDescription, textctrl_description->GetValue());
     textctrl_description->Clear();
 }
-//-----------------------------------------------------------------------------
+
 void AdvancedSearchFrame::OnButtonAddDDLClick(wxCommandEvent& WXUNUSED(event))
 {
     addCriteria(CriteriaItem::ctDDL, textctrl_ddl->GetValue());
     textctrl_ddl->Clear();
 }
-//-----------------------------------------------------------------------------
+
 void AdvancedSearchFrame::OnButtonAddFieldClick(wxCommandEvent& WXUNUSED(event))
 {
     addCriteria(CriteriaItem::ctField, textctrl_field->GetValue());
     textctrl_field->Clear();
 }
-//-----------------------------------------------------------------------------
+
 void AdvancedSearchFrame::OnButtonAddDatabaseClick(
     wxCommandEvent& WXUNUSED(event))
 {
@@ -701,4 +701,4 @@ void AdvancedSearchFrame::OnButtonAddDatabaseClick(
             db);
     }
 }
-//-----------------------------------------------------------------------------
+

@@ -22,7 +22,7 @@
 */
 #ifndef FR_COMMANDMANAGER_H
 #define FR_COMMANDMANAGER_H
-//----------------------------------------------------------------------------
+
 
 #include <map>
 
@@ -49,5 +49,5 @@ public:
     wxString getPopupMenuItemText(const wxString& text, int id);
     wxString getToolbarHint(const wxString& text, int id);
 };
-//----------------------------------------------------------------------------
+
 #endif // FR_COMMANDMANAGER_H

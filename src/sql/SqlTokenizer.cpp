@@ -34,7 +34,7 @@
 
 #include "config/Config.h"
 #include "sql/SqlTokenizer.h"
-//-----------------------------------------------------------------------------
+
 // SqlTokenizerConfigCache: class to cache user preference for keyword case
 class SqlTokenizerConfigCache : public ConfigCache
 {
@@ -61,26 +61,26 @@ public:
         return sqlKeywordsUpperCaseM;
     }
 };
-//-----------------------------------------------------------------------------
+
 SqlTokenizer::SqlTokenizer()
     : termM(wxT(";"))
 {
     init();
 }
-//-----------------------------------------------------------------------------
+
 SqlTokenizer::SqlTokenizer(const wxString& statement)
     : sqlM(statement), termM(wxT(";"))
 {
     init();
 }
-//-----------------------------------------------------------------------------
+
 /*static*/
 wxString SqlTokenizer::getKeyword(SqlTokenType token)
 {
     return getKeyword(token,
         SqlTokenizerConfigCache::get().getSqlKeywordsUpperCase());
 }
-//-----------------------------------------------------------------------------
+
 /*static*/
 wxString SqlTokenizer::getKeyword(SqlTokenType token, bool upperCase)
 {
@@ -120,7 +120,7 @@ wxString SqlTokenizer::getKeyword(SqlTokenType token, bool upperCase)
     }
     return wxEmptyString;
 }
-//-----------------------------------------------------------------------------
+
 /*static*/
 const SqlTokenizer::KeywordToTokenMap& SqlTokenizer::getKeywordToTokenMap()
 {
@@ -142,7 +142,7 @@ const SqlTokenizer::KeywordToTokenMap& SqlTokenizer::getKeywordToTokenMap()
     }
     return keywords;
 }
-//-----------------------------------------------------------------------------
+
 /*static*/
 wxArrayString SqlTokenizer::getKeywords(KeywordCase kwc)
 {
@@ -163,7 +163,7 @@ wxArrayString SqlTokenizer::getKeywords(KeywordCase kwc)
     keywords.Sort();
     return keywords;
 }
-//-----------------------------------------------------------------------------
+
 /*static*/
 wxString SqlTokenizer::getKeywordsString(KeywordCase kwc)
 {
@@ -177,7 +177,7 @@ wxString SqlTokenizer::getKeywordsString(KeywordCase kwc)
     }
     return keywords;
 }
-//-----------------------------------------------------------------------------
+
 /*static*/
 SqlTokenType SqlTokenizer::getKeywordTokenType(const wxString& word)
 {
@@ -190,7 +190,7 @@ SqlTokenType SqlTokenizer::getKeywordTokenType(const wxString& word)
         return (*pos).second;
     return tkIDENTIFIER;
 }
-//-----------------------------------------------------------------------------
+
 /*static*/
 bool SqlTokenizer::isReservedWord(const wxString& word)
 {
@@ -201,35 +201,35 @@ bool SqlTokenizer::isReservedWord(const wxString& word)
     KeywordToTokenMap::const_iterator pos = keywords.find(word);
     return pos != keywords.end();
 }
-//-----------------------------------------------------------------------------
+
 SqlTokenType SqlTokenizer::getCurrentToken()
 {
     return sqlTokenTypeM;
 }
-//-----------------------------------------------------------------------------
+
 wxString SqlTokenizer::getCurrentTokenString()
 {
     if (sqlTokenStartM && sqlTokenEndM && sqlTokenEndM > sqlTokenStartM)
         return wxString(sqlTokenStartM, sqlTokenEndM);
     return wxEmptyString;
 }
-//-----------------------------------------------------------------------------
+
 bool SqlTokenizer::isKeywordToken()
 {
     return sqlTokenTypeM > tk_KEYWORDS_START_HERE;
 }
-//-----------------------------------------------------------------------------
+
 void SqlTokenizer::init()
 {
     sqlTokenEndM = sqlTokenStartM = sqlM.c_str();
     nextToken();
 }
-//-----------------------------------------------------------------------------
+
 int SqlTokenizer::getCurrentTokenPosition()
 {
     return (sqlTokenStartM - sqlM.c_str());
 }
-//-----------------------------------------------------------------------------
+
 // same as nextToken, but skips whitespace, comments and optionally parenthesis
 bool SqlTokenizer::jumpToken(bool skipParenthesis)
 {
@@ -250,7 +250,7 @@ bool SqlTokenizer::jumpToken(bool skipParenthesis)
     }
     return true;
 }
-//-----------------------------------------------------------------------------
+
 bool SqlTokenizer::nextToken()
 {
     sqlTokenStartM = sqlTokenEndM;
@@ -285,13 +285,13 @@ bool SqlTokenizer::nextToken()
         defaultToken();
     return true;
 }
-//-----------------------------------------------------------------------------
+
 void SqlTokenizer::setStatement(const wxString& statement)
 {
     sqlM = statement;
     init();
 }
-//-----------------------------------------------------------------------------
+
 void SqlTokenizer::defaultToken()
 {
     if (wxStricmp(sqlTokenStartM, termM.c_str()) == 0)
@@ -320,7 +320,7 @@ void SqlTokenizer::defaultToken()
     }
     sqlTokenTypeM = tkUNKNOWN;
 }
-//-----------------------------------------------------------------------------
+
 void SqlTokenizer::keywordIdentifierToken()
 {
     sqlTokenTypeM = tkIDENTIFIER;
@@ -342,7 +342,7 @@ void SqlTokenizer::keywordIdentifierToken()
     if (keywordType != tkIDENTIFIER)
         sqlTokenTypeM = keywordType;
 }
-//-----------------------------------------------------------------------------
+
 void SqlTokenizer::multilineCommentToken()
 {
     sqlTokenTypeM = tkCOMMENT;
@@ -359,7 +359,7 @@ void SqlTokenizer::multilineCommentToken()
         sqlTokenEndM++;
     }
 }
-//-----------------------------------------------------------------------------
+
 void SqlTokenizer::quotedIdentifierToken()
 {
     sqlTokenTypeM = tkIDENTIFIER;
@@ -378,7 +378,7 @@ void SqlTokenizer::quotedIdentifierToken()
         sqlTokenEndM++;
     }
 }
-//-----------------------------------------------------------------------------
+
 void SqlTokenizer::singleLineCommentToken()
 {
     sqlTokenTypeM = tkCOMMENT;
@@ -397,7 +397,7 @@ void SqlTokenizer::singleLineCommentToken()
         sqlTokenEndM++;
     }
 }
-//-----------------------------------------------------------------------------
+
 void SqlTokenizer::stringToken()
 {
     sqlTokenTypeM = tkSTRING;
@@ -416,13 +416,13 @@ void SqlTokenizer::stringToken()
         sqlTokenEndM++;
     }
 }
-//-----------------------------------------------------------------------------
+
 inline void SqlTokenizer::symbolToken(SqlTokenType type)
 {
     sqlTokenTypeM = type;
     sqlTokenEndM++;
 }
-//-----------------------------------------------------------------------------
+
 void SqlTokenizer::whitespaceToken()
 {
     sqlTokenTypeM = tkWHITESPACE;
@@ -432,4 +432,4 @@ void SqlTokenizer::whitespaceToken()
     while (*sqlTokenEndM != 0 && wxIsspace(*sqlTokenEndM))
         sqlTokenEndM++;
 }
-//-----------------------------------------------------------------------------
+

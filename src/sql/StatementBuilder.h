@@ -23,10 +23,10 @@
 
 #ifndef FR_STATEMENTBUILDER_H
 #define FR_STATEMENTBUILDER_H
-//-----------------------------------------------------------------------------
+
 #include <wx/string.h>
 #include "sql/SqlTokenizer.h"
-//-----------------------------------------------------------------------------
+
 class StatementBuilder
 {
 private:
@@ -53,5 +53,5 @@ public:
 
     void reset();
 };
-//-----------------------------------------------------------------------------
+
 #endif // FR_STATEMENT_BUILDER_H

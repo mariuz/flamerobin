@@ -20,7 +20,7 @@
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//-----------------------------------------------------------------------------
+
 #ifndef FR_PRIVILEGESDIALOG_H
 #define FR_PRIVILEGESDIALOG_H
 
@@ -29,7 +29,7 @@
 #include "gui/BaseDialog.h"
 
 class Database;
-//-----------------------------------------------------------------------------
+
 class PrivilegesDialog : public BaseDialog
 {
 private:
@@ -107,5 +107,5 @@ public:
 
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 #endif

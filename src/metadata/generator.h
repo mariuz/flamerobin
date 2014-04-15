@@ -28,7 +28,7 @@
 #include "metadata/database.h"
 
 class ProgressIndicator;
-//-----------------------------------------------------------------------------
+
 class Generator: public MetadataItem
 {
 private:
@@ -44,7 +44,7 @@ public:
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
-//-----------------------------------------------------------------------------
+
 class Generators: public MetadataCollection<Generator>
 {
 protected:
@@ -56,5 +56,5 @@ public:
     void load(ProgressIndicator* progressIndicator);
     virtual const wxString getTypeName() const;
 };
-//-----------------------------------------------------------------------------
+
 #endif

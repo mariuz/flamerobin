@@ -32,7 +32,7 @@
 
 #include <algorithm>
 #include "gui/FRLayoutConfig.h"
-//-----------------------------------------------------------------------------
+
 class RgbHsvConversion // used by StyleGuidFR::getReadonlyColour()
 {
 private:
@@ -47,7 +47,7 @@ public:
     float getValue();
     void setValue(float value);
 };
-//-----------------------------------------------------------------------------
+
 RgbHsvConversion::RgbHsvConversion(const wxColour& colour)
 {
     redM = colour.Red() / 255.0;
@@ -59,7 +59,7 @@ RgbHsvConversion::RgbHsvConversion(const wxColour& colour)
     valM = 0.0;
     hsvValidM = false;
 }
-//-----------------------------------------------------------------------------
+
 // Adapted from public domain code by Zack Booth Simpson
 // http://www.mine-control.com/zack/code/zrgbhsv.cpp
 void RgbHsvConversion::calcHsvFromRgb()
@@ -90,7 +90,7 @@ void RgbHsvConversion::calcHsvFromRgb()
     hueM /= 360.0;
     hsvValidM = true;
 }
-//-----------------------------------------------------------------------------
+
 // Adapted from public domain code by Zack Booth Simpson
 // http://www.mine-control.com/zack/code/zrgbhsv.cpp
 void RgbHsvConversion::calcRgbFromHsv()
@@ -145,7 +145,7 @@ void RgbHsvConversion::calcRgbFromHsv()
     }
     rgbValidM = true;
 }
-//-----------------------------------------------------------------------------
+
 wxColour RgbHsvConversion::getColour()
 {
     if (!rgbValidM)
@@ -156,7 +156,7 @@ wxColour RgbHsvConversion::getColour()
     return wxColour((unsigned char)(255.0 * redM),
         (unsigned char)(255.0 * greenM), (unsigned char)(255.0 * blueM));
 }
-//-----------------------------------------------------------------------------
+
 float RgbHsvConversion::getValue()
 {
     if (!hsvValidM)
@@ -166,7 +166,7 @@ float RgbHsvConversion::getValue()
     }
     return valM;
 }
-//-----------------------------------------------------------------------------
+
 void RgbHsvConversion::setValue(float value)
 {
     if (value < 0.0 || value > 1.0)
@@ -179,15 +179,15 @@ void RgbHsvConversion::setValue(float value)
         rgbValidM = false;
     }
 }
-//-----------------------------------------------------------------------------
+
 FRLayoutConfig::FRLayoutConfig()
 {
 }
-//-----------------------------------------------------------------------------
+
 FRLayoutConfig::~FRLayoutConfig()
 {
 }
-//-----------------------------------------------------------------------------
+
 wxColour FRLayoutConfig::getReadonlyColour()
 {
     static wxColour colourReadOnly;
@@ -219,7 +219,7 @@ wxColour FRLayoutConfig::getReadonlyColour()
     }
     return colourReadOnly;
 }
-//-----------------------------------------------------------------------------
+
 int FRLayoutConfig::getEditorFontSize()
 {
 #ifdef __WINDOWS__
@@ -228,10 +228,10 @@ int FRLayoutConfig::getEditorFontSize()
     return 12; // MAC, GTK
 #endif
 }
-//-----------------------------------------------------------------------------
+
 FRLayoutConfig& frlayoutconfig()
 {
     static FRLayoutConfig layout;
     return layout;
 }
-//-----------------------------------------------------------------------------
+

@@ -41,7 +41,7 @@
 #include "metadata/database.h"
 #include "metadata/MetadataItemURIHandlerHelper.h"
 #include "metadata/table.h"
-//-----------------------------------------------------------------------------
+
 CreateIndexDialog::CreateIndexDialog(wxWindow* parent, Table* table)
     : BaseDialog(parent, -1, wxEmptyString)
 {
@@ -55,7 +55,7 @@ CreateIndexDialog::CreateIndexDialog(wxWindow* parent, Table* table)
     layoutControls();
     button_ok->SetDefault();
 }
-//-----------------------------------------------------------------------------
+
 void CreateIndexDialog::createControls()
 {
     label_name = new wxStaticText(getControlsPanel(), -1, _("Index name:"));
@@ -78,7 +78,7 @@ void CreateIndexDialog::createControls()
     button_ok = new wxButton(getControlsPanel(), wxID_OK, _("Create"));
     button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL, _("Cancel"));
 }
-//-----------------------------------------------------------------------------
+
 void CreateIndexDialog::layoutControls()
 {
     wxSizer* sizerName = new wxBoxSizer(wxHORIZONTAL);
@@ -107,7 +107,7 @@ void CreateIndexDialog::layoutControls()
     // use method in base class to set everything up
     layoutSizers(sizerControls, sizerButtons, true);
 }
-//-----------------------------------------------------------------------------
+
 void CreateIndexDialog::setControlsProperties()
 {
     // suggest name for new index
@@ -139,12 +139,12 @@ void CreateIndexDialog::setControlsProperties()
         colNames.Add((*it)->getName_());
     listbox_columns->Set(colNames);
 }
-//-----------------------------------------------------------------------------
+
 const wxString CreateIndexDialog::getName() const
 {
     return wxT("CreateIndexDialog");
 }
-//-----------------------------------------------------------------------------
+
 wxString CreateIndexDialog::getSelectedColumnsList()
 {
     wxArrayInt selection;
@@ -160,7 +160,7 @@ wxString CreateIndexDialog::getSelectedColumnsList()
     }
     return columnsList;
 }
-//-----------------------------------------------------------------------------
+
 const wxString CreateIndexDialog::getStatementsToExecute()
 {
     wxString sql(wxT("CREATE "));
@@ -173,7 +173,7 @@ const wxString CreateIndexDialog::getStatementsToExecute()
         + wxT("  (") + getSelectedColumnsList() + wxT(");\n");
     return sql;
 }
-//-----------------------------------------------------------------------------
+
 void CreateIndexDialog::updateButtons()
 {
     bool ok = !textctrl_name->GetValue().IsEmpty();
@@ -185,18 +185,18 @@ void CreateIndexDialog::updateButtons()
     }
     button_ok->Enable(ok);
 }
-//-----------------------------------------------------------------------------
+
 //! event handling
 BEGIN_EVENT_TABLE(CreateIndexDialog, BaseDialog)
     EVT_LISTBOX(CreateIndexDialog::ID_list_columns, CreateIndexDialog::OnControlChange)
     EVT_TEXT(CreateIndexDialog::ID_textcontrol_name, CreateIndexDialog::OnControlChange)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 void CreateIndexDialog::OnControlChange(wxCommandEvent& WXUNUSED(event))
 {
     updateButtons();
 }
-//-----------------------------------------------------------------------------
+
 class TableIndicesHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
@@ -207,9 +207,9 @@ private:
     // singleton; registers itself on creation.
     static const TableIndicesHandler handlerInstance;
 };
-//-----------------------------------------------------------------------------
+
 const TableIndicesHandler TableIndicesHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 bool TableIndicesHandler::handleURI(URI& uri)
 {
     if (uri.action != wxT("add_index") && uri.action != wxT("recompute_all"))
@@ -251,4 +251,4 @@ bool TableIndicesHandler::handleURI(URI& uri)
         execSql(w, frameCaption, t->getDatabase(), sql, true);
     return true;
 }
-//-----------------------------------------------------------------------------
+

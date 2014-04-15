@@ -40,7 +40,7 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/trigger.h"
 #include "sql/StatementBuilder.h"
-//-----------------------------------------------------------------------------
+
 /* static */
 Trigger::FiringTime Trigger::getFiringTime(int type)
 {
@@ -60,18 +60,18 @@ Trigger::FiringTime Trigger::getFiringTime(int type)
         return afterIUD;
     return invalid;
 }
-//-----------------------------------------------------------------------------
+
 Trigger::Trigger(DatabasePtr database, const wxString& name)
     : MetadataItem(ntTrigger, database.get(), name)
 {
 }
-//-----------------------------------------------------------------------------
+
 bool Trigger::getActive()
 {
     ensurePropertiesLoaded();
     return activeM;
 }
-//-----------------------------------------------------------------------------
+
 wxString Trigger::getFiringEvent()
 {
     ensurePropertiesLoaded();
@@ -126,19 +126,19 @@ wxString Trigger::getFiringEvent()
     }
     return sb;
 }
-//-----------------------------------------------------------------------------
+
 Trigger::FiringTime Trigger::getFiringTime()
 {
     ensurePropertiesLoaded();
     return getFiringTime(typeM);
 }
-//-----------------------------------------------------------------------------
+
 int Trigger::getPosition()
 {
     ensurePropertiesLoaded();
     return positionM;
 }
-//-----------------------------------------------------------------------------
+
 wxString Trigger::getRelationName()
 {
     ensurePropertiesLoaded();
@@ -146,13 +146,13 @@ wxString Trigger::getRelationName()
         return relationNameM;
     return wxEmptyString;
 }
-//-----------------------------------------------------------------------------
+
 wxString Trigger::getSource()
 {
     ensurePropertiesLoaded();
     return sourceM;
 }
-//-----------------------------------------------------------------------------
+
 void Trigger::loadProperties()
 {
     setPropertiesLoaded(false);
@@ -203,7 +203,7 @@ void Trigger::loadProperties()
 
     setPropertiesLoaded(true);
 }
-//-----------------------------------------------------------------------------
+
 wxString Trigger::getAlterSql()
 {
     ensurePropertiesLoaded();
@@ -228,7 +228,7 @@ wxString Trigger::getAlterSql()
         << StatementBuilder::NewLine;
     return sb;
 }
-//-----------------------------------------------------------------------------
+
 bool Trigger::isDatabaseTrigger()
 {
     ensurePropertiesLoaded();
@@ -241,28 +241,28 @@ bool Trigger::isDatabaseTrigger()
             return false;
     }
 }
-//-----------------------------------------------------------------------------
+
 const wxString Trigger::getTypeName() const
 {
     return wxT("TRIGGER");
 }
-//-----------------------------------------------------------------------------
+
 void Trigger::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitTrigger(*this);
 }
-//-----------------------------------------------------------------------------
+
 // Triggers collection
 Triggers::Triggers(DatabasePtr database)
     : MetadataCollection<Trigger>(ntTriggers, database, _("Triggers"))
 {
 }
-//-----------------------------------------------------------------------------
+
 void Triggers::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitTriggers(*this);
 }
-//-----------------------------------------------------------------------------
+
 void Triggers::load(ProgressIndicator* progressIndicator)
 {
     wxString stmt = wxT("select rdb$trigger_name from rdb$triggers")
@@ -270,14 +270,14 @@ void Triggers::load(ProgressIndicator* progressIndicator)
         wxT(" order by 1");
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
-//-----------------------------------------------------------------------------
+
 void Triggers::loadChildren()
 {
     load(0);
 }
-//-----------------------------------------------------------------------------
+
 const wxString Triggers::getTypeName() const
 {
     return wxT("TRIGGER_COLLECTION");
 }
-//-----------------------------------------------------------------------------
+

@@ -48,7 +48,7 @@
 #include "metadata/column.h"
 #include "metadata/database.h"
 #include "metadata/table.h"
-//-----------------------------------------------------------------------------
+
 // GridCellFormats: class to cache config data for cell formatting
 class GridCellFormats: public ConfigCache
 {
@@ -83,18 +83,18 @@ public:
     bool showBinaryBlobContent();
     bool showBlobContent();
 };
-//-----------------------------------------------------------------------------
+
 GridCellFormats::GridCellFormats()
     : ConfigCache(config())
 {
 }
-//-----------------------------------------------------------------------------
+
 GridCellFormats& GridCellFormats::get()
 {
     static GridCellFormats gcf;
     return gcf;
 }
-//-----------------------------------------------------------------------------
+
 void GridCellFormats::loadFromConfig()
 {
     floatingPointPrecisionM = config().get(wxT("NumberPrecision"), 2);
@@ -110,7 +110,7 @@ void GridCellFormats::loadFromConfig()
     showBinaryBlobContentM = config().get(wxT("GridShowBinaryBlobs"), false);
     showBlobContentM = config().get(wxT("DataGridFetchBlobs"), true);
 }
-//-----------------------------------------------------------------------------
+
 template<typename T>
 wxString GridCellFormats::format(T value)
 {
@@ -120,7 +120,7 @@ wxString GridCellFormats::format(T value)
         return wxString::Format(wxT("%.*f"), floatingPointPrecisionM, value);
     return wxString::Format(wxT("%f"), value);
 }
-//-----------------------------------------------------------------------------
+
 wxString GridCellFormats::formatDate(int year, int month, int day)
 {
     ensureCacheValid();
@@ -156,7 +156,7 @@ wxString GridCellFormats::formatDate(int year, int month, int day)
     }
     return result;
 }
-//-----------------------------------------------------------------------------
+
 bool getNumber(wxString::iterator& ci, int& toSet)
 {
     wxString num;
@@ -174,7 +174,7 @@ bool getNumber(wxString::iterator& ci, int& toSet)
     toSet = l;
     return true;
 }
-//-----------------------------------------------------------------------------
+
 bool GridCellFormats::parseDate(wxString::iterator& start,
     wxString::iterator end, bool consumeAll, int& year, int& month, int& day)
 {
@@ -236,7 +236,7 @@ bool GridCellFormats::parseDate(wxString::iterator& start,
     }
     return true;
 }
-//-----------------------------------------------------------------------------
+
 wxString GridCellFormats::formatTime(int hour, int minute, int second,
     int milliSecond)
 {
@@ -276,13 +276,13 @@ wxString GridCellFormats::formatTime(int hour, int minute, int second,
     }
     return result;
 }
-//-----------------------------------------------------------------------------
+
 int GridCellFormats::maxBlobBytesToFetch()
 {
     ensureCacheValid();
     return (maxBlobKBytesM > 0) ? 1024 * maxBlobKBytesM : INT_MAX;
 }
-//-----------------------------------------------------------------------------
+
 bool GridCellFormats::parseTime(wxString::iterator& start,
     wxString::iterator end, int& hr, int& mn, int& sc, int& ml)
 {
@@ -321,7 +321,7 @@ bool GridCellFormats::parseTime(wxString::iterator& start,
     }
     return true;
 }
-//-----------------------------------------------------------------------------
+
 wxString GridCellFormats::formatTimestamp(int year, int month, int day,
     int hour, int minute, int second, int milliSecond)
 {
@@ -379,7 +379,7 @@ wxString GridCellFormats::formatTimestamp(int year, int month, int day,
     }
     return result;
 }
-//-----------------------------------------------------------------------------
+
 bool GridCellFormats::parseTimestamp(wxString::iterator& start,
     wxString::iterator end, int& year, int& month, int& day,
     int& hr, int& mn, int& sc, int& ml)
@@ -461,61 +461,61 @@ bool GridCellFormats::parseTimestamp(wxString::iterator& start,
     }
     return true;
 }
-//-----------------------------------------------------------------------------
+
 bool GridCellFormats::showBinaryBlobContent()
 {
     ensureCacheValid();
     return showBinaryBlobContentM;
 }
-//-----------------------------------------------------------------------------
+
 bool GridCellFormats::showBlobContent()
 {
     ensureCacheValid();
     return showBlobContentM;
 }
-//-----------------------------------------------------------------------------
+
 // ResultsetColumnDef class
 ResultsetColumnDef::ResultsetColumnDef(const wxString& name, bool readonly,
     bool nullable)
     : nameM(name), readOnlyM(readonly), nullableM(nullable)
 {
 }
-//-----------------------------------------------------------------------------
+
 ResultsetColumnDef::~ResultsetColumnDef()
 {
 }
-//-----------------------------------------------------------------------------
+
 // needed to avoid strange date&time formatting if such column is PK/UNQ
 wxString ResultsetColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
 {
     return getAsString(buffer);
 }
-//-----------------------------------------------------------------------------
+
 wxString ResultsetColumnDef::getName()
 {
     return nameM;
 }
-//-----------------------------------------------------------------------------
+
 unsigned ResultsetColumnDef::getIndex()
 {
     return 0;
 }
-//-----------------------------------------------------------------------------
+
 bool ResultsetColumnDef::isNumeric()
 {
     return false;
 }
-//-----------------------------------------------------------------------------
+
 bool ResultsetColumnDef::isReadOnly()
 {
     return readOnlyM;
 }
-//-----------------------------------------------------------------------------
+
 bool ResultsetColumnDef::isNullable()
 {
     return nullableM;
 }
-//-----------------------------------------------------------------------------
+
 // DummyColumnDef class
 class DummyColumnDef : public ResultsetColumnDef
 {
@@ -528,32 +528,32 @@ public:
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source);
 };
-//-----------------------------------------------------------------------------
+
 DummyColumnDef::DummyColumnDef(const wxString& name)
     : ResultsetColumnDef(name)
 {
 }
-//-----------------------------------------------------------------------------
+
 wxString DummyColumnDef::getAsString(DataGridRowBuffer*)
 {
     return wxT("[...]");
 }
-//-----------------------------------------------------------------------------
+
 unsigned DummyColumnDef::getBufferSize()
 {
     return 0;
 }
-//-----------------------------------------------------------------------------
+
 void DummyColumnDef::setValue(DataGridRowBuffer* /*buffer*/, unsigned /*col*/,
     const IBPP::Statement& /*statement*/, wxMBConv* /*converter*/)
 {
 }
-//-----------------------------------------------------------------------------
+
 void DummyColumnDef::setFromString(DataGridRowBuffer* /* buffer */,
          const wxString& /* source */)
 {
 }
-//-----------------------------------------------------------------------------
+
 // IntegerColumnDef class
 class IntegerColumnDef : public ResultsetColumnDef
 {
@@ -570,13 +570,13 @@ public:
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source);
 };
-//-----------------------------------------------------------------------------
+
 IntegerColumnDef::IntegerColumnDef(const wxString& name, unsigned offset,
     bool readOnly, bool nullable)
     : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
 {
 }
-//-----------------------------------------------------------------------------
+
 wxString IntegerColumnDef::getAsString(DataGridRowBuffer* buffer)
 {
     wxASSERT(buffer);
@@ -585,7 +585,7 @@ wxString IntegerColumnDef::getAsString(DataGridRowBuffer* buffer)
         return wxEmptyString;
     return wxString::Format(wxT("%d"), value);
 }
-//-----------------------------------------------------------------------------
+
 void IntegerColumnDef::setFromString(DataGridRowBuffer* buffer,
         const wxString& source)
 {
@@ -595,17 +595,17 @@ void IntegerColumnDef::setFromString(DataGridRowBuffer* buffer,
         throw FRError(_("Invalid integer numeric value"));
     buffer->setValue(offsetM, (int)value);
 }
-//-----------------------------------------------------------------------------
+
 unsigned IntegerColumnDef::getBufferSize()
 {
     return sizeof(int);
 }
-//-----------------------------------------------------------------------------
+
 bool IntegerColumnDef::isNumeric()
 {
     return true;
 }
-//-----------------------------------------------------------------------------
+
 void IntegerColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     const IBPP::Statement& statement, wxMBConv*)
 {
@@ -614,7 +614,7 @@ void IntegerColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     statement->Get(col, value);
     buffer->setValue(offsetM, value);
 }
-//-----------------------------------------------------------------------------
+
 // Int64ColumnDef class
 class Int64ColumnDef : public ResultsetColumnDef
 {
@@ -631,13 +631,13 @@ public:
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source);
 };
-//-----------------------------------------------------------------------------
+
 Int64ColumnDef::Int64ColumnDef(const wxString& name, unsigned offset,
     bool readOnly, bool nullable)
     : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
 {
 }
-//-----------------------------------------------------------------------------
+
 wxString Int64ColumnDef::getAsString(DataGridRowBuffer* buffer)
 {
     wxASSERT(buffer);
@@ -646,7 +646,7 @@ wxString Int64ColumnDef::getAsString(DataGridRowBuffer* buffer)
         return wxEmptyString;
     return wxLongLong(value).ToString();
 }
-//-----------------------------------------------------------------------------
+
 void Int64ColumnDef::setFromString(DataGridRowBuffer* buffer,
     const wxString& source)
 {
@@ -665,17 +665,17 @@ void Int64ColumnDef::setFromString(DataGridRowBuffer* buffer,
         throw FRError(_("Invalid 64bit numeric value"));
     buffer->setValue(offsetM, (int64_t)l);
 }
-//-----------------------------------------------------------------------------
+
 unsigned Int64ColumnDef::getBufferSize()
 {
     return sizeof(int64_t);
 }
-//-----------------------------------------------------------------------------
+
 bool Int64ColumnDef::isNumeric()
 {
     return true;
 }
-//-----------------------------------------------------------------------------
+
 void Int64ColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     const IBPP::Statement& statement, wxMBConv*)
 {
@@ -684,7 +684,7 @@ void Int64ColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     statement->Get(col, value);
     buffer->setValue(offsetM, value);
 }
-//-----------------------------------------------------------------------------
+
 // DBKeyColumnDef class
 class DBKeyColumnDef : public ResultsetColumnDef
 {
@@ -702,13 +702,13 @@ public:
         const wxString& source);
     void getDBKey(IBPP::DBKey& dbkey, DataGridRowBuffer* buffer);
 };
-//-----------------------------------------------------------------------------
+
 DBKeyColumnDef::DBKeyColumnDef(const wxString& name, unsigned offset,
     unsigned size)
     : ResultsetColumnDef(name, true, false), offsetM(offset), sizeM(size)
 {
 }
-//-----------------------------------------------------------------------------
+
 wxString DBKeyColumnDef::getAsString(DataGridRowBuffer* buffer)
 {
     wxASSERT(buffer);
@@ -724,23 +724,23 @@ wxString DBKeyColumnDef::getAsString(DataGridRowBuffer* buffer)
     }
     return ret;
 }
-//-----------------------------------------------------------------------------
+
 void DBKeyColumnDef::setFromString(DataGridRowBuffer* /*buffer*/,
     const wxString& /*source*/)
 {
     // should never be editable
 }
-//-----------------------------------------------------------------------------
+
 unsigned DBKeyColumnDef::getBufferSize()
 {
     return sizeM;
 }
-//-----------------------------------------------------------------------------
+
 bool DBKeyColumnDef::isNumeric()
 {
     return false;
 }
-//-----------------------------------------------------------------------------
+
 void DBKeyColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     const IBPP::Statement& statement, wxMBConv*)
 {
@@ -749,13 +749,13 @@ void DBKeyColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     statement->Get(col, value);
     buffer->setValue(offsetM, value);
 }
-//-----------------------------------------------------------------------------
+
 void DBKeyColumnDef::getDBKey(IBPP::DBKey& dbkey, DataGridRowBuffer* buffer)
 {
     wxASSERT(buffer);
     buffer->getValue(offsetM, dbkey, sizeM);
 }
-//-----------------------------------------------------------------------------
+
 // DateColumnDef class
 class DateColumnDef : public ResultsetColumnDef
 {
@@ -772,13 +772,13 @@ public:
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source);
 };
-//-----------------------------------------------------------------------------
+
 DateColumnDef::DateColumnDef(const wxString& name, unsigned offset,
     bool readOnly, bool nullable)
     : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
 {
 }
-//-----------------------------------------------------------------------------
+
 wxString DateColumnDef::getAsString(DataGridRowBuffer* buffer)
 {
     wxASSERT(buffer);
@@ -791,7 +791,7 @@ wxString DateColumnDef::getAsString(DataGridRowBuffer* buffer)
     date.GetDate(year, month, day);
     return GridCellFormats::get().formatDate(year, month, day);
 }
-//-----------------------------------------------------------------------------
+
 wxString DateColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
 {
     wxASSERT(buffer);
@@ -804,7 +804,7 @@ wxString DateColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
     date.GetDate(year, month, day);
     return wxString::Format(wxT("%d-%d-%d"), year, month, day);
 }
-//-----------------------------------------------------------------------------
+
 void DateColumnDef::setFromString(DataGridRowBuffer* buffer,
     const wxString& source)
 {
@@ -833,12 +833,12 @@ void DateColumnDef::setFromString(DataGridRowBuffer* buffer,
     }
     buffer->setValue(offsetM, idt.GetDate());
 }
-//-----------------------------------------------------------------------------
+
 unsigned DateColumnDef::getBufferSize()
 {
     return sizeof(int);
 }
-//-----------------------------------------------------------------------------
+
 void DateColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     const IBPP::Statement& statement, wxMBConv*)
 {
@@ -847,7 +847,7 @@ void DateColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     statement->Get(col, value);
     buffer->setValue(offsetM, value.GetDate());
 }
-//-----------------------------------------------------------------------------
+
 // TimeColumnDef class
 class TimeColumnDef : public ResultsetColumnDef
 {
@@ -864,13 +864,13 @@ public:
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source);
 };
-//-----------------------------------------------------------------------------
+
 TimeColumnDef::TimeColumnDef(const wxString& name, unsigned offset,
     bool readOnly, bool nullable)
     : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
 {
 }
-//-----------------------------------------------------------------------------
+
 wxString TimeColumnDef::getAsString(DataGridRowBuffer* buffer)
 {
     wxASSERT(buffer);
@@ -884,7 +884,7 @@ wxString TimeColumnDef::getAsString(DataGridRowBuffer* buffer)
     return GridCellFormats::get().formatTime(hour, minute, second,
         tenththousands / 10);
 }
-//-----------------------------------------------------------------------------
+
 wxString TimeColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
 {
     wxASSERT(buffer);
@@ -898,7 +898,7 @@ wxString TimeColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
     return wxString::Format(wxT("%d:%d:%d.%d"), hour, minute, second,
         tenththousands / 10);
 }
-//-----------------------------------------------------------------------------
+
 void TimeColumnDef::setFromString(DataGridRowBuffer* buffer,
     const wxString& source)
 {
@@ -919,12 +919,12 @@ void TimeColumnDef::setFromString(DataGridRowBuffer* buffer,
     }
     buffer->setValue(offsetM, itm.GetTime());
 }
-//-----------------------------------------------------------------------------
+
 unsigned TimeColumnDef::getBufferSize()
 {
     return sizeof(int);
 }
-//-----------------------------------------------------------------------------
+
 void TimeColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     const IBPP::Statement& statement, wxMBConv*)
 {
@@ -933,7 +933,7 @@ void TimeColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     statement->Get(col, value);
     buffer->setValue(offsetM, value.GetTime());
 }
-//-----------------------------------------------------------------------------
+
 // TimestampColumnDef class
 class TimestampColumnDef : public ResultsetColumnDef
 {
@@ -950,13 +950,13 @@ public:
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source);
 };
-//-----------------------------------------------------------------------------
+
 TimestampColumnDef::TimestampColumnDef(const wxString& name, unsigned offset,
     bool readOnly, bool nullable)
     : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
 {
 }
-//-----------------------------------------------------------------------------
+
 wxString TimestampColumnDef::getAsString(DataGridRowBuffer* buffer)
 {
     wxASSERT(buffer);
@@ -976,7 +976,7 @@ wxString TimestampColumnDef::getAsString(DataGridRowBuffer* buffer)
     return GridCellFormats::get().formatTimestamp(year, month, day,
         hour, minute, second, tenththousands / 10);
 }
-//-----------------------------------------------------------------------------
+
 wxString TimestampColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
 {
     wxASSERT(buffer);
@@ -996,7 +996,7 @@ wxString TimestampColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
     return wxString::Format(wxT("%d-%d-%d, %d:%d:%d.%d"), year, month, day,
         hour, minute, second, tenththousands / 10);
 }
-//-----------------------------------------------------------------------------
+
 void TimestampColumnDef::setFromString(DataGridRowBuffer* buffer,
         const wxString& source)
 {
@@ -1035,12 +1035,12 @@ void TimestampColumnDef::setFromString(DataGridRowBuffer* buffer,
     buffer->setValue(offsetM, its.GetDate());
     buffer->setValue(offsetM + sizeof(int), its.GetTime());
 }
-//-----------------------------------------------------------------------------
+
 unsigned TimestampColumnDef::getBufferSize()
 {
     return 2 * sizeof(int);
 }
-//-----------------------------------------------------------------------------
+
 void TimestampColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     const IBPP::Statement& statement, wxMBConv*)
 {
@@ -1050,7 +1050,7 @@ void TimestampColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     buffer->setValue(offsetM, value.GetDate());
     buffer->setValue(offsetM + sizeof(int), value.GetTime());
 }
-//-----------------------------------------------------------------------------
+
 // FloatColumnDef class
 class FloatColumnDef : public ResultsetColumnDef
 {
@@ -1067,13 +1067,13 @@ public:
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source);
 };
-//-----------------------------------------------------------------------------
+
 FloatColumnDef::FloatColumnDef(const wxString& name, unsigned offset,
         bool readOnly, bool nullable)
     : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
 {
 }
-//-----------------------------------------------------------------------------
+
 wxString FloatColumnDef::getAsString(DataGridRowBuffer* buffer)
 {
     wxASSERT(buffer);
@@ -1083,7 +1083,7 @@ wxString FloatColumnDef::getAsString(DataGridRowBuffer* buffer)
 
     return GridCellFormats::get().format<float>(value);
 }
-//-----------------------------------------------------------------------------
+
 void FloatColumnDef::setFromString(DataGridRowBuffer* buffer,
     const wxString& source)
 {
@@ -1093,17 +1093,17 @@ void FloatColumnDef::setFromString(DataGridRowBuffer* buffer,
         throw FRError(_("Invalid float numeric value"));
     buffer->setValue(offsetM, (float)d);
 }
-//-----------------------------------------------------------------------------
+
 unsigned FloatColumnDef::getBufferSize()
 {
     return sizeof(float);
 }
-//-----------------------------------------------------------------------------
+
 bool FloatColumnDef::isNumeric()
 {
     return true;
 }
-//-----------------------------------------------------------------------------
+
 void FloatColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     const IBPP::Statement& statement, wxMBConv*)
 {
@@ -1112,7 +1112,7 @@ void FloatColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     statement->Get(col, value);
     buffer->setValue(offsetM, value);
 }
-//-----------------------------------------------------------------------------
+
 // DoubleColumnDef class
 class DoubleColumnDef : public ResultsetColumnDef
 {
@@ -1130,14 +1130,14 @@ public:
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source);
 };
-//-----------------------------------------------------------------------------
+
 DoubleColumnDef::DoubleColumnDef(const wxString& name, unsigned offset,
         bool readOnly, bool nullable, short scale)
     : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset),
         scaleM(scale)
 {
 }
-//-----------------------------------------------------------------------------
+
 wxString DoubleColumnDef::getAsString(DataGridRowBuffer* buffer)
 {
     wxASSERT(buffer);
@@ -1149,7 +1149,7 @@ wxString DoubleColumnDef::getAsString(DataGridRowBuffer* buffer)
         return wxString::Format(wxT("%.*f"), scaleM, value);
     return GridCellFormats::get().format<double>(value);
 }
-//-----------------------------------------------------------------------------
+
 void DoubleColumnDef::setFromString(DataGridRowBuffer* buffer,
     const wxString& source)
 {
@@ -1159,17 +1159,17 @@ void DoubleColumnDef::setFromString(DataGridRowBuffer* buffer,
         throw FRError(_("Invalid double numeric value"));
     buffer->setValue(offsetM, d);
 }
-//-----------------------------------------------------------------------------
+
 unsigned DoubleColumnDef::getBufferSize()
 {
     return sizeof(double);
 }
-//-----------------------------------------------------------------------------
+
 bool DoubleColumnDef::isNumeric()
 {
     return true;
 }
-//-----------------------------------------------------------------------------
+
 void DoubleColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     const IBPP::Statement& statement, wxMBConv*)
 {
@@ -1178,7 +1178,7 @@ void DoubleColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     statement->Get(col, value);
     buffer->setValue(offsetM, value);
 }
-//-----------------------------------------------------------------------------
+
 class BlobColumnDef : public ResultsetColumnDef
 {
 private:
@@ -1198,7 +1198,7 @@ public:
         const wxString& source);
     bool isTextual() { return textualM; };
 };
-//-----------------------------------------------------------------------------
+
 BlobColumnDef::BlobColumnDef(const wxString& name, bool readOnly,
         bool nullable, unsigned stringIndex, unsigned blobIndex, bool textual)
     : ResultsetColumnDef(name, readOnly, nullable), indexM(blobIndex),
@@ -1206,17 +1206,17 @@ BlobColumnDef::BlobColumnDef(const wxString& name, bool readOnly,
 {
     //readOnlyM = true;   // TODO: uncomment this when we make BlobDialog
 }
-//-----------------------------------------------------------------------------
+
 void BlobColumnDef::reset(DataGridRowBuffer* buffer)
 {
     buffer->setStringLoaded(stringIndexM, false);
 }
-//-----------------------------------------------------------------------------
+
 unsigned BlobColumnDef::getIndex()
 {
     return indexM;
 }
-//-----------------------------------------------------------------------------
+
 wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
 {
     wxASSERT(buffer);
@@ -1285,7 +1285,7 @@ wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
     buffer->setString(stringIndexM, wxs);
     return wxs;
 }
-//-----------------------------------------------------------------------------
+
 void BlobColumnDef::setFromString(DataGridRowBuffer* /*buffer*/,
     const wxString& /*source*/)
 {
@@ -1293,12 +1293,12 @@ void BlobColumnDef::setFromString(DataGridRowBuffer* /*buffer*/,
     // TODO: is this called from anywhere? - blobs will have a custom editor
     // buffer->setString(indexM, source);
 }
-//-----------------------------------------------------------------------------
+
 unsigned BlobColumnDef::getBufferSize()
 {
     return 0;
 }
-//-----------------------------------------------------------------------------
+
 void BlobColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     const IBPP::Statement& statement, wxMBConv* converter)
 {
@@ -1309,7 +1309,7 @@ void BlobColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     buffer->setBlob(indexM, b);
     converterM = converter; // store for later when we fetch the data
 }
-//-----------------------------------------------------------------------------
+
 // StringColumnDef class
 class StringColumnDef : public ResultsetColumnDef
 {
@@ -1328,19 +1328,19 @@ public:
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source);
 };
-//-----------------------------------------------------------------------------
+
 StringColumnDef::StringColumnDef(const wxString& name, unsigned stringIndex,
     bool readOnly, bool nullable, int charSize)
     : ResultsetColumnDef(name, readOnly, nullable), indexM(stringIndex),
       charSizeM(charSize)
 {
 }
-//-----------------------------------------------------------------------------
+
 unsigned StringColumnDef::getIndex()
 {
     return indexM;
 }
-//-----------------------------------------------------------------------------
+
 wxString StringColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
 {
     wxASSERT(buffer);
@@ -1349,13 +1349,13 @@ wxString StringColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
     s.Replace(wxT("'"), wxT("''"));
     return s;
 }
-//-----------------------------------------------------------------------------
+
 wxString StringColumnDef::getAsString(DataGridRowBuffer* buffer)
 {
     wxASSERT(buffer);
     return buffer->getString(indexM);
 }
-//-----------------------------------------------------------------------------
+
 void StringColumnDef::setFromString(DataGridRowBuffer* buffer,
         const wxString& source)
 {
@@ -1363,12 +1363,12 @@ void StringColumnDef::setFromString(DataGridRowBuffer* buffer,
     // TODO: if CHARACTER SET OCTETS - check if it is a valid hexdec string
     buffer->setString(indexM, source);
 }
-//-----------------------------------------------------------------------------
+
 unsigned StringColumnDef::getBufferSize()
 {
     return 0;
 }
-//-----------------------------------------------------------------------------
+
 void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     const IBPP::Statement& statement, wxMBConv* converter)
 {
@@ -1391,30 +1391,30 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
         buffer->setString(indexM, val);
     }
 }
-//-----------------------------------------------------------------------------
+
 // DataGridRows class
 DataGridRows::DataGridRows(Database* db)
     : bufferSizeM(0), databaseM(db), readOnlyM(false)
 {
 }
-//-----------------------------------------------------------------------------
+
 DataGridRows::~DataGridRows()
 {
     clear();
 }
-//-----------------------------------------------------------------------------
+
 ResultsetColumnDef* DataGridRows::getColumnDef(unsigned col)
 {
     return columnDefsM[col];
 }
-//-----------------------------------------------------------------------------
+
 void DataGridRows::addRow(DataGridRowBuffer* buffer)
 {
     if (buffersM.size() == buffersM.capacity())
         buffersM.reserve(buffersM.capacity() + 1024);
     buffersM.push_back(buffer);
 }
-//-----------------------------------------------------------------------------
+
 void DataGridRows::addRow(const IBPP::Statement& statement)
 {
     DataGridRowBuffer* buffer = new DataGridRowBuffer(columnDefsM.size());
@@ -1445,7 +1445,7 @@ void DataGridRows::addRow(const IBPP::Statement& statement)
     }
     addRow(buffer);
 }
-//-----------------------------------------------------------------------------
+
     void freeBuffer(DataGridRowBuffer* buffer) { delete buffer; }
 
     void freeColumnDef(ResultsetColumnDef* columnDef) { delete columnDef; }
@@ -1467,7 +1467,7 @@ void DataGridRows::clear()
     dbKeysM.clear();
     bufferSizeM = 0;
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridRows::canRemoveRow(size_t row)
 {
     if (row >= buffersM.size())
@@ -1510,7 +1510,7 @@ bool DataGridRows::canRemoveRow(size_t row)
     }
     return buffersM[row]->isDeletable();
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridRows::removeRows(size_t from, size_t count, wxString& stm)
 {
     if (statementTablesM.begin() == statementTablesM.end())
@@ -1568,24 +1568,24 @@ bool DataGridRows::removeRows(size_t from, size_t count, wxString& stm)
     }
     return true;
 }
-//-----------------------------------------------------------------------------
+
 unsigned DataGridRows::getRowCount()
 {
     return buffersM.size();
 }
-//-----------------------------------------------------------------------------
+
 unsigned DataGridRows::getRowFieldCount()
 {
     return columnDefsM.size();
 }
-//-----------------------------------------------------------------------------
+
 wxString DataGridRows::getRowFieldName(unsigned col)
 {
     if (col < columnDefsM.size())
         return columnDefsM[col]->getName();
     return wxEmptyString;
 }
-//-----------------------------------------------------------------------------
+
 void checkColumnsPresent(const Database* database,
     const IBPP::Statement& statement, UniqueConstraint** locator)
 {
@@ -1705,7 +1705,7 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
         nullable ? 1 : 0)
     );*/
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridRows::initialize(const IBPP::Statement& statement)
 {
     statementM = statement;
@@ -1798,28 +1798,28 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
     }
     return true;
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridRows::isColumnNullable(unsigned col)
 {
     if (col >= columnDefsM.size())
         return false;
     return columnDefsM[col]->isNullable();
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridRows::isColumnNumeric(unsigned col)
 {
     if (col >= columnDefsM.size())
         return false;
     return columnDefsM[col]->isNumeric();
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridRows::isColumnReadonly(unsigned col)
 {
     if (col >= columnDefsM.size())
         return false;
     return columnDefsM[col]->isReadOnly();
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridRows::getFieldInfo(unsigned row, unsigned col,
     DataGridFieldInfo& info)
 {
@@ -1837,7 +1837,7 @@ bool DataGridRows::getFieldInfo(unsigned row, unsigned col,
     info.fieldBlob = isBlobColumn(col);
     return true;
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridRows::isFieldReadonly(unsigned row, unsigned col)
 {
     if (col >= columnDefsM.size() || row >= buffersM.size())
@@ -1877,28 +1877,28 @@ bool DataGridRows::isFieldReadonly(unsigned row, unsigned col)
     }
     return false;
 }
-//-----------------------------------------------------------------------------
+
 wxString DataGridRows::getFieldValue(unsigned row, unsigned col)
 {
     if (row >= buffersM.size() || col >= columnDefsM.size())
         return wxEmptyString;
     return columnDefsM[col]->getAsString(buffersM[row]);
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridRows::isFieldNull(unsigned row, unsigned col)
 {
     if (row >= buffersM.size())
         return false;
     return buffersM[row]->isFieldNull(col);
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridRows::isFieldNA(unsigned row, unsigned col)
 {
     if (row >= buffersM.size())
         return false;
     return buffersM[row]->isFieldNA(col);
 }
-//-----------------------------------------------------------------------------
+
 IBPP::Statement DataGridRows::addWhere(UniqueConstraint* uq, wxString& stm,
     const wxString& table, DataGridRowBuffer *buffer)
 {
@@ -1960,7 +1960,7 @@ IBPP::Statement DataGridRows::addWhere(UniqueConstraint* uq, wxString& stm,
     }
     return st;
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridRows::isBlobColumn(unsigned col, bool* pIsTextual)
 {
     BlobColumnDef* bcd = dynamic_cast<BlobColumnDef *>(columnDefsM[col]);
@@ -1968,7 +1968,7 @@ bool DataGridRows::isBlobColumn(unsigned col, bool* pIsTextual)
         *pIsTextual = bcd->isTextual();
     return (0 != bcd);
 }
-//-----------------------------------------------------------------------------
+
 IBPP::Blob* DataGridRows::getBlob(unsigned row, unsigned col, bool validateBlob)
 {
     if (row >= buffersM.size())
@@ -1980,7 +1980,7 @@ IBPP::Blob* DataGridRows::getBlob(unsigned row, unsigned col, bool validateBlob)
         throw FRError(_("BLOB data not valid"));
     return b0;
 }
-//-----------------------------------------------------------------------------
+
 // Creates a Blob (DataGridRowBlob-struct) to save data in DataGridRowsBlob.blob
 // Finally the BLOB will be set with setBlob(...)
 DataGridRowsBlob DataGridRows::setBlobPrepare(unsigned row, unsigned col)
@@ -2005,7 +2005,7 @@ DataGridRowsBlob DataGridRows::setBlobPrepare(unsigned row, unsigned col)
     b.blob = IBPP::BlobFactory(b.st->DatabasePtr(), b.st->TransactionPtr());
     return b;
 }
-//-----------------------------------------------------------------------------
+
 void DataGridRows::setBlob(DataGridRowsBlob &b)
 {
     if (b.blob != 0) // b.blob is 0 if the blob is null
@@ -2022,7 +2022,7 @@ void DataGridRows::setBlob(DataGridRowsBlob &b)
         throw FRError(_("Not a BLOB column."));
     bcd->reset(buffersM[b.row]);  // reset cached blob data
 }
-//-----------------------------------------------------------------------------
+
 void DataGridRows::exportBlobFile(const wxString& filename, unsigned row,
     unsigned col, ProgressIndicator *pi)
 {
@@ -2050,7 +2050,7 @@ void DataGridRows::exportBlobFile(const wxString& filename, unsigned row,
     fl.Close();
     b->Close();
 }
-//-----------------------------------------------------------------------------
+
 void DataGridRows::importBlobFile(const wxString& filename, unsigned row,
     unsigned col, ProgressIndicator *pi)
 {
@@ -2079,7 +2079,7 @@ void DataGridRows::importBlobFile(const wxString& filename, unsigned row,
 
     setBlob(b);
 }
-//-----------------------------------------------------------------------------
+
 // returns the executed SQL statement
 wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
     const wxString& value, bool setNull)
@@ -2152,4 +2152,4 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
         throw;
     }
 }
-//-----------------------------------------------------------------------------
+

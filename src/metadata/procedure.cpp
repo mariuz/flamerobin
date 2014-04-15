@@ -48,12 +48,12 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/parameter.h"
 #include "metadata/procedure.h"
-//-----------------------------------------------------------------------------
+
 Procedure::Procedure(DatabasePtr database, const wxString& name)
     : MetadataItem(ntProcedure, database.get(), name)
 {
 }
-//-----------------------------------------------------------------------------
+
 void Procedure::loadChildren()
 {
     bool childrenWereLoaded = childrenLoaded();
@@ -133,7 +133,7 @@ void Procedure::loadChildren()
         notifyObservers();
     }
 }
-//-----------------------------------------------------------------------------
+
 bool Procedure::getChildren(std::vector<MetadataItem *>& temp)
 {
     if (parametersM.empty())
@@ -142,19 +142,19 @@ bool Procedure::getChildren(std::vector<MetadataItem *>& temp)
         std::back_inserter(temp), boost::mem_fn(&ParameterPtr::get));
     return !parametersM.empty();
 }
-//-----------------------------------------------------------------------------
+
 void Procedure::lockChildren()
 {
     std::for_each(parametersM.begin(), parametersM.end(),
         boost::mem_fn(&Parameter::lockSubject));
 }
-//-----------------------------------------------------------------------------
+
 void Procedure::unlockChildren()
 {
     std::for_each(parametersM.begin(), parametersM.end(),
         boost::mem_fn(&Parameter::unlockSubject));
 }
-//-----------------------------------------------------------------------------
+
 ParameterPtrs::iterator Procedure::begin()
 {
     // please - don't load here
@@ -163,23 +163,23 @@ ParameterPtrs::iterator Procedure::begin()
     // loading them
     return parametersM.begin();
 }
-//-----------------------------------------------------------------------------
+
 ParameterPtrs::iterator Procedure::end()
 {
     // please see comment for begin()
     return parametersM.end();
 }
-//-----------------------------------------------------------------------------
+
 ParameterPtrs::const_iterator Procedure::begin() const
 {
     return parametersM.begin();
 }
-//-----------------------------------------------------------------------------
+
 ParameterPtrs::const_iterator Procedure::end() const
 {
     return parametersM.end();
 }
-//-----------------------------------------------------------------------------
+
 ParameterPtr Procedure::findParameter(const wxString& name) const
 {
     for (ParameterPtrs::const_iterator it = parametersM.begin();
@@ -190,12 +190,12 @@ ParameterPtr Procedure::findParameter(const wxString& name) const
     }
     return ParameterPtr();
 }
-//-----------------------------------------------------------------------------
+
 size_t Procedure::getParamCount() const
 {
     return parametersM.size();
 }
-//-----------------------------------------------------------------------------
+
 wxString Procedure::getOwner()
 {
     DatabasePtr db = getDatabase();
@@ -211,7 +211,7 @@ wxString Procedure::getOwner()
     st1->Get(1, name);
     return std2wxIdentifier(name, db->getCharsetConverter());
 }
-//-----------------------------------------------------------------------------
+
 wxString Procedure::getSource()
 {
     DatabasePtr db = getDatabase();
@@ -229,7 +229,7 @@ wxString Procedure::getSource()
     source.Trim(false);     // remove leading whitespace
     return source;
 }
-//-----------------------------------------------------------------------------
+
 wxString Procedure::getDefinition()
 {
     ensureChildrenLoaded();
@@ -273,7 +273,7 @@ wxString Procedure::getDefinition()
         retval += wxT("returns:\n") + collist;
     return retval;
 }
-//-----------------------------------------------------------------------------
+
 wxString Procedure::getAlterSql(bool full)
 {
     ensureChildrenLoaded();
@@ -358,7 +358,7 @@ wxString Procedure::getAlterSql(bool full)
     sql += wxT("^\nSET TERM ; ^\n");
     return sql;
 }
-//-----------------------------------------------------------------------------
+
 void Procedure::checkDependentProcedures()
 {
     // check dependencies and parameters
@@ -417,7 +417,7 @@ void Procedure::checkDependentProcedures()
         );
     }
 }
-//-----------------------------------------------------------------------------
+
 std::vector<Privilege>* Procedure::getPrivileges()
 {
     // load privileges from database and return the pointer to collection
@@ -470,28 +470,28 @@ std::vector<Privilege>* Procedure::getPrivileges()
     }
     return &privilegesM;
 }
-//-----------------------------------------------------------------------------
+
 const wxString Procedure::getTypeName() const
 {
     return wxT("PROCEDURE");
 }
-//-----------------------------------------------------------------------------
+
 void Procedure::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitProcedure(*this);
 }
-//-----------------------------------------------------------------------------
+
 // Procedures collection
 Procedures::Procedures(DatabasePtr database)
     : MetadataCollection<Procedure>(ntProcedures, database, _("Procedures"))
 {
 }
-//-----------------------------------------------------------------------------
+
 void Procedures::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitProcedures(*this);
 }
-//-----------------------------------------------------------------------------
+
 void Procedures::load(ProgressIndicator* progressIndicator)
 {
     wxString stmt = wxT("select rdb$procedure_name from rdb$procedures")
@@ -499,14 +499,14 @@ void Procedures::load(ProgressIndicator* progressIndicator)
         wxT(" order by 1");
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
-//-----------------------------------------------------------------------------
+
 void Procedures::loadChildren()
 {
     load(0);
 }
-//-----------------------------------------------------------------------------
+
 const wxString Procedures::getTypeName() const
 {
     return wxT("PROCEDURE_COLLECTION");
 }
-//-----------------------------------------------------------------------------
+

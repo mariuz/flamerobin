@@ -40,7 +40,7 @@
 #include "gui/StyleGuide.h"
 #include "metadata/database.h"
 #include "metadata/server.h"
-//-----------------------------------------------------------------------------
+
 DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent,
         const wxString& title, bool createDB, bool connectAs)
     : BaseDialog(parent, wxID_ANY, title)
@@ -54,7 +54,7 @@ DatabaseRegistrationDialog::DatabaseRegistrationDialog(wxWindow* parent,
     layoutControls();
     updateButtons();
 }
-//-----------------------------------------------------------------------------
+
 //! implementation details
 void DatabaseRegistrationDialog::createControls()
 {
@@ -106,7 +106,7 @@ void DatabaseRegistrationDialog::createControls()
         (createM ? _("Create") : _("Save")));
     button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL, _("Cancel"));
 }
-//-----------------------------------------------------------------------------
+
 wxArrayString DatabaseRegistrationDialog::getAuthenticationChoices() const
 {
     wxArrayString choices;
@@ -121,7 +121,7 @@ wxArrayString DatabaseRegistrationDialog::getAuthenticationChoices() const
     }
     return choices;
 }
-//-----------------------------------------------------------------------------
+
 wxArrayString DatabaseRegistrationDialog::getDatabaseCharsetChoices() const
 {
     const wxString charset_choices[] = {
@@ -153,7 +153,7 @@ wxArrayString DatabaseRegistrationDialog::getDatabaseCharsetChoices() const
         choices.Add(charset_choices[i]);
     return choices;
 }
-//-----------------------------------------------------------------------------
+
 wxArrayString DatabaseRegistrationDialog::getDatabaseDialectChoices() const
 {
     wxArrayString choices;
@@ -163,7 +163,7 @@ wxArrayString DatabaseRegistrationDialog::getDatabaseDialectChoices() const
     choices.Add(wxT("3"));
     return choices;
 }
-//-----------------------------------------------------------------------------
+
 wxArrayString DatabaseRegistrationDialog::getDatabasePagesizeChoices() const
 {
     wxArrayString choices;
@@ -176,7 +176,7 @@ wxArrayString DatabaseRegistrationDialog::getDatabasePagesizeChoices() const
     choices.Add(wxT("16384"));
     return choices;
 }
-//-----------------------------------------------------------------------------
+
 void DatabaseRegistrationDialog::doReadConfigSettings(const wxString& prefix)
 {
     BaseDialog::doReadConfigSettings(prefix);
@@ -215,7 +215,7 @@ void DatabaseRegistrationDialog::doReadConfigSettings(const wxString& prefix)
         updateColors();
     }
 }
-//-----------------------------------------------------------------------------
+
 void DatabaseRegistrationDialog::doWriteConfigSettings(
     const wxString& prefix) const
 {
@@ -236,19 +236,19 @@ void DatabaseRegistrationDialog::doWriteConfigSettings(
             choice_dialect->GetStringSelection());
     }
 }
-//-----------------------------------------------------------------------------
+
 const wxString DatabaseRegistrationDialog::getName() const
 {
     // don't use different names here, force minimal height instead
     // this way it will work for all combinations of control visibility
     return wxT("DatabaseRegistrationDialog");
 }
-//-----------------------------------------------------------------------------
+
 bool DatabaseRegistrationDialog::getConfigStoresHeight() const
 {
     return false;
 }
-//-----------------------------------------------------------------------------
+
 void DatabaseRegistrationDialog::layoutControls()
 {
     // create sizer for controls
@@ -297,7 +297,7 @@ void DatabaseRegistrationDialog::layoutControls()
     // use method in base class to set everything up
     layoutSizers(sizerControls, sizerButtons);
 }
-//-----------------------------------------------------------------------------
+
 void DatabaseRegistrationDialog::setControlsProperties()
 {
     int wh = text_ctrl_dbpath->GetMinHeight();
@@ -313,7 +313,7 @@ void DatabaseRegistrationDialog::setControlsProperties()
 
     button_ok->SetDefault();
 }
-//-----------------------------------------------------------------------------
+
 void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
 {
     wxASSERT(db);
@@ -355,7 +355,7 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
     updateButtons();
     updateColors();
 }
-//-----------------------------------------------------------------------------
+
 void DatabaseRegistrationDialog::updateAuthenticationMode()
 {
     bool isConnected = databaseM->isConnected();
@@ -367,7 +367,7 @@ void DatabaseRegistrationDialog::updateAuthenticationMode()
     text_ctrl_password->SetEditable(!isConnected && sel < 2);
     updateButtons();
 }
-//-----------------------------------------------------------------------------
+
 void DatabaseRegistrationDialog::updateButtons()
 {
     if (button_ok->IsShown())
@@ -379,19 +379,19 @@ void DatabaseRegistrationDialog::updateButtons()
             && !missingUserName);
     }
 }
-//-----------------------------------------------------------------------------
+
 wxString DatabaseRegistrationDialog::getDefaultDatabaseName() const
 {
     return Database::extractNameFromConnectionString(
         text_ctrl_dbpath->GetValue());
 }
-//-----------------------------------------------------------------------------
+
 void DatabaseRegistrationDialog::updateIsDefaultDatabaseName()
 {
     wxString name(text_ctrl_name->GetValue());
     isDefaultNameM = name.empty() || name == getDefaultDatabaseName();
 }
-//-----------------------------------------------------------------------------
+
 //! event handling
 BEGIN_EVENT_TABLE(DatabaseRegistrationDialog, BaseDialog)
     EVT_BUTTON(DatabaseRegistrationDialog::ID_button_browse, DatabaseRegistrationDialog::OnBrowseButtonClick)
@@ -401,7 +401,7 @@ BEGIN_EVENT_TABLE(DatabaseRegistrationDialog, BaseDialog)
     EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_username, DatabaseRegistrationDialog::OnSettingsChange)
     EVT_CHOICE(DatabaseRegistrationDialog::ID_choice_authentication, DatabaseRegistrationDialog::OnAuthenticationChange)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     wxString path = ::wxFileSelector(_("Select database file"), wxT(""), wxT(""), wxT(""),
@@ -410,7 +410,7 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
     if (!path.empty())
         text_ctrl_dbpath->SetValue(path);
 }
-//-----------------------------------------------------------------------------
+
 void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     // TODO: This needs to be reworked. If the order of method calls is important
@@ -466,7 +466,7 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
         wxMessageBox(_("SYSTEM ERROR!"), _("Error"), wxOK|wxICON_ERROR);
     }
 }
-//-----------------------------------------------------------------------------
+
 void DatabaseRegistrationDialog::OnSettingsChange(
     wxCommandEvent& WXUNUSED(event))
 {
@@ -478,7 +478,7 @@ void DatabaseRegistrationDialog::OnSettingsChange(
         updateButtons();
     }
 }
-//-----------------------------------------------------------------------------
+
 void DatabaseRegistrationDialog::OnNameChange(wxCommandEvent& WXUNUSED(event))
 {
     if (IsShown())
@@ -487,7 +487,7 @@ void DatabaseRegistrationDialog::OnNameChange(wxCommandEvent& WXUNUSED(event))
         updateButtons();
     }
 }
-//-----------------------------------------------------------------------------
+
 void DatabaseRegistrationDialog::OnAuthenticationChange(
     wxCommandEvent& WXUNUSED(event))
 {
@@ -497,4 +497,4 @@ void DatabaseRegistrationDialog::OnAuthenticationChange(
         updateColors();
     }
 }
-//-----------------------------------------------------------------------------
+

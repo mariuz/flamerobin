@@ -30,7 +30,7 @@
     #include "wx/wx.h"
 #endif
 
-//-----------------------------------------------------------------------------
+
 #include "wx/fileconf.h"
 #include "wx/filename.h"
 
@@ -40,15 +40,15 @@
 #endif
 #include "core/FRError.h"
 
-//-----------------------------------------------------------------------------
+
 const wxString Config::pathSeparator = wxT("/");
-//-----------------------------------------------------------------------------
+
 FRConfig& config()
 {
     static FRConfig c;
     return c;
 }
-//-----------------------------------------------------------------------------
+
 Config::Config()
     : configM(0), needsFlushM(false)
 {
@@ -56,12 +56,12 @@ Config::Config()
     ((wxStandardPaths&)wxStandardPaths::Get()).SetInstallPrefix(wxT(FR_INSTALL_PREFIX));
 #endif
 }
-//-----------------------------------------------------------------------------
+
 Config::~Config()
 {
     delete configM;
 }
-//-----------------------------------------------------------------------------
+
 wxFileConfig* Config::getConfig() const
 {
     if (!configM)
@@ -75,7 +75,7 @@ wxFileConfig* Config::getConfig() const
     }
     return configM;
 }
-//-----------------------------------------------------------------------------
+
 void Config::lockedChanged(bool locked)
 {
     // delay getConfig()->Flush() until object is completely unlocked again
@@ -85,13 +85,13 @@ void Config::lockedChanged(bool locked)
         getConfig()->Flush();
     }
 }
-//-----------------------------------------------------------------------------
+
 //! return true if value exists, false if not
 bool Config::keyExists(const wxString& key) const
 {
     return getConfig()->HasEntry(key);
 }
-//-----------------------------------------------------------------------------
+
 //! return true if value exists, false if not
 bool Config::getValue(const wxString& key, wxString& value)
 {
@@ -123,7 +123,7 @@ bool Config::getValue(const wxString& key, wxString& value)
         }
     }
 }
-//-----------------------------------------------------------------------------
+
 bool Config::getValue(const wxString& key, int& value)
 {
     wxString s;
@@ -140,7 +140,7 @@ bool Config::getValue(const wxString& key, int& value)
     value = longValue;
     return true;
 }
-//-----------------------------------------------------------------------------
+
 bool Config::getValue(const wxString& key, double& value)
 {
     wxString s;
@@ -152,7 +152,7 @@ bool Config::getValue(const wxString& key, double& value)
 
     return true;
 }
-//-----------------------------------------------------------------------------
+
 bool Config::getValue(const wxString& key, bool& value)
 {
     wxString s;
@@ -162,7 +162,7 @@ bool Config::getValue(const wxString& key, bool& value)
     value = (s == wxT("1"));
     return true;
 }
-//-----------------------------------------------------------------------------
+
 bool Config::getValue(const wxString& key, StorageGranularity& value)
 {
     int intValue = 0;
@@ -171,7 +171,7 @@ bool Config::getValue(const wxString& key, StorageGranularity& value)
         value = StorageGranularity(intValue);
     return ret;
 }
-//-----------------------------------------------------------------------------
+
 bool Config::getValue(const wxString& key, wxArrayString& value)
 {
     wxString s;
@@ -192,7 +192,7 @@ bool Config::getValue(const wxString& key, wxArrayString& value)
         value.push_back(item);
     return true;
 }
-//-----------------------------------------------------------------------------
+
 //! return true if value existed, false if not
 bool Config::setValue(const wxString& key, const wxString& value)
 {
@@ -204,21 +204,21 @@ bool Config::setValue(const wxString& key, const wxString& value)
     notifyObservers();
     return result;
 }
-//-----------------------------------------------------------------------------
+
 bool Config::setValue(const wxString& key, int value)
 {
     wxString s;
     s << value;
     return setValue(key, s);
 }
-//-----------------------------------------------------------------------------
+
 bool Config::setValue(const wxString& key, double value)
 {
     wxString s;
     s << value;
     return setValue(key, s);
 }
-//-----------------------------------------------------------------------------
+
 bool Config::setValue(const wxString& key, bool value)
 {
     if (value)
@@ -226,12 +226,12 @@ bool Config::setValue(const wxString& key, bool value)
     else
         return setValue(key, wxString(wxT("0")));
 }
-//-----------------------------------------------------------------------------
+
 bool Config::setValue(const wxString& key, StorageGranularity value)
 {
     return setValue(key, int(value));
 }
-//-----------------------------------------------------------------------------
+
 bool Config::setValue(const wxString& key, const wxArrayString& value)
 {
     wxString s;
@@ -247,7 +247,7 @@ bool Config::setValue(const wxString& key, const wxArrayString& value)
     }
     return setValue(key, s);
 }
-//-----------------------------------------------------------------------------
+
 wxString Config::getHomePath() const
 {
     if (!homePathM.empty())
@@ -255,7 +255,7 @@ wxString Config::getHomePath() const
     else
         return getDataDir() + wxFileName::GetPathSeparator();
 }
-//-----------------------------------------------------------------------------
+
 wxString Config::getUserHomePath() const
 {
     if (!userHomePathM.empty())
@@ -263,49 +263,49 @@ wxString Config::getUserHomePath() const
     else
         return getUserLocalDataDir() + wxFileName::GetPathSeparator();
 }
-//-----------------------------------------------------------------------------
+
 wxFileName Config::getConfigFileName() const
 {
     return configFileNameM;
 }
-//-----------------------------------------------------------------------------
+
 void Config::setConfigFileName(const wxFileName& fileName)
 {
     configFileNameM = fileName;
 }
-//-----------------------------------------------------------------------------
+
 wxString Config::getDataDir() const
 {
     return wxStandardPaths::Get().GetDataDir();
 }
-//-----------------------------------------------------------------------------
+
 wxString Config::getLocalDataDir() const
 {    
     return wxStandardPaths::Get().GetLocalDataDir();
 }
-//-----------------------------------------------------------------------------
+
 wxString Config::getUserLocalDataDir() const
 {
     return wxStandardPaths::Get().GetUserLocalDataDir();
 }
-//-----------------------------------------------------------------------------
+
 void Config::setHomePath(const wxString& homePath)
 {
     homePathM = homePath;
 }
-//-----------------------------------------------------------------------------
+
 void Config::setUserHomePath(const wxString& userHomePath)
 {
     userHomePathM = userHomePath;
 }
-//-----------------------------------------------------------------------------
+
 // class ConfigCache
 ConfigCache::ConfigCache(Config& config)
     : Observer(), cacheValidM(false)
 {
     config.attachObserver(this, false);
 }
-//-----------------------------------------------------------------------------
+
 void ConfigCache::ensureCacheValid()
 {
     if (!cacheValidM)
@@ -314,72 +314,72 @@ void ConfigCache::ensureCacheValid()
         cacheValidM = true;
     }
 }
-//-----------------------------------------------------------------------------
+
 void ConfigCache::loadFromConfig()
 {
 }
-//-----------------------------------------------------------------------------
+
 void ConfigCache::update()
 {
     // next call to ensureCacheValid() will reload the cached information
     cacheValidM = false;
 }
-//-----------------------------------------------------------------------------
+
 wxString FRConfig::getHtmlTemplatesPath() const
 {
     return getHomePath() + wxT("html-templates")
         + wxFileName::GetPathSeparator();
 }
-//-----------------------------------------------------------------------------
+
 wxString FRConfig::getCodeTemplatesPath() const
 {
     return getHomePath() + wxT("code-templates")
         + wxFileName::GetPathSeparator();
 }
-//-----------------------------------------------------------------------------
+
 wxString FRConfig::getUserCodeTemplatesPath() const
 {
     return getUserHomePath() + wxT("code-templates")
         + wxFileName::GetPathSeparator();
 }
-//-----------------------------------------------------------------------------
+
 wxString FRConfig::getSysTemplatesPath() const
 {
     return getHomePath() + wxT("sys-templates")
         + wxFileName::GetPathSeparator();
 }
-//-----------------------------------------------------------------------------
+
 wxString FRConfig::getUserSysTemplatesPath() const
 {
     return getUserHomePath() + wxT("sys-templates")
         + wxFileName::GetPathSeparator();
 }
-//-----------------------------------------------------------------------------
+
 wxString FRConfig::getDocsPath() const
 {
     return getHomePath() + wxT("docs") + wxFileName::GetPathSeparator();
 }
-//-----------------------------------------------------------------------------
+
 wxString FRConfig::getConfDefsPath() const
 {
     return getHomePath() + wxT("conf-defs") + wxFileName::GetPathSeparator();
 }
-//-----------------------------------------------------------------------------
+
 wxString FRConfig::getImagesPath() const
 {
     return getHomePath() + wxT("images") + wxFileName::GetPathSeparator();
 }
-//-----------------------------------------------------------------------------
+
 wxString FRConfig::getDBHFileName() const
 {
     return getUserHomePath() + wxT("fr_databases.conf");
 }
-//-----------------------------------------------------------------------------
+
 wxFileName FRConfig::getConfigFileName() const
 {
     return wxFileName(getUserHomePath(), wxT("fr_settings.conf"));
 }
-//-----------------------------------------------------------------------------
+
 const wxString FRConfig::getSysTemplateFileName(const wxString& templateName)
 {
     wxFileName fileName = getUserSysTemplatesPath() + templateName
@@ -401,4 +401,4 @@ const wxString FRConfig::getSysTemplateFileName(const wxString& templateName)
     }
     return fileName.GetFullPath();
 }
-//-----------------------------------------------------------------------------
+

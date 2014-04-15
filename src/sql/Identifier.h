@@ -22,7 +22,7 @@
 */
 #ifndef FR_IDENTIFIER_H
 #define FR_IDENTIFIER_H
-//----------------------------------------------------------------------------
+
 //! The purpose of this class is to abstract all the work with identifiers
 //! so that we don't have to struggle with quoted identifiers all over the
 //! place. If also makes matching easier (upper/lower case problems)
@@ -47,5 +47,5 @@ public:
     wxString getQuoted() const;
     static wxString userString(const wxString& s);
 };
-//----------------------------------------------------------------------------
+
 #endif

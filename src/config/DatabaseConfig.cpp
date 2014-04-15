@@ -29,11 +29,11 @@
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
-//-----------------------------------------------------------------------------
+
 #include "config/Config.h"
 #include "config/DatabaseConfig.h"
 #include "metadata/database.h"
-//-----------------------------------------------------------------------------
+
 DatabaseConfig::DatabaseConfig(const Database *d, Config& referenceConfig)
     :Config(), databaseM(d), referenceConfigM(referenceConfig)
 {
@@ -42,7 +42,7 @@ DatabaseConfig::DatabaseConfig(const Database *d, Config& referenceConfig)
     setHomePath(referenceConfigM.getHomePath());
     setUserHomePath(referenceConfigM.getUserHomePath());
 }
-//-----------------------------------------------------------------------------
+
 wxString DatabaseConfig::addPathToKey(const wxString& key) const
 {
     if (databaseM)
@@ -50,19 +50,19 @@ wxString DatabaseConfig::addPathToKey(const wxString& key) const
     else
         return wxT("");
 }
-//-----------------------------------------------------------------------------
+
 bool DatabaseConfig::keyExists(const wxString& key) const
 {
     return referenceConfigM.keyExists(addPathToKey(key));
 }
-//-----------------------------------------------------------------------------
+
 bool DatabaseConfig::getValue(const wxString& key, wxString& value)
 {
     return referenceConfigM.getValue(addPathToKey(key), value);
 }
-//-----------------------------------------------------------------------------
+
 bool DatabaseConfig::setValue(const wxString& key, const wxString& value)
 {
     return referenceConfigM.setValue(addPathToKey(key), value);
 }
-//-----------------------------------------------------------------------------
+

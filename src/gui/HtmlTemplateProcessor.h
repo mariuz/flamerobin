@@ -21,13 +21,13 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef FR_HTMLTEMPLATEPROCESSOR_H
 #define FR_HTMLTEMPLATEPROCESSOR_H
 
 #include "core/TemplateProcessor.h"
 
-//-----------------------------------------------------------------------------
+
 class HtmlTemplateProcessor: public TemplateProcessor
 {
 protected:
@@ -39,5 +39,5 @@ public:
     virtual wxString escapeChars(const wxString& input,
         bool processNewlines = true);
 };
-//-----------------------------------------------------------------------------
+
 #endif // FR_HTMLTEMPLATEPROCESSOR_H

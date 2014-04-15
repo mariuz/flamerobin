@@ -37,7 +37,7 @@
 
 #include "config/Config.h"
 #include "core/ArtProvider.h"
-//-----------------------------------------------------------------------------
+
 // these have size 32x32
 #include "flamerobin.xpm"
 #include "sqlicon.xpm"
@@ -97,7 +97,7 @@
 #include "toggle16.xpm"
 #include "trigger.xpm"
 #include "view.xpm"
-//-----------------------------------------------------------------------------
+
 wxBitmap bitmapFromEmbeddedPNG(const unsigned char* data, size_t len)
 {
     static int createMask = -1;
@@ -125,7 +125,7 @@ wxBitmap bitmapFromEmbeddedPNG(const unsigned char* data, size_t len)
         img.ConvertAlphaToMask(16);
     return wxBitmap(img);
 }
-//-----------------------------------------------------------------------------
+
 wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
     const wxArtClient& client, const wxSize& size)
 {
@@ -282,7 +282,7 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
 //    return wxBitmap(toggle16_xpm);
     return wxNullBitmap;
 }
-//-----------------------------------------------------------------------------
+
 wxBitmap ArtProvider::loadBitmapFromFile(const wxArtID& id, wxSize size)
 {
     wxString name(id.Lower());
@@ -313,4 +313,4 @@ wxBitmap ArtProvider::loadBitmapFromFile(const wxArtID& id, wxSize size)
 
     return wxNullBitmap;
 }
-//-----------------------------------------------------------------------------
+

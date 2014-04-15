@@ -34,17 +34,17 @@
 
 #include "sql/SelectStatement.h"
 #include "sql/SqlTokenizer.h"
-//-----------------------------------------------------------------------------
+
 SelectStatement::SelectStatement(const wxString& sql)
 {
     setStatement(sql);
 }
-//-----------------------------------------------------------------------------
+
 bool SelectStatement::isValidSelectStatement()
 {
     return (posSelectM != -1 && posFromM != -1);
 }
-//-----------------------------------------------------------------------------
+
 void SelectStatement::setStatement(const wxString& sql)
 {
     sqlM = sql;
@@ -83,12 +83,12 @@ void SelectStatement::setStatement(const wxString& sql)
     if (posSelectM != -1 && posFromM != -1 && posFromEndM == -1)
         posFromEndM = tokenizerM.getCurrentTokenPosition();
 }
-//-----------------------------------------------------------------------------
+
 wxString SelectStatement::getStatement()
 {
     return sqlM;
 }
-//-----------------------------------------------------------------------------
+
 // start from SELECT position and look for COMMA
 void SelectStatement::getColumns(std::vector<wxString>& columns)
 {
@@ -114,7 +114,7 @@ void SelectStatement::getColumns(std::vector<wxString>& columns)
             columnName.Clear();
     }
 }
-//-----------------------------------------------------------------------------
+
 /*
 SELECT ...
 FROM t1,t2 alias,t3
@@ -151,7 +151,7 @@ void SelectStatement::getTables(std::vector<wxString>& tables)
             tableName.Clear();
     }
 }
-//-----------------------------------------------------------------------------
+
 void SelectStatement::add(const wxString& toAdd, int position)
 {
     wxString s(sqlM.Left(position));
@@ -163,7 +163,7 @@ void SelectStatement::add(const wxString& toAdd, int position)
     s += sqlM.Mid(position);
     setStatement(s);
 }
-//-----------------------------------------------------------------------------
+
 void SelectStatement::addTable(const wxString& name, const wxString& joinType,
     const wxString& joinList)
 {
@@ -182,7 +182,7 @@ void SelectStatement::addTable(const wxString& name, const wxString& joinType,
             posFromEndM);
     }
 }
-//-----------------------------------------------------------------------------
+
 void SelectStatement::addColumn(const wxString& columnList)
 {
     std::vector<wxString> s;
@@ -192,7 +192,7 @@ void SelectStatement::addColumn(const wxString& columnList)
     else
         add(columnList + wxT(", "), posSelectM + 7);
 }
-//-----------------------------------------------------------------------------
+
 // covers only the most basic cases
 void SelectStatement::orderBy(int column)
 {
@@ -240,4 +240,4 @@ void SelectStatement::orderBy(int column)
             add(wxT("DESC "), p);
     }
 }
-//-----------------------------------------------------------------------------
+

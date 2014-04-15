@@ -36,14 +36,14 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/parameter.h"
 #include "metadata/procedure.h"
-//-----------------------------------------------------------------------------
+
 // TODO: pass ProcedurePtr instead of Procedure*
 Parameter::Parameter(Procedure* procedure, const wxString& name)
     : ColumnBase(ntParameter, procedure, name), outputParameterM(false),
         parameterMechanismM(-1)
 {
 }
-//-----------------------------------------------------------------------------
+
 void Parameter::initialize(const wxString& source, int parameterType,
     int mechanism, bool nullable, const wxString& defaultValue,
     bool hasDefault, bool hasDescription)
@@ -68,24 +68,24 @@ void Parameter::initialize(const wxString& source, int parameterType,
     if (changed)
         notifyObservers();
 }
-//-----------------------------------------------------------------------------
+
 bool Parameter::isOutputParameter() const
 {
     return outputParameterM;
 }
-//-----------------------------------------------------------------------------
+
 int Parameter::getMechanism() const
 {
     return parameterMechanismM;
 }
-//-----------------------------------------------------------------------------
+
 const wxString Parameter::getTypeName() const
 {
     return wxT("PARAMETER");
 }
-//-----------------------------------------------------------------------------
+
 void Parameter::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitParameter(*this);
 }
-//-----------------------------------------------------------------------------
+

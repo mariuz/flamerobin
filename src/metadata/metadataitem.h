@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef FR_METADATAITEM_H
 #define FR_METADATAITEM_H
 
@@ -38,7 +38,7 @@
 
 class Dependency;
 class MetadataItemVisitor;
-//-----------------------------------------------------------------------------
+
 typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
     // each item type and (if applicable) its parent type
     ntTable, ntTables, ntView, ntViews, ntProcedure, ntProcedures,
@@ -48,13 +48,13 @@ typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
     ntRole, ntRoles, ntSysRole, ntSysRoles, ntColumn, ntParameter, ntIndex,
     ntLastType
 } NodeType;
-//-----------------------------------------------------------------------------
+
 NodeType getTypeByName(const wxString& name);
 wxString getNameOfType(NodeType type);
-//-----------------------------------------------------------------------------
+
 void initializeLockCount(MetadataItem* item, unsigned count);
 void initializeLockCount(MetadataItemPtr item, unsigned count);
-//-----------------------------------------------------------------------------
+
 class MetadataItem: public Subject, public ObjectWithHandle<MetadataItem>,
     public ProcessableObject
 {
@@ -157,7 +157,7 @@ public:
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
-//-----------------------------------------------------------------------------
+
 //! masks the object it points to so others see it transparently
 class Dependency: public MetadataItem
 {
@@ -182,5 +182,5 @@ public:
     bool operator!= (const Dependency& other) const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
-//-----------------------------------------------------------------------------
+
 #endif //FR_METADATAITEM_H

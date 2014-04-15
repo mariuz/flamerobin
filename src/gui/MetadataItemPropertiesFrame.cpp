@@ -54,7 +54,7 @@
 #include "metadata/procedure.h"
 #include "metadata/table.h"
 #include "metadata/view.h"
-//-----------------------------------------------------------------------------
+
 //! MetadataItemPropertiesPanel class
 class MetadataItemPropertiesPanel: public wxPanel, public Observer
 {
@@ -89,11 +89,11 @@ private:
     void OnIdle(wxIdleEvent& event);
     void OnRefresh(wxCommandEvent& event);
 };
-//-----------------------------------------------------------------------------
+
 typedef std::list<MetadataItemPropertiesPanel*> MIPPanels;
 
 static MIPPanels mipPanels;
-//-----------------------------------------------------------------------------
+
 MetadataItemPropertiesPanel::MetadataItemPropertiesPanel(
         MetadataItemPropertiesFrame* parent, MetadataItem* object)
     : wxPanel(parent, wxID_ANY), pageTypeM(ptSummary), objectM(object),
@@ -133,17 +133,17 @@ MetadataItemPropertiesPanel::MetadataItemPropertiesPanel(
     requestLoadPage(true);
     objectM->attachObserver(this, true);
 }
-//-----------------------------------------------------------------------------
+
 MetadataItemPropertiesPanel::~MetadataItemPropertiesPanel()
 {
     mipPanels.remove(this);
 }
-//-----------------------------------------------------------------------------
+
 MetadataItem* MetadataItemPropertiesPanel::getObservedObject() const
 {
     return objectM;
 }
-//-----------------------------------------------------------------------------
+
 //! defer (possibly expensive) creation and display of html page to idle time
 void MetadataItemPropertiesPanel::requestLoadPage(bool showLoadingPage)
 {
@@ -160,7 +160,7 @@ void MetadataItemPropertiesPanel::requestLoadPage(bool showLoadingPage)
         htmlReloadRequestedM = true;
     }
 }
-//-----------------------------------------------------------------------------
+
 //! determine the path, load and display html page
 void MetadataItemPropertiesPanel::loadPage()
 {
@@ -219,7 +219,7 @@ void MetadataItemPropertiesPanel::loadPage()
             + html_window->GetOpenedPageTitle());
     }
 }
-//-----------------------------------------------------------------------------
+
 //! closes window if observed object gets removed (disconnecting, dropping, etc)
 void MetadataItemPropertiesPanel::subjectRemoved(Subject* subject)
 {
@@ -231,7 +231,7 @@ void MetadataItemPropertiesPanel::subjectRemoved(Subject* subject)
             f->removePanel(this);
     }
 }
-//-----------------------------------------------------------------------------
+
 MetadataItemPropertiesFrame* MetadataItemPropertiesPanel::getParentFrame()
 {
     for (wxWindow* w = GetParent(); w; w = w->GetParent())
@@ -244,7 +244,7 @@ MetadataItemPropertiesFrame* MetadataItemPropertiesPanel::getParentFrame()
     }
     return 0;
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItemPropertiesPanel::setPage(const wxString& type)
 {
     if (type == wxT("constraints"))
@@ -264,7 +264,7 @@ void MetadataItemPropertiesPanel::setPage(const wxString& type)
         pageTypeM = ptSummary;
     requestLoadPage(true);
 }
-//-----------------------------------------------------------------------------
+
 //! recreate html page if something changes
 void MetadataItemPropertiesPanel::update()
 {
@@ -316,13 +316,13 @@ void MetadataItemPropertiesPanel::update()
     if (!htmlReloadRequestedM)
         requestLoadPage(false);
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItemPropertiesPanel::OnCloseFrame(wxCommandEvent& WXUNUSED(event))
 {
     if (MetadataItemPropertiesFrame* f = getParentFrame())
         f->removePanel(this);
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItemPropertiesPanel::OnHtmlCellHover(wxHtmlCellEvent& event)
 {
     wxHtmlCell* c = event.GetCell();
@@ -350,7 +350,7 @@ void MetadataItemPropertiesPanel::OnHtmlCellHover(wxHtmlCellEvent& event)
         tw->SetBoundingRect(r);
     }
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItemPropertiesPanel::OnIdle(wxIdleEvent& WXUNUSED(event))
 {
     Disconnect(wxID_ANY, wxEVT_IDLE);
@@ -358,7 +358,7 @@ void MetadataItemPropertiesPanel::OnIdle(wxIdleEvent& WXUNUSED(event))
     loadPage();
     htmlReloadRequestedM = false;
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItemPropertiesPanel::OnRefresh(wxCommandEvent& WXUNUSED(event))
 {
     if (objectM)
@@ -369,7 +369,7 @@ void MetadataItemPropertiesPanel::OnRefresh(wxCommandEvent& WXUNUSED(event))
     requestLoadPage(false);
     SetFocus();
 }
-//-----------------------------------------------------------------------------
+
 // TODO: replace this with a nice generic property page icon for all types
 wxIcon getMetadataItemIcon(NodeType type)
 {
@@ -403,7 +403,7 @@ wxIcon getMetadataItemIcon(NodeType type)
     }
     return wxArtProvider::GetIcon(ART_FlameRobin, wxART_OTHER, sz);
 }
-//-----------------------------------------------------------------------------
+
 //! MetadataItemPropertiesFrame class
 MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
         MetadataItem* object)
@@ -445,12 +445,12 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
     Connect(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CHANGED, wxAuiNotebookEventHandler(
         MetadataItemPropertiesFrame::OnNotebookPageChanged), NULL, this);
 }
-//-----------------------------------------------------------------------------
+
 MetadataItemPropertiesFrame::~MetadataItemPropertiesFrame()
 {
     auiManagerM.UnInit();
 }
-//-----------------------------------------------------------------------------
+
 /*static*/ MetadataItemPropertiesPanel*
 MetadataItemPropertiesFrame::openNewPropertyPageInFrame(MetadataItem* object)
 {
@@ -462,7 +462,7 @@ MetadataItemPropertiesFrame::openNewPropertyPageInFrame(MetadataItem* object)
     mf->showPanel(mpp, object->getName_());
     return mpp;
 }
-//-----------------------------------------------------------------------------
+
 /*static*/ MetadataItemPropertiesPanel*
 MetadataItemPropertiesFrame::openNewPropertyPageInTab(MetadataItem* object,
     MetadataItemPropertiesFrame* parentFrame)
@@ -495,7 +495,7 @@ MetadataItemPropertiesFrame::openNewPropertyPageInTab(MetadataItem* object,
     mf->showPanel(mpp, object->getName_());
     return mpp;
 }
-//-----------------------------------------------------------------------------
+
 /*static*/ MetadataItemPropertiesPanel*
 MetadataItemPropertiesFrame::showPropertyPage(MetadataItem* object)
 {
@@ -517,22 +517,22 @@ MetadataItemPropertiesFrame::showPropertyPage(MetadataItem* object)
         return openNewPropertyPageInTab(object, 0);
     return openNewPropertyPageInFrame(object);
 }
-//-----------------------------------------------------------------------------
+
 const wxRect MetadataItemPropertiesFrame::getDefaultRect() const
 {
     return wxRect(-1, -1, 600, 420);
 }
-//-----------------------------------------------------------------------------
+
 const wxString MetadataItemPropertiesFrame::getName() const
 {
     return wxT("MIPFrame");
 }
-//-----------------------------------------------------------------------------
+
 const wxString MetadataItemPropertiesFrame::getStorageName() const
 {
     return storageNameM;
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItemPropertiesFrame::removePanel(
     MetadataItemPropertiesPanel* panel)
 {
@@ -544,7 +544,7 @@ void MetadataItemPropertiesFrame::removePanel(
     if (notebookM->GetPageCount() < 1)
         Close();
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItemPropertiesFrame::setStorageName(MetadataItem* object)
 {
     StorageGranularity g;
@@ -571,7 +571,7 @@ void MetadataItemPropertiesFrame::setStorageName(MetadataItem* object)
             break;
     }
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItemPropertiesFrame::setTabTitle(
     MetadataItemPropertiesPanel* panel, const wxString& title)
 {
@@ -580,7 +580,7 @@ void MetadataItemPropertiesFrame::setTabTitle(
         return;
     notebookM->SetPageText(pg, title);
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItemPropertiesFrame::showPanel(MetadataItemPropertiesPanel* panel,
     const wxString& title)
 {
@@ -595,7 +595,7 @@ void MetadataItemPropertiesFrame::showPanel(MetadataItemPropertiesPanel* panel,
         panel->SetFocus();
     Raise();
 }
-//-----------------------------------------------------------------------------
+
 // when last tab is closed, close the frame
 void MetadataItemPropertiesFrame::OnNotebookPageClose(
     wxAuiNotebookEvent& WXUNUSED(event))
@@ -605,7 +605,7 @@ void MetadataItemPropertiesFrame::OnNotebookPageClose(
     if (notebookM->GetPageCount() < 2)
         Close();
 }
-//-----------------------------------------------------------------------------
+
 // when last tab is closed, close the frame
 void MetadataItemPropertiesFrame::OnNotebookPageChanged(
     wxAuiNotebookEvent& event)
@@ -618,7 +618,7 @@ void MetadataItemPropertiesFrame::OnNotebookPageChanged(
     else
         SetTitle(databaseNameM + wxT(" - ") + notebookM->GetPageText(sel));
 }
-//-----------------------------------------------------------------------------
+
 //! PageHandler class
 class PageHandler: public URIHandler, private GUIURIHandlerHelper
 {
@@ -629,7 +629,7 @@ private:
     static const PageHandler handlerInstance;   // singleton; registers itself on creation.
 };
 const PageHandler PageHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 bool PageHandler::handleURI(URI& uri)
 {
     if (uri.action != wxT("page"))
@@ -655,7 +655,7 @@ bool PageHandler::handleURI(URI& uri)
     //frameManager().rebuildMenu();
     return true;
 }
-//-----------------------------------------------------------------------------
+
 //! PropertiesHandler class
 class PropertiesHandler: public URIHandler, private GUIURIHandlerHelper
 {
@@ -666,7 +666,7 @@ private:
     static const PropertiesHandler handlerInstance; // singleton; registers itself on creation.
 };
 const PropertiesHandler PropertiesHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 bool PropertiesHandler::handleURI(URI& uri)
 {
     if (uri.action != wxT("properties"))
@@ -701,4 +701,4 @@ bool PropertiesHandler::handleURI(URI& uri)
         MetadataItemPropertiesFrame::showPropertyPage(object);
     return true;
 }
-//-----------------------------------------------------------------------------
+

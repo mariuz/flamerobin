@@ -23,7 +23,7 @@
 
 #ifndef FR_OBJECTWITHHANDLE_H
 #define FR_OBJECTWITHHANDLE_H
-//-----------------------------------------------------------------------------
+
 #include <wx/string.h>
 
 #include <map>
@@ -101,5 +101,5 @@ public:
         return 0;
     }
 };
-//-----------------------------------------------------------------------------
+
 #endif // FR_OBJECTWITHHANDLE_H

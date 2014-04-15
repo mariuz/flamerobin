@@ -41,7 +41,7 @@
 #include "metadata/metadataitem.h"
 #include "metadata/MetadataTemplateManager.h"
 
-//-----------------------------------------------------------------------------
+
 TemplateDescriptor::TemplateDescriptor(const wxFileName& templateFileName,
     MetadataItem* metadataItem)
     : templateFileNameM(templateFileName), metadataItemM(metadataItem),
@@ -49,7 +49,7 @@ TemplateDescriptor::TemplateDescriptor(const wxFileName& templateFileName,
 {
     loadDescriptionFromConfigFile();
 }
-//-----------------------------------------------------------------------------
+
 void TemplateDescriptor::loadDescriptionFromConfigFile()
 {
     wxFileName confFileName(templateFileNameM);
@@ -82,7 +82,7 @@ void TemplateDescriptor::loadDescriptionFromConfigFile()
         matchesWhenM = true;
     }
 }
-//-----------------------------------------------------------------------------
+
 wxString TemplateDescriptor::expandTemplateCommands(const wxString& inputText) const
 {
     wxString result = wxEmptyString;
@@ -90,7 +90,7 @@ wxString TemplateDescriptor::expandTemplateCommands(const wxString& inputText) c
     tp.processTemplateText(result, inputText, metadataItemM);
     return result;
  }
-//-----------------------------------------------------------------------------
+
 bool TemplateDescriptor::operator<(const TemplateDescriptor& right) const
 {
     int p = getMenuPosition();
@@ -100,14 +100,14 @@ bool TemplateDescriptor::operator<(const TemplateDescriptor& right) const
     else
         return (p < rp);
 }
-//-----------------------------------------------------------------------------
+
 wxString TemplateDescriptor::getMenuCaption() const
 {
     if (!menuCaptionM.IsEmpty())
         return menuCaptionM;
     return templateFileNameM.GetName();
 }
-//-----------------------------------------------------------------------------
+
  bool TemplateDescriptor::matches(const MetadataItem* metadataItem) const
 {
     wxRegEx typeRegEx(matchesTypeM, wxRE_ADVANCED);
@@ -123,20 +123,20 @@ wxString TemplateDescriptor::getMenuCaption() const
     }
     return false;
 }
-//-----------------------------------------------------------------------------
+
 //! needed in checkDescriptorsSorted() to sort on objects instead of pointers
 bool templateDescriptorPointerLT(const TemplateDescriptorPtr left,
     const TemplateDescriptorPtr right)
 {
     return *left < *right;
 }
-//-----------------------------------------------------------------------------
+
 MetadataTemplateManager::MetadataTemplateManager(MetadataItem* metadataItem)
     : metadataItemM(metadataItem)
 {
     collectDescriptors();
 }
-//-----------------------------------------------------------------------------
+
 void MetadataTemplateManager::collectDescriptors()
 {
     wxArrayString fileNames;
@@ -172,7 +172,7 @@ void MetadataTemplateManager::collectDescriptors()
     // Sort everything by menu position.
     descriptorsM.sort(templateDescriptorPointerLT);
 }
-//-----------------------------------------------------------------------------
+
 TemplateDescriptorPtr MetadataTemplateManager::findDescriptor(
     const wxString& baseFileName) const
 {
@@ -184,14 +184,14 @@ TemplateDescriptorPtr MetadataTemplateManager::findDescriptor(
     }
     return TemplateDescriptorPtr();
 }
-//-----------------------------------------------------------------------------
+
 TemplateDescriptorList::const_iterator MetadataTemplateManager::descriptorsBegin() const
 {
     return descriptorsM.begin();
 }
-//-----------------------------------------------------------------------------
+
 TemplateDescriptorList::const_iterator MetadataTemplateManager::descriptorsEnd() const
 {
     return descriptorsM.end();
 }
-//-----------------------------------------------------------------------------
+

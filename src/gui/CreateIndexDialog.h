@@ -20,7 +20,7 @@
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//-----------------------------------------------------------------------------
+
 #ifndef FR_CREATEINDEXDIALOG_H
 #define FR_CREATEINDEXDIALOG_H
 
@@ -30,7 +30,7 @@
 #include "gui/BaseDialog.h"
 
 class Table;
-//-----------------------------------------------------------------------------
+
 class CreateIndexDialog: public BaseDialog
 {
 private:
@@ -69,5 +69,5 @@ private:
 
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 #endif // FR_CREATEINDEXDIALOG_H

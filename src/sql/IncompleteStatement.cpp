@@ -40,12 +40,12 @@
 #include "sql/IncompleteStatement.h"
 #include "sql/MultiStatement.h"
 #include "sql/SqlTokenizer.h"
-//-----------------------------------------------------------------------------
+
 IncompleteStatement::IncompleteStatement(Database *db, const wxString& sql)
     :databaseM(db), sqlM(sql)
 {
 }
-//-----------------------------------------------------------------------------
+
 // position is offset at which user typed the dot character
 wxString IncompleteStatement::getObjectColumns(const wxString& table,
     int position)
@@ -79,7 +79,7 @@ wxString IncompleteStatement::getObjectColumns(const wxString& table,
     sql = sql.Mid(pstart, pend-pstart);
     return getColumnsForObject(sql, table, position);
 }
-//-----------------------------------------------------------------------------
+
 typedef std::pair<wxString, wxString> IdAlias;
 typedef std::multimap<wxString, wxString> IdAliasMap;
 
@@ -101,7 +101,7 @@ T* IncompleteStatement::findObject(IdAliasMap& aliases, const wxString& alias,
     id.setFromSql(alias);
     return dynamic_cast<T *>(databaseM->findByNameAndType(type, id.get()));
 }
-//-----------------------------------------------------------------------------
+
 Relation *IncompleteStatement::getCreateTriggerRelation(const wxString& sql)
 {
     Relation* r = 0;
@@ -137,7 +137,7 @@ Relation *IncompleteStatement::getCreateTriggerRelation(const wxString& sql)
     }
     return r;
 }
-//-----------------------------------------------------------------------------
+
 Relation *IncompleteStatement::getAlterTriggerRelation(const wxString& sql)
 {
     Relation* r = 0;
@@ -179,7 +179,7 @@ Relation *IncompleteStatement::getAlterTriggerRelation(const wxString& sql)
     }
     return r;
 }
-//-----------------------------------------------------------------------------
+
 wxString IncompleteStatement::extractBlockAtPosition(const wxString& sql,
     int pos) const
 {
@@ -216,7 +216,7 @@ wxString IncompleteStatement::extractBlockAtPosition(const wxString& sql,
     MultiStatement mst(s);
     return mst.getStatementAt(pos - start).getSql();
 }
-//-----------------------------------------------------------------------------
+
 wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
     const wxString& objectSqlAlias, int cursorPos)
 {
@@ -347,4 +347,4 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
         columns += (*i) + wxT(" ");
     return columns.Strip();     // remove trailing space
 }
-//-----------------------------------------------------------------------------
+

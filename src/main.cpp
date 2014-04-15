@@ -41,9 +41,9 @@
 #include "core/StringUtils.h"
 #include "gui/MainFrame.h"
 #include "main.h"
-//-----------------------------------------------------------------------------
+
 IMPLEMENT_APP(Application)
-//-----------------------------------------------------------------------------
+
 void parachute()
 {
     if (wxYES == ::wxMessageBox(::wxGetTranslation(
@@ -59,17 +59,17 @@ void parachute()
     }
     exit(1);
 }
-//-----------------------------------------------------------------------------
+
 bool Application::OnExceptionInMainLoop()
 {
     return true;
 }
-//-----------------------------------------------------------------------------
+
 void Application::OnFatalException()
 {
     parachute();
 }
-//-----------------------------------------------------------------------------
+
 bool Application::OnInit()
 {
 #if wxUSE_ON_FATAL_EXCEPTION
@@ -114,7 +114,7 @@ bool Application::OnInit()
     openDatabasesFromParams(main_frame);
     return true;
 }
-//-----------------------------------------------------------------------------
+
 void Application::HandleEvent(wxEvtHandler* handler, wxEventFunction func,
     wxEvent& event) const
 {
@@ -132,7 +132,7 @@ void Application::HandleEvent(wxEvtHandler* handler, wxEventFunction func,
             wxOK | wxICON_ERROR, wxGetTopLevelParent(wxGetActiveWindow()));
     }
 }
-//-----------------------------------------------------------------------------
+
 void Application::checkEnvironment()
 {
     wxString envVar;
@@ -141,7 +141,7 @@ void Application::checkEnvironment()
     if (wxGetEnv(wxT("FR_USER_HOME"), &envVar))
         config().setUserHomePath(translatePathMacros(envVar));
 }
-//-----------------------------------------------------------------------------
+
 void Application::parseCommandLine()
 {
     wxCmdLineParser parser(wxGetApp().argc, wxGetApp().argv);
@@ -165,7 +165,7 @@ void Application::parseCommandLine()
             cmdlineParamsM.Add(parser.GetParam(i));
     }
 }
-//-----------------------------------------------------------------------------
+
 const wxString Application::translatePathMacros(const wxString path) const
 {
     if (path == wxT("$app"))
@@ -175,12 +175,12 @@ const wxString Application::translatePathMacros(const wxString path) const
     else
         return path;
 }
-//-----------------------------------------------------------------------------
+
 const wxString Application::getConfigurableObjectId() const
 {
     return wxT("");
 }
-//-----------------------------------------------------------------------------
+
 void Application::openDatabasesFromParams(MainFrame* frFrame)
 {
     if (cmdlineParamsM.GetCount())
@@ -190,4 +190,4 @@ void Application::openDatabasesFromParams(MainFrame* frFrame)
         cmdlineParamsM.Clear();
     }
 }
-//-----------------------------------------------------------------------------
+

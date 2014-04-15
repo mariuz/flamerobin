@@ -23,15 +23,15 @@
 
 #ifndef FR_SIMPLEHTMLFRAME_H
 #define FR_SIMPLEHTMLFRAME_H
-//-----------------------------------------------------------------------------
+
 #include <wx/wx.h>
 
 #include "gui/BaseFrame.h"
-//-----------------------------------------------------------------------------
+
 bool showHtmlFile(wxWindow* parent, const wxFileName& fileName);
 
 class PrintableHtmlWindow;
-//-----------------------------------------------------------------------------
+
 class SimpleHtmlFrame: public BaseFrame
 {
 private:
@@ -47,5 +47,5 @@ public:
 
     static SimpleHtmlFrame* findFrameFor(const wxFileName& fileName);
 };
-//-----------------------------------------------------------------------------
+
 #endif // FR_SIMPLEHTMLFRAME_H

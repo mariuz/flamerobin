@@ -20,7 +20,7 @@
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//-----------------------------------------------------------------------------
+
 
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
@@ -33,7 +33,7 @@
 
 #include "gui/ProgressDialog.h"
 #include "gui/StyleGuide.h"
-//-----------------------------------------------------------------------------
+
 // ProgressDialog
 ProgressDialog::ProgressDialog(wxWindow* parent, const wxString& title,
         size_t levelCount)
@@ -43,19 +43,19 @@ ProgressDialog::ProgressDialog(wxWindow* parent, const wxString& title,
     SetExtraStyle(GetExtraStyle() | wxWS_EX_TRANSIENT);
     setProgressLevelCount(levelCount);
 }
-//-----------------------------------------------------------------------------
+
 ProgressDialog::~ProgressDialog()
 {
     enableOtherWindows(true);
 }
-//-----------------------------------------------------------------------------
+
 void ProgressDialog::destroyControls()
 {
     labelsM.clear();
     gaugesM.clear();
     getControlsPanel()->DestroyChildren();
 }
-//-----------------------------------------------------------------------------
+
 void ProgressDialog::createControls()
 {
     int gaugeHeight = wxSystemSettings::GetMetric(wxSYS_HSCROLL_Y);
@@ -75,7 +75,7 @@ void ProgressDialog::createControls()
     button_cancel->SetDefault();
     button_cancel->SetFocus();
 }
-//-----------------------------------------------------------------------------
+
 void ProgressDialog::doUpdate()
 {
     // update all changed controls, and make sure they paint themselves...
@@ -87,7 +87,7 @@ void ProgressDialog::doUpdate()
     wxYieldIfNeeded(); 
 #endif
 }
-//-----------------------------------------------------------------------------
+
 void ProgressDialog::enableOtherWindows(bool enable)
 {
      if (!enable && (0 == winDisablerM))
@@ -98,7 +98,7 @@ void ProgressDialog::enableOtherWindows(bool enable)
         winDisablerM = 0;
     }
 }
-//-----------------------------------------------------------------------------
+
 void ProgressDialog::layoutControls()
 {
     wxSizer* sizerControls = new wxBoxSizer(wxVERTICAL);
@@ -121,26 +121,26 @@ void ProgressDialog::layoutControls()
     // use method in base class to set everything up
     layoutSizers(sizerControls, sizerButtons);
 }
-//-----------------------------------------------------------------------------
+
 wxGauge* ProgressDialog::getGaugeForLevel(size_t progressLevel)
 {
     if (progressLevel > 0 && progressLevel <= gaugesM.size())
         return gaugesM[progressLevel - 1];
     return 0;
 }
-//-----------------------------------------------------------------------------
+
 wxStaticText* ProgressDialog::getLabelForLevel(size_t progressLevel)
 {
     if (progressLevel > 0 && progressLevel <= labelsM.size())
         return labelsM[progressLevel - 1];
     return 0;
 }
-//-----------------------------------------------------------------------------
+
 inline bool ProgressDialog::isValidProgressLevel(size_t progressLevel)
 {
     return progressLevel > 0 && progressLevel <= levelCountM;
 }
-//-----------------------------------------------------------------------------
+
 void ProgressDialog::setCanceled()
 {
     if (!canceledM)
@@ -151,21 +151,21 @@ void ProgressDialog::setCanceled()
         doUpdate();
     }
 }
-//-----------------------------------------------------------------------------
+
 bool ProgressDialog::Show(bool show)
 {
     if (!show)
         enableOtherWindows(true);
     return BaseDialog::Show(show);
 }
-//-----------------------------------------------------------------------------
+
 // ProgressIndicator methods
 bool ProgressDialog::isCanceled()
 {
     wxYieldIfNeeded();
     return canceledM;
 }
-//-----------------------------------------------------------------------------
+
 void ProgressDialog::initProgress(wxString progressMsg, size_t maxPosition,
     size_t startingPosition, size_t progressLevel)
 {
@@ -182,7 +182,7 @@ void ProgressDialog::initProgress(wxString progressMsg, size_t maxPosition,
         doUpdate();
     }
 }
-//-----------------------------------------------------------------------------
+
 void ProgressDialog::initProgressIndeterminate(wxString progressMsg,
     size_t progressLevel)
 {
@@ -198,7 +198,7 @@ void ProgressDialog::initProgressIndeterminate(wxString progressMsg,
         doUpdate();
     }
 }
-//-----------------------------------------------------------------------------
+
 void ProgressDialog::setProgressMessage(wxString progressMsg,
     size_t progressLevel)
 {
@@ -211,7 +211,7 @@ void ProgressDialog::setProgressMessage(wxString progressMsg,
         doUpdate();
     }
 }
-//-----------------------------------------------------------------------------
+
 void ProgressDialog::setProgressPosition(size_t currentPosition,
     size_t progressLevel)
 {
@@ -225,7 +225,7 @@ void ProgressDialog::setProgressPosition(size_t currentPosition,
         doUpdate();
     }
 }
-//-----------------------------------------------------------------------------
+
 void ProgressDialog::stepProgress(int stepAmount, size_t progressLevel)
 {
     wxASSERT(isValidProgressLevel(progressLevel));
@@ -244,7 +244,7 @@ void ProgressDialog::stepProgress(int stepAmount, size_t progressLevel)
         doUpdate();
     }
 }
-//-----------------------------------------------------------------------------
+
 void ProgressDialog::doShow()
 {
     enableOtherWindows(false);
@@ -252,13 +252,13 @@ void ProgressDialog::doShow()
     Enable();
     doUpdate();
 }
-//-----------------------------------------------------------------------------
+
 void ProgressDialog::doHide()
 {
     Hide();
     enableOtherWindows(true);
 }
-//-----------------------------------------------------------------------------
+
 void ProgressDialog::setProgressLevelCount(size_t levelCount)
 {
     if (levelCountM != levelCount)
@@ -270,21 +270,21 @@ void ProgressDialog::setProgressLevelCount(size_t levelCount)
         layoutControls();
     }
 }
-//-----------------------------------------------------------------------------
+
 //! event handling
 BEGIN_EVENT_TABLE(ProgressDialog, BaseDialog)
     EVT_BUTTON(wxID_CANCEL, ProgressDialog::OnCancelButtonClick)
     EVT_CLOSE(ProgressDialog::OnClose)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 void ProgressDialog::OnCancelButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     setCanceled();
 }
-//-----------------------------------------------------------------------------
+
 void ProgressDialog::OnClose(wxCloseEvent& event)
 {
     setCanceled();
     event.Veto();
 }
-//-----------------------------------------------------------------------------
+

@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef FR_TABLE_H
 #define FR_TABLE_H
 
@@ -29,7 +29,7 @@
 #include "metadata/constraints.h"
 #include "metadata/Index.h"
 #include "metadata/relation.h"
-//-----------------------------------------------------------------------------
+
 class Table: public Relation
 {
 private:
@@ -79,7 +79,7 @@ public:
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
-//-----------------------------------------------------------------------------
+
 class SysTables: public MetadataCollection<Table>
 {
 protected:
@@ -92,7 +92,7 @@ public:
     void load(ProgressIndicator* progressIndicator);
     virtual const wxString getTypeName() const;
 };
-//-----------------------------------------------------------------------------
+
 class Tables: public MetadataCollection<Table>
 {
 protected:
@@ -104,5 +104,5 @@ public:
     void load(ProgressIndicator* progressIndicator);
     virtual const wxString getTypeName() const;
 };
-//-----------------------------------------------------------------------------
+
 #endif

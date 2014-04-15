@@ -20,19 +20,19 @@
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//-----------------------------------------------------------------------------
+
 
 #ifndef FR_PROGRESSINDICATOR_H
 #define FR_PROGRESSINDICATOR_H
 
 #include <wx/wx.h>
-//-----------------------------------------------------------------------------
+
 class CancelProgressException
 {
 public:
     CancelProgressException();
 };
-//-----------------------------------------------------------------------------
+
 class ProgressIndicator
 {
 public:
@@ -52,7 +52,7 @@ public:
     virtual void doHide() = 0;
     virtual void setProgressLevelCount(size_t levelCount = 1) = 0;
 };
-//-----------------------------------------------------------------------------
+
 void checkProgressIndicatorCanceled(ProgressIndicator* progressIndicator);
-//-----------------------------------------------------------------------------
+
 #endif // FR_PROGRESSINDICATOR_H

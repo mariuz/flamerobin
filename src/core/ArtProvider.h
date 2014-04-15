@@ -23,9 +23,9 @@
 
 #ifndef FR_ARTPROVIDER_H
 #define FR_ARTPROVIDER_H
-//-----------------------------------------------------------------------------
+
 #include <wx/artprov.h>
-//-----------------------------------------------------------------------------
+
 #define ART_FlameRobin              wxART_MAKE_ART_ID(ART_FlameRobin)
 #define ART_ExecuteSqlFrame         wxART_MAKE_ART_ID(ART_ExecuteSqlFrame)
 
@@ -74,7 +74,7 @@
 #define ART_ShowExecutionPlan       wxART_MAKE_ART_ID(ART_ShowExecutionPlan)
 #define ART_CommitTransaction       wxART_MAKE_ART_ID(ART_CommitTransaction)
 #define ART_RollbackTransaction     wxART_MAKE_ART_ID(ART_RollbackTransaction)
-//-----------------------------------------------------------------------------
+
 class ArtProvider : public wxArtProvider
 {
 private:
@@ -83,5 +83,5 @@ protected:
     virtual wxBitmap CreateBitmap(const wxArtID& id, const wxArtClient& client,
         const wxSize& size);
 };
-//-----------------------------------------------------------------------------
+
 #endif // FR_ARTPROVIDER_H

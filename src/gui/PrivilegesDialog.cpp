@@ -20,7 +20,7 @@
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//-----------------------------------------------------------------------------
+
 #include "wx/wxprec.h"
 
 #ifndef WX_PRECOMP
@@ -44,7 +44,7 @@
 #include "metadata/trigger.h"
 #include "metadata/view.h"
 
-//-----------------------------------------------------------------------------
+
 PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     const wxString& title)
     :BaseDialog(parent, -1, title)
@@ -335,7 +335,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     inConstructor = false;
     updateControls();
 }
-//-----------------------------------------------------------------------------
+
 void PrivilegesDialog::enableRelationCheckboxes(bool enable, bool all)
 {
     if (all)
@@ -346,12 +346,12 @@ void PrivilegesDialog::enableRelationCheckboxes(bool enable, bool all)
     checkbox_delete->Enable(enable);
     checkbox_references->Enable(enable);
 }
-//-----------------------------------------------------------------------------
+
 const wxString PrivilegesDialog::getName() const
 {
     return wxT("PrivilegesDialog");
 }
-//-----------------------------------------------------------------------------
+
 void PrivilegesDialog::updateControls()
 {
     if (inConstructor)
@@ -485,7 +485,7 @@ void PrivilegesDialog::updateControls()
 
     textbox_current_sql->SetValue(sql);
 }
-//-----------------------------------------------------------------------------
+
 wxString PrivilegesDialog::getSqlStatements()
 {
     wxString stmt;
@@ -493,7 +493,7 @@ wxString PrivilegesDialog::getSqlStatements()
         stmt << listbox_statements->GetString(i) << wxT(";\n");
     return stmt;
 }
-//-----------------------------------------------------------------------------
+
 //! event handling
 BEGIN_EVENT_TABLE(PrivilegesDialog, BaseDialog)
     EVT_BUTTON(PrivilegesDialog::ID_button_add,
@@ -516,19 +516,19 @@ BEGIN_EVENT_TABLE(PrivilegesDialog, BaseDialog)
     EVT_TEXT(PrivilegesDialog::ID_textctrl,
         PrivilegesDialog::OnSettingChanged)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 void PrivilegesDialog::OnListBoxStatementsSelected(wxCommandEvent&
     WXUNUSED(event))
 {
     button_remove->Enable(listbox_statements->GetSelection() != wxNOT_FOUND);
 }
-//-----------------------------------------------------------------------------
+
 void PrivilegesDialog::OnButtonAddClick(wxCommandEvent& WXUNUSED(event))
 {
     listbox_statements->Append(textbox_current_sql->GetValue());
     button_execute->Enable();
 }
-//-----------------------------------------------------------------------------
+
 void PrivilegesDialog::OnButtonRemoveClick(wxCommandEvent& WXUNUSED(event))
 {
     int sel = listbox_statements->GetSelection();
@@ -538,7 +538,7 @@ void PrivilegesDialog::OnButtonRemoveClick(wxCommandEvent& WXUNUSED(event))
     if (listbox_statements->GetCount() == 0)
         button_execute->Enable(false);
 }
-//-----------------------------------------------------------------------------
+
 void PrivilegesDialog::OnButtonBrowseClick(wxCommandEvent& event)
 {
     Identifier id(choice_relations->GetStringSelection());
@@ -556,12 +556,12 @@ void PrivilegesDialog::OnButtonBrowseClick(wxCommandEvent& event)
     if (tc)
         tc->SetValue(cols);
 }
-//-----------------------------------------------------------------------------
+
 void PrivilegesDialog::OnSettingChanged(wxCommandEvent& WXUNUSED(event))
 {
     updateControls();
 }
-//-----------------------------------------------------------------------------
+
 class ManagePrivilegesHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
@@ -572,9 +572,9 @@ private:
     // singleton; registers itself on creation.
     static const ManagePrivilegesHandler handlerInstance;
 };
-//-----------------------------------------------------------------------------
+
 const ManagePrivilegesHandler ManagePrivilegesHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 bool ManagePrivilegesHandler::handleURI(URI& uri)
 {
     if (uri.action != wxT("manage_privileges"))
@@ -603,5 +603,5 @@ bool ManagePrivilegesHandler::handleURI(URI& uri)
     }
     return true;
 }
-//-----------------------------------------------------------------------------
+
 

@@ -50,7 +50,7 @@ int EditBlobDialog::m_libEditBlobUseCount = 0;
 wxDynamicLibrary* EditBlobDialog::m_libEditBlob = NULL;
 */
 
-//-----------------------------------------------------------------------------
+
 // Helper Class of wxStyledTextCtrl to handle NULL values
 class EditBlobDialogSTC : public wxStyledTextCtrl 
 {
@@ -70,7 +70,7 @@ private:
 
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 EditBlobDialogSTC::EditBlobDialogSTC(wxWindow *parent, wxWindowID id)
     : wxStyledTextCtrl(parent, id, wxDefaultPosition, wxDefaultSize,
         wxBORDER_THEME), isNullM(false)
@@ -81,7 +81,7 @@ EditBlobDialogSTC::EditBlobDialogSTC(wxWindow *parent, wxWindowID id)
     StyleSetFont(10, fontNull);
     StyleSetForeground(10, wxT("RED"));
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialogSTC::OnKeyDown(wxKeyEvent& event)
 {
     if (GetReadOnly())
@@ -105,7 +105,7 @@ void EditBlobDialogSTC::OnKeyDown(wxKeyEvent& event)
 
     event.Skip();
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialogSTC::OnChar(wxKeyEvent& event)
 {
     if (GetReadOnly())
@@ -117,7 +117,7 @@ void EditBlobDialogSTC::OnChar(wxKeyEvent& event)
     setIsNull(false);
     event.Skip();
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialogSTC::setIsNull(bool isNull)
 {
     if (isNull == isNullM)
@@ -137,26 +137,26 @@ void EditBlobDialogSTC::setIsNull(bool isNull)
     }
     isNullM = isNull;
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialogSTC::ClearAll()
 {
     setIsNull(false);
     wxStyledTextCtrl::ClearAll();
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialogSTC::SetText(const wxString& text)
 {
     setIsNull(false);
     wxStyledTextCtrl::SetText(text);
 }
-//-----------------------------------------------------------------------------
+
 //! event handling
 BEGIN_EVENT_TABLE(EditBlobDialogSTC, wxStyledTextCtrl)
     EVT_KEY_DOWN(EditBlobDialogSTC::OnKeyDown)
     EVT_CHAR(EditBlobDialogSTC::OnChar)
 END_EVENT_TABLE()
 
-//-----------------------------------------------------------------------------
+
 // Helper Class of wxStyledTextCtrl
 // -> adds a context to toggle "Linkebreak" on / off
 class EditBlobDialogSTCText : public EditBlobDialogSTC 
@@ -171,17 +171,17 @@ private:
 
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 EditBlobDialogSTCText::EditBlobDialogSTCText(wxWindow *parent, wxWindowID id)
     : EditBlobDialogSTC(parent,id)
 {
 }
-//-----------------------------------------------------------------------------
+
 bool EditBlobDialogSTCText::hasSelection()
 {
     return GetSelectionStart() != GetSelectionEnd();
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialogSTCText::OnContextMenu(wxContextMenuEvent& event)
 {
     if (AutoCompActive() || CallTipActive())
@@ -203,7 +203,7 @@ void EditBlobDialogSTCText::OnContextMenu(wxContextMenuEvent& event)
 
     PopupMenu(&m, calcContextMenuPosition(event.GetPosition(), this));
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialogSTCText::OnContextMenuCmd(wxCommandEvent& event)
 {
     switch (event.GetId())
@@ -222,7 +222,7 @@ void EditBlobDialogSTCText::OnContextMenuCmd(wxCommandEvent& event)
             break;
     }
 }
-//-----------------------------------------------------------------------------
+
 BEGIN_EVENT_TABLE(EditBlobDialogSTCText, EditBlobDialogSTC)
     EVT_CONTEXT_MENU(EditBlobDialogSTCText::OnContextMenu)
 
@@ -236,7 +236,7 @@ BEGIN_EVENT_TABLE(EditBlobDialogSTCText, EditBlobDialogSTC)
     EVT_MENU(Cmds::BlobEditor_ChangeLineBreak, EditBlobDialogSTCText::OnContextMenuCmd)
 END_EVENT_TABLE()
 
-//-----------------------------------------------------------------------------
+
 // Helper-Class for streaming into blob / buffer
 class FRInputBlobStream : public wxInputStream
 {
@@ -250,7 +250,7 @@ class FRInputBlobStream : public wxInputStream
         IBPP::Blob blobM;
         int sizeM;
 };
-//-----------------------------------------------------------------------------
+
 class FROutputBlobStream : public wxOutputStream
 {
     public:
@@ -264,9 +264,9 @@ class FROutputBlobStream : public wxOutputStream
         IBPP::Blob blobM;
 };
 
-//-----------------------------------------------------------------------------
+
 // Helper Class - ProgressPanel - Progress-info with Progressbar
-//-----------------------------------------------------------------------------
+
 class EditBlobDialogProgressSizer : public wxBoxSizer
 {
 public:
@@ -292,7 +292,7 @@ private:
     wxGauge* progressGaugeM;
     wxStaticText* progressTextM;
 };
-//-----------------------------------------------------------------------------
+
 EditBlobDialogProgressSizer::EditBlobDialogProgressSizer(wxWindow* parent)
     : wxBoxSizer(wxHORIZONTAL), parentM(parent)
 {
@@ -317,18 +317,18 @@ EditBlobDialogProgressSizer::EditBlobDialogProgressSizer(wxWindow* parent)
     //Layout();
     Hide();
 };
-//-----------------------------------------------------------------------------
+
 bool EditBlobDialogProgressSizer::canCancel()
 {
     return canCancelM;
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialogProgressSizer::cancel()
 {
     if (canCancelM)
         canceledM = true;
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialogProgressSizer::Hide()
 { 
     progressTextM->Hide();
@@ -336,7 +336,7 @@ void EditBlobDialogProgressSizer::Hide()
     progressGaugeM->Hide();
     activeM = false;
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialogProgressSizer::initProgress(const wxString& progressTitle,
     int range, bool canCancel)
 {
@@ -357,17 +357,17 @@ void EditBlobDialogProgressSizer::initProgress(const wxString& progressTitle,
     //parentM->Layout();
     Layout();
 }
-//-----------------------------------------------------------------------------
+
 bool EditBlobDialogProgressSizer::isActive()
 {
     return activeM;
 }
-//-----------------------------------------------------------------------------
+
 bool EditBlobDialogProgressSizer::isCanceled()
 {
     return canceledM;
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialogProgressSizer::stepProgress(int stepAmount)
 { 
     posM += stepAmount;
@@ -375,7 +375,7 @@ void EditBlobDialogProgressSizer::stepProgress(int stepAmount)
     wxYieldIfNeeded();
 }
 
-//-----------------------------------------------------------------------------
+
 // Main (dialog) class for blob editor
 EditBlobDialog::EditBlobDialog(wxWindow* parent)
     :BaseDialog(parent, -1, wxEmptyString)    
@@ -419,7 +419,7 @@ EditBlobDialog::EditBlobDialog(wxWindow* parent)
 
     runningM = true;  // enable wxNotebookPageChanged-Events
 }
-//-----------------------------------------------------------------------------
+
 EditBlobDialog::~EditBlobDialog()
 {
     /*
@@ -435,7 +435,7 @@ EditBlobDialog::~EditBlobDialog()
     delete menu_blob;
     cacheDelete();
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialog::buildMenus(CommandManager& cm)
 {
     menu_blob = new wxMenu(); // dynamic menus, created at runtime
@@ -445,7 +445,7 @@ void EditBlobDialog::buildMenus(CommandManager& cm)
     menu_blob->Append(Cmds::BlobEditor_Menu_BLOBSaveToFile,
         cm.getMainMenuItemText(_("&Save to File"), Cmds::BlobEditor_Menu_BLOBSaveToFile));
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialog::cacheDelete()
 {
     dataValidM.clear();
@@ -454,7 +454,7 @@ void EditBlobDialog::cacheDelete()
     delete cacheM;
     cacheM = 0;
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialog::notebookAddPageById(int pageId)
 {
     // if page is already added -> do nothing
@@ -478,7 +478,7 @@ void EditBlobDialog::notebookAddPageById(int pageId)
             break;
     }
 }
-//-----------------------------------------------------------------------------
+
 int EditBlobDialog::notebookGetPageIndexById(int pageId)
 {
     for (unsigned int i = 0; i < notebook->GetPageCount(); i++)
@@ -486,7 +486,7 @@ int EditBlobDialog::notebookGetPageIndexById(int pageId)
             return i;
     return -1;
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialog::notebookRemovePageById(int pageId)
 {
     int i = notebookGetPageIndexById(pageId);
@@ -510,21 +510,21 @@ void EditBlobDialog::notebookRemovePageById(int pageId)
         notebook->RemovePage(i);
     }
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialog::notebookSelectPageById(int pageId)
 {
     int i = notebookGetPageIndexById(pageId);
     if (i > -1)
         notebook->ChangeSelection(i);
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialog::closeDontSave()
 {
     // We dont want to save the blob data back to DB.
     dataModifiedM = false;
     Close();
 }
-//-----------------------------------------------------------------------------
+
 bool EditBlobDialog::setBlob(DataGrid* dg, DataGridTable* dgt,
     IBPP::Statement* st, unsigned row, unsigned col, bool saveOldValue)
 {
@@ -551,7 +551,7 @@ bool EditBlobDialog::setBlob(DataGrid* dg, DataGridTable* dgt,
 
     return loadBlob();
 }
-//-----------------------------------------------------------------------------
+
 bool EditBlobDialog::loadBlob()
 {
     bool isTextual;
@@ -639,7 +639,7 @@ bool EditBlobDialog::loadBlob()
 
     return res;
 }
-//-----------------------------------------------------------------------------
+
 bool EditBlobDialog::loadFromStreamAsText(wxInputStream& stream, bool isNull, const wxString& progressTitle)
 {
     if (isNull)
@@ -704,7 +704,7 @@ bool EditBlobDialog::loadFromStreamAsText(wxInputStream& stream, bool isNull, co
 
     return !progress->isCanceled();
 }
-//-----------------------------------------------------------------------------
+
 bool EditBlobDialog::loadFromStreamAsBinary(wxInputStream& stream, bool isNull, const wxString& progressTitle)
 {
     if (isNull)
@@ -800,7 +800,7 @@ bool EditBlobDialog::loadFromStreamAsBinary(wxInputStream& stream, bool isNull, 
 
     return !progress->isCanceled();
 }
-//-----------------------------------------------------------------------------
+
 bool EditBlobDialog::saveToStream(wxOutputStream& stream, bool* isNull, const wxString& progressTitle)
 {
     progressBegin(progressTitle, 0, false);
@@ -888,7 +888,7 @@ bool EditBlobDialog::saveToStream(wxOutputStream& stream, bool* isNull, const wx
 
     return !progress->isCanceled();
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialog::set_properties()
 {
     dialogCaptionM = wxT("");
@@ -905,7 +905,7 @@ void EditBlobDialog::set_properties()
     button_reset->Enable(false);
     button_save->Enable(false);
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialog::do_layout()
 {
     // Maybe we can find a better solution to get the margin font
@@ -982,7 +982,7 @@ void EditBlobDialog::do_layout()
     
     progress->Layout();
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialog::saveBlob()
 {
     // If there is no blob loaded (no Data) OR
@@ -1066,7 +1066,7 @@ void EditBlobDialog::saveBlob()
     dataSetModified(false, editorModeM);
     dataUpdateGUI();
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialog::OnClose(wxCloseEvent& event)
 {
     // Save implicit if data was modified
@@ -1080,17 +1080,17 @@ void EditBlobDialog::OnClose(wxCloseEvent& event)
     else
         this->Destroy();
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialog::OnResetButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     loadBlob();
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialog::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     saveBlob();
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialog::OnNotebookPageChanged(wxNotebookEvent& event)
 {
     if (!runningM)
@@ -1168,25 +1168,25 @@ void EditBlobDialog::OnNotebookPageChanged(wxNotebookEvent& event)
     }
     editorModeM = newEditorMode;
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialog::OnProgressCancel(wxCommandEvent& WXUNUSED(event))
 { 
     progress->cancel();
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialog::OnDataModified(wxStyledTextEvent& WXUNUSED(event))
 {
     if (loadingM)
         return;
     dataSetModified(true, editorModeM);
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialog::OnMenuBLOBButtonClick(wxCommandEvent& WXUNUSED(event))
 {   
     int h = button_menu_blob->GetSize().GetHeight();
     button_menu_blob->PopupMenu(menu_blob, 0, h);
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialog::OnMenuBLOBLoadFromFile(wxCommandEvent& WXUNUSED(event))
 {
     if (editorModeM == noData)
@@ -1209,7 +1209,7 @@ void EditBlobDialog::OnMenuBLOBLoadFromFile(wxCommandEvent& WXUNUSED(event))
     if (res)
         dataSetModified(true, editorModeM);
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialog::OnMenuBLOBSaveToFile(wxCommandEvent& WXUNUSED(event))
 {
     //DataGridTable* dgt = grid_data->getDataGridTable();
@@ -1233,7 +1233,7 @@ void EditBlobDialog::OnMenuBLOBSaveToFile(wxCommandEvent& WXUNUSED(event))
     bool dummy;
     saveToStream(fs, &dummy, _("Importing BLOB from file"));
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialog::dataUpdateGUI()
 {
     wxString status;
@@ -1253,7 +1253,7 @@ void EditBlobDialog::dataUpdateGUI()
     button_reset->Enable(canSave);
     button_save->Enable(canSave);
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialog::dataSetModified(bool value, EditorMode editorMode)
 {
     if (dataModifiedM == value)
@@ -1266,7 +1266,7 @@ void EditBlobDialog::dataSetModified(bool value, EditorMode editorMode)
 
     dataUpdateGUI();
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialog::blob_textSetReadonly(bool readonly)
 {
     if (readonly)
@@ -1281,7 +1281,7 @@ void EditBlobDialog::blob_textSetReadonly(bool readonly)
     }
     blob_text->SetReadOnly(readonly);
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialog::progressBegin(const wxString& progressTitle, int maxPosition, bool canCancel)
 {
     button_menu_blob->Enable(false);
@@ -1292,7 +1292,7 @@ void EditBlobDialog::progressBegin(const wxString& progressTitle, int maxPositio
     progress->Show(true);
     Update();
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialog::progressCancel()
 {
     // cancel load progress or 
@@ -1308,7 +1308,7 @@ void EditBlobDialog::progressCancel()
             wxSleep(500);
     }
 }
-//-----------------------------------------------------------------------------
+
 void EditBlobDialog::progressEnd()
 {
     progress->Hide();
@@ -1316,7 +1316,7 @@ void EditBlobDialog::progressEnd()
     button_menu_blob->Enable(true);
     notebook->Enable(true);
 }
-//-----------------------------------------------------------------------------
+
 //! event handling
 BEGIN_EVENT_TABLE(EditBlobDialog, BaseDialog)
     EVT_MENU(wxID_RESET, EditBlobDialog::OnResetButtonClick) 
@@ -1338,7 +1338,7 @@ BEGIN_EVENT_TABLE(EditBlobDialog, BaseDialog)
     // Progress
     EVT_BUTTON(Cmds::BlobEditor_ProgressCancel, EditBlobDialog::OnProgressCancel)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 // Helper-Class for streaming into blob / buffer
 // frInputBlobStream
 FRInputBlobStream::FRInputBlobStream(IBPP::Blob blob)
@@ -1354,13 +1354,13 @@ FRInputBlobStream::FRInputBlobStream(IBPP::Blob blob)
     else
         sizeM = 0;
 }
-//-----------------------------------------------------------------------------
+
 FRInputBlobStream::~FRInputBlobStream()
 {
     if (blobM != 0)
         blobM->Close();
 }
-//-----------------------------------------------------------------------------
+
 size_t FRInputBlobStream::OnSysRead(void* buffer, size_t size)
 {
     if ((blobM != 0) && (sizeM > 0))
@@ -1368,12 +1368,12 @@ size_t FRInputBlobStream::OnSysRead(void* buffer, size_t size)
     else
         return 0;
 }
-//-----------------------------------------------------------------------------
+
 size_t FRInputBlobStream::GetSize() const
 {
     return sizeM;
 }
-//-----------------------------------------------------------------------------
+
 // Helper-Class for streaming into blob / buffer
 // frOutputBlobStream
 FROutputBlobStream::FROutputBlobStream(IBPP::Blob blob)
@@ -1382,12 +1382,12 @@ FROutputBlobStream::FROutputBlobStream(IBPP::Blob blob)
     blobM = blob;
     blobM->Create();
 }
-//-----------------------------------------------------------------------------
+
 FROutputBlobStream::~FROutputBlobStream()
 {
     Close();
 }
-//-----------------------------------------------------------------------------
+
 size_t FROutputBlobStream::OnSysWrite(const void* buffer, size_t bufsize)
 {
     if (bufsize == 0)
@@ -1396,11 +1396,11 @@ size_t FROutputBlobStream::OnSysWrite(const void* buffer, size_t bufsize)
     blobM->Write(buffer, bufsize);
     return bufsize;
 }
-//-----------------------------------------------------------------------------
+
 bool FROutputBlobStream::Close()
 {
     if (blobM != 0)
         blobM->Close();
     return true;
 }
-//-----------------------------------------------------------------------------
+

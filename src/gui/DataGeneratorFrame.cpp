@@ -53,14 +53,14 @@
 #include "metadata/database.h"
 #include "metadata/domain.h"
 #include "metadata/table.h"
-//-----------------------------------------------------------------------------
+
 // returns a value between 0 and (maxval-1)
 // I wrote this as I don't know how much is rand from stdlib portable
 int frRandom(double maxval)
 {
     return (int)(maxval*rand()/(RAND_MAX+1.0));
 }
-//-----------------------------------------------------------------------------
+
 // dd.mm.yyyy
 void str2date(const wxString& str, int& date)
 {
@@ -71,7 +71,7 @@ void str2date(const wxString& str, int& date)
         throw FRError(_("Invalid date: ") + str);
     }
 }
-//-----------------------------------------------------------------------------
+
 // HH:MM:SS
 void str2time(const wxString& str, int& mytime)
 {
@@ -83,7 +83,7 @@ void str2time(const wxString& str, int& mytime)
     }
     IBPP::itot(&mytime, h, m, s, 0);
 }
-//-----------------------------------------------------------------------------
+
 // only used in function OnGenerateButtonClick
 class TableDep
 {
@@ -115,7 +115,7 @@ public:
     Table *table;
     std::list<wxString> dependsOn;
 };
-//-----------------------------------------------------------------------------
+
 // helper for saving settings
 void dsAddChildNode(wxXmlNode* parentNode, const wxString nodeName,
     const wxString nodeContent)
@@ -128,7 +128,7 @@ void dsAddChildNode(wxXmlNode* parentNode, const wxString nodeName,
             nodeContent));
     }
 }
-//-----------------------------------------------------------------------------
+
 // used for loading settings from XML file
 static const wxString getNodeContent(wxXmlNode* node)
 {
@@ -142,7 +142,7 @@ static const wxString getNodeContent(wxXmlNode* node)
     }
     return wxEmptyString;
 }
-//-----------------------------------------------------------------------------
+
 // used for loading settings from XML file
 void parseTable(wxXmlNode* xmln, std::map<wxString, int>& tr)
 {
@@ -164,7 +164,7 @@ void parseTable(wxXmlNode* xmln, std::map<wxString, int>& tr)
     if (!tablename.IsEmpty())
         tr.insert(std::pair<wxString, int>(tablename, records));
 }
-//-----------------------------------------------------------------------------
+
 class GeneratorSettings
 {
 public:
@@ -182,11 +182,11 @@ public:
     void toXML(wxXmlNode *parent);
     wxString fromXML(wxXmlNode *parent);    // returns column name
 };
-//-----------------------------------------------------------------------------
+
 GeneratorSettings::GeneratorSettings()
 {
 }
-//-----------------------------------------------------------------------------
+
 GeneratorSettings::GeneratorSettings(GeneratorSettings* other)
 {
     valueType = other->valueType;
@@ -197,7 +197,7 @@ GeneratorSettings::GeneratorSettings(GeneratorSettings* other)
     randomValues = other->randomValues;
     nullPercent = other->nullPercent;
 }
-//-----------------------------------------------------------------------------
+
 void GeneratorSettings::toXML(wxXmlNode *parent)
 {
     dsAddChildNode(parent, wxT("valueType"),
@@ -211,7 +211,7 @@ void GeneratorSettings::toXML(wxXmlNode *parent)
     dsAddChildNode(parent, wxT("nullPercent"),
         wxString::Format(wxT("%d"), nullPercent));
 }
-//-----------------------------------------------------------------------------
+
 wxString GeneratorSettings::fromXML(wxXmlNode *parent)
 {
     wxASSERT(parent);
@@ -251,7 +251,7 @@ wxString GeneratorSettings::fromXML(wxXmlNode *parent)
     }
     return colname;
 }
-//-----------------------------------------------------------------------------
+
 DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     :BaseFrame(parent,-1, wxT("")), databaseM(db), loadingM(true)
 {
@@ -457,7 +457,7 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     if (node.IsOk())
         mainTree->SelectItem(node);
 }
-//-----------------------------------------------------------------------------
+
 DataGeneratorFrame::~DataGeneratorFrame()
 {
     for (std::map<wxString, GeneratorSettings *>::iterator it =
@@ -466,30 +466,30 @@ DataGeneratorFrame::~DataGeneratorFrame()
         delete (*it).second;
     }
 }
-//-----------------------------------------------------------------------------
+
 const wxString DataGeneratorFrame::getName() const
 {
     return wxT("DataGeneratorFrame");
 }
-//-----------------------------------------------------------------------------
+
 const wxRect DataGeneratorFrame::getDefaultRect() const
 {
     return wxRect(-1, -1, 700, 500);
 }
-//-----------------------------------------------------------------------------
+
 //! closes window if database is removed (unregistered)
 void DataGeneratorFrame::subjectRemoved(Subject* subject)
 {
     if (subject == databaseM)
         Close();
 }
-//-----------------------------------------------------------------------------
+
 void DataGeneratorFrame::update()
 {
     if (!databaseM->isConnected())
         Close();
 }
-//-----------------------------------------------------------------------------
+
 bool DataGeneratorFrame::loadColumns(const wxString& tableName, wxChoice* c)
 {
     Identifier id;
@@ -503,7 +503,7 @@ bool DataGeneratorFrame::loadColumns(const wxString& tableName, wxChoice* c)
         c->Append((*it)->getQuotedName());
     return true;
 }
-//-----------------------------------------------------------------------------
+
 // prehaps using values from config() would be nice
 wxString getDefaultRange(Domain *d)
 {
@@ -538,7 +538,7 @@ wxString getDefaultRange(Domain *d)
 
     return wxEmptyString;
 }
-//-----------------------------------------------------------------------------
+
 // returns the setting or creates a default one
 GeneratorSettings* DataGeneratorFrame::getSettings(Column *c)
 {
@@ -631,7 +631,7 @@ GeneratorSettings* DataGeneratorFrame::getSettings(Column *c)
     }
     return gs;
 }
-//-----------------------------------------------------------------------------
+
 void DataGeneratorFrame::showColumnSettings(bool show)
 {
     if (loadingM)
@@ -648,7 +648,7 @@ void DataGeneratorFrame::showColumnSettings(bool show)
             ww[i]->Show(show);
     rightPanelSizer->Layout();
 }
-//-----------------------------------------------------------------------------
+
 void DataGeneratorFrame::saveSetting(wxTreeItemId item)
 {
     if (!item.IsOk())
@@ -687,7 +687,7 @@ void DataGeneratorFrame::saveSetting(wxTreeItemId item)
         gs->nullPercent = nullSpin->GetValue();
     }
 }
-//-----------------------------------------------------------------------------
+
 BEGIN_EVENT_TABLE( DataGeneratorFrame, BaseFrame )
     EVT_BUTTON( ID_button_file, DataGeneratorFrame::OnFileButtonClick )
     EVT_BUTTON( ID_button_copy, DataGeneratorFrame::OnCopyButtonClick )
@@ -699,7 +699,7 @@ BEGIN_EVENT_TABLE( DataGeneratorFrame, BaseFrame )
     EVT_CHOICE(ID_choice_copy, DataGeneratorFrame::OnTableCopyChoiceChange)
     EVT_TREE_SEL_CHANGED(DBHTreeControl::ID_tree_ctrl, DataGeneratorFrame::OnTreeSelectionChanged)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 void DataGeneratorFrame::OnTableValueChoiceChange(wxCommandEvent& event)
 {
     if (loadColumns(event.GetString(), valueColumnChoice))
@@ -709,7 +709,7 @@ void DataGeneratorFrame::OnTableValueChoiceChange(wxCommandEvent& event)
         radioColumn->SetValue(true);
     }
 }
-//-----------------------------------------------------------------------------
+
 void DataGeneratorFrame::OnTableCopyChoiceChange(wxCommandEvent& event)
 {
     if (loadColumns(event.GetString(), copyColumnChoice))
@@ -718,7 +718,7 @@ void DataGeneratorFrame::OnTableCopyChoiceChange(wxCommandEvent& event)
         copySizer->Layout();
     }
 }
-//-----------------------------------------------------------------------------
+
 void DataGeneratorFrame::OnSkipCheckboxClick(wxCommandEvent& event)
 {
     if (event.IsChecked())
@@ -726,7 +726,7 @@ void DataGeneratorFrame::OnSkipCheckboxClick(wxCommandEvent& event)
     else
         spinRecords->SetValue(200); // TODO: load default from config
 }
-//-----------------------------------------------------------------------------
+
 void DataGeneratorFrame::OnTreeSelectionChanged(wxTreeEvent& event)
 {
     if (loadingM)
@@ -735,7 +735,7 @@ void DataGeneratorFrame::OnTreeSelectionChanged(wxTreeEvent& event)
     saveSetting(event.GetOldItem());    // save old item
     loadSetting(event.GetItem());       // load new item
 }
-//-----------------------------------------------------------------------------
+
 void DataGeneratorFrame::loadSetting(wxTreeItemId newitem)
 {
     if (!newitem.IsOk())
@@ -792,7 +792,7 @@ void DataGeneratorFrame::loadSetting(wxTreeItemId newitem)
     randomCheckbox->SetValue(gs->randomValues);
     nullSpin->SetValue(gs->nullPercent);
 }
-//-----------------------------------------------------------------------------
+
 void DataGeneratorFrame::OnLoadButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     wxFileDialog fd(this, _("Select file to load"), wxT(""), wxT(""),
@@ -858,7 +858,7 @@ void DataGeneratorFrame::OnLoadButtonClick(wxCommandEvent& WXUNUSED(event))
         _("The setting where successfully loaded from file."),
         AdvancedMessageDialogButtonsOk());
 }
-//-----------------------------------------------------------------------------
+
 void DataGeneratorFrame::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     saveSetting(mainTree->GetSelection());  // save current item if changed
@@ -913,7 +913,7 @@ void DataGeneratorFrame::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
             AdvancedMessageDialogButtonsOk());
     }
 }
-//-----------------------------------------------------------------------------
+
 void DataGeneratorFrame::OnCopyButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     MetadataItem *m = mainTree->getMetadataItem(mainTree->GetSelection());
@@ -952,7 +952,7 @@ void DataGeneratorFrame::OnCopyButtonClick(wxCommandEvent& WXUNUSED(event))
     // update the current node
     loadSetting(mainTree->GetSelection());
 }
-//-----------------------------------------------------------------------------
+
 void DataGeneratorFrame::OnFileButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     wxFileDialog fd(this, _("Select file to load"), wxT(""), wxT(""),
@@ -964,7 +964,7 @@ void DataGeneratorFrame::OnFileButtonClick(wxCommandEvent& WXUNUSED(event))
     fileText->SetValue(fd.GetPath());
     radioFile->SetValue(true);
 }
-//-----------------------------------------------------------------------------
+
 void DataGeneratorFrame::OnGenerateButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     saveSetting(mainTree->GetSelection());  // save current item if changed
@@ -978,7 +978,7 @@ void DataGeneratorFrame::OnGenerateButtonClick(wxCommandEvent& WXUNUSED(event))
         _("Data generation completed."),
         AdvancedMessageDialogButtonsOk());
 }
-//-----------------------------------------------------------------------------
+
 bool DataGeneratorFrame::sortTables(std::list<Table *>& order)
 {
     // collect list of tables
@@ -1041,7 +1041,7 @@ bool DataGeneratorFrame::sortTables(std::list<Table *>& order)
     }
     return true;
 }
-//-----------------------------------------------------------------------------
+
 // range = comma separated list of values or ranges
 wxString getCharFromRange(const wxString& range, bool rnd, int recNo,
     int charNo, int chars)
@@ -1083,7 +1083,7 @@ wxString getCharFromRange(const wxString& range, bool rnd, int recNo,
         record /= base;
     return valueset.Mid(record % base, 1);
 }
-//-----------------------------------------------------------------------------
+
 void setFromFile(IBPP::Statement st, int param,
     GeneratorSettings *gs, int recNo)
 {
@@ -1188,7 +1188,7 @@ void setFromFile(IBPP::Statement st, int param,
             throw FRError(_("Array datatype not supported"));
     };
 }
-//-----------------------------------------------------------------------------
+
 template<typename T>
 void setFromOther(IBPP::Statement st, int param,
     GeneratorSettings *gs, size_t recNo)
@@ -1233,7 +1233,7 @@ void setFromOther(IBPP::Statement st, int param,
     else
         st->Set(param, values[recNo % values.size()]);
 }
-//-----------------------------------------------------------------------------
+
 // format for values:
 // number[value or range(s)]
 // example: 25[az,AZ,09] means: 25 letters or numbers
@@ -1272,7 +1272,7 @@ void DataGeneratorFrame::setString(IBPP::Statement st, int param,
     }
     st->Set(param, wx2std(value, databaseM->getCharsetConverter()));
 }
-//-----------------------------------------------------------------------------
+
 // gs->range = x,x-y,...
 template<typename T>
 void setNumber(IBPP::Statement st, int param, GeneratorSettings* gs, int recNo)
@@ -1327,7 +1327,7 @@ void setNumber(IBPP::Statement st, int param, GeneratorSettings* gs, int recNo)
         toget -= sz;
     }
 }
-//-----------------------------------------------------------------------------
+
 void setDatetime(IBPP::Statement st, int param, GeneratorSettings* gs,
     int recNo)
 {
@@ -1448,7 +1448,7 @@ void setDatetime(IBPP::Statement st, int param, GeneratorSettings* gs,
         st->Set(param, IBPP::Timestamp(y, mo, d, h, mi, s, t));
     }
 }
-//-----------------------------------------------------------------------------
+
 void DataGeneratorFrame::setParam(IBPP::Statement st, int param,
     GeneratorSettings* gs, int recNo)
 {
@@ -1521,7 +1521,7 @@ void DataGeneratorFrame::setParam(IBPP::Statement st, int param,
     if (gs->valueType == GeneratorSettings::vtFile)
         setFromFile(st, param, gs, recNo);
 }
-//-----------------------------------------------------------------------------
+
 void DataGeneratorFrame::generateData(std::list<Table *>& order)
 {
     ProgressDialog pd(this, _("Generating data"), 2);
@@ -1591,4 +1591,4 @@ void DataGeneratorFrame::generateData(std::list<Table *>& order)
 
     tr->Commit();
 }
-//-----------------------------------------------------------------------------
+

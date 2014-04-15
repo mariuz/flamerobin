@@ -37,14 +37,14 @@
 #include "metadata/relation.h"
 #include "sql/SqlStatement.h"
 
-//-----------------------------------------------------------------------------
+
 // TOKEN LIST - a helper class
-//-----------------------------------------------------------------------------
+
 void TokenList::add(const SqlTokenType& item)
 {
     tokensM.push_back(item);
 }
-//-----------------------------------------------------------------------------
+
 const SqlTokenType& TokenList::operator[](const size_t& index) const
 {
     static const SqlTokenType dummy = tkEOF;
@@ -53,14 +53,14 @@ const SqlTokenType& TokenList::operator[](const size_t& index) const
     else
         return tokensM[index];
 }
-//-----------------------------------------------------------------------------
+
 size_t TokenList::size() const
 {
     return tokensM.size();
 }
-//-----------------------------------------------------------------------------
+
 // STATEMENT
-//-----------------------------------------------------------------------------
+
 SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
     terminator)
     :actionM(actNONE), objectTypeM(ntUnknown), databaseM(db), objectM(0),
@@ -345,17 +345,17 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
         }
     }
 }
-//-----------------------------------------------------------------------------
+
 wxString SqlStatement::getStatement() const
 {
     return statementM;
 }
-//-----------------------------------------------------------------------------
+
 wxString SqlStatement::getTerminator() const
 {
     return terminatorM;
 }
-//-----------------------------------------------------------------------------
+
 Relation* SqlStatement::getCreateTriggerRelation() const
 {
     if (objectTypeM == ntTrigger && databaseM
@@ -370,7 +370,7 @@ Relation* SqlStatement::getCreateTriggerRelation() const
     }
     return 0;
 }
-//-----------------------------------------------------------------------------
+
 bool SqlStatement::isDDL() const
 {
     // actUPDATE means that we did have the UPDATE statment, but it didn't
@@ -378,47 +378,47 @@ bool SqlStatement::isDDL() const
     return (objectTypeM != ntUnknown && actionM != actNONE
         && actionM != actUPDATE);
 }
-//-----------------------------------------------------------------------------
+
 bool SqlStatement::isAlterColumn() const
 {
     return isAlterColumnM;
 }
-//-----------------------------------------------------------------------------
+
 bool SqlStatement::isDatatype() const
 {
     return isDatatypeM;
 }
-//-----------------------------------------------------------------------------
+
 MetadataItem* SqlStatement::getObject() const
 {
     return objectM;
 }
-//-----------------------------------------------------------------------------
+
 NodeType SqlStatement::getObjectType() const
 {
     return objectTypeM;
 }
-//-----------------------------------------------------------------------------
+
 Identifier SqlStatement::getIdentifier() const
 {
     return nameM;
 }
-//-----------------------------------------------------------------------------
+
 wxString SqlStatement::getName() const
 {
     return nameM.get();
 }
-//-----------------------------------------------------------------------------
+
 wxString SqlStatement::getFieldName() const
 {
     return fieldNameM.get();
 }
-//-----------------------------------------------------------------------------
+
 SqlAction SqlStatement::getAction() const
 {
     return actionM;
 }
-//-----------------------------------------------------------------------------
+
 bool SqlStatement::actionIs(const SqlAction& act, NodeType nt) const
 {
     if (nt == ntUnknown)
@@ -426,4 +426,4 @@ bool SqlStatement::actionIs(const SqlAction& act, NodeType nt) const
     else
         return (actionM == act && objectTypeM == nt);
 }
-//-----------------------------------------------------------------------------
+

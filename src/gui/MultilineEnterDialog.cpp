@@ -33,7 +33,7 @@
 #include "gui/controls/TextControl.h"
 #include "gui/MultilineEnterDialog.h"
 #include "gui/StyleGuide.h"
-//-----------------------------------------------------------------------------
+
 bool GetMultilineTextFromUser(wxWindow* parent, const wxString& title,
     wxString& value, const wxString& caption, const wxString& buttonLabel)
 {
@@ -46,7 +46,7 @@ bool GetMultilineTextFromUser(wxWindow* parent, const wxString& title,
     value = med.getText();
     return true;
 }
-//-----------------------------------------------------------------------------
+
 MultilineEnterDialog::MultilineEnterDialog(wxWindow* parent,
         const wxString& title, const wxString& caption)
     : BaseDialog(parent, wxID_ANY, title)
@@ -61,27 +61,27 @@ MultilineEnterDialog::MultilineEnterDialog(wxWindow* parent,
     layoutControls();
     button_ok->SetDefault();
 }
-//-----------------------------------------------------------------------------
+
 wxString MultilineEnterDialog::getText() const
 {
     return text_ctrl_value->GetText();
 }
-//-----------------------------------------------------------------------------
+
 void MultilineEnterDialog::setText(const wxString& text)
 {
     text_ctrl_value->SetText(text);
 }
-//-----------------------------------------------------------------------------
+
 void MultilineEnterDialog::setOkButtonLabel(const wxString& label)
 {
     button_ok->SetLabel(label);
 }
-//-----------------------------------------------------------------------------
+
 const wxString MultilineEnterDialog::getName() const
 {
     return wxT("MultilineEnterDialog");
 }
-//-----------------------------------------------------------------------------
+
 void MultilineEnterDialog::layoutControls()
 {
     wxBoxSizer* sizerControls = new wxBoxSizer(wxVERTICAL);
@@ -99,4 +99,4 @@ void MultilineEnterDialog::layoutControls()
         button_cancel);
     layoutSizers(sizerControls, sizerButtons, true);
 }
-//-----------------------------------------------------------------------------
+

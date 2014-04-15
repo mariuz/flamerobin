@@ -23,13 +23,13 @@
 
 #ifndef FR_FIND_DIALOG
 #define FR_FIND_DIALOG
-//-----------------------------------------------------------------------------
+
 #include <wx/wx.h>
 #include <wx/image.h>
 #include <wx/stc/stc.h>
 
 #include "gui/BaseDialog.h"
-//-----------------------------------------------------------------------------
+
 namespace se    // instead of defines
 {
     const unsigned int WHOLE_WORD         = 1;
@@ -41,7 +41,7 @@ namespace se    // instead of defines
     const unsigned int ALERT =             64;
     const unsigned int DEFAULT =          127;
 };
-//-----------------------------------------------------------------------------
+
 class FindFlags
 {
 private:
@@ -56,9 +56,9 @@ public:
     void show() const;
 
 };
-//-----------------------------------------------------------------------------
+
 class FindDialog;
-//-----------------------------------------------------------------------------
+
 // this allows us to add search&replace to all wxSTC derivatives
 class SearchableEditor: public wxStyledTextCtrl
 {
@@ -82,7 +82,7 @@ public:
 
     SearchableEditor(wxWindow *parent, wxWindowID id);
 };
-//-----------------------------------------------------------------------------
+
 class FindDialog: public BaseDialog
 {
 protected:
@@ -123,5 +123,5 @@ public:
 
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 #endif

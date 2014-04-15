@@ -30,7 +30,7 @@
     #include "wx/wx.h"
 #endif
 
-//-----------------------------------------------------------------------------
+
 #include <ibpp.h>
 
 #include "core/FRError.h"
@@ -40,18 +40,18 @@
 #include "metadata/generator.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "sql/StatementBuilder.h"
-//-----------------------------------------------------------------------------
+
 Generator::Generator(DatabasePtr database, const wxString& name)
     : MetadataItem(ntGenerator, database.get(), name)
 {
 }
-//-----------------------------------------------------------------------------
+
 int64_t Generator::getValue()
 {
     ensurePropertiesLoaded();
     return valueM;
 }
-//-----------------------------------------------------------------------------
+
 void Generator::loadProperties()
 {
     setPropertiesLoaded(false);
@@ -75,28 +75,28 @@ void Generator::loadProperties()
     setPropertiesLoaded(true);
     notifyObservers();
 }
-//-----------------------------------------------------------------------------
+
 const wxString Generator::getTypeName() const
 {
     return wxT("GENERATOR");
 }
-//-----------------------------------------------------------------------------
+
 void Generator::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitGenerator(*this);
 }
-//-----------------------------------------------------------------------------
+
 // Generators collection
 Generators::Generators(DatabasePtr database)
     : MetadataCollection<Generator>(ntGenerators, database, _("Generators"))
 {
 }
-//-----------------------------------------------------------------------------
+
 void Generators::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitGenerators(*this);
 }
-//-----------------------------------------------------------------------------
+
 void Generators::load(ProgressIndicator* progressIndicator)
 {
     wxString stmt = wxT("select rdb$generator_name from rdb$generators")
@@ -104,14 +104,14 @@ void Generators::load(ProgressIndicator* progressIndicator)
         wxT(" order by 1");
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
-//-----------------------------------------------------------------------------
+
 void Generators::loadChildren()
 {
     load(0);
 }
-//-----------------------------------------------------------------------------
+
 const wxString Generators::getTypeName() const
 {
     return wxT("GENERATOR_COLLECTION");
 }
-//-----------------------------------------------------------------------------
+

@@ -47,7 +47,7 @@
 #include "gui/UsernamePasswordDialog.h"
 #include "metadata/database.h"
 #include "metadata/server.h"
-//-----------------------------------------------------------------------------
+
 // worker thread class to perform database restore
 class RestoreThread: public wxThread {
 public:
@@ -70,7 +70,7 @@ private:
     void logImportant(wxString& msg);
     void logProgress(wxString& msg);
 };
-//-----------------------------------------------------------------------------
+
 RestoreThread::RestoreThread(RestoreFrame* frame, wxString server,
         wxString username, wxString password, wxString bkfilename,
         wxString dbfilename, int pagesize, IBPP::BRF flags)
@@ -86,7 +86,7 @@ RestoreThread::RestoreThread(RestoreFrame* frame, wxString server,
     // always use verbose flag
     brfM = (IBPP::BRF)((int)flags | (int)IBPP::brVerbose);
 }
-//-----------------------------------------------------------------------------
+
 void* RestoreThread::Entry()
 {
     wxDateTime now;
@@ -145,7 +145,7 @@ void* RestoreThread::Entry()
     }
     return 0;
 }
-//-----------------------------------------------------------------------------
+
 void RestoreThread::OnExit()
 {
     if (frameM != 0)
@@ -155,25 +155,25 @@ void RestoreThread::OnExit()
         wxPostEvent(frameM, event);
     }
 }
-//-----------------------------------------------------------------------------
+
 void RestoreThread::logError(wxString& msg)
 {
     if (frameM != 0)
         frameM->threadOutputMsg(msg, BackupRestoreBaseFrame::error_message);
 }
-//-----------------------------------------------------------------------------
+
 void RestoreThread::logImportant(wxString& msg)
 {
     if (frameM != 0)
         frameM->threadOutputMsg(msg, BackupRestoreBaseFrame::important_message);
 }
-//-----------------------------------------------------------------------------
+
 void RestoreThread::logProgress(wxString& msg)
 {
     if (frameM != 0)
         frameM->threadOutputMsg(msg, BackupRestoreBaseFrame::progress_message);
 }
-//-----------------------------------------------------------------------------
+
 RestoreFrame::RestoreFrame(wxWindow* parent, DatabasePtr db)
     : BackupRestoreBaseFrame(parent, db)
 {
@@ -190,7 +190,7 @@ RestoreFrame::RestoreFrame(wxWindow* parent, DatabasePtr db)
 
     text_ctrl_filename->SetFocus();
 }
-//-----------------------------------------------------------------------------
+
 //! implementation details
 void RestoreFrame::createControls()
 {
@@ -232,7 +232,7 @@ void RestoreFrame::createControls()
 
     text_ctrl_log = new LogTextControl(this, ID_text_ctrl_log);
 }
-//-----------------------------------------------------------------------------
+
 void RestoreFrame::layoutControls()
 {
     int wh = text_ctrl_filename->GetMinHeight();
@@ -296,7 +296,7 @@ void RestoreFrame::layoutControls()
         -1, 3 * text_ctrl_filename->GetSize().GetHeight());
     SetSizerAndFit(sizerMain);
 }
-//-----------------------------------------------------------------------------
+
 void RestoreFrame::updateControls()
 {
     bool running = getThreadRunning();
@@ -313,7 +313,7 @@ void RestoreFrame::updateControls()
     button_start->Enable(!running && !text_ctrl_filename->GetValue().empty()
         && db && !db->isConnected());
 }
-//-----------------------------------------------------------------------------
+
 void RestoreFrame::doReadConfigSettings(const wxString& prefix)
 {
     BackupRestoreBaseFrame::doReadConfigSettings(prefix);
@@ -345,7 +345,7 @@ void RestoreFrame::doReadConfigSettings(const wxString& prefix)
     }
     updateControls();
 }
-//-----------------------------------------------------------------------------
+
 void RestoreFrame::doWriteConfigSettings(const wxString& prefix) const
 {
     BackupRestoreBaseFrame::doWriteConfigSettings(prefix);
@@ -367,12 +367,12 @@ void RestoreFrame::doWriteConfigSettings(const wxString& prefix) const
         flags.push_back(wxT("use_all_space"));
     config().setValue(prefix + Config::pathSeparator + wxT("options"), flags);
 }
-//-----------------------------------------------------------------------------
+
 const wxString RestoreFrame::getName() const
 {
     return wxT("RestoreFrame");
 }
-//-----------------------------------------------------------------------------
+
 /*static*/
 wxString RestoreFrame::getFrameId(DatabasePtr db)
 {
@@ -381,7 +381,7 @@ wxString RestoreFrame::getFrameId(DatabasePtr db)
     else
         return wxEmptyString;
 }
-//-----------------------------------------------------------------------------
+
 RestoreFrame* RestoreFrame::findFrameFor(DatabasePtr db)
 {
     BaseFrame* bf = frameFromIdString(getFrameId(db));
@@ -389,12 +389,12 @@ RestoreFrame* RestoreFrame::findFrameFor(DatabasePtr db)
         return 0;
     return dynamic_cast<RestoreFrame*>(bf);
 }
-//-----------------------------------------------------------------------------
+
 BEGIN_EVENT_TABLE(RestoreFrame, BackupRestoreBaseFrame)
     EVT_BUTTON(BackupRestoreBaseFrame::ID_button_browse, RestoreFrame::OnBrowseButtonClick)
     EVT_BUTTON(BackupRestoreBaseFrame::ID_button_start, RestoreFrame::OnStartButtonClick)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 void RestoreFrame::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     wxFileName origName(text_ctrl_filename->GetValue());
@@ -405,7 +405,7 @@ void RestoreFrame::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
     if (!filename.empty())
         text_ctrl_filename->SetValue(filename);
 }
-//-----------------------------------------------------------------------------
+
 void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     verboseMsgsM = checkbox_showlog->IsChecked();
@@ -448,4 +448,4 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     startThread(thread);
     updateControls();
 }
-//-----------------------------------------------------------------------------
+

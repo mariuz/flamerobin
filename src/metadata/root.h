@@ -23,12 +23,12 @@
 
 #ifndef FR_ROOT_H
 #define FR_ROOT_H
-//-----------------------------------------------------------------------------
+
 #include "metadata/MetadataClasses.h"
 #include "metadata/metadataitem.h"
 
 class wxXmlNode;
-//-----------------------------------------------------------------------------
+
 class Root: public MetadataItem
 {
 private:
@@ -64,5 +64,5 @@ public:
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     virtual const wxString getTypeName() const;
 };
-//-----------------------------------------------------------------------------
+
 #endif

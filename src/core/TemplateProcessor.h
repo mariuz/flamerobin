@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef FR_TEMPLATEPROCESSOR_H
 #define FR_TEMPLATEPROCESSOR_H
 
@@ -35,7 +35,7 @@
 #include "core/ProcessableObject.h"
 #include "core/ProgressIndicator.h"
 
-//-----------------------------------------------------------------------------
+
 class TemplateCmdParams: public wxArrayString
 {
 public:
@@ -44,11 +44,11 @@ public:
     // returns all params from start, concatenated with the default separator.
     wxString from(size_t start) const;
 };
-//-----------------------------------------------------------------------------
+
 typedef std::map<wxString, wxString> wxStringMap;
-//-----------------------------------------------------------------------------
+
 class TemplateCmdHandler;
-//-----------------------------------------------------------------------------
+
 class TemplateProcessor
 {
 private:
@@ -108,7 +108,7 @@ public:
     virtual wxString escapeChars(const wxString& input,
         bool processNewlines = true) = 0;
 };
-//-----------------------------------------------------------------------------
+
 class TemplateCmdHandlerRepository
 {
 public:
@@ -135,10 +135,10 @@ private:
     TemplateCmdHandlerRepository(const TemplateCmdHandlerRepository&) {};
     TemplateCmdHandlerRepository operator==(const TemplateCmdHandlerRepository&);
 };
-//-----------------------------------------------------------------------------
+
 //!singleton instance of the command handler repository.
 TemplateCmdHandlerRepository& getTemplateCmdHandlerRepository();
-//-----------------------------------------------------------------------------
+
 // Pure virtual class, specific handlers should be derived from it
 class TemplateCmdHandler
 {
@@ -167,6 +167,6 @@ private:
     TemplateCmdHandlerRepository* repositoryM;
     void setRepository(TemplateCmdHandlerRepository* const repository);
 };
-//-----------------------------------------------------------------------------
+
 
 #endif // FR_TEMPLATEPROCESSOR_H

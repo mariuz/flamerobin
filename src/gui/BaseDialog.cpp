@@ -33,7 +33,7 @@
 #include "config/Config.h"
 #include "gui/BaseDialog.h"
 #include "gui/StyleGuide.h"
-//-----------------------------------------------------------------------------
+
 BaseDialog::BaseDialog(wxWindow* parent, int id, const wxString& title,
         const wxPoint& pos, const wxSize& size, long style)
     : wxDialog(parent, id, title, pos, size, style)
@@ -41,12 +41,12 @@ BaseDialog::BaseDialog(wxWindow* parent, int id, const wxString& title,
     panel_controls = new wxPanel(this, wxID_ANY, wxDefaultPosition,
         wxDefaultSize, wxTAB_TRAVERSAL | wxCLIP_CHILDREN | wxNO_BORDER);
 }
-//-----------------------------------------------------------------------------
+
 wxPanel* BaseDialog::getControlsPanel()
 {
     return panel_controls;
 }
-//-----------------------------------------------------------------------------
+
 void BaseDialog::layoutSizers(wxSizer* controls, wxSizer* buttons,
     bool expandControls)
 {
@@ -74,7 +74,7 @@ void BaseDialog::layoutSizers(wxSizer* controls, wxSizer* buttons,
     sizerAll->Fit(this);
     sizerAll->SetSizeHints(this);
 }
-//-----------------------------------------------------------------------------
+
 bool BaseDialog::Show(bool show)
 {
     if (show)
@@ -83,11 +83,11 @@ bool BaseDialog::Show(bool show)
         writeConfigSettings();
     return wxDialog::Show(show);
 }
-//-----------------------------------------------------------------------------
+
 BaseDialog::~BaseDialog()
 {
 }
-//-----------------------------------------------------------------------------
+
 //! updates colors of controls
 void BaseDialog::updateColors(wxWindow *parent)
 {
@@ -112,7 +112,7 @@ void BaseDialog::updateColors(wxWindow *parent)
     }
 
 }
-//-----------------------------------------------------------------------------
+
 void BaseDialog::readConfigSettings()
 {
     // default to centered dialogs
@@ -144,11 +144,11 @@ void BaseDialog::readConfigSettings()
     if (centered)
         Centre(wxCENTER_FRAME | wxBOTH);
 }
-//-----------------------------------------------------------------------------
+
 void BaseDialog::doReadConfigSettings(const wxString& WXUNUSED(prefix))
 {
 }
-//-----------------------------------------------------------------------------
+
 void BaseDialog::writeConfigSettings() const
 {
     if (config().get(wxT("FrameStorage"), false) && !IsIconized())
@@ -175,11 +175,11 @@ void BaseDialog::writeConfigSettings() const
         }
     }
 }
-//-----------------------------------------------------------------------------
+
 void BaseDialog::doWriteConfigSettings(const wxString& WXUNUSED(prefix)) const
 {
 }
-//-----------------------------------------------------------------------------
+
 const wxString BaseDialog::getName() const
 {
     // Couldn't find a reliable (meaning supportable and cross-platform) way
@@ -187,24 +187,24 @@ const wxString BaseDialog::getName() const
     // if it needs to use features that depend on it.
     return wxT("");
 }
-//-----------------------------------------------------------------------------
+
 const wxString BaseDialog::getStorageName() const
 {
     return getName();
 }
-//-----------------------------------------------------------------------------
+
 const wxRect BaseDialog::getDefaultRect() const
 {
     return wxRect(-1, -1, -1, -1);
 }
-//-----------------------------------------------------------------------------
+
 bool BaseDialog::getConfigStoresWidth() const
 {
     return true;
 }
-//-----------------------------------------------------------------------------
+
 bool BaseDialog::getConfigStoresHeight() const
 {
     return true;
 }
-//-----------------------------------------------------------------------------
+

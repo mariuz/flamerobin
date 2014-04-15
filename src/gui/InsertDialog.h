@@ -23,7 +23,7 @@
 
 #ifndef FR_INSERTDIALOG_H
 #define FR_INSERTDIALOG_H
-//-----------------------------------------------------------------------------
+
 #include <wx/wx.h>
 #include <wx/image.h>
 
@@ -50,7 +50,7 @@ public:
     ResultsetColumnDef *columnDef;
     int index;  // column index in dataset
 };
-//-----------------------------------------------------------------------------
+
 class InsertDialog: public BaseDialog
 {
 public:
@@ -97,5 +97,5 @@ protected:
 
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 #endif

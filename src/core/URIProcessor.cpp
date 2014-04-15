@@ -29,21 +29,21 @@
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
-//-----------------------------------------------------------------------------
+
 #include <list>
 #include <algorithm>
 
 #include "core/URIProcessor.h"
-//-----------------------------------------------------------------------------
+
 URI::URI()
 {
 }
-//-----------------------------------------------------------------------------
+
 URI::URI(const wxString& uri)
 {
     parseURI(uri);
 }
-//-----------------------------------------------------------------------------
+
 //! pair has format: name=value
 void URI::addParam(const wxString& pair)
 {
@@ -53,7 +53,7 @@ void URI::addParam(const wxString& pair)
     else
         params[pair.substr(0, p)] = pair.substr(p + 1);
 }
-//-----------------------------------------------------------------------------
+
 wxString URI::getParam(const wxString& name) const
 {
     std::map<wxString, wxString>::const_iterator it = params.find(name);
@@ -62,7 +62,7 @@ wxString URI::getParam(const wxString& name) const
     else
         return (*it).second;
 }
-//-----------------------------------------------------------------------------
+
 bool URI::parseURI(const wxString& uri)
 {
     wxString::size_type p = uri.find(wxT("://"));               // find ://
@@ -95,31 +95,31 @@ bool URI::parseURI(const wxString& uri)
 
     return true;
 }
-//-----------------------------------------------------------------------------
+
 URIProcessor& getURIProcessor()
 {
     static URIProcessor uriProcessor;
     return uriProcessor;
 }
-//-----------------------------------------------------------------------------
+
 //! needed to disallow instantiation
 URIProcessor::URIProcessor()
     : handlerListSortedM(false)
 {
 }
-//-----------------------------------------------------------------------------
+
 URIProcessor::~URIProcessor()
 {
     while (!handlersM.empty())
         removeHandler(handlersM.front());
 }
-//-----------------------------------------------------------------------------
+
 //! needed in checkHandlerListSorted() to sort on objects instead of pointers
 bool uriHandlerPointerLT(const URIHandler* left, const URIHandler* right)
 {
     return *left < *right;
 }
-//-----------------------------------------------------------------------------
+
 void URIProcessor::checkHandlerListSorted()
 {
     if (!handlerListSortedM)
@@ -128,7 +128,7 @@ void URIProcessor::checkHandlerListSorted()
         handlerListSortedM = true;
     }
 }
-//-----------------------------------------------------------------------------
+
 //! returns false if no suitable handler found
 bool URIProcessor::handleURI(URI& uri)
 {
@@ -138,7 +138,7 @@ bool URIProcessor::handleURI(URI& uri)
             return true;
     return false;
 }
-//-----------------------------------------------------------------------------
+
 void URIProcessor::addHandler(URIHandler* handler)
 {
     // can't do ordered insert here, since the getPosition() function that
@@ -149,28 +149,28 @@ void URIProcessor::addHandler(URIHandler* handler)
     handler->setProcessor(this);
     handlerListSortedM = false;
 }
-//-----------------------------------------------------------------------------
+
 void URIProcessor::removeHandler(URIHandler* handler)
 {
     handlersM.erase(std::find(handlersM.begin(), handlersM.end(), handler));
     handler->setProcessor(0);
 }
-//-----------------------------------------------------------------------------
+
 URIHandler::URIHandler() :
     processorM(0)
 {
     getURIProcessor().addHandler(this);
 }
-//-----------------------------------------------------------------------------
+
 void URIHandler::setProcessor(URIProcessor* const processor)
 {
     processorM = processor;
 }
-//-----------------------------------------------------------------------------
+
 //! this is currently only called on program termination
 URIHandler::~URIHandler()
 {
     if (processorM)
         processorM->removeHandler(this);
 }
-//-----------------------------------------------------------------------------
+

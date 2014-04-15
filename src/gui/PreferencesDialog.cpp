@@ -47,7 +47,7 @@
 #include "gui/ConfdefTemplateProcessor.h"
 #include "gui/PreferencesDialog.h"
 #include "gui/StyleGuide.h"
-//-----------------------------------------------------------------------------
+
 static bool hasParamNode(wxXmlNode* node, const wxString& param)
 {
     for (wxXmlNode* n = node->GetChildren(); (n); n = n->GetNext())
@@ -57,7 +57,7 @@ static bool hasParamNode(wxXmlNode* node, const wxString& param)
     }
     return false;
 }
-//-----------------------------------------------------------------------------
+
 static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)
 {
     for (wxXmlNode* n = node->GetChildren(); (n); n = n->GetNext())
@@ -70,7 +70,7 @@ static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)
     }
     return defvalue;
 }
-//-----------------------------------------------------------------------------
+
 //! return wxString for comparison, used to limit features to certain platforms
 wxString getPlatformName()
 {
@@ -84,7 +84,7 @@ wxString getPlatformName()
     return wxT("undefined");
 #endif
 }
-//-----------------------------------------------------------------------------
+
 static void processPlatformAttribute(wxXmlNode *node)
 {
     wxString s;
@@ -125,7 +125,7 @@ static void processPlatformAttribute(wxXmlNode *node)
         }
     }
 }
-//-----------------------------------------------------------------------------
+
 // Optionbook class
 class Optionbook: public wxBookCtrlBase {
 public:
@@ -175,7 +175,7 @@ private:
 
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 bool Optionbook::Create(wxWindow *parent, wxWindowID id, const wxPoint& pos,
     const wxSize& size, long style, const wxString& name)
 {
@@ -184,7 +184,7 @@ bool Optionbook::Create(wxWindow *parent, wxWindowID id, const wxPoint& pos,
     return wxControl::Create(parent, id, pos, size, style,
         wxDefaultValidator, name);
 }
-//-----------------------------------------------------------------------------
+
 wxWindow* Optionbook::DoRemovePage(size_t page)
 {
     const int page_count = GetPageCount();
@@ -209,7 +209,7 @@ wxWindow* Optionbook::DoRemovePage(size_t page)
     }
     return win;
 }
-//-----------------------------------------------------------------------------
+
 wxString Optionbook::GetPageText(size_t n) const
 {
     if (n < GetPageCount())
@@ -217,12 +217,12 @@ wxString Optionbook::GetPageText(size_t n) const
     else
         return wxEmptyString;
 }
-//-----------------------------------------------------------------------------
+
 void Optionbook::Init()
 {
     m_selection = wxNOT_FOUND;
 }
-//-----------------------------------------------------------------------------
+
 bool Optionbook::InsertPage(size_t n, wxWindow *page, const wxString& text,
     bool bSelect, int imageId)
 {
@@ -256,14 +256,14 @@ bool Optionbook::InsertPage(size_t n, wxWindow *page, const wxString& text,
     InvalidateBestSize();
     return true;
 }
-//-----------------------------------------------------------------------------
+
 bool Optionbook::SetPageText(size_t n, const wxString& strText)
 {
     wxCHECK((n >= pageTextsM.GetCount()), false);
     pageTextsM[n] = strText;
     return true;
 }
-//-----------------------------------------------------------------------------
+
 int Optionbook::SetSelection(size_t n)
 {
     wxCHECK((n < GetPageCount()), wxNOT_FOUND);
@@ -282,12 +282,12 @@ int Optionbook::SetSelection(size_t n)
     }
     return oldSel;
 }
-//-----------------------------------------------------------------------------
+
 BEGIN_EVENT_TABLE(Optionbook, wxBookCtrlBase)
     EVT_SET_FOCUS(Optionbook::OnSetFocus)
     EVT_SIZE(Optionbook::OnSize)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 void Optionbook::OnSetFocus(wxFocusEvent& event)
 {
     if (m_selection != wxNOT_FOUND)
@@ -298,7 +298,7 @@ void Optionbook::OnSetFocus(wxFocusEvent& event)
     }
     event.Skip();
 }
-//-----------------------------------------------------------------------------
+
 void Optionbook::OnSize(wxSizeEvent& event)
 {
     if (m_selection != wxNOT_FOUND)
@@ -309,7 +309,7 @@ void Optionbook::OnSize(wxSizeEvent& event)
     }
     event.Skip();
 }
-//-----------------------------------------------------------------------------
+
 // PreferencesDialog class
 PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
         Config& targetConfig, const wxFileName& confDefFileName,
@@ -321,7 +321,7 @@ PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
     loadConfDefFile(confDefFileName);
     setControlLayout();
 }
-//-----------------------------------------------------------------------------
+
 PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
         Config& targetConfig, const wxString& confDefData,
         const wxString& saveButtonCaption, const wxString& dialogName)
@@ -332,7 +332,7 @@ PreferencesDialog::PreferencesDialog(wxWindow* parent, const wxString& title,
     loadConfDef(confDefData);
     setControlLayout();
 }
-//-----------------------------------------------------------------------------
+
 void PreferencesDialog::initControls(const wxString& saveButtonCaption)
 {
     // we don't want this dialog centered on parent since it is very big, and
@@ -352,7 +352,7 @@ void PreferencesDialog::initControls(const wxString& saveButtonCaption)
     button_save = new wxButton(getControlsPanel(), wxID_SAVE, saveButtonCaption);
     button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL, _("Cancel"));
 }
-//-----------------------------------------------------------------------------
+
 void PreferencesDialog::setControlLayout()
 {
     // order of these is important: first create all controls, then set
@@ -363,14 +363,14 @@ void PreferencesDialog::setControlLayout()
     // do this last, otherwise default button style may be lost on MSW
     button_save->SetDefault();
 }
-//-----------------------------------------------------------------------------
+
 PreferencesDialog::~PreferencesDialog()
 {
     std::list<PrefDlgSetting*>::iterator it;
     for (it = settingsM.begin(); it != settingsM.end(); ++it)
         delete (*it);
 }
-//-----------------------------------------------------------------------------
+
 bool PreferencesDialog::createControlsAndAddToSizer(wxPanel* page, wxSizer* sizerPage)
 {
     // get a list of all settings belonging to this page
@@ -424,7 +424,7 @@ bool PreferencesDialog::createControlsAndAddToSizer(wxPanel* page, wxSizer* size
     }
     return true;
 }
-//-----------------------------------------------------------------------------
+
 const wxString PreferencesDialog::getName() const
 {
     if (!dialogNameM.IsEmpty())
@@ -432,17 +432,17 @@ const wxString PreferencesDialog::getName() const
     else
         return wxT("PreferencesDialog");
 }
-//-----------------------------------------------------------------------------
+
 int PreferencesDialog::getSelectedPage()
 {
     return (bookctrl_1) ? bookctrl_1->GetSelection() : wxNOT_FOUND;
 }
-//-----------------------------------------------------------------------------
+
 bool PreferencesDialog::isOk()
 {
     return loadSuccessM;
 }
-//-----------------------------------------------------------------------------
+
 void PreferencesDialog::layout()
 {
     wxBoxSizer* sizerCateg = new wxBoxSizer(wxHORIZONTAL);
@@ -478,7 +478,7 @@ void PreferencesDialog::layout()
     // use method in base class to set everything up
     layoutSizers(sizerControls, sizerButtons, true);
 }
-//-----------------------------------------------------------------------------
+
 void PreferencesDialog::loadConfDefFile(const wxFileName& filename)
 {
     loadSuccessM = false;
@@ -493,7 +493,7 @@ void PreferencesDialog::loadConfDefFile(const wxFileName& filename)
     }
     loadConfDef(loadEntireFile(filename));
 }
-//-----------------------------------------------------------------------------
+
 void PreferencesDialog::loadConfDef(const wxString& confDefData)
 {
     wxStringInputStream stream(confDefData);
@@ -522,7 +522,7 @@ void PreferencesDialog::loadConfDef(const wxString& confDefData)
     }
     loadSuccessM = true;
 }
-//-----------------------------------------------------------------------------
+
 bool PreferencesDialog::loadFromTargetConfig()
 {
     std::list<PrefDlgSetting*>::iterator it;
@@ -533,7 +533,7 @@ bool PreferencesDialog::loadFromTargetConfig()
     }
     return true;
 }
-//-----------------------------------------------------------------------------
+
 bool PreferencesDialog::parseDescriptionNode(wxTreeItemId parent, wxXmlNode* xmln)
 {
     // ignore empty nodes
@@ -592,7 +592,7 @@ bool PreferencesDialog::parseDescriptionNode(wxTreeItemId parent, wxXmlNode* xml
     treeItemsM.Add(item);
     return controlsok;
 }
-//-----------------------------------------------------------------------------
+
 bool PreferencesDialog::parseDescriptionSetting(wxPanel* page, wxXmlNode* xmln,
     PrefDlgSetting* enabledby)
 {
@@ -641,7 +641,7 @@ bool PreferencesDialog::parseDescriptionSetting(wxPanel* page, wxXmlNode* xmln,
     }
     return true;
 }
-//-----------------------------------------------------------------------------
+
 bool PreferencesDialog::saveToTargetConfig()
 {
     // Avoid flushing the config object at each write.
@@ -655,7 +655,7 @@ bool PreferencesDialog::saveToTargetConfig()
     }
     return true;
 }
-//-----------------------------------------------------------------------------
+
 void PreferencesDialog::selectPage(int index)
 {
     if (bookctrl_1 && index >= 0 && index < (int)treeItemsM.GetCount())
@@ -665,7 +665,7 @@ void PreferencesDialog::selectPage(int index)
         bookctrl_1->SetFocus();
     }
 }
-//-----------------------------------------------------------------------------
+
 void PreferencesDialog::setProperties()
 {
     // setup image list for tree control
@@ -691,20 +691,20 @@ void PreferencesDialog::setProperties()
     font.SetWeight(wxBOLD);
     static_text_categ->SetFont(font);
 }
-//-----------------------------------------------------------------------------
+
 BEGIN_EVENT_TABLE(PreferencesDialog, wxDialog)
     EVT_BUTTON(wxID_SAVE, PreferencesDialog::OnSaveButtonClick)
     EVT_TREE_SEL_CHANGED(PreferencesDialog::ID_treectrl_panes,
         PreferencesDialog::OnTreeSelChanged)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 void PreferencesDialog::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     wxBusyCursor wait;
     if (saveToTargetConfig())
         EndModal(wxID_OK);
 }
-//-----------------------------------------------------------------------------
+
 void PreferencesDialog::OnTreeSelChanged(wxTreeEvent& event)
 {
     wxTreeItemId item = event.GetItem();
@@ -719,7 +719,7 @@ void PreferencesDialog::OnTreeSelChanged(wxTreeEvent& event)
         }
     }
 }
-//-----------------------------------------------------------------------------
+
 bool PreferencesDialog::Show(bool show)
 {
     bool r = BaseDialog::Show(show);
@@ -729,7 +729,7 @@ bool PreferencesDialog::Show(bool show)
         static_text_categ->SetLabel(bookctrl_1->GetPageText(0));
     return r;
 }
-//-----------------------------------------------------------------------------
+
 class PreferencesDialogTemplateCmdHandler: public TemplateCmdHandler
 {
 private:
@@ -740,9 +740,9 @@ public:
         const wxString& cmdName, const TemplateCmdParams& cmdParams,
         ProcessableObject* object, wxString& processedText);
 };
-//-----------------------------------------------------------------------------
+
 const PreferencesDialogTemplateCmdHandler PreferencesDialogTemplateCmdHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 void PreferencesDialogTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
     const wxString& cmdName, const TemplateCmdParams& /*cmdParams*/,
     ProcessableObject* object, wxString& /*processedText*/)
@@ -778,4 +778,4 @@ void PreferencesDialogTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *t
                 throw FRAbort();
     }
 }
-//-----------------------------------------------------------------------------
+

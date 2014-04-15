@@ -20,7 +20,7 @@
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//-----------------------------------------------------------------------------
+
 #include "wx/wxprec.h"
 
 #ifndef WX_PRECOMP
@@ -34,7 +34,7 @@
 #include "config/Config.h"
 #include "gui/StatementHistoryDialog.h"
 #include "gui/StyleGuide.h"
-//-----------------------------------------------------------------------------
+
 StatementHistoryDialog::StatementHistoryDialog(wxWindow *parent,
     StatementHistory *history, const wxString& title)
     :BaseDialog(parent, -1, title), historyM(history),
@@ -128,7 +128,7 @@ StatementHistoryDialog::StatementHistoryDialog(wxWindow *parent,
     SetSize(620, 400);
     Centre();
 }
-//-----------------------------------------------------------------------------
+
 void StatementHistoryDialog::setSearching(bool searching)
 {
     isSearchingM = searching;
@@ -141,7 +141,7 @@ void StatementHistoryDialog::setSearching(bool searching)
     else
         button_search->SetLabel(_("&Search"));
 }
-//-----------------------------------------------------------------------------
+
 BEGIN_EVENT_TABLE(StatementHistoryDialog, BaseDialog)
     EVT_BUTTON(StatementHistoryDialog::ID_button_search,
         StatementHistoryDialog::OnButtonSearchClick)
@@ -154,7 +154,7 @@ BEGIN_EVENT_TABLE(StatementHistoryDialog, BaseDialog)
     EVT_LISTBOX_DCLICK(StatementHistoryDialog::ID_listbox_search,
         StatementHistoryDialog::OnListBoxSearchDoubleClick)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 void StatementHistoryDialog::OnListBoxSelect(wxCommandEvent& WXUNUSED(event))
 {
     wxArrayInt sels;
@@ -194,7 +194,7 @@ void StatementHistoryDialog::OnListBoxSelect(wxCommandEvent& WXUNUSED(event))
         textctrl_statement->SetStyling(searchString.Length(), 1);
     }
 }
-//-----------------------------------------------------------------------------
+
 void StatementHistoryDialog::OnButtonSearchClick(wxCommandEvent&
     WXUNUSED(event))
 {
@@ -237,7 +237,7 @@ void StatementHistoryDialog::OnButtonSearchClick(wxCommandEvent&
     setSearching(false);
     gauge_progress->SetValue(0);
 }
-//-----------------------------------------------------------------------------
+
 void StatementHistoryDialog::OnButtonDeleteClick(wxCommandEvent&
     WXUNUSED(event))
 {
@@ -262,7 +262,7 @@ void StatementHistoryDialog::OnButtonDeleteClick(wxCommandEvent&
     for (size_t i=temp.GetCount()-1; (int)i >= 0; --i)
         listbox_search->Delete(temp.Item(i));
 }
-//-----------------------------------------------------------------------------
+
 void StatementHistoryDialog::OnButtonCopyClick(wxCommandEvent& WXUNUSED(event))
 {
     wxArrayInt temp;
@@ -279,7 +279,7 @@ void StatementHistoryDialog::OnButtonCopyClick(wxCommandEvent& WXUNUSED(event))
     }
     EndModal(wxID_OK);
 }
-//-----------------------------------------------------------------------------
+
 void StatementHistoryDialog::OnListBoxSearchDoubleClick(wxCommandEvent& event)
 {
     StatementHistory::Position item =
@@ -289,9 +289,9 @@ void StatementHistoryDialog::OnListBoxSearchDoubleClick(wxCommandEvent& event)
     sqlM = historyM->get(item);
     EndModal(wxID_OK);
 }
-//-----------------------------------------------------------------------------
+
 wxString StatementHistoryDialog::getSql() const
 {
     return sqlM;
 }
-//-----------------------------------------------------------------------------
+

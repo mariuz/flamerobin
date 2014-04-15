@@ -23,12 +23,12 @@
 
 #ifndef FR_LOGGER_H
 #define FR_LOGGER_H
-//-----------------------------------------------------------------------------
+
 // Functions used to log successfully executed statements
 // in database or textual files
 #include <ibpp.h>
 class SqlStatement;
-//-----------------------------------------------------------------------------
+
 class Database;
 class Config;
 
@@ -42,5 +42,5 @@ private:
 public:
     static bool logStatement(const SqlStatement& st, Database *db);
 };
-//-----------------------------------------------------------------------------
+
 #endif

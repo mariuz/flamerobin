@@ -60,7 +60,7 @@
 #include "metadata/trigger.h"
 #include "metadata/view.h"
 #include "sql/SqlTokenizer.h"
-//-----------------------------------------------------------------------------
+
 // DBHTreeConfigCache: class to cache config data for tree control behaviour
 class DBHTreeConfigCache: public ConfigCache, public Subject
 {
@@ -94,19 +94,19 @@ public:
     bool getSortDatabases() { return sortDatabasesM; };
     bool getSortServers() { return sortServersM; };
 };
-//----------------------------------------------------------------------------
+
 DBHTreeConfigCache::DBHTreeConfigCache()
     : ConfigCache(config()), Subject()
 {
     loadFromConfig();
 }
-//-----------------------------------------------------------------------------
+
 DBHTreeConfigCache& DBHTreeConfigCache::get()
 {
     static DBHTreeConfigCache dndc;
     return dndc;
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeConfigCache::loadFromConfig()
 {
     Config& cfg(config());
@@ -140,7 +140,7 @@ void DBHTreeConfigCache::loadFromConfig()
     if (changes)
         notifyObservers();
 }
-//-----------------------------------------------------------------------------
+
 template<typename T>
 unsigned DBHTreeConfigCache::setValue(T& field, T newValue)
 {
@@ -149,14 +149,14 @@ unsigned DBHTreeConfigCache::setValue(T& field, T newValue)
     field = newValue;
     return 1;
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeConfigCache::update()
 {
     ConfigCache::update();
     // load changed settings immediately and notify observers 
     loadFromConfig();
 }
-//-----------------------------------------------------------------------------
+
 // DBHTreeImageList class
 class DBHTreeImageList: public wxImageList
 {
@@ -169,7 +169,7 @@ public:
     static DBHTreeImageList& get();
     int getImageIndex(const wxArtID& id);
 };
-//-----------------------------------------------------------------------------
+
 DBHTreeImageList::DBHTreeImageList()
     : wxImageList(16, 16)
 {
@@ -208,13 +208,13 @@ DBHTreeImageList::DBHTreeImageList()
     addImage(ART_View);
     addImage(ART_Views);
 }
-//-----------------------------------------------------------------------------
+
 /*static*/ DBHTreeImageList& DBHTreeImageList::get()
 {
     static DBHTreeImageList til;
     return til;
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeImageList::addImage(const wxArtID& art)
 {
     wxBitmap bmp(wxArtProvider::GetBitmap(art, wxART_OTHER, wxSize(16, 16)));
@@ -224,7 +224,7 @@ void DBHTreeImageList::addImage(const wxArtID& art)
     icon.CopyFromBitmap(bmp);
     artIdIndicesM[art] = Add(icon);
 }
-//-----------------------------------------------------------------------------
+
 int DBHTreeImageList::getImageIndex(const wxArtID& id)
 {
     std::map<wxArtID, int>::const_iterator it = artIdIndicesM.find(id);
@@ -232,7 +232,7 @@ int DBHTreeImageList::getImageIndex(const wxArtID& id)
         return (*it).second;
     return -1;
 }
-//-----------------------------------------------------------------------------
+
 // DBHTreeItemVisitor class
 class DBHTreeItemVisitor: public MetadataItemVisitor
 {
@@ -289,7 +289,7 @@ public:
     virtual void visitView(View& view);
     virtual void visitViews(Views& views);
 };
-//-----------------------------------------------------------------------------
+
 DBHTreeItemVisitor::DBHTreeItemVisitor(DBHTreeControl* tree)
     : MetadataItemVisitor(), treeM(tree), nodeVisibleM(true),
         nodeTextBoldM(false), nodeTextM(), nodeImageIndexM(-1),
@@ -297,13 +297,13 @@ DBHTreeItemVisitor::DBHTreeItemVisitor(DBHTreeControl* tree)
         sortChildrenM(false), nodeConfigSensitiveM(false)
 {
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::defaultAction()
 {
     // all classes that have corresponding tree nodes must have visitClass()
     wxASSERT_MSG(false, wxT("DBHTreeItemVisitor::visit[Classname]() missing"));
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::setNodeProperties(MetadataItem* metadataItem,
     const wxArtID& artId)
 {
@@ -325,7 +325,7 @@ void DBHTreeItemVisitor::setNodeProperties(MetadataItem* metadataItem,
     showChildrenM = childCount > 0;
     sortChildrenM = false;
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitColumn(Column& column)
 {
     // node text: column_name + column_datatype [+ "not null"]
@@ -361,7 +361,7 @@ void DBHTreeItemVisitor::visitColumn(Column& column)
     // set remaining default properties, nodeTextM will not be touched
     setNodeProperties(&column, artId);
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitDatabase(Database& database)
 {
     // show different images for connected and disconnected databases
@@ -378,7 +378,7 @@ void DBHTreeItemVisitor::visitDatabase(Database& database)
     // update if settings change: "Show system roles/tables in tree"
     nodeConfigSensitiveM = true;
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitDomain(Domain& domain)
 {
     // skip autogenerated domains
@@ -396,33 +396,33 @@ void DBHTreeItemVisitor::visitDomain(Domain& domain)
     // set remaining default properties, nodeTextM will not be touched
     setNodeProperties(&domain, ART_Domain);
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitDomains(Domains& domains)
 {
     // domain collection contains system domains that are not visible
     setNodeProperties(&domains, ART_Domains);
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitException(Exception& exception)
 {
     setNodeProperties(&exception, ART_Exception);
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitExceptions(Exceptions& exceptions)
 {
     setNodeProperties(&exceptions, ART_Exceptions);
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitFunction(Function& function)
 {
     setNodeProperties(&function, ART_Function);
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitFunctions(Functions& functions)
 {
     setNodeProperties(&functions, ART_Functions);
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitGenerator(Generator& generator)
 {
     // show generator value, but only if it has been loaded already
@@ -435,12 +435,12 @@ void DBHTreeItemVisitor::visitGenerator(Generator& generator)
     // set remaining default properties, nodeTextM will not be touched
     setNodeProperties(&generator, ART_Generator);
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitGenerators(Generators& generators)
 {
     setNodeProperties(&generators, ART_Generators);
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitParameter(Parameter& parameter)
 {
     bool isOutput = parameter.isOutputParameter();
@@ -455,7 +455,7 @@ void DBHTreeItemVisitor::visitParameter(Parameter& parameter)
     setNodeProperties(&parameter,
         isOutput ? ART_ParameterOutput : ART_ParameterInput);
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitProcedure(Procedure& procedure)
 {
     setNodeProperties(&procedure, ART_Procedure);
@@ -485,28 +485,28 @@ void DBHTreeItemVisitor::visitProcedure(Procedure& procedure)
     // update if settings change
     nodeConfigSensitiveM = true;
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitProcedures(Procedures& procedures)
 {
     setNodeProperties(&procedures, ART_Procedures);
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitRole(Role& role)
 {
     setNodeProperties(&role,
         role.isSystem() ? ART_SystemRole : ART_Role);
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitRoles(Roles& roles)
 {
     setNodeProperties(&roles, ART_Roles);
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitSysRoles(SysRoles& roles)
 {
     setNodeProperties(&roles, ART_SystemRoles);
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitRoot(Root& root)
 {
     setNodeProperties(&root, ART_Root);
@@ -518,7 +518,7 @@ void DBHTreeItemVisitor::visitRoot(Root& root)
     // update if settings change (sort servers?)
     nodeConfigSensitiveM = true;
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitServer(Server& server)
 {
     setNodeProperties(&server, ART_Server);
@@ -530,12 +530,12 @@ void DBHTreeItemVisitor::visitServer(Server& server)
     // update if settings change (sort databases?)
     nodeConfigSensitiveM = true;
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitSysTables(SysTables& tables)
 {
     setNodeProperties(&tables, ART_SystemTables);
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitTable(Table& table)
 {
     setNodeProperties(&table,
@@ -558,22 +558,22 @@ void DBHTreeItemVisitor::visitTable(Table& table)
     // update if settings change
     nodeConfigSensitiveM = true;
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitTables(Tables& tables)
 {
     setNodeProperties(&tables, ART_Tables);
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitTrigger(Trigger& trigger)
 {
     setNodeProperties(&trigger, ART_Trigger);
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitTriggers(Triggers& triggers)
 {
     setNodeProperties(&triggers, ART_Triggers);
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitView(View& view)
 {
     setNodeProperties(&view, ART_View);
@@ -594,12 +594,12 @@ void DBHTreeItemVisitor::visitView(View& view)
     // update if settings change
     nodeConfigSensitiveM = true;
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemVisitor::visitViews(Views& views)
 {
     setNodeProperties(&views, ART_Views);
 }
-//-----------------------------------------------------------------------------
+
 // TreeSelectionRestorer class
 class TreeSelectionRestorer
 {
@@ -624,7 +624,7 @@ public:
     TreeSelectionRestorer(DBHTreeControl* tree);
     ~TreeSelectionRestorer();
 };
-//-----------------------------------------------------------------------------
+
 TreeSelectionRestorer::TreeSelectionRestorer(DBHTreeControl* tree)
     : treeM(tree)
 {
@@ -637,7 +637,7 @@ TreeSelectionRestorer::TreeSelectionRestorer(DBHTreeControl* tree)
         getSelections()[tree] = TreeSelectionData(selItem);
     }
 }
-//-----------------------------------------------------------------------------
+
 TreeSelectionRestorer::~TreeSelectionRestorer()
 {
     SelectionMap::iterator pos = getSelections().find(treeM);
@@ -651,14 +651,14 @@ TreeSelectionRestorer::~TreeSelectionRestorer()
         getSelections().erase(pos);
     }
 }
-//-----------------------------------------------------------------------------
+
 /*static*/
 TreeSelectionRestorer::SelectionMap& TreeSelectionRestorer::getSelections()
 {
     static SelectionMap sm;
     return sm;
 }
-//-----------------------------------------------------------------------------
+
 // DBHTreeItem is a special kind of observer, which observes special kind
 // of subjects: MetadataItem instances
 class DBHTreeItemData: public wxTreeItemData, public Observer
@@ -675,12 +675,12 @@ public:
     MetadataItem* getObservedMetadata();
     void setObservedMetadata(MetadataItem* item);
 };
-//-----------------------------------------------------------------------------
+
 DBHTreeItemData::DBHTreeItemData(DBHTreeControl* tree)
     : Observer(), treeM(tree), observedItemM(0)
 {
 }
-//-----------------------------------------------------------------------------
+
 //! returns tree subnode that points to given metadata object
 wxTreeItemId DBHTreeItemData::findSubNode(MetadataItem* item)
 {
@@ -694,12 +694,12 @@ wxTreeItemId DBHTreeItemData::findSubNode(MetadataItem* item)
     }
     return wxTreeItemId();
 }
-//-----------------------------------------------------------------------------
+
 MetadataItem* DBHTreeItemData::getObservedMetadata()
 {
     return observedItemM;
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeItemData::setObservedMetadata(MetadataItem* item)
 {
     if (observedItemM != item)
@@ -711,7 +711,7 @@ void DBHTreeItemData::setObservedMetadata(MetadataItem* item)
             observedItemM->attachObserver(this, true);
     }
 }
-//-----------------------------------------------------------------------------
+
 struct MetadataItemSorter
 {
     bool operator() (MetadataItem* item1, MetadataItem* item2)
@@ -782,7 +782,7 @@ struct MetadataItemSorter
 */
     };
 };
-//-----------------------------------------------------------------------------
+
 //! parent nodes are responsible for "insert" / "delete"
 //! node is responsible for "update"
 void DBHTreeItemData::update()
@@ -940,13 +940,13 @@ void DBHTreeItemData::update()
     treeM->SetItemBold(id, tivObject.getNodeTextBold()
         || treeM->ItemHasChildren(id));
 }
-//-----------------------------------------------------------------------------
+
 BEGIN_EVENT_TABLE(DBHTreeControl, wxTreeCtrl)
     EVT_CONTEXT_MENU(DBHTreeControl::OnContextMenu)
     EVT_TREE_BEGIN_DRAG(wxID_ANY, DBHTreeControl::OnBeginDrag)
     EVT_TREE_ITEM_EXPANDING(wxID_ANY, DBHTreeControl::OnTreeItemExpanding)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 void DBHTreeControl::OnBeginDrag(wxTreeEvent& event)
 {
     if (!DBHTreeConfigCache::get().allowDnD())
@@ -971,7 +971,7 @@ void DBHTreeControl::OnBeginDrag(wxTreeEvent& event)
     else
         event.Skip();
 }
-//-----------------------------------------------------------------------------
+
 //! Creates context menu
 void DBHTreeControl::OnContextMenu(wxContextMenuEvent& event)
 {
@@ -1016,7 +1016,7 @@ void DBHTreeControl::OnContextMenu(wxContextMenuEvent& event)
     if (MyMenu.GetMenuItemCount())
         PopupMenu(&MyMenu, pos);
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeControl::OnTreeItemExpanding(wxTreeEvent& event)
 {
     MetadataItem* mi = getMetadataItem(event.GetItem());
@@ -1024,7 +1024,7 @@ void DBHTreeControl::OnTreeItemExpanding(wxTreeEvent& event)
         mi->ensureChildrenLoaded();
     event.Skip();
 }
-//-----------------------------------------------------------------------------
+
 DBHTreeControl::DBHTreeControl(wxWindow* parent, const wxPoint& pos,
         const wxSize& size, long style)
     : wxTreeCtrl(parent, ID_tree_ctrl, pos, size, style)
@@ -1038,19 +1038,19 @@ DBHTreeControl::DBHTreeControl(wxWindow* parent, const wxPoint& pos,
 */
     SetImageList(&DBHTreeImageList::get());
 }
-//-----------------------------------------------------------------------------
+
 void DBHTreeControl::allowContextMenu(bool doAllow)
 {
     allowContextMenuM = doAllow;
 }
-//-----------------------------------------------------------------------------
+
 //! Override wxWidgets method, since it's buggy (doesn't handle negative values properly)
 void DBHTreeControl::SetSpacing(short spacing)
 {
     wxTreeCtrl::SetSpacing(spacing);
     m_spacing = spacing;
 }
-//-----------------------------------------------------------------------------
+
 wxTreeItemId DBHTreeControl::addRootNode(MetadataItem* rootItem)
 {
     wxASSERT(rootItem);
@@ -1064,13 +1064,13 @@ wxTreeItemId DBHTreeControl::addRootNode(MetadataItem* rootItem)
     DBHTreeConfigCache::get().attachObserver(rootdata, false);
     return id;
 }
-//-----------------------------------------------------------------------------
+
 //! returns the object that selected wxTree node observes
 MetadataItem* DBHTreeControl::getSelectedMetadataItem()
 {
     return getMetadataItem(GetSelection());
 }
-//-----------------------------------------------------------------------------
+
 //! returns the object that some wxTree node observes
 MetadataItem* DBHTreeControl::getMetadataItem(wxTreeItemId item)
 {
@@ -1081,7 +1081,7 @@ MetadataItem* DBHTreeControl::getMetadataItem(wxTreeItemId item)
     }
     return 0;
 }
-//-----------------------------------------------------------------------------
+
 // recursively searches children for item
 bool DBHTreeControl::findMetadataItem(MetadataItem *item, wxTreeItemId parent)
 {
@@ -1100,12 +1100,12 @@ bool DBHTreeControl::findMetadataItem(MetadataItem *item, wxTreeItemId parent)
     }
     return false;
 }
-//-----------------------------------------------------------------------------
+
 bool DBHTreeControl::selectMetadataItem(MetadataItem* item)
 {
     return item && findMetadataItem(item, GetRootItem());
 }
-//----------------------------------------------------------------------------
+
 //! recursively get the last child of item
 wxTreeItemId DBHTreeControl::getLastItem(wxTreeItemId id)
 {
@@ -1115,7 +1115,7 @@ wxTreeItemId DBHTreeControl::getLastItem(wxTreeItemId id)
     else
         return id;
 }
-//----------------------------------------------------------------------------
+
 //! get the previous item vertically
 wxTreeItemId DBHTreeControl::getPreviousItem(wxTreeItemId current)
 {
@@ -1132,7 +1132,7 @@ wxTreeItemId DBHTreeControl::getPreviousItem(wxTreeItemId current)
     else
         return getLastItem(temp);
 }
-//----------------------------------------------------------------------------
+
 //! get the next item vertically
 wxTreeItemId DBHTreeControl::getNextItem(wxTreeItemId current)
 {
@@ -1156,7 +1156,7 @@ wxTreeItemId DBHTreeControl::getNextItem(wxTreeItemId current)
     }
     return temp;
 }
-//----------------------------------------------------------------------------
+
 //! searches for next node whose text starts with "text"
 //! where "text" can contain wildcards: * and ?
 bool DBHTreeControl::findText(const wxString& text, bool forward)
@@ -1185,4 +1185,4 @@ bool DBHTreeControl::findText(const wxString& text, bool forward)
             return false;
     }
 }
-//-----------------------------------------------------------------------------
+

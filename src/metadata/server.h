@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef FR_SERVER_H
 #define FR_SERVER_H
 
@@ -34,7 +34,7 @@
 #include "metadata/MetadataClasses.h"
 #include "metadata/metadataitem.h"
 #include "metadata/User.h"
-//-----------------------------------------------------------------------------
+
 class Server : public MetadataItem,
     public boost::enable_shared_from_this<Server>
 {
@@ -86,5 +86,5 @@ public:
     virtual const wxString getItemPath() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
-//-----------------------------------------------------------------------------
+
 #endif

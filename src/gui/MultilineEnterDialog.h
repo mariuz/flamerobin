@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef MULTILINEENTERDIALOG_H
 #define MULTILINEENTERDIALOG_H
 
@@ -30,11 +30,11 @@
 #include "gui/BaseDialog.h"
 
 class TextControl;
-//-----------------------------------------------------------------------------
+
 bool GetMultilineTextFromUser(wxWindow* parent, const wxString& title,
     wxString& value, const wxString& caption = wxEmptyString,
     const wxString& buttonLabel = wxEmptyString);
-//-----------------------------------------------------------------------------
+
 //! normally you shouldn't need to create objects of this class, just use
 //  the GetMultilineTextFromUser() function
 class MultilineEnterDialog: public BaseDialog {
@@ -55,5 +55,5 @@ public:
 
     void setOkButtonLabel(const wxString& label);
 };
-//-----------------------------------------------------------------------------
+
 #endif

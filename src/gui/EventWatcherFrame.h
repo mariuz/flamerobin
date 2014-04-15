@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef FR_EVENT_FRAME_H
 #define FR_EVENT_FRAME_H
 
@@ -41,7 +41,7 @@
 #include "metadata/MetadataClasses.h"
 
 class EventLogControl;
-//-----------------------------------------------------------------------------
+
 class EventWatcherFrame : public BaseFrame, public Observer,
     public IBPP::EventInterface
 {
@@ -111,5 +111,5 @@ private:
 
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 #endif

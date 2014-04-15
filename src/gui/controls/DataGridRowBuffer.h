@@ -27,7 +27,7 @@
 #include <boost/cstdint.hpp>
 #include <ibpp.h>
 
-//-----------------------------------------------------------------------------
+
 struct DataGridRowBufferFieldAttr
 // use bits instead of bool here to save memory
 {
@@ -39,7 +39,7 @@ struct DataGridRowBufferFieldAttr
     //      It is accesed by stringIndexM.
     int isStringLoaded:1;  // accessed by stringIndexM !!
 };
-//-----------------------------------------------------------------------------
+
 // DataGridRowBuffer class
 class DataGridRowBuffer
 {
@@ -90,7 +90,7 @@ public:
     bool isDeleted();
     void setIsDeleted(bool value);
 };
-//-----------------------------------------------------------------------------
+
 // class for rows inserted by user - to minimize memory usage of regular rows
 // and also speed up code in DataGridRows::isFieldReadonly
 class InsertedGridRowBuffer: public DataGridRowBuffer
@@ -105,5 +105,5 @@ public:
     virtual bool isFieldNA(unsigned num);
     virtual void setFieldNA(unsigned num, bool isNA);
 };
-//-----------------------------------------------------------------------------
+
 #endif

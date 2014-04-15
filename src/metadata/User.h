@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef FR_USER_H
 #define FR_USER_H
 
@@ -67,5 +67,5 @@ public:
 
     void assignTo(IBPP::User& dest) const;
 };
-//-----------------------------------------------------------------------------
+
 #endif

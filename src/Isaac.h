@@ -29,7 +29,7 @@ whose size should not be bigger than size of unsigned long int.
 
 #ifndef FR_ISAAC_H
 #define FR_ISAAC_H
-//-----------------------------------------------------------------------------
+
 class Isaac
 {
 private:
@@ -157,5 +157,5 @@ public:
         return result;
     }
 };
-//-----------------------------------------------------------------------------
+
 #endif

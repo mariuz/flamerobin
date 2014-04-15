@@ -23,7 +23,7 @@
 
 #ifndef FR_METADATALOADER_H
 #define FR_METADATALOADER_H
-//-----------------------------------------------------------------------------
+
 #include <list>
 #include <string>
 
@@ -31,7 +31,7 @@
 
 class Database;
 class MetadataLoaderTransaction;
-//-----------------------------------------------------------------------------
+
 class MetadataLoader
 {
 private:
@@ -95,7 +95,7 @@ public:
     // Creates an IBPP::Blob object using the database and transaction
     IBPP::Blob createBlob();
 };
-//-----------------------------------------------------------------------------
+
 class MetadataLoaderTransaction
 {
 private:
@@ -104,5 +104,5 @@ public:
     MetadataLoaderTransaction(MetadataLoader* loader);
     ~MetadataLoaderTransaction();
 };
-//-----------------------------------------------------------------------------
+
 #endif //FR_METADATALOADER_H

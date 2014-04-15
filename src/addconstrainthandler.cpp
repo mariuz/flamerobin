@@ -38,7 +38,7 @@
 #include "metadata/MetadataItemURIHandlerHelper.h"
 #include "metadata/table.h"
 
-//-----------------------------------------------------------------------------
+
 class AddConstraintHandler: public URIHandler, private GUIURIHandlerHelper,
     private MetadataItemURIHandlerHelper
 {
@@ -51,9 +51,9 @@ private:
     TablePtr selectTable(DatabasePtr db, wxWindow* parent) const;
     wxString selectAction(const wxString& label, wxWindow* parent) const;
 };
-//-----------------------------------------------------------------------------
+
 const AddConstraintHandler AddConstraintHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 TablePtr AddConstraintHandler::selectTable(DatabasePtr db,
     wxWindow* parent) const
 {
@@ -67,7 +67,7 @@ TablePtr AddConstraintHandler::selectTable(DatabasePtr db,
         return TablePtr();
     return ts->findByName(tables[index]);
 }
-//-----------------------------------------------------------------------------
+
 wxString AddConstraintHandler::selectAction(const wxString& label,
     wxWindow *parent) const
 {
@@ -83,7 +83,7 @@ wxString AddConstraintHandler::selectAction(const wxString& label,
         return wxT("CANCEL");
     return actions[index];
 }
-//-----------------------------------------------------------------------------
+
 bool AddConstraintHandler::handleURI(URI& uri)
 {
     if (uri.action != wxT("add_constraint"))
@@ -175,4 +175,4 @@ bool AddConstraintHandler::handleURI(URI& uri)
     execSql(w, wxT(""), db, sql, true);  // true = commit + close at once
     return true;
 }
-//-----------------------------------------------------------------------------
+

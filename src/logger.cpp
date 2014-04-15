@@ -40,7 +40,7 @@
 #include "logger.h"
 #include "sql/SqlStatement.h"
 #include "metadata/database.h"
-//----------------------------------------------------------------------------
+
 bool Logger::log2database(Config *cfg, const SqlStatement& stm, Database* db)
 {
     wxMBConv* conv = db->getCharsetConverter();
@@ -96,7 +96,7 @@ bool Logger::log2database(Config *cfg, const SqlStatement& stm, Database* db)
     }
     return false;
 }
-//----------------------------------------------------------------------------
+
 bool Logger::log2file(Config *cfg, const SqlStatement& st,
     Database *db, const wxString& filename)
 {
@@ -186,7 +186,7 @@ bool Logger::log2file(Config *cfg, const SqlStatement& st,
     f.Close();
     return true;
 }
-//----------------------------------------------------------------------------
+
 bool Logger::logStatement(const SqlStatement& st, Database* db)
 {
     DatabaseConfig dc(db, config());
@@ -280,4 +280,4 @@ bool Logger::logStatementByConfig(Config* cfg, const SqlStatement& st,
     }
     return true;
 }
-//----------------------------------------------------------------------------
+

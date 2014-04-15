@@ -23,7 +23,7 @@
 
 #ifndef FR_FIELDPROPERTIESDIALOG_H
 #define FR_FIELDPROPERTIESDIALOG_H
-//-----------------------------------------------------------------------------
+
 #include <wx/wx.h>
 #include <wx/statline.h>
 
@@ -33,7 +33,7 @@
 class Database;
 class Table;
 class Column;
-//-----------------------------------------------------------------------------
+
 class FieldPropertiesDialog: public BaseDialog, public Observer {
 private:
     DatabasePtr databaseM;
@@ -126,5 +126,5 @@ private:
 
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 #endif // FR_FIELDPROPERTIESDIALOG_H

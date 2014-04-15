@@ -37,7 +37,7 @@
 #include "config/Config.h"
 #include "metadata/database.h"
 #include "statementHistory.h"
-//-----------------------------------------------------------------------------
+
 wxString StatementHistory::getFilename(StatementHistory::Position item)
 {
     wxString fn = config().getUserHomePath() + wxT("history/");
@@ -49,7 +49,7 @@ wxString StatementHistory::getFilename(StatementHistory::Position item)
     fn << wxT("_ITEM_") << (item);
     return fn;
 }
-//-----------------------------------------------------------------------------
+
 StatementHistory::StatementHistory(const wxString& storageName)
 {
     storageNameM = storageName;
@@ -61,13 +61,13 @@ StatementHistory::StatementHistory(const wxString& storageName)
         sizeM++;
     }
 }
-//-----------------------------------------------------------------------------
+
 StatementHistory::StatementHistory(const StatementHistory& source)
 {
     storageNameM = source.storageNameM;
     sizeM = source.sizeM;
 }
-//-----------------------------------------------------------------------------
+
 //! reads granularity from config() and gives pointer to appropriate history object
 StatementHistory& StatementHistory::get(Database* db)
 {
@@ -101,7 +101,7 @@ StatementHistory& StatementHistory::get(Database* db)
         return (*(stm.find(db))).second;
     }
 }
-//-----------------------------------------------------------------------------
+
 wxDateTime StatementHistory::getDateTime(StatementHistory::Position pos)
 {
     if (pos < sizeM)
@@ -110,7 +110,7 @@ wxDateTime StatementHistory::getDateTime(StatementHistory::Position pos)
     }
     return wxInvalidDateTime;
 }
-//-----------------------------------------------------------------------------
+
 wxString StatementHistory::get(StatementHistory::Position pos)
 {
     if (pos < sizeM)
@@ -127,7 +127,7 @@ wxString StatementHistory::get(StatementHistory::Position pos)
     }
     return wxEmptyString;
 }
-//-----------------------------------------------------------------------------
+
 void StatementHistory::add(const wxString& str)
 {
     if (str.Strip().IsEmpty() ||    // empty or too big string
@@ -148,12 +148,12 @@ void StatementHistory::add(const wxString& str)
         }
     }
 }
-//-----------------------------------------------------------------------------
+
 StatementHistory::Position StatementHistory::size()
 {
     return sizeM;
 }
-//-----------------------------------------------------------------------------
+
 void StatementHistory::deleteItems(
     const std::vector<StatementHistory::Position>& items)
 {
@@ -180,4 +180,4 @@ void StatementHistory::deleteItems(
     // set new size
     sizeM = start;
 }
-//-----------------------------------------------------------------------------
+

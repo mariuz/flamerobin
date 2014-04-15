@@ -38,18 +38,18 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/table.h"
 
-//-----------------------------------------------------------------------------
+
 ColumnBase::ColumnBase(NodeType type, MetadataItem* parent,
         const wxString& name)
     : MetadataItem(type, parent, name), hasDefaultM(false)
 {
 }
-//-----------------------------------------------------------------------------
+
 wxString ColumnBase::getComputedSource() const
 {
     return wxEmptyString;
 }
-//-----------------------------------------------------------------------------
+
 //! retrieve datatype from domain if possible
 wxString ColumnBase::getDatatype(bool useConfig)
 {
@@ -94,13 +94,13 @@ wxString ColumnBase::getDatatype(bool useConfig)
         ret += wxT(" (") + getComputedSource() + wxT(")");
     return ret;
 }
-//-----------------------------------------------------------------------------
+
 DomainPtr ColumnBase::getDomain() const
 {
     DatabasePtr db = getDatabase();
     return (db) ? db->getDomain(sourceM) : DomainPtr();
 }
-//-----------------------------------------------------------------------------
+
 bool ColumnBase::getDefault(GetColumnDefaultType type, wxString& value) const
 {
     if (hasDefaultM)
@@ -119,12 +119,12 @@ bool ColumnBase::getDefault(GetColumnDefaultType type, wxString& value) const
     value = wxEmptyString;
     return false;
 }
-//-----------------------------------------------------------------------------
+
 wxString ColumnBase::getSource() const
 {
     return sourceM;
 }
-//-----------------------------------------------------------------------------
+
 template<typename T>
 inline void setIfChanged(T& value, const T& newValue, bool& changed)
 {
@@ -134,7 +134,7 @@ inline void setIfChanged(T& value, const T& newValue, bool& changed)
         changed = true;
     }
 }
-//-----------------------------------------------------------------------------
+
 void ColumnBase::initialize(const wxString& source, bool nullable,
     const wxString& defaultValue, bool hasDefault, bool hasDescription)
 {
@@ -148,7 +148,7 @@ void ColumnBase::initialize(const wxString& source, bool nullable,
     if (changed)
         notifyObservers();
 }
-//-----------------------------------------------------------------------------
+
 bool ColumnBase::isNullable(GetColumnNullabilityType type) const
 {
     if (!nullableM)
@@ -160,12 +160,12 @@ bool ColumnBase::isNullable(GetColumnNullabilityType type) const
     }
     return true;
 }
-//-----------------------------------------------------------------------------
+
 Column::Column(Relation* relation, const wxString& name)
     : ColumnBase(ntColumn, relation, name)
 {
 }
-//-----------------------------------------------------------------------------
+
 void Column::initialize(const wxString& source, const wxString& computedSource,
     const wxString& collation, bool nullable,
     const wxString& defaultValue, bool hasDefault, bool hasDescription)
@@ -181,7 +181,7 @@ void Column::initialize(const wxString& source, const wxString& computedSource,
     if (changed)
         notifyObservers();
 }
-//-----------------------------------------------------------------------------
+
 bool Column::isPrimaryKey() const
 {
     Table* t = getTable();
@@ -198,7 +198,7 @@ bool Column::isPrimaryKey() const
     }
     return false;
 }
-//-----------------------------------------------------------------------------
+
 bool Column::isForeignKey() const
 {
     Table* t = getTable();
@@ -219,33 +219,33 @@ bool Column::isForeignKey() const
     }
     return false;
 }
-//-----------------------------------------------------------------------------
+
 bool Column::isString() const
 {
     DomainPtr d = getDomain();
     return (d ? d->isString() : false);
 }
-//-----------------------------------------------------------------------------
+
 Table* Column::getTable() const
 {
     return dynamic_cast<Table*>(getParent());
 }
-//-----------------------------------------------------------------------------
+
 wxString Column::getComputedSource() const
 {
     return computedSourceM;
 }
-//-----------------------------------------------------------------------------
+
 wxString Column::getCollation() const
 {
     return collationM;
 }
-//-----------------------------------------------------------------------------
+
 const wxString Column::getTypeName() const
 {
     return wxT("COLUMN");
 }
-//-----------------------------------------------------------------------------
+
 wxString Column::getDropSqlStatement() const
 {
     Table* t = getTable();
@@ -253,9 +253,9 @@ wxString Column::getDropSqlStatement() const
         return wxEmptyString;
     return wxT("ALTER TABLE ") + t->getQuotedName() + wxT(" DROP ") + getQuotedName();
 }
-//-----------------------------------------------------------------------------
+
 void Column::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitColumn(*this);
 }
-//-----------------------------------------------------------------------------
+

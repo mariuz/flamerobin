@@ -33,12 +33,12 @@
 #include "core/StringUtils.h"
 #include "metadata/server.h"
 #include "metadata/User.h"
-//-----------------------------------------------------------------------------
+
 User::User(ServerPtr server)
     : MetadataItem(ntUnknown, server.get()), serverM(server)
 {
 }
-//-----------------------------------------------------------------------------
+
 User::User(ServerPtr server, const IBPP::User& src)
     : MetadataItem(ntUnknown, server.get()), serverM(server),
         useridM(src.userid), groupidM(src.groupid)
@@ -49,47 +49,47 @@ User::User(ServerPtr server, const IBPP::User& src)
     middlenameM = std2wx(src.middlename);
     lastnameM = std2wx(src.lastname);
 }
-//-----------------------------------------------------------------------------
+
 ServerPtr User::getServer() const
 {
     return ServerPtr(serverM);
 }
-//-----------------------------------------------------------------------------
+
 wxString User::getUsername() const
 {
     return usernameM;
 }
-//-----------------------------------------------------------------------------
+
 wxString User::getPassword() const
 {
     return passwordM;
 }
-//-----------------------------------------------------------------------------
+
 wxString User::getFirstName() const
 {
     return firstnameM;
 }
-//-----------------------------------------------------------------------------
+
 wxString User::getMiddleName() const
 {
     return middlenameM;
 }
-//-----------------------------------------------------------------------------
+
 wxString User::getLastName() const
 {
     return lastnameM;
 }
-//-----------------------------------------------------------------------------
+
 uint32_t User::getUserId() const
 {
     return useridM;
 }
-//-----------------------------------------------------------------------------
+
 uint32_t User::getGroupId() const
 {
     return groupidM;
 }
-//-----------------------------------------------------------------------------
+
 void User::setUsername(const wxString& value)
 {
     if (usernameM != value)
@@ -98,7 +98,7 @@ void User::setUsername(const wxString& value)
         notifyObservers();
     }
 }
-//-----------------------------------------------------------------------------
+
 void User::setPassword(const wxString& value)
 {
     if (passwordM != value)
@@ -107,7 +107,7 @@ void User::setPassword(const wxString& value)
         notifyObservers();
     }
 }
-//-----------------------------------------------------------------------------
+
 void User::setFirstName(const wxString& value)
 {
     if (firstnameM != value)
@@ -116,7 +116,7 @@ void User::setFirstName(const wxString& value)
         notifyObservers();
     }
 }
-//-----------------------------------------------------------------------------
+
 void User::setMiddleName(const wxString& value)
 {
     if (middlenameM != value)
@@ -125,7 +125,7 @@ void User::setMiddleName(const wxString& value)
         notifyObservers();
     }
 }
-//-----------------------------------------------------------------------------
+
 void User::setLastName(const wxString& value)
 {
     if (lastnameM != value)
@@ -134,7 +134,7 @@ void User::setLastName(const wxString& value)
         notifyObservers();
     }
 }
-//-----------------------------------------------------------------------------
+
 void User::setUserId(uint32_t value)
 {
     if (useridM != value)
@@ -143,7 +143,7 @@ void User::setUserId(uint32_t value)
         notifyObservers();
     }
 }
-//-----------------------------------------------------------------------------
+
 void User::setGroupId(uint32_t value)
 {
     if (groupidM != value)
@@ -152,7 +152,7 @@ void User::setGroupId(uint32_t value)
         notifyObservers();
     }
 }
-//-----------------------------------------------------------------------------
+
 void User::assignTo(IBPP::User& dest) const
 {
     dest.username = wx2std(usernameM);
@@ -163,9 +163,9 @@ void User::assignTo(IBPP::User& dest) const
     dest.userid = useridM;
     dest.groupid = groupidM;
 }
-//-----------------------------------------------------------------------------
+
 bool User::isSystem() const
 {
     return usernameM == wxT("SYSDBA");
 }
-//-----------------------------------------------------------------------------
+

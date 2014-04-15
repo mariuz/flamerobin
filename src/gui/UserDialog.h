@@ -23,13 +23,13 @@
 
 #ifndef FR_USERDIALOG_H
 #define FR_USERDIALOG_H
-//-----------------------------------------------------------------------------
+
 #include <wx/wx.h>
 #include <wx/spinctrl.h>
 
 #include "gui/BaseDialog.h"
 #include "metadata/MetadataClasses.h"
-//-----------------------------------------------------------------------------
+
 class UserDialog: public BaseDialog
 {
 private:
@@ -78,5 +78,5 @@ private:
 
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 #endif

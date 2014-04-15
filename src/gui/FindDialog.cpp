@@ -34,27 +34,27 @@
 
 #include "gui/FindDialog.h"
 #include "gui/StyleGuide.h"
-//-----------------------------------------------------------------------------
+
 FindFlags::FindFlags()
 {
     flags = se::DEFAULT;
 }
-//-----------------------------------------------------------------------------
+
 bool FindFlags::has(unsigned int flag) const
 {
     return ((flags & flag) == flag);
 }
-//-----------------------------------------------------------------------------
+
 void FindFlags::remove(unsigned int flag)
 {
     flags &= ~flag;
 }
-//-----------------------------------------------------------------------------
+
 void FindFlags::add(unsigned int flag)
 {
     flags |= flag;
 }
-//-----------------------------------------------------------------------------
+
 int FindFlags::asStc() const            // returns "flags" converted to wxSTC search flags
 {
     int retval = 0;
@@ -66,7 +66,7 @@ int FindFlags::asStc() const            // returns "flags" converted to wxSTC se
         retval |= wxSTC_FIND_REGEXP;
     return retval;
 }
-//-----------------------------------------------------------------------------
+
 // Used for debugging
 void FindFlags::show() const
 {
@@ -85,20 +85,20 @@ void FindFlags::show() const
         retval += wxT("se::CONVERT_BACKSLASH\n");
     wxMessageBox(retval);
 }
-//-----------------------------------------------------------------------------
+
 FindFlags& FindFlags::operator= (const FindFlags& source)
 {
     flags = source.flags;
     return *this;
 }
-//-----------------------------------------------------------------------------
+
 //! wxStyledTextCtrl with Search&Replace capability
 SearchableEditor::SearchableEditor(wxWindow *parent, wxWindowID id)
     : wxStyledTextCtrl(parent, id, wxDefaultPosition, wxDefaultSize,
         wxBORDER_THEME), fd(0)
 {
 }
-//-----------------------------------------------------------------------------
+
 wxString SearchableEditor::convertBackslashes(const wxString& source)
 {
     wxString result(source);
@@ -125,7 +125,7 @@ wxString SearchableEditor::convertBackslashes(const wxString& source)
     result.Replace(wxT("\\\\"), wxT("\\"));
     return result;
 }
-//-----------------------------------------------------------------------------
+
 void SearchableEditor::setupSearch(const wxString& findText, const wxString& replaceText, const FindFlags& flags)
 {
     findFlagsM = flags;
@@ -140,7 +140,7 @@ void SearchableEditor::setupSearch(const wxString& findText, const wxString& rep
         replaceTextM = replaceText;
     }
 }
-//-----------------------------------------------------------------------------
+
 bool SearchableEditor::find(bool newSearch)
 {
     if (!fd)
@@ -198,7 +198,7 @@ bool SearchableEditor::find(bool newSearch)
     centerCaret(false);
     return true;
 }
-//-----------------------------------------------------------------------------
+
 bool SearchableEditor::replace(bool force)
 {
     int start = GetSelectionStart();
@@ -218,7 +218,7 @@ bool SearchableEditor::replace(bool force)
     find(false);
     return true;
 }
-//-----------------------------------------------------------------------------
+
 int SearchableEditor::replaceAll()
 {
     int caret = GetSelectionStart();        // remember position, so we return to some sensible place at end
@@ -246,7 +246,7 @@ int SearchableEditor::replaceAll()
     SetSelectionEnd(caret);
     return cnt;
 }
-//-----------------------------------------------------------------------------
+
 int SearchableEditor::replaceInSelection()
 {
     findFlagsM.remove(se::FROM_TOP);    // turn flag off
@@ -287,7 +287,7 @@ int SearchableEditor::replaceInSelection()
     SetSelectionEnd(selend);
     return cnt;
 }
-//-----------------------------------------------------------------------------
+
 void SearchableEditor::centerCaret(bool doCenter)
 {
     if (doCenter)       // try to keep it in center of screen
@@ -301,7 +301,7 @@ void SearchableEditor::centerCaret(bool doCenter)
         SetYCaretPolicy(wxSTC_CARET_SLOP|wxSTC_CARET_EVEN|wxSTC_CARET_STRICT, 2);
     }
 }
-//-----------------------------------------------------------------------------
+
 FindDialog::FindDialog(SearchableEditor *editor, wxWindow* parent, const wxString& title, FindFlags *allowedFlags)
     :BaseDialog(parent, -1, title)
 {
@@ -342,7 +342,7 @@ FindDialog::FindDialog(SearchableEditor *editor, wxWindow* parent, const wxStrin
     button_find->SetDefault();
     text_ctrl_find->SetFocus();
 }
-//-----------------------------------------------------------------------------
+
 void FindDialog::do_layout()
 {
     wxFlexGridSizer* sizerEdits = new wxFlexGridSizer(2, 2,
@@ -391,7 +391,7 @@ void FindDialog::do_layout()
     // use method in base class to set everything up
     layoutSizers(sizerControls, sizerButtons);
 }
-//-----------------------------------------------------------------------------
+
 void FindDialog::setup()
 {
     FindFlags flags;
@@ -414,7 +414,7 @@ void FindDialog::setup()
     if (flags.has(se::FROM_TOP))
         checkbox_fromtop->SetValue(false);
 }
-//-----------------------------------------------------------------------------
+
 void FindDialog::SetFindText(const wxString& text)
 {
     // don't overwrite search text with empty or multiline text
@@ -423,39 +423,39 @@ void FindDialog::SetFindText(const wxString& text)
     text_ctrl_find->ChangeValue(text);
     text_ctrl_find->SelectAll();
 }
-//-----------------------------------------------------------------------------
+
 BEGIN_EVENT_TABLE(FindDialog, BaseDialog)
     EVT_BUTTON(wxID_FIND, FindDialog::OnFindButtonClick)
     EVT_BUTTON(wxID_REPLACE, FindDialog::OnReplaceButtonClick)
     EVT_BUTTON(wxID_REPLACE_ALL, FindDialog::OnReplaceAllButtonClick)
     EVT_BUTTON(FindDialog::ID_button_replace_in_selection, FindDialog::OnReplaceInSelectionButtonClick)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 void FindDialog::OnFindButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     wxBusyCursor wait;
     setup();
     parentEditorM->find(false);
 }
-//-----------------------------------------------------------------------------
+
 void FindDialog::OnReplaceButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     wxBusyCursor wait;
     setup();
     parentEditorM->replace();
 }
-//-----------------------------------------------------------------------------
+
 void FindDialog::OnReplaceAllButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     wxBusyCursor wait;
     setup();
     parentEditorM->replaceAll();
 }
-//-----------------------------------------------------------------------------
+
 void FindDialog::OnReplaceInSelectionButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     wxBusyCursor wait;
     setup();
     parentEditorM->replaceInSelection();
 }
-//-----------------------------------------------------------------------------
+

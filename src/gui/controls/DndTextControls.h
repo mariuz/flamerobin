@@ -25,12 +25,12 @@
 #define FILETEXTCONTROL_H
 
 #include <wx/wx.h>
-//-----------------------------------------------------------------------------
+
 class FileTextControl: public wxTextCtrl
 {
 public:
     FileTextControl(wxWindow* parent, wxWindowID id,
         const wxString& value = wxEmptyString);
 };
-//-----------------------------------------------------------------------------
+
 #endif

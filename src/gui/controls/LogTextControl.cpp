@@ -33,14 +33,14 @@
 #include "gui/CommandManager.h"
 #include "gui/controls/ControlUtils.h"
 #include "gui/controls/LogTextControl.h"
-//-----------------------------------------------------------------------------
+
 LogTextControl::LogTextControl(wxWindow *parent, wxWindowID id)
     : TextControl(parent, id)
 {
     SetReadOnly(true);
     setDefaultStyles();
 }
-//-----------------------------------------------------------------------------
+
 void LogTextControl::addStyledText(const wxString& message, LogStyle style)
 {
     if (message.empty())
@@ -62,35 +62,35 @@ void LogTextControl::addStyledText(const wxString& message, LogStyle style)
         GotoPos(len);
     SetReadOnly(true);
 }
-//-----------------------------------------------------------------------------
+
 void LogTextControl::ClearAll()
 {
     SetReadOnly(false);
     TextControl::ClearAll();
     SetReadOnly(true);
 }
-//-----------------------------------------------------------------------------
+
 void LogTextControl::logErrorMsg(const wxString& message)
 {
     addStyledText(message, logStyleError);
 }
-//-----------------------------------------------------------------------------
+
 void LogTextControl::logImportantMsg(const wxString& message)
 {
     addStyledText(message, logStyleImportant);
 }
-//-----------------------------------------------------------------------------
+
 void LogTextControl::logMsg(const wxString& message)
 {
     addStyledText(message, logStyleDefault);
 }
-//-----------------------------------------------------------------------------
+
 void LogTextControl::setDefaultStyles()
 {
     StyleSetForeground(int(logStyleImportant), *wxBLUE);
     StyleSetForeground(int(logStyleError), *wxRED);
 }
-//-----------------------------------------------------------------------------
+
 //! event handling
 BEGIN_EVENT_TABLE(LogTextControl, TextControl)
     EVT_CONTEXT_MENU(LogTextControl::OnContextMenu)
@@ -98,17 +98,17 @@ BEGIN_EVENT_TABLE(LogTextControl, TextControl)
     EVT_UPDATE_UI(wxID_DELETE, LogTextControl::OnCommandUpdate)
     EVT_UPDATE_UI(wxID_SELECTALL, LogTextControl::OnCommandUpdate)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 void LogTextControl::OnCommandClearAll(wxCommandEvent& WXUNUSED(event))
 {
     ClearAll();
 }
-//-----------------------------------------------------------------------------
+
 void LogTextControl::OnCommandUpdate(wxUpdateUIEvent& event)
 {
     event.Enable(GetLength() > 0);
 }
-//-----------------------------------------------------------------------------
+
 void LogTextControl::OnContextMenu(wxContextMenuEvent& event)
 {
     SetFocus();
@@ -125,4 +125,4 @@ void LogTextControl::OnContextMenu(wxContextMenuEvent& event)
 
     PopupMenu(&m, calcContextMenuPosition(event.GetPosition(), this));
 }
-//-----------------------------------------------------------------------------
+

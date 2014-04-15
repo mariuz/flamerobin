@@ -23,21 +23,21 @@
 
 #ifndef FR_DATAGRIDTABLE_H
 #define FR_DATAGRIDTABLE_H
-//-----------------------------------------------------------------------------
+
 #include <wx/wx.h>
 #include <wx/grid.h>
 
 #include <ibpp.h>
 
 #include "gui/controls/DataGridRows.h"
-//-----------------------------------------------------------------------------
+
 class Column;
 class Database;
 class DataGridCell;
 class ResultsetColumnDef;
 class DataGridRowBuffer;
 class ProgressIndicator;
-//-----------------------------------------------------------------------------
+
 BEGIN_DECLARE_EVENT_TYPES()
     // this event is sent after new rows have been fetched
     DECLARE_LOCAL_EVENT_TYPE(wxEVT_FRDG_ROWCOUNT_CHANGED, 42)
@@ -47,7 +47,7 @@ BEGIN_DECLARE_EVENT_TYPES()
     // after a field value has changed
     DECLARE_LOCAL_EVENT_TYPE(wxEVT_FRDG_INVALIDATEATTR, 44)
 END_DECLARE_EVENT_TYPES()
-//-----------------------------------------------------------------------------
+
 class DataGridTable: public wxGridTableBase
 {
 private:
@@ -126,5 +126,5 @@ public:
     void exportBlobFile(const wxString& filename, int row, int col,
         ProgressIndicator *pi = 0);
 };
-//-----------------------------------------------------------------------------
+
 #endif

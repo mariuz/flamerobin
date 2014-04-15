@@ -58,7 +58,7 @@
     When all values are entered, we try to INSERT into database, and if all
     goes well, the prepared row buffer is simply added to the grid.
 */
-//-----------------------------------------------------------------------------
+
 namespace InsertOptions
 {
     // make sure you keep these two in sync if you add/remove items
@@ -106,7 +106,7 @@ namespace InsertOptions
 
 };
 using namespace InsertOptions;
-//-----------------------------------------------------------------------------
+
 Generator *findAutoincGenerator(std::vector<Trigger *>& triggers, Column *c)
 {
     for (std::vector<Trigger *>::iterator tt = triggers.begin();
@@ -130,7 +130,7 @@ Generator *findAutoincGenerator(std::vector<Trigger *>& triggers, Column *c)
     }
     return 0;
 }
-//-----------------------------------------------------------------------------
+
 // MB: When editor is shown for NULL field, we want to reset the color from
 // red to black, so that user does not see the red letters.
 // I tried to do that in InsertDialog::OnCellEditorCreated. However, it
@@ -149,7 +149,7 @@ public:
             wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
     }
 };
-//-----------------------------------------------------------------------------
+
 InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
     DataGridTable *gridTable, IBPP::Statement& st, Database *db)
     :BaseDialog(parent, -1, wxEmptyString), tableNameM(tableName), bufferM(0),
@@ -272,7 +272,7 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
     // until we find something better
     SetIcon(wxArtProvider::GetIcon(ART_Trigger, wxART_FRAME_ICON));
 }
-//-----------------------------------------------------------------------------
+
 void InsertDialog::OnClose(wxCloseEvent& WXUNUSED(event))
 {
     // make sure parent window is properly activated again
@@ -285,19 +285,19 @@ void InsertDialog::OnClose(wxCloseEvent& WXUNUSED(event))
     }
     Destroy();
 }
-//-----------------------------------------------------------------------------
+
 InsertDialog::~InsertDialog()
 {
     delete bufferM;
 }
-//-----------------------------------------------------------------------------
+
 void InsertDialog::set_properties()
 {
     SetTitle(wxString::Format(_("Insert Record(s) Into Table \"%s\""),
         tableNameM.c_str()));
     button_ok->SetDefault();
 }
-//-----------------------------------------------------------------------------
+
 void InsertDialog::do_layout()
 {
     gridM->AutoSize();
@@ -318,22 +318,22 @@ void InsertDialog::do_layout()
         styleguide().createButtonSizer(button_ok, button_cancel);
     layoutSizers(sizerControls, sizerButtons, true);
 }
-//-----------------------------------------------------------------------------
+
 const wxString InsertDialog::getName() const
 {
     return wxT("InsertDialog");
 }
-//-----------------------------------------------------------------------------
+
 bool InsertDialog::getConfigStoresWidth() const
 {
     return true;
 }
-//-----------------------------------------------------------------------------
+
 bool InsertDialog::getConfigStoresHeight() const
 {
     return false;
 }
-//-----------------------------------------------------------------------------
+
 void InsertDialog::updateControls(int row)
 {
     InsertOption ix = getInsertOption(gridM, row);
@@ -352,7 +352,7 @@ void InsertDialog::updateControls(int row)
             wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
     }
 }
-//-----------------------------------------------------------------------------
+
 void InsertDialog::storeValues()
 {
     for (std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
@@ -417,7 +417,7 @@ void InsertDialog::storeValues()
         }
     }
 }
-//-----------------------------------------------------------------------------
+
 void InsertDialog::preloadSpecialColumns()
 {
     // step 1: build list of CURRENT_* and generator values
@@ -485,7 +485,7 @@ void InsertDialog::preloadSpecialColumns()
         updateControls((*it).row);
     }
 }
-//-----------------------------------------------------------------------------
+
 //! event handling
 BEGIN_EVENT_TABLE(InsertDialog, BaseDialog)
 #if wxCHECK_VERSION(2, 9, 0)
@@ -501,7 +501,7 @@ BEGIN_EVENT_TABLE(InsertDialog, BaseDialog)
     EVT_BUTTON(wxID_CANCEL, InsertDialog::OnCancelButtonClick)
     EVT_CLOSE(InsertDialog::OnClose)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 void InsertDialog::OnCellEditorCreated(wxGridEditorCreatedEvent& event)
 {
     wxTextCtrl *editor = dynamic_cast<wxTextCtrl *>(event.GetControl());
@@ -511,7 +511,7 @@ void InsertDialog::OnCellEditorCreated(wxGridEditorCreatedEvent& event)
         wxKeyEventHandler(InsertDialog::OnEditorKeyDown),
         0, this);
 }
-//-----------------------------------------------------------------------------
+
 void InsertDialog::OnEditorKeyDown(wxKeyEvent& event)
 {
     wxTextCtrl *editor = dynamic_cast<wxTextCtrl *>(event.GetEventObject());
@@ -526,12 +526,12 @@ void InsertDialog::OnEditorKeyDown(wxKeyEvent& event)
     }
     event.Skip();
 }
-//-----------------------------------------------------------------------------
+
 void InsertDialog::OnCancelButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     Close();
 }
-//-----------------------------------------------------------------------------
+
 void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     storeValues();
@@ -616,7 +616,7 @@ void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
         Close();
     }
 }
-//-----------------------------------------------------------------------------
+
 // helper function for OnChoiceChange
 void InsertDialog::setStringOption(InsertColumnInfo& ici, const wxString& s)
 {
@@ -628,7 +628,7 @@ void InsertDialog::setStringOption(InsertColumnInfo& ici, const wxString& s)
         updateControls(ici.row);
     }
 }
-//-----------------------------------------------------------------------------
+
 void InsertDialog::OnGridCellChange(wxGridEvent& event)
 {
     if (!databaseM) // dialog already closed
@@ -707,4 +707,4 @@ void InsertDialog::OnGridCellChange(wxGridEvent& event)
         }
     }
 }
-//-----------------------------------------------------------------------------
+

@@ -20,7 +20,7 @@
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//-----------------------------------------------------------------------------
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -35,12 +35,12 @@
 
 #include "gui/CommandIds.h"
 #include "gui/CommandManager.h"
-//-----------------------------------------------------------------------------
+
 CommandManager::CommandManager()
 {
     init();
 }
-//-----------------------------------------------------------------------------
+
 bool CommandManager::findShortcutFor(int id, int& flags, int& keyCode)
 {
     // our own commands
@@ -65,7 +65,7 @@ bool CommandManager::findShortcutFor(int id, int& flags, int& keyCode)
 
     return false;
 }
-//-----------------------------------------------------------------------------
+
 wxString CommandManager::getShortcutText(int id)
 {
     int flags, keyCode;
@@ -86,13 +86,13 @@ wxString CommandManager::getShortcutText(int id)
     }
     return wxEmptyString;
 }
-//-----------------------------------------------------------------------------
+
 wxString CommandManager::getMainMenuItemText(const wxString& text, int id)
 {
     wxString shortcut(getShortcutText(id));
     return (shortcut.empty() ? text : text + wxT("\t") + shortcut);
 }
-//-----------------------------------------------------------------------------
+
 wxString CommandManager::getPopupMenuItemText(const wxString& text, int id)
 {
     bool appendShortcuts = false;
@@ -107,13 +107,13 @@ wxString CommandManager::getPopupMenuItemText(const wxString& text, int id)
     }
     return text;
 }
-//-----------------------------------------------------------------------------
+
 wxString CommandManager::getToolbarHint(const wxString& text, int id)
 {
     wxString shortcut(getShortcutText(id));
     return (shortcut.empty() ? text : text + wxT(" (") + shortcut + wxT(")"));
 }
-//-----------------------------------------------------------------------------
+
 void CommandManager::init()
 {
     ShortCutData scd;
@@ -153,4 +153,4 @@ void CommandManager::init()
     scd.keyCode = 'S';
     shortcutsM.insert(ShortCutDataPair(Cmds::View_SplitView, scd));
 }
-//-----------------------------------------------------------------------------
+

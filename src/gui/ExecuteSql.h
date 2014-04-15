@@ -23,7 +23,7 @@
 
 #ifndef EXECUTESQL_H
 #define EXECUTESQL_H
-//-----------------------------------------------------------------------------
+
 // These functions are used to show (and execute) sql statements
 // they are separated here since:
 // a) it is used in many places and improves compilation time a lot
@@ -31,10 +31,10 @@
 #include "metadata/MetadataClasses.h"
 
 class ExecuteSqlFrame;
-//-----------------------------------------------------------------------------
+
 ExecuteSqlFrame* showSql(wxWindow* parent, const wxString& title,
     DatabasePtr database, const wxString &sql);
 void execSql(wxWindow* parent, const wxString& title, DatabasePtr database,
     const wxString &sql, bool closeWindow);
-//-----------------------------------------------------------------------------
+
 #endif // EXECUTESQL_H

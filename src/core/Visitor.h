@@ -20,14 +20,14 @@
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//-----------------------------------------------------------------------------
+
 
 #ifndef FR_VISITOR_H
 #define FR_VISITOR_H
 
 // [GoF] Visitor pattern. Abstract generic Visitor.
 
-//-----------------------------------------------------------------------------
+
 class Visitor
 {
 protected:
@@ -35,5 +35,5 @@ protected:
     virtual ~Visitor() {}
     virtual void defaultAction();
 };
-//-----------------------------------------------------------------------------
+
 #endif //FR_VISITOR_H

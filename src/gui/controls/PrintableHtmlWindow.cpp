@@ -39,28 +39,28 @@
 
 #include "core/FRError.h"
 #include "gui/controls/PrintableHtmlWindow.h"
-//-----------------------------------------------------------------------------
+
 #ifdef _DEBUG
     enum { CmdCopyAllHtml = wxID_HIGHEST + 1 };
 #endif
-//-----------------------------------------------------------------------------
+
 HtmlPrinter::HtmlPrinter()
 {
     prnM = new wxHtmlEasyPrinting(_("Printing"));
 }
-//-----------------------------------------------------------------------------
+
 wxHtmlEasyPrinting *HtmlPrinter::getHEP()
 {
     static HtmlPrinter instance;
     return instance.prnM;
 }
-//-----------------------------------------------------------------------------
+
 HtmlPrinter::~HtmlPrinter()
 {
     delete prnM;
     prnM = 0;
 }
-//-----------------------------------------------------------------------------
+
 //! PrintableHtmlWindow class
 PrintableHtmlWindow::PrintableHtmlWindow(wxWindow* parent, wxWindowID id)
     : wxHtmlWindow(parent, id)
@@ -71,7 +71,7 @@ PrintableHtmlWindow::PrintableHtmlWindow(wxWindow* parent, wxWindowID id)
     SetFonts(wxEmptyString, wxEmptyString, sizes);
 #endif
 }
-//-----------------------------------------------------------------------------
+
 BEGIN_EVENT_TABLE(PrintableHtmlWindow, wxHtmlWindow)
     EVT_RIGHT_UP(PrintableHtmlWindow::OnRightUp)
     EVT_MENU(wxID_COPY, PrintableHtmlWindow::OnMenuCopy)
@@ -84,7 +84,7 @@ BEGIN_EVENT_TABLE(PrintableHtmlWindow, wxHtmlWindow)
     EVT_MENU(wxID_PRINT, PrintableHtmlWindow::OnMenuPrint)
     EVT_MENU(wxID_PREVIEW, PrintableHtmlWindow::OnMenuPreview)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 void PrintableHtmlWindow::OnRightUp(wxMouseEvent& event)
 {
     wxMenu m;
@@ -123,18 +123,18 @@ void PrintableHtmlWindow::OnRightUp(wxMouseEvent& event)
     m.Enable(wxID_COPY, !SelectionToText().IsEmpty());
     PopupMenu(&m, ScreenToClient(::wxGetMousePosition()));
 }
-//-----------------------------------------------------------------------------
+
 void PrintableHtmlWindow::setPageSource(const wxString& html)
 {
     pageSourceM = html;
     SetPage(pageSourceM);
 }
-//-----------------------------------------------------------------------------
+
 void PrintableHtmlWindow::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
 {
     CopySelection();
 }
-//-----------------------------------------------------------------------------
+
 void PrintableHtmlWindow::OnMenuCopyAllHtml(wxCommandEvent& WXUNUSED(event))
 {
     if (wxTheClipboard->Open())
@@ -143,13 +143,13 @@ void PrintableHtmlWindow::OnMenuCopyAllHtml(wxCommandEvent& WXUNUSED(event))
         wxTheClipboard->Close();
     }
 }
-//-----------------------------------------------------------------------------
+
 void notImplementedMessage(wxWindow* parent)
 {
     ::wxMessageBox(_("Feature not yet implemented."), _("Information"),
         wxICON_INFORMATION | wxOK, parent);
 }
-//-----------------------------------------------------------------------------
+
 void PrintableHtmlWindow::OnMenuNewTab(wxCommandEvent& WXUNUSED(event))
 {
     wxString addr = tempLinkM;
@@ -161,7 +161,7 @@ void PrintableHtmlWindow::OnMenuNewTab(wxCommandEvent& WXUNUSED(event))
     if (!getURIProcessor().handleURI(uri))
         notImplementedMessage(this);
 }
-//-----------------------------------------------------------------------------
+
 void PrintableHtmlWindow::OnMenuNewWindow(wxCommandEvent& WXUNUSED(event))
 {
     wxString addr = tempLinkM;
@@ -173,7 +173,7 @@ void PrintableHtmlWindow::OnMenuNewWindow(wxCommandEvent& WXUNUSED(event))
     if (!getURIProcessor().handleURI(uri))
         notImplementedMessage(this);
 }
-//-----------------------------------------------------------------------------
+
 void PrintableHtmlWindow::OnMenuSave(wxCommandEvent& WXUNUSED(event))
 {
     wxString filename = wxFileSelector(_("Save as HTML..."), wxEmptyString,
@@ -205,7 +205,7 @@ void PrintableHtmlWindow::OnMenuSave(wxCommandEvent& WXUNUSED(event))
         f.Close();
     }
 }
-//-----------------------------------------------------------------------------
+
 void PrintableHtmlWindow::OnMenuPreview(wxCommandEvent& WXUNUSED(event))
 {
     HtmlPrinter::getHEP()->SetHeader(GetOpenedPageTitle());
@@ -213,7 +213,7 @@ void PrintableHtmlWindow::OnMenuPreview(wxCommandEvent& WXUNUSED(event))
         _("Printed from FlameRobin - www.flamerobin.org"));
     HtmlPrinter::getHEP()->PreviewText(pageSourceM);
 }
-//-----------------------------------------------------------------------------
+
 void PrintableHtmlWindow::OnMenuPrint(wxCommandEvent& WXUNUSED(event))
 {
     HtmlPrinter::getHEP()->SetHeader(GetOpenedPageTitle());
@@ -221,7 +221,7 @@ void PrintableHtmlWindow::OnMenuPrint(wxCommandEvent& WXUNUSED(event))
         _("Printed from FlameRobin - www.flamerobin.org"));
     HtmlPrinter::getHEP()->PrintText(pageSourceM);
 }
-//-----------------------------------------------------------------------------
+
 //! Link is in format: "protocol://action?name=value&amp;name=value...etc.
 void PrintableHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
 {
@@ -250,4 +250,4 @@ void PrintableHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
     if (!getURIProcessor().handleURI(uri))
         notImplementedMessage(this);
 }
-//-----------------------------------------------------------------------------
+

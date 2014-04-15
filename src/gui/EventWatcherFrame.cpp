@@ -42,7 +42,7 @@
 #include "gui/MultilineEnterDialog.h"
 #include "gui/StyleGuide.h"
 #include "metadata/database.h"
-//-----------------------------------------------------------------------------
+
 class EventLogControl: public LogTextControl
 {
 public:
@@ -50,19 +50,19 @@ public:
     void logAction(const wxString& action);
     void logEvent(const wxString& name, int count);
 };
-//-----------------------------------------------------------------------------
+
 EventLogControl::EventLogControl(wxWindow* parent, wxWindowID id)
     : LogTextControl(parent, id)
 {
 }
-//-----------------------------------------------------------------------------
+
 void EventLogControl::logAction(const wxString& action)
 {
     wxString now(wxDateTime::Now().Format(wxT("%H:%M:%S  ")));
     addStyledText(now, logStyleImportant);
     logMsg(action + wxT("\n"));
 }
-//-----------------------------------------------------------------------------
+
 void EventLogControl::logEvent(const wxString& name, int count)
 {
     wxString now(wxDateTime::Now().Format(wxT("%H:%M:%S  ")));
@@ -70,7 +70,7 @@ void EventLogControl::logEvent(const wxString& name, int count)
     logMsg(name);
     addStyledText(wxString::Format(wxT(" (%d)\n"), count), logStyleError);
 }
-//-----------------------------------------------------------------------------
+
 EventWatcherFrame::EventWatcherFrame(wxWindow* parent, DatabasePtr db)
     : BaseFrame(parent, -1, wxEmptyString), databaseM(db), eventsM(0)
 {
@@ -95,7 +95,7 @@ EventWatcherFrame::EventWatcherFrame(wxWindow* parent, DatabasePtr db)
     icon.CopyFromBitmap(bmp);
     SetIcon(icon);
 }
-//-----------------------------------------------------------------------------
+
 void EventWatcherFrame::createControls()
 {
     panel_controls = new wxPanel(this, -1, wxDefaultPosition, wxDefaultSize,
@@ -116,7 +116,7 @@ void EventWatcherFrame::createControls()
     button_monitor = new wxButton(panel_controls, ID_button_monitor,
         _("Start &Monitoring"));
 }
-//-----------------------------------------------------------------------------
+
 void EventWatcherFrame::layoutControls()
 {
     wxBoxSizer* sizerList = new wxBoxSizer(wxVERTICAL);
@@ -165,7 +165,7 @@ void EventWatcherFrame::layoutControls()
     sizerAll->Fit(this);
     sizerAll->SetSizeHints(this);
 }
-//-----------------------------------------------------------------------------
+
 void EventWatcherFrame::updateControls()
 {
     bool isSelected = false;
@@ -179,7 +179,7 @@ void EventWatcherFrame::updateControls()
     button_save->Enable(hasEvents);
     button_monitor->Enable(hasEvents || timerM.IsRunning());
 }
-//-----------------------------------------------------------------------------
+
 void EventWatcherFrame::addEvents(wxString& s)
 {
     // deselect all items so user can cleanly see what is added
@@ -207,7 +207,7 @@ void EventWatcherFrame::addEvents(wxString& s)
     }
     updateControls();
 }
-//-----------------------------------------------------------------------------
+
 void EventWatcherFrame::defineMonitoredEvents()
 {
     if (eventsM != 0)
@@ -235,12 +235,12 @@ void EventWatcherFrame::defineMonitoredEvents()
             setTimerActive(true);
     }
 }
-//-----------------------------------------------------------------------------
+
 DatabasePtr EventWatcherFrame::getDatabase() const
 {
     return databaseM.lock();
 }
-//-----------------------------------------------------------------------------
+
 bool EventWatcherFrame::setTimerActive(bool active)
 {
     if (active && !timerM.Start(100))
@@ -253,7 +253,7 @@ bool EventWatcherFrame::setTimerActive(bool active)
     }
     return active == timerM.IsRunning();
 }
-//-----------------------------------------------------------------------------
+
 void EventWatcherFrame::updateMonitoringActive()
 {
     if (eventsM != 0)
@@ -270,13 +270,13 @@ void EventWatcherFrame::updateMonitoringActive()
     }
     updateControls();
 }
-//-----------------------------------------------------------------------------
+
 void EventWatcherFrame::ibppEventHandler(IBPP::Events events,
     const std::string& name, int count)
 {
     eventlog_received->logEvent(std2wx(name), count);
 }
-//-----------------------------------------------------------------------------
+
 //! closes window if database is removed (unregistered)
 void EventWatcherFrame::subjectRemoved(Subject* subject)
 {
@@ -284,14 +284,14 @@ void EventWatcherFrame::subjectRemoved(Subject* subject)
     if (!db || !db->isConnected() || subject == db.get())
         Close();
 }
-//-----------------------------------------------------------------------------
+
 void EventWatcherFrame::update()
 {
     DatabasePtr db = getDatabase();
     if (!db || !db->isConnected())
         Close();
 }
-//-----------------------------------------------------------------------------
+
 void EventWatcherFrame::doReadConfigSettings(const wxString& prefix)
 {
     BaseFrame::doReadConfigSettings(prefix);
@@ -300,19 +300,19 @@ void EventWatcherFrame::doReadConfigSettings(const wxString& prefix)
     listbox_monitored->Append(events);
     updateControls();
 }
-//-----------------------------------------------------------------------------
+
 void EventWatcherFrame::doWriteConfigSettings(const wxString& prefix) const
 {
     BaseFrame::doWriteConfigSettings(prefix);
     config().setValue(prefix + Config::pathSeparator + wxT("events"),
         listbox_monitored->GetStrings());
 }
-//-----------------------------------------------------------------------------
+
 const wxString EventWatcherFrame::getName() const
 {
     return wxT("EventWatcherFrame");
 }
-//-----------------------------------------------------------------------------
+
 wxString EventWatcherFrame::getFrameId(DatabasePtr db)
 {
     if (db)
@@ -320,7 +320,7 @@ wxString EventWatcherFrame::getFrameId(DatabasePtr db)
     else
         return wxEmptyString;
 }
-//-----------------------------------------------------------------------------
+
 EventWatcherFrame* EventWatcherFrame::findFrameFor(DatabasePtr db)
 {
     BaseFrame* bf = frameFromIdString(getFrameId(db));
@@ -328,7 +328,7 @@ EventWatcherFrame* EventWatcherFrame::findFrameFor(DatabasePtr db)
         return 0;
     return dynamic_cast<EventWatcherFrame*>(bf);
 }
-//-----------------------------------------------------------------------------
+
 BEGIN_EVENT_TABLE(EventWatcherFrame, wxFrame)
     EVT_BUTTON(EventWatcherFrame::ID_button_add, EventWatcherFrame::OnButtonAddClick)
     EVT_BUTTON(EventWatcherFrame::ID_button_remove, EventWatcherFrame::OnButtonRemoveClick)
@@ -338,7 +338,7 @@ BEGIN_EVENT_TABLE(EventWatcherFrame, wxFrame)
     EVT_LISTBOX(EventWatcherFrame::ID_listbox_monitored, EventWatcherFrame::OnListBoxSelected)
     EVT_TIMER(EventWatcherFrame::ID_timer, EventWatcherFrame::OnTimer)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 void EventWatcherFrame::OnButtonLoadClick(wxCommandEvent& WXUNUSED(event))
 {
     wxFileDialog fd(this, _("Select file to load"), wxT(""), wxT(""),
@@ -360,7 +360,7 @@ void EventWatcherFrame::OnButtonLoadClick(wxCommandEvent& WXUNUSED(event))
     addEvents(s);
     defineMonitoredEvents();
 }
-//-----------------------------------------------------------------------------
+
 void EventWatcherFrame::OnButtonSaveClick(wxCommandEvent& WXUNUSED(event))
 {
     wxFileDialog fd(this, _("Select file to save"), wxT(""), wxT(""),
@@ -384,7 +384,7 @@ void EventWatcherFrame::OnButtonSaveClick(wxCommandEvent& WXUNUSED(event))
     if (f.IsOpened())
         f.Close();
 }
-//-----------------------------------------------------------------------------
+
 void EventWatcherFrame::OnButtonAddClick(wxCommandEvent& WXUNUSED(event))
 {
     wxString s;
@@ -396,7 +396,7 @@ void EventWatcherFrame::OnButtonAddClick(wxCommandEvent& WXUNUSED(event))
         defineMonitoredEvents();
     }
 }
-//-----------------------------------------------------------------------------
+
 void EventWatcherFrame::OnButtonRemoveClick(wxCommandEvent& WXUNUSED(event))
 {
     wxArrayInt sel;
@@ -409,7 +409,7 @@ void EventWatcherFrame::OnButtonRemoveClick(wxCommandEvent& WXUNUSED(event))
         listbox_monitored->Delete(sel.Item(ix));
     defineMonitoredEvents();
 }
-//-----------------------------------------------------------------------------
+
 void EventWatcherFrame::OnButtonStartStopClick(wxCommandEvent& WXUNUSED(event))
 {
     if (eventsM != 0)
@@ -428,12 +428,12 @@ void EventWatcherFrame::OnButtonStartStopClick(wxCommandEvent& WXUNUSED(event))
     }
     updateMonitoringActive();
 }
-//-----------------------------------------------------------------------------
+
 void EventWatcherFrame::OnListBoxSelected(wxCommandEvent& WXUNUSED(event))
 {
     updateControls();
 }
-//-----------------------------------------------------------------------------
+
 void EventWatcherFrame::OnTimer(wxTimerEvent& WXUNUSED(event))
 {
     if (eventsM != 0)
@@ -441,4 +441,4 @@ void EventWatcherFrame::OnTimer(wxTimerEvent& WXUNUSED(event))
     else // stop timer, update UI
         updateMonitoringActive();
 }
-//-----------------------------------------------------------------------------
+

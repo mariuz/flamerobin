@@ -45,7 +45,7 @@
 #include "metadata/column.h"
 #include "metadata/database.h"
 #include "metadata/table.h"
-//-----------------------------------------------------------------------------
+
 DataGridTable::DataGridTable(IBPP::Statement& s, Database* db)
     : wxGridTableBase(), statementM(s), databaseM(db), nullFlagM(false),
         rowsM(db)
@@ -59,25 +59,25 @@ DataGridTable::DataGridTable(IBPP::Statement& s, Database* db)
     maxRowToFetchM = 100;
     cellAttriM = new wxGridCellAttr();
 }
-//-----------------------------------------------------------------------------
+
 DataGridTable::~DataGridTable()
 {
     Clear();
     cellAttriM->DecRef();
 }
-//-----------------------------------------------------------------------------
+
 void DataGridTable::setNullFlag(bool isNull)
 {
     nullFlagM = isNull;
 }
-//-----------------------------------------------------------------------------
+
 // implementation methods
 bool DataGridTable::canFetchMoreRows()
 {
     // this will also handle a closed result set
     return !allRowsFetchedM && getStatementColCount() > 0;
 }
-//-----------------------------------------------------------------------------
+
 void DataGridTable::Clear()
 {
     nullFlagM = false;
@@ -104,7 +104,7 @@ void DataGridTable::Clear()
         GetView()->ProcessTableMessage(colMsg);
     }
 }
-//-----------------------------------------------------------------------------
+
 void DataGridTable::fetchOne()
 {
     rowsM.addRow(statementM);
@@ -120,7 +120,7 @@ void DataGridTable::fetchOne()
         wxPostEvent(GetView(), evt);
     }
 }
-//-----------------------------------------------------------------------------
+
 void DataGridTable::fetch()
 {
     if (!canFetchMoreRows())
@@ -170,7 +170,7 @@ void DataGridTable::fetch()
         wxPostEvent(GetView(), evt);
     }
 }
-//-----------------------------------------------------------------------------
+
 void DataGridTable::addRow(DataGridRowBuffer *buffer, const wxString& sql)
 {
     rowsM.addRow(buffer);
@@ -189,7 +189,7 @@ void DataGridTable::addRow(DataGridRowBuffer *buffer, const wxString& sql)
         wxPostEvent(GetView(), evt2);
     }
 }
-//-----------------------------------------------------------------------------
+
 wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
     wxGridCellAttr::wxAttrKind kind)
 {
@@ -238,7 +238,7 @@ wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
     cellAttriM->IncRef();
     return cellAttriM;
 }
-//-----------------------------------------------------------------------------
+
 wxString DataGridTable::getCellValue(int row, int col)
 {
     if (!isValidCellPos(row, col))
@@ -250,7 +250,7 @@ wxString DataGridTable::getCellValue(int row, int col)
         return wxT("[null]");
     return rowsM.getFieldValue(row, col);
 }
-//-----------------------------------------------------------------------------
+
 wxString DataGridTable::getCellValueForInsert(int row, int col)
 {
     if (!isValidCellPos(row, col) || rowsM.isFieldNA(row, col))
@@ -263,7 +263,7 @@ wxString DataGridTable::getCellValueForInsert(int row, int col)
     s.Replace(wxT("'"), wxT("''"));
     return wxT("'") + s + wxT("'");
 }
-//-----------------------------------------------------------------------------
+
 wxString DataGridTable::getCellValueForCSV(int row, int col,
     const wxChar& textDelimiter)
 {
@@ -290,27 +290,27 @@ wxString DataGridTable::getCellValueForCSV(int row, int col,
     s.Replace(sTextDelim, sTextDelim + sTextDelim);
     return sTextDelim + s + sTextDelim;
 }
-//-----------------------------------------------------------------------------
+
 wxString DataGridTable::GetColLabelValue(int col)
 {
     return rowsM.getRowFieldName(col);
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridTable::getFetchAllRows()
 {
     return fetchAllRowsM;
 }
-//-----------------------------------------------------------------------------
+
 int DataGridTable::GetNumberCols()
 {
     return rowsM.getRowFieldCount();
 }
-//-----------------------------------------------------------------------------
+
 int DataGridTable::GetNumberRows()
 {
     return rowsM.getRowCount();
 }
-//-----------------------------------------------------------------------------
+
 int DataGridTable::getStatementColCount()
 {
     if (statementM == 0)
@@ -324,7 +324,7 @@ int DataGridTable::getStatementColCount()
             return 0;
     }
 }
-//-----------------------------------------------------------------------------
+
 wxString DataGridTable::getTableName()
 {
     // TODO: using one table is not correct for JOINs or sub-SELECTs, so we
@@ -336,7 +336,7 @@ wxString DataGridTable::getTableName()
     return std2wxIdentifier(statementM->ColumnTable(1),
         databaseM->getCharsetConverter());
 }
-//-----------------------------------------------------------------------------
+
 void DataGridTable::getTableNames(wxArrayString& tables)
 {
     int colCount = getStatementColCount();
@@ -370,7 +370,7 @@ void DataGridTable::getTableNames(wxArrayString& tables)
         }
     }
 }
-//-----------------------------------------------------------------------------
+
 // all fields of that table
 void DataGridTable::getFields(const wxString& table,
     DataGridTable::FieldSet& flds)
@@ -414,12 +414,12 @@ void DataGridTable::getFields(const wxString& table,
         flds.insert(std::pair<int,FinalPair>((*it).second.second, p));
     }
 }
-//-----------------------------------------------------------------------------
+
 Database *DataGridTable::getDatabase()
 {
     return databaseM;
 }
-//-----------------------------------------------------------------------------
+
 wxString DataGridTable::GetValue(int row, int col)
 {
     if (!isValidCellPos(row, col))
@@ -442,7 +442,7 @@ wxString DataGridTable::GetValue(int row, int col)
         s.erase(eol);
     return s;
 }
-//-----------------------------------------------------------------------------
+
 void DataGridTable::initialFetch(bool readonly)
 {
     Clear();
@@ -479,38 +479,38 @@ void DataGridTable::initialFetch(bool readonly)
     else
         fetch();
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridTable::IsEmptyCell(int row, int col)
 {
     return !isValidCellPos(row, col);
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridTable::isNullableColumn(int col)
 {
     return rowsM.isColumnNullable(col);
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridTable::isNullCell(int row, int col)
 {
     return rowsM.isFieldNull(row, col);
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridTable::isNumericColumn(int col)
 {
     return rowsM.isColumnNumeric(col);
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridTable::isReadonlyColumn(int col)
 {
     return readOnlyM || rowsM.isColumnReadonly(col);
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridTable::isValidCellPos(int row, int col)
 {
     return (row >= 0 && col >= 0 && row < (int)rowsM.getRowCount()
         && col < (int)rowsM.getRowFieldCount());
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridTable::canInsertRows()
 {
     if (!canInsertRowsIsSetM)
@@ -522,12 +522,12 @@ bool DataGridTable::canInsertRows()
     }
     return canInsertRowsM;
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridTable::canRemoveRow(size_t row)
 {
     return rowsM.canRemoveRow(row);
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridTable::needsMoreRowsFetched()
 {
     if (allRowsFetchedM)
@@ -536,27 +536,27 @@ bool DataGridTable::needsMoreRowsFetched()
     // for more responsive grid scrolling
     return (fetchAllRowsM || rowsM.getRowCount() < maxRowToFetchM);
 }
-//-----------------------------------------------------------------------------
+
 void DataGridTable::setFetchAllRecords(bool fetchall)
 {
     fetchAllRowsM = fetchall;
 }
-//-----------------------------------------------------------------------------
+
 IBPP::Blob* DataGridTable::getBlob(unsigned row, unsigned col, bool validateBlob)
 {
     return rowsM.getBlob(row, col, validateBlob);
 }
-//-----------------------------------------------------------------------------
+
 DataGridRowsBlob DataGridTable::setBlobPrepare(unsigned row, unsigned col)
 {
     return rowsM.setBlobPrepare(row, col);
 }
-//-----------------------------------------------------------------------------
+
 void DataGridTable::setBlob(DataGridRowsBlob &b)
 {
     rowsM.setBlob(b);
 }
-//-----------------------------------------------------------------------------
+
 void DataGridTable::importBlobFile(const wxString& filename, int row, int col,
     ProgressIndicator *pi)
 {
@@ -569,18 +569,18 @@ void DataGridTable::importBlobFile(const wxString& filename, int row, int col,
         GetView()->ProcessTableMessage(msg);
     }
 }
-//-----------------------------------------------------------------------------
+
 void DataGridTable::exportBlobFile(const wxString& filename, int row, int col,
     ProgressIndicator *pi)
 {
     rowsM.exportBlobFile(filename, row, col, pi);
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridTable::isBlobColumn(int col, bool* pIsTextual)
 {
     return rowsM.isBlobColumn(col, pIsTextual);
 }
-//-----------------------------------------------------------------------------
+
 void DataGridTable::SetValue(int row, int col, const wxString& value)
 {
     // We need explicit exception handling here since wxGrid gets
@@ -626,7 +626,7 @@ void DataGridTable::SetValue(int row, int col, const wxString& value)
             AdvancedMessageDialogButtonsOk());
     }
 }
-//-----------------------------------------------------------------------------
+
 void DataGridTable::setValueToNull(int row, int col)
 {
     setNullFlag(true);
@@ -642,7 +642,7 @@ void DataGridTable::setValueToNull(int row, int col)
         rowsM.setBlob(b);
     }
 }
-//-----------------------------------------------------------------------------
+
 bool DataGridTable::DeleteRows(size_t pos, size_t numRows)
 {
     // Needs explicit exception handling (see comment for SetValue)
@@ -677,8 +677,8 @@ bool DataGridTable::DeleteRows(size_t pos, size_t numRows)
     }
     return false;
 }
-//-----------------------------------------------------------------------------
+
 DEFINE_EVENT_TYPE(wxEVT_FRDG_ROWCOUNT_CHANGED)
 DEFINE_EVENT_TYPE(wxEVT_FRDG_STATEMENT)
 DEFINE_EVENT_TYPE(wxEVT_FRDG_INVALIDATEATTR)
-//-----------------------------------------------------------------------------
+

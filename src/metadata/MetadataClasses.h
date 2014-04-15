@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef FR_METADATACLASSES_H
 #define FR_METADATACLASSES_H
 
@@ -129,5 +129,5 @@ typedef boost::shared_ptr<View> ViewPtr;
 typedef std::vector<ViewPtr> ViewPtrs;
 class Views;
 typedef boost::shared_ptr<Views> ViewsPtr;
-//-----------------------------------------------------------------------------
+
 #endif // FR_METADATACLASSES_H

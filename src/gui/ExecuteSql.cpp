@@ -20,7 +20,7 @@
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//-----------------------------------------------------------------------------
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -31,7 +31,7 @@
 #endif
 
 #include "gui/ExecuteSqlFrame.h"
-//-----------------------------------------------------------------------------
+
 ExecuteSqlFrame* showSql(wxWindow* parent, const wxString& title,
     DatabasePtr database, const wxString &sql)
 {
@@ -40,7 +40,7 @@ ExecuteSqlFrame* showSql(wxWindow* parent, const wxString& title,
     eff->setSql(sql);
     return eff;
 }
-//-----------------------------------------------------------------------------
+
 void execSql(wxWindow* parent, const wxString& title, DatabasePtr database,
     const wxString &sql, bool closeWindow)
 {
@@ -48,4 +48,4 @@ void execSql(wxWindow* parent, const wxString& title, DatabasePtr database,
     eff->Update();
     eff->executeAllStatements(closeWindow);
 }
-//-----------------------------------------------------------------------------
+

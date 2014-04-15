@@ -36,15 +36,15 @@
 #include "metadata/metadataitem.h"
 #include "HtmlTemplateProcessor.h"
 
-//-----------------------------------------------------------------------------
+
 class ProcessableObject;
-//-----------------------------------------------------------------------------
+
 HtmlTemplateProcessor::HtmlTemplateProcessor(ProcessableObject* object,
     wxWindow* window)
     : TemplateProcessor(object, window)
 {
 }
-//-----------------------------------------------------------------------------
+
 void HtmlTemplateProcessor::processCommand(const wxString& cmdName,
     const TemplateCmdParams& cmdParams, ProcessableObject* object,
     wxString& processedText)
@@ -93,9 +93,9 @@ void HtmlTemplateProcessor::processCommand(const wxString& cmdName,
         }
     }
 }
-//-----------------------------------------------------------------------------
+
 wxString HtmlTemplateProcessor::escapeChars(const wxString& input, bool processNewlines)
 {
     return escapeHtmlChars(input, processNewlines);
 }
-//-----------------------------------------------------------------------------
+

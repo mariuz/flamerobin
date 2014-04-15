@@ -20,7 +20,7 @@
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//-----------------------------------------------------------------------------
+
 
 #ifndef FR_CREATEDDLVISITOR_H
 #define FR_CREATEDDLVISITOR_H
@@ -28,7 +28,7 @@
 #include "metadata/MetadataItemVisitor.h"
 
 class ProgressIndicator;
-//-----------------------------------------------------------------------------
+
 class CreateDDLVisitor: public MetadataItemVisitor
 {
 private:
@@ -80,5 +80,5 @@ public:
 //    virtual void visitViews(Views& views);
 //    virtual void visitMetadataItem(MetadataItem& metadataItem);
 };
-//-----------------------------------------------------------------------------
+
 #endif

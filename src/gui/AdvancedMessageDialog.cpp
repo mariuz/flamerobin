@@ -29,7 +29,7 @@
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
-//----------------------------------------------------------------------------
+
 #include <wx/artprov.h>
 #include <wx/display.h>
 #include <wx/tokenzr.h>
@@ -37,35 +37,35 @@
 #include "config/Config.h"
 #include "gui/AdvancedMessageDialog.h"
 #include "gui/StyleGuide.h"
-//----------------------------------------------------------------------------
+
 AdvancedMessageDialogButtons::AdvancedMessageDialogButtons()
 {
     affirmativeButtonM.id = wxID_ANY;
     alternateButtonM.id = wxID_ANY;
     negativeButtonM.id = wxID_ANY;
 }
-//----------------------------------------------------------------------------
+
 void AdvancedMessageDialogButtons::addAffirmativeButton(int id,
     const wxString& caption)
 {
     affirmativeButtonM.id = id;
     affirmativeButtonM.caption = caption;
 }
-//----------------------------------------------------------------------------
+
 void AdvancedMessageDialogButtons::addAlternateButton(int id,
     const wxString& caption)
 {
     alternateButtonM.id = id;
     alternateButtonM.caption = caption;
 }
-//----------------------------------------------------------------------------
+
 void AdvancedMessageDialogButtons::addNegativeButton(int id,
     const wxString& caption)
 {
     negativeButtonM.id = id;
     negativeButtonM.caption = caption;
 }
-//----------------------------------------------------------------------------
+
 wxButton* AdvancedMessageDialogButtons::createAffirmativeButton(
     wxWindow* parent)
 {
@@ -74,7 +74,7 @@ wxButton* AdvancedMessageDialogButtons::createAffirmativeButton(
     return new wxButton(parent, affirmativeButtonM.id,
         affirmativeButtonM.caption);
 }
-//----------------------------------------------------------------------------
+
 wxButton* AdvancedMessageDialogButtons::createAlternateButton(
     wxWindow* parent)
 {
@@ -83,7 +83,7 @@ wxButton* AdvancedMessageDialogButtons::createAlternateButton(
     return new wxButton(parent, alternateButtonM.id,
         alternateButtonM.caption);
 }
-//----------------------------------------------------------------------------
+
 wxButton* AdvancedMessageDialogButtons::createNegativeButton(
     wxWindow* parent)
 {
@@ -91,7 +91,7 @@ wxButton* AdvancedMessageDialogButtons::createNegativeButton(
         return 0;
     return new wxButton(parent, negativeButtonM.id, negativeButtonM.caption);
 }
-//----------------------------------------------------------------------------
+
 int AdvancedMessageDialogButtons::getNumberOfButtons()
 {
     int count = 0;
@@ -103,20 +103,20 @@ int AdvancedMessageDialogButtons::getNumberOfButtons()
         ++count;
     return count;
 }
-//----------------------------------------------------------------------------
+
 AdvancedMessageDialogButtonsOk::AdvancedMessageDialogButtonsOk(
     const wxString buttonOkCaption)
 {
     addAffirmativeButton(wxID_OK, buttonOkCaption);
 }
-//-----------------------------------------------------------------------------
+
 AdvancedMessageDialogButtonsOkCancel::AdvancedMessageDialogButtonsOkCancel(
     const wxString buttonOkCaption, const wxString buttonCancelCaption)
 {
     addAffirmativeButton(wxID_OK, buttonOkCaption);
     addNegativeButton(wxID_CANCEL, buttonCancelCaption);
 }
-//-----------------------------------------------------------------------------
+
 AdvancedMessageDialogButtonsYesNoCancel::
     AdvancedMessageDialogButtonsYesNoCancel(const wxString buttonYesCaption,
     const wxString buttonNoCaption, const wxString buttonCancelCaption)
@@ -125,7 +125,7 @@ AdvancedMessageDialogButtonsYesNoCancel::
     addAlternateButton(wxID_NO, buttonNoCaption);
     addNegativeButton(wxID_CANCEL, buttonCancelCaption);
 }
-//-----------------------------------------------------------------------------
+
 class TextWrapEngine
 {
 private:
@@ -140,7 +140,7 @@ public:
         int wrapWidth, bool minimizeWrapWidth, wxString& wrappedText,
         wxSize* wrappedTextExtent);
 };
-//-----------------------------------------------------------------------------
+
 void TextWrapEngine::computeWordWrap(const wxString& text, const wxFont& font,
     int wrapWidth, bool minimizeWrapWidth, wxString& wrappedText,
     wxSize* wrappedTextExtent)
@@ -196,7 +196,7 @@ void TextWrapEngine::computeWordWrap(const wxString& text, const wxFont& font,
         *wrappedTextExtent = wxSize(w, h);
     }
 }
-//-----------------------------------------------------------------------------
+
 int TextWrapEngine::computeBestWrapWidth(wxDC& dc, const wxString& text,
     int wrapWidth)
 {
@@ -221,7 +221,7 @@ int TextWrapEngine::computeBestWrapWidth(wxDC& dc, const wxString& text,
     }
     return largeWidth;
 }
-//-----------------------------------------------------------------------------
+
 wxSize TextWrapEngine::computeWrappedExtent(wxDC& dc, const wxString& text,
     int wrapWidth)
 {
@@ -258,7 +258,7 @@ wxSize TextWrapEngine::computeWrappedExtent(wxDC& dc, const wxString& text,
     }
     return wxSize(textW, textH);
 }
-//-----------------------------------------------------------------------------
+
 wxString TextWrapEngine::wrapLine(wxDC& dc, const wxString& text,
     int wrapWidth)
 {
@@ -295,7 +295,7 @@ wxString TextWrapEngine::wrapLine(wxDC& dc, const wxString& text,
     }
     return result;
 }
-//-----------------------------------------------------------------------------
+
 AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent, wxArtID iconId,
         const wxString& primaryText, const wxString& secondaryText,
         AdvancedMessageDialogButtons& buttons,
@@ -415,12 +415,12 @@ AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent, wxArtID iconId,
     // use method in base class to set everything up
     layoutSizers(controlsSizer, buttonSizer);
 }
-//-----------------------------------------------------------------------------
+
 bool AdvancedMessageDialog::getDontShowAgain() const
 {
     return checkBoxM != 0 && checkBoxM->IsChecked();
 }
-//-----------------------------------------------------------------------------
+
 void AdvancedMessageDialog::OnButtonClick(wxCommandEvent& event)
 {
     switch (event.GetId())
@@ -439,7 +439,7 @@ void AdvancedMessageDialog::OnButtonClick(wxCommandEvent& event)
             break;
     }
 }
-//-----------------------------------------------------------------------------
+
 int showAdvancedMessageDialog(wxWindow* parent, int style,
     const wxString& primaryText, const wxString& secondaryText,
     AdvancedMessageDialogButtons& buttons, bool* showNeverAgain = 0,
@@ -471,7 +471,7 @@ int showAdvancedMessageDialog(wxWindow* parent, int style,
         *showNeverAgain = amd.getDontShowAgain();
     return res;
 }
-//-----------------------------------------------------------------------------
+
 int showAdvancedMessageDialog(wxWindow* parent, int style,
     const wxString& primaryText, const wxString& secondaryText,
     AdvancedMessageDialogButtons& buttons, Config& config,
@@ -490,14 +490,14 @@ int showAdvancedMessageDialog(wxWindow* parent, int style,
         config.setValue(configKey, value);
     return value;
 }
-//-----------------------------------------------------------------------------
+
 int showInformationDialog(wxWindow* parent, const wxString& primaryText,
     const wxString& secondaryText, AdvancedMessageDialogButtons buttons)
 {
     return showAdvancedMessageDialog(parent, wxICON_INFORMATION, primaryText,
         secondaryText, buttons);
 }
-//-----------------------------------------------------------------------------
+
 int showInformationDialog(wxWindow* parent, const wxString& primaryText,
     const wxString& secondaryText, AdvancedMessageDialogButtons buttons,
     Config& config, const wxString& configKey,
@@ -506,14 +506,14 @@ int showInformationDialog(wxWindow* parent, const wxString& primaryText,
     return showAdvancedMessageDialog(parent, wxICON_INFORMATION, primaryText,
         secondaryText, buttons, config, configKey, dontShowAgainText);
 }
-//-----------------------------------------------------------------------------
+
 int showQuestionDialog(wxWindow* parent, const wxString& primaryText,
     const wxString& secondaryText, AdvancedMessageDialogButtons buttons)
 {
     return showAdvancedMessageDialog(parent, wxICON_QUESTION, primaryText,
         secondaryText, buttons);
 }
-//-----------------------------------------------------------------------------
+
 int showQuestionDialog(wxWindow* parent, const wxString& primaryText,
     const wxString& secondaryText, AdvancedMessageDialogButtons buttons,
     Config& config, const wxString& configKey,
@@ -522,14 +522,14 @@ int showQuestionDialog(wxWindow* parent, const wxString& primaryText,
     return showAdvancedMessageDialog(parent, wxICON_QUESTION, primaryText,
         secondaryText, buttons, config, configKey, dontShowAgainText);
 }
-//-----------------------------------------------------------------------------
+
 int showWarningDialog(wxWindow* parent, const wxString& primaryText,
     const wxString& secondaryText, AdvancedMessageDialogButtons buttons)
 {
     return showAdvancedMessageDialog(parent, wxICON_WARNING, primaryText,
         secondaryText, buttons);
 }
-//-----------------------------------------------------------------------------
+
 int showWarningDialog(wxWindow* parent, const wxString& primaryText,
     const wxString& secondaryText, AdvancedMessageDialogButtons buttons,
     Config& config, const wxString& configKey,
@@ -538,14 +538,14 @@ int showWarningDialog(wxWindow* parent, const wxString& primaryText,
     return showAdvancedMessageDialog(parent, wxICON_WARNING, primaryText,
         secondaryText, buttons, config, configKey, dontShowAgainText);
 }
-//-----------------------------------------------------------------------------
+
 int showErrorDialog(wxWindow* parent, const wxString& primaryText,
     const wxString& secondaryText, AdvancedMessageDialogButtons buttons)
 {
     return showAdvancedMessageDialog(parent, wxICON_ERROR, primaryText,
         secondaryText, buttons);
 }
-//-----------------------------------------------------------------------------
+
 int showErrorDialog(wxWindow* parent, const wxString& primaryText,
     const wxString& secondaryText, AdvancedMessageDialogButtons buttons,
     Config& config, const wxString& configKey,
@@ -554,4 +554,4 @@ int showErrorDialog(wxWindow* parent, const wxString& primaryText,
     return showAdvancedMessageDialog(parent, wxICON_ERROR, primaryText,
         secondaryText, buttons, config, configKey, dontShowAgainText);
 }
-//-----------------------------------------------------------------------------
+

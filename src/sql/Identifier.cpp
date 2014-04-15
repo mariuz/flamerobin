@@ -34,7 +34,7 @@
 #include "core/Subject.h"
 #include "sql/Identifier.h"
 #include "sql/SqlTokenizer.h"
-//----------------------------------------------------------------------------
+
 // IdentifierQuotes: class to cache config data for identifier quoting
 class IdentifierQuotes: public ConfigCache
 {
@@ -53,54 +53,54 @@ public:
     bool getQuoteCharsAreRegular();
     bool getQuoteMixedCase();
 };
-//----------------------------------------------------------------------------
+
 IdentifierQuotes::IdentifierQuotes()
     : ConfigCache(config()), quoteAlwaysM(false),
         quoteCharsAreRegularM(false), quoteMixedCaseM(true)
 {
 }
-//-----------------------------------------------------------------------------
+
 IdentifierQuotes& IdentifierQuotes::get()
 {
     static IdentifierQuotes iq;
     return iq;
 }
-//-----------------------------------------------------------------------------
+
 void IdentifierQuotes::loadFromConfig()
 {
     quoteAlwaysM = !config().get(wxT("quoteOnlyWhenNeeded"), true);
     quoteCharsAreRegularM = config().get(wxT("quoteCharsAreRegular"), false);
     quoteMixedCaseM = config().get(wxT("quoteMixedCase"), false);
 }
-//----------------------------------------------------------------------------
+
 bool IdentifierQuotes::getQuoteAlways()
 {
     ensureCacheValid();
     return quoteAlwaysM;
 }
-//----------------------------------------------------------------------------
+
 bool IdentifierQuotes::getQuoteCharsAreRegular()
 {
     ensureCacheValid();
     return quoteCharsAreRegularM;
 }
-//----------------------------------------------------------------------------
+
 bool IdentifierQuotes::getQuoteMixedCase()
 {
     ensureCacheValid();
     return quoteMixedCaseM;
 }
-//----------------------------------------------------------------------------
+
 // Identifier class
 Identifier::Identifier(const wxString& source)
 {
     setText(source);
 }
-//----------------------------------------------------------------------------
+
 Identifier::Identifier()
 {
 }
-//----------------------------------------------------------------------------
+
 void Identifier::setText(const wxString& source)
 {
     // although it may not be completely correct we right-trim everything we
@@ -108,7 +108,7 @@ void Identifier::setText(const wxString& source)
     // a space - but who does that anyway
     textM = source.Strip();
 }
-//----------------------------------------------------------------------------
+
 void Identifier::setFromSql(const wxString& source)
 {
     // const wxChar pointers to first and last characters
@@ -137,32 +137,32 @@ void Identifier::setFromSql(const wxString& source)
     // set to uppercased input parameter, no leading and trailing whitespace
     textM = wxString(p, q + 1).Upper();
 }
-//----------------------------------------------------------------------------
+
 bool Identifier::isQuoted(const wxString &s)
 {
     wxString::size_type p = s.Length();
     return (s[0] == wxChar('\"') && p > 1 && s[p - 1] == wxChar('\"'));
 }
-//----------------------------------------------------------------------------
+
 wxString& Identifier::escape(wxString& s)
 {
     s.Replace(wxT("\""), wxT("\"\""));
     return s;
 }
-//----------------------------------------------------------------------------
+
 wxString& Identifier::strip(wxString& s)
 {
     if (isQuoted(s))
         s = s.SubString(1, s.Length()-2);
     return s;
 }
-//----------------------------------------------------------------------------
+
 wxString& Identifier::quote(wxString &s)
 {
     s = wxT("\"") + s + wxT("\"");
     return s;
 }
-//----------------------------------------------------------------------------
+
 bool hasBothCases(const wxString& value)
 {
     if (value.empty())
@@ -183,7 +183,7 @@ bool hasBothCases(const wxString& value)
     }
     return false;
 }
-//----------------------------------------------------------------------------
+
 wxString Identifier::userString(const wxString& s)
 {
     if (s.IsEmpty())
@@ -207,7 +207,7 @@ wxString Identifier::userString(const wxString& s)
         return ret;
     }
 }
-//----------------------------------------------------------------------------
+
 bool Identifier::needsQuoting(const wxString& s)
 {
     if (s.IsEmpty())
@@ -229,12 +229,12 @@ bool Identifier::needsQuoting(const wxString& s)
     // may still need quotes if reserved word
     return SqlTokenizer::isReservedWord(s);
 }
-//----------------------------------------------------------------------------
+
 bool Identifier::equals(const Identifier& rhs) const
 {
     return textM == rhs.textM;
 }
-//----------------------------------------------------------------------------
+
 bool Identifier::equals(const wxString& rhs) const
 {
     if (needsQuoting(textM))
@@ -242,12 +242,12 @@ bool Identifier::equals(const wxString& rhs) const
     else
         return (0 == rhs.CmpNoCase(textM));
 }
-//----------------------------------------------------------------------------
+
 wxString Identifier::get() const
 {
     return textM;
 }
-//----------------------------------------------------------------------------
+
 wxString Identifier::getQuoted() const
 {
     if (IdentifierQuotes::get().getQuoteAlways() || needsQuoting(textM))
@@ -258,4 +258,4 @@ wxString Identifier::getQuoted() const
     else
         return textM;
 }
-//----------------------------------------------------------------------------
+

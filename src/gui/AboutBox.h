@@ -21,12 +21,12 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef FR_ABOUTBOX_H
 #define FR_ABOUTBOX_H
 
 #include <wx/wx.h>
 
 void showAboutBox(wxWindow* parent);
-//-----------------------------------------------------------------------------
+
 #endif // FR_ABOUTBOX_H

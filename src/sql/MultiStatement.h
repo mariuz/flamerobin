@@ -20,10 +20,10 @@
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//-----------------------------------------------------------------------------
+
 #ifndef FR_MULTI_STATEMENT_H
 #define FR_MULTI_STATEMENT_H
-//-----------------------------------------------------------------------------
+
 class SingleStatement
 {
 private:
@@ -45,7 +45,7 @@ public:
 
     wxString getSql() const;
 };
-//-----------------------------------------------------------------------------
+
 class MultiStatement
 {
 private:
@@ -74,5 +74,5 @@ public:
     wxString getTerminator() const;
     void setTerminator(const wxString& newTerm);
 };
-//-----------------------------------------------------------------------------
+
 #endif

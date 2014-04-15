@@ -32,13 +32,13 @@
 
 #include "core/CodeTemplateProcessor.h"
 
-//-----------------------------------------------------------------------------
+
 CodeTemplateProcessor::CodeTemplateProcessor(ProcessableObject*object,
     wxWindow* window)
     : TemplateProcessor(object, window)
 {
 }
-//-----------------------------------------------------------------------------
+
 void CodeTemplateProcessor::processCommand(const wxString& cmdName,
     const TemplateCmdParams& cmdParams, ProcessableObject* object,
     wxString& processedText)
@@ -46,9 +46,9 @@ void CodeTemplateProcessor::processCommand(const wxString& cmdName,
     TemplateProcessor::processCommand(cmdName, cmdParams, object,
         processedText);
 }
-//-----------------------------------------------------------------------------
+
 wxString CodeTemplateProcessor::escapeChars(const wxString& input, bool)
 {
     return input;
 }
-//-----------------------------------------------------------------------------
+

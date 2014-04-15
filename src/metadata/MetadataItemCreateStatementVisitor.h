@@ -25,7 +25,7 @@
 #define FR_METADATAITEMCREATESTATEMENTVISITOR_H
 
 #include "metadata/MetadataItemVisitor.h"
-//-----------------------------------------------------------------------------
+
 class MetadataItemCreateStatementVisitor : public MetadataItemVisitor
 {
 private:
@@ -53,5 +53,5 @@ public:
 
     wxString getStatement() const;
 };
-//-----------------------------------------------------------------------------
+
 #endif // FR_METADATAITEMCREATESTATEMENTVISITOR_H

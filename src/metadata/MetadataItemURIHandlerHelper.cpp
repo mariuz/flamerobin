@@ -31,11 +31,11 @@
 #endif
 
 #include "metadata/MetadataItemURIHandlerHelper.h"
-//-----------------------------------------------------------------------------
+
 MetadataItem* MetadataItemURIHandlerHelper::doExtractMetadataItemFromURI(
     const URI& uri)
 {
     return MetadataItem::getObjectFromHandle(
         uri.getParam(wxT("object_handle")));
 }
-//-----------------------------------------------------------------------------
+

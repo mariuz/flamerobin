@@ -21,13 +21,13 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef TEXTCONTROL_H
 #define TEXTCONTROL_H
 
 #include <wx/wx.h>
 #include <wx/stc/stc.h>
-//-----------------------------------------------------------------------------
+
 // Base class for multiline text controls in FlameRobin.  Based on
 // wxStyledTextCtrl instead of wxTextCtrl, because that works better/faster
 // on some systems, and provides popup menu on wxGTK.
@@ -59,5 +59,5 @@ protected:
 public:
     TextControl(wxWindow *parent, wxWindowID id = wxID_ANY);
 };
-//-----------------------------------------------------------------------------
+
 #endif

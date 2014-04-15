@@ -25,7 +25,7 @@
 #define BASEDIALOG_H
 
 #include <list>
-//-----------------------------------------------------------------------------
+
 // Base class for dialogs in FlameRobin. Implements helper methods to ease
 // dynamic layout.
 class BaseDialog: public wxDialog
@@ -78,5 +78,5 @@ protected:
 private:
     wxPanel* panel_controls;
 };
-//-----------------------------------------------------------------------------
+
 #endif // BASEDIALOG_H

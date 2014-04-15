@@ -23,14 +23,14 @@
 
 #ifndef DATABASEREGISTRATIONDIALOG_H
 #define DATABASEREGISTRATIONDIALOG_H
-//-----------------------------------------------------------------------------
+
 #include <wx/wx.h>
 
 #include "gui/BaseDialog.h"
 #include "metadata/MetadataClasses.h"
 
 class FileTextControl;
-//-----------------------------------------------------------------------------
+
 class DatabaseRegistrationDialog: public BaseDialog {
 private:
     DatabasePtr databaseM;
@@ -103,5 +103,5 @@ private:
 
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 #endif // DATABASEREGISTRATIONDIALOG_H

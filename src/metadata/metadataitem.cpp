@@ -43,7 +43,7 @@
 #include "metadata/table.h"
 #include "metadata/trigger.h"
 #include "metadata/view.h"
-//-----------------------------------------------------------------------------
+
 void initializeLockCount(MetadataItem* item, unsigned count)
 {
     if (item != 0 && count > 0)
@@ -52,23 +52,23 @@ void initializeLockCount(MetadataItem* item, unsigned count)
             item->lockSubject();
     }
 }
-//-----------------------------------------------------------------------------
+
 void initializeLockCount(MetadataItemPtr item, unsigned count)
 {
     initializeLockCount(item.get(), count);
 }
-//-----------------------------------------------------------------------------
+
 template<>
 ObjectWithHandle<MetadataItem>::HandleMap ObjectWithHandle<MetadataItem>::handleMap = ObjectWithHandle<MetadataItem>::HandleMap();
 template<>
 ObjectWithHandle<MetadataItem>::Handle ObjectWithHandle<MetadataItem>::nextHandle = 0;
-//-----------------------------------------------------------------------------
+
 MetadataItem::MetadataItem()
     : Subject(), typeM(ntUnknown), parentM(0), childrenLoadedM(lsNotLoaded),
         descriptionLoadedM(lsNotLoaded), propertiesLoadedM(lsNotLoaded)
 {
 }
-//-----------------------------------------------------------------------------
+
 MetadataItem::MetadataItem(NodeType type, MetadataItem* parent,
         const wxString& name)
     : Subject(), typeM(type), parentM(parent), identifierM(name),
@@ -76,16 +76,16 @@ MetadataItem::MetadataItem(NodeType type, MetadataItem* parent,
         propertiesLoadedM(lsNotLoaded)
 {
 }
-//-----------------------------------------------------------------------------
+
 MetadataItem::~MetadataItem()
 {
 }
-//-----------------------------------------------------------------------------
+
 const wxString MetadataItem::getTypeName() const
 {
     return wxT("");
 }
-//-----------------------------------------------------------------------------
+
 const wxString MetadataItem::getItemPath() const
 {
     wxString result = getTypeName() + wxT("_") + getPathId();
@@ -97,17 +97,17 @@ const wxString MetadataItem::getItemPath() const
     }
     return result;
 }
-//-----------------------------------------------------------------------------
+
 const wxString MetadataItem::getPathId() const
 {
     return getId();
 }
-//-----------------------------------------------------------------------------
+
 const wxString MetadataItem::getId() const
 {
     return getName_();
 }
-//-----------------------------------------------------------------------------
+
 wxString getNameOfType(NodeType type)
 {
     switch (type)
@@ -126,7 +126,7 @@ wxString getNameOfType(NodeType type)
             return wxT("");
     }
 }
-//-----------------------------------------------------------------------------
+
 NodeType getTypeByName(const wxString& name)
 {
     if (name == wxT("TABLE"))
@@ -152,14 +152,14 @@ NodeType getTypeByName(const wxString& name)
     else
         return ntUnknown;
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItem::invalidate()
 {
     setChildrenLoaded(false);
     setPropertiesLoaded(false);
     notifyObservers();
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItem::loadPendingData()
 {
     if (propertiesLoadedM == lsLoadPending)
@@ -167,7 +167,7 @@ void MetadataItem::loadPendingData()
     if (childrenLoadedM == lsLoadPending)
         loadChildren();
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItem::resetPendingLoadData()
 {
     if (propertiesLoadedM == lsLoadPending)
@@ -175,22 +175,22 @@ void MetadataItem::resetPendingLoadData()
     if (childrenLoadedM == lsLoadPending)
         childrenLoadedM = lsNotLoaded;
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItem::ensurePropertiesLoaded()
 {
     if (!propertiesLoaded())
         loadProperties();
 }
-//-----------------------------------------------------------------------------
+
 bool MetadataItem::propertiesLoaded() const
 {
     return propertiesLoadedM == lsLoaded;
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItem::loadProperties()
 {
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItem::setPropertiesLoaded(bool loaded)
 {
     if (loaded)
@@ -203,26 +203,26 @@ void MetadataItem::setPropertiesLoaded(bool loaded)
             propertiesLoadedM = lsNotLoaded;
     }
 }
-//-----------------------------------------------------------------------------
+
 bool MetadataItem::childrenLoaded() const
 {
     return childrenLoadedM == lsLoaded;
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItem::doSetChildrenLoaded(bool /*loaded*/)
 {
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItem::ensureChildrenLoaded()
 {
     if (!childrenLoaded())
         loadChildren();
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItem::loadChildren()
 {
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItem::setChildrenLoaded(bool loaded)
 {
     if (loaded)
@@ -236,19 +236,19 @@ void MetadataItem::setChildrenLoaded(bool loaded)
     }
     doSetChildrenLoaded(loaded);
 }
-//-----------------------------------------------------------------------------
+
 bool MetadataItem::getChildren(std::vector<MetadataItem*>& /*temp*/)
 {
     return false;
 }
-//-----------------------------------------------------------------------------
+
 DatabasePtr MetadataItem::getDatabase() const
 {
     if (MetadataItem* m = getParent())
         return m->getDatabase();
     return DatabasePtr();
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItem::getDependencies(std::vector<Dependency>& list,
     bool ofObject, const wxString& field)
 {
@@ -261,7 +261,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
             list.push_back(*it);
     }
 }
-//-----------------------------------------------------------------------------
+
 //! ofObject = true   => returns list of objects this object depends on
 //! ofObject = false  => returns list of objects that depend on this object
 void MetadataItem::getDependencies(std::vector<Dependency>& list,
@@ -526,19 +526,19 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
 
     tr1->Commit();
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItem::ensureDescriptionLoaded()
 {
     if (descriptionLoadedM == lsNotLoaded)
         loadDescription();
 }
-//-----------------------------------------------------------------------------
+
 wxString MetadataItem::getDescription()
 {
     ensureDescriptionLoaded();
     return descriptionM;
 }
-//-----------------------------------------------------------------------------
+
 bool MetadataItem::getDescription(wxString& description)
 {
     ensureDescriptionLoaded();
@@ -546,7 +546,7 @@ bool MetadataItem::getDescription(wxString& description)
     return descriptionLoadedM == lsLoaded;
 }
 
-//-----------------------------------------------------------------------------
+
 void MetadataItem::invalidateDescription()
 {
     if (descriptionLoadedM != lsNotLoaded)
@@ -558,7 +558,7 @@ void MetadataItem::invalidateDescription()
         notifyObservers();
     }
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItem::loadDescription()
 {
     LoadDescriptionVisitor ldv;
@@ -577,14 +577,14 @@ void MetadataItem::loadDescription()
         descriptionM = wxEmptyString;
     }
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItem::saveDescription(const wxString& WXUNUSED(description))
 {
     throw FRError(wxString::Format(
         wxT("Objects of type %s do not support descriptions"),
         getTypeName().c_str()));
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItem::setDescription(const wxString& description)
 {
     if (getDescription() != description)
@@ -599,28 +599,28 @@ void MetadataItem::setDescription(const wxString& description)
         notifyObservers();
     }
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItem::setDescriptionIsEmpty()
 {
     descriptionLoadedM = lsLoaded;
     descriptionM = wxEmptyString;
 }
-//-----------------------------------------------------------------------------
+
 MetadataItem* MetadataItem::getParent() const
 {
     return parentM;
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItem::setParent(MetadataItem* parent)
 {
     parentM = parent;
 }
-//-----------------------------------------------------------------------------
+
 wxString MetadataItem::getName_() const
 {
     return identifierM.get();
 }
-//-----------------------------------------------------------------------------
+
 wxString MetadataItem::getQuotedName() const
 {
     if (DatabasePtr db = getDatabase())
@@ -631,106 +631,106 @@ wxString MetadataItem::getQuotedName() const
     }
     return identifierM.getQuoted();
 }
-//-----------------------------------------------------------------------------
+
 Identifier MetadataItem::getIdentifier() const
 {
     return identifierM;
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItem::setName_(const wxString& name)
 {
     identifierM.setText(name);
     notifyObservers();
 }
-//-----------------------------------------------------------------------------
+
 NodeType MetadataItem::getType() const
 {
     return typeM;
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItem::setType(NodeType type)
 {
     typeM = type;
 }
-//-----------------------------------------------------------------------------
+
 bool MetadataItem::isSystem() const
 {
     return hasSystemPrefix(getName_());
 }
-//-----------------------------------------------------------------------------
+
 /*static*/
 bool MetadataItem::hasSystemPrefix(const wxString& name)
 {
     wxString prefix(name.substr(0, 4));
     return prefix == wxT("RDB$") || prefix == wxT("MON$");
 }
-//-----------------------------------------------------------------------------
+
 wxString MetadataItem::getDropSqlStatement() const
 {
     return wxT("DROP ") + getTypeName() + wxT(" ") + getQuotedName() + wxT(";");
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItem::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitMetadataItem(*this);
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItem::lockChildren()
 {
 // NOTE: getChildren() can not be used here, because we want to lock the
 //       MetadataCollection objects as well.  That means we have to override
 //       this method in all descendant classes - oh well...
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItem::lockSubject()
 {
     Subject::lockSubject();
     lockChildren();
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItem::unlockChildren()
 {
 // NOTE: getChildren() can not be used here, because we want to lock the
 //       MetadataCollection objects as well.  That means we have to override
 //       this method in all descendant classes - oh well...
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItem::unlockSubject()
 {
     Subject::unlockSubject();
     unlockChildren();
 }
-//-----------------------------------------------------------------------------
+
 MetadataItem *Dependency::getParent() const
 {
     return objectM->getParent();
 }
-//-----------------------------------------------------------------------------
+
 wxString Dependency::getName_() const
 {
     return objectM->getName_();
 }
-//-----------------------------------------------------------------------------
+
 NodeType Dependency::getType() const
 {
     return objectM->getType();
 }
-//-----------------------------------------------------------------------------
+
 const wxString Dependency::getTypeName() const
 {
     return objectM->getTypeName();
 }
-//-----------------------------------------------------------------------------
+
 MetadataItem *Dependency::getDependentObject() const
 {
     return objectM;
 }
-//-----------------------------------------------------------------------------
+
 Dependency::Dependency(MetadataItem *object)
 {
     objectM = object;
 }
-//-----------------------------------------------------------------------------
+
 void Dependency::getFields(std::vector<wxString>& fields) const
 {
     for (std::vector<wxString>::const_iterator it = fieldsM.begin();
@@ -739,7 +739,7 @@ void Dependency::getFields(std::vector<wxString>& fields) const
         fields.push_back(*it);
     }
 }
-//-----------------------------------------------------------------------------
+
 wxString Dependency::getFields() const
 {
     wxString temp;
@@ -751,36 +751,36 @@ wxString Dependency::getFields() const
     }
     return temp;
 }
-//-----------------------------------------------------------------------------
+
 void Dependency::addField(const wxString& name)
 {
     if (fieldsM.end() == std::find(fieldsM.begin(), fieldsM.end(), name))
         fieldsM.push_back(name);
 }
-//-----------------------------------------------------------------------------
+
 void Dependency::setFields(const std::vector<wxString>& fields)
 {
     fieldsM = fields;
 }
-//-----------------------------------------------------------------------------
+
 bool Dependency::hasField(const wxString& name) const
 {
     return fieldsM.end() != std::find(fieldsM.begin(), fieldsM.end(), name);
 }
-//-----------------------------------------------------------------------------
+
 bool Dependency::operator== (const Dependency& other) const
 {
     return (objectM == other.getDependentObject() && getFields() == other.getFields());
 }
-//-----------------------------------------------------------------------------
+
 bool Dependency::operator!= (const Dependency& other) const
 {
     return (objectM != other.getDependentObject() || getFields() != other.getFields());
 }
-//-----------------------------------------------------------------------------
+
 void Dependency::acceptVisitor(MetadataItemVisitor* visitor)
 {
     if (objectM)
         objectM->acceptVisitor(visitor);
 }
-//-----------------------------------------------------------------------------
+

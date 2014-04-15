@@ -40,7 +40,7 @@
 #include "metadata/column.h"
 #include "metadata/relation.h"
 #include "metadata/server.h"
-//-----------------------------------------------------------------------------
+-
 void adjustControlsMinWidth(std::list<wxWindow*> controls)
 {
     int w = 0;
@@ -62,7 +62,7 @@ void adjustControlsMinWidth(std::list<wxWindow*> controls)
         (*it)->SetSizeHints(w, sz.GetHeight());
     }
 }
-//-----------------------------------------------------------------------------
+-
 void readBlob(IBPP::Statement& st, int column, wxString& result,
     wxMBConv* conv)
 {
@@ -95,7 +95,7 @@ void readBlob(IBPP::Statement& st, int column, wxString& result,
     result = std2wx(resultBuffer, conv);
     b->Close();
 }
-//-----------------------------------------------------------------------------
+-
 wxString selectRelationColumns(Relation* t, wxWindow* parent)
 {
     std::vector<wxString> list;
@@ -108,7 +108,7 @@ wxString selectRelationColumns(Relation* t, wxWindow* parent)
         retval += wxT(", ") + (*it);
     return retval;
 }
-//-----------------------------------------------------------------------------
+-
 bool selectRelationColumnsIntoVector(Relation* t, wxWindow* parent,
     std::vector<wxString>& list)
 {
@@ -148,7 +148,7 @@ bool selectRelationColumnsIntoVector(Relation* t, wxWindow* parent,
     }
     return true;
 }
-//-----------------------------------------------------------------------------
+-
 bool connectDatabase(Database* db, wxWindow* parent,
     ProgressDialog* progressdialog)
 {
@@ -176,7 +176,7 @@ bool connectDatabase(Database* db, wxWindow* parent,
     }
     return true;
 }
-//-----------------------------------------------------------------------------
+-
 bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
     bool sysdba)
 {
@@ -219,4 +219,4 @@ bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
     }
     return true;
 }
-//-----------------------------------------------------------------------------
+-

@@ -47,7 +47,7 @@
 #include "gui/FRLayoutConfig.h"
 #include "metadata/database.h"
 #include "metadata/table.h"
-//-----------------------------------------------------------------------------
+
 DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
     : wxGrid(parent, id), timerM(this, TIMER_ID), calculateSumM(true)
 {
@@ -79,11 +79,11 @@ DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
     }
     updateRowHeights();
 }
-//-----------------------------------------------------------------------------
+
 DataGrid::~DataGrid()
 {
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::copyToClipboard(const wxString cbText)
 {
     if (!wxTheClipboard->Open())
@@ -96,7 +96,7 @@ void DataGrid::copyToClipboard(const wxString cbText)
         wxMessageBox(_("Cannot write to clipboard"), _("Error"), wxOK|wxICON_EXCLAMATION);
     wxTheClipboard->Close();
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::extendSelection(int direction)
 {
     // extend selection of cell selection blocks
@@ -133,7 +133,7 @@ void DataGrid::extendSelection(int direction)
             SelectCol(cc.GetCol(), true);
     }
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::fetchData(bool readonly)
 {
     DataGridTable* table = getDataGridTable();
@@ -171,13 +171,13 @@ void DataGrid::fetchData(bool readonly)
     Layout();
 #endif
 }
-//-----------------------------------------------------------------------------
+
 DataGridTable* DataGrid::getDataGridTable()
 {
     DataGridTable* table = dynamic_cast<DataGridTable*>(GetTable());
     return table;
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::notifyIfUnfetchedData()
 {
     DataGridTable* table = getDataGridTable();
@@ -190,7 +190,7 @@ void DataGrid::notifyIfUnfetchedData()
             _("Do not show this information again"));
     }
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::showPopupMenu(wxPoint cursorPos)
 {
     SetFocus();
@@ -221,7 +221,7 @@ void DataGrid::showPopupMenu(wxPoint cursorPos)
     m.Append(Cmds::DataGrid_Set_cell_font, _("Set cell font"));
     PopupMenu(&m, cursorPos);
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::updateRowHeights()
 {
     // HACK alert: this is taken straight from wxWidgets grid.cpp...
@@ -244,13 +244,13 @@ void DataGrid::updateRowHeights()
     SetDefaultRowSize(h, true);
     SetScrollLineY(h);
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::refreshAndInvalidateAttributes()
 {
     ClearAttrCache();
     Refresh();
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::setCellFont()
 {
     wxFont f = ::wxGetFontFromUser(this, GetDefaultCellFont());
@@ -262,7 +262,7 @@ void DataGrid::setCellFont()
         ForceRefresh();
     }
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::copyToClipboard()
 {
     DataGridTable* table = getDataGridTable();
@@ -308,7 +308,7 @@ void DataGrid::copyToClipboard()
     if (all)
         notifyIfUnfetchedData();
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::copyToClipboardAsInsert()
 {
     DataGridTable* table = getDataGridTable();
@@ -377,7 +377,7 @@ void DataGrid::copyToClipboardAsInsert()
     if (all)
         notifyIfUnfetchedData();
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::copyToClipboardAsInList()
 {
     DataGridTable* table = getDataGridTable();
@@ -423,7 +423,7 @@ void DataGrid::copyToClipboardAsInList()
     if (all)
         notifyIfUnfetchedData();
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::copyToClipboardAsUpdate()
 {
     DataGridTable* table = getDataGridTable();
@@ -529,7 +529,7 @@ void DataGrid::copyToClipboardAsUpdate()
     if (all)
         notifyIfUnfetchedData();
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::setHeaderFont()
 {
     wxFont f = ::wxGetFontFromUser(this, GetLabelFont());
@@ -543,7 +543,7 @@ void DataGrid::setHeaderFont()
         ForceRefresh();
     }
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::saveAsCSV(const wxString& fileName,
     const wxChar& fieldDelimiter, const wxChar& textDelimiter)
 {
@@ -611,7 +611,7 @@ void DataGrid::saveAsCSV(const wxString& fileName,
     if (all)
         notifyIfUnfetchedData();
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::saveAsHTML()
 {
     wxString fname = ::wxFileSelector(_("Save data in selected cells as"),
@@ -687,21 +687,21 @@ void DataGrid::saveAsHTML()
     }
     outStr.WriteString(wxT("</table></body></html>\n"));
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::fetchAll()
 {
     DataGridTable* table = getDataGridTable();
     if (table)
         table->setFetchAllRecords(true);
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::cancelFetchAll()
 {
     DataGridTable* table = getDataGridTable();
     if (table)
         table->setFetchAllRecords(false);
 }
-//-----------------------------------------------------------------------------
+
 std::vector<bool> DataGrid::getColumnsWithSelectedCells()
 {
     // fully selected rows cause all columns to have selected cells
@@ -735,7 +735,7 @@ std::vector<bool> DataGrid::getColumnsWithSelectedCells()
 
     return ret;
 }
-//-----------------------------------------------------------------------------
+
 std::vector<bool> DataGrid::getRowsWithSelectedCells()
 {
     // fully selected columns cause all rows to have selected cells
@@ -769,7 +769,7 @@ std::vector<bool> DataGrid::getRowsWithSelectedCells()
 
     return ret;
 }
-//-----------------------------------------------------------------------------
+
 std::vector<bool> DataGrid::getSelectedCellsInRow(int row)
 {
     // check whether row is fully selected
@@ -811,7 +811,7 @@ std::vector<bool> DataGrid::getSelectedCellsInRow(int row)
 
     return ret;
 }
-//-----------------------------------------------------------------------------
+
 wxGridCellCoordsArray DataGrid::getSelectedCells()
 {
     wxGridCellCoordsArray result;
@@ -837,7 +837,7 @@ wxGridCellCoordsArray DataGrid::getSelectedCells()
 
     return result;
 }
-//-----------------------------------------------------------------------------
+
 BEGIN_EVENT_TABLE(DataGrid, wxGrid)
     EVT_CONTEXT_MENU(DataGrid::OnContextMenu)
     EVT_GRID_CELL_RIGHT_CLICK(DataGrid::OnGridCellRightClick)
@@ -853,19 +853,19 @@ BEGIN_EVENT_TABLE(DataGrid, wxGrid)
     EVT_SCROLLWIN_THUMBRELEASE(DataGrid::OnThumbRelease)
 #endif
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 void DataGrid::OnGridCellSelected(wxGridEvent& event)
 {
     timerM.Start(500, wxTIMER_ONE_SHOT);
     event.Skip();
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::OnGridRangeSelected(wxGridRangeSelectEvent& event)
 {
     timerM.Start(500, wxTIMER_ONE_SHOT);
     event.Skip();
 }
-//-----------------------------------------------------------------------------
+
 DEFINE_EVENT_TYPE(wxEVT_FRDG_SUM)
 void DataGrid::OnTimer(wxTimerEvent& WXUNUSED(event))
 {
@@ -924,7 +924,7 @@ void DataGrid::OnTimer(wxTimerEvent& WXUNUSED(event))
         wxPostEvent(this, evt);
     }
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::OnEditorCreated(wxGridEditorCreatedEvent& event)
 {
     wxTextCtrl *editor = dynamic_cast<wxTextCtrl *>(event.GetControl());
@@ -935,7 +935,7 @@ void DataGrid::OnEditorCreated(wxGridEditorCreatedEvent& event)
         wxKeyEventHandler(DataGrid::OnEditorKeyDown),
         0, this);
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::OnEditorKeyDown(wxKeyEvent& event)
 {
     if (event.GetKeyCode() == WXK_DELETE || event.GetKeyCode() == WXK_BACK)
@@ -953,7 +953,7 @@ void DataGrid::OnEditorKeyDown(wxKeyEvent& event)
     }
     event.Skip();
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::OnContextMenu(wxContextMenuEvent& event)
 {
     if (IsCellEditControlEnabled())
@@ -966,7 +966,7 @@ void DataGrid::OnContextMenu(wxContextMenuEvent& event)
     //  showPopMenu(event.GetPosition());
     showPopupMenu(ScreenToClient(::wxGetMousePosition()));
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::OnGridCellRightClick(wxGridEvent& event)
 {
     if (IsCellEditControlEnabled())
@@ -976,12 +976,12 @@ void DataGrid::OnGridCellRightClick(wxGridEvent& event)
     }
     showPopupMenu(event.GetPosition());
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::OnGridLabelRightClick(wxGridEvent& WXUNUSED(event))
 {
     showPopupMenu(ScreenToClient(::wxGetMousePosition()));
 }
-//-----------------------------------------------------------------------------
+
 /*
 void DataGrid::OnGridSelectCell(wxGridEvent& event)
 {
@@ -990,7 +990,7 @@ void DataGrid::OnGridSelectCell(wxGridEvent& event)
         table->saveEditorChanges(event.GetRow());
     event.Skip();
 }*/
-//-----------------------------------------------------------------------------
+
 void DataGrid::OnIdle(wxIdleEvent& event)
 {
     DataGridTable* table = getDataGridTable();
@@ -1011,7 +1011,7 @@ void DataGrid::OnIdle(wxIdleEvent& event)
         AdjustScrollbars();
     }
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::OnKeyDown(wxKeyEvent& event)
 {
     if (event.GetKeyCode() == WXK_SPACE)
@@ -1042,7 +1042,7 @@ void DataGrid::OnKeyDown(wxKeyEvent& event)
 
     event.Skip();
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::OnMouseWheel(wxMouseEvent& event)
 {
     int wheelrotation = event.GetWheelRotation();
@@ -1055,11 +1055,11 @@ void DataGrid::OnMouseWheel(wxMouseEvent& event)
     Scroll(x,y);
     AdjustScrollbars();
 }
-//-----------------------------------------------------------------------------
+
 void DataGrid::OnThumbRelease(wxScrollWinEvent& event)
 {
     wxIdleEvent dummy;
     OnIdle(dummy);
     event.Skip();
 }
-//-----------------------------------------------------------------------------
+

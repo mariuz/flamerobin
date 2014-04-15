@@ -23,7 +23,7 @@
 
 #ifndef DATAGRIDROWS_H
 #define DATAGRIDROWS_H
-//-----------------------------------------------------------------------------
+
 #include <vector>
 #include <map>
 #include <list>

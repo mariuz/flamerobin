@@ -40,7 +40,7 @@
 #include "gui/controls/LogTextControl.h"
 #include "metadata/database.h"
 #include "metadata/server.h"
-//-----------------------------------------------------------------------------
+
 BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent,
         DatabasePtr db)
     : BaseFrame(parent, wxID_ANY, wxEmptyString), databaseM(db), threadM(0)
@@ -62,7 +62,7 @@ BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent,
 
     SetIcon(wxArtProvider::GetIcon(ART_Backup, wxART_FRAME_ICON));
 }
-//-----------------------------------------------------------------------------
+
 //! implementation details
 void BackupRestoreBaseFrame::addThreadMsg(const wxString msg,
     bool& notificationNeeded)
@@ -80,7 +80,7 @@ void BackupRestoreBaseFrame::addThreadMsg(const wxString msg,
         notificationNeeded = true;
     }
 }
-//-----------------------------------------------------------------------------
+
 void BackupRestoreBaseFrame::cancelBackupRestore()
 {
     if (threadM != 0)
@@ -89,20 +89,20 @@ void BackupRestoreBaseFrame::cancelBackupRestore()
         threadM = 0;
     }
 }
-//-----------------------------------------------------------------------------
+
 void BackupRestoreBaseFrame::clearLog()
 {
     msgKindsM.Clear();
     msgsM.Clear();
     text_ctrl_log->ClearAll();
 }
-//-----------------------------------------------------------------------------
+
 bool BackupRestoreBaseFrame::Destroy()
 {
     cancelBackupRestore();
     return BaseFrame::Destroy();
 }
-//-----------------------------------------------------------------------------
+
 void BackupRestoreBaseFrame::doReadConfigSettings(const wxString& prefix)
 {
     BaseFrame::doReadConfigSettings(prefix);
@@ -118,7 +118,7 @@ void BackupRestoreBaseFrame::doReadConfigSettings(const wxString& prefix)
     if (!bkfile.empty())
         text_ctrl_filename->SetValue(bkfile);
 }
-//-----------------------------------------------------------------------------
+
 void BackupRestoreBaseFrame::doWriteConfigSettings(const wxString& prefix) const
 {
     BaseFrame::doWriteConfigSettings(prefix);
@@ -127,31 +127,31 @@ void BackupRestoreBaseFrame::doWriteConfigSettings(const wxString& prefix) const
     config().setValue(prefix + Config::pathSeparator + wxT("backupfilename"),
         text_ctrl_filename->GetValue());
 }
-//-----------------------------------------------------------------------------
+
 DatabasePtr BackupRestoreBaseFrame::getDatabase() const
 {
     return databaseM.lock();
 }
-//-----------------------------------------------------------------------------
+
 const wxString BackupRestoreBaseFrame::getStorageName() const
 {
     if (DatabasePtr db = getDatabase())
         return getName() + Config::pathSeparator + db->getItemPath();
     return wxEmptyString;
 }
-//-----------------------------------------------------------------------------
+
 bool BackupRestoreBaseFrame::getThreadRunning() const
 {
     return threadM != 0;
 }
-//-----------------------------------------------------------------------------
+
 void BackupRestoreBaseFrame::subjectRemoved(Subject* subject)
 {
     DatabasePtr db = getDatabase();
     if (!db || !db->isConnected() || subject == db.get())
         Close();
 }
-//-----------------------------------------------------------------------------
+
 bool BackupRestoreBaseFrame::startThread(std::auto_ptr<wxThread> thread)
 {
     wxASSERT(threadM == 0);
@@ -170,7 +170,7 @@ bool BackupRestoreBaseFrame::startThread(std::auto_ptr<wxThread> thread)
     threadM = thread.release();
     return true;
 }
-//-----------------------------------------------------------------------------
+
 void BackupRestoreBaseFrame::threadOutputMsg(const wxString msg, MsgKind kind)
 {
     wxString s(msg);
@@ -197,7 +197,7 @@ void BackupRestoreBaseFrame::threadOutputMsg(const wxString msg, MsgKind kind)
         wxPostEvent(this, event);
     }
 }
-//-----------------------------------------------------------------------------
+
 void BackupRestoreBaseFrame::update()
 {
     DatabasePtr db = getDatabase();
@@ -206,14 +206,14 @@ void BackupRestoreBaseFrame::update()
     else
         Close();
 }
-//-----------------------------------------------------------------------------
+
 void BackupRestoreBaseFrame::updateControls()
 {
     // empty implementation to allow this to be called from update()
     // which could happen in the constructor, when descendant isn't
     // completely initialized yet
 }
-//-----------------------------------------------------------------------------
+
 void BackupRestoreBaseFrame::updateMessages(size_t firstmsg, size_t lastmsg)
 {
     if (lastmsg > msgsM.GetCount())
@@ -235,7 +235,7 @@ void BackupRestoreBaseFrame::updateMessages(size_t firstmsg, size_t lastmsg)
         }
     }
 }
-//-----------------------------------------------------------------------------
+
 //! event handlers
 BEGIN_EVENT_TABLE(BackupRestoreBaseFrame, BaseFrame)
     EVT_CHECKBOX(BackupRestoreBaseFrame::ID_checkbox_showlog, BackupRestoreBaseFrame::OnVerboseLogChange)
@@ -243,20 +243,20 @@ BEGIN_EVENT_TABLE(BackupRestoreBaseFrame, BaseFrame)
     EVT_MENU(BackupRestoreBaseFrame::ID_thread_output, BackupRestoreBaseFrame::OnThreadOutput)
     EVT_TEXT(BackupRestoreBaseFrame::ID_text_ctrl_filename, BackupRestoreBaseFrame::OnSettingsChange)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 void BackupRestoreBaseFrame::OnSettingsChange(wxCommandEvent& WXUNUSED(event))
 {
     if (IsShown())
         updateControls();
 }
-//-----------------------------------------------------------------------------
+
 void BackupRestoreBaseFrame::OnThreadFinished(wxCommandEvent& event)
 {
     threadM = 0;
     OnThreadOutput(event);
     updateControls();
 }
-//-----------------------------------------------------------------------------
+
 void BackupRestoreBaseFrame::OnThreadOutput(wxCommandEvent& WXUNUSED(event))
 {
     wxCriticalSectionLocker locker(critsectM);
@@ -289,7 +289,7 @@ void BackupRestoreBaseFrame::OnThreadOutput(wxCommandEvent& WXUNUSED(event))
 
     updateMessages(first, msgsM.GetCount());
 }
-//-----------------------------------------------------------------------------
+
 void BackupRestoreBaseFrame::OnVerboseLogChange(wxCommandEvent& WXUNUSED(event))
 {
     wxBusyCursor wait;
@@ -300,4 +300,4 @@ void BackupRestoreBaseFrame::OnVerboseLogChange(wxCommandEvent& WXUNUSED(event))
     text_ctrl_log->ClearAll();
     updateMessages(0, msgsM.GetCount());
 }
-//-----------------------------------------------------------------------------
+

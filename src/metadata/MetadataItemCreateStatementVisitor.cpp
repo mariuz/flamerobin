@@ -20,7 +20,7 @@
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//-----------------------------------------------------------------------------
+
 
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
@@ -33,7 +33,7 @@
 
 #include "metadata/MetadataItemCreateStatementVisitor.h"
 #include "sql/StatementBuilder.h"
-//-----------------------------------------------------------------------------
+
 /*static*/
 wxString MetadataItemCreateStatementVisitor::getCreateDomainStatement()
 {
@@ -44,7 +44,7 @@ wxString MetadataItemCreateStatementVisitor::getCreateDomainStatement()
             wxT("[CHECK (dom_search_condition)]\n")
             wxT("COLLATE collation;\n");
 }
-//-----------------------------------------------------------------------------
+
 /*static*/
 wxString MetadataItemCreateStatementVisitor::getCreateExceptionStatement()
 {
@@ -53,7 +53,7 @@ wxString MetadataItemCreateStatementVisitor::getCreateExceptionStatement()
         << StatementBuilder::NewLine;
     return sb;
 }
-//-----------------------------------------------------------------------------
+
 /*static*/
 wxString MetadataItemCreateStatementVisitor::getCreateFunctionStatement()
 {
@@ -63,7 +63,7 @@ wxString MetadataItemCreateStatementVisitor::getCreateFunctionStatement()
            wxT("ENTRY_POINT 'entryname'\n")
            wxT("MODULE_NAME 'modulename';\n");
 }
-//-----------------------------------------------------------------------------
+
 /*static*/
 wxString MetadataItemCreateStatementVisitor::getCreateGeneratorStatement()
 {
@@ -74,7 +74,7 @@ wxString MetadataItemCreateStatementVisitor::getCreateGeneratorStatement()
         << wxT(" value;") << StatementBuilder::NewLine;
     return sb;
 }
-//-----------------------------------------------------------------------------
+
 /*static*/
 wxString MetadataItemCreateStatementVisitor::getCreateProcedureStatement()
 {
@@ -91,13 +91,13 @@ wxString MetadataItemCreateStatementVisitor::getCreateProcedureStatement()
             wxT("SET TERM ; ^\n"));
     return s;
 }
-//-----------------------------------------------------------------------------
+
 /*static*/
 wxString MetadataItemCreateStatementVisitor::getCreateRoleStatement()
 {
     return  wxT("CREATE ROLE role_name;\n");
 }
-//-----------------------------------------------------------------------------
+
 /*static*/
 wxString MetadataItemCreateStatementVisitor::getCreateTableStatement()
 {
@@ -114,7 +114,7 @@ wxString MetadataItemCreateStatementVisitor::getCreateTableStatement()
         wxT("    ...\n")
         wxT(");\n");
 }
-//-----------------------------------------------------------------------------
+
 /*static*/
 wxString MetadataItemCreateStatementVisitor::getCreateTriggerStatement()
 {
@@ -130,7 +130,7 @@ wxString MetadataItemCreateStatementVisitor::getCreateTriggerStatement()
         wxT("END^\n\n")
         wxT("SET TERM ; ^\n");
 }
-//-----------------------------------------------------------------------------
+
 /*static*/
 wxString MetadataItemCreateStatementVisitor::getCreateViewStatement()
 {
@@ -143,58 +143,58 @@ wxString MetadataItemCreateStatementVisitor::getCreateViewStatement()
         << StatementBuilder::NewLine;
     return sb;
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItemCreateStatementVisitor::visitDomains(Domains& /*domains*/)
 {
     statementM = getCreateDomainStatement();
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItemCreateStatementVisitor::visitExceptions(
     Exceptions& /*exceptions*/)
 {
     statementM = getCreateExceptionStatement();
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItemCreateStatementVisitor::visitFunctions(
     Functions& /*functions*/)
 {
     statementM = getCreateFunctionStatement();
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItemCreateStatementVisitor::visitGenerators(
     Generators& /*generators*/)
 {
     statementM = getCreateGeneratorStatement();
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItemCreateStatementVisitor::visitProcedures(
     Procedures& /*procedures*/)
 {
     statementM = getCreateProcedureStatement();
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItemCreateStatementVisitor::visitRoles(Roles& /*roles*/)
 {
     statementM = getCreateRoleStatement();
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItemCreateStatementVisitor::visitTables(Tables& /*tables*/)
 {
     statementM = getCreateTableStatement();
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItemCreateStatementVisitor::visitTriggers(Triggers& /*triggers*/)
 {
     statementM = getCreateTriggerStatement();
 }
-//-----------------------------------------------------------------------------
+
 void MetadataItemCreateStatementVisitor::visitViews(Views& /*views*/)
 {
     statementM = getCreateViewStatement();
 }
-//-----------------------------------------------------------------------------
+
 wxString MetadataItemCreateStatementVisitor::getStatement() const
 {
     return statementM;
 }
-//-----------------------------------------------------------------------------
+

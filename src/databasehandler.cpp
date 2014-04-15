@@ -36,7 +36,7 @@
 #include "metadata/server.h"
 #include "metadata/database.h"
 #include "metadata/MetadataItemURIHandlerHelper.h"
-//-----------------------------------------------------------------------------
+
 class DatabaseInfoHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
@@ -47,9 +47,9 @@ private:
     // singleton; registers itself on creation.
     static const DatabaseInfoHandler handlerInstance;
 };
-//-----------------------------------------------------------------------------
+
 const DatabaseInfoHandler DatabaseInfoHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 bool DatabaseInfoHandler::handleURI(URI& uri)
 {
     bool isEditSweep, isEditForcedWrites, isEditReserve, isEditReadOnly,
@@ -157,4 +157,4 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
     svc->Disconnect();
     return true;
 }
-//-----------------------------------------------------------------------------
+

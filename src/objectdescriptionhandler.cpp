@@ -29,14 +29,14 @@
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
-//-----------------------------------------------------------------------------
+
 #include "core/URIProcessor.h"
 #include "gui/GUIURIHandlerHelper.h"
 #include "gui/MultilineEnterDialog.h"
 #include "metadata/database.h"
 #include "metadata/metadataitem.h"
 #include "metadata/MetadataItemURIHandlerHelper.h"
-//-----------------------------------------------------------------------------
+
 class ObjectDescriptionHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
@@ -47,9 +47,9 @@ private:
     // singleton; registers itself on creation.
     static const ObjectDescriptionHandler handlerInstance;
 };
-//-----------------------------------------------------------------------------
+
 const ObjectDescriptionHandler ObjectDescriptionHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 bool ObjectDescriptionHandler::handleURI(URI& uri)
 {
     if (uri.action != wxT("edit_description"))
@@ -69,5 +69,5 @@ bool ObjectDescriptionHandler::handleURI(URI& uri)
     }
     return true;
 }
-//-----------------------------------------------------------------------------
+
 

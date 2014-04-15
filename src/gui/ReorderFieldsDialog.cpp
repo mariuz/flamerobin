@@ -48,7 +48,7 @@ namespace reorder_icons {
     #include "up.xpm"
     #include "down.xpm"
 };
-//-----------------------------------------------------------------------------
+
 ReorderFieldsDialog::ReorderFieldsDialog(wxWindow* parent, Table* table)
     : BaseDialog(parent, -1, wxEmptyString)
 {
@@ -61,7 +61,7 @@ ReorderFieldsDialog::ReorderFieldsDialog(wxWindow* parent, Table* table)
     tableM->attachObserver(this, true);
     button_ok->SetDefault();
 }
-//-----------------------------------------------------------------------------
+
 void ReorderFieldsDialog::createControls()
 {
     const wxString fields_choices[] = {
@@ -81,7 +81,7 @@ void ReorderFieldsDialog::createControls()
     button_ok = new wxButton(getControlsPanel(), wxID_OK, _("Reorder"));
     button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL, _("Cancel"));
 }
-//-----------------------------------------------------------------------------
+
 void ReorderFieldsDialog::layoutControls()
 {
     wxBoxSizer* sizerBtns1 = new wxBoxSizer(wxVERTICAL);
@@ -106,12 +106,12 @@ void ReorderFieldsDialog::layoutControls()
     // use method in base class to set everything up
     layoutSizers(sizerControls, sizerButtons, true);
 }
-//-----------------------------------------------------------------------------
+
 const wxString ReorderFieldsDialog::getName() const
 {
     return wxT("ReorderFieldsDialog");
 }
-//-----------------------------------------------------------------------------
+
 void ReorderFieldsDialog::moveSelected(int moveby)
 {
     int sel = list_box_fields->GetSelection();
@@ -131,14 +131,14 @@ void ReorderFieldsDialog::moveSelected(int moveby)
         updateButtons();
     }
 }
-//-----------------------------------------------------------------------------
+
 //! closes window if table is removed (dropped/disconnected,etc.)
 void ReorderFieldsDialog::subjectRemoved(Subject* subject)
 {
     if (subject == tableM)
         Close();
 }
-//-----------------------------------------------------------------------------
+
 void ReorderFieldsDialog::update()
 {
     wxArrayString colNames;
@@ -149,7 +149,7 @@ void ReorderFieldsDialog::update()
     list_box_fields->Set(colNames);
     updateButtons();
 }
-//-----------------------------------------------------------------------------
+
 void ReorderFieldsDialog::updateButtons()
 {
     int sel = list_box_fields->GetSelection();
@@ -159,7 +159,7 @@ void ReorderFieldsDialog::updateButtons()
     button_down->Enable(sel >= 0 && sel < itemcnt - 1);
     button_last->Enable(sel >= 0 && sel < itemcnt - 1);
 }
-//-----------------------------------------------------------------------------
+
 const wxString ReorderFieldsDialog::getStatementsToExecute()
 {
     wxString sql;
@@ -172,7 +172,7 @@ const wxString ReorderFieldsDialog::getStatementsToExecute()
     }
     return sql;
 }
-//-----------------------------------------------------------------------------
+
 //! event handling
 BEGIN_EVENT_TABLE(ReorderFieldsDialog, BaseDialog)
     EVT_LISTBOX(ReorderFieldsDialog::ID_list_box_fields, ReorderFieldsDialog::OnListBoxSelChange)
@@ -181,32 +181,32 @@ BEGIN_EVENT_TABLE(ReorderFieldsDialog, BaseDialog)
     EVT_BUTTON(ReorderFieldsDialog::ID_button_last, ReorderFieldsDialog::OnLastButtonClick)
     EVT_BUTTON(ReorderFieldsDialog::ID_button_up, ReorderFieldsDialog::OnUpButtonClick)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 void ReorderFieldsDialog::OnListBoxSelChange(wxCommandEvent& WXUNUSED(event))
 {
     updateButtons();
 }
-//-----------------------------------------------------------------------------
+
 void ReorderFieldsDialog::OnDownButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     moveSelected(1);
 }
-//-----------------------------------------------------------------------------
+
 void ReorderFieldsDialog::OnFirstButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     moveSelected(-(int)list_box_fields->GetCount());
 }
-//-----------------------------------------------------------------------------
+
 void ReorderFieldsDialog::OnLastButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     moveSelected(list_box_fields->GetCount());
 }
-//-----------------------------------------------------------------------------
+
 void ReorderFieldsDialog::OnUpButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     moveSelected(-1);
 }
-//-----------------------------------------------------------------------------
+
 class ReorderFieldsHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
@@ -217,9 +217,9 @@ private:
     // singleton; registers itself on creation.
     static const ReorderFieldsHandler handlerInstance;
 };
-//-----------------------------------------------------------------------------
+
 const ReorderFieldsHandler ReorderFieldsHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 bool ReorderFieldsHandler::handleURI(URI& uri)
 {
     if (uri.action != wxT("reorder_fields"))
@@ -243,4 +243,4 @@ bool ReorderFieldsHandler::handleURI(URI& uri)
     }
     return true;
 }
-//-----------------------------------------------------------------------------
+

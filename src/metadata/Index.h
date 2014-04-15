@@ -21,14 +21,14 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef FR_INDEX_H
 #define FR_INDEX_H
 
 #include <vector>
 
 #include "metadata/metadataitem.h"
-//-----------------------------------------------------------------------------
+
 class Index: public MetadataItem
 {
 public:
@@ -60,5 +60,5 @@ public:
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
-//-----------------------------------------------------------------------------
+
 #endif

@@ -21,14 +21,14 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef BASEFRAME_H
 #define BASEFRAME_H
 
 #include <wx/wx.h>
 
 #include <map>
-//-----------------------------------------------------------------------------
+
 // Base class for all the frames in FlameRobin. Implements storing and restoring
 // of settings in config and other commonalities.
 class BaseFrame: public wxFrame {
@@ -100,5 +100,5 @@ private:
     // event handling
     void OnClose(wxCloseEvent& event);
 };
-//-----------------------------------------------------------------------------
+
 #endif // BASEFRAME_H

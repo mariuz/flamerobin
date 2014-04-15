@@ -33,7 +33,7 @@
 #include <wx/dnd.h>
 
 #include "gui/controls/DndTextControls.h"
-//-----------------------------------------------------------------------------
+
 #if wxUSE_DRAG_AND_DROP
 class DnDFilename : public wxFileDropTarget
 {
@@ -49,7 +49,7 @@ public:
     }
 };
 #endif
-//-----------------------------------------------------------------------------
+
 FileTextControl::FileTextControl(wxWindow* parent, wxWindowID id,
         const wxString& value)
     : wxTextCtrl(parent, id, value)
@@ -62,4 +62,4 @@ FileTextControl::FileTextControl(wxWindow* parent, wxWindowID id,
     AutoCompleteFileNames();
 #endif
 }
-//-----------------------------------------------------------------------------
+

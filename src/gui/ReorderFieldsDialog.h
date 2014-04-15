@@ -23,14 +23,14 @@
 
 #ifndef FR_REORDERFIELDSDIALOG_H
 #define FR_REORDERFIELDSDIALOG_H
-//-----------------------------------------------------------------------------
+
 #include <wx/wx.h>
 
 #include "core/Observer.h"
 #include "gui/BaseDialog.h"
 
 class Table;
-//-----------------------------------------------------------------------------
+
 class ReorderFieldsDialog: public BaseDialog, public Observer {
 private:
     Table* tableM;
@@ -75,5 +75,5 @@ private:
 
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 #endif // FR_REORDERFIELDSDIALOG_H

@@ -20,7 +20,7 @@
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//-----------------------------------------------------------------------------
+
 
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
@@ -48,29 +48,29 @@
 #include "metadata/role.h"
 #include "metadata/trigger.h"
 
-//-----------------------------------------------------------------------------
+
 // class LoadDescriptionVisitor
 LoadDescriptionVisitor::LoadDescriptionVisitor()
     : MetadataItemVisitor(), availableM(false)
 {
 }
-//-----------------------------------------------------------------------------
+
 bool LoadDescriptionVisitor::descriptionAvailable() const
 {
     return availableM;
 }
-//-----------------------------------------------------------------------------
+
 wxString LoadDescriptionVisitor::getDescription() const
 {
     return descriptionM;
 }
-//-----------------------------------------------------------------------------
+
 void LoadDescriptionVisitor::loadDescription(MetadataItem* object,
     const std::string& statement)
 {
     loadDescription(object, 0, statement);
 }
-//-----------------------------------------------------------------------------
+
 void LoadDescriptionVisitor::loadDescription(MetadataItem* object,
     MetadataItem* parent, const std::string& statement)
 {
@@ -114,7 +114,7 @@ void LoadDescriptionVisitor::loadDescription(MetadataItem* object,
             throw;
     }
 }
-//-----------------------------------------------------------------------------
+
 void LoadDescriptionVisitor::visitColumn(Column& column)
 {
     // TODO: use Column::GetRelation() / Column::getProcedure() instead
@@ -122,42 +122,42 @@ void LoadDescriptionVisitor::visitColumn(Column& column)
         "select RDB$DESCRIPTION from RDB$RELATION_FIELDS "
         "where RDB$FIELD_NAME = ? and RDB$RELATION_NAME = ?");
 }
-//-----------------------------------------------------------------------------
+
 void LoadDescriptionVisitor::visitDomain(Domain& domain)
 {
     loadDescription(&domain,
         "select RDB$DESCRIPTION from RDB$FIELDS "
         "where RDB$FIELD_NAME = ?");
 }
-//-----------------------------------------------------------------------------
+
 void LoadDescriptionVisitor::visitException(Exception& exception)
 {
     loadDescription(&exception,
         "select RDB$DESCRIPTION from RDB$EXCEPTIONS "
         "where RDB$EXCEPTION_NAME = ?");
 }
-//-----------------------------------------------------------------------------
+
 void LoadDescriptionVisitor::visitFunction(Function& function)
 {
     loadDescription(&function,
         "select RDB$DESCRIPTION from RDB$FUNCTIONS "
         "where RDB$FUNCTION_NAME = ?");
 }
-//-----------------------------------------------------------------------------
+
 void LoadDescriptionVisitor::visitGenerator(Generator& generator)
 {
     loadDescription(&generator,
         "select RDB$DESCRIPTION from RDB$GENERATORS "
         "where RDB$GENERATOR_NAME = ?");
 }
-//-----------------------------------------------------------------------------
+
 void LoadDescriptionVisitor::visitIndex(Index& index)
 {
     loadDescription(&index,
         "select RDB$DESCRIPTION from RDB$INDICES "
         "where RDB$INDEX_NAME = ?");
 }
-//-----------------------------------------------------------------------------
+
 void LoadDescriptionVisitor::visitParameter(Parameter& parameter)
 {
     // TODO: use Parameter::getProcedure() instead
@@ -165,47 +165,47 @@ void LoadDescriptionVisitor::visitParameter(Parameter& parameter)
         "select RDB$DESCRIPTION from RDB$PROCEDURE_PARAMETERS "
         "where RDB$PARAMETER_NAME = ? and RDB$PROCEDURE_NAME = ?");
 }
-//-----------------------------------------------------------------------------
+
 void LoadDescriptionVisitor::visitProcedure(Procedure& procedure)
 {
     loadDescription(&procedure,
         "select RDB$DESCRIPTION from RDB$PROCEDURES "
         "where RDB$PROCEDURE_NAME = ?");
 }
-//-----------------------------------------------------------------------------
+
 void LoadDescriptionVisitor::visitRelation(Relation& relation)
 {
     loadDescription(&relation,
         "select RDB$DESCRIPTION from RDB$RELATIONS "
         "where RDB$RELATION_NAME = ?");
 }
-//-----------------------------------------------------------------------------
+
 void LoadDescriptionVisitor::visitRole(Role& role)
 {
     loadDescription(&role,
         "select RDB$DESCRIPTION from RDB$ROLES "
         "where RDB$ROLE_NAME = ?");
 }
-//-----------------------------------------------------------------------------
+
 void LoadDescriptionVisitor::visitTrigger(Trigger& trigger)
 {
     loadDescription(&trigger,
         "select RDB$DESCRIPTION from RDB$TRIGGERS "
         "where RDB$TRIGGER_NAME = ?");
 }
-//-----------------------------------------------------------------------------
+
 // class SaveDescriptionVisitor
 SaveDescriptionVisitor::SaveDescriptionVisitor(wxString description)
     : MetadataItemVisitor(), descriptionM(description)
 {
 }
-//-----------------------------------------------------------------------------
+
 void SaveDescriptionVisitor::saveDescription(MetadataItem* object,
     const std::string& statement)
 {
     saveDescription(object, 0, statement);
 }
-//-----------------------------------------------------------------------------
+
 void SaveDescriptionVisitor::saveDescription(MetadataItem* object,
     MetadataItem* parent, const std::string& statement)
 {
@@ -236,7 +236,7 @@ void SaveDescriptionVisitor::saveDescription(MetadataItem* object,
     st1->Execute();
     tr1->Commit();
 }
-//-----------------------------------------------------------------------------
+
 void SaveDescriptionVisitor::visitColumn(Column& column)
 {
     // TODO: use Column::GetRelation() / Column::getProcedure() instead
@@ -244,42 +244,42 @@ void SaveDescriptionVisitor::visitColumn(Column& column)
         "update RDB$RELATION_FIELDS set RDB$DESCRIPTION = ? "
         "where RDB$FIELD_NAME = ? and RDB$RELATION_NAME = ?");
 }
-//-----------------------------------------------------------------------------
+
 void SaveDescriptionVisitor::visitDomain(Domain& domain)
 {
     saveDescription(&domain,
         "update RDB$FIELDS set RDB$DESCRIPTION = ? "
         "where RDB$FIELD_NAME = ?");
 }
-//-----------------------------------------------------------------------------
+
 void SaveDescriptionVisitor::visitException(Exception& exception)
 {
     saveDescription(&exception,
         "update RDB$EXCEPTIONS set RDB$DESCRIPTION = ? "
         "where RDB$EXCEPTION_NAME = ?");
 }
-//-----------------------------------------------------------------------------
+
 void SaveDescriptionVisitor::visitFunction(Function& function)
 {
     saveDescription(&function,
         "update RDB$FUNCTIONS set rdb$description = ? "
         "where RDB$FUNCTION_NAME = ?");
 }
-//-----------------------------------------------------------------------------
+
 void SaveDescriptionVisitor::visitGenerator(Generator& generator)
 {
     saveDescription(&generator,
         "update RDB$GENERATORS set RDB$DESCRIPTION = ? "
         "where RDB$GENERATOR_NAME = ?");
 }
-//-----------------------------------------------------------------------------
+
 void SaveDescriptionVisitor::visitIndex(Index& index)
 {
     saveDescription(&index,
         "update RDB$INDICES set RDB$DESCRIPTION = ? "
         "where RDB$INDEX_NAME = ?");
 }
-//-----------------------------------------------------------------------------
+
 void SaveDescriptionVisitor::visitParameter(Parameter& parameter)
 {
     // TODO: use Parameter::getProcedure() instead
@@ -287,32 +287,32 @@ void SaveDescriptionVisitor::visitParameter(Parameter& parameter)
         "update RDB$PROCEDURE_PARAMETERS set RDB$DESCRIPTION = ? "
         "where RDB$PARAMETER_NAME = ? and RDB$PROCEDURE_NAME = ?");
 }
-//-----------------------------------------------------------------------------
+
 void SaveDescriptionVisitor::visitProcedure(Procedure& procedure)
 {
     saveDescription(&procedure,
         "update RDB$PROCEDURES set RDB$DESCRIPTION = ? "
         "where RDB$PROCEDURE_NAME = ?");
 }
-//-----------------------------------------------------------------------------
+
 void SaveDescriptionVisitor::visitRelation(Relation& relation)
 {
     saveDescription(&relation,
         "update RDB$RELATIONS set RDB$DESCRIPTION = ? "
         "where RDB$RELATION_NAME = ?");
 }
-//-----------------------------------------------------------------------------
+
 void SaveDescriptionVisitor::visitRole(Role& role)
 {
     saveDescription(&role,
         "update RDB$ROLES set RDB$DESCRIPTION = ? "
         "where RDB$ROLE_NAME = ?");
 }
-//-----------------------------------------------------------------------------
+
 void SaveDescriptionVisitor::visitTrigger(Trigger& trigger)
 {
     saveDescription(&trigger,
         "update RDB$TRIGGERS set RDB$DESCRIPTION = ? "
         "where RDB$TRIGGER_NAME = ?");
 }
-//-----------------------------------------------------------------------------
+

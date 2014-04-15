@@ -45,12 +45,12 @@
 #include "metadata/table.h"
 #include "metadata/view.h"
 #include "sql/StatementBuilder.h"
-//-----------------------------------------------------------------------------
+
 Relation::Relation(NodeType type, DatabasePtr database, const wxString& name)
     : MetadataItem(type, database.get(), name)
 {
 }
-//-----------------------------------------------------------------------------
+
 ColumnPtrs::iterator Relation::begin()
 {
     // please - don't load here
@@ -59,23 +59,23 @@ ColumnPtrs::iterator Relation::begin()
     // loading them
     return columnsM.begin();
 }
-//-----------------------------------------------------------------------------
+
 ColumnPtrs::iterator Relation::end()
 {
     // please see comment for begin()
     return columnsM.end();
 }
-//-----------------------------------------------------------------------------
+
 ColumnPtrs::const_iterator Relation::begin() const
 {
     return columnsM.begin();
 }
-//-----------------------------------------------------------------------------
+
 ColumnPtrs::const_iterator Relation::end() const
 {
     return columnsM.end();
 }
-//-----------------------------------------------------------------------------
+
 ColumnPtr Relation::findColumn(const wxString& name) const
 {
     for (ColumnPtrs::const_iterator it = columnsM.begin();
@@ -86,12 +86,12 @@ ColumnPtr Relation::findColumn(const wxString& name) const
     }
     return ColumnPtr();
 }
-//-----------------------------------------------------------------------------
+
 size_t Relation::getColumnCount() const
 {
     return columnsM.size();
 }
-//-----------------------------------------------------------------------------
+
 void Relation::loadProperties()
 {
     setPropertiesLoaded(false);
@@ -145,27 +145,27 @@ void Relation::loadProperties()
 
     setPropertiesLoaded(true);
 }
-//-----------------------------------------------------------------------------
+
 void Relation::setExternalFilePath(const wxString& /*value*/)
 {
 }
-//-----------------------------------------------------------------------------
+
 void Relation::setSource(const wxString& /*value*/)
 {
 }
-//-----------------------------------------------------------------------------
+
 wxString Relation::getOwner()
 {
     ensurePropertiesLoaded();
     return ownerM;
 }
-//-----------------------------------------------------------------------------
+
 int Relation::getRelationType()
 {
     ensurePropertiesLoaded();
     return relationTypeM;
 }
-//-----------------------------------------------------------------------------
+
 void Relation::loadChildren()
 {
     // in case an exception is thrown this should be repeated
@@ -245,7 +245,7 @@ void Relation::loadChildren()
         notifyObservers();
     }
 }
-//-----------------------------------------------------------------------------
+
 //! holds all views + self (even if it's a table)
 void Relation::getDependentViews(std::vector<Relation *>& views,
     const wxString& forColumn)
@@ -266,7 +266,7 @@ void Relation::getDependentViews(std::vector<Relation *>& views,
     // add self
     views.push_back(this);
 }
-//-----------------------------------------------------------------------------
+
 void Relation::getDependentChecks(std::vector<CheckConstraint>& checks)
 {
     DatabasePtr db = getDatabase();
@@ -325,7 +325,7 @@ void Relation::getDependentChecks(std::vector<CheckConstraint>& checks)
         checks.push_back(c);
     }
 }
-//-----------------------------------------------------------------------------
+
 // STEPS:
 // * drop dependent check constraints (checks reference this view)
 //      these checks can include other objects that might be dropped here
@@ -561,7 +561,7 @@ wxString Relation::getRebuildSql(const wxString& forColumn)
 
     return sql;
 }
-//-----------------------------------------------------------------------------
+
 std::vector<Privilege>* Relation::getPrivileges()
 {
     // load privileges from database and return the pointer to collection
@@ -614,7 +614,7 @@ std::vector<Privilege>* Relation::getPrivileges()
     }
     return &privilegesM;
 }
-//-----------------------------------------------------------------------------
+
 //! load list of triggers for relation
 //! link them to triggers in database's collection
 void Relation::getTriggers(std::vector<Trigger *>& list,
@@ -642,7 +642,7 @@ void Relation::getTriggers(std::vector<Trigger *>& list,
             list.push_back(t);
     }
 }
-//-----------------------------------------------------------------------------
+
 bool Relation::getChildren(std::vector<MetadataItem*>& temp)
 {
     if (columnsM.empty())
@@ -651,16 +651,16 @@ bool Relation::getChildren(std::vector<MetadataItem*>& temp)
         boost::mem_fn(&ColumnPtr::get));
     return !columnsM.empty();
 }
-//-----------------------------------------------------------------------------
+
 void Relation::lockChildren()
 {
     std::for_each(columnsM.begin(), columnsM.end(),
         boost::mem_fn(&Column::lockSubject));
 }
-//-----------------------------------------------------------------------------
+
 void Relation::unlockChildren()
 {
     std::for_each(columnsM.begin(), columnsM.end(),
         boost::mem_fn(&Column::unlockSubject));
 }
-//-----------------------------------------------------------------------------
+

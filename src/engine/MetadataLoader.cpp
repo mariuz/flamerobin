@@ -32,13 +32,13 @@
 
 #include "engine/MetadataLoader.h"
 #include "metadata/database.h"
-//-----------------------------------------------------------------------------
+
 MetadataLoader::MetadataLoader(Database& database, unsigned maxStatements)
     : databaseM(database.getIBPPDatabase()), transactionM(),
         transactionLevelM(0), statementsM(), maxStatementsM(maxStatements)
 {
 }
-//-----------------------------------------------------------------------------
+
 void MetadataLoader::transactionStart()
 {
     ++transactionLevelM;
@@ -63,7 +63,7 @@ void MetadataLoader::transactionStart()
     if (!transactionM->Started())
         transactionM->Start();
 }
-//-----------------------------------------------------------------------------
+
 void MetadataLoader::transactionCommit()
 {
     if (--transactionLevelM == 0 && transactionM != 0)
@@ -73,19 +73,19 @@ void MetadataLoader::transactionCommit()
         transactionM = 0;
     }
 }
-//-----------------------------------------------------------------------------
+
 bool MetadataLoader::transactionStarted()
 {
     return (transactionM != 0 && transactionM->Started());
 }
-//-----------------------------------------------------------------------------
+
 IBPP::Statement MetadataLoader::createStatement(const std::string& sql)
 {
     wxASSERT(transactionStarted());
 
     return IBPP::StatementFactory(databaseM, transactionM, sql);
 }
-//-----------------------------------------------------------------------------
+
 MetadataLoader::IBPPStatementListIterator MetadataLoader::findStatement(
     const std::string& sql)
 {
@@ -97,7 +97,7 @@ MetadataLoader::IBPPStatementListIterator MetadataLoader::findStatement(
     }
     return statementsM.end();
 }
-//-----------------------------------------------------------------------------
+
 IBPP::Statement& MetadataLoader::getStatement(const std::string& sql)
 {
     wxASSERT(transactionStarted());
@@ -117,7 +117,7 @@ IBPP::Statement& MetadataLoader::getStatement(const std::string& sql)
     limitListSize();
     return statementsM.front();
 }
-//-----------------------------------------------------------------------------
+
 void MetadataLoader::limitListSize()
 {
     if (maxStatementsM)
@@ -126,7 +126,7 @@ void MetadataLoader::limitListSize()
             statementsM.remove(statementsM.back());
     }
 }
-//-----------------------------------------------------------------------------
+
 void MetadataLoader::releaseStatements()
 {
     statementsM.clear();
@@ -136,7 +136,7 @@ void MetadataLoader::releaseStatements()
         transactionLevelM = 0;
     }
 }
-//-----------------------------------------------------------------------------
+
 void MetadataLoader::setMaximumConcurrentStatements(unsigned count)
 {
     if (maxStatementsM != count)
@@ -145,24 +145,24 @@ void MetadataLoader::setMaximumConcurrentStatements(unsigned count)
         limitListSize();
     }
 }
-//-----------------------------------------------------------------------------
+
 IBPP::Blob MetadataLoader::createBlob()
 {
     wxASSERT(transactionStarted());
 
     return IBPP::BlobFactory(databaseM, transactionM);
 }
-//-----------------------------------------------------------------------------
+
 MetadataLoaderTransaction::MetadataLoaderTransaction(MetadataLoader* loader)
     : loaderM(loader)
 {
     if (loaderM)
         loaderM->transactionStart();
 }
-//-----------------------------------------------------------------------------
+
 MetadataLoaderTransaction::~MetadataLoaderTransaction()
 {
     if (loaderM)
         loaderM->transactionCommit();
 }
-//-----------------------------------------------------------------------------
+

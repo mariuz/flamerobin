@@ -27,7 +27,7 @@
 #include <list>
 #include <map>
 
-//-----------------------------------------------------------------------------
+
 class URI
 {
 public:
@@ -41,9 +41,9 @@ public:
     void addParam(const wxString& pair);
     wxString getParam(const wxString& name) const;
 };
-//-----------------------------------------------------------------------------
+
 class URIHandler;
-//-----------------------------------------------------------------------------
+
 class URIProcessor
 {
 public:
@@ -68,9 +68,9 @@ private:
     URIProcessor(const URIProcessor&) {};
     URIProcessor operator==(const URIProcessor&);
 };
-//-----------------------------------------------------------------------------
+
 URIProcessor& getURIProcessor();
-//-----------------------------------------------------------------------------
+
 //! pure virtual class, specific handlers should be derived from it
 class URIHandler
 {
@@ -100,6 +100,6 @@ private:
     URIProcessor* processorM;
     void setProcessor(URIProcessor* const processor);
 };
-//-----------------------------------------------------------------------------
+
 
 #endif // FR_URIPROCESSOR_H

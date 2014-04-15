@@ -42,12 +42,12 @@
 #include "metadata/function.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "sql/StatementBuilder.h"
-//-----------------------------------------------------------------------------
+
 Function::Function(DatabasePtr database, const wxString& name)
     : MetadataItem(ntFunction, database.get(), name)
 {
 }
-//-----------------------------------------------------------------------------
+
 wxString Function::getCreateSql()
 {
     ensurePropertiesLoaded();
@@ -62,12 +62,12 @@ wxString Function::getCreateSql()
         << StatementBuilder::NewLine;
     return sb;
 }
-//-----------------------------------------------------------------------------
+
 const wxString Function::getTypeName() const
 {
     return wxT("FUNCTION");
 }
-//-----------------------------------------------------------------------------
+
 wxString Function::getDropSqlStatement() const
 {
     StatementBuilder sb;
@@ -75,25 +75,25 @@ wxString Function::getDropSqlStatement() const
         << getQuotedName() << ';';
     return sb;
 }
-//-----------------------------------------------------------------------------
+
 wxString Function::getDefinition()
 {
     ensurePropertiesLoaded();
     return definitionM;
 }
-//-----------------------------------------------------------------------------
+
 wxString Function::getLibraryName()
 {
     ensurePropertiesLoaded();
     return libraryNameM;
 }
-//-----------------------------------------------------------------------------
+
 wxString Function::getEntryPoint()
 {
     ensurePropertiesLoaded();
     return entryPointM;
 }
-//-----------------------------------------------------------------------------
+
 void Function::loadProperties()
 {
     setPropertiesLoaded(false);
@@ -202,23 +202,23 @@ void Function::loadProperties()
 
     setPropertiesLoaded(true);
 }
-//-----------------------------------------------------------------------------
+
 void Function::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitFunction(*this);
 }
-//-----------------------------------------------------------------------------
+
 // Functions collection
 Functions::Functions(DatabasePtr database)
     : MetadataCollection<Function>(ntFunctions, database, _("Functions"))
 {
 }
-//-----------------------------------------------------------------------------
+
 void Functions::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitFunctions(*this);
 }
-//-----------------------------------------------------------------------------
+
 void Functions::load(ProgressIndicator* progressIndicator)
 {
     wxString stmt = wxT("select rdb$function_name from rdb$functions")
@@ -226,14 +226,14 @@ void Functions::load(ProgressIndicator* progressIndicator)
         wxT(" order by 1");
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
-//-----------------------------------------------------------------------------
+
 void Functions::loadChildren()
 {
     load(0);
 }
-//-----------------------------------------------------------------------------
+
 const wxString Functions::getTypeName() const
 {
     return wxT("FUNCTION_COLLECTION");
 }
-//-----------------------------------------------------------------------------
+

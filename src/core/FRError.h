@@ -20,7 +20,7 @@
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//-----------------------------------------------------------------------------
+
 #ifndef FR_FRERROR_H
 #define FR_FRERROR_H
 
@@ -30,7 +30,7 @@
 
 #include <string>
 #include <exception>
-//-----------------------------------------------------------------------------
+
 class FRError: public std::exception
 {
 private:
@@ -42,7 +42,7 @@ public:
 
     virtual ~FRError() throw();
 };
-//-----------------------------------------------------------------------------
+
 //! A silent exception.
 class FRAbort: public FRError
 {
@@ -51,5 +51,5 @@ public:
     
     virtual ~FRAbort() throw();
 };
-//-----------------------------------------------------------------------------
+
 #endif //FR_FRERROR_H

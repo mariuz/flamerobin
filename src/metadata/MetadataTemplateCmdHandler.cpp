@@ -50,7 +50,7 @@
 #include "metadata/User.h"
 #include "metadata/view.h"
 
-//-----------------------------------------------------------------------------
+
 class MetadataTemplateCmdHandler: public TemplateCmdHandler
 {
 private:
@@ -61,9 +61,9 @@ public:
         const wxString& cmdName, const TemplateCmdParams& cmdParams,
         ProcessableObject* object, wxString& processedText);
 };
-//-----------------------------------------------------------------------------
+
 const MetadataTemplateCmdHandler MetadataTemplateCmdHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
     const wxString& cmdName, const TemplateCmdParams& cmdParams,
     ProcessableObject* object, wxString& processedText)
@@ -840,4 +840,4 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             processedText << u->getGroupId();
     }
 }
-//-----------------------------------------------------------------------------
+

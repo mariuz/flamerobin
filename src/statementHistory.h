@@ -26,9 +26,9 @@
 
 #include <wx/wx.h>
 #include <vector>
-//-----------------------------------------------------------------------------
+
 class Database;
-//-----------------------------------------------------------------------------
+
 class StatementHistory
 {
 public:
@@ -53,5 +53,5 @@ public:
     void deleteItems(const std::vector<Position>& items);
     Position size();
 };
-//-----------------------------------------------------------------------------
+
 #endif

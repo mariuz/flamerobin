@@ -32,13 +32,13 @@
 
 #include "core/StringUtils.h"
 #include "gui/ConfdefTemplateProcessor.h"
-//-----------------------------------------------------------------------------
+
 ConfdefTemplateProcessor::ConfdefTemplateProcessor(ProcessableObject* object,
     wxWindow*window)
     : TemplateProcessor(object, window)
 {
 }
-//-----------------------------------------------------------------------------
+
 void ConfdefTemplateProcessor::processCommand(const wxString& cmdName,
     const TemplateCmdParams& cmdParams, ProcessableObject* object,
     wxString& processedText)
@@ -46,10 +46,10 @@ void ConfdefTemplateProcessor::processCommand(const wxString& cmdName,
     TemplateProcessor::processCommand(cmdName, cmdParams, object,
         processedText);
 }
-//-----------------------------------------------------------------------------
+
 wxString ConfdefTemplateProcessor::escapeChars(const wxString& input,
     bool /*processNewlines*/)
 {
     return escapeXmlChars(input);
 }
-//-----------------------------------------------------------------------------
+

@@ -31,9 +31,9 @@
 
 class MetadataItem;
 class PrivilegeItem;
-//-----------------------------------------------------------------------------
+
 typedef std::vector<PrivilegeItem> PrivilegeItems;
-//-----------------------------------------------------------------------------
+
 class PrivilegeItem: public ProcessableObject
 {
 public:
@@ -43,7 +43,7 @@ public:
     PrivilegeItem(const wxString& grantorName, bool withGrantOption,
         const wxString& fieldName);
 };
-//-----------------------------------------------------------------------------
+
 class Privilege: public ProcessableObject
 {
 private:
@@ -66,5 +66,5 @@ public:
     wxString getGrantee() const;
     void getPrivilegeItems(const wxString& type, PrivilegeItems& list) const;
 };
-//-----------------------------------------------------------------------------
+
 #endif

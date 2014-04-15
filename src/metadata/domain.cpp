@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -40,7 +40,7 @@
 #include "metadata/domain.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "sql/SqlTokenizer.h"
-//-----------------------------------------------------------------------------
+
 /*static*/
 std::string Domain::getLoadStatement(bool list)
 {
@@ -73,13 +73,13 @@ std::string Domain::getLoadStatement(bool list)
         stmt += "= ?";
     return stmt;
 }
-//-----------------------------------------------------------------------------
+
 Domain::Domain(DatabasePtr database, const wxString& name)
     : MetadataItem((hasSystemPrefix(name) ? ntSysDomain : ntDomain),
         database.get(), name)
 {
 }
-//-----------------------------------------------------------------------------
+
 void Domain::loadProperties()
 {
     setPropertiesLoaded(false);
@@ -97,7 +97,7 @@ void Domain::loadProperties()
 
     loadProperties(st1, converter);
 }
-//-----------------------------------------------------------------------------
+
 /*static*/
 wxString Domain::trimDefaultValue(const wxString& value)
 {
@@ -113,7 +113,7 @@ wxString Domain::trimDefaultValue(const wxString& value)
     defValue.Trim(false);
     return defValue;
 }
-//-----------------------------------------------------------------------------
+
 void Domain::loadProperties(IBPP::Statement& statement, wxMBConv* converter)
 {
     setPropertiesLoaded(false);
@@ -180,13 +180,13 @@ void Domain::loadProperties(IBPP::Statement& statement, wxMBConv* converter)
 
     setPropertiesLoaded(true);
 }
-//-----------------------------------------------------------------------------
+
 bool Domain::isString()
 {
     ensurePropertiesLoaded();
     return (datatypeM == 14 || datatypeM == 10 || datatypeM == 37);
 }
-//-----------------------------------------------------------------------------
+
 bool Domain::isSystem() const
 {
     wxString prefix(getName_().substr(0, 4));
@@ -197,14 +197,14 @@ bool Domain::isSystem() const
     long l;
     return getName_().Mid(4).ToLong(&l);    // numeric = system
 }
-//-----------------------------------------------------------------------------
+
 //! returns column's datatype as human readable wxString.
 wxString Domain::getDatatypeAsString()
 {
     ensurePropertiesLoaded();
     return dataTypeToString(datatypeM, scaleM, precisionM, subtypeM, lengthM);
 }
-//-----------------------------------------------------------------------------
+
 /* static*/
 wxString Domain::dataTypeToString(short datatype, short scale, short precision,
     short subtype, short length)
@@ -281,19 +281,19 @@ wxString Domain::dataTypeToString(short datatype, short scale, short precision,
     retval << wxT("(") << length << wxT(")");
     return retval;
 }
-//-----------------------------------------------------------------------------
+
 wxString Domain::getCollation()
 {
     ensurePropertiesLoaded();
     return collationM;
 }
-//-----------------------------------------------------------------------------
+
 wxString Domain::getCheckConstraint()
 {
     ensurePropertiesLoaded();
     return checkM;
 }
-//-----------------------------------------------------------------------------
+
 bool Domain::getDefault(wxString& value)
 {
     ensurePropertiesLoaded();
@@ -305,13 +305,13 @@ bool Domain::getDefault(wxString& value)
     value = wxEmptyString;
     return false;
 }
-//-----------------------------------------------------------------------------
+
 bool Domain::isNullable()
 {
     ensurePropertiesLoaded();
     return nullableM;
 }
-//-----------------------------------------------------------------------------
+
 void Domain::getDatatypeParts(wxString& type, wxString& size, wxString& scale)
 {
     size = scale = wxEmptyString;
@@ -338,13 +338,13 @@ void Domain::getDatatypeParts(wxString& type, wxString& size, wxString& scale)
             type = SqlTokenizer::getKeyword(kwBLOB);
     }
 }
-//-----------------------------------------------------------------------------
+
 wxString Domain::getCharset()
 {
     ensurePropertiesLoaded();
     return charsetM;
 }
-//-----------------------------------------------------------------------------
+
 wxString Domain::getAlterSqlTemplate() const
 {
     return wxT("ALTER DOMAIN ") + getQuotedName() + wxT("\n")
@@ -355,24 +355,24 @@ wxString Domain::getAlterSqlTemplate() const
         wxT("  | new_name\n")
         wxT("  | TYPE new_datatype;\n");
 }
-//-----------------------------------------------------------------------------
+
 const wxString Domain::getTypeName() const
 {
     return wxT("DOMAIN");
 }
-//-----------------------------------------------------------------------------
+
 void Domain::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitDomain(*this);
 }
-//-----------------------------------------------------------------------------
+
 // DomainCollectionBase
 DomainCollectionBase::DomainCollectionBase(NodeType type,
         DatabasePtr database, const wxString& name)
     : MetadataCollection<Domain>(type, database, name)
 {
 }
-//-----------------------------------------------------------------------------
+
 DomainPtr DomainCollectionBase::getDomain(const wxString& name)
 {
     DomainPtr domain = findByName(name);
@@ -397,18 +397,18 @@ DomainPtr DomainCollectionBase::getDomain(const wxString& name)
     }
     return domain;
 }
-//-----------------------------------------------------------------------------
+
 // Domains collection
 Domains::Domains(DatabasePtr database)
     : DomainCollectionBase(ntDomains, database, _("Domains"))
 {
 }
-//-----------------------------------------------------------------------------
+
 void Domains::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitDomains(*this);
 }
-//-----------------------------------------------------------------------------
+
 void Domains::load(ProgressIndicator* progressIndicator)
 {
     DatabasePtr db = getDatabase();
@@ -444,30 +444,30 @@ void Domains::load(ProgressIndicator* progressIndicator)
 
     setItems(domains);
 }
-//-----------------------------------------------------------------------------
+
 void Domains::loadChildren()
 {
     load(0);
 }
-//-----------------------------------------------------------------------------
+
 const wxString Domains::getTypeName() const
 {
     return wxT("DOMAIN_COLLECTION");
 }
-//-----------------------------------------------------------------------------
+
 // System domains collection
 SysDomains::SysDomains(DatabasePtr database)
     : DomainCollectionBase(ntSysDomains, database, _("System domains"))
 {
 }
-//-----------------------------------------------------------------------------
+
 void SysDomains::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitSysDomains(*this);
 }
-//-----------------------------------------------------------------------------
+
 const wxString SysDomains::getTypeName() const
 {
     return wxT("SYSDOMAIN_COLLECTION");
 }
-//-----------------------------------------------------------------------------
+

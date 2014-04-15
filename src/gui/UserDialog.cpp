@@ -45,7 +45,7 @@
 #include "metadata/MetadataItemURIHandlerHelper.h"
 #include "metadata/server.h"
 #include "core/URIProcessor.h"
-//-----------------------------------------------------------------------------
+
 UserDialog::UserDialog(wxWindow* parent, const wxString& title, bool isNewUser)
     : BaseDialog(parent, wxID_ANY, title), isNewUserM(isNewUser)
 {
@@ -54,7 +54,7 @@ UserDialog::UserDialog(wxWindow* parent, const wxString& title, bool isNewUser)
     layoutControls();
     updateButtons();
 }
-//-----------------------------------------------------------------------------
+
 void UserDialog::createControls()
 {
     labelUserNameM = new wxStaticText(getControlsPanel(), wxID_ANY,
@@ -92,12 +92,12 @@ void UserDialog::createControls()
         (isNewUserM) ? _("Create") : _("Save"));
     buttonCancelM = new wxButton(getControlsPanel(), wxID_CANCEL, _("Cancel"));
 }
-//-----------------------------------------------------------------------------
+
 const wxString UserDialog::getName() const
 {
     return wxT("UserDialog");
 }
-//-----------------------------------------------------------------------------
+
 void UserDialog::layoutControls()
 {
     int dx = styleguide().getUnrelatedControlMargin(wxHORIZONTAL)
@@ -152,13 +152,13 @@ void UserDialog::layoutControls()
     // use method in base class to set everything up
     layoutSizers(controlsSizer, buttonSizer);
 }
-//-----------------------------------------------------------------------------
+
 void UserDialog::setControlsProperties()
 {
     textUserNameM->SetEditable(isNewUserM);
     buttonOkM->SetDefault();
 }
-//-----------------------------------------------------------------------------
+
 void UserDialog::setUser(UserPtr user)
 {
     wxASSERT(user);
@@ -178,7 +178,7 @@ void UserDialog::setUser(UserPtr user)
     updateButtons();
     updateColors();
 }
-//-----------------------------------------------------------------------------
+
 void UserDialog::updateButtons()
 {
     wxString passwd = textPasswordM->GetValue();
@@ -186,7 +186,7 @@ void UserDialog::updateButtons()
     buttonOkM->Enable(!textUserNameM->GetValue().IsEmpty()
         && !passwd.IsEmpty() && passwd == confirm);
 }
-//-----------------------------------------------------------------------------
+
 //! event handling
 BEGIN_EVENT_TABLE(UserDialog, BaseDialog)
     EVT_TEXT(UserDialog::ID_textctrl_username, UserDialog::OnSettingsChange)
@@ -194,14 +194,14 @@ BEGIN_EVENT_TABLE(UserDialog, BaseDialog)
     EVT_TEXT(UserDialog::ID_textctrl_confirmpw, UserDialog::OnSettingsChange)
     EVT_BUTTON(wxID_SAVE, UserDialog::OnOkButtonClick)
 END_EVENT_TABLE()
-//-----------------------------------------------------------------------------
+
 void UserDialog::OnSettingsChange(wxCommandEvent& WXUNUSED(event))
 {
     // will allready be called in constructor!
     if (IsShown())
         updateButtons();
 }
-//-----------------------------------------------------------------------------
+
 void UserDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     SubjectLocker locker(userM.get());
@@ -214,7 +214,7 @@ void UserDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
     userM->setUserId(spinctrlUserIdM->GetValue());
     EndModal(wxID_OK);
 }
-//-----------------------------------------------------------------------------
+
 class UserPropertiesHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
@@ -225,9 +225,9 @@ private:
     // singleton; registers itself on creation.
     static const UserPropertiesHandler handlerInstance;
 };
-//-----------------------------------------------------------------------------
+
 const UserPropertiesHandler UserPropertiesHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 bool UserPropertiesHandler::handleURI(URI& uri)
 {
     bool addUser = uri.action == wxT("add_user");
@@ -294,7 +294,7 @@ bool UserPropertiesHandler::handleURI(URI& uri)
     }
     return true;
 }
-//-----------------------------------------------------------------------------
+
 class DropUserHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
@@ -305,9 +305,9 @@ private:
     // singleton; registers itself on creation.
     static const DropUserHandler handlerInstance;
 };
-//-----------------------------------------------------------------------------
+
 const DropUserHandler DropUserHandler::handlerInstance;
-//-----------------------------------------------------------------------------
+
 bool DropUserHandler::handleURI(URI& uri)
 {
     if (uri.action != wxT("drop_user"))
@@ -343,4 +343,4 @@ bool DropUserHandler::handleURI(URI& uri)
     }
     return true;
 }
-//-----------------------------------------------------------------------------
+

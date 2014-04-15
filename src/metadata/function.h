@@ -21,14 +21,14 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef FR_FUNCTION_H
 #define FR_FUNCTION_H
 
 #include "metadata/collection.h"
 
 class ProgressIndicator;
-//-----------------------------------------------------------------------------
+
 class Function: public MetadataItem
 {
 private:
@@ -45,7 +45,7 @@ public:
     wxString getEntryPoint();
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
-//-----------------------------------------------------------------------------
+
 class Functions: public MetadataCollection<Function>
 {
 protected:
@@ -57,5 +57,5 @@ public:
     void load(ProgressIndicator* progressIndicator);
     virtual const wxString getTypeName() const;
 };
-//-----------------------------------------------------------------------------
+
 #endif

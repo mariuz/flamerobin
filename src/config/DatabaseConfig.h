@@ -30,7 +30,7 @@
 
 #include "config/Config.h"
 #include "metadata/MetadataClasses.h"
-//-----------------------------------------------------------------------------
+
 class DatabaseConfig: public Config
 {
 private:
@@ -51,5 +51,5 @@ public:
     virtual bool getValue(const wxString& key, wxString& value);
     virtual bool setValue(const wxString& key, const wxString& value);
 };
-//-----------------------------------------------------------------------------
+
 #endif

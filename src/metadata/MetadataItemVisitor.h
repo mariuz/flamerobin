@@ -20,7 +20,7 @@
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//-----------------------------------------------------------------------------
+
 
 #ifndef FR_METADATAITEMVISITOR_H
 #define FR_METADATAITEMVISITOR_H
@@ -29,7 +29,7 @@
 
 #include "core/Visitor.h"
 #include "metadata/MetadataClasses.h"
-//-----------------------------------------------------------------------------
+
 class MetadataItemVisitor: public Visitor
 {
 public:
@@ -69,5 +69,5 @@ public:
     virtual void visitViews(Views& views);
     virtual void visitMetadataItem(MetadataItem& metadataItem);
 };
-//-----------------------------------------------------------------------------
+
 #endif //FR_METADATAITEMVISITOR_H

@@ -23,12 +23,12 @@
 
 #ifndef FR_SUBJECT_H
 #define FR_SUBJECT_H
-//-----------------------------------------------------------------------------
+
 #include <list>
 #include <vector>
 
 class Observer;
-//-----------------------------------------------------------------------------
+
 class Subject
 {
 private:
@@ -56,7 +56,7 @@ public:
     void detachObserver(Observer* observer);
     void notifyObservers();
 };
-//-----------------------------------------------------------------------------
+
 class SubjectLocker
 {
 private:
@@ -68,5 +68,5 @@ public:
     SubjectLocker(Subject* subject);
     ~SubjectLocker();
 };
-//-----------------------------------------------------------------------------
+
 #endif

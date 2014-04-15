@@ -41,30 +41,30 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/root.h"
 #include "metadata/server.h"
-//-----------------------------------------------------------------------------
+
 Server::Server()
     : MetadataItem(ntServer)
 {
     setChildrenLoaded(true);
 }
-//-----------------------------------------------------------------------------
+
 DatabasePtrs Server::getDatabases() const
 {
     return databasesM;
 }
-//-----------------------------------------------------------------------------
+
 void Server::lockChildren()
 {
     std::for_each(databasesM.begin(), databasesM.end(),
         boost::mem_fn(&Database::lockSubject));
 }
-//-----------------------------------------------------------------------------
+
 void Server::unlockChildren()
 {
     std::for_each(databasesM.begin(), databasesM.end(),
         boost::mem_fn(&Database::unlockSubject));
 }
-//-----------------------------------------------------------------------------
+
 bool Server::getChildren(std::vector<MetadataItem*>& temp)
 {
     if (databasesM.empty())
@@ -73,14 +73,14 @@ bool Server::getChildren(std::vector<MetadataItem*>& temp)
         std::back_inserter(temp), boost::mem_fn(&DatabasePtr::get));
     return !databasesM.empty();
 }
-//-----------------------------------------------------------------------------
+
 DatabasePtr Server::addDatabase()
 {
     DatabasePtr database(new Database());
     addDatabase(database);
     return database;
 }
-//-----------------------------------------------------------------------------
+
 void Server::addDatabase(DatabasePtr database)
 {
     if (database)
@@ -90,7 +90,7 @@ void Server::addDatabase(DatabasePtr database)
         notifyObservers();
     }
 }
-//-----------------------------------------------------------------------------
+
 void Server::removeDatabase(DatabasePtr database)
 {
     DatabasePtrs::iterator it = std::remove(databasesM.begin(),
@@ -101,17 +101,17 @@ void Server::removeDatabase(DatabasePtr database)
         notifyObservers();
     }
 }
-//-----------------------------------------------------------------------------
+
 wxString Server::getHostname() const
 {
     return hostnameM;
 }
-//-----------------------------------------------------------------------------
+
 wxString Server::getPort() const
 {
     return portM;
 }
-//-----------------------------------------------------------------------------
+
 bool Server::hasConnectedDatabase() const
 {
     DatabasePtrs::const_iterator it = std::find_if(
@@ -119,27 +119,27 @@ bool Server::hasConnectedDatabase() const
         boost::mem_fn(&Database::isConnected));
     return it != databasesM.end();
 }
-//-----------------------------------------------------------------------------
+
 void Server::setHostname(wxString hostname)
 {
     hostnameM = hostname;
 }
-//-----------------------------------------------------------------------------
+
 void Server::setPort(wxString port)
 {
     portM = port;
 }
-//-----------------------------------------------------------------------------
+
 const wxString Server::getTypeName() const
 {
     return wxT("SERVER");
 }
-//-----------------------------------------------------------------------------
+
 void Server::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitServer(*this);
 }
-//-----------------------------------------------------------------------------
+
 /* static */
 wxString Server::makeConnectionString(const wxString& hostname,
     const wxString& port)
@@ -149,12 +149,12 @@ wxString Server::makeConnectionString(const wxString& hostname,
     else
         return hostname;
 }
-//-----------------------------------------------------------------------------
+
 wxString Server::getConnectionString() const
 {
     return makeConnectionString(getHostname(), getPort());
 }
-//-----------------------------------------------------------------------------
+
 const wxString Server::getItemPath() const
 {
     // Since database Ids are already unique, let's shorten the item paths
@@ -162,7 +162,7 @@ const wxString Server::getItemPath() const
     // to disappear in the future.
     return wxT("");
 }
-//-----------------------------------------------------------------------------
+
 struct SortUsers
 {
     bool operator() (UserPtr user1, UserPtr user2)
@@ -190,18 +190,18 @@ UserPtrs Server::getUsers(ProgressIndicator* progressind)
     std::sort(usersM.begin(), usersM.end(), SortUsers());
     return usersM;
 }
-//-----------------------------------------------------------------------------
+
 void Server::setServiceCredentials(const wxString& user, const wxString& pass)
 {
     serviceUserM = user;
     servicePasswordM = pass;
 }
-//-----------------------------------------------------------------------------
+
 void Server::setServiceSysdbaPassword(const wxString& pass)
 {
     serviceSysdbaPasswordM = pass;
 }
-//-----------------------------------------------------------------------------
+
 bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
     bool sysdba)
 {
@@ -332,4 +332,4 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
     }
     return false;
 }
-//-----------------------------------------------------------------------------
+

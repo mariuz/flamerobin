@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef FR_DOMAIN_H
 #define FR_DOMAIN_H
 
@@ -30,7 +30,7 @@
 class DomainCollectionBase;
 class Domains;
 class ProgressIndicator;
-//-----------------------------------------------------------------------------
+
 class Domain: public MetadataItem
 {
 private:
@@ -65,7 +65,7 @@ public:
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* v);
 };
-//-----------------------------------------------------------------------------
+
 class DomainCollectionBase: public MetadataCollection<Domain>
 {
 protected:
@@ -74,7 +74,7 @@ protected:
 public:
     DomainPtr getDomain(const wxString& name);
 };
-//-----------------------------------------------------------------------------
+
 class Domains: public DomainCollectionBase
 {
 protected:
@@ -86,7 +86,7 @@ public:
     void load(ProgressIndicator* progressIndicator);
     virtual const wxString getTypeName() const;
 };
-//-----------------------------------------------------------------------------
+
 class SysDomains: public DomainCollectionBase
 {
 public:
@@ -95,5 +95,5 @@ public:
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     virtual const wxString getTypeName() const;
 };
-//-----------------------------------------------------------------------------
+
 #endif

@@ -35,20 +35,20 @@
 
 #include "core/Observer.h"
 #include "core/Subject.h"
-//-----------------------------------------------------------------------------
+
 typedef std::list<Observer*> ObserverList;
-//-----------------------------------------------------------------------------
+
 Subject::Subject()
 {
     locksCountM = 0;
     needsNotifyObjectsM = false;
 }
-//-----------------------------------------------------------------------------
+
 Subject::~Subject()
 {
     detachAllObservers();
 }
-//-----------------------------------------------------------------------------
+
 void Subject::attachObserver(Observer* observer, bool callUpdate)
 {
     if (observer && observersM.end() == std::find(observersM.begin(),
@@ -60,7 +60,7 @@ void Subject::attachObserver(Observer* observer, bool callUpdate)
             observer->doUpdate();
     }
 }
-//-----------------------------------------------------------------------------
+
 void Subject::detachObserver(Observer* observer)
 {
     if (!observer)
@@ -72,7 +72,7 @@ void Subject::detachObserver(Observer* observer)
     if (it != observersM.end())
         observersM.erase(it);
 }
-//-----------------------------------------------------------------------------
+
 void Subject::detachAllObservers()
 {
     ObserverList orig(observersM);
@@ -86,13 +86,13 @@ void Subject::detachAllObservers()
     }
     observersM.clear();
 }
-//-----------------------------------------------------------------------------
+
 bool Subject::isObservedBy(Observer* observer) const
 {
     return observersM.end() != std::find(observersM.begin(),
         observersM.end(), observer);
 }
-//-----------------------------------------------------------------------------
+
 void Subject::notifyObservers()
 {
     if (isLocked())
@@ -111,14 +111,14 @@ void Subject::notifyObservers()
         needsNotifyObjectsM = false;
     }
 }
-//-----------------------------------------------------------------------------
+
 void Subject::lockSubject()
 {
     if (!isLocked())
         lockedChanged(true);
     ++locksCountM;
 }
-//-----------------------------------------------------------------------------
+
 void Subject::unlockSubject()
 {
     if (isLocked())
@@ -132,37 +132,37 @@ void Subject::unlockSubject()
         }
     }
 }
-//-----------------------------------------------------------------------------
+
 void Subject::lockedChanged(bool /*locked*/)
 {
 }
-//-----------------------------------------------------------------------------
+
 unsigned int Subject::getLockCount()
 {
     return locksCountM;
 }
-//-----------------------------------------------------------------------------
+
 bool Subject::isLocked()
 {
     return locksCountM > 0;
 }
-//-----------------------------------------------------------------------------
+
 SubjectLocker::SubjectLocker(Subject* subject)
 {
     subjectM = 0;
     setSubject(subject);
 }
-//-----------------------------------------------------------------------------
+
 SubjectLocker::~SubjectLocker()
 {
     setSubject(0);
 }
-//-----------------------------------------------------------------------------
+
 Subject* SubjectLocker::getSubject()
 {
     return subjectM;
 }
-//-----------------------------------------------------------------------------
+
 void SubjectLocker::setSubject(Subject* subject)
 {
     if (subject != subjectM)
@@ -174,4 +174,4 @@ void SubjectLocker::setSubject(Subject* subject)
             subjectM->lockSubject();
     }
 }
-//-----------------------------------------------------------------------------
+

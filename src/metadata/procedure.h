@@ -30,7 +30,7 @@
 #include "metadata/privilege.h"
 
 class ProgressIndicator;
-//-----------------------------------------------------------------------------
+
 class Procedure : public MetadataItem
 {
 private:
@@ -64,7 +64,7 @@ public:
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
-//-----------------------------------------------------------------------------
+
 class Procedures: public MetadataCollection<Procedure>
 {
 protected:
@@ -76,5 +76,5 @@ public:
     void load(ProgressIndicator* progressIndicator);
     virtual const wxString getTypeName() const;
 };
-//-----------------------------------------------------------------------------
+
 #endif

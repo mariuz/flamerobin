@@ -20,14 +20,14 @@
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//-----------------------------------------------------------------------------
+
 #ifndef FR_SELECT_STATEMENT_H
 #define FR_SELECT_STATEMENT_H
 
 #include <vector>
 
 #include "sql/SqlTokenizer.h"
-//-----------------------------------------------------------------------------
+
 //! Should provide a way to:
 //! - parse the user supplied SELECT statement into components
 //! - add/remove tables and columns to it
@@ -56,5 +56,5 @@ public:
     
     void orderBy(int column);
 };
-//-----------------------------------------------------------------------------
+
 #endif

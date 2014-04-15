@@ -20,7 +20,7 @@
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//-----------------------------------------------------------------------------
+
 #ifndef FR_SQL_STATEMENT_H
 #define FR_SQL_STATEMENT_H
 
@@ -32,13 +32,13 @@
 
 class Database;
 class Relation;
-//-----------------------------------------------------------------------------
+
 typedef enum
 {
     actNONE, actALTER, actCREATE, actCREATE_OR_ALTER, actDECLARE, actDROP,
     actRECREATE, actSET, actUPDATE, actGRANT, actCOMMENT
 } SqlAction;
-//-----------------------------------------------------------------------------
+
 class TokenList
 {
 private:
@@ -48,7 +48,7 @@ public:
     void add(const SqlTokenType& item);
     const SqlTokenType& operator[](const size_t& index) const;
 };
-//-----------------------------------------------------------------------------
+
 class SqlStatement
 {
 public:
@@ -85,5 +85,5 @@ protected:
     wxString terminatorM;
     wxString statementM;
 };
-//-----------------------------------------------------------------------------
+
 #endif

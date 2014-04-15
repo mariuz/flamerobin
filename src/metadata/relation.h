@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef FR_RELATION_H
 #define FR_RELATION_H
 
@@ -32,7 +32,7 @@
 #include "metadata/metadataitem.h"
 #include "metadata/privilege.h"
 #include "metadata/trigger.h"
-//-----------------------------------------------------------------------------
+
 class Relation: public MetadataItem
 {
 private:
@@ -77,5 +77,5 @@ public:
     void getTriggers(std::vector<Trigger*>& list,
         Trigger::FiringTime time);
 };
-//-----------------------------------------------------------------------------
+
 #endif // FR_RELATION_H

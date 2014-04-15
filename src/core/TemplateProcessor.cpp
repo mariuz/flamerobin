@@ -40,12 +40,12 @@
 #include "core/ProgressIndicator.h"
 #include "TemplateProcessor.h"
 
-//-----------------------------------------------------------------------------
+
 TemplateProcessor::TemplateProcessor(ProcessableObject* object, wxWindow* window)
     : objectM(object), windowM(window)
 {
 }
-//-----------------------------------------------------------------------------
+
 void TemplateProcessor::processCommand(const wxString& cmdName,
     const TemplateCmdParams& cmdParams, ProcessableObject* object,
     wxString& processedText)
@@ -391,7 +391,7 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
            cmdParams, object, processedText);
     }
 }
-//-----------------------------------------------------------------------------
+
 void TemplateProcessor::internalProcessTemplateText(wxString& processedText,
     const wxString& inputText, ProcessableObject* object)
 {
@@ -487,7 +487,7 @@ void TemplateProcessor::internalProcessTemplateText(wxString& processedText,
         oldpos = pos = endpos + 2;
     }
 }
-//-----------------------------------------------------------------------------
+
 void TemplateProcessor::processTemplateFile(wxString& processedText,
     const wxFileName&  inputFileName, ProcessableObject* object,
     ProgressIndicator* progressIndicator)
@@ -508,7 +508,7 @@ void TemplateProcessor::processTemplateFile(wxString& processedText,
     internalProcessTemplateText(processedText, loadEntireFile(fileNameM),
         object);
 }
-//-----------------------------------------------------------------------------
+
 void TemplateProcessor::processTemplateText(wxString& processedText,
     const wxString& inputText, ProcessableObject* object,
     ProgressIndicator* progressIndicator)
@@ -518,38 +518,38 @@ void TemplateProcessor::processTemplateText(wxString& processedText,
     progressIndicatorM = progressIndicator;
     internalProcessTemplateText(processedText, inputText, object);
 }
-//-----------------------------------------------------------------------------
+
 void TemplateProcessor::setVar(const wxString& varName,
     const wxString& varValue)
 {
     varsM[varName] = varValue;
 }
-//-----------------------------------------------------------------------------
+
 const wxString& TemplateProcessor::getVar(const wxString& varName)
 {
     return varsM[varName];
 }
-//-----------------------------------------------------------------------------
+
 void TemplateProcessor::clearVar(const wxString& varName)
 {
     varsM.erase(varName);
 }
-//-----------------------------------------------------------------------------
+
 void TemplateProcessor::clearVars()
 {
     varsM.clear();
 }
-//-----------------------------------------------------------------------------
+
 wxString TemplateProcessor::getTemplatePath()
 {
     return fileNameM.GetPathWithSep();
 }
-//-----------------------------------------------------------------------------
+
 wxString TemplateCmdParams::all() const
 {
     return from(0);
 }
-//-----------------------------------------------------------------------------
+
 wxString TemplateCmdParams::from(size_t start) const
 {
     wxString result;
@@ -561,32 +561,32 @@ wxString TemplateCmdParams::from(size_t start) const
     }
     return result;
 }
-//-----------------------------------------------------------------------------
+
 TemplateCmdHandlerRepository& getTemplateCmdHandlerRepository()
 {
     static TemplateCmdHandlerRepository repository;
     return repository;
 }
-//-----------------------------------------------------------------------------
+
 //! needed to disallow instantiation
 TemplateCmdHandlerRepository::TemplateCmdHandlerRepository()
     : handlerListSortedM(false)
 {
 }
-//-----------------------------------------------------------------------------
+
 TemplateCmdHandlerRepository::~TemplateCmdHandlerRepository()
 {
     while (!handlersM.empty())
         removeHandler(handlersM.front());
 }
-//-----------------------------------------------------------------------------
+
 //! needed in checkHandlerListSorted() to sort on objects instead of pointers
 bool templateCmdHandlerPointerLT(const TemplateCmdHandler* left,
     const TemplateCmdHandler* right)
 {
     return *left < *right;
 }
-//-----------------------------------------------------------------------------
+
 void TemplateCmdHandlerRepository::checkHandlerListSorted()
 {
     if (!handlerListSortedM)
@@ -595,7 +595,7 @@ void TemplateCmdHandlerRepository::checkHandlerListSorted()
         handlerListSortedM = true;
     }
 }
-//-----------------------------------------------------------------------------
+
 //! returns false if no suitable handler found
 void TemplateCmdHandlerRepository::handleTemplateCmd(TemplateProcessor *tp,
     const wxString& cmdName, const TemplateCmdParams& cmdParams,
@@ -609,7 +609,7 @@ void TemplateCmdHandlerRepository::handleTemplateCmd(TemplateProcessor *tp,
             processedText);
     }
 }
-//-----------------------------------------------------------------------------
+
 void TemplateCmdHandlerRepository::addHandler(TemplateCmdHandler* handler)
 {
     // can't do ordered insert here, since the getPosition() function that
@@ -620,28 +620,28 @@ void TemplateCmdHandlerRepository::addHandler(TemplateCmdHandler* handler)
     handler->setRepository(this);
     handlerListSortedM = false;
 }
-//-----------------------------------------------------------------------------
+
 void TemplateCmdHandlerRepository::removeHandler(TemplateCmdHandler* handler)
 {
     handlersM.erase(std::find(handlersM.begin(), handlersM.end(), handler));
     handler->setRepository(0);
 }
-//-----------------------------------------------------------------------------
+
 TemplateCmdHandler::TemplateCmdHandler() :
     repositoryM(0)
 {
     getTemplateCmdHandlerRepository().addHandler(this);
 }
-//-----------------------------------------------------------------------------
+
 void TemplateCmdHandler::setRepository(TemplateCmdHandlerRepository* const repository)
 {
     repositoryM = repository;
 }
-//-----------------------------------------------------------------------------
+
 //! this is currently only called on program termination
 TemplateCmdHandler::~TemplateCmdHandler()
 {
     if (repositoryM)
         repositoryM->removeHandler(this);
 }
-//-----------------------------------------------------------------------------
+

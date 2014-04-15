@@ -40,7 +40,7 @@
 #include "metadata/domain.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/table.h"
-//-----------------------------------------------------------------------------
+
 Table::Table(DatabasePtr database, const wxString& name)
     : Relation((hasSystemPrefix(name) ? ntSysTable : ntTable), database, name),
         primaryKeyLoadedM(false), foreignKeysLoadedM(false),
@@ -48,18 +48,18 @@ Table::Table(DatabasePtr database, const wxString& name)
         indicesLoadedM(false)
 {
 }
-//-----------------------------------------------------------------------------
+
 wxString Table::getExternalPath()
 {
     ensurePropertiesLoaded();
     return externalPathM;
 }
-//-----------------------------------------------------------------------------
+
 void Table::setExternalFilePath(const wxString& value)
 {
     externalPathM = value;
 }
-//-----------------------------------------------------------------------------
+
 void Table::invalidateIndices(const wxString& forIndex)
 {
     if (indicesLoadedM)
@@ -83,7 +83,7 @@ void Table::invalidateIndices(const wxString& forIndex)
         }
     }
 }
-//-----------------------------------------------------------------------------
+
 void Table::loadChildren()
 {
     // force info to be reloaded if asked
@@ -95,7 +95,7 @@ void Table::loadChildren()
 
     Relation::loadChildren();
 }
-//-----------------------------------------------------------------------------
+
 //! reads checks info from database
 void Table::loadCheckConstraints()
 {
@@ -155,7 +155,7 @@ void Table::loadCheckConstraints()
     }
     checkConstraintsLoadedM = true;
 }
-//-----------------------------------------------------------------------------
+
 //! reads primary key info from database
 void Table::loadPrimaryKey()
 {
@@ -199,7 +199,7 @@ void Table::loadPrimaryKey()
     primaryKeyM.setParent(this);
     primaryKeyLoadedM = true;
 }
-//-----------------------------------------------------------------------------
+
 //! reads uniques from database
 void Table::loadUniqueConstraints()
 {
@@ -252,7 +252,7 @@ void Table::loadUniqueConstraints()
     }
     uniqueConstraintsLoadedM = true;
 }
-//-----------------------------------------------------------------------------
+
 PrimaryKeyConstraint *Table::getPrimaryKey()
 {
     loadPrimaryKey();
@@ -260,31 +260,31 @@ PrimaryKeyConstraint *Table::getPrimaryKey()
         return 0;
     return &primaryKeyM;
 }
-//-----------------------------------------------------------------------------
+
 std::vector<ForeignKey> *Table::getForeignKeys()
 {
     loadForeignKeys();
     return &foreignKeysM;
 }
-//-----------------------------------------------------------------------------
+
 std::vector<CheckConstraint> *Table::getCheckConstraints()
 {
     loadCheckConstraints();
     return &checkConstraintsM;
 }
-//-----------------------------------------------------------------------------
+
 std::vector<UniqueConstraint> *Table::getUniqueConstraints()
 {
     loadUniqueConstraints();
     return &uniqueConstraintsM;
 }
-//-----------------------------------------------------------------------------
+
 std::vector<Index> *Table::getIndices()
 {
     loadIndices();
     return &indicesM;
 }
-//-----------------------------------------------------------------------------
+
 //! reads foreign keys info from database
 void Table::loadForeignKeys()
 {
@@ -366,7 +366,7 @@ void Table::loadForeignKeys()
     }
     foreignKeysLoadedM = true;
 }
-//-----------------------------------------------------------------------------
+
 //! reads indices from database
 void Table::loadIndices()
 {
@@ -450,12 +450,12 @@ void Table::loadIndices()
     }
     indicesLoadedM = true;
 }
-//-----------------------------------------------------------------------------
+
 const wxString Table::getTypeName() const
 {
     return wxT("TABLE");
 }
-//-----------------------------------------------------------------------------
+
 // find all tables from "tables" which have foreign keys with "table"
 // and return them in "list"
 bool Table::tablesRelate(const std::vector<wxString>& tables, Table* table,
@@ -505,28 +505,28 @@ bool Table::tablesRelate(const std::vector<wxString>& tables, Table* table,
 
     return !list.empty();
 }
-//-----------------------------------------------------------------------------
+
 void Table::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitTable(*this);
 }
-//-----------------------------------------------------------------------------
+
 // System tables collection
 SysTables::SysTables(DatabasePtr database)
     : MetadataCollection<Table>(ntSysTables, database, _("System tables"))
 {
 }
-//-----------------------------------------------------------------------------
+
 void SysTables::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitSysTables(*this);
 }
-//-----------------------------------------------------------------------------
+
 bool SysTables::isSystem() const
 {
     return true;
 }
-//-----------------------------------------------------------------------------
+
 void SysTables::load(ProgressIndicator* progressIndicator)
 {
     wxString stmt = wxT("select rdb$relation_name from rdb$relations")
@@ -534,28 +534,28 @@ void SysTables::load(ProgressIndicator* progressIndicator)
         wxT(" and rdb$view_source is null order by 1");
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
-//-----------------------------------------------------------------------------
+
 void SysTables::loadChildren()
 {
     load(0);
 }
-//-----------------------------------------------------------------------------
+
 const wxString SysTables::getTypeName() const
 {
     return wxT("SYSTABLE_COLLECTION");
 }
-//-----------------------------------------------------------------------------
+
 // Tables collection
 Tables::Tables(DatabasePtr database)
     : MetadataCollection<Table>(ntTables, database, _("Tables"))
 {
 }
-//-----------------------------------------------------------------------------
+
 void Tables::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitTables(*this);
 }
-//-----------------------------------------------------------------------------
+
 void Tables::load(ProgressIndicator* progressIndicator)
 {
     wxString stmt = wxT("select rdb$relation_name from rdb$relations")
@@ -563,14 +563,14 @@ void Tables::load(ProgressIndicator* progressIndicator)
         wxT(" and rdb$view_source is null order by 1");
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
-//-----------------------------------------------------------------------------
+
 void Tables::loadChildren()
 {
     load(0);
 }
-//-----------------------------------------------------------------------------
+
 const wxString Tables::getTypeName() const
 {
     return wxT("TABLE_COLLECTION");
 }
-//-----------------------------------------------------------------------------
+

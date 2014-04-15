@@ -20,13 +20,13 @@
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
-//-----------------------------------------------------------------------------
+
 #ifndef FR_INCOMPLETE_STATEMENT_H
 #define FR_INCOMPLETE_STATEMENT_H
 
 class Database;
 class Relation;
-//-----------------------------------------------------------------------------
+
 //! Provides various information for incomplete (partial) sql statements
 //! Used mostly for autocomplete stuff
 class IncompleteStatement
@@ -51,5 +51,5 @@ public:
     // position is offset at which user typed the dot character
     wxString getObjectColumns(const wxString& table, int position);
 };
-//-----------------------------------------------------------------------------
+
 #endif

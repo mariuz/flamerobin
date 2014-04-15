@@ -21,15 +21,15 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef FR_COLUMN_H
 #define FR_COLUMN_H
 
 #include "metadata/metadataitem.h"
-//-----------------------------------------------------------------------------
+
 enum GetColumnDefaultType { ReturnDomainDefault, IgnoreDomainDefault };
 enum GetColumnNullabilityType { CheckDomainNullability, IgnoreDomainNullability };
-//-----------------------------------------------------------------------------
+
 class ColumnBase: public MetadataItem
 {
 private:
@@ -50,7 +50,7 @@ public:
     wxString getSource() const;
     bool isNullable(GetColumnNullabilityType type) const;
 };
-//-----------------------------------------------------------------------------
+
 class Column: public ColumnBase
 {
 private:
@@ -73,5 +73,5 @@ public:
     Table* getTable() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
-//-----------------------------------------------------------------------------
+
 #endif

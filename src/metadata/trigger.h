@@ -21,7 +21,7 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//-----------------------------------------------------------------------------
+
 #ifndef FR_TRIGGER_H
 #define FR_TRIGGER_H
 
@@ -29,7 +29,7 @@
 #include "metadata/database.h"
 
 class ProgressIndicator;
-//-----------------------------------------------------------------------------
+
 class Trigger: public MetadataItem
 {
 public:
@@ -67,7 +67,7 @@ public:
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
-//-----------------------------------------------------------------------------
+
 class Triggers: public MetadataCollection<Trigger>
 {
 protected:
@@ -79,5 +79,5 @@ public:
     void load(ProgressIndicator* progressIndicator);
     virtual const wxString getTypeName() const;
 };
-//-----------------------------------------------------------------------------
+
 #endif

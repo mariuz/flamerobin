@@ -23,12 +23,12 @@
 
 #ifndef SERVERREGISTRATIONDIALOG_H
 #define SERVERREGISTRATIONDIALOG_H
-//-----------------------------------------------------------------------------
+
 #include <wx/wx.h>
 
 #include "gui/BaseDialog.h"
 #include "metadata/MetadataClasses.h"
-//-----------------------------------------------------------------------------
+
 class ServerRegistrationDialog: public BaseDialog {
 private:
     ServerPtr serverM;
@@ -63,5 +63,5 @@ private:
     void OnOkButtonClick(wxCommandEvent& event);
     void OnSettingsChange(wxCommandEvent& event);
 };
-//-----------------------------------------------------------------------------
+
 #endif // SERVERREGISTRATIONDIALOG_H

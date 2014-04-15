@@ -23,7 +23,7 @@
 
 #ifndef MAIN_H
 #define MAIN_H
-//-----------------------------------------------------------------------------
+
 class MainFrame;
 
 class Application: public wxApp
@@ -48,7 +48,7 @@ public:
     virtual void HandleEvent(wxEvtHandler* handler, wxEventFunction func,
         wxEvent& event) const;
 };
-//-----------------------------------------------------------------------------
+
 DECLARE_APP(Application)
-//-----------------------------------------------------------------------------
+
 #endif // MAIN_H

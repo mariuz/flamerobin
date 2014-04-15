@@ -26,9 +26,9 @@
 
 #include "metadata/MetadataClasses.h"
 #include "metadata/MetadataItemVisitor.h"
-//-----------------------------------------------------------------------------
+
 class wxMenu;
-//-----------------------------------------------------------------------------
+
 class MainObjectMenuMetadataItemVisitor : public MetadataItemVisitor
 {
 public:
@@ -73,7 +73,7 @@ private:
     void addRefreshItem();
     void addSeparator();
 };
-//-----------------------------------------------------------------------------
+
 class ContextMenuMetadataItemVisitor : public MainObjectMenuMetadataItemVisitor
 {
 public:
@@ -83,5 +83,5 @@ protected:
     virtual void addCreateItem();
     virtual void addDeclareItem();
 };
-//-----------------------------------------------------------------------------
+
 #endif //FR_CONTEXTMENUMETADATAITEMVISITOR_H

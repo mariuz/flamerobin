@@ -23,7 +23,7 @@
 
 #ifndef FR_DATABASE_H
 #define FR_DATABASE_H
-//-----------------------------------------------------------------------------
+
 #include <wx/strconv.h>
 
 #include <map>
@@ -34,11 +34,11 @@
 
 #include "metadata/MetadataClasses.h"
 #include "metadata/metadataitem.h"
-//-----------------------------------------------------------------------------
+
 class MetadataLoader;
 class ProgressIndicator;
 class SqlStatement;
-//-----------------------------------------------------------------------------
+
 class CharacterSet
 {
 private:
@@ -53,7 +53,7 @@ public:
     int getId() const;
     wxString getName() const;
 };
-//-----------------------------------------------------------------------------
+
 class Credentials
 {
 private:
@@ -72,7 +72,7 @@ public:
     void setPassword(const wxString& value);
     void setRole(const wxString& value);
 };
-//-----------------------------------------------------------------------------
+
 class DatabaseInfo
 {
     friend class Database;
@@ -120,7 +120,7 @@ public:
     bool getForcedWrites() const;
     bool getReserve() const;
 };
-//-----------------------------------------------------------------------------
+
 class DatabaseAuthenticationMode
 {
 public:
@@ -142,7 +142,7 @@ public:
 private:
     Mode modeM;
 };
-//-----------------------------------------------------------------------------
+
 class Database: public MetadataItem,
     public boost::enable_shared_from_this<Database>
 {
@@ -309,5 +309,5 @@ public:
 
     wxMBConv* getCharsetConverter() const;
 };
-//----------------------------------------------------------------------------
+
 #endif

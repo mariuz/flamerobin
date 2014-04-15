@@ -23,7 +23,7 @@
 
 #ifndef PREFERENCESDIALOG_H
 #define PREFERENCESDIALOG_H
-//-----------------------------------------------------------------------------
+
 #include <wx/wx.h>
 #include <wx/event.h>
 #include <wx/filename.h>
@@ -35,10 +35,10 @@
 #include "config/Config.h"
 #include "core/TemplateProcessor.h"
 #include "gui/BaseDialog.h"
-//-----------------------------------------------------------------------------
+
 class Optionbook;
 class wxXmlNode;
-//-----------------------------------------------------------------------------
+
 class PrefDlgSetting
 {
 protected:
@@ -90,7 +90,7 @@ private:
     int alignmentGroupM;
     int sizerProportionM;
 };
-//-----------------------------------------------------------------------------
+
 class PreferencesDialog: public BaseDialog
 {
 public:
@@ -151,5 +151,5 @@ protected:
 
     DECLARE_EVENT_TABLE()
 };
-//-----------------------------------------------------------------------------
+
 #endif // PREFERENCESDIALOG_H

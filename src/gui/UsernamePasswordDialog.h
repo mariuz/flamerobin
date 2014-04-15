@@ -23,12 +23,12 @@
 
 #ifndef USERNAMEPASSWORDDIALOG_H
 #define USERNAMEPASSWORDDIALOG_H
-//-----------------------------------------------------------------------------
+
 #include <wx/wx.h>
 
 #include "gui/BaseDialog.h"
 #include "metadata/MetadataClasses.h"
-//-----------------------------------------------------------------------------
+
 class UsernamePasswordDialog: public BaseDialog {
 public:
     enum Flags
@@ -59,12 +59,12 @@ public:
     wxString getUsername();
     wxString getPassword();
 };
-//-----------------------------------------------------------------------------
+
 bool getConnectionCredentials(wxWindow* parentWindow, DatabasePtr database,
     wxString& username, wxString& password,
     int flags = UsernamePasswordDialog::Default);
 bool getConnectionCredentials(wxWindow* parentWindow,
     const wxString& description, wxString& username, wxString& password,
     int flags = UsernamePasswordDialog::Default);
-//-----------------------------------------------------------------------------
+
 #endif // USERNAMEPASSWORDDIALOG_H

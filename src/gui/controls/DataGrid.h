@@ -31,7 +31,7 @@
 #include <vector>
 
 class DataGridTable;
-//-----------------------------------------------------------------------------
+
 BEGIN_DECLARE_EVENT_TYPES()
     // this event is sent when selection is changed and values are summed up
     DECLARE_LOCAL_EVENT_TYPE(wxEVT_FRDG_SUM, 44)
