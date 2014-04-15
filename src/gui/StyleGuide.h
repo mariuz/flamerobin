@@ -70,7 +70,7 @@ protected:
     StyleGuide();
     virtual ~StyleGuide();
 };
----------
+
 StyleGuide& styleguide();
----------
+
 #endif

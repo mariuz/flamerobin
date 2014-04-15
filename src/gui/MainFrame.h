@@ -23,7 +23,7 @@
 
 #ifndef MAINFRAME_H
 #define MAINFRAME_H
----------
+
 #include <wx/wx.h>
 #include <wx/image.h>
 #include <wx/treectrl.h>
