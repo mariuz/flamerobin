@@ -23,7 +23,7 @@
 
 #ifndef FRUTILS_H
 #define FRUTILS_H
--
+
 #include <wx/wx.h>
 #include <wx/strconv.h>
 
@@ -35,24 +35,24 @@
 
 class ProgressDialog;
 class ProgressIndicator;
--
+
 //! sets all controls to width of widest control
 void adjustControlsMinWidth(std::list<wxWindow*> controls);
--
+
 //! reads blob from statement into wxString
 void readBlob(IBPP::Statement& st, int column, wxString& result,
     wxMBConv* conv);
--
+
 //! displays a list of table columns and lets user select some
 wxString selectRelationColumns(Relation* t, wxWindow* parent);
 bool selectRelationColumnsIntoVector(Relation* t, wxWindow* parent,
     std::vector<wxString>& list);
--
+
 //! prompts for password if needed and connects to database
 bool connectDatabase(Database *db, wxWindow* parent,
     ProgressDialog* progressdialog = 0);
--
+
 bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
     bool sysdba);
--
+
 #endif // FRUTILS_H
