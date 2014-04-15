@@ -40,7 +40,7 @@
 #include "metadata/column.h"
 #include "metadata/relation.h"
 #include "metadata/server.h"
--
+
 void adjustControlsMinWidth(std::list<wxWindow*> controls)
 {
     int w = 0;
@@ -176,7 +176,7 @@ bool connectDatabase(Database* db, wxWindow* parent,
     }
     return true;
 }
--
+
 bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
     bool sysdba)
 {
@@ -219,4 +219,3 @@ bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
     }
     return true;
 }
--
