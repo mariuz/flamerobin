@@ -2581,7 +2581,7 @@ bool ExecuteSqlFrame::commitTransaction()
 
     try
     {
-        log(_("Commiting transaction..."));
+        log(_("Committing transaction..."));
         sae.scroll();
         {
             wxStopWatch sw;
@@ -2590,7 +2590,7 @@ bool ExecuteSqlFrame::commitTransaction()
             log(wxString::Format(_("Transaction committed (elapsed time: %s)."),
                 millisToTimeString(sw.Time()).c_str()));
         }
-        statusbar_1->SetStatusText(_("Transaction commited"), 3);
+        statusbar_1->SetStatusText(_("Transaction committed"), 3);
         inTransaction(false);
 
         SubjectLocker locker(databaseM);
