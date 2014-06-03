@@ -1359,6 +1359,10 @@ void MainFrame::OnMenuToggleStatusBar(wxCommandEvent& event)
     config().setValue(wxT("showStatusBar"), show);
     s->Show(show);
     SendSizeEvent();
+
+    // workaround a problem with wx 3.0 and g++ 4.9. See
+    // https://bugs.debian.org/746847
+    std::auto_ptr<wxEvent> tmp_ev(event.Clone());
 }
 
 void MainFrame::OnMenuToggleSearchBar(wxCommandEvent& event)

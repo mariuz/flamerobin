@@ -299,6 +299,11 @@ void AdvancedSearchFrame::rebuildList()
     }
     // send size event
     wxSizeEvent ev(listctrl_criteria->GetSize());
+
+    // workaround a problem with wx 3.0 and g++ 4.9. See
+    // https://bugs.debian.org/746847
+    std::auto_ptr<wxEvent> tmp_ev(ev.Clone());
+
     listctrl_criteria->GetEventHandler()->AddPendingEvent(ev);
 }
 
