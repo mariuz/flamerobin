@@ -272,8 +272,7 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     innerSizer = new wxBoxSizer( wxVERTICAL );
 
     mainSplitter = new wxSplitterWindow( outerPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-        // wx docs say that wxSP_NOBORDER is default, but it obviously is not the case on MSW
-        // (I tried on Windows 98)
+        // wx docs say that wxSP_NOBORDER is default
         wxSP_NOBORDER);
     mainSplitter->SetMinimumPaneSize(100);
     mainSplitter->SetSashGravity( 0.5 );
