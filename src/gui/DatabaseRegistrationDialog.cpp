@@ -437,14 +437,7 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
     databaseM->setEncryptedPassword(text_ctrl_password->GetValue());
 
     wxBusyCursor wait;
-    // for some reason GetValue didn't work correctly before
-    // I can't remember the exact issue, perhaps it was platform specific (Gtk1 maybe?)
-    // so we replaced all of those with GetStringSelection()
-    // the problem is that we are now using a *real* combo, not just a
-    // dropdown list. So, this needs testing
     databaseM->setConnectionCharset(combobox_charset->GetValue());
-    //databaseM->setConnectionCharset(combobox_charset->GetStringSelection());
-
     databaseM->setRole(text_ctrl_role->GetValue());
 
     try
