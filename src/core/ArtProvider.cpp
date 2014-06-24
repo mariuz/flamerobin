@@ -33,7 +33,6 @@
 #include <wx/filename.h>
 #include <wx/image.h>
 #include <wx/mstream.h>
-#include <wx/utils.h>
 
 #include "config/Config.h"
 #include "core/ArtProvider.h"
@@ -100,29 +99,8 @@
 
 wxBitmap bitmapFromEmbeddedPNG(const unsigned char* data, size_t len)
 {
-    static int createMask = -1;
-    if (createMask == -1)
-    {
-        int verMajor, verMinor;
-        switch (wxGetOsVersion(&verMajor, &verMinor))
-        {
-            case wxOS_WINDOWS_9X:
-                createMask = 1;
-                break;
-            case wxOS_WINDOWS_NT:
-                createMask = (verMajor > 5 || verMinor > 0) ? 0 : 1;
-                break;
-            default:
-                createMask = 0;
-                break;
-        }
-    }
-
     wxMemoryInputStream is(data, len);
     wxImage img(is);
-    // work around the transparency problems of Windows versions before XP
-    if (createMask == 1)
-        img.ConvertAlphaToMask(16);
     return wxBitmap(img);
 }
 
