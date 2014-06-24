@@ -83,9 +83,13 @@ void DatabaseRegistrationDialog::createControls()
         wxDefaultSize, wxTE_PASSWORD);
 
     label_charset = new wxStaticText(getControlsPanel(), -1, _("Charset:"));
+    long comboStyle =  wxCB_DROPDOWN;
+#ifndef __WXMAC__
+    // Not supported on OSX/Cocoa presently
+    comboStyle |= wxCB_SORT;
+#endif
     combobox_charset = new wxComboBox(getControlsPanel(), -1, wxT("NONE"),
-        wxDefaultPosition, wxDefaultSize, getDatabaseCharsetChoices(),
-        wxCB_DROPDOWN | wxCB_SORT);
+        wxDefaultPosition, wxDefaultSize, getDatabaseCharsetChoices(), comboStyle);
 
     label_role = new wxStaticText(getControlsPanel(), -1, _("Role:"));
     text_ctrl_role = new wxTextCtrl(getControlsPanel(), -1, wxT(""));
