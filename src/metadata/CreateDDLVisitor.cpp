@@ -178,7 +178,7 @@ void CreateDDLVisitor::visitDatabase(Database& d)
         iterateit<FunctionsPtr, Function>(this, d.getFunctions(),
             progressIndicatorM);
 
-        preSqlM << wxT("/****************** GENERATORS ********************/\n\n");
+        preSqlM << wxT("/****************** SEQUENCES ********************/\n\n");
         iterateit<GeneratorsPtr, Generator>(this, d.getGenerators(),
             progressIndicatorM);
 
@@ -329,16 +329,15 @@ void CreateDDLVisitor::visitFunction(Function& f)
 
 void CreateDDLVisitor::visitGenerator(Generator& g)
 {
-    preSqlM += wxT("CREATE GENERATOR ") + g.getQuotedName() + wxT(";\n");
+    preSqlM += wxT("CREATE SEQUENCE ") + g.getQuotedName() + wxT(";\n");
     wxString description = g.getDescription();
     if (!description.empty())
     {
         wxString name(g.getName_());
         description.Replace(wxT("'"), wxT("''"));
         name.Replace(wxT("'"), wxT("''"));
-        postSqlM << wxT("UPDATE RDB$GENERATORS set\n  RDB$DESCRIPTION = '")
-             << description << wxT("'\n  where RDB$GENERATOR_NAME = '")
-             << name << wxT("';\n");
+        postSqlM << wxT("comment on sequence ") << name << wxT(" is '")
+             << description << wxT("';\n");
     }
     sqlM = preSqlM + postSqlM;
 }
