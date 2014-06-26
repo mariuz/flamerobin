@@ -248,10 +248,9 @@ void CreateDDLVisitor::visitDomain(Domain& d)
     {
         wxString colname(d.getName_());
         description.Replace(wxT("'"), wxT("''"));
-        colname.Replace(wxT("'"), wxT("''"));
-        postSqlM << wxT("UPDATE RDB$FIELDS set\n  RDB$DESCRIPTION = '")
-             << description << wxT("'\n  where RDB$FIELD_NAME = '")
-             << colname << wxT("';\n");
+        colname.Replace(wxT("'"), wxT("''"));        
+        postSqlM << wxT("comment on domain ") << colname << wxT(" is '")
+                     << description << wxT("';\n");
     }
     sqlM = preSqlM + postSqlM;
 }
@@ -386,9 +385,8 @@ void CreateDDLVisitor::visitProcedure(Procedure& p)
     if (!description.empty())
     {
         description.Replace(wxT("'"), wxT("''"));
-        temp << wxT("UPDATE RDB$PROCEDURES set\n  RDB$DESCRIPTION = '")
-             << description << wxT("'\n  where RDB$PROCEDURE_NAME = '")
-             << name << wxT("';\n");
+        postSqlM << wxT("comment on procedure ") << name << wxT(" is '")
+                     << description << wxT("';\n");
     }
     for (ParameterPtrs::iterator it = p.begin(); it != p.end(); ++it)
     {
@@ -436,9 +434,8 @@ void CreateDDLVisitor::visitRole(Role& r)
         wxString name(r.getName_());
         description.Replace(wxT("'"), wxT("''"));
         name.Replace(wxT("'"), wxT("''"));
-        postSqlM << wxT("UPDATE RDB$ROLES set\nRDB$DESCRIPTION = '")
-                 << description << wxT("'\nwhere RDB$ROLE_NAME = '")
-                 << name << wxT("';\n");
+        postSqlM << wxT("comment on role ") << name << wxT(" is '")
+                     << description << wxT("';\n");
     }
     sqlM = preSqlM + wxT("\n") + postSqlM + grantSqlM;
 }
@@ -564,10 +561,9 @@ void CreateDDLVisitor::visitTable(Table& t)
     {
         wxString name(t.getName_());
         description.Replace(wxT("'"), wxT("''"));
-        name.Replace(wxT("'"), wxT("''"));
-        postSqlM << wxT("UPDATE RDB$RELATIONS set\nRDB$DESCRIPTION = '")
-                 << description << wxT("'\nwhere RDB$RELATION_NAME = '")
-                 << name << wxT("';\n");
+        name.Replace(wxT("'"), wxT("''"));        
+        postSqlM << wxT("comment on table ") << name << wxT(" is '")
+                     << description << wxT("';\n");
     }
 
     sqlM = preSqlM + wxT("\n") + postSqlM + grantSqlM;
@@ -596,10 +592,9 @@ void CreateDDLVisitor::visitTrigger(Trigger& t)
     {
         wxString name(t.getName_());
         description.Replace(wxT("'"), wxT("''"));
-        name.Replace(wxT("'"), wxT("''"));
-        postSqlM << wxT("UPDATE RDB$TRIGGERS set\n  RDB$DESCRIPTION = '")
-             << description << wxT("'\n  where RDB$TRIGGER_NAME = '")
-             << name << wxT("';\n");
+        name.Replace(wxT("'"), wxT("''"));        
+        postSqlM << wxT("comment on trigger ") << name << wxT(" is '")
+                     << description << wxT("';\n");
     }
     sqlM = preSqlM + postSqlM;
 }
@@ -643,10 +638,9 @@ void CreateDDLVisitor::visitView(View& v)
     wxString description = v.getDescription();
     if (!description.empty())
     {
-        description.Replace(wxT("'"), wxT("''"));
-        postSqlM << wxT("UPDATE RDB$RELATIONS set\n  RDB$DESCRIPTION = '")
-                 << description << wxT("'\n  where RDB$RELATION_NAME = '")
-                 << name << wxT("';\n");
+        description.Replace(wxT("'"), wxT("''"));        
+        postSqlM << wxT("comment on view ") << name << wxT(" is '")
+                     << description << wxT("';\n");
     }
 
     // description for columns
