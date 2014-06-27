@@ -130,11 +130,9 @@ void CreateDDLVisitor::visitColumn(Column& c)
         wxString tabname(c.getTable()->getName_());
         description.Replace(wxT("'"), wxT("''"));
         colname.Replace(wxT("'"), wxT("''"));
-        tabname.Replace(wxT("'"), wxT("''"));
-        postSqlM << wxT("UPDATE RDB$RELATION_FIELDS set RDB$DESCRIPTION = '")
-                 << description << wxT("'  where RDB$FIELD_NAME = '")
-                 << colname << wxT("' and RDB$RELATION_NAME = '") << tabname
-                 << wxT("';\n");
+        tabname.Replace(wxT("'"), wxT("''"));        
+        postSqlM << wxT("comment on column ") << tabname << wxT(".") << colname << wxT(" is '")
+                     << description << wxT("';\n");
     }
 }
 
@@ -267,10 +265,9 @@ void CreateDDLVisitor::visitException(Exception& e)
     {
         wxString name(e.getName_());
         description.Replace(wxT("'"), wxT("''"));
-        name.Replace(wxT("'"), wxT("''"));
-        postSqlM << wxT("UPDATE RDB$EXCEPTIONS set\n  RDB$DESCRIPTION = '")
-             << description << wxT("'\n  where RDB$EXCEPTION_NAME = '")
-             << name << wxT("';\n");
+        name.Replace(wxT("'"), wxT("''"));        
+        postSqlM << wxT("comment on exception ") << name << wxT(" is '")
+                     << description << wxT("';\n");
     }
     sqlM = preSqlM + postSqlM;
 }
@@ -395,11 +392,8 @@ void CreateDDLVisitor::visitProcedure(Procedure& p)
             wxString pname((*it)->getName_());
             description.Replace(wxT("'"), wxT("''"));
             pname.Replace(wxT("'"), wxT("''"));
-            temp <<
-            wxT("UPDATE RDB$PROCEDURE_PARAMETERS set RDB$DESCRIPTION = '")
-            << description << wxT("'\n  where RDB$PARAMETER_NAME = '")
-            << pname << wxT("' AND RDB$PROCEDURE_NAME = '") << name
-            << wxT("';\n");
+            temp << wxT("comment on parameter ") << name << wxT(".") << pname << wxT(" is '")
+                         << description << wxT("';\n");
         }
     }
 
@@ -652,14 +646,10 @@ void CreateDDLVisitor::visitView(View& v)
             wxString cname((*it)->getName_());
             description.Replace(wxT("'"), wxT("''"));
             cname.Replace(wxT("'"), wxT("''"));
-            postSqlM <<
-            wxT("UPDATE RDB$RELATION_FIELDS set\n  RDB$DESCRIPTION = '")
-            << description << wxT("'\n  where RDB$FIELD_NAME = '") <<
-            cname << wxT("' AND RDB$RELATION_NAME = '") << name <<
-            wxT("';\n");
+            postSqlM << wxT("comment on column ") << name << wxT(".") << cname << wxT(" is '")
+                         << description << wxT("';\n");
         }
     }
 
     sqlM += preSqlM + wxT("\n") + postSqlM + grantSqlM;
 }
-
