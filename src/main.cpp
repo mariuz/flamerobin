@@ -97,14 +97,6 @@ bool Application::OnInit()
 
     wxImage::AddHandler(new wxPNGHandler);
 
-    /* we might be needing this
-#ifdef __WXMSW__
-    if (wxTheApp->GetComCtl32Version() >= 600 && ::wxDisplayDepth() >= 32)
-        wxSystemOptions::SetOption(wxT("msw.remap"), 2);
-    else
-        wxSystemOptions::SetOption(wxT("msw.remap"), 0);
-#endif
-    */
     wxSystemOptions::SetOption(wxT("mac.listctrl.always_use_generic"), true);
 
     MainFrame* main_frame = new MainFrame(0, -1, wxT(""));
