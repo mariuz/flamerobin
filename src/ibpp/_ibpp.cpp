@@ -40,9 +40,22 @@
 
 #ifdef IBPP_WINDOWS
 
-// New (optional) Registry Keys introduced by Firebird Server 1.5
+// Optional Registry Keys introduced by Firebird Server 1.5.x
 #define REG_KEY_ROOT_INSTANCES	"SOFTWARE\\Firebird Project\\Firebird Server\\Instances"
 #define FB_DEFAULT_INSTANCE	  	"DefaultInstance"
+
+#ifdef IBPP_UNIX
+#ifdef IBPP_LATE_BIND
+
+#include <dlfcn.h>
+#include <stdlib.h>
+
+//empty string terminated list of Firebird SO libraries o try in turn
+static const char* fblibs[] = {"libfbembed.so.2.5","libfbembed.so.2.1","libfbclient.so.2",""};
+
+#endif
+#endif
+
 
 // Many compilers confuses those following min/max with macros min and max !
 #undef min
