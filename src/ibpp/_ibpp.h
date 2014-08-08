@@ -274,7 +274,7 @@ typedef ISC_STATUS  ISC_EXPORT proto_rollback_transaction (ISC_STATUS *,
 typedef ISC_STATUS  ISC_EXPORT proto_rollback_retaining (ISC_STATUS *,
                          isc_tr_handle *);
 
-///////////
+
 typedef ISC_STATUS  ISC_EXPORT proto_dsql_allocate_statement (ISC_STATUS *,
                             isc_db_handle *,
                             isc_stmt_handle *);
@@ -1326,16 +1326,10 @@ public:
     bool operator == (const EventBufferIterator& i) const { return i.mIt == mIt; }
     bool operator != (const EventBufferIterator& i) const { return i.mIt != mIt; }
 
-#ifdef __BCPLUSPLUS__
-#pragma warn -8027
-#endif
     std::string get_name() const
     {
         return std::string(mIt + 1, mIt + 1 + static_cast<int32_t>(*mIt));
     }
-#ifdef __BCPLUSPLUS__
-#pragma warn .8027
-#endif
 
     uint32_t get_count() const
     {
