@@ -210,6 +210,31 @@ GDS* GDS::Call()
 		}
 #endif
 
+#ifdef IBPP_UNIX
+#ifdef IBPP_LATE_BIND
+
+               mHandle = 0;
+               if (getenv("FBLIB") != 0)
+                       mHandle = dlopen(getenv("FBLIB"),RTLD_LAZY);
+               else
+               {
+                       int ixlib = 0;
+                       while (fblibs[ixlib] != "")
+                       {
+                               mHandle = dlopen(fblibs[ixlib],RTLD_LAZY);
+                               if (mHandle != 0) break;
+                               ixlib++;
+                       }
+               }
+
+               if (mHandle == 0)
+                                       throw LogicExceptionImpl("GDS::Call()",
+                                               _("Can't find or load the Firebird Client Library"));
+
+#endif
+#endif
+
+
 		// Get the entry points that we need
 
 #ifdef IBPP_WINDOWS
@@ -218,8 +243,13 @@ GDS* GDS::Call()
 				throw LogicExceptionImpl("GDS:gds()", _("Entry-point isc_"#X" not found"))
 #endif
 #ifdef IBPP_UNIX
-/* TODO : perform a late-bind on unix --- not so important, well I think (OM) */
+#ifdef IBPP_LATE_BIND
+#define IB_ENTRYPOINT(X) \
+    if ((m_##X = (proto_##X*)dlsym(mHandle,"isc_"#X)) == 0) \
+        throw LogicExceptionImpl("GDS:gds()", _("Entry-point isc_"#X" not found"))
+#else
 #define IB_ENTRYPOINT(X) m_##X = (proto_##X*)isc_##X
+#endif
 #endif
 
 		IB_ENTRYPOINT(create_database);

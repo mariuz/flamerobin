@@ -65,6 +65,7 @@
 #include <cstdarg>
 #include <cstring>
 
+
 #ifdef _DEBUG
 #define ASSERTION(x)    {if (!(x)) {throw LogicExceptionImpl("ASSERTION", \
                             "'"#x"' is not verified at %s, line %d", \
@@ -401,6 +402,12 @@ struct GDS
     HMODULE mHandle;            // The GDS32.DLL HMODULE
     std::string mSearchPaths;   // Optional additional search paths
 #endif
+#ifdef IBPP_UNIX
+#ifdef IBPP_LATE_BIND
+               void *mHandle;
+#endif
+#endif
+
 
     GDS* Call();
 
