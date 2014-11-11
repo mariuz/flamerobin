@@ -662,7 +662,7 @@ bool MetadataItem::isSystem() const
 bool MetadataItem::hasSystemPrefix(const wxString& name)
 {
     wxString prefix(name.substr(0, 4));
-    return prefix == wxT("RDB$") || prefix == wxT("MON$");
+    return prefix == wxT("RDB$") || prefix == wxT("MON$") || prefix == wxT("SEC$");
 }
 
 wxString MetadataItem::getDropSqlStatement() const
