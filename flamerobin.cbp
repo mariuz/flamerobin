@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="flamerobin" />
+		<Option platforms="Windows;Unix;" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="DebugMingw">
+				<Option platforms="Windows;" />
+				<Option output="flamerobin" prefix_auto="1" extension_auto="1" />
+				<Option object_output=".odmingwu" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-O0" />
+					<Add option="-mthreads" />
+					<Add option="-fexceptions" />
+					<Add option="-D__WXMSW__" />
+					<Add option="-DHAVE_W32API_H" />
+					<Add option="-D_UNICODE" />
+					<Add option="-DIBPP_WINDOWS" />
+					<Add directory="$(#wx29.lib)/gcc_lib/mswu" />
+					<Add directory="$(#wx29.include)" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="$(#wx29.include)" />
+				</ResourceCompiler>
+				<Linker>
+					<Add option="-Wl,--subsystem,windows" />
+					<Add option="-mwindows" />
+					<Add option="-g" />
+					<Add option="-mthreads" />
+					<Add library="wxmsw29u_aui" />
+					<Add library="wxmsw29u_stc" />
+					<Add library="wxmsw29u_html" />
+					<Add library="wxmsw29u_adv" />
+					<Add library="wxmsw29u_core" />
+					<Add library="wxbase29u_xml" />
+					<Add library="wxbase29u" />
+					<Add library="wxtiff" />
+					<Add library="wxjpeg" />
+					<Add library="wxpng" />
+					<Add library="wxzlib" />
+					<Add library="wxregexu" />
+					<Add library="wxexpat" />
+					<Add library="wxscintilla" />
+					<Add library="kernel32" />
+					<Add library="user32" />
+					<Add library="gdi32" />
+					<Add library="comdlg32" />
+					<Add library="winspool" />
+					<Add library="winmm" />
+					<Add library="shell32" />
+					<Add library="comctl32" />
+					<Add library="ole32" />
+					<Add library="oleaut32" />
+					<Add library="uuid" />
+					<Add library="rpcrt4" />
+					<Add library="advapi32" />
+					<Add library="wsock32" />
+					<Add library="wininet" />
+					<Add directory="$(#wx29.lib)/gcc_lib" />
+				</Linker>
+			</Target>
+			<Target title="DebugGCC">
+				<Option platforms="Unix;" />
+				<Option output="flamerobin" prefix_auto="1" extension_auto="1" />
+				<Option object_output=".odgcu" />
+				<Option type="0" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="`/home/dsf/wxWidgets-2.9.4/buildgtk/wx-config --cflags`" />
+					<Add option="-DIBPP_LINUX" />
+				</Compiler>
+				<Linker>
+					<Add option="`/home/dsf/wxWidgets-2.9.4/buildgtk/wx-config --libs`" />
+					<Add library="wx_gtk2u_aui-2.9" />
+          <Add library="wx_gtk2u_html-2.9" />
+          <Add library="wx_gtk2u_adv-2.9" />
+          <Add library="wx_gtk2u_stc-2.9" />
+          <Add library="wx_gtk2u_core-2.9" />
+					<Add library="wxscintilla-2.9" />
+					<Add library="fbclient" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add directory="src" />
+			<Add directory="src/ibpp" />
+			<Add directory="res" />
+		</Compiler>
+		<Unit filename="res/flamerobin.rc">
+			<Option compilerVar="WINDRES" />
+			<Option target="DebugMingw" />
+		</Unit>
+		<Unit filename="src/Isaac.h" />
+		<Unit filename="src/MasterPassword.cpp" />
+		<Unit filename="src/MasterPassword.h" />
+		<Unit filename="src/addconstrainthandler.cpp" />
+		<Unit filename="src/config/Config.cpp" />
+		<Unit filename="src/config/Config.h" />
+		<Unit filename="src/config/DatabaseConfig.cpp" />
+		<Unit filename="src/config/DatabaseConfig.h" />
+		<Unit filename="src/core/ArtProvider.cpp" />
+		<Unit filename="src/core/ArtProvider.h" />
+		<Unit filename="src/core/FRError.cpp" />
+		<Unit filename="src/core/FRError.h" />
+		<Unit filename="src/core/Observer.cpp" />
+		<Unit filename="src/core/Observer.h" />
+		<Unit filename="src/core/ProgressIndicator.h" />
+		<Unit filename="src/core/StringUtils.cpp" />
+		<Unit filename="src/core/StringUtils.h" />
+		<Unit filename="src/core/Subject.cpp" />
+		<Unit filename="src/core/Subject.h" />
+		<Unit filename="src/core/Visitor.cpp" />
+		<Unit filename="src/core/Visitor.h" />
+		<Unit filename="src/databasehandler.cpp" />
+		<Unit filename="src/engine/MetadataLoader.cpp" />
+		<Unit filename="src/engine/MetadataLoader.h" />
+		<Unit filename="src/framemanager.cpp" />
+		<Unit filename="src/framemanager.h" />
+		<Unit filename="src/frprec.cpp" />
+		<Unit filename="src/frsvnrev.h" />
+		<Unit filename="src/frtypes.h" />
+		<Unit filename="src/frutils.cpp" />
+		<Unit filename="src/frutils.h" />
+		<Unit filename="src/frversion.h" />
+		<Unit filename="src/gui/AboutBox.cpp" />
+		<Unit filename="src/gui/AboutBox.h" />
+		<Unit filename="src/gui/AdvancedMessageDialog.cpp" />
+		<Unit filename="src/gui/AdvancedMessageDialog.h" />
+		<Unit filename="src/gui/AdvancedSearchFrame.cpp" />
+		<Unit filename="src/gui/AdvancedSearchFrame.h" />
+		<Unit filename="src/gui/BackupFrame.cpp" />
+		<Unit filename="src/gui/BackupFrame.h" />
+		<Unit filename="src/gui/BackupRestoreBaseFrame.cpp" />
+		<Unit filename="src/gui/BackupRestoreBaseFrame.h" />
+		<Unit filename="src/gui/BaseDialog.cpp" />
+		<Unit filename="src/gui/BaseDialog.h" />
+		<Unit filename="src/gui/BaseFrame.cpp" />
+		<Unit filename="src/gui/BaseFrame.h" />
+		<Unit filename="src/gui/CommandIds.h" />
+		<Unit filename="src/gui/CommandManager.cpp" />
+		<Unit filename="src/gui/CommandManager.h" />
+		<Unit filename="src/gui/ContextMenuMetadataItemVisitor.cpp" />
+		<Unit filename="src/gui/ContextMenuMetadataItemVisitor.h" />
+		<Unit filename="src/gui/CreateIndexDialog.cpp" />
+		<Unit filename="src/gui/CreateIndexDialog.h" />
+		<Unit filename="src/gui/DataGeneratorFrame.cpp" />
+		<Unit filename="src/gui/DataGeneratorFrame.h" />
+		<Unit filename="src/gui/DatabaseRegistrationDialog.cpp" />
+		<Unit filename="src/gui/DatabaseRegistrationDialog.h" />
+		<Unit filename="src/gui/EventWatcherFrame.cpp" />
+		<Unit filename="src/gui/EventWatcherFrame.h" />
+		<Unit filename="src/gui/ExecuteSql.cpp" />
+		<Unit filename="src/gui/ExecuteSql.h" />
+		<Unit filename="src/gui/ExecuteSqlFrame.cpp" />
+		<Unit filename="src/gui/ExecuteSqlFrame.h" />
+		<Unit filename="src/gui/FieldPropertiesDialog.cpp" />
+		<Unit filename="src/gui/FieldPropertiesDialog.h" />
+		<Unit filename="src/gui/FindDialog.cpp" />
+		<Unit filename="src/gui/FindDialog.h" />
+		<Unit filename="src/gui/InsertDialog.cpp" />
+		<Unit filename="src/gui/InsertDialog.h" />
+		<Unit filename="src/gui/MainFrame.cpp" />
+		<Unit filename="src/gui/MainFrame.h" />
+		<Unit filename="src/gui/MetadataItemPropertiesFrame.cpp" />
+		<Unit filename="src/gui/MetadataItemPropertiesFrame.h" />
+		<Unit filename="src/gui/MultilineEnterDialog.cpp" />
+		<Unit filename="src/gui/MultilineEnterDialog.h" />
+		<Unit filename="src/gui/PreferencesDialog.cpp" />
+		<Unit filename="src/gui/PreferencesDialog.h" />
+		<Unit filename="src/gui/PreferencesDialogSettings.cpp" />
+		<Unit filename="src/gui/PrivilegesDialog.cpp" />
+		<Unit filename="src/gui/PrivilegesDialog.h" />
+		<Unit filename="src/gui/ProgressDialog.cpp" />
+		<Unit filename="src/gui/ProgressDialog.h" />
+		<Unit filename="src/gui/ReorderFieldsDialog.cpp" />
+		<Unit filename="src/gui/ReorderFieldsDialog.h" />
+		<Unit filename="src/gui/RestoreFrame.cpp" />
+		<Unit filename="src/gui/RestoreFrame.h" />
+		<Unit filename="src/gui/ServerRegistrationDialog.cpp" />
+		<Unit filename="src/gui/ServerRegistrationDialog.h" />
+		<Unit filename="src/gui/SimpleHtmlFrame.cpp" />
+		<Unit filename="src/gui/SimpleHtmlFrame.h" />
+		<Unit filename="src/gui/StatementHistoryDialog.cpp" />
+		<Unit filename="src/gui/StatementHistoryDialog.h" />
+		<Unit filename="src/gui/StyleGuide.cpp" />
+		<Unit filename="src/gui/StyleGuide.h" />
+		<Unit filename="src/gui/TriggerWizardDialog.cpp" />
+		<Unit filename="src/gui/TriggerWizardDialog.h" />
+		<Unit filename="src/gui/UserDialog.cpp" />
+		<Unit filename="src/gui/UserDialog.h" />
+		<Unit filename="src/gui/UsernamePasswordDialog.cpp" />
+		<Unit filename="src/gui/UsernamePasswordDialog.h" />
+		<Unit filename="src/gui/controls/DBHTreeControl.cpp" />
+		<Unit filename="src/gui/controls/DBHTreeControl.h" />
+		<Unit filename="src/gui/controls/DataGrid.cpp" />
+		<Unit filename="src/gui/controls/DataGrid.h" />
+		<Unit filename="src/gui/controls/DataGridRowBuffer.cpp" />
+		<Unit filename="src/gui/controls/DataGridRowBuffer.h" />
+		<Unit filename="src/gui/controls/DataGridRows.cpp" />
+		<Unit filename="src/gui/controls/DataGridRows.h" />
+		<Unit filename="src/gui/controls/DataGridTable.cpp" />
+		<Unit filename="src/gui/controls/DataGridTable.h" />
+		<Unit filename="src/gui/controls/DndTextControls.cpp" />
+		<Unit filename="src/gui/controls/DndTextControls.h" />
+		<Unit filename="src/gui/controls/LogTextControl.cpp" />
+		<Unit filename="src/gui/controls/LogTextControl.h" />
+		<Unit filename="src/gui/controls/PrintableHtmlWindow.cpp" />
+		<Unit filename="src/gui/controls/PrintableHtmlWindow.h" />
+		<Unit filename="src/gui/controls/TextControl.cpp" />
+		<Unit filename="src/gui/controls/TextControl.h" />
+		<Unit filename="src/gui/gtk/StyleGuideGTK.cpp">
+			<Option target="DebugGCC" />
+		</Unit>
+		<Unit filename="src/gui/msw/StyleGuideMSW.cpp">
+			<Option target="DebugMingw" />
+		</Unit>
+		<Unit filename="src/ibpp/_dpb.cpp" />
+		<Unit filename="src/ibpp/_ibpp.cpp" />
+		<Unit filename="src/ibpp/_ibpp.h" />
+		<Unit filename="src/ibpp/_ibs.cpp" />
+		<Unit filename="src/ibpp/_rb.cpp" />
+		<Unit filename="src/ibpp/_spb.cpp" />
+		<Unit filename="src/ibpp/_tpb.cpp" />
+		<Unit filename="src/ibpp/array.cpp" />
+		<Unit filename="src/ibpp/blob.cpp" />
+		<Unit filename="src/ibpp/database.cpp" />
+		<Unit filename="src/ibpp/date.cpp" />
+		<Unit filename="src/ibpp/dbkey.cpp" />
+		<Unit filename="src/ibpp/events.cpp" />
+		<Unit filename="src/ibpp/exception.cpp" />
+		<Unit filename="src/ibpp/ibase.h" />
+		<Unit filename="src/ibpp/iberror.h" />
+		<Unit filename="src/ibpp/ibpp.h" />
+		<Unit filename="src/ibpp/row.cpp" />
+		<Unit filename="src/ibpp/service.cpp" />
+		<Unit filename="src/ibpp/statement.cpp" />
+		<Unit filename="src/ibpp/time.cpp" />
+		<Unit filename="src/ibpp/transaction.cpp" />
+		<Unit filename="src/ibpp/user.cpp" />
+		<Unit filename="src/images.cpp" />
+		<Unit filename="src/images.h" />
+		<Unit filename="src/logger.cpp" />
+		<Unit filename="src/logger.h" />
+		<Unit filename="src/main.cpp" />
+		<Unit filename="src/main.h" />
+		<Unit filename="src/metadata/CreateDDLVisitor.cpp" />
+		<Unit filename="src/metadata/CreateDDLVisitor.h" />
+		<Unit filename="src/metadata/Index.cpp" />
+		<Unit filename="src/metadata/Index.h" />
+		<Unit filename="src/metadata/MetadataItemVisitor.cpp" />
+		<Unit filename="src/metadata/MetadataItemVisitor.h" />
+		<Unit filename="src/metadata/User.cpp" />
+		<Unit filename="src/metadata/User.h" />
+		<Unit filename="src/metadata/collection.h" />
+		<Unit filename="src/metadata/column.cpp" />
+		<Unit filename="src/metadata/column.h" />
+		<Unit filename="src/metadata/constraints.cpp" />
+		<Unit filename="src/metadata/constraints.h" />
+		<Unit filename="src/metadata/database.cpp" />
+		<Unit filename="src/metadata/database.h" />
+		<Unit filename="src/metadata/domain.cpp" />
+		<Unit filename="src/metadata/domain.h" />
+		<Unit filename="src/metadata/exception.cpp" />
+		<Unit filename="src/metadata/exception.h" />
+		<Unit filename="src/metadata/function.cpp" />
+		<Unit filename="src/metadata/function.h" />
+		<Unit filename="src/metadata/generator.cpp" />
+		<Unit filename="src/metadata/generator.h" />
+		<Unit filename="src/metadata/metadataitem.cpp" />
+		<Unit filename="src/metadata/metadataitem.h" />
+		<Unit filename="src/metadata/parameter.cpp" />
+		<Unit filename="src/metadata/parameter.h" />
+		<Unit filename="src/metadata/privilege.cpp" />
+		<Unit filename="src/metadata/privilege.h" />
+		<Unit filename="src/metadata/procedure.cpp" />
+		<Unit filename="src/metadata/procedure.h" />
+		<Unit filename="src/metadata/relation.cpp" />
+		<Unit filename="src/metadata/relation.h" />
+		<Unit filename="src/metadata/role.cpp" />
+		<Unit filename="src/metadata/role.h" />
+		<Unit filename="src/metadata/root.cpp" />
+		<Unit filename="src/metadata/root.h" />
+		<Unit filename="src/metadata/server.cpp" />
+		<Unit filename="src/metadata/server.h" />
+		<Unit filename="src/metadata/table.cpp" />
+		<Unit filename="src/metadata/table.h" />
+		<Unit filename="src/metadata/trigger.cpp" />
+		<Unit filename="src/metadata/trigger.h" />
+		<Unit filename="src/metadata/view.cpp" />
+		<Unit filename="src/metadata/view.h" />
+		<Unit filename="src/objectdescriptionhandler.cpp" />
+		<Unit filename="src/sql/Identifier.cpp" />
+		<Unit filename="src/sql/Identifier.h" />
+		<Unit filename="src/sql/IncompleteStatement.cpp" />
+		<Unit filename="src/sql/IncompleteStatement.h" />
+		<Unit filename="src/sql/MultiStatement.cpp" />
+		<Unit filename="src/sql/MultiStatement.h" />
+		<Unit filename="src/sql/SelectStatement.cpp" />
+		<Unit filename="src/sql/SelectStatement.h" />
+		<Unit filename="src/sql/SqlStatement.cpp" />
+		<Unit filename="src/sql/SqlStatement.h" />
+		<Unit filename="src/sql/SqlTokenizer.cpp" />
+		<Unit filename="src/sql/SqlTokenizer.h" />
+		<Unit filename="src/statementHistory.cpp" />
+		<Unit filename="src/statementHistory.h" />
+		<Unit filename="src/urihandler.cpp" />
+		<Unit filename="src/urihandler.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
