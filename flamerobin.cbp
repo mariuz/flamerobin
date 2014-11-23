@@ -73,16 +73,16 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
-					<Add option="`/home/dsf/wxWidgets-2.9.4/buildgtk/wx-config --cflags`" />
+					<Add option="`wx-config --cflags`" />
 					<Add option="-DIBPP_LINUX" />
 				</Compiler>
 				<Linker>
-					<Add option="`/home/dsf/wxWidgets-2.9.4/buildgtk/wx-config --libs`" />
+					<Add option="wx-config --libs`" />
 					<Add library="wx_gtk2u_aui-2.9" />
-          <Add library="wx_gtk2u_html-2.9" />
-          <Add library="wx_gtk2u_adv-2.9" />
-          <Add library="wx_gtk2u_stc-2.9" />
-          <Add library="wx_gtk2u_core-2.9" />
+					<Add library="wx_gtk2u_html-2.9" />
+					<Add library="wx_gtk2u_adv-2.9" />
+					<Add library="wx_gtk2u_stc-2.9" />
+					<Add library="wx_gtk2u_core-2.9" />
 					<Add library="wxscintilla-2.9" />
 					<Add library="fbclient" />
 				</Linker>
