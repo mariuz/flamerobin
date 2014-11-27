@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//	File    : $Id$
 //	Subject : IBPP, Initialization of the library
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,10 +15,6 @@
 //	basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.  See the
 //	License for the specific language governing rights and limitations
 //	under the License.
-//
-///////////////////////////////////////////////////////////////////////////////
-//
-//	COMMENTS
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -50,7 +45,7 @@
 #include <dlfcn.h>
 #include <stdlib.h>
 
-//empty string terminated list of Firebird SO libraries o try in turn
+//empty string terminated list of Firebird SO libraries to try in turn
 static const char* fblibs[] = {"libfbembed.so.2.5","libfbembed.so.2.1","libfbclient.so.2",""};
 
 #endif

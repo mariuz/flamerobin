@@ -1,5 +1,3 @@
-$Id$
-
 IBPP, A C++ Client API for Firebird (and Interbase)
 Some general notes about the ibpp project
 
@@ -330,5 +328,3 @@ of the C++ Standard.
 - Useage of '_' (underscore) as a leading character in internal identifiers of
 the library has been dropped. Such naming convention is reserved for
 implementation and thus may clash with system defined identifiers.
-
->>> EOF <<<
