@@ -1,6 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//	File    : $Id$
 //	Subject : IBPP, Service class implementation
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,13 +15,7 @@
 //	basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.  See the
 //	License for the specific language governing rights and limitations
 //	under the License.
-//
-///////////////////////////////////////////////////////////////////////////////
-//
-//	COMMENTS
-//	* Tabulations should be set every four characters when editing this file.
-//
-///////////////////////////////////////////////////////////////////////////////
+
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4786 4996)
@@ -730,7 +723,3 @@ ServiceImpl::~ServiceImpl()
 	try { if (Connected()) Disconnect(); }
 		catch (...) { }
 }
-
-//
-//	Eof
-//
