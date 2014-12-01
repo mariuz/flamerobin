@@ -41,7 +41,7 @@ class DatabaseInfoHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
-    DatabaseInfoHandler() {};
+    DatabaseInfoHandler() {}
     bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
