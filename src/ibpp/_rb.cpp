@@ -1,5 +1,4 @@
-//	Subject : IBPP, internal RB class implementation
-//	COMMENTS
+//	Internal RB class implementation
 //	* RB == Result Block/Buffer, see Interbase 6.0 C-API
 
 /*

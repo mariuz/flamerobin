@@ -1,5 +1,4 @@
-//	Subject : IBPP, internal TPB class implementation
-//	COMMENTS
+//	Internal TPB class implementation
 //	* TPB == Transaction Parameter Block/Buffer, see Interbase 6.0 C-API
 
 /*

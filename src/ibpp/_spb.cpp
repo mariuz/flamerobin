@@ -1,5 +1,4 @@
-//	Subject : IBPP, internal SPB class implementation
-//	COMMENTS
+//	Internal SPB class implementation
 //	* SPB == Service Parameter Block/Buffer, see Interbase 6.0 C-API
 
 /*
