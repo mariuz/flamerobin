@@ -1,4 +1,4 @@
-//	Subject : IBPP, User class implementation
+//	IBPP, User class implementation
 /*
     (C) Copyright 2000-2006 T.I.P. Group S.A. and the IBPP Team (www.ibpp.org)
 
