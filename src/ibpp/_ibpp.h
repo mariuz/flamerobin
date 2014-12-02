@@ -1,5 +1,4 @@
-//  Subject : IBPP internal declarations
-//  COMMENTS
+//   IBPP internal declarations
 //
 //  'Internal declarations' means everything used to implement ibpp. This
 //   file and its contents is NOT needed by users of the library. All those

@@ -1,4 +1,4 @@
-//	Subject : IBPP, Initialization of the library
+//	Initialization of the library
 
 /*	(C) Copyright 2000-2006 T.I.P. Group S.A. and the IBPP Team (www.ibpp.org)
 
