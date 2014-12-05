@@ -125,7 +125,7 @@ public:
     {
         for (int i=0; i<256; ++i)
             ctxM.randrsl[i]=(ub4)0;
-        for (int i=0; masterpw[i] && i<256; ++i)
+        for (int i=0; i<256 && masterpw[i]; ++i)
             ctxM.randrsl[i] = (wxChar)masterpw[i];
         randinit(&ctxM);
         isaac(&ctxM);
