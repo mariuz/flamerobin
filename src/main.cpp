@@ -49,7 +49,7 @@ void parachute()
     if (wxYES == ::wxMessageBox(::wxGetTranslation(
         wxT("A fatal error has occured. If you know how to\n")
         wxT("reproduce the problem, please submit the bug report at:\n")
-        wxT("http://www.flamerobin.org/bugs.php\n\n")
+        wxT("http://flamerobin.org/bugs.php\n\n")
         wxT("The program can try to keep running so that you\n")
         wxT("can save your data. Do you wish to try?\n")),
         _("Fatal error"), wxYES_NO | wxICON_ERROR))

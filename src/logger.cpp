@@ -198,7 +198,7 @@ bool Logger::logStatement(const SqlStatement& st, Database* db)
     }
     return result;
 }
-//---------------------------------------------------------------------------
+
 bool Logger::prepareDatabase(Database *db)
 {
     IBPP::Transaction tr = IBPP::TransactionFactory(db->getIBPPDatabase());
@@ -245,7 +245,7 @@ bool Logger::prepareDatabase(Database *db)
     }
     return false;
 }
-//---------------------------------------------------------------------------
+
 bool Logger::logStatementByConfig(Config* cfg, const SqlStatement& st,
     Database *db)
 {
