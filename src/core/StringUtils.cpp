@@ -73,46 +73,6 @@ wxString std2wxIdentifier(const std::string& input, wxMBConv* conv)
 
 wxString getHtmlCharset()
 {
-#if !wxUSE_UNICODE
-    struct CharsetMapping {
-        wxFontEncoding encoding;
-        const wxChar* htmlCS;
-    };
-    static const CharsetMapping mappings[] = {
-        { wxFONTENCODING_ISO8859_1, wxT("ISO-8859-1") },
-        { wxFONTENCODING_ISO8859_2, wxT("ISO-8859-2") },
-        { wxFONTENCODING_ISO8859_3, wxT("ISO-8859-3") },
-        { wxFONTENCODING_ISO8859_4, wxT("ISO-8859-4") },
-        { wxFONTENCODING_ISO8859_5, wxT("ISO-8859-5") },
-        { wxFONTENCODING_ISO8859_6, wxT("ISO-8859-6") },
-        { wxFONTENCODING_ISO8859_7, wxT("ISO-8859-7") },
-        { wxFONTENCODING_ISO8859_8, wxT("ISO-8859-8") },
-        { wxFONTENCODING_ISO8859_9, wxT("ISO-8859-9") },
-        { wxFONTENCODING_ISO8859_10, wxT("ISO-8859-10") },
-        { wxFONTENCODING_ISO8859_11, wxT("ISO-8859-11") },
-        { wxFONTENCODING_ISO8859_12, wxT("ISO-8859-12") },
-        { wxFONTENCODING_ISO8859_13, wxT("ISO-8859-13") },
-        { wxFONTENCODING_ISO8859_14, wxT("ISO-8859-14") },
-        { wxFONTENCODING_ISO8859_15, wxT("ISO-8859-15") },
-
-        { wxFONTENCODING_CP1250, wxT("windows-1250") },
-        { wxFONTENCODING_CP1251, wxT("windows-1251") },
-        { wxFONTENCODING_CP1252, wxT("windows-1252") },
-        { wxFONTENCODING_CP1253, wxT("windows-1253") },
-        { wxFONTENCODING_CP1254, wxT("windows-1254") },
-        { wxFONTENCODING_CP1255, wxT("windows-1255") },
-        { wxFONTENCODING_CP1256, wxT("windows-1256") },
-        { wxFONTENCODING_CP1257, wxT("windows-1257") }
-    };
-    int mappingCount = sizeof(mappings) / sizeof(CharsetMapping);
-
-    wxFontEncoding enc = wxLocale::GetSystemEncoding();
-    for (int i = 0; i < mappingCount; i++)
-    {
-        if (mappings[i].encoding == enc)
-            return mappings[i].htmlCS;
-    }
-#endif
     return wxT("UTF-8");
 }
 
