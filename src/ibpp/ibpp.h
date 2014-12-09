@@ -57,15 +57,8 @@
 // the standard type 'int' is used. And where an exact integer size is required
 // the standard exact precision types definitions of C 99 standard are used.
 
-#if defined(_MSC_VER) 
-// C99 7.18.1.1 Exact-width integer types (only those used by IBPP)
-    typedef __int16 int16_t;
-    typedef __int32 int32_t;
-    typedef unsigned __int32 uint32_t;
-    typedef __int64 int64_t;
-#else
-    #include <stdint.h>         // C99 (7.18) integer types definitions
-#endif
+#include <stdint.h>
+
 
 #if !defined(_)
 #define _(s)    s
@@ -456,7 +449,7 @@ namespace IBPP
         virtual IBlob* AddRef() = 0;
         virtual void Release() = 0;
 
-        virtual ~IBlob() { };
+        virtual ~IBlob() { }
     };
 
     /*  IArray is the interface to the array capabilities of IBPP. Array is the
@@ -539,7 +532,7 @@ namespace IBPP
     class CountInfo
     {
     public:
-        CountInfo(): inserts(0), updates(0), deletes(0) {};
+        CountInfo(): inserts(0), updates(0), deletes(0) {}
         int inserts;
         int updates;
         int deletes;
@@ -580,7 +573,7 @@ namespace IBPP
         virtual IDatabase* AddRef() = 0;
         virtual void Release() = 0;
 
-        virtual ~IDatabase() { };
+        virtual ~IDatabase() { }
     };
 
     /* ITransaction is the interface to the transaction connections in IBPP.
@@ -610,7 +603,7 @@ namespace IBPP
         virtual ITransaction* AddRef() = 0;
         virtual void Release() = 0;
 
-        virtual ~ITransaction() { };
+        virtual ~ITransaction() { }
     };
 
     /*
@@ -689,7 +682,7 @@ namespace IBPP
         virtual IRow* AddRef() = 0;
         virtual void Release() = 0;
 
-        virtual ~IRow() {};
+        virtual ~IRow() {}
     };
 
     /* IStatement is the interface to the statements execution in IBPP.
@@ -788,7 +781,7 @@ namespace IBPP
         virtual IStatement* AddRef() = 0;
         virtual void Release() = 0;
 
-        virtual ~IStatement() { };
+        virtual ~IStatement() { }
 
         // DEPRECATED METHODS (WON'T BE AVAILABLE IN VERSIONS 3.x)
         virtual bool Get(int, char*) = 0;                   // DEPRECATED
@@ -821,7 +814,7 @@ namespace IBPP
         virtual IEvents* AddRef() = 0;
         virtual void Release() = 0;
 
-        virtual ~IEvents() { };
+        virtual ~IEvents() { }
     };
 
     /* Class EventInterface is merely a pure interface.
@@ -833,7 +826,7 @@ namespace IBPP
     {
     public:
         virtual void ibppEventHandler(Events, const std::string&, int) = 0;
-        virtual ~EventInterface() { };
+        virtual ~EventInterface() { }
     };
 
     //  --- Factories ---
@@ -916,7 +909,3 @@ namespace IBPP
 }
 
 #endif
-
-//
-//  EOF
-//
