@@ -50,7 +50,6 @@
 #define IBPP_UNIX   // IBPP_UNIX stands as a common denominator to *NIX flavours
 #endif
 
-// IBPP is written for 32 bits systems or higher.
 // The standard type 'int' is assumed to be at least 32 bits.
 // And the standard type 'short' is assumed to be exactly 16 bits.
 // Everywhere possible, where the exact size of an integer does not matter,
@@ -259,7 +258,7 @@ namespace IBPP
         bool operator==(const Time& rv) { return mTime == rv.GetTime(); }
         bool operator<(const Time& rv) { return mTime < rv.GetTime(); }
 
-        virtual ~Time() { };
+        virtual ~Time() { }
     };
 
     /* Class Timestamp represent a date AND a time. It is usefull in
