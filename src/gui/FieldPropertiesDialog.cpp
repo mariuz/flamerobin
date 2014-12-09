@@ -50,29 +50,29 @@
 
 struct DatatypeProperties
 {
-    //wxString name;    // doesn't work with Borland
+    wxString name;
     //wxChar name[];    // doesn't work with MSVC
-    const wxChar* name;
+    //const wxChar* name;
     bool hasSize;
     bool hasScale;
     bool isChar;
 };
 
 static const DatatypeProperties datatypes[] = {
-    { wxT("Char"), true, false, true },
-    { wxT("Varchar"), true, false, true },
-    { wxT("Integer") },
-    { wxT("Smallint") },
-    { wxT("Numeric"), true, true, false },
-    { wxT("Decimal"), true, true, false },
-    { wxT("BigInt") },
-    { wxT("Float") },
-    { wxT("Double precision") },
-    { wxT("Date") },
-    { wxT("Time") },
-    { wxT("Timestamp") },
-    { wxT("Array") },
-    { wxT("Blob") }
+    { "Char", true, false, true },
+    { "Varchar", true, false, true },
+    { "Integer" },
+    { "Smallint" },
+    { "Numeric", true, true, false },
+    { "Decimal", true, true, false },
+    { "BigInt" },
+    { "Float" },
+    { "Double precision" },
+    { "Date" },
+    { "Time" },
+    { "Timestamp" },
+    { "Array" },
+    { "Blob" }
 };
 
 const size_t datatypescnt = sizeof(datatypes) / sizeof(DatatypeProperties);
@@ -127,7 +127,7 @@ void FieldPropertiesDialog::createControls()
 
     label_charset = new wxStaticText(getControlsPanel(), wxID_ANY, _("Charset:"));
     const wxString charset_choices[] = {
-        wxT("NONE")
+        "NONE"
     };
     choice_charset = new wxChoice(getControlsPanel(), ID_choice_charset,
         wxDefaultPosition, wxDefaultSize,
@@ -243,7 +243,7 @@ void FieldPropertiesDialog::layoutControls()
 
 const wxString FieldPropertiesDialog::getName() const
 {
-    return wxT("FieldPropertiesDialog");
+    return "FieldPropertiesDialog";
 }
 
 void FieldPropertiesDialog::subjectRemoved(Subject* subject)
@@ -338,7 +338,7 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
             dtScale.Clear();
     }
 
-    wxString alterTable = wxT("ALTER TABLE ") + tableM->getQuotedName() + wxT(" ");
+    wxString alterTable = "ALTER TABLE " + tableM->getQuotedName() + " ";
     enum unn { unnNone, unnBefore, unnAfter } update_not_null = unnNone;
 
     // detect changes to existing field, create appropriate SQL actions
@@ -356,8 +356,8 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
         }
         else
         {
-            statements += alterTable + wxT("ALTER ") + columnM->getQuotedName()
-                + wxT(" TO ") + colNameSql + wxT(";\n\n");
+            statements += alterTable + "ALTER " + columnM->getQuotedName()
+                + " TO " + colNameSql + ";\n\n";
         }
 
         // domain changed ?
@@ -370,23 +370,23 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
         }
         if (columnM->getSource() != selDomain.get() && !newDomain)
         {   // UDD -> other UDD  or  AGD -> UDD
-            statements += alterTable + wxT("ALTER ") + colNameSql +
-                wxT(" TYPE ") + selDomain.getQuoted() + wxT(";\n\n");
+            statements += alterTable + "ALTER " + colNameSql +
+                " TYPE " + selDomain.getQuoted() + ";\n\n";
         }
         else if (newDomain
             || type.CmpNoCase(selDatatype) || size != dtSize || scale != dtScale)
         {   // UDD -> AGD  or  AGD -> different AGD
-            statements += alterTable + wxT("ALTER ") + colNameSql +
-                wxT(" TYPE ");
+            statements += alterTable + "ALTER " + colNameSql +
+                " TYPE ";
             statements += selDatatype;
             if (!dtSize.IsEmpty())
             {
-                statements += wxT("(") + dtSize;
+                statements += "(" + dtSize;
                 if (!dtScale.IsEmpty())
-                    statements += wxT(",") + dtScale;
-                statements += wxT(")");
+                    statements += "," + dtScale;
+                statements += ")";
             }
-            statements += wxT(";\n\n");
+            statements += ";\n\n";
         }
 
         // not null option changed ?
@@ -395,28 +395,28 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
             if (!isNullable) // change from NULL to NOT NULL
                 update_not_null = unnBefore;
 
-            statements += wxT("UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG = ");
+            statements += "UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG = ";
             if (isNullable)
-                statements += wxT("NULL");
+                statements += "NULL";
             else
-                statements += wxT("1");
+                statements += "1";
             // direct change in RDB$RELATION_FIELDS needs unquoted field name
             Identifier id;
             id.setFromSql(colNameSql);
             wxString fnm = id.get();
-            fnm.Replace(wxT("'"), wxT("''"));
+            fnm.Replace("'", "''");
             wxString tnm = tableM->getName_();
-            statements += wxT("\nWHERE RDB$FIELD_NAME = '") + fnm
-                + wxT("' AND RDB$RELATION_NAME = '") + tnm
-                + wxT("';\n\n");
+            statements += "\nWHERE RDB$FIELD_NAME = '" + fnm
+                + "' AND RDB$RELATION_NAME = '" + tnm
+                + "';\n\n";
 
             if (isNullable) // change from NOT NULL to NULL
             {
                 wxString constraintName;
                 if (getNotNullConstraintName(fnm, constraintName))
                 {
-                    statements += alterTable + wxT("DROP CONSTRAINT ")
-                        + constraintName + wxT(";\n\n");
+                    statements += alterTable + "DROP CONSTRAINT "
+                        + constraintName + ";\n\n";
                 }
             }
         }
@@ -424,16 +424,16 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
     else // create new field
     {
         wxString addCollate;
-        statements += alterTable + wxT("ADD \n") + colNameSql + wxT(" ");
+        statements += alterTable + "ADD \n" + colNameSql + " ";
         if (newDomain)
         {
             statements += selDatatype;
             if (!dtSize.IsEmpty())
             {
-                statements += wxT("(") + dtSize;
+                statements += "(" + dtSize;
                 if (!dtScale.IsEmpty())
-                    statements += wxT(",") + dtScale;
-                statements += wxT(")");
+                    statements += "," + dtScale;
+                statements += ")";
             }
             if (datatypes[n].isChar)
             {
@@ -441,9 +441,9 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
                 wxString collate = choice_collate->GetStringSelection();
                 if (!charset.IsEmpty())
                 {
-                    statements += wxT(" CHARACTER SET ") + charset;
+                    statements += " CHARACTER SET " + charset;
                     if (!collate.IsEmpty())
-                        addCollate = wxT(" COLLATE ") + collate;
+                        addCollate = " COLLATE " + collate;
                 }
             }
         }
@@ -452,31 +452,31 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
 
         if (!isNullable)
         {
-            statements += wxT(" NOT NULL");
+            statements += " NOT NULL";
             update_not_null = unnAfter;
         }
-        statements += addCollate + wxT(";\n\n");
+        statements += addCollate + ";\n\n";
     }
 
     if (update_not_null != unnNone && !justCheck)
     {
         wxString s = ::wxGetTextFromUser(
             _("Enter value for existing fields containing NULL"),
-            _("Update Existing NULL Values"), wxT(""), this);
+            _("Update Existing NULL Values"), "", this);
         if (update_not_null == unnBefore)
         {
             wxString origColumnName = columnM->getQuotedName();
-            statements = wxT("UPDATE ") + tableM->getQuotedName()
-                + wxT(" \nSET ") + origColumnName + wxT(" = '") + s
-                + wxT("' \nWHERE ") + origColumnName + wxT(" IS NULL;\n")
+            statements = "UPDATE " + tableM->getQuotedName()
+                + " \nSET " + origColumnName + " = '" + s
+                + "' \nWHERE " + origColumnName + " IS NULL;\n"
                 + statements;
         }
         else
         {
-            statements = statements + wxT("COMMIT;\n")
-                + wxT("UPDATE ") + tableM->getQuotedName()
-                + wxT(" \nSET ") + colNameSql + wxT(" = '") + s
-                + wxT("' \nWHERE ") + colNameSql + wxT(" IS NULL;\n");
+            statements = statements + "COMMIT;\n"
+                + "UPDATE " + tableM->getQuotedName()
+                + " \nSET " + colNameSql + " = '" + s
+                + "' \nWHERE " + colNameSql + " IS NULL;\n";
         }
     }
     statements += textctrl_sql->GetValue();
@@ -495,13 +495,13 @@ void FieldPropertiesDialog::loadCharsets()
     wxWindowUpdateLocker freeze(choice_charset);
 
     choice_charset->Clear();
-    choice_charset->Append(wxT("NONE"));
+    choice_charset->Append("NONE");
     if (DatabasePtr db = tableM->getDatabase())
     {
-        wxString stmt = wxT("select rdb$character_set_name")
-            wxT(" from rdb$character_sets order by 1");
+        wxString stmt = "select rdb$character_set_name"
+            " from rdb$character_sets order by 1";
         wxArrayString charsets(db->loadIdentifiers(stmt));
-        charsets.Remove(wxT("NONE"));
+        charsets.Remove("NONE");
         choice_charset->Append(charsets);
     }
 }
@@ -617,7 +617,7 @@ void FieldPropertiesDialog::updateControls()
 
     wxString genName;
     if (tableM)
-        genName = wxT("GEN_") + tableM->getName_() + wxT("_ID");
+        genName = "GEN_" + tableM->getName_() + "_ID";
     textctrl_generator_name->SetValue(genName);
 
     loadGeneratorNames();
@@ -654,7 +654,7 @@ void FieldPropertiesDialog::updateDomainControls()
 
     // data type, size, scale and collate are not editable for all other
     // already existing domains
-    bool allowEdit = (newDomain || domain.Mid(0, 4) == wxT("RDB$"));
+    bool allowEdit = (newDomain || domain.Mid(0, 4) == "RDB$");
     choice_datatype->Enable(allowEdit);
     if (allowEdit)
         updateDatatypeInfo();
@@ -689,27 +689,27 @@ void FieldPropertiesDialog::updateSqlStatement()
     if (radio_generator_new->GetValue())
     {
         generator.setText(textctrl_generator_name->GetValue());
-        sql = wxT("CREATE GENERATOR ") + generator.getQuoted() + wxT(";\n\n");
+        sql = "CREATE GENERATOR " + generator.getQuoted() + ";\n\n";
     }
 
     if (checkbox_trigger->IsChecked())
     {
         // TODO: we could use BIGINT for FB 1.5 and above
-        Identifier triggername(tableM->getName_() + wxT("_BI"));
-        sql += wxT("SET TERM !! ;\n");
-        sql += wxT("CREATE TRIGGER ") + triggername.getQuoted() + wxT(" FOR ")
-            + tableM->getQuotedName() + wxT("\n")
-            + wxT("ACTIVE BEFORE INSERT POSITION 0\nAS\n")
-            + wxT("DECLARE VARIABLE tmp DECIMAL(18,0);\nBEGIN\n")
-            + wxT("  IF (NEW.") + fNameSql + wxT(" IS NULL) THEN\n")
-            + wxT("    NEW.") + fNameSql + wxT(" = GEN_ID(")
-            + generator.getQuoted() + wxT(", 1);\n")
-            + wxT("  ELSE\n  BEGIN\n    tmp = GEN_ID(")
-            + generator.getQuoted() + wxT(", 0);\n    if (tmp < new.")
-            + fNameSql + wxT(") then\n      tmp = GEN_ID(")
-            + generator.getQuoted() + wxT(", new.") + fNameSql
-            + wxT("-tmp);\n  END\nEND!!\n");
-        sql += wxT("SET TERM ; !!\n");
+        Identifier triggername(tableM->getName_() + "_BI");
+        sql += "SET TERM !! ;\n";
+        sql += "CREATE TRIGGER " + triggername.getQuoted() + " FOR "
+            + tableM->getQuotedName() + "\n"
+            + "ACTIVE BEFORE INSERT POSITION 0\nAS\n"
+            + "DECLARE VARIABLE tmp DECIMAL(18,0);\nBEGIN\n"
+            + "  IF (NEW." + fNameSql + " IS NULL) THEN\n"
+            + "    NEW." + fNameSql + " = GEN_ID("
+            + generator.getQuoted() + ", 1);\n"
+            + "  ELSE\n  BEGIN\n    tmp = GEN_ID("
+            + generator.getQuoted() + ", 0);\n    if (tmp < new."
+            + fNameSql + ") then\n      tmp = GEN_ID("
+            + generator.getQuoted() + ", new." + fNameSql
+            + "-tmp);\n  END\nEND!!\n";
+        sql += "SET TERM ; !!\n";
     }
 
     textctrl_sql->SetValue(sql);
@@ -841,8 +841,8 @@ const ColumnPropertiesHandler ColumnPropertiesHandler::handlerInstance;
 
 bool ColumnPropertiesHandler::handleURI(URI& uri)
 {
-    bool addField = uri.action == wxT("add_field");
-    bool editField = uri.action == wxT("edit_field");
+    bool addField = uri.action == "add_field";
+    bool editField = uri.action == "edit_field";
     if (!addField && !editField)
         return false;
 

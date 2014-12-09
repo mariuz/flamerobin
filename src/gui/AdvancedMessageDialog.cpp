@@ -147,7 +147,7 @@ void TextWrapEngine::computeWordWrap(const wxString& text, const wxFont& font,
 {
     // split text into lines
     wxArrayString lines;
-    wxStringTokenizer tokenizer(text, wxT("\n"), wxTOKEN_RET_EMPTY);
+    wxStringTokenizer tokenizer(text, "\n", wxTOKEN_RET_EMPTY);
     while (tokenizer.HasMoreTokens())
         lines.Add(tokenizer.GetNextToken().Trim());
 
@@ -157,7 +157,7 @@ void TextWrapEngine::computeWordWrap(const wxString& text, const wxFont& font,
 
     if (wrapWidth <= 0)
     {
-        dc.GetTextExtent(wxT("x"), &wrapWidth, 0);
+        dc.GetTextExtent("x", &wrapWidth, 0);
         wrapWidth *= 68;
     }
 
@@ -183,7 +183,7 @@ void TextWrapEngine::computeWordWrap(const wxString& text, const wxFont& font,
     for (size_t i = 0; i < lines.size(); i++)
     {
         if (!wrappedText.empty())
-            wrappedText += wxT("\n");
+            wrappedText += "\n";
         if (!lines[i].empty())
             wrappedText += wrapLine(dc, lines[i], wrapWidth);
     }
@@ -203,7 +203,7 @@ int TextWrapEngine::computeBestWrapWidth(wxDC& dc, const wxString& text,
     wxSize origExtent = computeWrappedExtent(dc, text, wrapWidth);
     // don't try to wrap single-line text
     int h;
-    dc.GetTextExtent(wxT("x"), 0, &h);
+    dc.GetTextExtent("x", 0, &h);
     if (origExtent.GetHeight() == h)
         return origExtent.GetWidth();
 
@@ -281,7 +281,7 @@ wxString TextWrapEngine::wrapLine(wxDC& dc, const wxString& text,
         if (w > wrapWidth || *r == 0)
         {
             if (!result.empty())
-                result += wxT("\n");
+                result += "\n";
             result += text.Mid(p-pos, pWrap-p);
             p = pWrap;
             // scan over whitespace

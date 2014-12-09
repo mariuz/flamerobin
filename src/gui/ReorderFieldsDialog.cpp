@@ -109,7 +109,7 @@ void ReorderFieldsDialog::layoutControls()
 
 const wxString ReorderFieldsDialog::getName() const
 {
-    return wxT("ReorderFieldsDialog");
+    return "ReorderFieldsDialog";
 }
 
 void ReorderFieldsDialog::moveSelected(int moveby)
@@ -166,7 +166,7 @@ const wxString ReorderFieldsDialog::getStatementsToExecute()
     for (int i = 0; i < (int)list_box_fields->GetCount(); ++i)
     {
         Identifier temp(list_box_fields->GetString(i));
-        sql += wxString::Format(wxT("ALTER TABLE %s ALTER %s POSITION %d;\n"),
+        sql += wxString::Format("ALTER TABLE %s ALTER %s POSITION %d;\n",
             tableM->getQuotedName().c_str(),
             temp.getQuoted().c_str(), i + 1);
     }
@@ -222,7 +222,7 @@ const ReorderFieldsHandler ReorderFieldsHandler::handlerInstance;
 
 bool ReorderFieldsHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("reorder_fields"))
+    if (uri.action != "reorder_fields")
         return false;
 
     Table* t = extractMetadataItemFromURI<Table>(uri);

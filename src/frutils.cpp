@@ -66,7 +66,7 @@ void adjustControlsMinWidth(std::list<wxWindow*> controls)
 void readBlob(IBPP::Statement& st, int column, wxString& result,
     wxMBConv* conv)
 {
-    result = wxT("");
+    result = "";
     if (st->IsNull(column))
         return;
 
@@ -105,7 +105,7 @@ wxString selectRelationColumns(Relation* t, wxWindow* parent)
     std::vector<wxString>::iterator it = list.begin();
     wxString retval(*it);
     while ((++it) != list.end())
-        retval += wxT(", ") + (*it);
+        retval += ", " + (*it);
     return retval;
 }
 
@@ -188,11 +188,11 @@ bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
         else
             msg = _("None of the known database connection credentials could be used.");
         if (sysdba)
-            msg = msg = msg + wxT("\n") + _("Please enter connection credentials with administrative rights.");
+            msg = msg = msg + "\n" + _("Please enter connection credentials with administrative rights.");
 
         int flags = UsernamePasswordDialog::AllowTrustedUser
             | (sysdba ? 0 : UsernamePasswordDialog::AllowOtherUsername);
-        UsernamePasswordDialog upd(wxGetActiveWindow(), msg, wxT("SYSDBA"),
+        UsernamePasswordDialog upd(wxGetActiveWindow(), msg, "SYSDBA",
             flags);
         if (upd.ShowModal() != wxID_OK)
             return false;
@@ -205,7 +205,7 @@ bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
                 wx2std(username), wx2std(password));
             svc->Connect();
             // exception might be thrown. If not, we store the credentials:
-            if (sysdba || username.Upper() == wxT("SYSDBA"))
+            if (sysdba || username.Upper() == "SYSDBA")
                 s->setServiceSysdbaPassword(password);
             else
                 s->setServiceCredentials(username, password);

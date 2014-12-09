@@ -155,9 +155,9 @@ void parseTable(wxXmlNode* xmln, std::map<wxString, int>& tr)
             continue;
 
         wxString value(getNodeContent(xmln));
-        if (xmln->GetName() == wxT("name"))
+        if (xmln->GetName() == "name")
             tablename = value;
-        else if (xmln->GetName() == wxT("records"))
+        else if (xmln->GetName() == "records")
             value.ToLong(&records);
     }
 
@@ -200,16 +200,16 @@ GeneratorSettings::GeneratorSettings(GeneratorSettings* other)
 
 void GeneratorSettings::toXML(wxXmlNode *parent)
 {
-    dsAddChildNode(parent, wxT("valueType"),
-        wxString::Format(wxT("%d"), (int)valueType));
-    dsAddChildNode(parent, wxT("range"), range);
-    dsAddChildNode(parent, wxT("sourceTable"), sourceTable);
-    dsAddChildNode(parent, wxT("sourceColumn"), sourceColumn);
-    dsAddChildNode(parent, wxT("fileName"), fileName);
-    dsAddChildNode(parent, wxT("randomValues"),
-        randomValues ? wxT("1") : wxT("0"));
-    dsAddChildNode(parent, wxT("nullPercent"),
-        wxString::Format(wxT("%d"), nullPercent));
+    dsAddChildNode(parent, "valueType",
+        wxString::Format("%d", (int)valueType));
+    dsAddChildNode(parent, "range", range);
+    dsAddChildNode(parent, "sourceTable", sourceTable);
+    dsAddChildNode(parent, "sourceColumn", sourceColumn);
+    dsAddChildNode(parent, "fileName", fileName);
+    dsAddChildNode(parent, "randomValues",
+        randomValues ? "1" : "0");
+    dsAddChildNode(parent, "nullPercent",
+        wxString::Format("%d", nullPercent));
 }
 
 wxString GeneratorSettings::fromXML(wxXmlNode *parent)
@@ -224,25 +224,25 @@ wxString GeneratorSettings::fromXML(wxXmlNode *parent)
             continue;
 
         wxString value(getNodeContent(xmln));
-        if (xmln->GetName() == wxT("name"))
+        if (xmln->GetName() == "name")
             colname = value;
-        else if (xmln->GetName() == wxT("valueType"))
+        else if (xmln->GetName() == "valueType")
         {
             if (!value.ToLong(&l))
                 return wxEmptyString;
             valueType = (ValueType)l;
         }
-        else if (xmln->GetName() == wxT("range"))
+        else if (xmln->GetName() == "range")
             range = value;
-        else if (xmln->GetName() == wxT("sourceTable"))
+        else if (xmln->GetName() == "sourceTable")
             sourceTable = value;
-        else if (xmln->GetName() == wxT("sourceColumn"))
+        else if (xmln->GetName() == "sourceColumn")
             sourceColumn = value;
-        else if (xmln->GetName() == wxT("fileName"))
+        else if (xmln->GetName() == "fileName")
             fileName = value;
-        else if (xmln->GetName() == wxT("randomValues"))
-            randomValues = (value == wxT("1"));
-        else if (xmln->GetName() == wxT("nullPercent"))
+        else if (xmln->GetName() == "randomValues")
+            randomValues = (value == "1");
+        else if (xmln->GetName() == "nullPercent")
         {
             if (!value.ToLong(&l))
                 return wxEmptyString;
@@ -253,7 +253,7 @@ wxString GeneratorSettings::fromXML(wxXmlNode *parent)
 }
 
 DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
-    :BaseFrame(parent,-1, wxT("")), databaseM(db), loadingM(true)
+    :BaseFrame(parent,-1, ""), databaseM(db), loadingM(true)
 {
     // until we find something better
     SetIcon(wxArtProvider::GetIcon(ART_Procedure, wxART_FRAME_ICON));
@@ -281,7 +281,7 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     wxBoxSizer* leftPanelSizer;
     leftPanelSizer = new wxBoxSizer( wxVERTICAL );
 
-    leftLabel = new wxStaticText( leftPanel, wxID_ANY, wxT("Select tables and columns"), wxDefaultPosition, wxDefaultSize, 0 );
+    leftLabel = new wxStaticText( leftPanel, wxID_ANY, "Select tables and columns", wxDefaultPosition, wxDefaultSize, 0 );
     leftPanelSizer->Add( leftLabel, 0, wxALL|wxEXPAND, 5 );
 
     mainTree = new DBHTreeControl(leftPanel, wxDefaultPosition, wxDefaultSize,
@@ -298,17 +298,17 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     rightPanel = new wxPanel( mainSplitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
     rightPanelSizer = new wxBoxSizer( wxVERTICAL );
 
-    rightLabel = new wxStaticText( rightPanel, wxID_ANY, wxT("Configure"), wxDefaultPosition, wxDefaultSize, 0 );
+    rightLabel = new wxStaticText( rightPanel, wxID_ANY, "Configure", wxDefaultPosition, wxDefaultSize, 0 );
     rightPanelSizer->Add( rightLabel, 0, wxALL|wxEXPAND, 5 );
 
-    tableLabel = new wxStaticText( rightPanel, wxID_ANY, wxT("Table: table name"), wxDefaultPosition, wxDefaultSize, 0 );
-    tableLabel->SetFont( wxFont( 10, 74, 90, 92, false, wxT("sans") ) );
+    tableLabel = new wxStaticText( rightPanel, wxID_ANY, "Table: table name", wxDefaultPosition, wxDefaultSize, 0 );
+    tableLabel->SetFont( wxFont( 10, 74, 90, 92, false, "sans" ) );
 
     rightPanelSizer->Add( tableLabel, 0, wxTOP|wxBOTTOM|wxLEFT, 10 );
 
     wxBoxSizer* recordsSizer = new wxBoxSizer( wxHORIZONTAL );
 
-    recordsLabel = new wxStaticText( rightPanel, wxID_ANY, wxT("Number of records to create:"), wxDefaultPosition, wxDefaultSize, 0 );
+    recordsLabel = new wxStaticText( rightPanel, wxID_ANY, "Number of records to create:", wxDefaultPosition, wxDefaultSize, 0 );
     recordsSizer->Add( recordsLabel, 0, wxALIGN_CENTER_VERTICAL|wxLEFT, 10 );
 
     spinRecords = new wxSpinCtrl( rightPanel, wxID_ANY, wxEmptyString, wxDefaultPosition,
@@ -317,34 +317,34 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
 
     rightPanelSizer->Add( recordsSizer, 0, wxEXPAND, 5 );
 
-    skipCheckbox = new wxCheckBox( rightPanel, ID_checkbox_skip, wxT("Skip this table"), wxDefaultPosition, wxDefaultSize, 0 );
+    skipCheckbox = new wxCheckBox( rightPanel, ID_checkbox_skip, "Skip this table", wxDefaultPosition, wxDefaultSize, 0 );
 
     rightPanelSizer->Add( skipCheckbox, 0, wxBOTTOM|wxRIGHT|wxLEFT, 8 );
 
-    columnLabel = new wxStaticText( rightPanel, wxID_ANY, wxT("Column: column name"), wxDefaultPosition, wxDefaultSize, 0 );
-    columnLabel->SetFont( wxFont( 10, 74, 90, 92, false, wxT("sans") ) );
+    columnLabel = new wxStaticText( rightPanel, wxID_ANY, "Column: column name", wxDefaultPosition, wxDefaultSize, 0 );
+    columnLabel->SetFont( wxFont( 10, 74, 90, 92, false, "sans" ) );
 
     rightPanelSizer->Add( columnLabel, 0, wxTOP|wxLEFT, 10 );
 
-    valuetypeLabel = new wxStaticText( rightPanel, wxID_ANY, wxT("Value type:"), wxDefaultPosition, wxDefaultSize, 0 );
+    valuetypeLabel = new wxStaticText( rightPanel, wxID_ANY, "Value type:", wxDefaultPosition, wxDefaultSize, 0 );
     rightPanelSizer->Add( valuetypeLabel, 0, wxALL, 10 );
 
     wxFlexGridSizer* flexSizer = new wxFlexGridSizer( 2, 2, 3, 3 );
     flexSizer->AddGrowableCol( 1 );
     flexSizer->SetFlexibleDirection( wxHORIZONTAL );
 
-    radioSkip = new wxRadioButton( rightPanel, wxID_ANY, wxT("Skip"), wxDefaultPosition, wxDefaultSize, 0);
+    radioSkip = new wxRadioButton( rightPanel, wxID_ANY, "Skip", wxDefaultPosition, wxDefaultSize, 0);
     flexSizer->Add( radioSkip, 0, wxALIGN_CENTER_VERTICAL, 5 );
 
     flexSizer->Add( 0, 0, 1, wxALL, 5 );
 
-    radioRange = new wxRadioButton( rightPanel, wxID_ANY, wxT("Range/mask:"), wxDefaultPosition, wxDefaultSize, 0);
+    radioRange = new wxRadioButton( rightPanel, wxID_ANY, "Range/mask:", wxDefaultPosition, wxDefaultSize, 0);
     flexSizer->Add( radioRange, 0, wxALIGN_CENTER_VERTICAL, 5 );
 
     rangeText = new wxTextCtrl( rightPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
     flexSizer->Add( rangeText, 0, wxEXPAND|wxALIGN_CENTER_VERTICAL, 5 );
 
-    radioColumn = new wxRadioButton( rightPanel, wxID_ANY, wxT("Value from column:"), wxDefaultPosition, wxDefaultSize, 0);
+    radioColumn = new wxRadioButton( rightPanel, wxID_ANY, "Value from column:", wxDefaultPosition, wxDefaultSize, 0);
     flexSizer->Add( radioColumn, 0, wxALIGN_CENTER_VERTICAL, 5 );
 
     wxArrayString tables;
@@ -361,7 +361,7 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     valueSizer->Add( valueColumnChoice, 0, wxALIGN_CENTER_VERTICAL|wxEXPAND|wxLEFT, 5 );
     flexSizer->Add( valueSizer, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL, 5 );
 
-    radioFile = new wxRadioButton( rightPanel, wxID_ANY, wxT("Value from file:"), wxDefaultPosition, wxDefaultSize, 0);
+    radioFile = new wxRadioButton( rightPanel, wxID_ANY, "Value from file:", wxDefaultPosition, wxDefaultSize, 0);
     flexSizer->Add( radioFile, 0, wxALIGN_CENTER_VERTICAL, 5 );
 
     wxBoxSizer* filenameSizer = new wxBoxSizer( wxHORIZONTAL );
@@ -369,35 +369,35 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     fileText = new wxTextCtrl( rightPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
     filenameSizer->Add( fileText, 1, wxALIGN_CENTER_VERTICAL, 5 );
 
-    fileButton = new wxButton( rightPanel, ID_button_file, wxT("..."), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT );
+    fileButton = new wxButton( rightPanel, ID_button_file, "...", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT );
     filenameSizer->Add( fileButton, 0, wxLEFT, 5 );
 
     flexSizer->Add( filenameSizer, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL, 5 );
 
     rightPanelSizer->Add( flexSizer, 0, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 10 );
 
-    randomCheckbox = new wxCheckBox( rightPanel, wxID_ANY, wxT("Select random values rather than sequential"), wxDefaultPosition, wxDefaultSize, 0 );
+    randomCheckbox = new wxCheckBox( rightPanel, wxID_ANY, "Select random values rather than sequential", wxDefaultPosition, wxDefaultSize, 0 );
     randomCheckbox->SetValue(true);
 
     rightPanelSizer->Add( randomCheckbox, 0, wxALL, 8 );
 
     wxBoxSizer* nullSizer = new wxBoxSizer( wxHORIZONTAL );
 
-    nullLabel = new wxStaticText( rightPanel, wxID_ANY, wxT("Percentage of NULLs:"), wxDefaultPosition, wxDefaultSize, 0 );
+    nullLabel = new wxStaticText( rightPanel, wxID_ANY, "Percentage of NULLs:", wxDefaultPosition, wxDefaultSize, 0 );
     nullSizer->Add( nullLabel, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM|wxLEFT, 10 );
 
     nullSpin = new wxSpinCtrl( rightPanel, wxID_ANY, wxEmptyString, wxDefaultPosition,
         wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, 0);
     nullSizer->Add( nullSpin, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 
-    nullPercentLabel = new wxStaticText( rightPanel, wxID_ANY, wxT("%"), wxDefaultPosition, wxDefaultSize, 0 );
+    nullPercentLabel = new wxStaticText( rightPanel, wxID_ANY, "%", wxDefaultPosition, wxDefaultSize, 0 );
     nullSizer->Add( nullPercentLabel, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM|wxRIGHT, 5 );
 
     rightPanelSizer->Add( nullSizer, 0, wxEXPAND, 5 );
 
     copySizer = new wxBoxSizer( wxHORIZONTAL );
 
-    copyLabel = new wxStaticText( rightPanel, wxID_ANY, wxT("Copy settings from:"), wxDefaultPosition, wxDefaultSize, 0 );
+    copyLabel = new wxStaticText( rightPanel, wxID_ANY, "Copy settings from:", wxDefaultPosition, wxDefaultSize, 0 );
     copySizer->Add( copyLabel, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM|wxRIGHT, 10 );
 
     copyChoice = new wxChoice( rightPanel, ID_choice_copy, wxDefaultPosition, wxDefaultSize, tables, 0 );
@@ -405,7 +405,7 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     copyColumnChoice = new wxChoice( rightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, empty, 0 );
     copySizer->Add( copyColumnChoice, 1, wxLEFT|wxALIGN_CENTER_VERTICAL, 5 );
 
-    copyButton = new wxButton( rightPanel, ID_button_copy, wxT("Copy"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT );
+    copyButton = new wxButton( rightPanel, ID_button_copy, "Copy", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT );
     copySizer->Add( copyButton, 0, wxALIGN_CENTER_VERTICAL|wxTOP|wxBOTTOM|wxLEFT, 5 );
 
     rightPanelSizer->Add( copySizer, 0, wxEXPAND|wxRIGHT|wxLEFT, 10 );
@@ -421,13 +421,13 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
 
     buttonSizer->Add( 0, 0, 1, wxALL, 5 );
 
-    saveButton = new wxButton( outerPanel, ID_button_save, wxT("Save settings"), wxDefaultPosition, wxDefaultSize, 0 );
+    saveButton = new wxButton( outerPanel, ID_button_save, "Save settings", wxDefaultPosition, wxDefaultSize, 0 );
     buttonSizer->Add( saveButton, 0, wxALL, 5 );
 
-    loadButton = new wxButton( outerPanel, ID_button_load, wxT("Load settings"), wxDefaultPosition, wxDefaultSize, 0 );
+    loadButton = new wxButton( outerPanel, ID_button_load, "Load settings", wxDefaultPosition, wxDefaultSize, 0 );
     buttonSizer->Add( loadButton, 0, wxALL, 5 );
 
-    generateButton = new wxButton( outerPanel, ID_button_generate, wxT("Generate data"), wxDefaultPosition, wxDefaultSize, 0 );
+    generateButton = new wxButton( outerPanel, ID_button_generate, "Generate data", wxDefaultPosition, wxDefaultSize, 0 );
     buttonSizer->Add( generateButton, 0, wxTOP|wxBOTTOM|wxLEFT, 5 );
 
     buttonSizer->Add( 10, 0, 0, wxRIGHT, 0 );
@@ -468,7 +468,7 @@ DataGeneratorFrame::~DataGeneratorFrame()
 
 const wxString DataGeneratorFrame::getName() const
 {
-    return wxT("DataGeneratorFrame");
+    return "DataGeneratorFrame";
 }
 
 const wxRect DataGeneratorFrame::getDefaultRect() const
@@ -509,31 +509,31 @@ wxString getDefaultRange(Domain *d)
     wxString dt, size, scale;
     d->getDatatypeParts(dt, size, scale);
 
-    if (dt == wxT("Smallint") || dt == wxT("Float"))
-        return wxT("0-100");
+    if (dt == "Smallint" || dt == "Float")
+        return "0-100";
 
-    if (   dt == wxT("Numeric") || dt == wxT("Integer") || dt == wxT("Bigint")
-        || dt == wxT("Decimal") || dt == wxT("Double precision"))
+    if (   dt == "Numeric" || dt == "Integer" || dt == "Bigint"
+        || dt == "Decimal" || dt == "Double precision")
     {
-        return wxT("0-2000000");
+        return "0-2000000";
     }
 
-    if (dt == wxT("Char") || dt == wxT("Varchar"))
+    if (dt == "Char" || dt == "Varchar")
     {
-        if (size == wxT("1"))
-            return wxT("[az,AZ]");
+        if (size == "1")
+            return "[az,AZ]";
         else
-            return size + wxT("[az,AZ]");
+            return size + "[az,AZ]";
     }
 
-    if (dt == wxT("Timestamp"))
-        return wxT("01.01.1980 00:00:00-31.12.2005 23:59:59");
+    if (dt == "Timestamp")
+        return "01.01.1980 00:00:00-31.12.2005 23:59:59";
 
-    if (dt == wxT("Date"))
-        return wxT("01.01.1980-31.12.2005");
+    if (dt == "Date")
+        return "01.01.1980-31.12.2005";
 
-    if (dt == wxT("Time"))
-        return wxT("00:00:00-23:59:59");
+    if (dt == "Time")
+        return "00:00:00-23:59:59";
 
     return wxEmptyString;
 }
@@ -544,7 +544,7 @@ GeneratorSettings* DataGeneratorFrame::getSettings(Column *c)
     Table *tab = c->getTable();
     if (!tab)
         throw FRError(_("Table not set"));
-    wxString s = tab->getQuotedName() + wxT(".") + c->getQuotedName();
+    wxString s = tab->getQuotedName() + "." + c->getQuotedName();
     std::map<wxString, GeneratorSettings *>::iterator it = settingsM.find(s);
     if (it != settingsM.end())    // found
         return (*it).second;
@@ -752,7 +752,7 @@ void DataGeneratorFrame::loadSetting(wxTreeItemId newitem)
         return;
 
     wxString tablename = tab->getQuotedName();
-    tableLabel->SetLabel(wxT("Table: ") + tab->getName_());
+    tableLabel->SetLabel("Table: " + tab->getName_());
     int records = 0;    // tables are not filled by default
     std::map<wxString, int>::iterator i1 = tableRecordsM.find(tablename);
     if (i1 != tableRecordsM.end())
@@ -762,7 +762,7 @@ void DataGeneratorFrame::loadSetting(wxTreeItemId newitem)
 
     if (!col)
         return;
-    columnLabel->SetLabel(wxT("Column: ") + col->getName_());
+    columnLabel->SetLabel("Column: " + col->getName_());
 
     // copy settings from gs to controls
     GeneratorSettings *gs = getSettings(col);
@@ -794,7 +794,7 @@ void DataGeneratorFrame::loadSetting(wxTreeItemId newitem)
 
 void DataGeneratorFrame::OnLoadButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    wxFileDialog fd(this, _("Select file to load"), wxT(""), wxT(""),
+    wxFileDialog fd(this, _("Select file to load"), "", "",
         _("XML files (*.xml)|*.xml|All files (*.*)|*.*"),
         wxFD_OPEN | wxFD_CHANGE_DIR);
     if (wxID_OK != fd.ShowModal())
@@ -806,7 +806,7 @@ void DataGeneratorFrame::OnLoadButtonClick(wxCommandEvent& WXUNUSED(event))
     if (stream.Ok() && doc.Load(stream) && doc.IsOk())
     {
         root = doc.GetRoot();
-        if (root->GetName() != wxT("dgf_root"))
+        if (root->GetName() != "dgf_root")
             root = 0;
     }
 
@@ -832,7 +832,7 @@ void DataGeneratorFrame::OnLoadButtonClick(wxCommandEvent& WXUNUSED(event))
     {
         if (xmln->GetType() != wxXML_ELEMENT_NODE)
             continue;
-        if (xmln->GetName() == wxT("column"))
+        if (xmln->GetName() == "column")
         {
             GeneratorSettings *gs = new GeneratorSettings;
             wxString name = gs->fromXML(xmln);
@@ -846,7 +846,7 @@ void DataGeneratorFrame::OnLoadButtonClick(wxCommandEvent& WXUNUSED(event))
             settingsM.insert(
                 std::pair<wxString, GeneratorSettings *>(name, gs));
         }
-        if (xmln->GetName() == wxT("table"))
+        if (xmln->GetName() == "table")
             parseTable(xmln, tableRecordsM);
     }
 
@@ -862,7 +862,7 @@ void DataGeneratorFrame::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     saveSetting(mainTree->GetSelection());  // save current item if changed
 
-    wxFileDialog fd(this, _("Select file to save"), wxT(""), wxT(""),
+    wxFileDialog fd(this, _("Select file to save"), "", "",
         _("XML files (*.xml)|*.xml|All files (*.*)|*.*"),
         wxFD_SAVE | wxFD_CHANGE_DIR | wxFD_OVERWRITE_PROMPT);
     if (wxID_OK != fd.ShowModal())
@@ -875,27 +875,27 @@ void DataGeneratorFrame::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
         wxMkdir(dir);
 
     wxXmlDocument doc;
-    wxXmlNode* root = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("dgf_root"));
+    wxXmlNode* root = new wxXmlNode(wxXML_ELEMENT_NODE, "dgf_root");
     doc.SetRoot(root);
 
     // save tables
     for (std::map<wxString, int>::iterator it = tableRecordsM.begin();
         it != tableRecordsM.end(); ++it)
     {
-        wxXmlNode* node = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("table"));
+        wxXmlNode* node = new wxXmlNode(wxXML_ELEMENT_NODE, "table");
         root->AddChild(node);
-        dsAddChildNode(node, wxT("name"), (*it).first);
-        dsAddChildNode(node, wxT("records"),
-            wxString::Format(wxT("%d"), (*it).second));
+        dsAddChildNode(node, "name", (*it).first);
+        dsAddChildNode(node, "records",
+            wxString::Format("%d", (*it).second));
     }
 
     // save columns
     for (std::map<wxString, GeneratorSettings *>::iterator it =
         settingsM.begin(); it!= settingsM.end(); ++it)
     {
-        wxXmlNode* cs = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("column"));
+        wxXmlNode* cs = new wxXmlNode(wxXML_ELEMENT_NODE, "column");
         root->AddChild(cs);
-        dsAddChildNode(cs, wxT("name"), (*it).first);
+        dsAddChildNode(cs, "name", (*it).first);
         (*it).second->toXML(cs);
     }
 
@@ -924,7 +924,7 @@ void DataGeneratorFrame::OnCopyButtonClick(wxCommandEvent& WXUNUSED(event))
         throw FRError(_("Table not found."));
 
     // copy settings
-    wxString name = copyChoice->GetStringSelection() + wxT(".") +
+    wxString name = copyChoice->GetStringSelection() + "." +
         copyColumnChoice->GetStringSelection();
     std::map<wxString, GeneratorSettings *>::iterator it =
         settingsM.find(name);
@@ -938,7 +938,7 @@ void DataGeneratorFrame::OnCopyButtonClick(wxCommandEvent& WXUNUSED(event))
 
     GeneratorSettings *n = new GeneratorSettings((*it).second);
 
-    wxString c = tab->getQuotedName() + wxT(".") + col->getQuotedName();
+    wxString c = tab->getQuotedName() + "." + col->getQuotedName();
     it = settingsM.find(c);
     if (it == settingsM.end())  // this should not happen either, but still
         settingsM.insert(std::pair<wxString, GeneratorSettings *>(c, n));
@@ -954,7 +954,7 @@ void DataGeneratorFrame::OnCopyButtonClick(wxCommandEvent& WXUNUSED(event))
 
 void DataGeneratorFrame::OnFileButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    wxFileDialog fd(this, _("Select file to load"), wxT(""), wxT(""),
+    wxFileDialog fd(this, _("Select file to load"), "", "",
         _("Text files (*.txt)|*.txt|All files (*.*)|*.*"),
         wxFD_OPEN | wxFD_CHANGE_DIR);
     if (wxID_OK != fd.ShowModal())
@@ -1051,7 +1051,7 @@ wxString getCharFromRange(const wxString& range, bool rnd, int recNo,
     {
         // last
         wxString one = range.Mid(start);
-        size_t p = range.find(wxT(","), start);
+        size_t p = range.find(",", start);
         if (p != wxString::npos)
         {
             one = range.Mid(start, p-start);
@@ -1195,11 +1195,11 @@ void setFromOther(IBPP::Statement st, int param,
     IBPP::Statement st2 =
         IBPP::StatementFactory(st->DatabasePtr(), st->TransactionPtr());
 
-    wxString sql = wxT("SELECT ") + gs->sourceColumn + wxT(" FROM ")
-        + gs->sourceTable + wxT(" WHERE ") + gs->sourceColumn
-        + wxT(" IS NOT NULL");
+    wxString sql = "SELECT " + gs->sourceColumn + " FROM "
+        + gs->sourceTable + " WHERE " + gs->sourceColumn
+        + " IS NOT NULL";
     if (!gs->randomValues)
-        sql += wxT(" ORDER BY 1");
+        sql += " ORDER BY 1";
     st2->Prepare(wx2std(sql));
     st2->Execute();
     std::vector<T> values;
@@ -1245,9 +1245,9 @@ void DataGeneratorFrame::setString(IBPP::Statement st, int param,
     size_t start = 0;
     while (start < gs->range.Length())
     {
-        if (gs->range.Mid(start, 1) == wxT("["))
+        if (gs->range.Mid(start, 1) == "[")
         {
-            size_t p = gs->range.find(wxT("]"), start+1);
+            size_t p = gs->range.find("]", start+1);
             if (p == wxString::npos)    // invalid mask
                 throw FRError(_("Invalid mask: missing ]"));
             for (int i = 0; i < chars; i++)
@@ -1260,7 +1260,7 @@ void DataGeneratorFrame::setString(IBPP::Statement st, int param,
         }
         else
         {
-            size_t p = gs->range.find(wxT("["), start+1);
+            size_t p = gs->range.find("[", start+1);
             if (p == wxString::npos)    // invalid mask
                 throw FRError(_("Invalid mask, missing ["));
             wxString number = gs->range.Mid(start, p-start);
@@ -1283,7 +1283,7 @@ void setNumber(IBPP::Statement st, int param, GeneratorSettings* gs, int recNo)
     {
         // last
         wxString one = gs->range.Mid(start);
-        size_t p = gs->range.find(wxT(","), start);
+        size_t p = gs->range.find(",", start);
         if (p != wxString::npos)
         {
             one = gs->range.Mid(start, p-start);
@@ -1292,7 +1292,7 @@ void setNumber(IBPP::Statement st, int param, GeneratorSettings* gs, int recNo)
         else
             start = gs->range.Length(); // exit on next loop
 
-        p = one.find(wxT("-"));
+        p = one.find("-");
         if (p == wxString::npos)
         {
             long l;
@@ -1341,7 +1341,7 @@ void setDatetime(IBPP::Statement st, int param, GeneratorSettings* gs,
     {
         // last
         wxString one = gs->range.Mid(start);
-        size_t p = gs->range.find(wxT(","), start);
+        size_t p = gs->range.find(",", start);
         if (p != wxString::npos)
         {
             one = gs->range.Mid(start, p-start);
@@ -1359,7 +1359,7 @@ void setDatetime(IBPP::Statement st, int param, GeneratorSettings* gs,
         if (dt == IBPP::sdTimestamp)
             str2time(one.Mid(11,8), time);
 
-        p = one.find(wxT("-"));
+        p = one.find("-");
         if (p == wxString::npos)
         {
             if (dt == IBPP::sdDate || dt == IBPP::sdTimestamp)
@@ -1546,9 +1546,9 @@ void DataGeneratorFrame::generateData(std::list<Table *>& order)
             records, 0, 2);
 
         // collect columns + create insert statement
-        wxString ins = wxT("INSERT INTO ") + (*it)->getQuotedName()
-            + wxT(" (");
-        wxString params(wxT(") VALUES ("));
+        wxString ins = "INSERT INTO " + (*it)->getQuotedName()
+            + " (";
+        wxString params(") VALUES (");
         (*it)->ensureChildrenLoaded();
         bool first = true;
         std::vector<GeneratorSettings *> colSet;
@@ -1563,11 +1563,11 @@ void DataGeneratorFrame::generateData(std::list<Table *>& order)
                 first = false;
             else
             {
-                ins += wxT(", ");
-                params += wxT(",");
+                ins += ", ";
+                params += ",";
             }
             ins += (*col)->getQuotedName();
-            params += wxT("?");
+            params += "?";
             colSet.push_back(gs);
         }
         if (first)  // no columns
@@ -1575,7 +1575,7 @@ void DataGeneratorFrame::generateData(std::list<Table *>& order)
 
         IBPP::Statement st =
             IBPP::StatementFactory(databaseM->getIBPPDatabase(), tr);
-        st->Prepare(wx2std(ins + params + wxT(")")));
+        st->Prepare(wx2std(ins + params + ")"));
 
         for (int i = 0; i < records; i++)
         {

@@ -79,7 +79,7 @@ wxString Index::getFieldsAsString()
             it != segmentsM.end(); ++it)
         {
             if (!retval.empty())
-                retval += wxT(", ");
+                retval += ", ";
             retval += (*it);
         }
         return retval;

@@ -49,13 +49,13 @@ private:
     std::vector<wxString>& titlesM;
     void emptyTitles() { titlesM.clear(); };
     // TODO: These should be localizable - see also HtmlTemplateProcessor.
-    void addSummary()      { titlesM.push_back(wxT("Summary")); };
-    void addPrivileges()   { titlesM.push_back(wxT("Privileges")); };
-    void addTriggers()     { titlesM.push_back(wxT("Triggers")); };
-    void addConstraints()  { titlesM.push_back(wxT("Constraints")); };
-    void addIndices()      { titlesM.push_back(wxT("Indices")); };
-    void addDependencies() { titlesM.push_back(wxT("Dependencies")); };
-    void addDDL()          { titlesM.push_back(wxT("DDL")); };
+    void addSummary()      { titlesM.push_back("Summary"); }
+    void addPrivileges()   { titlesM.push_back("Privileges"); }
+    void addTriggers()     { titlesM.push_back("Triggers"); }
+    void addConstraints()  { titlesM.push_back("Constraints"); }
+    void addIndices()      { titlesM.push_back("Indices"); }
+    void addDependencies() { titlesM.push_back("Dependencies"); }
+    void addDDL()          { titlesM.push_back("DDL"); }
 };
 
 #endif // FR_HTMLHEADERMETADATAITEMVISITOR_H

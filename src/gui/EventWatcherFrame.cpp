@@ -58,17 +58,17 @@ EventLogControl::EventLogControl(wxWindow* parent, wxWindowID id)
 
 void EventLogControl::logAction(const wxString& action)
 {
-    wxString now(wxDateTime::Now().Format(wxT("%H:%M:%S  ")));
+    wxString now(wxDateTime::Now().Format("%H:%M:%S  "));
     addStyledText(now, logStyleImportant);
-    logMsg(action + wxT("\n"));
+    logMsg(action + "\n");
 }
 
 void EventLogControl::logEvent(const wxString& name, int count)
 {
-    wxString now(wxDateTime::Now().Format(wxT("%H:%M:%S  ")));
+    wxString now(wxDateTime::Now().Format("%H:%M:%S  "));
     addStyledText(now, logStyleImportant);
     logMsg(name);
-    addStyledText(wxString::Format(wxT(" (%d)\n"), count), logStyleError);
+    addStyledText(wxString::Format(" (%d)\n", count), logStyleError);
 }
 
 EventWatcherFrame::EventWatcherFrame(wxWindow* parent, DatabasePtr db)
@@ -190,7 +190,7 @@ void EventWatcherFrame::addEvents(wxString& s)
     }
     while (true)
     {
-        int p = s.Find(wxT("\n"));
+        int p = s.Find("\n");
         wxString s2;
         if (p == -1)
             s2 = s.Strip();
@@ -296,7 +296,7 @@ void EventWatcherFrame::doReadConfigSettings(const wxString& prefix)
 {
     BaseFrame::doReadConfigSettings(prefix);
     wxArrayString events;
-    config().getValue(prefix + Config::pathSeparator + wxT("events"), events);
+    config().getValue(prefix + Config::pathSeparator + "events", events);
     listbox_monitored->Append(events);
     updateControls();
 }
@@ -304,19 +304,19 @@ void EventWatcherFrame::doReadConfigSettings(const wxString& prefix)
 void EventWatcherFrame::doWriteConfigSettings(const wxString& prefix) const
 {
     BaseFrame::doWriteConfigSettings(prefix);
-    config().setValue(prefix + Config::pathSeparator + wxT("events"),
+    config().setValue(prefix + Config::pathSeparator + "events",
         listbox_monitored->GetStrings());
 }
 
 const wxString EventWatcherFrame::getName() const
 {
-    return wxT("EventWatcherFrame");
+    return "EventWatcherFrame";
 }
 
 wxString EventWatcherFrame::getFrameId(DatabasePtr db)
 {
     if (db)
-        return wxString(wxT("EventWatcherFrame/") + db->getItemPath());
+        return wxString("EventWatcherFrame/" + db->getItemPath());
     else
         return wxEmptyString;
 }
@@ -341,7 +341,7 @@ END_EVENT_TABLE()
 
 void EventWatcherFrame::OnButtonLoadClick(wxCommandEvent& WXUNUSED(event))
 {
-    wxFileDialog fd(this, _("Select file to load"), wxT(""), wxT(""),
+    wxFileDialog fd(this, _("Select file to load"), "", "",
         _("Text files (*.txt)|*.txt|All files (*.*)|*.*"),
         wxFD_OPEN | wxFD_CHANGE_DIR);
     if (wxID_OK != fd.ShowModal())
@@ -363,7 +363,7 @@ void EventWatcherFrame::OnButtonLoadClick(wxCommandEvent& WXUNUSED(event))
 
 void EventWatcherFrame::OnButtonSaveClick(wxCommandEvent& WXUNUSED(event))
 {
-    wxFileDialog fd(this, _("Select file to save"), wxT(""), wxT(""),
+    wxFileDialog fd(this, _("Select file to save"), "", "",
         _("Text files (*.txt)|*.txt|All files (*.*)|*.*"),
         wxFD_SAVE | wxFD_CHANGE_DIR | wxFD_OVERWRITE_PROMPT);
     if (wxID_OK != fd.ShowModal())
@@ -372,7 +372,7 @@ void EventWatcherFrame::OnButtonSaveClick(wxCommandEvent& WXUNUSED(event))
     wxBusyCursor wait;
     wxString s;
     for (int i = 0; i < (int)listbox_monitored->GetCount(); ++i)
-        s += listbox_monitored->GetString(i) + wxT("\n");
+        s += listbox_monitored->GetString(i) + "\n";
 
     wxFile f;
     if (!f.Open(fd.GetPath(), wxFile::write) || !f.Write(s))

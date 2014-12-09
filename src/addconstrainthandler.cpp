@@ -72,24 +72,24 @@ wxString AddConstraintHandler::selectAction(const wxString& label,
     wxWindow *parent) const
 {
     wxArrayString actions;
-    actions.Add(wxT("RESTRICT"));
-    actions.Add(wxT("NO ACTION"));
-    actions.Add(wxT("CASCADE"));
-    actions.Add(wxT("SET DEFAULT"));
-    actions.Add(wxT("SET NULL"));
+    actions.Add("RESTRICT");
+    actions.Add("NO ACTION");
+    actions.Add("CASCADE");
+    actions.Add("SET DEFAULT");
+    actions.Add("SET NULL");
     int index = ::wxGetSingleChoiceIndex(wxString::Format(_("Select action for %s"), label.c_str()),
         _("Creating foreign key"), actions, parent);
     if (index == -1)
-        return wxT("CANCEL");
+        return ("CANCEL");
     return actions[index];
 }
 
 bool AddConstraintHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("add_constraint"))
+    if (uri.action != "add_constraint")
         return false;
 
-    wxString type = uri.getParam(wxT("type"));    // pk, fk, check, unique
+    wxString type = uri.getParam("type");    // pk, fk, check, unique
     Table* t = extractMetadataItemFromURI<Table>(uri);
     wxWindow* w = getParentWindow(uri);
     if (!t || !w)
@@ -97,17 +97,17 @@ bool AddConstraintHandler::handleURI(URI& uri)
 
     // Find first available constraint name:
     DatabasePtr db = t->getDatabase();
-    wxString prefix = type + wxT("_") + t->getName_();
+    wxString prefix = type + "_" + t->getName_();
     wxString stmt(
-        wxT("select rdb$constraint_name from rdb$relation_constraints ")
-        wxT("where rdb$relation_name = '") + t->getName_() +
-        wxT("' and rdb$constraint_name starting with '") + prefix +
-        wxT("' order by 1"));
+        "select rdb$constraint_name from rdb$relation_constraints "
+        "where rdb$relation_name = '" + t->getName_() +
+        "' and rdb$constraint_name starting with '" + prefix +
+        "' order by 1");
     wxString default_value;
     wxArrayString constraintNames(db->loadIdentifiers(stmt));
     for (int i = 0; ; ++i)
     {
-        default_value = prefix + wxString::Format(wxT("_%d"), i);
+        default_value = prefix + wxString::Format("_%d", i);
         if (constraintNames.Index(default_value, false) == wxNOT_FOUND)
             break;
     }
@@ -117,54 +117,54 @@ bool AddConstraintHandler::handleURI(URI& uri)
     if (cname.IsEmpty())    // cancel
         return true;
 
-    wxString sql = wxT("alter table ") + t->getQuotedName() +
-            wxT("\nadd constraint ") + Identifier::userString(cname);
+    wxString sql = "alter table " + t->getQuotedName() +
+            "\nadd constraint " + Identifier::userString(cname);
 
-    if (type == wxT("PK"))
+    if (type == "PK")
     {
         wxString columnlist = selectRelationColumns(t, w);
         if (columnlist.IsEmpty())   // cancel
             return true;
-        sql += wxT("\nprimary key (") + columnlist + wxT(")");
+        sql += "\nprimary key (" + columnlist + ")";
     }
-    else if (type == wxT("FK"))
+    else if (type == "FK")
     {
         wxString columnlist = selectRelationColumns(t, w);
-        if (columnlist == wxT(""))
+        if (columnlist == "")
             return true;
         TablePtr ref = selectTable(t->getDatabase(), w);
         if (!ref)
             return true;
         wxString refcolumnlist = selectRelationColumns(ref.get(), w);
-        if (refcolumnlist == wxT(""))
+        if (refcolumnlist == "")
             return true;
-        sql += wxT("\nforeign key (") + columnlist + wxT(") \nreferences ") + ref->getQuotedName()
-            + wxT(" (") + refcolumnlist + wxT(")");
+        sql += "\nforeign key (" + columnlist + ") \nreferences " + ref->getQuotedName()
+            + " (" + refcolumnlist + ")";
         wxString action = selectAction(_("update"), w);
-        if (action == wxT("CANCEL"))
+        if (action == "CANCEL")
             return true;
-        else if (action != wxT("RESTRICT"))
-            sql += wxT("\non update ") + action + wxT(" ");
+        else if (action != "RESTRICT")
+            sql += "\non update " + action + " ";
 
         action = selectAction(_("delete"), w);
-        if (action == wxT("CANCEL"))
+        if (action == "CANCEL")
             return true;
-        else if (action != wxT("RESTRICT"))
-            sql += wxT("\non delete ") + action + wxT(" ");
+        else if (action != "RESTRICT")
+            sql += "\non delete " + action + " ";
     }
-    else if (type == wxT("CHK"))
+    else if (type == "CHK")
     {
         wxString source;
         if (!GetMultilineTextFromUser(w, _("Enter check condition"), source))
             return true;
-        sql += wxT("\ncheck (") + source + wxT(")");
+        sql += "\ncheck (" + source + ")";
     }
-    else if (type == wxT("UNQ"))
+    else if (type == "UNQ")
     {
         wxString columnlist = selectRelationColumns(t, w);
         if (columnlist.IsEmpty())   // cancel
             return true;
-        sql += wxT("\nunique (") + columnlist + wxT(")");
+        sql += "\nunique (" + columnlist + ")";
     }
     else
     {
@@ -172,7 +172,7 @@ bool AddConstraintHandler::handleURI(URI& uri)
         return true;
     }
 
-    execSql(w, wxT(""), db, sql, true);  // true = commit + close at once
+    execSql(w, "", db, sql, true);  // true = commit + close at once
     return true;
 }
 

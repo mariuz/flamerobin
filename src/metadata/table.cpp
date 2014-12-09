@@ -453,7 +453,7 @@ void Table::loadIndices()
 
 const wxString Table::getTypeName() const
 {
-    return wxT("TABLE");
+    return "TABLE";
 }
 
 // find all tables from "tables" which have foreign keys with "table"
@@ -529,9 +529,9 @@ bool SysTables::isSystem() const
 
 void SysTables::load(ProgressIndicator* progressIndicator)
 {
-    wxString stmt = wxT("select rdb$relation_name from rdb$relations")
-        wxT(" where rdb$system_flag = 1")
-        wxT(" and rdb$view_source is null order by 1");
+    wxString stmt = "select rdb$relation_name from rdb$relations"
+        " where rdb$system_flag = 1"
+        " and rdb$view_source is null order by 1";
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 
@@ -542,7 +542,7 @@ void SysTables::loadChildren()
 
 const wxString SysTables::getTypeName() const
 {
-    return wxT("SYSTABLE_COLLECTION");
+    return "SYSTABLE_COLLECTION";
 }
 
 // Tables collection
@@ -558,9 +558,9 @@ void Tables::acceptVisitor(MetadataItemVisitor* visitor)
 
 void Tables::load(ProgressIndicator* progressIndicator)
 {
-    wxString stmt = wxT("select rdb$relation_name from rdb$relations")
-        wxT(" where (rdb$system_flag = 0 or rdb$system_flag is null)")
-        wxT(" and rdb$view_source is null order by 1");
+    wxString stmt = "select rdb$relation_name from rdb$relations"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
+        " and rdb$view_source is null order by 1";
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 
@@ -571,6 +571,6 @@ void Tables::loadChildren()
 
 const wxString Tables::getTypeName() const
 {
-    return wxT("TABLE_COLLECTION");
+    return "TABLE_COLLECTION";
 }
 

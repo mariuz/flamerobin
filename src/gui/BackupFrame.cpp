@@ -290,21 +290,21 @@ void BackupFrame::doReadConfigSettings(const wxString& prefix)
 {
     BackupRestoreBaseFrame::doReadConfigSettings(prefix);
     wxArrayString flags;
-    config().getValue(prefix + Config::pathSeparator + wxT("options"), flags);
+    config().getValue(prefix + Config::pathSeparator + "options", flags);
     if (!flags.empty())
     {
         checkbox_checksum->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), wxT("ignore_checksums")));
+            flags.end() != std::find(flags.begin(), flags.end(), "ignore_checksums"));
         checkbox_limbo->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), wxT("ignore_limbo")));
+            flags.end() != std::find(flags.begin(), flags.end(), "ignore_limbo"));
         checkbox_metadata->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), wxT("metadata_only")));
+            flags.end() != std::find(flags.begin(), flags.end(), "metadata_only"));
         checkbox_garbage->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), wxT("no_garbage_collect")));
+            flags.end() != std::find(flags.begin(), flags.end(), "no_garbage_collect"));
         checkbox_transport->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), wxT("no_transportable")));
+            flags.end() != std::find(flags.begin(), flags.end(), "no_transportable"));
         checkbox_extern->SetValue(
-            flags.end() != std::find(flags.begin(), flags.end(), wxT("external_tables")));
+            flags.end() != std::find(flags.begin(), flags.end(), "external_tables"));
     }
     updateControls();
 }
@@ -314,30 +314,30 @@ void BackupFrame::doWriteConfigSettings(const wxString& prefix) const
     BackupRestoreBaseFrame::doWriteConfigSettings(prefix);
     wxArrayString flags;
     if (checkbox_checksum->IsChecked())
-        flags.push_back(wxT("ignore_checksums"));
+        flags.push_back("ignore_checksums");
     if (checkbox_limbo->IsChecked())
-        flags.push_back(wxT("ignore_limbo"));
+        flags.push_back("ignore_limbo");
     if (checkbox_metadata->IsChecked())
-        flags.push_back(wxT("metadata_only"));
+        flags.push_back("metadata_only");
     if (checkbox_garbage->IsChecked())
-        flags.push_back(wxT("no_garbage_collect"));
+        flags.push_back("no_garbage_collect");
     if (checkbox_transport->IsChecked())
-        flags.push_back(wxT("no_transportable"));
+        flags.push_back("no_transportable");
     if (checkbox_extern->IsChecked())
-        flags.push_back(wxT("external_tables"));
-    config().setValue(prefix + Config::pathSeparator + wxT("options"), flags);
+        flags.push_back("external_tables");
+    config().setValue(prefix + Config::pathSeparator + "options", flags);
 }
 
 const wxString BackupFrame::getName() const
 {
-    return wxT("BackupFrame");
+    return "BackupFrame";
 }
 
 /*static*/
 wxString BackupFrame::getFrameId(DatabasePtr db)
 {
     if (db)
-        return wxString(wxT("BackupFrame/") + db->getItemPath());
+        return wxString("BackupFrame/" + db->getItemPath());
     else
         return wxEmptyString;
 }
@@ -360,7 +360,7 @@ void BackupFrame::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     wxFileName origName(text_ctrl_filename->GetValue());
     wxString filename = ::wxFileSelector(_("Select Backup File"),
-        origName.GetPath(), origName.GetFullName(), wxT("*.fbk"),
+        origName.GetPath(), origName.GetFullName(), "*.fbk",
         _("Backup file (*.fbk)|*.fbk|All files (*.*)|*.*"),
         wxFD_SAVE | wxFD_OVERWRITE_PROMPT, this);
     if (!filename.empty())
@@ -374,10 +374,10 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
 
     DatabasePtr database = getDatabase();
     wxCHECK_RET(database,
-        wxT("Cannot backup unassigned database"));
+        "Cannot backup unassigned database");
     ServerPtr server = database->getServer();
     wxCHECK_RET(server,
-        wxT("Cannot backup database without assigned server"));
+        "Cannot backup database without assigned server");
 
     wxString username;
     wxString password;

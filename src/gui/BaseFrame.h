@@ -84,7 +84,7 @@ public:
         const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize,
         long style = wxDEFAULT_FRAME_STYLE,
-        const wxString& name = wxT("FlameRobin"));
+        const wxString& name = "FlameRobin");
     virtual ~BaseFrame();
     virtual bool Show(bool show = TRUE);
     virtual bool Destroy();

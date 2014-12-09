@@ -152,7 +152,7 @@ void MetadataItemPropertiesPanel::requestLoadPage(bool showLoadingPage)
         if (showLoadingPage)
         {
             html_window->LoadFile(config().getHtmlTemplatesPath()
-                + wxT("ALLloading.html"));
+                + "ALLloading.html");
         }
 
         Connect(wxID_ANY, wxEVT_IDLE,
@@ -168,25 +168,25 @@ void MetadataItemPropertiesPanel::loadPage()
     switch (pageTypeM)
     {
         case ptSummary:
-            fileName += objectM->getTypeName() + wxT(".html");
+            fileName += objectM->getTypeName() + ".html";
             break;
         case ptConstraints:
-            fileName += objectM->getTypeName() + wxT("constraints.html");
+            fileName += objectM->getTypeName() + "constraints.html";
             break;
         case ptTriggers:
-            fileName += objectM->getTypeName() + wxT("triggers.html");
+            fileName += objectM->getTypeName() + "triggers.html";
             break;
         case ptPrivileges:
-            fileName += objectM->getTypeName() + wxT("privileges.html");
+            fileName += objectM->getTypeName() + "privileges.html";
             break;
         case ptTableIndices:
-            fileName += wxT("TABLEindices.html");
+            fileName += "TABLEindices.html";
             break;
         case ptDependencies:
-            fileName += wxT("dependencies.html");
+            fileName += "dependencies.html";
             break;
         case ptDDL:
-            fileName += wxT("DDL.html");
+            fileName += "DDL.html";
             break;
     }
 
@@ -215,7 +215,7 @@ void MetadataItemPropertiesPanel::loadPage()
     // set title
     if (MetadataItemPropertiesFrame* pf = getParentFrame())
     {
-        pf->setTabTitle(this, objectM->getName_() + wxT(": ")
+        pf->setTabTitle(this, objectM->getName_() + ": "
             + html_window->GetOpenedPageTitle());
     }
 }
@@ -247,17 +247,17 @@ MetadataItemPropertiesFrame* MetadataItemPropertiesPanel::getParentFrame()
 
 void MetadataItemPropertiesPanel::setPage(const wxString& type)
 {
-    if (type == wxT("constraints"))
+    if (type == "constraints")
         pageTypeM = ptConstraints;
-    else if (type == wxT("dependencies"))
+    else if (type == "dependencies")
         pageTypeM = ptDependencies;
-    else if (type == wxT("triggers"))
+    else if (type == "triggers")
         pageTypeM = ptTriggers;
-    else if (type == wxT("indices"))
+    else if (type == "indices")
         pageTypeM = ptTableIndices;
-    else if (type == wxT("ddl"))
+    else if (type == "ddl")
         pageTypeM = ptDDL;
-    else if (type == wxT("privileges"))
+    else if (type == "privileges")
         pageTypeM = ptPrivileges;
     // add more page types here when needed
     else
@@ -334,7 +334,7 @@ void MetadataItemPropertiesPanel::OnHtmlCellHover(wxHtmlCellEvent& event)
 
     wxString addr = lnk->GetHref();
     URI uri(addr);
-    if (uri.protocol == wxT("info"))    // special
+    if (uri.protocol == "info")    // special
     {
         //      GetStatusBar()->SetStatusText(uri.action);
 
@@ -420,7 +420,7 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
     else
         sb->SetStatusText(object->getName_());
 
-    if (db && config().get(wxT("linksOpenInTabs"), true))
+    if (db && config().get("linksOpenInTabs", true))
     {
         SetIcon(wxArtProvider::GetIcon(ART_DatabaseConnected,
             wxART_FRAME_ICON));
@@ -513,7 +513,7 @@ MetadataItemPropertiesFrame::showPropertyPage(MetadataItem* object)
         }
     }
 
-    if (config().get(wxT("linksOpenInTabs"), true))
+    if (config().get("linksOpenInTabs", true))
         return openNewPropertyPageInTab(object, 0);
     return openNewPropertyPageInFrame(object);
 }
@@ -525,7 +525,7 @@ const wxRect MetadataItemPropertiesFrame::getDefaultRect() const
 
 const wxString MetadataItemPropertiesFrame::getName() const
 {
-    return wxT("MIPFrame");
+    return "MIPFrame";
 }
 
 const wxString MetadataItemPropertiesFrame::getStorageName() const
@@ -548,9 +548,9 @@ void MetadataItemPropertiesFrame::removePanel(
 void MetadataItemPropertiesFrame::setStorageName(MetadataItem* object)
 {
     StorageGranularity g;
-    if (!config().getValue(wxT("MetadataFrameStorageGranularity"), g))
+    if (!config().getValue("MetadataFrameStorageGranularity", g))
         g = sgFrame;
-    if (config().get(wxT("linksOpenInTabs"), true))
+    if (config().get("linksOpenInTabs", true))
         g = sgFrame;
 
     switch (g)
@@ -567,7 +567,7 @@ void MetadataItemPropertiesFrame::setStorageName(MetadataItem* object)
                 + object->getItemPath();
             break;
         default:
-            storageNameM = wxT("");
+            storageNameM = "";
             break;
     }
 }
@@ -616,7 +616,7 @@ void MetadataItemPropertiesFrame::OnNotebookPageChanged(
     if (databaseNameM.empty())
         SetTitle(notebookM->GetPageText(sel));
     else
-        SetTitle(databaseNameM + wxT(" - ") + notebookM->GetPageText(sel));
+        SetTitle(databaseNameM + " - " + notebookM->GetPageText(sel));
 }
 
 //! PageHandler class
@@ -632,7 +632,7 @@ const PageHandler PageHandler::handlerInstance;
 
 bool PageHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("page"))
+    if (uri.action != "page")
         return false;
 
     MetadataItemPropertiesPanel* mpp = dynamic_cast<
@@ -640,18 +640,18 @@ bool PageHandler::handleURI(URI& uri)
     if (!mpp)
         return true;
 
-    if (uri.getParam(wxT("target")) == wxT("new"))
+    if (uri.getParam("target") == "new")
     {
         mpp = MetadataItemPropertiesFrame::openNewPropertyPageInFrame(
             mpp->getObservedObject());
     }
-    else if (uri.getParam(wxT("target")) == wxT("new_tab"))
+    else if (uri.getParam("target") == "new_tab")
     {
         mpp = MetadataItemPropertiesFrame::openNewPropertyPageInTab(
             mpp->getObservedObject(), mpp->getParentFrame());
     }
 
-    mpp->setPage(uri.getParam(wxT("type")));
+    mpp->setPage(uri.getParam("type"));
     //frameManager().rebuildMenu();
     return true;
 }
@@ -669,7 +669,7 @@ const PropertiesHandler PropertiesHandler::handlerInstance;
 
 bool PropertiesHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("properties"))
+    if (uri.action != "properties")
         return false;
 
     MetadataItemPropertiesPanel* parent = dynamic_cast<
@@ -679,9 +679,9 @@ bool PropertiesHandler::handleURI(URI& uri)
     DatabasePtr db = parent->getObservedObject()->getDatabase();
     if (!db)
         return true;
-    NodeType n = getTypeByName(uri.getParam(wxT("object_type")));
+    NodeType n = getTypeByName(uri.getParam("object_type"));
     MetadataItem* object = db->findByNameAndType(n,
-        uri.getParam(wxT("object_name")));
+        uri.getParam("object_name"));
     if (!object)
     {
         ::wxMessageBox(
@@ -690,12 +690,12 @@ bool PropertiesHandler::handleURI(URI& uri)
         return true;
     }
 
-    if (uri.getParam(wxT("target")) == wxT("new_tab"))
+    if (uri.getParam("target") == "new_tab")
     {
         MetadataItemPropertiesFrame::openNewPropertyPageInTab(object,
             parent->getParentFrame());
     }
-    else if (uri.getParam(wxT("target")) == wxT("new"))
+    else if (uri.getParam("target") == "new")
         MetadataItemPropertiesFrame::openNewPropertyPageInFrame(object);
     else 
         MetadataItemPropertiesFrame::showPropertyPage(object);

@@ -52,7 +52,7 @@ const ObjectDescriptionHandler ObjectDescriptionHandler::handlerInstance;
 
 bool ObjectDescriptionHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("edit_description"))
+    if (uri.action != "edit_description")
         return false;
 
     MetadataItem* m = extractMetadataItemFromURI<MetadataItem>(uri);
@@ -62,7 +62,7 @@ bool ObjectDescriptionHandler::handleURI(URI& uri)
 
     wxString desc = m->getDescription();
     if (GetMultilineTextFromUser(w, wxString::Format(_("Description of %s"),
-        uri.getParam(wxT("object_name")).c_str()), desc))
+        uri.getParam("object_name").c_str()), desc))
     {
         wxBusyCursor wait;
         m->setDescription(desc);

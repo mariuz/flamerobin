@@ -38,16 +38,16 @@
 StatementBuilder::StatementBuilder()
     : indentCharsM(0), indentLevelM(0), lineWrappingM(false), maxLineLengthM(0)
 {
-    keywordsUpperCaseM = config().get(wxT("SQLKeywordsUpperCase"), true);
+    keywordsUpperCaseM = config().get("SQLKeywordsUpperCase", true);
     // take settings for line wrapping from vertical editor line settings:
     // enable wrapping only if the marker is shown, and if so wrap to the
     // same column, indent by editor tab size
     
-    if (config().get(wxT("sqlEditorShowEdge"), false))
+    if (config().get("sqlEditorShowEdge", false))
     {
         lineWrappingM = true;
-        maxLineLengthM = config().get(wxT("sqlEditorEdgeColumn"), 80);
-        indentCharsM = config().get(wxT("sqlEditorTabSize"), 4);
+        maxLineLengthM = config().get("sqlEditorEdgeColumn", 80);
+        indentCharsM = config().get("sqlEditorTabSize", 4);
     }
 }
 

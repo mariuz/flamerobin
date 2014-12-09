@@ -66,7 +66,7 @@ private:
     void OnListBoxSearchDoubleClick(wxCommandEvent& event);
 public:
     StatementHistoryDialog(wxWindow *parent, StatementHistory *history,
-        const wxString& title = wxT("SQL Statement History"));
+        const wxString& title = "SQL Statement History");
     wxString getSql() const;
 
     DECLARE_EVENT_TABLE()

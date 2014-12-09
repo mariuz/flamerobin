@@ -58,34 +58,34 @@ UserDialog::UserDialog(wxWindow* parent, const wxString& title, bool isNewUser)
 void UserDialog::createControls()
 {
     labelUserNameM = new wxStaticText(getControlsPanel(), wxID_ANY,
-        wxT("User name:"));
+        "User name:");
     textUserNameM = new wxTextCtrl(getControlsPanel(), ID_textctrl_username);
     labelFirstNameM = new wxStaticText(getControlsPanel(), wxID_ANY,
-        wxT("First name:"));
+        "First name:");
     textFirstNameM = new wxTextCtrl(getControlsPanel(), wxID_ANY);
     labelMiddleNameM = new wxStaticText(getControlsPanel(), wxID_ANY,
-        wxT("Middle name:"));
+        "Middle name:");
     textMiddleNameM = new wxTextCtrl(getControlsPanel(), wxID_ANY);
     labelLastNameM = new wxStaticText(getControlsPanel(), wxID_ANY,
-        wxT("Last name:"));
+        "Last name:");
     textLastNameM = new wxTextCtrl(getControlsPanel(), wxID_ANY);
 
     labelPasswordM = new wxStaticText(getControlsPanel(), wxID_ANY,
-        wxT("Password:"));
+        "Password:");
     textPasswordM = new wxTextCtrl(getControlsPanel(), ID_textctrl_password,
         wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
     labelConfirmPasswordM = new wxStaticText(getControlsPanel(), wxID_ANY,
-        wxT("Confirm password:"));
+        "Confirm password:");
     textConfirmPasswordM = new wxTextCtrl(getControlsPanel(),
         ID_textctrl_confirmpw, wxEmptyString, wxDefaultPosition, wxDefaultSize,
         wxTE_PASSWORD);
     labelUserIdM = new wxStaticText(getControlsPanel(), wxID_ANY,
-        wxT("Unix user ID:"));
-    spinctrlUserIdM = new wxSpinCtrl(getControlsPanel(), wxID_ANY, wxT("0"),
+        "Unix user ID:");
+    spinctrlUserIdM = new wxSpinCtrl(getControlsPanel(), wxID_ANY, "0",
         wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 30000, 0);
     labelGroupIdM = new wxStaticText(getControlsPanel(), wxID_ANY,
-        wxT("Unix group ID:"));
-    spinctrlGroupIdM = new wxSpinCtrl(getControlsPanel(), wxID_ANY, wxT("0"),
+        "Unix group ID:");
+    spinctrlGroupIdM = new wxSpinCtrl(getControlsPanel(), wxID_ANY, "0",
         wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 30000, 0);
 
     buttonOkM = new wxButton(getControlsPanel(), wxID_SAVE,
@@ -95,7 +95,7 @@ void UserDialog::createControls()
 
 const wxString UserDialog::getName() const
 {
-    return wxT("UserDialog");
+    return "UserDialog";
 }
 
 void UserDialog::layoutControls()
@@ -230,8 +230,8 @@ const UserPropertiesHandler UserPropertiesHandler::handlerInstance;
 
 bool UserPropertiesHandler::handleURI(URI& uri)
 {
-    bool addUser = uri.action == wxT("add_user");
-    bool editUser = uri.action == wxT("edit_user");
+    bool addUser = uri.action == "add_user";
+    bool editUser = uri.action == "edit_user";
     if (!addUser && !editUser)
         return false;
 
@@ -253,11 +253,11 @@ bool UserPropertiesHandler::handleURI(URI& uri)
         if (!user)
             return true;
 #ifdef __WXGTK__
-        if (user->getUsername() == wxT("SYSDBA"))
+        if (user->getUsername() == "SYSDBA")
         {
             showWarningDialog(w, _("The password for the SYSDBA user should not be changed here."),
                 _("The appropriate way to change the password of the SYSDBA user is to run the changeDBAPassword.sh script in Firebird's bin directory.\n\nOtherwise the scripts will not be updated."),
-                AdvancedMessageDialogButtonsOk(), config(), wxT("DIALOG_warn_sysdba_change"),
+                AdvancedMessageDialogButtonsOk(), config(), "DIALOG_warn_sysdba_change",
                 _("Do not show this information again"));
         }
 #endif
@@ -310,7 +310,7 @@ const DropUserHandler DropUserHandler::handlerInstance;
 
 bool DropUserHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("drop_user"))
+    if (uri.action != "drop_user")
         return false;
 
     wxWindow* w = getParentWindow(uri);

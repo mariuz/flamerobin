@@ -79,7 +79,7 @@ public:
             int wd;
             wxMemoryDC dc;
             dc.SetFont(GetFont());
-            dc.GetTextExtent(wxT("PROCEDUREM"), &wd, &h);
+            dc.GetTextExtent("PROCEDUREM", &wd, &h);
             SetColumnWidth(1, wd);
             w -= wd;
         }
@@ -112,9 +112,9 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent, RootPtr root)
     fgSizer1->Add(m_staticText1, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     wxString choices1[] =
     {
-        wxT("TABLE"), wxT("VIEW"), wxT("PROCEDURE"),
-        wxT("TRIGGER"), wxT("GENERATOR"), wxT("FUNCTION"), wxT("DOMAIN"),
-        wxT("ROLE"), wxT("COLUMN"), wxT("EXCEPTION")
+        "TABLE", "VIEW", "PROCEDURE",
+        "TRIGGER", "GENERATOR", "FUNCTION", "DOMAIN",
+        "ROLE", "COLUMN", "EXCEPTION"
     };
     int nchoices1 = sizeof(choices1) / sizeof(wxString);
     choice_type = new wxChoice(mainPanel, wxID_ANY, wxDefaultPosition,
@@ -169,7 +169,7 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent, RootPtr root)
             itdb != databases.end(); ++itdb)
         {   // we store DB pointer, so we observe in case database is removed
             Database* db = (*itdb).get();
-            choice_database->Append((*its)->getName_() + wxT("::") +
+            choice_database->Append((*its)->getName_() + "::" +
                 db->getName_(), (void*)db);
             db->attachObserver(this, false);
         }
@@ -264,7 +264,7 @@ void AdvancedSearchFrame::addCriteria(CriteriaItem::Type type, wxString
         return;
     value.MakeUpper();
     if (type == CriteriaItem::ctDDL || type == CriteriaItem::ctDescription)
-        value = wxT("*") + value + wxT("*");
+        value = "*" + value + "*";
     CriteriaItem c(value, db);
     for (CriteriaCollection::const_iterator
         it = searchCriteriaM.lower_bound(type);
@@ -306,7 +306,7 @@ void AdvancedSearchFrame::addResult(Database* db, MetadataItem* item)
 {
     int index = listctrl_results->GetItemCount();
     listctrl_results->InsertItem(index, db->getServer()->getName_()
-        + wxT("::") + db->getName_());
+        + "::" + db->getName_());
     listctrl_results->SetItem(index, 1, item->getTypeName());
     listctrl_results->SetItem(index, 2, item->getName_());
     results.push_back(item);
@@ -578,7 +578,7 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& WXUNUSED(event))
                     types.find((*it)->getType()) == types.end())
                     break;
                 pd.setProgressMessage(_("Searching ") + (*col)->getName_() +
-                    wxT(": ") + (*it)->getName_(), 2);
+                    ": " + (*it)->getName_(), 2);
                 pd.stepProgress(1, 2);
                 if (pd.isCanceled())
                     return;

@@ -63,15 +63,15 @@ namespace InsertOptions
 {
     // make sure you keep these two in sync if you add/remove items
     const wxString insertOptionStrings[] = {
-        wxT(""),
-        wxT("NULL"),
+        "",
+        "NULL",
         wxTRANSLATE("Skip (N/A)"),
         wxTRANSLATE("Column default"),
         wxTRANSLATE("Hexadecimal"),
-        wxT("CURRENT_DATE"),
-        wxT("CURRENT_TIME"),
-        wxT("CURRENT_TIMESTAMP"),
-        wxT("CURRENT_USER"),
+        "CURRENT_DATE",
+        "CURRENT_TIME",
+        "CURRENT_TIMESTAMP",
+        "CURRENT_USER",
         wxTRANSLATE("File..."),
         wxTRANSLATE("Generator...")
     };
@@ -219,7 +219,7 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
         Column *c = (*it).second.second;
         ResultsetColumnDef *def = (*it).second.first;
 
-        gridM->SetRowLabelValue(row, wxString::Format(wxT("%d"), row+1));
+        gridM->SetRowLabelValue(row, wxString::Format("%d", row+1));
         gridM->SetCellValue(row, 0, c->getName_());
         gridM->SetCellValue(row, 1, c->getDatatype());
 
@@ -241,7 +241,7 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
                 updateControls(row);
             }
             else if (def->isNumeric())
-                gridM->SetCellValue(row, 3, wxT("0"));
+                gridM->SetCellValue(row, 3, "0");
         }
 
         InsertColumnInfo ici(row, c, def, (*it).first);
@@ -302,7 +302,7 @@ void InsertDialog::do_layout()
 {
     gridM->AutoSize();
     wxScreenDC sdc;
-    wxSize sz = sdc.GetTextExtent(wxT("CURRENT_TIMESTAMP WWW"));
+    wxSize sz = sdc.GetTextExtent("CURRENT_TIMESTAMP WWW");
     gridM->SetColSize(2, sz.GetWidth());
     gridM->SetColSize(3, sz.GetWidth());    // reasonable default width?
     gridM->ForceRefresh();
@@ -321,7 +321,7 @@ void InsertDialog::do_layout()
 
 const wxString InsertDialog::getName() const
 {
-    return wxT("InsertDialog");
+    return "InsertDialog";
 }
 
 bool InsertDialog::getConfigStoresWidth() const
@@ -344,7 +344,7 @@ void InsertDialog::updateControls(int row)
     if (ix == ioNull)
     {
         gridM->SetCellTextColour(row, 3, *wxRED);
-        gridM->SetCellValue(row, 3, wxT("[null]"));
+        gridM->SetCellValue(row, 3, "[null]");
     }
     else
     {
@@ -370,7 +370,7 @@ void InsertDialog::storeValues()
                     long l;                     // should we support 64bit?
                     if (!value.ToLong(&l, 16))
                         throw FRError(_("Invalid hexadecimal number"));
-                    value.Printf(wxT("%d"), l);
+                    value.Printf("%d", l);
                 }
                 else    // convert hex string to regular string and set
                 {
@@ -421,7 +421,7 @@ void InsertDialog::storeValues()
 void InsertDialog::preloadSpecialColumns()
 {
     // step 1: build list of CURRENT_* and generator values
-    wxString sql(wxT("SELECT "));
+    wxString sql("SELECT ");
     bool first = true;
     for (std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
         it != columnsM.end(); ++it)
@@ -432,19 +432,19 @@ void InsertDialog::preloadSpecialColumns()
         if (first)
             first = false;
         else
-            sql += wxT(",");
+            sql += ",";
         if (sel == ioGenerator) // generator
-            sql += wxT("GEN_ID(") + gridM->GetCellValue((*it).row, 3)
-                + wxT(", 1)");
+            sql += "GEN_ID(" + gridM->GetCellValue((*it).row, 3)
+                + ", 1)";
         else if (sel == ioDefault)
         {
             if (!(*it).column->isString())
-                sql += wxT("CAST(");
+                sql += "CAST(";
             sql += gridM->GetCellValue((*it).row, 3);
             if (!(*it).column->isString())
             {   // false = no custom formatting, just the pure type
-                sql += wxT(" AS ") + (*it).column->getDatatype(false)
-                    + wxT(")");
+                sql += " AS " + (*it).column->getDatatype(false)
+                    + ")";
             }
         }
         else // CURRENT_ USER/DATE/TIMESTAMP...
@@ -456,7 +456,7 @@ void InsertDialog::preloadSpecialColumns()
         statementM->TransactionPtr());
     if (!first) // we do need some data
     {
-        sql += wxT(" FROM RDB$DATABASE");
+        sql += " FROM RDB$DATABASE";
         st1->Prepare(wx2std(sql));
         st1->Execute();
         st1->Fetch();
@@ -538,8 +538,8 @@ void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
     preloadSpecialColumns();
 
     Identifier tableId(tableNameM);
-    wxString stm = wxT("INSERT INTO ") + tableId.getQuoted() + wxT(" (");
-    wxString val = wxT(") VALUES (");
+    wxString stm = "INSERT INTO " + tableId.getQuoted() + " (";
+    wxString val = ") VALUES (";
     bool first = true;
     for (std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
         it != columnsM.end(); ++it)
@@ -552,24 +552,24 @@ void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
             first = false;
         else
         {
-            stm += wxT(",");
-            val += wxT(",");
+            stm += ",";
+            val += ",";
         }
         stm += (*it).column->getQuotedName();
         if (sel == ioFile)
-            val += wxT("?");
+            val += "?";
         else if (sel == ioNull || bufferM->isFieldNull((*it).index))
-            val += wxT("NULL");
+            val += "NULL";
         else
         {
-            val += wxT("'") + (*it).columnDef->getAsFirebirdString(bufferM)
-                + wxT("'");
+            val += "'" + (*it).columnDef->getAsFirebirdString(bufferM)
+                + "'";
         }
     }
 
     IBPP::Statement st1 = IBPP::StatementFactory(statementM->DatabasePtr(),
         statementM->TransactionPtr());
-    stm += val + wxT(")");
+    stm += val + ")";
     st1->Prepare(wx2std(stm, databaseM->getCharsetConverter()));
 
     // load blobs
@@ -579,7 +579,7 @@ void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
     {
         if (getInsertOption(gridM, (*it).row) != ioFile)
             continue;
-        wxFFile fl(gridM->GetCellValue((*it).row, 3), wxT("rb"));
+        wxFFile fl(gridM->GetCellValue((*it).row, 3), "rb");
         if (!fl.IsOpened())
             throw FRError(_("Cannot open BLOB file."));
         IBPP::Blob b = IBPP::BlobFactory(st1->DatabasePtr(),

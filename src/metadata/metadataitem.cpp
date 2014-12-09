@@ -83,17 +83,17 @@ MetadataItem::~MetadataItem()
 
 const wxString MetadataItem::getTypeName() const
 {
-    return wxT("");
+    return "";
 }
 
 const wxString MetadataItem::getItemPath() const
 {
-    wxString result = getTypeName() + wxT("_") + getPathId();
+    wxString result = getTypeName() + "_" + getPathId();
     if (MetadataItem* parent = getParent())
     {
         wxString parentItemPath = parent->getItemPath();
         if (!parentItemPath.empty())
-            result = parentItemPath + wxT("/") + result;
+            result = parentItemPath + "/" + result;
     }
     return result;
 }
@@ -112,42 +112,42 @@ wxString getNameOfType(NodeType type)
 {
     switch (type)
     {
-        case ntTable:       return (wxT("TABLE"));
-        case ntView:        return (wxT("VIEW"));
-        case ntProcedure:   return (wxT("PROCEDURE"));
-        case ntTrigger:     return (wxT("TRIGGER"));
-        case ntGenerator:   return (wxT("GENERATOR"));
-        case ntFunction:    return (wxT("FUNCTION"));
-        case ntDomain:      return (wxT("DOMAIN"));
-        case ntRole:        return (wxT("ROLE"));
-        case ntColumn:      return (wxT("COLUMN"));
-        case ntException:   return (wxT("EXCEPTION"));
+        case ntTable:       return ("TABLE");
+        case ntView:        return ("VIEW");
+        case ntProcedure:   return ("PROCEDURE");
+        case ntTrigger:     return ("TRIGGER");
+        case ntGenerator:   return ("GENERATOR");
+        case ntFunction:    return ("FUNCTION");
+        case ntDomain:      return ("DOMAIN");
+        case ntRole:        return ("ROLE");
+        case ntColumn:      return ("COLUMN");
+        case ntException:   return ("EXCEPTION");
         default:
-            return wxT("");
+            return "";
     }
 }
 
 NodeType getTypeByName(const wxString& name)
 {
-    if (name == wxT("TABLE"))
+    if (name == "TABLE")
         return ntTable;
-    else if (name == wxT("VIEW"))
+    else if (name == "VIEW")
         return ntView;
-    else if (name == wxT("PROCEDURE"))
+    else if (name == "PROCEDURE")
         return ntProcedure;
-    else if (name == wxT("TRIGGER"))
+    else if (name == "TRIGGER")
         return ntTrigger;
-    else if (name == wxT("GENERATOR"))
+    else if (name == "GENERATOR")
         return ntGenerator;
-    else if (name == wxT("FUNCTION"))
+    else if (name == "FUNCTION")
         return ntFunction;
-    else if (name == wxT("DOMAIN"))
+    else if (name == "DOMAIN")
         return ntDomain;
-    else if (name == wxT("ROLE"))
+    else if (name == "ROLE")
         return ntRole;
-    else if (name == wxT("COLUMN"))
+    else if (name == "COLUMN")
         return ntColumn;
-    else if (name == wxT("EXCEPTION"))
+    else if (name == "EXCEPTION")
         return ntException;
     else
         return ntUnknown;
@@ -295,29 +295,29 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
     tr1->Start();
     IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
 
-    wxString o1 = (ofObject ? wxT("DEPENDENT") : wxT("DEPENDED_ON"));
-    wxString o2 = (ofObject ? wxT("DEPENDED_ON") : wxT("DEPENDENT"));
+    wxString o1 = (ofObject ? "DEPENDENT" : "DEPENDED_ON");
+    wxString o2 = (ofObject ? "DEPENDED_ON" : "DEPENDENT");
     wxString sql =
-        wxT("select RDB$") + o2 + wxT("_TYPE, RDB$") + o2 + wxT("_NAME, RDB$FIELD_NAME \n ")
-        wxT(" from RDB$DEPENDENCIES \n ")
-        wxT(" where RDB$") + o1 + wxT("_TYPE in (?,?) and RDB$") + o1 + wxT("_NAME = ? \n ");
+        "select RDB$" + o2 + "_TYPE, RDB$" + o2 + "_NAME, RDB$FIELD_NAME \n "
+        " from RDB$DEPENDENCIES \n "
+        " where RDB$" + o1 + "_TYPE in (?,?) and RDB$" + o1 + "_NAME = ? \n ";
     int params = 1;
     if ((typeM == ntTable || typeM == ntSysTable || typeM == ntView) && ofObject)  // get deps for computed columns
     {                                                       // view needed to bind with generators
-        sql += wxT(" union  \n")
-            wxT(" SELECT DISTINCT d.rdb$depended_on_type, d.rdb$depended_on_name, d.rdb$field_name \n")
-            wxT(" FROM rdb$relation_fields f \n")
-            wxT(" LEFT JOIN rdb$dependencies d ON d.rdb$dependent_name = f.rdb$field_source \n")
-            wxT(" WHERE d.rdb$dependent_type = 3 AND f.rdb$relation_name = ? \n");
+        sql += " union  \n"
+            " SELECT DISTINCT d.rdb$depended_on_type, d.rdb$depended_on_name, d.rdb$field_name \n"
+            " FROM rdb$relation_fields f \n"
+            " LEFT JOIN rdb$dependencies d ON d.rdb$dependent_name = f.rdb$field_source \n"
+            " WHERE d.rdb$dependent_type = 3 AND f.rdb$relation_name = ? \n";
         params++;
     }
     if (!ofObject) // find tables that have calculated columns based on "this" object
     {
-        sql += wxT("union  \n")
-            wxT(" SELECT distinct cast(0 as smallint), f.rdb$relation_name, f.rdb$field_name \n")
-            wxT(" from rdb$relation_fields f \n")
-            wxT(" left join rdb$dependencies d on d.rdb$dependent_name = f.rdb$field_source \n")
-            wxT(" where d.rdb$dependent_type = 3 and d.rdb$depended_on_name = ? ");
+        sql += "union  \n"
+            " SELECT distinct cast(0 as smallint), f.rdb$relation_name, f.rdb$field_name \n"
+            " from rdb$relation_fields f \n"
+            " left join rdb$dependencies d on d.rdb$dependent_name = f.rdb$field_source \n"
+            " where d.rdb$dependent_type = 3 and d.rdb$depended_on_name = ? ";
         params++;
     }
     // get the exact table and fields for views
@@ -325,28 +325,28 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
     // but we also need mapping for column list in SELECT. These 2 queries cover it:
     if (ofObject && typeM == ntView)
     {
-        sql += wxT(" union \n")
-            wxT(" select distinct cast(0 as smallint), vr.RDB$RELATION_NAME, f.RDB$BASE_FIELD \n")
-            wxT(" from RDB$RELATION_FIELDS f \n")
-            wxT(" join RDB$VIEW_RELATIONS vr on f.RDB$VIEW_CONTEXT = vr.RDB$VIEW_CONTEXT \n")
-            wxT("   and f.RDB$RELATION_NAME = vr.RDB$VIEW_NAME \n")
-            wxT(" where f.rdb$relation_name = ? \n");
+        sql += " union \n"
+            " select distinct cast(0 as smallint), vr.RDB$RELATION_NAME, f.RDB$BASE_FIELD \n"
+            " from RDB$RELATION_FIELDS f \n"
+            " join RDB$VIEW_RELATIONS vr on f.RDB$VIEW_CONTEXT = vr.RDB$VIEW_CONTEXT \n"
+            "   and f.RDB$RELATION_NAME = vr.RDB$VIEW_NAME \n"
+            " where f.rdb$relation_name = ? \n";
         params++;
     }
     // views can depend on other views as well
     // we might need to add procedures here one day when Firebird gains support for it
     if (!ofObject && (typeM == ntView || typeM == ntTable || typeM == ntSysTable))
     {
-        sql += wxT(" union \n")
-            wxT(" select distinct cast(0 as smallint), f.RDB$RELATION_NAME, f.RDB$BASE_FIELD \n")
-            wxT(" from RDB$RELATION_FIELDS f \n")
-            wxT(" join RDB$VIEW_RELATIONS vr on f.RDB$VIEW_CONTEXT = vr.RDB$VIEW_CONTEXT \n")
-            wxT("   and f.RDB$RELATION_NAME = vr.RDB$VIEW_NAME \n")
-            wxT(" where vr.rdb$relation_name = ? \n");
+        sql += " union \n"
+            " select distinct cast(0 as smallint), f.RDB$RELATION_NAME, f.RDB$BASE_FIELD \n"
+            " from RDB$RELATION_FIELDS f \n"
+            " join RDB$VIEW_RELATIONS vr on f.RDB$VIEW_CONTEXT = vr.RDB$VIEW_CONTEXT \n"
+            "   and f.RDB$RELATION_NAME = vr.RDB$VIEW_NAME \n"
+            " where vr.rdb$relation_name = ? \n";
         params++;
     }
 
-    sql += wxT(" order by 1, 2, 3");
+    sql += " order by 1, 2, 3";
     st1->Prepare(wx2std(sql, d->getCharsetConverter()));
     st1->Set(1, mytype);
     st1->Set(2, mytype2);
@@ -581,7 +581,7 @@ void MetadataItem::loadDescription()
 void MetadataItem::saveDescription(const wxString& WXUNUSED(description))
 {
     throw FRError(wxString::Format(
-        wxT("Objects of type %s do not support descriptions"),
+        "Objects of type %s do not support descriptions",
         getTypeName().c_str()));
 }
 
@@ -662,12 +662,12 @@ bool MetadataItem::isSystem() const
 bool MetadataItem::hasSystemPrefix(const wxString& name)
 {
     wxString prefix(name.substr(0, 4));
-    return prefix == wxT("RDB$") || prefix == wxT("MON$") || prefix == wxT("SEC$");
+    return prefix == "RDB$" || prefix == "MON$" || prefix == "SEC$";
 }
 
 wxString MetadataItem::getDropSqlStatement() const
 {
-    return wxT("DROP ") + getTypeName() + wxT(" ") + getQuotedName() + wxT(";");
+    return "DROP " + getTypeName() + " " + getQuotedName() + ";";
 }
 
 void MetadataItem::acceptVisitor(MetadataItemVisitor* visitor)
@@ -746,7 +746,7 @@ wxString Dependency::getFields() const
     for (std::vector<wxString>::const_iterator it = fieldsM.begin(); it != fieldsM.end(); ++it)
     {
         if (it != fieldsM.begin())
-            temp += wxT(", ");
+            temp += ", ";
         temp += (*it);
     }
     return temp;

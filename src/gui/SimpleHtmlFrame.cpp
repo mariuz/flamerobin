@@ -63,7 +63,7 @@ SimpleHtmlFrame::SimpleHtmlFrame(wxWindow* parent, const wxFileName& fileName)
 {
     html_window = new PrintableHtmlWindow(this);
     CreateStatusBar();
-    html_window->SetRelatedFrame(this, wxT("%s"));
+    html_window->SetRelatedFrame(this, "%s");
     html_window->SetRelatedStatusBar(0);
 
     // we don't use LoadPage here since we need PrintableHtmlWindow to
@@ -83,7 +83,7 @@ const wxRect SimpleHtmlFrame::getDefaultRect() const
 
 const wxString SimpleHtmlFrame::getName() const
 {
-    return wxT("SimpleHtmlFrameFrame");
+    return "SimpleHtmlFrameFrame";
 }
 
 const wxString SimpleHtmlFrame::getStorageName() const
@@ -97,7 +97,7 @@ const wxString SimpleHtmlFrame::getStorageName() const
 wxString SimpleHtmlFrame::getFrameId(const wxFileName& fileName)
 {
     if (fileName.HasName())
-        return wxString(wxT("SimpleHtmlFrame/") + fileName.GetFullPath());
+        return wxString("SimpleHtmlFrame/" + fileName.GetFullPath());
     else
         return wxEmptyString;
 }

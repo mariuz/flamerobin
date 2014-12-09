@@ -99,7 +99,7 @@ void ServerRegistrationDialog::createControls(bool registerServer)
 
 const wxString ServerRegistrationDialog::getName() const
 {
-    return wxT("ServerRegistrationDialog");
+    return "ServerRegistrationDialog";
 }
 
 void ServerRegistrationDialog::layoutControls()

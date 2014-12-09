@@ -41,7 +41,7 @@
 #include "core/FRError.h"
 
 
-const wxString Config::pathSeparator = wxT("/");
+const wxString Config::pathSeparator = "/";
 
 FRConfig& config()
 {
@@ -53,7 +53,7 @@ Config::Config()
     : configM(0), needsFlushM(false)
 {
 #ifdef FR_CONFIG_USE_PRIVATE_STDPATHS    
-    ((wxStandardPaths&)wxStandardPaths::Get()).SetInstallPrefix(wxT(FR_INSTALL_PREFIX));
+    ((wxStandardPaths&)wxStandardPaths::Get()).SetInstallPrefix(FR_INSTALL_PREFIX);
 #endif
 }
 
@@ -69,8 +69,8 @@ wxFileConfig* Config::getConfig() const
         wxFileName configFileName = getConfigFileName();
         if (!wxDirExists(configFileName.GetPath()))
             wxMkdir(configFileName.GetPath());
-        configM = new wxFileConfig(wxT(""), wxT(""),
-            configFileName.GetFullPath(), wxT(""), wxCONFIG_USE_LOCAL_FILE);
+        configM = new wxFileConfig("", "",
+            configFileName.GetFullPath(), "", wxCONFIG_USE_LOCAL_FILE);
         configM->SetExpandEnvVars(false);
     }
     return configM;
@@ -159,7 +159,7 @@ bool Config::getValue(const wxString& key, bool& value)
     if (!getValue(key, s))
         return false;
 
-    value = (s == wxT("1"));
+    value = (s == "1");
     return true;
 }
 
@@ -222,9 +222,9 @@ bool Config::setValue(const wxString& key, double value)
 bool Config::setValue(const wxString& key, bool value)
 {
     if (value)
-        return setValue(key, wxString(wxT("1")));
+        return setValue(key, wxString("1"));
     else
-        return setValue(key, wxString(wxT("0")));
+        return setValue(key, wxString("0"));
 }
 
 bool Config::setValue(const wxString& key, StorageGranularity value)
@@ -239,7 +239,7 @@ bool Config::setValue(const wxString& key, const wxArrayString& value)
         it++)
     {
         if (it != value.begin())
-            s += wxT(",");
+            s += ",";
         // this is just a parachute, if this should ever be triggered we
         // will need to quote and unquote this wxString or all in value
         wxASSERT((*it).find(',') == wxString::npos);
@@ -327,72 +327,72 @@ void ConfigCache::update()
 
 wxString FRConfig::getHtmlTemplatesPath() const
 {
-    return getHomePath() + wxT("html-templates")
+    return getHomePath() + "html-templates"
         + wxFileName::GetPathSeparator();
 }
 
 wxString FRConfig::getCodeTemplatesPath() const
 {
-    return getHomePath() + wxT("code-templates")
+    return getHomePath() + "code-templates"
         + wxFileName::GetPathSeparator();
 }
 
 wxString FRConfig::getUserCodeTemplatesPath() const
 {
-    return getUserHomePath() + wxT("code-templates")
+    return getUserHomePath() + "code-templates"
         + wxFileName::GetPathSeparator();
 }
 
 wxString FRConfig::getSysTemplatesPath() const
 {
-    return getHomePath() + wxT("sys-templates")
+    return getHomePath() + "sys-templates"
         + wxFileName::GetPathSeparator();
 }
 
 wxString FRConfig::getUserSysTemplatesPath() const
 {
-    return getUserHomePath() + wxT("sys-templates")
+    return getUserHomePath() + "sys-templates"
         + wxFileName::GetPathSeparator();
 }
 
 wxString FRConfig::getDocsPath() const
 {
-    return getHomePath() + wxT("docs") + wxFileName::GetPathSeparator();
+    return getHomePath() + "docs" + wxFileName::GetPathSeparator();
 }
 
 wxString FRConfig::getConfDefsPath() const
 {
-    return getHomePath() + wxT("conf-defs") + wxFileName::GetPathSeparator();
+    return getHomePath() + "conf-defs" + wxFileName::GetPathSeparator();
 }
 
 wxString FRConfig::getImagesPath() const
 {
-    return getHomePath() + wxT("images") + wxFileName::GetPathSeparator();
+    return getHomePath() + "images" + wxFileName::GetPathSeparator();
 }
 
 wxString FRConfig::getDBHFileName() const
 {
-    return getUserHomePath() + wxT("fr_databases.conf");
+    return getUserHomePath() + "fr_databases.conf";
 }
 
 wxFileName FRConfig::getConfigFileName() const
 {
-    return wxFileName(getUserHomePath(), wxT("fr_settings.conf"));
+    return wxFileName(getUserHomePath(), "fr_settings.conf");
 }
 
 const wxString FRConfig::getSysTemplateFileName(const wxString& templateName)
 {
     wxFileName fileName = getUserSysTemplatesPath() + templateName
-        + wxT(".template");
+        + ".template";
     if (!fileName.FileExists())
-        fileName = getSysTemplatesPath() + templateName + wxT(".template");
+        fileName = getSysTemplatesPath() + templateName + ".template";
     if (!fileName.FileExists())
-        fileName = getUserCodeTemplatesPath() + templateName + wxT(".template");
+        fileName = getUserCodeTemplatesPath() + templateName + ".template";
     if (!fileName.FileExists())
-        fileName = getCodeTemplatesPath() + templateName + wxT(".template");
+        fileName = getCodeTemplatesPath() + templateName + ".template";
     if (!fileName.FileExists())
     {
-        fileName = getSysTemplatesPath() + templateName + wxT(".template");
+        fileName = getSysTemplatesPath() + templateName + ".template";
         if (!fileName.FileExists())
         {
             throw FRError(wxString::Format(_("Template \"%s\" not found."),

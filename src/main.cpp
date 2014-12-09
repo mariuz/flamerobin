@@ -47,11 +47,11 @@ IMPLEMENT_APP(Application)
 void parachute()
 {
     if (wxYES == ::wxMessageBox(::wxGetTranslation(
-        wxT("A fatal error has occured. If you know how to\n")
-        wxT("reproduce the problem, please submit the bug report at:\n")
-        wxT("http://flamerobin.org/bugs.php\n\n")
-        wxT("The program can try to keep running so that you\n")
-        wxT("can save your data. Do you wish to try?\n")),
+        "A fatal error has occured. If you know how to\n"
+        "reproduce the problem, please submit the bug report at:\n"
+        "http://flamerobin.org/bugs.php\n\n"
+        "The program can try to keep running so that you\n"
+        "can save your data. Do you wish to try?\n"),
         _("Fatal error"), wxYES_NO | wxICON_ERROR))
     {
         int result = ::wxGetApp().OnRun();
@@ -97,9 +97,9 @@ bool Application::OnInit()
 
     wxImage::AddHandler(new wxPNGHandler);
 
-    wxSystemOptions::SetOption(wxT("mac.listctrl.always_use_generic"), true);
+    wxSystemOptions::SetOption("mac.listctrl.always_use_generic", true);
 
-    MainFrame* main_frame = new MainFrame(0, -1, wxT(""));
+    MainFrame* main_frame = new MainFrame(0, -1, "");
     SetTopWindow(main_frame);
     main_frame->Show();
 
@@ -128,17 +128,17 @@ void Application::HandleEvent(wxEvtHandler* handler, wxEventFunction func,
 void Application::checkEnvironment()
 {
     wxString envVar;
-    if (wxGetEnv(wxT("FR_HOME"), &envVar))
+    if (wxGetEnv("FR_HOME", &envVar))
         config().setHomePath(translatePathMacros(envVar));
-    if (wxGetEnv(wxT("FR_USER_HOME"), &envVar))
+    if (wxGetEnv("FR_USER_HOME", &envVar))
         config().setUserHomePath(translatePathMacros(envVar));
 }
 
 void Application::parseCommandLine()
 {
     wxCmdLineParser parser(wxGetApp().argc, wxGetApp().argv);
-    parser.AddOption(wxT("h"), wxT("home"), _("Set FlameRobin's home path"));
-    parser.AddOption(wxT("uh"), wxT("user-home"),
+    parser.AddOption("h", "home", _("Set FlameRobin's home path"));
+    parser.AddOption("uh", "user-home",
         _("Set FlameRobin's user home path"));
     // open databases given as command line parameters
     parser.AddParam(_("File name of database to open"), wxCMD_LINE_VAL_STRING,
@@ -147,10 +147,10 @@ void Application::parseCommandLine()
     if (parser.Parse() == 0)
     {
         wxString paramValue;
-        if (parser.Found(wxT("home"), &paramValue))
+        if (parser.Found("home", &paramValue))
             config().setHomePath(translatePathMacros(paramValue));
 
-        if (parser.Found(wxT("user-home"), &paramValue))
+        if (parser.Found("user-home", &paramValue))
             config().setUserHomePath(translatePathMacros(paramValue));
 
         for (size_t i = 0; i < parser.GetParamCount(); i++)
@@ -160,9 +160,9 @@ void Application::parseCommandLine()
 
 const wxString Application::translatePathMacros(const wxString path) const
 {
-    if (path == wxT("$app"))
+    if (path == "$app")
         return config().getLocalDataDir();
-    else if (path == wxT("$user"))
+    else if (path == "$user")
         return config().getUserLocalDataDir();
     else
         return path;
@@ -170,7 +170,7 @@ const wxString Application::translatePathMacros(const wxString path) const
 
 const wxString Application::getConfigurableObjectId() const
 {
-    return wxT("");
+    return "";
 }
 
 void Application::openDatabasesFromParams(MainFrame* frFrame)

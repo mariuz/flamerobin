@@ -58,13 +58,13 @@ void Privilege::addPrivilege(char privilege, const wxString& grantor,
     wxString p;
     switch (privilege)
     {
-        case 'S':   p = wxT("SELECT");      break;
-        case 'I':   p = wxT("INSERT");      break;
-        case 'U':   p = wxT("UPDATE");      break;
-        case 'D':   p = wxT("DELETE");      break;
-        case 'R':   p = wxT("REFERENCES");  break;
-        case 'X':   p = wxT("EXECUTE");     break;
-        case 'M':   p = wxT("MEMBER OF");   break;
+        case 'S':   p = "SELECT";      break;
+        case 'I':   p = "INSERT";      break;
+        case 'U':   p = "UPDATE";      break;
+        case 'D':   p = "DELETE";      break;
+        case 'R':   p = "REFERENCES";  break;
+        case 'X':   p = "EXECUTE";     break;
+        case 'M':   p = "MEMBER OF";   break;
         default:
             return;
     };
@@ -78,7 +78,7 @@ void Privilege::addPrivilege(char privilege, const wxString& grantor,
             (*it).second.grantOption == withGrantOption)    // got it
         {
             std::vector<wxString> *cols = 0;
-            if (p == wxT("UPDATE") || p == wxT("REFERENCES"))
+            if (p == "UPDATE" || p == "REFERENCES")
                 cols = &((*it).second.columns);
             if (!field.IsEmpty() && cols && cols->end() ==
                 std::find(cols->begin(), cols->end(), field))
@@ -97,13 +97,13 @@ void Privilege::addPrivilege(char privilege, const wxString& grantor,
 wxString granteeTypeToString(int type)
 {
     if (type == 1)
-        return wxT("VIEW");
+        return "VIEW";
     if (type == 2)
-        return wxT("TRIGGER");
+        return "TRIGGER";
     if (type == 5)
-        return wxT("PROCEDURE");
+        return "PROCEDURE";
     if (type == 13)
-        return wxT("ROLE");
+        return "ROLE";
     return wxEmptyString;
 }
 
@@ -116,37 +116,37 @@ wxString Privilege::getSql(bool withGrantOption) const
         if ((*c).second.grantOption != withGrantOption)
             continue;
         if (!ret.IsEmpty())
-            ret += wxT(", ");
+            ret += ", ";
         ret += (*c).first;
         const std::vector<wxString>& cols = (*c).second.columns;
         if (cols.size())
         {
-            ret += wxT("(");
+            ret += "(";
             for (std::vector<wxString>::const_iterator ci = cols.begin();
                 ci != cols.end(); ++ci)
             {
                 if (ci != cols.begin())
-                    ret += wxT(",");
+                    ret += ",";
                 Identifier id(*ci);
                 ret += id.getQuoted();
             }
-            ret += wxT(")");
+            ret += ")";
         }
     }
 
     if (ret.IsEmpty())          // no privileges found
         return wxEmptyString;
 
-    ret = wxT("GRANT ") + ret + wxT("\n ON ");
+    ret = "GRANT " + ret + "\n ON ";
     if (dynamic_cast<Procedure *>(parentObjectM))
-        ret += wxT("PROCEDURE ");
+        ret += "PROCEDURE ";
     Identifier id(granteeM);
-    ret += parentObjectM->getQuotedName() + wxT(" TO ")
-        + granteeTypeToString(granteeTypeM) + wxT(" ") + id.getQuoted();
+    ret += parentObjectM->getQuotedName() + " TO "
+        + granteeTypeToString(granteeTypeM) + " " + id.getQuoted();
 
     if (withGrantOption)
-        ret += wxT(" WITH GRANT OPTION");
-    ret += wxT(";\n");
+        ret += " WITH GRANT OPTION";
+    ret += ";\n";
     return ret;
 }
 
@@ -156,17 +156,17 @@ wxString Privilege::getSql() const
     if (!r)
         return getSql(true) + getSql(false);
 
-    wxString ret = wxT("GRANT ") + r->getQuotedName() + wxT(" TO ") + granteeM;
+    wxString ret = "GRANT " + r->getQuotedName() + " TO " + granteeM;
     for (PMap::const_iterator c = privilegeItemsM.begin();
         c != privilegeItemsM.end(); ++c)
     {
         if ((*c).second.grantOption)
         {
-            ret += wxT(" WITH ADMIN OPTION");
+            ret += " WITH ADMIN OPTION";
             break;
         }
     }
-    ret += wxT(";\n");
+    ret += ";\n";
     return ret;
 }
 
@@ -174,7 +174,7 @@ wxString Privilege::getGrantee() const
 {
     wxString gt = granteeTypeToString(granteeTypeM);
     if (!gt.IsEmpty())
-        gt += wxT(" ");
+        gt += " ";
     return gt + granteeM;
 }
 

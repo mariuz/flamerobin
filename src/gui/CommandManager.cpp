@@ -90,7 +90,7 @@ wxString CommandManager::getShortcutText(int id)
 wxString CommandManager::getMainMenuItemText(const wxString& text, int id)
 {
     wxString shortcut(getShortcutText(id));
-    return (shortcut.empty() ? text : text + wxT("\t") + shortcut);
+    return (shortcut.empty() ? text : text + "\t" + shortcut);
 }
 
 wxString CommandManager::getPopupMenuItemText(const wxString& text, int id)
@@ -103,7 +103,7 @@ wxString CommandManager::getPopupMenuItemText(const wxString& text, int id)
     {
         wxString shortcut(getShortcutText(id));
         if (!shortcut.empty())
-            return text + wxT("\t") + shortcut;
+            return text + "\t" + shortcut;
     }
     return text;
 }
@@ -111,7 +111,7 @@ wxString CommandManager::getPopupMenuItemText(const wxString& text, int id)
 wxString CommandManager::getToolbarHint(const wxString& text, int id)
 {
     wxString shortcut(getShortcutText(id));
-    return (shortcut.empty() ? text : text + wxT(" (") + shortcut + wxT(")"));
+    return (shortcut.empty() ? text : text + " (" + shortcut + ")");
 }
 
 void CommandManager::init()

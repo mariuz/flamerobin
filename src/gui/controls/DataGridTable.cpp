@@ -55,7 +55,7 @@ DataGridTable::DataGridTable(IBPP::Statement& s, Database* db)
     readOnlyM = false;
     canInsertRowsIsSetM = false;
     canInsertRowsM = false;
-    config().getValue(wxT("GridFetchAllRecords"), fetchAllRowsM);
+    config().getValue("GridFetchAllRecords", fetchAllRowsM);
     maxRowToFetchM = 100;
     cellAttriM = new wxGridCellAttr();
 }
@@ -85,7 +85,7 @@ void DataGridTable::Clear()
     allRowsFetchedM = true;
     fetchAllRowsM = false;
     canInsertRowsIsSetM = false;
-    config().getValue(wxT("GridFetchAllRecords"), fetchAllRowsM);
+    config().getValue("GridFetchAllRecords", fetchAllRowsM);
 
     unsigned oldCols = rowsM.getRowFieldCount();
     unsigned oldRows = rowsM.getRowCount();
@@ -245,9 +245,9 @@ wxString DataGridTable::getCellValue(int row, int col)
         return wxEmptyString;
 
     if (rowsM.isFieldNA(row, col))
-        return wxT("N/A");
+        return "N/A";
     if (rowsM.isFieldNull(row, col))
-        return wxT("[null]");
+        return "[null]";
     return rowsM.getFieldValue(row, col);
 }
 
@@ -257,11 +257,11 @@ wxString DataGridTable::getCellValueForInsert(int row, int col)
         return wxEmptyString;
 
     if (rowsM.isFieldNull(row, col))
-        return wxT("NULL");
+        return "NULL";
     // return quoted text, but escape embedded quotes
     wxString s(rowsM.getFieldValue(row, col));
-    s.Replace(wxT("'"), wxT("''"));
-    return wxT("'") + s + wxT("'");
+    s.Replace("'", "''");
+    return "'" + s + "'";
 }
 
 wxString DataGridTable::getCellValueForCSV(int row, int col,
@@ -271,10 +271,10 @@ wxString DataGridTable::getCellValueForCSV(int row, int col,
         return wxEmptyString;
 
     const wxString sTextDelim =
-        (textDelimiter != '\0') ? wxString(textDelimiter) : wxT("");
+        (textDelimiter != '\0') ? wxString(textDelimiter) : "";
 
     if (rowsM.isFieldNull(row, col))
-        return sTextDelim + wxT("NULL") + sTextDelim;
+        return sTextDelim + "NULL" + sTextDelim;
     wxString s(rowsM.getFieldValue(row, col));
     if (rowsM.isColumnNumeric(col))
         return s;
@@ -282,7 +282,7 @@ wxString DataGridTable::getCellValueForCSV(int row, int col,
     // wxTextOutputStream (which is used to write the CSV file) will convert
     // '\n' to the proper EOL sequence while writing the stream
     // so make sure '\r' isn't doubled on Windows
-    s.Replace(wxT("\r\n"), wxT("\n"));
+    s.Replace("\r\n", "\n");
 
     if (textDelimiter == '\0')
         return s;
@@ -432,12 +432,12 @@ wxString DataGridTable::GetValue(int row, int col)
         maxRowToFetchM = maxRowToFetch;
 
     if (rowsM.isFieldNA(row, col))
-        return wxT("N/A");
+        return "N/A";
     if (rowsM.isFieldNull(row, col))
-        return wxT("[null]");
+        return "[null]";
     // limit returned string to first line (speeds up output in grid)
     wxString s(rowsM.getFieldValue(row, col));
-    size_t eol = s.find_first_of(wxT("\r\n"));
+    size_t eol = s.find_first_of("\r\n");
     if (eol != wxString::npos)
         s.erase(eol);
     return s;
@@ -630,7 +630,7 @@ void DataGridTable::SetValue(int row, int col, const wxString& value)
 void DataGridTable::setValueToNull(int row, int col)
 {
     setNullFlag(true);
-    SetValue(row, col, wxT("[null]"));
+    SetValue(row, col, "[null]");
     if (isBlobColumn(col,0))
     {
         // set blob to null

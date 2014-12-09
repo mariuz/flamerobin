@@ -59,8 +59,8 @@ static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)
         int type = n->GetType();
         if (type == wxXML_TEXT_NODE || type == wxXML_CDATA_SECTION_NODE)
             content += n->GetContent();
-        else if (type == wxXML_ELEMENT_NODE && n->GetName() == wxT("br"))
-            content += wxT("\n");
+        else if (type == wxXML_ELEMENT_NODE && n->GetName() == "br")
+            content += "\n";
     }
     return content.empty() ? defvalue : content;
 }
@@ -205,23 +205,23 @@ bool PrefDlgSetting::parseProperty(wxXmlNode* xmln)
         wxString name(xmln->GetName());
         wxString value(getNodeContent(xmln, wxEmptyString));
 
-        if (name == wxT("caption"))
+        if (name == "caption")
             captionM = value;
-        else if (name == wxT("description"))
+        else if (name == "description")
             descriptionM = value;
-        else if (name == wxT("key"))
+        else if (name == "key")
             keyM = value;
-        else if (name == wxT("default"))
+        else if (name == "default")
             setDefault(value);
-        else if (name == wxT("related"))
+        else if (name == "related")
             relatedM = true;
-        else if (name == wxT("aligngroup"))
+        else if (name == "aligngroup")
         {
             long l;
             if (value.ToLong(&l) && l > 0)
                 alignmentGroupM = l;
         }
-        else if (name == wxT("proportion"))
+        else if (name == "proportion")
         {
             long l;
             if (value.ToLong(&l) && l >= 0)
@@ -347,7 +347,7 @@ bool PrefDlgCheckboxSetting::saveToTargetConfig(Config& config)
 
 void PrefDlgCheckboxSetting::setDefault(const wxString& defValue)
 {
-    defaultM = (defValue == wxT("on") || defValue == wxT("yes"));
+    defaultM = (defValue == "on" || defValue == "yes");
     long l;
     if (defValue.ToLong(&l) && l != 0)
         defaultM = true;
@@ -434,7 +434,7 @@ bool PrefDlgRadioboxSetting::loadFromTargetConfig(Config& config)
 bool PrefDlgRadioboxSetting::parseProperty(wxXmlNode* xmln)
 {
     if (xmln->GetType() == wxXML_ELEMENT_NODE
-        && xmln->GetName() == wxT("option"))
+        && xmln->GetName() == "option")
     {
         wxString optcaption;
 
@@ -444,10 +444,10 @@ bool PrefDlgRadioboxSetting::parseProperty(wxXmlNode* xmln)
             if (xmlc->GetType() != wxXML_ELEMENT_NODE)
                 continue;
             wxString value(getNodeContent(xmlc, wxEmptyString));
-            if (xmlc->GetName() == wxT("caption"))
+            if (xmlc->GetName() == "caption")
                 optcaption = value;
 /*
-            else if (xmlc->GetName() == wxT("value"))
+            else if (xmlc->GetName() == "value"))
                 optvalue = value;
 */
         }
@@ -531,7 +531,7 @@ bool PrefDlgIntEditSetting::createControl(bool WXUNUSED(ignoreerrors))
     wxString caption1(captionM);
     wxString caption2;
 
-    int pos = captionM.Find(wxT("[VALUE]"));
+    int pos = captionM.Find("[VALUE]");
     if (pos >= 0)
     {
         caption1.Truncate(size_t(pos));
@@ -596,13 +596,13 @@ bool PrefDlgIntEditSetting::parseProperty(wxXmlNode* xmln)
     if (xmln->GetType() == wxXML_ELEMENT_NODE)
     {
         wxString name(xmln->GetName());
-        if (name == wxT("minvalue") || name == wxT("maxvalue"))
+        if (name == "minvalue" || name == "maxvalue")
         {
             wxString value(getNodeContent(xmln, wxEmptyString));
             long l;
             if (!value.empty() && value.ToLong(&l))
             {
-                if (name == wxT("maxvalue"))
+                if (name == "maxvalue")
                     maxValueM = l;
                 else
                     minValueM = l;
@@ -686,7 +686,7 @@ bool PrefDlgStringEditSetting::createControl(bool WXUNUSED(ignoreerrors))
     wxString caption1(captionM);
     wxString caption2;
 
-    int pos = captionM.Find(wxT("[VALUE]"));
+    int pos = captionM.Find("[VALUE]");
     if (pos >= 0)
     {
         caption1.Truncate(size_t(pos));
@@ -747,14 +747,14 @@ bool PrefDlgStringEditSetting::parseProperty(wxXmlNode* xmln)
     if (xmln->GetType() == wxXML_ELEMENT_NODE)
     {
         wxString name(xmln->GetName());
-        if (name == wxT("expand"))
+        if (name == "expand")
         {
             wxString value(getNodeContent(xmln, wxEmptyString));
             long l;
             if (!value.empty() && value.ToLong(&l))
                 expandM = l;
         }
-        else if (name == wxT("hint"))
+        else if (name == "hint")
             toolTipM = getNodeContent(xmln, wxEmptyString);
     }
     return PrefDlgSetting::parseProperty(xmln);
@@ -948,7 +948,7 @@ void PrefDlgFileChooserSetting::choose()
 bool PrefDlgFileChooserSetting::parseProperty(wxXmlNode* xmln)
 {
     if (xmln->GetType() == wxXML_ELEMENT_NODE
-        && xmln->GetName() == wxT("dlg_filter"))
+        && xmln->GetName() == "dlg_filter")
     {
         dlgFilterM = getNodeContent(xmln, wxEmptyString);
     }
@@ -1004,7 +1004,7 @@ PrefDlgRelationColumnsChooserSetting::PrefDlgRelationColumnsChooserSetting(
 void PrefDlgRelationColumnsChooserSetting::choose()
 {
     wxArrayString defaultNames = ::wxStringTokenize(textCtrlM->GetValue(),
-        wxT(","));
+        ",");
     std::vector<wxString> list;
     for (size_t i = 0; i < defaultNames.Count(); i++)
         list.push_back(defaultNames[i].Trim(true).Trim(false));
@@ -1014,7 +1014,7 @@ void PrefDlgRelationColumnsChooserSetting::choose()
         std::vector<wxString>::iterator it = list.begin();
         wxString retval(*it);
         while ((++it) != list.end())
-            retval += wxT(", ") + (*it);
+            retval += ", " + (*it);
         textCtrlM->SetValue(retval);
     }
 }
@@ -1030,7 +1030,7 @@ void PrefDlgRelationColumnsChooserSetting::enableControls(bool enabled)
 bool PrefDlgRelationColumnsChooserSetting::parseProperty(wxXmlNode* xmln)
 {
     if (xmln->GetType() == wxXML_ELEMENT_NODE
-        && xmln->GetName() == wxT("relation"))
+        && xmln->GetName() == "relation")
     {
         wxString handle(getNodeContent(xmln, wxEmptyString));
         MetadataItem* mi = MetadataItem::getObjectFromHandle(handle);
@@ -1153,7 +1153,7 @@ void PrefDlgCheckListBoxSetting::enableControls(bool enabled)
 bool PrefDlgCheckListBoxSetting::parseProperty(wxXmlNode* xmln)
 {
     if (xmln->GetType() == wxXML_ELEMENT_NODE
-        && xmln->GetName() == wxT("option"))
+        && xmln->GetName() == "option")
     {
         wxString optcaption;
         for (wxXmlNode* xmlc = xmln->GetChildren(); xmlc != 0;
@@ -1162,10 +1162,10 @@ bool PrefDlgCheckListBoxSetting::parseProperty(wxXmlNode* xmln)
             if (xmlc->GetType() != wxXML_ELEMENT_NODE)
                 continue;
             wxString value(getNodeContent(xmlc, wxEmptyString));
-            if (xmlc->GetName() == wxT("caption"))
+            if (xmlc->GetName() == "caption")
                 optcaption = value;
 /*
-            else if (xmlc->GetName() == wxT("value"))
+            else if (xmlc->GetName() == "value"))
                 optvalue = value;
 */
         }
@@ -1215,7 +1215,7 @@ bool PrefDlgCheckListBoxSetting::loadFromTargetConfig(Config& config)
     {
         wxString value = defaultM;
         config.getValue(keyM, value);
-        wxArrayString checked(::wxStringTokenize(value, wxT(", \t\r\n"),
+        wxArrayString checked(::wxStringTokenize(value, ", \t\r\n",
             wxTOKEN_STRTOK));
 
         ignoreEventsM = true;
@@ -1246,7 +1246,7 @@ bool PrefDlgCheckListBoxSetting::saveToTargetConfig(Config& config)
             if (checkListBoxM->IsChecked(i))
             {
                 if (!first)
-                    value += wxString(wxT(", "));
+                    value += wxString(", ");
                 first = false;
                 value += checkListBoxM->GetString(i);
             }
@@ -1330,7 +1330,7 @@ wxArrayString PrefDlgRelationColumnsListSetting::getCheckListBoxItems()
 bool PrefDlgRelationColumnsListSetting::parseProperty(wxXmlNode* xmln)
 {
     if (xmln->GetType() == wxXML_ELEMENT_NODE
-        && xmln->GetName() == wxT("relation"))
+        && xmln->GetName() == "relation")
     {
         wxString handle(getNodeContent(xmln, wxEmptyString));
         MetadataItem* mi = MetadataItem::getObjectFromHandle(handle);
@@ -1344,23 +1344,23 @@ bool PrefDlgRelationColumnsListSetting::parseProperty(wxXmlNode* xmln)
 PrefDlgSetting* PrefDlgSetting::createPrefDlgSetting(wxPanel* page,
     const wxString& type, const wxString& style, PrefDlgSetting* parent)
 {
-    if (type == wxT("checkbox"))
+    if (type == "checkbox")
         return new PrefDlgCheckboxSetting(page, parent);
-    if (type == wxT("checklistbox"))
+    if (type == "checklistbox")
         return new PrefDlgCheckListBoxSetting(page, parent);
-    if (type == wxT("radiobox"))
+    if (type == "radiobox")
         return new PrefDlgRadioboxSetting(page, parent);
-    if (type == wxT("int"))
+    if (type == "int")
         return new PrefDlgIntEditSetting(page, parent);
-    if (type == wxT("string"))
+    if (type == "string")
         return new PrefDlgStringEditSetting(page, parent);
-    if (type == wxT("file"))
+    if (type == "file")
         return new PrefDlgFileChooserSetting(page, parent);
-    if (type == wxT("font"))
+    if (type == "font")
         return new PrefDlgFontChooserSetting(page, parent);
-    if (type == wxT("relation_columns"))
+    if (type == "relation_columns")
     {
-        if (style == wxT("list"))
+        if (style == "list")
             return new PrefDlgRelationColumnsListSetting(page, parent);
         return new PrefDlgRelationColumnsChooserSetting(page, parent);
     }

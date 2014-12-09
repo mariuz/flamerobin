@@ -45,13 +45,13 @@ class ColumnConstraint: public Constraint
     friend class Table;
 public:
     typedef std::vector<wxString>::const_iterator const_iterator;
-    std::vector<wxString>::const_iterator begin() { return columnsM.begin(); };
-    std::vector<wxString>::const_iterator end() { return columnsM.end(); };
-    wxString getColumnList(const wxString& separator = wxT(", "),
-        const wxString& suffix = wxT("")) const;
+    std::vector<wxString>::const_iterator begin() { return columnsM.begin(); }
+    std::vector<wxString>::const_iterator end() { return columnsM.end(); }
+    wxString getColumnList(const wxString& separator = ", ",
+        const wxString& suffix = "") const;
     bool hasColumn(const wxString& column) const;
-    const wxString& getIndexName() const { return indexNameM; };
-    std::vector<wxString>& getColumns() { return columnsM; };
+    const wxString& getIndexName() const { return indexNameM; }
+    std::vector<wxString>& getColumns() { return columnsM; }
 protected:
     std::vector<wxString> columnsM;
 private:

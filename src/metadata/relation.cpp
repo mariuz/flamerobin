@@ -366,8 +366,8 @@ wxString Relation::getRebuildSql(const wxString& forColumn)
         View *v = dynamic_cast<View*>(*vi);
         if (v)
         {
-            dropViews += wxT("DROP VIEW ") + v->getQuotedName() + wxT(";\n");
-            createViews = v->getCreateSql() + wxT("\n") + createViews;
+            dropViews += "DROP VIEW " + v->getQuotedName() + ";\n";
+            createViews = v->getCreateSql() + "\n" + createViews;
         }
         else if (!forColumn.IsEmpty() && (*vi) != this)
             continue;
@@ -410,12 +410,12 @@ wxString Relation::getRebuildSql(const wxString& forColumn)
             //       for the time being: don't use a progress indicator
             CreateDDLVisitor cdv(0);
             (*it)->acceptVisitor(&cdv);
-            createTriggers += cdv.getSql() + wxT("\n");
+            createTriggers += cdv.getSql() + "\n";
 
             // view's triggers would be dropped together with view anyway
             // but it is much simpler this way
-            dropTriggers += wxT("DROP TRIGGER ") + (*it)->getQuotedName()
-                + wxT(";\n");
+            dropTriggers += "DROP TRIGGER " + (*it)->getQuotedName()
+                + ";\n";
         }
 
         const std::vector<Privilege>* priv = (*vi)->getPrivileges();
@@ -473,8 +473,8 @@ wxString Relation::getRebuildSql(const wxString& forColumn)
         PrimaryKeyConstraint* pk = t1->getPrimaryKey();
         if (pk && (forColumn.IsEmpty() || pk->hasColumn(forColumn)))
         {
-            pkDrop += wxT("ALTER TABLE ") + getQuotedName() +
-                wxT(" DROP CONSTRAINT ") + pk->getQuotedName() + wxT(";\n");
+            pkDrop += "ALTER TABLE " + getQuotedName() +
+                " DROP CONSTRAINT " + pk->getQuotedName() + ";\n";
             CreateDDLVisitor cdv(0);
             pk->acceptVisitor(&cdv);
             pkCreate += cdv.getSql();
@@ -486,8 +486,8 @@ wxString Relation::getRebuildSql(const wxString& forColumn)
             {
                 if (!forColumn.IsEmpty() && !(*it).hasColumn(forColumn))
                     continue;
-                pkDrop += wxT("ALTER TABLE ") + getQuotedName() +
-                    wxT(" DROP CONSTRAINT ") + (*it).getQuotedName() + wxT(";\n");
+                pkDrop += "ALTER TABLE " + getQuotedName() +
+                    " DROP CONSTRAINT " + (*it).getQuotedName() + ";\n";
                 CreateDDLVisitor cdv(0);
                 (*it).acceptVisitor(&cdv);
                 pkCreate += cdv.getSql();
@@ -503,10 +503,10 @@ wxString Relation::getRebuildSql(const wxString& forColumn)
         {
             if (!forColumn.IsEmpty() && !(*i2).hasColumn(forColumn))
                 continue;
-            fkDrop += wxT("ALTER TABLE ") +
+            fkDrop += "ALTER TABLE " +
                 (*i2).getTable()->getQuotedName() +
-                wxT(" DROP CONSTRAINT ") +
-                (*i2).getQuotedName() + wxT(";\n");
+                " DROP CONSTRAINT " +
+                (*i2).getQuotedName() + ";\n";
             CreateDDLVisitor cdv(0);
             (*i2).acceptVisitor(&cdv);
             fkCreate += cdv.getSql();
@@ -519,17 +519,17 @@ wxString Relation::getRebuildSql(const wxString& forColumn)
     {
         if (!forColumn.IsEmpty() && !(*it).hasColumn(forColumn))
             continue;
-        wxString cname = wxT("CONSTRAINT ") + (*it).getQuotedName();
-        dropChecks += wxT("ALTER TABLE ") + (*it).getTable()->getQuotedName()
-            + wxT(" DROP ") + cname + wxT(";\n");
-        createChecks += wxT("ALTER TABLE ") +
-            (*it).getTable()->getQuotedName() + wxT(" ADD ");
+        wxString cname = "CONSTRAINT " + (*it).getQuotedName();
+        dropChecks += "ALTER TABLE " + (*it).getTable()->getQuotedName()
+            + " DROP " + cname + ";\n";
+        createChecks += "ALTER TABLE " +
+            (*it).getTable()->getQuotedName() + " ADD ";
         if (!(*it).isSystem())
             createChecks += cname;
-        createChecks += wxT("\n  ") + (*it).sourceM + wxT(";\n");
+        createChecks += "\n  " + (*it).sourceM + ";\n";
     }
 
-    wxString sql(wxT("SET AUTODDL ON;\n\n"));
+    wxString sql("SET AUTODDL ON;\n\n");
     sql += dropChecks;
     sql += dropTriggers;
     sql += fkDrop;
@@ -538,16 +538,16 @@ wxString Relation::getRebuildSql(const wxString& forColumn)
     for (std::vector<Procedure *>::iterator it = procedures.begin();
         it != procedures.end(); ++it)
     {
-        sql += wxT("\n/* ------------------------------------------ */\n\n")
+        sql += "\n/* ------------------------------------------ */\n\n"
             + (*it)->getAlterSql(false);
     }
     sql += dropViews;
-    sql += wxT("\n/**************** DROPPING COMPLETE ***************/\n\n");
+    sql += "\n/**************** DROPPING COMPLETE ***************/\n\n";
     sql += createViews;
     for (std::vector<Procedure *>::iterator it = procedures.begin();
         it != procedures.end(); ++it)
     {
-        sql += wxT("\n/* ------------------------------------------ */\n\n")
+        sql += "\n/* ------------------------------------------ */\n\n"
             + (*it)->getAlterSql(true);
     }
     sql += createTriggers;

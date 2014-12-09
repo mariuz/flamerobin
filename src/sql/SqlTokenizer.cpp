@@ -43,7 +43,7 @@ private:
 protected:
     virtual void loadFromConfig()
     {
-        sqlKeywordsUpperCaseM = config().get(wxT("SQLKeywordsUpperCase"),
+        sqlKeywordsUpperCaseM = config().get("SQLKeywordsUpperCase",
             false);
     }
 public:
@@ -63,13 +63,13 @@ public:
 };
 
 SqlTokenizer::SqlTokenizer()
-    : termM(wxT(";"))
+    : termM(";")
 {
     init();
 }
 
 SqlTokenizer::SqlTokenizer(const wxString& statement)
-    : sqlM(statement), termM(wxT(";"))
+    : sqlM(statement), termM(";")
 {
     init();
 }
@@ -127,12 +127,12 @@ const SqlTokenizer::KeywordToTokenMap& SqlTokenizer::getKeywordToTokenMap()
     static KeywordToTokenMap keywords;
     if (keywords.empty())
     {
-        static const struct {const wxChar* name; SqlTokenType type; } entries[] =
+        static const struct {wxString name; SqlTokenType type; } entries[] =
         {
             #include "keywordtokens.hpp"
             // this element makes for simpler code: all lines in the file can
             // end with a comma, and it is used as the stop marker
-            { wxT(""), tkUNKNOWN }
+            { "", tkUNKNOWN }
         };
         for (int i = 0; entries[i].type != tkUNKNOWN; i++)
         {
@@ -151,7 +151,7 @@ wxArrayString SqlTokenizer::getKeywords(KeywordCase kwc)
     keywords.Alloc(keywordsMap.size());
 
     bool upperCase = (kwc == kwUpperCase) || (kwc == kwDefaultCase
-        && config().get(wxT("SQLKeywordsUpperCase"), false));
+        && config().get("SQLKeywordsUpperCase", false));
     for (KeywordToTokenMap::const_iterator it = keywordsMap.begin();
         it != keywordsMap.end(); ++it)
     {
@@ -172,7 +172,7 @@ wxString SqlTokenizer::getKeywordsString(KeywordCase kwc)
     for (size_t i = 0; i < keywordsArray.size(); ++i)
     {
         if (i)
-            keywords += wxT(" ");
+            keywords += " ";
         keywords += keywordsArray[i];
     }
     return keywords;

@@ -47,9 +47,9 @@ URI::URI(const wxString& uri)
 //! pair has format: name=value
 void URI::addParam(const wxString& pair)
 {
-    wxString::size_type p = pair.find(wxT("="));
+    wxString::size_type p = pair.find("=");
     if (p == wxString::npos)
-        params[pair] = wxT("");
+        params[pair] = "";
     else
         params[pair.substr(0, p)] = pair.substr(p + 1);
 }
@@ -58,19 +58,19 @@ wxString URI::getParam(const wxString& name) const
 {
     std::map<wxString, wxString>::const_iterator it = params.find(name);
     if (it == params.end())
-        return wxT("");
+        return "";
     else
         return (*it).second;
 }
 
 bool URI::parseURI(const wxString& uri)
 {
-    wxString::size_type p = uri.find(wxT("://"));               // find ://
+    wxString::size_type p = uri.find("://");               // find ://
     if (p == wxString::npos)
         return false;
     protocol = uri.substr(0, p);
 
-    wxString::size_type p2 = uri.find(wxT("?"), p);             // ?
+    wxString::size_type p2 = uri.find("?", p);             // ?
     if (p2 == wxString::npos)
     {
         action = uri.substr(p + 3);
@@ -82,7 +82,7 @@ bool URI::parseURI(const wxString& uri)
     wxString par = uri.substr(p2 + 1);
     while (true)
     {
-        p = par.find(wxT("&"));
+        p = par.find("&");
         if (p == wxString::npos)
         {
             addParam(par);

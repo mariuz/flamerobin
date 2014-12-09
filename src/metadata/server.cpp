@@ -132,7 +132,7 @@ void Server::setPort(wxString port)
 
 const wxString Server::getTypeName() const
 {
-    return wxT("SERVER");
+    return "SERVER";
 }
 
 void Server::acceptVisitor(MetadataItemVisitor* visitor)
@@ -145,7 +145,7 @@ wxString Server::makeConnectionString(const wxString& hostname,
     const wxString& port)
 {
     if (!hostname.empty() && !port.empty())
-        return hostname + wxT("/") + port;
+        return hostname + "/" + port;
     else
         return hostname;
 }
@@ -160,7 +160,7 @@ const wxString Server::getItemPath() const
     // Since database Ids are already unique, let's shorten the item paths
     // by not including the server part. Even more so if this class is bound
     // to disappear in the future.
-    return wxT("");
+    return "";
 }
 
 struct SortUsers
@@ -267,12 +267,12 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
         // Use the user name and password of the connected user
         // instead of the stored ones.
         IBPP::Database& db = (*ci)->getIBPPDatabase();
-        if (sysdba && std2wx(db->Username()).Upper() != wxT("SYSDBA"))
+        if (sysdba && std2wx(db->Username()).Upper() != "SYSDBA")
             continue;
         if (progressind)
         {
             progressind->setProgressMessage(_("Using password of: ") +
-                std2wx(db->Username()) + wxT("@") + (*ci)->getName_());
+                std2wx(db->Username()) + "@" + (*ci)->getName_());
             progressind->stepProgress();
         }
         try
@@ -304,12 +304,12 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
             continue;
         wxString user = (*ci)->getUsername();
         wxString pwd = (*ci)->getDecryptedPassword();
-        if (pwd.IsEmpty() || (sysdba && user.Upper() != wxT("SYSDBA")))
+        if (pwd.IsEmpty() || (sysdba && user.Upper() != "SYSDBA"))
             continue;
         if (progressind)
         {
             progressind->setProgressMessage(_("Using password of: ") +
-                user + wxT("@") + (*ci)->getName_());
+                user + "@" + (*ci)->getName_());
             progressind->stepProgress();
         }
         try

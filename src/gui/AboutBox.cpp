@@ -59,15 +59,15 @@ void showAboutBox(wxWindow* parent)
 
     wxString ver;
 #if defined FR_GIT_HASH
-    wxString githash(wxT(FR_GIT_HASH));
-    ver.Printf(wxT("%d.%d.%d (git hash %s)"),
+    wxString githash(FR_GIT_HASH);
+    ver.Printf("%d.%d.%d (git hash %s)",
         FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RLS, githash.c_str());
 #else
-    ver.Printf(wxT("%d.%d.%d"),
+    ver.Printf("%d.%d.%d",
         FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RLS);
 #endif
 #if wxUSE_UNICODE
-    ver += wxT(" Unicode");
+    ver += " Unicode";
 #endif
 
 #if defined wxUSE_ABOUTDLG && (defined __WXMAC__ || defined __WXGTK__)
@@ -76,20 +76,20 @@ void showAboutBox(wxWindow* parent)
 
     wxAboutDialogInfo info;
 
-    info.SetName(wxT("FlameRobin"));
+    info.SetName("FlameRobin");
 
     info.SetCopyright(_("Copyright (c) 2004-2014 FlameRobin Development Team"));
 
     info.SetVersion(ver);
 
     wxString msg(_("Database Administration Tool for Firebird RDBMS"));
-    msg += wxT("\n\n");
+    msg += "\n\n";
     msg += libs;
     info.SetDescription(msg);
 
     // the following would prohibit the native dialog on Mac OS X
 #if defined __WXGTK__
-    info.SetWebSite(wxT("http://www.flamerobin.org"));
+    info.SetWebSite("http://www.flamerobin.org");
 /* possible additions
     AddDeveloper(...);
     AddDocWriter(...);
@@ -102,19 +102,19 @@ void showAboutBox(wxWindow* parent)
 
 #else
 
-    wxString msg(wxT("FlameRobin ") + ver);
+    wxString msg("FlameRobin ") + ver);
 
 #if defined(_WIN64)
-    msg += wxT(" (x64)");
+    msg += " (x64)");
 #endif
 
-    msg += wxT("\n");
+    msg += "\n");
     msg += _("Database administration tool for Firebird RDBMS");
-    msg += wxT("\n\n");
+    msg += "\n\n");
     msg += libs;
-    msg += wxT("\n\n");
+    msg += "\n\n");
     msg += _("Copyright (c) 2004-2014  FlameRobin Development Team");
-    msg += wxT("\n");
+    msg += "\n");
     msg += _("http://www.flamerobin.org");
 
     wxMessageBox(msg, _("About FlameRobin"), wxOK | wxICON_INFORMATION, parent);

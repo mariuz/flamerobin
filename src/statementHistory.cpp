@@ -40,13 +40,13 @@
 
 wxString StatementHistory::getFilename(StatementHistory::Position item)
 {
-    wxString fn = config().getUserHomePath() + wxT("history/");
+    wxString fn = config().getUserHomePath() + "history/";
     if (!wxDirExists(fn))
         wxMkdir(fn);
 
     for (Position i=0; i<storageNameM.Length(); ++i)
-        fn += wxString::Format(wxT("%04x"), storageNameM[i]);
-    fn << wxT("_ITEM_") << (item);
+        fn += wxString::Format("%04x", storageNameM[i]);
+    fn << "_ITEM_" << (item);
     return fn;
 }
 
@@ -72,7 +72,7 @@ StatementHistory::StatementHistory(const StatementHistory& source)
 StatementHistory& StatementHistory::get(Database* db)
 {
     enum historyGranularity { hgCommonToAll = 0, hgPerDatabaseName, hgPerDatabase };
-    historyGranularity hg = (historyGranularity)(config().get(wxT("statementHistoryGranularity"), (int)hgPerDatabase));
+    historyGranularity hg = (historyGranularity)(config().get("statementHistoryGranularity", (int)hgPerDatabase));
     if (hg == hgCommonToAll)
     {
         static StatementHistory st(wxEmptyString);
@@ -84,7 +84,7 @@ StatementHistory& StatementHistory::get(Database* db)
         static std::map<wxString, StatementHistory> stm;
         if (stm.find(db->getName_()) == stm.end())
         {
-            StatementHistory st(wxT("DATABASENAME") + db->getName_());
+            StatementHistory st("DATABASENAME" + db->getName_());
             stm.insert(std::pair<wxString, StatementHistory>(db->getName_(), st));
         }
         return (*(stm.find(db->getName_()))).second;
@@ -95,7 +95,7 @@ StatementHistory& StatementHistory::get(Database* db)
         static std::map<Database*, StatementHistory> stm;
         if (stm.find(db) == stm.end())
         {
-            StatementHistory st(wxT("DATABASE") + db->getId());
+            StatementHistory st("DATABASE" + db->getId());
             stm.insert(std::pair<Database*, StatementHistory>(db, st));
         }
         return (*(stm.find(db))).second;
@@ -115,7 +115,7 @@ wxString StatementHistory::get(StatementHistory::Position pos)
 {
     if (pos < sizeM)
     {
-        wxFFile f(getFilename(pos), wxT("rb"));
+        wxFFile f(getFilename(pos), "rb");
         if (!f.IsOpened())
             return wxEmptyString;
         wxString retval;
@@ -131,15 +131,15 @@ wxString StatementHistory::get(StatementHistory::Position pos)
 void StatementHistory::add(const wxString& str)
 {
     if (str.Strip().IsEmpty() ||    // empty or too big string
-        (config().get(wxT("limitHistoryItemSize"), false) &&
-        int(str.Length()) > 1024 * config().get(wxT("statementHistoryItemSize"), 500)))
+        (config().get("limitHistoryItemSize", false) &&
+        int(str.Length()) > 1024 * config().get("statementHistoryItemSize", 500)))
     {
         return;
     }
 
     if (sizeM == 0 || get(sizeM-1) != str)
     {
-        wxFFile f(getFilename(sizeM), wxT("wb+"));
+        wxFFile f(getFilename(sizeM), "wb+");
         if (f.IsOpened())
         {
             f.Write(str);

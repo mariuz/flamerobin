@@ -53,7 +53,7 @@ class SqlStatement
 {
 public:
     SqlStatement(const wxString& sql, Database* db,
-        const wxString& terminator = wxT(";"));
+        const wxString& terminator = ";");
 
     bool isDDL() const;
     SqlAction getAction() const;

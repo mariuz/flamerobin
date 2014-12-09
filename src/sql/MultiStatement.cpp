@@ -165,7 +165,7 @@ SingleStatement MultiStatement::getNextStatement()
     if (atEndM)    // end marked in previous iteration
         return SingleStatement();
 
-    wxString interesting(wxT("'/-"));
+    wxString interesting("'/-");
     if (!terminatorM.empty())
         interesting += *terminatorM.begin();
     wxString::const_iterator searchEnd = sqlM.end();
@@ -205,7 +205,7 @@ SingleStatement MultiStatement::getNextStatement()
             // scan over multi-line comment
             else if (*p == '/' && p + 1 != searchEnd && *(p + 1) == '*')
             {
-                wxString commentEnd(wxT("*/"));
+                wxString commentEnd("*/");
                 searchPosM = std::search(p + 2, searchEnd, commentEnd.begin(),
                     commentEnd.end());
                 if (searchPosM != searchEnd)
@@ -250,7 +250,7 @@ SingleStatement MultiStatement::getNextStatement()
             if (atEndM)             // terminator is the last statement
                 return SingleStatement();
 
-            interesting = wxT("'/-");
+            interesting = "'/-";
             interesting += *terminatorM.begin();
             oldPosM = searchPosM;
             continue;

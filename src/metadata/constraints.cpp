@@ -48,7 +48,7 @@ bool Constraint::isSystem() const
 
 const wxString Constraint::getTypeName() const
 {
-    return wxT("CONSTRAINT");
+    return "CONSTRAINT";
 }
 
 wxString ColumnConstraint::getColumnList(const wxString& separator,
@@ -77,7 +77,7 @@ wxString ForeignKey::getReferencedColumnList() const
          it != referencedColumnsM.end(); ++it)
     {
         if (it != referencedColumnsM.begin())
-            result += wxT(", ");
+            result += ", ";
         result += (*it);
     }
     return result;
@@ -94,12 +94,12 @@ wxString ForeignKey::getJoin(bool quoted) const
          it != referencedColumnsM.end(); ++it, ++im)
     {
         if (!result.IsEmpty())
-            result += wxT(" AND ");
+            result += " AND ";
         Identifier col1(*im);
         Identifier col2(*it);
         wxString c1 = (quoted ? col1.getQuoted() : col1.get());
         wxString c2 = (quoted ? col2.getQuoted() : col2.get());
-        result += table + wxT(".") + c1 + wxT(" = ") + rtab + wxT(".") + c2;
+        result += table + "." + c1 + " = " + rtab + "." + c2;
     }
     return result;
 }

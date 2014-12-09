@@ -79,7 +79,7 @@ void MultilineEnterDialog::setOkButtonLabel(const wxString& label)
 
 const wxString MultilineEnterDialog::getName() const
 {
-    return wxT("MultilineEnterDialog");
+    return "MultilineEnterDialog";
 }
 
 void MultilineEnterDialog::layoutControls()

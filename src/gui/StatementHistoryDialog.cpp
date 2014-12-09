@@ -47,7 +47,7 @@ StatementHistoryDialog::StatementHistoryDialog(wxWindow *parent,
     topSizer->Add(m_staticText2, 0, wxALIGN_CENTER_VERTICAL|wxRIGHT,
         styleguide().getControlLabelMargin());
 
-    textctrl_search = new wxTextCtrl(getControlsPanel(), wxID_ANY, wxT(""));
+    textctrl_search = new wxTextCtrl(getControlsPanel(), wxID_ANY, "");
     button_search = new wxButton(getControlsPanel(), ID_button_search,
         _("&Search"));
     button_delete = new wxButton(getControlsPanel(), ID_button_delete,
@@ -170,11 +170,11 @@ void StatementHistoryDialog::OnListBoxSelect(wxCommandEvent& WXUNUSED(event))
     {
         StatementHistory::Position p = (StatementHistory::Position)
             listbox_search->GetClientData(sels.Item(i));
-        textctrl_statement->AddText(historyM->get(p) + wxT("\n"));
+        textctrl_statement->AddText(historyM->get(p) + "\n");
         if (i == 0)
         {
             dateTimeTextM->SetLabel(historyM->getDateTime(p).Format(
-                wxT("%Y-%m-%d %H:%M:%S")));
+                "%Y-%m-%d %H:%M:%S"));
         }
     }
 
@@ -228,9 +228,9 @@ void StatementHistoryDialog::OnButtonSearchClick(wxCommandEvent&
         if (searchString.IsEmpty() || s.Upper().Contains(searchString))
         {
             wxString entry;
-            entry = (s.Length() > 200) ? s.Mid(0, 200) + wxT("...") : s;
-            entry.Replace(wxT("\n"), wxT(" "));
-            entry.Replace(wxT("\r"), wxEmptyString);
+            entry = (s.Length() > 200) ? s.Mid(0, 200) + "..." : s;
+            entry.Replace("\n", " ");
+            entry.Replace("\r", wxEmptyString);
             listbox_search->Append(entry, (void *)p);
         }
     }
@@ -275,7 +275,7 @@ void StatementHistoryDialog::OnButtonCopyClick(wxCommandEvent& WXUNUSED(event))
         sqlM += historyM->get(
             (StatementHistory::Position)listbox_search->GetClientData(
                 temp.Item(i)))
-            + wxT("\n");
+            + "\n";
     }
     EndModal(wxID_OK);
 }

@@ -113,7 +113,7 @@ wxString Role::getOwner()
 
 const wxString Role::getTypeName() const
 {
-    return wxT("ROLE");
+    return "ROLE";
 }
 
 void Role::acceptVisitor(MetadataItemVisitor* visitor)
@@ -142,8 +142,8 @@ void SysRoles::load(ProgressIndicator* progressIndicator)
     DatabasePtr db = getDatabase();
     if (db && db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
     {
-        wxString stmt = wxT("select rdb$role_name from rdb$roles")
-            wxT(" where (rdb$system_flag > 0) order by 1");
+        wxString stmt = "select rdb$role_name from rdb$roles"
+            " where (rdb$system_flag > 0) order by 1";
         setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
     }
 }
@@ -155,7 +155,7 @@ void SysRoles::loadChildren()
 
 const wxString SysRoles::getTypeName() const
 {
-    return wxT("SYSROLE_COLLECTION");
+    return "SYSROLE_COLLECTION";
 }
 
 // Roles collection
@@ -171,11 +171,11 @@ void Roles::acceptVisitor(MetadataItemVisitor* visitor)
 
 void Roles::load(ProgressIndicator* progressIndicator)
 {
-    wxString stmt = wxT("select rdb$role_name from rdb$roles");
+    wxString stmt = "select rdb$role_name from rdb$roles";
     DatabasePtr db = getDatabase();
     if (db && db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
-        stmt += wxT(" where (rdb$system_flag = 0 or rdb$system_flag is null)");
-    stmt += wxT(" order by 1");
+        stmt += " where (rdb$system_flag = 0 or rdb$system_flag is null)";
+    stmt += " order by 1";
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 
@@ -186,6 +186,6 @@ void Roles::loadChildren()
 
 const wxString Roles::getTypeName() const
 {
-    return wxT("ROLE_COLLECTION");
+    return "ROLE_COLLECTION";
 }
 

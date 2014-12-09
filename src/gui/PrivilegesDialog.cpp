@@ -82,7 +82,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
         _("User/Role:"));
     radiobtn_user->SetValue(true);  // not needed on GTK, but doesn't hurt
     fgSizer3->Add(radiobtn_user, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
-    textctrl_user = new wxTextCtrl(granteePanel, ID_textctrl, wxT("PUBLIC"));
+    textctrl_user = new wxTextCtrl(granteePanel, ID_textctrl, "PUBLIC");
     fgSizer3->Add(textctrl_user, 0, wxALL|wxEXPAND, 5);
 
     radiobtn_trigger = new wxRadioButton(granteePanel, ID_radiobtn,
@@ -179,17 +179,17 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     choice_relations->Enable(false);
     fgSizer4->Add(choice_relations, 0, wxALIGN_CENTER_VERTICAL|wxEXPAND, 0);
 
-    checkbox_all = new wxCheckBox(privilegesPanel, ID_checkbox, wxT("All"));
+    checkbox_all = new wxCheckBox(privilegesPanel, ID_checkbox, "All");
     checkbox_select = new wxCheckBox(privilegesPanel, ID_checkbox,
-        wxT("Select"));
+        "Select");
     checkbox_insert = new wxCheckBox(privilegesPanel, ID_checkbox,
-        wxT("Insert"));
+        "Insert");
     checkbox_update = new wxCheckBox(privilegesPanel, ID_checkbox,
-        wxT("Update"));
+        "Update");
     checkbox_delete = new wxCheckBox(privilegesPanel, ID_checkbox,
-        wxT("Delete"));
+        "Delete");
     checkbox_references = new wxCheckBox(privilegesPanel, ID_checkbox,
-        wxT("References"));
+        "References");
 
     int indentation = 20;
     fgSizer4->Add(checkbox_all, 0, wxLEFT|wxALIGN_CENTER_VERTICAL|wxEXPAND,
@@ -205,13 +205,13 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     fgSizer4->Add(checkbox_update, 0, wxLEFT|wxALIGN_CENTER_VERTICAL|wxEXPAND,
         indentation);
     wxBoxSizer *bSizer2 = new wxBoxSizer(wxHORIZONTAL);
-    textctrl_update = new wxTextCtrl(privilegesPanel, ID_textctrl, wxT(""),
+    textctrl_update = new wxTextCtrl(privilegesPanel, ID_textctrl, "",
         wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
     textctrl_update->SetBackgroundColour(
         wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
     bSizer2->Add(textctrl_update, 1, wxALIGN_CENTER_VERTICAL|wxEXPAND, 0);
     button_update_browse = new wxButton(privilegesPanel, ID_button_browse,
-        wxT("..."), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+        "...", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
     bSizer2->Add(button_update_browse, 0, wxLEFT | wxALIGN_CENTER_VERTICAL,
         styleguide().getBrowseButtonMargin());
     fgSizer4->Add(bSizer2, 1, wxEXPAND, 0);
@@ -223,12 +223,12 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
         wxLEFT|wxALIGN_CENTER_VERTICAL|wxEXPAND, indentation);
     wxBoxSizer *bSizer3 = new wxBoxSizer(wxHORIZONTAL);
     textctrl_references = new wxTextCtrl(privilegesPanel, ID_textctrl,
-        wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
+        "", wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
     textctrl_references->SetBackgroundColour(
         wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
     bSizer3->Add(textctrl_references, 1, wxALIGN_CENTER_VERTICAL|wxEXPAND, 0);
     button_references_browse = new wxButton(privilegesPanel,
-        ID_button_browse, wxT("..."), wxDefaultPosition,
+        ID_button_browse, "...", wxDefaultPosition,
         wxDefaultSize, wxBU_EXACTFIT);
     bSizer3->Add(button_references_browse, 0, wxLEFT | wxALIGN_CENTER_VERTICAL,
         styleguide().getBrowseButtonMargin());
@@ -290,7 +290,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
         _("Preview SQL:"));
     previewSqlSizer->Add(label_sql, 0, wxRIGHT|wxALIGN_CENTER_VERTICAL,
         styleguide().getControlLabelMargin());
-    textbox_current_sql = new wxTextCtrl(getControlsPanel(), wxID_ANY, wxT(""),
+    textbox_current_sql = new wxTextCtrl(getControlsPanel(), wxID_ANY, "",
         wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
     textbox_current_sql->SetBackgroundColour(
         wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
@@ -349,7 +349,7 @@ void PrivilegesDialog::enableRelationCheckboxes(bool enable, bool all)
 
 const wxString PrivilegesDialog::getName() const
 {
-    return wxT("PrivilegesDialog");
+    return "PrivilegesDialog";
 }
 
 void PrivilegesDialog::updateControls()
@@ -422,31 +422,31 @@ void PrivilegesDialog::updateControls()
     }
     else if (radiobtn_trigger->GetValue())
     {
-        grantee = wxT("TRIGGER ") + Identifier(
+        grantee = "TRIGGER " + Identifier(
                   choice_trigger->GetStringSelection()).getQuoted();
     }
     else if (radiobtn_procedure->GetValue())
     {
-        grantee = wxT("PROCEDURE ") + Identifier(
+        grantee = "PROCEDURE " + Identifier(
                   choice_procedure->GetStringSelection()).getQuoted();
     }
     else if (radiobtn_view->GetValue())
     {
-        grantee = wxT("VIEW ") + Identifier(
+        grantee = "VIEW " + Identifier(
                   choice_view->GetStringSelection()).getQuoted();
     }
     bool grant = radiobox_action->GetSelection() < 2;
     bool grantoption = (radiobox_action->GetSelection() % 2 == 1);
-    wxString sql(grant ? wxT("GRANT ") : wxT("REVOKE "));
+    wxString sql(grant ? "GRANT " : "REVOKE ");
     if (!grant && grantoption)
-        sql << (isRole ? wxT("ADMIN") : wxT("GRANT")) << wxT(" OPTION FOR ");
+        sql << (isRole ? "ADMIN" : "GRANT") << " OPTION FOR ";
     if (isRole)
         sql << Identifier(choice_memberof->GetStringSelection()).getQuoted();
     else if (isRelation)
     {
         wxString priv;
         if (checkbox_all->IsChecked())
-            priv = wxT("ALL");
+            priv = "ALL";
         else
         {
             wxCheckBox* boxes[5] = { checkbox_select, checkbox_insert,
@@ -458,29 +458,29 @@ void PrivilegesDialog::updateControls()
                 if (boxes[i]->IsChecked())
                 {
                     if (!priv.IsEmpty())
-                        priv += wxT(",");
+                        priv += ",";
                     priv += boxes[i]->GetLabel().Upper();
                     if (boxes[i] == checkbox_update && !upd.IsEmpty())
-                        priv += wxT("(") + upd + wxT(")");
+                        priv += "(" + upd + ")";
                     if (boxes[i] == checkbox_references && !ref.IsEmpty())
-                        priv += wxT("(") + ref + wxT(")");
+                        priv += "(" + ref + ")";
                 }
             }
         }
-        sql << priv << wxT(" ON ") << Identifier(
+        sql << priv << " ON " << Identifier(
             choice_relations->GetStringSelection()).getQuoted();
     }
     else if (isProcedure)
     {
-        sql << wxT("EXECUTE ON PROCEDURE ")
+        sql << "EXECUTE ON PROCEDURE "
             << Identifier(choice_execute->GetStringSelection()).getQuoted();
     }
 
-    sql << (grant ? wxT(" TO ") : wxT(" FROM ")) << grantee;
+    sql << (grant ? " TO " : " FROM ") << grantee;
     if (grant && grantoption)
     {
-        sql << wxT(" WITH ") << (isRole ? wxT("ADMIN") : wxT("GRANT"))
-            << wxT(" OPTION");
+        sql << " WITH " << (isRole ? "ADMIN" : "GRANT")
+            << " OPTION";
     }
 
     textbox_current_sql->SetValue(sql);
@@ -490,7 +490,7 @@ wxString PrivilegesDialog::getSqlStatements()
 {
     wxString stmt;
     for (int i = 0; i < (int)listbox_statements->GetCount(); i++)
-        stmt << listbox_statements->GetString(i) << wxT(";\n");
+        stmt << listbox_statements->GetString(i) << ";\n";
     return stmt;
 }
 
@@ -577,7 +577,7 @@ const ManagePrivilegesHandler ManagePrivilegesHandler::handlerInstance;
 
 bool ManagePrivilegesHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("manage_privileges"))
+    if (uri.action != "manage_privileges")
         return false;
 
     wxWindow* w = getParentWindow(uri);

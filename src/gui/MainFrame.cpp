@@ -131,7 +131,7 @@ public:
 
 MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title,
         const wxPoint& pos, const wxSize& size, long style)
-    : BaseFrame(parent, id, title, pos, size, style, wxT("FlameRobin_main")),
+    : BaseFrame(parent, id, title, pos, size, style, "FlameRobin_main"),
         rootM(new Root())
 {
     wxArtProvider::Push(new ArtProvider);
@@ -174,7 +174,7 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title,
 #if wxUSE_DRAG_AND_DROP
     treeMainM->SetDropTarget(new DnDDatabaseFile(this));
 #endif
-    if (!config().get(wxT("showSearchBar"), true))
+    if (!config().get("showSearchBar", true))
     {
         searchPanelSizerM->Show(searchPanelM, false, true);    // recursive
         searchPanelSizerM->Layout();
@@ -252,15 +252,15 @@ void MainFrame::buildMainMenu()
     SetMenuBar(menuBarM);
 
     // update checkboxes
-    config().setValue(wxT("HideDisconnectedDatabases"), false);
+    config().setValue("HideDisconnectedDatabases", false);
     viewMenu->Check(Cmds::Menu_ToggleDisconnected, true);
-    if (config().get(wxT("showStatusBar"), true))
+    if (config().get("showStatusBar", true))
     {
         CreateStatusBar();
         viewMenu->Check(Cmds::Menu_ToggleStatusBar, true);
         GetStatusBar()->SetStatusText(_("[No database selected]"));
     }
-    if (config().get(wxT("showSearchBar"), true))
+    if (config().get("showSearchBar", true))
         viewMenu->Check(Cmds::Menu_ToggleSearchBar, true);
 }
 
@@ -284,17 +284,17 @@ void MainFrame::set_properties()
     {
         wxString confile = config().getDBHFileName();
         if (confile.Length() > 20)
-            confile = wxT("\n") + confile + wxT("\n");  // break into several lines if path is long
+            confile = "\n" + confile + "\n";  // break into several lines if path is long
         else
-            confile = wxT(" ") + confile + wxT(" ");
+            confile = " " + confile + " ";
         wxString msg;
         msg.Printf(_("The configuration file:%sdoes not exist or can not be opened.\n\nThis is normal for first time users.\n\nYou may now register new servers and databases."),
             confile.c_str());
         wxMessageBox(msg, _("Configuration file not found"), wxOK|wxICON_INFORMATION);
 
         ServerPtr s(new Server());
-        s->setName_(wxT("Localhost"));
-        s->setHostname(wxT("localhost"));
+        s->setName_("Localhost");
+        s->setHostname("localhost");
         rootM->addServer(s);
         rootM->save();
     }
@@ -563,7 +563,7 @@ void MainFrame::OnTreeSelectionChanged(wxTreeEvent& WXUNUSED(event))
     while (t.IsOk())
     {
         if (!path.IsEmpty())
-            path = wxT(" > ") + path;
+            path = " > ") + path;
         path = treeMainM->GetItemText(t) + path;
         t = treeMainM->GetItemParent(t);
     }
@@ -590,7 +590,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
 
     enum { showProperties = 0, showColumnInfo, selectFromOrExecute };
     int treeActivateAction = showProperties;
-    config().getValue(wxT("OnTreeActivate"), treeActivateAction);
+    config().getValue("OnTreeActivate", treeActivateAction);
 
     if (treeActivateAction == showColumnInfo && (nt == ntTable
         || nt == ntSysTable || nt == ntView || nt == ntProcedure))
@@ -651,7 +651,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
     // Windows tree control automatically does it
 #ifdef __WXGTK__
     bool toggle = true;
-    config().getValue(wxT("ToggleNodeOnTreeActivate"), toggle);
+    config().getValue("ToggleNodeOnTreeActivate", toggle);
     if (toggle)
     {
         if (treeMainM->IsExpanded(item))
@@ -706,43 +706,43 @@ void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::OnMenuManual(wxCommandEvent& WXUNUSED(event))
 {
-    showUrl(wxT("http://flamerobin.org/dokuwiki/wiki/manual"));
+    showUrl("http://flamerobin.org/dokuwiki/wiki/manual");
 }
 
 void MainFrame::OnMenuRelNotes(wxCommandEvent& WXUNUSED(event))
 {
-    showDocsHtmlFile(wxT("fr_whatsnew.html"));
+    showDocsHtmlFile("fr_whatsnew.html");
 }
 
 void MainFrame::OnMenuLicense(wxCommandEvent& WXUNUSED(event))
 {
-    showDocsHtmlFile(wxT("fr_license.html"));
+    showDocsHtmlFile("fr_license.html");
 }
 
 void MainFrame::OnMenuURLHomePage(wxCommandEvent& WXUNUSED(event))
 {
-    showUrl(wxT("http://www.flamerobin.org"));
+    showUrl("http://www.flamerobin.org");
 }
 
 void MainFrame::OnMenuURLProjectPage(wxCommandEvent& WXUNUSED(event))
 {
-    showUrl(wxT("http://sourceforge.net/projects/flamerobin"));
+    showUrl("http://sourceforge.net/projects/flamerobin");
 }
 
 void MainFrame::OnMenuURLFeatureRequest(wxCommandEvent& WXUNUSED(event))
 {
-    showUrl(wxT("http://sourceforge.net/p/flamerobin/feature-requests/"));
+    showUrl("http://sourceforge.net/p/flamerobin/feature-requests/");
 }
 
 void MainFrame::OnMenuURLBugReport(wxCommandEvent& WXUNUSED(event))
 {
-    showUrl(wxT("http://sourceforge.net/p/flamerobin/bugs/"));
+    showUrl("http://sourceforge.net/p/flamerobin/bugs/");
 }
 
 void MainFrame::OnMenuConfigure(wxCommandEvent& WXUNUSED(event))
 {
     PreferencesDialog pd(this, _("Preferences"), config(),
-        wxFileName(config().getConfDefsPath(), wxT("fr_settings.confdef")));
+        wxFileName(config().getConfDefsPath(), "fr_settings.confdef"));
     if (pd.isOk() && pd.loadFromTargetConfig())
     {
         static int pdSelection = 0;
@@ -771,7 +771,7 @@ void MainFrame::OnMenuDatabasePreferences(wxCommandEvent& WXUNUSED(event))
     DatabaseConfig dc(d.get(), config());
     PreferencesDialog pd(this,
         wxString::Format(_("%s Preferences"), d->getName_().c_str()), dc,
-        wxFileName(config().getConfDefsPath(), wxT("db_settings.confdef")));
+        wxFileName(config().getConfDefsPath(), "db_settings.confdef"));
     if (pd.isOk() && pd.loadFromTargetConfig())
     {
         pd.selectPage(0);
@@ -806,13 +806,13 @@ void MainFrame::OnMenuGenerateCode(wxCommandEvent& event)
 
 void MainFrame::OnMenuExecuteProcedure(wxCommandEvent& WXUNUSED(event))
 {
-    executeSysTemplate(wxT("execute_procedure"),
+    executeSysTemplate("execute_procedure",
         treeMainM->getSelectedMetadataItem(), this);
 }
 
 void MainFrame::OnMenuBrowseData(wxCommandEvent& WXUNUSED(event))
 {
-    executeSysTemplate(wxT("browse_data"),
+    executeSysTemplate("browse_data",
         treeMainM->getSelectedMetadataItem(), this);
 }
 
@@ -972,7 +972,7 @@ void MainFrame::OnMenuUnRegisterDatabase(wxCommandEvent& WXUNUSED(event))
         return;
     // command should never be enabled when database is connected
     wxCHECK_RET(!d->isConnected(),
-        wxT("Can not unregister connected database"));
+        "Can not unregister connected database");
 
     int res = showQuestionDialog(this, _("Do you really want to unregister this database?"),
         _("The registration information for the database will be deleted. This operation can not be undone."),
@@ -984,11 +984,11 @@ void MainFrame::OnMenuUnRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 void MainFrame::unregisterDatabase(DatabasePtr database)
 {
     wxCHECK_RET(database,
-        wxT("Cannot unregister unassigned database"));
+        "Cannot unregister unassigned database");
 
     ServerPtr server = database->getServer();
     wxCHECK_RET(server,
-        wxT("Cannot unregister database without server"));
+        "Cannot unregister database without server");
 
     server->removeDatabase(database);
     rootM->save();
@@ -1101,7 +1101,7 @@ void MainFrame::OnMenuConnectAs(wxCommandEvent& WXUNUSED(event))
         return;
     // command should never be enabled when database is connected
     wxCHECK_RET(!db->isConnected(),
-        wxT("Can not connect to already connected database"));
+        "Can not connect to already connected database");
 
     DatabaseRegistrationDialog drd(this, _("Connect as..."), false, true);
     db->prepareTemporaryCredentials();
@@ -1118,7 +1118,7 @@ void MainFrame::OnMenuConnect(wxCommandEvent& WXUNUSED(event))
 bool MainFrame::getAutoConnectDatabase()
 {
     int value;
-    if (config().getValue(wxT("DIALOG_ConfirmAutoConnect"), value))
+    if (config().getValue("DIALOG_ConfirmAutoConnect", value))
         return value == wxYES;
     // enable all commands to show the dialog when connection is needed
     return true;
@@ -1138,7 +1138,7 @@ bool MainFrame::tryAutoConnectDatabase(DatabasePtr database)
     int res = showQuestionDialog(this, _("Do you want to connect to the database?"),
         _("The database is not connected. You first have to establish a connection before you can execute SQL statements or otherwise work with the database."),
         AdvancedMessageDialogButtonsYesNoCancel(_("C&onnect"), _("Do&n't connect")),
-        config(), wxT("DIALOG_ConfirmAutoConnect"), _("Don't ask again, &always (don't) connect"));
+        config(), "DIALOG_ConfirmAutoConnect", _("Don't ask again, &always (don't) connect"));
     if (res == wxYES)
     {
         connect();
@@ -1159,7 +1159,7 @@ bool MainFrame::connect()
         if (db->usesDifferentConnectionCharset())
         {
             DatabaseConfig dc(db.get(), config());
-            if (dc.get(wxT("differentCharsetWarning"), true))
+            if (dc.get("differentCharsetWarning", true))
             {
                 if (wxNO == wxMessageBox(wxString::Format(
                     _("Database charset: %s\nis different from connection charset: %s.\n\nWould you like to be reminded next time?"),
@@ -1168,7 +1168,7 @@ bool MainFrame::connect()
                     _("Warning"),
                     wxICON_QUESTION | wxYES_NO))
                 {
-                    dc.setValue(wxT("differentCharsetWarning"), false);
+                    dc.setValue("differentCharsetWarning", false);
                 }
             }
         }
@@ -1233,9 +1233,9 @@ void MainFrame::OnMenuSetGeneratorValue(wxCommandEvent& WXUNUSED(event))
     if (!g)
         return;
 
-    URI uri(wxT("fr://edit_generator_value"));
-    uri.addParam(wxString::Format(wxT("parent_window=%ld"), (uintptr_t)this));
-    uri.addParam(wxString::Format(wxT("object_handle=%d"), g->getHandle()));
+    URI uri("fr://edit_generator_value");
+    uri.addParam(wxString::Format("parent_window=%ld", (uintptr_t)this));
+    uri.addParam(wxString::Format("object_handle=%d", g->getHandle()));
     getURIProcessor().handleURI(uri);
 }
 
@@ -1340,15 +1340,15 @@ void MainFrame::OnMenuAddColumn(wxCommandEvent& WXUNUSED(event))
     if (!t)
         return;
 
-    URI uri(wxT("fr://add_field"));
-    uri.addParam(wxString::Format(wxT("parent_window=%ld"), (uintptr_t)this));
-    uri.addParam(wxString::Format(wxT("object_handle=%d"), t->getHandle()));
+    URI uri("fr://add_field");
+    uri.addParam(wxString::Format("parent_window=%ld", (uintptr_t)this));
+    uri.addParam(wxString::Format("object_handle=%d", t->getHandle()));
     getURIProcessor().handleURI(uri);
 }
 
 void MainFrame::OnMenuToggleDisconnected(wxCommandEvent& event)
 {
-    config().setValue(wxT("HideDisconnectedDatabases"), !event.IsChecked());
+    config().setValue("HideDisconnectedDatabases", !event.IsChecked());
     // no need to call notifyAllServers() - DBH tree nodes observe the global
     // config objects themselves
 }
@@ -1360,7 +1360,7 @@ void MainFrame::OnMenuToggleStatusBar(wxCommandEvent& event)
         s = CreateStatusBar();
 
     bool show = event.IsChecked();
-    config().setValue(wxT("showStatusBar"), show);
+    config().setValue("showStatusBar", show);
     s->Show(show);
     SendSizeEvent();
 }
@@ -1368,7 +1368,7 @@ void MainFrame::OnMenuToggleStatusBar(wxCommandEvent& event)
 void MainFrame::OnMenuToggleSearchBar(wxCommandEvent& event)
 {
     bool show = event.IsChecked();
-    config().setValue(wxT("showSearchBar"), show);
+    config().setValue("showSearchBar", show);
     searchPanelSizerM->Show(searchPanelM, show, true);    // recursive
     searchPanelSizerM->Layout();
 }
@@ -1461,10 +1461,10 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
         if (c->isSystem() || !c->getTable())
             return;
 
-        URI uri(wxT("fr://edit_field"));
-        uri.addParam(wxString::Format(wxT("parent_window=%ld"),
+        URI uri("fr://edit_field");
+        uri.addParam(wxString::Format("parent_window=%ld",
             (uintptr_t)this));
-        uri.addParam(wxString::Format(wxT("object_handle=%d"),
+        uri.addParam(wxString::Format("object_handle=%d",
             c->getHandle()));
         getURIProcessor().handleURI(uri);
     }
@@ -1494,9 +1494,9 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
     Procedure* p = dynamic_cast<Procedure*>(mi);
     if (p)
     {
-        URI uri(wxT("fr://edit_procedure"));
-        uri.addParam(wxString::Format(wxT("parent_window=%ld"), (uintptr_t)this));
-        uri.addParam(wxString::Format(wxT("object_handle=%d"), p->getHandle()));
+        URI uri("fr://edit_procedure");
+        uri.addParam(wxString::Format("parent_window=%ld", (uintptr_t)this));
+        uri.addParam(wxString::Format("object_handle=%d", p->getHandle()));
         getURIProcessor().handleURI(uri);
         return;
     }
@@ -1607,7 +1607,7 @@ void MainFrame::OnMenuExecuteStatements(wxCommandEvent& WXUNUSED(event))
 
 const wxString MainFrame::getName() const
 {
-    return wxT("MainFrame");
+    return "MainFrame";
 }
 
 void MainFrame::OnMenuUpdateUnRegisterServer(wxUpdateUIEvent& event)
@@ -1662,7 +1662,7 @@ bool MainFrame::confirmDropItem(MetadataItem* item)
     return wxOK == showQuestionDialog(this, msg,
         _("Once you drop the object it is permanently removed from database."),
         AdvancedMessageDialogButtonsOkCancel(_("&Drop")),
-        config(), wxT("DIALOG_ConfirmDrop"), _("Always drop without asking"));
+        config(), "DIALOG_ConfirmDrop", _("Always drop without asking"));
 }
 
 bool MainFrame::confirmDropDatabase(Database* db)
@@ -1682,10 +1682,10 @@ bool MainFrame::openUnregisteredDatabase(const wxString& dbpath)
     database->setName_(Database::extractNameFromConnectionString(dbpath));
 
     wxString iscUser, iscPassword;
-    if (!wxGetEnv(wxT("ISC_USER"), &iscUser))
-        iscUser = wxT("SYSDBA");
+    if (!wxGetEnv("ISC_USER", &iscUser))
+        iscUser = "SYSDBA";
     database->setUsername(iscUser);
-    if (!wxGetEnv(wxT("ISC_PASSWORD"), &iscPassword))
+    if (!wxGetEnv("ISC_PASSWORD", &iscPassword))
         iscPassword = wxEmptyString;
     database->setRawPassword(iscPassword);
 
@@ -1739,7 +1739,7 @@ void MainFrame::executeCodeTemplate(const wxFileName& fileName,
 void MainFrame::handleTemplateOutput(TemplateProcessor& tp,
     DatabasePtr database, const wxString& code)
 {
-    if (getStringAsBoolean(tp.getVar(wxT("output.autoexec"))))
+    if (getStringAsBoolean(tp.getVar("output.autoexec")))
         execSql(this, wxString(_("Execute SQL statements")),
             database, code, false);
     else
@@ -1749,13 +1749,13 @@ void MainFrame::handleTemplateOutput(TemplateProcessor& tp,
 
 bool MainFrame::handleURI(URI& uri)
 {
-    if (uri.action == wxT("create_trigger"))
+    if (uri.action == "create_trigger")
     {
         Relation* r = extractMetadataItemFromURI<Relation>(uri);
         wxWindow* w = getParentWindow(uri);
         if (!r || !w)
             return true;
-        executeSysTemplate(wxT("create_trigger"), r, w);
+        executeSysTemplate("create_trigger", r, w);
         return true;
     }
     else

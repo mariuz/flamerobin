@@ -79,7 +79,7 @@ EditBlobDialogSTC::EditBlobDialogSTC(wxWindow *parent, wxWindowID id)
         wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL,
         false);
     StyleSetFont(10, fontNull);
-    StyleSetForeground(10, wxT("RED"));
+    StyleSetForeground(10, "RED");
 }
 
 void EditBlobDialogSTC::OnKeyDown(wxKeyEvent& event)
@@ -92,7 +92,7 @@ void EditBlobDialogSTC::OnKeyDown(wxKeyEvent& event)
 
     int kc = event.GetKeyCode();
     if ((kc == WXK_DELETE) &&
-        (GetText() == wxT("")))
+        (GetText() == ""))
     {
         setIsNull(true);
         return;
@@ -125,7 +125,7 @@ void EditBlobDialogSTC::setIsNull(bool isNull)
 
     if (isNull)
     {
-        wxStyledTextCtrl::SetText(wxT("[null]"));
+        wxStyledTextCtrl::SetText("[null]");
         SelectAll();
         StartStyling(0, 0xff);
         SetStyling(GetTextLength(), 0x0A);
@@ -301,7 +301,7 @@ EditBlobDialogProgressSizer::EditBlobDialogProgressSizer(wxWindow* parent)
     posM = 0;
     canCancelM = false;
 
-    progressTextM = new wxStaticText(parent, wxID_ANY, wxT(""));
+    progressTextM = new wxStaticText(parent, wxID_ANY, "");
     buttonCancelM = new wxButton(parent, Cmds::BlobEditor_ProgressCancel, _("&Cancel"));
 
     int gaugeHeight = wxSystemSettings::GetMetric(wxSYS_HSCROLL_Y);
@@ -385,10 +385,10 @@ EditBlobDialog::EditBlobDialog(wxWindow* parent)
     editorModeM = noData;
     cacheM = 0;
     cacheIsNullM = false;
-    dialogCaptionM = wxT("");
+    dialogCaptionM = "";
     dataGridTableM = 0;
     dataGridM = 0;
-    fieldNameM = wxT("");
+    fieldNameM = "";
     rowM = 0;
     colM = 0;
     blobM = 0;
@@ -398,7 +398,7 @@ EditBlobDialog::EditBlobDialog(wxWindow* parent)
 
     notebook = new wxNotebook(getControlsPanel(), wxID_ANY);
     blob_noData = new wxPanel(notebook, wxID_ANY);
-    blob_noDataText = new wxStaticText(blob_noData, wxID_ANY, wxT(""));
+    blob_noDataText = new wxStaticText(blob_noData, wxID_ANY, "");
     blob_text = new EditBlobDialogSTCText(notebook, wxID_ANY);
     blob_binary = new EditBlobDialogSTC(notebook, wxID_ANY);
     progress = new EditBlobDialogProgressSizer(getControlsPanel());
@@ -544,7 +544,7 @@ bool EditBlobDialog::setBlob(DataGrid* dg, DataGridTable* dgt,
     // generator blob fieldname
     wxString tableName = dgt->getTableName();
     wxString fieldName = dg->GetColLabelValue(dg->GetGridCursorCol());
-    fieldNameM  = tableName + wxT(".") + fieldName;
+    fieldNameM  = tableName + "." + fieldName;
 
     dialogCaptionM = wxString::Format(_("Edit BLOB: %s #%i"), fieldNameM.c_str(), rowM+1);
     SetTitle(dialogCaptionM);
@@ -745,16 +745,16 @@ bool EditBlobDialog::loadFromStreamAsBinary(wxInputStream& stream, bool isNull, 
         int bufpos = 0;
         while (bufpos < size)
         {
-            txtLine += wxString::Format( wxT("%02X"), (unsigned char)(buffer[bufpos]) );
+            txtLine += wxString::Format( "%02X", (unsigned char)(buffer[bufpos]) );
             bufpos++;
             col++;
 
             if ((col % 8) == 0)
-                txtLine += wxT(" ");
+                txtLine += " ";
             if (col >= 32)
             {
-                blob_binary->AddText(txtLine + wxT("\n"));
-                txtLine = wxT("");
+                blob_binary->AddText(txtLine + "\n");
+                txtLine = "";
                 col = 0;
                 line++;
             }
@@ -891,7 +891,7 @@ bool EditBlobDialog::saveToStream(wxOutputStream& stream, bool* isNull, const wx
 
 void EditBlobDialog::set_properties()
 {
-    dialogCaptionM = wxT("");
+    dialogCaptionM = "";
     SetTitle(dialogCaptionM);
     int style = GetWindowStyle();
     SetWindowStyle(style | wxMINIMIZE_BOX | wxMAXIMIZE_BOX | wxSYSTEM_MENU
@@ -910,7 +910,7 @@ void EditBlobDialog::do_layout()
 {
     // Maybe we can find a better solution to get the margin font
     // I assume here it is the default font./amaier
-    int marginCharWidth = blob_binary->TextWidth(0, wxT("9"));
+    int marginCharWidth = blob_binary->TextWidth(0, "9");
     // *** TEXT-EDIT-LAYOUT ***
     blob_text->SetSizeHints(200, 100);
     blob_text->SetSize(200, 100);
@@ -934,7 +934,7 @@ void EditBlobDialog::do_layout()
     blob_binary->StyleSetBackground(0, frlayoutconfig().getReadonlyColour());
     blob_binary->StyleSetFont(1, fBin);
     blob_binary->StyleSetBackground(1, frlayoutconfig().getReadonlyColour());
-    blob_binary->StyleSetForeground(1, wxT("MEDIUM BLUE"));
+    blob_binary->StyleSetForeground(1, "MEDIUM BLUE");
     blob_binary->StyleSetBackground(10, frlayoutconfig().getReadonlyColour());
     // set with of the viewport to avoid "empty" space after each line
     blob_binary->SetScrollWidth(600);
@@ -1191,8 +1191,8 @@ void EditBlobDialog::OnMenuBLOBLoadFromFile(wxCommandEvent& WXUNUSED(event))
 {
     if (editorModeM == noData)
         throw FRError(_("Not a BLOB column"));
-    wxString filename = ::wxFileSelector(_("Select a file"), wxT(""),
-        wxT(""), wxT(""), wxT("*"),
+    wxString filename = ::wxFileSelector(_("Select a file"), "",
+        "", "", "*",
         wxFD_OPEN | wxFD_FILE_MUST_EXIST, this);
     if (filename.IsEmpty())
         return;
@@ -1219,8 +1219,8 @@ void EditBlobDialog::OnMenuBLOBSaveToFile(wxCommandEvent& WXUNUSED(event))
     //    throw FRError(_("Not a BLOB column"));
     if (editorModeM == noData)
         throw FRError(_("Not a BLOB column"));
-    wxString filename = ::wxFileSelector(_("Select a file"), wxT(""),
-        wxT(""), wxT(""), wxT("*"),
+    wxString filename = ::wxFileSelector(_("Select a file"), "",
+        "", "", "*",
         wxFD_SAVE | wxFD_OVERWRITE_PROMPT, this);
     if (filename.IsEmpty())
         return;
@@ -1240,12 +1240,12 @@ void EditBlobDialog::dataUpdateGUI()
     bool canSave;
     if ((dataModifiedM) || (cacheM))
     {
-        status = wxT("*");
+        status = "*";
         canSave = true;
     }
     else
     {
-        status = wxT("");
+        status = "";
         canSave = false;
     }
 
@@ -1276,7 +1276,7 @@ void EditBlobDialog::blob_textSetReadonly(bool readonly)
     }
     else
     {
-        blob_text->StyleSetBackground(0, wxT("WHITE"));
+        blob_text->StyleSetBackground(0, "WHITE");
         blob_text->StyleResetDefault();
     }
     blob_text->SetReadOnly(readonly);

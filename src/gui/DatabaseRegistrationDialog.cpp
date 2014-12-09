@@ -66,7 +66,7 @@ void DatabaseRegistrationDialog::createControls()
     text_ctrl_dbpath = new FileTextControl(getControlsPanel(),
         ID_textcontrol_dbpath, wxEmptyString);
     button_browse = new wxButton(getControlsPanel(), ID_button_browse,
-        wxT("..."), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+        "...", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
 
     label_authentication = new wxStaticText(getControlsPanel(), -1,
         _("Authentication:"));
@@ -88,11 +88,11 @@ void DatabaseRegistrationDialog::createControls()
     // Not supported on OSX/Cocoa presently
     comboStyle |= wxCB_SORT;
 #endif
-    combobox_charset = new wxComboBox(getControlsPanel(), -1, wxT("NONE"),
+    combobox_charset = new wxComboBox(getControlsPanel(), -1, "NONE",
         wxDefaultPosition, wxDefaultSize, getDatabaseCharsetChoices(), comboStyle);
 
     label_role = new wxStaticText(getControlsPanel(), -1, _("Role:"));
-    text_ctrl_role = new wxTextCtrl(getControlsPanel(), -1, wxT(""));
+    text_ctrl_role = new wxTextCtrl(getControlsPanel(), -1, "");
 
     if (createM)
     {
@@ -129,25 +129,25 @@ wxArrayString DatabaseRegistrationDialog::getAuthenticationChoices() const
 wxArrayString DatabaseRegistrationDialog::getDatabaseCharsetChoices() const
 {
     const wxString charset_choices[] = {
-        wxT("NONE"), wxT("ASCII"), wxT("BIG_5"), wxT("CYRL"),
+        "NONE", "ASCII", "BIG_5", "CYRL",
 
-        wxT("DOS437"), wxT("DOS737"), wxT("DOS775"), wxT("DOS850"),
-        wxT("DOS852"), wxT("DOS857"), wxT("DOS858"), wxT("DOS860"),
-        wxT("DOS861"), wxT("DOS862"), wxT("DOS863"), wxT("DOS864"),
-        wxT("DOS865"), wxT("DOS866"), wxT("DOS869"),
+        "DOS437", "DOS737", "DOS775", "DOS850",
+        "DOS852", "DOS857", "DOS858", "DOS860",
+        "DOS861", "DOS862", "DOS863", "DOS864",
+        "DOS865", "DOS866", "DOS869",
 
-        wxT("EUCJ_0208"), wxT("GB_2312"),
+        "EUCJ_0208", "GB_2312",
 
-        wxT("ISO8859_1"), wxT("ISO8859_2"), wxT("ISO8859_3"), wxT("ISO8859_4"),
-        wxT("ISO8859_5"), wxT("ISO8859_6"), wxT("ISO8859_7"), wxT("ISO8859_8"),
-        wxT("ISO8859_9"), wxT("ISO8859_13"),
+        "ISO8859_1", "ISO8859_2", "ISO8859_3", "ISO8859_4",
+        "ISO8859_5", "ISO8859_6", "ISO8859_7", "ISO8859_8",
+        "ISO8859_9", "ISO8859_13",
 
-        wxT("KSC_5601"), wxT("NEXT"), wxT("OCTETS"), wxT("SJIS_0208"),
+        "KSC_5601", "NEXT", "OCTETS", "SJIS_0208",
 
-        wxT("UNICODE_FSS"), wxT("UTF8"),
+        "UNICODE_FSS", "UTF8",
 
-        wxT("WIN1250"), wxT("WIN1251"), wxT("WIN1252"), wxT("WIN1253"),
-        wxT("WIN1254"), wxT("WIN1255"), wxT("WIN1256"), wxT("WIN1257")
+        "WIN1250", "WIN1251", "WIN1252", "WIN1253",
+        "WIN1254", "WIN1255", "WIN1256", "WIN1257"
     };
     const size_t cnt = sizeof(charset_choices) / sizeof(wxString);
 
@@ -163,8 +163,8 @@ wxArrayString DatabaseRegistrationDialog::getDatabaseDialectChoices() const
     wxArrayString choices;
     choices.Alloc(2);
     // IBPP allows only dialects 1 and 3 for database creation
-    choices.Add(_("1"));
-    choices.Add(wxT("3"));
+    choices.Add("1");
+    choices.Add("3");
     return choices;
 }
 
@@ -173,11 +173,11 @@ wxArrayString DatabaseRegistrationDialog::getDatabasePagesizeChoices() const
     wxArrayString choices;
     choices.Alloc(6);
     choices.Add(_("Default"));
-    choices.Add(wxT("1024"));
-    choices.Add(wxT("2048"));
-    choices.Add(wxT("4096"));
-    choices.Add(wxT("8192"));
-    choices.Add(wxT("16384"));
+    choices.Add("1024");
+    choices.Add("2048");
+    choices.Add("4096");
+    choices.Add("8192");
+    choices.Add("16384");
     return choices;
 }
 
@@ -188,7 +188,7 @@ void DatabaseRegistrationDialog::doReadConfigSettings(const wxString& prefix)
     if (createM)
     {
         int idx = config().get(
-            prefix + Config::pathSeparator + wxT("createDialogAuthentication"),
+            prefix + Config::pathSeparator + "createDialogAuthentication",
             wxNOT_FOUND);
         bool indexValid = idx >= 0
             && idx < static_cast<int>(choice_authentication->GetCount());
@@ -197,19 +197,19 @@ void DatabaseRegistrationDialog::doReadConfigSettings(const wxString& prefix)
 
         wxString selection, empty;
         selection = config().get(
-            prefix + Config::pathSeparator + wxT("createDialogCharset"),
+            prefix + Config::pathSeparator + "createDialogCharset",
             empty);
         if (!selection.empty())
             combobox_charset->SetStringSelection(selection);
 
         selection = config().get(
-            prefix + Config::pathSeparator + wxT("createDialogPageSize"),
+            prefix + Config::pathSeparator + "createDialogPageSize",
             empty);
         if (!selection.empty())
             choice_pagesize->SetStringSelection(selection);
 
         selection = config().get(
-            prefix + Config::pathSeparator + wxT("createDialogDialect"),
+            prefix + Config::pathSeparator + "createDialogDialect",
             empty);
         if (!selection.empty())
             choice_dialect->SetStringSelection(selection);
@@ -227,16 +227,16 @@ void DatabaseRegistrationDialog::doWriteConfigSettings(
     if (createM && GetReturnCode() == wxID_OK)
     {
         config().setValue(
-            prefix + Config::pathSeparator + wxT("createDialogAuthentication"),
+            prefix + Config::pathSeparator + "createDialogAuthentication",
             choice_authentication->GetSelection());
         config().setValue(
-            prefix + Config::pathSeparator + wxT("createDialogCharset"),
+            prefix + Config::pathSeparator + "createDialogCharset",
             combobox_charset->GetStringSelection());
         config().setValue(
-            prefix + Config::pathSeparator + wxT("createDialogPageSize"),
+            prefix + Config::pathSeparator + "createDialogPageSize",
             choice_pagesize->GetStringSelection());
         config().setValue(
-            prefix + Config::pathSeparator + wxT("createDialogDialect"),
+            prefix + Config::pathSeparator + "createDialogDialect",
             choice_dialect->GetStringSelection());
     }
 }
@@ -245,7 +245,7 @@ const wxString DatabaseRegistrationDialog::getName() const
 {
     // don't use different names here, force minimal height instead
     // this way it will work for all combinations of control visibility
-    return wxT("DatabaseRegistrationDialog");
+    return "DatabaseRegistrationDialog";
 }
 
 bool DatabaseRegistrationDialog::getConfigStoresHeight() const
@@ -308,11 +308,11 @@ void DatabaseRegistrationDialog::setControlsProperties()
     button_browse->SetSize(wh, wh);
 
     choice_authentication->SetSelection(0);
-    combobox_charset->SetStringSelection(wxT("NONE"));
+    combobox_charset->SetStringSelection("NONE");
     if (createM)
     {
-        choice_pagesize->SetStringSelection(wxT("4096"));
-        choice_dialect->SetStringSelection(wxT("3"));
+        choice_pagesize->SetStringSelection("4096");
+        choice_dialect->SetStringSelection("3");
     }
 
     button_ok->SetDefault();
@@ -333,7 +333,7 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
     text_ctrl_role->SetValue(databaseM->getRole());
     wxString charset(databaseM->getConnectionCharset());
     if (charset.empty())
-        charset = wxT("NONE");
+        charset = "NONE";
     combobox_charset->SetValue(charset);
     // see whether the database has an empty or default name; knowing that will be
     // useful to keep the name in sync when other attributes change.
@@ -408,7 +408,7 @@ END_EVENT_TABLE()
 
 void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    wxString path = ::wxFileSelector(_("Select database file"), wxT(""), wxT(""), wxT(""),
+    wxString path = ::wxFileSelector(_("Select database file"), "", "", "",
         _("Firebird database files (*.fdb, *.gdb)|*.fdb;*.gdb|All files (*.*)|*.*"),
         wxFD_OPEN, this);
     if (!path.empty())
@@ -448,7 +448,7 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
             if (!choice_pagesize->GetStringSelection().ToLong(&ps))
                 ps = 0;
             long dialect = 3;
-            if (choice_dialect->GetStringSelection() == wxT("1"))
+            if (choice_dialect->GetStringSelection() == "1")
                 dialect = 1;
             databaseM->create(ps, dialect);
         }

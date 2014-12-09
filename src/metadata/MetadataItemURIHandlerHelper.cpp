@@ -36,6 +36,6 @@ MetadataItem* MetadataItemURIHandlerHelper::doExtractMetadataItemFromURI(
     const URI& uri)
 {
     return MetadataItem::getObjectFromHandle(
-        uri.getParam(wxT("object_handle")));
+        uri.getParam("object_handle"));
 }
 

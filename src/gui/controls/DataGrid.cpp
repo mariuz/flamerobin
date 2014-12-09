@@ -56,7 +56,7 @@ DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
     SetMinSize(wxSize(100, 50));
 
     EnableEditing(true);
-    SetColLabelValue(0, wxT(""));
+    SetColLabelValue(0, "");
     SetRowLabelSize(50);
     DisableDragRowSize();
     SetGridLineColour(*wxLIGHT_GREY);
@@ -65,13 +65,13 @@ DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
 
     wxString s;
     wxFont f;
-    if (config().getValue(wxT("DataGridFont"), s) && !s.empty())
+    if (config().getValue("DataGridFont", s) && !s.empty())
     {
         f.SetNativeFontInfo(s);
         if (f.Ok())
             SetDefaultCellFont(f);
     }
-    if (config().getValue(wxT("DataGridHeaderFont"), s) && !s.empty())
+    if (config().getValue("DataGridHeaderFont", s) && !s.empty())
     {
         f.SetNativeFontInfo(s);
         if (f.Ok())
@@ -186,7 +186,7 @@ void DataGrid::notifyIfUnfetchedData()
         showInformationDialog(wxGetTopLevelParent(this),
             _("Not all records in the result set are copied to the clipboard."),
             _("The result set has unfetched data. Only the records that have already been fetched will be copied. Use the \"Fetch all data\" command in the popup menu first if you want to copy the complete data set."),
-            AdvancedMessageDialogButtonsOk(), config(), wxT("DIALOG_InfoClipboardCopyUnfetched"),
+            AdvancedMessageDialogButtonsOk(), config(), "DIALOG_InfoClipboardCopyUnfetched",
             _("Do not show this information again"));
     }
 }
@@ -257,7 +257,7 @@ void DataGrid::setCellFont()
     if (f.Ok())
     {
         SetDefaultCellFont(f);
-        config().setValue(wxT("DataGridFont"), f.GetNativeFontInfoDesc());
+        config().setValue("DataGridFont", f.GetNativeFontInfoDesc());
         updateRowHeights();
         ForceRefresh();
     }
@@ -285,7 +285,7 @@ void DataGrid::copyToClipboard()
                     // TODO: - align fields in columns ?
                     //       - fields with multiline strings don't really work...
                     if (!first)
-                        sRow += wxT("\t");
+                        sRow += "\t";
                     first = false;
                     sRow += table->getCellValue(i, j);
                     any = true;
@@ -352,10 +352,10 @@ void DataGrid::copyToClipboardAsInsert()
                 if (IsInSelection(i, j))
                 {
                     if (!sCols.IsEmpty())
-                        sCols += wxT(", ");
+                        sCols += ", ";
                     sCols += columnNames[j];
                     if (!sValues.IsEmpty())
-                        sValues += wxT(", ");
+                        sValues += ", ";
                     sValues += table->getCellValueForInsert(i, j);
                 }
                 else
@@ -363,11 +363,11 @@ void DataGrid::copyToClipboardAsInsert()
             }
             if (!sCols.IsEmpty())
             {
-                sRows += wxT("INSERT INTO ") + tableId.getQuoted() + wxT(" (");
+                sRows += "INSERT INTO " + tableId.getQuoted() + " (";
                 sRows += sCols;
-                sRows += wxT(") VALUES (");
+                sRows += ") VALUES (";
                 sRows += sValues;
-                sRows += wxT(");");
+                sRows += ");";
                 sRows += wxTextBuffer::GetEOL();
             }
         }
@@ -402,7 +402,7 @@ void DataGrid::copyToClipboardAsInList()
                 if (IsInSelection(i, j))
                 {
                     if (!sLine.IsEmpty())
-                        sLine += wxT(", ");
+                        sLine += ", ";
                     wxString v(table->getCellValueForInsert(i, j));
                     if (sLine.Length() + v.Length() > 80)   // new line
                     {
@@ -463,9 +463,9 @@ void DataGrid::copyToClipboardAsUpdate()
                 if (IsInSelection(i, j))
                 {
                     if (!str.IsEmpty())
-                        str += wxT(", ");
+                        str += ", ";
                     str += wxTextBuffer::GetEOL() + columnNames[j]
-                        + wxT(" = ") + table->getCellValueForInsert(i, j);
+                        + " = " + table->getCellValueForInsert(i, j);
                 }
                 else
                     all = false;
@@ -502,8 +502,8 @@ void DataGrid::copyToClipboardAsUpdate()
                             if ((*ci) == GetColLabelValue(k))
                             {
                                 if (!where.IsEmpty())
-                                    where += wxT(" AND ");
-                                where += (*ci) + wxT(" = ") +
+                                    where += " AND ";
+                                where += (*ci) + " = " +
                                     table->getCellValueForInsert(i, k);
                                 found = true;
                                 break;
@@ -518,9 +518,9 @@ void DataGrid::copyToClipboardAsUpdate()
                 }
                 // TODO: if (!pkc)   // WHERE all_cols = all_vals
 
-                sRows += wxT("UPDATE ") + tableId.getQuoted() + wxT(" SET ")
-                    + str + wxTextBuffer::GetEOL() + wxT("WHERE ") + where
-                    + wxT(";") + wxTextBuffer::GetEOL();
+                sRows += "UPDATE " + tableId.getQuoted() + " SET "
+                    + str + wxTextBuffer::GetEOL() + "WHERE " + where
+                    + ";" + wxTextBuffer::GetEOL();
             }
         }
         if (!sRows.IsEmpty())
@@ -536,7 +536,7 @@ void DataGrid::setHeaderFont()
     if (f.Ok())
     {
         SetLabelFont(f);
-        config().setValue(wxT("DataGridHeaderFont"),
+        config().setValue("DataGridHeaderFont",
             f.GetNativeFontInfoDesc());
         updateRowHeights();
         AutoSizeColumns(false);
@@ -570,10 +570,10 @@ void DataGrid::saveAsCSV(const wxString& fileName,
 
         // wxTextOutputStream (which is used to write the CSV file) will
         // convert '\n' to the proper EOL sequence while writing the stream
-        const wxString sEOL(wxT("\n"));
+        const wxString sEOL("\n");
         const wxString sFieldDelim(fieldDelimiter);
         const wxString sTextDelim =
-            (textDelimiter != '\0') ? wxString(textDelimiter) : wxT("");
+            (textDelimiter != '\0') ? wxString(textDelimiter) : "";
 
         wxString sHeader;
         for (size_t col = 0; col < selCols.size(); col++)
@@ -615,7 +615,7 @@ void DataGrid::saveAsCSV(const wxString& fileName,
 void DataGrid::saveAsHTML()
 {
     wxString fname = ::wxFileSelector(_("Save data in selected cells as"),
-        wxEmptyString, wxEmptyString, wxT("*.html"),
+        wxEmptyString, wxEmptyString, "*.html",
         _("HTML files (*.html)|*.html|All files (*.*)|*.*"),
         wxFD_SAVE | wxFD_CHANGE_DIR | wxFD_OVERWRITE_PROMPT, this);
     if (fname.empty())
@@ -630,27 +630,27 @@ void DataGrid::saveAsHTML()
         return;
     wxTextOutputStream outStr(fos);
 
-    outStr.WriteString(wxT(
+    outStr.WriteString(
         "<html><head><META \
-            HTTP-EQUIV=\"Content-Type\" content=\"text/html; charset="));
+            HTTP-EQUIV=\"Content-Type\" content=\"text/html; charset=");
     outStr.WriteString(getHtmlCharset());
-    outStr.WriteString(wxT("\"></head>\
+    outStr.WriteString("\"></head>\
         <body bgcolor=white>\
         <table bgcolor=black cellspacing=1 cellpadding=3 border=0>\
-            <tr>\n"));
+            <tr>\n");
     // write table header
-    outStr.WriteString(wxT("<tr>"));
+    outStr.WriteString("<tr>");
     int cols = GetNumberCols();
     for (int i = 0; i < cols; i++)
     {
         if (selCols[i])
         {
-            outStr.WriteString(wxT("<td nowrap><font color=white><b>"));
+            outStr.WriteString("<td nowrap><font color=white><b>");
             outStr.WriteString(GetColLabelValue(i));
-            outStr.WriteString(wxT("</b></font></td>"));
+            outStr.WriteString("</b></font></td>");
         }
     }
-    outStr.WriteString(wxT("</tr>\n"));
+    outStr.WriteString("</tr>\n");
 
     DataGridTable* table = getDataGridTable();
     // write table data
@@ -661,31 +661,31 @@ void DataGrid::saveAsHTML()
         if (std::count(selCells.begin(), selCells.end(), true) == 0)
             continue;
 
-        outStr.WriteString(wxT("<tr bgcolor=white>"));
+        outStr.WriteString("<tr bgcolor=white>");
         // write data for selected grid cells only
         for (int j = 0; j < cols; j++)
         {
             if (!selCols[j])
                 continue;
             if (!selCells[j])
-                outStr.WriteString(wxT("<td bgcolor=silver>"));
+                outStr.WriteString("<td bgcolor=silver>");
             else if (table->isNullCell(i, j))
-                outStr.WriteString(wxT("<td><font color=red>NULL</font>"));
+                outStr.WriteString("<td><font color=red>NULL</font>");
             else
             {
-                outStr.WriteString(wxT("<td"));
+                outStr.WriteString("<td");
                 int halign, valign;
                 GetCellAlignment(i, j, &halign, &valign);
                 if (halign == wxALIGN_RIGHT)
-                    outStr.WriteString(wxT(" align=right"));
-                outStr.WriteString(wxT(" nowrap>"));
+                    outStr.WriteString(" align=right");
+                outStr.WriteString(" nowrap>");
                 outStr.WriteString(escapeHtmlChars(table->getCellValue(i, j)));
             }
-            outStr.WriteString(wxT("</td>"));
+            outStr.WriteString("</td>");
         }
-        outStr.WriteString(wxT("</tr>\n"));
+        outStr.WriteString("</tr>\n");
     }
-    outStr.WriteString(wxT("</table></body></html>\n"));
+    outStr.WriteString("</table></body></html>\n");
 }
 
 void DataGrid::fetchAll()
@@ -901,7 +901,7 @@ void DataGrid::OnTimer(wxTimerEvent& WXUNUSED(event))
                 int res = showQuestionDialog(this,
                     _("Calculating the sum takes too long"),
                     _("FlameRobin automatically calculates the sum of selected numeric values. However, the current calculation seems to be taking too long. Would you like to abort it?"),
-                    amb, config(), wxT("DIALOG_DisableGridSum"),
+                    amb, config(), "DIALOG_DisableGridSum",
                     _("Do not ask this question again"));
                 if (res == wxNO)
                     calculateSumM = false;
@@ -916,10 +916,10 @@ void DataGrid::OnTimer(wxTimerEvent& WXUNUSED(event))
     {
         // used in frame to update status bar
         wxCommandEvent evt(wxEVT_FRDG_SUM, GetId());
-        wxString ss = wxString::Format(wxT("Sum: %f"), sum);
+        wxString ss = wxString::Format("Sum: %f", sum);
         // strip trailing zeroes
-        ss.Truncate(1 + ss.find_last_not_of(wxT("0")));
-        ss.Truncate(1 + ss.find_last_not_of(wxT(".")));
+        ss.Truncate(1 + ss.find_last_not_of("0"));
+        ss.Truncate(1 + ss.find_last_not_of("."));
         evt.SetString(ss);
         wxPostEvent(this, evt);
     }
@@ -946,7 +946,7 @@ void DataGrid::OnEditorKeyDown(wxKeyEvent& event)
         if (editor && table && editor->GetValue().empty())
         {
             table->setNullFlag(true);
-            editor->SetValue(wxT("[null]"));
+            editor->SetValue("[null]");
             editor->SetSelection(-1,-1);
             return; // prevent control from deleting [null]
         }

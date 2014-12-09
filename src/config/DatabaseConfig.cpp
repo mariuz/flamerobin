@@ -46,9 +46,9 @@ DatabaseConfig::DatabaseConfig(const Database *d, Config& referenceConfig)
 wxString DatabaseConfig::addPathToKey(const wxString& key) const
 {
     if (databaseM)
-        return wxT("DATABASE_") + databaseM->getId() + Config::pathSeparator + key;
+        return "DATABASE_" + databaseM->getId() + Config::pathSeparator + key;
     else
-        return wxT("");
+        return "";
 }
 
 bool DatabaseConfig::keyExists(const wxString& key) const

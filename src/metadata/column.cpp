@@ -61,7 +61,7 @@ wxString ColumnBase::getDatatype(bool useConfig)
     };
     int flag = (useConfig ? showFormula : showType);
     if (useConfig)
-        config().getValue(wxT("ShowComputed"), flag);
+        config().getValue("ShowComputed", flag);
     // view columns are all computed and have their source empty
     if (flag == showFormula && !getComputedSource().empty())
         return getComputedSource();
@@ -78,7 +78,7 @@ wxString ColumnBase::getDatatype(bool useConfig)
     };
     int show = (useConfig ? showBoth : showDatatype);
     if (useConfig)
-        config().getValue(wxT("ShowDomains"), show);
+        config().getValue("ShowDomains", show);
 
     if (!d || d->isSystem() || show == showBoth || show == showDatatype)
         ret += datatype;
@@ -86,12 +86,12 @@ wxString ColumnBase::getDatatype(bool useConfig)
     if (d && !d->isSystem() && (show == showBoth || show == showDomain))
     {
         if (!ret.empty())
-            ret += wxT(" ");
-        ret += wxT("(") + d->getName_() + wxT(")");
+            ret += " ";
+        ret += "(" + d->getName_() + ")";
     }
 
     if (flag == showAll && !getComputedSource().empty())
-        ret += wxT(" (") + getComputedSource() + wxT(")");
+        ret += " (" + getComputedSource() + ")";
     return ret;
 }
 
@@ -243,7 +243,7 @@ wxString Column::getCollation() const
 
 const wxString Column::getTypeName() const
 {
-    return wxT("COLUMN");
+    return "COLUMN";
 }
 
 wxString Column::getDropSqlStatement() const
@@ -251,7 +251,7 @@ wxString Column::getDropSqlStatement() const
     Table* t = getTable();
     if (t == 0)
         return wxEmptyString;
-    return wxT("ALTER TABLE ") + t->getQuotedName() + wxT(" DROP ") + getQuotedName();
+    return "ALTER TABLE " + t->getQuotedName() + " DROP " + getQuotedName();
 }
 
 void Column::acceptVisitor(MetadataItemVisitor* visitor)

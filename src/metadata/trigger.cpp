@@ -211,7 +211,7 @@ wxString Trigger::getAlterSql()
     StatementBuilder sb;
     sb << StatementBuilder::DisableLineWrapping;
 
-    sb << kwSET << ' ' << kwTERMINATOR << wxT(" ^ ;")
+    sb << kwSET << ' ' << kwTERMINATOR << " ^ ;"
         << StatementBuilder::NewLine;
 
     sb << kwALTER << ' ' << kwTRIGGER << ' ' << getQuotedName() << ' ';
@@ -220,11 +220,11 @@ wxString Trigger::getAlterSql()
     else
         sb << kwINACTIVE;
     sb << StatementBuilder::NewLine << getFiringEvent()
-        << ' ' << kwPOSITION << ' ' << wxString::Format(wxT("%d"), positionM)
+        << ' ' << kwPOSITION << ' ' << wxString::Format("%d", positionM)
         << StatementBuilder::NewLine;
-    sb << sourceM + wxT("^") << StatementBuilder::NewLine;
+    sb << sourceM + "^" << StatementBuilder::NewLine;
 
-    sb << kwSET << ' ' << kwTERMINATOR << wxT(" ; ^")
+    sb << kwSET << ' ' << kwTERMINATOR << " ; ^"
         << StatementBuilder::NewLine;
     return sb;
 }
@@ -244,7 +244,7 @@ bool Trigger::isDatabaseTrigger()
 
 const wxString Trigger::getTypeName() const
 {
-    return wxT("TRIGGER");
+    return "TRIGGER";
 }
 
 void Trigger::acceptVisitor(MetadataItemVisitor* visitor)
@@ -265,9 +265,9 @@ void Triggers::acceptVisitor(MetadataItemVisitor* visitor)
 
 void Triggers::load(ProgressIndicator* progressIndicator)
 {
-    wxString stmt = wxT("select rdb$trigger_name from rdb$triggers")
-        wxT(" where (rdb$system_flag = 0 or rdb$system_flag is null)")
-        wxT(" order by 1");
+    wxString stmt = "select rdb$trigger_name from rdb$triggers"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
+        " order by 1";
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 
@@ -278,6 +278,6 @@ void Triggers::loadChildren()
 
 const wxString Triggers::getTypeName() const
 {
-    return wxT("TRIGGER_COLLECTION");
+    return "TRIGGER_COLLECTION";
 }
 

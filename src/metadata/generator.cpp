@@ -78,7 +78,7 @@ void Generator::loadProperties()
 
 const wxString Generator::getTypeName() const
 {
-    return wxT("GENERATOR");
+    return "GENERATOR";
 }
 
 void Generator::acceptVisitor(MetadataItemVisitor* visitor)
@@ -99,9 +99,9 @@ void Generators::acceptVisitor(MetadataItemVisitor* visitor)
 
 void Generators::load(ProgressIndicator* progressIndicator)
 {
-    wxString stmt = wxT("select rdb$generator_name from rdb$generators")
-        wxT(" where (rdb$system_flag = 0 or rdb$system_flag is null)")
-        wxT(" order by 1");
+    wxString stmt = "select rdb$generator_name from rdb$generators"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
+        " order by 1";
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 
@@ -112,6 +112,6 @@ void Generators::loadChildren()
 
 const wxString Generators::getTypeName() const
 {
-    return wxT("GENERATOR_COLLECTION");
+    return "GENERATOR_COLLECTION";
 }
 

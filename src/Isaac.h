@@ -141,7 +141,7 @@ public:
             pw[i] = (ub4)(wxChar)pwd[i];
 
         for (int j=0; j<32; ++j)
-            result += wxString::Format(wxT("%08lx"), pw[j] ^ ctxM.randrsl[j]);
+            result += wxString::Format("%08lx", pw[j] ^ ctxM.randrsl[j]);
         return result;
     }
 

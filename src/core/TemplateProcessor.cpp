@@ -50,7 +50,7 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
     const TemplateCmdParams& cmdParams, ProcessableObject* object,
     wxString& processedText)
 {
-    if (cmdName == wxT("--"))
+    if (cmdName == "--")
         // Comment.
         ;
 
@@ -59,19 +59,19 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
     // processed template, including the final path separator.
     // May expand to a blank string if the template being processed does
     // not come from a text file.
-    else if (cmdName == wxT("template_root"))
+    else if (cmdName == "template_root")
         processedText += getTemplatePath();
 
     // {%getvar:name%}
     // Expands to the value of the specified string variable, or a blank
     // string if the variable is not defined.
-    else if (cmdName == wxT("getvar") && !cmdParams.IsEmpty())
+    else if (cmdName == "getvar" && !cmdParams.IsEmpty())
         processedText += getVar(cmdParams.all());
 
     // {%setvar:name:value%}
     // Sets the value of the specified variable and expands to a blank string.
     // If the variable is already defined overwrites it.
-    else if (cmdName == wxT("setvar") && !cmdParams.IsEmpty())
+    else if (cmdName == "setvar" && !cmdParams.IsEmpty())
     {
         if (cmdParams.Count() == 1)
             clearVar(cmdParams[0]);
@@ -83,13 +83,13 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
     // Sets the value of the specified variable to a blank string.
     // If the variable is not defined it does nothing.
     // Expands to a blank string.
-    else if (cmdName == wxT("clearvar") && !cmdParams.IsEmpty())
+    else if (cmdName == "clearvar" && !cmdParams.IsEmpty())
         clearVar(cmdParams.all());
 
     // {%clearvars%}
     // Sets all defined variables to blank strings.
     // Expands to a blank string.
-    else if (cmdName == wxT("clearvars"))
+    else if (cmdName == "clearvars")
         clearVars();
 
     // {%getconf:key:default%}
@@ -97,7 +97,7 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
     // or a blank string if the key is not found.
     // The local config is associated to the template - this is
     // not one of FlameRobin's global config files.
-    else if (cmdName == wxT("getconf") && !cmdParams.IsEmpty())
+    else if (cmdName == "getconf" && !cmdParams.IsEmpty())
     {
         wxString text;
         internalProcessTemplateText(text, cmdParams[0], object);
@@ -111,10 +111,10 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
     // Sets the value of the specified local config key.
     // If the key is already defined overwrites it.
     // Expands to a blank string.
-    else if (cmdName == wxT("setconf") && !cmdParams.IsEmpty())
+    else if (cmdName == "setconf" && !cmdParams.IsEmpty())
     {
         if (cmdParams.Count() == 1)
-            configM.setValue(cmdParams[0], wxString(wxT("")));
+            configM.setValue(cmdParams[0], wxString(""));
         else
             configM.setValue(cmdParams[0], cmdParams[1]);
     }
@@ -122,33 +122,33 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
     // {%getglobalconf:key%}
     // Expands to the value of the specified global config key,
     // or a blank string if the key is not found.
-    else if (cmdName == wxT("getglobalconf") && !cmdParams.IsEmpty())
+    else if (cmdName == "getglobalconf" && !cmdParams.IsEmpty())
     {
         wxString text;
         internalProcessTemplateText(text, cmdParams.all(), object);
-        processedText += config().get(text, wxString(wxT("")));
+        processedText += config().get(text, wxString(""));
     }
 
     // {%abort%}
     // Throws a silent exception, interrupting the processing.
     // Expands to a blank string.
-    else if (cmdName == wxT("abort"))
+    else if (cmdName == "abort")
         throw FRAbort();
 
     // {%parent_window%}
     // Expands to the current window's numeric memory address.
     // Used to call FR's commands through URIs.
-    else if (cmdName == wxT("parent_window"))
-        processedText += wxString::Format(wxT("%ld"), (uintptr_t)windowM);
+    else if (cmdName == "parent_window")
+        processedText += wxString::Format("%ld", (uintptr_t)windowM);
 
     // {%colon%}
-    else if (cmdName == wxT("colon"))
-        processedText += wxT(":");
+    else if (cmdName == "colon")
+        processedText += ":";
 
     // {%if:<term>:<true output>[:<false output>]%}
     // If <term> equals true expands to <true output>, otherwise
     // expands to <false output> (or an empty string).
-    else if (cmdName == wxT("if") && (cmdParams.Count() >= 2))
+    else if (cmdName == "if" && (cmdParams.Count() >= 2))
     {
         wxString val;
         internalProcessTemplateText(val, cmdParams[0], object);
@@ -167,7 +167,7 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
     // {%ifeq:<left term>:<right term>:<true output>[:<false output>]%}
     // If <left term> equals <right term> expands to <true output>, otherwise
     // expands to <false output> (or an empty string).
-    else if (cmdName == wxT("ifeq") && (cmdParams.Count() >= 3))
+    else if (cmdName == "ifeq" && (cmdParams.Count() >= 3))
     {
         wxString val1;
         internalProcessTemplateText(val1, cmdParams[0], object);
@@ -189,7 +189,7 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
     // if <input> equals "false" returns "true";
     // otherwise returns <input>.
     // Always expands the argument before evaluating it.
-    else if ((cmdName == wxT("!") || (cmdName == wxT("not"))) && (cmdParams.Count()))
+    else if ((cmdName == "!" || (cmdName == "not")) && (cmdParams.Count()))
     {
         wxString input;
         internalProcessTemplateText(input, cmdParams[0], object);
@@ -205,11 +205,11 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
     // If <list> contains <term> expands to <true output>, otherwise
     // expands to <false output> (or an empty string).
     // <list> is a list of comma-separated values.
-    else if (cmdName == wxT("ifcontains") && (cmdParams.Count() >= 3))
+    else if (cmdName == "ifcontains" && (cmdParams.Count() >= 3))
     {
         wxString listStr;
         internalProcessTemplateText(listStr, cmdParams[0], object);
-        wxArrayString list(wxStringTokenize(listStr, wxT(",")));
+        wxArrayString list(wxStringTokenize(listStr, ","));
         for (wxString::size_type i = 0; i < list.Count(); i++)
             list[i] = list[i].Trim(true).Trim(false);
         wxString val2;
@@ -231,11 +231,11 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
     // <list> is a list of comma-separated values.
     // Inside <text> use the placeholder %%current_value%% to
     // mean the current string in the list.
-    else if (cmdName == wxT("forall") && (cmdParams.Count() >= 3))
+    else if (cmdName == "forall" && (cmdParams.Count() >= 3))
     {
         wxString listStr;
         internalProcessTemplateText(listStr, cmdParams[0], object);
-        wxArrayString list(wxStringTokenize(listStr, wxT(",")));
+        wxArrayString list(wxStringTokenize(listStr, ","));
         for (wxString::size_type i = 0; i < list.Count(); i++)
             list[i] = list[i].Trim(true).Trim(false);
 
@@ -247,10 +247,10 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
         {
             wxString param = cmdParams.from(2);
             // Try to replace %%current_value%% both before and after expansion.
-            param.Replace(wxT("%%current_value%%"), *(it));
+            param.Replace("%%current_value%%", *(it));
             wxString newText;
             internalProcessTemplateText(newText, param, object);
-            newText.Replace(wxT("%%current_value%%"), *(it));
+            newText.Replace("%%current_value%%", *(it));
             if ((!firstItem) && (!newText.IsEmpty()))
                 processedText += escapeChars(separator);
             if (!newText.IsEmpty())
@@ -262,11 +262,11 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
     // {%countall:<list>%}
     // Expands to the number of strings in <list>.
     // <list> is a list of comma-separated values.
-    else if (cmdName == wxT("countall") && (cmdParams.Count() >= 1))
+    else if (cmdName == "countall" && (cmdParams.Count() >= 1))
     {
         wxString listStr;
         internalProcessTemplateText(listStr, cmdParams.all(), object);
-        wxArrayString list(wxStringTokenize(listStr, wxT(",")));
+        wxArrayString list(wxStringTokenize(listStr, ","));
         processedText << list.Count();
     }
 
@@ -274,7 +274,7 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
     // Alternates expanding to <text1> and <text2> at each call,
     // starting with <text1>.
     // Used to alternate table row colours, for example.
-    else if (cmdName == wxT("alternate") && (cmdParams.Count() >= 2))
+    else if (cmdName == "alternate" && (cmdParams.Count() >= 2))
     {
         static bool first = false;
         first = !first;
@@ -288,7 +288,7 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
     // Extracts a substring of <for> characters from <text>
     // starting at character <from>.
     // <from> defaults to 0. <for> defaults to <text>'s length minus 1.
-    else if (cmdName == wxT("substr") && (cmdParams.Count() >= 3))
+    else if (cmdName == "substr" && (cmdParams.Count() >= 3))
     {
         wxString text;
         internalProcessTemplateText(text, cmdParams[0], object);
@@ -308,7 +308,7 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
 
     // {%uppercase:<text>%}
     // Converts <text> to upper case.
-    else if (cmdName == wxT("uppercase") && (cmdParams.Count() >= 1))
+    else if (cmdName == "uppercase" && (cmdParams.Count() >= 1))
     {
         wxString text;
         internalProcessTemplateText(text, cmdParams.all(), object);
@@ -318,7 +318,7 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
 
     // {%lowercase:<text>%}
     // Converts <text> to lower case.
-    else if (cmdName == wxT("lowercase") && (cmdParams.Count() >= 1))
+    else if (cmdName == "lowercase" && (cmdParams.Count() >= 1))
     {
         wxString text;
         internalProcessTemplateText(text, cmdParams.all(), object);
@@ -331,7 +331,7 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
     // resulting lines after the first one by <indent> chars.
     // <width> defaults to config item sqlEditorEdgeColumn, or 80.
     // <indent> defaults to config item sqlEditorTabSize, or 4.
-    else if (cmdName == wxT("wrap") && (cmdParams.Count() >= 1))
+    else if (cmdName == "wrap" && (cmdParams.Count() >= 1))
     {
         wxString text;
         internalProcessTemplateText(text, cmdParams[0], object);
@@ -342,10 +342,10 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
             wxString width;
             internalProcessTemplateText(width, cmdParams[1], object);
             if (!width.ToLong(&widthI))
-                widthI = config().get(wxT("sqlEditorEdgeColumn"), 80);
+                widthI = config().get("sqlEditorEdgeColumn", 80);
         }
         else
-            widthI = config().get(wxT("sqlEditorEdgeColumn"), 80);
+            widthI = config().get("sqlEditorEdgeColumn", 80);
 
         long indentI;
         if (cmdParams.Count() >= 3)
@@ -353,10 +353,10 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
             wxString indent;
             internalProcessTemplateText(indent, cmdParams[2], object);
             if (!indent.ToLong(&indentI))
-                indentI = config().get(wxT("sqlEditorTabSize"), 4);
+                indentI = config().get("sqlEditorTabSize", 4);
         }
         else
-            indentI = config().get(wxT("sqlEditorTabSize"), 4);
+            indentI = config().get("sqlEditorTabSize", 4);
 
         processedText += wrapText(text, widthI, indentI);
     }
@@ -364,12 +364,12 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
     // {%kw:<text>%}
     // Formats <text> as a keyword (upper or lower case)
     // according to config item SQLKeywordsUpperCase.
-    else if (cmdName == wxT("kw") && (cmdParams.Count() >= 1))
+    else if (cmdName == "kw" && (cmdParams.Count() >= 1))
     {
         wxString text;
         internalProcessTemplateText(text, cmdParams.all(), object);
 
-        if (config().get(wxT("SQLKeywordsUpperCase"), true))
+        if (config().get("SQLKeywordsUpperCase", true))
             processedText += text.Upper();
         else
             processedText += text.Lower();
@@ -378,10 +378,10 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
     // {%tab%}
     // Expands to a number of spaces defined by config item
     // sqlEditorTabSize.
-    else if (cmdName == wxT("tab"))
+    else if (cmdName == "tab")
     {
         wxString tab;
-        processedText += tab.Pad(config().get(wxT("sqlEditorTabSize"), 4));
+        processedText += tab.Pad(config().get("sqlEditorTabSize", 4));
     }
 
     // Only if no internal commands are recognized, call external command handlers.
@@ -402,7 +402,7 @@ void TemplateProcessor::internalProcessTemplateText(wxString& processedText,
     wxString::size_type pos = 0, oldpos = 0, endpos = 0;
     while (true)
     {
-        pos = inputText.find(wxT("{%"), pos);
+        pos = inputText.find("{%", pos);
         if (pos == wxString::npos)
         {
             processedText += inputText.substr(oldpos);
@@ -413,11 +413,11 @@ void TemplateProcessor::internalProcessTemplateText(wxString& processedText,
         int cnt = 1;
         while (cnt > 0)
         {
-            endpos = inputText.find(wxT("%}"), startpos+1);
+            endpos = inputText.find("%}", startpos+1);
             if (endpos == wxString::npos)
                 break;
 
-            check = inputText.find(wxT("{%"), startpos+1);
+            check = inputText.find("{%", startpos+1);
             if (check == wxString::npos)
                 startpos = endpos;
             else
@@ -454,7 +454,7 @@ void TemplateProcessor::internalProcessTemplateText(wxString& processedText,
         {
             wxChar c = cmd[i];
 
-            if (c == wxT(':'))
+            if (c == ':')
             {
                 if ((nestLevel == 0) && (state == inText))
                 {
@@ -465,13 +465,13 @@ void TemplateProcessor::internalProcessTemplateText(wxString& processedText,
             }
             buffer += c;
 
-            if ((c == wxT('{')) && (i < cmd.Length() - 1) && (cmd[i + 1] == wxT('%')))
+            if ((c == '{') && (i < cmd.Length() - 1) && (cmd[i + 1] == '%'))
                 nestLevel++;
-            else if ((c == wxT('}')) && (i > 0) && (cmd[i - 1] == wxT('%')))
+            else if ((c == '}') && (i > 0) && (cmd[i - 1] == '%'))
                 nestLevel--;
-            else if (c == wxT('\''))
+            else if (c == '\'')
                 state == inString1 ? state = inText : state = inString1;
-            else if (c == wxT('"'))
+            else if (c == '"')
                 state == inString2 ? state = inText : state = inString2;
         }
         if (buffer.Length() > 0)
@@ -495,14 +495,14 @@ void TemplateProcessor::processTemplateFile(wxString& processedText,
     fileNameM = inputFileName;
 
     wxFileName infoFileName(inputFileName);
-    infoFileName.SetExt(wxT("info"));
+    infoFileName.SetExt("info");
     infoM.setConfigFileName(infoFileName);
     // put settings file in user writable directory
     wxString confFileNameStr(inputFileName.GetFullPath());
     confFileNameStr.Replace(config().getHomePath(),
         config().getUserHomePath(), false);
     wxFileName confFileName(confFileNameStr);
-    confFileName.SetExt(wxT("conf"));
+    confFileName.SetExt("conf");
     configM.setConfigFileName(confFileName);
     progressIndicatorM = progressIndicator;
     internalProcessTemplateText(processedText, loadEntireFile(fileNameM),
@@ -557,7 +557,7 @@ wxString TemplateCmdParams::from(size_t start) const
     {
         result = Item(start);
         for (size_t i = start + 1; i < Count(); i++)
-            result += wxT(':') + Item(i);
+            result += ':' + Item(i);
     }
     return result;
 }

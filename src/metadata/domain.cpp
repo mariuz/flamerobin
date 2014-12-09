@@ -106,9 +106,9 @@ wxString Domain::trimDefaultValue(const wxString& value)
     // Trim(false) is trim-left
     wxString defValue(value);
     defValue.Trim(false);
-    if (defValue.Upper().StartsWith(wxT("DEFAULT")))
+    if (defValue.Upper().StartsWith("DEFAULT"))
         defValue.Remove(0, 7);
-    else if (defValue.StartsWith(wxT("=")))
+    else if (defValue.StartsWith("="))
         defValue.Remove(0, 1);
     defValue.Trim(false);
     return defValue;
@@ -146,7 +146,7 @@ void Domain::loadProperties(IBPP::Statement& statement, wxMBConv* converter)
     else
         statement->Get(6, &scaleM);
     if (statement->IsNull(7))
-        charsetM = wxT("");
+        charsetM = "";
     else
     {
         std::string s;
@@ -190,9 +190,9 @@ bool Domain::isString()
 bool Domain::isSystem() const
 {
     wxString prefix(getName_().substr(0, 4));
-    if (prefix == wxT("MON$"))
+    if (prefix == "MON$")
         return true;
-    if (prefix != wxT("RDB$"))
+    if (prefix != "RDB$")
         return false;
     long l;
     return getName_().Mid(4).ToLong(&l);    // numeric = system
@@ -216,7 +216,7 @@ wxString Domain::dataTypeToString(short datatype, short scale, short precision,
     if (datatype == 27 && scale < 0)
     {
         retval = SqlTokenizer::getKeyword(kwNUMERIC);
-        retval << wxT("(15,") << -scale << wxT(")");
+        retval << "(15," << -scale << ")";
         return retval;
     }
 
@@ -236,12 +236,12 @@ wxString Domain::dataTypeToString(short datatype, short scale, short precision,
 
         retval = SqlTokenizer::getKeyword(
             (subtype == 2) ? kwDECIMAL : kwNUMERIC);
-        retval << wxT("(");
+        retval << "(";
         if (precision <= 0 || precision > 18)
             retval << 18;
         else
             retval << precision;
-        retval << wxT(",") << -scale << wxT(")");
+        retval << "," << -scale << ")";
         return retval;
     }
 
@@ -250,7 +250,7 @@ wxString Domain::dataTypeToString(short datatype, short scale, short precision,
         case 10:
             return SqlTokenizer::getKeyword(kwFLOAT);
         case 27:
-            return SqlTokenizer::getKeyword(kwDOUBLE) + wxT(" ")
+            return SqlTokenizer::getKeyword(kwDOUBLE) + " "
                 + SqlTokenizer::getKeyword(kwPRECISION);
 
         case 12:
@@ -262,8 +262,8 @@ wxString Domain::dataTypeToString(short datatype, short scale, short precision,
 
         // add subtype for blob
         case 261:
-            retval = SqlTokenizer::getKeyword(kwBLOB) + wxT(" ")
-                + SqlTokenizer::getKeyword(kwSUB_TYPE) + wxT(" ");
+            retval = SqlTokenizer::getKeyword(kwBLOB) + " "
+                + SqlTokenizer::getKeyword(kwSUB_TYPE) + " ";
             retval << subtype;
             return retval;
 
@@ -278,7 +278,7 @@ wxString Domain::dataTypeToString(short datatype, short scale, short precision,
             retval = SqlTokenizer::getKeyword(kwCSTRING);
             break;
     }
-    retval << wxT("(") << length << wxT(")");
+    retval << "(" << length << ")";
     return retval;
 }
 
@@ -316,16 +316,16 @@ void Domain::getDatatypeParts(wxString& type, wxString& size, wxString& scale)
 {
     size = scale = wxEmptyString;
     wxString datatype = getDatatypeAsString();
-    wxString::size_type p1 = datatype.find(wxT("("));
+    wxString::size_type p1 = datatype.find("(");
     if (p1 != wxString::npos)
     {
         type = datatype.substr(0, p1);
-        wxString::size_type p2 = datatype.find(wxT(","));
+        wxString::size_type p2 = datatype.find(",");
         if (p2 == wxString::npos)
-            p2 = datatype.find(wxT(")"));
+            p2 = datatype.find(")");
         else
         {
-            wxString::size_type p3 = datatype.find(wxT(")"));
+            wxString::size_type p3 = datatype.find(")");
             scale = datatype.substr(p2 + 1, p3 - p2 - 1);
         }
         size = datatype.substr(p1 + 1, p2 - p1 - 1);
@@ -347,18 +347,18 @@ wxString Domain::getCharset()
 
 wxString Domain::getAlterSqlTemplate() const
 {
-    return wxT("ALTER DOMAIN ") + getQuotedName() + wxT("\n")
-        wxT("  SET DEFAULT { literal | NULL | USER }\n")
-        wxT("  | DROP DEFAULT\n")
-        wxT("  | ADD [CONSTRAINT] CHECK (condition)\n")
-        wxT("  | DROP CONSTRAINT\n")
-        wxT("  | new_name\n")
-        wxT("  | TYPE new_datatype;\n");
+    return "ALTER DOMAIN " + getQuotedName() + "\n"
+        "  SET DEFAULT { literal | NULL | USER }\n"
+        "  | DROP DEFAULT\n"
+        "  | ADD [CONSTRAINT] CHECK (condition)\n"
+        "  | DROP CONSTRAINT\n"
+        "  | new_name\n"
+        "  | TYPE new_datatype;\n";
 }
 
 const wxString Domain::getTypeName() const
 {
-    return wxT("DOMAIN");
+    return "DOMAIN";
 }
 
 void Domain::acceptVisitor(MetadataItemVisitor* visitor)
@@ -452,7 +452,7 @@ void Domains::loadChildren()
 
 const wxString Domains::getTypeName() const
 {
-    return wxT("DOMAIN_COLLECTION");
+    return "DOMAIN_COLLECTION";
 }
 
 // System domains collection
@@ -468,6 +468,6 @@ void SysDomains::acceptVisitor(MetadataItemVisitor* visitor)
 
 const wxString SysDomains::getTypeName() const
 {
-    return wxT("SYSDOMAIN_COLLECTION");
+    return "SYSDOMAIN_COLLECTION";
 }
 

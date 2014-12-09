@@ -55,11 +55,11 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
     bool isEditSweep, isEditForcedWrites, isEditReserve, isEditReadOnly,
         isEditPageBuffers;
 
-    isEditSweep = (uri.action == wxT("edit_db_sweep_interval"));
-    isEditForcedWrites = (uri.action == wxT("edit_db_forced_writes"));
-    isEditReserve = (uri.action == wxT("edit_db_reserve_space"));
-    isEditReadOnly = (uri.action == wxT("edit_db_read_only"));
-    isEditPageBuffers = (uri.action == wxT("edit_db_page_buffers"));
+    isEditSweep = (uri.action == "edit_db_sweep_interval");
+    isEditForcedWrites = (uri.action == "edit_db_forced_writes");
+    isEditReserve = (uri.action == "edit_db_reserve_space");
+    isEditReadOnly = (uri.action == "edit_db_read_only");
+    isEditPageBuffers = (uri.action == "edit_db_page_buffers");
 
     if (!isEditSweep && !isEditForcedWrites && !isEditReserve
         && !isEditReadOnly && !isEditPageBuffers)
@@ -104,7 +104,7 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
             wxString s;
             long value = oldValue;
             s = ::wxGetTextFromUser(title, label,
-                wxString::Format(wxT("%d"), value), w);
+                wxString::Format("%d", value), w);
 
             // return from the iteration when the entered string is empty, in
             // case of cancelling the operation.

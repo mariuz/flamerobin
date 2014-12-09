@@ -167,18 +167,18 @@ void SelectStatement::add(const wxString& toAdd, int position)
 void SelectStatement::addTable(const wxString& name, const wxString& joinType,
     const wxString& joinList)
 {
-    if (joinType == wxT("CARTESIAN"))
+    if (joinType == "CARTESIAN")
     {
         std::vector<wxString> s;
         getTables(s);
         if (s.empty())
-            add(name + wxT(" "), posFromM + 5); // 5 = strlen("FROM ");
+            add(name + " ", posFromM + 5); // 5 = strlen("FROM ");
         else
-            add(name + wxT(", "), posFromM + 5);    // 5 = strlen("FROM ");
+            add(name + ", ", posFromM + 5);    // 5 = strlen("FROM ");
     }
     else
     {
-        add(joinType + wxT(" ") + name + wxT(" ON ") + joinList + wxT(" "),
+        add(joinType + " " + name + " ON " + joinList + " ",
             posFromEndM);
     }
 }
@@ -188,9 +188,9 @@ void SelectStatement::addColumn(const wxString& columnList)
     std::vector<wxString> s;
     getColumns(s);
     if (s.empty())
-        add(columnList + wxT(" "), posSelectM + 7); // 7 = strlen("SELECT ");
+        add(columnList + " ", posSelectM + 7); // 7 = strlen("SELECT ");
     else
-        add(columnList + wxT(", "), posSelectM + 7);
+        add(columnList + ", ", posSelectM + 7);
 }
 
 // covers only the most basic cases
@@ -212,11 +212,11 @@ void SelectStatement::orderBy(int column)
         }
     }
     wxString coltoadd;
-    coltoadd.Printf(wxT("%d"), column);
+    coltoadd.Printf("%d", column);
     // if !found, add ORDER BY at the end
     if (pos == -1)
     {
-        sqlM += wxTextBuffer::GetEOL() + wxString(wxT("ORDER BY "))
+        sqlM += wxTextBuffer::GetEOL() + wxString("ORDER BY ")
             + coltoadd;
     }
     else
@@ -225,7 +225,7 @@ void SelectStatement::orderBy(int column)
         tokenizerM.jumpToken(true);
         if (coltoadd != tokenizerM.getCurrentTokenString())
         {
-            add(coltoadd + wxT(", "), pos); // No. Add it
+            add(coltoadd + ", ", pos); // No. Add it
             return;
         }
 
@@ -237,7 +237,7 @@ void SelectStatement::orderBy(int column)
         if (stt == kwDESCENDING || stt == kwASCENDING) // remove
             sqlM.Remove(p, s.Length());
         if (stt != kwDESCENDING)    // add desc if there wasn't
-            add(wxT("DESC "), p);
+            add("DESC ", p);
     }
 }
 

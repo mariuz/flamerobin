@@ -83,15 +83,15 @@ void CreateDDLVisitor::visitColumn(Column& c)
     wxString computed = c.getComputedSource();
     if (!computed.IsEmpty())
     {
-        wxString add = wxT("ALTER TABLE ") + c.getTable()->getQuotedName()
-            + wxT(" ADD ") + c.getQuotedName() + wxT(" COMPUTED BY ")
-            + computed + wxT(";\n");
+        wxString add = "ALTER TABLE " + c.getTable()->getQuotedName()
+            + " ADD " + c.getQuotedName() + " COMPUTED BY "
+            + computed + ";\n";
         postSqlM << add;
         sqlM << add;
         return;
     }
 
-    preSqlM << c.getQuotedName() << wxT(" ");
+    preSqlM << c.getQuotedName() << " ";
     wxString collate = c.getCollation();
     if (DomainPtr d = c.getDomain())
     {
@@ -103,7 +103,7 @@ void CreateDDLVisitor::visitColumn(Column& c)
             if (!charset.IsEmpty())
             {
                 if (!db || db->getDatabaseCharset() != charset)
-                    preSqlM << wxT(" CHARACTER SET ") << charset;
+                    preSqlM << " CHARACTER SET " << charset;
                 if (db && db->isDefaultCollation(charset, collate))
                     collate.clear();    // don't show default collations
             }
@@ -116,23 +116,23 @@ void CreateDDLVisitor::visitColumn(Column& c)
 
     wxString defaultValue;
     if (c.getDefault(IgnoreDomainDefault, defaultValue))
-        preSqlM << wxT(" DEFAULT ") << defaultValue;
+        preSqlM << " DEFAULT " << defaultValue;
     if (!c.isNullable(IgnoreDomainNullability))
-        preSqlM << wxT(" NOT NULL");
+        preSqlM << " NOT NULL";
     if (!collate.IsEmpty())
     {
-        preSqlM << wxT(" COLLATE ") << collate;
+        preSqlM << " COLLATE " << collate;
     }
     wxString description = c.getDescription();
     if (!description.empty())
     {
         wxString colname(c.getName_());
         wxString tabname(c.getTable()->getName_());
-        description.Replace(wxT("'"), wxT("''"));
-        colname.Replace(wxT("'"), wxT("''"));
-        tabname.Replace(wxT("'"), wxT("''"));        
-        postSqlM << wxT("comment on column ") << tabname << wxT(".") << colname << wxT(" is '")
-                     << description << wxT("';\n");
+        description.Replace("'", "''");
+        colname.Replace("'", "''");
+        tabname.Replace("'", "''");
+        postSqlM << "comment on column " << tabname << "." << colname << " is '"
+                     << description << "';\n";
     }
 }
 
@@ -169,38 +169,38 @@ void CreateDDLVisitor::visitDatabase(Database& d)
 
     try
     {
-        preSqlM << wxT("/********************* ROLES **********************/\n\n");
+        preSqlM << "/********************* ROLES **********************/\n\n";
         iterateit<RolesPtr, Role>(this, d.getRoles(), progressIndicatorM);
 
-        preSqlM << wxT("/********************* UDFS ***********************/\n\n");
+        preSqlM << "/********************* UDFS ***********************/\n\n";
         iterateit<FunctionsPtr, Function>(this, d.getFunctions(),
             progressIndicatorM);
 
-        preSqlM << wxT("/****************** SEQUENCES ********************/\n\n");
+        preSqlM << "/****************** SEQUENCES ********************/\n\n";
         iterateit<GeneratorsPtr, Generator>(this, d.getGenerators(),
             progressIndicatorM);
 
-        preSqlM << wxT("/******************** DOMAINS *********************/\n\n");
+        preSqlM << "/******************** DOMAINS *********************/\n\n";
         iterateit<DomainsPtr, Domain>(this, d.getDomains(),
             progressIndicatorM);
 
-        preSqlM << wxT("/******************* PROCEDURES ******************/\n\n");
+        preSqlM << "/******************* PROCEDURES ******************/\n\n";
         iterateit<ProceduresPtr, Procedure>(this, d.getProcedures(),
             progressIndicatorM);
 
-        preSqlM << wxT("/******************** TABLES **********************/\n\n");
+        preSqlM << "/******************** TABLES **********************/\n\n";
         iterateit<TablesPtr, Table>(this, d.getTables(), progressIndicatorM);
 
-        preSqlM << wxT("/********************* VIEWS **********************/\n\n");
+        preSqlM << "/********************* VIEWS **********************/\n\n";
         // TODO: build dependecy tree first, and order views by it
         //       also include computed columns of tables?
         iterateit<ViewsPtr, View>(this, d.getViews(), progressIndicatorM);
 
-        preSqlM << wxT("/******************* EXCEPTIONS *******************/\n\n");
+        preSqlM << "/******************* EXCEPTIONS *******************/\n\n";
         iterateit<ExceptionsPtr, Exception>(this, d.getExceptions(),
             progressIndicatorM);
 
-        preSqlM << wxT("/******************** TRIGGERS ********************/\n\n");
+        preSqlM << "/******************** TRIGGERS ********************/\n\n";
         iterateit<TriggersPtr, Trigger>(this, d.getTriggers(),
             progressIndicatorM);
     }
@@ -211,7 +211,7 @@ void CreateDDLVisitor::visitDatabase(Database& d)
         return;
     }
 
-    sqlM = preSqlM + wxT("\n") + postSqlM + grantSqlM;
+    sqlM = preSqlM + "\n" + postSqlM + grantSqlM;
     if (progressIndicatorM)
     {
         progressIndicatorM->initProgress(_("Extraction complete."), 1, 1);
@@ -221,34 +221,34 @@ void CreateDDLVisitor::visitDatabase(Database& d)
 
 void CreateDDLVisitor::visitDomain(Domain& d)
 {
-    preSqlM += wxT("CREATE DOMAIN ") + d.getQuotedName() + wxT("\n AS ") +
+    preSqlM += "CREATE DOMAIN " + d.getQuotedName() + "\n AS " +
             d.getDatatypeAsString();
     wxString charset = d.getCharset();
     DatabasePtr db = d.getDatabase();
     if (!charset.IsEmpty() && (!db || db->getDatabaseCharset() != charset))
-        preSqlM += wxT(" CHARACTER SET ") + charset;
-    preSqlM += wxT("\n");
+        preSqlM += " CHARACTER SET " + charset;
+    preSqlM += "\n";
     wxString defaultValue;
     if (d.getDefault(defaultValue))
-        preSqlM += wxT(" DEFAULT ") + defaultValue + wxT("\n");
+        preSqlM += " DEFAULT " + defaultValue + "\n";
     if (!d.isNullable())
-        preSqlM += wxT(" NOT NULL\n");
+        preSqlM += " NOT NULL\n";
     wxString check = d.getCheckConstraint();
     if (!check.IsEmpty())
-        preSqlM += wxT(" ") + check + wxT("\n");  // already contains CHECK keyword
+        preSqlM += " " + check + "\n";  // already contains CHECK keyword
     wxString collate = d.getCollation();
     if (!collate.IsEmpty())
-        preSqlM += wxT(" COLLATE ") + collate;
-    preSqlM += wxT(";\n");
+        preSqlM += " COLLATE " + collate;
+    preSqlM += ";\n";
 
     wxString description = d.getDescription();
     if (!description.empty())
     {
         wxString colname(d.getName_());
-        description.Replace(wxT("'"), wxT("''"));
-        colname.Replace(wxT("'"), wxT("''"));        
-        postSqlM << wxT("comment on domain ") << colname << wxT(" is '")
-                     << description << wxT("';\n");
+        description.Replace("'", "''");
+        colname.Replace("'", "''");
+        postSqlM << "comment on domain " << colname << " is '"
+                     << description << "';\n";
     }
     sqlM = preSqlM + postSqlM;
 }
@@ -256,18 +256,18 @@ void CreateDDLVisitor::visitDomain(Domain& d)
 void CreateDDLVisitor::visitException(Exception& e)
 {
     wxString ms(e.getMessage());
-    ms.Replace(wxT("'"), wxT("''"));    // escape quotes
-    preSqlM += wxT("CREATE EXCEPTION ") + e.getQuotedName() + wxT("\n'") +
-        ms + wxT("';\n");
+    ms.Replace("'", "''");    // escape quotes
+    preSqlM += "CREATE EXCEPTION " + e.getQuotedName() + "\n'" +
+        ms + "';\n";
 
     wxString description = e.getDescription();
     if (!description.empty())
     {
         wxString name(e.getName_());
-        description.Replace(wxT("'"), wxT("''"));
-        name.Replace(wxT("'"), wxT("''"));        
-        postSqlM << wxT("comment on exception ") << name << wxT(" is '")
-                     << description << wxT("';\n");
+        description.Replace("'", "''");
+        name.Replace("'", "''");
+        postSqlM << "comment on exception " << name << " is '"
+                     << description << "';\n";
     }
     sqlM = preSqlM + postSqlM;
 }
@@ -279,7 +279,7 @@ void CreateDDLVisitor::visitForeignKey(ForeignKey& fk)
     for (std::vector<wxString>::const_iterator it = fk.begin(); it != fk.end(); ++it)
     {
         if (it != fk.begin())
-            src_col += wxT(",");
+            src_col += ",";
         Identifier id(*it);
         src_col += id.getQuoted();
     }
@@ -287,52 +287,52 @@ void CreateDDLVisitor::visitForeignKey(ForeignKey& fk)
         it != fk.getReferencedColumns().end(); ++it)
     {
         if (it != fk.getReferencedColumns().begin())
-            dest_col += wxT(",");
+            dest_col += ",";
         Identifier id(*it);
         dest_col += id.getQuoted();
     }
-    postSqlM += wxT("ALTER TABLE ") + fk.getTable()->getQuotedName() + wxT(" ADD");
+    postSqlM += "ALTER TABLE " + fk.getTable()->getQuotedName() + " ADD";
     if (!fk.isSystem())
-        postSqlM += wxT(" CONSTRAINT ") + fk.getQuotedName();
-    postSqlM += wxT("\n  FOREIGN KEY (") + src_col + wxT(") REFERENCES ")
-        + reftab.getQuoted() + wxT(" (") + dest_col + wxT(")");
+        postSqlM += " CONSTRAINT " + fk.getQuotedName();
+    postSqlM += "\n  FOREIGN KEY (" + src_col + ") REFERENCES "
+        + reftab.getQuoted() + " (" + dest_col + ")";
     wxString upd = fk.getUpdateAction();
-    if (!upd.IsEmpty() && upd != wxT("RESTRICT"))
-        postSqlM += wxT(" ON UPDATE ") + upd;
+    if (!upd.IsEmpty() && upd != "RESTRICT")
+        postSqlM += " ON UPDATE " + upd;
     wxString del = fk.getDeleteAction();
-    if (!del.IsEmpty() && del != wxT("RESTRICT"))
-        postSqlM += wxT(" ON DELETE ") + del;
+    if (!del.IsEmpty() && del != "RESTRICT")
+        postSqlM += " ON DELETE " + del;
     addIndex(fk.getTable()->getIndices(), postSqlM, &fk);
-    postSqlM += wxT(";\n");
+    postSqlM += ";\n";
     sqlM = postSqlM;
 }
 
 void CreateDDLVisitor::visitFunction(Function& f)
 {
-    preSqlM << f.getCreateSql() << wxT("\n");
+    preSqlM << f.getCreateSql() << "\n";
     wxString description = f.getDescription();
     if (!description.empty())
     {
         wxString name(f.getName_());
-        description.Replace(wxT("'"), wxT("''"));
-        name.Replace(wxT("'"), wxT("''"));
-        postSqlM << wxT("comment on external function ") << name << wxT(" is '")
-                     << description << wxT("';\n");
+        description.Replace("'", "''");
+        name.Replace("'", "''");
+        postSqlM << "comment on external function " << name << " is '"
+                     << description << "';\n";
     }
     sqlM = preSqlM + postSqlM;
 }
 
 void CreateDDLVisitor::visitGenerator(Generator& g)
 {
-    preSqlM += wxT("CREATE SEQUENCE ") + g.getQuotedName() + wxT(";\n");
+    preSqlM += "CREATE SEQUENCE " + g.getQuotedName() + ";\n";
     wxString description = g.getDescription();
     if (!description.empty())
     {
         wxString name(g.getName_());
-        description.Replace(wxT("'"), wxT("''"));
-        name.Replace(wxT("'"), wxT("''"));
-        postSqlM << wxT("comment on sequence ") << name << wxT(" is '")
-             << description << wxT("';\n");
+        description.Replace("'", "''");
+        name.Replace("'", "''");
+        postSqlM << "comment on sequence " << name << " is '"
+             << description << "';\n";
     }
     sqlM = preSqlM + postSqlM;
 }
@@ -341,27 +341,27 @@ void CreateDDLVisitor::visitPrimaryKeyConstraint(PrimaryKeyConstraint& pk)
 {
     wxString sql;
     if (!pk.isSystem())     // system one, noname
-        sql += wxT(" CONSTRAINT ") + pk.getQuotedName();
-    sql += wxT(" PRIMARY KEY (");
+        sql += " CONSTRAINT " + pk.getQuotedName();
+    sql += " PRIMARY KEY (";
 
     for (std::vector<wxString>::const_iterator it = pk.begin(); it != pk.end(); ++it)
     {
         if (it != pk.begin())
-            sql += wxT(",");
+            sql += ",";
         Identifier id(*it);
         sql += id.getQuoted();
     }
-    sql += wxT(")");
+    sql += ")";
     addIndex(pk.getTable()->getIndices(), sql, &pk);
-    preSqlM += wxT(",\n ") + sql;
-    sqlM = wxT("ALTER TABLE ") + pk.getTable()->getQuotedName() + wxT(" ADD") +
-        sql + wxT(";\n");
+    preSqlM += ",\n " + sql;
+    sqlM = "ALTER TABLE " + pk.getTable()->getQuotedName() + " ADD" +
+        sql + ";\n";
 }
 
 void CreateDDLVisitor::visitProcedure(Procedure& p)
 {
     wxString temp(p.getAlterSql());
-    temp += wxT("\n");
+    temp += "\n";
 
     // grant execute on [name] to [user/role]
     const std::vector<Privilege>* priv = p.getPrivileges();
@@ -370,19 +370,19 @@ void CreateDDLVisitor::visitProcedure(Procedure& p)
         for (std::vector<Privilege>::const_iterator ci = priv->begin();
             ci != priv->end(); ++ci)
         {
-            grantSqlM += (*ci).getSql() + wxT("\n");
+            grantSqlM += (*ci).getSql() + "\n";
         }
     }
 
     /* description of procedure and parameters */
     wxString name(p.getName_());
-    name.Replace(wxT("'"), wxT("''"));
+    name.Replace("'", "''");
     wxString description = p.getDescription();
     if (!description.empty())
     {
-        description.Replace(wxT("'"), wxT("''"));
-        postSqlM << wxT("comment on procedure ") << name << wxT(" is '")
-                     << description << wxT("';\n");
+        description.Replace("'", "''");
+        postSqlM << "comment on procedure " << name << " is '"
+                     << description << "';\n";
     }
     for (ParameterPtrs::iterator it = p.begin(); it != p.end(); ++it)
     {
@@ -390,26 +390,26 @@ void CreateDDLVisitor::visitProcedure(Procedure& p)
         if (!description.empty())
         {
             wxString pname((*it)->getName_());
-            description.Replace(wxT("'"), wxT("''"));
-            pname.Replace(wxT("'"), wxT("''"));
-            temp << wxT("comment on parameter ") << name << wxT(".") << pname << wxT(" is '")
-                         << description << wxT("';\n");
+            description.Replace("'", "''");
+            pname.Replace("'", "''");
+            temp << "comment on parameter " << name << "." << pname << " is '"
+                         << description << "';\n";
         }
     }
 
-    postSqlM << temp << wxT("\n");
-    temp.Replace(wxT("ALTER"), wxT("CREATE"), false);   // just first
+    postSqlM << temp << "\n";
+    temp.Replace("ALTER", "CREATE", false);   // just first
     sqlM << temp << grantSqlM;
 
     // create empty procedure body (for database DDL dump)
     temp = p.getAlterSql(false);    // false = only headers
-    temp.Replace(wxT("ALTER"), wxT("CREATE"), false);   // just first
-    preSqlM << temp << wxT("\n");
+    temp.Replace("ALTER", "CREATE", false);   // just first
+    preSqlM << temp << "\n";
 }
 
 void CreateDDLVisitor::visitRole(Role& r)
 {
-    preSqlM += wxT("CREATE ROLE ") + r.getQuotedName() + wxT(";\n");
+    preSqlM += "CREATE ROLE " + r.getQuotedName() + ";\n";
 
     // grant execute on [name] to [user/role]
     const std::vector<Privilege>* priv = r.getPrivileges();
@@ -425,28 +425,28 @@ void CreateDDLVisitor::visitRole(Role& r)
     if (!description.empty())
     {
         wxString name(r.getName_());
-        description.Replace(wxT("'"), wxT("''"));
-        name.Replace(wxT("'"), wxT("''"));
-        postSqlM << wxT("comment on role ") << name << wxT(" is '")
-                     << description << wxT("';\n");
+        description.Replace("'", "''");
+        name.Replace("'", "''");
+        postSqlM << "comment on role " << name << " is '"
+                     << description << "';\n";
     }
-    sqlM = preSqlM + wxT("\n") + postSqlM + grantSqlM;
+    sqlM = preSqlM + "\n" + postSqlM + grantSqlM;
 }
 
 // used by visit(Table)
 void addIndex(std::vector<Index> *ix, wxString& sql, ColumnConstraint *cc)
 {
     // only for FB 1.5+
-    if (!ix || cc->getIndexName().StartsWith(wxT("RDB$")) || cc->getName_() == cc->getIndexName())
+    if (!ix || cc->getIndexName().StartsWith("RDB$") || cc->getName_() == cc->getIndexName())
         return;
     for (std::vector<Index>::iterator it = ix->begin(); it != ix->end(); ++it)
     {
         if ((*it).getName_() == cc->getIndexName())
         {
-            sql += wxT("\n  USING ");
+            sql += "\n  USING ";
             if ((*it).getIndexType() == Index::itDescending)
-                sql += wxT("DESC ");
-            sql += wxT("INDEX ") + (*it).getQuotedName();
+                sql += "DESC ";
+            sql += "INDEX " + (*it).getQuotedName();
         }
     }
 }
@@ -454,22 +454,22 @@ void addIndex(std::vector<Index> *ix, wxString& sql, ColumnConstraint *cc)
 void CreateDDLVisitor::visitTable(Table& t)
 {
     int type = t.getRelationType();
-    preSqlM += wxT("CREATE ");
+    preSqlM += "CREATE ";
     if (type == 4 || type == 5)
-        preSqlM += wxT("GLOBAL TEMPORARY ");
-    preSqlM += wxT("TABLE ") + t.getQuotedName();
+        preSqlM += "GLOBAL TEMPORARY ";
+    preSqlM += "TABLE " + t.getQuotedName();
     wxString external = t.getExternalPath();
     if (!external.IsEmpty())
     {
-        external.Replace(wxT("'"), wxT("''"));
-        preSqlM += wxT(" EXTERNAL '") + external + wxT("'");
+        external.Replace("'", "''");
+        preSqlM += " EXTERNAL '" + external + "'";
     }
-    preSqlM += wxT("\n(\n  ");
+    preSqlM += "\n(\n  ";
     t.ensureChildrenLoaded();
     for (ColumnPtrs::iterator it=t.begin(); it!=t.end(); ++it)
     {
         if (it != t.begin() && (*it)->getComputedSource().empty())
-            preSqlM += wxT(",\n  ");
+            preSqlM += ",\n  ";
         visitColumn(*(*it).get());
     }
 
@@ -498,10 +498,10 @@ void CreateDDLVisitor::visitTable(Table& t)
     {
         for (std::vector<CheckConstraint>::iterator ci = chk->begin(); ci != chk->end(); ++ci)
         {
-            postSqlM += wxT("ALTER TABLE ") + t.getQuotedName() + wxT(" ADD ");
+            postSqlM += "ALTER TABLE " + t.getQuotedName() + " ADD ";
             if (!(*ci).isSystem())
-                postSqlM += wxT("CONSTRAINT ") + (*ci).getQuotedName();
-            postSqlM += wxT("\n  ") + (*ci).getSource() + wxT(";\n");
+                postSqlM += "CONSTRAINT " + (*ci).getQuotedName();
+            postSqlM += "\n  " + (*ci).getSource() + ";\n";
         }
     }
 
@@ -512,29 +512,29 @@ void CreateDDLVisitor::visitTable(Table& t)
         {
             if ((*ci).isSystem())
                 continue;
-            postSqlM += wxT("CREATE ");
+            postSqlM += "CREATE ";
             if ((*ci).isUnique())
-                postSqlM += wxT("UNIQUE ");
+                postSqlM += "UNIQUE ";
             if ((*ci).getIndexType() == Index::itDescending)
-                postSqlM += wxT("DESCENDING ");
-            postSqlM += wxT("INDEX ") + (*ci).getQuotedName() + wxT(" ON ") + t.getQuotedName();
+                postSqlM += "DESCENDING ";
+            postSqlM += "INDEX " + (*ci).getQuotedName() + " ON " + t.getQuotedName();
             wxString expre = (*ci).getExpression();
             if (!expre.IsEmpty())
-                postSqlM += wxT(" COMPUTED BY ") + expre;
+                postSqlM += " COMPUTED BY " + expre;
             else
             {
-                postSqlM += wxT(" (");
+                postSqlM += " (";
                 std::vector<wxString> *cols = (*ci).getSegments();
                 for (std::vector<wxString>::const_iterator it = cols->begin(); it != cols->end(); ++it)
                 {
                     if (it != cols->begin())
-                        postSqlM += wxT(",");
+                        postSqlM += ",";
                     Identifier id(*it);
                     postSqlM += id.getQuoted();
                 }
-                postSqlM += wxT(")");
+                postSqlM += ")";
             }
-            postSqlM += wxT(";\n");
+            postSqlM += ";\n";
         }
     }
 
@@ -542,52 +542,52 @@ void CreateDDLVisitor::visitTable(Table& t)
     const std::vector<Privilege>* priv = t.getPrivileges();
     if (priv)
         for (std::vector<Privilege>::const_iterator ci = priv->begin(); ci != priv->end(); ++ci)
-            grantSqlM += (*ci).getSql() + wxT("\n");
+            grantSqlM += (*ci).getSql() + "\n";
 
-    preSqlM += wxT("\n)");
+    preSqlM += "\n)";
     if (type == 4)
-        preSqlM += wxT("\nON COMMIT PRESERVE ROWS");
-    preSqlM += wxT(";\n");
+        preSqlM += "\nON COMMIT PRESERVE ROWS";
+    preSqlM += ";\n";
 
     wxString description = t.getDescription();
     if (!description.empty())
     {
         wxString name(t.getName_());
-        description.Replace(wxT("'"), wxT("''"));
-        name.Replace(wxT("'"), wxT("''"));        
-        postSqlM << wxT("comment on table ") << name << wxT(" is '")
-                     << description << wxT("';\n");
+        description.Replace("'", "''");
+        name.Replace("'", "''");
+        postSqlM << "comment on table " << name << " is '"
+                     << description << "';\n";
     }
 
-    sqlM = preSqlM + wxT("\n") + postSqlM + grantSqlM;
+    sqlM = preSqlM + "\n" + postSqlM + grantSqlM;
 }
 
 void CreateDDLVisitor::visitTrigger(Trigger& t)
 {
-    preSqlM << wxT("SET TERM ^ ;\nCREATE TRIGGER ") << t.getQuotedName();
+    preSqlM << "SET TERM ^ ;\nCREATE TRIGGER " << t.getQuotedName();
     if (!t.isDatabaseTrigger())
     {
         Identifier id(t.getRelationName());
-        preSqlM << wxT(" FOR ") << id.getQuoted();
+        preSqlM << " FOR " << id.getQuoted();
     }
     if (t.getActive())
-        preSqlM << wxT(" ACTIVE\n");
+        preSqlM << " ACTIVE\n";
     else
-        preSqlM << wxT(" INACTIVE\n");
+        preSqlM << " INACTIVE\n";
     preSqlM << t.getFiringEvent();
-    preSqlM << wxT(" POSITION ");
-    preSqlM << t.getPosition() << wxT("\n");
+    preSqlM << " POSITION ";
+    preSqlM << t.getPosition() << "\n";
     preSqlM << t.getSource();
-    preSqlM << wxT("^\nSET TERM ; ^\n");
+    preSqlM << "^\nSET TERM ; ^\n";
 
     wxString description = t.getDescription();
     if (!description.empty())
     {
         wxString name(t.getName_());
-        description.Replace(wxT("'"), wxT("''"));
-        name.Replace(wxT("'"), wxT("''"));        
-        postSqlM << wxT("comment on trigger ") << name << wxT(" is '")
-                     << description << wxT("';\n");
+        description.Replace("'", "''");
+        name.Replace("'", "''");
+        postSqlM << "comment on trigger " << name << " is '"
+                     << description << "';\n";
     }
     sqlM = preSqlM + postSqlM;
 }
@@ -596,20 +596,20 @@ void CreateDDLVisitor::visitUniqueConstraint(UniqueConstraint& unq)
 {
     wxString sql;
     if (!unq.isSystem())
-        sql += wxT(" CONSTRAINT ") + unq.getQuotedName();
-    sql += wxT(" UNIQUE (");
+        sql += " CONSTRAINT " + unq.getQuotedName();
+    sql += " UNIQUE (";
     for (std::vector<wxString>::const_iterator it = unq.begin(); it != unq.end(); ++it)
     {
         if (it != unq.begin())
-            sql += wxT(",");
+            sql += ",";
         Identifier id(*it);
         sql += id.getQuoted();
     }
-    sql += wxT(")");
+    sql += ")";
     addIndex(unq.getTable()->getIndices(), sql, &unq);
-    preSqlM += wxT(",\n ") + sql;
-    sqlM = wxT("ALTER TABLE ") + unq.getTable()->getQuotedName()
-        + wxT(" ADD") + sql + wxT(";\n");
+    preSqlM += ",\n " + sql;
+    sqlM = "ALTER TABLE " + unq.getTable()->getQuotedName()
+        + " ADD" + sql + ";\n";
 }
 
 void CreateDDLVisitor::visitView(View& v)
@@ -623,17 +623,17 @@ void CreateDDLVisitor::visitView(View& v)
         for (std::vector<Privilege>::const_iterator ci = priv->begin();
             ci != priv->end(); ++ci)
         {
-            grantSqlM += (*ci).getSql() + wxT("\n");
+            grantSqlM += (*ci).getSql() + "\n";
         }
     }
     wxString name(v.getName_());
-    name.Replace(wxT("'"), wxT("''"));
+    name.Replace("'", "''");
     wxString description = v.getDescription();
     if (!description.empty())
     {
-        description.Replace(wxT("'"), wxT("''"));        
-        postSqlM << wxT("comment on view ") << name << wxT(" is '")
-                     << description << wxT("';\n");
+        description.Replace("'", "''");
+        postSqlM << "comment on view " << name << " is '"
+                     << description << "';\n";
     }
 
     // description for columns
@@ -644,12 +644,12 @@ void CreateDDLVisitor::visitView(View& v)
         if (!description.empty())
         {
             wxString cname((*it)->getName_());
-            description.Replace(wxT("'"), wxT("''"));
-            cname.Replace(wxT("'"), wxT("''"));
-            postSqlM << wxT("comment on column ") << name << wxT(".") << cname << wxT(" is '")
-                         << description << wxT("';\n");
+            description.Replace("'", "''");
+            cname.Replace("'", "''");
+            postSqlM << "comment on column " << name << "." << cname << " is '"
+                         << description << "';\n";
         }
     }
 
-    sqlM += preSqlM + wxT("\n") + postSqlM + grantSqlM;
+    sqlM += preSqlM + "\n" + postSqlM + grantSqlM;
 }

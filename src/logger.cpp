@@ -52,11 +52,11 @@ bool Logger::log2database(Config *cfg, const SqlStatement& stm, Database* db)
         IBPP::Statement st = IBPP::StatementFactory(db->getIBPPDatabase(), tr);
 
         // find next id
-        wxString sql = wxT("SELECT gen_id(FLAMEROBIN$LOG_GEN, 1) FROM rdb$database");
-        if (cfg->get(wxT("LoggingUsesCustomSelect"), false))
+        wxString sql = "SELECT gen_id(FLAMEROBIN$LOG_GEN, 1) FROM rdb$database";
+        if (cfg->get("LoggingUsesCustomSelect", false))
         {
-            sql = cfg->get(wxT("LoggingCustomSelect"),
-                wxString(wxT("SELECT 1+MAX(ID) FROM FLAMEROBIN$LOG")));
+            sql = cfg->get("LoggingCustomSelect",
+                wxString("SELECT 1+MAX(ID) FROM FLAMEROBIN$LOG"));
         }
         st->Prepare(wx2std(sql, conv));
         st->Execute();
@@ -102,13 +102,13 @@ bool Logger::log2file(Config *cfg, const SqlStatement& st,
 {
     enum { singleFile=0, multiFile };
     int logToFileType;
-    cfg->getValue(wxT("LogToFileType"), logToFileType);
+    cfg->getValue("LogToFileType", logToFileType);
 
     wxString sql = st.getStatement();
     bool logSetTerm = false;
-    cfg->getValue(wxT("LogSetTerm"), logSetTerm);
+    cfg->getValue("LogSetTerm", logSetTerm);
     // add term. to statement if missing
-    if (logToFileType == singleFile || (logSetTerm && st.getTerminator() != wxT(";")))
+    if (logToFileType == singleFile || (logSetTerm && st.getTerminator() != ";"))
     {
         sql.Trim();
         wxString::size_type pos = sql.rfind(st.getTerminator());
@@ -119,7 +119,7 @@ bool Logger::log2file(Config *cfg, const SqlStatement& st,
     wxFile f;
     if (logToFileType == multiFile)
     {   // filename should contain stuff like: %d, %02d, %05d, etc.
-        if (filename.find_last_of(wxT("%")) == wxString::npos) // % not found
+        if (filename.find_last_of("%") == wxString::npos) // % not found
         {
             showWarningDialog(0, _("Logging to file failed"),
                 _("Multiple file option selected, but path string does not contain the % character"),
@@ -128,7 +128,7 @@ bool Logger::log2file(Config *cfg, const SqlStatement& st,
         }
         wxString test;
         int start = 1;
-        cfg->getValue(wxT("IncrementalLogFileStart"), start);
+        cfg->getValue("IncrementalLogFileStart", start);
         for (int i=start; i < 100000; ++i) // dummy test for 100000
         {
             test.Printf(filename, i);
@@ -164,7 +164,7 @@ bool Logger::log2file(Config *cfg, const SqlStatement& st,
     }
 
     bool loggingAddHeader = true;
-    cfg->getValue(wxT("LoggingAddHeader"), loggingAddHeader);
+    cfg->getValue("LoggingAddHeader", loggingAddHeader);
     if (loggingAddHeader)
     {
         wxString header = wxString::Format(
@@ -177,12 +177,12 @@ bool Logger::log2file(Config *cfg, const SqlStatement& st,
         f.Write(header);
     }
     else
-        f.Write(wxT("\n"));
-    if (logSetTerm && st.getTerminator() != wxT(";"))
-        f.Write(wxT("SET TERM ") + st.getTerminator() + wxT(" ;\n"));
+        f.Write("\n");
+    if (logSetTerm && st.getTerminator() != ";")
+        f.Write("SET TERM " + st.getTerminator() + " ;\n");
     f.Write(sql);
-    if (logSetTerm && st.getTerminator() != wxT(";"))
-        f.Write(wxT("\nSET TERM ; ") + st.getTerminator() + wxT("\n"));
+    if (logSetTerm && st.getTerminator() != ";")
+        f.Write("\nSET TERM ; " + st.getTerminator() + "\n");
     f.Close();
     return true;
 }
@@ -191,7 +191,7 @@ bool Logger::logStatement(const SqlStatement& st, Database* db)
 {
     DatabaseConfig dc(db, config());
     bool result = logStatementByConfig(&dc, st, db);
-    if (!dc.get(wxT("ExcludeFromGlobalLogging"), false))
+    if (!dc.get("ExcludeFromGlobalLogging", false))
     {
         Config& globalConfig = config();
         result = result && logStatementByConfig(&globalConfig, st, db);
@@ -205,7 +205,7 @@ bool Logger::prepareDatabase(Database *db)
     try
     {
         // create table
-        if (db->findByNameAndType(ntTable, wxT("FLAMEROBIN$LOG")) == 0)
+        if (db->findByNameAndType(ntTable, "FLAMEROBIN$LOG") == 0)
         {
             tr->Start();
             IBPP::Statement st = IBPP::StatementFactory(db->getIBPPDatabase(), tr);
@@ -218,18 +218,18 @@ bool Logger::prepareDatabase(Database *db)
                 user_name char(31) default current_user )");
             st->Execute();
             tr->Commit();
-            db->addObject(ntTable, wxT("FLAMEROBIN$LOG"));
+            db->addObject(ntTable, "FLAMEROBIN$LOG");
         }
 
         // create generator
-        if (db->findByNameAndType(ntGenerator, wxT("FLAMEROBIN$LOG_GEN")) == 0)
+        if (db->findByNameAndType(ntGenerator, "FLAMEROBIN$LOG_GEN") == 0)
         {
             tr->Start();
             IBPP::Statement st = IBPP::StatementFactory(db->getIBPPDatabase(), tr);
             st->Prepare("create generator FLAMEROBIN$LOG_GEN");
             st->Execute();
             tr->Commit();
-            db->addObject(ntGenerator, wxT("FLAMEROBIN$LOG_GEN"));
+            db->addObject(ntGenerator, "FLAMEROBIN$LOG_GEN");
         }
         return true;
     }
@@ -250,16 +250,16 @@ bool Logger::logStatementByConfig(Config* cfg, const SqlStatement& st,
     Database *db)
 {
     bool logDML = false;
-    cfg->getValue(wxT("LogDML"), logDML);
+    cfg->getValue("LogDML", logDML);
     if (!logDML && !st.isDDL())    // logging not needed
         return true;
 
     bool logToFile = false;
-    cfg->getValue(wxT("LogToFile"), logToFile);
+    cfg->getValue("LogToFile", logToFile);
     if (logToFile)
     {
         wxString logFilename;
-        cfg->getValue(wxT("LogFile"), logFilename);
+        cfg->getValue("LogFile", logFilename);
         if (logFilename.empty())
         {
             showWarningDialog(0,
@@ -271,7 +271,7 @@ bool Logger::logStatementByConfig(Config* cfg, const SqlStatement& st,
         return log2file(cfg, st, db, logFilename);
     }
     bool logToDb = false;
-    cfg->getValue(wxT("LogToDatabase"), logToDb);
+    cfg->getValue("LogToDatabase", logToDb);
     if (logToDb)
     {
         if (!prepareDatabase(db))

@@ -56,13 +56,13 @@ void HtmlTemplateProcessor::processCommand(const wxString& cmdName,
     if (!metadataItem)
         return;
 
-    if (cmdName == wxT("header") && !cmdParams.empty())  // include another file
+    if (cmdName == "header" && !cmdParams.empty())  // include another file
     {
         std::vector<wxString> pages;
         HtmlHeaderMetadataItemVisitor v(pages);
         metadataItem->acceptVisitor(&v);
 
-        wxString page = loadEntireFile(getTemplatePath() + wxT("header.html"));
+        wxString page = loadEntireFile(getTemplatePath() + "header.html");
         bool first = true;
         while (!page.Strip().IsEmpty())
         {
@@ -78,14 +78,14 @@ void HtmlTemplateProcessor::processCommand(const wxString& cmdName,
             for (std::vector<wxString>::iterator it = pages.begin(); it !=
                 pages.end(); ++it)
             {
-                if (part.Find(wxT(">")+(*it)+wxT("<")) == -1)
+                if (part.Find(">"+(*it)+"<") == -1)
                     continue;
                 if (first)
                     first = false;
                 else
-                    processedText += wxT(" | ");
+                    processedText += " | ";
                 wxString allParams = cmdParams.all();
-                if (part.Find(wxT(">") + allParams + wxT("<")) != -1)
+                if (part.Find(">" + allParams + "<") != -1)
                     processedText += allParams;
                 else
                     internalProcessTemplateText(processedText, part, object);

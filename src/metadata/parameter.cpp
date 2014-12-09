@@ -81,7 +81,7 @@ int Parameter::getMechanism() const
 
 const wxString Parameter::getTypeName() const
 {
-    return wxT("PARAMETER");
+    return "PARAMETER";
 }
 
 void Parameter::acceptVisitor(MetadataItemVisitor* visitor)

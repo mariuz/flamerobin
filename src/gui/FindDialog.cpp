@@ -70,19 +70,19 @@ int FindFlags::asStc() const            // returns "flags" converted to wxSTC se
 // Used for debugging
 void FindFlags::show() const
 {
-    wxString retval(wxString::Format(wxT("Flags (%d) contains:\n"), flags));
+    wxString retval(wxString::Format("Flags (%d) contains:\n", flags));
     if (has(se::WHOLE_WORD))
-        retval += wxT("se::WHOLE_WORD\n");
+        retval += "se::WHOLE_WORD\n";
     if (has(se::MATCH_CASE))
-        retval += wxT("se::MATCH_CASE\n");
+        retval += "se::MATCH_CASE\n";
     if (has(se::REGULAR_EXPRESSION))
-        retval += wxT("se::REGULAR_EXPRESSION\n");
+        retval += "se::REGULAR_EXPRESSION\n";
     if (has(se::FROM_TOP))
-        retval += wxT("se::FROM_TOP\n");
+        retval += "se::FROM_TOP\n";
     if (has(se::WRAP))
-        retval += wxT("se::WRAP\n");
+        retval += "se::WRAP\n";
     if (has(se::CONVERT_BACKSLASH))
-        retval += wxT("se::CONVERT_BACKSLASH\n");
+        retval += "se::CONVERT_BACKSLASH\n";
     wxMessageBox(retval);
 }
 
@@ -102,12 +102,12 @@ SearchableEditor::SearchableEditor(wxWindow *parent, wxWindowID id)
 wxString SearchableEditor::convertBackslashes(const wxString& source)
 {
     wxString result(source);
-    result.Replace(wxT("\\n"), wxT("\n"));
-    result.Replace(wxT("\\r"), wxT("\r"));
-    result.Replace(wxT("\\t"), wxT("\t"));
+    result.Replace("\\n", "\n");
+    result.Replace("\\r", "\r");
+    result.Replace("\\t", "\t");
     while (true)    // hexadecimal bytes can be given if format: \xNN where NN is in range from 00 to ff
     {
-        int p = result.Find(wxT("\\x"));
+        int p = result.Find("\\x");
         if (p == -1)
             break;
         unsigned long number;
@@ -122,7 +122,7 @@ wxString SearchableEditor::convertBackslashes(const wxString& source)
             break;
         }
     }
-    result.Replace(wxT("\\\\"), wxT("\\"));
+    result.Replace("\\\\", "\\");
     return result;
 }
 

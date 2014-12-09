@@ -68,9 +68,9 @@ IdentifierQuotes& IdentifierQuotes::get()
 
 void IdentifierQuotes::loadFromConfig()
 {
-    quoteAlwaysM = !config().get(wxT("quoteOnlyWhenNeeded"), true);
-    quoteCharsAreRegularM = config().get(wxT("quoteCharsAreRegular"), false);
-    quoteMixedCaseM = config().get(wxT("quoteMixedCase"), false);
+    quoteAlwaysM = !config().get("quoteOnlyWhenNeeded", true);
+    quoteCharsAreRegularM = config().get("quoteCharsAreRegular", false);
+    quoteMixedCaseM = config().get("quoteMixedCase", false);
 }
 
 bool IdentifierQuotes::getQuoteAlways()
@@ -146,7 +146,7 @@ bool Identifier::isQuoted(const wxString &s)
 
 wxString& Identifier::escape(wxString& s)
 {
-    s.Replace(wxT("\""), wxT("\"\""));
+    s.Replace("\"", "\"\"");
     return s;
 }
 
@@ -159,7 +159,7 @@ wxString& Identifier::strip(wxString& s)
 
 wxString& Identifier::quote(wxString &s)
 {
-    s = wxT("\"") + s + wxT("\"");
+    s = "\"" + s + "\"";
     return s;
 }
 

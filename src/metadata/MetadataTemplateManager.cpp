@@ -53,32 +53,32 @@ TemplateDescriptor::TemplateDescriptor(const wxFileName& templateFileName,
 void TemplateDescriptor::loadDescriptionFromConfigFile()
 {
     wxFileName confFileName(templateFileNameM);
-    confFileName.SetExt(wxT("info"));
+    confFileName.SetExt("info");
     if (confFileName.FileExists())
     {
         configM.setConfigFileName(confFileName);
         menuCaptionM = expandTemplateCommands(
-            configM.get(wxT("templateInfo/menuCaption"),
+            configM.get("templateInfo/menuCaption",
             templateFileNameM.GetName()));
-        menuPositionM = configM.get(wxT("templateInfo/menuPosition"), 0);
+        menuPositionM = configM.get("templateInfo/menuPosition", 0);
         matchesTypeM = expandTemplateCommands(
-            configM.get(wxT("templateInfo/matchesType"), matchesTypeM));
+            configM.get("templateInfo/matchesType", matchesTypeM));
         if (!matchesTypeM)
-            matchesTypeM = wxT(".*");
+            matchesTypeM = ".*";
         matchesNameM = expandTemplateCommands(
-            configM.get(wxT("templateInfo/matchesName"), matchesNameM));
+            configM.get("templateInfo/matchesName", matchesNameM));
         if (!matchesNameM)
-            matchesNameM = wxT(".*");
+            matchesNameM = ".*";
         wxString matchesWhen = getBooleanAsString(true);
         matchesWhenM = getStringAsBoolean(expandTemplateCommands(
-            configM.get(wxT("templateInfo/matchesWhen"), matchesWhen)));
+            configM.get("templateInfo/matchesWhen", matchesWhen)));
     }
     else
     {
         menuCaptionM = templateFileNameM.GetName();
         menuPositionM = 0;
-        matchesTypeM = wxT(".*");
-        matchesNameM = wxT(".*");
+        matchesTypeM = ".*";
+        matchesNameM = ".*";
         matchesWhenM = true;
     }
 }
@@ -146,10 +146,10 @@ void MetadataTemplateManager::collectDescriptors()
     // A user may also remove a predefined template by overriding it with one
     // that does not match any object.
     wxDir::GetAllFiles(config().getCodeTemplatesPath(), &fileNames,
-        wxT("*.template"), wxDIR_FILES);
+        "*.template", wxDIR_FILES);
     wxString userPath = config().getUserCodeTemplatesPath();
     if (wxDir::Exists(userPath))
-        wxDir::GetAllFiles(userPath, &fileNames, wxT("*.template"), wxDIR_FILES);
+        wxDir::GetAllFiles(userPath, &fileNames, "*.template", wxDIR_FILES);
     descriptorsM.clear();
     for (wxString::size_type i = 0; i < fileNames.Count(); i++)
     {

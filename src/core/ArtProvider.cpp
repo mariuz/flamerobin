@@ -264,22 +264,22 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
 wxBitmap ArtProvider::loadBitmapFromFile(const wxArtID& id, wxSize size)
 {
     wxString name(id.Lower());
-    if (name.substr(0, 4) == wxT("art_"))
+    if (name.substr(0, 4) == "art_")
         name.erase(0, 4);
     if (size == wxDefaultSize)
         size = wxSize(32, 32);
     wxFileName fname(config().getImagesPath() + name
-        + wxString::Format(wxT("_%dx%d"), size.GetWidth(), size.GetHeight()));
+        + wxString::Format("_%dx%d", size.GetWidth(), size.GetHeight()));
 
     wxArrayString imgExts;
-    imgExts.Add(wxT("png"));
-    imgExts.Add(wxT("xpm"));
-    imgExts.Add(wxT("bmp"));
+    imgExts.Add("png");
+    imgExts.Add("xpm");
+    imgExts.Add("bmp");
 
     for (size_t i = 0; i < imgExts.GetCount(); ++i)
     {
         fname.SetExt(imgExts[i]);
-        wxLogDebug(wxT("Trying to load image file \"%s\""),
+        wxLogDebug("Trying to load image file \"%s\"",
             fname.GetFullPath().c_str());
         if (fname.FileExists())
         {

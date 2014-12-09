@@ -37,19 +37,19 @@
 /*static*/
 wxString MetadataItemCreateStatementVisitor::getCreateDomainStatement()
 {
-    return  wxT("CREATE DOMAIN domain_name\n")
-            wxT("AS datatype [CHARACTER SET charset]\n")
-            wxT("DEFAULT {literal | NULL | USER}\n")
-            wxT("[NOT NULL]\n")
-            wxT("[CHECK (dom_search_condition)]\n")
-            wxT("COLLATE collation;\n");
+    return  "CREATE DOMAIN domain_name\n"
+            "AS datatype [CHARACTER SET charset]\n"
+            "DEFAULT {literal | NULL | USER}\n"
+            "[NOT NULL]\n"
+            "[CHECK (dom_search_condition)]\n"
+            "COLLATE collation;\n";
 }
 
 /*static*/
 wxString MetadataItemCreateStatementVisitor::getCreateExceptionStatement()
 {
     StatementBuilder sb;
-    sb << kwCREATE << ' ' << kwEXCEPTION << wxT(" name 'exception message';")
+    sb << kwCREATE << ' ' << kwEXCEPTION << " name 'exception message';"
         << StatementBuilder::NewLine;
     return sb;
 }
@@ -57,87 +57,87 @@ wxString MetadataItemCreateStatementVisitor::getCreateExceptionStatement()
 /*static*/
 wxString MetadataItemCreateStatementVisitor::getCreateFunctionStatement()
 {
-    return wxT("DECLARE EXTERNAL FUNCTION name [datatype | CSTRING (int) ")
-           wxT("[, datatype | CSTRING (int) ...]]\n")
-           wxT("RETURNS {datatype [BY VALUE] | CSTRING (int)} [FREE_IT]\n")
-           wxT("ENTRY_POINT 'entryname'\n")
-           wxT("MODULE_NAME 'modulename';\n");
+    return "DECLARE EXTERNAL FUNCTION name [datatype | CSTRING (int) "
+           "[, datatype | CSTRING (int) ...]]\n"
+           "RETURNS {datatype [BY VALUE] | CSTRING (int)} [FREE_IT]\n"
+           "ENTRY_POINT 'entryname'\n"
+           "MODULE_NAME 'modulename';\n";
 }
 
 /*static*/
 wxString MetadataItemCreateStatementVisitor::getCreateGeneratorStatement()
 {
     StatementBuilder sb;
-    sb << kwCREATE << ' ' << kwGENERATOR << wxT(" name;")
+    sb << kwCREATE << ' ' << kwGENERATOR << " name;"
         << StatementBuilder::NewLine
-        << kwSET << ' ' << kwGENERATOR << wxT(" name ") << kwTO
-        << wxT(" value;") << StatementBuilder::NewLine;
+        << kwSET << ' ' << kwGENERATOR << " name " << kwTO
+        << " value;" << StatementBuilder::NewLine;
     return sb;
 }
 
 /*static*/
 wxString MetadataItemCreateStatementVisitor::getCreateProcedureStatement()
 {
-    wxString s(wxT("SET TERM ^ ;\n\n")
-            wxT("CREATE PROCEDURE name \n")
-            wxT(" ( input_parameter_name < datatype>, ... ) \n")
-            wxT("RETURNS \n")
-            wxT(" ( output_parameter_name < datatype>, ... )\n")
-            wxT("AS \n")
-            wxT("DECLARE VARIABLE variable_name < datatype>; \n")
-            wxT("BEGIN\n")
-            wxT("  /* write your code here */ \n")
-            wxT("END^\n\n")
-            wxT("SET TERM ; ^\n"));
+    wxString s("SET TERM ^ ;\n\n"
+            "CREATE PROCEDURE name \n"
+            " ( input_parameter_name < datatype>, ... ) \n"
+            "RETURNS \n"
+            " ( output_parameter_name < datatype>, ... )\n"
+            "AS \n"
+            "DECLARE VARIABLE variable_name < datatype>; \n"
+            "BEGIN\n"
+            "  /* write your code here */ \n"
+            "END^\n\n"
+            "SET TERM ; ^\n");
     return s;
 }
 
 /*static*/
 wxString MetadataItemCreateStatementVisitor::getCreateRoleStatement()
 {
-    return  wxT("CREATE ROLE role_name;\n");
+    return  "CREATE ROLE role_name;\n";
 }
 
 /*static*/
 wxString MetadataItemCreateStatementVisitor::getCreateTableStatement()
 {
-    return wxT("CREATE TABLE table_name\n")
-        wxT("(\n")
-        wxT("    column_name {< datatype> | COMPUTED BY (< expr>) | domain}\n")
-        wxT("        [DEFAULT { literal | NULL | USER}] [NOT NULL]\n")
-        wxT("    ...\n")
-        wxT("    CONSTRAINT constraint_name\n")
-        wxT("        PRIMARY KEY (column_list),\n")
-        wxT("        UNIQUE      (column_list),\n")
-        wxT("        FOREIGN KEY (column_list) REFERENCES other_table (column_list),\n")
-        wxT("        CHECK       (condition),\n")
-        wxT("    ...\n")
-        wxT(");\n");
+    return "CREATE TABLE table_name\n"
+        "(\n"
+        "    column_name {< datatype> | COMPUTED BY (< expr>) | domain}\n"
+        "        [DEFAULT { literal | NULL | USER}] [NOT NULL]\n"
+        "    ...\n"
+        "    CONSTRAINT constraint_name\n"
+        "        PRIMARY KEY (column_list),\n"
+        "        UNIQUE      (column_list),\n"
+        "        FOREIGN KEY (column_list) REFERENCES other_table (column_list),\n"
+        "        CHECK       (condition),\n"
+        "    ...\n"
+        ");\n";
 }
 
 /*static*/
 wxString MetadataItemCreateStatementVisitor::getCreateTriggerStatement()
 {
-    return wxT("SET TERM ^ ;\n\n")
-        wxT("CREATE TRIGGER name [FOR table/view] \n")
-        wxT(" [IN]ACTIVE \n")
-        wxT(" [ON {[DIS]CONNECT | TRANSACTION {START | COMMIT | ROLLBACK}} ] \n")
-        wxT(" [{BEFORE | AFTER} INSERT OR UPDATE OR DELETE] \n")
-        wxT(" POSITION number \n")
-        wxT("AS \n")
-        wxT("BEGIN \n")
-        wxT("    /* enter trigger code here */ \n")
-        wxT("END^\n\n")
-        wxT("SET TERM ; ^\n");
+    return "SET TERM ^ ;\n\n"
+        "CREATE TRIGGER name [FOR table/view] \n"
+        " [IN]ACTIVE \n"
+        " [ON {[DIS]CONNECT | TRANSACTION {START | COMMIT | ROLLBACK}} ] \n"
+        " [{BEFORE | AFTER} INSERT OR UPDATE OR DELETE] \n"
+        " POSITION number \n"
+        "AS \n"
+        "BEGIN \n"
+        "    /* enter trigger code here */ \n"
+        "END^\n\n"
+        "SET TERM ; ^\n";
 }
 
 /*static*/
 wxString MetadataItemCreateStatementVisitor::getCreateViewStatement()
 {
     StatementBuilder sb;
-    sb << kwCREATE << ' ' << kwVIEW << wxT(" name ( view_column, ...)")
+    sb << kwCREATE << ' ' << kwVIEW << " name ( view_column, ...)"
         << StatementBuilder::NewLine << kwAS << StatementBuilder::NewLine
-        << wxT("/* write select statement here */")
+        << "/* write select statement here */"
         << StatementBuilder::NewLine
         << kwWITH << ' ' << kwCHECK << ' ' << kwOPTION << ';'
         << StatementBuilder::NewLine;

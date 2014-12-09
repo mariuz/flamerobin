@@ -90,16 +90,16 @@ void BaseFrame::readConfigSettings()
     wxRect rc = rcDefault;
     bool enabled = false;
     bool maximized = false;
-    if (config().getValue(wxT("FrameStorage"), enabled) && enabled)
+    if (config().getValue("FrameStorage", enabled) && enabled)
     {
         wxString itemPrefix = getStorageName();
         if (!itemPrefix.empty())
         {
-            config().getValue(itemPrefix + Config::pathSeparator + wxT("maximized"), maximized);
-            config().getValue(itemPrefix + Config::pathSeparator + wxT("x"), rc.x);
-            config().getValue(itemPrefix + Config::pathSeparator + wxT("y"), rc.y);
-            config().getValue(itemPrefix + Config::pathSeparator + wxT("width"), rc.width);
-            config().getValue(itemPrefix + Config::pathSeparator + wxT("height"), rc.height);
+            config().getValue(itemPrefix + Config::pathSeparator + "maximized", maximized);
+            config().getValue(itemPrefix + Config::pathSeparator + "x", rc.x);
+            config().getValue(itemPrefix + Config::pathSeparator + "y", rc.y);
+            config().getValue(itemPrefix + Config::pathSeparator + "width", rc.width);
+            config().getValue(itemPrefix + Config::pathSeparator + "height", rc.height);
             doReadConfigSettings(itemPrefix);
         }
     }
@@ -139,7 +139,7 @@ void BaseFrame::writeConfigSettings() const
             f->writeConfigSettings();
     }
 
-    if (config().get(wxT("FrameStorage"), false) && !IsIconized())    // don't save for minimized windows
+    if (config().get("FrameStorage", false) && !IsIconized())    // don't save for minimized windows
     {
         // save window position and size to config.
         wxString itemPrefix = getStorageName();
@@ -157,12 +157,12 @@ void BaseFrame::writeConfigSettings() const
                 r.SetRight(wp.rcNormalPosition.right);
                 r.SetBottom(wp.rcNormalPosition.bottom);
             }
-            config().setValue(itemPrefix + Config::pathSeparator + wxT("maximized"), IsMaximized());
+            config().setValue(itemPrefix + Config::pathSeparator + "maximized"), IsMaximized());
 #endif
-            config().setValue(itemPrefix + Config::pathSeparator + wxT("x"), r.x);
-            config().setValue(itemPrefix + Config::pathSeparator + wxT("y"), r.y);
-            config().setValue(itemPrefix + Config::pathSeparator + wxT("width"), r.width);
-            config().setValue(itemPrefix + Config::pathSeparator + wxT("height"), r.height);
+            config().setValue(itemPrefix + Config::pathSeparator + "x", r.x);
+            config().setValue(itemPrefix + Config::pathSeparator + "y", r.y);
+            config().setValue(itemPrefix + Config::pathSeparator + "width", r.width);
+            config().setValue(itemPrefix + Config::pathSeparator + "height", r.height);
             doWriteConfigSettings(itemPrefix);
         }
     }
@@ -177,7 +177,7 @@ const wxString BaseFrame::getName() const
     // Couldn't find a reliable (meaning supportable and cross-platform) way
     // to use the class name here, so every derived frame needs to override getName()
     // if it needs to use features that depend on it.
-    return wxT("");
+    return "";
 }
 
 const wxString BaseFrame::getStorageName() const

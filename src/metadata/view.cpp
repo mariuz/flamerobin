@@ -56,7 +56,7 @@ wxString View::getCreateSql()
     ensureChildrenLoaded();
 
     StatementBuilder sb;
-    sb << kwCREATE << ' ' << kwVIEW << ' ' << getQuotedName() << wxT(" (")
+    sb << kwCREATE << ' ' << kwVIEW << ' ' << getQuotedName() << " ("
         << StatementBuilder::IncIndent;
 
     // make sure that line breaking occurs after comma, not before
@@ -64,7 +64,7 @@ wxString View::getCreateSql()
     wxString colName = (*it)->getQuotedName();
     for (++it; it != columnsM.end(); ++it)
     {
-        sb << colName + wxT(", ");
+        sb << colName + ", ";
         colName = (*it)->getQuotedName();
     }
     sb << colName;
@@ -77,7 +77,7 @@ wxString View::getCreateSql()
 
 const wxString View::getTypeName() const
 {
-    return wxT("VIEW");
+    return "VIEW";
 }
 
 void View::acceptVisitor(MetadataItemVisitor* visitor)
@@ -98,9 +98,9 @@ void Views::acceptVisitor(MetadataItemVisitor* visitor)
 
 void Views::load(ProgressIndicator* progressIndicator)
 {
-    wxString stmt = wxT("select rdb$relation_name from rdb$relations")
-        wxT(" where (rdb$system_flag = 0 or rdb$system_flag is null)")
-        wxT(" and rdb$view_source is not null order by 1");
+    wxString stmt = "select rdb$relation_name from rdb$relations"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
+        " and rdb$view_source is not null order by 1";
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 
@@ -111,6 +111,6 @@ void Views::loadChildren()
 
 const wxString Views::getTypeName() const
 {
-    return wxT("VIEW_COLLECTION");
+    return "VIEW_COLLECTION";
 }
 

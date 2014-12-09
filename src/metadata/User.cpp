@@ -166,6 +166,6 @@ void User::assignTo(IBPP::User& dest) const
 
 bool User::isSystem() const
 {
-    return usernameM == wxT("SYSDBA");
+    return usernameM == "SYSDBA";
 }
 

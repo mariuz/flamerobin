@@ -224,7 +224,7 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
     idAlias.setFromSql(objectSqlAlias);
     wxString objectAlias(idAlias.get());
     Relation *r = 0;
-    if (objectAlias.Upper() == wxT("OLD") || objectAlias.Upper() == wxT("NEW"))
+    if (objectAlias.Upper() == "OLD" || objectAlias.Upper() == "NEW")
     {
         r = getCreateTriggerRelation(sql);
         if (!r)
@@ -241,8 +241,8 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
         SqlTokenType stt;
         while (tkEOF != (stt = tokenizer.getCurrentToken()))
         {
-            //wxMessageBox(wxString::Format(wxT("Tok: %d, String: %s"), stt,
-            //  tokenizer.getCurrentTokenString().c_str()), wxT("TOKEN"));
+            //wxMessageBox(wxString::Format("Tok: %d, String: %s"), stt,
+            //  tokenizer.getCurrentTokenString().c_str()), "TOKEN"));
 
             // skip FROM in: substring (x FROM y for z)
             if (stt == kwSUBSTRING)
@@ -280,7 +280,7 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
                     }
                     else
                         alias = id.get();
-                    //wxMessageBox(id.get()+wxT(" ")+alias);
+                    //wxMessageBox(id.get()+" ")+alias);
                     aliases.insert(IdAlias(alias, id.get()));
                     tokenizer.jumpToken(false);
                     // allow for SELECT ... FROM TBL_FOO f, TBL_BAR b
@@ -309,7 +309,7 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
     {
         if (r->begin() == r->end())   // no columns, load if needed
         {
-            if (config().get(wxT("autoCompleteLoadColumns"), true))
+            if (config().get("autoCompleteLoadColumns", true))
                 r->ensureChildrenLoaded();
             else
                 return wxEmptyString;
@@ -328,7 +328,7 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
             return wxEmptyString;
         if (p->begin() == p->end())
         {
-            if (config().get(wxT("autoCompleteLoadColumns"), true))
+            if (config().get("autoCompleteLoadColumns", true))
                 p->ensureChildrenLoaded();
             else
                 return wxEmptyString;
@@ -344,7 +344,7 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
     cols.sort();
     wxString columns;
     for (std::list<wxString>::iterator i = cols.begin(); i != cols.end(); ++i)
-        columns += (*i) + wxT(" ");
+        columns += (*i) + " ";
     return columns.Strip();     // remove trailing space
 }
 

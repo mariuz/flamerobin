@@ -116,27 +116,27 @@ void BaseDialog::updateColors(wxWindow *parent)
 void BaseDialog::readConfigSettings()
 {
     // default to centered dialogs
-    bool centered = config().get(wxT("centerDialogOnParent"), true);
-    if (config().get(wxT("FrameStorage"), false))
+    bool centered = config().get("centerDialogOnParent", true);
+    if (config().get("FrameStorage", false))
     {
         wxString itemPrefix = getStorageName();
         if (!itemPrefix.empty())
         {
             wxRect r = getDefaultRect();
             if (getConfigStoresWidth())
-                config().getValue(itemPrefix + Config::pathSeparator + wxT("width"), r.width);
+                config().getValue(itemPrefix + Config::pathSeparator + "width", r.width);
             if (getConfigStoresHeight())
-                config().getValue(itemPrefix + Config::pathSeparator + wxT("height"), r.height);
+                config().getValue(itemPrefix + Config::pathSeparator + "height", r.height);
             doReadConfigSettings(itemPrefix);
             if (r.width > 0 || r.height > 0)
                 SetSize(r.width, r.height);
             // default to global setting, set to 0 to disable
             // restore the position if we don't want it centered
-            config().getValue(itemPrefix + Config::pathSeparator + wxT("centerDialogOnParent"), centered);
+            config().getValue(itemPrefix + Config::pathSeparator + "centerDialogOnParent", centered);
             if (!centered)
             {
-                config().getValue(itemPrefix + Config::pathSeparator + wxT("x"), r.x);
-                config().getValue(itemPrefix + Config::pathSeparator + wxT("y"), r.y);
+                config().getValue(itemPrefix + Config::pathSeparator + "x", r.x);
+                config().getValue(itemPrefix + Config::pathSeparator + "y", r.y);
                 SetSize(r);
             }
         }
@@ -151,7 +151,7 @@ void BaseDialog::doReadConfigSettings(const wxString& WXUNUSED(prefix))
 
 void BaseDialog::writeConfigSettings() const
 {
-    if (config().get(wxT("FrameStorage"), false) && !IsIconized())
+    if (config().get("FrameStorage", false) && !IsIconized())
     {
         // wxFileConfig::Flush() should only be called once
         SubjectLocker locker(&config());
@@ -161,15 +161,15 @@ void BaseDialog::writeConfigSettings() const
         if (!itemPrefix.empty())
         {
             wxRect r = GetRect();
-            config().setValue(itemPrefix + Config::pathSeparator + wxT("width"), r.width);
-            config().setValue(itemPrefix + Config::pathSeparator + wxT("height"), r.height);
+            config().setValue(itemPrefix + Config::pathSeparator + "width", r.width);
+            config().setValue(itemPrefix + Config::pathSeparator + "height", r.height);
 
             bool centered = true;
-            config().getValue(itemPrefix + Config::pathSeparator + wxT("centerDialogOnParent"), centered);
+            config().getValue(itemPrefix + Config::pathSeparator + "centerDialogOnParent", centered);
             if (!centered)
             {
-                config().setValue(itemPrefix + Config::pathSeparator + wxT("x"), r.x);
-                config().setValue(itemPrefix + Config::pathSeparator + wxT("y"), r.y);
+                config().setValue(itemPrefix + Config::pathSeparator + "x", r.x);
+                config().setValue(itemPrefix + Config::pathSeparator + "y", r.y);
             }
             doWriteConfigSettings(itemPrefix);
         }
@@ -185,7 +185,7 @@ const wxString BaseDialog::getName() const
     // Couldn't find a reliable (meaning supportable and cross-platform) way
     // to use the class name here, so every derived frame needs to override getName()
     // if it needs to use features that depend on it.
-    return wxT("");
+    return "";
 }
 
 const wxString BaseDialog::getStorageName() const

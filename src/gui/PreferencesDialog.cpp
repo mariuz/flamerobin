@@ -75,13 +75,13 @@ static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)
 wxString getPlatformName()
 {
 #ifdef __WINDOWS__
-    return wxT("win");
+    return "win");
 #elif defined(__MAC__) || defined(__APPLE__)
-    return wxT("mac");
+    return "mac");
 #elif defined(__UNIX__)
-    return wxT("unix");
+    return "unix";
 #else
-    return wxT("undefined");
+    return "undefined");
 #endif
 }
 
@@ -95,14 +95,14 @@ static void processPlatformAttribute(wxXmlNode *node)
     {
         isok = false;
 #if wxCHECK_VERSION(2, 9, 0)
-        if (!c->GetAttribute(wxT("platform"), &s))
+        if (!c->GetAttribute("platform", &s))
 #else
-        if (!c->GetPropVal(wxT("platform"), &s))
+        if (!c->GetPropVal("platform"), &s))
 #endif
             isok = true;
         else
         {
-            wxStringTokenizer tkn(s, wxT(" |"));
+            wxStringTokenizer tkn(s, " |");
 
             while (!isok && tkn.HasMoreTokens())
             {
@@ -338,14 +338,14 @@ void PreferencesDialog::initControls(const wxString& saveButtonCaption)
     // we don't want this dialog centered on parent since it is very big, and
     // some parents (ex. main frame) could even be smaller.
     // Don't use targetConfig here, the setting must go in the global instance.
-    config().setValue(getStorageName() + Config::pathSeparator + wxT("centerDialogOnParent"), false);
+    config().setValue(getStorageName() + Config::pathSeparator + "centerDialogOnParent", false);
 
     treectrl_1 = new wxTreeCtrl(getControlsPanel(), ID_treectrl_panes,
         wxDefaultPosition, wxDefaultSize,
         wxBORDER_THEME | wxTR_DEFAULT_STYLE | wxTR_HAS_BUTTONS | wxTR_HIDE_ROOT);
     panel_categ = new wxPanel(getControlsPanel(), wxID_ANY, wxDefaultPosition,
         wxDefaultSize, wxBORDER_THEME);
-    static_text_categ = new wxStaticText(panel_categ, wxID_ANY, wxT("Dummy min size text"));
+    static_text_categ = new wxStaticText(panel_categ, wxID_ANY, "Dummy min size text");
     bookctrl_1 = new Optionbook(getControlsPanel(), ID_bookctrl_panes,
         wxDefaultPosition, wxDefaultSize);
 
@@ -430,7 +430,7 @@ const wxString PreferencesDialog::getName() const
     if (!dialogNameM.IsEmpty())
         return dialogNameM;
     else
-        return wxT("PreferencesDialog");
+        return "PreferencesDialog";
 }
 
 int PreferencesDialog::getSelectedPage()
@@ -501,20 +501,20 @@ void PreferencesDialog::loadConfDef(const wxString& confDefData)
     if (!doc.Load(stream))
         return;
     wxXmlNode* xmlr = doc.GetRoot();
-    if (xmlr->GetName() != wxT("root"))
+    if (xmlr->GetName() != "root")
     {
         wxLogError(_("Invalid root node in confdef."));
         return;
     }
     processPlatformAttribute(xmlr);
-    debugDescriptionM = hasParamNode(xmlr, wxT("debug"));
+    debugDescriptionM = hasParamNode(xmlr, "debug");
 
     wxTreeItemId root = treectrl_1->AddRoot(wxEmptyString);
     for (wxXmlNode* xmln = doc.GetRoot()->GetChildren();
         (xmln); xmln = xmln->GetNext())
     {
         if (xmln->GetType() == wxXML_ELEMENT_NODE
-            && xmln->GetName() == wxT("node"))
+            && xmln->GetName() == "node")
         {
             if (!parseDescriptionNode(root, xmln))
                 return;
@@ -550,23 +550,23 @@ bool PreferencesDialog::parseDescriptionNode(wxTreeItemId parent, wxXmlNode* xml
     {
         if (xmln->GetType() != wxXML_ELEMENT_NODE)
             continue;
-        if (xmln->GetName() == wxT("caption"))
+        if (xmln->GetName() == "caption")
             caption = getNodeContent(xmln, wxEmptyString);
-        else if (xmln->GetName() == wxT("description"))
+        else if (xmln->GetName() == "description")
             description = getNodeContent(xmln, wxEmptyString);
-        else if (xmln->GetName() == wxT("image"))
+        else if (xmln->GetName() == "image")
         {
             wxString value(getNodeContent(xmln, wxEmptyString));
             long l;
             if (!value.IsEmpty() && value.ToLong(&l))
                 treectrl_1->SetItemImage(item, l);
         }
-        else if (xmln->GetName() == wxT("node"))
+        else if (xmln->GetName() == "node")
         {
             if (!parseDescriptionNode(item, xmln))
                 return false;
         }
-        else if (xmln->GetName() == wxT("setting"))
+        else if (xmln->GetName() == "setting")
         {
             if (!parseDescriptionSetting(page, xmln, 0))
                 return false;
@@ -597,11 +597,11 @@ bool PreferencesDialog::parseDescriptionSetting(wxPanel* page, wxXmlNode* xmln,
     PrefDlgSetting* enabledby)
 {
 #if wxCHECK_VERSION(2, 9, 0)
-    wxString type(xmln->GetAttribute(wxT("type"), wxEmptyString));
-    wxString style(xmln->GetAttribute(wxT("style"), wxEmptyString));
+    wxString type(xmln->GetAttribute("type", wxEmptyString));
+    wxString style(xmln->GetAttribute("style", wxEmptyString));
 #else
-    wxString type(xmln->GetPropVal(wxT("type"), wxEmptyString));
-    wxString style(xmln->GetPropVal(wxT("style"), wxEmptyString));
+    wxString type(xmln->GetPropVal("type"), wxEmptyString));
+    wxString style(xmln->GetPropVal("style"), wxEmptyString));
 #endif
     PrefDlgSetting* setting = PrefDlgSetting::createPrefDlgSetting(page,
         type, style, enabledby);
@@ -620,13 +620,13 @@ bool PreferencesDialog::parseDescriptionSetting(wxPanel* page, wxXmlNode* xmln,
     {
         if (xmln->GetType() != wxXML_ELEMENT_NODE)
             continue;
-        if (xmln->GetName() == wxT("enables"))
+        if (xmln->GetName() == "enables")
         {
             for (wxXmlNode* xmlc = xmln->GetChildren();
                 (xmlc); xmlc = xmlc->GetNext())
             {
                 if (xmlc->GetType() == wxXML_ELEMENT_NODE
-                    && xmlc->GetName() == wxT("setting"))
+                    && xmlc->GetName() == "setting")
                 {
                     if (!parseDescriptionSetting(page, xmlc, setting))
                         return false;
@@ -749,13 +749,13 @@ void PreferencesDialogTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *t
 {
     // {%edit_conf%} shows a gui to set config params based on <template name>.confdef.
     // {%edit_info%} shows a gui to set template info based on template_info.confdef
-    if (cmdName == wxT("edit_conf") || cmdName == wxT("edit_info"))
+    if (cmdName == "edit_conf" || cmdName == "edit_info")
     {
         wxFileName defFileName = tp->getCurrentTemplateFileName();
         wxString dialogName = defFileName.GetName();
-        defFileName.SetExt(wxT("confdef"));
-        if (cmdName == wxT("edit_info"))
-            defFileName.SetName(wxT("template_info"));
+        defFileName.SetExt("confdef");
+        if (cmdName == "edit_info")
+            defFileName.SetName("template_info");
 
         // Expand commands in confdef file.
         ConfdefTemplateProcessor ctp(object, tp->getWindow());
@@ -765,7 +765,7 @@ void PreferencesDialogTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *t
         // Show dialog for expanded confdef data.
         wxString dialogTitle(_("Code generation"));
         Config& config(tp->getConfig());
-        if (cmdName == wxT("edit_info"))
+        if (cmdName == "edit_info")
         {
             dialogTitle = _("Code template metadata");
             config = tp->getInfo(); 

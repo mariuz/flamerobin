@@ -99,7 +99,7 @@ bool Root::load()
         return false;
 
     wxXmlNode* xmlr = doc.GetRoot();
-    if (xmlr->GetName() != wxT("root"))
+    if (xmlr->GetName() != "root")
         return false;
 
     SubjectLocker locker(this);
@@ -108,9 +108,9 @@ bool Root::load()
     {
         if (xmln->GetType() != wxXML_ELEMENT_NODE)
             continue;
-        if (xmln->GetName() == wxT("server"))
+        if (xmln->GetName() == "server")
             parseServer(xmln);
-        if (xmln->GetName() == wxT("nextId"))
+        if (xmln->GetName() == "nextId")
         {
             wxString value(getNodeContent(xmln, wxEmptyString));
             unsigned long l;
@@ -138,23 +138,23 @@ bool Root::parseDatabase(ServerPtr server, wxXmlNode* xmln)
             continue;
 
         wxString value(getNodeContent(xmln, wxEmptyString));
-        if (xmln->GetName() == wxT("name"))
+        if (xmln->GetName() == "name")
             database->setName_(value);
-        else if (xmln->GetName() == wxT("path"))
+        else if (xmln->GetName() == "path")
             database->setPath(value);
-        else if (xmln->GetName() == wxT("charset"))
+        else if (xmln->GetName() == "charset")
             database->setConnectionCharset(value);
-        else if (xmln->GetName() == wxT("username"))
+        else if (xmln->GetName() == "username")
             database->setUsername(value);
-        else if (xmln->GetName() == wxT("password"))
+        else if (xmln->GetName() == "password")
             database->setRawPassword(value);
-        else if (xmln->GetName() == wxT("encrypted") && value == wxT("1"))
+        else if (xmln->GetName() == "encrypted" && value == "1")
             database->getAuthenticationMode().setStoreEncryptedPassword();
-        else if (xmln->GetName() == wxT("authentication"))
+        else if (xmln->GetName() == "authentication")
             database->getAuthenticationMode().setConfigValue(value);
-        else if (xmln->GetName() == wxT("role"))
+        else if (xmln->GetName() == "role")
             database->setRole(value);
-        else if (xmln->GetName() == wxT("id"))
+        else if (xmln->GetName() == "id")
         {
             unsigned long id;
             if (value.ToULong(&id))
@@ -181,13 +181,13 @@ bool Root::parseServer(wxXmlNode* xmln)
             continue;
 
         wxString value(getNodeContent(xmln, wxEmptyString));
-        if (xmln->GetName() == wxT("name"))
+        if (xmln->GetName() == "name")
             server->setName_(value);
-        else if (xmln->GetName() == wxT("host"))
+        else if (xmln->GetName() == "host")
             server->setHostname(value);
-        else if (xmln->GetName() == wxT("port"))
+        else if (xmln->GetName() == "port")
             server->setPort(value);
-        else if (xmln->GetName() == wxT("database"))
+        else if (xmln->GetName() == "database")
         {
             if (!parseDatabase(server, xmln))
                 return false;
@@ -239,7 +239,7 @@ void Root::addUnregisteredDatabase(DatabasePtr database)
         ServerPtr server(new Server());
         serversM.push_back(server);
         server->setName_(_("Unregistered local databases"));
-        server->setHostname(wxT("localhost"));
+        server->setHostname("localhost");
         server->setParent(this);
 
         unregLocalDatabasesM = server;
@@ -274,11 +274,11 @@ bool Root::save()
         wxMkdir(dir);
 
     wxXmlDocument doc;
-    wxXmlNode* rn = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("root"));
+    wxXmlNode* rn = new wxXmlNode(wxXML_ELEMENT_NODE, "root");
     doc.SetRoot(rn);
 
-    rsAddChildNode(rn, wxT("nextId"),
-        wxString::Format(wxT("%d"), Database::getUIDGeneratorValue()));
+    rsAddChildNode(rn, "nextId",
+        wxString::Format("%d", Database::getUIDGeneratorValue()));
 
     for (ServerPtrs::iterator its = serversM.begin();
         its != serversM.end(); ++its)
@@ -288,12 +288,12 @@ bool Root::save()
         if ((*its) == unregLocalDatabasesM)
             continue;
 
-        wxXmlNode* srvn = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("server"));
+        wxXmlNode* srvn = new wxXmlNode(wxXML_ELEMENT_NODE, "server");
         rn->AddChild(srvn);
         
-        rsAddChildNode(srvn, wxT("name"), (*its)->getName_());
-        rsAddChildNode(srvn, wxT("host"), (*its)->getHostname());
-        rsAddChildNode(srvn, wxT("port"), (*its)->getPort());
+        rsAddChildNode(srvn, "name", (*its)->getName_());
+        rsAddChildNode(srvn, "host", (*its)->getHostname());
+        rsAddChildNode(srvn, "port", (*its)->getPort());
 
         DatabasePtrs databases((*its)->getDatabases());
         for (DatabasePtrs::iterator itdb = databases.begin();
@@ -301,17 +301,17 @@ bool Root::save()
         {
             (*itdb)->resetCredentials();    // clean up eventual extra credentials
 
-            wxXmlNode* dbn = new wxXmlNode(wxXML_ELEMENT_NODE, wxT("database"));
+            wxXmlNode* dbn = new wxXmlNode(wxXML_ELEMENT_NODE, "database");
             srvn->AddChild(dbn);
 
-            rsAddChildNode(dbn, wxT("id"), (*itdb)->getId());
-            rsAddChildNode(dbn, wxT("name"), (*itdb)->getName_());
-            rsAddChildNode(dbn, wxT("path"), (*itdb)->getPath());
-            rsAddChildNode(dbn, wxT("charset"), (*itdb)->getConnectionCharset());
-            rsAddChildNode(dbn, wxT("username"), (*itdb)->getUsername());
-            rsAddChildNode(dbn, wxT("password"), (*itdb)->getRawPassword());
-            rsAddChildNode(dbn, wxT("role"), (*itdb)->getRole());
-            rsAddChildNode(dbn, wxT("authentication"),
+            rsAddChildNode(dbn, "id", (*itdb)->getId());
+            rsAddChildNode(dbn, "name", (*itdb)->getName_());
+            rsAddChildNode(dbn, "path", (*itdb)->getPath());
+            rsAddChildNode(dbn, "charset", (*itdb)->getConnectionCharset());
+            rsAddChildNode(dbn, "username", (*itdb)->getUsername());
+            rsAddChildNode(dbn, "password", (*itdb)->getRawPassword());
+            rsAddChildNode(dbn, "role", (*itdb)->getRole());
+            rsAddChildNode(dbn, "authentication",
                 (*itdb)->getAuthenticationMode().getConfigValue());
         }
     }
@@ -347,7 +347,7 @@ void Root::unlockChildren()
 const wxString Root::getItemPath() const
 {
     // Root is root, don't make the path strings any longer than needed.
-    return wxT("");
+    return "";
 }
 
 wxString Root::getFileName()
@@ -364,6 +364,6 @@ void Root::acceptVisitor(MetadataItemVisitor* visitor)
 
 const wxString Root::getTypeName() const
 {
-    return wxT("ROOT");
+    return "ROOT";
 }
 

@@ -56,16 +56,16 @@ wxString Function::getCreateSql()
         << getQuotedName() << StatementBuilder::NewLine
         << paramListM  << StatementBuilder::NewLine
         << kwRETURNS << ' ' << retstrM << StatementBuilder::NewLine
-        << kwENTRY_POINT << wxT(" '") << entryPointM << '\''
+        << kwENTRY_POINT << " '" << entryPointM << '\''
         << StatementBuilder::NewLine
-        << kwMODULE_NAME << wxT(" '") << libraryNameM << wxT("\';")
+        << kwMODULE_NAME << " '" << libraryNameM << "\';"
         << StatementBuilder::NewLine;
     return sb;
 }
 
 const wxString Function::getTypeName() const
 {
-    return wxT("FUNCTION");
+    return "FUNCTION";
 }
 
 wxString Function::getDropSqlStatement() const
@@ -98,16 +98,16 @@ void Function::loadProperties()
 {
     setPropertiesLoaded(false);
 
-    wxString mechanismNames[] = { wxT("value"), wxT("reference"),
-        wxT("descriptor"), wxT("blob descriptor"), wxT("scalar array"),
-        wxT("null"), wxEmptyString };
-    wxString mechanismDDL[] = { wxT(" BY VALUE "), wxEmptyString,
-        wxT(" BY DESCRIPTOR "), wxEmptyString, wxT(" BY SCALAR ARRAY "),
-        wxT(" NULL "), wxEmptyString };
+    wxString mechanismNames[] = { "value", "reference",
+        "descriptor", "blob descriptor", "scalar array",
+        "null", wxEmptyString };
+    wxString mechanismDDL[] = { " BY VALUE ", wxEmptyString,
+        " BY DESCRIPTOR ", wxEmptyString, " BY SCALAR ARRAY ",
+        " NULL ", wxEmptyString };
 
     bool first = true;
     wxString retstr;
-    definitionM = getName_() + wxT("(") + wxTextBuffer::GetEOL();
+    definitionM = getName_() + "(" + wxTextBuffer::GetEOL();
     paramListM = wxEmptyString;
 
     DatabasePtr db = getDatabase();
@@ -155,9 +155,9 @@ void Function::loadProperties()
             wxString chset(std2wx(charset, converter).Strip());
             if (db->getDatabaseCharset() != chset)
             {
-                datatype += wxT(" ") + SqlTokenizer::getKeyword(kwCHARACTER)
-                    + wxT(" ") + SqlTokenizer::getKeyword(kwSET)
-                    + wxT(" ") + chset;
+                datatype += " " + SqlTokenizer::getKeyword(kwCHARACTER)
+                    + " " + SqlTokenizer::getKeyword(kwSET)
+                    + " " + chset;
             }
         }
         if (type == 261)    // avoid subtype information for BLOB
@@ -166,21 +166,21 @@ void Function::loadProperties()
         int mechIndex = (mechanism < 0 ? -mechanism : mechanism);
         if (mechIndex >= (sizeof(mechanismNames)/sizeof(wxString)))
             mechIndex = (sizeof(mechanismNames)/sizeof(wxString)) - 1;
-        wxString param = wxT("    ") + datatype + wxT(" ")
-            + SqlTokenizer::getKeyword(kwBY) + wxT(" ")
+        wxString param = "    " + datatype + " "
+            + SqlTokenizer::getKeyword(kwBY) + " "
             + mechanismNames[mechIndex];
         if (mechanism < 0)
-            param += wxString(wxT(" ")) + SqlTokenizer::getKeyword(kwFREE_IT);
+            param += wxString(" ") + SqlTokenizer::getKeyword(kwFREE_IT);
         if (returnarg == retpos)    // output
         {
             retstr = param;
             retstrM = datatype + mechanismDDL[mechIndex];
             if (retpos != 0)
             {
-                retstrM = SqlTokenizer::getKeyword(kwPARAMETER) + wxT(" ");
+                retstrM = SqlTokenizer::getKeyword(kwPARAMETER) + " ";
                 retstrM << retpos;
                 if (!paramListM.IsEmpty())
-                    paramListM += wxT(", ");
+                    paramListM += ", ";
                 paramListM += datatype + mechanismDDL[mechIndex];
             }
         }
@@ -189,16 +189,16 @@ void Function::loadProperties()
             if (first)
                 first = false;
             else
-                definitionM += wxString(wxT(",")) + wxTextBuffer::GetEOL();
+                definitionM += wxString(",") + wxTextBuffer::GetEOL();
             definitionM += param;
             if (!paramListM.empty())
-                paramListM += wxT(", ");
+                paramListM += ", ";
             paramListM += datatype + mechanismDDL[mechIndex];
         }
     }
-    definitionM += wxString(wxTextBuffer::GetEOL()) + wxT(")")
+    definitionM += wxString(wxTextBuffer::GetEOL()) + ")"
         + wxTextBuffer::GetEOL() + SqlTokenizer::getKeyword(kwRETURNS)
-        + wxT(":") + wxTextBuffer::GetEOL() + retstr;
+        + ":" + wxTextBuffer::GetEOL() + retstr;
 
     setPropertiesLoaded(true);
 }
@@ -221,9 +221,9 @@ void Functions::acceptVisitor(MetadataItemVisitor* visitor)
 
 void Functions::load(ProgressIndicator* progressIndicator)
 {
-    wxString stmt = wxT("select rdb$function_name from rdb$functions")
-        wxT(" where (rdb$system_flag = 0 or rdb$system_flag is null)")
-        wxT(" order by 1");
+    wxString stmt = "select rdb$function_name from rdb$functions"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
+        " order by 1";
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 
@@ -234,6 +234,6 @@ void Functions::loadChildren()
 
 const wxString Functions::getTypeName() const
 {
-    return wxT("FUNCTION_COLLECTION");
+    return "FUNCTION_COLLECTION";
 }
 

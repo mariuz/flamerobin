@@ -97,18 +97,18 @@ GridCellFormats& GridCellFormats::get()
 
 void GridCellFormats::loadFromConfig()
 {
-    floatingPointPrecisionM = config().get(wxT("NumberPrecision"), 2);
-    if (!config().get(wxT("ReformatNumbers"), false))
+    floatingPointPrecisionM = config().get("NumberPrecision", 2);
+    if (!config().get("ReformatNumbers", false))
         floatingPointPrecisionM = -1;
 
-    dateFormatM = config().get(wxT("DateFormat"), wxString(wxT("D.M.Y")));
-    timeFormatM = config().get(wxT("TimeFormat"), wxString(wxT("H:M:S.T")));
-    timestampFormatM = config().get(wxT("TimestampFormat"),
-        wxString(wxT("D.N.Y, H:M:S.T")));
+    dateFormatM = config().get("DateFormat", wxString("D.M.Y"));
+    timeFormatM = config().get("TimeFormat", wxString("H:M:S.T"));
+    timestampFormatM = config().get("TimestampFormat",
+        wxString("D.N.Y, H:M:S.T"));
 
-    maxBlobKBytesM = config().get(wxT("DataGridFetchBlobAmount"), 1);
-    showBinaryBlobContentM = config().get(wxT("GridShowBinaryBlobs"), false);
-    showBlobContentM = config().get(wxT("DataGridFetchBlobs"), true);
+    maxBlobKBytesM = config().get("DataGridFetchBlobAmount", 1);
+    showBinaryBlobContentM = config().get("GridShowBinaryBlobs", false);
+    showBlobContentM = config().get("DataGridFetchBlobs", true);
 }
 
 template<typename T>
@@ -117,8 +117,8 @@ wxString GridCellFormats::format(T value)
     ensureCacheValid();
 
     if (floatingPointPrecisionM >= 0 && floatingPointPrecisionM <= 18)
-        return wxString::Format(wxT("%.*f"), floatingPointPrecisionM, value);
-    return wxString::Format(wxT("%f"), value);
+        return wxString::Format("%.*f", floatingPointPrecisionM, value);
+    return wxString::Format("%f", value);
 }
 
 wxString GridCellFormats::formatDate(int year, int month, int day)
@@ -132,22 +132,22 @@ wxString GridCellFormats::formatDate(int year, int month, int day)
         switch (wxChar(*c))
         {
             case 'd':
-                result += wxString::Format(wxT("%d"), day);
+                result += wxString::Format("%d", day);
                 break;
             case 'D':
-                result += wxString::Format(wxT("%02d"), day);
+                result += wxString::Format("%02d", day);
                 break;
             case 'm':
-                result += wxString::Format(wxT("%d"), month);
+                result += wxString::Format("%d", month);
                 break;
             case 'M':
-                result += wxString::Format(wxT("%02d"), month);
+                result += wxString::Format("%02d", month);
                 break;
             case 'y':
-                result += wxString::Format(wxT("%02d"), year % 100);
+                result += wxString::Format("%02d", year % 100);
                 break;
             case 'Y':
-                result += wxString::Format(wxT("%04d"), year);
+                result += wxString::Format("%04d", year);
                 break;
             default:
                 result += *c;
@@ -249,25 +249,25 @@ wxString GridCellFormats::formatTime(int hour, int minute, int second,
         switch ((wxChar)*c)
         {
             case 'h':
-                result += wxString::Format(wxT("%d"), hour);
+                result += wxString::Format("%d", hour);
                 break;
             case 'H':
-                result += wxString::Format(wxT("%02d"), hour);
+                result += wxString::Format("%02d", hour);
                 break;
             case 'm':
-                result += wxString::Format(wxT("%d"), minute);
+                result += wxString::Format("%d", minute);
                 break;
             case 'M':
-                result += wxString::Format(wxT("%02d"), minute);
+                result += wxString::Format("%02d", minute);
                 break;
             case 's':
-                result += wxString::Format(wxT("%d"), second);
+                result += wxString::Format("%d", second);
                 break;
             case 'S':
-                result += wxString::Format(wxT("%02d"), second);
+                result += wxString::Format("%02d", second);
                 break;
             case 'T':
-                result += wxString::Format(wxT("%03d"), milliSecond);
+                result += wxString::Format("%03d", milliSecond);
                 break;
             default:
                 result += *c;
@@ -334,43 +334,43 @@ wxString GridCellFormats::formatTimestamp(int year, int month, int day,
         switch ((wxChar)*c)
         {
             case 'd':
-                result += wxString::Format(wxT("%d"), day);
+                result += wxString::Format("%d", day);
                 break;
             case 'D':
-                result += wxString::Format(wxT("%02d"), day);
+                result += wxString::Format("%02d", day);
                 break;
             case 'n':
-                result += wxString::Format(wxT("%d"), month);
+                result += wxString::Format("%d", month);
                 break;
             case 'N':
-                result += wxString::Format(wxT("%02d"), month);
+                result += wxString::Format("%02d", month);
                 break;
             case 'y':
-                result += wxString::Format(wxT("%02d"), year % 100);
+                result += wxString::Format("%02d", year % 100);
                 break;
             case 'Y':
-                result += wxString::Format(wxT("%04d"), year);
+                result += wxString::Format("%04d", year);
                 break;
             case 'h':
-                result += wxString::Format(wxT("%d"), hour);
+                result += wxString::Format("%d", hour);
                 break;
             case 'H':
-                result += wxString::Format(wxT("%02d"), hour);
+                result += wxString::Format("%02d", hour);
                 break;
             case 'm':
-                result += wxString::Format(wxT("%d"), minute);
+                result += wxString::Format("%d", minute);
                 break;
             case 'M':
-                result += wxString::Format(wxT("%02d"), minute);
+                result += wxString::Format("%02d", minute);
                 break;
             case 's':
-                result += wxString::Format(wxT("%d"), second);
+                result += wxString::Format("%d", second);
                 break;
             case 'S':
-                result += wxString::Format(wxT("%02d"), second);
+                result += wxString::Format("%02d", second);
                 break;
             case 'T':
-                result += wxString::Format(wxT("%03d"), milliSecond);
+                result += wxString::Format("%03d", milliSecond);
                 break;
             default:
                 result += *c;
@@ -536,7 +536,7 @@ DummyColumnDef::DummyColumnDef(const wxString& name)
 
 wxString DummyColumnDef::getAsString(DataGridRowBuffer*)
 {
-    return wxT("[...]");
+    return "[...]";
 }
 
 unsigned DummyColumnDef::getBufferSize()
@@ -583,7 +583,7 @@ wxString IntegerColumnDef::getAsString(DataGridRowBuffer* buffer)
     int value;
     if (!buffer->getValue(offsetM, value))
         return wxEmptyString;
-    return wxString::Format(wxT("%d"), value);
+    return wxString::Format("%d", value);
 }
 
 void IntegerColumnDef::setFromString(DataGridRowBuffer* buffer,
@@ -716,11 +716,11 @@ wxString DBKeyColumnDef::getAsString(DataGridRowBuffer* buffer)
     for (int i = 0; i < (int)sizeM / 8; i++)
     {
         if (i > 0)
-            ret += wxT("-");
+            ret += "-";
         int v1, v2;
         buffer->getValue(offsetM+i*8, v1);
         buffer->getValue(offsetM+i*8+4, v2);
-        ret += wxString::Format(wxT("%08x:%08x"), (unsigned)v1, (unsigned)v2);
+        ret += wxString::Format("%08x:%08x", (unsigned)v1, (unsigned)v2);
     }
     return ret;
 }
@@ -802,7 +802,7 @@ wxString DateColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
     IBPP::Date date(value);
     int year, month, day;
     date.GetDate(year, month, day);
-    return wxString::Format(wxT("%d-%d-%d"), year, month, day);
+    return wxString::Format("%d-%d-%d", year, month, day);
 }
 
 void DateColumnDef::setFromString(DataGridRowBuffer* buffer,
@@ -818,13 +818,13 @@ void DateColumnDef::setFromString(DataGridRowBuffer* buffer,
     wxString temp(source);
     temp.Trim(true).Trim(false);
 
-    if (temp.CmpNoCase(wxT("TOMORROW")) == 0)
+    if (temp.CmpNoCase("TOMORROW") == 0)
         idt.Add(1);
-    else if (temp.CmpNoCase(wxT("YESTERDAY")) == 0)
+    else if (temp.CmpNoCase("YESTERDAY") == 0)
         idt.Add(-1);
-    else if (temp.CmpNoCase(wxT("DATE")) != 0
-        && temp.CmpNoCase(wxT("NOW")) != 0
-        && temp.CmpNoCase(wxT("TODAY")) != 0)
+    else if (temp.CmpNoCase("DATE") != 0
+        && temp.CmpNoCase("NOW") != 0
+        && temp.CmpNoCase("TODAY") != 0)
     {
         wxString::iterator it = temp.begin();
         if (!GridCellFormats::get().parseDate(it, temp.end(), true, y, m, d))
@@ -895,7 +895,7 @@ wxString TimeColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
     IBPP::Time time(value);
     int hour, minute, second, tenththousands;
     time.GetTime(hour, minute, second, tenththousands);
-    return wxString::Format(wxT("%d:%d:%d.%d"), hour, minute, second,
+    return wxString::Format("%d:%d:%d.%d", hour, minute, second,
         tenththousands / 10);
 }
 
@@ -909,7 +909,7 @@ void TimeColumnDef::setFromString(DataGridRowBuffer* buffer,
     wxString temp(source);
     temp.Trim(true).Trim(false);
 
-    if (temp.CmpNoCase(wxT("TIME")) != 0 && temp.CmpNoCase(wxT("NOW")) != 0)
+    if (temp.CmpNoCase("TIME") != 0 && temp.CmpNoCase("NOW") != 0)
     {
         wxString::iterator it = temp.begin();
         int hr = 0, mn = 0, sc = 0, ms = 0;
@@ -993,7 +993,7 @@ wxString TimestampColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
     date.GetDate(year, month, day);
     time.GetTime(hour, minute, second, tenththousands);
 
-    return wxString::Format(wxT("%d-%d-%d, %d:%d:%d.%d"), year, month, day,
+    return wxString::Format("%d-%d-%d, %d:%d:%d.%d", year, month, day,
         hour, minute, second, tenththousands / 10);
 }
 
@@ -1007,14 +1007,14 @@ void TimestampColumnDef::setFromString(DataGridRowBuffer* buffer,
     wxString temp(source);
     temp.Trim(true).Trim(false);
 
-    if (temp.CmpNoCase(wxT("TOMORROW")) == 0)
+    if (temp.CmpNoCase("TOMORROW") == 0)
         its.Add(1);
-    else if (temp.CmpNoCase(wxT("YESTERDAY")) == 0)
+    else if (temp.CmpNoCase("YESTERDAY") == 0)
         its.Add(-1);
-    else if (temp.CmpNoCase(wxT("NOW")) == 0)
+    else if (temp.CmpNoCase("NOW") == 0)
         its.Now(); // with time
-    else if (temp.CmpNoCase(wxT("DATE")) != 0
-        && temp.CmpNoCase(wxT("TODAY")) != 0)
+    else if (temp.CmpNoCase("DATE") != 0
+        && temp.CmpNoCase("TODAY") != 0)
     {
         // get date
         int y = its.Year();  // defaults
@@ -1146,7 +1146,7 @@ wxString DoubleColumnDef::getAsString(DataGridRowBuffer* buffer)
         return wxEmptyString;
 
     if (scaleM)
-        return wxString::Format(wxT("%.*f"), scaleM, value);
+        return wxString::Format("%.*f", scaleM, value);
     return GridCellFormats::get().format<double>(value);
 }
 
@@ -1229,7 +1229,7 @@ wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
 
     IBPP::Blob *b0 = buffer->getBlob(indexM);
     if (!b0)
-        return wxT("");
+        return "";
     IBPP::Blob b = *b0;
     try
     {
@@ -1263,7 +1263,7 @@ wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
                     last = size - i;
                 for (int j=0; j<last; j++)
                 {
-                    result += wx2std(wxString::Format(wxT("%02X"),
+                    result += wx2std(wxString::Format("%02X",
                         (unsigned char)(buffer[i+j])));
                 }
                 result += " ";
@@ -1346,7 +1346,7 @@ wxString StringColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
     wxASSERT(buffer);
     wxString s(buffer->getString(indexM));
     // SF bug #1889800: quote chars have to be escaped
-    s.Replace(wxT("'"), wxT("''"));
+    s.Replace("'", "''");
     return s;
 }
 
@@ -1379,7 +1379,7 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     {
         wxString val;
         for (std::string::size_type p = 0; p < value.length(); p++)
-            val += wxString::Format(wxT("%02x"), boost::uint8_t(value[p]));
+            val += wxString::Format("%02x", boost::uint8_t(value[p]));
         buffer->setString(indexM, val);
     }
     else
@@ -1544,12 +1544,12 @@ bool DataGridRows::removeRows(size_t from, size_t count, wxString& stm)
     {
         if (pos > 0)
             stm += wxTextBuffer::GetEOL();
-        wxString s = wxT("DELETE FROM ")
-            + Identifier((*deleteFromM).first).getQuoted() + wxT(" WHERE ");
+        wxString s = "DELETE FROM "
+            + Identifier((*deleteFromM).first).getQuoted() + " WHERE ";
         IBPP::Statement st = addWhere((*deleteFromM).second, s,
             (*deleteFromM).first, buffersM[from+pos]);
         st->Execute();
-        stm += s + wxT(";");
+        stm += s + ";";
     }
 
     std::vector<DataGridRowBuffer*>::iterator i2, it = buffersM.begin();
@@ -1670,7 +1670,7 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
         if (!locator)   // neither PK nor UNQ found, look for RDB$DB_KEY
         {
             UniqueConstraint uc;
-            uc.getColumns().push_back(wxT("DB_KEY"));
+            uc.getColumns().push_back("DB_KEY");
             uc.setParent(t);
             locator = &uc;
             checkColumnsPresent(databaseM, statementM, &locator);
@@ -1697,7 +1697,7 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
             nullable = c->isNullable(CheckDomainNullability);
     }
 
-    /* wxMessageBox(wxString::Format(wxT("TABLE: %s (RO=%d), COLUMN: %s (RO=%d, NULL=%d)"),
+    /* wxMessageBox(wxString::Format("TABLE: %s (RO=%d), COLUMN: %s (RO=%d, NULL=%d)"),
         tabName.c_str(),
         locator ? 0 : 1,
         std2wx(statementM->ColumnName(col)).c_str(),
@@ -1906,9 +1906,9 @@ IBPP::Statement DataGridRows::addWhere(UniqueConstraint* uq, wxString& stm,
     for (ColumnConstraint::const_iterator ci = uq->begin(); ci !=
         uq->end(); ++ci)
     {
-        if ((*ci) == wxT("DB_KEY"))
+        if ((*ci) == "DB_KEY")
         {
-            stm += wxT(" RDB$DB_KEY = ?");
+            stm += " RDB$DB_KEY = ?";
             dbkey = true;
             break;
         }
@@ -1923,10 +1923,10 @@ IBPP::Statement DataGridRows::addWhere(UniqueConstraint* uq, wxString& stm,
                 if (buffer->isFieldNA(c2-1))
                     throw FRError(_("N/A value in key column."));
                 if (ci != uq->begin())
-                    stm += wxT(" AND ");
-                stm += Identifier(cn).getQuoted() + wxT(" = '");
+                    stm += " AND ";
+                stm += Identifier(cn).getQuoted() + " = '";
                 stm += columnDefsM[c2-1]->getAsFirebirdString(buffer);
-                stm += wxT("'");
+                stm += "'";
                 break;
             }
         }
@@ -1943,7 +1943,7 @@ IBPP::Statement DataGridRows::addWhere(UniqueConstraint* uq, wxString& stm,
                 databaseM->getCharsetConverter()));
             wxString tn(std2wxIdentifier(statementM->ColumnTable(c2),
                 databaseM->getCharsetConverter()));
-            if (cn == wxT("DB_KEY") && tn == table)
+            if (cn == "DB_KEY" && tn == table)
             {
                 DBKeyColumnDef *dbk =
                     dynamic_cast<DBKeyColumnDef *>(columnDefsM[c2-1]);
@@ -1990,9 +1990,9 @@ DataGridRowsBlob DataGridRows::setBlobPrepare(unsigned row, unsigned col)
     wxString cn(std2wxIdentifier(statementM->ColumnName(col + 1),
         databaseM->getCharsetConverter()));
 
-    wxString stm = wxT("UPDATE ") + Identifier(tn).getQuoted()
-        + wxT(" SET ") + Identifier(cn).getQuoted()
-        + wxT(" = ? WHERE ");
+    wxString stm = "UPDATE " + Identifier(tn).getQuoted()
+        + " SET " + Identifier(cn).getQuoted()
+        + " = ? WHERE ";
     std::map<wxString, UniqueConstraint *>::iterator it =
         statementTablesM.find(tn);
     if (it == statementTablesM.end() || (*it).second == 0)
@@ -2026,7 +2026,7 @@ void DataGridRows::setBlob(DataGridRowsBlob &b)
 void DataGridRows::exportBlobFile(const wxString& filename, unsigned row,
     unsigned col, ProgressIndicator *pi)
 {
-    wxFFile fl(filename, wxT("wb+"));
+    wxFFile fl(filename, "wb+");
     if (!fl.IsOpened())
         throw FRError(_("Cannot open destination file."));
     IBPP::Blob *b0 = getBlob(row,col,true);
@@ -2054,7 +2054,7 @@ void DataGridRows::exportBlobFile(const wxString& filename, unsigned row,
 void DataGridRows::importBlobFile(const wxString& filename, unsigned row,
     unsigned col, ProgressIndicator *pi)
 {
-    wxFFile fl(filename, wxT("rb"));
+    wxFFile fl(filename, "rb");
     if (!fl.IsOpened())
         throw FRError(_("Cannot open BLOB file."));
     if (pi)
@@ -2090,7 +2090,7 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
     // user wants to store null
     bool newIsNull = (
         (!dynamic_cast<StringColumnDef*>(columnDefsM[col]) && value.IsEmpty())
-        || (setNull && value == wxT("[null]")) );
+        || (setNull && value == "[null]") );
     if (newIsNull && !columnDefsM[col]->isNullable())
         throw FRError(_("This column does not accept NULLs."));
 
@@ -2121,15 +2121,15 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
             databaseM->getCharsetConverter()));
         wxString cn(std2wxIdentifier(statementM->ColumnName(col + 1),
             databaseM->getCharsetConverter()));
-        wxString stm = wxT("UPDATE ") + Identifier(tn).getQuoted()
-            + wxT(" SET ") + Identifier(cn).getQuoted();
+        wxString stm = "UPDATE " + Identifier(tn).getQuoted()
+            + " SET " + Identifier(cn).getQuoted();
         if (newIsNull)
-            stm += wxT(" = NULL WHERE ");
+            stm += " = NULL WHERE ";
         else
         {
-            stm += wxT(" = '") +
+            stm += " = '" +
                 columnDefsM[col]->getAsFirebirdString(buffersM[row])
-                + wxT("' WHERE ");
+                + "' WHERE ";
         }
 
         std::map<wxString, UniqueConstraint *>::iterator it =

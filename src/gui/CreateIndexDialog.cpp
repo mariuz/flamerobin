@@ -116,7 +116,7 @@ void CreateIndexDialog::setControlsProperties()
     std::vector<Index>* indices = tableM->getIndices();
     while (indexName.IsEmpty())
     {
-        indexName = wxString::Format(wxT("IDX_%s%d"),
+        indexName = wxString::Format("IDX_%s%d",
             tableM->getName_().c_str(), nr++);
         std::vector<Index>::iterator itIdx;
         for (itIdx = indices->begin(); itIdx != indices->end(); ++itIdx)
@@ -142,7 +142,7 @@ void CreateIndexDialog::setControlsProperties()
 
 const wxString CreateIndexDialog::getName() const
 {
-    return wxT("CreateIndexDialog");
+    return "CreateIndexDialog";
 }
 
 wxString CreateIndexDialog::getSelectedColumnsList()
@@ -154,7 +154,7 @@ wxString CreateIndexDialog::getSelectedColumnsList()
     for (size_t i = 0; i < selection.size(); i++)
     {
         if (!columnsList.IsEmpty())
-            columnsList += wxT(", ");
+            columnsList += ", ";
         Identifier id(listbox_columns->GetString(selection[i]));
         columnsList += id.getQuoted();
     }
@@ -163,14 +163,14 @@ wxString CreateIndexDialog::getSelectedColumnsList()
 
 const wxString CreateIndexDialog::getStatementsToExecute()
 {
-    wxString sql(wxT("CREATE "));
+    wxString sql("CREATE ");
     if (checkbox_unique->IsChecked())
-        sql += wxT("UNIQUE ");
+        sql += "UNIQUE ";
     if (radiobox_order->GetSelection() == 1)
-        sql += wxT("DESCENDING ");
-    sql += wxT("INDEX ") + Identifier::userString(textctrl_name->GetValue())
-        + wxT(" ON ") + tableM->getQuotedName() + wxT("\n")
-        + wxT("  (") + getSelectedColumnsList() + wxT(");\n");
+        sql += "DESCENDING ";
+    sql += "INDEX " + Identifier::userString(textctrl_name->GetValue())
+        + " ON " + tableM->getQuotedName() + "\n"
+        + "  (" + getSelectedColumnsList() + ");\n";
     return sql;
 }
 
@@ -212,7 +212,7 @@ const TableIndicesHandler TableIndicesHandler::handlerInstance;
 
 bool TableIndicesHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("add_index") && uri.action != wxT("recompute_all"))
+    if (uri.action != "add_index" && uri.action != "recompute_all")
         return false;
 
     Table* t = extractMetadataItemFromURI<Table>(uri);
@@ -222,13 +222,13 @@ bool TableIndicesHandler::handleURI(URI& uri)
 
     wxString sql;
     wxString frameCaption;
-    if (uri.action == wxT("recompute_all"))
+    if (uri.action == "recompute_all")
     {
         std::vector<Index>* indices = t->getIndices();
         std::vector<Index>::iterator itIdx;
         for (itIdx = indices->begin(); itIdx != indices->end(); ++itIdx)
         {
-            sql += wxString::Format(wxT("SET STATISTICS INDEX %s;\n"),
+            sql += wxString::Format("SET STATISTICS INDEX %s;\n",
                 (*itIdx).getQuotedName().c_str());
         }
         frameCaption = _("Recompute All Indexes");

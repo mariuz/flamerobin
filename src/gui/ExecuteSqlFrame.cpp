@@ -146,7 +146,7 @@ bool SqlEditorDropTarget::OnDropFiles(wxCoord, wxCoord,
 //       - dump statement back to editor
 bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
 {
-    if (text.Mid(0, 7) != wxT("OBJECT:"))
+    if (text.Mid(0, 7) != "OBJECT:")
         return false;
 
     long address;
@@ -187,7 +187,7 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
     // add the column(s)
     if (c)
     {
-        sstm.addColumn(t->getQuotedName() + wxT(".") + c->getQuotedName());
+        sstm.addColumn(t->getQuotedName() + "." + c->getQuotedName());
     }
     else
     {
@@ -195,7 +195,7 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
         for (ColumnPtrs::const_iterator it = t->begin(); it != t->end(); ++it)
         {
             sstm.addColumn(
-                t->getQuotedName() + wxT(".") + (*it)->getQuotedName());
+                t->getQuotedName() + "." + (*it)->getQuotedName());
         }
     }
 
@@ -214,7 +214,7 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
             for (std::vector<ForeignKey>::iterator it = relatedTables.begin();
                 it != relatedTables.end(); ++it)
             {
-                wxString addme = (*it).getReferencedTable() + wxT(":  ")
+                wxString addme = (*it).getReferencedTable() + ":  "
                     + (*it).getJoin(false); // false = unquoted
                 if (as.Index(addme) == wxNOT_FOUND)
                     as.Add(addme);
@@ -235,12 +235,12 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
             // FIXME: dummy test value
             // can_be_null = (check if any of the FK fields can be null)
             bool can_be_null = true;
-            wxString joinType = (can_be_null ? wxT("LEFT JOIN"):wxT("JOIN"));
+            wxString joinType = (can_be_null ? "LEFT JOIN":"JOIN");
             sstm.addTable(t->getQuotedName(), joinType, join_list);
         }
         else
         {
-            sstm.addTable(t->getQuotedName(), wxT("CARTESIAN"), wxT(""));
+            sstm.addTable(t->getQuotedName(), "CARTESIAN", "");
         }
     }
 
@@ -253,7 +253,7 @@ SqlEditor::SqlEditor(wxWindow *parent, wxWindowID id)
     : SearchableEditor(parent, id)
 {
     wxString s;
-    if (config().getValue(wxT("SqlEditorFont"), s) && !s.empty())
+    if (config().getValue("SqlEditorFont", s) && !s.empty())
     {
         wxFont f;
         f.SetNativeFontInfo(s);
@@ -267,7 +267,7 @@ SqlEditor::SqlEditor(wxWindow *parent, wxWindowID id)
     }
 
     int charset;
-    if (config().getValue(wxT("SqlEditorCharset"), charset))
+    if (config().getValue("SqlEditorCharset", charset))
         StyleSetCharacterSet(wxSTC_STYLE_DEFAULT, charset);
 
     setup();
@@ -292,7 +292,7 @@ void SqlEditor::markText(int start, int end)
 void SqlEditor::setChars(bool firebirdIdentifierOnly)
 {
     SetKeyWords(0, SqlTokenizer::getKeywordsString(SqlTokenizer::kwLowerCase));
-    wxString chars(wxT("_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\"$"));
+    wxString chars("_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\"$");
 
     if (!firebirdIdentifierOnly)
     {
@@ -331,7 +331,7 @@ void SqlEditor::setup()
     SetLexer(wxSTC_LEX_SQL);
     setChars(false);
 
-    int tabSize = config().get(wxT("sqlEditorTabSize"), 4);
+    int tabSize = config().get("sqlEditorTabSize", 4);
     SetTabWidth(tabSize);
     SetIndent(tabSize);
     SetUseTabs(false);
@@ -342,13 +342,13 @@ void SqlEditor::setup()
     SetMarginWidth(0, 40);            // turn on the linenumbers margin, set width to 40pixels
     SetMarginWidth(1, 0);             // turn off the folding margin
     SetMarginType(0, 1);              // set margin type to linenumbers
-    if (config().get(wxT("sqlEditorShowEdge"), false))
+    if (config().get("sqlEditorShowEdge", false))
     {
         SetEdgeMode(wxSTC_EDGE_LINE);
-        SetEdgeColumn(config().get(wxT("sqlEditorEdgeColumn"), 50));
+        SetEdgeColumn(config().get("sqlEditorEdgeColumn", 50));
     }
 
-    if (!config().get(wxT("sqlEditorSmartHomeKey"), true))
+    if (!config().get("sqlEditorSmartHomeKey", true))
         CmdKeyAssign(wxSTC_KEY_HOME, wxSTC_SCMOD_NORM, wxSTC_CMD_HOMEDISPLAY);
 
     centerCaret(false);
@@ -382,7 +382,7 @@ void SqlEditor::OnContextMenu(wxContextMenuEvent& event)
     if (slen && slen < 50)     // something (small) is selected
     {
         wxString sel = GetSelectedText().Strip();
-        size_t p = sel.find_first_of(wxT("\n\r\t"));
+        size_t p = sel.find_first_of("\n\r\t");
         if (p != wxString::npos)
             sel.Remove(p);
         m.Append(Cmds::Find_Selected_Object,
@@ -405,7 +405,7 @@ void SqlEditor::setFont()
     // step 1 of 2: set font
     wxFont f, f2;
     wxString s;        // since we can't get the font from control we ask config() for it
-    if (config().getValue(wxT("SqlEditorFont"), s) && !s.empty())
+    if (config().getValue("SqlEditorFont", s) && !s.empty())
     {
         f.SetNativeFontInfo(s);
         f2 = ::wxGetFontFromUser(this, f);
@@ -422,26 +422,26 @@ void SqlEditor::setFont()
 
     // step 2 of 2: set charset
     std::map<wxString, int> sets;        // create human-readable names from wxSTC charsets
-    sets[wxT("CHARSET_ANSI")] = 0;
-    sets[wxT("CHARSET_EASTEUROPE")] = 238;
-    sets[wxT("CHARSET_GB2312")] = 134;
-    sets[wxT("CHARSET_HANGUL")] = 129;
-    sets[wxT("CHARSET_HEBREW")] = 177;
-    sets[wxT("CHARSET_SHIFTJIS")] = 128;
+    sets["CHARSET_ANSI"] = 0;
+    sets["CHARSET_EASTEUROPE"] = 238;
+    sets["CHARSET_GB2312"] = 134;
+    sets["CHARSET_HANGUL"] = 129;
+    sets["CHARSET_HEBREW"] = 177;
+    sets["CHARSET_SHIFTJIS"] = 128;
     #ifdef __WXMSW__
-    sets[wxT("CHARSET_DEFAULT")] = 1;        // according to scintilla docs these only work on Windows
-    sets[wxT("CHARSET_BALTIC")] = 186;        // so we won't offer them
-    sets[wxT("CHARSET_CHINESEBIG5")] = 136;
-    sets[wxT("CHARSET_GREEK")] = 161;
-    sets[wxT("CHARSET_MAC")] = 77;
-    sets[wxT("CHARSET_OEM")] = 255;
-    sets[wxT("CHARSET_RUSSIAN")] = 204;
-    sets[wxT("CHARSET_SYMBOL")] = 2;
-    sets[wxT("CHARSET_TURKISH")] = 162;
-    sets[wxT("CHARSET_JOHAB")] = 130;
-    sets[wxT("CHARSET_ARABIC")] = 178;
-    sets[wxT("CHARSET_VIETNAMESE")] = 163;
-    sets[wxT("CHARSET_THAI")] = 222;
+    sets["CHARSET_DEFAULT"] = 1;        // according to scintilla docs these only work on Windows
+    sets["CHARSET_BALTIC"] = 186;        // so we won't offer them
+    sets["CHARSET_CHINESEBIG5"] = 136;
+    sets["CHARSET_GREEK"] = 161;
+    sets["CHARSET_MAC"] = 77;
+    sets["CHARSET_OEM"] = 255;
+    sets["CHARSET_RUSSIAN"] = 204;
+    sets["CHARSET_SYMBOL"] = 2;
+    sets["CHARSET_TURKISH"] = 162;
+    sets["CHARSET_JOHAB"] = 130;
+    sets["CHARSET_ARABIC"] = 178;
+    sets["CHARSET_VIETNAMESE"] = 163;
+    sets["CHARSET_THAI"] = 222;
     #endif
     wxArrayString slist;  // copy to wxArrayString
     slist.Alloc(sets.size());
@@ -461,13 +461,13 @@ void SqlEditor::setFont()
     {
         wxString fontdesc = f2.GetNativeFontInfoDesc();
         if (!fontdesc.IsEmpty())
-            config().setValue(wxT("SqlEditorFont"), fontdesc);
-        config().setValue(wxT("SqlEditorCharset"), (*it).second);
+            config().setValue("SqlEditorFont", fontdesc);
+        config().setValue("SqlEditorCharset", (*it).second);
     }
     setup();    // make control accept new settings
     showInformationDialog(wxGetTopLevelParent(this), _("The SQL editor font has been changed."),
         _("This setting affects only the SQL editor font. The font used in the result set data grid has to be changed separately."),
-        AdvancedMessageDialogButtonsOk(), config(), wxT("DIALOG_WarnFont"), _("Do not show this information again"));
+        AdvancedMessageDialogButtonsOk(), config(), "DIALOG_WarnFont", _("Do not show this information again"));
 }
 
 class ScrollAtEnd
@@ -788,9 +788,9 @@ void ExecuteSqlFrame::set_properties()
     statusbar_1->SetStatusWidths(4, statusbar_widths);
 
     statusbar_1->SetStatusText(databaseM->getConnectionInfoString(), 0);
-    statusbar_1->SetStatusText(wxT("Rows fetched"), 1);
-    statusbar_1->SetStatusText(wxT("Cursor position"), 2);
-    statusbar_1->SetStatusText(wxT("Transaction status"), 3);
+    statusbar_1->SetStatusText("Rows fetched", 1);
+    statusbar_1->SetStatusText("Cursor position", 2);
+    statusbar_1->SetStatusText("Transaction status", 3);
 
     grid_data->SetTable(new DataGridTable(statementM, databaseM), true);
     splitter_window_1->Initialize(styled_text_ctrl_sql);
@@ -799,7 +799,7 @@ void ExecuteSqlFrame::set_properties()
     SetIcon(wxArtProvider::GetIcon(ART_ExecuteSqlFrame, wxART_FRAME_ICON));
 
     closeWhenTransactionDoneM = false;
-    autoCommitM = config().get(wxT("autoCommitDDL"), false);
+    autoCommitM = config().get("autoCommitDDL", false);
 }
 
 void ExecuteSqlFrame::do_layout()
@@ -843,7 +843,7 @@ bool ExecuteSqlFrame::doCanClose()
         int res = showQuestionDialog(this, _("Do you want to commit the active transaction?"),
             _("If you don't commit the transaction then it will be automatically rolled back, and all changes made by statements executed in this transaction will be lost."),
             AdvancedMessageDialogButtonsYesNoCancel(_("&Commit Transaction"), _("&Rollback Transaction")),
-            config(), wxT("DIALOG_ActiveTransaction"), _("Don't ask again, &always commit/rollback"));
+            config(), "DIALOG_ActiveTransaction", _("Don't ask again, &always commit/rollback"));
         if (res != wxYES && res != wxNO)
             return false;
         if (res == wxYES && !commitTransaction())
@@ -1051,7 +1051,7 @@ bool HasWord(wxString word, wxString& wordlist)
 {
     word.MakeUpper();
 
-    wxStringTokenizer tkz(wordlist, wxT(" "));
+    wxStringTokenizer tkz(wordlist, " ");
     while (tkz.HasMoreTokens())
     {
         if (tkz.GetNextToken().Upper().StartsWith(word))
@@ -1070,7 +1070,7 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& event)
     int c = event.GetKey();
     if (c == '\n')
     {
-        if (config().get(wxT("sqlEditorAutoIndent"), true))
+        if (config().get("sqlEditorAutoIndent", true))
         {
             int lineNum = styled_text_ctrl_sql->LineFromPosition(pos - 1);
             int linestart = styled_text_ctrl_sql->PositionFromLine(lineNum);
@@ -1084,7 +1084,7 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& event)
     }
     else if (c == '(')
     {
-        if (config().get(wxT("SQLEditorCalltips"), true))
+        if (config().get("SQLEditorCalltips", true))
         {
             int start = styled_text_ctrl_sql->WordStartPosition(pos - 2, true);
             if (start != -1 && start != pos - 2)
@@ -1107,10 +1107,10 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& event)
     }
     else
     {
-        if (config().get(wxT("AutocompleteEnabled"), true))
+        if (config().get("AutocompleteEnabled", true))
         {
             #ifndef __WXGTK20__
-            bool allow = config().get(wxT("autoCompleteQuoted"), true);
+            bool allow = config().get("autoCompleteQuoted"), true);
             if (!allow)
             {
                 // needed since event that updates the style happens later
@@ -1127,7 +1127,7 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& event)
             {
                 if (styled_text_ctrl_sql->CallTipActive())
                 {
-                    if (!config().get(wxT("AutoCompleteDisableWhenCalltipShown"), true))
+                    if (!config().get("AutoCompleteDisableWhenCalltipShown", true))
                         autoComplete(false);
                 }
                 else
@@ -1187,7 +1187,7 @@ void ExecuteSqlFrame::autoComplete(bool force)
     int autoCompleteChars = 1;
     if (!force)
     {
-        autoCompleteChars = config().get(wxT("AutocompleteChars"), 3);
+        autoCompleteChars = config().get("AutocompleteChars", 3);
         if (autoCompleteChars <= 0)
             return;
     }
@@ -1212,7 +1212,7 @@ void ExecuteSqlFrame::autoComplete(bool force)
 void ExecuteSqlFrame::OnMenuFindSelectedObject(wxCommandEvent& WXUNUSED(event))
 {
     wxString sel = styled_text_ctrl_sql->GetSelectedText();
-    int p = sel.Find(wxT(" "));
+    int p = sel.Find(" ");
     if (p != -1)
         sel.Remove(p);
     showProperties(sel);
@@ -1234,7 +1234,7 @@ void ExecuteSqlFrame::OnKeyDown(wxKeyEvent& event)
         {
             enum { acSpace=0, acTab };
             int acc = acSpace;
-            config().getValue(wxT("AutoCompleteKey"), acc);
+            config().getValue("AutoCompleteKey", acc);
             if (acc == acSpace && event.ControlDown() && key == WXK_SPACE)
             {
                 autoComplete(true);
@@ -1258,7 +1258,7 @@ void ExecuteSqlFrame::OnKeyDown(wxKeyEvent& event)
         }
         else if (key == WXK_RETURN)
         {
-            if (!config().get(wxT("AutoCompleteWithEnter"), true))
+            if (!config().get("AutoCompleteWithEnter", true))
                 styled_text_ctrl_sql->AutoCompCancel();
         }
     }
@@ -1281,7 +1281,7 @@ void ExecuteSqlFrame::OnIdle(wxIdleEvent& event)
         int p = styled_text_ctrl_sql->GetCurrentPos();
         int row = styled_text_ctrl_sql->GetCurrentLine();
         int col = p - styled_text_ctrl_sql->PositionFromLine(row);
-        statusbar_1->SetStatusText(wxString::Format(wxT("%d : %d"),
+        statusbar_1->SetStatusText(wxString::Format("%d : %d",
             row + 1, col + 1), 2);
     }
     if (updateFrameTitleM)
@@ -1462,7 +1462,7 @@ void ExecuteSqlFrame::OnMenuSelectView(wxCommandEvent& event)
     else if (event.GetId() == Cmds::View_Data)
         setViewMode(vmGrid);
     else
-        wxCHECK_RET(false, wxT("event id not handled"));
+        wxCHECK_RET(false, "event id not handled");
 }
 
 void ExecuteSqlFrame::OnMenuUpdateSelectView(wxUpdateUIEvent& event)
@@ -1572,8 +1572,8 @@ void ExecuteSqlFrame::OnMenuExecuteFromCursor(wxCommandEvent& WXUNUSED(event))
 void ExecuteSqlFrame::OnMenuExecuteSelection(wxCommandEvent& WXUNUSED(event))
 {
     clearLogBeforeExecution();
-    if (config().get(wxT("TreatAsSingleStatement"), false))
-        execute(styled_text_ctrl_sql->GetSelectedText(), wxT(";"));
+    if (config().get("TreatAsSingleStatement", false))
+        execute(styled_text_ctrl_sql->GetSelectedText(), ";");
     else
         parseStatements(styled_text_ctrl_sql->GetSelectedText(),
             false,
@@ -1645,8 +1645,8 @@ void ExecuteSqlFrame::OnMenuGridExportBlob(wxCommandEvent& WXUNUSED(event))
         return;
     if (!dgt->isBlobColumn(grid_data->GetGridCursorCol()))
         throw FRError(_("Not a BLOB column"));
-    wxString filename = ::wxFileSelector(_("Select a file"), wxT(""),
-        wxT(""), wxT(""), wxT("*"),
+    wxString filename = ::wxFileSelector(_("Select a file"), "",
+        "", "", "*",
         wxFD_SAVE | wxFD_OVERWRITE_PROMPT, this);
     if (filename.IsEmpty())
         return;
@@ -1664,8 +1664,8 @@ void ExecuteSqlFrame::OnMenuGridImportBlob(wxCommandEvent& WXUNUSED(event))
         return;
     if (!dgt->isBlobColumn(grid_data->GetGridCursorCol()))
         throw FRError(_("Not a BLOB column"));
-    wxString filename = ::wxFileSelector(_("Select a file"), wxT(""),
-        wxT(""), wxT(""), wxT("*"),
+    wxString filename = ::wxFileSelector(_("Select a file"), "",
+        "", "", "*",
         wxFD_OPEN | wxFD_FILE_MUST_EXIST, this);
    if (filename.IsEmpty())
         return;
@@ -1818,7 +1818,7 @@ void ExecuteSqlFrame::OnMenuGridSetFieldToNULL(wxCommandEvent& WXUNUSED(event))
     for (col = colsReadonly.begin(); col != colsReadonly.end(); col++)
     {
         if (colNames != wxEmptyString)
-            colNames += wxT(", ");
+            colNames += ", ";
         colNames += dgt->GetColLabelValue(*col);
     }
     // -> if colNames != "" the user has readonly columns selected
@@ -1881,21 +1881,21 @@ void ExecuteSqlFrame::OnMenuGridSaveAsCsv(wxCommandEvent& WXUNUSED(event))
     CodeTemplateProcessor ctp(0, this);
     wxString code;
     ctp.processTemplateFile(code,
-        config().getSysTemplateFileName(wxT("save_as_csv")), 0);
+        config().getSysTemplateFileName("save_as_csv"), 0);
 
     wxString fileName;
-    if (!ctp.getConfig().getValue(wxT("CSVExportFileName"), fileName))
+    if (!ctp.getConfig().getValue("CSVExportFileName", fileName))
         return;
 
     int i;
-    if (!ctp.getConfig().getValue(wxT("CSVFieldDelimiter"), i))
+    if (!ctp.getConfig().getValue("CSVFieldDelimiter", i))
         return;
     static const wxChar fieldDelimiters[] = { '\t', ',', ';' };
     if (i < 0 || i >= sizeof(fieldDelimiters) / sizeof(wxChar))
         return;
     wxChar fieldDelimiter(fieldDelimiters[i]);
 
-    if (!ctp.getConfig().getValue(wxT("CSVTextDelimiter"), i))
+    if (!ctp.getConfig().getValue("CSVTextDelimiter", i))
         return;
     static const wxChar textDelimiters[] = { '\0', '"', '\'' };
     if (i < 0 || i >= sizeof(textDelimiters) / sizeof(wxChar))
@@ -2019,7 +2019,7 @@ bool ExecuteSqlFrame::setSql(wxString sql)
 
 void ExecuteSqlFrame::clearLogBeforeExecution()
 {
-    if (config().get(wxT("SQLEditorExecuteClears"), false))
+    if (config().get("SQLEditorExecuteClears", false))
         styled_text_ctrl_stats->ClearAll();
 }
 
@@ -2028,11 +2028,11 @@ void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
     bool hasSelection = styled_text_ctrl_sql->GetSelectionStart()
         != styled_text_ctrl_sql->GetSelectionEnd();
     bool ok;
-    if (hasSelection && config().get(wxT("OnlyExecuteSelected"), false))
+    if (hasSelection && config().get("OnlyExecuteSelected", false))
     {
-        if (config().get(wxT("TreatAsSingleStatement"), false))
+        if (config().get("TreatAsSingleStatement", false))
         {
-            ok = execute(styled_text_ctrl_sql->GetSelectedText(), wxT(";"),
+            ok = execute(styled_text_ctrl_sql->GetSelectedText(), ";",
                 prepareOnly);
         }
         else
@@ -2047,7 +2047,7 @@ void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
             prepareOnly);
     }
 
-    if (ok || config().get(wxT("historyStoreUnsuccessful"), true))
+    if (ok || config().get("historyStoreUnsuccessful", true))
     {
         // add to history
         StatementHistory& sh = StatementHistory::get(databaseM);
@@ -2064,8 +2064,8 @@ void ExecuteSqlFrame::executeAllStatements(bool closeWhenDone)
 {
     clearLogBeforeExecution();
     bool ok = parseStatements(styled_text_ctrl_sql->GetText(), closeWhenDone);
-    if (config().get(wxT("historyStoreGenerated"), true) &&
-        (ok || config().get(wxT("historyStoreUnsuccessful"), true)))
+    if (config().get("historyStoreGenerated", true) &&
+        (ok || config().get("historyStoreUnsuccessful", true)))
     {
         // add buffer to history
         StatementHistory& sh = StatementHistory::get(databaseM);
@@ -2110,9 +2110,9 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
         }
         else if (ss.isSetAutoDDLStatement(autoDDLSetting))
         {
-            if (autoDDLSetting.CmpNoCase(wxT("ON")) == 0)
+            if (autoDDLSetting.CmpNoCase("ON") == 0)
                 autoCommitM = true;
-            else if (autoDDLSetting.CmpNoCase(wxT("OFF")) == 0)
+            else if (autoDDLSetting.CmpNoCase("OFF") == 0)
                 autoCommitM = false;
             else if (autoDDLSetting.empty())
                 autoCommitM = !autoCommitM;
@@ -2127,15 +2127,11 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
             && !execute(ss.getSql(), ms.getTerminator(), prepareOnly))
         {
             int stmtStart = selectionOffset + ms.getStart();
-#if wxUSE_UNICODE
             // STC uses UTF-8 internally in Unicode build
             // account for possible differences in string length
             // if system charset != UTF-8
             std::string stmt(wx2std(ss.getSql(), &wxConvUTF8));
             int stmtEnd = stmtStart + stmt.size();
-#else
-            int stmtEnd = selectionOffset + ms.getEnd();
-#endif
             styled_text_ctrl_sql->markText(stmtStart, stmtEnd);
             styled_text_ctrl_sql->SetFocus();
             return false;
@@ -2162,26 +2158,26 @@ wxString IBPPtype2string(Database *db, IBPP::SDT t, int subtype, int size,
     int scale)
 {
     if (scale > 0)
-        return wxString::Format(wxT("NUMERIC(%d,%d)"), size==4 ? 9:18, scale);
+        return wxString::Format("NUMERIC(%d,%d)", size==4 ? 9:18, scale);
     if (t == IBPP::sdString)
     {
         int bpc = db->getCharsetById(subtype).getBytesPerChar();
-        return wxString::Format(wxT("STRING(%d)"), bpc ? size/bpc : size);
+        return wxString::Format("STRING(%d)", bpc ? size/bpc : size);
     }
     switch (t)
     {
-        case IBPP::sdArray:     return wxT("ARRAY");
+        case IBPP::sdArray:     return "ARRAY";
         case IBPP::sdBlob:      return wxString::Format(
-                                    wxT("BLOB SUB_TYPE %d"), subtype);
-        case IBPP::sdDate:      return wxT("DATE");
-        case IBPP::sdTime:      return wxT("TIME");
-        case IBPP::sdTimestamp: return wxT("TIMESTAMP");
-        case IBPP::sdSmallint:  return wxT("SMALLINT");
-        case IBPP::sdInteger:   return wxT("INTEGER");
-        case IBPP::sdLargeint:  return wxT("BIGINT");
-        case IBPP::sdFloat:     return wxT("FLOAT");
-        case IBPP::sdDouble:    return wxT("DOUBLE PRECISION");
-        default:                return wxT("UNKNOWN");
+                                    "BLOB SUB_TYPE %d", subtype);
+        case IBPP::sdDate:      return "DATE";
+        case IBPP::sdTime:      return "TIME";
+        case IBPP::sdTimestamp: return "TIMESTAMP";
+        case IBPP::sdSmallint:  return "SMALLINT";
+        case IBPP::sdInteger:   return "INTEGER";
+        case IBPP::sdLargeint:  return "BIGINT";
+        case IBPP::sdFloat:     return "FLOAT";
+        case IBPP::sdDouble:    return "DOUBLE PRECISION";
+        default:                return "UNKNOWN";
     }
 }
 
@@ -2228,7 +2224,7 @@ void ExecuteSqlFrame::compareCounts(IBPP::DatabaseCounts& one,
             }
             if (relName.IsEmpty())
                 relName.Format(_("Relation #%d"), (*it).first);
-            log(relName + wxT(": ") + s, ttSql);
+            log(relName + ": " + s, ttSql);
         }
     }
 }
@@ -2244,10 +2240,10 @@ wxString millisToTimeString(long millis)
         int mm = millis / (60 * 1000);
         millis -= 60 * 1000 * mm;
         int ss = millis / 1000;
-        return wxString::Format(wxT("%d:%.2d:%.2d (hh:mm:ss)"), hh, mm, ss);
+        return wxString::Format("%d:%.2d:%.2d (hh:mm:ss)", hh, mm, ss);
     }
     else
-        return wxString::Format(wxT("%.3fs"), 0.001 * millis);
+        return wxString::Format("%.3fs", 0.001 * millis);
 }
 
 bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
@@ -2318,7 +2314,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             del1 = 0, ridx1 = 0, rseq1 = 0, mem1 = 0;
         int fetch2, mark2, read2, write2, ins2, upd2, del2, ridx2, rseq2, mem2;
         IBPP::DatabaseCounts counts1, counts2;
-        bool doShowStats = config().get(wxT("SQLEditorShowStats"), true);
+        bool doShowStats = config().get("SQLEditorShowStats", true);
         if (!prepareOnly && doShowStats)
         {
             databaseM->getIBPPDatabase()->
@@ -2424,7 +2420,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
 
         if (type != IBPP::stSelect) // for other statements: show rows affected
         {   // left trim
-            wxString::size_type p = sql.find_first_not_of(wxT(" \n\t\r"));
+            wxString::size_type p = sql.find_first_not_of(" \n\t\r");
             if (p != wxString::npos && p > 0)
                 sql.erase(0, p);
             if (type == IBPP::stInsert || type == IBPP::stDelete
@@ -2436,10 +2432,10 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
                 {
                     wxString addon;
                     if (statementM->AffectedRows() % 10 != 1)
-                        addon = wxT("s");
+                        addon = "s";
                     wxString s = wxString::Format(_("%d row%s affected directly."),
                         statementM->AffectedRows(), addon.c_str());
-                    log(wxT("") + s);
+                    log("" + s);
                     statusbar_1->SetStatusText(s, 1);
                 }
                 catch (IBPP::Exception&)
@@ -2463,13 +2459,13 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         splitScreen();
         wxString msg(std2wx(e.ErrorMessage(),
             databaseM->getCharsetConverter()));
-        log(_("Error: ") + msg + wxT("\n"), ttError);
+        log(_("Error: ") + msg + "\n", ttError);
         retval = false;
     }
     catch (std::exception& e)
     {
         splitScreen();
-        log(_("Error: ") + std2wx(e.what()) + wxT("\n"), ttError);
+        log(_("Error: ") + std2wx(e.what()) + "\n", ttError);
         retval = false;
     }
     catch (...)
@@ -2505,7 +2501,7 @@ void ExecuteSqlFrame::OnMenuTransactionIsolationLevel(wxCommandEvent& event)
         transactionIsolationLevelM = IBPP::ilReadDirty;
 
     wxCHECK_RET(transactionM == 0 || !transactionM->Started(),
-        wxT("Can't change transaction isolation level while started"));
+        "Can't change transaction isolation level while started");
     transactionM = 0;
 }
 
@@ -2529,7 +2525,7 @@ void ExecuteSqlFrame::OnMenuTransactionLockResolution(wxCommandEvent& event)
         event.IsChecked() ? IBPP::lrWait : IBPP::lrNoWait;
 
     wxCHECK_RET(transactionM == 0 || !transactionM->Started(),
-        wxT("Can't change transaction lock resolution while started"));
+        "Can't change transaction lock resolution while started");
     transactionM = 0;
 }
 
@@ -2545,7 +2541,7 @@ void ExecuteSqlFrame::OnMenuTransactionReadOnly(wxCommandEvent& event)
     transactionAccessModeM = event.IsChecked() ? IBPP::amRead : IBPP::amWrite;
 
     wxCHECK_RET(transactionM == 0 || !transactionM->Started(),
-        wxT("Can't change transaction access mode while started"));
+        "Can't change transaction access mode while started");
     transactionM = 0;
 }
 
@@ -2783,11 +2779,11 @@ void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent& event)
     if (!splitter_window_1->IsSplit())    // already ok
         return;
     bool selectMaximizeGrid = false;
-    config().getValue(wxT("SelectMaximizeGrid"), selectMaximizeGrid);
+    config().getValue("SelectMaximizeGrid", selectMaximizeGrid);
     if (selectMaximizeGrid)
     {
         int rowsNeeded = 10;    // default
-        config().getValue(wxT("MaximizeGridRowsNeeded"), rowsNeeded);
+        config().getValue("MaximizeGridRowsNeeded", rowsNeeded);
         if (rowsFetched >= rowsNeeded)
         {
             //splitScreen();    // not needed atm, might be later (see TODO above)
@@ -2900,7 +2896,7 @@ void ExecuteSqlFrame::setKeywords()
     keywordsM.clear();                          // create final wxString from array
     keywordsM.Alloc(20480);     // preallocate 20kB
     for (size_t i = 0; i < as.GetCount(); ++i)  // separate words with spaces
-        keywordsM += as.Item(i) + wxT(" ");
+        keywordsM += as.Item(i) + " ";
 }
 
 //! logs all activity to text control
@@ -2910,7 +2906,7 @@ void ExecuteSqlFrame::log(wxString s, TextType type)
 {
     int startpos = styled_text_ctrl_stats->GetLength();
     styled_text_ctrl_stats->SetCurrentPos(startpos);
-    styled_text_ctrl_stats->AddText(s + wxT("\n"));
+    styled_text_ctrl_stats->AddText(s + "\n");
     int endpos = styled_text_ctrl_stats->GetLength();
 
     int style = 0;
@@ -2925,21 +2921,21 @@ void ExecuteSqlFrame::log(wxString s, TextType type)
 
 const wxString ExecuteSqlFrame::getName() const
 {
-    return wxT("ExecuteSqlFrame");
+    return "ExecuteSqlFrame";
 }
 
 void ExecuteSqlFrame::doReadConfigSettings(const wxString& prefix)
 {
     BaseFrame::doReadConfigSettings(prefix);
     int zoom;
-    if (config().getValue(prefix + Config::pathSeparator + wxT("zoom"), zoom))
+    if (config().getValue(prefix + Config::pathSeparator + "zoom", zoom))
         styled_text_ctrl_sql->SetZoom(zoom);
 }
 
 void ExecuteSqlFrame::doWriteConfigSettings(const wxString& prefix) const
 {
     BaseFrame::doWriteConfigSettings(prefix);
-    config().setValue(prefix + Config::pathSeparator + wxT("zoom"),
+    config().setValue(prefix + Config::pathSeparator + "zoom",
         styled_text_ctrl_sql->GetZoom());
 }
 
@@ -2966,7 +2962,7 @@ void ExecuteSqlFrame::setViewMode(ViewMode mode)
 void ExecuteSqlFrame::setViewMode(bool splitView, ViewMode mode)
 {
     wxCHECK_RET(mode == vmEditor || mode == vmLogCtrl || mode == vmGrid,
-        wxT("Try to set invalid view mode"));
+        "Try to set invalid view mode");
     viewModeM = mode;
 
     // select notebook pane first (could still be invisible)
@@ -3046,7 +3042,7 @@ void ExecuteSqlFrame::updateFrameTitle()
     {
         wxString title(filenameM.GetFullName());
         if (styled_text_ctrl_sql->GetModify())
-            title += wxT("*");
+            title += "*";
         SetTitle(title);
         return;
     }
@@ -3058,12 +3054,12 @@ void ExecuteSqlFrame::updateFrameTitle()
         return;
     }
 
-    size_t p = text.find(wxT("@FR-TITLE@"));
+    size_t p = text.find("@FR-TITLE@");
     if (p != wxString::npos)
     {
-        size_t q = text.find(wxT("*/"), p);
+        size_t q = text.find("*/", p);
         if (q == wxString::npos)
-            q = text.find_first_of(wxT("\n\r"), p);
+            q = text.find_first_of("\n\r", p);
         if (q != wxString::npos)
             SetTitle(text.substr(p+11, q - p - 11));
         else
@@ -3078,17 +3074,17 @@ void ExecuteSqlFrame::updateFrameTitle()
         tkIDENTIFIER
     };
     const wxString namesShort[] = {
-        wxT("alt"), wxT("cre"), wxT("dclr"), wxT("drop"), wxT("exec"),
-        wxT("ins"), wxT("recr"), wxT("rvk"), wxT("grnt"), wxT("sel"),
-        wxT("upd"), wxT("del")
+        "alt", "cre", "dclr", "drop", "exec",
+        "ins", "recr", "rvk", "grnt", "sel",
+        "upd", "del"
     };
     const wxString namesVeryShort[] = {
-        wxT("a"), wxT("c"), wxT("decl"), wxT("drop"), wxT("x"),
-        wxT("i"), wxT("recr"), wxT("rev"), wxT("grnt"), wxT("s"),
-        wxT("u"), wxT("del")
+        "a", "c", "decl", "drop", "x",
+        "i", "recr", "rev", "grnt", "s",
+        "u", "del"
     };
     const wxString* names = 0;
-    int setting = config().get(wxT("sqlEditorWindowKeywords"), 1);
+    int setting = config().get("sqlEditorWindowKeywords", 1);
     if (setting == 1)
         names = &namesShort[0];
     else if (setting == 2)
@@ -3106,7 +3102,7 @@ void ExecuteSqlFrame::updateFrameTitle()
                 if (setting == 3)   // entire statement till end of line
                 {
                     p = tk.getCurrentTokenPosition();
-                    size_t q = text.find_first_of(wxT("\n\r;"), p);
+                    size_t q = text.find_first_of("\n\r;", p);
                     if (q == wxString::npos)
                         title = text.substr(p);
                     else
@@ -3115,7 +3111,7 @@ void ExecuteSqlFrame::updateFrameTitle()
                     break;
                 }
                 if (cnt == 1)
-                    title += wxT(" ");
+                    title += " ";
                 if (stt == tkIDENTIFIER || setting == 0)
                     title += tk.getCurrentTokenString();
                 else
@@ -3157,7 +3153,7 @@ const DropColumnHandler DropColumnHandler::handlerInstance;
 
 bool DropColumnHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("drop_field") && uri.action != wxT("drop_constraint"))
+    if (uri.action != "drop_field" && uri.action != "drop_constraint")
         return false;
 
     MetadataItem* c = extractMetadataItemFromURI<MetadataItem>(uri);
@@ -3166,7 +3162,7 @@ bool DropColumnHandler::handleURI(URI& uri)
         return true;
 
     Table *t = 0;
-    if (uri.action == wxT("drop_field"))
+    if (uri.action == "drop_field")
     {
         if (Column *cp = dynamic_cast<Column *>(c))
             t = cp->getTable();
@@ -3179,9 +3175,9 @@ bool DropColumnHandler::handleURI(URI& uri)
     if (!t)
         return true;
 
-    wxString sql = wxT("ALTER TABLE ") + t->getQuotedName() + wxT(" DROP ");
-    if (uri.action == wxT("drop_constraint"))
-        sql += wxT("CONSTRAINT ");
+    wxString sql = "ALTER TABLE " + t->getQuotedName() + " DROP ";
+    if (uri.action == "drop_constraint")
+        sql += "CONSTRAINT ";
     sql += c->getQuotedName();
 
     wxString msg(wxString::Format(
@@ -3191,7 +3187,7 @@ bool DropColumnHandler::handleURI(URI& uri)
     if (wxOK != showQuestionDialog(w, msg,
         _("Once you drop the object it is permanently removed from database."),
         AdvancedMessageDialogButtonsOkCancel(_("&Drop")),
-        config(), wxT("DIALOG_ConfirmDrop"), _("Always drop without asking")))
+        config(), "DIALOG_ConfirmDrop", _("Always drop without asking")))
     {
         return true;
     }
@@ -3204,7 +3200,7 @@ class DropColumnsHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
-    DropColumnsHandler() {};
+    DropColumnsHandler() {}
     bool handleURI(URI& uri);
 private:
     static const DropColumnsHandler handlerInstance;
@@ -3214,7 +3210,7 @@ const DropColumnsHandler DropColumnsHandler::handlerInstance;
 
 bool DropColumnsHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("drop_fields"))
+    if (uri.action != "drop_fields")
         return false;
 
     Table* t = extractMetadataItemFromURI<Table>(uri);
@@ -3231,8 +3227,8 @@ bool DropColumnsHandler::handleURI(URI& uri)
             it != list.end(); ++it)
         {
             Identifier temp(*it);
-            sql += wxT("ALTER TABLE ") + t->getQuotedName() + wxT(" DROP ")
-                + temp.getQuoted() + wxT(";\n");
+            sql += "ALTER TABLE " + t->getQuotedName() + " DROP "
+                + temp.getQuoted() + ";\n";
         }
         execSql(w, _("Dropping fields"), t->getDatabase(), sql, true);
     }
@@ -3244,7 +3240,7 @@ class DropObjectHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
-    DropObjectHandler() {};
+    DropObjectHandler() {}
     bool handleURI(URI& uri);
 private:
     static const DropObjectHandler handlerInstance;
@@ -3254,7 +3250,7 @@ const DropObjectHandler DropObjectHandler::handlerInstance;
 
 bool DropObjectHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("drop_object"))
+    if (uri.action != "drop_object")
         return false;
 
     MetadataItem* m = extractMetadataItemFromURI<MetadataItem>(uri);
@@ -3269,7 +3265,7 @@ bool DropObjectHandler::handleURI(URI& uri)
     if (wxOK != showQuestionDialog(w, msg,
         _("Once you drop the object it is permanently removed from database."),
         AdvancedMessageDialogButtonsOkCancel(_("&Drop")),
-        config(), wxT("DIALOG_ConfirmDrop"), _("Always drop without asking")))
+        config(), "DIALOG_ConfirmDrop", _("Always drop without asking")))
     {
         return true;
     }
@@ -3282,7 +3278,7 @@ class EditDDLHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
-    EditDDLHandler() {};
+    EditDDLHandler() {}
     bool handleURI(URI& uri);
 private:
     static const EditDDLHandler handlerInstance;
@@ -3292,7 +3288,7 @@ const EditDDLHandler EditDDLHandler::handlerInstance;
 
 bool EditDDLHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("edit_ddl"))
+    if (uri.action != "edit_ddl")
         return false;
 
     MetadataItem* m = extractMetadataItemFromURI<MetadataItem>(uri);
@@ -3312,7 +3308,7 @@ bool EditDDLHandler::handleURI(URI& uri)
         return true;
 
     ExecuteSqlFrame* eff = new ExecuteSqlFrame(wxTheApp->GetTopWindow(), -1,
-        wxT("DDL"), db);
+        "DDL", db);
     eff->setSql(cdv.getSql());
     // ProgressDialog needs to be hidden before ExecuteSqlFrame is shown,
     // otherwise the HTML frame will be raised over the ExecuteSqlFrame
@@ -3326,7 +3322,7 @@ class EditProcedureHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
-    EditProcedureHandler() {};
+    EditProcedureHandler() {}
     bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
@@ -3337,7 +3333,7 @@ const EditProcedureHandler EditProcedureHandler::handlerInstance;
 
 bool EditProcedureHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("edit_procedure"))
+    if (uri.action != "edit_procedure")
         return false;
 
     Procedure* p = extractMetadataItemFromURI<Procedure>(uri);
@@ -3356,7 +3352,7 @@ class AlterViewHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
-    AlterViewHandler() {};
+    AlterViewHandler() {}
     bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
@@ -3367,15 +3363,15 @@ const AlterViewHandler AlterViewHandler::handlerInstance;
 
 bool AlterViewHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("alter_relation")
-        && uri.action != wxT("alter_field"))
+    if (uri.action != "alter_relation"
+        && uri.action != "alter_field")
     {
         return false;
     }
 
     Relation* r;
     wxString column;
-    if (uri.action == wxT("alter_relation"))
+    if (uri.action == "alter_relation")
         r = extractMetadataItemFromURI<Relation>(uri);
     else
     {
@@ -3396,7 +3392,7 @@ class EditTriggerHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
-    EditTriggerHandler() {};
+    EditTriggerHandler() {}
     bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
@@ -3407,7 +3403,7 @@ const EditTriggerHandler EditTriggerHandler::handlerInstance;
 
 bool EditTriggerHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("edit_trigger"))
+    if (uri.action != "edit_trigger")
         return false;
 
     Trigger* t = extractMetadataItemFromURI<Trigger>(uri);
@@ -3424,7 +3420,7 @@ class EditGeneratorValueHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
-    EditGeneratorValueHandler() {};
+    EditGeneratorValueHandler() {}
     bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
@@ -3435,7 +3431,7 @@ const EditGeneratorValueHandler EditGeneratorValueHandler::handlerInstance;
 
 bool EditGeneratorValueHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("edit_generator_value"))
+    if (uri.action != "edit_generator_value")
         return false;
 
     Generator* g = extractMetadataItemFromURI<Generator>(uri);
@@ -3454,13 +3450,13 @@ bool EditGeneratorValueHandler::handleURI(URI& uri)
     // MB: we'll use wxLongLong wherever it is available
         wxLongLong(oldvalue).ToString(), w);
 #else
-        wxString::Format(wxT("%d"), oldvalue), w);
+        wxString::Format("%d"), oldvalue), w);
 #endif
 
-    if (value != wxT(""))
+    if (value != "")
     {
-        wxString sql = wxT("SET GENERATOR ") + g->getQuotedName()
-            + wxT(" TO ") + value + wxT(";");
+        wxString sql = "SET GENERATOR " + g->getQuotedName()
+            + " TO " + value + ";";
         execSql(w, sql, db, sql, true);
     }
     return true;
@@ -3470,7 +3466,7 @@ class EditExceptionHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
-    EditExceptionHandler() {};
+    EditExceptionHandler() {}
     bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
@@ -3481,7 +3477,7 @@ const EditExceptionHandler EditExceptionHandler::handlerInstance;
 
 bool EditExceptionHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("edit_exception"))
+    if (uri.action != "edit_exception")
         return false;
 
     Exception* e = extractMetadataItemFromURI<Exception>(uri);
@@ -3498,7 +3494,7 @@ class IndexActionHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
-    IndexActionHandler() {};
+    IndexActionHandler() {}
     bool handleURI(URI& uri);
 private:
     // singleton; registers itself on creation.
@@ -3509,7 +3505,7 @@ const IndexActionHandler IndexActionHandler::handlerInstance;
 
 bool IndexActionHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("index_action"))
+    if (uri.action != "index_action")
         return false;
 
     Index* i = extractMetadataItemFromURI<Index>(uri);
@@ -3518,8 +3514,8 @@ bool IndexActionHandler::handleURI(URI& uri)
         return true;
 
     wxString sql;
-    wxString type = uri.getParam(wxT("type"));        // type of operation
-    if (type == wxT("DROP"))
+    wxString type = uri.getParam("type");        // type of operation
+    if (type == "DROP")
     {
         wxString msg(wxString::Format(
             _("Are you sure you wish to drop the index %s?"),
@@ -3527,16 +3523,16 @@ bool IndexActionHandler::handleURI(URI& uri)
         if (wxOK != showQuestionDialog(w, msg,
             _("Once you drop the object it is permanently removed from database."),
             AdvancedMessageDialogButtonsOkCancel(_("&Drop")),
-            config(), wxT("DIALOG_ConfirmDrop"), _("Always drop without asking")))
+            config(), "DIALOG_ConfirmDrop", _("Always drop without asking")))
         {
             return true;
         }
-        sql = wxT("DROP INDEX ") + i->getQuotedName();
+        sql = "DROP INDEX " + i->getQuotedName();
     }
-    else if (type == wxT("RECOMPUTE"))
-        sql = wxT("SET STATISTICS INDEX ") + i->getQuotedName();
-    else if (type == wxT("TOGGLE_ACTIVE"))
-        sql = wxT("ALTER INDEX ") + i->getQuotedName() + (i->isActive() ? wxT(" INACTIVE") : wxT(" ACTIVE"));
+    else if (type == "RECOMPUTE")
+        sql = "SET STATISTICS INDEX " + i->getQuotedName();
+    else if (type == "TOGGLE_ACTIVE")
+        sql = "ALTER INDEX " + i->getQuotedName() + (i->isActive() ? " INACTIVE" : " ACTIVE");
 
     execSql(w, wxEmptyString, i->getDatabase(), sql, true);
     return true;
@@ -3556,8 +3552,8 @@ const ActivateTriggersHandler ActivateTriggersHandler::handlerInstance;
 
 bool ActivateTriggersHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("activate_triggers")
-        && uri.action != wxT("deactivate_triggers"))
+    if (uri.action != "activate_triggers"
+        && uri.action != "deactivate_triggers")
     {
         return false;
     }
@@ -3585,10 +3581,10 @@ bool ActivateTriggersHandler::handleURI(URI& uri)
     for (std::vector<Trigger*>::iterator it = list.begin(); it != list.end();
         ++it)
     {
-        sql += wxT("ALTER TRIGGER ") + (*it)->getQuotedName() + wxT(" ");
-        if (uri.action == wxT("deactivate_triggers"))
-            sql += wxT("IN");
-        sql += wxT("ACTIVE;\n");
+        sql += "ALTER TRIGGER " + (*it)->getQuotedName() + " ";
+        if (uri.action == "deactivate_triggers")
+            sql += "IN";
+        sql += "ACTIVE;\n";
     }
 
     execSql(w, wxEmptyString, mi->getDatabase(), sql, true);
@@ -3599,7 +3595,7 @@ class ActivateTriggerHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
-    ActivateTriggerHandler() {};
+    ActivateTriggerHandler() {}
     bool handleURI(URI& uri);
 private:
     static const ActivateTriggerHandler handlerInstance;
@@ -3609,7 +3605,7 @@ const ActivateTriggerHandler ActivateTriggerHandler::handlerInstance;
 
 bool ActivateTriggerHandler::handleURI(URI& uri)
 {
-    if (uri.action != wxT("activate_trigger") && uri.action != wxT("deactivate_trigger"))
+    if (uri.action != "activate_trigger" && uri.action != "deactivate_trigger")
         return false;
 
     Trigger* t = extractMetadataItemFromURI<Trigger>(uri);
@@ -3617,10 +3613,10 @@ bool ActivateTriggerHandler::handleURI(URI& uri)
     if (!t || !w)
         return true;
 
-    wxString sql = wxT("ALTER TRIGGER ") + t->getQuotedName() + wxT(" ");
-    if (uri.action == wxT("deactivate_trigger"))
-        sql += wxT("IN");
-    sql += wxT("ACTIVE;\n");
+    wxString sql = "ALTER TRIGGER " + t->getQuotedName() + " ";
+    if (uri.action == "deactivate_trigger")
+        sql += "IN";
+    sql += "ACTIVE;\n";
 
     execSql(w, wxEmptyString, t->getDatabase(), sql, true);
     return true;

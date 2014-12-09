@@ -291,12 +291,12 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
 
     // check for "UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG"
     // convert this change in NULL flag to "ALTER TABLE" and act accordingly
-    if (actionM == actUPDATE  && nameM.equals(wxT("RDB$RELATION_FIELDS"))
+    if (actionM == actUPDATE  && nameM.equals("RDB$RELATION_FIELDS")
         && tokensM[2] == kwSET && tokensM[3] == tkIDENTIFIER)
     {
         Identifier id;
         id.setFromSql(tokenStringsM[3]);
-        if (!id.equals(wxT("RDB$NULL_FLAG")))
+        if (!id.equals("RDB$NULL_FLAG"))
             return; // true;
 
         actionM = actALTER;
@@ -306,7 +306,7 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
         for (std::map<int, wxString>::const_iterator mit = tokenStringsM.begin();
             mit != tokenStringsM.end(); mit++)
         {
-            if ((*mit).second.CmpNoCase(wxT("RDB$RELATION_NAME")) == 0)
+            if ((*mit).second.CmpNoCase("RDB$RELATION_NAME") == 0)
             {
                 size_t i = (*mit).first;
                 if (tokensM[i + 1] == tkEQUALS && tokensM[i + 2] == tkSTRING)

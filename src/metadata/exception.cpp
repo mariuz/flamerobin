@@ -112,17 +112,17 @@ void Exception::loadProperties(IBPP::Statement& statement, wxMBConv* converter)
 wxString Exception::getAlterSql()
 {
     wxString message = getMessage();
-    message.Replace(wxT("'"), wxT("''"));
+    message.Replace("'", "''");
 
     StatementBuilder sb;
-    sb << kwALTER << ' ' << kwEXCEPTION << ' ' << getQuotedName() << wxT(" '")
-        << message << wxT("';");
+    sb << kwALTER << ' ' << kwEXCEPTION << ' ' << getQuotedName() << " '"
+        << message << "';";
     return sb;
 }
 
 const wxString Exception::getTypeName() const
 {
-    return wxT("EXCEPTION");
+    return "EXCEPTION";
 }
 
 void Exception::acceptVisitor(MetadataItemVisitor* visitor)
@@ -184,6 +184,6 @@ void Exceptions::loadChildren()
 
 const wxString Exceptions::getTypeName() const
 {
-    return wxT("EXCEPTION_COLLECTION");
+    return "EXCEPTION_COLLECTION";
 }
 

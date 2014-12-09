@@ -263,25 +263,25 @@ wxString DatabaseAuthenticationMode::getConfigValue() const
     switch (modeM)
     {
         case UseSavedEncryptedPwd:
-            return wxT("encpwd");
+            return "encpwd";
         case AlwaysEnterPassword:
-            return wxT("askpwd");
+            return "askpwd";
         case TrustedUser:
-            return wxT("trusted");
+            return "trusted";
         default:
-            return wxT("pwd");
+            return "pwd";
     }
 }
 
 void DatabaseAuthenticationMode::setConfigValue(const wxString& value)
 {
-    if (value == wxT("pwd"))
+    if (value == "pwd")
         modeM = UseSavedPassword;
-    else if (value == wxT("encpwd"))
+    else if (value == "encpwd")
         modeM = UseSavedEncryptedPwd;
-    else if (value == wxT("askpwd"))
+    else if (value == "askpwd")
         modeM = AlwaysEnterPassword;
-    else if (value == wxT("trusted"))
+    else if (value == "trusted")
         modeM = TrustedUser;
     else
         wxASSERT(false);
@@ -894,11 +894,11 @@ void Database::create(int pagesize, int dialect)
 {
     wxString extra_params;
     if (pagesize)
-        extra_params << wxT(" PAGE_SIZE ") << pagesize;
+        extra_params << " PAGE_SIZE " << pagesize;
 
     wxString charset(getConnectionCharset());
     if (!charset.empty())
-        extra_params << wxT(" DEFAULT CHARACTER SET ") << charset;
+        extra_params << " DEFAULT CHARACTER SET " << charset;
 
     bool useUserNamePwd = !authenticationModeM.getIgnoreUsernamePassword();
     IBPP::Database db = IBPP::DatabaseFactory("",
@@ -934,7 +934,7 @@ private:
     boost::mutex lockM;
     wxString errorMsgM;
 
-    virtual void doExecute() {};
+    virtual void doExecute() {}
 protected:
     BackgroundTask() {}
 
@@ -1008,7 +1008,7 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
         if (indicator)
         {
             indicator->doShow();
-            indicator->initProgressIndeterminate(wxT("Establishing connection..."));
+            indicator->initProgressIndeterminate("Establishing connection...");
         }
 
         databaseM.clear();
@@ -1107,7 +1107,7 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
                     connectionUserM = std2wxIdentifier(s, getCharsetConverter());
                     st1->Get(3, s);
                     connectionRoleM = std2wxIdentifier(s, getCharsetConverter());
-                    if (connectionRoleM == wxT("NONE"))
+                    if (connectionRoleM == "NONE")
                         connectionRoleM.clear();
                 }
                 checkProgressIndicatorCanceled(indicator);
@@ -1264,7 +1264,7 @@ void Database::setDisconnected()
     viewsM.reset();
     exceptionsM.reset();
 
-    if (config().get(wxT("HideDisconnectedDatabases"), false))
+    if (config().get("HideDisconnectedDatabases", false))
         getServer()->notifyObservers();
     notifyObservers();
 }
@@ -1473,22 +1473,22 @@ wxString Database::getConnectionInfoString() const
     {
         if (connectedM)
         {
-            username = wxT("[") + connectionUserM;
+            username = "[" + connectionUserM;
             if (!connectionRoleM.empty())
-                username += wxT(" (") + connectionRoleM + wxT(")");
-            username += wxT("]");
+                username += " (" + connectionRoleM + ")";
+            username += "]";
         }
         else
             username = _("[Trusted user]");
     }
-    return wxString(username + wxT("@") + getConnectionString() + wxT(" (")
-        + getConnectionCharset() + wxT(")"));
+    return wxString(username + "@" + getConnectionString() + " (")
+        + getConnectionCharset() + ")";
 }
 
 bool Database::usesDifferentConnectionCharset() const
 {
     wxString charset(getConnectionCharset().Upper());
-    if (databaseCharsetM.empty() && charset == wxT("NONE"))
+    if (databaseCharsetM.empty() && charset == "NONE")
         return false;
     return (charset.compare(databaseCharsetM.Upper()) != 0);
 }
@@ -1607,7 +1607,7 @@ void Database::setRole(const wxString& value)
 
 const wxString Database::getTypeName() const
 {
-    return wxT("DATABASE");
+    return "DATABASE";
 }
 
 void Database::acceptVisitor(MetadataItemVisitor* visitor)
@@ -1631,7 +1631,7 @@ wxString Database::getConnectionString() const
 {
     wxString serverConnStr = getServer()->getConnectionString();
     if (!serverConnStr.empty())
-        return serverConnStr + wxT(":") + pathM;
+        return serverConnStr + ":" + pathM;
     else
         return pathM;
 }
@@ -1640,10 +1640,10 @@ wxString Database::getConnectionString() const
 wxString Database::extractNameFromConnectionString(const wxString& path)
 {
     wxString name = path;
-    wxString::size_type p = name.find_last_of(wxT("/\\:"));
+    wxString::size_type p = name.find_last_of("/\\:");
     if (p != wxString::npos)
         name.erase(0, p + 1);
-    p = name.find_last_of(wxT("."));
+    p = name.find_last_of(".");
     if (p != wxString::npos)
         name.erase(p, name.length());
     return name;
@@ -1653,7 +1653,7 @@ const wxString Database::getId() const
 {
     if (idM == 0)
         idM = getUniqueId();
-    wxString result = wxString::Format(wxT("%d"), idM);
+    wxString result = wxString::Format("%d", idM);
     return result;
 }
 
@@ -1702,7 +1702,7 @@ bool Database::showSystemRoles()
     if (!getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
         return false;
 
-    const wxString SHOW_SYSROLES = wxT("ShowSystemRoles");
+    const wxString SHOW_SYSROLES = "ShowSystemRoles";
 
     bool b;
     if (!DatabaseConfig(this, config()).getValue(SHOW_SYSROLES, b))
@@ -1713,7 +1713,7 @@ bool Database::showSystemRoles()
 
 bool Database::showSystemTables()
 {
-    const wxString SHOW_SYSTABLES = wxT("ShowSystemTables");
+    const wxString SHOW_SYSTABLES = "ShowSystemTables";
 
     bool b;
     if (!DatabaseConfig(this, config()).getValue(SHOW_SYSTABLES, b))
@@ -1728,21 +1728,21 @@ wxString mapConnectionCharsetToSystemCharset(const wxString& connectionCharset)
 
     // fixes hang when character set name empty (invalid encoding is returned)
     if (charset.empty())
-        charset = wxT("NONE");
+        charset = "NONE";
 
     // Firebird charsets WIN125X need to be replaced with either
     // WINDOWS125X or CP125X - we take the latter
-    if (charset.Mid(0, 5) == wxT("WIN12"))
-        return wxT("CP12") + charset.Mid(5);
+    if (charset.Mid(0, 5) == "WIN12")
+        return "CP12" + charset.Mid(5);
 
     // Firebird charsets ISO8859_X
-    if (charset.Mid(0, 8) == wxT("ISO8859_"))
-        return wxT("ISO-8859-") + charset.Mid(8);
+    if (charset.Mid(0, 8) == "ISO8859_")
+        return "ISO-8859-" + charset.Mid(8);
 
     // all other mappings need to be added here...
-    struct CharsetMapping { const wxChar* connCS; const wxChar* convCS; };
+    struct CharsetMapping { wxString connCS; wxString convCS; };
     static const CharsetMapping mappings[] = {
-        { wxT("UTF8"), wxT("UTF-8") }, { wxT("UNICODE_FSS"), wxT("UTF-8") }
+        { "UTF8", "UTF-8" }, { "UNICODE_FSS", "UTF-8" }
     };
     int mappingCount = sizeof(mappings) / sizeof(CharsetMapping);
     for (int i = 0; i < mappingCount; i++)
@@ -1791,7 +1791,7 @@ void Database::getConnectedUsers(wxArrayString& users) const
         {
             wxString name(std2wx((*it).first));
             if ((*it).second > 1)
-                name += wxString::Format(wxT(" (%d)"), (*it).second);
+                name += wxString::Format(" (%d)", (*it).second);
             users.Add(name);
         }
     }

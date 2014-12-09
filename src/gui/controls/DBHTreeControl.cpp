@@ -113,29 +113,29 @@ void DBHTreeConfigCache::loadFromConfig()
     unsigned changes = 0;
 
     changes += setValue(allowDragM,
-        cfg.get(wxT("allowDragAndDrop"), false));
+        cfg.get("allowDragAndDrop", false));
     changes += setValue(hideDisconnectedDatabasesM,
-        cfg.get(wxT("HideDisconnectedDatabases"), false));
+        cfg.get("HideDisconnectedDatabases", false));
     changes += setValue(showColumnParamCountM,
-        cfg.get(wxT("ShowColumnAndParameterCountInTree"), false));
+        cfg.get("ShowColumnAndParameterCountInTree", false));
     changes += setValue(showColumnsM,
-        cfg.get(wxT("ShowColumnsInTree"), true));
+        cfg.get("ShowColumnsInTree", true));
     changes += setValue(sortDatabasesM,
-        cfg.get(wxT("OrderDatabasesInTree"), false));
+        cfg.get("OrderDatabasesInTree", false));
     changes += setValue(sortServersM,
-        cfg.get(wxT("OrderServersInTree"), false));
+        cfg.get("OrderServersInTree", false));
     // these aren't surfaced by methods, but needed to cause observing tree
     // nodes to update themselves
     changes += setValue(showSystemRolesM,
-        cfg.get(wxT("ShowSystemRoles"), false));
+        cfg.get("ShowSystemRoles", false));
     changes += setValue(showSystemTablesM,
-        cfg.get(wxT("ShowSystemTables"), true));
+        cfg.get("ShowSystemTables", true));
     changes += setValue(showComputedM,
-        cfg.get(wxT("ShowComputed"), 1));
+        cfg.get("ShowComputed", 1));
     changes += setValue(showDomainsM,
-        cfg.get(wxT("ShowDomains"), 2));
+        cfg.get("ShowDomains", 2));
     changes += setValue(sqlKeywordsUpperCaseM,
-        cfg.get(wxT("SQLKeywordsUpperCase"), false));
+        cfg.get("SQLKeywordsUpperCase", false));
 
     if (changes)
         notifyObservers();
@@ -254,14 +254,14 @@ protected:
 public:
     DBHTreeItemVisitor(DBHTreeControl* tree);
 
-    bool getNodeVisible() { return nodeVisibleM; };
-    wxString getNodeText() { return nodeTextM; };
-    bool getNodeTextBold() { return nodeTextBoldM; };
-    int getNodeImage() { return nodeImageIndexM; };
-    bool getShowChildren() { return showChildrenM; };
+    bool getNodeVisible() { return nodeVisibleM; }
+    wxString getNodeText() { return nodeTextM; }
+    bool getNodeTextBold() { return nodeTextBoldM; }
+    int getNodeImage() { return nodeImageIndexM; }
+    bool getShowChildren() { return showChildrenM; }
     bool getShowNodeExpander() { return showNodeExpanderM; }
-    bool getSortChildren() { return sortChildrenM; };
-    bool isConfigSensitive() { return nodeConfigSensitiveM; };
+    bool getSortChildren() { return sortChildrenM; }
+    bool isConfigSensitive() { return nodeConfigSensitiveM; }
 
     virtual void visitColumn(Column& column);
     virtual void visitDatabase(Database& database);
@@ -301,7 +301,7 @@ DBHTreeItemVisitor::DBHTreeItemVisitor(DBHTreeControl* tree)
 void DBHTreeItemVisitor::defaultAction()
 {
     // all classes that have corresponding tree nodes must have visitClass()
-    wxASSERT_MSG(false, wxT("DBHTreeItemVisitor::visit[Classname]() missing"));
+    wxASSERT_MSG(false, "DBHTreeItemVisitor::visit[Classname]() missing");
 }
 
 void DBHTreeItemVisitor::setNodeProperties(MetadataItem* metadataItem,
@@ -319,7 +319,7 @@ void DBHTreeItemVisitor::setNodeProperties(MetadataItem* metadataItem,
     {
         nodeTextM = metadataItem->getName_();
         if (childCount)
-            nodeTextM << wxT(" (") << childCount << wxT(")");
+            nodeTextM << " (" << childCount << ")";
     }
 
     showChildrenM = childCount > 0;
@@ -329,18 +329,18 @@ void DBHTreeItemVisitor::setNodeProperties(MetadataItem* metadataItem,
 void DBHTreeItemVisitor::visitColumn(Column& column)
 {
     // node text: column_name + column_datatype [+ "not null"]
-    nodeTextM = column.getName_() + wxT(" ") + column.getDatatype();
+    nodeTextM = column.getName_() + " " + column.getDatatype();
     // only show first line of multiline text
-    size_t nl = nodeTextM.find_first_of(wxT("\n\r"));
+    size_t nl = nodeTextM.find_first_of("\n\r");
     if (nl != wxString::npos)
     {
         nodeTextM.Truncate(nl);
-        nodeTextM += wxT("...");
+        nodeTextM += "...";
     }
     if (!column.isNullable(CheckDomainNullability))
     {
-        nodeTextM << wxT(" ") << SqlTokenizer::getKeyword(kwNOT)
-            << wxT(" ") << SqlTokenizer::getKeyword(kwNULL);
+        nodeTextM << " " << SqlTokenizer::getKeyword(kwNOT)
+            << " " << SqlTokenizer::getKeyword(kwNULL);
     }
 
     // image index depends on participation in primary and foreign keys
@@ -387,11 +387,11 @@ void DBHTreeItemVisitor::visitDomain(Domain& domain)
         return;
 
     // node text: domain_name + domain_datatype [+ "not null"]
-    nodeTextM = domain.getName_() + wxT(" ") + domain.getDatatypeAsString();
+    nodeTextM = domain.getName_() + " " + domain.getDatatypeAsString();
     if (!domain.isNullable())
     {
-        nodeTextM << wxT(" ") << SqlTokenizer::getKeyword(kwNOT)
-            << wxT(" ") << SqlTokenizer::getKeyword(kwNULL);
+        nodeTextM << " " << SqlTokenizer::getKeyword(kwNOT)
+            << " " << SqlTokenizer::getKeyword(kwNULL);
     }
     // set remaining default properties, nodeTextM will not be touched
     setNodeProperties(&domain, ART_Domain);
@@ -429,7 +429,7 @@ void DBHTreeItemVisitor::visitGenerator(Generator& generator)
     generator.loadPendingData();
     if (generator.propertiesLoaded())
     {
-        nodeTextM = generator.getName_() + wxT(" = ");
+        nodeTextM = generator.getName_() + " = ";
         nodeTextM << generator.getValue();
     }
     // set remaining default properties, nodeTextM will not be touched
@@ -444,12 +444,12 @@ void DBHTreeItemVisitor::visitGenerators(Generators& generators)
 void DBHTreeItemVisitor::visitParameter(Parameter& parameter)
 {
     bool isOutput = parameter.isOutputParameter();
-    nodeTextM = (isOutput ? wxT("out ") : wxT("in "))
-        + parameter.getName_() + wxT(" ") + parameter.getDatatype();
+    nodeTextM = (isOutput ? "out " : "in ")
+        + parameter.getName_() + " " + parameter.getDatatype();
     if (!parameter.isNullable(CheckDomainNullability))
     {
-        nodeTextM << wxT(" ") << SqlTokenizer::getKeyword(kwNOT)
-            << wxT(" ") << SqlTokenizer::getKeyword(kwNULL);
+        nodeTextM << " " << SqlTokenizer::getKeyword(kwNOT)
+            << " " << SqlTokenizer::getKeyword(kwNULL);
     }
     // set remaining default properties, nodeTextM will not be touched
     setNodeProperties(&parameter,
@@ -476,7 +476,7 @@ void DBHTreeItemVisitor::visitProcedure(Procedure& procedure)
                 else
                     ++ins;
             }
-            nodeTextM += wxString::Format(wxT(" (%d, %d)"), ins, outs);
+            nodeTextM += wxString::Format(" (%d, %d)", ins, outs);
         }
     }
     // show Parameter nodes if Config setting is on
@@ -549,7 +549,7 @@ void DBHTreeItemVisitor::visitTable(Table& table)
         if (DBHTreeConfigCache::get().getShowColumnParamCount())
         {
             size_t colCount = table.getColumnCount();
-            nodeTextM += wxString::Format(wxT(" (%d)"), colCount);
+            nodeTextM += wxString::Format(" (%d)", colCount);
         }
     }
     // show Column nodes if Config setting is on
@@ -585,7 +585,7 @@ void DBHTreeItemVisitor::visitView(View& view)
         if (DBHTreeConfigCache::get().getShowColumnParamCount())
         {
             size_t colCount = view.getColumnCount();
-            nodeTextM += wxString::Format(wxT(" (%d)"), colCount);
+            nodeTextM += wxString::Format(" (%d)", colCount);
         }
     }
     // show Column nodes if Config setting is on
@@ -610,11 +610,11 @@ private:
         MetadataItem* itemM;
         unsigned refCountM;
     public:
-        TreeSelectionData() : itemM(0), refCountM(0) {};
-        TreeSelectionData(MetadataItem* item) : itemM(item), refCountM(1) {};
-        unsigned addRef() { return ++refCountM; };
-        unsigned decRef() { return (refCountM > 0) ? --refCountM : 0; };
-        MetadataItem* getSelectedItem() { return itemM; };
+        TreeSelectionData() : itemM(0), refCountM(0) {}
+        TreeSelectionData(MetadataItem* item) : itemM(item), refCountM(1) {}
+        unsigned addRef() { return ++refCountM; }
+        unsigned decRef() { return (refCountM > 0) ? --refCountM : 0; }
+        MetadataItem* getSelectedItem() { return itemM; }
     };
 
     typedef std::map<DBHTreeControl*, TreeSelectionData> SelectionMap;
@@ -642,7 +642,7 @@ TreeSelectionRestorer::~TreeSelectionRestorer()
 {
     SelectionMap::iterator pos = getSelections().find(treeM);
     wxCHECK_RET(pos != getSelections().end(),
-        wxT("tree selection data not found"));
+        "tree selection data not found");
     if ((*pos).second.decRef() == 0)
     {
         MetadataItem* origSelItem = (*pos).second.getSelectedItem();
@@ -723,7 +723,7 @@ struct MetadataItemSorter
         // this makes sure that for example "Server10" comes after "Server2"
         wxArrayString letterChunks1, letterChunks2;
 
-        wxString digits(wxT("0123456789"));
+        wxString digits("0123456789");
         size_t start1 = 0, start2 = 0;
         size_t len1 = name1.size(), len2 = name2.size();
         while (start1 < len1 || start2 < len2)
@@ -963,7 +963,7 @@ void DBHTreeControl::OnBeginDrag(wxTreeEvent& event)
         if (!m)
             return;
         wxString test;
-        test.Printf(wxT("OBJECT:%ld"), (uintptr_t)m);
+        test.Printf("OBJECT:%ld", (uintptr_t)m);
         wxTextDataObject textData(test);
         wxDropSource source(textData, this);
         source.DoDragDrop(wxDrag_AllowMove);
@@ -1161,7 +1161,7 @@ wxTreeItemId DBHTreeControl::getNextItem(wxTreeItemId current)
 //! where "text" can contain wildcards: * and ?
 bool DBHTreeControl::findText(const wxString& text, bool forward)
 {
-    wxString searchString = text.Upper() + wxT("*");
+    wxString searchString = text.Upper() + "*";
     // start from the current position in tree and look forward
     // for item that starts with that name
     wxTreeItemId start = GetSelection();

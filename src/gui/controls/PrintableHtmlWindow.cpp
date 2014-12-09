@@ -155,9 +155,9 @@ void PrintableHtmlWindow::OnMenuNewTab(wxCommandEvent& WXUNUSED(event))
     wxString addr = tempLinkM;
     URI uri(addr);
     // we don't support "new tab" for non-fr protocols
-    if (uri.protocol != wxT("fr"))
+    if (uri.protocol != "fr")
         return;
-    uri.addParam(wxT("target=new_tab"));
+    uri.addParam("target=new_tab");
     if (!getURIProcessor().handleURI(uri))
         notImplementedMessage(this);
 }
@@ -167,9 +167,9 @@ void PrintableHtmlWindow::OnMenuNewWindow(wxCommandEvent& WXUNUSED(event))
     wxString addr = tempLinkM;
     URI uri(addr);
     // we don't support "new window" for non-fr protocols
-    if (uri.protocol != wxT("fr"))
+    if (uri.protocol != "fr")
         return;
-    uri.addParam(wxT("target=new"));
+    uri.addParam("target=new");
     if (!getURIProcessor().handleURI(uri))
         notImplementedMessage(this);
 }
@@ -177,7 +177,7 @@ void PrintableHtmlWindow::OnMenuNewWindow(wxCommandEvent& WXUNUSED(event))
 void PrintableHtmlWindow::OnMenuSave(wxCommandEvent& WXUNUSED(event))
 {
     wxString filename = wxFileSelector(_("Save as HTML..."), wxEmptyString,
-        GetOpenedPageTitle(), wxT("*.html"),
+        GetOpenedPageTitle(), "*.html",
         _("HTML files (*.html)|*.html|All files (*.*)|*.*"),
         wxFD_SAVE | wxFD_OVERWRITE_PROMPT, this);
     if (filename.IsEmpty())
@@ -189,13 +189,13 @@ void PrintableHtmlWindow::OnMenuSave(wxCommandEvent& WXUNUSED(event))
         wxString ns(pageSourceM.Upper());
         while (true)    // remove links, but leave text
         {
-            size_t p1 = ns.find(wxT("<A"));
+            size_t p1 = ns.find("<A");
             if (p1 == wxNOT_FOUND)
                 break;
-            size_t pb = ns.find(wxT(">"), p1);
+            size_t pb = ns.find(">", p1);
             if (pb == wxNOT_FOUND)
                 break;
-            size_t p2 = ns.find(wxT("</A>"), pb);
+            size_t p2 = ns.find("</A>", pb);
             if (p2 == wxNOT_FOUND)
                 break;
             ns.Remove(p2, 4);
@@ -227,9 +227,9 @@ void PrintableHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
 {
     wxString addr = link.GetHref();
     URI uri(addr);
-    if (uri.protocol == wxT("info"))    // not really a link
+    if (uri.protocol == "info")    // not really a link
         return;
-    if (uri.protocol != wxT("fr")) // call default handler for other protocols
+    if (uri.protocol != "fr") // call default handler for other protocols
     {
         wxHtmlWindow::OnLinkClicked(link);
         return;
@@ -243,9 +243,9 @@ void PrintableHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
     else
         openInTab = ::wxGetKeyState(WXK_CONTROL);
     if (openInTab)
-        uri.addParam(wxT("target=new_tab"));
+        uri.addParam("target=new_tab");
     else if (::wxGetKeyState(WXK_SHIFT))
-        uri.addParam(wxT("target=new"));
+        uri.addParam("target=new");
 
     if (!getURIProcessor().handleURI(uri))
         notImplementedMessage(this);

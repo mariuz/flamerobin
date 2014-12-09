@@ -73,7 +73,7 @@ wxString std2wxIdentifier(const std::string& input, wxMBConv* conv)
 
 wxString getHtmlCharset()
 {
-    return wxT("UTF-8");
+    return "UTF-8";
 }
 
 wxString escapeHtmlChars(const wxString& input, bool processNewlines)
@@ -94,19 +94,19 @@ wxString escapeHtmlChars(const wxString& input, bool processNewlines)
                 if (stop > start)
                     result += wxString(start, stop);
                 if (c == '&')
-                    result += wxT("&amp;");
+                    result += "&amp;";
                 else if (c == '<')
-                    result += wxT("&lt;");
+                    result += "&lt;";
                 else if (c == '>')
-                    result += wxT("&gt;");
+                    result += "&gt;";
                 else if (c == '"')
-                    result += wxT("&quot;");
+                    result += "&quot;";
                 else if (c == '\n')
-                    result += wxT("<BR>");
+                    result += "<BR>";
                 else if (c == '\r')
                     /* swallow silently */;
                 else
-                    wxASSERT_MSG(false, wxT("escape not handled"));
+                    wxASSERT_MSG(false, "escape not handled");
                 // start processing *after* the replaced character
                 ++stop;
                 start = stop;
@@ -138,15 +138,15 @@ wxString escapeXmlChars(const wxString& input)
                 if (stop > start)
                     result += wxString(start, stop);
                 if (c == '&')
-                    result += wxT("&amp;");
+                    result += "&amp;";
                 else if (c == '<')
-                    result += wxT("&lt;");
+                    result += "&lt;";
                 else if (c == '>')
-                    result += wxT("&gt;");
+                    result += "&gt;";
                 else if (c == '"')
-                    result += wxT("&quot;");
+                    result += "&quot;";
                 else
-                    wxASSERT_MSG(false, wxT("escape not handled"));
+                    wxASSERT_MSG(false, "escape not handled");
                 // start processing *after* the replaced character
                 ++stop;
                 start = stop;
@@ -226,7 +226,7 @@ wxString wrapText(const wxString& text, size_t maxWidth, size_t indent)
 
         if (eol)
         {
-            wrappedText += wxT('\n');
+            wrappedText += '\n';
             if (indentStr.IsEmpty())
                 indentStr.Pad(indent);
 
@@ -236,7 +236,7 @@ wxString wrapText(const wxString& text, size_t maxWidth, size_t indent)
             eol = false;
         }
 
-        if (*it == wxT('\n'))
+        if (*it == '\n')
         {
             wrappedText << indentStr << line;
             eol = true;
@@ -245,21 +245,21 @@ wxString wrapText(const wxString& text, size_t maxWidth, size_t indent)
         {
             if (wrapState == insideSingle)
             {
-                if (*it == wxT('\''))
+                if (*it == '\'')
                     wrapState = none;
             }
             else if (wrapState == insideDouble)
             {
-                if (*it == wxT('"'))
+                if (*it == '"')
                     wrapState = none;
             }
             else
             {
-                if (*it == wxT(' '))
+                if (*it == ' ')
                     lastSpace = it;
-                else if (*it == wxT('\''))
+                else if (*it == '\'')
                     wrapState = insideSingle;
-                else if (*it == wxT('"'))
+                else if (*it == '"')
                     wrapState = insideDouble;
             }
 

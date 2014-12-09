@@ -108,12 +108,12 @@ void BackupRestoreBaseFrame::doReadConfigSettings(const wxString& prefix)
     BaseFrame::doReadConfigSettings(prefix);
 
     bool verbose = true;
-    config().getValue(prefix + Config::pathSeparator + wxT("verboselog"),
+    config().getValue(prefix + Config::pathSeparator + "verboselog",
         verbose);
     checkbox_showlog->SetValue(verbose);
 
     wxString bkfile;
-    config().getValue(prefix + Config::pathSeparator + wxT("backupfilename"),
+    config().getValue(prefix + Config::pathSeparator + "backupfilename",
         bkfile);
     if (!bkfile.empty())
         text_ctrl_filename->SetValue(bkfile);
@@ -122,9 +122,9 @@ void BackupRestoreBaseFrame::doReadConfigSettings(const wxString& prefix)
 void BackupRestoreBaseFrame::doWriteConfigSettings(const wxString& prefix) const
 {
     BaseFrame::doWriteConfigSettings(prefix);
-    config().setValue(prefix + Config::pathSeparator + wxT("verboselog"),
+    config().setValue(prefix + Config::pathSeparator + "verboselog",
         checkbox_showlog->GetValue());
-    config().setValue(prefix + Config::pathSeparator + wxT("backupfilename"),
+    config().setValue(prefix + Config::pathSeparator + "backupfilename",
         text_ctrl_filename->GetValue());
 }
 
@@ -177,13 +177,13 @@ void BackupRestoreBaseFrame::threadOutputMsg(const wxString msg, MsgKind kind)
     switch (kind)
     {
     case error_message:
-        s.Prepend(wxT("e"));
+        s.Prepend("e");
         break;
     case important_message:
-        s.Prepend(wxT("i"));
+        s.Prepend("i");
         break;
     case progress_message:
-        s.Prepend(wxT("p"));
+        s.Prepend("p");
         break;
     default:
         wxASSERT(false);

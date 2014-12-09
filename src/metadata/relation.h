@@ -41,7 +41,7 @@ private:
 protected:
     void getDependentChecks(std::vector<CheckConstraint>& checks);
     void getDependentViews(std::vector<Relation*>& views,
-        const wxString& forColumn = wxT(""));
+        const wxString& forColumn = "");
 
     ColumnPtrs columnsM;
     std::vector<Privilege> privilegesM;
@@ -71,7 +71,7 @@ public:
     size_t getColumnCount() const;
     ColumnPtr findColumn(const wxString& name) const;
 
-    wxString getRebuildSql(const wxString& forColumn = wxT(""));
+    wxString getRebuildSql(const wxString& forColumn = "");
     std::vector<Privilege>* getPrivileges();
     bool getChildren(std::vector<MetadataItem *>& temp);
     void getTriggers(std::vector<Trigger*>& list,

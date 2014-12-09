@@ -57,7 +57,7 @@ private:
     wxString sqlM;
     wxString terminatorM;
 public:
-    MultiStatement(const wxString& sql, const wxString& terminator = wxT(";"));
+    MultiStatement(const wxString& sql, const wxString& terminator = ";");
 
     SingleStatement getNextStatement();
     SingleStatement getStatementAt(int position)
