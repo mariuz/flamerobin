@@ -1,48 +1,39 @@
-///////////////////////////////////////////////////////////////////////////////
-//
-//  File    : $Id$
 //  Subject : IBPP public header file. This is _the_ only file you include in
 //            your application files when developing with IBPP.
-//
-///////////////////////////////////////////////////////////////////////////////
-//
-//  (C) Copyright 2000-2006 T.I.P. Group S.A. and the IBPP Team (www.ibpp.org)
-//
-//  The contents of this file are subject to the IBPP License (the "License");
-//  you may not use this file except in compliance with the License.  You may
-//  obtain a copy of the License at http://www.ibpp.org or in the 'license.txt'
-//  file which must have been distributed along with this file.
-//
-//  This software, distributed under the License, is distributed on an "AS IS"
-//  basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.  See the
-//  License for the specific language governing rights and limitations
-//  under the License.
-//
-//  Contributor(s):
-//
-//      Olivier Mascia, main coding
-//      Matt Hortman, initial linux port
-//      Mark Jordan, design contributions
-//      Maxim Abrashkin, enhancement patches
-//      Torsten Martinsen, enhancement patches
-//      Michael Hieke, darwin (OS X) port, enhancement patches
-//      Val Samko, enhancement patches and debugging
-//      Mike Nordell, invaluable C++ advices
-//      Claudio Valderrama, help with not-so-well documented IB/FB features
-//      Many others, excellent suggestions, bug finding, and support
-//
-///////////////////////////////////////////////////////////////////////////////
-//
 //  COMMENTS
-//  Tabulations should be set every four characters when editing this file.
-//
 //  When compiling a project using IBPP, the following defines should be made
 //  on the command-line (or in makefiles) according to the OS platform and
 //  compiler used.
 //
 //  Select the platform:    IBPP_WINDOWS | IBPP_LINUX | IBPP_DARWIN
 //
-///////////////////////////////////////////////////////////////////////////////
+
+/*
+  (C) Copyright 2000-2006 T.I.P. Group S.A. and the IBPP Team (www.ibpp.org)
+
+  The contents of this file are subject to the IBPP License (the "License");
+  you may not use this file except in compliance with the License.  You may
+  obtain a copy of the License at http://www.ibpp.org or in the 'license.txt'
+  file which must have been distributed along with this file.
+
+  This software, distributed under the License, is distributed on an "AS IS"
+  basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.  See the
+  License for the specific language governing rights and limitations
+  under the License.
+
+  Contributor(s):
+
+      Olivier Mascia, main coding
+      Matt Hortman, initial linux port
+      Mark Jordan, design contributions
+      Maxim Abrashkin, enhancement patches
+      Torsten Martinsen, enhancement patches
+      Michael Hieke, darwin (OS X) port, enhancement patches
+      Val Samko, enhancement patches and debugging
+      Mike Nordell, invaluable C++ advices
+      Claudio Valderrama, help with not-so-well documented IB/FB features
+      Many others, excellent suggestions, bug finding, and support
+*/
 
 #ifndef __IBPP_H__
 #define __IBPP_H__
@@ -67,13 +58,13 @@
 // the standard exact precision types definitions of C 99 standard are used.
 
 #if defined(_MSC_VER) 
-// C99 §7.18.1.1 Exact-width integer types (only those used by IBPP)
+// C99 7.18.1.1 Exact-width integer types (only those used by IBPP)
     typedef __int16 int16_t;
     typedef __int32 int32_t;
     typedef unsigned __int32 uint32_t;
     typedef __int64 int64_t;
 #else
-    #include <stdint.h>         // C99 (§7.18) integer types definitions
+    #include <stdint.h>         // C99 (7.18) integer types definitions
 #endif
 
 #if !defined(_)
