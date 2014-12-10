@@ -127,14 +127,10 @@ bool selectRelationColumnsIntoVector(Relation* t, wxWindow* parent,
         wxString::size_type i = colNames.Index((*it));
         if (i != wxNOT_FOUND)
             selected_columns.Add(i);
-    }    
-    
-    bool ok = 
-#if wxCHECK_VERSION(2, 9, 0)
+    }
+
+    bool ok =
     ::wxGetSelectedChoices(selected_columns,
-#else
-    ::wxGetMultipleChoices(selected_columns,
-#endif
         _("Select one or more fields... (use ctrl key)"),  _("Table Fields"),
         colNames, parent) > 0;
     list.clear();

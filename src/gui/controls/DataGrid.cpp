@@ -725,7 +725,7 @@ std::vector<bool> DataGrid::getColumnsWithSelectedCells()
             ret[c] = true;
     }
 
-    // now mark all columns of selected single cells 
+    // now mark all columns of selected single cells
     wxGridCellCoordsArray cells(GetSelectedCells());
     for (size_t i = 0; i < cells.size(); i++)
     {
@@ -759,7 +759,7 @@ std::vector<bool> DataGrid::getRowsWithSelectedCells()
             ret[r] = true;
     }
 
-    // now mark all columns of selected single cells 
+    // now mark all columns of selected single cells
     wxGridCellCoordsArray cells(GetSelectedCells());
     for (size_t i = 0; i < cells.size(); i++)
     {
@@ -800,7 +800,7 @@ std::vector<bool> DataGrid::getSelectedCellsInRow(int row)
         }
     }
 
-    // now mark all selected single cells 
+    // now mark all selected single cells
     wxGridCellCoordsArray cells(GetSelectedCells());
     for (size_t i = 0; i < cells.size(); i++)
     {
@@ -1028,7 +1028,6 @@ void DataGrid::OnKeyDown(wxKeyEvent& event)
         }
     }
 
-#if !wxCHECK_VERSION(2, 9, 0)
     if ((event.GetKeyCode() == WXK_HOME || event.GetKeyCode() == WXK_END)
         && !event.ControlDown())
     {
@@ -1038,7 +1037,6 @@ void DataGrid::OnKeyDown(wxKeyEvent& event)
         MakeCellVisible(c);
         return;
     }
-#endif
 
     event.Skip();
 }
@@ -1062,4 +1060,3 @@ void DataGrid::OnThumbRelease(wxScrollWinEvent& event)
     OnIdle(dummy);
     event.Skip();
 }
-

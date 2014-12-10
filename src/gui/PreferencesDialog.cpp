@@ -94,11 +94,7 @@ static void processPlatformAttribute(wxXmlNode *node)
     while (c)
     {
         isok = false;
-#if wxCHECK_VERSION(2, 9, 0)
         if (!c->GetAttribute("platform", &s))
-#else
-        if (!c->GetPropVal("platform"), &s))
-#endif
             isok = true;
         else
         {
@@ -596,13 +592,8 @@ bool PreferencesDialog::parseDescriptionNode(wxTreeItemId parent, wxXmlNode* xml
 bool PreferencesDialog::parseDescriptionSetting(wxPanel* page, wxXmlNode* xmln,
     PrefDlgSetting* enabledby)
 {
-#if wxCHECK_VERSION(2, 9, 0)
     wxString type(xmln->GetAttribute("type", wxEmptyString));
     wxString style(xmln->GetAttribute("style", wxEmptyString));
-#else
-    wxString type(xmln->GetPropVal("type"), wxEmptyString));
-    wxString style(xmln->GetPropVal("style"), wxEmptyString));
-#endif
     PrefDlgSetting* setting = PrefDlgSetting::createPrefDlgSetting(page,
         type, style, enabledby);
     // ignore unknown settings unless debug mode is active
@@ -761,14 +752,14 @@ void PreferencesDialogTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *t
         ConfdefTemplateProcessor ctp(object, tp->getWindow());
         wxString confDefData;
         ctp.processTemplateFile(confDefData, defFileName, object, tp->getProgressIndicator());
-        
+
         // Show dialog for expanded confdef data.
         wxString dialogTitle(_("Code generation"));
         Config& config(tp->getConfig());
         if (cmdName == "edit_info")
         {
             dialogTitle = _("Code template metadata");
-            config = tp->getInfo(); 
+            config = tp->getInfo();
         }
         PreferencesDialog pd(tp->getWindow(), dialogTitle,
             config, confDefData, _("Continue"), dialogName);
@@ -778,4 +769,3 @@ void PreferencesDialogTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *t
                 throw FRAbort();
     }
 }
-

@@ -58,8 +58,6 @@ FileTextControl::FileTextControl(wxWindow* parent, wxWindowID id,
     SetDropTarget(new DnDFilename(this));
 #endif
 
-#if wxCHECK_VERSION(2, 9, 0)
     AutoCompleteFileNames();
-#endif
-}
 
+}
