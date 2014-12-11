@@ -236,14 +236,5 @@ make -j4
 make install
 
 
-In wx3.x STC library is already included and no need for step bellow 
-
-In wx2.8.x: you have to compile STC library. It is needed for wxStyledTextControl which
-is used in many places in FlameRobin. Enter "contrib/src/stc" directory:
-
-make j4
-make install
-
-
 Depending on your --prefix setting, you might need to run 'make install' as
 superuser (root).
