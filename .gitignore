@@ -23,3 +23,7 @@ flamerobin.config
 flamerobin.creator
 flamerobin.files
 flamerobin.includes
+*.o
+*.a
+.deps/
+.pch/
