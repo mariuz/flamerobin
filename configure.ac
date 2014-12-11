@@ -25,7 +25,7 @@ else
 fi
 
 # Check for wxWidgets
-AM_PATH_WXCONFIG([2.8.0], [], [
+AM_PATH_WXCONFIG([3.0.0], [], [
         AC_MSG_ERROR([
            wxWidgets must be installed on your system
            but wx-config script couldn't be found.

@@ -14476,7 +14476,7 @@ fi
   if test "$WX_CONFIG_PATH" != "no" ; then
     WX_VERSION=""
 
-    min_wx_version=2.8.0
+    min_wx_version=3.0.0
     if test -z "" ; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for wxWidgets version >= $min_wx_version" >&5
 $as_echo_n "checking for wxWidgets version >= $min_wx_version... " >&6; }
@@ -14629,7 +14629,7 @@ $as_echo "no (version $WX_VERSION is not new enough)" >&6; }
     If you still get this error, then check that 'wx-config' is
     in path, the directory where wxWidgets libraries are installed
     (returned by 'wx-config --libs' command) is in LD_LIBRARY_PATH
-    or equivalent variable and wxWidgets version is 2.8.0 or above."
+    or equivalent variable and wxWidgets version is 3.0.0 or above."
 
 
         as_fn_error $? "
