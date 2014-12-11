@@ -51,7 +51,7 @@
 DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
     : wxGrid(parent, id), timerM(this, TIMER_ID), calculateSumM(true)
 {
-    // this is necessary for wxWidgets 2.9, otherwise grid will be as wide
+    // this is necessary for wxWidgets 3.0, otherwise grid will be as wide
     // as the sum of column widths
     SetMinSize(wxSize(100, 50));
 
@@ -225,7 +225,7 @@ void DataGrid::showPopupMenu(wxPoint cursorPos)
 void DataGrid::updateRowHeights()
 {
     // HACK alert: this is taken straight from wxWidgets grid.cpp...
-#if defined(__WXMOTIF__) || defined(__WXGTK__)
+#if defined(__WXGTK__)
     int extraHeight = 8;
 #else
     int extraHeight = 4;
