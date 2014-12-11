@@ -23,7 +23,7 @@
 
 #ifndef FR_DATAGRID_H
 #define FR_DATAGRID_H
-//----------------------------------------------------------------------
+
 #include <wx/wx.h>
 #include <wx/grid.h>
 #include <wx/listimpl.cpp>
@@ -36,7 +36,7 @@ BEGIN_DECLARE_EVENT_TYPES()
     // this event is sent when selection is changed and values are summed up
     DECLARE_LOCAL_EVENT_TYPE(wxEVT_FRDG_SUM, 44)
 END_DECLARE_EVENT_TYPES()
-//----------------------------------------------------------------------
+
 class DataGrid: public wxGrid
 {
 private:
@@ -90,5 +90,5 @@ public:
     std::vector<bool> getSelectedCellsInRow(int row);
     wxGridCellCoordsArray getSelectedCells();
 };
-//----------------------------------------------------------------------
+
 #endif

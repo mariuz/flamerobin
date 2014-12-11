@@ -89,32 +89,26 @@ void showAboutBox(wxWindow* parent)
 
     // the following would prohibit the native dialog on Mac OS X
 #if defined __WXGTK__
-    info.SetWebSite("http://www.flamerobin.org");
-/* possible additions
-    AddDeveloper(...);
-    AddDocWriter(...);
-    AddArtist(...);
-    AddTranslator(...);
-*/
+    info.SetWebSite("http://flamerobin.org");
 #endif
 
     wxAboutBox(info);
 
 #else
 
-    wxString msg("FlameRobin ") + ver);
+    wxString msg("FlameRobin " + ver);
 
 #if defined(_WIN64)
-    msg += " (x64)");
+    msg += " (x64)";
 #endif
 
-    msg += "\n");
+    msg += "\n";
     msg += _("Database administration tool for Firebird RDBMS");
-    msg += "\n\n");
+    msg += "\n\n";
     msg += libs;
-    msg += "\n\n");
+    msg += "\n\n";
     msg += _("Copyright (c) 2004-2014  FlameRobin Development Team");
-    msg += "\n");
+    msg += "\n";
     msg += _("http://www.flamerobin.org");
 
     wxMessageBox(msg, _("About FlameRobin"), wxOK | wxICON_INFORMATION, parent);

@@ -31,12 +31,12 @@
 #include <ibpp.h>
 
 #include "metadata/constraints.h"
-//----------------------------------------------------------------------
+
 class Database;
 class DataGridRowBuffer;
 class ProgressIndicator;
 class wxMBConv;
-//----------------------------------------------------------------------
+
 class ResultsetColumnDef
 {
 private:
@@ -62,7 +62,7 @@ public:
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter) = 0;
 };
-//----------------------------------------------------------------------
+
 struct DataGridFieldInfo
 {
     bool rowInserted;
@@ -81,7 +81,7 @@ struct DataGridRowsBlob
     unsigned row;
     unsigned col;
 };
-//----------------------------------------------------------------------
+
 class DataGridRows
 {
 private:
@@ -137,5 +137,5 @@ public:
     DataGridRowsBlob setBlobPrepare(unsigned row, unsigned col);
     void setBlob(DataGridRowsBlob &b);
 };
-//----------------------------------------------------------------------
+
 #endif

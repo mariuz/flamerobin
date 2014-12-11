@@ -86,13 +86,13 @@ public:
 
     static DBHTreeConfigCache& get();
 
-    bool allowDnD() { return allowDragM; };
+    bool allowDnD() { return allowDragM; }
     bool getHideDisconnectedDatabases()
-        { return hideDisconnectedDatabasesM; };
-    bool getShowColumnParamCount() { return showColumnParamCountM; };
-    bool getShowColumns() { return showColumnsM; };
-    bool getSortDatabases() { return sortDatabasesM; };
-    bool getSortServers() { return sortServersM; };
+        { return hideDisconnectedDatabasesM; }
+    bool getShowColumnParamCount() { return showColumnParamCountM; }
+    bool getShowColumns() { return showColumnsM; }
+    bool getSortDatabases() { return sortDatabasesM; }
+    bool getSortServers() { return sortServersM; }
 };
 
 DBHTreeConfigCache::DBHTreeConfigCache()
