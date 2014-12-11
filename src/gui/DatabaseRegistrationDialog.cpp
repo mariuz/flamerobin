@@ -162,7 +162,7 @@ wxArrayString DatabaseRegistrationDialog::getDatabaseDialectChoices() const
 {
     wxArrayString choices;
     choices.Alloc(2);
-    // IBPP allows only dialects 1 and 3 for database creation
+    // only dialects 1 and 3 are valid for database creation
     choices.Add("1");
     choices.Add("3");
     return choices;
