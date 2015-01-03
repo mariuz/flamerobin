@@ -2637,7 +2637,7 @@ bool ExecuteSqlFrame::commitTransaction()
     catch (std::exception &se)
     {
         splitScreen();
-        log(wxString(_("ERROR!\n")) + std2wx(se.what()), ttError);
+        log(wxString(_("ERROR!\n")) + se.what(), ttError);
         return false;
     }
 

@@ -272,7 +272,7 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
         if (progressind)
         {
             progressind->setProgressMessage(_("Using password of: ") +
-                std2wx(db->Username()) + "@" + (*ci)->getName_());
+                db->Username() + "@" + (*ci)->getName_());
             progressind->stepProgress();
         }
         try
@@ -281,11 +281,11 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
                 db->Username(), db->UserPassword());
             svc->Connect();
             if (sysdba)
-                serviceSysdbaPasswordM = std2wx(db->UserPassword());
+                serviceSysdbaPasswordM = db->UserPassword();
             else
             {
-                serviceUserM = std2wx(db->Username());
-                servicePasswordM = std2wx(db->UserPassword());
+                serviceUserM = db->Username();
+                servicePasswordM = db->UserPassword();
             }
             return true;
         }
