@@ -43,11 +43,11 @@ User::User(ServerPtr server, const IBPP::User& src)
     : MetadataItem(ntUnknown, server.get()), serverM(server),
         useridM(src.userid), groupidM(src.groupid)
 {
-    usernameM = std2wx(src.username);
-    passwordM = std2wx(src.password);
-    firstnameM = std2wx(src.firstname);
-    middlenameM = std2wx(src.middlename);
-    lastnameM = std2wx(src.lastname);
+    usernameM = src.username;
+    passwordM = src.password;
+    firstnameM = src.firstname;
+    middlenameM = src.middlename;
+    lastnameM = src.lastname;
 }
 
 ServerPtr User::getServer() const

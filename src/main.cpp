@@ -91,7 +91,7 @@ bool Application::OnInit()
     }
     catch (IBPP::Exception &e)
     {
-        wxMessageBox(std2wx(e.ErrorMessage()), _("Error initalizing IBPP library."), wxOK | wxICON_ERROR);
+        wxMessageBox(e.ErrorMessage(), _("Error initalizing IBPP library."), wxOK | wxICON_ERROR);
         return false;
     }
 
@@ -120,7 +120,7 @@ void Application::HandleEvent(wxEvtHandler* handler, wxEventFunction func,
     }
     catch (const std::exception& e)
     {
-        wxMessageBox(std2wx(e.what()), _("Unhandled Error in FlameRobin"),
+        wxMessageBox(e.what(), _("Unhandled Error in FlameRobin"),
             wxOK | wxICON_ERROR, wxGetTopLevelParent(wxGetActiveWindow()));
     }
 }

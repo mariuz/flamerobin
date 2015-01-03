@@ -1154,7 +1154,7 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
         ProgressIndicator* progressIndicatorM;
     public:
         ProgressIndicatorHelper(ProgressIndicator* progressIndicator)
-            : progressIndicatorM(progressIndicator) {};
+            : progressIndicatorM(progressIndicator) {}
         void init(wxString collectionName, int stepsTotal, int currentStep)
         {
             if (progressIndicatorM)

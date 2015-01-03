@@ -1014,11 +1014,11 @@ void MainFrame::OnMenuGetServerVersion(wxCommandEvent& WXUNUSED(event))
     }
     catch (IBPP::Exception& e)
     {
-        wxMessageBox(std2wx(e.ErrorMessage()), _("Error"));
+        wxMessageBox(e.ErrorMessage(), _("Error"));
         return;
     }
 
-    wxMessageBox(std2wx(version), _("Server Version"),
+    wxMessageBox(version, _("Server Version"),
         wxOK | wxICON_INFORMATION);
 }
 
