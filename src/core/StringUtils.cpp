@@ -197,7 +197,7 @@ wxString loadEntireFile(const wxFileName& filename)
 
     std::stringstream ss;
     ss << filex.rdbuf();
-    wxString s(std2wx(ss.str()));
+    wxString s(ss.str());
     filex.close();
     return s;
 }
