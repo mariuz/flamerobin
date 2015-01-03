@@ -267,7 +267,7 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
         // Use the user name and password of the connected user
         // instead of the stored ones.
         IBPP::Database& db = (*ci)->getIBPPDatabase();
-        if (sysdba && std2wx(db->Username()).Upper() != "SYSDBA")
+        if (sysdba && wxString(db->Username()).Upper() != "SYSDBA")
             continue;
         if (progressind)
         {
