@@ -31,12 +31,6 @@
 
 using namespace ibpp_internals;
 
-// None of the exception classes methods are implemented inline, because they
-// are all declared throw() and Borland compilers at least, but possibly some
-// others emit a warning like "W8026 - functions with exception specification
-// are not expanded inline". Nothing we have to worry about, but we don't want
-// people concerned by such warnings.
-
 IBPP::Exception::~Exception() throw()
 {
 }
