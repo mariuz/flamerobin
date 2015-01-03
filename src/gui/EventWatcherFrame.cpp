@@ -274,7 +274,7 @@ void EventWatcherFrame::updateMonitoringActive()
 void EventWatcherFrame::ibppEventHandler(IBPP::Events events,
     const std::string& name, int count)
 {
-    eventlog_received->logEvent(std2wx(name), count);
+    eventlog_received->logEvent(name, count);
 }
 
 //! closes window if database is removed (unregistered)

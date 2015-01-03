@@ -955,7 +955,7 @@ public:
         catch (std::exception& e)
         {
             boost::lock_guard<boost::mutex> guard(lockM);
-            errorMsgM = std2wx(e.what());
+            errorMsgM = e.what();
         }
     }
 };
@@ -1513,7 +1513,7 @@ wxString Database::getDecryptedPassword() const
 {
     // if we already have an established connection return that password
     if (databaseM != 0 && databaseM->Connected())
-        return std2wx(databaseM->UserPassword());
+        return databaseM->UserPassword();
 
     // temporary connection
     if (connectionCredentialsM)
@@ -1789,7 +1789,7 @@ void Database::getConnectedUsers(wxArrayString& users) const
         for (std::map<std::string, size_t>::iterator it = counts.begin();
             it != counts.end(); ++it)
         {
-            wxString name(std2wx((*it).first));
+            wxString name((*it).first);
             if ((*it).second > 1)
                 name += wxString::Format(" (%d)", (*it).second);
             users.Add(name);

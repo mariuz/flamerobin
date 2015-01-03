@@ -2465,7 +2465,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     catch (std::exception& e)
     {
         splitScreen();
-        log(_("Error: ") + std2wx(e.what()) + "\n", ttError);
+        log(_("Error: ") + e.what() + "\n", ttError);
         retval = false;
     }
     catch (...)

@@ -456,7 +456,7 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
     }
     catch (IBPP::Exception &e)
     {
-        wxMessageBox(std2wx(e.ErrorMessage()), _("Error"), wxOK|wxICON_ERROR);
+        wxMessageBox(e.ErrorMessage(), _("Error"), wxOK|wxICON_ERROR);
     }
     catch (...)
     {

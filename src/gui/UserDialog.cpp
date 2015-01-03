@@ -288,7 +288,7 @@ bool UserPropertiesHandler::handleURI(URI& uri)
         }
         catch(IBPP::Exception& e)
         {
-            wxMessageBox(std2wx(e.ErrorMessage()), _("Error"),
+            wxMessageBox(e.ErrorMessage(), _("Error"),
                 wxOK | wxICON_WARNING);
         }
     }
@@ -338,7 +338,7 @@ bool DropUserHandler::handleURI(URI& uri)
     }
     catch(IBPP::Exception& e)
     {
-        wxMessageBox(std2wx(e.ErrorMessage()), _("Error"),
+        wxMessageBox(e.ErrorMessage(), _("Error"),
             wxOK | wxICON_WARNING);
     }
     return true;

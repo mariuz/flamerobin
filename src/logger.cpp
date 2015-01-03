@@ -236,7 +236,7 @@ bool Logger::prepareDatabase(Database *db)
     catch (IBPP::Exception &e)
     {
         showWarningDialog(0, _("Creation of logging objects failed"),
-            std2wx(e.ErrorMessage()), AdvancedMessageDialogButtonsOk());
+            e.ErrorMessage(), AdvancedMessageDialogButtonsOk());
     }
     catch (...)
     {

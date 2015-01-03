@@ -141,7 +141,7 @@ void DataGridTable::fetch()
         catch (IBPP::Exception& e)
         {
             allRowsFetchedM = true;
-            ::wxMessageBox(std2wx(e.ErrorMessage()),
+            ::wxMessageBox(e.ErrorMessage(),
                 _("An IBPP error occurred."), wxOK|wxICON_ERROR);
         }
         catch (...)
@@ -458,7 +458,7 @@ void DataGridTable::initialFetch(bool readonly)
     }
     catch (IBPP::Exception& e)
     {
-        ::wxMessageBox(std2wx(e.ErrorMessage()),
+        ::wxMessageBox(e.ErrorMessage(),
             _("An IBPP error occurred."), wxOK | wxICON_ERROR);
     }
     catch (...)
@@ -610,13 +610,13 @@ void DataGridTable::SetValue(int row, int col, const wxString& value)
     catch (const FRError& err)
     {
         showErrorDialog(wxGetTopLevelParent(wxGetActiveWindow()),
-            _("Invalid data"), std2wx(err.what()),
+            _("Invalid data"), err.what(),
             AdvancedMessageDialogButtonsOk());
     }
     catch (const IBPP::Exception& e)
     {
         showErrorDialog(wxGetTopLevelParent(wxGetActiveWindow()),
-            _("Database error"), std2wx(e.what()),
+            _("Database error"), e.what(),
             AdvancedMessageDialogButtonsOk());
     }
     catch (...)
@@ -666,7 +666,7 @@ bool DataGridTable::DeleteRows(size_t pos, size_t numRows)
     catch (const IBPP::Exception& e)
     {
         showErrorDialog(wxGetTopLevelParent(wxGetActiveWindow()),
-            _("Database error"), std2wx(e.what()),
+            _("Database error"), e.what(),
             AdvancedMessageDialogButtonsOk());
     }
     catch (...)

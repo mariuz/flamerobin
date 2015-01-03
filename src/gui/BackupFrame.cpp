@@ -120,7 +120,7 @@ void* BackupThread::Entry()
                 logImportant(msg);
                 break;
             }
-            msg = std2wx(c);
+            msg = c;
             logProgress(msg);
         }
         svc->Disconnect();
@@ -130,7 +130,7 @@ void* BackupThread::Entry()
         now = wxDateTime::Now();
         msg.Printf(_("Database backup canceled %s due to IBPP exception:\n\n"),
             now.FormatTime().c_str());
-        msg += std2wx(e.ErrorMessage());
+        msg += e.ErrorMessage();
         logError(msg);
     }
     catch (...)
