@@ -754,10 +754,10 @@ class ServiceImpl : public IBPP::IService
 
 private:
     int mRefCount;              // Reference counter
-    isc_svc_handle mHandle;     // InterBase API Service Handle
-    std::string mServerName;    // Nom du serveur
-    std::string mUserName;      // Nom de l'utilisateur
-    std::string mUserPassword;  // Mot de passe de l'utilisateur
+    isc_svc_handle mHandle;     // Firebird API Service Handle
+    std::string mServerName;    // Server Name
+    std::string mUserName;      // User Name
+    std::string mUserPassword;  // User Password
     std::string mWaitMessage;   // Progress message returned by WaitMsg()
 
     isc_svc_handle* GetHandlePtr() { return &mHandle; }
