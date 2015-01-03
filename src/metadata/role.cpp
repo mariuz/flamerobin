@@ -83,13 +83,13 @@ std::vector<Privilege>* Role::getPrivileges()
             st1->Get(5, grantoption);
         if (!pr || user != lastuser || usertype != lasttype)
         {
-            Privilege p(this, std2wx(user).Strip(), usertype);
+            Privilege p(this, wxString(user).Strip(), usertype);
             privilegesM.push_back(p);
             pr = &privilegesM.back();
             lastuser = user;
             lasttype = usertype;
         }
-        pr->addPrivilege(privilege[0], std2wx(grantor).Strip(),
+        pr->addPrivilege(privilege[0], wxString(grantor).Strip(),
             grantoption != 0);  // ADMIN OPTION = 2
     }
     return &privilegesM;
@@ -108,7 +108,7 @@ wxString Role::getOwner()
     st1->Fetch();
     std::string name;
     st1->Get(1, name);
-    return std2wx(name).Trim();
+    return wxString(name).Trim();
 }
 
 const wxString Role::getTypeName() const
