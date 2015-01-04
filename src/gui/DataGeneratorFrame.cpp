@@ -329,7 +329,7 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     valuetypeLabel = new wxStaticText( rightPanel, wxID_ANY, "Value type:", wxDefaultPosition, wxDefaultSize, 0 );
     rightPanelSizer->Add( valuetypeLabel, 0, wxALL, 10 );
 
-    wxFlexGridSizer* flexSizer = new wxFlexGridSizer( 2, 2, 3, 3 );
+    wxFlexGridSizer* flexSizer = new wxFlexGridSizer( 0, 2, 3, 3 );
     flexSizer->AddGrowableCol( 1 );
     flexSizer->SetFlexibleDirection( wxHORIZONTAL );
 
