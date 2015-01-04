@@ -1384,7 +1384,7 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     }
     else
     {
-        wxString val(std2wx(value, converter));
+        wxString val = wxString(value.c_str(), *converter);
         size_t trimLen = val.Strip().Length();
         if (val.Length() > size_t(charSizeM))
             val.Truncate(trimLen > size_t(charSizeM) ? trimLen : charSizeM);
@@ -1700,7 +1700,7 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
     /* wxMessageBox(wxString::Format("TABLE: %s (RO=%d), COLUMN: %s (RO=%d, NULL=%d)"),
         tabName.c_str(),
         locator ? 0 : 1,
-        std2wx(statementM->ColumnName(col)).c_str(),
+        wxString(statementM->ColumnName(col)).c_str(),
         readOnly ? 1 : 0,
         nullable ? 1 : 0)
     );*/

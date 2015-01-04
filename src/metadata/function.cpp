@@ -152,7 +152,7 @@ void Function::loadProperties()
         if (!st1->IsNull(11))
         {
             st1->Get(11, charset);
-            wxString chset(std2wx(charset, converter).Strip());
+            wxString chset = wxString(charset.c_str(), *converter).Strip();
             if (db->getDatabaseCharset() != chset)
             {
                 datatype += " " + SqlTokenizer::getKeyword(kwCHARACTER)

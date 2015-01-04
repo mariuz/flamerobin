@@ -465,7 +465,7 @@ std::vector<Privilege>* Procedure::getPrivileges()
             lastuser = user;
             lasttype = usertype;
         }
-        pr->addPrivilege(privilege[0], std2wx(grantor, converter),
+        pr->addPrivilege(privilege[0], wxString(grantor.c_str(), *converter),
             grantoption == 1);
     }
     return &privilegesM;

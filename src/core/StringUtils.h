@@ -31,7 +31,6 @@
 
 
 std::string wx2std(const wxString& input, wxMBConv* conv = wxConvCurrent);
-wxString std2wx(const std::string& input, wxMBConv* conv = wxConvCurrent);
 
 wxString std2wxIdentifier(const std::string& input, wxMBConv* conv);
 

@@ -101,7 +101,7 @@ void Exception::loadProperties(IBPP::Statement& statement, wxMBConv* converter)
 
     std::string message;
     statement->Get(2, message);
-    messageM = std2wx(message, converter);
+    messageM = wxString(message.c_str(), *converter);
     statement->Get(3, numberM);
     if (statement->IsNull(4))
         setDescriptionIsEmpty();

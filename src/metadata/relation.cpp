@@ -128,7 +128,7 @@ void Relation::loadProperties()
         {
             std::string s;
             st1->Get(3, s);
-            setExternalFilePath(std2wx(s, converter));
+            setExternalFilePath(wxString(s.c_str(), *converter));
         }
         else
             setExternalFilePath(wxEmptyString);
@@ -603,7 +603,7 @@ std::vector<Privilege>* Relation::getPrivileges()
         st1->Get(6, field);
         if (!pr || user != lastuser || usertype != lasttype)
         {
-            Privilege p(this, std2wx(user, converter).Strip(), usertype);
+            Privilege p(this, wxString(user.c_str(), *converter).Strip(), usertype);
             privilegesM.push_back(p);
             pr = &privilegesM.back();
             lastuser = user;

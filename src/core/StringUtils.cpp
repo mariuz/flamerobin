@@ -50,15 +50,6 @@ std::string wx2std(const wxString& input, wxMBConv* conv)
     return std::string(buf);
 }
 
-wxString std2wx(const std::string& input, wxMBConv* conv)
-{
-    if (input.empty())
-        return wxEmptyString;
-    if (!conv)
-        conv = wxConvCurrent;
-    return wxString(input.c_str(), *conv);
-}
-
 wxString std2wxIdentifier(const std::string& input, wxMBConv* conv)
 {
     if (input.empty())

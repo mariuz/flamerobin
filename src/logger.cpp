@@ -87,7 +87,7 @@ bool Logger::log2database(Config *cfg, const SqlStatement& stm, Database* db)
     catch (IBPP::Exception &e)
     {
         showWarningDialog(0, _("Logging to database failed"),
-            std2wx(e.ErrorMessage(), conv), AdvancedMessageDialogButtonsOk());
+            wxString(e.ErrorMessage(), *conv), AdvancedMessageDialogButtonsOk());
     }
     catch (...)
     {

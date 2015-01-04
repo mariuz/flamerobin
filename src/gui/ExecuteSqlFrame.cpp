@@ -2817,8 +2817,8 @@ void ExecuteSqlFrame::OnGridLabelLeftDClick(wxGridEvent& event)
     int column = 1 + event.GetCol();
     if (column < 1 || column > table->GetNumberCols())
         return;
-    SelectStatement sstm(std2wx(statementM->Sql(),
-        databaseM->getCharsetConverter()));
+    SelectStatement sstm(wxString(statementM->Sql().c_str(),
+        *databaseM->getCharsetConverter()));
 
     // rebuild SQL statement with different ORDER BY clause
     sstm.orderBy(column);
