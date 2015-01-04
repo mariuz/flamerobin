@@ -144,9 +144,9 @@ void Function::loadProperties()
         st1->Get(7, subtype);
         st1->Get(8, precision);
         st1->Get(9, libraryName);
-        libraryNameM = std2wx(libraryName, converter).Strip();
+        libraryNameM = wxString(libraryName.c_str(), *converter).Strip();
         st1->Get(10, entryPoint);
-        entryPointM = std2wx(entryPoint, converter).Strip();
+        entryPointM = wxString(entryPoint.c_str(), *converter).Strip();
         wxString datatype = Domain::dataTypeToString(type, scale,
             precision, subtype, length);
         if (!st1->IsNull(11))

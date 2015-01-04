@@ -92,7 +92,7 @@ void readBlob(IBPP::Statement& st, int column, wxString& result,
         readBuffer[size] = 0;
         resultBuffer += readBuffer;
     }
-    result = std2wx(resultBuffer, conv);
+    result = wxString(resultBuffer.c_str(), *conv);
     b->Close();
 }
 

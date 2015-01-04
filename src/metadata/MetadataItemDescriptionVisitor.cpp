@@ -100,7 +100,7 @@ void LoadDescriptionVisitor::loadDescription(MetadataItem* object,
             IBPP::Blob b = loader->createBlob();
             st1->Get(1, b);
             b->Load(value);
-            descriptionM = std2wx(value, csConverter);
+            descriptionM = wxString(value.c_str(), *csConverter);
         }
         else
             descriptionM = wxEmptyString;

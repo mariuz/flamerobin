@@ -1273,13 +1273,13 @@ wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
         }
     }
     b->Close();
-    wxString wxs(std2wx(result, converterM));
+    wxString wxs(result.c_str(), *converterM);
     if (bytesToFetch <= 0)    // there was more data to fetch
     {               // incomplete strings might not get translated properly
         while (wxs.IsEmpty() && result.length() > 0)
         {
             result.erase(result.length()-1, 1); // remove last byte
-            wxs = std2wx(result, converterM);   // try converting again
+            wxs = wxString(result.c_str(), *converterM);   // try converting again
         }
     }
     buffer->setString(stringIndexM, wxs);
@@ -1726,12 +1726,12 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
         bool readOnly, nullable;
         getColumnInfo(databaseM, col, readOnly, nullable);
 
-        wxString colName(std2wx(statement->ColumnAlias(col),
-            databaseM->getCharsetConverter()));
+        wxString colName(statement->ColumnAlias(col),
+            *databaseM->getCharsetConverter());
         if (colName.empty())
         {
-            colName = std2wx(statement->ColumnName(col),
-                databaseM->getCharsetConverter());
+            colName = wxString(statement->ColumnName(col),
+                *databaseM->getCharsetConverter());
         }
 
         IBPP::SDT type = statement->ColumnType(col);

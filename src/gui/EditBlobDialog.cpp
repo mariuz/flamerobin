@@ -691,7 +691,7 @@ bool EditBlobDialog::loadFromStreamAsText(wxInputStream& stream, bool isNull, co
 
     if (!progress->isCanceled())
     {
-        blob_text->SetText(std2wx(buffer));
+        blob_text->SetText(buffer);
     }
 
     free(buffer);

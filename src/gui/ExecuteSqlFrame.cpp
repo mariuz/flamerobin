@@ -2374,7 +2374,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         {
             std::string plan;
             statementM->Plan(plan);
-            log(std2wx(plan, databaseM->getCharsetConverter()));
+            log(wxString(plan.c_str(), *databaseM->getCharsetConverter()));
         }
         catch(IBPP::Exception&)
         {
@@ -2457,8 +2457,8 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     catch(IBPP::Exception& e)
     {
         splitScreen();
-        wxString msg(std2wx(e.ErrorMessage(),
-            databaseM->getCharsetConverter()));
+        wxString msg(e.ErrorMessage(),
+            *databaseM->getCharsetConverter());
         log(_("Error: ") + msg + "\n", ttError);
         retval = false;
     }
@@ -2630,7 +2630,7 @@ bool ExecuteSqlFrame::commitTransaction()
     catch (IBPP::Exception &e)
     {
         splitScreen();
-        log(std2wx(e.ErrorMessage(), databaseM->getCharsetConverter()),
+        log(wxString(e.ErrorMessage(), *databaseM->getCharsetConverter()),
             ttError);
         return false;
     }
@@ -2695,7 +2695,7 @@ bool ExecuteSqlFrame::rollbackTransaction()
     catch (IBPP::Exception &e)
     {
         splitScreen();
-        log(std2wx(e.ErrorMessage(), databaseM->getCharsetConverter()),
+        log(wxString(e.ErrorMessage(), *databaseM->getCharsetConverter()),
             ttError);
         return false;
     }
@@ -3143,7 +3143,7 @@ class DropColumnHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
 public:
-    DropColumnHandler() {};
+    DropColumnHandler() {}
     bool handleURI(URI& uri);
 private:
     static const DropColumnHandler handlerInstance;
