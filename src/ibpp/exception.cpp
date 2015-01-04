@@ -208,11 +208,6 @@ const char* SQLExceptionImpl::Origin() const throw()
 	return ExceptionBase::Origin();
 }
 
-const char* SQLExceptionImpl::ErrorMessage() const throw()
-{
-	return ExceptionBase::what();
-}
-
 const char* SQLExceptionImpl::what() const throw()
 {
 	return ExceptionBase::what();
@@ -303,11 +298,6 @@ WrongTypeImpl::~WrongTypeImpl() throw ()
 const char* WrongTypeImpl::Origin() const throw()
 {
 	return ExceptionBase::Origin();
-}
-
-const char* WrongTypeImpl::ErrorMessage() const throw()
-{
-	return ExceptionBase::what();
 }
 
 const char* WrongTypeImpl::what() const throw()

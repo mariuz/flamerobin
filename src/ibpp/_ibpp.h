@@ -652,7 +652,6 @@ public:
     //  (((((((( OBJECT INTERFACE ))))))))
 
     virtual const char* Origin() const throw();
-    virtual const char* ErrorMessage() const throw();
     virtual const char* what() const throw();
 };
 
@@ -676,7 +675,6 @@ public:
 
 public:
     virtual const char* Origin() const throw();
-    virtual const char* ErrorMessage() const throw();
     virtual const char* what() const throw();
 };
 
@@ -705,7 +703,6 @@ public:
 
 public:
     virtual const char* Origin() const throw();
-    virtual const char* ErrorMessage() const throw();
     virtual const char* what() const throw();
     virtual int SqlCode() const throw();
     virtual int EngineCode() const throw();
@@ -732,7 +729,6 @@ public:
 
 public:
     virtual const char* Origin() const throw();
-    virtual const char* ErrorMessage() const throw();
     virtual const char* what() const throw();
 };
 
