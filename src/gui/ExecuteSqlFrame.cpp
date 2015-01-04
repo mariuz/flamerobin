@@ -2457,7 +2457,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     catch(IBPP::Exception& e)
     {
         splitScreen();
-        wxString msg(e.ErrorMessage(),
+        wxString msg(e.what(),
             *databaseM->getCharsetConverter());
         log(_("Error: ") + msg + "\n", ttError);
         retval = false;
@@ -2630,7 +2630,7 @@ bool ExecuteSqlFrame::commitTransaction()
     catch (IBPP::Exception &e)
     {
         splitScreen();
-        log(wxString(e.ErrorMessage(), *databaseM->getCharsetConverter()),
+        log(wxString(e.what(), *databaseM->getCharsetConverter()),
             ttError);
         return false;
     }
@@ -2695,7 +2695,7 @@ bool ExecuteSqlFrame::rollbackTransaction()
     catch (IBPP::Exception &e)
     {
         splitScreen();
-        log(wxString(e.ErrorMessage(), *databaseM->getCharsetConverter()),
+        log(wxString(e.what(), *databaseM->getCharsetConverter()),
             ttError);
         return false;
     }

@@ -151,8 +151,7 @@ namespace IBPP
     class Exception : public std::exception
     {
     public:
-        virtual const char* Origin() const throw() = 0;
-        virtual const char* ErrorMessage() const throw() = 0;   // Deprecated, use what()
+        virtual const char* Origin() const throw() = 0;        
         virtual const char* what() const throw() = 0;
         virtual ~Exception() throw();
     };

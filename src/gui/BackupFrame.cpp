@@ -130,7 +130,7 @@ void* BackupThread::Entry()
         now = wxDateTime::Now();
         msg.Printf(_("Database backup canceled %s due to IBPP exception:\n\n"),
             now.FormatTime().c_str());
-        msg += e.ErrorMessage();
+        msg += e.what();
         logError(msg);
     }
     catch (...)

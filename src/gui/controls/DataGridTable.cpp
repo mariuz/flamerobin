@@ -141,7 +141,7 @@ void DataGridTable::fetch()
         catch (IBPP::Exception& e)
         {
             allRowsFetchedM = true;
-            ::wxMessageBox(e.ErrorMessage(),
+            ::wxMessageBox(e.what(),
                 _("An IBPP error occurred."), wxOK|wxICON_ERROR);
         }
         catch (...)
@@ -458,7 +458,7 @@ void DataGridTable::initialFetch(bool readonly)
     }
     catch (IBPP::Exception& e)
     {
-        ::wxMessageBox(e.ErrorMessage(),
+        ::wxMessageBox(e.what(),
             _("An IBPP error occurred."), wxOK | wxICON_ERROR);
     }
     catch (...)

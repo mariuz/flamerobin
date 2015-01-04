@@ -91,7 +91,7 @@ bool Application::OnInit()
     }
     catch (IBPP::Exception &e)
     {
-        wxMessageBox(e.ErrorMessage(), _("Error initalizing IBPP library."), wxOK | wxICON_ERROR);
+        wxMessageBox(e.what(), _("Error initalizing IBPP library."), wxOK | wxICON_ERROR);
         return false;
     }
 

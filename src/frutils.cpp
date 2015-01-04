@@ -208,7 +208,7 @@ bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
         }
         catch(IBPP::Exception& e)
         {
-            wxMessageBox(e.ErrorMessage(), _("Error"),
+            wxMessageBox(e.what(), _("Error"),
                 wxICON_ERROR | wxOK);
             return false;
         }

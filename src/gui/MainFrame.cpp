@@ -1014,7 +1014,7 @@ void MainFrame::OnMenuGetServerVersion(wxCommandEvent& WXUNUSED(event))
     }
     catch (IBPP::Exception& e)
     {
-        wxMessageBox(e.ErrorMessage(), _("Error"));
+        wxMessageBox(e.what(), _("Error"));
         return;
     }
 

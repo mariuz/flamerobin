@@ -118,11 +118,6 @@ const char* ExceptionBase::Origin() const throw()
 	return mContext.c_str();
 }
 
-const char* ExceptionBase::ErrorMessage() const throw()
-{
-	return mWhat.c_str();
-}
-
 const char* ExceptionBase::what() const throw()
 {
 	return mWhat.c_str();
@@ -163,11 +158,6 @@ LogicExceptionImpl::~LogicExceptionImpl() throw ()
 const char* LogicExceptionImpl::Origin() const throw()
 {
 	return ExceptionBase::Origin();
-}
-
-const char* LogicExceptionImpl::ErrorMessage() const throw()
-{
-	return ExceptionBase::what();
 }
 
 const char* LogicExceptionImpl::what() const throw()
