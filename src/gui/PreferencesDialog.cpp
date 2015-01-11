@@ -75,13 +75,13 @@ static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)
 wxString getPlatformName()
 {
 #ifdef __WINDOWS__
-    return "win");
+    return "win";
 #elif defined(__MAC__) || defined(__APPLE__)
-    return "mac");
+    return "mac";
 #elif defined(__UNIX__)
     return "unix";
 #else
-    return "undefined");
+    return "undefined";
 #endif
 }
 
