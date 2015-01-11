@@ -393,8 +393,12 @@ void SqlEditor::OnContextMenu(wxContextMenuEvent& event)
 
 void SqlEditor::OnKillFocus(wxFocusEvent& event)
 {
+// Milan: this makes STC crash on Mac (tested on Mavericks and Yosemite with wx3.0.1 and 3.0.2
+//        because showing autocomplete box makes the edit control use focus
+#ifndef __WXMAC__
     if (AutoCompActive())
         AutoCompCancel();
+#endif
     if (CallTipActive())
         CallTipCancel();
     event.Skip();   // let the STC do it's job
@@ -1110,7 +1114,7 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& event)
         if (config().get("AutocompleteEnabled", true))
         {
             #ifndef __WXGTK20__
-            bool allow = config().get("autoCompleteQuoted"), true);
+            bool allow = config().get("autoCompleteQuoted", true);
             if (!allow)
             {
                 // needed since event that updates the style happens later
