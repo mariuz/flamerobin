@@ -592,6 +592,7 @@ Accepted values: AMD64, IA64.
                 mkdir -p $(BUNDLE)/SharedSupport/conf-defs
                 mkdir -p $(BUNDLE)/SharedSupport/docs
                 mkdir -p $(BUNDLE)/SharedSupport/html-templates
+		mkdir -p $(BUNDLE)/SharedSupport/sys-templates
 
                 <!-- PkgInfo: -->
                 echo -n "APPL????" >$(BUNDLE)/PkgInfo
@@ -613,6 +614,7 @@ Accepted values: AMD64, IA64.
                 cp -R $(DOLLAR)(srcdir)/conf-defs/* $(BUNDLE)/SharedSupport/conf-defs
                 cp -R $(DOLLAR)(srcdir)/docs/* $(BUNDLE)/SharedSupport/docs
                 cp -R $(DOLLAR)(srcdir)/html-templates/* $(BUNDLE)/SharedSupport/html-templates
+		cp -R $(DOLLAR)(srcdir)/sys-templates/* $(BUNDLE)/SharedSupport/sys-templates
             </command>
         </modify-target>
 
