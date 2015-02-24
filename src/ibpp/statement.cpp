@@ -1292,6 +1292,3 @@ StatementImpl::~StatementImpl()
 		catch (...) { }
 }
 
-//
-//	EOF
-//
