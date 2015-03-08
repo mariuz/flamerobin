@@ -331,9 +331,6 @@ typedef int         ISC_EXPORT proto_add_user (ISC_STATUS *, USER_SEC_DATA *);
 typedef int         ISC_EXPORT proto_delete_user (ISC_STATUS *, USER_SEC_DATA *);
 typedef int         ISC_EXPORT proto_modify_user (ISC_STATUS *, USER_SEC_DATA *);
 
-//
-//  Those API are only available in versions 6.x of the GDS32.DLL
-//
 
 typedef ISC_STATUS  ISC_EXPORT proto_service_attach (ISC_STATUS *,
                        unsigned short,
@@ -383,7 +380,7 @@ typedef void        ISC_EXPORT proto_encode_timestamp (void *,
 //  Internal binding structure to the FBCLIENT DLL
 //
 
-struct GDS
+struct FBCLIENT
 {
     // Attributes
     bool mReady;
@@ -399,9 +396,9 @@ struct GDS
 #endif
 
 
-    GDS* Call();
+    FBCLIENT* Call();
 
-    // GDS32 Entry Points
+    // FBCLIENT Entry Points
     proto_create_database*          m_create_database;
     proto_attach_database*          m_attach_database;
     proto_detach_database*          m_detach_database;
@@ -458,7 +455,7 @@ struct GDS
     //proto_encode_timestamp*           m_encode_timestamp;
 
     // Constructor (No need for a specific destructor)
-    GDS()
+    FBCLIENT()
     {
         mReady = false;
 #ifdef IBPP_WINDOWS
@@ -467,7 +464,7 @@ struct GDS
     }
 };
 
-extern GDS gds;
+extern FBCLIENT gds;
 
 //
 //  Service Parameter Block (used to define a service)
