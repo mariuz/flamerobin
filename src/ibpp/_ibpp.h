@@ -380,7 +380,7 @@ typedef void        ISC_EXPORT proto_encode_timestamp (void *,
                     ISC_TIMESTAMP *);
 
 //
-//  Internal binding structure to the GDS32 DLL
+//  Internal binding structure to the FBCLIENT DLL
 //
 
 struct GDS
@@ -389,7 +389,7 @@ struct GDS
     bool mReady;
 
 #ifdef IBPP_WINDOWS
-    HMODULE mHandle;            // The GDS32.DLL HMODULE
+    HMODULE mHandle;            // The FBCLIENT.DLL HMODULE
     std::string mSearchPaths;   // Optional additional search paths
 #endif
 #ifdef IBPP_UNIX
