@@ -68,7 +68,7 @@ namespace ibpp_internals
 	const int32_t consts::min32 = std::numeric_limits<int32_t>::min();
 	const int32_t consts::max32 = std::numeric_limits<int32_t>::max();
 
-	GDS gds;	// Global unique GDS instance
+    FBCLIENT gds;	// Global unique GDS instance
 
 #ifdef _DEBUG
 	std::ostream& operator<< (std::ostream& a, flush_debug_stream_type)
@@ -88,7 +88,7 @@ namespace ibpp_internals
 
 using namespace ibpp_internals;
 
-GDS* GDS::Call()
+FBCLIENT* FBCLIENT::Call()
 {
 	// Let's load the CLIENT library, if it is not already loaded.
 	// The load is guaranteed to be done only once per application.
@@ -219,7 +219,7 @@ GDS* GDS::Call()
                }
 
                if (mHandle == 0)
-                                       throw LogicExceptionImpl("GDS::Call()",
+                                       throw LogicExceptionImpl("FBCLIENT::Call()",
                                                _("Can't find or load the Firebird Client Library"));
 
 #endif
@@ -231,13 +231,13 @@ GDS* GDS::Call()
 #ifdef IBPP_WINDOWS
 #define IB_ENTRYPOINT(X) \
 			if ((m_##X = (proto_##X*)GetProcAddress(mHandle, "isc_"#X)) == 0) \
-				throw LogicExceptionImpl("GDS:gds()", _("Entry-point isc_"#X" not found"))
+                throw LogicExceptionImpl("FBCLIENT:gds()", _("Entry-point isc_"#X" not found"))
 #endif
 #ifdef IBPP_UNIX
 #ifdef IBPP_LATE_BIND
 #define IB_ENTRYPOINT(X) \
     if ((m_##X = (proto_##X*)dlsym(mHandle,"isc_"#X)) == 0) \
-        throw LogicExceptionImpl("GDS:gds()", _("Entry-point isc_"#X" not found"))
+        throw LogicExceptionImpl("FBCLIENT:gds()", _("Entry-point isc_"#X" not found"))
 #else
 #define IB_ENTRYPOINT(X) m_##X = (proto_##X*)isc_##X
 #endif
