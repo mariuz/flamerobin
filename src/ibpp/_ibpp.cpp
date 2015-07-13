@@ -232,14 +232,21 @@ FBCLIENT* FBCLIENT::Call()
 #define IB_ENTRYPOINT(X) \
 			if ((m_##X = (proto_##X*)GetProcAddress(mHandle, "isc_"#X)) == 0) \
                 throw LogicExceptionImpl("FBCLIENT:gds()", _("Entry-point isc_"#X" not found"))
+#define FB_ENTRYPOINT(X) \
+            if ((m_##X = (proto_##X*)GetProcAddress(mHandle, "fb_"#X)) == 0) \
+                throw LogicExceptionImpl("FBCLIENT:gds()", _("Entry-point fb_"#X" not found"))
 #endif
 #ifdef IBPP_UNIX
 #ifdef IBPP_LATE_BIND
 #define IB_ENTRYPOINT(X) \
     if ((m_##X = (proto_##X*)dlsym(mHandle,"isc_"#X)) == 0) \
         throw LogicExceptionImpl("FBCLIENT:gds()", _("Entry-point isc_"#X" not found"))
+#define FB_ENTRYPOINT(X) \
+    if ((m_##X = (proto_##X*)dlsym(mHandle,"fb_"#X)) == 0) \
+        throw LogicExceptionImpl("FBCLIENT:gds()", _("Entry-point fb_"#X" not found"))
 #else
 #define IB_ENTRYPOINT(X) m_##X = (proto_##X*)isc_##X
+#define FB_ENTRYPOINT(X) m_##X = (proto_##X*)fb_##X
 #endif
 #endif
 
@@ -261,7 +268,11 @@ FBCLIENT* FBCLIENT::Call()
 		IB_ENTRYPOINT(vax_integer);
 		IB_ENTRYPOINT(sqlcode);
         IB_ENTRYPOINT(sql_interprete);
+        #if defined(FB_API_VER) && FB_API_VER >= 20
+        FB_ENTRYPOINT(interpret);
+        #else
         IB_ENTRYPOINT(interprete);
+        #endif
 		IB_ENTRYPOINT(que_events);
 		IB_ENTRYPOINT(cancel_events);
 		IB_ENTRYPOINT(start_multiple);

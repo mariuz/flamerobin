@@ -52,13 +52,22 @@ const char* IBS::ErrorMessage() const
 	message<< _("Engine Code    : ")<< EngineCode()<< "\n";
 
 	// Compiles the message (Engine part)
+    #if defined(FB_API_VER) && FB_API_VER >= 20
+    const ISC_STATUS* error = &mVector[0];
+    try { (*gds.Call()->m_interpret)(msg, sizeof(msg), &error);}
+    #else
 	ISC_STATUS* error = &mVector[0];
 	try { (*gds.Call()->m_interprete)(msg, &error); }
-	catch(...) { msg[0] = '\0'; }
+    #endif
+    catch(...) { msg[0] = '\0'; }
 	message<< _("Engine Message :")<< "\n"<< msg;
 	try
 	{
-		while ((*gds.Call()->m_interprete)(msg, &error))
+        #if defined(FB_API_VER) && FB_API_VER >= 20
+        while ((*gds.Call()->m_interpret)(msg, sizeof(msg), &error))
+        #else
+        while ((*gds.Call()->m_interprete)(msg, &error))
+        #endif
 			message<< "\n"<< msg;
 	}
 	catch (...) { }

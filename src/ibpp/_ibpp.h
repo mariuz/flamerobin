@@ -232,8 +232,15 @@ typedef void        ISC_EXPORT proto_sql_interprete (short,
                        char *,
                        short);
 
+#if defined(FB_API_VER) && FB_API_VER >= 20
+typedef ISC_STATUS  ISC_EXPORT proto_interpret (char *,
+                                      unsigned int,
+                                      const ISC_STATUS * *);
+#else
 typedef ISC_STATUS  ISC_EXPORT proto_interprete (char *,
                        ISC_STATUS * *);
+
+#endif
 
 typedef ISC_STATUS  ISC_EXPORT proto_que_events (ISC_STATUS *,
                        isc_db_handle *,
@@ -419,7 +426,12 @@ struct FBCLIENT
     proto_vax_integer*              m_vax_integer;
     proto_sqlcode*                  m_sqlcode;
     proto_sql_interprete*           m_sql_interprete;
+    #if defined(FB_API_VER) && FB_API_VER >= 20
+    proto_interpret*                m_interpret;
+    #else
     proto_interprete*               m_interprete;
+    #endif
+
     proto_que_events*               m_que_events;
     proto_cancel_events*            m_cancel_events;
     proto_start_multiple*           m_start_multiple;
