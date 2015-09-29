@@ -45,7 +45,7 @@ void ServiceImpl::Connect()
 	SPB spb;
 	std::string connect;
 
-	// Build a SPB based on	the	properties
+	// Build a SPB based on	the properties
 	spb.Insert(isc_spb_version);
 	spb.Insert(isc_spb_current_version);
 	if (!mUserName.empty())
