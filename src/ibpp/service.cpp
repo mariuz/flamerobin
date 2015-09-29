@@ -68,7 +68,7 @@ void ServiceImpl::Connect()
 		&mHandle, spb.Size(), spb.Self());
 	if (status.Errors())
 	{
-		mHandle	= 0;		// Should be, but better be	sure...
+		mHandle	= 0;		// Should be, but better be sure...
 		throw SQLExceptionImpl(status, "Service::Connect", _("isc_service_attach failed"));
 	}
 }
