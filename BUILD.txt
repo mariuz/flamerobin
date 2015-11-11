@@ -192,28 +192,19 @@ question there.
 -- Mac OS X - Autoconf Build Instructions --
 --------------------------------------------
 
-To build FlameRobin on Mac OS X 10.5 for compatibility with 10.4, open
+To build FlameRobin on Mac OS X 10.5 minimum, open
 a command line, cd into the flamerobin root directory, and execute the
 following commands:
 
-mkdir ppcu
-cd ppcu
-../configure --disable-debug --disable-dependency-tracking \
-  CFLAGS="-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch ppc" \
-  LDFLAGS="-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch ppc \
-    -Wl,-macosx_version_min -Wl,10.4" \
-  CXXFLAGS="-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch ppc" \
-  --with-wx-config=/my/path/to/wx-config_for_ppc_unicode
-make
 
 cd ..
 mkdir i386u
 cd i386u
 ../configure --disable-debug --disable-dependency-tracking \
-  CFLAGS="-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386" \
+  CFLAGS="-mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5u.sdk -arch i386" \
   LDFLAGS="-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch i386 \
-    -Wl,-macosx_version_min -Wl,10.4" \
-  CXXFLAGS="-mmacosx-version-min=10.4 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386" \
+    -Wl,-macosx_version_min -Wl,10.5" \
+  CXXFLAGS="-mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5u.sdk -arch i386" \
   --with-wx-config=/my/path/to/wx-config_for_i386_unicode
 make
 
