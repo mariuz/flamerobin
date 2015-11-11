@@ -198,14 +198,14 @@ following commands:
 
 
 cd ..
-mkdir i386u
-cd i386u
+mkdir x86_64
+cd x86_64
 ../configure --disable-debug --disable-dependency-tracking \
-  CFLAGS="-mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5u.sdk -arch i386" \
-  LDFLAGS="-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch i386 \
+  CFLAGS="-mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5u.sdk" \
+  LDFLAGS="-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk \
     -Wl,-macosx_version_min -Wl,10.5" \
-  CXXFLAGS="-mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5u.sdk -arch i386" \
-  --with-wx-config=/my/path/to/wx-config_for_i386_unicode
+  CXXFLAGS="-mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5u.sdk" \
+  --with-wx-config=/my/path/to/wx-config_for_x86_64_unicode
 make
 
 The resulting bundles differ only in the flamerobin executable, the lipo
