@@ -125,7 +125,7 @@ default to 0 and are optional.
 -- MSW - Building wxWidgets with Visual C++ 20xx Express --
 -----------------------------------------------------------
 
-Unpack the archive somewhere, for example c:\wxWin:
+Unpack the archive somewhere, for example c:\wxWidgets:
 
 * Using the dsp/dsw/sln projects *
 
@@ -136,12 +136,9 @@ and then picking a config, then build!
 
 * Using the makefiles *
 Open cmd.exe  prompt and go into "build\msw" directory:
-set WXWIN=c:\wxWin
-set WXDIR=c:\wxWin
+set WXWIN=c:\wxWidgets
+set WXDIR=c:\wxWidgets
 nmake -f makefile.vc BUILD=release RUNTIME_LIBS=static
-
-As you can see, it is important to build STC package too. It is for
-wxStyledTextControl which is used in many places in FlameRobin.
 
 If you wish to build an executable that is small in size (just like the
 official one), you need to build wx from the command line using modified
