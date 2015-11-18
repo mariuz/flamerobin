@@ -42,11 +42,11 @@ For the sole purpose of building FlameRobin only a few libraries are needed,
 and only the version for static linking, so the following invocations are
 all that is needed:
 
-  bjam link=static --with-thread --with-date_time --with-system stage
+  b2 link=static --with-thread --with-date_time --with-system stage
 
 (for 32 bit build) and
 
-  bjam address-model=64 link=static --with-thread --with-date_time --with-system stage
+  b2 address-model=64 link=static --with-thread --with-date_time --with-system stage
 
 (for 64 bit build).
 
