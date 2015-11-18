@@ -133,18 +133,11 @@ Double click on build\msw\wx.dsw, convert to new format, select a build
 configuration by going to the Build menu, selecting "Set build configuration"
 and then picking a config, then build!
 
-Double click on contrib\build\stc\stc.dsw, convert to new format, select a
-build configuration by going to the Build menu, selecting "Set build
-configuration" and then picking a config, then build!
-
 
 * Using the makefiles *
 Open cmd.exe  prompt and go into "build\msw" directory:
 set WXWIN=c:\wxWin
 set WXDIR=c:\wxWin
-nmake -f makefile.vc BUILD=release RUNTIME_LIBS=static
-cd ..\..
-cd contrib\build\stc
 nmake -f makefile.vc BUILD=release RUNTIME_LIBS=static
 
 As you can see, it is important to build STC package too. It is for
