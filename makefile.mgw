@@ -249,7 +249,7 @@ revision-info:
 	update-revision-info.cmd
 
 gccu$(R_OPT)$(D_OPT)\flamerobin.exe: $(FLAMEROBIN_OBJECTS) gccu$(R_OPT)$(D_OPT)\libibpp.a gccu$(R_OPT)$(D_OPT)\flamerobin_flamerobin_rc.o gccu$(R_OPT)$(D_OPT)\libibpp.a
-	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS)  -mthreads $(__DEBUGINFO) $(______flamerobin_WX_LIB_DIR_FILENAMES_1_p) -L$(BOOST_LIB_DIR) -Wl,--subsystem,windows -mwindows $(LDFLAGS)  -lwxmsw28u$(D_OPT)_aui -lwxmsw28u$(D_OPT)_stc -lwxmsw28u$(D_OPT)_html -lwxmsw28u$(D_OPT)_adv -lwxmsw28u$(D_OPT)_core -lwxbase28u$(D_OPT)_xml -lwxbase28u$(D_OPT) -lwxexpat$(D_OPT) -lwxtiff$(D_OPT) -lwxjpeg$(D_OPT) -lwxpng$(D_OPT) -lwxzlib$(D_OPT) -lwxregexu$(D_OPT) -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lcomctl32 -lrpcrt4 -lwsock32 gccu$(R_OPT)$(D_OPT)\libibpp.a
+	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS)  -mthreads $(__DEBUGINFO) $(______flamerobin_WX_LIB_DIR_FILENAMES_1_p) -L$(BOOST_LIB_DIR) -Wl,--subsystem,windows -mwindows $(LDFLAGS)  -lwxmsw30u$(D_OPT)_aui -lwxmsw30u$(D_OPT)_stc -lwxmsw30u$(D_OPT)_html -lwxmsw30u$(D_OPT)_adv -lwxmsw30u$(D_OPT)_core -lwxbase30u$(D_OPT)_xml -lwxbase30u$(D_OPT) -lwxexpat$(D_OPT) -lwxtiff$(D_OPT) -lwxjpeg$(D_OPT) -lwxpng$(D_OPT) -lwxzlib$(D_OPT) -lwxregexu$(D_OPT) -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lcomctl32 -lrpcrt4 -lwsock32 gccu$(R_OPT)$(D_OPT)\libibpp.a
 
 gccu$(R_OPT)$(D_OPT)\libibpp.a: $(IBPP_OBJECTS)
 	if exist $@ del $@

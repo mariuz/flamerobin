@@ -18,7 +18,7 @@
 		/>
 	</Platforms>
 	<ToolFiles>
-		
+
 	</ToolFiles>
 	<Configurations>
 		<Configuration
@@ -81,7 +81,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/nologo /subsystem:windows"
-				AdditionalDependencies="wxmsw28ud_aui.lib wxmsw28ud_stc.lib wxmsw28ud_html.lib wxmsw28ud_adv.lib wxmsw28ud_core.lib wxbase28ud_xml.lib wxbase28ud.lib wxexpatd.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexud.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib vcud\ibpp.lib"
+				AdditionalDependencies="wxmsw30ud_aui.lib wxmsw30ud_stc.lib wxmsw30ud_html.lib wxmsw30ud_adv.lib wxmsw30ud_core.lib wxbase30ud_xml.lib wxbase30ud.lib wxexpatd.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexud.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib vcud\ibpp.lib"
 				OutputFile="vcud\flamerobin.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -176,7 +176,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/nologo /subsystem:windows"
-				AdditionalDependencies="wxmsw28ud_aui.lib wxmsw28ud_stc.lib wxmsw28ud_html.lib wxmsw28ud_adv.lib wxmsw28ud_core.lib wxbase28ud_xml.lib wxbase28ud.lib wxexpatd.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexud.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib vcusd\ibpp.lib"
+				AdditionalDependencies="wxmsw30ud_aui.lib wxmsw30ud_stc.lib wxmsw30ud_html.lib wxmsw30ud_adv.lib wxmsw30ud_core.lib wxbase30ud_xml.lib wxbase30ud.lib wxexpatd.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexud.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib vcusd\ibpp.lib"
 				OutputFile="vcusd\flamerobin.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -269,7 +269,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/nologo /subsystem:windows"
-				AdditionalDependencies="wxmsw28u_aui.lib wxmsw28u_stc.lib wxmsw28u_html.lib wxmsw28u_adv.lib wxmsw28u_core.lib wxbase28u_xml.lib wxbase28u.lib wxexpat.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregexu.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib vcu\ibpp.lib"
+				AdditionalDependencies="wxmsw30u_aui.lib wxmsw30u_stc.lib wxmsw30u_html.lib wxmsw30u_adv.lib wxmsw30u_core.lib wxbase30u_xml.lib wxbase30u.lib wxexpat.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregexu.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib vcu\ibpp.lib"
 				OutputFile="vcu\flamerobin.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -361,7 +361,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/nologo /subsystem:windows"
-				AdditionalDependencies="wxmsw28u_aui.lib wxmsw28u_stc.lib wxmsw28u_html.lib wxmsw28u_adv.lib wxmsw28u_core.lib wxbase28u_xml.lib wxbase28u.lib wxexpat.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregexu.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib vcus\ibpp.lib"
+				AdditionalDependencies="wxmsw30u_aui.lib wxmsw30u_stc.lib wxmsw30u_html.lib wxmsw30u_adv.lib wxmsw30u_core.lib wxbase30u_xml.lib wxbase30u.lib wxexpat.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregexu.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib vcus\ibpp.lib"
 				OutputFile="vcus\flamerobin.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -455,7 +455,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/nologo /subsystem:windows"
-				AdditionalDependencies="wxmsw28ud_aui.lib wxmsw28ud_stc.lib wxmsw28ud_html.lib wxmsw28ud_adv.lib wxmsw28ud_core.lib wxbase28ud_xml.lib wxbase28ud.lib wxexpatd.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexud.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib vcud\ibpp.lib"
+				AdditionalDependencies="wxmsw30ud_aui.lib wxmsw30ud_stc.lib wxmsw30ud_html.lib wxmsw30ud_adv.lib wxmsw30ud_core.lib wxbase30ud_xml.lib wxbase30ud.lib wxexpatd.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexud.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib vcud\ibpp.lib"
 				OutputFile="vcud\flamerobin.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -550,7 +550,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/nologo /subsystem:windows"
-				AdditionalDependencies="wxmsw28ud_aui.lib wxmsw28ud_stc.lib wxmsw28ud_html.lib wxmsw28ud_adv.lib wxmsw28ud_core.lib wxbase28ud_xml.lib wxbase28ud.lib wxexpatd.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexud.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib vcusd\ibpp.lib"
+				AdditionalDependencies="wxmsw30ud_aui.lib wxmsw30ud_stc.lib wxmsw30ud_html.lib wxmsw30ud_adv.lib wxmsw30ud_core.lib wxbase30ud_xml.lib wxbase30ud.lib wxexpatd.lib wxtiffd.lib wxjpegd.lib wxpngd.lib wxzlibd.lib wxregexud.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib vcusd\ibpp.lib"
 				OutputFile="vcusd\flamerobin.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -643,7 +643,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/nologo /subsystem:windows"
-				AdditionalDependencies="wxmsw28u_aui.lib wxmsw28u_stc.lib wxmsw28u_html.lib wxmsw28u_adv.lib wxmsw28u_core.lib wxbase28u_xml.lib wxbase28u.lib wxexpat.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregexu.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib vcu\ibpp.lib"
+				AdditionalDependencies="wxmsw30u_aui.lib wxmsw30u_stc.lib wxmsw30u_html.lib wxmsw30u_adv.lib wxmsw30u_core.lib wxbase30u_xml.lib wxbase30u.lib wxexpat.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregexu.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib vcu\ibpp.lib"
 				OutputFile="vcu\flamerobin.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -735,7 +735,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/nologo /subsystem:windows"
-				AdditionalDependencies="wxmsw28u_aui.lib wxmsw28u_stc.lib wxmsw28u_html.lib wxmsw28u_adv.lib wxmsw28u_core.lib wxbase28u_xml.lib wxbase28u.lib wxexpat.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregexu.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib vcus\ibpp.lib"
+				AdditionalDependencies="wxmsw30u_aui.lib wxmsw30u_stc.lib wxmsw30u_html.lib wxmsw30u_adv.lib wxmsw30u_core.lib wxbase30u_xml.lib wxbase30u.lib wxexpat.lib wxtiff.lib wxjpeg.lib wxpng.lib wxzlib.lib wxregexu.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib vcus\ibpp.lib"
 				OutputFile="vcus\flamerobin.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -771,7 +771,7 @@
 		</Configuration>
 	</Configurations>
 	<References>
-		
+
 	</References>
 	<Files>
 		<Filter
@@ -1710,7 +1710,6 @@
 		</Filter>
 	</Files>
 	<Globals>
-		
+
 	</Globals>
 </VisualStudioProject>
-
