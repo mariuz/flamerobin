@@ -2,7 +2,6 @@ src/revisioninfo.h
 flamerobin_vs2010.*
 flamerobin.ncb
 flamerobin*.suo
-*.vcxproj
 Debug
 Release
 ipch
@@ -10,7 +9,6 @@ bcc*
 gcc*
 vc*
 .bakefile_gen.state
-*.filters
 *.opensdf
 *.sdf
 *.user
