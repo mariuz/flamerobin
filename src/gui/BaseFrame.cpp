@@ -157,7 +157,7 @@ void BaseFrame::writeConfigSettings() const
                 r.SetRight(wp.rcNormalPosition.right);
                 r.SetBottom(wp.rcNormalPosition.bottom);
             }
-            config().setValue(itemPrefix + Config::pathSeparator + "maximized"), IsMaximized());
+            config().setValue(itemPrefix + Config::pathSeparator + "maximized", IsMaximized());
 #endif
             config().setValue(itemPrefix + Config::pathSeparator + "x", r.x);
             config().setValue(itemPrefix + Config::pathSeparator + "y", r.y);
