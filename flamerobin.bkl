@@ -177,8 +177,8 @@ Accepted values: AMD64, IA64.
             <define>WIN32_LEAN_AND_MEAN</define>
 
             <set var="WX_PORT">wxmsw</set>
-<!-- set this to 28 for wxWidgets 2.8.X, to 29 for wxWidgets 2.9.x-->
-            <set var="WX_VERSION">28</set>
+<!-- set this to 28 for wxWidgets 2.8.X, to 30 for wxWidgets 3.0.x-->
+            <set var="WX_VERSION">30</set>
 
             <set var="WX_LIB_DIR" make_var="1">
                 <if cond="USEDLL=='1'">$(WXDIR)/lib/$(COMPILER)$(DIR_SUFFIX_CPU)_dll</if>
@@ -201,7 +201,7 @@ Accepted values: AMD64, IA64.
             <sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_core</sys-lib>
             <sys-lib>wxbase$(WX_VERSION)$(U_OPT)$(D_OPT)_xml</sys-lib>
             <sys-lib>wxbase$(WX_VERSION)$(U_OPT)$(D_OPT)</sys-lib>
-            <if cond="WX_VERSION>='29'">
+            <if cond="WX_VERSION>='30'">
                 <sys-lib>wxscintilla$(D_OPT)</sys-lib>
             </if>
             <sys-lib>wxexpat$(D_OPT)</sys-lib>
