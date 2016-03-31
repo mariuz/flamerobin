@@ -1849,8 +1849,8 @@ void ExecuteSqlFrame::OnMenuGridSetFieldToNULL(wxCommandEvent& WXUNUSED(event))
 
         // if visible, update BLOB editor
         if (editBlobDlgM && editBlobDlgM->IsShown()
-            && grid_data->GetCursorColumn() == col
-            && grid_data->GetCursorRow() == row)
+            && grid_data->GetGridCursorCol() == col
+            && grid_data->GetGridCursorRow() == row)
         {
             editBlobDlgM->setBlob(grid_data, dgt, &statementM, row, col, false);
         }
