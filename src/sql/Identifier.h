@@ -30,14 +30,15 @@ class Identifier
 {
 private:
     wxString textM;
-    static bool needsQuoting(const wxString& s);
+    int dialectM;
+    static bool needsQuoting(const wxString& s, int sqldialect = 3);
     static bool isQuoted(const wxString &s);
     static wxString& escape(wxString& s);
     static wxString& strip(wxString& s);
-    static wxString& quote(wxString &s);
+    static wxString& quote(wxString &s, int sqldialect = 3);
 public:
-    Identifier();
-    Identifier(const wxString& source);
+    Identifier(int sqldialect = 3);
+    Identifier(const wxString& source, int sqldialect = 3);
     void setText(const wxString& source);
     void setFromSql(const wxString& source);
 
@@ -45,7 +46,7 @@ public:
     bool equals(const wxString& rhs) const;
     wxString get() const;
     wxString getQuoted() const;
-    static wxString userString(const wxString& s);
+    static wxString userString(const wxString& s, int sqldialect = 3);
 };
 
 #endif

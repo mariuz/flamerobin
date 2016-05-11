@@ -324,19 +324,20 @@ void DataGrid::copyToClipboardAsInsert()
     bool all = true;
     {   // begin busy cursor
         wxBusyCursor cr;
+        int sqlDialect = table->getDatabase()->getSqlDialect();
 
         // TODO: - using one table is not correct for JOINs or sub-SELECTs
         //       - should probably refuse to work if not from one table
         //       - should probably refuse to create INSERT for "[...]"
         //       - table&PK info is available in DataGridRows::statementTablesM
-        Identifier tableId(table->getTableName());
+        Identifier tableId(table->getTableName(), sqlDialect);
 
         // load the (quoted if necessary) column names into an array
         wxArrayString columnNames;
         columnNames.Alloc(GetNumberCols());
         for (int i = 0; i < GetNumberCols(); i++)
         {
-            Identifier colId(GetColLabelValue(i));
+            Identifier colId(GetColLabelValue(i), sqlDialect);
             columnNames.Add(colId.getQuoted());
         }
 
@@ -439,18 +440,19 @@ void DataGrid::copyToClipboardAsUpdate()
     bool all = true;
     {   // begin busy cursor
         wxBusyCursor cr;
+        int sqlDialect = table->getDatabase()->getSqlDialect();
         // TODO: - using one table is not correct for JOINs or sub-SELECTs
         //       - should probably refuse to work if not from one table
         //       - should probably refuse to create UPDATE for "[...]"
         //       - we have this info in DataGridRows::statementTablesM
-        Identifier tableId(table->getTableName());
+        Identifier tableId(table->getTableName(), sqlDialect);
 
         // load the (quoted if necessary) column names into an array
         wxArrayString columnNames;
         columnNames.Alloc(GetNumberCols());
         for (int i = 0; i < GetNumberCols(); i++)
         {
-            Identifier colId(GetColLabelValue(i));
+            Identifier colId(GetColLabelValue(i), sqlDialect);
             columnNames.Add(colId.getQuoted());
         }
 
