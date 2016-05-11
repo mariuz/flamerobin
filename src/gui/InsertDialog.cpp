@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2015 The FlameRobin Development Team
+  Copyright (c) 2004-2016 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -223,8 +223,8 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
         gridM->SetCellValue(row, 0, c->getName_());
         gridM->SetCellValue(row, 1, c->getDatatype());
 
-        gridM->SetCellAlignment(
-            def->isNumeric() ? wxALIGN_RIGHT : wxALIGN_LEFT, row, 3);
+        gridM->SetCellAlignment(row, 3, 
+		def->isNumeric() ? wxALIGN_RIGHT : wxALIGN_LEFT, wxALIGN_CENTER);
 
         wxString defaultValue;
         if (c->getDefault(ReturnDomainDefault, defaultValue))

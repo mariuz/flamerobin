@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2015 The FlameRobin Development Team
+  Copyright (c) 2004-2016 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -1849,8 +1849,8 @@ void ExecuteSqlFrame::OnMenuGridSetFieldToNULL(wxCommandEvent& WXUNUSED(event))
 
         // if visible, update BLOB editor
         if (editBlobDlgM && editBlobDlgM->IsShown()
-            && grid_data->GetCursorColumn() == col
-            && grid_data->GetCursorRow() == row)
+            && grid_data->GetGridCursorCol() == col
+            && grid_data->GetGridCursorRow() == row)
         {
             editBlobDlgM->setBlob(grid_data, dgt, &statementM, row, col, false);
         }

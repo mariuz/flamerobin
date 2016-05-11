@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2015 The FlameRobin Development Team
+  Copyright (c) 2004-2016 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -706,9 +706,9 @@ std::vector<bool> DataGrid::getColumnsWithSelectedCells()
 {
     // fully selected rows cause all columns to have selected cells
     if (GetSelectedRows().size() > 0)
-        return std::vector<bool>(GetCols(), true);
+        return std::vector<bool>(GetNumberCols(), true);
 
-    std::vector<bool> ret(GetCols(), false);
+    std::vector<bool> ret(GetNumberCols(), false);
     // first mark all completely selected columns
     wxArrayInt cols(GetSelectedCols());
     for (size_t i = 0; i < cols.size(); i++)
@@ -740,9 +740,9 @@ std::vector<bool> DataGrid::getRowsWithSelectedCells()
 {
     // fully selected columns cause all rows to have selected cells
     if (GetSelectedCols().size() > 0)
-        return std::vector<bool>(GetRows(), true);
+        return std::vector<bool>(GetNumberRows(), true);
 
-    std::vector<bool> ret(GetRows(), false);
+    std::vector<bool> ret(GetNumberRows(), false);
     // first mark all completely selected rows
     wxArrayInt rows(GetSelectedRows());
     for (size_t i = 0; i < rows.size(); i++)
@@ -777,10 +777,10 @@ std::vector<bool> DataGrid::getSelectedCellsInRow(int row)
     for (size_t i = 0; i < rows.size(); i++)
     {
         if (rows[i] == row)
-            return std::vector<bool>(GetCols(), true);
+            return std::vector<bool>(GetNumberCols(), true);
     }
 
-    std::vector<bool> ret(GetCols(), false);
+    std::vector<bool> ret(GetNumberCols(), false);
     // first mark cells of all completely selected columns
     wxArrayInt cols(GetSelectedCols());
     for (size_t i = 0; i < cols.size(); i++)
@@ -833,7 +833,7 @@ wxGridCellCoordsArray DataGrid::getSelectedCells()
     }
 
     if (result.size() == 0)
-        result.Add(wxGridCellCoords(wxGrid::GetCursorRow(),wxGrid::GetCursorColumn()));
+        result.Add(wxGridCellCoords(wxGrid::GetGridCursorRow(),wxGrid::GetGridCursorCol()));
 
     return result;
 }
