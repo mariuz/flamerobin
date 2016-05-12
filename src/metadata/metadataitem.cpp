@@ -71,7 +71,7 @@ MetadataItem::MetadataItem()
 
 MetadataItem::MetadataItem(NodeType type, MetadataItem* parent,
         const wxString& name)
-    : Subject(), typeM(type), parentM(parent), identifierM(name),
+   : Subject(), typeM(type), parentM(parent), identifierM(name, getDatabase() != nullptr ? getDatabase()->getSqlDialect() : 3),
         childrenLoadedM(lsNotLoaded), descriptionLoadedM(lsNotLoaded),
         propertiesLoadedM(lsNotLoaded)
 {
@@ -623,12 +623,6 @@ wxString MetadataItem::getName_() const
 
 wxString MetadataItem::getQuotedName() const
 {
-    if (DatabasePtr db = getDatabase())
-    {
-        // dialect 1 does not support quoted identifiers
-        if (db->getSqlDialect() == 1)
-            return identifierM.get();
-    }
     return identifierM.getQuoted();
 }
 

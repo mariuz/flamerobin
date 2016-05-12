@@ -1990,8 +1990,11 @@ DataGridRowsBlob DataGridRows::setBlobPrepare(unsigned row, unsigned col)
     wxString cn(std2wxIdentifier(statementM->ColumnName(col + 1),
         databaseM->getCharsetConverter()));
 
-    wxString stm = "UPDATE " + Identifier(tn).getQuoted()
-        + " SET " + Identifier(cn).getQuoted()
+    Identifier iTn(tn, databaseM->getSqlDialect());
+    Identifier iCn(cn, databaseM->getSqlDialect());
+
+    wxString stm = "UPDATE " + iTn.getQuoted()
+        + " SET " + iCn.getQuoted()
         + " = ? WHERE ";
     std::map<wxString, UniqueConstraint *>::iterator it =
         statementTablesM.find(tn);
@@ -2121,8 +2124,12 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
             databaseM->getCharsetConverter()));
         wxString cn(std2wxIdentifier(statementM->ColumnName(col + 1),
             databaseM->getCharsetConverter()));
-        wxString stm = "UPDATE " + Identifier(tn).getQuoted()
-            + " SET " + Identifier(cn).getQuoted();
+
+        Identifier iTn(tn, databaseM->getSqlDialect());
+        Identifier iCn(cn, databaseM->getSqlDialect());
+
+        wxString stm = "UPDATE " + iTn.getQuoted()
+            + " SET " + iCn.getQuoted();
         if (newIsNull)
             stm += " = NULL WHERE ";
         else

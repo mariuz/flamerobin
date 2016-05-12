@@ -92,12 +92,14 @@ bool IdentifierQuotes::getQuoteMixedCase()
 }
 
 // Identifier class
-Identifier::Identifier(const wxString& source)
+Identifier::Identifier(const wxString& source, int sqldialect)
+   : dialectM(sqldialect)
 {
     setText(source);
 }
 
-Identifier::Identifier()
+Identifier::Identifier(int sqldialect)
+   : dialectM(sqldialect)
 {
 }
 
@@ -157,8 +159,11 @@ wxString& Identifier::strip(wxString& s)
     return s;
 }
 
-wxString& Identifier::quote(wxString &s)
+wxString& Identifier::quote(wxString &s, int sqldialect)
 {
+   if (sqldialect == 1)
+      return s;
+
     s = "\"" + s + "\"";
     return s;
 }
@@ -184,7 +189,7 @@ bool hasBothCases(const wxString& value)
     return false;
 }
 
-wxString Identifier::userString(const wxString& s)
+wxString Identifier::userString(const wxString& s, int sqldialect)
 {
     if (s.IsEmpty())
         return wxEmptyString;
@@ -192,26 +197,30 @@ wxString Identifier::userString(const wxString& s)
     if (IdentifierQuotes::get().getQuoteAlways())
     {
         if (IdentifierQuotes::get().getQuoteCharsAreRegular())
-            return quote(escape(ret));
+            return quote(escape(ret), sqldialect);
         else
-            return quote(escape(strip(ret)));
+            return quote(escape(strip(ret)), sqldialect);
     }
     else
     {
         if (isQuoted(ret))   // pass the quoted text as-it-is
             return ret;
         if (IdentifierQuotes::get().getQuoteMixedCase() && hasBothCases(ret))
-            return quote(escape(ret));
-        if (Identifier::needsQuoting(ret.Upper()))    // special chars
-            return quote(escape(ret));
+            return quote(escape(ret), sqldialect);
+        if (Identifier::needsQuoting(ret.Upper(), sqldialect))    // special chars
+            return quote(escape(ret), sqldialect);
         return ret;
     }
 }
 
-bool Identifier::needsQuoting(const wxString& s)
+bool Identifier::needsQuoting(const wxString& s, int sqldialect)
 {
     if (s.IsEmpty())
         return false;
+
+   if (sqldialect == 1)
+       return false;
+
     const wxChar* p = s.c_str();
     // first character: only 'A'..'Z' allowed, else quotes needed
     if (*p < 'A' || *p > 'Z')
@@ -226,6 +235,7 @@ bool Identifier::needsQuoting(const wxString& s)
             return true;
         p++;
     }
+
     // may still need quotes if reserved word
     return SqlTokenizer::isReservedWord(s);
 }
@@ -250,10 +260,10 @@ wxString Identifier::get() const
 
 wxString Identifier::getQuoted() const
 {
-    if (IdentifierQuotes::get().getQuoteAlways() || needsQuoting(textM))
+    if (IdentifierQuotes::get().getQuoteAlways() || needsQuoting(textM, dialectM))
     {
         wxString retval(textM);
-        return quote(escape(retval));
+        return quote(escape(retval), dialectM);
     }
     else
         return textM;

@@ -530,7 +530,8 @@ void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
     storeValues();
     preloadSpecialColumns();
 
-    Identifier tableId(tableNameM);
+    Identifier tableId(tableNameM, databaseM->getSqlDialect());
+
     wxString stm = "INSERT INTO " + tableId.getQuoted() + " (";
     wxString val = ") VALUES (";
     bool first = true;
