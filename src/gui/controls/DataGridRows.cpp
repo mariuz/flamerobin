@@ -1313,7 +1313,7 @@ void BlobColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
 // StringColumnDef class
 class StringColumnDef : public ResultsetColumnDef
 {
-private:
+protected:
     unsigned indexM;
     int charSizeM;
 public:
@@ -1397,6 +1397,28 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
             val.Truncate(trimLen > size_t(charSizeM) ? trimLen : charSizeM);
         buffer->setString(indexM, val);
     }
+}
+
+class BooleanColumnDef : public StringColumnDef // v3
+{
+public:
+    BooleanColumnDef(const wxString& name, unsigned stringIndex, bool readOnly, bool nullable);
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col, const IBPP::Statement& statement);
+};
+
+BooleanColumnDef::BooleanColumnDef(const wxString& name, unsigned stringIndex,
+    bool readOnly, bool nullable) : StringColumnDef(name, stringIndex, readOnly, nullable, 5)
+{
+}
+
+void BooleanColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    const IBPP::Statement& statement)
+{
+    wxASSERT(buffer);
+    bool value;
+    statement->Get(col, value);
+    wxString val = value ? "true" : "false";
+    buffer->setString(StringColumnDef::indexM, val);
 }
 
 // DataGridRows class
@@ -1753,7 +1775,8 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
             switch (type)
             {
                 case IBPP::sdBoolean: // v3
-                    columnDef = new StringColumnDef(colName, 0, readOnly, nullable, 4);
+                    columnDef = new BooleanColumnDef(colName, stringIndex, readOnly, nullable);
+                    ++stringIndex;
                     break;
                 case IBPP::sdDate:
                     columnDef = new DateColumnDef(colName, bufferSizeM, readOnly, nullable);
