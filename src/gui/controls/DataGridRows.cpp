@@ -1745,6 +1745,9 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
         {
             switch (type)
             {
+                case IBPP::sdBoolean: // v3
+                    columnDef = new StringColumnDef(colName, 0, readOnly, nullable, 4);
+                    break;
                 case IBPP::sdDate:
                     columnDef = new DateColumnDef(colName, bufferSizeM, readOnly, nullable);
                     break;
