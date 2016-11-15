@@ -518,7 +518,7 @@ wxString getDefaultRange(Domain *d)
         return "0-2000000";
     }
     
-    if (dt == "Boolean") // v3
+    if (dt == "Boolean") // Firebird v3
     {
         return "[t-f,T-F]";
     }
@@ -1122,7 +1122,7 @@ void setFromFile(IBPP::Statement st, int param,
         dt = IBPP::sdDouble;
     switch (dt)
     {
-        case IBPP::sdBoolean: // v3
+        case IBPP::sdBoolean: // Firebird v3
             st->Set(param, wx2std(selected)); break;
         case IBPP::sdString:
             st->Set(param, wx2std(selected));   break;
@@ -1468,7 +1468,7 @@ void DataGeneratorFrame::setParam(IBPP::Statement st, int param,
     {
         switch (st->ParameterType(param))
         {
-            case IBPP::sdBoolean: // v3
+            case IBPP::sdBoolean: // Firebird v3
                 setFromOther<std::string>(st, param, gs, recNo);  break;
             case IBPP::sdString:
                 setFromOther<std::string>(st, param, gs, recNo);  break;
@@ -1500,7 +1500,7 @@ void DataGeneratorFrame::setParam(IBPP::Statement st, int param,
     {
         switch (st->ParameterType(param))
         {
-            case IBPP::sdBoolean: // v3
+            case IBPP::sdBoolean: // Firebird v3
                 setString(st, param, gs, recNo);          break;
             case IBPP::sdString:
                 setString(st, param, gs, recNo);          break;

@@ -1375,7 +1375,7 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     wxASSERT(buffer);
     std::string value;
     statement->Get(col, value);
-    if (statement->ColumnType(col) == IBPP::sdBoolean) // v3
+    if (statement->ColumnType(col) == IBPP::sdBoolean) // Firebird v3
     {
         bool value; // UGLY, must create a specific Columm (child one ?)
         statement->Get(col, value);
@@ -1399,7 +1399,7 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     }
 }
 
-class BooleanColumnDef : public StringColumnDef // v3
+class BooleanColumnDef : public StringColumnDef // Firebird v3
 {
 public:
     BooleanColumnDef(const wxString& name, unsigned stringIndex, bool readOnly, bool nullable);
@@ -1774,7 +1774,7 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
         {
             switch (type)
             {
-                case IBPP::sdBoolean: // v3
+                case IBPP::sdBoolean: // Firebird v3
                     columnDef = new BooleanColumnDef(colName, stringIndex, readOnly, nullable);
                     ++stringIndex;
                     break;

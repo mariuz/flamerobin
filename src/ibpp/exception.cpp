@@ -257,7 +257,7 @@ WrongTypeImpl::WrongTypeImpl(const std::string& context, int sqlType, IITYPE var
 	std::string info;
 	switch (sqlType & ~1)
 	{
-		case SQL_BOOLEAN :		info.append("BOOLEAN"); break; // v3
+		case SQL_BOOLEAN :		info.append("BOOLEAN"); break; // Firebird v3
 		case SQL_TEXT :			info.append("CHAR"); break;
 		case SQL_VARYING :		info.append("VARCHAR"); break;
 		case SQL_SHORT :		info.append("SMALLINT"); break;

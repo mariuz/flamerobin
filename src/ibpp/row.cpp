@@ -1067,7 +1067,7 @@ void* RowImpl::GetValue(int varnum, IITYPE ivType, void* retvalue)
 
 	switch (var->sqltype & ~1)
 	{
-		    case SQL_BOOLEAN : // v3
+		    case SQL_BOOLEAN : // Firebird v3
 			if (ivType == ivString)
 			{
 				value = &var->sqldata[0];
@@ -1380,7 +1380,7 @@ void RowImpl::Free()
 					case SQL_TIMESTAMP :delete (ISC_TIMESTAMP*) var->sqldata; break;
 					case SQL_TYPE_TIME :delete (ISC_TIME*) var->sqldata; break;
 					case SQL_TYPE_DATE :delete (ISC_DATE*) var->sqldata; break;
-					case SQL_BOOLEAN : // v3
+					case SQL_BOOLEAN : // Firebird v3
 					case SQL_TEXT :
 					case SQL_VARYING :	delete [] var->sqldata; break;
 					case SQL_SHORT :	delete (int16_t*) var->sqldata; break;
@@ -1465,7 +1465,7 @@ void RowImpl::AllocVariables()
 			case SQL_TYPE_DATE :var->sqldata = (char*) new ISC_DATE;
 								memset(var->sqldata, 0, sizeof(ISC_DATE));
 								break;
-		    case SQL_BOOLEAN :  var->sqldata = new char[1]; // v3
+		    case SQL_BOOLEAN :  var->sqldata = new char[1]; // Firebird v3
 								break;
 			case SQL_TEXT :		var->sqldata = new char[var->sqllen+1];
 								memset(var->sqldata, ' ', var->sqllen);
@@ -1526,7 +1526,7 @@ RowImpl& RowImpl::operator=(const RowImpl& copied)
 			case SQL_TYPE_DATE :var->sqldata = (char*) new ISC_DATE;
 								memcpy(var->sqldata, org->sqldata, sizeof(ISC_DATE));
 								break;
-			case SQL_BOOLEAN :  var->sqldata = new char[1]; // v3
+			case SQL_BOOLEAN :  var->sqldata = new char[1]; // Firebird v3
 								break;
 			case SQL_TEXT :		var->sqldata = new char[var->sqllen+1];
 								memcpy(var->sqldata, org->sqldata, var->sqllen+1);

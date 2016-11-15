@@ -60,7 +60,7 @@ struct DatatypeProperties
 
 static const DatatypeProperties datatypes[] = {
     { "Char", true, false, true },
-    { "Boolean", false, false, true }, // v3
+    { "Boolean", false, false, true }, // Firebird v3
     { "Varchar", true, false, true },
     { "Integer" },
     { "Smallint" },
