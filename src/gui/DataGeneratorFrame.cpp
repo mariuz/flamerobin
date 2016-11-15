@@ -520,7 +520,7 @@ wxString getDefaultRange(Domain *d)
     
     if (dt == "Boolean") // Firebird v3
     {
-        return "[t-f,T-F]";
+        return "true-false";
     }
 
     if (dt == "Char" || dt == "Varchar")
