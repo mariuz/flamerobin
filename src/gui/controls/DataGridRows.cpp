@@ -1375,7 +1375,14 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     wxASSERT(buffer);
     std::string value;
     statement->Get(col, value);
-    if (statement->ColumnSubtype(col) == 1)   // charset OCTETS
+    if (statement->ColumnType(col) == IBPP::sdBoolean) // v3
+    {
+        bool value; // UGLY, must create a specific Columm (child one ?)
+        statement->Get(col, value);
+        wxString val = value ? "true" : "false";
+        buffer->setString(indexM, val);
+    }
+    else if (statement->ColumnSubtype(col) == 1)   // charset OCTETS
     {
         wxString val;
         for (std::string::size_type p = 0; p < value.length(); p++)
