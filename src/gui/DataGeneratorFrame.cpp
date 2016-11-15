@@ -517,6 +517,11 @@ wxString getDefaultRange(Domain *d)
     {
         return "0-2000000";
     }
+    
+    if (dt == "Boolean") // v3
+    {
+        return "[t-f,T-F]";
+    }
 
     if (dt == "Char" || dt == "Varchar")
     {

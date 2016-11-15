@@ -98,7 +98,7 @@ namespace IBPP
 
     //  SQL Data Types
     enum SDT {sdArray, sdBlob, sdDate, sdTime, sdTimestamp, sdString,
-        sdSmallint, sdInteger, sdLargeint, sdFloat, sdDouble};
+        sdSmallint, sdInteger, sdLargeint, sdFloat, sdDouble, sdBoolean};
 
     //  Array Data Types
     enum ADT {adDate, adTime, adTimestamp, adString,
