@@ -697,7 +697,7 @@ IBPP::SDT RowImpl::ColumnType(int varnum)
 		case SQL_TYPE_TIME : value = IBPP::sdTime;      break;
 		case SQL_BLOB :      value = IBPP::sdBlob;      break;
 		case SQL_ARRAY :     value = IBPP::sdArray;     break;
-		case SQL_BOOLEAN :   value = IBPP::sdString;     break;
+		case SQL_BOOLEAN :   value = IBPP::sdBoolean;     break;
 		default : throw LogicExceptionImpl("Row::ColumnType",
 						_("Found an unknown sqltype !"));
 	}
@@ -1067,7 +1067,19 @@ void* RowImpl::GetValue(int varnum, IITYPE ivType, void* retvalue)
 
 	switch (var->sqltype & ~1)
 	{
-		
+		    case SQL_BOOLEAN : // Firebird v3
+			if (ivType == ivString)
+			{
+				value = &var->sqldata[0];
+			}
+			else if (ivType == ivBool)
+			{
+				value = var->sqldata;
+			}
+			else throw WrongTypeImpl("RowImpl::GetValue", var->sqltype, ivType,
+										_("Incompatible types."));
+			break;
+		    
 			case SQL_TEXT :
 			if (ivType == ivString)
 			{
@@ -1368,6 +1380,7 @@ void RowImpl::Free()
 					case SQL_TIMESTAMP :delete (ISC_TIMESTAMP*) var->sqldata; break;
 					case SQL_TYPE_TIME :delete (ISC_TIME*) var->sqldata; break;
 					case SQL_TYPE_DATE :delete (ISC_DATE*) var->sqldata; break;
+					case SQL_BOOLEAN : // Firebird v3
 					case SQL_TEXT :
 					case SQL_VARYING :	delete [] var->sqldata; break;
 					case SQL_SHORT :	delete (int16_t*) var->sqldata; break;
@@ -1452,6 +1465,8 @@ void RowImpl::AllocVariables()
 			case SQL_TYPE_DATE :var->sqldata = (char*) new ISC_DATE;
 								memset(var->sqldata, 0, sizeof(ISC_DATE));
 								break;
+		    case SQL_BOOLEAN :  var->sqldata = new char[1]; // Firebird v3
+								break;
 			case SQL_TEXT :		var->sqldata = new char[var->sqllen+1];
 								memset(var->sqldata, ' ', var->sqllen);
 								var->sqldata[var->sqllen] = '\0';
@@ -1510,6 +1525,8 @@ RowImpl& RowImpl::operator=(const RowImpl& copied)
 								break;
 			case SQL_TYPE_DATE :var->sqldata = (char*) new ISC_DATE;
 								memcpy(var->sqldata, org->sqldata, sizeof(ISC_DATE));
+								break;
+			case SQL_BOOLEAN :  var->sqldata = new char[1]; // Firebird v3
 								break;
 			case SQL_TEXT :		var->sqldata = new char[var->sqllen+1];
 								memcpy(var->sqldata, org->sqldata, var->sqllen+1);

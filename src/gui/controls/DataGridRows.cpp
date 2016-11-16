@@ -1313,7 +1313,7 @@ void BlobColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
 // StringColumnDef class
 class StringColumnDef : public ResultsetColumnDef
 {
-private:
+protected:
     unsigned indexM;
     int charSizeM;
 public:
@@ -1375,7 +1375,14 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     wxASSERT(buffer);
     std::string value;
     statement->Get(col, value);
-    if (statement->ColumnSubtype(col) == 1)   // charset OCTETS
+    if (statement->ColumnType(col) == IBPP::sdBoolean) // Firebird v3
+    {
+        bool value; // UGLY, must create a specific Columm (child one ?)
+        statement->Get(col, value);
+        wxString val = value ? "true" : "false";
+        buffer->setString(indexM, val);
+    }
+    else if (statement->ColumnSubtype(col) == 1)   // charset OCTETS
     {
         wxString val;
         for (std::string::size_type p = 0; p < value.length(); p++)
@@ -1390,6 +1397,28 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
             val.Truncate(trimLen > size_t(charSizeM) ? trimLen : charSizeM);
         buffer->setString(indexM, val);
     }
+}
+
+class BooleanColumnDef : public StringColumnDef // Firebird v3
+{
+public:
+    BooleanColumnDef(const wxString& name, unsigned stringIndex, bool readOnly, bool nullable);
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col, const IBPP::Statement& statement);
+};
+
+BooleanColumnDef::BooleanColumnDef(const wxString& name, unsigned stringIndex,
+    bool readOnly, bool nullable) : StringColumnDef(name, stringIndex, readOnly, nullable, 5)
+{
+}
+
+void BooleanColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    const IBPP::Statement& statement)
+{
+    wxASSERT(buffer);
+    bool value;
+    statement->Get(col, value);
+    wxString val = value ? "true" : "false";
+    buffer->setString(StringColumnDef::indexM, val);
 }
 
 // DataGridRows class
@@ -1745,6 +1774,10 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
         {
             switch (type)
             {
+                case IBPP::sdBoolean: // Firebird v3
+                    columnDef = new BooleanColumnDef(colName, stringIndex, readOnly, nullable);
+                    ++stringIndex;
+                    break;
                 case IBPP::sdDate:
                     columnDef = new DateColumnDef(colName, bufferSizeM, readOnly, nullable);
                     break;

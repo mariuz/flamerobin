@@ -25,3 +25,4 @@ flamerobin.includes
 *.a
 .deps/
 .pch/
+build/

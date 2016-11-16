@@ -266,6 +266,9 @@ wxString Domain::dataTypeToString(short datatype, short scale, short precision,
                 + SqlTokenizer::getKeyword(kwSUB_TYPE) + " ";
             retval << subtype;
             return retval;
+            
+        case 23: // Firebird v3
+            return SqlTokenizer::getKeyword(kwBOOLEAN);
 
         // add length for char, varchar and cstring
         case 14:

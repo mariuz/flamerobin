@@ -335,7 +335,7 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
                 fieldNameM.setFromSql(tokenStringsM[fieldNameIndex]);
 
                 stt = tokensM[fieldNameIndex + 2];
-                isDatatypeM = (stt == kwCHAR || stt == kwVARCHAR
+                isDatatypeM = (stt == kwCHAR || stt == kwVARCHAR ||stt == kwBOOLEAN
                     || stt == kwINTEGER || stt == kwSMALLINT || stt == kwBIGINT
                     || stt == kwDECIMAL || stt == kwNUMERIC
                     || stt == kwDATE || stt == kwTIME || stt == kwTIMESTAMP
