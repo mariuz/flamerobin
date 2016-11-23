@@ -112,8 +112,8 @@ Source: ..\..\code-templates\*.*; DestDir: {app}\code-templates; Flags: ignoreve
 Source: ..\..\html-templates\*.*; DestDir: {app}\html-templates; Flags: ignoreversion
 Source: ..\..\sys-templates\*.*; DestDir: {app}\sys-templates; Flags: ignoreversion
 #ifndef X64VERSION
-Source: ..\..\res\system32\msvcr71.dll; DestDir: {app}
-Source: ..\..\res\system32\msvcp71.dll; DestDir: {app}
+#Source: ..\..\res\system32\msvcr71.dll; DestDir: {app}
+#Source: ..\..\res\system32\msvcp71.dll; DestDir: {app}
 #endif
 
 [INI]
