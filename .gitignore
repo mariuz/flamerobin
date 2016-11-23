@@ -27,3 +27,6 @@ flamerobin.includes
 .pch/
 build/
 *.db
+# Visual Studio 2015 cache/options directory
+.vs/
+
