@@ -5,33 +5,65 @@
       <Configuration>Debug Dynamic</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug Dynamic|x64">
+      <Configuration>Debug Dynamic</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug Static|Win32">
       <Configuration>Debug Static</Configuration>
       <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug Static|x64">
+      <Configuration>Debug Static</Configuration>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="DLL Debug Dynamic|Win32">
       <Configuration>DLL Debug Dynamic</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="DLL Debug Dynamic|x64">
+      <Configuration>DLL Debug Dynamic</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="DLL Debug Static|Win32">
       <Configuration>DLL Debug Static</Configuration>
       <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DLL Debug Static|x64">
+      <Configuration>DLL Debug Static</Configuration>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="DLL Release Dynamic|Win32">
       <Configuration>DLL Release Dynamic</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="DLL Release Dynamic|x64">
+      <Configuration>DLL Release Dynamic</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="DLL Release Static|Win32">
       <Configuration>DLL Release Static</Configuration>
       <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="DLL Release Static|x64">
+      <Configuration>DLL Release Static</Configuration>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release Dynamic|Win32">
       <Configuration>Release Dynamic</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Release Dynamic|x64">
+      <Configuration>Release Dynamic</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release Static|Win32">
       <Configuration>Release Static</Configuration>
       <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release Static|x64">
+      <Configuration>Release Static</Configuration>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -45,7 +77,17 @@
     <PlatformToolset>v140</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release Static|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release Dynamic|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release Dynamic|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v140</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
@@ -55,7 +97,17 @@
     <PlatformToolset>v140</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug Static|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug Dynamic|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug Dynamic|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v140</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
@@ -65,7 +117,17 @@
     <PlatformToolset>v140</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Static|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Dynamic|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Dynamic|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v140</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
@@ -75,7 +137,17 @@
     <PlatformToolset>v140</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Static|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dynamic|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v140</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dynamic|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v140</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
@@ -86,25 +158,49 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release Static|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release Static|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release Dynamic|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release Dynamic|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug Static|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug Static|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug Dynamic|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug Dynamic|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release Static|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release Static|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release Dynamic|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release Dynamic|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug Static|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug Static|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dynamic|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dynamic|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
@@ -117,9 +213,17 @@
     <LinkIncremental>true</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dynamic|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <GenerateManifest>true</GenerateManifest>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Static|Win32'">
     <OutDir>vcusd\</OutDir>
     <IntDir>vcusd\flamerobin\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+    <GenerateManifest>true</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Static|x64'">
     <LinkIncremental>true</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
   </PropertyGroup>
@@ -129,9 +233,17 @@
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Dynamic|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <GenerateManifest>true</GenerateManifest>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Static|Win32'">
     <OutDir>vcus\</OutDir>
     <IntDir>vcus\flamerobin\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <GenerateManifest>true</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Static|x64'">
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
   </PropertyGroup>
@@ -141,9 +253,17 @@
     <LinkIncremental>true</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug Dynamic|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <GenerateManifest>true</GenerateManifest>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug Static|Win32'">
     <OutDir>vcusd\</OutDir>
     <IntDir>vcusd\flamerobin\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+    <GenerateManifest>true</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug Static|x64'">
     <LinkIncremental>true</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
   </PropertyGroup>
@@ -153,9 +273,17 @@
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release Dynamic|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <GenerateManifest>true</GenerateManifest>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release Static|Win32'">
     <OutDir>vcus\</OutDir>
     <IntDir>vcus\flamerobin\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <GenerateManifest>true</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release Static|x64'">
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
   </PropertyGroup>
@@ -198,6 +326,50 @@
       <ProgramDatabaseFile>vcud\flamerobin.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <Bscmake>
+      <OutputFile>vcud\flamerobin_flamerobin.bsc</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dynamic|x64'">
+    <Midl>
+      <PreprocessorDefinitions>WIN32;_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_lib\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_lib\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x0A00;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>vcud\flamerobin.pch</PrecompiledHeaderOutputFile>
+      <ObjectFileName>vcud\flamerobin\</ObjectFileName>
+      <ProgramDataBaseFileName>vcud\flamerobin.pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x0A00;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_lib\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>wxmsw31ud_aui.lib;wxmsw31ud_stc.lib;wxmsw31ud_html.lib;wxmsw31ud_adv.lib;wxmsw31ud_core.lib;wxbase31ud_xml.lib;wxbase31ud.lib;wxscintillad.lib;wxexpatd.lib;wxtiffd.lib;wxjpegd.lib;wxpngd.lib;wxzlibd.lib;wxregexud.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcud\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>vcud\flamerobin.exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_lib;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>vcud\flamerobin.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
     </Link>
     <Bscmake>
       <OutputFile>vcud\flamerobin_flamerobin.bsc</OutputFile>
@@ -249,6 +421,50 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Bscmake>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Static|x64'">
+    <Midl>
+      <PreprocessorDefinitions>WIN32;_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_lib\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_lib\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>vcusd\flamerobin.pch</PrecompiledHeaderOutputFile>
+      <ObjectFileName>vcusd\flamerobin\</ObjectFileName>
+      <ProgramDataBaseFileName>vcusd\flamerobin.pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_lib\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>wxmsw30ud_aui.lib;wxmsw30ud_stc.lib;wxmsw30ud_html.lib;wxmsw30ud_adv.lib;wxmsw30ud_core.lib;wxbase30ud_xml.lib;wxbase30ud.lib;wxscintillad.lib;wxexpatd.lib;wxtiffd.lib;wxjpegd.lib;wxpngd.lib;wxzlibd.lib;wxregexud.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcusd\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>vcusd\flamerobin.exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_lib;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>vcusd\flamerobin.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <Bscmake>
+      <OutputFile>vcusd\flamerobin_flamerobin.bsc</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Bscmake>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Dynamic|Win32'">
     <Midl>
       <PreprocessorDefinitions>WIN32;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -291,6 +507,48 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Bscmake>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Dynamic|x64'">
+    <Midl>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_lib\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>MinSpace</Optimization>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_x64_lib\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_WIN64;_WINDOWS;__WINDOWS__;WINVER=0x500;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>vcu\flamerobin.pch</PrecompiledHeaderOutputFile>
+      <ObjectFileName>vcu\flamerobin\</ObjectFileName>
+      <ProgramDataBaseFileName>vcu\flamerobin.pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_lib\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>wxmsw31u_aui.lib;wxmsw31u_stc.lib;wxmsw31u_html.lib;wxmsw31u_adv.lib;wxmsw31u_core.lib;wxbase31u_xml.lib;wxbase31u.lib;wxscintilla.lib;wxexpat.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;wxregexu.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcu\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>vcu\flamerobin.exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_x64_lib;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ProgramDatabaseFile>vcu\flamerobin.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <Bscmake>
+      <OutputFile>vcu\flamerobin_flamerobin.bsc</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Bscmake>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Static|Win32'">
     <Midl>
       <PreprocessorDefinitions>WIN32;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -327,6 +585,48 @@
       <ProgramDatabaseFile>vcus\flamerobin.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <Bscmake>
+      <OutputFile>vcus\flamerobin_flamerobin.bsc</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Static|x64'">
+    <Midl>
+      <PreprocessorDefinitions>WIN64;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_lib\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>MinSpace</Optimization>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_x64_lib\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN64;_WINDOWS;__WINDOWS__;WINVER=0x500;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>vcus\flamerobin.pch</PrecompiledHeaderOutputFile>
+      <ObjectFileName>vcus\flamerobin\</ObjectFileName>
+      <ProgramDataBaseFileName>vcus\flamerobin.pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_lib\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>wxmsw31u_aui.lib;wxmsw31u_stc.lib;wxmsw31u_html.lib;wxmsw31u_adv.lib;wxmsw31u_core.lib;wxbase31u_xml.lib;wxbase31u.lib;wxscintilla.lib;wxexpat.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;wxregexu.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcus\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>vcus\flamerobin.exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_lib;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ProgramDatabaseFile>vcus\flamerobin.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
     </Link>
     <Bscmake>
       <OutputFile>vcus\flamerobin_flamerobin.bsc</OutputFile>
@@ -378,6 +678,50 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Bscmake>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug Dynamic|x64'">
+    <Midl>
+      <PreprocessorDefinitions>WIN32;_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_dll\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_dll\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>vcud\flamerobin.pch</PrecompiledHeaderOutputFile>
+      <ObjectFileName>vcud\flamerobin\</ObjectFileName>
+      <ProgramDataBaseFileName>vcud\flamerobin.pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_dll\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>wxmsw30ud_aui.lib;wxmsw30ud_stc.lib;wxmsw30ud_html.lib;wxmsw30ud_adv.lib;wxmsw30ud_core.lib;wxbase30ud_xml.lib;wxbase30ud.lib;wxscintillad.lib;wxexpatd.lib;wxtiffd.lib;wxjpegd.lib;wxpngd.lib;wxzlibd.lib;wxregexud.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcud\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>vcud\flamerobin.exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_dll;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>vcud\flamerobin.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <Bscmake>
+      <OutputFile>vcud\flamerobin_flamerobin.bsc</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Bscmake>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug Static|Win32'">
     <Midl>
       <PreprocessorDefinitions>WIN32;_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -417,6 +761,50 @@
       <ProgramDatabaseFile>vcusd\flamerobin.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <Bscmake>
+      <OutputFile>vcusd\flamerobin_flamerobin.bsc</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug Static|x64'">
+    <Midl>
+      <PreprocessorDefinitions>WIN32;_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_dll\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_dll\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>vcusd\flamerobin.pch</PrecompiledHeaderOutputFile>
+      <ObjectFileName>vcusd\flamerobin\</ObjectFileName>
+      <ProgramDataBaseFileName>vcusd\flamerobin.pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_dll\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>wxmsw30ud_aui.lib;wxmsw30ud_stc.lib;wxmsw30ud_html.lib;wxmsw30ud_adv.lib;wxmsw30ud_core.lib;wxbase30ud_xml.lib;wxbase30ud.lib;wxscintillad.lib;wxexpatd.lib;wxtiffd.lib;wxjpegd.lib;wxpngd.lib;wxzlibd.lib;wxregexud.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcusd\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>vcusd\flamerobin.exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_dll;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>vcusd\flamerobin.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
     </Link>
     <Bscmake>
       <OutputFile>vcusd\flamerobin_flamerobin.bsc</OutputFile>
@@ -465,6 +853,48 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Bscmake>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release Dynamic|x64'">
+    <Midl>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_dll\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>MinSpace</Optimization>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_dll\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>vcu\flamerobin.pch</PrecompiledHeaderOutputFile>
+      <ObjectFileName>vcu\flamerobin\</ObjectFileName>
+      <ProgramDataBaseFileName>vcu\flamerobin.pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_dll\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>wxmsw30u_aui.lib;wxmsw30u_stc.lib;wxmsw30u_html.lib;wxmsw30u_adv.lib;wxmsw30u_core.lib;wxbase30u_xml.lib;wxbase30u.lib;wxscintilla.lib;wxexpat.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;wxregexu.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcu\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>vcu\flamerobin.exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_dll;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ProgramDatabaseFile>vcu\flamerobin.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <Bscmake>
+      <OutputFile>vcu\flamerobin_flamerobin.bsc</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Bscmake>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release Static|Win32'">
     <Midl>
       <PreprocessorDefinitions>WIN32;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -507,6 +937,48 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Bscmake>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release Static|x64'">
+    <Midl>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_dll\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>MinSpace</Optimization>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_dll\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>wx/wxprec.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderOutputFile>vcus\flamerobin.pch</PrecompiledHeaderOutputFile>
+      <ObjectFileName>vcus\flamerobin\</ObjectFileName>
+      <ProgramDataBaseFileName>vcus\flamerobin.pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level4</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_dll\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>wxmsw30u_aui.lib;wxmsw30u_stc.lib;wxmsw30u_html.lib;wxmsw30u_adv.lib;wxmsw30u_core.lib;wxbase30u_xml.lib;wxbase30u.lib;wxscintilla.lib;wxexpat.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;wxregexu.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcus\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>vcus\flamerobin.exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_dll;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ProgramDatabaseFile>vcus\flamerobin.pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <Bscmake>
+      <OutputFile>vcus\flamerobin_flamerobin.bsc</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Bscmake>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\addconstrainthandler.cpp" />
     <ClCompile Include="src\config\Config.cpp" />
@@ -525,13 +997,21 @@
     <ClCompile Include="src\engine\MetadataLoader.cpp" />
     <ClCompile Include="src\frprec.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DLL Debug Dynamic|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DLL Debug Dynamic|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DLL Debug Static|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DLL Debug Static|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DLL Release Dynamic|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DLL Release Dynamic|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DLL Release Static|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='DLL Release Static|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Dynamic|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Dynamic|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Static|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Static|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Dynamic|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Dynamic|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Static|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Static|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\frutils.cpp" />
     <ClCompile Include="src\gui\AboutBox.cpp" />
