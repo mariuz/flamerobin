@@ -48,7 +48,8 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{3C914FEE-C6E8-58AA-B046-6E951FCD6BFC}.Debug Dynamic|Win32.ActiveCfg = Debug Dynamic|Win32
 		{3C914FEE-C6E8-58AA-B046-6E951FCD6BFC}.Debug Dynamic|Win32.Build.0 = Debug Dynamic|Win32
-		{3C914FEE-C6E8-58AA-B046-6E951FCD6BFC}.Debug Dynamic|x64.ActiveCfg = Debug Dynamic|Win32
+		{3C914FEE-C6E8-58AA-B046-6E951FCD6BFC}.Debug Dynamic|x64.ActiveCfg = Debug Dynamic|x64
+		{3C914FEE-C6E8-58AA-B046-6E951FCD6BFC}.Debug Dynamic|x64.Build.0 = Debug Dynamic|x64
 		{3C914FEE-C6E8-58AA-B046-6E951FCD6BFC}.Debug Dynamic|x86.ActiveCfg = Debug Dynamic|Win32
 		{3C914FEE-C6E8-58AA-B046-6E951FCD6BFC}.Debug Static|Win32.ActiveCfg = Debug Static|Win32
 		{3C914FEE-C6E8-58AA-B046-6E951FCD6BFC}.Debug Static|Win32.Build.0 = Debug Static|Win32
@@ -94,7 +95,8 @@ Global
 		{3C914FEE-C6E8-58AA-B046-6E951FCD6BFC}.Release|x86.ActiveCfg = Release Static|Win32
 		{F98A5270-7698-516C-9430-13EBB667AEA5}.Debug Dynamic|Win32.ActiveCfg = Debug Dynamic|Win32
 		{F98A5270-7698-516C-9430-13EBB667AEA5}.Debug Dynamic|Win32.Build.0 = Debug Dynamic|Win32
-		{F98A5270-7698-516C-9430-13EBB667AEA5}.Debug Dynamic|x64.ActiveCfg = Debug Dynamic|Win32
+		{F98A5270-7698-516C-9430-13EBB667AEA5}.Debug Dynamic|x64.ActiveCfg = Debug Dynamic|x64
+		{F98A5270-7698-516C-9430-13EBB667AEA5}.Debug Dynamic|x64.Build.0 = Debug Dynamic|x64
 		{F98A5270-7698-516C-9430-13EBB667AEA5}.Debug Dynamic|x86.ActiveCfg = Debug Dynamic|Win32
 		{F98A5270-7698-516C-9430-13EBB667AEA5}.Debug Static|Win32.ActiveCfg = Debug Static|Win32
 		{F98A5270-7698-516C-9430-13EBB667AEA5}.Debug Static|Win32.Build.0 = Debug Static|Win32
