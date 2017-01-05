@@ -13,6 +13,9 @@ AC_ARG_ENABLE(debug,
               [  --enable-debug          Enable debugging information],
               USE_DEBUG="$enableval", USE_DEBUG="no")
 
+CFLAGS+=" -std=c11"
+CXXFLAGS+=" -std=c++11"
+
 if test $USE_DEBUG = yes ; then 
   DEBUG=1
   FINAL=0
