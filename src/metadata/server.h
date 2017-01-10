@@ -25,8 +25,6 @@
 #ifndef FR_SERVER_H
 #define FR_SERVER_H
 
-#include <boost/enable_shared_from_this.hpp>
-
 #include <ibpp.h>
 
 #include "metadata/collection.h"
