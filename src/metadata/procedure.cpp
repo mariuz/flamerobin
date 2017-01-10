@@ -35,8 +35,6 @@
 
 #include <string>
 
-#include <boost/function.hpp>
-
 #include <ibpp.h>
 
 #include "core/FRError.h"
@@ -139,20 +137,20 @@ bool Procedure::getChildren(std::vector<MetadataItem *>& temp)
     if (parametersM.empty())
         return false;
     std::transform(parametersM.begin(), parametersM.end(),
-        std::back_inserter(temp), boost::mem_fn(&ParameterPtr::get));
+        std::back_inserter(temp), std::mem_fn(&ParameterPtr::get));
     return !parametersM.empty();
 }
 
 void Procedure::lockChildren()
 {
     std::for_each(parametersM.begin(), parametersM.end(),
-        boost::mem_fn(&Parameter::lockSubject));
+        std::mem_fn(&Parameter::lockSubject));
 }
 
 void Procedure::unlockChildren()
 {
     std::for_each(parametersM.begin(), parametersM.end(),
-        boost::mem_fn(&Parameter::unlockSubject));
+        std::mem_fn(&Parameter::unlockSubject));
 }
 
 ParameterPtrs::iterator Procedure::begin()

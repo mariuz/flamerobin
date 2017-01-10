@@ -36,7 +36,6 @@
 #include <algorithm>
 #include <functional>
 
-#include <boost/function.hpp>
 #include <boost/thread.hpp>
 
 #include "config/Config.h"
@@ -341,25 +340,25 @@ void Database::getIdentifiers(std::vector<Identifier>& temp)
 {
     checkConnected(_("getIdentifiers"));
     std::transform(tablesM->begin(), tablesM->end(),
-        std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(sysTablesM->begin(), sysTablesM->end(),
-        std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(viewsM->begin(), viewsM->end(),
-        std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(proceduresM->begin(), proceduresM->end(),
-        std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(triggersM->begin(), triggersM->end(),
-        std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(rolesM->begin(), rolesM->end(),
-        std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(generatorsM->begin(), generatorsM->end(),
-        std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(functionsM->begin(), functionsM->end(),
-        std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(userDomainsM->begin(), userDomainsM->end(),
-        std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(exceptionsM->begin(), exceptionsM->end(),
-        std::back_inserter(temp), boost::mem_fn(&MetadataItem::getIdentifier));
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
 }
 
 // This could be moved to Column class
@@ -969,7 +968,7 @@ void runTask(SharedBackgroundTask task)
 static boost::thread startTask(SharedBackgroundTask task)
 {
     wxASSERT(task != 0);
-    return boost::thread(boost::bind(&::runTask, task));
+    return boost::thread(std::bind(&::runTask, task));
 }
 
 class BackgroundDatabaseConnection: public BackgroundTask

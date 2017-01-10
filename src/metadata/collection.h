@@ -28,7 +28,6 @@
 #include <iterator>
 #include <vector>
 
-#include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "metadata/database.h"
@@ -205,7 +204,7 @@ public:
         if (!childrenLoaded())
             return false;
         std::transform(itemsM.begin(), itemsM.end(),
-            std::back_inserter(temp), boost::mem_fn(&ItemType::get));
+            std::back_inserter(temp), std::mem_fn(&ItemType::get));
         return !itemsM.empty();
     }
 

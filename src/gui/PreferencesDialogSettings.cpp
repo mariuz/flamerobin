@@ -41,8 +41,8 @@
 #include <vector>
 
 #include <boost/bind.hpp>
-#include <boost/function.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <functional>
 
 #include "config/Config.h"
 #include "frutils.h"
@@ -236,7 +236,7 @@ void PrefDlgSetting::setDefault(const wxString& WXUNUSED(defValue))
 }
 
 // PrefDlgEventHandler helper
-typedef boost::function<void (wxCommandEvent&)> CommandEventHandler;
+typedef std::function<void (wxCommandEvent&)> CommandEventHandler;
 
 class PrefDlgEventHandler: public wxEvtHandler
 {
@@ -303,7 +303,7 @@ bool PrefDlgCheckboxSetting::createControl(bool WXUNUSED(ignoreerrors))
         checkBoxM->SetToolTip(descriptionM);
 
     checkBoxHandlerM.reset(new PrefDlgEventHandler(
-        boost::bind(&PrefDlgCheckboxSetting::OnCheckBox, this, _1)));
+        std::bind(&PrefDlgCheckboxSetting::OnCheckBox, this,  std::placeholders::_1)));
     checkBoxM->PushEventHandler(checkBoxHandlerM.get());
     checkBoxHandlerM->Connect(checkBoxM->GetId(),
         wxEVT_COMMAND_CHECKBOX_CLICKED,
@@ -845,7 +845,7 @@ bool PrefDlgChooserSetting::createControl(bool WXUNUSED(ignoreerrors))
     browsebtnM = new wxButton(getPage(), wxID_ANY, _("Select..."));
 
     buttonHandlerM.reset(new PrefDlgEventHandler(
-        boost::bind(&PrefDlgChooserSetting::OnBrowseButton, this, _1)));
+        std::bind(&PrefDlgChooserSetting::OnBrowseButton, this,  std::placeholders::_1)));
     browsebtnM->PushEventHandler(buttonHandlerM.get());
     buttonHandlerM->Connect(browsebtnM->GetId(),
         wxEVT_COMMAND_BUTTON_CLICKED,
@@ -1120,13 +1120,13 @@ bool PrefDlgCheckListBoxSetting::createControl(bool WXUNUSED(ignoreerrors))
         wxCHK_3STATE);
 
     checkListBoxHandlerM.reset(new PrefDlgEventHandler(
-        boost::bind(&PrefDlgCheckListBoxSetting::OnCheckListBox, this, _1)));
+        std::bind(&PrefDlgCheckListBoxSetting::OnCheckListBox, this,  std::placeholders::_1)));
     checkListBoxM->PushEventHandler(checkListBoxHandlerM.get());
     checkListBoxHandlerM->Connect(checkListBoxM->GetId(),
         wxEVT_COMMAND_CHECKLISTBOX_TOGGLED,
         wxCommandEventHandler(PrefDlgEventHandler::OnCommandEvent));
     checkBoxHandlerM.reset(new PrefDlgEventHandler(
-        boost::bind(&PrefDlgCheckListBoxSetting::OnCheckBox, this, _1)));
+        std::bind(&PrefDlgCheckListBoxSetting::OnCheckBox, this,  std::placeholders::_1)));
     checkBoxM->PushEventHandler(checkBoxHandlerM.get());
     checkBoxHandlerM->Connect(checkBoxM->GetId(),
         wxEVT_COMMAND_CHECKBOX_CLICKED,

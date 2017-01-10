@@ -30,8 +30,6 @@
     #include "wx/wx.h"
 #endif
 
-#include <boost/function.hpp>
-
 #include <ibpp.h>
 
 #include "core/StringUtils.h"
@@ -648,19 +646,19 @@ bool Relation::getChildren(std::vector<MetadataItem*>& temp)
     if (columnsM.empty())
         return false;
     std::transform(columnsM.begin(), columnsM.end(), std::back_inserter(temp),
-        boost::mem_fn(&ColumnPtr::get));
+        std::mem_fn(&ColumnPtr::get));
     return !columnsM.empty();
 }
 
 void Relation::lockChildren()
 {
     std::for_each(columnsM.begin(), columnsM.end(),
-        boost::mem_fn(&Column::lockSubject));
+        std::mem_fn(&Column::lockSubject));
 }
 
 void Relation::unlockChildren()
 {
     std::for_each(columnsM.begin(), columnsM.end(),
-        boost::mem_fn(&Column::unlockSubject));
+        std::mem_fn(&Column::unlockSubject));
 }
 

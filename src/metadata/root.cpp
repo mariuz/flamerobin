@@ -37,8 +37,6 @@
 
 #include <algorithm>
 
-#include <boost/function.hpp>
-
 #include "config/Config.h"
 #include "core/StringUtils.h"
 #include "metadata/database.h"
@@ -72,7 +70,7 @@ void Root::disconnectAllDatabases()
     {
         DatabasePtrs databases((*its)->getDatabases());
         std::for_each(databases.begin(), databases.end(),
-            boost::mem_fn(&Database::disconnect));
+            std::mem_fn(&Database::disconnect));
     }
 }
 
@@ -328,20 +326,20 @@ bool Root::getChildren(std::vector<MetadataItem *>& temp)
     if (serversM.empty())
         return false;
     std::transform(serversM.begin(), serversM.end(), std::back_inserter(temp),
-        boost::mem_fn(&ServerPtr::get));
+        std::mem_fn(&ServerPtr::get));
     return !serversM.empty();
 }
 
 void Root::lockChildren()
 {
     std::for_each(serversM.begin(), serversM.end(),
-        boost::mem_fn(&Server::lockSubject));
+        std::mem_fn(&Server::lockSubject));
 }
 
 void Root::unlockChildren()
 {
     std::for_each(serversM.begin(), serversM.end(),
-        boost::mem_fn(&Server::unlockSubject));
+        std::mem_fn(&Server::unlockSubject));
 }
 
 const wxString Root::getItemPath() const

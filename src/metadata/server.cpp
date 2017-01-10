@@ -32,8 +32,6 @@
 
 #include <algorithm>
 
-#include <boost/function.hpp>
-
 #include "config/Config.h"
 #include "core/ProgressIndicator.h"
 #include "core/StringUtils.h"
@@ -56,13 +54,13 @@ DatabasePtrs Server::getDatabases() const
 void Server::lockChildren()
 {
     std::for_each(databasesM.begin(), databasesM.end(),
-        boost::mem_fn(&Database::lockSubject));
+        std::mem_fn(&Database::lockSubject));
 }
 
 void Server::unlockChildren()
 {
     std::for_each(databasesM.begin(), databasesM.end(),
-        boost::mem_fn(&Database::unlockSubject));
+        std::mem_fn(&Database::unlockSubject));
 }
 
 bool Server::getChildren(std::vector<MetadataItem*>& temp)
@@ -70,7 +68,7 @@ bool Server::getChildren(std::vector<MetadataItem*>& temp)
     if (databasesM.empty())
         return false;
     std::transform(databasesM.begin(), databasesM.end(),
-        std::back_inserter(temp), boost::mem_fn(&DatabasePtr::get));
+        std::back_inserter(temp), std::mem_fn(&DatabasePtr::get));
     return !databasesM.empty();
 }
 
@@ -116,7 +114,7 @@ bool Server::hasConnectedDatabase() const
 {
     DatabasePtrs::const_iterator it = std::find_if(
         databasesM.begin(), databasesM.end(),
-        boost::mem_fn(&Database::isConnected));
+        std::mem_fn(&Database::isConnected));
     return it != databasesM.end();
 }
 
