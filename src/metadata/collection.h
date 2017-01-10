@@ -28,8 +28,6 @@
 #include <iterator>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-
 #include "metadata/database.h"
 
 class MetadataCollectionBase : public MetadataItem
