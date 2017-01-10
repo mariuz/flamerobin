@@ -40,7 +40,6 @@
 
 #include <vector>
 
-#include <boost/scoped_ptr.hpp>
 #include <functional>
 
 #include "config/Config.h"
