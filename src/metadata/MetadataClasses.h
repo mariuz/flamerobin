@@ -30,104 +30,104 @@
 #include <boost/shared_ptr.hpp>
 
 class Column;
-typedef boost::shared_ptr<Column> ColumnPtr;
+typedef std::shared_ptr<Column> ColumnPtr;
 typedef std::vector<ColumnPtr> ColumnPtrs;
 
 class Database;
-typedef boost::shared_ptr<Database> DatabasePtr;
-typedef boost::weak_ptr<Database> DatabaseWeakPtr;
+typedef std::shared_ptr<Database> DatabasePtr;
+typedef std::weak_ptr<Database> DatabaseWeakPtr;
 typedef std::vector<DatabasePtr> DatabasePtrs;
 
 class Domain;
-typedef boost::shared_ptr<Domain> DomainPtr;
+typedef std::shared_ptr<Domain> DomainPtr;
 typedef std::vector<DomainPtr> DomainPtrs;
 class Domains;
-typedef boost::shared_ptr<Domains> DomainsPtr;
+typedef std::shared_ptr<Domains> DomainsPtr;
 
 class Exception;
-typedef boost::shared_ptr<Exception> ExceptionPtr;
+typedef std::shared_ptr<Exception> ExceptionPtr;
 typedef std::vector<ExceptionPtr> ExceptionPtrs;
 class Exceptions;
-typedef boost::shared_ptr<Exceptions> ExceptionsPtr;
+typedef std::shared_ptr<Exceptions> ExceptionsPtr;
 
 class ForeignKey;
 
 class Function;
-typedef boost::shared_ptr<Function> FunctionPtr;
+typedef std::shared_ptr<Function> FunctionPtr;
 typedef std::vector<FunctionPtr> FunctionPtrs;
 class Functions;
-typedef boost::shared_ptr<Functions> FunctionsPtr;
+typedef std::shared_ptr<Functions> FunctionsPtr;
 
 class Generator;
-typedef boost::shared_ptr<Generator> GeneratorPtr;
+typedef std::shared_ptr<Generator> GeneratorPtr;
 typedef std::vector<GeneratorPtr> GeneratorPtrs;
 class Generators;
-typedef boost::shared_ptr<Generators> GeneratorsPtr;
+typedef std::shared_ptr<Generators> GeneratorsPtr;
 
 class Index;
 
 class MetadataItem;
-typedef boost::shared_ptr<MetadataItem> MetadataItemPtr;
+typedef std::shared_ptr<MetadataItem> MetadataItemPtr;
 
 class Parameter;
-typedef boost::shared_ptr<Parameter> ParameterPtr;
+typedef std::shared_ptr<Parameter> ParameterPtr;
 typedef std::vector<ParameterPtr> ParameterPtrs;
 
 class PrimaryKeyConstraint;
 
 class Procedure;
-typedef boost::shared_ptr<Procedure> ProcedurePtr;
+typedef std::shared_ptr<Procedure> ProcedurePtr;
 typedef std::vector<ProcedurePtr> ProcedurePtrs;
 class Procedures;
-typedef boost::shared_ptr<Procedures> ProceduresPtr;
+typedef std::shared_ptr<Procedures> ProceduresPtr;
 
 class Relation;
 
 class Role;
-typedef boost::shared_ptr<Role> RolePtr;
+typedef std::shared_ptr<Role> RolePtr;
 typedef std::vector<RolePtr> RolePtrs;
 class Roles;
-typedef boost::shared_ptr<Roles> RolesPtr;
+typedef std::shared_ptr<Roles> RolesPtr;
 
 class Root;
-typedef boost::shared_ptr<Root> RootPtr;
+typedef std::shared_ptr<Root> RootPtr;
 
 class Server;
-typedef boost::shared_ptr<Server> ServerPtr;
-typedef boost::weak_ptr<Server> ServerWeakPtr;
+typedef std::shared_ptr<Server> ServerPtr;
+typedef std::weak_ptr<Server> ServerWeakPtr;
 typedef std::vector<ServerPtr> ServerPtrs;
 
 class SysDomains;
-typedef boost::shared_ptr<SysDomains> SysDomainsPtr;
+typedef std::shared_ptr<SysDomains> SysDomainsPtr;
 
 class SysRoles;
-typedef boost::shared_ptr<SysRoles> SysRolesPtr;
+typedef std::shared_ptr<SysRoles> SysRolesPtr;
 
 class SysTables;
-typedef boost::shared_ptr<SysTables> SysTablesPtr;
+typedef std::shared_ptr<SysTables> SysTablesPtr;
 
 class Table;
-typedef boost::shared_ptr<Table> TablePtr;
+typedef std::shared_ptr<Table> TablePtr;
 typedef std::vector<TablePtr> TablePtrs;
 class Tables;
-typedef boost::shared_ptr<Tables> TablesPtr;
+typedef std::shared_ptr<Tables> TablesPtr;
 
 class Trigger;
-typedef boost::shared_ptr<Trigger> TriggerPtr;
+typedef std::shared_ptr<Trigger> TriggerPtr;
 typedef std::vector<TriggerPtr> TriggerPtrs;
 class Triggers;
-typedef boost::shared_ptr<Triggers> TriggersPtr;
+typedef std::shared_ptr<Triggers> TriggersPtr;
 
 class UniqueConstraint;
 
 class User;
-typedef boost::shared_ptr<User> UserPtr;
+typedef std::shared_ptr<User> UserPtr;
 typedef std::vector<UserPtr> UserPtrs;
 
 class View;
-typedef boost::shared_ptr<View> ViewPtr;
+typedef std::shared_ptr<View> ViewPtr;
 typedef std::vector<ViewPtr> ViewPtrs;
 class Views;
-typedef boost::shared_ptr<Views> ViewsPtr;
+typedef std::shared_ptr<Views> ViewsPtr;
 
 #endif // FR_METADATACLASSES_H

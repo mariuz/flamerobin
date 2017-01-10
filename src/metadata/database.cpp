@@ -925,7 +925,7 @@ void Database::reconnect()
 }
 
 class BackgroundTask;
-typedef boost::shared_ptr<BackgroundTask> SharedBackgroundTask;
+typedef std::shared_ptr<BackgroundTask> SharedBackgroundTask;
 
 class BackgroundTask
 {

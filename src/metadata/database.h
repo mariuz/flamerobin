@@ -144,7 +144,7 @@ private:
 };
 
 class Database: public MetadataItem,
-    public boost::enable_shared_from_this<Database>
+    public std::enable_shared_from_this<Database>
 {
 private:
     ServerWeakPtr serverM;
@@ -181,7 +181,7 @@ private:
     ViewsPtr viewsM;
 
     // copy constructor implementation removed since it's no longer needed
-    // (Server uses a vector of boost::shared_ptr<Database> now)
+    // (Server uses a vector of std::shared_ptr<Database> now)
     Database(const Database& rhs);
 
     void setDisconnected();

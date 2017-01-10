@@ -40,7 +40,6 @@
 
 #include <vector>
 
-#include <boost/bind.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <functional>
 

@@ -31,7 +31,7 @@
 #include "metadata/metadataitem.h"
 
 class User: public MetadataItem,
-    public boost::enable_shared_from_this<User>
+    public std::enable_shared_from_this<User>
 {
 private:
     ServerWeakPtr serverM;

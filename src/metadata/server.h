@@ -36,7 +36,7 @@
 #include "metadata/User.h"
 
 class Server : public MetadataItem,
-    public boost::enable_shared_from_this<Server>
+    public std::enable_shared_from_this<Server>
 {
 private:
     wxString hostnameM;

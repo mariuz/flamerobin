@@ -41,11 +41,11 @@ protected:
     }
 
     template<class T>
-    boost::shared_ptr<T> extractMetadataItemPtrFromURI(const URI& uri)
+    std::shared_ptr<T> extractMetadataItemPtrFromURI(const URI& uri)
     {
         if (T* t = extractMetadataItemFromURI<T>(uri))
             return t->shared_from_this();
-        return boost::shared_ptr<T>();
+        return std::shared_ptr<T>();
     }
 };
 

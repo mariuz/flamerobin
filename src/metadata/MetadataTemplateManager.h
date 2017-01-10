@@ -62,7 +62,7 @@ public:
     wxString getBaseFileName() const { return templateFileNameM.GetName(); }
 };
 
-typedef boost::shared_ptr<TemplateDescriptor> TemplateDescriptorPtr;
+typedef std::shared_ptr<TemplateDescriptor> TemplateDescriptorPtr;
 typedef std::list<TemplateDescriptorPtr> TemplateDescriptorList;
 
 class MetadataTemplateManager

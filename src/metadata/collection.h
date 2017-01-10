@@ -81,7 +81,7 @@ template <class T>
 class MetadataCollection : public MetadataCollectionBase
 {
 public:
-    typedef typename boost::shared_ptr<T> ItemType;
+    typedef typename std::shared_ptr<T> ItemType;
     typedef typename std::vector<ItemType> CollectionType;
     typedef typename CollectionType::iterator iterator;
     typedef typename CollectionType::const_iterator const_iterator;
