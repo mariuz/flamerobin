@@ -273,7 +273,7 @@ private:
     wxCheckBox* checkBoxM;
     bool defaultM;
 
-    boost::scoped_ptr<wxEvtHandler> checkBoxHandlerM;
+    std::unique_ptr<wxEvtHandler> checkBoxHandlerM;
     void OnCheckBox(wxCommandEvent& event);
 };
 
@@ -799,7 +799,7 @@ private:
 
     virtual void choose() = 0;
 
-    boost::scoped_ptr<wxEvtHandler> buttonHandlerM;
+    std::unique_ptr<wxEvtHandler> buttonHandlerM;
     void OnBrowseButton(wxCommandEvent& event);
 };
 
@@ -1066,8 +1066,8 @@ private:
     bool ignoreEventsM;
     wxArrayString itemsM;
 
-    boost::scoped_ptr<wxEvtHandler> checkListBoxHandlerM;
-    boost::scoped_ptr<wxEvtHandler> checkBoxHandlerM;
+    std::unique_ptr<wxEvtHandler> checkListBoxHandlerM;
+    std::unique_ptr<wxEvtHandler> checkBoxHandlerM;
     void OnCheckListBox(wxCommandEvent& event);
     void OnCheckBox(wxCommandEvent& event);
 };
