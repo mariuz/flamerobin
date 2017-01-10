@@ -24,7 +24,6 @@
 #ifndef FR_DATAGRIDROWBUFFER_H
 #define FR_DATAGRIDROWBUFFER_H
 
-#include <boost/cstdint.hpp>
 #include <ibpp.h>
 
 
@@ -51,7 +50,7 @@ private:
     int isDeletableM:1;
 protected:
     std::vector<DataGridRowBufferFieldAttr> fieldAttrM;
-    std::vector<boost::uint8_t> dataM;
+    std::vector<uint8_t> dataM;
     std::vector<wxString> stringsM;
     std::vector<IBPP::Blob> blobsM;
     void invalidateIsDeletable();

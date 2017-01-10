@@ -1386,7 +1386,7 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     {
         wxString val;
         for (std::string::size_type p = 0; p < value.length(); p++)
-            val += wxString::Format("%02x", boost::uint8_t(value[p]));
+            val += wxString::Format("%02x", uint8_t(value[p]));
         buffer->setString(indexM, val);
     }
     else
@@ -2075,7 +2075,7 @@ void DataGridRows::exportBlobFile(const wxString& filename, unsigned row,
         pi->initProgress(_("Saving..."), size);
     while (!pi || !pi->isCanceled())
     {
-        boost::uint8_t buffer[32768];
+        uint8_t buffer[32768];
         int size = b->Read((void*)buffer, 32767);
         if (size < 1)
             break;
@@ -2098,7 +2098,7 @@ void DataGridRows::importBlobFile(const wxString& filename, unsigned row,
 
     DataGridRowsBlob b = setBlobPrepare(row,col);
     b.blob->Create();
-    boost::uint8_t buffer[32768];
+    uint8_t buffer[32768];
     while (!fl.Eof())
     {
         size_t len = fl.Read(buffer, 32767);    // slow when not 32k
