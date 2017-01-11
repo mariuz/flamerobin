@@ -341,7 +341,7 @@
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_x64_lib\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x0A00;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN64;_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x0A00;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
