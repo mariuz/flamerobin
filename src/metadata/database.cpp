@@ -1022,7 +1022,7 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
         {
             SharedBackgroundTask sbt(BackgroundDatabaseConnection::create(db));
             boost::thread t = startTask(sbt);
-            while (!t.timed_join(boost::posix_time::milliseconds(50)))
+            while (!t.try_join_for(boost::chrono::milliseconds(50)))
             {
                 indicator->stepProgress();
                 if (indicator->isCanceled())
