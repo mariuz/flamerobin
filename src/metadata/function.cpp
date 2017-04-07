@@ -183,6 +183,9 @@ void Function::loadProperties()
                     paramListM += ", ";
                 paramListM += datatype + mechanismDDL[mechIndex];
             }
+            if (mechanism < 0){
+              retstrM += wxString(" ") + SqlTokenizer::getKeyword(kwFREE_IT);
+            }
         }
         else
         {
