@@ -11,7 +11,7 @@ AC_PROG_CXX
 
 AC_ARG_ENABLE(debug,
               [  --enable-debug          Enable debugging information],
-              USE_DEBUG="$enableval", USE_DEBUG="no")
+              USE_DEBUG="$enableval", USE_DEBUG="no" CXXFLAGS+=" -DNDEBUG")
 
 CFLAGS+=" -std=c11"
 CXXFLAGS+=" -std=c++11"

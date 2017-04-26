@@ -14402,7 +14402,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 if test "${enable_debug+set}" = set; then :
   enableval=$enable_debug; USE_DEBUG="$enableval"
 else
-  USE_DEBUG="no"
+  USE_DEBUG="no" CXXFLAGS+=" -DNDEBUG"
 fi
 
 
