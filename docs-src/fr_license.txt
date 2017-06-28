@@ -1,4 +1,4 @@
-Copyright (c) 2004-2015 The FlameRobin Development Team
+Copyright (c) 2004-2017 The FlameRobin Development Team
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -21,7 +21,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 This is a BSD-style Expat license. You may obtain a copy of the License at:
-http://www.flamerobin.org/license.html
+http://www.flamerobin.org/license.php
 
 The original Expat license is available from:
 http://www.jclark.com/xml/copying.txt
