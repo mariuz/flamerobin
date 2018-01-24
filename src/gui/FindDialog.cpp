@@ -355,7 +355,7 @@ void FindDialog::do_layout()
     sizerEdits->Add(text_ctrl_replace, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL);
     sizerEdits->AddGrowableCol(1, 1);
 
-    wxGridSizer* sizerChecks = new wxGridSizer(2, 2,
+    wxGridSizer* sizerChecks = new wxGridSizer(3, 2,
         styleguide().getCheckboxSpacing(),
         styleguide().getUnrelatedControlMargin(wxHORIZONTAL));
     if (checkbox_wholeword)
