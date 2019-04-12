@@ -67,7 +67,7 @@ StatementHistoryDialog::StatementHistoryDialog(wxWindow *parent,
         styleguide().getRelatedControlMargin(wxVERTICAL));
 
     mainSplitter = new wxSplitterWindow( getControlsPanel(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_3D );
-    leftSplitterPanel = new wxPanel( mainSplitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    leftSplitterPanel = new wxPanel( mainSplitter, wxID_ANY, wxDefaultPosition, wxSize(100, 1), wxTAB_TRAVERSAL );
     wxBoxSizer* leftSplitterSizer = new wxBoxSizer( wxVERTICAL );
 
     leftSplitterPanel->SetSizer( leftSplitterSizer );
