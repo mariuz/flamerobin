@@ -105,7 +105,7 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent, RootPtr root)
     wxBoxSizer *leftSizer;
     leftSizer = new wxBoxSizer(wxVERTICAL);
     wxFlexGridSizer *fgSizer1;
-    fgSizer1 = new wxFlexGridSizer(2, 3, 0, 0);
+    fgSizer1 = new wxFlexGridSizer(6, 3, 0, 0);
     fgSizer1->AddGrowableCol(1);
 
     m_staticText1 = new wxStaticText(mainPanel, wxID_ANY, _("Type"));
