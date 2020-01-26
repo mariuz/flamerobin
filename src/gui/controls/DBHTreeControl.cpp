@@ -416,6 +416,32 @@ void DBHTreeItemVisitor::visitExceptions(Exceptions& exceptions)
 void DBHTreeItemVisitor::visitFunction(Function& function)
 {
     setNodeProperties(&function, ART_Function);
+	if (function.childrenLoaded())
+	{
+		// make node caption bold when parameter data is loaded
+		// (even if the procedure has no parameters at all)
+		nodeTextBoldM = true;
+		// show number of parameters?
+		if (DBHTreeConfigCache::get().getShowColumnParamCount())
+		{
+			size_t ins = 0, outs = 0;
+			for (ParameterPtrs::const_iterator it = function.begin();
+				it != function.end(); ++it)
+			{
+				if ((*it)->isOutputParameter())
+					++outs;
+				else
+					++ins;
+			}
+			nodeTextM += wxString::Format(" (%d, %d)", ins, outs);
+		}
+	}
+	// show Parameter nodes if Config setting is on
+	showChildrenM = DBHTreeConfigCache::get().getShowColumns();
+	showNodeExpanderM = showChildrenM && !function.childrenLoaded();
+	// update if settings change
+	nodeConfigSensitiveM = true;
+
 }
 
 void DBHTreeItemVisitor::visitFunctions(Functions& functions)

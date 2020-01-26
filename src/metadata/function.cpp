@@ -41,12 +41,195 @@
 #include "metadata/domain.h"
 #include "metadata/function.h"
 #include "metadata/MetadataItemVisitor.h"
+#include "metadata/parameter.h"
 #include "sql/StatementBuilder.h"
+
 
 Function::Function(DatabasePtr database, const wxString& name)
     : MetadataItem(ntFunction, database.get(), name)
 {
+	ensurePropertiesLoaded();
 }
+
+void Function::loadChildren()
+{
+	bool childrenWereLoaded = childrenLoaded();
+	// in case an exception is thrown this should be repeated
+	setChildrenLoaded(false);
+
+	DatabasePtr db = getDatabase();
+	MetadataLoader* loader = db->getMetadataLoader();
+	// first start a transaction for metadata loading, then lock the procedure
+	// when objects go out of scope and are destroyed, procedure will be
+	// unlocked before the transaction is committed - any update() calls on
+	// observers can possibly use the same transaction
+	// when objects go out of scope and are destroyed, object will be unlocked
+	// before the transaction is committed - any update() calls on observers
+	// can possibly use the same transaction
+	MetadataLoaderTransaction tr(loader);
+	SubjectLocker lock(db.get());
+	wxMBConv* converter = db->getCharsetConverter();
+
+	std::string sql(
+		"select a.rdb$argument_name, a.rdb$field_source, " //1..2
+		"a.rdb$mechanism, a.rdb$field_type, a.rdb$field_scale, a.rdb$field_length, " //3..6
+		"a.rdb$field_sub_type, a.rdb$field_precision, "//7..8
+		"f.rdb$return_argument, a.rdb$argument_position, " //9..10
+	);
+	if (db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
+		sql += "rdb$default_source, rdb$null_flag, rdb$argument_mechanism, "; //11..13
+	else
+		sql += "null, null, -1, ";
+	sql += "a.rdb$description from rdb$function_arguments a "
+		" join rdb$functions f on f.rdb$function_name = a.rdb$function_name "
+		"where a.rdb$function_name = ? ";
+	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+		sql += " and a.rdb$package_name is null ";
+	sql += "order by a.rdb$argument_position";
+
+	IBPP::Statement st1 = loader->getStatement(sql);
+	st1->Set(1, wx2std(getName_(), converter));
+	st1->Execute();
+
+	ParameterPtrs parameters;
+	while (st1->Fetch())
+	{
+		std::string s;
+		short returnarg, retpos;
+		st1->Get(9, returnarg);
+		st1->Get(10, retpos);
+
+		if (!st1->IsNull(1)) {
+			st1->Get(1, s);
+		}
+		else {
+			s = (returnarg == retpos) ? "RETURN " : "";
+		}
+		wxString param_name(std2wxIdentifier (s, converter));
+		if (!st1->IsNull(2)) {
+			st1->Get(2, s);
+		}
+		else {
+			if (!st1->IsNull(4)) {
+				short  type, scale, length, subtype, precision ;
+				st1->Get(4, type);
+				st1->Get(5, scale);
+				st1->Get(6, length);
+				st1->Get(7, subtype);
+				st1->Get(8, precision);
+				s = Domain::dataTypeToString(type, scale,precision, subtype, length);
+			}
+		}
+		wxString source(std2wxIdentifier(s, converter));
+
+		short partype, mechanism = -1;
+		partype = (returnarg == retpos) ? 1 : 0;
+		/*if (st1->IsNull(3)) {
+			partype = st1->IsNull(1) ? 1 : 0;
+		}
+		else {
+			st1->Get(3, partype);
+		}*/
+		bool hasDefault = !st1->IsNull(11);
+		wxString defaultSrc;
+		if (hasDefault)
+		{
+			st1->Get(11, s);
+			defaultSrc = std2wxIdentifier(s, converter);
+		}
+		bool notNull = false;
+		if (!st1->IsNull(12))
+			st1->Get(12, &notNull);
+		if (!st1->IsNull(13)) {
+			st1->Get(13, mechanism);
+		}
+		else {
+			if (!st1->IsNull(3)) 
+				st1->Get(3, mechanism);
+		}
+		bool hasDescription = !st1->IsNull(14);
+
+		ParameterPtr par = findParameter(param_name);
+		if (!par)
+		{
+			par.reset(new Parameter(this, param_name));
+			initializeLockCount(par, getLockCount());
+		}
+		parameters.push_back(par);
+		par->initialize(source, partype, mechanism, !notNull, defaultSrc,
+			hasDefault, hasDescription);
+	}
+
+	setChildrenLoaded(true);
+	if (!childrenWereLoaded || parametersM != parameters)
+	{
+		parametersM.swap(parameters);
+		notifyObservers();
+	}
+}
+
+bool Function::getChildren(std::vector<MetadataItem *>& temp)
+{
+	if (parametersM.empty())
+		return false;
+	std::transform(parametersM.begin(), parametersM.end(),
+		std::back_inserter(temp), std::mem_fn(&ParameterPtr::get));
+	return !parametersM.empty();
+}
+
+void Function::lockChildren()
+{
+	std::for_each(parametersM.begin(), parametersM.end(),
+		std::mem_fn(&Parameter::lockSubject));
+}
+
+void Function::unlockChildren()
+{
+	std::for_each(parametersM.begin(), parametersM.end(),
+		std::mem_fn(&Parameter::unlockSubject));
+}
+
+ParameterPtrs::iterator Function::begin()
+{
+	// please - don't load here
+	// this code is used to get columns we want to alert about changes
+	// but if there aren't any columns, we don't want to waste time
+	// loading them
+	return parametersM.begin();
+}
+
+ParameterPtrs::iterator Function::end()
+{
+	// please see comment for begin()
+	return parametersM.end();
+}
+
+ParameterPtrs::const_iterator Function::begin() const
+{
+	return parametersM.begin();
+}
+
+ParameterPtrs::const_iterator Function::end() const
+{
+	return parametersM.end();
+}
+
+ParameterPtr Function::findParameter(const wxString& name) const
+{
+	for (ParameterPtrs::const_iterator it = parametersM.begin();
+		it != parametersM.end(); ++it)
+	{
+		if ((*it)->getName_() == name)
+			return *it;
+	}
+	return ParameterPtr();
+}
+
+size_t Function::getParamCount() const
+{
+	return parametersM.size();
+}
+
 
 wxString Function::getCreateSql()
 {
@@ -65,7 +248,7 @@ wxString Function::getCreateSql()
 
 const wxString Function::getTypeName() const
 {
-    return "FUNCTION";
+	return legacyFunctionM ? "FUNCTION" : "PROCEDURE";
 }
 
 wxString Function::getDropSqlStatement() const
@@ -80,6 +263,12 @@ wxString Function::getDefinition()
 {
     ensurePropertiesLoaded();
     return definitionM;
+}
+
+bool Function::getLegacyFunction() 
+{
+	ensurePropertiesLoaded();
+	return legacyFunctionM;
 }
 
 wxString Function::getLibraryName()
@@ -115,25 +304,31 @@ void Function::loadProperties()
     wxMBConv* converter = db->getCharsetConverter();
     MetadataLoaderTransaction tr(loader);
 
-    IBPP::Statement& st1 = loader->getStatement(
-        "SELECT f.RDB$RETURN_ARGUMENT, a.RDB$MECHANISM,"
-        " a.RDB$ARGUMENT_POSITION, a.RDB$FIELD_TYPE, a.RDB$FIELD_SCALE,"
-        " a.RDB$FIELD_LENGTH, a.RDB$FIELD_SUB_TYPE, a.RDB$FIELD_PRECISION,"
-        " f.RDB$MODULE_NAME, f.RDB$ENTRYPOINT, c.RDB$CHARACTER_SET_NAME "
-        " FROM RDB$FUNCTIONS f"
-        " LEFT OUTER JOIN RDB$FUNCTION_ARGUMENTS a"
-        " ON f.RDB$FUNCTION_NAME = a.RDB$FUNCTION_NAME"
-        " LEFT OUTER JOIN RDB$CHARACTER_SETS c"
-        " ON a.RDB$CHARACTER_SET_ID = c.RDB$CHARACTER_SET_ID"
-        " WHERE f.RDB$FUNCTION_NAME = ? "
-        " ORDER BY a.RDB$ARGUMENT_POSITION"
-    );
+	std::string stmt = "SELECT f.RDB$RETURN_ARGUMENT, a.RDB$MECHANISM,"
+		" a.RDB$ARGUMENT_POSITION, a.RDB$FIELD_TYPE, a.RDB$FIELD_SCALE,"
+		" a.RDB$FIELD_LENGTH, a.RDB$FIELD_SUB_TYPE, a.RDB$FIELD_PRECISION,"
+		" f.RDB$MODULE_NAME, f.RDB$ENTRYPOINT, c.RDB$CHARACTER_SET_NAME, ";
+	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+		stmt += " f.RDB$LEGACY_FLAG ";
+	else
+		stmt += "null ";
+
+	stmt +=	" FROM RDB$FUNCTIONS f"
+		" LEFT OUTER JOIN RDB$FUNCTION_ARGUMENTS a"
+		" ON f.RDB$FUNCTION_NAME = a.RDB$FUNCTION_NAME"
+		" LEFT OUTER JOIN RDB$CHARACTER_SETS c"
+		" ON a.RDB$CHARACTER_SET_ID = c.RDB$CHARACTER_SET_ID"
+		" WHERE f.RDB$FUNCTION_NAME = ? "
+		" ORDER BY a.RDB$ARGUMENT_POSITION";
+
+
+    IBPP::Statement& st1 = loader->getStatement(stmt);
     st1->Set(1, wx2std(getName_(), converter));
     st1->Execute();
     while (st1->Fetch())
     {
         short returnarg, mechanism, type, scale, length, subtype, precision,
-            retpos;
+            retpos, retlegacy;
         std::string libraryName, entryPoint, charset;
         st1->Get(1, returnarg);
         st1->Get(2, mechanism);
@@ -162,6 +357,14 @@ void Function::loadProperties()
         }
         if (type == 261)    // avoid subtype information for BLOB
             datatype = SqlTokenizer::getKeyword(kwBLOB);
+
+		if (!st1->IsNull(12)) {
+			st1->Get(12,retlegacy);
+			legacyFunctionM = retlegacy == 1;
+		}
+		else {
+			legacyFunctionM = true;
+		}
 
         int mechIndex = (mechanism < 0 ? -mechanism : mechanism);
         if (mechIndex >= (sizeof(mechanismNames)/sizeof(wxString)))
@@ -211,6 +414,11 @@ void Function::acceptVisitor(MetadataItemVisitor* visitor)
     visitor->visitFunction(*this);
 }
 
+wxString Function::getSource()
+{
+	return "<< Source >> ";
+}
+
 // Functions collection
 Functions::Functions(DatabasePtr database)
     : MetadataCollection<Function>(ntFunctions, database, _("Functions"))
@@ -224,10 +432,13 @@ void Functions::acceptVisitor(MetadataItemVisitor* visitor)
 
 void Functions::load(ProgressIndicator* progressIndicator)
 {
-    wxString stmt = "select rdb$function_name from rdb$functions"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
-        " order by 1";
-    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+	DatabasePtr db = getDatabase();
+	wxString stmt = "select rdb$function_name from rdb$functions"
+		" where (rdb$system_flag = 0 or rdb$system_flag is null)";
+	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+		stmt += " and rdb$package_name is null ";
+	stmt += " order by 1";
+    setItems(db->loadIdentifiers(stmt, progressIndicator));
 }
 
 void Functions::loadChildren()
@@ -240,3 +451,135 @@ const wxString Functions::getTypeName() const
     return "FUNCTION_COLLECTION";
 }
 
+void FunctionLegacy::loadProperties()
+{
+}
+
+FunctionLegacy::FunctionLegacy(DatabasePtr database, const wxString & name)
+	: Function(database, name)
+{
+}
+
+const wxString FunctionLegacy::getTypeName() const
+{
+	return wxString();
+}
+
+wxString FunctionLegacy::getDropSqlStatement() const
+{
+	return wxString();
+}
+
+wxString FunctionLegacy::getCreateSql()
+{
+	return wxString();
+}
+
+wxString FunctionLegacy::getDefinition()
+{
+	return wxString();
+}
+
+wxString FunctionLegacy::getLibraryName()
+{
+	return wxString();
+}
+
+wxString FunctionLegacy::getEntryPoint()
+{
+	return wxString();
+}
+
+void FunctionLegacy::acceptVisitor(MetadataItemVisitor * visitor)
+{
+}
+
+void FunctionSQL::loadChildren()
+{
+}
+
+void FunctionSQL::lockChildren()
+{
+}
+
+void FunctionSQL::unlockChildren()
+{
+}
+
+FunctionSQL::FunctionSQL(DatabasePtr database, const wxString & name)
+	: Function(database, name)
+{
+}
+
+bool FunctionSQL::getChildren(std::vector<MetadataItem*>& temp)
+{
+	return false;
+}
+
+ParameterPtrs::iterator FunctionSQL::begin()
+{
+	return ParameterPtrs::iterator();
+}
+
+ParameterPtrs::iterator FunctionSQL::end()
+{
+	return ParameterPtrs::iterator();
+}
+
+ParameterPtrs::const_iterator FunctionSQL::begin() const
+{
+	return ParameterPtrs::const_iterator();
+}
+
+ParameterPtrs::const_iterator FunctionSQL::end() const
+{
+	return ParameterPtrs::const_iterator();
+}
+
+size_t FunctionSQL::getParamCount() const
+{
+	return size_t();
+}
+
+ParameterPtr FunctionSQL::findParameter(const wxString & name) const
+{
+	return ParameterPtr();
+}
+
+wxString FunctionSQL::getOwner()
+{
+	return wxString();
+}
+
+wxString FunctionSQL::getSource()
+{
+	return wxString();
+}
+
+wxString FunctionSQL::getAlterSql(bool full)
+{
+	return wxString();
+}
+
+wxString FunctionSQL::getDefinition()
+{
+	return wxString();
+}
+
+std::vector<Privilege>* FunctionSQL::getPrivileges()
+{
+	return nullptr;
+}
+
+void FunctionSQL::checkDependentProcedures()
+{
+}
+
+const wxString FunctionSQL::getTypeName() const
+{
+	return wxString();
+}
+
+void FunctionSQL::acceptVisitor(MetadataItemVisitor * visitor)
+{
+}
