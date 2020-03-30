@@ -182,26 +182,40 @@ question there.
 -- Mac OS X - Autoconf Build Instructions --
 --------------------------------------------
 
+Before compiling you need to install these packages (easily with brew)
+
+brew install autoconf
+brew install wxwidgets
+brew install boost
+
 To build FlameRobin on Mac OS X 10.5 minimum, open
 a command line, cd into the flamerobin root directory, and execute the
 following commands:
 
-
 cd ..
-mkdir x86_64
-cd x86_64
-../configure --disable-debug --disable-dependency-tracking \
-  CFLAGS="-mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5u.sdk" \
-  LDFLAGS="-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk \
-    -Wl,-macosx_version_min -Wl,10.5" \
-  CXXFLAGS="-mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5u.sdk" \
-  --with-wx-config=/my/path/to/wx-config_for_x86_64_unicode
-make
+mkdir release
+cd release
+../configure --disable-debug --disable-dependency-tracking
+
+After configuration, open created Makefile and fix path for linking Firebird (otherwise you will get error from linker)
+
+Change this line:
+LIBS = -framework Firebird
+to this
+LIBS = /Library/Frameworks/Firebird.framework/Firebird
+
+Save and then compile and install:
+
+make -j4
+make install
+
+Copy missing sys-templates:
+cp -R ../sys-templates FlameRobin.app/Contents/SharedSupport/sys-templates
+
+Now you will have working Flamerobin.app which you should move to /Applications folder.
 
 The resulting bundles differ only in the flamerobin executable, the lipo
 tool can be used to make a Universal Build out of them.
-
-
 
 ----------------------------------------------
 -- Unix - Building wxWidgets with configure --
