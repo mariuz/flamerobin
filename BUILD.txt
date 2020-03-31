@@ -35,7 +35,7 @@ $(BOOST_ROOT)/stage/lib, but you may have changed that. For systems where
 both 32 and 64 bit versions of FlameRobin are to be built consider the
 following Stack Overflow post about how to build Boost in both versions:
 
-  http://stackoverflow.com/a/2326485/30568
+  https://stackoverflow.com/a/2326485/30568
   (accepted answer to "64-bit version of Boost for 64-bit windows")
 
 For the sole purpose of building FlameRobin only a few libraries are needed,
@@ -179,7 +179,7 @@ question there.
 
 
 --------------------------------------------
--- Mac OS X - Autoconf Build Instructions --
+-- Mac OS  - Autoconf Build Instructions --
 --------------------------------------------
 
 Before compiling you need to install these packages (easily with brew)
@@ -188,7 +188,7 @@ brew install autoconf
 brew install wxwidgets
 brew install boost
 
-To build FlameRobin on Mac OS X 10.5 minimum, open
+To build FlameRobin on Mac OS 10.5 minimum, open
 a command line, cd into the flamerobin root directory, and execute the
 following commands:
 
