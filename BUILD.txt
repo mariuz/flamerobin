@@ -196,21 +196,8 @@ cd ..
 mkdir release
 cd release
 ../configure --disable-debug --disable-dependency-tracking
-
-After configuration, open created Makefile and fix path for linking Firebird (otherwise you will get error from linker)
-
-Change this line:
-LIBS = -framework Firebird
-to this
-LIBS = /Library/Frameworks/Firebird.framework/Firebird
-
-Save and then compile and install:
-
-make -j4
+make
 make install
-
-Copy missing sys-templates:
-cp -R ../sys-templates FlameRobin.app/Contents/SharedSupport/sys-templates
 
 Now you will have working Flamerobin.app which you should move to /Applications folder.
 
