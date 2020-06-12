@@ -2930,7 +2930,7 @@ void ExecuteSqlFrame::log(wxString s, TextType type)
     if (type == ttSql)
         style = 2;
 
-    styled_text_ctrl_stats->StartStyling(startpos, 255);
+    styled_text_ctrl_stats->StartStyling(startpos, 0); // assert "unused==0" failed in wxStyledTextCtrl::StartStyling(): The second argument passed to StartStyling should be 0
     styled_text_ctrl_stats->SetStyling(endpos-startpos-1, style);
 }
 
