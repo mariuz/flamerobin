@@ -267,14 +267,14 @@ InsertParametersDialog::InsertParametersDialog(wxWindow* parent, IBPP::Statement
 
         //gridM->SetCellAlignment(
         //    def->isNumeric() ? wxALIGN_RIGHT : wxALIGN_LEFT, row, 3);
-        gridM->SetCellAlignment(wxALIGN_RIGHT, row, 3);
+        gridM->SetCellAlignment(row, 3, wxALIGN_RIGHT, wxALIGN_CENTER); //TODO: get isNumeric() from "somewhere" (done is better than perfect, and in this case is just estetic)
 
         //Show prevoius data
         //TODO: load SPECIAL selected option too
         if (statementM->ParametersByName().at(row)!='?')
         {
             if (parameterSaveList.count(statementM->ParametersByName().at(row))) {
-                gridM->SetCellValue(parameterSaveList.at(statementM->ParametersByName().at(row)), row, 3);
+                gridM->SetCellValue(wxGridCellCoords(row, 3), parameterSaveList.at(statementM->ParametersByName().at(row)));
             }
         }
 

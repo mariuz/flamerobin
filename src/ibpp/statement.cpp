@@ -22,6 +22,10 @@
 
 #include "_ibpp.h"
 
+#include <cctype>
+#include <functional>
+#include <array>
+
 #ifdef HAS_HDRSTOP
 #pragma hdrstop
 #endif
