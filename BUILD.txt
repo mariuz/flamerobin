@@ -35,7 +35,7 @@ $(BOOST_ROOT)/stage/lib, but you may have changed that. For systems where
 both 32 and 64 bit versions of FlameRobin are to be built consider the
 following Stack Overflow post about how to build Boost in both versions:
 
-  http://stackoverflow.com/a/2326485/30568
+  https://stackoverflow.com/a/2326485/30568
   (accepted answer to "64-bit version of Boost for 64-bit windows")
 
 For the sole purpose of building FlameRobin only a few libraries are needed,
@@ -179,29 +179,30 @@ question there.
 
 
 --------------------------------------------
--- Mac OS X - Autoconf Build Instructions --
+-- Mac OS  - Autoconf Build Instructions --
 --------------------------------------------
 
-To build FlameRobin on Mac OS X 10.5 minimum, open
+Before compiling you need to install these packages (easily with brew)
+
+brew install autoconf
+brew install wxwidgets
+brew install boost
+
+To build FlameRobin on Mac OS 10.5 minimum, open
 a command line, cd into the flamerobin root directory, and execute the
 following commands:
 
-
 cd ..
-mkdir x86_64
-cd x86_64
-../configure --disable-debug --disable-dependency-tracking \
-  CFLAGS="-mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5u.sdk" \
-  LDFLAGS="-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk \
-    -Wl,-macosx_version_min -Wl,10.5" \
-  CXXFLAGS="-mmacosx-version-min=10.5 -isysroot /Developer/SDKs/MacOSX10.5u.sdk" \
-  --with-wx-config=/my/path/to/wx-config_for_x86_64_unicode
+mkdir release
+cd release
+../configure --disable-debug --disable-dependency-tracking
 make
+make install
+
+Now you will have working Flamerobin.app which you should move to /Applications folder.
 
 The resulting bundles differ only in the flamerobin executable, the lipo
 tool can be used to make a Universal Build out of them.
-
-
 
 ----------------------------------------------
 -- Unix - Building wxWidgets with configure --
