@@ -1116,6 +1116,31 @@ public:
     void Set(int, const IBPP::Blob&);
     void Set(int, const IBPP::Array&);
 
+    void SetNull(std::string);
+    void Set(std::string, bool);
+    void Set(std::string, const char*);             // c-strings
+    void Set(std::string, const void*, int);        // byte buffers
+    void Set(std::string, const std::string&);
+    void Set(std::string, int16_t);
+    void Set(std::string, int32_t);
+    void Set(std::string, int64_t);
+    void Set(std::string, float);
+    void Set(std::string, double);
+    void Set(std::string, const IBPP::Timestamp&);
+    void Set(std::string, const IBPP::Date&);
+    void Set(std::string, const IBPP::Time&);
+    void Set(std::string, const IBPP::DBKey&);
+    void Set(std::string, const IBPP::Blob&);
+    void Set(std::string, const IBPP::Array&);
+
+private:
+    std::string ParametersParser(std::string sql);
+    std::vector<std::string> parametersByName_;
+public:
+    std::vector<std::string> ParametersByName();//Return a vector list, with the parameter(s) name, starting in 0
+    std::vector<int> FindParamsByName(std::string name);  //Return a vector list, with the parameter(s) ID, starting in 1
+    int ParameterNum(const std::string& name);
+
     bool IsNull(int);
     bool Get(int, bool*);
     bool Get(int, bool&);

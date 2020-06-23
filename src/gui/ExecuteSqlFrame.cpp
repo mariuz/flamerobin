@@ -62,6 +62,7 @@
 #include "gui/ExecuteSqlFrame.h"
 #include "gui/FRLayoutConfig.h"
 #include "gui/InsertDialog.h"
+#include "gui/InsertParametersDialog.h"
 #include "gui/StatementHistoryDialog.h"
 #include "gui/StyleGuide.h"
 #include "frutils.h"
@@ -1176,7 +1177,7 @@ void ExecuteSqlFrame::autoCompleteColumns(int pos, int len)
     }
     wxString table = styled_text_ctrl_sql->GetTextRange(start, pos-1);
     IncompleteStatement is(databaseM, styled_text_ctrl_sql->GetText());
-    wxString columns = is.getObjectColumns(table, pos);
+    wxString columns = is.getObjectColumns(table, pos, len);//When the user are typing something, you need to sort de result, else intelisense won't work properly
     if (columns.IsEmpty())
         return;
     if (HasWord(styled_text_ctrl_sql->GetTextRange(pos, pos+len), columns))
@@ -2388,6 +2389,16 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         if (prepareOnly)
             return true;
 
+        log(wxString::Format(_("Parametros: %d"), statementM->ParametersByName().size() ));
+        //Define parameters here:
+        if (statementM->ParametersByName().size() >0)
+        {
+            //Insert parameters here:
+            InsertParametersDialog* id = new InsertParametersDialog(this, statementM,
+                databaseM, parameterSaveList);
+            int result = id->ShowModal();
+        }
+
         log(wxEmptyString);
         log(wxEmptyString);
         log(_("Executing statement..."));
@@ -2919,7 +2930,7 @@ void ExecuteSqlFrame::log(wxString s, TextType type)
     if (type == ttSql)
         style = 2;
 
-    styled_text_ctrl_stats->StartStyling(startpos, 255);
+    styled_text_ctrl_stats->StartStyling(startpos, 0); // assert "unused==0" failed in wxStyledTextCtrl::StartStyling(): The second argument passed to StartStyling should be 0
     styled_text_ctrl_stats->SetStyling(endpos-startpos-1, style);
 }
 

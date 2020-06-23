@@ -38,7 +38,6 @@
 #include <bitset>
 #include <string>
 
-#include "config/Config.h"
 #include "core/FRError.h"
 #include "core/Observer.h"
 #include "core/ProgressIndicator.h"
@@ -48,41 +47,6 @@
 #include "metadata/column.h"
 #include "metadata/database.h"
 #include "metadata/table.h"
-
-// GridCellFormats: class to cache config data for cell formatting
-class GridCellFormats: public ConfigCache
-{
-private:
-    int floatingPointPrecisionM;
-    wxString dateFormatM;
-    int maxBlobKBytesM;
-    bool showBinaryBlobContentM;
-    bool showBlobContentM;
-    wxString timeFormatM;
-    wxString timestampFormatM;
-protected:
-    virtual void loadFromConfig();
-public:
-    GridCellFormats();
-
-    static GridCellFormats& get();
-
-    template<typename T>
-    wxString format(T value);
-    wxString formatDate(int year, int month, int day);
-    wxString formatTime(int hour, int minute, int second, int milliSecond);
-    wxString formatTimestamp(int year, int month, int day,
-        int hour, int minute, int second, int milliSecond);
-    int maxBlobBytesToFetch();
-    bool parseDate(wxString::iterator& start, wxString::iterator end,
-        bool consumeAll, int& year, int& month, int& day);
-    bool parseTime(wxString::iterator& start, wxString::iterator end,
-        int& hr, int& mn, int& sc, int& ml);
-    bool parseTimestamp(wxString::iterator& start, wxString::iterator end,
-        int& year, int& month, int& day, int& hr, int& mn, int& sc, int& ml);
-    bool showBinaryBlobContent();
-    bool showBlobContent();
-};
 
 GridCellFormats::GridCellFormats()
     : ConfigCache(config())
