@@ -9,12 +9,13 @@ on:
 jobs:
   build:
 
-    #runs-on: ubuntu-latest
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-latest
+    #runs-on: ubuntu-16.04
 
     steps:
     - uses: actions/checkout@v2
-#    - name why Ubuntu, why?
+    - name: why Ubuntu, why?
+      run: sudo sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list   
     - name: apt update
       run: sudo apt-get update 
     - name: Preparing dependencies
