@@ -9,12 +9,14 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    #runs-on: ubuntu-latest
+    runs-on: ubuntu-16.04
 
     steps:
     - uses: actions/checkout@v2
-#    - name: apt update
-#      run: sudo apt-get update 
+#    - name why Ubuntu, why?
+    - name: apt update
+      run: sudo apt-get update 
     - name: Preparing dependencies
       run: sudo apt-get build-dep flamerobin -y
     - name: install libboost
