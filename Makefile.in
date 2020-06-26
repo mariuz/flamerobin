@@ -95,6 +95,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_HtmlHeaderMetadataItemVisitor.o \
 	flamerobin_HtmlTemplateProcessor.o \
 	flamerobin_InsertDialog.o \
+	flamerobin_InsertParametersDialog.o \
 	flamerobin_MainFrame.o \
 	flamerobin_MetadataItemPropertiesFrame.o \
 	flamerobin_MultilineEnterDialog.o \
@@ -469,6 +470,9 @@ flamerobin_HtmlTemplateProcessor.o: $(srcdir)/src/gui/HtmlTemplateProcessor.cpp 
 
 flamerobin_InsertDialog.o: $(srcdir)/src/gui/InsertDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/InsertDialog.cpp
+
+flamerobin_InsertParametersDialog.o: $(srcdir)/src/gui/InsertParametersDialog.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/InsertParametersDialog.cpp
 
 flamerobin_MainFrame.o: $(srcdir)/src/gui/MainFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/MainFrame.cpp
