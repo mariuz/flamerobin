@@ -13,9 +13,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Preparing dependencies
+    - name: apt update
       run: sudo apt-get update 
+    - name: Preparing dependencies
       run: sudo apt-get build-dep flamerobin -y
+    - name: install libbost
       run: sudo apt-get install libboost-dev libboost-thread-dev libboost-system-dev -y
     - name: configure
       run: ./configure
