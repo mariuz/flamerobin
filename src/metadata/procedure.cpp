@@ -79,10 +79,11 @@ void Procedure::loadChildren()
         sql += "rdb$default_source, rdb$null_flag, rdb$parameter_mechanism, ";
     else
         sql += "null, null, -1, ";
-
-    sql +=  "rdb$description from rdb$procedure_parameters "
-            "where rdb$procedure_name = ? "
-            "order by rdb$parameter_type, rdb$parameter_number";
+	sql += "rdb$description from rdb$procedure_parameters "
+		"where rdb$procedure_name = ? ";
+	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+		sql += " and rdb$package_name is null ";
+    sql +=  "order by rdb$parameter_type, rdb$parameter_number";
 
     IBPP::Statement st1 = loader->getStatement(sql);
     st1->Set(1, wx2std(getName_(), converter));
@@ -199,15 +200,19 @@ wxString Procedure::getOwner()
     DatabasePtr db = getDatabase();
     MetadataLoader* loader = db->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
-
-    IBPP::Statement st1 = loader->getStatement(
-        "select rdb$owner_name from rdb$procedures where rdb$procedure_name = ?");
-    st1->Set(1, wx2std(getName_(), db->getCharsetConverter()));
+	wxMBConv* converter = db->getCharsetConverter();
+	std::string sql(
+		"select rdb$owner_name from rdb$procedures where rdb$procedure_name = ?"
+	);
+	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+		sql += " and rdb$package_name is null ";
+	IBPP::Statement st1 = loader->getStatement(sql);
+	st1->Set(1, wx2std(getName_(), converter));
     st1->Execute();
     st1->Fetch();
     std::string name;
     st1->Get(1, name);
-    return std2wxIdentifier(name, db->getCharsetConverter());
+    return std2wxIdentifier(name, converter);
 }
 
 wxString Procedure::getSource()
@@ -215,16 +220,59 @@ wxString Procedure::getSource()
     DatabasePtr db = getDatabase();
     MetadataLoader* loader = db->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
+	wxMBConv* converter = db->getCharsetConverter();
 
-    IBPP::Statement st1 = loader->getStatement(
-        "select rdb$procedure_source from rdb$procedures"
-        " where rdb$procedure_name = ?");
-    st1->Set(1, wx2std(getName_(), db->getCharsetConverter()));
+	std::string sql(
+		"select rdb$procedure_source, "
+	);
+	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+		sql += "rdb$entrypoint, rdb$engine_name,  ";
+	else
+		sql += "null, null, ";
+	if (db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
+		sql += " rdb$sql_security ";
+	else
+		sql += " null ";
+	sql += "from rdb$procedures where rdb$procedure_name = ?";
+	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+		sql += " and rdb$package_name is null ";
+	IBPP::Statement st1 = loader->getStatement( sql );
+	st1->Set(1, wx2std(getName_(), converter));
     st1->Execute();
     st1->Fetch();
     wxString source;
-    readBlob(st1, 1, source, db->getCharsetConverter());
-    source.Trim(false);     // remove leading whitespace
+	if (!st1->IsNull(4))
+	{
+		bool b;
+		st1->Get(4, b);
+		source += b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER";
+	}
+	if (!st1->IsNull(2))
+	{
+		std::string s;
+		st1->Get(2, s);
+		source += "EXTERNAL NAME "+std2wxIdentifier(s, converter)+ "\n";
+	}
+	if (!st1->IsNull(3))
+	{
+		std::string s;
+		st1->Get(3, s);
+		source += "ENGINE" + std2wxIdentifier(s, converter) + "\n";
+		if (!st1->IsNull(1))
+		{
+			wxString source1;
+			readBlob(st1, 1, source1, converter);
+			source1.Trim(false);     // remove leading whitespace
+			source += "\nAS\n"+ source1 + "\n";
+		}
+	}
+	else
+	{
+		wxString source1;
+		readBlob(st1, 1, source1, converter);
+		source1.Trim(false);     // remove leading whitespace
+		source += "\nAS\n" + source1 + "\n";
+	}
     return source;
 }
 
@@ -348,7 +396,7 @@ wxString Procedure::getAlterSql(bool full)
         if (!output.empty())
             sql += output + " )";
     }
-    sql += "\nAS\n";
+    //sql += "\nAS\n";
     if (full)
         sql += getSource();
     else
@@ -492,10 +540,13 @@ void Procedures::acceptVisitor(MetadataItemVisitor* visitor)
 
 void Procedures::load(ProgressIndicator* progressIndicator)
 {
-    wxString stmt = "select rdb$procedure_name from rdb$procedures"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
-        " order by 1";
-    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+	DatabasePtr db = getDatabase();
+	wxString stmt = "select rdb$procedure_name from rdb$procedures"
+		" where (rdb$system_flag = 0 or rdb$system_flag is null)";
+	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+		stmt += " and rdb$package_name is null ";
+	stmt += " order by rdb$procedure_name ";
+    setItems(db->loadIdentifiers(stmt, progressIndicator));
 }
 
 void Procedures::loadChildren()

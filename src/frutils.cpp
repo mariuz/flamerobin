@@ -83,10 +83,10 @@ void readBlob(IBPP::Statement& st, int column, wxString& result,
     }
 
     std::string resultBuffer;
-    char readBuffer[8192];        // 8K block
+    char readBuffer[16384];        // 16K block
     while (true)
     {
-        int size = b->Read(readBuffer, 8192-1);
+        int size = b->Read(readBuffer, 16384);
         if (size <= 0)
             break;
         readBuffer[size] = 0;
