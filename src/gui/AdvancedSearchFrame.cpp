@@ -105,7 +105,7 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent, RootPtr root)
     wxBoxSizer *leftSizer;
     leftSizer = new wxBoxSizer(wxVERTICAL);
     wxFlexGridSizer *fgSizer1;
-    fgSizer1 = new wxFlexGridSizer(2, 3, 0, 0);
+    fgSizer1 = new wxFlexGridSizer(6, 3, 0, 0);
     fgSizer1->AddGrowableCol(1);
 
     m_staticText1 = new wxStaticText(mainPanel, wxID_ANY, _("Type"));
@@ -455,7 +455,7 @@ void AdvancedSearchFrame::OnListCtrlResultsItemSelected(wxListEvent& event)
                 p = sql.find(sfind, p+1);
                 if (p == int(wxString::npos))
                     break;
-                stc_ddl->StartStyling(p);
+                stc_ddl->StartStyling(p, 0);
                 stc_ddl->SetStyling(len, 1+color%2);
             }
         }

@@ -67,7 +67,7 @@ StatementHistoryDialog::StatementHistoryDialog(wxWindow *parent,
         styleguide().getRelatedControlMargin(wxVERTICAL));
 
     mainSplitter = new wxSplitterWindow( getControlsPanel(), wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_3D );
-    leftSplitterPanel = new wxPanel( mainSplitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+    leftSplitterPanel = new wxPanel( mainSplitter, wxID_ANY, wxDefaultPosition, wxSize(100, 1), wxTAB_TRAVERSAL );
     wxBoxSizer* leftSplitterSizer = new wxBoxSizer( wxVERTICAL );
 
     leftSplitterPanel->SetSizer( leftSplitterSizer );
@@ -190,7 +190,7 @@ void StatementHistoryDialog::OnListBoxSelect(wxCommandEvent& WXUNUSED(event))
         p = sql.find(searchString, p+1);
         if (p == int(wxString::npos))
             break;
-        textctrl_statement->StartStyling(p);
+        textctrl_statement->StartStyling(p, 0);
         textctrl_statement->SetStyling(searchString.Length(), 1);
     }
 }

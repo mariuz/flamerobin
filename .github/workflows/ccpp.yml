@@ -1,0 +1,32 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    #runs-on: ubuntu-16.04
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: why Ubuntu, why?
+      run: sudo sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list   
+    - name: apt update
+      run: sudo apt-get update 
+    - name: Preparing dependencies
+      run: sudo apt-get build-dep flamerobin -y
+    - name: install libboost
+      run: sudo apt-get install libboost-dev libboost-thread-dev libboost-system-dev -y
+    - name: configure
+      run: ./configure
+    - name: make
+      run: make
+    - name: make check
+      run: make check
+    - name: make distcheck
+      run: make distcheck
