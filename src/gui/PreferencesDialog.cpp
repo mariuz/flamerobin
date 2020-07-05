@@ -679,7 +679,7 @@ void PreferencesDialog::setProperties()
         wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHTTEXT));
     wxFont font(static_text_categ->GetFont());
     font.SetPointSize(15);
-    font.SetWeight(wxBOLD);
+    font.SetWeight(wxFONTWEIGHT_BOLD);
     static_text_categ->SetFont(font);
 }
 
