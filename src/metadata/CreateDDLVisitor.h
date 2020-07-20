@@ -55,8 +55,10 @@ public:
     virtual void visitException(Exception& exception);
 //    virtual void visitExceptions(Exceptions& exceptions);
     virtual void visitForeignKey(ForeignKey& fk);
-    virtual void visitFunction(Function& function);
-//    virtual void visitFunctions(Functions& functions);
+    virtual void visitFunctionSQL(FunctionSQL& function);
+//    virtual void visitFunctionSQLs(FunctionSQLs& functions);
+    virtual void visitUDF(UDF& function);
+//    virtual void visitUDFs(UDFs& functions);
     virtual void visitGenerator(Generator& generator);
 //    virtual void visitGenerators(Generators& generators);
 //    virtual void visitIndex(Index& index);

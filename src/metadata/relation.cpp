@@ -108,6 +108,10 @@ void Relation::loadProperties()
     sql += "rdb$external_file, ";
     // for views: source as blob
     sql += "rdb$view_source ";
+    if (db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
+        sql += ", rdb$sql_security ";
+    else
+        sql += ", null ";
     sql += "from rdb$relations where rdb$relation_name = ?";
 
     IBPP::Statement& st1 = loader->getStatement(sql);
@@ -139,6 +143,16 @@ void Relation::loadProperties()
         }
         else
             setSource(wxEmptyString);
+        // Sql Security
+        if (!st1->IsNull(5))
+        {
+            bool b;
+            st1->Get(5, b);
+            sqlSecurityM = wxString(b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER");
+
+        }
+        else
+            sqlSecurityM.clear();
     }
 
     setPropertiesLoaded(true);
@@ -156,6 +170,12 @@ wxString Relation::getOwner()
 {
     ensurePropertiesLoaded();
     return ownerM;
+}
+
+wxString Relation::getSqlSecurity()
+{
+    ensurePropertiesLoaded();
+    return sqlSecurityM;
 }
 
 int Relation::getRelationType()

@@ -38,6 +38,12 @@ typedef std::shared_ptr<Database> DatabasePtr;
 typedef std::weak_ptr<Database> DatabaseWeakPtr;
 typedef std::vector<DatabasePtr> DatabasePtrs;
 
+class DdlTrigger;
+typedef std::shared_ptr<DdlTrigger> DdlTriggerPtr;
+typedef std::vector<DdlTriggerPtr> DdlTriggerPtrs;
+class DdlTriggers;
+typedef std::shared_ptr<DdlTriggers> DdlTriggersPtr;
+
 class Domain;
 typedef std::shared_ptr<Domain> DomainPtr;
 typedef std::vector<DomainPtr> DomainPtrs;
@@ -52,11 +58,12 @@ typedef std::shared_ptr<Exceptions> ExceptionsPtr;
 
 class ForeignKey;
 
-class Function;
-typedef std::shared_ptr<Function> FunctionPtr;
-typedef std::vector<FunctionPtr> FunctionPtrs;
-class Functions;
-typedef std::shared_ptr<Functions> FunctionsPtr;
+class FunctionSQL;
+typedef std::shared_ptr<FunctionSQL> FunctionSQLPtr;
+typedef std::vector<FunctionSQLPtr> FunctionSQLPtrs;
+class FunctionSQLs;
+typedef std::shared_ptr<FunctionSQLs> FunctionSQLsPtr;
+
 
 class Generator;
 typedef std::shared_ptr<Generator> GeneratorPtr;
@@ -64,10 +71,22 @@ typedef std::vector<GeneratorPtr> GeneratorPtrs;
 class Generators;
 typedef std::shared_ptr<Generators> GeneratorsPtr;
 
+class GTT;
+typedef std::shared_ptr<GTT> GTTPtr;
+typedef std::vector<GTTPtr> GTTPtrs;
+class GTTs;
+typedef std::shared_ptr<GTTs> GTTsPtr;
+
 class Index;
 
 class MetadataItem;
 typedef std::shared_ptr<MetadataItem> MetadataItemPtr;
+
+class Package;
+typedef std::shared_ptr<Package> PackagePtr;
+typedef std::vector<PackagePtr> PackagePtrs;
+class Packages;
+typedef std::shared_ptr<Packages> PackagesPtr;
 
 class Parameter;
 typedef std::shared_ptr<Parameter> ParameterPtr;
@@ -117,6 +136,12 @@ typedef std::shared_ptr<Trigger> TriggerPtr;
 typedef std::vector<TriggerPtr> TriggerPtrs;
 class Triggers;
 typedef std::shared_ptr<Triggers> TriggersPtr;
+
+class UDF;
+typedef std::shared_ptr<UDF> UDFPtr;
+typedef std::vector<UDFPtr> UDFPtrs;
+class UDFs;
+typedef std::shared_ptr<UDFs> UDFsPtr;
 
 class UniqueConstraint;
 

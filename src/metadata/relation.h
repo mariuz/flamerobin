@@ -38,6 +38,7 @@ class Relation: public MetadataItem
 private:
     int relationTypeM;
     wxString ownerM;
+    wxString sqlSecurityM;
 protected:
     void getDependentChecks(std::vector<CheckConstraint>& checks);
     void getDependentViews(std::vector<Relation*>& views,
@@ -61,6 +62,7 @@ public:
     Relation(NodeType type, DatabasePtr database, const wxString& name);
 
     wxString getOwner();
+    wxString getSqlSecurity();
     int getRelationType();
 
     ColumnPtrs::iterator begin();

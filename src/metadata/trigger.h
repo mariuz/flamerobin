@@ -48,6 +48,9 @@ private:
     int positionM;
     wxString sourceM;
     int typeM;
+    wxString sqlSecurityM;
+    wxString entryPointM;
+    wxString engineNameM;
 
     static FiringTime getFiringTime(int type);
 protected:
@@ -63,6 +66,7 @@ public:
     wxString getSource();
     wxString getAlterSql();
     bool isDatabaseTrigger();
+    wxString getSqlSecurity();
 
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);

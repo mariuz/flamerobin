@@ -1099,7 +1099,7 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& event)
                 Procedure* p = dynamic_cast<Procedure*>(databaseM->findByNameAndType(ntProcedure, word));
                 if (p)
                     calltip = p->getDefinition();
-                Function* f = dynamic_cast<Function*>(databaseM->findByNameAndType(ntFunction, word));
+                UDF* f = dynamic_cast<UDF*>(databaseM->findByNameAndType(ntUDF, word)); //JOCHOA FUNCTIONS
                 if (f)
                     calltip = f->getDefinition();
                 if (!calltip.empty())

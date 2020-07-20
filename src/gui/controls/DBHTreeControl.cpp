@@ -269,10 +269,12 @@ public:
     virtual void visitDomains(Domains& domains);
     virtual void visitException(Exception& exception);
     virtual void visitExceptions(Exceptions& exceptions);
-    virtual void visitFunction(Function& function);
-    virtual void visitFunctions(Functions& functions);
+    virtual void visitFunctionSQL(FunctionSQL& function);
+    virtual void visitFunctionSQLs(FunctionSQLs& functions);
     virtual void visitGenerator(Generator& generator);
     virtual void visitGenerators(Generators& generators);
+    virtual void visitPackage(Package& package);
+    virtual void visitPackages(Packages& packages);
     virtual void visitProcedure(Procedure& procedure);
     virtual void visitProcedures(Procedures& procedures);
     virtual void visitParameter(Parameter& parameter);
@@ -284,8 +286,12 @@ public:
     virtual void visitTable(Table& table);
     virtual void visitTables(Tables& tables);
     virtual void visitSysTables(SysTables& tables);
+	virtual void visitGTTs(GTTs& tables);
     virtual void visitTrigger(Trigger& trigger);
     virtual void visitTriggers(Triggers& triggers);
+	virtual void visitDdlTriggers(DdlTriggers& triggers);
+    virtual void visitUDF(UDF& function);
+    virtual void visitUDFs(UDFs& functions);
     virtual void visitView(View& view);
     virtual void visitViews(Views& views);
 };
@@ -413,38 +419,74 @@ void DBHTreeItemVisitor::visitExceptions(Exceptions& exceptions)
     setNodeProperties(&exceptions, ART_Exceptions);
 }
 
-void DBHTreeItemVisitor::visitFunction(Function& function)
+void DBHTreeItemVisitor::visitFunctionSQL(FunctionSQL& function)
 {
     setNodeProperties(&function, ART_Function);
-	if (function.childrenLoaded())
-	{
-		// make node caption bold when parameter data is loaded
-		// (even if the procedure has no parameters at all)
-		nodeTextBoldM = true;
-		// show number of parameters?
-		if (DBHTreeConfigCache::get().getShowColumnParamCount())
-		{
-			size_t ins = 0, outs = 0;
-			for (ParameterPtrs::const_iterator it = function.begin();
-				it != function.end(); ++it)
-			{
-				if ((*it)->isOutputParameter())
-					++outs;
-				else
-					++ins;
-			}
-			nodeTextM += wxString::Format(" (%d, %d)", ins, outs);
-		}
-	}
-	// show Parameter nodes if Config setting is on
-	showChildrenM = DBHTreeConfigCache::get().getShowColumns();
-	showNodeExpanderM = showChildrenM && !function.childrenLoaded();
-	// update if settings change
-	nodeConfigSensitiveM = true;
+    if (function.childrenLoaded())
+    {
+        // make node caption bold when parameter data is loaded
+        // (even if the procedure has no parameters at all)
+        nodeTextBoldM = true;
+        // show number of parameters?
+        if (DBHTreeConfigCache::get().getShowColumnParamCount())
+        {
+            size_t ins = 0, outs = 0;
+            for (ParameterPtrs::const_iterator it = function.begin();
+                it != function.end(); ++it)
+            {
+                if ((*it)->isOutputParameter())
+                    ++outs;
+                else
+                    ++ins;
+            }
+            nodeTextM += wxString::Format(" (%d, %d)", ins, outs);
+        }
+    }
+    // show Parameter nodes if Config setting is on
+    showChildrenM = DBHTreeConfigCache::get().getShowColumns();
+    showNodeExpanderM = showChildrenM && !function.childrenLoaded();
+    // update if settings change
+    nodeConfigSensitiveM = true;
 
 }
 
-void DBHTreeItemVisitor::visitFunctions(Functions& functions)
+void DBHTreeItemVisitor::visitFunctionSQLs(FunctionSQLs& functions)
+{
+    setNodeProperties(&functions, ART_Functions);
+}
+
+void DBHTreeItemVisitor::visitUDF(UDF& function)
+{
+    setNodeProperties(&function, ART_Function);
+    if (function.childrenLoaded())
+    {
+        // make node caption bold when parameter data is loaded
+        // (even if the procedure has no parameters at all)
+        nodeTextBoldM = true;
+        // show number of parameters?
+        if (DBHTreeConfigCache::get().getShowColumnParamCount())
+        {
+            size_t ins = 0, outs = 0;
+            for (ParameterPtrs::const_iterator it = function.begin();
+                it != function.end(); ++it)
+            {
+                if ((*it)->isOutputParameter())
+                    ++outs;
+                else
+                    ++ins;
+            }
+            nodeTextM += wxString::Format(" (%d, %d)", ins, outs);
+        }
+    }
+    // show Parameter nodes if Config setting is on
+    showChildrenM = DBHTreeConfigCache::get().getShowColumns();
+    showNodeExpanderM = showChildrenM && !function.childrenLoaded();
+    // update if settings change
+    nodeConfigSensitiveM = true;
+
+}
+
+void DBHTreeItemVisitor::visitUDFs(UDFs& functions)
 {
     setNodeProperties(&functions, ART_Functions);
 }
@@ -481,6 +523,44 @@ void DBHTreeItemVisitor::visitParameter(Parameter& parameter)
     setNodeProperties(&parameter,
         isOutput ? ART_ParameterOutput : ART_ParameterInput);
 }
+
+void DBHTreeItemVisitor::visitPackage(Package& package)
+{
+    //setNodeProperties(&package, ART_Procedure); jochoa package
+/*   
+   if (package.childrenLoaded())
+    {
+        // make node caption bold when parameter data is loaded
+        // (even if the package has no parameters at all)
+        nodeTextBoldM = true;
+        // show number of parameters?
+        if (DBHTreeConfigCache::get().getShowColumnParamCount())
+        {
+            size_t ins = 0, outs = 0;
+            for (ParameterPtrs::const_iterator it = procedure.begin();
+                it != package.end(); ++it)
+            {
+                if ((*it)->isOutputParameter())
+                    ++outs;
+                else
+                    ++ins;
+            }
+            nodeTextM += wxString::Format(" (%d, %d)", ins, outs);
+        }
+    }
+    // show Parameter nodes if Config setting is on
+    showChildrenM = DBHTreeConfigCache::get().getShowColumns();
+    showNodeExpanderM = showChildrenM && !procedure.childrenLoaded();
+*/
+    // update if settings change
+    nodeConfigSensitiveM = true;
+}
+
+void DBHTreeItemVisitor::visitPackages(Packages& packages)
+{
+    //setNodeProperties(&packages, ART_Procedures); jochoa package
+}
+
 
 void DBHTreeItemVisitor::visitProcedure(Procedure& procedure)
 {
@@ -559,7 +639,12 @@ void DBHTreeItemVisitor::visitServer(Server& server)
 
 void DBHTreeItemVisitor::visitSysTables(SysTables& tables)
 {
-    setNodeProperties(&tables, ART_SystemTables);
+    setNodeProperties(&tables, ART_SystemTables); 
+}
+
+void DBHTreeItemVisitor::visitGTTs(GTTs& tables)
+{
+    setNodeProperties(&tables, ART_Tables);
 }
 
 void DBHTreeItemVisitor::visitTable(Table& table)
@@ -598,6 +683,11 @@ void DBHTreeItemVisitor::visitTrigger(Trigger& trigger)
 void DBHTreeItemVisitor::visitTriggers(Triggers& triggers)
 {
     setNodeProperties(&triggers, ART_Triggers);
+}
+
+void DBHTreeItemVisitor::visitDdlTriggers(DdlTriggers& triggers)
+{
+    //setNodeProperties(&triggers, ART_Triggers); JOCHOA DDL RIGGER
 }
 
 void DBHTreeItemVisitor::visitView(View& view)

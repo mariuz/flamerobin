@@ -173,7 +173,11 @@ void CreateDDLVisitor::visitDatabase(Database& d)
         iterateit<RolesPtr, Role>(this, d.getRoles(), progressIndicatorM);
 
         preSqlM << "/********************* UDFS ***********************/\n\n";
-        iterateit<FunctionsPtr, Function>(this, d.getFunctions(),
+        iterateit<UDFsPtr, UDF>(this, d.getUDFs(),
+            progressIndicatorM);
+
+        preSqlM << "/********************* FUNCTIONS ***********************/\n\n";
+        iterateit<FunctionSQLsPtr, FunctionSQL>(this, d.getFunctionSQLs(),
             progressIndicatorM);
 
         preSqlM << "/****************** SEQUENCES ********************/\n\n";
@@ -307,7 +311,23 @@ void CreateDDLVisitor::visitForeignKey(ForeignKey& fk)
     sqlM = postSqlM;
 }
 
-void CreateDDLVisitor::visitFunction(Function& f)
+void CreateDDLVisitor::visitFunctionSQL(FunctionSQL& f)
+{
+    preSqlM << f.getCreateSql() << "\n";
+    wxString description = f.getDescription();
+    if (!description.empty())
+    {
+        wxString name(f.getName_());
+        description.Replace("'", "''");
+        name.Replace("'", "''");
+        postSqlM << "comment on external function " << name << " is '"
+            << description << "';\n";
+    }
+    sqlM = preSqlM + postSqlM;
+}
+
+
+void CreateDDLVisitor::visitUDF(UDF& f)
 {
     preSqlM << f.getCreateSql() << "\n";
     wxString description = f.getDescription();

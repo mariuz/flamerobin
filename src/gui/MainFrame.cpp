@@ -632,7 +632,8 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
             case ntView:
             case ntProcedure:
             case ntDomain:
-            case ntFunction:
+            case ntFunctionSQL:
+            case ntUDF:
             case ntTrigger:
             case ntException:
             case ntRole:
@@ -1261,7 +1262,7 @@ void MainFrame::OnMenuCreateException(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuCreateFunction(wxCommandEvent& WXUNUSED(event))
 {
     showCreateTemplate(
-        MetadataItemCreateStatementVisitor::getCreateFunctionStatement());
+        MetadataItemCreateStatementVisitor::getCreateUDFStatement());
 }
 
 void MainFrame::OnMenuCreateGenerator(wxCommandEvent& WXUNUSED(event))

@@ -41,8 +41,10 @@ class MetadataItemVisitor;
 
 typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
     // each item type and (if applicable) its parent type
-    ntTable, ntTables, ntView, ntViews, ntProcedure, ntProcedures,
-    ntTrigger, ntTriggers, ntGenerator, ntGenerators, ntFunction, ntFunctions,
+    ntTable, ntTables, ntGTT, ntGTTs,
+    ntView, ntViews, ntProcedure, ntProcedures,
+    ntTrigger, ntTriggers, ntGenerator, ntGenerators, 
+    ntFunctionSQL, ntFunctionSQLs, ntUDF,  ntUDFs,
     ntSysTable, ntSysTables, ntException, ntExceptions,
     ntDomain, ntDomains, ntSysDomain, ntSysDomains,
     ntRole, ntRoles, ntSysRole, ntSysRoles, ntColumn, ntParameter, ntIndex,

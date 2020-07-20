@@ -34,11 +34,11 @@ class ProgressIndicator;
 class Function: public MetadataItem
 {
 private:
-    wxString libraryNameM, entryPointM, definitionM, retstrM, paramListM;
+//    wxString libraryNameM, entryPointM, definitionM, retstrM, paramListM;
+	std::vector<Privilege> privilegesM;
 	ParameterPtrs parametersM;
-	bool legacyFunctionM;
+//	bool legacyFunctionM;
 protected:
-    virtual void loadProperties();
 
 	virtual void loadChildren();
 	virtual void lockChildren();
@@ -58,33 +58,36 @@ public:
 	size_t getParamCount() const;
 	ParameterPtr findParameter(const wxString& name) const;
 
-    virtual const wxString getTypeName() const;
-    virtual wxString getDropSqlStatement() const;
-    wxString getCreateSql();
-    wxString getDefinition();
-	bool getLegacyFunction();
-	wxString getLibraryName();
-    wxString getEntryPoint();
-	wxString getSource();
+	virtual wxString getCreateSql();
+	virtual wxString getDropSqlStatement() const ;
+	virtual wxString getDefinition() = 0;
+	wxString getOwner();
+	virtual wxString getSource();
+	wxString getSqlSecurity();
+	virtual const wxString getTypeName()  const = 0;
 
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 
-class FunctionLegacy : public Function
+class UDF : public Function
 {
 private:
 	wxString libraryNameM, entryPointM, definitionM, retstrM, paramListM;
 protected:
 	virtual void loadProperties();
 public:
-	FunctionLegacy(DatabasePtr database, const wxString& name);
-	virtual const wxString getTypeName() const;
+	UDF(DatabasePtr database, const wxString& name);
+
+	virtual wxString getCreateSql();
 	virtual wxString getDropSqlStatement() const;
-	wxString getCreateSql();
-	wxString getDefinition();
-	wxString getLibraryName();
+	virtual wxString getDefinition();
+	virtual wxString getSource();
+	virtual const wxString getTypeName() const ;
+
 	wxString getEntryPoint();
+	wxString getLibraryName();
+
 	virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 
@@ -97,6 +100,7 @@ protected:
 	virtual void loadChildren();
 	virtual void lockChildren();
 	virtual void unlockChildren();
+	virtual void loadProperties();
 public:
 	FunctionSQL(DatabasePtr database, const wxString& name);
 
@@ -114,22 +118,35 @@ public:
 	wxString getOwner();
 	wxString getSource();
 	wxString getAlterSql(bool full = true);
-	wxString getDefinition();   // used for calltip in sql editor
+	virtual wxString getDefinition();   // used for calltip in sql editor
+	virtual const wxString getTypeName() const;
+
 	std::vector<Privilege>* getPrivileges();
 
 	void checkDependentProcedures();
 
-	virtual const wxString getTypeName() const;
 	virtual void acceptVisitor(MetadataItemVisitor* visitor);
 
 };
 
-class Functions: public MetadataCollection<Function>
+class UDFs : public MetadataCollection<UDF>
+{
+protected:
+	virtual void loadChildren();
+public:
+	UDFs(DatabasePtr database);
+
+	virtual void acceptVisitor(MetadataItemVisitor* visitor);
+	void load(ProgressIndicator* progressIndicator);
+	virtual const wxString getTypeName() const;
+
+};
+class FunctionSQLs: public MetadataCollection<FunctionSQL>
 {
 protected:
     virtual void loadChildren();
 public:
-    Functions(DatabasePtr database);
+    FunctionSQLs(DatabasePtr database);
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     void load(ProgressIndicator* progressIndicator);

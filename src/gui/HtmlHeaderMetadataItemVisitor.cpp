@@ -68,7 +68,15 @@ void HtmlHeaderMetadataItemVisitor::visitException(Exception& /*exception*/)
     addDDL();
 }
 
-void HtmlHeaderMetadataItemVisitor::visitFunction(Function& /*function*/)
+void HtmlHeaderMetadataItemVisitor::visitFunctionSQL(FunctionSQL& /*function*/)
+{
+    emptyTitles();
+    addSummary();
+    addDependencies();
+    addDDL();
+}
+
+void HtmlHeaderMetadataItemVisitor::visitUDF(UDF& /*function*/)
 {
     emptyTitles();
     addSummary();
@@ -80,6 +88,15 @@ void HtmlHeaderMetadataItemVisitor::visitGenerator(Generator& /*generator*/)
 {
     emptyTitles();
     addSummary();
+    addDependencies();
+    addDDL();
+}
+
+void HtmlHeaderMetadataItemVisitor::visitPackage(Package& /*procedure*/)
+{
+    emptyTitles();
+    addSummary();
+    addPrivileges();
     addDependencies();
     addDDL();
 }

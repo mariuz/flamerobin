@@ -57,12 +57,15 @@ public:
     wxString getSource();
     wxString getAlterSql(bool full = true);
     wxString getDefinition();   // used for calltip in sql editor
+    wxString getSqlSecurity();
+
     std::vector<Privilege>* getPrivileges();
 
     void checkDependentProcedures();
 
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+
 };
 
 class Procedures: public MetadataCollection<Procedure>

@@ -147,7 +147,28 @@ void MainObjectMenuMetadataItemVisitor::visitExceptions(Exceptions& exceptions)
     addRefreshItem();
 }
 
-void MainObjectMenuMetadataItemVisitor::visitFunction(Function& function)
+void MainObjectMenuMetadataItemVisitor::visitFunctionSQL(FunctionSQL& function)
+{
+    //menuM->Append(Cmds::Menu_ExecuteProcedure, _("&Execute"));
+    addAlterItem(function);
+    addDropItem(function);
+    addSeparator();
+    addGenerateCodeMenu(function);
+    addSeparator();
+    // TODO: addRefreshItem();
+    addPropertiesItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitFunctionSQLs(FunctionSQLs& functions)
+{
+    addDeclareItem();
+    addSeparator();
+    addGenerateCodeMenu(functions);
+    addSeparator();
+    addRefreshItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitUDF(UDF& function)
 {
     addDropItem(function);
     addSeparator();
@@ -157,7 +178,7 @@ void MainObjectMenuMetadataItemVisitor::visitFunction(Function& function)
     addPropertiesItem();
 }
 
-void MainObjectMenuMetadataItemVisitor::visitFunctions(Functions& functions)
+void MainObjectMenuMetadataItemVisitor::visitUDFs(UDFs& functions)
 {
     addDeclareItem();
     addSeparator();
@@ -186,6 +207,27 @@ void MainObjectMenuMetadataItemVisitor::visitGenerators(Generators& generators)
     addCreateItem();
     addSeparator();
     addGenerateCodeMenu(generators);
+    addSeparator();
+    addRefreshItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitPackage(Package& package)
+{
+    //menuM->Append(Cmds::Menu_ExecuteProcedure, _("&Execute"));
+    //addAlterItem(package); jochoa package
+    //addDropItem(package);
+    addSeparator();
+    //addGenerateCodeMenu(package);
+    addSeparator();
+    // TODO: addRefreshItem();
+    addPropertiesItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitPackages(Packages& packages)
+{
+    addCreateItem();
+    addSeparator();
+    //addGenerateCodeMenu(procedures); jochoa package
     addSeparator();
     addRefreshItem();
 }
@@ -289,9 +331,17 @@ void MainObjectMenuMetadataItemVisitor::visitTables(Tables& tables)
     addRefreshItem();
 }
 
+
 void MainObjectMenuMetadataItemVisitor::visitSysTables(SysTables& sysTables)
 {
     addGenerateCodeMenu(sysTables);
+    addSeparator();
+    addRefreshItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitGTTTables(GTTs& gtts)
+{
+    addGenerateCodeMenu(gtts);
     addSeparator();
     addRefreshItem();
 }
@@ -314,6 +364,15 @@ void MainObjectMenuMetadataItemVisitor::visitTriggers(Triggers& triggers)
     addCreateItem();
     addSeparator();
     addGenerateCodeMenu(triggers);
+    addSeparator();
+    addRefreshItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitDdlTriggers(DdlTriggers& triggers)
+{
+    addCreateItem();
+    addSeparator();
+    //addGenerateCodeMenu(triggers); jochoa ddl triggers
     addSeparator();
     addRefreshItem();
 }

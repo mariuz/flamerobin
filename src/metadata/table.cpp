@@ -574,3 +574,32 @@ const wxString Tables::getTypeName() const
     return "TABLE_COLLECTION";
 }
 
+// Global Teporal Tables collection
+GTTs::GTTs(DatabasePtr database)
+    : MetadataCollection<Table>(ntSysTables, database, _("Global temporary tables"))
+{
+}
+
+void GTTs::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitGTTs(*this);
+}
+
+void GTTs::load(ProgressIndicator* progressIndicator)
+{
+    wxString stmt = "select rdb$relation_name from rdb$relations"
+        " where (rdb$system_flag = 2 or rdb$system_flag is null)"
+        " and rdb$view_source is null order by 1";
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+}
+
+void GTTs::loadChildren()
+{
+    load(0);
+}
+
+const wxString GTTs::getTypeName() const
+{
+    return "GTT_COLLECTION";
+}
+

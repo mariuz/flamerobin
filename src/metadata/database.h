@@ -168,13 +168,15 @@ private:
     DomainsPtr userDomainsM;
     SysDomainsPtr sysDomainsM;
     ExceptionsPtr exceptionsM;
-    FunctionsPtr functionsM;
+    FunctionSQLsPtr functionSQLsM;
+    UDFsPtr UDFsM;
     GeneratorsPtr generatorsM;
     ProceduresPtr proceduresM;
     RolesPtr rolesM;
     SysRolesPtr sysRolesM;
     TablesPtr tablesM;
     SysTablesPtr sysTablesM;
+    GTTsPtr GTTsM;
     TriggersPtr triggersM;
     ViewsPtr viewsM;
 
@@ -213,13 +215,15 @@ public:
     DomainsPtr getDomains();
     SysDomainsPtr getSysDomains();
     ExceptionsPtr getExceptions();
-    FunctionsPtr getFunctions();
+    UDFsPtr getUDFs();
+    FunctionSQLsPtr getFunctionSQLs();
     GeneratorsPtr getGenerators();
     ProceduresPtr getProcedures();
     RolesPtr getRoles();
     SysRolesPtr getSysRoles();
     TablesPtr getTables();
     SysTablesPtr getSysTables();
+    GTTsPtr getGTTs();
     TriggersPtr getTriggers();
     ViewsPtr getViews();
 

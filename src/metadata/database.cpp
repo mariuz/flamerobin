@@ -344,6 +344,8 @@ void Database::getIdentifiers(std::vector<Identifier>& temp)
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(sysTablesM->begin(), sysTablesM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(GTTsM->begin(), GTTsM->end(),
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(viewsM->begin(), viewsM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(proceduresM->begin(), proceduresM->end(),
@@ -354,7 +356,9 @@ void Database::getIdentifiers(std::vector<Identifier>& temp)
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(generatorsM->begin(), generatorsM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
-    std::transform(functionsM->begin(), functionsM->end(),
+    std::transform(functionSQLsM->begin(), functionSQLsM->end(),
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(UDFsM->begin(), UDFsM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(userDomainsM->begin(), userDomainsM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
@@ -556,6 +560,9 @@ MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
         case ntSysTable:
             return sysTablesM->findByName(name).get();
             break;
+        case ntGTT:
+            return GTTsM->findByName(name).get();
+            break;
         case ntView:
             return viewsM->findByName(name).get();
             break;
@@ -565,8 +572,11 @@ MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
         case ntProcedure:
             return proceduresM->findByName(name).get();
             break;
-        case ntFunction:
-            return functionsM->findByName(name).get();
+        case ntFunctionSQL:
+            return functionSQLsM->findByName(name).get();
+            break;
+        case ntUDF:
+            return UDFsM->findByName(name).get();
             break;
         case ntGenerator:
             return generatorsM->findByName(name).get();
@@ -600,6 +610,8 @@ Relation* Database::findRelation(const Identifier& name)
         return v.get();
     if (TablePtr t = sysTablesM->findByName(s))
         return t.get();
+    if (TablePtr t = GTTsM->findByName(s))
+        return t.get();
     return 0;
 }
 
@@ -625,6 +637,9 @@ void Database::dropObject(MetadataItem* object)
         case ntSysTable:
             sysTablesM->remove((Table*)object);
             break;
+        case ntGTT:
+            GTTsM->remove((Table*)object);
+            break;
         case ntView:
             viewsM->remove((View*)object);
             break;
@@ -634,8 +649,11 @@ void Database::dropObject(MetadataItem* object)
         case ntProcedure:
             proceduresM->remove((Procedure*)object);
             break;
-        case ntFunction:
-            functionsM->remove((Function*)object);
+        case ntFunctionSQL:
+            functionSQLsM->remove((FunctionSQL*)object);
+            break;
+        case ntUDF:
+            UDFsM->remove((UDF*)object);
             break;
         case ntGenerator:
             generatorsM->remove((Generator*)object);
@@ -670,6 +688,9 @@ void Database::addObject(NodeType type, const wxString& name)
         case ntSysTable:
             sysTablesM->insert(name);
             break;
+        case ntGTT:
+            GTTsM->insert(name);
+            break;
         case ntView:
             viewsM->insert(name);
             break;
@@ -688,8 +709,11 @@ void Database::addObject(NodeType type, const wxString& name)
         case ntGenerator:
             generatorsM->insert(name);
             break;
-        case ntFunction:
-            functionsM->insert(name);
+        case ntFunctionSQL:
+            functionSQLsM->insert(name);
+            break;
+        case ntUDF:
+            UDFsM->insert(name);
             break;
         case ntDomain:
             userDomainsM->insert(name);
@@ -1062,8 +1086,10 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             initializeLockCount(sysDomainsM, lockCount);
             exceptionsM.reset(new Exceptions(me));
             initializeLockCount(exceptionsM, lockCount);
-            functionsM.reset(new Functions(me));
-            initializeLockCount(functionsM, lockCount);
+            functionSQLsM.reset(new FunctionSQLs(me));
+            initializeLockCount(functionSQLsM, lockCount);
+            UDFsM.reset(new UDFs(me));
+            initializeLockCount(UDFsM, lockCount);
             generatorsM.reset(new Generators(me));
             initializeLockCount(generatorsM, lockCount);
             proceduresM.reset(new Procedures(me));
@@ -1077,6 +1103,7 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             tablesM.reset(new Tables(me));
             initializeLockCount(tablesM, lockCount);
             sysTablesM.reset(new SysTables(me));
+            GTTsM.reset(new GTTs(me));
             initializeLockCount(sysTablesM, lockCount);
             viewsM.reset(new Views(me));
             initializeLockCount(viewsM, lockCount);
@@ -1181,6 +1208,9 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
     pih.init(_("system tables"), collectionCount, 1);
     sysTablesM->load(progressIndicator);
 
+    pih.init(_("global temporary table"), collectionCount, 1);
+    GTTsM->load(progressIndicator);
+
     pih.init(_("views"), collectionCount, 2);
     viewsM->load(progressIndicator);
 
@@ -1199,13 +1229,16 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
     pih.init(_("domains"), collectionCount, 7);
     userDomainsM->load(progressIndicator);
 
-    pih.init(_("functions"), collectionCount, 8);
-    functionsM->load(progressIndicator);
+    pih.init(_("functions SQL"), collectionCount, 8);
+    functionSQLsM->load(progressIndicator);
 
-    pih.init(_("generators"), collectionCount, 9);
+    pih.init(_("functions UDF"), collectionCount, 9);
+    UDFsM->load(progressIndicator);
+
+    pih.init(_("generators"), collectionCount, 10);
     generatorsM->load(progressIndicator);
 
-    pih.init(_("exceptions"), collectionCount, 10);
+    pih.init(_("exceptions"), collectionCount, 11);
     exceptionsM->load(progressIndicator);
 }
 
@@ -1254,12 +1287,14 @@ void Database::setDisconnected()
     // remove entire DBH beneath
     userDomainsM.reset();
     sysDomainsM.reset();
-    functionsM.reset();
+    functionSQLsM.reset();
+    UDFsM.reset();
     generatorsM.reset();
     proceduresM.reset();
     rolesM.reset();
     tablesM.reset();
     sysTablesM.reset();
+    GTTsM.reset();
     triggersM.reset();
     viewsM.reset();
     exceptionsM.reset();
@@ -1311,11 +1346,18 @@ ExceptionsPtr Database::getExceptions()
     return exceptionsM;
 }
 
-FunctionsPtr Database::getFunctions()
+UDFsPtr Database::getUDFs()
 {
-    wxASSERT(functionsM);
-    functionsM->ensureChildrenLoaded();
-    return functionsM;
+    wxASSERT(UDFsM);
+    UDFsM->ensureChildrenLoaded();
+    return UDFsM;
+}
+
+FunctionSQLsPtr Database::getFunctionSQLs()
+{
+    wxASSERT(functionSQLsM);
+    functionSQLsM->ensureChildrenLoaded();
+    return functionSQLsM;
 }
 
 GeneratorsPtr Database::getGenerators()
@@ -1353,6 +1395,13 @@ SysTablesPtr Database::getSysTables()
     return sysTablesM;
 }
 
+GTTsPtr Database::getGTTs()
+{
+    wxASSERT(GTTsM);
+    GTTsM->ensureChildrenLoaded();
+    return GTTsM;
+}
+
 TablesPtr Database::getTables()
 {
     wxASSERT(tablesM);
@@ -1384,7 +1433,8 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
 
     temp.push_back(userDomainsM.get());
     temp.push_back(exceptionsM.get());
-    temp.push_back(functionsM.get());
+    temp.push_back(functionSQLsM.get());
+    temp.push_back(UDFsM.get());
     temp.push_back(generatorsM.get());
     temp.push_back(proceduresM.get());
     temp.push_back(rolesM.get());
@@ -1394,6 +1444,7 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
     if (system && showSystemTables())
         temp.push_back(sysTablesM.get());
     temp.push_back(tablesM.get());
+    temp.push_back(GTTsM.get());
     temp.push_back(triggersM.get());
     temp.push_back(viewsM.get());
 }
@@ -1411,12 +1462,14 @@ void Database::lockChildren()
         userDomainsM->lockSubject();
         sysDomainsM->lockSubject();
         exceptionsM->lockSubject();
-        functionsM->lockSubject();
+        functionSQLsM->lockSubject();
+        UDFsM->lockSubject();
         generatorsM->lockSubject();
         proceduresM->lockSubject();
         rolesM->lockSubject();
         tablesM->lockSubject();
         sysTablesM->lockSubject();
+        GTTsM->lockSubject();
         triggersM->lockSubject();
         viewsM->lockSubject();
     }
@@ -1432,11 +1485,13 @@ void Database::unlockChildren()
         viewsM->unlockSubject();
         triggersM->unlockSubject();
         sysTablesM->unlockSubject();
+        GTTsM->unlockSubject();
         tablesM->unlockSubject();
         rolesM->unlockSubject();
         proceduresM->unlockSubject();
         generatorsM->unlockSubject();
-        functionsM->unlockSubject();
+        functionSQLsM->unlockSubject();
+        UDFsM->unlockSubject();
         exceptionsM->unlockSubject();
         sysDomainsM->unlockSubject();
         userDomainsM->unlockSubject();

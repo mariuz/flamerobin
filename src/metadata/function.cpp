@@ -46,7 +46,7 @@
 
 
 Function::Function(DatabasePtr database, const wxString& name)
-    : MetadataItem(ntFunction, database.get(), name)
+    : MetadataItem(ntUDF, database.get(), name)
 {
 	ensurePropertiesLoaded();
 }
@@ -230,188 +230,72 @@ size_t Function::getParamCount() const
 	return parametersM.size();
 }
 
+wxString Function::getOwner()
+{
+	DatabasePtr db = getDatabase();
+	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+	{
+		MetadataLoader* loader = db->getMetadataLoader();
+		MetadataLoaderTransaction tr(loader);
+		wxMBConv* converter = db->getCharsetConverter();
+		std::string sql(
+			"select rdb$owner_name from rdb$functions where rdb$function_name = ?"
+		     " and rdb$package_name is null ");
+		IBPP::Statement st1 = loader->getStatement(sql);
+		st1->Set(1, wx2std(getName_(), converter));
+		st1->Execute();
+		st1->Fetch();
+		std::string name;
+		st1->Get(1, name);
+		return std2wxIdentifier(name, converter);
+	}
+	else
+	{
+		return wxString();
+	}
+}
+
+wxString Function::getSqlSecurity()
+{
+	DatabasePtr db = getDatabase();
+	if (db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
+	{
+		MetadataLoader* loader = db->getMetadataLoader();
+		MetadataLoaderTransaction tr(loader);
+		wxMBConv* converter = db->getCharsetConverter();
+		std::string sql(
+			"select rdb$sql_security from rdb$functions where rdb$function_name = ?"
+			" and rdb$package_name is null ");
+		IBPP::Statement st1 = loader->getStatement(sql);
+		st1->Set(1, wx2std(getName_(), converter));
+		st1->Execute();
+		st1->Fetch();
+		bool b;
+		st1->Get(1, b);
+		return wxString(b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER");
+	}
+	else
+	{
+		return wxString();
+	}
+}
 
 wxString Function::getCreateSql()
 {
-    ensurePropertiesLoaded();
-    StatementBuilder sb;
-    sb << kwDECLARE << ' ' << kwEXTERNAL << ' ' << kwFUNCTION << ' '
-        << getQuotedName() << StatementBuilder::NewLine
-        << paramListM  << StatementBuilder::NewLine
-        << kwRETURNS << ' ' << retstrM << StatementBuilder::NewLine
-        << kwENTRY_POINT << " '" << entryPointM << '\''
-        << StatementBuilder::NewLine
-        << kwMODULE_NAME << " '" << libraryNameM << "\';"
-        << StatementBuilder::NewLine;
-    return sb;
+	return "<<Create SQL>>";
 }
 
-const wxString Function::getTypeName() const
-{
-	return legacyFunctionM ? "FUNCTION" : "PROCEDURE";
-}
 
 wxString Function::getDropSqlStatement() const
 {
-    StatementBuilder sb;
-    sb << kwDROP << ' ' << kwEXTERNAL << ' ' << kwFUNCTION << ' '
-        << getQuotedName() << ';';
-    return sb;
+	return "<<Drop SQL>>";
 }
 
-wxString Function::getDefinition()
-{
-    ensurePropertiesLoaded();
-    return definitionM;
-}
 
-bool Function::getLegacyFunction() 
-{
-	ensurePropertiesLoaded();
-	return legacyFunctionM;
-}
-
-wxString Function::getLibraryName()
-{
-    ensurePropertiesLoaded();
-    return libraryNameM;
-}
-
-wxString Function::getEntryPoint()
-{
-    ensurePropertiesLoaded();
-    return entryPointM;
-}
-
-void Function::loadProperties()
-{
-    setPropertiesLoaded(false);
-
-    wxString mechanismNames[] = { "value", "reference",
-        "descriptor", "blob descriptor", "scalar array",
-        "null", wxEmptyString };
-    wxString mechanismDDL[] = { " BY VALUE ", wxEmptyString,
-        " BY DESCRIPTOR ", wxEmptyString, " BY SCALAR ARRAY ",
-        " NULL ", wxEmptyString };
-
-    bool first = true;
-    wxString retstr;
-    definitionM = getName_() + "(" + wxTextBuffer::GetEOL();
-    paramListM = wxEmptyString;
-
-    DatabasePtr db = getDatabase();
-    MetadataLoader* loader = db->getMetadataLoader();
-    wxMBConv* converter = db->getCharsetConverter();
-    MetadataLoaderTransaction tr(loader);
-
-	std::string stmt = "SELECT f.RDB$RETURN_ARGUMENT, a.RDB$MECHANISM,"
-		" a.RDB$ARGUMENT_POSITION, a.RDB$FIELD_TYPE, a.RDB$FIELD_SCALE,"
-		" a.RDB$FIELD_LENGTH, a.RDB$FIELD_SUB_TYPE, a.RDB$FIELD_PRECISION,"
-		" f.RDB$MODULE_NAME, f.RDB$ENTRYPOINT, c.RDB$CHARACTER_SET_NAME, ";
-	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
-		stmt += " f.RDB$LEGACY_FLAG ";
-	else
-		stmt += "null ";
-
-	stmt +=	" FROM RDB$FUNCTIONS f"
-		" LEFT OUTER JOIN RDB$FUNCTION_ARGUMENTS a"
-		" ON f.RDB$FUNCTION_NAME = a.RDB$FUNCTION_NAME"
-		" LEFT OUTER JOIN RDB$CHARACTER_SETS c"
-		" ON a.RDB$CHARACTER_SET_ID = c.RDB$CHARACTER_SET_ID"
-		" WHERE f.RDB$FUNCTION_NAME = ? "
-		" ORDER BY a.RDB$ARGUMENT_POSITION";
-
-
-    IBPP::Statement& st1 = loader->getStatement(stmt);
-    st1->Set(1, wx2std(getName_(), converter));
-    st1->Execute();
-    while (st1->Fetch())
-    {
-        short returnarg, mechanism, type, scale, length, subtype, precision,
-            retpos, retlegacy;
-        std::string libraryName, entryPoint, charset;
-        st1->Get(1, returnarg);
-        st1->Get(2, mechanism);
-        st1->Get(3, retpos);
-        st1->Get(4, type);
-        st1->Get(5, scale);
-        st1->Get(6, length);
-        st1->Get(7, subtype);
-        st1->Get(8, precision);
-        st1->Get(9, libraryName);
-        libraryNameM = wxString(libraryName.c_str(), *converter).Strip();
-        st1->Get(10, entryPoint);
-        entryPointM = wxString(entryPoint.c_str(), *converter).Strip();
-        wxString datatype = Domain::dataTypeToString(type, scale,
-            precision, subtype, length);
-        if (!st1->IsNull(11))
-        {
-            st1->Get(11, charset);
-            wxString chset = wxString(charset.c_str(), *converter).Strip();
-            if (db->getDatabaseCharset() != chset)
-            {
-                datatype += " " + SqlTokenizer::getKeyword(kwCHARACTER)
-                    + " " + SqlTokenizer::getKeyword(kwSET)
-                    + " " + chset;
-            }
-        }
-        if (type == 261)    // avoid subtype information for BLOB
-            datatype = SqlTokenizer::getKeyword(kwBLOB);
-
-		if (!st1->IsNull(12)) {
-			st1->Get(12,retlegacy);
-			legacyFunctionM = retlegacy == 1;
-		}
-		else {
-			legacyFunctionM = true;
-		}
-
-        int mechIndex = (mechanism < 0 ? -mechanism : mechanism);
-        if (mechIndex >= (sizeof(mechanismNames)/sizeof(wxString)))
-            mechIndex = (sizeof(mechanismNames)/sizeof(wxString)) - 1;
-        wxString param = "    " + datatype + " "
-            + SqlTokenizer::getKeyword(kwBY) + " "
-            + mechanismNames[mechIndex];
-        if (mechanism < 0)
-            param += wxString(" ") + SqlTokenizer::getKeyword(kwFREE_IT);
-        if (returnarg == retpos)    // output
-        {
-            retstr = param;
-            retstrM = datatype + mechanismDDL[mechIndex];
-            if (retpos != 0)
-            {
-                retstrM = SqlTokenizer::getKeyword(kwPARAMETER) + " ";
-                retstrM << retpos;
-                if (!paramListM.IsEmpty())
-                    paramListM += ", ";
-                paramListM += datatype + mechanismDDL[mechIndex];
-            }
-            if (mechanism < 0){
-              retstrM += wxString(" ") + SqlTokenizer::getKeyword(kwFREE_IT);
-            }
-        }
-        else
-        {
-            if (first)
-                first = false;
-            else
-                definitionM += wxString(",") + wxTextBuffer::GetEOL();
-            definitionM += param;
-            if (!paramListM.empty())
-                paramListM += ", ";
-            paramListM += datatype + mechanismDDL[mechIndex];
-        }
-    }
-    definitionM += wxString(wxTextBuffer::GetEOL()) + ")"
-        + wxTextBuffer::GetEOL() + SqlTokenizer::getKeyword(kwRETURNS)
-        + ":" + wxTextBuffer::GetEOL() + retstr;
-
-    setPropertiesLoaded(true);
-}
 
 void Function::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    visitor->visitFunction(*this);
+    visitor->visitMetadataItem(*this); 
 }
 
 wxString Function::getSource()
@@ -419,80 +303,8 @@ wxString Function::getSource()
 	return "<< Source >> ";
 }
 
-// Functions collection
-Functions::Functions(DatabasePtr database)
-    : MetadataCollection<Function>(ntFunctions, database, _("Functions"))
-{
-}
 
-void Functions::acceptVisitor(MetadataItemVisitor* visitor)
-{
-    visitor->visitFunctions(*this);
-}
 
-void Functions::load(ProgressIndicator* progressIndicator)
-{
-	DatabasePtr db = getDatabase();
-	wxString stmt = "select rdb$function_name from rdb$functions"
-		" where (rdb$system_flag = 0 or rdb$system_flag is null)";
-	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
-		stmt += " and rdb$package_name is null ";
-	stmt += " order by 1";
-    setItems(db->loadIdentifiers(stmt, progressIndicator));
-}
-
-void Functions::loadChildren()
-{
-    load(0);
-}
-
-const wxString Functions::getTypeName() const
-{
-    return "FUNCTION_COLLECTION";
-}
-
-void FunctionLegacy::loadProperties()
-{
-}
-
-FunctionLegacy::FunctionLegacy(DatabasePtr database, const wxString & name)
-	: Function(database, name)
-{
-}
-
-const wxString FunctionLegacy::getTypeName() const
-{
-	return wxString();
-}
-
-wxString FunctionLegacy::getDropSqlStatement() const
-{
-	return wxString();
-}
-
-wxString FunctionLegacy::getCreateSql()
-{
-	return wxString();
-}
-
-wxString FunctionLegacy::getDefinition()
-{
-	return wxString();
-}
-
-wxString FunctionLegacy::getLibraryName()
-{
-	return wxString();
-}
-
-wxString FunctionLegacy::getEntryPoint()
-{
-	return wxString();
-}
-
-void FunctionLegacy::acceptVisitor(MetadataItemVisitor * visitor)
-{
-}
 
 void FunctionSQL::loadChildren()
 {
@@ -503,6 +315,10 @@ void FunctionSQL::lockChildren()
 }
 
 void FunctionSQL::unlockChildren()
+{
+}
+
+void FunctionSQL::loadProperties()
 {
 }
 
@@ -563,7 +379,12 @@ wxString FunctionSQL::getAlterSql(bool full)
 
 wxString FunctionSQL::getDefinition()
 {
-	return wxString();
+	return wxString("Function SQL");
+}
+
+const wxString FunctionSQL::getTypeName() const
+{
+	return wxString("FUNCTIONSQL");
 }
 
 std::vector<Privilege>* FunctionSQL::getPrivileges()
@@ -575,11 +396,371 @@ void FunctionSQL::checkDependentProcedures()
 {
 }
 
-const wxString FunctionSQL::getTypeName() const
-{
-	return wxString();
-}
+
 
 void FunctionSQL::acceptVisitor(MetadataItemVisitor * visitor)
 {
+}
+
+
+// Functions SQL collection
+FunctionSQLs::FunctionSQLs(DatabasePtr database)
+	: MetadataCollection<FunctionSQL>(ntFunctionSQLs, database, _("FunctionSQLs"))
+{
+}
+
+void FunctionSQLs::acceptVisitor(MetadataItemVisitor* visitor)
+{
+	visitor->visitFunctionSQLs(*this);
+}
+
+void FunctionSQLs::load(ProgressIndicator* progressIndicator)
+{
+	DatabasePtr db = getDatabase();
+	wxString stmt = "select rdb$function_name from rdb$functions"
+		" where (rdb$system_flag = 0 or rdb$system_flag is null)";
+	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+		stmt += " and RDB$LEGACY_FLAG != 0  and rdb$package_name is null ";
+	stmt += " order by 1";
+	setItems(db->loadIdentifiers(stmt, progressIndicator));
+}
+
+void FunctionSQLs::loadChildren()
+{
+	load(0);
+}
+
+const wxString FunctionSQLs::getTypeName() const
+{
+	return "FUNCTIONSQL_COLLECTION";
+}
+
+
+void UDF::loadProperties()
+{
+	setPropertiesLoaded(false);
+		wxString mechanismNames[] = { "value", "reference",
+			"descriptor", "blob descriptor", "scalar array",
+			"null", wxEmptyString };
+		wxString mechanismDDL[] = { " BY VALUE ", wxEmptyString,
+			" BY DESCRIPTOR ", wxEmptyString, " BY SCALAR ARRAY ",
+			" NULL ", wxEmptyString };
+
+		bool first = true;
+		wxString retstr;
+		definitionM = getName_() + "(" + wxTextBuffer::GetEOL();
+		paramListM = wxEmptyString;
+
+		DatabasePtr db = getDatabase();
+		MetadataLoader* loader = db->getMetadataLoader();
+		wxMBConv* converter = db->getCharsetConverter();
+		MetadataLoaderTransaction tr(loader);
+
+		std::string stmt = "SELECT f.RDB$RETURN_ARGUMENT, a.RDB$MECHANISM,"
+			" a.RDB$ARGUMENT_POSITION, a.RDB$FIELD_TYPE, a.RDB$FIELD_SCALE,"
+			" a.RDB$FIELD_LENGTH, a.RDB$FIELD_SUB_TYPE, a.RDB$FIELD_PRECISION,"
+			" f.RDB$MODULE_NAME, f.RDB$ENTRYPOINT, c.RDB$CHARACTER_SET_NAME, ";
+		if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+			stmt += " f.RDB$LEGACY_FLAG ";
+		else
+			stmt += "null ";
+
+		stmt += " FROM RDB$FUNCTIONS f"
+			" LEFT OUTER JOIN RDB$FUNCTION_ARGUMENTS a"
+			" ON f.RDB$FUNCTION_NAME = a.RDB$FUNCTION_NAME"
+			" LEFT OUTER JOIN RDB$CHARACTER_SETS c"
+			" ON a.RDB$CHARACTER_SET_ID = c.RDB$CHARACTER_SET_ID"
+			" WHERE f.RDB$FUNCTION_NAME = ? ";
+		if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+			stmt += " and f.rdb$package_name is null";
+		stmt +=	" ORDER BY a.RDB$ARGUMENT_POSITION";
+
+
+		IBPP::Statement& st1 = loader->getStatement(stmt);
+		st1->Set(1, wx2std(getName_(), converter));
+		st1->Execute();
+		while (st1->Fetch())
+		{
+			short returnarg, mechanism, type, scale, length, subtype, precision,
+				retpos, retlegacy;
+			std::string libraryName, entryPoint, charset;
+			st1->Get(1, returnarg);
+			st1->Get(2, mechanism);
+			st1->Get(3, retpos);
+			st1->Get(4, type);
+			st1->Get(5, scale);
+			st1->Get(6, length);
+			st1->Get(7, subtype);
+			st1->Get(8, precision);
+			st1->Get(9, libraryName);
+			libraryNameM = wxString(libraryName.c_str(), *converter).Strip();
+			st1->Get(10, entryPoint);
+			entryPointM = wxString(entryPoint.c_str(), *converter).Strip();
+			wxString datatype = Domain::dataTypeToString(type, scale,
+				precision, subtype, length);
+			if (!st1->IsNull(11))
+			{
+				st1->Get(11, charset);
+				wxString chset = wxString(charset.c_str(), *converter).Strip();
+				if (db->getDatabaseCharset() != chset)
+				{
+					datatype += " " + SqlTokenizer::getKeyword(kwCHARACTER)
+						+ " " + SqlTokenizer::getKeyword(kwSET)
+						+ " " + chset;
+				}
+			}
+			if (type == 261)    // avoid subtype information for BLOB
+				datatype = SqlTokenizer::getKeyword(kwBLOB);
+
+
+			int mechIndex = (mechanism < 0 ? -mechanism : mechanism);
+			if (mechIndex >= (sizeof(mechanismNames)/sizeof(wxString)))
+				mechIndex = (sizeof(mechanismNames)/sizeof(wxString)) - 1;
+			wxString param = "    " + datatype + " "
+				+ SqlTokenizer::getKeyword(kwBY) + " "
+				+ mechanismNames[mechIndex];
+			if (mechanism < 0)
+				param += wxString(" ") + SqlTokenizer::getKeyword(kwFREE_IT);
+			if (returnarg == retpos)    // output
+			{
+				retstr = param;
+				retstrM = datatype + mechanismDDL[mechIndex];
+				if (retpos != 0)
+				{
+					retstrM = SqlTokenizer::getKeyword(kwPARAMETER) + " ";
+					retstrM << retpos;
+					if (!paramListM.IsEmpty())
+						paramListM += ", ";
+					paramListM += datatype + mechanismDDL[mechIndex];
+				}
+				if (mechanism < 0){
+				  retstrM += wxString(" ") + SqlTokenizer::getKeyword(kwFREE_IT);
+				}
+			}
+			else
+			{
+				if (first)
+					first = false;
+				else
+					definitionM += wxString(",") + wxTextBuffer::GetEOL();
+				definitionM += param;
+				if (!paramListM.empty())
+					paramListM += ", ";
+				paramListM += datatype + mechanismDDL[mechIndex];
+			}
+		}
+		definitionM += wxString(wxTextBuffer::GetEOL()) + ")"
+			+ wxTextBuffer::GetEOL() + SqlTokenizer::getKeyword(kwRETURNS)
+			+ ":" + wxTextBuffer::GetEOL() + retstr;
+	
+	setPropertiesLoaded(true);
+
+}
+
+UDF::UDF(DatabasePtr database, const wxString& name)
+	: Function(database, name)
+{
+	ensurePropertiesLoaded();
+}
+
+const wxString UDF::getTypeName() const
+{
+	return "UDF";
+}
+
+wxString UDF::getDropSqlStatement() const
+{
+	StatementBuilder sb;
+	sb << kwDROP << ' ' << kwEXTERNAL << ' ' << kwFUNCTION << ' '
+		<< getQuotedName() << ';';
+	return sb;
+}
+
+
+wxString UDF::getCreateSql()
+{
+	ensurePropertiesLoaded();
+	StatementBuilder sb;
+	    sb << kwDECLARE << ' ' << kwEXTERNAL << ' ' << kwFUNCTION << ' '
+			<< getQuotedName() << StatementBuilder::NewLine
+			<< paramListM  << StatementBuilder::NewLine
+			<< kwRETURNS << ' ' << retstrM << StatementBuilder::NewLine
+			<< kwENTRY_POINT << " '" << entryPointM << '\''
+			<< StatementBuilder::NewLine
+			<< kwMODULE_NAME << " '" << libraryNameM << "\';"
+			<< StatementBuilder::NewLine;
+	return sb;
+}
+
+wxString UDF::getDefinition()
+{
+	ensurePropertiesLoaded();
+	return definitionM;
+}
+
+wxString UDF::getLibraryName()
+{
+	ensurePropertiesLoaded();
+	return libraryNameM;
+}
+
+wxString UDF::getEntryPoint()
+{
+	ensurePropertiesLoaded();
+	return entryPointM;
+}
+
+void UDF::acceptVisitor(MetadataItemVisitor* visitor)
+{
+	visitor->visitUDF(*this);
+}
+
+wxString UDF::getSource()
+{
+	wxString mechanismNames[] = { "value", "reference",
+		"descriptor", "blob descriptor", "scalar array",
+		"null", wxEmptyString };
+	wxString mechanismDDL[] = { " BY VALUE ", wxEmptyString,
+		" BY DESCRIPTOR ", wxEmptyString, " BY SCALAR ARRAY ",
+		" NULL ", wxEmptyString };
+
+	bool first = true;
+	wxString retstr;
+	definitionM = getName_() + "(" + wxTextBuffer::GetEOL();
+	paramListM = wxEmptyString;
+
+	DatabasePtr db = getDatabase();
+	MetadataLoader* loader = db->getMetadataLoader();
+	wxMBConv* converter = db->getCharsetConverter();
+	MetadataLoaderTransaction tr(loader);
+
+	std::string stmt = "SELECT f.RDB$RETURN_ARGUMENT, a.RDB$MECHANISM,"
+		" a.RDB$ARGUMENT_POSITION, a.RDB$FIELD_TYPE, a.RDB$FIELD_SCALE,"
+		" a.RDB$FIELD_LENGTH, a.RDB$FIELD_SUB_TYPE, a.RDB$FIELD_PRECISION,"
+		" f.RDB$MODULE_NAME, f.RDB$ENTRYPOINT, c.RDB$CHARACTER_SET_NAME, ";
+	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+		stmt += " f.RDB$LEGACY_FLAG ";
+	else
+		stmt += "null ";
+
+	stmt += " FROM RDB$FUNCTIONS f"
+		" LEFT OUTER JOIN RDB$FUNCTION_ARGUMENTS a"
+		" ON f.RDB$FUNCTION_NAME = a.RDB$FUNCTION_NAME"
+		" LEFT OUTER JOIN RDB$CHARACTER_SETS c"
+		" ON a.RDB$CHARACTER_SET_ID = c.RDB$CHARACTER_SET_ID"
+		" WHERE f.RDB$FUNCTION_NAME = ? "
+		" ORDER BY a.RDB$ARGUMENT_POSITION";
+
+
+	IBPP::Statement& st1 = loader->getStatement(stmt);
+	st1->Set(1, wx2std(getName_(), converter));
+	st1->Execute();
+	while (st1->Fetch())
+	{
+		short returnarg, mechanism, type, scale, length, subtype, precision,
+			retpos, retlegacy;
+		std::string libraryName, entryPoint, charset;
+		st1->Get(1, returnarg);
+		st1->Get(2, mechanism);
+		st1->Get(3, retpos);
+		st1->Get(4, type);
+		st1->Get(5, scale);
+		st1->Get(6, length);
+		st1->Get(7, subtype);
+		st1->Get(8, precision);
+		st1->Get(9, libraryName);
+		libraryNameM = wxString(libraryName.c_str(), *converter).Strip();
+		st1->Get(10, entryPoint);
+		entryPointM = wxString(entryPoint.c_str(), *converter).Strip();
+		wxString datatype = Domain::dataTypeToString(type, scale,
+			precision, subtype, length);
+		if (!st1->IsNull(11))
+		{
+			st1->Get(11, charset);
+			wxString chset = wxString(charset.c_str(), *converter).Strip();
+			if (db->getDatabaseCharset() != chset)
+			{
+				datatype += " " + SqlTokenizer::getKeyword(kwCHARACTER)
+					+ " " + SqlTokenizer::getKeyword(kwSET)
+					+ " " + chset;
+			}
+		}
+		if (type == 261)    // avoid subtype information for BLOB
+			datatype = SqlTokenizer::getKeyword(kwBLOB);
+
+
+		int mechIndex = (mechanism < 0 ? -mechanism : mechanism);
+		if (mechIndex >= (sizeof(mechanismNames) / sizeof(wxString)))
+			mechIndex = (sizeof(mechanismNames) / sizeof(wxString)) - 1;
+		wxString param = "    " + datatype + " "
+			+ SqlTokenizer::getKeyword(kwBY) + " "
+			+ mechanismNames[mechIndex];
+		if (mechanism < 0)
+			param += wxString(" ") + SqlTokenizer::getKeyword(kwFREE_IT);
+		if (returnarg == retpos)    // output
+		{
+			retstr = param;
+			retstrM = datatype + mechanismDDL[mechIndex];
+			if (retpos != 0)
+			{
+				retstrM = SqlTokenizer::getKeyword(kwPARAMETER) + " ";
+				retstrM << retpos;
+				if (!paramListM.IsEmpty())
+					paramListM += ", ";
+				paramListM += datatype + mechanismDDL[mechIndex];
+			}
+			if (mechanism < 0) {
+				retstrM += wxString(" ") + SqlTokenizer::getKeyword(kwFREE_IT);
+			}
+		}
+		else
+		{
+			if (first)
+				first = false;
+			else
+				definitionM += wxString(",") + wxTextBuffer::GetEOL();
+			definitionM += param;
+			if (!paramListM.empty())
+				paramListM += ", ";
+			paramListM += datatype + mechanismDDL[mechIndex];
+		}
+	}
+	definitionM += wxString(wxTextBuffer::GetEOL()) + ")"
+		+ wxTextBuffer::GetEOL() + SqlTokenizer::getKeyword(kwRETURNS)
+		+ ":" + wxTextBuffer::GetEOL() + retstr;
+
+	return definitionM;
+}
+
+
+// Functions UDF collection
+UDFs::UDFs(DatabasePtr database)
+	: MetadataCollection<UDF>(ntUDFs, database, _("UDFs"))
+{
+}
+
+void UDFs::acceptVisitor(MetadataItemVisitor* visitor)
+{
+	visitor->visitUDFs(*this);
+}
+
+void UDFs::load(ProgressIndicator* progressIndicator)
+{
+	DatabasePtr db = getDatabase();
+	wxString stmt = "select rdb$function_name from rdb$functions "
+		" where (rdb$system_flag = 0 or rdb$system_flag is null) ";
+	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+		stmt += " and RDB$LEGACY_FLAG = 1 and rdb$package_name is null ";
+	stmt += " order by 1";
+	setItems(db->loadIdentifiers(stmt, progressIndicator));
+}
+
+void UDFs::loadChildren()
+{
+	load(0);
+}
+
+const wxString UDFs::getTypeName() const
+{
+	return "UDF_COLLECTION";
 }

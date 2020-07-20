@@ -408,8 +408,10 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             name = r->getOwner();
         else if (Procedure* p = dynamic_cast<Procedure*>(object))
             name = p->getOwner();
-        else if (Role* r = dynamic_cast<Role*>(object))
-            name = r->getOwner();
+        else if (Role* role = dynamic_cast<Role*>(object))
+            name = role->getOwner();
+        else if (Function* f = dynamic_cast<Function*>(object))
+            name = f->getOwner();
         if (!name.IsEmpty())
             processedText += tp->escapeChars(name);
     }
@@ -662,7 +664,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
     // requested property.
     else if (cmdName == "functioninfo" && !cmdParams.IsEmpty())
     {
-        Function* f = dynamic_cast<Function*>(object);
+        UDF* f = dynamic_cast<UDF*>(object);
         if (!f)
             return;
 
@@ -852,6 +854,23 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             processedText << u->getUserId();
         else if (cmdParams[0] == "unix_group")
             processedText << u->getGroupId();
+    }
+    // {%sql_security%}
+    // If the current object is a data base, procedure, relation, function or trigger
+    // expands to the SQL Security.
+    else if (cmdName == "sql_security")
+    {
+    wxString name;
+    if (Relation* r = dynamic_cast<Relation*>(object))
+        name = r->getSqlSecurity();
+    else if (Procedure* p = dynamic_cast<Procedure*>(object))
+        name = p->getSqlSecurity();
+    else if (Function* f = dynamic_cast<Function*>(object))
+        name = f->getSqlSecurity();
+    else if (Trigger* t = dynamic_cast<Trigger*>(object))
+        name = t->getSqlSecurity();
+    if (!name.IsEmpty())
+        processedText += tp->escapeChars(name);
     }
 }
 

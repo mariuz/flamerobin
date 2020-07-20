@@ -113,11 +113,13 @@ wxString getNameOfType(NodeType type)
     switch (type)
     {
         case ntTable:       return ("TABLE");
+        case ntGTT:         return ("TABLEGTT");
         case ntView:        return ("VIEW");
         case ntProcedure:   return ("PROCEDURE");
         case ntTrigger:     return ("TRIGGER");
         case ntGenerator:   return ("GENERATOR");
-        case ntFunction:    return ("FUNCTION");
+        case ntFunctionSQL: return ("FUNCTIONSQL");
+        case ntUDF:         return ("UDF");
         case ntDomain:      return ("DOMAIN");
         case ntRole:        return ("ROLE");
         case ntColumn:      return ("COLUMN");
@@ -131,6 +133,8 @@ NodeType getTypeByName(const wxString& name)
 {
     if (name == "TABLE")
         return ntTable;
+    else if (name == "TABLEGTT")
+        return ntGTT;
     else if (name == "VIEW")
         return ntView;
     else if (name == "PROCEDURE")
@@ -139,8 +143,10 @@ NodeType getTypeByName(const wxString& name)
         return ntTrigger;
     else if (name == "GENERATOR")
         return ntGenerator;
-    else if (name == "FUNCTION")
-        return ntFunction;
+    else if (name == "FUNCTIONSQL")
+        return ntFunctionSQL;
+    else if (name == "UDF")
+        return ntUDF;
     else if (name == "DOMAIN")
         return ntDomain;
     else if (name == "ROLE")
@@ -273,7 +279,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
     NodeType dep_types[] = {    ntTable,    ntView,     ntTrigger,  ntUnknown,  ntUnknown,
                                 ntProcedure,ntUnknown,  ntException,ntUnknown,  ntUnknown,
                                 ntUnknown,  ntUnknown,  ntUnknown,  ntUnknown,  ntGenerator,
-                                ntFunction
+                                ntFunctionSQL, // jochoa
     };
     int type_count = sizeof(dep_types)/sizeof(NodeType);
     for (int i = 0; i < type_count; i++)

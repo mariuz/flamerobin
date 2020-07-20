@@ -202,27 +202,32 @@ void Trigger::loadProperties()
         st1->Get(4, &typeM);
 
 
-		if (!st1->IsNull(8))
-		{
-			bool b;
-			st1->Get(8, b);
-			sourceM += b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER";
-		}
+        if (!st1->IsNull(8))
+        {
+            bool b;
+            st1->Get(8, b);
+            sourceM += b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER";
+            sqlSecurityM = b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER";
+        }
+        else
+            sqlSecurityM.clear();
+
 		if (!st1->IsNull(6))
 		{
 			std::string s;
 			st1->Get(6, s);
 			sourceM += "EXTERNAL NAME " + std2wxIdentifier(s, converter) + "\n";
-			//entryPointM = std2wxIdentifier(s, db->getCharsetConverter());
+			entryPointM = std2wxIdentifier(s, db->getCharsetConverter());
 		}
-		//else
-			//entryPointM.clear();
+		else
+			entryPointM.clear();
+
 		if (!st1->IsNull(7))
 		{
 			std::string s;
 			st1->Get(7, s);
 			sourceM += "ENGINE" + std2wxIdentifier(s, converter) + "\n";
-			//engineNameM = std2wxIdentifier(s, db->getCharsetConverter()) ;
+			engineNameM = std2wxIdentifier(s, db->getCharsetConverter()) ;
 			if (!st1->IsNull(5))
 			{
 				wxString source1;
@@ -233,6 +238,7 @@ void Trigger::loadProperties()
 		}
 		else
 		{
+            engineNameM.clear();
 			wxString source1;
 			readBlob(st1, 5, source1, converter);
 			source1.Trim(false);     // remove leading whitespace
@@ -247,8 +253,9 @@ void Trigger::loadProperties()
         positionM = -1;
         sourceM.clear();
         typeM = 0;
-		//entryPointM.clear();
-		//engineNameM.clear();
+		entryPointM.clear();
+		engineNameM.clear();
+        sqlSecurityM.clear();
     }
 
     setPropertiesLoaded(true);
@@ -290,6 +297,12 @@ bool Trigger::isDatabaseTrigger()
         default:
             return false;
     }
+}
+
+wxString Trigger::getSqlSecurity()
+{
+    ensurePropertiesLoaded();
+    return sqlSecurityM;
 }
 
 const wxString Trigger::getTypeName() const

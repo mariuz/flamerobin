@@ -320,6 +320,31 @@ wxString Procedure::getDefinition()
     return retval;
 }
 
+wxString Procedure::getSqlSecurity()
+{
+    DatabasePtr db = getDatabase();
+    if (db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
+    {
+        MetadataLoader* loader = db->getMetadataLoader();
+        MetadataLoaderTransaction tr(loader);
+        wxMBConv* converter = db->getCharsetConverter();
+        std::string sql(
+            "select rdb$sql_security from rdb$procedures where rdb$procedure_name = ?"
+            " and rdb$package_name is null ");
+        IBPP::Statement st1 = loader->getStatement(sql);
+        st1->Set(1, wx2std(getName_(), converter));
+        st1->Execute();
+        st1->Fetch();
+        bool b;
+        st1->Get(1, b);
+        return wxString(b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER");
+    }
+    else
+    {
+        return wxString();
+    }
+}
+
 wxString Procedure::getAlterSql(bool full)
 {
     ensureChildrenLoaded();
