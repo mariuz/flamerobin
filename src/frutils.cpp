@@ -86,7 +86,7 @@ void readBlob(IBPP::Statement& st, int column, wxString& result,
     char readBuffer[16384];        // 16K block
     while (true)
     {
-        int size = b->Read(readBuffer, 16384);
+        int size = b->Read(readBuffer, 16384-1); 
         if (size <= 0)
             break;
         readBuffer[size] = 0;
