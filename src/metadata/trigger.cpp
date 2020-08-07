@@ -160,25 +160,14 @@ void Trigger::loadProperties()
     DatabasePtr db = getDatabase();
     MetadataLoader* loader = db->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
-	wxMBConv* converter = db->getCharsetConverter();
 
-	std::string sql("select t.rdb$relation_name, t.rdb$trigger_sequence, "
-		"t.rdb$trigger_inactive, t.rdb$trigger_type, rdb$trigger_source, "
-	);
-	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
-		sql += "rdb$entrypoint, rdb$engine_name,  ";
-	else
-		sql += "null, null, ";
-	if (db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
-		sql += " rdb$sql_security ";
-	else
-		sql += " null ";
+    IBPP::Statement& st1 = loader->getStatement(
+        "select t.rdb$relation_name, t.rdb$trigger_sequence, "
+        "t.rdb$trigger_inactive, t.rdb$trigger_type, rdb$trigger_source "
+        "from rdb$triggers t where rdb$trigger_name = ? "
+    );
 
-	sql += "from rdb$triggers t where rdb$trigger_name = ? ";
-
-    IBPP::Statement& st1 = loader->getStatement(sql );
-
-    st1->Set(1, wx2std(getName_(), converter));
+    st1->Set(1, wx2std(getName_(), db->getCharsetConverter()));
     st1->Execute();
     if (st1->Fetch())
     {
@@ -188,7 +177,7 @@ void Trigger::loadProperties()
         {
             std::string objname;
             st1->Get(1, objname);
-            relationNameM = std2wxIdentifier(objname, converter);
+            relationNameM = std2wxIdentifier(objname, db->getCharsetConverter());
         }
         st1->Get(2, &positionM);
 
@@ -201,44 +190,7 @@ void Trigger::loadProperties()
 
         st1->Get(4, &typeM);
 
-
-		if (!st1->IsNull(8))
-		{
-			bool b;
-			st1->Get(8, b);
-			sourceM += b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER";
-		}
-		if (!st1->IsNull(6))
-		{
-			std::string s;
-			st1->Get(6, s);
-			sourceM += "EXTERNAL NAME " + std2wxIdentifier(s, converter) + "\n";
-			//entryPointM = std2wxIdentifier(s, db->getCharsetConverter());
-		}
-		//else
-			//entryPointM.clear();
-		if (!st1->IsNull(7))
-		{
-			std::string s;
-			st1->Get(7, s);
-			sourceM += "ENGINE" + std2wxIdentifier(s, converter) + "\n";
-			//engineNameM = std2wxIdentifier(s, db->getCharsetConverter()) ;
-			if (!st1->IsNull(5))
-			{
-				wxString source1;
-				readBlob(st1, 5, source1, converter);
-				source1.Trim(false);     // remove leading whitespace
-				sourceM += "\n"+ source1+ "\n";
-			}
-		}
-		else
-		{
-			wxString source1;
-			readBlob(st1, 5, source1, converter);
-			source1.Trim(false);     // remove leading whitespace
-			sourceM += "\n" + source1 + "\n";
-		}
-
+        readBlob(st1, 5, sourceM, db->getCharsetConverter());
     }
     else // maybe trigger was dropped?
     {
@@ -247,8 +199,6 @@ void Trigger::loadProperties()
         positionM = -1;
         sourceM.clear();
         typeM = 0;
-		//entryPointM.clear();
-		//engineNameM.clear();
     }
 
     setPropertiesLoaded(true);

@@ -274,12 +274,9 @@ void DataGrid::copyToClipboard()
     {
         wxBusyCursor cr;
         wxString sRows;
-		wxString sTitles;
-		bool bTitles = true;
-		for (int i = 0; i < GetNumberRows(); i++)
+        for (int i = 0; i < GetNumberRows(); i++)
         {
             wxString sRow;
-			wxString sTitle;
             bool first = true;
             for (int j = 0; j < GetNumberCols(); j++)
             {
@@ -287,32 +284,20 @@ void DataGrid::copyToClipboard()
                 {
                     // TODO: - align fields in columns ?
                     //       - fields with multiline strings don't really work...
-					if (!first)
-					{
-						sRow += "\t";
-						if (bTitles)
-							sTitle += "\t";
-					}
+                    if (!first)
+                        sRow += "\t";
                     first = false;
                     sRow += table->getCellValue(i, j);
-					if (bTitles)
-						sTitle += table->GetColLabelValue(j);
                     any = true;
                 }
                 else
                     all = false;
             }
-			if (!first) 
-			{
-				sRows += sRow + wxTextBuffer::GetEOL();
-				if (bTitles) {
-					sTitles += sTitle + wxTextBuffer::GetEOL();
-					bTitles = false;
-				}
-			}
+            if (!first)
+                sRows += sRow + wxTextBuffer::GetEOL();
         }
         if (!sRows.IsEmpty())
-            copyToClipboard(sTitles + sRows);
+            copyToClipboard(sRows);
     }
 
     if (!any)   // no cells selected -> copy a single cell

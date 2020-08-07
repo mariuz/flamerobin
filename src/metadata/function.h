@@ -26,8 +26,6 @@
 #define FR_FUNCTION_H
 
 #include "metadata/collection.h"
-#include "metadata/privilege.h"
-
 
 class ProgressIndicator;
 
@@ -35,93 +33,17 @@ class Function: public MetadataItem
 {
 private:
     wxString libraryNameM, entryPointM, definitionM, retstrM, paramListM;
-	ParameterPtrs parametersM;
-	bool legacyFunctionM;
 protected:
     virtual void loadProperties();
-
-	virtual void loadChildren();
-	virtual void lockChildren();
-	virtual void unlockChildren();
-
 public:
     Function(DatabasePtr database, const wxString& name);
-
-	bool getChildren(std::vector<MetadataItem *>& temp);
-
-
-	ParameterPtrs::iterator begin();
-	ParameterPtrs::iterator end();
-	ParameterPtrs::const_iterator begin() const;
-	ParameterPtrs::const_iterator end() const;
-
-	size_t getParamCount() const;
-	ParameterPtr findParameter(const wxString& name) const;
-
     virtual const wxString getTypeName() const;
     virtual wxString getDropSqlStatement() const;
     wxString getCreateSql();
     wxString getDefinition();
-	bool getLegacyFunction();
-	wxString getLibraryName();
+    wxString getLibraryName();
     wxString getEntryPoint();
-	wxString getSource();
-
-
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
-};
-
-class FunctionLegacy : public Function
-{
-private:
-	wxString libraryNameM, entryPointM, definitionM, retstrM, paramListM;
-protected:
-	virtual void loadProperties();
-public:
-	FunctionLegacy(DatabasePtr database, const wxString& name);
-	virtual const wxString getTypeName() const;
-	virtual wxString getDropSqlStatement() const;
-	wxString getCreateSql();
-	wxString getDefinition();
-	wxString getLibraryName();
-	wxString getEntryPoint();
-	virtual void acceptVisitor(MetadataItemVisitor* visitor);
-};
-
-class FunctionSQL : public Function
-{
-private:
-	std::vector<Privilege> privilegesM;
-	ParameterPtrs parametersM;
-protected:
-	virtual void loadChildren();
-	virtual void lockChildren();
-	virtual void unlockChildren();
-public:
-	FunctionSQL(DatabasePtr database, const wxString& name);
-
-	bool getChildren(std::vector<MetadataItem *>& temp);
-
-
-	ParameterPtrs::iterator begin();
-	ParameterPtrs::iterator end();
-	ParameterPtrs::const_iterator begin() const;
-	ParameterPtrs::const_iterator end() const;
-
-	size_t getParamCount() const;
-	ParameterPtr findParameter(const wxString& name) const;
-
-	wxString getOwner();
-	wxString getSource();
-	wxString getAlterSql(bool full = true);
-	wxString getDefinition();   // used for calltip in sql editor
-	std::vector<Privilege>* getPrivileges();
-
-	void checkDependentProcedures();
-
-	virtual const wxString getTypeName() const;
-	virtual void acceptVisitor(MetadataItemVisitor* visitor);
-
 };
 
 class Functions: public MetadataCollection<Function>
