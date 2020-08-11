@@ -35,9 +35,7 @@
       {%ifeq:{%parent:{%is_system%}%}:false:
         <a href="fr://index_action?type=TOGGLE_ACTIVE&amp;parent_window={%parent_window%}&amp;object_handle={%object_handle%}">
       %}
-      <img src="{%template_root%}{%ifeq:{%indexinfo:is_active%}:true:ok.png:redx.png%}">
-      {%ifeq:{%parent:{%is_system%}%}:false:
-      </a>
+      <img src="{%template_root%}{%ifeq:{%indexinfo:is_active%}:true:ok.png:redx.png%}">{%ifeq:{%parent:{%is_system%}%}:false:</a>
       %}
       </td>
       <td nowrap valign="top" align="center"><img src="{%template_root%}{%ifeq:{%indexinfo:is_unique%}:true:ok.png:redx.png%}"></td>
