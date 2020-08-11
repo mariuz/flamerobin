@@ -214,7 +214,7 @@ wxString Trigger::getAlterSql()
     sb << kwSET << ' ' << kwTERMINATOR << " ^ ;"
         << StatementBuilder::NewLine;
 
-    sb << kwCREATE << ' OR ' << kwALTER << ' ' << kwTRIGGER << ' ' << getQuotedName() << ' ';
+    sb << kwCREATE << ' ' << kwOR << ' ' << kwALTER << ' ' << kwTRIGGER << ' ' << getQuotedName() << ' ';
     if (activeM)
         sb << kwACTIVE;
     else
