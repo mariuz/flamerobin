@@ -412,7 +412,7 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
 				statements += " NOT NULL ;\n\n";
 
 			} else {
-				statements += "UPDATE RDB$RELATION_FIELDS SET   RDB$NULL_FLAG = ";
+				statements += "UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG = ";
 				if (isNullable)
 					statements += "NULL";
 				else
