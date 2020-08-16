@@ -421,15 +421,16 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
                 statements += "\nWHERE RDB$FIELD_NAME = '" + fnm
                     + "' AND RDB$RELATION_NAME = '" + tnm
                     + "';\n\n";
-            }
-            if (isNullable) // change from NOT NULL to NULL
-            {
-                wxString constraintName;
-                //I'm not 100% sure this code runs with ODS>=12
-                if (getNotNullConstraintName(fnm, constraintName))
+
+                if (isNullable) // change from NOT NULL to NULL
                 {
-                    statements += alterTable + "DROP CONSTRAINT "
-                        + constraintName + ";\n\n";
+                    wxString constraintName;
+                    //I'm not 100% sure this code runs with ODS>=12
+                    if (getNotNullConstraintName(fnm, constraintName))
+                    {
+                        statements += alterTable + "DROP CONSTRAINT "
+                            + constraintName + ";\n\n";
+                    }
                 }
             }
         }
