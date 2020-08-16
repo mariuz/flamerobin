@@ -342,7 +342,10 @@ void SaveDescriptionVisitor::visitProcedure(Procedure& procedure)
 void SaveDescriptionVisitor::visitRelation(Relation& relation)
 {
 	if (relation.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
-		saveDescription(&relation, "comment on table %s is '%s'");
+		if (relation.getRelationType() == 1)
+			saveDescription(&relation, "comment on view %s is '%s'");
+		else
+			saveDescription(&relation, "comment on table %s is '%s'");
 		return;
 	}
     saveDescription(&relation,
