@@ -395,33 +395,33 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
         {
             if (!isNullable) // change from NULL to NOT NULL
                 update_not_null = unnBefore;
-			// direct change in RDB$RELATION_FIELDS needs unquoted field name
-			Identifier id;
-			id.setFromSql(colNameSql);
-			wxString fnm = id.get();
-			fnm.Replace("'", "''");
-			wxString tnm = tableM->getName_();
+            // direct change in RDB$RELATION_FIELDS needs unquoted field name
+            Identifier id;
+            id.setFromSql(colNameSql);
+            wxString fnm = id.get();
+            fnm.Replace("'", "''");
+            wxString tnm = tableM->getName_();
 
-			if (columnM->getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12,0))
-			{
-				statements += "ALTER TABLE " + tableM->getQuotedName() + " ALTER " + colNameSql + " ";
-				if (isNullable)
-					statements += "DROP";
-				else
-					statements += "SET";
-				statements += " NOT NULL ;\n\n";
+            if (columnM->getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12,0))
+            {
+                statements += "ALTER TABLE " + tableM->getQuotedName() + " ALTER " + colNameSql + " ";
+                if (isNullable)
+                    statements += "DROP";
+                else
+                    statements += "SET";
+                statements += " NOT NULL ;\n\n";
 
-			} else {
-				statements += "UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG = ";
-				if (isNullable)
-					statements += "NULL";
-				else
-					statements += "1";
+            } else {
+                statements += "UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG = ";
+                if (isNullable)
+                    statements += "NULL";
+                else
+                    statements += "1";
 
-				statements += "\nWHERE RDB$FIELD_NAME = '" + fnm
-					+ "' AND RDB$RELATION_NAME = '" + tnm
-					+ "';\n\n";
-			}
+                statements += "\nWHERE RDB$FIELD_NAME = '" + fnm
+                    + "' AND RDB$RELATION_NAME = '" + tnm
+                    + "';\n\n";
+            }
             if (isNullable) // change from NOT NULL to NULL
             {
                 wxString constraintName;
