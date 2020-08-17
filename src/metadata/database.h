@@ -117,6 +117,7 @@ public:
     bool getReadOnly() const;
     bool getForcedWrites() const;
     bool getReserve() const;
+    
 };
 
 class DatabaseAuthenticationMode
@@ -153,6 +154,9 @@ private:
     wxString databaseCharsetM;
     wxString connectionUserM;
     wxString connectionRoleM;
+
+    int lingerM; // ODS 12
+    wxString sqlSecurityM; // ODS 13
 
     wxString pathM;
     int dialectM;
@@ -308,6 +312,8 @@ public:
     void loadInfo();
 
     void getConnectedUsers(wxArrayString& users) const;
+    int getLinger() const; // ODS:12
+    wxString getSqlSecurity() const; // ODS:13
 
     wxMBConv* getCharsetConverter() const;
 };

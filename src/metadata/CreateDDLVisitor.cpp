@@ -313,17 +313,51 @@ void CreateDDLVisitor::visitForeignKey(ForeignKey& fk)
 
 void CreateDDLVisitor::visitFunctionSQL(FunctionSQL& f)
 {
-    preSqlM << f.getCreateSql() << "\n";
+    wxString temp(f.getAlterSql());
+    temp += "\n";
+
+    // grant execute on [name] to [user/role]
+    const std::vector<Privilege>* priv = f.getPrivileges();
+    if (priv)
+    {
+        for (std::vector<Privilege>::const_iterator ci = priv->begin();
+            ci != priv->end(); ++ci)
+        {
+            grantSqlM += (*ci).getSql() + "\n";
+        }
+    }
+
+    /* description of function and parameters */
+    wxString name(f.getName_());
+    name.Replace("'", "''");
     wxString description = f.getDescription();
     if (!description.empty())
     {
-        wxString name(f.getName_());
         description.Replace("'", "''");
-        name.Replace("'", "''");
-        postSqlM << "comment on external function " << name << " is '"
+        postSqlM << "comment on function " << name << " is '"
             << description << "';\n";
     }
-    sqlM = preSqlM + postSqlM;
+    for (ParameterPtrs::iterator it = f.begin(); it != f.end(); ++it)
+    {
+        description = (*it)->getDescription();
+        if (!description.empty())
+        {
+            wxString pname((*it)->getName_());
+            description.Replace("'", "''");
+            pname.Replace("'", "''");
+            temp << "comment on parameter " << name << "." << pname << " is '"
+                << description << "';\n";
+        }
+    }
+
+    postSqlM << temp << "\n";
+    temp.Replace("ALTER", "CREATE", false);   // just first
+    sqlM << temp << grantSqlM;
+
+    // create empty function body (for database DDL dump)
+    temp = f.getAlterSql(false);    // false = only headers
+    temp.Replace("ALTER", "CREATE", false);   // just first
+    preSqlM << temp << "\n";
 }
 
 

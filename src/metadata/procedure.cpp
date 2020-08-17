@@ -75,15 +75,11 @@ void Procedure::loadChildren()
         "select rdb$parameter_name, rdb$field_source, "
         "rdb$parameter_type, "
     );
-    if (db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
-        sql += "rdb$default_source, rdb$null_flag, rdb$parameter_mechanism, ";
-    else
-        sql += "null, null, -1, ";
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)? "rdb$default_source, rdb$null_flag, rdb$parameter_mechanism, ": "null, null, -1, ";
 	sql += "rdb$description from rdb$procedure_parameters "
 		"where rdb$procedure_name = ? ";
-	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
-		sql += " and rdb$package_name is null ";
-    sql +=  "order by rdb$parameter_type, rdb$parameter_number";
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and rdb$package_name is null " : "";
+    sql += "order by rdb$parameter_type, rdb$parameter_number";
 
     IBPP::Statement st1 = loader->getStatement(sql);
     st1->Set(1, wx2std(getName_(), converter));
@@ -225,14 +221,7 @@ wxString Procedure::getSource()
 	std::string sql(
 		"select rdb$procedure_source, "
 	);
-	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
-		sql += "rdb$entrypoint, rdb$engine_name,  ";
-	else
-		sql += "null, null, ";
-	if (db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
-		sql += " rdb$sql_security ";
-	else
-		sql += " null ";
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? "rdb$entrypoint, rdb$engine_name  " : "null, null ";
 	sql += "from rdb$procedures where rdb$procedure_name = ?";
 	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
 		sql += " and rdb$package_name is null ";
@@ -241,31 +230,25 @@ wxString Procedure::getSource()
     st1->Execute();
     st1->Fetch();
     wxString source;
-	if (!st1->IsNull(4))
-	{
-		bool b;
-		st1->Get(4, b);
-		source += b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER";
-	}
 	if (!st1->IsNull(2))
 	{
 		std::string s;
 		st1->Get(2, s);
-		source += "EXTERNAL NAME "+std2wxIdentifier(s, converter)+ "\n";
-	}
-	if (!st1->IsNull(3))
-	{
-		std::string s;
-		st1->Get(3, s);
-		source += "ENGINE" + std2wxIdentifier(s, converter) + "\n";
-		if (!st1->IsNull(1))
-		{
-			wxString source1;
-			readBlob(st1, 1, source1, converter);
-			source1.Trim(false);     // remove leading whitespace
-			source += "\nAS\n"+ source1 + "\n";
-		}
-	}
+		source += "EXTERNAL NAME '"+std2wxIdentifier(s, converter)+ "' \n";
+        if (!st1->IsNull(3))
+        {
+            s.clear();
+            st1->Get(3, s);
+            source += "ENGINE " + std2wxIdentifier(s, converter) + "\n";
+            if (!st1->IsNull(1))
+            {
+                wxString source1;
+                readBlob(st1, 1, source1, converter);
+                source1.Trim(false);     // remove leading whitespace
+                source += "\nAS\n" + source1 + "\n";
+            }
+        }
+    }
 	else
 	{
 		wxString source1;
@@ -421,7 +404,7 @@ wxString Procedure::getAlterSql(bool full)
         if (!output.empty())
             sql += output + " )";
     }
-    //sql += "\nAS\n";
+    sql += getSqlSecurity() + "\n";
     if (full)
         sql += getSource();
     else

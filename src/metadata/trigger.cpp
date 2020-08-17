@@ -165,14 +165,8 @@ void Trigger::loadProperties()
 	std::string sql("select t.rdb$relation_name, t.rdb$trigger_sequence, "
 		"t.rdb$trigger_inactive, t.rdb$trigger_type, rdb$trigger_source, "
 	);
-	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
-		sql += "rdb$entrypoint, rdb$engine_name,  ";
-	else
-		sql += "null, null, ";
-	if (db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
-		sql += " rdb$sql_security ";
-	else
-		sql += " null ";
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " rdb$entrypoint, rdb$engine_name,  ": " null, null, ";
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0) ? " rdb$sql_security " : " null ";
 
 	sql += "from rdb$triggers t where rdb$trigger_name = ? ";
 
@@ -206,7 +200,6 @@ void Trigger::loadProperties()
         {
             bool b;
             st1->Get(8, b);
-            sourceM += b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER";
             sqlSecurityM = b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER";
         }
         else
@@ -216,35 +209,30 @@ void Trigger::loadProperties()
 		{
 			std::string s;
 			st1->Get(6, s);
-			sourceM += "EXTERNAL NAME " + std2wxIdentifier(s, converter) + "\n";
+			sourceM += "EXTERNAL NAME '" + std2wxIdentifier(s, converter) + "'\n";
 			entryPointM = std2wxIdentifier(s, db->getCharsetConverter());
+            if (!st1->IsNull(7))
+            {
+                std::string s;
+                st1->Get(7, s);
+                sourceM += "ENGINE " + std2wxIdentifier(s, converter) + "\n";
+                engineNameM = std2wxIdentifier(s, db->getCharsetConverter());
+            }
+            else
+                engineNameM.clear();
 		}
-		else
-			entryPointM.clear();
-
-		if (!st1->IsNull(7))
-		{
-			std::string s;
-			st1->Get(7, s);
-			sourceM += "ENGINE" + std2wxIdentifier(s, converter) + "\n";
-			engineNameM = std2wxIdentifier(s, db->getCharsetConverter()) ;
-			if (!st1->IsNull(5))
-			{
-				wxString source1;
-				readBlob(st1, 5, source1, converter);
-				source1.Trim(false);     // remove leading whitespace
-				sourceM += "\n"+ source1+ "\n";
-			}
-		}
-		else
-		{
+        else
+        {
+            entryPointM.clear();
             engineNameM.clear();
-			wxString source1;
-			readBlob(st1, 5, source1, converter);
-			source1.Trim(false);     // remove leading whitespace
-			sourceM += "\n" + source1 + "\n";
-		}
-
+        }
+        if (!st1->IsNull(5))
+        {
+            wxString source1;
+            readBlob(st1, 5, source1, converter);
+            source1.Trim(false);     // remove leading whitespace
+            sourceM += "\n" + source1 + "\n";
+        }
     }
     else // maybe trigger was dropped?
     {
@@ -279,6 +267,8 @@ wxString Trigger::getAlterSql()
     sb << StatementBuilder::NewLine << getFiringEvent()
         << ' ' << kwPOSITION << ' ' << wxString::Format("%d", positionM)
         << StatementBuilder::NewLine;
+    sb << getSqlSecurity() << StatementBuilder::NewLine;
+
     sb << sourceM + "^" << StatementBuilder::NewLine;
 
     sb << kwSET << ' ' << kwTERMINATOR << " ; ^"

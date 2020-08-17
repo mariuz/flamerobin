@@ -146,6 +146,7 @@ bool DatabaseInfo::getReserve() const
     return reserveM;
 }
 
+
 int DatabaseInfo::getNextTransaction() const
 {
     return nextTransactionM;
@@ -1121,9 +1122,12 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             {
                 checkProgressIndicatorCanceled(indicator);
                 // load database charset
-                IBPP::Statement& st1 = loader->getStatement(
-                    "select rdb$character_set_name, current_user, current_role "
-                    "from rdb$database");
+                std::string stmt = "select rdb$character_set_name, current_user, current_role, ";
+                stmt += getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " rdb$linger, " : " null, ";
+                stmt += getInfo().getODSVersionIsHigherOrEqualTo(13, 0) ? " rdb$sql_security   " : " null  ";
+                stmt +=" from rdb$database ";
+                IBPP::Statement& st1 = loader->getStatement(stmt);
+                
                 st1->Execute();
                 if (st1->Fetch())
                 {
@@ -1136,6 +1140,18 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
                     connectionRoleM = std2wxIdentifier(s, getCharsetConverter());
                     if (connectionRoleM == "NONE")
                         connectionRoleM.clear();
+                    if (!st1->IsNull(4))
+                        st1->Get(4, lingerM);
+                    else
+                        lingerM = 0;
+                    if (!st1->IsNull(5))
+                    {
+                        bool b;
+                        st1->Get(5, b);
+                        sqlSecurityM = wxString(b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER");
+                    }
+                    else
+                        sqlSecurityM.clear();
                 }
                 checkProgressIndicatorCanceled(indicator);
                 // load database information
@@ -1850,6 +1866,16 @@ void Database::getConnectedUsers(wxArrayString& users) const
             users.Add(name);
         }
     }
+}
+
+int Database::getLinger() const
+{
+    return lingerM;
+}
+
+wxString Database::getSqlSecurity() const
+{
+    return sqlSecurityM;
 }
 
 void Database::checkConnected(const wxString& operation) const

@@ -7,7 +7,6 @@
 <br>
 <br>
 <font size=+2>{%object_name%}</font><br>
-SQL SECURITY: {%sql_security%}<br>
 {%dbinfo:connection_string%}
 <br><br>
 <table bgcolor="white" border=0 cellpadding=2 cellspacing=0 valign=top>
@@ -37,6 +36,9 @@ SQL SECURITY: {%sql_security%}<br>
     <tr bgcolor="#DDDDFF">
         <td nowrap>Default Character Set</td><td align="right" bgcolor="#CCCCFF" nowrap>{%dbinfo:default_charset%}</td>
     </tr>
+    <tr bgcolor="#DDDDFF">
+        <td nowrap>SQL SECURITY</td><td align="right" bgcolor="#CCCCFF" nowrap>{%dbinfo:sql_security%}</td>
+    </tr>
   </tbody>
 </table>
 <!-- left table end-->
@@ -54,6 +56,10 @@ SQL SECURITY: {%sql_security%}<br>
     <tr bgcolor="#DDDDFF">
         <td nowrap>Sweep Interval</td>
         <td align="right" bgcolor="#CCCCFF" nowrap><a href="fr://edit_db_sweep_interval?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">{%dbinfo:sweep_interval%}</a></td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+        <td nowrap>Linger</td>
+        <td align="right" bgcolor="#CCCCFF" nowrap><a href="fr://edit_db_linger?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">{%dbinfo:linger%}</a></td>
     </tr>
     <tr bgcolor="#DDDDFF">
         <td nowrap>Forced Writes</td>

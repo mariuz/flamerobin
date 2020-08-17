@@ -659,10 +659,10 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             processedText << e->getMessage();
     }
 
-    // {%functioninfo:<property>%}
+    // {%udfinfo:<property>%}
     // If the current object is a function, expands to the function's
     // requested property.
-    else if (cmdName == "functioninfo" && !cmdParams.IsEmpty())
+    else if (cmdName == "udfinfo" && !cmdParams.IsEmpty())
     {
         UDF* f = dynamic_cast<UDF*>(object);
         if (!f)
@@ -674,6 +674,22 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             processedText += tp->escapeChars(f->getEntryPoint());
         else if (cmdParams[0] == "definition")
             processedText += tp->escapeChars(f->getDefinition(), false);
+        else if (cmdParams[0] == "source")
+            processedText += tp->escapeChars(f->getSource(), false);
+    }
+    // {%functioninfo:<property>%}
+    // If the current object is a function, expands to the function's
+    // requested property.
+    else if (cmdName == "functioninfo" && !cmdParams.IsEmpty())
+    {
+        FunctionSQL* f = dynamic_cast<FunctionSQL*>(object);
+        if (!f)
+            return;
+
+        if (cmdParams[0] == "definition")
+            processedText += tp->escapeChars(f->getDefinition(), false);
+        else if (cmdParams[0] == "source")
+            processedText += tp->escapeChars(f->getSource(), false);
     }
 
     // {%indexinfo:<property>%}
@@ -780,6 +796,10 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             db->getConnectedUsers(users);
             processedText += wxArrayToString(users, ",");
         }
+        else if (cmdParams[0] == "linger")
+            processedText += wxString() << db->getLinger();
+        else if (cmdParams[0] == "sql_security")
+            processedText += wxString() << db->getSqlSecurity();
     }
 
     // {%privilegeinfo:<property>%}

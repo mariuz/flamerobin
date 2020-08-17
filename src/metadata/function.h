@@ -34,10 +34,8 @@ class ProgressIndicator;
 class Function: public MetadataItem
 {
 private:
-//    wxString libraryNameM, entryPointM, definitionM, retstrM, paramListM;
 	std::vector<Privilege> privilegesM;
 	ParameterPtrs parametersM;
-//	bool legacyFunctionM;
 protected:
 
 	virtual void loadChildren();
@@ -60,14 +58,16 @@ public:
 
 	virtual wxString getCreateSql();
 	virtual wxString getDropSqlStatement() const ;
-	virtual wxString getDefinition() = 0;
+	virtual wxString getDefinition();
 	wxString getOwner();
-	virtual wxString getSource();
+	virtual wxString getSource() = 0;
 	wxString getSqlSecurity();
 	virtual const wxString getTypeName()  const = 0;
+	std::vector<Privilege>* getPrivileges();
 
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+	virtual void checkDependentFunction();
 };
 
 class UDF : public Function
@@ -94,37 +94,16 @@ public:
 class FunctionSQL : public Function
 {
 private:
-	std::vector<Privilege> privilegesM;
-	ParameterPtrs parametersM;
+
 protected:
-	virtual void loadChildren();
-	virtual void lockChildren();
-	virtual void unlockChildren();
 	virtual void loadProperties();
 public:
 	FunctionSQL(DatabasePtr database, const wxString& name);
 
-	bool getChildren(std::vector<MetadataItem *>& temp);
-
-
-	ParameterPtrs::iterator begin();
-	ParameterPtrs::iterator end();
-	ParameterPtrs::const_iterator begin() const;
-	ParameterPtrs::const_iterator end() const;
-
-	size_t getParamCount() const;
-	ParameterPtr findParameter(const wxString& name) const;
-
-	wxString getOwner();
 	wxString getSource();
 	wxString getAlterSql(bool full = true);
 	virtual wxString getDefinition();   // used for calltip in sql editor
 	virtual const wxString getTypeName() const;
-
-	std::vector<Privilege>* getPrivileges();
-
-	void checkDependentProcedures();
-
 	virtual void acceptVisitor(MetadataItemVisitor* visitor);
 
 };

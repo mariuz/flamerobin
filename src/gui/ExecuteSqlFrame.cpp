@@ -1099,9 +1099,16 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& event)
                 Procedure* p = dynamic_cast<Procedure*>(databaseM->findByNameAndType(ntProcedure, word));
                 if (p)
                     calltip = p->getDefinition();
-                UDF* f = dynamic_cast<UDF*>(databaseM->findByNameAndType(ntUDF, word)); //JOCHOA FUNCTIONS
+                /*
+                jochoa
+                UDF* f = dynamic_cast<UDF*>(databaseM->findByNameAndType(ntUDF, word)); 
                 if (f)
                     calltip = f->getDefinition();
+                
+                FunctionSQL* f = dynamic_cast<FunctionSQL*>(databaseM->findByNameAndType(ntFunctionSQL, word));
+                if (f)
+                    calltip = f->getDefinition();
+                 */ 
                 if (!calltip.empty())
                 {
                     styled_text_ctrl_sql->CallTipShow(start, calltip);
@@ -3359,6 +3366,36 @@ bool EditProcedureHandler::handleURI(URI& uri)
     CreateDDLVisitor cdv;
     p->acceptVisitor(&cdv);
     showSql(w->GetParent(), _("Editing stored procedure"), p->getDatabase(),
+        cdv.getSuffixSql());
+    return true;
+}
+
+class EditFunctionHandler : public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
+{
+public:
+    EditFunctionHandler() {}
+    bool handleURI(URI& uri);
+private:
+    // singleton; registers itself on creation.
+    static const EditFunctionHandler handlerInstance;
+};
+
+const EditFunctionHandler EditFunctionHandler::handlerInstance;
+
+bool EditFunctionHandler::handleURI(URI& uri)
+{
+    if (uri.action != "edit_function")
+        return false;
+
+    FunctionSQL* f = extractMetadataItemFromURI<FunctionSQL>(uri);
+    wxWindow* w = getParentWindow(uri);
+    if (!f || !w)
+        return true;
+
+    CreateDDLVisitor cdv;
+    f->acceptVisitor(&cdv);
+    showSql(w->GetParent(), _("Editing stored function"), f->getDatabase(),
         cdv.getSuffixSql());
     return true;
 }
