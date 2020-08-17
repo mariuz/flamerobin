@@ -126,11 +126,9 @@ void CreateDDLVisitor::visitColumn(Column& c)
     wxString description = c.getDescription();
     if (!description.empty())
     {
-        wxString colname(c.getName_());
-        wxString tabname(c.getTable()->getName_());
+        wxString colname(c.getQuotedName());
+        wxString tabname(c.getTable()->getQuotedName());
         description.Replace("'", "''");
-        colname.Replace("'", "''");
-        tabname.Replace("'", "''");
         postSqlM << "comment on column " << tabname << "." << colname << " is '"
                      << description << "';\n";
     }
