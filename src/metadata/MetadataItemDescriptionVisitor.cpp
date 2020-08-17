@@ -218,20 +218,32 @@ void SaveDescriptionVisitor::saveDescription(MetadataItem* object,
     tr1->Start();
 
     IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-    st1->Prepare(statement);
+	if (d->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) {
+		descriptionM.Replace("'", "''");
+		wxString s;
+		if (parent)
+		  s = s.Format(wxString(statement), parent->getQuotedName(), object->getQuotedName(), descriptionM);
+		else
+			s = s.Format(wxString(statement), object->getQuotedName(), descriptionM);
 
-    if (!descriptionM.empty())
-    {
-        IBPP::Blob b = IBPP::BlobFactory(db, tr1);
-        b->Save(wx2std(descriptionM, csConverter));
-        st1->Set(1, b);
-    }
-    else
-        st1->SetNull(1);
-    st1->Set(2, wx2std(object->getName_(), csConverter));
-    // relation column or SP parameter?
-    if (parent)
-        st1->Set(3, wx2std(parent->getName_(), csConverter));
+		st1->Prepare(wx2std(s, csConverter));
+	}
+	else {
+		st1->Prepare(statement);
+
+		if (!descriptionM.empty())
+		{
+			IBPP::Blob b = IBPP::BlobFactory(db, tr1);
+			b->Save(wx2std(descriptionM, csConverter));
+			st1->Set(1, b);
+		}
+		else
+			st1->SetNull(1);
+		st1->Set(2, wx2std(object->getName_(), csConverter));
+		// relation column or SP parameter?
+		if (parent)
+			st1->Set(3, wx2std(parent->getName_(), csConverter));
+	}
 
     st1->Execute();
     tr1->Commit();
@@ -239,6 +251,10 @@ void SaveDescriptionVisitor::saveDescription(MetadataItem* object,
 
 void SaveDescriptionVisitor::visitColumn(Column& column)
 {
+	if (column.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11,1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+		saveDescription(&column, column.getParent(), "comment on column %s.%s is '%s'");
+		return;
+	}
     // TODO: use Column::GetRelation() / Column::getProcedure() instead
     saveDescription(&column, column.getParent(),
         "update RDB$RELATION_FIELDS set RDB$DESCRIPTION = ? "
@@ -247,6 +263,10 @@ void SaveDescriptionVisitor::visitColumn(Column& column)
 
 void SaveDescriptionVisitor::visitDomain(Domain& domain)
 {
+	if (domain.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+		saveDescription(&domain, "comment on domain %s is '%s'");
+		return;
+	}
     saveDescription(&domain,
         "update RDB$FIELDS set RDB$DESCRIPTION = ? "
         "where RDB$FIELD_NAME = ?");
@@ -254,6 +274,10 @@ void SaveDescriptionVisitor::visitDomain(Domain& domain)
 
 void SaveDescriptionVisitor::visitException(Exception& exception)
 {
+	if (exception.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+		saveDescription(&exception, "comment on exception %s is '%s'");
+		return;
+	}
     saveDescription(&exception,
         "update RDB$EXCEPTIONS set RDB$DESCRIPTION = ? "
         "where RDB$EXCEPTION_NAME = ?");
@@ -261,6 +285,10 @@ void SaveDescriptionVisitor::visitException(Exception& exception)
 
 void SaveDescriptionVisitor::visitFunction(Function& function)
 {
+	if (function.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+		saveDescription(&function, "comment on function %s is '%s'");
+		return;
+	}
     saveDescription(&function,
         "update RDB$FUNCTIONS set rdb$description = ? "
         "where RDB$FUNCTION_NAME = ?");
@@ -268,6 +296,10 @@ void SaveDescriptionVisitor::visitFunction(Function& function)
 
 void SaveDescriptionVisitor::visitGenerator(Generator& generator)
 {
+	if (generator.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+		saveDescription(&generator, "comment on generator %s is '%s'");
+		return;
+	}
     saveDescription(&generator,
         "update RDB$GENERATORS set RDB$DESCRIPTION = ? "
         "where RDB$GENERATOR_NAME = ?");
@@ -275,6 +307,10 @@ void SaveDescriptionVisitor::visitGenerator(Generator& generator)
 
 void SaveDescriptionVisitor::visitIndex(Index& index)
 {
+	if (index.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+		saveDescription(&index, "comment on index %s is '%s'");
+		return;
+	}
     saveDescription(&index,
         "update RDB$INDICES set RDB$DESCRIPTION = ? "
         "where RDB$INDEX_NAME = ?");
@@ -282,6 +318,10 @@ void SaveDescriptionVisitor::visitIndex(Index& index)
 
 void SaveDescriptionVisitor::visitParameter(Parameter& parameter)
 {
+	if (parameter.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+		saveDescription(&parameter, parameter.getParent(), "comment on parameter %s.%s is '%s'");
+		return;
+	}
     // TODO: use Parameter::getProcedure() instead
     saveDescription(&parameter, parameter.getParent(),
         "update RDB$PROCEDURE_PARAMETERS set RDB$DESCRIPTION = ? "
@@ -290,6 +330,10 @@ void SaveDescriptionVisitor::visitParameter(Parameter& parameter)
 
 void SaveDescriptionVisitor::visitProcedure(Procedure& procedure)
 {
+	if (procedure.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+		saveDescription(&procedure, "comment on procedure %s is '%s'");
+		return;
+	}
     saveDescription(&procedure,
         "update RDB$PROCEDURES set RDB$DESCRIPTION = ? "
         "where RDB$PROCEDURE_NAME = ?");
@@ -297,6 +341,13 @@ void SaveDescriptionVisitor::visitProcedure(Procedure& procedure)
 
 void SaveDescriptionVisitor::visitRelation(Relation& relation)
 {
+	if (relation.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+		if (relation.getRelationType() == 1)
+			saveDescription(&relation, "comment on view %s is '%s'");
+		else
+			saveDescription(&relation, "comment on table %s is '%s'");
+		return;
+	}
     saveDescription(&relation,
         "update RDB$RELATIONS set RDB$DESCRIPTION = ? "
         "where RDB$RELATION_NAME = ?");
@@ -304,6 +355,10 @@ void SaveDescriptionVisitor::visitRelation(Relation& relation)
 
 void SaveDescriptionVisitor::visitRole(Role& role)
 {
+	if (role.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+		saveDescription(&role, "comment on role %s is '%s'");
+		return;
+	}
     saveDescription(&role,
         "update RDB$ROLES set RDB$DESCRIPTION = ? "
         "where RDB$ROLE_NAME = ?");
@@ -311,6 +366,10 @@ void SaveDescriptionVisitor::visitRole(Role& role)
 
 void SaveDescriptionVisitor::visitTrigger(Trigger& trigger)
 {
+	if (trigger.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+		saveDescription(&trigger, "comment on trigger %s is '%s'");
+		return;
+	}
     saveDescription(&trigger,
         "update RDB$TRIGGERS set RDB$DESCRIPTION = ? "
         "where RDB$TRIGGER_NAME = ?");
