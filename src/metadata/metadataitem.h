@@ -37,6 +37,7 @@
 #include "sql/Identifier.h"
 
 class Dependency;
+class DependencyField;
 class MetadataItemVisitor;
 
 typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
@@ -102,6 +103,7 @@ public:
     void getDependencies(std::vector<Dependency>& list, bool ofObject);  // load from db
     void getDependencies(std::vector<Dependency>& list, bool ofObject,
         const wxString& field);  // load from db
+    void getDependenciesPivoted(std::vector<DependencyField>& list);
 
     // returned shared ptr may be unassigned
     virtual DatabasePtr getDatabase() const;
@@ -156,6 +158,17 @@ public:
     static bool hasSystemPrefix(const wxString& name);
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+
+class DependencyField : public MetadataItem
+{
+private:
+std::vector<Dependency> objectsM_;
+public:
+    void getDependencies(std::vector<Dependency>& list) const;
+    void addDependency(const Dependency& other);
+    bool operator== (const DependencyField& other) const;
+
 };
 
 //! masks the object it points to so others see it transparently
