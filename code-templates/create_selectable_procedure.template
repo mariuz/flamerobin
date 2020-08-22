@@ -2,15 +2,15 @@
 
 create procedure%} SP_{%object_name%}
 {%kw:returns%} ( {%foreach:column:, :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:
-{%tab%}{%object_name%} {%columninfo:datatype%}%}%}
+{%tab%}{%object_quoted_name%} {%columninfo:datatype%}%}%}
 )
 {%kw:as
 begin
 {%tab%}for select%} {%foreach:column:, :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:
-{%tab%}{%tab%}a.{%object_name%}%}%}
-{%tab%}{%kw:from%} {%object_name%} a
+{%tab%}{%tab%}a.{%object_quoted_name%}%}%}
+{%tab%}{%kw:from%} {%object_quoted_name%} a
 {%tab%}{%kw:into%} {%foreach:column:, :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:
-{%tab%}{%tab%}{%object_name%}%}%} 
+{%tab%}{%tab%}{%object_quoted_name%}%}%} 
 {%tab%}{%kw:do
 {%tab%}begin
 {%tab%}{%tab%}suspend;

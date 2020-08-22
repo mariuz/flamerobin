@@ -67,8 +67,12 @@ std::string Domain::getLoadStatement(bool list)
             " and l.rdb$character_set_id = f.rdb$character_set_id"
         " left outer join rdb$types t on f.rdb$field_type=t.rdb$type"
         " where t.rdb$field_name='RDB$FIELD_TYPE' and f.rdb$field_name ");
-    if (list)
-        stmt += "not starting with 'RDB$' order by 1";
+	if (list) {
+		stmt += "not starting with 'RDB$' ";
+		//if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) //If Firebird 3 ODS, remove SEC$DOMAINs, this is a static method, so I wont be able to get ODS
+		stmt += "and f.RDB$SYSTEM_FLAG=0 ";//Need to test on Firebird 1
+		stmt += "order by 1";
+	}
     else
         stmt += "= ?";
     return stmt;

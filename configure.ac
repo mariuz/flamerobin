@@ -58,7 +58,7 @@ case "${host}" in
 
     *-*-darwin* )
         dnl Mac OS X uses the Firebird framework
-        LIBS="$LIBS -framework Firebird"
+        LIBS="$LIBS /Library/Frameworks/Firebird.Framework/Firebird"
     ;;
 
     * )

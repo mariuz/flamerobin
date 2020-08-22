@@ -723,6 +723,28 @@ namespace IBPP
         virtual void Set(int, const Blob& value) = 0;
         virtual void Set(int, const Array& value) = 0;
 
+        virtual void SetNull(std::string) = 0;
+        virtual void Set(std::string, bool) = 0;
+        virtual void Set(std::string, const void*, int) = 0;        // byte buffers
+        virtual void Set(std::string, const char*) = 0;             // c-string
+        virtual void Set(std::string, const std::string&) = 0;
+        virtual void Set(std::string, int16_t value) = 0;
+        virtual void Set(std::string, int32_t value) = 0;
+        virtual void Set(std::string, int64_t value) = 0;
+        virtual void Set(std::string, float value) = 0;
+        virtual void Set(std::string, double value) = 0;
+        virtual void Set(std::string, const Timestamp& value) = 0;
+        virtual void Set(std::string, const Date& value) = 0;
+        virtual void Set(std::string, const Time& value) = 0;
+        virtual void Set(std::string, const DBKey& value) = 0;
+        virtual void Set(std::string, const Blob& value) = 0;
+        virtual void Set(std::string, const Array& value) = 0;
+
+        virtual std::vector<std::string> ParametersByName() = 0;
+        virtual std::vector<int> FindParamsByName(std::string name) = 0;
+        virtual int ParameterNum(const std::string& name) = 0;
+
+
         virtual bool IsNull(int) = 0;
         virtual bool Get(int, bool&) = 0;
         virtual bool Get(int, void*, int&) = 0; // byte buffers

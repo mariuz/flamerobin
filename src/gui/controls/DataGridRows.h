@@ -31,11 +31,47 @@
 #include <ibpp.h>
 
 #include "metadata/constraints.h"
+#include "config/Config.h"
 
 class Database;
 class DataGridRowBuffer;
 class ProgressIndicator;
 class wxMBConv;
+
+// GridCellFormats: class to cache config data for cell formatting
+class GridCellFormats: public ConfigCache
+{
+private:
+    int floatingPointPrecisionM;
+    wxString dateFormatM;
+    int maxBlobKBytesM;
+    bool showBinaryBlobContentM;
+    bool showBlobContentM;
+    wxString timeFormatM;
+    wxString timestampFormatM;
+protected:
+    virtual void loadFromConfig();
+public:
+    GridCellFormats();
+
+    static GridCellFormats& get();
+
+    template<typename T>
+    wxString format(T value);
+    wxString formatDate(int year, int month, int day);
+    wxString formatTime(int hour, int minute, int second, int milliSecond);
+    wxString formatTimestamp(int year, int month, int day,
+        int hour, int minute, int second, int milliSecond);
+    int maxBlobBytesToFetch();
+    bool parseDate(wxString::iterator& start, wxString::iterator end,
+        bool consumeAll, int& year, int& month, int& day);
+    bool parseTime(wxString::iterator& start, wxString::iterator end,
+        int& hr, int& mn, int& sc, int& ml);
+    bool parseTimestamp(wxString::iterator& start, wxString::iterator end,
+        int& year, int& month, int& day, int& hr, int& mn, int& sc, int& ml);
+    bool showBinaryBlobContent();
+    bool showBlobContent();
+};
 
 class ResultsetColumnDef
 {

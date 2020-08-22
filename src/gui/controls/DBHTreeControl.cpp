@@ -1138,7 +1138,7 @@ wxTreeItemId DBHTreeControl::getNextItem(wxTreeItemId current)
 {
     wxTreeItemId temp = current;
     wxTreeItemIdValue cookie;   // dummy - not really used
-    if (ItemHasChildren(temp))
+    if (((ItemHasChildren(temp)) && (GetFirstChild(temp, cookie).IsOk()))) //It tries to read de node content, but for FB objects not loaded, it raises error, the ideal is to skip, or to load (all) the database content?
         temp = GetFirstChild(temp, cookie);
     else
     {
