@@ -78,7 +78,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             wxString newText;
             tp->internalProcessTemplateText(newText, text, object);
             if ((!firstItem) && (!newText.IsEmpty()))
-                processedText += tp->escapeChars(separator);
+                processedText += separator;
             if (!newText.IsEmpty())
                 firstItem = false;
             processedText += newText;
