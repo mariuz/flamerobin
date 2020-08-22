@@ -207,7 +207,12 @@ void MetadataItemVisitor::visitTriggers(Triggers&)
     defaultAction();
 }
 
-void MetadataItemVisitor::visitDdlTriggers(DdlTriggers&)
+void MetadataItemVisitor::visitDDLTriggers(DDLTriggers&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitDBTriggers(DBTriggers&)
 {
     defaultAction();
 }
@@ -228,6 +233,11 @@ void MetadataItemVisitor::visitViews(Views&)
 }
 
 void MetadataItemVisitor::visitMetadataItem(MetadataItem&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitMethod(Method& method)
 {
     defaultAction();
 }

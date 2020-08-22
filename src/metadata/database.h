@@ -173,8 +173,8 @@ private:
     SysDomainsPtr sysDomainsM;
     ExceptionsPtr exceptionsM;
     FunctionSQLsPtr functionSQLsM;
-    UDFsPtr UDFsM;
     GeneratorsPtr generatorsM;
+    PackagesPtr packagesM;
     ProceduresPtr proceduresM;
     RolesPtr rolesM;
     SysRolesPtr sysRolesM;
@@ -182,6 +182,9 @@ private:
     SysTablesPtr sysTablesM;
     GTTsPtr GTTsM;
     TriggersPtr triggersM;
+    DBTriggersPtr DBTriggersM;
+    DDLTriggersPtr DDLTriggersM;
+    UDFsPtr UDFsM;
     ViewsPtr viewsM;
 
     // copy constructor implementation removed since it's no longer needed
@@ -200,6 +203,7 @@ private:
 
     mutable unsigned idM;
 
+    bool showSystemDomains();
     bool showSystemRoles();
     bool showSystemTables();
 
@@ -219,9 +223,9 @@ public:
     DomainsPtr getDomains();
     SysDomainsPtr getSysDomains();
     ExceptionsPtr getExceptions();
-    UDFsPtr getUDFs();
     FunctionSQLsPtr getFunctionSQLs();
     GeneratorsPtr getGenerators();
+    PackagesPtr getPackages();
     ProceduresPtr getProcedures();
     RolesPtr getRoles();
     SysRolesPtr getSysRoles();
@@ -229,6 +233,9 @@ public:
     SysTablesPtr getSysTables();
     GTTsPtr getGTTs();
     TriggersPtr getTriggers();
+    DBTriggersPtr getDBTriggers();
+    DDLTriggersPtr getDDLTriggers();
+    UDFsPtr getUDFs();
     ViewsPtr getViews();
 
     bool isConnected() const;

@@ -39,20 +39,23 @@ public:
     static wxString getCreateProcedureStatement();
     static wxString getCreateRoleStatement();
     static wxString getCreateTableStatement();
+    static wxString getCreateGTTTableStatement();
     static wxString getCreateTriggerStatement();
+    static wxString getCreateDBTriggerStatement();
+    static wxString getCreateDDLTriggerStatement();
     static wxString getCreateUDFStatement();
     static wxString getCreateViewStatement();
 
     virtual void visitDomains(Domains& domains);
     virtual void visitExceptions(Exceptions& exceptions);
     virtual void visitFunctionSQLs(FunctionSQLs& functions);
-    virtual void visitUDFs(UDFs& functions);
     virtual void visitGenerators(Generators& generators);
     virtual void visitPackages(Packages& packages);
     virtual void visitProcedures(Procedures& procedures);
     virtual void visitRoles(Roles& roles);
     virtual void visitTables(Tables& tables);
     virtual void visitTriggers(Triggers& triggers);
+    virtual void visitUDFs(UDFs& functions);
     virtual void visitViews(Views& views);
 
     wxString getStatement() const;

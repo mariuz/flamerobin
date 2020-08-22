@@ -49,6 +49,7 @@
 #include "metadata/table.h"
 #include "metadata/User.h"
 #include "metadata/view.h"
+#include "metadata/package.h"
 
 
 class MetadataTemplateCmdHandler: public TemplateCmdHandler
@@ -288,9 +289,12 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         // processes <text> for each privilege.
         else if (cmdParams[0] == "privilege")
         {
+            
             Relation* rel = dynamic_cast<Relation*>(object);
             Procedure* proc = dynamic_cast<Procedure*>(object);
             Role* role = dynamic_cast<Role*>(object);
+            Function* func = dynamic_cast<Function*>(object);
+            Package* pack = dynamic_cast<Package*>(object);
             std::vector<Privilege>* p = 0;
             if (rel)
                 p = rel->getPrivileges();
@@ -298,6 +302,10 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
                 p = proc->getPrivileges();
             if (role)
                 p = role->getPrivileges();
+            if (func)
+                p = func->getPrivileges();
+            if (pack)
+                p = pack->getPrivileges();
             if (!p)
                 return;
             bool firstItem = true;
@@ -412,6 +420,8 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             name = role->getOwner();
         else if (Function* f = dynamic_cast<Function*>(object))
             name = f->getOwner();
+        else if (Package* p = dynamic_cast<Package*>(object))
+            name = p->getOwner();
         if (!name.IsEmpty())
             processedText += tp->escapeChars(name);
     }
@@ -876,8 +886,8 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             processedText << u->getGroupId();
     }
     // {%sql_security%}
-    // If the current object is a data base, procedure, relation, function or trigger
-    // expands to the SQL Security.
+    // If the current object is a data base, procedure, relation, 
+    // function or trigger expands to the SQL Security.
     else if (cmdName == "sql_security")
     {
     wxString name;
@@ -889,8 +899,24 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         name = f->getSqlSecurity();
     else if (Trigger* t = dynamic_cast<Trigger*>(object))
         name = t->getSqlSecurity();
+    else if (Package* p = dynamic_cast<Package*>(object))
+        name = p->getSqlSecurity();
     if (!name.IsEmpty())
         processedText += tp->escapeChars(name);
     }
+    // {%packageinfo:<property>%}
+    // If the current object is a package, expands to the package's
+    // requested property.
+    else if ((cmdName == "packageinfo") && (cmdParams.Count() >= 1))
+    {
+        Package* p = dynamic_cast<Package*>(object);
+        if (!p)
+            return;
+        if (cmdParams[0] == "definition")
+            processedText += tp->escapeChars(p->getDefinition(), false);
+        if (cmdParams[0] == "source")
+            processedText += tp->escapeChars(p->getSource(), false);
+    }
+
 }
 

@@ -72,6 +72,7 @@ void HtmlHeaderMetadataItemVisitor::visitFunctionSQL(FunctionSQL& /*function*/)
 {
     emptyTitles();
     addSummary();
+    addPrivileges();
     addDependencies();
     addDDL();
 }
@@ -80,6 +81,7 @@ void HtmlHeaderMetadataItemVisitor::visitUDF(UDF& /*function*/)
 {
     emptyTitles();
     addSummary();
+    addPrivileges();
     addDependencies();
     addDDL();
 }

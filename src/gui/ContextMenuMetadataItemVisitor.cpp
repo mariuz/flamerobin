@@ -40,6 +40,7 @@
 #include "metadata/function.h"
 #include "metadata/generator.h"
 #include "metadata/MetadataTemplateManager.h"
+#include "metadata/package.h"
 #include "metadata/procedure.h"
 #include "metadata/role.h"
 #include "metadata/root.h"
@@ -149,7 +150,7 @@ void MainObjectMenuMetadataItemVisitor::visitExceptions(Exceptions& exceptions)
 
 void MainObjectMenuMetadataItemVisitor::visitFunctionSQL(FunctionSQL& function)
 {
-    //menuM->Append(Cmds::Menu_ExecuteProcedure, _("&Execute"));
+    menuM->Append(Cmds::Menu_ExecuteFunction, _("&Execute"));
     addAlterItem(function);
     addDropItem(function);
     addSeparator();
@@ -213,13 +214,12 @@ void MainObjectMenuMetadataItemVisitor::visitGenerators(Generators& generators)
 
 void MainObjectMenuMetadataItemVisitor::visitPackage(Package& package)
 {
-    //menuM->Append(Cmds::Menu_ExecuteProcedure, _("&Execute"));
-    //addAlterItem(package); jochoa package
-    //addDropItem(package);
+    addAlterItem(package);
+    addDropItem(package);
     addSeparator();
-    //addGenerateCodeMenu(package);
+    addGenerateCodeMenu(package);
     addSeparator();
-    // TODO: addRefreshItem();
+    addRefreshItem();
     addPropertiesItem();
 }
 
@@ -227,7 +227,7 @@ void MainObjectMenuMetadataItemVisitor::visitPackages(Packages& packages)
 {
     addCreateItem();
     addSeparator();
-    //addGenerateCodeMenu(procedures); jochoa package
+    //addGenerateCodeMenu(procedures); 
     addSeparator();
     addRefreshItem();
 }
@@ -368,11 +368,20 @@ void MainObjectMenuMetadataItemVisitor::visitTriggers(Triggers& triggers)
     addRefreshItem();
 }
 
-void MainObjectMenuMetadataItemVisitor::visitDdlTriggers(DdlTriggers& triggers)
+void MainObjectMenuMetadataItemVisitor::visitDBTriggers(DBTriggers& triggers)
 {
     addCreateItem();
     addSeparator();
-    //addGenerateCodeMenu(triggers); jochoa ddl triggers
+    addGenerateCodeMenu(triggers); 
+    addSeparator();
+    addRefreshItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitDDLTriggers(DDLTriggers& triggers)
+{
+    addCreateItem();
+    addSeparator();
+    addGenerateCodeMenu(triggers);
     addSeparator();
     addRefreshItem();
 }

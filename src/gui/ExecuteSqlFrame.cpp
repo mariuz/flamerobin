@@ -74,6 +74,7 @@
 #include "metadata/function.h"
 #include "metadata/generator.h"
 #include "metadata/MetadataItemURIHandlerHelper.h"
+#include "metadata/package.h"
 #include "metadata/procedure.h"
 #include "metadata/server.h"
 #include "metadata/table.h"
@@ -3674,3 +3675,62 @@ bool ActivateTriggerHandler::handleURI(URI& uri)
     return true;
 }
 
+class EditPackageHeaderHandler : public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
+{
+public:
+    EditPackageHeaderHandler() {}
+    bool handleURI(URI& uri);
+private:
+    // singleton; registers itself on creation.
+    static const EditPackageHeaderHandler handlerInstance;
+};
+
+const EditPackageHeaderHandler EditPackageHeaderHandler::handlerInstance;
+
+bool EditPackageHeaderHandler::handleURI(URI& uri)
+{
+    if (uri.action != "edit_package_header")
+        return false;
+
+    Package* p = extractMetadataItemFromURI<Package>(uri);
+    wxWindow* w = getParentWindow(uri);
+    if (!p || !w)
+        return true;
+
+    CreateDDLVisitor cdv;
+    p->acceptVisitor(&cdv);
+    showSql(w->GetParent(), _("Editing Package Header"), p->getDatabase(),
+        p->getAlterHeader());
+    return true;
+}
+
+class EditPackageBodyHandler : public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
+{
+public:
+    EditPackageBodyHandler() {}
+    bool handleURI(URI& uri);
+private:
+    // singleton; registers itself on creation.
+    static const EditPackageBodyHandler handlerInstance;
+};
+
+const EditPackageBodyHandler EditPackageBodyHandler::handlerInstance;
+
+bool EditPackageBodyHandler::handleURI(URI& uri)
+{
+    if (uri.action != "edit_package_body")
+        return false;
+
+    Package* p = extractMetadataItemFromURI<Package>(uri);
+    wxWindow* w = getParentWindow(uri);
+    if (!p || !w)
+        return true;
+
+    CreateDDLVisitor cdv;
+    p->acceptVisitor(&cdv);
+    showSql(w->GetParent(), _("Editing Package Body"), p->getDatabase(),
+        p->getAlterBody());
+    return true;
+}

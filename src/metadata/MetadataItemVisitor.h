@@ -69,11 +69,13 @@ public:
     virtual void visitGTTs(GTTs& tables);
     virtual void visitTrigger(Trigger& trigger);
     virtual void visitTriggers(Triggers& triggers);
-    virtual void visitDdlTriggers(DdlTriggers& triggers);
+    virtual void visitDBTriggers(DBTriggers& triggers);
+    virtual void visitDDLTriggers(DDLTriggers& triggers);
     virtual void visitUniqueConstraint(UniqueConstraint& unq);
     virtual void visitView(View& view);
     virtual void visitViews(Views& views);
     virtual void visitMetadataItem(MetadataItem& metadataItem);
+    virtual void visitMethod(Method& method);
 };
 
 #endif //FR_METADATAITEMVISITOR_H

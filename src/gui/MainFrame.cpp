@@ -225,10 +225,15 @@ void MainFrame::buildMainMenu()
     newMenu->Append(Cmds::Menu_CreateException,   _("&Exception"));
     newMenu->Append(Cmds::Menu_CreateFunction,    _("&Function"));
     newMenu->Append(Cmds::Menu_CreateGenerator,   _("&Generator"));
+    newMenu->Append(Cmds::Menu_CreatePackage,     _("P&ackage"));
     newMenu->Append(Cmds::Menu_CreateProcedure,   _("&Procedure"));
     newMenu->Append(Cmds::Menu_CreateRole,        _("&Role"));
     newMenu->Append(Cmds::Menu_CreateTable,       _("&Table"));
+    newMenu->Append(Cmds::Menu_CreateGTTTable,    _("GTT Table"));
     newMenu->Append(Cmds::Menu_CreateTrigger,     _("Tr&igger"));
+    newMenu->Append(Cmds::Menu_CreateDBTrigger,   _("D&B Trigger"));
+    newMenu->Append(Cmds::Menu_CreateDDLTrigger,  _("DD&L Trigger"));
+    newMenu->Append(Cmds::Menu_CreateUDF,         _("&UDF"));
     newMenu->Append(Cmds::Menu_CreateView,        _("&View"));
     // removed accelerator from "New", any of them potentially conflicts
     // with one of the commands in the object menu
@@ -413,6 +418,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(Cmds::Menu_BrowseData, MainFrame::OnMenuBrowseData)
     EVT_MENU(Cmds::Menu_AddColumn, MainFrame::OnMenuAddColumn)
     EVT_MENU(Cmds::Menu_ExecuteProcedure, MainFrame::OnMenuExecuteProcedure)
+    EVT_MENU(Cmds::Menu_ExecuteFunction, MainFrame::OnMenuExecuteFunction)
 
     EVT_MENU(Cmds::Menu_ShowAllGeneratorValues, MainFrame::OnMenuShowAllGeneratorValues)
     EVT_UPDATE_UI(Cmds::Menu_ShowAllGeneratorValues, MainFrame::OnMenuUpdateIfMetadataItemHasChildren)
@@ -441,10 +447,15 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(Cmds::Menu_CreateException,  MainFrame::OnMenuCreateException)
     EVT_MENU(Cmds::Menu_CreateFunction,   MainFrame::OnMenuCreateFunction)
     EVT_MENU(Cmds::Menu_CreateGenerator,  MainFrame::OnMenuCreateGenerator)
+    EVT_MENU(Cmds::Menu_CreatePackage,    MainFrame::OnMenuCreatePackage)
     EVT_MENU(Cmds::Menu_CreateProcedure,  MainFrame::OnMenuCreateProcedure)
     EVT_MENU(Cmds::Menu_CreateRole,       MainFrame::OnMenuCreateRole)
     EVT_MENU(Cmds::Menu_CreateTable,      MainFrame::OnMenuCreateTable)
+    EVT_MENU(Cmds::Menu_CreateGTTTable,   MainFrame::OnMenuCreateGTTTable)
     EVT_MENU(Cmds::Menu_CreateTrigger,    MainFrame::OnMenuCreateTrigger)
+    EVT_MENU(Cmds::Menu_CreateDBTrigger,  MainFrame::OnMenuCreateDBTrigger)
+    EVT_MENU(Cmds::Menu_CreateDDLTrigger, MainFrame::OnMenuCreateDDLTrigger)
+    EVT_MENU(Cmds::Menu_CreateUDF,        MainFrame::OnMenuCreateUDF)
     EVT_MENU(Cmds::Menu_CreateView,       MainFrame::OnMenuCreateView)
 
     EVT_MENU_RANGE(Cmds::Menu_TemplateFirst, Cmds::Menu_TemplateLast,
@@ -762,6 +773,13 @@ void MainFrame::OnMenuDatabaseProperties(wxCommandEvent& WXUNUSED(event))
         return;
 
     MetadataItemPropertiesFrame::showPropertyPage(db.get());
+}
+
+void MainFrame::OnMenuExecuteFunction(wxCommandEvent& WXUNUSED(event))
+{
+    executeSysTemplate("execute_function",
+        treeMainM->getSelectedMetadataItem(), this);
+
 }
 
 void MainFrame::OnMenuDatabasePreferences(wxCommandEvent& WXUNUSED(event))
@@ -1262,13 +1280,19 @@ void MainFrame::OnMenuCreateException(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuCreateFunction(wxCommandEvent& WXUNUSED(event))
 {
     showCreateTemplate(
-        MetadataItemCreateStatementVisitor::getCreateUDFStatement());
+        MetadataItemCreateStatementVisitor::getCreateFunctionSQLStatement());
 }
 
 void MainFrame::OnMenuCreateGenerator(wxCommandEvent& WXUNUSED(event))
 {
     showCreateTemplate(
         MetadataItemCreateStatementVisitor::getCreateGeneratorStatement());
+}
+
+void MainFrame::OnMenuCreatePackage(wxCommandEvent& WXUNUSED(event))
+{
+    showCreateTemplate(
+        MetadataItemCreateStatementVisitor::getCreatePackageStatement());
 }
 
 void MainFrame::OnMenuCreateProcedure(wxCommandEvent& WXUNUSED(event))
@@ -1289,10 +1313,34 @@ void MainFrame::OnMenuCreateTable(wxCommandEvent& WXUNUSED(event))
         MetadataItemCreateStatementVisitor::getCreateTableStatement());
 }
 
+void MainFrame::OnMenuCreateGTTTable(wxCommandEvent& WXUNUSED(event))
+{
+    showCreateTemplate(
+        MetadataItemCreateStatementVisitor::getCreateGTTTableStatement());
+}
+
 void MainFrame::OnMenuCreateTrigger(wxCommandEvent& WXUNUSED(event))
 {
     showCreateTemplate(
         MetadataItemCreateStatementVisitor::getCreateTriggerStatement());
+}
+
+void MainFrame::OnMenuCreateDBTrigger(wxCommandEvent& WXUNUSED(event))
+{
+    showCreateTemplate(
+        MetadataItemCreateStatementVisitor::getCreateDBTriggerStatement());
+}
+
+void MainFrame::OnMenuCreateDDLTrigger(wxCommandEvent& WXUNUSED(event))
+{
+    showCreateTemplate(
+        MetadataItemCreateStatementVisitor::getCreateDDLTriggerStatement());
+}
+
+void MainFrame::OnMenuCreateUDF(wxCommandEvent& WXUNUSED(event))
+{
+    showCreateTemplate(
+        MetadataItemCreateStatementVisitor::getCreateUDFStatement());
 }
 
 void MainFrame::OnMenuCreateView(wxCommandEvent& WXUNUSED(event))

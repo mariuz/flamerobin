@@ -43,6 +43,7 @@
 #include "metadata/metadataitem.h"
 #include "metadata/MetadataItemDescriptionVisitor.h"
 #include "metadata/parameter.h"
+#include "metadata/package.h"
 #include "metadata/procedure.h"
 #include "metadata/relation.h"
 #include "metadata/role.h"
@@ -175,9 +176,9 @@ void LoadDescriptionVisitor::visitParameter(Parameter& parameter)
 
 void LoadDescriptionVisitor::visitPackage(Package& package)
 {
-/*    loadDescription(&procedure,
-        "select RDB$DESCRIPTION from RDB$PROCEDURES "
-        "where RDB$PROCEDURE_NAME = ?");*/
+    loadDescription(&package,
+        "select RDB$DESCRIPTION from RDB$PACKAGES "
+        "where RDB$PACLAGE_NAME = ?");
 }
 
 void LoadDescriptionVisitor::visitProcedure(Procedure& procedure)

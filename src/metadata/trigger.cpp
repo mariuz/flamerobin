@@ -319,7 +319,8 @@ void Triggers::acceptVisitor(MetadataItemVisitor* visitor)
 void Triggers::load(ProgressIndicator* progressIndicator)
 {
     wxString stmt = "select rdb$trigger_name from rdb$triggers"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null) "
+        " and rdb$trigger_type between 1 and 6 "
         " order by 1";
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
@@ -334,3 +335,63 @@ const wxString Triggers::getTypeName() const
     return "TRIGGER_COLLECTION";
 }
 
+// DB Triggers collection
+DBTriggers::DBTriggers(DatabasePtr database)
+    : MetadataCollection<Trigger>(ntDBTriggers, database, _("DataBase Triggers"))
+{
+}
+
+void DBTriggers::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitDBTriggers(*this);
+}
+
+void DBTriggers::load(ProgressIndicator* progressIndicator)
+{
+    wxString stmt = "select rdb$trigger_name from rdb$triggers"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null) "
+        " and rdb$trigger_type between 8192 and 8196 "
+        " order by 1";
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+}
+
+void DBTriggers::loadChildren()
+{
+    load(0);
+}
+
+const wxString DBTriggers::getTypeName() const
+{
+    return "DBTRIGGER_COLLECTION";
+}
+
+
+// DDL Triggers collection
+DDLTriggers::DDLTriggers(DatabasePtr database)
+    : MetadataCollection<Trigger>(ntDDLTriggers, database, _("DDL Triggers"))
+{
+}
+
+void DDLTriggers::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitDDLTriggers(*this);
+}
+
+void DDLTriggers::load(ProgressIndicator* progressIndicator)
+{
+    wxString stmt = "select rdb$trigger_name from rdb$triggers"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null) "
+        " and rdb$trigger_type > 8196 "
+        " order by 1";
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+}
+
+void DDLTriggers::loadChildren()
+{
+    load(0);
+}
+
+const wxString DDLTriggers::getTypeName() const
+{
+    return "DDLTRIGGER_COLLECTION";
+}

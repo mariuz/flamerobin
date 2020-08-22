@@ -48,7 +48,7 @@
 
 
 Function::Function(DatabasePtr database, const wxString& name)
-    : MetadataItem(ntUDF, database.get(), name)
+    : MetadataItem(ntFunction, database.get(), name)
 {
 	ensurePropertiesLoaded();
 }
@@ -340,7 +340,6 @@ wxString Function::getCreateSql()
 	return "<<Create SQL>>";
 }
 
-
 wxString Function::getDropSqlStatement() const
 {
 	return "<<Drop SQL>>";
@@ -389,8 +388,6 @@ wxString Function::getDefinition()
 		retval += "returns:\n" + collist;
 	return retval;
 }
-
-
 
 void Function::acceptVisitor(MetadataItemVisitor* visitor)
 {

@@ -124,6 +124,7 @@ wxString getNameOfType(NodeType type)
         case ntRole:        return ("ROLE");
         case ntColumn:      return ("COLUMN");
         case ntException:   return ("EXCEPTION");
+        case ntPackage:     return ("PACKAGE");
         default:
             return "";
     }
@@ -155,6 +156,8 @@ NodeType getTypeByName(const wxString& name)
         return ntColumn;
     else if (name == "EXCEPTION")
         return ntException;
+    else if (name == "PACKAGE")
+        return ntPackage;
     else
         return ntUnknown;
 }
@@ -268,6 +271,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
     }
 }
 
+
 //! ofObject = true   => returns list of objects this object depends on
 //! ofObject = false  => returns list of objects that depend on this object
 void MetadataItem::getDependencies(std::vector<Dependency>& list,
@@ -279,7 +283,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
     NodeType dep_types[] = {    ntTable,    ntView,     ntTrigger,  ntUnknown,  ntUnknown,
                                 ntProcedure,ntUnknown,  ntException,ntUnknown,  ntUnknown,
                                 ntUnknown,  ntUnknown,  ntUnknown,  ntUnknown,  ntGenerator,
-                                ntFunctionSQL, // jochoa
+                                ntFunction, ntUnknown,  ntUnknown,  ntUnknown,  ntPackage
     };
     int type_count = sizeof(dep_types)/sizeof(NodeType);
     for (int i = 0; i < type_count; i++)
@@ -293,6 +297,9 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
     // views count as relations(tables) when other object refer to them
     if (mytype == 1 && !ofObject)
         mytype2 = 0;
+    // package header and package body
+    if (mytype == ntPackage)
+        mytype2 = 18;
 
     if (typeM == ntUnknown || mytype == -1)
         throw FRError(_("Unsupported type"));

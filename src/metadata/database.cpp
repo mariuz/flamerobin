@@ -54,6 +54,7 @@
 #include "metadata/generator.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/parameter.h"
+#include "metadata/package.h"
 #include "metadata/procedure.h"
 #include "metadata/role.h"
 #include "metadata/root.h"
@@ -349,9 +350,15 @@ void Database::getIdentifiers(std::vector<Identifier>& temp)
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(viewsM->begin(), viewsM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(packagesM->begin(), packagesM->end(),
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(proceduresM->begin(), proceduresM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(triggersM->begin(), triggersM->end(),
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(DBTriggersM->begin(), DBTriggersM->end(),
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(DDLTriggersM->begin(), DDLTriggersM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(rolesM->begin(), rolesM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
@@ -364,6 +371,8 @@ void Database::getIdentifiers(std::vector<Identifier>& temp)
     std::transform(userDomainsM->begin(), userDomainsM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(exceptionsM->begin(), exceptionsM->end(),
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(sysDomainsM->begin(), sysDomainsM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
 }
 
@@ -597,6 +606,15 @@ MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
         case ntException:
             return exceptionsM->findByName(name).get();
             break;
+        case ntPackage:
+            return packagesM->findByName(name).get();
+            break;
+        case ntDBTrigger:
+            return DBTriggersM->findByName(name).get();
+            break;
+        case ntDDLTrigger:
+            return DDLTriggersM->findByName(name).get();
+            break;
         default:
             return 0;
     };
@@ -674,6 +692,15 @@ void Database::dropObject(MetadataItem* object)
         case ntException:
             exceptionsM->remove((Exception*)object);
             break;
+        case ntPackage:
+            packagesM->remove((Exception*)object);
+            break;
+        case ntDBTrigger:
+            DBTriggersM->remove((Exception*)object);
+            break;
+        case ntDDLTrigger:
+            DDLTriggersM->remove((Exception*)object);
+            break;
         default:
             return;
     };
@@ -724,6 +751,15 @@ void Database::addObject(NodeType type, const wxString& name)
             break;
         case ntException:
             exceptionsM->insert(name);
+            break;
+        case ntPackage:
+            packagesM->insert(name);
+            break;
+        case ntDBTrigger:
+            DBTriggersM->insert(name);
+            break;
+        case ntDDLTrigger:
+            DDLTriggersM->insert(name);
             break;
         default:
             break;
@@ -1089,8 +1125,6 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             initializeLockCount(exceptionsM, lockCount);
             functionSQLsM.reset(new FunctionSQLs(me));
             initializeLockCount(functionSQLsM, lockCount);
-            UDFsM.reset(new UDFs(me));
-            initializeLockCount(UDFsM, lockCount);
             generatorsM.reset(new Generators(me));
             initializeLockCount(generatorsM, lockCount);
             proceduresM.reset(new Procedures(me));
@@ -1106,8 +1140,16 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             sysTablesM.reset(new SysTables(me));
             GTTsM.reset(new GTTs(me));
             initializeLockCount(sysTablesM, lockCount);
+            UDFsM.reset(new UDFs(me));
+            initializeLockCount(UDFsM, lockCount);
             viewsM.reset(new Views(me));
             initializeLockCount(viewsM, lockCount);
+            packagesM.reset(new Packages(me));
+            initializeLockCount(packagesM, lockCount);
+            DBTriggersM.reset(new DBTriggers(me));
+            initializeLockCount(DBTriggersM, lockCount);
+            DDLTriggersM.reset(new DDLTriggers(me));
+            initializeLockCount(DDLTriggersM, lockCount);
 
             // first start a transaction for metadata loading, then lock the
             // database
@@ -1210,7 +1252,7 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
         }
     };
 
-    const int collectionCount = 11;
+    const int collectionCount = 16;
     std::string loadStmt;
     ProgressIndicatorHelper pih(progressIndicator);
 
@@ -1224,38 +1266,61 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
     pih.init(_("system tables"), collectionCount, 1);
     sysTablesM->load(progressIndicator);
 
-    pih.init(_("global temporary table"), collectionCount, 1);
-    GTTsM->load(progressIndicator);
+    if (getInfo().getODSVersionIsHigherOrEqualTo(11.1)) {
+        pih.init(_("global temporary table"), collectionCount, 2);
+        GTTsM->load(progressIndicator);
+    }
 
-    pih.init(_("views"), collectionCount, 2);
+    pih.init(_("views"), collectionCount, 3);
     viewsM->load(progressIndicator);
 
-    pih.init(_("procedures"), collectionCount, 3);
+    pih.init(_("procedures"), collectionCount, 4);
     proceduresM->load(progressIndicator);
 
-    pih.init(_("triggers"), collectionCount, 4);
+    pih.init(_("triggers"), collectionCount, 5);
     triggersM->load(progressIndicator);
 
-    pih.init(_("roles"), collectionCount, 5);
+    pih.init(_("roles"), collectionCount, 6);
     rolesM->load(progressIndicator);
 
-    pih.init(_("system roles"), collectionCount, 6);
+    pih.init(_("system roles"), collectionCount, 7);
     sysRolesM->load(progressIndicator);
 
-    pih.init(_("domains"), collectionCount, 7);
+    pih.init(_("domains"), collectionCount, 8);
     userDomainsM->load(progressIndicator);
 
-    pih.init(_("functions SQL"), collectionCount, 8);
-    functionSQLsM->load(progressIndicator);
+    if (getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
+        pih.init(_("functions SQL"), collectionCount, 9);
+        functionSQLsM->load(progressIndicator);
+    }
 
-    pih.init(_("functions UDF"), collectionCount, 9);
+    pih.init(_("functions UDF"), collectionCount, 10);
     UDFsM->load(progressIndicator);
 
-    pih.init(_("generators"), collectionCount, 10);
+    pih.init(_("generators"), collectionCount, 11);
     generatorsM->load(progressIndicator);
 
-    pih.init(_("exceptions"), collectionCount, 11);
+    pih.init(_("exceptions"), collectionCount, 12);
     exceptionsM->load(progressIndicator);
+
+    if (getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
+        pih.init(_("packages"), collectionCount, 13);
+        packagesM->load(progressIndicator);
+    }
+
+    if (getInfo().getODSVersionIsHigherOrEqualTo(11.1)) {
+        pih.init(_("DBTriggers"), collectionCount, 14);
+        DBTriggersM->load(progressIndicator);
+    }
+
+    if (getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
+        pih.init(_("DDLTriggers"), collectionCount, 15);
+        DDLTriggersM->load(progressIndicator);
+    }
+
+    pih.init(_("System domains"), collectionCount, 16);
+    sysDomainsM->load(progressIndicator);
+
 }
 
 wxArrayString Database::loadIdentifiers(const wxString& loadStatement,
@@ -1304,7 +1369,6 @@ void Database::setDisconnected()
     userDomainsM.reset();
     sysDomainsM.reset();
     functionSQLsM.reset();
-    UDFsM.reset();
     generatorsM.reset();
     proceduresM.reset();
     rolesM.reset();
@@ -1312,8 +1376,12 @@ void Database::setDisconnected()
     sysTablesM.reset();
     GTTsM.reset();
     triggersM.reset();
+    UDFsM.reset();
     viewsM.reset();
     exceptionsM.reset();
+    packagesM.reset();
+    DBTriggersM.reset();
+    DDLTriggersM.reset();
 
     if (config().get("HideDisconnectedDatabases", false))
         getServer()->notifyObservers();
@@ -1383,6 +1451,13 @@ GeneratorsPtr Database::getGenerators()
     return generatorsM;
 }
 
+PackagesPtr Database::getPackages()
+{
+    wxASSERT(packagesM);
+    packagesM->ensureChildrenLoaded();
+    return packagesM;
+}
+
 ProceduresPtr Database::getProcedures()
 {
     wxASSERT(proceduresM);
@@ -1432,6 +1507,18 @@ TriggersPtr Database::getTriggers()
     return triggersM;
 }
 
+DBTriggersPtr Database::getDBTriggers()
+{
+    wxASSERT(DBTriggersM);
+    DBTriggersM->ensureChildrenLoaded();
+    return DBTriggersM;
+}
+DDLTriggersPtr Database::getDDLTriggers()
+{
+    wxASSERT(DDLTriggersM);
+    DDLTriggersM->ensureChildrenLoaded();
+    return DDLTriggersM;
+}
 ViewsPtr Database::getViews()
 {
     wxASSERT(viewsM);
@@ -1447,11 +1534,19 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
 
     ensureChildrenLoaded();
 
+    if (getInfo().getODSVersionIsHigherOrEqualTo(11.1)) 
+        temp.push_back(DBTriggersM.get());
+    if (getInfo().getODSVersionIsHigherOrEqualTo(12.0)) 
+        temp.push_back(DDLTriggersM.get());
     temp.push_back(userDomainsM.get());
     temp.push_back(exceptionsM.get());
-    temp.push_back(functionSQLsM.get());
-    temp.push_back(UDFsM.get());
+    if (getInfo().getODSVersionIsHigherOrEqualTo(12.0))
+        temp.push_back(functionSQLsM.get());
     temp.push_back(generatorsM.get());
+    if (getInfo().getODSVersionIsHigherOrEqualTo(11.1)) 
+        temp.push_back(GTTsM.get());
+    if (getInfo().getODSVersionIsHigherOrEqualTo(12.0)) 
+        temp.push_back(packagesM.get());
     temp.push_back(proceduresM.get());
     temp.push_back(rolesM.get());
     // Only push back system objects when they should be shown
@@ -1459,9 +1554,11 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
         temp.push_back(sysRolesM.get());
     if (system && showSystemTables())
         temp.push_back(sysTablesM.get());
+    if (system && showSystemDomains())
+        temp.push_back(sysDomainsM.get());
     temp.push_back(tablesM.get());
-    temp.push_back(GTTsM.get());
     temp.push_back(triggersM.get());
+    temp.push_back(UDFsM.get());
     temp.push_back(viewsM.get());
 }
 
@@ -1479,14 +1576,17 @@ void Database::lockChildren()
         sysDomainsM->lockSubject();
         exceptionsM->lockSubject();
         functionSQLsM->lockSubject();
-        UDFsM->lockSubject();
         generatorsM->lockSubject();
+        packagesM->lockSubject();
         proceduresM->lockSubject();
         rolesM->lockSubject();
         tablesM->lockSubject();
         sysTablesM->lockSubject();
         GTTsM->lockSubject();
         triggersM->lockSubject();
+        DBTriggersM->lockSubject();
+        DDLTriggersM->lockSubject();
+        UDFsM->lockSubject();
         viewsM->lockSubject();
     }
 }
@@ -1500,10 +1600,13 @@ void Database::unlockChildren()
     {
         viewsM->unlockSubject();
         triggersM->unlockSubject();
+        DBTriggersM->unlockSubject();
+        DDLTriggersM->unlockSubject();
         sysTablesM->unlockSubject();
         GTTsM->unlockSubject();
         tablesM->unlockSubject();
         rolesM->unlockSubject();
+        packagesM->unlockSubject();
         proceduresM->unlockSubject();
         generatorsM->unlockSubject();
         functionSQLsM->unlockSubject();
@@ -1766,6 +1869,17 @@ void Database::loadInfo()
 {
     databaseInfoM.load(databaseM);
     notifyObservers();
+}
+
+bool Database::showSystemDomains()
+{
+    const wxString SHOW_SYSDOMAINS = "ShowSystemDomains";
+
+    bool b;
+    if (!DatabaseConfig(this, config()).getValue(SHOW_SYSDOMAINS, b))
+        b = config().get(SHOW_SYSDOMAINS, true);
+
+    return b;
 }
 
 bool Database::showSystemRoles()

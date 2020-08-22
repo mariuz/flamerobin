@@ -1,0 +1,33 @@
+<html>
+<head>
+  <title>Package</title>
+</head>
+<body>
+{%header:Summary%}
+<br>
+<br>
+<font size=+2>{%object_name%}</font><br>
+Owner: {%owner_name%}<br>
+{%sql_security%}<br>
+{%object_description%} [<a
+ href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=PACKAGE&amp;object_name={%object_name%}">edit</a>]
+<br><br>
+<br><br>
+<table cellspacing=1 cellpadding=3 border=0 width="98%" bgcolor="black">
+<tr><td bgcolor="navy"><font color=white><b>Source</b> [<a
+    href="fr://edit_package_header?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><font
+    color="yellow">edit</font></a>]</font></td>
+</tr>
+<tr><td bgcolor="#DDDDFF"><font size=-1><pre>{%packageinfo:definition%}</pre></font></td></tr>
+</table>
+<br><br>
+<br><br>
+<table cellspacing=1 cellpadding=3 border=0 width="98%" bgcolor="black">
+<tr><td bgcolor="navy"><font color=white><b>Source</b> [<a
+    href="fr://edit_package_body?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><font
+    color="yellow">edit</font></a>]</font></td>
+</tr>
+<tr><td bgcolor="#DDDDFF"><font size=-1><pre>{%packageinfo:source%}</pre></font></td></tr>
+</table>
+</body>
+</html>

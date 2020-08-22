@@ -52,6 +52,7 @@
 #include "metadata/function.h"
 #include "metadata/generator.h"
 #include "metadata/parameter.h"
+#include "metadata/package.h"
 #include "metadata/procedure.h"
 #include "metadata/role.h"
 #include "metadata/root.h"
@@ -267,6 +268,7 @@ public:
     virtual void visitDatabase(Database& database);
     virtual void visitDomain(Domain& domain);
     virtual void visitDomains(Domains& domains);
+    virtual void visitSysDomains(SysDomains& domains);
     virtual void visitException(Exception& exception);
     virtual void visitExceptions(Exceptions& exceptions);
     virtual void visitFunctionSQL(FunctionSQL& function);
@@ -289,7 +291,8 @@ public:
 	virtual void visitGTTs(GTTs& tables);
     virtual void visitTrigger(Trigger& trigger);
     virtual void visitTriggers(Triggers& triggers);
-	virtual void visitDdlTriggers(DdlTriggers& triggers);
+    virtual void visitDBTriggers(DBTriggers& triggers);
+    virtual void visitDDLTriggers(DDLTriggers& triggers);
     virtual void visitUDF(UDF& function);
     virtual void visitUDFs(UDFs& functions);
     virtual void visitView(View& view);
@@ -405,7 +408,11 @@ void DBHTreeItemVisitor::visitDomain(Domain& domain)
 
 void DBHTreeItemVisitor::visitDomains(Domains& domains)
 {
-    // domain collection contains system domains that are not visible
+    setNodeProperties(&domains, ART_Domains);
+}
+
+void DBHTreeItemVisitor::visitSysDomains(SysDomains& domains)
+{
     setNodeProperties(&domains, ART_Domains);
 }
 
@@ -526,8 +533,8 @@ void DBHTreeItemVisitor::visitParameter(Parameter& parameter)
 
 void DBHTreeItemVisitor::visitPackage(Package& package)
 {
-    //setNodeProperties(&package, ART_Procedure); jochoa package
-/*   
+    setNodeProperties(&package, ART_Procedure);
+   
    if (package.childrenLoaded())
     {
         // make node caption bold when parameter data is loaded
@@ -537,7 +544,7 @@ void DBHTreeItemVisitor::visitPackage(Package& package)
         if (DBHTreeConfigCache::get().getShowColumnParamCount())
         {
             size_t ins = 0, outs = 0;
-            for (ParameterPtrs::const_iterator it = procedure.begin();
+            for (ParameterPtrs::const_iterator it = package.begin();
                 it != package.end(); ++it)
             {
                 if ((*it)->isOutputParameter())
@@ -550,15 +557,15 @@ void DBHTreeItemVisitor::visitPackage(Package& package)
     }
     // show Parameter nodes if Config setting is on
     showChildrenM = DBHTreeConfigCache::get().getShowColumns();
-    showNodeExpanderM = showChildrenM && !procedure.childrenLoaded();
-*/
+    showNodeExpanderM = showChildrenM && !package.childrenLoaded();
+
     // update if settings change
     nodeConfigSensitiveM = true;
 }
 
 void DBHTreeItemVisitor::visitPackages(Packages& packages)
 {
-    //setNodeProperties(&packages, ART_Procedures); jochoa package
+    setNodeProperties(&packages, ART_Procedures); //jochoa package
 }
 
 
@@ -685,9 +692,14 @@ void DBHTreeItemVisitor::visitTriggers(Triggers& triggers)
     setNodeProperties(&triggers, ART_Triggers);
 }
 
-void DBHTreeItemVisitor::visitDdlTriggers(DdlTriggers& triggers)
+void DBHTreeItemVisitor::visitDBTriggers(DBTriggers& triggers)
 {
-    //setNodeProperties(&triggers, ART_Triggers); JOCHOA DDL RIGGER
+    setNodeProperties(&triggers, ART_Triggers); //JOCHOA DBTRIGGER
+}
+
+void DBHTreeItemVisitor::visitDDLTriggers(DDLTriggers& triggers)
+{
+    setNodeProperties(&triggers, ART_Triggers); //JOCHOA DDLTRIGGER
 }
 
 void DBHTreeItemVisitor::visitView(View& view)

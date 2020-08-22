@@ -414,38 +414,10 @@ void Domains::acceptVisitor(MetadataItemVisitor* visitor)
 
 void Domains::load(ProgressIndicator* progressIndicator)
 {
-    DatabasePtr db = getDatabase();
-    MetadataLoader* loader = db->getMetadataLoader();
-    MetadataLoaderTransaction tr(loader);
-    wxMBConv* converter = db->getCharsetConverter();
-
-    IBPP::Statement& st1 = loader->getStatement(
-        Domain::getLoadStatement(true));
-
-    CollectionType domains;
-    st1->Execute();
-    while (st1->Fetch())
-    {
-        checkProgressIndicatorCanceled(progressIndicator);
-        if (!st1->IsNull(1))
-        {
-            std::string s;
-            st1->Get(1, s);
-            wxString name(std2wxIdentifier(s, converter));
-
-            DomainPtr domain = findByName(name);
-            if (!domain)
-            {
-                domain.reset(new Domain(db, name));
-                initializeLockCount(domain, getLockCount());
-            }
-            domains.push_back(domain);
-            domain->loadProperties(st1, converter);
-            checkProgressIndicatorCanceled(progressIndicator);
-        }
-    }
-
-    setItems(domains);
+    wxString stmt = "select rdb$field_name from rdb$fields "
+        " where rdb$system_flag = 0 and rdb$field_name not starting 'RDB' "
+        " order by 1";
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 
 void Domains::loadChildren()
@@ -467,6 +439,14 @@ SysDomains::SysDomains(DatabasePtr database)
 void SysDomains::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitSysDomains(*this);
+}
+
+void SysDomains::load(ProgressIndicator* progressIndicator)
+{
+    wxString stmt = "select rdb$field_name from rdb$fields "
+        " where rdb$system_flag = 1 "
+        " order by 1";
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 
 const wxString SysDomains::getTypeName() const

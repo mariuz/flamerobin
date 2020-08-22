@@ -7,8 +7,8 @@
 <br>
 <br>
 <font size=+2>{%object_name%}</font><br>
-{%dbinfo:connection_string%}
-<br><br>
+{%dbinfo:connection_string%}<br>
+{%dbinfo:sql_security%}<br>
 <table bgcolor="white" border=0 cellpadding=2 cellspacing=0 valign=top>
     <tr><td>
 
@@ -35,9 +35,6 @@
     </tr>
     <tr bgcolor="#DDDDFF">
         <td nowrap>Default Character Set</td><td align="right" bgcolor="#CCCCFF" nowrap>{%dbinfo:default_charset%}</td>
-    </tr>
-    <tr bgcolor="#DDDDFF">
-        <td nowrap>SQL SECURITY</td><td align="right" bgcolor="#CCCCFF" nowrap>{%dbinfo:sql_security%}</td>
     </tr>
   </tbody>
 </table>

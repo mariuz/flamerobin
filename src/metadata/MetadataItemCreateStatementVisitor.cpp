@@ -58,10 +58,9 @@ wxString MetadataItemCreateStatementVisitor::getCreateExceptionStatement()
 wxString MetadataItemCreateStatementVisitor::getCreateFunctionSQLStatement()
 {
     wxString s("SET TERM ^ ;\n\n"
-        "CREATE PROCEDURE name \n"
+        "CREATE FUNCTION name \n"
         " ( input_parameter_name < datatype>, ... ) \n"
-        "RETURNS \n"
-        " ( output_parameter_name < datatype>, ... )\n"
+        "RETURNS  < datatype>)\n"
         "AS \n"
         "DECLARE VARIABLE variable_name < datatype>; \n"
         "BEGIN\n"
@@ -96,12 +95,8 @@ wxString MetadataItemCreateStatementVisitor::getCreateGeneratorStatement()
 wxString MetadataItemCreateStatementVisitor::getCreatePackageStatement()
 {
     wxString s("SET TERM ^ ;\n\n"
-        "CREATE PROCEDURE name \n"
-        " ( input_parameter_name < datatype>, ... ) \n"
-        "RETURNS \n"
-        " ( output_parameter_name < datatype>, ... )\n"
+        "CREATE PACKAGE name \n"
         "AS \n"
-        "DECLARE VARIABLE variable_name < datatype>; \n"
         "BEGIN\n"
         "  /* write your code here */ \n"
         "END^\n\n"
@@ -149,6 +144,11 @@ wxString MetadataItemCreateStatementVisitor::getCreateTableStatement()
         ");\n";
 }
 
+wxString MetadataItemCreateStatementVisitor::getCreateGTTTableStatement()
+{
+    return wxString();
+}
+
 /*static*/
 wxString MetadataItemCreateStatementVisitor::getCreateTriggerStatement()
 {
@@ -163,6 +163,16 @@ wxString MetadataItemCreateStatementVisitor::getCreateTriggerStatement()
         "    /* enter trigger code here */ \n"
         "END^\n\n"
         "SET TERM ; ^\n";
+}
+
+wxString MetadataItemCreateStatementVisitor::getCreateDBTriggerStatement()
+{
+    return wxString();
+}
+
+wxString MetadataItemCreateStatementVisitor::getCreateDDLTriggerStatement()
+{
+    return wxString();
 }
 
 /*static*/
@@ -210,7 +220,7 @@ void MetadataItemCreateStatementVisitor::visitGenerators(
 void MetadataItemCreateStatementVisitor::visitPackages(
     Packages& /*packages*/)
 {
-    statementM = getCreateProcedureStatement();
+    statementM = getCreatePackageStatement();
 }
 
 void MetadataItemCreateStatementVisitor::visitProcedures(

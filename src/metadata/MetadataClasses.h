@@ -38,11 +38,17 @@ typedef std::shared_ptr<Database> DatabasePtr;
 typedef std::weak_ptr<Database> DatabaseWeakPtr;
 typedef std::vector<DatabasePtr> DatabasePtrs;
 
-class DdlTrigger;
-typedef std::shared_ptr<DdlTrigger> DdlTriggerPtr;
-typedef std::vector<DdlTriggerPtr> DdlTriggerPtrs;
-class DdlTriggers;
-typedef std::shared_ptr<DdlTriggers> DdlTriggersPtr;
+class DBTrigger;
+typedef std::shared_ptr<DBTrigger> DBTriggerPtr;
+typedef std::vector<DBTriggerPtr> DBTriggerPtrs;
+class DBTriggers;
+typedef std::shared_ptr<DBTriggers> DBTriggersPtr;
+
+class DDLTrigger;
+typedef std::shared_ptr<DDLTrigger> DDLTriggerPtr;
+typedef std::vector<DDLTriggerPtr> DDLTriggerPtrs;
+class DDLTriggers;
+typedef std::shared_ptr<DDLTriggers> DDLTriggersPtr;
 
 class Domain;
 typedef std::shared_ptr<Domain> DomainPtr;
@@ -81,6 +87,10 @@ class Index;
 
 class MetadataItem;
 typedef std::shared_ptr<MetadataItem> MetadataItemPtr;
+
+class Method;
+typedef std::shared_ptr<Method> MethodPtr;
+typedef std::vector<MethodPtr> MethodPtrs;
 
 class Package;
 typedef std::shared_ptr<Package> PackagePtr;
