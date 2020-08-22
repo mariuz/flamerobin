@@ -1083,6 +1083,7 @@
     <ClCompile Include="src\metadata\MetadataItemVisitor.cpp" />
     <ClCompile Include="src\metadata\MetadataTemplateCmdHandler.cpp" />
     <ClCompile Include="src\metadata\MetadataTemplateManager.cpp" />
+    <ClCompile Include="src\metadata\package.cpp" />
     <ClCompile Include="src\metadata\parameter.cpp" />
     <ClCompile Include="src\metadata\privilege.cpp" />
     <ClCompile Include="src\metadata\procedure.cpp" />
@@ -1193,6 +1194,7 @@
     <ClInclude Include="src\metadata\MetadataItemURIHandlerHelper.h" />
     <ClInclude Include="src\metadata\MetadataItemVisitor.h" />
     <ClInclude Include="src\metadata\MetadataTemplateManager.h" />
+    <ClInclude Include="src\metadata\package.h" />
     <ClInclude Include="src\metadata\parameter.h" />
     <ClInclude Include="src\metadata\privilege.h" />
     <ClInclude Include="src\metadata\procedure.h" />
