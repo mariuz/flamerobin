@@ -213,8 +213,9 @@ wxString Trigger::getAlterSql()
 
     sb << kwSET << ' ' << kwTERMINATOR << " ^ ;"
         << StatementBuilder::NewLine;
-
-    sb << kwCREATE << ' ' << kwOR << ' ' << kwALTER << ' ' << kwTRIGGER << ' ' << getQuotedName() << ' ';
+    if (this->getRelationName().IsEmpty())  //TODO: Get better info and improve for DDL triggers
+        sb << kwCREATE << ' ' << kwOR << ' ';
+    sb << kwALTER << ' ' << kwTRIGGER << ' ' << getQuotedName() << ' ';
     if (activeM)
         sb << kwACTIVE;
     else
