@@ -262,6 +262,42 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
     }
 }
 
+void MetadataItem::getDependenciesPivoted(std::vector<DependencyField>& list)
+{
+    std::vector<Dependency> deps;
+    this->getDependencies(deps, true);
+    this->getDependencies(deps, false);
+    bool firstItem = true;
+    for (std::vector<Dependency>::iterator it = deps.begin(); it != deps.end(); ++it)
+    {
+        std::vector<wxString> fields;
+        it->getFields(fields);
+        for (std::vector<wxString>::iterator field = fields.begin(); field != fields.end(); ++field)
+        {
+            DependencyField* depField;
+            auto itDep = find_if(list.begin(), list.end(), [&field](const DependencyField& obj) {return obj.getName_() == *field; });
+
+            if (itDep == list.end()) {
+                //TODO: determine a better way to do it, by now, it's only used here, but who knows in the future?
+                depField =  new DependencyField();
+                depField->setName_(*field);
+                list.push_back(*depField);
+                depField = &list.back();
+            }
+            else {
+                depField = (&*itDep) ;
+
+            }
+            MetadataItem *current = getDatabase()->findByNameAndType(it->getType(), it->getName_());
+            if (!current)
+                continue;
+            Dependency de(current);
+            depField->addDependency(de);
+
+        }
+    }
+}
+
 //! ofObject = true   => returns list of objects this object depends on
 //! ofObject = false  => returns list of objects that depend on this object
 void MetadataItem::getDependencies(std::vector<Dependency>& list,
@@ -777,4 +813,22 @@ void Dependency::acceptVisitor(MetadataItemVisitor* visitor)
     if (objectM)
         objectM->acceptVisitor(visitor);
 }
+void DependencyField::getDependencies(std::vector<Dependency>& list) const
+{
+    for (std::vector<Dependency>::const_iterator it = objectsM_.begin();
+        it != objectsM_.end(); ++it)
+    {
+        list.push_back(*it);
+    }
+}
 
+void DependencyField::addDependency(const Dependency & other)
+{
+    this->objectsM_.push_back(other);
+}
+
+bool DependencyField::operator==(const DependencyField & other) const
+{
+    //TODO: verify correctly if the object is the same
+    return other.getName_()==this->getName_();
+}
