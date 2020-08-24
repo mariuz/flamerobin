@@ -264,7 +264,7 @@ SqlEditor::SqlEditor(wxWindow *parent, wxWindowID id)
     }
     else
     {
-        wxFont font(frlayoutconfig().getEditorFontSize(), wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+        wxFont font(frlayoutconfig().getEditorFontSize(), wxMODERN, wxNORMAL, wxNORMAL);
         StyleSetFont(wxSTC_STYLE_DEFAULT, font);
     }
 
@@ -351,7 +351,7 @@ void SqlEditor::setup()
     }
 
     if (!config().get("sqlEditorSmartHomeKey", true))
-        CmdKeyAssign(wxSTC_KEY_HOME, wxSTC_KEYMOD_NORM, wxSTC_CMD_HOMEDISPLAY);
+        CmdKeyAssign(wxSTC_KEY_HOME, wxSTC_SCMOD_NORM, wxSTC_CMD_HOMEDISPLAY);
 
     centerCaret(false);
 }
@@ -418,7 +418,7 @@ void SqlEditor::setFont()
     }
     else                // if config() doesn't have it, we'll use the default
     {
-        wxFont font(frlayoutconfig().getEditorFontSize(), wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+        wxFont font(frlayoutconfig().getEditorFontSize(), wxMODERN, wxNORMAL, wxNORMAL);
         f2 = ::wxGetFontFromUser(this, font);
     }
 
@@ -622,7 +622,7 @@ void ExecuteSqlFrame::buildToolbar(CommandManager& cm)
         wxArtProvider::GetBitmap(ART_History, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_NORMAL, cm.getToolbarHint(_("Browse and search statement history"), Cmds::History_Search));
     toolBarM->AddSeparator();
-	
+
     toolBarM->AddTool( Cmds::Query_Execute, _("Execute"),
         wxArtProvider::GetBitmap(ART_ExecuteStatement, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_NORMAL, cm.getToolbarHint(_("Execute statement(s)"), Cmds::Query_Execute));
@@ -644,7 +644,7 @@ void ExecuteSqlFrame::buildToolbar(CommandManager& cm)
         wxArtProvider::GetBitmap(ART_DeleteRow, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_NORMAL, cm.getToolbarHint(_("Delete row(s) from recordset"), Cmds::DataGrid_Delete_row));
     toolBarM->AddSeparator();
-	
+
     toolBarM->AddTool( Cmds::View_SplitView, _("Toggle split view"),
         wxArtProvider::GetBitmap(ART_ToggleView, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_CHECK, cm.getToolbarHint(_("Toggle split view"), Cmds::View_SplitView));

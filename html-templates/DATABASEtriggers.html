@@ -26,8 +26,7 @@
           href="fr://properties?object_type=TRIGGER&amp;object_name={%object_name%}&amp;parent_window={%parent_window%}">{%object_name%}</a></td>
       <td nowrap valign="top" bgcolor="#DDDDFF" align="center">
         <a href="fr://{%ifeq:{%triggerinfo:is_active%}:true:deactivate_trigger:activate_trigger%}?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">
-          <img src="{%template_root%}{%ifeq:{%triggerinfo:is_active%}:true:ok.png:redx.png%}">
-        </a>
+          <img src="{%template_root%}{%ifeq:{%triggerinfo:is_active%}:true:ok.png:redx.png%}"></a>
       </td>
       <td nowrap valign="top" bgcolor="#DDDDFF" align="right">{%triggerinfo:position%}</td>
       <td nowrap valign="top" bgcolor="#DDDDFF">{%triggerinfo:type%}</td>

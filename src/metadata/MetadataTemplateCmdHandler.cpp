@@ -336,41 +336,27 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         }
 
         // {%foreach:parameter:<separator>:<input|output>:<text>%}
-        // If the current object is a procedure or function, processes <text> for
+        // If the current object is a procedure, processes <text> for
         // each "input" or "output" parameter.
         else if ((cmdParams[0] == "parameter") && (cmdParams.Count() >= 4))
         {
             Procedure* p = dynamic_cast<Procedure*>(object);
-			if (p) {
-				SubjectLocker locker(p);
-				p->ensureChildrenLoaded();
-				bool isOut = (cmdParams[2] == "output");
-				bool firstItem = true;
-				for (ParameterPtrs::iterator it = p->begin(); it != p->end(); ++it)
-				{
-					if ((*it)->isOutputParameter() == isOut)
-					{
-						Local::foreachIteration(firstItem, tp, processedText, sep,
-							cmdParams.from(3), (*it).get());
-					}
-				}
-			}
-			Function* f = dynamic_cast<Function*>(object);
-			if (f) {
-				SubjectLocker locker(f);
-				f->ensureChildrenLoaded();
-				bool isOut = (cmdParams[2] == "output");
-				bool firstItem = true;
-				for (ParameterPtrs::iterator it = f->begin(); it != f->end(); ++it)
-				{
-					if ((*it)->isOutputParameter() == isOut)
-					{
-						Local::foreachIteration(firstItem, tp, processedText, sep,
-							cmdParams.from(3), (*it).get());
-					}
-				}
-			}
-		}
+            if (!p)
+                return;
+
+            SubjectLocker locker(p);
+            p->ensureChildrenLoaded();
+            bool isOut = (cmdParams[2] == "output");
+            bool firstItem = true;
+            for (ParameterPtrs::iterator it = p->begin(); it != p->end(); ++it)
+            {
+                if ((*it)->isOutputParameter() == isOut)
+                {
+                    Local::foreachIteration(firstItem, tp, processedText, sep,
+                        cmdParams.from(3), (*it).get());
+                }
+            }
+        }
 
         // {%foreach:user:<separator>:<text>%}
         // If the current object is a server, processes

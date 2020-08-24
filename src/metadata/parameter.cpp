@@ -38,8 +38,8 @@
 #include "metadata/procedure.h"
 
 // TODO: pass ProcedurePtr instead of Procedure*
-Parameter::Parameter(MetadataItem* parent, const wxString& name)
-    : ColumnBase(ntParameter, parent, name), outputParameterM(false),
+Parameter::Parameter(Procedure* procedure, const wxString& name)
+    : ColumnBase(ntParameter, procedure, name), outputParameterM(false),
         parameterMechanismM(-1)
 {
 }

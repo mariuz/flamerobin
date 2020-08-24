@@ -78,7 +78,7 @@ void showAboutBox(wxWindow* parent)
 
     info.SetName("FlameRobin");
 
-    info.SetCopyright(_("Copyright (c) 2004-2016 FlameRobin Development Team"));
+    info.SetCopyright(_("Copyright (c) 2004-2020 FlameRobin Development Team"));
 
     info.SetVersion(ver);
 
@@ -107,7 +107,7 @@ void showAboutBox(wxWindow* parent)
     msg += "\n\n";
     msg += libs;
     msg += "\n\n";
-    msg += _("Copyright (c) 2004-2016  FlameRobin Development Team");
+    msg += _("Copyright (c) 2004-2020  FlameRobin Development Team");
     msg += "\n";
     msg += _("http://www.flamerobin.org");
 
