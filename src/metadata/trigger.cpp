@@ -156,6 +156,7 @@ wxString Trigger::getSource()
 void Trigger::loadProperties()
 {
     setPropertiesLoaded(false);
+    sourceM.clear();
 
     DatabasePtr db = getDatabase();
     MetadataLoader* loader = db->getMetadataLoader();
