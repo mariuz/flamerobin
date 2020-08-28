@@ -405,7 +405,8 @@ void Database::getDatabaseTriggers(std::vector<Trigger *>& list)
 
     IBPP::Statement& st1 = loader->getStatement(
         "select rdb$trigger_name from rdb$triggers "
-        "where rdb$relation_name is null "
+        "where (rdb$system_flag = 0 or rdb$system_flag is null)  "
+        " and rdb$trigger_type between 8192 and 8196 "
         "order by rdb$trigger_sequence"
     );
     st1->Execute();
@@ -413,7 +414,7 @@ void Database::getDatabaseTriggers(std::vector<Trigger *>& list)
     {
         std::string name;
         st1->Get(1, name);
-        Trigger* t = dynamic_cast<Trigger*>(findByNameAndType(ntTrigger,
+        Trigger* t = dynamic_cast<Trigger*>(findByNameAndType(ntDBTrigger,
             std2wxIdentifier(name, converter)));
         if (t)
             list.push_back(t);

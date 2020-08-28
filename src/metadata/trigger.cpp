@@ -338,7 +338,7 @@ const wxString Triggers::getTypeName() const
 
 // DB Triggers collection
 DBTriggers::DBTriggers(DatabasePtr database)
-    : MetadataCollection<Trigger>(ntDBTriggers, database, _("DataBase Triggers"))
+    : MetadataCollection<Trigger>(ntDBTriggers, database, _("Database Triggers"))
 {
 }
 

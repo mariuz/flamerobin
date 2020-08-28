@@ -612,7 +612,7 @@ void FunctionSQL::acceptVisitor(MetadataItemVisitor * visitor)
 
 // Functions SQL collection
 FunctionSQLs::FunctionSQLs(DatabasePtr database)
-	: MetadataCollection<FunctionSQL>(ntFunctionSQLs, database, _("FunctionSQLs"))
+	: MetadataCollection<FunctionSQL>(ntFunctionSQLs, database, _("Functions"))
 {
 }
 

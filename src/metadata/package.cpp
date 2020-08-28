@@ -57,7 +57,7 @@ void Package::loadChildren()
     bool childrenWereLoaded = childrenLoaded();
     // in case an exception is thrown this should be repeated
     setChildrenLoaded(false);
-
+  /*
     DatabasePtr db = getDatabase();
     MetadataLoader* loader = db->getMetadataLoader();
     // first start a transaction for metadata loading, then lock the procedure
@@ -105,13 +105,15 @@ void Package::loadChildren()
         parameters.push_back(par);
         par->initialize("", objtype, -1, false, "",false, false);
     }
-
+*/
     setChildrenLoaded(true);
+/*
     if (!childrenWereLoaded || parametersM != parameters)
     {
         parametersM.swap(parameters);
         notifyObservers();
     }
+*/
 }
 
 bool Package::getChildren(std::vector<MetadataItem *>& temp)
