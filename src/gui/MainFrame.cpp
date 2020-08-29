@@ -1565,7 +1565,7 @@ void MainFrame::OnMenuDropDatabase(wxCommandEvent& WXUNUSED(event))
     int result = wxMessageBox(
         _("Do you wish to keep the registration info?"),
         _("Dropping database: ") + db->getName_(),
-        wxYES_NO | wxCANCEL | wxICON_QUESTION);
+        wxYES_NO | wxCANCEL | wxICON_ASTERISK);
     if (result == wxCANCEL)
         return;
     db->drop();
