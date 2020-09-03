@@ -47,7 +47,7 @@ IMPLEMENT_APP(Application)
 void parachute()
 {
     if (wxYES == ::wxMessageBox(::wxGetTranslation(
-        "A fatal error has occured. If you know how to\n"
+        "A fatal error has occurred. If you know how to\n"
         "reproduce the problem, please submit the bug report at:\n"
         "http://flamerobin.org/bugs.php\n\n"
         "The program can try to keep running so that you\n"
@@ -91,7 +91,7 @@ bool Application::OnInit()
     }
     catch (IBPP::Exception &e)
     {
-        wxMessageBox(e.what(), _("Error initalizing IBPP library."), wxOK | wxICON_ERROR);
+        wxMessageBox(e.what(), _("Error initializing IBPP library."), wxOK | wxICON_ERROR);
         return false;
     }
 
