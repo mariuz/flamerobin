@@ -685,9 +685,8 @@ std::vector<int> StatementImpl::FindParamsByName(std::string name) {
 
     std::vector<int> params;
     unsigned int i;
-    for(i=0;i < parametersByName_.size() ; i++) {
-        //if (icasecmp(parametersByName_.at(i), name))
-        if (parametersByName_.at(i) == name)
+    for(i=0;i < parametersDetailedByName_.size() ; i++) {
+        if (parametersDetailedByName_.at(i) == name)
             params.push_back(i+1);
     }
     return params;
@@ -707,6 +706,7 @@ std::string StatementImpl::ParametersParser(std::string sql)
     //ctor
     bool comment = false, blockComment = false, palavra = false, quote = false, doubleQuote = false;
     parametersByName_.clear();
+    parametersDetailedByName_.clear();
 
     unsigned int i;
 
@@ -751,7 +751,10 @@ std::string StatementImpl::ParametersParser(std::string sql)
         {
             comment = false;  //New line?
             if (sql.at(i)=='?'){
-               parametersByName_.push_back("?");
+
+                if (FindParamsByName("?").size() == 0)//if first time:
+                    parametersByName_.push_back("?");
+                parametersDetailedByName_.push_back("?");
             }
             if (sql.at(i)==':'){
                 palavra = true;
@@ -770,7 +773,10 @@ std::string StatementImpl::ParametersParser(std::string sql)
                     sProcessedSQL << "?"<<"/*:"<<temp.str()<<"*/";
                     if (!(std::isalnum(sql.at(i)) || sql.at(i)=='_' || sql.at(i)=='$'))
                         sProcessedSQL << sql.at(i);
-                    parametersByName_.push_back(temp.str());
+                    std::vector<int> tmp = FindParamsByName(temp.str());
+                    if (tmp.size() == 0)//If first time
+                        parametersByName_.push_back(temp.str());
+                    parametersDetailedByName_.push_back(temp.str());
                     temp.str(std::string());temp.clear(); //Limpar StringStream
                 }
             }
@@ -840,6 +846,7 @@ std::string StatementImpl::ParametersParser(std::string sql)
   ddl:
   //Probably is DDL... don't replace parameters then
   parametersByName_.clear();
+  parametersDetailedByName_.clear();
   //std::cout << sql << std::endl;
   return sql;
 }
