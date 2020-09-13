@@ -121,16 +121,16 @@ wxString GridCellFormats::formatDate(int year, int month, int day)
     return result;
 }
 
-bool getNumber(wxString::iterator& ci, int& toSet)
+bool getNumber(wxString::iterator& ci, wxString::iterator& end, int& toSet)
 {
     wxString num;
-    while (true)
+    while (ci != end)
     {
         wxChar c = (wxChar)*ci;
         if (c < wxChar('0') || c > wxChar('9'))
             break;
         num += c;
-        ci++;
+        ++ci;
     }
     long l;
     if (num.IsEmpty() || !num.ToLong(&l))
@@ -153,20 +153,20 @@ bool GridCellFormats::parseDate(wxString::iterator& start,
             case 'D':
                 if (!consumeAll && (*start < wxChar('0') || *start > wxChar('9')))
                     return true;
-                if (!(getNumber(start, day) && day >= 1 && day <= 31))
+                if (!(getNumber(start, end, day) && day >= 1 && day <= 31))
                     return false;
                 break;
             case 'm':
             case 'M':
                 if (!consumeAll && (*start < wxChar('0') || *start > wxChar('9')))
                     return true;
-                if (!(getNumber(start, month) && month >= 1 && month <= 12))
+                if (!(getNumber(start, end, month) && month >= 1 && month <= 12))
                     return false;
                 break;
             case 'y':
                 if (!consumeAll && (*start < wxChar('0') || *start > wxChar('9')))
                     return true;
-                if (!getNumber(start, year))
+                if (!getNumber(start, end, year))
                     return false;
                 // see http://www.firebirdsql.org/doc/contrib/FirebirdDateLiterals.html
                 if (year < 100)
@@ -188,7 +188,7 @@ bool GridCellFormats::parseDate(wxString::iterator& start,
             case 'Y':
                 if (!consumeAll && (*start < wxChar('0') || *start > wxChar('9')))
                     return true;
-                if (!getNumber(start, year))
+                if (!getNumber(start, end, year))
                     return false;
                 break;
             default:        // other characters must match
@@ -259,21 +259,21 @@ bool GridCellFormats::parseTime(wxString::iterator& start,
         {
             case 'h':
             case 'H':
-                if (!(getNumber(start, hr) && hr >= 0 && hr <= 23))
+                if (!(getNumber(start, end, hr) && hr >= 0 && hr <= 23))
                     return false;
                 break;
             case 'm':
             case 'M':
-                if (!(getNumber(start, mn) && mn >= 0 && mn <= 59))
+                if (!(getNumber(start, end, mn) && mn >= 0 && mn <= 59))
                     return false;
                 break;
             case 's':
             case 'S':
-                if (!(getNumber(start, sc) && sc >= 0 && sc <= 59))
+                if (!(getNumber(start, end, sc) && sc >= 0 && sc <= 59))
                     return false;
                 break;
             case 'T':
-                if (!(getNumber(start, ml) && ml >= 0 && ml <= 999))
+                if (!(getNumber(start, end, ml) && ml >= 0 && ml <= 999))
                     return false;
                 break;
             default:        // other characters must match
@@ -359,20 +359,20 @@ bool GridCellFormats::parseTimestamp(wxString::iterator& start,
             case 'D':
                 if (*start < wxChar('0') || *start > wxChar('9'))
                     return true;
-                if (!(getNumber(start, day) && day >= 1 && day <= 31))
+                if (!(getNumber(start, end, day) && day >= 1 && day <= 31))
                     return false;
                 break;
             case 'n':
             case 'N':
                 if (*start < wxChar('0') || *start > wxChar('9'))
                     return true;
-                if (!(getNumber(start, month) && month >= 1 && month <= 12))
+                if (!(getNumber(start, end, month) && month >= 1 && month <= 12))
                     return false;
                 break;
             case 'y':
                 if (*start < wxChar('0') || *start > wxChar('9'))
                     return true;
-                if (!getNumber(start, year))
+                if (!getNumber(start, end, year))
                     return false;
                 // see http://www.firebirdsql.org/doc/contrib/FirebirdDateLiterals.html
                 if (year < 100)
@@ -394,26 +394,26 @@ bool GridCellFormats::parseTimestamp(wxString::iterator& start,
             case 'Y':
                 if (*start < wxChar('0') || *start > wxChar('9'))
                     return true;
-                if (!getNumber(start, year))
+                if (!getNumber(start, end, year))
                     return false;
                 break;
             case 'h':
             case 'H':
-                if (!(getNumber(start, hr) && hr >= 0 && hr <= 23))
+                if (!(getNumber(start, end, hr) && hr >= 0 && hr <= 23))
                     return false;
                 break;
             case 'm':
             case 'M':
-                if (!(getNumber(start, mn) && mn >= 0 && mn <= 59))
+                if (!(getNumber(start, end, mn) && mn >= 0 && mn <= 59))
                     return false;
                 break;
             case 's':
             case 'S':
-                if (!(getNumber(start, sc) && sc >= 0 && sc <= 59))
+                if (!(getNumber(start, end, sc) && sc >= 0 && sc <= 59))
                     return false;
                 break;
             case 'T':
-                if (!(getNumber(start, ml) && ml >= 0 && ml <= 999))
+                if (!(getNumber(start, end, ml) && ml >= 0 && ml <= 999))
                     return false;
                 break;
             default:        // other characters must match
