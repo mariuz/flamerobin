@@ -139,7 +139,7 @@ void TemplateProcessor::processCommand(const wxString& cmdName,
     // Expands to the current window's numeric memory address.
     // Used to call FR's commands through URIs.
     else if (cmdName == "parent_window")
-        processedText += wxString::Format("%ld", (uintptr_t)windowM);
+        processedText += wxString::Format("%p", windowM);
 
     // {%colon%}
     else if (cmdName == "colon")

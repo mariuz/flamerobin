@@ -2395,7 +2395,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         {
             //Insert parameters here:
             InsertParametersDialog* id = new InsertParametersDialog(this, statementM,
-                databaseM, parameterSaveList);
+                databaseM, parameterSaveList, parameterSaveListOptionNull);
             int result = id->ShowModal();
         }
 
@@ -2717,7 +2717,7 @@ bool ExecuteSqlFrame::rollbackTransaction()
     catch (...)
     {
         splitScreen();
-        log(_("ERROR!\nA non-IBPP C++ runtime exception occured !"), ttError);
+        log(_("ERROR!\nA non-IBPP C++ runtime exception occurred !"), ttError);
         return false;
     }
 
