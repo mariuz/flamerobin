@@ -2717,7 +2717,7 @@ bool ExecuteSqlFrame::rollbackTransaction()
     catch (...)
     {
         splitScreen();
-        log(_("ERROR!\nA non-IBPP C++ runtime exception occured !"), ttError);
+        log(_("ERROR!\nA non-IBPP C++ runtime exception occurred !"), ttError);
         return false;
     }
 
