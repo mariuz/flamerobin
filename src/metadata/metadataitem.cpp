@@ -281,6 +281,7 @@ void MetadataItem::getDependenciesPivoted(std::vector<DependencyField>& list)
                 //TODO: determine a better way to do it, by now, it's only used here, but who knows in the future?
                 depField = new DependencyField(field->getName_(), field->getPosition());
                 //depField->setName_(*field);
+
                 list.push_back(*depField);
                 depField = &list.back();
             }
@@ -864,6 +865,7 @@ void Dependency::acceptVisitor(MetadataItemVisitor* visitor)
     if (objectM)
         objectM->acceptVisitor(visitor);
 }
+
 DependencyField::DependencyField(wxString name, int position)
     :positionM(position)
 {
@@ -873,6 +875,7 @@ int DependencyField::getPosition()
 {
     return this->positionM;
 }
+
 void DependencyField::getDependencies(std::vector<Dependency>& list) const
 {
     for (std::vector<Dependency>::const_iterator it = objectsM_.begin();
