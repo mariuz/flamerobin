@@ -100,7 +100,7 @@ public:
     virtual void lockSubject();
     virtual void unlockSubject();
 
-    void getDependencies(std::vector<Dependency>& list, bool ofObject);  // load from db
+    void getDependencies(std::vector<Dependency>& list, bool ofObject, bool fieldsOnly=false);  // load from db
     void getDependencies(std::vector<Dependency>& list, bool ofObject,
         const wxString& field);  // load from db
     void getDependenciesPivoted(std::vector<DependencyField>& list);
@@ -164,10 +164,14 @@ class DependencyField : public MetadataItem
 {
 private:
 std::vector<Dependency> objectsM_;
+int positionM = 0;
 public:
+    DependencyField(wxString name, int position = 0);
+    int getPosition();
     void getDependencies(std::vector<Dependency>& list) const;
     void addDependency(const Dependency& other);
     bool operator== (const DependencyField& other) const;
+    bool operator <(const DependencyField& other) const; //For sorting
 
 };
 
@@ -176,7 +180,8 @@ class Dependency: public MetadataItem
 {
 private:
     MetadataItem *objectM;
-    std::vector<wxString> fieldsM;
+    std::vector<DependencyField> fieldsM;
+    MetadataItem *auxiliarM;  //For example, when listing a table as tependency of another tables, where whe will reference the FK related
 
 public:
     virtual MetadataItem *getParent() const;
@@ -184,15 +189,18 @@ public:
     virtual NodeType getType() const;
     virtual const wxString getTypeName() const;
     MetadataItem *getDependentObject() const;
+    MetadataItem * getAuxiliar() const;
 
-    Dependency(MetadataItem *object);
+    Dependency(MetadataItem *object, MetadataItem *auxiliar=0);
     wxString getFields() const;
-    void getFields(std::vector<wxString>& fields) const;
-    void addField(const wxString& name);
+    void getFields(std::vector<DependencyField>& fields) const;
+    void addField(const DependencyField& name);
+    void setFields(const std::vector<DependencyField>& fields);
     void setFields(const std::vector<wxString>& fields);
-    bool hasField(const wxString& name) const;
+    bool hasField(const DependencyField& name) const;
     bool operator== (const Dependency& other) const;
     bool operator!= (const Dependency& other) const;
+    bool operator <(const Dependency& other) const; //For sorting
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 

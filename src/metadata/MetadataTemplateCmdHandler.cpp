@@ -462,6 +462,16 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
 
         processedText += d->getFields();
     }
+    else if (cmdName == "auxiliar")
+    {
+        Dependency* d = dynamic_cast<Dependency*>(object);
+        if (!d)
+            return;
+        if ((cmdParams.Count() >= 1) && (cmdParams[0] == "isnull"))
+          processedText += tp->escapeChars(getBooleanAsString(d->getAuxiliar()==0));
+        else if(d->getAuxiliar())
+            processedText += tp->escapeChars(d->getAuxiliar()->getName_());
+    }
 
     // {%primary_key:<text>%}
     // If the current object is a table, processes <text> after switching
