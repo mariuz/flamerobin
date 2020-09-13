@@ -773,7 +773,7 @@ void InsertParametersDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
                     if (value.length() % 2 == 1)
                         throw FRError(_("Invalid HEX value value"));
                     std::vector<char> octet = std::vector<char>();
-                    wxString::iterator& ci = value.begin();
+                    wxString::iterator ci = value.begin();
                     wxString::iterator end = value.end();
 
                     wxString num;
