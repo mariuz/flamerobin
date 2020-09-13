@@ -55,7 +55,7 @@ public:
 class InsertParametersDialog: public BaseDialog
 {
 public:
-    InsertParametersDialog(wxWindow* parent, IBPP::Statement& st, Database *db, std::map<std::string, wxString>& pParameterSaveList);
+    InsertParametersDialog(wxWindow* parent, IBPP::Statement& st, Database *db, std::map<std::string, wxString>& pParameterSaveList, std::map<std::string, wxString>& pParameterSaveListOptionNull);
     virtual ~InsertParametersDialog();
     void OnOkButtonClick(wxCommandEvent& event);
     void OnCancelButtonClick(wxCommandEvent& event);
@@ -74,6 +74,7 @@ private:
     IBPP::Statement& statementM;
     std::vector<InsertParametersColumnInfo> columnsM;
     std::map<std::string, wxString>& parameterSaveList;
+    std::map<std::string, wxString>& parameterSaveListOptionNull;
     DataGridTable *gridTableM;
     InsertedGridRowBuffer *bufferM;
     wxString tableNameM;
