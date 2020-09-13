@@ -124,6 +124,8 @@ wxString IBPPtype2string(Database *db, IBPP::SDT t, int subtype, int size,
     if (t == IBPP::sdString)
     {
         int bpc = db->getCharsetById(subtype).getBytesPerChar();
+        if (subtype == 1) // charset OCTETS
+            return wxString::Format("OCTETS(%d)", bpc ? size / bpc : size);
         return wxString::Format("STRING(%d)", bpc ? size/bpc : size);
     }
     switch (t)
@@ -766,6 +768,31 @@ void InsertParametersDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
                 parseTimeStamp(row, value);
                 break;
             case IBPP::SDT::sdString:
+                if (subtype == 1) {
+
+                    if (value.length() % 2 == 1)
+                        throw FRError(_("Invalid HEX value value"));
+                    std::vector<char> octet = std::vector<char>();
+                    wxString::iterator& ci = value.begin();
+                    wxString::iterator end = value.end();
+
+                    wxString num;
+                    while (ci != end)
+                    {
+                        wxChar c = (wxChar)*ci;
+                        num = c;
+                        ++ci;
+                        c = (wxChar)*ci;
+                        num += c;
+                        ++ci;
+                        long l;
+                        octet.push_back(std::stoi(wx2std(num, databaseM->getCharsetConverter()), nullptr, 16));
+                    }
+                    while (octet.size() < statementM->ParameterSize(parameterslist.back()))
+                        octet.push_back(0x0);
+                    statementM->Set(row + 1, octet.data(), octet.size());
+                }
+                else
                     statementM->Set(row + 1, wx2std(value, databaseM->getCharsetConverter()));
                 break;
             case IBPP::SDT::sdSmallint:

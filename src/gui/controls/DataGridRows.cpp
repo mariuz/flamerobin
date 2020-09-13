@@ -1622,8 +1622,8 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
     if (statementM->ColumnType(col) == IBPP::sdString
         && statementM->ColumnSubtype(col) == 1) // charset OCTETS
     {                       // TODO: to make those editable, we need to
-        readOnly = true;    // enter values as parameters. This should
-        return;             // probably be done together with BLOB support
+        //readOnly = true;    // enter values as parameters. This should
+        //return;             // probably be done together with BLOB support
     }
 
     wxString tabName(std2wxIdentifier(statementM->ColumnTable(col),
@@ -1921,7 +1921,11 @@ IBPP::Statement DataGridRows::addWhere(UniqueConstraint* uq, wxString& stm,
                     throw FRError(_("N/A value in key column."));
                 if (ci != uq->begin())
                     stm += " AND ";
-                stm += Identifier(cn).getQuoted() + " = '";
+                if ((statementM->ColumnType(c2) == IBPP::SDT::sdString) && (statementM->ColumnSubtype(c2) == 1) ) //OCTET
+                    stm += Identifier(cn).getQuoted() + " = x'";
+                else
+                    stm += Identifier(cn).getQuoted() + " = '";
+
                 stm += columnDefsM[c2-1]->getAsFirebirdString(buffer);
                 stm += "'";
                 break;
@@ -2131,8 +2135,11 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
             stm += " = NULL WHERE ";
         else
         {
-            stm += " = '" +
-                columnDefsM[col]->getAsFirebirdString(buffersM[row])
+            if ((statementM->ColumnType(col + 1) == IBPP::SDT::sdString) && (statementM->ColumnSubtype(col + 1) == 1)) //OCTET
+                stm += " = x'";
+            else
+                stm += " = '";
+            stm += columnDefsM[col]->getAsFirebirdString(buffersM[row])
                 + "' WHERE ";
         }
 
