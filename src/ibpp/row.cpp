@@ -1046,6 +1046,12 @@ void RowImpl::SetValue(int varnum, IITYPE ivType, const void* value, int userlen
 			}
 			break;
 
+        case SQL_BOOLEAN:
+            if (ivType != ivBool)
+                throw WrongTypeImpl("RowImpl::SetValue", var->sqltype, ivType,
+                    _("Incompatible types."));
+            *(bool*)var->sqldata = *(bool*)value;
+            break;
 		default : throw LogicExceptionImpl("RowImpl::SetValue",
 						_("The field uses an unsupported SQL type !"));
 	}
