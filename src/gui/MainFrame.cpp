@@ -1341,6 +1341,7 @@ void MainFrame::OnMenuAddColumn(wxCommandEvent& WXUNUSED(event))
         return;
 
     URI uri("fr://add_field");
+
     uri.addParam(wxString::Format("parent_window=%p",this));
     uri.addParam(wxString::Format("object_handle=%lu", t->getHandle()));
     getURIProcessor().handleURI(uri);
@@ -1462,8 +1463,10 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
             return;
 
         URI uri("fr://edit_field");
+
         uri.addParam(wxString::Format("parent_window=%p", this));
         uri.addParam(wxString::Format("object_handle=%lu", c->getHandle()));
+
         getURIProcessor().handleURI(uri);
     }
     else
@@ -1563,7 +1566,7 @@ void MainFrame::OnMenuDropDatabase(wxCommandEvent& WXUNUSED(event))
     int result = wxMessageBox(
         _("Do you wish to keep the registration info?"),
         _("Dropping database: ") + db->getName_(),
-        wxYES_NO | wxCANCEL | wxICON_QUESTION);
+        wxYES_NO | wxCANCEL | wxICON_ASTERISK);
     if (result == wxCANCEL)
         return;
     db->drop();
