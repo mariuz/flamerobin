@@ -1341,7 +1341,6 @@ void MainFrame::OnMenuAddColumn(wxCommandEvent& WXUNUSED(event))
         return;
 
     URI uri("fr://add_field");
-
     uri.addParam(wxString::Format("parent_window=%p",this));
     uri.addParam(wxString::Format("object_handle=%lu", t->getHandle()));
     getURIProcessor().handleURI(uri);
@@ -1463,7 +1462,6 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
             return;
 
         URI uri("fr://edit_field");
-
         uri.addParam(wxString::Format("parent_window=%p", this));
         uri.addParam(wxString::Format("object_handle=%lu", c->getHandle()));
 
