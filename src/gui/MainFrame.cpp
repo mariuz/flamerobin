@@ -1235,7 +1235,7 @@ void MainFrame::OnMenuSetGeneratorValue(wxCommandEvent& WXUNUSED(event))
 
     URI uri("fr://edit_generator_value");
     uri.addParam(wxString::Format("parent_window=%p", this));
-    uri.addParam(wxString::Format("object_handle=%d", g->getHandle()));
+    uri.addParam(wxString::Format("object_handle=%lu", g->getHandle()));
     getURIProcessor().handleURI(uri);
 }
 
@@ -1341,8 +1341,8 @@ void MainFrame::OnMenuAddColumn(wxCommandEvent& WXUNUSED(event))
         return;
 
     URI uri("fr://add_field");
-    uri.addParam(wxString::Format("parent_window=%p", this));
-    uri.addParam(wxString::Format("object_handle=%d", t->getHandle()));
+    uri.addParam(wxString::Format("parent_window=%p",this));
+    uri.addParam(wxString::Format("object_handle=%lu", t->getHandle()));
     getURIProcessor().handleURI(uri);
 }
 
@@ -1462,9 +1462,9 @@ void MainFrame::OnMenuObjectProperties(wxCommandEvent& WXUNUSED(event))
             return;
 
         URI uri("fr://edit_field");
-        uri.addParam(wxString::Format("parent_window=%p",this));
-        uri.addParam(wxString::Format("object_handle=%d",
-            c->getHandle()));
+        uri.addParam(wxString::Format("parent_window=%p", this));
+        uri.addParam(wxString::Format("object_handle=%lu", c->getHandle()));
+
         getURIProcessor().handleURI(uri);
     }
     else
@@ -1495,7 +1495,7 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
     {
         URI uri("fr://edit_procedure");
         uri.addParam(wxString::Format("parent_window=%p", this));
-        uri.addParam(wxString::Format("object_handle=%d", p->getHandle()));
+        uri.addParam(wxString::Format("object_handle=%lu", p->getHandle()));
         getURIProcessor().handleURI(uri);
         return;
     }
