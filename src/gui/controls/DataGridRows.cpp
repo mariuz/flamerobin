@@ -1181,17 +1181,17 @@ unsigned BlobColumnDef::getIndex()
     return indexM;
 }
 
-wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
+wxString BlobColumnDef::getAsString(DataGridRowBuffer* grid_buffer)
 {
-    wxASSERT(buffer);
-    if (buffer->isStringLoaded(stringIndexM))
-        return buffer->getString(stringIndexM);
+    wxASSERT(grid_buffer);
+    if (grid_buffer->isStringLoaded(stringIndexM))
+        return grid_buffer->getString(stringIndexM);
     if (!GridCellFormats::get().showBlobContent())
         return _("[BLOB]");
     if (!textualM && !GridCellFormats::get().showBinaryBlobContent())
         return _("[BINARY]");
 
-    IBPP::Blob *b0 = buffer->getBlob(indexM);
+    IBPP::Blob *b0 = grid_buffer->getBlob(indexM);
     if (!b0)
         return "";
     IBPP::Blob b = *b0;
@@ -1246,7 +1246,7 @@ wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
             wxs = wxString(result.c_str(), *converterM);   // try converting again
         }
     }
-    buffer->setString(stringIndexM, wxs);
+    grid_buffer->setString(stringIndexM, wxs);
     return wxs;
 }
 
@@ -1337,8 +1337,6 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     const IBPP::Statement& statement, wxMBConv* converter)
 {
     wxASSERT(buffer);
-    std::string value;
-    statement->Get(col, value);
     if (statement->ColumnType(col) == IBPP::sdBoolean) // Firebird v3
     {
         bool value; // UGLY, must create a specific Columm (child one ?)
@@ -1348,6 +1346,8 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     }
     else if (statement->ColumnSubtype(col) == 1)   // charset OCTETS
     {
+        std::string value;
+        statement->Get(col, value);
         wxString val;
         for (std::string::size_type p = 0; p < value.length(); p++)
             val += wxString::Format("%02x", uint8_t(value[p]));
@@ -1355,6 +1355,8 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     }
     else
     {
+        std::string value;
+        statement->Get(col, value);
         wxString val = wxString(value.c_str(), *converter);
         size_t trimLen = val.Strip().Length();
         if (val.Length() > size_t(charSizeM))
@@ -1899,14 +1901,14 @@ bool DataGridRows::isFieldNA(unsigned row, unsigned col)
 IBPP::Statement DataGridRows::addWhere(UniqueConstraint* uq, wxString& stm,
     const wxString& table, DataGridRowBuffer *buffer)
 {
-    bool dbkey = false;
+    bool have_dbkey = false;
     for (ColumnConstraint::const_iterator ci = uq->begin(); ci !=
         uq->end(); ++ci)
     {
         if ((*ci) == "DB_KEY")
         {
             stm += " RDB$DB_KEY = ?";
-            dbkey = true;
+            have_dbkey = true;
             break;
         }
         for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
@@ -1936,7 +1938,7 @@ IBPP::Statement DataGridRows::addWhere(UniqueConstraint* uq, wxString& stm,
     IBPP::Statement st = IBPP::StatementFactory(statementM->DatabasePtr(),
         statementM->TransactionPtr());
     st->Prepare(wx2std(stm, databaseM->getCharsetConverter()));
-    if (dbkey)  // find the column and set the parameter
+    if (have_dbkey)  // find the column and set the parameter
     {
         for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
         {
@@ -2037,10 +2039,12 @@ void DataGridRows::exportBlobFile(const wxString& filename, unsigned row,
     IBPP::Blob b = *b0;
 
     b->Open();
-    int size;
-    b->Info(&size, 0, 0);
     if (pi)
+    {
+        int size;
+        b->Info(&size, 0, 0);
         pi->initProgress(_("Saving..."), size);
+    }
     while (!pi || !pi->isCanceled())
     {
         uint8_t buffer[32768];
