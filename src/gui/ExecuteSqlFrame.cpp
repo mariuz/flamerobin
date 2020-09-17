@@ -150,11 +150,10 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
     if (text.Mid(0, 7) != "OBJECT:")
         return false;
 
-    long address;
-    if (!text.Mid(7).ToLong(&address))
+    MetadataItem* m;
+    if (!wxSscanf(text.Mid(7), "%p", &m))
         return false;
-    MetadataItem *m = (MetadataItem *)address;
-
+  
     DatabasePtr db = m->getDatabase();
     if (db.get() != databaseM)
     {

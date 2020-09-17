@@ -963,7 +963,7 @@ void DBHTreeControl::OnBeginDrag(wxTreeEvent& event)
         if (!m)
             return;
         wxString test;
-        test.Printf("OBJECT:%ld", (uintptr_t)m);
+        test.Printf("OBJECT:%p", m);
         wxTextDataObject textData(test);
         wxDropSource source(textData, this);
         source.DoDragDrop(wxDrag_AllowMove);
