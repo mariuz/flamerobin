@@ -590,11 +590,8 @@ void ExecuteSqlFrame::buildToolbar(CommandManager& cm)
     //toolBarM = CreateToolBar( wxTB_FLAT|wxTB_HORIZONTAL|wxTB_TEXT, wxID_ANY );
     toolBarM = CreateToolBar( wxTB_FLAT | wxTB_HORIZONTAL, wxID_ANY );
 
-#ifdef __WXGTK20__
+
     wxSize bmpSize(24, 24);
-#else
-    wxSize bmpSize(16, 16);
-#endif
     toolBarM->SetToolBitmapSize(bmpSize);
 
     toolBarM->AddTool( wxID_NEW, _("New"),
