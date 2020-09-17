@@ -13,8 +13,8 @@ AC_ARG_ENABLE(debug,
               [  --enable-debug          Enable debugging information],
               USE_DEBUG="$enableval", USE_DEBUG="no" CXXFLAGS+=" -DNDEBUG")
 
-CFLAGS+=" -std=c11"
-CXXFLAGS+=" -std=c++11"
+CFLAGS+=" -std=c14"
+CXXFLAGS+=" -std=c++14"
 
 if test $USE_DEBUG = yes ; then 
   DEBUG=1
