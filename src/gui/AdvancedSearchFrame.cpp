@@ -616,12 +616,12 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& WXUNUSED(event))
                         if (r)
                         {
                             found |= std::any_of(r->begin(), r->end(),
-                                                 [this](auto i) { return match(CriteriaItem::ctField, i->getName_()); });
+                                                 [this](ColumnPtr i) { return match(CriteriaItem::ctField, i->getName_()); });
                         }
                         if (p)
                         {
                             found |= std::any_of(p->begin(), p->end(),
-                                                 [this](auto i) { return match(CriteriaItem::ctField, i->getName_()); });
+                                                 [this](ParameterPtr i) { return match(CriteriaItem::ctField, i->getName_()); });
                         }
                         if (!found)     // object doesn't contain that field
                             continue;
