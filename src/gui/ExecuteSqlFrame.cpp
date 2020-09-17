@@ -2389,7 +2389,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         if (prepareOnly)
             return true;
 
-        log(wxString::Format(_("Parametros: %d"), statementM->ParametersByName().size() ));
+        log(wxString::Format(_("Parametros: %zu"), statementM->ParametersByName().size() ));
         //Define parameters here:
         if (statementM->ParametersByName().size() >0)
         {
