@@ -104,10 +104,10 @@ public:
                 dependsOn.push_back(id.getQuoted());
         }
     }
-    void remove(const wxString& table)
+    void remove(const wxString& tab_name)
     {
         std::list<wxString>::iterator it = std::find(dependsOn.begin(),
-            dependsOn.end(), table);
+            dependsOn.end(), tab_name);
         if (it != dependsOn.end())
             dependsOn.erase(it);
     }
