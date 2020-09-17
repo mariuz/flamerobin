@@ -30,6 +30,7 @@
 #include <wx/stc/stc.h>
 
 #include <set>
+#include <algorithm>
 
 #include "frutils.h"
 #include "gui/AdvancedSearchFrame.h"
@@ -614,29 +615,13 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& WXUNUSED(event))
                         bool found = false;
                         if (r)
                         {
-                            ColumnPtrs::iterator it;
-                            for (it = r->begin(); it != r->end(); ++it)
-                            {
-                                if (match(CriteriaItem::ctField,
-                                    (*it)->getName_()))
-                                {
-                                    found = true;
-                                    break;
-                                }
-                            }
+                            found |= std::any_of(r->begin(), r->end(),
+                                                 [this](auto i) { return match(CriteriaItem::ctField, i->getName_()); });
                         }
                         if (p)
                         {
-                            for (ParameterPtrs::iterator it = p->begin();
-                                it != p->end(); ++it)
-                            {
-                                if (match(CriteriaItem::ctField,
-                                    (*it)->getName_()))
-                                {
-                                    found = true;
-                                    break;
-                                }
-                            }
+                            found |= std::any_of(p->begin(), p->end(),
+                                                 [this](auto i) { return match(CriteriaItem::ctField, i->getName_()); });
                         }
                         if (!found)     // object doesn't contain that field
                             continue;
