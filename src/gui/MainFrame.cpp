@@ -600,15 +600,15 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
     else if (treeActivateAction == selectFromOrExecute
         && (nt == ntTable || nt == ntSysTable || nt == ntView))
     {
-        wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
+        wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED,
             Cmds::Menu_BrowseData);
-        AddPendingEvent(event);
+        AddPendingEvent(evt);
     }
     else if (treeActivateAction == selectFromOrExecute && (nt == ntProcedure))
     {
-        wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
+        wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED,
             Cmds::Menu_ExecuteProcedure);
-        AddPendingEvent(event);
+        AddPendingEvent(evt);
     }
     else
     {
@@ -617,9 +617,9 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
             case ntDatabase:
                 if (!dynamic_cast<Database *>(m)->isConnected())
                 {
-                    wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
+                    wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED,
                         Cmds::Menu_Connect);
-                    AddPendingEvent(event);
+                    AddPendingEvent(evt);
                     return;
                 }
                 break;
@@ -638,9 +638,9 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
             case ntRole:
             case ntSysRole:
                 {
-                    wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
+                    wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED,
                         Cmds::Menu_ObjectProperties);
-                    AddPendingEvent(event);
+                    AddPendingEvent(evt);
                 }
                 return;
             default:

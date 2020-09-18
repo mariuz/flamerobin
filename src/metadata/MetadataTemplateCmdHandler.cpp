@@ -390,12 +390,12 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
     else if (cmdName == "owner_name")
     {
         wxString name;
-        if (Relation* r = dynamic_cast<Relation*>(object))
-            name = r->getOwner();
-        else if (Procedure* p = dynamic_cast<Procedure*>(object))
-            name = p->getOwner();
-        else if (Role* r = dynamic_cast<Role*>(object))
-            name = r->getOwner();
+        if (Relation* rel = dynamic_cast<Relation*>(object))
+            name = rel->getOwner();
+        else if (Procedure* pro = dynamic_cast<Procedure*>(object))
+            name = pro->getOwner();
+        else if (Role* rol = dynamic_cast<Role*>(object))
+            name = rol->getOwner();
         if (!name.IsEmpty())
             processedText += tp->escapeChars(name);
     }
