@@ -785,7 +785,6 @@ void InsertParametersDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
                         c = (wxChar)*ci;
                         num += c;
                         ++ci;
-                        long l;
                         octet.push_back(std::stoi(wx2std(num, databaseM->getCharsetConverter()), nullptr, 16));
                     }
                     while (octet.size() < statementM->ParameterSize(parameterslist.back()))
