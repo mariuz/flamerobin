@@ -262,7 +262,7 @@ SqlEditor::SqlEditor(wxWindow *parent, wxWindowID id)
     }
     else
     {
-        wxFont font(frlayoutconfig().getEditorFontSize(), wxMODERN, wxNORMAL, wxNORMAL);
+        wxFont font(frlayoutconfig().getEditorFontSize(), wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
         StyleSetFont(wxSTC_STYLE_DEFAULT, font);
     }
 
@@ -349,7 +349,7 @@ void SqlEditor::setup()
     }
 
     if (!config().get("sqlEditorSmartHomeKey", true))
-        CmdKeyAssign(wxSTC_KEY_HOME, wxSTC_SCMOD_NORM, wxSTC_CMD_HOMEDISPLAY);
+        CmdKeyAssign(wxSTC_KEY_HOME, wxSTC_KEYMOD_NORM, wxSTC_CMD_HOMEDISPLAY);
 
     centerCaret(false);
 }
@@ -416,7 +416,7 @@ void SqlEditor::setFont()
     }
     else                // if config() doesn't have it, we'll use the default
     {
-        wxFont font(frlayoutconfig().getEditorFontSize(), wxMODERN, wxNORMAL, wxNORMAL);
+        wxFont font(frlayoutconfig().getEditorFontSize(), wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
         f2 = ::wxGetFontFromUser(this, font);
     }
 
@@ -2925,7 +2925,7 @@ void ExecuteSqlFrame::log(wxString s, TextType type)
     if (type == ttSql)
         style = 2;
 
-    styled_text_ctrl_stats->StartStyling(startpos, 0); // assert "unused==0" failed in wxStyledTextCtrl::StartStyling(): The second argument passed to StartStyling should be 0
+    styled_text_ctrl_stats->StartStyling(startpos);
     styled_text_ctrl_stats->SetStyling(endpos-startpos-1, style);
 }
 
