@@ -244,7 +244,7 @@ void StatementImpl::Plan(std::string& plan)
 		throw LogicExceptionImpl("Statement::Plan", _("Database must be connected."));
 
 	IBS status;
-	RB result(16384);
+	RB result(65535);
 	char itemsReq[] = {isc_info_sql_get_plan};
 
 	(*gds.Call()->m_dsql_sql_info)(status.Self(), &mHandle, 1, itemsReq,
