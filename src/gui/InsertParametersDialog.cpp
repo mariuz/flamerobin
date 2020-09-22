@@ -604,7 +604,7 @@ void InsertParametersDialog::OnCancelButtonClick(wxCommandEvent& WXUNUSED(event)
 {
     Close();
 }
-bool InsertParametersDialog::parseDate(int row, const wxString& source)
+void InsertParametersDialog::parseDate(int row, const wxString& source)
 {
     IBPP::Date idt;
     idt.Today();
@@ -629,9 +629,8 @@ bool InsertParametersDialog::parseDate(int row, const wxString& source)
         idt.SetDate(y, m, d);
     }
     statementM->Set(row+1, idt);
-
 }
-bool InsertParametersDialog::parseTime(int row, const wxString& source)
+void InsertParametersDialog::parseTime(int row, const wxString& source)
 {
     IBPP::Time itm;
     itm.Now();
@@ -650,7 +649,7 @@ bool InsertParametersDialog::parseTime(int row, const wxString& source)
     statementM->Set(row+1, itm);
 }
 
-bool InsertParametersDialog::parseTimeStamp(int row, const wxString& source)
+void InsertParametersDialog::parseTimeStamp(int row, const wxString& source)
 {
 
     IBPP::Timestamp its;
