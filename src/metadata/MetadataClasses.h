@@ -27,8 +27,6 @@
 
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-
 class Column;
 typedef std::shared_ptr<Column> ColumnPtr;
 typedef std::vector<ColumnPtr> ColumnPtrs;
