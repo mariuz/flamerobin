@@ -313,7 +313,7 @@ bool DatabaseAuthenticationMode::getUseEncryptedPassword() const
 // Database class
 Database::Database()
     : MetadataItem(ntDatabase), metadataLoaderM(0), connectedM(false),
-        connectionCredentialsM(0), charsetConverterM(0), dialectM(3), idM(0)
+        connectionCredentialsM(0), dialectM(3), idM(0)
 {
 }
 
