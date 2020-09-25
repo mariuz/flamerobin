@@ -441,11 +441,9 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     if (!choice_pagesize->GetStringSelection().ToULong(&pagesize))
         pagesize = 0;
 
-    std::auto_ptr<wxThread> thread(new RestoreThread(this,
+    startThread(std::make_unique<RestoreThread>(this,
         server->getConnectionString(), username, password,
         text_ctrl_filename->GetValue(), database->getPath(), pagesize,
         (IBPP::BRF)flags));
-    startThread(thread);
     updateControls();
 }
-
