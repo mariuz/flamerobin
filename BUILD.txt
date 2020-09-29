@@ -1,62 +1,35 @@
-FlameRobin Build Instructions
------------------------------
+===================================
+== FlameRobin Build Instructions ==
+===================================
+
 Below are build instructions for FlameRobin on all supported build environments.
-
-Instructions assume that you have already compiled wxWidgets.
-There are some tips regarding that at the end of this file.
-
-To build FR a recent installation of the Boost libraries is also necessary (version >= 1.54 should
-work well). FR uses the header-only libraries, so building the Boost
-libraries for the used compiler isn't necessary, adding the directories to
-the list of includes will be enough.
 
 --------------------------
 -- Common to all builds --
 --------------------------
 
-FR must be built with the same settings for debug/release etc.
-as the wxWidgets library.( Unicode build is required )  Failing to do so will usually lead to compile or
-link errors. This does not apply completely to Linux/GCC build, as you can
-build wx in release mode and FlameRobin in debug mode - in case you just want
-to debug FR code, and not code of wxWidgets.
+-- General Requirements
 
-Before building on Windows, you MUST set a WXDIR environment variable which
-points to your wxWidgets root directory (unless you use MinGW and configure
-script to build a Makefile). To do this, go to:
-Start->Control Panel->System and select the "Advanced" tab. Then, click the
-"Environment Variables" button and add WXDIR to the user or system env vars.
-You can set the variable from the command line, using the "set" command
+Required:
+ * A C++14 compiler (Visual Studio on Windows, G++ on Linux, others may work but untested)
+   https://visualstudio.microsoft.com/ https://gcc.gnu.org/
+ * The wxWidgets library - https://www.wxwidgets.org/
+ * CMake - https://cmake.org/
+ * git - https://git-scm.com/
+Optional:
+ * GitHub desktop app (for interacting with the project) - https://github.com/
+ * TortoiseGit (Windows extension) - https://tortoisegit.org/
 
-For Windows you must also set a BOOST_ROOT environment variable which points
-to the Boost root directory, see the previous section for how to do this.
-You also need to set a BOOST_LIB_DIR environment variable which points to
-the directory where the Boost libraries are. The default location would be
-$(BOOST_ROOT)/stage/lib, but you may have changed that. For systems where
-both 32 and 64 bit versions of FlameRobin are to be built consider the
-following Stack Overflow post about how to build Boost in both versions:
+-- Notes
 
-  https://stackoverflow.com/a/2326485/30568
-  (accepted answer to "64-bit version of Boost for 64-bit windows")
+FR must be built with the same settings for debug/release etc.  as the
+wxWidgets library.( Unicode build is required ) Failing to do so will usually
+lead to compile or link errors. This does not apply completely to Linux/GCC
+build, as you can build wx in release mode and FlameRobin in debug mode - in
+case you just want to debug FR code, and not code of wxWidgets.
 
-For the sole purpose of building FlameRobin only a few libraries are needed,
-and only the version for static linking, so the following invocations are
-all that is needed:
-
-  b2 link=static --with-thread --with-date_time --with-system stage
-
-(for 32 bit build) and
-
-  b2 address-model=64 link=static --with-thread --with-date_time --with-system stage
-
-(for 64 bit build).
-
-For other systems the configure script checks for the used header files and
-libraries of Boost. On Debian and Ubuntu use the following commands to
-install the headers and thread library:
-
-  sudo apt-get install libboost-dev libboost-thread-dev
-
-If you have problems building FR, please post to the development list.
+If you have problems building FR, please contact the development team:
+https://github.com/mariuz/flamerobin
 
 -----------------------------------------
 -- MSW - Visual C++ Build Instructions --
