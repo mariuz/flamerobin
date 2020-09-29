@@ -35,161 +35,109 @@ https://github.com/mariuz/flamerobin
 -- MSW - Visual C++ Build Instructions --
 -----------------------------------------
 
-There are two ways to build using Microsoft Visual C++. One is via the dsp/dsw
-project files, and the other is via the makefile.vc command line makefile.
+First, make sure you have git and CMake installed and aviable in your PATH.
+The installers for these utils should give you that option.
 
-* Using the dsp/dsw projects *
+Install Visual Studio with C++ support, and make sure you can find the 'Native
+Tool Command Prompt' in your start menu (there will be versions of x86 and x64)
 
-Since custom build steps are not set up for the Visual Studio build the
-update-revision-info.cmd script is not automatically run during the build, so the
-src/revisioninfo.h file may be missing or outdated. Please run the
-update-revision-info.cmd manually after a checkout of the sources and each svn
-update.
+We're going to assume there's a 'C:\projects' directory where all the relevant
+files are going to be placed, but any location that suits your install should
+be fine (avoid spaces in dir/files names)
 
-Double click on flamerobin\flamerobin.dsw, select a build configuration by
-going to the Build menu, selecting "Set build configuration" and then
-picking a config, then build!
+-- Build wxWidgets
 
-* Using the makefiles *
-To use the makefiles, start up a command line and navigate to the
-flamerobin directory. There, run the following command:
+(written for wxWidgets 3.1 series, there may be newer versions)
 
-nmake -f makefile.vc <BUILD OPTIONS>
+ 1. Download the wxWdigets source zip: https://www.wxwidgets.org/downloads/
+ 2. Unzip file to a sensible location (e.g. C:\projects\wxWidgets-3.1.4)
+    Keep a note of this, as it will be the WXDIR used to build FlameRobin
+ 3. Start the Visual Studio 'Native Tool Command Prompt'
+ 4. CD to the wxWidgets root
+    CD C:\projects\wxWidgets-3.1.4
+ 5. CD to the Windows build sub-dir
+    CD build/msw
+ 6. Build the static debug lib
+    namke /f makefile.vc RUNTIME_LIBS=static
+ 7. Build the static release lib
+    namke /f makefile.vc BUILD=release RUNTIME_LIBS=static
 
-Build options can be any of the following:
+That's it for wxWidgets, until you need a newer version.
 
-WXDIR=<dir> - tells the makefile where to find the root wxWidgets directory
-FINAL=<0,1> - tells whether to build debug (0) or release (1) build
-USEDLL=<0,1> - tells whether to link against wx static or dynamic libs
+-- Setup FlameRobin build (using CMake GUI)
 
-WXDIR *must* be specified (or set as an environment variable), but the rest
-default to 0 and are optional.
+ 1. Download the FlameRobin source code
+    * Plain git on command line:
+      cd c:\projects
+      git clone https://github.com/mariuz/flamerobin.git
+    * GitHub, TortoiseGit follow relevant instructions.
+ 2. Run the CMake GUI
+    a. Point 'Where is the source code' to the FlameRobin root
+       (C:\projects\flamerobin)
+    b. Point 'Where to build the binaries' to a 'build' sub-dir that you need
+       to create
+       (C:\projects\flamerobin\build)
+    c. Click 'Add Entry' (button to the right of window)
+       * Give it the name WXDIR
+       * Set Type to 'PATH'
+	  * Select the root dir of wxWdigets
+         (C:\projects\wxWidgets-3.1.4)
+    d. Click on 'Configure', you'll be prompted for compiler type
+       * Select your version of Visual Studio
+       * Select the platform (Win32 or x64)
+    e. Click on 'Generate' to create the Visual Studio project files
+    f. You can now click on 'Open Project' to launch Visual Studio or you can
+       directly open the build/flamerobin.sln file that was created
+ 3. Try building the solution : <ctrl>+<shift>+B
+ 4. Run with <ctrl>+<F5>
 
-------------------------------------------------------
--- MSW - Visual C++ 20xx Express Build Instructions --
-------------------------------------------------------
+-- Setup FlameRobin build (using command line)
 
-Microsoft Visual C++ Express is a freeware version of MS Visual Studio.
-There are two ways to build FlameRobin. One is via the dsp/dsw
-project files, and the other is via the makefile.vc command line makefile.
+ 1. > cd C:\projects
+ 2. > git clone https://github.com/mariuz/flamerobin.git
+ 3. > cd flamerobin
+ 4. > mkdir build
+ 5. > cd build
+ 6. > cmake -DWXDIR:PATH=C:\projects\wxWidgets-3.1.4 ..
+ 7. Open resulting flamerobin.sln file in Visual Studio, or from VS command
+    prompt, build with:
+    > devenv flamerobin.sln /release
 
-* Using the dsp/dsw/sln projects *
+You can delete the whole build directory and re-run CMake as above to make a
+clean start, if needed.
 
-Double click on flamerobin\flamerobin_flamerobin.sln, select a build
-configuration by going to the Build menu, selecting "Set build configuration"
-and then picking a config, then build!
+Different version of wxWidgets or platform builds (x86, x64) can be created to
+suit your needs at the same time, just use different build dirs (e.g
+build-wx302-x64). Recomended to start the name with 'build' as the .gitignore
+file will be set to ignore those directories.
 
-* Using the makefiles *
-To use the makefiles, start up a command line and navigate to the
-flamerobin directory. There, run the following command:
+---------------------------------------------------
+-- Unix (Debian and related; Ubuntu, Mint, etc.) --
+---------------------------------------------------
 
-nmake -f makefile.vc <BUILD OPTIONS>
+Assumes a 'project' dir in you home directory, change to suit
 
-Build options can be any of the following:
+ 1. Setup the tools and libs needed:
+    $ sudo apt-get install build-essential git cmake firebird-dev libwxgtk3.0-gtk3-dev
+    (wxWidgets version may change in the future, update to match)
+ 2. $ cd ~/project
+ 3. $ git clone https://github.com/mariuz/flamerobin.git
+ 4. $ cd flamerobin
+ 5. $ mkdir build
+ 6. $ cd build
+ 7. $ cmake ..
+ 8. $ make
+ 9. To run FlameRobin use the run_flamerobin.sh script. This sets up an
+    environment variable that points the FlameRobin app to the build directory
+    which contains various sub-dir used by FlameRobin
+    $ ./run_flamerobin.sh
 
-WXDIR=<dir> - tells the makefile where to find the root wxWidgets directory
-FINAL=<0,1> - tells whether to build debug (0) or release (1) build
-USEDLL=<0,1> - tells whether to link against wx static or dynamic libs
+TODO: install support
 
-WXDIR *must* be specified (or set as an environment variable), but the rest
-default to 0 and are optional.
+------------
+-- Mac OS --
+------------
 
------------------------------------------------------------
--- MSW - Building wxWidgets with Visual C++ 20xx Express --
------------------------------------------------------------
+TODO: We currently have no MacOS devs. The UNIX build above may work, with some
+      tweaks.
 
-Unpack the archive somewhere, for example c:\wxWidgets:
-
-* Using the dsp/dsw/sln projects *
-
-Double click on build\msw\wx.dsw, convert to new format, select a build
-configuration by going to the Build menu, selecting "Set build configuration"
-and then picking a config, then build!
-
-
-* Using the makefiles *
-Open cmd.exe  prompt and go into "build\msw" directory:
-set WXWIN=c:\wxWidgets
-set WXDIR=c:\wxWidgets
-nmake -f makefile.vc BUILD=release RUNTIME_LIBS=static
-
-If you wish to build an executable that is small in size (just like the
-official one), you need to build wx from the command line using modified
-makefile.vc. Just edit the makefile.vc and change the __OPTIMIZEFLAG setting
-from /O2 to /O1.
-
-
-----------------------------------------
--- Unix - Autoconf Build Instructions --
-----------------------------------------
-
-To build on Unix or MinGW, simply open a command line, cd into the flamerobin
-root directory, and execute the following commands:
-
-mkdir debug
-cd debug
-../configure --with-wx-config=/my/path/to/wx-config --enable-debug
-
-for a build in debug configuration, and the following commands
-
-mkdir release
-cd release
-../configure --with-wx-config=/my/path/to/wx-config --disable-debug
-
-for a build in release configuration.
-
-You only need to specify wx-config if you do not have a wx-config that can
-be found on the PATH, or if you want to use a wx-config other than the
-default one.
-
-Running the command
-
-make
-
-should build the flamerobin executable. If you experience any problems,
-please check the flamerobin developer mailing list archive, or ask a
-question there.
-
-
---------------------------------------------
--- Mac OS  - Autoconf Build Instructions --
---------------------------------------------
-
-Before compiling you need to install these packages (easily with brew)
-
-brew install autoconf
-brew install wxwidgets
-brew install boost
-
-To build FlameRobin on Mac OS 10.5 minimum, open
-a command line, cd into the flamerobin root directory, and execute the
-following commands:
-
-cd ..
-mkdir release
-cd release
-../configure --disable-debug --disable-dependency-tracking
-make
-make install
-
-Now you will have working Flamerobin.app which you should move to /Applications folder.
-
-The resulting bundles differ only in the flamerobin executable, the lipo
-tool can be used to make a Universal Build out of them.
-
-----------------------------------------------
--- Unix - Building wxWidgets with configure --
-----------------------------------------------
-
-Unpack the sources, enter "build" directory and run "./configure". There
-are many options you may like to set, run "./configure --help" to find about
-them. We assume Gtk static release build with Unicode support:
-
-./configure --disable-shared --disable-debug --enable-unicode --prefix=/opt/wxwidgets
-
-make -j4
-make install
-
-
-Depending on your --prefix setting, you might need to run 'make install' as
-superuser (root).
