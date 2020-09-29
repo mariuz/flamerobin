@@ -346,7 +346,7 @@ if (UNIX)
 
 	# Create the revision include file
 	execute_process(
-		COMMAND update-revision-info.sh
+		COMMAND "${CMAKE_SOURCE_DIR}/update-revision-info.sh"
 		WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 	)
 
@@ -366,7 +366,7 @@ if(APPLE)
 
 	# Create the revision include file
 	execute_process(
-		COMMAND update-revision-info.sh
+		COMMAND "${CMAKE_SOURCE_DIR}/update-revision-info.sh"
 		WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 	)
 
@@ -401,5 +401,24 @@ file(COPY ${CMAKE_SOURCE_DIR}/conf-defs  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
 
 #--------------------------------------
 # Install
-# TODO: list all files for instalation (mainly for UNIX systems and `make install`
+install(
+	TARGETS flamerobin
+	RUNTIME DESTINATION bin
+)
+install(
+	DIRECTORY
+		html-templates
+		code-templates
+		sys-templates
+		conf-defs 
+	DESTINATION share/flamerobin
+)
+install(
+	DIRECTORY
+		docs
+	DESTINATION share/flamerobin
+	FILES_MATCHING
+	PATTERN "*.html"
+	PATTERN "*.css"
+)
 
