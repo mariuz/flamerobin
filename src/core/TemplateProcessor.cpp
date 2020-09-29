@@ -40,6 +40,7 @@
 #include "core/ProgressIndicator.h"
 #include "TemplateProcessor.h"
 
+#include <algorithm>
 
 TemplateProcessor::TemplateProcessor(ProcessableObject* object, wxWindow* window)
     : objectM(object), windowM(window)
