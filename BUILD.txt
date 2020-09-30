@@ -60,9 +60,9 @@ be fine (avoid spaces in dir/files names)
  5. CD to the Windows build sub-dir
     > cd build\msw
  6. Build the static debug lib
-    > namke /f makefile.vc RUNTIME_LIBS=static
+    > nmake /f makefile.vc RUNTIME_LIBS=static
  7. Build the static release lib
-    > namke /f makefile.vc BUILD=release RUNTIME_LIBS=static
+    > nmake /f makefile.vc BUILD=release RUNTIME_LIBS=static
 
 That's it for wxWidgets, until you need a newer version.
 
