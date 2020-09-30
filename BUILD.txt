@@ -11,19 +11,21 @@ Below are build instructions for FlameRobin on all supported build environments.
 -- General Requirements
 
 Required:
+ * FirebirdSQL, the client libs (e.g. fbclient.dll) at a minimum, but the whole
+   server install to test with - https://www.firebirdsql.org/
  * A C++14 compiler (Visual Studio on Windows, G++ on Linux, others may work but untested)
    https://visualstudio.microsoft.com/ https://gcc.gnu.org/
  * The wxWidgets library - https://www.wxwidgets.org/
  * CMake - https://cmake.org/
  * git - https://git-scm.com/
 Optional:
- * GitHub desktop app (for interacting with the project) - https://github.com/
+ * GitHub desktop app (for interacting with this project) - https://github.com/
  * TortoiseGit (Windows extension) - https://tortoisegit.org/
 
 -- Notes
 
 FR must be built with the same settings for debug/release etc.  as the
-wxWidgets library.( Unicode build is required ) Failing to do so will usually
+wxWidgets library (Unicode build is required). Failing to do so will usually
 lead to compile or link errors. This does not apply completely to Linux/GCC
 build, as you can build wx in release mode and FlameRobin in debug mode - in
 case you just want to debug FR code, and not code of wxWidgets.
@@ -54,13 +56,13 @@ be fine (avoid spaces in dir/files names)
     Keep a note of this, as it will be the WXDIR used to build FlameRobin
  3. Start the Visual Studio 'Native Tool Command Prompt'
  4. CD to the wxWidgets root
-    CD C:\projects\wxWidgets-3.1.4
+    > cd C:\projects\wxWidgets-3.1.4
  5. CD to the Windows build sub-dir
-    CD build/msw
+    > cd build\msw
  6. Build the static debug lib
-    namke /f makefile.vc RUNTIME_LIBS=static
+    > namke /f makefile.vc RUNTIME_LIBS=static
  7. Build the static release lib
-    namke /f makefile.vc BUILD=release RUNTIME_LIBS=static
+    > namke /f makefile.vc BUILD=release RUNTIME_LIBS=static
 
 That's it for wxWidgets, until you need a newer version.
 
@@ -68,8 +70,8 @@ That's it for wxWidgets, until you need a newer version.
 
  1. Download the FlameRobin source code
     * Plain git on command line:
-      cd c:\projects
-      git clone https://github.com/mariuz/flamerobin.git
+      > cd c:\projects
+      > git clone https://github.com/mariuz/flamerobin.git
     * GitHub, TortoiseGit follow relevant instructions.
  2. Run the CMake GUI
     a. Point 'Where is the source code' to the FlameRobin root
@@ -129,10 +131,16 @@ Assumes a 'project' dir in you home directory, change to suit
  8. $ make
  9. To run FlameRobin use the run_flamerobin.sh script. This sets up an
     environment variable that points the FlameRobin app to the build directory
-    which contains various sub-dir used by FlameRobin
+    which contains various sub-dir used by the app
     $ ./run_flamerobin.sh
 
-TODO: install support
+-- Install support
+
+The usual 'make install' will work as normal, you may want to configure the
+build for 'release':
+ $ cmake -DCMAKE_BUILD_TYPE=Release ..
+ $ make
+ $ sudo make install
 
 ------------
 -- Mac OS --
