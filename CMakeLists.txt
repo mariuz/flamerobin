@@ -401,24 +401,33 @@ file(COPY ${CMAKE_SOURCE_DIR}/conf-defs  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
 
 #--------------------------------------
 # Install
-install(
-	TARGETS flamerobin
-	RUNTIME DESTINATION bin
-)
-install(
-	DIRECTORY
-		html-templates
-		code-templates
-		sys-templates
-		conf-defs 
-	DESTINATION share/flamerobin
-)
-install(
-	DIRECTORY
-		docs
-	DESTINATION share/flamerobin
-	FILES_MATCHING
-	PATTERN "*.html"
-	PATTERN "*.css"
-)
-
+if (UNIX)
+	install(
+		TARGETS flamerobin
+		RUNTIME DESTINATION bin
+	)
+	install(
+		DIRECTORY
+			html-templates
+			code-templates
+			sys-templates
+			conf-defs 
+		DESTINATION share/flamerobin
+	)
+	install(
+		FILES res/flamerobin.png
+		DESTINATION share/pixmaps
+	)
+	install(
+		FILES res/flamerobin.desktop
+		DESTINATION share/applications
+	)
+	install(
+		DIRECTORY
+			docs
+		DESTINATION share/flamerobin
+		FILES_MATCHING
+		PATTERN "*.html"
+		PATTERN "*.css"
+	)
+endif (UNIX)
