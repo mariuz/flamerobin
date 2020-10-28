@@ -34,6 +34,20 @@ Owner: {%owner_name%}<br>
   </tbody>
 </table>
 <br><br>
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=black>
+  <tbody>
+    {%foreach:parameter::output:
+    <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
+	  <td nowrap valign="top" bgcolor="navy"><b><font color=white>Return Type</font></b></td>
+      <td nowrap valign="top"><b>{%columninfo:datatype%}</b></td>
+      <td nowrap valign="top"><center>{%ifeq:{%columninfo:is_nullable%}:false:<img src="{%template_root%}ok.png">%}</center></td>
+      <td nowrap valign="top">{%columninfo:default_expression%}</td>
+      <td valign="top"><font size=-1>{%object_description%} [<a
+        href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=COLUMN&amp;object_name={%object_name%}">edit</a>]</font></td>
+    </tr>%}
+  </tbody>
+</table>
+<br><br>
 <table cellspacing=1 cellpadding=3 border=0 width="98%" bgcolor="black">
 <tr><td bgcolor="navy"><font color=white><b>Source</b> [<a
     href="fr://edit_function?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><font

@@ -38,18 +38,21 @@ private:
     wxString resultM;
 protected:
 public:
-    Method(NodeType type, MetadataItem* parent, const wxString& name);
+    Method(MetadataItem* parent, const wxString& name);
 
     bool isFunction() const;
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    void initialize(int MethodType);
+
 
 };
+
 class Package : public MetadataItem
 {
 private:
     std::vector<Privilege> privilegesM;
-    ParameterPtrs parametersM;
+    MethodPtrs methodsM;
 protected:
     virtual void loadChildren();
     virtual void lockChildren();
@@ -59,13 +62,13 @@ public:
 
     bool getChildren(std::vector<MetadataItem *>& temp);
 
-    ParameterPtrs::iterator begin();
-    ParameterPtrs::iterator end();
-    ParameterPtrs::const_iterator begin() const;
-    ParameterPtrs::const_iterator end() const;
+    MethodPtrs::iterator begin();
+    MethodPtrs::iterator end();
+    MethodPtrs::const_iterator begin() const;
+    MethodPtrs::const_iterator end() const;
 
-    size_t getParamCount() const;
-    ParameterPtr findParameter(const wxString& name) const;
+    size_t getMethodCount() const;
+    MethodPtr findMethod(const wxString& name) const;
 
     wxString getOwner();
     wxString getSource();
@@ -95,5 +98,18 @@ public:
     void load(ProgressIndicator* progressIndicator);
     virtual const wxString getTypeName() const;
 };
+
+class SysPackages : public MetadataCollection<Package>
+{
+protected:
+    virtual void loadChildren();
+public:
+    SysPackages(DatabasePtr database);
+
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    void load(ProgressIndicator* progressIndicator);
+    virtual const wxString getTypeName() const;
+};
+
 
 #endif

@@ -175,6 +175,7 @@ private:
     FunctionSQLsPtr functionSQLsM;
     GeneratorsPtr generatorsM;
     PackagesPtr packagesM;
+    SysPackagesPtr sysPackagesM;
     ProceduresPtr proceduresM;
     RolesPtr rolesM;
     SysRolesPtr sysRolesM;
@@ -204,6 +205,7 @@ private:
     mutable unsigned idM;
 
     bool showSystemDomains();
+    bool showSystemPackages();
     bool showSystemRoles();
     bool showSystemTables();
 
@@ -226,6 +228,7 @@ public:
     FunctionSQLsPtr getFunctionSQLs();
     GeneratorsPtr getGenerators();
     PackagesPtr getPackages();
+    SysPackagesPtr getSysPackages();
     ProceduresPtr getProcedures();
     RolesPtr getRoles();
     SysRolesPtr getSysRoles();

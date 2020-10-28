@@ -1100,8 +1100,8 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& event)
                 Procedure* p = dynamic_cast<Procedure*>(databaseM->findByNameAndType(ntProcedure, word));
                 if (p)
                     calltip = p->getDefinition();
+// TODO: review tip for package, function and udf
                 /*
-                jochoa
                 UDF* f = dynamic_cast<UDF*>(databaseM->findByNameAndType(ntUDF, word)); 
                 if (f)
                     calltip = f->getDefinition();
@@ -1209,6 +1209,7 @@ void ExecuteSqlFrame::autoComplete(bool force)
     int start = styled_text_ctrl_sql->WordStartPosition(pos, true);
     if (start > 1 && styled_text_ctrl_sql->GetCharAt(start - 1) == '.')
     {
+// TODO: Autocomplete function/procedure for a package
         autoCompleteColumns(start, pos-start);
         return;
     }

@@ -57,7 +57,7 @@ void Package::loadChildren()
     bool childrenWereLoaded = childrenLoaded();
     // in case an exception is thrown this should be repeated
     setChildrenLoaded(false);
-  /*
+  
     DatabasePtr db = getDatabase();
     MetadataLoader* loader = db->getMetadataLoader();
     // first start a transaction for metadata loading, then lock the procedure
@@ -74,11 +74,11 @@ void Package::loadChildren()
     std::string sql(
         "select 15 rdb$object_type, rdb$function_name "
         "from rdb$functions "
-        "where rdb$private_flag = 1 and rdb$package_name = ? "
+        "where rdb$private_flag = 0 and rdb$package_name = ? "
         "union all "
         "select 05 rdb$object_type,rdb$procedure_name "
         "from rdb$procedures "
-        "where rdb$private_flag = 1 and rdb$package_name = ? "
+        "where rdb$private_flag = 0 and rdb$package_name = ? "
         "order by 1,2 "
     );
 
@@ -87,7 +87,7 @@ void Package::loadChildren()
     st1->Set(2, wx2std(getName_(), converter));
     st1->Execute();
 
-    ParameterPtrs parameters;
+    MethodPtrs methods;
     while (st1->Fetch())
     {
         short objtype = -1;
@@ -96,86 +96,86 @@ void Package::loadChildren()
         st1->Get(2, s);
         wxString method_name(std2wxIdentifier(s, converter));
 
-        ParameterPtr par = findParameter(method_name);
-        if (!par)
+        MethodPtr met = findMethod(method_name);
+        if (!met)
         {
-            par.reset(new Parameter(this, method_name));
-            initializeLockCount(par, getLockCount());
+            met.reset(new Method(this, method_name));
+            initializeLockCount(met, getLockCount());
         }
-        parameters.push_back(par);
-        par->initialize("", objtype, -1, false, "",false, false);
+        methods.push_back(met);
+        met->initialize(objtype);
     }
-*/
+
     setChildrenLoaded(true);
-/*
-    if (!childrenWereLoaded || parametersM != parameters)
+
+    if (!childrenWereLoaded || methodsM != methods)
     {
-        parametersM.swap(parameters);
+        methodsM.swap(methods);
         notifyObservers();
     }
-*/
+
 }
 
 bool Package::getChildren(std::vector<MetadataItem *>& temp)
 {
-    if (parametersM.empty())
+    if (methodsM.empty())
         return false;
-    std::transform(parametersM.begin(), parametersM.end(),
-        std::back_inserter(temp), std::mem_fn(&ParameterPtr::get));
-    return !parametersM.empty();
+    std::transform(methodsM.begin(), methodsM.end(),
+        std::back_inserter(temp), std::mem_fn(&MethodPtr::get));
+    return !methodsM.empty();
 }
 
 void Package::lockChildren()
 {
-    std::for_each(parametersM.begin(), parametersM.end(),
-        std::mem_fn(&Parameter::lockSubject));
+    std::for_each(methodsM.begin(), methodsM.end(),
+        std::mem_fn(&Method::lockSubject));
 }
 
 void Package::unlockChildren()
 {
-    std::for_each(parametersM.begin(), parametersM.end(),
-        std::mem_fn(&Parameter::unlockSubject));
+    std::for_each(methodsM.begin(), methodsM.end(),
+        std::mem_fn(&Method::unlockSubject));
 }
 
-ParameterPtrs::iterator Package::begin()
+MethodPtrs::iterator Package::begin()
 {
     // please - don't load here
     // this code is used to get columns we want to alert about changes
     // but if there aren't any columns, we don't want to waste time
     // loading them
-    return parametersM.begin();
+    return methodsM.begin();
 }
 
-ParameterPtrs::iterator Package::end()
+MethodPtrs::iterator Package::end()
 {
     // please see comment for begin()
-    return parametersM.end();
+    return methodsM.end();
 }
 
-ParameterPtrs::const_iterator Package::begin() const
+MethodPtrs::const_iterator Package::begin() const
 {
-    return parametersM.begin();
+    return methodsM.begin();
 }
 
-ParameterPtrs::const_iterator Package::end() const
+MethodPtrs::const_iterator Package::end() const
 {
-    return parametersM.end();
+    return methodsM.end();
 }
 
-ParameterPtr Package::findParameter(const wxString& name) const
+MethodPtr Package::findMethod(const wxString& name) const
 {
-    for (ParameterPtrs::const_iterator it = parametersM.begin();
-        it != parametersM.end(); ++it)
+    for (MethodPtrs::const_iterator it = methodsM.begin();
+        it != methodsM.end(); ++it)
     {
         if ((*it)->getName_() == name)
             return *it;
     }
-    return ParameterPtr();
+    return MethodPtr();
 }
 
-size_t Package::getParamCount() const
+size_t Package::getMethodCount() const
 {
-    return parametersM.size();
+    return methodsM.size();
 }
 
 wxString Package::getOwner()
@@ -278,8 +278,9 @@ wxString Package::getSqlSecurity()
 
 wxString Package::getAlterHeader()
 {
-    wxString sql = "SET TERM ^ ;\nALTER PACKAGE " + getQuotedName();
-    sql += "^\nAS^\n";
+    wxString sql = "SET TERM ^ ;\n ";
+    sql += "ALTER PACKAGE " + getQuotedName() + "\n";
+    sql += "AS \n";
     sql += getDefinition();
     sql += "^\nSET TERM ; ^\n";
     return sql;
@@ -287,8 +288,9 @@ wxString Package::getAlterHeader()
 
 wxString Package::getAlterBody()
 {
-    wxString sql = "SET TERM ^ ;\nALTER PACKAGE BODY" + getQuotedName();
-    sql += "^\nAS^\n";
+    wxString sql = "SET TERM ^ ;\n";
+    sql+= "RECREATE PACKAGE BODY " + getQuotedName()+"\n";
+    sql += "AS\n";
     sql += getSource();
     sql += "^\nSET TERM ; ^\n";
     return sql;
@@ -300,7 +302,7 @@ wxString Package::getAlterSql(bool full)
 
 
     wxString sql = getAlterHeader();
-    sql += "^\n ^\n";
+    sql += "\n \n";
     sql += getAlterBody();
     return sql;
 }
@@ -324,7 +326,7 @@ void Package::checkDependentPackage()
             ci != fields.end(); ++ci)
         {
             bool found = false;
-            for (ParameterPtrs::iterator i2 = begin();
+            for (MethodPtrs::iterator i2 = begin();
                 i2 != end(); ++i2)
             {
                 if ((*i2)->getName_() == (*ci))
@@ -441,7 +443,8 @@ void Packages::acceptVisitor(MetadataItemVisitor* visitor)
 void Packages::load(ProgressIndicator* progressIndicator)
 {
 	DatabasePtr db = getDatabase();
-    wxString stmt = "select rdb$package_name from rdb$packages";
+    wxString stmt = "select rdb$package_name from rdb$packages ";
+    stmt += " where rdb$system_flag = 0 ";
 	stmt += " order by rdb$package_name ";
     setItems(db->loadIdentifiers(stmt, progressIndicator));
 }
@@ -456,9 +459,9 @@ const wxString Packages::getTypeName() const
     return "PACKAGE_COLLECTION";
 }
 
-Method::Method(NodeType type, MetadataItem* parent, 
+Method::Method(MetadataItem* parent, 
     const wxString& name)
-    : MetadataItem(type, parent, name), functionM(false)
+    : MetadataItem(ntMethod, parent, name), functionM(false)
 {
 }
 
@@ -475,4 +478,40 @@ const wxString Method::getTypeName() const
 void Method::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitMethod(*this);
+}
+
+void Method::initialize(int MethodType)
+{
+    functionM = MethodType == 15;
+}
+
+// System Packages collection
+
+SysPackages::SysPackages(DatabasePtr database)
+    : MetadataCollection<Package>(ntSysPackages, database, _("System Packages"))
+{
+}
+
+void SysPackages::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitSysPackages(*this);
+}
+
+void SysPackages::load(ProgressIndicator* progressIndicator)
+{
+    DatabasePtr db = getDatabase();
+    wxString stmt = "select rdb$package_name from rdb$packages ";
+    stmt += " where rdb$system_flag = 1 ";
+    stmt += " order by rdb$package_name ";
+    setItems(db->loadIdentifiers(stmt, progressIndicator));
+}
+
+const wxString SysPackages::getTypeName() const
+{
+    return "SYSPACKAGE_COLLECTION";
+}
+
+void SysPackages::loadChildren()
+{
+    load(0);
 }

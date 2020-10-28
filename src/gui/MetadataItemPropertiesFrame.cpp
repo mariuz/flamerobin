@@ -388,8 +388,9 @@ wxIcon getMetadataItemIcon(NodeType type)
             return wxArtProvider::GetIcon(ART_Function, wxART_OTHER, sz);
         case ntGenerator:
             return wxArtProvider::GetIcon(ART_Generator, wxART_OTHER, sz);
-//        case ntPackage: jochoa package
-//            return wxArtProvider::GetIcon(ART_Procedure, wxART_OTHER, sz);
+// TODO: replace package art
+        case ntPackage: 
+            return wxArtProvider::GetIcon(ART_Procedure, wxART_OTHER, sz);
         case ntProcedure:
             return wxArtProvider::GetIcon(ART_Procedure, wxART_OTHER, sz);
         case ntServer:

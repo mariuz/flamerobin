@@ -129,6 +129,9 @@ typedef std::vector<ServerPtr> ServerPtrs;
 class SysDomains;
 typedef std::shared_ptr<SysDomains> SysDomainsPtr;
 
+class SysPackages;
+typedef std::shared_ptr<SysPackages> SysPackagesPtr;
+
 class SysRoles;
 typedef std::shared_ptr<SysRoles> SysRolesPtr;
 

@@ -172,8 +172,7 @@ void CreateDDLVisitor::visitDatabase(Database& d)
         iterateit<RolesPtr, Role>(this, d.getRoles(), progressIndicatorM);
 
         preSqlM << "/********************* UDFS ***********************/\n\n";
-        iterateit<UDFsPtr, UDF>(this, d.getUDFs(),
-            progressIndicatorM);
+        iterateit<UDFsPtr, UDF>(this, d.getUDFs(), progressIndicatorM);
 
         preSqlM << "/********************* FUNCTIONS ***********************/\n\n";
         iterateit<FunctionSQLsPtr, FunctionSQL>(this, d.getFunctionSQLs(),
@@ -445,7 +444,6 @@ void CreateDDLVisitor::visitPackage(Package& package)
     temp.Replace("ALTER", "CREATE", false);   // just first
     sqlM << temp << grantSqlM;
 
-    // create empty procedure body (for database DDL dump)
     temp = package.getAlterSql(false);    // false = only headers
     temp.Replace("ALTER", "CREATE", false);   // just first
     preSqlM << temp << "\n";

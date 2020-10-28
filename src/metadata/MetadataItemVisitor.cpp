@@ -131,6 +131,11 @@ void MetadataItemVisitor::visitPackages(Packages&)
     defaultAction();
 }
 
+void MetadataItemVisitor::visitSysPackages(SysPackages& packages)
+{
+    defaultAction();
+}
+
 void MetadataItemVisitor::visitProcedure(Procedure&)
 {
     defaultAction();

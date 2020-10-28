@@ -194,7 +194,7 @@ bool Domain::isString()
 bool Domain::isSystem() const
 {
     wxString prefix(getName_().substr(0, 4));
-    if (prefix == "MON$")
+    if (prefix == "MON$" || prefix == "SEC$" || prefix == "RDB$")
         return true;
     if (prefix != "RDB$")
         return false;
@@ -419,7 +419,7 @@ void Domains::acceptVisitor(MetadataItemVisitor* visitor)
 void Domains::load(ProgressIndicator* progressIndicator)
 {
     wxString stmt = "select rdb$field_name from rdb$fields "
-        " where rdb$system_flag = 0 and rdb$field_name not starting 'RDB' "
+        " where rdb$system_flag = 0 and rdb$field_name not starting 'RDB$' "
         " order by 1";
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }

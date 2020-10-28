@@ -227,7 +227,14 @@ void MainObjectMenuMetadataItemVisitor::visitPackages(Packages& packages)
 {
     addCreateItem();
     addSeparator();
-    //addGenerateCodeMenu(procedures); 
+    addGenerateCodeMenu(packages); 
+    addSeparator();
+    addRefreshItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitSysPackages(SysPackages& packages)
+{
+    addGenerateCodeMenu(packages);
     addSeparator();
     addRefreshItem();
 }

@@ -313,7 +313,6 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
                     cmdParams.from(2), &(*it));
             }
         }
-
         // {%foreach:depends_on:<separator>:<text>%}
         // Lists all objects on which the current object depends.
         // {%foreach:dependent:<separator>:<text>%}
@@ -339,23 +338,57 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         else if ((cmdParams[0] == "parameter") && (cmdParams.Count() >= 4))
         {
             Procedure* p = dynamic_cast<Procedure*>(object);
-            if (!p)
-                return;
-
-            SubjectLocker locker(p);
-            p->ensureChildrenLoaded();
-            bool isOut = (cmdParams[2] == "output");
-            bool firstItem = true;
-            for (ParameterPtrs::iterator it = p->begin(); it != p->end(); ++it)
-            {
-                if ((*it)->isOutputParameter() == isOut)
+            Function* f = dynamic_cast<Function*>(object);
+            if (p) {
+                SubjectLocker locker(p);
+                p->ensureChildrenLoaded();
+                bool isOut = (cmdParams[2] == "output");
+                bool firstItem = true;
+                for (ParameterPtrs::iterator it = p->begin(); it != p->end(); ++it)
                 {
-                    Local::foreachIteration(firstItem, tp, processedText, sep,
-                        cmdParams.from(3), (*it).get());
+                    if ((*it)->isOutputParameter() == isOut)
+                    {
+                        Local::foreachIteration(firstItem, tp, processedText, sep,
+                            cmdParams.from(3), (*it).get());
+                    }
+                }
+            }
+            if (f) {
+                SubjectLocker locker(f);
+                f->ensureChildrenLoaded();
+                bool isOut = (cmdParams[2] == "output");
+                bool firstItem = true;
+                for (ParameterPtrs::iterator it = f->begin(); it != f->end(); ++it)
+                {
+                    if ((*it)->isOutputParameter() == isOut)
+                    {
+                        Local::foreachIteration(firstItem, tp, processedText, sep,
+                            cmdParams.from(3), (*it).get());
+                    }
                 }
             }
         }
-
+        // {%foreach:method:<separator>:<function|procedure>:<text>%}
+        // If the current object is a package, processes <text> for
+        // each "function" or "procedure" method.
+        else if ((cmdParams[0] == "method") && (cmdParams.Count() >= 4))
+        {
+            Package* p = dynamic_cast<Package*>(object);
+            if (p) {
+                SubjectLocker locker(p);
+                p->ensureChildrenLoaded();
+                //bool isFunction = (cmdParams[2] == "function");
+                bool firstItem = true;
+                for (MethodPtrs::iterator it = p->begin(); it != p->end(); ++it)
+                {
+                    //if ((*it)->isFunction() == isFunction)
+                    {
+                        Local::foreachIteration(firstItem, tp, processedText, sep,
+                            cmdParams.from(3), (*it).get());
+                    }
+                }
+            }
+        }
         // {%foreach:user:<separator>:<text>%}
         // If the current object is a server, processes
         // the specified text once for each defined user,

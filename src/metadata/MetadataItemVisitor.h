@@ -55,6 +55,7 @@ public:
     virtual void visitPrimaryKeyConstraint(PrimaryKeyConstraint& pk);
     virtual void visitPackage(Package& package);
     virtual void visitPackages(Packages& packages);
+    virtual void visitSysPackages(SysPackages& packages);
     virtual void visitProcedure(Procedure& procedure);
     virtual void visitProcedures(Procedures& procedures);
     virtual void visitRelation(Relation& relation);

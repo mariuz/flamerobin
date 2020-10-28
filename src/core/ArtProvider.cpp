@@ -47,8 +47,11 @@
 #include "domain32.xpm"
 #include "function32.xpm"
 #include "generator32.xpm"
+#include "package32.xpm"
 #include "procedure32.xpm"
 #include "server32.xpm"
+#include "systemdomain32.xpm"
+#include "systempackage32.xpm"
 #include "systemtable32.xpm"
 #include "table32.xpm"
 #include "toggle32.xpm"
@@ -83,12 +86,18 @@
 #include "object.xpm"
 #include "ok.xpm"
 #include "plan16.xpm"
+#include "package.xpm"
+#include "packages.xpm"
 #include "procedure.xpm"
 #include "procedures.xpm"
 #include "redx.xpm"
 #include "role16_png.cpp"
 #include "root.xpm"
 #include "server.xpm"
+#include "systemdomain.xpm"
+#include "systemdomains.xpm"
+#include "systempackage.xpm"
+#include "systempackages.xpm"
 #include "systemtable.xpm"
 #include "systemtables.xpm"
 #include "table.xpm"
@@ -133,10 +142,16 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(function32_xpm);
         if (id == ART_Generator)
             return wxBitmap(generator32_xpm);
+        if (id == ART_Package)
+            return wxBitmap(package32_xpm);
         if (id == ART_Procedure)
             return wxBitmap(procedure32_xpm);
         if (id == ART_Server)
             return wxBitmap(server32_xpm);
+        if (id == ART_SystemDomain)
+            return wxBitmap(systemdomain32_xpm);
+        if (id == ART_SystemPackage)
+            return wxBitmap(systempackage32_xpm);
         if (id == ART_SystemTable)
             return wxBitmap(systemtable32_xpm);
         if (id == ART_Table)
@@ -213,6 +228,10 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return bitmapFromEmbeddedPNG(pkfk16_png, sizeof(pkfk16_png));
         if (id == ART_PrimaryKey)
             return bitmapFromEmbeddedPNG(pk16_png, sizeof(pk16_png));
+        if (id == ART_Package)
+            return wxBitmap(package_xpm);
+        if (id == ART_Packages)
+            return wxBitmap(packages_xpm);
         if (id == ART_Procedure)
             return wxBitmap(procedure_xpm);
         if (id == ART_Procedures)
@@ -229,6 +248,14 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(server_xpm);
         if (id == ART_ShowExecutionPlan)
             return wxBitmap(plan16_xpm);
+        if (id == ART_SystemDomain)
+            return wxBitmap(systemdomain_xpm);
+        if (id == ART_SystemPackages)
+            return wxBitmap(systempackages_xpm);
+        if (id == ART_SystemPackage)
+            return wxBitmap(systempackage_xpm);
+        if (id == ART_SystemDomains)
+            return wxBitmap(systemdomains_xpm);
         if (id == ART_SystemRole)
             return bitmapFromEmbeddedPNG(role16_png, sizeof(role16_png));
         if (id == ART_SystemRoles)

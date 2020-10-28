@@ -48,7 +48,10 @@ typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
     ntSysTable, ntSysTables, ntException, ntExceptions,
     ntDomain, ntDomains, ntSysDomain, ntSysDomains,
     ntRole, ntRoles, ntSysRole, ntSysRoles, ntColumn, ntParameter, ntIndex,
-    ntPackage, ntPackages, ntDBTrigger, ntDBTriggers, ntDDLTrigger, ntDDLTriggers,
+    ntPackage, ntPackages, ntSysPackage, ntSysPackages,
+    ntDBTrigger, 
+    ntDBTriggers, ntDDLTrigger, ntDDLTriggers,
+    ntMethod,
     ntLastType
 } NodeType;
 

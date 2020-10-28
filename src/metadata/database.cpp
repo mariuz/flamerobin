@@ -352,6 +352,8 @@ void Database::getIdentifiers(std::vector<Identifier>& temp)
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(packagesM->begin(), packagesM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(sysPackagesM->begin(), sysPackagesM->end(),
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(proceduresM->begin(), proceduresM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(triggersM->begin(), triggersM->end(),
@@ -610,6 +612,9 @@ MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
         case ntPackage:
             return packagesM->findByName(name).get();
             break;
+        case ntSysPackage:
+            return sysPackagesM->findByName(name).get();
+            break;
         case ntDBTrigger:
             return DBTriggersM->findByName(name).get();
             break;
@@ -696,6 +701,9 @@ void Database::dropObject(MetadataItem* object)
         case ntPackage:
             packagesM->remove((Exception*)object);
             break;
+        case ntSysPackage:
+            sysPackagesM->remove((Exception*)object);
+            break;
         case ntDBTrigger:
             DBTriggersM->remove((Exception*)object);
             break;
@@ -755,6 +763,9 @@ void Database::addObject(NodeType type, const wxString& name)
             break;
         case ntPackage:
             packagesM->insert(name);
+            break;
+        case ntSysPackage:
+            sysPackagesM->insert(name);
             break;
         case ntDBTrigger:
             DBTriggersM->insert(name);
@@ -1147,6 +1158,8 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             initializeLockCount(viewsM, lockCount);
             packagesM.reset(new Packages(me));
             initializeLockCount(packagesM, lockCount);
+            sysPackagesM.reset(new SysPackages(me));
+            initializeLockCount(sysPackagesM, lockCount);
             DBTriggersM.reset(new DBTriggers(me));
             initializeLockCount(DBTriggersM, lockCount);
             DDLTriggersM.reset(new DDLTriggers(me));
@@ -1253,7 +1266,7 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
         }
     };
 
-    const int collectionCount = 16;
+    const int collectionCount = 17;
     std::string loadStmt;
     ProgressIndicatorHelper pih(progressIndicator);
 
@@ -1307,19 +1320,22 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
     if (getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
         pih.init(_("packages"), collectionCount, 13);
         packagesM->load(progressIndicator);
+
+        pih.init(_("System packages"), collectionCount, 14);
+        sysPackagesM->load(progressIndicator);
     }
 
     if (getInfo().getODSVersionIsHigherOrEqualTo(11.1)) {
-        pih.init(_("DBTriggers"), collectionCount, 14);
+        pih.init(_("DBTriggers"), collectionCount, 15);
         DBTriggersM->load(progressIndicator);
     }
 
     if (getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
-        pih.init(_("DDLTriggers"), collectionCount, 15);
+        pih.init(_("DDLTriggers"), collectionCount, 16);
         DDLTriggersM->load(progressIndicator);
     }
 
-    pih.init(_("System domains"), collectionCount, 16);
+    pih.init(_("System domains"), collectionCount, 17);
     sysDomainsM->load(progressIndicator);
 
 }
@@ -1381,6 +1397,7 @@ void Database::setDisconnected()
     viewsM.reset();
     exceptionsM.reset();
     packagesM.reset();
+    sysPackagesM.reset();
     DBTriggersM.reset();
     DDLTriggersM.reset();
 
@@ -1457,6 +1474,13 @@ PackagesPtr Database::getPackages()
     wxASSERT(packagesM);
     packagesM->ensureChildrenLoaded();
     return packagesM;
+}
+
+SysPackagesPtr Database::getSysPackages()
+{
+    wxASSERT(sysPackagesM);
+    sysPackagesM->ensureChildrenLoaded();
+    return sysPackagesM;
 }
 
 ProceduresPtr Database::getProcedures()
@@ -1551,6 +1575,10 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
     temp.push_back(proceduresM.get());
     temp.push_back(rolesM.get());
     // Only push back system objects when they should be shown
+    if (getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
+        if (system && showSystemPackages())
+            temp.push_back(sysPackagesM.get());
+    }
     if (system && showSystemRoles())
         temp.push_back(sysRolesM.get());
     if (system && showSystemTables())
@@ -1579,6 +1607,7 @@ void Database::lockChildren()
         functionSQLsM->lockSubject();
         generatorsM->lockSubject();
         packagesM->lockSubject();
+        sysPackagesM->lockSubject();
         proceduresM->lockSubject();
         rolesM->lockSubject();
         tablesM->lockSubject();
@@ -1608,6 +1637,7 @@ void Database::unlockChildren()
         tablesM->unlockSubject();
         rolesM->unlockSubject();
         packagesM->unlockSubject();
+        sysPackagesM->unlockSubject();
         proceduresM->unlockSubject();
         generatorsM->unlockSubject();
         functionSQLsM->unlockSubject();
@@ -1883,6 +1913,20 @@ bool Database::showSystemDomains()
     return b;
 }
 
+bool Database::showSystemPackages()
+{
+    if (!getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        return false;
+
+    const wxString SHOW_SYSPACKAGES = "ShowSystemPackages";
+
+    bool b;
+    if (!DatabaseConfig(this, config()).getValue(SHOW_SYSPACKAGES, b))
+        b = config().get(SHOW_SYSPACKAGES, true);
+
+    return b;
+}
+
 bool Database::showSystemRoles()
 {
     if (!getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
@@ -1892,7 +1936,7 @@ bool Database::showSystemRoles()
 
     bool b;
     if (!DatabaseConfig(this, config()).getValue(SHOW_SYSROLES, b))
-        b = config().get(SHOW_SYSROLES, false);
+        b = config().get(SHOW_SYSROLES, true);
 
     return b;
 }
