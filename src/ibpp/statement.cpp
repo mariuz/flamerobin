@@ -90,7 +90,7 @@ void StatementImpl::Prepare(const std::string& sql)
 
 	status.Reset();
 	(*gds.Call()->m_dsql_prepare)(status.Self(), mTransaction->GetHandlePtr(),
-		&mHandle, (short)mSql.length(), const_cast<char*>(mSql.c_str()),
+		&mHandle, 0, const_cast<char*>(mSql.c_str()),
 			short(mDatabase->Dialect()), mOutRow->Self());
 	if (status.Errors())
 	{
@@ -244,7 +244,7 @@ void StatementImpl::Plan(std::string& plan)
 		throw LogicExceptionImpl("Statement::Plan", _("Database must be connected."));
 
 	IBS status;
-	RB result(4096);
+	RB result(65535);
 	char itemsReq[] = {isc_info_sql_get_plan};
 
 	(*gds.Call()->m_dsql_sql_info)(status.Self(), &mHandle, 1, itemsReq,
@@ -685,9 +685,8 @@ std::vector<int> StatementImpl::FindParamsByName(std::string name) {
 
     std::vector<int> params;
     unsigned int i;
-    for(i=0;i < parametersByName_.size() ; i++) {
-        //if (icasecmp(parametersByName_.at(i), name))
-        if (parametersByName_.at(i) == name)
+    for(i=0;i < parametersDetailedByName_.size() ; i++) {
+        if (parametersDetailedByName_.at(i) == name)
             params.push_back(i+1);
     }
     return params;
@@ -707,6 +706,7 @@ std::string StatementImpl::ParametersParser(std::string sql)
     //ctor
     bool comment = false, blockComment = false, palavra = false, quote = false, doubleQuote = false;
     parametersByName_.clear();
+    parametersDetailedByName_.clear();
 
     unsigned int i;
 
@@ -751,7 +751,10 @@ std::string StatementImpl::ParametersParser(std::string sql)
         {
             comment = false;  //New line?
             if (sql.at(i)=='?'){
-               parametersByName_.push_back("?");
+
+                if (FindParamsByName("?").size() == 0)//if first time:
+                    parametersByName_.push_back("?");
+                parametersDetailedByName_.push_back("?");
             }
             if (sql.at(i)==':'){
                 palavra = true;
@@ -770,7 +773,10 @@ std::string StatementImpl::ParametersParser(std::string sql)
                     sProcessedSQL << "?"<<"/*:"<<temp.str()<<"*/";
                     if (!(std::isalnum(sql.at(i)) || sql.at(i)=='_' || sql.at(i)=='$'))
                         sProcessedSQL << sql.at(i);
-                    parametersByName_.push_back(temp.str());
+                    std::vector<int> tmp = FindParamsByName(temp.str());
+                    if (tmp.size() == 0)//If first time
+                        parametersByName_.push_back(temp.str());
+                    parametersDetailedByName_.push_back(temp.str());
                     temp.str(std::string());temp.clear(); //Limpar StringStream
                 }
             }
@@ -791,7 +797,7 @@ std::string StatementImpl::ParametersParser(std::string sql)
   std::string isDML = sProcessedSQL.str();
   isDML.erase(isDML.begin(), std::find_if(isDML.begin(), isDML.end(), std::not1(std::ptr_fun<int, int>(std::isspace)))); //lTrim
 
-  std::transform(isDML.begin(), isDML.end(), isDML.begin(),  [] ( char c ) { return ( std::toupper( c ) ); } ); //UpperCase
+  std::transform(isDML.begin(), isDML.end(), isDML.begin(),  [] ( char c ) { return (char)std::toupper(c); } ); //UpperCase (only bothered about ASCII text, cast is okay)
 
   std::string isDML4=isDML.substr(0,4);  std::string isDML6=isDML.substr(0,6);  std::string isDML7=isDML.substr(0,7);
 
@@ -818,7 +824,7 @@ std::string StatementImpl::ParametersParser(std::string sql)
     {
         if (dml.at(i)=="EXECUTE")//is execute procedure or execute block? else, is DML for sure
         {
-            unsigned int x=dml.at(i).size();
+            auto x=dml.at(i).size();
             while(std::isspace(isDML.at(x)) && x<isDML.size())
               x++;
             char p = isDML.at(x);
@@ -840,6 +846,7 @@ std::string StatementImpl::ParametersParser(std::string sql)
   ddl:
   //Probably is DDL... don't replace parameters then
   parametersByName_.clear();
+  parametersDetailedByName_.clear();
   //std::cout << sql << std::endl;
   return sql;
 }

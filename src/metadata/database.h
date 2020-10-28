@@ -164,7 +164,7 @@ private:
     Credentials* connectionCredentialsM;
     DatabaseAuthenticationMode authenticationModeM;
 
-    std::auto_ptr<wxMBConv> charsetConverterM;
+    std::unique_ptr<wxMBConv> charsetConverterM;
     void createCharsetConverter();
 
     DatabaseInfo databaseInfoM;

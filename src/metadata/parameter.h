@@ -26,7 +26,6 @@
 #define FR_PARAMETER_H
 
 #include "metadata/column.h"
-#include "metadata/metadataitem.h"
 
 class Parameter: public ColumnBase
 {
@@ -34,7 +33,7 @@ private:
     bool outputParameterM;
     int parameterMechanismM;    // -1 none, 0 domain, 1 type_of
 public:
-    Parameter(MetadataItem* parent, const wxString& name);
+    Parameter(Procedure* procedure, const wxString& name);
 
     void initialize(const wxString& source, int parameterType, int mechanism,
         bool nullable, const wxString& defaultValue, bool hasDefault,

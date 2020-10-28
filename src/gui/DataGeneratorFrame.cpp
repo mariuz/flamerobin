@@ -104,10 +104,10 @@ public:
                 dependsOn.push_back(id.getQuoted());
         }
     }
-    void remove(const wxString& table)
+    void remove(const wxString& tab_name)
     {
         std::list<wxString>::iterator it = std::find(dependsOn.begin(),
-            dependsOn.end(), table);
+            dependsOn.end(), tab_name);
         if (it != dependsOn.end())
             dependsOn.erase(it);
     }
@@ -302,7 +302,7 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     rightPanelSizer->Add( rightLabel, 0, wxALL|wxEXPAND, 5 );
 
     tableLabel = new wxStaticText( rightPanel, wxID_ANY, "Table: table name", wxDefaultPosition, wxDefaultSize, 0 );
-    tableLabel->SetFont( wxFont( 10, 74, 90, 92, false, "sans" ) );
+    tableLabel->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false, "sans"));
 
     rightPanelSizer->Add( tableLabel, 0, wxTOP|wxBOTTOM|wxLEFT, 10 );
 

@@ -161,7 +161,6 @@ void Trigger::loadProperties()
     DatabasePtr db = getDatabase();
     MetadataLoader* loader = db->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
-	wxMBConv* converter = db->getCharsetConverter();
 
 	std::string sql("select t.rdb$relation_name, t.rdb$trigger_sequence, "
 		"t.rdb$trigger_inactive, t.rdb$trigger_type, rdb$trigger_source, "
@@ -169,11 +168,7 @@ void Trigger::loadProperties()
     sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " rdb$entrypoint, rdb$engine_name,  ": " null, null, ";
     sql += db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0) ? " rdb$sql_security " : " null ";
 
-	sql += "from rdb$triggers t where rdb$trigger_name = ? ";
-
-    IBPP::Statement& st1 = loader->getStatement(sql );
-
-    st1->Set(1, wx2std(getName_(), converter));
+    st1->Set(1, wx2std(getName_(), db->getCharsetConverter()));
     st1->Execute();
     if (st1->Fetch())
     {
@@ -183,7 +178,7 @@ void Trigger::loadProperties()
         {
             std::string objname;
             st1->Get(1, objname);
-            relationNameM = std2wxIdentifier(objname, converter);
+            relationNameM = std2wxIdentifier(objname, db->getCharsetConverter());
         }
         st1->Get(2, &positionM);
 
@@ -242,8 +237,8 @@ void Trigger::loadProperties()
         positionM = -1;
         sourceM.clear();
         typeM = 0;
-		entryPointM.clear();
-		engineNameM.clear();
+		    entryPointM.clear();
+		    engineNameM.clear();
         sqlSecurityM.clear();
     }
 
@@ -259,7 +254,8 @@ wxString Trigger::getAlterSql()
 
     sb << kwSET << ' ' << kwTERMINATOR << " ^ ;"
         << StatementBuilder::NewLine;
-
+    if (this->getRelationName().IsEmpty())  //TODO: Get better info and improve for DDL triggers
+        sb << kwCREATE << ' ' << kwOR << ' ';
     sb << kwALTER << ' ' << kwTRIGGER << ' ' << getQuotedName() << ' ';
     if (activeM)
         sb << kwACTIVE;

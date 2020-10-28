@@ -62,6 +62,15 @@ public:
     Relation(NodeType type, DatabasePtr database, const wxString& name);
 
     wxString getOwner();
+	/* from: https://ib-aid.com/download/docs/firebird-language-reference-2.5/fblangref-appx04-relations.html
+	The type of the relation object being described:
+	0 - system or user-defined table
+	1 - view
+	2 - external table
+	3 - monitoring table
+	4 - connection-level GTT (PRESERVE ROWS)
+	5 - transaction-level GTT (DELETE ROWS)
+	*/
     wxString getSqlSecurity();
     int getRelationType();
 

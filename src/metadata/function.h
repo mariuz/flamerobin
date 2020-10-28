@@ -26,8 +26,6 @@
 #define FR_FUNCTION_H
 
 #include "metadata/collection.h"
-#include "metadata/privilege.h"
-
 
 class ProgressIndicator;
 
@@ -65,8 +63,7 @@ public:
 	virtual const wxString getTypeName()  const = 0;
 	std::vector<Privilege>* getPrivileges();
 
-
-    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+  virtual void acceptVisitor(MetadataItemVisitor* visitor);
 	virtual void checkDependentFunction();
 };
 

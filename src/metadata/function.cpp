@@ -43,146 +43,11 @@
 #include "metadata/domain.h"
 #include "metadata/function.h"
 #include "metadata/MetadataItemVisitor.h"
-#include "metadata/parameter.h"
 #include "sql/StatementBuilder.h"
-
 
 Function::Function(DatabasePtr database, const wxString& name)
     : MetadataItem(ntFunction, database.get(), name)
 {
-	ensurePropertiesLoaded();
-}
-
-void Function::loadChildren()
-{
-	bool childrenWereLoaded = childrenLoaded();
-	// in case an exception is thrown this should be repeated
-	setChildrenLoaded(false);
-
-	DatabasePtr db = getDatabase();
-	MetadataLoader* loader = db->getMetadataLoader();
-	// first start a transaction for metadata loading, then lock the procedure
-	// when objects go out of scope and are destroyed, procedure will be
-	// unlocked before the transaction is committed - any update() calls on
-	// observers can possibly use the same transaction
-	// when objects go out of scope and are destroyed, object will be unlocked
-	// before the transaction is committed - any update() calls on observers
-	// can possibly use the same transaction
-	MetadataLoaderTransaction tr(loader);
-	SubjectLocker lock(db.get());
-	wxMBConv* converter = db->getCharsetConverter();
-
-	std::string sql(
-		"select a.rdb$argument_name, a.rdb$field_source, " //1..2
-		"a.rdb$mechanism, a.rdb$field_type, a.rdb$field_scale, a.rdb$field_length, " //3..6
-		"a.rdb$field_sub_type, a.rdb$field_precision, "//7..8
-		"f.rdb$return_argument, a.rdb$argument_position, " //9..10
-	);
-	if (db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
-		sql += "rdb$default_source, rdb$null_flag, rdb$argument_mechanism, "; //11..13
-	else
-		sql += "null, null, -1, ";
-	sql += "a.rdb$description from rdb$function_arguments a "
-		" join rdb$functions f on f.rdb$function_name = a.rdb$function_name "
-		"where a.rdb$function_name = ? ";
-	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
-		sql += " and a.rdb$package_name is null ";
-	sql += "order by a.rdb$argument_position";
-
-	IBPP::Statement st1 = loader->getStatement(sql);
-	st1->Set(1, wx2std(getName_(), converter));
-	st1->Execute();
-
-	ParameterPtrs parameters;
-	while (st1->Fetch())
-	{
-		std::string s;
-		short returnarg, retpos;
-		st1->Get(9, returnarg);
-		st1->Get(10, retpos);
-
-		if (!st1->IsNull(1)) {
-			st1->Get(1, s);
-		}
-		else {
-			s = (returnarg == retpos) ? "RETURN " : "";
-		}
-		wxString param_name(std2wxIdentifier (s, converter));
-		if (!st1->IsNull(2)) {
-			st1->Get(2, s);
-		}
-		else {
-			if (!st1->IsNull(4)) {
-				short  type, scale, length, subtype, precision ;
-				st1->Get(4, type);
-				st1->Get(5, scale);
-				st1->Get(6, length);
-				st1->Get(7, subtype);
-				st1->Get(8, precision);
-				s = Domain::dataTypeToString(type, scale,precision, subtype, length);
-			}
-		}
-		wxString source(std2wxIdentifier(s, converter));
-
-		short partype, mechanism = -1;
-		partype = (returnarg == retpos) ? 1 : 0;
-		/*if (st1->IsNull(3)) {
-			partype = st1->IsNull(1) ? 1 : 0;
-		}
-		else {
-			st1->Get(3, partype);
-		}*/
-		bool hasDefault = !st1->IsNull(11);
-		wxString defaultSrc;
-		if (hasDefault)
-		{
-			st1->Get(11, s);
-			defaultSrc = std2wxIdentifier(s, converter);
-		}
-		bool notNull = false;
-		if (!st1->IsNull(12))
-			st1->Get(12, &notNull);
-		if (!st1->IsNull(13)) {
-			st1->Get(13, mechanism);
-		}
-		else {
-			if (!st1->IsNull(3)) 
-				st1->Get(3, mechanism);
-		}
-		bool hasDescription = !st1->IsNull(14);
-
-		ParameterPtr par = findParameter(param_name);
-		if (!par)
-		{
-			par.reset(new Parameter(this, param_name));
-			initializeLockCount(par, getLockCount());
-		}
-		parameters.push_back(par);
-		par->initialize(source, partype, mechanism, !notNull, defaultSrc,
-			hasDefault, hasDescription);
-	}
-
-	setChildrenLoaded(true);
-	if (!childrenWereLoaded || parametersM != parameters)
-	{
-		parametersM.swap(parameters);
-		notifyObservers();
-	}
-}
-
-bool Function::getChildren(std::vector<MetadataItem *>& temp)
-{
-	if (parametersM.empty())
-		return false;
-	std::transform(parametersM.begin(), parametersM.end(),
-		std::back_inserter(temp), std::mem_fn(&ParameterPtr::get));
-	return !parametersM.empty();
-}
-
-void Function::lockChildren()
-{
-	std::for_each(parametersM.begin(), parametersM.end(),
-		std::mem_fn(&Parameter::lockSubject));
 }
 
 void Function::unlockChildren()
@@ -504,8 +369,6 @@ wxString FunctionSQL::getSource()
 		source1.Trim(false);     // remove leading whitespace
 		source += "\nAS\n" + source1 + "\n";
 	}
-
-
 	return source;
 }
 

@@ -26,8 +26,7 @@
 #define FR_METADATACLASSES_H
 
 #include <vector>
-
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class Column;
 typedef std::shared_ptr<Column> ColumnPtr;

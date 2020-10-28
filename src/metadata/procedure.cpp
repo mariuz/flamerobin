@@ -196,19 +196,15 @@ wxString Procedure::getOwner()
     DatabasePtr db = getDatabase();
     MetadataLoader* loader = db->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
-	wxMBConv* converter = db->getCharsetConverter();
-	std::string sql(
-		"select rdb$owner_name from rdb$procedures where rdb$procedure_name = ?"
-	);
-	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
-		sql += " and rdb$package_name is null ";
-	IBPP::Statement st1 = loader->getStatement(sql);
-	st1->Set(1, wx2std(getName_(), converter));
+
+    IBPP::Statement st1 = loader->getStatement(
+        "select rdb$owner_name from rdb$procedures where rdb$procedure_name = ?");
+    st1->Set(1, wx2std(getName_(), db->getCharsetConverter()));
     st1->Execute();
     st1->Fetch();
     std::string name;
     st1->Get(1, name);
-    return std2wxIdentifier(name, converter);
+    return std2wxIdentifier(name, db->getCharsetConverter());
 }
 
 wxString Procedure::getSource()
@@ -548,13 +544,10 @@ void Procedures::acceptVisitor(MetadataItemVisitor* visitor)
 
 void Procedures::load(ProgressIndicator* progressIndicator)
 {
-	DatabasePtr db = getDatabase();
-	wxString stmt = "select rdb$procedure_name from rdb$procedures"
-		" where (rdb$system_flag = 0 or rdb$system_flag is null)";
-	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
-		stmt += " and rdb$package_name is null ";
-	stmt += " order by rdb$procedure_name ";
-    setItems(db->loadIdentifiers(stmt, progressIndicator));
+    wxString stmt = "select rdb$procedure_name from rdb$procedures"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
+        " order by 1";
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 
 void Procedures::loadChildren()

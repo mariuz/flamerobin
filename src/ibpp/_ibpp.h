@@ -1136,6 +1136,7 @@ public:
 private:
     std::string ParametersParser(std::string sql);
     std::vector<std::string> parametersByName_;
+    std::vector<std::string> parametersDetailedByName_;
 public:
     std::vector<std::string> ParametersByName();//Return a vector list, with the parameter(s) name, starting in 0
     std::vector<int> FindParamsByName(std::string name);  //Return a vector list, with the parameter(s) ID, starting in 1

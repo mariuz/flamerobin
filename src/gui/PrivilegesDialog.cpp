@@ -378,11 +378,14 @@ void PrivilegesDialog::updateControls()
     choice_memberof->Enable(isRole);
 
     bool hasRelPriv = false;
-    wxCheckBox* boxes[] = { checkbox_select, checkbox_insert, checkbox_all,
-        checkbox_update, checkbox_delete, checkbox_references };
-    for (int i = 0; i < sizeof(boxes)/sizeof(wxCheckBox *); i++)
-        if (boxes[i]->IsChecked())
+    for (const auto box : {
+            checkbox_select, checkbox_insert, checkbox_all,
+            checkbox_update, checkbox_delete, checkbox_references
+        })
+    {
+        if (box->IsChecked())
             hasRelPriv = true;
+    }
 
     // if ALL is selected, turn the rest off...
     if (checkbox_all->IsChecked())
@@ -449,20 +452,21 @@ void PrivilegesDialog::updateControls()
             priv = "ALL";
         else
         {
-            wxCheckBox* boxes[5] = { checkbox_select, checkbox_insert,
-                checkbox_update, checkbox_delete, checkbox_references };
             wxString upd = textctrl_update->GetValue();
             wxString ref = textctrl_references->GetValue();
-            for (int i = 0; i < sizeof(boxes)/sizeof(wxCheckBox *); i++)
+            for (const auto box : {
+                    checkbox_select, checkbox_insert,
+                    checkbox_update, checkbox_delete, checkbox_references
+                })
             {
-                if (boxes[i]->IsChecked())
+                if (box->IsChecked())
                 {
                     if (!priv.IsEmpty())
                         priv += ",";
-                    priv += boxes[i]->GetLabel().Upper();
-                    if (boxes[i] == checkbox_update && !upd.IsEmpty())
+                    priv += box->GetLabel().Upper();
+                    if (box == checkbox_update && !upd.IsEmpty())
                         priv += "(" + upd + ")";
-                    if (boxes[i] == checkbox_references && !ref.IsEmpty())
+                    if (box == checkbox_references && !ref.IsEmpty())
                         priv += "(" + ref + ")";
                 }
             }
