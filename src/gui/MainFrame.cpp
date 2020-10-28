@@ -641,9 +641,11 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
             case ntTable:
             case ntSysTable:
             case ntView:
+            case ntPackage:
+            case ntSysPackage:
             case ntProcedure:
             case ntDomain:
-            case ntFunctionSQL:
+            case ntFunction:
             case ntUDF:
             case ntTrigger:
             case ntException:

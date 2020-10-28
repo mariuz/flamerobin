@@ -26,6 +26,8 @@
 #define FR_FUNCTION_H
 
 #include "metadata/collection.h"
+#include "metadata/privilege.h"
+
 
 class ProgressIndicator;
 
