@@ -718,8 +718,7 @@ bool EditBlobDialog::loadFromStreamAsBinary(wxInputStream& stream, bool isNull, 
         return true;
     }
 
-    int size = stream.GetSize();
-    progressBegin(progressTitle, size, true);
+    progressBegin(progressTitle, stream.GetSize(), true);
 
     // disable OnDataModified event
     loadingM = true;
@@ -1117,7 +1116,7 @@ void EditBlobDialog::OnNotebookPageChanged(wxNotebookEvent& event)
         if (!saveToStream(*cacheM, &cacheIsNullM, _("Switching editor-mode. (Saving)")))
         {
             showErrorDialog(this, _("ERROR"),
-                _("A error occured while switching editor-mode. (Saving)"),
+                _("An error occurred while switching editor-mode. (Saving)"),
                 AdvancedMessageDialogButtonsOk());
             notebook->ChangeSelection(oldPage);
             return;
@@ -1158,7 +1157,7 @@ void EditBlobDialog::OnNotebookPageChanged(wxNotebookEvent& event)
         if (!loadOk)
         {
             showErrorDialog(this, _("ERROR"),
-                _("A error occured while switching editor-mode. (Loading)"),
+                _("An error occurred while switching editor-mode. (Loading)"),
                 AdvancedMessageDialogButtonsOk());
             notebook->ChangeSelection(oldPage);
             //event.Veto();

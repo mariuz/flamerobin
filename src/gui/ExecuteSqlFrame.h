@@ -95,6 +95,7 @@ private:
 
     std::vector<SqlStatement> executedStatementsM;
     std::map<std::string, wxString> parameterSaveList;
+    std::map<std::string, wxString> parameterSaveListOptionNull;
     wxFileName filenameM;
     wxDateTime filenameModificationTimeM;
 

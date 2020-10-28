@@ -398,11 +398,10 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     if (checkbox_extern->IsChecked())
         flags |= (int)IBPP::brConvertExtTables;
 
-    std::auto_ptr<wxThread> thread(new BackupThread(this,
+    startThread(std::make_unique<BackupThread>(this,
         server->getConnectionString(), username, password,
         database->getPath(), text_ctrl_filename->GetValue(),
         (IBPP::BRF)flags));
-    startThread(thread);
     updateControls();
 }
 

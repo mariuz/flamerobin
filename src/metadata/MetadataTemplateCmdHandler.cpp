@@ -78,7 +78,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             wxString newText;
             tp->internalProcessTemplateText(newText, text, object);
             if ((!firstItem) && (!newText.IsEmpty()))
-                processedText += tp->escapeChars(separator);
+                processedText += separator;
             if (!newText.IsEmpty())
                 firstItem = false;
             processedText += newText;
@@ -107,7 +107,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
     // Expands to the current object's unique numeric handle.
     // Used to call FR's commands through URIs.
     else if ((cmdName == "object_handle") && metadataItem)
-        processedText += wxString::Format("%ld", metadataItem->getHandle());
+        processedText += wxString::Format("%lu", metadataItem->getHandle());
 
     // {%object_name%}
     // Expands to the current object's (non quoted) name.
@@ -390,12 +390,12 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
     else if (cmdName == "owner_name")
     {
         wxString name;
-        if (Relation* r = dynamic_cast<Relation*>(object))
-            name = r->getOwner();
-        else if (Procedure* p = dynamic_cast<Procedure*>(object))
-            name = p->getOwner();
-        else if (Role* r = dynamic_cast<Role*>(object))
-            name = r->getOwner();
+        if (Relation* rel = dynamic_cast<Relation*>(object))
+            name = rel->getOwner();
+        else if (Procedure* pro = dynamic_cast<Procedure*>(object))
+            name = pro->getOwner();
+        else if (Role* rol = dynamic_cast<Role*>(object))
+            name = rol->getOwner();
         if (!name.IsEmpty())
             processedText += tp->escapeChars(name);
     }

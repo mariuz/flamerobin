@@ -68,7 +68,7 @@ namespace InsertParametersOptions
     const wxString insertParametersOptionStrings[] = {
         "",
         "NULL",
-        wxTRANSLATE("Skip (N/A)"),
+        //wxTRANSLATE("Skip (N/A)"),
         //wxTRANSLATE("Column default"),
         wxTRANSLATE("Hexadecimal"),
         "CURRENT_DATE",
@@ -78,7 +78,7 @@ namespace InsertParametersOptions
         wxTRANSLATE("File...")
         //wxTRANSLATE("Generator...")
     };
-    typedef enum { ioRegular = 0, ioNull, ioSkip, /*ioDefault, */ioHex,
+    typedef enum { ioRegular = 0, ioNull, /*ioSkip, ioDefault, */ioHex,
         ioDate, ioTime, ioTimestamp, ioUser, ioFile/*, ioGenerator*/
     } InsertParametersOption;
 
@@ -106,6 +106,16 @@ namespace InsertParametersOptions
                 return (InsertParametersOption)i;
         return ioRegular;
     }
+
+    wxString getInsertParametersOptionString(InsertParametersOption opt)
+    {
+        for (int i = 0; i<sizeof(insertParametersOptionStrings) / sizeof(wxString); ++i)
+            if ((InsertParametersOption)i == opt)
+                return insertParametersOptionStrings[i];
+        return "";
+    }
+
+
 wxString IBPPtype2string(Database *db, IBPP::SDT t, int subtype, int size,
     int scale)
 {
@@ -114,6 +124,8 @@ wxString IBPPtype2string(Database *db, IBPP::SDT t, int subtype, int size,
     if (t == IBPP::sdString)
     {
         int bpc = db->getCharsetById(subtype).getBytesPerChar();
+        if (subtype == 1) // charset OCTETS
+            return wxString::Format("OCTETS(%d)", bpc ? size / bpc : size);
         return wxString::Format("STRING(%d)", bpc ? size/bpc : size);
     }
     switch (t)
@@ -129,6 +141,7 @@ wxString IBPPtype2string(Database *db, IBPP::SDT t, int subtype, int size,
         case IBPP::sdLargeint:  return "BIGINT";
         case IBPP::sdFloat:     return "FLOAT";
         case IBPP::sdDouble:    return "DOUBLE PRECISION";
+        case IBPP::sdBoolean:   return "BOOLEAN";
         default:                return "UNKNOWN";
     }
 }
@@ -183,14 +196,15 @@ public:
 //  Improve the usability, when we have more than 1 parameter with the same name,
 //  it's better to merge both, in a single one parameter, and use Set(name, value)
 //  let IBPP set the values by itself
-InsertParametersDialog::InsertParametersDialog(wxWindow* parent, IBPP::Statement& st, Database *db, std::map<std::string, wxString>& pParameterSaveList)
-    :BaseDialog(parent, -1, wxEmptyString), bufferM(0), statementM(st), databaseM(db), parameterSaveList(pParameterSaveList)
+InsertParametersDialog::InsertParametersDialog(wxWindow* parent, IBPP::Statement& st, Database *db, std::map<std::string, wxString>& pParameterSaveList, std::map<std::string, wxString>& pParameterSaveListOptionNull)
+    :BaseDialog(parent, -1, wxEmptyString), bufferM(0), statementM(st), databaseM(db), parameterSaveList(pParameterSaveList), parameterSaveListOptionNull(pParameterSaveListOptionNull)
 {
 
+    int count = statementM->ParametersByName().size();
 
     // 500 should be reasonable for enough rows on the screen, but not too much
     gridM = new wxGrid(getControlsPanel(), ID_Grid, wxDefaultPosition,
-        statementM->Parameters() < 12 ? wxDefaultSize : wxSize(-1, 500),
+        count < 12 ? wxDefaultSize : wxSize(-1, 500),
         wxWANTS_CHARS | wxBORDER_THEME);
     gridM->SetRowLabelSize(50);
     gridM->DisableDragRowSize();
@@ -202,11 +216,11 @@ InsertParametersDialog::InsertParametersDialog(wxWindow* parent, IBPP::Statement
         wxTRANSLATE("Field name"), wxTRANSLATE("Data type"),
         wxTRANSLATE("Special"),    wxTRANSLATE("Value") };
 
-    bufferM = new InsertedGridRowBuffer(statementM->Parameters());
-    for (unsigned u = 0; (int)u < statementM->Parameters(); u++)
+    bufferM = new InsertedGridRowBuffer(count);
+    for (unsigned u = 0; (int)u < count; u++)
         bufferM->setFieldNA(u, true);
 
-    gridM->CreateGrid(statementM->Parameters(), sizeof(labels)/sizeof(wxString));
+    gridM->CreateGrid(count, sizeof(labels)/sizeof(wxString));
     for (int i=0; i<sizeof(labels)/sizeof(wxString); ++i)
         gridM->SetColLabelValue(i, labels[i]);
 
@@ -244,22 +258,24 @@ InsertParametersDialog::InsertParametersDialog(wxWindow* parent, IBPP::Statement
     gridM->SetColAttr(3, gca);
 
     int row = 0;
-    for (row = 0; row < statementM->Parameters(); row++)
+    //for (row = 0; row < statementM->Parameters(); row++)
+    for (row = 0; row < count; row++)
     //for (std::string it = statementM->ParametersByName().begin();
     ////    it != statementM->ParametersByName().end(); ++it, ++row)
     {
 
         std::string c = statementM->ParametersByName().at(row);
+        int rowid = statementM->FindParamsByName(c).back() -1;
         gridM->SetRowLabelValue(row, wxString::Format("%d", row+1));
         gridM->SetCellValue(row, 0, c);
         try
         {
             gridM->SetCellValue(row, 1, IBPPtype2string(
                                 databaseM,
-                                statementM->ParameterType(row+1),
-                                statementM->ParameterSubtype(row+1),
-                                statementM->ParameterSize(row+1),
-                                statementM->ParameterScale(row+1)).c_str());//statementM->ParameterType(row));
+                                statementM->ParameterType(rowid +1),
+                                statementM->ParameterSubtype(rowid +1),
+                                statementM->ParameterSize(rowid +1),
+                                statementM->ParameterScale(rowid +1)).c_str());//statementM->ParameterType(row));
         }catch(...)
         {
 
@@ -269,12 +285,21 @@ InsertParametersDialog::InsertParametersDialog(wxWindow* parent, IBPP::Statement
         //    def->isNumeric() ? wxALIGN_RIGHT : wxALIGN_LEFT, row, 3);
         gridM->SetCellAlignment(row, 3, wxALIGN_RIGHT, wxALIGN_CENTER); //TODO: get isNumeric() from "somewhere" (done is better than perfect, and in this case is just estetic)
 
+        gridM->SetCellValue(row, 2, getInsertParametersOptionString(ioNull));
+        updateControls(row);
         //Show prevoius data
         //TODO: load SPECIAL selected option too
         if (statementM->ParametersByName().at(row)!='?')
         {
             if (parameterSaveList.count(statementM->ParametersByName().at(row))) {
                 gridM->SetCellValue(wxGridCellCoords(row, 3), parameterSaveList.at(statementM->ParametersByName().at(row)));
+                gridM->SetCellValue(row, 2, parameterSaveListOptionNull.at(statementM->ParametersByName().at(row)));
+                updateControls(row);
+                //if (getInsertParametersOption(gridM, row)!=ioNull)
+                //  gridM->SetCellValue(row, 2, insertParametersOptionStrings[ioRegular]);
+
+                //gridM->SetCellValue(wxGridCellCoords(row, 3), parameterSaveList.at(statementM->ParametersByName().at(row)));
+
             }
         }
 
@@ -305,8 +330,8 @@ InsertParametersDialog::InsertParametersDialog(wxWindow* parent, IBPP::Statement
         */
     }
 
-    checkboxInsertAnother = new wxCheckBox(getControlsPanel(), wxID_ANY,
-        _("Keep values"));
+    //checkboxInsertAnother = new wxCheckBox(getControlsPanel(), wxID_ANY,
+      //  _("Keep values"));
 
     button_ok = new wxButton(getControlsPanel(), wxID_OK, _("&Execute/Run"));
     button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL,
@@ -362,7 +387,7 @@ void InsertParametersDialog::do_layout()
 
     sizerControls->AddSpacer(
         styleguide().getUnrelatedControlMargin(wxVERTICAL));
-    sizerControls->Add(checkboxInsertAnother, 0, wxEXPAND);
+    //sizerControls->Add(checkboxInsertAnother, 0, wxEXPAND);
 
     wxSizer* sizerButtons =
         styleguide().createButtonSizer(button_ok, button_cancel);
@@ -449,9 +474,9 @@ void InsertParametersDialog::storeValues()
                     bufferM->setFieldNull((*it).index, false);
                     bufferM->setFieldNA((*it).index, false);
                     break;
-                case ioSkip:
-                    bufferM->setFieldNA((*it).index, true);
-                    break;
+                //case ioSkip:
+                //    bufferM->setFieldNA((*it).index, true);
+                //    break;
                 case ioNull:
                     bufferM->setFieldNull((*it).index, true);
                     bufferM->setFieldNA((*it).index, false);
@@ -579,7 +604,7 @@ void InsertParametersDialog::OnCancelButtonClick(wxCommandEvent& WXUNUSED(event)
 {
     Close();
 }
-bool InsertParametersDialog::parseDate(int row, const wxString& source)
+void InsertParametersDialog::parseDate(int row, const wxString& source)
 {
     IBPP::Date idt;
     idt.Today();
@@ -604,9 +629,8 @@ bool InsertParametersDialog::parseDate(int row, const wxString& source)
         idt.SetDate(y, m, d);
     }
     statementM->Set(row+1, idt);
-
 }
-bool InsertParametersDialog::parseTime(int row, const wxString& source)
+void InsertParametersDialog::parseTime(int row, const wxString& source)
 {
     IBPP::Time itm;
     itm.Now();
@@ -625,7 +649,7 @@ bool InsertParametersDialog::parseTime(int row, const wxString& source)
     statementM->Set(row+1, itm);
 }
 
-bool InsertParametersDialog::parseTimeStamp(int row, const wxString& source)
+void InsertParametersDialog::parseTimeStamp(int row, const wxString& source)
 {
 
     IBPP::Timestamp its;
@@ -666,102 +690,149 @@ void InsertParametersDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     //storeValues();
     //preloadSpecialColumns();
-    int row = 0;
+    int resumedRow = 0;
     parameterSaveList.clear();
-    for (row = 0; row < statementM->ParametersByName().size(); ++row)
+    parameterSaveListOptionNull.clear();
+    for (resumedRow = 0; resumedRow < statementM->ParametersByName().size(); ++resumedRow)
     {
-        wxString value = gridM->GetCellValue(row, 3);
-        wxString param = gridM->GetCellValue(row, 0);
+        wxString value = gridM->GetCellValue(resumedRow, 3);
+        wxString param = gridM->GetCellValue(resumedRow, 0);
         //std::string value2 = wx2std(gridM->GetCellValue(row, 3), databaseM->getCharsetConverter());
         //std::string param2 = wx2std(gridM->GetCellValue(row, 0), databaseM->getCharsetConverter());
 
-        parameterSaveList[wx2std(param, databaseM->getCharsetConverter())] = value;
+        InsertParametersOption sel = getInsertParametersOption(gridM, resumedRow);
 
-        InsertParametersOption sel = getInsertParametersOption(gridM, row);
-        if (value.empty())
+        parameterSaveList[wx2std(param, databaseM->getCharsetConverter())] = value;
+        parameterSaveListOptionNull[wx2std(param, databaseM->getCharsetConverter())] = gridM->GetCellValue(resumedRow, 2); // sel == ioNull;
+
+        int row = 0;
+        std::vector<int> parameterslist = statementM->FindParamsByName(wx2std(param, databaseM->getCharsetConverter()));
+        for (std::vector<int>::const_iterator it = parameterslist.begin(); it != parameterslist.end(); ++it)
         {
-            if (statementM->ParameterType(row+1)!=IBPP::SDT::sdString)
+            row = (*it)-1;
+            IBPP::SDT parameterType = statementM->ParameterType(parameterslist.back()); //statementM->ParameterType(row + 1);
+            int subtype = statementM->ParameterSubtype(parameterslist.back());
+
+            if (sel == ioNull)
             {
-                statementM->SetNull(row+1);
+                statementM->SetNull(row + 1);
                 continue;
             }
-        }
-        if (getInsertParametersOption(gridM, row) == ioFile)
-        {
-            wxFFile fl(gridM->GetCellValue(row, 3), "rb");
-            if (!fl.IsOpened())
-                throw FRError(_("Cannot open BLOB file."));
-            IBPP::Blob b = IBPP::BlobFactory(statementM->DatabasePtr(),
-                statementM->TransactionPtr());
-            b->Create();
-            uint8_t buffer[32768];
-            while (!fl.Eof())
+            if (value.empty())
             {
-                size_t len = fl.Read(buffer, 32767);    // slow when not 32k
-                if (len < 1)
-                    break;
-                b->Write(buffer, len);
+                if (parameterType != IBPP::SDT::sdString)
+                {
+                    statementM->SetNull(row + 1);
+                    continue;
+                }
             }
-            fl.Close();
-            b->Close();
-            //st1->Set(index++, b);
-            //bufferM->setBlob((*it).columnDef->getIndex(), b);
-            //
-            statementM->Set(row+1, b);
-            continue;
-        }
-
-            switch (statementM->ParameterType(row+1))
+            if (sel == ioFile)
             {
-                case IBPP::SDT::sdArray:
-                    throw FRError(_("Unsupported array format"));
-                    break;
-                case IBPP::SDT::sdBlob: break;  //Done before
-                case IBPP::SDT::sdDate:
-                    parseDate(row, value);
-                    break;
-                case IBPP::SDT::sdTime:
-                    parseTime(row, value);
-                    break;
-                case IBPP::SDT::sdTimestamp:
-                    parseTimeStamp(row, value);
-                    break;
-                case IBPP::SDT::sdString:
-                    statementM->Set(row+1, wx2std(value, databaseM->getCharsetConverter()));
-                    break;
-                case IBPP::SDT::sdSmallint:
-                    long d;
-                    if (!value.ToLong(&d))
-                        throw FRError(_("Invalid integer value"));
-                    statementM->Set(row+1, (int)d);
-                    break;
-                case IBPP::SDT::sdInteger:
-                    long d1;
-                    if (!value.ToLong(&d1))
-                        throw FRError(_("Invalid integer value"));
-                    statementM->Set(row+1, (int)d1);
-                    break;
-                case IBPP::SDT::sdLargeint:
-                    wxLongLong_t d2;
-                    if (!value.ToLongLong(&d2))
-                        throw FRError(_("Invalid large integer value"));
-                    statementM->Set(row+1, (int64_t)d2);
-                    break;
-                case IBPP::SDT::sdFloat:
-                    double d3;
-                    if (!value.ToDouble(&d3))
-                        throw FRError(_("Invalid float numeric value"));
-                    statementM->Set(row+1, (float)d3);
-                    break;
-                case IBPP::SDT::sdDouble:
-                    double d4;
-                    if (!value.ToDouble(&d4))
-                        throw FRError(_("Invalid double numeric value"));
-                    statementM->Set(row+1, d4);
-                    break;
+                wxFFile fl(gridM->GetCellValue(resumedRow, 3), "rb");
+                if (!fl.IsOpened())
+                    throw FRError(_("Cannot open BLOB file."));
+                IBPP::Blob b = IBPP::BlobFactory(statementM->DatabasePtr(),
+                    statementM->TransactionPtr());
+                b->Create();
+                uint8_t buffer[32768];
+                while (!fl.Eof())
+                {
+                    size_t len = fl.Read(buffer, 32767);    // slow when not 32k
+                    if (len < 1)
+                        break;
+                    b->Write(buffer, len);
+                }
+                fl.Close();
+                b->Close();
+                //st1->Set(index++, b);
+                //bufferM->setBlob((*it).columnDef->getIndex(), b);
+                //
+                statementM->Set(row + 1, b);
+                continue;
             }
 
+            switch (parameterType)
+            {
+            case IBPP::SDT::sdArray:
+                throw FRError(_("Unsupported array format"));
+                break;
+            case IBPP::SDT::sdBlob: break;  //Done before
+            case IBPP::SDT::sdDate:
+                parseDate(row, value);
+                break;
+            case IBPP::SDT::sdTime:
+                parseTime(row, value);
+                break;
+            case IBPP::SDT::sdTimestamp:
+                parseTimeStamp(row, value);
+                break;
+            case IBPP::SDT::sdString:
+                if (subtype == 1) {
 
+                    if (value.length() % 2 == 1)
+                        throw FRError(_("Invalid HEX value value"));
+                    std::vector<char> octet = std::vector<char>();
+                    wxString::iterator ci = value.begin();
+                    wxString::iterator end = value.end();
+
+                    wxString num;
+                    while (ci != end)
+                    {
+                        wxChar c = (wxChar)*ci;
+                        num = c;
+                        ++ci;
+                        c = (wxChar)*ci;
+                        num += c;
+                        ++ci;
+                        octet.push_back(std::stoi(wx2std(num, databaseM->getCharsetConverter()), nullptr, 16));
+                    }
+                    while (octet.size() < statementM->ParameterSize(parameterslist.back()))
+                        octet.push_back(0x0);
+                    statementM->Set(row + 1, octet.data(), octet.size());
+                }
+                else
+                    statementM->Set(row + 1, wx2std(value, databaseM->getCharsetConverter()));
+                break;
+            case IBPP::SDT::sdSmallint:
+                long d;
+                if (!value.ToLong(&d))
+                    throw FRError(_("Invalid integer value"));
+                statementM->Set(row + 1, (int)d);
+                break;
+            case IBPP::SDT::sdInteger:
+                long d1;
+                if (!value.ToLong(&d1))
+                    throw FRError(_("Invalid integer value"));
+                statementM->Set(row + 1, (int)d1);
+                break;
+            case IBPP::SDT::sdLargeint:
+                wxLongLong_t d2;
+                if (!value.ToLongLong(&d2))
+                    throw FRError(_("Invalid large integer value"));
+                statementM->Set(row + 1, (int64_t)d2);
+                break;
+            case IBPP::SDT::sdFloat:
+                double d3;
+                if (!value.ToDouble(&d3))
+                    throw FRError(_("Invalid float numeric value"));
+                statementM->Set(row + 1, (float)d3);
+                break;
+            case IBPP::SDT::sdDouble:
+                double d4;
+                if (!value.ToDouble(&d4))
+                    throw FRError(_("Invalid double numeric value"));
+                statementM->Set(row + 1, d4);
+                break;
+            case IBPP::SDT::sdBoolean:
+                if ((value.Upper() == "TRUE") || (value.Upper() == "FALSE") || (value == "0") || (value == "1")) {
+                    bool b1 = (value.Upper() == "TRUE" || value == "1");
+                    statementM->Set(row + 1, b1);
+                }else
+                    throw FRError(_("Invalid boolean value"));
+                    break;
+
+            }
+        }
 
         //throw FRError(_("Cannot open BLOB file."));
     }
@@ -811,7 +882,7 @@ void InsertParametersDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
         IBPP::Blob b = IBPP::BlobFactory(st1->DatabasePtr(),
             st1->TransactionPtr());
         b->Create();
-        boost::uint8_t buffer[32768];
+        uint8_t buffer[32768];
         while (!fl.Eof())
         {
             size_t len = fl.Read(buffer, 32767);    // slow when not 32k
@@ -831,11 +902,11 @@ void InsertParametersDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
     // (to prevent deletion in destructor)
     gridTableM->addRow(bufferM, stm);
 */
-    if (checkboxInsertAnother->IsChecked())
+    /*if (checkboxInsertAnother->IsChecked())
     {
         //bufferM = new InsertedGridRowBuffer(bufferM);
     }
-    else
+    else*/
     {
         bufferM = 0;
         databaseM = 0;  // prevent other event handlers from making problems

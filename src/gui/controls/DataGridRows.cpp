@@ -121,16 +121,16 @@ wxString GridCellFormats::formatDate(int year, int month, int day)
     return result;
 }
 
-bool getNumber(wxString::iterator& ci, int& toSet)
+bool getNumber(wxString::iterator& ci, wxString::iterator& end, int& toSet)
 {
     wxString num;
-    while (true)
+    while (ci != end)
     {
         wxChar c = (wxChar)*ci;
         if (c < wxChar('0') || c > wxChar('9'))
             break;
         num += c;
-        ci++;
+        ++ci;
     }
     long l;
     if (num.IsEmpty() || !num.ToLong(&l))
@@ -153,20 +153,20 @@ bool GridCellFormats::parseDate(wxString::iterator& start,
             case 'D':
                 if (!consumeAll && (*start < wxChar('0') || *start > wxChar('9')))
                     return true;
-                if (!(getNumber(start, day) && day >= 1 && day <= 31))
+                if (!(getNumber(start, end, day) && day >= 1 && day <= 31))
                     return false;
                 break;
             case 'm':
             case 'M':
                 if (!consumeAll && (*start < wxChar('0') || *start > wxChar('9')))
                     return true;
-                if (!(getNumber(start, month) && month >= 1 && month <= 12))
+                if (!(getNumber(start, end, month) && month >= 1 && month <= 12))
                     return false;
                 break;
             case 'y':
                 if (!consumeAll && (*start < wxChar('0') || *start > wxChar('9')))
                     return true;
-                if (!getNumber(start, year))
+                if (!getNumber(start, end, year))
                     return false;
                 // see http://www.firebirdsql.org/doc/contrib/FirebirdDateLiterals.html
                 if (year < 100)
@@ -188,7 +188,7 @@ bool GridCellFormats::parseDate(wxString::iterator& start,
             case 'Y':
                 if (!consumeAll && (*start < wxChar('0') || *start > wxChar('9')))
                     return true;
-                if (!getNumber(start, year))
+                if (!getNumber(start, end, year))
                     return false;
                 break;
             default:        // other characters must match
@@ -259,21 +259,21 @@ bool GridCellFormats::parseTime(wxString::iterator& start,
         {
             case 'h':
             case 'H':
-                if (!(getNumber(start, hr) && hr >= 0 && hr <= 23))
+                if (!(getNumber(start, end, hr) && hr >= 0 && hr <= 23))
                     return false;
                 break;
             case 'm':
             case 'M':
-                if (!(getNumber(start, mn) && mn >= 0 && mn <= 59))
+                if (!(getNumber(start, end, mn) && mn >= 0 && mn <= 59))
                     return false;
                 break;
             case 's':
             case 'S':
-                if (!(getNumber(start, sc) && sc >= 0 && sc <= 59))
+                if (!(getNumber(start, end, sc) && sc >= 0 && sc <= 59))
                     return false;
                 break;
             case 'T':
-                if (!(getNumber(start, ml) && ml >= 0 && ml <= 999))
+                if (!(getNumber(start, end, ml) && ml >= 0 && ml <= 999))
                     return false;
                 break;
             default:        // other characters must match
@@ -359,20 +359,20 @@ bool GridCellFormats::parseTimestamp(wxString::iterator& start,
             case 'D':
                 if (*start < wxChar('0') || *start > wxChar('9'))
                     return true;
-                if (!(getNumber(start, day) && day >= 1 && day <= 31))
+                if (!(getNumber(start, end, day) && day >= 1 && day <= 31))
                     return false;
                 break;
             case 'n':
             case 'N':
                 if (*start < wxChar('0') || *start > wxChar('9'))
                     return true;
-                if (!(getNumber(start, month) && month >= 1 && month <= 12))
+                if (!(getNumber(start, end, month) && month >= 1 && month <= 12))
                     return false;
                 break;
             case 'y':
                 if (*start < wxChar('0') || *start > wxChar('9'))
                     return true;
-                if (!getNumber(start, year))
+                if (!getNumber(start, end, year))
                     return false;
                 // see http://www.firebirdsql.org/doc/contrib/FirebirdDateLiterals.html
                 if (year < 100)
@@ -394,26 +394,26 @@ bool GridCellFormats::parseTimestamp(wxString::iterator& start,
             case 'Y':
                 if (*start < wxChar('0') || *start > wxChar('9'))
                     return true;
-                if (!getNumber(start, year))
+                if (!getNumber(start, end, year))
                     return false;
                 break;
             case 'h':
             case 'H':
-                if (!(getNumber(start, hr) && hr >= 0 && hr <= 23))
+                if (!(getNumber(start, end, hr) && hr >= 0 && hr <= 23))
                     return false;
                 break;
             case 'm':
             case 'M':
-                if (!(getNumber(start, mn) && mn >= 0 && mn <= 59))
+                if (!(getNumber(start, end, mn) && mn >= 0 && mn <= 59))
                     return false;
                 break;
             case 's':
             case 'S':
-                if (!(getNumber(start, sc) && sc >= 0 && sc <= 59))
+                if (!(getNumber(start, end, sc) && sc >= 0 && sc <= 59))
                     return false;
                 break;
             case 'T':
-                if (!(getNumber(start, ml) && ml >= 0 && ml <= 999))
+                if (!(getNumber(start, end, ml) && ml >= 0 && ml <= 999))
                     return false;
                 break;
             default:        // other characters must match
@@ -1181,17 +1181,17 @@ unsigned BlobColumnDef::getIndex()
     return indexM;
 }
 
-wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
+wxString BlobColumnDef::getAsString(DataGridRowBuffer* grid_buffer)
 {
-    wxASSERT(buffer);
-    if (buffer->isStringLoaded(stringIndexM))
-        return buffer->getString(stringIndexM);
+    wxASSERT(grid_buffer);
+    if (grid_buffer->isStringLoaded(stringIndexM))
+        return grid_buffer->getString(stringIndexM);
     if (!GridCellFormats::get().showBlobContent())
         return _("[BLOB]");
     if (!textualM && !GridCellFormats::get().showBinaryBlobContent())
         return _("[BINARY]");
 
-    IBPP::Blob *b0 = buffer->getBlob(indexM);
+    IBPP::Blob *b0 = grid_buffer->getBlob(indexM);
     if (!b0)
         return "";
     IBPP::Blob b = *b0;
@@ -1246,7 +1246,7 @@ wxString BlobColumnDef::getAsString(DataGridRowBuffer* buffer)
             wxs = wxString(result.c_str(), *converterM);   // try converting again
         }
     }
-    buffer->setString(stringIndexM, wxs);
+    grid_buffer->setString(stringIndexM, wxs);
     return wxs;
 }
 
@@ -1337,8 +1337,6 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     const IBPP::Statement& statement, wxMBConv* converter)
 {
     wxASSERT(buffer);
-    std::string value;
-    statement->Get(col, value);
     if (statement->ColumnType(col) == IBPP::sdBoolean) // Firebird v3
     {
         bool value; // UGLY, must create a specific Columm (child one ?)
@@ -1348,6 +1346,8 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     }
     else if (statement->ColumnSubtype(col) == 1)   // charset OCTETS
     {
+        std::string value;
+        statement->Get(col, value);
         wxString val;
         for (std::string::size_type p = 0; p < value.length(); p++)
             val += wxString::Format("%02x", uint8_t(value[p]));
@@ -1355,6 +1355,8 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     }
     else
     {
+        std::string value;
+        statement->Get(col, value);
         wxString val = wxString(value.c_str(), *converter);
         size_t trimLen = val.Strip().Length();
         if (val.Length() > size_t(charSizeM))
@@ -1622,8 +1624,8 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
     if (statementM->ColumnType(col) == IBPP::sdString
         && statementM->ColumnSubtype(col) == 1) // charset OCTETS
     {                       // TODO: to make those editable, we need to
-        readOnly = true;    // enter values as parameters. This should
-        return;             // probably be done together with BLOB support
+        //readOnly = true;    // enter values as parameters. This should
+        //return;             // probably be done together with BLOB support
     }
 
     wxString tabName(std2wxIdentifier(statementM->ColumnTable(col),
@@ -1899,14 +1901,14 @@ bool DataGridRows::isFieldNA(unsigned row, unsigned col)
 IBPP::Statement DataGridRows::addWhere(UniqueConstraint* uq, wxString& stm,
     const wxString& table, DataGridRowBuffer *buffer)
 {
-    bool dbkey = false;
+    bool have_dbkey = false;
     for (ColumnConstraint::const_iterator ci = uq->begin(); ci !=
         uq->end(); ++ci)
     {
         if ((*ci) == "DB_KEY")
         {
             stm += " RDB$DB_KEY = ?";
-            dbkey = true;
+            have_dbkey = true;
             break;
         }
         for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
@@ -1921,7 +1923,11 @@ IBPP::Statement DataGridRows::addWhere(UniqueConstraint* uq, wxString& stm,
                     throw FRError(_("N/A value in key column."));
                 if (ci != uq->begin())
                     stm += " AND ";
-                stm += Identifier(cn).getQuoted() + " = '";
+                if ((statementM->ColumnType(c2) == IBPP::SDT::sdString) && (statementM->ColumnSubtype(c2) == 1) ) //OCTET
+                    stm += Identifier(cn).getQuoted() + " = x'";
+                else
+                    stm += Identifier(cn).getQuoted() + " = '";
+
                 stm += columnDefsM[c2-1]->getAsFirebirdString(buffer);
                 stm += "'";
                 break;
@@ -1932,7 +1938,7 @@ IBPP::Statement DataGridRows::addWhere(UniqueConstraint* uq, wxString& stm,
     IBPP::Statement st = IBPP::StatementFactory(statementM->DatabasePtr(),
         statementM->TransactionPtr());
     st->Prepare(wx2std(stm, databaseM->getCharsetConverter()));
-    if (dbkey)  // find the column and set the parameter
+    if (have_dbkey)  // find the column and set the parameter
     {
         for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
         {
@@ -2033,10 +2039,12 @@ void DataGridRows::exportBlobFile(const wxString& filename, unsigned row,
     IBPP::Blob b = *b0;
 
     b->Open();
-    int size;
-    b->Info(&size, 0, 0);
     if (pi)
+    {
+        int size;
+        b->Info(&size, 0, 0);
         pi->initProgress(_("Saving..."), size);
+    }
     while (!pi || !pi->isCanceled())
     {
         uint8_t buffer[32768];
@@ -2131,8 +2139,11 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
             stm += " = NULL WHERE ";
         else
         {
-            stm += " = '" +
-                columnDefsM[col]->getAsFirebirdString(buffersM[row])
+            if ((statementM->ColumnType(col + 1) == IBPP::SDT::sdString) && (statementM->ColumnSubtype(col + 1) == 1)) //OCTET
+                stm += " = x'";
+            else
+                stm += " = '";
+            stm += columnDefsM[col]->getAsFirebirdString(buffersM[row])
                 + "' WHERE ";
         }
 

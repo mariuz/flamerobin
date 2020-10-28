@@ -35,8 +35,9 @@
 wxWindow* GUIURIHandlerHelper::getParentWindow(const URI& uri)
 {
     wxString ms = uri.getParam("parent_window");
-    unsigned long mo;
-    if (!ms.ToULong(&mo))
-        return 0;
-    return (wxWindow*)mo;
+    wxWindow* res;
+    if (!wxSscanf(ms, "%p", &res)) {
+         return NULL;
+    }
+    return res;
 }

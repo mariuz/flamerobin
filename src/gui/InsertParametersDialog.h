@@ -55,7 +55,7 @@ public:
 class InsertParametersDialog: public BaseDialog
 {
 public:
-    InsertParametersDialog(wxWindow* parent, IBPP::Statement& st, Database *db, std::map<std::string, wxString>& pParameterSaveList);
+    InsertParametersDialog(wxWindow* parent, IBPP::Statement& st, Database *db, std::map<std::string, wxString>& pParameterSaveList, std::map<std::string, wxString>& pParameterSaveListOptionNull);
     virtual ~InsertParametersDialog();
     void OnOkButtonClick(wxCommandEvent& event);
     void OnCancelButtonClick(wxCommandEvent& event);
@@ -74,6 +74,7 @@ private:
     IBPP::Statement& statementM;
     std::vector<InsertParametersColumnInfo> columnsM;
     std::map<std::string, wxString>& parameterSaveList;
+    std::map<std::string, wxString>& parameterSaveListOptionNull;
     DataGridTable *gridTableM;
     InsertedGridRowBuffer *bufferM;
     wxString tableNameM;
@@ -96,9 +97,9 @@ protected:
     virtual bool getConfigStoresWidth() const;
     virtual bool getConfigStoresHeight() const;
 
-    bool parseDate(int row, const wxString& source);
-    bool parseTime(int row, const wxString& source);
-    bool parseTimeStamp(int row, const wxString& source);
+    void parseDate(int row, const wxString& source);
+    void parseTime(int row, const wxString& source);
+    void parseTimeStamp(int row, const wxString& source);
 
     DECLARE_EVENT_TABLE()
 };
