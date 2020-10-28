@@ -156,16 +156,17 @@ wxString Trigger::getSource()
 void Trigger::loadProperties()
 {
     setPropertiesLoaded(false);
+    sourceM.clear();
 
     DatabasePtr db = getDatabase();
     MetadataLoader* loader = db->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
 
-    IBPP::Statement& st1 = loader->getStatement(
-        "select t.rdb$relation_name, t.rdb$trigger_sequence, "
-        "t.rdb$trigger_inactive, t.rdb$trigger_type, rdb$trigger_source "
-        "from rdb$triggers t where rdb$trigger_name = ? "
-    );
+	std::string sql("select t.rdb$relation_name, t.rdb$trigger_sequence, "
+		"t.rdb$trigger_inactive, t.rdb$trigger_type, rdb$trigger_source, "
+	);
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " rdb$entrypoint, rdb$engine_name,  ": " null, null, ";
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0) ? " rdb$sql_security " : " null ";
 
     st1->Set(1, wx2std(getName_(), db->getCharsetConverter()));
     st1->Execute();
@@ -190,7 +191,44 @@ void Trigger::loadProperties()
 
         st1->Get(4, &typeM);
 
-        readBlob(st1, 5, sourceM, db->getCharsetConverter());
+
+        if (!st1->IsNull(8))
+        {
+            bool b;
+            st1->Get(8, b);
+            sqlSecurityM = b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER";
+        }
+        else
+            sqlSecurityM.clear();
+
+		if (!st1->IsNull(6))
+		{
+			std::string s;
+			st1->Get(6, s);
+			sourceM += "EXTERNAL NAME '" + std2wxIdentifier(s, converter) + "'\n";
+			entryPointM = std2wxIdentifier(s, db->getCharsetConverter());
+            if (!st1->IsNull(7))
+            {
+                std::string s;
+                st1->Get(7, s);
+                sourceM += "ENGINE " + std2wxIdentifier(s, converter) + "\n";
+                engineNameM = std2wxIdentifier(s, db->getCharsetConverter());
+            }
+            else
+                engineNameM.clear();
+		}
+        else
+        {
+            entryPointM.clear();
+            engineNameM.clear();
+        }
+        if (!st1->IsNull(5))
+        {
+            wxString source1;
+            readBlob(st1, 5, source1, converter);
+            source1.Trim(false);     // remove leading whitespace
+            sourceM += "\n" + source1 + "\n";
+        }
     }
     else // maybe trigger was dropped?
     {
@@ -199,6 +237,9 @@ void Trigger::loadProperties()
         positionM = -1;
         sourceM.clear();
         typeM = 0;
+		    entryPointM.clear();
+		    engineNameM.clear();
+        sqlSecurityM.clear();
     }
 
     setPropertiesLoaded(true);
@@ -223,6 +264,8 @@ wxString Trigger::getAlterSql()
     sb << StatementBuilder::NewLine << getFiringEvent()
         << ' ' << kwPOSITION << ' ' << wxString::Format("%d", positionM)
         << StatementBuilder::NewLine;
+    sb << getSqlSecurity() << StatementBuilder::NewLine;
+
     sb << sourceM + "^" << StatementBuilder::NewLine;
 
     sb << kwSET << ' ' << kwTERMINATOR << " ; ^"
@@ -241,6 +284,12 @@ bool Trigger::isDatabaseTrigger()
         default:
             return false;
     }
+}
+
+wxString Trigger::getSqlSecurity()
+{
+    ensurePropertiesLoaded();
+    return sqlSecurityM;
 }
 
 const wxString Trigger::getTypeName() const
@@ -267,7 +316,8 @@ void Triggers::acceptVisitor(MetadataItemVisitor* visitor)
 void Triggers::load(ProgressIndicator* progressIndicator)
 {
     wxString stmt = "select rdb$trigger_name from rdb$triggers"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null) "
+        " and rdb$trigger_type between 1 and 6 "
         " order by 1";
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
@@ -282,3 +332,63 @@ const wxString Triggers::getTypeName() const
     return "TRIGGER_COLLECTION";
 }
 
+// DB Triggers collection
+DBTriggers::DBTriggers(DatabasePtr database)
+    : MetadataCollection<Trigger>(ntDBTriggers, database, _("Database Triggers"))
+{
+}
+
+void DBTriggers::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitDBTriggers(*this);
+}
+
+void DBTriggers::load(ProgressIndicator* progressIndicator)
+{
+    wxString stmt = "select rdb$trigger_name from rdb$triggers"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null) "
+        " and rdb$trigger_type between 8192 and 8196 "
+        " order by 1";
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+}
+
+void DBTriggers::loadChildren()
+{
+    load(0);
+}
+
+const wxString DBTriggers::getTypeName() const
+{
+    return "DBTRIGGER_COLLECTION";
+}
+
+
+// DDL Triggers collection
+DDLTriggers::DDLTriggers(DatabasePtr database)
+    : MetadataCollection<Trigger>(ntDDLTriggers, database, _("DDL Triggers"))
+{
+}
+
+void DDLTriggers::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitDDLTriggers(*this);
+}
+
+void DDLTriggers::load(ProgressIndicator* progressIndicator)
+{
+    wxString stmt = "select rdb$trigger_name from rdb$triggers"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null) "
+        " and rdb$trigger_type > 8196 "
+        " order by 1";
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+}
+
+void DDLTriggers::loadChildren()
+{
+    load(0);
+}
+
+const wxString DDLTriggers::getTypeName() const
+{
+    return "DDLTRIGGER_COLLECTION";
+}

@@ -100,14 +100,12 @@ void Relation::loadProperties()
     wxMBConv* converter = db->getCharsetConverter();
 
     std::string sql("select rdb$owner_name, ");
-    if (db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
-        sql += "rdb$relation_type, ";
-    else
-        sql += "0, ";
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1) ? "rdb$relation_type, " :" 0, ";
     // for tables: path to external file as string
     sql += "rdb$external_file, ";
     // for views: source as blob
     sql += "rdb$view_source ";
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0)? ", rdb$sql_security " : ", null ";
     sql += "from rdb$relations where rdb$relation_name = ?";
 
     IBPP::Statement& st1 = loader->getStatement(sql);
@@ -139,6 +137,16 @@ void Relation::loadProperties()
         }
         else
             setSource(wxEmptyString);
+        // Sql Security
+        if (!st1->IsNull(5))
+        {
+            bool b;
+            st1->Get(5, b);
+            sqlSecurityM = wxString(b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER");
+
+        }
+        else
+            sqlSecurityM.clear();
     }
 
     setPropertiesLoaded(true);
@@ -156,6 +164,12 @@ wxString Relation::getOwner()
 {
     ensurePropertiesLoaded();
     return ownerM;
+}
+
+wxString Relation::getSqlSecurity()
+{
+    ensurePropertiesLoaded();
+    return sqlSecurityM;
 }
 
 int Relation::getRelationType()

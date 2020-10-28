@@ -43,6 +43,7 @@
 #include "metadata/function.h"
 #include "metadata/generator.h"
 #include "metadata/Index.h"
+#include "metadata/package.h"
 #include "metadata/parameter.h"
 #include "metadata/procedure.h"
 #include "metadata/role.h"
@@ -171,7 +172,10 @@ void CreateDDLVisitor::visitDatabase(Database& d)
         iterateit<RolesPtr, Role>(this, d.getRoles(), progressIndicatorM);
 
         preSqlM << "/********************* UDFS ***********************/\n\n";
-        iterateit<FunctionsPtr, Function>(this, d.getFunctions(),
+        iterateit<UDFsPtr, UDF>(this, d.getUDFs(), progressIndicatorM);
+
+        preSqlM << "/********************* FUNCTIONS ***********************/\n\n";
+        iterateit<FunctionSQLsPtr, FunctionSQL>(this, d.getFunctionSQLs(),
             progressIndicatorM);
 
         preSqlM << "/****************** SEQUENCES ********************/\n\n";
@@ -186,6 +190,9 @@ void CreateDDLVisitor::visitDatabase(Database& d)
         iterateit<ProceduresPtr, Procedure>(this, d.getProcedures(),
             progressIndicatorM);
 
+        preSqlM << "/******************* PACKAGES ******************/\n\n";
+        iterateit<PackagesPtr, Package>(this, d.getPackages(),
+            progressIndicatorM);
         preSqlM << "/******************** TABLES **********************/\n\n";
         iterateit<TablesPtr, Table>(this, d.getTables(), progressIndicatorM);
 
@@ -305,7 +312,57 @@ void CreateDDLVisitor::visitForeignKey(ForeignKey& fk)
     sqlM = postSqlM;
 }
 
-void CreateDDLVisitor::visitFunction(Function& f)
+void CreateDDLVisitor::visitFunctionSQL(FunctionSQL& f)
+{
+    wxString temp(f.getAlterSql());
+    temp += "\n";
+
+    // grant execute on [name] to [user/role]
+    const std::vector<Privilege>* priv = f.getPrivileges();
+    if (priv)
+    {
+        for (std::vector<Privilege>::const_iterator ci = priv->begin();
+            ci != priv->end(); ++ci)
+        {
+            grantSqlM += (*ci).getSql() + "\n";
+        }
+    }
+
+    /* description of function and parameters */
+    wxString name(f.getName_());
+    name.Replace("'", "''");
+    wxString description = f.getDescription();
+    if (!description.empty())
+    {
+        description.Replace("'", "''");
+        postSqlM << "comment on function " << name << " is '"
+            << description << "';\n";
+    }
+    for (ParameterPtrs::iterator it = f.begin(); it != f.end(); ++it)
+    {
+        description = (*it)->getDescription();
+        if (!description.empty())
+        {
+            wxString pname((*it)->getName_());
+            description.Replace("'", "''");
+            pname.Replace("'", "''");
+            temp << "comment on parameter " << name << "." << pname << " is '"
+                << description << "';\n";
+        }
+    }
+
+    postSqlM << temp << "\n";
+    temp.Replace("ALTER", "CREATE", false);   // just first
+    sqlM << temp << grantSqlM;
+
+    // create empty function body (for database DDL dump)
+    temp = f.getAlterSql(false);    // false = only headers
+    temp.Replace("ALTER", "CREATE", false);   // just first
+    preSqlM << temp << "\n";
+}
+
+
+void CreateDDLVisitor::visitUDF(UDF& f)
 {
     preSqlM << f.getCreateSql() << "\n";
     wxString description = f.getDescription();
@@ -354,6 +411,43 @@ void CreateDDLVisitor::visitPrimaryKeyConstraint(PrimaryKeyConstraint& pk)
     preSqlM += ",\n " + sql;
     sqlM = "ALTER TABLE " + pk.getTable()->getQuotedName() + " ADD" +
         sql + ";\n";
+}
+
+void CreateDDLVisitor::visitPackage(Package& package)
+{
+    wxString temp(package.getAlterSql());
+    temp += "\n";
+
+    // grant execute on [name] to [user/role]
+    const std::vector<Privilege>* priv = package.getPrivileges();
+    if (priv)
+    {
+        for (std::vector<Privilege>::const_iterator ci = priv->begin();
+            ci != priv->end(); ++ci)
+        {
+            grantSqlM += (*ci).getSql() + "\n";
+        }
+    }
+
+    /* description of package*/
+    wxString name(package.getName_());
+    name.Replace("'", "''");
+    wxString description = package.getDescription();
+    if (!description.empty())
+    {
+        description.Replace("'", "''");
+        postSqlM << "comment on package " << name << " is '"
+            << description << "';\n";
+    }
+
+    postSqlM << temp << "\n";
+    temp.Replace("ALTER", "CREATE", false);   // just first
+    sqlM << temp << grantSqlM;
+
+    temp = package.getAlterSql(false);    // false = only headers
+    temp.Replace("ALTER", "CREATE", false);   // just first
+    preSqlM << temp << "\n";
+
 }
 
 void CreateDDLVisitor::visitProcedure(Procedure& p)

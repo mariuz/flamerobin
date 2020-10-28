@@ -21,88 +21,90 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#ifndef FR_PACKAGE_H
+#define FR_PACKAGE_H
 
-#ifndef FR_TRIGGER_H
-#define FR_TRIGGER_H
+#include <vector>
 
 #include "metadata/collection.h"
-#include "metadata/database.h"
+#include "metadata/privilege.h"
 
 class ProgressIndicator;
 
-class Trigger: public MetadataItem
+class Method : public MetadataItem
 {
-public:
-    enum FiringTime
-    {
-        invalid,
-        // relation triggers
-        beforeIUD, afterIUD,
-        // database triggers
-        databaseConnect, databaseDisconnect,
-        transactionStart, transactionCommit, transactionRollback
-    };
 private:
-    wxString relationNameM;
-    bool activeM;
-    int positionM;
-    wxString sourceM;
-    int typeM;
-    wxString sqlSecurityM;
-    wxString entryPointM;
-    wxString engineNameM;
-
-    static FiringTime getFiringTime(int type);
+    bool functionM;
+    wxString resultM;
 protected:
-    virtual void loadProperties();
 public:
-    Trigger(DatabasePtr database, const wxString& name);
+    Method(MetadataItem* parent, const wxString& name);
 
-    bool getActive();
-    wxString getFiringEvent();
-    FiringTime getFiringTime();
-    int getPosition();
-    wxString getRelationName();
+    bool isFunction() const;
+    virtual const wxString getTypeName() const;
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    void initialize(int MethodType);
+
+
+};
+
+class Package : public MetadataItem
+{
+private:
+    std::vector<Privilege> privilegesM;
+    MethodPtrs methodsM;
+protected:
+    virtual void loadChildren();
+    virtual void lockChildren();
+    virtual void unlockChildren();
+public:
+    Package(DatabasePtr database, const wxString& name);
+
+    bool getChildren(std::vector<MetadataItem *>& temp);
+
+    MethodPtrs::iterator begin();
+    MethodPtrs::iterator end();
+    MethodPtrs::const_iterator begin() const;
+    MethodPtrs::const_iterator end() const;
+
+    size_t getMethodCount() const;
+    MethodPtr findMethod(const wxString& name) const;
+
+    wxString getOwner();
     wxString getSource();
-    wxString getAlterSql();
-    bool isDatabaseTrigger();
+    wxString getAlterSql(bool full = true);
+    wxString getDefinition();   // used for calltip in sql editor
     wxString getSqlSecurity();
+    wxString getAlterHeader();
+    wxString getAlterBody();
+
+    std::vector<Privilege>* getPrivileges();
+
+    void checkDependentPackage();
 
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+
 };
 
-class Triggers: public MetadataCollection<Trigger>
+class Packages: public MetadataCollection<Package>
 {
 protected:
     virtual void loadChildren();
 public:
-    Triggers(DatabasePtr database);
-
-    virtual void acceptVisitor(MetadataItemVisitor* visitor);
-    void load(ProgressIndicator* progressIndicator);
-    virtual const wxString getTypeName() const;
-};
-
-
-class DBTriggers : public MetadataCollection<Trigger>
-{
-protected:
-    virtual void loadChildren();
-public:
-    DBTriggers(DatabasePtr database);
+    Packages(DatabasePtr database);
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     void load(ProgressIndicator* progressIndicator);
     virtual const wxString getTypeName() const;
 };
 
-class DDLTriggers : public MetadataCollection<Trigger>
+class SysPackages : public MetadataCollection<Package>
 {
 protected:
     virtual void loadChildren();
 public:
-    DDLTriggers(DatabasePtr database);
+    SysPackages(DatabasePtr database);
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     void load(ProgressIndicator* progressIndicator);

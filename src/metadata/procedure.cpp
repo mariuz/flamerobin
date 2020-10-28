@@ -75,14 +75,11 @@ void Procedure::loadChildren()
         "select rdb$parameter_name, rdb$field_source, "
         "rdb$parameter_type, "
     );
-    if (db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
-        sql += "rdb$default_source, rdb$null_flag, rdb$parameter_mechanism, ";
-    else
-        sql += "null, null, -1, ";
-
-    sql +=  "rdb$description from rdb$procedure_parameters "
-            "where rdb$procedure_name = ? "
-            "order by rdb$parameter_type, rdb$parameter_number";
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)? "rdb$default_source, rdb$null_flag, rdb$parameter_mechanism, ": "null, null, -1, ";
+	sql += "rdb$description from rdb$procedure_parameters "
+		"where rdb$procedure_name = ? ";
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and rdb$package_name is null " : "";
+    sql += "order by rdb$parameter_type, rdb$parameter_number";
 
     IBPP::Statement st1 = loader->getStatement(sql);
     st1->Set(1, wx2std(getName_(), converter));
@@ -215,16 +212,46 @@ wxString Procedure::getSource()
     DatabasePtr db = getDatabase();
     MetadataLoader* loader = db->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
+	wxMBConv* converter = db->getCharsetConverter();
 
-    IBPP::Statement st1 = loader->getStatement(
-        "select rdb$procedure_source from rdb$procedures"
-        " where rdb$procedure_name = ?");
-    st1->Set(1, wx2std(getName_(), db->getCharsetConverter()));
+	std::string sql(
+		"select rdb$procedure_source, "
+	);
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? "rdb$entrypoint, rdb$engine_name  " : "null, null ";
+	sql += "from rdb$procedures where rdb$procedure_name = ?";
+	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+		sql += " and rdb$package_name is null ";
+	IBPP::Statement st1 = loader->getStatement( sql );
+	st1->Set(1, wx2std(getName_(), converter));
     st1->Execute();
     st1->Fetch();
     wxString source;
-    readBlob(st1, 1, source, db->getCharsetConverter());
-    source.Trim(false);     // remove leading whitespace
+	if (!st1->IsNull(2))
+	{
+		std::string s;
+		st1->Get(2, s);
+		source += "EXTERNAL NAME '"+std2wxIdentifier(s, converter)+ "' \n";
+        if (!st1->IsNull(3))
+        {
+            s.clear();
+            st1->Get(3, s);
+            source += "ENGINE " + std2wxIdentifier(s, converter) + "\n";
+            if (!st1->IsNull(1))
+            {
+                wxString source1;
+                readBlob(st1, 1, source1, converter);
+                source1.Trim(false);     // remove leading whitespace
+                source += "\nAS\n" + source1 + "\n";
+            }
+        }
+    }
+	else
+	{
+		wxString source1;
+		readBlob(st1, 1, source1, converter);
+		source1.Trim(false);     // remove leading whitespace
+		source += "\nAS\n" + source1 + "\n";
+	}
     return source;
 }
 
@@ -270,6 +297,31 @@ wxString Procedure::getDefinition()
     if (!collist.empty())
         retval += "returns:\n" + collist;
     return retval;
+}
+
+wxString Procedure::getSqlSecurity()
+{
+    DatabasePtr db = getDatabase();
+    if (db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
+    {
+        MetadataLoader* loader = db->getMetadataLoader();
+        MetadataLoaderTransaction tr(loader);
+        wxMBConv* converter = db->getCharsetConverter();
+        std::string sql(
+            "select rdb$sql_security from rdb$procedures where rdb$procedure_name = ?"
+            " and rdb$package_name is null ");
+        IBPP::Statement st1 = loader->getStatement(sql);
+        st1->Set(1, wx2std(getName_(), converter));
+        st1->Execute();
+        st1->Fetch();
+        bool b;
+        st1->Get(1, b);
+        return wxString(b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER");
+    }
+    else
+    {
+        return wxString();
+    }
 }
 
 wxString Procedure::getAlterSql(bool full)
@@ -348,7 +400,7 @@ wxString Procedure::getAlterSql(bool full)
         if (!output.empty())
             sql += output + " )";
     }
-    sql += "\nAS\n";
+    sql += getSqlSecurity() + "\n";
     if (full)
         sql += getSource();
     else
