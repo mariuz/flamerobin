@@ -19,7 +19,7 @@ jobs:
       run: sudo apt-get install build-essential git cmake firebird-dev libwxgtk*-gtk3-dev -y
     - name: CMake
       run: |
-	     mkdir build
+          mkdir build
           cd build
           cmake ..
     - name: Build
