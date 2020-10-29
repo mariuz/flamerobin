@@ -3,18 +3,18 @@ FlameRobin
 FlameRobin is a software package for administration of Firebird DBMS. It is
 developed by:
 
-Milan Babuskov
-Nando Dessena
-Michael Hieke
-Gregory Sapunkov
-Bart Bakker
-Marius Popa
+* Milan Babuskov
+* Nando Dessena
+* Michael Hieke
+* Gregory Sapunkov
+* Bart Bakker
+* Marius Popa
 
 
 The following people also made a significant non-coding contributions:
 
-Alex Stanciu
-Barbara Del Vecchio
+* Alex Stanciu
+* Barbara Del Vecchio
 
 License
 ---------------------------
