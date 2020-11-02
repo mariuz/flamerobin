@@ -326,6 +326,42 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
                     cmdParams.from(2), &(*it));
             }
         }
+        else if (cmdParams[0] == "fieldDependencyInfo") {
+            if (!metadataItem)
+                return;
+
+            std::vector<DependencyField> depFields;
+            metadataItem->getDependenciesPivoted(depFields);
+            bool firstItem = true;
+            for (std::vector<DependencyField>::iterator it = depFields.begin(); it != depFields.end(); ++it)
+            {
+                Local::foreachIteration(firstItem, tp, processedText, sep,
+                    cmdParams.from(2), &(*it));
+            }
+        }
+
+        // {%foreach:fieldDependencyObjects:separator:text%}
+        // If the current object is a dependency, expands to the requested
+        // property of the dependency object.
+        else if (cmdParams[0] == "fieldDependencyObjects")
+        {
+            DependencyField* cb = dynamic_cast<DependencyField*>(object);
+            if (!cb)
+                return;
+
+            if (!metadataItem)
+                return;
+            DependencyField* mt = dynamic_cast<DependencyField*>(metadataItem);
+
+            std::vector<Dependency> deps;
+            mt->getDependencies(deps);
+            bool firstItem = true;
+            for (std::vector<Dependency>::iterator it = deps.begin(); it != deps.end(); ++it)
+            {
+                    Local::foreachIteration(firstItem, tp, processedText, sep,
+                        cmdParams.from(2), &(*it));
+            }
+        }
 
         // {%foreach:parameter:<separator>:<input|output>:<text>%}
         // If the current object is a procedure, processes <text> for
@@ -425,6 +461,16 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             return;
 
         processedText += d->getFields();
+    }
+    else if (cmdName == "auxiliar")
+    {
+        Dependency* d = dynamic_cast<Dependency*>(object);
+        if (!d)
+            return;
+        if ((cmdParams.Count() >= 1) && (cmdParams[0] == "isnull"))
+          processedText += tp->escapeChars(getBooleanAsString(d->getAuxiliar()==0));
+        else if(d->getAuxiliar())
+            processedText += tp->escapeChars(d->getAuxiliar()->getName_());
     }
 
     // {%primary_key:<text>%}
