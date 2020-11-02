@@ -27,6 +27,7 @@
 #include <algorithm>
 #include <iterator>
 #include <vector>
+#include <functional>
 
 #include "metadata/database.h"
 

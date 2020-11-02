@@ -462,36 +462,32 @@ bool Table::tablesRelate(const std::vector<wxString>& tables, Table* table,
                           std::vector<ForeignKey>& list)
 {
     // see if "table" references some of the "tables"
-    std::vector<ForeignKey> *fks = table->getForeignKeys();
-    for (std::vector<ForeignKey>::iterator it = fks->begin(); it != fks->end(); ++it)
+    for (const auto fk : *(table->getForeignKeys()))
     {
-        ForeignKey& fk = (*it);
-        for (std::vector<wxString>::const_iterator i2 = tables.begin(); i2 != tables.end(); ++i2)
-            if ((*i2) == fk.referencedTableM)
+        for(const auto t : tables)
+            if (t == fk.referencedTableM)
                 list.push_back(fk);
     }
 
     // see if some of the "tables" reference the "table"
     std::vector<Dependency> deplist;
     table->getDependencies(deplist, false);
-    for (std::vector<Dependency>::iterator it = deplist.begin(); it != deplist.end(); ++it)
+    for (const auto dep : deplist)
     {
-        if ((*it).getType() == ntTable)
+        if (dep.getType() == ntTable)
         {
-            for (std::vector<wxString>::const_iterator i2 = tables.begin(); i2 != tables.end(); ++i2)
+            for (const auto tab : tables)
             {
-                if ((*i2) == (*it).getName_())
+                if (tab == dep.getName_())
                 {
                     // find foreign keys for that table
                     DatabasePtr db = table->getDatabase();
-                    Table* other_table = dynamic_cast<Table*>(db->findByNameAndType(ntTable, (*i2)));
+                    Table* other_table = dynamic_cast<Table*>(db->findByNameAndType(ntTable, tab));
                     if (!other_table)
                         break;
 
-                    std::vector<ForeignKey>* fks = other_table->getForeignKeys();
-                    for (std::vector<ForeignKey>::iterator it = fks->begin(); it != fks->end(); ++it)
+                    for (const auto fk : *(other_table->getForeignKeys()))
                     {
-                        ForeignKey& fk = (*it);
                         if (table->getName_() == fk.referencedTableM)
                         {
                             list.push_back(fk);

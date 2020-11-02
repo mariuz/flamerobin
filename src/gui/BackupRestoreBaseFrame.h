@@ -68,7 +68,7 @@ protected:
     virtual const wxString getStorageName() const;
     // set threadM if thread was successfully created and started,
     // otherwise delete the thread
-    bool startThread(std::auto_ptr<wxThread> thread);
+    bool startThread(std::unique_ptr<wxThread> thread);
     bool getThreadRunning() const;
 
     void threadOutputMsg(const wxString msg, MsgKind kind);
