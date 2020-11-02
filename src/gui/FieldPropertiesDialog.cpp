@@ -587,7 +587,7 @@ void FieldPropertiesDialog::setControlsProperties()
 
     // bold font for "Autoincrement" label
     wxFont font(label_autoinc->GetFont());
-    font.SetWeight(wxBOLD);
+    font.SetWeight(wxFONTWEIGHT_BOLD);
     label_autoinc->SetFont(font);
 
     // select items in controls without selection, this is called after

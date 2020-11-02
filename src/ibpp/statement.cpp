@@ -244,7 +244,7 @@ void StatementImpl::Plan(std::string& plan)
 		throw LogicExceptionImpl("Statement::Plan", _("Database must be connected."));
 
 	IBS status;
-	RB result(4096);
+	RB result(65535);
 	char itemsReq[] = {isc_info_sql_get_plan};
 
 	(*gds.Call()->m_dsql_sql_info)(status.Self(), &mHandle, 1, itemsReq,
@@ -797,7 +797,7 @@ std::string StatementImpl::ParametersParser(std::string sql)
   std::string isDML = sProcessedSQL.str();
   isDML.erase(isDML.begin(), std::find_if(isDML.begin(), isDML.end(), std::not1(std::ptr_fun<int, int>(std::isspace)))); //lTrim
 
-  std::transform(isDML.begin(), isDML.end(), isDML.begin(),  [] ( char c ) { return ( std::toupper( c ) ); } ); //UpperCase
+  std::transform(isDML.begin(), isDML.end(), isDML.begin(),  [] ( char c ) { return (char)std::toupper(c); } ); //UpperCase (only bothered about ASCII text, cast is okay)
 
   std::string isDML4=isDML.substr(0,4);  std::string isDML6=isDML.substr(0,6);  std::string isDML7=isDML.substr(0,7);
 
@@ -824,7 +824,7 @@ std::string StatementImpl::ParametersParser(std::string sql)
     {
         if (dml.at(i)=="EXECUTE")//is execute procedure or execute block? else, is DML for sure
         {
-            unsigned int x=dml.at(i).size();
+            auto x=dml.at(i).size();
             while(std::isspace(isDML.at(x)) && x<isDML.size())
               x++;
             char p = isDML.at(x);

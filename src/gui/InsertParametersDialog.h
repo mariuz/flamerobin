@@ -97,9 +97,9 @@ protected:
     virtual bool getConfigStoresWidth() const;
     virtual bool getConfigStoresHeight() const;
 
-    bool parseDate(int row, const wxString& source);
-    bool parseTime(int row, const wxString& source);
-    bool parseTimeStamp(int row, const wxString& source);
+    void parseDate(int row, const wxString& source);
+    void parseTime(int row, const wxString& source);
+    void parseTimeStamp(int row, const wxString& source);
 
     DECLARE_EVENT_TABLE()
 };

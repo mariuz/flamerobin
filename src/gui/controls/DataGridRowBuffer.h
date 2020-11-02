@@ -31,12 +31,12 @@ struct DataGridRowBufferFieldAttr
 // use bits instead of bool here to save memory
 {
     // Field is null or not
-    int isNull:1; // accesed by indexM
+    bool isNull:1; // accesed by indexM
     // The buffer (stringsM) is loaded or not 
     // ATT: isStringLoaded is used with stringsM (see below)
     //      the size of stringsM can be less than fieldCount.
     //      It is accesed by stringIndexM.
-    int isStringLoaded:1;  // accessed by stringIndexM !!
+    bool isStringLoaded:1;  // accessed by stringIndexM !!
 };
 
 // DataGridRowBuffer class
@@ -44,10 +44,10 @@ class DataGridRowBuffer
 {
 private:
     // use bits instead of bool here to use less memory
-    int isModifiedM:1;
-    int isDeletedM:1;
-    int isDeletableIsSetM:1;
-    int isDeletableM:1;
+    bool isModifiedM:1;
+    bool isDeletedM:1;
+    bool isDeletableIsSetM:1;
+    bool isDeletableM:1;
 protected:
     std::vector<DataGridRowBufferFieldAttr> fieldAttrM;
     std::vector<uint8_t> dataM;

@@ -718,8 +718,7 @@ bool EditBlobDialog::loadFromStreamAsBinary(wxInputStream& stream, bool isNull, 
         return true;
     }
 
-    int size = stream.GetSize();
-    progressBegin(progressTitle, size, true);
+    progressBegin(progressTitle, stream.GetSize(), true);
 
     // disable OnDataModified event
     loadingM = true;

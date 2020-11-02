@@ -14395,7 +14395,7 @@ fi
 
 
 CFLAGS+=" -std=c11"
-CXXFLAGS+=" -std=c++11"
+CXXFLAGS+=" -std=c++14"
 
 if test $USE_DEBUG = yes ; then
   DEBUG=1

@@ -312,7 +312,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
                                 ntUnknown,  ntUnknown,  ntUnknown,  ntUnknown,  ntGenerator,
                                 ntFunction
     };
-    int type_count = sizeof(dep_types)/sizeof(NodeType);
+    const int type_count = sizeof(dep_types)/sizeof(NodeType);
     for (int i = 0; i < type_count; i++)
         if (typeM == dep_types[i])
             mytype = i;
@@ -396,8 +396,8 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
     for (int i = 0; i < params; i++)
         st1->Set(3 + i, wx2std(getName_(), d->getCharsetConverter()));
     st1->Execute();
-    MetadataItem* last = 0;
-    Dependency* dep = 0;
+    MetadataItem* last = NULL;
+    Dependency* dep = NULL;
     while (st1->Fetch())
     {
         int object_type;
@@ -470,21 +470,19 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
     //       call MetadataItem::getDependencies() and then add this
     if ((typeM == ntTable || typeM == ntSysTable) && ofObject)   // foreign keys of this table + computed columns
     {
-        Table *t = dynamic_cast<Table *>(this);
-        std::vector<ForeignKey> *f = t->getForeignKeys();
-        for (std::vector<ForeignKey>::const_iterator it = f->begin();
-            it != f->end(); ++it)
+        Table *tab = dynamic_cast<Table *>(this);
+        for (const auto iter : *(tab->getForeignKeys()))
         {
             MetadataItem *table = d->findByNameAndType(ntTable,
-                (*it).getReferencedTable());
+                iter.getReferencedTable());
             if (!table)
             {
                 throw FRError(wxString::Format(_("Table %s not found."),
-                    (*it).getReferencedTable().c_str()));
+                    iter.getReferencedTable().c_str()));
             }
-            MetadataItem* mi = new MetadataItem(*it);
+            MetadataItem* mi = new MetadataItem(iter);
             Dependency de(table, mi);
-            de.setFields((*it).getReferencedColumns());
+            de.setFields(iter.getReferencedColumns());
             list.push_back(de);
         }
 
@@ -549,7 +547,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
         st1->Set(1, wx2std(getName_(), d->getCharsetConverter()));
         st1->Execute();
         wxString lasttable;
-        Dependency* dep = 0;
+        dep = NULL;
         while (st1->Fetch())
         {
             std::string s;

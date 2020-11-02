@@ -36,8 +36,9 @@
 #include <algorithm>
 #include <functional>
 
-#include <boost/thread.hpp>
-#include <boost/chrono.hpp>
+#include <thread>
+#include <future>
+#include <chrono>
 
 #include "config/Config.h"
 #include "config/DatabaseConfig.h"
@@ -312,7 +313,7 @@ bool DatabaseAuthenticationMode::getUseEncryptedPassword() const
 // Database class
 Database::Database()
     : MetadataItem(ntDatabase), metadataLoaderM(0), connectedM(false),
-        connectionCredentialsM(0), charsetConverterM(0), dialectM(3), idM(0)
+        connectionCredentialsM(0), dialectM(3), idM(0)
 {
 }
 
@@ -925,75 +926,6 @@ void Database::reconnect()
     databaseM->Connect();
 }
 
-class BackgroundTask;
-typedef std::shared_ptr<BackgroundTask> SharedBackgroundTask;
-
-class BackgroundTask
-{
-private:
-    boost::mutex lockM;
-    wxString errorMsgM;
-
-    virtual void doExecute() {}
-protected:
-    BackgroundTask() {}
-
-public:
-    void checkForErrors()
-    {
-        wxASSERT(wxIsMainThread());
-        if (!errorMsgM.empty())
-            throw FRError(errorMsgM);
-    }
-
-    void execute()
-    {
-        try
-        {
-            doExecute();
-        }
-        catch (std::exception& e)
-        {
-            boost::lock_guard<boost::mutex> guard(lockM);
-            errorMsgM = e.what();
-        }
-    }
-};
-
-void runTask(SharedBackgroundTask task)
-{
-    if (task != 0)
-        task->execute();
-}
-
-static boost::thread startTask(SharedBackgroundTask task)
-{
-    wxASSERT(task != 0);
-    return boost::thread(std::bind(&::runTask, task));
-}
-
-class BackgroundDatabaseConnection: public BackgroundTask
-{
-private:
-    IBPP::Database databaseM;
-
-    BackgroundDatabaseConnection(IBPP::Database database)
-        : databaseM(database)
-    {
-    }
-
-    virtual void doExecute()
-    {
-        databaseM->Connect();
-    }
-public:
-    static SharedBackgroundTask create(IBPP::Database database)
-    {
-        wxASSERT(database != 0);
-        return SharedBackgroundTask(new BackgroundDatabaseConnection(database));
-    }
-};
-
 // the caller of this function should check whether the database object has the
 // password set, and if it does not, it should provide the password
 //               and if it does, just provide that password
@@ -1012,40 +944,58 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
         }
 
         databaseM.clear();
-        bool useUserNamePwd = !authenticationModeM.getIgnoreUsernamePassword();
-        IBPP::Database db = IBPP::DatabaseFactory("",
-            wx2std(getConnectionString()),
-            (useUserNamePwd ? wx2std(getUsername()) : ""),
-            (useUserNamePwd ? wx2std(password) : ""),
-            wx2std(getRole()), wx2std(getConnectionCharset()), "");
+
+        auto connect = [this, &password]() {
+            bool useUserNamePwd = !authenticationModeM.getIgnoreUsernamePassword();
+            IBPP::Database db = IBPP::DatabaseFactory("",
+                wx2std(getConnectionString()),
+                (useUserNamePwd ? wx2std(getUsername()) : ""),
+                (useUserNamePwd ? wx2std(password) : ""),
+                wx2std(getRole()), wx2std(getConnectionCharset()), "");
+            db->Connect();  // As standard, will block for 180 seconds or until connected
+            return db;
+        };
 
         if (indicator)
         {
-            SharedBackgroundTask sbt(BackgroundDatabaseConnection::create(db));
-            boost::thread t = startTask(sbt);
-            while (!t.try_join_for(boost::chrono::milliseconds(50)))
+            // We can't just do a std::async here, we need to detach the thread to allow for user canceling
+            std::promise<IBPP::Database> promise;
+            auto future = promise.get_future();
+            std::thread thread([&connect](std::promise<IBPP::Database> p) {
+                try {
+                    p.set_value(connect());
+                }
+                catch (...) {
+                    try {
+                        p.set_exception(std::current_exception());
+                    }
+                    catch (...) {} // set_exception() may throw too, apparently
+                }
+            }, std::move(promise));
+            thread.detach();  // No use for this, just using the future
+
+            while (future.wait_for(std::chrono::milliseconds(50)) == std::future_status::timeout)
             {
                 indicator->stepProgress();
                 if (indicator->isCanceled())
                 {
-                    t.detach();
+                    // There is no safe, clean way to kill the thread. So it will continue in
+                    // the background, and clean itself up when done.
+                    // If user quits app before then, technically 'undefined behaviour' in the
+                    // C++ standard, but all the main OS's just quietly kill the thread and
+                    // release resources.
                     break;
                 }
             }
             if (!indicator->isCanceled())
             {
-                // throw exception in this thread context if Connect() call failed
-                sbt->checkForErrors();
-                if (db->Connected())
-                    databaseM = db;
+                // Will throw exception in this thread context if Connect() call failed
+                databaseM = future.get();
             }
+        } else
+        {
+            databaseM = connect();
         }
-        else
-        { 
-            db->Connect();
-            databaseM = db;
-        }
-        db.clear();
 
         if (databaseM != 0 && databaseM->Connected())
         {
