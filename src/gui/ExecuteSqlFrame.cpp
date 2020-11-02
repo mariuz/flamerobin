@@ -150,11 +150,10 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
     if (text.Mid(0, 7) != "OBJECT:")
         return false;
 
-    long address;
-    if (!text.Mid(7).ToLong(&address))
+    MetadataItem* m;
+    if (!wxSscanf(text.Mid(7), "%p", &m))
         return false;
-    MetadataItem *m = (MetadataItem *)address;
-
+  
     DatabasePtr db = m->getDatabase();
     if (db.get() != databaseM)
     {
@@ -263,7 +262,7 @@ SqlEditor::SqlEditor(wxWindow *parent, wxWindowID id)
     }
     else
     {
-        wxFont font(frlayoutconfig().getEditorFontSize(), wxMODERN, wxNORMAL, wxNORMAL);
+        wxFont font(frlayoutconfig().getEditorFontSize(), wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
         StyleSetFont(wxSTC_STYLE_DEFAULT, font);
     }
 
@@ -417,7 +416,7 @@ void SqlEditor::setFont()
     }
     else                // if config() doesn't have it, we'll use the default
     {
-        wxFont font(frlayoutconfig().getEditorFontSize(), wxMODERN, wxNORMAL, wxNORMAL);
+        wxFont font(frlayoutconfig().getEditorFontSize(), wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
         f2 = ::wxGetFontFromUser(this, font);
     }
 
@@ -590,11 +589,8 @@ void ExecuteSqlFrame::buildToolbar(CommandManager& cm)
     //toolBarM = CreateToolBar( wxTB_FLAT|wxTB_HORIZONTAL|wxTB_TEXT, wxID_ANY );
     toolBarM = CreateToolBar( wxTB_FLAT | wxTB_HORIZONTAL, wxID_ANY );
 
-#ifdef __WXGTK20__
+
     wxSize bmpSize(24, 24);
-#else
-    wxSize bmpSize(16, 16);
-#endif
     toolBarM->SetToolBitmapSize(bmpSize);
 
     toolBarM->AddTool( wxID_NEW, _("New"),
@@ -1810,8 +1806,7 @@ void ExecuteSqlFrame::OnMenuGridSetFieldToNULL(wxCommandEvent& WXUNUSED(event))
     for (int i = 0; i < count; i++)
         colsReadonly.insert(cells[i].GetCol());
     // -> remove all fiels that are nullable and not readonly
-    std::set<int>::iterator col;
-    for (col = colsReadonly.begin(); col != colsReadonly.end();)
+    for (auto col = colsReadonly.begin(); col != colsReadonly.end();)
     {
         if (!dgt->isReadonlyColumn(*col) && dgt->isNullableColumn(*col))
             colsReadonly.erase(col++);
@@ -1820,11 +1815,11 @@ void ExecuteSqlFrame::OnMenuGridSetFieldToNULL(wxCommandEvent& WXUNUSED(event))
     }
     // generate a string for message with column names
     wxString colNames = wxEmptyString;
-    for (col = colsReadonly.begin(); col != colsReadonly.end(); col++)
+    for (auto col : colsReadonly)
     {
-        if (colNames != wxEmptyString)
+        if (!colNames.IsEmpty())
             colNames += ", ";
-        colNames += dgt->GetColLabelValue(*col);
+        colNames += dgt->GetColLabelValue(col);
     }
     // -> if colNames != "" the user has readonly columns selected
     // -> we will inform him
@@ -2192,7 +2187,7 @@ void ExecuteSqlFrame::compareCounts(IBPP::DatabaseCounts& one,
     for (IBPP::DatabaseCounts::iterator it = two.begin(); it != two.end();
         ++it)
     {
-        wxString s;
+        wxString str_log;
         IBPP::DatabaseCounts::iterator i2 = one.find((*it).first);
         IBPP::CountInfo c;
         IBPP::CountInfo& r1 = (*it).second;
@@ -2200,12 +2195,12 @@ void ExecuteSqlFrame::compareCounts(IBPP::DatabaseCounts& one,
         if (i2 != one.end())
             r2 = (*i2).second;
         if (r1.inserts > r2.inserts)
-            s += wxString::Format(_("%d inserts. "), r1.inserts - r2.inserts);
+            str_log += wxString::Format(_("%d inserts. "), r1.inserts - r2.inserts);
         if (r1.updates > r2.updates)
-            s += wxString::Format(_("%d updates. "), r1.updates - r2.updates);
+            str_log += wxString::Format(_("%d updates. "), r1.updates - r2.updates);
         if (r1.deletes > r2.deletes)
-            s += wxString::Format(_("%d deletes. "), r1.deletes - r2.deletes);
-        if (!s.IsEmpty())
+            str_log += wxString::Format(_("%d deletes. "), r1.deletes - r2.deletes);
+        if (!str_log.IsEmpty())
         {
             wxString relName;
             try
@@ -2229,7 +2224,7 @@ void ExecuteSqlFrame::compareCounts(IBPP::DatabaseCounts& one,
             }
             if (relName.IsEmpty())
                 relName.Format(_("Relation #%d"), (*it).first);
-            log(relName + ": " + s, ttSql);
+            log(relName + ": " + str_log, ttSql);
         }
     }
 }
@@ -2389,14 +2384,14 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         if (prepareOnly)
             return true;
 
-        log(wxString::Format(_("Parametros: %d"), statementM->ParametersByName().size() ));
+        log(wxString::Format(_("Parameters: %zu"), statementM->ParametersByName().size() ));
         //Define parameters here:
         if (statementM->ParametersByName().size() >0)
         {
             //Insert parameters here:
             InsertParametersDialog* id = new InsertParametersDialog(this, statementM,
                 databaseM, parameterSaveList, parameterSaveListOptionNull);
-            int result = id->ShowModal();
+            id->ShowModal();
         }
 
         log(wxEmptyString);
@@ -2930,7 +2925,7 @@ void ExecuteSqlFrame::log(wxString s, TextType type)
     if (type == ttSql)
         style = 2;
 
-    styled_text_ctrl_stats->StartStyling(startpos, 0); // assert "unused==0" failed in wxStyledTextCtrl::StartStyling(): The second argument passed to StartStyling should be 0
+    styled_text_ctrl_stats->StartStyling(startpos, 0);
     styled_text_ctrl_stats->SetStyling(endpos-startpos-1, style);
 }
 

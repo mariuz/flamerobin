@@ -70,6 +70,7 @@
     <ProjectName>flamerobin</ProjectName>
     <ProjectGuid>{3C914FEE-C6E8-58AA-B046-6E951FCD6BFC}</ProjectGuid>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release Static|Win32'" Label="Configuration">

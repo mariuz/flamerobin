@@ -152,7 +152,7 @@ void BackupRestoreBaseFrame::subjectRemoved(Subject* subject)
         Close();
 }
 
-bool BackupRestoreBaseFrame::startThread(std::auto_ptr<wxThread> thread)
+bool BackupRestoreBaseFrame::startThread(std::unique_ptr<wxThread> thread)
 {
     wxASSERT(threadM == 0);
     if (wxTHREAD_NO_ERROR != thread->Create())

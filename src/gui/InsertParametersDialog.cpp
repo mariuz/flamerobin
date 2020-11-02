@@ -604,7 +604,7 @@ void InsertParametersDialog::OnCancelButtonClick(wxCommandEvent& WXUNUSED(event)
 {
     Close();
 }
-bool InsertParametersDialog::parseDate(int row, const wxString& source)
+void InsertParametersDialog::parseDate(int row, const wxString& source)
 {
     IBPP::Date idt;
     idt.Today();
@@ -629,9 +629,8 @@ bool InsertParametersDialog::parseDate(int row, const wxString& source)
         idt.SetDate(y, m, d);
     }
     statementM->Set(row+1, idt);
-
 }
-bool InsertParametersDialog::parseTime(int row, const wxString& source)
+void InsertParametersDialog::parseTime(int row, const wxString& source)
 {
     IBPP::Time itm;
     itm.Now();
@@ -650,7 +649,7 @@ bool InsertParametersDialog::parseTime(int row, const wxString& source)
     statementM->Set(row+1, itm);
 }
 
-bool InsertParametersDialog::parseTimeStamp(int row, const wxString& source)
+void InsertParametersDialog::parseTimeStamp(int row, const wxString& source)
 {
 
     IBPP::Timestamp its;
@@ -785,7 +784,6 @@ void InsertParametersDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
                         c = (wxChar)*ci;
                         num += c;
                         ++ci;
-                        long l;
                         octet.push_back(std::stoi(wx2std(num, databaseM->getCharsetConverter()), nullptr, 16));
                     }
                     while (octet.size() < statementM->ParameterSize(parameterslist.back()))
@@ -884,7 +882,7 @@ void InsertParametersDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
         IBPP::Blob b = IBPP::BlobFactory(st1->DatabasePtr(),
             st1->TransactionPtr());
         b->Create();
-        boost::uint8_t buffer[32768];
+        uint8_t buffer[32768];
         while (!fl.Eof())
         {
             size_t len = fl.Read(buffer, 32767);    // slow when not 32k

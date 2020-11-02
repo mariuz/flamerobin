@@ -36,25 +36,20 @@
 
 #include <ibpp.h>
 
-#include <boost/version.hpp>
-
 #include "frversion.h"
 #include "gui/AboutBox.h"
 
 void showAboutBox(wxWindow* parent)
 {
     wxString libs;
-    libs.Printf(_("This tool uses IBPP library version %d.%d.%d.%d\nwxWidgets library version %d.%d.%d\nand Boost library version %d.%d.%d"),
+    libs.Printf(_("This tool uses IBPP library version %d.%d.%d.%d\nwxWidgets library version %d.%d.%d"),
         (IBPP::Version & 0xFF000000) >> 24,
         (IBPP::Version & 0x00FF0000) >> 16,
         (IBPP::Version & 0x0000FF00) >> 8,
         (IBPP::Version & 0x000000FF),
         wxMAJOR_VERSION,
         wxMINOR_VERSION,
-        wxRELEASE_NUMBER,
-        BOOST_VERSION / 100000,
-        BOOST_VERSION / 100 % 1000,
-        BOOST_VERSION % 100
+        wxRELEASE_NUMBER
     );
 
     wxString ver;
