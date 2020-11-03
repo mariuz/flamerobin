@@ -173,7 +173,7 @@ Relation *IncompleteStatement::getAlterTriggerRelation(const wxString& sql)
             ntTrigger, id.get()));
         if (!t)
             return 0;
-        if (t->isDatabaseTrigger())
+        if (!t->isDMLTrigger())
             return 0;
         r = databaseM->findRelation(t->getRelationName());
     }

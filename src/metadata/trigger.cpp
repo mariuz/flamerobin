@@ -40,25 +40,42 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/trigger.h"
 #include "sql/StatementBuilder.h"
+#include "constants.h"
+
 
 /* static */
 Trigger::FiringTime Trigger::getFiringTime(int type)
 {
-    if (type == 8192)
-        return databaseConnect;
-    if (type == 8193)
-        return databaseDisconnect;
-    if (type == 8194)
-        return transactionStart;
-    if (type == 8195)
-        return transactionCommit;
-    if (type == 8196)
-        return transactionRollback;
-    if (type % 2)
-        return beforeIUD;
-    if (type)
-        return afterIUD;
-    return invalid;
+    switch (type & TRIGGER_TYPE_MASK)
+    {
+    case TRIGGER_TYPE_DML:
+    {
+        if (((type + 1) & 1) == 0)
+            return beforeIUD;
+        else
+            return afterIUD;
+    }
+    case TRIGGER_TYPE_DB:
+        switch (type & ~TRIGGER_TYPE_DB)
+        {
+        case DB_TRIGGER_CONNECT:
+            return databaseConnect;
+        case DB_TRIGGER_DISCONNECT:
+            return databaseDisconnect;
+        case DB_TRIGGER_TRANS_START:
+            return transactionStart;
+        case DB_TRIGGER_TRANS_COMMIT:
+            return transactionCommit;
+        case DB_TRIGGER_TRANS_ROLLBACK:
+            return transactionRollback;
+        default:
+            return invalid;
+        }
+    case TRIGGER_TYPE_DDL:
+        return DDL;
+    default:
+       return invalid;
+    }        
 }
 
 Trigger::Trigger(DatabasePtr database, const wxString& name)
@@ -124,6 +141,40 @@ wxString Trigger::getFiringEvent()
             }
         }
     }
+    if (time == DDL) {
+        bool first = true;
+        if ((typeM & 1) == DDL_TRIGGER_BEFORE)
+            sb << kwBEFORE;
+        else
+            sb << kwAFTER;
+        if ((typeM & DDL_TRIGGER_ANY) == DDL_TRIGGER_ANY)
+            sb << " ANY DDL STATEMENT ";
+        else
+        {
+            for (SINT64 pos = 1; pos < 64; ++pos)
+            {
+                if (((1LL << pos) & TRIGGER_TYPE_MASK) || (typeM & (1LL << pos)) == 0)
+                    continue;
+
+                if (first)
+                    first = false;
+                else
+                    sb << " OR";
+
+                sb << " ";
+
+                if (pos < FB_NELEM(DDL_TRIGGER_ACTION_NAMES))
+                {
+                    sb << wxString(DDL_TRIGGER_ACTION_NAMES[pos][0]) + " " +
+                        DDL_TRIGGER_ACTION_NAMES[pos][1];
+                }
+                else
+                    sb << "<unknown>";
+            }
+
+        }
+
+    }
     return sb;
 }
 
@@ -142,7 +193,7 @@ int Trigger::getPosition()
 wxString Trigger::getRelationName()
 {
     ensurePropertiesLoaded();
-    if (!isDatabaseTrigger())
+    if (isDMLTrigger())
         return relationNameM;
     return wxEmptyString;
 }
@@ -278,17 +329,22 @@ wxString Trigger::getAlterSql()
     return sb;
 }
 
-bool Trigger::isDatabaseTrigger()
+bool Trigger::isDBTrigger()
 {
     ensurePropertiesLoaded();
-    switch (getFiringTime(typeM))
-    {
-        case databaseConnect:
-        case databaseDisconnect:
-            return true;
-        default:
-            return false;
-    }
+    return (typeM & TRIGGER_TYPE_MASK) == TRIGGER_TYPE_DB;
+}
+
+bool Trigger::isDDLTrigger()
+{
+    ensurePropertiesLoaded();
+    return (typeM & TRIGGER_TYPE_MASK) == TRIGGER_TYPE_DDL;
+}
+
+bool Trigger::isDMLTrigger()
+{
+    ensurePropertiesLoaded();
+    return (typeM & TRIGGER_TYPE_MASK) == TRIGGER_TYPE_DML;
 }
 
 wxString Trigger::getSqlSecurity()
@@ -322,7 +378,7 @@ void Triggers::load(ProgressIndicator* progressIndicator)
 {
     wxString stmt = "select rdb$trigger_name from rdb$triggers"
         " where (rdb$system_flag = 0 or rdb$system_flag is null) "
-        " and rdb$trigger_type between 1 and 6 "
+        " and rdb$relation_name is not null  "
         " order by 1";
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }

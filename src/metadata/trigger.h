@@ -40,14 +40,15 @@ public:
         beforeIUD, afterIUD,
         // database triggers
         databaseConnect, databaseDisconnect,
-        transactionStart, transactionCommit, transactionRollback
+        transactionStart, transactionCommit, transactionRollback,
+        DDL
     };
 private:
     wxString relationNameM;
     bool activeM;
     int positionM;
     wxString sourceM;
-    int typeM;
+    LONGLONG typeM;
     wxString sqlSecurityM;
     wxString entryPointM;
     wxString engineNameM;
@@ -65,7 +66,9 @@ public:
     wxString getRelationName();
     wxString getSource();
     wxString getAlterSql();
-    bool isDatabaseTrigger();
+    bool isDBTrigger();
+    bool isDDLTrigger();
+    bool isDMLTrigger();
     wxString getSqlSecurity();
 
     virtual const wxString getTypeName() const;

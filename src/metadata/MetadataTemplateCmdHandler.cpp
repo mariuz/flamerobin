@@ -655,7 +655,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         else if (cmdParams[0] == "is_active")
             processedText += tp->escapeChars(getBooleanAsString(t->getActive()));
         else if (cmdParams[0] == "is_db_trigger")
-            processedText += tp->escapeChars(getBooleanAsString(t->isDatabaseTrigger()));
+            processedText += tp->escapeChars(getBooleanAsString(t->isDBTrigger()));
     }
 
     // {%generatorinfo:<property>%}

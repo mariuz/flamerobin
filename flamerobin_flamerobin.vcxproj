@@ -1179,6 +1179,7 @@
     <ClInclude Include="src\MasterPassword.h" />
     <ClInclude Include="src\metadata\collection.h" />
     <ClInclude Include="src\metadata\column.h" />
+    <ClInclude Include="src\metadata\constants.h" />
     <ClInclude Include="src\metadata\constraints.h" />
     <ClInclude Include="src\metadata\CreateDDLVisitor.h" />
     <ClInclude Include="src\metadata\database.h" />
