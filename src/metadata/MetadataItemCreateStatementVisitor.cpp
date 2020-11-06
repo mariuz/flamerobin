@@ -55,7 +55,23 @@ wxString MetadataItemCreateStatementVisitor::getCreateExceptionStatement()
 }
 
 /*static*/
-wxString MetadataItemCreateStatementVisitor::getCreateFunctionStatement()
+wxString MetadataItemCreateStatementVisitor::getCreateFunctionSQLStatement()
+{
+    wxString s("SET TERM ^ ;\n\n"
+        "CREATE FUNCTION name \n"
+        " ( input_parameter_name < datatype>, ... ) \n"
+        "RETURNS  < datatype>)\n"
+        "AS \n"
+        "DECLARE VARIABLE variable_name < datatype>; \n"
+        "BEGIN\n"
+        "  /* write your code here */ \n"
+        "END^\n\n"
+        "SET TERM ; ^\n");
+    return s;
+}
+
+/*static*/
+wxString MetadataItemCreateStatementVisitor::getCreateUDFStatement()
 {
     return "DECLARE EXTERNAL FUNCTION name [datatype | CSTRING (int) "
            "[, datatype | CSTRING (int) ...]]\n"
@@ -73,6 +89,19 @@ wxString MetadataItemCreateStatementVisitor::getCreateGeneratorStatement()
         << kwSET << ' ' << kwGENERATOR << " name " << kwTO
         << " value;" << StatementBuilder::NewLine;
     return sb;
+}
+
+/*static*/
+wxString MetadataItemCreateStatementVisitor::getCreatePackageStatement()
+{
+    wxString s("SET TERM ^ ;\n\n"
+        "CREATE PACKAGE name \n"
+        "AS \n"
+        "BEGIN\n"
+        "  /* write your code here */ \n"
+        "END^\n\n"
+        "SET TERM ; ^\n");
+    return s;
 }
 
 /*static*/
@@ -115,6 +144,11 @@ wxString MetadataItemCreateStatementVisitor::getCreateTableStatement()
         ");\n";
 }
 
+wxString MetadataItemCreateStatementVisitor::getCreateGTTTableStatement()
+{
+    return wxString();
+}
+
 /*static*/
 wxString MetadataItemCreateStatementVisitor::getCreateTriggerStatement()
 {
@@ -129,6 +163,16 @@ wxString MetadataItemCreateStatementVisitor::getCreateTriggerStatement()
         "    /* enter trigger code here */ \n"
         "END^\n\n"
         "SET TERM ; ^\n";
+}
+
+wxString MetadataItemCreateStatementVisitor::getCreateDBTriggerStatement()
+{
+    return wxString();
+}
+
+wxString MetadataItemCreateStatementVisitor::getCreateDDLTriggerStatement()
+{
+    return wxString();
 }
 
 /*static*/
@@ -155,16 +199,28 @@ void MetadataItemCreateStatementVisitor::visitExceptions(
     statementM = getCreateExceptionStatement();
 }
 
-void MetadataItemCreateStatementVisitor::visitFunctions(
-    Functions& /*functions*/)
+void MetadataItemCreateStatementVisitor::visitFunctionSQLs(
+    FunctionSQLs& /*functions*/)
 {
-    statementM = getCreateFunctionStatement();
+    statementM = getCreateFunctionSQLStatement();
+}
+
+void MetadataItemCreateStatementVisitor::visitUDFs(
+    UDFs& /*udfs*/)
+{
+    statementM = getCreateUDFStatement();
 }
 
 void MetadataItemCreateStatementVisitor::visitGenerators(
     Generators& /*generators*/)
 {
     statementM = getCreateGeneratorStatement();
+}
+
+void MetadataItemCreateStatementVisitor::visitPackages(
+    Packages& /*packages*/)
+{
+    statementM = getCreatePackageStatement();
 }
 
 void MetadataItemCreateStatementVisitor::visitProcedures(

@@ -42,11 +42,17 @@ class MetadataItemVisitor;
 
 typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
     // each item type and (if applicable) its parent type
-    ntTable, ntTables, ntView, ntViews, ntProcedure, ntProcedures,
-    ntTrigger, ntTriggers, ntGenerator, ntGenerators, ntFunction, ntFunctions,
+    ntTable, ntTables, ntGTT, ntGTTs,
+    ntView, ntViews, ntProcedure, ntProcedures,
+    ntTrigger, ntTriggers, ntGenerator, ntGenerators, 
+    ntFunction, ntFunctions, ntFunctionSQL, ntFunctionSQLs, ntUDF,  ntUDFs,
     ntSysTable, ntSysTables, ntException, ntExceptions,
     ntDomain, ntDomains, ntSysDomain, ntSysDomains,
     ntRole, ntRoles, ntSysRole, ntSysRoles, ntColumn, ntParameter, ntIndex,
+    ntPackage, ntPackages, ntSysPackage, ntSysPackages,
+    ntDBTrigger, 
+    ntDBTriggers, ntDDLTrigger, ntDDLTriggers,
+    ntMethod,
     ntLastType
 } NodeType;
 
@@ -104,6 +110,7 @@ public:
     void getDependencies(std::vector<Dependency>& list, bool ofObject,
         const wxString& field);  // load from db
     void getDependenciesPivoted(std::vector<DependencyField>& list);
+
 
     // returned shared ptr may be unassigned
     virtual DatabasePtr getDatabase() const;

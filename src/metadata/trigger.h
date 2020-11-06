@@ -40,14 +40,18 @@ public:
         beforeIUD, afterIUD,
         // database triggers
         databaseConnect, databaseDisconnect,
-        transactionStart, transactionCommit, transactionRollback
+        transactionStart, transactionCommit, transactionRollback,
+        DDL
     };
 private:
     wxString relationNameM;
     bool activeM;
     int positionM;
     wxString sourceM;
-    int typeM;
+    LONGLONG typeM;
+    wxString sqlSecurityM;
+    wxString entryPointM;
+    wxString engineNameM;
 
     static FiringTime getFiringTime(int type);
 protected:
@@ -62,7 +66,10 @@ public:
     wxString getRelationName();
     wxString getSource();
     wxString getAlterSql();
-    bool isDatabaseTrigger();
+    bool isDBTrigger();
+    bool isDDLTrigger();
+    bool isDMLTrigger();
+    wxString getSqlSecurity();
 
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
@@ -79,5 +86,31 @@ public:
     void load(ProgressIndicator* progressIndicator);
     virtual const wxString getTypeName() const;
 };
+
+
+class DBTriggers : public MetadataCollection<Trigger>
+{
+protected:
+    virtual void loadChildren();
+public:
+    DBTriggers(DatabasePtr database);
+
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    void load(ProgressIndicator* progressIndicator);
+    virtual const wxString getTypeName() const;
+};
+
+class DDLTriggers : public MetadataCollection<Trigger>
+{
+protected:
+    virtual void loadChildren();
+public:
+    DDLTriggers(DatabasePtr database);
+
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    void load(ProgressIndicator* progressIndicator);
+    virtual const wxString getTypeName() const;
+};
+
 
 #endif

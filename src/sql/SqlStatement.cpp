@@ -239,7 +239,7 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
             case kwEXCEPTION:
                 objectTypeM = ntException; break;
             case kwFUNCTION:
-                objectTypeM = ntFunction; break;
+                objectTypeM = ntFunctionSQL; break; //JOCHOA FUNCTIONS
             case kwGENERATOR:
                 objectTypeM = ntGenerator; break;
             case kwINDEX:

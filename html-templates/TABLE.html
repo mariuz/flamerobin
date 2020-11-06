@@ -5,8 +5,9 @@
 <body>
 {%header:Summary%}
 <br><br>
-<font size=+2>{%object_name%}</font>
-<br>Owner: {%owner_name%}<br>
+<font size=+2>{%object_name%}</font><br>
+Owner: {%owner_name%}<br>
+{%sql_security%}<br>
 {%object_description%} {%ifeq:{%is_system%}:false:[<a
  href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=TABLE&amp;object_name={%object_name%}">edit</a>]%}
 <br><br>

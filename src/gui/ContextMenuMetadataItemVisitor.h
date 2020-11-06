@@ -41,10 +41,15 @@ public:
     virtual void visitDomains(Domains& domains);
     virtual void visitException(Exception& exception);
     virtual void visitExceptions(Exceptions& exceptions);
-    virtual void visitFunction(Function& function);
-    virtual void visitFunctions(Functions& functions);
+    virtual void visitFunctionSQL(FunctionSQL& function);
+    virtual void visitFunctionSQLs(FunctionSQLs& functions);
+    virtual void visitUDF(UDF& function);
+    virtual void visitUDFs(UDFs& functions);
     virtual void visitGenerator(Generator& generator);
     virtual void visitGenerators(Generators& generators);
+    virtual void visitPackage(Package& package);
+    virtual void visitPackages(Packages& packages);
+    virtual void visitSysPackages(SysPackages& packages);
     virtual void visitProcedure(Procedure& procedure);
     virtual void visitProcedures(Procedures& procedures);
     virtual void visitRole(Role& role);
@@ -55,8 +60,11 @@ public:
     virtual void visitTable(Table& table);
     virtual void visitTables(Tables& tables);
     virtual void visitSysTables(SysTables& tables);
+    virtual void visitGTTTables(GTTs& tables);
     virtual void visitTrigger(Trigger& trigger);
     virtual void visitTriggers(Triggers& triggers);
+    virtual void visitDBTriggers(DBTriggers& triggers);
+    virtual void visitDDLTriggers(DDLTriggers& triggers);
     virtual void visitView(View& view);
     virtual void visitViews(Views& views);
 protected:

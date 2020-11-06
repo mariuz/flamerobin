@@ -26,32 +26,105 @@
 #define FR_FUNCTION_H
 
 #include "metadata/collection.h"
+#include "metadata/privilege.h"
+
 
 class ProgressIndicator;
 
 class Function: public MetadataItem
 {
 private:
-    wxString libraryNameM, entryPointM, definitionM, retstrM, paramListM;
+	std::vector<Privilege> privilegesM;
+	ParameterPtrs parametersM;
 protected:
-    virtual void loadProperties();
+
+	virtual void loadChildren();
+	virtual void lockChildren();
+	virtual void unlockChildren();
+
 public:
     Function(DatabasePtr database, const wxString& name);
-    virtual const wxString getTypeName() const;
-    virtual wxString getDropSqlStatement() const;
-    wxString getCreateSql();
-    wxString getDefinition();
-    wxString getLibraryName();
-    wxString getEntryPoint();
-    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+
+	bool getChildren(std::vector<MetadataItem *>& temp);
+
+
+	ParameterPtrs::iterator begin();
+	ParameterPtrs::iterator end();
+	ParameterPtrs::const_iterator begin() const;
+	ParameterPtrs::const_iterator end() const;
+
+	size_t getParamCount() const;
+	ParameterPtr findParameter(const wxString& name) const;
+
+	virtual wxString getCreateSql();
+	virtual wxString getDropSqlStatement() const ;
+	virtual wxString getDefinition();
+	wxString getOwner();
+	virtual wxString getSource() = 0;
+	wxString getSqlSecurity();
+	virtual const wxString getTypeName()  const = 0;
+	std::vector<Privilege>* getPrivileges();
+
+  virtual void acceptVisitor(MetadataItemVisitor* visitor);
+	virtual void checkDependentFunction();
 };
 
-class Functions: public MetadataCollection<Function>
+class UDF : public Function
+{
+private:
+	wxString libraryNameM, entryPointM, definitionM, retstrM, paramListM;
+protected:
+	virtual void loadProperties();
+public:
+	UDF(DatabasePtr database, const wxString& name);
+
+	virtual wxString getCreateSql();
+	virtual wxString getDropSqlStatement() const;
+	virtual wxString getDefinition();
+	virtual wxString getSource();
+	virtual const wxString getTypeName() const ;
+
+	wxString getEntryPoint();
+	wxString getLibraryName();
+
+	virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+
+class FunctionSQL : public Function
+{
+private:
+
+protected:
+	virtual void loadProperties();
+public:
+	FunctionSQL(DatabasePtr database, const wxString& name);
+
+	wxString getSource();
+	wxString getAlterSql(bool full = true);
+	virtual wxString getDefinition();   // used for calltip in sql editor
+	virtual const wxString getTypeName() const;
+	virtual void acceptVisitor(MetadataItemVisitor* visitor);
+
+};
+
+class UDFs : public MetadataCollection<UDF>
+{
+protected:
+	virtual void loadChildren();
+public:
+	UDFs(DatabasePtr database);
+
+	virtual void acceptVisitor(MetadataItemVisitor* visitor);
+	void load(ProgressIndicator* progressIndicator);
+	virtual const wxString getTypeName() const;
+
+};
+class FunctionSQLs: public MetadataCollection<FunctionSQL>
 {
 protected:
     virtual void loadChildren();
 public:
-    Functions(DatabasePtr database);
+    FunctionSQLs(DatabasePtr database);
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     void load(ProgressIndicator* progressIndicator);

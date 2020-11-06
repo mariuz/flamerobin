@@ -38,6 +38,7 @@ class Relation: public MetadataItem
 private:
     int relationTypeM;
     wxString ownerM;
+    wxString sqlSecurityM;
 protected:
     void getDependentChecks(std::vector<CheckConstraint>& checks);
     void getDependentViews(std::vector<Relation*>& views,
@@ -70,6 +71,7 @@ public:
 	4 - connection-level GTT (PRESERVE ROWS)
 	5 - transaction-level GTT (DELETE ROWS)
 	*/
+    wxString getSqlSecurity();
     int getRelationType();
 
     ColumnPtrs::iterator begin();
