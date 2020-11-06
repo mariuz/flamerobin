@@ -337,7 +337,10 @@ void MetadataItemPropertiesPanel::OnHtmlCellHover(wxHtmlCellEvent& event)
     if (uri.protocol == "info")    // special
     {
         //      GetStatusBar()->SetStatusText(uri.action);
-
+        static wxTipWindow* tw;
+        if (tw) {
+            tw->Close();
+        }
         // I'm having a hard time trying to convert this to screen coordinates
         // since parent's coords cannot be retrieved(?)
         //wxRect r(c->GetPosX(), c->GetPosY(), c->GetWidth(), c->GetHeight());
@@ -346,7 +349,7 @@ void MetadataItemPropertiesPanel::OnHtmlCellHover(wxHtmlCellEvent& event)
         wxRect r(::wxGetMousePosition().x - 10, ::wxGetMousePosition().y - 4,
             21, 9);
 
-        wxTipWindow* tw = new wxTipWindow(this, uri.action);
+        tw = new wxTipWindow(this, uri.action, 100, &tw);
         tw->SetBoundingRect(r);
     }
 }

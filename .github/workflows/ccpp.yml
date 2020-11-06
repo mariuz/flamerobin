@@ -13,19 +13,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: why Ubuntu, why?
-      run: sudo sed -i~orig -e 's/# deb-src/deb-src/' /etc/apt/sources.list   
     - name: apt update
       run: sudo apt-get update 
-    - name: Preparing dependencies
-      run: sudo apt-get build-dep flamerobin -y
-    - name: install libboost
-      run: sudo apt-get install libboost-dev libboost-thread-dev libboost-system-dev -y
-    - name: configure
-      run: ./configure
-    - name: make
+    - name: Install tools and libs
+      run: sudo apt-get install build-essential git cmake firebird-dev libwxgtk*-gtk3-dev -y
+    - name: CMake
+      run: |
+          mkdir build
+          cd build
+          cmake ..
+    - name: Build
       run: make
-#    - name: make check
-#      run: make check
-#    - name: make distcheck
-#      run: make distcheck
+      working-directory: ./build
+

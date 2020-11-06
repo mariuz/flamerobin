@@ -271,11 +271,47 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
     }
 }
 
+void MetadataItem::getDependenciesPivoted(std::vector<DependencyField>& list)
+{
+    std::vector<Dependency> deps;
+    this->getDependencies(deps, true, true);
+    this->getDependencies(deps, false, true);
+    bool firstItem = true;
+    for (std::vector<Dependency>::iterator it = deps.begin(); it != deps.end(); ++it)
+    {
+        std::vector<DependencyField> fields;
+        it->getFields(fields);
+        for (std::vector<DependencyField>::iterator field = fields.begin(); field != fields.end(); ++field)
+        {
+            DependencyField* depField;
+            auto itDep = find_if(list.begin(), list.end(), [&field](const DependencyField& obj) {return obj.getName_() == field->getName_(); });
+
+            if (itDep == list.end()) {
+                //TODO: determine a better way to do it, by now, it's only used here, but who knows in the future?
+                depField = new DependencyField(field->getName_(), field->getPosition());
+                //depField->setName_(*field);
+
+                list.push_back(*depField);
+                depField = &list.back();
+            }
+            else {
+                depField = (&*itDep) ;
+
+            }
+            MetadataItem *current = getDatabase()->findByNameAndType(it->getType(), it->getName_());
+            if (!current)
+                continue;
+            Dependency de(current, it->getAuxiliar());
+            depField->addDependency(de);
+
+        }
+    }
+}
 
 //! ofObject = true   => returns list of objects this object depends on
 //! ofObject = false  => returns list of objects that depend on this object
 void MetadataItem::getDependencies(std::vector<Dependency>& list,
-    bool ofObject)
+    bool ofObject, bool fieldsOnly)
 {
     DatabasePtr d = getDatabase();
 
@@ -311,6 +347,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
     wxString o1 = (ofObject ? "DEPENDENT" : "DEPENDED_ON");
     wxString o2 = (ofObject ? "DEPENDED_ON" : "DEPENDENT");
     wxString sql =
+        "select t1.*, f2.rdb$field_position from ( \n "
         "select RDB$" + o2 + "_TYPE, RDB$" + o2 + "_NAME, RDB$FIELD_NAME \n "
         " from RDB$DEPENDENCIES \n "
         " where RDB$" + o1 + "_TYPE in (?,?) and RDB$" + o1 + "_NAME = ? \n ";
@@ -358,6 +395,11 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
             " where vr.rdb$relation_name = ? \n";
         params++;
     }
+    sql += " ) t1 \n "
+        "left join RDB$RELATION_FIELDS f2 \n "
+        "    on f2.RDB$FIELD_NAME = t1.RDB$FIELD_NAME \n "
+        "    and f2.RDB$RELATION_NAME = ? \n ";
+    params++;
 
     sql += " order by 1, 2, 3";
     st1->Prepare(wx2std(sql, d->getCharsetConverter()));
@@ -429,7 +471,10 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
         {
             std::string s;
             st1->Get(3, s);
-            dep->addField(std2wxIdentifier(s, d->getCharsetConverter()));
+            int pos;
+            st1->Get(4, pos);
+
+            dep->addField( DependencyField(std2wxIdentifier(s, d->getCharsetConverter()), pos));
         }
     }
 
@@ -447,7 +492,8 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
                 throw FRError(wxString::Format(_("Table %s not found."),
                     iter.getReferencedTable().c_str()));
             }
-            Dependency de(table);
+            MetadataItem* mi = new MetadataItem(iter);
+            Dependency de(table, mi);
             de.setFields(iter.getReferencedColumns());
             list.push_back(de);
         }
@@ -501,11 +547,12 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
     if ((typeM == ntTable || typeM == ntSysTable) && !ofObject)  // foreign keys of other tables
     {
         st1->Prepare(
-            "select r1.rdb$relation_name, i.rdb$field_name "
+            "select r1.rdb$relation_name, i.rdb$field_name, i.RDB$FIELD_POSITION, R1.RDB$CONSTRAINT_NAME, i2.RDB$FIELD_NAME "
             " from rdb$relation_constraints r1 "
             " join rdb$ref_constraints c on r1.rdb$constraint_name = c.rdb$constraint_name "
             " join rdb$relation_constraints r2 on c.RDB$CONST_NAME_UQ = r2.rdb$constraint_name "
             " join rdb$index_segments i on r1.rdb$index_name=i.rdb$index_name "
+            " left join rdb$index_segments i2 on c.RDB$CONST_NAME_UQ = i2.rdb$index_name and i2.RDB$FIELD_POSITION = i.RDB$FIELD_POSITION "
             " where r2.rdb$relation_name=? "
             " and r1.rdb$constraint_type='FOREIGN KEY' "
         );
@@ -518,20 +565,33 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
             std::string s;
             st1->Get(1, s);
             wxString table_name(std2wxIdentifier(s, d->getCharsetConverter()));
+
             st1->Get(2, s);
+            if (fieldsOnly)
+            st1->Get(5, s);
             wxString field_name(std2wxIdentifier(s, d->getCharsetConverter()));
+            int pos;
+            st1->Get(3, pos);
 
             if (table_name != lasttable)    // new
             {
                 MetadataItem* table = d->findByNameAndType(ntTable, table_name);
+
                 if (!table)
                     continue;           // dummy check
-                Dependency de(table);
+                ForeignKey* fk = new ForeignKey();
+                st1->Get(4, s);
+                wxString fk_name(std2wxIdentifier(s, d->getCharsetConverter()));
+                fk->setName_(fk_name);
+                fk->setParent(table);
+
+                Dependency de(table, fk);
+
                 list.push_back(de);
                 dep = &list.back();
                 lasttable = table_name;
             }
-            dep->addField(field_name);
+            dep->addField(DependencyField(field_name, pos));
         }
     }
 
@@ -731,14 +791,20 @@ MetadataItem *Dependency::getDependentObject() const
     return objectM;
 }
 
-Dependency::Dependency(MetadataItem *object)
+MetadataItem * Dependency::getAuxiliar() const
 {
-    objectM = object;
+    return auxiliarM;
 }
 
-void Dependency::getFields(std::vector<wxString>& fields) const
+Dependency::Dependency(MetadataItem *object, MetadataItem *auxiliar)
 {
-    for (std::vector<wxString>::const_iterator it = fieldsM.begin();
+    objectM = object;
+    auxiliarM = auxiliar;
+}
+
+void Dependency::getFields(std::vector<DependencyField>& fields) const
+{
+    for (std::vector<DependencyField>::const_iterator it = fieldsM.begin();
         it != fieldsM.end(); ++it)
     {
         fields.push_back(*it);
@@ -748,27 +814,40 @@ void Dependency::getFields(std::vector<wxString>& fields) const
 wxString Dependency::getFields() const
 {
     wxString temp;
-    for (std::vector<wxString>::const_iterator it = fieldsM.begin(); it != fieldsM.end(); ++it)
+    for (std::vector<DependencyField>::const_iterator it = fieldsM.begin(); it != fieldsM.end(); ++it)
     {
         if (it != fieldsM.begin())
             temp += ", ";
-        temp += (*it);
+        temp += (*it).getName_();
     }
     return temp;
 }
 
-void Dependency::addField(const wxString& name)
+void Dependency::addField(const DependencyField& name)
 {
     if (fieldsM.end() == std::find(fieldsM.begin(), fieldsM.end(), name))
-        fieldsM.push_back(name);
+    {
+        std::vector<DependencyField>::const_iterator it = std::lower_bound(fieldsM.begin(), fieldsM.end(), name); // find proper position in descending order
+        this->fieldsM.insert(it, name); // insert before iterator it
+        //fieldsM.push_back(name);
+    }
 }
 
-void Dependency::setFields(const std::vector<wxString>& fields)
+void Dependency::setFields(const std::vector<DependencyField>& fields)
 {
     fieldsM = fields;
 }
+void Dependency::setFields(const std::vector<wxString>& fields)
+{
+    fieldsM = std::vector<DependencyField>();
+    for (std::vector<wxString>::const_iterator it = fields.begin(); it != fields.end(); ++it)
+    {
+        //fieldsM.push_back(DependencyField(*it, 0));
+        this->addField(DependencyField(*it, 0));
+    }
+}
 
-bool Dependency::hasField(const wxString& name) const
+bool Dependency::hasField(const DependencyField& name) const
 {
     return fieldsM.end() != std::find(fieldsM.begin(), fieldsM.end(), name);
 }
@@ -783,9 +862,55 @@ bool Dependency::operator!= (const Dependency& other) const
     return (objectM != other.getDependentObject() || getFields() != other.getFields());
 }
 
+bool Dependency::operator<(const Dependency & other) const
+{
+    if (this->getType() == other.getType())
+        return this->getName_() < other.getName_();
+    return  this->getType() < other.getType();
+}
+
+
 void Dependency::acceptVisitor(MetadataItemVisitor* visitor)
 {
     if (objectM)
         objectM->acceptVisitor(visitor);
 }
 
+DependencyField::DependencyField(wxString name, int position)
+    :positionM(position)
+{
+    setName_(name);
+}
+int DependencyField::getPosition()
+{
+    return this->positionM;
+}
+
+void DependencyField::getDependencies(std::vector<Dependency>& list) const
+{
+    for (std::vector<Dependency>::const_iterator it = objectsM_.begin();
+        it != objectsM_.end(); ++it)
+    {
+        list.push_back(*it);
+    }
+}
+
+void DependencyField::addDependency(const Dependency & other)
+{
+    std::vector<Dependency>::const_iterator it = std::lower_bound(objectsM_.begin(), objectsM_.end(), other); // find proper position in descending order
+    this->objectsM_.insert(it, other); // insert before iterator it
+    //this->objectsM_.push_back(other);
+}
+
+bool DependencyField::operator==(const DependencyField & other) const
+{
+    //TODO: verify correctly if the object is the same
+    return other.getName_()==this->getName_();
+}
+
+bool DependencyField::operator<(const DependencyField & other) const
+{
+    if (this->positionM == other.positionM)
+        return this->getName_() < other.getName_();
+    //return this->positionM < other.positionM;//TODO: enable after fix position in every possible place
+}
