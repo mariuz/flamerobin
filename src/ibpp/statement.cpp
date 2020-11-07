@@ -703,13 +703,82 @@ std::vector<std::string> StatementImpl::ParametersByName() {
 
 std::string StatementImpl::ParametersParser(std::string sql)
 {
-    //ctor
-    bool comment = false, blockComment = false, palavra = false, quote = false, doubleQuote = false;
+
+
+    unsigned int i;
+    bool isDMLcheck = false;
+    
     parametersByName_.clear();
     parametersDetailedByName_.clear();
 
-    unsigned int i;
+    //Improve this part, verify the SQL, if is really necessary to process the parameters this time
+    //Can be done in the begin
 
+    //Here we verify, the job done recently was time lost?
+    std::string isDML(sql);
+
+    isDML.erase(isDML.begin(), std::find_if(isDML.begin(), isDML.end(), std::not1(std::ptr_fun<int, int>(std::isspace)))); //lTrim
+
+    std::transform(isDML.begin(), isDML.end(), isDML.begin(), [](char c) { return (char)std::toupper(c); }); //UpperCase (only bothered about ASCII text, cast is okay)
+
+    std::string isDML4 = isDML.substr(0, 4);  std::string isDML6 = isDML.substr(0, 6);  std::string isDML7 = isDML.substr(0, 7);
+
+    std::array<std::string, 6> dml =
+    {
+        "INSERT",
+        "UPDATE",
+        "DELETE",
+        "SELECT",
+        "EXECUTE",
+        "WITH"
+    };
+    std::array<std::string, 6> check =
+    {
+        isDML6,
+        isDML6,
+        isDML6,
+        isDML6,
+        isDML7,
+        isDML4
+    };
+    for (i = 0; i<dml.size(); i++) {
+        if (check.at(i) == dml.at(i))
+        {
+            if (dml.at(i) == "EXECUTE")//is execute procedure or execute block? else, is DML for sure
+            {
+                auto x = dml.at(i).size();
+                while (std::isspace(isDML.at(x)) && x<isDML.size())
+                    x++;
+                char p = isDML.at(x);
+                //std::cout << "Char:"<<p << std::endl;
+                if (p != 'P')//Procedure: execute procedure $sp(:params), OK to replace, else, use original, break loop
+                    break;     //I don't want to replace :parameters inside an execute block..
+                               //TODO:
+                               //It is possible to insert parameters in the begin of the block, example:
+                               //execute block (x double precision = ?, y double precision = ?)
+                               //But it will need more work to do it
+                               //Source: http://www.firebirdsql.org/refdocs/langrefupd20-execblock.html
+
+            }            
+            isDMLcheck = true;
+            break;
+        }
+
+    }
+    if (!isDMLcheck) {
+        //Probably is DDL... don't replace parameters then
+
+        //std::cout << sql << std::endl;
+        return sql;
+    }
+
+
+
+
+
+
+    //ctor
+    bool comment = false, blockComment = false, palavra = false, quote = false, doubleQuote = false;
     std::ostringstream temp, sProcessedSQL;
     std::string debugProcessedSQL="";
 
@@ -789,66 +858,7 @@ std::string StatementImpl::ParametersParser(std::string sql)
     }
   std::cout << "sProcessedSQL: " << sProcessedSQL.str() << std::endl;
 
-  //TODO:
-  //Improve this part, verify the SQL, if is really necessary to process the parameters this time
-  //Can be done in the begin
-
-  //Here we verify, the job done recently was time lost?
-  std::string isDML = sProcessedSQL.str();
-  isDML.erase(isDML.begin(), std::find_if(isDML.begin(), isDML.end(), std::not1(std::ptr_fun<int, int>(std::isspace)))); //lTrim
-
-  std::transform(isDML.begin(), isDML.end(), isDML.begin(),  [] ( char c ) { return (char)std::toupper(c); } ); //UpperCase (only bothered about ASCII text, cast is okay)
-
-  std::string isDML4=isDML.substr(0,4);  std::string isDML6=isDML.substr(0,6);  std::string isDML7=isDML.substr(0,7);
-
-  std::array<std::string,6> dml =
-  {
-    "INSERT",
-    "UPDATE",
-    "DELETE",
-    "SELECT",
-    "EXECUTE",
-    "WITH"
-  };
-  std::array<std::string,6> check =
-  {
-    isDML6,
-    isDML6,
-    isDML6,
-    isDML6,
-    isDML7,
-    isDML4
-  };
-  for (i=0; i<dml.size(); i++) {
-    if (check.at(i)==dml.at(i))
-    {
-        if (dml.at(i)=="EXECUTE")//is execute procedure or execute block? else, is DML for sure
-        {
-            auto x=dml.at(i).size();
-            while(std::isspace(isDML.at(x)) && x<isDML.size())
-              x++;
-            char p = isDML.at(x);
-            //std::cout << "Char:"<<p << std::endl;
-            if (p!='P')//Procedure: execute procedure $sp(:params), OK to replace, else, use original, break loop
-                goto ddl;  //I don't want to replace :parameters inside an execute block..
-                           //TODO:
-                           //It is possible to insert parameters in the begin of the block, example:
-                           //execute block (x double precision = ?, y double precision = ?)
-                           //But it will need more work to do it
-                           //Source: http://www.firebirdsql.org/refdocs/langrefupd20-execblock.html
-
-        }
-        std::cout << "done!" << std::endl;
-        return sProcessedSQL.str();
-    }
-
-  }
-  ddl:
-  //Probably is DDL... don't replace parameters then
-  parametersByName_.clear();
-  parametersDetailedByName_.clear();
-  //std::cout << sql << std::endl;
-  return sql;
+  return sProcessedSQL.str();
 }
 
 void StatementImpl::SetNull(std::string param) {
