@@ -677,7 +677,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
                 paramCount = p->getParamCount();
 
             processedText += tp->escapeChars(
-                wxString::Format("%d", paramCount), false);
+                wxString::Format("%zu", paramCount), false);
         }
     }
 
