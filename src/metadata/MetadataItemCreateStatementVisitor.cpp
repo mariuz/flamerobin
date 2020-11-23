@@ -239,7 +239,7 @@ void MetadataItemCreateStatementVisitor::visitTables(Tables& /*tables*/)
     statementM = getCreateTableStatement();
 }
 
-void MetadataItemCreateStatementVisitor::visitTriggers(Triggers& /*triggers*/)
+void MetadataItemCreateStatementVisitor::visitTriggers(DMLTriggers& /*triggers*/)
 {
     statementM = getCreateTriggerStatement();
 }

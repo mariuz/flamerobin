@@ -170,7 +170,7 @@ Relation *IncompleteStatement::getAlterTriggerRelation(const wxString& sql)
         Identifier id;
         id.setFromSql(trigName);
         Trigger* t = dynamic_cast<Trigger *>(databaseM->findByNameAndType(
-            ntTrigger, id.get()));
+            ntDMLTrigger, id.get()));
         if (!t)
             return 0;
         if (!t->isDMLTrigger())

@@ -26,6 +26,7 @@
 #define FR_DOMAIN_H
 
 #include "metadata/collection.h"
+#include "metadata/privilege.h"
 
 class DomainCollectionBase;
 class Domains;
@@ -37,6 +38,7 @@ private:
     short datatypeM, subtypeM, lengthM, precisionM, scaleM;
     bool nullableM, hasDefaultM;
     wxString charsetM, defaultM, collationM, checkM;
+    std::vector<Privilege> privilegesM;
 
     static std::string getLoadStatement(bool list);
     void loadProperties(IBPP::Statement& statement, wxMBConv* converter);
@@ -64,6 +66,7 @@ public:
     wxString getAlterSqlTemplate() const;
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* v);
+    std::vector<Privilege>* getPrivileges();
 };
 
 class DomainCollectionBase: public MetadataCollection<Domain>

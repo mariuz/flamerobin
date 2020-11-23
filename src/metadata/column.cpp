@@ -120,7 +120,7 @@ bool ColumnBase::getDefault(GetColumnDefaultType type, wxString& value) const
     return false;
 }
 
-wxString ColumnBase::getSource() const
+wxString ColumnBase::getSource() 
 {
     return sourceM;
 }
@@ -168,7 +168,8 @@ Column::Column(Relation* relation, const wxString& name)
 
 void Column::initialize(const wxString& source, const wxString& computedSource,
     const wxString& collation, bool nullable,
-    const wxString& defaultValue, bool hasDefault, bool hasDescription)
+    const wxString& defaultValue, bool hasDefault, bool hasDescription,
+    const wxString& identityType, const long initialValue, const long incrementalValue)
 {
     SubjectLocker lock(this);
 
@@ -178,6 +179,9 @@ void Column::initialize(const wxString& source, const wxString& computedSource,
     bool changed = false;
     setIfChanged(computedSourceM, computedSource, changed);
     setIfChanged(collationM, collation.Strip(wxString::both), changed);
+    setIfChanged(identityTypeM, identityType, changed);
+    setIfChanged(initialValueM, initialValue, changed);
+    setIfChanged(incrementalValueM, incrementalValue, changed);
     if (changed)
         notifyObservers();
 }
@@ -226,6 +230,11 @@ bool Column::isString() const
     return (d ? d->isString() : false);
 }
 
+bool Column::isIdentity() const
+{
+    return identityTypeM != "";
+}
+
 Table* Column::getTable() const
 {
     return dynamic_cast<Table*>(getParent());
@@ -257,5 +266,21 @@ wxString Column::getDropSqlStatement() const
 void Column::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitColumn(*this);
+}
+
+wxString Column::getSource()
+{
+    if (isIdentity()) {
+        wxString sql;
+        sql = " GENERATED " + identityTypeM + " AS IDENTITY ";
+        if (initialValueM != 0) {
+            sql += "(START WITH " + wxString::Format("%d", initialValueM) + ")";
+            if (incrementalValueM != 1)
+                sql += "INCREMENT BY " + wxString::Format("%d", incrementalValueM);
+        }
+        return sql;
+    }
+    else
+        return sourceM;
 }
 

@@ -116,7 +116,7 @@ wxString getNameOfType(NodeType type)
         case ntGTT:         return ("TABLEGTT");
         case ntView:        return ("VIEW");
         case ntProcedure:   return ("PROCEDURE");
-        case ntTrigger:     return ("TRIGGER");
+        case ntDMLTrigger:  return ("TRIGGER");
         case ntGenerator:   return ("GENERATOR");
         case ntFunctionSQL: return ("FUNCTIONSQL");
         case ntUDF:         return ("UDF");
@@ -141,7 +141,7 @@ NodeType getTypeByName(const wxString& name)
     else if (name == "PROCEDURE")
         return ntProcedure;
     else if (name == "TRIGGER")
-        return ntTrigger;
+        return ntDMLTrigger;
     else if (name == "GENERATOR")
         return ntGenerator;
     else if (name == "FUNCTIONSQL")
@@ -435,7 +435,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
                 if (!current)
                     current = d->findByNameAndType(ntSysTable, objname);
             }
-            if (!ofObject && t == ntTrigger)
+            if (!ofObject && t == ntDMLTrigger)
             {
                 // system trigger dependent of this object indicates possible check constraint on a table
                 // that references this object. So, let's check if this trigger is used for check constraint
@@ -515,7 +515,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
         {
             std::string s;
             st1->Get(1, s);
-            Trigger t(d->shared_from_this(),
+            DMLTrigger t(d->shared_from_this(),
                 std2wxIdentifier(s, d->getCharsetConverter()));
             t.getDependencies(tempdep, true);
         }

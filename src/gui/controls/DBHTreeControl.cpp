@@ -297,9 +297,11 @@ public:
     virtual void visitTables(Tables& tables);
     virtual void visitSysTables(SysTables& tables);
 	virtual void visitGTTs(GTTs& tables);
-    virtual void visitTrigger(Trigger& trigger);
-    virtual void visitTriggers(Triggers& triggers);
+    virtual void visitDMLTrigger(DMLTrigger& trigger);
+    virtual void visitDMLTriggers(DMLTriggers& triggers);
+    virtual void visitDBTrigger(DBTrigger& trigger);
     virtual void visitDBTriggers(DBTriggers& triggers);
+    virtual void visitDDLTrigger(DDLTrigger& trigger);
     virtual void visitDDLTriggers(DDLTriggers& triggers);
     virtual void visitUDF(UDF& function);
     virtual void visitUDFs(UDFs& functions);
@@ -705,24 +707,34 @@ void DBHTreeItemVisitor::visitTables(Tables& tables)
     setNodeProperties(&tables, ART_Tables);
 }
 
-void DBHTreeItemVisitor::visitTrigger(Trigger& trigger)
+void DBHTreeItemVisitor::visitDMLTrigger(DMLTrigger& trigger)
 {
     setNodeProperties(&trigger, ART_Trigger);
 }
 
-void DBHTreeItemVisitor::visitTriggers(Triggers& triggers)
+void DBHTreeItemVisitor::visitDMLTriggers(DMLTriggers& triggers)
 {
     setNodeProperties(&triggers, ART_Triggers);
 }
 
+void DBHTreeItemVisitor::visitDBTrigger(DBTrigger& trigger)
+{
+    setNodeProperties(&trigger, ART_Trigger);
+}
+
 void DBHTreeItemVisitor::visitDBTriggers(DBTriggers& triggers)
 {
-    setNodeProperties(&triggers, ART_Triggers); //JOCHOA DBTRIGGER
+    setNodeProperties(&triggers, ART_Triggers); 
+}
+
+void DBHTreeItemVisitor::visitDDLTrigger(DDLTrigger& trigger)
+{
+    setNodeProperties(&trigger, ART_Trigger);
 }
 
 void DBHTreeItemVisitor::visitDDLTriggers(DDLTriggers& triggers)
 {
-    setNodeProperties(&triggers, ART_Triggers); //JOCHOA DDLTRIGGER
+    setNodeProperties(&triggers, ART_Triggers); 
 }
 
 void DBHTreeItemVisitor::visitView(View& view)

@@ -647,7 +647,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
             case ntDomain:
             case ntFunction:
             case ntUDF:
-            case ntTrigger:
+            case ntDMLTrigger:
             case ntException:
             case ntRole:
             case ntSysRole:

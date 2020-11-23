@@ -39,6 +39,7 @@ private:
     int relationTypeM;
     wxString ownerM;
     wxString sqlSecurityM;
+    bool identityM;
 protected:
     void getDependentChecks(std::vector<CheckConstraint>& checks);
     void getDependentViews(std::vector<Relation*>& views,

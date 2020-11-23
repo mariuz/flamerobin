@@ -99,6 +99,8 @@ void CreateDDLVisitor::visitColumn(Column& c)
         if (d->isSystem())
         {
             preSqlM << d->getDatatypeAsString();
+            if (c.isIdentity())
+                preSqlM << c.getSource();
             wxString charset = d->getCharset();
             DatabasePtr db = d->getDatabase();
             if (!charset.IsEmpty())
@@ -206,7 +208,7 @@ void CreateDDLVisitor::visitDatabase(Database& d)
             progressIndicatorM);
 
         preSqlM << "/******************** TRIGGERS ********************/\n\n";
-        iterateit<TriggersPtr, Trigger>(this, d.getTriggers(),
+        iterateit<DMLTriggersPtr, DMLTrigger>(this, d.getDMLTriggers(),
             progressIndicatorM);
     }
     catch (CancelProgressException&)
@@ -379,7 +381,7 @@ void CreateDDLVisitor::visitUDF(UDF& f)
 
 void CreateDDLVisitor::visitGenerator(Generator& g)
 {
-    preSqlM += "CREATE SEQUENCE " + g.getQuotedName() + ";\n";
+    preSqlM += "CREATE " + g.getSource() + ";\n";
     wxString description = g.getDescription();
     if (!description.empty())
     {

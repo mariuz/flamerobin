@@ -65,6 +65,7 @@ void Privilege::addPrivilege(char privilege, const wxString& grantor,
         case 'R':   p = "REFERENCES";  break;
         case 'X':   p = "EXECUTE";     break;
         case 'M':   p = "MEMBER OF";   break;
+        case 'G':   p = "USAGE";       break;
         default:
             return;
     };

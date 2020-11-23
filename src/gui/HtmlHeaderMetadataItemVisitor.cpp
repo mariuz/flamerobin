@@ -55,6 +55,7 @@ void HtmlHeaderMetadataItemVisitor::visitDomain(Domain& /*domain*/)
 {
     emptyTitles();
     addSummary();
+    addPrivileges();
     // TODO: Support dependencies retrieval in MetadataItem::getDependencies().
     //addDependencies();
     addDDL();
@@ -64,6 +65,7 @@ void HtmlHeaderMetadataItemVisitor::visitException(Exception& /*exception*/)
 {
     emptyTitles();
     addSummary();
+    addPrivileges();
     addDependencies();
     addDDL();
 }
@@ -90,6 +92,7 @@ void HtmlHeaderMetadataItemVisitor::visitGenerator(Generator& /*generator*/)
 {
     emptyTitles();
     addSummary();
+    addPrivileges();
     addDependencies();
     addDDL();
 }
