@@ -405,13 +405,14 @@ void DBHTreeItemVisitor::visitDomain(Domain& domain)
     setNodeProperties(&domain, domain.isSystem() ? ART_SystemDomain : ART_Domain);
     if (!nodeVisibleM)
         return;
-
-    // node text: domain_name + domain_datatype [+ "not null"]
-    nodeTextM = domain.getName_() + " " + domain.getDatatypeAsString();
-    if (!domain.isNullable())
-    {
-        nodeTextM << " " << SqlTokenizer::getKeyword(kwNOT)
-            << " " << SqlTokenizer::getKeyword(kwNULL);
+    if (domain.propertiesLoaded()) {
+        // node text: domain_name + domain_datatype [+ "not null"]
+        nodeTextM = domain.getName_() + " " + domain.getDatatypeAsString();
+        if (!domain.isNullable())
+        {
+            nodeTextM << " " << SqlTokenizer::getKeyword(kwNOT)
+                << " " << SqlTokenizer::getKeyword(kwNULL);
+        }
     }
     // set remaining default properties, nodeTextM will not be touched
 //    setNodeProperties(&domain, domain.isSystem() ? ART_SystemDomain : ART_Domain);

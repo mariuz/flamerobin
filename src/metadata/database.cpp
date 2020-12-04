@@ -928,25 +928,19 @@ void Database::parseCommitedSql(const SqlStatement& stm)
                 dynamic_cast<Procedure*>(object)->checkDependentProcedures();
                 break;
             case ntDMLTrigger:
-                {
-                    DMLTrigger* tr = dynamic_cast<DMLTrigger*>(object);
-                    if (tr)
-                    {
-                        tr->invalidate();
-                        Relation* r = getRelationForTrigger(tr);
-                        if (r)
-                            r->notifyObservers();
-                        else  // database trigger
-                            notifyObservers();
-                    }
-                    break;
-                }
-            case ntDBTrigger:
-            case ntDDLTrigger:
             {
-                    notifyObservers();
-                    break;
+                DMLTrigger* tr = dynamic_cast<DMLTrigger*>(object);
+                if (tr)
+                {
+                    tr->invalidate();
+                    Relation* r = getRelationForTrigger(tr);
+                    if (r)
+                        r->notifyObservers();
+                    else  // database trigger
+                        notifyObservers();
                 }
+                break;
+            }
             case ntDomain:
                 object->invalidate();
                 // notify all table columns with that domain
@@ -965,6 +959,8 @@ void Database::parseCommitedSql(const SqlStatement& stm)
                 // calls notifyObservers() only in the base class
                 // descendent classes are free to put there whatever it takes...
                 object->invalidate();
+                //object->ensurePropertiesLoaded();
+                notifyObservers();
                 break;
         }
     }
@@ -1584,19 +1580,19 @@ void Database::unlockChildren()
     if (isConnected())
     {
         viewsM->unlockSubject();
-        DMLtriggersM->unlockSubject();
-        DBTriggersM->unlockSubject();
+        UDFsM->unlockSubject();
         DDLTriggersM->unlockSubject();
-        sysTablesM->unlockSubject();
+        DBTriggersM->unlockSubject();
+        DMLtriggersM->unlockSubject();
         GTTsM->unlockSubject();
+        sysTablesM->unlockSubject();
         tablesM->unlockSubject();
         rolesM->unlockSubject();
-        packagesM->unlockSubject();
-        sysPackagesM->unlockSubject();
         proceduresM->unlockSubject();
+        sysPackagesM->unlockSubject();
+        packagesM->unlockSubject();
         generatorsM->unlockSubject();
         functionSQLsM->unlockSubject();
-        UDFsM->unlockSubject();
         exceptionsM->unlockSubject();
         sysDomainsM->unlockSubject();
         userDomainsM->unlockSubject();

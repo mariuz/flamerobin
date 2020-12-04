@@ -353,7 +353,7 @@ void MainObjectMenuMetadataItemVisitor::visitGTTTables(GTTs& gtts)
     addRefreshItem();
 }
 
-void MainObjectMenuMetadataItemVisitor::visitDMLTrigger(DMLTrigger& trigger)
+void MainObjectMenuMetadataItemVisitor::visitTrigger(Trigger& trigger)
 {
     addGenerateCodeMenu(trigger);
     addSeparator();
