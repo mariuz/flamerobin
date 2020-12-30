@@ -320,16 +320,16 @@ void Package::checkDependentPackage()
     for (std::vector<Dependency>::iterator it = deps.begin();
         it != deps.end(); ++it)
     {
-        std::vector<wxString> fields;
+        std::vector<DependencyField> fields;
         (*it).getFields(fields);
-        for (std::vector<wxString>::const_iterator ci = fields.begin();
+        for (std::vector<DependencyField>::const_iterator ci = fields.begin();
             ci != fields.end(); ++ci)
         {
             bool found = false;
             for (MethodPtrs::iterator i2 = begin();
                 i2 != end(); ++i2)
             {
-                if ((*i2)->getName_() == (*ci))
+                if ((*i2)->getName_() == (ci->getName_()))
                 {
                     found = true;
                     break;
@@ -340,7 +340,7 @@ void Package::checkDependentPackage()
                 missing += wxString::Format(
                     _("Package %s depends on parameter %s.%s"),
                     (*it).getName_().c_str(),
-                    (*ci).c_str(),
+                    (ci->getName_()).c_str(),
                     wxTextBuffer::GetEOL()
                 );
             }

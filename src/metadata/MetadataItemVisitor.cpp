@@ -207,7 +207,22 @@ void MetadataItemVisitor::visitTrigger(Trigger&)
     defaultAction();
 }
 
-void MetadataItemVisitor::visitTriggers(Triggers&)
+void MetadataItemVisitor::visitDBTrigger(DBTrigger&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitDDLTrigger(DDLTrigger&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitDMLTrigger(DMLTrigger&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitDMLTriggers(DMLTriggers&)
 {
     defaultAction();
 }
@@ -242,7 +257,7 @@ void MetadataItemVisitor::visitMetadataItem(MetadataItem&)
     defaultAction();
 }
 
-void MetadataItemVisitor::visitMethod(Method& method)
+void MetadataItemVisitor::visitMethod(Method&)
 {
     defaultAction();
 }

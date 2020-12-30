@@ -366,7 +366,7 @@ void MainObjectMenuMetadataItemVisitor::visitTrigger(Trigger& trigger)
     addPropertiesItem();
 }
 
-void MainObjectMenuMetadataItemVisitor::visitTriggers(Triggers& triggers)
+void MainObjectMenuMetadataItemVisitor::visitDMLTriggers(DMLTriggers& triggers)
 {
     addCreateItem();
     addSeparator();

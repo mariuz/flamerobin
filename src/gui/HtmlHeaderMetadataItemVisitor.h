@@ -43,7 +43,9 @@ public:
     virtual void visitProcedure(Procedure& procedure);
     virtual void visitRole(Role& role);
     virtual void visitTable(Table& table);
-    virtual void visitTrigger(Trigger& trigger);
+    virtual void visitDBTrigger(DBTrigger& trigger);
+    virtual void visitDDLTrigger(DDLTrigger& trigger);
+    virtual void visitDMLTrigger(DMLTrigger& trigger);
     virtual void visitView(View& view);
 protected:
     virtual void defaultAction();

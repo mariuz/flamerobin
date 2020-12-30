@@ -62,7 +62,7 @@ public:
     virtual void visitSysTables(SysTables& tables);
     virtual void visitGTTTables(GTTs& tables);
     virtual void visitTrigger(Trigger& trigger);
-    virtual void visitTriggers(Triggers& triggers);
+    virtual void visitDMLTriggers(DMLTriggers& triggers);
     virtual void visitDBTriggers(DBTriggers& triggers);
     virtual void visitDDLTriggers(DDLTriggers& triggers);
     virtual void visitView(View& view);

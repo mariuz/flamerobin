@@ -65,8 +65,8 @@ public:
 	virtual const wxString getTypeName()  const = 0;
 	std::vector<Privilege>* getPrivileges();
 
-  virtual void acceptVisitor(MetadataItemVisitor* visitor);
-	virtual void checkDependentFunction();
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    virtual void checkDependentFunction();
 };
 
 class UDF : public Function

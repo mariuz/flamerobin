@@ -19,7 +19,9 @@
   CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/foreachwx.h".
+*/
+
+// For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
 // for all others, include the necessary headers (this file is usually all you
@@ -293,6 +295,9 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             Role* role = dynamic_cast<Role*>(object);
             Function* func = dynamic_cast<Function*>(object);
             Package* pack = dynamic_cast<Package*>(object);
+            Generator* gen = dynamic_cast<Generator*>(object);
+            Exception* exc = dynamic_cast<Exception*>(object);
+            Domain* dom = dynamic_cast<Domain*>(object);
             std::vector<Privilege>* p = 0;
             if (rel)
                 p = rel->getPrivileges();
@@ -304,6 +309,12 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
                 p = func->getPrivileges();
             if (pack)
                 p = pack->getPrivileges();
+            if (gen)
+                p = gen->getPrivileges();
+            if (exc)
+                p = exc->getPrivileges();
+            if (dom)
+                p = dom->getPrivileges();
             if (!p)
                 return;
             bool firstItem = true;
@@ -715,6 +726,8 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
 
         if (cmdParams[0] == "value")
             processedText << g->getValue();
+        else if (cmdParams[0] == "source")
+            processedText << g->getSource();
     }
 
     // {%exceptioninfo:<property>%}

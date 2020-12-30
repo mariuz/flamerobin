@@ -37,6 +37,8 @@ typedef std::shared_ptr<Database> DatabasePtr;
 typedef std::weak_ptr<Database> DatabaseWeakPtr;
 typedef std::vector<DatabasePtr> DatabasePtrs;
 
+class Trigger;
+
 class DBTrigger;
 typedef std::shared_ptr<DBTrigger> DBTriggerPtr;
 typedef std::vector<DBTriggerPtr> DBTriggerPtrs;
@@ -48,6 +50,12 @@ typedef std::shared_ptr<DDLTrigger> DDLTriggerPtr;
 typedef std::vector<DDLTriggerPtr> DDLTriggerPtrs;
 class DDLTriggers;
 typedef std::shared_ptr<DDLTriggers> DDLTriggersPtr;
+
+class DMLTrigger;
+typedef std::shared_ptr<DMLTrigger> DMLTriggerPtr;
+typedef std::vector<DMLTriggerPtr> DMLTriggerPtrs;
+class DMLTriggers;
+typedef std::shared_ptr<DMLTriggers> DMLTriggersPtr;
 
 class Domain;
 typedef std::shared_ptr<Domain> DomainPtr;
@@ -142,12 +150,6 @@ typedef std::shared_ptr<Table> TablePtr;
 typedef std::vector<TablePtr> TablePtrs;
 class Tables;
 typedef std::shared_ptr<Tables> TablesPtr;
-
-class Trigger;
-typedef std::shared_ptr<Trigger> TriggerPtr;
-typedef std::vector<TriggerPtr> TriggerPtrs;
-class Triggers;
-typedef std::shared_ptr<Triggers> TriggersPtr;
 
 class UDF;
 typedef std::shared_ptr<UDF> UDFPtr;

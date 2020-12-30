@@ -99,6 +99,8 @@ void CreateDDLVisitor::visitColumn(Column& c)
         if (d->isSystem())
         {
             preSqlM << d->getDatatypeAsString();
+            if (c.isIdentity())
+                preSqlM << c.getSource();
             wxString charset = d->getCharset();
             DatabasePtr db = d->getDatabase();
             if (!charset.IsEmpty())
@@ -206,7 +208,7 @@ void CreateDDLVisitor::visitDatabase(Database& d)
             progressIndicatorM);
 
         preSqlM << "/******************** TRIGGERS ********************/\n\n";
-        iterateit<TriggersPtr, Trigger>(this, d.getTriggers(),
+        iterateit<DMLTriggersPtr, DMLTrigger>(this, d.getDMLTriggers(),
             progressIndicatorM);
     }
     catch (CancelProgressException&)
@@ -379,7 +381,7 @@ void CreateDDLVisitor::visitUDF(UDF& f)
 
 void CreateDDLVisitor::visitGenerator(Generator& g)
 {
-    preSqlM += "CREATE SEQUENCE " + g.getQuotedName() + ";\n";
+    preSqlM += "CREATE " + g.getSource() + ";\n";
     wxString description = g.getDescription();
     if (!description.empty())
     {
@@ -654,7 +656,7 @@ void CreateDDLVisitor::visitTable(Table& t)
     sqlM = preSqlM + "\n" + postSqlM + grantSqlM;
 }
 
-void CreateDDLVisitor::visitTrigger(Trigger& t)
+void CreateDDLVisitor::visitDBTrigger(DBTrigger& t)
 {
     preSqlM << "SET TERM ^ ;\nCREATE TRIGGER " << t.getQuotedName();
     if (t.isDMLTrigger())
@@ -680,6 +682,66 @@ void CreateDDLVisitor::visitTrigger(Trigger& t)
         name.Replace("'", "''");
         postSqlM << "comment on trigger " << name << " is '"
                      << description << "';\n";
+    }
+    sqlM = preSqlM + postSqlM;
+}
+
+void CreateDDLVisitor::visitDDLTrigger(DDLTrigger& t)
+{
+    preSqlM << "SET TERM ^ ;\nCREATE TRIGGER " << t.getQuotedName();
+    if (t.isDMLTrigger())
+    {
+        Identifier id(t.getRelationName());
+        preSqlM << " FOR " << id.getQuoted();
+    }
+    if (t.getActive())
+        preSqlM << " ACTIVE\n";
+    else
+        preSqlM << " INACTIVE\n";
+    preSqlM << t.getFiringEvent();
+    preSqlM << " POSITION ";
+    preSqlM << t.getPosition() << "\n";
+    preSqlM << t.getSource();
+    preSqlM << "^\nSET TERM ; ^\n";
+
+    wxString description = t.getDescription();
+    if (!description.empty())
+    {
+        wxString name(t.getName_());
+        description.Replace("'", "''");
+        name.Replace("'", "''");
+        postSqlM << "comment on trigger " << name << " is '"
+            << description << "';\n";
+    }
+    sqlM = preSqlM + postSqlM;
+}
+
+void CreateDDLVisitor::visitDMLTrigger(DMLTrigger& t)
+{
+    preSqlM << "SET TERM ^ ;\nCREATE TRIGGER " << t.getQuotedName();
+    if (t.isDMLTrigger())
+    {
+        Identifier id(t.getRelationName());
+        preSqlM << " FOR " << id.getQuoted();
+    }
+    if (t.getActive())
+        preSqlM << " ACTIVE\n";
+    else
+        preSqlM << " INACTIVE\n";
+    preSqlM << t.getFiringEvent();
+    preSqlM << " POSITION ";
+    preSqlM << t.getPosition() << "\n";
+    preSqlM << t.getSource();
+    preSqlM << "^\nSET TERM ; ^\n";
+
+    wxString description = t.getDescription();
+    if (!description.empty())
+    {
+        wxString name(t.getName_());
+        description.Replace("'", "''");
+        name.Replace("'", "''");
+        postSqlM << "comment on trigger " << name << " is '"
+            << description << "';\n";
     }
     sqlM = preSqlM + postSqlM;
 }

@@ -26,6 +26,7 @@
 
 #include "metadata/collection.h"
 #include "metadata/database.h"
+#include "metadata/privilege.h"
 
 class ProgressIndicator;
 
@@ -33,6 +34,9 @@ class Generator: public MetadataItem
 {
 private:
     int64_t valueM;
+    int64_t initialValueM;
+    int64_t incrementalValueM;
+    std::vector<Privilege> privilegesM;
     void setValue(int64_t value);
 protected:
     virtual void loadProperties();
@@ -43,6 +47,8 @@ public:
 
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    wxString getSource();
+    std::vector<Privilege>* getPrivileges();
 };
 
 class Generators: public MetadataCollection<Generator>

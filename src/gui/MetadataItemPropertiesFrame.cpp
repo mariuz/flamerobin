@@ -402,7 +402,7 @@ wxIcon getMetadataItemIcon(NodeType type)
             return wxArtProvider::GetIcon(ART_SystemTable, wxART_OTHER, sz);
         case ntTable:
             return wxArtProvider::GetIcon(ART_Table, wxART_OTHER, sz);
-        case ntTrigger:
+        case ntDMLTrigger:
             return wxArtProvider::GetIcon(ART_Trigger, wxART_OTHER, sz);
         case ntView:
             return wxArtProvider::GetIcon(ART_View, wxART_OTHER, sz);

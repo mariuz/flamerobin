@@ -182,7 +182,7 @@ private:
     TablesPtr tablesM;
     SysTablesPtr sysTablesM;
     GTTsPtr GTTsM;
-    TriggersPtr triggersM;
+    DMLTriggersPtr DMLtriggersM;
     DBTriggersPtr DBTriggersM;
     DDLTriggersPtr DDLTriggersM;
     UDFsPtr UDFsM;
@@ -235,7 +235,7 @@ public:
     TablesPtr getTables();
     SysTablesPtr getSysTables();
     GTTsPtr getGTTs();
-    TriggersPtr getTriggers();
+    DMLTriggersPtr getDMLTriggers();
     DBTriggersPtr getDBTriggers();
     DDLTriggersPtr getDDLTriggers();
     UDFsPtr getUDFs();
@@ -260,7 +260,7 @@ public:
     DomainPtr getDomain(const wxString& name);
 
     void loadGeneratorValues();
-    Relation* getRelationForTrigger(Trigger* trigger);
+    Relation* getRelationForTrigger(DMLTrigger* trigger);
 
     virtual DatabasePtr getDatabase() const;
     MetadataItem* findByNameAndType(NodeType nt, const wxString& name);

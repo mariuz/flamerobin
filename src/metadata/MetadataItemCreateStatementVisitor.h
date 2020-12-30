@@ -54,7 +54,7 @@ public:
     virtual void visitProcedures(Procedures& procedures);
     virtual void visitRoles(Roles& roles);
     virtual void visitTables(Tables& tables);
-    virtual void visitTriggers(Triggers& triggers);
+    virtual void visitTriggers(DMLTriggers& triggers);
     virtual void visitUDFs(UDFs& functions);
     virtual void visitViews(Views& views);
 

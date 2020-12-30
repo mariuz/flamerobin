@@ -37,11 +37,11 @@ public:
     {
         invalid,
         // relation triggers
-        beforeIUD, afterIUD,
+        beforeIUD, afterIUD
         // database triggers
-        databaseConnect, databaseDisconnect,
-        transactionStart, transactionCommit, transactionRollback,
-        DDL
+        //databaseConnect, databaseDisconnect,
+        //transactionStart, transactionCommit, transactionRollback,
+        //DDL
     };
 private:
     wxString relationNameM;
@@ -57,7 +57,7 @@ private:
 protected:
     virtual void loadProperties();
 public:
-    Trigger(DatabasePtr database, const wxString& name);
+    Trigger(NodeType type, DatabasePtr database, const wxString& name);
 
     bool getActive();
     wxString getFiringEvent();
@@ -75,12 +75,33 @@ public:
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 
-class Triggers: public MetadataCollection<Trigger>
+class DMLTrigger : public Trigger
+{
+public:
+    DMLTrigger(DatabasePtr dataBase, const wxString& name);
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+
+class DDLTrigger : public Trigger
+{
+public:
+    DDLTrigger(DatabasePtr dataBase, const wxString& name);
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+
+class DBTrigger : public Trigger
+{
+public:
+    DBTrigger(DatabasePtr dataBase, const wxString& name);
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+
+class DMLTriggers: public MetadataCollection<DMLTrigger>
 {
 protected:
     virtual void loadChildren();
 public:
-    Triggers(DatabasePtr database);
+    DMLTriggers(DatabasePtr database);
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     void load(ProgressIndicator* progressIndicator);
@@ -88,7 +109,7 @@ public:
 };
 
 
-class DBTriggers : public MetadataCollection<Trigger>
+class DBTriggers : public MetadataCollection<DBTrigger>
 {
 protected:
     virtual void loadChildren();
@@ -100,7 +121,7 @@ public:
     virtual const wxString getTypeName() const;
 };
 
-class DDLTriggers : public MetadataCollection<Trigger>
+class DDLTriggers : public MetadataCollection<DDLTrigger>
 {
 protected:
     virtual void loadChildren();
