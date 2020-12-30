@@ -125,6 +125,7 @@ wxString getNameOfType(NodeType type)
         case ntColumn:      return ("COLUMN");
         case ntException:   return ("EXCEPTION");
         case ntPackage:     return ("PACKAGE");
+        case ntIndex:       return ("INDEX");
         default:
             return "";
     }
@@ -158,6 +159,8 @@ NodeType getTypeByName(const wxString& name)
         return ntException;
     else if (name == "PACKAGE")
         return ntPackage;
+    else if (name == "INDEX")
+        return ntIndex;
     else
         return ntUnknown;
 }
@@ -328,6 +331,8 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
     // system tables should be treated as tables
     if (typeM == ntSysTable)
         mytype = 0;
+    if (typeM == ntDBTrigger || typeM == ntDDLTrigger || typeM == ntDMLTrigger)
+        mytype = 2;
 
     int mytype2 = mytype;
     // views count as relations(tables) when other object refer to them

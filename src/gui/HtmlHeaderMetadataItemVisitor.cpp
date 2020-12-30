@@ -135,7 +135,23 @@ void HtmlHeaderMetadataItemVisitor::visitTable(Table& /*table*/)
     addDDL();
 }
 
-void HtmlHeaderMetadataItemVisitor::visitTrigger(Trigger& /*trigger*/)
+void HtmlHeaderMetadataItemVisitor::visitDBTrigger(DBTrigger& /*trigger*/)
+{
+    emptyTitles();
+    addSummary();
+    addDependencies();
+    addDDL();
+}
+
+void HtmlHeaderMetadataItemVisitor::visitDDLTrigger(DDLTrigger& /*trigger*/)
+{
+    emptyTitles();
+    addSummary();
+    addDependencies();
+    addDDL();
+}
+
+void HtmlHeaderMetadataItemVisitor::visitDMLTrigger(DMLTrigger& /*trigger*/)
 {
     emptyTitles();
     addSummary();

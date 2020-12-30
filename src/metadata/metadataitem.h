@@ -55,6 +55,8 @@ typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
     ntDBTrigger, ntDBTriggers, 
     ntDDLTrigger, ntDDLTriggers,
     ntMethod,
+    ntUser, ntUsers,
+    ntSystem, 
     ntLastType
 } NodeType;
 
