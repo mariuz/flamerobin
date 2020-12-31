@@ -48,7 +48,7 @@ private:
     bool activeM;
     int positionM;
     wxString sourceM;
-    LONGLONG typeM;
+    int64_t typeM;
     wxString sqlSecurityM;
     wxString entryPointM;
     wxString engineNameM;
