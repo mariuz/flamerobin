@@ -113,6 +113,37 @@
             <default>0</default>
         </setting>
     </node>
+	<node>
+        <caption>Transaction Settings</caption>
+        <image>0</image>
+		<setting type="radiobox">
+            <caption>Isolation Mode</caption>
+            <key>transactionIsolationLevel</key>
+            <default>0</default>
+            <option>
+                <caption>Concurrency isolation mode (default of Flamerobin behavior)</caption>
+            </option>
+            <option>
+                <caption>Dirty read isolation mode</caption>
+            </option>
+            <option>
+                <caption>Read committed isolation mode</caption>
+            </option>
+            <option>
+                <caption>Consistency isolation mode</caption>
+            </option>
+        </setting>
+        <setting type="checkbox">
+            <caption>Wait for lock resolution</caption>
+            <key>transactionLockResolution</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Read only transaction mode</caption>
+            <key>transactionAccessMode</key>
+            <default>0</default>
+        </setting>
+	</node>
     <node>
         <caption>SQL Editor</caption>
         <image>0</image>
@@ -238,6 +269,11 @@
                 <key>autoCompleteLoadColumns</key>
                 <default>1</default>
             </setting>
+			<setting type="checkbox">
+				<caption>Sort object columns alphabetically</caption>
+				<key>autoCompleteLoadColumnsSort</key>
+				<default>0</default>
+			</setting>
         </node>
         <node>
             <caption>Statement History</caption>
