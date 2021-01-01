@@ -37,23 +37,27 @@ public:
     {
         invalid,
         // relation triggers
-        beforeIUD, afterIUD,
+        beforeIUD, afterIUD
         // database triggers
-        databaseConnect, databaseDisconnect,
-        transactionStart, transactionCommit, transactionRollback
+        //databaseConnect, databaseDisconnect,
+        //transactionStart, transactionCommit, transactionRollback,
+        //DDL
     };
 private:
     wxString relationNameM;
     bool activeM;
     int positionM;
     wxString sourceM;
-    int typeM;
+    int64_t typeM;
+    wxString sqlSecurityM;
+    wxString entryPointM;
+    wxString engineNameM;
 
     static FiringTime getFiringTime(int type);
 protected:
     virtual void loadProperties();
 public:
-    Trigger(DatabasePtr database, const wxString& name);
+    Trigger(NodeType type, DatabasePtr database, const wxString& name);
 
     bool getActive();
     wxString getFiringEvent();
@@ -62,22 +66,72 @@ public:
     wxString getRelationName();
     wxString getSource();
     wxString getAlterSql();
-    bool isDatabaseTrigger();
+    bool isDBTrigger();
+    bool isDDLTrigger();
+    bool isDMLTrigger();
+    wxString getSqlSecurity();
 
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 
-class Triggers: public MetadataCollection<Trigger>
+class DMLTrigger : public Trigger
+{
+public:
+    DMLTrigger(DatabasePtr dataBase, const wxString& name);
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+
+class DDLTrigger : public Trigger
+{
+public:
+    DDLTrigger(DatabasePtr dataBase, const wxString& name);
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+
+class DBTrigger : public Trigger
+{
+public:
+    DBTrigger(DatabasePtr dataBase, const wxString& name);
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+
+class DMLTriggers: public MetadataCollection<DMLTrigger>
 {
 protected:
     virtual void loadChildren();
 public:
-    Triggers(DatabasePtr database);
+    DMLTriggers(DatabasePtr database);
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     void load(ProgressIndicator* progressIndicator);
     virtual const wxString getTypeName() const;
 };
+
+
+class DBTriggers : public MetadataCollection<DBTrigger>
+{
+protected:
+    virtual void loadChildren();
+public:
+    DBTriggers(DatabasePtr database);
+
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    void load(ProgressIndicator* progressIndicator);
+    virtual const wxString getTypeName() const;
+};
+
+class DDLTriggers : public MetadataCollection<DDLTrigger>
+{
+protected:
+    virtual void loadChildren();
+public:
+    DDLTriggers(DatabasePtr database);
+
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    void load(ProgressIndicator* progressIndicator);
+    virtual const wxString getTypeName() const;
+};
+
 
 #endif

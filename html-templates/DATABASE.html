@@ -7,8 +7,8 @@
 <br>
 <br>
 <font size=+2>{%object_name%}</font><br>
-{%dbinfo:connection_string%}
-<br><br>
+{%dbinfo:connection_string%}<br>
+{%dbinfo:sql_security%}<br>
 <table bgcolor="white" border=0 cellpadding=2 cellspacing=0 valign=top>
     <tr><td>
 
@@ -53,6 +53,10 @@
     <tr bgcolor="#DDDDFF">
         <td nowrap>Sweep Interval</td>
         <td align="right" bgcolor="#CCCCFF" nowrap><a href="fr://edit_db_sweep_interval?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">{%dbinfo:sweep_interval%}</a></td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+        <td nowrap>Linger</td>
+        <td align="right" bgcolor="#CCCCFF" nowrap><a href="fr://edit_db_linger?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">{%dbinfo:linger%}</a></td>
     </tr>
     <tr bgcolor="#DDDDFF">
         <td nowrap>Forced Writes</td>

@@ -36,6 +36,7 @@
 #include "core/FRError.h"
 #include "engine/MetadataLoader.h"
 #include "frutils.h"
+#include "constants.h"
 #include "metadata/column.h"
 #include "metadata/CreateDDLVisitor.h"
 #include "metadata/database.h"
@@ -100,14 +101,12 @@ void Relation::loadProperties()
     wxMBConv* converter = db->getCharsetConverter();
 
     std::string sql("select rdb$owner_name, ");
-    if (db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
-        sql += "rdb$relation_type, ";
-    else
-        sql += "0, ";
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1) ? "rdb$relation_type, " :" 0, ";
     // for tables: path to external file as string
     sql += "rdb$external_file, ";
     // for views: source as blob
     sql += "rdb$view_source ";
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0)? ", rdb$sql_security " : ", null ";
     sql += "from rdb$relations where rdb$relation_name = ?";
 
     IBPP::Statement& st1 = loader->getStatement(sql);
@@ -139,6 +138,16 @@ void Relation::loadProperties()
         }
         else
             setSource(wxEmptyString);
+        // Sql Security
+        if (!st1->IsNull(5))
+        {
+            bool b;
+            st1->Get(5, b);
+            sqlSecurityM = wxString(b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER");
+
+        }
+        else
+            sqlSecurityM.clear();
     }
 
     setPropertiesLoaded(true);
@@ -156,6 +165,12 @@ wxString Relation::getOwner()
 {
     ensurePropertiesLoaded();
     return ownerM;
+}
+
+wxString Relation::getSqlSecurity()
+{
+    ensurePropertiesLoaded();
+    return sqlSecurityM;
 }
 
 int Relation::getRelationType()
@@ -181,20 +196,24 @@ void Relation::loadChildren()
     MetadataLoaderTransaction tr(loader);
     SubjectLocker lock(db.get());
     wxMBConv* converter = db->getCharsetConverter();
-
-    IBPP::Statement& st1 = loader->getStatement(
-        "select r.rdb$field_name, r.rdb$null_flag, r.rdb$field_source,"
-        " l.rdb$collation_name, f.rdb$computed_source, r.rdb$default_source,"
-        " r.rdb$description"
-        " from rdb$fields f"
-        " join rdb$relation_fields r "
-        "     on f.rdb$field_name=r.rdb$field_source"
-        " left outer join rdb$collations l "
-        "     on l.rdb$collation_id = r.rdb$collation_id "
-        "     and l.rdb$character_set_id = f.rdb$character_set_id"
-        " where r.rdb$relation_name = ?"
-        " order by r.rdb$field_position"
-    );
+    std::string sql(
+            "select r.rdb$field_name, r.rdb$null_flag, r.rdb$field_source,"         //1,2,3
+            " l.rdb$collation_name, f.rdb$computed_source, r.rdb$default_source,"   //4,5,6
+            " r.rdb$description ");                                                 //7
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? ", r.RDB$GENERATOR_NAME, r.RDB$IDENTITY_TYPE, g.RDB$INITIAL_VALUE, RDB$GENERATOR_INCREMENT " : ", null, null, null, null "; //8,9, 10, 11
+    sql +=  " from rdb$fields f"
+            " join rdb$relation_fields r "
+            "     on f.rdb$field_name=r.rdb$field_source"
+            " left outer join rdb$collations l "
+            "     on l.rdb$collation_id = r.rdb$collation_id "
+            "     and l.rdb$character_set_id = f.rdb$character_set_id";
+    
+    if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        sql += " left join RDB$GENERATORS g on g.RDB$GENERATOR_NAME = r.RDB$GENERATOR_NAME ";
+    sql +=  " where r.rdb$relation_name = ?"
+            " order by r.rdb$field_position";
+    
+    IBPP::Statement& st1 = loader->getStatement(sql);
     st1->Set(1, wx2std(getName_(), converter));
     st1->Execute();
 
@@ -224,6 +243,16 @@ void Relation::loadChildren()
             defaultSrc.Trim(false).Remove(0, 8);
         }
         bool hasDescription = !st1->IsNull(7);
+        wxString identityType = "";
+        int initialValue = 0, incrementValue = 0;
+        if (!st1->IsNull(8)) {
+            int i;
+            st1->Get(9, i);
+            identityType = i == IDENT_TYPE_BY_DEFAULT ? "BY DEFAULT" : i == IDENT_TYPE_ALWAYS ? "ALWAYS" : "";
+            st1->Get(10, initialValue);
+            st1->Get(11, incrementValue);
+        }
+
 
         ColumnPtr col = findColumn(fname);
         if (!col)
@@ -233,7 +262,7 @@ void Relation::loadChildren()
         }
         columns.push_back(col);
         col->initialize(source, computedSrc, collation, !notNull,
-            defaultSrc, hasDefault, hasDescription);
+            defaultSrc, hasDefault, hasDescription, identityType, initialValue, incrementValue);
     }
 
     setChildrenLoaded(true);
@@ -634,7 +663,7 @@ void Relation::getTriggers(std::vector<Trigger *>& list,
     {
         std::string name;
         st1->Get(1, name);
-        Trigger* t = dynamic_cast<Trigger*>(db->findByNameAndType(ntTrigger,
+        Trigger* t = dynamic_cast<Trigger*>(db->findByNameAndType(ntDMLTrigger,
             std2wxIdentifier(name, converter)));
         if (t && t->getFiringTime() == time)
             list.push_back(t);

@@ -113,15 +113,19 @@ wxString getNameOfType(NodeType type)
     switch (type)
     {
         case ntTable:       return ("TABLE");
+        case ntGTT:         return ("TABLEGTT");
         case ntView:        return ("VIEW");
         case ntProcedure:   return ("PROCEDURE");
-        case ntTrigger:     return ("TRIGGER");
+        case ntDMLTrigger:  return ("TRIGGER");
         case ntGenerator:   return ("GENERATOR");
-        case ntFunction:    return ("FUNCTION");
+        case ntFunctionSQL: return ("FUNCTIONSQL");
+        case ntUDF:         return ("UDF");
         case ntDomain:      return ("DOMAIN");
         case ntRole:        return ("ROLE");
         case ntColumn:      return ("COLUMN");
         case ntException:   return ("EXCEPTION");
+        case ntPackage:     return ("PACKAGE");
+        case ntIndex:       return ("INDEX");
         default:
             return "";
     }
@@ -131,16 +135,20 @@ NodeType getTypeByName(const wxString& name)
 {
     if (name == "TABLE")
         return ntTable;
+    else if (name == "TABLEGTT")
+        return ntGTT;
     else if (name == "VIEW")
         return ntView;
     else if (name == "PROCEDURE")
         return ntProcedure;
     else if (name == "TRIGGER")
-        return ntTrigger;
+        return ntDMLTrigger;
     else if (name == "GENERATOR")
         return ntGenerator;
-    else if (name == "FUNCTION")
-        return ntFunction;
+    else if (name == "FUNCTIONSQL")
+        return ntFunctionSQL;
+    else if (name == "UDF")
+        return ntUDF;
     else if (name == "DOMAIN")
         return ntDomain;
     else if (name == "ROLE")
@@ -149,6 +157,10 @@ NodeType getTypeByName(const wxString& name)
         return ntColumn;
     else if (name == "EXCEPTION")
         return ntException;
+    else if (name == "PACKAGE")
+        return ntPackage;
+    else if (name == "INDEX")
+        return ntIndex;
     else
         return ntUnknown;
 }
@@ -310,7 +322,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
     NodeType dep_types[] = {    ntTable,    ntView,     ntTrigger,  ntUnknown,  ntUnknown,
                                 ntProcedure,ntUnknown,  ntException,ntUnknown,  ntUnknown,
                                 ntUnknown,  ntUnknown,  ntUnknown,  ntUnknown,  ntGenerator,
-                                ntFunction
+                                ntFunction, ntUnknown,  ntUnknown,  ntUnknown,  ntPackage
     };
     const int type_count = sizeof(dep_types)/sizeof(NodeType);
     for (int i = 0; i < type_count; i++)
@@ -319,11 +331,16 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
     // system tables should be treated as tables
     if (typeM == ntSysTable)
         mytype = 0;
+    if (typeM == ntDBTrigger || typeM == ntDDLTrigger || typeM == ntDMLTrigger)
+        mytype = 2;
 
     int mytype2 = mytype;
     // views count as relations(tables) when other object refer to them
     if (mytype == 1 && !ofObject)
         mytype2 = 0;
+    // package header and package body
+    if (mytype == ntPackage)
+        mytype2 = 18;
 
     if (typeM == ntUnknown || mytype == -1)
         throw FRError(_("Unsupported type"));
@@ -423,7 +440,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
                 if (!current)
                     current = d->findByNameAndType(ntSysTable, objname);
             }
-            if (!ofObject && t == ntTrigger)
+            if (!ofObject && t == ntDMLTrigger)
             {
                 // system trigger dependent of this object indicates possible check constraint on a table
                 // that references this object. So, let's check if this trigger is used for check constraint
@@ -503,7 +520,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
         {
             std::string s;
             st1->Get(1, s);
-            Trigger t(d->shared_from_this(),
+            DMLTrigger t(d->shared_from_this(),
                 std2wxIdentifier(s, d->getCharsetConverter()));
             t.getDependencies(tempdep, true);
         }

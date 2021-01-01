@@ -336,6 +336,9 @@
     <ClCompile Include="src\gui\InsertParametersDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\metadata\package.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\gui\AboutBox.h">
@@ -657,6 +660,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\InsertParametersDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\metadata\package.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\metadata\constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -40,6 +40,7 @@
 #include "metadata/function.h"
 #include "metadata/generator.h"
 #include "metadata/MetadataTemplateManager.h"
+#include "metadata/package.h"
 #include "metadata/procedure.h"
 #include "metadata/role.h"
 #include "metadata/root.h"
@@ -147,7 +148,28 @@ void MainObjectMenuMetadataItemVisitor::visitExceptions(Exceptions& exceptions)
     addRefreshItem();
 }
 
-void MainObjectMenuMetadataItemVisitor::visitFunction(Function& function)
+void MainObjectMenuMetadataItemVisitor::visitFunctionSQL(FunctionSQL& function)
+{
+    menuM->Append(Cmds::Menu_ExecuteFunction, _("&Execute"));
+    addAlterItem(function);
+    addDropItem(function);
+    addSeparator();
+    addGenerateCodeMenu(function);
+    addSeparator();
+    // TODO: addRefreshItem();
+    addPropertiesItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitFunctionSQLs(FunctionSQLs& functions)
+{
+    addDeclareItem();
+    addSeparator();
+    addGenerateCodeMenu(functions);
+    addSeparator();
+    addRefreshItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitUDF(UDF& function)
 {
     addDropItem(function);
     addSeparator();
@@ -157,7 +179,7 @@ void MainObjectMenuMetadataItemVisitor::visitFunction(Function& function)
     addPropertiesItem();
 }
 
-void MainObjectMenuMetadataItemVisitor::visitFunctions(Functions& functions)
+void MainObjectMenuMetadataItemVisitor::visitUDFs(UDFs& functions)
 {
     addDeclareItem();
     addSeparator();
@@ -186,6 +208,33 @@ void MainObjectMenuMetadataItemVisitor::visitGenerators(Generators& generators)
     addCreateItem();
     addSeparator();
     addGenerateCodeMenu(generators);
+    addSeparator();
+    addRefreshItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitPackage(Package& package)
+{
+    addAlterItem(package);
+    addDropItem(package);
+    addSeparator();
+    addGenerateCodeMenu(package);
+    addSeparator();
+    addRefreshItem();
+    addPropertiesItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitPackages(Packages& packages)
+{
+    addCreateItem();
+    addSeparator();
+    addGenerateCodeMenu(packages); 
+    addSeparator();
+    addRefreshItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitSysPackages(SysPackages& packages)
+{
+    addGenerateCodeMenu(packages);
     addSeparator();
     addRefreshItem();
 }
@@ -289,9 +338,17 @@ void MainObjectMenuMetadataItemVisitor::visitTables(Tables& tables)
     addRefreshItem();
 }
 
+
 void MainObjectMenuMetadataItemVisitor::visitSysTables(SysTables& sysTables)
 {
     addGenerateCodeMenu(sysTables);
+    addSeparator();
+    addRefreshItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitGTTTables(GTTs& gtts)
+{
+    addGenerateCodeMenu(gtts);
     addSeparator();
     addRefreshItem();
 }
@@ -309,7 +366,25 @@ void MainObjectMenuMetadataItemVisitor::visitTrigger(Trigger& trigger)
     addPropertiesItem();
 }
 
-void MainObjectMenuMetadataItemVisitor::visitTriggers(Triggers& triggers)
+void MainObjectMenuMetadataItemVisitor::visitDMLTriggers(DMLTriggers& triggers)
+{
+    addCreateItem();
+    addSeparator();
+    addGenerateCodeMenu(triggers);
+    addSeparator();
+    addRefreshItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitDBTriggers(DBTriggers& triggers)
+{
+    addCreateItem();
+    addSeparator();
+    addGenerateCodeMenu(triggers); 
+    addSeparator();
+    addRefreshItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitDDLTriggers(DDLTriggers& triggers)
 {
     addCreateItem();
     addSeparator();

@@ -554,9 +554,12 @@ void Tables::acceptVisitor(MetadataItemVisitor* visitor)
 
 void Tables::load(ProgressIndicator* progressIndicator)
 {
-    wxString stmt = "select rdb$relation_name from rdb$relations"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
-        " and rdb$view_source is null order by 1";
+    
+    wxString stmt = "select rdb$relation_name from rdb$relations "
+        "where  (rdb$system_flag = 0 or rdb$system_flag is null) ";
+    if (getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11.1))
+        stmt += " and  rdb$relation_type = 0 ";
+    stmt += " and rdb$view_source is null order by 1";
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 
@@ -568,5 +571,36 @@ void Tables::loadChildren()
 const wxString Tables::getTypeName() const
 {
     return "TABLE_COLLECTION";
+}
+
+// Global Teporal Tables collection
+GTTs::GTTs(DatabasePtr database)
+    : MetadataCollection<Table>(ntSysTables, database, _("Global Temporaries"))
+{
+}
+
+void GTTs::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitGTTs(*this);
+}
+
+void GTTs::load(ProgressIndicator* progressIndicator)
+{
+    if (getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11.1)) {
+        wxString stmt = "select rdb$relation_name from rdb$relations"
+            " where rdb$relation_type in (4,5) "
+            " and rdb$view_source is null order by 1";
+        setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+    }
+}
+
+void GTTs::loadChildren()
+{
+    load(0);
+}
+
+const wxString GTTs::getTypeName() const
+{
+    return "GTT_COLLECTION";
 }
 

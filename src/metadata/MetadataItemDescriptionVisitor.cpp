@@ -43,6 +43,7 @@
 #include "metadata/metadataitem.h"
 #include "metadata/MetadataItemDescriptionVisitor.h"
 #include "metadata/parameter.h"
+#include "metadata/package.h"
 #include "metadata/procedure.h"
 #include "metadata/relation.h"
 #include "metadata/role.h"
@@ -137,7 +138,14 @@ void LoadDescriptionVisitor::visitException(Exception& exception)
         "where RDB$EXCEPTION_NAME = ?");
 }
 
-void LoadDescriptionVisitor::visitFunction(Function& function)
+void LoadDescriptionVisitor::visitFunctionSQL(FunctionSQL& function)
+{
+    loadDescription(&function,
+        "select RDB$DESCRIPTION from RDB$FUNCTIONS "
+        "where RDB$FUNCTION_NAME = ?");
+}
+
+void LoadDescriptionVisitor::visitUDF(UDF& function)
 {
     loadDescription(&function,
         "select RDB$DESCRIPTION from RDB$FUNCTIONS "
@@ -164,6 +172,13 @@ void LoadDescriptionVisitor::visitParameter(Parameter& parameter)
     loadDescription(&parameter, parameter.getParent(),
         "select RDB$DESCRIPTION from RDB$PROCEDURE_PARAMETERS "
         "where RDB$PARAMETER_NAME = ? and RDB$PROCEDURE_NAME = ?");
+}
+
+void LoadDescriptionVisitor::visitPackage(Package& package)
+{
+    loadDescription(&package,
+        "select RDB$DESCRIPTION from RDB$PACKAGES "
+        "where RDB$PACLAGE_NAME = ?");
 }
 
 void LoadDescriptionVisitor::visitProcedure(Procedure& procedure)
@@ -283,7 +298,14 @@ void SaveDescriptionVisitor::visitException(Exception& exception)
         "where RDB$EXCEPTION_NAME = ?");
 }
 
-void SaveDescriptionVisitor::visitFunction(Function& function)
+void SaveDescriptionVisitor::visitFunctionSQL(FunctionSQL& function)
+{
+    saveDescription(&function,
+        "update RDB$FUNCTIONS set rdb$description = ? "
+        "where RDB$FUNCTION_NAME = ?");
+}
+
+void SaveDescriptionVisitor::visitUDF(UDF& function)
 {
 	if (function.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
 		saveDescription(&function, "comment on function %s is '%s'");

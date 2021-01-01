@@ -55,6 +55,7 @@ void HtmlHeaderMetadataItemVisitor::visitDomain(Domain& /*domain*/)
 {
     emptyTitles();
     addSummary();
+    addPrivileges();
     // TODO: Support dependencies retrieval in MetadataItem::getDependencies().
     //addDependencies();
     addDDL();
@@ -64,14 +65,25 @@ void HtmlHeaderMetadataItemVisitor::visitException(Exception& /*exception*/)
 {
     emptyTitles();
     addSummary();
+    addPrivileges();
     addDependencies();
     addDDL();
 }
 
-void HtmlHeaderMetadataItemVisitor::visitFunction(Function& /*function*/)
+void HtmlHeaderMetadataItemVisitor::visitFunctionSQL(FunctionSQL& /*function*/)
 {
     emptyTitles();
     addSummary();
+    addPrivileges();
+    addDependencies();
+    addDDL();
+}
+
+void HtmlHeaderMetadataItemVisitor::visitUDF(UDF& /*function*/)
+{
+    emptyTitles();
+    addSummary();
+    addPrivileges();
     addDependencies();
     addDDL();
 }
@@ -80,6 +92,16 @@ void HtmlHeaderMetadataItemVisitor::visitGenerator(Generator& /*generator*/)
 {
     emptyTitles();
     addSummary();
+    addPrivileges();
+    addDependencies();
+    addDDL();
+}
+
+void HtmlHeaderMetadataItemVisitor::visitPackage(Package& /*procedure*/)
+{
+    emptyTitles();
+    addSummary();
+    addPrivileges();
     addDependencies();
     addDDL();
 }
@@ -113,7 +135,23 @@ void HtmlHeaderMetadataItemVisitor::visitTable(Table& /*table*/)
     addDDL();
 }
 
-void HtmlHeaderMetadataItemVisitor::visitTrigger(Trigger& /*trigger*/)
+void HtmlHeaderMetadataItemVisitor::visitDBTrigger(DBTrigger& /*trigger*/)
+{
+    emptyTitles();
+    addSummary();
+    addDependencies();
+    addDDL();
+}
+
+void HtmlHeaderMetadataItemVisitor::visitDDLTrigger(DDLTrigger& /*trigger*/)
+{
+    emptyTitles();
+    addSummary();
+    addDependencies();
+    addDDL();
+}
+
+void HtmlHeaderMetadataItemVisitor::visitDMLTrigger(DMLTrigger& /*trigger*/)
 {
     emptyTitles();
     addSummary();

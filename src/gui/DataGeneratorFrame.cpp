@@ -322,7 +322,7 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     rightPanelSizer->Add( skipCheckbox, 0, wxBOTTOM|wxRIGHT|wxLEFT, 8 );
 
     columnLabel = new wxStaticText( rightPanel, wxID_ANY, "Column: column name", wxDefaultPosition, wxDefaultSize, 0 );
-    columnLabel->SetFont( wxFont( 10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false, "sans" ) );
+    columnLabel->SetFont( wxFont( 10, 74, 90, 92, false, "sans" ) );
 
     rightPanelSizer->Add( columnLabel, 0, wxTOP|wxLEFT, 10 );
 

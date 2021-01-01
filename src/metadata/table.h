@@ -78,6 +78,7 @@ public:
 
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+
 };
 
 class SysTables: public MetadataCollection<Table>
@@ -99,6 +100,18 @@ protected:
     virtual void loadChildren();
 public:
     Tables(DatabasePtr database);
+
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    void load(ProgressIndicator* progressIndicator);
+    virtual const wxString getTypeName() const;
+};
+
+class GTTs: public MetadataCollection<Table>
+{
+protected:
+    virtual void loadChildren();
+public:
+    GTTs(DatabasePtr database);
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     void load(ProgressIndicator* progressIndicator);

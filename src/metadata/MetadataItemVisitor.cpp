@@ -76,12 +76,22 @@ void MetadataItemVisitor::visitForeignKey(ForeignKey&)
     defaultAction();
 }
 
-void MetadataItemVisitor::visitFunction(Function&)
+void MetadataItemVisitor::visitFunctionSQL(FunctionSQL&)
 {
     defaultAction();
 }
 
-void MetadataItemVisitor::visitFunctions(Functions&)
+void MetadataItemVisitor::visitFunctionSQLs(FunctionSQLs&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitUDF(UDF&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitUDFs(UDFs&)
 {
     defaultAction();
 }
@@ -107,6 +117,21 @@ void MetadataItemVisitor::visitParameter(Parameter&)
 }
 
 void MetadataItemVisitor::visitPrimaryKeyConstraint(PrimaryKeyConstraint&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitPackage(Package&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitPackages(Packages&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitSysPackages(SysPackages& packages)
 {
     defaultAction();
 }
@@ -161,6 +186,12 @@ void MetadataItemVisitor::visitSysTables(SysTables&)
     defaultAction();
 }
 
+void MetadataItemVisitor::visitGTTs(GTTs&)
+{
+    defaultAction();
+}
+
+
 void MetadataItemVisitor::visitTable(Table& table)
 {
     visitRelation(*(Relation*)&table);
@@ -176,7 +207,32 @@ void MetadataItemVisitor::visitTrigger(Trigger&)
     defaultAction();
 }
 
-void MetadataItemVisitor::visitTriggers(Triggers&)
+void MetadataItemVisitor::visitDBTrigger(DBTrigger&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitDDLTrigger(DDLTrigger&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitDMLTrigger(DMLTrigger&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitDMLTriggers(DMLTriggers&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitDDLTriggers(DDLTriggers&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitDBTriggers(DBTriggers&)
 {
     defaultAction();
 }
@@ -197,6 +253,11 @@ void MetadataItemVisitor::visitViews(Views&)
 }
 
 void MetadataItemVisitor::visitMetadataItem(MetadataItem&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitMethod(Method&)
 {
     defaultAction();
 }

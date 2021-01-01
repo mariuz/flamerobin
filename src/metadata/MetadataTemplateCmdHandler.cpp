@@ -49,6 +49,7 @@
 #include "metadata/table.h"
 #include "metadata/User.h"
 #include "metadata/view.h"
+#include "metadata/package.h"
 
 
 class MetadataTemplateCmdHandler: public TemplateCmdHandler
@@ -288,9 +289,15 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         // processes <text> for each privilege.
         else if (cmdParams[0] == "privilege")
         {
+            
             Relation* rel = dynamic_cast<Relation*>(object);
             Procedure* proc = dynamic_cast<Procedure*>(object);
             Role* role = dynamic_cast<Role*>(object);
+            Function* func = dynamic_cast<Function*>(object);
+            Package* pack = dynamic_cast<Package*>(object);
+            Generator* gen = dynamic_cast<Generator*>(object);
+            Exception* exc = dynamic_cast<Exception*>(object);
+            Domain* dom = dynamic_cast<Domain*>(object);
             std::vector<Privilege>* p = 0;
             if (rel)
                 p = rel->getPrivileges();
@@ -298,6 +305,16 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
                 p = proc->getPrivileges();
             if (role)
                 p = role->getPrivileges();
+            if (func)
+                p = func->getPrivileges();
+            if (pack)
+                p = pack->getPrivileges();
+            if (gen)
+                p = gen->getPrivileges();
+            if (exc)
+                p = exc->getPrivileges();
+            if (dom)
+                p = dom->getPrivileges();
             if (!p)
                 return;
             bool firstItem = true;
@@ -307,7 +324,6 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
                     cmdParams.from(2), &(*it));
             }
         }
-
         // {%foreach:depends_on:<separator>:<text>%}
         // Lists all objects on which the current object depends.
         // {%foreach:dependent:<separator>:<text>%}
@@ -369,23 +385,57 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         else if ((cmdParams[0] == "parameter") && (cmdParams.Count() >= 4))
         {
             Procedure* p = dynamic_cast<Procedure*>(object);
-            if (!p)
-                return;
-
-            SubjectLocker locker(p);
-            p->ensureChildrenLoaded();
-            bool isOut = (cmdParams[2] == "output");
-            bool firstItem = true;
-            for (ParameterPtrs::iterator it = p->begin(); it != p->end(); ++it)
-            {
-                if ((*it)->isOutputParameter() == isOut)
+            Function* f = dynamic_cast<Function*>(object);
+            if (p) {
+                SubjectLocker locker(p);
+                p->ensureChildrenLoaded();
+                bool isOut = (cmdParams[2] == "output");
+                bool firstItem = true;
+                for (ParameterPtrs::iterator it = p->begin(); it != p->end(); ++it)
                 {
-                    Local::foreachIteration(firstItem, tp, processedText, sep,
-                        cmdParams.from(3), (*it).get());
+                    if ((*it)->isOutputParameter() == isOut)
+                    {
+                        Local::foreachIteration(firstItem, tp, processedText, sep,
+                            cmdParams.from(3), (*it).get());
+                    }
+                }
+            }
+            if (f) {
+                SubjectLocker locker(f);
+                f->ensureChildrenLoaded();
+                bool isOut = (cmdParams[2] == "output");
+                bool firstItem = true;
+                for (ParameterPtrs::iterator it = f->begin(); it != f->end(); ++it)
+                {
+                    if ((*it)->isOutputParameter() == isOut)
+                    {
+                        Local::foreachIteration(firstItem, tp, processedText, sep,
+                            cmdParams.from(3), (*it).get());
+                    }
                 }
             }
         }
-
+        // {%foreach:method:<separator>:<function|procedure>:<text>%}
+        // If the current object is a package, processes <text> for
+        // each "function" or "procedure" method.
+        else if ((cmdParams[0] == "method") && (cmdParams.Count() >= 4))
+        {
+            Package* p = dynamic_cast<Package*>(object);
+            if (p) {
+                SubjectLocker locker(p);
+                p->ensureChildrenLoaded();
+                //bool isFunction = (cmdParams[2] == "function");
+                bool firstItem = true;
+                for (MethodPtrs::iterator it = p->begin(); it != p->end(); ++it)
+                {
+                    //if ((*it)->isFunction() == isFunction)
+                    {
+                        Local::foreachIteration(firstItem, tp, processedText, sep,
+                            cmdParams.from(3), (*it).get());
+                    }
+                }
+            }
+        }
         // {%foreach:user:<separator>:<text>%}
         // If the current object is a server, processes
         // the specified text once for each defined user,
@@ -426,12 +476,16 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
     else if (cmdName == "owner_name")
     {
         wxString name;
-        if (Relation* rel = dynamic_cast<Relation*>(object))
-            name = rel->getOwner();
-        else if (Procedure* pro = dynamic_cast<Procedure*>(object))
-            name = pro->getOwner();
-        else if (Role* rol = dynamic_cast<Role*>(object))
-            name = rol->getOwner();
+        if (Relation* r = dynamic_cast<Relation*>(object))
+            name = r->getOwner();
+        else if (Procedure* p = dynamic_cast<Procedure*>(object))
+            name = p->getOwner();
+        else if (Role* role = dynamic_cast<Role*>(object))
+            name = role->getOwner();
+        else if (Function* f = dynamic_cast<Function*>(object))
+            name = f->getOwner();
+        else if (Package* p = dynamic_cast<Package*>(object))
+            name = p->getOwner();
         if (!name.IsEmpty())
             processedText += tp->escapeChars(name);
     }
@@ -658,7 +712,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         else if (cmdParams[0] == "is_active")
             processedText += tp->escapeChars(getBooleanAsString(t->getActive()));
         else if (cmdParams[0] == "is_db_trigger")
-            processedText += tp->escapeChars(getBooleanAsString(t->isDatabaseTrigger()));
+            processedText += tp->escapeChars(getBooleanAsString(t->isDBTrigger()));
     }
 
     // {%generatorinfo:<property>%}
@@ -672,6 +726,8 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
 
         if (cmdParams[0] == "value")
             processedText << g->getValue();
+        else if (cmdParams[0] == "source")
+            processedText << g->getSource();
     }
 
     // {%exceptioninfo:<property>%}
@@ -689,12 +745,12 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             processedText << e->getMessage();
     }
 
-    // {%functioninfo:<property>%}
+    // {%udfinfo:<property>%}
     // If the current object is a function, expands to the function's
     // requested property.
-    else if (cmdName == "functioninfo" && !cmdParams.IsEmpty())
+    else if (cmdName == "udfinfo" && !cmdParams.IsEmpty())
     {
-        Function* f = dynamic_cast<Function*>(object);
+        UDF* f = dynamic_cast<UDF*>(object);
         if (!f)
             return;
 
@@ -704,6 +760,22 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             processedText += tp->escapeChars(f->getEntryPoint());
         else if (cmdParams[0] == "definition")
             processedText += tp->escapeChars(f->getDefinition(), false);
+        else if (cmdParams[0] == "source")
+            processedText += tp->escapeChars(f->getSource(), false);
+    }
+    // {%functioninfo:<property>%}
+    // If the current object is a function, expands to the function's
+    // requested property.
+    else if (cmdName == "functioninfo" && !cmdParams.IsEmpty())
+    {
+        FunctionSQL* f = dynamic_cast<FunctionSQL*>(object);
+        if (!f)
+            return;
+
+        if (cmdParams[0] == "definition")
+            processedText += tp->escapeChars(f->getDefinition(), false);
+        else if (cmdParams[0] == "source")
+            processedText += tp->escapeChars(f->getSource(), false);
     }
 
     // {%indexinfo:<property>%}
@@ -810,6 +882,10 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             db->getConnectedUsers(users);
             processedText += wxArrayToString(users, ",");
         }
+        else if (cmdParams[0] == "linger")
+            processedText += wxString() << db->getLinger();
+        else if (cmdParams[0] == "sql_security")
+            processedText += wxString() << db->getSqlSecurity();
     }
 
     // {%privilegeinfo:<property>%}
@@ -885,5 +961,38 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         else if (cmdParams[0] == "unix_group")
             processedText << u->getGroupId();
     }
+    // {%sql_security%}
+    // If the current object is a data base, procedure, relation, 
+    // function or trigger expands to the SQL Security.
+    else if (cmdName == "sql_security")
+    {
+    wxString name;
+    if (Relation* r = dynamic_cast<Relation*>(object))
+        name = r->getSqlSecurity();
+    else if (Procedure* p = dynamic_cast<Procedure*>(object))
+        name = p->getSqlSecurity();
+    else if (Function* f = dynamic_cast<Function*>(object))
+        name = f->getSqlSecurity();
+    else if (Trigger* t = dynamic_cast<Trigger*>(object))
+        name = t->getSqlSecurity();
+    else if (Package* p = dynamic_cast<Package*>(object))
+        name = p->getSqlSecurity();
+    if (!name.IsEmpty())
+        processedText += tp->escapeChars(name);
+    }
+    // {%packageinfo:<property>%}
+    // If the current object is a package, expands to the package's
+    // requested property.
+    else if ((cmdName == "packageinfo") && (cmdParams.Count() >= 1))
+    {
+        Package* p = dynamic_cast<Package*>(object);
+        if (!p)
+            return;
+        if (cmdParams[0] == "definition")
+            processedText += tp->escapeChars(p->getDefinition(), false);
+        if (cmdParams[0] == "source")
+            processedText += tp->escapeChars(p->getSource(), false);
+    }
+
 }
 

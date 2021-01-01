@@ -36,12 +36,16 @@ public:
     virtual void visitDatabase(Database& database);
     virtual void visitDomain(Domain& domain);
     virtual void visitException(Exception& exception);
-    virtual void visitFunction(Function& function);
+    virtual void visitFunctionSQL(FunctionSQL& function);
+    virtual void visitUDF(UDF& function);
     virtual void visitGenerator(Generator& generator);
+    virtual void visitPackage(Package& package);
     virtual void visitProcedure(Procedure& procedure);
     virtual void visitRole(Role& role);
     virtual void visitTable(Table& table);
-    virtual void visitTrigger(Trigger& trigger);
+    virtual void visitDBTrigger(DBTrigger& trigger);
+    virtual void visitDDLTrigger(DDLTrigger& trigger);
+    virtual void visitDMLTrigger(DMLTrigger& trigger);
     virtual void visitView(View& view);
 protected:
     virtual void defaultAction();

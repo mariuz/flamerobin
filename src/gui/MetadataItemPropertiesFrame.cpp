@@ -385,10 +385,15 @@ wxIcon getMetadataItemIcon(NodeType type)
             return wxArtProvider::GetIcon(ART_DatabaseConnected, wxART_OTHER, sz);
         case ntDomain:
             return wxArtProvider::GetIcon(ART_Domain, wxART_OTHER, sz);
-        case ntFunction:
+        case ntFunctionSQL:
+            return wxArtProvider::GetIcon(ART_Function, wxART_OTHER, sz);
+        case ntUDF:
             return wxArtProvider::GetIcon(ART_Function, wxART_OTHER, sz);
         case ntGenerator:
             return wxArtProvider::GetIcon(ART_Generator, wxART_OTHER, sz);
+// TODO: replace package art
+        case ntPackage: 
+            return wxArtProvider::GetIcon(ART_Procedure, wxART_OTHER, sz);
         case ntProcedure:
             return wxArtProvider::GetIcon(ART_Procedure, wxART_OTHER, sz);
         case ntServer:
@@ -397,7 +402,7 @@ wxIcon getMetadataItemIcon(NodeType type)
             return wxArtProvider::GetIcon(ART_SystemTable, wxART_OTHER, sz);
         case ntTable:
             return wxArtProvider::GetIcon(ART_Table, wxART_OTHER, sz);
-        case ntTrigger:
+        case ntDMLTrigger:
             return wxArtProvider::GetIcon(ART_Trigger, wxART_OTHER, sz);
         case ntView:
             return wxArtProvider::GetIcon(ART_View, wxART_OTHER, sz);
