@@ -558,7 +558,7 @@ void Tables::load(ProgressIndicator* progressIndicator)
     wxString stmt = "select rdb$relation_name from rdb$relations "
         "where  (rdb$system_flag = 0 or rdb$system_flag is null) ";
     if (getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11.1))
-        stmt += " and  rdb$relation_type = 0 ";
+        stmt += " and  coalesce(rdb$relation_type,0) = 0 ";
     stmt += " and rdb$view_source is null order by 1";
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
