@@ -191,12 +191,14 @@ void CreateDDLVisitor::visitDatabase(Database& d)
         preSqlM << "/******************* PROCEDURES ******************/\n\n";
         iterateit<ProceduresPtr, Procedure>(this, d.getProcedures(),
             progressIndicatorM);
-
-        preSqlM << "/******************* PACKAGES ******************/\n\n";
-        iterateit<PackagesPtr, Package>(this, d.getPackages(),
-            progressIndicatorM);
+        if (d.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12)) {
+            preSqlM << "/******************* PACKAGES ******************/\n\n";
+            iterateit<PackagesPtr, Package>(this, d.getPackages(),
+                progressIndicatorM);
+        }
         preSqlM << "/******************** TABLES **********************/\n\n";
         iterateit<TablesPtr, Table>(this, d.getTables(), progressIndicatorM);
+        iterateit<GTTsPtr, Table>(this, d.getGTTs(), progressIndicatorM);
 
         preSqlM << "/********************* VIEWS **********************/\n\n";
         // TODO: build dependecy tree first, and order views by it
@@ -209,6 +211,12 @@ void CreateDDLVisitor::visitDatabase(Database& d)
 
         preSqlM << "/******************** TRIGGERS ********************/\n\n";
         iterateit<DMLTriggersPtr, DMLTrigger>(this, d.getDMLTriggers(),
+            progressIndicatorM);
+
+        iterateit<DDLTriggersPtr, DDLTrigger>(this, d.getDDLTriggers(),
+            progressIndicatorM);
+
+        iterateit<DBTriggersPtr, DBTrigger>(this, d.getDBTriggers(),
             progressIndicatorM);
     }
     catch (CancelProgressException&)
