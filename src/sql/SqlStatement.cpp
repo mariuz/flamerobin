@@ -270,7 +270,44 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
             objectTypeM = ntTable;
             break;
         case kwTRIGGER:
-            objectTypeM = ntDMLTrigger;
+            if (actionM == actCREATE || actionM == actALTER || 
+                actionM == actCREATE_OR_ALTER) {
+                stt = tokenizer.getCurrentToken();
+                if (stt == kwACTIVE || stt == kwINACTIVE || 
+                    stt == kwBEFORE || stt == kwAFTER ||
+                    stt == kwON) {
+                    if (stt == kwACTIVE || stt == kwINACTIVE) {
+                        tokenizer.jumpToken(false);
+                        stt = tokenizer.getCurrentToken();
+                    }
+                    if (stt == kwON) { // DB Trigger
+                        objectTypeM = ntDBTrigger;
+                    }
+                    else{
+                        tokenizer.jumpToken(false);
+                        stt = tokenizer.getCurrentToken();
+                        if (stt == kwINSERT || stt == kwUPDATE ||
+                            stt == kwDELETE) { // SQL 2003 DML Trigger
+                            objectTypeM = ntDMLTrigger;
+                        }
+                        else
+                            objectTypeM = ntDDLTrigger;
+                    }
+                }
+                else // Legacy DML Trigger
+                    objectTypeM = ntDMLTrigger;
+            }
+            else {
+                objectTypeM = ntDMLTrigger;
+                if (actionM == actDROP) {
+                    if (databaseM->findByNameAndType(ntDBTrigger, nameM.get())) {
+                        objectTypeM = ntDBTrigger;
+                    }
+                    if (databaseM->findByNameAndType(ntDDLTrigger, nameM.get())) {
+                        objectTypeM = ntDDLTrigger;
+                    }
+                }
+            }
             break;
         case kwVIEW:
             objectTypeM = ntView;
@@ -290,23 +327,8 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
     if (objectTypeM == ntUnknown || !databaseM)
         return; // false;
 
-    // find UDF functions
     objectM = databaseM->findByNameAndType(objectTypeM, nameM.get());
-    if (!objectM && objectTypeM == ntFunctionSQL) {
-        objectTypeM = ntUDF;
-        objectM = databaseM->findByNameAndType(objectTypeM, nameM.get());
-    }
 
-    // find other's type of trigger's
-    if (!objectM && objectTypeM == ntDMLTrigger) {
-        objectTypeM = ntDBTrigger;
-        objectM = databaseM->findByNameAndType(objectTypeM, nameM.get());
-        if (!objectM) {
-            objectTypeM = ntDDLTrigger;
-            objectM = databaseM->findByNameAndType(objectTypeM, nameM.get());
-        }
-
-    }
 
     // map "CREATE OR ALTER" and "RECREATE" to correct action
     if (actionM == actCREATE_OR_ALTER || actionM == actRECREATE)
