@@ -452,10 +452,10 @@ void PreferencesDialog::layout()
     sizerRight->Add(bookctrl_1, 1, wxEXPAND);
 
     wxBoxSizer* sizerControls = new wxBoxSizer(wxHORIZONTAL);
-    int bookProportion = 1;
+    int bookProportion = 5;
     if (bookctrl_1->GetPageCount() > 1)
     {
-        int treeProportion = 0;
+        int treeProportion = 2;
         // for some reason the tree width isn't calculated correctly on the Mac
         // use proportional widths for tree and book controls there
         if (wxPlatformInfo::Get().GetOperatingSystemId() & wxOS_MAC)

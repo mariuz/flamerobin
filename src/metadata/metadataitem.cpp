@@ -917,5 +917,5 @@ bool DependencyField::operator<(const DependencyField & other) const
 {
     if (this->positionM == other.positionM)
         return this->getName_() < other.getName_();
-    //return this->positionM < other.positionM;//TODO: enable after fix position in every possible place
+    return this->positionM < other.positionM;//TODO: enable after fix position in every possible place
 }

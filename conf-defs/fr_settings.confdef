@@ -65,10 +65,23 @@
             <related /><!-- this moves the checkbox closer to the previous one -->
         </setting>
         <setting type="checkbox">
+            <caption>Show system domains in tree</caption>
+            <description>If checked the system domains will be shown in the tree by default (can be overridden per database)</description>
+            <key>ShowSystemDomains</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Show system packages in tree (Firebird 3.0 and later)</caption>
+            <description>If checked the system packages will be shown in the tree by default (can be overridden per database)</description>
+            <key>ShowSystemPackages</key>
+            <default>1</default>
+            <related /><!-- this moves the checkbox closer to the previous one -->
+        </setting>        <setting type="checkbox">
             <caption>Show system roles in tree (Firebird 2.5 and later)</caption>
             <description>If checked the system roles will be shown in the tree by default (can be overridden per database)</description>
             <key>ShowSystemRoles</key>
             <default>0</default>
+            <related /><!-- this moves the checkbox closer to the previous one -->
         </setting>
         <setting type="checkbox">
             <caption>Show system tables in tree</caption>
@@ -113,6 +126,37 @@
             <default>0</default>
         </setting>
     </node>
+	<node>
+        <caption>Transaction Settings</caption>
+        <image>0</image>
+		<setting type="radiobox">
+            <caption>Isolation Mode</caption>
+            <key>transactionIsolationLevel</key>
+            <default>0</default>
+            <option>
+                <caption>Concurrency isolation mode (default of Flamerobin behavior)</caption>
+            </option>
+            <option>
+                <caption>Dirty read isolation mode</caption>
+            </option>
+            <option>
+                <caption>Read committed isolation mode</caption>
+            </option>
+            <option>
+                <caption>Consistency isolation mode</caption>
+            </option>
+        </setting>
+        <setting type="checkbox">
+            <caption>Wait for lock resolution</caption>
+            <key>transactionLockResolution</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Read only transaction mode</caption>
+            <key>transactionAccessMode</key>
+            <default>0</default>
+        </setting>
+	</node>
     <node>
         <caption>SQL Editor</caption>
         <image>0</image>
@@ -238,6 +282,11 @@
                 <key>autoCompleteLoadColumns</key>
                 <default>1</default>
             </setting>
+			<setting type="checkbox">
+				<caption>Sort object columns alphabetically</caption>
+				<key>autoCompleteLoadColumnsSort</key>
+				<default>0</default>
+			</setting>
         </node>
         <node>
             <caption>Statement History</caption>
