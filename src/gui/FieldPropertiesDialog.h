@@ -64,6 +64,11 @@ private:
     wxChoice* choice_generator;
     wxCheckBox* checkbox_trigger;
     wxTextCtrl* textctrl_sql;
+    wxCheckBox* checkbox_identity;
+    wxStaticText* label_initialValue;
+    wxTextCtrl* textctrl_initialValue;
+    wxStaticText* label_incrementalValue;
+    wxTextCtrl* textctrl_incrementalValue;
 
     wxButton* button_ok;
     wxButton* button_cancel;
@@ -112,7 +117,8 @@ private:
         ID_textctrl_generator_name,
         ID_radio_generator_existing,
         ID_choice_generator,
-        ID_checkbox_trigger
+        ID_checkbox_trigger,
+        ID_checkbox_identity
     };
 
     void OnButtonEditDomainClick(wxCommandEvent& event);
@@ -123,6 +129,7 @@ private:
     void OnNeedsUpdateSql(wxCommandEvent& event);
     void OnRadioGeneratorClick(wxCommandEvent& event);
     void OnTextFieldnameUpdate(wxCommandEvent& event);
+    void OnCheckBoxidentityClick(wxCommandEvent& event);
 
     DECLARE_EVENT_TABLE()
 };

@@ -100,7 +100,7 @@ void CreateDDLVisitor::visitColumn(Column& c)
         {
             preSqlM << d->getDatatypeAsString();
             if (c.isIdentity())
-                preSqlM << c.getSource();
+                preSqlM << c.getSource(true);
             wxString charset = d->getCharset();
             DatabasePtr db = d->getDatabase();
             if (!charset.IsEmpty())
@@ -175,10 +175,12 @@ void CreateDDLVisitor::visitDatabase(Database& d)
 
         preSqlM << "/********************* UDFS ***********************/\n\n";
         iterateit<UDFsPtr, UDF>(this, d.getUDFs(), progressIndicatorM);
-
-        preSqlM << "/********************* FUNCTIONS ***********************/\n\n";
-        iterateit<FunctionSQLsPtr, FunctionSQL>(this, d.getFunctionSQLs(),
-            progressIndicatorM);
+        
+        if (d.getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
+            preSqlM << "/********************* FUNCTIONS ***********************/\n\n";
+            iterateit<FunctionSQLsPtr, FunctionSQL>(this, d.getFunctionSQLs(),
+                progressIndicatorM);
+        }
 
         preSqlM << "/****************** SEQUENCES ********************/\n\n";
         iterateit<GeneratorsPtr, Generator>(this, d.getGenerators(),
@@ -192,9 +194,12 @@ void CreateDDLVisitor::visitDatabase(Database& d)
         iterateit<ProceduresPtr, Procedure>(this, d.getProcedures(),
             progressIndicatorM);
 
-        preSqlM << "/******************* PACKAGES ******************/\n\n";
-        iterateit<PackagesPtr, Package>(this, d.getPackages(),
-            progressIndicatorM);
+        if (d.getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
+            preSqlM << "/******************* PACKAGES ******************/\n\n";
+            iterateit<PackagesPtr, Package>(this, d.getPackages(),
+                progressIndicatorM);
+        }
+
         preSqlM << "/******************** TABLES **********************/\n\n";
         iterateit<TablesPtr, Table>(this, d.getTables(), progressIndicatorM);
 
@@ -210,6 +215,16 @@ void CreateDDLVisitor::visitDatabase(Database& d)
         preSqlM << "/******************** TRIGGERS ********************/\n\n";
         iterateit<DMLTriggersPtr, DMLTrigger>(this, d.getDMLTriggers(),
             progressIndicatorM);
+        if (d.getInfo().getODSVersionIsHigherOrEqualTo(11.1)) {
+            preSqlM << "/******************** DB TRIGGERS ********************/\n\n";
+            iterateit<DBTriggersPtr, DBTrigger>(this, d.getDBTriggers(),
+                progressIndicatorM);
+        }
+        if (d.getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
+            preSqlM << "/******************** DDL TRIGGERS ********************/\n\n";
+            iterateit<DDLTriggersPtr, DDLTrigger>(this, d.getDDLTriggers(),
+                progressIndicatorM);
+        }
     }
     catch (CancelProgressException&)
     {

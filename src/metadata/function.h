@@ -119,6 +119,7 @@ public:
 	virtual const wxString getTypeName() const;
 
 };
+
 class FunctionSQLs: public MetadataCollection<FunctionSQL>
 {
 protected:
