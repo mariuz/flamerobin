@@ -484,8 +484,8 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             name = role->getOwner();
         else if (Function* f = dynamic_cast<Function*>(object))
             name = f->getOwner();
-        else if (Package* p = dynamic_cast<Package*>(object))
-            name = p->getOwner();
+        else if (Package* pk = dynamic_cast<Package*>(object))
+            name = pk->getOwner();
         if (!name.IsEmpty())
             processedText += tp->escapeChars(name);
     }
@@ -975,8 +975,8 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         name = f->getSqlSecurity();
     else if (Trigger* t = dynamic_cast<Trigger*>(object))
         name = t->getSqlSecurity();
-    else if (Package* p = dynamic_cast<Package*>(object))
-        name = p->getSqlSecurity();
+    else if (Package* pk = dynamic_cast<Package*>(object))
+        name = pk->getSqlSecurity();
     if (!name.IsEmpty())
         processedText += tp->escapeChars(name);
     }

@@ -56,17 +56,18 @@ struct DatatypeProperties
     bool hasSize;
     bool hasScale;
     bool isChar;
+    bool identity;
 };
 
 static const DatatypeProperties datatypes[] = {
-    { "Char", true, false, true },
-    { "Boolean", false, false, true }, // Firebird v3
-    { "Varchar", true, false, true },
-    { "Integer" },
-    { "Smallint" },
-    { "Numeric", true, true, false },
-    { "Decimal", true, true, false },
-    { "BigInt" },
+    { "Char", true, false, true, false },
+    { "Boolean", false, false, true, false }, // Firebird v3
+    { "Varchar", true, false, true, false },
+    { "Integer", false, false, false, true},
+    { "Smallint", false, false, false, true },
+    { "Numeric", true, true, false, true },
+    { "Decimal", true, true, false, true },
+    { "BigInt", false, false, false, true },
     { "Float" },
     { "Double precision" },
     { "Date" },
@@ -138,7 +139,16 @@ void FieldPropertiesDialog::createControls()
         wxDefaultPosition, wxDefaultSize, 0, 0);
 
     checkbox_notnull = new wxCheckBox(getControlsPanel(), wxID_ANY, _("Not null"));
-
+    {
+        DatabasePtr db = tableM->getDatabase();
+        if (db->getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
+            checkbox_identity = new wxCheckBox(getControlsPanel(), ID_checkbox_identity, _("Identity"));
+            label_initialValue = new wxStaticText(getControlsPanel(), wxID_ANY, _("Initial Value:"));
+            textctrl_initialValue = new wxTextCtrl(getControlsPanel(), wxID_ANY, wxEmptyString);
+            //label_incrementalValue = new wxStaticText(getControlsPanel(), wxID_ANY, _("Icremental Value:"));
+            //textctrl_incrementalValue = new wxTextCtrl(getControlsPanel(), wxID_ANY, wxEmptyString);
+        }
+    }
     static_line_autoinc = new wxStaticLine(getControlsPanel());
     label_autoinc = new wxStaticText(getControlsPanel(), wxID_ANY, _("Autoincrement"));
 
@@ -202,6 +212,21 @@ void FieldPropertiesDialog::layoutControls()
         wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
     sizerTop->Add(choice_collate, wxGBPosition(3, 5), wxDefaultSpan,
         wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    {
+        DatabasePtr db = tableM->getDatabase();
+        if (db->getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
+            sizerTop->Add(checkbox_identity, wxGBPosition(4, 0), wxDefaultSpan,
+                wxALIGN_CENTER_VERTICAL | wxEXPAND);
+            sizerTop->Add(label_initialValue, wxGBPosition(4, 2), wxDefaultSpan,
+                wxALIGN_CENTER_VERTICAL | wxEXPAND);
+            sizerTop->Add(textctrl_initialValue, wxGBPosition(4, 3), wxDefaultSpan,
+                wxALIGN_CENTER_VERTICAL | wxEXPAND);
+            //sizerTop->Add(label_incrementalValue, wxGBPosition(4, 4), wxDefaultSpan,
+            //    wxALIGN_CENTER_VERTICAL | wxEXPAND);
+            //sizerTop->Add(textctrl_incrementalValue, wxGBPosition(4, 5), wxDefaultSpan,
+            //    wxALIGN_CENTER_VERTICAL | wxEXPAND);
+        }
+    }
 
     sizerTop->AddGrowableCol(1);
     sizerTop->AddGrowableCol(3);
@@ -329,6 +354,8 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
     wxString dtSize = textctrl_size->GetValue();
     wxString dtScale = textctrl_scale->GetValue();
     bool isNullable = !checkbox_notnull->IsChecked();
+    bool isIdentity = tableM->getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12.0) ? checkbox_identity->IsChecked() : false;
+    wxString initialValue = tableM->getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12.0) ? textctrl_initialValue->GetValue() : "";
 
     int n = choice_datatype->GetSelection();
     if (n >= 0 && n < datatypescnt)
@@ -439,6 +466,11 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
     {
         wxString addCollate;
         statements += alterTable + "ADD \n" + colNameSql + " ";
+        if (isIdentity) {
+            statements += selDatatype + " GENERATED " + " BY DEFAULT "  + " AS IDENTITY "; // Todo: implemented ALWAYS
+            if (!initialValue.IsEmpty())
+                statements += "(START WITH " + initialValue + ")";
+        }else
         if (newDomain)
         {
             statements += selDatatype;
@@ -621,6 +653,15 @@ void FieldPropertiesDialog::updateColumnControls()
         loadCollations();
         choice_collate->SetSelection(
             choice_collate->FindString(columnM->getCollation()));
+        if (tableM->getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
+            checkbox_identity->SetValue(columnM->isIdentity());
+            if (columnM->isIdentity()) {
+                textctrl_initialValue->SetValue(std::to_string(columnM->getInitialValue()));
+            }
+            else
+                textctrl_initialValue->SetEditable(false);
+
+        }
     }
     updateDatatypeInfo();
 }
@@ -656,6 +697,12 @@ void FieldPropertiesDialog::updateDatatypeInfo()
     choice_collate->Enable(columnM == 0 && indexOk && datatypes[n].isChar);
     if (!choice_collate->IsEnabled())
         choice_collate->SetSelection(wxNOT_FOUND);
+    if (tableM->getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
+        checkbox_identity->Enable(datatypes[n].identity);
+        textctrl_initialValue->SetEditable(datatypes[n].identity);
+        //textctrl_incrementalValue->SetEditable(datatypes[n].identity);
+    }
+
     updateColors();
 }
 
@@ -752,7 +799,9 @@ BEGIN_EVENT_TABLE(FieldPropertiesDialog, BaseDialog)
         FieldPropertiesDialog::OnTextFieldnameUpdate)
     EVT_TEXT(FieldPropertiesDialog::ID_textctrl_generator_name,
         FieldPropertiesDialog::OnNeedsUpdateSql)
-END_EVENT_TABLE()
+    EVT_CHECKBOX(FieldPropertiesDialog::ID_checkbox_identity,
+        FieldPropertiesDialog::OnCheckBoxidentityClick)
+    END_EVENT_TABLE()
 
 void FieldPropertiesDialog::OnButtonEditDomainClick(wxCommandEvent&
     WXUNUSED(event))
@@ -838,6 +887,12 @@ void FieldPropertiesDialog::OnTextFieldnameUpdate(wxCommandEvent&
 {
     button_ok->Enable(!textctrl_fieldname->GetValue().IsEmpty());
     updateSqlStatement();
+}
+
+void FieldPropertiesDialog::OnCheckBoxidentityClick(wxCommandEvent& WXUNUSED(event))
+{
+    textctrl_initialValue->SetEditable(checkbox_identity->IsChecked());
+    checkbox_notnull->SetValue(checkbox_identity->IsChecked());
 }
 
 class ColumnPropertiesHandler: public URIHandler,
