@@ -452,7 +452,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(Cmds::Menu_CreateRole,       MainFrame::OnMenuCreateRole)
     EVT_MENU(Cmds::Menu_CreateTable,      MainFrame::OnMenuCreateTable)
     EVT_MENU(Cmds::Menu_CreateGTTTable,   MainFrame::OnMenuCreateGTTTable)
-    EVT_MENU(Cmds::Menu_CreateTrigger,    MainFrame::OnMenuCreateTrigger)
+    EVT_MENU(Cmds::Menu_CreateTrigger,    MainFrame::OnMenuDMLCreateTrigger)
     EVT_MENU(Cmds::Menu_CreateDBTrigger,  MainFrame::OnMenuCreateDBTrigger)
     EVT_MENU(Cmds::Menu_CreateDDLTrigger, MainFrame::OnMenuCreateDDLTrigger)
     EVT_MENU(Cmds::Menu_CreateUDF,        MainFrame::OnMenuCreateUDF)
@@ -1323,10 +1323,10 @@ void MainFrame::OnMenuCreateGTTTable(wxCommandEvent& WXUNUSED(event))
         MetadataItemCreateStatementVisitor::getCreateGTTTableStatement());
 }
 
-void MainFrame::OnMenuCreateTrigger(wxCommandEvent& WXUNUSED(event))
+void MainFrame::OnMenuDMLCreateTrigger(wxCommandEvent& WXUNUSED(event))
 {
     showCreateTemplate(
-        MetadataItemCreateStatementVisitor::getCreateTriggerStatement());
+        MetadataItemCreateStatementVisitor::getCreateDMLTriggerStatement());
 }
 
 void MainFrame::OnMenuCreateDBTrigger(wxCommandEvent& WXUNUSED(event))

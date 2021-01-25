@@ -110,7 +110,7 @@ public:
     void OnMenuCreateRole(wxCommandEvent& event);
     void OnMenuCreateTable(wxCommandEvent& event);
     void OnMenuCreateGTTTable(wxCommandEvent& event);
-    void OnMenuCreateTrigger(wxCommandEvent& event);
+    void OnMenuDMLCreateTrigger(wxCommandEvent& event);
     void OnMenuCreateDBTrigger(wxCommandEvent& event);
     void OnMenuCreateDDLTrigger(wxCommandEvent& event);
     void OnMenuCreateUDF(wxCommandEvent& event);
