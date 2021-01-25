@@ -199,9 +199,10 @@ void CreateDDLVisitor::visitDatabase(Database& d)
             iterateit<PackagesPtr, Package>(this, d.getPackages(),
                 progressIndicatorM);
         }
-
+      
         preSqlM << "/******************** TABLES **********************/\n\n";
         iterateit<TablesPtr, Table>(this, d.getTables(), progressIndicatorM);
+        iterateit<GTTsPtr, Table>(this, d.getGTTs(), progressIndicatorM);
 
         preSqlM << "/********************* VIEWS **********************/\n\n";
         // TODO: build dependecy tree first, and order views by it
@@ -215,6 +216,7 @@ void CreateDDLVisitor::visitDatabase(Database& d)
         preSqlM << "/******************** TRIGGERS ********************/\n\n";
         iterateit<DMLTriggersPtr, DMLTrigger>(this, d.getDMLTriggers(),
             progressIndicatorM);
+
         if (d.getInfo().getODSVersionIsHigherOrEqualTo(11.1)) {
             preSqlM << "/******************** DB TRIGGERS ********************/\n\n";
             iterateit<DBTriggersPtr, DBTrigger>(this, d.getDBTriggers(),

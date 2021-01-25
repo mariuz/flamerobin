@@ -67,11 +67,12 @@ typedef FB_UINT64 TraNumber;
 #define FB_NELEM(x)	((int)(sizeof(x) / sizeof(x[0])))
 
 
+/*
 const ULONG MAX_COLUMN_SIZE = 32767;
 const ULONG MAX_VARY_COLUMN_SIZE = MAX_COLUMN_SIZE - sizeof(USHORT);
 
 const ULONG MAX_STR_SIZE = 65535;
-
+*/
 const int TEMP_STR_LENGTH = 128;
 
 // Metadata constants
@@ -88,7 +89,7 @@ const unsigned int USERNAME_LENGTH	= METADATA_IDENTIFIER_CHAR_LEN * METADATA_BYT
 const FB_SIZE_T MAX_SQL_IDENTIFIER_LEN = METADATA_IDENTIFIER_CHAR_LEN * METADATA_BYTES_PER_CHAR;
 const FB_SIZE_T MAX_SQL_IDENTIFIER_SIZE = MAX_SQL_IDENTIFIER_LEN + 1;
 
-const ULONG MAX_SQL_LENGTH = 10 * 1024 * 1024; // 10 MB - just a safety check
+//const ULONG MAX_SQL_LENGTH = 10 * 1024 * 1024; // 10 MB - just a safety check
 
 const char* const DB_KEY_NAME = "DB_KEY";
 const char* const RDB_DB_KEY_NAME = "RDB$DB_KEY";
@@ -205,12 +206,13 @@ const int PRETTY_BUFFER_SIZE = 1024;
 
 const int MAX_INDEX_SEGMENTS = 16;
 
+/*
 // Maximum index key length (must be in sync with MAX_PAGE_SIZE in ods.h)
 const ULONG MAX_KEY			= 8192;		// Maximum page size possible divide by 4 (MAX_PAGE_SIZE / 4)
 
 const USHORT SQL_MATCH_1_CHAR		= '_';	// Not translatable
 const USHORT SQL_MATCH_ANY_CHARS	= '%';	// Not translatable
-
+*/
 const size_t MAX_CONTEXT_VARS	= 1000;		// Maximum number of context variables allowed for a single object
 
 // Time precision limits and defaults for TIME/TIMESTAMP values.
@@ -493,6 +495,6 @@ const int WITH_GRANT_OPTION = 1;
 const int WITH_ADMIN_OPTION = 2;
 
 // Max length of the string returned by ERROR_TEXT context variable
-const USHORT MAX_ERROR_MSG_LENGTH = 1024 * METADATA_BYTES_PER_CHAR; // 1024 UTF-8 characters
+//const USHORT MAX_ERROR_MSG_LENGTH = 1024 * METADATA_BYTES_PER_CHAR; // 1024 UTF-8 characters
 
 #endif // JRD_CONSTANTS_H
