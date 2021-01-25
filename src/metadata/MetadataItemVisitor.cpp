@@ -111,6 +111,11 @@ void MetadataItemVisitor::visitIndex(Index&)
     defaultAction();
 }
 
+void MetadataItemVisitor::visitIndices(Indices& indices)
+{
+	defaultAction();
+}
+
 void MetadataItemVisitor::visitParameter(Parameter&)
 {
     defaultAction();
