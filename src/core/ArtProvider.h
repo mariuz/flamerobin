@@ -43,6 +43,8 @@
 #define ART_Functions               wxART_MAKE_ART_ID(ART_Functions)
 #define ART_Generator               wxART_MAKE_ART_ID(ART_Generator)
 #define ART_Generators              wxART_MAKE_ART_ID(ART_Generators)
+#define ART_Index                   wxART_MAKE_ART_ID(ART_Index)
+#define ART_Indices                 wxART_MAKE_ART_ID(ART_Indices)
 #define ART_Object                  wxART_MAKE_ART_ID(ART_Object)
 #define ART_Package                 wxART_MAKE_ART_ID(ART_Package)
 #define ART_Packages                wxART_MAKE_ART_ID(ART_Packages)

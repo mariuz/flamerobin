@@ -353,7 +353,31 @@ void MainObjectMenuMetadataItemVisitor::visitGTTTables(GTTs& gtts)
     addRefreshItem();
 }
 
-void MainObjectMenuMetadataItemVisitor::visitTrigger(Trigger& trigger)
+void MainObjectMenuMetadataItemVisitor::visitDMLTrigger(DMLTrigger& trigger)
+{
+    addGenerateCodeMenu(trigger);
+    addSeparator();
+    addAlterItem(trigger);
+    addDropItem(trigger);
+    addSeparator();
+    addGenerateCodeMenu(trigger);
+    addSeparator();
+    addRefreshItem();
+    addPropertiesItem();
+}
+void MainObjectMenuMetadataItemVisitor::visitDBTrigger(DBTrigger& trigger)
+{
+    addGenerateCodeMenu(trigger);
+    addSeparator();
+    addAlterItem(trigger);
+    addDropItem(trigger);
+    addSeparator();
+    addGenerateCodeMenu(trigger);
+    addSeparator();
+    addRefreshItem();
+    addPropertiesItem();
+}
+void MainObjectMenuMetadataItemVisitor::visitDDLTrigger(DDLTrigger& trigger)
 {
     addGenerateCodeMenu(trigger);
     addSeparator();

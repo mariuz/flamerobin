@@ -150,14 +150,15 @@ wxString MetadataItemCreateStatementVisitor::getCreateGTTTableStatement()
 }
 
 /*static*/
-wxString MetadataItemCreateStatementVisitor::getCreateTriggerStatement()
+wxString MetadataItemCreateStatementVisitor::getCreateDMLTriggerStatement()
 {
     return "SET TERM ^ ;\n\n"
-        "CREATE TRIGGER name [FOR table/view] \n"
+        "CREATE TRIGGER name \n"
+//        "[FOR table/view] \n"
         " [IN]ACTIVE \n"
-        " [ON {[DIS]CONNECT | TRANSACTION {START | COMMIT | ROLLBACK}} ] \n"
         " [{BEFORE | AFTER} INSERT OR UPDATE OR DELETE] \n"
-        " POSITION number \n"
+        " POSITION number \n "
+        " ON table/view \n"
         "AS \n"
         "BEGIN \n"
         "    /* enter trigger code here */ \n"
@@ -167,12 +168,43 @@ wxString MetadataItemCreateStatementVisitor::getCreateTriggerStatement()
 
 wxString MetadataItemCreateStatementVisitor::getCreateDBTriggerStatement()
 {
-    return wxString();
+    return "SET TERM ^ ;\n\n"
+        "CREATE TRIGGER name  \n"
+        " [IN]ACTIVE \n"
+        " [ON {[DIS]CONNECT | TRANSACTION {START | COMMIT | ROLLBACK}} ] \n"
+        " POSITION number \n"
+        "AS \n"
+        "BEGIN \n"
+        "    /* enter trigger code here */ \n"
+        "END^\n\n"
+        "SET TERM ; ^\n";
 }
 
 wxString MetadataItemCreateStatementVisitor::getCreateDDLTriggerStatement()
 {
-    return wxString();
+    return "SET TERM ^ ;\n\n"
+        "CREATE TRIGGER name  \n"
+        " [IN]ACTIVE \n"
+        " {BEFORE | AFTER}  CREATE TABLE | ALTER TABLE | DROP TABLE | \n"
+        "                   CREATE PROCEDURE | ALTER PROCEDURE | DROP PROCEDURE | \n"
+        "                   CREATE FUNCTION | ALTER FUNCTION | DROP FUNCTION | \n"
+        "                   CREATE TRIGGER  | ALTER TRIGGER  | DROP TRIGGER  | \n"
+        "                   CREATE EXCEPTION | ALTER EXCEPTION | DROP EXCEPTION | \n"
+        "                   CREATE VIEW | ALTER VIEW | DROP VIEW | \n"
+        "                   CREATE DOMAIN | ALTER DOMAIN | DROP DOMAIN | \n"
+        "                   CREATE ROLE | ALTER ROLE | DROP ROLE \n"
+        "                   CREATE SEQUENCE | ALTER SEQUENCE | DROP SEQUENCE | \n"
+        "                   CREATE USER | ALTER USER | DROP USER | \n"
+        "                   CREATE INDEX | ALTER INDEX | DROP INDEX | \n"
+        "                   CREATE COLLATION | DROP COLLATION | ALTER CHARACTER SET | \n"
+        "                   CREATE PACKAGE | ALTER PACKAGE | DROP PACKAGE | \n"
+        "                   CREATE PACKAGE BODY| DROP PACKAGE BODY \n"
+        " POSITION number \n"
+        "AS \n"
+        "BEGIN \n"
+        "    /* enter trigger code here */ \n"
+        "END^\n\n"
+        "SET TERM ; ^\n";
 }
 
 /*static*/
@@ -239,9 +271,19 @@ void MetadataItemCreateStatementVisitor::visitTables(Tables& /*tables*/)
     statementM = getCreateTableStatement();
 }
 
-void MetadataItemCreateStatementVisitor::visitTriggers(DMLTriggers& /*triggers*/)
+void MetadataItemCreateStatementVisitor::visitDBTriggers(DBTriggers& /*triggers*/)
 {
-    statementM = getCreateTriggerStatement();
+    statementM = getCreateDBTriggerStatement();
+}
+
+void MetadataItemCreateStatementVisitor::visitDDLTriggers(DDLTriggers& /*triggers*/)
+{
+    statementM = getCreateDDLTriggerStatement();
+}
+
+void MetadataItemCreateStatementVisitor::visitDMLTriggers(DMLTriggers& /*triggers*/)
+{
+    statementM = getCreateDMLTriggerStatement();
 }
 
 void MetadataItemCreateStatementVisitor::visitViews(Views& /*views*/)

@@ -53,6 +53,7 @@
 #include "metadata/exception.h"
 #include "metadata/function.h"
 #include "metadata/generator.h"
+#include "metadata/Index.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/parameter.h"
 #include "metadata/package.h"
@@ -377,6 +378,8 @@ void Database::getIdentifiers(std::vector<Identifier>& temp)
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(sysDomainsM->begin(), sysDomainsM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(indicesM->begin(), indicesM->end(),
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
 }
 
 // This could be moved to Column class
@@ -622,6 +625,9 @@ MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
         case ntDDLTrigger:
             return DDLTriggersM->findByName(name).get();
             break;
+        case ntIndices:
+            return indicesM->findByName(name).get();
+            break;
         default:
             return 0;
     };
@@ -711,6 +717,9 @@ void Database::dropObject(MetadataItem* object)
         case ntDDLTrigger:
             DDLTriggersM->remove((DDLTrigger*)object);
             break;
+        case ntIndex:
+            indicesM->remove((Index*)object);
+            break;
         default:
             return;
     };
@@ -773,6 +782,9 @@ void Database::addObject(NodeType type, const wxString& name)
             break;
         case ntDDLTrigger:
             DDLTriggersM->insert(name);
+            break;
+        case ntIndex:
+            indicesM->insert(name);
             break;
         default:
             break;
@@ -1116,6 +1128,8 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             initializeLockCount(DBTriggersM, lockCount);
             DDLTriggersM.reset(new DDLTriggers(me));
             initializeLockCount(DDLTriggersM, lockCount);
+            indicesM.reset(new Indices(me));
+            initializeLockCount(indicesM, lockCount);
 
             // first start a transaction for metadata loading, then lock the
             // database
@@ -1217,7 +1231,7 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
         }
     };
 
-    const int collectionCount = 17;
+    const int collectionCount = 18;
     std::string loadStmt;
     ProgressIndicatorHelper pih(progressIndicator);
 
@@ -1272,7 +1286,7 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
         pih.init(_("packages"), collectionCount, 13);
         packagesM->load(progressIndicator);
 
-        pih.init(_("System packages"), collectionCount, 14);
+        pih.init(_("system packages"), collectionCount, 14);
         sysPackagesM->load(progressIndicator);
     }
 
@@ -1286,8 +1300,11 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
         DDLTriggersM->load(progressIndicator);
     }
 
-    pih.init(_("System domains"), collectionCount, 17);
+    pih.init(_("system domains"), collectionCount, 17);
     sysDomainsM->load(progressIndicator);
+
+    pih.init(_("indices"), collectionCount, 18);
+    indicesM->load(progressIndicator);
 
 }
 
@@ -1351,6 +1368,7 @@ void Database::setDisconnected()
     sysPackagesM.reset();
     DBTriggersM.reset();
     DDLTriggersM.reset();
+    indicesM.reset();
 
     if (config().get("HideDisconnectedDatabases", false))
         getServer()->notifyObservers();
@@ -1418,6 +1436,13 @@ GeneratorsPtr Database::getGenerators()
     wxASSERT(generatorsM);
     generatorsM->ensureChildrenLoaded();
     return generatorsM;
+}
+
+IndicesPtr Database::getIndices()
+{
+    wxASSERT(indicesM);
+    indicesM->ensureChildrenLoaded();
+    return indicesM;
 }
 
 PackagesPtr Database::getPackages()
@@ -1521,6 +1546,7 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
     temp.push_back(generatorsM.get());
     if (getInfo().getODSVersionIsHigherOrEqualTo(11.1)) 
         temp.push_back(GTTsM.get());
+    temp.push_back(indicesM.get());
     if (getInfo().getODSVersionIsHigherOrEqualTo(12.0)) 
         temp.push_back(packagesM.get());
     temp.push_back(proceduresM.get());
@@ -1569,6 +1595,7 @@ void Database::lockChildren()
         DDLTriggersM->lockSubject();
         UDFsM->lockSubject();
         viewsM->lockSubject();
+        indicesM->lockSubject();
     }
 }
 
@@ -1579,6 +1606,7 @@ void Database::unlockChildren()
     // every added domain will cause all collection observers to update
     if (isConnected())
     {
+        indicesM->unlockSubject();
         viewsM->unlockSubject();
         UDFsM->unlockSubject();
         DDLTriggersM->unlockSubject();

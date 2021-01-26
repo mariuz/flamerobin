@@ -40,7 +40,7 @@ public:
     static wxString getCreateRoleStatement();
     static wxString getCreateTableStatement();
     static wxString getCreateGTTTableStatement();
-    static wxString getCreateTriggerStatement();
+    static wxString getCreateDMLTriggerStatement();
     static wxString getCreateDBTriggerStatement();
     static wxString getCreateDDLTriggerStatement();
     static wxString getCreateUDFStatement();
@@ -54,7 +54,9 @@ public:
     virtual void visitProcedures(Procedures& procedures);
     virtual void visitRoles(Roles& roles);
     virtual void visitTables(Tables& tables);
-    virtual void visitTriggers(DMLTriggers& triggers);
+    virtual void visitDBTriggers(DBTriggers& triggers);
+    virtual void visitDDLTriggers(DDLTriggers& triggers);
+    virtual void visitDMLTriggers(DMLTriggers& triggers);
     virtual void visitUDFs(UDFs& functions);
     virtual void visitViews(Views& views);
 

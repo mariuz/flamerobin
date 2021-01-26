@@ -51,6 +51,7 @@ public:
     virtual void visitGenerator(Generator& generator);
     virtual void visitGenerators(Generators& generators);
     virtual void visitIndex(Index& index);
+    virtual void visitIndices(Indices& indices);
     virtual void visitParameter(Parameter& parameter);
     virtual void visitPrimaryKeyConstraint(PrimaryKeyConstraint& pk);
     virtual void visitPackage(Package& package);

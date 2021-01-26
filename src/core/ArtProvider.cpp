@@ -47,6 +47,7 @@
 #include "domain32.xpm"
 #include "function32.xpm"
 #include "generator32.xpm"
+#include "index32.xpm"
 #include "package32.xpm"
 #include "procedure32.xpm"
 #include "server32.xpm"
@@ -80,6 +81,8 @@
 #include "generator.xpm"
 #include "generators.xpm"
 #include "history.xpm"
+#include "index.xpm"
+#include "indices.xpm"
 #include "insert16.xpm"
 #include "pk16_png.cpp"
 #include "pkfk16_png.cpp"
@@ -142,6 +145,8 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(function32_xpm);
         if (id == ART_Generator)
             return wxBitmap(generator32_xpm);
+        if (id == ART_Index)
+            return wxBitmap(index32_xpm);
         if (id == ART_Package)
             return wxBitmap(package32_xpm);
         if (id == ART_Procedure)
@@ -276,6 +281,10 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(view_xpm);
         if (id == ART_Views)
             return wxBitmap(view_xpm);
+        if (id == ART_Index)
+            return wxBitmap(index_xpm);
+        if (id == ART_Indices)
+            return wxBitmap(indices_xpm);
 
         if (id == ART_DeleteRow)
             return wxBitmap(delete16_xpm);

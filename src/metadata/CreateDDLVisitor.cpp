@@ -676,11 +676,6 @@ void CreateDDLVisitor::visitTable(Table& t)
 void CreateDDLVisitor::visitDBTrigger(DBTrigger& t)
 {
     preSqlM << "SET TERM ^ ;\nCREATE TRIGGER " << t.getQuotedName();
-    if (t.isDMLTrigger())
-    {
-        Identifier id(t.getRelationName());
-        preSqlM << " FOR " << id.getQuoted();
-    }
     if (t.getActive())
         preSqlM << " ACTIVE\n";
     else

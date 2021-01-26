@@ -509,7 +509,7 @@ void Table::acceptVisitor(MetadataItemVisitor* visitor)
 
 // System tables collection
 SysTables::SysTables(DatabasePtr database)
-    : MetadataCollection<Table>(ntSysTables, database, _("System tables"))
+    : MetadataCollection<Table>(ntSysTables, database, _("System Tables"))
 {
 }
 
@@ -558,7 +558,7 @@ void Tables::load(ProgressIndicator* progressIndicator)
     wxString stmt = "select rdb$relation_name from rdb$relations "
         "where  (rdb$system_flag = 0 or rdb$system_flag is null) ";
     if (getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11.1))
-        stmt += " and  coalesce(rdb$relation_type,0) = 0 ";
+        stmt += " and  (rdb$relation_type = 0 or rdb$relation_type is null)";
     stmt += " and rdb$view_source is null order by 1";
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }

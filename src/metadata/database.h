@@ -174,6 +174,7 @@ private:
     ExceptionsPtr exceptionsM;
     FunctionSQLsPtr functionSQLsM;
     GeneratorsPtr generatorsM;
+    IndicesPtr indicesM;
     PackagesPtr packagesM;
     SysPackagesPtr sysPackagesM;
     ProceduresPtr proceduresM;
@@ -222,22 +223,23 @@ public:
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
     void getCollections(std::vector<MetadataItem *>& temp, bool system);
 
-    DomainsPtr getDomains();
-    SysDomainsPtr getSysDomains();
-    ExceptionsPtr getExceptions();
-    FunctionSQLsPtr getFunctionSQLs();
-    GeneratorsPtr getGenerators();
-    PackagesPtr getPackages();
-    SysPackagesPtr getSysPackages();
-    ProceduresPtr getProcedures();
-    RolesPtr getRoles();
-    SysRolesPtr getSysRoles();
-    TablesPtr getTables();
-    SysTablesPtr getSysTables();
-    GTTsPtr getGTTs();
-    DMLTriggersPtr getDMLTriggers();
     DBTriggersPtr getDBTriggers();
     DDLTriggersPtr getDDLTriggers();
+    DMLTriggersPtr getDMLTriggers();
+    DomainsPtr getDomains();
+    ExceptionsPtr getExceptions();
+    FunctionSQLsPtr getFunctionSQLs();
+    GTTsPtr getGTTs();
+    GeneratorsPtr getGenerators();
+    IndicesPtr getIndices();
+    PackagesPtr getPackages();
+    ProceduresPtr getProcedures();
+    RolesPtr getRoles();
+    SysDomainsPtr getSysDomains();
+    SysPackagesPtr getSysPackages();
+    SysRolesPtr getSysRoles();
+    SysTablesPtr getSysTables();
+    TablesPtr getTables();
     UDFsPtr getUDFs();
     ViewsPtr getViews();
 

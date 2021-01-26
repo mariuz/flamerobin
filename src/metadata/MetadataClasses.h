@@ -91,6 +91,10 @@ class GTTs;
 typedef std::shared_ptr<GTTs> GTTsPtr;
 
 class Index;
+typedef std::shared_ptr<Index> IndexPtr;
+typedef std::vector<IndexPtr> IndexPtrs;
+class Indices;
+typedef std::shared_ptr<Indices> IndicesPtr;
 
 class MetadataItem;
 typedef std::shared_ptr<MetadataItem> MetadataItemPtr;

@@ -51,6 +51,7 @@
 #include "metadata/exception.h"
 #include "metadata/function.h"
 #include "metadata/generator.h"
+#include "metadata/Index.h"
 #include "metadata/parameter.h"
 #include "metadata/package.h"
 #include "metadata/procedure.h"
@@ -188,6 +189,8 @@ DBHTreeImageList::DBHTreeImageList()
     addImage(ART_Functions);
     addImage(ART_Generator);
     addImage(ART_Generators);
+    addImage(ART_Index);
+    addImage(ART_Indices);
     addImage(ART_Package);
     addImage(ART_Packages);
     addImage(ART_ParameterInput);
@@ -307,6 +310,8 @@ public:
     virtual void visitUDFs(UDFs& functions);
     virtual void visitView(View& view);
     virtual void visitViews(Views& views);
+    virtual void visitIndex(Index& index);
+    virtual void visitIndices(Indices& indices);
 };
 
 DBHTreeItemVisitor::DBHTreeItemVisitor(DBHTreeControl* tree)
@@ -762,6 +767,16 @@ void DBHTreeItemVisitor::visitView(View& view)
 void DBHTreeItemVisitor::visitViews(Views& views)
 {
     setNodeProperties(&views, ART_Views);
+}
+
+void DBHTreeItemVisitor::visitIndex(Index& index)
+{
+    setNodeProperties(&index, ART_Index);
+}
+
+void DBHTreeItemVisitor::visitIndices(Indices& indices)
+{
+    setNodeProperties(&indices, ART_Indices);
 }
 
 // TreeSelectionRestorer class

@@ -249,6 +249,7 @@ void Trigger::loadProperties()
         activeM = (temp == 0);
 
         st1->Get(4, &typeM);
+        st1->Get(4, typeM);
 
 
         if (!st1->IsNull(8))
@@ -268,7 +269,7 @@ void Trigger::loadProperties()
 			entryPointM = std2wxIdentifier(s, converter);
             if (!st1->IsNull(7))
             {
-                std::string s;
+                //std::string s;
                 st1->Get(7, s);
                 sourceM += "ENGINE " + std2wxIdentifier(s, converter) + "\n";
                 engineNameM = std2wxIdentifier(s, converter);
