@@ -18,7 +18,7 @@ The following people also made a significant non-coding contributions:
 
 License
 ---------------------------
-FlameRobin code is licensed under the Mit license.
+FlameRobin code is licensed under the MIT license.
 A copy of the license can be found in the [LICENSE](https://github.com/mariuz/flamerobin/blob/master/LICENSE) file
 
 Part of code covering IBPP library is licensed under IBPP license.
