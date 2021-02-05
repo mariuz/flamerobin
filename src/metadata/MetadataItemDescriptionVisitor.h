@@ -41,10 +41,12 @@ public:
     virtual void visitColumn(Column& column);
     virtual void visitDomain(Domain& domain);
     virtual void visitException(Exception& exception);
-    virtual void visitFunction(Function& function);
+    virtual void visitFunctionSQL(FunctionSQL& function);
+    virtual void visitUDF(UDF& function);
     virtual void visitGenerator(Generator& generator);
     virtual void visitIndex(Index& index);
     virtual void visitParameter(Parameter& parameter);
+    virtual void visitPackage(Package& package);
     virtual void visitProcedure(Procedure& procedure);
     virtual void visitRelation(Relation& relation);
     virtual void visitRole(Role& role);
@@ -67,7 +69,8 @@ public:
     virtual void visitColumn(Column& column);
     virtual void visitDomain(Domain& domain);
     virtual void visitException(Exception& exception);
-    virtual void visitFunction(Function& function);
+    virtual void visitFunctionSQL(FunctionSQL& function);
+    virtual void visitUDF(UDF& function);
     virtual void visitGenerator(Generator& generator);
     virtual void visitIndex(Index& index);
     virtual void visitParameter(Parameter& parameter);

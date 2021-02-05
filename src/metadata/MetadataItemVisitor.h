@@ -44,13 +44,19 @@ public:
     virtual void visitException(Exception& exception);
     virtual void visitExceptions(Exceptions& exceptions);
     virtual void visitForeignKey(ForeignKey& fk);
-    virtual void visitFunction(Function& function);
-    virtual void visitFunctions(Functions& functions);
+    virtual void visitFunctionSQL(FunctionSQL& function);
+    virtual void visitFunctionSQLs(FunctionSQLs& functions);
+    virtual void visitUDF(UDF& function);
+    virtual void visitUDFs(UDFs& functions);
     virtual void visitGenerator(Generator& generator);
     virtual void visitGenerators(Generators& generators);
     virtual void visitIndex(Index& index);
+    virtual void visitIndices(Indices& indices);
     virtual void visitParameter(Parameter& parameter);
     virtual void visitPrimaryKeyConstraint(PrimaryKeyConstraint& pk);
+    virtual void visitPackage(Package& package);
+    virtual void visitPackages(Packages& packages);
+    virtual void visitSysPackages(SysPackages& packages);
     virtual void visitProcedure(Procedure& procedure);
     virtual void visitProcedures(Procedures& procedures);
     virtual void visitRelation(Relation& relation);
@@ -62,12 +68,19 @@ public:
     virtual void visitTable(Table& table);
     virtual void visitTables(Tables& tables);
     virtual void visitSysTables(SysTables& sysTables);
+    virtual void visitGTTs(GTTs& tables);
     virtual void visitTrigger(Trigger& trigger);
-    virtual void visitTriggers(Triggers& triggers);
+    virtual void visitDBTrigger(DBTrigger& trigger);
+    virtual void visitDDLTrigger(DDLTrigger& trigger);
+    virtual void visitDMLTrigger(DMLTrigger& trigger);
+    virtual void visitDMLTriggers(DMLTriggers& triggers);
+    virtual void visitDBTriggers(DBTriggers& triggers);
+    virtual void visitDDLTriggers(DDLTriggers& triggers);
     virtual void visitUniqueConstraint(UniqueConstraint& unq);
     virtual void visitView(View& view);
     virtual void visitViews(Views& views);
     virtual void visitMetadataItem(MetadataItem& metadataItem);
+    virtual void visitMethod(Method& method);
 };
 
 #endif //FR_METADATAITEMVISITOR_H

@@ -831,7 +831,7 @@ std::string StatementImpl::ParametersParser(std::string sql)
             }else if (palavra) {
                 if (std::isalnum(sql.at(i)) || sql.at(i)=='_' || sql.at(i)=='$')
                 { //A-Z 0-9 _
-                    temp << sql.at(i);
+                    temp << (char)std::toupper(sql.at(i));
                     if (i==sql.length()-1)  //se o I esta no fim do SQL...
                         goto fimPalavra;
                 }else{

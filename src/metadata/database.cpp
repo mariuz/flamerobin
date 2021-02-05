@@ -53,8 +53,10 @@
 #include "metadata/exception.h"
 #include "metadata/function.h"
 #include "metadata/generator.h"
+#include "metadata/Index.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/parameter.h"
+#include "metadata/package.h"
 #include "metadata/procedure.h"
 #include "metadata/role.h"
 #include "metadata/root.h"
@@ -146,6 +148,7 @@ bool DatabaseInfo::getReserve() const
 {
     return reserveM;
 }
+
 
 int DatabaseInfo::getNextTransaction() const
 {
@@ -345,21 +348,37 @@ void Database::getIdentifiers(std::vector<Identifier>& temp)
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(sysTablesM->begin(), sysTablesM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(GTTsM->begin(), GTTsM->end(),
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(viewsM->begin(), viewsM->end(),
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(packagesM->begin(), packagesM->end(),
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(sysPackagesM->begin(), sysPackagesM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(proceduresM->begin(), proceduresM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
-    std::transform(triggersM->begin(), triggersM->end(),
+    std::transform(DMLtriggersM->begin(), DMLtriggersM->end(),
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(DBTriggersM->begin(), DBTriggersM->end(),
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(DDLTriggersM->begin(), DDLTriggersM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(rolesM->begin(), rolesM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(generatorsM->begin(), generatorsM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
-    std::transform(functionsM->begin(), functionsM->end(),
+    std::transform(functionSQLsM->begin(), functionSQLsM->end(),
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(UDFsM->begin(), UDFsM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(userDomainsM->begin(), userDomainsM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(exceptionsM->begin(), exceptionsM->end(),
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(sysDomainsM->begin(), sysDomainsM->end(),
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(indicesM->begin(), indicesM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
 }
 
@@ -392,7 +411,8 @@ void Database::getDatabaseTriggers(std::vector<Trigger *>& list)
 
     IBPP::Statement& st1 = loader->getStatement(
         "select rdb$trigger_name from rdb$triggers "
-        "where rdb$relation_name is null "
+        "where (rdb$system_flag = 0 or rdb$system_flag is null)  "
+        " and rdb$trigger_type between 8192 and 8196 "
         "order by rdb$trigger_sequence"
     );
     st1->Execute();
@@ -400,7 +420,7 @@ void Database::getDatabaseTriggers(std::vector<Trigger *>& list)
     {
         std::string name;
         st1->Get(1, name);
-        Trigger* t = dynamic_cast<Trigger*>(findByNameAndType(ntTrigger,
+        DBTrigger* t = dynamic_cast<DBTrigger*>(findByNameAndType(ntDBTrigger,
             std2wxIdentifier(name, converter)));
         if (t)
             list.push_back(t);
@@ -557,17 +577,23 @@ MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
         case ntSysTable:
             return sysTablesM->findByName(name).get();
             break;
+        case ntGTT:
+            return GTTsM->findByName(name).get();
+            break;
         case ntView:
             return viewsM->findByName(name).get();
             break;
-        case ntTrigger:
-            return triggersM->findByName(name).get();
+        case ntDMLTrigger:
+            return DMLtriggersM->findByName(name).get();
             break;
         case ntProcedure:
             return proceduresM->findByName(name).get();
             break;
-        case ntFunction:
-            return functionsM->findByName(name).get();
+        case ntFunctionSQL:
+            return functionSQLsM->findByName(name).get();
+            break;
+        case ntUDF:
+            return UDFsM->findByName(name).get();
             break;
         case ntGenerator:
             return generatorsM->findByName(name).get();
@@ -587,6 +613,21 @@ MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
         case ntException:
             return exceptionsM->findByName(name).get();
             break;
+        case ntPackage:
+            return packagesM->findByName(name).get();
+            break;
+        case ntSysPackage:
+            return sysPackagesM->findByName(name).get();
+            break;
+        case ntDBTrigger:
+            return DBTriggersM->findByName(name).get();
+            break;
+        case ntDDLTrigger:
+            return DDLTriggersM->findByName(name).get();
+            break;
+        case ntIndices:
+            return indicesM->findByName(name).get();
+            break;
         default:
             return 0;
     };
@@ -601,10 +642,12 @@ Relation* Database::findRelation(const Identifier& name)
         return v.get();
     if (TablePtr t = sysTablesM->findByName(s))
         return t.get();
+    if (TablePtr t = GTTsM->findByName(s))
+        return t.get();
     return 0;
 }
 
-Relation* Database::getRelationForTrigger(Trigger* trigger)
+Relation* Database::getRelationForTrigger(DMLTrigger* trigger)
 {
     if (!trigger)
         return 0;
@@ -626,17 +669,23 @@ void Database::dropObject(MetadataItem* object)
         case ntSysTable:
             sysTablesM->remove((Table*)object);
             break;
+        case ntGTT:
+            GTTsM->remove((Table*)object);
+            break;
         case ntView:
             viewsM->remove((View*)object);
             break;
-        case ntTrigger:
-            triggersM->remove((Trigger*)object);
+        case ntDMLTrigger:
+            DMLtriggersM->remove((DMLTrigger*)object);
             break;
         case ntProcedure:
             proceduresM->remove((Procedure*)object);
             break;
-        case ntFunction:
-            functionsM->remove((Function*)object);
+        case ntFunctionSQL:
+            functionSQLsM->remove((FunctionSQL*)object);
+            break;
+        case ntUDF:
+            UDFsM->remove((UDF*)object);
             break;
         case ntGenerator:
             generatorsM->remove((Generator*)object);
@@ -656,6 +705,21 @@ void Database::dropObject(MetadataItem* object)
         case ntException:
             exceptionsM->remove((Exception*)object);
             break;
+        case ntPackage:
+            packagesM->remove((Package*)object);
+            break;
+        case ntSysPackage:
+            sysPackagesM->remove((Package*)object);
+            break;
+        case ntDBTrigger:
+            DBTriggersM->remove((DBTrigger*)object);
+            break;
+        case ntDDLTrigger:
+            DDLTriggersM->remove((DDLTrigger*)object);
+            break;
+        case ntIndex:
+            indicesM->remove((Index*)object);
+            break;
         default:
             return;
     };
@@ -671,14 +735,17 @@ void Database::addObject(NodeType type, const wxString& name)
         case ntSysTable:
             sysTablesM->insert(name);
             break;
+        case ntGTT:
+            GTTsM->insert(name);
+            break;
         case ntView:
             viewsM->insert(name);
             break;
         case ntProcedure:
             proceduresM->insert(name);
             break;
-        case ntTrigger:
-            triggersM->insert(name);
+        case ntDMLTrigger:
+            DMLtriggersM->insert(name);
             break;
         case ntRole:
             rolesM->insert(name);
@@ -689,8 +756,11 @@ void Database::addObject(NodeType type, const wxString& name)
         case ntGenerator:
             generatorsM->insert(name);
             break;
-        case ntFunction:
-            functionsM->insert(name);
+        case ntFunctionSQL:
+            functionSQLsM->insert(name);
+            break;
+        case ntUDF:
+            UDFsM->insert(name);
             break;
         case ntDomain:
             userDomainsM->insert(name);
@@ -700,6 +770,21 @@ void Database::addObject(NodeType type, const wxString& name)
             break;
         case ntException:
             exceptionsM->insert(name);
+            break;
+        case ntPackage:
+            packagesM->insert(name);
+            break;
+        case ntSysPackage:
+            sysPackagesM->insert(name);
+            break;
+        case ntDBTrigger:
+            DBTriggersM->insert(name);
+            break;
+        case ntDDLTrigger:
+            DDLTriggersM->insert(name);
+            break;
+        case ntIndex:
+            indicesM->insert(name);
             break;
         default:
             break;
@@ -748,7 +833,7 @@ void Database::parseCommitedSql(const SqlStatement& stm)
     }
 
     // update all TABLEs, VIEWs and DATABASE on "DROP TRIGGER"
-    if (stm.actionIs(actDROP, ntTrigger))
+    if (stm.actionIs(actDROP, ntDMLTrigger))
     {
         Tables::iterator itt;
         for (itt = tablesM->begin(); itt != tablesM->end(); itt++)
@@ -766,7 +851,7 @@ void Database::parseCommitedSql(const SqlStatement& stm)
         Relation *r = stm.getCreateTriggerRelation();
         if (r)
             r->notifyObservers();
-        else if (stm.getObjectType() == ntTrigger) // database trigger probably
+        else if (stm.getObjectType() == ntDMLTrigger) // database trigger probably
             notifyObservers();
         return;
     }
@@ -792,14 +877,14 @@ void Database::parseCommitedSql(const SqlStatement& stm)
         dropObject(object);
         if (stm.getObjectType() == ntTable || stm.getObjectType() == ntView)
         {
-            Triggers::iterator it = triggersM->begin();
-            while (it != triggersM->end())
+            DMLTriggers::iterator it = DMLtriggersM->begin();
+            while (it != DMLtriggersM->end())
             {
                 Relation* r = getRelationForTrigger((*it).get());
                 if (!r || r->getIdentifier().equals(stm.getIdentifier()))
                 {
                     dropObject((*it).get());
-                    it = triggersM->begin();
+                    it = DMLtriggersM->begin();
                 }
                 else
                     it++;
@@ -854,20 +939,20 @@ void Database::parseCommitedSql(const SqlStatement& stm)
                 object->invalidate();
                 dynamic_cast<Procedure*>(object)->checkDependentProcedures();
                 break;
-            case ntTrigger:
+            case ntDMLTrigger:
+            {
+                DMLTrigger* tr = dynamic_cast<DMLTrigger*>(object);
+                if (tr)
                 {
-                    Trigger* tr = dynamic_cast<Trigger*>(object);
-                    if (tr)
-                    {
-                        tr->invalidate();
-                        Relation* r = getRelationForTrigger(tr);
-                        if (r)
-                            r->notifyObservers();
-                        else  // database trigger
-                            notifyObservers();
-                    }
-                    break;
+                    tr->invalidate();
+                    Relation* r = getRelationForTrigger(tr);
+                    if (r)
+                        r->notifyObservers();
+                    else  // database trigger
+                        notifyObservers();
                 }
+                break;
+            }
             case ntDomain:
                 object->invalidate();
                 // notify all table columns with that domain
@@ -886,6 +971,8 @@ void Database::parseCommitedSql(const SqlStatement& stm)
                 // calls notifyObservers() only in the base class
                 // descendent classes are free to put there whatever it takes...
                 object->invalidate();
+                //object->ensurePropertiesLoaded();
+                notifyObservers();
                 break;
         }
     }
@@ -1012,8 +1099,8 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             initializeLockCount(sysDomainsM, lockCount);
             exceptionsM.reset(new Exceptions(me));
             initializeLockCount(exceptionsM, lockCount);
-            functionsM.reset(new Functions(me));
-            initializeLockCount(functionsM, lockCount);
+            functionSQLsM.reset(new FunctionSQLs(me));
+            initializeLockCount(functionSQLsM, lockCount);
             generatorsM.reset(new Generators(me));
             initializeLockCount(generatorsM, lockCount);
             proceduresM.reset(new Procedures(me));
@@ -1022,14 +1109,27 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             initializeLockCount(rolesM, lockCount);
             sysRolesM.reset(new SysRoles(me));
             initializeLockCount(sysRolesM, lockCount);
-            triggersM.reset(new Triggers(me));
-            initializeLockCount(triggersM, lockCount);
+            DMLtriggersM.reset(new DMLTriggers(me));
+            initializeLockCount(DMLtriggersM, lockCount);
             tablesM.reset(new Tables(me));
             initializeLockCount(tablesM, lockCount);
             sysTablesM.reset(new SysTables(me));
+            GTTsM.reset(new GTTs(me));
             initializeLockCount(sysTablesM, lockCount);
+            UDFsM.reset(new UDFs(me));
+            initializeLockCount(UDFsM, lockCount);
             viewsM.reset(new Views(me));
             initializeLockCount(viewsM, lockCount);
+            packagesM.reset(new Packages(me));
+            initializeLockCount(packagesM, lockCount);
+            sysPackagesM.reset(new SysPackages(me));
+            initializeLockCount(sysPackagesM, lockCount);
+            DBTriggersM.reset(new DBTriggers(me));
+            initializeLockCount(DBTriggersM, lockCount);
+            DDLTriggersM.reset(new DDLTriggers(me));
+            initializeLockCount(DDLTriggersM, lockCount);
+            indicesM.reset(new Indices(me));
+            initializeLockCount(indicesM, lockCount);
 
             // first start a transaction for metadata loading, then lock the
             // database
@@ -1044,9 +1144,12 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             {
                 checkProgressIndicatorCanceled(indicator);
                 // load database charset
-                IBPP::Statement& st1 = loader->getStatement(
-                    "select rdb$character_set_name, current_user, current_role "
-                    "from rdb$database");
+                std::string stmt = "select rdb$character_set_name, current_user, current_role, ";
+                stmt += getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " rdb$linger, " : " null, ";
+                stmt += getInfo().getODSVersionIsHigherOrEqualTo(13, 0) ? " rdb$sql_security   " : " null  ";
+                stmt +=" from rdb$database ";
+                IBPP::Statement& st1 = loader->getStatement(stmt);
+                
                 st1->Execute();
                 if (st1->Fetch())
                 {
@@ -1059,6 +1162,18 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
                     connectionRoleM = std2wxIdentifier(s, getCharsetConverter());
                     if (connectionRoleM == "NONE")
                         connectionRoleM.clear();
+                    if (!st1->IsNull(4))
+                        st1->Get(4, lingerM);
+                    else
+                        lingerM = 0;
+                    if (!st1->IsNull(5))
+                    {
+                        bool b;
+                        st1->Get(5, b);
+                        sqlSecurityM = wxString(b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER");
+                    }
+                    else
+                        sqlSecurityM.clear();
                 }
                 checkProgressIndicatorCanceled(indicator);
                 // load database information
@@ -1111,13 +1226,12 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
             {
                 wxString msg(wxString::Format(_("Loading %s..."),
                     collectionName.c_str()));
-                progressIndicatorM->initProgress(msg, stepsTotal,
-                    currentStep, 1);
+                progressIndicatorM->initProgress(msg, stepsTotal,currentStep, 1);
             }
         }
     };
 
-    const int collectionCount = 11;
+    const int collectionCount = 18;
     std::string loadStmt;
     ProgressIndicatorHelper pih(progressIndicator);
 
@@ -1131,32 +1245,67 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
     pih.init(_("system tables"), collectionCount, 1);
     sysTablesM->load(progressIndicator);
 
-    pih.init(_("views"), collectionCount, 2);
+    if (getInfo().getODSVersionIsHigherOrEqualTo(11.1)) {
+        pih.init(_("global temporary table"), collectionCount, 2);
+        GTTsM->load(progressIndicator);
+    }
+
+    pih.init(_("views"), collectionCount, 3);
     viewsM->load(progressIndicator);
 
-    pih.init(_("procedures"), collectionCount, 3);
+    pih.init(_("procedures"), collectionCount, 4);
     proceduresM->load(progressIndicator);
 
-    pih.init(_("triggers"), collectionCount, 4);
-    triggersM->load(progressIndicator);
+    pih.init(_("DML triggers"), collectionCount, 5);
+    DMLtriggersM->load(progressIndicator);
 
-    pih.init(_("roles"), collectionCount, 5);
+    pih.init(_("roles"), collectionCount, 6);
     rolesM->load(progressIndicator);
 
-    pih.init(_("system roles"), collectionCount, 6);
+    pih.init(_("system roles"), collectionCount, 7);
     sysRolesM->load(progressIndicator);
 
-    pih.init(_("domains"), collectionCount, 7);
+    pih.init(_("domains"), collectionCount, 8);
     userDomainsM->load(progressIndicator);
 
-    pih.init(_("functions"), collectionCount, 8);
-    functionsM->load(progressIndicator);
+    if (getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
+        pih.init(_("functions SQL"), collectionCount, 9);
+        functionSQLsM->load(progressIndicator);
+    }
 
-    pih.init(_("generators"), collectionCount, 9);
+    pih.init(_("functions UDF"), collectionCount, 10);
+    UDFsM->load(progressIndicator);
+
+    pih.init(_("generators"), collectionCount, 11);
     generatorsM->load(progressIndicator);
 
-    pih.init(_("exceptions"), collectionCount, 10);
+    pih.init(_("exceptions"), collectionCount, 12);
     exceptionsM->load(progressIndicator);
+
+    if (getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
+        pih.init(_("packages"), collectionCount, 13);
+        packagesM->load(progressIndicator);
+
+        pih.init(_("system packages"), collectionCount, 14);
+        sysPackagesM->load(progressIndicator);
+    }
+
+    if (getInfo().getODSVersionIsHigherOrEqualTo(11.1)) {
+        pih.init(_("DBTriggers"), collectionCount, 15);
+        DBTriggersM->load(progressIndicator);
+    }
+
+    if (getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
+        pih.init(_("DDLTriggers"), collectionCount, 16);
+        DDLTriggersM->load(progressIndicator);
+    }
+
+    pih.init(_("system domains"), collectionCount, 17);
+    sysDomainsM->load(progressIndicator);
+
+    pih.init(_("indices"), collectionCount, 18);
+    indicesM->load(progressIndicator);
+
 }
 
 wxArrayString Database::loadIdentifiers(const wxString& loadStatement,
@@ -1204,15 +1353,22 @@ void Database::setDisconnected()
     // remove entire DBH beneath
     userDomainsM.reset();
     sysDomainsM.reset();
-    functionsM.reset();
+    functionSQLsM.reset();
     generatorsM.reset();
     proceduresM.reset();
     rolesM.reset();
     tablesM.reset();
     sysTablesM.reset();
-    triggersM.reset();
+    GTTsM.reset();
+    DMLtriggersM.reset();
+    UDFsM.reset();
     viewsM.reset();
     exceptionsM.reset();
+    packagesM.reset();
+    sysPackagesM.reset();
+    DBTriggersM.reset();
+    DDLTriggersM.reset();
+    indicesM.reset();
 
     if (config().get("HideDisconnectedDatabases", false))
         getServer()->notifyObservers();
@@ -1261,11 +1417,18 @@ ExceptionsPtr Database::getExceptions()
     return exceptionsM;
 }
 
-FunctionsPtr Database::getFunctions()
+UDFsPtr Database::getUDFs()
 {
-    wxASSERT(functionsM);
-    functionsM->ensureChildrenLoaded();
-    return functionsM;
+    wxASSERT(UDFsM);
+    UDFsM->ensureChildrenLoaded();
+    return UDFsM;
+}
+
+FunctionSQLsPtr Database::getFunctionSQLs()
+{
+    wxASSERT(functionSQLsM);
+    functionSQLsM->ensureChildrenLoaded();
+    return functionSQLsM;
 }
 
 GeneratorsPtr Database::getGenerators()
@@ -1273,6 +1436,27 @@ GeneratorsPtr Database::getGenerators()
     wxASSERT(generatorsM);
     generatorsM->ensureChildrenLoaded();
     return generatorsM;
+}
+
+IndicesPtr Database::getIndices()
+{
+    wxASSERT(indicesM);
+    indicesM->ensureChildrenLoaded();
+    return indicesM;
+}
+
+PackagesPtr Database::getPackages()
+{
+    wxASSERT(packagesM);
+    packagesM->ensureChildrenLoaded();
+    return packagesM;
+}
+
+SysPackagesPtr Database::getSysPackages()
+{
+    wxASSERT(sysPackagesM);
+    sysPackagesM->ensureChildrenLoaded();
+    return sysPackagesM;
 }
 
 ProceduresPtr Database::getProcedures()
@@ -1303,6 +1487,13 @@ SysTablesPtr Database::getSysTables()
     return sysTablesM;
 }
 
+GTTsPtr Database::getGTTs()
+{
+    wxASSERT(GTTsM);
+    GTTsM->ensureChildrenLoaded();
+    return GTTsM;
+}
+
 TablesPtr Database::getTables()
 {
     wxASSERT(tablesM);
@@ -1310,13 +1501,25 @@ TablesPtr Database::getTables()
     return tablesM;
 }
 
-TriggersPtr Database::getTriggers()
+DMLTriggersPtr Database::getDMLTriggers()
 {
-    wxASSERT(triggersM);
-    triggersM->ensureChildrenLoaded();
-    return triggersM;
+    wxASSERT(DMLtriggersM);
+    DMLtriggersM->ensureChildrenLoaded();
+    return DMLtriggersM;
 }
 
+DBTriggersPtr Database::getDBTriggers()
+{
+    wxASSERT(DBTriggersM);
+    DBTriggersM->ensureChildrenLoaded();
+    return DBTriggersM;
+}
+DDLTriggersPtr Database::getDDLTriggers()
+{
+    wxASSERT(DDLTriggersM);
+    DDLTriggersM->ensureChildrenLoaded();
+    return DDLTriggersM;
+}
 ViewsPtr Database::getViews()
 {
     wxASSERT(viewsM);
@@ -1332,19 +1535,36 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
 
     ensureChildrenLoaded();
 
+    if (getInfo().getODSVersionIsHigherOrEqualTo(11.1)) 
+        temp.push_back(DBTriggersM.get());
+    if (getInfo().getODSVersionIsHigherOrEqualTo(12.0)) 
+        temp.push_back(DDLTriggersM.get());
     temp.push_back(userDomainsM.get());
     temp.push_back(exceptionsM.get());
-    temp.push_back(functionsM.get());
+    if (getInfo().getODSVersionIsHigherOrEqualTo(12.0))
+        temp.push_back(functionSQLsM.get());
     temp.push_back(generatorsM.get());
+    if (getInfo().getODSVersionIsHigherOrEqualTo(11.1)) 
+        temp.push_back(GTTsM.get());
+    temp.push_back(indicesM.get());
+    if (getInfo().getODSVersionIsHigherOrEqualTo(12.0)) 
+        temp.push_back(packagesM.get());
     temp.push_back(proceduresM.get());
     temp.push_back(rolesM.get());
     // Only push back system objects when they should be shown
+    if (getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
+        if (system && showSystemPackages())
+            temp.push_back(sysPackagesM.get());
+    }
     if (system && showSystemRoles())
         temp.push_back(sysRolesM.get());
     if (system && showSystemTables())
         temp.push_back(sysTablesM.get());
+    if (system && showSystemDomains())
+        temp.push_back(sysDomainsM.get());
     temp.push_back(tablesM.get());
-    temp.push_back(triggersM.get());
+    temp.push_back(DMLtriggersM.get());
+    temp.push_back(UDFsM.get());
     temp.push_back(viewsM.get());
 }
 
@@ -1361,14 +1581,21 @@ void Database::lockChildren()
         userDomainsM->lockSubject();
         sysDomainsM->lockSubject();
         exceptionsM->lockSubject();
-        functionsM->lockSubject();
+        functionSQLsM->lockSubject();
         generatorsM->lockSubject();
+        packagesM->lockSubject();
+        sysPackagesM->lockSubject();
         proceduresM->lockSubject();
         rolesM->lockSubject();
         tablesM->lockSubject();
         sysTablesM->lockSubject();
-        triggersM->lockSubject();
+        GTTsM->lockSubject();
+        DMLtriggersM->lockSubject();
+        DBTriggersM->lockSubject();
+        DDLTriggersM->lockSubject();
+        UDFsM->lockSubject();
         viewsM->lockSubject();
+        indicesM->lockSubject();
     }
 }
 
@@ -1379,14 +1606,21 @@ void Database::unlockChildren()
     // every added domain will cause all collection observers to update
     if (isConnected())
     {
+        indicesM->unlockSubject();
         viewsM->unlockSubject();
-        triggersM->unlockSubject();
+        UDFsM->unlockSubject();
+        DDLTriggersM->unlockSubject();
+        DBTriggersM->unlockSubject();
+        DMLtriggersM->unlockSubject();
+        GTTsM->unlockSubject();
         sysTablesM->unlockSubject();
         tablesM->unlockSubject();
         rolesM->unlockSubject();
         proceduresM->unlockSubject();
+        sysPackagesM->unlockSubject();
+        packagesM->unlockSubject();
         generatorsM->unlockSubject();
-        functionsM->unlockSubject();
+        functionSQLsM->unlockSubject();
         exceptionsM->unlockSubject();
         sysDomainsM->unlockSubject();
         userDomainsM->unlockSubject();
@@ -1647,6 +1881,31 @@ void Database::loadInfo()
     notifyObservers();
 }
 
+bool Database::showSystemDomains()
+{
+    const wxString SHOW_SYSDOMAINS = "ShowSystemDomains";
+
+    bool b;
+    if (!DatabaseConfig(this, config()).getValue(SHOW_SYSDOMAINS, b))
+        b = config().get(SHOW_SYSDOMAINS, true);
+
+    return b;
+}
+
+bool Database::showSystemPackages()
+{
+    if (!getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        return false;
+
+    const wxString SHOW_SYSPACKAGES = "ShowSystemPackages";
+
+    bool b;
+    if (!DatabaseConfig(this, config()).getValue(SHOW_SYSPACKAGES, b))
+        b = config().get(SHOW_SYSPACKAGES, true);
+
+    return b;
+}
+
 bool Database::showSystemRoles()
 {
     if (!getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
@@ -1656,7 +1915,7 @@ bool Database::showSystemRoles()
 
     bool b;
     if (!DatabaseConfig(this, config()).getValue(SHOW_SYSROLES, b))
-        b = config().get(SHOW_SYSROLES, false);
+        b = config().get(SHOW_SYSROLES, true);
 
     return b;
 }
@@ -1745,6 +2004,16 @@ void Database::getConnectedUsers(wxArrayString& users) const
             users.Add(name);
         }
     }
+}
+
+int Database::getLinger() const
+{
+    return lingerM;
+}
+
+wxString Database::getSqlSecurity() const
+{
+    return sqlSecurityM;
 }
 
 void Database::checkConnected(const wxString& operation) const

@@ -117,6 +117,7 @@ public:
     bool getReadOnly() const;
     bool getForcedWrites() const;
     bool getReserve() const;
+    
 };
 
 class DatabaseAuthenticationMode
@@ -154,6 +155,9 @@ private:
     wxString connectionUserM;
     wxString connectionRoleM;
 
+    int lingerM; // ODS 12
+    wxString sqlSecurityM; // ODS 13
+
     wxString pathM;
     int dialectM;
     Credentials credentialsM;
@@ -168,14 +172,21 @@ private:
     DomainsPtr userDomainsM;
     SysDomainsPtr sysDomainsM;
     ExceptionsPtr exceptionsM;
-    FunctionsPtr functionsM;
+    FunctionSQLsPtr functionSQLsM;
     GeneratorsPtr generatorsM;
+    IndicesPtr indicesM;
+    PackagesPtr packagesM;
+    SysPackagesPtr sysPackagesM;
     ProceduresPtr proceduresM;
     RolesPtr rolesM;
     SysRolesPtr sysRolesM;
     TablesPtr tablesM;
     SysTablesPtr sysTablesM;
-    TriggersPtr triggersM;
+    GTTsPtr GTTsM;
+    DMLTriggersPtr DMLtriggersM;
+    DBTriggersPtr DBTriggersM;
+    DDLTriggersPtr DDLTriggersM;
+    UDFsPtr UDFsM;
     ViewsPtr viewsM;
 
     // copy constructor implementation removed since it's no longer needed
@@ -194,6 +205,8 @@ private:
 
     mutable unsigned idM;
 
+    bool showSystemDomains();
+    bool showSystemPackages();
     bool showSystemRoles();
     bool showSystemTables();
 
@@ -210,17 +223,24 @@ public:
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
     void getCollections(std::vector<MetadataItem *>& temp, bool system);
 
+    DBTriggersPtr getDBTriggers();
+    DDLTriggersPtr getDDLTriggers();
+    DMLTriggersPtr getDMLTriggers();
     DomainsPtr getDomains();
-    SysDomainsPtr getSysDomains();
     ExceptionsPtr getExceptions();
-    FunctionsPtr getFunctions();
+    FunctionSQLsPtr getFunctionSQLs();
+    GTTsPtr getGTTs();
     GeneratorsPtr getGenerators();
+    IndicesPtr getIndices();
+    PackagesPtr getPackages();
     ProceduresPtr getProcedures();
     RolesPtr getRoles();
+    SysDomainsPtr getSysDomains();
+    SysPackagesPtr getSysPackages();
     SysRolesPtr getSysRoles();
-    TablesPtr getTables();
     SysTablesPtr getSysTables();
-    TriggersPtr getTriggers();
+    TablesPtr getTables();
+    UDFsPtr getUDFs();
     ViewsPtr getViews();
 
     bool isConnected() const;
@@ -242,7 +262,7 @@ public:
     DomainPtr getDomain(const wxString& name);
 
     void loadGeneratorValues();
-    Relation* getRelationForTrigger(Trigger* trigger);
+    Relation* getRelationForTrigger(DMLTrigger* trigger);
 
     virtual DatabasePtr getDatabase() const;
     MetadataItem* findByNameAndType(NodeType nt, const wxString& name);
@@ -304,6 +324,8 @@ public:
     void loadInfo();
 
     void getConnectedUsers(wxArrayString& users) const;
+    int getLinger() const; // ODS:12
+    wxString getSqlSecurity() const; // ODS:13
 
     wxMBConv* getCharsetConverter() const;
 };

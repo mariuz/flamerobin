@@ -194,7 +194,7 @@ bool Domain::isString()
 bool Domain::isSystem() const
 {
     wxString prefix(getName_().substr(0, 4));
-    if (prefix == "MON$")
+    if (prefix == "MON$" || prefix == "SEC$" || prefix == "RDB$")
         return true;
     if (prefix != "RDB$")
         return false;
@@ -373,6 +373,59 @@ void Domain::acceptVisitor(MetadataItemVisitor* visitor)
     visitor->visitDomain(*this);
 }
 
+std::vector<Privilege>* Domain::getPrivileges()
+{
+    // load privileges from database and return the pointer to collection
+    DatabasePtr db = getDatabase();
+    MetadataLoader* loader = db->getMetadataLoader();
+
+    privilegesM.clear();
+
+    // first start a transaction for metadata loading, then lock the relation
+    // when objects go out of scope and are destroyed, object will be unlocked
+    // before the transaction is committed - any update() calls on observers
+    // can possibly use the same transaction
+    MetadataLoaderTransaction tr(loader);
+    SubjectLocker lock(this);
+    wxMBConv* converter = db->getCharsetConverter();
+
+    IBPP::Statement& st1 = loader->getStatement(
+        "select RDB$USER, RDB$USER_TYPE, RDB$GRANTOR, RDB$PRIVILEGE, "
+        "RDB$GRANT_OPTION, RDB$FIELD_NAME "
+        "from RDB$USER_PRIVILEGES "
+        "where RDB$RELATION_NAME = ? and rdb$object_type = 9 "
+        "order by rdb$user, rdb$user_type, rdb$grant_option, rdb$privilege"
+    );
+    st1->Set(1, wx2std(getName_(), converter));
+    st1->Execute();
+    std::string lastuser;
+    int lasttype = -1;
+    Privilege* pr = 0;
+    while (st1->Fetch())
+    {
+        std::string user, grantor, privilege, field;
+        int usertype, grantoption = 0;
+        st1->Get(1, user);
+        st1->Get(2, usertype);
+        st1->Get(3, grantor);
+        st1->Get(4, privilege);
+        if (!st1->IsNull(5))
+            st1->Get(5, grantoption);
+        st1->Get(6, field);
+        if (!pr || user != lastuser || usertype != lasttype)
+        {
+            Privilege p(this, wxString(user.c_str(), *converter).Strip(), usertype);
+            privilegesM.push_back(p);
+            pr = &privilegesM.back();
+            lastuser = user;
+            lasttype = usertype;
+        }
+        pr->addPrivilege(privilege[0], std2wxIdentifier(grantor, converter),
+            grantoption == 1, std2wxIdentifier(field, converter));
+    }
+    return &privilegesM;
+}
+
 // DomainCollectionBase
 DomainCollectionBase::DomainCollectionBase(NodeType type,
         DatabasePtr database, const wxString& name)
@@ -418,38 +471,10 @@ void Domains::acceptVisitor(MetadataItemVisitor* visitor)
 
 void Domains::load(ProgressIndicator* progressIndicator)
 {
-    DatabasePtr db = getDatabase();
-    MetadataLoader* loader = db->getMetadataLoader();
-    MetadataLoaderTransaction tr(loader);
-    wxMBConv* converter = db->getCharsetConverter();
-
-    IBPP::Statement& st1 = loader->getStatement(
-        Domain::getLoadStatement(true));
-
-    CollectionType domains;
-    st1->Execute();
-    while (st1->Fetch())
-    {
-        checkProgressIndicatorCanceled(progressIndicator);
-        if (!st1->IsNull(1))
-        {
-            std::string s;
-            st1->Get(1, s);
-            wxString name(std2wxIdentifier(s, converter));
-
-            DomainPtr domain = findByName(name);
-            if (!domain)
-            {
-                domain.reset(new Domain(db, name));
-                initializeLockCount(domain, getLockCount());
-            }
-            domains.push_back(domain);
-            domain->loadProperties(st1, converter);
-            checkProgressIndicatorCanceled(progressIndicator);
-        }
-    }
-
-    setItems(domains);
+    wxString stmt = "select rdb$field_name from rdb$fields "
+        " where rdb$system_flag = 0 and rdb$field_name not starting 'RDB$' "
+        " order by 1";
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 
 void Domains::loadChildren()
@@ -464,13 +489,21 @@ const wxString Domains::getTypeName() const
 
 // System domains collection
 SysDomains::SysDomains(DatabasePtr database)
-    : DomainCollectionBase(ntSysDomains, database, _("System domains"))
+    : DomainCollectionBase(ntSysDomains, database, _("System Domains"))
 {
 }
 
 void SysDomains::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitSysDomains(*this);
+}
+
+void SysDomains::load(ProgressIndicator* progressIndicator)
+{
+    wxString stmt = "select rdb$field_name from rdb$fields "
+        " where rdb$system_flag = 1 "
+        " order by 1";
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 
 const wxString SysDomains::getTypeName() const

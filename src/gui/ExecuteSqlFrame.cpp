@@ -74,6 +74,7 @@
 #include "metadata/function.h"
 #include "metadata/generator.h"
 #include "metadata/MetadataItemURIHandlerHelper.h"
+#include "metadata/package.h"
 #include "metadata/procedure.h"
 #include "metadata/server.h"
 #include "metadata/table.h"
@@ -262,7 +263,7 @@ SqlEditor::SqlEditor(wxWindow *parent, wxWindowID id)
     }
     else
     {
-        wxFont font(frlayoutconfig().getEditorFontSize(), wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+        wxFont font(frlayoutconfig().getEditorFontSize(), wxMODERN, wxNORMAL, wxNORMAL);
         StyleSetFont(wxSTC_STYLE_DEFAULT, font);
     }
 
@@ -416,7 +417,7 @@ void SqlEditor::setFont()
     }
     else                // if config() doesn't have it, we'll use the default
     {
-        wxFont font(frlayoutconfig().getEditorFontSize(), wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+        wxFont font(frlayoutconfig().getEditorFontSize(), wxMODERN, wxNORMAL, wxNORMAL);
         f2 = ::wxGetFontFromUser(this, font);
     }
 
@@ -525,9 +526,9 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     updateEditorCaretPosM = true;
     updateFrameTitleM = true;
 
-    transactionIsolationLevelM = IBPP::ilConcurrency;
-    transactionLockResolutionM = IBPP::lrWait;
-    transactionAccessModeM = IBPP::amWrite;
+    transactionIsolationLevelM = static_cast<IBPP::TIL>(config().get("transactionIsolationLevel", 0));
+    transactionLockResolutionM = config().get("transactionLockResolution", true) ? IBPP::lrWait : IBPP::lrNoWait;
+    transactionAccessModeM = config().get("transactionAccessMode", false) ? IBPP::amRead : IBPP::amWrite;
 
     timerBlobEditorM.SetOwner(this, TIMER_ID_UPDATE_BLOB);
 
@@ -1095,9 +1096,16 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& event)
                 Procedure* p = dynamic_cast<Procedure*>(databaseM->findByNameAndType(ntProcedure, word));
                 if (p)
                     calltip = p->getDefinition();
-                Function* f = dynamic_cast<Function*>(databaseM->findByNameAndType(ntFunction, word));
+// TODO: review tip for package, function and udf
+                /*
+                UDF* f = dynamic_cast<UDF*>(databaseM->findByNameAndType(ntUDF, word)); 
                 if (f)
                     calltip = f->getDefinition();
+                
+                FunctionSQL* f = dynamic_cast<FunctionSQL*>(databaseM->findByNameAndType(ntFunctionSQL, word));
+                if (f)
+                    calltip = f->getDefinition();
+                 */ 
                 if (!calltip.empty())
                 {
                     styled_text_ctrl_sql->CallTipShow(start, calltip);
@@ -1173,7 +1181,7 @@ void ExecuteSqlFrame::autoCompleteColumns(int pos, int len)
     }
     wxString table = styled_text_ctrl_sql->GetTextRange(start, pos-1);
     IncompleteStatement is(databaseM, styled_text_ctrl_sql->GetText());
-    wxString columns = is.getObjectColumns(table, pos, len);//When the user are typing something, you need to sort de result, else intelisense won't work properly
+    wxString columns = is.getObjectColumns(table, pos, len>0 || config().get("autoCompleteLoadColumnsSort", false));//When the user are typing something, you need to sort de result, else intelisense won't work properly
     if (columns.IsEmpty())
         return;
     if (HasWord(styled_text_ctrl_sql->GetTextRange(pos, pos+len), columns))
@@ -1197,6 +1205,7 @@ void ExecuteSqlFrame::autoComplete(bool force)
     int start = styled_text_ctrl_sql->WordStartPosition(pos, true);
     if (start > 1 && styled_text_ctrl_sql->GetCharAt(start - 1) == '.')
     {
+// TODO: Autocomplete function/procedure for a package
         autoCompleteColumns(start, pos-start);
         return;
     }
@@ -3358,6 +3367,36 @@ bool EditProcedureHandler::handleURI(URI& uri)
     return true;
 }
 
+class EditFunctionHandler : public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
+{
+public:
+    EditFunctionHandler() {}
+    bool handleURI(URI& uri);
+private:
+    // singleton; registers itself on creation.
+    static const EditFunctionHandler handlerInstance;
+};
+
+const EditFunctionHandler EditFunctionHandler::handlerInstance;
+
+bool EditFunctionHandler::handleURI(URI& uri)
+{
+    if (uri.action != "edit_function")
+        return false;
+
+    FunctionSQL* f = extractMetadataItemFromURI<FunctionSQL>(uri);
+    wxWindow* w = getParentWindow(uri);
+    if (!f || !w)
+        return true;
+
+    CreateDDLVisitor cdv;
+    f->acceptVisitor(&cdv);
+    showSql(w->GetParent(), _("Editing stored function"), f->getDatabase(),
+        cdv.getSuffixSql());
+    return true;
+}
+
 class AlterViewHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
 {
@@ -3632,3 +3671,62 @@ bool ActivateTriggerHandler::handleURI(URI& uri)
     return true;
 }
 
+class EditPackageHeaderHandler : public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
+{
+public:
+    EditPackageHeaderHandler() {}
+    bool handleURI(URI& uri);
+private:
+    // singleton; registers itself on creation.
+    static const EditPackageHeaderHandler handlerInstance;
+};
+
+const EditPackageHeaderHandler EditPackageHeaderHandler::handlerInstance;
+
+bool EditPackageHeaderHandler::handleURI(URI& uri)
+{
+    if (uri.action != "edit_package_header")
+        return false;
+
+    Package* p = extractMetadataItemFromURI<Package>(uri);
+    wxWindow* w = getParentWindow(uri);
+    if (!p || !w)
+        return true;
+
+    CreateDDLVisitor cdv;
+    p->acceptVisitor(&cdv);
+    showSql(w->GetParent(), _("Editing Package Header"), p->getDatabase(),
+        p->getAlterHeader());
+    return true;
+}
+
+class EditPackageBodyHandler : public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
+{
+public:
+    EditPackageBodyHandler() {}
+    bool handleURI(URI& uri);
+private:
+    // singleton; registers itself on creation.
+    static const EditPackageBodyHandler handlerInstance;
+};
+
+const EditPackageBodyHandler EditPackageBodyHandler::handlerInstance;
+
+bool EditPackageBodyHandler::handleURI(URI& uri)
+{
+    if (uri.action != "edit_package_body")
+        return false;
+
+    Package* p = extractMetadataItemFromURI<Package>(uri);
+    wxWindow* w = getParentWindow(uri);
+    if (!p || !w)
+        return true;
+
+    CreateDDLVisitor cdv;
+    p->acceptVisitor(&cdv);
+    showSql(w->GetParent(), _("Editing Package Body"), p->getDatabase(),
+        p->getAlterBody());
+    return true;
+}

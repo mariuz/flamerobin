@@ -1,7 +1,6 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30225.117
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flamerobin", "flamerobin_flamerobin.vcxproj", "{3C914FEE-C6E8-58AA-B046-6E951FCD6BFC}"
 EndProject
@@ -30,7 +29,8 @@ Global
 		{3C914FEE-C6E8-58AA-B046-6E951FCD6BFC}.Debug Dynamic|x64.ActiveCfg = Debug Dynamic|x64
 		{3C914FEE-C6E8-58AA-B046-6E951FCD6BFC}.Debug Dynamic|x64.Build.0 = Debug Dynamic|x64
 		{3C914FEE-C6E8-58AA-B046-6E951FCD6BFC}.Debug Dynamic|x86.ActiveCfg = Debug Dynamic|Win32
-		{3C914FEE-C6E8-58AA-B046-6E951FCD6BFC}.Debug Dynamic|x86.Build.0 = Debug Dynamic|Win32
+		{3C914FEE-C6E8-58AA-B046-6E951FCD6BFC}.Debug Static|Win32.ActiveCfg = Debug Static|Win32
+		{3C914FEE-C6E8-58AA-B046-6E951FCD6BFC}.Debug Static|Win32.Build.0 = Debug Static|Win32
 		{3C914FEE-C6E8-58AA-B046-6E951FCD6BFC}.Debug Static|x64.ActiveCfg = Debug Static|x64
 		{3C914FEE-C6E8-58AA-B046-6E951FCD6BFC}.Debug Static|x64.Build.0 = Debug Static|x64
 		{3C914FEE-C6E8-58AA-B046-6E951FCD6BFC}.Debug Static|x86.ActiveCfg = Debug Static|Win32
@@ -62,7 +62,8 @@ Global
 		{F98A5270-7698-516C-9430-13EBB667AEA5}.Debug Dynamic|x64.ActiveCfg = Debug Dynamic|x64
 		{F98A5270-7698-516C-9430-13EBB667AEA5}.Debug Dynamic|x64.Build.0 = Debug Dynamic|x64
 		{F98A5270-7698-516C-9430-13EBB667AEA5}.Debug Dynamic|x86.ActiveCfg = Debug Dynamic|Win32
-		{F98A5270-7698-516C-9430-13EBB667AEA5}.Debug Dynamic|x86.Build.0 = Debug Dynamic|Win32
+		{F98A5270-7698-516C-9430-13EBB667AEA5}.Debug Static|Win32.ActiveCfg = Debug Static|Win32
+		{F98A5270-7698-516C-9430-13EBB667AEA5}.Debug Static|Win32.Build.0 = Debug Static|Win32
 		{F98A5270-7698-516C-9430-13EBB667AEA5}.Debug Static|x64.ActiveCfg = Debug Static|x64
 		{F98A5270-7698-516C-9430-13EBB667AEA5}.Debug Static|x64.Build.0 = Debug Static|x64
 		{F98A5270-7698-516C-9430-13EBB667AEA5}.Debug Static|x86.ActiveCfg = Debug Static|Win32
@@ -94,5 +95,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AAC61EBF-B39D-4C16-B7A4-25063DB7928D}
 	EndGlobalSection
 EndGlobal

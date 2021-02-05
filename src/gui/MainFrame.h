@@ -97,6 +97,7 @@ public:
     void OnMenuReconnect(wxCommandEvent& event);
     void OnMenuDatabasePreferences(wxCommandEvent& event);
     void OnMenuDatabaseProperties(wxCommandEvent& event);
+    void OnMenuExecuteFunction(wxCommandEvent& event);
 
     // create new object
     void showCreateTemplate(const wxString& statement);
@@ -104,10 +105,15 @@ public:
     void OnMenuCreateException(wxCommandEvent& event);
     void OnMenuCreateFunction(wxCommandEvent& event);
     void OnMenuCreateGenerator(wxCommandEvent& event);
+    void OnMenuCreatePackage(wxCommandEvent& event);
     void OnMenuCreateProcedure(wxCommandEvent& event);
     void OnMenuCreateRole(wxCommandEvent& event);
     void OnMenuCreateTable(wxCommandEvent& event);
-    void OnMenuCreateTrigger(wxCommandEvent& event);
+    void OnMenuCreateGTTTable(wxCommandEvent& event);
+    void OnMenuDMLCreateTrigger(wxCommandEvent& event);
+    void OnMenuCreateDBTrigger(wxCommandEvent& event);
+    void OnMenuCreateDDLTrigger(wxCommandEvent& event);
+    void OnMenuCreateUDF(wxCommandEvent& event);
     void OnMenuCreateView(wxCommandEvent& event);
 
     // enabled menu items

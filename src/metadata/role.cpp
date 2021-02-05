@@ -123,7 +123,7 @@ void Role::acceptVisitor(MetadataItemVisitor* visitor)
 
 // System roles collection
 SysRoles::SysRoles(DatabasePtr database)
-    : MetadataCollection<Role>(ntSysRoles, database, _("System roles"))
+    : MetadataCollection<Role>(ntSysRoles, database, _("System Roles"))
 {
 }
 

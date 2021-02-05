@@ -40,29 +40,46 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/trigger.h"
 #include "sql/StatementBuilder.h"
+#include "constants.h"
+
 
 /* static */
 Trigger::FiringTime Trigger::getFiringTime(int type)
 {
-    if (type == 8192)
-        return databaseConnect;
-    if (type == 8193)
-        return databaseDisconnect;
-    if (type == 8194)
-        return transactionStart;
-    if (type == 8195)
-        return transactionCommit;
-    if (type == 8196)
-        return transactionRollback;
-    if (type % 2)
-        return beforeIUD;
-    if (type)
-        return afterIUD;
-    return invalid;
+    switch (type & TRIGGER_TYPE_MASK)
+    {
+    case TRIGGER_TYPE_DML:
+    {
+        if (((type + 1) & 1) == 0)
+            return beforeIUD;
+        else
+            return afterIUD;
+    }
+/*    case TRIGGER_TYPE_DB:
+        switch (type & ~TRIGGER_TYPE_DB)
+        {
+        case DB_TRIGGER_CONNECT:
+            return DB_TRIGGER_CONNECT;
+        case DB_TRIGGER_DISCONNECT:
+            return DB_TRIGGER_DISCONNECT;
+        case DB_TRIGGER_TRANS_START:
+            return DB_TRIGGER_TRANS_START;
+        case DB_TRIGGER_TRANS_COMMIT:
+            return DB_TRIGGER_TRANS_COMMIT;
+        case DB_TRIGGER_TRANS_ROLLBACK:
+            return DB_TRIGGER_TRANS_ROLLBACK;
+        default:
+            return invalid;
+        }
+    case TRIGGER_TYPE_DDL:
+        return TRIGGER_TYPE_DDL;*/
+    default:
+       return invalid;
+    }        
 }
 
-Trigger::Trigger(DatabasePtr database, const wxString& name)
-    : MetadataItem(ntTrigger, database.get(), name)
+Trigger::Trigger(NodeType type, DatabasePtr database, const wxString& name)
+    : MetadataItem(type, database.get(), name)
 {
 }
 
@@ -79,50 +96,87 @@ wxString Trigger::getFiringEvent()
     StatementBuilder sb;
     wxString result;
     FiringTime time = getFiringTime(typeM);
-    switch (time)
-    {
-        case databaseConnect:
+    if ((typeM & TRIGGER_TYPE_MASK) == TRIGGER_TYPE_DB) {
+        switch (typeM & ~TRIGGER_TYPE_DB)
+        {
+        case DB_TRIGGER_CONNECT:
             sb << kwON << ' ' << kwCONNECT;
             break;
-        case databaseDisconnect:
+        case DB_TRIGGER_DISCONNECT:
             sb << kwON << ' ' << kwDISCONNECT;
             break;
-        case transactionStart:
+        case DB_TRIGGER_TRANS_START:
             sb << kwON << ' ' << kwTRANSACTION << ' ' << kwSTART;
             break;
-        case transactionCommit:
+        case DB_TRIGGER_TRANS_COMMIT:
             sb << kwON << ' ' << kwTRANSACTION << ' ' << kwCOMMIT;
             break;
-        case transactionRollback:
+        case DB_TRIGGER_TRANS_ROLLBACK:
             sb << kwON << ' ' << kwTRANSACTION << ' ' << kwROLLBACK;
             break;
         default:
             break;
+        }
     }
-
-    if (time == beforeIUD || time == afterIUD)
-    {
-        if (time == beforeIUD)
+    if (((typeM & TRIGGER_TYPE_MASK) == TRIGGER_TYPE_DML)) {
+        if (time == beforeIUD || time == afterIUD)
+        {
+            if (((typeM + 1) & 1) == 0)
+                sb << kwBEFORE;
+            else
+                sb << kwAFTER;
+            sb << ' ';
+            // For explanation: read README.universal_triggers file in Firebird's
+            //                  doc/sql.extensions directory
+            wxString types[] = { SqlTokenizer::getKeyword(kwINSERT),
+                SqlTokenizer::getKeyword(kwUPDATE),
+                SqlTokenizer::getKeyword(kwDELETE) };
+            int type = typeM + 1;    // compensate for decrement
+            type >>= 1;              // remove bit 0
+            for (int i = 0; i < 3; ++i, type >>= 2)
+            {
+                if (type % 4)
+                {
+                    if (i)
+                        sb << ' ' << kwOR << ' ';
+                    sb << types[(type % 4) - 1];
+                }
+            }
+        }
+    }
+    if (((typeM & TRIGGER_TYPE_MASK) == TRIGGER_TYPE_DDL)) {
+        bool first = true;
+        if ((typeM & 1) == DDL_TRIGGER_BEFORE)
             sb << kwBEFORE;
         else
             sb << kwAFTER;
-        sb << ' ';
-        // For explanation: read README.universal_triggers file in Firebird's
-        //                  doc/sql.extensions directory
-        wxString types[] = { SqlTokenizer::getKeyword(kwINSERT),
-            SqlTokenizer::getKeyword(kwUPDATE),
-            SqlTokenizer::getKeyword(kwDELETE) };
-        int type = typeM + 1;    // compensate for decrement
-        type >>= 1;              // remove bit 0
-        for (int i = 0; i < 3; ++i, type >>= 2)
+        if ((typeM & DDL_TRIGGER_ANY) == DDL_TRIGGER_ANY)
+            sb << " ANY DDL STATEMENT ";
+        else
         {
-            if (type % 4)
+            for (SINT64 pos = 1; pos < 64; ++pos)
             {
-                if (i)
-                    sb << ' ' << kwOR << ' ';
-                sb << types[ (type%4) - 1 ];
+                if (((1LL << pos) & TRIGGER_TYPE_MASK) || (typeM & (1LL << pos)) == 0)
+                    continue;
+
+                if (first)
+                    first = false;
+                else
+                    sb << " OR";
+
+                sb << " ";
+
+                if (pos < FB_NELEM(DDL_TRIGGER_ACTION_NAMES))
+                {
+                    sb << wxString(DDL_TRIGGER_ACTION_NAMES[pos][0]) + " " +
+                        DDL_TRIGGER_ACTION_NAMES[pos][1];
+                }
+                else
+                    sb << "<unknown>";
             }
+
         }
+
     }
     return sb;
 }
@@ -142,7 +196,7 @@ int Trigger::getPosition()
 wxString Trigger::getRelationName()
 {
     ensurePropertiesLoaded();
-    if (!isDatabaseTrigger())
+    if (isDMLTrigger())
         return relationNameM;
     return wxEmptyString;
 }
@@ -156,18 +210,24 @@ wxString Trigger::getSource()
 void Trigger::loadProperties()
 {
     setPropertiesLoaded(false);
+    sourceM.clear();
 
     DatabasePtr db = getDatabase();
     MetadataLoader* loader = db->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
+    wxMBConv* converter = db->getCharsetConverter();
 
-    IBPP::Statement& st1 = loader->getStatement(
-        "select t.rdb$relation_name, t.rdb$trigger_sequence, "
-        "t.rdb$trigger_inactive, t.rdb$trigger_type, rdb$trigger_source "
-        "from rdb$triggers t where rdb$trigger_name = ? "
-    );
+	std::string sql("select t.rdb$relation_name, t.rdb$trigger_sequence, "
+		"t.rdb$trigger_inactive, t.rdb$trigger_type, rdb$trigger_source, "
+	);
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " rdb$entrypoint, rdb$engine_name,  ": " null, null, ";
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0) ? " rdb$sql_security " : " null ";
 
-    st1->Set(1, wx2std(getName_(), db->getCharsetConverter()));
+    sql += "from rdb$triggers t where rdb$trigger_name = ? ";
+
+    IBPP::Statement& st1 = loader->getStatement(sql);
+
+    st1->Set(1, wx2std(getName_(), converter));
     st1->Execute();
     if (st1->Fetch())
     {
@@ -177,7 +237,7 @@ void Trigger::loadProperties()
         {
             std::string objname;
             st1->Get(1, objname);
-            relationNameM = std2wxIdentifier(objname, db->getCharsetConverter());
+            relationNameM = std2wxIdentifier(objname, converter);
         }
         st1->Get(2, &positionM);
 
@@ -189,8 +249,46 @@ void Trigger::loadProperties()
         activeM = (temp == 0);
 
         st1->Get(4, &typeM);
+        st1->Get(4, typeM);
 
-        readBlob(st1, 5, sourceM, db->getCharsetConverter());
+
+        if (!st1->IsNull(8))
+        {
+            bool b;
+            st1->Get(8, b);
+            sqlSecurityM = b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER";
+        }
+        else
+            sqlSecurityM.clear();
+
+		if (!st1->IsNull(6))
+		{
+			std::string s;
+			st1->Get(6, s);
+			sourceM += "EXTERNAL NAME '" + std2wxIdentifier(s, converter) + "'\n";
+			entryPointM = std2wxIdentifier(s, converter);
+            if (!st1->IsNull(7))
+            {
+                //std::string s;
+                st1->Get(7, s);
+                sourceM += "ENGINE " + std2wxIdentifier(s, converter) + "\n";
+                engineNameM = std2wxIdentifier(s, converter);
+            }
+            else
+                engineNameM.clear();
+		}
+        else
+        {
+            entryPointM.clear();
+            engineNameM.clear();
+        }
+        if (!st1->IsNull(5))
+        {
+            wxString source1;
+            readBlob(st1, 5, source1, converter);
+            source1.Trim(false);     // remove leading whitespace
+            sourceM += "\n" + source1 + "\n";
+        }
     }
     else // maybe trigger was dropped?
     {
@@ -199,6 +297,9 @@ void Trigger::loadProperties()
         positionM = -1;
         sourceM.clear();
         typeM = 0;
+		entryPointM.clear();
+		engineNameM.clear();
+        sqlSecurityM.clear();
     }
 
     setPropertiesLoaded(true);
@@ -223,6 +324,8 @@ wxString Trigger::getAlterSql()
     sb << StatementBuilder::NewLine << getFiringEvent()
         << ' ' << kwPOSITION << ' ' << wxString::Format("%d", positionM)
         << StatementBuilder::NewLine;
+    sb << getSqlSecurity() << StatementBuilder::NewLine;
+
     sb << sourceM + "^" << StatementBuilder::NewLine;
 
     sb << kwSET << ' ' << kwTERMINATOR << " ; ^"
@@ -230,17 +333,28 @@ wxString Trigger::getAlterSql()
     return sb;
 }
 
-bool Trigger::isDatabaseTrigger()
+bool Trigger::isDBTrigger()
 {
     ensurePropertiesLoaded();
-    switch (getFiringTime(typeM))
-    {
-        case databaseConnect:
-        case databaseDisconnect:
-            return true;
-        default:
-            return false;
-    }
+    return (typeM & TRIGGER_TYPE_MASK) == TRIGGER_TYPE_DB;
+}
+
+bool Trigger::isDDLTrigger()
+{
+    ensurePropertiesLoaded();
+    return (typeM & TRIGGER_TYPE_MASK) == TRIGGER_TYPE_DDL;
+}
+
+bool Trigger::isDMLTrigger()
+{
+    ensurePropertiesLoaded();
+    return (typeM & TRIGGER_TYPE_MASK) == TRIGGER_TYPE_DML;
+}
+
+wxString Trigger::getSqlSecurity()
+{
+    ensurePropertiesLoaded();
+    return sqlSecurityM;
 }
 
 const wxString Trigger::getTypeName() const
@@ -254,31 +368,128 @@ void Trigger::acceptVisitor(MetadataItemVisitor* visitor)
 }
 
 // Triggers collection
-Triggers::Triggers(DatabasePtr database)
-    : MetadataCollection<Trigger>(ntTriggers, database, _("Triggers"))
+DMLTriggers::DMLTriggers(DatabasePtr database)
+    : MetadataCollection<DMLTrigger>(ntDMLTriggers, database, _("Triggers"))
 {
 }
 
-void Triggers::acceptVisitor(MetadataItemVisitor* visitor)
+void DMLTriggers::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    visitor->visitTriggers(*this);
+    visitor->visitDMLTriggers(*this);
 }
 
-void Triggers::load(ProgressIndicator* progressIndicator)
+void DMLTriggers::load(ProgressIndicator* progressIndicator)
 {
     wxString stmt = "select rdb$trigger_name from rdb$triggers"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
-        " order by 1";
+        " where (rdb$system_flag = 0 or rdb$system_flag is null) "
+        " and rdb$relation_name is not null  ";
+    if (getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        stmt += "and BIN_AND(rdb$trigger_type,"+ std::to_string(TRIGGER_TYPE_MASK)+") = "+ std::to_string(TRIGGER_TYPE_DML);
+    stmt += " order by 1";
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 
-void Triggers::loadChildren()
+void DMLTriggers::loadChildren()
 {
     load(0);
 }
 
-const wxString Triggers::getTypeName() const
+const wxString DMLTriggers::getTypeName() const
 {
     return "TRIGGER_COLLECTION";
 }
 
+// DB Triggers collection
+DBTriggers::DBTriggers(DatabasePtr database)
+    : MetadataCollection<DBTrigger>(ntDBTriggers, database, _("Database Triggers"))
+{
+}
+
+void DBTriggers::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitDBTriggers(*this);
+}
+
+void DBTriggers::load(ProgressIndicator* progressIndicator)
+{
+    wxString stmt = "select rdb$trigger_name from rdb$triggers"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null) ";
+    stmt += " and BIN_AND(rdb$trigger_type," + std::to_string(TRIGGER_TYPE_MASK) + ") = " + std::to_string(TRIGGER_TYPE_DB)+
+        " order by 1";
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+}
+
+void DBTriggers::loadChildren()
+{
+    load(0);
+}
+
+const wxString DBTriggers::getTypeName() const
+{
+    return "DBTRIGGER_COLLECTION";
+}
+
+
+// DDL Triggers collection
+DDLTriggers::DDLTriggers(DatabasePtr database)
+    : MetadataCollection<DDLTrigger>(ntDDLTriggers, database, _("DDL Triggers"))
+{
+}
+
+void DDLTriggers::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitDDLTriggers(*this);
+}
+
+void DDLTriggers::load(ProgressIndicator* progressIndicator)
+{
+    wxString stmt = "select rdb$trigger_name from rdb$triggers"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null) ";
+    stmt += " and BIN_AND(rdb$trigger_type," + std::to_string(TRIGGER_TYPE_MASK) + ") = " + std::to_string(TRIGGER_TYPE_DDL) +
+        " order by 1";
+
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+}
+
+void DDLTriggers::loadChildren()
+{
+    load(0);
+}
+
+const wxString DDLTriggers::getTypeName() const
+{
+    return "DDLTRIGGER_COLLECTION";
+}
+
+DDLTrigger::DDLTrigger(DatabasePtr dataBase, const wxString& name)
+    :Trigger(ntDDLTrigger, dataBase, name)
+{
+
+}
+
+void DDLTrigger::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitDDLTrigger(*this);
+}
+
+DBTrigger::DBTrigger(DatabasePtr dataBase, const wxString& name)
+    :Trigger(ntDBTrigger, dataBase, name)
+{
+}
+
+void DBTrigger::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitDBTrigger(*this);
+}
+
+DMLTrigger::DMLTrigger(DatabasePtr dataBase, const wxString& name)
+    :Trigger(ntDMLTrigger, dataBase, name)
+{
+
+}
+
+void DMLTrigger::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitDMLTrigger(*this);
+
+}

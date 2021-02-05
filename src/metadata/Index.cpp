@@ -34,6 +34,12 @@
 
 #include "metadata/Index.h"
 #include "metadata/MetadataItemVisitor.h"
+#include "metadata/database.h"
+
+Index::Index(DatabasePtr database, const wxString& name)
+    : MetadataItem(ntIndex, database.get(), name)
+{
+}
 
 Index::Index(bool unique, bool active, bool ascending, double statistics,
         bool system, wxString expression)
@@ -101,3 +107,33 @@ void Index::acceptVisitor(MetadataItemVisitor* visitor)
     visitor->visitIndex(*this);
 }
 
+void Indices::loadChildren()
+{
+    load(0);
+}
+
+Indices::Indices(DatabasePtr database)
+    : MetadataCollection<Index>(ntIndices, database, _("Indices")) 
+{
+}
+
+void Indices::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitIndices(*this);
+}
+
+void Indices::load(ProgressIndicator* progressIndicator)
+{
+    DatabasePtr db = getDatabase();
+    wxString stmt = "select a.rdb$index_name from rdb$indices a "
+            "   left join rdb$relation_constraints b on b.rdb$index_name = a.rdb$index_name "
+            " where (rdb$system_flag = 0 or rdb$system_flag is null) "
+            "   and b.rdb$index_name is null "
+            " order by 1 ";
+        setItems(db->loadIdentifiers(stmt, progressIndicator));
+}
+
+const wxString Indices::getTypeName() const
+{
+    return "INDICES_COLLECTION";
+}

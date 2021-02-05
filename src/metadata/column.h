@@ -47,7 +47,7 @@ public:
     wxString getDatatype(bool useConfig = true);
     DomainPtr getDomain() const;
     bool getDefault(GetColumnDefaultType type, wxString& value) const;
-    wxString getSource() const;
+    virtual wxString getSource(bool identity = false) ;
     bool isNullable(GetColumnNullabilityType type) const;
 };
 
@@ -56,22 +56,28 @@ class Column: public ColumnBase
 private:
     bool computedM;
     wxString sourceM, computedSourceM, collationM;
+    wxString identityTypeM; // ODS 12
+    long initialValueM, incrementalValueM; // ODS 12
 public:
     Column(Relation* relation, const wxString& name);
 
     void initialize(const wxString& source, const wxString& computedSource,
         const wxString& collation, bool nullable,
-        const wxString& defaultValue, bool hasDefault, bool hasDescription);
+        const wxString& defaultValue, bool hasDefault, bool hasDescription,
+        const wxString& identityType, const long initialValue, const long incrementalValue);
     virtual const wxString getTypeName() const;
     virtual wxString getDropSqlStatement() const;
 
     bool isForeignKey() const;
     bool isPrimaryKey() const;
     bool isString() const;
+    bool isIdentity() const;
     virtual wxString getComputedSource() const;
     wxString getCollation() const;
     Table* getTable() const;
+    long getInitialValue() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    virtual wxString getSource(bool identity=false);
 };
 
 #endif
