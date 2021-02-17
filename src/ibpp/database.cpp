@@ -210,6 +210,15 @@ void DatabaseImpl::Drop()
     mHandle = 0;
 }
 
+IBPP::IDatabase * DatabaseImpl::Clone()
+{
+    // By definition the clone of an IBPP Database is a new Database.
+    DatabaseImpl* clone = new DatabaseImpl(mServerName, mDatabaseName,
+        mUserName, mUserPassword, mRoleName,
+        mCharSet, mCreateParams);
+    return clone;
+}
+
 void DatabaseImpl::Info(int* ODSMajor, int* ODSMinor,
     int* PageSize, int* Pages, int* Buffers, int* Sweep,
     bool* Sync, bool* Reserve, bool* ReadOnly)

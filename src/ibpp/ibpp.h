@@ -568,6 +568,8 @@ namespace IBPP
         virtual void Disconnect() = 0;
         virtual void Drop() = 0;
 
+        virtual IDatabase* Clone() = 0;
+
         virtual IDatabase* AddRef() = 0;
         virtual void Release() = 0;
 
