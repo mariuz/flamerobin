@@ -67,6 +67,7 @@ public:
 
     enum { ID_Choice = 1001, ID_Grid };
 
+    wxStopWatch swWaitForParameterInputTime;
 private:
     Database *databaseM;
     void storeValues();

@@ -2295,7 +2295,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     notebook_1->SetSelection(0);
     wxStopWatch swTotal;
     bool retval = true;
-
+    long waitForParameterInputTime = 0;
     try
     {
         if (transactionM == 0 || !transactionM->Started())
@@ -2505,7 +2505,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     }
 
     log(wxString::Format(_("Total execution time: %s"),
-        millisToTimeString(swTotal.Time()).c_str()));
+        millisToTimeString(swTotal.Time() - waitForParameterInputTime).c_str()));
     return retval;
 }
 
