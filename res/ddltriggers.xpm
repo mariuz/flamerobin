@@ -1,5 +1,5 @@
 /* XPM */
-static char * DDLTriggers_xpm[] = {
+static const char * DDLTriggers_xpm[] = {
 "16 16 98 2",
 "  	c None",
 ". 	c #F3F3F3",

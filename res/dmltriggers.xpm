@@ -1,5 +1,5 @@
 /* XPM */
-static char * DMLTriggers_xpm[] = {
+static const char * DMLTriggers_xpm[] = {
 "16 16 56 1",
 " 	c None",
 ".	c #F3F3F3",

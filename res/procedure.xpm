@@ -1,5 +1,5 @@
 /* XPM */
-static char * procedure_xpm[] = {
+static const char * procedure_xpm[] = {
 "16 16 72 1",
 " 	g None",
 ".	g #C2C2C2",

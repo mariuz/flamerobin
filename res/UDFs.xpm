@@ -1,5 +1,5 @@
 /* XPM */
-static char * UDFs_xpm[] = {
+static const char * UDFs_xpm[] = {
 "16 16 139 2",
 "  	c None",
 ". 	c #3D3D3D",

@@ -1,5 +1,5 @@
 /* XPM */
-static char * DBTrigger_xpm[] = {
+static const char * DBTrigger_xpm[] = {
 "16 16 87 1",
 " 	c None",
 ".	c #F3F3F3",

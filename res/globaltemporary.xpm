@@ -1,5 +1,5 @@
 /* XPM */
-static char * globaltemporary_xpm[] = {
+static const char * globaltemporary_xpm[] = {
 "16 16 116 2",
 "  	c None",
 ". 	c #A2C1EF",

@@ -1,5 +1,5 @@
 /* XPM */
-static char * systempackage_xpm[] = {
+static const char * systempackage_xpm[] = {
 "16 16 147 2",
 "  	c None",
 ". 	c #FEBF14",
