@@ -285,7 +285,11 @@ wxString Column::getSource(bool identity)
         }
         return sql;
     }
-    else
-        return ColumnBase::getSource(identity);
+    else {
+        if ((isIdentity() && !identity) || !getComputedSource().IsEmpty())
+            return  getDatatype(false);
+        else
+            return ColumnBase::getSource(identity);
+    }
 }
 
