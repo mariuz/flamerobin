@@ -88,6 +88,7 @@ public:
     void OnMenuObjectRefresh(wxCommandEvent& event);
     void OnMenuDropObject(wxCommandEvent& event);
     void OnMenuAlterObject(wxCommandEvent& event);
+    void OnMenRebuildObject(wxCommandEvent& event);
     void OnMenuCreateTriggerForTable(wxCommandEvent& event);
     void OnMenuGenerateCode(wxCommandEvent& event);
     void OnMenuExecuteProcedure(wxCommandEvent& event);

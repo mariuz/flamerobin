@@ -75,6 +75,30 @@ wxString View::getCreateSql()
     return sb;
 }
 
+wxString View::getAlterSql()
+{
+    ensureChildrenLoaded();
+
+    StatementBuilder sb;
+    sb << kwALTER << ' ' << kwVIEW << ' ' << getQuotedName() << " ("
+        << StatementBuilder::IncIndent;
+
+    // make sure that line breaking occurs after comma, not before
+    ColumnPtrs::const_iterator it = columnsM.begin();
+    wxString colName = (*it)->getQuotedName();
+    for (++it; it != columnsM.end(); ++it)
+    {
+        sb << colName + ", ";
+        colName = (*it)->getQuotedName();
+    }
+    sb << colName;
+
+    sb << ')' << StatementBuilder::DecIndent << StatementBuilder::NewLine
+        << kwAS << ' ' << StatementBuilder::DisableLineWrapping
+        << getSource() << ';' << StatementBuilder::NewLine;
+    return sb;
+}
+
 const wxString View::getTypeName() const
 {
     return "VIEW";

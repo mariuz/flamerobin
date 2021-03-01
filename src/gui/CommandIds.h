@@ -120,6 +120,7 @@ namespace Cmds
         Menu_ShowStatisticsValue,
         Menu_SetStatisticsValue,
         Menu_ShowAllStatisticsValue,
+        Menu_RebuildObject,
 
         // view menu
         Menu_ToggleStatusBar, 

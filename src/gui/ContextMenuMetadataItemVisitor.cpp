@@ -439,6 +439,7 @@ void MainObjectMenuMetadataItemVisitor::visitView(View& view)
     addGenerateCodeMenu(view);
     addSeparator();
     addAlterItem(view);
+    menuM->Append(Cmds::Menu_RebuildObject, _("&Rebuild"));
     addDropItem(view);
     addSeparator();
     addRefreshItem();

@@ -437,6 +437,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_UPDATE_UI(Cmds::Menu_ObjectProperties, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
     EVT_MENU(Cmds::Menu_ObjectRefresh, MainFrame::OnMenuObjectRefresh)
     EVT_UPDATE_UI(Cmds::Menu_ObjectRefresh, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_MENU(Cmds::Menu_RebuildObject, MainFrame::OnMenRebuildObject)
 
     EVT_MENU(Cmds::Menu_ToggleStatusBar, MainFrame::OnMenuToggleStatusBar)
     EVT_MENU(Cmds::Menu_ToggleSearchBar, MainFrame::OnMenuToggleSearchBar)
@@ -1578,7 +1579,8 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
 
     wxString sql;
     if (View* v = dynamic_cast<View*>(mi))
-        sql = v->getRebuildSql();
+        sql = v->getAlterSql();
+        //        sql = v->getRebuildSql();
     else if (Trigger* t = dynamic_cast<Trigger*>(mi))
         sql = t->getAlterSql();
     else if (Domain* dm = dynamic_cast<Domain*>(mi))
@@ -1590,6 +1592,20 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
 
     if (!sql.empty())
         showSql(this, wxString(_("Alter object")), db, sql);
+}
+
+void MainFrame::OnMenRebuildObject(wxCommandEvent& event)
+{
+    MetadataItem* mi = treeMainM->getSelectedMetadataItem();
+    DatabasePtr db = getDatabase(mi);
+    if (!db)
+        return;
+
+    wxString sql;
+    if (View* v = dynamic_cast<View*>(mi))
+        sql = v->getRebuildSql();
+    if (!sql.empty())
+        showSql(this, wxString(_("Rebuild object")), db, sql);
 }
 
 void MainFrame::OnMenuRecreateDatabase(wxCommandEvent& WXUNUSED(event))
