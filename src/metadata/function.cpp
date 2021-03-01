@@ -79,9 +79,9 @@ void Function::loadChildren()
         "f.rdb$return_argument, a.rdb$argument_position, " //9..10
     );
     if (db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
-        sql += "rdb$default_source, rdb$null_flag, rdb$argument_mechanism, "; //11..13
+        sql += "rdb$default_source, rdb$null_flag, rdb$argument_mechanism, rdb$FIELD_NAME, rdb$RELATION_NAME, "; //11..13
     else
-        sql += "null, null, -1, ";
+        sql += "null, null, -1, null, null, ";
     sql += "a.rdb$description from rdb$function_arguments a "
         " join rdb$functions f on f.rdb$function_name = a.rdb$function_name "
         "where a.rdb$function_name = ? ";
@@ -149,7 +149,18 @@ void Function::loadChildren()
             if (!st1->IsNull(3))
                 st1->Get(3, mechanism);
         }
-        bool hasDescription = !st1->IsNull(14);
+        wxString field;
+        if (!st1->IsNull(14)) {
+            st1->Get(14, s);
+            field = std2wxIdentifier(s, converter);
+        }
+        wxString relation;
+        if (!st1->IsNull(15)) {
+            st1->Get(15, s);
+            relation = std2wxIdentifier(s, converter);
+        }
+
+        bool hasDescription = !st1->IsNull(16);
 
         ParameterPtr par = findParameter(param_name);
         if (!par)
@@ -159,7 +170,7 @@ void Function::loadChildren()
         }
         parameters.push_back(par);
         par->initialize(source, partype, mechanism, !notNull, defaultSrc,
-            hasDefault, hasDescription);
+            hasDefault, hasDescription, relation, field);
     }
 
     setChildrenLoaded(true);
@@ -539,9 +550,10 @@ wxString FunctionSQL::getAlterSql(bool full)
 				}
 				else
 				{
-					if ((*it)->getMechanism() == 1)
-						param += "TYPE OF ";
-					param += dm->getQuotedName();
+                    if ((*it)->getMechanism() == 1)
+                        param += param += (*it)->getTypeOf();
+                    else
+                        param += dm->getQuotedName();
 				}
 			}
 			else

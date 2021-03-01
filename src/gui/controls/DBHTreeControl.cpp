@@ -180,6 +180,12 @@ DBHTreeImageList::DBHTreeImageList()
     addImage(ART_Computed);
     addImage(ART_DatabaseConnected);
     addImage(ART_DatabaseDisconnected);
+    addImage(ART_DBTrigger);
+    addImage(ART_DBTriggers);
+    addImage(ART_DDLTrigger);
+    addImage(ART_DDLTriggers);
+    addImage(ART_DMLTrigger);
+    addImage(ART_DMLTriggers);
     addImage(ART_Domain);
     addImage(ART_Domains);
     addImage(ART_Exception);
@@ -189,6 +195,8 @@ DBHTreeImageList::DBHTreeImageList()
     addImage(ART_Functions);
     addImage(ART_Generator);
     addImage(ART_Generators);
+    addImage(ART_GlobalTemporary);
+    addImage(ART_GlobalTemporaries);
     addImage(ART_Index);
     addImage(ART_Indices);
     addImage(ART_Package);
@@ -215,6 +223,10 @@ DBHTreeImageList::DBHTreeImageList()
     addImage(ART_Tables);
     addImage(ART_Trigger);
     addImage(ART_Triggers);
+    addImage(ART_UDF);
+    addImage(ART_UDFs);
+    addImage(ART_User);
+    addImage(ART_Users);
     addImage(ART_View);
     addImage(ART_Views);
 }
@@ -308,6 +320,8 @@ public:
     virtual void visitDDLTriggers(DDLTriggers& triggers);
     virtual void visitUDF(UDF& function);
     virtual void visitUDFs(UDFs& functions);
+    virtual void visitUDF(User& user);
+    virtual void visitUDFs(Users& users);
     virtual void visitView(View& view);
     virtual void visitViews(Views& views);
     virtual void visitIndex(Index& index);
@@ -481,7 +495,7 @@ void DBHTreeItemVisitor::visitFunctionSQLs(FunctionSQLs& functions)
 
 void DBHTreeItemVisitor::visitUDF(UDF& function)
 {
-    setNodeProperties(&function, ART_Function);
+    setNodeProperties(&function, ART_UDF);
     if (function.childrenLoaded())
     {
         // make node caption bold when parameter data is loaded
@@ -512,7 +526,17 @@ void DBHTreeItemVisitor::visitUDF(UDF& function)
 
 void DBHTreeItemVisitor::visitUDFs(UDFs& functions)
 {
-    setNodeProperties(&functions, ART_Functions);
+    setNodeProperties(&functions, ART_UDFs);
+}
+
+void DBHTreeItemVisitor::visitUDF(User& user)
+{
+    //setNodeProperties(&user, ART_User);
+}
+
+void DBHTreeItemVisitor::visitUDFs(Users& users)
+{
+    //setNodeProperties(&users, ART_Users);
 }
 
 void DBHTreeItemVisitor::visitGenerator(Generator& generator)
@@ -682,13 +706,14 @@ void DBHTreeItemVisitor::visitSysTables(SysTables& tables)
 
 void DBHTreeItemVisitor::visitGTTs(GTTs& tables)
 {
-    setNodeProperties(&tables, ART_Tables);
+    setNodeProperties(&tables, ART_GlobalTemporaries);
 }
 
 void DBHTreeItemVisitor::visitTable(Table& table)
 {
     setNodeProperties(&table,
-        table.isSystem() ? ART_SystemTable : ART_Table);
+        table.isSystem() ? ART_SystemTable : 
+        table.getRelationType() == 4 || table.getRelationType() == 5 ? ART_GlobalTemporary : ART_Table);
 
     if (table.childrenLoaded())
     {
@@ -715,32 +740,32 @@ void DBHTreeItemVisitor::visitTables(Tables& tables)
 
 void DBHTreeItemVisitor::visitDMLTrigger(DMLTrigger& trigger)
 {
-    setNodeProperties(&trigger, ART_Trigger);
+    setNodeProperties(&trigger, ART_DMLTrigger);
 }
 
 void DBHTreeItemVisitor::visitDMLTriggers(DMLTriggers& triggers)
 {
-    setNodeProperties(&triggers, ART_Triggers);
+    setNodeProperties(&triggers, ART_DMLTriggers);
 }
 
 void DBHTreeItemVisitor::visitDBTrigger(DBTrigger& trigger)
 {
-    setNodeProperties(&trigger, ART_Trigger);
+    setNodeProperties(&trigger, ART_DBTrigger);
 }
 
 void DBHTreeItemVisitor::visitDBTriggers(DBTriggers& triggers)
 {
-    setNodeProperties(&triggers, ART_Triggers); 
+    setNodeProperties(&triggers, ART_DBTriggers); 
 }
 
 void DBHTreeItemVisitor::visitDDLTrigger(DDLTrigger& trigger)
 {
-    setNodeProperties(&trigger, ART_Trigger);
+    setNodeProperties(&trigger, ART_DDLTrigger);
 }
 
 void DBHTreeItemVisitor::visitDDLTriggers(DDLTriggers& triggers)
 {
-    setNodeProperties(&triggers, ART_Triggers); 
+    setNodeProperties(&triggers, ART_DDLTriggers); 
 }
 
 void DBHTreeItemVisitor::visitView(View& view)

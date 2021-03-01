@@ -38,6 +38,10 @@ typedef std::weak_ptr<Database> DatabaseWeakPtr;
 typedef std::vector<DatabasePtr> DatabasePtrs;
 
 class Trigger;
+typedef std::shared_ptr<Trigger> TriggerPtr;
+typedef std::vector<TriggerPtr> TriggerPtrs;
+class Triggers;
+typedef std::shared_ptr<Triggers> TriggersPtr;
 
 class DBTrigger;
 typedef std::shared_ptr<DBTrigger> DBTriggerPtr;
@@ -166,6 +170,9 @@ class UniqueConstraint;
 class User;
 typedef std::shared_ptr<User> UserPtr;
 typedef std::vector<UserPtr> UserPtrs;
+class Users;
+typedef std::shared_ptr<Users> UsersPtr;
+
 
 class View;
 typedef std::shared_ptr<View> ViewPtr;

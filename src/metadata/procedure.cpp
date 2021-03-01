@@ -75,7 +75,7 @@ void Procedure::loadChildren()
         "select rdb$parameter_name, rdb$field_source, "
         "rdb$parameter_type, "
     );
-    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)? "rdb$default_source, rdb$null_flag, rdb$parameter_mechanism, ": "null, null, -1, ";
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)? "rdb$default_source, rdb$null_flag, rdb$parameter_mechanism, rdb$FIELD_NAME, rdb$RELATION_NAME, ": "null, null, -1, null, null ";
 	sql += "rdb$description from rdb$procedure_parameters "
 		"where rdb$procedure_name = ? ";
     sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and rdb$package_name is null " : "";
@@ -108,7 +108,18 @@ void Procedure::loadChildren()
             st1->Get(5, &notNull);
         if (!st1->IsNull(6))
             st1->Get(6, mechanism);
-        bool hasDescription = !st1->IsNull(7);
+        wxString field;
+        if (!st1->IsNull(7)){
+            st1->Get(7, s);
+            field = std2wxIdentifier(s, converter);
+        }
+        wxString relation;
+        if (!st1->IsNull(8)) {
+            st1->Get(8, s);
+            relation = std2wxIdentifier(s, converter);
+        }
+
+        bool hasDescription = !st1->IsNull(9);
 
         ParameterPtr par = findParameter(param_name);
         if (!par)
@@ -118,7 +129,7 @@ void Procedure::loadChildren()
         }
         parameters.push_back(par);
         par->initialize(source, partype, mechanism, !notNull, defaultSrc,
-            hasDefault, hasDescription);
+            hasDefault, hasDescription, relation, field);
     }
 
     setChildrenLoaded(true);
@@ -357,8 +368,9 @@ wxString Procedure::getAlterSql(bool full)
                 else
                 {
                     if ((*it)->getMechanism() == 1)
-                        param += "TYPE OF ";
-                    param += dm->getQuotedName();
+                        param += (*it)->getTypeOf();
+                    else
+                        param += dm->getQuotedName();
                 }
             }
             else
@@ -545,8 +557,9 @@ void Procedures::acceptVisitor(MetadataItemVisitor* visitor)
 void Procedures::load(ProgressIndicator* progressIndicator)
 {
     wxString stmt = "select rdb$procedure_name from rdb$procedures"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null)"
-        " order by 1";
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)";
+    stmt += getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and rdb$package_name is null " : " ";
+    stmt += " order by 1";
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 

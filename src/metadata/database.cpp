@@ -1424,6 +1424,13 @@ UDFsPtr Database::getUDFs()
     return UDFsM;
 }
 
+UsersPtr Database::getUsers()
+{
+    wxASSERT(usersM);
+//    usersM->ensureChildrenLoaded();
+    return usersM;
+}
+
 FunctionSQLsPtr Database::getFunctionSQLs()
 {
     wxASSERT(functionSQLsM);

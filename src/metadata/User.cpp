@@ -31,6 +31,7 @@
 #endif
 
 #include "core/StringUtils.h"
+#include "metadata/MetadataItemVisitor.h"
 #include "metadata/server.h"
 #include "metadata/User.h"
 
@@ -169,3 +170,32 @@ bool User::isSystem() const
     return usernameM == "SYSDBA";
 }
 
+/*
+void Users::loadChildren()
+{
+    load(0);
+}
+
+Users::Users(DatabasePtr database)
+    : MetadataCollection<User>(ntUsers, database, _("Users"))
+{
+}
+
+void Users::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitUsers(*this);
+}
+
+void Users::load(ProgressIndicator* progressIndicator)
+{
+    DatabasePtr db = getDatabase();
+    wxString stmt = "select sec$user_name from sec$users a order by 1 ";
+    setItems(db->loadIdentifiers(stmt, progressIndicator));
+}
+
+const wxString Users::getTypeName() const
+{
+    return "USERS_COLLECTION";
+}
+
+*/

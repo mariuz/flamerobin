@@ -41,6 +41,7 @@ public:
 
     wxString getSource();
     wxString getCreateSql();
+    wxString getAlterSql();
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
