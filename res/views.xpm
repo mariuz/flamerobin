@@ -1,5 +1,5 @@
 /* XPM */
-static char * view_xpm[] = {
+static char * views_xpm[] = {
 "16 16 152 2",
 "  	c None",
 ". 	c #A2C1EF",

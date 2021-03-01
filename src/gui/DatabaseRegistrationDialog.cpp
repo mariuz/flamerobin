@@ -355,6 +355,7 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
         choice_authentication->SetSelection(
             databaseM->getAuthenticationMode().getMode());
     }
+
     updateAuthenticationMode();
     updateButtons();
     updateColors();

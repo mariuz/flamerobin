@@ -169,24 +169,25 @@ private:
 
     DatabaseInfo databaseInfoM;
 
+    DBTriggersPtr DBTriggersM;
+    DDLTriggersPtr DDLTriggersM;
+    DMLTriggersPtr DMLtriggersM;
     DomainsPtr userDomainsM;
-    SysDomainsPtr sysDomainsM;
     ExceptionsPtr exceptionsM;
     FunctionSQLsPtr functionSQLsM;
     GeneratorsPtr generatorsM;
+    GTTsPtr GTTsM;
     IndicesPtr indicesM;
     PackagesPtr packagesM;
-    SysPackagesPtr sysPackagesM;
     ProceduresPtr proceduresM;
     RolesPtr rolesM;
+    SysDomainsPtr sysDomainsM;
+    SysPackagesPtr sysPackagesM;
     SysRolesPtr sysRolesM;
-    TablesPtr tablesM;
     SysTablesPtr sysTablesM;
-    GTTsPtr GTTsM;
-    DMLTriggersPtr DMLtriggersM;
-    DBTriggersPtr DBTriggersM;
-    DDLTriggersPtr DDLTriggersM;
+    TablesPtr tablesM;
     UDFsPtr UDFsM;
+    UsersPtr usersM;
     ViewsPtr viewsM;
 
     // copy constructor implementation removed since it's no longer needed
@@ -241,6 +242,7 @@ public:
     SysTablesPtr getSysTables();
     TablesPtr getTables();
     UDFsPtr getUDFs();
+    UsersPtr getUsers();
     ViewsPtr getViews();
 
     bool isConnected() const;

@@ -72,14 +72,23 @@
 // these have size 16x16
 #include "column.xpm"
 #include "database.xpm"
+#include "dbtrigger.xpm"
+#include "dbtriggers.xpm"
+#include "ddltrigger.xpm"
+#include "ddltriggers.xpm"
 #include "delete16.xpm"
+#include "dmltrigger.xpm"
+#include "dmltriggers.xpm"
 #include "domain.xpm"
 #include "exception16_png.cpp"
 #include "execute16.xpm"
 #include "fk16_png.cpp"
 #include "function.xpm"
+#include "functions.xpm"
 #include "generator.xpm"
 #include "generators.xpm"
+#include "globaltemporary.xpm"
+#include "globaltemporaries.xpm"
 #include "history.xpm"
 #include "index.xpm"
 #include "indices.xpm"
@@ -107,6 +116,10 @@
 #include "tables.xpm"
 #include "toggle16.xpm"
 #include "trigger.xpm"
+#include "UDF.xpm"
+#include "UDFs.xpm"
+#include "user.xpm"
+#include "users.xpm"
 #include "view.xpm"
 
 wxBitmap bitmapFromEmbeddedPNG(const unsigned char* data, size_t len)
@@ -201,6 +214,18 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(database_xpm);
         if (id == ART_DatabaseDisconnected)
             return wxBitmap(database_xpm);
+        if (id == ART_DBTrigger)
+            return wxBitmap(DBTrigger_xpm);
+        if (id == ART_DBTriggers)
+            return wxBitmap(DBTriggers_xpm);
+        if (id == ART_DMLTrigger)
+            return wxBitmap(DMLTrigger_xpm);
+        if (id == ART_DMLTriggers)
+            return wxBitmap(DMLTriggers_xpm);
+        if (id == ART_DDLTrigger)
+            return wxBitmap(DDLTrigger_xpm);
+        if (id == ART_DDLTriggers)
+            return wxBitmap(DDLTriggers_xpm);
         if (id == ART_Domain)
             return wxBitmap(domain_xpm);
         if (id == ART_Domains)
@@ -216,11 +241,15 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
         if (id == ART_Function)
             return wxBitmap(function_xpm);
         if (id == ART_Functions)
-            return wxBitmap(function_xpm);
+            return wxBitmap(functions_xpm);
         if (id == ART_Generator)
             return wxBitmap(generator_xpm);
         if (id == ART_Generators)
             return wxBitmap(generators_xpm);
+        if (id == ART_GlobalTemporary)
+            return wxBitmap(globaltemporary_xpm);
+        if (id == ART_GlobalTemporaries)
+            return wxBitmap(globaltemporaries_xpm);
         if (id == ART_History)
             return wxBitmap(history_xpm);
         if (id == ART_Object)
@@ -277,6 +306,14 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(trigger_xpm);
         if (id == ART_Triggers)
             return wxBitmap(trigger_xpm);
+        if (id == ART_UDF)
+            return wxBitmap(UDF_xpm);
+        if (id == ART_UDFs)
+            return wxBitmap(UDFs_xpm);
+        if (id == ART_User)
+            return wxBitmap(user_xpm);
+        if (id == ART_Users)
+            return wxBitmap(users_xpm);
         if (id == ART_View)
             return wxBitmap(view_xpm);
         if (id == ART_Views)
@@ -285,7 +322,6 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(index_xpm);
         if (id == ART_Indices)
             return wxBitmap(indices_xpm);
-
         if (id == ART_DeleteRow)
             return wxBitmap(delete16_xpm);
         if (id == ART_InsertRow)

@@ -156,13 +156,13 @@ void MainObjectMenuMetadataItemVisitor::visitFunctionSQL(FunctionSQL& function)
     addSeparator();
     addGenerateCodeMenu(function);
     addSeparator();
-    // TODO: addRefreshItem();
+    addRefreshItem();
     addPropertiesItem();
 }
 
 void MainObjectMenuMetadataItemVisitor::visitFunctionSQLs(FunctionSQLs& functions)
 {
-    addDeclareItem();
+    addCreateItem();
     addSeparator();
     addGenerateCodeMenu(functions);
     addSeparator();
@@ -184,6 +184,26 @@ void MainObjectMenuMetadataItemVisitor::visitUDFs(UDFs& functions)
     addDeclareItem();
     addSeparator();
     addGenerateCodeMenu(functions);
+    addSeparator();
+    addRefreshItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitUser(User& user)
+{
+    addAlterItem(user);
+    addDropItem(user);
+    addSeparator();
+    addGenerateCodeMenu(user);
+    addSeparator();
+    addRefreshItem();
+    addPropertiesItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitUsers(Users& users)
+{
+    addCreateItem();
+    addSeparator();
+    //addGenerateCodeMenu(users);
     addSeparator();
     addRefreshItem();
 }
@@ -247,7 +267,7 @@ void MainObjectMenuMetadataItemVisitor::visitProcedure(Procedure& procedure)
     addSeparator();
     addGenerateCodeMenu(procedure);
     addSeparator();
-    // TODO: addRefreshItem();
+    addRefreshItem();
     addPropertiesItem();
 }
 
@@ -266,7 +286,7 @@ void MainObjectMenuMetadataItemVisitor::visitRole(Role& role)
     addSeparator();
     addGenerateCodeMenu(role);
     addSeparator();
-    // TODO: addRefreshItem();
+    addRefreshItem();
     addPropertiesItem();
 }
 
@@ -325,7 +345,7 @@ void MainObjectMenuMetadataItemVisitor::visitTable(Table& table)
         menuM->Append(Cmds::Menu_AddColumn, _("&Add column"));
     addDropItem(table);
     addSeparator();
-    // TODO: addRefreshItem();
+    addRefreshItem();
     addPropertiesItem();
 }
 
@@ -346,8 +366,10 @@ void MainObjectMenuMetadataItemVisitor::visitSysTables(SysTables& sysTables)
     addRefreshItem();
 }
 
-void MainObjectMenuMetadataItemVisitor::visitGTTTables(GTTs& gtts)
+void MainObjectMenuMetadataItemVisitor::visitGTTs(GTTs& gtts)
 {
+    addCreateItem();
+    addSeparator();
     addGenerateCodeMenu(gtts);
     addSeparator();
     addRefreshItem();
@@ -355,8 +377,6 @@ void MainObjectMenuMetadataItemVisitor::visitGTTTables(GTTs& gtts)
 
 void MainObjectMenuMetadataItemVisitor::visitDMLTrigger(DMLTrigger& trigger)
 {
-    addGenerateCodeMenu(trigger);
-    addSeparator();
     addAlterItem(trigger);
     addDropItem(trigger);
     addSeparator();
@@ -367,8 +387,6 @@ void MainObjectMenuMetadataItemVisitor::visitDMLTrigger(DMLTrigger& trigger)
 }
 void MainObjectMenuMetadataItemVisitor::visitDBTrigger(DBTrigger& trigger)
 {
-    addGenerateCodeMenu(trigger);
-    addSeparator();
     addAlterItem(trigger);
     addDropItem(trigger);
     addSeparator();
@@ -379,8 +397,6 @@ void MainObjectMenuMetadataItemVisitor::visitDBTrigger(DBTrigger& trigger)
 }
 void MainObjectMenuMetadataItemVisitor::visitDDLTrigger(DDLTrigger& trigger)
 {
-    addGenerateCodeMenu(trigger);
-    addSeparator();
     addAlterItem(trigger);
     addDropItem(trigger);
     addSeparator();
@@ -425,7 +441,7 @@ void MainObjectMenuMetadataItemVisitor::visitView(View& view)
     addAlterItem(view);
     addDropItem(view);
     addSeparator();
-    // TODO: addRefreshItem();
+    addRefreshItem();
     addPropertiesItem();
 }
 
@@ -434,6 +450,31 @@ void MainObjectMenuMetadataItemVisitor::visitViews(Views& views)
     addCreateItem();
     addSeparator();
     addGenerateCodeMenu(views);
+    addSeparator();
+    addRefreshItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitIndex(Index& index)
+{
+    menuM->Append(Cmds::Menu_ShowStatisticsValue, _("Show &statistics"));
+    menuM->Append(Cmds::Menu_SetStatisticsValue, _("&Recompute statistics"));
+    addSeparator();
+    addAlterItem(index);
+    addDropItem(index);
+    addSeparator();
+    addGenerateCodeMenu(index);
+    addSeparator();
+    addRefreshItem();
+    addPropertiesItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitIndices(Indices& indices)
+{
+    menuM->Append(Cmds::Menu_ShowAllStatisticsValue, _("Show &all statistics"));
+    addSeparator();
+    addCreateItem();
+    addSeparator();
+    addGenerateCodeMenu(indices);
     addSeparator();
     addRefreshItem();
 }

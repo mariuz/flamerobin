@@ -101,19 +101,21 @@ public:
 
     // create new object
     void showCreateTemplate(const wxString& statement);
+    void OnMenuCreateDBTrigger(wxCommandEvent& event);
+    void OnMenuCreateDDLTrigger(wxCommandEvent& event);
+    void OnMenuCreateDMLTrigger(wxCommandEvent& event);
     void OnMenuCreateDomain(wxCommandEvent& event);
     void OnMenuCreateException(wxCommandEvent& event);
     void OnMenuCreateFunction(wxCommandEvent& event);
+    void OnMenuCreateIndex(wxCommandEvent& event);
     void OnMenuCreateGenerator(wxCommandEvent& event);
+    void OnMenuCreateGTTTable(wxCommandEvent& event);
     void OnMenuCreatePackage(wxCommandEvent& event);
     void OnMenuCreateProcedure(wxCommandEvent& event);
     void OnMenuCreateRole(wxCommandEvent& event);
     void OnMenuCreateTable(wxCommandEvent& event);
-    void OnMenuCreateGTTTable(wxCommandEvent& event);
-    void OnMenuDMLCreateTrigger(wxCommandEvent& event);
-    void OnMenuCreateDBTrigger(wxCommandEvent& event);
-    void OnMenuCreateDDLTrigger(wxCommandEvent& event);
     void OnMenuCreateUDF(wxCommandEvent& event);
+    void OnMenuCreateUser(wxCommandEvent& event);
     void OnMenuCreateView(wxCommandEvent& event);
 
     // enabled menu items
