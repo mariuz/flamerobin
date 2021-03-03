@@ -2934,7 +2934,7 @@ void ExecuteSqlFrame::log(wxString s, TextType type)
     if (type == ttSql)
         style = 2;
 
-    styled_text_ctrl_stats->StartStyling(startpos);
+    styled_text_ctrl_stats->StartStyling(startpos, 0);
     styled_text_ctrl_stats->SetStyling(endpos-startpos-1, style);
 }
 
