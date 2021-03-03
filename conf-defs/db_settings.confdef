@@ -11,22 +11,24 @@
             <default>1</default>
         </setting>
         <setting type="checkbox">
-            <caption>Show system packages in tree</caption>
+            <caption>Show system packages in tree (Firebird 3.0 and later)</caption>
             <description>If checked the system packages for this database will be shown in the tree</description>
             <key>ShowSystemPackages</key>
             <default>1</default>
+            <related /><!-- this moves the checkbox closer to the previous one -->
         </setting>
         <setting type="checkbox">
-            <caption>Show system roles in tree</caption>
+            <caption>Show system roles in tree (Firebird 2.5 and later)</caption>
             <description>If checked the system roles for this database will be shown in the tree</description>
             <key>ShowSystemRoles</key>
-            <default>1</default>
-        </setting>
-        <setting type="checkbox">
+            <default>0</default>
+            <related /><!-- this moves the checkbox closer to the previous one -->
+        </setting><setting type="checkbox">
             <caption>Show system tables in tree</caption>
             <description>If checked the system tables for this database will be shown in the tree</description>
             <key>ShowSystemTables</key>
             <default>1</default>
+            <related /><!-- this moves the checkbox closer to the previous one -->
         </setting>
     </node>
     <node>
