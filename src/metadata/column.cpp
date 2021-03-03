@@ -120,7 +120,7 @@ bool ColumnBase::getDefault(GetColumnDefaultType type, wxString& value) const
     return false;
 }
 
-wxString ColumnBase::getSource(bool identity)
+wxString ColumnBase::getSource(bool /*identity*/)
 {
     return sourceM;
 }

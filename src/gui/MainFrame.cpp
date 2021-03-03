@@ -1594,7 +1594,7 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
         showSql(this, wxString(_("Alter object")), db, sql);
 }
 
-void MainFrame::OnMenRebuildObject(wxCommandEvent& event)
+void MainFrame::OnMenRebuildObject(wxCommandEvent& WXUNUSED(event))
 {
     MetadataItem* mi = treeMainM->getSelectedMetadataItem();
     DatabasePtr db = getDatabase(mi);

@@ -303,7 +303,7 @@ void MetadataItemCreateStatementVisitor::visitUDFs(
     statementM = getCreateUDFStatement();
 }
 
-void MetadataItemCreateStatementVisitor::visitUsers(Users& Users)
+void MetadataItemCreateStatementVisitor::visitUsers(Users& /*Users*/)
 {
     statementM = getCreateUserStatement();
 }

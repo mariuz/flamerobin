@@ -531,12 +531,12 @@ void DBHTreeItemVisitor::visitUDFs(UDFs& functions)
 
 void DBHTreeItemVisitor::visitUDF(User& user)
 {
-    //setNodeProperties(&user, ART_User);
+    setNodeProperties(&user, ART_User);
 }
 
 void DBHTreeItemVisitor::visitUDFs(Users& users)
 {
-    //setNodeProperties(&users, ART_Users);
+    setNodeProperties(&users, ART_Users);
 }
 
 void DBHTreeItemVisitor::visitGenerator(Generator& generator)

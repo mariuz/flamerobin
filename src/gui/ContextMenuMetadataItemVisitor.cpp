@@ -199,7 +199,7 @@ void MainObjectMenuMetadataItemVisitor::visitUser(User& user)
     addPropertiesItem();
 }
 
-void MainObjectMenuMetadataItemVisitor::visitUsers(Users& users)
+void MainObjectMenuMetadataItemVisitor::visitUsers(Users& /*users*/)
 {
     addCreateItem();
     addSeparator();

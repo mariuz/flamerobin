@@ -1138,7 +1138,7 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             // on observers can possibly use the same transaction
             MetadataLoader* loader = getMetadataLoader();
             MetadataLoaderTransaction tr(loader);
-            SubjectLocker lock(this);
+            //SubjectLocker lock(this); 
 
             try
             {
