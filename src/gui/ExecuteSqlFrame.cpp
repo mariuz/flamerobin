@@ -2411,6 +2411,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             InsertParametersDialog* id = new InsertParametersDialog(this, statementM,
                 databaseM, parameterSaveList, parameterSaveListOptionNull);
             id->ShowModal();
+            waitForParameterInputTime = id->swWaitForParameterInputTime.Time();
         }
 
         log(wxEmptyString);
