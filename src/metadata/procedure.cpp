@@ -416,7 +416,7 @@ wxString Procedure::getAlterSql(bool full)
     if (full)
         sql += getSource();
     else
-        sql += "BEGIN SUSPEND; END";
+        sql += "AS \nBEGIN SUSPEND; \nEND";
     sql += "^\nSET TERM ; ^\n";
     return sql;
 }

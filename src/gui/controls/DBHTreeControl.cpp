@@ -320,8 +320,8 @@ public:
     virtual void visitDDLTriggers(DDLTriggers& triggers);
     virtual void visitUDF(UDF& function);
     virtual void visitUDFs(UDFs& functions);
-    virtual void visitUDF(User& user);
-    virtual void visitUDFs(Users& users);
+    virtual void visitUser(User& user);
+    virtual void visitUsers(Users& users);
     virtual void visitView(View& view);
     virtual void visitViews(Views& views);
     virtual void visitIndex(Index& index);
@@ -529,12 +529,12 @@ void DBHTreeItemVisitor::visitUDFs(UDFs& functions)
     setNodeProperties(&functions, ART_UDFs);
 }
 
-void DBHTreeItemVisitor::visitUDF(User& user)
+void DBHTreeItemVisitor::visitUser(User& user)
 {
-    //setNodeProperties(&user, ART_User);
+    setNodeProperties(&user, ART_User);
 }
 
-void DBHTreeItemVisitor::visitUDFs(Users& users)
+void DBHTreeItemVisitor::visitUsers(Users& /*users*/)
 {
     //setNodeProperties(&users, ART_Users);
 }

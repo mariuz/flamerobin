@@ -279,7 +279,6 @@ void MetadataItem::getDependenciesPivoted(std::vector<DependencyField>& list)
     std::vector<Dependency> deps;
     this->getDependencies(deps, true, true);
     this->getDependencies(deps, false, true);
-    bool firstItem = true;
     for (std::vector<Dependency>::iterator it = deps.begin(); it != deps.end(); ++it)
     {
         std::vector<DependencyField> fields;

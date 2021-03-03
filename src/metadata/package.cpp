@@ -296,7 +296,7 @@ wxString Package::getAlterBody()
     return sql;
 }
 
-wxString Package::getAlterSql(bool full)
+wxString Package::getAlterSql(bool WXUNUSED(full))
 {
     ensureChildrenLoaded();
 
