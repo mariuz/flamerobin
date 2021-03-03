@@ -350,7 +350,7 @@ void SqlEditor::setup()
     }
 
     if (!config().get("sqlEditorSmartHomeKey", true))
-        CmdKeyAssign(wxSTC_KEY_HOME, wxSTC_KEYMOD_NORM, wxSTC_CMD_HOMEDISPLAY);
+        CmdKeyAssign(wxSTC_KEY_HOME, wxSTC_SCMOD_NORM, wxSTC_CMD_HOMEDISPLAY);
 
     centerCaret(false);
 }
