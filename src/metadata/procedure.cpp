@@ -75,7 +75,8 @@ void Procedure::loadChildren()
         "select rdb$parameter_name, rdb$field_source, "
         "rdb$parameter_type, "
     );
-    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)? "rdb$default_source, rdb$null_flag, rdb$parameter_mechanism, rdb$FIELD_NAME, rdb$RELATION_NAME, ": "null, null, -1, null, null ";
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1) ? "rdb$default_source, rdb$null_flag, rdb$parameter_mechanism,  " : "null, null, -1, ";
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(11, 2) ? " rdb$field_name, rdb$relation_name, " : " null, null ";
 	sql += "rdb$description from rdb$procedure_parameters "
 		"where rdb$procedure_name = ? ";
     sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and rdb$package_name is null " : "";

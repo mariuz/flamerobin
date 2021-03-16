@@ -78,8 +78,8 @@ void Function::loadChildren()
         "a.rdb$field_sub_type, a.rdb$field_precision, "//7..8
         "f.rdb$return_argument, a.rdb$argument_position, " //9..10
     );
-    if (db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
-        sql += "rdb$default_source, rdb$null_flag, rdb$argument_mechanism, rdb$FIELD_NAME, rdb$RELATION_NAME, "; //11..13
+    if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        sql += "rdb$default_source, rdb$null_flag, rdb$argument_mechanism, rdb$field_name, rdb$relation_name, "; //11..13
     else
         sql += "null, null, -1, null, null, ";
     sql += "a.rdb$description from rdb$function_arguments a "
