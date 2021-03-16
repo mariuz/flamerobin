@@ -104,6 +104,7 @@ public:
 	virtual wxString getDefinition();   // used for calltip in sql editor
 	virtual const wxString getTypeName() const;
 	virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    virtual wxString getDropSqlStatement() const;
 
 };
 

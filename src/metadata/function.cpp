@@ -623,6 +623,13 @@ void FunctionSQL::acceptVisitor(MetadataItemVisitor * visitor)
 	visitor->visitFunctionSQL(*this);
 }
 
+wxString FunctionSQL::getDropSqlStatement() const
+{
+    StatementBuilder sb;
+    sb << kwDROP << ' '<< kwFUNCTION << ' ' << getQuotedName() << ';';
+    return sb;
+}
+
 
 // Functions SQL collection
 FunctionSQLs::FunctionSQLs(DatabasePtr database)
