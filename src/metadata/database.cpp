@@ -405,26 +405,8 @@ wxString Database::loadDomainNameForColumn(const wxString& table,
 
 void Database::getDatabaseTriggers(std::vector<Trigger *>& list)
 {
-    MetadataLoader* loader = getMetadataLoader();
-    MetadataLoaderTransaction tr(loader);
-    wxMBConv* converter = getCharsetConverter();
-
-    IBPP::Statement& st1 = loader->getStatement(
-        "select rdb$trigger_name from rdb$triggers "
-        "where (rdb$system_flag = 0 or rdb$system_flag is null)  "
-        " and rdb$trigger_type between 8192 and 8196 "
-        "order by rdb$trigger_sequence"
-    );
-    st1->Execute();
-    while (st1->Fetch())
-    {
-        std::string name;
-        st1->Get(1, name);
-        DBTrigger* t = dynamic_cast<DBTrigger*>(findByNameAndType(ntDBTrigger,
-            std2wxIdentifier(name, converter)));
-        if (t)
-            list.push_back(t);
-    }
+    std::transform(DBTriggersM->begin(), DBTriggersM->end(),
+        std::back_inserter(list), std::mem_fn(&DBTriggerPtr::get));
 }
 
 CharacterSet Database::getCharsetById(int id)
