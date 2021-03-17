@@ -39,6 +39,7 @@
 #include "metadata/exception.h"
 #include "metadata/function.h"
 #include "metadata/generator.h"
+#include "metadata/Index.h"
 #include "metadata/MetadataTemplateManager.h"
 #include "metadata/package.h"
 #include "metadata/procedure.h"
@@ -151,12 +152,15 @@ void MainObjectMenuMetadataItemVisitor::visitExceptions(Exceptions& exceptions)
 void MainObjectMenuMetadataItemVisitor::visitFunctionSQL(FunctionSQL& function)
 {
     menuM->Append(Cmds::Menu_ExecuteFunction, _("&Execute"));
-    addAlterItem(function);
-    addDropItem(function);
+    if (function.getParent()->getType() == ntDatabase) {
+        addAlterItem(function);
+        addDropItem(function);
+    }
     addSeparator();
     addGenerateCodeMenu(function);
     addSeparator();
-    addRefreshItem();
+    if (function.getParent()->getType() == ntDatabase)
+        addRefreshItem();
     addPropertiesItem();
 }
 
@@ -262,12 +266,15 @@ void MainObjectMenuMetadataItemVisitor::visitSysPackages(SysPackages& packages)
 void MainObjectMenuMetadataItemVisitor::visitProcedure(Procedure& procedure)
 {
     menuM->Append(Cmds::Menu_ExecuteProcedure, _("&Execute"));
-    addAlterItem(procedure);
-    addDropItem(procedure);
+    if (procedure.getParent()->getType() == ntDatabase) {
+        addAlterItem(procedure);
+        addDropItem(procedure);
+    }
     addSeparator();
     addGenerateCodeMenu(procedure);
     addSeparator();
-    addRefreshItem();
+    if (procedure.getParent()->getType() == ntDatabase)
+        addRefreshItem();
     addPropertiesItem();
 }
 
@@ -478,6 +485,15 @@ void MainObjectMenuMetadataItemVisitor::visitIndices(Indices& indices)
     addGenerateCodeMenu(indices);
     addSeparator();
     addRefreshItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitMethod(Method& method)
+{
+    if (method.isFunction())
+        menuM->Append(Cmds::Menu_ExecuteFunction, _("&Execute"));
+    else
+        menuM->Append(Cmds::Menu_ExecuteProcedure, _("&Execute"));
+
 }
 
 void MainObjectMenuMetadataItemVisitor::addAlterItem(MetadataItem& metadataItem)

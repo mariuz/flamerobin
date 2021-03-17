@@ -54,6 +54,7 @@ public:
     virtual void visitGTTs(GTTs& tables);
     virtual void visitIndex(Index& index);
     virtual void visitIndices(Indices& indices);
+    virtual void visitMethod(Method& method);
     virtual void visitPackage(Package& package);
     virtual void visitPackages(Packages& packages);
     virtual void visitProcedure(Procedure& procedure);

@@ -53,6 +53,12 @@ Function::Function(DatabasePtr database, const wxString& name)
     ensurePropertiesLoaded();
 }
 
+Function::Function(MetadataItem* parent, const wxString& name)
+    : MetadataItem(ntFunction, parent, name)
+{
+    ensurePropertiesLoaded();
+}
+
 void Function::loadChildren()
 {
     bool childrenWereLoaded = childrenLoaded();
@@ -72,6 +78,7 @@ void Function::loadChildren()
     SubjectLocker lock(db.get());
     wxMBConv* converter = db->getCharsetConverter();
 
+
     std::string sql(
         "select a.rdb$argument_name, a.rdb$field_source, " //1..2
         "a.rdb$mechanism, a.rdb$field_type, a.rdb$field_scale, a.rdb$field_length, " //3..6
@@ -85,9 +92,11 @@ void Function::loadChildren()
     sql += "a.rdb$description from rdb$function_arguments a "
         " join rdb$functions f on f.rdb$function_name = a.rdb$function_name "
         "where a.rdb$function_name = ? ";
-    if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
-        sql += " and a.rdb$package_name is null ";
-    sql += "order by a.rdb$argument_position";
+    if (getParent()->getType() == ntDatabase) {
+        sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and a.rdb$package_name is null " : " ";
+    }
+    sql += "order by a.rdb$argument_position ";
+ //    sql += "order by iif(a.rdb$argument_name is null, 2014, a.rdb$argument_position) ";
 
     IBPP::Statement st1 = loader->getStatement(sql);
     st1->Set(1, wx2std(getName_(), converter));
@@ -97,6 +106,7 @@ void Function::loadChildren()
     while (st1->Fetch())
     {
         std::string s;
+        
         short returnarg, retpos;
         st1->Get(9, returnarg);
         st1->Get(10, retpos);
@@ -346,15 +356,6 @@ std::vector<Privilege>* Function::getPrivileges()
 	return &privilegesM;
 }
 
-wxString Function::getCreateSql()
-{
-	return "<<Create SQL>>";
-}
-
-wxString Function::getDropSqlStatement() const
-{
-	return "<<Drop SQL>>";
-}
 
 wxString Function::getDefinition()
 {
@@ -467,6 +468,11 @@ void Function::checkDependentFunction()
 
 FunctionSQL::FunctionSQL(DatabasePtr database, const wxString & name)
 	: Function(database, name)
+{
+}
+
+FunctionSQL::FunctionSQL(MetadataItem* parent, const wxString& name)
+    : Function(parent, name)
 {
 }
 
@@ -623,11 +629,12 @@ void FunctionSQL::acceptVisitor(MetadataItemVisitor * visitor)
 	visitor->visitFunctionSQL(*this);
 }
 
-wxString FunctionSQL::getDropSqlStatement() const
+wxString FunctionSQL::getQuotedName() const
 {
-    StatementBuilder sb;
-    sb << kwDROP << ' '<< kwFUNCTION << ' ' << getQuotedName() << ';';
-    return sb;
+    if (getParent()->getType() == ntDatabase)
+        return MetadataItem::getQuotedName();
+    else
+        return getParent()->getQuotedName() + '.' + MetadataItem::getQuotedName();
 }
 
 

@@ -42,6 +42,8 @@ protected:
     virtual void unlockChildren();
 public:
     Procedure(DatabasePtr database, const wxString& name);
+    Procedure(MetadataItem* parent, const wxString& name);
+
 
     bool getChildren(std::vector<MetadataItem *>& temp);
 
@@ -65,7 +67,7 @@ public:
 
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
-
+    virtual wxString getQuotedName() const;
 };
 
 class Procedures: public MetadataCollection<Procedure>

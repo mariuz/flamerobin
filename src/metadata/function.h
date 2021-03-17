@@ -44,6 +44,7 @@ protected:
 
 public:
     Function(DatabasePtr database, const wxString& name);
+    Function(MetadataItem* parent, const wxString& name);
 
 	bool getChildren(std::vector<MetadataItem *>& temp);
 
@@ -56,8 +57,6 @@ public:
 	size_t getParamCount() const;
 	ParameterPtr findParameter(const wxString& name) const;
 
-	virtual wxString getCreateSql();
-	virtual wxString getDropSqlStatement() const ;
 	virtual wxString getDefinition();
 	wxString getOwner();
 	virtual wxString getSource() = 0;
@@ -98,13 +97,14 @@ protected:
 	virtual void loadProperties();
 public:
 	FunctionSQL(DatabasePtr database, const wxString& name);
+    FunctionSQL(MetadataItem* parent, const wxString& name);
 
 	wxString getSource();
 	wxString getAlterSql(bool full = true);
 	virtual wxString getDefinition();   // used for calltip in sql editor
 	virtual const wxString getTypeName() const;
 	virtual void acceptVisitor(MetadataItemVisitor* visitor);
-    virtual wxString getDropSqlStatement() const;
+    virtual wxString getQuotedName() const;
 
 };
 

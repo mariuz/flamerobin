@@ -52,6 +52,11 @@ Procedure::Procedure(DatabasePtr database, const wxString& name)
 {
 }
 
+Procedure::Procedure(MetadataItem* parent, const wxString& name)
+    : MetadataItem(ntProcedure, parent, name)
+{
+}
+
 void Procedure::loadChildren()
 {
     bool childrenWereLoaded = childrenLoaded();
@@ -79,7 +84,9 @@ void Procedure::loadChildren()
     sql += db->getInfo().getODSVersionIsHigherOrEqualTo(11, 2) ? " rdb$field_name, rdb$relation_name, " : " null, null ";
 	sql += "rdb$description from rdb$procedure_parameters "
 		"where rdb$procedure_name = ? ";
-    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and rdb$package_name is null " : "";
+    if (getParent()->getType() == ntDatabase) {
+        sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and rdb$package_name is null " : "";
+    }
     sql += "order by rdb$parameter_type, rdb$parameter_number";
 
     IBPP::Statement st1 = loader->getStatement(sql);
@@ -544,6 +551,14 @@ const wxString Procedure::getTypeName() const
 void Procedure::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitProcedure(*this);
+}
+
+wxString Procedure::getQuotedName() const
+{
+    if (getParent()->getType() == ntDatabase)
+        return MetadataItem::getQuotedName();
+    else
+        return getParent()->getQuotedName() + '.' + MetadataItem::getQuotedName();
 }
 
 // Procedures collection
