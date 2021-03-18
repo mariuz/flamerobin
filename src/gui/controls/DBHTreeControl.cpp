@@ -180,6 +180,7 @@ DBHTreeImageList::DBHTreeImageList()
     addImage(ART_Computed);
     addImage(ART_DatabaseConnected);
     addImage(ART_DatabaseDisconnected);
+    addImage(ART_DatabaseServer);
     addImage(ART_DBTrigger);
     addImage(ART_DBTriggers);
     addImage(ART_DDLTrigger);
@@ -199,6 +200,8 @@ DBHTreeImageList::DBHTreeImageList()
     addImage(ART_GlobalTemporaries);
     addImage(ART_Index);
     addImage(ART_Indices);
+    addImage(ART_Input);
+    addImage(ART_Output);
     addImage(ART_Package);
     addImage(ART_Packages);
     addImage(ART_ParameterInput);
@@ -263,6 +266,7 @@ private:
 
     bool nodeVisibleM;
     bool nodeTextBoldM;
+    bool nodeEnabledM;
     wxString nodeTextM;
     int nodeImageIndexM;
     bool showChildrenM;
@@ -279,6 +283,7 @@ public:
     bool getNodeVisible() { return nodeVisibleM; }
     wxString getNodeText() { return nodeTextM; }
     bool getNodeTextBold() { return nodeTextBoldM; }
+    bool getNodeEnabled() { return nodeEnabledM; }
     int getNodeImage() { return nodeImageIndexM; }
     bool getShowChildren() { return showChildrenM; }
     bool getShowNodeExpander() { return showNodeExpanderM; }
@@ -332,7 +337,8 @@ DBHTreeItemVisitor::DBHTreeItemVisitor(DBHTreeControl* tree)
     : MetadataItemVisitor(), treeM(tree), nodeVisibleM(true),
         nodeTextBoldM(false), nodeTextM(), nodeImageIndexM(-1),
         showChildrenM(false), showNodeExpanderM(false),
-        sortChildrenM(false), nodeConfigSensitiveM(false)
+        sortChildrenM(false), nodeConfigSensitiveM(false),
+        nodeEnabledM(true)
 {
 }
 
@@ -739,6 +745,7 @@ void DBHTreeItemVisitor::visitTables(Tables& tables)
 
 void DBHTreeItemVisitor::visitDMLTrigger(DMLTrigger& trigger)
 {
+    nodeEnabledM = trigger.getActive();
     setNodeProperties(&trigger, ART_DMLTrigger);
 }
 
@@ -749,6 +756,7 @@ void DBHTreeItemVisitor::visitDMLTriggers(DMLTriggers& triggers)
 
 void DBHTreeItemVisitor::visitDBTrigger(DBTrigger& trigger)
 {
+    nodeEnabledM = trigger.getActive();
     setNodeProperties(&trigger, ART_DBTrigger);
 }
 
@@ -759,6 +767,7 @@ void DBHTreeItemVisitor::visitDBTriggers(DBTriggers& triggers)
 
 void DBHTreeItemVisitor::visitDDLTrigger(DDLTrigger& trigger)
 {
+    nodeEnabledM = trigger.getActive();
     setNodeProperties(&trigger, ART_DDLTrigger);
 }
 
@@ -1010,7 +1019,6 @@ void DBHTreeItemData::update()
         treeM->SetItemText(id, tivObject.getNodeText());
     if (treeM->GetItemImage(id) != tivObject.getNodeImage())
         treeM->SetItemImage(id, tivObject.getNodeImage());
-
     // track number of visible child nodes for SetItemHasChildren() calls
     unsigned numVisibleChildren = 0;
     // check subitems
@@ -1102,6 +1110,9 @@ void DBHTreeItemData::update()
         // allow for on-demand-loading of children
         treeM->SetItemHasChildren(id, tivObject.getShowNodeExpander());
         treeM->SetItemBold(id, tivObject.getNodeTextBold());
+        if (!tivObject.getNodeEnabled())
+            treeM->SetItemTextColour(id, wxColour(0x080, 0x080, 0x080));
+
         return;
     }
     treeM->SetItemHasChildren(id, true);
@@ -1142,6 +1153,7 @@ void DBHTreeItemData::update()
 
     treeM->SetItemBold(id, tivObject.getNodeTextBold()
         || treeM->ItemHasChildren(id));
+    //treeM->SetBackgroundColour(wxYELLOW);
 }
 
 BEGIN_EVENT_TABLE(DBHTreeControl, wxTreeCtrl)
