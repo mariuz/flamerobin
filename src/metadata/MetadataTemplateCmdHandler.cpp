@@ -622,6 +622,12 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
 
         if (cmdParams[0] == "datatype")
             processedText += tp->escapeChars(cb->getDatatype());
+        else if(cmdParams[0] == "typeof") {
+            processedText += "TYPE OF COLUMN " + cb->getParent()->getQuotedName() + "." + cb->getQuotedName();
+        }
+        else if (cmdParams[0] == "source") {
+            processedText += tp->escapeChars(cb->getSource());
+        }
         else if (cmdParams[0] == "is_nullable")
         {
             processedText += tp->escapeChars(getBooleanAsString(

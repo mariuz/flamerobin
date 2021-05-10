@@ -34,18 +34,22 @@ class Parameter: public ColumnBase
 private:
     bool outputParameterM;
     int parameterMechanismM;    // -1 none, 0 domain, 1 type_of
+    wxString relationM;
+    wxString fieldM;
 public:
     Parameter(MetadataItem* metadataitem, const wxString& name);
 
     void initialize(const wxString& source, int parameterType, int mechanism,
         bool nullable, const wxString& defaultValue, bool hasDefault,
-        bool hasDescription);
+        bool hasDescription, wxString& relation, wxString& field);
 
     int getMechanism() const;
     bool isOutputParameter() const;
 
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    wxString getTypeOf();
+
 };
 
 #endif

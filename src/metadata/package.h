@@ -44,7 +44,7 @@ public:
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     void initialize(int MethodType);
-
+    virtual wxString getQuotedName() const;
 
 };
 
@@ -53,10 +53,14 @@ class Package : public MetadataItem
 private:
     std::vector<Privilege> privilegesM;
     MethodPtrs methodsM;
+    FunctionSQLPtrs functionsM;
+    ProcedurePtrs proceduresM;
 protected:
     virtual void loadChildren();
     virtual void lockChildren();
     virtual void unlockChildren();
+    FunctionSQLPtr findFunctionSQL(const wxString& name) const;
+    ProcedurePtr findProcedure(const wxString& name) const;
 public:
     Package(DatabasePtr database, const wxString& name);
 

@@ -49,7 +49,7 @@ wxString MetadataItemCreateStatementVisitor::getCreateDomainStatement()
 wxString MetadataItemCreateStatementVisitor::getCreateExceptionStatement()
 {
     StatementBuilder sb;
-    sb << kwCREATE << ' ' << kwEXCEPTION << " name 'exception message';"
+    sb << kwCREATE << ' ' << kwEXCEPTION << " exception_name 'exception message';"
         << StatementBuilder::NewLine;
     return sb;
 }
@@ -57,27 +57,66 @@ wxString MetadataItemCreateStatementVisitor::getCreateExceptionStatement()
 /*static*/
 wxString MetadataItemCreateStatementVisitor::getCreateFunctionSQLStatement()
 {
+    StatementBuilder sb;
+    sb << kwSET << ' ' << kwTERMINATOR << "^ ;"
+        << StatementBuilder::NewLine
+        << StatementBuilder::NewLine
+        << kwCREATE << ' ' << kwFUNCTION << " function_name "
+        << StatementBuilder::NewLine
+        << " ( input_parameter_name < datatype>, ... )"
+        << StatementBuilder::NewLine
+        << kwRETURNS << "<datatype>"
+        << StatementBuilder::NewLine
+        << kwAS
+        << StatementBuilder::NewLine
+        << "DECLARE VARIABLE variable_name < datatype>; "
+        << StatementBuilder::NewLine
+        << kwBEGIN
+        << StatementBuilder::NewLine
+        << "  /* write your code here */ "
+        << StatementBuilder::NewLine
+        << kwEND << "^"
+        << StatementBuilder::NewLine
+        << StatementBuilder::NewLine
+        << kwSET << ' ' << kwTERMINATOR << "; ^ ";
+        
+        
     wxString s("SET TERM ^ ;\n\n"
-        "CREATE FUNCTION name \n"
+        "CREATE FUNCTION function_name \n"
         " ( input_parameter_name < datatype>, ... ) \n"
-        "RETURNS  < datatype>)\n"
+        "RETURNS  < datatype>\n"
         "AS \n"
         "DECLARE VARIABLE variable_name < datatype>; \n"
         "BEGIN\n"
         "  /* write your code here */ \n"
         "END^\n\n"
         "SET TERM ; ^\n");
-    return s;
+    return sb;
 }
 
 /*static*/
 wxString MetadataItemCreateStatementVisitor::getCreateUDFStatement()
 {
-    return "DECLARE EXTERNAL FUNCTION name [datatype | CSTRING (int) "
+    return "DECLARE EXTERNAL FUNCTION function_name [datatype | CSTRING (int) "
            "[, datatype | CSTRING (int) ...]]\n"
            "RETURNS {datatype [BY VALUE] | CSTRING (int)} [FREE_IT]\n"
            "ENTRY_POINT 'entryname'\n"
            "MODULE_NAME 'modulename';\n";
+}
+
+wxString MetadataItemCreateStatementVisitor::getCreateUserStatement()
+{
+    StatementBuilder sb;
+    sb << kwCREATE << ' ' << kwUSER << " username " << kwPASSWORD << " 'password' "
+        << StatementBuilder::NewLine
+        << "[" << kwFIRSTNAME << "'firstname']"
+        << StatementBuilder::NewLine
+        << "[" << kwMIDDLENAME << "'middlename']"
+        << StatementBuilder::NewLine
+        << "[" << kwLASTNAME << "'lastname']"
+        << StatementBuilder::NewLine
+        << "[" << kwGRANT << " " << kwADMIN << " " << kwROLE << "]";
+    return sb;
 }
 
 /*static*/
@@ -95,7 +134,7 @@ wxString MetadataItemCreateStatementVisitor::getCreateGeneratorStatement()
 wxString MetadataItemCreateStatementVisitor::getCreatePackageStatement()
 {
     wxString s("SET TERM ^ ;\n\n"
-        "CREATE PACKAGE name \n"
+        "CREATE PACKAGE package_name \n"
         "AS \n"
         "BEGIN\n"
         "  /* write your code here */ \n"
@@ -108,7 +147,7 @@ wxString MetadataItemCreateStatementVisitor::getCreatePackageStatement()
 wxString MetadataItemCreateStatementVisitor::getCreateProcedureStatement()
 {
     wxString s("SET TERM ^ ;\n\n"
-            "CREATE PROCEDURE name \n"
+            "CREATE PROCEDURE procedure_name \n"
             " ( input_parameter_name < datatype>, ... ) \n"
             "RETURNS \n"
             " ( output_parameter_name < datatype>, ... )\n"
@@ -146,14 +185,25 @@ wxString MetadataItemCreateStatementVisitor::getCreateTableStatement()
 
 wxString MetadataItemCreateStatementVisitor::getCreateGTTTableStatement()
 {
-    return wxString();
+    return "CREATE TABLE table_name\n"
+        "(\n"
+        "    column_name {< datatype> | COMPUTED BY (< expr>) | domain}\n"
+        "        [DEFAULT { literal | NULL | USER}] [NOT NULL]\n"
+        "    ...\n"
+        "    CONSTRAINT constraint_name\n"
+        "        PRIMARY KEY (column_list),\n"
+        "        UNIQUE      (column_list),\n"
+        "        FOREIGN KEY (column_list) REFERENCES other_table (column_list),\n"
+        "        CHECK       (condition),\n"
+        "    ...\n"
+        ");\n";
 }
 
 /*static*/
 wxString MetadataItemCreateStatementVisitor::getCreateDMLTriggerStatement()
 {
     return "SET TERM ^ ;\n\n"
-        "CREATE TRIGGER name \n"
+        "CREATE TRIGGER trigger_name \n"
 //        "[FOR table/view] \n"
         " [IN]ACTIVE \n"
         " [{BEFORE | AFTER} INSERT OR UPDATE OR DELETE] \n"
@@ -169,7 +219,7 @@ wxString MetadataItemCreateStatementVisitor::getCreateDMLTriggerStatement()
 wxString MetadataItemCreateStatementVisitor::getCreateDBTriggerStatement()
 {
     return "SET TERM ^ ;\n\n"
-        "CREATE TRIGGER name  \n"
+        "CREATE TRIGGER trigger_name  \n"
         " [IN]ACTIVE \n"
         " [ON {[DIS]CONNECT | TRANSACTION {START | COMMIT | ROLLBACK}} ] \n"
         " POSITION number \n"
@@ -183,9 +233,10 @@ wxString MetadataItemCreateStatementVisitor::getCreateDBTriggerStatement()
 wxString MetadataItemCreateStatementVisitor::getCreateDDLTriggerStatement()
 {
     return "SET TERM ^ ;\n\n"
-        "CREATE TRIGGER name  \n"
+        "CREATE TRIGGER trigger_name  \n"
         " [IN]ACTIVE \n"
-        " {BEFORE | AFTER}  CREATE TABLE | ALTER TABLE | DROP TABLE | \n"
+        " {BEFORE | AFTER}  ANY | "
+        "                   CREATE TABLE | ALTER TABLE | DROP TABLE | \n"
         "                   CREATE PROCEDURE | ALTER PROCEDURE | DROP PROCEDURE | \n"
         "                   CREATE FUNCTION | ALTER FUNCTION | DROP FUNCTION | \n"
         "                   CREATE TRIGGER  | ALTER TRIGGER  | DROP TRIGGER  | \n"
@@ -211,12 +262,21 @@ wxString MetadataItemCreateStatementVisitor::getCreateDDLTriggerStatement()
 wxString MetadataItemCreateStatementVisitor::getCreateViewStatement()
 {
     StatementBuilder sb;
-    sb << kwCREATE << ' ' << kwVIEW << " name ( view_column, ...)"
+    sb << kwCREATE << ' ' << kwVIEW << " view_name ( view_column, ...)"
         << StatementBuilder::NewLine << kwAS << StatementBuilder::NewLine
         << "/* write select statement here */"
         << StatementBuilder::NewLine
         << kwWITH << ' ' << kwCHECK << ' ' << kwOPTION << ';'
         << StatementBuilder::NewLine;
+    return sb;
+}
+
+wxString MetadataItemCreateStatementVisitor::getCreateIndexStatement()
+{
+    StatementBuilder sb;
+    sb << kwCREATE << " [" << kwUNIQUE << "] [" << kwASCENDING << "[ENDING]] | [" << kwDESCENDING << "[ENDING]]"
+        << kwINDEX << " index_name " << kwON << " table_name "
+        << "{ (<col> [, <col> ...]) | " << kwCOMPUTED << " " << kwBY << "(expression) }";
     return sb;
 }
 
@@ -243,10 +303,25 @@ void MetadataItemCreateStatementVisitor::visitUDFs(
     statementM = getCreateUDFStatement();
 }
 
+void MetadataItemCreateStatementVisitor::visitUsers(Users& /*Users*/)
+{
+    statementM = getCreateUserStatement();
+}
+
 void MetadataItemCreateStatementVisitor::visitGenerators(
     Generators& /*generators*/)
 {
     statementM = getCreateGeneratorStatement();
+}
+
+void MetadataItemCreateStatementVisitor::visitGTTs(GTTs& /*tables*/)
+{
+    statementM = getCreateGTTTableStatement();
+}
+
+void MetadataItemCreateStatementVisitor::visitIndices(Indices& /*indices*/)
+{
+    statementM = getCreateIndexStatement();
 }
 
 void MetadataItemCreateStatementVisitor::visitPackages(

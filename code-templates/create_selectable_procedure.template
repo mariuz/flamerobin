@@ -2,7 +2,7 @@
 
 create procedure%} SP_{%object_name%}
 {%kw:returns%} ( {%foreach:column:, :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:
-{%tab%}{%object_quoted_name%} {%columninfo:datatype%}%}%}
+{%tab%}{%object_quoted_name%} {%columninfo:typeof%}%}%}
 )
 {%kw:as
 begin

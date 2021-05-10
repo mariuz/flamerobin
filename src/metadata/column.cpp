@@ -120,7 +120,7 @@ bool ColumnBase::getDefault(GetColumnDefaultType type, wxString& value) const
     return false;
 }
 
-wxString ColumnBase::getSource(bool identity)
+wxString ColumnBase::getSource(bool /*identity*/)
 {
     return sourceM;
 }
@@ -285,7 +285,11 @@ wxString Column::getSource(bool identity)
         }
         return sql;
     }
-    else
-        return ColumnBase::getSource(identity);
+    else {
+        if ((isIdentity() && !identity) || !getComputedSource().IsEmpty())
+            return  getDatatype(false);
+        else
+            return ColumnBase::getSource(identity);
+    }
 }
 

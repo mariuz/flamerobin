@@ -320,7 +320,7 @@ AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent, wxArtID iconId,
     wxStaticText* labelPrimary = new wxStaticText(getControlsPanel(),
         wxID_ANY, wxEmptyString /*primaryText*/);
     wxFont primaryLabelFont(labelPrimary->GetFont());
-    primaryLabelFont.SetWeight(wxBOLD);
+    primaryLabelFont.MakeBold();
 #ifdef __WXGTK__
     primaryLabelFont.SetPointSize(primaryLabelFont.GetPointSize() * 4 / 3);
 #endif
