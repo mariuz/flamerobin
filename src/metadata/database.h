@@ -176,7 +176,7 @@ private:
     ExceptionsPtr exceptionsM;
     FunctionSQLsPtr functionSQLsM;
     GeneratorsPtr generatorsM;
-    GTTsPtr GTTsM;
+    GTTablesPtr GTTablesM;
     IndicesPtr indicesM;
     PackagesPtr packagesM;
     ProceduresPtr proceduresM;
@@ -230,7 +230,7 @@ public:
     DomainsPtr getDomains();
     ExceptionsPtr getExceptions();
     FunctionSQLsPtr getFunctionSQLs();
-    GTTsPtr getGTTs();
+    GTTablesPtr getGTTables();
     GeneratorsPtr getGenerators();
     IndicesPtr getIndices();
     PackagesPtr getPackages();

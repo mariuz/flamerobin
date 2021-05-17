@@ -185,6 +185,7 @@ private:
     void OnMenuCut(wxCommandEvent& event);
     void OnMenuUpdateCut(wxUpdateUIEvent& event);
     void OnMenuCopy(wxCommandEvent& event);
+    void OnMenuCopyWithTitles(wxCommandEvent& event);
     void OnMenuUpdateCopy(wxUpdateUIEvent& event);
     void OnMenuPaste(wxCommandEvent& event);
     void OnMenuUpdatePaste(wxUpdateUIEvent& event);

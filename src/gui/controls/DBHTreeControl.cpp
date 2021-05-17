@@ -315,8 +315,10 @@ public:
     virtual void visitServer(Server& server);
     virtual void visitTable(Table& table);
     virtual void visitTables(Tables& tables);
+    virtual void visitSysTable(SysTable& table);
     virtual void visitSysTables(SysTables& tables);
-	virtual void visitGTTs(GTTs& tables);
+    virtual void visitGTTable(GTTable& table);
+    virtual void visitGTTables(GTTables& tables);
     virtual void visitDMLTrigger(DMLTrigger& trigger);
     virtual void visitDMLTriggers(DMLTriggers& triggers);
     virtual void visitDBTrigger(DBTrigger& trigger);
@@ -709,17 +711,37 @@ void DBHTreeItemVisitor::visitSysTables(SysTables& tables)
     setNodeProperties(&tables, ART_SystemTables); 
 }
 
-void DBHTreeItemVisitor::visitGTTs(GTTs& tables)
+void DBHTreeItemVisitor::visitGTTable(GTTable& table)
+{
+    setNodeProperties(&table, ART_GlobalTemporary);
+
+    if (table.childrenLoaded())
+    {
+        // make node caption bold when column data has been loaded
+        nodeTextBoldM = true;
+        // show number of columns?
+        if (DBHTreeConfigCache::get().getShowColumnParamCount())
+        {
+            size_t colCount = table.getColumnCount();
+            nodeTextM += wxString::Format(" (%d)", colCount);
+        }
+    }
+    // show Column nodes if Config setting is on
+    showChildrenM = DBHTreeConfigCache::get().getShowColumns();
+    showNodeExpanderM = showChildrenM && !table.childrenLoaded();
+    // update if settings change
+    nodeConfigSensitiveM = true;
+}
+
+void DBHTreeItemVisitor::visitGTTables(GTTables& tables)
 {
     setNodeProperties(&tables, ART_GlobalTemporaries);
+
 }
 
 void DBHTreeItemVisitor::visitTable(Table& table)
 {
-    setNodeProperties(&table,
-        table.isSystem() ? ART_SystemTable : 
-        table.getRelationType() == 4 || table.getRelationType() == 5 ? ART_GlobalTemporary : ART_Table);
-
+    setNodeProperties(&table, ART_Table);
     if (table.childrenLoaded())
     {
         // make node caption bold when column data has been loaded
@@ -741,6 +763,27 @@ void DBHTreeItemVisitor::visitTable(Table& table)
 void DBHTreeItemVisitor::visitTables(Tables& tables)
 {
     setNodeProperties(&tables, ART_Tables);
+}
+
+void DBHTreeItemVisitor::visitSysTable(SysTable& table)
+{
+    setNodeProperties(&table, ART_SystemTable);
+    if (table.childrenLoaded())
+    {
+        // make node caption bold when column data has been loaded
+        nodeTextBoldM = true;
+        // show number of columns?
+        if (DBHTreeConfigCache::get().getShowColumnParamCount())
+        {
+            size_t colCount = table.getColumnCount();
+            nodeTextM += wxString::Format(" (%d)", colCount);
+        }
+    }
+    // show Column nodes if Config setting is on
+    showChildrenM = DBHTreeConfigCache::get().getShowColumns();
+    showNodeExpanderM = showChildrenM && !table.childrenLoaded();
+    // update if settings change
+    nodeConfigSensitiveM = true;
 }
 
 void DBHTreeItemVisitor::visitDMLTrigger(DMLTrigger& trigger)
@@ -804,6 +847,7 @@ void DBHTreeItemVisitor::visitViews(Views& views)
 
 void DBHTreeItemVisitor::visitIndex(Index& index)
 {
+    nodeEnabledM = index.isActive();
     setNodeProperties(&index, ART_Index);
 }
 

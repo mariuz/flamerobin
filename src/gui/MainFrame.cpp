@@ -430,6 +430,13 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(Cmds::Menu_ShowGeneratorValue, MainFrame::OnMenuShowGeneratorValue)
     EVT_MENU(Cmds::Menu_SetGeneratorValue, MainFrame::OnMenuSetGeneratorValue)
 
+    EVT_MENU(Cmds::Menu_ShowAllStatisticsValue, MainFrame::OnMenuShowAllStatisticsValues)
+    EVT_UPDATE_UI(Cmds::Menu_ShowAllStatisticsValue, MainFrame::OnMenuUpdateIfMetadataItemHasChildren)
+    EVT_MENU(Cmds::Menu_ShowStatisticsValue, MainFrame::OnMenuShowStatisticsValue)
+    EVT_MENU(Cmds::Menu_SetStatisticsValue, MainFrame::OnMenuSetStatisticsValue)
+
+
+
     EVT_MENU(Cmds::Menu_CreateObject, MainFrame::OnMenuCreateObject)
     EVT_MENU(Cmds::Menu_AlterObject, MainFrame::OnMenuAlterObject)
     EVT_MENU(Cmds::Menu_DropObject, MainFrame::OnMenuDropObject)
@@ -438,6 +445,8 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(Cmds::Menu_ObjectRefresh, MainFrame::OnMenuObjectRefresh)
     EVT_UPDATE_UI(Cmds::Menu_ObjectRefresh, MainFrame::OnMenuUpdateIfDatabaseConnected)
     EVT_MENU(Cmds::Menu_RebuildObject, MainFrame::OnMenRebuildObject)
+    EVT_MENU(Cmds::Menu_ActiveObject, MainFrame::OnMenActiveObject)
+    EVT_MENU(Cmds::Menu_InactiveObject, MainFrame::OnMenInactiveObject)
 
     EVT_MENU(Cmds::Menu_ToggleStatusBar, MainFrame::OnMenuToggleStatusBar)
     EVT_MENU(Cmds::Menu_ToggleSearchBar, MainFrame::OnMenuToggleSearchBar)
@@ -792,6 +801,67 @@ void MainFrame::OnMenuExecuteFunction(wxCommandEvent& WXUNUSED(event))
     executeSysTemplate("execute_function",
         treeMainM->getSelectedMetadataItem(), this);
 
+}
+
+void MainFrame::OnMenActiveObject(wxCommandEvent& WXUNUSED(event))
+{
+    MetadataItem* mi = treeMainM->getSelectedMetadataItem();
+    URI uri;
+    if (dynamic_cast<Trigger*>(mi))
+    {
+        uri.parseURI("fr://activate_trigger");
+    }
+    else
+    if (dynamic_cast<Index*>(mi))
+    {
+        uri.parseURI("fr://index_action");
+        uri.addParam("type=TOGGLE_ACTIVE");
+    }
+    uri.addParam(wxString::Format("parent_window=%p", this));
+    uri.addParam(wxString::Format("object_handle=%lu", mi->getHandle()));
+    getURIProcessor().handleURI(uri);
+    return;
+}
+
+void MainFrame::OnMenInactiveObject(wxCommandEvent& WXUNUSED(event))
+{
+    MetadataItem* mi = treeMainM->getSelectedMetadataItem();
+    URI uri;
+    if (dynamic_cast<Trigger*>(mi))
+    {
+        uri.parseURI("fr://deactivate_trigger");
+    }else
+    if (dynamic_cast<Index*>(mi))
+    {
+        uri.parseURI("fr://index_action");
+        uri.addParam("type=TOGGLE_ACTIVE");
+    }
+    uri.addParam(wxString::Format("parent_window=%p", this));
+    uri.addParam(wxString::Format("object_handle=%lu", mi->getHandle()));
+    getURIProcessor().handleURI(uri);
+    return;
+}
+
+void MainFrame::OnMenuShowAllStatisticsValues(wxCommandEvent& WXUNUSED(event))
+{
+}
+
+void MainFrame::OnMenuShowStatisticsValue(wxCommandEvent& WXUNUSED(event))
+{
+}
+
+void MainFrame::OnMenuSetStatisticsValue(wxCommandEvent& WXUNUSED(event))
+{
+    MetadataItem* mi = treeMainM->getSelectedMetadataItem();
+    if (dynamic_cast<Index*>(mi))
+    {
+        URI uri("fr://index_action");
+        uri.addParam(wxString::Format("parent_window=%p", this));
+        uri.addParam(wxString::Format("object_handle=%lu", mi->getHandle()));
+        uri.addParam("type=RECOMPUTE");
+        getURIProcessor().handleURI(uri);
+        return;
+    }
 }
 
 void MainFrame::OnMenuDatabasePreferences(wxCommandEvent& WXUNUSED(event))

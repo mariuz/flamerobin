@@ -202,6 +202,7 @@ void DataGrid::showPopupMenu(wxPoint cursorPos)
     m.AppendSeparator();
 
     m.Append(wxID_COPY, _("Copy"));
+    m.Append(Cmds::DataGrid_Copy_with_titles, _("Copy with titles"));
     m.Append(Cmds::DataGrid_Copy_as_insert, _("Copy as INSERT statements"));
     m.Append(Cmds::DataGrid_Copy_as_update, _("Copy as UPDATE statements"));
     m.Append(Cmds::DataGrid_Copy_as_inList, _("Copy as IN list"));
@@ -263,7 +264,7 @@ void DataGrid::setCellFont()
     }
 }
 
-void DataGrid::copyToClipboard()
+void DataGrid::copyToClipboard(bool titles)
 {
     DataGridTable* table = getDataGridTable();
     if (!table)
@@ -275,7 +276,7 @@ void DataGrid::copyToClipboard()
         wxBusyCursor cr;
         wxString sRows;
 		wxString sTitles;
-		bool bTitles = true;
+		bool bTitles = titles;
 		for (int i = 0; i < GetNumberRows(); i++)
         {
             wxString sRow;

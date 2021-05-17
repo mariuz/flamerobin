@@ -56,7 +56,7 @@ public:
     virtual void visitExceptions(Exceptions& exceptions);
     virtual void visitFunctionSQLs(FunctionSQLs& functions);
     virtual void visitGenerators(Generators& generators);
-    virtual void visitGTTs(GTTs& tables);
+    virtual void visitGTTables(GTTables& tables);
     virtual void visitIndices(Indices& indices);
     virtual void visitPackages(Packages& packages);
     virtual void visitProcedures(Procedures& procedures);

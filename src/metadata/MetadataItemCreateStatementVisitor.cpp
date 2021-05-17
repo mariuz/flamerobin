@@ -314,7 +314,7 @@ void MetadataItemCreateStatementVisitor::visitGenerators(
     statementM = getCreateGeneratorStatement();
 }
 
-void MetadataItemCreateStatementVisitor::visitGTTs(GTTs& /*tables*/)
+void MetadataItemCreateStatementVisitor::visitGTTables(GTTables& /*tables*/)
 {
     statementM = getCreateGTTTableStatement();
 }
