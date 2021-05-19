@@ -439,7 +439,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
                 if (!current)
                     current = d->findByNameAndType(ntSysTable, objname);
             }
-            if (!ofObject && t == ntDMLTrigger)
+            if (!ofObject && (t == ntDMLTrigger || t == ntDBTrigger || t == ntTrigger))
             {
                 // system trigger dependent of this object indicates possible check constraint on a table
                 // that references this object. So, let's check if this trigger is used for check constraint
