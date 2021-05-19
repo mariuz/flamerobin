@@ -251,6 +251,9 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
         case kwEXCEPTION:
             objectTypeM = ntException;
             break;
+        case kwEXTERNAL:
+            objectTypeM = ntUDF;
+            break;
         case kwFUNCTION:
             if (actionM == actCREATE || actionM == actALTER ||
                 actionM == actCREATE_OR_ALTER) {

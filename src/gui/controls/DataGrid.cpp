@@ -202,6 +202,7 @@ void DataGrid::showPopupMenu(wxPoint cursorPos)
     m.AppendSeparator();
 
     m.Append(wxID_COPY, _("Copy"));
+    m.Append(Cmds::DataGrid_Copy_with_header, _("Copy with headers"));
     m.Append(Cmds::DataGrid_Copy_as_insert, _("Copy as INSERT statements"));
     m.Append(Cmds::DataGrid_Copy_as_update, _("Copy as UPDATE statements"));
     m.Append(Cmds::DataGrid_Copy_as_inList, _("Copy as IN list"));
@@ -263,7 +264,7 @@ void DataGrid::setCellFont()
     }
 }
 
-void DataGrid::copyToClipboard()
+void DataGrid::copyToClipboard(bool headers)
 {
     DataGridTable* table = getDataGridTable();
     if (!table)
@@ -274,12 +275,12 @@ void DataGrid::copyToClipboard()
     {
         wxBusyCursor cr;
         wxString sRows;
-		wxString sTitles;
-		bool bTitles = true;
+		wxString sHeaders;
+		bool bHeaders = headers;
 		for (int i = 0; i < GetNumberRows(); i++)
         {
             wxString sRow;
-			wxString sTitle;
+			wxString sHeader;
             bool first = true;
             for (int j = 0; j < GetNumberCols(); j++)
             {
@@ -290,13 +291,13 @@ void DataGrid::copyToClipboard()
 					if (!first)
 					{
 						sRow += "\t";
-						if (bTitles)
-							sTitle += "\t";
+						if (bHeaders)
+							sHeader += "\t";
 					}
                     first = false;
                     sRow += table->getCellValue(i, j);
-					if (bTitles)
-						sTitle += table->GetColLabelValue(j);
+					if (bHeaders)
+						sHeader += table->GetColLabelValue(j);
                     any = true;
                 }
                 else
@@ -305,14 +306,14 @@ void DataGrid::copyToClipboard()
 			if (!first) 
 			{
 				sRows += sRow + wxTextBuffer::GetEOL();
-				if (bTitles) {
-					sTitles += sTitle + wxTextBuffer::GetEOL();
-					bTitles = false;
+				if (bHeaders) {
+					sHeaders += sHeader + wxTextBuffer::GetEOL();
+					bHeaders = false;
 				}
 			}
         }
         if (!sRows.IsEmpty())
-            copyToClipboard(sTitles + sRows);
+            copyToClipboard(sHeaders + sRows);
     }
 
     if (!any)   // no cells selected -> copy a single cell

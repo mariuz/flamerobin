@@ -64,6 +64,7 @@ namespace Cmds
         DataGrid_EditBlob,
         DataGrid_ExportBlob,
         DataGrid_ImportBlob,
+        DataGrid_Copy_with_header,
         DataGrid_Copy_as_insert,
         DataGrid_Copy_as_inList,
         DataGrid_Copy_as_update,
@@ -121,6 +122,8 @@ namespace Cmds
         Menu_SetStatisticsValue,
         Menu_ShowAllStatisticsValue,
         Menu_RebuildObject,
+        Menu_ActiveObject,
+        Menu_InactiveObject,
 
         // view menu
         Menu_ToggleStatusBar, 

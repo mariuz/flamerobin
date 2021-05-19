@@ -39,6 +39,7 @@
 #include "metadata/exception.h"
 #include "metadata/function.h"
 #include "metadata/generator.h"
+#include "metadata/Index.h"
 #include "metadata/MetadataTemplateManager.h"
 #include "metadata/package.h"
 #include "metadata/procedure.h"
@@ -151,12 +152,15 @@ void MainObjectMenuMetadataItemVisitor::visitExceptions(Exceptions& exceptions)
 void MainObjectMenuMetadataItemVisitor::visitFunctionSQL(FunctionSQL& function)
 {
     menuM->Append(Cmds::Menu_ExecuteFunction, _("&Execute"));
-    addAlterItem(function);
-    addDropItem(function);
+    if (function.getParent()->getType() == ntDatabase) {
+        addAlterItem(function);
+        addDropItem(function);
+    }
     addSeparator();
     addGenerateCodeMenu(function);
     addSeparator();
-    addRefreshItem();
+    if (function.getParent()->getType() == ntDatabase)
+        addRefreshItem();
     addPropertiesItem();
 }
 
@@ -232,6 +236,19 @@ void MainObjectMenuMetadataItemVisitor::visitGenerators(Generators& generators)
     addRefreshItem();
 }
 
+void MainObjectMenuMetadataItemVisitor::visitGTTable(GTTable& table)
+{
+    addBrowseDataItem();
+    addGenerateCodeMenu(table);
+    addSeparator();
+    if (!table.isSystem())
+        menuM->Append(Cmds::Menu_AddColumn, _("&Add column"));
+    addDropItem(table);
+    addSeparator();
+    addRefreshItem();
+    addPropertiesItem();
+}
+
 void MainObjectMenuMetadataItemVisitor::visitPackage(Package& package)
 {
     addAlterItem(package);
@@ -262,12 +279,15 @@ void MainObjectMenuMetadataItemVisitor::visitSysPackages(SysPackages& packages)
 void MainObjectMenuMetadataItemVisitor::visitProcedure(Procedure& procedure)
 {
     menuM->Append(Cmds::Menu_ExecuteProcedure, _("&Execute"));
-    addAlterItem(procedure);
-    addDropItem(procedure);
+    if (procedure.getParent()->getType() == ntDatabase) {
+        addAlterItem(procedure);
+        addDropItem(procedure);
+    }
     addSeparator();
     addGenerateCodeMenu(procedure);
     addSeparator();
-    addRefreshItem();
+    if (procedure.getParent()->getType() == ntDatabase)
+        addRefreshItem();
     addPropertiesItem();
 }
 
@@ -366,11 +386,11 @@ void MainObjectMenuMetadataItemVisitor::visitSysTables(SysTables& sysTables)
     addRefreshItem();
 }
 
-void MainObjectMenuMetadataItemVisitor::visitGTTs(GTTs& gtts)
+void MainObjectMenuMetadataItemVisitor::visitGTTables(GTTables& tables)
 {
     addCreateItem();
     addSeparator();
-    addGenerateCodeMenu(gtts);
+    addGenerateCodeMenu(tables);
     addSeparator();
     addRefreshItem();
 }
@@ -379,6 +399,7 @@ void MainObjectMenuMetadataItemVisitor::visitDMLTrigger(DMLTrigger& trigger)
 {
     addAlterItem(trigger);
     addDropItem(trigger);
+    addActiveItem(trigger);
     addSeparator();
     addGenerateCodeMenu(trigger);
     addSeparator();
@@ -389,6 +410,7 @@ void MainObjectMenuMetadataItemVisitor::visitDBTrigger(DBTrigger& trigger)
 {
     addAlterItem(trigger);
     addDropItem(trigger);
+    addActiveItem(trigger);
     addSeparator();
     addGenerateCodeMenu(trigger);
     addSeparator();
@@ -399,6 +421,7 @@ void MainObjectMenuMetadataItemVisitor::visitDDLTrigger(DDLTrigger& trigger)
 {
     addAlterItem(trigger);
     addDropItem(trigger);
+    addActiveItem(trigger);
     addSeparator();
     addGenerateCodeMenu(trigger);
     addSeparator();
@@ -457,11 +480,12 @@ void MainObjectMenuMetadataItemVisitor::visitViews(Views& views)
 
 void MainObjectMenuMetadataItemVisitor::visitIndex(Index& index)
 {
-    menuM->Append(Cmds::Menu_ShowStatisticsValue, _("Show &statistics"));
+    //menuM->Append(Cmds::Menu_ShowStatisticsValue, _("Show &statistics"));
     menuM->Append(Cmds::Menu_SetStatisticsValue, _("&Recompute statistics"));
     addSeparator();
     addAlterItem(index);
     addDropItem(index);
+    addActiveItem(index);
     addSeparator();
     addGenerateCodeMenu(index);
     addSeparator();
@@ -480,10 +504,39 @@ void MainObjectMenuMetadataItemVisitor::visitIndices(Indices& indices)
     addRefreshItem();
 }
 
+void MainObjectMenuMetadataItemVisitor::visitMethod(Method& method)
+{
+    if (method.isFunction())
+        menuM->Append(Cmds::Menu_ExecuteFunction, _("&Execute"));
+    else
+        menuM->Append(Cmds::Menu_ExecuteProcedure, _("&Execute"));
+
+}
+
 void MainObjectMenuMetadataItemVisitor::addAlterItem(MetadataItem& metadataItem)
 {
     if (!metadataItem.isSystem())
         menuM->Append(Cmds::Menu_AlterObject, _("&Alter"));
+}
+
+void MainObjectMenuMetadataItemVisitor::addActiveItem(MetadataItem& metadataItem)
+{
+    Index* i = dynamic_cast<Index*>(&metadataItem);
+    if (i) {
+        if (i->isActive())
+            menuM->Append(Cmds::Menu_InactiveObject, _("&Inactive"));
+        else
+            menuM->Append(Cmds::Menu_ActiveObject, _("&Active"));
+    }
+
+    Trigger* t = dynamic_cast<Trigger*>(&metadataItem);
+    if (t) {
+        if (t->isActive())
+            menuM->Append(Cmds::Menu_InactiveObject, _("&Inactive"));
+        else
+            menuM->Append(Cmds::Menu_ActiveObject, _("&Active"));
+    }
+
 }
 
 void MainObjectMenuMetadataItemVisitor::addCreateItem()

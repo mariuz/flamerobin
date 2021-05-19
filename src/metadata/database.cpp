@@ -348,7 +348,7 @@ void Database::getIdentifiers(std::vector<Identifier>& temp)
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(sysTablesM->begin(), sysTablesM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
-    std::transform(GTTsM->begin(), GTTsM->end(),
+    std::transform(GTTablesM->begin(), GTTablesM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(viewsM->begin(), viewsM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
@@ -405,26 +405,8 @@ wxString Database::loadDomainNameForColumn(const wxString& table,
 
 void Database::getDatabaseTriggers(std::vector<Trigger *>& list)
 {
-    MetadataLoader* loader = getMetadataLoader();
-    MetadataLoaderTransaction tr(loader);
-    wxMBConv* converter = getCharsetConverter();
-
-    IBPP::Statement& st1 = loader->getStatement(
-        "select rdb$trigger_name from rdb$triggers "
-        "where (rdb$system_flag = 0 or rdb$system_flag is null)  "
-        " and rdb$trigger_type between 8192 and 8196 "
-        "order by rdb$trigger_sequence"
-    );
-    st1->Execute();
-    while (st1->Fetch())
-    {
-        std::string name;
-        st1->Get(1, name);
-        DBTrigger* t = dynamic_cast<DBTrigger*>(findByNameAndType(ntDBTrigger,
-            std2wxIdentifier(name, converter)));
-        if (t)
-            list.push_back(t);
-    }
+    std::transform(DBTriggersM->begin(), DBTriggersM->end(),
+        std::back_inserter(list), std::mem_fn(&DBTriggerPtr::get));
 }
 
 CharacterSet Database::getCharsetById(int id)
@@ -578,7 +560,7 @@ MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
             return sysTablesM->findByName(name).get();
             break;
         case ntGTT:
-            return GTTsM->findByName(name).get();
+            return GTTablesM->findByName(name).get();
             break;
         case ntView:
             return viewsM->findByName(name).get();
@@ -642,7 +624,7 @@ Relation* Database::findRelation(const Identifier& name)
         return v.get();
     if (TablePtr t = sysTablesM->findByName(s))
         return t.get();
-    if (TablePtr t = GTTsM->findByName(s))
+    if (TablePtr t = GTTablesM->findByName(s))
         return t.get();
     return 0;
 }
@@ -670,7 +652,7 @@ void Database::dropObject(MetadataItem* object)
             sysTablesM->remove((Table*)object);
             break;
         case ntGTT:
-            GTTsM->remove((Table*)object);
+            GTTablesM->remove((Table*)object);
             break;
         case ntView:
             viewsM->remove((View*)object);
@@ -736,7 +718,7 @@ void Database::addObject(NodeType type, const wxString& name)
             sysTablesM->insert(name);
             break;
         case ntGTT:
-            GTTsM->insert(name);
+            GTTablesM->insert(name);
             break;
         case ntView:
             viewsM->insert(name);
@@ -1021,7 +1003,7 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
     if (connectedM)
         return;
 
-    SubjectLocker lock(this);
+    //SubjectLocker lock(this);
     try
     {
         if (indicator)
@@ -1114,7 +1096,7 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             tablesM.reset(new Tables(me));
             initializeLockCount(tablesM, lockCount);
             sysTablesM.reset(new SysTables(me));
-            GTTsM.reset(new GTTs(me));
+            GTTablesM.reset(new GTTables(me));
             initializeLockCount(sysTablesM, lockCount);
             UDFsM.reset(new UDFs(me));
             initializeLockCount(UDFsM, lockCount);
@@ -1138,7 +1120,7 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             // on observers can possibly use the same transaction
             MetadataLoader* loader = getMetadataLoader();
             MetadataLoaderTransaction tr(loader);
-            //SubjectLocker lock(this); 
+            SubjectLocker lock(this); 
 
             try
             {
@@ -1247,7 +1229,7 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
 
     if (getInfo().getODSVersionIsHigherOrEqualTo(11.1)) {
         pih.init(_("global temporary table"), collectionCount, 2);
-        GTTsM->load(progressIndicator);
+        GTTablesM->load(progressIndicator);
     }
 
     pih.init(_("views"), collectionCount, 3);
@@ -1359,7 +1341,7 @@ void Database::setDisconnected()
     rolesM.reset();
     tablesM.reset();
     sysTablesM.reset();
-    GTTsM.reset();
+    GTTablesM.reset();
     DMLtriggersM.reset();
     UDFsM.reset();
     viewsM.reset();
@@ -1494,11 +1476,11 @@ SysTablesPtr Database::getSysTables()
     return sysTablesM;
 }
 
-GTTsPtr Database::getGTTs()
+GTTablesPtr Database::getGTTables()
 {
-    wxASSERT(GTTsM);
-    GTTsM->ensureChildrenLoaded();
-    return GTTsM;
+    wxASSERT(GTTablesM);
+    GTTablesM->ensureChildrenLoaded();
+    return GTTablesM;
 }
 
 TablesPtr Database::getTables()
@@ -1552,7 +1534,7 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
         temp.push_back(functionSQLsM.get());
     temp.push_back(generatorsM.get());
     if (getInfo().getODSVersionIsHigherOrEqualTo(11.1)) 
-        temp.push_back(GTTsM.get());
+        temp.push_back(GTTablesM.get());
     temp.push_back(indicesM.get());
     if (getInfo().getODSVersionIsHigherOrEqualTo(12.0)) 
         temp.push_back(packagesM.get());
@@ -1596,7 +1578,7 @@ void Database::lockChildren()
         rolesM->lockSubject();
         tablesM->lockSubject();
         sysTablesM->lockSubject();
-        GTTsM->lockSubject();
+        GTTablesM->lockSubject();
         DMLtriggersM->lockSubject();
         DBTriggersM->lockSubject();
         DDLTriggersM->lockSubject();
@@ -1619,7 +1601,7 @@ void Database::unlockChildren()
         DDLTriggersM->unlockSubject();
         DBTriggersM->unlockSubject();
         DMLtriggersM->unlockSubject();
-        GTTsM->unlockSubject();
+        GTTablesM->unlockSubject();
         sysTablesM->unlockSubject();
         tablesM->unlockSubject();
         rolesM->unlockSubject();

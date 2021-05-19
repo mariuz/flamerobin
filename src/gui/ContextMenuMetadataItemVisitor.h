@@ -51,9 +51,11 @@ public:
     virtual void visitFunctionSQLs(FunctionSQLs& functions);
     virtual void visitGenerator(Generator& generator);
     virtual void visitGenerators(Generators& generators);
-    virtual void visitGTTs(GTTs& tables);
+    virtual void visitGTTable(GTTable& table);
+    virtual void visitGTTables(GTTables& tables);
     virtual void visitIndex(Index& index);
     virtual void visitIndices(Indices& indices);
+    virtual void visitMethod(Method& method);
     virtual void visitPackage(Package& package);
     virtual void visitPackages(Packages& packages);
     virtual void visitProcedure(Procedure& procedure);
@@ -80,6 +82,7 @@ protected:
 private:
     // helper member functions to add menu items and separators
     void addAlterItem(MetadataItem& metadataItem);
+    void addActiveItem(MetadataItem& metadataItem);
     void addBrowseDataItem();
     void addDropItem(MetadataItem& metadataItem);
     void addGenerateCodeMenu(MetadataItem& metadataItem, wxMenu* parent = 0);

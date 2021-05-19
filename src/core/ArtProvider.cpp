@@ -72,6 +72,7 @@
 // these have size 16x16
 #include "column.xpm"
 #include "database.xpm"
+#include "databaseserver.xpm"
 #include "dbtrigger.xpm"
 #include "dbtriggers.xpm"
 #include "ddltrigger.xpm"
@@ -93,10 +94,12 @@
 #include "index.xpm"
 #include "indices.xpm"
 #include "insert16.xpm"
+#include "input.xpm"
 #include "pk16_png.cpp"
 #include "pkfk16_png.cpp"
 #include "object.xpm"
 #include "ok.xpm"
+#include "output.xpm"
 #include "plan16.xpm"
 #include "package.xpm"
 #include "packages.xpm"
@@ -254,10 +257,12 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(history_xpm);
         if (id == ART_Object)
             return wxBitmap(object_xpm);
+        if (id == ART_Output)
+            return wxBitmap(output_xpm);
         if (id == ART_ParameterInput)
-            return wxBitmap(column_xpm);
+            return wxBitmap(input_xpm);
         if (id == ART_ParameterOutput)
-            return wxBitmap(column_xpm);
+            return wxBitmap(output_xpm);
         if (id == ART_PrimaryAndForeignKey)
             return bitmapFromEmbeddedPNG(pkfk16_png, sizeof(pkfk16_png));
         if (id == ART_PrimaryKey)
@@ -279,7 +284,7 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
         if (id == ART_Root)
             return wxBitmap(root_xpm);
         if (id == ART_Server)
-            return wxBitmap(server_xpm);
+            return wxBitmap(databaseserver_xpm);
         if (id == ART_ShowExecutionPlan)
             return wxBitmap(plan16_xpm);
         if (id == ART_SystemDomain)
@@ -320,6 +325,8 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(view_xpm);
         if (id == ART_Index)
             return wxBitmap(index_xpm);
+        if (id == ART_Input)
+            return wxBitmap(input_xpm);
         if (id == ART_Indices)
             return wxBitmap(indices_xpm);
         if (id == ART_DeleteRow)

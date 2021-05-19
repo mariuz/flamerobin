@@ -61,7 +61,7 @@ public:
 //    virtual void visitUDFs(UDFs& functions);
     virtual void visitGenerator(Generator& generator);
 //    virtual void visitGenerators(Generators& generators);
-//    virtual void visitIndex(Index& index);
+    virtual void visitIndex(Index& index);
 //    virtual void visitParameter(Parameter& parameter);
     virtual void visitPrimaryKeyConstraint(PrimaryKeyConstraint& pk);
     virtual void visitPackage(Package& package);
@@ -76,7 +76,8 @@ public:
 //    virtual void visitRoot(Root& root);
 //    virtual void visitServer(Server& server);
     virtual void visitTable(Table& table);
-//    virtual void visitTables(Tables& tables);
+    virtual void visitGTTable(GTTable& table);
+    //    virtual void visitTables(Tables& tables);
 //    virtual void visitSysTables(SysTables& sysTables);
     virtual void visitDBTrigger(DBTrigger& trigger);
     virtual void visitDDLTrigger(DDLTrigger& trigger);

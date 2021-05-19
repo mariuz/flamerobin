@@ -99,6 +99,11 @@ public:
     void OnMenuDatabasePreferences(wxCommandEvent& event);
     void OnMenuDatabaseProperties(wxCommandEvent& event);
     void OnMenuExecuteFunction(wxCommandEvent& event);
+    void OnMenActiveObject(wxCommandEvent& event);
+    void OnMenInactiveObject(wxCommandEvent& event);
+    void OnMenuShowAllStatisticsValues(wxCommandEvent& event);
+    void OnMenuShowStatisticsValue(wxCommandEvent& event);
+    void OnMenuSetStatisticsValue(wxCommandEvent& event);
 
     // create new object
     void showCreateTemplate(const wxString& statement);
