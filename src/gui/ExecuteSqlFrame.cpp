@@ -958,7 +958,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_MENU(Cmds::DataGrid_Insert_row,      ExecuteSqlFrame::OnMenuGridInsertRow)
     EVT_MENU(Cmds::DataGrid_Delete_row,      ExecuteSqlFrame::OnMenuGridDeleteRow)
     EVT_MENU(Cmds::DataGrid_SetFieldToNULL,  ExecuteSqlFrame::OnMenuGridSetFieldToNULL)
-    EVT_MENU(Cmds::DataGrid_Copy_with_titles,ExecuteSqlFrame::OnMenuCopyWithTitles)
+    EVT_MENU(Cmds::DataGrid_Copy_with_header,ExecuteSqlFrame::OnMenuCopyWithHeader)
     EVT_MENU(Cmds::DataGrid_Copy_as_insert,  ExecuteSqlFrame::OnMenuGridCopyAsInsert)
     EVT_MENU(Cmds::DataGrid_Copy_as_inList,  ExecuteSqlFrame::OnMenuGridCopyAsInList)
     EVT_MENU(Cmds::DataGrid_Copy_as_update,  ExecuteSqlFrame::OnMenuGridCopyAsUpdate)
@@ -975,7 +975,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_UPDATE_UI(Cmds::DataGrid_Insert_row,     ExecuteSqlFrame::OnMenuUpdateGridInsertRow)
     EVT_UPDATE_UI(Cmds::DataGrid_Delete_row,     ExecuteSqlFrame::OnMenuUpdateGridDeleteRow)
     EVT_UPDATE_UI(Cmds::DataGrid_SetFieldToNULL, ExecuteSqlFrame::OnMenuUpdateGridCanSetFieldToNULL)
-    EVT_UPDATE_UI(Cmds::DataGrid_Copy_with_titles,ExecuteSqlFrame::OnMenuUpdateGridHasData)
+    EVT_UPDATE_UI(Cmds::DataGrid_Copy_with_header,ExecuteSqlFrame::OnMenuUpdateGridHasData)
     EVT_UPDATE_UI(Cmds::DataGrid_Copy_as_insert, ExecuteSqlFrame::OnMenuUpdateGridHasData)
     EVT_UPDATE_UI(Cmds::DataGrid_Copy_as_update, ExecuteSqlFrame::OnMenuUpdateGridHasData)
     EVT_UPDATE_UI(Cmds::DataGrid_EditBlob,       ExecuteSqlFrame::OnMenuUpdateGridCellIsBlob)
@@ -1402,7 +1402,7 @@ void ExecuteSqlFrame::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
         grid_data->copyToClipboard(false);
 }
 
-void ExecuteSqlFrame::OnMenuCopyWithTitles(wxCommandEvent& WXUNUSED(event))
+void ExecuteSqlFrame::OnMenuCopyWithHeader(wxCommandEvent& WXUNUSED(event))
 {
     if (viewModeM == vmEditor)
         styled_text_ctrl_sql->Copy();

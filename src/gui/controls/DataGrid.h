@@ -70,7 +70,7 @@ private:
     void OnTimer(wxTimerEvent& event);
     DECLARE_EVENT_TABLE()
 public:
-    void copyToClipboard(bool titles);
+    void copyToClipboard(bool headers);
     void copyToClipboardAsInsert();
     void copyToClipboardAsInList();
     void copyToClipboardAsUpdate();

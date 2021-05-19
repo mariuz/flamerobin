@@ -80,6 +80,9 @@ bool Application::OnInit()
     checkEnvironment();
     parseCommandLine();
 
+    mLocale = new wxLocale();
+    mLocale->Init(wxLANGUAGE_DEFAULT);
+
     // initialize IBPP library - if it fails: exit
     try
     {
@@ -123,6 +126,12 @@ void Application::HandleEvent(wxEvtHandler* handler, wxEventFunction func,
         wxMessageBox(e.what(), _("Unhandled Error in FlameRobin"),
             wxOK | wxICON_ERROR, wxGetTopLevelParent(wxGetActiveWindow()));
     }
+}
+
+int Application::OnExit()
+{
+    wxDELETE(mLocale);
+    return 0;
 }
 
 void Application::checkEnvironment()
