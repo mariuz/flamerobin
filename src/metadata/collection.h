@@ -143,7 +143,7 @@ public:
             iterator oldPos = getPosition(itemName);
             if (oldPos == itemsM.end())
             {
-                ItemType item(new T(database, names[i]));
+               ItemType item(new T(database, names[i]));
                 newItems.push_back(item);
                 initializeLockCount(item, getLockCount());
             }
@@ -151,6 +151,17 @@ public:
                 newItems.push_back(*oldPos);
         }
         setItems(newItems);
+    }
+
+    void setInactiveItems(wxArrayString names)
+    {
+        for (size_t i = 0; i < names.size(); ++i)
+        {
+            ItemType item = findByName(names[i]);
+            if (item) {
+                item.get()->setActive(false);
+            }
+        }
     }
 
     void setItems(CollectionType items)

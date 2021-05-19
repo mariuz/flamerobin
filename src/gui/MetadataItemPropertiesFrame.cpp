@@ -310,6 +310,14 @@ void MetadataItemPropertiesPanel::update()
             (*it)->attachObserver(this, false);
     }
 
+    if (objectM->getType() == ntIndex)
+    {
+        Index* i = dynamic_cast<Index*>(objectM);
+        if (!i)
+            return;
+        SubjectLocker locker(i);
+        i->ensurePropertiesLoaded();
+    }
     // with this set to false updates to the same page do not show the
     // "Please wait while the data is being loaded..." temporary page
     // this results in less flicker, but may also seem less responsive

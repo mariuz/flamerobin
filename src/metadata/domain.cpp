@@ -489,7 +489,7 @@ const wxString Domains::getTypeName() const
 
 // System domains collection
 SysDomains::SysDomains(DatabasePtr database)
-    : DomainCollectionBase(ntSysDomains, database, _("System domains"))
+    : DomainCollectionBase(ntSysDomains, database, _("System Domains"))
 {
 }
 

@@ -96,6 +96,16 @@ void MetadataItemVisitor::visitUDFs(UDFs&)
     defaultAction();
 }
 
+void MetadataItemVisitor::visitUser(User& )
+{
+	defaultAction();
+}
+
+void MetadataItemVisitor::visitUsers(Users& )
+{
+    defaultAction();
+}
+
 void MetadataItemVisitor::visitGenerator(Generator&)
 {
     defaultAction();
@@ -109,6 +119,11 @@ void MetadataItemVisitor::visitGenerators(Generators&)
 void MetadataItemVisitor::visitIndex(Index&)
 {
     defaultAction();
+}
+
+void MetadataItemVisitor::visitIndices(Indices&)
+{
+	defaultAction();
 }
 
 void MetadataItemVisitor::visitParameter(Parameter&)
@@ -131,7 +146,7 @@ void MetadataItemVisitor::visitPackages(Packages&)
     defaultAction();
 }
 
-void MetadataItemVisitor::visitSysPackages(SysPackages& packages)
+void MetadataItemVisitor::visitSysPackages(SysPackages&)
 {
     defaultAction();
 }
@@ -186,7 +201,7 @@ void MetadataItemVisitor::visitSysTables(SysTables&)
     defaultAction();
 }
 
-void MetadataItemVisitor::visitGTTs(GTTs&)
+void MetadataItemVisitor::visitGTTables(GTTables&)
 {
     defaultAction();
 }
@@ -197,12 +212,27 @@ void MetadataItemVisitor::visitTable(Table& table)
     visitRelation(*(Relation*)&table);
 }
 
+void MetadataItemVisitor::visitSysTable(SysTable& table)
+{
+    visitTable(*(Table*)&table);
+}
+
+void MetadataItemVisitor::visitGTTable(GTTable& table)
+{
+    visitTable(*(Table*)&table);
+}
+
 void MetadataItemVisitor::visitTables(Tables&)
 {
     defaultAction();
 }
 
 void MetadataItemVisitor::visitTrigger(Trigger&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitTriggers(Triggers&)
 {
     defaultAction();
 }

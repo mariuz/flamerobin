@@ -24,11 +24,16 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#include <wx/intl.h>
+
 class MainFrame;
 
 class Application: public wxApp
 {
 private:
+    // format local settings 
+    // TODO: multilingual
+    wxLocale* mLocale;
     // Open databases whose file names were given as command line parameters
     wxArrayString cmdlineParamsM;
     void openDatabasesFromParams(MainFrame* frFrame);
@@ -47,6 +52,7 @@ public:
     void OnFatalException();
     virtual void HandleEvent(wxEvtHandler* handler, wxEventFunction func,
         wxEvent& event) const;
+    int OnExit();
 };
 
 DECLARE_APP(Application)

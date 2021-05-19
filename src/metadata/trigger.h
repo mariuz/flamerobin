@@ -59,7 +59,9 @@ protected:
 public:
     Trigger(NodeType type, DatabasePtr database, const wxString& name);
 
+    void setActive(bool active);
     bool getActive();
+    bool isActive();
     wxString getFiringEvent();
     FiringTime getFiringTime();
     int getPosition();

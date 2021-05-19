@@ -120,7 +120,7 @@ bool ColumnBase::getDefault(GetColumnDefaultType type, wxString& value) const
     return false;
 }
 
-wxString ColumnBase::getSource() 
+wxString ColumnBase::getSource(bool /*identity*/)
 {
     return sourceM;
 }
@@ -240,6 +240,11 @@ Table* Column::getTable() const
     return dynamic_cast<Table*>(getParent());
 }
 
+long Column::getInitialValue() const
+{
+    return initialValueM;
+}
+
 wxString Column::getComputedSource() const
 {
     return computedSourceM;
@@ -268,9 +273,9 @@ void Column::acceptVisitor(MetadataItemVisitor* visitor)
     visitor->visitColumn(*this);
 }
 
-wxString Column::getSource()
+wxString Column::getSource(bool identity)
 {
-    if (isIdentity()) {
+    if (isIdentity()&& identity) {
         wxString sql;
         sql = " GENERATED " + identityTypeM + " AS IDENTITY ";
         if (initialValueM != 0) {
@@ -280,7 +285,11 @@ wxString Column::getSource()
         }
         return sql;
     }
-    else
-        return sourceM;
+    else {
+        if ((isIdentity() && !identity) || !getComputedSource().IsEmpty())
+            return  getDatatype(false);
+        else
+            return ColumnBase::getSource(identity);
+    }
 }
 

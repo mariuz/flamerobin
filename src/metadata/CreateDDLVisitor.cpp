@@ -100,7 +100,7 @@ void CreateDDLVisitor::visitColumn(Column& c)
         {
             preSqlM << d->getDatatypeAsString();
             if (c.isIdentity())
-                preSqlM << c.getSource();
+                preSqlM << c.getSource(true);
             wxString charset = d->getCharset();
             DatabasePtr db = d->getDatabase();
             if (!charset.IsEmpty())
@@ -175,10 +175,12 @@ void CreateDDLVisitor::visitDatabase(Database& d)
 
         preSqlM << "/********************* UDFS ***********************/\n\n";
         iterateit<UDFsPtr, UDF>(this, d.getUDFs(), progressIndicatorM);
-
-        preSqlM << "/********************* FUNCTIONS ***********************/\n\n";
-        iterateit<FunctionSQLsPtr, FunctionSQL>(this, d.getFunctionSQLs(),
-            progressIndicatorM);
+        
+        if (d.getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
+            preSqlM << "/********************* FUNCTIONS ***********************/\n\n";
+            iterateit<FunctionSQLsPtr, FunctionSQL>(this, d.getFunctionSQLs(),
+                progressIndicatorM);
+        }
 
         preSqlM << "/****************** SEQUENCES ********************/\n\n";
         iterateit<GeneratorsPtr, Generator>(this, d.getGenerators(),
@@ -191,14 +193,18 @@ void CreateDDLVisitor::visitDatabase(Database& d)
         preSqlM << "/******************* PROCEDURES ******************/\n\n";
         iterateit<ProceduresPtr, Procedure>(this, d.getProcedures(),
             progressIndicatorM);
-        if (d.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12)) {
+
+        if (d.getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
             preSqlM << "/******************* PACKAGES ******************/\n\n";
             iterateit<PackagesPtr, Package>(this, d.getPackages(),
                 progressIndicatorM);
         }
+      
         preSqlM << "/******************** TABLES **********************/\n\n";
         iterateit<TablesPtr, Table>(this, d.getTables(), progressIndicatorM);
-        iterateit<GTTsPtr, Table>(this, d.getGTTs(), progressIndicatorM);
+        if (d.getInfo().getODSVersionIsHigherOrEqualTo(11.1)) {
+            iterateit<GTTablesPtr, GTTable>(this, d.getGTTables(), progressIndicatorM);
+        }
 
         preSqlM << "/********************* VIEWS **********************/\n\n";
         // TODO: build dependecy tree first, and order views by it
@@ -213,11 +219,16 @@ void CreateDDLVisitor::visitDatabase(Database& d)
         iterateit<DMLTriggersPtr, DMLTrigger>(this, d.getDMLTriggers(),
             progressIndicatorM);
 
-        iterateit<DDLTriggersPtr, DDLTrigger>(this, d.getDDLTriggers(),
-            progressIndicatorM);
-
-        iterateit<DBTriggersPtr, DBTrigger>(this, d.getDBTriggers(),
-            progressIndicatorM);
+        if (d.getInfo().getODSVersionIsHigherOrEqualTo(11.1)) {
+            preSqlM << "/******************** DB TRIGGERS ********************/\n\n";
+            iterateit<DBTriggersPtr, DBTrigger>(this, d.getDBTriggers(),
+                progressIndicatorM);
+        }
+        if (d.getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
+            preSqlM << "/******************** DDL TRIGGERS ********************/\n\n";
+            iterateit<DDLTriggersPtr, DDLTrigger>(this, d.getDDLTriggers(),
+                progressIndicatorM);
+        }
     }
     catch (CancelProgressException&)
     {
@@ -400,6 +411,49 @@ void CreateDDLVisitor::visitGenerator(Generator& g)
              << description << "';\n";
     }
     sqlM = preSqlM + postSqlM;
+}
+
+void CreateDDLVisitor::visitIndex(Index& i)
+{
+//    preSqlM += "CREATE INDEX " + i.getQuotedName() + "\n AS ";
+
+    preSqlM += "CREATE ";
+    if (i.isUnique())
+        preSqlM += "UNIQUE ";
+    if (i.getIndexType() == Index::itDescending)
+        preSqlM += "DESCENDING ";
+    preSqlM += "INDEX " + i.getQuotedName() + " ON " /*+ t.getQuotedName()*/;
+    wxString expre = i.getExpression();
+    if (!expre.IsEmpty())
+        preSqlM += " COMPUTED BY " + expre;
+    else
+    {
+        preSqlM += " (";
+        std::vector<wxString>* cols = i.getSegments();
+        for (std::vector<wxString>::const_iterator it = cols->begin(); it != cols->end(); ++it)
+        {
+            if (it != cols->begin())
+                preSqlM += ",";
+            Identifier id(*it);
+            preSqlM += id.getQuoted();
+        }
+        preSqlM += ")";
+    }
+    preSqlM += ";\n";
+
+
+
+    wxString description = i.getDescription();
+    if (!description.empty())
+    {
+        wxString colname(i.getName_());
+        description.Replace("'", "''");
+        colname.Replace("'", "''");
+        postSqlM << "comment on index " << colname << " is '"
+            << description << "';\n";
+    }
+    sqlM = preSqlM + postSqlM;
+
 }
 
 void CreateDDLVisitor::visitPrimaryKeyConstraint(PrimaryKeyConstraint& pk)
@@ -664,14 +718,120 @@ void CreateDDLVisitor::visitTable(Table& t)
     sqlM = preSqlM + "\n" + postSqlM + grantSqlM;
 }
 
+void CreateDDLVisitor::visitGTTable(GTTable& t)
+{
+    int type = t.getRelationType();
+    preSqlM += "CREATE ";
+    if (type == 4 || type == 5)
+        preSqlM += "GLOBAL TEMPORARY ";
+    preSqlM += "TABLE " + t.getQuotedName();
+    wxString external = t.getExternalPath();
+    if (!external.IsEmpty())
+    {
+        external.Replace("'", "''");
+        preSqlM += " EXTERNAL '" + external + "'";
+    }
+    preSqlM += "\n(\n  ";
+    t.ensureChildrenLoaded();
+    for (ColumnPtrs::iterator it = t.begin(); it != t.end(); ++it)
+    {
+        if (it != t.begin() && (*it)->getComputedSource().empty())
+            preSqlM += ",\n  ";
+        visitColumn(*(*it).get());
+    }
+
+    std::vector<Index>* ix = t.getIndices();
+
+    // primary keys (detect the name and use CONSTRAINT name PRIMARY KEY... or PRIMARY KEY(col)
+    PrimaryKeyConstraint* pk = t.getPrimaryKey();
+    if (pk)
+        visitPrimaryKeyConstraint(*pk);
+
+    // unique constraints
+    std::vector<UniqueConstraint>* uc = t.getUniqueConstraints();
+    if (uc)
+        for (std::vector<UniqueConstraint>::iterator it = uc->begin(); it != uc->end(); ++it)
+            visitUniqueConstraint(*it);
+
+    // foreign keys
+    std::vector<ForeignKey>* fk = t.getForeignKeys();
+    if (fk)
+        for (std::vector<ForeignKey>::iterator it = fk->begin(); it != fk->end(); ++it)
+            visitForeignKey(*it);
+
+    // check constraints
+    std::vector<CheckConstraint>* chk = t.getCheckConstraints();
+    if (chk)
+    {
+        for (std::vector<CheckConstraint>::iterator ci = chk->begin(); ci != chk->end(); ++ci)
+        {
+            postSqlM += "ALTER TABLE " + t.getQuotedName() + " ADD ";
+            if (!(*ci).isSystem())
+                postSqlM += "CONSTRAINT " + (*ci).getQuotedName();
+            postSqlM += "\n  " + (*ci).getSource() + ";\n";
+        }
+    }
+
+    // indices
+    if (ix)
+    {
+        for (std::vector<Index>::iterator ci = ix->begin(); ci != ix->end(); ++ci)
+        {
+            if ((*ci).isSystem())
+                continue;
+            postSqlM += "CREATE ";
+            if ((*ci).isUnique())
+                postSqlM += "UNIQUE ";
+            if ((*ci).getIndexType() == Index::itDescending)
+                postSqlM += "DESCENDING ";
+            postSqlM += "INDEX " + (*ci).getQuotedName() + " ON " + t.getQuotedName();
+            wxString expre = (*ci).getExpression();
+            if (!expre.IsEmpty())
+                postSqlM += " COMPUTED BY " + expre;
+            else
+            {
+                postSqlM += " (";
+                std::vector<wxString>* cols = (*ci).getSegments();
+                for (std::vector<wxString>::const_iterator it = cols->begin(); it != cols->end(); ++it)
+                {
+                    if (it != cols->begin())
+                        postSqlM += ",";
+                    Identifier id(*it);
+                    postSqlM += id.getQuoted();
+                }
+                postSqlM += ")";
+            }
+            postSqlM += ";\n";
+        }
+    }
+
+    // grant sel/ins/upd/del/ref/all ON [name] to [SP,user,role]
+    const std::vector<Privilege>* priv = t.getPrivileges();
+    if (priv)
+        for (std::vector<Privilege>::const_iterator ci = priv->begin(); ci != priv->end(); ++ci)
+            grantSqlM += (*ci).getSql() + "\n";
+
+    preSqlM += "\n)";
+    if (type == 4)
+        preSqlM += "\nON COMMIT PRESERVE ROWS";
+    preSqlM += ";\n";
+
+    wxString description = t.getDescription();
+    if (!description.empty())
+    {
+        wxString name(t.getName_());
+        description.Replace("'", "''");
+        name.Replace("'", "''");
+        postSqlM << "comment on table " << name << " is '"
+            << description << "';\n";
+    }
+
+    sqlM = preSqlM + "\n" + postSqlM + grantSqlM;
+}
+
 void CreateDDLVisitor::visitDBTrigger(DBTrigger& t)
 {
     preSqlM << "SET TERM ^ ;\nCREATE TRIGGER " << t.getQuotedName();
-    if (t.isDMLTrigger())
-    {
-        Identifier id(t.getRelationName());
-        preSqlM << " FOR " << id.getQuoted();
-    }
     if (t.getActive())
         preSqlM << " ACTIVE\n";
     else

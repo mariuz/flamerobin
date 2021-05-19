@@ -64,6 +64,7 @@ namespace Cmds
         DataGrid_EditBlob,
         DataGrid_ExportBlob,
         DataGrid_ImportBlob,
+        DataGrid_Copy_with_header,
         DataGrid_Copy_as_insert,
         DataGrid_Copy_as_inList,
         DataGrid_Copy_as_update,
@@ -117,6 +118,12 @@ namespace Cmds
         Menu_GenerateData, 
         Menu_CloneDatabase,
         Menu_ExecuteFunction,
+        Menu_ShowStatisticsValue,
+        Menu_SetStatisticsValue,
+        Menu_ShowAllStatisticsValue,
+        Menu_RebuildObject,
+        Menu_ActiveObject,
+        Menu_InactiveObject,
 
         // view menu
         Menu_ToggleStatusBar, 
@@ -124,19 +131,21 @@ namespace Cmds
         Menu_ToggleDisconnected,
 
         // create new ... (stuff)
-        Menu_CreateDomain, 
+        Menu_CreateDBTrigger,
+        Menu_CreateDDLTrigger,
+        Menu_CreateDMLTrigger,
+        Menu_CreateDomain,
         Menu_CreateException, 
         Menu_CreateFunction,
+        Menu_CreateGTTTable,
         Menu_CreateGenerator, 
+        Menu_CreateIndex,
         Menu_CreatePackage,
         Menu_CreateProcedure,
         Menu_CreateRole,
-        Menu_CreateTable, 
-        Menu_CreateGTTTable,
-        Menu_CreateTrigger,
-        Menu_CreateDBTrigger,
-        Menu_CreateDDLTrigger,
+        Menu_CreateTable,         
         Menu_CreateUDF,
+        Menu_CreateUser,
         Menu_CreateView,
 
         // blob editor

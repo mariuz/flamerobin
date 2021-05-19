@@ -38,6 +38,10 @@ typedef std::weak_ptr<Database> DatabaseWeakPtr;
 typedef std::vector<DatabasePtr> DatabasePtrs;
 
 class Trigger;
+typedef std::shared_ptr<Trigger> TriggerPtr;
+typedef std::vector<TriggerPtr> TriggerPtrs;
+class Triggers;
+typedef std::shared_ptr<Triggers> TriggersPtr;
 
 class DBTrigger;
 typedef std::shared_ptr<DBTrigger> DBTriggerPtr;
@@ -84,13 +88,11 @@ typedef std::vector<GeneratorPtr> GeneratorPtrs;
 class Generators;
 typedef std::shared_ptr<Generators> GeneratorsPtr;
 
-class GTT;
-typedef std::shared_ptr<GTT> GTTPtr;
-typedef std::vector<GTTPtr> GTTPtrs;
-class GTTs;
-typedef std::shared_ptr<GTTs> GTTsPtr;
-
 class Index;
+typedef std::shared_ptr<Index> IndexPtr;
+typedef std::vector<IndexPtr> IndexPtrs;
+class Indices;
+typedef std::shared_ptr<Indices> IndicesPtr;
 
 class MetadataItem;
 typedef std::shared_ptr<MetadataItem> MetadataItemPtr;
@@ -142,6 +144,15 @@ typedef std::shared_ptr<SysPackages> SysPackagesPtr;
 class SysRoles;
 typedef std::shared_ptr<SysRoles> SysRolesPtr;
 
+class GTTable;
+typedef std::shared_ptr<GTTable> GTTablePtr;
+typedef std::vector<GTTablePtr> GTTablePtrs;
+class GTTables;
+typedef std::shared_ptr<GTTables> GTTablesPtr;
+
+class SysTable;
+typedef std::shared_ptr<SysTable> SysTablePtr;
+typedef std::vector<SysTablePtr> SysTablePtrs;
 class SysTables;
 typedef std::shared_ptr<SysTables> SysTablesPtr;
 
@@ -162,6 +173,9 @@ class UniqueConstraint;
 class User;
 typedef std::shared_ptr<User> UserPtr;
 typedef std::vector<UserPtr> UserPtrs;
+class Users;
+typedef std::shared_ptr<Users> UsersPtr;
+
 
 class View;
 typedef std::shared_ptr<View> ViewPtr;

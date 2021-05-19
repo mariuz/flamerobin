@@ -202,6 +202,7 @@ void DataGrid::showPopupMenu(wxPoint cursorPos)
     m.AppendSeparator();
 
     m.Append(wxID_COPY, _("Copy"));
+    m.Append(Cmds::DataGrid_Copy_with_header, _("Copy with headers"));
     m.Append(Cmds::DataGrid_Copy_as_insert, _("Copy as INSERT statements"));
     m.Append(Cmds::DataGrid_Copy_as_update, _("Copy as UPDATE statements"));
     m.Append(Cmds::DataGrid_Copy_as_inList, _("Copy as IN list"));
@@ -263,7 +264,7 @@ void DataGrid::setCellFont()
     }
 }
 
-void DataGrid::copyToClipboard()
+void DataGrid::copyToClipboard(bool headers)
 {
     DataGridTable* table = getDataGridTable();
     if (!table)
@@ -274,9 +275,12 @@ void DataGrid::copyToClipboard()
     {
         wxBusyCursor cr;
         wxString sRows;
-        for (int i = 0; i < GetNumberRows(); i++)
+		wxString sHeaders;
+		bool bHeaders = headers;
+		for (int i = 0; i < GetNumberRows(); i++)
         {
             wxString sRow;
+			wxString sHeader;
             bool first = true;
             for (int j = 0; j < GetNumberCols(); j++)
             {
@@ -284,20 +288,32 @@ void DataGrid::copyToClipboard()
                 {
                     // TODO: - align fields in columns ?
                     //       - fields with multiline strings don't really work...
-                    if (!first)
-                        sRow += "\t";
+					if (!first)
+					{
+						sRow += "\t";
+						if (bHeaders)
+							sHeader += "\t";
+					}
                     first = false;
                     sRow += table->getCellValue(i, j);
+					if (bHeaders)
+						sHeader += table->GetColLabelValue(j);
                     any = true;
                 }
                 else
                     all = false;
             }
-            if (!first)
-                sRows += sRow + wxTextBuffer::GetEOL();
+			if (!first) 
+			{
+				sRows += sRow + wxTextBuffer::GetEOL();
+				if (bHeaders) {
+					sHeaders += sHeader + wxTextBuffer::GetEOL();
+					bHeaders = false;
+				}
+			}
         }
         if (!sRows.IsEmpty())
-            copyToClipboard(sRows);
+            copyToClipboard(sHeaders + sRows);
     }
 
     if (!any)   // no cells selected -> copy a single cell

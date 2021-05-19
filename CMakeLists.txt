@@ -433,4 +433,8 @@ if (UNIX)
 		PATTERN "*.html"
 		PATTERN "*.css"
 	)
+	install(
+		FILES docs/flamerobin.1
+		DESTINATION share/man/man1
+	)
 endif (UNIX)

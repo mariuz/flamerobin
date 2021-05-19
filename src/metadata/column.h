@@ -47,7 +47,7 @@ public:
     wxString getDatatype(bool useConfig = true);
     DomainPtr getDomain() const;
     bool getDefault(GetColumnDefaultType type, wxString& value) const;
-    virtual wxString getSource() ;
+    virtual wxString getSource(bool identity = false) ;
     bool isNullable(GetColumnNullabilityType type) const;
 };
 
@@ -75,9 +75,9 @@ public:
     virtual wxString getComputedSource() const;
     wxString getCollation() const;
     Table* getTable() const;
+    long getInitialValue() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
-    virtual wxString getSource();
-
+    virtual wxString getSource(bool identity=false);
 };
 
 #endif

@@ -67,5 +67,19 @@ public:
 
     void assignTo(IBPP::User& dest) const;
 };
+/*
+class Users : public MetadataCollection<User>
+{
+protected:
+    virtual void loadChildren();
+public:
+    Users(DatabasePtr database);
+
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    void load(ProgressIndicator* progressIndicator);
+    virtual const wxString getTypeName() const;
+
+};
+*/
 
 #endif

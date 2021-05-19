@@ -27,6 +27,7 @@
 
 #include <vector>
 
+#include "metadata/collection.h"
 #include "metadata/metadataitem.h"
 
 class Index: public MetadataItem
@@ -43,22 +44,42 @@ private:
     double statisticsM;
     std::vector<wxString> segmentsM;
     wxString expressionM;
+protected:
+    virtual void loadProperties();
 public:
+    Index(DatabasePtr database, const wxString& name);
     Index(bool unique, bool active, bool ascending, double statistics,
         bool system, wxString expression);
 
     virtual bool isSystem() const;
-    bool isActive() const;
+    void setActive(bool active);
+    bool getActive();
+    bool isActive();
     bool isUnique() const;
     double getStatistics();
     wxString getExpression() const;
     IndexType getIndexType();
+    virtual const wxString getTypeName() const;
     // Returns a list of index fields, or the expression source if
     // the index is an expression-based index.
     wxString getFieldsAsString();
     std::vector<wxString> *getSegments();
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+
+
+class Indices : public MetadataCollection<Index>
+{
+protected:
+    virtual void loadChildren();
+public:
+    Indices(DatabasePtr database);
+
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    void load(ProgressIndicator* progressIndicator);
+    virtual const wxString getTypeName() const;
+
 };
 
 #endif

@@ -79,14 +79,24 @@ Trigger::FiringTime Trigger::getFiringTime(int type)
 }
 
 Trigger::Trigger(NodeType type, DatabasePtr database, const wxString& name)
-    : MetadataItem(type, database.get(), name)
+    : MetadataItem(type, database.get(), name), activeM(true)
 {
+}
+
+void Trigger::setActive(bool active)
+{
+    activeM = active;
 }
 
 bool Trigger::getActive()
 {
-    ensurePropertiesLoaded();
+    //ensurePropertiesLoaded();
     return activeM;
+}
+
+bool Trigger::isActive()
+{
+    return getActive();
 }
 
 wxString Trigger::getFiringEvent()
@@ -249,6 +259,7 @@ void Trigger::loadProperties()
         activeM = (temp == 0);
 
         st1->Get(4, &typeM);
+        st1->Get(4, typeM);
 
 
         if (!st1->IsNull(8))
@@ -268,7 +279,7 @@ void Trigger::loadProperties()
 			entryPointM = std2wxIdentifier(s, converter);
             if (!st1->IsNull(7))
             {
-                std::string s;
+                //std::string s;
                 st1->Get(7, s);
                 sourceM += "ENGINE " + std2wxIdentifier(s, converter) + "\n";
                 engineNameM = std2wxIdentifier(s, converter);
@@ -385,7 +396,17 @@ void DMLTriggers::load(ProgressIndicator* progressIndicator)
     if (getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
         stmt += "and BIN_AND(rdb$trigger_type,"+ std::to_string(TRIGGER_TYPE_MASK)+") = "+ std::to_string(TRIGGER_TYPE_DML);
     stmt += " order by 1";
+
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+
+    stmt = "select rdb$trigger_name from rdb$triggers"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)  and rdb$trigger_inactive = 1"
+        " and rdb$relation_name is not null  ";
+    if (getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        stmt += "and BIN_AND(rdb$trigger_type," + std::to_string(TRIGGER_TYPE_MASK) + ") = " + std::to_string(TRIGGER_TYPE_DML);
+    stmt += " order by 1";
+
+    setInactiveItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 
 void DMLTriggers::loadChildren()
@@ -412,11 +433,21 @@ void DBTriggers::acceptVisitor(MetadataItemVisitor* visitor)
 void DBTriggers::load(ProgressIndicator* progressIndicator)
 {
     wxString stmt = "select rdb$trigger_name from rdb$triggers"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null) ";
-    stmt += " and BIN_AND(rdb$trigger_type," + std::to_string(TRIGGER_TYPE_MASK) + ") = " + std::to_string(TRIGGER_TYPE_DB)+
+        " where (rdb$system_flag = 0 or rdb$system_flag is null) "
+        " and BIN_AND(rdb$trigger_type," + std::to_string(TRIGGER_TYPE_MASK) + ") = " + std::to_string(TRIGGER_TYPE_DB)+
         " order by 1";
-    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator)); 
+
+    stmt = "select rdb$trigger_name from rdb$triggers"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null) and rdb$trigger_inactive = 1"
+        " and BIN_AND(rdb$trigger_type," + std::to_string(TRIGGER_TYPE_MASK) + ") = " + std::to_string(TRIGGER_TYPE_DB) +
+        " order by 1";
+
+    setInactiveItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+
 }
+
+
 
 void DBTriggers::loadChildren()
 {
@@ -443,11 +474,17 @@ void DDLTriggers::acceptVisitor(MetadataItemVisitor* visitor)
 void DDLTriggers::load(ProgressIndicator* progressIndicator)
 {
     wxString stmt = "select rdb$trigger_name from rdb$triggers"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null) ";
-    stmt += " and BIN_AND(rdb$trigger_type," + std::to_string(TRIGGER_TYPE_MASK) + ") = " + std::to_string(TRIGGER_TYPE_DDL) +
+        " where (rdb$system_flag = 0 or rdb$system_flag is null) "
+        " and BIN_AND(rdb$trigger_type," + std::to_string(TRIGGER_TYPE_MASK) + ") = " + std::to_string(TRIGGER_TYPE_DDL) +
+        " order by 1";
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+
+    stmt = "select rdb$trigger_name from rdb$triggers"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null) and rdb$trigger_inactive = 1 "
+        " and BIN_AND(rdb$trigger_type," + std::to_string(TRIGGER_TYPE_MASK) + ") = " + std::to_string(TRIGGER_TYPE_DDL) +
         " order by 1";
 
-    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+    setInactiveItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 
 void DDLTriggers::loadChildren()

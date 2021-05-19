@@ -34,18 +34,20 @@ public:
     virtual ~HtmlHeaderMetadataItemVisitor();
 
     virtual void visitDatabase(Database& database);
+    virtual void visitDBTrigger(DBTrigger& trigger);
+    virtual void visitDDLTrigger(DDLTrigger& trigger);
+    virtual void visitDMLTrigger(DMLTrigger& trigger);
     virtual void visitDomain(Domain& domain);
     virtual void visitException(Exception& exception);
     virtual void visitFunctionSQL(FunctionSQL& function);
-    virtual void visitUDF(UDF& function);
     virtual void visitGenerator(Generator& generator);
+    virtual void visitIndex(Index& index);
     virtual void visitPackage(Package& package);
     virtual void visitProcedure(Procedure& procedure);
     virtual void visitRole(Role& role);
     virtual void visitTable(Table& table);
-    virtual void visitDBTrigger(DBTrigger& trigger);
-    virtual void visitDDLTrigger(DDLTrigger& trigger);
-    virtual void visitDMLTrigger(DMLTrigger& trigger);
+    virtual void visitGTTable(GTTable& table);
+    virtual void visitUDF(UDF & function);
     virtual void visitView(View& view);
 protected:
     virtual void defaultAction();

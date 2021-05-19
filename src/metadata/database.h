@@ -169,23 +169,25 @@ private:
 
     DatabaseInfo databaseInfoM;
 
+    DBTriggersPtr DBTriggersM;
+    DDLTriggersPtr DDLTriggersM;
+    DMLTriggersPtr DMLtriggersM;
     DomainsPtr userDomainsM;
-    SysDomainsPtr sysDomainsM;
     ExceptionsPtr exceptionsM;
     FunctionSQLsPtr functionSQLsM;
     GeneratorsPtr generatorsM;
+    GTTablesPtr GTTablesM;
+    IndicesPtr indicesM;
     PackagesPtr packagesM;
-    SysPackagesPtr sysPackagesM;
     ProceduresPtr proceduresM;
     RolesPtr rolesM;
+    SysDomainsPtr sysDomainsM;
+    SysPackagesPtr sysPackagesM;
     SysRolesPtr sysRolesM;
-    TablesPtr tablesM;
     SysTablesPtr sysTablesM;
-    GTTsPtr GTTsM;
-    DMLTriggersPtr DMLtriggersM;
-    DBTriggersPtr DBTriggersM;
-    DDLTriggersPtr DDLTriggersM;
+    TablesPtr tablesM;
     UDFsPtr UDFsM;
+    UsersPtr usersM;
     ViewsPtr viewsM;
 
     // copy constructor implementation removed since it's no longer needed
@@ -222,23 +224,25 @@ public:
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
     void getCollections(std::vector<MetadataItem *>& temp, bool system);
 
-    DomainsPtr getDomains();
-    SysDomainsPtr getSysDomains();
-    ExceptionsPtr getExceptions();
-    FunctionSQLsPtr getFunctionSQLs();
-    GeneratorsPtr getGenerators();
-    PackagesPtr getPackages();
-    SysPackagesPtr getSysPackages();
-    ProceduresPtr getProcedures();
-    RolesPtr getRoles();
-    SysRolesPtr getSysRoles();
-    TablesPtr getTables();
-    SysTablesPtr getSysTables();
-    GTTsPtr getGTTs();
-    DMLTriggersPtr getDMLTriggers();
     DBTriggersPtr getDBTriggers();
     DDLTriggersPtr getDDLTriggers();
+    DMLTriggersPtr getDMLTriggers();
+    DomainsPtr getDomains();
+    ExceptionsPtr getExceptions();
+    FunctionSQLsPtr getFunctionSQLs();
+    GTTablesPtr getGTTables();
+    GeneratorsPtr getGenerators();
+    IndicesPtr getIndices();
+    PackagesPtr getPackages();
+    ProceduresPtr getProcedures();
+    RolesPtr getRoles();
+    SysDomainsPtr getSysDomains();
+    SysPackagesPtr getSysPackages();
+    SysRolesPtr getSysRoles();
+    SysTablesPtr getSysTables();
+    TablesPtr getTables();
     UDFsPtr getUDFs();
+    UsersPtr getUsers();
     ViewsPtr getViews();
 
     bool isConnected() const;

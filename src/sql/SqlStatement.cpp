@@ -251,8 +251,23 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
         case kwEXCEPTION:
             objectTypeM = ntException;
             break;
+        case kwEXTERNAL:
+            objectTypeM = ntUDF;
+            break;
         case kwFUNCTION:
-            objectTypeM = ntFunctionSQL;
+            if (actionM == actCREATE || actionM == actALTER ||
+                actionM == actCREATE_OR_ALTER) {
+                if (tokensM[0] == kwDECLARE)
+                    objectTypeM = ntUDF;
+                else
+                    objectTypeM = ntFunctionSQL;
+            }else{ 
+                if (actionM == actDROP) {
+                    objectTypeM = ntFunctionSQL;
+                    if (databaseM->findByNameAndType(ntUDF, nameM.get())) 
+                        objectTypeM = ntUDF;
+                }
+            }
             break;
         case kwGENERATOR:
             objectTypeM = ntGenerator;
