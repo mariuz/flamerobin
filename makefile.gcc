@@ -100,6 +100,7 @@ FLAMEROBIN_OBJECTS =  \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_HtmlHeaderMetadataItemVisitor.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_HtmlTemplateProcessor.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_InsertDialog.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_InsertParametersDialog.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_MainFrame.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_MetadataItemPropertiesFrame.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_MultilineEnterDialog.o \
@@ -408,6 +409,9 @@ gccu$(R_OPT)$(D_OPT)\flamerobin_HtmlTemplateProcessor.o: ./src/gui/HtmlTemplateP
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gccu$(R_OPT)$(D_OPT)\flamerobin_InsertDialog.o: ./src/gui/InsertDialog.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gccu$(R_OPT)$(D_OPT)\flamerobin_InsertParametersDialog.o: ./${SOURCEDIR}/gui/InsertParametersDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gccu$(R_OPT)$(D_OPT)\flamerobin_MainFrame.o: ./src/gui/MainFrame.cpp

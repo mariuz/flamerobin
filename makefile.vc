@@ -116,6 +116,7 @@ FLAMEROBIN_OBJECTS =  \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_HtmlHeaderMetadataItemVisitor.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_HtmlTemplateProcessor.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_InsertDialog.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_InsertParametersDialog.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MainFrame.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MetadataItemPropertiesFrame.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MultilineEnterDialog.obj \
@@ -502,6 +503,9 @@ vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_HtmlTemplateProcessor.obj: .\src
 
 vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_InsertDialog.obj: .\src\gui\InsertDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\InsertDialog.cpp
+
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_InsertParametersDialog.obj: .\${SOURCEDIR}\gui\InsertParametersDialog.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\${SOURCEDIR}\gui\InsertParametersDialog.cpp
 
 vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_MainFrame.obj: .\src\gui\MainFrame.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\MainFrame.cpp
