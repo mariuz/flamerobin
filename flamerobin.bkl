@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <makefile>
 
-    <requires version="0.2.9"/>
+    <requires version="0.2.10"/>
     <using module="datafiles"/>
 
 <!-- necessary if wx-config can not be used -->
