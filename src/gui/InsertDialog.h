@@ -30,6 +30,7 @@
 #include <ibpp.h>
 
 #include "gui/BaseDialog.h"
+#include "config/LocalSettings.h"
 
 class Column;
 class Database;
@@ -69,6 +70,7 @@ public:
 
 private:
     Database *databaseM;
+    LocalSettings localSetM;
     void storeValues();
     void preloadSpecialColumns();
     IBPP::Statement& statementM;

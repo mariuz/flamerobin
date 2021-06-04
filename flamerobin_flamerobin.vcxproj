@@ -982,6 +982,7 @@
     <ClCompile Include="src\addconstrainthandler.cpp" />
     <ClCompile Include="src\config\Config.cpp" />
     <ClCompile Include="src\config\DatabaseConfig.cpp" />
+    <ClCompile Include="src\config\LocalSettings.cpp" />
     <ClCompile Include="src\core\ArtProvider.cpp" />
     <ClCompile Include="src\core\CodeTemplateProcessor.cpp" />
     <ClCompile Include="src\core\FRError.cpp" />
@@ -1108,6 +1109,7 @@
   <ItemGroup>
     <ClInclude Include="src\config\Config.h" />
     <ClInclude Include="src\config\DatabaseConfig.h" />
+    <ClInclude Include="src\config\LocalSettings.h" />
     <ClInclude Include="src\core\ArtProvider.h" />
     <ClInclude Include="src\core\CodeTemplateProcessor.h" />
     <ClInclude Include="src\core\FRError.h" />

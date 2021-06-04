@@ -37,6 +37,7 @@
 #include <ibpp.h>
 
 #include "config/Config.h"
+#include "config/LocalSettings.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "gui/MainFrame.h"
@@ -80,8 +81,7 @@ bool Application::OnInit()
     checkEnvironment();
     parseCommandLine();
 
-    mLocale = new wxLocale();
-    mLocale->Init(wxLANGUAGE_DEFAULT);
+    LocalSettings LocalSet;
 
     // initialize IBPP library - if it fails: exit
     try
@@ -130,7 +130,8 @@ void Application::HandleEvent(wxEvtHandler* handler, wxEventFunction func,
 
 int Application::OnExit()
 {
-    wxDELETE(mLocale);
+    if (mLocale)
+        wxDELETE(mLocale);
     return 0;
 }
 

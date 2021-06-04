@@ -155,6 +155,8 @@ InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
     :BaseDialog(parent, -1, wxEmptyString), tableNameM(tableName), bufferM(0),
     gridTableM(gridTable), statementM(st), databaseM(db)
 {
+    localSetM.setDataBaseLenguage();
+
     DataGridTable::FieldSet fields;
     gridTable->getFields(tableName, fields);
 

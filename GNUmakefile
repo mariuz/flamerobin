@@ -53,6 +53,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_addconstrainthandler.o \
 	flamerobin_Config.o \
 	flamerobin_DatabaseConfig.o \
+	flamerobin_LocalSettings.o \
 	flamerobin_ArtProvider.o \
 	flamerobin_CodeTemplateProcessor.o \
 	flamerobin_FRError.o \
@@ -235,6 +236,9 @@ flamerobin_Config.o: ./src/config/Config.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 flamerobin_DatabaseConfig.o: ./src/config/DatabaseConfig.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+flamerobin_LocalSettings.o: ./src/config/LocalSettings.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 flamerobin_ArtProvider.o: ./src/core/ArtProvider.cpp

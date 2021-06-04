@@ -10,6 +10,11 @@
             <default>1</default>
         </setting>
         <setting type="checkbox">
+            <caption>Use language locale settings</caption>
+            <key>UseLocalConfig</key>
+            <default>0</default>
+        </setting>
+        <setting type="checkbox">
             <caption>Remember window positions and sizes</caption>
             <related />
             <description>Newly created windows get previous size and position</description>

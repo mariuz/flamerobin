@@ -147,6 +147,7 @@ public:
     // Returns the full pathname of the specified system template, giving
     // precedence to any existing user override.
     const wxString getSysTemplateFileName(const wxString& templateName);
+    bool getUseLocalConfig() const;
 };
 
 FRConfig& config();

@@ -402,3 +402,11 @@ const wxString FRConfig::getSysTemplateFileName(const wxString& templateName)
     return fileName.GetFullPath();
 }
 
+bool FRConfig::getUseLocalConfig() const
+{
+    bool b;
+    if (!config().getValue("UseLocalConfig", b))
+        b = config().get("UseLocalConfig", true);
+    return b;
+}
+

@@ -70,6 +70,7 @@ FLAMEROBIN_OBJECTS =  \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.obj \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_Config.obj \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.obj \
+	bccu$(R_OPT)$(D_OPT)\flamerobin_LocalSettings.obj \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_ArtProvider.obj \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_CodeTemplateProcessor.obj \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_FRError.obj \
@@ -287,6 +288,9 @@ bccu$(R_OPT)$(D_OPT)\flamerobin_Config.obj: .\src\config\Config.cpp
 
 bccu$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.obj: .\src\config\DatabaseConfig.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\config\DatabaseConfig.cpp
+
+bccu$(R_OPT)$(D_OPT)\flamerobin_LocalSettings.obj: .\src\config\LocalSettings.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\config\LocalSettings.cpp
 
 bccu$(R_OPT)$(D_OPT)\flamerobin_ArtProvider.obj: .\src\core\ArtProvider.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\core\ArtProvider.cpp

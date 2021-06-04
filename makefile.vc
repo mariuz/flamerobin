@@ -68,6 +68,7 @@ FLAMEROBIN_OBJECTS =  \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_addconstrainthandler.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Config.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DatabaseConfig.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_LocalSettings.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ArtProvider.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_CodeTemplateProcessor.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FRError.obj \
@@ -359,6 +360,9 @@ vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Config.obj: .\src\config\Config.
 
 vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_DatabaseConfig.obj: .\src\config\DatabaseConfig.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\config\DatabaseConfig.cpp
+
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_LocalSettings.obj: .\src\config\LocalSettings.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\config\LocalSettings.cpp
 
 vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ArtProvider.obj: .\src\core\ArtProvider.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\core\ArtProvider.cpp
