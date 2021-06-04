@@ -95,11 +95,18 @@ void Function::loadChildren()
     if (getParent()->getType() == ntDatabase) {
         sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and a.rdb$package_name is null " : " ";
     }
+    else
+        if (getParent()->getType() == ntPackage) {
+            sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and rdb$package_name = ? " : "";
+        }
     sql += "order by a.rdb$argument_position ";
  //    sql += "order by iif(a.rdb$argument_name is null, 2014, a.rdb$argument_position) ";
 
     IBPP::Statement st1 = loader->getStatement(sql);
     st1->Set(1, wx2std(getName_(), converter));
+    if (getParent()->getType() == ntPackage) {
+        st1->Set(2, wx2std(getParent()->getName_(), converter));
+    }
     st1->Execute();
 
     ParameterPtrs parameters;
