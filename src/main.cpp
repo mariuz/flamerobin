@@ -37,7 +37,6 @@
 #include <ibpp.h>
 
 #include "config/Config.h"
-#include "config/LocalSettings.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "gui/MainFrame.h"
@@ -80,8 +79,6 @@ bool Application::OnInit()
     std::set_terminate(parachute);
     checkEnvironment();
     parseCommandLine();
-
-    LocalSettings LocalSet;
 
     // initialize IBPP library - if it fails: exit
     try
@@ -130,8 +127,6 @@ void Application::HandleEvent(wxEvtHandler* handler, wxEventFunction func,
 
 int Application::OnExit()
 {
-    if (mLocale)
-        wxDELETE(mLocale);
     return 0;
 }
 
@@ -142,6 +137,7 @@ void Application::checkEnvironment()
         config().setHomePath(translatePathMacros(envVar));
     if (wxGetEnv("FR_USER_HOME", &envVar))
         config().setUserHomePath(translatePathMacros(envVar));
+    LocalSettings localSet;
 }
 
 void Application::parseCommandLine()

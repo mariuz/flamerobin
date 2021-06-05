@@ -24,6 +24,8 @@
 #ifndef FR_LOCALSETTINGS_H
 #define FR_LOCALSETTINGS_H
 
+#include <wx/intl.h>
+
 class LocalSettings
 {
 public:
