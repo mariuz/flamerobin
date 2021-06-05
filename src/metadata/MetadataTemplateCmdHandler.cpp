@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -19,7 +19,9 @@
   CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/foreachwx.h".
+*/
+
+// For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
 // for all others, include the necessary headers (this file is usually all you
@@ -293,6 +295,9 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             Role* role = dynamic_cast<Role*>(object);
             Function* func = dynamic_cast<Function*>(object);
             Package* pack = dynamic_cast<Package*>(object);
+            Generator* gen = dynamic_cast<Generator*>(object);
+            Exception* exc = dynamic_cast<Exception*>(object);
+            Domain* dom = dynamic_cast<Domain*>(object);
             std::vector<Privilege>* p = 0;
             if (rel)
                 p = rel->getPrivileges();
@@ -304,6 +309,12 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
                 p = func->getPrivileges();
             if (pack)
                 p = pack->getPrivileges();
+            if (gen)
+                p = gen->getPrivileges();
+            if (exc)
+                p = exc->getPrivileges();
+            if (dom)
+                p = dom->getPrivileges();
             if (!p)
                 return;
             bool firstItem = true;
@@ -329,6 +340,42 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             {
                 Local::foreachIteration(firstItem, tp, processedText, sep,
                     cmdParams.from(2), &(*it));
+            }
+        }
+        else if (cmdParams[0] == "fieldDependencyInfo") {
+            if (!metadataItem)
+                return;
+
+            std::vector<DependencyField> depFields;
+            metadataItem->getDependenciesPivoted(depFields);
+            bool firstItem = true;
+            for (std::vector<DependencyField>::iterator it = depFields.begin(); it != depFields.end(); ++it)
+            {
+                Local::foreachIteration(firstItem, tp, processedText, sep,
+                    cmdParams.from(2), &(*it));
+            }
+        }
+
+        // {%foreach:fieldDependencyObjects:separator:text%}
+        // If the current object is a dependency, expands to the requested
+        // property of the dependency object.
+        else if (cmdParams[0] == "fieldDependencyObjects")
+        {
+            DependencyField* cb = dynamic_cast<DependencyField*>(object);
+            if (!cb)
+                return;
+
+            if (!metadataItem)
+                return;
+            DependencyField* mt = dynamic_cast<DependencyField*>(metadataItem);
+
+            std::vector<Dependency> deps;
+            mt->getDependencies(deps);
+            bool firstItem = true;
+            for (std::vector<Dependency>::iterator it = deps.begin(); it != deps.end(); ++it)
+            {
+                    Local::foreachIteration(firstItem, tp, processedText, sep,
+                        cmdParams.from(2), &(*it));
             }
         }
 
@@ -437,8 +484,8 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             name = role->getOwner();
         else if (Function* f = dynamic_cast<Function*>(object))
             name = f->getOwner();
-        else if (Package* p = dynamic_cast<Package*>(object))
-            name = p->getOwner();
+        else if (Package* pk = dynamic_cast<Package*>(object))
+            name = pk->getOwner();
         if (!name.IsEmpty())
             processedText += tp->escapeChars(name);
     }
@@ -468,6 +515,16 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             return;
 
         processedText += d->getFields();
+    }
+    else if (cmdName == "auxiliar")
+    {
+        Dependency* d = dynamic_cast<Dependency*>(object);
+        if (!d)
+            return;
+        if ((cmdParams.Count() >= 1) && (cmdParams[0] == "isnull"))
+          processedText += tp->escapeChars(getBooleanAsString(d->getAuxiliar()==0));
+        else if(d->getAuxiliar())
+            processedText += tp->escapeChars(d->getAuxiliar()->getName_());
     }
 
     // {%primary_key:<text>%}
@@ -565,6 +622,12 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
 
         if (cmdParams[0] == "datatype")
             processedText += tp->escapeChars(cb->getDatatype());
+        else if(cmdParams[0] == "typeof") {
+            processedText += "TYPE OF COLUMN " + cb->getParent()->getQuotedName() + "." + cb->getQuotedName();
+        }
+        else if (cmdParams[0] == "source") {
+            processedText += tp->escapeChars(cb->getSource());
+        }
         else if (cmdParams[0] == "is_nullable")
         {
             processedText += tp->escapeChars(getBooleanAsString(
@@ -631,7 +694,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
                 paramCount = p->getParamCount();
 
             processedText += tp->escapeChars(
-                wxString::Format("%d", paramCount), false);
+                wxString::Format("%zu", paramCount), false);
         }
     }
 
@@ -655,7 +718,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         else if (cmdParams[0] == "is_active")
             processedText += tp->escapeChars(getBooleanAsString(t->getActive()));
         else if (cmdParams[0] == "is_db_trigger")
-            processedText += tp->escapeChars(getBooleanAsString(t->isDatabaseTrigger()));
+            processedText += tp->escapeChars(getBooleanAsString(t->isDBTrigger()));
     }
 
     // {%generatorinfo:<property>%}
@@ -669,6 +732,8 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
 
         if (cmdParams[0] == "value")
             processedText << g->getValue();
+        else if (cmdParams[0] == "source")
+            processedText << g->getSource();
     }
 
     // {%exceptioninfo:<property>%}
@@ -916,8 +981,8 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         name = f->getSqlSecurity();
     else if (Trigger* t = dynamic_cast<Trigger*>(object))
         name = t->getSqlSecurity();
-    else if (Package* p = dynamic_cast<Package*>(object))
-        name = p->getSqlSecurity();
+    else if (Package* pk = dynamic_cast<Package*>(object))
+        name = pk->getSqlSecurity();
     if (!name.IsEmpty())
         processedText += tp->escapeChars(name);
     }

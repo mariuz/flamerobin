@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -263,7 +263,7 @@ SqlEditor::SqlEditor(wxWindow *parent, wxWindowID id)
     }
     else
     {
-        wxFont font(frlayoutconfig().getEditorFontSize(), wxMODERN, wxNORMAL, wxNORMAL);
+        wxFont font(frlayoutconfig().getEditorFontSize(), wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
         StyleSetFont(wxSTC_STYLE_DEFAULT, font);
     }
 
@@ -417,7 +417,7 @@ void SqlEditor::setFont()
     }
     else                // if config() doesn't have it, we'll use the default
     {
-        wxFont font(frlayoutconfig().getEditorFontSize(), wxMODERN, wxNORMAL, wxNORMAL);
+        wxFont font(frlayoutconfig().getEditorFontSize(), wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
         f2 = ::wxGetFontFromUser(this, font);
     }
 
@@ -526,9 +526,9 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     updateEditorCaretPosM = true;
     updateFrameTitleM = true;
 
-    transactionIsolationLevelM = IBPP::ilConcurrency;
-    transactionLockResolutionM = IBPP::lrWait;
-    transactionAccessModeM = IBPP::amWrite;
+    transactionIsolationLevelM = static_cast<IBPP::TIL>(config().get("transactionIsolationLevel", 0));
+    transactionLockResolutionM = config().get("transactionLockResolution", true) ? IBPP::lrWait : IBPP::lrNoWait;
+    transactionAccessModeM = config().get("transactionAccessMode", false) ? IBPP::amRead : IBPP::amWrite;
 
     timerBlobEditorM.SetOwner(this, TIMER_ID_UPDATE_BLOB);
 
@@ -958,6 +958,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_MENU(Cmds::DataGrid_Insert_row,      ExecuteSqlFrame::OnMenuGridInsertRow)
     EVT_MENU(Cmds::DataGrid_Delete_row,      ExecuteSqlFrame::OnMenuGridDeleteRow)
     EVT_MENU(Cmds::DataGrid_SetFieldToNULL,  ExecuteSqlFrame::OnMenuGridSetFieldToNULL)
+    EVT_MENU(Cmds::DataGrid_Copy_with_header,ExecuteSqlFrame::OnMenuCopyWithHeader)
     EVT_MENU(Cmds::DataGrid_Copy_as_insert,  ExecuteSqlFrame::OnMenuGridCopyAsInsert)
     EVT_MENU(Cmds::DataGrid_Copy_as_inList,  ExecuteSqlFrame::OnMenuGridCopyAsInList)
     EVT_MENU(Cmds::DataGrid_Copy_as_update,  ExecuteSqlFrame::OnMenuGridCopyAsUpdate)
@@ -974,6 +975,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_UPDATE_UI(Cmds::DataGrid_Insert_row,     ExecuteSqlFrame::OnMenuUpdateGridInsertRow)
     EVT_UPDATE_UI(Cmds::DataGrid_Delete_row,     ExecuteSqlFrame::OnMenuUpdateGridDeleteRow)
     EVT_UPDATE_UI(Cmds::DataGrid_SetFieldToNULL, ExecuteSqlFrame::OnMenuUpdateGridCanSetFieldToNULL)
+    EVT_UPDATE_UI(Cmds::DataGrid_Copy_with_header,ExecuteSqlFrame::OnMenuUpdateGridHasData)
     EVT_UPDATE_UI(Cmds::DataGrid_Copy_as_insert, ExecuteSqlFrame::OnMenuUpdateGridHasData)
     EVT_UPDATE_UI(Cmds::DataGrid_Copy_as_update, ExecuteSqlFrame::OnMenuUpdateGridHasData)
     EVT_UPDATE_UI(Cmds::DataGrid_EditBlob,       ExecuteSqlFrame::OnMenuUpdateGridCellIsBlob)
@@ -1181,7 +1183,7 @@ void ExecuteSqlFrame::autoCompleteColumns(int pos, int len)
     }
     wxString table = styled_text_ctrl_sql->GetTextRange(start, pos-1);
     IncompleteStatement is(databaseM, styled_text_ctrl_sql->GetText());
-    wxString columns = is.getObjectColumns(table, pos, len);//When the user are typing something, you need to sort de result, else intelisense won't work properly
+    wxString columns = is.getObjectColumns(table, pos, len>0 || config().get("autoCompleteLoadColumnsSort", false));//When the user are typing something, you need to sort de result, else intelisense won't work properly
     if (columns.IsEmpty())
         return;
     if (HasWord(styled_text_ctrl_sql->GetTextRange(pos, pos+len), columns))
@@ -1397,7 +1399,15 @@ void ExecuteSqlFrame::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
     if (viewModeM == vmEditor)
         styled_text_ctrl_sql->Copy();
     else if (viewModeM == vmGrid)
-        grid_data->copyToClipboard();
+        grid_data->copyToClipboard(false);
+}
+
+void ExecuteSqlFrame::OnMenuCopyWithHeader(wxCommandEvent& WXUNUSED(event))
+{
+    if (viewModeM == vmEditor)
+        styled_text_ctrl_sql->Copy();
+    else if (viewModeM == vmGrid)
+        grid_data->copyToClipboard(true);
 }
 
 void ExecuteSqlFrame::OnMenuUpdateCopy(wxUpdateUIEvent& event)

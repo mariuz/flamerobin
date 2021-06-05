@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -53,6 +53,12 @@ Function::Function(DatabasePtr database, const wxString& name)
     ensurePropertiesLoaded();
 }
 
+Function::Function(MetadataItem* parent, const wxString& name)
+    : MetadataItem(ntFunction, parent, name)
+{
+    ensurePropertiesLoaded();
+}
+
 void Function::loadChildren()
 {
     bool childrenWereLoaded = childrenLoaded();
@@ -72,31 +78,42 @@ void Function::loadChildren()
     SubjectLocker lock(db.get());
     wxMBConv* converter = db->getCharsetConverter();
 
+
     std::string sql(
         "select a.rdb$argument_name, a.rdb$field_source, " //1..2
         "a.rdb$mechanism, a.rdb$field_type, a.rdb$field_scale, a.rdb$field_length, " //3..6
         "a.rdb$field_sub_type, a.rdb$field_precision, "//7..8
         "f.rdb$return_argument, a.rdb$argument_position, " //9..10
     );
-    if (db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
-        sql += "rdb$default_source, rdb$null_flag, rdb$argument_mechanism, "; //11..13
+    if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        sql += "rdb$default_source, rdb$null_flag, rdb$argument_mechanism, rdb$field_name, rdb$relation_name, "; //11..13
     else
-        sql += "null, null, -1, ";
+        sql += "null, null, -1, null, null, ";
     sql += "a.rdb$description from rdb$function_arguments a "
         " join rdb$functions f on f.rdb$function_name = a.rdb$function_name "
         "where a.rdb$function_name = ? ";
-    if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
-        sql += " and a.rdb$package_name is null ";
-    sql += "order by a.rdb$argument_position";
+    if (getParent()->getType() == ntDatabase) {
+        sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and a.rdb$package_name is null " : " ";
+    }
+    else
+        if (getParent()->getType() == ntPackage) {
+            sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and rdb$package_name = ? " : "";
+        }
+    sql += "order by a.rdb$argument_position ";
+ //    sql += "order by iif(a.rdb$argument_name is null, 2014, a.rdb$argument_position) ";
 
     IBPP::Statement st1 = loader->getStatement(sql);
     st1->Set(1, wx2std(getName_(), converter));
+    if (getParent()->getType() == ntPackage) {
+        st1->Set(2, wx2std(getParent()->getName_(), converter));
+    }
     st1->Execute();
 
     ParameterPtrs parameters;
     while (st1->Fetch())
     {
         std::string s;
+        
         short returnarg, retpos;
         st1->Get(9, returnarg);
         st1->Get(10, retpos);
@@ -149,7 +166,18 @@ void Function::loadChildren()
             if (!st1->IsNull(3))
                 st1->Get(3, mechanism);
         }
-        bool hasDescription = !st1->IsNull(14);
+        wxString field;
+        if (!st1->IsNull(14)) {
+            st1->Get(14, s);
+            field = std2wxIdentifier(s, converter);
+        }
+        wxString relation;
+        if (!st1->IsNull(15)) {
+            st1->Get(15, s);
+            relation = std2wxIdentifier(s, converter);
+        }
+
+        bool hasDescription = !st1->IsNull(16);
 
         ParameterPtr par = findParameter(param_name);
         if (!par)
@@ -159,7 +187,7 @@ void Function::loadChildren()
         }
         parameters.push_back(par);
         par->initialize(source, partype, mechanism, !notNull, defaultSrc,
-            hasDefault, hasDescription);
+            hasDefault, hasDescription, relation, field);
     }
 
     setChildrenLoaded(true);
@@ -335,15 +363,6 @@ std::vector<Privilege>* Function::getPrivileges()
 	return &privilegesM;
 }
 
-wxString Function::getCreateSql()
-{
-	return "<<Create SQL>>";
-}
-
-wxString Function::getDropSqlStatement() const
-{
-	return "<<Drop SQL>>";
-}
 
 wxString Function::getDefinition()
 {
@@ -406,16 +425,16 @@ void Function::checkDependentFunction()
 	for (std::vector<Dependency>::iterator it = deps.begin();
 		it != deps.end(); ++it)
 	{
-		std::vector<wxString> fields;
+		std::vector<DependencyField> fields;
 		(*it).getFields(fields);
-		for (std::vector<wxString>::const_iterator ci = fields.begin();
+		for (std::vector<DependencyField>::const_iterator ci = fields.begin();
 			ci != fields.end(); ++ci)
 		{
 			bool found = false;
 			for (ParameterPtrs::iterator i2 = begin();
 				i2 != end(); ++i2)
 			{
-				if ((*i2)->getName_() == (*ci))
+                if ((*i2)->getName_() == (ci->getName_()))
 				{
 					found = true;
 					break;
@@ -426,7 +445,7 @@ void Function::checkDependentFunction()
 				missing += wxString::Format(
 					_("Function %s depends on parameter %s.%s"),
 					(*it).getName_().c_str(),
-					(*ci).c_str(),
+                    (ci->getName_()).c_str(),
 					wxTextBuffer::GetEOL()
 				);
 			}
@@ -456,6 +475,11 @@ void Function::checkDependentFunction()
 
 FunctionSQL::FunctionSQL(DatabasePtr database, const wxString & name)
 	: Function(database, name)
+{
+}
+
+FunctionSQL::FunctionSQL(MetadataItem* parent, const wxString& name)
+    : Function(parent, name)
 {
 }
 
@@ -523,7 +547,11 @@ wxString FunctionSQL::getAlterSql(bool full)
 			wxString charset;
 			wxString param = (*it)->isOutputParameter() ? "" : (*it)->getQuotedName() + " ";
 			DomainPtr dm = (*it)->getDomain();
-			if (dm)
+            if ((*it)->getMechanism() == 1) {
+                param += (*it)->getTypeOf();
+            }
+            else
+                if (dm)
 			{
 				if (dm->isSystem()) // autogenerated domain -> use datatype
 				{
@@ -539,9 +567,10 @@ wxString FunctionSQL::getAlterSql(bool full)
 				}
 				else
 				{
-					if ((*it)->getMechanism() == 1)
-						param += "TYPE OF ";
-					param += dm->getQuotedName();
+                    if ((*it)->getMechanism() == 1)
+                        param += param += (*it)->getTypeOf();
+                    else
+                        param += dm->getQuotedName();
 				}
 			}
 			else
@@ -605,6 +634,14 @@ const wxString FunctionSQL::getTypeName() const
 void FunctionSQL::acceptVisitor(MetadataItemVisitor * visitor)
 {
 	visitor->visitFunctionSQL(*this);
+}
+
+wxString FunctionSQL::getQuotedName() const
+{
+    if (getParent()->getType() == ntDatabase)
+        return MetadataItem::getQuotedName();
+    else
+        return getParent()->getQuotedName() + '.' + MetadataItem::getQuotedName();
 }
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -322,7 +322,7 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     rightPanelSizer->Add( skipCheckbox, 0, wxBOTTOM|wxRIGHT|wxLEFT, 8 );
 
     columnLabel = new wxStaticText( rightPanel, wxID_ANY, "Column: column name", wxDefaultPosition, wxDefaultSize, 0 );
-    columnLabel->SetFont( wxFont( 10, 74, 90, 92, false, "sans" ) );
+    columnLabel->SetFont( wxFont( 10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "sans" ) );
 
     rightPanelSizer->Add( columnLabel, 0, wxTOP|wxLEFT, 10 );
 

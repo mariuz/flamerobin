@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -42,7 +42,7 @@
 #include "metadata/table.h"
 
 Table::Table(DatabasePtr database, const wxString& name)
-    : Relation((hasSystemPrefix(name) ? ntSysTable : ntTable), database, name),
+    : Relation(ntTable, database, name),
         primaryKeyLoadedM(false), foreignKeysLoadedM(false),
         checkConstraintsLoadedM(false), uniqueConstraintsLoadedM(false),
         indicesLoadedM(false)
@@ -509,7 +509,7 @@ void Table::acceptVisitor(MetadataItemVisitor* visitor)
 
 // System tables collection
 SysTables::SysTables(DatabasePtr database)
-    : MetadataCollection<Table>(ntSysTables, database, _("System tables"))
+    : MetadataCollection<SysTable>(ntSysTables, database, _("System Tables"))
 {
 }
 
@@ -558,7 +558,7 @@ void Tables::load(ProgressIndicator* progressIndicator)
     wxString stmt = "select rdb$relation_name from rdb$relations "
         "where  (rdb$system_flag = 0 or rdb$system_flag is null) ";
     if (getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11.1))
-        stmt += " and  rdb$relation_type = 0 ";
+        stmt += " and  (rdb$relation_type in (0, 2)  or rdb$relation_type is null)";
     stmt += " and rdb$view_source is null order by 1";
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
@@ -574,17 +574,17 @@ const wxString Tables::getTypeName() const
 }
 
 // Global Teporal Tables collection
-GTTs::GTTs(DatabasePtr database)
-    : MetadataCollection<Table>(ntSysTables, database, _("Global Temporaries"))
+GTTables::GTTables(DatabasePtr database)
+    : MetadataCollection<GTTable>(ntGTTs, database, _("Global Temporaries"))
 {
 }
 
-void GTTs::acceptVisitor(MetadataItemVisitor* visitor)
+void GTTables::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    visitor->visitGTTs(*this);
+    visitor->visitGTTables(*this);
 }
 
-void GTTs::load(ProgressIndicator* progressIndicator)
+void GTTables::load(ProgressIndicator* progressIndicator)
 {
     if (getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11.1)) {
         wxString stmt = "select rdb$relation_name from rdb$relations"
@@ -594,13 +594,35 @@ void GTTs::load(ProgressIndicator* progressIndicator)
     }
 }
 
-void GTTs::loadChildren()
+void GTTables::loadChildren()
 {
     load(0);
 }
 
-const wxString GTTs::getTypeName() const
+const wxString GTTables::getTypeName() const
 {
     return "GTT_COLLECTION";
+}
+
+SysTable::SysTable(DatabasePtr database, const wxString& name)
+    :Table(database, name)
+{
+    setType(ntSysTable);
+}
+
+void SysTable::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitSysTable(*this);
+}
+
+GTTable::GTTable(DatabasePtr database, const wxString& name)
+    : Table(database, name)
+{
+    setType(ntGTT);
+}
+
+void GTTable::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitGTTable(*this);
 }
 

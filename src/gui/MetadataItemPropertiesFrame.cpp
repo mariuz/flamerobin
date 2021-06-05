@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -310,6 +310,14 @@ void MetadataItemPropertiesPanel::update()
             (*it)->attachObserver(this, false);
     }
 
+    if (objectM->getType() == ntIndex)
+    {
+        Index* i = dynamic_cast<Index*>(objectM);
+        if (!i)
+            return;
+        SubjectLocker locker(i);
+        i->ensurePropertiesLoaded();
+    }
     // with this set to false updates to the same page do not show the
     // "Please wait while the data is being loaded..." temporary page
     // this results in less flicker, but may also seem less responsive
@@ -337,7 +345,10 @@ void MetadataItemPropertiesPanel::OnHtmlCellHover(wxHtmlCellEvent& event)
     if (uri.protocol == "info")    // special
     {
         //      GetStatusBar()->SetStatusText(uri.action);
-
+        static wxTipWindow* tw;
+        if (tw) {
+            tw->Close();
+        }
         // I'm having a hard time trying to convert this to screen coordinates
         // since parent's coords cannot be retrieved(?)
         //wxRect r(c->GetPosX(), c->GetPosY(), c->GetWidth(), c->GetHeight());
@@ -346,7 +357,7 @@ void MetadataItemPropertiesPanel::OnHtmlCellHover(wxHtmlCellEvent& event)
         wxRect r(::wxGetMousePosition().x - 10, ::wxGetMousePosition().y - 4,
             21, 9);
 
-        wxTipWindow* tw = new wxTipWindow(this, uri.action);
+        tw = new wxTipWindow(this, uri.action, 100, &tw);
         tw->SetBoundingRect(r);
     }
 }
@@ -399,7 +410,7 @@ wxIcon getMetadataItemIcon(NodeType type)
             return wxArtProvider::GetIcon(ART_SystemTable, wxART_OTHER, sz);
         case ntTable:
             return wxArtProvider::GetIcon(ART_Table, wxART_OTHER, sz);
-        case ntTrigger:
+        case ntDMLTrigger:
             return wxArtProvider::GetIcon(ART_Trigger, wxART_OTHER, sz);
         case ntView:
             return wxArtProvider::GetIcon(ART_View, wxART_OTHER, sz);

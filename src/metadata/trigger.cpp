@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -40,36 +40,63 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/trigger.h"
 #include "sql/StatementBuilder.h"
+#include "constants.h"
+
 
 /* static */
 Trigger::FiringTime Trigger::getFiringTime(int type)
 {
-    if (type == 8192)
-        return databaseConnect;
-    if (type == 8193)
-        return databaseDisconnect;
-    if (type == 8194)
-        return transactionStart;
-    if (type == 8195)
-        return transactionCommit;
-    if (type == 8196)
-        return transactionRollback;
-    if (type % 2)
-        return beforeIUD;
-    if (type)
-        return afterIUD;
-    return invalid;
+    switch (type & TRIGGER_TYPE_MASK)
+    {
+    case TRIGGER_TYPE_DML:
+    {
+        if (((type + 1) & 1) == 0)
+            return beforeIUD;
+        else
+            return afterIUD;
+    }
+/*    case TRIGGER_TYPE_DB:
+        switch (type & ~TRIGGER_TYPE_DB)
+        {
+        case DB_TRIGGER_CONNECT:
+            return DB_TRIGGER_CONNECT;
+        case DB_TRIGGER_DISCONNECT:
+            return DB_TRIGGER_DISCONNECT;
+        case DB_TRIGGER_TRANS_START:
+            return DB_TRIGGER_TRANS_START;
+        case DB_TRIGGER_TRANS_COMMIT:
+            return DB_TRIGGER_TRANS_COMMIT;
+        case DB_TRIGGER_TRANS_ROLLBACK:
+            return DB_TRIGGER_TRANS_ROLLBACK;
+        default:
+            return invalid;
+        }
+    case TRIGGER_TYPE_DDL:
+        return TRIGGER_TYPE_DDL;*/
+    default:
+       return invalid;
+    }        
 }
 
-Trigger::Trigger(DatabasePtr database, const wxString& name)
-    : MetadataItem(ntTrigger, database.get(), name)
+Trigger::Trigger(NodeType type, DatabasePtr database, const wxString& name)
+    : MetadataItem(type, database.get(), name), activeM(true)
 {
+}
+
+void Trigger::setActive(bool active)
+{
+    activeM = active;
 }
 
 bool Trigger::getActive()
 {
-    ensurePropertiesLoaded();
+    //ensurePropertiesLoaded();
     return activeM;
+}
+
+bool Trigger::isActive()
+{
+    return getActive();
 }
 
 wxString Trigger::getFiringEvent()
@@ -79,50 +106,87 @@ wxString Trigger::getFiringEvent()
     StatementBuilder sb;
     wxString result;
     FiringTime time = getFiringTime(typeM);
-    switch (time)
-    {
-        case databaseConnect:
+    if ((typeM & TRIGGER_TYPE_MASK) == TRIGGER_TYPE_DB) {
+        switch (typeM & ~TRIGGER_TYPE_DB)
+        {
+        case DB_TRIGGER_CONNECT:
             sb << kwON << ' ' << kwCONNECT;
             break;
-        case databaseDisconnect:
+        case DB_TRIGGER_DISCONNECT:
             sb << kwON << ' ' << kwDISCONNECT;
             break;
-        case transactionStart:
+        case DB_TRIGGER_TRANS_START:
             sb << kwON << ' ' << kwTRANSACTION << ' ' << kwSTART;
             break;
-        case transactionCommit:
+        case DB_TRIGGER_TRANS_COMMIT:
             sb << kwON << ' ' << kwTRANSACTION << ' ' << kwCOMMIT;
             break;
-        case transactionRollback:
+        case DB_TRIGGER_TRANS_ROLLBACK:
             sb << kwON << ' ' << kwTRANSACTION << ' ' << kwROLLBACK;
             break;
         default:
             break;
+        }
     }
-
-    if (time == beforeIUD || time == afterIUD)
-    {
-        if (time == beforeIUD)
+    if (((typeM & TRIGGER_TYPE_MASK) == TRIGGER_TYPE_DML)) {
+        if (time == beforeIUD || time == afterIUD)
+        {
+            if (((typeM + 1) & 1) == 0)
+                sb << kwBEFORE;
+            else
+                sb << kwAFTER;
+            sb << ' ';
+            // For explanation: read README.universal_triggers file in Firebird's
+            //                  doc/sql.extensions directory
+            wxString types[] = { SqlTokenizer::getKeyword(kwINSERT),
+                SqlTokenizer::getKeyword(kwUPDATE),
+                SqlTokenizer::getKeyword(kwDELETE) };
+            int type = typeM + 1;    // compensate for decrement
+            type >>= 1;              // remove bit 0
+            for (int i = 0; i < 3; ++i, type >>= 2)
+            {
+                if (type % 4)
+                {
+                    if (i)
+                        sb << ' ' << kwOR << ' ';
+                    sb << types[(type % 4) - 1];
+                }
+            }
+        }
+    }
+    if (((typeM & TRIGGER_TYPE_MASK) == TRIGGER_TYPE_DDL)) {
+        bool first = true;
+        if ((typeM & 1) == DDL_TRIGGER_BEFORE)
             sb << kwBEFORE;
         else
             sb << kwAFTER;
-        sb << ' ';
-        // For explanation: read README.universal_triggers file in Firebird's
-        //                  doc/sql.extensions directory
-        wxString types[] = { SqlTokenizer::getKeyword(kwINSERT),
-            SqlTokenizer::getKeyword(kwUPDATE),
-            SqlTokenizer::getKeyword(kwDELETE) };
-        int type = typeM + 1;    // compensate for decrement
-        type >>= 1;              // remove bit 0
-        for (int i = 0; i < 3; ++i, type >>= 2)
+        if ((typeM & DDL_TRIGGER_ANY) == DDL_TRIGGER_ANY)
+            sb << " ANY DDL STATEMENT ";
+        else
         {
-            if (type % 4)
+            for (SINT64 pos = 1; pos < 64; ++pos)
             {
-                if (i)
-                    sb << ' ' << kwOR << ' ';
-                sb << types[ (type%4) - 1 ];
+                if (((1LL << pos) & TRIGGER_TYPE_MASK) || (typeM & (1LL << pos)) == 0)
+                    continue;
+
+                if (first)
+                    first = false;
+                else
+                    sb << " OR";
+
+                sb << " ";
+
+                if (pos < FB_NELEM(DDL_TRIGGER_ACTION_NAMES))
+                {
+                    sb << wxString(DDL_TRIGGER_ACTION_NAMES[pos][0]) + " " +
+                        DDL_TRIGGER_ACTION_NAMES[pos][1];
+                }
+                else
+                    sb << "<unknown>";
             }
+
         }
+
     }
     return sb;
 }
@@ -142,7 +206,7 @@ int Trigger::getPosition()
 wxString Trigger::getRelationName()
 {
     ensurePropertiesLoaded();
-    if (!isDatabaseTrigger())
+    if (isDMLTrigger())
         return relationNameM;
     return wxEmptyString;
 }
@@ -195,6 +259,7 @@ void Trigger::loadProperties()
         activeM = (temp == 0);
 
         st1->Get(4, &typeM);
+        st1->Get(4, typeM);
 
 
         if (!st1->IsNull(8))
@@ -214,7 +279,7 @@ void Trigger::loadProperties()
 			entryPointM = std2wxIdentifier(s, converter);
             if (!st1->IsNull(7))
             {
-                std::string s;
+                //std::string s;
                 st1->Get(7, s);
                 sourceM += "ENGINE " + std2wxIdentifier(s, converter) + "\n";
                 engineNameM = std2wxIdentifier(s, converter);
@@ -278,17 +343,22 @@ wxString Trigger::getAlterSql()
     return sb;
 }
 
-bool Trigger::isDatabaseTrigger()
+bool Trigger::isDBTrigger()
 {
     ensurePropertiesLoaded();
-    switch (getFiringTime(typeM))
-    {
-        case databaseConnect:
-        case databaseDisconnect:
-            return true;
-        default:
-            return false;
-    }
+    return (typeM & TRIGGER_TYPE_MASK) == TRIGGER_TYPE_DB;
+}
+
+bool Trigger::isDDLTrigger()
+{
+    ensurePropertiesLoaded();
+    return (typeM & TRIGGER_TYPE_MASK) == TRIGGER_TYPE_DDL;
+}
+
+bool Trigger::isDMLTrigger()
+{
+    ensurePropertiesLoaded();
+    return (typeM & TRIGGER_TYPE_MASK) == TRIGGER_TYPE_DML;
 }
 
 wxString Trigger::getSqlSecurity()
@@ -308,38 +378,50 @@ void Trigger::acceptVisitor(MetadataItemVisitor* visitor)
 }
 
 // Triggers collection
-Triggers::Triggers(DatabasePtr database)
-    : MetadataCollection<Trigger>(ntTriggers, database, _("Triggers"))
+DMLTriggers::DMLTriggers(DatabasePtr database)
+    : MetadataCollection<DMLTrigger>(ntDMLTriggers, database, _("Triggers"))
 {
 }
 
-void Triggers::acceptVisitor(MetadataItemVisitor* visitor)
+void DMLTriggers::acceptVisitor(MetadataItemVisitor* visitor)
 {
-    visitor->visitTriggers(*this);
+    visitor->visitDMLTriggers(*this);
 }
 
-void Triggers::load(ProgressIndicator* progressIndicator)
+void DMLTriggers::load(ProgressIndicator* progressIndicator)
 {
     wxString stmt = "select rdb$trigger_name from rdb$triggers"
         " where (rdb$system_flag = 0 or rdb$system_flag is null) "
-        " and rdb$trigger_type between 1 and 6 "
-        " order by 1";
+        " and rdb$relation_name is not null  ";
+    if (getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        stmt += "and BIN_AND(rdb$trigger_type,"+ std::to_string(TRIGGER_TYPE_MASK)+") = "+ std::to_string(TRIGGER_TYPE_DML);
+    stmt += " order by 1";
+
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+
+    stmt = "select rdb$trigger_name from rdb$triggers"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)  and rdb$trigger_inactive = 1"
+        " and rdb$relation_name is not null  ";
+    if (getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        stmt += "and BIN_AND(rdb$trigger_type," + std::to_string(TRIGGER_TYPE_MASK) + ") = " + std::to_string(TRIGGER_TYPE_DML);
+    stmt += " order by 1";
+
+    setInactiveItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 
-void Triggers::loadChildren()
+void DMLTriggers::loadChildren()
 {
     load(0);
 }
 
-const wxString Triggers::getTypeName() const
+const wxString DMLTriggers::getTypeName() const
 {
     return "TRIGGER_COLLECTION";
 }
 
 // DB Triggers collection
 DBTriggers::DBTriggers(DatabasePtr database)
-    : MetadataCollection<Trigger>(ntDBTriggers, database, _("Database Triggers"))
+    : MetadataCollection<DBTrigger>(ntDBTriggers, database, _("Database Triggers"))
 {
 }
 
@@ -352,10 +434,20 @@ void DBTriggers::load(ProgressIndicator* progressIndicator)
 {
     wxString stmt = "select rdb$trigger_name from rdb$triggers"
         " where (rdb$system_flag = 0 or rdb$system_flag is null) "
-        " and rdb$trigger_type between 8192 and 8196 "
+        " and BIN_AND(rdb$trigger_type," + std::to_string(TRIGGER_TYPE_MASK) + ") = " + std::to_string(TRIGGER_TYPE_DB)+
         " order by 1";
-    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator)); 
+
+    stmt = "select rdb$trigger_name from rdb$triggers"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null) and rdb$trigger_inactive = 1"
+        " and BIN_AND(rdb$trigger_type," + std::to_string(TRIGGER_TYPE_MASK) + ") = " + std::to_string(TRIGGER_TYPE_DB) +
+        " order by 1";
+
+    setInactiveItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+
 }
+
+
 
 void DBTriggers::loadChildren()
 {
@@ -370,7 +462,7 @@ const wxString DBTriggers::getTypeName() const
 
 // DDL Triggers collection
 DDLTriggers::DDLTriggers(DatabasePtr database)
-    : MetadataCollection<Trigger>(ntDDLTriggers, database, _("DDL Triggers"))
+    : MetadataCollection<DDLTrigger>(ntDDLTriggers, database, _("DDL Triggers"))
 {
 }
 
@@ -383,9 +475,16 @@ void DDLTriggers::load(ProgressIndicator* progressIndicator)
 {
     wxString stmt = "select rdb$trigger_name from rdb$triggers"
         " where (rdb$system_flag = 0 or rdb$system_flag is null) "
-        " and rdb$trigger_type > 8196 "
+        " and BIN_AND(rdb$trigger_type," + std::to_string(TRIGGER_TYPE_MASK) + ") = " + std::to_string(TRIGGER_TYPE_DDL) +
         " order by 1";
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+
+    stmt = "select rdb$trigger_name from rdb$triggers"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null) and rdb$trigger_inactive = 1 "
+        " and BIN_AND(rdb$trigger_type," + std::to_string(TRIGGER_TYPE_MASK) + ") = " + std::to_string(TRIGGER_TYPE_DDL) +
+        " order by 1";
+
+    setInactiveItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 
 void DDLTriggers::loadChildren()
@@ -396,4 +495,37 @@ void DDLTriggers::loadChildren()
 const wxString DDLTriggers::getTypeName() const
 {
     return "DDLTRIGGER_COLLECTION";
+}
+
+DDLTrigger::DDLTrigger(DatabasePtr dataBase, const wxString& name)
+    :Trigger(ntDDLTrigger, dataBase, name)
+{
+
+}
+
+void DDLTrigger::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitDDLTrigger(*this);
+}
+
+DBTrigger::DBTrigger(DatabasePtr dataBase, const wxString& name)
+    :Trigger(ntDBTrigger, dataBase, name)
+{
+}
+
+void DBTrigger::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitDBTrigger(*this);
+}
+
+DMLTrigger::DMLTrigger(DatabasePtr dataBase, const wxString& name)
+    :Trigger(ntDMLTrigger, dataBase, name)
+{
+
+}
+
+void DMLTrigger::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitDMLTrigger(*this);
+
 }

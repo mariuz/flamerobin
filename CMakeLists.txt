@@ -63,6 +63,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/addconstrainthandler.cpp
         ${SOURCEDIR}/config/Config.cpp
         ${SOURCEDIR}/config/DatabaseConfig.cpp
+        ${SOURCEDIR}/config/LocalSettings.cpp
         ${SOURCEDIR}/core/ArtProvider.cpp
         ${SOURCEDIR}/core/CodeTemplateProcessor.cpp
         ${SOURCEDIR}/core/FRError.cpp
@@ -146,6 +147,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/metadata/MetadataItemVisitor.cpp
         ${SOURCEDIR}/metadata/MetadataTemplateCmdHandler.cpp
         ${SOURCEDIR}/metadata/MetadataTemplateManager.cpp
+        ${SOURCEDIR}/metadata/package.cpp
         ${SOURCEDIR}/metadata/parameter.cpp
         ${SOURCEDIR}/metadata/privilege.cpp
         ${SOURCEDIR}/metadata/procedure.cpp
@@ -170,6 +172,7 @@ list(APPEND SOURCE_LIST
 list(APPEND HEADER_LIST
         ${SOURCEDIR}/config/Config.h
         ${SOURCEDIR}/config/DatabaseConfig.h
+        ${SOURCEDIR}/config/LocalSettings.h
         ${SOURCEDIR}/core/ArtProvider.h
         ${SOURCEDIR}/core/CodeTemplateProcessor.h
         ${SOURCEDIR}/core/FRError.h
@@ -241,6 +244,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/MasterPassword.h
         ${SOURCEDIR}/metadata/collection.h
         ${SOURCEDIR}/metadata/column.h
+        ${SOURCEDIR}/metadata/constants.h
         ${SOURCEDIR}/metadata/constraints.h
         ${SOURCEDIR}/metadata/CreateDDLVisitor.h
         ${SOURCEDIR}/metadata/database.h
@@ -256,6 +260,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/metadata/MetadataItemURIHandlerHelper.h
         ${SOURCEDIR}/metadata/MetadataItemVisitor.h
         ${SOURCEDIR}/metadata/MetadataTemplateManager.h
+        ${SOURCEDIR}/metadata/package.h
         ${SOURCEDIR}/metadata/parameter.h
         ${SOURCEDIR}/metadata/privilege.h
         ${SOURCEDIR}/metadata/procedure.h

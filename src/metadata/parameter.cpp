@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -46,7 +46,7 @@ Parameter::Parameter(MetadataItem* metadataitem, const wxString& name)
 
 void Parameter::initialize(const wxString& source, int parameterType,
     int mechanism, bool nullable, const wxString& defaultValue,
-    bool hasDefault, bool hasDescription)
+    bool hasDefault, bool hasDescription, wxString& relation, wxString& field)
 {
     SubjectLocker lock(this);
 
@@ -65,6 +65,8 @@ void Parameter::initialize(const wxString& source, int parameterType,
         outputParameterM = outputParam;
         changed= true;
     }
+    relationM = relation;
+    fieldM = field;
     if (changed)
         notifyObservers();
 }
@@ -87,5 +89,17 @@ const wxString Parameter::getTypeName() const
 void Parameter::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitParameter(*this);
+}
+
+wxString Parameter::getTypeOf()
+{
+    if (relationM.empty()) {
+        if (getSource() == "") {
+            return "TYPE OF " + getDomain()->getDatatypeAsString();
+        }else
+            return "TYPE OF " + getSource();
+    }
+    else
+        return "TYPE OF COLUMN " + relationM + "." + fieldM;
 }
 

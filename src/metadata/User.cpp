@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -31,6 +31,7 @@
 #endif
 
 #include "core/StringUtils.h"
+#include "metadata/MetadataItemVisitor.h"
 #include "metadata/server.h"
 #include "metadata/User.h"
 
@@ -169,3 +170,32 @@ bool User::isSystem() const
     return usernameM == "SYSDBA";
 }
 
+/*
+void Users::loadChildren()
+{
+    load(0);
+}
+
+Users::Users(DatabasePtr database)
+    : MetadataCollection<User>(ntUsers, database, _("Users"))
+{
+}
+
+void Users::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitUsers(*this);
+}
+
+void Users::load(ProgressIndicator* progressIndicator)
+{
+    DatabasePtr db = getDatabase();
+    wxString stmt = "select sec$user_name from sec$users a order by 1 ";
+    setItems(db->loadIdentifiers(stmt, progressIndicator));
+}
+
+const wxString Users::getTypeName() const
+{
+    return "USERS_COLLECTION";
+}
+
+*/

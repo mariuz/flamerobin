@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -26,6 +26,7 @@
 
 #include "metadata/collection.h"
 #include "metadata/database.h"
+#include "metadata/privilege.h"
 
 class ProgressIndicator;
 
@@ -33,6 +34,9 @@ class Generator: public MetadataItem
 {
 private:
     int64_t valueM;
+    int64_t initialValueM;
+    int64_t incrementalValueM;
+    std::vector<Privilege> privilegesM;
     void setValue(int64_t value);
 protected:
     virtual void loadProperties();
@@ -43,6 +47,8 @@ public:
 
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    wxString getSource();
+    std::vector<Privilege>* getPrivileges();
 };
 
 class Generators: public MetadataCollection<Generator>

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -37,6 +37,7 @@
 #include "sql/Identifier.h"
 
 class Dependency;
+class DependencyField;
 class MetadataItemVisitor;
 
 typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
@@ -44,14 +45,19 @@ typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
     ntTable, ntTables, ntGTT, ntGTTs,
     ntView, ntViews, ntProcedure, ntProcedures,
     ntTrigger, ntTriggers, ntGenerator, ntGenerators, 
-    ntFunction, ntFunctions, ntFunctionSQL, ntFunctionSQLs, ntUDF,  ntUDFs,
+    ntFunction, ntFunctions, 
+    ntFunctionSQL, ntFunctionSQLs, ntUDF,  ntUDFs,
     ntSysTable, ntSysTables, ntException, ntExceptions,
     ntDomain, ntDomains, ntSysDomain, ntSysDomains,
-    ntRole, ntRoles, ntSysRole, ntSysRoles, ntColumn, ntParameter, ntIndex,
+    ntRole, ntRoles, ntSysRole, ntSysRoles, ntColumn, ntParameter, 
+    ntIndex, ntIndices,
     ntPackage, ntPackages, ntSysPackage, ntSysPackages,
-    ntDBTrigger, 
-    ntDBTriggers, ntDDLTrigger, ntDDLTriggers,
+    ntDMLTrigger, ntDMLTriggers,
+    ntDBTrigger, ntDBTriggers, 
+    ntDDLTrigger, ntDDLTriggers,
     ntMethod,
+    ntUser, ntUsers,
+    ntSystem, 
     ntLastType
 } NodeType;
 
@@ -105,9 +111,10 @@ public:
     virtual void lockSubject();
     virtual void unlockSubject();
 
-    void getDependencies(std::vector<Dependency>& list, bool ofObject);  // load from db
+    void getDependencies(std::vector<Dependency>& list, bool ofObject, bool fieldsOnly=false);  // load from db
     void getDependencies(std::vector<Dependency>& list, bool ofObject,
         const wxString& field);  // load from db
+    void getDependenciesPivoted(std::vector<DependencyField>& list);
 
 
     // returned shared ptr may be unassigned
@@ -165,12 +172,28 @@ public:
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 
+class DependencyField : public MetadataItem
+{
+private:
+std::vector<Dependency> objectsM_;
+int positionM = 0;
+public:
+    DependencyField(wxString name, int position = 0);
+    int getPosition();
+    void getDependencies(std::vector<Dependency>& list) const;
+    void addDependency(const Dependency& other);
+    bool operator== (const DependencyField& other) const;
+    bool operator <(const DependencyField& other) const; //For sorting
+
+};
+
 //! masks the object it points to so others see it transparently
 class Dependency: public MetadataItem
 {
 private:
     MetadataItem *objectM;
-    std::vector<wxString> fieldsM;
+    std::vector<DependencyField> fieldsM;
+    MetadataItem *auxiliarM;  //For example, when listing a table as tependency of another tables, where whe will reference the FK related
 
 public:
     virtual MetadataItem *getParent() const;
@@ -178,15 +201,18 @@ public:
     virtual NodeType getType() const;
     virtual const wxString getTypeName() const;
     MetadataItem *getDependentObject() const;
+    MetadataItem * getAuxiliar() const;
 
-    Dependency(MetadataItem *object);
+    Dependency(MetadataItem *object, MetadataItem *auxiliar=0);
     wxString getFields() const;
-    void getFields(std::vector<wxString>& fields) const;
-    void addField(const wxString& name);
+    void getFields(std::vector<DependencyField>& fields) const;
+    void addField(const DependencyField& name);
+    void setFields(const std::vector<DependencyField>& fields);
     void setFields(const std::vector<wxString>& fields);
-    bool hasField(const wxString& name) const;
+    bool hasField(const DependencyField& name) const;
     bool operator== (const Dependency& other) const;
     bool operator!= (const Dependency& other) const;
+    bool operator <(const Dependency& other) const; //For sorting
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -89,9 +89,9 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
         _("Trigger:"));
     fgSizer3->Add(radiobtn_trigger, 0, wxALL|wxALIGN_CENTER_VERTICAL, 5);
     {
-        TriggersPtr tc(databaseM->getTriggers());
+        DMLTriggersPtr tc(databaseM->getDMLTriggers());
         wxArrayString choices;
-        for (Triggers::iterator it = tc->begin(); it != tc->end(); ++it)
+        for (DMLTriggers::iterator it = tc->begin(); it != tc->end(); ++it)
             choices.Add((*it)->getName_());
         choice_trigger = new wxChoice(granteePanel, ID_choice,
             wxDefaultPosition, wxDefaultSize, choices);

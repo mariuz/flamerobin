@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -46,6 +46,8 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/parameter.h"
 #include "metadata/package.h"
+#include "metadata/function.h"
+#include "metadata/procedure.h"
 
 Package::Package(DatabasePtr database, const wxString& name)
     : MetadataItem(ntPackage, database.get(), name)
@@ -87,7 +89,8 @@ void Package::loadChildren()
     st1->Set(2, wx2std(getName_(), converter));
     st1->Execute();
 
-    MethodPtrs methods;
+    FunctionSQLPtrs functions;
+    ProcedurePtrs procedures;
     while (st1->Fetch())
     {
         short objtype = -1;
@@ -96,21 +99,30 @@ void Package::loadChildren()
         st1->Get(2, s);
         wxString method_name(std2wxIdentifier(s, converter));
 
-        MethodPtr met = findMethod(method_name);
-        if (!met)
-        {
-            met.reset(new Method(this, method_name));
-            initializeLockCount(met, getLockCount());
+        if (objtype == 15) {
+            FunctionSQLPtr fun = findFunctionSQL(method_name);
+            if (!fun) {
+                fun.reset(new FunctionSQL(this, method_name));
+                initializeLockCount(fun, getLockCount());
+            }
+            functions.push_back(fun);
+        }else{
+            ProcedurePtr prc = findProcedure(method_name);
+            if (!prc) {
+                prc.reset(new Procedure(this, method_name));
+                initializeLockCount(prc, getLockCount());
+            }
+            procedures.push_back(prc);
         }
-        methods.push_back(met);
-        met->initialize(objtype);
     }
 
     setChildrenLoaded(true);
 
-    if (!childrenWereLoaded || methodsM != methods)
+    if (!childrenWereLoaded /*|| methodsM != methods*/)
     {
-        methodsM.swap(methods);
+        //methodsM.swap(methods);
+        functionsM.swap(functions);
+        proceduresM.swap(procedures);
         notifyObservers();
     }
 
@@ -118,23 +130,56 @@ void Package::loadChildren()
 
 bool Package::getChildren(std::vector<MetadataItem *>& temp)
 {
-    if (methodsM.empty())
+    if (functionsM.empty() && proceduresM.empty())
         return false;
-    std::transform(methodsM.begin(), methodsM.end(),
-        std::back_inserter(temp), std::mem_fn(&MethodPtr::get));
-    return !methodsM.empty();
+    std::transform(functionsM.begin(), functionsM.end(),
+        std::back_inserter(temp), std::mem_fn(&FunctionSQLPtr::get));
+    std::transform(proceduresM.begin(), proceduresM.end(),
+        std::back_inserter(temp), std::mem_fn(&ProcedurePtr::get));
+    return !(functionsM.empty() && proceduresM.empty());
 }
 
 void Package::lockChildren()
 {
     std::for_each(methodsM.begin(), methodsM.end(),
         std::mem_fn(&Method::lockSubject));
+    std::for_each(functionsM.begin(), functionsM.end(),
+        std::mem_fn(&FunctionSQL::lockSubject));
+    std::for_each(proceduresM.begin(), proceduresM.end(),
+        std::mem_fn(&Procedure::lockSubject));
+
 }
 
 void Package::unlockChildren()
 {
     std::for_each(methodsM.begin(), methodsM.end(),
         std::mem_fn(&Method::unlockSubject));
+    std::for_each(functionsM.begin(), functionsM.end(),
+        std::mem_fn(&FunctionSQL::unlockSubject));
+    std::for_each(proceduresM.begin(), proceduresM.end(),
+        std::mem_fn(&Procedure::unlockSubject));
+}
+
+FunctionSQLPtr Package::findFunctionSQL(const wxString& name) const
+{
+    for (FunctionSQLPtrs::const_iterator it = functionsM.begin();
+        it != functionsM.end(); ++it)
+    {
+        if ((*it)->getName_() == name)
+            return *it;
+    }
+    return FunctionSQLPtr();
+}
+
+ProcedurePtr Package::findProcedure(const wxString& name) const
+{
+    for (ProcedurePtrs::const_iterator it = proceduresM.begin();
+        it != proceduresM.end(); ++it)
+    {
+        if ((*it)->getName_() == name)
+            return *it;
+    }
+    return ProcedurePtr();
 }
 
 MethodPtrs::iterator Package::begin()
@@ -149,7 +194,7 @@ MethodPtrs::iterator Package::begin()
 MethodPtrs::iterator Package::end()
 {
     // please see comment for begin()
-    return methodsM.end();
+    return methodsM.end();    
 }
 
 MethodPtrs::const_iterator Package::begin() const
@@ -175,7 +220,8 @@ MethodPtr Package::findMethod(const wxString& name) const
 
 size_t Package::getMethodCount() const
 {
-    return methodsM.size();
+    //return methodsM.size();
+    return functionsM.size() + proceduresM.size();
 }
 
 wxString Package::getOwner()
@@ -296,7 +342,7 @@ wxString Package::getAlterBody()
     return sql;
 }
 
-wxString Package::getAlterSql(bool full)
+wxString Package::getAlterSql(bool WXUNUSED(full))
 {
     ensureChildrenLoaded();
 
@@ -320,16 +366,16 @@ void Package::checkDependentPackage()
     for (std::vector<Dependency>::iterator it = deps.begin();
         it != deps.end(); ++it)
     {
-        std::vector<wxString> fields;
+        std::vector<DependencyField> fields;
         (*it).getFields(fields);
-        for (std::vector<wxString>::const_iterator ci = fields.begin();
+        for (std::vector<DependencyField>::const_iterator ci = fields.begin();
             ci != fields.end(); ++ci)
         {
             bool found = false;
             for (MethodPtrs::iterator i2 = begin();
                 i2 != end(); ++i2)
             {
-                if ((*i2)->getName_() == (*ci))
+                if ((*i2)->getName_() == (ci->getName_()))
                 {
                     found = true;
                     break;
@@ -340,7 +386,7 @@ void Package::checkDependentPackage()
                 missing += wxString::Format(
                     _("Package %s depends on parameter %s.%s"),
                     (*it).getName_().c_str(),
-                    (*ci).c_str(),
+                    (ci->getName_()).c_str(),
                     wxTextBuffer::GetEOL()
                 );
             }
@@ -483,6 +529,11 @@ void Method::acceptVisitor(MetadataItemVisitor* visitor)
 void Method::initialize(int MethodType)
 {
     functionM = MethodType == 15;
+}
+
+wxString Method::getQuotedName() const
+{
+    return getParent()->getQuotedName() + '.' + MetadataItem::getQuotedName();
 }
 
 // System Packages collection

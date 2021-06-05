@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -34,6 +34,13 @@
 #define ART_Computed                wxART_MAKE_ART_ID(ART_Computed)
 #define ART_DatabaseConnected       wxART_MAKE_ART_ID(ART_DatabaseConnected)
 #define ART_DatabaseDisconnected    wxART_MAKE_ART_ID(ART_DatabaseDisconnected)
+#define ART_DatabaseServer          wxART_MAKE_ART_ID(ART_DatabaseServer)
+#define ART_DBTrigger               wxART_MAKE_ART_ID(ART_DBTrigger)
+#define ART_DBTriggers              wxART_MAKE_ART_ID(ART_DBTriggers)
+#define ART_DMLTrigger              wxART_MAKE_ART_ID(ART_DMLTrigger)
+#define ART_DMLTriggers             wxART_MAKE_ART_ID(ART_DMLTriggers)
+#define ART_DDLTrigger              wxART_MAKE_ART_ID(ART_DDLTrigger)
+#define ART_DDLTriggers             wxART_MAKE_ART_ID(ART_DDLTriggers)
 #define ART_Domain                  wxART_MAKE_ART_ID(ART_Domain)
 #define ART_Domains                 wxART_MAKE_ART_ID(ART_Domains)
 #define ART_Exception               wxART_MAKE_ART_ID(ART_Exception)
@@ -43,7 +50,13 @@
 #define ART_Functions               wxART_MAKE_ART_ID(ART_Functions)
 #define ART_Generator               wxART_MAKE_ART_ID(ART_Generator)
 #define ART_Generators              wxART_MAKE_ART_ID(ART_Generators)
+#define ART_GlobalTemporary         wxART_MAKE_ART_ID(ART_GlobalTemporary)
+#define ART_GlobalTemporaries       wxART_MAKE_ART_ID(ART_GlobalTemporaries)
+#define ART_Index                   wxART_MAKE_ART_ID(ART_Index)
+#define ART_Indices                 wxART_MAKE_ART_ID(ART_Indices)
+#define ART_Input                   wxART_MAKE_ART_ID(ART_Input)
 #define ART_Object                  wxART_MAKE_ART_ID(ART_Object)
+#define ART_Output                  wxART_MAKE_ART_ID(ART_Output)
 #define ART_Package                 wxART_MAKE_ART_ID(ART_Package)
 #define ART_Packages                wxART_MAKE_ART_ID(ART_Packages)
 #define ART_ParameterInput          wxART_MAKE_ART_ID(ART_ParameterInput)
@@ -68,6 +81,10 @@
 #define ART_Tables                  wxART_MAKE_ART_ID(ART_Tables)
 #define ART_Trigger                 wxART_MAKE_ART_ID(ART_Trigger)
 #define ART_Triggers                wxART_MAKE_ART_ID(ART_Triggers)
+#define ART_UDF                     wxART_MAKE_ART_ID(ART_UDF)
+#define ART_UDFs                    wxART_MAKE_ART_ID(ART_UDFs)
+#define ART_User                    wxART_MAKE_ART_ID(ART_User)
+#define ART_Users                   wxART_MAKE_ART_ID(ART_Users)
 #define ART_View                    wxART_MAKE_ART_ID(ART_View)
 #define ART_Views                   wxART_MAKE_ART_ID(ART_Views)
 

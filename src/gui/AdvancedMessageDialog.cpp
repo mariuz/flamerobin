@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -320,7 +320,7 @@ AdvancedMessageDialog::AdvancedMessageDialog(wxWindow* parent, wxArtID iconId,
     wxStaticText* labelPrimary = new wxStaticText(getControlsPanel(),
         wxID_ANY, wxEmptyString /*primaryText*/);
     wxFont primaryLabelFont(labelPrimary->GetFont());
-    primaryLabelFont.SetWeight(wxBOLD);
+    primaryLabelFont.MakeBold();
 #ifdef __WXGTK__
     primaryLabelFont.SetPointSize(primaryLabelFont.GetPointSize() * 4 / 3);
 #endif

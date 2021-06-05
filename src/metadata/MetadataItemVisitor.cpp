@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -96,6 +96,16 @@ void MetadataItemVisitor::visitUDFs(UDFs&)
     defaultAction();
 }
 
+void MetadataItemVisitor::visitUser(User& )
+{
+	defaultAction();
+}
+
+void MetadataItemVisitor::visitUsers(Users& )
+{
+    defaultAction();
+}
+
 void MetadataItemVisitor::visitGenerator(Generator&)
 {
     defaultAction();
@@ -109,6 +119,11 @@ void MetadataItemVisitor::visitGenerators(Generators&)
 void MetadataItemVisitor::visitIndex(Index&)
 {
     defaultAction();
+}
+
+void MetadataItemVisitor::visitIndices(Indices&)
+{
+	defaultAction();
 }
 
 void MetadataItemVisitor::visitParameter(Parameter&)
@@ -131,7 +146,7 @@ void MetadataItemVisitor::visitPackages(Packages&)
     defaultAction();
 }
 
-void MetadataItemVisitor::visitSysPackages(SysPackages& packages)
+void MetadataItemVisitor::visitSysPackages(SysPackages&)
 {
     defaultAction();
 }
@@ -186,7 +201,7 @@ void MetadataItemVisitor::visitSysTables(SysTables&)
     defaultAction();
 }
 
-void MetadataItemVisitor::visitGTTs(GTTs&)
+void MetadataItemVisitor::visitGTTables(GTTables&)
 {
     defaultAction();
 }
@@ -195,6 +210,16 @@ void MetadataItemVisitor::visitGTTs(GTTs&)
 void MetadataItemVisitor::visitTable(Table& table)
 {
     visitRelation(*(Relation*)&table);
+}
+
+void MetadataItemVisitor::visitSysTable(SysTable& table)
+{
+    visitTable(*(Table*)&table);
+}
+
+void MetadataItemVisitor::visitGTTable(GTTable& table)
+{
+    visitTable(*(Table*)&table);
 }
 
 void MetadataItemVisitor::visitTables(Tables&)
@@ -208,6 +233,26 @@ void MetadataItemVisitor::visitTrigger(Trigger&)
 }
 
 void MetadataItemVisitor::visitTriggers(Triggers&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitDBTrigger(DBTrigger&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitDDLTrigger(DDLTrigger&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitDMLTrigger(DMLTrigger&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitDMLTriggers(DMLTriggers&)
 {
     defaultAction();
 }
@@ -242,7 +287,7 @@ void MetadataItemVisitor::visitMetadataItem(MetadataItem&)
     defaultAction();
 }
 
-void MetadataItemVisitor::visitMethod(Method& method)
+void MetadataItemVisitor::visitMethod(Method&)
 {
     defaultAction();
 }

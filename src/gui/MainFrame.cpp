@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -65,8 +65,10 @@
 #include "metadata/column.h"
 #include "metadata/domain.h"
 #include "metadata/generator.h"
+#include "metadata/function.h"
 #include "metadata/MetadataItemCreateStatementVisitor.h"
 #include "metadata/MetadataTemplateManager.h"
+#include "metadata/package.h"
 #include "metadata/procedure.h"
 #include "metadata/root.h"
 #include "metadata/server.h"
@@ -219,22 +221,25 @@ void MainFrame::buildMainMenu()
     serverMenu->Append(Cmds::Menu_ManageUsers, _("&Manage users"));
     menuBarM->Append(serverMenu, _("&Server"));
 
+
     objectMenuM = new wxMenu();
     wxMenu* newMenu = new wxMenu();
-    newMenu->Append(Cmds::Menu_CreateDomain,      _("&Domain"));
-    newMenu->Append(Cmds::Menu_CreateException,   _("&Exception"));
-    newMenu->Append(Cmds::Menu_CreateFunction,    _("&Function"));
-    newMenu->Append(Cmds::Menu_CreateGenerator,   _("&Generator"));
-    newMenu->Append(Cmds::Menu_CreatePackage,     _("P&ackage"));
-    newMenu->Append(Cmds::Menu_CreateProcedure,   _("&Procedure"));
-    newMenu->Append(Cmds::Menu_CreateRole,        _("&Role"));
-    newMenu->Append(Cmds::Menu_CreateTable,       _("&Table"));
-    newMenu->Append(Cmds::Menu_CreateGTTTable,    _("GTT Table"));
-    newMenu->Append(Cmds::Menu_CreateTrigger,     _("Tr&igger"));
-    newMenu->Append(Cmds::Menu_CreateDBTrigger,   _("D&B Trigger"));
-    newMenu->Append(Cmds::Menu_CreateDDLTrigger,  _("DD&L Trigger"));
-    newMenu->Append(Cmds::Menu_CreateUDF,         _("&UDF"));
-    newMenu->Append(Cmds::Menu_CreateView,        _("&View"));
+    newMenu->Append(Cmds::Menu_CreateDBTrigger, _("D&B Trigger"));
+    newMenu->Append(Cmds::Menu_CreateDDLTrigger, _("DD&L Trigger"));
+    newMenu->Append(Cmds::Menu_CreateDMLTrigger, _("DML Tr&igger"));
+    newMenu->Append(Cmds::Menu_CreateDomain, _("&Domain"));
+    newMenu->Append(Cmds::Menu_CreateException, _("&Exception"));
+    newMenu->Append(Cmds::Menu_CreateFunction, _("&Function"));
+    newMenu->Append(Cmds::Menu_CreateGenerator, _("&Generator"));
+    newMenu->Append(Cmds::Menu_CreateGTTTable, _("Global Temporary"));
+    newMenu->Append(Cmds::Menu_CreateIndex, _("&Index"));
+    newMenu->Append(Cmds::Menu_CreatePackage, _("P&ackage"));
+    newMenu->Append(Cmds::Menu_CreateProcedure, _("&Procedure"));
+    newMenu->Append(Cmds::Menu_CreateRole, _("&Role"));
+    newMenu->Append(Cmds::Menu_CreateTable, _("&Table"));
+    newMenu->Append(Cmds::Menu_CreateUDF, _("&UDF"));
+    newMenu->Append(Cmds::Menu_CreateUser, _("U&ser"));
+    newMenu->Append(Cmds::Menu_CreateView, _("&View"));
     // removed accelerator from "New", any of them potentially conflicts
     // with one of the commands in the object menu
     objectMenuM->Append(Cmds::Menu_NewObject, _("New"), newMenu);
@@ -425,6 +430,13 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(Cmds::Menu_ShowGeneratorValue, MainFrame::OnMenuShowGeneratorValue)
     EVT_MENU(Cmds::Menu_SetGeneratorValue, MainFrame::OnMenuSetGeneratorValue)
 
+    EVT_MENU(Cmds::Menu_ShowAllStatisticsValue, MainFrame::OnMenuShowAllStatisticsValues)
+    EVT_UPDATE_UI(Cmds::Menu_ShowAllStatisticsValue, MainFrame::OnMenuUpdateIfMetadataItemHasChildren)
+    EVT_MENU(Cmds::Menu_ShowStatisticsValue, MainFrame::OnMenuShowStatisticsValue)
+    EVT_MENU(Cmds::Menu_SetStatisticsValue, MainFrame::OnMenuSetStatisticsValue)
+
+
+
     EVT_MENU(Cmds::Menu_CreateObject, MainFrame::OnMenuCreateObject)
     EVT_MENU(Cmds::Menu_AlterObject, MainFrame::OnMenuAlterObject)
     EVT_MENU(Cmds::Menu_DropObject, MainFrame::OnMenuDropObject)
@@ -432,6 +444,9 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_UPDATE_UI(Cmds::Menu_ObjectProperties, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
     EVT_MENU(Cmds::Menu_ObjectRefresh, MainFrame::OnMenuObjectRefresh)
     EVT_UPDATE_UI(Cmds::Menu_ObjectRefresh, MainFrame::OnMenuUpdateIfDatabaseConnected)
+    EVT_MENU(Cmds::Menu_RebuildObject, MainFrame::OnMenRebuildObject)
+    EVT_MENU(Cmds::Menu_ActiveObject, MainFrame::OnMenActiveObject)
+    EVT_MENU(Cmds::Menu_InactiveObject, MainFrame::OnMenInactiveObject)
 
     EVT_MENU(Cmds::Menu_ToggleStatusBar, MainFrame::OnMenuToggleStatusBar)
     EVT_MENU(Cmds::Menu_ToggleSearchBar, MainFrame::OnMenuToggleSearchBar)
@@ -443,19 +458,21 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_BUTTON(MainFrame::ID_button_prev, MainFrame::OnButtonPrevClick)
     EVT_BUTTON(MainFrame::ID_button_next, MainFrame::OnButtonNextClick)
 
+    EVT_MENU(Cmds::Menu_CreateDBTrigger,  MainFrame::OnMenuCreateDBTrigger)
+    EVT_MENU(Cmds::Menu_CreateDDLTrigger, MainFrame::OnMenuCreateDDLTrigger)
+    EVT_MENU(Cmds::Menu_CreateDMLTrigger, MainFrame::OnMenuCreateDMLTrigger)
     EVT_MENU(Cmds::Menu_CreateDomain,     MainFrame::OnMenuCreateDomain)
     EVT_MENU(Cmds::Menu_CreateException,  MainFrame::OnMenuCreateException)
     EVT_MENU(Cmds::Menu_CreateFunction,   MainFrame::OnMenuCreateFunction)
     EVT_MENU(Cmds::Menu_CreateGenerator,  MainFrame::OnMenuCreateGenerator)
+    EVT_MENU(Cmds::Menu_CreateGTTTable,   MainFrame::OnMenuCreateGTTTable)
+    EVT_MENU(Cmds::Menu_CreateIndex,      MainFrame::OnMenuCreateIndex)
     EVT_MENU(Cmds::Menu_CreatePackage,    MainFrame::OnMenuCreatePackage)
     EVT_MENU(Cmds::Menu_CreateProcedure,  MainFrame::OnMenuCreateProcedure)
     EVT_MENU(Cmds::Menu_CreateRole,       MainFrame::OnMenuCreateRole)
     EVT_MENU(Cmds::Menu_CreateTable,      MainFrame::OnMenuCreateTable)
-    EVT_MENU(Cmds::Menu_CreateGTTTable,   MainFrame::OnMenuCreateGTTTable)
-    EVT_MENU(Cmds::Menu_CreateTrigger,    MainFrame::OnMenuCreateTrigger)
-    EVT_MENU(Cmds::Menu_CreateDBTrigger,  MainFrame::OnMenuCreateDBTrigger)
-    EVT_MENU(Cmds::Menu_CreateDDLTrigger, MainFrame::OnMenuCreateDDLTrigger)
     EVT_MENU(Cmds::Menu_CreateUDF,        MainFrame::OnMenuCreateUDF)
+    EVT_MENU(Cmds::Menu_CreateUser,       MainFrame::OnMenuCreateUser)
     EVT_MENU(Cmds::Menu_CreateView,       MainFrame::OnMenuCreateView)
 
     EVT_MENU_RANGE(Cmds::Menu_TemplateFirst, Cmds::Menu_TemplateLast,
@@ -647,7 +664,9 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
             case ntDomain:
             case ntFunction:
             case ntUDF:
-            case ntTrigger:
+            case ntDBTrigger:
+            case ntDDLTrigger:
+            case ntDMLTrigger:
             case ntException:
             case ntRole:
             case ntSysRole:
@@ -782,6 +801,67 @@ void MainFrame::OnMenuExecuteFunction(wxCommandEvent& WXUNUSED(event))
     executeSysTemplate("execute_function",
         treeMainM->getSelectedMetadataItem(), this);
 
+}
+
+void MainFrame::OnMenActiveObject(wxCommandEvent& WXUNUSED(event))
+{
+    MetadataItem* mi = treeMainM->getSelectedMetadataItem();
+    URI uri;
+    if (dynamic_cast<Trigger*>(mi))
+    {
+        uri.parseURI("fr://activate_trigger");
+    }
+    else
+    if (dynamic_cast<Index*>(mi))
+    {
+        uri.parseURI("fr://index_action");
+        uri.addParam("type=TOGGLE_ACTIVE");
+    }
+    uri.addParam(wxString::Format("parent_window=%p", this));
+    uri.addParam(wxString::Format("object_handle=%lu", mi->getHandle()));
+    getURIProcessor().handleURI(uri);
+    return;
+}
+
+void MainFrame::OnMenInactiveObject(wxCommandEvent& WXUNUSED(event))
+{
+    MetadataItem* mi = treeMainM->getSelectedMetadataItem();
+    URI uri;
+    if (dynamic_cast<Trigger*>(mi))
+    {
+        uri.parseURI("fr://deactivate_trigger");
+    }else
+    if (dynamic_cast<Index*>(mi))
+    {
+        uri.parseURI("fr://index_action");
+        uri.addParam("type=TOGGLE_ACTIVE");
+    }
+    uri.addParam(wxString::Format("parent_window=%p", this));
+    uri.addParam(wxString::Format("object_handle=%lu", mi->getHandle()));
+    getURIProcessor().handleURI(uri);
+    return;
+}
+
+void MainFrame::OnMenuShowAllStatisticsValues(wxCommandEvent& WXUNUSED(event))
+{
+}
+
+void MainFrame::OnMenuShowStatisticsValue(wxCommandEvent& WXUNUSED(event))
+{
+}
+
+void MainFrame::OnMenuSetStatisticsValue(wxCommandEvent& WXUNUSED(event))
+{
+    MetadataItem* mi = treeMainM->getSelectedMetadataItem();
+    if (dynamic_cast<Index*>(mi))
+    {
+        URI uri("fr://index_action");
+        uri.addParam(wxString::Format("parent_window=%p", this));
+        uri.addParam(wxString::Format("object_handle=%lu", mi->getHandle()));
+        uri.addParam("type=RECOMPUTE");
+        getURIProcessor().handleURI(uri);
+        return;
+    }
 }
 
 void MainFrame::OnMenuDatabasePreferences(wxCommandEvent& WXUNUSED(event))
@@ -1285,6 +1365,12 @@ void MainFrame::OnMenuCreateFunction(wxCommandEvent& WXUNUSED(event))
         MetadataItemCreateStatementVisitor::getCreateFunctionSQLStatement());
 }
 
+void MainFrame::OnMenuCreateIndex(wxCommandEvent& WXUNUSED(event))
+{
+    showCreateTemplate(
+        MetadataItemCreateStatementVisitor::getCreateIndexStatement());
+}
+
 void MainFrame::OnMenuCreateGenerator(wxCommandEvent& WXUNUSED(event))
 {
     showCreateTemplate(
@@ -1321,10 +1407,10 @@ void MainFrame::OnMenuCreateGTTTable(wxCommandEvent& WXUNUSED(event))
         MetadataItemCreateStatementVisitor::getCreateGTTTableStatement());
 }
 
-void MainFrame::OnMenuCreateTrigger(wxCommandEvent& WXUNUSED(event))
+void MainFrame::OnMenuCreateDMLTrigger(wxCommandEvent& WXUNUSED(event))
 {
     showCreateTemplate(
-        MetadataItemCreateStatementVisitor::getCreateTriggerStatement());
+        MetadataItemCreateStatementVisitor::getCreateDMLTriggerStatement());
 }
 
 void MainFrame::OnMenuCreateDBTrigger(wxCommandEvent& WXUNUSED(event))
@@ -1343,6 +1429,12 @@ void MainFrame::OnMenuCreateUDF(wxCommandEvent& WXUNUSED(event))
 {
     showCreateTemplate(
         MetadataItemCreateStatementVisitor::getCreateUDFStatement());
+}
+
+void MainFrame::OnMenuCreateUser(wxCommandEvent& WXUNUSED(event))
+{
+    showCreateTemplate(
+        MetadataItemCreateStatementVisitor::getCreateUserStatement());
 }
 
 void MainFrame::OnMenuCreateView(wxCommandEvent& WXUNUSED(event))
@@ -1557,14 +1649,33 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
 
     wxString sql;
     if (View* v = dynamic_cast<View*>(mi))
-        sql = v->getRebuildSql();
+        sql = v->getAlterSql();
+        //        sql = v->getRebuildSql();
     else if (Trigger* t = dynamic_cast<Trigger*>(mi))
         sql = t->getAlterSql();
     else if (Domain* dm = dynamic_cast<Domain*>(mi))
         sql = dm->getAlterSqlTemplate();
+    else if (Package* pk = dynamic_cast<Package*>(mi))
+        sql = pk->getAlterSql();
+    else if (FunctionSQL* fn = dynamic_cast<FunctionSQL*>(mi))
+        sql = fn->getAlterSql();
 
     if (!sql.empty())
         showSql(this, wxString(_("Alter object")), db, sql);
+}
+
+void MainFrame::OnMenRebuildObject(wxCommandEvent& WXUNUSED(event))
+{
+    MetadataItem* mi = treeMainM->getSelectedMetadataItem();
+    DatabasePtr db = getDatabase(mi);
+    if (!db)
+        return;
+
+    wxString sql;
+    if (View* v = dynamic_cast<View*>(mi))
+        sql = v->getRebuildSql();
+    if (!sql.empty())
+        showSql(this, wxString(_("Rebuild object")), db, sql);
 }
 
 void MainFrame::OnMenuRecreateDatabase(wxCommandEvent& WXUNUSED(event))

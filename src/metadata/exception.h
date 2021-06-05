@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -26,6 +26,7 @@
 #define FR_EXCEPTION_H
 
 #include "metadata/collection.h"
+#include "metadata/privilege.h"
 
 class Exceptions;
 class ProgressIndicator;
@@ -35,6 +36,7 @@ class Exception: public MetadataItem
 private:
     wxString messageM;
     int numberM;
+    std::vector<Privilege> privilegesM;
     static std::string getLoadStatement(bool list);
     void loadProperties(IBPP::Statement& statement, wxMBConv* converter);
     friend class Exceptions;
@@ -49,6 +51,7 @@ public:
 
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    std::vector<Privilege>* getPrivileges();
 };
 
 class Exceptions : public MetadataCollection<Exception>

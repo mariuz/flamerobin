@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -55,6 +55,7 @@ void HtmlHeaderMetadataItemVisitor::visitDomain(Domain& /*domain*/)
 {
     emptyTitles();
     addSummary();
+    addPrivileges();
     // TODO: Support dependencies retrieval in MetadataItem::getDependencies().
     //addDependencies();
     addDDL();
@@ -64,6 +65,7 @@ void HtmlHeaderMetadataItemVisitor::visitException(Exception& /*exception*/)
 {
     emptyTitles();
     addSummary();
+    addPrivileges();
     addDependencies();
     addDDL();
 }
@@ -90,6 +92,16 @@ void HtmlHeaderMetadataItemVisitor::visitGenerator(Generator& /*generator*/)
 {
     emptyTitles();
     addSummary();
+    addPrivileges();
+    addDependencies();
+    addDDL();
+}
+
+void HtmlHeaderMetadataItemVisitor::visitIndex(Index& /*index*/)
+{
+    emptyTitles();
+    addSummary();
+    addPrivileges();
     addDependencies();
     addDDL();
 }
@@ -132,7 +144,35 @@ void HtmlHeaderMetadataItemVisitor::visitTable(Table& /*table*/)
     addDDL();
 }
 
-void HtmlHeaderMetadataItemVisitor::visitTrigger(Trigger& /*trigger*/)
+void HtmlHeaderMetadataItemVisitor::visitGTTable(GTTable& /*table*/)
+{
+	emptyTitles();
+	addSummary();
+	addConstraints();
+	addIndices();
+	addTriggers();
+	addPrivileges();
+	addDependencies();
+	addDDL();
+}
+
+void HtmlHeaderMetadataItemVisitor::visitDBTrigger(DBTrigger& /*trigger*/)
+{
+    emptyTitles();
+    addSummary();
+    addDependencies();
+    addDDL();
+}
+
+void HtmlHeaderMetadataItemVisitor::visitDDLTrigger(DDLTrigger& /*trigger*/)
+{
+    emptyTitles();
+    addSummary();
+    addDependencies();
+    addDDL();
+}
+
+void HtmlHeaderMetadataItemVisitor::visitDMLTrigger(DMLTrigger& /*trigger*/)
 {
     emptyTitles();
     addSummary();

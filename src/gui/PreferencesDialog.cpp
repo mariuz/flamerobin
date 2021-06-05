@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -452,10 +452,10 @@ void PreferencesDialog::layout()
     sizerRight->Add(bookctrl_1, 1, wxEXPAND);
 
     wxBoxSizer* sizerControls = new wxBoxSizer(wxHORIZONTAL);
-    int bookProportion = 1;
+    int bookProportion = 5;
     if (bookctrl_1->GetPageCount() > 1)
     {
-        int treeProportion = 0;
+        int treeProportion = 2;
         // for some reason the tree width isn't calculated correctly on the Mac
         // use proportional widths for tree and book controls there
         if (wxPlatformInfo::Get().GetOperatingSystemId() & wxOS_MAC)
@@ -679,7 +679,7 @@ void PreferencesDialog::setProperties()
         wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHTTEXT));
     wxFont font(static_text_categ->GetFont());
     font.SetPointSize(15);
-    font.SetWeight(wxBOLD);
+    font.MakeBold();
     static_text_categ->SetFont(font);
 }
 

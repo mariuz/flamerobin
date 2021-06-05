@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -37,34 +37,42 @@ public:
 
     virtual void visitColumn(Column& column);
     virtual void visitDatabase(Database& database);
+    virtual void visitDBTrigger(DBTrigger& trigger);
+    virtual void visitDBTriggers(DBTriggers& triggers);
+    virtual void visitDDLTrigger(DDLTrigger& trigger);
+    virtual void visitDDLTriggers(DDLTriggers& triggers);
+    virtual void visitDMLTrigger(DMLTrigger& trigger);
+    virtual void visitDMLTriggers(DMLTriggers& triggers);
     virtual void visitDomain(Domain& domain);
     virtual void visitDomains(Domains& domains);
     virtual void visitException(Exception& exception);
     virtual void visitExceptions(Exceptions& exceptions);
     virtual void visitFunctionSQL(FunctionSQL& function);
     virtual void visitFunctionSQLs(FunctionSQLs& functions);
-    virtual void visitUDF(UDF& function);
-    virtual void visitUDFs(UDFs& functions);
     virtual void visitGenerator(Generator& generator);
     virtual void visitGenerators(Generators& generators);
+    virtual void visitGTTable(GTTable& table);
+    virtual void visitGTTables(GTTables& tables);
+    virtual void visitIndex(Index& index);
+    virtual void visitIndices(Indices& indices);
+    virtual void visitMethod(Method& method);
     virtual void visitPackage(Package& package);
     virtual void visitPackages(Packages& packages);
-    virtual void visitSysPackages(SysPackages& packages);
     virtual void visitProcedure(Procedure& procedure);
     virtual void visitProcedures(Procedures& procedures);
     virtual void visitRole(Role& role);
     virtual void visitRoles(Roles& roles);
-    virtual void visitSysRoles(SysRoles& roles);
     virtual void visitRoot(Root& root);
+    virtual void visitSysPackages(SysPackages& packages);
+    virtual void visitSysRoles(SysRoles& roles);
+    virtual void visitSysTables(SysTables& tables);
     virtual void visitServer(Server& server);
     virtual void visitTable(Table& table);
     virtual void visitTables(Tables& tables);
-    virtual void visitSysTables(SysTables& tables);
-    virtual void visitGTTTables(GTTs& tables);
-    virtual void visitTrigger(Trigger& trigger);
-    virtual void visitTriggers(Triggers& triggers);
-    virtual void visitDBTriggers(DBTriggers& triggers);
-    virtual void visitDDLTriggers(DDLTriggers& triggers);
+    virtual void visitUDF(UDF& function);
+    virtual void visitUDFs(UDFs& functions);
+    virtual void visitUser(User& user);
+    virtual void visitUsers(Users& users);
     virtual void visitView(View& view);
     virtual void visitViews(Views& views);
 protected:
@@ -74,6 +82,7 @@ protected:
 private:
     // helper member functions to add menu items and separators
     void addAlterItem(MetadataItem& metadataItem);
+    void addActiveItem(MetadataItem& metadataItem);
     void addBrowseDataItem();
     void addDropItem(MetadataItem& metadataItem);
     void addGenerateCodeMenu(MetadataItem& metadataItem, wxMenu* parent = 0);

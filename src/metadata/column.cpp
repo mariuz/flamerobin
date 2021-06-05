@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -120,7 +120,7 @@ bool ColumnBase::getDefault(GetColumnDefaultType type, wxString& value) const
     return false;
 }
 
-wxString ColumnBase::getSource() const
+wxString ColumnBase::getSource(bool /*identity*/)
 {
     return sourceM;
 }
@@ -168,7 +168,8 @@ Column::Column(Relation* relation, const wxString& name)
 
 void Column::initialize(const wxString& source, const wxString& computedSource,
     const wxString& collation, bool nullable,
-    const wxString& defaultValue, bool hasDefault, bool hasDescription)
+    const wxString& defaultValue, bool hasDefault, bool hasDescription,
+    const wxString& identityType, const long initialValue, const long incrementalValue)
 {
     SubjectLocker lock(this);
 
@@ -178,6 +179,9 @@ void Column::initialize(const wxString& source, const wxString& computedSource,
     bool changed = false;
     setIfChanged(computedSourceM, computedSource, changed);
     setIfChanged(collationM, collation.Strip(wxString::both), changed);
+    setIfChanged(identityTypeM, identityType, changed);
+    setIfChanged(initialValueM, initialValue, changed);
+    setIfChanged(incrementalValueM, incrementalValue, changed);
     if (changed)
         notifyObservers();
 }
@@ -226,9 +230,19 @@ bool Column::isString() const
     return (d ? d->isString() : false);
 }
 
+bool Column::isIdentity() const
+{
+    return identityTypeM != "";
+}
+
 Table* Column::getTable() const
 {
     return dynamic_cast<Table*>(getParent());
+}
+
+long Column::getInitialValue() const
+{
+    return initialValueM;
 }
 
 wxString Column::getComputedSource() const
@@ -257,5 +271,25 @@ wxString Column::getDropSqlStatement() const
 void Column::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitColumn(*this);
+}
+
+wxString Column::getSource(bool identity)
+{
+    if (isIdentity()&& identity) {
+        wxString sql;
+        sql = " GENERATED " + identityTypeM + " AS IDENTITY ";
+        if (initialValueM != 0) {
+            sql += "(START WITH " + wxString::Format("%d", initialValueM) + ")";
+            if (incrementalValueM != 1)
+                sql += "INCREMENT BY " + wxString::Format("%d", incrementalValueM);
+        }
+        return sql;
+    }
+    else {
+        if ((isIdentity() && !identity) || !getComputedSource().IsEmpty())
+            return  getDatatype(false);
+        else
+            return ColumnBase::getSource(identity);
+    }
 }
 

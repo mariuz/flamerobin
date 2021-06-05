@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -64,6 +64,11 @@ private:
     wxChoice* choice_generator;
     wxCheckBox* checkbox_trigger;
     wxTextCtrl* textctrl_sql;
+    wxCheckBox* checkbox_identity;
+    wxStaticText* label_initialValue;
+    wxTextCtrl* textctrl_initialValue;
+    wxStaticText* label_incrementalValue;
+    wxTextCtrl* textctrl_incrementalValue;
 
     wxButton* button_ok;
     wxButton* button_cancel;
@@ -112,7 +117,8 @@ private:
         ID_textctrl_generator_name,
         ID_radio_generator_existing,
         ID_choice_generator,
-        ID_checkbox_trigger
+        ID_checkbox_trigger,
+        ID_checkbox_identity
     };
 
     void OnButtonEditDomainClick(wxCommandEvent& event);
@@ -123,6 +129,7 @@ private:
     void OnNeedsUpdateSql(wxCommandEvent& event);
     void OnRadioGeneratorClick(wxCommandEvent& event);
     void OnTextFieldnameUpdate(wxCommandEvent& event);
+    void OnCheckBoxidentityClick(wxCommandEvent& event);
 
     DECLARE_EVENT_TABLE()
 };

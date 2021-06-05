@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -116,25 +116,35 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
     switch (tokensM[0])
     {
         case kwALTER:
-            actionM = actALTER; break;
+            actionM = actALTER; 
+            break;
         case kwCOMMENT:
-            actionM = actCOMMENT; break;
+            actionM = actCOMMENT; 
+            break;
         case kwCREATE:
-            actionM = actCREATE; break;
+            actionM = actCREATE; 
+            break;
         case kwDECLARE:
-            actionM = actDECLARE; break;
+            actionM = actDECLARE; 
+            break;
         case kwDROP:
-            actionM = actDROP; break;
+            actionM = actDROP; 
+            break;
         case kwGRANT:
         case kwREVOKE:
-            actionM = actGRANT; break;
+            actionM = actGRANT; 
+            break;
         case kwRECREATE:
-            actionM = actRECREATE; break;
+            actionM = actRECREATE; 
+            break;
         case kwSET:
-            actionM = actSET; break;
+            actionM = actSET; 
+            break;
         case kwUPDATE:
             // it's the only statement we care for which has implicit type
-            actionM = actUPDATE; objectTypeM = ntTable; break;
+            actionM = actUPDATE; 
+            objectTypeM = ntTable; 
+            break;
         default:
             return; // true;
     }
@@ -232,39 +242,108 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
     {
         switch (tokensM[typeTokenIndex])
         {
-            case kwDATABASE:
-                objectTypeM = ntDatabase; break;
-            case kwDOMAIN:
-                objectTypeM = ntDomain; break;
-            case kwEXCEPTION:
-                objectTypeM = ntException; break;
-            case kwFUNCTION:
-                objectTypeM = ntFunctionSQL; break; //JOCHOA FUNCTIONS
-            case kwGENERATOR:
-                objectTypeM = ntGenerator; break;
-            case kwINDEX:
-                objectTypeM = ntIndex; break;
-            case kwPROCEDURE:
-                objectTypeM = ntProcedure; break;
-            case kwROLE:
-                objectTypeM = ntRole; break;
-            case kwTABLE:
-                objectTypeM = ntTable; break;
-            case kwTRIGGER:
-                objectTypeM = ntTrigger; break;
-            case kwVIEW:
-                objectTypeM = ntView; break;
-            default:
-                // this will scan over things like "EXTERNAL", "UNIQUE",
-                // "ASCENDING", "STATISTICS" etc., until object type is found
-                typeTokenIndex++;
-                break;
+        case kwDATABASE:
+            objectTypeM = ntDatabase;
+            break;
+        case kwDOMAIN:
+            objectTypeM = ntDomain;
+            break;
+        case kwEXCEPTION:
+            objectTypeM = ntException;
+            break;
+        case kwEXTERNAL:
+            objectTypeM = ntUDF;
+            break;
+        case kwFUNCTION:
+            if (actionM == actCREATE || actionM == actALTER ||
+                actionM == actCREATE_OR_ALTER) {
+                if (tokensM[0] == kwDECLARE)
+                    objectTypeM = ntUDF;
+                else
+                    objectTypeM = ntFunctionSQL;
+            }else{ 
+                if (actionM == actDROP) {
+                    objectTypeM = ntFunctionSQL;
+                    if (databaseM->findByNameAndType(ntUDF, nameM.get())) 
+                        objectTypeM = ntUDF;
+                }
+            }
+            break;
+        case kwGENERATOR:
+            objectTypeM = ntGenerator;
+            break;
+        case kwINDEX:
+            objectTypeM = ntIndex;
+            break;
+        case kwPROCEDURE:
+            objectTypeM = ntProcedure;
+            break;
+        case kwROLE:
+            objectTypeM = ntRole;
+            break;
+        case kwTABLE:
+            objectTypeM = ntTable;
+            break;
+        case kwTRIGGER:
+            if (actionM == actCREATE || actionM == actALTER || 
+                actionM == actCREATE_OR_ALTER) {
+                stt = tokenizer.getCurrentToken();
+                if (stt == kwACTIVE || stt == kwINACTIVE || 
+                    stt == kwBEFORE || stt == kwAFTER ||
+                    stt == kwON) {
+                    if (stt == kwACTIVE || stt == kwINACTIVE) {
+                        tokenizer.jumpToken(false);
+                        stt = tokenizer.getCurrentToken();
+                    }
+                    if (stt == kwON) { // DB Trigger
+                        objectTypeM = ntDBTrigger;
+                    }
+                    else{
+                        tokenizer.jumpToken(false);
+                        stt = tokenizer.getCurrentToken();
+                        if (stt == kwINSERT || stt == kwUPDATE ||
+                            stt == kwDELETE) { // SQL 2003 DML Trigger
+                            objectTypeM = ntDMLTrigger;
+                        }
+                        else
+                            objectTypeM = ntDDLTrigger;
+                    }
+                }
+                else // Legacy DML Trigger
+                    objectTypeM = ntDMLTrigger;
+            }
+            else {
+                objectTypeM = ntDMLTrigger;
+                if (actionM == actDROP) {
+                    if (databaseM->findByNameAndType(ntDBTrigger, nameM.get())) {
+                        objectTypeM = ntDBTrigger;
+                    }
+                    if (databaseM->findByNameAndType(ntDDLTrigger, nameM.get())) {
+                        objectTypeM = ntDDLTrigger;
+                    }
+                }
+            }
+            break;
+        case kwVIEW:
+            objectTypeM = ntView;
+            break;
+        case kwPACKAGE:
+            objectTypeM = ntPackage;
+            break;
+        default:
+            // this will scan over things like "EXTERNAL", "UNIQUE",
+            // "ASCENDING", "STATISTICS" etc., until object type is found
+            typeTokenIndex++;
+            break;
         }
+            
     }
+
     if (objectTypeM == ntUnknown || !databaseM)
         return; // false;
 
     objectM = databaseM->findByNameAndType(objectTypeM, nameM.get());
+
 
     // map "CREATE OR ALTER" and "RECREATE" to correct action
     if (actionM == actCREATE_OR_ALTER || actionM == actRECREATE)
@@ -358,7 +437,7 @@ wxString SqlStatement::getTerminator() const
 
 Relation* SqlStatement::getCreateTriggerRelation() const
 {
-    if (objectTypeM == ntTrigger && databaseM
+    if (objectTypeM == ntDMLTrigger && databaseM
         && tokensM[identifierTokenIndexM + 1] == kwFOR
         && tokensM[identifierTokenIndexM + 2] == tkIDENTIFIER)
     {

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -31,31 +31,39 @@ class MetadataItemCreateStatementVisitor : public MetadataItemVisitor
 private:
     wxString statementM;
 public:
+    static wxString getCreateDBTriggerStatement();
+    static wxString getCreateDDLTriggerStatement();
+    static wxString getCreateDMLTriggerStatement();
     static wxString getCreateDomainStatement();
     static wxString getCreateExceptionStatement();
     static wxString getCreateFunctionSQLStatement();
     static wxString getCreateGeneratorStatement();
+    static wxString getCreateGTTTableStatement();
+    static wxString getCreateIndexStatement();
     static wxString getCreatePackageStatement();
     static wxString getCreateProcedureStatement();
     static wxString getCreateRoleStatement();
     static wxString getCreateTableStatement();
-    static wxString getCreateGTTTableStatement();
-    static wxString getCreateTriggerStatement();
-    static wxString getCreateDBTriggerStatement();
-    static wxString getCreateDDLTriggerStatement();
     static wxString getCreateUDFStatement();
+    static wxString getCreateUserStatement();
     static wxString getCreateViewStatement();
 
+
+    virtual void visitDBTriggers(DBTriggers& triggers);
+    virtual void visitDDLTriggers(DDLTriggers& triggers);
+    virtual void visitDMLTriggers(DMLTriggers& triggers);
     virtual void visitDomains(Domains& domains);
     virtual void visitExceptions(Exceptions& exceptions);
     virtual void visitFunctionSQLs(FunctionSQLs& functions);
     virtual void visitGenerators(Generators& generators);
+    virtual void visitGTTables(GTTables& tables);
+    virtual void visitIndices(Indices& indices);
     virtual void visitPackages(Packages& packages);
     virtual void visitProcedures(Procedures& procedures);
     virtual void visitRoles(Roles& roles);
     virtual void visitTables(Tables& tables);
-    virtual void visitTriggers(Triggers& triggers);
     virtual void visitUDFs(UDFs& functions);
+    virtual void visitUsers(Users& Users);
     virtual void visitViews(Views& views);
 
     wxString getStatement() const;

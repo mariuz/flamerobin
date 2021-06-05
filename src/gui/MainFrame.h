@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -88,6 +88,7 @@ public:
     void OnMenuObjectRefresh(wxCommandEvent& event);
     void OnMenuDropObject(wxCommandEvent& event);
     void OnMenuAlterObject(wxCommandEvent& event);
+    void OnMenRebuildObject(wxCommandEvent& event);
     void OnMenuCreateTriggerForTable(wxCommandEvent& event);
     void OnMenuGenerateCode(wxCommandEvent& event);
     void OnMenuExecuteProcedure(wxCommandEvent& event);
@@ -98,22 +99,29 @@ public:
     void OnMenuDatabasePreferences(wxCommandEvent& event);
     void OnMenuDatabaseProperties(wxCommandEvent& event);
     void OnMenuExecuteFunction(wxCommandEvent& event);
+    void OnMenActiveObject(wxCommandEvent& event);
+    void OnMenInactiveObject(wxCommandEvent& event);
+    void OnMenuShowAllStatisticsValues(wxCommandEvent& event);
+    void OnMenuShowStatisticsValue(wxCommandEvent& event);
+    void OnMenuSetStatisticsValue(wxCommandEvent& event);
 
     // create new object
     void showCreateTemplate(const wxString& statement);
+    void OnMenuCreateDBTrigger(wxCommandEvent& event);
+    void OnMenuCreateDDLTrigger(wxCommandEvent& event);
+    void OnMenuCreateDMLTrigger(wxCommandEvent& event);
     void OnMenuCreateDomain(wxCommandEvent& event);
     void OnMenuCreateException(wxCommandEvent& event);
     void OnMenuCreateFunction(wxCommandEvent& event);
+    void OnMenuCreateIndex(wxCommandEvent& event);
     void OnMenuCreateGenerator(wxCommandEvent& event);
+    void OnMenuCreateGTTTable(wxCommandEvent& event);
     void OnMenuCreatePackage(wxCommandEvent& event);
     void OnMenuCreateProcedure(wxCommandEvent& event);
     void OnMenuCreateRole(wxCommandEvent& event);
     void OnMenuCreateTable(wxCommandEvent& event);
-    void OnMenuCreateGTTTable(wxCommandEvent& event);
-    void OnMenuCreateTrigger(wxCommandEvent& event);
-    void OnMenuCreateDBTrigger(wxCommandEvent& event);
-    void OnMenuCreateDDLTrigger(wxCommandEvent& event);
     void OnMenuCreateUDF(wxCommandEvent& event);
+    void OnMenuCreateUser(wxCommandEvent& event);
     void OnMenuCreateView(wxCommandEvent& event);
 
     // enabled menu items

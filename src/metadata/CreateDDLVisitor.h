@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -61,7 +61,7 @@ public:
 //    virtual void visitUDFs(UDFs& functions);
     virtual void visitGenerator(Generator& generator);
 //    virtual void visitGenerators(Generators& generators);
-//    virtual void visitIndex(Index& index);
+    virtual void visitIndex(Index& index);
 //    virtual void visitParameter(Parameter& parameter);
     virtual void visitPrimaryKeyConstraint(PrimaryKeyConstraint& pk);
     virtual void visitPackage(Package& package);
@@ -76,10 +76,13 @@ public:
 //    virtual void visitRoot(Root& root);
 //    virtual void visitServer(Server& server);
     virtual void visitTable(Table& table);
-//    virtual void visitTables(Tables& tables);
+    virtual void visitGTTable(GTTable& table);
+    //    virtual void visitTables(Tables& tables);
 //    virtual void visitSysTables(SysTables& sysTables);
-    virtual void visitTrigger(Trigger& trigger);
-//    virtual void visitTriggers(Triggers& triggers);
+    virtual void visitDBTrigger(DBTrigger& trigger);
+    virtual void visitDDLTrigger(DDLTrigger& trigger);
+    virtual void visitDMLTrigger(DMLTrigger& trigger);
+    //    virtual void visitTriggers(Triggers& triggers);
     virtual void visitUniqueConstraint(UniqueConstraint& unq);
     virtual void visitView(View& view);
 //    virtual void visitViews(Views& views);

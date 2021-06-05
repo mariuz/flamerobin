@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -53,6 +53,7 @@
 #include "metadata/exception.h"
 #include "metadata/function.h"
 #include "metadata/generator.h"
+#include "metadata/Index.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/parameter.h"
 #include "metadata/package.h"
@@ -347,7 +348,7 @@ void Database::getIdentifiers(std::vector<Identifier>& temp)
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(sysTablesM->begin(), sysTablesM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
-    std::transform(GTTsM->begin(), GTTsM->end(),
+    std::transform(GTTablesM->begin(), GTTablesM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(viewsM->begin(), viewsM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
@@ -357,7 +358,7 @@ void Database::getIdentifiers(std::vector<Identifier>& temp)
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(proceduresM->begin(), proceduresM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
-    std::transform(triggersM->begin(), triggersM->end(),
+    std::transform(DMLtriggersM->begin(), DMLtriggersM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(DBTriggersM->begin(), DBTriggersM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
@@ -376,6 +377,8 @@ void Database::getIdentifiers(std::vector<Identifier>& temp)
     std::transform(exceptionsM->begin(), exceptionsM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(sysDomainsM->begin(), sysDomainsM->end(),
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(indicesM->begin(), indicesM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
 }
 
@@ -402,26 +405,8 @@ wxString Database::loadDomainNameForColumn(const wxString& table,
 
 void Database::getDatabaseTriggers(std::vector<Trigger *>& list)
 {
-    MetadataLoader* loader = getMetadataLoader();
-    MetadataLoaderTransaction tr(loader);
-    wxMBConv* converter = getCharsetConverter();
-
-    IBPP::Statement& st1 = loader->getStatement(
-        "select rdb$trigger_name from rdb$triggers "
-        "where (rdb$system_flag = 0 or rdb$system_flag is null)  "
-        " and rdb$trigger_type between 8192 and 8196 "
-        "order by rdb$trigger_sequence"
-    );
-    st1->Execute();
-    while (st1->Fetch())
-    {
-        std::string name;
-        st1->Get(1, name);
-        Trigger* t = dynamic_cast<Trigger*>(findByNameAndType(ntDBTrigger,
-            std2wxIdentifier(name, converter)));
-        if (t)
-            list.push_back(t);
-    }
+    std::transform(DBTriggersM->begin(), DBTriggersM->end(),
+        std::back_inserter(list), std::mem_fn(&DBTriggerPtr::get));
 }
 
 CharacterSet Database::getCharsetById(int id)
@@ -575,13 +560,13 @@ MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
             return sysTablesM->findByName(name).get();
             break;
         case ntGTT:
-            return GTTsM->findByName(name).get();
+            return GTTablesM->findByName(name).get();
             break;
         case ntView:
             return viewsM->findByName(name).get();
             break;
-        case ntTrigger:
-            return triggersM->findByName(name).get();
+        case ntDMLTrigger:
+            return DMLtriggersM->findByName(name).get();
             break;
         case ntProcedure:
             return proceduresM->findByName(name).get();
@@ -622,6 +607,9 @@ MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
         case ntDDLTrigger:
             return DDLTriggersM->findByName(name).get();
             break;
+        case ntIndices:
+            return indicesM->findByName(name).get();
+            break;
         default:
             return 0;
     };
@@ -636,12 +624,12 @@ Relation* Database::findRelation(const Identifier& name)
         return v.get();
     if (TablePtr t = sysTablesM->findByName(s))
         return t.get();
-    if (TablePtr t = GTTsM->findByName(s))
+    if (TablePtr t = GTTablesM->findByName(s))
         return t.get();
     return 0;
 }
 
-Relation* Database::getRelationForTrigger(Trigger* trigger)
+Relation* Database::getRelationForTrigger(DMLTrigger* trigger)
 {
     if (!trigger)
         return 0;
@@ -664,13 +652,13 @@ void Database::dropObject(MetadataItem* object)
             sysTablesM->remove((Table*)object);
             break;
         case ntGTT:
-            GTTsM->remove((Table*)object);
+            GTTablesM->remove((Table*)object);
             break;
         case ntView:
             viewsM->remove((View*)object);
             break;
-        case ntTrigger:
-            triggersM->remove((Trigger*)object);
+        case ntDMLTrigger:
+            DMLtriggersM->remove((DMLTrigger*)object);
             break;
         case ntProcedure:
             proceduresM->remove((Procedure*)object);
@@ -700,16 +688,19 @@ void Database::dropObject(MetadataItem* object)
             exceptionsM->remove((Exception*)object);
             break;
         case ntPackage:
-            packagesM->remove((Exception*)object);
+            packagesM->remove((Package*)object);
             break;
         case ntSysPackage:
-            sysPackagesM->remove((Exception*)object);
+            sysPackagesM->remove((Package*)object);
             break;
         case ntDBTrigger:
-            DBTriggersM->remove((Exception*)object);
+            DBTriggersM->remove((DBTrigger*)object);
             break;
         case ntDDLTrigger:
-            DDLTriggersM->remove((Exception*)object);
+            DDLTriggersM->remove((DDLTrigger*)object);
+            break;
+        case ntIndex:
+            indicesM->remove((Index*)object);
             break;
         default:
             return;
@@ -727,7 +718,7 @@ void Database::addObject(NodeType type, const wxString& name)
             sysTablesM->insert(name);
             break;
         case ntGTT:
-            GTTsM->insert(name);
+            GTTablesM->insert(name);
             break;
         case ntView:
             viewsM->insert(name);
@@ -735,8 +726,8 @@ void Database::addObject(NodeType type, const wxString& name)
         case ntProcedure:
             proceduresM->insert(name);
             break;
-        case ntTrigger:
-            triggersM->insert(name);
+        case ntDMLTrigger:
+            DMLtriggersM->insert(name);
             break;
         case ntRole:
             rolesM->insert(name);
@@ -773,6 +764,9 @@ void Database::addObject(NodeType type, const wxString& name)
             break;
         case ntDDLTrigger:
             DDLTriggersM->insert(name);
+            break;
+        case ntIndex:
+            indicesM->insert(name);
             break;
         default:
             break;
@@ -821,7 +815,7 @@ void Database::parseCommitedSql(const SqlStatement& stm)
     }
 
     // update all TABLEs, VIEWs and DATABASE on "DROP TRIGGER"
-    if (stm.actionIs(actDROP, ntTrigger))
+    if (stm.actionIs(actDROP, ntDMLTrigger))
     {
         Tables::iterator itt;
         for (itt = tablesM->begin(); itt != tablesM->end(); itt++)
@@ -839,7 +833,7 @@ void Database::parseCommitedSql(const SqlStatement& stm)
         Relation *r = stm.getCreateTriggerRelation();
         if (r)
             r->notifyObservers();
-        else if (stm.getObjectType() == ntTrigger) // database trigger probably
+        else if (stm.getObjectType() == ntDMLTrigger) // database trigger probably
             notifyObservers();
         return;
     }
@@ -865,14 +859,14 @@ void Database::parseCommitedSql(const SqlStatement& stm)
         dropObject(object);
         if (stm.getObjectType() == ntTable || stm.getObjectType() == ntView)
         {
-            Triggers::iterator it = triggersM->begin();
-            while (it != triggersM->end())
+            DMLTriggers::iterator it = DMLtriggersM->begin();
+            while (it != DMLtriggersM->end())
             {
                 Relation* r = getRelationForTrigger((*it).get());
                 if (!r || r->getIdentifier().equals(stm.getIdentifier()))
                 {
                     dropObject((*it).get());
-                    it = triggersM->begin();
+                    it = DMLtriggersM->begin();
                 }
                 else
                     it++;
@@ -927,20 +921,20 @@ void Database::parseCommitedSql(const SqlStatement& stm)
                 object->invalidate();
                 dynamic_cast<Procedure*>(object)->checkDependentProcedures();
                 break;
-            case ntTrigger:
+            case ntDMLTrigger:
+            {
+                DMLTrigger* tr = dynamic_cast<DMLTrigger*>(object);
+                if (tr)
                 {
-                    Trigger* tr = dynamic_cast<Trigger*>(object);
-                    if (tr)
-                    {
-                        tr->invalidate();
-                        Relation* r = getRelationForTrigger(tr);
-                        if (r)
-                            r->notifyObservers();
-                        else  // database trigger
-                            notifyObservers();
-                    }
-                    break;
+                    tr->invalidate();
+                    Relation* r = getRelationForTrigger(tr);
+                    if (r)
+                        r->notifyObservers();
+                    else  // database trigger
+                        notifyObservers();
                 }
+                break;
+            }
             case ntDomain:
                 object->invalidate();
                 // notify all table columns with that domain
@@ -959,6 +953,8 @@ void Database::parseCommitedSql(const SqlStatement& stm)
                 // calls notifyObservers() only in the base class
                 // descendent classes are free to put there whatever it takes...
                 object->invalidate();
+                //object->ensurePropertiesLoaded();
+                notifyObservers();
                 break;
         }
     }
@@ -1007,7 +1003,7 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
     if (connectedM)
         return;
 
-    SubjectLocker lock(this);
+    //SubjectLocker lock(this);
     try
     {
         if (indicator)
@@ -1095,12 +1091,12 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             initializeLockCount(rolesM, lockCount);
             sysRolesM.reset(new SysRoles(me));
             initializeLockCount(sysRolesM, lockCount);
-            triggersM.reset(new Triggers(me));
-            initializeLockCount(triggersM, lockCount);
+            DMLtriggersM.reset(new DMLTriggers(me));
+            initializeLockCount(DMLtriggersM, lockCount);
             tablesM.reset(new Tables(me));
             initializeLockCount(tablesM, lockCount);
             sysTablesM.reset(new SysTables(me));
-            GTTsM.reset(new GTTs(me));
+            GTTablesM.reset(new GTTables(me));
             initializeLockCount(sysTablesM, lockCount);
             UDFsM.reset(new UDFs(me));
             initializeLockCount(UDFsM, lockCount);
@@ -1114,6 +1110,8 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             initializeLockCount(DBTriggersM, lockCount);
             DDLTriggersM.reset(new DDLTriggers(me));
             initializeLockCount(DDLTriggersM, lockCount);
+            indicesM.reset(new Indices(me));
+            initializeLockCount(indicesM, lockCount);
 
             // first start a transaction for metadata loading, then lock the
             // database
@@ -1122,7 +1120,7 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             // on observers can possibly use the same transaction
             MetadataLoader* loader = getMetadataLoader();
             MetadataLoaderTransaction tr(loader);
-            SubjectLocker lock(this);
+            SubjectLocker lock(this); 
 
             try
             {
@@ -1210,13 +1208,12 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
             {
                 wxString msg(wxString::Format(_("Loading %s..."),
                     collectionName.c_str()));
-                progressIndicatorM->initProgress(msg, stepsTotal,
-                    currentStep, 1);
+                progressIndicatorM->initProgress(msg, stepsTotal,currentStep, 1);
             }
         }
     };
 
-    const int collectionCount = 17;
+    const int collectionCount = 18;
     std::string loadStmt;
     ProgressIndicatorHelper pih(progressIndicator);
 
@@ -1232,7 +1229,7 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
 
     if (getInfo().getODSVersionIsHigherOrEqualTo(11.1)) {
         pih.init(_("global temporary table"), collectionCount, 2);
-        GTTsM->load(progressIndicator);
+        GTTablesM->load(progressIndicator);
     }
 
     pih.init(_("views"), collectionCount, 3);
@@ -1241,8 +1238,8 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
     pih.init(_("procedures"), collectionCount, 4);
     proceduresM->load(progressIndicator);
 
-    pih.init(_("triggers"), collectionCount, 5);
-    triggersM->load(progressIndicator);
+    pih.init(_("DML triggers"), collectionCount, 5);
+    DMLtriggersM->load(progressIndicator);
 
     pih.init(_("roles"), collectionCount, 6);
     rolesM->load(progressIndicator);
@@ -1271,7 +1268,7 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
         pih.init(_("packages"), collectionCount, 13);
         packagesM->load(progressIndicator);
 
-        pih.init(_("System packages"), collectionCount, 14);
+        pih.init(_("system packages"), collectionCount, 14);
         sysPackagesM->load(progressIndicator);
     }
 
@@ -1285,8 +1282,11 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
         DDLTriggersM->load(progressIndicator);
     }
 
-    pih.init(_("System domains"), collectionCount, 17);
+    pih.init(_("system domains"), collectionCount, 17);
     sysDomainsM->load(progressIndicator);
+
+    pih.init(_("indices"), collectionCount, 18);
+    indicesM->load(progressIndicator);
 
 }
 
@@ -1341,8 +1341,8 @@ void Database::setDisconnected()
     rolesM.reset();
     tablesM.reset();
     sysTablesM.reset();
-    GTTsM.reset();
-    triggersM.reset();
+    GTTablesM.reset();
+    DMLtriggersM.reset();
     UDFsM.reset();
     viewsM.reset();
     exceptionsM.reset();
@@ -1350,6 +1350,7 @@ void Database::setDisconnected()
     sysPackagesM.reset();
     DBTriggersM.reset();
     DDLTriggersM.reset();
+    indicesM.reset();
 
     if (config().get("HideDisconnectedDatabases", false))
         getServer()->notifyObservers();
@@ -1405,6 +1406,13 @@ UDFsPtr Database::getUDFs()
     return UDFsM;
 }
 
+UsersPtr Database::getUsers()
+{
+    wxASSERT(usersM);
+//    usersM->ensureChildrenLoaded();
+    return usersM;
+}
+
 FunctionSQLsPtr Database::getFunctionSQLs()
 {
     wxASSERT(functionSQLsM);
@@ -1417,6 +1425,13 @@ GeneratorsPtr Database::getGenerators()
     wxASSERT(generatorsM);
     generatorsM->ensureChildrenLoaded();
     return generatorsM;
+}
+
+IndicesPtr Database::getIndices()
+{
+    wxASSERT(indicesM);
+    indicesM->ensureChildrenLoaded();
+    return indicesM;
 }
 
 PackagesPtr Database::getPackages()
@@ -1461,11 +1476,11 @@ SysTablesPtr Database::getSysTables()
     return sysTablesM;
 }
 
-GTTsPtr Database::getGTTs()
+GTTablesPtr Database::getGTTables()
 {
-    wxASSERT(GTTsM);
-    GTTsM->ensureChildrenLoaded();
-    return GTTsM;
+    wxASSERT(GTTablesM);
+    GTTablesM->ensureChildrenLoaded();
+    return GTTablesM;
 }
 
 TablesPtr Database::getTables()
@@ -1475,11 +1490,11 @@ TablesPtr Database::getTables()
     return tablesM;
 }
 
-TriggersPtr Database::getTriggers()
+DMLTriggersPtr Database::getDMLTriggers()
 {
-    wxASSERT(triggersM);
-    triggersM->ensureChildrenLoaded();
-    return triggersM;
+    wxASSERT(DMLtriggersM);
+    DMLtriggersM->ensureChildrenLoaded();
+    return DMLtriggersM;
 }
 
 DBTriggersPtr Database::getDBTriggers()
@@ -1519,7 +1534,8 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
         temp.push_back(functionSQLsM.get());
     temp.push_back(generatorsM.get());
     if (getInfo().getODSVersionIsHigherOrEqualTo(11.1)) 
-        temp.push_back(GTTsM.get());
+        temp.push_back(GTTablesM.get());
+    temp.push_back(indicesM.get());
     if (getInfo().getODSVersionIsHigherOrEqualTo(12.0)) 
         temp.push_back(packagesM.get());
     temp.push_back(proceduresM.get());
@@ -1536,7 +1552,7 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
     if (system && showSystemDomains())
         temp.push_back(sysDomainsM.get());
     temp.push_back(tablesM.get());
-    temp.push_back(triggersM.get());
+    temp.push_back(DMLtriggersM.get());
     temp.push_back(UDFsM.get());
     temp.push_back(viewsM.get());
 }
@@ -1562,12 +1578,13 @@ void Database::lockChildren()
         rolesM->lockSubject();
         tablesM->lockSubject();
         sysTablesM->lockSubject();
-        GTTsM->lockSubject();
-        triggersM->lockSubject();
+        GTTablesM->lockSubject();
+        DMLtriggersM->lockSubject();
         DBTriggersM->lockSubject();
         DDLTriggersM->lockSubject();
         UDFsM->lockSubject();
         viewsM->lockSubject();
+        indicesM->lockSubject();
     }
 }
 
@@ -1578,20 +1595,21 @@ void Database::unlockChildren()
     // every added domain will cause all collection observers to update
     if (isConnected())
     {
+        indicesM->unlockSubject();
         viewsM->unlockSubject();
-        triggersM->unlockSubject();
-        DBTriggersM->unlockSubject();
+        UDFsM->unlockSubject();
         DDLTriggersM->unlockSubject();
+        DBTriggersM->unlockSubject();
+        DMLtriggersM->unlockSubject();
+        GTTablesM->unlockSubject();
         sysTablesM->unlockSubject();
-        GTTsM->unlockSubject();
         tablesM->unlockSubject();
         rolesM->unlockSubject();
-        packagesM->unlockSubject();
-        sysPackagesM->unlockSubject();
         proceduresM->unlockSubject();
+        sysPackagesM->unlockSubject();
+        packagesM->unlockSubject();
         generatorsM->unlockSubject();
         functionSQLsM->unlockSubject();
-        UDFsM->unlockSubject();
         exceptionsM->unlockSubject();
         sysDomainsM->unlockSubject();
         userDomainsM->unlockSubject();

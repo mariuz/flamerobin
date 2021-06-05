@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -57,6 +57,30 @@ wxString View::getCreateSql()
 
     StatementBuilder sb;
     sb << kwCREATE << ' ' << kwVIEW << ' ' << getQuotedName() << " ("
+        << StatementBuilder::IncIndent;
+
+    // make sure that line breaking occurs after comma, not before
+    ColumnPtrs::const_iterator it = columnsM.begin();
+    wxString colName = (*it)->getQuotedName();
+    for (++it; it != columnsM.end(); ++it)
+    {
+        sb << colName + ", ";
+        colName = (*it)->getQuotedName();
+    }
+    sb << colName;
+
+    sb << ')' << StatementBuilder::DecIndent << StatementBuilder::NewLine
+        << kwAS << ' ' << StatementBuilder::DisableLineWrapping
+        << getSource() << ';' << StatementBuilder::NewLine;
+    return sb;
+}
+
+wxString View::getAlterSql()
+{
+    ensureChildrenLoaded();
+
+    StatementBuilder sb;
+    sb << kwALTER << ' ' << kwVIEW << ' ' << getQuotedName() << " ("
         << StatementBuilder::IncIndent;
 
     // make sure that line breaking occurs after comma, not before
