@@ -33,6 +33,8 @@
 #include "metadata/database.h"
 #include "metadata/privilege.h"
 #include "metadata/procedure.h"
+#include "metadata/package.h"
+#include "metadata/function.h"
 #include "metadata/relation.h"
 #include "metadata/role.h"
 
@@ -141,6 +143,10 @@ wxString Privilege::getSql(bool withGrantOption) const
     ret = "GRANT " + ret + "\n ON ";
     if (dynamic_cast<Procedure *>(parentObjectM))
         ret += "PROCEDURE ";
+    if (dynamic_cast<Package *>(parentObjectM))
+        ret += "PACKAGE ";
+    if (dynamic_cast<FunctionSQL *>(parentObjectM))
+        ret += "FUNCTION ";
     Identifier id(granteeM);
     ret += parentObjectM->getQuotedName() + " TO "
         + granteeTypeToString(granteeTypeM) + " " + id.getQuoted();
