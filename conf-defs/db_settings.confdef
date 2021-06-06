@@ -29,6 +29,7 @@
             <key>ShowSystemTables</key>
             <default>1</default>
             <related /><!-- this moves the checkbox closer to the previous one -->
+
         </setting>
     </node>
     <node>

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -24,8 +24,8 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include <wx/intl.h>
 
+#include "config/LocalSettings.h"
 class MainFrame;
 
 class Application: public wxApp
@@ -33,7 +33,7 @@ class Application: public wxApp
 private:
     // format local settings 
     // TODO: multilingual
-    wxLocale* mLocale;
+    LocalSettings* localSetM;
     // Open databases whose file names were given as command line parameters
     wxArrayString cmdlineParamsM;
     void openDatabasesFromParams(MainFrame* frFrame);

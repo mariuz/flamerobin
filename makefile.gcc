@@ -52,6 +52,7 @@ FLAMEROBIN_OBJECTS =  \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_Config.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_LocalSettings.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_ArtProvider.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_CodeTemplateProcessor.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_FRError.o \
@@ -265,6 +266,9 @@ gccu$(R_OPT)$(D_OPT)\flamerobin_Config.o: ./src/config/Config.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gccu$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.o: ./src/config/DatabaseConfig.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gccu$(R_OPT)$(D_OPT)\flamerobin_LocalSettings.o: ./src/config/LocalSettings.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gccu$(R_OPT)$(D_OPT)\flamerobin_ArtProvider.o: ./src/core/ArtProvider.cpp

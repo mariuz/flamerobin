@@ -63,6 +63,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/addconstrainthandler.cpp
         ${SOURCEDIR}/config/Config.cpp
         ${SOURCEDIR}/config/DatabaseConfig.cpp
+        ${SOURCEDIR}/config/LocalSettings.cpp
         ${SOURCEDIR}/core/ArtProvider.cpp
         ${SOURCEDIR}/core/CodeTemplateProcessor.cpp
         ${SOURCEDIR}/core/FRError.cpp
@@ -171,6 +172,7 @@ list(APPEND SOURCE_LIST
 list(APPEND HEADER_LIST
         ${SOURCEDIR}/config/Config.h
         ${SOURCEDIR}/config/DatabaseConfig.h
+        ${SOURCEDIR}/config/LocalSettings.h
         ${SOURCEDIR}/core/ArtProvider.h
         ${SOURCEDIR}/core/CodeTemplateProcessor.h
         ${SOURCEDIR}/core/FRError.h

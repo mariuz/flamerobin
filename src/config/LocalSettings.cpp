@@ -27,20 +27,38 @@
 // for all others, include the necessary headers (this file is usually all you
 // need because it includes almost all "standard" wxWindows headers
 #ifndef WX_PRECOMP
-    #include "wx/wx.h"
+#include "wx/wx.h"
 #endif
 
+#include "Config.h"
+#include "LocalSettings.h"
 
-wxPoint calcContextMenuPosition(const wxPoint& eventPos, wxControl* control)
+
+
+LocalSettings::LocalSettings()
 {
-    // use mouse coordinates if event is response to keyboard action
-    wxPoint menuPos(eventPos);
-    if (menuPos == wxDefaultPosition)
-        menuPos = wxGetMousePosition();
-    // make sure popup appears in the focused control
-    wxPoint menuPosClient = control->ScreenToClient(menuPos);
-    if (!control->GetClientRect().Contains(menuPosClient))
-        menuPosClient = wxPoint(0, 0);
-    return menuPosClient;
+    wxLocale* locale;
+    locale = new wxLocale();
+    if (config().getUseLocalConfig())
+        locale->Init(wxLANGUAGE_DEFAULT);
+    else
+        locale->Init(wxLANGUAGE_ENGLISH);
 }
 
+LocalSettings::~LocalSettings()
+{
+    wxLocale* locale;
+    locale = new wxLocale();
+    if (config().getUseLocalConfig())
+        locale->Init(wxLANGUAGE_DEFAULT);
+    else
+        locale->Init(wxLANGUAGE_ENGLISH);
+}
+
+
+void LocalSettings::setDataBaseLenguage()
+{
+    wxLocale* locale;
+    locale = new wxLocale();
+    locale->Init(wxLANGUAGE_ENGLISH);
+}

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -130,7 +130,6 @@ void Application::HandleEvent(wxEvtHandler* handler, wxEventFunction func,
 
 int Application::OnExit()
 {
-    wxDELETE(mLocale);
     return 0;
 }
 
@@ -141,6 +140,7 @@ void Application::checkEnvironment()
         config().setHomePath(translatePathMacros(envVar));
     if (wxGetEnv("FR_USER_HOME", &envVar))
         config().setUserHomePath(translatePathMacros(envVar));
+    LocalSettings localSet;
 }
 
 void Application::parseCommandLine()

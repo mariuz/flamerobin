@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -36,8 +36,10 @@
 #include <wx/textbuf.h>
 #include <wx/txtstrm.h>
 #include <wx/wfstream.h>
+#include <wx/intl.h>
 
 #include "config/Config.h"
+#include "config/LocalSettings.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "gui/AdvancedMessageDialog.h"
@@ -359,37 +361,45 @@ void DataGrid::copyToClipboardAsInsert()
 
         // NOTE: this has been reworked (compared to myDataGrid), because
         //       not all rows have necessarily the same fields selected
-        wxString sRows;
-        for (int i = 0; i < GetNumberRows(); i++)
         {
-            wxString sCols;
-            wxString sValues;
-            for (int j = 0; j < GetNumberCols(); j++)
+            wxString sRows;
+
+            LocalSettings localSet;
+
+            localSet.setDataBaseLenguage();
+            
+            
+            for (int i = 0; i < GetNumberRows(); i++)
             {
-                if (IsInSelection(i, j))
+                wxString sCols;
+                wxString sValues;
+                for (int j = 0; j < GetNumberCols(); j++)
                 {
-                    if (!sCols.IsEmpty())
-                        sCols += ", ";
-                    sCols += columnNames[j];
-                    if (!sValues.IsEmpty())
-                        sValues += ", ";
-                    sValues += table->getCellValueForInsert(i, j);
+                    if (IsInSelection(i, j))
+                    {
+                        if (!sCols.IsEmpty())
+                            sCols += ", ";
+                        sCols += columnNames[j];
+                        if (!sValues.IsEmpty())
+                            sValues += ", ";
+                        sValues += table->getCellValueForInsert(i, j);
+                    }
+                    else
+                        all = false;
                 }
-                else
-                    all = false;
+                if (!sCols.IsEmpty())
+                {
+                    sRows += "INSERT INTO " + tableId.getQuoted() + " (";
+                    sRows += sCols;
+                    sRows += ") VALUES (";
+                    sRows += sValues;
+                    sRows += ");";
+                    sRows += wxTextBuffer::GetEOL();
+                }
             }
-            if (!sCols.IsEmpty())
-            {
-                sRows += "INSERT INTO " + tableId.getQuoted() + " (";
-                sRows += sCols;
-                sRows += ") VALUES (";
-                sRows += sValues;
-                sRows += ");";
-                sRows += wxTextBuffer::GetEOL();
-            }
+            if (!sRows.IsEmpty())
+                copyToClipboard(sRows);
         }
-        if (!sRows.IsEmpty())
-            copyToClipboard(sRows);
     }   // end busy cursor
     if (all)
         notifyIfUnfetchedData();
@@ -443,6 +453,7 @@ void DataGrid::copyToClipboardAsInList()
 
 void DataGrid::copyToClipboardAsUpdate()
 {
+
     DataGridTable* table = getDataGridTable();
     if (!table)
         return;
@@ -472,77 +483,85 @@ void DataGrid::copyToClipboardAsUpdate()
             columnNames.Add(colId.getQuoted());
         }
 
-        wxString sRows;
-        for (int i = 0; i < GetNumberRows(); i++)
         {
-            wxString str;
-            for (int j = 0; j < GetNumberCols(); j++)
+            LocalSettings localSet;
+            localSet.setDataBaseLenguage();
+
+            wxString sRows;
+
+
+            for (int i = 0; i < GetNumberRows(); i++)
             {
-                if (IsInSelection(i, j))
+                wxString str;
+                for (int j = 0; j < GetNumberCols(); j++)
                 {
-                    if (!str.IsEmpty())
-                        str += ", ";
-                    str += wxTextBuffer::GetEOL() + columnNames[j]
-                        + " = " + table->getCellValueForInsert(i, j);
-                }
-                else
-                    all = false;
-            }
-            if (!str.IsEmpty())
-            {
-                wxString where;
-                // find primary key (otherwise use all values)
-                Table *t = 0;
-                Database* db = table->getDatabase();
-                if (db)
-                {
-                    t = dynamic_cast<Table *>(
-                        db->findByNameAndType(ntTable, tableId.get()));
-                }
-                if (!t)
-                {
-                    wxMessageBox(wxString::Format(
-                        _("Table %s cannot be found in database."),
-                        tableId.get().c_str()),
-                        _("Error"), wxOK|wxICON_ERROR);
-                    return;
-                }
-                PrimaryKeyConstraint *pkc = t->getPrimaryKey();
-                // check if all PK components are available
-                if (pkc)
-                {
-                    for (ColumnConstraint::const_iterator ci = pkc->begin();
-                        ci != pkc->end(); ++ci)
+                    if (IsInSelection(i, j))
                     {
-                        bool found = false;
-                        for (int k = 0; k < GetNumberCols(); k++)
+                        if (!str.IsEmpty())
+                            str += ", ";
+                        str += wxTextBuffer::GetEOL() + columnNames[j]
+                            + " = " + table->getCellValueForInsert(i, j);
+                    }
+                    else
+                        all = false;
+                }
+                if (!str.IsEmpty())
+                {
+                    wxString where;
+                    // find primary key (otherwise use all values)
+                    Table* t = 0;
+                    Database* db = table->getDatabase();
+                    if (db)
+                    {
+                        t = dynamic_cast<Table*>(
+                            db->findByNameAndType(ntTable, tableId.get()));
+                    }
+                    if (!t)
+                    {
+                        wxMessageBox(wxString::Format(
+                            _("Table %s cannot be found in database."),
+                            tableId.get().c_str()),
+                            _("Error"), wxOK | wxICON_ERROR);
+                        return;
+                    }
+                    PrimaryKeyConstraint* pkc = t->getPrimaryKey();
+                    // check if all PK components are available
+                    if (pkc)
+                    {
+                        for (ColumnConstraint::const_iterator ci = pkc->begin();
+                            ci != pkc->end(); ++ci)
                         {
-                            if ((*ci) == GetColLabelValue(k))
+                            bool found = false;
+                            for (int k = 0; k < GetNumberCols(); k++)
                             {
-                                if (!where.IsEmpty())
-                                    where += " AND ";
-                                where += (*ci) + " = " +
-                                    table->getCellValueForInsert(i, k);
-                                found = true;
+                                if ((*ci) == GetColLabelValue(k))
+                                {
+                                    if (!where.IsEmpty())
+                                        where += " AND ";
+                                    where += (*ci) + " = " +
+                                        table->getCellValueForInsert(i, k);
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (!found)
+                            {
+                                pkc = 0;    // as if PK doesn't exists
                                 break;
                             }
                         }
-                        if (!found)
-                        {
-                            pkc = 0;    // as if PK doesn't exists
-                            break;
-                        }
                     }
-                }
-                // TODO: if (!pkc)   // WHERE all_cols = all_vals
+                    // TODO: if (!pkc)   // WHERE all_cols = all_vals
 
-                sRows += "UPDATE " + tableId.getQuoted() + " SET "
-                    + str + wxTextBuffer::GetEOL() + "WHERE " + where
-                    + ";" + wxTextBuffer::GetEOL();
+                    sRows += "UPDATE " + tableId.getQuoted() + " SET "
+                        + str + wxTextBuffer::GetEOL() + "WHERE " + where
+                        + ";" + wxTextBuffer::GetEOL();
+                }
             }
+            if (!sRows.IsEmpty())
+                copyToClipboard(sRows);
         }
-        if (!sRows.IsEmpty())
-            copyToClipboard(sRows);
+
     }   // end busy cursor
     if (all)
         notifyIfUnfetchedData();

@@ -21,26 +21,18 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// For compilers that support precompilation, includes "wx/wx.h".
-#include "wx/wxprec.h"
+#ifndef FR_LOCALSETTINGS_H
+#define FR_LOCALSETTINGS_H
 
-// for all others, include the necessary headers (this file is usually all you
-// need because it includes almost all "standard" wxWindows headers
-#ifndef WX_PRECOMP
-    #include "wx/wx.h"
-#endif
+#include <wx/intl.h>
 
-
-wxPoint calcContextMenuPosition(const wxPoint& eventPos, wxControl* control)
+class LocalSettings
 {
-    // use mouse coordinates if event is response to keyboard action
-    wxPoint menuPos(eventPos);
-    if (menuPos == wxDefaultPosition)
-        menuPos = wxGetMousePosition();
-    // make sure popup appears in the focused control
-    wxPoint menuPosClient = control->ScreenToClient(menuPos);
-    if (!control->GetClientRect().Contains(menuPosClient))
-        menuPosClient = wxPoint(0, 0);
-    return menuPosClient;
-}
+public:
+    LocalSettings();
+    ~LocalSettings();
+    void setDataBaseLenguage();
+};
 
+
+#endif
