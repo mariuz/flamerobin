@@ -550,6 +550,7 @@ MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
 {
     if (!isConnected())
         return 0;
+    MetadataItem* item;
 
     switch (nt)
     {
@@ -565,15 +566,26 @@ MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
         case ntView:
             return viewsM->findByName(name).get();
             break;
-        case ntDMLTrigger:
-            return DMLtriggersM->findByName(name).get();
-            break;
         case ntTrigger:
-            return DMLtriggersM->findByName(name).get();
-            break;
+        case ntDMLTrigger:
+            if ( item = DMLtriggersM->findByName(name).get() ) {
+                return item;
+                break;
+            }
+        case ntDBTrigger:
+            if ( item = DBTriggersM->findByName(name).get()) {
+                return item;
+                break;
+            }
+        case ntDDLTrigger:
+            if (item = DDLTriggersM->findByName(name).get()) {
+                return item;
+                break;
+            }
         case ntProcedure:
             return proceduresM->findByName(name).get();
             break;
+        case ntFunction:
         case ntFunctionSQL:
             return functionSQLsM->findByName(name).get();
             break;
@@ -603,12 +615,6 @@ MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
             break;
         case ntSysPackage:
             return sysPackagesM->findByName(name).get();
-            break;
-        case ntDBTrigger:
-            return DBTriggersM->findByName(name).get();
-            break;
-        case ntDDLTrigger:
-            return DDLTriggersM->findByName(name).get();
             break;
         case ntIndices:
             return indicesM->findByName(name).get();
