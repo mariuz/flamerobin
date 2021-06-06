@@ -80,9 +80,6 @@ bool Application::OnInit()
     checkEnvironment();
     parseCommandLine();
 
-    mLocale = new wxLocale();
-    //mLocale->Init(wxLANGUAGE_DEFAULT);
-
     // initialize IBPP library - if it fails: exit
     try
     {
