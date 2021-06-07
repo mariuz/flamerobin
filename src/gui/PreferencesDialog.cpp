@@ -41,6 +41,7 @@
 #include <wx/xml/xml.h>
 
 #include "config/Config.h"
+#include "config/LocalSettings.h"
 #include "core/ArtProvider.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
@@ -692,8 +693,10 @@ END_EVENT_TABLE()
 void PreferencesDialog::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     wxBusyCursor wait;
-    if (saveToTargetConfig())
+    if (saveToTargetConfig()) {
+        LocalSettings locSet;
         EndModal(wxID_OK);
+    }
 }
 
 void PreferencesDialog::OnTreeSelChanged(wxTreeEvent& event)

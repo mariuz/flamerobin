@@ -406,7 +406,7 @@ bool FRConfig::getUseLocalConfig() const
 {
     bool b;
     if (!config().getValue("UseLocalConfig", b))
-        b = config().get("UseLocalConfig", true);
+        b = config().get("UseLocalConfig", false);
     return b;
 }
 
