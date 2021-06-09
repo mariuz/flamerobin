@@ -97,7 +97,7 @@ void Function::loadChildren()
     }
     else
         if (getParent()->getType() == ntPackage) {
-            sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and rdb$package_name = ? " : "";
+            sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and a.rdb$package_name = ? " : "";
         }
     sql += "order by a.rdb$argument_position ";
  //    sql += "order by iif(a.rdb$argument_name is null, 2014, a.rdb$argument_position) ";
