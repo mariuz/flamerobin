@@ -100,7 +100,7 @@ void Function::loadChildren()
         if (getParent()->getType() == ntPackage) {
             sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and a.rdb$package_name = ? " : "";
         }
-    sql += "order by a.rdb$argument_position ";
+    sql += "order by iif(a.rdb$argument_name is null,255, a.rdb$argument_position) ";
  //    sql += "order by iif(a.rdb$argument_name is null, 2014, a.rdb$argument_position) ";
 
     IBPP::Statement st1 = loader->getStatement(sql);
