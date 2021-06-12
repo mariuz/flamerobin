@@ -477,11 +477,13 @@ void Function::checkDependentFunction()
 FunctionSQL::FunctionSQL(DatabasePtr database, const wxString & name)
 	: Function(database, name)
 {
+    setType(ntFunctionSQL);
 }
 
 FunctionSQL::FunctionSQL(MetadataItem* parent, const wxString& name)
     : Function(parent, name)
 {
+    setType(ntFunctionSQL);
 }
 
 void FunctionSQL::loadProperties()
@@ -805,6 +807,7 @@ void UDF::loadProperties()
 UDF::UDF(DatabasePtr database, const wxString& name)
 	: Function(database, name)
 {
+    setType(ntUDF);
 	ensurePropertiesLoaded();
 }
 
