@@ -68,7 +68,16 @@ wxString ColumnBase::getDatatype(bool useConfig)
 
     wxString ret;
     DomainPtr d = getDomain();
-    wxString datatype(d ? d->getDatatypeAsString() : sourceM);
+    wxString datatype;
+    if (((getParent()->getType() == ntProcedure) || (getParent()->getType() == ntFunctionSQL)) && (isTypeOf())) {
+        datatype = getTypeOf();
+        if (datatype.IsEmpty())
+            datatype = d ? d->getDatatypeAsString() : sourceM;
+    }
+    else
+        datatype = (d ? d->getDatatypeAsString() : sourceM);
+
+
 
     enum
     {
@@ -159,6 +168,16 @@ bool ColumnBase::isNullable(GetColumnNullabilityType type) const
             return d->isNullable();
     }
     return true;
+}
+
+wxString ColumnBase::getTypeOf()
+{
+    return wxString();
+}
+
+bool ColumnBase::isTypeOf()
+{
+    return false;
 }
 
 Column::Column(Relation* relation, const wxString& name)

@@ -44,11 +44,13 @@ protected:
 public:
     ColumnBase(NodeType type, MetadataItem* parent, const wxString& name);
 
-    wxString getDatatype(bool useConfig = true);
+    virtual wxString getDatatype(bool useConfig = true);
     DomainPtr getDomain() const;
     bool getDefault(GetColumnDefaultType type, wxString& value) const;
     virtual wxString getSource(bool identity = false) ;
     bool isNullable(GetColumnNullabilityType type) const;
+    virtual wxString getTypeOf();
+    virtual bool isTypeOf();
 };
 
 class Column: public ColumnBase
