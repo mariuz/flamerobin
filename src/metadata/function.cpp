@@ -90,14 +90,15 @@ void Function::loadChildren()
     else
         sql += "null, null, -1, null, null, ";
     sql += "a.rdb$description from rdb$function_arguments a "
-        " join rdb$functions f on f.rdb$function_name = a.rdb$function_name "
-        "where a.rdb$function_name = ? ";
+        " join rdb$functions f on f.rdb$function_name = a.rdb$function_name ";
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)  ? " and ((f.rdb$package_name = a.rdb$package_name) or (a.rdb$package_name is null)) " : "";
+    sql += "where a.rdb$function_name = ? ";
     if (getParent()->getType() == ntDatabase) {
         sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and a.rdb$package_name is null " : " ";
     }
     else
         if (getParent()->getType() == ntPackage) {
-            sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and rdb$package_name = ? " : "";
+            sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and a.rdb$package_name = ? " : "";
         }
     sql += "order by a.rdb$argument_position ";
  //    sql += "order by iif(a.rdb$argument_name is null, 2014, a.rdb$argument_position) ";
