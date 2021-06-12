@@ -2095,15 +2095,19 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
 {
     LocalSettings localSet;
 
-    double localDouble = 0;
     wxString localValue = value;
-    if (localValue.ToDouble(&localDouble))
-    {
-        localSet.setDataBaseLenguage();
 
-        localValue = std::to_string(localDouble);
-        if (localValue.Contains(",")) {
-            localValue.Replace(",", ".", true);
+    if (config().getUseLocalConfig()) 
+    {
+        double localDouble = 0;
+        if (localValue.ToDouble(&localDouble) && localValue.Contains(","))
+        {
+            localSet.setDataBaseLenguage();
+
+            localValue = std::to_string(localDouble);
+            if (localValue.Contains(",")) {
+                localValue.Replace(",", ".", true);
+            }
         }
     }
     
