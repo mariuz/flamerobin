@@ -663,6 +663,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
             case ntProcedure:
             case ntDomain:
             case ntFunction:
+            case ntFunctionSQL:
             case ntUDF:
             case ntDBTrigger:
             case ntDDLTrigger:

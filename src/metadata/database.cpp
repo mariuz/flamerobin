@@ -585,7 +585,7 @@ MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
         case ntProcedure:
             return proceduresM->findByName(name).get();
             break;
-        case ntFunction:
+        //case ntFunction:
         case ntFunctionSQL:
             return functionSQLsM->findByName(name).get();
             break;

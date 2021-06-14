@@ -332,6 +332,8 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
         mytype = 0;
     if (typeM == ntDBTrigger || typeM == ntDDLTrigger || typeM == ntDMLTrigger)
         mytype = 2;
+    if (typeM == ntFunctionSQL || typeM == ntUDF)
+        mytype = 15;
 
     int mytype2 = mytype;
     // views count as relations(tables) when other object refer to them
