@@ -2097,7 +2097,8 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
 
     double localDouble = 0;
     wxString localValue = value;
-    if (localValue.ToDouble(&localDouble))
+    
+    if (localValue.ToDouble(&localDouble) && (value.Contains(",") || value.Contains(".")))
     {
         localSet.setDataBaseLenguage();
 
