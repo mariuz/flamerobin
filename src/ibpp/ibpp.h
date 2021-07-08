@@ -100,6 +100,9 @@ namespace IBPP
     enum SDT {sdArray, sdBlob, sdDate, sdTime, sdTimestamp, sdString,
         sdSmallint, sdInteger, sdLargeint, sdFloat, sdDouble, sdBoolean};
 
+    bool isIntegerNumber(SDT type);
+    bool isRationalNumber(SDT type);
+
     //  Array Data Types
     enum ADT {adDate, adTime, adTimestamp, adString,
         adBool, adInt16, adInt32, adInt64, adFloat, adDouble};
