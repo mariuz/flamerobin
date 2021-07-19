@@ -16,7 +16,7 @@ jobs:
     - name: apt update
       run: sudo apt-get update 
     - name: Install tools and libs
-      run: sudo apt-get install build-essential git cmake firebird-dev libwxgtk*-gtk3-dev -y
+      run: sudo apt-get install build-essential git cmake firebird-dev libwxgtk3.1-gtk3-dev -y
     - name: CMake
       run: |
           mkdir build
