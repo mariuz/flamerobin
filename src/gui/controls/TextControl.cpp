@@ -33,6 +33,7 @@
 #include "gui/CommandManager.h"
 #include "gui/controls/ControlUtils.h"
 #include "gui/controls/TextControl.h"
+#include "gui/FRStyle.h"
 
 TextControl::TextControl(wxWindow *parent, wxWindowID id)
     : wxStyledTextCtrl(parent, id, wxDefaultPosition, wxDefaultSize,
@@ -60,6 +61,7 @@ void TextControl::resetStyles()
     StyleSetForeground(wxSTC_STYLE_DEFAULT,
         wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
     // Make all other styles use these default colours
+    //stylerManager().assignGlobal(this);
     StyleClearAll();
 }
 
