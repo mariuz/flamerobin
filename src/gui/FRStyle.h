@@ -34,7 +34,7 @@
 
 #include "config/Config.h"
 
-typedef DWORD   COLORREF;
+typedef unsigned long   COLORREF;
 
 const int FONTSTYLE_NONE = 0;
 const int FONTSTYLE_BOLD = 1;
