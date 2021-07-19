@@ -156,7 +156,7 @@ void FRStyles::addStyler(int styleID, wxXmlNode* styleNode)
            
             long result; 
             str.ToLong(&result, 16);
-            newStyle->setfgColor((RGB((result >> 16) & 0xFF, (result >> 8) & 0xFF, result & 0xFF)) | (result & 0xFF000000));
+            newStyle->setfgColor((_RGB((result >> 16) & 0xFF, (result >> 8) & 0xFF, result & 0xFF)) | (result & 0xFF000000));
 
         }
 
@@ -165,7 +165,7 @@ void FRStyles::addStyler(int styleID, wxXmlNode* styleNode)
         {
             long result;
             str.ToLong(&result, 16);
-            newStyle->setbgColor((RGB((result >> 16) & 0xFF, (result >> 8) & 0xFF, result & 0xFF)) | (result & 0xFF000000));
+            newStyle->setbgColor((_RGB((result >> 16) & 0xFF, (result >> 8) & 0xFF, result & 0xFF)) | (result & 0xFF000000));
         }
 
         str = element->GetAttribute("colorStyle");

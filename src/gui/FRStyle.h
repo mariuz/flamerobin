@@ -34,7 +34,11 @@
 
 #include "config/Config.h"
 
-typedef unsigned long   COLORREF;
+typedef unsigned long       _DWORD;
+typedef unsigned char       _BYTE;
+#define _RGB(r,g,b)          ((COLORREF)(((_BYTE)(r)|((_DWORD)((_BYTE)(g))<<8))|(((_DWORD)(_BYTE)(b))<<16)))
+typedef _DWORD   COLORREF;
+
 
 const int FONTSTYLE_NONE = 0;
 const int FONTSTYLE_BOLD = 1;
