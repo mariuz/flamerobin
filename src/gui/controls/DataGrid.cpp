@@ -68,19 +68,19 @@ DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
     SetBackgroundColour(stylerManager().getDefaultStyle()->getbgColor());
     SetForegroundColour(stylerManager().getDefaultStyle()->getfgColor());
 
-    SetSelectionBackground(stylerManager().getDefaultStyle()->getbgColor());
-    SetSelectionForeground(stylerManager().getDefaultStyle()->getfgColor());
+    SetSelectionBackground(stylerManager().getStyleByName("Selected text colour")->getbgColor());
+    //SetSelectionForeground(stylerManager().getDefaultStyle()->getfgColor());
 
 
     SetDefaultCellBackgroundColour(stylerManager().getDefaultStyle()->getbgColor());
     SetDefaultCellTextColour(stylerManager().getDefaultStyle()->getfgColor());
+
     SetCellHighlightColour(stylerManager().getDefaultStyle()->getfgColor());
 
-
-    SetDefaultCellFont(stylerManager().getDefaultStyle()->getFont());
-    
     wxString s;
     wxFont f;
+
+    SetDefaultCellFont(stylerManager().getDefaultStyle()->getFont());
     if (config().getValue("DataGridFont", s) && !s.empty())
     {
         f.SetNativeFontInfo(s);
@@ -89,13 +89,13 @@ DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
     }
 
     SetLabelFont(stylerManager().getDefaultStyle()->getFont());
-
     if (config().getValue("DataGridHeaderFont", s) && !s.empty())
     {
         f.SetNativeFontInfo(s);
         if (f.Ok())
             SetLabelFont(f);
     }
+
     updateRowHeights();
 }
 

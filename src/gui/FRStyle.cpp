@@ -112,7 +112,7 @@ FRStyles& FRStyles::operator=(const FRStyles& sa)
     return *this;
 }
 
-int FRStyles::getStylerIndexByID(int id)
+int FRStyles::getStyleIndexByID(int id)
 {
     std::vector<FRStyle*>::iterator it;
     it = std::find_if(styleVectorM.begin(), styleVectorM.end(), [id](FRStyle* style)->bool {return style->getStyleID() == id; });
@@ -239,7 +239,7 @@ void FRStyles::addStyler(int styleID, const wxString styleName)
 
 }
 
-int FRStyles::getStylerIndexByName(wxString styleName) 
+int FRStyles::getStyleIndexByName(wxString styleName) 
 {
     if (styleName.IsEmpty())
         return -1;
@@ -257,6 +257,15 @@ FRStyle* FRStyles::getStyle(size_t index)
 {
     assert(index < wxSTC_STYLE_MAX);
     return styleVectorM[index];
+}
+
+FRStyle* FRStyles::getStyleByName(wxString styleName)
+{
+    int i = getStyleIndexByName(styleName);
+    if (i != -1)
+        return getStyle(i);
+    else
+        return nullptr;
 }
 
 
@@ -444,6 +453,12 @@ FRStyleManager::FRStyleManager(wxFileName style)
         }
     }
 
+}
+
+
+FRStyle* FRStyleManager::getStyleByName(wxString styleName)
+{
+    return globalStylesM.getStyleByName(styleName);
 }
 
 void FRStyleManager::assignGlobal(wxStyledTextCtrl* text)

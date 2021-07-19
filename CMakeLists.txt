@@ -108,6 +108,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/FieldPropertiesDialog.cpp
         ${SOURCEDIR}/gui/FindDialog.cpp
         ${SOURCEDIR}/gui/FRLayoutConfig.cpp
+        ${SOURCEDIR}/gui/FRStyle.cpp
         ${SOURCEDIR}/gui/GUIURIHandlerHelper.cpp
         ${SOURCEDIR}/gui/HtmlHeaderMetadataItemVisitor.cpp
         ${SOURCEDIR}/gui/HtmlTemplateProcessor.cpp
@@ -219,6 +220,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/gui/FieldPropertiesDialog.h
         ${SOURCEDIR}/gui/FindDialog.h
         ${SOURCEDIR}/gui/FRLayoutConfig.h
+        ${SOURCEDIR}/gui/FRStyle.h
         ${SOURCEDIR}/gui/HtmlHeaderMetadataItemVisitor.h
         ${SOURCEDIR}/gui/HtmlTemplateProcessor.h
         ${SOURCEDIR}/gui/GUIURIHandlerHelper.h

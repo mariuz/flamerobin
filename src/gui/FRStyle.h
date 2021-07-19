@@ -34,6 +34,8 @@
 
 #include "config/Config.h"
 
+typedef DWORD   COLORREF;
+
 const int FONTSTYLE_NONE = 0;
 const int FONTSTYLE_BOLD = 1;
 const int FONTSTYLE_ITALIC = 2;
@@ -134,14 +136,15 @@ public:
     //void setNbStyler(int nb) { nbStylerM = nb; };
 
     FRStyle* getStyle(size_t index);
+    FRStyle* getStyleByName(wxString styleName);
 
     bool hasEnoughSpace() { return (getNbStyler() < wxSTC_STYLE_MAX); };
     void addStyler(int styleID, wxXmlNode* styleNode);
     void addStyler(int styleID, const wxString styleName);
 
-    int getStylerIndexByID(int id);
+    int getStyleIndexByID(int id);
 
-    int getStylerIndexByName(wxString styleName);
+    int getStyleIndexByName(wxString styleName);
     void clear() { styleVectorM.clear(); };
 
 };
@@ -218,6 +221,7 @@ public:
 
     FRStyle* getGlobalStyle() { return globalStyleM; };
     FRStyle* getDefaultStyle() { return defaultStyleM; };
+    FRStyle* getStyleByName(wxString styleName);
 
     void assignGlobal(wxStyledTextCtrl* text);
 
