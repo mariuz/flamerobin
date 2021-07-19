@@ -16,7 +16,7 @@ jobs:
     - name: wxWidgets 3.1
       run: sudo apt-key adv --fetch-keys http://repos.codelite.org/CodeLite.asc
     - name: add repository
-      run: sudo apt-add-repository 'deb http://repos.codelite.org/wx3.1.5/ubuntu/ bionic universe'
+      run: sudo apt-add-repository 'deb http://repos.codelite.org/wx3.1.5/ubuntu/ xenial universe'
     - name: apt update
       run: sudo apt-get update 
     - name: Install tools and libs
