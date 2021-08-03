@@ -208,7 +208,7 @@
     <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dynamic|Win32'">
-    <OutDir>vcud\</OutDir>
+    <OutDir>.\</OutDir>
     <IntDir>vcud\flamerobin\</IntDir>
     <LinkIncremental>true</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
@@ -218,7 +218,7 @@
     <GenerateManifest>true</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Static|Win32'">
-    <OutDir>.\</OutDir>
+    <OutDir>..\</OutDir>
     <IntDir>vcusd\flamerobin\</IntDir>
     <LinkIncremental>true</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
@@ -310,6 +310,7 @@
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x0A00;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -355,6 +356,7 @@
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x0A00;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -398,6 +400,7 @@
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -443,6 +446,7 @@
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -485,6 +489,7 @@
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat />
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -528,6 +533,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>
       </DebugInformationFormat>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -569,6 +575,7 @@
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat />
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -612,6 +619,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>
       </DebugInformationFormat>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -655,6 +663,7 @@
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -700,6 +709,7 @@
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -744,6 +754,7 @@
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -789,6 +800,7 @@
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -831,6 +843,7 @@
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat />
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -874,6 +887,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>
       </DebugInformationFormat>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -915,6 +929,7 @@
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat />
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -958,6 +973,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>
       </DebugInformationFormat>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>

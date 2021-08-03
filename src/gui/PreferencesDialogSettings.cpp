@@ -1337,6 +1337,90 @@ bool PrefDlgRelationColumnsListSetting::parseProperty(wxXmlNode* xmln)
     return PrefDlgCheckListBoxSetting::parseProperty(xmln);
 }
 
+
+class PrefDlgStyleEditSetting : public PrefDlgSetting
+{
+public:
+    PrefDlgStyleEditSetting(wxPanel* page, PrefDlgSetting* parent);
+
+    virtual bool createControl(bool ignoreerrors);
+    virtual bool loadFromTargetConfig(Config& config);
+    virtual bool parseProperty(wxXmlNode* xmln);
+    virtual bool saveToTargetConfig(Config& config);
+protected:
+    virtual void addControlsToSizer(wxSizer* sizer);
+    virtual void enableControls(bool enabled);
+    virtual wxStaticText* getLabel();
+    virtual bool hasControls() const;
+    virtual void setDefault(const wxString& defValue);
+private:
+    void OnComboBoxClick(wxCommandEvent& e) {
+        stylesComboBoxM->SetSelection(static_cast<wxComboBox*>(e.GetEventObject())->GetSelection());
+    }
+    wxComboBox* stylesComboBoxM;
+    wxString defaultM;
+
+};
+
+PrefDlgStyleEditSetting::PrefDlgStyleEditSetting(
+    wxPanel* page, PrefDlgSetting* parent)
+    : PrefDlgSetting(page, parent), stylesComboBoxM(0)//, defaultM(0)
+{
+}
+
+bool PrefDlgStyleEditSetting::createControl(bool WXUNUSED(ignoreerrors))
+{
+    stylesComboBoxM = new wxComboBox(getPage(), wxID_ANY);
+
+    return true;
+}
+
+bool PrefDlgStyleEditSetting::loadFromTargetConfig(Config& config)
+{
+    if (!checkTargetConfigProperties())
+        return false;
+    if (stylesComboBoxM)
+    {
+        wxString value = defaultM;
+        config.getValue(keyM, value);
+        stylesComboBoxM->SetValue(value);
+    }
+    enableControls(true);
+    return true;
+}
+
+bool PrefDlgStyleEditSetting::parseProperty(wxXmlNode* xmln)
+{
+    return false;
+}
+
+bool PrefDlgStyleEditSetting::saveToTargetConfig(Config& config)
+{
+    return false;
+}
+
+void PrefDlgStyleEditSetting::addControlsToSizer(wxSizer* sizer)
+{
+}
+
+void PrefDlgStyleEditSetting::enableControls(bool enabled)
+{
+}
+
+wxStaticText* PrefDlgStyleEditSetting::getLabel()
+{
+    return nullptr;
+}
+
+bool PrefDlgStyleEditSetting::hasControls() const
+{
+    return false;
+}
+
+void PrefDlgStyleEditSetting::setDefault(const wxString& defValue)
+{
+}
+
 // PrefDlgSetting factory
 /* static */
 PrefDlgSetting* PrefDlgSetting::createPrefDlgSetting(wxPanel* page,
@@ -1362,6 +1446,8 @@ PrefDlgSetting* PrefDlgSetting::createPrefDlgSetting(wxPanel* page,
             return new PrefDlgRelationColumnsListSetting(page, parent);
         return new PrefDlgRelationColumnsChooserSetting(page, parent);
     }
+    if (type == "style")
+        return new PrefDlgStyleEditSetting(page, parent);
     return 0;
 }
 

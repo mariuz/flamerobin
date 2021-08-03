@@ -362,6 +362,17 @@
                 </option>
             </setting>
         </node>
+		<node>
+            <caption>Style</caption>
+            <description>SQL Style Editor </description>
+            <image>0</image>
+			<setting type="style">
+				<caption>Style file name:</caption>
+                <description>Select the file with the style</description>
+                <key>StyleFile</key>
+            </setting>
+
+		</node>
     </node>
     <node>
         <caption>Data Grid</caption>
