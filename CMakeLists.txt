@@ -337,7 +337,7 @@ if (WIN32)
 	)
 endif (WIN32)
 
-if (UNIX)
+if (UNIX AND NOT APPLE)
 	# UNIX (Linux) specific details
 	list(APPEND SOURCE_LIST
 		${SOURCEDIR}/gui/gtk/StyleGuideGTK.cpp
@@ -355,17 +355,15 @@ if (UNIX)
 
 	# Util script to help run FR in build dir
 	file(COPY utils/run_flamerobin.sh  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-endif (UNIX)
+endif (UNIX AND NOT APPLE)
 
 if(APPLE)
 	# MacOS specific stuff
 	# TODO: Untested, if any Mac devs want to check, please get in touch
 	message(WARNING "MacOS build is untested.\n"
 	                "Please get in contact to tell us of your results.")
-	list(APPEND SOURCE_LIST
-		${SOURCEDIR}/gui/mac/StyleGuideMAC.cpp
-	)
 	add_definitions(-DIBPP_DARWIN)
+	list(APPEND FR_LIBS -lfbclient)
 
 	# Create the revision include file
 	execute_process(
@@ -375,6 +373,22 @@ if(APPLE)
 
 	# Util script to help run FR in build dir
 	file(COPY utils/run_flamerobin.sh  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+	# MacOS bundle
+	string(CURYEAR TODAY "%Y")
+	set(RESOURCE_FILES_MAC
+		html-templates
+		code-templates
+		sys-templates
+		conf-defs )
+	set_target_properties(${PROJECT_NAME} PROPERTIES
+		MACOSX_BUNDLE ON
+		MACOSX_BUNDLE_BUNDLE_NAME "FlameRobin"
+		MACOSX_BUNDLE_BUNDLE_IDENTIFIER "org.flamerobin"
+		MACOSX_BUNDLE_COPYRIGHT "Copyright 2004-${CURYEAR} FlameRobin Team"
+		MACOSX_BUNDLE_ICON_FILE "flamerobin.icns"
+		MACOSX_BUNDLE_INFO_STRING "FlameRobin, Copyright 2004-${CURYEAR} FlameRobin Team"
+		RESOURCE "${RESOURCE_FILES_MAC}" )
 endif (APPLE)
 
 # Organize Visual Studio projects (possibly others so it's outside the WIN32 section)
@@ -404,7 +418,7 @@ file(COPY ${CMAKE_SOURCE_DIR}/conf-defs  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
 
 #--------------------------------------
 # Install
-if (UNIX)
+if (UNIX AND NOT APPLE)
 	install(
 		TARGETS flamerobin
 		RUNTIME DESTINATION bin
@@ -437,4 +451,5 @@ if (UNIX)
 		FILES docs/flamerobin.1
 		DESTINATION share/man/man1
 	)
-endif (UNIX)
+endif (UNIX AND NOT APPLE)
+
