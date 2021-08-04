@@ -337,7 +337,7 @@ if (WIN32)
 	)
 endif (WIN32)
 
-if (UNIX AND NOT APPLE)
+if (UNIX and not APPLE)
 	# UNIX (Linux) specific details
 	list(APPEND SOURCE_LIST
 		${SOURCEDIR}/gui/gtk/StyleGuideGTK.cpp
@@ -355,7 +355,7 @@ if (UNIX AND NOT APPLE)
 
 	# Util script to help run FR in build dir
 	file(COPY utils/run_flamerobin.sh  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-endif (UNIX)
+endif (UNIX and not APPLE)
 
 if(APPLE)
 	# MacOS specific stuff
