@@ -337,7 +337,7 @@ if (WIN32)
 	)
 endif (WIN32)
 
-if (UNIX and not APPLE)
+if (UNIX AND NOT APPLE)
 	# UNIX (Linux) specific details
 	list(APPEND SOURCE_LIST
 		${SOURCEDIR}/gui/gtk/StyleGuideGTK.cpp
@@ -355,7 +355,7 @@ if (UNIX and not APPLE)
 
 	# Util script to help run FR in build dir
 	file(COPY utils/run_flamerobin.sh  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-endif (UNIX and not APPLE)
+endif (UNIX AND NOT APPLE)
 
 if(APPLE)
 	# MacOS specific stuff
@@ -418,7 +418,7 @@ file(COPY ${CMAKE_SOURCE_DIR}/conf-defs  DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
 
 #--------------------------------------
 # Install
-if (UNIX and not APPLE)
+if (UNIX AND NOT APPLE)
 	install(
 		TARGETS flamerobin
 		RUNTIME DESTINATION bin
@@ -451,5 +451,5 @@ if (UNIX and not APPLE)
 		FILES docs/flamerobin.1
 		DESTINATION share/man/man1
 	)
-endif (UNIX and not APPLE)
+endif (UNIX AND NOT APPLE)
 
