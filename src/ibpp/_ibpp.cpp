@@ -35,6 +35,8 @@
 #define REG_KEY_ROOT_INSTANCES	"SOFTWARE\\Firebird Project\\Firebird Server\\Instances"
 #define FB_DEFAULT_INSTANCE	  	"DefaultInstance"
 
+#endif
+
 #ifdef IBPP_UNIX
 #ifdef IBPP_LATE_BIND
 
@@ -51,8 +53,6 @@ static const char* fblibs[] = {"libfbembed.so.2.5","libfbembed.so.2.1","libfbcli
 // Many compilers confuses those following min/max with macros min and max !
 #undef min
 #undef max
-
-#endif
 
 namespace ibpp_internals
 {

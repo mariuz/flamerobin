@@ -1172,7 +1172,7 @@ void setFromFile(IBPP::Statement st, int param,
         }
         case IBPP::sdTime:
             str2time(selected, mytime);
-            st->Set(param, IBPP::Time(mytime));
+            st->Set(param, IBPP::Time(IBPP::Time::tmNone, mytime, IBPP::Time::TZ_NONE));
             break;
         case IBPP::sdDate:
             str2date(selected, mydate);
@@ -1185,7 +1185,7 @@ void setFromFile(IBPP::Statement st, int param,
             int y, mo, d, h, mi, s, t;
             IBPP::dtoi(mydate, &y, &mo, &d);
             IBPP::ttoi(mytime, &h, &mi, &s, &t);
-            st->Set(param, IBPP::Timestamp(y, mo, d, h, mi, s, t));
+            st->Set(param, IBPP::Timestamp(y, mo, d, IBPP::Time::tmNone, h, mi, s, t, IBPP::Time::TZ_NONE));
             break;
         }
         case IBPP::sdBlob:
@@ -1445,13 +1445,13 @@ void setDatetime(IBPP::Statement st, int param, GeneratorSettings* gs,
     if (dt == IBPP::sdDate)
         st->Set(param, IBPP::Date(myDate));
     if (dt == IBPP::sdTime)
-        st->Set(param, IBPP::Time(myTime));
+        st->Set(param, IBPP::Time(IBPP::Time::tmNone, myTime, IBPP::Time::TZ_NONE));
     if (dt == IBPP::sdTimestamp)
     {
         int y, mo, d, h, mi, s, t;
         IBPP::dtoi(myDate, &y, &mo, &d);
         IBPP::ttoi(myTime, &h, &mi, &s, &t);
-        st->Set(param, IBPP::Timestamp(y, mo, d, h, mi, s, t));
+        st->Set(param, IBPP::Timestamp(y, mo, d, IBPP::Time::tmNone, h, mi, s, t, IBPP::Time::TZ_NONE));
     }
 }
 

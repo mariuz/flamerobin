@@ -698,6 +698,8 @@ IBPP::SDT RowImpl::ColumnType(int varnum)
 		case SQL_BLOB :      value = IBPP::sdBlob;      break;
 		case SQL_ARRAY :     value = IBPP::sdArray;     break;
 		case SQL_BOOLEAN :   value = IBPP::sdBoolean;     break;
+		case SQL_TIME_TZ :   value = IBPP::sdTimeTz;    break;
+		case SQL_TIMESTAMP_TZ : value = IBPP::sdTimestampTz; break;
 		default : throw LogicExceptionImpl("Row::ColumnType",
 						_("Found an unknown sqltype !"));
 	}
@@ -1363,6 +1365,22 @@ void* RowImpl::GetValue(int varnum, IITYPE ivType, void* retvalue)
 			}
 			break;
 
+		case SQL_TIMESTAMP_TZ :
+			if (ivType != ivTimestamp)
+				throw WrongTypeImpl("RowImpl::SetValue", var->sqltype, ivType,
+										_("Incompatible types."));
+			decodeTimestampTz(*(IBPP::Timestamp*)retvalue, *(ISC_TIMESTAMP_TZ*)var->sqldata);
+			value = retvalue;
+			break;
+
+		case SQL_TIME_TZ :
+			if (ivType != ivTime)
+				throw WrongTypeImpl("RowImpl::SetValue", var->sqltype, ivType,
+										_("Incompatible types."));
+			decodeTimeTz(*(IBPP::Time*)retvalue, *(ISC_TIME_TZ*)var->sqldata);
+			value = retvalue;
+			break;
+
 		default : throw LogicExceptionImpl("RowImpl::GetValue",
 						_("Found an unknown sqltype !"));
 	}
@@ -1394,6 +1412,8 @@ void RowImpl::Free()
 					case SQL_INT64 :	delete (int64_t*) var->sqldata; break;
 					case SQL_FLOAT : 	delete (float*) var->sqldata; break;
 					case SQL_DOUBLE :	delete (double*) var->sqldata; break;
+					case SQL_TIMESTAMP_TZ : delete (ISC_TIMESTAMP_TZ*) var->sqldata; break;
+					case SQL_TIME_TZ   : delete (ISC_TIME_TZ*) var->sqldata; break;
 					default : throw LogicExceptionImpl("RowImpl::Free",
 								_("Found an unknown sqltype !"));
 				}
@@ -1487,6 +1507,13 @@ void RowImpl::AllocVariables()
 			case SQL_INT64 :	var->sqldata = (char*) new int64_t(0); break;
 			case SQL_FLOAT : 	var->sqldata = (char*) new float(0.0); break;
 			case SQL_DOUBLE :	var->sqldata = (char*) new double(0.0); break;
+			case SQL_TIMESTAMP_TZ:
+								var->sqldata = (char*) new ISC_TIMESTAMP_TZ;
+								memset(var->sqldata, 0, sizeof(ISC_TIMESTAMP_TZ));
+								break;
+			case SQL_TIME_TZ :  var->sqldata = (char*) new ISC_TIME_TZ;
+								memset(var->sqldata, 0, sizeof(ISC_TIME_TZ));
+								break;
 			default : throw LogicExceptionImpl("RowImpl::AllocVariables",
 						_("Found an unknown sqltype !"));
 		}

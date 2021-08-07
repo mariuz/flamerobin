@@ -189,9 +189,19 @@ typedef int			ISC_DATE;
 typedef unsigned int	ISC_TIME;
 typedef struct
 {
+	ISC_TIME utc_time;
+	ISC_USHORT time_zone;
+} ISC_TIME_TZ;
+typedef struct
+{
 	ISC_DATE timestamp_date;
 	ISC_TIME timestamp_time;
 } ISC_TIMESTAMP;
+typedef struct
+{
+	ISC_TIMESTAMP utc_timestamp;
+	ISC_USHORT time_zone;
+} ISC_TIMESTAMP_TZ;
 #define ISC_TIMESTAMP_DEFINED
 #endif	/* ISC_TIMESTAMP_DEFINED */
 
@@ -483,6 +493,8 @@ typedef struct
 #define SQL_TYPE_TIME                      560
 #define SQL_TYPE_DATE                      570
 #define SQL_INT64                          580
+#define SQL_TIMESTAMP_TZ                 32754
+#define SQL_TIME_TZ                      32756
 #define SQL_BOOLEAN                      32764
 #define SQL_NULL                         32766
 
