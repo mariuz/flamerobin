@@ -346,7 +346,7 @@
             <expand>1</expand>
         </setting>
         <setting type="radiobox">
-            <caption>Time an timstamp fields with time zone</caption>
+            <caption>Time an timestamp fields with time zone</caption>
             <key>ShowTimezoneInfo</key>
             <default>2</default>
             <option>
