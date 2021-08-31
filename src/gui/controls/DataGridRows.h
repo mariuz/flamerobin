@@ -42,6 +42,18 @@ class wxMBConv;
 class GridCellFormats: public ConfigCache
 {
 private:
+    enum ShowTimezoneInfoType
+	{
+        // ** Keep in sync with radiogroup control **
+        // append no timezone info
+        tzNone = 0,
+        // append timezone raw value (id)
+        tzRawId   = 1,
+        // append timezone name
+        tzName = 2
+	};
+
+private:
     int floatingPointPrecisionM;
     wxString dateFormatM;
     int maxBlobKBytesM;
@@ -49,6 +61,9 @@ private:
     bool showBlobContentM;
     wxString timeFormatM;
     wxString timestampFormatM;
+    ShowTimezoneInfoType showTimezoneInfoM;
+    void formatAppendTz(wxString &s, IBPP::Time &t, bool hasTz,
+        Database* db);
 protected:
     virtual void loadFromConfig();
 public:
@@ -59,9 +74,9 @@ public:
     template<typename T>
     wxString format(T value);
     wxString formatDate(int year, int month, int day);
-    wxString formatTime(int hour, int minute, int second, int milliSecond);
-    wxString formatTimestamp(int year, int month, int day,
-        int hour, int minute, int second, int milliSecond);
+    wxString formatTime(IBPP::Time &t, bool hasTz, Database* db);
+    wxString formatTimestamp(IBPP::Timestamp &ts, bool hasTz, Database* db);
+
     int maxBlobBytesToFetch();
     bool parseDate(wxString::iterator& start, wxString::iterator end,
         bool consumeAll, int& year, int& month, int& day);
@@ -86,7 +101,7 @@ public:
     virtual ~ResultsetColumnDef();
 
     virtual wxString getAsFirebirdString(DataGridRowBuffer* buffer);
-    virtual wxString getAsString(DataGridRowBuffer* buffer) = 0;
+    virtual wxString getAsString(DataGridRowBuffer* buffer, Database* db) = 0;
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source) = 0;
     virtual unsigned getBufferSize() = 0;
@@ -96,7 +111,7 @@ public:
     bool isReadOnly();
     bool isNullable();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
-        const IBPP::Statement& statement, wxMBConv* converter) = 0;
+        const IBPP::Statement& statement, wxMBConv* converter, Database* db) = 0;
 };
 
 struct DataGridFieldInfo

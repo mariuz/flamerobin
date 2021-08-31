@@ -66,6 +66,7 @@ public:
     bool getValue(unsigned offset, float& value);
     bool getValue(unsigned offset, int& value);
     bool getValue(unsigned offset, int64_t& value);
+    bool getValue(unsigned offset, uint16_t& value);
     bool getValue(unsigned offset, IBPP::DBKey& value, unsigned size);
     bool isFieldNull(unsigned num);
     void setFieldNull(unsigned num, bool isNull);

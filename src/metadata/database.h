@@ -142,6 +142,17 @@ private:
     Mode modeM;
 };
 
+class TimezoneInfo
+{
+public:
+    TimezoneInfo() { name = ""; id = 0; };
+
+    bool empty() { return (name == "") && (id == 0); };
+
+    wxString name;
+    uint16_t id;
+};
+
 class Database: public MetadataItem,
     public std::enable_shared_from_this<Database>
 {
@@ -163,6 +174,8 @@ private:
     Credentials credentialsM;
     Credentials* connectionCredentialsM;
     DatabaseAuthenticationMode authenticationModeM;
+    std::vector<TimezoneInfo*> timezonesM;
+    TimezoneInfo defaultTimezoneM;
 
     std::unique_ptr<wxMBConv> charsetConverterM;
     void createCharsetConverter();
@@ -200,6 +213,9 @@ private:
     void loadCollations();
 
     void loadCollections(ProgressIndicator* progressIndicator);
+
+    void loadDefaultTimezone();
+    void loadTimezones();
 
     // small help for parser
     wxString getTableForIndex(const wxString& indexName);
@@ -277,6 +293,9 @@ public:
     CharacterSet getCharsetById(int id);
     wxArrayString getCollations(const wxString& charset);
     bool isDefaultCollation(const wxString& charset, const wxString& collate);
+
+    TimezoneInfo getDefaultTimezone();
+    wxString getTimezoneName(int timezone);
 
     //! fill vector with names of all tables, views, etc.
     void getIdentifiers(std::vector<Identifier>& temp);

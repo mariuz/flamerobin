@@ -98,7 +98,8 @@ namespace IBPP
 
     //  SQL Data Types
     enum SDT {sdArray, sdBlob, sdDate, sdTime, sdTimestamp, sdString,
-        sdSmallint, sdInteger, sdLargeint, sdFloat, sdDouble, sdBoolean};
+        sdSmallint, sdInteger, sdLargeint, sdFloat, sdDouble, sdBoolean,
+		sdTimeTz, sdTimestampTz};
 
     //  Array Data Types
     enum ADT {adDate, adTime, adTimestamp, adString,
@@ -232,32 +233,54 @@ namespace IBPP
 
     class Time
     {
+	public:
+        enum TimezoneMode
+        {
+            // ISC_TIME / ISC_TIMESTAMP
+            tmNone,
+            // ISC_TIME_TZ / ISC_TIMESTAMP_TZ
+            tmTimezone,
+            // ISC_TIM_TZ_EX / ISC_TIMESTAMP_TZ_EX
+            tmTimezoneOffset
+        };
+		/* no time zone -> utc = local */
+		const static int TZ_NONE     =  0;
+		const static int TZ_DEFAULT  = -1;
+		/* time not initialized */
+		const static int TM_NOT_INIT = -1;
     protected:
-        int mTime;  // The time, in ten-thousandths of seconds since midnight
+        // The time, in ten-thousandths of seconds since midnight - UTC and TZ
+        mutable int mTime;
+        mutable TimezoneMode mTimezoneMode;
+        // The timezone
+        int mTimezone;
+        int mTimezoneOffset;
 
+        void SetTimezone(int tz);
     public:
-        void Clear()    { mTime = 0; }
+        void Clear()    { mTime = 0; mTimezoneMode = tmNone; mTimezone = TZ_NONE; mTimezoneOffset = 0;}
         void Now();
-        void SetTime(int hour, int minute, int second, int tenthousandths = 0);
-        void SetTime(int tm);
+        void SetTime(TimezoneMode tzMode, int hour, int minute, int second, int tenthousandths, int timezone);
+        void SetTime(TimezoneMode tzMode, int tm, int timezone);
+        //void SetTimezoneOffset(int ofs);
         void GetTime(int& hour, int& minute, int& second) const;
         void GetTime(int& hour, int& minute, int& second, int& tenthousandths) const;
-        int GetTime() const { return mTime; }
+        int GetTime() const;
+        int GetTimezone() const { return mTimezone; }
+        int GetTimezoneOffset() const { return mTimezoneOffset; }
         int Hours() const;
         int Minutes() const;
         int Seconds() const;
         int SubSeconds() const;     // Actually tenthousandths of seconds
         Time()          { Clear(); }
-        Time(int tm)    { SetTime(tm); }
-        Time(int hour, int minute, int second, int tenthousandths = 0);
+        Time(TimezoneMode tzMode, int tm, int timezone)    { SetTime(tzMode, tm, timezone); }
+        Time(TimezoneMode tzMode, int hour, int minute, int second, int tenthousandths, int timezone);
         Time(const Time&);                          // Copy Constructor
         Time& operator=(const Timestamp&);          // Timestamp Assignment operator
         Time& operator=(const Time&);               // Time Assignment operator
 
         bool operator==(const Time& rv) { return mTime == rv.GetTime(); }
         bool operator<(const Time& rv) { return mTime < rv.GetTime(); }
-
-        virtual ~Time() { }
     };
 
     /* Class Timestamp represent a date AND a time. It is usefull in
@@ -270,33 +293,33 @@ namespace IBPP
     public:
         void Clear()    { Date::Clear(); Time::Clear(); }
         void Today()    { Date::Today(); Time::Clear(); }
-        void Now()      { Date::Today(); Time::Now(); }
+        void Now(/*int timezone*/) { Date::Today(); Time::Now(/*timezone*/); }
 
         Timestamp()     { Clear(); }
 
         Timestamp(int y, int m, int d)
             { Date::SetDate(y, m, d); Time::Clear(); }
 
-        Timestamp(int y, int mo, int d, int h, int mi, int s, int t = 0)
-            { Date::SetDate(y, mo, d); Time::SetTime(h, mi, s, t); }
+        Timestamp(int y, int mo, int d, TimezoneMode tzMode, int h, int mi, int s, int t, int tz)
+            { Date::SetDate(y, mo, d); Time::SetTime(tzMode, h, mi, s, t, tz); }
 
         Timestamp(const Timestamp& rv)
-            : Date(rv.mDate), Time(rv.mTime) {} // Copy Constructor
+            : Date(rv.mDate), Time::Time(rv) {} // Copy Constructor
 
         Timestamp(const Date& rv)
-            { mDate = rv.GetDate(); mTime = 0; }
+            { mDate = rv.GetDate(); Time::Clear(); }
 
         Timestamp(const Time& rv)
-            { mDate = 0; mTime = rv.GetTime(); }
+            { mDate = 0; (Time)*this = rv; }
 
         Timestamp& operator=(const Timestamp& rv)   // Timestamp Assignment operator
-            { mDate = rv.mDate; mTime = rv.mTime; return *this; }
+            { mDate = rv.mDate; (Time)*this = (Time)rv; return *this; }
 
         Timestamp& operator=(const Date& rv)        // Date Assignment operator
             { mDate = rv.GetDate(); return *this; }
 
         Timestamp& operator=(const Time& rv)        // Time Assignment operator
-            { mTime = rv.GetTime(); return *this; }
+            { (Time)*this = (Time)rv; return *this; }
 
         bool operator==(const Timestamp& rv)
             { return (mDate == rv.GetDate()) && (mTime == rv.GetTime()); }
