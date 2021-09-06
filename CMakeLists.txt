@@ -66,6 +66,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/core/ArtProvider.cpp
         ${SOURCEDIR}/core/CodeTemplateProcessor.cpp
         ${SOURCEDIR}/core/FRError.cpp
+        ${SOURCEDIR}/core/FRInt128.cpp
         ${SOURCEDIR}/core/Observer.cpp
         ${SOURCEDIR}/core/ProgressIndicator.cpp
         ${SOURCEDIR}/core/StringUtils.cpp
@@ -174,6 +175,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/core/ArtProvider.h
         ${SOURCEDIR}/core/CodeTemplateProcessor.h
         ${SOURCEDIR}/core/FRError.h
+        ${SOURCEDIR}/core/FRInt128.h
         ${SOURCEDIR}/core/ObjectWithHandle.h
         ${SOURCEDIR}/core/Observer.h
         ${SOURCEDIR}/core/ProcessableObject.h

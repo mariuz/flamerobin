@@ -222,6 +222,12 @@ typedef struct GDS_QUAD_t ISC_QUAD;
 
 typedef int (*FB_SHUTDOWN_CALLBACK)(const int reason, const int mask, void* arg);
 
+struct FB_I128_t {
+	ISC_UINT64 fb_data[2];
+};
+
+typedef struct FB_I128_t FB_I128;
+
 #endif /* INCLUDE_TYPES_PUB_H */
 
 /********************************/
@@ -494,6 +500,7 @@ typedef struct
 #define SQL_TYPE_DATE                      570
 #define SQL_INT64                          580
 #define SQL_TIMESTAMP_TZ                 32754
+#define SQL_INT128                       32752
 #define SQL_TIME_TZ                      32756
 #define SQL_BOOLEAN                      32764
 #define SQL_NULL                         32766

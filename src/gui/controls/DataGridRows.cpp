@@ -39,6 +39,7 @@
 #include <string>
 
 #include "core/FRError.h"
+#include "core/FRInt128.h"
 #include "core/Observer.h"
 #include "core/ProgressIndicator.h"
 #include "core/StringUtils.h"
@@ -677,6 +678,68 @@ void Int64ColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     int64_t value;
     statement->Get(col, value);
     buffer->setValue(offsetM, value);
+}
+
+// Int128ColumnDef class
+class Int128ColumnDef : public ResultsetColumnDef
+{
+private:
+    unsigned offsetM;
+public:
+    Int128ColumnDef(const wxString& name, unsigned offset, bool readOnly,
+        bool nullable);
+    virtual wxString getAsString(DataGridRowBuffer* buffer, Database* db);
+    virtual unsigned getBufferSize();
+    virtual bool isNumeric();
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
+        const IBPP::Statement& statement, wxMBConv* converter, Database* db);
+    virtual void setFromString(DataGridRowBuffer* buffer,
+        const wxString& source);
+};
+
+Int128ColumnDef::Int128ColumnDef(const wxString& name, unsigned offset,
+    bool readOnly, bool nullable)
+    : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
+{
+}
+
+wxString Int128ColumnDef::getAsString(DataGridRowBuffer* buffer, Database*)
+{
+    wxASSERT(buffer);
+    int128_t value;
+    if (!buffer->getValue(offsetM, value))
+        return wxEmptyString;
+    return Int128ToString(value);
+}
+
+void Int128ColumnDef::setFromString(DataGridRowBuffer* buffer,
+    const wxString& source)
+{
+    wxASSERT(buffer);
+
+    int128_t v128 = 0;
+    if (!StringToInt128(source, &v128))
+        throw FRError(_("Invalid int128 numeric value"));
+    buffer->setValue(offsetM, v128);
+}
+
+unsigned Int128ColumnDef::getBufferSize()
+{
+    return sizeof(int128_t);
+}
+
+bool Int128ColumnDef::isNumeric()
+{
+    return true;
+}
+
+void Int128ColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    const IBPP::Statement& statement, wxMBConv*, Database*)
+{
+    wxASSERT(buffer);
+    IBPP::ibpp_int128_t value;
+    statement->Get(col, value);
+    buffer->setValue(offsetM, *reinterpret_cast<int128_t*>(&value));
 }
 
 // DBKeyColumnDef class
@@ -1861,6 +1924,9 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
                     break;
                 case IBPP::sdLargeint:
                     columnDef = new Int64ColumnDef(colName, bufferSizeM, readOnly, nullable);
+                    break;
+                case IBPP::sdInt128:
+                    columnDef = new Int128ColumnDef(colName, bufferSizeM, readOnly, nullable);
                     break;
 
                 case IBPP::sdFloat:

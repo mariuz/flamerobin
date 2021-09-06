@@ -105,6 +105,14 @@ bool DataGridRowBuffer::getValue(unsigned offset, int64_t& value)
     return true;
 }
 
+bool DataGridRowBuffer::getValue(unsigned offset, int128_t& value)
+{
+    if (offset + sizeof(int128_t) > dataM.size())
+        return false;
+    value = *((int128_t*)&dataM[offset]);
+    return true;
+}
+
 bool DataGridRowBuffer::getValue(unsigned offset, IBPP::DBKey& value,
     unsigned size)
 {
@@ -199,6 +207,14 @@ void DataGridRowBuffer::setValue(unsigned offset, int64_t value)
     if (offset + sizeof(int64_t) > dataM.size())
         dataM.resize(offset + sizeof(int64_t), 0);
     *((int64_t*)&dataM[offset]) = value;
+    invalidateIsDeletable();
+}
+
+void  DataGridRowBuffer::setValue(unsigned offset, int128_t value)
+{
+    if (offset + sizeof(int128_t) > dataM.size())
+        dataM.resize(offset + sizeof(int128_t), 0);
+    *((int128_t*)&dataM[offset]) = value;
     invalidateIsDeletable();
 }
 
