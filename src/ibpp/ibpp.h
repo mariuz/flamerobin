@@ -58,7 +58,6 @@
 
 #include <stdint.h>
 
-
 #if !defined(_)
 #define _(s)    s
 #endif
@@ -99,7 +98,7 @@ namespace IBPP
     //  SQL Data Types
     enum SDT {sdArray, sdBlob, sdDate, sdTime, sdTimestamp, sdString,
         sdSmallint, sdInteger, sdLargeint, sdFloat, sdDouble, sdBoolean,
-		sdTimeTz, sdTimestampTz};
+        sdTimeTz, sdTimestampTz, sdInt128};
 
     //  Array Data Types
     enum ADT {adDate, adTime, adTimestamp, adString,
@@ -132,6 +131,16 @@ namespace IBPP
 
     // TransactionFactory Flags
     enum TFF {tfIgnoreLimbo = 0x1, tfAutoCommit = 0x2, tfNoAutoUndo = 0x4};
+
+    // FB 4 - int128
+    // NOTICE: could/should be replaced with int128_t if msvc supports this type.
+    #pragma pack(push, 1)
+    typedef struct IBPP_INT128
+    {
+        uint64_t LowPart;
+        int64_t HighPart;
+    } ibpp_int128_t;
+    #pragma pack(pop)
 
     /* IBPP never return any error codes. It throws exceptions.
      * On database engine reported errors, an IBPP::SQLException is thrown.
@@ -634,6 +643,7 @@ namespace IBPP
         virtual void Set(int, int16_t) = 0;
         virtual void Set(int, int32_t) = 0;
         virtual void Set(int, int64_t) = 0;
+        virtual void Set(int, IBPP::ibpp_int128_t) = 0;
         virtual void Set(int, float) = 0;
         virtual void Set(int, double) = 0;
         virtual void Set(int, const Timestamp&) = 0;
@@ -650,6 +660,7 @@ namespace IBPP
         virtual bool Get(int, int16_t&) = 0;
         virtual bool Get(int, int32_t&) = 0;
         virtual bool Get(int, int64_t&) = 0;
+        virtual bool Get(int, IBPP::ibpp_int128_t&) = 0;
         virtual bool Get(int, float&) = 0;
         virtual bool Get(int, double&) = 0;
         virtual bool Get(int, Timestamp&) = 0;
@@ -767,6 +778,7 @@ namespace IBPP
         virtual bool Get(int, int16_t&) = 0;
         virtual bool Get(int, int32_t&) = 0;
         virtual bool Get(int, int64_t&) = 0;
+        virtual bool Get(int, IBPP::ibpp_int128_t&) = 0;
         virtual bool Get(int, float&) = 0;
         virtual bool Get(int, double&) = 0;
         virtual bool Get(int, Timestamp& value) = 0;

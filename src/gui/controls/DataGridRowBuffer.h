@@ -25,6 +25,7 @@
 #define FR_DATAGRIDROWBUFFER_H
 
 #include <ibpp.h>
+#include <core/FRInt128.h>
 
 
 struct DataGridRowBufferFieldAttr
@@ -66,6 +67,7 @@ public:
     bool getValue(unsigned offset, float& value);
     bool getValue(unsigned offset, int& value);
     bool getValue(unsigned offset, int64_t& value);
+    bool getValue(unsigned offset, int128_t& value);
     bool getValue(unsigned offset, IBPP::DBKey& value, unsigned size);
     bool isFieldNull(unsigned num);
     void setFieldNull(unsigned num, bool isNull);
@@ -79,6 +81,7 @@ public:
     void setValue(unsigned offset, float value);
     void setValue(unsigned offset, int value);
     void setValue(unsigned offset, int64_t value);
+    void setValue(unsigned offset, int128_t value);
     void setValue(unsigned offset, IBPP::DBKey value);
 
     virtual bool isInserted();
