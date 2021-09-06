@@ -886,7 +886,7 @@ bool TimeColumnDef::readFromBuffer(DataGridRowBuffer* buffer, IBPP::Time &t)
     wxASSERT(buffer);
     int vTime;
     IBPP::Time::TimezoneMode tzMode;
-    uint16_t vTimezone = 0;
+    int vTimezone = 0;
 
     if (!buffer->getValue(offsetM, vTime))
         return false;
@@ -963,7 +963,7 @@ unsigned TimeColumnDef::getBufferSize()
 {
     int result = sizeof(int);
     if (withTimezoneM)
-        result += sizeof(uint16_t);
+        result += sizeof(int);
     return result;
 }
 
@@ -1025,7 +1025,7 @@ bool TimestampColumnDef::readFromBuffer(DataGridRowBuffer* buffer, IBPP::Timesta
     if (!buffer->getValue(offsetM + sizeof(int), vTime))
         return false;
 
-    uint16_t vTimezone = 0;
+    int vTimezone = 0;
     if (withTimezoneM)
     {
         tzMode = IBPP::Time::tmTimezone;
@@ -1110,7 +1110,7 @@ unsigned TimestampColumnDef::getBufferSize()
 {
     int result = 2 * sizeof(int);
     if (withTimezoneM)
-        result += sizeof(uint16_t);
+        result += sizeof(int);
     return result;
 }
 
