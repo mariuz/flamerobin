@@ -240,34 +240,26 @@ namespace IBPP
             tmNone,
             // ISC_TIME_TZ / ISC_TIMESTAMP_TZ
             tmTimezone,
-            // ISC_TIM_TZ_EX / ISC_TIMESTAMP_TZ_EX
-            tmTimezoneOffset
         };
 		/* no time zone -> utc = local */
 		const static int TZ_NONE     =  0;
-		const static int TZ_DEFAULT  = -1;
-		/* time not initialized */
-		const static int TM_NOT_INIT = -1;
     protected:
         // The time, in ten-thousandths of seconds since midnight - UTC and TZ
         mutable int mTime;
         mutable TimezoneMode mTimezoneMode;
         // The timezone
         int mTimezone;
-        int mTimezoneOffset;
 
         void SetTimezone(int tz);
     public:
-        void Clear()    { mTime = 0; mTimezoneMode = tmNone; mTimezone = TZ_NONE; mTimezoneOffset = 0;}
+        void Clear()    { mTime = 0; mTimezoneMode = tmNone; mTimezone = TZ_NONE; }
         void Now();
         void SetTime(TimezoneMode tzMode, int hour, int minute, int second, int tenthousandths, int timezone);
         void SetTime(TimezoneMode tzMode, int tm, int timezone);
-        //void SetTimezoneOffset(int ofs);
         void GetTime(int& hour, int& minute, int& second) const;
         void GetTime(int& hour, int& minute, int& second, int& tenthousandths) const;
         int GetTime() const;
         int GetTimezone() const { return mTimezone; }
-        int GetTimezoneOffset() const { return mTimezoneOffset; }
         int Hours() const;
         int Minutes() const;
         int Seconds() const;

@@ -468,18 +468,6 @@ bool GridCellFormats::showBlobContent()
     return showBlobContentM;
 }
 
-/*bool GridCellFormats::timeWithTzShowInUtc()
-{
-    ensureCacheValid();
-    return timeWithTzShowInUtcM;
-}*/
-
-/*GridCellFormats::AppendTzType GridCellFormats::timeWithTzAppendTzType()
-{
-    ensureCacheValid();
-    return timeWithTzAppendTzTypeM;
-}*/
-
 // ResultsetColumnDef class
 ResultsetColumnDef::ResultsetColumnDef(const wxString& name, bool readonly,
     bool nullable)
@@ -909,7 +897,6 @@ bool TimeColumnDef::readFromBuffer(DataGridRowBuffer* buffer, IBPP::Time &t)
 void TimeColumnDef::writeToBuffer(DataGridRowBuffer* buffer, IBPP::Time &t)
 {
     wxASSERT(buffer);
-    // if we have a time zone we store the time value in utc!
     buffer->setValue(offsetM, t.GetTime());
     if (withTimezoneM)
         buffer->setValue(offsetM + sizeof(int), t.GetTimezone());
@@ -1007,7 +994,6 @@ void TimestampColumnDef::writeToBuffer(DataGridRowBuffer* buffer, IBPP::Timestam
 {
     wxASSERT(buffer);
     buffer->setValue(offsetM, ts.GetDate());
-    // if we have a time zone we store the time value in utc!
     buffer->setValue(offsetM + sizeof(int), ts.GetTime());
     if (withTimezoneM)
         buffer->setValue(offsetM + sizeof(int) * 2, ts.GetTimezone());
