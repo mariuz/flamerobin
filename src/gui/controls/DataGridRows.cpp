@@ -468,18 +468,6 @@ bool GridCellFormats::showBlobContent()
     return showBlobContentM;
 }
 
-/*bool GridCellFormats::timeWithTzShowInUtc()
-{
-    ensureCacheValid();
-    return timeWithTzShowInUtcM;
-}*/
-
-/*GridCellFormats::AppendTzType GridCellFormats::timeWithTzAppendTzType()
-{
-    ensureCacheValid();
-    return timeWithTzAppendTzTypeM;
-}*/
-
 // ResultsetColumnDef class
 ResultsetColumnDef::ResultsetColumnDef(const wxString& name, bool readonly,
     bool nullable)
@@ -886,7 +874,7 @@ bool TimeColumnDef::readFromBuffer(DataGridRowBuffer* buffer, IBPP::Time &t)
     wxASSERT(buffer);
     int vTime;
     IBPP::Time::TimezoneMode tzMode;
-    uint16_t vTimezone = 0;
+    int vTimezone = 0;
 
     if (!buffer->getValue(offsetM, vTime))
         return false;
@@ -909,7 +897,6 @@ bool TimeColumnDef::readFromBuffer(DataGridRowBuffer* buffer, IBPP::Time &t)
 void TimeColumnDef::writeToBuffer(DataGridRowBuffer* buffer, IBPP::Time &t)
 {
     wxASSERT(buffer);
-    // if we have a time zone we store the time value in utc!
     buffer->setValue(offsetM, t.GetTime());
     if (withTimezoneM)
         buffer->setValue(offsetM + sizeof(int), t.GetTimezone());
@@ -963,7 +950,7 @@ unsigned TimeColumnDef::getBufferSize()
 {
     int result = sizeof(int);
     if (withTimezoneM)
-        result += sizeof(uint16_t);
+        result += sizeof(int);
     return result;
 }
 
@@ -1007,7 +994,6 @@ void TimestampColumnDef::writeToBuffer(DataGridRowBuffer* buffer, IBPP::Timestam
 {
     wxASSERT(buffer);
     buffer->setValue(offsetM, ts.GetDate());
-    // if we have a time zone we store the time value in utc!
     buffer->setValue(offsetM + sizeof(int), ts.GetTime());
     if (withTimezoneM)
         buffer->setValue(offsetM + sizeof(int) * 2, ts.GetTimezone());
@@ -1025,7 +1011,7 @@ bool TimestampColumnDef::readFromBuffer(DataGridRowBuffer* buffer, IBPP::Timesta
     if (!buffer->getValue(offsetM + sizeof(int), vTime))
         return false;
 
-    uint16_t vTimezone = 0;
+    int vTimezone = 0;
     if (withTimezoneM)
     {
         tzMode = IBPP::Time::tmTimezone;
@@ -1110,7 +1096,7 @@ unsigned TimestampColumnDef::getBufferSize()
 {
     int result = 2 * sizeof(int);
     if (withTimezoneM)
-        result += sizeof(uint16_t);
+        result += sizeof(int);
     return result;
 }
 

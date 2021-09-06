@@ -63,7 +63,6 @@ void IBPP::Time::SetTime(TimezoneMode tzMode, int hour, int minute, int second, 
 void IBPP::Time::SetTimezone(int tz)
 {
     mTimezone = tz;
-    mTimezoneOffset = 0;
 }
 
 int IBPP::Time::GetTime() const
@@ -119,14 +118,12 @@ IBPP::Time::Time(const IBPP::Time& copied)
 	mTime = copied.mTime;
 	mTimezoneMode = copied.mTimezoneMode;
 	mTimezone = copied.mTimezone;
-	mTimezoneOffset = copied.mTimezoneOffset;
 }
 
 IBPP::Time& IBPP::Time::operator=(const IBPP::Timestamp& assigned)
 {
 	mTime = assigned.GetTime();
 	mTimezone = assigned.GetTimezone();
-	mTimezoneOffset = assigned.GetTimezoneOffset();
 	return *this;
 }
 
@@ -134,7 +131,6 @@ IBPP::Time& IBPP::Time::operator=(const IBPP::Time& assigned)
 {
 	mTime = assigned.mTime;
 	mTimezone = assigned.GetTimezone();
-	mTimezoneOffset = assigned.GetTimezoneOffset();
 	return *this;
 }
 

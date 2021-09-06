@@ -105,14 +105,6 @@ bool DataGridRowBuffer::getValue(unsigned offset, int64_t& value)
     return true;
 }
 
-bool DataGridRowBuffer::getValue(unsigned offset, uint16_t& value)
-{
-    if (offset + sizeof(uint16_t) > dataM.size())
-        return false;
-    value = *((uint16_t*)&dataM[offset]);
-    return true;
-}
-
 bool DataGridRowBuffer::getValue(unsigned offset, IBPP::DBKey& value,
     unsigned size)
 {
