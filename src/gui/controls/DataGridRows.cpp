@@ -32,6 +32,7 @@
 
 #include <wx/datetime.h>
 #include <wx/ffile.h>
+#include <wx/numformatter.h>
 #include <wx/textbuf.h>
 
 #include <algorithm>
@@ -684,10 +685,11 @@ void Int64ColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
 class Int128ColumnDef : public ResultsetColumnDef
 {
 private:
+    short scaleM;
     unsigned offsetM;
 public:
     Int128ColumnDef(const wxString& name, unsigned offset, bool readOnly,
-        bool nullable);
+        bool nullable, short scale);
     virtual wxString getAsString(DataGridRowBuffer* buffer, Database* db);
     virtual unsigned getBufferSize();
     virtual bool isNumeric();
@@ -698,8 +700,9 @@ public:
 };
 
 Int128ColumnDef::Int128ColumnDef(const wxString& name, unsigned offset,
-    bool readOnly, bool nullable)
-    : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
+    bool readOnly, bool nullable, short scale)
+    : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset),
+        scaleM(scale)
 {
 }
 
@@ -707,9 +710,14 @@ wxString Int128ColumnDef::getAsString(DataGridRowBuffer* buffer, Database*)
 {
     wxASSERT(buffer);
     int128_t value;
+    wxString result;
     if (!buffer->getValue(offsetM, value))
         return wxEmptyString;
-    return Int128ToString(value);
+    result = Int128ToString(value);
+    if (scaleM > 0)
+        result.insert(result.length() - scaleM,
+                      wxNumberFormatter::GetDecimalSeparator());
+    return result;
 }
 
 void Int128ColumnDef::setFromString(DataGridRowBuffer* buffer,
@@ -1888,7 +1896,9 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
         }
 
         IBPP::SDT type = statement->ColumnType(col);
-        if (statement->ColumnScale(col) > 0)
+        short scale = statement->ColumnScale(col);
+        if ((scale > 0) &&
+            (type != IBPP::sdInt128))
             type = IBPP::sdDouble;
 
         ResultsetColumnDef* columnDef = 0;
@@ -1926,14 +1936,14 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
                     columnDef = new Int64ColumnDef(colName, bufferSizeM, readOnly, nullable);
                     break;
                 case IBPP::sdInt128:
-                    columnDef = new Int128ColumnDef(colName, bufferSizeM, readOnly, nullable);
+                    columnDef = new Int128ColumnDef(colName, bufferSizeM, readOnly, nullable, scale);
                     break;
 
                 case IBPP::sdFloat:
                     columnDef = new FloatColumnDef(colName, bufferSizeM, readOnly, nullable);
                     break;
                 case IBPP::sdDouble:
-                    columnDef = new DoubleColumnDef(colName, bufferSizeM, readOnly, nullable, statement->ColumnScale(col));
+                    columnDef = new DoubleColumnDef(colName, bufferSizeM, readOnly, nullable, scale);
                     break;
 
                 case IBPP::sdString:

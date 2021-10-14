@@ -297,6 +297,7 @@ list(APPEND IBPP_SOURCE_LIST
         ${SOURCEDIR}/ibpp/dbkey.cpp
         ${SOURCEDIR}/ibpp/events.cpp
         ${SOURCEDIR}/ibpp/exception.cpp
+        ${SOURCEDIR}/ibpp/ibint128.cpp
         ${SOURCEDIR}/ibpp/row.cpp
         ${SOURCEDIR}/ibpp/service.cpp
         ${SOURCEDIR}/ibpp/statement.cpp
