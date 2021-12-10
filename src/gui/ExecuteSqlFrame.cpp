@@ -1653,7 +1653,7 @@ void ExecuteSqlFrame::OnMenuGridEditBlob(wxCommandEvent& WXUNUSED(event))
 {
     if (!editBlobDlgM)
     {
-        editBlobDlgM = new EditBlobDialog(this);
+        editBlobDlgM = new EditBlobDialog(this, databaseM->getCharsetConverter());
     }
     updateBlobEditor();
 }
