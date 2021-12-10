@@ -1246,7 +1246,7 @@ private:
     wxMBConv* converterM;
 public:
     BlobColumnDef(const wxString& name, bool readOnly, bool nullable,
-        unsigned stringIndex, unsigned blobIndex, bool textual);
+        unsigned stringIndex, unsigned blobIndex, bool textual, wxMBConv* converterM = 0);
     void reset(DataGridRowBuffer* buffer);
     virtual unsigned getIndex();
     virtual wxString getAsString(DataGridRowBuffer* buffer, Database* db);
@@ -1259,9 +1259,9 @@ public:
 };
 
 BlobColumnDef::BlobColumnDef(const wxString& name, bool readOnly,
-        bool nullable, unsigned stringIndex, unsigned blobIndex, bool textual)
+        bool nullable, unsigned stringIndex, unsigned blobIndex, bool textual, wxMBConv* converterM)
     : ResultsetColumnDef(name, readOnly, nullable), indexM(blobIndex),
-        textualM(textual), stringIndexM(stringIndex), converterM(0)
+        textualM(textual), stringIndexM(stringIndex), converterM(converterM)
 {
     //readOnlyM = true;   // TODO: uncomment this when we make BlobDialog
 }
@@ -1883,7 +1883,7 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
                     break;
                 }
                 case IBPP::sdBlob:
-                    columnDef = new BlobColumnDef(colName, readOnly, nullable, stringIndex, blobIndex, statement->ColumnSubtype(col) == 1);
+                    columnDef = new BlobColumnDef(colName, readOnly, nullable, stringIndex, blobIndex, statement->ColumnSubtype(col) == 1, this->databaseM->getCharsetConverter());
                     ++blobIndex;    // stores blob handle
                     ++stringIndex;  // stored blob data (fetched on demand)
                     break;
