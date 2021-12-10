@@ -326,7 +326,7 @@ namespace IBPP
 
 	//	Factories for our Interface objects
 
-	Service ServiceFactory(const std::string& ServerName,
+    Service ServiceFactory(const std::string& ServerName,
 				const std::string& UserName, const std::string& UserPassword)
 	{
 		(void)gds.Call();			// Triggers the initialization, if needed
