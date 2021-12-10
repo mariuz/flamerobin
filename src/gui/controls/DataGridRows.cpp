@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -38,6 +38,7 @@
 #include <bitset>
 #include <string>
 
+#include "config/LocalSettings.h"
 #include "core/FRError.h"
 #include "core/Observer.h"
 #include "core/ProgressIndicator.h"
@@ -2193,13 +2194,30 @@ void DataGridRows::importBlobFile(const wxString& filename, unsigned row,
 wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
     const wxString& value, bool setNull)
 {
+    LocalSettings localSet;
+
+    double localDouble = 0;
+    wxString localValue = value;
+    
+    
+    if (IBPP::isRationalNumber(statementM->ColumnType(col + 1)) && localValue.ToDouble(&localDouble) && (value.Contains(",") || value.Contains(".")))
+    {
+        localSet.setDataBaseLenguage();
+
+        localValue = std::to_string(localDouble);
+        if (localValue.Contains(",")) {
+            localValue.Replace(",", ".", true);
+        }
+    }
+    
+
     if (columnDefsM[col]->isReadOnly())
         throw FRError(_("This column is not editable."));
 
     // user wants to store null
     bool newIsNull = (
-        (!dynamic_cast<StringColumnDef*>(columnDefsM[col]) && value.IsEmpty())
-        || (setNull && value == "[null]") );
+        (!dynamic_cast<StringColumnDef*>(columnDefsM[col]) && localValue.IsEmpty())
+        || (setNull && localValue == "[null]") );
     if (newIsNull && !columnDefsM[col]->isNullable())
         throw FRError(_("This column does not accept NULLs."));
 
@@ -2221,7 +2239,7 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
             buffersM[row]->setFieldNull(col, true);
         else
         {
-            columnDefsM[col]->setFromString(buffersM[row], value);
+            columnDefsM[col]->setFromString(buffersM[row], localValue);
             buffersM[row]->setFieldNull(col, false);
         }
 
@@ -2259,7 +2277,9 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
         IBPP::Statement st = addWhere((*it).second, stm, tn, oldRecord);
         st->Execute();
         delete oldRecord;
+
         return stm;
+
     }
     catch(...)
     {

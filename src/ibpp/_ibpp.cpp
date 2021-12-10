@@ -378,4 +378,28 @@ namespace IBPP
 		return new EventsImpl(dynamic_cast<DatabaseImpl*>(db.intf()));
 	}
 
+    bool isIntegerNumber(SDT type)
+    {
+        switch (type) {
+        case SDT::sdSmallint:
+        case SDT::sdInteger:
+        case SDT::sdLargeint:
+            return true;
+        }
+        return false;
+
+    }
+
+    bool isRationalNumber(SDT type)
+    {
+        if (isIntegerNumber(type))
+            return true;
+        switch (type) {
+        case SDT::sdDouble:
+        case SDT::sdFloat:
+            return true;
+        }
+        return false;
+
+    }
 }

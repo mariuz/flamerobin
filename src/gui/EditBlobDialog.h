@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -44,7 +44,7 @@ class EditBlobDialogSTC;     // declared in cpp
 class EditBlobDialog : public BaseDialog
 {
 public:
-    EditBlobDialog(wxWindow* parent);
+    EditBlobDialog(wxWindow* parent, wxMBConv* charsetConverter);
     virtual ~EditBlobDialog();
     // close without saving (for rollback-transaction)
     void closeDontSave(); 
@@ -66,6 +66,7 @@ private:
     unsigned rowM;
     bool runningM;
     IBPP::Statement* statementM; 
+    wxMBConv* charsetConverter;  //TODO: use directly from the database object
 
     std::set<EditorMode> dataValidM;
     wxMemoryOutputStream* cacheM;

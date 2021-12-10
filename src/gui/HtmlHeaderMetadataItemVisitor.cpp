@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -97,6 +97,15 @@ void HtmlHeaderMetadataItemVisitor::visitGenerator(Generator& /*generator*/)
     addDDL();
 }
 
+void HtmlHeaderMetadataItemVisitor::visitIndex(Index& /*index*/)
+{
+    emptyTitles();
+    addSummary();
+    addPrivileges();
+    addDependencies();
+    addDDL();
+}
+
 void HtmlHeaderMetadataItemVisitor::visitPackage(Package& /*procedure*/)
 {
     emptyTitles();
@@ -133,6 +142,18 @@ void HtmlHeaderMetadataItemVisitor::visitTable(Table& /*table*/)
     addPrivileges();
     addDependencies();
     addDDL();
+}
+
+void HtmlHeaderMetadataItemVisitor::visitGTTable(GTTable& /*table*/)
+{
+	emptyTitles();
+	addSummary();
+	addConstraints();
+	addIndices();
+	addTriggers();
+	addPrivileges();
+	addDependencies();
+	addDDL();
 }
 
 void HtmlHeaderMetadataItemVisitor::visitDBTrigger(DBTrigger& /*trigger*/)

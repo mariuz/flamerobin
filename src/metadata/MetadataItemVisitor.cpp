@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -201,7 +201,7 @@ void MetadataItemVisitor::visitSysTables(SysTables&)
     defaultAction();
 }
 
-void MetadataItemVisitor::visitGTTs(GTTs&)
+void MetadataItemVisitor::visitGTTables(GTTables&)
 {
     defaultAction();
 }
@@ -210,6 +210,16 @@ void MetadataItemVisitor::visitGTTs(GTTs&)
 void MetadataItemVisitor::visitTable(Table& table)
 {
     visitRelation(*(Relation*)&table);
+}
+
+void MetadataItemVisitor::visitSysTable(SysTable& table)
+{
+    visitTable(*(Table*)&table);
+}
+
+void MetadataItemVisitor::visitGTTable(GTTable& table)
+{
+    visitTable(*(Table*)&table);
 }
 
 void MetadataItemVisitor::visitTables(Tables&)

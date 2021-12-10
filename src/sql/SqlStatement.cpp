@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -250,6 +250,9 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
             break;
         case kwEXCEPTION:
             objectTypeM = ntException;
+            break;
+        case kwEXTERNAL:
+            objectTypeM = ntUDF;
             break;
         case kwFUNCTION:
             if (actionM == actCREATE || actionM == actALTER ||

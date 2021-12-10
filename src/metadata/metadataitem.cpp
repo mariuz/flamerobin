@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -439,7 +439,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
                 if (!current)
                     current = d->findByNameAndType(ntSysTable, objname);
             }
-            if (!ofObject && t == ntDMLTrigger)
+            if (!ofObject && (t == ntDMLTrigger || t == ntDBTrigger || t == ntTrigger))
             {
                 // system trigger dependent of this object indicates possible check constraint on a table
                 // that references this object. So, let's check if this trigger is used for check constraint

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -958,6 +958,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_MENU(Cmds::DataGrid_Insert_row,      ExecuteSqlFrame::OnMenuGridInsertRow)
     EVT_MENU(Cmds::DataGrid_Delete_row,      ExecuteSqlFrame::OnMenuGridDeleteRow)
     EVT_MENU(Cmds::DataGrid_SetFieldToNULL,  ExecuteSqlFrame::OnMenuGridSetFieldToNULL)
+    EVT_MENU(Cmds::DataGrid_Copy_with_header,ExecuteSqlFrame::OnMenuCopyWithHeader)
     EVT_MENU(Cmds::DataGrid_Copy_as_insert,  ExecuteSqlFrame::OnMenuGridCopyAsInsert)
     EVT_MENU(Cmds::DataGrid_Copy_as_inList,  ExecuteSqlFrame::OnMenuGridCopyAsInList)
     EVT_MENU(Cmds::DataGrid_Copy_as_update,  ExecuteSqlFrame::OnMenuGridCopyAsUpdate)
@@ -974,6 +975,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_UPDATE_UI(Cmds::DataGrid_Insert_row,     ExecuteSqlFrame::OnMenuUpdateGridInsertRow)
     EVT_UPDATE_UI(Cmds::DataGrid_Delete_row,     ExecuteSqlFrame::OnMenuUpdateGridDeleteRow)
     EVT_UPDATE_UI(Cmds::DataGrid_SetFieldToNULL, ExecuteSqlFrame::OnMenuUpdateGridCanSetFieldToNULL)
+    EVT_UPDATE_UI(Cmds::DataGrid_Copy_with_header,ExecuteSqlFrame::OnMenuUpdateGridHasData)
     EVT_UPDATE_UI(Cmds::DataGrid_Copy_as_insert, ExecuteSqlFrame::OnMenuUpdateGridHasData)
     EVT_UPDATE_UI(Cmds::DataGrid_Copy_as_update, ExecuteSqlFrame::OnMenuUpdateGridHasData)
     EVT_UPDATE_UI(Cmds::DataGrid_EditBlob,       ExecuteSqlFrame::OnMenuUpdateGridCellIsBlob)
@@ -1397,7 +1399,15 @@ void ExecuteSqlFrame::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
     if (viewModeM == vmEditor)
         styled_text_ctrl_sql->Copy();
     else if (viewModeM == vmGrid)
-        grid_data->copyToClipboard();
+        grid_data->copyToClipboard(false);
+}
+
+void ExecuteSqlFrame::OnMenuCopyWithHeader(wxCommandEvent& WXUNUSED(event))
+{
+    if (viewModeM == vmEditor)
+        styled_text_ctrl_sql->Copy();
+    else if (viewModeM == vmGrid)
+        grid_data->copyToClipboard(true);
 }
 
 void ExecuteSqlFrame::OnMenuUpdateCopy(wxUpdateUIEvent& event)
@@ -1643,7 +1653,7 @@ void ExecuteSqlFrame::OnMenuGridEditBlob(wxCommandEvent& WXUNUSED(event))
 {
     if (!editBlobDlgM)
     {
-        editBlobDlgM = new EditBlobDialog(this);
+        editBlobDlgM = new EditBlobDialog(this, databaseM->getCharsetConverter());
     }
     updateBlobEditor();
 }
@@ -2287,7 +2297,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     notebook_1->SetSelection(0);
     wxStopWatch swTotal;
     bool retval = true;
-
+    long waitForParameterInputTime = 0;
     try
     {
         if (transactionM == 0 || !transactionM->Started())
@@ -2403,6 +2413,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             InsertParametersDialog* id = new InsertParametersDialog(this, statementM,
                 databaseM, parameterSaveList, parameterSaveListOptionNull);
             id->ShowModal();
+            waitForParameterInputTime = id->swWaitForParameterInputTime.Time();
         }
 
         log(wxEmptyString);
@@ -2497,7 +2508,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     }
 
     log(wxString::Format(_("Total execution time: %s"),
-        millisToTimeString(swTotal.Time()).c_str()));
+        millisToTimeString(swTotal.Time() - waitForParameterInputTime).c_str()));
     return retval;
 }
 

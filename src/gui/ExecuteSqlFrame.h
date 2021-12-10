@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -185,6 +185,7 @@ private:
     void OnMenuCut(wxCommandEvent& event);
     void OnMenuUpdateCut(wxUpdateUIEvent& event);
     void OnMenuCopy(wxCommandEvent& event);
+    void OnMenuCopyWithHeader(wxCommandEvent& event);
     void OnMenuUpdateCopy(wxUpdateUIEvent& event);
     void OnMenuPaste(wxCommandEvent& event);
     void OnMenuUpdatePaste(wxUpdateUIEvent& event);

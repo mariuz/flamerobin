@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -64,6 +64,7 @@ namespace Cmds
         DataGrid_EditBlob,
         DataGrid_ExportBlob,
         DataGrid_ImportBlob,
+        DataGrid_Copy_with_header,
         DataGrid_Copy_as_insert,
         DataGrid_Copy_as_inList,
         DataGrid_Copy_as_update,
@@ -121,6 +122,8 @@ namespace Cmds
         Menu_SetStatisticsValue,
         Menu_ShowAllStatisticsValue,
         Menu_RebuildObject,
+        Menu_ActiveObject,
+        Menu_InactiveObject,
 
         // view menu
         Menu_ToggleStatusBar, 

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -81,16 +81,23 @@ void Procedure::loadChildren()
         "rdb$parameter_type, "
     );
     sql += db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1) ? "rdb$default_source, rdb$null_flag, rdb$parameter_mechanism,  " : "null, null, -1, ";
-    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(11, 2) ? " rdb$field_name, rdb$relation_name, " : " null, null ";
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(11, 2) ? " rdb$field_name, rdb$relation_name, " : " null, null, ";
 	sql += "rdb$description from rdb$procedure_parameters "
 		"where rdb$procedure_name = ? ";
     if (getParent()->getType() == ntDatabase) {
         sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and rdb$package_name is null " : "";
     }
+    else
+        if (getParent()->getType() == ntPackage) {
+            sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and rdb$package_name = ? " : "";
+        }
     sql += "order by rdb$parameter_type, rdb$parameter_number";
 
     IBPP::Statement st1 = loader->getStatement(sql);
     st1->Set(1, wx2std(getName_(), converter));
+    if (getParent()->getType() == ntPackage) {
+        st1->Set(2, wx2std(getParent()->getName_(), converter));
+    }
     st1->Execute();
 
     ParameterPtrs parameters;

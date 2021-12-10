@@ -874,6 +874,8 @@ public:
     void Inactivate();
     void Disconnect();
     void Drop();
+    IBPP::IDatabase* Clone();
+
 
     IBPP::IDatabase* AddRef();
     void Release();

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -377,7 +377,7 @@ void EditBlobDialogProgressSizer::stepProgress(int stepAmount)
 
 
 // Main (dialog) class for blob editor
-EditBlobDialog::EditBlobDialog(wxWindow* parent)
+EditBlobDialog::EditBlobDialog(wxWindow* parent, wxMBConv* charsetConverter)
     :BaseDialog(parent, -1, wxEmptyString)    
 {
     runningM = false; // disable wxNotebookPageChanged-Events
@@ -395,6 +395,8 @@ EditBlobDialog::EditBlobDialog(wxWindow* parent)
     loadingM = false;
     statementM = 0;
     readonlyM = false;
+
+    this->charsetConverter = charsetConverter;
 
     notebook = new wxNotebook(getControlsPanel(), wxID_ANY);
     blob_noData = new wxPanel(notebook, wxID_ANY);
@@ -691,7 +693,7 @@ bool EditBlobDialog::loadFromStreamAsText(wxInputStream& stream, bool isNull, co
 
     if (!progress->isCanceled())
     {
-        blob_text->SetText(buffer);
+        blob_text->SetText(std2wxIdentifier(buffer, charsetConverter));
     }
 
     free(buffer);
@@ -876,7 +878,8 @@ bool EditBlobDialog::saveToStream(wxOutputStream& stream, bool* isNull, const wx
                 if (*isNull)
                   break;
 
-                std::string txt = wx2std(blob_text->GetText());
+                
+                std::string txt = wx2std(blob_text->GetText(), charsetConverter);
                 stream.Write(txt.c_str(), txt.length());
             }
             break;

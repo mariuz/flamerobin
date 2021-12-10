@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -88,12 +88,6 @@ typedef std::vector<GeneratorPtr> GeneratorPtrs;
 class Generators;
 typedef std::shared_ptr<Generators> GeneratorsPtr;
 
-class GTT;
-typedef std::shared_ptr<GTT> GTTPtr;
-typedef std::vector<GTTPtr> GTTPtrs;
-class GTTs;
-typedef std::shared_ptr<GTTs> GTTsPtr;
-
 class Index;
 typedef std::shared_ptr<Index> IndexPtr;
 typedef std::vector<IndexPtr> IndexPtrs;
@@ -150,6 +144,15 @@ typedef std::shared_ptr<SysPackages> SysPackagesPtr;
 class SysRoles;
 typedef std::shared_ptr<SysRoles> SysRolesPtr;
 
+class GTTable;
+typedef std::shared_ptr<GTTable> GTTablePtr;
+typedef std::vector<GTTablePtr> GTTablePtrs;
+class GTTables;
+typedef std::shared_ptr<GTTables> GTTablesPtr;
+
+class SysTable;
+typedef std::shared_ptr<SysTable> SysTablePtr;
+typedef std::vector<SysTablePtr> SysTablePtrs;
 class SysTables;
 typedef std::shared_ptr<SysTables> SysTablesPtr;
 

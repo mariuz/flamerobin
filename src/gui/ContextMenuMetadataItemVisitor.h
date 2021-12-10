@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -51,7 +51,8 @@ public:
     virtual void visitFunctionSQLs(FunctionSQLs& functions);
     virtual void visitGenerator(Generator& generator);
     virtual void visitGenerators(Generators& generators);
-    virtual void visitGTTs(GTTs& tables);
+    virtual void visitGTTable(GTTable& table);
+    virtual void visitGTTables(GTTables& tables);
     virtual void visitIndex(Index& index);
     virtual void visitIndices(Indices& indices);
     virtual void visitMethod(Method& method);
@@ -81,6 +82,7 @@ protected:
 private:
     // helper member functions to add menu items and separators
     void addAlterItem(MetadataItem& metadataItem);
+    void addActiveItem(MetadataItem& metadataItem);
     void addBrowseDataItem();
     void addDropItem(MetadataItem& metadataItem);
     void addGenerateCodeMenu(MetadataItem& metadataItem, wxMenu* parent = 0);

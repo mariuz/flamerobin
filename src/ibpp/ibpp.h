@@ -101,6 +101,9 @@ namespace IBPP
         sdSmallint, sdInteger, sdLargeint, sdFloat, sdDouble, sdBoolean,
 		sdTimeTz, sdTimestampTz};
 
+    bool isIntegerNumber(SDT type);
+    bool isRationalNumber(SDT type);
+
     //  Array Data Types
     enum ADT {adDate, adTime, adTimestamp, adString,
         adBool, adInt16, adInt32, adInt64, adFloat, adDouble};
@@ -582,6 +585,8 @@ namespace IBPP
         virtual void Inactivate() = 0;
         virtual void Disconnect() = 0;
         virtual void Drop() = 0;
+
+        virtual IDatabase* Clone() = 0;
 
         virtual IDatabase* AddRef() = 0;
         virtual void Release() = 0;

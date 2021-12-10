@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -44,17 +44,22 @@ private:
     double statisticsM;
     std::vector<wxString> segmentsM;
     wxString expressionM;
+protected:
+    virtual void loadProperties();
 public:
     Index(DatabasePtr database, const wxString& name);
     Index(bool unique, bool active, bool ascending, double statistics,
         bool system, wxString expression);
 
     virtual bool isSystem() const;
-    bool isActive() const;
+    void setActive(bool active);
+    bool getActive();
+    bool isActive();
     bool isUnique() const;
     double getStatistics();
     wxString getExpression() const;
     IndexType getIndexType();
+    virtual const wxString getTypeName() const;
     // Returns a list of index fields, or the expression source if
     // the index is an expression-based index.
     wxString getFieldsAsString();

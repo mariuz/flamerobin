@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -310,6 +310,14 @@ void MetadataItemPropertiesPanel::update()
             (*it)->attachObserver(this, false);
     }
 
+    if (objectM->getType() == ntIndex)
+    {
+        Index* i = dynamic_cast<Index*>(objectM);
+        if (!i)
+            return;
+        SubjectLocker locker(i);
+        i->ensurePropertiesLoaded();
+    }
     // with this set to false updates to the same page do not show the
     // "Please wait while the data is being loaded..." temporary page
     // this results in less flicker, but may also seem less responsive

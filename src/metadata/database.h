@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -189,7 +189,7 @@ private:
     ExceptionsPtr exceptionsM;
     FunctionSQLsPtr functionSQLsM;
     GeneratorsPtr generatorsM;
-    GTTsPtr GTTsM;
+    GTTablesPtr GTTablesM;
     IndicesPtr indicesM;
     PackagesPtr packagesM;
     ProceduresPtr proceduresM;
@@ -246,7 +246,7 @@ public:
     DomainsPtr getDomains();
     ExceptionsPtr getExceptions();
     FunctionSQLsPtr getFunctionSQLs();
-    GTTsPtr getGTTs();
+    GTTablesPtr getGTTables();
     GeneratorsPtr getGenerators();
     IndicesPtr getIndices();
     PackagesPtr getPackages();

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -79,14 +79,24 @@ Trigger::FiringTime Trigger::getFiringTime(int type)
 }
 
 Trigger::Trigger(NodeType type, DatabasePtr database, const wxString& name)
-    : MetadataItem(type, database.get(), name)
+    : MetadataItem(type, database.get(), name), activeM(true)
 {
+}
+
+void Trigger::setActive(bool active)
+{
+    activeM = active;
 }
 
 bool Trigger::getActive()
 {
-    ensurePropertiesLoaded();
+    //ensurePropertiesLoaded();
     return activeM;
+}
+
+bool Trigger::isActive()
+{
+    return getActive();
 }
 
 wxString Trigger::getFiringEvent()
@@ -386,7 +396,17 @@ void DMLTriggers::load(ProgressIndicator* progressIndicator)
     if (getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
         stmt += "and BIN_AND(rdb$trigger_type,"+ std::to_string(TRIGGER_TYPE_MASK)+") = "+ std::to_string(TRIGGER_TYPE_DML);
     stmt += " order by 1";
+
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+
+    stmt = "select rdb$trigger_name from rdb$triggers"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null)  and rdb$trigger_inactive = 1"
+        " and rdb$relation_name is not null  ";
+    if (getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        stmt += "and BIN_AND(rdb$trigger_type," + std::to_string(TRIGGER_TYPE_MASK) + ") = " + std::to_string(TRIGGER_TYPE_DML);
+    stmt += " order by 1";
+
+    setInactiveItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 
 void DMLTriggers::loadChildren()
@@ -413,11 +433,21 @@ void DBTriggers::acceptVisitor(MetadataItemVisitor* visitor)
 void DBTriggers::load(ProgressIndicator* progressIndicator)
 {
     wxString stmt = "select rdb$trigger_name from rdb$triggers"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null) ";
-    stmt += " and BIN_AND(rdb$trigger_type," + std::to_string(TRIGGER_TYPE_MASK) + ") = " + std::to_string(TRIGGER_TYPE_DB)+
+        " where (rdb$system_flag = 0 or rdb$system_flag is null) "
+        " and BIN_AND(rdb$trigger_type," + std::to_string(TRIGGER_TYPE_MASK) + ") = " + std::to_string(TRIGGER_TYPE_DB)+
         " order by 1";
-    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator)); 
+
+    stmt = "select rdb$trigger_name from rdb$triggers"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null) and rdb$trigger_inactive = 1"
+        " and BIN_AND(rdb$trigger_type," + std::to_string(TRIGGER_TYPE_MASK) + ") = " + std::to_string(TRIGGER_TYPE_DB) +
+        " order by 1";
+
+    setInactiveItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+
 }
+
+
 
 void DBTriggers::loadChildren()
 {
@@ -444,11 +474,17 @@ void DDLTriggers::acceptVisitor(MetadataItemVisitor* visitor)
 void DDLTriggers::load(ProgressIndicator* progressIndicator)
 {
     wxString stmt = "select rdb$trigger_name from rdb$triggers"
-        " where (rdb$system_flag = 0 or rdb$system_flag is null) ";
-    stmt += " and BIN_AND(rdb$trigger_type," + std::to_string(TRIGGER_TYPE_MASK) + ") = " + std::to_string(TRIGGER_TYPE_DDL) +
+        " where (rdb$system_flag = 0 or rdb$system_flag is null) "
+        " and BIN_AND(rdb$trigger_type," + std::to_string(TRIGGER_TYPE_MASK) + ") = " + std::to_string(TRIGGER_TYPE_DDL) +
+        " order by 1";
+    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+
+    stmt = "select rdb$trigger_name from rdb$triggers"
+        " where (rdb$system_flag = 0 or rdb$system_flag is null) and rdb$trigger_inactive = 1 "
+        " and BIN_AND(rdb$trigger_type," + std::to_string(TRIGGER_TYPE_MASK) + ") = " + std::to_string(TRIGGER_TYPE_DDL) +
         " order by 1";
 
-    setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
+    setInactiveItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }
 
 void DDLTriggers::loadChildren()

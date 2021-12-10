@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -81,7 +81,21 @@ public:
 
 };
 
-class SysTables: public MetadataCollection<Table>
+class SysTable : public Table
+{
+public:
+    SysTable(DatabasePtr database, const wxString& name);
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+
+class GTTable : public Table
+{
+public:
+    GTTable(DatabasePtr database, const wxString& name);
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+};
+
+class SysTables: public MetadataCollection<SysTable>
 {
 protected:
     virtual void loadChildren();
@@ -106,12 +120,12 @@ public:
     virtual const wxString getTypeName() const;
 };
 
-class GTTs: public MetadataCollection<Table>
+class GTTables: public MetadataCollection<GTTable>
 {
 protected:
     virtual void loadChildren();
 public:
-    GTTs(DatabasePtr database);
+    GTTables(DatabasePtr database);
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     void load(ProgressIndicator* progressIndicator);

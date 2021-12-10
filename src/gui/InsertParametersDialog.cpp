@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2016 The FlameRobin Development Team
+  Copyright (c) 2004-2021 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -690,6 +690,8 @@ void InsertParametersDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
 {
     //storeValues();
     //preloadSpecialColumns();
+
+    swWaitForParameterInputTime.Pause();
     int resumedRow = 0;
     parameterSaveList.clear();
     parameterSaveListOptionNull.clear();
