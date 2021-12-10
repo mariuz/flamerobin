@@ -377,7 +377,7 @@ void EditBlobDialogProgressSizer::stepProgress(int stepAmount)
 
 
 // Main (dialog) class for blob editor
-EditBlobDialog::EditBlobDialog(wxWindow* parent, wxMBConv* charsetConverter)
+EditBlobDialog::EditBlobDialog(wxWindow* parent, wxMBConv* converterM)
     :BaseDialog(parent, -1, wxEmptyString)    
 {
     runningM = false; // disable wxNotebookPageChanged-Events
@@ -396,7 +396,7 @@ EditBlobDialog::EditBlobDialog(wxWindow* parent, wxMBConv* charsetConverter)
     statementM = 0;
     readonlyM = false;
 
-    this->charsetConverter = charsetConverter;
+    this->converterM = converterM;
 
     notebook = new wxNotebook(getControlsPanel(), wxID_ANY);
     blob_noData = new wxPanel(notebook, wxID_ANY);
@@ -693,7 +693,7 @@ bool EditBlobDialog::loadFromStreamAsText(wxInputStream& stream, bool isNull, co
 
     if (!progress->isCanceled())
     {
-        blob_text->SetText(std2wxIdentifier(buffer, charsetConverter));
+        blob_text->SetText(std2wxIdentifier(buffer, converterM));
     }
 
     free(buffer);
@@ -879,7 +879,7 @@ bool EditBlobDialog::saveToStream(wxOutputStream& stream, bool* isNull, const wx
                   break;
 
                 
-                std::string txt = wx2std(blob_text->GetText(), charsetConverter);
+                std::string txt = wx2std(blob_text->GetText(), converterM);
                 stream.Write(txt.c_str(), txt.length());
             }
             break;
