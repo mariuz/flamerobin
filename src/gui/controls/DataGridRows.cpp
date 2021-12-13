@@ -70,7 +70,7 @@ void GridCellFormats::loadFromConfig()
     dateFormatM = config().get("DateFormat", wxString("D.M.Y"));
     timeFormatM = config().get("TimeFormat", wxString("H:M:S.T"));
     timestampFormatM = config().get("TimestampFormat",
-        wxString("D.N.Y, H:M:S.T"));
+        wxString("D.N.Y H:M:S.T"));
     showTimezoneInfoM = (ShowTimezoneInfoType)config().get("ShowTimezoneInfo", int(tzName));
 
     maxBlobKBytesM = config().get("DataGridFetchBlobAmount", 1);
@@ -819,7 +819,9 @@ void DateColumnDef::setFromString(DataGridRowBuffer* buffer,
         idt.Add(-1);
     else if (temp.CmpNoCase("DATE") != 0
         && temp.CmpNoCase("NOW") != 0
-        && temp.CmpNoCase("TODAY") != 0)
+        && temp.CmpNoCase("TODAY") != 0
+        && temp.CmpNoCase("CURRENT_DATE") != 0
+        && temp.CmpNoCase("CURRENT_TIMESTAMP") != 0)
     {
         wxString::iterator it = temp.begin();
         if (!GridCellFormats::get().parseDate(it, temp.end(), true, y, m, d))
@@ -1052,7 +1054,7 @@ wxString TimestampColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
     ts.GetDate(year, month, day);
     ts.GetTime(hour, minute, second, tenththousands);
 
-    return wxString::Format("%d-%d-%d, %d:%d:%d.%d", year, month, day,
+    return wxString::Format("%d-%d-%d %d:%d:%d.%d", year, month, day,
         hour, minute, second, tenththousands / 10);
 }
 
@@ -1070,7 +1072,8 @@ void TimestampColumnDef::setFromString(DataGridRowBuffer* buffer,
         its.Add(1);
     else if (temp.CmpNoCase("YESTERDAY") == 0)
         its.Add(-1);
-    else if (temp.CmpNoCase("NOW") == 0)
+    else if ((temp.CmpNoCase("NOW") == 0) || 
+             (temp.CmpNoCase("CURRENT_TIMESTAMP") == 0))
         its.Now(); // with time
     else if (temp.CmpNoCase("DATE") != 0
         && temp.CmpNoCase("TODAY") != 0)
