@@ -2198,6 +2198,7 @@ wxString IBPPtype2string(Database *db, IBPP::SDT t, int subtype, int size,
         case IBPP::sdDouble:    return "DOUBLE PRECISION";
         case IBPP::sdTimeTz:    return "TIME WITH TIMEZONE";
         case IBPP::sdTimestampTz: return "TIMESTAMP WITH TIMEZONE";
+        case IBPP::sdInt128:    return "INT128";
         default:                return "UNKNOWN";
     }
 }
