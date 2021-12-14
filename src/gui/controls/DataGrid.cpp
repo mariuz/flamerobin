@@ -65,17 +65,17 @@ DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
     SetColLabelAlignment(wxALIGN_LEFT, wxALIGN_CENTRE);
     SetRowLabelAlignment(wxALIGN_RIGHT, wxALIGN_CENTRE);
 
-    SetBackgroundColour(stylerManager().getDefaultStyle()->getbgColor());
-    SetForegroundColour(stylerManager().getDefaultStyle()->getfgColor());
+    SetBackgroundColour(stylerManager().getDefaultStyle()->getbgColour());
+    SetForegroundColour(stylerManager().getDefaultStyle()->getfgColour());
 
-    SetSelectionBackground(stylerManager().getStyleByName("Selected text colour")->getbgColor());
+    SetSelectionBackground(stylerManager().getStyleByName("Selected text colour")->getbgColour());
     //SetSelectionForeground(stylerManager().getDefaultStyle()->getfgColor());
 
 
-    SetDefaultCellBackgroundColour(stylerManager().getDefaultStyle()->getbgColor());
-    SetDefaultCellTextColour(stylerManager().getDefaultStyle()->getfgColor());
+    SetDefaultCellBackgroundColour(stylerManager().getDefaultStyle()->getbgColour());
+    SetDefaultCellTextColour(stylerManager().getDefaultStyle()->getfgColour());
 
-    SetCellHighlightColour(stylerManager().getDefaultStyle()->getfgColor());
+    SetCellHighlightColour(stylerManager().getDefaultStyle()->getfgColour());
 
     wxString s;
     wxFont f;

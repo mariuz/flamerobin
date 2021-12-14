@@ -9,7 +9,7 @@ Notepad++ Custom Style
                    assembly, bash, batch, lua at least for detail. Everything else more or less...
         Info:    Inspired by Oblivion theme for gedit.
 -->
-<NotepadPlus>
+<Flamerobin>
     <LexerStyles>
         <LexerType name="actionscript" desc="ActionScript" ext="">
             <WordsStyle name="DEFAULT" styleID="11" fgColor="E0E2E4" bgColor="293134" fontName="" fontStyle="0" fontSize="" />
@@ -808,4 +808,4 @@ Notepad++ Custom Style
         <WidgetStyle name="Inactive tabs" styleID="0" fgColor="808080" bgColor="C0C0C0" />
         <WidgetStyle name="URL hovered" styleID="0" fgColor="FFFFFF" />
     </GlobalStyles>
-</NotepadPlus>
+</Flamerobin>

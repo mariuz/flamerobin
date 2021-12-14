@@ -36,7 +36,7 @@ Installation:
     Copy this file to C:\Users\%%USERNAME%%\AppData\Roaming\Notepad++\themes
 
 //-->
-<NotepadPlus>
+<Flamerobin>
     <LexerStyles>
         <LexerType name="actionscript" desc="ActionScript" ext="">
             <WordsStyle name="DEFAULT" styleID="11" fgColor="f2c476" bgColor="58693D" fontName="" fontStyle="0" fontSize="" />
@@ -926,4 +926,4 @@ Installation:
         <WidgetStyle name="Inactive tabs" styleID="0" fgColor="162504" bgColor="BBCF60" />
         <WidgetStyle name="URL hovered" styleID="0" fgColor="FFFFFF" />
     </GlobalStyles>
-</NotepadPlus>
+</Flamerobin>

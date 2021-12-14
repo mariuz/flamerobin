@@ -5,7 +5,7 @@ This theme is not complete. If you enhance it, please send it back to me :
 <don.h@free.fr>
 so your enhanced file can be included in Notepad++ future release.
 -->
-<NotepadPlus>
+<Flamerobin>
     <LexerStyles>
         <LexerType name="actionscript" desc="ActionScript" ext="">
             <WordsStyle name="DEFAULT" styleID="11" fgColor="000000" bgColor="FFB0FF" fontName="" fontStyle="0" fontSize="" />
@@ -762,4 +762,4 @@ so your enhanced file can be included in Notepad++ future release.
         <WidgetStyle name="Inactive tabs" styleID="0" fgColor="808080" bgColor="C0C0C0" />
         <WidgetStyle name="URL hovered" styleID="0" fgColor="FFFFFF" />
     </GlobalStyles>
-</NotepadPlus>
+</Flamerobin>

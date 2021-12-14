@@ -40,7 +40,7 @@
 
 
 FRStyle::FRStyle()
-    :styleIDM(-1), styleDescM(""), fgColorM(STYLE_NOT_USED), bgColorM(STYLE_NOT_USED), colorStyleM(COLORSTYLE_ALL),
+    :styleIDM(-1), styleDescM(""), fgColourM(STYLE_NOT_USED), bgColourM(STYLE_NOT_USED), colourStyleM(COLORSTYLE_ALL),
     fontNameM(""), fontStyleM(FONTSTYLE_NONE), fontSizeM(STYLE_NOT_USED), nestingM(FONTSTYLE_NONE), 
     keywordClassM(STYLE_NOT_USED), keywordsM("")
 {
@@ -50,9 +50,9 @@ FRStyle::FRStyle(const FRStyle& style)
 {
     styleIDM = style.styleIDM;
     styleDescM = style.styleDescM;
-    fgColorM = style.fgColorM;
-    bgColorM = style.bgColorM;
-    colorStyleM = style.colorStyleM;
+    fgColourM = style.fgColourM;
+    bgColourM = style.bgColourM;
+    colourStyleM = style.colourStyleM;
     fontNameM = style.fontNameM;
     fontSizeM = style.fontSizeM;
     fontStyleM = style.fontStyleM;
@@ -69,9 +69,9 @@ FRStyle& FRStyle::operator=(const FRStyle& style)
 {
     styleIDM = style.styleIDM;
     styleDescM = style.styleDescM;
-    fgColorM = style.fgColorM;
-    bgColorM = style.bgColorM;
-    colorStyleM = style.colorStyleM;
+    fgColourM = style.fgColourM;
+    bgColourM = style.bgColourM;
+    colourStyleM = style.colourStyleM;
     fontNameM = style.fontNameM;
     fontSizeM = style.fontSizeM;
     fontStyleM = style.fontStyleM;
@@ -156,7 +156,7 @@ void FRStyles::addStyler(int styleID, wxXmlNode* styleNode)
            
             long result; 
             str.ToLong(&result, 16);
-            newStyle->setfgColor((_RGB((result >> 16) & 0xFF, (result >> 8) & 0xFF, result & 0xFF)) | (result & 0xFF000000));
+            newStyle->setfgColour((_RGB((result >> 16) & 0xFF, (result >> 8) & 0xFF, result & 0xFF)) | (result & 0xFF000000));
 
         }
 
@@ -165,7 +165,7 @@ void FRStyles::addStyler(int styleID, wxXmlNode* styleNode)
         {
             long result;
             str.ToLong(&result, 16);
-            newStyle->setbgColor((_RGB((result >> 16) & 0xFF, (result >> 8) & 0xFF, result & 0xFF)) | (result & 0xFF000000));
+            newStyle->setbgColour((_RGB((result >> 16) & 0xFF, (result >> 8) & 0xFF, result & 0xFF)) | (result & 0xFF000000));
         }
 
         str = element->GetAttribute("colorStyle");
@@ -173,7 +173,7 @@ void FRStyles::addStyler(int styleID, wxXmlNode* styleNode)
         {
             long temp;
             str.ToLong(&temp, 10);
-            newStyle->setColorStyle(temp);
+            newStyle->setColourStyle(temp);
         }
 
         str = element->GetAttribute("fontName");
@@ -232,8 +232,8 @@ void FRStyles::addStyler(int styleID, const wxString styleName)
     FRStyle* newStyle = new FRStyle();
     newStyle->setStyleID(styleID);
     newStyle->setStyleDesc(styleName);
-    newStyle->setfgColor(wxBLACK->GetRGB());
-    newStyle->setbgColor(wxWHITE->GetRGB());
+    newStyle->setfgColour(wxBLACK->GetRGB());
+    newStyle->setbgColour(wxWHITE->GetRGB());
 
     styleVectorM.push_back(newStyle);
 
@@ -343,7 +343,7 @@ void FRLexerStylers::addLexerStyler(wxString lexerName, wxString lexerDesc, wxSt
 
     wxXmlNode* child = lexerNode->GetChildren();
     while (child) {
-        if (child->GetName() == "WordsStyle") {
+        if (child->GetType() == wxXML_ELEMENT_NODE &&  child->GetName() == "WordsStyle") {
             long styleID = -1;
             if (child->GetAttribute("styleID").ToLong(&styleID)) {
                 ls->addStyler(styleID, child);
@@ -355,29 +355,32 @@ void FRLexerStylers::addLexerStyler(wxString lexerName, wxString lexerDesc, wxSt
     lexerStylerVectorM.push_back(ls);
 }
 
-void FRLexerStylers::eraseAll()
+void FRLexerStylers::clear()
 {
-    //std::for_each(lexerStylerVectorM.begin(), lexerStylerVectorM.end(), [] {lexerStylerVectorM[].clear();});
     lexerStylerVectorM.clear();    
 }
 
 FRStyleManager& stylerManager()
 {
-    const wxString STYLE = "Style";
-    const wxString def = "stylers.xml";
+    const wxString STYLE = "StyleTheme";
+    const wxString def = "stylers";
 
-    wxFileName file = wxFileName(config().getXmlStylesPath(), config().get(STYLE, def));
+    wxFileName file = wxFileName(config().getXmlStylesPath(), config().get(STYLE, def) + ".xml");
     static FRStyleManager s(file);
     return s;
 }
 
 void FRStyleManager::loadLexerStyles(wxXmlNode* node)
 {
-    wxXmlNode* child = node->GetChildren();
+    lexerStylesM.clear();
 
+    wxXmlNode* child = node->GetChildren();
+    
     while (child) {
-        if (child->GetName() == "LexerType" /*&& child->GetAttribute("name")=="sql"*/) {
-            lexerStylesM.addLexerStyler(child->GetAttribute("name"), child->GetAttribute("desc"), child->GetAttribute("ext"), child);
+        if (child->GetType() == wxXML_ELEMENT_NODE && child->GetName() == "LexerType" && 
+            child->GetAttribute("name")=="sql") {
+            lexerStylesM.addLexerStyler(child->GetAttribute("name"), 
+                child->GetAttribute("desc"), child->GetAttribute("ext"), child);
         }
         child = child->GetNext();
     };
@@ -386,10 +389,11 @@ void FRStyleManager::loadLexerStyles(wxXmlNode* node)
 
 void FRStyleManager::loadGlobalStyles(wxXmlNode* node)
 {
+    globalStylesM.clear();
     wxXmlNode* child = node->GetChildren();
 
     while (child) {
-        if (child->GetName() == "WidgetStyle") {
+        if (child->GetType() == wxXML_ELEMENT_NODE && child->GetName() == "WidgetStyle") {
             long styleID = -1;
             if (child->GetAttribute("styleID").ToLong(&styleID)) {
                 globalStylesM.addStyler(styleID, child);
@@ -402,13 +406,13 @@ void FRStyleManager::loadGlobalStyles(wxXmlNode* node)
 
 void FRStyleManager::assignWordStyle(wxStyledTextCtrl* text, FRStyle* style)
 {
-    if (style->getbgColor() != 0){ 
-        text->StyleSetBackground(style->getStyleID(), style->getbgColor());
-    }
+    //if (style->getbgColour() & COLORSTYLE_BACKGROUND){
+        text->StyleSetBackground(style->getStyleID(), style->getbgColour());
+    //}
 
-    if (style->getfgColor() != 0) {
-        text->StyleSetForeground(style->getStyleID(), style->getfgColor());
-    }
+    //if (style->getfgColour() & COLORSTYLE_FOREGROUND) {
+        text->StyleSetForeground(style->getStyleID(), style->getfgColour());
+    //}
         
     double size = style->getFontSize() == 0 ? globalStyleM->getFontSize() : style->getFontSize();
     wxFontInfo fontInfo(size);
@@ -416,9 +420,11 @@ void FRStyleManager::assignWordStyle(wxStyledTextCtrl* text, FRStyle* style)
     wxString fontName = style->getFontName().IsEmpty() ? globalStyleM->getFontName() : style->getFontName();
     fontInfo.FaceName(fontName);
         
-    fontInfo.Bold(style->getFontStyle() & FONTSTYLE_BOLD);
-    fontInfo.Italic(style->getFontStyle() & FONTSTYLE_ITALIC);
-    fontInfo.Underlined(style->getFontStyle() & FONTSTYLE_UNDERLINE);
+    if (style->getFontStyle() != STYLE_NOT_USED) {
+        fontInfo.Bold(style->getFontStyle() & FONTSTYLE_BOLD);
+        fontInfo.Italic(style->getFontStyle() & FONTSTYLE_ITALIC);
+        fontInfo.Underlined(style->getFontStyle() & FONTSTYLE_UNDERLINE);
+    }
 
     wxFont font(fontInfo);
 
@@ -432,27 +438,9 @@ void FRStyleManager::assignWordStyle(wxStyledTextCtrl* text, FRStyle* style)
 
 FRStyleManager::FRStyleManager(wxFileName style)
 {
-    wxXmlDocument xmlDoc;
-    xmlDoc.Load(style.GetFullPath());
-    if (xmlDoc.IsOk()) {
-        wxXmlNode* xmlNode = xmlDoc.GetRoot();
-        if (xmlNode->GetName() == "Flamerobin") {
-            
-            wxXmlNode* child = xmlNode->GetChildren();
-            while (child) {
-                if (!child)
-                    break;
-                if (child->GetName() == "LexerStyles") {
-                    loadLexerStyles(child);
-                }
-                if (child->GetName() == "GlobalStyles") {
-                    loadGlobalStyles(child);
-                }
-                child = child->GetNext();
-            }
-        }
-    }
-
+    fileNameM = style;
+    
+    loadStyle();
 }
 
 
@@ -473,8 +461,8 @@ void FRStyleManager::assignGlobal(wxStyledTextCtrl* text)
         if (style->getStyleDesc() == "Global override") {
             globalStyleM = style;
             text->StyleResetDefault();
-            text->SetBackgroundColour(style->getbgColor());
-            text->SetForegroundColour(style->getfgColor());
+            text->SetBackgroundColour(style->getbgColour());
+            text->SetForegroundColour(style->getfgColour());
             assignWordStyle(text, style);
         }
         if (style->getStyleDesc() == "Default Style") {
@@ -482,26 +470,22 @@ void FRStyleManager::assignGlobal(wxStyledTextCtrl* text)
         }
         if (style->getStyleDesc() == "Mark colour") {}
         if (style->getStyleDesc() == "Selected text colour") {
-            text->SetSelBackground(true, style->getbgColor());
+            text->SetSelBackground(true, style->getbgColour());
             //text->SetSelForeground(true, style->getfgColor());
         }
         if (style->getStyleDesc() == "Edge colour") {
-            text->SetEdgeColour(style->getfgColor());
+            text->SetEdgeColour(style->getfgColour());
         }
-        if (style->getStyleDesc() == "Bookmark margin") {
-            //text->SetMarginBackground(wxSTC_MARGIN_SYMBOL,style->getbgColor());
-            //text->SetMarginBackground(wxSTC_MARGIN_NUMBER, style->getbgColor());
-
-        }
+        if (style->getStyleDesc() == "Bookmark margin" ) {}
         if (style->getStyleDesc() == "Fold") {}
         if (style->getStyleDesc() == "Fold active") {}
         if (style->getStyleDesc() == "Fold margin") {
-            text->SetFoldMarginColour(true, style->getbgColor());
-            text->SetFoldMarginHiColour(true, style->getfgColor());
+            text->SetFoldMarginColour(true, style->getbgColour());
+            text->SetFoldMarginHiColour(true, style->getfgColour());
         }
         if (style->getStyleDesc() == "White space symbol") {
-            text->SetWhitespaceForeground(true, style->getfgColor());
-            text->SetWhitespaceBackground(true, style->getbgColor());
+            text->SetWhitespaceForeground(true, style->getfgColour());
+            text->SetWhitespaceBackground(true, style->getbgColour());
         }
         if (style->getStyleDesc() == "Active tab focused indicator") {}
         if (style->getStyleDesc() == "Active tab unfocused indicator") {}
@@ -509,8 +493,8 @@ void FRStyleManager::assignGlobal(wxStyledTextCtrl* text)
         if (style->getStyleDesc() == "Inactive tabs") {}
         if (style->getStyleDesc() == "URL hovered") {}
         if (style->getStyleDesc() == "Current line background colour") {
-            text->SetCaretLineBackground(style->getbgColor());
-            text->SetCaretForeground(style->getfgColor());
+            text->SetCaretLineBackground(style->getbgColour());
+            text->SetCaretForeground(style->getfgColour());
         }
     }
 
@@ -529,4 +513,49 @@ void FRStyleManager::assignLexer(wxStyledTextCtrl* text)
             }
         }
     }
+    FRStyle* style = globalStylesM.getStyleByName("Line number margin");
+    if (style) {
+        assignWordStyle(text, style);
+    }
+}
+
+void FRStyleManager::loadConfig()
+{
+    const wxString STYLE = "StyleTheme";
+    const wxString def = "stylers";
+
+    wxFileName file = wxFileName(config().getXmlStylesPath(), config().get(STYLE, def) + ".xml");
+    setfileName(file);
+    
+    loadStyle();
+}
+
+void FRStyleManager::loadStyle()
+{
+    wxXmlDocument xmlDoc;
+    xmlDoc.Load(fileNameM.GetFullPath());
+    if (xmlDoc.IsOk()) {
+        wxXmlNode* xmlNode = xmlDoc.GetRoot();
+        if (xmlNode->GetType() == wxXML_ELEMENT_NODE && xmlNode->GetName() == "Flamerobin") {
+
+            wxXmlNode* child = xmlNode->GetChildren();
+            while (child) {
+                if (!child)
+                    break;
+                if (child->GetType() == wxXML_ELEMENT_NODE && child->GetName() == "LexerStyles") {
+                    loadLexerStyles(child);
+                }
+                if (child->GetType() == wxXML_ELEMENT_NODE && child->GetName() == "GlobalStyles") {
+                    loadGlobalStyles(child);
+                }
+                child = child->GetNext();
+            }
+        }
+    }
+
+}
+
+void FRStyleManager::saveStyle()
+{
+    //TODO: Implemented
 }

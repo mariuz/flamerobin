@@ -41,7 +41,7 @@ Credits:
     Thanks for the user for the tmTheme source.
 
 //-->
-<NotepadPlus>
+<Flamerobin>
     <LexerStyles>
         <LexerType name="c" desc="C" ext="">
             <WordsStyle name="PREPROCESSOR" styleID="9" fgColor="FFAA00" bgColor="0B161D" fontName="" fontStyle="0" fontSize="10" />
@@ -803,4 +803,4 @@ Credits:
         <WidgetStyle name="Inactive tabs" styleID="0" fgColor="808080" bgColor="C0C0C0" />
         <WidgetStyle name="URL hovered" styleID="0" fgColor="FFFFFF" />
     </GlobalStyles>
-</NotepadPlus>
+</Flamerobin>

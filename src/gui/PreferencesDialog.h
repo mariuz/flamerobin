@@ -62,6 +62,7 @@ public:
     int getControlLeft();
     // parent for created controls
     wxPanel* getPage() const;
+    PrefDlgSetting* getParent() const;
     virtual bool loadFromTargetConfig(Config& targetConfig) = 0;
     virtual bool parseProperty(wxXmlNode* xmln);
     virtual bool saveToTargetConfig(Config& targetConfig) = 0;

@@ -34,10 +34,12 @@
 
 #include "config/Config.h"
 
+typedef unsigned short      _WORD;
 typedef unsigned long       _DWORD;
 typedef unsigned char       _BYTE;
-#define _RGB(r,g,b)          ((COLORREF)(((_BYTE)(r)|((_DWORD)((_BYTE)(g))<<8))|(((_DWORD)(_BYTE)(b))<<16)))
-typedef _DWORD   COLORREF;
+typedef _DWORD   _COLOURREF;
+
+#define _RGB(r,g,b)          ((_COLOURREF)(((_BYTE)(r)|((_WORD)((_BYTE)(g))<<8))|(((_DWORD)(_BYTE)(b))<<16)))
 
 
 const int FONTSTYLE_NONE = 0;
@@ -53,6 +55,8 @@ const int COLORSTYLE_ALL = COLORSTYLE_FOREGROUND | COLORSTYLE_BACKGROUND;
 
 const int MAX_LEXER_STYLE = 100;
 
+const int MARGE_LINENUMBER = 0;
+const int MARGE_SYMBOLE = 1;
 
 
 class FRStyle
@@ -61,9 +65,9 @@ protected:
     int styleIDM;
     wxString styleDescM;
 
-    COLORREF fgColorM;
-    COLORREF bgColorM;
-    int colorStyleM;
+    _COLOURREF fgColourM;
+    _COLOURREF bgColourM;
+    int colourStyleM;
 
     wxString fontNameM;
     int fontStyleM;
@@ -88,15 +92,14 @@ public:
     void setStyleDesc(wxString name) { styleDescM = name; };
 
 
-    COLORREF getfgColor() { return fgColorM; };
-    void setfgColor(COLORREF color) { fgColorM = color; };
+    _COLOURREF getfgColour() { return fgColourM; };
+    void setfgColour(_COLOURREF color) { fgColourM = color; };
     
-    COLORREF getbgColor() { return bgColorM; };
-    void setbgColor(COLORREF color) { bgColorM = color; };
+    _COLOURREF getbgColour() { return bgColourM; };
+    void setbgColour(_COLOURREF color) { bgColourM = color; };
     
-    int getColorStyle() { return colorStyleM; };
-    void setColorStyle(int color) { colorStyleM = color; };
-
+    int getColourStyle() { return colourStyleM; };
+    void setColourStyle(int color) { colourStyleM = color; };
 
 
     wxString getFontName() { return fontNameM; };
@@ -204,11 +207,12 @@ public:
 
     void addLexerStyler(wxString lexerName, wxString lexerDesc, wxString lexerUserExt, wxXmlNode* lexerNode);
 
-    void eraseAll();
+    void clear();
 };
 
 class FRStyleManager {
 private:
+    wxFileName fileNameM;
     FRStyles globalStylesM;
     FRLexerStylers lexerStylesM;
     FRStyle* globalStyleM;
@@ -226,10 +230,20 @@ public:
     FRStyle* getGlobalStyle() { return globalStyleM; };
     FRStyle* getDefaultStyle() { return defaultStyleM; };
     FRStyle* getStyleByName(wxString styleName);
+    
+    wxFileName getfileName() { return fileNameM; };
+    void setfileName(wxFileName fileName) { fileNameM = fileName; };
+    
 
     void assignGlobal(wxStyledTextCtrl* text);
 
     void assignLexer(wxStyledTextCtrl* text);
+
+    void loadConfig();
+    void loadStyle();
+    void saveStyle();
+
+
 
 };
 

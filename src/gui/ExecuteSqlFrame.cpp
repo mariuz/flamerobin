@@ -310,24 +310,28 @@ void SqlEditor::setChars(bool firebirdIdentifierOnly)
 //! This code has to be called each time the font has changed, so that the control updates
 void SqlEditor::setup()
 {
-    stylerManager().assignGlobal(this);
-    StyleClearAll();
-    stylerManager().assignLexer(this);
-    SetLexer(wxSTC_LEX_SQL);
-    setChars(false);
 
     int tabSize = config().get("sqlEditorTabSize", 4);
+
     SetTabWidth(tabSize);
     SetIndent(tabSize);
     SetUseTabs(false);
     SetTabIndents(true);
+
     SetBackSpaceUnIndents(true);
     AutoCompSetIgnoreCase(true);
     AutoCompSetAutoHide(true);        // info in ScintillaDoc.html file (in scintilla source package)
-    SetMarginWidth(0, 40);            // turn on the linenumbers margin, set width to 40pixels
+
+    /*SetMarginWidth(0, 40);            // turn on the linenumbers margin, set width to 40pixels
     SetMarginWidth(1, 0);             // turn off the folding margin
     SetMarginType(0, 1);              // set margin type to linenumbers
-    //SetCaretLineVisible(true);
+    */
+    SetCaretLineVisible(true);
+
+    SetMargins(0, 0);
+    SetMarginWidth(MARGE_LINENUMBER, 40);
+    SetMarginType(MARGE_LINENUMBER, wxSTC_MARGIN_NUMBER);
+
     if (config().get("sqlEditorShowEdge", false))
     {
         SetEdgeMode(wxSTC_EDGE_LINE);
@@ -337,6 +341,13 @@ void SqlEditor::setup()
     if (!config().get("sqlEditorSmartHomeKey", true))
         CmdKeyAssign(wxSTC_KEY_HOME, wxSTC_KEYMOD_NORM, wxSTC_CMD_HOMEDISPLAY);
         
+    stylerManager().assignGlobal(this);
+    StyleClearAll();
+    stylerManager().assignLexer(this);
+    SetLexer(wxSTC_LEX_SQL);
+    setChars(false);
+
+
     centerCaret(false);
 }
 
@@ -788,7 +799,7 @@ void ExecuteSqlFrame::set_properties()
     statusbar_1->SetStatusText("Transaction status", 3);
 
     grid_data->SetTable(new DataGridTable(statementM, databaseM), true);
-    grid_data->SetBackgroundColour(stylerManager().getDefaultStyle()->getbgColor());
+    grid_data->SetBackgroundColour(stylerManager().getDefaultStyle()->getbgColour());
     splitter_window_1->Initialize(styled_text_ctrl_sql);
     viewModeM = vmEditor;
 

@@ -31,9 +31,12 @@
 #endif
 
 #include <wx/checklst.h>
+#include <wx/clrpicker.h>
+#include <wx/dir.h>
 #include <wx/filedlg.h>
 #include <wx/filename.h>
 #include <wx/fontdlg.h>
+#include <wx/listbox.h>
 #include <wx/spinctrl.h>
 #include <wx/tokenzr.h>
 #include <wx/xml/xml.h>
@@ -46,6 +49,7 @@
 #include "frutils.h"
 #include "gui/PreferencesDialog.h"
 #include "gui/StyleGuide.h"
+#include "gui/FRStyle.h"
 #include "metadata/column.h"
 #include "metadata/relation.h"
 
@@ -177,6 +181,11 @@ int PrefDlgSetting::getLevel() const
 wxPanel* PrefDlgSetting::getPage() const
 {
     return pageM;
+}
+
+PrefDlgSetting* PrefDlgSetting::getParent() const
+{
+    return parentM;
 }
 
 int PrefDlgSetting::getSizerProportion() const
@@ -1123,6 +1132,7 @@ bool PrefDlgCheckListBoxSetting::createControl(bool WXUNUSED(ignoreerrors))
     checkListBoxHandlerM->Connect(checkListBoxM->GetId(),
         wxEVT_COMMAND_CHECKLISTBOX_TOGGLED,
         wxCommandEventHandler(PrefDlgEventHandler::OnCommandEvent));
+
     checkBoxHandlerM.reset(new PrefDlgEventHandler(
         std::bind(&PrefDlgCheckListBoxSetting::OnCheckBox, this,  std::placeholders::_1)));
     checkBoxM->PushEventHandler(checkBoxHandlerM.get());
@@ -1338,88 +1348,553 @@ bool PrefDlgRelationColumnsListSetting::parseProperty(wxXmlNode* xmln)
 }
 
 
-class PrefDlgStyleEditSetting : public PrefDlgSetting
+class PrefDlgComboBoxSetting : public PrefDlgSetting
 {
 public:
-    PrefDlgStyleEditSetting(wxPanel* page, PrefDlgSetting* parent);
+    PrefDlgComboBoxSetting(wxPanel* page, PrefDlgSetting* parent);
+    ~PrefDlgComboBoxSetting();
 
     virtual bool createControl(bool ignoreerrors);
     virtual bool loadFromTargetConfig(Config& config);
     virtual bool parseProperty(wxXmlNode* xmln);
     virtual bool saveToTargetConfig(Config& config);
 protected:
+    wxString defaultM;
+    wxArrayString itemsM;
+
+    virtual void addControlsToSizer(wxSizer* sizer);
+    virtual void enableControls(bool enabled);
+    virtual wxStaticText* getLabel();
+    virtual wxArrayString getComboBoxItems();
+    virtual bool hasControls() const;
+    virtual void setDefault(const wxString& defValue);
+private:
+    void OnComboBoxClick(wxCommandEvent& e) {
+        comboBoxM->SetSelection(static_cast<wxComboBox*>(e.GetEventObject())->GetSelection());
+    }
+    wxStaticText* captionBeforeM;
+    wxComboBox* comboBoxM;
+
+    std::unique_ptr<wxEvtHandler> comboBoxHandlerM;
+
+};
+
+PrefDlgComboBoxSetting::PrefDlgComboBoxSetting(
+    wxPanel* page, PrefDlgSetting* parent)
+    : PrefDlgSetting(page, parent), comboBoxM(0), captionBeforeM(0)
+{
+}
+
+PrefDlgComboBoxSetting::~PrefDlgComboBoxSetting()
+{
+    /*
+        if (comboBoxM && comboBoxHandlerM.get())
+        comboBoxM->PopEventHandler();
+
+    */
+}
+
+bool PrefDlgComboBoxSetting::createControl(bool WXUNUSED(ignoreerrors))
+{
+
+    if (!captionM.empty())
+        captionBeforeM = new wxStaticText(getPage(), wxID_ANY, captionM);
+
+    comboBoxM = new wxComboBox(getPage(), wxID_ANY, wxEmptyString, wxDefaultPosition,
+        wxDefaultSize, getComboBoxItems());
+
+    if (!descriptionM.empty())
+    {
+        if (captionBeforeM)
+            captionBeforeM->SetToolTip(descriptionM);
+        comboBoxM->SetToolTip(descriptionM);
+    }
+
+    return true;
+}
+
+bool PrefDlgComboBoxSetting::loadFromTargetConfig(Config& config)
+{
+    if (!checkTargetConfigProperties())
+        return false;
+
+    if (comboBoxM)
+    {
+        wxString value = defaultM;
+        config.getValue(keyM, value);
+        comboBoxM->SetValue(value);
+    }
+
+    enableControls(true);
+    return true;
+}
+
+bool PrefDlgComboBoxSetting::parseProperty(wxXmlNode* xmln)
+{
+
+    if (xmln->GetType() == wxXML_ELEMENT_NODE
+        && xmln->GetName() == "option")
+    {
+        wxString optcaption;
+        for (wxXmlNode* xmlc = xmln->GetChildren(); xmlc != 0;
+            xmlc = xmlc->GetNext())
+        {
+            if (xmlc->GetType() != wxXML_ELEMENT_NODE)
+                continue;
+            wxString value(getNodeContent(xmlc, wxEmptyString));
+            if (xmlc->GetName() == "caption")
+                optcaption = value;
+        }
+        // for the time being values are the index of the caption in the array
+        if (!optcaption.empty())
+            itemsM.Add(optcaption);
+    }
+
+    return PrefDlgSetting::parseProperty(xmln);
+}
+
+bool PrefDlgComboBoxSetting::saveToTargetConfig(Config& config)
+{
+    if (!checkTargetConfigProperties())
+        return false;
+    
+    wxString value = comboBoxM->GetStringSelection();
+
+    if (!value.IsEmpty()) {
+        config.setValue(keyM, value);
+    }
+
+    return true;
+}
+
+void PrefDlgComboBoxSetting::addControlsToSizer(wxSizer* sizer)
+{
+    if (comboBoxM)
+    {
+        if (captionBeforeM)
+        {
+            sizer->Add(captionBeforeM, 0, wxFIXED_MINSIZE | wxALIGN_TOP);
+            sizer->Add(styleguide().getControlLabelMargin(), 0);
+        }
+
+        wxSizer* sizerVert = new wxBoxSizer(wxVERTICAL);
+        sizerVert->Add(comboBoxM, 1, wxEXPAND);
+        sizerVert->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+
+        sizer->Add(sizerVert, 1, wxEXPAND | wxFIXED_MINSIZE | wxALIGN_TOP);
+    }
+
+}
+
+void PrefDlgComboBoxSetting::enableControls(bool enabled)
+{
+   if (comboBoxM)
+        comboBoxM->Enable(enabled);
+}
+
+wxStaticText* PrefDlgComboBoxSetting::getLabel()
+{
+    return captionBeforeM;
+}
+
+wxArrayString PrefDlgComboBoxSetting::getComboBoxItems()
+{
+    return itemsM;
+}
+
+bool PrefDlgComboBoxSetting::hasControls() const
+{
+    return captionBeforeM != 0 || comboBoxM != 0;
+}
+
+void PrefDlgComboBoxSetting::setDefault(const wxString& defValue)
+{
+    defaultM = defValue;
+}
+
+
+
+class PrefDlgThemeComboBoxSetting : public PrefDlgComboBoxSetting
+{
+public:
+    PrefDlgThemeComboBoxSetting(wxPanel* page, PrefDlgSetting* parent);
+
+protected:
+    virtual bool parseProperty(wxXmlNode* xmln);
+    virtual bool saveToTargetConfig(Config& config);
+
+private:
+};
+
+PrefDlgThemeComboBoxSetting::PrefDlgThemeComboBoxSetting(wxPanel* page, PrefDlgSetting* parent)
+    :PrefDlgComboBoxSetting(page, parent)
+{
+}
+
+bool PrefDlgThemeComboBoxSetting::parseProperty(wxXmlNode* xmln)
+{
+    if (xmln->GetType() == wxXML_ELEMENT_NODE
+        && xmln->GetName() == "file")
+    {
+        wxString dirName = config().getXmlStylesPath();
+        wxString fileSpec = _T("*.xml");
+        wxArrayString files;
+        itemsM.clear();
+
+        if (wxDir::GetAllFiles(dirName, &files, fileSpec, wxDIR_FILES) > 0) {
+            wxString name, ext;
+            wxString allFileNames;
+            for (size_t i = 0; i < files.GetCount(); i++) {
+                wxFileName::SplitPath(files[i], NULL, &name, &ext);
+                itemsM.Add(name);
+            }
+        }
+    }
+
+    return PrefDlgComboBoxSetting::parseProperty(xmln);
+}
+
+bool PrefDlgThemeComboBoxSetting::saveToTargetConfig(Config& config)
+{
+    if (!PrefDlgComboBoxSetting::saveToTargetConfig(config))
+        return false;
+
+    stylerManager().loadConfig();
+
+    return true;
+}
+
+
+class PrefDlgColourPickerSetting : public PrefDlgSetting
+{
+public:
+    PrefDlgColourPickerSetting(wxPanel* page, PrefDlgSetting* parent);
+    ~PrefDlgColourPickerSetting();
+
+    virtual bool createControl(bool ignoreerrors);
+    virtual bool loadFromTargetConfig(Config& config);
+    virtual bool parseProperty(wxXmlNode* xmln);
+    virtual bool saveToTargetConfig(Config& config);
+protected:
+    wxString defaultM;
+
     virtual void addControlsToSizer(wxSizer* sizer);
     virtual void enableControls(bool enabled);
     virtual wxStaticText* getLabel();
     virtual bool hasControls() const;
     virtual void setDefault(const wxString& defValue);
 private:
-    void OnComboBoxClick(wxCommandEvent& e) {
-        stylesComboBoxM->SetSelection(static_cast<wxComboBox*>(e.GetEventObject())->GetSelection());
-    }
-    wxComboBox* stylesComboBoxM;
-    wxString defaultM;
-
+    wxStaticText* captionBeforeM;
+    wxColourPickerCtrl* colourPickerM;
 };
 
-PrefDlgStyleEditSetting::PrefDlgStyleEditSetting(
+PrefDlgColourPickerSetting::PrefDlgColourPickerSetting(
     wxPanel* page, PrefDlgSetting* parent)
-    : PrefDlgSetting(page, parent), stylesComboBoxM(0)//, defaultM(0)
+    : PrefDlgSetting(page, parent), colourPickerM(0), captionBeforeM(0)
 {
 }
 
-bool PrefDlgStyleEditSetting::createControl(bool WXUNUSED(ignoreerrors))
+PrefDlgColourPickerSetting::~PrefDlgColourPickerSetting()
 {
-    stylesComboBoxM = new wxComboBox(getPage(), wxID_ANY);
+}
+
+bool PrefDlgColourPickerSetting::createControl(bool ignoreerrors)
+{
+    if (!captionM.empty())
+        captionBeforeM = new wxStaticText(getPage(), wxID_ANY, captionM);
+
+    //wxSize size = wxSize(10, 10);
+
+    colourPickerM = new wxColourPickerCtrl(getPage(), wxID_ANY, *wxBLACK, wxDefaultPosition, wxDefaultSize);
+
+    if (!descriptionM.empty())
+    {
+        if (captionBeforeM)
+            captionBeforeM->SetToolTip(descriptionM);
+        colourPickerM->SetToolTip(descriptionM);
+    }
 
     return true;
 }
 
-bool PrefDlgStyleEditSetting::loadFromTargetConfig(Config& config)
+bool PrefDlgColourPickerSetting::loadFromTargetConfig(Config& config)
 {
     if (!checkTargetConfigProperties())
         return false;
-    if (stylesComboBoxM)
+
+    if (colourPickerM)
     {
         wxString value = defaultM;
         config.getValue(keyM, value);
-        stylesComboBoxM->SetValue(value);
+
+        long result;
+        value.ToLong(&result, 16);
+        _COLOURREF colour = (_RGB((result >> 16) & 0xFF, (result >> 8) & 0xFF, result & 0xFF)) | (result & 0xFF000000);
+
+        colourPickerM->SetColour(colour);
     }
+
     enableControls(true);
     return true;
 }
 
-bool PrefDlgStyleEditSetting::parseProperty(wxXmlNode* xmln)
+bool PrefDlgColourPickerSetting::parseProperty(wxXmlNode* xmln)
+{
+    if (xmln->GetType() == wxXML_ELEMENT_NODE
+        && xmln->GetName() == "option")
+    {
+        /*wxString optcaption;
+        for (wxXmlNode* xmlc = xmln->GetChildren(); xmlc != 0;
+            xmlc = xmlc->GetNext())
+        {
+            if (xmlc->GetType() != wxXML_ELEMENT_NODE)
+                continue;
+            wxString value(getNodeContent(xmlc, wxEmptyString));
+            if (xmlc->GetName() == "caption")
+                optcaption = value;
+        }
+        // for the time being values are the index of the caption in the array
+        if (!optcaption.empty())
+            itemsM.Add(optcaption);
+        */
+    }
+
+    return PrefDlgSetting::parseProperty(xmln);
+}
+
+bool PrefDlgColourPickerSetting::saveToTargetConfig(Config& config)
+{
+    if (!checkTargetConfigProperties())
+        return false;
+
+    wxColour value = colourPickerM->GetColour();
+
+    //if (!value.IsEmpty()) {
+        config.setValue(keyM, value.GetAsString(wxC2S_CSS_SYNTAX));
+   // }
+
+    return true;
+}
+
+void PrefDlgColourPickerSetting::addControlsToSizer(wxSizer* sizer)
+{
+    if (colourPickerM)
+    {
+        if (captionBeforeM)
+        {
+            sizer->Add(captionBeforeM, 0, wxFIXED_MINSIZE | wxALIGN_LEFT);
+            sizer->Add(styleguide().getControlLabelMargin(), 0);
+        }
+
+        wxSizer* sizerVert = new wxBoxSizer(wxVERTICAL);
+        sizerVert->Add(colourPickerM, 1, wxEXPAND);
+        sizerVert->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+
+        sizer->Add(sizerVert, 1, wxEXPAND | wxFIXED_MINSIZE | wxALIGN_LEFT);
+    }
+
+}
+
+void PrefDlgColourPickerSetting::enableControls(bool enabled)
+{
+    if (colourPickerM)
+        colourPickerM->Enable(enabled);
+}
+
+wxStaticText* PrefDlgColourPickerSetting::getLabel()
+{
+    return captionBeforeM;
+}
+
+bool PrefDlgColourPickerSetting::hasControls() const
+{
+    return captionBeforeM != 0 || colourPickerM != 0;
+}
+
+void PrefDlgColourPickerSetting::setDefault(const wxString& defValue)
+{
+    defaultM = defValue;
+}
+
+class PrefDlgThemeSetting : public PrefDlgSetting
+{
+public:
+    PrefDlgThemeSetting(wxPanel* page, PrefDlgSetting* parent);
+    ~PrefDlgThemeSetting();
+
+    virtual bool createControl(bool ignoreerrors);
+    virtual bool loadFromTargetConfig(Config& config);
+    virtual bool parseProperty(wxXmlNode* xmln);
+    virtual bool saveToTargetConfig(Config& config);
+protected:
+    wxString defaultM;
+
+    virtual void addControlsToSizer(wxSizer* sizer);
+    virtual void enableControls(bool enabled);
+    //virtual wxStaticText* getLabel();
+    virtual bool hasControls() const;
+    //virtual void setDefault(const wxString& defValue);*/
+    virtual wxArrayString getComboBoxItems();
+private:
+    wxStaticText* captionBeforeM;
+    wxComboBox* comboBoxM;
+    wxListBox* languageListBoxM;
+    wxListBox* styleListBoxM;
+};
+
+PrefDlgThemeSetting::PrefDlgThemeSetting(wxPanel* page, PrefDlgSetting* parent)
+    : PrefDlgSetting(page, parent), comboBoxM(0), captionBeforeM(0),
+    languageListBoxM(0), styleListBoxM(0)
+{
+}
+
+PrefDlgThemeSetting::~PrefDlgThemeSetting()
+{
+}
+
+bool PrefDlgThemeSetting::createControl(bool WXUNUSED(ignoreerrors))
+{
+    captionBeforeM = new wxStaticText(getPage(), wxID_ANY, "Select theme:");
+
+    comboBoxM = new wxComboBox(getPage(), wxID_ANY, wxEmptyString, wxDefaultPosition,
+        wxDefaultSize, getComboBoxItems());
+    languageListBoxM = new wxListBox(getPage(), wxID_ANY, wxDefaultPosition, wxDefaultSize);
+    languageListBoxM->Insert("SQL", 0);
+
+    styleListBoxM = new wxListBox(getPage(), wxID_ANY, wxDefaultPosition, wxDefaultSize);
+    styleListBoxM->Insert("Global", 0);
+
+    return true;
+}
+
+bool PrefDlgThemeSetting::loadFromTargetConfig(Config& config)
+{
+    return true;
+}
+
+bool PrefDlgThemeSetting::parseProperty(wxXmlNode* xmln)
+{
+    /*if (xmln->GetType() == wxXML_ELEMENT_NODE
+        && xmln->GetName() == "file")
+    {
+        wxString dirName = config().getXmlStylesPath();
+        wxString fileSpec = _T("*.xml");
+        wxArrayString files;
+        itemsM.clear();
+
+        if (wxDir::GetAllFiles(dirName, &files, fileSpec, wxDIR_FILES) > 0) {
+            wxString name, ext;
+            wxString allFileNames;
+            for (size_t i = 0; i < files.GetCount(); i++) {
+                wxFileName::SplitPath(files[i], NULL, &name, &ext);
+                itemsM.Add(name);
+            }
+        }
+    }*/
+
+    return PrefDlgSetting::parseProperty(xmln);
+}
+
+bool PrefDlgThemeSetting::saveToTargetConfig(Config& config)
 {
     return false;
 }
 
-bool PrefDlgStyleEditSetting::saveToTargetConfig(Config& config)
+void PrefDlgThemeSetting::addControlsToSizer(wxSizer* sizer)
 {
-    return false;
+    //if (checkListBoxM)
+    {
+        static_cast<wxBoxSizer*>(sizer)->SetOrientation(wxVERTICAL);
+        wxSizer* topSizer = new wxBoxSizer(wxHORIZONTAL);
+        sizer->Add(topSizer, 0, wxEXPAND | wxALIGN_TOP);
+        if (captionBeforeM)
+        {
+            topSizer->Add(captionBeforeM, 0, wxFIXED_MINSIZE | wxALIGN_TOP);
+            topSizer->Add(styleguide().getControlLabelMargin(), 0);
+        }
+
+
+        wxSizer* sizerVert = new wxBoxSizer(wxVERTICAL);
+        sizerVert->Add(comboBoxM, 1, wxEXPAND);
+        topSizer->Add(sizerVert, 1, wxEXPAND | wxFIXED_MINSIZE | wxALIGN_TOP);
+
+
+        wxSizer* buttomSizer = new wxBoxSizer(wxHORIZONTAL);
+        sizer->Add(buttomSizer, 1, wxEXPAND );
+
+
+        wxSizer* rightSizer = new wxBoxSizer(wxHORIZONTAL);
+        buttomSizer->Add(rightSizer, 1, wxEXPAND | wxFIXED_MINSIZE | wxALIGN_TOP);
+
+        wxPanel* rightPanel = new wxPanel(getPage(), wxID_ANY, wxDefaultPosition, wxSize(100,200));
+        //rightPanel->SetBackgroundColour(wxColor(200, 100, 200));
+        buttomSizer->Add(rightPanel, 1, wxEXPAND | wxLEFT | wxTOP | wxRIGHT, 10);
+        
+        wxBoxSizer* rightBoxSizer  = new wxBoxSizer(wxVERTICAL); /*vbox*/
+        wxStaticBox* rightStaticBox = new wxStaticBox(rightPanel, -1, ""); /*nm*/
+        wxStaticBoxSizer* rightStaticBoxSizer = new wxStaticBoxSizer(rightStaticBox, wxHORIZONTAL);/*mnSizer*/
+
+        wxBoxSizer* languageBoxSizer = new wxBoxSizer(wxVERTICAL); /*mnBox*/
+        languageBoxSizer->Add(new wxStaticText(rightPanel, -1, "Language:"), 0, wxALL | wxCENTER, 1);
+        languageBoxSizer->Add(new wxListBox(rightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize), 0, wxALL | wxCENTER, 1);
+        
+        //wxSizer* sizerlanguageListBox = new wxBoxSizer(wxVERTICAL);
+        //languageListBoxM->SetParent(rightPanel);
+        languageBoxSizer->Add(languageListBoxM, 1, wxALL | wxCENTER, 1);
+        //languageBoxSizer->Add(sizerlanguageListBox, 1, wxEXPAND | wxFIXED_MINSIZE | wxALIGN_LEFT, 5);
+
+        rightStaticBoxSizer->Add(languageBoxSizer, 0, wxALL | wxCENTER, 10);
+
+
+        wxBoxSizer* styleBoxSizer = new wxBoxSizer(wxVERTICAL); /*mnBox*/
+        styleBoxSizer->Add(new wxStaticText(rightPanel, -1, "Style:"), 0, wxALL | wxCENTER, 1);
+        styleBoxSizer->Add(styleListBoxM, 1, wxALL | wxCENTER, 1);
+        rightStaticBoxSizer->Add(styleBoxSizer, 0, wxALL | wxCENTER, 10);
+
+
+        rightBoxSizer->Add(rightStaticBoxSizer, 0, wxEXPAND | wxLEFT | wxTOP | wxRIGHT | wxBOTTOM, 5);
+        rightPanel->SetSizer(rightBoxSizer);
+
+        //wxStaticBoxSizer* rigthStaticSizer = new wxStaticBoxSizer(rigthStaticBox, wxVERTICAL);
+        //rigthStaticSizer->SetDimension(1, 1, 198, 198);
+        //rigthStaticSizer->Add(0, styleguide().getUnrelatedControlMargin(wxVERTICAL));
+        //rigthStaticSizer->Add(new wxStaticText(rigthStaticSizer->GetStaticBox(), wxID_ANY, "Language:"), 0, wxCENTER, 10);
+
+        //wxBoxSizer* languageSizer = new wxBoxSizer(wxVERTICAL);
+        //rigthStaticSizer->Add(languageSizer, 1);
+        //languageSizer->Add(new wxStaticText(rigthStaticSizer->GetStaticBox(), wxID_ANY, "Language:"),  1, wxEXPAND | wxLEFT | wxTOP | wxRIGHT, 10);
+        
+
+
+
+
+
+
+        wxSizer* leftSizer = new wxBoxSizer(wxHORIZONTAL);
+        buttomSizer->Add(leftSizer, 1, wxEXPAND );
+        
+        
+        wxPanel* panel_top = new wxPanel(getPage(), wxID_ANY, wxDefaultPosition, wxDefaultSize);
+        panel_top->SetBackgroundColour(wxColor(100, 100, 200));
+        leftSizer->Add(panel_top, 1, wxEXPAND | wxLEFT | wxTOP | wxRIGHT, 10);
+        
+    }
 }
 
-void PrefDlgStyleEditSetting::addControlsToSizer(wxSizer* sizer)
+void PrefDlgThemeSetting::enableControls(bool enabled)
 {
 }
 
-void PrefDlgStyleEditSetting::enableControls(bool enabled)
+bool PrefDlgThemeSetting::hasControls() const
 {
+    return true;
 }
 
-wxStaticText* PrefDlgStyleEditSetting::getLabel()
+wxArrayString PrefDlgThemeSetting::getComboBoxItems()
 {
-    return nullptr;
+    return wxArrayString();
 }
 
-bool PrefDlgStyleEditSetting::hasControls() const
-{
-    return false;
-}
-
-void PrefDlgStyleEditSetting::setDefault(const wxString& defValue)
-{
-}
 
 // PrefDlgSetting factory
 /* static */
@@ -1430,6 +1905,13 @@ PrefDlgSetting* PrefDlgSetting::createPrefDlgSetting(wxPanel* page,
         return new PrefDlgCheckboxSetting(page, parent);
     if (type == "checklistbox")
         return new PrefDlgCheckListBoxSetting(page, parent);
+    if (type == "colour")
+        return new PrefDlgColourPickerSetting(page, parent);
+    if (type == "combobox")
+        return new PrefDlgComboBoxSetting(page, parent);
+    if (type == "themecombobox")
+        return new PrefDlgThemeSetting(page, parent);
+        //return new PrefDlgThemeComboBoxSetting(page, parent);
     if (type == "radiobox")
         return new PrefDlgRadioboxSetting(page, parent);
     if (type == "int")
@@ -1446,8 +1928,6 @@ PrefDlgSetting* PrefDlgSetting::createPrefDlgSetting(wxPanel* page,
             return new PrefDlgRelationColumnsListSetting(page, parent);
         return new PrefDlgRelationColumnsChooserSetting(page, parent);
     }
-    if (type == "style")
-        return new PrefDlgStyleEditSetting(page, parent);
     return 0;
 }
 
