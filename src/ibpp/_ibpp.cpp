@@ -35,6 +35,8 @@
 #define REG_KEY_ROOT_INSTANCES	"SOFTWARE\\Firebird Project\\Firebird Server\\Instances"
 #define FB_DEFAULT_INSTANCE	  	"DefaultInstance"
 
+#endif
+
 #ifdef IBPP_UNIX
 #ifdef IBPP_LATE_BIND
 
@@ -51,8 +53,6 @@ static const char* fblibs[] = {"libfbembed.so.2.5","libfbembed.so.2.1","libfbcli
 // Many compilers confuses those following min/max with macros min and max !
 #undef min
 #undef max
-
-#endif
 
 namespace ibpp_internals
 {
@@ -326,7 +326,7 @@ namespace IBPP
 
 	//	Factories for our Interface objects
 
-	Service ServiceFactory(const std::string& ServerName,
+    Service ServiceFactory(const std::string& ServerName,
 				const std::string& UserName, const std::string& UserPassword)
 	{
 		(void)gds.Call();			// Triggers the initialization, if needed
@@ -378,4 +378,28 @@ namespace IBPP
 		return new EventsImpl(dynamic_cast<DatabaseImpl*>(db.intf()));
 	}
 
+    bool isIntegerNumber(SDT type)
+    {
+        switch (type) {
+        case SDT::sdSmallint:
+        case SDT::sdInteger:
+        case SDT::sdLargeint:
+            return true;
+        }
+        return false;
+
+    }
+
+    bool isRationalNumber(SDT type)
+    {
+        if (isIntegerNumber(type))
+            return true;
+        switch (type) {
+        case SDT::sdDouble:
+        case SDT::sdFloat:
+            return true;
+        }
+        return false;
+
+    }
 }

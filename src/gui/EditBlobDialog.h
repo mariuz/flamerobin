@@ -44,7 +44,7 @@ class EditBlobDialogSTC;     // declared in cpp
 class EditBlobDialog : public BaseDialog
 {
 public:
-    EditBlobDialog(wxWindow* parent);
+    EditBlobDialog(wxWindow* parent, wxMBConv* converterM);
     virtual ~EditBlobDialog();
     // close without saving (for rollback-transaction)
     void closeDontSave(); 
@@ -66,6 +66,7 @@ private:
     unsigned rowM;
     bool runningM;
     IBPP::Statement* statementM; 
+    wxMBConv* converterM;  //TODO: if possible, use directly from the database object
 
     std::set<EditorMode> dataValidM;
     wxMemoryOutputStream* cacheM;

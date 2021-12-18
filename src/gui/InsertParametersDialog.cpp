@@ -434,7 +434,7 @@ void InsertParametersDialog::storeValues()
         it != columnsM.end(); ++it)
     {
         InsertParametersOption sel = getInsertParametersOption(gridM, (*it).row);
-        wxString previous = (*it).columnDef->getAsString(bufferM);
+        wxString previous = (*it).columnDef->getAsString(bufferM, databaseM);
         wxString value = gridM->GetCellValue((*it).row, 3);
         try
         {
@@ -468,7 +468,7 @@ void InsertParametersDialog::storeValues()
                 case ioRegular:
                     (*it).columnDef->setFromString(bufferM, value);
                     gridM->SetCellValue((*it).row, 3,
-                        (*it).columnDef->getAsString(bufferM));
+                        (*it).columnDef->getAsString(bufferM, databaseM));
                     // there is no break; here deliberately!
                 case ioFile:
                     bufferM->setFieldNull((*it).index, false);
@@ -551,12 +551,12 @@ void InsertParametersDialog::preloadSpecialColumns()
         bufferM->setFieldNA((*it).index, false);
         bufferM->setFieldNull((*it).index, st1->IsNull(col));
         if (!st1->IsNull(col))
-            (*it).columnDef->setValue(bufferM, col, st1, wxConvCurrent);
+            (*it).columnDef->setValue(bufferM, col, st1, wxConvCurrent, databaseM);
         ++col;
         //if (sel != ioGenerator)  // what follows is only for generators
             continue;
         gridM->SetCellValue((*it).row, 3,
-            (*it).columnDef->getAsString(bufferM));
+            (*it).columnDef->getAsString(bufferM, databaseM));
         gridM->SetCellValue((*it).row, 2,
             insertParametersOptionStrings[ioRegular]);  // treat as regular value
         updateControls((*it).row);
@@ -644,7 +644,7 @@ void InsertParametersDialog::parseTime(int row, const wxString& source)
         int hr = 0, mn = 0, sc = 0, ms = 0;
         if (!GridCellFormats::get().parseTime(it, temp.end(), hr, mn, sc, ms))
             throw FRError(_("Cannot parse time"));
-        itm.SetTime(hr, mn, sc, 10 * ms);
+        itm.SetTime(IBPP::Time::tmNone, hr, mn, sc, 10 * ms, IBPP::Time::TZ_NONE);
     }
     statementM->Set(row+1, itm);
 }
@@ -679,7 +679,7 @@ void InsertParametersDialog::parseTimeStamp(int row, const wxString& source)
             throw FRError(_("Cannot parse timestamp"));
         }
         its.SetDate(y, m, d);
-        its.SetTime(hr, mn, sc, 10 * ms);
+        its.SetTime(IBPP::Time::tmNone, hr, mn, sc, 10 * ms, IBPP::Time::TZ_NONE);
     }
 
     // all done, set the value

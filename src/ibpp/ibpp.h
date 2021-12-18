@@ -58,7 +58,6 @@
 
 #include <stdint.h>
 
-
 #if !defined(_)
 #define _(s)    s
 #endif
@@ -98,7 +97,11 @@ namespace IBPP
 
     //  SQL Data Types
     enum SDT {sdArray, sdBlob, sdDate, sdTime, sdTimestamp, sdString,
-        sdSmallint, sdInteger, sdLargeint, sdFloat, sdDouble, sdBoolean};
+        sdSmallint, sdInteger, sdLargeint, sdFloat, sdDouble, sdBoolean,
+        sdTimeTz, sdTimestampTz, sdInt128};
+
+    bool isIntegerNumber(SDT type);
+    bool isRationalNumber(SDT type);
 
     //  Array Data Types
     enum ADT {adDate, adTime, adTimestamp, adString,
@@ -131,6 +134,67 @@ namespace IBPP
 
     // TransactionFactory Flags
     enum TFF {tfIgnoreLimbo = 0x1, tfAutoCommit = 0x2, tfNoAutoUndo = 0x4};
+
+    // int128 - FB4
+    #pragma pack(push, 1)
+
+    // gcc has a builtin type __int128
+    // msvc does not have something we can use (AFICS)
+    // so we have to do it by own code.
+    #define HAVE_INT128
+
+    #ifdef _MSC_VER
+    #undef HAVE_INT128
+    #endif
+
+    #ifndef HAVE_INT128
+    // NOTICE: could/should be replaced with int128_t if msvc supports this
+    typedef struct IBPP_INT128_T
+    {
+    private:
+        // _InOut_ dst
+        // _In_ toadd
+        // _Out_ overflow
+        void AddPart128(uint32_t* dst, const uint32_t& toadd, bool* overflow);
+        // _InOut_ T1
+        // _In_ T2
+        // _Out_ overflow
+        void Add128(IBPP_INT128_T* T1, const IBPP_INT128_T& T2, bool* overflow);
+public:
+        union DATA
+        {
+            struct
+            {
+                uint64_t lowPart;
+                int64_t highPart;
+            } s2;
+            struct
+            {
+                uint64_t lowPart;
+                uint64_t highPart;
+            } us2;
+            struct
+            {
+                uint32_t llPart;
+                uint32_t hlPart;
+                uint32_t lhPart;
+                uint32_t hhPart;
+            } s4;
+        } data;
+
+        // constructor
+        IBPP_INT128_T() {};
+        IBPP_INT128_T(const int64_t value);
+
+        IBPP_INT128_T operator-();
+        IBPP_INT128_T operator-(const IBPP_INT128_T& T2);
+        bool operator<(const IBPP_INT128_T& T2) const;
+    } ibpp_int128_t;
+    #else
+    typedef __int128 ibpp_int128_t;
+    #endif
+
+    #pragma pack(pop)
 
     /* IBPP never return any error codes. It throws exceptions.
      * On database engine reported errors, an IBPP::SQLException is thrown.
@@ -232,32 +296,46 @@ namespace IBPP
 
     class Time
     {
+	public:
+        enum TimezoneMode
+        {
+            // ISC_TIME / ISC_TIMESTAMP
+            tmNone,
+            // ISC_TIME_TZ / ISC_TIMESTAMP_TZ
+            tmTimezone,
+        };
+		/* no time zone -> utc = local */
+		const static int TZ_NONE     =  0;
     protected:
-        int mTime;  // The time, in ten-thousandths of seconds since midnight
+        // The time, in ten-thousandths of seconds since midnight - UTC and TZ
+        mutable int mTime;
+        mutable TimezoneMode mTimezoneMode;
+        // The timezone
+        int mTimezone;
 
+        void SetTimezone(int tz);
     public:
-        void Clear()    { mTime = 0; }
+        void Clear()    { mTime = 0; mTimezoneMode = tmNone; mTimezone = TZ_NONE; }
         void Now();
-        void SetTime(int hour, int minute, int second, int tenthousandths = 0);
-        void SetTime(int tm);
+        void SetTime(TimezoneMode tzMode, int hour, int minute, int second, int tenthousandths, int timezone);
+        void SetTime(TimezoneMode tzMode, int tm, int timezone);
         void GetTime(int& hour, int& minute, int& second) const;
         void GetTime(int& hour, int& minute, int& second, int& tenthousandths) const;
-        int GetTime() const { return mTime; }
+        int GetTime() const;
+        int GetTimezone() const { return mTimezone; }
         int Hours() const;
         int Minutes() const;
         int Seconds() const;
         int SubSeconds() const;     // Actually tenthousandths of seconds
         Time()          { Clear(); }
-        Time(int tm)    { SetTime(tm); }
-        Time(int hour, int minute, int second, int tenthousandths = 0);
+        Time(TimezoneMode tzMode, int tm, int timezone)    { SetTime(tzMode, tm, timezone); }
+        Time(TimezoneMode tzMode, int hour, int minute, int second, int tenthousandths, int timezone);
         Time(const Time&);                          // Copy Constructor
         Time& operator=(const Timestamp&);          // Timestamp Assignment operator
         Time& operator=(const Time&);               // Time Assignment operator
 
         bool operator==(const Time& rv) { return mTime == rv.GetTime(); }
         bool operator<(const Time& rv) { return mTime < rv.GetTime(); }
-
-        virtual ~Time() { }
     };
 
     /* Class Timestamp represent a date AND a time. It is usefull in
@@ -270,33 +348,33 @@ namespace IBPP
     public:
         void Clear()    { Date::Clear(); Time::Clear(); }
         void Today()    { Date::Today(); Time::Clear(); }
-        void Now()      { Date::Today(); Time::Now(); }
+        void Now(/*int timezone*/) { Date::Today(); Time::Now(/*timezone*/); }
 
         Timestamp()     { Clear(); }
 
         Timestamp(int y, int m, int d)
             { Date::SetDate(y, m, d); Time::Clear(); }
 
-        Timestamp(int y, int mo, int d, int h, int mi, int s, int t = 0)
-            { Date::SetDate(y, mo, d); Time::SetTime(h, mi, s, t); }
+        Timestamp(int y, int mo, int d, TimezoneMode tzMode, int h, int mi, int s, int t, int tz)
+            { Date::SetDate(y, mo, d); Time::SetTime(tzMode, h, mi, s, t, tz); }
 
         Timestamp(const Timestamp& rv)
-            : Date(rv.mDate), Time(rv.mTime) {} // Copy Constructor
+            : Date(rv.mDate), Time::Time(rv) {} // Copy Constructor
 
         Timestamp(const Date& rv)
-            { mDate = rv.GetDate(); mTime = 0; }
+            { mDate = rv.GetDate(); Time::Clear(); }
 
         Timestamp(const Time& rv)
-            { mDate = 0; mTime = rv.GetTime(); }
+            { mDate = 0; (Time)*this = rv; }
 
         Timestamp& operator=(const Timestamp& rv)   // Timestamp Assignment operator
-            { mDate = rv.mDate; mTime = rv.mTime; return *this; }
+            { mDate = rv.mDate; (Time)*this = (Time)rv; return *this; }
 
         Timestamp& operator=(const Date& rv)        // Date Assignment operator
             { mDate = rv.GetDate(); return *this; }
 
         Timestamp& operator=(const Time& rv)        // Time Assignment operator
-            { mTime = rv.GetTime(); return *this; }
+            { (Time)*this = (Time)rv; return *this; }
 
         bool operator==(const Timestamp& rv)
             { return (mDate == rv.GetDate()) && (mTime == rv.GetTime()); }
@@ -621,6 +699,7 @@ namespace IBPP
         virtual void Set(int, int16_t) = 0;
         virtual void Set(int, int32_t) = 0;
         virtual void Set(int, int64_t) = 0;
+        virtual void Set(int, IBPP::ibpp_int128_t) = 0;
         virtual void Set(int, float) = 0;
         virtual void Set(int, double) = 0;
         virtual void Set(int, const Timestamp&) = 0;
@@ -637,6 +716,7 @@ namespace IBPP
         virtual bool Get(int, int16_t&) = 0;
         virtual bool Get(int, int32_t&) = 0;
         virtual bool Get(int, int64_t&) = 0;
+        virtual bool Get(int, IBPP::ibpp_int128_t&) = 0;
         virtual bool Get(int, float&) = 0;
         virtual bool Get(int, double&) = 0;
         virtual bool Get(int, Timestamp&) = 0;
@@ -754,6 +834,7 @@ namespace IBPP
         virtual bool Get(int, int16_t&) = 0;
         virtual bool Get(int, int32_t&) = 0;
         virtual bool Get(int, int64_t&) = 0;
+        virtual bool Get(int, IBPP::ibpp_int128_t&) = 0;
         virtual bool Get(int, float&) = 0;
         virtual bool Get(int, double&) = 0;
         virtual bool Get(int, Timestamp& value) = 0;

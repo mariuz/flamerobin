@@ -1658,7 +1658,7 @@ void ExecuteSqlFrame::OnMenuGridEditBlob(wxCommandEvent& WXUNUSED(event))
 {
     if (!editBlobDlgM)
     {
-        editBlobDlgM = new EditBlobDialog(this);
+        editBlobDlgM = new EditBlobDialog(this, databaseM->getCharsetConverter());
     }
     updateBlobEditor();
 }
@@ -2201,6 +2201,9 @@ wxString IBPPtype2string(Database *db, IBPP::SDT t, int subtype, int size,
         case IBPP::sdLargeint:  return "BIGINT";
         case IBPP::sdFloat:     return "FLOAT";
         case IBPP::sdDouble:    return "DOUBLE PRECISION";
+        case IBPP::sdTimeTz:    return "TIME WITH TIMEZONE";
+        case IBPP::sdTimestampTz: return "TIMESTAMP WITH TIMEZONE";
+        case IBPP::sdInt128:    return "INT128";
         default:                return "UNKNOWN";
     }
 }

@@ -361,7 +361,7 @@ void InsertDialog::storeValues()
         it != columnsM.end(); ++it)
     {
         InsertOption sel = getInsertOption(gridM, (*it).row);
-        wxString previous = (*it).columnDef->getAsString(bufferM);
+        wxString previous = (*it).columnDef->getAsString(bufferM, databaseM);
         wxString value = gridM->GetCellValue((*it).row, 3);
         try
         {
@@ -395,7 +395,7 @@ void InsertDialog::storeValues()
                 case ioRegular:
                     (*it).columnDef->setFromString(bufferM, value);
                     gridM->SetCellValue((*it).row, 3,
-                        (*it).columnDef->getAsString(bufferM));
+                        (*it).columnDef->getAsString(bufferM, databaseM));
                     // there is no break; here deliberately!
                 case ioFile:
                     bufferM->setFieldNull((*it).index, false);
@@ -476,12 +476,12 @@ void InsertDialog::preloadSpecialColumns()
         bufferM->setFieldNA((*it).index, false);
         bufferM->setFieldNull((*it).index, st1->IsNull(col));
         if (!st1->IsNull(col))
-            (*it).columnDef->setValue(bufferM, col, st1, wxConvCurrent);
+            (*it).columnDef->setValue(bufferM, col, st1, wxConvCurrent, databaseM);
         ++col;
         if (sel != ioGenerator)  // what follows is only for generators
             continue;
         gridM->SetCellValue((*it).row, 3,
-            (*it).columnDef->getAsString(bufferM));
+            (*it).columnDef->getAsString(bufferM, databaseM));
         gridM->SetCellValue((*it).row, 2,
             insertOptionStrings[ioRegular]);  // treat as regular value
         updateControls((*it).row);
@@ -664,7 +664,7 @@ void InsertDialog::OnGridCellChange(wxGridEvent& event)
             throw;
         }
         gridM->SetCellValue(row, 3,
-            columnsM[row].columnDef->getAsString(bufferM));
+            columnsM[row].columnDef->getAsString(bufferM, databaseM));
         gridM->SetCellValue(row, 2, insertOptionStrings[ioRegular]);
         updateControls(row);
         bufferM->setFieldNull(columnsM[row].index, false);

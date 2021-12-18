@@ -115,7 +115,7 @@ class EventsImpl;
 
 //  Native data types
 typedef enum {ivArray, ivBlob, ivDate, ivTime, ivTimestamp, ivString,
-            ivInt16, ivInt32, ivInt64, ivFloat, ivDouble,
+            ivInt16, ivInt32, ivInt64, ivInt128, ivFloat, ivDouble,
             ivBool, ivDBKey, ivByte} IITYPE;
 
 //
@@ -986,6 +986,7 @@ public:
     void Set(int, int16_t);
     void Set(int, int32_t);
     void Set(int, int64_t);
+    void Set(int, IBPP::ibpp_int128_t);
     void Set(int, float);
     void Set(int, double);
     void Set(int, const IBPP::Timestamp&);
@@ -1003,6 +1004,7 @@ public:
     bool Get(int, int16_t&);
     bool Get(int, int32_t&);
     bool Get(int, int64_t&);
+    bool Get(int, IBPP::ibpp_int128_t&);
     bool Get(int, float&);
     bool Get(int, double&);
     bool Get(int, IBPP::Timestamp&);
@@ -1020,6 +1022,7 @@ public:
     bool Get(const std::string&, int16_t&);
     bool Get(const std::string&, int32_t&);
     bool Get(const std::string&, int64_t&);
+    void Get(const std::string&, IBPP::ibpp_int128_t&);
     bool Get(const std::string&, float&);
     bool Get(const std::string&, double&);
     bool Get(const std::string&, IBPP::Timestamp&);
@@ -1109,6 +1112,7 @@ public:
     void Set(int, int16_t);
     void Set(int, int32_t);
     void Set(int, int64_t);
+    void Set(int, IBPP::ibpp_int128_t);
     void Set(int, float);
     void Set(int, double);
     void Set(int, const IBPP::Timestamp&);
@@ -1126,6 +1130,7 @@ public:
     void Set(std::string, int16_t);
     void Set(std::string, int32_t);
     void Set(std::string, int64_t);
+    void Set(std::string, IBPP::ibpp_int128_t);
     void Set(std::string, float);
     void Set(std::string, double);
     void Set(std::string, const IBPP::Timestamp&);
@@ -1156,6 +1161,7 @@ public:
     bool Get(int, int32_t&);
     bool Get(int, int64_t*);
     bool Get(int, int64_t&);
+    bool Get(int, IBPP::ibpp_int128_t&);
     bool Get(int, float*);
     bool Get(int, float&);
     bool Get(int, double*);
@@ -1410,8 +1416,12 @@ void decodeDate(IBPP::Date& dt, const ISC_DATE& isc_dt);
 void encodeTime(ISC_TIME& isc_tm, const IBPP::Time& tm);
 void decodeTime(IBPP::Time& tm, const ISC_TIME& isc_tm);
 
+void decodeTimeTz(IBPP::Time& tm, const ISC_TIME_TZ& isc_tm);
+
 void encodeTimestamp(ISC_TIMESTAMP& isc_ts, const IBPP::Timestamp& ts);
 void decodeTimestamp(IBPP::Timestamp& ts, const ISC_TIMESTAMP& isc_ts);
+
+void decodeTimestampTz(IBPP::Timestamp& ts, const ISC_TIMESTAMP_TZ& isc_ts);
 
 struct consts   // See _ibpp.cpp for initializations of these constants
 {
