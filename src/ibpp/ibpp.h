@@ -58,7 +58,6 @@
 
 #include <stdint.h>
 
-
 #if !defined(_)
 #define _(s)    s
 #endif
@@ -99,7 +98,7 @@ namespace IBPP
     //  SQL Data Types
     enum SDT {sdArray, sdBlob, sdDate, sdTime, sdTimestamp, sdString,
         sdSmallint, sdInteger, sdLargeint, sdFloat, sdDouble, sdBoolean,
-		sdTimeTz, sdTimestampTz};
+        sdTimeTz, sdTimestampTz, sdInt128};
 
     bool isIntegerNumber(SDT type);
     bool isRationalNumber(SDT type);
@@ -135,6 +134,67 @@ namespace IBPP
 
     // TransactionFactory Flags
     enum TFF {tfIgnoreLimbo = 0x1, tfAutoCommit = 0x2, tfNoAutoUndo = 0x4};
+
+    // int128 - FB4
+    #pragma pack(push, 1)
+
+    // gcc has a builtin type __int128
+    // msvc does not have something we can use (AFICS)
+    // so we have to do it by own code.
+    #define HAVE_INT128
+
+    #ifdef _MSC_VER
+    #undef HAVE_INT128
+    #endif
+
+    #ifndef HAVE_INT128
+    // NOTICE: could/should be replaced with int128_t if msvc supports this
+    typedef struct IBPP_INT128_T
+    {
+    private:
+        // _InOut_ dst
+        // _In_ toadd
+        // _Out_ overflow
+        void AddPart128(uint32_t* dst, const uint32_t& toadd, bool* overflow);
+        // _InOut_ T1
+        // _In_ T2
+        // _Out_ overflow
+        void Add128(IBPP_INT128_T* T1, const IBPP_INT128_T& T2, bool* overflow);
+public:
+        union DATA
+        {
+            struct
+            {
+                uint64_t lowPart;
+                int64_t highPart;
+            } s2;
+            struct
+            {
+                uint64_t lowPart;
+                uint64_t highPart;
+            } us2;
+            struct
+            {
+                uint32_t llPart;
+                uint32_t hlPart;
+                uint32_t lhPart;
+                uint32_t hhPart;
+            } s4;
+        } data;
+
+        // constructor
+        IBPP_INT128_T() {};
+        IBPP_INT128_T(const int64_t value);
+
+        IBPP_INT128_T operator-();
+        IBPP_INT128_T operator-(const IBPP_INT128_T& T2);
+        bool operator<(const IBPP_INT128_T& T2) const;
+    } ibpp_int128_t;
+    #else
+    typedef __int128 ibpp_int128_t;
+    #endif
+
+    #pragma pack(pop)
 
     /* IBPP never return any error codes. It throws exceptions.
      * On database engine reported errors, an IBPP::SQLException is thrown.
@@ -639,6 +699,7 @@ namespace IBPP
         virtual void Set(int, int16_t) = 0;
         virtual void Set(int, int32_t) = 0;
         virtual void Set(int, int64_t) = 0;
+        virtual void Set(int, IBPP::ibpp_int128_t) = 0;
         virtual void Set(int, float) = 0;
         virtual void Set(int, double) = 0;
         virtual void Set(int, const Timestamp&) = 0;
@@ -655,6 +716,7 @@ namespace IBPP
         virtual bool Get(int, int16_t&) = 0;
         virtual bool Get(int, int32_t&) = 0;
         virtual bool Get(int, int64_t&) = 0;
+        virtual bool Get(int, IBPP::ibpp_int128_t&) = 0;
         virtual bool Get(int, float&) = 0;
         virtual bool Get(int, double&) = 0;
         virtual bool Get(int, Timestamp&) = 0;
@@ -772,6 +834,7 @@ namespace IBPP
         virtual bool Get(int, int16_t&) = 0;
         virtual bool Get(int, int32_t&) = 0;
         virtual bool Get(int, int64_t&) = 0;
+        virtual bool Get(int, IBPP::ibpp_int128_t&) = 0;
         virtual bool Get(int, float&) = 0;
         virtual bool Get(int, double&) = 0;
         virtual bool Get(int, Timestamp& value) = 0;

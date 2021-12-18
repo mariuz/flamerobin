@@ -32,6 +32,7 @@
 
 #include <wx/datetime.h>
 #include <wx/ffile.h>
+#include <wx/numformatter.h>
 #include <wx/textbuf.h>
 
 #include <algorithm>
@@ -40,6 +41,7 @@
 
 #include "config/LocalSettings.h"
 #include "core/FRError.h"
+#include "core/FRInt128.h"
 #include "core/Observer.h"
 #include "core/ProgressIndicator.h"
 #include "core/StringUtils.h"
@@ -70,7 +72,7 @@ void GridCellFormats::loadFromConfig()
     dateFormatM = config().get("DateFormat", wxString("D.M.Y"));
     timeFormatM = config().get("TimeFormat", wxString("H:M:S.T"));
     timestampFormatM = config().get("TimestampFormat",
-        wxString("D.N.Y, H:M:S.T"));
+        wxString("D.N.Y H:M:S.T"));
     showTimezoneInfoM = (ShowTimezoneInfoType)config().get("ShowTimezoneInfo", int(tzName));
 
     maxBlobKBytesM = config().get("DataGridFetchBlobAmount", 1);
@@ -680,6 +682,75 @@ void Int64ColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     buffer->setValue(offsetM, value);
 }
 
+// Int128ColumnDef class
+class Int128ColumnDef : public ResultsetColumnDef
+{
+private:
+    short scaleM;
+    unsigned offsetM;
+public:
+    Int128ColumnDef(const wxString& name, unsigned offset, bool readOnly,
+        bool nullable, short scale);
+    virtual wxString getAsString(DataGridRowBuffer* buffer, Database* db);
+    virtual unsigned getBufferSize();
+    virtual bool isNumeric();
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
+        const IBPP::Statement& statement, wxMBConv* converter, Database* db);
+    virtual void setFromString(DataGridRowBuffer* buffer,
+        const wxString& source);
+};
+
+Int128ColumnDef::Int128ColumnDef(const wxString& name, unsigned offset,
+    bool readOnly, bool nullable, short scale)
+    : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset),
+        scaleM(scale)
+{
+}
+
+wxString Int128ColumnDef::getAsString(DataGridRowBuffer* buffer, Database*)
+{
+    wxASSERT(buffer);
+    int128_t value;
+    wxString result;
+    if (!buffer->getValue(offsetM, value))
+        return wxEmptyString;
+    result = Int128ToString(value);
+    if (scaleM > 0)
+        result.insert(result.length() - scaleM,
+                      wxNumberFormatter::GetDecimalSeparator());
+    return result;
+}
+
+void Int128ColumnDef::setFromString(DataGridRowBuffer* buffer,
+    const wxString& source)
+{
+    wxASSERT(buffer);
+
+    int128_t v128 = 0;
+    if (!StringToInt128(source, &v128))
+        throw FRError(_("Invalid int128 numeric value"));
+    buffer->setValue(offsetM, v128);
+}
+
+unsigned Int128ColumnDef::getBufferSize()
+{
+    return sizeof(int128_t);
+}
+
+bool Int128ColumnDef::isNumeric()
+{
+    return true;
+}
+
+void Int128ColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    const IBPP::Statement& statement, wxMBConv*, Database*)
+{
+    wxASSERT(buffer);
+    IBPP::ibpp_int128_t value;
+    statement->Get(col, value);
+    buffer->setValue(offsetM, *reinterpret_cast<int128_t*>(&value));
+}
+
 // DBKeyColumnDef class
 class DBKeyColumnDef : public ResultsetColumnDef
 {
@@ -819,7 +890,9 @@ void DateColumnDef::setFromString(DataGridRowBuffer* buffer,
         idt.Add(-1);
     else if (temp.CmpNoCase("DATE") != 0
         && temp.CmpNoCase("NOW") != 0
-        && temp.CmpNoCase("TODAY") != 0)
+        && temp.CmpNoCase("TODAY") != 0
+        && temp.CmpNoCase("CURRENT_DATE") != 0
+        && temp.CmpNoCase("CURRENT_TIMESTAMP") != 0)
     {
         wxString::iterator it = temp.begin();
         if (!GridCellFormats::get().parseDate(it, temp.end(), true, y, m, d))
@@ -1052,7 +1125,7 @@ wxString TimestampColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
     ts.GetDate(year, month, day);
     ts.GetTime(hour, minute, second, tenththousands);
 
-    return wxString::Format("%d-%d-%d, %d:%d:%d.%d", year, month, day,
+    return wxString::Format("%d-%d-%d %d:%d:%d.%d", year, month, day,
         hour, minute, second, tenththousands / 10);
 }
 
@@ -1070,7 +1143,8 @@ void TimestampColumnDef::setFromString(DataGridRowBuffer* buffer,
         its.Add(1);
     else if (temp.CmpNoCase("YESTERDAY") == 0)
         its.Add(-1);
-    else if (temp.CmpNoCase("NOW") == 0)
+    else if ((temp.CmpNoCase("NOW") == 0) || 
+             (temp.CmpNoCase("CURRENT_TIMESTAMP") == 0))
         its.Now(); // with time
     else if (temp.CmpNoCase("DATE") != 0
         && temp.CmpNoCase("TODAY") != 0)
@@ -1826,7 +1900,9 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
         }
 
         IBPP::SDT type = statement->ColumnType(col);
-        if (statement->ColumnScale(col) > 0)
+        short scale = statement->ColumnScale(col);
+        if ((scale > 0) &&
+            (type != IBPP::sdInt128))
             type = IBPP::sdDouble;
 
         ResultsetColumnDef* columnDef = 0;
@@ -1863,12 +1939,15 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
                 case IBPP::sdLargeint:
                     columnDef = new Int64ColumnDef(colName, bufferSizeM, readOnly, nullable);
                     break;
+                case IBPP::sdInt128:
+                    columnDef = new Int128ColumnDef(colName, bufferSizeM, readOnly, nullable, scale);
+                    break;
 
                 case IBPP::sdFloat:
                     columnDef = new FloatColumnDef(colName, bufferSizeM, readOnly, nullable);
                     break;
                 case IBPP::sdDouble:
-                    columnDef = new DoubleColumnDef(colName, bufferSizeM, readOnly, nullable, statement->ColumnScale(col));
+                    columnDef = new DoubleColumnDef(colName, bufferSizeM, readOnly, nullable, scale);
                     break;
 
                 case IBPP::sdString:
