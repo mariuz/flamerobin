@@ -986,6 +986,7 @@
     <ClCompile Include="src\core\ArtProvider.cpp" />
     <ClCompile Include="src\core\CodeTemplateProcessor.cpp" />
     <ClCompile Include="src\core\FRError.cpp" />
+    <ClCompile Include="src\core\FRInt128.cpp" />
     <ClCompile Include="src\core\Observer.cpp" />
     <ClCompile Include="src\core\ProgressIndicator.cpp" />
     <ClCompile Include="src\core\StringUtils.cpp" />
@@ -1114,6 +1115,7 @@
     <ClInclude Include="src\core\ArtProvider.h" />
     <ClInclude Include="src\core\CodeTemplateProcessor.h" />
     <ClInclude Include="src\core\FRError.h" />
+    <ClInclude Include="src\core\FRInt128.h" />
     <ClInclude Include="src\core\ObjectWithHandle.h" />
     <ClInclude Include="src\core\Observer.h" />
     <ClInclude Include="src\core\ProcessableObject.h" />
