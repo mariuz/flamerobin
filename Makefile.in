@@ -582,6 +582,9 @@ flamerobin_MetadataTemplateCmdHandler.o: $(srcdir)/src/metadata/MetadataTemplate
 
 flamerobin_MetadataTemplateManager.o: $(srcdir)/src/metadata/MetadataTemplateManager.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/MetadataTemplateManager.cpp
+	
+flamerobin_package.o: $(srcdir)/src/metadata/package.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/package.cpp	
 
 flamerobin_package.o: $(srcdir)/${SOURCEDIR}/metadata/package.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/${SOURCEDIR}/metadata/package.cpp

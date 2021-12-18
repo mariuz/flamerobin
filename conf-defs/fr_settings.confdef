@@ -388,6 +388,20 @@
             <aligngroup>1</aligngroup>
             <expand>1</expand>
         </setting>
+        <setting type="radiobox">
+            <caption>Time an timestamp fields with time zone</caption>
+            <key>ShowTimezoneInfo</key>
+            <default>2</default>
+            <option>
+                <caption>Don't show time zone info.</caption>
+            </option>
+            <option>
+                <caption>Append time zone id.</caption>
+            </option>
+            <option>
+                <caption>Append time zone name.</caption>
+            </option>
+        </setting>
         <setting type="font">
             <caption>Grid header font:</caption>
             <key>DataGridHeaderFont</key>

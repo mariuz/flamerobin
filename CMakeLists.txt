@@ -339,7 +339,7 @@ if (WIN32)
 	)
 endif (WIN32)
 
-if (UNIX)
+if (UNIX AND NOT APPLE)
 	# UNIX (Linux) specific details
 	list(APPEND SOURCE_LIST
 		${SOURCEDIR}/gui/gtk/StyleGuideGTK.cpp
@@ -357,26 +357,65 @@ if (UNIX)
 
 	# Util script to help run FR in build dir
 	file(COPY utils/run_flamerobin.sh  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-endif (UNIX)
+endif (UNIX AND NOT APPLE)
 
 if(APPLE)
 	# MacOS specific stuff
 	# TODO: Untested, if any Mac devs want to check, please get in touch
 	message(WARNING "MacOS build is untested.\n"
 	                "Please get in contact to tell us of your results.")
-	list(APPEND SOURCE_LIST
-		${SOURCEDIR}/gui/mac/StyleGuideMAC.cpp
-	)
 	add_definitions(-DIBPP_DARWIN)
+	list(APPEND FR_LIBS -lfbclient)
 
-	# Create the revision include file
-	execute_process(
-		COMMAND "${CMAKE_SOURCE_DIR}/update-revision-info.sh"
-		WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-	)
+    list(APPEND SOURCE_LIST
+        ${SOURCEDIR}/gui/mac/StyleGuideMAC.cpp
+    )
 
-	# Util script to help run FR in build dir
-	file(COPY utils/run_flamerobin.sh  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    add_definitions(-DFR_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
+    list(APPEND FR_LIBS -lfbclient)
+
+    # Create the revision include file
+    execute_process(
+        COMMAND "${CMAKE_SOURCE_DIR}/update-revision-info.sh"
+        WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    )
+
+    # Util script to help run FR in build dir
+    file(COPY utils/run_flamerobin.sh  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+    # Helper function for adding resource files
+    function(add_resources VAR SOURCE_PATH DESTINATION PATTERN)
+            file(GLOB_RECURSE _LIST CONFIGURE_DEPENDS ${SOURCE_PATH}/${PATTERN})
+            foreach (RESOURCE ${_LIST})
+                    get_filename_component(_PARENT ${RESOURCE} DIRECTORY)
+                    if (${_PARENT} STREQUAL ${SOURCE_PATH})
+                    set(_DESTINATION ${DESTINATION})
+                    else ()
+                    file(RELATIVE_PATH _DESTINATION ${SOURCE_PATH} ${_PARENT})
+                    set(_DESTINATION ${DESTINATION}/${_DESTINATION})
+                    endif ()
+                    set_property(SOURCE ${RESOURCE} PROPERTY MACOSX_PACKAGE_LOCATION ${_DESTINATION})
+            endforeach (RESOURCE)
+            set(${VAR} ${_LIST} PARENT_SCOPE)
+    endfunction()
+
+    # Add resources
+    add_resources(HTML_TEMPLATES ${CMAKE_SOURCE_DIR}/html-templates SharedSupport/html-templates *)
+    add_resources(CONF_DEFS ${CMAKE_SOURCE_DIR}/conf-defs SharedSupport/conf-defs *)
+    add_resources(DOCS ${CMAKE_SOURCE_DIR}/docs SharedSupport/docs *)
+    add_resources(SYS_TEMPLATES ${CMAKE_SOURCE_DIR}/sys-templates SharedSupport/sys-templates *)
+    add_resources(CODE_TEMPLATES ${CMAKE_SOURCE_DIR}/code-templates SharedSupport/code-templates *)
+    add_resources(ICON ${CMAKE_SOURCE_DIR}/res Resources flamerobin.icns)
+
+    set(RESOURCE_FILES_MAC
+            ${HTML_TEMPLATES}
+            ${CONF_DEFS}
+            ${DOCS}
+            ${SYS_TEMPLATES}
+            ${CODE_TEMPLATES}
+            ${ICON}
+    )
+
 endif (APPLE)
 
 # Organize Visual Studio projects (possibly others so it's outside the WIN32 section)
@@ -394,8 +433,10 @@ add_library(IBPP STATIC ${IBPP_SOURCE_LIST} ${IBPP_HEADER_LIST})
 #--------------------------------------
 # FlameRobin app
 include_directories(BEFORE src src/ibpp res)
-add_executable(${PROJECT_NAME} WIN32 ${SOURCE_LIST} ${HEADER_LIST} ${RESOURCE_LIST})
-target_link_libraries(${PROJECT_NAME} IBPP ${wxWidgets_LIBRARIES} ${FR_LIBS})
+
+if (NOT APPLE)
+    add_executable(${PROJECT_NAME} WIN32 ${SOURCE_LIST} ${HEADER_LIST} ${RESOURCE_LIST})
+endif (NOT APPLE)
 
 #--------------------------------------
 # Copy template files to build location so we can run in debugger
@@ -404,9 +445,25 @@ file(COPY ${CMAKE_SOURCE_DIR}/code-templates DESTINATION ${CMAKE_CURRENT_BINARY_
 file(COPY ${CMAKE_SOURCE_DIR}/sys-templates  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_SOURCE_DIR}/conf-defs  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
+if (APPLE)
+    add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCE_LIST} ${HEADER_LIST} ${RESOURCE_FILES_MAC})
+
+    string(TIMESTAMP CURYEAR "%Y")
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+            MACOSX_BUNDLE TRUE
+            MACOSX_BUNDLE_BUNDLE_NAME "FlameRobin"
+            MACOSX_BUNDLE_BUNDLE_IDENTIFIER "org.flamerobin"
+            MACOSX_BUNDLE_COPYRIGHT "Copyright 2004-${CURYEAR} FlameRobin Team"
+            MACOSX_BUNDLE_ICON_FILE "flamerobin.icns"
+            MACOSX_BUNDLE_INFO_STRING "FlameRobin, Copyright 2004-${CURYEAR} FlameRobin Team"
+    )
+endif (APPLE)
+
+target_link_libraries(${PROJECT_NAME} IBPP ${wxWidgets_LIBRARIES} ${FR_LIBS})
+
 #--------------------------------------
 # Install
-if (UNIX)
+if (UNIX AND NOT APPLE)
 	install(
 		TARGETS flamerobin
 		RUNTIME DESTINATION bin
@@ -439,4 +496,12 @@ if (UNIX)
 		FILES docs/flamerobin.1
 		DESTINATION share/man/man1
 	)
-endif (UNIX)
+endif (UNIX AND NOT APPLE)
+
+if (APPLE)
+        install(
+                TARGETS flamerobin
+                DESTINATION /Applications
+        )
+endif (APPLE)
+

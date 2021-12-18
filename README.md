@@ -18,8 +18,8 @@ The following people also made a significant non-coding contributions:
 
 License
 ---------------------------
-FlameRobin code is licensed under the Expat license.
-A copy of the license can be found in the docs folder.
+FlameRobin code is licensed under the MIT license.
+A copy of the license can be found in the [LICENSE](https://github.com/mariuz/flamerobin/blob/master/LICENSE) file
 
 Part of code covering IBPP library is licensed under IBPP license.
 A copy of IBPP license can be found in src/ibpp folder.

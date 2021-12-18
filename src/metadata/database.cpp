@@ -318,6 +318,8 @@ Database::Database()
     : MetadataItem(ntDatabase), metadataLoaderM(0), connectedM(false),
         connectionCredentialsM(0), dialectM(3), idM(0)
 {
+    defaultTimezoneM.name = "";
+    defaultTimezoneM.id = 0;
 }
 
 Database::~Database()
@@ -1173,6 +1175,10 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
                 databaseInfoM.load(databaseM);
                 setPropertiesLoaded(true);
 
+                // load default timezone
+                loadDefaultTimezone();
+                loadTimezones();
+
                 // load collections of metadata objects
                 setChildrenLoaded(false);
                 loadCollections(indicator);
@@ -2023,3 +2029,78 @@ void Database::checkConnected(const wxString& operation) const
     }
 }
 
+void Database::loadDefaultTimezone()
+{
+    MetadataLoader* loader = getMetadataLoader();
+    wxMBConv* converter = getCharsetConverter();
+    std::string tzName;
+    int tzId;
+
+    // RDB$TIME_ZONES is available on Firebird 4 (ODS Ver 13) or higher
+    if (!getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
+        return;
+
+    IBPP::Statement& st1 = loader->getStatement(
+        "select z.RDB$TIME_ZONE_ID, "
+        "       z.RDB$TIME_ZONE_NAME "
+        "from RDB$TIME_ZONES z "
+        "where z.RDB$TIME_ZONE_NAME = RDB$GET_CONTEXT('SYSTEM', 'SESSION_TIMEZONE');");
+
+    st1->Execute();
+    st1->Fetch();
+    st1->Get(1, tzId);
+    st1->Get(2, tzName);
+
+    defaultTimezoneM.id = tzId;
+    defaultTimezoneM.name = std2wxIdentifier(tzName, converter);
+}
+
+void Database::loadTimezones()
+{
+    MetadataLoader* loader = getMetadataLoader();
+    wxMBConv* converter = getCharsetConverter();
+    std::string tzName;
+    int tzId;
+    TimezoneInfo* tzItm;
+
+    // RDB$TIME_ZONES is available on Firebird 4 (ODS Ver 13) or higher
+    if (!getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
+        return;
+
+    IBPP::Statement& st1 = loader->getStatement(
+        "select z.RDB$TIME_ZONE_ID, "
+        "       z.RDB$TIME_ZONE_NAME "
+        "from RDB$TIME_ZONES z");
+
+    st1->Execute();
+
+    while (st1->Fetch())
+    {
+        st1->Get(1, tzId);
+        st1->Get(2, tzName);
+
+        tzItm = new TimezoneInfo;
+        tzItm->id = tzId;
+        tzItm->name = std2wxIdentifier(tzName, converter);
+        timezonesM.push_back(tzItm);
+    }
+}
+
+TimezoneInfo Database::getDefaultTimezone()
+{
+    loadDefaultTimezone();
+    return defaultTimezoneM;
+}
+
+wxString Database::getTimezoneName(int timezone)
+{
+    std::vector<TimezoneInfo*>::iterator it;
+    for (it = timezonesM.begin(); it != timezonesM.end(); it++)
+    {
+        if ((*it)->id != timezone)
+            continue;
+        return (*it)->name;
+    }
+    // not found
+    return wxString::Format("TZ %d", timezone);
+}
