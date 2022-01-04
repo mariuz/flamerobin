@@ -1312,6 +1312,129 @@ void DoubleColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     buffer->setValue(offsetM, value);
 }
 
+// Dec16ColumnDef class
+class Dec16ColumnDef : public ResultsetColumnDef
+{
+private:
+    unsigned offsetM;
+public:
+    Dec16ColumnDef(const wxString& name, unsigned offset, bool readOnly,
+        bool nullable);
+    virtual wxString getAsString(DataGridRowBuffer* buffer, Database* db);
+    virtual unsigned getBufferSize();
+    virtual bool isNumeric();
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
+        const IBPP::Statement& statement, wxMBConv* converter, Database* db);
+    virtual void setFromString(DataGridRowBuffer* buffer,
+        const wxString& source);
+};
+
+Dec16ColumnDef::Dec16ColumnDef(const wxString& name, unsigned offset,
+        bool readOnly, bool nullable)
+    : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
+{
+}
+
+wxString Dec16ColumnDef::getAsString(DataGridRowBuffer* buffer, Database*)
+{
+    wxASSERT(buffer);
+    dec16_t value;
+    if (!buffer->getValue(offsetM, value))
+        return wxEmptyString;
+    return Dec16DPDToString(value);
+}
+
+void Dec16ColumnDef::setFromString(DataGridRowBuffer* buffer,
+    const wxString& source)
+{
+    wxASSERT(buffer);
+    dec16_t value;
+    if (!StringToDec16DPD(source, &value))
+        throw FRError(_("Invalid decimal34 numeric value"));
+    buffer->setValue(offsetM, value);
+}
+
+unsigned Dec16ColumnDef::getBufferSize()
+{
+    return sizeof(dec16_t);
+}
+
+bool Dec16ColumnDef::isNumeric()
+{
+    return true;
+}
+
+void Dec16ColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    const IBPP::Statement& statement, wxMBConv*, Database*)
+{
+    wxASSERT(buffer);
+    dec16_t value;
+    statement->Get(col, value);
+    buffer->setValue(offsetM, value);
+}
+
+// Dec34ColumnDef class
+class Dec34ColumnDef : public ResultsetColumnDef
+{
+private:
+    unsigned offsetM;
+public:
+    Dec34ColumnDef(const wxString& name, unsigned offset, bool readOnly,
+        bool nullable);
+    virtual wxString getAsString(DataGridRowBuffer* buffer, Database* db);
+    virtual unsigned getBufferSize();
+    virtual bool isNumeric();
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
+        const IBPP::Statement& statement, wxMBConv* converter, Database* db);
+    virtual void setFromString(DataGridRowBuffer* buffer,
+        const wxString& source);
+};
+
+Dec34ColumnDef::Dec34ColumnDef(const wxString& name, unsigned offset,
+        bool readOnly, bool nullable)
+    : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
+{
+}
+
+wxString Dec34ColumnDef::getAsString(DataGridRowBuffer* buffer, Database*)
+{
+    wxASSERT(buffer);
+    dec34_t value;
+    if (!buffer->getValue(offsetM, value))
+        return wxEmptyString;
+    return Dec34DPDToString(value);
+}
+
+void Dec34ColumnDef::setFromString(DataGridRowBuffer* buffer,
+    const wxString& source)
+{
+    wxASSERT(buffer);
+    dec34_t value;
+    if (!StringToDec34DPD(source, &value))
+        throw FRError(_("Invalid decimal34 numeric value"));
+    buffer->setValue(offsetM, value);
+}
+
+unsigned Dec34ColumnDef::getBufferSize()
+{
+    return sizeof(dec34_t);
+}
+
+bool Dec34ColumnDef::isNumeric()
+{
+    return true;
+}
+
+void Dec34ColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    const IBPP::Statement& statement, wxMBConv*, Database*)
+{
+    wxASSERT(buffer);
+    dec34_t value;
+    statement->Get(col, value);
+    buffer->setValue(offsetM, value);
+}
+
+// BlobColumnDef class
 class BlobColumnDef : public ResultsetColumnDef
 {
 private:
@@ -1902,7 +2025,9 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
         IBPP::SDT type = statement->ColumnType(col);
         short scale = statement->ColumnScale(col);
         if ((scale > 0) &&
-            (type != IBPP::sdInt128))
+            (type != IBPP::sdInt128) &&
+            (type != IBPP::sdDec16) &&
+            (type != IBPP::sdDec34))
             type = IBPP::sdDouble;
 
         ResultsetColumnDef* columnDef = 0;
@@ -1948,6 +2073,12 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
                     break;
                 case IBPP::sdDouble:
                     columnDef = new DoubleColumnDef(colName, bufferSizeM, readOnly, nullable, scale);
+                    break;
+                case IBPP::sdDec16:
+                    columnDef = new Dec16ColumnDef(colName, bufferSizeM, readOnly, nullable);
+                    break;
+                case IBPP::sdDec34:
+                    columnDef = new Dec34ColumnDef(colName, bufferSizeM, readOnly, nullable);
                     break;
 
                 case IBPP::sdString:
