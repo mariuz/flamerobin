@@ -66,6 +66,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/config/LocalSettings.cpp
         ${SOURCEDIR}/core/ArtProvider.cpp
         ${SOURCEDIR}/core/CodeTemplateProcessor.cpp
+        ${SOURCEDIR}/core/FRDecimal.cpp
         ${SOURCEDIR}/core/FRError.cpp
         ${SOURCEDIR}/core/FRInt128.cpp
         ${SOURCEDIR}/core/Observer.cpp
@@ -176,6 +177,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/config/LocalSettings.h
         ${SOURCEDIR}/core/ArtProvider.h
         ${SOURCEDIR}/core/CodeTemplateProcessor.h
+        ${SOURCEDIR}/core/FRDecimal.h
         ${SOURCEDIR}/core/FRError.h
         ${SOURCEDIR}/core/FRInt128.h
         ${SOURCEDIR}/core/ObjectWithHandle.h

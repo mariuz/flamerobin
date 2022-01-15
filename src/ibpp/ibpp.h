@@ -67,6 +67,10 @@
 #include <string>
 #include <vector>
 
+#ifndef _MSC_VER
+#include <decimal/decimal>
+#endif
+
 namespace IBPP
 {
     //  Typically you use this constant in a call IBPP::CheckVersion as in:
@@ -98,7 +102,7 @@ namespace IBPP
     //  SQL Data Types
     enum SDT {sdArray, sdBlob, sdDate, sdTime, sdTimestamp, sdString,
         sdSmallint, sdInteger, sdLargeint, sdFloat, sdDouble, sdBoolean,
-        sdTimeTz, sdTimestampTz, sdInt128};
+        sdTimeTz, sdTimestampTz, sdInt128, sdDec16, sdDec34};
 
     bool isIntegerNumber(SDT type);
     bool isRationalNumber(SDT type);
@@ -142,9 +146,11 @@ namespace IBPP
     // msvc does not have something we can use (AFICS)
     // so we have to do it by own code.
     #define HAVE_INT128
+    #define HAVE_DECFLOAT
 
     #ifdef _MSC_VER
     #undef HAVE_INT128
+    #undef HAVE_DECFLOAT
     #endif
 
     #ifndef HAVE_INT128
@@ -190,8 +196,29 @@ public:
         IBPP_INT128_T operator-(const IBPP_INT128_T& T2);
         bool operator<(const IBPP_INT128_T& T2) const;
     } ibpp_int128_t;
+    typedef struct IBPP_UINT128_T
+    {
+        uint64_t lowPart;
+        uint64_t highPart;
+    } ibpp_uint128_t;
     #else
     typedef __int128 ibpp_int128_t;
+    typedef __uint128_t ibpp_uint128_t;
+    #endif
+
+    #ifndef HAVE_DECFLOAT
+    typedef struct IBPP_DEC16_T
+    {
+        int64_t lowPart;
+    } ibpp_dec16_t;
+    typedef struct IBPP_DEC34_T
+    {
+        uint64_t lowPart;
+        uint64_t highPart;
+    } ibpp_dec34_t;
+    #else
+    typedef std::decimal::decimal64 ibpp_dec16_t;
+    typedef std::decimal::decimal128 ibpp_dec34_t;
     #endif
 
     #pragma pack(pop)
@@ -702,6 +729,8 @@ public:
         virtual void Set(int, IBPP::ibpp_int128_t) = 0;
         virtual void Set(int, float) = 0;
         virtual void Set(int, double) = 0;
+        virtual void Set(int, IBPP::ibpp_dec16_t) = 0;
+        virtual void Set(int, IBPP::ibpp_dec34_t) = 0;
         virtual void Set(int, const Timestamp&) = 0;
         virtual void Set(int, const Date&) = 0;
         virtual void Set(int, const Time&) = 0;
@@ -719,6 +748,8 @@ public:
         virtual bool Get(int, IBPP::ibpp_int128_t&) = 0;
         virtual bool Get(int, float&) = 0;
         virtual bool Get(int, double&) = 0;
+        virtual bool Get(int, IBPP::ibpp_dec16_t&) = 0;
+        virtual bool Get(int, IBPP::ibpp_dec34_t&) = 0;
         virtual bool Get(int, Timestamp&) = 0;
         virtual bool Get(int, Date&) = 0;
         virtual bool Get(int, Time&) = 0;
@@ -837,6 +868,8 @@ public:
         virtual bool Get(int, IBPP::ibpp_int128_t&) = 0;
         virtual bool Get(int, float&) = 0;
         virtual bool Get(int, double&) = 0;
+        virtual bool Get(int, IBPP::ibpp_dec16_t&) = 0;
+        virtual bool Get(int, IBPP::ibpp_dec34_t&) = 0;
         virtual bool Get(int, Timestamp& value) = 0;
         virtual bool Get(int, Date& value) = 0;
         virtual bool Get(int, Time& value) = 0;
