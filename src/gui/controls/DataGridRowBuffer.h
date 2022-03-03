@@ -26,6 +26,7 @@
 
 #include <ibpp.h>
 #include <core/FRInt128.h>
+#include <core/FRDecimal.h>
 
 
 struct DataGridRowBufferFieldAttr
@@ -65,6 +66,8 @@ public:
     IBPP::Blob *getBlob(unsigned index);
     bool getValue(unsigned offset, double& value);
     bool getValue(unsigned offset, float& value);
+    bool getValue(unsigned offset, dec16_t& value);
+    bool getValue(unsigned offset, dec34_t& value);
     bool getValue(unsigned offset, int& value);
     bool getValue(unsigned offset, int64_t& value);
     bool getValue(unsigned offset, int128_t& value);
@@ -79,6 +82,8 @@ public:
     void setBlob(unsigned num, IBPP::Blob b);
     void setValue(unsigned offset, double value);
     void setValue(unsigned offset, float value);
+    void setValue(unsigned offset, dec16_t value);
+    void setValue(unsigned offset, dec34_t value);
     void setValue(unsigned offset, int value);
     void setValue(unsigned offset, int64_t value);
     void setValue(unsigned offset, int128_t value);
