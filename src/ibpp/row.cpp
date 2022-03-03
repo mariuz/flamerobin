@@ -148,6 +148,24 @@ void RowImpl::Set(int param, double value)
 	mUpdated[param-1] = true;
 }
 
+void RowImpl::Set(int param, IBPP::ibpp_dec16_t value)
+{
+	if (mDescrArea == 0)
+		throw LogicExceptionImpl("Row::Set[dec16_t]", _("The row is not initialized."));
+
+	SetValue(param, ivDec16, &value);
+	mUpdated[param-1] = true;
+}
+
+void RowImpl::Set(int param, IBPP::ibpp_dec34_t value)
+{
+	if (mDescrArea == 0)
+		throw LogicExceptionImpl("Row::Set[dec34_t]", _("The row is not initialized."));
+
+	SetValue(param, ivDec34, &value);
+	mUpdated[param-1] = true;
+}
+
 void RowImpl::Set(int param, const IBPP::Timestamp& value)
 {
 	if (mDescrArea == 0)
@@ -371,6 +389,28 @@ bool RowImpl::Get(int column, double& retvalue)
 	void* pvalue = GetValue(column, ivDouble);
 	if (pvalue != 0)
 		retvalue = *(double*)pvalue;
+	return pvalue == 0 ? true : false;
+}
+
+bool RowImpl::Get(int column, IBPP::ibpp_dec16_t& retvalue)
+{
+	if (mDescrArea == 0)
+		throw LogicExceptionImpl("Row::Get", _("The row is not initialized."));
+
+	void* pvalue = GetValue(column, ivDec16);
+	if (pvalue != 0)
+		retvalue = *(IBPP::ibpp_dec16_t*)pvalue;
+	return pvalue == 0 ? true : false;
+}
+
+bool RowImpl::Get(int column, IBPP::ibpp_dec34_t& retvalue)
+{
+	if (mDescrArea == 0)
+		throw LogicExceptionImpl("Row::Get", _("The row is not initialized."));
+
+	void* pvalue = GetValue(column, ivDec34);
+	if (pvalue != 0)
+		retvalue = *(IBPP::ibpp_dec34_t*)pvalue;
 	return pvalue == 0 ? true : false;
 }
 
@@ -720,7 +760,9 @@ IBPP::SDT RowImpl::ColumnType(int varnum)
 		case SQL_BOOLEAN :   value = IBPP::sdBoolean;     break;
 		case SQL_TIME_TZ :   value = IBPP::sdTimeTz;    break;
 		case SQL_TIMESTAMP_TZ : value = IBPP::sdTimestampTz; break;
-        case SQL_INT128 :    value = IBPP::sdInt128;    break;
+		case SQL_INT128 :    value = IBPP::sdInt128;    break;
+		case SQL_DEC16 :     value = IBPP::sdDec16;     break;
+		case SQL_DEC34 :     value = IBPP::sdDec34;     break;
 		default : throw LogicExceptionImpl("Row::ColumnType",
 						_("Found an unknown sqltype !"));
 	}
@@ -1319,6 +1361,24 @@ void* RowImpl::GetValue(int varnum, IITYPE ivType, void* retvalue)
 										_("Incompatible types."));
 			break;
 
+		case SQL_DEC16 :
+			if (ivType == ivDec16)
+			{
+				value = var->sqldata;
+			}
+			else throw WrongTypeImpl("RowImpl::GetValue", var->sqltype, ivType,
+										_("Incompatible types."));
+			break;
+
+		case SQL_DEC34 :
+			if (ivType == ivDec34)
+			{
+				value = var->sqldata;
+			}
+			else throw WrongTypeImpl("RowImpl::GetValue", var->sqltype, ivType,
+										_("Incompatible types."));
+			break;
+
 		case SQL_FLOAT :
 			if (ivType != ivFloat)
 				throw WrongTypeImpl("RowImpl::GetValue", var->sqltype, ivType,
@@ -1445,6 +1505,8 @@ void RowImpl::Free()
 					case SQL_TIMESTAMP_TZ : delete (ISC_TIMESTAMP_TZ*) var->sqldata; break;
 					case SQL_TIME_TZ   : delete (ISC_TIME_TZ*) var->sqldata; break;
 					case SQL_INT128 : delete (FB_I128_t*) var->sqldata; break;
+					case SQL_DEC16 : delete (FB_DEC16_t*) var->sqldata; break;
+					case SQL_DEC34 : delete (FB_DEC34_t*) var->sqldata; break;
 					default : throw LogicExceptionImpl("RowImpl::Free",
 								_("Found an unknown sqltype !"));
 				}
@@ -1547,6 +1609,12 @@ void RowImpl::AllocVariables()
 								break;
 			case SQL_INT128 :	var->sqldata = (char*) new FB_I128_t;
 								memset(var->sqldata, 0, sizeof(FB_I128_t));
+								break;;
+			case SQL_DEC16 :	var->sqldata = (char*) new FB_DEC16_t;
+								memset(var->sqldata, 0, sizeof(FB_DEC16_t));
+								break;;
+			case SQL_DEC34 :	var->sqldata = (char*) new FB_DEC34_t;
+								memset(var->sqldata, 0, sizeof(FB_DEC34_t));
 								break;;
 			default : throw LogicExceptionImpl("RowImpl::AllocVariables",
 						_("Found an unknown sqltype !"));

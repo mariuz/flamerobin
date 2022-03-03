@@ -116,7 +116,7 @@ class EventsImpl;
 //  Native data types
 typedef enum {ivArray, ivBlob, ivDate, ivTime, ivTimestamp, ivString,
             ivInt16, ivInt32, ivInt64, ivInt128, ivFloat, ivDouble,
-            ivBool, ivDBKey, ivByte} IITYPE;
+            ivBool, ivDBKey, ivByte, ivDec34, ivDec16} IITYPE;
 
 //
 //  Those are the Interbase C API prototypes that we use
@@ -989,6 +989,8 @@ public:
     void Set(int, IBPP::ibpp_int128_t);
     void Set(int, float);
     void Set(int, double);
+    void Set(int, IBPP::ibpp_dec16_t);
+    void Set(int, IBPP::ibpp_dec34_t);
     void Set(int, const IBPP::Timestamp&);
     void Set(int, const IBPP::Date&);
     void Set(int, const IBPP::Time&);
@@ -1007,6 +1009,8 @@ public:
     bool Get(int, IBPP::ibpp_int128_t&);
     bool Get(int, float&);
     bool Get(int, double&);
+    bool Get(int, IBPP::ibpp_dec16_t&);
+    bool Get(int, IBPP::ibpp_dec34_t&);
     bool Get(int, IBPP::Timestamp&);
     bool Get(int, IBPP::Date&);
     bool Get(int, IBPP::Time&);
@@ -1166,6 +1170,8 @@ public:
     bool Get(int, float&);
     bool Get(int, double*);
     bool Get(int, double&);
+    bool Get(int, IBPP::ibpp_dec16_t&);
+    bool Get(int, IBPP::ibpp_dec34_t&);
     bool Get(int, IBPP::Timestamp&);
     bool Get(int, IBPP::Date&);
     bool Get(int, IBPP::Time&);
