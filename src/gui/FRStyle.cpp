@@ -269,77 +269,103 @@ FRStyle* FRStyles::getStyleByName(wxString styleName)
 }
 
 
-FRLexerStyler::FRLexerStyler()
+FRStyler::FRStyler()
     :FRStyles()
 {
     
 }
 
-FRLexerStyler& FRLexerStyler::operator=(const FRLexerStyler& ls)
+FRStyler& FRStyler::operator=(const FRStyler& ls)
 {
     if (this != &ls)
     {
         *(static_cast<FRStyles*>(this)) = ls;
-        this->setLexerName(ls.getLexerName());
-        this->setLexerDesc(ls.getLexerDesc());
-        this->setLexerUserExt(ls.getLexerUserExt());
+        this->setStylerName(ls.getStylerName());
+        this->setStylerDesc(ls.getStylerDesc());
+        this->setStylerUserExt(ls.getStylerUserExt());
     }
     return *this;
 }
 
 
-FRLexerStylers::FRLexerStylers()
+FRStylers::FRStylers()
 {
-    lexerStylerVectorM.clear();
+    stylerVectorM.clear();
 }
 
-FRLexerStylers& FRLexerStylers::operator=(const FRLexerStylers& lsa)
+FRStylers& FRStylers::operator=(const FRStylers& lsa)
 {
     if (this != &lsa)
     {
-        this->lexerStylerVectorM = lsa.lexerStylerVectorM;
+        this->stylerVectorM = lsa.stylerVectorM;
     }
     return *this;
 }
 
-FRLexerStyler* FRLexerStylers::getLexerStylerByName(wxString lexerName)
+FRStyler* FRStylers::getStylerByName(wxString lexerName)
 {
     if (!lexerName) 
         return NULL;
 
-    std::vector<FRLexerStyler*>::iterator it;
-    it = std::find_if(lexerStylerVectorM.begin(), lexerStylerVectorM.end(), [lexerName](FRLexerStyler* style)->bool {return style->getLexerName() == lexerName; });
+    std::vector<FRStyler*>::iterator it;
+    it = std::find_if(stylerVectorM.begin(), stylerVectorM.end(), [lexerName](FRStyler* style)->bool {return style->getStylerName() == lexerName; });
 
-    if (it == lexerStylerVectorM.end())
+    if (it == stylerVectorM.end())
         return NULL;
     else
-        return (FRLexerStyler*)&*it;
-
+        return (FRStyler*)*it;
 }
 
-int FRLexerStylers::getLexerStylerIndexByName(wxString lexerName)
+int FRStylers::getStylerIndexByName(wxString lexerName)
 {
     if (lexerName.IsEmpty())
         return -1;
 
-    std::vector<FRLexerStyler*>::iterator it;
-    it = std::find_if(lexerStylerVectorM.begin(), lexerStylerVectorM.end(), [lexerName](FRLexerStyler* style)->bool {return style->getLexerName() == lexerName; });
-    if (it == lexerStylerVectorM.end())
+    std::vector<FRStyler*>::iterator it;
+    it = std::find_if(stylerVectorM.begin(), stylerVectorM.end(), [lexerName](FRStyler* style)->bool {return style->getStylerName() == lexerName; });
+    if (it == stylerVectorM.end())
         return -1;
     else
-        return std::distance(lexerStylerVectorM.begin(), it);
+        return std::distance(stylerVectorM.begin(), it);
 }
 
-void FRLexerStylers::addLexerStyler(wxString lexerName, wxString lexerDesc, wxString lexerUserExt, wxXmlNode* lexerNode)
+FRStyler* FRStylers::getStylerByDesc(wxString lexerDesc)
 {
-    FRLexerStyler* ls = new FRLexerStyler();
-    ls->setLexerName(lexerName);
+    if (!lexerDesc)
+        return NULL;
+
+    std::vector<FRStyler*>::iterator it;
+    it = std::find_if(stylerVectorM.begin(), stylerVectorM.end(), [lexerDesc](FRStyler* style)->bool {return style->getStylerDesc() == lexerDesc; });
+
+    if (it == stylerVectorM.end())
+        return NULL;
+    else
+        return (FRStyler*)*it;
+}
+
+int FRStylers::getStylerIndexByDesc(wxString lexerDesc)
+{
+    if (lexerDesc.IsEmpty())
+        return -1;
+
+    std::vector<FRStyler*>::iterator it;
+    it = std::find_if(stylerVectorM.begin(), stylerVectorM.end(), [lexerDesc](FRStyler* style)->bool {return style->getStylerDesc() == lexerDesc; });
+    if (it == stylerVectorM.end())
+        return -1;
+    else
+        return std::distance(stylerVectorM.begin(), it);
+}
+
+void FRStylers::addStyler(wxString lexerName, wxString lexerDesc, wxString lexerUserExt, wxXmlNode* lexerNode)
+{
+    FRStyler* ls = new FRStyler();
+    ls->setStylerName(lexerName);
 
     if (!lexerDesc.IsEmpty())
-        ls->setLexerDesc(lexerDesc);
+        ls->setStylerDesc(lexerDesc);
 
     if (!lexerUserExt.IsEmpty())
-        ls->setLexerUserExt(lexerUserExt);
+        ls->setStylerUserExt(lexerUserExt);
 
     wxXmlNode* child = lexerNode->GetChildren();
     while (child) {
@@ -352,12 +378,12 @@ void FRLexerStylers::addLexerStyler(wxString lexerName, wxString lexerDesc, wxSt
         child = child->GetNext();
     }
 
-    lexerStylerVectorM.push_back(ls);
+    stylerVectorM.push_back(ls);
 }
 
-void FRLexerStylers::clear()
+void FRStylers::clear()
 {
-    lexerStylerVectorM.clear();    
+    stylerVectorM.clear();    
 }
 
 FRStyleManager& stylerManager()
@@ -372,14 +398,14 @@ FRStyleManager& stylerManager()
 
 void FRStyleManager::loadLexerStyles(wxXmlNode* node)
 {
-    lexerStylesM.clear();
+    stylersM.clear();
 
     wxXmlNode* child = node->GetChildren();
     
     while (child) {
         if (child->GetType() == wxXML_ELEMENT_NODE && child->GetName() == "LexerType" && 
             child->GetAttribute("name")=="sql") {
-            lexerStylesM.addLexerStyler(child->GetAttribute("name"), 
+            stylersM.addStyler(child->GetAttribute("name"), 
                 child->GetAttribute("desc"), child->GetAttribute("ext"), child);
         }
         child = child->GetNext();
@@ -389,19 +415,18 @@ void FRStyleManager::loadLexerStyles(wxXmlNode* node)
 
 void FRStyleManager::loadGlobalStyles(wxXmlNode* node)
 {
-    globalStylesM.clear();
+    globalStylerM->clear();
     wxXmlNode* child = node->GetChildren();
 
     while (child) {
         if (child->GetType() == wxXML_ELEMENT_NODE && child->GetName() == "WidgetStyle") {
             long styleID = -1;
             if (child->GetAttribute("styleID").ToLong(&styleID)) {
-                globalStylesM.addStyler(styleID, child);
+                globalStylerM->addStyler(styleID, child);
             }
         }
         child = child->GetNext();
     };
-  
 }
 
 void FRStyleManager::assignWordStyle(wxStyledTextCtrl* text, FRStyle* style)
@@ -414,10 +439,10 @@ void FRStyleManager::assignWordStyle(wxStyledTextCtrl* text, FRStyle* style)
         text->StyleSetForeground(style->getStyleID(), style->getfgColour());
     //}
         
-    double size = style->getFontSize() == 0 ? globalStyleM->getFontSize() : style->getFontSize();
+    double size = style->getFontSize() == 0 ? getGlobalStyle()->getFontSize() : style->getFontSize();
     wxFontInfo fontInfo(size);
         
-    wxString fontName = style->getFontName().IsEmpty() ? globalStyleM->getFontName() : style->getFontName();
+    wxString fontName = style->getFontName().IsEmpty() ? getGlobalStyle()->getFontName() : style->getFontName();
     fontInfo.FaceName(fontName);
         
     if (style->getFontStyle() != STYLE_NOT_USED) {
@@ -439,34 +464,35 @@ void FRStyleManager::assignWordStyle(wxStyledTextCtrl* text, FRStyle* style)
 FRStyleManager::FRStyleManager(wxFileName style)
 {
     fileNameM = style;
-    
+    globalStylerM = new FRStyler();
+
     loadStyle();
 }
 
 
 FRStyle* FRStyleManager::getStyleByName(wxString styleName)
 {
-    return globalStylesM.getStyleByName(styleName);
+    return globalStylerM->getStyleByName(styleName);
 }
 
 void FRStyleManager::assignGlobal(wxStyledTextCtrl* text)
 {
     //text->StyleClearAll();
 
-    for (int i = 0; i < globalStylesM.getNbStyler(); i++) {
-        FRStyle* style = globalStylesM.getStyle(i);
-        if (style->getStyleID() != 0) {
+    for (int i = 0; i < globalStylerM->getNbStyler(); i++) {
+        FRStyle* style = globalStylerM->getStyle(i);
+        //if (style->getStyleID() != 0) {
             assignWordStyle(text, style);
-        }
+        //}
         if (style->getStyleDesc() == "Global override") {
-            globalStyleM = style;
+            //globalStyleM = style;
             text->StyleResetDefault();
             text->SetBackgroundColour(style->getbgColour());
             text->SetForegroundColour(style->getfgColour());
             assignWordStyle(text, style);
         }
         if (style->getStyleDesc() == "Default Style") {
-            defaultStyleM = style;
+            //defaultStyleM = style;
         }
         if (style->getStyleDesc() == "Mark colour") {}
         if (style->getStyleDesc() == "Selected text colour") {
@@ -476,7 +502,9 @@ void FRStyleManager::assignGlobal(wxStyledTextCtrl* text)
         if (style->getStyleDesc() == "Edge colour") {
             text->SetEdgeColour(style->getfgColour());
         }
-        if (style->getStyleDesc() == "Bookmark margin" ) {}
+        if (style->getStyleDesc() == "Bookmark margin" ) {
+            //text->SetMarginBackground()
+        }
         if (style->getStyleDesc() == "Fold") {}
         if (style->getStyleDesc() == "Fold active") {}
         if (style->getStyleDesc() == "Fold margin") {
@@ -503,9 +531,9 @@ void FRStyleManager::assignGlobal(wxStyledTextCtrl* text)
 void FRStyleManager::assignLexer(wxStyledTextCtrl* text)
 {
     //FRLexerStyler* lexer= lexerStylesM.getLexerStylerByName("sql");    lexerStylesM.
-    if (lexerStylesM.getNbLexerStyler() > 0) {
-        int index = lexerStylesM.getLexerStylerIndexByName("sql");
-        FRLexerStyler* lexer = lexerStylesM.getLexerFromIndex(index);
+    if (stylersM.getNbLexerStyler() > 0) {
+        int index = stylersM.getStylerIndexByName("sql");
+        FRStyler* lexer = stylersM.getLexerFromIndex(index);
         if (lexer) {
             int max = lexer->getNbStyler();
             for (int i = 0; i < max; i++) {
@@ -513,10 +541,77 @@ void FRStyleManager::assignLexer(wxStyledTextCtrl* text)
             }
         }
     }
-    FRStyle* style = globalStylesM.getStyleByName("Line number margin");
+    FRStyle* style = globalStylerM->getStyleByName("Line number margin");
     if (style) {
         assignWordStyle(text, style);
     }
+}
+
+void FRStyleManager::assignFold(wxStyledTextCtrl* text)
+{
+    FRStyle* styleFoldMargin = getGlobalStyler()->getStyleByName("Fold margin");
+    FRStyle* styleFold = getGlobalStyler()->getStyleByName("Fold");
+    FRStyle* styleFoldActive = getGlobalStyler()->getStyleByName("Fold active");
+
+    text->SetProperty(wxT("fold"), wxT("1"));
+    text->SetProperty(wxT("fold.comment"), wxT("1"));
+    text->SetFoldFlags(wxSTC_FOLDFLAG_LINEBEFORE_CONTRACTED | wxSTC_FOLDFLAG_LINEAFTER_CONTRACTED);
+    text->SetAutomaticFold(wxSTC_AUTOMATICFOLD_SHOW | wxSTC_AUTOMATICFOLD_CLICK | wxSTC_AUTOMATICFOLD_CHANGE);
+
+    text->SetMarginWidth(FR_FOLDMARGIN, 14);
+    text->SetMarginMask(FR_FOLDMARGIN, wxSTC_MASK_FOLDERS);
+    text->SetFoldMarginColour(true, styleFoldMargin->getbgColour());
+    text->SetFoldMarginHiColour(true, styleFoldMargin->getfgColour());
+
+
+    text->MarkerDefine(wxSTC_MARKNUM_FOLDEREND, wxSTC_MARK_BOXPLUSCONNECTED);
+    text->MarkerSetForeground(wxSTC_MARKNUM_FOLDEREND, styleFold->getfgColour());
+    text->MarkerSetBackground(wxSTC_MARKNUM_FOLDEREND, styleFold->getbgColour());
+    text->MarkerSetBackgroundSelected(wxSTC_MARKNUM_FOLDEREND, styleFoldActive->getfgColour());
+
+    text->MarkerDefine(wxSTC_MARKNUM_FOLDEROPENMID, wxSTC_MARK_BOXMINUSCONNECTED);
+    text->MarkerSetForeground(wxSTC_MARKNUM_FOLDEROPENMID, styleFold->getfgColour());
+    text->MarkerSetBackground(wxSTC_MARKNUM_FOLDEROPENMID, styleFold->getbgColour());
+    text->MarkerSetBackgroundSelected(wxSTC_MARKNUM_FOLDEROPENMID, styleFoldActive->getfgColour());
+
+    text->MarkerDefine(wxSTC_MARKNUM_FOLDERMIDTAIL, wxSTC_MARK_TCORNER);
+    text->MarkerSetForeground(wxSTC_MARKNUM_FOLDERMIDTAIL, styleFold->getfgColour());
+    text->MarkerSetBackground(wxSTC_MARKNUM_FOLDERMIDTAIL, styleFold->getbgColour());
+    text->MarkerSetBackgroundSelected(wxSTC_MARKNUM_FOLDERMIDTAIL, styleFoldActive->getfgColour());
+
+    text->MarkerDefine(wxSTC_MARKNUM_FOLDERTAIL, wxSTC_MARK_LCORNER);
+    text->MarkerSetForeground(wxSTC_MARKNUM_FOLDERTAIL, styleFold->getfgColour());
+    text->MarkerSetBackground(wxSTC_MARKNUM_FOLDERTAIL, styleFold->getbgColour());
+    text->MarkerSetBackgroundSelected(wxSTC_MARKNUM_FOLDERTAIL, styleFoldActive->getfgColour());
+
+    text->MarkerDefine(wxSTC_MARKNUM_FOLDERSUB, wxSTC_MARK_VLINE);
+    text->MarkerSetForeground(wxSTC_MARKNUM_FOLDERSUB, styleFold->getfgColour());
+    text->MarkerSetBackground(wxSTC_MARKNUM_FOLDERSUB, styleFold->getbgColour());
+    text->MarkerSetBackgroundSelected(wxSTC_MARKNUM_FOLDERSUB, styleFoldActive->getfgColour());
+
+    text->MarkerDefine(wxSTC_MARKNUM_FOLDER, wxSTC_MARK_BOXPLUS);
+    text->MarkerSetForeground(wxSTC_MARKNUM_FOLDER, styleFold->getfgColour());
+    text->MarkerSetBackground(wxSTC_MARKNUM_FOLDER, styleFold->getbgColour());
+    text->MarkerSetBackgroundSelected(wxSTC_MARKNUM_FOLDER, styleFoldActive->getfgColour());
+
+    text->MarkerDefine(wxSTC_MARKNUM_FOLDEROPEN, wxSTC_MARK_BOXMINUS);
+    text->MarkerSetForeground(wxSTC_MARKNUM_FOLDEROPEN, styleFold->getfgColour());
+    text->MarkerSetBackground(wxSTC_MARKNUM_FOLDEROPEN, styleFold->getbgColour());
+    text->MarkerSetBackgroundSelected(wxSTC_MARKNUM_FOLDEROPEN, styleFoldActive->getfgColour());
+
+    //Turn the fold markers red when the caret is a line in the group (optional)
+    text->MarkerEnableHighlight(true);
+
+    //The margin will only respond to clicks if it set sensitive.  Also, connect
+    //the event handler that will do the collapsing/restoring
+    text->SetMarginSensitive(FR_FOLDMARGIN, true);
+    //m_activeSTC->Bind(wxEVT_STC_MARGINCLICK, &myFrame::onMarginClick, this);
+    //m_activeSTC->Bind(wxEVT_STC_STYLENEEDED, &myFrame::OnStyleNeeded, this);
+
+    //set color for G-Code highlighting
+    //text->StyleSetForeground(19, m_GCodecolor);
+
+    
 }
 
 void FRStyleManager::loadConfig()
@@ -532,9 +627,11 @@ void FRStyleManager::loadConfig()
 
 void FRStyleManager::loadStyle()
 {
+
     wxXmlDocument xmlDoc;
     xmlDoc.Load(fileNameM.GetFullPath());
     if (xmlDoc.IsOk()) {
+        
         wxXmlNode* xmlNode = xmlDoc.GetRoot();
         if (xmlNode->GetType() == wxXML_ELEMENT_NODE && xmlNode->GetName() == "Flamerobin") {
 

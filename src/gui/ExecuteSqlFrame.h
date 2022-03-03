@@ -83,6 +83,16 @@ public:
 
     Database* getDatabase() const;
 private:
+    // fold 
+    int m_stylemask = 255;
+    void onMarginClick(wxStyledTextEvent& event);
+    void onStyleNeeded(wxStyledTextEvent& event);
+    void highlightSTCsyntax(size_t fromPos, size_t toPos, wxString& text);
+    void setfoldlevels(size_t fromPos, int startfoldlevel, wxString& text);
+    void fold(size_t line, bool mode);
+    void foldAll(bool mode);
+
+
     virtual bool doCanClose();
     virtual void doBeforeDestroy();
 

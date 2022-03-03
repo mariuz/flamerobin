@@ -58,6 +58,7 @@ const int MAX_LEXER_STYLE = 100;
 const int MARGE_LINENUMBER = 0;
 const int MARGE_SYMBOLE = 1;
 
+#define FR_FOLDMARGIN 2
 
 class FRStyle
 {
@@ -144,6 +145,7 @@ public:
 
     FRStyle* getStyle(size_t index);
     FRStyle* getStyleByName(wxString styleName);
+    std::vector<FRStyle*> getStyles() { return styleVectorM; }
 
     bool hasEnoughSpace() { return (getNbStyler() < wxSTC_STYLE_MAX); };
     void addStyler(int styleID, wxXmlNode* styleNode);
@@ -157,55 +159,60 @@ public:
 };
 
 
-class FRLexerStyler : public FRStyles
+class FRStyler : public FRStyles
 {
 private:
-    wxString lexerNameM;
-    wxString lexerDescM;
-    wxString lexerUserExtM;
+    wxString stylerNameM;
+    wxString stylerDescM;
+    wxString stylerUserExtM;
 
 public:
-    FRLexerStyler();
-    FRLexerStyler& operator=(const FRLexerStyler& ls);
+    FRStyler();
+    FRStyler& operator=(const FRStyler& ls);
 
-    wxString getLexerName() const { return lexerNameM; };
-    void setLexerName(wxString lexerName) { lexerNameM = lexerName; };
+    wxString getStylerName() const { return stylerNameM; };
+    void setStylerName(wxString lexerName) { stylerNameM = lexerName; };
 
-    void setLexerDesc(wxString lexerDesc) { lexerDescM = lexerDesc; };
-    wxString getLexerDesc() const { return lexerDescM; };
+    void setStylerDesc(wxString lexerDesc) { stylerDescM = lexerDesc; };
+    wxString getStylerDesc() const { return stylerDescM; };
 
-    void setLexerUserExt(wxString lexerUserExt) { lexerUserExtM = lexerUserExt; };
-    wxString getLexerUserExt() const { return lexerUserExtM; };
+    void setStylerUserExt(wxString lexerUserExt) { stylerUserExtM = lexerUserExt; };
+    wxString getStylerUserExt() const { return stylerUserExtM; };
 
 };
 
 
-class FRLexerStylers
+class FRStylers
 {
 private:
-    std::vector<FRLexerStyler*> lexerStylerVectorM;
+    std::vector<FRStyler*> stylerVectorM;
 protected:
 
 public:
-    FRLexerStylers();
+    FRStylers();
 
-    FRLexerStylers& operator=(const FRLexerStylers& lsa);
+    FRStylers& operator=(const FRStylers& lsa);
 
-    int getNbLexerStyler() const { return lexerStylerVectorM.size(); };
+    int getNbLexerStyler() const { return stylerVectorM.size(); };
     //void setNbLexerStyler(int nbLexer) { nbLexerStylerM = nbLexer; };
     bool hasEnoughSpace() { return (getNbLexerStyler() < MAX_LEXER_STYLE); };
 
 
 
-    FRLexerStyler* getLexerFromIndex(int index) { return lexerStylerVectorM[index]; };
+    FRStyler* getLexerFromIndex(int index) { return stylerVectorM[index]; };
+    std::vector<FRStyler*> getStylers() { return stylerVectorM; };
 
-    wxString getLexerNameFromIndex(int index) const { return lexerStylerVectorM[index]->getLexerName(); };
-    wxString getLexerDescFromIndex(int index) const { return lexerStylerVectorM[index]->getLexerDesc(); };
+    wxString getStylerNameFromIndex(int index) const { return stylerVectorM[index]->getStylerName(); };
+    wxString getStylerDescFromIndex(int index) const { return stylerVectorM[index]->getStylerDesc(); };
 
-    FRLexerStyler* getLexerStylerByName(wxString lexerName);
-    int getLexerStylerIndexByName(wxString lexerName);
+    FRStyler* getStylerByName(wxString lexerName);
+    int getStylerIndexByName(wxString lexerName);
 
-    void addLexerStyler(wxString lexerName, wxString lexerDesc, wxString lexerUserExt, wxXmlNode* lexerNode);
+    FRStyler* getStylerByDesc(wxString lexerDesc);
+    int getStylerIndexByDesc(wxString lexerDesc);
+
+
+    void addStyler(wxString lexerName, wxString lexerDesc, wxString lexerUserExt, wxXmlNode* lexerNode);
 
     void clear();
 };
@@ -213,10 +220,9 @@ public:
 class FRStyleManager {
 private:
     wxFileName fileNameM;
-    FRStyles globalStylesM;
-    FRLexerStylers lexerStylesM;
-    FRStyle* globalStyleM;
-    FRStyle* defaultStyleM;
+    FRStyler* globalStylerM;
+    FRStylers stylersM;
+    wxColor m_GCodecolor{ 255,130,0 };
 protected:
     void loadLexerStyles(wxXmlNode* node);
     void loadGlobalStyles(wxXmlNode* node);
@@ -225,19 +231,25 @@ protected:
 public:
     FRStyleManager(wxFileName style);
     
-    FRStyles getGlobalStyles() { return globalStylesM; };
+    FRStyler* getGlobalStyler() { return globalStylerM; };
+    FRStylers getLexerStylers() { return stylersM; };
+    FRStyler* getStylerByName(wxString stylerName) { return stylerName == "Global Styles" ? getGlobalStyler() : getLexerStylers().getStylerByName(stylerName); };
+    FRStyler* getStylerByDesc(wxString stylerDesc) { return stylerDesc == "Global Styles" ? getGlobalStyler() : getLexerStylers().getStylerByDesc(stylerDesc); };
 
-    FRStyle* getGlobalStyle() { return globalStyleM; };
-    FRStyle* getDefaultStyle() { return defaultStyleM; };
+    FRStyle* getGlobalStyle() { return globalStylerM->getStyleByName("Global override"); };
+    FRStyle* getDefaultStyle() { return globalStylerM->getStyleByName("Default Style"); };
     FRStyle* getStyleByName(wxString styleName);
     
     wxFileName getfileName() { return fileNameM; };
     void setfileName(wxFileName fileName) { fileNameM = fileName; };
+
     
 
     void assignGlobal(wxStyledTextCtrl* text);
 
     void assignLexer(wxStyledTextCtrl* text);
+
+    void assignFold(wxStyledTextCtrl* text);
 
     void loadConfig();
     void loadStyle();

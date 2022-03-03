@@ -331,6 +331,7 @@ void SqlEditor::setup()
     SetMargins(0, 0);
     SetMarginWidth(MARGE_LINENUMBER, 40);
     SetMarginType(MARGE_LINENUMBER, wxSTC_MARGIN_NUMBER);
+    SetAutomaticFold(wxSTC_AUTOMATICFOLD_SHOW);
 
     if (config().get("sqlEditorShowEdge", false))
     {
@@ -345,11 +346,13 @@ void SqlEditor::setup()
     StyleClearAll();
     stylerManager().assignLexer(this);
     SetLexer(wxSTC_LEX_SQL);
+    stylerManager().assignFold(this);
     setChars(false);
 
 
     centerCaret(false);
 }
+
 
 BEGIN_EVENT_TABLE(SqlEditor, wxStyledTextCtrl)
     EVT_CONTEXT_MENU(SqlEditor::OnContextMenu)
@@ -539,7 +542,9 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     splitter_window_1 = new wxSplitterWindow(panel_contents, -1);
     styled_text_ctrl_sql = new SqlEditor(splitter_window_1, ID_stc_sql);
 
-
+    //Fold
+    //styled_text_ctrl_sql->Bind(wxEVT_STC_MARGINCLICK, &ExecuteSqlFrame::onMarginClick, this);
+    //styled_text_ctrl_sql->Bind(wxEVT_STC_STYLENEEDED, &ExecuteSqlFrame::onStyleNeeded, this);
 
     notebook_1 = new wxNotebook(splitter_window_1, -1, wxDefaultPosition,
         wxDefaultSize, 0);
@@ -587,6 +592,232 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
 Database* ExecuteSqlFrame::getDatabase() const
 {
     return databaseM;
+}
+
+void ExecuteSqlFrame::onMarginClick(wxStyledTextEvent& event)
+{
+    int margin = event.GetMargin();
+    int position = event.GetPosition();
+    int  line = styled_text_ctrl_sql->LineFromPosition(position);
+    int  foldLevel = styled_text_ctrl_sql->GetFoldLevel(line);
+    bool headerFlag = (foldLevel & wxSTC_FOLDLEVELHEADERFLAG) != 0;
+
+    if (margin == FR_FOLDMARGIN && headerFlag) {
+        styled_text_ctrl_sql->ToggleFold(line);
+    }
+}
+
+void ExecuteSqlFrame::onStyleNeeded(wxStyledTextEvent& event)
+{
+    /*this is called every time the styler detects a line that needs style, so we style that range.
+    This will save a lot of performance since we only style text when needed instead of parsing the whole file every time.*/
+    size_t line_end = styled_text_ctrl_sql->LineFromPosition(styled_text_ctrl_sql->GetCurrentPos());
+    size_t line_start = styled_text_ctrl_sql->LineFromPosition(styled_text_ctrl_sql->GetEndStyled());
+    /*fold level: May need to include the two lines in front because of the fold level these lines have- the line above
+    may be affected*/
+    if (line_start > 1) {
+        line_start -= 2;
+    }
+    else {
+        line_start = 0;
+    }
+    //if it is so small that all lines are visible, style the whole document
+    if (styled_text_ctrl_sql->GetLineCount() == styled_text_ctrl_sql->LinesOnScreen()) {
+        line_start = 0;
+        line_end = styled_text_ctrl_sql->GetLineCount() - 1;
+    }
+    if (line_end < line_start) {
+        //that happens when you select parts that are in front of the styled area
+        size_t temp = line_end;
+        line_end = line_start;
+        line_start = temp;
+    }
+    //style the line following the style area too (if present) in case fold level decreases in that one
+    if (line_end < styled_text_ctrl_sql->GetLineCount() - 1) {
+        line_end++;
+    }
+    //get exact start positions
+    size_t startpos = styled_text_ctrl_sql->PositionFromLine(line_start);
+    size_t endpos = (styled_text_ctrl_sql->GetLineEndPosition(line_end));
+    int startfoldlevel = styled_text_ctrl_sql->GetFoldLevel(line_start);
+    startfoldlevel &= wxSTC_FOLDFLAG_LEVELNUMBERS; //mask out the flags and only use the fold level
+    wxString text = styled_text_ctrl_sql->GetTextRange(startpos, endpos).Upper();
+    this->highlightSTCsyntax(startpos, endpos, text);
+    //calculate and apply foldings
+    this->setfoldlevels(startpos, startfoldlevel, text);
+}
+
+void ExecuteSqlFrame::highlightSTCsyntax(size_t fromPos, size_t toPos, wxString& text)
+{
+    //this vector will hold the start and end position of each word to highlight
+    //if you want to highlight more than one, you should pass a whole class or struct containing the offsets
+    std::vector<std::pair<size_t, size_t>>GcodeVector;
+    //the following example is a quick and dirty parser for G-Codes.
+    //it just iterates through the Text Range and finds "Gxx" where xx is a digit.
+    //you could also use regex, but one can build a pretty fast routine based on single char evaluation
+    size_t actual_cursorpos = 0;
+    size_t startpos = 0;
+    size_t end_of_text = text.length();
+    bool word_boundary = true; //check for word boundary
+    char actualchar;
+    while (actual_cursorpos < end_of_text) {
+        actualchar = text[actual_cursorpos];
+        //check if syntax matches "G" followed by a couple of numbers
+        if ((actualchar == 'G') && (word_boundary == true)) {
+            //this is a new G-Code, store startposition
+            startpos = actual_cursorpos;
+            word_boundary = false;
+            actual_cursorpos++;
+            if (actual_cursorpos < end_of_text) {
+                //refresh actual character
+                actualchar = text[actual_cursorpos];
+            }
+            //add digits
+            while ((std::isdigit(actualchar) && (actual_cursorpos < end_of_text))) {
+                actual_cursorpos++;
+                actualchar = text[actual_cursorpos];
+            }
+            //check if word boundary occurs at end of digits
+            if ((actualchar == ' ') || (actualchar == '\n') || (actualchar == '\r') || (actualchar == '\t') || (actual_cursorpos == end_of_text)) {
+                //success, append this one
+                if ((actual_cursorpos - startpos) > 1) {
+                    //success, append to vector. DO NOT FORGET THE OFFSET HERE! We start from fromPos, so we need to add this
+                    GcodeVector.push_back(std::make_pair(startpos + fromPos, actual_cursorpos + fromPos));
+                }
+                word_boundary = true;
+            }
+        }
+        if ((actualchar == ' ') || (actualchar == '\n') || (actualchar == '\r') || (actualchar == '\t') || (actual_cursorpos == end_of_text)) {
+            word_boundary = true;
+        }
+        actual_cursorpos++;
+    }
+    //remove old styling
+    styled_text_ctrl_sql->StartStyling(fromPos, m_stylemask); //from here
+    styled_text_ctrl_sql->SetStyling(toPos - fromPos, 0); //with that length and style -> cleared
+    //now style the G-Codes
+    for (int i = 0; i < GcodeVector.size(); i++) {
+        size_t startpos = GcodeVector[i].first;
+        size_t endpos = GcodeVector[i].second;
+        size_t length = (endpos - startpos);
+        styled_text_ctrl_sql->StartStyling(startpos, m_stylemask);
+        styled_text_ctrl_sql->SetStyling(length, 19); //must match the style set above
+    }
+}
+
+void ExecuteSqlFrame::setfoldlevels(size_t fromPos, int startfoldlevel, wxString& text)
+{
+    /*we'll increase the fold level with "IF" and decrease it with "ENDIF".
+    First, find all "IF" included in the text. Then we check if this IF is actually an ENDIF.
+    Keep in mind that you still need to check if this is actually commented out and so on.
+    This is a pretty simple and not perfect example to demonstrate basic folding*/
+    std::vector<size_t>if_positions;
+    size_t actual_cursorpos = 0;
+    while ((actual_cursorpos < text.size()) && (actual_cursorpos != wxNOT_FOUND)) {
+        actual_cursorpos = text.find("IF", actual_cursorpos + 1);
+        if (actual_cursorpos != wxNOT_FOUND) {
+            if_positions.push_back(actual_cursorpos + fromPos);
+        }
+    }
+    //build a vector to include line and folding level
+    //also, check if this IF is actually an ENDIF
+    std::vector<std::pair<size_t, int>>foldingvector;
+    int actualfoldlevel = startfoldlevel;
+    for (int i = 0; i < if_positions.size(); i++) {
+        size_t this_line = styled_text_ctrl_sql->LineFromPosition(if_positions[i]);
+        //check if that "IF" is an ENDIF
+        wxString endif_string;
+        if (if_positions[i] > 3) {
+            endif_string = text.substr(if_positions[i] - 3 - fromPos, 5);
+        }
+        //if it's an IF the fold level increases, if it's an ENDIF the foldlevel decreases
+        if (endif_string == "ENDIF") {
+            actualfoldlevel--;
+            foldingvector.push_back(std::make_pair(this_line, actualfoldlevel));
+        }
+        else {
+            actualfoldlevel++;
+            foldingvector.push_back(std::make_pair(this_line, actualfoldlevel));
+        }
+    }
+    //now that we know which lines shall influence folding, we can apply to folding level to the STC line for line
+    int foldlevel = startfoldlevel; //this is a temporary marker containing the foldlevel of that position
+    size_t vectorcount = 0;
+    //get positions from line from start and end
+    size_t startline = styled_text_ctrl_sql->LineFromPosition(fromPos);
+    size_t endline = styled_text_ctrl_sql->LineFromPosition(fromPos + text.size());
+    //set folding for these lines
+    for (size_t i = startline; i <= endline; i++) {
+        int prevlevel = foldlevel; //previous foldlevel
+        int foldflag = foldlevel; //this flag will be applied to the line
+        if ((foldingvector.size() > 0) && (vectorcount < foldingvector.size())) {
+            if (i == foldingvector[vectorcount].first) { //if the fold level changes in that line
+                //new foldlevel = foldlevel in that line
+                foldlevel = foldingvector[vectorcount].second;
+                vectorcount++;
+                if (foldlevel > prevlevel) {
+                    //when incremented, this line keeps the previous fold level (!) but is marked as a folder level header
+                    foldflag = foldflag | wxSTC_FOLDLEVELHEADERFLAG; //incremented, set header flag
+                }
+            }
+        }
+        foldflag = foldflag | wxSTC_FOLDLEVELBASE; //add 1024 to the fold level
+        if (styled_text_ctrl_sql->GetLineLength(i) == 0) { //if this does not contain any characters, set the white flag
+            foldflag = foldflag | wxSTC_FOLDLEVELWHITEFLAG;
+        }
+        //finally, set fold level to line
+        styled_text_ctrl_sql->SetFoldLevel(i, foldflag);
+    }
+}
+
+void ExecuteSqlFrame::fold(size_t line, bool mode)
+{
+    
+    auto endStyled = styled_text_ctrl_sql->GetEndStyled();
+    auto len = styled_text_ctrl_sql->GetTextLength();
+
+    if (endStyled < len)
+        styled_text_ctrl_sql->Colourise(0, -1);
+
+    int headerLine;
+    auto level = styled_text_ctrl_sql->GetFoldLevel(line);    
+
+    if (level & wxSTC_FOLDLEVELHEADERFLAG)
+        headerLine = static_cast<int32_t>(line);
+    else
+    {
+        headerLine = styled_text_ctrl_sql->GetFoldParent(line);
+        if (headerLine == -1)
+            return;
+    }
+
+    if (styled_text_ctrl_sql->GetFoldExpanded(headerLine) != mode)
+    {
+        styled_text_ctrl_sql->ToggleFold(headerLine);
+        /*SCNotification scnN;
+        scnN.nmhdr.code = SCN_FOLDINGSTATECHANGED;
+        scnN.nmhdr.hwndFrom = _hSelf;
+        scnN.nmhdr.idFrom = 0;
+        scnN.line = headerLine;
+        scnN.foldLevelNow = isFolded(headerLine) ? 1 : 0; //folded:1, unfolded:0
+
+        ::SendMessage(_hParent, WM_NOTIFY, 0, reinterpret_cast<LPARAM>(&scnN));*/
+    }
+
+}
+
+void ExecuteSqlFrame::foldAll(bool mode)
+{
+    auto maxLine = styled_text_ctrl_sql->GetLineCount();
+
+    for (int line = 0; line < maxLine; ++line)
+    {
+        auto level = styled_text_ctrl_sql->GetFoldLevel(line);
+        if (level & wxSTC_FOLDLEVELHEADERFLAG)
+            if (styled_text_ctrl_sql->GetFoldExpanded(line) != mode)
+                fold(line, mode);
+    }
+
 }
 
 void ExecuteSqlFrame::buildToolbar(CommandManager& cm)

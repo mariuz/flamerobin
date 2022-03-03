@@ -36,6 +36,7 @@
 #include <wx/filedlg.h>
 #include <wx/filename.h>
 #include <wx/fontdlg.h>
+#include <wx/fontenum.h>
 #include <wx/listbox.h>
 #include <wx/spinctrl.h>
 #include <wx/tokenzr.h>
@@ -310,11 +311,16 @@ bool PrefDlgCheckboxSetting::createControl(bool WXUNUSED(ignoreerrors))
         checkBoxM->SetToolTip(descriptionM);
 
     checkBoxHandlerM.reset(new PrefDlgEventHandler(
-        std::bind(&PrefDlgCheckboxSetting::OnCheckBox, this,  std::placeholders::_1)));
+            std::bind(&PrefDlgCheckboxSetting::OnCheckBox, this,  std::placeholders::_1)
+        )
+    );
+
     checkBoxM->PushEventHandler(checkBoxHandlerM.get());
+
     checkBoxHandlerM->Connect(checkBoxM->GetId(),
         wxEVT_COMMAND_CHECKBOX_CLICKED,
         wxCommandEventHandler(PrefDlgEventHandler::OnCommandEvent));
+
     return true;
 }
 
@@ -1735,40 +1741,131 @@ protected:
     virtual bool hasControls() const;
     //virtual void setDefault(const wxString& defValue);*/
     virtual wxArrayString getComboBoxItems();
+    void loadStylers(const wxString& styleFileName);
+    void loadStyles(const wxString& language);
+    void loadStyle(const wxString& styleName);
 private:
+    FRStyleManager* styleManagerM;
+
     wxStaticText* captionBeforeM;
-    wxComboBox* comboBoxM;
-    wxListBox* languageListBoxM;
+
+    wxComboBox* fileComboBoxM;
+    std::unique_ptr<wxEvtHandler> fileComboBoxHandlerM;
+    void OnSelectFileComboBox(wxCommandEvent& event);
+
+    wxListBox* stylersListBoxM;
+    std::unique_ptr<wxEvtHandler> stylersListBoxHandlerM;
+    void OnSelectStylersListBox(wxCommandEvent& event);
+
     wxListBox* styleListBoxM;
+    std::unique_ptr<wxEvtHandler> styleListBoxHandlerM;
+    void OnSelectStyleListBox(wxCommandEvent& event);
+
+    //wxStaticText* lenguageStyleM;
+    
+    wxColourPickerCtrl* foregroundPickerM;
+    wxColourPickerCtrl* backgroundPickerM;
+
+    wxComboBox* fontNameComboBoxM;
+    wxComboBox* fontSizeComboBoxM;
+
+    wxCheckBox* blodCheckBoxM;
+    wxCheckBox* italicCheckBoxM;
+    wxCheckBox* underlineCheckBoxM;
+
 };
 
 PrefDlgThemeSetting::PrefDlgThemeSetting(wxPanel* page, PrefDlgSetting* parent)
-    : PrefDlgSetting(page, parent), comboBoxM(0), captionBeforeM(0),
-    languageListBoxM(0), styleListBoxM(0)
+    : PrefDlgSetting(page, parent), styleManagerM(0), fileComboBoxM(0), captionBeforeM(0),
+    stylersListBoxM(0), styleListBoxM(0), fontNameComboBoxM(0), fontSizeComboBoxM(0)
 {
+    const wxString STYLE = "StyleTheme";
+    const wxString def = "stylers";
+
+
+    styleManagerM = new FRStyleManager(wxFileName(config().getXmlStylesPath(), config().get(STYLE, def) + ".xml"));
 }
 
 PrefDlgThemeSetting::~PrefDlgThemeSetting()
 {
+    if (fileComboBoxM && fileComboBoxHandlerM.get())
+        fileComboBoxM->PopEventHandler();
+
+    if (stylersListBoxM && stylersListBoxHandlerM.get())
+        stylersListBoxM->PopEventHandler();
+
+    if (styleListBoxM && styleListBoxHandlerM.get())
+        styleListBoxM->PopEventHandler();
 }
 
 bool PrefDlgThemeSetting::createControl(bool WXUNUSED(ignoreerrors))
 {
     captionBeforeM = new wxStaticText(getPage(), wxID_ANY, "Select theme:");
 
-    comboBoxM = new wxComboBox(getPage(), wxID_ANY, wxEmptyString, wxDefaultPosition,
+    fileComboBoxM = new wxComboBox(getPage(), wxID_ANY, wxEmptyString, wxDefaultPosition,
         wxDefaultSize, getComboBoxItems());
-    languageListBoxM = new wxListBox(getPage(), wxID_ANY, wxDefaultPosition, wxDefaultSize);
-    languageListBoxM->Insert("SQL", 0);
+    fileComboBoxHandlerM.reset(new PrefDlgEventHandler(std::bind(&PrefDlgThemeSetting::OnSelectFileComboBox, this, std::placeholders::_1)));
+    fileComboBoxM->PushEventHandler(fileComboBoxHandlerM.get());
+    fileComboBoxHandlerM->Connect(fileComboBoxM->GetId(),
+        wxEVT_COMMAND_COMBOBOX_SELECTED,
+        wxCommandEventHandler(PrefDlgEventHandler::OnCommandEvent));
+
+
+    stylersListBoxM = new wxListBox(getPage(), wxID_ANY, wxDefaultPosition, wxDefaultSize);
+    stylersListBoxHandlerM.reset(new PrefDlgEventHandler(std::bind(&PrefDlgThemeSetting::OnSelectStylersListBox, this, std::placeholders::_1)));
+    stylersListBoxM->PushEventHandler(stylersListBoxHandlerM.get());
+    stylersListBoxHandlerM->Connect(stylersListBoxM->GetId(),
+        wxEVT_COMMAND_LISTBOX_SELECTED,
+        wxCommandEventHandler(PrefDlgEventHandler::OnCommandEvent));
 
     styleListBoxM = new wxListBox(getPage(), wxID_ANY, wxDefaultPosition, wxDefaultSize);
-    styleListBoxM->Insert("Global", 0);
+    styleListBoxHandlerM.reset(new PrefDlgEventHandler(std::bind(&PrefDlgThemeSetting::OnSelectStyleListBox, this, std::placeholders::_1)));
+    styleListBoxM->PushEventHandler(styleListBoxHandlerM.get());
+    styleListBoxHandlerM->Connect(styleListBoxM->GetId(),
+        wxEVT_COMMAND_LISTBOX_SELECTED,
+        wxCommandEventHandler(PrefDlgEventHandler::OnCommandEvent));
 
+
+
+    foregroundPickerM = new wxColourPickerCtrl(getPage(), wxID_ANY, *wxBLACK, wxDefaultPosition, wxDefaultSize);
+    backgroundPickerM = new wxColourPickerCtrl(getPage(), wxID_ANY, *wxBLACK, wxDefaultPosition, wxDefaultSize);
+
+    wxArrayString strArray = wxFontEnumerator::GetFacenames();
+    strArray.Sort();
+    fontNameComboBoxM = new wxComboBox(getPage(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, strArray);
+
+    strArray.Clear();
+    for (int i = 5; i <= 30; i++) {
+        if (i <= 12 || i % 2 == 0) {
+            strArray.Add(wxString::Format("%i", i));
+        }
+    }
+    fontSizeComboBoxM = new wxComboBox(getPage(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, strArray);
+
+    blodCheckBoxM = new wxCheckBox(getPage(), wxID_ANY, "Bold", wxDefaultPosition, wxDefaultSize);
+    italicCheckBoxM = new wxCheckBox(getPage(), wxID_ANY, "Italic", wxDefaultPosition, wxDefaultSize);
+    underlineCheckBoxM = new wxCheckBox(getPage(), wxID_ANY, "Underline", wxDefaultPosition, wxDefaultSize);
+
+    
     return true;
 }
 
 bool PrefDlgThemeSetting::loadFromTargetConfig(Config& config)
 {
+    if (!checkTargetConfigProperties())
+        return false;
+
+    if (fileComboBoxM)
+    {
+        wxString value = defaultM;
+        config.getValue(keyM, value);
+        fileComboBoxM->SetValue(value);
+        
+        loadStylers(fileComboBoxM->GetValue());
+    }
+
+    enableControls(true);
+
     return true;
 }
 
@@ -1790,6 +1887,8 @@ bool PrefDlgThemeSetting::parseProperty(wxXmlNode* xmln)
                 itemsM.Add(name);
             }
         }
+
+
     }*/
 
     return PrefDlgSetting::parseProperty(xmln);
@@ -1802,6 +1901,7 @@ bool PrefDlgThemeSetting::saveToTargetConfig(Config& config)
 
 void PrefDlgThemeSetting::addControlsToSizer(wxSizer* sizer)
 {
+
     //if (checkListBoxM)
     {
         static_cast<wxBoxSizer*>(sizer)->SetOrientation(wxVERTICAL);
@@ -1813,72 +1913,91 @@ void PrefDlgThemeSetting::addControlsToSizer(wxSizer* sizer)
             topSizer->Add(styleguide().getControlLabelMargin(), 0);
         }
 
-
         wxSizer* sizerVert = new wxBoxSizer(wxVERTICAL);
-        sizerVert->Add(comboBoxM, 1, wxEXPAND);
+        sizerVert->Add(fileComboBoxM, 1, wxEXPAND);
         topSizer->Add(sizerVert, 1, wxEXPAND | wxFIXED_MINSIZE | wxALIGN_TOP);
+ 
+        wxSizer* buttomSizer = new wxBoxSizer(wxVERTICAL);
+        sizer->Add(buttomSizer, 1, wxEXPAND);
+
+        wxSizer* languageStyleSizer = new wxStaticBoxSizer(new wxStaticBox(getPage(), -1, ""), wxHORIZONTAL);//new wxBoxSizer(wxHORIZONTAL);
+        buttomSizer->Add(languageStyleSizer, 1, wxEXPAND | wxFIXED_MINSIZE | wxALIGN_TOP, 10);
+
+        wxStaticBoxSizer* languageStaticBox = new wxStaticBoxSizer(new wxStaticBox(getPage(), -1, "Language:"), wxVERTICAL);
+        languageStyleSizer->Add(languageStaticBox, 1, wxLEFT, 10);
+        languageStaticBox->Add(stylersListBoxM, 1, wxEXPAND | wxCENTER, 10);
+
+        wxStaticBoxSizer* styleStaticBox = new wxStaticBoxSizer(new wxStaticBox(getPage(), -1, "Style:"), wxVERTICAL);
+        languageStyleSizer->Add(styleStaticBox, 1, wxLEFT, 10);
+        styleStaticBox->Add(styleListBoxM, 1, wxEXPAND | wxCENTER, 10);
 
 
-        wxSizer* buttomSizer = new wxBoxSizer(wxHORIZONTAL);
-        sizer->Add(buttomSizer, 1, wxEXPAND );
+        wxSizer* fontSizer = new wxBoxSizer(wxHORIZONTAL);
+        buttomSizer->Add(fontSizer, 1, wxEXPAND | wxFIXED_MINSIZE | wxALIGN_TOP, 10);
 
 
-        wxSizer* rightSizer = new wxBoxSizer(wxHORIZONTAL);
-        buttomSizer->Add(rightSizer, 1, wxEXPAND | wxFIXED_MINSIZE | wxALIGN_TOP);
-
-        wxPanel* rightPanel = new wxPanel(getPage(), wxID_ANY, wxDefaultPosition, wxSize(100,200));
-        //rightPanel->SetBackgroundColour(wxColor(200, 100, 200));
-        buttomSizer->Add(rightPanel, 1, wxEXPAND | wxLEFT | wxTOP | wxRIGHT, 10);
-        
-        wxBoxSizer* rightBoxSizer  = new wxBoxSizer(wxVERTICAL); /*vbox*/
-        wxStaticBox* rightStaticBox = new wxStaticBox(rightPanel, -1, ""); /*nm*/
-        wxStaticBoxSizer* rightStaticBoxSizer = new wxStaticBoxSizer(rightStaticBox, wxHORIZONTAL);/*mnSizer*/
-
-        wxBoxSizer* languageBoxSizer = new wxBoxSizer(wxVERTICAL); /*mnBox*/
-        languageBoxSizer->Add(new wxStaticText(rightPanel, -1, "Language:"), 0, wxALL | wxCENTER, 1);
-        languageBoxSizer->Add(new wxListBox(rightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize), 0, wxALL | wxCENTER, 1);
-        
-        //wxSizer* sizerlanguageListBox = new wxBoxSizer(wxVERTICAL);
-        //languageListBoxM->SetParent(rightPanel);
-        languageBoxSizer->Add(languageListBoxM, 1, wxALL | wxCENTER, 1);
-        //languageBoxSizer->Add(sizerlanguageListBox, 1, wxEXPAND | wxFIXED_MINSIZE | wxALIGN_LEFT, 5);
-
-        rightStaticBoxSizer->Add(languageBoxSizer, 0, wxALL | wxCENTER, 10);
-
-
-        wxBoxSizer* styleBoxSizer = new wxBoxSizer(wxVERTICAL); /*mnBox*/
-        styleBoxSizer->Add(new wxStaticText(rightPanel, -1, "Style:"), 0, wxALL | wxCENTER, 1);
-        styleBoxSizer->Add(styleListBoxM, 1, wxALL | wxCENTER, 1);
-        rightStaticBoxSizer->Add(styleBoxSizer, 0, wxALL | wxCENTER, 10);
-
-
-        rightBoxSizer->Add(rightStaticBoxSizer, 0, wxEXPAND | wxLEFT | wxTOP | wxRIGHT | wxBOTTOM, 5);
-        rightPanel->SetSizer(rightBoxSizer);
-
-        //wxStaticBoxSizer* rigthStaticSizer = new wxStaticBoxSizer(rigthStaticBox, wxVERTICAL);
-        //rigthStaticSizer->SetDimension(1, 1, 198, 198);
-        //rigthStaticSizer->Add(0, styleguide().getUnrelatedControlMargin(wxVERTICAL));
-        //rigthStaticSizer->Add(new wxStaticText(rigthStaticSizer->GetStaticBox(), wxID_ANY, "Language:"), 0, wxCENTER, 10);
-
-        //wxBoxSizer* languageSizer = new wxBoxSizer(wxVERTICAL);
-        //rigthStaticSizer->Add(languageSizer, 1);
-        //languageSizer->Add(new wxStaticText(rigthStaticSizer->GetStaticBox(), wxID_ANY, "Language:"),  1, wxEXPAND | wxLEFT | wxTOP | wxRIGHT, 10);
         
 
-
-
-
-
-
-        wxSizer* leftSizer = new wxBoxSizer(wxHORIZONTAL);
-        buttomSizer->Add(leftSizer, 1, wxEXPAND );
+        wxStaticBoxSizer* colourStaticBox = new wxStaticBoxSizer(new wxStaticBox(getPage(), -1, "Colour Style"), wxVERTICAL);
+        fontSizer->Add(colourStaticBox, 1, wxLEFT, 10);
         
+
+        wxSizer* foregroundsizerHor = new wxBoxSizer(wxHORIZONTAL);
+        foregroundsizerHor->Add(new wxStaticText(getPage(), -1, "Foreground Colour"),  0, wxFIXED_MINSIZE | wxALIGN_TOP);
+        foregroundsizerHor->Add(styleguide().getControlLabelMargin(), 0);
+
+        wxSizer* foregroundsizerVert = new wxBoxSizer(wxVERTICAL);
+        foregroundsizerVert->Add(foregroundPickerM, 0, wxFIXED_MINSIZE, styleguide().getRelatedControlMargin(wxHORIZONTAL));
+        foregroundsizerVert->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+        foregroundsizerHor->Add(foregroundsizerVert, 1, wxEXPAND | wxFIXED_MINSIZE | wxALIGN_LEFT);
         
-        wxPanel* panel_top = new wxPanel(getPage(), wxID_ANY, wxDefaultPosition, wxDefaultSize);
-        panel_top->SetBackgroundColour(wxColor(100, 100, 200));
-        leftSizer->Add(panel_top, 1, wxEXPAND | wxLEFT | wxTOP | wxRIGHT, 10);
-        
+        colourStaticBox->Add(foregroundsizerHor, 1, wxEXPAND | wxFIXED_MINSIZE | wxALIGN_TOP);
+
+
+        wxSizer* backgroundsizerHor = new wxBoxSizer(wxHORIZONTAL);
+        backgroundsizerHor->Add(new wxStaticText(getPage(), -1, "Background Colour"), 0, wxFIXED_MINSIZE | wxALIGN_TOP);
+        backgroundsizerHor->Add(styleguide().getControlLabelMargin(), 0);
+
+        wxSizer* backgroundsizerVert = new wxBoxSizer(wxVERTICAL);
+        backgroundsizerVert->Add(backgroundPickerM, 0, wxFIXED_MINSIZE, styleguide().getRelatedControlMargin(wxHORIZONTAL));
+        backgroundsizerVert->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+        backgroundsizerHor->Add(backgroundsizerVert, 1, wxEXPAND | wxFIXED_MINSIZE | wxALIGN_LEFT);
+
+        colourStaticBox->Add(backgroundsizerHor, 1, wxEXPAND | wxFIXED_MINSIZE | wxALIGN_TOP);
+
+
+        wxStaticBoxSizer* fontStaticBox = new wxStaticBoxSizer(new wxStaticBox(getPage(), -1, "Font Style"), wxVERTICAL);
+        fontSizer->Add(fontStaticBox, 1, wxLEFT, 10);
+
+        wxSizer* fontNameSizerHor = new wxBoxSizer(wxHORIZONTAL);
+        fontStaticBox->Add(fontNameSizerHor, 1, wxEXPAND | wxFIXED_MINSIZE | wxALIGN_TOP);
+
+        fontNameSizerHor->Add(new wxStaticText(getPage(), -1, "Font Name:"), 0, wxFIXED_MINSIZE | wxALIGN_TOP);
+        fontNameSizerHor->Add(styleguide().getControlLabelMargin(), 0);
+
+        wxSizer* fontNameSizerVert = new wxBoxSizer(wxVERTICAL);
+        fontNameSizerHor->Add(fontNameSizerVert, 1, wxEXPAND | wxFIXED_MINSIZE | wxALIGN_LEFT);
+
+        fontNameSizerVert->Add(fontNameComboBoxM, 0, wxEXPAND, styleguide().getRelatedControlMargin(wxHORIZONTAL));
+        fontNameSizerVert->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+
+        wxSizer* fontSizeSizerHor = new wxBoxSizer(wxHORIZONTAL);
+        fontStaticBox->Add(fontSizeSizerHor, 1, wxEXPAND | wxFIXED_MINSIZE | wxALIGN_TOP);
+
+        fontSizeSizerHor->Add(new wxStaticText(getPage(), -1, "Font Size:"), 0, wxFIXED_MINSIZE | wxALIGN_TOP);
+        fontSizeSizerHor->Add(styleguide().getControlLabelMargin(), 0);
+
+        wxSizer* fontSizeSizerVert = new wxBoxSizer(wxVERTICAL);
+        fontSizeSizerHor->Add(fontSizeSizerVert, 1, wxEXPAND | wxFIXED_MINSIZE | wxALIGN_LEFT);
+
+        fontSizeSizerVert->Add(fontSizeComboBoxM, 0, wxEXPAND, styleguide().getRelatedControlMargin(wxHORIZONTAL));
+        fontSizeSizerVert->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+
+        fontStaticBox->Add(blodCheckBoxM, 0, wxFIXED_MINSIZE, 10);
+        fontStaticBox->Add(italicCheckBoxM, 0, wxFIXED_MINSIZE, 10);
+        fontStaticBox->Add(underlineCheckBoxM, 0, wxFIXED_MINSIZE, 10);
     }
+
 }
 
 void PrefDlgThemeSetting::enableControls(bool enabled)
@@ -1892,7 +2011,97 @@ bool PrefDlgThemeSetting::hasControls() const
 
 wxArrayString PrefDlgThemeSetting::getComboBoxItems()
 {
-    return wxArrayString();
+    wxArrayString lItems = wxArrayString();
+
+    wxString dirName = config().getXmlStylesPath();
+    wxString fileSpec = _T("*.xml");
+    wxArrayString files;
+    lItems.clear();
+
+    if (wxDir::GetAllFiles(dirName, &files, fileSpec, wxDIR_FILES) > 0) {
+        wxString name, ext;
+        wxString allFileNames;
+        for (size_t i = 0; i < files.GetCount(); i++) {
+            wxFileName::SplitPath(files[i], NULL, &name, &ext);
+            lItems.Add(name);
+        }
+    }
+
+    return lItems;
+}
+
+void PrefDlgThemeSetting::loadStylers(const wxString& styleFileName)
+{
+    styleManagerM->setfileName(wxFileName(config().getXmlStylesPath(), styleFileName + ".xml"));
+    styleManagerM->loadStyle();
+
+    stylersListBoxM->Clear();
+    stylersListBoxM->Insert("Global Styles", 0);
+
+    FRStylers stylers = styleManagerM->getLexerStylers();
+    
+    //if (stylers) 
+    {
+        int i = 0;
+        for (FRStyler* styler : stylers.getStylers()) {
+            stylersListBoxM->Insert(styler->getStylerDesc(), ++i);
+        }
+    }
+
+    stylersListBoxM->Select(0);
+    //loadStyles(stylersListBoxM->GetString(stylersListBoxM->GetSelection()));
+
+}
+
+void PrefDlgThemeSetting::loadStyles(const wxString& language)
+{
+    FRStyler* styler;
+    styleListBoxM->Clear();
+
+    if (language == "Global Styles") {
+        styler = styleManagerM->getGlobalStyler();
+    }else{
+        styler = styleManagerM->getLexerStylers().getStylerByDesc(language);
+    }
+
+    if (styler) {
+        int i = 0;
+        for (FRStyle* style : styler->getStyles()) {
+            styleListBoxM->Insert(style->getStyleDesc(), i++);
+        }
+    }
+
+}
+
+void PrefDlgThemeSetting::loadStyle(const wxString& styleName)
+{
+    FRStyle* style = styleManagerM->getStylerByDesc(stylersListBoxM->GetString(stylersListBoxM->GetSelection()))->getStyleByName(styleName);
+    fontNameComboBoxM->SetSelection(fontNameComboBoxM->FindString(style->getFontName()));
+
+    fontSizeComboBoxM->SetSelection(fontSizeComboBoxM->FindString(wxString::Format("%i", style->getFontSize())));
+
+    foregroundPickerM->SetColour(style->getfgColour());
+    backgroundPickerM->SetColour(style->getbgColour());
+
+    blodCheckBoxM->SetValue(style->getFontStyle() & FONTSTYLE_BOLD);
+    italicCheckBoxM->SetValue(style->getFontStyle() & FONTSTYLE_ITALIC);
+    underlineCheckBoxM->SetValue(style->getFontStyle() & FONTSTYLE_UNDERLINE);
+
+}
+
+void PrefDlgThemeSetting::OnSelectFileComboBox(wxCommandEvent& event)
+{
+    loadStylers(fileComboBoxM->GetValue());
+}
+
+void PrefDlgThemeSetting::OnSelectStylersListBox(wxCommandEvent& event)
+{
+    loadStyles(stylersListBoxM->GetString(stylersListBoxM->GetSelection()));
+}
+
+void PrefDlgThemeSetting::OnSelectStyleListBox(wxCommandEvent& event)
+{
+    loadStyle(styleListBoxM->GetString(styleListBoxM->GetSelection()));
 }
 
 
