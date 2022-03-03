@@ -2276,6 +2276,7 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
     LocalSettings localSet;
 
     wxString localValue = value;
+    double localDouble = 0;
     
     
     if (IBPP::isRationalNumber(statementM->ColumnType(col + 1)) && localValue.ToDouble(&localDouble) && (value.Contains(",") || value.Contains(".")))
