@@ -1732,6 +1732,7 @@ public:
     virtual bool loadFromTargetConfig(Config& config);
     virtual bool parseProperty(wxXmlNode* xmln);
     virtual bool saveToTargetConfig(Config& config);
+    FRStyleManager* getStyleManager() { return styleManagerM; };
 protected:
     wxString defaultM;
 
@@ -2032,13 +2033,13 @@ wxArrayString PrefDlgThemeSetting::getComboBoxItems()
 
 void PrefDlgThemeSetting::loadStylers(const wxString& styleFileName)
 {
-    styleManagerM->setfileName(wxFileName(config().getXmlStylesPath(), styleFileName + ".xml"));
-    styleManagerM->loadStyle();
+    getStyleManager()->setfileName(wxFileName(config().getXmlStylesPath(), styleFileName + ".xml"));
+    getStyleManager()->loadStyle();
 
     stylersListBoxM->Clear();
     stylersListBoxM->Insert("Global Styles", 0);
 
-    FRStylers stylers = styleManagerM->getLexerStylers();
+    FRStylers stylers = getStyleManager()->getLexerStylers();
     
     //if (stylers) 
     {
@@ -2059,9 +2060,9 @@ void PrefDlgThemeSetting::loadStyles(const wxString& language)
     styleListBoxM->Clear();
 
     if (language == "Global Styles") {
-        styler = styleManagerM->getGlobalStyler();
+        styler = getStyleManager()->getGlobalStyler();
     }else{
-        styler = styleManagerM->getLexerStylers().getStylerByDesc(language);
+        styler = getStyleManager()->getLexerStylers().getStylerByDesc(language);
     }
 
     if (styler) {
@@ -2075,7 +2076,7 @@ void PrefDlgThemeSetting::loadStyles(const wxString& language)
 
 void PrefDlgThemeSetting::loadStyle(const wxString& styleName)
 {
-    FRStyle* style = styleManagerM->getStylerByDesc(stylersListBoxM->GetString(stylersListBoxM->GetSelection()))->getStyleByName(styleName);
+    FRStyle* style = getStyleManager()->getStylerByDesc(stylersListBoxM->GetString(stylersListBoxM->GetSelection()))->getStyleByName(styleName);
     fontNameComboBoxM->SetSelection(fontNameComboBoxM->FindString(style->getFontName()));
 
     fontSizeComboBoxM->SetSelection(fontSizeComboBoxM->FindString(wxString::Format("%i", style->getFontSize())));
