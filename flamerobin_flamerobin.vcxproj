@@ -985,6 +985,7 @@
     <ClCompile Include="src\config\LocalSettings.cpp" />
     <ClCompile Include="src\core\ArtProvider.cpp" />
     <ClCompile Include="src\core\CodeTemplateProcessor.cpp" />
+    <ClCompile Include="src\core\FRDecimal.cpp" />
     <ClCompile Include="src\core\FRError.cpp" />
     <ClCompile Include="src\core\FRInt128.cpp" />
     <ClCompile Include="src\core\Observer.cpp" />
@@ -1113,6 +1114,7 @@
     <ClInclude Include="src\config\LocalSettings.h" />
     <ClInclude Include="src\core\ArtProvider.h" />
     <ClInclude Include="src\core\CodeTemplateProcessor.h" />
+    <ClInclude Include="src\core\FRDecimal.h" />
     <ClInclude Include="src\core\FRError.h" />
     <ClInclude Include="src\core\FRInt128.h" />
     <ClInclude Include="src\core\ObjectWithHandle.h" />
