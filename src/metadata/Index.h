@@ -69,6 +69,7 @@ public:
 };
 
 
+
 class Indices : public MetadataCollection<Index>
 {
 protected:
@@ -81,5 +82,31 @@ public:
     virtual const wxString getTypeName() const;
 
 };
+
+
+class SysIndices : public MetadataCollection<Index>
+{
+protected:
+    virtual void loadChildren();
+public:
+    SysIndices(DatabasePtr database);
+
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    void load(ProgressIndicator* progressIndicator);
+    virtual const wxString getTypeName() const;
+};
+
+class UsrIndices : public MetadataCollection<Index>
+{
+protected:
+    virtual void loadChildren();
+public:
+    UsrIndices(DatabasePtr database);
+
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    void load(ProgressIndicator* progressIndicator);
+    virtual const wxString getTypeName() const;
+};
+
 
 #endif

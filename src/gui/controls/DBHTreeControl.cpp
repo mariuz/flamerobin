@@ -73,6 +73,7 @@ private:
     bool showColumnsM;
     int showComputedM;
     int showDomainsM;
+    bool showSystemIndicesM;
     bool showSystemRolesM;
     bool showSystemTablesM;
     bool sortDatabasesM;
@@ -128,6 +129,8 @@ void DBHTreeConfigCache::loadFromConfig()
         cfg.get("OrderServersInTree", false));
     // these aren't surfaced by methods, but needed to cause observing tree
     // nodes to update themselves
+    changes += setValue(showSystemIndicesM,
+        cfg.get("ShowSystemIndices", false));
     changes += setValue(showSystemRolesM,
         cfg.get("ShowSystemRoles", false));
     changes += setValue(showSystemTablesM,
@@ -214,6 +217,8 @@ DBHTreeImageList::DBHTreeImageList()
     addImage(ART_Roles);
     addImage(ART_Root);
     addImage(ART_Server);
+    addImage(ART_SystemIndex);
+    addImage(ART_SystemIndices);
     addImage(ART_SystemDomain);
     addImage(ART_SystemDomains);
     addImage(ART_SystemPackage);
@@ -333,6 +338,8 @@ public:
     virtual void visitViews(Views& views);
     virtual void visitIndex(Index& index);
     virtual void visitIndices(Indices& indices);
+    virtual void visitSysIndices(SysIndices& sysIndices);
+    virtual void visitUsrIndices(UsrIndices& UsrIndices);
 };
 
 DBHTreeItemVisitor::DBHTreeItemVisitor(DBHTreeControl* tree)
@@ -848,12 +855,24 @@ void DBHTreeItemVisitor::visitViews(Views& views)
 void DBHTreeItemVisitor::visitIndex(Index& index)
 {
     nodeEnabledM = index.isActive();
+    
+    //setNodeProperties(&index, index.isSystem() ? ART_SystemIndex : ART_Index);
     setNodeProperties(&index, ART_Index);
 }
 
 void DBHTreeItemVisitor::visitIndices(Indices& indices)
 {
     setNodeProperties(&indices, ART_Indices);
+}
+
+void DBHTreeItemVisitor::visitSysIndices(SysIndices& sysIndices)
+{
+    setNodeProperties(&sysIndices, ART_SystemIndices);
+}
+
+void DBHTreeItemVisitor::visitUsrIndices(UsrIndices& usrIndices)
+{
+    setNodeProperties(&usrIndices, ART_Indices);
 }
 
 // TreeSelectionRestorer class

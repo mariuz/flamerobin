@@ -93,6 +93,11 @@ typedef std::shared_ptr<Index> IndexPtr;
 typedef std::vector<IndexPtr> IndexPtrs;
 class Indices;
 typedef std::shared_ptr<Indices> IndicesPtr;
+class SysIndices;
+typedef std::shared_ptr<SysIndices> SysIndicesPtr;
+class UsrIndices;
+typedef std::shared_ptr<UsrIndices> UsrIndicesPtr;
+
 
 class MetadataItem;
 typedef std::shared_ptr<MetadataItem> MetadataItemPtr;

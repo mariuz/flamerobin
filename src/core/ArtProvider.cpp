@@ -109,6 +109,8 @@
 #include "role16_png.cpp"
 #include "root.xpm"
 #include "server.xpm"
+#include "systemindex.xpm"
+#include "systemindices.xpm"
 #include "systemdomain.xpm"
 #include "systemdomains.xpm"
 #include "systempackage.xpm"
@@ -171,6 +173,8 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(server32_xpm);
         if (id == ART_SystemDomain)
             return wxBitmap(systemdomain32_xpm);
+        if (id == ART_SystemIndex)
+            return wxBitmap(systemindex32_xpm);
         if (id == ART_SystemPackage)
             return wxBitmap(systempackage32_xpm);
         if (id == ART_SystemTable)
@@ -287,6 +291,10 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(databaseserver_xpm);
         if (id == ART_ShowExecutionPlan)
             return wxBitmap(plan16_xpm);
+        if (id == ART_SystemIndex)
+            return wxBitmap(systemindex32_xpm);
+        if (id == ART_SystemIndices)
+            return wxBitmap(systemindices_xpm);
         if (id == ART_SystemDomain)
             return wxBitmap(systemdomain_xpm);
         if (id == ART_SystemPackages)

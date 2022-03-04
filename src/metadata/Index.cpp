@@ -227,12 +227,84 @@ void Indices::load(ProgressIndicator* progressIndicator)
 {
     DatabasePtr db = getDatabase();
     wxString stmt = "select a.rdb$index_name from rdb$indices a "
-            "   left join rdb$relation_constraints b on b.rdb$index_name = a.rdb$index_name "
             " where (rdb$system_flag = 0 or rdb$system_flag is null) "
-            "   and b.rdb$index_name is null "
             " order by 1 ";
     setItems(db->loadIdentifiers(stmt, progressIndicator));
     
+    stmt = "select a.rdb$index_name from rdb$indices a "
+        " where (rdb$system_flag = 0 or rdb$system_flag is null) and a.rdb$index_inactive = 1 "
+        " order by 1 ";
+    setInactiveItems(db->loadIdentifiers(stmt, progressIndicator));
+}
+
+const wxString Indices::getTypeName() const
+{
+    return "INDICES_COLLECTION";
+}
+
+void SysIndices::loadChildren()
+{
+    load(0);
+}
+
+SysIndices::SysIndices(DatabasePtr database)
+    : MetadataCollection<Index>(ntSysIndices, database, _("System Indices"))
+{
+}
+
+void SysIndices::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitSysIndices(*this);
+}
+
+void SysIndices::load(ProgressIndicator* progressIndicator)
+{
+    DatabasePtr db = getDatabase();
+    wxString stmt = "select a.rdb$index_name from rdb$indices a "
+        "   left join rdb$relation_constraints b on b.rdb$index_name = a.rdb$index_name "
+        " where (rdb$system_flag = 0 or rdb$system_flag is null) "
+        "   and b.rdb$index_name is not null "
+        " order by 1 ";
+    setItems(db->loadIdentifiers(stmt, progressIndicator));
+
+    stmt = "select a.rdb$index_name from rdb$indices a "
+        "   left join rdb$relation_constraints b on b.rdb$index_name = a.rdb$index_name "
+        " where (rdb$system_flag = 0 or rdb$system_flag is null) and a.rdb$index_inactive = 1 "
+        "   and b.rdb$index_name is not null "
+        " order by 1 ";
+    setInactiveItems(db->loadIdentifiers(stmt, progressIndicator));
+}
+
+const wxString SysIndices::getTypeName() const
+{
+    return "SYSINDICES_COLLECTION";
+}
+
+void UsrIndices::loadChildren()
+{
+    load(0);
+}
+
+UsrIndices::UsrIndices(DatabasePtr database)
+    : MetadataCollection<Index>(ntUsrIndices, database, _("Indices"))
+{
+}
+
+void UsrIndices::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitUsrIndices(*this);
+}
+
+void UsrIndices::load(ProgressIndicator* progressIndicator)
+{
+    DatabasePtr db = getDatabase();
+    wxString stmt = "select a.rdb$index_name from rdb$indices a "
+        "   left join rdb$relation_constraints b on b.rdb$index_name = a.rdb$index_name "
+        " where (rdb$system_flag = 0 or rdb$system_flag is null) "
+        "   and b.rdb$index_name is null "
+        " order by 1 ";
+    setItems(db->loadIdentifiers(stmt, progressIndicator));
+
     stmt = "select a.rdb$index_name from rdb$indices a "
         "   left join rdb$relation_constraints b on b.rdb$index_name = a.rdb$index_name "
         " where (rdb$system_flag = 0 or rdb$system_flag is null) and a.rdb$index_inactive = 1 "
@@ -241,7 +313,8 @@ void Indices::load(ProgressIndicator* progressIndicator)
     setInactiveItems(db->loadIdentifiers(stmt, progressIndicator));
 }
 
-const wxString Indices::getTypeName() const
+
+const wxString UsrIndices::getTypeName() const
 {
-    return "INDICES_COLLECTION";
+    return "USRINDICES_COLLECTION";
 }

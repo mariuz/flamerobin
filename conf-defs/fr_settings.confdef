@@ -70,6 +70,18 @@
             <related /><!-- this moves the checkbox closer to the previous one -->
         </setting>
         <setting type="checkbox">
+            <caption>Show all indices in one node in tree</caption>
+            <description>If checked the all indices will be shown in one node in the tree by default (can be overridden per database)</description>
+            <key>ShowOneNodeIndices</key>
+            <default>0</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Show system indices in tree</caption>
+            <description>If checked the system indices will be shown in the tree by default (can be overridden per database)</description>
+            <key>ShowSystemIndices</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
             <caption>Show system domains in tree</caption>
             <description>If checked the system domains will be shown in the tree by default (can be overridden per database)</description>
             <key>ShowSystemDomains</key>

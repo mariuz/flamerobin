@@ -70,6 +70,8 @@ public:
     virtual void visitRoles(Roles& roles);
     virtual void visitRoot(Root& root);
     virtual void visitServer(Server& server);
+    virtual void visitSysIndices(SysIndices& indices);
+    virtual void visitUsrIndices(UsrIndices& indices);
     virtual void visitSysDomains(SysDomains& domains);
     virtual void visitSysPackages(SysPackages& packages);
     virtual void visitSysRoles(SysRoles& sysRoles);

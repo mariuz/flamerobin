@@ -382,6 +382,10 @@ void Database::getIdentifiers(std::vector<Identifier>& temp)
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(indicesM->begin(), indicesM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(sysIndicesM->begin(), sysIndicesM->end(),
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(usrIndicesM->begin(), usrIndicesM->end(),
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
 }
 
 // This could be moved to Column class
@@ -620,6 +624,12 @@ MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
             break;
         case ntIndices:
             return indicesM->findByName(name).get();
+            break;
+        case ntSysIndices:
+            return sysIndicesM->findByName(name).get();
+            break;
+        case ntUsrIndices:
+            return usrIndicesM->findByName(name).get();
             break;
         default:
             return 0;
@@ -1123,6 +1133,10 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             initializeLockCount(DDLTriggersM, lockCount);
             indicesM.reset(new Indices(me));
             initializeLockCount(indicesM, lockCount);
+            sysIndicesM.reset(new SysIndices(me));
+            initializeLockCount(sysIndicesM, lockCount);
+            usrIndicesM.reset(new UsrIndices(me));
+            initializeLockCount(usrIndicesM, lockCount);
 
             // first start a transaction for metadata loading, then lock the
             // database
@@ -1228,7 +1242,7 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
         }
     };
 
-    const int collectionCount = 18;
+    const int collectionCount = 20;
     std::string loadStmt;
     ProgressIndicatorHelper pih(progressIndicator);
 
@@ -1303,6 +1317,12 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
     pih.init(_("indices"), collectionCount, 18);
     indicesM->load(progressIndicator);
 
+    pih.init(_("system indices"), collectionCount, 19);
+    sysIndicesM->load(progressIndicator);
+
+    pih.init(_("indices"), collectionCount, 20);
+    usrIndicesM->load(progressIndicator);
+
 }
 
 wxArrayString Database::loadIdentifiers(const wxString& loadStatement,
@@ -1366,6 +1386,8 @@ void Database::setDisconnected()
     DBTriggersM.reset();
     DDLTriggersM.reset();
     indicesM.reset();
+    sysIndicesM.reset();
+    usrIndicesM.reset();
 
     if (config().get("HideDisconnectedDatabases", false))
         getServer()->notifyObservers();
@@ -1428,6 +1450,13 @@ UsersPtr Database::getUsers()
     return usersM;
 }
 
+UsrIndicesPtr Database::getUsrIndices()
+{
+    wxASSERT(usrIndicesM);
+    usrIndicesM->ensureChildrenLoaded();
+    return usrIndicesM;
+}
+
 FunctionSQLsPtr Database::getFunctionSQLs()
 {
     wxASSERT(functionSQLsM);
@@ -1475,6 +1504,13 @@ RolesPtr Database::getRoles()
     wxASSERT(rolesM);
     rolesM->ensureChildrenLoaded();
     return rolesM;
+}
+
+SysIndicesPtr Database::getSysIndices()
+{
+    wxASSERT(sysIndicesM);
+    sysIndicesM->ensureChildrenLoaded();
+    return sysIndicesM;
 }
 
 SysRolesPtr Database::getSysRoles()
@@ -1550,7 +1586,12 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
     temp.push_back(generatorsM.get());
     if (getInfo().getODSVersionIsHigherOrEqualTo(11.1)) 
         temp.push_back(GTTablesM.get());
-    temp.push_back(indicesM.get());
+    
+    if (showOneNodeIndices() && showSystemIndices())
+        temp.push_back(indicesM.get());
+    else
+        temp.push_back(usrIndicesM.get());
+
     if (getInfo().getODSVersionIsHigherOrEqualTo(12.0)) 
         temp.push_back(packagesM.get());
     temp.push_back(proceduresM.get());
@@ -1560,12 +1601,14 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
         if (system && showSystemPackages())
             temp.push_back(sysPackagesM.get());
     }
+    if (system && showSystemDomains())
+        temp.push_back(sysDomainsM.get());
+    if (system && showSystemIndices() && !showOneNodeIndices())
+        temp.push_back(sysIndicesM.get());
     if (system && showSystemRoles())
         temp.push_back(sysRolesM.get());
     if (system && showSystemTables())
         temp.push_back(sysTablesM.get());
-    if (system && showSystemDomains())
-        temp.push_back(sysDomainsM.get());
     temp.push_back(tablesM.get());
     temp.push_back(DMLtriggersM.get());
     temp.push_back(UDFsM.get());
@@ -1600,6 +1643,8 @@ void Database::lockChildren()
         UDFsM->lockSubject();
         viewsM->lockSubject();
         indicesM->lockSubject();
+        sysIndicesM->lockSubject();
+        usrIndicesM->lockSubject();
     }
 }
 
@@ -1610,6 +1655,8 @@ void Database::unlockChildren()
     // every added domain will cause all collection observers to update
     if (isConnected())
     {
+        usrIndicesM->unlockSubject();
+        sysIndicesM->unlockSubject();
         indicesM->unlockSubject();
         viewsM->unlockSubject();
         UDFsM->unlockSubject();
@@ -1885,6 +1932,17 @@ void Database::loadInfo()
     notifyObservers();
 }
 
+bool Database::showSystemIndices()
+{
+    const wxString SHOW_SYSINDICES = "ShowSystemIndices";
+
+    bool b;
+    if (!DatabaseConfig(this, config()).getValue(SHOW_SYSINDICES, b))
+        b = config().get(SHOW_SYSINDICES, true);
+
+    return b;
+}
+
 bool Database::showSystemDomains()
 {
     const wxString SHOW_SYSDOMAINS = "ShowSystemDomains";
@@ -1931,6 +1989,17 @@ bool Database::showSystemTables()
     bool b;
     if (!DatabaseConfig(this, config()).getValue(SHOW_SYSTABLES, b))
         b = config().get(SHOW_SYSTABLES, true);
+
+    return b;
+}
+
+bool Database::showOneNodeIndices()
+{
+    const wxString SHOW_ONENODEINDICES = "ShowOneNodeIndices";
+
+    bool b;
+    if (!DatabaseConfig(this, config()).getValue(SHOW_ONENODEINDICES, b))
+        b = config().get(SHOW_ONENODEINDICES, false);
 
     return b;
 }

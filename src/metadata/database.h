@@ -194,6 +194,7 @@ private:
     PackagesPtr packagesM;
     ProceduresPtr proceduresM;
     RolesPtr rolesM;
+    SysIndicesPtr sysIndicesM;
     SysDomainsPtr sysDomainsM;
     SysPackagesPtr sysPackagesM;
     SysRolesPtr sysRolesM;
@@ -201,6 +202,7 @@ private:
     TablesPtr tablesM;
     UDFsPtr UDFsM;
     UsersPtr usersM;
+    UsrIndicesPtr usrIndicesM;
     ViewsPtr viewsM;
 
     // copy constructor implementation removed since it's no longer needed
@@ -222,10 +224,12 @@ private:
 
     mutable unsigned idM;
 
+    bool showSystemIndices();
     bool showSystemDomains();
     bool showSystemPackages();
     bool showSystemRoles();
     bool showSystemTables();
+    bool showOneNodeIndices();
 
     inline void checkConnected(const wxString& operation) const;
 protected:
@@ -252,6 +256,7 @@ public:
     PackagesPtr getPackages();
     ProceduresPtr getProcedures();
     RolesPtr getRoles();
+    SysIndicesPtr getSysIndices();
     SysDomainsPtr getSysDomains();
     SysPackagesPtr getSysPackages();
     SysRolesPtr getSysRoles();
@@ -259,6 +264,7 @@ public:
     TablesPtr getTables();
     UDFsPtr getUDFs();
     UsersPtr getUsers();
+    UsrIndicesPtr getUsrIndices();
     ViewsPtr getViews();
 
     bool isConnected() const;

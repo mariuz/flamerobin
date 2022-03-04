@@ -186,6 +186,16 @@ void MetadataItemVisitor::visitServer(Server&)
     defaultAction();
 }
 
+void MetadataItemVisitor::visitSysIndices(SysIndices&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitUsrIndices(UsrIndices&)
+{
+	defaultAction();
+}
+
 void MetadataItemVisitor::visitSysDomains(SysDomains&)
 {
     defaultAction();
