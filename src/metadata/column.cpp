@@ -307,8 +307,13 @@ wxString Column::getSource(bool identity)
     else {
         if ((isIdentity() && !identity) || !getComputedSource().IsEmpty())
             return  getDatatype(false);
-        else
-            return ColumnBase::getSource(identity);
+        else {
+            wxString lSource = ColumnBase::getSource(identity);
+            if (lSource.Contains("RDB$"))
+                return  getDatatype(false);
+            else
+                return ColumnBase::getSource(identity);
+        }
     }
 }
 
