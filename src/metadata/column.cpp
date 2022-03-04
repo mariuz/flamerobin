@@ -70,7 +70,7 @@ wxString ColumnBase::getDatatype(bool useConfig)
     DomainPtr d = getDomain();
     wxString datatype;
     if (((getParent()->getType() == ntProcedure) || (getParent()->getType() == ntFunctionSQL)) && (isTypeOf())) {
-        datatype = getTypeOf();
+        datatype = getTypeOf(false);
         if (datatype.IsEmpty())
             datatype = d ? d->getDatatypeAsString() : sourceM;
     }
@@ -170,7 +170,7 @@ bool ColumnBase::isNullable(GetColumnNullabilityType type) const
     return true;
 }
 
-wxString ColumnBase::getTypeOf()
+wxString ColumnBase::getTypeOf(bool /*large*/)
 {
     return wxString();
 }

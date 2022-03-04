@@ -49,7 +49,7 @@ public:
     bool getDefault(GetColumnDefaultType type, wxString& value) const;
     virtual wxString getSource(bool identity = false) ;
     bool isNullable(GetColumnNullabilityType type) const;
-    virtual wxString getTypeOf();
+    virtual wxString getTypeOf(bool large = true);
     virtual bool isTypeOf();
 };
 

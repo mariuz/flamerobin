@@ -91,20 +91,20 @@ void Parameter::acceptVisitor(MetadataItemVisitor* visitor)
     visitor->visitParameter(*this);
 }
 
-wxString Parameter::getTypeOf()
+wxString Parameter::getTypeOf(bool large)
 {
     if (relationM.empty()) {
         if (getDomain()->isSystem())
             return "";
         else
-        if (getSource() == "") {
-            return "TYPE OF " + getDomain()->getDatatypeAsString();
-        }
-        else
-            return "TYPE OF " + getSource();
+            if (getSource() == "") {
+                return (large ? "TYPE OF " : "") + getDomain()->getDatatypeAsString();
+            }
+            else
+                return (large ? "TYPE OF " : "") + getSource();
     }
     else
-        return "TYPE OF COLUMN " + relationM + "." + fieldM;
+        return (large ? "TYPE OF COLUMN " : "") + relationM + "." + fieldM;
 }
 
 bool Parameter::isTypeOf()

@@ -48,7 +48,7 @@ public:
 
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
-    virtual wxString getTypeOf();
+    virtual wxString getTypeOf(bool large = true);
     virtual bool isTypeOf();
 
 };
