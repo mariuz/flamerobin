@@ -25,6 +25,7 @@
 #ifndef FR_CREATEDDLVISITOR_H
 #define FR_CREATEDDLVISITOR_H
 
+#include "sql/SqlTokenizer.h"
 #include "metadata/MetadataItemVisitor.h"
 
 class ProgressIndicator;
@@ -39,6 +40,9 @@ private:
     wxString grantSqlM; // grant statements at the very end (for easy diff)
 
     ProgressIndicator* progressIndicatorM;
+
+protected:
+    wxString getCommentOn(MetadataItem& metadataitem);
 
 public:
     CreateDDLVisitor(ProgressIndicator* progressIndicator = 0);
