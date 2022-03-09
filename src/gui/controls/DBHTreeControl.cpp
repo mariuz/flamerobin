@@ -1175,6 +1175,13 @@ void DBHTreeItemData::update()
         treeM->SetItemBold(id, tivObject.getNodeTextBold());
         if (!tivObject.getNodeEnabled())
             treeM->SetItemTextColour(id, wxColour(0x080, 0x080, 0x080));
+            //treeM->SetItemTextColour(id, wxSYS_COLOUR_GRAYTEXT);
+        else
+            treeM->SetItemTextColour(id, wxSystemSettings::GetColour(wxSYS_COLOUR_CAPTIONTEXT));
+        
+
+
+
 
         return;
     }

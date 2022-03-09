@@ -622,7 +622,7 @@ MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
         case ntSysPackage:
             return sysPackagesM->findByName(name).get();
             break;
-        case ntIndices:
+        case ntIndex:
             return indicesM->findByName(name).get();
             break;
         case ntSysIndices:
@@ -832,6 +832,14 @@ void Database::parseCommitedSql(const SqlStatement& stm)
         MetadataItem* m = findByNameAndType(ntTable, tableName);
         if (Table* t = dynamic_cast<Table*>(m))
             t->invalidateIndices();
+
+        if (Index* i = dynamic_cast<Index*>(stm.getObject())) {
+            i->invalidate();
+            i->ensurePropertiesLoaded();
+            i->notifyObservers();
+        }
+        notifyObservers();
+
         return;
     }
 
@@ -942,6 +950,22 @@ void Database::parseCommitedSql(const SqlStatement& stm)
                 object->invalidate();
                 dynamic_cast<Procedure*>(object)->checkDependentProcedures();
                 break;
+            case ntDDLTrigger:
+            {
+                DDLTrigger* tr = dynamic_cast<DDLTrigger*>(object);
+                tr->invalidate();
+                tr->ensurePropertiesLoaded();
+                tr->notifyObservers();
+                notifyObservers();
+            }
+            case ntDBTrigger:
+            {
+                DBTrigger* tr = dynamic_cast<DBTrigger*>(object);
+                tr->invalidate();
+                tr->ensurePropertiesLoaded();
+                tr->notifyObservers();
+                notifyObservers();
+            }
             case ntDMLTrigger:
             {
                 DMLTrigger* tr = dynamic_cast<DMLTrigger*>(object);
@@ -974,6 +998,7 @@ void Database::parseCommitedSql(const SqlStatement& stm)
                 // calls notifyObservers() only in the base class
                 // descendent classes are free to put there whatever it takes...
                 object->invalidate();
+                object->notifyObservers();
                 //object->ensurePropertiesLoaded();
                 notifyObservers();
                 break;

@@ -294,19 +294,28 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
                     if (stt == kwACTIVE || stt == kwINACTIVE) {
                         tokenizer.jumpToken(false);
                         stt = tokenizer.getCurrentToken();
-                    }
-                    if (stt == kwON) { // DB Trigger
-                        objectTypeM = ntDBTrigger;
-                    }
-                    else{
-                        tokenizer.jumpToken(false);
-                        stt = tokenizer.getCurrentToken();
-                        if (stt == kwINSERT || stt == kwUPDATE ||
-                            stt == kwDELETE) { // SQL 2003 DML Trigger
-                            objectTypeM = ntDMLTrigger;
+                        objectTypeM = ntDMLTrigger;
+                        if (databaseM->findByNameAndType(ntDBTrigger, nameM.get())) {
+                            objectTypeM = ntDBTrigger;
                         }
-                        else
+                        if (databaseM->findByNameAndType(ntDDLTrigger, nameM.get())) {
                             objectTypeM = ntDDLTrigger;
+                        }
+                    }
+                    else {
+                        if (stt == kwON) { // DB Trigger
+                            objectTypeM = ntDBTrigger;
+                        }
+                        else {
+                            tokenizer.jumpToken(false);
+                            stt = tokenizer.getCurrentToken();
+                            if (stt == kwINSERT || stt == kwUPDATE ||
+                                stt == kwDELETE) { // SQL 2003 DML Trigger
+                                objectTypeM = ntDMLTrigger;
+                            }
+                            else
+                                objectTypeM = ntDDLTrigger;
+                        }
                     }
                 }
                 else // Legacy DML Trigger
