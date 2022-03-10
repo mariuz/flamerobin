@@ -76,7 +76,7 @@ namespace ibpp_internals
 		if (std::stringstream* p = dynamic_cast<std::stringstream*>(&a))
 		{
 #ifdef IBPP_WINDOWS
-			::OutputDebugString(("IBPP: " + p->str() + "\n").c_str());
+			::OutputDebugStringA(("IBPP: " + p->str() + "\n").c_str());
 #endif
 			p->str("");
 		}
@@ -120,7 +120,7 @@ FBCLIENT* FBCLIENT::Call()
 			{
 				if (path[path.size()-1] != '\\') path += '\\';
 				path.append("fbclient.dll");
-				mHandle = LoadLibrary(path.c_str());
+				mHandle = LoadLibraryA(path.c_str());
 				if (mHandle != 0 || newpos == std::string::npos) break;
 			}
 			pos = newpos + 1;
@@ -132,7 +132,7 @@ FBCLIENT* FBCLIENT::Call()
 			// is a usefull step for applications using the embedded version of FB
 			// or a local copy (for whatever reasons) of the dll.
 
-			int len = GetModuleFileName(NULL, fbdll, sizeof(fbdll));
+			int len = GetModuleFileNameA(NULL, fbdll, sizeof(fbdll));
 			if (len != 0)
 			{
 				// Get to the last '\' (this one precedes the filename part).
@@ -140,13 +140,13 @@ FBCLIENT* FBCLIENT::Call()
 				char* p = fbdll + len;
 				do {--p;} while (*p != '\\');
 				*p = '\0';
-				lstrcat(fbdll, "\\fbembed.dll");// Local copy could be named fbembed.dll
-				mHandle = LoadLibrary(fbdll);
+				lstrcatA(fbdll, "\\fbembed.dll");// Local copy could be named fbembed.dll
+				mHandle = LoadLibraryA(fbdll);
 				if (mHandle == 0)
 				{
 					*p = '\0';
-					lstrcat(fbdll, "\\fbclient.dll");	// Or possibly renamed fbclient.dll
-					mHandle = LoadLibrary(fbdll);
+					lstrcatA(fbdll, "\\fbclient.dll");	// Or possibly renamed fbclient.dll
+					mHandle = LoadLibraryA(fbdll);
 				}
 			}
 		}
@@ -158,10 +158,10 @@ FBCLIENT* FBCLIENT::Call()
 			// of IBPP in order to be able to select among multiple instances
 			// that Firebird Server version > 1.5 might introduce.
 
-			if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, REG_KEY_ROOT_INSTANCES, 0,
+			if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, REG_KEY_ROOT_INSTANCES, 0,
 					KEY_READ, &hkey_instances) == ERROR_SUCCESS
 				// try 64 bit registry view for 32 bit client program with 64 bit server
-				|| RegOpenKeyEx(HKEY_LOCAL_MACHINE, REG_KEY_ROOT_INSTANCES, 0,
+				|| RegOpenKeyExA(HKEY_LOCAL_MACHINE, REG_KEY_ROOT_INSTANCES, 0,
 					KEY_READ | KEY_WOW64_64KEY, &hkey_instances) == ERROR_SUCCESS)
 			{
 				DWORD keytype;
@@ -172,13 +172,13 @@ FBCLIENT* FBCLIENT::Call()
 					&& keytype == REG_SZ)
 				{
 					int len = lstrlen(fbdll);
-					lstrcat(fbdll, "bin\\fbclient.dll");
-					mHandle = LoadLibrary(fbdll);
+					lstrcatA(fbdll, "bin\\fbclient.dll");
+					mHandle = LoadLibraryA(fbdll);
 					// try 32 bit client library of 64 bit server too
 					if (mHandle == 0)
 					{
 						lstrcpy(fbdll + len, "WOW64\\fbclient.dll");
-						mHandle = LoadLibrary(fbdll);
+						mHandle = LoadLibraryA(fbdll);
 					}
 				}
 				RegCloseKey(hkey_instances);
@@ -188,12 +188,12 @@ FBCLIENT* FBCLIENT::Call()
 		if (mHandle == 0)
 		{
 			// Let's try from the PATH and System directories
-			mHandle = LoadLibrary("fbclient.dll");
+			mHandle = LoadLibraryA("fbclient.dll");
 			if (mHandle == 0)
 			{
 				// Not found. Last try : attemps loading gds32.dll from PATH and
 				// System directories
-				mHandle = LoadLibrary("gds32.dll");
+				mHandle = LoadLibraryA("gds32.dll");
 				if (mHandle == 0)
 					throw LogicExceptionImpl("GDS::Call()",
 						_("Can't find or load FBCLIENT.DLL or GDS32.DLL"));
