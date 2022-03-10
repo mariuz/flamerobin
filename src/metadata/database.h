@@ -216,6 +216,8 @@ private:
 
     void loadCollections(ProgressIndicator* progressIndicator);
 
+    void loadDatabaseInfo();
+
     void loadDefaultTimezone();
     void loadTimezones();
 

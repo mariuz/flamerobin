@@ -560,6 +560,9 @@ MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
 
     switch (nt)
     {
+        case ntDatabase:
+            return this;
+            break;
         case ntTable:
             return tablesM->findByName(name).get();
             break;
@@ -1175,38 +1178,7 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             try
             {
                 checkProgressIndicatorCanceled(indicator);
-                // load database charset
-                std::string stmt = "select rdb$character_set_name, current_user, current_role, ";
-                stmt += getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " rdb$linger, " : " null, ";
-                stmt += getInfo().getODSVersionIsHigherOrEqualTo(13, 0) ? " rdb$sql_security   " : " null  ";
-                stmt +=" from rdb$database ";
-                IBPP::Statement& st1 = loader->getStatement(stmt);
-                
-                st1->Execute();
-                if (st1->Fetch())
-                {
-                    std::string s;
-                    st1->Get(1, s);
-                    databaseCharsetM = std2wxIdentifier(s, getCharsetConverter());
-                    st1->Get(2, s);
-                    connectionUserM = std2wxIdentifier(s, getCharsetConverter());
-                    st1->Get(3, s);
-                    connectionRoleM = std2wxIdentifier(s, getCharsetConverter());
-                    if (connectionRoleM == "NONE")
-                        connectionRoleM.clear();
-                    if (!st1->IsNull(4))
-                        st1->Get(4, lingerM);
-                    else
-                        lingerM = 0;
-                    if (!st1->IsNull(5))
-                    {
-                        bool b;
-                        st1->Get(5, b);
-                        sqlSecurityM = wxString(b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER");
-                    }
-                    else
-                        sqlSecurityM.clear();
-                }
+                loadDatabaseInfo();
                 checkProgressIndicatorCanceled(indicator);
                 // load database information
                 setPropertiesLoaded(false);
@@ -1348,6 +1320,45 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
     pih.init(_("indices"), collectionCount, 20);
     usrIndicesM->load(progressIndicator);
 
+}
+
+void Database::loadDatabaseInfo()
+{
+    MetadataLoader* loader = getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+
+    // load database charset
+    std::string stmt = "select rdb$character_set_name, current_user, current_role, ";
+    stmt += getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " rdb$linger, " : " null, ";
+    stmt += getInfo().getODSVersionIsHigherOrEqualTo(13, 0) ? " rdb$sql_security   " : " null  ";
+    stmt += " from rdb$database ";
+    IBPP::Statement& st1 = loader->getStatement(stmt);
+
+    st1->Execute();
+    if (st1->Fetch())
+    {
+        std::string s;
+        st1->Get(1, s);
+        databaseCharsetM = std2wxIdentifier(s, getCharsetConverter());
+        st1->Get(2, s);
+        connectionUserM = std2wxIdentifier(s, getCharsetConverter());
+        st1->Get(3, s);
+        connectionRoleM = std2wxIdentifier(s, getCharsetConverter());
+        if (connectionRoleM == "NONE")
+            connectionRoleM.clear();
+        if (!st1->IsNull(4))
+            st1->Get(4, lingerM);
+        else
+            lingerM = 0;
+        if (!st1->IsNull(5))
+        {
+            bool b;
+            st1->Get(5, b);
+            sqlSecurityM = wxString(b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER");
+        }
+        else
+            sqlSecurityM.clear();
+    }
 }
 
 wxArrayString Database::loadIdentifiers(const wxString& loadStatement,
@@ -1954,6 +1965,7 @@ const DatabaseInfo& Database::getInfo()
 void Database::loadInfo()
 {
     databaseInfoM.load(databaseM);
+    loadDatabaseInfo();
     notifyObservers();
 }
 
