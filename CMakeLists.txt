@@ -66,7 +66,9 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/config/LocalSettings.cpp
         ${SOURCEDIR}/core/ArtProvider.cpp
         ${SOURCEDIR}/core/CodeTemplateProcessor.cpp
+        ${SOURCEDIR}/core/FRDecimal.cpp
         ${SOURCEDIR}/core/FRError.cpp
+        ${SOURCEDIR}/core/FRInt128.cpp
         ${SOURCEDIR}/core/Observer.cpp
         ${SOURCEDIR}/core/ProgressIndicator.cpp
         ${SOURCEDIR}/core/StringUtils.cpp
@@ -175,7 +177,9 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/config/LocalSettings.h
         ${SOURCEDIR}/core/ArtProvider.h
         ${SOURCEDIR}/core/CodeTemplateProcessor.h
+        ${SOURCEDIR}/core/FRDecimal.h
         ${SOURCEDIR}/core/FRError.h
+        ${SOURCEDIR}/core/FRInt128.h
         ${SOURCEDIR}/core/ObjectWithHandle.h
         ${SOURCEDIR}/core/Observer.h
         ${SOURCEDIR}/core/ProcessableObject.h
@@ -297,6 +301,7 @@ list(APPEND IBPP_SOURCE_LIST
         ${SOURCEDIR}/ibpp/dbkey.cpp
         ${SOURCEDIR}/ibpp/events.cpp
         ${SOURCEDIR}/ibpp/exception.cpp
+        ${SOURCEDIR}/ibpp/ibint128.cpp
         ${SOURCEDIR}/ibpp/row.cpp
         ${SOURCEDIR}/ibpp/service.cpp
         ${SOURCEDIR}/ibpp/statement.cpp

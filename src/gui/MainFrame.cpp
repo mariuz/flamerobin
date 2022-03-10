@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -663,6 +663,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
             case ntProcedure:
             case ntDomain:
             case ntFunction:
+            case ntFunctionSQL:
             case ntUDF:
             case ntDBTrigger:
             case ntDDLTrigger:
@@ -764,12 +765,12 @@ void MainFrame::OnMenuURLProjectPage(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::OnMenuURLFeatureRequest(wxCommandEvent& WXUNUSED(event))
 {
-    showUrl("http://sourceforge.net/p/flamerobin/feature-requests/");
+    showUrl("https://github.com/mariuz/flamerobin/issues");
 }
 
 void MainFrame::OnMenuURLBugReport(wxCommandEvent& WXUNUSED(event))
 {
-    showUrl("http://sourceforge.net/p/flamerobin/bugs/");
+    showUrl("https://github.com/mariuz/flamerobin/issues");
 }
 
 void MainFrame::OnMenuConfigure(wxCommandEvent& WXUNUSED(event))
@@ -863,6 +864,7 @@ void MainFrame::OnMenuSetStatisticsValue(wxCommandEvent& WXUNUSED(event))
         return;
     }
 }
+
 
 void MainFrame::OnMenuDatabasePreferences(wxCommandEvent& WXUNUSED(event))
 {

@@ -1117,6 +1117,14 @@ bool StatementImpl::Get(int column, int64_t& retvalue)
 	return mOutRow->Get(column, retvalue);
 }
 
+bool StatementImpl::Get(int column, IBPP::ibpp_int128_t& retvalue)
+{
+	if (mOutRow == 0)
+		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
+
+	return mOutRow->Get(column, retvalue);
+}
+
 bool StatementImpl::Get(int column, float* retvalue)
 {
 	if (mOutRow == 0)
@@ -1152,6 +1160,23 @@ bool StatementImpl::Get(int column, double& retvalue)
 
 	return mOutRow->Get(column, retvalue);
 }
+
+bool StatementImpl::Get(int column, IBPP::ibpp_dec16_t& retvalue)
+{
+	if (mOutRow == 0)
+		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
+
+	return mOutRow->Get(column, retvalue);
+}
+
+bool StatementImpl::Get(int column, IBPP::ibpp_dec34_t& retvalue)
+{
+	if (mOutRow == 0)
+		throw LogicExceptionImpl("Statement::Get", _("The row is not initialized."));
+
+	return mOutRow->Get(column, retvalue);
+}
+
 
 bool StatementImpl::Get(int column, IBPP::Timestamp& timestamp)
 {

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -53,13 +53,15 @@ const DatabaseInfoHandler DatabaseInfoHandler::handlerInstance;
 bool DatabaseInfoHandler::handleURI(URI& uri)
 {
     bool isEditSweep, isEditForcedWrites, isEditReserve, isEditReadOnly,
-        isEditPageBuffers;
+        isEditPageBuffers, isEditLinger;
 
     isEditSweep = (uri.action == "edit_db_sweep_interval");
     isEditForcedWrites = (uri.action == "edit_db_forced_writes");
     isEditReserve = (uri.action == "edit_db_reserve_space");
     isEditReadOnly = (uri.action == "edit_db_read_only");
     isEditPageBuffers = (uri.action == "edit_db_page_buffers");
+    isEditLinger = (uri.action == "edit_db_linger");
+
 
     if (!isEditSweep && !isEditForcedWrites && !isEditReserve
         && !isEditReadOnly && !isEditPageBuffers)

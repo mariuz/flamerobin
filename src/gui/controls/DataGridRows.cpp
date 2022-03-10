@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -32,6 +32,7 @@
 
 #include <wx/datetime.h>
 #include <wx/ffile.h>
+#include <wx/numformatter.h>
 #include <wx/textbuf.h>
 
 #include <algorithm>
@@ -40,6 +41,7 @@
 
 #include "config/LocalSettings.h"
 #include "core/FRError.h"
+#include "core/FRInt128.h"
 #include "core/Observer.h"
 #include "core/ProgressIndicator.h"
 #include "core/StringUtils.h"
@@ -70,7 +72,7 @@ void GridCellFormats::loadFromConfig()
     dateFormatM = config().get("DateFormat", wxString("D.M.Y"));
     timeFormatM = config().get("TimeFormat", wxString("H:M:S.T"));
     timestampFormatM = config().get("TimestampFormat",
-        wxString("D.N.Y, H:M:S.T"));
+        wxString("D.N.Y H:M:S.T"));
     showTimezoneInfoM = (ShowTimezoneInfoType)config().get("ShowTimezoneInfo", int(tzName));
 
     maxBlobKBytesM = config().get("DataGridFetchBlobAmount", 1);
@@ -680,6 +682,75 @@ void Int64ColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     buffer->setValue(offsetM, value);
 }
 
+// Int128ColumnDef class
+class Int128ColumnDef : public ResultsetColumnDef
+{
+private:
+    short scaleM;
+    unsigned offsetM;
+public:
+    Int128ColumnDef(const wxString& name, unsigned offset, bool readOnly,
+        bool nullable, short scale);
+    virtual wxString getAsString(DataGridRowBuffer* buffer, Database* db);
+    virtual unsigned getBufferSize();
+    virtual bool isNumeric();
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
+        const IBPP::Statement& statement, wxMBConv* converter, Database* db);
+    virtual void setFromString(DataGridRowBuffer* buffer,
+        const wxString& source);
+};
+
+Int128ColumnDef::Int128ColumnDef(const wxString& name, unsigned offset,
+    bool readOnly, bool nullable, short scale)
+    : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset),
+        scaleM(scale)
+{
+}
+
+wxString Int128ColumnDef::getAsString(DataGridRowBuffer* buffer, Database*)
+{
+    wxASSERT(buffer);
+    int128_t value;
+    wxString result;
+    if (!buffer->getValue(offsetM, value))
+        return wxEmptyString;
+    result = Int128ToString(value);
+    if (scaleM > 0)
+        result.insert(result.length() - scaleM,
+                      wxNumberFormatter::GetDecimalSeparator());
+    return result;
+}
+
+void Int128ColumnDef::setFromString(DataGridRowBuffer* buffer,
+    const wxString& source)
+{
+    wxASSERT(buffer);
+
+    int128_t v128 = 0;
+    if (!StringToInt128(source, &v128))
+        throw FRError(_("Invalid int128 numeric value"));
+    buffer->setValue(offsetM, v128);
+}
+
+unsigned Int128ColumnDef::getBufferSize()
+{
+    return sizeof(int128_t);
+}
+
+bool Int128ColumnDef::isNumeric()
+{
+    return true;
+}
+
+void Int128ColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    const IBPP::Statement& statement, wxMBConv*, Database*)
+{
+    wxASSERT(buffer);
+    IBPP::ibpp_int128_t value;
+    statement->Get(col, value);
+    buffer->setValue(offsetM, *reinterpret_cast<int128_t*>(&value));
+}
+
 // DBKeyColumnDef class
 class DBKeyColumnDef : public ResultsetColumnDef
 {
@@ -819,7 +890,9 @@ void DateColumnDef::setFromString(DataGridRowBuffer* buffer,
         idt.Add(-1);
     else if (temp.CmpNoCase("DATE") != 0
         && temp.CmpNoCase("NOW") != 0
-        && temp.CmpNoCase("TODAY") != 0)
+        && temp.CmpNoCase("TODAY") != 0
+        && temp.CmpNoCase("CURRENT_DATE") != 0
+        && temp.CmpNoCase("CURRENT_TIMESTAMP") != 0)
     {
         wxString::iterator it = temp.begin();
         if (!GridCellFormats::get().parseDate(it, temp.end(), true, y, m, d))
@@ -1052,7 +1125,7 @@ wxString TimestampColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
     ts.GetDate(year, month, day);
     ts.GetTime(hour, minute, second, tenththousands);
 
-    return wxString::Format("%d-%d-%d, %d:%d:%d.%d", year, month, day,
+    return wxString::Format("%d-%d-%d %d:%d:%d.%d", year, month, day,
         hour, minute, second, tenththousands / 10);
 }
 
@@ -1070,7 +1143,8 @@ void TimestampColumnDef::setFromString(DataGridRowBuffer* buffer,
         its.Add(1);
     else if (temp.CmpNoCase("YESTERDAY") == 0)
         its.Add(-1);
-    else if (temp.CmpNoCase("NOW") == 0)
+    else if ((temp.CmpNoCase("NOW") == 0) || 
+             (temp.CmpNoCase("CURRENT_TIMESTAMP") == 0))
         its.Now(); // with time
     else if (temp.CmpNoCase("DATE") != 0
         && temp.CmpNoCase("TODAY") != 0)
@@ -1238,6 +1312,129 @@ void DoubleColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     buffer->setValue(offsetM, value);
 }
 
+// Dec16ColumnDef class
+class Dec16ColumnDef : public ResultsetColumnDef
+{
+private:
+    unsigned offsetM;
+public:
+    Dec16ColumnDef(const wxString& name, unsigned offset, bool readOnly,
+        bool nullable);
+    virtual wxString getAsString(DataGridRowBuffer* buffer, Database* db);
+    virtual unsigned getBufferSize();
+    virtual bool isNumeric();
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
+        const IBPP::Statement& statement, wxMBConv* converter, Database* db);
+    virtual void setFromString(DataGridRowBuffer* buffer,
+        const wxString& source);
+};
+
+Dec16ColumnDef::Dec16ColumnDef(const wxString& name, unsigned offset,
+        bool readOnly, bool nullable)
+    : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
+{
+}
+
+wxString Dec16ColumnDef::getAsString(DataGridRowBuffer* buffer, Database*)
+{
+    wxASSERT(buffer);
+    dec16_t value;
+    if (!buffer->getValue(offsetM, value))
+        return wxEmptyString;
+    return Dec16DPDToString(value);
+}
+
+void Dec16ColumnDef::setFromString(DataGridRowBuffer* buffer,
+    const wxString& source)
+{
+    wxASSERT(buffer);
+    dec16_t value;
+    if (!StringToDec16DPD(source, &value))
+        throw FRError(_("Invalid decimal34 numeric value"));
+    buffer->setValue(offsetM, value);
+}
+
+unsigned Dec16ColumnDef::getBufferSize()
+{
+    return sizeof(dec16_t);
+}
+
+bool Dec16ColumnDef::isNumeric()
+{
+    return true;
+}
+
+void Dec16ColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    const IBPP::Statement& statement, wxMBConv*, Database*)
+{
+    wxASSERT(buffer);
+    dec16_t value;
+    statement->Get(col, value);
+    buffer->setValue(offsetM, value);
+}
+
+// Dec34ColumnDef class
+class Dec34ColumnDef : public ResultsetColumnDef
+{
+private:
+    unsigned offsetM;
+public:
+    Dec34ColumnDef(const wxString& name, unsigned offset, bool readOnly,
+        bool nullable);
+    virtual wxString getAsString(DataGridRowBuffer* buffer, Database* db);
+    virtual unsigned getBufferSize();
+    virtual bool isNumeric();
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
+        const IBPP::Statement& statement, wxMBConv* converter, Database* db);
+    virtual void setFromString(DataGridRowBuffer* buffer,
+        const wxString& source);
+};
+
+Dec34ColumnDef::Dec34ColumnDef(const wxString& name, unsigned offset,
+        bool readOnly, bool nullable)
+    : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
+{
+}
+
+wxString Dec34ColumnDef::getAsString(DataGridRowBuffer* buffer, Database*)
+{
+    wxASSERT(buffer);
+    dec34_t value;
+    if (!buffer->getValue(offsetM, value))
+        return wxEmptyString;
+    return Dec34DPDToString(value);
+}
+
+void Dec34ColumnDef::setFromString(DataGridRowBuffer* buffer,
+    const wxString& source)
+{
+    wxASSERT(buffer);
+    dec34_t value;
+    if (!StringToDec34DPD(source, &value))
+        throw FRError(_("Invalid decimal34 numeric value"));
+    buffer->setValue(offsetM, value);
+}
+
+unsigned Dec34ColumnDef::getBufferSize()
+{
+    return sizeof(dec34_t);
+}
+
+bool Dec34ColumnDef::isNumeric()
+{
+    return true;
+}
+
+void Dec34ColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    const IBPP::Statement& statement, wxMBConv*, Database*)
+{
+    wxASSERT(buffer);
+    dec34_t value;
+    statement->Get(col, value);
+    buffer->setValue(offsetM, value);
+}
+
+// BlobColumnDef class
 class BlobColumnDef : public ResultsetColumnDef
 {
 private:
@@ -1826,7 +2023,11 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
         }
 
         IBPP::SDT type = statement->ColumnType(col);
-        if (statement->ColumnScale(col) > 0)
+        short scale = statement->ColumnScale(col);
+        if ((scale > 0) &&
+            (type != IBPP::sdInt128) &&
+            (type != IBPP::sdDec16) &&
+            (type != IBPP::sdDec34))
             type = IBPP::sdDouble;
 
         ResultsetColumnDef* columnDef = 0;
@@ -1863,12 +2064,21 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
                 case IBPP::sdLargeint:
                     columnDef = new Int64ColumnDef(colName, bufferSizeM, readOnly, nullable);
                     break;
+                case IBPP::sdInt128:
+                    columnDef = new Int128ColumnDef(colName, bufferSizeM, readOnly, nullable, scale);
+                    break;
 
                 case IBPP::sdFloat:
                     columnDef = new FloatColumnDef(colName, bufferSizeM, readOnly, nullable);
                     break;
                 case IBPP::sdDouble:
-                    columnDef = new DoubleColumnDef(colName, bufferSizeM, readOnly, nullable, statement->ColumnScale(col));
+                    columnDef = new DoubleColumnDef(colName, bufferSizeM, readOnly, nullable, scale);
+                    break;
+                case IBPP::sdDec16:
+                    columnDef = new Dec16ColumnDef(colName, bufferSizeM, readOnly, nullable);
+                    break;
+                case IBPP::sdDec34:
+                    columnDef = new Dec34ColumnDef(colName, bufferSizeM, readOnly, nullable);
                     break;
 
                 case IBPP::sdString:
@@ -2196,17 +2406,21 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
 {
     LocalSettings localSet;
 
-    double localDouble = 0;
     wxString localValue = value;
+    double localDouble = 0;
     
     
     if (IBPP::isRationalNumber(statementM->ColumnType(col + 1)) && localValue.ToDouble(&localDouble) && (value.Contains(",") || value.Contains(".")))
     {
-        localSet.setDataBaseLenguage();
+        double localDouble = 0;
+        if (localValue.ToDouble(&localDouble) && localValue.Contains(","))
+        {
+            localSet.setDataBaseLenguage();
 
-        localValue = std::to_string(localDouble);
-        if (localValue.Contains(",")) {
-            localValue.Replace(",", ".", true);
+            localValue = std::to_string(localDouble);
+            if (localValue.Contains(",")) {
+                localValue.Replace(",", ".", true);
+            }
         }
     }
     

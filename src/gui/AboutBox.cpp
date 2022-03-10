@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -73,7 +73,7 @@ void showAboutBox(wxWindow* parent)
 
     info.SetName("FlameRobin");
 
-    info.SetCopyright(_("Copyright (c) 2004-2020 FlameRobin Development Team"));
+    info.SetCopyright(_("Copyright (c) 2004-2022 FlameRobin Development Team"));
 
     info.SetVersion(ver);
 
@@ -102,7 +102,7 @@ void showAboutBox(wxWindow* parent)
     msg += "\n\n";
     msg += libs;
     msg += "\n\n";
-    msg += _("Copyright (c) 2004-2020  FlameRobin Development Team");
+    msg += _("Copyright (c) 2004-2022  FlameRobin Development Team");
     msg += "\n";
     msg += _("http://www.flamerobin.org");
 
