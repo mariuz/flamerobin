@@ -171,13 +171,14 @@ wxArrayString DatabaseRegistrationDialog::getDatabaseDialectChoices() const
 wxArrayString DatabaseRegistrationDialog::getDatabasePagesizeChoices() const
 {
     wxArrayString choices;
-    choices.Alloc(6);
+    choices.Alloc(7);
     choices.Add(_("Default"));
     choices.Add("1024");
     choices.Add("2048");
     choices.Add("4096");
     choices.Add("8192");
     choices.Add("16384");
+    choices.Add("32768");
     return choices;
 }
 
@@ -311,7 +312,7 @@ void DatabaseRegistrationDialog::setControlsProperties()
     combobox_charset->SetStringSelection("NONE");
     if (createM)
     {
-        choice_pagesize->SetStringSelection("4096");
+        choice_pagesize->SetStringSelection("Default");
         choice_dialect->SetStringSelection("3");
     }
 

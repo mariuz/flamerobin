@@ -219,7 +219,7 @@ void RestoreFrame::createControls()
     label_pagesize = new wxStaticText(panel_controls, wxID_ANY,
         _("Page size:"));
     const wxString pagesize_choices[] = {
-        _("Default"), "1024", "2048", "4096", "8192", "16384"
+        _("Default"), "1024", "2048", "4096", "8192", "16384", "32768"
     };
     choice_pagesize = new wxChoice(panel_controls, wxID_ANY,
         wxDefaultPosition, wxDefaultSize,
