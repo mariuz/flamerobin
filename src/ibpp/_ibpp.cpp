@@ -35,6 +35,8 @@
 #define REG_KEY_ROOT_INSTANCES	"SOFTWARE\\Firebird Project\\Firebird Server\\Instances"
 #define FB_DEFAULT_INSTANCE	  	"DefaultInstance"
 
+#endif
+
 #ifdef IBPP_UNIX
 #ifdef IBPP_LATE_BIND
 
@@ -51,8 +53,6 @@ static const char* fblibs[] = {"libfbembed.so.2.5","libfbembed.so.2.1","libfbcli
 // Many compilers confuses those following min/max with macros min and max !
 #undef min
 #undef max
-
-#endif
 
 namespace ibpp_internals
 {
@@ -107,24 +107,34 @@ FBCLIENT* FBCLIENT::Call()
 		// that may have been specified through ClientLibSearchPaths().
 		mHandle = 0;
 
-		std::string::size_type pos = 0;
-		while (pos < mSearchPaths.size())
-		{
-			std::string::size_type newpos = mSearchPaths.find(';', pos);
+        // try specific library
+        if (lstrlen(mfbdll.c_str()) > 0)
+            mHandle = LoadLibrary(mfbdll.c_str());
 
-			std::string path;
-			if (newpos == std::string::npos) path = mSearchPaths.substr(pos);
-			else path = mSearchPaths.substr(pos, newpos-pos);
+        if (mHandle == 0) {
+            std::string::size_type pos = 0;
+            while (pos < mSearchPaths.size())
+            {
+                std::string::size_type newpos = mSearchPaths.find(';', pos);
 
-			if (path.size() >= 1)
-			{
-				if (path[path.size()-1] != '\\') path += '\\';
-				path.append("fbclient.dll");
-				mHandle = LoadLibrary(path.c_str());
-				if (mHandle != 0 || newpos == std::string::npos) break;
-			}
-			pos = newpos + 1;
-		}
+                std::string path;
+                if (newpos == std::string::npos) 
+                    path = mSearchPaths.substr(pos);
+                else 
+                    path = mSearchPaths.substr(pos, newpos - pos);
+
+                if (path.size() >= 1)
+                {
+                    if (path[path.size() - 1] != '\\') 
+                        path += '\\';
+                    path.append("fbclient.dll");
+                    mHandle = LoadLibrary(path.c_str());
+                    if (mHandle != 0 || newpos == std::string::npos) 
+                        break;
+                }
+                pos = newpos + 1;
+            }
+        }
 
 		if (mHandle == 0)
 		{
@@ -172,14 +182,25 @@ FBCLIENT* FBCLIENT::Call()
 					&& keytype == REG_SZ)
 				{
 					int len = lstrlen(fbdll);
-					lstrcat(fbdll, "bin\\fbclient.dll");
-					mHandle = LoadLibrary(fbdll);
-					// try 32 bit client library of 64 bit server too
-					if (mHandle == 0)
-					{
-						lstrcpy(fbdll + len, "WOW64\\fbclient.dll");
-						mHandle = LoadLibrary(fbdll);
-					}
+                    // for Firebird 3+
+                    lstrcat(fbdll, "fbclient.dll");
+                    mHandle = LoadLibrary(fbdll);
+                    // try 32 bit client library of 64 bit server too 
+                    if (mHandle == 0) {
+                        lstrcpy(fbdll + len, "WOW64\\fbclient.dll");
+                        mHandle = LoadLibrary(fbdll);
+                        // for Firebird 2.5 -
+                        if (mHandle == 0){
+                            lstrcpy(fbdll + len, "bin\\fbclient.dll");
+                            mHandle = LoadLibrary(fbdll);
+                            // try 32 bit client library of 64 bit server too
+                            if (mHandle == 0)
+                            {
+                                lstrcpy(fbdll + len, "WOW64\\fbclient.dll");
+                                mHandle = LoadLibrary(fbdll);
+                            }
+                        }
+                    }
 				}
 				RegCloseKey(hkey_instances);
 			}
@@ -326,7 +347,7 @@ namespace IBPP
 
 	//	Factories for our Interface objects
 
-	Service ServiceFactory(const std::string& ServerName,
+    Service ServiceFactory(const std::string& ServerName,
 				const std::string& UserName, const std::string& UserPassword)
 	{
 		(void)gds.Call();			// Triggers the initialization, if needed
@@ -336,8 +357,12 @@ namespace IBPP
 	Database DatabaseFactory(const std::string& ServerName,
 		const std::string& DatabaseName, const std::string& UserName,
 		const std::string& UserPassword, const std::string& RoleName,
-		const std::string& CharSet, const std::string& CreateParams)
+		const std::string& CharSet, const std::string& CreateParams,
+        const std::string& FBClient)
 	{
+        
+        if (FBClient.length() != 0)
+            gds.mfbdll = FBClient;
 		(void)gds.Call();			// Triggers the initialization, if needed
 		return new DatabaseImpl(ServerName, DatabaseName, UserName,
 								UserPassword, RoleName, CharSet, CreateParams);
@@ -378,4 +403,28 @@ namespace IBPP
 		return new EventsImpl(dynamic_cast<DatabaseImpl*>(db.intf()));
 	}
 
+    bool isIntegerNumber(SDT type)
+    {
+        switch (type) {
+        case SDT::sdSmallint:
+        case SDT::sdInteger:
+        case SDT::sdLargeint:
+            return true;
+        }
+        return false;
+
+    }
+
+    bool isRationalNumber(SDT type)
+    {
+        if (isIntegerNumber(type))
+            return true;
+        switch (type) {
+        case SDT::sdDouble:
+        case SDT::sdFloat:
+            return true;
+        }
+        return false;
+
+    }
 }

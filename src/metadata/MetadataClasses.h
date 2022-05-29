@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -93,6 +93,11 @@ typedef std::shared_ptr<Index> IndexPtr;
 typedef std::vector<IndexPtr> IndexPtrs;
 class Indices;
 typedef std::shared_ptr<Indices> IndicesPtr;
+class SysIndices;
+typedef std::shared_ptr<SysIndices> SysIndicesPtr;
+class UsrIndices;
+typedef std::shared_ptr<UsrIndices> UsrIndicesPtr;
+
 
 class MetadataItem;
 typedef std::shared_ptr<MetadataItem> MetadataItemPtr;

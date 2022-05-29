@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -81,7 +81,7 @@ void Procedure::loadChildren()
         "rdb$parameter_type, "
     );
     sql += db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1) ? "rdb$default_source, rdb$null_flag, rdb$parameter_mechanism,  " : "null, null, -1, ";
-    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(11, 2) ? " rdb$field_name, rdb$relation_name, " : " null, null ";
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(11, 2) ? " rdb$field_name, rdb$relation_name, " : " null, null, ";
 	sql += "rdb$description from rdb$procedure_parameters "
 		"where rdb$procedure_name = ? ";
     if (getParent()->getType() == ntDatabase) {
@@ -429,7 +429,7 @@ wxString Procedure::getAlterSql(bool full)
         if (!output.empty())
             sql += output + " )";
     }
-    sql += getSqlSecurity() + "\n";
+    sql += +"\n" + getSqlSecurity() + "\n";
     if (full)
         sql += getSource();
     else

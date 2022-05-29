@@ -270,6 +270,9 @@ WrongTypeImpl::WrongTypeImpl(const std::string& context, int sqlType, IITYPE var
 		case SQL_TYPE_TIME :	info.append("TIME"); break;
 		case SQL_BLOB :			info.append("BLOB"); break;
 		case SQL_ARRAY :		info.append("ARRAY"); break;
+		case SQL_INT128 :		info.append("INT128"); break;
+		case SQL_DEC16 :		info.append("SQL_DEC16"); break;
+		case SQL_DEC34 :		info.append("SQL_DEC34"); break;
 	}
 	info.append(" ").append(_(" and ")).append(" ");
 	switch (varType)
@@ -283,6 +286,7 @@ WrongTypeImpl::WrongTypeImpl(const std::string& context, int sqlType, IITYPE var
 		case ivInt16 :		info.append("int16_t"); break;
 		case ivInt32 :		info.append("int32_t"); break;
 		case ivInt64 :		info.append("int64_t"); break;
+		case ivInt128 :		info.append("int128_t"); break;
 		case ivFloat :		info.append("float"); break;
 		case ivDouble :		info.append("double"); break;
 		case ivBool :		info.append("bool"); break;

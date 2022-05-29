@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -142,6 +142,17 @@ private:
     Mode modeM;
 };
 
+class TimezoneInfo
+{
+public:
+    TimezoneInfo() { name = ""; id = 0; };
+
+    bool empty() { return (name == "") && (id == 0); };
+
+    wxString name;
+    uint16_t id;
+};
+
 class Database: public MetadataItem,
     public std::enable_shared_from_this<Database>
 {
@@ -159,10 +170,13 @@ private:
     wxString sqlSecurityM; // ODS 13
 
     wxString pathM;
+    wxString clientLibraryM;
     int dialectM;
     Credentials credentialsM;
     Credentials* connectionCredentialsM;
     DatabaseAuthenticationMode authenticationModeM;
+    std::vector<TimezoneInfo*> timezonesM;
+    TimezoneInfo defaultTimezoneM;
 
     std::unique_ptr<wxMBConv> charsetConverterM;
     void createCharsetConverter();
@@ -181,6 +195,7 @@ private:
     PackagesPtr packagesM;
     ProceduresPtr proceduresM;
     RolesPtr rolesM;
+    SysIndicesPtr sysIndicesM;
     SysDomainsPtr sysDomainsM;
     SysPackagesPtr sysPackagesM;
     SysRolesPtr sysRolesM;
@@ -188,6 +203,7 @@ private:
     TablesPtr tablesM;
     UDFsPtr UDFsM;
     UsersPtr usersM;
+    UsrIndicesPtr usrIndicesM;
     ViewsPtr viewsM;
 
     // copy constructor implementation removed since it's no longer needed
@@ -201,15 +217,22 @@ private:
 
     void loadCollections(ProgressIndicator* progressIndicator);
 
+    void loadDatabaseInfo();
+
+    void loadDefaultTimezone();
+    void loadTimezones();
+
     // small help for parser
     wxString getTableForIndex(const wxString& indexName);
 
     mutable unsigned idM;
 
+    bool showSystemIndices();
     bool showSystemDomains();
     bool showSystemPackages();
     bool showSystemRoles();
     bool showSystemTables();
+    bool showOneNodeIndices();
 
     inline void checkConnected(const wxString& operation) const;
 protected:
@@ -236,6 +259,7 @@ public:
     PackagesPtr getPackages();
     ProceduresPtr getProcedures();
     RolesPtr getRoles();
+    SysIndicesPtr getSysIndices();
     SysDomainsPtr getSysDomains();
     SysPackagesPtr getSysPackages();
     SysRolesPtr getSysRoles();
@@ -243,6 +267,7 @@ public:
     TablesPtr getTables();
     UDFsPtr getUDFs();
     UsersPtr getUsers();
+    UsrIndicesPtr getUsrIndices();
     ViewsPtr getViews();
 
     bool isConnected() const;
@@ -278,6 +303,9 @@ public:
     wxArrayString getCollations(const wxString& charset);
     bool isDefaultCollation(const wxString& charset, const wxString& collate);
 
+    TimezoneInfo getDefaultTimezone();
+    wxString getTimezoneName(int timezone);
+
     //! fill vector with names of all tables, views, etc.
     void getIdentifiers(std::vector<Identifier>& temp);
 
@@ -285,6 +313,7 @@ public:
     void getDatabaseTriggers(std::vector<Trigger *>& list);
 
     wxString getPath() const;
+    wxString getClientLibrary() const;
     int getSqlDialect() const;
     wxString getDatabaseCharset() const;
     wxString getConnectionCharset() const;
@@ -297,6 +326,7 @@ public:
     wxString getRole() const;
     IBPP::Database& getIBPPDatabase();
     void setPath(const wxString& value);
+    void setClientLibrary(const wxString& value);
     void setConnectionCharset(const wxString& value);
     void setUsername(const wxString& value);
     void setRawPassword(const wxString& value);

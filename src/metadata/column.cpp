@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -68,7 +68,16 @@ wxString ColumnBase::getDatatype(bool useConfig)
 
     wxString ret;
     DomainPtr d = getDomain();
-    wxString datatype(d ? d->getDatatypeAsString() : sourceM);
+    wxString datatype;
+    if (((getParent()->getType() == ntProcedure) || (getParent()->getType() == ntFunctionSQL)) && (isTypeOf())) {
+        datatype = getTypeOf(false);
+        if (datatype.IsEmpty())
+            datatype = d ? d->getDatatypeAsString() : sourceM;
+    }
+    else
+        datatype = (d ? d->getDatatypeAsString() : sourceM);
+
+
 
     enum
     {
@@ -159,6 +168,16 @@ bool ColumnBase::isNullable(GetColumnNullabilityType type) const
             return d->isNullable();
     }
     return true;
+}
+
+wxString ColumnBase::getTypeOf(bool /*large*/)
+{
+    return wxString();
+}
+
+bool ColumnBase::isTypeOf()
+{
+    return false;
 }
 
 Column::Column(Relation* relation, const wxString& name)
@@ -288,8 +307,13 @@ wxString Column::getSource(bool identity)
     else {
         if ((isIdentity() && !identity) || !getComputedSource().IsEmpty())
             return  getDatatype(false);
-        else
-            return ColumnBase::getSource(identity);
+        else {
+            wxString lSource = ColumnBase::getSource(identity);
+            if (lSource.Contains("RDB$"))
+                return  getDatatype(false);
+            else
+                return ColumnBase::getSource(identity);
+        }
     }
 }
 

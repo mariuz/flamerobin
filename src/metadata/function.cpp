@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -79,27 +79,31 @@ void Function::loadChildren()
     wxMBConv* converter = db->getCharsetConverter();
 
 
-    std::string sql(
-        "select a.rdb$argument_name, a.rdb$field_source, " //1..2
-        "a.rdb$mechanism, a.rdb$field_type, a.rdb$field_scale, a.rdb$field_length, " //3..6
-        "a.rdb$field_sub_type, a.rdb$field_precision, "//7..8
-        "f.rdb$return_argument, a.rdb$argument_position, " //9..10
-    );
+    std::string sql("select");
     if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
-        sql += "rdb$default_source, rdb$null_flag, rdb$argument_mechanism, rdb$field_name, rdb$relation_name, "; //11..13
+        sql += " a.rdb$argument_name, a.rdb$field_source, "; //1..2
     else
-        sql += "null, null, -1, null, null, ";
-    sql += "a.rdb$description from rdb$function_arguments a "
-        " join rdb$functions f on f.rdb$function_name = a.rdb$function_name "
-        "where a.rdb$function_name = ? ";
+        sql += " null rdb$argument_name, null rdb$field_source, "; //1..2
+    sql += "a.rdb$mechanism, a.rdb$field_type, a.rdb$field_scale, a.rdb$field_length, " //3..6
+        "a.rdb$field_sub_type, a.rdb$field_precision, "//7..8
+        "f.rdb$return_argument, a.rdb$argument_position, "; //9..10
+    
+    if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        sql += "rdb$default_source, rdb$null_flag, rdb$argument_mechanism, rdb$field_name, rdb$relation_name, a.rdb$description "; //11..16
+    else
+        sql += "null, null, -1, null, null, null";
+    sql += " from rdb$function_arguments a "
+        " join rdb$functions f on f.rdb$function_name = a.rdb$function_name ";
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)  ? " and ((f.rdb$package_name = a.rdb$package_name) or (a.rdb$package_name is null)) " : "";
+    sql += "where a.rdb$function_name = ? ";
     if (getParent()->getType() == ntDatabase) {
         sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and a.rdb$package_name is null " : " ";
     }
     else
         if (getParent()->getType() == ntPackage) {
-            sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and rdb$package_name = ? " : "";
+            sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and a.rdb$package_name = ? " : "";
         }
-    sql += "order by a.rdb$argument_position ";
+    sql += "order by iif(a.rdb$argument_name is null,255, a.rdb$argument_position) ";
  //    sql += "order by iif(a.rdb$argument_name is null, 2014, a.rdb$argument_position) ";
 
     IBPP::Statement st1 = loader->getStatement(sql);
@@ -476,11 +480,13 @@ void Function::checkDependentFunction()
 FunctionSQL::FunctionSQL(DatabasePtr database, const wxString & name)
 	: Function(database, name)
 {
+    setType(ntFunctionSQL);
 }
 
 FunctionSQL::FunctionSQL(MetadataItem* parent, const wxString& name)
     : Function(parent, name)
 {
+    setType(ntFunctionSQL);
 }
 
 void FunctionSQL::loadProperties()
@@ -612,7 +618,7 @@ wxString FunctionSQL::getAlterSql(bool full)
 		if (!output.empty())
 			sql += output ;
 	}
-	sql += getSqlSecurity() + "\n";
+    sql += +"\n" + getSqlSecurity() + "\n";
 	if (full)
 		sql += getSource();
 	else
@@ -804,6 +810,7 @@ void UDF::loadProperties()
 UDF::UDF(DatabasePtr database, const wxString& name)
 	: Function(database, name)
 {
+    setType(ntUDF);
 	ensurePropertiesLoaded();
 }
 

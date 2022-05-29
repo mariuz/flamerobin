@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -294,19 +294,28 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
                     if (stt == kwACTIVE || stt == kwINACTIVE) {
                         tokenizer.jumpToken(false);
                         stt = tokenizer.getCurrentToken();
-                    }
-                    if (stt == kwON) { // DB Trigger
-                        objectTypeM = ntDBTrigger;
-                    }
-                    else{
-                        tokenizer.jumpToken(false);
-                        stt = tokenizer.getCurrentToken();
-                        if (stt == kwINSERT || stt == kwUPDATE ||
-                            stt == kwDELETE) { // SQL 2003 DML Trigger
-                            objectTypeM = ntDMLTrigger;
+                        objectTypeM = ntDMLTrigger;
+                        if (databaseM->findByNameAndType(ntDBTrigger, nameM.get())) {
+                            objectTypeM = ntDBTrigger;
                         }
-                        else
+                        if (databaseM->findByNameAndType(ntDDLTrigger, nameM.get())) {
                             objectTypeM = ntDDLTrigger;
+                        }
+                    }
+                    else {
+                        if (stt == kwON) { // DB Trigger
+                            objectTypeM = ntDBTrigger;
+                        }
+                        else {
+                            tokenizer.jumpToken(false);
+                            stt = tokenizer.getCurrentToken();
+                            if (stt == kwINSERT || stt == kwUPDATE ||
+                                stt == kwDELETE) { // SQL 2003 DML Trigger
+                                objectTypeM = ntDMLTrigger;
+                            }
+                            else
+                                objectTypeM = ntDDLTrigger;
+                        }
                     }
                 }
                 else // Legacy DML Trigger

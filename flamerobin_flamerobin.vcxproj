@@ -402,14 +402,14 @@
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
-      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_lib\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_lib\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>wxmsw31ud_aui.lib;wxmsw31ud_stc.lib;wxmsw31ud_html.lib;wxmsw31ud_adv.lib;wxmsw31ud_core.lib;wxbase31ud_xml.lib;wxbase31ud.lib;wxscintillad.lib;wxexpatd.lib;wxtiffd.lib;wxjpegd.lib;wxpngd.lib;wxzlibd.lib;wxregexud.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcusd\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>flamerobin.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_lib;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>vcusd\flamerobin.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
@@ -985,7 +985,9 @@
     <ClCompile Include="src\config\LocalSettings.cpp" />
     <ClCompile Include="src\core\ArtProvider.cpp" />
     <ClCompile Include="src\core\CodeTemplateProcessor.cpp" />
+    <ClCompile Include="src\core\FRDecimal.cpp" />
     <ClCompile Include="src\core\FRError.cpp" />
+    <ClCompile Include="src\core\FRInt128.cpp" />
     <ClCompile Include="src\core\Observer.cpp" />
     <ClCompile Include="src\core\ProgressIndicator.cpp" />
     <ClCompile Include="src\core\StringUtils.cpp" />
@@ -1112,7 +1114,9 @@
     <ClInclude Include="src\config\LocalSettings.h" />
     <ClInclude Include="src\core\ArtProvider.h" />
     <ClInclude Include="src\core\CodeTemplateProcessor.h" />
+    <ClInclude Include="src\core\FRDecimal.h" />
     <ClInclude Include="src\core\FRError.h" />
+    <ClInclude Include="src\core\FRInt128.h" />
     <ClInclude Include="src\core\ObjectWithHandle.h" />
     <ClInclude Include="src\core\Observer.h" />
     <ClInclude Include="src\core\ProcessableObject.h" />

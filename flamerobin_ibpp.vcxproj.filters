@@ -68,6 +68,9 @@
     <ClCompile Include="src\ibpp\user.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\ibpp\ibint128.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ibpp\_ibpp.h">

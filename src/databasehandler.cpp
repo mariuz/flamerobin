@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -33,6 +33,7 @@
 #include "core/StringUtils.h"
 #include "core/URIProcessor.h"
 #include "gui/GUIURIHandlerHelper.h"
+#include "gui/ExecuteSql.h"
 #include "metadata/server.h"
 #include "metadata/database.h"
 #include "metadata/MetadataItemURIHandlerHelper.h"
@@ -53,16 +54,18 @@ const DatabaseInfoHandler DatabaseInfoHandler::handlerInstance;
 bool DatabaseInfoHandler::handleURI(URI& uri)
 {
     bool isEditSweep, isEditForcedWrites, isEditReserve, isEditReadOnly,
-        isEditPageBuffers;
+        isEditPageBuffers, isEditLinger;
 
     isEditSweep = (uri.action == "edit_db_sweep_interval");
     isEditForcedWrites = (uri.action == "edit_db_forced_writes");
     isEditReserve = (uri.action == "edit_db_reserve_space");
     isEditReadOnly = (uri.action == "edit_db_read_only");
     isEditPageBuffers = (uri.action == "edit_db_page_buffers");
+    isEditLinger = (uri.action == "edit_db_linger");
+
 
     if (!isEditSweep && !isEditForcedWrites && !isEditReserve
-        && !isEditReadOnly && !isEditPageBuffers)
+        && !isEditReadOnly && !isEditPageBuffers && !isEditLinger)
     {
         return false;
     }
@@ -82,7 +85,7 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
         db->Username(), db->UserPassword());
     svc->Connect();
 
-    if (isEditSweep || isEditPageBuffers)
+    if (isEditSweep || isEditPageBuffers || isEditLinger)
     {
         long oldValue = 0;
         wxString title, label;
@@ -97,6 +100,13 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
             oldValue = d->getInfo().getBuffers();
             title = _("Enter the new value for Page Buffers");
             label = _("Page Buffers"); 
+        }
+        else if (isEditLinger)
+        {
+            oldValue = d->getLinger();
+            title = _("Enter the new value for Linger");
+            label = _("Linger Value");
+
         }
 
         while (true)
@@ -120,7 +130,8 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
                 svc->SetSweepInterval(wx2std(d->getPath()), value);
             else if (isEditPageBuffers)
                 svc->SetPageBuffers(wx2std(d->getPath()), value);
-
+            else if (isEditLinger)
+                execSql(NULL, wxString(_("Alter databse")), d, wxString::Format("ALTER DATABASE SET LINGER TO %d ; commit; ", value, w), true);
             // Before reloading the info, re-attach to the database
             // otherwise the sweep interval won't be changed for FB Classic
             // Server.

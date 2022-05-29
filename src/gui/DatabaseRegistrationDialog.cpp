@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -61,6 +61,7 @@ void DatabaseRegistrationDialog::createControls()
     label_name = new wxStaticText(getControlsPanel(), -1, _("Display name:"));
     text_ctrl_name = new wxTextCtrl(getControlsPanel(),
         ID_textcontrol_name, wxEmptyString);
+
     label_dbpath = new wxStaticText(getControlsPanel(), -1,
         _("Database path:"));
     text_ctrl_dbpath = new FileTextControl(getControlsPanel(),
@@ -84,7 +85,7 @@ void DatabaseRegistrationDialog::createControls()
 
     label_charset = new wxStaticText(getControlsPanel(), -1, _("Charset:"));
     long comboStyle =  wxCB_DROPDOWN;
-#ifndef __WXMAC__
+#ifndef __WXMAC__l
     // Not supported on OSX/Cocoa presently
     comboStyle |= wxCB_SORT;
 #endif
@@ -93,6 +94,14 @@ void DatabaseRegistrationDialog::createControls()
 
     label_role = new wxStaticText(getControlsPanel(), -1, _("Role:"));
     text_ctrl_role = new wxTextCtrl(getControlsPanel(), -1, "");
+
+    label_library = new wxStaticText(getControlsPanel(), -1,
+        _("Library path:"));
+    text_ctrl_library = new FileTextControl(getControlsPanel(),
+        ID_textcontrol_library, wxEmptyString);
+    button_browse_library = new wxButton(getControlsPanel(), ID_button_browse_library,
+        "...", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+
 
     if (createM)
     {
@@ -171,13 +180,14 @@ wxArrayString DatabaseRegistrationDialog::getDatabaseDialectChoices() const
 wxArrayString DatabaseRegistrationDialog::getDatabasePagesizeChoices() const
 {
     wxArrayString choices;
-    choices.Alloc(6);
+    choices.Alloc(7);
     choices.Add(_("Default"));
     choices.Add("1024");
     choices.Add("2048");
     choices.Add("4096");
     choices.Add("8192");
     choices.Add("16384");
+    choices.Add("32768");
     return choices;
 }
 
@@ -285,12 +295,19 @@ void DatabaseRegistrationDialog::layoutControls()
     sizerControls->Add(label_role, wxGBPosition(4, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
     sizerControls->Add(text_ctrl_role, wxGBPosition(4, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
 
+    sizerControls->Add(label_library, wxGBPosition(5, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
+    wxBoxSizer* sizer_r1c1_4 = new wxBoxSizer(wxHORIZONTAL);
+    sizer_r1c1_4->Add(text_ctrl_library, 1, wxALIGN_CENTER_VERTICAL);
+    sizer_r1c1_4->Add(button_browse_library, 0, wxLEFT | wxALIGN_CENTER_VERTICAL, styleguide().getBrowseButtonMargin());
+    sizerControls->Add(sizer_r1c1_4, wxGBPosition(5, 1), wxGBSpan(1, 3), wxEXPAND);
+
+
     if (createM)
     {
-        sizerControls->Add(label_pagesize, wxGBPosition(5, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-        sizerControls->Add(choice_pagesize, wxGBPosition(5, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
-        sizerControls->Add(label_dialect, wxGBPosition(5, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
-        sizerControls->Add(choice_dialect, wxGBPosition(5, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+        sizerControls->Add(label_pagesize, wxGBPosition(6, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
+        sizerControls->Add(choice_pagesize, wxGBPosition(6, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+        sizerControls->Add(label_dialect, wxGBPosition(6, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
+        sizerControls->Add(choice_dialect, wxGBPosition(6, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
     }
 
     sizerControls->AddGrowableCol(1);
@@ -311,7 +328,7 @@ void DatabaseRegistrationDialog::setControlsProperties()
     combobox_charset->SetStringSelection("NONE");
     if (createM)
     {
-        choice_pagesize->SetStringSelection("4096");
+        choice_pagesize->SetStringSelection("Default");
         choice_dialect->SetStringSelection("3");
     }
 
@@ -331,6 +348,8 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
     text_ctrl_username->SetValue(databaseM->getUsername());
     text_ctrl_password->SetValue(databaseM->getDecryptedPassword());
     text_ctrl_role->SetValue(databaseM->getRole());
+    text_ctrl_library->SetValue(databaseM->getClientLibrary());
+
     wxString charset(databaseM->getConnectionCharset());
     if (charset.empty())
         charset = "NONE";
@@ -400,11 +419,13 @@ void DatabaseRegistrationDialog::updateIsDefaultDatabaseName()
 //! event handling
 BEGIN_EVENT_TABLE(DatabaseRegistrationDialog, BaseDialog)
     EVT_BUTTON(DatabaseRegistrationDialog::ID_button_browse, DatabaseRegistrationDialog::OnBrowseButtonClick)
+    EVT_BUTTON(DatabaseRegistrationDialog::ID_button_browse_library, DatabaseRegistrationDialog::OnBrowseLibraryButtonClick)
     EVT_BUTTON(wxID_SAVE, DatabaseRegistrationDialog::OnOkButtonClick)
     EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_dbpath, DatabaseRegistrationDialog::OnSettingsChange)
     EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_name, DatabaseRegistrationDialog::OnNameChange)
     EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_username, DatabaseRegistrationDialog::OnSettingsChange)
     EVT_CHOICE(DatabaseRegistrationDialog::ID_choice_authentication, DatabaseRegistrationDialog::OnAuthenticationChange)
+    EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_library, DatabaseRegistrationDialog::OnSettingsChange)
 END_EVENT_TABLE()
 
 void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
@@ -414,6 +435,15 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
         wxFD_OPEN, this);
     if (!path.empty())
         text_ctrl_dbpath->SetValue(path);
+}
+
+void DatabaseRegistrationDialog::OnBrowseLibraryButtonClick(wxCommandEvent& WXUNUSED(event))
+{
+    wxString path = ::wxFileSelector(_("Select library file"), "", "", "",
+        _("Firebird library files (*.dll)|*.dll|All files (*.*)|*.*"),
+        wxFD_OPEN, this);
+    if (!path.empty())
+        text_ctrl_library->SetValue(path);
 }
 
 void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
@@ -436,6 +466,7 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
     databaseM->setPath(text_ctrl_dbpath->GetValue());
     databaseM->setUsername(text_ctrl_username->GetValue());
     databaseM->setEncryptedPassword(text_ctrl_password->GetValue());
+    databaseM->setClientLibrary(text_ctrl_library->GetValue());
 
     wxBusyCursor wait;
     databaseM->setConnectionCharset(combobox_charset->GetValue());

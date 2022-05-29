@@ -34,17 +34,20 @@ void IBPP::Time::Now()
 {
 	time_t systime = time(0);
 	tm* loctime = localtime(&systime);
-	IBPP::itot(&mTime, loctime->tm_hour, loctime->tm_min, loctime->tm_sec, 0);
+	SetTime(IBPP::Time::tmNone, loctime->tm_hour, loctime->tm_min, loctime->tm_sec, 0, IBPP::Time::TZ_NONE);
 }
 
-void IBPP::Time::SetTime(int tm)
+void IBPP::Time::SetTime(TimezoneMode tzMode, int tm, int timezone)
 {
-	if (tm < 0 || tm > 863999999)
-		throw LogicExceptionImpl("Time::SetTime", _("Invalid time value"));
-	mTime = tm;
+    if (tm < 0 || tm > 863999999)
+        throw LogicExceptionImpl("Time::SetTime", _("Invalid time value"));
+
+    mTime = tm;
+    mTimezoneMode = tzMode;
+    SetTimezone(timezone);
 }
 
-void IBPP::Time::SetTime(int hour, int minute, int second, int tenthousandths)
+void IBPP::Time::SetTime(TimezoneMode tzMode, int hour, int minute, int second, int tenthousandths, int timezone)
 {
 	if (hour < 0 || hour > 23 ||
 		minute < 0 || minute > 59 ||
@@ -52,17 +55,29 @@ void IBPP::Time::SetTime(int hour, int minute, int second, int tenthousandths)
 				tenthousandths < 0 || tenthousandths > 9999)
 					throw LogicExceptionImpl("Time::SetTime",
 						_("Invalid hour, minute, second values"));
-	IBPP::itot(&mTime, hour, minute, second, tenthousandths);
+	int tm;
+	IBPP::itot(&tm, hour, minute, second, tenthousandths);
+	SetTime(tzMode, tm, timezone);
+}
+
+void IBPP::Time::SetTimezone(int tz)
+{
+    mTimezone = tz;
+}
+
+int IBPP::Time::GetTime() const
+{
+    return mTime;
 }
 
 void IBPP::Time::GetTime(int& hour, int& minute, int& second) const
 {
-	IBPP::ttoi(mTime, &hour, &minute, &second, 0);
+	IBPP::ttoi(GetTime(), &hour, &minute, &second, 0);
 }
 
 void IBPP::Time::GetTime(int& hour, int& minute, int& second, int& tenthousandths) const
 {
-	IBPP::ttoi(mTime, &hour, &minute, &second, &tenthousandths);
+	IBPP::ttoi(GetTime(), &hour, &minute, &second, &tenthousandths);
 }
 
 int IBPP::Time::Hours() const
@@ -93,25 +108,29 @@ int IBPP::Time::SubSeconds() const	// Actually tenthousandths of seconds
 	return tenthousandths;
 }
 
-IBPP::Time::Time(int hour, int minute, int second, int tenthousandths)
+IBPP::Time::Time(TimezoneMode tzMode, int hour, int minute, int second, int tenthousandths, int timezone)
 {
-	SetTime(hour, minute, second, tenthousandths);
+	SetTime(tzMode, hour, minute, second, tenthousandths, timezone);
 }
 
 IBPP::Time::Time(const IBPP::Time& copied)
 {
 	mTime = copied.mTime;
+	mTimezoneMode = copied.mTimezoneMode;
+	mTimezone = copied.mTimezone;
 }
 
 IBPP::Time& IBPP::Time::operator=(const IBPP::Timestamp& assigned)
 {
 	mTime = assigned.GetTime();
+	mTimezone = assigned.GetTimezone();
 	return *this;
 }
 
 IBPP::Time& IBPP::Time::operator=(const IBPP::Time& assigned)
 {
 	mTime = assigned.mTime;
+	mTimezone = assigned.GetTimezone();
 	return *this;
 }
 
@@ -174,7 +193,12 @@ void encodeTime(ISC_TIME& isc_tm, const IBPP::Time& tm)
 
 void decodeTime(IBPP::Time& tm, const ISC_TIME& isc_tm)
 {
-	tm.SetTime((int)isc_tm);
+	tm.SetTime(IBPP::Time::tmNone, (int)isc_tm, IBPP::Time::TZ_NONE);
+}
+
+void decodeTimeTz(IBPP::Time& tm, const ISC_TIME_TZ& isc_tm)
+{
+	tm.SetTime(IBPP::Time::tmTimezone, (int)isc_tm.utc_time, isc_tm.time_zone);
 }
 
 void encodeTimestamp(ISC_TIMESTAMP& isc_ts, const IBPP::Timestamp& ts)
@@ -187,6 +211,12 @@ void decodeTimestamp(IBPP::Timestamp& ts, const ISC_TIMESTAMP& isc_ts)
 {
 	decodeDate(ts, isc_ts.timestamp_date);
 	decodeTime(ts, isc_ts.timestamp_time);
+}
+
+void decodeTimestampTz(IBPP::Timestamp& ts, const ISC_TIMESTAMP_TZ& isc_ts)
+{
+	decodeDate(ts, isc_ts.utc_timestamp.timestamp_date);
+	ts.SetTime(IBPP::Time::tmTimezone, (int)isc_ts.utc_timestamp.timestamp_time, isc_ts.time_zone);
 }
 
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -332,6 +332,8 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
         mytype = 0;
     if (typeM == ntDBTrigger || typeM == ntDDLTrigger || typeM == ntDMLTrigger)
         mytype = 2;
+    if (typeM == ntFunctionSQL || typeM == ntUDF)
+        mytype = 15;
 
     int mytype2 = mytype;
     // views count as relations(tables) when other object refer to them
@@ -439,7 +441,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
                 if (!current)
                     current = d->findByNameAndType(ntSysTable, objname);
             }
-            if (!ofObject && t == ntDMLTrigger)
+            if (!ofObject && (t == ntDMLTrigger || t == ntDBTrigger || t == ntTrigger))
             {
                 // system trigger dependent of this object indicates possible check constraint on a table
                 // that references this object. So, let's check if this trigger is used for check constraint
