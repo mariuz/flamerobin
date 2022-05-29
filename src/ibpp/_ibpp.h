@@ -391,6 +391,7 @@ struct FBCLIENT
 {
     // Attributes
     bool mReady;
+    std::string mfbdll;
 
 #ifdef IBPP_WINDOWS
     HMODULE mHandle;            // The FBCLIENT.DLL HMODULE
@@ -764,6 +765,7 @@ public:
     ServiceImpl(const std::string& ServerName, const std::string& UserName,
                     const std::string& UserPassword);
     ~ServiceImpl();
+    FBCLIENT getGDS() const { return gds; };
 
     //  (((((((( OBJECT INTERFACE ))))))))
 
@@ -807,6 +809,8 @@ class DatabaseImpl : public IBPP::IDatabase
 {
     //  (((((((( OBJECT INTERNALS ))))))))
 
+    FBCLIENT gdsM;	// Local GDS instance
+
     int mRefCount;              // Reference counter
     isc_db_handle mHandle;      // InterBase API Session Handle
     std::string mServerName;    // Server name
@@ -844,6 +848,7 @@ public:
                 const std::string& RoleName, const std::string& CharSet,
                 const std::string& CreateParams);
     ~DatabaseImpl();
+    FBCLIENT getGDS() const { return gds; };
 
     //  (((((((( OBJECT INTERFACE ))))))))
 
@@ -916,6 +921,8 @@ public:
         IBPP::TIL il = IBPP::ilConcurrency,
         IBPP::TLR lr = IBPP::lrWait, IBPP::TFF flags = IBPP::TFF(0));
     ~TransactionImpl();
+
+    FBCLIENT getGDS() const { return gds; };
 
     //  (((((((( OBJECT INTERFACE ))))))))
 
@@ -1091,10 +1098,12 @@ public:
 
     StatementImpl(DatabaseImpl*, TransactionImpl*);
     ~StatementImpl();
+    FBCLIENT getGDS() const { return mDatabase->getGDS(); };
 
     //  (((((((( OBJECT INTERFACE ))))))))
 
 public:
+
     void Prepare(const std::string& sql);
     void Execute(const std::string& sql);
     inline void Execute()   { Execute(std::string()); }
@@ -1256,6 +1265,7 @@ public:
     BlobImpl(const BlobImpl&);
     BlobImpl(DatabaseImpl*, TransactionImpl* = 0);
     ~BlobImpl();
+    FBCLIENT getGDS() const { return mDatabase->getGDS(); };
 
     //  (((((((( OBJECT INTERFACE ))))))))
 
@@ -1312,6 +1322,7 @@ public:
     ArrayImpl(const ArrayImpl&);
     ArrayImpl(DatabaseImpl*, TransactionImpl* = 0);
     ~ArrayImpl();
+    FBCLIENT getGDS() const { return mDatabase->getGDS(); };
 
     //  (((((((( OBJECT INTERFACE ))))))))
 
@@ -1400,6 +1411,8 @@ public:
 
     EventsImpl(DatabaseImpl* dbi);
     ~EventsImpl();
+    FBCLIENT getGDS() const { return mDatabase->getGDS(); };
+
 
     //  (((((((( OBJECT INTERFACE ))))))))
 

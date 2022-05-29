@@ -1024,7 +1024,9 @@ void Database::create(int pagesize, int dialect)
         wx2std(getConnectionString()),
         (useUserNamePwd ? wx2std(getUsername()) : ""),
         (useUserNamePwd ? wx2std(getDecryptedPassword()) : ""),
-        "", wx2std(charset), wx2std(extra_params));
+        "", wx2std(charset), wx2std(extra_params),
+        wx2std(getClientLibrary())
+    );
     db->Create(dialect);
 }
 
@@ -1069,7 +1071,9 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
                 wx2std(getConnectionString()),
                 (useUserNamePwd ? wx2std(getUsername()) : ""),
                 (useUserNamePwd ? wx2std(password) : ""),
-                wx2std(getRole()), wx2std(getConnectionCharset()), "");
+                wx2std(getRole()), wx2std(getConnectionCharset()), 
+                "", wx2std(getClientLibrary())
+            );
             db->Connect();  // As standard, will block for 180 seconds or until connected
             return db;
         };
@@ -1719,6 +1723,11 @@ wxString Database::getPath() const
     return pathM;
 }
 
+wxString Database::getClientLibrary() const
+{
+    return clientLibraryM;
+}
+
 int Database::getSqlDialect() const
 {
     return dialectM;
@@ -1820,6 +1829,11 @@ IBPP::Database& Database::getIBPPDatabase()
 void Database::setPath(const wxString& value)
 {
     pathM = value;
+}
+
+void Database::setClientLibrary(const wxString& value)
+{
+    clientLibraryM = value;
 }
 
 void Database::setConnectionCharset(const wxString& value)

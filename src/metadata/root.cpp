@@ -158,6 +158,8 @@ bool Root::parseDatabase(ServerPtr server, wxXmlNode* xmln)
             if (value.ToULong(&id))
                 database->setId(id);
         }
+        else if (xmln->GetName() == "fbclient")
+            database->setClientLibrary(value);
     }
 
     // make sure the database has an Id before Root::save() is called,
@@ -309,6 +311,7 @@ bool Root::save()
             rsAddChildNode(dbn, "username", (*itdb)->getUsername());
             rsAddChildNode(dbn, "password", (*itdb)->getRawPassword());
             rsAddChildNode(dbn, "role", (*itdb)->getRole());
+            rsAddChildNode(dbn, "fbclient", (*itdb)->getClientLibrary());
             rsAddChildNode(dbn, "authentication",
                 (*itdb)->getAuthenticationMode().getConfigValue());
         }

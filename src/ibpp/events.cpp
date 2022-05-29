@@ -208,7 +208,7 @@ void EventsImpl::Queue()
 		IBS vector;
 		mTrapped = false;
 		mQueued = true;
-		(*gds.Call()->m_que_events)(vector.Self(), mDatabase->GetHandlePtr(), &mId,
+		(*getGDS().Call()->m_que_events)(vector.Self(), mDatabase->GetHandlePtr(), &mId,
 			short(mEventBuffer.size()), &mEventBuffer[0],
 				(isc_callback)EventHandler, (char*)this);
 
@@ -237,7 +237,7 @@ void EventsImpl::Cancel()
 		// subsequent to the execution of isc_cancel_events().
 		mTrapped = false;
 		mQueued = false;
-		(*gds.Call()->m_cancel_events)(vector.Self(), mDatabase->GetHandlePtr(), &mId);
+		(*getGDS().Call()->m_cancel_events)(vector.Self(), mDatabase->GetHandlePtr(), &mId);
 
 	    if (vector.Errors())
 		{

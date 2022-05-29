@@ -64,7 +64,7 @@ void ServiceImpl::Connect()
 
 	connect += "service_mgr";
 
-	(*gds.Call()->m_service_attach)(status.Self(), (short)connect.size(), (char*)connect.c_str(),
+	(*getGDS().Call()->m_service_attach)(status.Self(), (short)connect.size(), (char*)connect.c_str(),
 		&mHandle, spb.Size(), spb.Self());
 	if (status.Errors())
 	{
@@ -80,7 +80,7 @@ void ServiceImpl::Disconnect()
 	IBS status;
 
 	// Detach from the service manager
-	(*gds.Call()->m_service_detach)(status.Self(), &mHandle);
+	(*getGDS().Call()->m_service_detach)(status.Self(), &mHandle);
 
 	// Set mHandle to 0 now, just in case we need to throw, because Disconnect()
 	// is called from Service destructor and we want to maintain a coherent state.
@@ -102,7 +102,7 @@ void ServiceImpl::GetVersion(std::string& version)
 
 	spb.Insert(isc_info_svc_server_version);
 
-	(*gds.Call()->m_service_query)(status.Self(), &mHandle, 0, 0, 0, spb.Size(), spb.Self(),
+	(*getGDS().Call()->m_service_query)(status.Self(), &mHandle, 0, 0, 0, spb.Size(), spb.Self(),
 		result.Size(), result.Self());
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "Service::GetVersion", _("isc_service_query failed"));
@@ -135,7 +135,7 @@ void ServiceImpl::AddUser(const IBPP::User& user)
 	if (user.groupid != 0)
 			spb.InsertQuad(isc_spb_sec_groupid, (int32_t)user.groupid);
 
-	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
+	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "Service::AddUser", _("isc_service_start failed"));
 
@@ -167,7 +167,7 @@ void ServiceImpl::ModifyUser(const IBPP::User& user)
 	if (user.groupid != 0)
 			spb.InsertQuad(isc_spb_sec_groupid, (int32_t)user.groupid);
 
-	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
+	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "Service::ModifyUser", _("isc_service_start failed"));
 
@@ -188,7 +188,7 @@ void ServiceImpl::RemoveUser(const std::string& username)
 	spb.Insert(isc_action_svc_delete_user);
 	spb.InsertString(isc_spb_sec_username, 2, username.c_str());
 
-	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
+	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "Service::RemoveUser", _("isc_service_start failed"));
 
@@ -207,14 +207,14 @@ void ServiceImpl::GetUser(IBPP::User& user)
 	spb.InsertString(isc_spb_sec_username, 2, user.username.c_str());
 
 	IBS status;
-	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
+	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "Service::GetUser", _("isc_service_start failed"));
 
 	RB result(8000);
 	char request[] = {isc_info_svc_get_users};
 	status.Reset();
-	(*gds.Call()->m_service_query)(status.Self(), &mHandle, 0, 0, 0,
+	(*getGDS().Call()->m_service_query)(status.Self(), &mHandle, 0, 0, 0,
 		sizeof(request), request, result.Size(), result.Self());
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "Service::GetUser", _("isc_service_query failed"));
@@ -229,17 +229,17 @@ void ServiceImpl::GetUser(IBPP::User& user)
 	{
 		if (*p == isc_spb_sec_userid)
 		{
-			user.userid = (uint32_t)(*gds.Call()->m_vax_integer)(p+1, 4);
+			user.userid = (uint32_t)(*getGDS().Call()->m_vax_integer)(p+1, 4);
 			p += 5;
 		}
 		else if (*p == isc_spb_sec_groupid)
 		{
-			user.groupid = (uint32_t)(*gds.Call()->m_vax_integer)(p+1, 4);
+			user.groupid = (uint32_t)(*getGDS().Call()->m_vax_integer)(p+1, 4);
 			p += 5;
 		}
 		else
 		{
-			unsigned short len = (unsigned short)(*gds.Call()->m_vax_integer)(p+1, 2);
+			unsigned short len = (unsigned short)(*getGDS().Call()->m_vax_integer)(p+1, 2);
 			switch (*p)
 			{
 			case isc_spb_sec_username :
@@ -273,14 +273,14 @@ void ServiceImpl::GetUsers(std::vector<IBPP::User>& users)
 	spb.Insert(isc_action_svc_display_user);
 
 	IBS status;
-	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
+	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "Service::GetUsers", _("isc_service_start failed"));
 
 	RB result(0xFFFF);
 	char request[] = {isc_info_svc_get_users};
 	status.Reset();
-	(*gds.Call()->m_service_query)(status.Self(), &mHandle, 0, 0, 0,
+	(*getGDS().Call()->m_service_query)(status.Self(), &mHandle, 0, 0, 0,
 		sizeof(request), request, result.Size(), result.Self());
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "Service::GetUsers", _("isc_service_query failed"));
@@ -290,24 +290,24 @@ void ServiceImpl::GetUsers(std::vector<IBPP::User>& users)
 	if (*p != isc_info_svc_get_users)
 		throw SQLExceptionImpl(status, "Service::GetUsers", _("isc_service_query returned unexpected answer"));
 
-	char* pEnd = p + (unsigned short)(*gds.Call()->m_vax_integer)(p+1, 2);
+	char* pEnd = p + (unsigned short)(*getGDS().Call()->m_vax_integer)(p+1, 2);
 	p += 3;	// Skips the 'isc_info_svc_get_users' and its total length
 	IBPP::User user;
 	while (p < pEnd && *p != isc_info_end)
 	{
 		if (*p == isc_spb_sec_userid)
 		{
-			user.userid = (uint32_t)(*gds.Call()->m_vax_integer)(p+1, 4);
+			user.userid = (uint32_t)(*getGDS().Call()->m_vax_integer)(p+1, 4);
 			p += 5;
 		}
 		else if (*p == isc_spb_sec_groupid)
 		{
-			user.groupid = (uint32_t)(*gds.Call()->m_vax_integer)(p+1, 4);
+			user.groupid = (uint32_t)(*getGDS().Call()->m_vax_integer)(p+1, 4);
 			p += 5;
 		}
 		else
 		{
-			unsigned short len = (unsigned short)(*gds.Call()->m_vax_integer)(p+1, 2);
+			unsigned short len = (unsigned short)(*getGDS().Call()->m_vax_integer)(p+1, 2);
 			switch (*p)
 			{
 			case isc_spb_sec_username :
@@ -349,7 +349,7 @@ void ServiceImpl::SetPageBuffers(const std::string& dbfile, int buffers)
 	spb.InsertString(isc_spb_dbname, 2, dbfile.c_str());
 	spb.InsertQuad(isc_spb_prp_page_buffers, buffers);
 
-	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
+	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "Service::SetPageBuffers", _("isc_service_start failed"));
 
@@ -370,7 +370,7 @@ void ServiceImpl::SetSweepInterval(const std::string& dbfile, int sweep)
 	spb.InsertString(isc_spb_dbname, 2, dbfile.c_str());
 	spb.InsertQuad(isc_spb_prp_sweep_interval, sweep);
 
-	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
+	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "Service::SetSweepInterval", _("isc_service_start failed"));
 
@@ -392,7 +392,7 @@ void ServiceImpl::SetSyncWrite(const std::string& dbfile, bool sync)
 	if (sync) spb.InsertByte(isc_spb_prp_write_mode, (char)isc_spb_prp_wm_sync);
 	else spb.InsertByte(isc_spb_prp_write_mode, (char)isc_spb_prp_wm_async);
 
-	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
+	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "Service::SetSyncWrite", _("isc_service_start failed"));
 
@@ -414,7 +414,7 @@ void ServiceImpl::SetReadOnly(const std::string& dbfile, bool readonly)
 	if (readonly) spb.InsertByte(isc_spb_prp_access_mode, (char)isc_spb_prp_am_readonly);
 	else spb.InsertByte(isc_spb_prp_access_mode, (char)isc_spb_prp_am_readwrite);
 
-	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
+	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "Service::SetReadOnly", _("isc_service_start failed"));
 
@@ -436,7 +436,7 @@ void ServiceImpl::SetReserveSpace(const std::string& dbfile, bool reserve)
 	if (reserve) spb.InsertByte(isc_spb_prp_reserve_space, (char)isc_spb_prp_res);
 	else spb.InsertByte(isc_spb_prp_reserve_space, (char)isc_spb_prp_res_use_full);
 
-	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
+	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "Service::SetReserveSpace", _("isc_service_start failed"));
 
@@ -468,7 +468,7 @@ void ServiceImpl::Shutdown(const std::string& dbfile, IBPP::DSM mode, int sectim
 			break;
 	}
 
-	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
+	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "Service::Shutdown", _("isc_service_start failed"));
 
@@ -489,7 +489,7 @@ void ServiceImpl::Restart(const std::string& dbfile)
 	spb.InsertString(isc_spb_dbname, 2, dbfile.c_str());
 	spb.InsertQuad(isc_spb_options, isc_spb_prp_db_online);
 
-	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
+	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "Service::Restart", _("isc_service_start failed"));
 
@@ -510,7 +510,7 @@ void ServiceImpl::Sweep(const std::string& dbfile)
 	spb.InsertString(isc_spb_dbname, 2, dbfile.c_str());
 	spb.InsertQuad(isc_spb_options, isc_spb_rpr_sweep_db);
 
-	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
+	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "Service::Sweep", _("isc_service_start failed"));
 
@@ -543,7 +543,7 @@ void ServiceImpl::Repair(const std::string& dbfile, IBPP::RPF flags)
 	
 	spb.InsertQuad(isc_spb_options, mask);
 
-	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
+	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "Service::Repair", _("isc_service_start failed"));
 
@@ -577,7 +577,7 @@ void ServiceImpl::StartBackup(const std::string& dbfile,
 	if (flags & IBPP::brConvertExtTables)	mask |= isc_spb_bkp_convert;
 	if (mask != 0) spb.InsertQuad(isc_spb_options, mask);
 
-	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
+	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "Service::Backup", _("isc_service_start failed"));
 }
@@ -612,7 +612,7 @@ void ServiceImpl::StartRestore(const std::string& bkfile, const std::string& dbf
 	if (flags & IBPP::brUseAllSpace)	mask |= isc_spb_res_use_all_space;
 	if (mask != 0) spb.InsertQuad(isc_spb_options, mask);
 
-	(*gds.Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
+	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "Service::Restore", _("isc_service_start failed"));
 }
@@ -627,7 +627,7 @@ const char* ServiceImpl::WaitMsg()
 
 	// _service_query will only block until a line of result is available
 	// (or until the end of the task if it does not report information)
-	(*gds.Call()->m_service_query)(status.Self(), &mHandle, 0, 0, 0,
+	(*getGDS().Call()->m_service_query)(status.Self(), &mHandle, 0, 0, 0,
 		req.Size(),	req.Self(),	result.Size(), result.Self());
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "ServiceImpl::Wait", _("isc_service_query failed"));
@@ -659,7 +659,7 @@ void ServiceImpl::Wait()
 
 		// _service_query will only block until a line of result is available
 		// (or until the end of the task if it does not report information) 
-		(*gds.Call()->m_service_query)(status.Self(), &mHandle, 0, 0,	0,
+		(*getGDS().Call()->m_service_query)(status.Self(), &mHandle, 0, 0,	0,
 			spb.Size(),	spb.Self(),	result.Size(), result.Self());
 		if (status.Errors())
 			throw SQLExceptionImpl(status, "ServiceImpl::Wait", _("isc_service_query failed"));
