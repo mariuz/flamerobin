@@ -40,7 +40,7 @@
 
 
 FRStyle::FRStyle()
-    :styleIDM(-1), styleDescM(""), fgColourM(STYLE_NOT_USED), bgColourM(STYLE_NOT_USED), colourStyleM(COLORSTYLE_ALL),
+    :styleIDM(-1), styleDescM(""), /*fgColourM(wxBLACK), bgColourM(wxWHITE),*/ colourStyleM(COLORSTYLE_ALL),
     fontNameM(""), fontStyleM(FONTSTYLE_NONE), fontSizeM(STYLE_NOT_USED), nestingM(FONTSTYLE_NONE), 
     keywordClassM(STYLE_NOT_USED), keywordsM("")
 {
@@ -156,7 +156,7 @@ void FRStyles::addStyler(int styleID, wxXmlNode* styleNode)
            
             long result; 
             str.ToLong(&result, 16);
-            newStyle->setfgColour((_RGB((result >> 16) & 0xFF, (result >> 8) & 0xFF, result & 0xFF)) | (result & 0xFF000000));
+            newStyle->setfgColour(wxColour((_RGB((result >> 16) & 0xFF, (result >> 8) & 0xFF, result & 0xFF)) | (result & 0xFF000000)));
 
         }
 
@@ -165,7 +165,7 @@ void FRStyles::addStyler(int styleID, wxXmlNode* styleNode)
         {
             long result;
             str.ToLong(&result, 16);
-            newStyle->setbgColour((_RGB((result >> 16) & 0xFF, (result >> 8) & 0xFF, result & 0xFF)) | (result & 0xFF000000));
+            newStyle->setbgColour(wxColour((_RGB((result >> 16) & 0xFF, (result >> 8) & 0xFF, result & 0xFF)) | (result & 0xFF000000)));
         }
 
         str = element->GetAttribute("colorStyle");
@@ -403,8 +403,10 @@ void FRStyleManager::loadLexerStyles(wxXmlNode* node)
     wxXmlNode* child = node->GetChildren();
     
     while (child) {
-        if (child->GetType() == wxXML_ELEMENT_NODE && child->GetName() == "LexerType" && 
-            child->GetAttribute("name")=="sql") {
+        if (child->GetType() == wxXML_ELEMENT_NODE && child->GetName() == "LexerType" 
+            //&& child->GetAttribute("name")=="sql"
+            ) 
+        {
             stylersM.addStyler(child->GetAttribute("name"), 
                 child->GetAttribute("desc"), child->GetAttribute("ext"), child);
         }
@@ -439,6 +441,8 @@ void FRStyleManager::assignWordStyle(wxStyledTextCtrl* text, FRStyle* style)
         text->StyleSetForeground(style->getStyleID(), style->getfgColour());
     //}
         
+        
+    text->StyleSetCase(style->getStyleID(), style->getCaseVisible());
     double size = style->getFontSize() == 0 ? getGlobalStyle()->getFontSize() : style->getFontSize();
     wxFontInfo fontInfo(size);
         

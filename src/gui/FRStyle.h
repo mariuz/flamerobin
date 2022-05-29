@@ -66,8 +66,8 @@ protected:
     int styleIDM;
     wxString styleDescM;
 
-    _COLOURREF fgColourM;
-    _COLOURREF bgColourM;
+    wxColour fgColourM;
+    wxColour bgColourM;
     int colourStyleM;
 
     wxString fontNameM;
@@ -93,11 +93,11 @@ public:
     void setStyleDesc(wxString name) { styleDescM = name; };
 
 
-    _COLOURREF getfgColour() { return fgColourM; };
-    void setfgColour(_COLOURREF color) { fgColourM = color; };
+    wxColour getfgColour() { return fgColourM; };
+    void setfgColour(wxColour color) { fgColourM = color; };
     
-    _COLOURREF getbgColour() { return bgColourM; };
-    void setbgColour(_COLOURREF color) { bgColourM = color; };
+    wxColour getbgColour() { return bgColourM; };
+    void setbgColour(wxColour color) { bgColourM = color; };
     
     int getColourStyle() { return colourStyleM; };
     void setColourStyle(int color) { colourStyleM = color; };

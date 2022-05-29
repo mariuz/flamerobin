@@ -81,12 +81,12 @@ DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
     wxFont f;
 
     SetDefaultCellFont(stylerManager().getDefaultStyle()->getFont());
-    if (config().getValue("DataGridFont", s) && !s.empty())
+    /*if (config().getValue("DataGridFont", s) && !s.empty())
     {
         f.SetNativeFontInfo(s);
         if (f.Ok())
             SetDefaultCellFont(f);
-    }
+    }*/
 
     SetLabelFont(stylerManager().getDefaultStyle()->getFont());
     if (config().getValue("DataGridHeaderFont", s) && !s.empty())

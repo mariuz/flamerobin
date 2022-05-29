@@ -37,6 +37,7 @@
 #include <wx/filename.h>
 #include <wx/fontdlg.h>
 #include <wx/fontenum.h>
+#include <wx/gbsizer.h>
 #include <wx/listbox.h>
 #include <wx/spinctrl.h>
 #include <wx/tokenzr.h>
@@ -1635,9 +1636,8 @@ bool PrefDlgColourPickerSetting::loadFromTargetConfig(Config& config)
 
         long result;
         value.ToLong(&result, 16);
-        _COLOURREF colour = (_RGB((result >> 16) & 0xFF, (result >> 8) & 0xFF, result & 0xFF)) | (result & 0xFF000000);
 
-        colourPickerM->SetColour(colour);
+        colourPickerM->SetColour(wxColour((_RGB((result >> 16) & 0xFF, (result >> 8) & 0xFF, result & 0xFF)) | (result & 0xFF000000)));
     }
 
     enableControls(true);
@@ -1914,7 +1914,10 @@ void PrefDlgThemeSetting::addControlsToSizer(wxSizer* sizer)
             topSizer->Add(styleguide().getControlLabelMargin(), 0);
         }
 
-        wxSizer* sizerVert = new wxBoxSizer(wxVERTICAL);
+        //wxSizer* sizerVert = new wxBoxSizer(wxVERTICAL);
+        wxGridBagSizer* sizerVert = new wxGridBagSizer(styleguide().getRelatedControlMargin(wxVERTICAL),
+            styleguide().getControlLabelMargin());
+
         sizerVert->Add(fileComboBoxM, 1, wxEXPAND);
         topSizer->Add(sizerVert, 1, wxEXPAND | wxFIXED_MINSIZE | wxALIGN_TOP);
  
@@ -1936,8 +1939,6 @@ void PrefDlgThemeSetting::addControlsToSizer(wxSizer* sizer)
         wxSizer* fontSizer = new wxBoxSizer(wxHORIZONTAL);
         buttomSizer->Add(fontSizer, 1, wxEXPAND | wxFIXED_MINSIZE | wxALIGN_TOP, 10);
 
-
-        
 
         wxStaticBoxSizer* colourStaticBox = new wxStaticBoxSizer(new wxStaticBox(getPage(), -1, "Colour Style"), wxVERTICAL);
         fontSizer->Add(colourStaticBox, 1, wxLEFT, 10);
@@ -2050,7 +2051,7 @@ void PrefDlgThemeSetting::loadStylers(const wxString& styleFileName)
     }
 
     stylersListBoxM->Select(0);
-    //loadStyles(stylersListBoxM->GetString(stylersListBoxM->GetSelection()));
+    loadStyles(stylersListBoxM->GetString(stylersListBoxM->GetSelection()));
 
 }
 
