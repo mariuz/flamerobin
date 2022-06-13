@@ -65,11 +65,13 @@ private:
     
     wxStaticText* label_dialect;
     wxChoice* choice_dialect;
-
+    
+    /*
+    * Todo: Implement FB library per conexion
     wxStaticText* label_library;
     FileTextControl* text_ctrl_library;
     wxButton* button_browse_library;
-
+    */
 
     wxButton* button_ok;
     wxButton* button_cancel;
