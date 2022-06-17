@@ -1370,6 +1370,10 @@ void ExecuteSqlFrame::OnMenuSaveOrSaveAs(wxCommandEvent& event)
         updateFrameTitleM = true;
         statusbar_1->SetStatusText((_("File saved")), 2);
     }
+    else
+    {
+        throw FRError(wxString::Format(_("Error saving the file, attention for not losing your SQL\nError code: %d"), GetLastError()));
+    }
 }
 
 void ExecuteSqlFrame::OnMenuClose(wxCommandEvent& WXUNUSED(event))
