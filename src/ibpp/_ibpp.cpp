@@ -196,7 +196,7 @@ FBCLIENT* FBCLIENT::Call()
                             // try 32 bit client library of 64 bit server too
                             if (mHandle == 0)
                             {
-                                lstrcpy(fbdll + len, "WOW64\\fbclient.dll");
+                                lstrcpy(fbdll + len, "bin\\WOW64\\fbclient.dll");
                                 mHandle = LoadLibrary(fbdll);
                             }
                         }
