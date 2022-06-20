@@ -196,7 +196,7 @@ FBCLIENT* FBCLIENT::Call()
                             // try 32 bit client library of 64 bit server too
                             if (mHandle == 0)
                             {
-                                lstrcpy(fbdll + len, "WOW64\\fbclient.dll");
+                                lstrcpy(fbdll + len, "bin\\WOW64\\fbclient.dll");
                                 mHandle = LoadLibrary(fbdll);
                             }
                         }
@@ -348,9 +348,12 @@ namespace IBPP
 	//	Factories for our Interface objects
 
     Service ServiceFactory(const std::string& ServerName,
-				const std::string& UserName, const std::string& UserPassword)
+				const std::string& UserName, const std::string& UserPassword,
+                const std::string& FBClient )
 	{
-		(void)gds.Call();			// Triggers the initialization, if needed
+        if (FBClient.length() != 0)
+            gds.mfbdll = FBClient;
+        (void)gds.Call();			// Triggers the initialization, if needed
 		return new ServiceImpl(ServerName, UserName, UserPassword);
 	}
 
@@ -371,35 +374,35 @@ namespace IBPP
 	Transaction TransactionFactory(Database db, TAM am,
 					TIL il, TLR lr, TFF flags)
 	{
-		(void)gds.Call();			// Triggers the initialization, if needed
+        (void)gds.Call();			// Triggers the initialization, if needed
 		return new TransactionImpl(	dynamic_cast<DatabaseImpl*>(db.intf()),
 									am, il, lr, flags);
 	}
 
 	Statement StatementFactory(Database db, Transaction tr)
 	{
-		(void)gds.Call();			// Triggers the initialization, if needed
+        (void)gds.Call();			// Triggers the initialization, if needed
 		return new StatementImpl(	dynamic_cast<DatabaseImpl*>(db.intf()),
 									dynamic_cast<TransactionImpl*>(tr.intf()));
 	}
 
 	Blob BlobFactory(Database db, Transaction tr)
 	{
-		(void)gds.Call();			// Triggers the initialization, if needed
+        (void)gds.Call();			// Triggers the initialization, if needed
 		return new BlobImpl(dynamic_cast<DatabaseImpl*>(db.intf()),
 							dynamic_cast<TransactionImpl*>(tr.intf()));
 	}
 
 	Array ArrayFactory(Database db, Transaction tr)
 	{
-		(void)gds.Call();			// Triggers the initialization, if needed
+        (void)gds.Call();			// Triggers the initialization, if needed
 		return new ArrayImpl(dynamic_cast<DatabaseImpl*>(db.intf()),
 							dynamic_cast<TransactionImpl*>(tr.intf()));
 	}
 
 	Events EventsFactory(Database db)
 	{
-		(void)gds.Call();			// Triggers the initialization, if needed
+        (void)gds.Call();			// Triggers the initialization, if needed
 		return new EventsImpl(dynamic_cast<DatabaseImpl*>(db.intf()));
 	}
 

@@ -1725,7 +1725,10 @@ wxString Database::getPath() const
 
 wxString Database::getClientLibrary() const
 {
-    return clientLibraryM;
+    /*Todo: Implement FB library per conexion */
+    //return clientLibraryM;
+    wxString LValue = "";
+    return config().get("LibraryFile", LValue);
 }
 
 int Database::getSqlDialect() const

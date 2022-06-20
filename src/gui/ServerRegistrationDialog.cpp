@@ -107,7 +107,8 @@ void ServerRegistrationDialog::layoutControls()
     // create sizer for controls
     wxFlexGridSizer* sizerControls = new wxFlexGridSizer(3, 2,
         styleguide().getRelatedControlMargin(wxVERTICAL),
-        styleguide().getControlLabelMargin());
+        styleguide().getControlLabelMargin()
+    );
     sizerControls->AddGrowableCol(1);
 
     sizerControls->Add(label_name, 0, wxALIGN_CENTER_VERTICAL);

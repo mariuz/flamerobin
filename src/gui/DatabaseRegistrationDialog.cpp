@@ -94,13 +94,15 @@ void DatabaseRegistrationDialog::createControls()
 
     label_role = new wxStaticText(getControlsPanel(), -1, _("Role:"));
     text_ctrl_role = new wxTextCtrl(getControlsPanel(), -1, "");
-
+    /*
+    Todo: Implement FB library per conexion
     label_library = new wxStaticText(getControlsPanel(), -1,
         _("Library path:"));
     text_ctrl_library = new FileTextControl(getControlsPanel(),
         ID_textcontrol_library, wxEmptyString);
     button_browse_library = new wxButton(getControlsPanel(), ID_button_browse_library,
         "...", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+     */
 
 
     if (createM)
@@ -294,20 +296,22 @@ void DatabaseRegistrationDialog::layoutControls()
     sizerControls->Add(combobox_charset, wxGBPosition(4, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
     sizerControls->Add(label_role, wxGBPosition(4, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
     sizerControls->Add(text_ctrl_role, wxGBPosition(4, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
-
+    
+    /*
+    * Todo: Implement FB library per conexion
     sizerControls->Add(label_library, wxGBPosition(5, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
     wxBoxSizer* sizer_r1c1_4 = new wxBoxSizer(wxHORIZONTAL);
     sizer_r1c1_4->Add(text_ctrl_library, 1, wxALIGN_CENTER_VERTICAL);
     sizer_r1c1_4->Add(button_browse_library, 0, wxLEFT | wxALIGN_CENTER_VERTICAL, styleguide().getBrowseButtonMargin());
     sizerControls->Add(sizer_r1c1_4, wxGBPosition(5, 1), wxGBSpan(1, 3), wxEXPAND);
-
+    */
 
     if (createM)
     {
-        sizerControls->Add(label_pagesize, wxGBPosition(6, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-        sizerControls->Add(choice_pagesize, wxGBPosition(6, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
-        sizerControls->Add(label_dialect, wxGBPosition(6, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
-        sizerControls->Add(choice_dialect, wxGBPosition(6, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+        sizerControls->Add(label_pagesize, wxGBPosition(5, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
+        sizerControls->Add(choice_pagesize, wxGBPosition(5, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+        sizerControls->Add(label_dialect, wxGBPosition(5, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
+        sizerControls->Add(choice_dialect, wxGBPosition(5, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
     }
 
     sizerControls->AddGrowableCol(1);
@@ -348,8 +352,10 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
     text_ctrl_username->SetValue(databaseM->getUsername());
     text_ctrl_password->SetValue(databaseM->getDecryptedPassword());
     text_ctrl_role->SetValue(databaseM->getRole());
+    /*
+    * Todo: Implement FB library per conexion
     text_ctrl_library->SetValue(databaseM->getClientLibrary());
-
+    */
     wxString charset(databaseM->getConnectionCharset());
     if (charset.empty())
         charset = "NONE";
@@ -439,11 +445,14 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
 
 void DatabaseRegistrationDialog::OnBrowseLibraryButtonClick(wxCommandEvent& WXUNUSED(event))
 {
+    /*
+    * Todo: Implement FB library per conexion
     wxString path = ::wxFileSelector(_("Select library file"), "", "", "",
         _("Firebird library files (*.dll)|*.dll|All files (*.*)|*.*"),
         wxFD_OPEN, this);
     if (!path.empty())
         text_ctrl_library->SetValue(path);
+     */
 }
 
 void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
@@ -466,7 +475,10 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
     databaseM->setPath(text_ctrl_dbpath->GetValue());
     databaseM->setUsername(text_ctrl_username->GetValue());
     databaseM->setEncryptedPassword(text_ctrl_password->GetValue());
+    /*
+    * Todo: Implement FB library per conexion
     databaseM->setClientLibrary(text_ctrl_library->GetValue());
+    */
 
     wxBusyCursor wait;
     databaseM->setConnectionCharset(combobox_charset->GetValue());
