@@ -36,6 +36,14 @@ http://sourceforge.net/donate/index.php?group_id=95717
             <WordsStyle name="DELETED" styleID="5" fgColor="808040" bgColor="000000" fontName="" fontStyle="0" fontSize="" />
             <WordsStyle name="ADDED" styleID="6" fgColor="339999" bgColor="000000" fontName="" fontStyle="0" fontSize="" />
         </LexerType>
+        <LexerType name="searchResult" desc="Search result" ext="">
+            <WordsStyle name="SELECTED LINE" styleID="6" fgColor="FFFF80" bgColor="0000FF" fontName="" fontStyle="1" fontSize="" />
+            <WordsStyle name="HEARDER" styleID="1" fgColor="9933CC" bgColor="D5FFD5" fontName="" fontStyle="1" fontSize="" />
+            <WordsStyle name="NUMBER" styleID="2" fgColor="99CC99" bgColor="000000" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="HIT WORD" styleID="3" fgColor="99CC99" bgColor="FFFF80" fontName="" fontStyle="4" fontSize="" />
+            <WordsStyle name="KEYWORD1" styleID="4" fgColor="FF6600" bgColor="000000" fontName="" fontStyle="1" fontSize="" keywordClass="instre2">if else for while</WordsStyle>
+            <WordsStyle name="KEYWORD2" styleID="5" fgColor="339999" bgColor="000000" fontName="" fontStyle="0" fontSize="" keywordClass="type1">bool long int char</WordsStyle>
+        </LexerType>
     </LexerStyles>
     <GlobalStyles>
         <!-- Attention : Don't modify the name of styleID="0" -->

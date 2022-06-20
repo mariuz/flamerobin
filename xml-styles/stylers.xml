@@ -23,6 +23,13 @@
             <WordsStyle name="COMMENT DOC" styleID="3" fgColor="008000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
             <WordsStyle name="Q OPERATOR" styleID="24" fgColor="808080" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
         </LexerType>
+        <LexerType name="searchResult" desc="Search result" ext="">
+            <WordsStyle name="Search Header" styleID="1" fgColor="000080" bgColor="BBBBFF" fontName="" fontStyle="1" fontSize="" />
+            <WordsStyle name="File Header" styleID="2" fgColor="008000" bgColor="D5FFD5" fontName="" fontStyle="1" fontSize="" />
+            <WordsStyle name="Line Number" styleID="3" fgColor="FF8040" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="Hit Word" styleID="4" fgColor="FF0000" bgColor="FFFFBF" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="Current line background colour" styleID="6" bgColor="E8E8FF" />
+		</LexerType>
     </LexerStyles>
     <GlobalStyles>
         <!-- Attention : Don't modify the name of styleID="0" -->
@@ -55,5 +62,6 @@
         <WidgetStyle name="Active tab text" styleID="0" fgColor="000000" />
         <WidgetStyle name="Inactive tabs" styleID="0" fgColor="808080" bgColor="C0C0C0" />
         <WidgetStyle name="URL hovered" styleID="0" fgColor="0000FF" />
+        <WidgetStyle name="Document map" styleID="0" fgColor="FF8000" bgColor="FFFFFF" />
     </GlobalStyles>
 </Flamerobin>
