@@ -132,7 +132,7 @@ void TransactionImpl::Start()
     }
 
     IBS status;
-    (*gds.Call()->m_start_multiple)(status.Self(), &mHandle, (short)mDatabases.size(), teb);
+    (*getGDS().Call()->m_start_multiple)(status.Self(), &mHandle, (short)mDatabases.size(), teb);
     delete [] teb;
     if (status.Errors())
     {
@@ -148,7 +148,7 @@ void TransactionImpl::Commit()
 
     IBS status;
 
-    (*gds.Call()->m_commit_transaction)(status.Self(), &mHandle);
+    (*getGDS().Call()->m_commit_transaction)(status.Self(), &mHandle);
     if (status.Errors())
         throw SQLExceptionImpl(status, "Transaction::Commit");
     mHandle = 0;    // Should be, better be sure
@@ -167,7 +167,7 @@ void TransactionImpl::CommitRetain()
 
     IBS status;
 
-    (*gds.Call()->m_commit_retaining)(status.Self(), &mHandle);
+    (*getGDS().Call()->m_commit_retaining)(status.Self(), &mHandle);
     if (status.Errors())
         throw SQLExceptionImpl(status, "Transaction::CommitRetain");
 }
@@ -178,7 +178,7 @@ void TransactionImpl::Rollback()
 
     IBS status;
 
-    (*gds.Call()->m_rollback_transaction)(status.Self(), &mHandle);
+    (*getGDS().Call()->m_rollback_transaction)(status.Self(), &mHandle);
     if (status.Errors())
         throw SQLExceptionImpl(status, "Transaction::Rollback");
     mHandle = 0;    // Should be, better be sure
@@ -197,7 +197,7 @@ void TransactionImpl::RollbackRetain()
 
     IBS status;
 
-    (*gds.Call()->m_rollback_retaining)(status.Self(), &mHandle);
+    (*getGDS().Call()->m_rollback_retaining)(status.Self(), &mHandle);
     if (status.Errors())
         throw SQLExceptionImpl(status, "Transaction::RollbackRetain");
 }

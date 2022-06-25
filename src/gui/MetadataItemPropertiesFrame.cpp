@@ -607,6 +607,9 @@ void MetadataItemPropertiesFrame::showPanel(MetadataItemPropertiesPanel* panel,
         notebookM->SetSelection(pg);
 
     Show();
+    if (!IsMaximized())
+        Maximize(true);
+
     if (panel)
         panel->SetFocus();
     Raise();

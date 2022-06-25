@@ -170,6 +170,7 @@ private:
     wxString sqlSecurityM; // ODS 13
 
     wxString pathM;
+    wxString clientLibraryM;
     int dialectM;
     Credentials credentialsM;
     Credentials* connectionCredentialsM;
@@ -312,6 +313,7 @@ public:
     void getDatabaseTriggers(std::vector<Trigger *>& list);
 
     wxString getPath() const;
+    wxString getClientLibrary() const;
     int getSqlDialect() const;
     wxString getDatabaseCharset() const;
     wxString getConnectionCharset() const;
@@ -324,6 +326,7 @@ public:
     wxString getRole() const;
     IBPP::Database& getIBPPDatabase();
     void setPath(const wxString& value);
+    void setClientLibrary(const wxString& value);
     void setConnectionCharset(const wxString& value);
     void setUsername(const wxString& value);
     void setRawPassword(const wxString& value);

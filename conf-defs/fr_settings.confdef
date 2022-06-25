@@ -38,6 +38,12 @@
                 </setting>
             </enables>
         </setting>
+                <setting type="file">
+                    <caption>Library file name:</caption>
+                    <description>FbClient.dll or gds32.dll </description>
+                    <key>LibraryFile</key>
+                </setting>
+		
         <!--
         <setting type="checkbox">
             <caption>Confirm quit</caption>

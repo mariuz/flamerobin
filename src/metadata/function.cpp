@@ -618,7 +618,7 @@ wxString FunctionSQL::getAlterSql(bool full)
 		if (!output.empty())
 			sql += output ;
 	}
-	sql += getSqlSecurity() + "\n";
+    sql += +"\n" + getSqlSecurity() + "\n";
 	if (full)
 		sql += getSource();
 	else

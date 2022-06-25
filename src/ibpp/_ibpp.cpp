@@ -76,7 +76,7 @@ namespace ibpp_internals
 		if (std::stringstream* p = dynamic_cast<std::stringstream*>(&a))
 		{
 #ifdef IBPP_WINDOWS
-			::OutputDebugStringA(("IBPP: " + p->str() + "\n").c_str());
+			::OutputDebugString(("IBPP: " + p->str() + "\n").c_str());
 #endif
 			p->str("");
 		}
@@ -107,24 +107,34 @@ FBCLIENT* FBCLIENT::Call()
 		// that may have been specified through ClientLibSearchPaths().
 		mHandle = 0;
 
-		std::string::size_type pos = 0;
-		while (pos < mSearchPaths.size())
-		{
-			std::string::size_type newpos = mSearchPaths.find(';', pos);
+        // try specific library
+        if (lstrlen(mfbdll.c_str()) > 0)
+            mHandle = LoadLibrary(mfbdll.c_str());
 
-			std::string path;
-			if (newpos == std::string::npos) path = mSearchPaths.substr(pos);
-			else path = mSearchPaths.substr(pos, newpos-pos);
+        if (mHandle == 0) {
+            std::string::size_type pos = 0;
+            while (pos < mSearchPaths.size())
+            {
+                std::string::size_type newpos = mSearchPaths.find(';', pos);
 
-			if (path.size() >= 1)
-			{
-				if (path[path.size()-1] != '\\') path += '\\';
-				path.append("fbclient.dll");
-				mHandle = LoadLibraryA(path.c_str());
-				if (mHandle != 0 || newpos == std::string::npos) break;
-			}
-			pos = newpos + 1;
-		}
+                std::string path;
+                if (newpos == std::string::npos) 
+                    path = mSearchPaths.substr(pos);
+                else 
+                    path = mSearchPaths.substr(pos, newpos - pos);
+
+                if (path.size() >= 1)
+                {
+                    if (path[path.size() - 1] != '\\') 
+                        path += '\\';
+                    path.append("fbclient.dll");
+                    mHandle = LoadLibrary(path.c_str());
+                    if (mHandle != 0 || newpos == std::string::npos) 
+                        break;
+                }
+                pos = newpos + 1;
+            }
+        }
 
 		if (mHandle == 0)
 		{
@@ -132,7 +142,7 @@ FBCLIENT* FBCLIENT::Call()
 			// is a usefull step for applications using the embedded version of FB
 			// or a local copy (for whatever reasons) of the dll.
 
-			int len = GetModuleFileNameA(NULL, fbdll, sizeof(fbdll));
+			int len = GetModuleFileName(NULL, fbdll, sizeof(fbdll));
 			if (len != 0)
 			{
 				// Get to the last '\' (this one precedes the filename part).
@@ -140,13 +150,13 @@ FBCLIENT* FBCLIENT::Call()
 				char* p = fbdll + len;
 				do {--p;} while (*p != '\\');
 				*p = '\0';
-				lstrcatA(fbdll, "\\fbembed.dll");// Local copy could be named fbembed.dll
-				mHandle = LoadLibraryA(fbdll);
+				lstrcat(fbdll, "\\fbembed.dll");// Local copy could be named fbembed.dll
+				mHandle = LoadLibrary(fbdll);
 				if (mHandle == 0)
 				{
 					*p = '\0';
-					lstrcatA(fbdll, "\\fbclient.dll");	// Or possibly renamed fbclient.dll
-					mHandle = LoadLibraryA(fbdll);
+					lstrcat(fbdll, "\\fbclient.dll");	// Or possibly renamed fbclient.dll
+					mHandle = LoadLibrary(fbdll);
 				}
 			}
 		}
@@ -158,10 +168,10 @@ FBCLIENT* FBCLIENT::Call()
 			// of IBPP in order to be able to select among multiple instances
 			// that Firebird Server version > 1.5 might introduce.
 
-			if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, REG_KEY_ROOT_INSTANCES, 0,
+			if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, REG_KEY_ROOT_INSTANCES, 0,
 					KEY_READ, &hkey_instances) == ERROR_SUCCESS
 				// try 64 bit registry view for 32 bit client program with 64 bit server
-				|| RegOpenKeyExA(HKEY_LOCAL_MACHINE, REG_KEY_ROOT_INSTANCES, 0,
+				|| RegOpenKeyEx(HKEY_LOCAL_MACHINE, REG_KEY_ROOT_INSTANCES, 0,
 					KEY_READ | KEY_WOW64_64KEY, &hkey_instances) == ERROR_SUCCESS)
 			{
 				DWORD keytype;
@@ -172,14 +182,25 @@ FBCLIENT* FBCLIENT::Call()
 					&& keytype == REG_SZ)
 				{
 					int len = lstrlen(fbdll);
-					lstrcatA(fbdll, "bin\\fbclient.dll");
-					mHandle = LoadLibraryA(fbdll);
-					// try 32 bit client library of 64 bit server too
-					if (mHandle == 0)
-					{
-						lstrcpy(fbdll + len, "WOW64\\fbclient.dll");
-						mHandle = LoadLibraryA(fbdll);
-					}
+                    // for Firebird 3+
+                    lstrcat(fbdll, "fbclient.dll");
+                    mHandle = LoadLibrary(fbdll);
+                    // try 32 bit client library of 64 bit server too 
+                    if (mHandle == 0) {
+                        lstrcpy(fbdll + len, "WOW64\\fbclient.dll");
+                        mHandle = LoadLibrary(fbdll);
+                        // for Firebird 2.5 -
+                        if (mHandle == 0){
+                            lstrcpy(fbdll + len, "bin\\fbclient.dll");
+                            mHandle = LoadLibrary(fbdll);
+                            // try 32 bit client library of 64 bit server too
+                            if (mHandle == 0)
+                            {
+                                lstrcpy(fbdll + len, "bin\\WOW64\\fbclient.dll");
+                                mHandle = LoadLibrary(fbdll);
+                            }
+                        }
+                    }
 				}
 				RegCloseKey(hkey_instances);
 			}
@@ -188,12 +209,12 @@ FBCLIENT* FBCLIENT::Call()
 		if (mHandle == 0)
 		{
 			// Let's try from the PATH and System directories
-			mHandle = LoadLibraryA("fbclient.dll");
+			mHandle = LoadLibrary("fbclient.dll");
 			if (mHandle == 0)
 			{
 				// Not found. Last try : attemps loading gds32.dll from PATH and
 				// System directories
-				mHandle = LoadLibraryA("gds32.dll");
+				mHandle = LoadLibrary("gds32.dll");
 				if (mHandle == 0)
 					throw LogicExceptionImpl("GDS::Call()",
 						_("Can't find or load FBCLIENT.DLL or GDS32.DLL"));
@@ -327,17 +348,24 @@ namespace IBPP
 	//	Factories for our Interface objects
 
     Service ServiceFactory(const std::string& ServerName,
-				const std::string& UserName, const std::string& UserPassword)
+				const std::string& UserName, const std::string& UserPassword,
+                const std::string& FBClient )
 	{
-		(void)gds.Call();			// Triggers the initialization, if needed
+        if (FBClient.length() != 0)
+            gds.mfbdll = FBClient;
+        (void)gds.Call();			// Triggers the initialization, if needed
 		return new ServiceImpl(ServerName, UserName, UserPassword);
 	}
 
 	Database DatabaseFactory(const std::string& ServerName,
 		const std::string& DatabaseName, const std::string& UserName,
 		const std::string& UserPassword, const std::string& RoleName,
-		const std::string& CharSet, const std::string& CreateParams)
+		const std::string& CharSet, const std::string& CreateParams,
+        const std::string& FBClient)
 	{
+        
+        if (FBClient.length() != 0)
+            gds.mfbdll = FBClient;
 		(void)gds.Call();			// Triggers the initialization, if needed
 		return new DatabaseImpl(ServerName, DatabaseName, UserName,
 								UserPassword, RoleName, CharSet, CreateParams);
@@ -346,35 +374,35 @@ namespace IBPP
 	Transaction TransactionFactory(Database db, TAM am,
 					TIL il, TLR lr, TFF flags)
 	{
-		(void)gds.Call();			// Triggers the initialization, if needed
+        (void)gds.Call();			// Triggers the initialization, if needed
 		return new TransactionImpl(	dynamic_cast<DatabaseImpl*>(db.intf()),
 									am, il, lr, flags);
 	}
 
 	Statement StatementFactory(Database db, Transaction tr)
 	{
-		(void)gds.Call();			// Triggers the initialization, if needed
+        (void)gds.Call();			// Triggers the initialization, if needed
 		return new StatementImpl(	dynamic_cast<DatabaseImpl*>(db.intf()),
 									dynamic_cast<TransactionImpl*>(tr.intf()));
 	}
 
 	Blob BlobFactory(Database db, Transaction tr)
 	{
-		(void)gds.Call();			// Triggers the initialization, if needed
+        (void)gds.Call();			// Triggers the initialization, if needed
 		return new BlobImpl(dynamic_cast<DatabaseImpl*>(db.intf()),
 							dynamic_cast<TransactionImpl*>(tr.intf()));
 	}
 
 	Array ArrayFactory(Database db, Transaction tr)
 	{
-		(void)gds.Call();			// Triggers the initialization, if needed
+        (void)gds.Call();			// Triggers the initialization, if needed
 		return new ArrayImpl(dynamic_cast<DatabaseImpl*>(db.intf()),
 							dynamic_cast<TransactionImpl*>(tr.intf()));
 	}
 
 	Events EventsFactory(Database db)
 	{
-		(void)gds.Call();			// Triggers the initialization, if needed
+        (void)gds.Call();			// Triggers the initialization, if needed
 		return new EventsImpl(dynamic_cast<DatabaseImpl*>(db.intf()));
 	}
 
