@@ -257,6 +257,11 @@
             <key>sqlEditorAutoIndent</key>
             <default>1</default>
         </setting>
+        <setting type="checkbox">
+            <caption>Use alternate save SQL file method (don't change this option if not necessary)</caption>
+            <key>useAlternativeSaveMode</key>
+            <default>0</default>
+        </setting>
         <node>
             <caption>Code Completion</caption>
             <description>SQL Code Completion</description>
