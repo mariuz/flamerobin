@@ -1363,12 +1363,42 @@ void ExecuteSqlFrame::OnMenuSaveOrSaveAs(wxCommandEvent& event)
         filename = fd.GetPath();
     }
 
-    if (styled_text_ctrl_sql->SaveFile(filename))
+    bool useAlternativeSaveMode = config().get("useAlternativeSaveMode", false);
+    int saveStatus = 0, errorCode = -1;
+    
+    if (useAlternativeSaveMode)
+    {
+        wxFile file(filename, wxFile::write);
+        if (saveStatus = file.Write(styled_text_ctrl_sql->GetValue()))
+        {
+            file.Close();
+            styled_text_ctrl_sql->SetModified(false);
+        }
+        else 
+            errorCode = file.GetLastError();
+    }
+    else
+    {
+        saveStatus = styled_text_ctrl_sql->SaveFile(filename);
+        if (! saveStatus )
+        {
+#ifdef __WINDOWS__
+            errorCode = GetLastError();
+#endif
+        }
+
+    }
+
+    if (saveStatus)
     {
         filenameM = filename;
         filenameModificationTimeM = wxFileName(filenameM).GetModificationTime();
         updateFrameTitleM = true;
         statusbar_1->SetStatusText((_("File saved")), 2);
+    }
+    else
+    {
+        throw FRError(wxString::Format(_("Error saving the file, attention for not losing your SQL. Error code: %d"), errorCode));
     }
 }
 
