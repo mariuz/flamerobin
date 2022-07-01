@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -332,6 +332,8 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
         mytype = 0;
     if (typeM == ntDBTrigger || typeM == ntDDLTrigger || typeM == ntDMLTrigger)
         mytype = 2;
+    if (typeM == ntFunctionSQL || typeM == ntUDF)
+        mytype = 15;
 
     int mytype2 = mytype;
     // views count as relations(tables) when other object refer to them

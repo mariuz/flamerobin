@@ -107,24 +107,34 @@ FBCLIENT* FBCLIENT::Call()
 		// that may have been specified through ClientLibSearchPaths().
 		mHandle = 0;
 
-		std::string::size_type pos = 0;
-		while (pos < mSearchPaths.size())
-		{
-			std::string::size_type newpos = mSearchPaths.find(';', pos);
+        // try specific library
+        if (lstrlen(mfbdll.c_str()) > 0)
+            mHandle = LoadLibrary(mfbdll.c_str());
 
-			std::string path;
-			if (newpos == std::string::npos) path = mSearchPaths.substr(pos);
-			else path = mSearchPaths.substr(pos, newpos-pos);
+        if (mHandle == 0) {
+            std::string::size_type pos = 0;
+            while (pos < mSearchPaths.size())
+            {
+                std::string::size_type newpos = mSearchPaths.find(';', pos);
 
-			if (path.size() >= 1)
-			{
-				if (path[path.size()-1] != '\\') path += '\\';
-				path.append("fbclient.dll");
-				mHandle = LoadLibrary(path.c_str());
-				if (mHandle != 0 || newpos == std::string::npos) break;
-			}
-			pos = newpos + 1;
-		}
+                std::string path;
+                if (newpos == std::string::npos) 
+                    path = mSearchPaths.substr(pos);
+                else 
+                    path = mSearchPaths.substr(pos, newpos - pos);
+
+                if (path.size() >= 1)
+                {
+                    if (path[path.size() - 1] != '\\') 
+                        path += '\\';
+                    path.append("fbclient.dll");
+                    mHandle = LoadLibrary(path.c_str());
+                    if (mHandle != 0 || newpos == std::string::npos) 
+                        break;
+                }
+                pos = newpos + 1;
+            }
+        }
 
 		if (mHandle == 0)
 		{
@@ -172,14 +182,25 @@ FBCLIENT* FBCLIENT::Call()
 					&& keytype == REG_SZ)
 				{
 					int len = lstrlen(fbdll);
-					lstrcat(fbdll, "bin\\fbclient.dll");
-					mHandle = LoadLibrary(fbdll);
-					// try 32 bit client library of 64 bit server too
-					if (mHandle == 0)
-					{
-						lstrcpy(fbdll + len, "WOW64\\fbclient.dll");
-						mHandle = LoadLibrary(fbdll);
-					}
+                    // for Firebird 3+
+                    lstrcat(fbdll, "fbclient.dll");
+                    mHandle = LoadLibrary(fbdll);
+                    // try 32 bit client library of 64 bit server too 
+                    if (mHandle == 0) {
+                        lstrcpy(fbdll + len, "WOW64\\fbclient.dll");
+                        mHandle = LoadLibrary(fbdll);
+                        // for Firebird 2.5 -
+                        if (mHandle == 0){
+                            lstrcpy(fbdll + len, "bin\\fbclient.dll");
+                            mHandle = LoadLibrary(fbdll);
+                            // try 32 bit client library of 64 bit server too
+                            if (mHandle == 0)
+                            {
+                                lstrcpy(fbdll + len, "bin\\WOW64\\fbclient.dll");
+                                mHandle = LoadLibrary(fbdll);
+                            }
+                        }
+                    }
 				}
 				RegCloseKey(hkey_instances);
 			}
@@ -327,17 +348,24 @@ namespace IBPP
 	//	Factories for our Interface objects
 
     Service ServiceFactory(const std::string& ServerName,
-				const std::string& UserName, const std::string& UserPassword)
+				const std::string& UserName, const std::string& UserPassword,
+                const std::string& FBClient )
 	{
-		(void)gds.Call();			// Triggers the initialization, if needed
+        if (FBClient.length() != 0)
+            gds.mfbdll = FBClient;
+        (void)gds.Call();			// Triggers the initialization, if needed
 		return new ServiceImpl(ServerName, UserName, UserPassword);
 	}
 
 	Database DatabaseFactory(const std::string& ServerName,
 		const std::string& DatabaseName, const std::string& UserName,
 		const std::string& UserPassword, const std::string& RoleName,
-		const std::string& CharSet, const std::string& CreateParams)
+		const std::string& CharSet, const std::string& CreateParams,
+        const std::string& FBClient)
 	{
+        
+        if (FBClient.length() != 0)
+            gds.mfbdll = FBClient;
 		(void)gds.Call();			// Triggers the initialization, if needed
 		return new DatabaseImpl(ServerName, DatabaseName, UserName,
 								UserPassword, RoleName, CharSet, CreateParams);
@@ -346,35 +374,35 @@ namespace IBPP
 	Transaction TransactionFactory(Database db, TAM am,
 					TIL il, TLR lr, TFF flags)
 	{
-		(void)gds.Call();			// Triggers the initialization, if needed
+        (void)gds.Call();			// Triggers the initialization, if needed
 		return new TransactionImpl(	dynamic_cast<DatabaseImpl*>(db.intf()),
 									am, il, lr, flags);
 	}
 
 	Statement StatementFactory(Database db, Transaction tr)
 	{
-		(void)gds.Call();			// Triggers the initialization, if needed
+        (void)gds.Call();			// Triggers the initialization, if needed
 		return new StatementImpl(	dynamic_cast<DatabaseImpl*>(db.intf()),
 									dynamic_cast<TransactionImpl*>(tr.intf()));
 	}
 
 	Blob BlobFactory(Database db, Transaction tr)
 	{
-		(void)gds.Call();			// Triggers the initialization, if needed
+        (void)gds.Call();			// Triggers the initialization, if needed
 		return new BlobImpl(dynamic_cast<DatabaseImpl*>(db.intf()),
 							dynamic_cast<TransactionImpl*>(tr.intf()));
 	}
 
 	Array ArrayFactory(Database db, Transaction tr)
 	{
-		(void)gds.Call();			// Triggers the initialization, if needed
+        (void)gds.Call();			// Triggers the initialization, if needed
 		return new ArrayImpl(dynamic_cast<DatabaseImpl*>(db.intf()),
 							dynamic_cast<TransactionImpl*>(tr.intf()));
 	}
 
 	Events EventsFactory(Database db)
 	{
-		(void)gds.Call();			// Triggers the initialization, if needed
+        (void)gds.Call();			// Triggers the initialization, if needed
 		return new EventsImpl(dynamic_cast<DatabaseImpl*>(db.intf()));
 	}
 
@@ -384,6 +412,7 @@ namespace IBPP
         case SDT::sdSmallint:
         case SDT::sdInteger:
         case SDT::sdLargeint:
+        case SDT::sdInt128:
             return true;
         }
         return false;
@@ -397,6 +426,8 @@ namespace IBPP
         switch (type) {
         case SDT::sdDouble:
         case SDT::sdFloat:
+        case SDT::sdDec16:
+        case SDT::sdDec34:
             return true;
         }
         return false;

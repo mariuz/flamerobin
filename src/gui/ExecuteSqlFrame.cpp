@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -309,26 +309,31 @@ void SqlEditor::setChars(bool firebirdIdentifierOnly)
 void SqlEditor::setup()
 {
     StyleClearAll();
-    StyleSetForeground(0,  wxColour(0x80, 0x00, 0x00));
-    StyleSetForeground(1,  wxColour(0x00, 0xa0, 0x00));        // multiline comment
-    StyleSetForeground(2,  wxColour(0x00, 0xa0, 0x00));        // one-line comment
-    StyleSetForeground(3,  wxColour(0x00, 0xff, 0x00));
-    StyleSetForeground(4,  wxColour(0x00, 0x00, 0xff));        // number
-    StyleSetForeground(5,  wxColour(0x00, 0x00, 0x7f));        // keyword
-    StyleSetForeground(6,  wxColour(0x00, 0x00, 0xff));        // 'single quotes'
-    StyleSetForeground(7,  wxColour(0xff, 0x00, 0xff));
-    StyleSetForeground(8,  wxColour(0x00, 0x7f, 0x7f));
-    StyleSetForeground(9,  wxColour(0xff, 0x00, 0x00));
-    StyleSetForeground(10, wxColour(0x00, 0x00, 0x00));        // ops
-    StyleSetForeground(11, wxColour(0x00, 0x00, 0x00));
-    StyleSetBackground(wxSTC_STYLE_BRACELIGHT, wxColour(0xff, 0xcc, 0x00));        // brace highlight
-    StyleSetBackground(wxSTC_STYLE_BRACEBAD, wxColour(0xff, 0x33, 0x33));        // brace bad highlight
-    StyleSetBold(5,  TRUE);
-    StyleSetBold(10, TRUE);
+
+    StyleSetForeground(wxSTC_SQL_DEFAULT,        wxColour(0x80, 0x00, 0x00));
+    StyleSetForeground(wxSTC_SQL_COMMENT,        wxColour(0x00, 0xa0, 0x00));        // multiline comment
+    StyleSetForeground(wxSTC_SQL_COMMENTLINE,    wxColour(0x00, 0xa0, 0x00));        // one-line comment
+    StyleSetForeground(wxSTC_SQL_COMMENTDOC,     wxColour(0x00, 0xff, 0x00));
+    StyleSetForeground(wxSTC_SQL_NUMBER,         wxColour(0x00, 0x00, 0xff));        // number
+    StyleSetForeground(wxSTC_SQL_WORD,           wxColour(0x00, 0x00, 0x7f));        // keyword
+    StyleSetForeground(wxSTC_SQL_STRING,         wxColour(0x00, 0x00, 0xff));        // 'single quotes'
+    StyleSetForeground(wxSTC_SQL_CHARACTER,      wxColour(0xff, 0x00, 0xff));
+    StyleSetForeground(wxSTC_SQL_SQLPLUS,        wxColour(0x00, 0x7f, 0x7f));
+    StyleSetForeground(wxSTC_SQL_SQLPLUS_PROMPT, wxColour(0xff, 0x00, 0x00));
+    StyleSetForeground(wxSTC_SQL_OPERATOR,       wxColour(0x00, 0x00, 0x00));        // ops
+    StyleSetForeground(wxSTC_SQL_IDENTIFIER,     wxColour(0x00, 0x00, 0x00));
+    
+    StyleSetBackground(wxSTC_STYLE_BRACELIGHT,   wxColour(0xff, 0xcc, 0x00));        // brace highlight
+    StyleSetBackground(wxSTC_STYLE_BRACEBAD,     wxColour(0xff, 0x33, 0x33));        // brace bad highlight
+    
+    StyleSetBold(wxSTC_SQL_WORD,         TRUE);
+    StyleSetBold(wxSTC_SQL_OPERATOR,     TRUE);
     StyleSetBold(wxSTC_STYLE_BRACELIGHT, TRUE);
-    StyleSetBold(wxSTC_STYLE_BRACEBAD, TRUE);
-    StyleSetItalic(2, TRUE);
-    StyleSetItalic(1, TRUE);
+    StyleSetBold(wxSTC_STYLE_BRACEBAD,   TRUE);
+    
+    StyleSetItalic(wxSTC_SQL_COMMENT,     TRUE);
+    StyleSetItalic(wxSTC_SQL_COMMENTLINE, TRUE);
+
     SetLexer(wxSTC_LEX_SQL);
     setChars(false);
 
@@ -1358,12 +1363,42 @@ void ExecuteSqlFrame::OnMenuSaveOrSaveAs(wxCommandEvent& event)
         filename = fd.GetPath();
     }
 
-    if (styled_text_ctrl_sql->SaveFile(filename))
+    bool useAlternativeSaveMode = config().get("useAlternativeSaveMode", false);
+    int saveStatus = 0, errorCode = -1;
+    
+    if (useAlternativeSaveMode)
+    {
+        wxFile file(filename, wxFile::write);
+        if (saveStatus = file.Write(styled_text_ctrl_sql->GetValue()))
+        {
+            file.Close();
+            styled_text_ctrl_sql->SetModified(false);
+        }
+        else 
+            errorCode = file.GetLastError();
+    }
+    else
+    {
+        saveStatus = styled_text_ctrl_sql->SaveFile(filename);
+        if (! saveStatus )
+        {
+#ifdef __WINDOWS__
+            errorCode = GetLastError();
+#endif
+        }
+
+    }
+
+    if (saveStatus)
     {
         filenameM = filename;
         filenameModificationTimeM = wxFileName(filenameM).GetModificationTime();
         updateFrameTitleM = true;
         statusbar_1->SetStatusText((_("File saved")), 2);
+    }
+    else
+    {
+        throw FRError(wxString::Format(_("Error saving the file, attention for not losing your SQL. Error code: %d"), errorCode));
     }
 }
 

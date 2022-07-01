@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -91,15 +91,24 @@ void Parameter::acceptVisitor(MetadataItemVisitor* visitor)
     visitor->visitParameter(*this);
 }
 
-wxString Parameter::getTypeOf()
+wxString Parameter::getTypeOf(bool large)
 {
     if (relationM.empty()) {
-        if (getSource() == "") {
-            return "TYPE OF " + getDomain()->getDatatypeAsString();
-        }else
-            return "TYPE OF " + getSource();
+        if (getDomain()->isSystem())
+            return "";
+        else
+            if (getSource() == "") {
+                return (large ? "TYPE OF " : "") + getDomain()->getDatatypeAsString();
+            }
+            else
+                return (large ? "TYPE OF " : "") + getSource();
     }
     else
-        return "TYPE OF COLUMN " + relationM + "." + fieldM;
+        return (large ? "TYPE OF COLUMN " : "") + relationM + "." + fieldM;
+}
+
+bool Parameter::isTypeOf()
+{
+    return !relationM.IsEmpty();
 }
 

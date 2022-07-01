@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -170,6 +170,7 @@ private:
     wxString sqlSecurityM; // ODS 13
 
     wxString pathM;
+    wxString clientLibraryM;
     int dialectM;
     Credentials credentialsM;
     Credentials* connectionCredentialsM;
@@ -194,6 +195,7 @@ private:
     PackagesPtr packagesM;
     ProceduresPtr proceduresM;
     RolesPtr rolesM;
+    SysIndicesPtr sysIndicesM;
     SysDomainsPtr sysDomainsM;
     SysPackagesPtr sysPackagesM;
     SysRolesPtr sysRolesM;
@@ -201,6 +203,7 @@ private:
     TablesPtr tablesM;
     UDFsPtr UDFsM;
     UsersPtr usersM;
+    UsrIndicesPtr usrIndicesM;
     ViewsPtr viewsM;
 
     // copy constructor implementation removed since it's no longer needed
@@ -214,6 +217,8 @@ private:
 
     void loadCollections(ProgressIndicator* progressIndicator);
 
+    void loadDatabaseInfo();
+
     void loadDefaultTimezone();
     void loadTimezones();
 
@@ -222,10 +227,12 @@ private:
 
     mutable unsigned idM;
 
+    bool showSystemIndices();
     bool showSystemDomains();
     bool showSystemPackages();
     bool showSystemRoles();
     bool showSystemTables();
+    bool showOneNodeIndices();
 
     inline void checkConnected(const wxString& operation) const;
 protected:
@@ -252,6 +259,7 @@ public:
     PackagesPtr getPackages();
     ProceduresPtr getProcedures();
     RolesPtr getRoles();
+    SysIndicesPtr getSysIndices();
     SysDomainsPtr getSysDomains();
     SysPackagesPtr getSysPackages();
     SysRolesPtr getSysRoles();
@@ -259,6 +267,7 @@ public:
     TablesPtr getTables();
     UDFsPtr getUDFs();
     UsersPtr getUsers();
+    UsrIndicesPtr getUsrIndices();
     ViewsPtr getViews();
 
     bool isConnected() const;
@@ -304,6 +313,7 @@ public:
     void getDatabaseTriggers(std::vector<Trigger *>& list);
 
     wxString getPath() const;
+    wxString getClientLibrary() const;
     int getSqlDialect() const;
     wxString getDatabaseCharset() const;
     wxString getConnectionCharset() const;
@@ -316,6 +326,7 @@ public:
     wxString getRole() const;
     IBPP::Database& getIBPPDatabase();
     void setPath(const wxString& value);
+    void setClientLibrary(const wxString& value);
     void setConnectionCharset(const wxString& value);
     void setUsername(const wxString& value);
     void setRawPassword(const wxString& value);

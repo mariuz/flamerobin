@@ -38,6 +38,12 @@
                 </setting>
             </enables>
         </setting>
+                <setting type="file">
+                    <caption>Library file name:</caption>
+                    <description>FbClient.dll or gds32.dll </description>
+                    <key>LibraryFile</key>
+                </setting>
+		
         <!--
         <setting type="checkbox">
             <caption>Confirm quit</caption>
@@ -68,6 +74,18 @@
             <key>OrderDatabasesInTree</key>
             <default>0</default>
             <related /><!-- this moves the checkbox closer to the previous one -->
+        </setting>
+        <setting type="checkbox">
+            <caption>Show all indices in one node in tree</caption>
+            <description>If checked the all indices will be shown in one node in the tree by default (can be overridden per database)</description>
+            <key>ShowOneNodeIndices</key>
+            <default>0</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Show system indices in tree</caption>
+            <description>If checked the system indices will be shown in the tree by default (can be overridden per database)</description>
+            <key>ShowSystemIndices</key>
+            <default>1</default>
         </setting>
         <setting type="checkbox">
             <caption>Show system domains in tree</caption>
@@ -238,6 +256,11 @@
             <caption>Auto-indent new lines to same level as previous line</caption>
             <key>sqlEditorAutoIndent</key>
             <default>1</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Use alternate save SQL file method (don't change this option if not necessary)</caption>
+            <key>useAlternativeSaveMode</key>
+            <default>0</default>
         </setting>
         <node>
             <caption>Code Completion</caption>

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -219,7 +219,7 @@ void RestoreFrame::createControls()
     label_pagesize = new wxStaticText(panel_controls, wxID_ANY,
         _("Page size:"));
     const wxString pagesize_choices[] = {
-        _("Default"), "1024", "2048", "4096", "8192", "16384"
+        _("Default"), "1024", "2048", "4096", "8192", "16384", "32768"
     };
     choice_pagesize = new wxChoice(panel_controls, wxID_ANY,
         wxDefaultPosition, wxDefaultSize,

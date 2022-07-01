@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -2406,17 +2406,21 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
 {
     LocalSettings localSet;
 
-    double localDouble = 0;
     wxString localValue = value;
+    double localDouble = 0;
     
     
     if (IBPP::isRationalNumber(statementM->ColumnType(col + 1)) && localValue.ToDouble(&localDouble) && (value.Contains(",") || value.Contains(".")))
     {
-        localSet.setDataBaseLenguage();
+        double localDouble = 0;
+        if (localValue.ToDouble(&localDouble) && localValue.Contains(","))
+        {
+            localSet.setDataBaseLenguage();
 
-        localValue = std::to_string(localDouble);
-        if (localValue.Contains(",")) {
-            localValue.Replace(",", ".", true);
+            localValue = std::to_string(localDouble);
+            if (localValue.Contains(",")) {
+                localValue.Replace(",", ".", true);
+            }
         }
     }
     

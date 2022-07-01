@@ -851,6 +851,7 @@
     <ClCompile Include="src\ibpp\dbkey.cpp" />
     <ClCompile Include="src\ibpp\events.cpp" />
     <ClCompile Include="src\ibpp\exception.cpp" />
+    <ClCompile Include="src\ibpp\ibint128.cpp" />
     <ClCompile Include="src\ibpp\row.cpp" />
     <ClCompile Include="src\ibpp\service.cpp" />
     <ClCompile Include="src\ibpp\statement.cpp" />

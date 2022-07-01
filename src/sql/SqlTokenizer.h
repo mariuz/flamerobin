@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -121,13 +121,13 @@ enum SqlTokenType {
      kwROW_NUMBER, kwROWS, kwRPAD, kwRSA_DECRYPT, kwRSA_ENCRYPT, kwRSA_PRIVATE, kwRSA_PUBLIC,
      kwRSA_SIGN, kwRSA_VERIFY, kwRUNTIME, 
      
-     kwSALT_LENGTH, kwSAVEPOINT, kwSCALAR_ARRAY, kwSCHEMA, kwSCROLL, kwSECOND, kwSECURITY,
-     kwSEGMENT, kwSELECT, kwSENSITIVE, kwSERVERWIDE, kwSESSION, kwSET, kwSHADOW, kwSHARED,
-     kwSHELL, kwSHOW, kwSIGN, kwSIGNATURE, kwSIMILAR, kwSIN, kwSINGULAR, kwSINH, kwSIZE,
-     kwSKIP, kwSMALLINT, kwSNAPSHOT, kwSOME, kwSORT, kwSOURCE, kwSPACE, kwSQL, kwSQLCODE,
-     kwSQLERROR, kwSQLSTATE, kwSQLWARNING, kwSQRT, kwSTABILITY, kwSTART, kwSTARTING,
+     kwSALT_LENGTH, kwSAVEPOINT, kwSCALAR_ARRAY, kwSCHEMA, kwSCROLL, kwSECOND, kwSECUENCE, 
+     kwSECURITY, kwSEGMENT, kwSELECT, kwSENSITIVE, kwSERVERWIDE, kwSESSION, kwSET, kwSHADOW, 
+     kwSHARED, kwSHELL, kwSHOW, kwSIGN, kwSIGNATURE, kwSIMILAR, kwSIN, kwSINGULAR, kwSINH, 
+     kwSIZE, kwSKIP, kwSMALLINT, kwSNAPSHOT, kwSOME, kwSORT, kwSOURCE, kwSPACE, kwSQL, 
+     kwSQLCODE, kwSQLERROR, kwSQLSTATE, kwSQLWARNING, kwSQRT, kwSTABILITY, kwSTART, kwSTARTING,
      kwSTARTS, kwSTATEMENT, kwSTATIC, kwSTATISTICS, kwSTDDEV_POP, kwSTDDEV_SAMP, kwSUB_TYPE,
-     kwSUBSTRING, kwSUM, kwSUSPEND, kwSYSTEM,
+     kwSUBSTRING, kwSUM, kwSUSPEND, kwSYSTEM, 
      
      kwTABLE, kwTAGS, kwTAN, kwTANH, kwTEMPORARY, kwTERMINATOR, kwTHEN, kwTIES, kwTIME, kwTIMEOUT,
      kwTIMESTAMP, kwTIMEZONE_HOUR, kwTIMEZONE_MINUTE, kwTO, kwTOTALORDER, kwTRAILING, kwTRANSACTION,

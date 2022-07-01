@@ -13,223 +13,232 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
+    <Filter Include="Source Files\Metadata">
+      <UniqueIdentifier>{0f09e77a-5c5b-43de-8cca-a5e23a946588}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui">
+      <UniqueIdentifier>{66289fbe-1c79-498d-adfc-caae5c0e9e11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\sql">
+      <UniqueIdentifier>{06d639b2-18b7-4a91-932f-f7e78d6e8308}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\gui\AboutBox.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\AdvancedMessageDialog.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\AdvancedSearchFrame.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\core\ArtProvider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\BackupFrame.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\BackupRestoreBaseFrame.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\BaseDialog.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\BaseFrame.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\core\CodeTemplateProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\CommandManager.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ConfdefTemplateProcessor.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\config\Config.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ContextMenuMetadataItemVisitor.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\controls\ControlUtils.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\CreateDDLVisitor.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\CreateIndexDialog.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\controls\DBHTreeControl.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\DataGeneratorFrame.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\controls\DataGrid.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\controls\DataGridRowBuffer.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\controls\DataGridRows.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\controls\DataGridTable.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\config\DatabaseConfig.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\DatabaseRegistrationDialog.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\controls\DndTextControls.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\EditBlobDialog.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\EventWatcherFrame.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ExecuteSql.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ExecuteSqlFrame.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\core\FRError.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\FRLayoutConfig.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\FieldPropertiesDialog.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\FindDialog.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\GUIURIHandlerHelper.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\HtmlHeaderMetadataItemVisitor.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\HtmlTemplateProcessor.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\sql\Identifier.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\sql</Filter>
     </ClCompile>
     <ClCompile Include="src\sql\IncompleteStatement.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\sql</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\Index.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\InsertDialog.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\controls\LogTextControl.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\MainFrame.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\MasterPassword.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\MetadataItemCreateStatementVisitor.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\MetadataItemDescriptionVisitor.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\MetadataItemPropertiesFrame.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\MetadataItemURIHandlerHelper.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\MetadataItemVisitor.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\MetadataLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\MetadataTemplateCmdHandler.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\MetadataTemplateManager.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\sql\MultiStatement.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\sql</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\MultilineEnterDialog.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\core\Observer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\PreferencesDialog.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\PreferencesDialogSettings.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\controls\PrintableHtmlWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\PrivilegesDialog.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ProgressDialog.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\core\ProgressIndicator.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ReorderFieldsDialog.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\RestoreFrame.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\sql\SelectStatement.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\sql</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ServerRegistrationDialog.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\SimpleHtmlFrame.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\sql\SqlStatement.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\sql</Filter>
     </ClCompile>
     <ClCompile Include="src\sql\SqlTokenizer.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\sql</Filter>
     </ClCompile>
     <ClCompile Include="src\sql\StatementBuilder.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\sql</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\StatementHistoryDialog.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\core\StringUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\StyleGuide.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\msw\StyleGuideMSW.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\core\Subject.cpp">
       <Filter>Source Files</Filter>
@@ -238,19 +247,19 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\controls\TextControl.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\core\URIProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\User.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\UserDialog.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\UsernamePasswordDialog.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\core\Visitor.cpp">
       <Filter>Source Files</Filter>
@@ -259,22 +268,22 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\column.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\constraints.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\database.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\databasehandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\domain.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\exception.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\frprec.cpp">
       <Filter>Source Files</Filter>
@@ -283,10 +292,10 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\function.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\generator.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\logger.cpp">
       <Filter>Source Files</Filter>
@@ -295,51 +304,57 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\metadataitem.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\objectdescriptionhandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\parameter.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\privilege.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\procedure.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\relation.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\role.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\root.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\server.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\statementHistory.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\table.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\trigger.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\view.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\InsertParametersDialog.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\package.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\config\LocalSettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\FRInt128.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\core\FRDecimal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -672,6 +687,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\config\LocalSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\FRInt128.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\core\FRDecimal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

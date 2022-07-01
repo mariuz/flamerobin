@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -66,7 +66,7 @@ std::string Domain::getLoadStatement(bool list)
             " on l.rdb$collation_id = f.rdb$collation_id"
             " and l.rdb$character_set_id = f.rdb$character_set_id"
         " left outer join rdb$types t on f.rdb$field_type=t.rdb$type"
-        " where t.rdb$field_name='RDB$FIELD_TYPE' and f.rdb$field_name ");
+        " where t.rdb$field_name = ? and f.rdb$field_name ");
 	if (list) {
 		stmt += "not starting with 'RDB$' ";
 		//if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) //If Firebird 3 ODS, remove SEC$DOMAINs, this is a static method, so I wont be able to get ODS
@@ -94,7 +94,8 @@ void Domain::loadProperties()
     wxMBConv* converter = db->getCharsetConverter();
 
     IBPP::Statement& st1 = loader->getStatement(getLoadStatement(false));
-    st1->Set(1, wx2std(getName_(), converter));
+    st1->Set(1, wx2std("RDB$FIELD_TYPE", converter)); 
+    st1->Set(2, wx2std(getName_(), converter));
     st1->Execute();
     if (!st1->Fetch())
         throw FRError(_("Domain not found: ") + getName_());
@@ -447,7 +448,8 @@ DomainPtr DomainCollectionBase::getDomain(const wxString& name)
 
         IBPP::Statement& st1 = loader->getStatement(
             Domain::getLoadStatement(false));
-        st1->Set(1, wx2std(name, converter));
+        st1->Set(1, wx2std("RDB$FIELD_TYPE", converter)); 
+        st1->Set(2, wx2std(name, converter));
         st1->Execute();
         if (st1->Fetch())
         {

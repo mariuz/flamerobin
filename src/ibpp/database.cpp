@@ -56,7 +56,7 @@ void DatabaseImpl::Create(int dialect)
     // Call ExecuteImmediate to create the database
     isc_tr_handle tr_handle = 0;
     IBS status;
-    (*gds.Call()->m_dsql_execute_immediate)(status.Self(), &mHandle, &tr_handle,
+    (*getGDS().Call()->m_dsql_execute_immediate)(status.Self(), &mHandle, &tr_handle,
         0, const_cast<char*>(create.c_str()), short(dialect), NULL);
     if (status.Errors())
         throw SQLExceptionImpl(status, "Database::Create", _("isc_dsql_execute_immediate failed"));
@@ -89,7 +89,7 @@ void DatabaseImpl::Connect()
     connect.append(mDatabaseName);
 
     IBS status;
-    (*gds.Call()->m_attach_database)(status.Self(), (short)connect.size(),
+    (*getGDS().Call()->m_attach_database)(status.Self(), (short)connect.size(),
         const_cast<char*>(connect.c_str()), &mHandle, dpb.Size(), dpb.Self());
     if (status.Errors())
     {
@@ -108,12 +108,12 @@ void DatabaseImpl::Connect()
     RB result(100);
 
     status.Reset();
-    (*gds.Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
+    (*getGDS().Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
         result.Size(), result.Self());
     if (status.Errors())
     {
         status.Reset();
-        (*gds.Call()->m_detach_database)(status.Self(), &mHandle);
+        (*getGDS().Call()->m_detach_database)(status.Self(), &mHandle);
         mHandle = 0;     // Should be, but better be sure...
         throw SQLExceptionImpl(status, "Database::Connect", _("isc_database_info failed"));
     }
@@ -122,7 +122,7 @@ void DatabaseImpl::Connect()
     if (ODS <= 9)
     {
         status.Reset();
-        (*gds.Call()->m_detach_database)(status.Self(), &mHandle);
+        (*getGDS().Call()->m_detach_database)(status.Self(), &mHandle);
         mHandle = 0;     // Should be, but better be sure...
         throw LogicExceptionImpl("Database::Connect",
             _("Unsupported Server : wrong ODS version (%d), at least '10' required."), ODS);
@@ -132,7 +132,7 @@ void DatabaseImpl::Connect()
     if (mDialect != 1 && mDialect != 3)
     {
         status.Reset();
-        (*gds.Call()->m_detach_database)(status.Self(), &mHandle);
+        (*getGDS().Call()->m_detach_database)(status.Self(), &mHandle);
         mHandle = 0;     // Should be, but better be sure...
         throw LogicExceptionImpl("Database::Connect", _("Dialect 1 or 3 required"));
     }
@@ -185,7 +185,7 @@ void DatabaseImpl::Disconnect()
 
     // Detach from the server
     IBS status;
-    (*gds.Call()->m_detach_database)(status.Self(), &mHandle);
+    (*getGDS().Call()->m_detach_database)(status.Self(), &mHandle);
 
     // Should we throw, set mHandle to 0 first, because Disconnect() may
     // be called from Database destructor (keeps the object coherent).
@@ -203,7 +203,7 @@ void DatabaseImpl::Drop()
     Inactivate();
 
     IBS vector;
-    (*gds.Call()->m_drop_database)(vector.Self(), &mHandle);
+    (*getGDS().Call()->m_drop_database)(vector.Self(), &mHandle);
     if (vector.Errors())
         throw SQLExceptionImpl(vector, "Database::Drop", _("isc_drop_database failed"));
 
@@ -240,7 +240,7 @@ void DatabaseImpl::Info(int* ODSMajor, int* ODSMinor,
     RB result(256);
 
     status.Reset();
-    (*gds.Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
+    (*getGDS().Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
         result.Size(), result.Self());
     if (status.Errors())
         throw SQLExceptionImpl(status, "Database::Info", _("isc_database_info failed"));
@@ -274,7 +274,7 @@ void DatabaseImpl::TransactionInfo(int* Oldest, int* OldestActive,
     RB result(256);
 
     status.Reset();
-    (*gds.Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
+    (*getGDS().Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
         result.Size(), result.Self());
     if (status.Errors())
         throw SQLExceptionImpl(status, "Database::TransactionInfo", _("isc_database_info failed"));
@@ -304,7 +304,7 @@ void DatabaseImpl::Statistics(int* Fetches, int* Marks, int* Reads, int* Writes,
     RB result(256);
 
     status.Reset();
-    (*gds.Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
+    (*getGDS().Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
         result.Size(), result.Self());
     if (status.Errors())
         throw SQLExceptionImpl(status, "Database::Statistics", _("isc_database_info failed"));
@@ -332,7 +332,7 @@ void DatabaseImpl::Counts(int* Insert, int* Update, int* Delete,
     RB result(1024);
 
     status.Reset();
-    (*gds.Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
+    (*getGDS().Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
         result.Size(), result.Self());
     if (status.Errors())
         throw SQLExceptionImpl(status, "Database::Counts", _("isc_database_info failed"));
@@ -357,7 +357,7 @@ void DatabaseImpl::DetailedCounts(IBPP::DatabaseCounts& counts)
     RB result(1024);
 
     status.Reset();
-    (*gds.Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
+    (*getGDS().Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
         result.Size(), result.Self());
     if (status.Errors())
         throw SQLExceptionImpl(status, "Database::DetailedCounts", _("isc_database_info failed"));
@@ -378,7 +378,7 @@ void DatabaseImpl::Users(std::vector<std::string>& users)
     RB result(8000);
 
     status.Reset();
-    (*gds.Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
+    (*getGDS().Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
         result.Size(), result.Self());
     if (status.Errors())
         throw SQLExceptionImpl(status, "Database::Users", _("isc_database_info failed"));

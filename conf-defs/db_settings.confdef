@@ -5,6 +5,18 @@
         <caption>Main Tree View</caption>
         <image>2</image>
         <setting type="checkbox">
+            <caption>show all indices in one node in tree</caption>
+            <description>If checked the all indices for this database will be shown in one node in the tree</description>
+            <key>ShowOneNodeIndices</key>
+            <default>0</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Show system indices in tree</caption>
+            <description>If checked the system indices for this database will be shown in the tree</description>
+            <key>ShowSystemIndices</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
             <caption>Show system domains in tree</caption>
             <description>If checked the system domains for this database will be shown in the tree</description>
             <key>ShowSystemDomains</key>

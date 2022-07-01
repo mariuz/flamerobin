@@ -978,17 +978,19 @@ public:
     //  }
 
     Service ServiceFactory(const std::string& ServerName,
-        const std::string& UserName, const std::string& UserPassword);
+        const std::string& UserName, const std::string& UserPassword,
+        const std::string& FBClient = "");
 
     Database DatabaseFactory(const std::string& ServerName,
         const std::string& DatabaseName, const std::string& UserName,
             const std::string& UserPassword, const std::string& RoleName,
-                const std::string& CharSet, const std::string& CreateParams);
+                const std::string& CharSet, const std::string& CreateParams,
+                    const std::string& FBClient = "");
 
     inline Database DatabaseFactory(const std::string& ServerName,
         const std::string& DatabaseName, const std::string& UserName,
-            const std::string& UserPassword)
-        { return DatabaseFactory(ServerName, DatabaseName, UserName, UserPassword, "", "", ""); }
+            const std::string& UserPassword, const std::string& FBClient = "")
+        { return DatabaseFactory(ServerName, DatabaseName, UserName, UserPassword, "", "", "", FBClient); }
 
     Transaction TransactionFactory(Database db, TAM am = amWrite,
         TIL il = ilConcurrency, TLR lr = lrWait, TFF flags = TFF(0));

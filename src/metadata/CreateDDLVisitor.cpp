@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -52,6 +52,43 @@
 
 // forward declaration to keep compilers happy
 void addIndex(std::vector<Index> *ix, wxString& sql, ColumnConstraint *cc);
+
+wxString CreateDDLVisitor::getCommentOn(MetadataItem& object)
+{
+    wxString comment = "";
+    wxString description = object.getDescription();
+    if (!description.empty())
+    {
+        comment << "COMMENT ON ";
+        description.Replace("'", "''");
+        wxString name(object.getQuotedName());
+
+        switch (object.getType())
+        {
+        case ntColumn:
+        {
+            Column c = dynamic_cast<Column&>(object);
+            wxString tabname(c.getTable()->getQuotedName());
+            name = tabname << "." << name;
+            comment << "COLUMN ";
+            break;
+        };
+        case ntUDF:
+            comment << "EXTERNAL FUNCTION ";
+            break;
+        case ntGenerator:
+            comment << "SECUENCE ";
+            break;
+        default:
+            comment << object.getTypeName() << " ";
+            break;
+        }
+        comment << name << " IS "<< "'" << description << "';\n";
+    }
+
+
+    return comment;
+}
 
 CreateDDLVisitor::CreateDDLVisitor(ProgressIndicator* progressIndicator)
     : MetadataItemVisitor()
@@ -126,15 +163,7 @@ void CreateDDLVisitor::visitColumn(Column& c)
     {
         preSqlM << " COLLATE " << collate;
     }
-    wxString description = c.getDescription();
-    if (!description.empty())
-    {
-        wxString colname(c.getQuotedName());
-        wxString tabname(c.getTable()->getQuotedName());
-        description.Replace("'", "''");
-        postSqlM << "comment on column " << tabname << "." << colname << " is '"
-                     << description << "';\n";
-    }
+    postSqlM << getCommentOn(c);
 }
 
 template <class C, class M>
@@ -267,15 +296,7 @@ void CreateDDLVisitor::visitDomain(Domain& d)
         preSqlM += " COLLATE " + collate;
     preSqlM += ";\n";
 
-    wxString description = d.getDescription();
-    if (!description.empty())
-    {
-        wxString colname(d.getName_());
-        description.Replace("'", "''");
-        colname.Replace("'", "''");
-        postSqlM << "comment on domain " << colname << " is '"
-                     << description << "';\n";
-    }
+    postSqlM << getCommentOn(d);
     sqlM = preSqlM + postSqlM;
 }
 
@@ -285,16 +306,8 @@ void CreateDDLVisitor::visitException(Exception& e)
     ms.Replace("'", "''");    // escape quotes
     preSqlM += "CREATE EXCEPTION " + e.getQuotedName() + "\n'" +
         ms + "';\n";
-
-    wxString description = e.getDescription();
-    if (!description.empty())
-    {
-        wxString name(e.getName_());
-        description.Replace("'", "''");
-        name.Replace("'", "''");
-        postSqlM << "comment on exception " << name << " is '"
-                     << description << "';\n";
-    }
+    
+    postSqlM << getCommentOn(e);
     sqlM = preSqlM + postSqlM;
 }
 
@@ -350,26 +363,11 @@ void CreateDDLVisitor::visitFunctionSQL(FunctionSQL& f)
     }
 
     /* description of function and parameters */
-    wxString name(f.getName_());
-    name.Replace("'", "''");
-    wxString description = f.getDescription();
-    if (!description.empty())
-    {
-        description.Replace("'", "''");
-        postSqlM << "comment on function " << name << " is '"
-            << description << "';\n";
-    }
+    postSqlM << getCommentOn(f);
+    
     for (ParameterPtrs::iterator it = f.begin(); it != f.end(); ++it)
     {
-        description = (*it)->getDescription();
-        if (!description.empty())
-        {
-            wxString pname((*it)->getName_());
-            description.Replace("'", "''");
-            pname.Replace("'", "''");
-            temp << "comment on parameter " << name << "." << pname << " is '"
-                << description << "';\n";
-        }
+        temp << getCommentOn(*(*it));
     }
 
     postSqlM << temp << "\n";
@@ -386,30 +384,14 @@ void CreateDDLVisitor::visitFunctionSQL(FunctionSQL& f)
 void CreateDDLVisitor::visitUDF(UDF& f)
 {
     preSqlM << f.getCreateSql() << "\n";
-    wxString description = f.getDescription();
-    if (!description.empty())
-    {
-        wxString name(f.getName_());
-        description.Replace("'", "''");
-        name.Replace("'", "''");
-        postSqlM << "comment on external function " << name << " is '"
-                     << description << "';\n";
-    }
+    postSqlM << getCommentOn(f);
     sqlM = preSqlM + postSqlM;
 }
 
 void CreateDDLVisitor::visitGenerator(Generator& g)
 {
     preSqlM += "CREATE " + g.getSource() + ";\n";
-    wxString description = g.getDescription();
-    if (!description.empty())
-    {
-        wxString name(g.getName_());
-        description.Replace("'", "''");
-        name.Replace("'", "''");
-        postSqlM << "comment on sequence " << name << " is '"
-             << description << "';\n";
-    }
+    postSqlM << getCommentOn(g);
     sqlM = preSqlM + postSqlM;
 }
 
@@ -443,15 +425,7 @@ void CreateDDLVisitor::visitIndex(Index& i)
 
 
 
-    wxString description = i.getDescription();
-    if (!description.empty())
-    {
-        wxString colname(i.getName_());
-        description.Replace("'", "''");
-        colname.Replace("'", "''");
-        postSqlM << "comment on index " << colname << " is '"
-            << description << "';\n";
-    }
+    postSqlM << getCommentOn(i);
     sqlM = preSqlM + postSqlM;
 
 }
@@ -494,15 +468,7 @@ void CreateDDLVisitor::visitPackage(Package& package)
     }
 
     /* description of package*/
-    wxString name(package.getName_());
-    name.Replace("'", "''");
-    wxString description = package.getDescription();
-    if (!description.empty())
-    {
-        description.Replace("'", "''");
-        postSqlM << "comment on package " << name << " is '"
-            << description << "';\n";
-    }
+    postSqlM << getCommentOn(package);
 
     postSqlM << temp << "\n";
     temp.Replace("ALTER", "CREATE", false);   // just first
@@ -531,26 +497,10 @@ void CreateDDLVisitor::visitProcedure(Procedure& p)
     }
 
     /* description of procedure and parameters */
-    wxString name(p.getName_());
-    name.Replace("'", "''");
-    wxString description = p.getDescription();
-    if (!description.empty())
-    {
-        description.Replace("'", "''");
-        postSqlM << "comment on procedure " << name << " is '"
-                     << description << "';\n";
-    }
+    postSqlM << getCommentOn(p);
     for (ParameterPtrs::iterator it = p.begin(); it != p.end(); ++it)
     {
-        description = (*it)->getDescription();
-        if (!description.empty())
-        {
-            wxString pname((*it)->getName_());
-            description.Replace("'", "''");
-            pname.Replace("'", "''");
-            temp << "comment on parameter " << name << "." << pname << " is '"
-                         << description << "';\n";
-        }
+        temp << getCommentOn(*(*it));
     }
 
     postSqlM << temp << "\n";
@@ -577,15 +527,7 @@ void CreateDDLVisitor::visitRole(Role& r)
             grantSqlM += (*ci).getSql();
         }
     }
-    wxString description = r.getDescription();
-    if (!description.empty())
-    {
-        wxString name(r.getName_());
-        description.Replace("'", "''");
-        name.Replace("'", "''");
-        postSqlM << "comment on role " << name << " is '"
-                     << description << "';\n";
-    }
+    postSqlM << getCommentOn(r);
     sqlM = preSqlM + "\n" + postSqlM + grantSqlM;
 }
 
@@ -705,15 +647,7 @@ void CreateDDLVisitor::visitTable(Table& t)
         preSqlM += "\nON COMMIT PRESERVE ROWS";
     preSqlM += ";\n";
 
-    wxString description = t.getDescription();
-    if (!description.empty())
-    {
-        wxString name(t.getName_());
-        description.Replace("'", "''");
-        name.Replace("'", "''");
-        postSqlM << "comment on table " << name << " is '"
-                     << description << "';\n";
-    }
+    postSqlM << getCommentOn(t);
 
     sqlM = preSqlM + "\n" + postSqlM + grantSqlM;
 }
@@ -816,15 +750,7 @@ void CreateDDLVisitor::visitGTTable(GTTable& t)
         preSqlM += "\nON COMMIT PRESERVE ROWS";
     preSqlM += ";\n";
 
-    wxString description = t.getDescription();
-    if (!description.empty())
-    {
-        wxString name(t.getName_());
-        description.Replace("'", "''");
-        name.Replace("'", "''");
-        postSqlM << "comment on table " << name << " is '"
-            << description << "';\n";
-    }
+    postSqlM << getCommentOn(t);
 
     sqlM = preSqlM + "\n" + postSqlM + grantSqlM;
 }
@@ -842,15 +768,7 @@ void CreateDDLVisitor::visitDBTrigger(DBTrigger& t)
     preSqlM << t.getSource();
     preSqlM << "^\nSET TERM ; ^\n";
 
-    wxString description = t.getDescription();
-    if (!description.empty())
-    {
-        wxString name(t.getName_());
-        description.Replace("'", "''");
-        name.Replace("'", "''");
-        postSqlM << "comment on trigger " << name << " is '"
-                     << description << "';\n";
-    }
+    postSqlM << getCommentOn(t);
     sqlM = preSqlM + postSqlM;
 }
 
@@ -872,15 +790,7 @@ void CreateDDLVisitor::visitDDLTrigger(DDLTrigger& t)
     preSqlM << t.getSource();
     preSqlM << "^\nSET TERM ; ^\n";
 
-    wxString description = t.getDescription();
-    if (!description.empty())
-    {
-        wxString name(t.getName_());
-        description.Replace("'", "''");
-        name.Replace("'", "''");
-        postSqlM << "comment on trigger " << name << " is '"
-            << description << "';\n";
-    }
+    postSqlM << getCommentOn(t);
     sqlM = preSqlM + postSqlM;
 }
 
@@ -902,15 +812,7 @@ void CreateDDLVisitor::visitDMLTrigger(DMLTrigger& t)
     preSqlM << t.getSource();
     preSqlM << "^\nSET TERM ; ^\n";
 
-    wxString description = t.getDescription();
-    if (!description.empty())
-    {
-        wxString name(t.getName_());
-        description.Replace("'", "''");
-        name.Replace("'", "''");
-        postSqlM << "comment on trigger " << name << " is '"
-            << description << "';\n";
-    }
+    postSqlM << getCommentOn(t);
     sqlM = preSqlM + postSqlM;
 }
 
@@ -948,30 +850,16 @@ void CreateDDLVisitor::visitView(View& v)
             grantSqlM += (*ci).getSql() + "\n";
         }
     }
-    wxString name(v.getName_());
-    name.Replace("'", "''");
-    wxString description = v.getDescription();
-    if (!description.empty())
-    {
-        description.Replace("'", "''");
-        postSqlM << "comment on view " << name << " is '"
-                     << description << "';\n";
-    }
+
+    postSqlM << getCommentOn(v);
 
     // description for columns
     for (ColumnPtrs::iterator it = v.begin(); it != v.end();
         ++it)
     {
-        description = (*it)->getDescription();
-        if (!description.empty())
-        {
-            wxString cname((*it)->getName_());
-            description.Replace("'", "''");
-            cname.Replace("'", "''");
-            postSqlM << "comment on column " << name << "." << cname << " is '"
-                         << description << "';\n";
-        }
+        postSqlM << getCommentOn(*(*it));
     }
+    
 
     sqlM += preSqlM + "\n" + postSqlM + grantSqlM;
 }
