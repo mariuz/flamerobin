@@ -128,6 +128,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/SimpleHtmlFrame.cpp
         ${SOURCEDIR}/gui/StatementHistoryDialog.cpp
         ${SOURCEDIR}/gui/StyleGuide.cpp
+        ${SOURCEDIR}/gui/ThreadBaseFrame.cpp
         ${SOURCEDIR}/gui/UserDialog.cpp
         ${SOURCEDIR}/gui/UsernamePasswordDialog.cpp
         ${SOURCEDIR}/logger.cpp
@@ -240,6 +241,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/gui/SimpleHtmlFrame.h
         ${SOURCEDIR}/gui/StatementHistoryDialog.h
         ${SOURCEDIR}/gui/StyleGuide.h
+        ${SOURCEDIR}/gui/ThreadBaseFrame.h
         ${SOURCEDIR}/gui/UserDialog.h
         ${SOURCEDIR}/gui/UsernamePasswordDialog.h
         ${SOURCEDIR}/Isaac.h
