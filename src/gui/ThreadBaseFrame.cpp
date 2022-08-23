@@ -223,7 +223,7 @@ BEGIN_EVENT_TABLE(ThreadBaseFrame, BaseFrame)
     EVT_MENU(ThreadBaseFrame::ID_thread_output, ThreadBaseFrame::OnThreadOutput)
 END_EVENT_TABLE()
 
-void ThreadBaseFrame::OnSettingsChange(wxCommandEvent& event)
+void ThreadBaseFrame::OnSettingsChange(wxCommandEvent& WXUNUSED(event))
 {
     if (IsShown())
         updateControls();

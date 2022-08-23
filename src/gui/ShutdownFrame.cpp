@@ -196,11 +196,11 @@ void ShutdownFrame::createControls()
     button_start->SetLabelText(_("Start Shutdown"));
 
     checkbox_tran = new wxCheckBox(panel_controls, wxID_ANY,
-        _("-tr[an] Prevents any new transactions"));
+        _("Prevents any new transactions"));
     checkbox_attach = new wxCheckBox(panel_controls, wxID_ANY,
-        _("-at[tach] Prevents any new connections"));
+        _("Prevents any new connections"));
     checkbox_force = new wxCheckBox(panel_controls, wxID_ANY,
-        _("-fo[rce] No new connections or transactions "));
+        _("No new connections or transactions "));
 
     label_timeout = new wxStaticText(panel_controls, wxID_ANY, _("Timeout"),
         wxDefaultPosition, wxDefaultSize);
