@@ -181,8 +181,6 @@ StartupFrame::StartupFrame(wxWindow* parent, DatabasePtr db)
     createControls();
     layoutControls();
     updateControls();
-
-    //text_ctrl_filename->SetFocus();
 }
 
 //! implementation details
@@ -205,10 +203,6 @@ void StartupFrame::layoutControls()
 
     wxBoxSizer* sizerPanelV = new wxBoxSizer(wxVERTICAL);
     sizerPanelV->Add(0, styleguide().getFrameMargin(wxTOP));
-    //sizerPanelV->Add(sizerChecks);
-    //sizerPanelV->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
-    //sizerPanelV->Add(sizerTimeout, 0, wxEXPAND);
-    //sizerPanelV->Add(0, styleguide().getUnrelatedControlMargin(wxVERTICAL));
     sizerPanelV->Add(radiobox_state, 0, wxEXPAND);
     sizerPanelV->Add(0, styleguide().getUnrelatedControlMargin(wxVERTICAL));
     sizerPanelV->Add(sizerButtons, 0, wxEXPAND);
@@ -272,7 +266,6 @@ StartupFrame* StartupFrame::findFrameFor(DatabasePtr db)
 
 //! event handlers
 BEGIN_EVENT_TABLE(StartupFrame, ShutdownStartupBaseFrame)
-    //EVT_BUTTON(ShutdownStartupBaseFrame::ID_button_browse, ShutdownFrame::OnBrowseButtonClick)
     EVT_BUTTON(ShutdownStartupBaseFrame::ID_button_start, StartupFrame::OnStartButtonClick)
 END_EVENT_TABLE()
 

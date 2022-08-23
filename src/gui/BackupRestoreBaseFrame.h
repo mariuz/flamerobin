@@ -59,7 +59,6 @@ protected:
     BackupRestoreBaseFrame(wxWindow* parent, DatabasePtr db);
 private:
 
-    //void updateMessages(size_t firstmsg, size_t lastmsg);
 
     // observer stuff
     virtual void subjectRemoved(Subject* subject);
@@ -75,14 +74,9 @@ protected:
         ID_button_start,
     };
 
-    //wxPanel* panel_controls;
     wxStaticText* label_filename;
     FileTextControl* text_ctrl_filename;
     wxButton* button_browse;
-    //wxCheckBox* checkbox_showlog;
-    //wxButton* button_start;
-    //LogTextControl* text_ctrl_log;
-    //void setupControls();
 private:
     // event handling
     void OnVerboseLogChange(wxCommandEvent& event);

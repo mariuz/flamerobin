@@ -106,7 +106,6 @@ protected:
     void OnThreadOutput(wxCommandEvent& event);
     void OnSettingsChange(wxCommandEvent& event);
     void OnThreadFinished(wxCommandEvent& event);
-    //void setupControls();
 
 private:
 

@@ -52,13 +52,10 @@ BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent,
     verboseMsgsM = true;
 
     // create controls in constructor of descendant class (correct tab order)
-    /*panel_controls = 0;
-    label_filename = 0;
-    text_ctrl_filename = 0;
-    button_browse = 0;
+    panel_controls = 0;
     checkbox_showlog = 0;
     button_start = 0;
-    text_ctrl_log = 0;*/
+    text_ctrl_log = 0;
 
     SetIcon(wxArtProvider::GetIcon(ART_Backup, wxART_FRAME_ICON));
 }

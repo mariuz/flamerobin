@@ -189,9 +189,6 @@ void ThreadBaseFrame::update()
 
 void ThreadBaseFrame::updateControls()
 {
-    // empty implementation to allow this to be called from update()
-    // which could happen in the constructor, when descendant isn't
-    // completely initialized yet
     bool running = getThreadRunning();
     
     button_start->Enable(!running);

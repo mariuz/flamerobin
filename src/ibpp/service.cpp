@@ -456,8 +456,6 @@ void ServiceImpl::Shutdown(const std::string& dbfile, IBPP::DSM flags, int secti
 	spb.Insert(isc_action_svc_properties);
 	spb.InsertString(isc_spb_dbname, 2, dbfile.c_str());
     
-    //if (flags & IBPP::dsVerbose) 
-    //    spb.Insert(isc_spb_verbose);
 	
     // Shutdown mode
     //if (flags & IBPP::dsCache) spb.InsertQuad(isc_spb_prp, sectimeout)

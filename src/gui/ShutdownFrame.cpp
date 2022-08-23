@@ -212,9 +212,6 @@ void ShutdownFrame::createControls()
 void ShutdownFrame::layoutControls()
 {
     
-    
-    //int wh = text_ctrl_filename->GetMinHeight();
-    //button_browse->SetSize(wh, wh);
 
     wxBoxSizer* sizerTimeout = new wxBoxSizer(wxHORIZONTAL);
     sizerTimeout->Add(label_timeout, 0, wxALIGN_CENTER_VERTICAL);
@@ -264,15 +261,9 @@ void ShutdownFrame::updateControls()
 
     bool running = getThreadRunning();
 
-
     checkbox_attach->Enable(!running);
     checkbox_tran->Enable(!running);
     checkbox_force->Enable(!running);
-
-
-
-    //button_start->Enable(!running);
-
 }
 
 void ShutdownFrame::doReadConfigSettings(const wxString& prefix)
@@ -329,7 +320,6 @@ ShutdownFrame* ShutdownFrame::findFrameFor(DatabasePtr db)
 
 //! event handlers
 BEGIN_EVENT_TABLE(ShutdownFrame, ShutdownStartupBaseFrame)
-    //EVT_BUTTON(ShutdownStartupBaseFrame::ID_button_browse, ShutdownFrame::OnBrowseButtonClick)
     EVT_BUTTON(ShutdownStartupBaseFrame::ID_button_start, ShutdownFrame::OnStartButtonClick)
 END_EVENT_TABLE()
 

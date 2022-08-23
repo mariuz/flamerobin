@@ -158,10 +158,6 @@ IBPP::DSM ShutdownStartupBaseFrame::getDatabaseMode()
 
 void ShutdownStartupBaseFrame::updateControls()
 {
-    // empty implementation to allow this to be called from update()
-    // which could happen in the constructor, when descendant isn't
-    // completely initialized yet
-
     ThreadBaseFrame::updateControls();
 
     bool running = getThreadRunning();
