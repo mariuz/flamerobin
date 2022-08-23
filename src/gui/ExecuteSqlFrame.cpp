@@ -329,8 +329,8 @@ void SqlEditor::setup()
     SetCaretLineVisible(true);
 
     SetMargins(0, 0);
-    SetMarginWidth(MARGE_LINENUMBER, 40);
-    SetMarginType(MARGE_LINENUMBER, wxSTC_MARGIN_NUMBER);
+    SetMarginWidth(FR_LINENUMBERNARGIN, 40);
+    SetMarginType(FR_LINENUMBERNARGIN, wxSTC_MARGIN_NUMBER);
     SetAutomaticFold(wxSTC_AUTOMATICFOLD_SHOW);
 
     if (config().get("sqlEditorShowEdge", false))
@@ -346,7 +346,7 @@ void SqlEditor::setup()
     StyleClearAll();
     stylerManager().assignLexer(this);
     SetLexer(wxSTC_LEX_SQL);
-    stylerManager().assignFold(this);
+    stylerManager().assignMargin(this);
     setChars(false);
 
 
@@ -805,7 +805,7 @@ void ExecuteSqlFrame::set_properties()
     statusbar_1->SetStatusText("Transaction status", 3);
 
     grid_data->SetTable(new DataGridTable(statementM, databaseM), true);
-    grid_data->SetBackgroundColour(stylerManager().getDefaultStyle()->getbgColour());
+    grid_data->SetBackgroundColour(stylerManager().getDefaultStyle()->getbgColor());
     splitter_window_1->Initialize(styled_text_ctrl_sql);
     viewModeM = vmEditor;
 

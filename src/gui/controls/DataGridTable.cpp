@@ -211,7 +211,7 @@ wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
         textCol = *wxBLUE;
     else
         //textCol = stylerManager().getDefaultStyle()->getfgColour() != 0 ? stylerManager().getDefaultStyle()->getfgColour() : wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT);
-        textCol = stylerManager().getDefaultStyle()->getfgColour();
+        textCol = stylerManager().getDefaultStyle()->getfgColor();
     cellAttriM->SetTextColour(textCol);
 
     // background colour
@@ -224,7 +224,7 @@ wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
         bgCol = frlayoutconfig().getReadonlyColour();
     else
         //bgCol = stylerManager().getDefaultStyle()->getbgColour() != 0 ? stylerManager().getDefaultStyle()->getbgColour() : wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
-        bgCol = stylerManager().getDefaultStyle()->getbgColour();
+        bgCol = stylerManager().getDefaultStyle()->getbgColor();
     cellAttriM->SetBackgroundColour(bgCol);
 
     // text alignment

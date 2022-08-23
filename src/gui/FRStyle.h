@@ -37,9 +37,13 @@
 typedef unsigned short      _WORD;
 typedef unsigned long       _DWORD;
 typedef unsigned char       _BYTE;
-typedef _DWORD   _COLOURREF;
+typedef _DWORD   _COLORREF;
+typedef unsigned long _ULONG_PTR, *_PULONG_PTR;
+typedef _ULONG_PTR _DWORD_PTR;
 
-#define _RGB(r,g,b)          ((_COLOURREF)(((_BYTE)(r)|((_WORD)((_BYTE)(g))<<8))|(((_DWORD)(_BYTE)(b))<<16)))
+#define _RGB(r,g,b)          ((_COLORREF)(((_BYTE)(r)|((_WORD)((_BYTE)(g))<<8))|(((_DWORD)(_BYTE)(b))<<16)))
+#define _HIWORD(l)           ((_WORD)((((_DWORD_PTR)(l)) >> 16) & 0xffff))
+#define _HIBYTE(w)           ((_BYTE)((((_DWORD_PTR)(w)) >> 8) & 0xff))
 
 
 const int FONTSTYLE_NONE = 0;
@@ -47,7 +51,7 @@ const int FONTSTYLE_BOLD = 1;
 const int FONTSTYLE_ITALIC = 2;
 const int FONTSTYLE_UNDERLINE = 4;
 
-const int STYLE_NOT_USED = 0;
+const int STYLE_NOT_USED = -1;
 
 const int COLORSTYLE_FOREGROUND = 0x01;
 const int COLORSTYLE_BACKGROUND = 0x02;
@@ -55,25 +59,28 @@ const int COLORSTYLE_ALL = COLORSTYLE_FOREGROUND | COLORSTYLE_BACKGROUND;
 
 const int MAX_LEXER_STYLE = 100;
 
-const int MARGE_LINENUMBER = 0;
-const int MARGE_SYMBOLE = 1;
-
+const int  FR_LINENUMBERNARGIN = 0;
+const int  FR_SYMBOLEMARGIN = 1;
 #define FR_FOLDMARGIN 2
 
+// <WordsStyle> or <WidgetStyle>
 class FRStyle
 {
 protected:
     int styleIDM;
     wxString styleDescM;
 
-    wxColour fgColourM;
-    wxColour bgColourM;
-    int colourStyleM;
+    wxColour fgColorM;
+    wxColour bgColorM;
+    int colorStyleM;
 
+    bool isFontEnabledM;
     wxString fontNameM;
     int fontStyleM;
     int fontSizeM;
     int caseVisibleM;
+
+
     int nestingM;
 
     int keywordClassM;
@@ -84,6 +91,9 @@ public:
     ~FRStyle();
 
     FRStyle& operator = (const FRStyle& style);
+    bool operator == (const FRStyle& style);
+
+    void write2Element(wxXmlNode* element);
 
 
     int getStyleID() { return styleIDM; };
@@ -93,19 +103,22 @@ public:
     void setStyleDesc(wxString name) { styleDescM = name; };
 
 
-    wxColour getfgColour() { return fgColourM; };
-    void setfgColour(wxColour color) { fgColourM = color; };
+    wxColour getfgColor() { return fgColorM; };
+    void setfgColor(wxColour color) { fgColorM = color; };
     
-    wxColour getbgColour() { return bgColourM; };
-    void setbgColour(wxColour color) { bgColourM = color; };
+    wxColour getbgColor() { return bgColorM; };
+    void setbgColor(wxColour color) { bgColorM = color; };
     
-    int getColourStyle() { return colourStyleM; };
-    void setColourStyle(int color) { colourStyleM = color; };
+    int getColorStyle() { return colorStyleM; };
+    void setColorStyle(int color) { colorStyleM = color; };
 
+
+    bool getisFontEnable() { return isFontEnabledM; };
+    void setisFontEnable(bool value) { isFontEnabledM = value; };
 
     wxString getFontName() { return fontNameM; };
     void setFontName(wxString name) { fontNameM = name; };
-    
+
     int getFontStyle() { return fontStyleM; };
     void setFontStyle(int font) { fontStyleM = font; };
     
@@ -129,6 +142,7 @@ public:
 };
 
 
+//List of <WordsStyle> or <WidgetStyle> for GlobalStyles
 class FRStyles
 {
     
@@ -139,6 +153,9 @@ public:
     FRStyles();
 
     FRStyles& operator=(const FRStyles& sa);
+    bool operator==(const FRStyles& sa);
+
+    void write2Element(wxXmlNode* element);
 
     int getNbStyler() const { return styleVectorM.size(); };
     //void setNbStyler(int nb) { nbStylerM = nb; };
@@ -158,7 +175,7 @@ public:
 
 };
 
-
+// <LexerType>
 class FRStyler : public FRStyles
 {
 private:
@@ -181,7 +198,7 @@ public:
 
 };
 
-
+// <LexerStyles>
 class FRStylers
 {
 private:
@@ -192,6 +209,7 @@ public:
     FRStylers();
 
     FRStylers& operator=(const FRStylers& lsa);
+    void write2Element(wxXmlNode* element);
 
     int getNbLexerStyler() const { return stylerVectorM.size(); };
     //void setNbLexerStyler(int nbLexer) { nbLexerStylerM = nbLexer; };
@@ -217,24 +235,29 @@ public:
     void clear();
 };
 
+
+// <Flamerobin>
 class FRStyleManager {
 private:
     wxFileName fileNameM;
-    FRStyler* globalStylerM;
+    FRStyles* globalStylerM;
     FRStylers stylersM;
     wxColor m_GCodecolor{ 255,130,0 };
 protected:
     void loadLexerStyles(wxXmlNode* node);
     void loadGlobalStyles(wxXmlNode* node);
 
+    void saveLexerStyles(wxXmlNode* node);
+    void saveGlobalStyles(wxXmlNode* node);
+
     void assignWordStyle(wxStyledTextCtrl* text, FRStyle* style);
 public:
     FRStyleManager(wxFileName style);
     
-    FRStyler* getGlobalStyler() { return globalStylerM; };
+    FRStyles* getGlobalStyler() { return globalStylerM; };
     FRStylers getLexerStylers() { return stylersM; };
-    FRStyler* getStylerByName(wxString stylerName) { return stylerName == "Global Styles" ? getGlobalStyler() : getLexerStylers().getStylerByName(stylerName); };
-    FRStyler* getStylerByDesc(wxString stylerDesc) { return stylerDesc == "Global Styles" ? getGlobalStyler() : getLexerStylers().getStylerByDesc(stylerDesc); };
+    FRStyles* getStylerByName(wxString stylerName) { return stylerName == "Global Styles" ? getGlobalStyler() : getLexerStylers().getStylerByName(stylerName); };
+    FRStyles* getStylerByDesc(wxString stylerDesc) { return stylerDesc == "Global Styles" ? getGlobalStyler() : getLexerStylers().getStylerByDesc(stylerDesc); };
 
     FRStyle* getGlobalStyle() { return globalStylerM->getStyleByName("Global override"); };
     FRStyle* getDefaultStyle() { return globalStylerM->getStyleByName("Default Style"); };
@@ -249,7 +272,7 @@ public:
 
     void assignLexer(wxStyledTextCtrl* text);
 
-    void assignFold(wxStyledTextCtrl* text);
+    void assignMargin(wxStyledTextCtrl* text);
 
     void loadConfig();
     void loadStyle();

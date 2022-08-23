@@ -2057,21 +2057,23 @@ void PrefDlgThemeSetting::loadStylers(const wxString& styleFileName)
 
 void PrefDlgThemeSetting::loadStyles(const wxString& language)
 {
-    FRStyler* styler;
+    FRStyles* styles;
     styleListBoxM->Clear();
 
     if (language == "Global Styles") {
-        styler = getStyleManager()->getGlobalStyler();
+        styles = getStyleManager()->getGlobalStyler();
     }else{
-        styler = getStyleManager()->getLexerStylers().getStylerByDesc(language);
+        styles = getStyleManager()->getLexerStylers().getStylerByDesc(language);
     }
 
-    if (styler) {
+    if (styles) {
         int i = 0;
-        for (FRStyle* style : styler->getStyles()) {
+        for (FRStyle* style : styles->getStyles()) {
             styleListBoxM->Insert(style->getStyleDesc(), i++);
         }
     }
+    styleListBoxM->Select(0);
+    loadStyle(styleListBoxM->GetString(styleListBoxM->GetSelection()));
 
 }
 
@@ -2082,8 +2084,8 @@ void PrefDlgThemeSetting::loadStyle(const wxString& styleName)
 
     fontSizeComboBoxM->SetSelection(fontSizeComboBoxM->FindString(wxString::Format("%i", style->getFontSize())));
 
-    foregroundPickerM->SetColour(style->getfgColour());
-    backgroundPickerM->SetColour(style->getbgColour());
+    foregroundPickerM->SetColour(style->getfgColor());
+    backgroundPickerM->SetColour(style->getbgColor());
 
     blodCheckBoxM->SetValue(style->getFontStyle() & FONTSTYLE_BOLD);
     italicCheckBoxM->SetValue(style->getFontStyle() & FONTSTYLE_ITALIC);
