@@ -206,7 +206,7 @@ void ShutdownFrame::createControls()
         wxDefaultPosition, wxDefaultSize);
 
     spinctrl_timeout = new wxSpinCtrl(panel_controls, wxID_ANY);
-    spinctrl_timeout->SetRange(0, MAXSHORT);
+    spinctrl_timeout->SetRange(0, 32767);
 }
 
 void ShutdownFrame::layoutControls()
