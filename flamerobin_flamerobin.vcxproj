@@ -1062,9 +1062,13 @@
     <ClCompile Include="src\gui\ReorderFieldsDialog.cpp" />
     <ClCompile Include="src\gui\RestoreFrame.cpp" />
     <ClCompile Include="src\gui\ServerRegistrationDialog.cpp" />
+    <ClCompile Include="src\gui\ShutdownFrame.cpp" />
+    <ClCompile Include="src\gui\ShutdownStartupBaseFrame.cpp" />
     <ClCompile Include="src\gui\SimpleHtmlFrame.cpp" />
+    <ClCompile Include="src\gui\StartupFrame.cpp" />
     <ClCompile Include="src\gui\StatementHistoryDialog.cpp" />
     <ClCompile Include="src\gui\StyleGuide.cpp" />
+    <ClCompile Include="src\gui\ThreadBaseFrame.cpp" />
     <ClCompile Include="src\gui\UserDialog.cpp" />
     <ClCompile Include="src\gui\UsernamePasswordDialog.cpp" />
     <ClCompile Include="src\logger.cpp" />
@@ -1174,9 +1178,13 @@
     <ClInclude Include="src\gui\ReorderFieldsDialog.h" />
     <ClInclude Include="src\gui\RestoreFrame.h" />
     <ClInclude Include="src\gui\ServerRegistrationDialog.h" />
+    <ClInclude Include="src\gui\ShutdownFrame.h" />
+    <ClInclude Include="src\gui\ShutdownStartupBaseFrame.h" />
     <ClInclude Include="src\gui\SimpleHtmlFrame.h" />
+    <ClInclude Include="src\gui\StartupFrame.h" />
     <ClInclude Include="src\gui\StatementHistoryDialog.h" />
     <ClInclude Include="src\gui\StyleGuide.h" />
+    <ClInclude Include="src\gui\ThreadBaseFrame.h" />
     <ClInclude Include="src\gui\UserDialog.h" />
     <ClInclude Include="src\gui\UsernamePasswordDialog.h" />
     <ClInclude Include="src\Isaac.h" />

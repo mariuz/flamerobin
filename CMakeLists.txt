@@ -125,8 +125,11 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/ReorderFieldsDialog.cpp
         ${SOURCEDIR}/gui/RestoreFrame.cpp
         ${SOURCEDIR}/gui/ServerRegistrationDialog.cpp
+        ${SOURCEDIR}/gui/ShutdownStartupBaseFrame.cpp
+        ${SOURCEDIR}/gui/ShutdownFrame.cpp
         ${SOURCEDIR}/gui/SimpleHtmlFrame.cpp
         ${SOURCEDIR}/gui/StatementHistoryDialog.cpp
+        ${SOURCEDIR}/gui/StartupFrame.cpp
         ${SOURCEDIR}/gui/StyleGuide.cpp
         ${SOURCEDIR}/gui/ThreadBaseFrame.cpp
         ${SOURCEDIR}/gui/UserDialog.cpp
@@ -238,8 +241,11 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/gui/ReorderFieldsDialog.h
         ${SOURCEDIR}/gui/RestoreFrame.h
         ${SOURCEDIR}/gui/ServerRegistrationDialog.h
+        ${SOURCEDIR}/gui/ShutdownStartupBaseFrame.h
+        ${SOURCEDIR}/gui/ShutdownFrame.h
         ${SOURCEDIR}/gui/SimpleHtmlFrame.h
         ${SOURCEDIR}/gui/StatementHistoryDialog.h
+        ${SOURCEDIR}/gui/StartupFrame.h
         ${SOURCEDIR}/gui/StyleGuide.h
         ${SOURCEDIR}/gui/ThreadBaseFrame.h
         ${SOURCEDIR}/gui/UserDialog.h
