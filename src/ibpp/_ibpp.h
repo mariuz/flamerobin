@@ -788,8 +788,8 @@ public:
     void SetReadOnly(const std::string& dbfile, bool);
     void SetReserveSpace(const std::string& dbfile, bool);
 
-    void Shutdown(const std::string& dbfile, IBPP::DSM mode, int sectimeout);
-    void Restart(const std::string& dbfile);
+    void Shutdown(const std::string& dbfile, IBPP::DSM flags,  int sectimeout);
+    void Restart(const std::string& dbfile, IBPP::DSM flags);
     void Sweep(const std::string& dbfile);
     void Repair(const std::string& dbfile, IBPP::RPF flags);
 

@@ -357,6 +357,18 @@
     <ClCompile Include="src\core\FRDecimal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\ThreadBaseFrame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ShutdownFrame.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\ShutdownStartupBaseFrame.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\StartupFrame.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\gui\AboutBox.h">
@@ -693,6 +705,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\core\FRDecimal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\ThreadBaseFrame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\ShutdownFrame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\ShutdownStartupBaseFrame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\StartupFrame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

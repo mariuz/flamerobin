@@ -130,9 +130,13 @@ FLAMEROBIN_OBJECTS =  \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_ReorderFieldsDialog.obj \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_RestoreFrame.obj \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.obj \
+	bccu$(R_OPT)$(D_OPT)\flamerobin_ShutdownStartupBaseFrame.obj \
+	bccu$(R_OPT)$(D_OPT)\flamerobin_ShutdownFrame.obj \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_SimpleHtmlFrame.obj \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_StatementHistoryDialog.obj \
+	bccu$(R_OPT)$(D_OPT)\flamerobin_StartupFrame.obj \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_StyleGuide.obj \
+	bccu$(R_OPT)$(D_OPT)\flamerobin_ThreadBaseFrame.obj \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_UserDialog.obj \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_UsernamePasswordDialog.obj \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_logger.obj \
@@ -469,14 +473,26 @@ bccu$(R_OPT)$(D_OPT)\flamerobin_RestoreFrame.obj: .\src\gui\RestoreFrame.cpp
 bccu$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.obj: .\src\gui\ServerRegistrationDialog.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\ServerRegistrationDialog.cpp
 
+bccu$(R_OPT)$(D_OPT)\flamerobin_ShutdownStartupBaseFrame.obj: .\${SOURCEDIR}\gui\ShutdownStartupBaseFrame.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\${SOURCEDIR}\gui\ShutdownStartupBaseFrame.cpp
+
+bccu$(R_OPT)$(D_OPT)\flamerobin_ShutdownFrame.obj: .\${SOURCEDIR}\gui\ShutdownFrame.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\${SOURCEDIR}\gui\ShutdownFrame.cpp
+
 bccu$(R_OPT)$(D_OPT)\flamerobin_SimpleHtmlFrame.obj: .\src\gui\SimpleHtmlFrame.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\SimpleHtmlFrame.cpp
 
 bccu$(R_OPT)$(D_OPT)\flamerobin_StatementHistoryDialog.obj: .\src\gui\StatementHistoryDialog.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\StatementHistoryDialog.cpp
 
+bccu$(R_OPT)$(D_OPT)\flamerobin_StartupFrame.obj: .\${SOURCEDIR}\gui\StartupFrame.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\${SOURCEDIR}\gui\StartupFrame.cpp
+
 bccu$(R_OPT)$(D_OPT)\flamerobin_StyleGuide.obj: .\src\gui\StyleGuide.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\StyleGuide.cpp
+
+bccu$(R_OPT)$(D_OPT)\flamerobin_ThreadBaseFrame.obj: .\${SOURCEDIR}\gui\ThreadBaseFrame.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\${SOURCEDIR}\gui\ThreadBaseFrame.cpp
 
 bccu$(R_OPT)$(D_OPT)\flamerobin_UserDialog.obj: .\src\gui\UserDialog.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\UserDialog.cpp

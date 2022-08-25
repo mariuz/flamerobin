@@ -191,14 +191,7 @@ BackupFrame::BackupFrame(wxWindow* parent, DatabasePtr db)
 //! implementation details
 void BackupFrame::createControls()
 {
-    panel_controls = new wxPanel(this, wxID_ANY, wxDefaultPosition,
-        wxDefaultSize, wxTAB_TRAVERSAL | wxCLIP_CHILDREN);
-    label_filename = new wxStaticText(panel_controls, wxID_ANY,
-        _("Backup file:"));
-    text_ctrl_filename = new FileTextControl(panel_controls,
-        ID_text_ctrl_filename, wxEmptyString);
-    button_browse = new wxButton(panel_controls, ID_button_browse, _("..."),
-        wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+    BackupRestoreBaseFrame::createControls();
 
     checkbox_checksum = new wxCheckBox(panel_controls, wxID_ANY,
         _("Ignore checksums"));
@@ -213,16 +206,12 @@ void BackupFrame::createControls()
     checkbox_extern = new wxCheckBox(panel_controls, wxID_ANY,
         _("Convert external tables"));
 
-    checkbox_showlog = new wxCheckBox(panel_controls, ID_checkbox_showlog,
-        _("Show complete log"));
-    button_start = new wxButton(panel_controls, ID_button_start,
-        _("&Start Backup"));
-
-    text_ctrl_log = new LogTextControl(this, ID_text_ctrl_log);
 }
 
 void BackupFrame::layoutControls()
 {
+    
+
     int wh = text_ctrl_filename->GetMinHeight();
     button_browse->SetSize(wh, wh);
 
@@ -275,14 +264,17 @@ void BackupFrame::layoutControls()
 void BackupFrame::updateControls()
 {
     bool running = getThreadRunning();
+
     button_browse->Enable(!running);
     text_ctrl_filename->Enable(!running);
+
     checkbox_checksum->Enable(!running);
     checkbox_limbo->Enable(!running);
     checkbox_metadata->Enable(!running);
     checkbox_garbage->Enable(!running);
     checkbox_transport->Enable(!running);
     checkbox_extern->Enable(!running);
+
     button_start->Enable(!running && !text_ctrl_filename->GetValue().empty());
 }
 

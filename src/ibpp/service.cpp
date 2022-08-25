@@ -443,7 +443,7 @@ void ServiceImpl::SetReserveSpace(const std::string& dbfile, bool reserve)
 	Wait();
 }
 
-void ServiceImpl::Shutdown(const std::string& dbfile, IBPP::DSM mode, int sectimeout)
+void ServiceImpl::Shutdown(const std::string& dbfile, IBPP::DSM flags, int sectimeout)
 {
 	if (mHandle	== 0)
 		throw LogicExceptionImpl("Service::Shutdown", _("Service is not connected."));
@@ -455,18 +455,27 @@ void ServiceImpl::Shutdown(const std::string& dbfile, IBPP::DSM mode, int sectim
 
 	spb.Insert(isc_action_svc_properties);
 	spb.InsertString(isc_spb_dbname, 2, dbfile.c_str());
-	switch (mode)
-	{
-		case IBPP::dsDenyAttach :
-			spb.InsertQuad(isc_spb_prp_deny_new_attachments, sectimeout);
-			break;
-		case IBPP::dsDenyTrans :
-			spb.InsertQuad(isc_spb_prp_deny_new_transactions, sectimeout);
-			break;
-		case IBPP::dsForce :
-			spb.InsertQuad(isc_spb_prp_shutdown_db, sectimeout);
-			break;
-	}
+    
+	
+    // Shutdown mode
+    //if (flags & IBPP::dsCache) spb.InsertQuad(isc_spb_prp, sectimeout)
+    if (flags & IBPP::dsDenyTrans) 
+        spb.InsertQuad(isc_spb_prp_deny_new_transactions, sectimeout);
+    if (flags & IBPP::dsDenyAttach) 
+        spb.InsertQuad(isc_spb_prp_deny_new_attachments, sectimeout);
+    if (flags & IBPP::dsForce) 
+        spb.InsertQuad(isc_spb_prp_force_shutdown, sectimeout);
+
+    // Database Mode
+    if (flags & IBPP::dsNormal) 
+        spb.InsertByte(isc_spb_prp_shutdown_mode, isc_spb_prp_sm_normal);
+    if (flags & IBPP::dsSingle) 
+        spb.InsertByte(isc_spb_prp_shutdown_mode, isc_spb_prp_sm_single);
+    if (flags & IBPP::dsMulti) 
+        spb.InsertByte(isc_spb_prp_shutdown_mode, isc_spb_prp_sm_multi);
+    if (flags & IBPP::dsFull) 
+        spb.InsertByte(isc_spb_prp_shutdown_mode, isc_spb_prp_sm_full);
+
 
 	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
@@ -475,7 +484,7 @@ void ServiceImpl::Shutdown(const std::string& dbfile, IBPP::DSM mode, int sectim
 	Wait();
 }
 
-void ServiceImpl::Restart(const std::string& dbfile)
+void ServiceImpl::Restart(const std::string& dbfile, IBPP::DSM flags )
 {
 	if (mHandle	== 0)
 		throw LogicExceptionImpl("Service::Restart", _("Service is not connected."));
