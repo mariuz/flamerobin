@@ -762,6 +762,7 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
     gridMenu->Append(wxID_COPY,                      _("&Copy"));
     gridMenu->Append(Cmds::DataGrid_Copy_as_insert,  _("Copy &as insert statements"));
     gridMenu->Append(Cmds::DataGrid_Copy_as_update,  _("Copy as &update statements"));
+    gridMenu->Append(Cmds::DataGrid_Copy_as_upins, _("Copy as update insert statements"));
     gridMenu->AppendSeparator();
     gridMenu->Append(Cmds::DataGrid_EditBlob, _("Edit BLOB..."));
     gridMenu->Append(Cmds::DataGrid_ImportBlob, _("Import BLOB from file..."));
@@ -967,6 +968,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_MENU(Cmds::DataGrid_Copy_as_insert,  ExecuteSqlFrame::OnMenuGridCopyAsInsert)
     EVT_MENU(Cmds::DataGrid_Copy_as_inList,  ExecuteSqlFrame::OnMenuGridCopyAsInList)
     EVT_MENU(Cmds::DataGrid_Copy_as_update,  ExecuteSqlFrame::OnMenuGridCopyAsUpdate)
+    EVT_MENU(Cmds::DataGrid_Copy_as_upins,   ExecuteSqlFrame::OnMenuGridCopyAsUpdateInsert)
     EVT_MENU(Cmds::DataGrid_EditBlob,        ExecuteSqlFrame::OnMenuGridEditBlob)
     EVT_MENU(Cmds::DataGrid_ImportBlob,      ExecuteSqlFrame::OnMenuGridImportBlob)
     EVT_MENU(Cmds::DataGrid_ExportBlob,      ExecuteSqlFrame::OnMenuGridExportBlob)
@@ -1923,6 +1925,11 @@ void ExecuteSqlFrame::OnMenuGridCopyAsInList(wxCommandEvent& WXUNUSED(event))
 void ExecuteSqlFrame::OnMenuGridCopyAsUpdate(wxCommandEvent& WXUNUSED(event))
 {
     grid_data->copyToClipboardAsUpdate();
+}
+
+void ExecuteSqlFrame::OnMenuGridCopyAsUpdateInsert(wxCommandEvent& WXUNUSED(event))
+{
+    grid_data->copyToClipboardAsUpdateInsert();
 }
 
 void ExecuteSqlFrame::OnMenuGridSaveAsHtml(wxCommandEvent& WXUNUSED(event))
