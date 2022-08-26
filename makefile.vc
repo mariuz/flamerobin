@@ -128,9 +128,13 @@ FLAMEROBIN_OBJECTS =  \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ReorderFieldsDialog.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_RestoreFrame.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ServerRegistrationDialog.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ShutdownStartupBaseFrame.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ShutdownFrame.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_SimpleHtmlFrame.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StatementHistoryDialog.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StartupFrame.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StyleGuide.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ThreadBaseFrame.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_UserDialog.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_UsernamePasswordDialog.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_logger.obj \
@@ -541,14 +545,26 @@ vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_RestoreFrame.obj: .\src\gui\Rest
 vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ServerRegistrationDialog.obj: .\src\gui\ServerRegistrationDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\ServerRegistrationDialog.cpp
 
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ShutdownStartupBaseFrame.obj: .\${SOURCEDIR}\gui\ShutdownStartupBaseFrame.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\${SOURCEDIR}\gui\ShutdownStartupBaseFrame.cpp
+
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ShutdownFrame.obj: .\${SOURCEDIR}\gui\ShutdownFrame.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\${SOURCEDIR}\gui\ShutdownFrame.cpp
+
 vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_SimpleHtmlFrame.obj: .\src\gui\SimpleHtmlFrame.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\SimpleHtmlFrame.cpp
 
 vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StatementHistoryDialog.obj: .\src\gui\StatementHistoryDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\StatementHistoryDialog.cpp
 
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StartupFrame.obj: .\${SOURCEDIR}\gui\StartupFrame.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\${SOURCEDIR}\gui\StartupFrame.cpp
+
 vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StyleGuide.obj: .\src\gui\StyleGuide.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\StyleGuide.cpp
+
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_ThreadBaseFrame.obj: .\${SOURCEDIR}\gui\ThreadBaseFrame.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\${SOURCEDIR}\gui\ThreadBaseFrame.cpp
 
 vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_UserDialog.obj: .\src\gui\UserDialog.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\UserDialog.cpp

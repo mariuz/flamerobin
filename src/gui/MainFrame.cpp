@@ -61,6 +61,8 @@
 #include "gui/RestoreFrame.h"
 #include "gui/ServerRegistrationDialog.h"
 #include "gui/SimpleHtmlFrame.h"
+#include "gui/ShutdownFrame.h"
+#include "gui/StartupFrame.h"
 #include "main.h"
 #include "metadata/column.h"
 #include "metadata/domain.h"
@@ -359,66 +361,72 @@ DBHTreeControl* MainFrame::getTreeCtrl()
 }
 
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
-    EVT_MENU(Cmds::Menu_RegisterServer, MainFrame::OnMenuRegisterServer)
-    EVT_MENU(wxID_EXIT, MainFrame::OnMenuQuit)
-    EVT_MENU(wxID_ABOUT, MainFrame::OnMenuAbout)
-    EVT_MENU(Cmds::Menu_Manual, MainFrame::OnMenuManual)
-    EVT_MENU(Cmds::Menu_RelNotes, MainFrame::OnMenuRelNotes)
-    EVT_MENU(Cmds::Menu_License, MainFrame::OnMenuLicense)
-    EVT_MENU(Cmds::Menu_URLHomePage, MainFrame::OnMenuURLHomePage)
-    EVT_MENU(Cmds::Menu_URLProjectPage, MainFrame::OnMenuURLProjectPage)
-    EVT_MENU(Cmds::Menu_URLFeatureRequest, MainFrame::OnMenuURLFeatureRequest)
-    EVT_MENU(Cmds::Menu_URLBugReport, MainFrame::OnMenuURLBugReport)
-    EVT_MENU(wxID_PREFERENCES, MainFrame::OnMenuConfigure)
+EVT_MENU(Cmds::Menu_RegisterServer, MainFrame::OnMenuRegisterServer)
+EVT_MENU(wxID_EXIT, MainFrame::OnMenuQuit)
+EVT_MENU(wxID_ABOUT, MainFrame::OnMenuAbout)
+EVT_MENU(Cmds::Menu_Manual, MainFrame::OnMenuManual)
+EVT_MENU(Cmds::Menu_RelNotes, MainFrame::OnMenuRelNotes)
+EVT_MENU(Cmds::Menu_License, MainFrame::OnMenuLicense)
+EVT_MENU(Cmds::Menu_URLHomePage, MainFrame::OnMenuURLHomePage)
+EVT_MENU(Cmds::Menu_URLProjectPage, MainFrame::OnMenuURLProjectPage)
+EVT_MENU(Cmds::Menu_URLFeatureRequest, MainFrame::OnMenuURLFeatureRequest)
+EVT_MENU(Cmds::Menu_URLBugReport, MainFrame::OnMenuURLBugReport)
+EVT_MENU(wxID_PREFERENCES, MainFrame::OnMenuConfigure)
 
-    EVT_MENU(Cmds::Menu_RegisterDatabase, MainFrame::OnMenuRegisterDatabase)
-    EVT_UPDATE_UI(Cmds::Menu_RegisterDatabase, MainFrame::OnMenuUpdateIfServerSelected)
-    EVT_MENU(Cmds::Menu_CreateDatabase, MainFrame::OnMenuCreateDatabase)
-    EVT_UPDATE_UI(Cmds::Menu_CreateDatabase, MainFrame::OnMenuUpdateIfServerSelected)
-    EVT_MENU(Cmds::Menu_RestoreIntoNew, MainFrame::OnMenuRestoreIntoNewDatabase)
-    EVT_UPDATE_UI(Cmds::Menu_RestoreIntoNew, MainFrame::OnMenuUpdateIfServerSelected)
-    EVT_MENU(Cmds::Menu_ManageUsers, MainFrame::OnMenuManageUsers)
-    EVT_UPDATE_UI(Cmds::Menu_ManageUsers, MainFrame::OnMenuUpdateIfServerSelected)
-    EVT_MENU(Cmds::Menu_UnRegisterServer, MainFrame::OnMenuUnRegisterServer)
-    EVT_UPDATE_UI(Cmds::Menu_UnRegisterServer, MainFrame::OnMenuUpdateUnRegisterServer)
-    EVT_MENU(Cmds::Menu_ServerProperties, MainFrame::OnMenuServerProperties)
-    EVT_UPDATE_UI(Cmds::Menu_ServerProperties, MainFrame::OnMenuUpdateIfServerSelected)
+EVT_MENU(Cmds::Menu_RegisterDatabase, MainFrame::OnMenuRegisterDatabase)
+EVT_UPDATE_UI(Cmds::Menu_RegisterDatabase, MainFrame::OnMenuUpdateIfServerSelected)
+EVT_MENU(Cmds::Menu_CreateDatabase, MainFrame::OnMenuCreateDatabase)
+EVT_UPDATE_UI(Cmds::Menu_CreateDatabase, MainFrame::OnMenuUpdateIfServerSelected)
+EVT_MENU(Cmds::Menu_RestoreIntoNew, MainFrame::OnMenuRestoreIntoNewDatabase)
+EVT_UPDATE_UI(Cmds::Menu_RestoreIntoNew, MainFrame::OnMenuUpdateIfServerSelected)
+EVT_MENU(Cmds::Menu_ManageUsers, MainFrame::OnMenuManageUsers)
+EVT_UPDATE_UI(Cmds::Menu_ManageUsers, MainFrame::OnMenuUpdateIfServerSelected)
+EVT_MENU(Cmds::Menu_UnRegisterServer, MainFrame::OnMenuUnRegisterServer)
+EVT_UPDATE_UI(Cmds::Menu_UnRegisterServer, MainFrame::OnMenuUpdateUnRegisterServer)
+EVT_MENU(Cmds::Menu_ServerProperties, MainFrame::OnMenuServerProperties)
+EVT_UPDATE_UI(Cmds::Menu_ServerProperties, MainFrame::OnMenuUpdateIfServerSelected)
 
-    EVT_MENU(Cmds::Menu_UnRegisterDatabase, MainFrame::OnMenuUnRegisterDatabase)
-    EVT_UPDATE_UI(Cmds::Menu_UnRegisterDatabase, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
-    EVT_MENU(Cmds::Menu_GetServerVersion, MainFrame::OnMenuGetServerVersion)
-    EVT_UPDATE_UI(Cmds::Menu_GetServerVersion, MainFrame::OnMenuUpdateIfServerSelected)
-    EVT_MENU(Cmds::Menu_MonitorEvents, MainFrame::OnMenuMonitorEvents)
-    EVT_UPDATE_UI(Cmds::Menu_MonitorEvents, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
-    EVT_MENU(Cmds::Menu_GenerateData, MainFrame::OnMenuGenerateData)
-    EVT_UPDATE_UI(Cmds::Menu_GenerateData, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
-    EVT_MENU(Cmds::Menu_CloneDatabase, MainFrame::OnMenuCloneDatabase)
-    EVT_UPDATE_UI(Cmds::Menu_CloneDatabase, MainFrame::OnMenuUpdateIfDatabaseSelected)
-    EVT_MENU(Cmds::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuDatabaseRegistrationInfo)
-    EVT_UPDATE_UI(Cmds::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuUpdateIfDatabaseSelected)
-    EVT_MENU(Cmds::Menu_Backup, MainFrame::OnMenuBackup)
-    EVT_UPDATE_UI(Cmds::Menu_Backup, MainFrame::OnMenuUpdateIfDatabaseSelected)
-    EVT_MENU(Cmds::Menu_Restore, MainFrame::OnMenuRestore)
-    EVT_UPDATE_UI(Cmds::Menu_Restore, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
-    EVT_MENU(Cmds::Menu_Connect, MainFrame::OnMenuConnect)
-    EVT_UPDATE_UI(Cmds::Menu_Connect, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
-    EVT_MENU(Cmds::Menu_ConnectAs, MainFrame::OnMenuConnectAs)
-    EVT_UPDATE_UI(Cmds::Menu_ConnectAs, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
-    EVT_MENU(Cmds::Menu_Disconnect, MainFrame::OnMenuDisconnect)
-    EVT_UPDATE_UI(Cmds::Menu_Disconnect, MainFrame::OnMenuUpdateIfDatabaseConnected)
-    EVT_MENU(Cmds::Menu_Reconnect, MainFrame::OnMenuReconnect)
-    EVT_UPDATE_UI(Cmds::Menu_Reconnect, MainFrame::OnMenuUpdateIfDatabaseConnected)
-    EVT_MENU(Cmds::Menu_RecreateDatabase, MainFrame::OnMenuRecreateDatabase)
-    EVT_UPDATE_UI(Cmds::Menu_RecreateDatabase, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
-    EVT_MENU(Cmds::Menu_DropDatabase, MainFrame::OnMenuDropDatabase)
-    EVT_UPDATE_UI(Cmds::Menu_DropDatabase, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
-    EVT_MENU(Cmds::Menu_ExecuteStatements, MainFrame::OnMenuExecuteStatements)
-    EVT_UPDATE_UI(Cmds::Menu_ExecuteStatements, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
-    EVT_UPDATE_UI(Cmds::Menu_NewObject, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
-    EVT_MENU(Cmds::Menu_DatabasePreferences, MainFrame::OnMenuDatabasePreferences)
-    EVT_UPDATE_UI(Cmds::Menu_DatabasePreferences, MainFrame::OnMenuUpdateIfDatabaseSelected)
-    EVT_MENU(Cmds::Menu_DatabaseProperties, MainFrame::OnMenuDatabaseProperties)
-    EVT_UPDATE_UI(Cmds::Menu_DatabaseProperties, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
+EVT_MENU(Cmds::Menu_UnRegisterDatabase, MainFrame::OnMenuUnRegisterDatabase)
+EVT_UPDATE_UI(Cmds::Menu_UnRegisterDatabase, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
+EVT_MENU(Cmds::Menu_GetServerVersion, MainFrame::OnMenuGetServerVersion)
+EVT_UPDATE_UI(Cmds::Menu_GetServerVersion, MainFrame::OnMenuUpdateIfServerSelected)
+EVT_MENU(Cmds::Menu_MonitorEvents, MainFrame::OnMenuMonitorEvents)
+EVT_UPDATE_UI(Cmds::Menu_MonitorEvents, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
+EVT_MENU(Cmds::Menu_GenerateData, MainFrame::OnMenuGenerateData)
+EVT_UPDATE_UI(Cmds::Menu_GenerateData, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
+EVT_MENU(Cmds::Menu_CloneDatabase, MainFrame::OnMenuCloneDatabase)
+EVT_UPDATE_UI(Cmds::Menu_CloneDatabase, MainFrame::OnMenuUpdateIfDatabaseSelected)
+EVT_MENU(Cmds::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuDatabaseRegistrationInfo)
+EVT_UPDATE_UI(Cmds::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuUpdateIfDatabaseSelected)
+EVT_MENU(Cmds::Menu_Backup, MainFrame::OnMenuBackup)
+EVT_UPDATE_UI(Cmds::Menu_Backup, MainFrame::OnMenuUpdateIfDatabaseSelected)
+EVT_MENU(Cmds::Menu_Restore, MainFrame::OnMenuRestore)
+EVT_UPDATE_UI(Cmds::Menu_Restore, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
+EVT_MENU(Cmds::Menu_Connect, MainFrame::OnMenuConnect)
+EVT_UPDATE_UI(Cmds::Menu_Connect, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
+EVT_MENU(Cmds::Menu_ConnectAs, MainFrame::OnMenuConnectAs)
+EVT_UPDATE_UI(Cmds::Menu_ConnectAs, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
+EVT_MENU(Cmds::Menu_Disconnect, MainFrame::OnMenuDisconnect)
+EVT_UPDATE_UI(Cmds::Menu_Disconnect, MainFrame::OnMenuUpdateIfDatabaseConnected)
+EVT_MENU(Cmds::Menu_Reconnect, MainFrame::OnMenuReconnect)
+EVT_UPDATE_UI(Cmds::Menu_Reconnect, MainFrame::OnMenuUpdateIfDatabaseConnected)
+EVT_MENU(Cmds::Menu_RecreateDatabase, MainFrame::OnMenuRecreateDatabase)
+EVT_UPDATE_UI(Cmds::Menu_RecreateDatabase, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
+EVT_MENU(Cmds::Menu_DropDatabase, MainFrame::OnMenuDropDatabase)
+EVT_UPDATE_UI(Cmds::Menu_DropDatabase, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
+EVT_MENU(Cmds::Menu_ExecuteStatements, MainFrame::OnMenuExecuteStatements)
+EVT_UPDATE_UI(Cmds::Menu_ExecuteStatements, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
+EVT_UPDATE_UI(Cmds::Menu_NewObject, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
+EVT_MENU(Cmds::Menu_DatabasePreferences, MainFrame::OnMenuDatabasePreferences)
+EVT_UPDATE_UI(Cmds::Menu_DatabasePreferences, MainFrame::OnMenuUpdateIfDatabaseSelected)
+EVT_MENU(Cmds::Menu_DatabaseProperties, MainFrame::OnMenuDatabaseProperties)
+EVT_UPDATE_UI(Cmds::Menu_DatabaseProperties, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
+
+EVT_MENU(Cmds::Menu_ShutdownDatabase, MainFrame::OnMenuShutdownDatabase)
+EVT_UPDATE_UI(Cmds::Menu_ShutdownDatabase, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
+
+EVT_MENU(Cmds::Menu_StartupDatabase, MainFrame::OnMenuStartupDatabase)
+EVT_UPDATE_UI(Cmds::Menu_StartupDatabase, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
 
     EVT_MENU(Cmds::Menu_BrowseData, MainFrame::OnMenuBrowseData)
     EVT_MENU(Cmds::Menu_AddColumn, MainFrame::OnMenuAddColumn)
@@ -863,6 +871,39 @@ void MainFrame::OnMenuSetStatisticsValue(wxCommandEvent& WXUNUSED(event))
         getURIProcessor().handleURI(uri);
         return;
     }
+}
+
+void MainFrame::OnMenuShutdownDatabase(wxCommandEvent& WXUNUSED(event))
+{
+    DatabasePtr db = getDatabase(treeMainM->getSelectedMetadataItem());
+    if (!checkValidDatabase(db))
+        return;
+    
+    ShutdownFrame* rf = ShutdownFrame::findFrameFor(db);
+    if (rf)
+    {
+        rf->Raise();
+        return;
+    }
+    rf = new ShutdownFrame(this, db);
+    rf->Show();
+}
+
+void MainFrame::OnMenuStartupDatabase(wxCommandEvent& WXUNUSED(event))
+{
+    DatabasePtr db = getDatabase(treeMainM->getSelectedMetadataItem());
+    if (!checkValidDatabase(db))
+        return;
+
+    StartupFrame* rf = StartupFrame::findFrameFor(db);
+    if (rf)
+    {
+        rf->Raise();
+        return;
+    }
+    rf = new StartupFrame(this, db);
+    rf->Show();
+
 }
 
 

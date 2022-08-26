@@ -107,9 +107,13 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_ReorderFieldsDialog.o \
 	flamerobin_RestoreFrame.o \
 	flamerobin_ServerRegistrationDialog.o \
+	flamerobin_ShutdownStartupBaseFrame.o \
+	flamerobin_ShutdownFrame.o \
 	flamerobin_SimpleHtmlFrame.o \
 	flamerobin_StatementHistoryDialog.o \
+	flamerobin_StartupFrame.o \
 	flamerobin_StyleGuide.o \
+	flamerobin_ThreadBaseFrame.o \
 	flamerobin_UserDialog.o \
 	flamerobin_UsernamePasswordDialog.o \
 	flamerobin_logger.o \
@@ -511,14 +515,26 @@ flamerobin_RestoreFrame.o: $(srcdir)/src/gui/RestoreFrame.cpp $(FLAMEROBIN_ODEP)
 flamerobin_ServerRegistrationDialog.o: $(srcdir)/src/gui/ServerRegistrationDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/ServerRegistrationDialog.cpp
 
+flamerobin_ShutdownStartupBaseFrame.o: $(srcdir)/${SOURCEDIR}/gui/ShutdownStartupBaseFrame.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/${SOURCEDIR}/gui/ShutdownStartupBaseFrame.cpp
+
+flamerobin_ShutdownFrame.o: $(srcdir)/${SOURCEDIR}/gui/ShutdownFrame.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/${SOURCEDIR}/gui/ShutdownFrame.cpp
+
 flamerobin_SimpleHtmlFrame.o: $(srcdir)/src/gui/SimpleHtmlFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/SimpleHtmlFrame.cpp
 
 flamerobin_StatementHistoryDialog.o: $(srcdir)/src/gui/StatementHistoryDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/StatementHistoryDialog.cpp
 
+flamerobin_StartupFrame.o: $(srcdir)/${SOURCEDIR}/gui/StartupFrame.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/${SOURCEDIR}/gui/StartupFrame.cpp
+
 flamerobin_StyleGuide.o: $(srcdir)/src/gui/StyleGuide.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/StyleGuide.cpp
+
+flamerobin_ThreadBaseFrame.o: $(srcdir)/${SOURCEDIR}/gui/ThreadBaseFrame.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/${SOURCEDIR}/gui/ThreadBaseFrame.cpp
 
 flamerobin_UserDialog.o: $(srcdir)/src/gui/UserDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/UserDialog.cpp
@@ -582,9 +598,6 @@ flamerobin_MetadataTemplateCmdHandler.o: $(srcdir)/src/metadata/MetadataTemplate
 
 flamerobin_MetadataTemplateManager.o: $(srcdir)/src/metadata/MetadataTemplateManager.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/MetadataTemplateManager.cpp
-	
-flamerobin_package.o: $(srcdir)/src/metadata/package.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/package.cpp	
 
 flamerobin_package.o: $(srcdir)/${SOURCEDIR}/metadata/package.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/${SOURCEDIR}/metadata/package.cpp

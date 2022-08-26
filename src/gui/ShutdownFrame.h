@@ -22,66 +22,44 @@
 */
 
 
-#ifndef BACKUPRESTOREBASEFRAME_H
-#define BACKUPRESTOREBASEFRAME_H
+#ifndef FR_SHUTDOWNFRAME_H
+#define FR_SHUTDOWNFRAME_H
 
 #include <wx/wx.h>
-#include <wx/thread.h>
 
-#include <memory>
+#include "ShutdownStartupBaseFrame.h"
 
-#include "core/Observer.h"
-#include "gui/ThreadBaseFrame.h"
-#include "metadata/database.h"
-#include "metadata/MetadataClasses.h"
+class ShutdownThread;
 
-class FileTextControl;
-class LogTextControl;
+class ShutdownFrame: public ShutdownStartupBaseFrame {
+    friend class ShutdownThread;
+private:
 
-class BackupRestoreBaseFrame: public ThreadBaseFrame//, public Observer
-{
-public:
+    wxCheckBox* checkbox_attach;
+    wxCheckBox* checkbox_tran;
+    wxCheckBox* checkbox_force;
 
-    // make sure that thread gets deleted
-    virtual bool Destroy();
-protected:
-
-    void cancelBackupRestore();
-    //void clearLog();
-    virtual void doReadConfigSettings(const wxString& prefix);
-    virtual void doWriteConfigSettings(const wxString& prefix) const;
-    virtual const wxString getStorageName() const;
+    wxStaticText* label_timeout;
+    wxSpinCtrl* spinctrl_timeout;
 
     virtual void createControls();
     virtual void layoutControls();
     virtual void updateControls();
 
-    BackupRestoreBaseFrame(wxWindow* parent, DatabasePtr db);
-private:
-
-
-    // observer stuff
-    virtual void subjectRemoved(Subject* subject);
-    virtual void update();
-
+    static wxString getFrameId(DatabasePtr db);
 protected:
-    enum {
-        ID_text_ctrl_filename = 101,
-        ID_button_browse,
-        ID_button_showlog,
-        ID_text_ctrl_log,
-        ID_checkbox_showlog,
-        ID_button_start,
-    };
+    virtual void doReadConfigSettings(const wxString& prefix);
+    virtual void doWriteConfigSettings(const wxString& prefix) const;
+    virtual const wxString getName() const;
+public:
+    ShutdownFrame(wxWindow* parent, DatabasePtr db);
 
-    wxStaticText* label_filename;
-    FileTextControl* text_ctrl_filename;
-    wxButton* button_browse;
+    static ShutdownFrame* findFrameFor(DatabasePtr db);
 private:
     // event handling
-    void OnVerboseLogChange(wxCommandEvent& event);
+    void OnStartButtonClick(wxCommandEvent& event);
 
     DECLARE_EVENT_TABLE()
 };
 
-#endif // BACKUPRESTOREBASEFRAME_H
+#endif // FR_SHUTDOWNFRAME_H

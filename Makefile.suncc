@@ -14,10 +14,13 @@
 AR ?= ar
 
 #  
+AROPTIONS ?= rcu
+
+#  
 RANLIB ?= ranlib
 
 # C++ compiler 
-CXX = g++
+CXX = sunCC
 
 # Standard flags for C++ 
 CXXFLAGS ?= 
@@ -45,10 +48,10 @@ STATICRTL ?= 0
 
 ### Variables: ###
 
-CPPDEPS = -MT$@ -MF`echo $@ | sed -e 's,\.o$$,.d,'` -MD -MP
-FLAMEROBIN_CXXFLAGS = -D_THREAD_SAFE -pthread $(__DEBUGINFO) $(__OPTIMIZE) -W \
-	-Wall $(____flamerobin_WXDEBUG_p) $(____flamerobin_DEBUGFLAG_p) \
-	-DIBPP_LINUX -I. -I./src -I./src/ibpp -I./res $(CPPFLAGS) $(CXXFLAGS)
+CPPDEPS = -xMF `echo $@ | sed -e 's,\.o$$,.d,'` -xMMD
+FLAMEROBIN_CXXFLAGS = -D_THREAD_SAFE -mt $(__DEBUGINFO) +w2 \
+	$(____flamerobin_WXDEBUG_p) $(____flamerobin_DEBUGFLAG_p) -DIBPP_LINUX -I. \
+	-I./src -I./src/ibpp -I./res $(CPPFLAGS) $(CXXFLAGS)
 FLAMEROBIN_OBJECTS =  \
 	flamerobin_addconstrainthandler.o \
 	flamerobin_Config.o \
@@ -163,8 +166,8 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_StatementBuilder.o \
 	flamerobin_statementHistory.o \
 	flamerobin_StyleGuideGTK.o
-IBPP_CXXFLAGS = -D_THREAD_SAFE -pthread $(__DEBUGINFO) $(__OPTIMIZE) -W -Wall \
-	-DIBPP_LINUX -I./src/ibpp $(CPPFLAGS) $(CXXFLAGS)
+IBPP_CXXFLAGS = -D_THREAD_SAFE -mt $(__DEBUGINFO) +w2 -DIBPP_LINUX -I./src/ibpp \
+	$(CPPFLAGS) $(CXXFLAGS)
 IBPP_OBJECTS =  \
 	ibpp__dpb.o \
 	ibpp__ibpp.o \
@@ -200,12 +203,6 @@ endif
 ifeq ($(FINAL),1)
 __DEBUGINFO = 
 endif
-ifeq ($(FINAL),0)
-__OPTIMIZE = -O0
-endif
-ifeq ($(FINAL),1)
-__OPTIMIZE = -Os
-endif
 
 
 ### Targets: ###
@@ -226,11 +223,11 @@ revision-info:
 	update-revision-info.cmd
 
 flamerobin: $(FLAMEROBIN_OBJECTS) libibpp.a libibpp.a
-	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS)  -pthread $(__DEBUGINFO)  $(LDFLAGS)  libibpp.a
+	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS)  -mt -lpthread $(__DEBUGINFO)  $(LDFLAGS)  libibpp.a
 
 libibpp.a: $(IBPP_OBJECTS)
 	rm -f $@
-	$(AR) rcu $@ $(IBPP_OBJECTS)
+	$(AR) $(AROPTIONS) $@ $(IBPP_OBJECTS)
 	$(RANLIB) $@
 
 flamerobin_addconstrainthandler.o: ./src/addconstrainthandler.cpp

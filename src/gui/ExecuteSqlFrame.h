@@ -234,6 +234,7 @@ private:
     void OnMenuGridCopyAsInList(wxCommandEvent& event);
     void OnMenuGridCopyAsInsert(wxCommandEvent& event);
     void OnMenuGridCopyAsUpdate(wxCommandEvent& event);
+    void OnMenuGridCopyAsUpdateInsert(wxCommandEvent& event);
     void OnMenuGridSaveAsHtml(wxCommandEvent& event);
     void OnMenuGridSaveAsCsv(wxCommandEvent& event);
     void OnMenuGridGridHeaderFont(wxCommandEvent& event);
