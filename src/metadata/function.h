@@ -94,6 +94,7 @@ class FunctionSQL : public Function
 private:
 
 protected:
+    bool deterministicM;
 	virtual void loadProperties();
 public:
 	FunctionSQL(DatabasePtr database, const wxString& name);
