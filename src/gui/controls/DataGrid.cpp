@@ -609,10 +609,59 @@ void DataGrid::copyToClipboardAsUpdateInsert()
             wxString sRows;
             wxString sCols;
             wxString sValues;
+            wxString swhere;
+
+            // find primary key (otherwise use all values)
+            Table* t = 0;
+            Database* db = table->getDatabase();
+            if (db)
+            {
+                t = dynamic_cast<Table*>(
+                    db->findByNameAndType(ntTable, tableId.get()));
+            }
+
+            if (!t)
+            {
+                wxMessageBox(wxString::Format(
+                    _("Table %s cannot be found in database."),
+                    tableId.get().c_str()),
+                    _("Error"), wxOK | wxICON_ERROR);
+                return;
+            }
+
+            PrimaryKeyConstraint* pkc = t->getPrimaryKey();
+            // check if all PK components are available
+            if (pkc)
+            {
+                for (ColumnConstraint::const_iterator ci = pkc->begin();
+                    ci != pkc->end(); ++ci)
+                {
+                    bool found = false;
+                    for (int k = 0; k < GetNumberCols(); k++)
+                    {
+                        if ((*ci) == GetColLabelValue(k))
+                        {
+                            if (!swhere.IsEmpty())
+                                swhere += " , ";
+                            swhere += (*ci);
+
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found)
+                    {
+                        pkc = 0;    // as if PK doesn't exists
+                        break;
+                    }
+                }
+            }
+
 
             for (int i = 0; i < GetNumberRows(); i++)
             {
-
+                sCols = "";
+                sValues = "";
                 for (int j = 0; j < GetNumberCols(); j++)
                 {
                     if (IsInSelection(i, j))
@@ -630,54 +679,6 @@ void DataGrid::copyToClipboardAsUpdateInsert()
 
                 if (!sCols.IsEmpty())
                 {
-                 
-                    wxString swhere;
-                    // find primary key (otherwise use all values)
-                    Table* t = 0;
-                    Database* db = table->getDatabase();
-                    if (db)
-                    {
-                        t = dynamic_cast<Table*>(
-                            db->findByNameAndType(ntTable, tableId.get()));
-                    }
-
-                    if (!t)
-                    {
-                        wxMessageBox(wxString::Format(
-                            _("Table %s cannot be found in database."),
-                            tableId.get().c_str()),
-                            _("Error"), wxOK | wxICON_ERROR);
-                        return;
-                    }
-
-                    PrimaryKeyConstraint* pkc = t->getPrimaryKey();
-                    // check if all PK components are available
-                    if (pkc)
-                    {
-                        for (ColumnConstraint::const_iterator ci = pkc->begin();
-                            ci != pkc->end(); ++ci)
-                        {
-                            bool found = false;
-                            for (int k = 0; k < GetNumberCols(); k++)
-                            {
-                                if ((*ci) == GetColLabelValue(k))
-                                {
-                                    if (!swhere.IsEmpty())
-                                        swhere += " , ";
-                                    swhere += (*ci);
-
-                                    found = true;
-                                    break;
-                                }
-                            }
-                            if (!found)
-                            {
-                                pkc = 0;    // as if PK doesn't exists
-                                break;
-                            }
-                        }
-                    }
-
                     sRows += "UPDATE OR INSERT INTO " + tableId.getQuoted()
                         + " (" + sCols + ") " + "VALUES ( " + sValues + ") "
                         + "MATCHING (" + swhere + ") ;"
