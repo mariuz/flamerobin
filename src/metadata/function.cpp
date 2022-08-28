@@ -478,19 +478,20 @@ void Function::checkDependentFunction()
 
 
 FunctionSQL::FunctionSQL(DatabasePtr database, const wxString & name)
-	: Function(database, name)
+	: Function(database, name), deterministicM(FALSE)
 {
     setType(ntFunctionSQL);
 }
 
 FunctionSQL::FunctionSQL(MetadataItem* parent, const wxString& name)
-    : Function(parent, name)
+    : Function(parent, name), deterministicM(FALSE)
 {
     setType(ntFunctionSQL);
 }
 
 void FunctionSQL::loadProperties()
 {
+    getSource();
 }
 
 wxString FunctionSQL::getSource()
@@ -500,7 +501,7 @@ wxString FunctionSQL::getSource()
 	MetadataLoaderTransaction tr(loader);
 	wxMBConv* converter = db->getCharsetConverter();
 	std::string sql = "select rdb$function_source, ";
-	sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? "rdb$entrypoint, rdb$engine_name  " : "null, null ";
+	sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? "rdb$entrypoint, rdb$engine_name, rdb$deterministic_flag  " : "null, null, null ";
 	sql += "from rdb$functions where rdb$function_name = ?";
 	sql += " and rdb$package_name is null ";
 	IBPP::Statement st1 = loader->getStatement(sql);
@@ -534,12 +535,21 @@ wxString FunctionSQL::getSource()
 		source1.Trim(false);     // remove leading whitespace
 		source += "\nAS\n" + source1 + "\n";
 	}
+
+    if (!st1->IsNull(4)) {
+        int i = 0;
+        st1->Get(4, i);
+        deterministicM = (i == 1);
+    }
+
 	return source;
 }
 
 wxString FunctionSQL::getAlterSql(bool full)
 {
-	ensureChildrenLoaded();
+    ensurePropertiesLoaded();
+
+    ensureChildrenLoaded();
 
 	DatabasePtr db = getDatabase();
 
@@ -585,12 +595,14 @@ wxString FunctionSQL::getAlterSql(bool full)
 			if ((*it)->isOutputParameter())
 			{
 				if (output.empty())
-					output += "\nRETURNS   ";
+					output += "\nRETURNS ";
 				else
 					output += ",\n    ";
 				output += param + charset;
 				if (!(*it)->isNullable(IgnoreDomainNullability))
 					output += " NOT NULL";
+                if (deterministicM)
+                    output += " DETERMINISTIC ";
 			}
 			else
 			{
