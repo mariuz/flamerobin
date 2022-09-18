@@ -43,7 +43,7 @@ typedef union _DECFLOAT128_UNION
     struct
     {
         // if higher bits of comb 00/01/10
-#ifdef _MSC_VER
+#ifndef HAVE_INT128
         uint64_t declet0 : 10;
         uint64_t declet1 : 10;
         uint64_t declet2 : 10;
@@ -81,7 +81,7 @@ typedef union _DECFLOAT128_UNION
     struct
     {
         // if higher bits of comb 11
-#ifdef _MSC_VER
+#ifndef HAVE_INT128
         uint64_t declet0 : 10;
         uint64_t declet1 : 10;
         uint64_t declet2 : 10;
@@ -121,7 +121,7 @@ typedef union _DECFLOAT128_UNION
     struct
     {
         // comb = 1111 infinite (1111) / NaN (
-#ifdef _MSC_VER
+#ifndef HAVE_INT128
         uint64_t unused1 : 64;
         uint64_t unused2 : 58;
         uint64_t nantype : 1; // 0 quiet / 1 signalling
@@ -369,7 +369,7 @@ void Dec34DPDToDecInfo(const dec34_t src, DECFLOAT_DECINFO* info)
     AppendDecletToStr(dfu.dpd1.declet9, mantStr);
     AppendDecletToStr(dfu.dpd1.declet8, mantStr);
     AppendDecletToStr(dfu.dpd1.declet7, mantStr);
-#ifdef _MSC_VER
+#ifndef HAVE_INT128
     AppendDecletToStr(dfu.dpd1.declet6a || dfu.dpd1.declet6b << 4, mantStr);
 #else
     AppendDecletToStr(dfu.dpd1.declet6, mantStr);
@@ -750,7 +750,7 @@ bool DecInfoToDec34DPD(const DECFLOAT_DECINFO &info, dec34_t* dst)
     dfu.dpd1.declet3 = Str3ToDeclet(info.mantStr, mantOfs);
     dfu.dpd1.declet4 = Str3ToDeclet(info.mantStr, mantOfs);
     dfu.dpd1.declet5 = Str3ToDeclet(info.mantStr, mantOfs);
-#ifdef _MSC_VER
+#ifndef HAVE_INT128
     uint32_t declet6 = Str3ToDeclet(info.mantStr, mantOfs);
     dfu.dpd1.declet6a = declet6 & 0xf;
     dfu.dpd1.declet6b = (declet6 & 0x3f) >> 4; 

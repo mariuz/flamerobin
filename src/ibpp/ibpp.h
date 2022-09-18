@@ -67,7 +67,7 @@
 #include <string>
 #include <vector>
 
-#ifndef _MSC_VER
+#ifdef HAVE_DECIMAL128
 #include <decimal/decimal>
 #endif
 
@@ -161,17 +161,6 @@ namespace IBPP
     // int128 - FB4
     #pragma pack(push, 1)
 
-    // gcc has a builtin type __int128
-    // msvc does not have something we can use (AFICS)
-    // so we have to do it by own code.
-    #define HAVE_INT128
-    #define HAVE_DECFLOAT
-
-    #ifdef _MSC_VER
-    #undef HAVE_INT128
-    #undef HAVE_DECFLOAT
-    #endif
-
     #ifndef HAVE_INT128
     // NOTICE: could/should be replaced with int128_t if msvc supports this
     typedef struct IBPP_INT128_T
@@ -225,7 +214,7 @@ public:
     typedef __uint128_t ibpp_uint128_t;
     #endif
 
-    #ifndef HAVE_DECFLOAT
+    #ifndef HAVE_DECIMAL128
     typedef struct IBPP_DEC16_T
     {
         int64_t lowPart;
