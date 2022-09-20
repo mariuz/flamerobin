@@ -362,6 +362,30 @@ if (UNIX AND NOT APPLE)
 	# Need to link the fbclient lib in *nix systems
 	list(APPEND FR_LIBS -lfbclient)
 
+	include(CheckCXXSourceCompiles)
+	check_cxx_source_compiles("
+int main() {
+    __int128 x;
+    return 0;
+}
+" HAVE_INT128)
+
+	if (HAVE_INT128)
+		add_definitions(-DHAVE_INT128)
+	endif()
+
+	check_cxx_source_compiles("
+#include <decimal/decimal>
+int main() {
+    std::decimal::decimal128 x;
+    return 0;
+}
+" HAVE_DECIMAL128)
+
+	if (HAVE_DECIMAL128)
+		add_definitions(-DHAVE_DECIMAL128)
+	endif()
+
 	# Create the revision include file
 	execute_process(
 		COMMAND "${CMAKE_SOURCE_DIR}/update-revision-info.sh"
