@@ -412,6 +412,7 @@ namespace IBPP
         case SDT::sdSmallint:
         case SDT::sdInteger:
         case SDT::sdLargeint:
+        case SDT::sdInt128:
             return true;
         }
         return false;
@@ -425,6 +426,8 @@ namespace IBPP
         switch (type) {
         case SDT::sdDouble:
         case SDT::sdFloat:
+        case SDT::sdDec16:
+        case SDT::sdDec34:
             return true;
         }
         return false;

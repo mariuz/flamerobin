@@ -35,45 +35,37 @@
 
 #include "config/Config.h"
 #include "core/ArtProvider.h"
-#include "gui/BackupRestoreBaseFrame.h"
+#include "gui/ShutdownStartupBaseFrame.h"
 #include "gui/controls/DndTextControls.h"
 #include "gui/controls/LogTextControl.h"
 #include "metadata/database.h"
 #include "metadata/server.h"
 
-BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent,
+ShutdownStartupBaseFrame::ShutdownStartupBaseFrame(wxWindow* parent,
         DatabasePtr db)
     : ThreadBaseFrame(parent, db)
 {
-    //wxASSERT(db);
-    //db->attachObserver(this, false);
 
-    //threadMsgTimeMillisM = 0;
     verboseMsgsM = true;
 
-    // create controls in constructor of descendant class (correct tab order)
-    panel_controls = 0;
-    checkbox_showlog = 0;
-    button_start = 0;
-    text_ctrl_log = 0;
 
     SetIcon(wxArtProvider::GetIcon(ART_Backup, wxART_FRAME_ICON));
 }
 
 //! implementation details
-void BackupRestoreBaseFrame::cancelBackupRestore()
+void ShutdownStartupBaseFrame::cancelShutdownStartup()
 {
     cancelThread();
 }
 
 
-bool BackupRestoreBaseFrame::Destroy()
+bool ShutdownStartupBaseFrame::Destroy()
 {
-    cancelBackupRestore();
+    cancelShutdownStartup();
     return ThreadBaseFrame::Destroy();
 }
 
-void BackupRestoreBaseFrame::doReadConfigSettings(const wxString& prefix)
+void ShutdownStartupBaseFrame::doReadConfigSettings(const wxString& prefix)
 {
     BaseFrame::doReadConfigSettings(prefix);
 
@@ -83,54 +75,56 @@ void BackupRestoreBaseFrame::doReadConfigSettings(const wxString& prefix)
     checkbox_showlog->SetValue(verbose);
 
     wxString bkfile;
-    config().getValue(prefix + Config::pathSeparator + "backupfilename",
+    config().getValue(prefix + Config::pathSeparator + "state",
         bkfile);
-    if (!bkfile.empty())
-        text_ctrl_filename->SetValue(bkfile);
+    //if (!bkfile.empty())
+    //    text_ctrl_filename->SetValue(bkfile);
 }
 
-void BackupRestoreBaseFrame::doWriteConfigSettings(const wxString& prefix) const
+void ShutdownStartupBaseFrame::doWriteConfigSettings(const wxString& prefix) const
 {
     BaseFrame::doWriteConfigSettings(prefix);
     config().setValue(prefix + Config::pathSeparator + "verboselog",
         checkbox_showlog->GetValue());
-    config().setValue(prefix + Config::pathSeparator + "backupfilename",
-        text_ctrl_filename->GetValue());
+    //config().setValue(prefix + Config::pathSeparator + "state",
+    //    text_ctrl_filename->GetValue());
 }
 
 
-const wxString BackupRestoreBaseFrame::getStorageName() const
+const wxString ShutdownStartupBaseFrame::getStorageName() const
 {
     if (DatabasePtr db = getDatabase())
         return getName() + Config::pathSeparator + db->getItemPath();
     return wxEmptyString;
 }
 
-void BackupRestoreBaseFrame::createControls()
+void ShutdownStartupBaseFrame::createControls()
 {
     ThreadBaseFrame::createControls();
+    
+    wxArrayString choices;
+    choices.Add("normal");
+    choices.Add("single");
+    choices.Add("multi");
+    choices.Add("full");
 
-    label_filename = new wxStaticText(panel_controls, wxID_ANY,
-        _("Backup file:"));
-    text_ctrl_filename = new FileTextControl(panel_controls,
-        ID_text_ctrl_filename, wxEmptyString);
-    button_browse = new wxButton(panel_controls, ID_button_browse, _("..."),
-        wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-
+    radiobox_state = new wxRadioBox(panel_controls, ID_radiobox_state,
+        _("Database mode  (FB 2.0+)"), wxDefaultPosition, wxDefaultSize, choices,
+        4, wxHORIZONTAL);
 }
 
-void BackupRestoreBaseFrame::layoutControls()
+void ShutdownStartupBaseFrame::layoutControls()
 {
 }
 
-void BackupRestoreBaseFrame::subjectRemoved(Subject* subject)
+void ShutdownStartupBaseFrame::subjectRemoved(Subject* subject)
 {
     DatabasePtr db = getDatabase();
     if (!db || !db->isConnected() || subject == db.get())
         Close();
 }
 
-void BackupRestoreBaseFrame::update()
+void ShutdownStartupBaseFrame::update()
 {
     DatabasePtr db = getDatabase();
     if (db)
@@ -139,23 +133,48 @@ void BackupRestoreBaseFrame::update()
         Close();
 }
 
-void BackupRestoreBaseFrame::updateControls()
+IBPP::DSM ShutdownStartupBaseFrame::getDatabaseMode()
 {
-    // empty implementation to allow this to be called from update()
-    // which could happen in the constructor, when descendant isn't
-    // completely initialized yet
+    int dbMode = radiobox_state->GetSelection();
+    switch (dbMode)
+    {
+        case 0 :
+            return IBPP::dsNormal;
+            break;
+        case 1 :
+            return IBPP::dsSingle;
+            break;
+        case 2 :
+            return IBPP::dsMulti;
+            break;
+
+        case 3 :
+            return IBPP::dsFull;
+            break;
+        default :
+            return IBPP::dsNormal;
+    }
+}
+
+void ShutdownStartupBaseFrame::updateControls()
+{
+    ThreadBaseFrame::updateControls();
+
+    bool running = getThreadRunning();
+
+    radiobox_state->Enable(!running);
+
 }
 
 //! event handlers
-BEGIN_EVENT_TABLE(BackupRestoreBaseFrame, BaseFrame)
-    EVT_CHECKBOX(BackupRestoreBaseFrame::ID_checkbox_showlog, BackupRestoreBaseFrame::OnVerboseLogChange)
-    EVT_MENU(BackupRestoreBaseFrame::ID_thread_finished, BackupRestoreBaseFrame::OnThreadFinished)
-    EVT_MENU(BackupRestoreBaseFrame::ID_thread_output, BackupRestoreBaseFrame::OnThreadOutput)
-    EVT_TEXT(BackupRestoreBaseFrame::ID_text_ctrl_filename, BackupRestoreBaseFrame::OnSettingsChange)
+BEGIN_EVENT_TABLE(ShutdownStartupBaseFrame, BaseFrame)
+    EVT_CHECKBOX(ShutdownStartupBaseFrame::ID_checkbox_showlog, ShutdownStartupBaseFrame::OnVerboseLogChange)
+    EVT_MENU(ShutdownStartupBaseFrame::ID_thread_finished, ShutdownStartupBaseFrame::OnThreadFinished)
+    EVT_MENU(ShutdownStartupBaseFrame::ID_thread_output, ShutdownStartupBaseFrame::OnThreadOutput)
 END_EVENT_TABLE()
 
 
-void BackupRestoreBaseFrame::OnVerboseLogChange(wxCommandEvent& WXUNUSED(event))
+void ShutdownStartupBaseFrame::OnVerboseLogChange(wxCommandEvent& WXUNUSED(event))
 {
     wxBusyCursor wait;
     verboseMsgsM = checkbox_showlog->IsChecked();

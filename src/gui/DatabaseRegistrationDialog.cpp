@@ -85,7 +85,7 @@ void DatabaseRegistrationDialog::createControls()
 
     label_charset = new wxStaticText(getControlsPanel(), -1, _("Charset:"));
     long comboStyle =  wxCB_DROPDOWN;
-#ifndef __WXMAC__l
+#ifndef __WXMAC__
     // Not supported on OSX/Cocoa presently
     comboStyle |= wxCB_SORT;
 #endif

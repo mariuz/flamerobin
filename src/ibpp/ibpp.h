@@ -67,7 +67,7 @@
 #include <string>
 #include <vector>
 
-#ifndef _MSC_VER
+#ifdef HAVE_DECIMAL128
 #include <decimal/decimal>
 #endif
 
@@ -112,19 +112,38 @@ namespace IBPP
         adBool, adInt16, adInt32, adInt64, adFloat, adDouble};
 
     // Database::Shutdown Modes
-    enum DSM {dsForce, dsDenyTrans, dsDenyAttach};
+    enum DSM {
+        dsVerbose = 0x1,
+        // Shutdhown  modes
+        dsCache = 0x100, 
+        dsForce = 0x200, 
+        dsDenyTrans = 0x400, 
+        dsDenyAttach = 0x800,
+        // database Modes
+        dsNormal =  0x1000,
+        dsSingle = 0x2000,
+        dsMulti = 0x4000,
+        dsFull = 0x8000
+    };
+
 
     // Service::StartBackup && Service::StartRestore Flags
     enum BRF {
         brVerbose = 0x1,
         // Backup flags
-        brIgnoreChecksums = 0x100, brIgnoreLimbo = 0x200,
-        brMetadataOnly = 0x400, brNoGarbageCollect = 0x800,
-        brNonTransportable = 0x1000, brConvertExtTables = 0x2000,
+        brIgnoreChecksums = 0x100, 
+        brIgnoreLimbo = 0x200,
+        brMetadataOnly = 0x400, 
+        brNoGarbageCollect = 0x800,
+        brNonTransportable = 0x1000, 
+        brConvertExtTables = 0x2000,
         // Restore flags
-        brReplace = 0x10000, brDeactivateIdx = 0x20000,
-        brNoShadow = 0x40000, brNoValidity = 0x80000,
-        brPerTableCommit = 0x100000, brUseAllSpace = 0x200000
+        brReplace = 0x10000, 
+        brDeactivateIdx = 0x20000,
+        brNoShadow = 0x40000, 
+        brNoValidity = 0x80000,
+        brPerTableCommit = 0x100000, 
+        brUseAllSpace = 0x200000
     };
 
     // Service::Repair Flags
@@ -141,17 +160,6 @@ namespace IBPP
 
     // int128 - FB4
     #pragma pack(push, 1)
-
-    // gcc has a builtin type __int128
-    // msvc does not have something we can use (AFICS)
-    // so we have to do it by own code.
-    #define HAVE_INT128
-    #define HAVE_DECFLOAT
-
-    #ifdef _MSC_VER
-    #undef HAVE_INT128
-    #undef HAVE_DECFLOAT
-    #endif
 
     #ifndef HAVE_INT128
     // NOTICE: could/should be replaced with int128_t if msvc supports this
@@ -206,7 +214,7 @@ public:
     typedef __uint128_t ibpp_uint128_t;
     #endif
 
-    #ifndef HAVE_DECFLOAT
+    #ifndef HAVE_DECIMAL128
     typedef struct IBPP_DEC16_T
     {
         int64_t lowPart;
@@ -607,8 +615,8 @@ public:
         virtual void SetReadOnly(const std::string& dbfile, bool) = 0;
         virtual void SetReserveSpace(const std::string& dbfile, bool) = 0;
 
-        virtual void Shutdown(const std::string& dbfile, DSM mode, int sectimeout) = 0;
-        virtual void Restart(const std::string& dbfile) = 0;
+        virtual void Shutdown(const std::string& dbfile, DSM flags, int sectimeout) = 0;
+        virtual void Restart(const std::string& dbfile, DSM flags) = 0;
         virtual void Sweep(const std::string& dbfile) = 0;
         virtual void Repair(const std::string& dbfile, RPF flags) = 0;
 

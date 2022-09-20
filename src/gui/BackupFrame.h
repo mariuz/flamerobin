@@ -40,8 +40,9 @@ private:
     wxCheckBox* checkbox_garbage;
     wxCheckBox* checkbox_transport;
     wxCheckBox* checkbox_extern;
-    void createControls();
-    void layoutControls();
+
+    virtual void createControls();
+    virtual void layoutControls();
     virtual void updateControls();
 
     static wxString getFrameId(DatabasePtr db);

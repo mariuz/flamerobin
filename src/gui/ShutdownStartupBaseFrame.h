@@ -22,8 +22,8 @@
 */
 
 
-#ifndef BACKUPRESTOREBASEFRAME_H
-#define BACKUPRESTOREBASEFRAME_H
+#ifndef FR_SHUTDOWNSTARTUPBASEFRAME_H
+#define FR_SHUTDOWNSTARTUPBASEFRAME_H
 
 #include <wx/wx.h>
 #include <wx/thread.h>
@@ -38,7 +38,7 @@
 class FileTextControl;
 class LogTextControl;
 
-class BackupRestoreBaseFrame: public ThreadBaseFrame//, public Observer
+class ShutdownStartupBaseFrame: public ThreadBaseFrame//, public Observer
 {
 public:
 
@@ -46,8 +46,8 @@ public:
     virtual bool Destroy();
 protected:
 
-    void cancelBackupRestore();
-    //void clearLog();
+    void cancelShutdownStartup();
+
     virtual void doReadConfigSettings(const wxString& prefix);
     virtual void doWriteConfigSettings(const wxString& prefix) const;
     virtual const wxString getStorageName() const;
@@ -56,7 +56,7 @@ protected:
     virtual void layoutControls();
     virtual void updateControls();
 
-    BackupRestoreBaseFrame(wxWindow* parent, DatabasePtr db);
+    ShutdownStartupBaseFrame(wxWindow* parent, DatabasePtr db);
 private:
 
 
@@ -66,22 +66,18 @@ private:
 
 protected:
     enum {
-        ID_text_ctrl_filename = 101,
-        ID_button_browse,
-        ID_button_showlog,
-        ID_text_ctrl_log,
-        ID_checkbox_showlog,
-        ID_button_start,
+        ID_radiobox_state = 101,
     };
 
-    wxStaticText* label_filename;
-    FileTextControl* text_ctrl_filename;
-    wxButton* button_browse;
+    wxRadioBox* radiobox_state;
+    IBPP::DSM getDatabaseMode();
+
 private:
     // event handling
+
     void OnVerboseLogChange(wxCommandEvent& event);
 
     DECLARE_EVENT_TABLE()
 };
 
-#endif // BACKUPRESTOREBASEFRAME_H
+#endif // FR_SHUTDOWNSTARTUPBASEFRAME_H
