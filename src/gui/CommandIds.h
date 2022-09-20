@@ -68,6 +68,7 @@ enum {
     DataGrid_Copy_as_insert,
     DataGrid_Copy_as_inList,
     DataGrid_Copy_as_update,
+    DataGrid_Copy_as_upins,
     DataGrid_Save_as_html,
     DataGrid_Save_as_csv,
     DataGrid_Set_header_font,

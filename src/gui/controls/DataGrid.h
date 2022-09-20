@@ -74,6 +74,7 @@ public:
     void copyToClipboardAsInsert();
     void copyToClipboardAsInList();
     void copyToClipboardAsUpdate();
+    void copyToClipboardAsUpdateInsert();
     void saveAsHTML();
     void saveAsCSV(const wxString& fileName,
         const wxChar& fieldDelimiter, const wxChar& textDelimiter);
