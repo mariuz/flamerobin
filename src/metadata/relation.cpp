@@ -36,7 +36,7 @@
 #include "core/FRError.h"
 #include "engine/MetadataLoader.h"
 #include "frutils.h"
-#include "constants.h"
+#include "firebird/constants.h"
 #include "metadata/column.h"
 #include "metadata/CreateDDLVisitor.h"
 #include "metadata/database.h"
