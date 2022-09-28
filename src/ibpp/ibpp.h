@@ -132,25 +132,27 @@ namespace IBPP
         // Backup flags
         brConvertExtTables      = 0x000001,
         brExpand                = 0x000002,
-        brGarbageCollect        = 0x000004,
+        brNoGarbageCollect      = 0x000004,
         brIgnoreChecksums       = 0x000008, 
         brIgnoreLimbo           = 0x000010,
         brNoDBTriggers          = 0x000020,  //FB2.5+
         brOldDescriptions       = 0x000040,
-        brTransportable         = 0x000080,
+        brNonTransportable      = 0x000080,
         brZip                   = 0x000100, //FB4.0+
         // Restore flags
         brFix_Fss_Data          = 0x000200, //FB2.0+
         brFix_Fss_Metadata      = 0x000400, //FB2.0+
-        brInactiveIdx           = 0x000800,
+        brDeactivateIdx         = 0x000800,
         brNoShadow              = 0x001000,
         brNoValidity            = 0x002000,
         brPerTableCommit        = 0x040000,
         brUseAllSpace           = 0x080000,
+        brReadOnlyDB            = 0x100000,
+        brReadOnlyRP            = 0x200000,
+        brReplace               = 0x400000,
         // General flags
-        brMetadataOnly          = 0x100000,
-        brReplace               = 0x200000,
-        brVerbose               = 0x400000,
+        brMetadataOnly          = 0x800000,
+        brVerbose               = 0x1000000,
     };
 
     // Service::Repair Flags
@@ -629,15 +631,21 @@ public:
 
         virtual void StartBackup(
             const std::string& dbfile,const std::string& bkfile, const std::string& outfile = "",
-            BRF flags = BRF(0),
             const int factor = 0,
+            BRF flags = BRF(0),
             const std::string& cryptName = "", const std::string& keyHolder="", const std::string& keyName="",
             const std::string& skypData = "", const std::string& includeData = "",
             const int statics = 0, const int verboseInteval = 0
         ) = 0;
 
-        virtual void StartRestore(const std::string& bkfile, const std::string& dbfile,
-            int pagesize = 0, BRF flags = BRF(0)) = 0;
+        virtual void StartRestore(
+            const std::string& bkfile, const std::string& dbfile, const std::string& outfile = "",
+            int pagesize = 0, int buffers = 0,  
+            BRF flags = BRF(0),
+            const std::string & cryptName = "", const std::string & keyHolder = "", const std::string & keyName = "",
+            const std::string & skypData = "", const std::string & includeData = "",
+            const int statics = 0, const int verboseInteval = 0
+        ) = 0;
 
         virtual const char* WaitMsg() = 0;  // With reporting (does not block)
         virtual void Wait() = 0;            // Without reporting (does block)

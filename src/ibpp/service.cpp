@@ -561,13 +561,11 @@ void ServiceImpl::Repair(const std::string& dbfile, IBPP::RPF flags)
 
 void ServiceImpl::StartBackup(
     const std::string& dbfile,	const std::string& bkfile, const std::string& outfile,
-    IBPP::BRF flags,
     const int factor,
+    IBPP::BRF flags,
     const std::string& cryptName, const std::string& keyHolder, const std::string& keyName,
     const std::string& skypData, const std::string& includeData,
-    const int statics, const int verboseInteval
-
-)
+    const int statics, const int verboseInteval)
 {
 	if (mHandle	== 0)
 		throw LogicExceptionImpl("Service::Backup", _("Service is not connected."));
@@ -598,11 +596,11 @@ void ServiceImpl::StartBackup(
 	unsigned int mask = 0;
     if (flags & IBPP::brConvertExtTables)	mask |= isc_spb_bkp_convert;
     if (flags & IBPP::brExpand)             mask |= isc_spb_bkp_expand;
-    if (flags & IBPP::brGarbageCollect)	    mask |= isc_spb_bkp_no_garbage_collect;
+    if (flags & IBPP::brNoGarbageCollect)	mask |= isc_spb_bkp_no_garbage_collect;
     if (flags & IBPP::brIgnoreChecksums)	mask |= isc_spb_bkp_ignore_checksums;
 	if (flags & IBPP::brIgnoreLimbo)		mask |= isc_spb_bkp_ignore_limbo;
     if (flags & IBPP::brNoDBTriggers)       mask |= isc_spb_bkp_no_triggers;
-    if (flags & IBPP::brTransportable)	    mask |= isc_spb_bkp_non_transportable;
+    if (flags & IBPP::brNonTransportable)	mask |= isc_spb_bkp_non_transportable;
     if (flags & IBPP::brOldDescriptions)	mask |= isc_spb_bkp_old_descriptions;
     if (flags & IBPP::brZip)	            mask |= isc_spb_bkp_zip;
 
@@ -615,8 +613,14 @@ void ServiceImpl::StartBackup(
 		throw SQLExceptionImpl(status, "Service::Backup", _("isc_service_start failed"));
 }
 
-void ServiceImpl::StartRestore(const std::string& bkfile, const std::string& dbfile,
-	int	pagesize, IBPP::BRF flags)
+void ServiceImpl::StartRestore(
+    const std::string& bkfile, const std::string& dbfile, const std::string& outfile,
+    int pagesize, int buffers,
+    IBPP::BRF flags,
+    const std::string& cryptName, const std::string& keyHolder, const std::string& keyName,
+    const std::string& skypData, const std::string& includeData,
+    const int statics, const int verboseInteval
+)
 {
 	if (mHandle	== 0)
 		throw LogicExceptionImpl("Service::Restore", _("Service is not connected."));
@@ -631,18 +635,34 @@ void ServiceImpl::StartRestore(const std::string& bkfile, const std::string& dbf
 	spb.Insert(isc_action_svc_restore);
 	spb.InsertString(isc_spb_bkp_file, 2, bkfile.c_str());
 	spb.InsertString(isc_spb_dbname, 2, dbfile.c_str());
+
 	if (flags & IBPP::brVerbose) spb.Insert(isc_spb_verbose);
-	if (pagesize !=	0) spb.InsertQuad(isc_spb_res_page_size, pagesize);
+    if (verboseInteval > 0) spb.InsertQuad(isc_spb_verbint, verboseInteval);
 
-	unsigned int mask;
-	if (flags & IBPP::brReplace) mask = isc_spb_res_replace;
-		else mask = isc_spb_res_create;	// Safe default mode
+	if (pagesize >	0) spb.InsertQuad(isc_spb_res_page_size, pagesize);
+    if (buffers > 0) spb.InsertQuad(isc_spb_res_buffers, buffers);
 
-	if (flags & IBPP::brDeactivateIdx)	mask |= isc_spb_res_deactivate_idx;
-	if (flags & IBPP::brNoShadow)		mask |= isc_spb_res_no_shadow;
-	if (flags & IBPP::brNoValidity)		mask |= isc_spb_res_no_validity;
-	if (flags & IBPP::brPerTableCommit)	mask |= isc_spb_res_one_at_a_time;
-	if (flags & IBPP::brUseAllSpace)	mask |= isc_spb_res_use_all_space;
+
+    if (!skypData.empty()) spb.InsertString(isc_spb_bkp_skip_data, 2, skypData.c_str());
+    if (!includeData.empty()) spb.InsertString(isc_spb_bkp_include_data, 2, includeData.c_str());
+
+    if (!cryptName.empty()) spb.InsertString(isc_spb_bkp_crypt, 2, cryptName.c_str());
+    if (!keyHolder.empty()) spb.InsertString(isc_spb_bkp_keyholder, 2, keyHolder.c_str());
+    if (!keyName.empty()) spb.InsertString(isc_spb_bkp_keyname, 2, keyName.c_str());
+
+    if (flags & IBPP::brReadOnlyDB)spb.InsertQuad(isc_spb_res_access_mode, 1);
+
+    if (flags & IBPP::brReadOnlyRP)spb.InsertQuad(isc_spb_res_replica_mode, 1);
+
+    unsigned int mask = (flags & IBPP::brReplace) ? isc_spb_res_replace : isc_spb_res_create;	// Safe default mode
+
+    if (flags & IBPP::brFix_Fss_Data)	    mask |= isc_spb_res_fix_fss_data;
+    if (flags & IBPP::brFix_Fss_Metadata)	mask |= isc_spb_res_fix_fss_metadata;
+    if (flags & IBPP::brDeactivateIdx)	    mask |= isc_spb_res_deactivate_idx;
+	if (flags & IBPP::brNoShadow)		    mask |= isc_spb_res_no_shadow;
+	if (flags & IBPP::brNoValidity)		    mask |= isc_spb_res_no_validity;
+	if (flags & IBPP::brPerTableCommit)	    mask |= isc_spb_res_one_at_a_time;
+	if (flags & IBPP::brUseAllSpace)	    mask |= isc_spb_res_use_all_space;
 	if (mask != 0) spb.InsertQuad(isc_spb_options, mask);
 
 	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
