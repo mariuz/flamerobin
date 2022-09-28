@@ -559,8 +559,15 @@ void ServiceImpl::Repair(const std::string& dbfile, IBPP::RPF flags)
 	Wait();
 }
 
-void ServiceImpl::StartBackup(const std::string& dbfile,
-	const std::string& bkfile, IBPP::BRF flags)
+void ServiceImpl::StartBackup(
+    const std::string& dbfile,	const std::string& bkfile, const std::string& outfile,
+    IBPP::BRF flags,
+    const int factor,
+    const std::string& cryptName, const std::string& keyHolder, const std::string& keyName,
+    const std::string& skypData, const std::string& includeData,
+    const int statics, const int verboseInteval
+
+)
 {
 	if (mHandle	== 0)
 		throw LogicExceptionImpl("Service::Backup", _("Service is not connected."));
@@ -575,15 +582,32 @@ void ServiceImpl::StartBackup(const std::string& dbfile,
 	spb.Insert(isc_action_svc_backup);
 	spb.InsertString(isc_spb_dbname, 2, dbfile.c_str());
 	spb.InsertString(isc_spb_bkp_file, 2, bkfile.c_str());
+
 	if (flags & IBPP::brVerbose) spb.Insert(isc_spb_verbose);
+    if(verboseInteval > 0) spb.InsertQuad(isc_spb_verbint, verboseInteval);
+
+    if (factor > 0) spb.InsertQuad(isc_spb_bkp_factor, factor);
+
+    if (!skypData.empty()) spb.InsertString(isc_spb_bkp_skip_data, 2, skypData.c_str());
+    if (!includeData.empty()) spb.InsertString(isc_spb_bkp_include_data, 2, includeData.c_str());
+
+    if(!cryptName.empty()) spb.InsertString(isc_spb_bkp_crypt, 2, cryptName.c_str());
+    if (!keyHolder.empty()) spb.InsertString(isc_spb_bkp_keyholder, 2, keyHolder.c_str());
+    if (!keyName.empty()) spb.InsertString(isc_spb_bkp_keyname, 2, keyName.c_str());
 
 	unsigned int mask = 0;
-	if (flags & IBPP::brIgnoreChecksums)	mask |= isc_spb_bkp_ignore_checksums;
+    if (flags & IBPP::brConvertExtTables)	mask |= isc_spb_bkp_convert;
+    if (flags & IBPP::brExpand)             mask |= isc_spb_bkp_expand;
+    if (flags & IBPP::brGarbageCollect)	    mask |= isc_spb_bkp_no_garbage_collect;
+    if (flags & IBPP::brIgnoreChecksums)	mask |= isc_spb_bkp_ignore_checksums;
 	if (flags & IBPP::brIgnoreLimbo)		mask |= isc_spb_bkp_ignore_limbo;
-	if (flags & IBPP::brMetadataOnly)		mask |= isc_spb_bkp_metadata_only;
-	if (flags & IBPP::brNoGarbageCollect)	mask |= isc_spb_bkp_no_garbage_collect;
-	if (flags & IBPP::brNonTransportable)	mask |= isc_spb_bkp_non_transportable;
-	if (flags & IBPP::brConvertExtTables)	mask |= isc_spb_bkp_convert;
+    if (flags & IBPP::brNoDBTriggers)       mask |= isc_spb_bkp_no_triggers;
+    if (flags & IBPP::brTransportable)	    mask |= isc_spb_bkp_non_transportable;
+    if (flags & IBPP::brOldDescriptions)	mask |= isc_spb_bkp_old_descriptions;
+    if (flags & IBPP::brZip)	            mask |= isc_spb_bkp_zip;
+
+    if (flags & IBPP::brMetadataOnly)		mask |= isc_spb_bkp_metadata_only;
+
 	if (mask != 0) spb.InsertQuad(isc_spb_options, mask);
 
 	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
