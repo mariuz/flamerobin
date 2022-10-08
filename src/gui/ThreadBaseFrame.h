@@ -57,8 +57,7 @@ public:
 protected:
     enum {
         ID_text_ctrl_log = 104,
-        ID_checkbox_showlog,
-        ID_button_start,
+        ID_button_start
     };
 
     wxArrayString msgsM;
@@ -82,6 +81,7 @@ protected:
     void addThreadMsg(const wxString msg, bool& notificationNeeded);
     void updateMessages(size_t firstmsg, size_t lastmsg);
 
+
     ThreadBaseFrame(wxWindow* parent, DatabasePtr db);
 private:
     DatabaseWeakPtr databaseM;
@@ -97,11 +97,15 @@ private:
 
 protected:
     wxPanel* panel_controls;
-    wxCheckBox* checkbox_showlog;
+
+
     wxButton* button_start;
 
     LogTextControl* text_ctrl_log;
-    
+
+    wxBoxSizer* sizerButtons;
+
+
     // event handling
     void OnThreadOutput(wxCommandEvent& event);
     void OnSettingsChange(wxCommandEvent& event);

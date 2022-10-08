@@ -32,6 +32,7 @@
 
 #include <wx/datetime.h>
 #include <wx/filename.h>
+#include <wx/spinctrl.h>
 
 #include <algorithm>
 
@@ -100,7 +101,7 @@ void* BackupThread::Entry()
         now = wxDateTime::Now();
         msg.Printf(_("Database backup started %s"), now.FormatTime().c_str());
         logImportant(msg);
-        svc->StartBackup(wx2std(dbfileM), wx2std(bkfileM), brfM);
+        //svc->StartBackup(wx2std(dbfileM), wx2std(bkfileM), brfM);
         while (true)
         {
             if (TestDestroy())
@@ -199,52 +200,54 @@ void BackupFrame::createControls()
         _("Ignore limbo transactions"));
     checkbox_transport = new wxCheckBox(panel_controls, wxID_ANY,
         _("Use non-transportable format"));
-    checkbox_metadata = new wxCheckBox(panel_controls, wxID_ANY,
-        _("Only backup metadata"));
     checkbox_garbage = new wxCheckBox(panel_controls, wxID_ANY,
         _("Don't perform garbage collection"));
     checkbox_extern = new wxCheckBox(panel_controls, wxID_ANY,
         _("Convert external tables"));
+    checkbox_expand = new wxCheckBox(panel_controls, wxID_ANY,
+        _("No data compression"));
+    checkbox_olddescription = new wxCheckBox(panel_controls, wxID_ANY,
+        _("Save old style metadata descriptions"));
+    checkbox_noDBtrigger = new wxCheckBox(panel_controls, wxID_ANY,
+        _("Do not run database triggers (FB2.5+)"));
+    checkbox_zip = new wxCheckBox(panel_controls, wxID_ANY,
+        _("Zip compressed format (FB4.0+)"));
+
+
 
 }
 
 void BackupFrame::layoutControls()
 {
     
+    BackupRestoreBaseFrame::layoutControls();
 
-    int wh = text_ctrl_filename->GetMinHeight();
-    button_browse->SetSize(wh, wh);
-
-    wxBoxSizer* sizerFilename = new wxBoxSizer(wxHORIZONTAL);
-    sizerFilename->Add(label_filename, 0, wxALIGN_CENTER_VERTICAL);
-    sizerFilename->Add(styleguide().getControlLabelMargin(), 0);
-    sizerFilename->Add(text_ctrl_filename, 1, wxALIGN_CENTER_VERTICAL);
-    sizerFilename->Add(styleguide().getBrowseButtonMargin(), 0);
-    sizerFilename->Add(button_browse, 0, wxALIGN_CENTER_VERTICAL);
-
-    wxGridSizer* sizerChecks = new wxGridSizer(3, 2,
+    wxGridSizer* sizerChecks = new wxGridSizer(3, 3,
         styleguide().getCheckboxSpacing(),
         styleguide().getUnrelatedControlMargin(wxHORIZONTAL));
     sizerChecks->Add(checkbox_checksum, 0, wxEXPAND);
-    sizerChecks->Add(checkbox_metadata, 0, wxEXPAND);
     sizerChecks->Add(checkbox_limbo, 0, wxEXPAND);
     sizerChecks->Add(checkbox_garbage, 0, wxEXPAND);
     sizerChecks->Add(checkbox_transport, 0, wxEXPAND);
     sizerChecks->Add(checkbox_extern, 0, wxEXPAND);
+    sizerChecks->Add(checkbox_expand, 0, wxEXPAND);
+    sizerChecks->Add(checkbox_olddescription, 0, wxEXPAND);
+    sizerChecks->Add(checkbox_noDBtrigger, 0, wxEXPAND);
+    sizerChecks->Add(checkbox_zip, 0, wxEXPAND);
 
-    wxBoxSizer* sizerButtons = new wxBoxSizer(wxHORIZONTAL);
-    sizerButtons->Add(checkbox_showlog, 0, wxALIGN_CENTER_VERTICAL);
-    sizerButtons->Add(0, 0, 1, wxEXPAND);
-    sizerButtons->Add(button_start);
+
 
     wxBoxSizer* sizerPanelV = new wxBoxSizer(wxVERTICAL);
     sizerPanelV->Add(0, styleguide().getFrameMargin(wxTOP));
     sizerPanelV->Add(sizerFilename, 0, wxEXPAND);
     sizerPanelV->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
     sizerPanelV->Add(sizerChecks);
+    sizerPanelV->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+    sizerPanelV->Add(sizerGeneralOptions, 0, wxEXPAND);
     sizerPanelV->Add(0, styleguide().getUnrelatedControlMargin(wxVERTICAL));
     sizerPanelV->Add(sizerButtons, 0, wxEXPAND);
     sizerPanelV->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+
     wxBoxSizer* sizerPanelH = new wxBoxSizer(wxHORIZONTAL);
     sizerPanelH->Add(styleguide().getFrameMargin(wxLEFT), 0);
     sizerPanelH->Add(sizerPanelV, 1, wxEXPAND);

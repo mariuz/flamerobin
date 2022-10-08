@@ -103,7 +103,7 @@ void* RestoreThread::Entry()
         now = wxDateTime::Now();
         msg.Printf(_("Database restore started %s"), now.FormatTime().c_str());
         logImportant(msg);
-        svc->StartRestore(wx2std(bkfileM), wx2std(dbfileM), pagesizeM, brfM);
+        //svc->StartRestore(wx2std(bkfileM), wx2std(dbfileM), pagesizeM, brfM);
         while (true)
         {
             if (TestDestroy())
@@ -209,6 +209,22 @@ void RestoreFrame::createControls()
     checkbox_space = new wxCheckBox(panel_controls, wxID_ANY,
         _("Use all space"));
 
+    checkbox_fix_fss_data = new wxCheckBox(panel_controls, wxID_ANY,
+        _("Fix malformed UNICODE_FSS data"));
+    checkbox_fix_fss_metadata = new wxCheckBox(panel_controls, wxID_ANY,
+        _("Fix malformed UNICODE_FSS metadata"));
+    checkbox_readonlyDB = new wxCheckBox(panel_controls, wxID_ANY,
+        _("Read only access"));
+
+    wxArrayString choices;
+    choices.Add(_("None"));
+    choices.Add(_("Read only"));
+    choices.Add(_("Read write"));
+    radioBox_replicamode = new wxRadioBox(panel_controls, wxID_ANY, _("Replica mode (FB4.0+)"),
+        wxDefaultPosition, wxDefaultSize, choices, 3);
+
+
+
     label_pagesize = new wxStaticText(panel_controls, wxID_ANY,
         _("Page size:"));
     const wxString pagesize_choices[] = {
@@ -222,23 +238,15 @@ void RestoreFrame::createControls()
 
 void RestoreFrame::layoutControls()
 {
-    int wh = text_ctrl_filename->GetMinHeight();
-    button_browse->SetSize(wh, wh);
+    BackupRestoreBaseFrame::layoutControls();
 
-    std::list<wxWindow*> controls;
+    /*std::list<wxWindow*> controls;
     controls.push_back(label_filename);
     controls.push_back(label_pagesize);
     adjustControlsMinWidth(controls);
-    controls.clear();
+    controls.clear();*/
 
-    wxBoxSizer* sizerFilename = new wxBoxSizer(wxHORIZONTAL);
-    sizerFilename->Add(label_filename, 0, wxALIGN_CENTER_VERTICAL);
-    sizerFilename->Add(styleguide().getControlLabelMargin(), 0);
-    sizerFilename->Add(text_ctrl_filename, 1, wxALIGN_CENTER_VERTICAL);
-    sizerFilename->Add(styleguide().getBrowseButtonMargin(), 0);
-    sizerFilename->Add(button_browse, 0, wxALIGN_CENTER_VERTICAL);
-
-    wxGridSizer* sizerChecks = new wxGridSizer(3, 2,
+    wxGridSizer* sizerChecks = new wxGridSizer(3, 3,
         styleguide().getCheckboxSpacing(),
         styleguide().getUnrelatedControlMargin(wxHORIZONTAL));
     sizerChecks->Add(checkbox_replace, 0, wxEXPAND);
@@ -247,16 +255,17 @@ void RestoreFrame::layoutControls()
     sizerChecks->Add(checkbox_validity, 0, wxEXPAND);
     sizerChecks->Add(checkbox_commit, 0, wxEXPAND);
     sizerChecks->Add(checkbox_space, 0, wxEXPAND);
+    sizerChecks->Add(checkbox_fix_fss_data, 0, wxEXPAND);
+    sizerChecks->Add(checkbox_fix_fss_metadata, 0, wxEXPAND);
+    sizerChecks->Add(checkbox_readonlyDB, 0, wxEXPAND);
+
+
 
     wxBoxSizer* sizerCombo = new wxBoxSizer(wxHORIZONTAL);
     sizerCombo->Add(label_pagesize, 0, wxALIGN_CENTER_VERTICAL);
     sizerCombo->Add(styleguide().getControlLabelMargin(), 0);
     sizerCombo->Add(choice_pagesize, 1, wxEXPAND);
 
-    wxBoxSizer* sizerButtons = new wxBoxSizer(wxHORIZONTAL);
-    sizerButtons->Add(checkbox_showlog, 0, wxALIGN_CENTER_VERTICAL);
-    sizerButtons->Add(0, 0, 1, wxEXPAND);
-    sizerButtons->Add(button_start);
 
     wxBoxSizer* sizerPanelV = new wxBoxSizer(wxVERTICAL);
     sizerPanelV->Add(0, styleguide().getFrameMargin(wxTOP));
@@ -265,6 +274,12 @@ void RestoreFrame::layoutControls()
     sizerPanelV->Add(sizerChecks);
     sizerPanelV->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
     sizerPanelV->Add(sizerCombo);
+    sizerPanelV->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+
+    sizerPanelV->Add(radioBox_replicamode, 0, wxEXPAND);
+    sizerPanelV->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+
+    sizerPanelV->Add(sizerGeneralOptions, 0, wxEXPAND);
     sizerPanelV->Add(0, styleguide().getUnrelatedControlMargin(wxVERTICAL));
     sizerPanelV->Add(sizerButtons, 0, wxEXPAND);
     sizerPanelV->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));

@@ -36,6 +36,7 @@
 #include "config/Config.h"
 #include "core/ArtProvider.h"
 #include "gui/BackupRestoreBaseFrame.h"
+#include "gui/StyleGuide.h"
 #include "gui/controls/DndTextControls.h"
 #include "gui/controls/LogTextControl.h"
 #include "metadata/database.h"
@@ -117,10 +118,164 @@ void BackupRestoreBaseFrame::createControls()
     button_browse = new wxButton(panel_controls, ID_button_browse, _("..."),
         wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
 
+    checkbox_metadata = new wxCheckBox(panel_controls, wxID_ANY,
+        _("Only metadata"));
+
+    checkbox_showlog = new wxCheckBox(panel_controls, ID_checkbox_showlog,
+        _("Show complete log"));
+
+    spinctrl_showlogInterval = new wxSpinCtrl(panel_controls, ID_spinctrl_showlogInterval);
+    spinctrl_showlogInterval->SetRange(0, 32767);
+
+    textCtrl_crypt = new wxTextCtrl(panel_controls, wxID_ANY, wxEmptyString);
+    textCtrl_keyholder = new wxTextCtrl(panel_controls, wxID_ANY, wxEmptyString);
+    textCtrl_keyname = new wxTextCtrl(panel_controls, wxID_ANY, wxEmptyString);
+
+    textCtrl_skipdata = new wxTextCtrl(panel_controls, wxID_ANY, wxEmptyString);
+    textCtrl_includedata = new wxTextCtrl(panel_controls, wxID_ANY, wxEmptyString);
+
+
+    checkbox_statictime = new wxCheckBox(panel_controls, wxID_ANY, _("Time from start"));
+    checkbox_staticdelta = new wxCheckBox(panel_controls, wxID_ANY, _("Delta time"));
+    checkbox_staticpageread = new wxCheckBox(panel_controls, wxID_ANY, _("Page reads"));
+    checkbox_staticpagewrite = new wxCheckBox(panel_controls, wxID_ANY, _("Page writes"));
+
 }
 
 void BackupRestoreBaseFrame::layoutControls()
 {
+    ThreadBaseFrame::layoutControls();
+
+    int wh = text_ctrl_filename->GetMinHeight();
+    button_browse->SetSize(wh, wh);
+
+    //sizerFilename = new wxStaticBoxSizer( wxHORIZONTAL, panel_controls, _("General Options"));
+    sizerFilename = new wxBoxSizer(wxHORIZONTAL);
+    sizerFilename->Add(label_filename, 0, wxALIGN_CENTER_VERTICAL);
+    sizerFilename->Add(styleguide().getControlLabelMargin(), 0);
+    sizerFilename->Add(text_ctrl_filename, 1, wxALIGN_CENTER_VERTICAL);
+    sizerFilename->Add(styleguide().getBrowseButtonMargin(), 0);
+    sizerFilename->Add(button_browse, 0, wxALIGN_CENTER_VERTICAL);
+
+    sizerGeneralOptions = new wxStaticBoxSizer(wxVERTICAL, panel_controls, _("General Options"));
+    sizerGeneralOptions->Add(0, styleguide().getFrameMargin(wxTOP));
+
+
+    {
+        wxGridSizer* gsizer = new wxGridSizer(1, 3,
+            styleguide().getCheckboxSpacing(),
+            styleguide().getUnrelatedControlMargin(wxHORIZONTAL));
+
+        gsizer->Add(checkbox_metadata, 0, wxEXPAND);
+        //gsizer->Add(0, 0, wxEXPAND);
+        gsizer->Add(checkbox_showlog, 0, wxEXPAND);
+
+        {
+            wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+            sizer->Add(new wxStaticText(panel_controls, wxID_ANY,
+                _("Verbose interval (FB3.0+)")), 0, wxALIGN_CENTER_VERTICAL);
+            sizer->Add(styleguide().getControlLabelMargin(), 0);
+            sizer->Add(spinctrl_showlogInterval, 1, wxALIGN_CENTER_VERTICAL);
+
+            gsizer->Add(sizer);
+            //sizerGeneralOptions->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+        }
+
+        sizerGeneralOptions->Add(gsizer);
+        sizerGeneralOptions->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+    }
+
+    {
+        wxStaticBoxSizer* sizerStatic = new wxStaticBoxSizer(wxVERTICAL, panel_controls, _("Show statistics (FB2.5+)"));
+        sizerStatic->Add(0, styleguide().getFrameMargin(wxTOP));
+        {
+            wxGridSizer* gsizer = new wxGridSizer(1, 4,
+                styleguide().getCheckboxSpacing(),
+                styleguide().getUnrelatedControlMargin(wxHORIZONTAL));
+            gsizer->Add(checkbox_statictime, 0, wxEXPAND);
+            gsizer->Add(checkbox_staticdelta, 0, wxEXPAND);
+            gsizer->Add(checkbox_staticpageread, 0, wxEXPAND);
+            gsizer->Add(checkbox_staticpagewrite, 0, wxEXPAND);
+
+            sizerStatic->Add(gsizer, 0, wxEXPAND);
+        }
+        sizerGeneralOptions->Add(sizerStatic, 0, wxEXPAND);
+        sizerGeneralOptions->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+
+    }
+
+    {
+        wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+        sizer->Add(new wxStaticText(panel_controls, wxID_ANY,
+            _("Skip data for table(s) (FB3.0+)")), 0, wxALIGN_CENTER_VERTICAL);
+        sizer->Add(styleguide().getControlLabelMargin(), 0);
+        sizer->Add(textCtrl_skipdata, 1, wxALIGN_CENTER_VERTICAL);
+
+        sizerGeneralOptions->Add(sizer, 0, wxEXPAND);
+        sizerGeneralOptions->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+    }
+
+    {
+        wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+        sizer->Add(new wxStaticText(panel_controls, wxID_ANY,
+            _("Include data of table(s) (FB4.0+)")), 0, wxALIGN_CENTER_VERTICAL);
+        sizer->Add(styleguide().getControlLabelMargin(), 0);
+        sizer->Add(textCtrl_includedata, 1, wxALIGN_CENTER_VERTICAL);
+
+        sizerGeneralOptions->Add(sizer, 0, wxEXPAND);
+        sizerGeneralOptions->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+    }
+
+    {
+        wxStaticBoxSizer* sizerBox = new wxStaticBoxSizer(wxVERTICAL, panel_controls, _("Encryption (FB4.0+)"));
+        sizerBox->Add(0, styleguide().getFrameMargin(wxTOP));
+
+        {
+            wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+            sizer->Add(new wxStaticText(panel_controls, wxID_ANY,
+                _("Plugin name")), 0, wxALIGN_CENTER_VERTICAL);
+            sizer->Add(styleguide().getControlLabelMargin(), 0);
+            sizer->Add(textCtrl_crypt, 1, wxALIGN_CENTER_VERTICAL);
+
+            sizerBox->Add(sizer, 0, wxEXPAND);
+            sizerBox->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+        }
+
+        {
+            wxGridSizer* gsizer = new wxGridSizer(1, 2,
+                styleguide().getRelatedControlMargin(wxHORIZONTAL),
+                styleguide().getUnrelatedControlMargin(wxHORIZONTAL));
+
+            {
+                wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+                sizer->Add(new wxStaticText(panel_controls, wxID_ANY,
+                    _("Key plugin ")), 0, wxALIGN_CENTER_VERTICAL);
+                sizer->Add(styleguide().getControlLabelMargin(), 0);
+                sizer->Add(textCtrl_keyholder, 1, wxALIGN_CENTER_VERTICAL);
+
+                gsizer->Add(sizer, 0, wxEXPAND);
+            }
+
+            {
+                wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+                sizer->Add(new wxStaticText(panel_controls, wxID_ANY,
+                    _("Key for encryption")), 0, wxALIGN_CENTER_VERTICAL);
+                sizer->Add(styleguide().getControlLabelMargin(), 0);
+                sizer->Add(textCtrl_keyname, 1, wxALIGN_CENTER_VERTICAL);
+
+                gsizer->Add(sizer, 0, wxEXPAND);
+            }
+            sizerBox->Add(gsizer, 0, wxEXPAND);
+            sizerBox->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+        }
+
+
+        sizerGeneralOptions->Add(sizerBox, 0, wxEXPAND);
+        sizerGeneralOptions->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+
+    }
+
+
 }
 
 void BackupRestoreBaseFrame::subjectRemoved(Subject* subject)
@@ -147,7 +302,7 @@ void BackupRestoreBaseFrame::updateControls()
 }
 
 //! event handlers
-BEGIN_EVENT_TABLE(BackupRestoreBaseFrame, BaseFrame)
+BEGIN_EVENT_TABLE(BackupRestoreBaseFrame, ThreadBaseFrame)
     EVT_CHECKBOX(BackupRestoreBaseFrame::ID_checkbox_showlog, BackupRestoreBaseFrame::OnVerboseLogChange)
     EVT_MENU(BackupRestoreBaseFrame::ID_thread_finished, BackupRestoreBaseFrame::OnThreadFinished)
     EVT_MENU(BackupRestoreBaseFrame::ID_thread_output, BackupRestoreBaseFrame::OnThreadOutput)

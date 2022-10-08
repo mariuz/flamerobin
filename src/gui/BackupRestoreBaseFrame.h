@@ -26,7 +26,9 @@
 #define BACKUPRESTOREBASEFRAME_H
 
 #include <wx/wx.h>
+#include <wx/spinctrl.h>
 #include <wx/thread.h>
+#include <wx/textctrl.h>
 
 #include <memory>
 
@@ -67,16 +69,42 @@ private:
 protected:
     enum {
         ID_text_ctrl_filename = 101,
+        ID_checkbox_showlog,
+        ID_spinctrl_showlogInterval,
+
         ID_button_browse,
         ID_button_showlog,
+
         ID_text_ctrl_log,
-        ID_checkbox_showlog,
-        ID_button_start,
+        ID_button_start
     };
 
     wxStaticText* label_filename;
     FileTextControl* text_ctrl_filename;
     wxButton* button_browse;
+
+    wxCheckBox* checkbox_metadata;
+   
+    wxCheckBox* checkbox_showlog;
+    wxSpinCtrl* spinctrl_showlogInterval;
+
+    wxTextCtrl* textCtrl_crypt;
+    wxTextCtrl* textCtrl_keyholder;
+    wxTextCtrl* textCtrl_keyname;
+
+    wxTextCtrl* textCtrl_skipdata;
+    wxTextCtrl* textCtrl_includedata;
+
+    wxBoxSizer* sizerFilename;
+    wxBoxSizer* sizerGeneralOptions;
+
+    wxCheckBox* checkbox_statictime;
+    wxCheckBox* checkbox_staticdelta;
+    wxCheckBox* checkbox_staticpageread;
+    wxCheckBox* checkbox_staticpagewrite;
+
+
+
 private:
     // event handling
     void OnVerboseLogChange(wxCommandEvent& event);

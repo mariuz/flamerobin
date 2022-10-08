@@ -211,7 +211,7 @@ void ShutdownFrame::createControls()
 
 void ShutdownFrame::layoutControls()
 {
-    
+    ShutdownStartupBaseFrame::layoutControls();
 
     wxBoxSizer* sizerTimeout = new wxBoxSizer(wxHORIZONTAL);
     sizerTimeout->Add(label_timeout, 0, wxALIGN_CENTER_VERTICAL);
@@ -225,10 +225,10 @@ void ShutdownFrame::layoutControls()
     sizerChecks->Add(checkbox_attach, 0, wxEXPAND);
     sizerChecks->Add(checkbox_force, 0, wxEXPAND);
 
-    wxBoxSizer* sizerButtons = new wxBoxSizer(wxHORIZONTAL);
+    /*wxBoxSizer* sizerButtons = new wxBoxSizer(wxHORIZONTAL);
     sizerButtons->Add(checkbox_showlog, 0, wxALIGN_CENTER_VERTICAL);
     sizerButtons->Add(0, 0, 1, wxEXPAND);
-    sizerButtons->Add(button_start);
+    sizerButtons->Add(button_start);*/
 
     wxBoxSizer* sizerPanelV = new wxBoxSizer(wxVERTICAL);
     sizerPanelV->Add(0, styleguide().getFrameMargin(wxTOP));
@@ -326,7 +326,7 @@ END_EVENT_TABLE()
 
 void ShutdownFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    verboseMsgsM = checkbox_showlog->IsChecked();
+    verboseMsgsM = true;
     clearLog();
 
     DatabasePtr database = getDatabase();

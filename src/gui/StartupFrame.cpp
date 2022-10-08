@@ -195,11 +195,12 @@ void StartupFrame::createControls()
 void StartupFrame::layoutControls()
 {
     
+    ShutdownStartupBaseFrame::layoutControls();
 
-    wxBoxSizer* sizerButtons = new wxBoxSizer(wxHORIZONTAL);
+    /*wxBoxSizer* sizerButtons = new wxBoxSizer(wxHORIZONTAL);
     sizerButtons->Add(checkbox_showlog, 0, wxALIGN_CENTER_VERTICAL);
     sizerButtons->Add(0, 0, 1, wxEXPAND);
-    sizerButtons->Add(button_start);
+    sizerButtons->Add(button_start);*/
 
     wxBoxSizer* sizerPanelV = new wxBoxSizer(wxVERTICAL);
     sizerPanelV->Add(0, styleguide().getFrameMargin(wxTOP));
@@ -272,7 +273,7 @@ END_EVENT_TABLE()
 
 void StartupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    verboseMsgsM = checkbox_showlog->IsChecked();
+    verboseMsgsM = true;
     clearLog();
 
     DatabasePtr database = getDatabase();
