@@ -53,7 +53,9 @@ class BackupThread: public wxThread {
 public:
     BackupThread(BackupFrame* frame, wxString server, wxString username,
         wxString password, wxString dbfilename, wxString bkfilename,
-        IBPP::BRF flags);
+        IBPP::BRF flags, int interval, wxString skipData, wxString includeData,
+        wxString cryptPluginName, wxString keyPlugin, wxString keyEncrypt
+    );
 
     virtual void* Entry();
     virtual void OnExit();
@@ -65,6 +67,15 @@ private:
     wxString dbfileM;
     wxString bkfileM;
     IBPP::BRF brfM;
+    wxString outputFileM;
+    int factorM;
+    int intervalM;
+    wxString skipDataM;
+    wxString includeDataM;
+    wxString cryptPluginNameM;
+    wxString keyPluginM;
+    wxString keyEncryptM;
+
     void logError(wxString& msg);
     void logImportant(wxString& msg);
     void logProgress(wxString& msg);
@@ -72,7 +83,9 @@ private:
 
 BackupThread::BackupThread(BackupFrame* frame, wxString server,
         wxString username, wxString password, wxString dbfilename,
-        wxString bkfilename, IBPP::BRF flags)
+        wxString bkfilename, IBPP::BRF flags, int interval, 
+        wxString skipData, wxString includeData, wxString cryptPluginName, 
+        wxString keyPlugin, wxString keyEncrypt)
     : wxThread()
 {
     frameM = frame;
@@ -83,6 +96,14 @@ BackupThread::BackupThread(BackupFrame* frame, wxString server,
     bkfileM = bkfilename;
     // always use verbose flag
     brfM = (IBPP::BRF)((int)flags | (int)IBPP::brVerbose);
+
+    intervalM = interval;
+    skipDataM = skipData;
+    includeDataM = includeData;
+    cryptPluginNameM = cryptPluginName;
+    keyPluginM = keyPlugin;
+    keyEncryptM = keyEncrypt;
+
 }
 
 void* BackupThread::Entry()
@@ -101,7 +122,10 @@ void* BackupThread::Entry()
         now = wxDateTime::Now();
         msg.Printf(_("Database backup started %s"), now.FormatTime().c_str());
         logImportant(msg);
-        //svc->StartBackup(wx2std(dbfileM), wx2std(bkfileM), brfM);
+        svc->StartBackup(wx2std(dbfileM), wx2std(bkfileM), wx2std(outputFileM),
+            factorM, brfM, wx2std(cryptPluginNameM), wx2std(keyPluginM),
+            wx2std(keyEncryptM), wx2std(skipDataM), wx2std(includeDataM), intervalM
+        );
         while (true)
         {
             if (TestDestroy())
@@ -266,17 +290,21 @@ void BackupFrame::layoutControls()
 
 void BackupFrame::updateControls()
 {
+    BackupRestoreBaseFrame::updateControls();
+
     bool running = getThreadRunning();
 
-    button_browse->Enable(!running);
-    text_ctrl_filename->Enable(!running);
 
     checkbox_checksum->Enable(!running);
     checkbox_limbo->Enable(!running);
-    checkbox_metadata->Enable(!running);
     checkbox_garbage->Enable(!running);
     checkbox_transport->Enable(!running);
     checkbox_extern->Enable(!running);
+
+    checkbox_expand->Enable(!running);
+    checkbox_olddescription->Enable(!running);
+    checkbox_noDBtrigger->Enable(!running);
+    checkbox_zip->Enable(!running);
 
     button_start->Enable(!running && !text_ctrl_filename->GetValue().empty());
 }
@@ -300,6 +328,16 @@ void BackupFrame::doReadConfigSettings(const wxString& prefix)
             flags.end() != std::find(flags.begin(), flags.end(), "no_transportable"));
         checkbox_extern->SetValue(
             flags.end() != std::find(flags.begin(), flags.end(), "external_tables"));
+
+        checkbox_expand->SetValue(
+            flags.end() != std::find(flags.begin(), flags.end(), "no_data_compression"));
+        checkbox_olddescription->SetValue(
+            flags.end() != std::find(flags.begin(), flags.end(), "old_description"));
+        checkbox_noDBtrigger->SetValue(
+            flags.end() != std::find(flags.begin(), flags.end(), "no_db_triggers"));
+        checkbox_zip->SetValue(
+            flags.end() != std::find(flags.begin(), flags.end(), "compressed_format"));
+
     }
     updateControls();
 }
@@ -307,6 +345,7 @@ void BackupFrame::doReadConfigSettings(const wxString& prefix)
 void BackupFrame::doWriteConfigSettings(const wxString& prefix) const
 {
     BackupRestoreBaseFrame::doWriteConfigSettings(prefix);
+
     wxArrayString flags;
     if (checkbox_checksum->IsChecked())
         flags.push_back("ignore_checksums");
@@ -320,6 +359,16 @@ void BackupFrame::doWriteConfigSettings(const wxString& prefix) const
         flags.push_back("no_transportable");
     if (checkbox_extern->IsChecked())
         flags.push_back("external_tables");
+
+    if (checkbox_expand->IsChecked())
+        flags.push_back("no_data_compression");
+    if (checkbox_olddescription->IsChecked())
+        flags.push_back("old_description");
+    if (checkbox_noDBtrigger->IsChecked())
+        flags.push_back("no_db_triggers");
+    if (checkbox_zip->IsChecked())
+        flags.push_back("compressed_format");
+
     config().setValue(prefix + Config::pathSeparator + "options", flags);
 }
 
@@ -393,10 +442,25 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     if (checkbox_extern->IsChecked())
         flags |= (int)IBPP::brConvertExtTables;
 
+    if (checkbox_expand->IsChecked())
+        flags |= (int)IBPP::brConvertExtTables;
+    if (checkbox_olddescription->IsChecked())
+        flags |= (int)IBPP::brOldDescriptions;
+    if (checkbox_noDBtrigger->IsChecked())
+        flags |= (int)IBPP::brNoDBTriggers;
+    if (checkbox_zip->IsChecked())
+        flags |= (int)IBPP::brZip;
+
+
     startThread(std::make_unique<BackupThread>(this,
         server->getConnectionString(), username, password,
         database->getPath(), text_ctrl_filename->GetValue(),
-        (IBPP::BRF)flags));
+        (IBPP::BRF)flags, spinctrl_showlogInterval->GetValue(), 
+        textCtrl_skipdata->GetValue(), textCtrl_includedata->GetValue(), 
+        textCtrl_crypt->GetValue(), textCtrl_keyholder->GetValue(), textCtrl_keyname->GetValue()
+        )
+    );
+    
     updateControls();
 }
 

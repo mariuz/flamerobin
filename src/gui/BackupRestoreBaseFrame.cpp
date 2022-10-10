@@ -119,7 +119,7 @@ void BackupRestoreBaseFrame::createControls()
         wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
 
     checkbox_metadata = new wxCheckBox(panel_controls, wxID_ANY,
-        _("Only metadata"));
+        _("Only metadata (FB2.5+)"));
 
     checkbox_showlog = new wxCheckBox(panel_controls, ID_checkbox_showlog,
         _("Show complete log"));
@@ -299,6 +299,29 @@ void BackupRestoreBaseFrame::updateControls()
     // empty implementation to allow this to be called from update()
     // which could happen in the constructor, when descendant isn't
     // completely initialized yet
+    ThreadBaseFrame::updateControls();
+
+    bool running = getThreadRunning();
+
+    text_ctrl_filename->Enable(!running);
+    button_browse->Enable(!running);
+
+    checkbox_metadata->Enable(!running);
+   
+    checkbox_showlog->Enable(!running);
+    spinctrl_showlogInterval->Enable(!running);
+
+    textCtrl_crypt->Enable(!running);
+    textCtrl_keyholder->Enable(!running);
+    textCtrl_keyname->Enable(!running);
+
+    textCtrl_skipdata->Enable(!running);
+    textCtrl_includedata->Enable(!running);
+
+    checkbox_statictime->Enable(!running);
+    checkbox_staticdelta->Enable(!running);
+    checkbox_staticpageread->Enable(!running);
+    checkbox_staticpagewrite->Enable(!running);
 }
 
 //! event handlers

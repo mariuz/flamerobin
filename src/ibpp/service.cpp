@@ -620,17 +620,22 @@ void ServiceImpl::StartBackup(
 	spb.InsertString(isc_spb_dbname, 2, dbfile.c_str());
 	spb.InsertString(isc_spb_bkp_file, 2, bkfile.c_str());
 
-	if ((flags & IBPP::brVerbose) && (verboseInteval == 0)) spb.Insert(isc_spb_verbose);
-    if(verboseInteval > 0) spb.InsertQuad(isc_spb_verbint, verboseInteval);
+    if (versionIsHigherOrEqualTo(3, 0)) {
+        if ((flags & IBPP::brVerbose) && (verboseInteval == 0)) spb.Insert(isc_spb_verbose);
+        if (verboseInteval > 0) spb.InsertQuad(isc_spb_verbint, verboseInteval);
+    }else
+        if (flags & IBPP::brVerbose) spb.Insert(isc_spb_verbose);
 
     if (factor > 0) spb.InsertQuad(isc_spb_bkp_factor, factor);
 
-    if (!skipData.empty()) spb.InsertString(isc_spb_bkp_skip_data, 2, skipData.c_str());
-    if (!includeData.empty()) spb.InsertString(isc_spb_bkp_include_data, 2, includeData.c_str());
+    if (!skipData.empty() && versionIsHigherOrEqualTo(3, 0)) spb.InsertString(isc_spb_bkp_skip_data, 2, skipData.c_str());
+    if (!includeData.empty() && versionIsHigherOrEqualTo(4, 0)) spb.InsertString(isc_spb_bkp_include_data, 2, includeData.c_str());
 
-    if(!cryptName.empty()) spb.InsertString(isc_spb_bkp_crypt, 2, cryptName.c_str());
-    if (!keyHolder.empty()) spb.InsertString(isc_spb_bkp_keyholder, 2, keyHolder.c_str());
-    if (!keyName.empty()) spb.InsertString(isc_spb_bkp_keyname, 2, keyName.c_str());
+    if (versionIsHigherOrEqualTo(4, 0)) {
+        if (!cryptName.empty()) spb.InsertString(isc_spb_bkp_crypt, 2, cryptName.c_str());
+        if (!keyHolder.empty()) spb.InsertString(isc_spb_bkp_keyholder, 2, keyHolder.c_str());
+        if (!keyName.empty()) spb.InsertString(isc_spb_bkp_keyname, 2, keyName.c_str());
+    }
 
 	unsigned int mask = 0;
     if (flags & IBPP::brConvertExtTables)	mask |= isc_spb_bkp_convert;
@@ -638,14 +643,16 @@ void ServiceImpl::StartBackup(
     if (flags & IBPP::brNoGarbageCollect)	mask |= isc_spb_bkp_no_garbage_collect;
     if (flags & IBPP::brIgnoreChecksums)	mask |= isc_spb_bkp_ignore_checksums;
 	if (flags & IBPP::brIgnoreLimbo)		mask |= isc_spb_bkp_ignore_limbo;
-    if (flags & IBPP::brNoDBTriggers)       mask |= isc_spb_bkp_no_triggers;
     if (flags & IBPP::brNonTransportable)	mask |= isc_spb_bkp_non_transportable;
     if (flags & IBPP::brOldDescriptions)	mask |= isc_spb_bkp_old_descriptions;
-    if (flags & IBPP::brZip)	            mask |= isc_spb_bkp_zip;
 
-    if (flags & IBPP::brMetadataOnly)		mask |= isc_spb_bkp_metadata_only;
+    if ((flags & IBPP::brNoDBTriggers) && versionIsHigherOrEqualTo(2, 5))       mask |= isc_spb_bkp_no_triggers;
+    if ((flags & IBPP::brZip) && versionIsHigherOrEqualTo(4, 0))	            mask |= isc_spb_bkp_zip;
+
+    if ((flags & IBPP::brMetadataOnly) && versionIsHigherOrEqualTo(2, 5))		mask |= isc_spb_bkp_metadata_only;
 
 	if (mask != 0) spb.InsertQuad(isc_spb_options, mask);
+
 
 	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())

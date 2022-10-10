@@ -73,10 +73,10 @@ protected:
         ID_spinctrl_showlogInterval,
 
         ID_button_browse,
-        ID_button_showlog,
+        ID_button_showlog
 
-        ID_text_ctrl_log,
-        ID_button_start
+        //ID_text_ctrl_log,
+        //ID_button_start
     };
 
     wxStaticText* label_filename;

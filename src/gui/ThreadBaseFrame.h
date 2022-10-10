@@ -56,7 +56,7 @@ public:
     virtual bool Destroy();
 protected:
     enum {
-        ID_text_ctrl_log = 104,
+        ID_text_ctrl_log = 201,
         ID_button_start
     };
 
