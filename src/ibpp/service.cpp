@@ -34,6 +34,8 @@ using namespace ibpp_internals;
 #define Sleep(x) usleep(x)
 #endif
 
+#include <regex>
+
 //	(((((((( OBJECT INTERFACE IMPLEMENTATION ))))))))
 
 void ServiceImpl::Connect()
@@ -71,6 +73,38 @@ void ServiceImpl::Connect()
 		mHandle	= 0;		// Should be, but better be sure...
 		throw SQLExceptionImpl(status, "Service::Connect", _("isc_service_attach failed"));
 	}
+
+
+    std::string version;
+    GetVersion(version);
+
+    std::smatch m;
+
+    if (std::regex_search(version, m, std::regex("\\d+.\\d+.\\d+.\\d+"))) {
+        version = m[0];
+        
+        const std::regex re{ "((?:[^\\\\.]|\\\\.)+)(?:.|$)" };
+
+        const std::vector<std::string> m_vecFields{ std::sregex_token_iterator(cbegin(version), 
+            cend(version), re, 1), std::sregex_token_iterator() 
+        };
+        if (m_vecFields.size() == 4) {
+
+            std::string str = m_vecFields[0];
+            major_ver = atoi(str.c_str());
+
+            str = m_vecFields[1];
+            minor_ver = atoi(str.c_str());
+
+            str = m_vecFields[2];
+            rev_no = atoi(str.c_str());
+
+            str = m_vecFields[3];
+            build_no = atoi(str.c_str());
+        }
+    }
+
+
 }
 
 void ServiceImpl::Disconnect()
@@ -108,6 +142,12 @@ void ServiceImpl::GetVersion(std::string& version)
 		throw SQLExceptionImpl(status, "Service::GetVersion", _("isc_service_query failed"));
 
 	result.GetString(isc_info_svc_server_version, version);
+}
+
+bool ibpp_internals::ServiceImpl::versionIsHigherOrEqualTo(int versionMajor, int versionMinor)
+{
+    return major_ver > versionMajor
+        || (major_ver == versionMajor && minor_ver >= versionMinor);
 }
 
 void ServiceImpl::AddUser(const IBPP::User& user)
@@ -564,8 +604,7 @@ void ServiceImpl::StartBackup(
     const int factor,
     IBPP::BRF flags,
     const std::string& cryptName, const std::string& keyHolder, const std::string& keyName,
-    const std::string& skypData, const std::string& includeData,
-    const int statics, const int verboseInteval)
+    const std::string& skipData, const std::string& includeData, const int verboseInteval)
 {
 	if (mHandle	== 0)
 		throw LogicExceptionImpl("Service::Backup", _("Service is not connected."));
@@ -581,12 +620,12 @@ void ServiceImpl::StartBackup(
 	spb.InsertString(isc_spb_dbname, 2, dbfile.c_str());
 	spb.InsertString(isc_spb_bkp_file, 2, bkfile.c_str());
 
-	if (flags & IBPP::brVerbose) spb.Insert(isc_spb_verbose);
+	if ((flags & IBPP::brVerbose) && (verboseInteval == 0)) spb.Insert(isc_spb_verbose);
     if(verboseInteval > 0) spb.InsertQuad(isc_spb_verbint, verboseInteval);
 
     if (factor > 0) spb.InsertQuad(isc_spb_bkp_factor, factor);
 
-    if (!skypData.empty()) spb.InsertString(isc_spb_bkp_skip_data, 2, skypData.c_str());
+    if (!skipData.empty()) spb.InsertString(isc_spb_bkp_skip_data, 2, skipData.c_str());
     if (!includeData.empty()) spb.InsertString(isc_spb_bkp_include_data, 2, includeData.c_str());
 
     if(!cryptName.empty()) spb.InsertString(isc_spb_bkp_crypt, 2, cryptName.c_str());
@@ -618,8 +657,7 @@ void ServiceImpl::StartRestore(
     int pagesize, int buffers,
     IBPP::BRF flags,
     const std::string& cryptName, const std::string& keyHolder, const std::string& keyName,
-    const std::string& skypData, const std::string& includeData,
-    const int statics, const int verboseInteval
+    const std::string& skipData, const std::string& includeData, const int verboseInteval
 )
 {
 	if (mHandle	== 0)
@@ -643,7 +681,7 @@ void ServiceImpl::StartRestore(
     if (buffers > 0) spb.InsertQuad(isc_spb_res_buffers, buffers);
 
 
-    if (!skypData.empty()) spb.InsertString(isc_spb_bkp_skip_data, 2, skypData.c_str());
+    if (!skipData.empty()) spb.InsertString(isc_spb_bkp_skip_data, 2, skipData.c_str());
     if (!includeData.empty()) spb.InsertString(isc_spb_bkp_include_data, 2, includeData.c_str());
 
     if (!cryptName.empty()) spb.InsertString(isc_spb_bkp_crypt, 2, cryptName.c_str());

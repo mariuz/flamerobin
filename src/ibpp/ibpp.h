@@ -611,6 +611,7 @@ public:
         virtual void Disconnect() = 0;
 
         virtual void GetVersion(std::string& version) = 0;
+        virtual bool versionIsHigherOrEqualTo(int versionMajor, int versionMinor) = 0;
 
         virtual void AddUser(const User&) = 0;
         virtual void GetUser(User&) = 0;
@@ -634,8 +635,7 @@ public:
             const int factor = 0,
             BRF flags = BRF(0),
             const std::string& cryptName = "", const std::string& keyHolder="", const std::string& keyName="",
-            const std::string& skypData = "", const std::string& includeData = "",
-            const int statics = 0, const int verboseInteval = 0
+            const std::string& skipData = "", const std::string& includeData = "", const int verboseInteval = 0
         ) = 0;
 
         virtual void StartRestore(
@@ -643,8 +643,7 @@ public:
             int pagesize = 0, int buffers = 0,  
             BRF flags = BRF(0),
             const std::string & cryptName = "", const std::string & keyHolder = "", const std::string & keyName = "",
-            const std::string & skypData = "", const std::string & includeData = "",
-            const int statics = 0, const int verboseInteval = 0
+            const std::string & skipData = "", const std::string & includeData = "", const int verboseInteval = 0
         ) = 0;
 
         virtual const char* WaitMsg() = 0;  // With reporting (does not block)
