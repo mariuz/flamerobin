@@ -78,25 +78,89 @@ void BackupRestoreBaseFrame::doReadConfigSettings(const wxString& prefix)
 {
     BaseFrame::doReadConfigSettings(prefix);
 
-    bool verbose = true;
-    config().getValue(prefix + Config::pathSeparator + "verboselog",
-        verbose);
-    checkbox_showlog->SetValue(verbose);
 
-    wxString bkfile;
-    config().getValue(prefix + Config::pathSeparator + "backupfilename",
-        bkfile);
-    if (!bkfile.empty())
-        text_ctrl_filename->SetValue(bkfile);
+    wxString strValue;
+    bool boolValue = true;
+    int intValue;
+
+    config().getValue(prefix + Config::pathSeparator + "backupfilename", strValue);
+    if (!strValue.empty())
+        text_ctrl_filename->SetValue(strValue);
+
+    
+    config().getValue(prefix + Config::pathSeparator + "metadata", boolValue);
+    checkbox_metadata->SetValue(boolValue);
+    
+    config().getValue(prefix + Config::pathSeparator + "verboselog", boolValue);
+    checkbox_showlog->SetValue(boolValue);
+    config().getValue(prefix + Config::pathSeparator + "verboselog_interval", intValue);
+    spinctrl_showlogInterval->SetValue(intValue);
+
+    config().getValue(prefix + Config::pathSeparator + "cryptplugin_name", strValue);
+    if (!strValue.empty())
+        textCtrl_crypt->SetValue(strValue);
+    config().getValue(prefix + Config::pathSeparator + "keyholder_name", strValue);
+    if (!strValue.empty())
+        textCtrl_keyholder->SetValue(strValue);
+    config().getValue(prefix + Config::pathSeparator + "key_name", strValue);
+    if (!strValue.empty())
+        textCtrl_keyname->SetValue(strValue);
+
+
+    config().getValue(prefix + Config::pathSeparator + "skipdata", strValue);
+    if (!strValue.empty())
+        textCtrl_skipdata->SetValue(strValue);
+    config().getValue(prefix + Config::pathSeparator + "includedata", strValue);
+    if (!strValue.empty())
+        textCtrl_includedata->SetValue(strValue);
+
+
+    config().getValue(prefix + Config::pathSeparator + "static_time", boolValue);
+    checkbox_statictime->SetValue(boolValue);
+    config().getValue(prefix + Config::pathSeparator + "static_delta", boolValue);
+    checkbox_staticdelta->SetValue(boolValue);
+    config().getValue(prefix + Config::pathSeparator + "static_pageread", boolValue);
+    checkbox_staticpageread->SetValue(boolValue);
+    config().getValue(prefix + Config::pathSeparator + "static_pagewrite", boolValue);
+    checkbox_staticpagewrite->SetValue(boolValue);
+
 }
 
 void BackupRestoreBaseFrame::doWriteConfigSettings(const wxString& prefix) const
 {
     BaseFrame::doWriteConfigSettings(prefix);
-    config().setValue(prefix + Config::pathSeparator + "verboselog",
-        checkbox_showlog->GetValue());
+
     config().setValue(prefix + Config::pathSeparator + "backupfilename",
         text_ctrl_filename->GetValue());
+
+    config().setValue(prefix + Config::pathSeparator + "metadata",
+        checkbox_metadata->GetValue());
+    
+    config().setValue(prefix + Config::pathSeparator + "verboselog",
+        checkbox_showlog->GetValue());
+    config().setValue(prefix + Config::pathSeparator + "verboselog_interval",
+        spinctrl_showlogInterval->GetValue());
+
+    config().setValue(prefix + Config::pathSeparator + "cryptplugin_name",
+        textCtrl_crypt->GetValue());
+    config().setValue(prefix + Config::pathSeparator + "keyholder_name",
+        textCtrl_keyholder->GetValue());
+    config().setValue(prefix + Config::pathSeparator + "key_name",
+        textCtrl_keyname->GetValue());
+
+    config().setValue(prefix + Config::pathSeparator + "skipdata",
+        textCtrl_skipdata->GetValue());
+    config().setValue(prefix + Config::pathSeparator + "includedata",
+        textCtrl_includedata->GetValue());
+
+    config().setValue(prefix + Config::pathSeparator + "static_time",
+        checkbox_statictime->GetValue());
+    config().setValue(prefix + Config::pathSeparator + "static_delta",
+        checkbox_staticdelta->GetValue());
+    config().setValue(prefix + Config::pathSeparator + "static_pageread",
+        checkbox_staticpageread->GetValue());
+    config().setValue(prefix + Config::pathSeparator + "static_pagewrite",
+        checkbox_staticpagewrite->GetValue());
 }
 
 
