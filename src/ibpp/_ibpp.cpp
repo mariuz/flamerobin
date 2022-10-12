@@ -349,12 +349,13 @@ namespace IBPP
 
     Service ServiceFactory(const std::string& ServerName,
 				const std::string& UserName, const std::string& UserPassword,
+                const std::string& RoleName, const std::string& CharSet,
                 const std::string& FBClient )
 	{
         if (FBClient.length() != 0)
             gds.mfbdll = FBClient;
         (void)gds.Call();			// Triggers the initialization, if needed
-		return new ServiceImpl(ServerName, UserName, UserPassword);
+		return new ServiceImpl(ServerName, UserName, UserPassword, RoleName, CharSet);
 	}
 
 	Database DatabaseFactory(const std::string& ServerName,

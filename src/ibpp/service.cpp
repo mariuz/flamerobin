@@ -721,6 +721,7 @@ void ServiceImpl::StartRestore(
 
     spb.InsertByte(isc_spb_res_access_mode, (flags & IBPP::brDatabase_readonly) ? isc_spb_res_am_readonly : isc_spb_res_am_readwrite);
     
+
     if (versionIsHigherOrEqualTo(4, 0)) {
         if (flags & IBPP::brReplicaMode_none)
             spb.InsertByte(isc_spb_res_replica_mode, isc_spb_res_rm_none);
@@ -729,7 +730,7 @@ void ServiceImpl::StartRestore(
         if (flags & IBPP::brReplicaMode_readwrite)
             spb.InsertByte(isc_spb_res_replica_mode, isc_spb_res_rm_readwrite);
     }
-    
+
     unsigned int mask = (flags & IBPP::brReplace) ? isc_spb_res_replace : isc_spb_res_create;	// Safe default mode
 
     if (flags & IBPP::brDeactivateIdx)	    mask |= isc_spb_res_deactivate_idx;
@@ -738,10 +739,14 @@ void ServiceImpl::StartRestore(
 	if (flags & IBPP::brPerTableCommit)	    mask |= isc_spb_res_one_at_a_time;
 	if (flags & IBPP::brUseAllSpace)	    mask |= isc_spb_res_use_all_space;
 
-
-    if ((flags & IBPP::brMetadataOnly) && versionIsHigherOrEqualTo(2, 5))		mask |= isc_spb_res_metadata_only;
-    if ((flags & IBPP::brFix_Fss_Data) && versionIsHigherOrEqualTo(2, 5))	    mask |= isc_spb_res_fix_fss_data;
-    if ((flags & IBPP::brFix_Fss_Metadata) && versionIsHigherOrEqualTo(2, 5))	mask |= isc_spb_res_fix_fss_metadata;
+    if (versionIsHigherOrEqualTo(2, 5)) {
+        if (flags & IBPP::brMetadataOnly)		
+            mask |= isc_spb_res_metadata_only;
+        if (flags & IBPP::brFix_Fss_Data)
+            spb.InsertString(isc_spb_res_fix_fss_data, 2, mCharSet.c_str());
+        if (flags & IBPP::brFix_Fss_Metadata)
+            spb.InsertString(isc_spb_res_fix_fss_metadata, 2, mCharSet.c_str());
+    }
     
     if (mask != 0) 
         spb.InsertQuad(isc_spb_options, mask);
@@ -842,10 +847,28 @@ void ServiceImpl::SetUserPassword(const char* newPassword)
 	else mUserPassword = newPassword;
 }
 
+void ibpp_internals::ServiceImpl::SetCharSet(const char* newCharset)
+{
+    if (newCharset == 0) 
+        mCharSet.erase();
+    else 
+        mCharSet = newCharset;
+}
+
+void ibpp_internals::ServiceImpl::SetRoleName(const char* newRoleName)
+{
+    if (newRoleName == 0)
+        mRoleName.erase();
+    else
+        mRoleName = newRoleName;
+}
+
 ServiceImpl::ServiceImpl(const std::string& ServerName,
-			const std::string& UserName, const std::string& UserPassword)
+			const std::string& UserName, const std::string& UserPassword, 
+            const std::string& RoleName, const std::string& CharSet)
 	:	mRefCount(0), mHandle(0),
-		mServerName(ServerName), mUserName(UserName), mUserPassword(UserPassword)
+		mServerName(ServerName), mUserName(UserName), mUserPassword(UserPassword),
+        mRoleName(RoleName), mCharSet(CharSet)
 {
 }
 

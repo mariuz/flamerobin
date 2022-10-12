@@ -51,8 +51,9 @@
 // worker thread class to perform database restore
 class RestoreThread: public wxThread {
 public:
-    RestoreThread(RestoreFrame* frame, wxString server, wxString username,
-        wxString password,  wxString bkfilename, wxString dbfilename,
+    RestoreThread(RestoreFrame* frame, wxString server, 
+        wxString username, wxString password,  wxString rolename, wxString charset,
+        wxString bkfilename, wxString dbfilename,
         int pagesize, IBPP::BRF flags, int interval, wxString skipData, wxString includeData,
         wxString cryptPluginName, wxString keyPlugin, wxString keyEncrypt
     );
@@ -63,6 +64,8 @@ private:
     wxString serverM;
     wxString usernameM;
     wxString passwordM;
+    wxString rolenameM;
+    wxString charsetM;
     wxString bkfileM;
     wxString dbfileM;
     int pagesizeM;
@@ -81,8 +84,9 @@ private:
     void logProgress(wxString& msg);
 };
 
-RestoreThread::RestoreThread(RestoreFrame* frame, wxString server, wxString username,
-    wxString password,  wxString bkfilename, wxString dbfilename,
+RestoreThread::RestoreThread(RestoreFrame* frame, wxString server, 
+    wxString username, wxString password, wxString rolename, wxString charset,
+    wxString bkfilename, wxString dbfilename,
     int pagesize, IBPP::BRF flags, int interval, wxString skipData, wxString includeData,
     wxString cryptPluginName, wxString keyPlugin, wxString keyEncrypt)
     : wxThread()
@@ -91,6 +95,9 @@ RestoreThread::RestoreThread(RestoreFrame* frame, wxString server, wxString user
     serverM = server;
     usernameM = username;
     passwordM = password;
+    rolenameM = rolename;
+    charsetM = charset;
+
     bkfileM = bkfilename;
     dbfileM = dbfilename;
     pagesizeM = pagesize;
@@ -116,7 +123,8 @@ void* RestoreThread::Entry()
         msg.Printf(_("Connecting to server %s..."), serverM.c_str());
         logImportant(msg);
         IBPP::Service svc = IBPP::ServiceFactory(wx2std(serverM),
-            wx2std(usernameM), wx2std(passwordM));
+            wx2std(usernameM), wx2std(passwordM), wx2std(rolenameM), wx2std(charsetM)
+        );
         svc->Connect();
 
         now = wxDateTime::Now();
@@ -235,11 +243,10 @@ void RestoreFrame::createControls()
     checkbox_fix_fss_data = new wxCheckBox(panel_controls, wxID_ANY,
         _("Fix malformed UNICODE_FSS data"));
     checkbox_fix_fss_data->SetValue(false);
-    checkbox_fix_fss_data->Enable(false);
+
     checkbox_fix_fss_metadata = new wxCheckBox(panel_controls, wxID_ANY,
         _("Fix malformed UNICODE_FSS metadata"));
     checkbox_fix_fss_metadata->SetValue(false);
-    checkbox_fix_fss_metadata->Enable(false);
 
     checkbox_readonlyDB = new wxCheckBox(panel_controls, wxID_ANY,
         _("Read only access"));
@@ -341,8 +348,8 @@ void RestoreFrame::updateControls()
     checkbox_commit->Enable(!running);
     checkbox_space->Enable(!running);
     choice_pagesize->Enable(!running);
-    //checkbox_fix_fss_data->Enable(!running);
-    //checkbox_fix_fss_metadata->Enable(!running);
+    checkbox_fix_fss_data->Enable(!running);
+    checkbox_fix_fss_metadata->Enable(!running);
     checkbox_readonlyDB->Enable(!running);
     
     //radiobox_replicamode->Enable(!running);
@@ -475,6 +482,10 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     wxString password;
     if (!getConnectionCredentials(this, database, username, password))
         return;
+    wxString rolename;
+    wxString charset;
+    rolename = database->getRole();
+    charset = database->getConnectionCharset();
 
     int flags = (int)IBPP::brVerbose; // this will be ORed in anyway
     if (checkbox_replace->IsChecked())
@@ -518,7 +529,7 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
         pagesize = 0;
 
     startThread(std::make_unique<RestoreThread>(this,
-        server->getConnectionString(), username, password,
+        server->getConnectionString(), username, password, rolename, charset,
         text_ctrl_filename->GetValue(), database->getPath(), pagesize,
         (IBPP::BRF)flags,
         spinctrl_showlogInterval->GetValue(),

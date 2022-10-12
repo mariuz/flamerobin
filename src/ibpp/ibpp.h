@@ -1009,7 +1009,8 @@ public:
     //  }
 
     Service ServiceFactory(const std::string& ServerName,
-        const std::string& UserName, const std::string& UserPassword,
+        const std::string& UserName, const std::string& UserPassword, 
+        const std::string& RoleName, const std::string& CharSet,
         const std::string& FBClient = "");
 
     Database DatabaseFactory(const std::string& ServerName,

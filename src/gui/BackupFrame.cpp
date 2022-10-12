@@ -51,8 +51,9 @@
 // worker thread class to perform database backup
 class BackupThread: public wxThread {
 public:
-    BackupThread(BackupFrame* frame, wxString server, wxString username,
-        wxString password, wxString dbfilename, wxString bkfilename,
+    BackupThread(BackupFrame* frame, wxString server, 
+        wxString username, wxString password, wxString rolename, wxString charset,
+        wxString dbfilename, wxString bkfilename,
         IBPP::BRF flags, int interval, wxString skipData, wxString includeData,
         wxString cryptPluginName, wxString keyPlugin, wxString keyEncrypt
     );
@@ -64,6 +65,8 @@ private:
     wxString serverM;
     wxString usernameM;
     wxString passwordM;
+    wxString rolenameM;
+    wxString charsetM;
     wxString dbfileM;
     wxString bkfileM;
     IBPP::BRF brfM;
@@ -82,8 +85,9 @@ private:
 };
 
 BackupThread::BackupThread(BackupFrame* frame, wxString server,
-        wxString username, wxString password, wxString dbfilename,
-        wxString bkfilename, IBPP::BRF flags, int interval, 
+        wxString username, wxString password, wxString rolename, wxString charset,
+        wxString dbfilename, wxString bkfilename, 
+        IBPP::BRF flags, int interval, 
         wxString skipData, wxString includeData, wxString cryptPluginName, 
         wxString keyPlugin, wxString keyEncrypt)
     : wxThread()
@@ -92,6 +96,8 @@ BackupThread::BackupThread(BackupFrame* frame, wxString server,
     serverM = server;
     usernameM = username;
     passwordM = password;
+    rolenameM = rolename;
+    charsetM = charset;
     dbfileM = dbfilename;
     bkfileM = bkfilename;
     // always use verbose flag
@@ -116,7 +122,8 @@ void* BackupThread::Entry()
         msg.Printf(_("Connecting to server %s..."), serverM.c_str());
         logImportant(msg);
         IBPP::Service svc = IBPP::ServiceFactory(wx2std(serverM),
-            wx2std(usernameM), wx2std(passwordM));
+            wx2std(usernameM), wx2std(passwordM), wx2std(rolenameM), wx2std(charsetM)
+        );
         svc->Connect();
 
         now = wxDateTime::Now();
@@ -427,6 +434,10 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     wxString password;
     if (!getConnectionCredentials(this, database, username, password))
         return;
+    wxString rolename;
+    wxString charset;
+    rolename = database->getRole();
+    charset = database->getConnectionCharset();
 
     int flags = (int)IBPP::brVerbose; // this will be ORed in anyway
     if (checkbox_checksum->IsChecked())
@@ -452,7 +463,7 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
         flags |= (int)IBPP::brMetadataOnly;
 
     startThread(std::make_unique<BackupThread>(this,
-        server->getConnectionString(), username, password,
+        server->getConnectionString(), username, password, rolename, charset,
         database->getPath(), text_ctrl_filename->GetValue(),
         (IBPP::BRF)flags, spinctrl_showlogInterval->GetValue(), 
         textCtrl_skipdata->GetValue(), textCtrl_includedata->GetValue(), 

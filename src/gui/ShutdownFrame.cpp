@@ -50,8 +50,9 @@
 // worker thread class to perform database Shutdown
 class ShutdownThread: public wxThread {
 public:
-    ShutdownThread(ShutdownFrame* frame, wxString server, wxString username,
-        wxString password, wxString dbfilename,  IBPP::DSM flags,
+    ShutdownThread(ShutdownFrame* frame, wxString server, 
+        wxString username, wxString password, wxString rolename, wxString charset,
+        wxString dbfilename,  IBPP::DSM flags,
         int timeout);
 
     virtual void* Entry();
@@ -61,6 +62,8 @@ private:
     wxString serverM;
     wxString usernameM;
     wxString passwordM;
+    wxString rolenameM;
+    wxString charsetM;
     wxString dbfileM;
     IBPP::DSM dsmM;
     int timeoutM;
@@ -70,7 +73,8 @@ private:
 };
 
 ShutdownThread::ShutdownThread(ShutdownFrame* frame, wxString server,
-        wxString username, wxString password, wxString dbfilename,
+        wxString username, wxString password, wxString rolename, wxString charset,
+        wxString dbfilename,
         IBPP::DSM flags,  int timeout)
     : wxThread()
 {
@@ -78,6 +82,8 @@ ShutdownThread::ShutdownThread(ShutdownFrame* frame, wxString server,
     serverM = server;
     usernameM = username;
     passwordM = password;
+    rolenameM = rolename;
+    charsetM = charset;
     dbfileM = dbfilename;
     // always use verbose flag
     dsmM = (IBPP::DSM)((int)flags | (int)IBPP::brVerbose);
@@ -94,7 +100,8 @@ void* ShutdownThread::Entry()
         msg.Printf(_("Connecting to server %s..."), serverM.c_str());
         logImportant(msg);
         IBPP::Service svc = IBPP::ServiceFactory(wx2std(serverM),
-            wx2std(usernameM), wx2std(passwordM));
+            wx2std(usernameM), wx2std(passwordM), wx2std(rolenameM), wx2std(charsetM) 
+        );
         svc->Connect();
 
         now = wxDateTime::Now();
@@ -341,6 +348,11 @@ void ShutdownFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     if (!getConnectionCredentials(this, database, username, password))
         return;
 
+    wxString rolename;
+    wxString charset;
+    rolename = database->getRole();
+    charset = database->getConnectionCharset();
+
     int flags = (int)IBPP::dsVerbose; 
 
     if (checkbox_attach->IsChecked())
@@ -355,7 +367,7 @@ void ShutdownFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     int ltimeout = spinctrl_timeout->GetValue();
 
     startThread(std::make_unique<ShutdownThread>(this,
-        server->getConnectionString(), username, password,
+        server->getConnectionString(), username, password, rolename, charset,
         database->getPath(), (IBPP::DSM)flags, ltimeout));
 
     updateControls();

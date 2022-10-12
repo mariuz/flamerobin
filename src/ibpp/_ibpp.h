@@ -753,7 +753,9 @@ private:
     std::string mUserName;      // User Name
     std::string mUserPassword;  // User Password
     std::string mWaitMessage;   // Progress message returned by WaitMsg()
-    
+    std::string mRoleName;      // Role used for the duration of the connection
+    std::string mCharSet;       // Character Set used for the connection
+
     int major_ver;
     int minor_ver;
     int rev_no;
@@ -764,12 +766,17 @@ private:
     void SetServerName(const char*);
     void SetUserName(const char*);
     void SetUserPassword(const char*);
+    void SetCharSet(const char*);
+    void SetRoleName(const char*);
+
 
 public:
     isc_svc_handle GetHandle() { return mHandle; }
 
     ServiceImpl(const std::string& ServerName, const std::string& UserName,
-                    const std::string& UserPassword);
+                const std::string& UserPassword, const std::string& RoleName,
+                const std::string& CharSet
+        );
     ~ServiceImpl();
     FBCLIENT getGDS() const { return gds; };
 
