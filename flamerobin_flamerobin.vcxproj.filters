@@ -695,9 +695,6 @@
     <ClInclude Include="src\metadata\package.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\metadata\constants.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\config\LocalSettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -717,6 +714,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\StartupFrame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
