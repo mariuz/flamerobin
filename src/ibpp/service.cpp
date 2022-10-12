@@ -655,10 +655,25 @@ void ServiceImpl::StartBackup(
     if (flags & IBPP::brNonTransportable)	mask |= isc_spb_bkp_non_transportable;
     if (flags & IBPP::brOldDescriptions)	mask |= isc_spb_bkp_old_descriptions;
 
-    if ((flags & IBPP::brNoDBTriggers) && versionIsHigherOrEqualTo(2, 5))       mask |= isc_spb_bkp_no_triggers;
-    if ((flags & IBPP::brZip) && versionIsHigherOrEqualTo(4, 0))	            mask |= isc_spb_bkp_zip;
+    if (versionIsHigherOrEqualTo(2, 5)) {
+        if (flags & IBPP::brNoDBTriggers)   mask |= isc_spb_bkp_no_triggers;
+        if (flags & IBPP::brMetadataOnly)   mask |= isc_spb_bkp_metadata_only;
+    }
 
-    if ((flags & IBPP::brMetadataOnly) && versionIsHigherOrEqualTo(2, 5))		mask |= isc_spb_bkp_metadata_only;
+    if ((flags & IBPP::brZip) && versionIsHigherOrEqualTo(4, 0))    mask |= isc_spb_bkp_zip;
+
+    if (versionIsHigherOrEqualTo(2, 5)) {
+        std::string stFlags = "";
+
+        if (flags & IBPP::brstatistics_time)        stFlags += "T";
+        if (flags & IBPP::brstatistics_delta)       stFlags += "D";
+        if (flags & IBPP::brstatistics_pagereads)   stFlags += "R";
+        if (flags & IBPP::brstatistics_pagewrites)  stFlags += "W";
+
+        if(!stFlags.empty())
+            spb.InsertString(isc_spb_bkp_stat, 2, stFlags.c_str());
+    }
+
 
 	if (mask != 0) spb.InsertQuad(isc_spb_options, mask);
 
@@ -746,6 +761,17 @@ void ServiceImpl::StartRestore(
             spb.InsertString(isc_spb_res_fix_fss_data, 2, mCharSet.c_str());
         if (flags & IBPP::brFix_Fss_Metadata)
             spb.InsertString(isc_spb_res_fix_fss_metadata, 2, mCharSet.c_str());
+
+        std::string stFlags = "";
+
+        if (flags & IBPP::brstatistics_time)        stFlags += "T";
+        if (flags & IBPP::brstatistics_delta)       stFlags += "D";
+        if (flags & IBPP::brstatistics_pagereads)   stFlags += "R";
+        if (flags & IBPP::brstatistics_pagewrites)  stFlags += "W";
+
+        if (!stFlags.empty())
+            spb.InsertString(isc_spb_bkp_stat, 2, stFlags.c_str());
+
     }
     
     if (mask != 0) 

@@ -153,8 +153,12 @@ namespace IBPP
         brReplicaMode_readwrite = 0x0800000, //FB4.0+
         brReplace               = 0x1000000,
         // General flags
-        brMetadataOnly          = 0x2000000,
+        brMetadataOnly          = 0x2000000, //FB2.5+
         brVerbose               = 0x4000000,
+        brstatistics_time       = 0x8000000, //FB2.5+
+        brstatistics_delta      = 0x10000000,//FB2.5+
+        brstatistics_pagereads  = 0x20000000,//FB2.5+
+        brstatistics_pagewrites = 0x40000000 //FB2.5+
     };
 
     // Service::Repair Flags

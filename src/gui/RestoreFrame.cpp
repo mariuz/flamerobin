@@ -507,6 +507,16 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
         flags |= (int)IBPP::brFix_Fss_Metadata;
     if (checkbox_readonlyDB->IsChecked())
         flags |= (int)IBPP::brDatabase_readonly;
+
+    if (checkbox_statictime->IsChecked())
+        flags |= (int)IBPP::brstatistics_time;
+    if (checkbox_staticdelta->IsChecked())
+        flags |= (int)IBPP::brstatistics_delta;
+    if (checkbox_staticpageread->IsChecked())
+        flags |= (int)IBPP::brstatistics_pagereads;
+    if (checkbox_staticpagewrite->IsChecked())
+        flags |= (int)IBPP::brstatistics_pagewrites;
+
     
     /*switch (radiobox_replicamode->GetSelection())
     {

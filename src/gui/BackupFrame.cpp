@@ -462,6 +462,15 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     if (checkbox_metadata->IsChecked())
         flags |= (int)IBPP::brMetadataOnly;
 
+    if (checkbox_statictime->IsChecked())
+        flags |= (int)IBPP::brstatistics_time;
+    if (checkbox_staticdelta->IsChecked())
+        flags |= (int)IBPP::brstatistics_delta;
+    if (checkbox_staticpageread->IsChecked())
+        flags |= (int)IBPP::brstatistics_pagereads;
+    if (checkbox_staticpagewrite->IsChecked())
+        flags |= (int)IBPP::brstatistics_pagewrites;
+
     startThread(std::make_unique<BackupThread>(this,
         server->getConnectionString(), username, password, rolename, charset,
         database->getPath(), text_ctrl_filename->GetValue(),
