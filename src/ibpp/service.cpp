@@ -621,20 +621,29 @@ void ServiceImpl::StartBackup(
 	spb.InsertString(isc_spb_bkp_file, 2, bkfile.c_str());
 
     if (versionIsHigherOrEqualTo(3, 0)) {
-        if ((flags & IBPP::brVerbose) && (verboseInteval == 0)) spb.Insert(isc_spb_verbose);
-        if (verboseInteval > 0) spb.InsertQuad(isc_spb_verbint, verboseInteval);
+        if ((flags & IBPP::brVerbose) && (verboseInteval == 0)) 
+            spb.Insert(isc_spb_verbose);
+        if (verboseInteval > 0) 
+            spb.InsertQuad(isc_spb_verbint, verboseInteval);
     }else
-        if (flags & IBPP::brVerbose) spb.Insert(isc_spb_verbose);
+        if (flags & IBPP::brVerbose) 
+            spb.Insert(isc_spb_verbose);
 
-    if (factor > 0) spb.InsertQuad(isc_spb_bkp_factor, factor);
+    if (factor > 0) 
+        spb.InsertQuad(isc_spb_bkp_factor, factor);
 
-    if (!skipData.empty() && versionIsHigherOrEqualTo(3, 0)) spb.InsertString(isc_spb_bkp_skip_data, 2, skipData.c_str());
-    if (!includeData.empty() && versionIsHigherOrEqualTo(4, 0)) spb.InsertString(isc_spb_bkp_include_data, 2, includeData.c_str());
+    if (!skipData.empty() && versionIsHigherOrEqualTo(3, 0)) 
+        spb.InsertString(isc_spb_bkp_skip_data, 2, skipData.c_str());
+    if (!includeData.empty() && versionIsHigherOrEqualTo(4, 0)) 
+        spb.InsertString(isc_spb_bkp_include_data, 2, includeData.c_str());
 
     if (versionIsHigherOrEqualTo(4, 0)) {
-        if (!cryptName.empty()) spb.InsertString(isc_spb_bkp_crypt, 2, cryptName.c_str());
-        if (!keyHolder.empty()) spb.InsertString(isc_spb_bkp_keyholder, 2, keyHolder.c_str());
-        if (!keyName.empty()) spb.InsertString(isc_spb_bkp_keyname, 2, keyName.c_str());
+        if (!cryptName.empty()) 
+            spb.InsertString(isc_spb_bkp_crypt, 2, cryptName.c_str());
+        if (!keyHolder.empty()) 
+            spb.InsertString(isc_spb_bkp_keyholder, 2, keyHolder.c_str());
+        if (!keyName.empty()) 
+            spb.InsertString(isc_spb_bkp_keyname, 2, keyName.c_str());
     }
 
 	unsigned int mask = 0;
@@ -678,37 +687,64 @@ void ServiceImpl::StartRestore(
 	SPB spb;
 
 	spb.Insert(isc_action_svc_restore);
-	spb.InsertString(isc_spb_bkp_file, 2, bkfile.c_str());
-	spb.InsertString(isc_spb_dbname, 2, dbfile.c_str());
+	spb.InsertString(isc_spb_bkp_file, 2, bkfile.c_str());	spb.InsertString(isc_spb_dbname, 2, dbfile.c_str());
 
-	if (flags & IBPP::brVerbose) spb.Insert(isc_spb_verbose);
-    if (verboseInteval > 0) spb.InsertQuad(isc_spb_verbint, verboseInteval);
+    if (versionIsHigherOrEqualTo(3, 0)) {
+        if ((flags & IBPP::brVerbose) && (verboseInteval == 0)) 
+            spb.Insert(isc_spb_verbose);
+        if (verboseInteval > 0) 
+            spb.InsertQuad(isc_spb_verbint, verboseInteval);
+    }
+    else
+        if (flags & IBPP::brVerbose) 
+            spb.Insert(isc_spb_verbose);
 
-	if (pagesize >	0) spb.InsertQuad(isc_spb_res_page_size, pagesize);
-    if (buffers > 0) spb.InsertQuad(isc_spb_res_buffers, buffers);
+	if (pagesize >	0) 
+        spb.InsertQuad(isc_spb_res_page_size, pagesize);
+    if (buffers > 0) 
+        spb.InsertQuad(isc_spb_res_buffers, buffers);
 
 
-    if (!skipData.empty()) spb.InsertString(isc_spb_bkp_skip_data, 2, skipData.c_str());
-    if (!includeData.empty()) spb.InsertString(isc_spb_bkp_include_data, 2, includeData.c_str());
+    if (!skipData.empty() && versionIsHigherOrEqualTo(3, 0)) 
+        spb.InsertString(isc_spb_res_skip_data, 2, skipData.c_str());
+    if (!includeData.empty() && versionIsHigherOrEqualTo(4, 0)) 
+        spb.InsertString(isc_spb_res_include_data, 2, includeData.c_str());
 
-    if (!cryptName.empty()) spb.InsertString(isc_spb_bkp_crypt, 2, cryptName.c_str());
-    if (!keyHolder.empty()) spb.InsertString(isc_spb_bkp_keyholder, 2, keyHolder.c_str());
-    if (!keyName.empty()) spb.InsertString(isc_spb_bkp_keyname, 2, keyName.c_str());
+    if (versionIsHigherOrEqualTo(4, 0)) {
+        if (!cryptName.empty()) 
+            spb.InsertString(isc_spb_res_crypt, 2, cryptName.c_str());
+        if (!keyHolder.empty()) 
+            spb.InsertString(isc_spb_res_keyholder, 2, keyHolder.c_str());
+        if (!keyName.empty()) 
+            spb.InsertString(isc_spb_res_keyname, 2, keyName.c_str());
+    }
 
-    if (flags & IBPP::brReadOnlyDB)spb.InsertQuad(isc_spb_res_access_mode, 1);
-
-    if (flags & IBPP::brReadOnlyRP)spb.InsertQuad(isc_spb_res_replica_mode, 1);
-
+    spb.InsertByte(isc_spb_res_access_mode, (flags & IBPP::brDatabase_readonly) ? isc_spb_res_am_readonly : isc_spb_res_am_readwrite);
+    
+    if (versionIsHigherOrEqualTo(4, 0)) {
+        if (flags & IBPP::brReplicaMode_none)
+            spb.InsertByte(isc_spb_res_replica_mode, isc_spb_res_rm_none);
+        if (flags & IBPP::brReplicaMode_readonly)
+            spb.InsertByte(isc_spb_res_replica_mode, isc_spb_res_rm_readonly);
+        if (flags & IBPP::brReplicaMode_readwrite)
+            spb.InsertByte(isc_spb_res_replica_mode, isc_spb_res_rm_readwrite);
+    }
+    
     unsigned int mask = (flags & IBPP::brReplace) ? isc_spb_res_replace : isc_spb_res_create;	// Safe default mode
 
-    if (flags & IBPP::brFix_Fss_Data)	    mask |= isc_spb_res_fix_fss_data;
-    if (flags & IBPP::brFix_Fss_Metadata)	mask |= isc_spb_res_fix_fss_metadata;
     if (flags & IBPP::brDeactivateIdx)	    mask |= isc_spb_res_deactivate_idx;
 	if (flags & IBPP::brNoShadow)		    mask |= isc_spb_res_no_shadow;
 	if (flags & IBPP::brNoValidity)		    mask |= isc_spb_res_no_validity;
 	if (flags & IBPP::brPerTableCommit)	    mask |= isc_spb_res_one_at_a_time;
 	if (flags & IBPP::brUseAllSpace)	    mask |= isc_spb_res_use_all_space;
-	if (mask != 0) spb.InsertQuad(isc_spb_options, mask);
+
+
+    if ((flags & IBPP::brMetadataOnly) && versionIsHigherOrEqualTo(2, 5))		mask |= isc_spb_res_metadata_only;
+    if ((flags & IBPP::brFix_Fss_Data) && versionIsHigherOrEqualTo(2, 5))	    mask |= isc_spb_res_fix_fss_data;
+    if ((flags & IBPP::brFix_Fss_Metadata) && versionIsHigherOrEqualTo(2, 5))	mask |= isc_spb_res_fix_fss_metadata;
+    
+    if (mask != 0) 
+        spb.InsertQuad(isc_spb_options, mask);
 
 	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())

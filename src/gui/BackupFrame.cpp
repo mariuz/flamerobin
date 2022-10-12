@@ -413,7 +413,7 @@ void BackupFrame::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
 
 void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    verboseMsgsM = checkbox_showlog->IsChecked();
+    verboseMsgsM = checkbox_showlog->IsChecked() || spinctrl_showlogInterval->GetValue() > 0;
     clearLog();
 
     DatabasePtr database = getDatabase();
@@ -433,15 +433,12 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
         flags |= (int)IBPP::brIgnoreChecksums;
     if (checkbox_limbo->IsChecked())
         flags |= (int)IBPP::brIgnoreLimbo;
-    if (checkbox_metadata->IsChecked())
-        flags |= (int)IBPP::brMetadataOnly;
     if (checkbox_garbage->IsChecked())
         flags |= (int)IBPP::brNoGarbageCollect;
     if (checkbox_transport->IsChecked())
         flags |= (int)IBPP::brNonTransportable;
     if (checkbox_extern->IsChecked())
         flags |= (int)IBPP::brConvertExtTables;
-
     if (checkbox_expand->IsChecked())
         flags |= (int)IBPP::brConvertExtTables;
     if (checkbox_olddescription->IsChecked())
@@ -451,6 +448,8 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     if (checkbox_zip->IsChecked())
         flags |= (int)IBPP::brZip;
 
+    if (checkbox_metadata->IsChecked())
+        flags |= (int)IBPP::brMetadataOnly;
 
     startThread(std::make_unique<BackupThread>(this,
         server->getConnectionString(), username, password,

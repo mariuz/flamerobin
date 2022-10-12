@@ -48,7 +48,7 @@ private:
     wxStaticText* label_pagesize;
     wxChoice* choice_pagesize;
 
-    wxRadioBox* radioBox_replicamode;
+    wxRadioBox* radiobox_replicamode;
 
     void createControls();
     void layoutControls();

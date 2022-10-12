@@ -52,9 +52,10 @@
 class RestoreThread: public wxThread {
 public:
     RestoreThread(RestoreFrame* frame, wxString server, wxString username,
-        wxString password, wxString bkfilename, wxString dbfilename,
-        int pagesize, IBPP::BRF flags);
-
+        wxString password,  wxString bkfilename, wxString dbfilename,
+        int pagesize, IBPP::BRF flags, int interval, wxString skipData, wxString includeData,
+        wxString cryptPluginName, wxString keyPlugin, wxString keyEncrypt
+    );
     virtual void* Entry();
     virtual void OnExit();
 private:
@@ -66,14 +67,24 @@ private:
     wxString dbfileM;
     int pagesizeM;
     IBPP::BRF brfM;
+
+    wxString outputFileM;
+    int intervalM;
+    wxString skipDataM;
+    wxString includeDataM;
+    wxString cryptPluginNameM;
+    wxString keyPluginM;
+    wxString keyEncryptM;
+
     void logError(wxString& msg);
     void logImportant(wxString& msg);
     void logProgress(wxString& msg);
 };
 
-RestoreThread::RestoreThread(RestoreFrame* frame, wxString server,
-        wxString username, wxString password, wxString bkfilename,
-        wxString dbfilename, int pagesize, IBPP::BRF flags)
+RestoreThread::RestoreThread(RestoreFrame* frame, wxString server, wxString username,
+    wxString password,  wxString bkfilename, wxString dbfilename,
+    int pagesize, IBPP::BRF flags, int interval, wxString skipData, wxString includeData,
+    wxString cryptPluginName, wxString keyPlugin, wxString keyEncrypt)
     : wxThread()
 {
     frameM = frame;
@@ -85,6 +96,14 @@ RestoreThread::RestoreThread(RestoreFrame* frame, wxString server,
     pagesizeM = pagesize;
     // always use verbose flag
     brfM = (IBPP::BRF)((int)flags | (int)IBPP::brVerbose);
+    wxString outputFileM;
+    intervalM = interval;
+    skipDataM = skipData;
+    includeDataM = includeData;
+    cryptPluginNameM = cryptPluginName;
+    keyPluginM = keyPlugin;
+    keyEncryptM = keyEncrypt;
+
 }
 
 void* RestoreThread::Entry()
@@ -103,7 +122,11 @@ void* RestoreThread::Entry()
         now = wxDateTime::Now();
         msg.Printf(_("Database restore started %s"), now.FormatTime().c_str());
         logImportant(msg);
-        //svc->StartRestore(wx2std(bkfileM), wx2std(dbfileM), pagesizeM, brfM);
+        svc->StartRestore(wx2std(bkfileM), wx2std(dbfileM), wx2std(outputFileM), 
+            pagesizeM, 0, brfM,
+            wx2std(cryptPluginNameM), wx2std(keyPluginM),
+            wx2std(keyEncryptM), wx2std(skipDataM), wx2std(includeDataM), intervalM
+        );
         while (true)
         {
             if (TestDestroy())
@@ -211,8 +234,13 @@ void RestoreFrame::createControls()
 
     checkbox_fix_fss_data = new wxCheckBox(panel_controls, wxID_ANY,
         _("Fix malformed UNICODE_FSS data"));
+    checkbox_fix_fss_data->SetValue(false);
+    checkbox_fix_fss_data->Enable(false);
     checkbox_fix_fss_metadata = new wxCheckBox(panel_controls, wxID_ANY,
         _("Fix malformed UNICODE_FSS metadata"));
+    checkbox_fix_fss_metadata->SetValue(false);
+    checkbox_fix_fss_metadata->Enable(false);
+
     checkbox_readonlyDB = new wxCheckBox(panel_controls, wxID_ANY,
         _("Read only access"));
 
@@ -220,9 +248,9 @@ void RestoreFrame::createControls()
     choices.Add(_("None"));
     choices.Add(_("Read only"));
     choices.Add(_("Read write"));
-    radioBox_replicamode = new wxRadioBox(panel_controls, wxID_ANY, _("Replica mode (FB4.0+)"),
+    radiobox_replicamode = new wxRadioBox(panel_controls, wxID_ANY, _("Replica mode (FB4.0+)"),
         wxDefaultPosition, wxDefaultSize, choices, 3);
-
+    radiobox_replicamode->Enable(false);
 
 
     label_pagesize = new wxStaticText(panel_controls, wxID_ANY,
@@ -276,7 +304,7 @@ void RestoreFrame::layoutControls()
     sizerPanelV->Add(sizerCombo);
     sizerPanelV->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
 
-    sizerPanelV->Add(radioBox_replicamode, 0, wxEXPAND);
+    sizerPanelV->Add(radiobox_replicamode, 0, wxEXPAND);
     sizerPanelV->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
 
     sizerPanelV->Add(sizerGeneralOptions, 0, wxEXPAND);
@@ -301,6 +329,8 @@ void RestoreFrame::layoutControls()
 
 void RestoreFrame::updateControls()
 {
+    BackupRestoreBaseFrame::updateControls();
+
     bool running = getThreadRunning();
     button_browse->Enable(!running);
     text_ctrl_filename->Enable(!running);
@@ -311,7 +341,14 @@ void RestoreFrame::updateControls()
     checkbox_commit->Enable(!running);
     checkbox_space->Enable(!running);
     choice_pagesize->Enable(!running);
+    //checkbox_fix_fss_data->Enable(!running);
+    //checkbox_fix_fss_metadata->Enable(!running);
+    checkbox_readonlyDB->Enable(!running);
+    
+    //radiobox_replicamode->Enable(!running);
+
     DatabasePtr db = getDatabase();
+    
     button_start->Enable(!running && !text_ctrl_filename->GetValue().empty()
         && db && !db->isConnected());
 }
@@ -344,6 +381,12 @@ void RestoreFrame::doReadConfigSettings(const wxString& prefix)
             flags.end() != std::find(flags.begin(), flags.end(), "commit_per_table"));
         checkbox_space->SetValue(
             flags.end() != std::find(flags.begin(), flags.end(), "use_all_space"));
+        checkbox_fix_fss_data->SetValue(
+            flags.end() != std::find(flags.begin(), flags.end(), "fix_fss_data"));
+        checkbox_fix_fss_metadata->SetValue(
+            flags.end() != std::find(flags.begin(), flags.end(), "fix_fss_metadata"));
+        checkbox_readonlyDB->SetValue(
+            flags.end() != std::find(flags.begin(), flags.end(), "readonlyDB"));
     }
     updateControls();
 }
@@ -351,6 +394,7 @@ void RestoreFrame::doReadConfigSettings(const wxString& prefix)
 void RestoreFrame::doWriteConfigSettings(const wxString& prefix) const
 {
     BackupRestoreBaseFrame::doWriteConfigSettings(prefix);
+    
     config().setValue(prefix + Config::pathSeparator + "pagesize",
         choice_pagesize->GetStringSelection());
 
@@ -367,6 +411,13 @@ void RestoreFrame::doWriteConfigSettings(const wxString& prefix) const
         flags.push_back("commit_per_table");
     if (checkbox_space->IsChecked())
         flags.push_back("use_all_space");
+    if (checkbox_fix_fss_data->IsChecked())
+        flags.push_back("fix_fss_data");
+    if (checkbox_fix_fss_metadata->IsChecked())
+        flags.push_back("fix_fss_metadata");
+    if (checkbox_readonlyDB->IsChecked())
+        flags.push_back("readonlyDB");
+
     config().setValue(prefix + Config::pathSeparator + "options", flags);
 }
 
@@ -410,7 +461,7 @@ void RestoreFrame::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
 
 void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    verboseMsgsM = checkbox_showlog->IsChecked();
+    verboseMsgsM = checkbox_showlog->IsChecked() || spinctrl_showlogInterval->GetValue() > 0;
     clearLog();
 
     DatabasePtr database = getDatabase();
@@ -439,6 +490,29 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     if (checkbox_space->IsChecked())
         flags |= (int)IBPP::brUseAllSpace;
 
+    if (checkbox_fix_fss_data->IsChecked())
+        flags |= (int)IBPP::brFix_Fss_Data;
+    if (checkbox_fix_fss_metadata->IsChecked())
+        flags |= (int)IBPP::brFix_Fss_Metadata;
+    if (checkbox_readonlyDB->IsChecked())
+        flags |= (int)IBPP::brDatabase_readonly;
+    
+    /*switch (radiobox_replicamode->GetSelection())
+    {
+    case 0: 
+        flags |= (int)IBPP::brReplicaMode_none; 
+        break;
+    case 1:
+        flags |= (int)IBPP::brReplicaMode_readonly; 
+        break;
+    case 2:
+        flags |= (int)IBPP::brReplicaMode_readwrite;
+        break;
+    }*/
+
+    if (checkbox_metadata->IsChecked())
+        flags |= (int)IBPP::brMetadataOnly;
+
     unsigned long pagesize;
     if (!choice_pagesize->GetStringSelection().ToULong(&pagesize))
         pagesize = 0;
@@ -446,6 +520,11 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     startThread(std::make_unique<RestoreThread>(this,
         server->getConnectionString(), username, password,
         text_ctrl_filename->GetValue(), database->getPath(), pagesize,
-        (IBPP::BRF)flags));
+        (IBPP::BRF)flags,
+        spinctrl_showlogInterval->GetValue(),
+        textCtrl_skipdata->GetValue(), textCtrl_includedata->GetValue(),
+        textCtrl_crypt->GetValue(), textCtrl_keyholder->GetValue(), textCtrl_keyname->GetValue()
+        )
+    );
     updateControls();
 }

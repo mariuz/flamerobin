@@ -130,29 +130,31 @@ namespace IBPP
     // Service::StartBackup && Service::StartRestore Flags
     enum BRF {
         // Backup flags
-        brConvertExtTables      = 0x000001,
-        brExpand                = 0x000002,
-        brNoGarbageCollect      = 0x000004,
-        brIgnoreChecksums       = 0x000008, 
-        brIgnoreLimbo           = 0x000010,
-        brNoDBTriggers          = 0x000020,  //FB2.5+
-        brOldDescriptions       = 0x000040,
-        brNonTransportable      = 0x000080,
-        brZip                   = 0x000100, //FB4.0+
+        brConvertExtTables      = 0x0000001,
+        brExpand                = 0x0000002,
+        brNoGarbageCollect      = 0x0000004,
+        brIgnoreChecksums       = 0x0000008, 
+        brIgnoreLimbo           = 0x0000010,
+        brNoDBTriggers          = 0x0000020, //FB2.5+
+        brOldDescriptions       = 0x0000040,
+        brNonTransportable      = 0x0000080,
+        brZip                   = 0x0000100, //FB4.0+
         // Restore flags
-        brFix_Fss_Data          = 0x000200, //FB2.0+
-        brFix_Fss_Metadata      = 0x000400, //FB2.0+
-        brDeactivateIdx         = 0x000800,
-        brNoShadow              = 0x001000,
-        brNoValidity            = 0x002000,
-        brPerTableCommit        = 0x040000,
-        brUseAllSpace           = 0x080000,
-        brReadOnlyDB            = 0x100000,
-        brReadOnlyRP            = 0x200000,
-        brReplace               = 0x400000,
+        brFix_Fss_Data          = 0x0000200, //FB2.0+
+        brFix_Fss_Metadata      = 0x0000400, //FB2.0+
+        brDeactivateIdx         = 0x0000800,
+        brNoShadow              = 0x0001000,
+        brNoValidity            = 0x0002000,
+        brPerTableCommit        = 0x0040000,
+        brUseAllSpace           = 0x0080000,
+        brDatabase_readonly     = 0x0100000,
+        brReplicaMode_none      = 0x0200000, //FB4.0+
+        brReplicaMode_readonly  = 0x0400000, //FB4.0+
+        brReplicaMode_readwrite = 0x0800000, //FB4.0+
+        brReplace               = 0x1000000,
         // General flags
-        brMetadataOnly          = 0x800000,
-        brVerbose               = 0x1000000,
+        brMetadataOnly          = 0x2000000,
+        brVerbose               = 0x4000000,
     };
 
     // Service::Repair Flags
