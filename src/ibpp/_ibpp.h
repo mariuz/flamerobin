@@ -36,7 +36,7 @@
 #endif
 #endif
 
-#include "ibase.h"      // From Firebird installation
+#include "../firebird/include/ibase.h"      // From Firebird installation
 
 #if (defined(__GNUC__) && defined(IBPP_WINDOWS))
 //  UNSETTING flags used above for ibase.h -- Huge conflicts with libstdc++ !
@@ -753,17 +753,30 @@ private:
     std::string mUserName;      // User Name
     std::string mUserPassword;  // User Password
     std::string mWaitMessage;   // Progress message returned by WaitMsg()
+    std::string mRoleName;      // Role used for the duration of the connection
+    std::string mCharSet;       // Character Set used for the connection
+
+    int major_ver;
+    int minor_ver;
+    int rev_no;
+    int build_no;
+
 
     isc_svc_handle* GetHandlePtr() { return &mHandle; }
     void SetServerName(const char*);
     void SetUserName(const char*);
     void SetUserPassword(const char*);
+    void SetCharSet(const char*);
+    void SetRoleName(const char*);
+
 
 public:
     isc_svc_handle GetHandle() { return mHandle; }
 
     ServiceImpl(const std::string& ServerName, const std::string& UserName,
-                    const std::string& UserPassword);
+                const std::string& UserPassword, const std::string& RoleName,
+                const std::string& CharSet
+        );
     ~ServiceImpl();
     FBCLIENT getGDS() const { return gds; };
 
@@ -775,6 +788,7 @@ public:
     void Disconnect();
 
     void GetVersion(std::string& version);
+    bool versionIsHigherOrEqualTo(int versionMajor, int versionMinor);
 
     void AddUser(const IBPP::User&);
     void GetUser(IBPP::User&);
@@ -793,10 +807,20 @@ public:
     void Sweep(const std::string& dbfile);
     void Repair(const std::string& dbfile, IBPP::RPF flags);
 
-    void StartBackup(const std::string& dbfile, const std::string& bkfile,
-        IBPP::BRF flags = IBPP::BRF(0));
-    void StartRestore(const std::string& bkfile, const std::string& dbfile,
-        int pagesize, IBPP::BRF flags = IBPP::BRF(0));
+    void StartBackup(
+        const std::string& dbfile, const std::string& bkfile, const std::string& outfile = "",
+        const int factor = 0,
+        IBPP::BRF flags = IBPP::BRF(0),
+        const std::string& cryptName = "", const std::string& keyHolder = "", const std::string& keyName = "",
+        const std::string& skipData = "", const std::string& includeData = "", const int verboseInteval = 0
+    );
+    void StartRestore(
+        const std::string& bkfile, const std::string& dbfile,  const std::string& outfile = "",
+        int pagesize = 0, int buffers = 0,
+        IBPP::BRF flags = IBPP::BRF(0),
+        const std::string& cryptName = "", const std::string& keyHolder = "", const std::string& keyName = "",
+        const std::string& skipData = "", const std::string& includeData = "", const int verboseInteval = 0
+    );
 
     const char* WaitMsg();
     void Wait();

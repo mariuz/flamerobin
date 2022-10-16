@@ -40,7 +40,7 @@
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/trigger.h"
 #include "sql/StatementBuilder.h"
-#include "constants.h"
+#include "firebird/constants.h"
 
 
 /* static */

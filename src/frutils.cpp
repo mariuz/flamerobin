@@ -199,7 +199,7 @@ bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
         try
         {
             svc = IBPP::ServiceFactory(wx2std(s->getConnectionString()),
-                wx2std(username), wx2std(password));
+                wx2std(username), wx2std(password), wx2std(""), wx2std(""));
             svc->Connect();
             // exception might be thrown. If not, we store the credentials:
             if (sysdba || username.Upper() == "SYSDBA")

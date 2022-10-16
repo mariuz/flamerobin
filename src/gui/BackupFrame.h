@@ -36,10 +36,14 @@ class BackupFrame: public BackupRestoreBaseFrame {
 private:
     wxCheckBox* checkbox_checksum;
     wxCheckBox* checkbox_limbo;
-    wxCheckBox* checkbox_metadata;
     wxCheckBox* checkbox_garbage;
     wxCheckBox* checkbox_transport;
     wxCheckBox* checkbox_extern;
+
+    wxCheckBox* checkbox_expand;
+    wxCheckBox* checkbox_olddescription;
+    wxCheckBox* checkbox_noDBtrigger;
+    wxCheckBox* checkbox_zip;
 
     virtual void createControls();
     virtual void layoutControls();

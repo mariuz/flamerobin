@@ -82,7 +82,8 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
     IBPP::Database& db = d->getIBPPDatabase();
     IBPP::Service svc = IBPP::ServiceFactory(
         wx2std(d->getServer()->getConnectionString()),
-        db->Username(), db->UserPassword());
+        db->Username(), db->UserPassword(), db->RoleName(), db->CharSet()
+    );
     svc->Connect();
 
     if (isEditSweep || isEditPageBuffers || isEditLinger)
