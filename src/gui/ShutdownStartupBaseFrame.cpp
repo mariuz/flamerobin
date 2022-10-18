@@ -69,11 +69,6 @@ void ShutdownStartupBaseFrame::doReadConfigSettings(const wxString& prefix)
 {
     BaseFrame::doReadConfigSettings(prefix);
 
-    bool verbose = true;
-    config().getValue(prefix + Config::pathSeparator + "verboselog",
-        verbose);
-    checkbox_showlog->SetValue(verbose);
-
     wxString bkfile;
     config().getValue(prefix + Config::pathSeparator + "state",
         bkfile);
@@ -84,8 +79,6 @@ void ShutdownStartupBaseFrame::doReadConfigSettings(const wxString& prefix)
 void ShutdownStartupBaseFrame::doWriteConfigSettings(const wxString& prefix) const
 {
     BaseFrame::doWriteConfigSettings(prefix);
-    config().setValue(prefix + Config::pathSeparator + "verboselog",
-        checkbox_showlog->GetValue());
     //config().setValue(prefix + Config::pathSeparator + "state",
     //    text_ctrl_filename->GetValue());
 }
@@ -115,6 +108,7 @@ void ShutdownStartupBaseFrame::createControls()
 
 void ShutdownStartupBaseFrame::layoutControls()
 {
+    ThreadBaseFrame::layoutControls();
 }
 
 void ShutdownStartupBaseFrame::subjectRemoved(Subject* subject)
@@ -167,8 +161,7 @@ void ShutdownStartupBaseFrame::updateControls()
 }
 
 //! event handlers
-BEGIN_EVENT_TABLE(ShutdownStartupBaseFrame, BaseFrame)
-    EVT_CHECKBOX(ShutdownStartupBaseFrame::ID_checkbox_showlog, ShutdownStartupBaseFrame::OnVerboseLogChange)
+BEGIN_EVENT_TABLE(ShutdownStartupBaseFrame, ThreadBaseFrame)
     EVT_MENU(ShutdownStartupBaseFrame::ID_thread_finished, ShutdownStartupBaseFrame::OnThreadFinished)
     EVT_MENU(ShutdownStartupBaseFrame::ID_thread_output, ShutdownStartupBaseFrame::OnThreadOutput)
 END_EVENT_TABLE()
@@ -177,7 +170,7 @@ END_EVENT_TABLE()
 void ShutdownStartupBaseFrame::OnVerboseLogChange(wxCommandEvent& WXUNUSED(event))
 {
     wxBusyCursor wait;
-    verboseMsgsM = checkbox_showlog->IsChecked();
+    verboseMsgsM = true;
 
     wxWindowUpdateLocker freeze(text_ctrl_log);
 
