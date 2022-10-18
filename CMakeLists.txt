@@ -411,6 +411,7 @@ if(APPLE)
     add_resources(SYS_TEMPLATES ${CMAKE_SOURCE_DIR}/sys-templates SharedSupport/sys-templates *)
     add_resources(CODE_TEMPLATES ${CMAKE_SOURCE_DIR}/code-templates SharedSupport/code-templates *)
     add_resources(ICON ${CMAKE_SOURCE_DIR}/res Resources flamerobin.icns)
+    add_resources(XML_STYLES ${CMAKE_SOURCE_DIR}/xml-styles SharedSupport/xml-styles *)
 
     set(RESOURCE_FILES_MAC
             ${HTML_TEMPLATES}
@@ -419,6 +420,7 @@ if(APPLE)
             ${SYS_TEMPLATES}
             ${CODE_TEMPLATES}
             ${ICON}
+			${XML_STYLES}
     )
 
 endif (APPLE)
@@ -449,6 +451,7 @@ file(COPY ${CMAKE_SOURCE_DIR}/html-templates DESTINATION ${CMAKE_CURRENT_BINARY_
 file(COPY ${CMAKE_SOURCE_DIR}/code-templates DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_SOURCE_DIR}/sys-templates  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_SOURCE_DIR}/conf-defs  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/xml-styles  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 if (APPLE)
     add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCE_LIST} ${HEADER_LIST} ${RESOURCE_FILES_MAC})
@@ -479,6 +482,7 @@ if (UNIX AND NOT APPLE)
 			code-templates
 			sys-templates
 			conf-defs 
+			xml-styles			
 		DESTINATION share/flamerobin
 	)
 	install(

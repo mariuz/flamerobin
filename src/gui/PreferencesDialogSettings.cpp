@@ -1897,7 +1897,9 @@ bool PrefDlgThemeSetting::parseProperty(wxXmlNode* xmln)
 
 bool PrefDlgThemeSetting::saveToTargetConfig(Config& config)
 {
-    return false;
+    config.setValue(keyM, fileComboBoxM->GetValue());
+
+    return true;
 }
 
 void PrefDlgThemeSetting::addControlsToSizer(wxSizer* sizer)
@@ -2034,6 +2036,9 @@ wxArrayString PrefDlgThemeSetting::getComboBoxItems()
 
 void PrefDlgThemeSetting::loadStylers(const wxString& styleFileName)
 {
+    if (!styleFileName.IsEmpty())
+        styleFileName = "stylers";
+
     getStyleManager()->setfileName(wxFileName(config().getXmlStylesPath(), styleFileName + ".xml"));
     getStyleManager()->loadStyle();
 
