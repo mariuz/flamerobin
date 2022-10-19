@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -49,7 +49,7 @@ public:
     bool getDefault(GetColumnDefaultType type, wxString& value) const;
     virtual wxString getSource(bool identity = false) ;
     bool isNullable(GetColumnNullabilityType type) const;
-    virtual wxString getTypeOf();
+    virtual wxString getTypeOf(bool large = true);
     virtual bool isTypeOf();
 };
 

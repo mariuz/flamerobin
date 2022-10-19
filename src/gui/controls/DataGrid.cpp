@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -224,6 +224,7 @@ void DataGrid::showPopupMenu(wxPoint cursorPos)
     m.Append(Cmds::DataGrid_Copy_with_header, _("Copy with headers"));
     m.Append(Cmds::DataGrid_Copy_as_insert, _("Copy as INSERT statements"));
     m.Append(Cmds::DataGrid_Copy_as_update, _("Copy as UPDATE statements"));
+    m.Append(Cmds::DataGrid_Copy_as_upins, _("Copy as UPDATE INSERT statements"));
     m.Append(Cmds::DataGrid_Copy_as_inList, _("Copy as IN list"));
     m.Append(Cmds::DataGrid_Save_as_html, _("Save as HTML file..."));
     m.Append(Cmds::DataGrid_Save_as_csv, _("Save as CSV file..."));
@@ -414,6 +415,7 @@ void DataGrid::copyToClipboardAsInsert()
                     sRows += wxTextBuffer::GetEOL();
                 }
             }
+            
             if (!sRows.IsEmpty())
                 copyToClipboard(sRows);
         }
@@ -575,6 +577,7 @@ void DataGrid::copyToClipboardAsUpdate()
                         + ";" + wxTextBuffer::GetEOL();
                 }
             }
+
             if (!sRows.IsEmpty())
                 copyToClipboard(sRows);
         }
@@ -584,6 +587,130 @@ void DataGrid::copyToClipboardAsUpdate()
         notifyIfUnfetchedData();
 }
 
+void DataGrid::copyToClipboardAsUpdateInsert()
+{
+    DataGridTable* table = getDataGridTable();
+    if (!table)
+        return;
+
+    if (!IsSelection()) // no selection -> select the current cell
+    {
+        SelectBlock(GetGridCursorRow(), GetGridCursorCol(),
+            GetGridCursorRow(), GetGridCursorCol());
+    }
+
+    bool all = true;
+    {   // begin busy cursor
+        wxBusyCursor cr;
+        int sqlDialect = table->getDatabase()->getSqlDialect();
+
+        // TODO: - using one table is not correct for JOINs or sub-SELECTs
+        //       - should probably refuse to work if not from one table
+        //       - should probably refuse to create INSERT for "[...]"
+        //       - table&PK info is available in DataGridRows::statementTablesM
+        Identifier tableId(table->getTableName(), sqlDialect);
+
+        // load the (quoted if necessary) column names into an array
+        wxArrayString columnNames;
+        columnNames.Alloc(GetNumberCols());
+        for (int i = 0; i < GetNumberCols(); i++)
+        {
+            Identifier colId(GetColLabelValue(i), sqlDialect);
+            columnNames.Add(colId.getQuoted());
+        }
+
+        {
+            LocalSettings localSet;
+            localSet.setDataBaseLenguage();
+
+            wxString sRows;
+            wxString sCols;
+            wxString sValues;
+            wxString swhere;
+
+            // find primary key (otherwise use all values)
+            Table* t = 0;
+            Database* db = table->getDatabase();
+            if (db)
+            {
+                t = dynamic_cast<Table*>(
+                    db->findByNameAndType(ntTable, tableId.get()));
+            }
+
+            if (!t)
+            {
+                wxMessageBox(wxString::Format(
+                    _("Table %s cannot be found in database."),
+                    tableId.get().c_str()),
+                    _("Error"), wxOK | wxICON_ERROR);
+                return;
+            }
+
+            PrimaryKeyConstraint* pkc = t->getPrimaryKey();
+            // check if all PK components are available
+            if (pkc)
+            {
+                for (ColumnConstraint::const_iterator ci = pkc->begin();
+                    ci != pkc->end(); ++ci)
+                {
+                    bool found = false;
+                    for (int k = 0; k < GetNumberCols(); k++)
+                    {
+                        if ((*ci) == GetColLabelValue(k))
+                        {
+                            if (!swhere.IsEmpty())
+                                swhere += " , ";
+                            swhere += (*ci);
+
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found)
+                    {
+                        pkc = 0;    // as if PK doesn't exists
+                        break;
+                    }
+                }
+            }
+
+
+            for (int i = 0; i < GetNumberRows(); i++)
+            {
+                sCols = "";
+                sValues = "";
+                for (int j = 0; j < GetNumberCols(); j++)
+                {
+                    if (IsInSelection(i, j))
+                    {
+                        if (!sCols.IsEmpty())
+                            sCols += ", ";
+                        sCols += columnNames[j];
+                        if (!sValues.IsEmpty())
+                            sValues += ", ";
+                        sValues += table->getCellValueForInsert(i, j);
+                    }
+                    else
+                        all = false;
+                }
+
+                if (!sCols.IsEmpty())
+                {
+                    sRows += "UPDATE OR INSERT INTO " + tableId.getQuoted()
+                        + " (" + sCols + ") " + "VALUES ( " + sValues + ") "
+                        + "MATCHING (" + swhere + ") ;"
+                        + wxTextBuffer::GetEOL();
+                }
+            }
+
+            if (!sRows.IsEmpty())
+                copyToClipboard(sRows);
+
+        }
+    }   // end busy cursor
+    if (all)
+        notifyIfUnfetchedData();
+}
 void DataGrid::setHeaderFont()
 {
     wxFont f = ::wxGetFontFromUser(this, GetLabelFont());

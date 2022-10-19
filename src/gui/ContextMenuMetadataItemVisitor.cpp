@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -93,6 +93,9 @@ void MainObjectMenuMetadataItemVisitor::visitDatabase(Database& database)
     toolsMenu->Append(Cmds::Menu_Restore, _("Rest&ore database"));
     addSeparator();
     toolsMenu->Append(Cmds::Menu_RecreateDatabase, _("Recreate empty database"));
+    addSeparator(); 
+    toolsMenu->Append(Cmds::Menu_ShutdownDatabase, _("Shutdown database"));
+    toolsMenu->Append(Cmds::Menu_StartupDatabase, _("Startup database"));
     addSeparator();
     toolsMenu->Append(Cmds::Menu_MonitorEvents, _("&Monitor events"));
     toolsMenu->Append(Cmds::Menu_GenerateData, _("&Test data generator"));

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -40,23 +40,39 @@ private:
 
     wxStaticText* label_name;
     wxTextCtrl* text_ctrl_name;
+
     wxStaticText* label_dbpath;
     FileTextControl* text_ctrl_dbpath;
     wxButton* button_browse;
+    
     wxStaticText* label_authentication;
     wxChoice* choice_authentication;
+    
     wxStaticText* label_username;
     wxTextCtrl* text_ctrl_username;
+    
     wxStaticText* label_password;
     wxTextCtrl* text_ctrl_password;
+    
     wxStaticText* label_charset;
     wxComboBox* combobox_charset;
+    
     wxStaticText* label_role;
     wxTextCtrl* text_ctrl_role;
+    
     wxStaticText* label_pagesize;
     wxChoice* choice_pagesize;
+    
     wxStaticText* label_dialect;
     wxChoice* choice_dialect;
+    
+    /*
+    * Todo: Implement FB library per conexion
+    wxStaticText* label_library;
+    FileTextControl* text_ctrl_library;
+    wxButton* button_browse_library;
+    */
+
     wxButton* button_ok;
     wxButton* button_cancel;
 
@@ -92,11 +108,14 @@ private:
         ID_textcontrol_username,
         ID_textcontrol_password,
         ID_button_browse,
-        ID_choice_authentication
+        ID_choice_authentication,
+        ID_textcontrol_library,
+        ID_button_browse_library
     };
 
     void OnAuthenticationChange(wxCommandEvent& event);
     void OnBrowseButtonClick(wxCommandEvent& event);
+    void OnBrowseLibraryButtonClick(wxCommandEvent& event);
     void OnNameChange(wxCommandEvent& event);
     void OnOkButtonClick(wxCommandEvent& event);
     void OnSettingsChange(wxCommandEvent& event);

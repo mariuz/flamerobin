@@ -67,6 +67,10 @@
 #include <string>
 #include <vector>
 
+#ifdef HAVE_DECIMAL128
+#include <decimal/decimal>
+#endif
+
 namespace IBPP
 {
     //  Typically you use this constant in a call IBPP::CheckVersion as in:
@@ -98,7 +102,7 @@ namespace IBPP
     //  SQL Data Types
     enum SDT {sdArray, sdBlob, sdDate, sdTime, sdTimestamp, sdString,
         sdSmallint, sdInteger, sdLargeint, sdFloat, sdDouble, sdBoolean,
-        sdTimeTz, sdTimestampTz, sdInt128};
+        sdTimeTz, sdTimestampTz, sdInt128, sdDec16, sdDec34};
 
     bool isIntegerNumber(SDT type);
     bool isRationalNumber(SDT type);
@@ -108,19 +112,53 @@ namespace IBPP
         adBool, adInt16, adInt32, adInt64, adFloat, adDouble};
 
     // Database::Shutdown Modes
-    enum DSM {dsForce, dsDenyTrans, dsDenyAttach};
+    enum DSM {
+        dsVerbose = 0x1,
+        // Shutdhown  modes
+        dsCache = 0x100, 
+        dsForce = 0x200, 
+        dsDenyTrans = 0x400, 
+        dsDenyAttach = 0x800,
+        // database Modes
+        dsNormal =  0x1000,
+        dsSingle = 0x2000,
+        dsMulti = 0x4000,
+        dsFull = 0x8000
+    };
+
 
     // Service::StartBackup && Service::StartRestore Flags
     enum BRF {
-        brVerbose = 0x1,
         // Backup flags
-        brIgnoreChecksums = 0x100, brIgnoreLimbo = 0x200,
-        brMetadataOnly = 0x400, brNoGarbageCollect = 0x800,
-        brNonTransportable = 0x1000, brConvertExtTables = 0x2000,
+        brConvertExtTables      = 0x0000001,
+        brExpand                = 0x0000002,
+        brNoGarbageCollect      = 0x0000004,
+        brIgnoreChecksums       = 0x0000008, 
+        brIgnoreLimbo           = 0x0000010,
+        brNoDBTriggers          = 0x0000020, //FB2.5+
+        brOldDescriptions       = 0x0000040,
+        brNonTransportable      = 0x0000080,
+        brZip                   = 0x0000100, //FB4.0+
         // Restore flags
-        brReplace = 0x10000, brDeactivateIdx = 0x20000,
-        brNoShadow = 0x40000, brNoValidity = 0x80000,
-        brPerTableCommit = 0x100000, brUseAllSpace = 0x200000
+        brFix_Fss_Data          = 0x0000200, //FB2.0+
+        brFix_Fss_Metadata      = 0x0000400, //FB2.0+
+        brDeactivateIdx         = 0x0000800,
+        brNoShadow              = 0x0001000,
+        brNoValidity            = 0x0002000,
+        brPerTableCommit        = 0x0040000,
+        brUseAllSpace           = 0x0080000,
+        brDatabase_readonly     = 0x0100000,
+        brReplicaMode_none      = 0x0200000, //FB4.0+
+        brReplicaMode_readonly  = 0x0400000, //FB4.0+
+        brReplicaMode_readwrite = 0x0800000, //FB4.0+
+        brReplace               = 0x1000000,
+        // General flags
+        brMetadataOnly          = 0x2000000, //FB2.5+
+        brVerbose               = 0x4000000,
+        brstatistics_time       = 0x8000000, //FB2.5+
+        brstatistics_delta      = 0x10000000,//FB2.5+
+        brstatistics_pagereads  = 0x20000000,//FB2.5+
+        brstatistics_pagewrites = 0x40000000 //FB2.5+
     };
 
     // Service::Repair Flags
@@ -137,15 +175,6 @@ namespace IBPP
 
     // int128 - FB4
     #pragma pack(push, 1)
-
-    // gcc has a builtin type __int128
-    // msvc does not have something we can use (AFICS)
-    // so we have to do it by own code.
-    #define HAVE_INT128
-
-    #ifdef _MSC_VER
-    #undef HAVE_INT128
-    #endif
 
     #ifndef HAVE_INT128
     // NOTICE: could/should be replaced with int128_t if msvc supports this
@@ -190,8 +219,29 @@ public:
         IBPP_INT128_T operator-(const IBPP_INT128_T& T2);
         bool operator<(const IBPP_INT128_T& T2) const;
     } ibpp_int128_t;
+    typedef struct IBPP_UINT128_T
+    {
+        uint64_t lowPart;
+        uint64_t highPart;
+    } ibpp_uint128_t;
     #else
     typedef __int128 ibpp_int128_t;
+    typedef __uint128_t ibpp_uint128_t;
+    #endif
+
+    #ifndef HAVE_DECIMAL128
+    typedef struct IBPP_DEC16_T
+    {
+        int64_t lowPart;
+    } ibpp_dec16_t;
+    typedef struct IBPP_DEC34_T
+    {
+        uint64_t lowPart;
+        uint64_t highPart;
+    } ibpp_dec34_t;
+    #else
+    typedef std::decimal::decimal64 ibpp_dec16_t;
+    typedef std::decimal::decimal128 ibpp_dec34_t;
     #endif
 
     #pragma pack(pop)
@@ -567,6 +617,7 @@ public:
         virtual void Disconnect() = 0;
 
         virtual void GetVersion(std::string& version) = 0;
+        virtual bool versionIsHigherOrEqualTo(int versionMajor, int versionMinor) = 0;
 
         virtual void AddUser(const User&) = 0;
         virtual void GetUser(User&) = 0;
@@ -580,15 +631,26 @@ public:
         virtual void SetReadOnly(const std::string& dbfile, bool) = 0;
         virtual void SetReserveSpace(const std::string& dbfile, bool) = 0;
 
-        virtual void Shutdown(const std::string& dbfile, DSM mode, int sectimeout) = 0;
-        virtual void Restart(const std::string& dbfile) = 0;
+        virtual void Shutdown(const std::string& dbfile, DSM flags, int sectimeout) = 0;
+        virtual void Restart(const std::string& dbfile, DSM flags) = 0;
         virtual void Sweep(const std::string& dbfile) = 0;
         virtual void Repair(const std::string& dbfile, RPF flags) = 0;
 
-        virtual void StartBackup(const std::string& dbfile,
-            const std::string& bkfile, BRF flags = BRF(0)) = 0;
-        virtual void StartRestore(const std::string& bkfile, const std::string& dbfile,
-            int pagesize = 0, BRF flags = BRF(0)) = 0;
+        virtual void StartBackup(
+            const std::string& dbfile,const std::string& bkfile, const std::string& outfile = "",
+            const int factor = 0,
+            BRF flags = BRF(0),
+            const std::string& cryptName = "", const std::string& keyHolder="", const std::string& keyName="",
+            const std::string& skipData = "", const std::string& includeData = "", const int verboseInteval = 0
+        ) = 0;
+
+        virtual void StartRestore(
+            const std::string& bkfile, const std::string& dbfile, const std::string& outfile = "",
+            int pagesize = 0, int buffers = 0,  
+            BRF flags = BRF(0),
+            const std::string & cryptName = "", const std::string & keyHolder = "", const std::string & keyName = "",
+            const std::string & skipData = "", const std::string & includeData = "", const int verboseInteval = 0
+        ) = 0;
 
         virtual const char* WaitMsg() = 0;  // With reporting (does not block)
         virtual void Wait() = 0;            // Without reporting (does block)
@@ -702,6 +764,8 @@ public:
         virtual void Set(int, IBPP::ibpp_int128_t) = 0;
         virtual void Set(int, float) = 0;
         virtual void Set(int, double) = 0;
+        virtual void Set(int, IBPP::ibpp_dec16_t) = 0;
+        virtual void Set(int, IBPP::ibpp_dec34_t) = 0;
         virtual void Set(int, const Timestamp&) = 0;
         virtual void Set(int, const Date&) = 0;
         virtual void Set(int, const Time&) = 0;
@@ -719,6 +783,8 @@ public:
         virtual bool Get(int, IBPP::ibpp_int128_t&) = 0;
         virtual bool Get(int, float&) = 0;
         virtual bool Get(int, double&) = 0;
+        virtual bool Get(int, IBPP::ibpp_dec16_t&) = 0;
+        virtual bool Get(int, IBPP::ibpp_dec34_t&) = 0;
         virtual bool Get(int, Timestamp&) = 0;
         virtual bool Get(int, Date&) = 0;
         virtual bool Get(int, Time&) = 0;
@@ -837,6 +903,8 @@ public:
         virtual bool Get(int, IBPP::ibpp_int128_t&) = 0;
         virtual bool Get(int, float&) = 0;
         virtual bool Get(int, double&) = 0;
+        virtual bool Get(int, IBPP::ibpp_dec16_t&) = 0;
+        virtual bool Get(int, IBPP::ibpp_dec34_t&) = 0;
         virtual bool Get(int, Timestamp& value) = 0;
         virtual bool Get(int, Date& value) = 0;
         virtual bool Get(int, Time& value) = 0;
@@ -945,17 +1013,20 @@ public:
     //  }
 
     Service ServiceFactory(const std::string& ServerName,
-        const std::string& UserName, const std::string& UserPassword);
+        const std::string& UserName, const std::string& UserPassword, 
+        const std::string& RoleName, const std::string& CharSet,
+        const std::string& FBClient = "");
 
     Database DatabaseFactory(const std::string& ServerName,
         const std::string& DatabaseName, const std::string& UserName,
             const std::string& UserPassword, const std::string& RoleName,
-                const std::string& CharSet, const std::string& CreateParams);
+                const std::string& CharSet, const std::string& CreateParams,
+                    const std::string& FBClient = "");
 
     inline Database DatabaseFactory(const std::string& ServerName,
         const std::string& DatabaseName, const std::string& UserName,
-            const std::string& UserPassword)
-        { return DatabaseFactory(ServerName, DatabaseName, UserName, UserPassword, "", "", ""); }
+            const std::string& UserPassword, const std::string& FBClient = "")
+        { return DatabaseFactory(ServerName, DatabaseName, UserName, UserPassword, "", "", "", FBClient); }
 
     Transaction TransactionFactory(Database db, TAM am = amWrite,
         TIL il = ilConcurrency, TLR lr = lrWait, TFF flags = TFF(0));

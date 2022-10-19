@@ -446,6 +446,7 @@
 { "SCHEMA", kwSCHEMA },
 { "SCROLL", kwSCROLL },
 { "SECOND", kwSECOND },
+{ "SECUENCE", kwSECUENCE },
 { "SECURITY", kwSECURITY },
 { "SEGMENT", kwSEGMENT },
 { "SELECT", kwSELECT },

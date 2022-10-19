@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -36,6 +36,7 @@
 #include "config/Config.h"
 #include "core/ArtProvider.h"
 #include "gui/BackupRestoreBaseFrame.h"
+#include "gui/StyleGuide.h"
 #include "gui/controls/DndTextControls.h"
 #include "gui/controls/LogTextControl.h"
 #include "metadata/database.h"
@@ -43,19 +44,16 @@
 
 BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent,
         DatabasePtr db)
-    : BaseFrame(parent, wxID_ANY, wxEmptyString), databaseM(db), threadM(0)
+    : ThreadBaseFrame(parent, db)
 {
-    wxASSERT(db);
-    db->attachObserver(this, false);
+    //wxASSERT(db);
+    //db->attachObserver(this, false);
 
-    threadMsgTimeMillisM = 0;
+    //threadMsgTimeMillisM = 0;
     verboseMsgsM = true;
 
     // create controls in constructor of descendant class (correct tab order)
     panel_controls = 0;
-    label_filename = 0;
-    text_ctrl_filename = 0;
-    button_browse = 0;
     checkbox_showlog = 0;
     button_start = 0;
     text_ctrl_log = 0;
@@ -64,74 +62,107 @@ BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent,
 }
 
 //! implementation details
-void BackupRestoreBaseFrame::addThreadMsg(const wxString msg,
-    bool& notificationNeeded)
-{
-    notificationNeeded = false;
-    wxLongLong millisNow = ::wxGetLocalTimeMillis();
-
-    wxCriticalSectionLocker locker(critsectM);
-    threadMsgsM.Add(msg);
-    // we post no more than 10 events per second to prevent flooding of
-    // the message queue, and to keep the frame responsive for user interaction
-    if ((millisNow - threadMsgTimeMillisM).GetLo() > 100)
-    {
-        threadMsgTimeMillisM = millisNow;
-        notificationNeeded = true;
-    }
-}
-
 void BackupRestoreBaseFrame::cancelBackupRestore()
 {
-    if (threadM != 0)
-    {
-        threadM->Delete();
-        threadM = 0;
-    }
+    cancelThread();
 }
 
-void BackupRestoreBaseFrame::clearLog()
-{
-    msgKindsM.Clear();
-    msgsM.Clear();
-    text_ctrl_log->ClearAll();
-}
 
 bool BackupRestoreBaseFrame::Destroy()
 {
     cancelBackupRestore();
-    return BaseFrame::Destroy();
+    return ThreadBaseFrame::Destroy();
 }
 
 void BackupRestoreBaseFrame::doReadConfigSettings(const wxString& prefix)
 {
     BaseFrame::doReadConfigSettings(prefix);
 
-    bool verbose = true;
-    config().getValue(prefix + Config::pathSeparator + "verboselog",
-        verbose);
-    checkbox_showlog->SetValue(verbose);
 
-    wxString bkfile;
-    config().getValue(prefix + Config::pathSeparator + "backupfilename",
-        bkfile);
-    if (!bkfile.empty())
-        text_ctrl_filename->SetValue(bkfile);
+    wxString strValue;
+    bool boolValue = true;
+    int intValue;
+
+    config().getValue(prefix + Config::pathSeparator + "backupfilename", strValue);
+    if (!strValue.empty())
+        text_ctrl_filename->SetValue(strValue);
+
+    
+    config().getValue(prefix + Config::pathSeparator + "metadata", boolValue);
+    checkbox_metadata->SetValue(boolValue);
+    
+    config().getValue(prefix + Config::pathSeparator + "verboselog", boolValue);
+    checkbox_showlog->SetValue(boolValue);
+    config().getValue(prefix + Config::pathSeparator + "verboselog_interval", intValue);
+    spinctrl_showlogInterval->SetValue(intValue);
+
+    config().getValue(prefix + Config::pathSeparator + "cryptplugin_name", strValue);
+    if (!strValue.empty())
+        textCtrl_crypt->SetValue(strValue);
+    config().getValue(prefix + Config::pathSeparator + "keyholder_name", strValue);
+    if (!strValue.empty())
+        textCtrl_keyholder->SetValue(strValue);
+    config().getValue(prefix + Config::pathSeparator + "key_name", strValue);
+    if (!strValue.empty())
+        textCtrl_keyname->SetValue(strValue);
+
+
+    config().getValue(prefix + Config::pathSeparator + "skipdata", strValue);
+    if (!strValue.empty())
+        textCtrl_skipdata->SetValue(strValue);
+    config().getValue(prefix + Config::pathSeparator + "includedata", strValue);
+    if (!strValue.empty())
+        textCtrl_includedata->SetValue(strValue);
+
+
+    config().getValue(prefix + Config::pathSeparator + "static_time", boolValue);
+    checkbox_statictime->SetValue(boolValue);
+    config().getValue(prefix + Config::pathSeparator + "static_delta", boolValue);
+    checkbox_staticdelta->SetValue(boolValue);
+    config().getValue(prefix + Config::pathSeparator + "static_pageread", boolValue);
+    checkbox_staticpageread->SetValue(boolValue);
+    config().getValue(prefix + Config::pathSeparator + "static_pagewrite", boolValue);
+    checkbox_staticpagewrite->SetValue(boolValue);
+
 }
 
 void BackupRestoreBaseFrame::doWriteConfigSettings(const wxString& prefix) const
 {
     BaseFrame::doWriteConfigSettings(prefix);
-    config().setValue(prefix + Config::pathSeparator + "verboselog",
-        checkbox_showlog->GetValue());
+
     config().setValue(prefix + Config::pathSeparator + "backupfilename",
         text_ctrl_filename->GetValue());
+
+    config().setValue(prefix + Config::pathSeparator + "metadata",
+        checkbox_metadata->GetValue());
+    
+    config().setValue(prefix + Config::pathSeparator + "verboselog",
+        checkbox_showlog->GetValue());
+    config().setValue(prefix + Config::pathSeparator + "verboselog_interval",
+        spinctrl_showlogInterval->GetValue());
+
+    config().setValue(prefix + Config::pathSeparator + "cryptplugin_name",
+        textCtrl_crypt->GetValue());
+    config().setValue(prefix + Config::pathSeparator + "keyholder_name",
+        textCtrl_keyholder->GetValue());
+    config().setValue(prefix + Config::pathSeparator + "key_name",
+        textCtrl_keyname->GetValue());
+
+    config().setValue(prefix + Config::pathSeparator + "skipdata",
+        textCtrl_skipdata->GetValue());
+    config().setValue(prefix + Config::pathSeparator + "includedata",
+        textCtrl_includedata->GetValue());
+
+    config().setValue(prefix + Config::pathSeparator + "static_time",
+        checkbox_statictime->GetValue());
+    config().setValue(prefix + Config::pathSeparator + "static_delta",
+        checkbox_staticdelta->GetValue());
+    config().setValue(prefix + Config::pathSeparator + "static_pageread",
+        checkbox_staticpageread->GetValue());
+    config().setValue(prefix + Config::pathSeparator + "static_pagewrite",
+        checkbox_staticpagewrite->GetValue());
 }
 
-DatabasePtr BackupRestoreBaseFrame::getDatabase() const
-{
-    return databaseM.lock();
-}
 
 const wxString BackupRestoreBaseFrame::getStorageName() const
 {
@@ -140,9 +171,175 @@ const wxString BackupRestoreBaseFrame::getStorageName() const
     return wxEmptyString;
 }
 
-bool BackupRestoreBaseFrame::getThreadRunning() const
+void BackupRestoreBaseFrame::createControls()
 {
-    return threadM != 0;
+    ThreadBaseFrame::createControls();
+
+    label_filename = new wxStaticText(panel_controls, wxID_ANY,
+        _("Backup file:"));
+    text_ctrl_filename = new FileTextControl(panel_controls,
+        ID_text_ctrl_filename, wxEmptyString);
+    button_browse = new wxButton(panel_controls, ID_button_browse, _("..."),
+        wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+
+    checkbox_metadata = new wxCheckBox(panel_controls, wxID_ANY,
+        _("Only metadata (FB2.5+)"));
+
+    checkbox_showlog = new wxCheckBox(panel_controls, ID_checkbox_showlog,
+        _("Show complete log"));
+
+    spinctrl_showlogInterval = new wxSpinCtrl(panel_controls, ID_spinctrl_showlogInterval);
+    spinctrl_showlogInterval->SetRange(0, 32767);
+
+    textCtrl_crypt = new wxTextCtrl(panel_controls, wxID_ANY, wxEmptyString);
+    textCtrl_keyholder = new wxTextCtrl(panel_controls, wxID_ANY, wxEmptyString);
+    textCtrl_keyname = new wxTextCtrl(panel_controls, wxID_ANY, wxEmptyString);
+
+    textCtrl_skipdata = new wxTextCtrl(panel_controls, wxID_ANY, wxEmptyString);
+    textCtrl_includedata = new wxTextCtrl(panel_controls, wxID_ANY, wxEmptyString);
+
+
+    checkbox_statictime = new wxCheckBox(panel_controls, wxID_ANY, _("Time from start"));
+    checkbox_staticdelta = new wxCheckBox(panel_controls, wxID_ANY, _("Delta time"));
+    checkbox_staticpageread = new wxCheckBox(panel_controls, wxID_ANY, _("Page reads"));
+    checkbox_staticpagewrite = new wxCheckBox(panel_controls, wxID_ANY, _("Page writes"));
+
+}
+
+void BackupRestoreBaseFrame::layoutControls()
+{
+    ThreadBaseFrame::layoutControls();
+
+    int wh = text_ctrl_filename->GetMinHeight();
+    button_browse->SetSize(wh, wh);
+
+    //sizerFilename = new wxStaticBoxSizer( wxHORIZONTAL, panel_controls, _("General Options"));
+    sizerFilename = new wxBoxSizer(wxHORIZONTAL);
+    sizerFilename->Add(label_filename, 0, wxALIGN_CENTER_VERTICAL);
+    sizerFilename->Add(styleguide().getControlLabelMargin(), 0);
+    sizerFilename->Add(text_ctrl_filename, 1, wxALIGN_CENTER_VERTICAL);
+    sizerFilename->Add(styleguide().getBrowseButtonMargin(), 0);
+    sizerFilename->Add(button_browse, 0, wxALIGN_CENTER_VERTICAL);
+
+    sizerGeneralOptions = new wxStaticBoxSizer(wxVERTICAL, panel_controls, _("General Options"));
+    sizerGeneralOptions->Add(0, styleguide().getFrameMargin(wxTOP));
+
+
+    {
+        wxGridSizer* gsizer = new wxGridSizer(1, 3,
+            styleguide().getCheckboxSpacing(),
+            styleguide().getUnrelatedControlMargin(wxHORIZONTAL));
+
+        gsizer->Add(checkbox_metadata, 0, wxEXPAND);
+        //gsizer->Add(0, 0, wxEXPAND);
+        gsizer->Add(checkbox_showlog, 0, wxEXPAND);
+
+        {
+            wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+            sizer->Add(new wxStaticText(panel_controls, wxID_ANY,
+                _("Verbose interval (FB3.0+)")), 0, wxALIGN_CENTER_VERTICAL);
+            sizer->Add(styleguide().getControlLabelMargin(), 0);
+            sizer->Add(spinctrl_showlogInterval, 1, wxALIGN_CENTER_VERTICAL);
+
+            gsizer->Add(sizer);
+            //sizerGeneralOptions->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+        }
+
+        sizerGeneralOptions->Add(gsizer);
+        sizerGeneralOptions->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+    }
+
+    {
+        wxStaticBoxSizer* sizerStatic = new wxStaticBoxSizer(wxVERTICAL, panel_controls, _("Show statistics (FB2.5+)"));
+        sizerStatic->Add(0, styleguide().getFrameMargin(wxTOP));
+        {
+            wxGridSizer* gsizer = new wxGridSizer(1, 4,
+                styleguide().getCheckboxSpacing(),
+                styleguide().getUnrelatedControlMargin(wxHORIZONTAL));
+            gsizer->Add(checkbox_statictime, 0, wxEXPAND);
+            gsizer->Add(checkbox_staticdelta, 0, wxEXPAND);
+            gsizer->Add(checkbox_staticpageread, 0, wxEXPAND);
+            gsizer->Add(checkbox_staticpagewrite, 0, wxEXPAND);
+
+            sizerStatic->Add(gsizer, 0, wxEXPAND);
+        }
+        sizerGeneralOptions->Add(sizerStatic, 0, wxEXPAND);
+        sizerGeneralOptions->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+
+    }
+
+    {
+        wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+        sizer->Add(new wxStaticText(panel_controls, wxID_ANY,
+            _("Skip data for table(s) (FB3.0+)")), 0, wxALIGN_CENTER_VERTICAL);
+        sizer->Add(styleguide().getControlLabelMargin(), 0);
+        sizer->Add(textCtrl_skipdata, 1, wxALIGN_CENTER_VERTICAL);
+
+        sizerGeneralOptions->Add(sizer, 0, wxEXPAND);
+        sizerGeneralOptions->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+    }
+
+    {
+        wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+        sizer->Add(new wxStaticText(panel_controls, wxID_ANY,
+            _("Include data of table(s) (FB4.0+)")), 0, wxALIGN_CENTER_VERTICAL);
+        sizer->Add(styleguide().getControlLabelMargin(), 0);
+        sizer->Add(textCtrl_includedata, 1, wxALIGN_CENTER_VERTICAL);
+
+        sizerGeneralOptions->Add(sizer, 0, wxEXPAND);
+        sizerGeneralOptions->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+    }
+
+    {
+        wxStaticBoxSizer* sizerBox = new wxStaticBoxSizer(wxVERTICAL, panel_controls, _("Encryption (FB4.0+)"));
+        sizerBox->Add(0, styleguide().getFrameMargin(wxTOP));
+
+        {
+            wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+            sizer->Add(new wxStaticText(panel_controls, wxID_ANY,
+                _("Plugin name")), 0, wxALIGN_CENTER_VERTICAL);
+            sizer->Add(styleguide().getControlLabelMargin(), 0);
+            sizer->Add(textCtrl_crypt, 1, wxALIGN_CENTER_VERTICAL);
+
+            sizerBox->Add(sizer, 0, wxEXPAND);
+            sizerBox->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+        }
+
+        {
+            wxGridSizer* gsizer = new wxGridSizer(1, 2,
+                styleguide().getRelatedControlMargin(wxHORIZONTAL),
+                styleguide().getUnrelatedControlMargin(wxHORIZONTAL));
+
+            {
+                wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+                sizer->Add(new wxStaticText(panel_controls, wxID_ANY,
+                    _("Key plugin ")), 0, wxALIGN_CENTER_VERTICAL);
+                sizer->Add(styleguide().getControlLabelMargin(), 0);
+                sizer->Add(textCtrl_keyholder, 1, wxALIGN_CENTER_VERTICAL);
+
+                gsizer->Add(sizer, 0, wxEXPAND);
+            }
+
+            {
+                wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+                sizer->Add(new wxStaticText(panel_controls, wxID_ANY,
+                    _("Key for encryption")), 0, wxALIGN_CENTER_VERTICAL);
+                sizer->Add(styleguide().getControlLabelMargin(), 0);
+                sizer->Add(textCtrl_keyname, 1, wxALIGN_CENTER_VERTICAL);
+
+                gsizer->Add(sizer, 0, wxEXPAND);
+            }
+            sizerBox->Add(gsizer, 0, wxEXPAND);
+            sizerBox->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+        }
+
+
+        sizerGeneralOptions->Add(sizerBox, 0, wxEXPAND);
+        sizerGeneralOptions->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+
+    }
+
+
 }
 
 void BackupRestoreBaseFrame::subjectRemoved(Subject* subject)
@@ -150,52 +347,6 @@ void BackupRestoreBaseFrame::subjectRemoved(Subject* subject)
     DatabasePtr db = getDatabase();
     if (!db || !db->isConnected() || subject == db.get())
         Close();
-}
-
-bool BackupRestoreBaseFrame::startThread(std::unique_ptr<wxThread> thread)
-{
-    wxASSERT(threadM == 0);
-    if (wxTHREAD_NO_ERROR != thread->Create())
-    {
-        ::wxMessageBox(_("Error creating thread!"), _("Error"),
-            wxOK | wxICON_ERROR);
-        return false;
-    }
-    if (wxTHREAD_NO_ERROR != thread->Run())
-    {
-        ::wxMessageBox(_("Error starting thread!"), _("Error"),
-            wxOK | wxICON_ERROR);
-        return false;
-    }
-    threadM = thread.release();
-    return true;
-}
-
-void BackupRestoreBaseFrame::threadOutputMsg(const wxString msg, MsgKind kind)
-{
-    wxString s(msg);
-    switch (kind)
-    {
-    case error_message:
-        s.Prepend("e");
-        break;
-    case important_message:
-        s.Prepend("i");
-        break;
-    case progress_message:
-        s.Prepend("p");
-        break;
-    default:
-        wxASSERT(false);
-        return;
-    }
-    bool doPostMsg = false;
-    addThreadMsg(s, doPostMsg);
-    if (doPostMsg)
-    {
-        wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, ID_thread_output);
-        wxPostEvent(this, event);
-    }
 }
 
 void BackupRestoreBaseFrame::update()
@@ -212,83 +363,39 @@ void BackupRestoreBaseFrame::updateControls()
     // empty implementation to allow this to be called from update()
     // which could happen in the constructor, when descendant isn't
     // completely initialized yet
-}
+    ThreadBaseFrame::updateControls();
 
-void BackupRestoreBaseFrame::updateMessages(size_t firstmsg, size_t lastmsg)
-{
-    if (lastmsg > msgsM.GetCount())
-        lastmsg = msgsM.GetCount();
-    for (size_t i = firstmsg; i < lastmsg; i++)
-    {
-        switch ((MsgKind)msgKindsM[i])
-        {
-            case progress_message:
-                if (verboseMsgsM)
-                    text_ctrl_log->logMsg(msgsM[i]);
-                break;
-            case important_message:
-                text_ctrl_log->logImportantMsg(msgsM[i]);
-                break;
-            case error_message:
-                text_ctrl_log->logErrorMsg(msgsM[i]);
-                break;
-        }
-    }
+    bool running = getThreadRunning();
+
+    text_ctrl_filename->Enable(!running);
+    button_browse->Enable(!running);
+
+    checkbox_metadata->Enable(!running);
+   
+    checkbox_showlog->Enable(!running);
+    spinctrl_showlogInterval->Enable(!running);
+
+    textCtrl_crypt->Enable(!running);
+    textCtrl_keyholder->Enable(!running);
+    textCtrl_keyname->Enable(!running);
+
+    textCtrl_skipdata->Enable(!running);
+    textCtrl_includedata->Enable(!running);
+
+    checkbox_statictime->Enable(!running);
+    checkbox_staticdelta->Enable(!running);
+    checkbox_staticpageread->Enable(!running);
+    checkbox_staticpagewrite->Enable(!running);
 }
 
 //! event handlers
-BEGIN_EVENT_TABLE(BackupRestoreBaseFrame, BaseFrame)
+BEGIN_EVENT_TABLE(BackupRestoreBaseFrame, ThreadBaseFrame)
     EVT_CHECKBOX(BackupRestoreBaseFrame::ID_checkbox_showlog, BackupRestoreBaseFrame::OnVerboseLogChange)
     EVT_MENU(BackupRestoreBaseFrame::ID_thread_finished, BackupRestoreBaseFrame::OnThreadFinished)
     EVT_MENU(BackupRestoreBaseFrame::ID_thread_output, BackupRestoreBaseFrame::OnThreadOutput)
     EVT_TEXT(BackupRestoreBaseFrame::ID_text_ctrl_filename, BackupRestoreBaseFrame::OnSettingsChange)
 END_EVENT_TABLE()
 
-void BackupRestoreBaseFrame::OnSettingsChange(wxCommandEvent& WXUNUSED(event))
-{
-    if (IsShown())
-        updateControls();
-}
-
-void BackupRestoreBaseFrame::OnThreadFinished(wxCommandEvent& event)
-{
-    threadM = 0;
-    OnThreadOutput(event);
-    updateControls();
-}
-
-void BackupRestoreBaseFrame::OnThreadOutput(wxCommandEvent& WXUNUSED(event))
-{
-    wxCriticalSectionLocker locker(critsectM);
-    threadMsgTimeMillisM = ::wxGetLocalTimeMillis();
-
-    size_t first = msgsM.GetCount();
-    for (size_t i = 0; i < threadMsgsM.GetCount(); i++)
-    {
-        wxString s(threadMsgsM[i]);
-        if (s.Length() == 0)
-            continue;
-        switch ((wxChar)s[0])
-        {
-            case 'e':
-                msgKindsM.Add((int)error_message);
-                break;
-            case 'i':
-                msgKindsM.Add((int)important_message);
-                break;
-            case 'p':
-                msgKindsM.Add((int)progress_message);
-                break;
-        }
-        // this depends on server type, so just in case...
-        if (s.Last() != '\n')
-            s.Append('\n');
-        msgsM.Add(s.Mid(1));
-    }
-    threadMsgsM.Clear();
-
-    updateMessages(first, msgsM.GetCount());
-}
 
 void BackupRestoreBaseFrame::OnVerboseLogChange(wxCommandEvent& WXUNUSED(event))
 {

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -767,6 +767,7 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
     gridMenu->Append(wxID_COPY,                      _("&Copy"));
     gridMenu->Append(Cmds::DataGrid_Copy_as_insert,  _("Copy &as insert statements"));
     gridMenu->Append(Cmds::DataGrid_Copy_as_update,  _("Copy as &update statements"));
+    gridMenu->Append(Cmds::DataGrid_Copy_as_upins, _("Copy as update insert statements"));
     gridMenu->AppendSeparator();
     gridMenu->Append(Cmds::DataGrid_EditBlob, _("Edit BLOB..."));
     gridMenu->Append(Cmds::DataGrid_ImportBlob, _("Import BLOB from file..."));
@@ -973,6 +974,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_MENU(Cmds::DataGrid_Copy_as_insert,  ExecuteSqlFrame::OnMenuGridCopyAsInsert)
     EVT_MENU(Cmds::DataGrid_Copy_as_inList,  ExecuteSqlFrame::OnMenuGridCopyAsInList)
     EVT_MENU(Cmds::DataGrid_Copy_as_update,  ExecuteSqlFrame::OnMenuGridCopyAsUpdate)
+    EVT_MENU(Cmds::DataGrid_Copy_as_upins,   ExecuteSqlFrame::OnMenuGridCopyAsUpdateInsert)
     EVT_MENU(Cmds::DataGrid_EditBlob,        ExecuteSqlFrame::OnMenuGridEditBlob)
     EVT_MENU(Cmds::DataGrid_ImportBlob,      ExecuteSqlFrame::OnMenuGridImportBlob)
     EVT_MENU(Cmds::DataGrid_ExportBlob,      ExecuteSqlFrame::OnMenuGridExportBlob)
@@ -1369,12 +1371,42 @@ void ExecuteSqlFrame::OnMenuSaveOrSaveAs(wxCommandEvent& event)
         filename = fd.GetPath();
     }
 
-    if (styled_text_ctrl_sql->SaveFile(filename))
+    bool useAlternativeSaveMode = config().get("useAlternativeSaveMode", false);
+    int saveStatus = 0, errorCode = -1;
+    
+    if (useAlternativeSaveMode)
+    {
+        wxFile file(filename, wxFile::write);
+        if (saveStatus = file.Write(styled_text_ctrl_sql->GetValue()))
+        {
+            file.Close();
+            styled_text_ctrl_sql->SetModified(false);
+        }
+        else 
+            errorCode = file.GetLastError();
+    }
+    else
+    {
+        saveStatus = styled_text_ctrl_sql->SaveFile(filename);
+        if (! saveStatus )
+        {
+#ifdef __WINDOWS__
+            errorCode = GetLastError();
+#endif
+        }
+
+    }
+
+    if (saveStatus)
     {
         filenameM = filename;
         filenameModificationTimeM = wxFileName(filenameM).GetModificationTime();
         updateFrameTitleM = true;
         statusbar_1->SetStatusText((_("File saved")), 2);
+    }
+    else
+    {
+        throw FRError(wxString::Format(_("Error saving the file, attention for not losing your SQL. Error code: %d"), errorCode));
     }
 }
 
@@ -1901,6 +1933,11 @@ void ExecuteSqlFrame::OnMenuGridCopyAsUpdate(wxCommandEvent& WXUNUSED(event))
     grid_data->copyToClipboardAsUpdate();
 }
 
+void ExecuteSqlFrame::OnMenuGridCopyAsUpdateInsert(wxCommandEvent& WXUNUSED(event))
+{
+    grid_data->copyToClipboardAsUpdateInsert();
+}
+
 void ExecuteSqlFrame::OnMenuGridSaveAsHtml(wxCommandEvent& WXUNUSED(event))
 {
     grid_data->saveAsHTML();
@@ -2210,6 +2247,8 @@ wxString IBPPtype2string(Database *db, IBPP::SDT t, int subtype, int size,
         case IBPP::sdTimeTz:    return "TIME WITH TIMEZONE";
         case IBPP::sdTimestampTz: return "TIMESTAMP WITH TIMEZONE";
         case IBPP::sdInt128:    return "INT128";
+        case IBPP::sdDec16:     return "DECFLOAT(16)";
+        case IBPP::sdDec34:     return "DECFLOAT(34)";
         default:                return "UNKNOWN";
     }
 }

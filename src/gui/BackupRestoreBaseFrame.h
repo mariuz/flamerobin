@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -26,63 +26,41 @@
 #define BACKUPRESTOREBASEFRAME_H
 
 #include <wx/wx.h>
+#include <wx/spinctrl.h>
 #include <wx/thread.h>
+#include <wx/textctrl.h>
 
 #include <memory>
 
 #include "core/Observer.h"
-#include "gui/BaseFrame.h"
+#include "gui/ThreadBaseFrame.h"
 #include "metadata/database.h"
 #include "metadata/MetadataClasses.h"
 
 class FileTextControl;
 class LogTextControl;
 
-class BackupRestoreBaseFrame: public BaseFrame, public Observer
+class BackupRestoreBaseFrame: public ThreadBaseFrame//, public Observer
 {
 public:
-    enum MsgKind {
-        progress_message,
-        important_message,
-        error_message
-    };
-
-    enum {
-        ID_thread_output = 500,
-        ID_thread_finished
-    };
 
     // make sure that thread gets deleted
     virtual bool Destroy();
 protected:
-    wxArrayString msgsM;
-    wxArrayInt msgKindsM;
-    bool verboseMsgsM;
-
-    DatabasePtr getDatabase() const;
 
     void cancelBackupRestore();
-    void clearLog();
+    //void clearLog();
     virtual void doReadConfigSettings(const wxString& prefix);
     virtual void doWriteConfigSettings(const wxString& prefix) const;
     virtual const wxString getStorageName() const;
-    // set threadM if thread was successfully created and started,
-    // otherwise delete the thread
-    bool startThread(std::unique_ptr<wxThread> thread);
-    bool getThreadRunning() const;
 
-    void threadOutputMsg(const wxString msg, MsgKind kind);
+    virtual void createControls();
+    virtual void layoutControls();
     virtual void updateControls();
+
     BackupRestoreBaseFrame(wxWindow* parent, DatabasePtr db);
 private:
-    DatabaseWeakPtr databaseM;
-    wxThread* threadM;
 
-    wxCriticalSection critsectM;
-    wxArrayString threadMsgsM;
-    wxLongLong threadMsgTimeMillisM;
-    void addThreadMsg(const wxString msg, bool& notificationNeeded);
-    void updateMessages(size_t firstmsg, size_t lastmsg);
 
     // observer stuff
     virtual void subjectRemoved(Subject* subject);
@@ -91,26 +69,44 @@ private:
 protected:
     enum {
         ID_text_ctrl_filename = 101,
-        ID_button_browse,
-        ID_button_showlog,
-        ID_text_ctrl_log,
         ID_checkbox_showlog,
-        ID_button_start,
+        ID_spinctrl_showlogInterval,
+
+        ID_button_browse,
+        ID_button_showlog
+
+        //ID_text_ctrl_log,
+        //ID_button_start
     };
 
-    wxPanel* panel_controls;
     wxStaticText* label_filename;
     FileTextControl* text_ctrl_filename;
     wxButton* button_browse;
+
+    wxCheckBox* checkbox_metadata;
+   
     wxCheckBox* checkbox_showlog;
-    wxButton* button_start;
-    LogTextControl* text_ctrl_log;
-    void setupControls();
+    wxSpinCtrl* spinctrl_showlogInterval;
+
+    wxTextCtrl* textCtrl_crypt;
+    wxTextCtrl* textCtrl_keyholder;
+    wxTextCtrl* textCtrl_keyname;
+
+    wxTextCtrl* textCtrl_skipdata;
+    wxTextCtrl* textCtrl_includedata;
+
+    wxBoxSizer* sizerFilename;
+    wxBoxSizer* sizerGeneralOptions;
+
+    wxCheckBox* checkbox_statictime;
+    wxCheckBox* checkbox_staticdelta;
+    wxCheckBox* checkbox_staticpageread;
+    wxCheckBox* checkbox_staticpagewrite;
+
+
+
 private:
     // event handling
-    void OnSettingsChange(wxCommandEvent& event);
-    void OnThreadFinished(wxCommandEvent& event);
-    void OnThreadOutput(wxCommandEvent& event);
     void OnVerboseLogChange(wxCommandEvent& event);
 
     DECLARE_EVENT_TABLE()

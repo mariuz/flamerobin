@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -69,6 +69,7 @@ public:
 };
 
 
+
 class Indices : public MetadataCollection<Index>
 {
 protected:
@@ -81,5 +82,31 @@ public:
     virtual const wxString getTypeName() const;
 
 };
+
+
+class SysIndices : public MetadataCollection<Index>
+{
+protected:
+    virtual void loadChildren();
+public:
+    SysIndices(DatabasePtr database);
+
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    void load(ProgressIndicator* progressIndicator);
+    virtual const wxString getTypeName() const;
+};
+
+class UsrIndices : public MetadataCollection<Index>
+{
+protected:
+    virtual void loadChildren();
+public:
+    UsrIndices(DatabasePtr database);
+
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    void load(ProgressIndicator* progressIndicator);
+    virtual const wxString getTypeName() const;
+};
+
 
 #endif

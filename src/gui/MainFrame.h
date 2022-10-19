@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -104,6 +104,8 @@ public:
     void OnMenuShowAllStatisticsValues(wxCommandEvent& event);
     void OnMenuShowStatisticsValue(wxCommandEvent& event);
     void OnMenuSetStatisticsValue(wxCommandEvent& event);
+    void OnMenuShutdownDatabase(wxCommandEvent& event);
+    void OnMenuStartupDatabase(wxCommandEvent& event);
 
     // create new object
     void showCreateTemplate(const wxString& statement);

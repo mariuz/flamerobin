@@ -85,5 +85,80 @@
     <ClInclude Include="src\ibpp\ibpp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\firebird\include\ibase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\include\iberror.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\include\firebird\impl\blr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\include\firebird\impl\consts_pub.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\include\firebird\impl\dsc_pub.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\include\firebird\impl\inf_pub.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\include\firebird\impl\msg_helper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\include\firebird\impl\sqlda_pub.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\include\firebird\impl\types_pub.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\all.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\dsql.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\dyn.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\fbsvcmgr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\fbtracemgr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\gbak.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\gfix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\gsec.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\gstat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\isql.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\jrd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\jrd_bugchk.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\nbackup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\sqlerr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\sqlwarn.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\utl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

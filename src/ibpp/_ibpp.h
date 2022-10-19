@@ -36,7 +36,7 @@
 #endif
 #endif
 
-#include "ibase.h"      // From Firebird installation
+#include "../firebird/include/ibase.h"      // From Firebird installation
 
 #if (defined(__GNUC__) && defined(IBPP_WINDOWS))
 //  UNSETTING flags used above for ibase.h -- Huge conflicts with libstdc++ !
@@ -116,7 +116,7 @@ class EventsImpl;
 //  Native data types
 typedef enum {ivArray, ivBlob, ivDate, ivTime, ivTimestamp, ivString,
             ivInt16, ivInt32, ivInt64, ivInt128, ivFloat, ivDouble,
-            ivBool, ivDBKey, ivByte} IITYPE;
+            ivBool, ivDBKey, ivByte, ivDec34, ivDec16} IITYPE;
 
 //
 //  Those are the Interbase C API prototypes that we use
@@ -391,6 +391,7 @@ struct FBCLIENT
 {
     // Attributes
     bool mReady;
+    std::string mfbdll;
 
 #ifdef IBPP_WINDOWS
     HMODULE mHandle;            // The FBCLIENT.DLL HMODULE
@@ -752,18 +753,32 @@ private:
     std::string mUserName;      // User Name
     std::string mUserPassword;  // User Password
     std::string mWaitMessage;   // Progress message returned by WaitMsg()
+    std::string mRoleName;      // Role used for the duration of the connection
+    std::string mCharSet;       // Character Set used for the connection
+
+    int major_ver;
+    int minor_ver;
+    int rev_no;
+    int build_no;
+
 
     isc_svc_handle* GetHandlePtr() { return &mHandle; }
     void SetServerName(const char*);
     void SetUserName(const char*);
     void SetUserPassword(const char*);
+    void SetCharSet(const char*);
+    void SetRoleName(const char*);
+
 
 public:
     isc_svc_handle GetHandle() { return mHandle; }
 
     ServiceImpl(const std::string& ServerName, const std::string& UserName,
-                    const std::string& UserPassword);
+                const std::string& UserPassword, const std::string& RoleName,
+                const std::string& CharSet
+        );
     ~ServiceImpl();
+    FBCLIENT getGDS() const { return gds; };
 
     //  (((((((( OBJECT INTERFACE ))))))))
 
@@ -773,6 +788,7 @@ public:
     void Disconnect();
 
     void GetVersion(std::string& version);
+    bool versionIsHigherOrEqualTo(int versionMajor, int versionMinor);
 
     void AddUser(const IBPP::User&);
     void GetUser(IBPP::User&);
@@ -786,15 +802,25 @@ public:
     void SetReadOnly(const std::string& dbfile, bool);
     void SetReserveSpace(const std::string& dbfile, bool);
 
-    void Shutdown(const std::string& dbfile, IBPP::DSM mode, int sectimeout);
-    void Restart(const std::string& dbfile);
+    void Shutdown(const std::string& dbfile, IBPP::DSM flags,  int sectimeout);
+    void Restart(const std::string& dbfile, IBPP::DSM flags);
     void Sweep(const std::string& dbfile);
     void Repair(const std::string& dbfile, IBPP::RPF flags);
 
-    void StartBackup(const std::string& dbfile, const std::string& bkfile,
-        IBPP::BRF flags = IBPP::BRF(0));
-    void StartRestore(const std::string& bkfile, const std::string& dbfile,
-        int pagesize, IBPP::BRF flags = IBPP::BRF(0));
+    void StartBackup(
+        const std::string& dbfile, const std::string& bkfile, const std::string& outfile = "",
+        const int factor = 0,
+        IBPP::BRF flags = IBPP::BRF(0),
+        const std::string& cryptName = "", const std::string& keyHolder = "", const std::string& keyName = "",
+        const std::string& skipData = "", const std::string& includeData = "", const int verboseInteval = 0
+    );
+    void StartRestore(
+        const std::string& bkfile, const std::string& dbfile,  const std::string& outfile = "",
+        int pagesize = 0, int buffers = 0,
+        IBPP::BRF flags = IBPP::BRF(0),
+        const std::string& cryptName = "", const std::string& keyHolder = "", const std::string& keyName = "",
+        const std::string& skipData = "", const std::string& includeData = "", const int verboseInteval = 0
+    );
 
     const char* WaitMsg();
     void Wait();
@@ -806,6 +832,8 @@ public:
 class DatabaseImpl : public IBPP::IDatabase
 {
     //  (((((((( OBJECT INTERNALS ))))))))
+
+    FBCLIENT gdsM;	// Local GDS instance
 
     int mRefCount;              // Reference counter
     isc_db_handle mHandle;      // InterBase API Session Handle
@@ -844,6 +872,7 @@ public:
                 const std::string& RoleName, const std::string& CharSet,
                 const std::string& CreateParams);
     ~DatabaseImpl();
+    FBCLIENT getGDS() const { return gds; };
 
     //  (((((((( OBJECT INTERFACE ))))))))
 
@@ -917,6 +946,8 @@ public:
         IBPP::TLR lr = IBPP::lrWait, IBPP::TFF flags = IBPP::TFF(0));
     ~TransactionImpl();
 
+    FBCLIENT getGDS() const { return gds; };
+
     //  (((((((( OBJECT INTERFACE ))))))))
 
 public:
@@ -989,6 +1020,8 @@ public:
     void Set(int, IBPP::ibpp_int128_t);
     void Set(int, float);
     void Set(int, double);
+    void Set(int, IBPP::ibpp_dec16_t);
+    void Set(int, IBPP::ibpp_dec34_t);
     void Set(int, const IBPP::Timestamp&);
     void Set(int, const IBPP::Date&);
     void Set(int, const IBPP::Time&);
@@ -1007,6 +1040,8 @@ public:
     bool Get(int, IBPP::ibpp_int128_t&);
     bool Get(int, float&);
     bool Get(int, double&);
+    bool Get(int, IBPP::ibpp_dec16_t&);
+    bool Get(int, IBPP::ibpp_dec34_t&);
     bool Get(int, IBPP::Timestamp&);
     bool Get(int, IBPP::Date&);
     bool Get(int, IBPP::Time&);
@@ -1087,10 +1122,12 @@ public:
 
     StatementImpl(DatabaseImpl*, TransactionImpl*);
     ~StatementImpl();
+    FBCLIENT getGDS() const { return mDatabase->getGDS(); };
 
     //  (((((((( OBJECT INTERFACE ))))))))
 
 public:
+
     void Prepare(const std::string& sql);
     void Execute(const std::string& sql);
     inline void Execute()   { Execute(std::string()); }
@@ -1166,6 +1203,8 @@ public:
     bool Get(int, float&);
     bool Get(int, double*);
     bool Get(int, double&);
+    bool Get(int, IBPP::ibpp_dec16_t&);
+    bool Get(int, IBPP::ibpp_dec34_t&);
     bool Get(int, IBPP::Timestamp&);
     bool Get(int, IBPP::Date&);
     bool Get(int, IBPP::Time&);
@@ -1250,6 +1289,7 @@ public:
     BlobImpl(const BlobImpl&);
     BlobImpl(DatabaseImpl*, TransactionImpl* = 0);
     ~BlobImpl();
+    FBCLIENT getGDS() const { return mDatabase->getGDS(); };
 
     //  (((((((( OBJECT INTERFACE ))))))))
 
@@ -1306,6 +1346,7 @@ public:
     ArrayImpl(const ArrayImpl&);
     ArrayImpl(DatabaseImpl*, TransactionImpl* = 0);
     ~ArrayImpl();
+    FBCLIENT getGDS() const { return mDatabase->getGDS(); };
 
     //  (((((((( OBJECT INTERFACE ))))))))
 
@@ -1394,6 +1435,8 @@ public:
 
     EventsImpl(DatabaseImpl* dbi);
     ~EventsImpl();
+    FBCLIENT getGDS() const { return mDatabase->getGDS(); };
+
 
     //  (((((((( OBJECT INTERFACE ))))))))
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2022 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -86,6 +86,22 @@ bool DataGridRowBuffer::getValue(unsigned offset, float& value)
     if (offset + sizeof(float) > dataM.size())
         return false;
     value = *((float*)&dataM[offset]);
+    return true;
+}
+
+bool DataGridRowBuffer::getValue(unsigned offset, dec16_t& value)
+{
+    if (offset + sizeof(dec16_t) > dataM.size())
+        return false;
+    value = *((dec16_t*)&dataM[offset]);
+    return true;
+}
+
+bool DataGridRowBuffer::getValue(unsigned offset, dec34_t& value)
+{
+    if (offset + sizeof(dec34_t) > dataM.size())
+        return false;
+    value = *((dec34_t*)&dataM[offset]);
     return true;
 }
 
@@ -191,6 +207,22 @@ void DataGridRowBuffer::setValue(unsigned offset, float value)
     if (offset + sizeof(float) > dataM.size())
         dataM.resize(offset + sizeof(float), 0);
     *((float*)&dataM[offset]) = value;
+    invalidateIsDeletable();
+}
+
+void DataGridRowBuffer::setValue(unsigned offset, dec16_t value)
+{
+    if (offset + sizeof(dec16_t) > dataM.size())
+        dataM.resize(offset + sizeof(dec16_t), 0);
+    *((dec16_t*)&dataM[offset]) = value;
+    invalidateIsDeletable();
+}
+
+void DataGridRowBuffer::setValue(unsigned offset, dec34_t value)
+{
+    if (offset + sizeof(dec34_t) > dataM.size())
+        dataM.resize(offset + sizeof(dec34_t), 0);
+    *((dec34_t*)&dataM[offset]) = value;
     invalidateIsDeletable();
 }
 

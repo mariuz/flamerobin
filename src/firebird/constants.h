@@ -27,7 +27,7 @@
 #ifndef JRD_CONSTANTS_H
 #define JRD_CONSTANTS_H
 
-#include "ibase.h"
+#include "include/ibase.h"
 // BLOb Subtype definitions
 
 /* Subtypes < 0  are user defined

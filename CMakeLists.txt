@@ -66,6 +66,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/config/LocalSettings.cpp
         ${SOURCEDIR}/core/ArtProvider.cpp
         ${SOURCEDIR}/core/CodeTemplateProcessor.cpp
+        ${SOURCEDIR}/core/FRDecimal.cpp
         ${SOURCEDIR}/core/FRError.cpp
         ${SOURCEDIR}/core/FRInt128.cpp
         ${SOURCEDIR}/core/Observer.cpp
@@ -125,9 +126,13 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/ReorderFieldsDialog.cpp
         ${SOURCEDIR}/gui/RestoreFrame.cpp
         ${SOURCEDIR}/gui/ServerRegistrationDialog.cpp
+        ${SOURCEDIR}/gui/ShutdownStartupBaseFrame.cpp
+        ${SOURCEDIR}/gui/ShutdownFrame.cpp
         ${SOURCEDIR}/gui/SimpleHtmlFrame.cpp
         ${SOURCEDIR}/gui/StatementHistoryDialog.cpp
+        ${SOURCEDIR}/gui/StartupFrame.cpp
         ${SOURCEDIR}/gui/StyleGuide.cpp
+        ${SOURCEDIR}/gui/ThreadBaseFrame.cpp
         ${SOURCEDIR}/gui/UserDialog.cpp
         ${SOURCEDIR}/gui/UsernamePasswordDialog.cpp
         ${SOURCEDIR}/logger.cpp
@@ -177,6 +182,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/config/LocalSettings.h
         ${SOURCEDIR}/core/ArtProvider.h
         ${SOURCEDIR}/core/CodeTemplateProcessor.h
+        ${SOURCEDIR}/core/FRDecimal.h
         ${SOURCEDIR}/core/FRError.h
         ${SOURCEDIR}/core/FRInt128.h
         ${SOURCEDIR}/core/ObjectWithHandle.h
@@ -191,6 +197,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/engine/MetadataLoader.h
         ${SOURCEDIR}/frutils.h
         ${SOURCEDIR}/frversion.h
+        ${SOURCEDIR}/firebird/constants.h
         ${SOURCEDIR}/gui/AboutBox.h
         ${SOURCEDIR}/gui/AdvancedMessageDialog.h
         ${SOURCEDIR}/gui/AdvancedSearchFrame.h
@@ -237,9 +244,13 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/gui/ReorderFieldsDialog.h
         ${SOURCEDIR}/gui/RestoreFrame.h
         ${SOURCEDIR}/gui/ServerRegistrationDialog.h
+        ${SOURCEDIR}/gui/ShutdownStartupBaseFrame.h
+        ${SOURCEDIR}/gui/ShutdownFrame.h
         ${SOURCEDIR}/gui/SimpleHtmlFrame.h
         ${SOURCEDIR}/gui/StatementHistoryDialog.h
+        ${SOURCEDIR}/gui/StartupFrame.h
         ${SOURCEDIR}/gui/StyleGuide.h
+        ${SOURCEDIR}/gui/ThreadBaseFrame.h
         ${SOURCEDIR}/gui/UserDialog.h
         ${SOURCEDIR}/gui/UsernamePasswordDialog.h
         ${SOURCEDIR}/Isaac.h
@@ -248,7 +259,6 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/MasterPassword.h
         ${SOURCEDIR}/metadata/collection.h
         ${SOURCEDIR}/metadata/column.h
-        ${SOURCEDIR}/metadata/constants.h
         ${SOURCEDIR}/metadata/constraints.h
         ${SOURCEDIR}/metadata/CreateDDLVisitor.h
         ${SOURCEDIR}/metadata/database.h
@@ -310,9 +320,32 @@ list(APPEND IBPP_SOURCE_LIST
         ${SOURCEDIR}/ibpp/user.cpp
 )
 list(APPEND IBPP_HEADER_LIST
+        ${SOURCEDIR}/firebird/include/ibase.h
+        ${SOURCEDIR}/firebird/include/iberror.h
+        ${SOURCEDIR}/firebird/include/firebird/impl/blr.h
+        ${SOURCEDIR}/firebird/include/firebird/impl/consts_pub.h
+        ${SOURCEDIR}/firebird/include/firebird/impl/dsc_pub.h
+        ${SOURCEDIR}/firebird/include/firebird/impl/inf_pub.h
+        ${SOURCEDIR}/firebird/include/firebird/impl/msg_helper.h
+        ${SOURCEDIR}/firebird/include/firebird/impl/sqlda_pub.h
+        ${SOURCEDIR}/firebird/include/firebird/impl/types_pub.h        
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/all.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/dsql.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/dyn.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/fbsvcmgr.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/fbtracemgr.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/gbak.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/gfix.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/gsec.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/gstat.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/isql.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/jrd.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/jrd_bugchk.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/nbackup.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/sqlerr.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/sqlwarn.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/utl.h		
         ${SOURCEDIR}/ibpp/_ibpp.h
-        ${SOURCEDIR}/ibpp/ibase.h
-        ${SOURCEDIR}/ibpp/iberror.h
         ${SOURCEDIR}/ibpp/ibpp.h
 )
 
@@ -353,6 +386,30 @@ if (UNIX AND NOT APPLE)
 	add_definitions(-DFR_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
 	# Need to link the fbclient lib in *nix systems
 	list(APPEND FR_LIBS -lfbclient)
+
+	include(CheckCXXSourceCompiles)
+	check_cxx_source_compiles("
+int main() {
+    __int128 x;
+    return 0;
+}
+" HAVE_INT128)
+
+	if (HAVE_INT128)
+		add_definitions(-DHAVE_INT128)
+	endif()
+
+	check_cxx_source_compiles("
+#include <decimal/decimal>
+int main() {
+    std::decimal::decimal128 x;
+    return 0;
+}
+" HAVE_DECIMAL128)
+
+	if (HAVE_DECIMAL128)
+		add_definitions(-DHAVE_DECIMAL128)
+	endif()
 
 	# Create the revision include file
 	execute_process(
