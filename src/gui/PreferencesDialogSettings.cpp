@@ -1745,6 +1745,8 @@ protected:
     void loadStylers(const wxString& styleFileName);
     void loadStyles(const wxString& language);
     void loadStyle(const wxString& styleName);
+
+    void saveStyle(const wxString& styleName);
 private:
     FRStyleManager* styleManagerM;
 
@@ -1762,17 +1764,30 @@ private:
     std::unique_ptr<wxEvtHandler> styleListBoxHandlerM;
     void OnSelectStyleListBox(wxCommandEvent& event);
 
-    //wxStaticText* lenguageStyleM;
+
     
+
     wxColourPickerCtrl* foregroundPickerM;
+    std::unique_ptr<wxEvtHandler> foregroundPickerHandlerM;
     wxColourPickerCtrl* backgroundPickerM;
+    std::unique_ptr<wxEvtHandler> backgroundPickerHandlerM;
 
     wxComboBox* fontNameComboBoxM;
+    std::unique_ptr<wxEvtHandler> fontNameComboBoxHandlerM;
     wxComboBox* fontSizeComboBoxM;
+    std::unique_ptr<wxEvtHandler> fontSizeComboBoxHandlerM;
 
     wxCheckBox* blodCheckBoxM;
+    std::unique_ptr<wxEvtHandler> blodCheckBoxHandlerM;
     wxCheckBox* italicCheckBoxM;
+    std::unique_ptr<wxEvtHandler> italicCheckBoxHandlerM;
     wxCheckBox* underlineCheckBoxM;
+    std::unique_ptr<wxEvtHandler> underlineCheckBoxHandlerM;
+
+    wxRadioBox* caseRadioBoxM;
+    std::unique_ptr<wxEvtHandler> caseRadioBoxHandlerM;
+
+    void OnChangeStyle(wxCommandEvent& event);
 
 };
 
@@ -1791,12 +1806,31 @@ PrefDlgThemeSetting::~PrefDlgThemeSetting()
 {
     if (fileComboBoxM && fileComboBoxHandlerM.get())
         fileComboBoxM->PopEventHandler();
-
     if (stylersListBoxM && stylersListBoxHandlerM.get())
         stylersListBoxM->PopEventHandler();
-
     if (styleListBoxM && styleListBoxHandlerM.get())
         styleListBoxM->PopEventHandler();
+
+    if (foregroundPickerM && foregroundPickerHandlerM.get())
+        foregroundPickerM->PopEventHandler();
+    if (backgroundPickerM && backgroundPickerHandlerM.get())
+        backgroundPickerM->PopEventHandler();
+
+    if (fontNameComboBoxM   && fontNameComboBoxHandlerM.get())
+        fontNameComboBoxM->PopEventHandler();
+    if (fontSizeComboBoxM && fontSizeComboBoxHandlerM.get())
+        fontSizeComboBoxM->PopEventHandler();
+
+    if (blodCheckBoxM && blodCheckBoxHandlerM.get())
+        blodCheckBoxM->PopEventHandler();
+    if (italicCheckBoxM && italicCheckBoxHandlerM.get())
+        italicCheckBoxM->PopEventHandler();
+    if (underlineCheckBoxM && underlineCheckBoxHandlerM.get())
+        underlineCheckBoxM->PopEventHandler();
+
+    if (caseRadioBoxM && caseRadioBoxHandlerM.get())
+        caseRadioBoxM->PopEventHandler();
+
 }
 
 bool PrefDlgThemeSetting::createControl(bool WXUNUSED(ignoreerrors))
@@ -1826,15 +1860,31 @@ bool PrefDlgThemeSetting::createControl(bool WXUNUSED(ignoreerrors))
         wxEVT_COMMAND_LISTBOX_SELECTED,
         wxCommandEventHandler(PrefDlgEventHandler::OnCommandEvent));
 
-
-
     foregroundPickerM = new wxColourPickerCtrl(getPage(), wxID_ANY, *wxBLACK, wxDefaultPosition, wxDefaultSize);
-    backgroundPickerM = new wxColourPickerCtrl(getPage(), wxID_ANY, *wxBLACK, wxDefaultPosition, wxDefaultSize);
+    foregroundPickerHandlerM.reset(new PrefDlgEventHandler(std::bind(&PrefDlgThemeSetting::OnChangeStyle, this, std::placeholders::_1)));
+    foregroundPickerM->PushEventHandler(foregroundPickerHandlerM.get());
+    foregroundPickerHandlerM->Connect(foregroundPickerM->GetId(),
+        wxEVT_COMMAND_COLOURPICKER_CHANGED,
+        wxCommandEventHandler(PrefDlgEventHandler::OnCommandEvent));
 
+    backgroundPickerM = new wxColourPickerCtrl(getPage(), wxID_ANY, *wxBLACK, wxDefaultPosition, wxDefaultSize);
+    backgroundPickerHandlerM.reset(new PrefDlgEventHandler(std::bind(&PrefDlgThemeSetting::OnChangeStyle, this, std::placeholders::_1)));
+    backgroundPickerM->PushEventHandler(backgroundPickerHandlerM.get());
+    backgroundPickerHandlerM->Connect(backgroundPickerM->GetId(),
+        wxEVT_COMMAND_COLOURPICKER_CHANGED,
+        wxCommandEventHandler(PrefDlgEventHandler::OnCommandEvent));
+
+    
     wxArrayString strArray = wxFontEnumerator::GetFacenames();
     strArray.Sort();
-    fontNameComboBoxM = new wxComboBox(getPage(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, strArray);
-
+    fontNameComboBoxM = new wxComboBox(getPage(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, strArray);    
+    fontNameComboBoxHandlerM.reset(new PrefDlgEventHandler(std::bind(&PrefDlgThemeSetting::OnChangeStyle, this, std::placeholders::_1)));
+    fontNameComboBoxM->PushEventHandler(fontNameComboBoxHandlerM.get());
+    fontNameComboBoxHandlerM->Connect(fontNameComboBoxM->GetId(),
+        wxEVT_COMMAND_COMBOBOX_SELECTED,
+        wxCommandEventHandler(PrefDlgEventHandler::OnCommandEvent));
+    
+    //wxArrayString strArray;
     strArray.Clear();
     for (int i = 5; i <= 30; i++) {
         if (i <= 12 || i % 2 == 0) {
@@ -1842,12 +1892,46 @@ bool PrefDlgThemeSetting::createControl(bool WXUNUSED(ignoreerrors))
         }
     }
     fontSizeComboBoxM = new wxComboBox(getPage(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, strArray);
+    fontSizeComboBoxHandlerM.reset(new PrefDlgEventHandler(std::bind(&PrefDlgThemeSetting::OnChangeStyle, this, std::placeholders::_1)));
+    fontSizeComboBoxM->PushEventHandler(fontSizeComboBoxHandlerM.get());
+    fontSizeComboBoxHandlerM->Connect(fontSizeComboBoxM->GetId(),
+        wxEVT_COMMAND_COMBOBOX_SELECTED,
+        wxCommandEventHandler(PrefDlgEventHandler::OnCommandEvent));
+
 
     blodCheckBoxM = new wxCheckBox(getPage(), wxID_ANY, "Bold", wxDefaultPosition, wxDefaultSize);
-    italicCheckBoxM = new wxCheckBox(getPage(), wxID_ANY, "Italic", wxDefaultPosition, wxDefaultSize);
-    underlineCheckBoxM = new wxCheckBox(getPage(), wxID_ANY, "Underline", wxDefaultPosition, wxDefaultSize);
+    blodCheckBoxHandlerM.reset(new PrefDlgEventHandler(std::bind(&PrefDlgThemeSetting::OnChangeStyle, this, std::placeholders::_1)));
+    blodCheckBoxM->PushEventHandler(blodCheckBoxHandlerM.get());
+    blodCheckBoxHandlerM->Connect(blodCheckBoxM->GetId(),
+        wxEVT_COMMAND_CHECKBOX_CLICKED,
+        wxCommandEventHandler(PrefDlgEventHandler::OnCommandEvent));
 
-    
+    italicCheckBoxM = new wxCheckBox(getPage(), wxID_ANY, "Italic", wxDefaultPosition, wxDefaultSize);
+    italicCheckBoxHandlerM.reset(new PrefDlgEventHandler(std::bind(&PrefDlgThemeSetting::OnChangeStyle, this, std::placeholders::_1)));
+    italicCheckBoxM->PushEventHandler(italicCheckBoxHandlerM.get());
+    italicCheckBoxHandlerM->Connect(italicCheckBoxM->GetId(),
+        wxEVT_COMMAND_CHECKBOX_CLICKED,
+        wxCommandEventHandler(PrefDlgEventHandler::OnCommandEvent));
+
+    underlineCheckBoxM = new wxCheckBox(getPage(), wxID_ANY, "Underline", wxDefaultPosition, wxDefaultSize);
+    underlineCheckBoxHandlerM.reset(new PrefDlgEventHandler(std::bind(&PrefDlgThemeSetting::OnChangeStyle, this, std::placeholders::_1)));
+    underlineCheckBoxM->PushEventHandler(underlineCheckBoxHandlerM.get());
+    underlineCheckBoxHandlerM->Connect(underlineCheckBoxM->GetId(),
+        wxEVT_COMMAND_CHECKBOX_CLICKED,
+        wxCommandEventHandler(PrefDlgEventHandler::OnCommandEvent));
+
+    wxArrayString caseChoices;
+    caseChoices.Add("Mixed");
+    caseChoices.Add("Upper");
+    caseChoices.Add("Lower");
+    caseChoices.Add("Camel");
+    caseRadioBoxM = new wxRadioBox(getPage(), wxID_ANY, "Font Case", wxDefaultPosition, wxDefaultSize, caseChoices, 4);
+    caseRadioBoxHandlerM.reset(new PrefDlgEventHandler(std::bind(&PrefDlgThemeSetting::OnChangeStyle, this, std::placeholders::_1)));
+    caseRadioBoxM->PushEventHandler(caseRadioBoxHandlerM.get());
+    caseRadioBoxHandlerM->Connect(caseRadioBoxM->GetId(),
+        wxEVT_COMMAND_RADIOBOX_SELECTED,
+        wxCommandEventHandler(PrefDlgEventHandler::OnCommandEvent));
+
     return true;
 }
 
@@ -1898,6 +1982,7 @@ bool PrefDlgThemeSetting::parseProperty(wxXmlNode* xmln)
 bool PrefDlgThemeSetting::saveToTargetConfig(Config& config)
 {
     config.setValue(keyM, fileComboBoxM->GetValue());
+    getStyleManager()->saveStyle();
 
     return true;
 }
@@ -1926,12 +2011,12 @@ void PrefDlgThemeSetting::addControlsToSizer(wxSizer* sizer)
         {
             wxStaticBoxSizer* sbz = new wxStaticBoxSizer(new wxStaticBox(getPage(), -1, "Language"), wxVERTICAL);
             sbz->Add(0, styleguide().getFrameMargin(wxTOP));
-            sbz->Add(stylersListBoxM, 0, wxEXPAND);
+            sbz->Add(stylersListBoxM, 0, wxSHAPED);
             sbz->Add(0, styleguide().getFrameMargin(wxBOTTOM));
             sz->Add(sbz, 0, wxEXPAND);
 
         }
-        sz->Add(0, styleguide().getUnrelatedControlMargin(wxHORIZONTAL));
+        sz->Add(0, styleguide().getRelatedControlMargin(wxHORIZONTAL));
         {
             wxStaticBoxSizer* sbz = new wxStaticBoxSizer(new wxStaticBox(getPage(), -1, "Style"), wxVERTICAL);
             sbz->Add(0, styleguide().getFrameMargin(wxTOP));
@@ -2001,6 +2086,15 @@ void PrefDlgThemeSetting::addControlsToSizer(wxSizer* sizer)
                 gz->Add(underlineCheckBoxM, 0, wxEXPAND);
                 sbz->Add(gz, 0, wxEXPAND);
             }
+            sbz->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+            {
+                wxSizer* s = new wxBoxSizer(wxHORIZONTAL);
+                s->Add(styleguide().getFrameMargin(wxLEFT), 0);
+                s->Add(styleguide().getControlLabelMargin(), 0);
+                s->Add(caseRadioBoxM, 1, wxALIGN_CENTER_VERTICAL);
+                sbz->Add(s, 0, wxEXPAND);
+            }
+
             sbz->Add(0, styleguide().getFrameMargin(wxBOTTOM));
             sz->Add(sbz, 0, wxEXPAND);
 
@@ -2091,9 +2185,10 @@ void PrefDlgThemeSetting::loadStyles(const wxString& language)
 
 void PrefDlgThemeSetting::loadStyle(const wxString& styleName)
 {
+    
     FRStyle* style = getStyleManager()->getStylerByDesc(stylersListBoxM->GetString(stylersListBoxM->GetSelection()))->getStyleByName(styleName);
-    fontNameComboBoxM->SetSelection(fontNameComboBoxM->FindString(style->getFontName()));
 
+    fontNameComboBoxM->SetSelection(fontNameComboBoxM->FindString(style->getFontName()));
     fontSizeComboBoxM->SetSelection(fontSizeComboBoxM->FindString(wxString::Format("%i", style->getFontSize())));
 
     foregroundPickerM->SetColour(style->getfgColor());
@@ -2102,6 +2197,34 @@ void PrefDlgThemeSetting::loadStyle(const wxString& styleName)
     blodCheckBoxM->SetValue(style->getFontStyle() & FONTSTYLE_BOLD);
     italicCheckBoxM->SetValue(style->getFontStyle() & FONTSTYLE_ITALIC);
     underlineCheckBoxM->SetValue(style->getFontStyle() & FONTSTYLE_UNDERLINE);
+
+    caseRadioBoxM->SetSelection(style->getCaseVisible());
+
+}
+
+void PrefDlgThemeSetting::saveStyle(const wxString& styleName)
+{
+    FRStyle* style = getStyleManager()->getStylerByDesc(stylersListBoxM->GetString(stylersListBoxM->GetSelection()))->getStyleByName(styleName);
+
+    style->setFontName(fontNameComboBoxM->GetString(fontNameComboBoxM->GetSelection()));
+    style->setFontSize(atoi(fontSizeComboBoxM->GetString(fontSizeComboBoxM->GetSelection())));
+
+    
+    style->setfgColor(foregroundPickerM->GetColour());
+    style->setbgColor(backgroundPickerM->GetColour());
+
+    int fontStyle = 0;
+    if (blodCheckBoxM->IsChecked())
+        fontStyle |= FONTSTYLE_BOLD;
+    if (italicCheckBoxM->IsChecked())
+        fontStyle |= FONTSTYLE_ITALIC;
+    if (underlineCheckBoxM->IsChecked())
+        fontStyle |= FONTSTYLE_UNDERLINE;
+
+    style->setFontStyle(fontStyle);
+
+    style->setCaseVisible(caseRadioBoxM->GetSelection());
+
 
 }
 
@@ -2118,6 +2241,11 @@ void PrefDlgThemeSetting::OnSelectStylersListBox(wxCommandEvent& event)
 void PrefDlgThemeSetting::OnSelectStyleListBox(wxCommandEvent& event)
 {
     loadStyle(styleListBoxM->GetString(styleListBoxM->GetSelection()));
+}
+
+void PrefDlgThemeSetting::OnChangeStyle(wxCommandEvent& event)
+{
+    saveStyle(styleListBoxM->GetString(styleListBoxM->GetSelection()));
 }
 
 

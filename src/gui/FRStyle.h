@@ -278,8 +278,6 @@ public:
     void loadStyle();
     void saveStyle();
 
-
-
 };
 
 FRStyleManager& stylerManager();

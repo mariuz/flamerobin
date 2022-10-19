@@ -46,7 +46,7 @@ int RGB2int(_COLORREF color)
 FRStyle::FRStyle()
     :styleIDM(STYLE_NOT_USED), styleDescM(""), 
     fgColorM(STYLE_NOT_USED), bgColorM(STYLE_NOT_USED), colorStyleM(COLORSTYLE_ALL), 
-    isFontEnabledM(false), fontNameM(""), fontStyleM(FONTSTYLE_NONE), fontSizeM(STYLE_NOT_USED), caseVisibleM(STYLE_NOT_USED),
+    isFontEnabledM(false), fontNameM(""), fontStyleM(FONTSTYLE_NONE), fontSizeM(STYLE_NOT_USED), caseVisibleM(0),
     nestingM(FONTSTYLE_NONE), 
     keywordClassM(STYLE_NOT_USED), keywordsM("")
 {
@@ -157,7 +157,6 @@ void FRStyle::write2Element(wxXmlNode* element)
                     lAttribute->SetValue(fontNameM);
             }
         }
-
         if (lName == "fontSize") {
             if (fontSizeM != STYLE_NOT_USED)
             {
@@ -167,28 +166,22 @@ void FRStyle::write2Element(wxXmlNode* element)
                     lAttribute->SetValue(wxString::Format(wxT("%i"), fontSizeM));
             }
         }
-
         if (lName == "fontStyle") {
             if (fontStyleM != STYLE_NOT_USED)
                 lAttribute->SetValue(wxString::Format(wxT("%i"), fontStyleM));
         }
+        if (lName == "caseVisible") {
+            if (caseVisibleM != STYLE_NOT_USED)
+                lAttribute->SetValue(wxString::Format(wxT("%i"), caseVisibleM));
+        }
         /*
         if (!keywordsM.empty())
         {
-            TiXmlNode* teteDeNoeud = element->LastChild();
-
-            if (teteDeNoeud)
-                teteDeNoeud->SetValue(style2Write._keywords.c_str());
-            else
-                element->InsertEndChild(TiXmlText(style2Write._keywords.c_str()));            
         }
         */
 
         lAttribute = lAttribute->GetNext();
     }
-    
-
-
 }
 
 wxFont FRStyle::getFont()
