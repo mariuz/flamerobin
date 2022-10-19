@@ -113,6 +113,7 @@ FLAMEROBIN_OBJECTS =  \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FieldPropertiesDialog.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FindDialog.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FRLayoutConfig.obj \
+	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FRStyle.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_GUIURIHandlerHelper.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_HtmlHeaderMetadataItemVisitor.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_HtmlTemplateProcessor.obj \
@@ -347,7 +348,7 @@ revision-info:
 
 vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.exe: vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_frprec.obj  $(FLAMEROBIN_OBJECTS) vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp.lib vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_flamerobin.res vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp.lib
 	link /NOLOGO /OUT:$@   $(__DEBUGINFO_5) /pdb:"vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin.pdb" $(__DEBUGINFO_9) /nologo /subsystem:windows $(LINK_TARGET_CPU) $(______flamerobin_WX_LIB_DIR_FILENAMES_2_p) /LIBPATH:$(BOOST_LIB_DIR) /SUBSYSTEM:WINDOWS $(LDFLAGS) @<<
-	$(FLAMEROBIN_OBJECTS) $(FLAMEROBIN_RESOURCES)  wxmsw30u$(D_OPT)_aui.lib wxmsw30u$(D_OPT)_stc.lib wxmsw30u$(D_OPT)_html.lib wxmsw30u$(D_OPT)_adv.lib wxmsw30u$(D_OPT)_core.lib wxbase30u$(D_OPT)_xml.lib wxbase30u$(D_OPT).lib wxscintilla$(D_OPT).lib wxexpat$(D_OPT).lib wxtiff$(D_OPT).lib wxjpeg$(D_OPT).lib wxpng$(D_OPT).lib wxzlib$(D_OPT).lib wxregexu$(D_OPT).lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp.lib
+	$(FLAMEROBIN_OBJECTS) $(FLAMEROBIN_RESOURCES)  wxmsw31u$(D_OPT)_aui.lib wxmsw31u$(D_OPT)_stc.lib wxmsw31u$(D_OPT)_html.lib wxmsw31u$(D_OPT)_adv.lib wxmsw31u$(D_OPT)_core.lib wxbase31u$(D_OPT)_xml.lib wxbase31u$(D_OPT).lib wxscintilla$(D_OPT).lib wxexpat$(D_OPT).lib wxtiff$(D_OPT).lib wxjpeg$(D_OPT).lib wxpng$(D_OPT).lib wxzlib$(D_OPT).lib wxregexu$(D_OPT).lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib rpcrt4.lib wsock32.lib vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp.lib
 <<
 
 vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp.lib: vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\ibpp__ibpp.obj  $(IBPP_OBJECTS)
@@ -499,6 +500,9 @@ vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FindDialog.obj: .\src\gui\FindDi
 
 vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FRLayoutConfig.obj: .\src\gui\FRLayoutConfig.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\FRLayoutConfig.cpp
+
+vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_FRStyle.obj: .\${SOURCEDIR}\gui\FRStyle.cpp
+	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\${SOURCEDIR}\gui\FRStyle.cpp
 
 vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_GUIURIHandlerHelper.obj: .\src\gui\GUIURIHandlerHelper.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\GUIURIHandlerHelper.cpp

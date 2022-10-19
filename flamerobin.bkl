@@ -177,8 +177,8 @@ Accepted values: AMD64, IA64.
             <define>WIN32_LEAN_AND_MEAN</define>
 
             <set var="WX_PORT">wxmsw</set>
-<!-- set this to 28 for wxWidgets 2.8.X, to 30 for wxWidgets 3.0.x-->
-            <set var="WX_VERSION">30</set>
+<!-- set this to 28 for wxWidgets 2.8.X, to 30 for wxWidgets 3.1.x-->
+            <set var="WX_VERSION">31</set>
 
             <set var="WX_LIB_DIR" make_var="1">
                 <if cond="USEDLL=='1'">$(WXDIR)/lib/$(COMPILER)$(DIR_SUFFIX_CPU)_dll</if>
@@ -188,10 +188,8 @@ Accepted values: AMD64, IA64.
             <include>$(WX_LIB_DIR)/msw$(U_OPT)$(D_OPT)</include>
             <include>$(WXDIR)/contrib/include</include>
             <include>$(WXDIR)/include</include>
-            <include>$(DOLLAR)(BOOST_ROOT)</include>
 
             <lib-path>$(WX_LIB_DIR)</lib-path>
-            <lib-path>$(DOLLAR)(BOOST_LIB_DIR)</lib-path>
 
             <!-- another nice thing that wx-config will take care of -->
             <sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_aui</sys-lib>
@@ -201,7 +199,7 @@ Accepted values: AMD64, IA64.
             <sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_core</sys-lib>
             <sys-lib>wxbase$(WX_VERSION)$(U_OPT)$(D_OPT)_xml</sys-lib>
             <sys-lib>wxbase$(WX_VERSION)$(U_OPT)$(D_OPT)</sys-lib>
-            <if cond="WX_VERSION>='30'">
+            <if cond="WX_VERSION>='31'">
                 <sys-lib>wxscintilla$(D_OPT)</sys-lib>
             </if>
             <sys-lib>wxexpat$(D_OPT)</sys-lib>
@@ -278,6 +276,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/FieldPropertiesDialog.h
         $(SOURCEDIR)/gui/FindDialog.h
         $(SOURCEDIR)/gui/FRLayoutConfig.h
+        ${SOURCEDIR}/gui/FRStyle.h
         $(SOURCEDIR)/gui/HtmlHeaderMetadataItemVisitor.h
         $(SOURCEDIR)/gui/HtmlTemplateProcessor.h
         $(SOURCEDIR)/gui/GUIURIHandlerHelper.h
@@ -405,6 +404,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/FieldPropertiesDialog.cpp
         $(SOURCEDIR)/gui/FindDialog.cpp
         $(SOURCEDIR)/gui/FRLayoutConfig.cpp
+        ${SOURCEDIR}/gui/FRStyle.cpp
         $(SOURCEDIR)/gui/GUIURIHandlerHelper.cpp
         $(SOURCEDIR)/gui/HtmlHeaderMetadataItemVisitor.cpp
         $(SOURCEDIR)/gui/HtmlTemplateProcessor.cpp

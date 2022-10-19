@@ -97,6 +97,7 @@ FLAMEROBIN_OBJECTS =  \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesDialog.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_FindDialog.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_FRLayoutConfig.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_FRStyle.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_GUIURIHandlerHelper.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_HtmlHeaderMetadataItemVisitor.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_HtmlTemplateProcessor.o \
@@ -405,6 +406,9 @@ gccu$(R_OPT)$(D_OPT)\flamerobin_FindDialog.o: ./src/gui/FindDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gccu$(R_OPT)$(D_OPT)\flamerobin_FRLayoutConfig.o: ./src/gui/FRLayoutConfig.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gccu$(R_OPT)$(D_OPT)\flamerobin_FRStyle.o: ./${SOURCEDIR}/gui/FRStyle.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gccu$(R_OPT)$(D_OPT)\flamerobin_GUIURIHandlerHelper.o: ./src/gui/GUIURIHandlerHelper.cpp

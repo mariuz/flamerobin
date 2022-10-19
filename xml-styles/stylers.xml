@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="Windows-1252"?>
+<Flamerobin>
+    <LexerStyles>
+        <LexerType name="diff" desc="DIFF" ext="">
+            <WordsStyle name="DEFAULT" styleID="0" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
+            <WordsStyle name="COMMENT" styleID="1" fgColor="008000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
+            <WordsStyle name="COMMAND" styleID="2" fgColor="0000FF" bgColor="FFFFFF" fontName="" fontStyle="1" fontSize="" caseVisible="0"/>
+            <WordsStyle name="HEADER" styleID="3" fgColor="8000FF" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
+            <WordsStyle name="POSITION" styleID="4" fgColor="FF8000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
+            <WordsStyle name="DELETED" styleID="5" fgColor="808040" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
+            <WordsStyle name="ADDED" styleID="6" fgColor="0080FF" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
+        </LexerType>
+        <LexerType name="sql" desc="SQL" ext="">
+            <WordsStyle name="KEYWORD" styleID="5" fgColor="0000FF" bgColor="FFFFFF" fontName="" fontStyle="1" fontSize="" caseVisible="3"/>
+            <WordsStyle name="USER1" styleID="16" fgColor="0000FF" bgColor="FFFFFF" fontName="" fontStyle="1" fontSize="" caseVisible="2"/>
+            <WordsStyle name="KEYWORD2" styleID="19" fgColor="800080" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="1"/>
+            <WordsStyle name="NUMBER" styleID="4" fgColor="FF8000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
+            <WordsStyle name="STRING" styleID="6" fgColor="808080" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
+            <WordsStyle name="STRING2" styleID="7" fgColor="808080" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
+            <WordsStyle name="OPERATOR" styleID="10" fgColor="000080" bgColor="FFFFFF" fontName="" fontStyle="1" fontSize="" caseVisible="0"/>
+            <WordsStyle name="COMMENT" styleID="1" fgColor="008000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
+            <WordsStyle name="COMMENT LINE" styleID="2" fgColor="008000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
+            <WordsStyle name="COMMENT DOC" styleID="3" fgColor="008000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
+            <WordsStyle name="Q OPERATOR" styleID="24" fgColor="808080" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
+        </LexerType>
+        <LexerType name="searchResult" desc="Search result" ext="">
+            <WordsStyle name="Search Header" styleID="1" fgColor="000080" bgColor="BBBBFF" fontName="" fontStyle="1" fontSize=""/>
+            <WordsStyle name="File Header" styleID="2" fgColor="008000" bgColor="D5FFD5" fontName="" fontStyle="1" fontSize=""/>
+            <WordsStyle name="Line Number" styleID="3" fgColor="FF8040" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize=""/>
+            <WordsStyle name="Hit Word" styleID="4" fgColor="FF0000" bgColor="FFFFBF" fontName="" fontStyle="0" fontSize=""/>
+            <WordsStyle name="Current line background colour" styleID="6" bgColor="E8E8FF"/>
+        </LexerType>
+    </LexerStyles>
+    <GlobalStyles>
+        <!-- Attention : Don't modify the name of styleID="0" -->
+        <WidgetStyle name="Global override" styleID="0" fgColor="FFFF80" bgColor="FF8000" fontName="Courier New" fontStyle="0" fontSize="10" caseVisible="0"/>
+        <WidgetStyle name="Default Style" styleID="32" fgColor="000000" bgColor="FFFFFF" fontName="Courier New" fontStyle="0" fontSize="10" caseVisible="0"/>
+        <WidgetStyle name="Indent guideline style" styleID="37" fgColor="C0C0C0" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
+        <WidgetStyle name="Brace highlight style" styleID="34" fgColor="FF0000" bgColor="FFFFFF" fontName="" fontStyle="1" fontSize="10" caseVisible="0"/>
+        <WidgetStyle name="Bad brace colour" styleID="35" fgColor="800000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
+        <WidgetStyle name="Current line background colour" styleID="0" bgColor="E8E8FF"/>
+        <WidgetStyle name="Selected text colour" styleID="0" bgColor="C0C0C0"/>
+        <WidgetStyle name="Caret colour" styleID="2069" fgColor="8000FF"/>
+        <WidgetStyle name="Edge colour" styleID="0" fgColor="80FFFF"/>
+        <WidgetStyle name="Line number margin" styleID="33" fgColor="808080" bgColor="E4E4E4" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
+        <WidgetStyle name="Fold" styleID="0" fgColor="808080" bgColor="F3F3F3"/>
+        <WidgetStyle name="Fold active" styleID="0" fgColor="FF0000"/>
+        <WidgetStyle name="Fold margin" styleID="0" fgColor="FFFFFF" bgColor="E9E9E9"/>
+        <WidgetStyle name="White space symbol" styleID="0" fgColor="FFB56A"/>
+        <WidgetStyle name="Smart HighLighting" styleID="29" bgColor="00FF00"/>
+        <WidgetStyle name="Find Mark Style" styleID="31" bgColor="FF0000"/>
+        <WidgetStyle name="Mark Style 1" styleID="25" bgColor="00FFFF"/>
+        <WidgetStyle name="Mark Style 2" styleID="24" bgColor="FF8000"/>
+        <WidgetStyle name="Mark Style 3" styleID="23" bgColor="FFFF00"/>
+        <WidgetStyle name="Mark Style 4" styleID="22" bgColor="8000FF"/>
+        <WidgetStyle name="Mark Style 5" styleID="21" bgColor="008000"/>
+        <WidgetStyle name="Incremental highlight all" styleID="28" bgColor="0080FF"/>
+        <WidgetStyle name="Tags match highlighting" styleID="27" bgColor="8000FF"/>
+        <WidgetStyle name="Tags attribute" styleID="26" bgColor="FFFF00"/>
+        <WidgetStyle name="Active tab focused indicator" styleID="0" fgColor="FAAA3C"/>
+        <WidgetStyle name="Active tab unfocused indicator" styleID="0" fgColor="FFCAB0"/>
+        <WidgetStyle name="Active tab text" styleID="0" fgColor="000000"/>
+        <WidgetStyle name="Inactive tabs" styleID="0" fgColor="808080" bgColor="C0C0C0"/>
+        <WidgetStyle name="URL hovered" styleID="0" fgColor="0000FF"/>
+        <WidgetStyle name="Document map" styleID="0" fgColor="FF8000" bgColor="FFFFFF"/>
+    </GlobalStyles>
+</Flamerobin>

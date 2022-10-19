@@ -195,7 +195,8 @@ wxColour FRLayoutConfig::getReadonlyColour()
     {
         // first try to compute a colour that is between "white" and "gray"
         // (but use the actual system colours instead of hard-coded values)
-        wxColour clWnd(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
+        //wxColour clWnd(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW));
+        wxColour clWnd(stylerManager().getDefaultStyle()->getbgColor());
         int r1 = clWnd.Red(), g1 = clWnd.Green(), b1 = clWnd.Blue();
         wxColour clBtn = wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE);
         int r2 = clBtn.Red(), g2 = clBtn.Green(), b2 = clBtn.Blue();
