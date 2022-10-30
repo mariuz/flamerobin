@@ -111,6 +111,9 @@ void RestoreFrame::createControls()
         wxDefaultPosition, wxDefaultSize,
         sizeof(pagesize_choices) / sizeof(wxString), pagesize_choices);
 
+    spinctrl_pagebuffers = new wxSpinCtrl(panel_controls, wxID_ANY);
+    spinctrl_pagebuffers->SetRange(0, 2147483646);
+
 }
 
 void RestoreFrame::layoutControls()
@@ -142,6 +145,18 @@ void RestoreFrame::layoutControls()
     sizerCombo->Add(label_pagesize, 0, wxALIGN_CENTER_VERTICAL);
     sizerCombo->Add(styleguide().getControlLabelMargin(), 0);
     sizerCombo->Add(choice_pagesize, 1, wxEXPAND);
+    sizerCombo->Add(styleguide().getRelatedControlMargin(wxHORIZONTAL), 0);
+    {
+        wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+        sizer->Add(new wxStaticText(panel_controls, wxID_ANY,
+            _("Page buffers")), 0, wxALIGN_CENTER_VERTICAL);
+        sizer->Add(styleguide().getControlLabelMargin(), 0);
+        sizer->Add(spinctrl_pagebuffers, 1, wxALIGN_CENTER_VERTICAL);
+
+        sizerCombo->Add(sizer);
+    }
+
+
 
 
     wxBoxSizer* sizerPanelV = new wxBoxSizer(wxVERTICAL);
@@ -193,6 +208,7 @@ void RestoreFrame::updateControls()
     checkbox_fix_fss_data->Enable(!running);
     checkbox_fix_fss_metadata->Enable(!running);
     checkbox_readonlyDB->Enable(!running);
+    spinctrl_pagebuffers->Enable(!running);
     
     //radiobox_replicamode->Enable(!running);
 
@@ -237,6 +253,11 @@ void RestoreFrame::doReadConfigSettings(const wxString& prefix)
         checkbox_readonlyDB->SetValue(
             flags.end() != std::find(flags.begin(), flags.end(), "readonlyDB"));
     }
+
+    int intValue = 0;
+    config().getValue(prefix + Config::pathSeparator + "page_buffers", intValue);
+    spinctrl_pagebuffers->SetValue(intValue);
+
     updateControls();
 }
 
@@ -268,6 +289,10 @@ void RestoreFrame::doWriteConfigSettings(const wxString& prefix) const
         flags.push_back("readonlyDB");
 
     config().setValue(prefix + Config::pathSeparator + "options", flags);
+
+    config().setValue(prefix + Config::pathSeparator + "page_buffers",
+        spinctrl_pagebuffers->GetValue());
+
 }
 
 const wxString RestoreFrame::getName() const
@@ -382,7 +407,7 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
 
     startThread(std::make_unique<RestoreThread>(this,
         server->getConnectionString(), username, password, rolename, charset,
-        text_ctrl_filename->GetValue(), database->getPath(), pagesize,
+        text_ctrl_filename->GetValue(), database->getPath(), pagesize, spinctrl_pagebuffers->GetValue(),
         (IBPP::BRF)flags, spinctrl_showlogInterval->GetValue(), spinctrl_parallelworkers->GetValue(),
         textCtrl_skipdata->GetValue(), textCtrl_includedata->GetValue(),
         textCtrl_crypt->GetValue(), textCtrl_keyholder->GetValue(), textCtrl_keyname->GetValue()
@@ -394,10 +419,10 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
 RestoreThread::RestoreThread(RestoreFrame* frame, wxString 
     server, wxString username, wxString password, wxString 
     rolename, wxString charset, wxString bkfilename, wxString dbfilename, 
-    int pagesize, IBPP::BRF flags, int interval, int parallel,
+    int pagesize, int pagebuffers, IBPP::BRF flags, int interval, int parallel,
     wxString skipData, wxString includeData, wxString cryptPluginName, wxString keyPlugin, 
     wxString keyEncrypt)
-    :pagesizeM(pagesize),
+    :pagesizeM(pagesize), pagebuffersM(pagebuffers),
     BackupRestoreThread(frame, server, username, password, rolename, charset,
         dbfilename, bkfilename, flags, interval, parallel, skipData, includeData, cryptPluginName,
         keyPlugin, keyEncrypt)
@@ -408,7 +433,7 @@ RestoreThread::RestoreThread(RestoreFrame* frame, wxString
 void RestoreThread::Execute(IBPP::Service svc)
 {
     svc->StartRestore(wx2std(bkfileM), wx2std(dbfileM), wx2std(outputFileM),
-        pagesizeM, 0, brfM,
+        pagesizeM, pagebuffersM, brfM,
         wx2std(cryptPluginNameM), wx2std(keyPluginM),
         wx2std(keyEncryptM), wx2std(skipDataM), wx2std(includeDataM), 
         intervalM, parallelM
