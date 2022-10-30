@@ -383,8 +383,7 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     startThread(std::make_unique<RestoreThread>(this,
         server->getConnectionString(), username, password, rolename, charset,
         text_ctrl_filename->GetValue(), database->getPath(), pagesize,
-        (IBPP::BRF)flags,
-        spinctrl_showlogInterval->GetValue(),
+        (IBPP::BRF)flags, spinctrl_showlogInterval->GetValue(), spinctrl_parallelworkers->GetValue(),
         textCtrl_skipdata->GetValue(), textCtrl_includedata->GetValue(),
         textCtrl_crypt->GetValue(), textCtrl_keyholder->GetValue(), textCtrl_keyname->GetValue()
         )
@@ -395,12 +394,12 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
 RestoreThread::RestoreThread(RestoreFrame* frame, wxString 
     server, wxString username, wxString password, wxString 
     rolename, wxString charset, wxString bkfilename, wxString dbfilename, 
-    int pagesize, IBPP::BRF flags, int interval, wxString skipData, 
-    wxString includeData, wxString cryptPluginName, wxString keyPlugin, 
+    int pagesize, IBPP::BRF flags, int interval, int parallel,
+    wxString skipData, wxString includeData, wxString cryptPluginName, wxString keyPlugin, 
     wxString keyEncrypt)
     :pagesizeM(pagesize),
     BackupRestoreThread(frame, server, username, password, rolename, charset,
-        dbfilename, bkfilename, flags, interval, skipData, includeData, cryptPluginName,
+        dbfilename, bkfilename, flags, interval, parallel, skipData, includeData, cryptPluginName,
         keyPlugin, keyEncrypt)
 
 {
@@ -411,6 +410,7 @@ void RestoreThread::Execute(IBPP::Service svc)
     svc->StartRestore(wx2std(bkfileM), wx2std(dbfileM), wx2std(outputFileM),
         pagesizeM, 0, brfM,
         wx2std(cryptPluginNameM), wx2std(keyPluginM),
-        wx2std(keyEncryptM), wx2std(skipDataM), wx2std(includeDataM), intervalM
+        wx2std(keyEncryptM), wx2std(skipDataM), wx2std(includeDataM), 
+        intervalM, parallelM
     );
 }

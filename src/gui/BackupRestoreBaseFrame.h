@@ -71,12 +71,11 @@ protected:
         ID_text_ctrl_filename = 101,
         ID_checkbox_showlog,
         ID_spinctrl_showlogInterval,
-
         ID_button_browse,
-        ID_button_showlog
+        ID_button_showlog,
+        ID_spinctrl_parallelworkers
 
-        //ID_text_ctrl_log,
-        //ID_button_start
+
     };
 
     wxStaticText* label_filename;
@@ -103,6 +102,7 @@ protected:
     wxCheckBox* checkbox_staticpageread;
     wxCheckBox* checkbox_staticpagewrite;
 
+    wxSpinCtrl* spinctrl_parallelworkers;
 
 
 private:
@@ -118,7 +118,8 @@ public:
     BackupRestoreThread(BackupRestoreBaseFrame* frame, wxString server,
         wxString username, wxString password, wxString rolename, wxString charset,
         wxString dbfilename, wxString bkfilename,
-        IBPP::BRF flags, int interval, wxString skipData, wxString includeData,
+        IBPP::BRF flags, int interval, int parallel,
+        wxString skipData, wxString includeData,
         wxString cryptPluginName, wxString keyPlugin, wxString keyEncrypt
     );
 protected:
@@ -132,6 +133,7 @@ protected:
     wxString keyEncryptM;
 
     int intervalM;
+    int parallelM;
     IBPP::BRF brfM;
 };
 

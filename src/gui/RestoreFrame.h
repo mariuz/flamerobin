@@ -78,7 +78,8 @@ public:
     RestoreThread(RestoreFrame* frame, wxString server,
         wxString username, wxString password, wxString rolename, wxString charset,
         wxString bkfilename, wxString dbfilename,
-        int pagesize, IBPP::BRF flags, int interval, wxString skipData, wxString includeData,
+        int pagesize, IBPP::BRF flags, int interval, int parallel,
+        wxString skipData, wxString includeData,
         wxString cryptPluginName, wxString keyPlugin, wxString keyEncrypt
     );
 protected:

@@ -72,7 +72,8 @@ public:
     BackupThread(BackupFrame* frame, wxString server,
         wxString username, wxString password, wxString rolename, wxString charset,
         wxString dbfilename, wxString bkfilename,
-        IBPP::BRF flags, int interval, wxString skipData, wxString includeData,
+        IBPP::BRF flags, int interval, int parallel,
+        wxString skipData, wxString includeData,
         wxString cryptPluginName, wxString keyPlugin, wxString keyEncrypt
     );
 protected:

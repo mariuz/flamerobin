@@ -133,6 +133,10 @@ void BackupRestoreBaseFrame::doReadConfigSettings(const wxString& prefix)
     config().getValue(prefix + Config::pathSeparator + "static_pagewrite", boolValue);
     checkbox_staticpagewrite->SetValue(boolValue);
 
+    intValue = 0;
+    config().getValue(prefix + Config::pathSeparator + "parallel_workers", intValue);
+    spinctrl_parallelworkers->SetValue(intValue);
+
 }
 
 void BackupRestoreBaseFrame::doWriteConfigSettings(const wxString& prefix) const
@@ -170,6 +174,10 @@ void BackupRestoreBaseFrame::doWriteConfigSettings(const wxString& prefix) const
         checkbox_staticpageread->GetValue());
     config().setValue(prefix + Config::pathSeparator + "static_pagewrite",
         checkbox_staticpagewrite->GetValue());
+
+    config().setValue(prefix + Config::pathSeparator + "parallel_workers",
+        spinctrl_parallelworkers->GetValue());
+
 }
 
 
@@ -213,6 +221,8 @@ void BackupRestoreBaseFrame::createControls()
     checkbox_staticpageread = new wxCheckBox(panel_controls, wxID_ANY, _("Page reads"));
     checkbox_staticpagewrite = new wxCheckBox(panel_controls, wxID_ANY, _("Page writes"));
 
+    spinctrl_parallelworkers = new wxSpinCtrl(panel_controls, ID_spinctrl_parallelworkers);
+    spinctrl_parallelworkers->SetRange(0, 32767);
 }
 
 void BackupRestoreBaseFrame::layoutControls()
@@ -235,14 +245,12 @@ void BackupRestoreBaseFrame::layoutControls()
 
 
     {
-        wxGridSizer* gsizer = new wxGridSizer(1, 3,
+        wxGridSizer* gsizer = new wxGridSizer(1, 4,
             styleguide().getCheckboxSpacing(),
             styleguide().getUnrelatedControlMargin(wxHORIZONTAL));
 
         gsizer->Add(checkbox_metadata, 0, wxEXPAND);
-        //gsizer->Add(0, 0, wxEXPAND);
         gsizer->Add(checkbox_showlog, 0, wxEXPAND);
-
         {
             wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
             sizer->Add(new wxStaticText(panel_controls, wxID_ANY,
@@ -251,7 +259,15 @@ void BackupRestoreBaseFrame::layoutControls()
             sizer->Add(spinctrl_showlogInterval, 1, wxALIGN_CENTER_VERTICAL);
 
             gsizer->Add(sizer);
-            //sizerGeneralOptions->Add(0, styleguide().getRelatedControlMargin(wxVERTICAL));
+        }
+        {
+            wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+            sizer->Add(new wxStaticText(panel_controls, wxID_ANY,
+                _("Parallel (FB3.0+)")), 0, wxALIGN_CENTER_VERTICAL);
+            sizer->Add(styleguide().getControlLabelMargin(), 0);
+            sizer->Add(spinctrl_parallelworkers, 1, wxALIGN_CENTER_VERTICAL);
+
+            gsizer->Add(sizer);
         }
 
         sizerGeneralOptions->Add(gsizer);
@@ -395,6 +411,8 @@ void BackupRestoreBaseFrame::updateControls()
     checkbox_staticdelta->Enable(!running);
     checkbox_staticpageread->Enable(!running);
     checkbox_staticpagewrite->Enable(!running);
+
+    spinctrl_parallelworkers->Enable(!running);
 }
 
 //! event handlers
@@ -419,11 +437,11 @@ void BackupRestoreBaseFrame::OnVerboseLogChange(wxCommandEvent& WXUNUSED(event))
 BackupRestoreThread::BackupRestoreThread(BackupRestoreBaseFrame* frame,
     wxString server, wxString username, wxString password,
     wxString rolename, wxString charset, wxString dbfilename,
-    wxString bkfilename, IBPP::BRF flags, int interval,
+    wxString bkfilename, IBPP::BRF flags, int interval, int parallel,
     wxString skipData, wxString includeData, wxString cryptPluginName,
     wxString keyPlugin, wxString keyEncrypt)
     :
-    dbfileM(dbfilename), bkfileM(bkfilename), intervalM(interval),
+    dbfileM(dbfilename), bkfileM(bkfilename), intervalM(interval), parallelM(parallel),
     skipDataM(skipData), includeDataM(includeData),
     cryptPluginNameM(cryptPluginName), keyPluginM(keyPlugin), keyEncryptM(keyEncrypt),
     ServiceThread(frame, server, username, password, rolename, charset)

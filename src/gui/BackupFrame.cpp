@@ -320,7 +320,7 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     startThread(std::make_unique<BackupThread>(this,
         server->getConnectionString(), username, password, rolename, charset,
         database->getPath(), text_ctrl_filename->GetValue(),
-        (IBPP::BRF)flags, spinctrl_showlogInterval->GetValue(), 
+        (IBPP::BRF)flags, spinctrl_showlogInterval->GetValue(), spinctrl_parallelworkers->GetValue(),
         textCtrl_skipdata->GetValue(), textCtrl_includedata->GetValue(), 
         textCtrl_crypt->GetValue(), textCtrl_keyholder->GetValue(), textCtrl_keyname->GetValue()
         )
@@ -332,12 +332,12 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
 BackupThread::BackupThread(BackupFrame* frame,
     wxString server, wxString username, wxString password,
     wxString rolename, wxString charset, wxString dbfilename,
-    wxString bkfilename, IBPP::BRF flags, int interval, wxString
-    skipData, wxString includeData, wxString cryptPluginName,
+    wxString bkfilename, IBPP::BRF flags, int interval, int parallel,
+    wxString skipData, wxString includeData, wxString cryptPluginName,
     wxString keyPlugin, wxString keyEncrypt)
     :factorM(0),
     BackupRestoreThread(frame, server, username, password,rolename, charset, 
-        dbfilename,bkfilename, flags, interval, skipData, includeData, cryptPluginName,
+        dbfilename,bkfilename, flags, interval, parallel, skipData, includeData, cryptPluginName,
         keyPlugin, keyEncrypt)
 {
 }
@@ -346,6 +346,7 @@ void BackupThread::Execute(IBPP::Service svc)
 {
     svc->StartBackup(wx2std(dbfileM), wx2std(bkfileM), wx2std(outputFileM),
         factorM, brfM, wx2std(cryptPluginNameM), wx2std(keyPluginM),
-        wx2std(keyEncryptM), wx2std(skipDataM), wx2std(includeDataM), intervalM
+        wx2std(keyEncryptM), wx2std(skipDataM), wx2std(includeDataM), 
+        intervalM, parallelM
     );
 }
