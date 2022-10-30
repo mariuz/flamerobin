@@ -319,7 +319,7 @@ list(APPEND IBPP_SOURCE_LIST
 )
 list(APPEND IBPP_HEADER_LIST
         ${SOURCEDIR}/firebird/include/ibase.h
-        ${SOURCEDIR}/firebird/include/ierror.h
+        ${SOURCEDIR}/firebird/include/iberror.h
         ${SOURCEDIR}/firebird/include/firebird/impl/blr.h
         ${SOURCEDIR}/firebird/include/firebird/impl/consts_pub.h
         ${SOURCEDIR}/firebird/include/firebird/impl/dsc_pub.h
