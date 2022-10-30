@@ -71,4 +71,20 @@ private:
     DECLARE_EVENT_TABLE()
 };
 
+
+class RestoreThread : public BackupRestoreThread
+{
+public:
+    RestoreThread(RestoreFrame* frame, wxString server,
+        wxString username, wxString password, wxString rolename, wxString charset,
+        wxString bkfilename, wxString dbfilename,
+        int pagesize, IBPP::BRF flags, int interval, wxString skipData, wxString includeData,
+        wxString cryptPluginName, wxString keyPlugin, wxString keyEncrypt
+    );
+protected:
+    virtual void Execute(IBPP::Service);
+
+    int pagesizeM;
+
+};
 #endif // RESTOREFRAME_H

@@ -44,14 +44,8 @@
 
 BackupRestoreBaseFrame::BackupRestoreBaseFrame(wxWindow* parent,
         DatabasePtr db)
-    : ThreadBaseFrame(parent, db)
+    : ServiceBaseFrame(parent, db)
 {
-    //wxASSERT(db);
-    //db->attachObserver(this, false);
-
-    //threadMsgTimeMillisM = 0;
-    verboseMsgsM = true;
-
     // create controls in constructor of descendant class (correct tab order)
     panel_controls = 0;
     checkbox_showlog = 0;
@@ -71,7 +65,7 @@ void BackupRestoreBaseFrame::cancelBackupRestore()
 bool BackupRestoreBaseFrame::Destroy()
 {
     cancelBackupRestore();
-    return ThreadBaseFrame::Destroy();
+    return ServiceBaseFrame::Destroy();
 }
 
 void BackupRestoreBaseFrame::doReadConfigSettings(const wxString& prefix)
@@ -80,47 +74,62 @@ void BackupRestoreBaseFrame::doReadConfigSettings(const wxString& prefix)
 
 
     wxString strValue;
-    bool boolValue = true;
+    bool boolValue;
     int intValue;
 
+    strValue = "";
     config().getValue(prefix + Config::pathSeparator + "backupfilename", strValue);
     if (!strValue.empty())
         text_ctrl_filename->SetValue(strValue);
 
     
+    boolValue = false;
     config().getValue(prefix + Config::pathSeparator + "metadata", boolValue);
     checkbox_metadata->SetValue(boolValue);
     
+    boolValue = false;
     config().getValue(prefix + Config::pathSeparator + "verboselog", boolValue);
     checkbox_showlog->SetValue(boolValue);
+    intValue = 0;
     config().getValue(prefix + Config::pathSeparator + "verboselog_interval", intValue);
     spinctrl_showlogInterval->SetValue(intValue);
 
+    strValue = "";
     config().getValue(prefix + Config::pathSeparator + "cryptplugin_name", strValue);
     if (!strValue.empty())
         textCtrl_crypt->SetValue(strValue);
+    
+    strValue = ""; 
     config().getValue(prefix + Config::pathSeparator + "keyholder_name", strValue);
     if (!strValue.empty())
         textCtrl_keyholder->SetValue(strValue);
+    
+    strValue = "";
     config().getValue(prefix + Config::pathSeparator + "key_name", strValue);
     if (!strValue.empty())
         textCtrl_keyname->SetValue(strValue);
 
-
+    strValue = "";
     config().getValue(prefix + Config::pathSeparator + "skipdata", strValue);
     if (!strValue.empty())
         textCtrl_skipdata->SetValue(strValue);
+
+    strValue = "";
     config().getValue(prefix + Config::pathSeparator + "includedata", strValue);
     if (!strValue.empty())
         textCtrl_includedata->SetValue(strValue);
 
 
+    boolValue = false;
     config().getValue(prefix + Config::pathSeparator + "static_time", boolValue);
     checkbox_statictime->SetValue(boolValue);
+    boolValue = false;
     config().getValue(prefix + Config::pathSeparator + "static_delta", boolValue);
     checkbox_staticdelta->SetValue(boolValue);
+    boolValue = false;
     config().getValue(prefix + Config::pathSeparator + "static_pageread", boolValue);
     checkbox_staticpageread->SetValue(boolValue);
+    boolValue = false;
     config().getValue(prefix + Config::pathSeparator + "static_pagewrite", boolValue);
     checkbox_staticpagewrite->SetValue(boolValue);
 
@@ -173,7 +182,7 @@ const wxString BackupRestoreBaseFrame::getStorageName() const
 
 void BackupRestoreBaseFrame::createControls()
 {
-    ThreadBaseFrame::createControls();
+    ServiceBaseFrame::createControls();
 
     label_filename = new wxStaticText(panel_controls, wxID_ANY,
         _("Backup file:"));
@@ -208,7 +217,7 @@ void BackupRestoreBaseFrame::createControls()
 
 void BackupRestoreBaseFrame::layoutControls()
 {
-    ThreadBaseFrame::layoutControls();
+    ServiceBaseFrame::layoutControls();
 
     int wh = text_ctrl_filename->GetMinHeight();
     button_browse->SetSize(wh, wh);
@@ -363,7 +372,7 @@ void BackupRestoreBaseFrame::updateControls()
     // empty implementation to allow this to be called from update()
     // which could happen in the constructor, when descendant isn't
     // completely initialized yet
-    ThreadBaseFrame::updateControls();
+    ServiceBaseFrame::updateControls();
 
     bool running = getThreadRunning();
 
@@ -389,10 +398,8 @@ void BackupRestoreBaseFrame::updateControls()
 }
 
 //! event handlers
-BEGIN_EVENT_TABLE(BackupRestoreBaseFrame, ThreadBaseFrame)
+BEGIN_EVENT_TABLE(BackupRestoreBaseFrame, ServiceBaseFrame)
     EVT_CHECKBOX(BackupRestoreBaseFrame::ID_checkbox_showlog, BackupRestoreBaseFrame::OnVerboseLogChange)
-    EVT_MENU(BackupRestoreBaseFrame::ID_thread_finished, BackupRestoreBaseFrame::OnThreadFinished)
-    EVT_MENU(BackupRestoreBaseFrame::ID_thread_output, BackupRestoreBaseFrame::OnThreadOutput)
     EVT_TEXT(BackupRestoreBaseFrame::ID_text_ctrl_filename, BackupRestoreBaseFrame::OnSettingsChange)
 END_EVENT_TABLE()
 
@@ -408,3 +415,19 @@ void BackupRestoreBaseFrame::OnVerboseLogChange(wxCommandEvent& WXUNUSED(event))
     updateMessages(0, msgsM.GetCount());
 }
 
+
+BackupRestoreThread::BackupRestoreThread(BackupRestoreBaseFrame* frame,
+    wxString server, wxString username, wxString password,
+    wxString rolename, wxString charset, wxString dbfilename,
+    wxString bkfilename, IBPP::BRF flags, int interval,
+    wxString skipData, wxString includeData, wxString cryptPluginName,
+    wxString keyPlugin, wxString keyEncrypt)
+    :
+    dbfileM(dbfilename), bkfileM(bkfilename), intervalM(interval),
+    skipDataM(skipData), includeDataM(includeData),
+    cryptPluginNameM(cryptPluginName), keyPluginM(keyPlugin), keyEncryptM(keyEncrypt),
+    ServiceThread(frame, server, username, password, rolename, charset)
+{
+    // always use verbose flag
+    brfM = (IBPP::BRF)((int)flags | (int)IBPP::brVerbose);
+}

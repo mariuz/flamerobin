@@ -888,37 +888,37 @@
 		};
 		0000000000000000000000a3 = {
 			isa = PBXFileReference;
-			path = ShutdownStartupBaseFrame.cpp;
+			path = ServiceBaseFrame.cpp;
 			sourceTree = "<group>";
 		};
 		0000000000000000000000a5 = {
 			isa = PBXFileReference;
-			path = ShutdownFrame.cpp;
+			path = ShutdownStartupBaseFrame.cpp;
 			sourceTree = "<group>";
 		};
 		0000000000000000000000a7 = {
 			isa = PBXFileReference;
-			path = SimpleHtmlFrame.cpp;
+			path = ShutdownFrame.cpp;
 			sourceTree = "<group>";
 		};
 		0000000000000000000000a9 = {
 			isa = PBXFileReference;
-			path = StatementHistoryDialog.cpp;
+			path = SimpleHtmlFrame.cpp;
 			sourceTree = "<group>";
 		};
 		0000000000000000000000ab = {
 			isa = PBXFileReference;
-			path = StartupFrame.cpp;
+			path = StatementHistoryDialog.cpp;
 			sourceTree = "<group>";
 		};
 		0000000000000000000000ad = {
 			isa = PBXFileReference;
-			path = StyleGuide.cpp;
+			path = StartupFrame.cpp;
 			sourceTree = "<group>";
 		};
 		0000000000000000000000af = {
 			isa = PBXFileReference;
-			path = ThreadBaseFrame.cpp;
+			path = StyleGuide.cpp;
 			sourceTree = "<group>";
 		};
 		0000000000000000000000b1 = {
@@ -1458,37 +1458,37 @@
 		};
 		00000000000000000000014c = {
 			isa = PBXFileReference;
-			path = ShutdownStartupBaseFrame.h;
+			path = ServiceBaseFrame.h;
 			sourceTree = "<group>";
 		};
 		00000000000000000000014d = {
 			isa = PBXFileReference;
-			path = ShutdownFrame.h;
+			path = ShutdownStartupBaseFrame.h;
 			sourceTree = "<group>";
 		};
 		00000000000000000000014e = {
 			isa = PBXFileReference;
-			path = SimpleHtmlFrame.h;
+			path = ShutdownFrame.h;
 			sourceTree = "<group>";
 		};
 		00000000000000000000014f = {
 			isa = PBXFileReference;
-			path = StatementHistoryDialog.h;
+			path = SimpleHtmlFrame.h;
 			sourceTree = "<group>";
 		};
 		000000000000000000000150 = {
 			isa = PBXFileReference;
-			path = StartupFrame.h;
+			path = StatementHistoryDialog.h;
 			sourceTree = "<group>";
 		};
 		000000000000000000000151 = {
 			isa = PBXFileReference;
-			path = StyleGuide.h;
+			path = StartupFrame.h;
 			sourceTree = "<group>";
 		};
 		000000000000000000000152 = {
 			isa = PBXFileReference;
-			path = ThreadBaseFrame.h;
+			path = StyleGuide.h;
 			sourceTree = "<group>";
 		};
 		000000000000000000000153 = {
@@ -2095,9 +2095,9 @@
 				00000000000000000000009d,
 				00000000000000000000009f,
 				0000000000000000000000a1,
-				0000000000000000000000a7,
 				0000000000000000000000a9,
-				0000000000000000000000ad,
+				0000000000000000000000ab,
+				0000000000000000000000af,
 				0000000000000000000000b1,
 				0000000000000000000000b3,
 				00000000000000000000011f,
@@ -2134,9 +2134,9 @@
 				000000000000000000000149,
 				00000000000000000000014a,
 				00000000000000000000014b,
-				00000000000000000000014e,
 				00000000000000000000014f,
-				000000000000000000000151,
+				000000000000000000000150,
+				000000000000000000000152,
 				000000000000000000000153,
 				000000000000000000000154,
 			);
@@ -2176,13 +2176,13 @@
 				00000000000000000000008d,
 				0000000000000000000000a3,
 				0000000000000000000000a5,
-				0000000000000000000000ab,
-				0000000000000000000000af,
+				0000000000000000000000a7,
+				0000000000000000000000ad,
 				000000000000000000000142,
 				00000000000000000000014c,
 				00000000000000000000014d,
-				000000000000000000000150,
-				000000000000000000000152,
+				00000000000000000000014e,
+				000000000000000000000151,
 			);
 			path = "${SOURCEDIR}/gui";
 			sourceTree = "<group>";

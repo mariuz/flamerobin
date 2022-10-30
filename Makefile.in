@@ -107,13 +107,13 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_ReorderFieldsDialog.o \
 	flamerobin_RestoreFrame.o \
 	flamerobin_ServerRegistrationDialog.o \
+	flamerobin_ServiceBaseFrame.o \
 	flamerobin_ShutdownStartupBaseFrame.o \
 	flamerobin_ShutdownFrame.o \
 	flamerobin_SimpleHtmlFrame.o \
 	flamerobin_StatementHistoryDialog.o \
 	flamerobin_StartupFrame.o \
 	flamerobin_StyleGuide.o \
-	flamerobin_ThreadBaseFrame.o \
 	flamerobin_UserDialog.o \
 	flamerobin_UsernamePasswordDialog.o \
 	flamerobin_logger.o \
@@ -515,6 +515,9 @@ flamerobin_RestoreFrame.o: $(srcdir)/src/gui/RestoreFrame.cpp $(FLAMEROBIN_ODEP)
 flamerobin_ServerRegistrationDialog.o: $(srcdir)/src/gui/ServerRegistrationDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/ServerRegistrationDialog.cpp
 
+flamerobin_ServiceBaseFrame.o: $(srcdir)/${SOURCEDIR}/gui/ServiceBaseFrame.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/${SOURCEDIR}/gui/ServiceBaseFrame.cpp
+
 flamerobin_ShutdownStartupBaseFrame.o: $(srcdir)/${SOURCEDIR}/gui/ShutdownStartupBaseFrame.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/${SOURCEDIR}/gui/ShutdownStartupBaseFrame.cpp
 
@@ -532,9 +535,6 @@ flamerobin_StartupFrame.o: $(srcdir)/${SOURCEDIR}/gui/StartupFrame.cpp $(FLAMERO
 
 flamerobin_StyleGuide.o: $(srcdir)/src/gui/StyleGuide.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/StyleGuide.cpp
-
-flamerobin_ThreadBaseFrame.o: $(srcdir)/${SOURCEDIR}/gui/ThreadBaseFrame.cpp $(FLAMEROBIN_ODEP)
-	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/${SOURCEDIR}/gui/ThreadBaseFrame.cpp
 
 flamerobin_UserDialog.o: $(srcdir)/src/gui/UserDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/UserDialog.cpp

@@ -62,4 +62,18 @@ private:
     DECLARE_EVENT_TABLE()
 };
 
+
+class ShutdownThread : public ShutdownStartupThread
+{
+public:
+    ShutdownThread(ShutdownFrame* frame, wxString server,
+        wxString username, wxString password, wxString rolename, wxString charset,
+        wxString dbfilename, IBPP::DSM flags, int timeout);
+protected:
+    virtual void Execute(IBPP::Service);
+    int timeoutM;
+
+
+
+};
 #endif // FR_SHUTDOWNFRAME_H

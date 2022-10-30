@@ -33,14 +33,14 @@
 #include <memory>
 
 #include "core/Observer.h"
-#include "gui/ThreadBaseFrame.h"
+#include "gui/ServiceBaseFrame.h"
 #include "metadata/database.h"
 #include "metadata/MetadataClasses.h"
 
 class FileTextControl;
 class LogTextControl;
 
-class BackupRestoreBaseFrame: public ThreadBaseFrame//, public Observer
+class BackupRestoreBaseFrame: public ServiceBaseFrame//, public Observer
 {
 public:
 
@@ -110,6 +110,29 @@ private:
     void OnVerboseLogChange(wxCommandEvent& event);
 
     DECLARE_EVENT_TABLE()
+};
+
+class BackupRestoreThread : public ServiceThread
+{
+public:
+    BackupRestoreThread(BackupRestoreBaseFrame* frame, wxString server,
+        wxString username, wxString password, wxString rolename, wxString charset,
+        wxString dbfilename, wxString bkfilename,
+        IBPP::BRF flags, int interval, wxString skipData, wxString includeData,
+        wxString cryptPluginName, wxString keyPlugin, wxString keyEncrypt
+    );
+protected:
+    wxString bkfileM;
+    wxString dbfileM;
+    wxString outputFileM;
+    wxString skipDataM;
+    wxString includeDataM;
+    wxString cryptPluginNameM;
+    wxString keyPluginM;
+    wxString keyEncryptM;
+
+    int intervalM;
+    IBPP::BRF brfM;
 };
 
 #endif // BACKUPRESTOREBASEFRAME_H
