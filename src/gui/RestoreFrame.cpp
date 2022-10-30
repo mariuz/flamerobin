@@ -47,164 +47,6 @@
 #include "gui/UsernamePasswordDialog.h"
 #include "metadata/database.h"
 #include "metadata/server.h"
-
-// worker thread class to perform database restore
-class RestoreThread: public wxThread {
-public:
-    RestoreThread(RestoreFrame* frame, wxString server, 
-        wxString username, wxString password,  wxString rolename, wxString charset,
-        wxString bkfilename, wxString dbfilename,
-        int pagesize, IBPP::BRF flags, int interval, wxString skipData, wxString includeData,
-        wxString cryptPluginName, wxString keyPlugin, wxString keyEncrypt
-    );
-    virtual void* Entry();
-    virtual void OnExit();
-private:
-    RestoreFrame* frameM;
-    wxString serverM;
-    wxString usernameM;
-    wxString passwordM;
-    wxString rolenameM;
-    wxString charsetM;
-    wxString bkfileM;
-    wxString dbfileM;
-    int pagesizeM;
-    IBPP::BRF brfM;
-
-    wxString outputFileM;
-    int intervalM;
-    wxString skipDataM;
-    wxString includeDataM;
-    wxString cryptPluginNameM;
-    wxString keyPluginM;
-    wxString keyEncryptM;
-
-    void logError(wxString& msg);
-    void logImportant(wxString& msg);
-    void logProgress(wxString& msg);
-};
-
-RestoreThread::RestoreThread(RestoreFrame* frame, wxString server, 
-    wxString username, wxString password, wxString rolename, wxString charset,
-    wxString bkfilename, wxString dbfilename,
-    int pagesize, IBPP::BRF flags, int interval, wxString skipData, wxString includeData,
-    wxString cryptPluginName, wxString keyPlugin, wxString keyEncrypt)
-    : wxThread()
-{
-    frameM = frame;
-    serverM = server;
-    usernameM = username;
-    passwordM = password;
-    rolenameM = rolename;
-    charsetM = charset;
-
-    bkfileM = bkfilename;
-    dbfileM = dbfilename;
-    pagesizeM = pagesize;
-    // always use verbose flag
-    brfM = (IBPP::BRF)((int)flags | (int)IBPP::brVerbose);
-    wxString outputFileM;
-    intervalM = interval;
-    skipDataM = skipData;
-    includeDataM = includeData;
-    cryptPluginNameM = cryptPluginName;
-    keyPluginM = keyPlugin;
-    keyEncryptM = keyEncrypt;
-
-}
-
-void* RestoreThread::Entry()
-{
-    wxDateTime now;
-    wxString msg;
-
-    try
-    {
-        msg.Printf(_("Connecting to server %s..."), serverM.c_str());
-        logImportant(msg);
-        IBPP::Service svc = IBPP::ServiceFactory(wx2std(serverM),
-            wx2std(usernameM), wx2std(passwordM), wx2std(rolenameM), wx2std(charsetM)
-        );
-        svc->Connect();
-
-        now = wxDateTime::Now();
-        msg.Printf(_("Database restore started %s"), now.FormatTime().c_str());
-        logImportant(msg);
-        svc->StartRestore(wx2std(bkfileM), wx2std(dbfileM), wx2std(outputFileM), 
-            pagesizeM, 0, brfM,
-            wx2std(cryptPluginNameM), wx2std(keyPluginM),
-            wx2std(keyEncryptM), wx2std(skipDataM), wx2std(includeDataM), intervalM
-        );
-        while (true)
-        {
-            if (TestDestroy())
-            {
-                now = wxDateTime::Now();
-                msg.Printf(_("Database restore canceled %s"),
-                    now.FormatTime().c_str());
-                logImportant(msg);
-                break;
-            }
-            const char* c = svc->WaitMsg();
-            if (c == 0)
-            {
-                now = wxDateTime::Now();
-                msg.Printf(_("Database restore finished %s"),
-                    now.FormatTime().c_str());
-                logImportant(msg);
-                break;
-            }
-            msg = c;
-            logProgress(msg);
-        }
-        svc->Disconnect();
-    }
-    catch (IBPP::Exception& e)
-    {
-        now = wxDateTime::Now();
-        msg.Printf(_("Database restore canceled %s due to IBPP exception:\n\n"),
-            now.FormatTime().c_str());
-        msg += e.what();
-        logError(msg);
-    }
-    catch (...)
-    {
-        now = wxDateTime::Now();
-        msg.Printf(_("Database restore canceled %s due to exception"),
-            now.FormatTime().c_str());
-        logError(msg);
-    }
-    return 0;
-}
-
-void RestoreThread::OnExit()
-{
-    if (frameM != 0)
-    {
-        wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
-            BackupRestoreBaseFrame::ID_thread_finished);
-        wxPostEvent(frameM, event);
-    }
-}
-
-void RestoreThread::logError(wxString& msg)
-{
-    if (frameM != 0)
-        frameM->threadOutputMsg(msg, BackupRestoreBaseFrame::error_message);
-}
-
-void RestoreThread::logImportant(wxString& msg)
-{
-    if (frameM != 0)
-        frameM->threadOutputMsg(msg, BackupRestoreBaseFrame::important_message);
-}
-
-void RestoreThread::logProgress(wxString& msg)
-{
-    if (frameM != 0)
-        frameM->threadOutputMsg(msg, BackupRestoreBaseFrame::progress_message);
-}
-
 RestoreFrame::RestoreFrame(wxWindow* parent, DatabasePtr db)
     : BackupRestoreBaseFrame(parent, db)
 {
@@ -269,6 +111,9 @@ void RestoreFrame::createControls()
         wxDefaultPosition, wxDefaultSize,
         sizeof(pagesize_choices) / sizeof(wxString), pagesize_choices);
 
+    spinctrl_pagebuffers = new wxSpinCtrl(panel_controls, wxID_ANY);
+    spinctrl_pagebuffers->SetRange(0, 2147483646);
+
 }
 
 void RestoreFrame::layoutControls()
@@ -300,6 +145,18 @@ void RestoreFrame::layoutControls()
     sizerCombo->Add(label_pagesize, 0, wxALIGN_CENTER_VERTICAL);
     sizerCombo->Add(styleguide().getControlLabelMargin(), 0);
     sizerCombo->Add(choice_pagesize, 1, wxEXPAND);
+    sizerCombo->Add(styleguide().getRelatedControlMargin(wxHORIZONTAL), 0);
+    {
+        wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
+        sizer->Add(new wxStaticText(panel_controls, wxID_ANY,
+            _("Page buffers")), 0, wxALIGN_CENTER_VERTICAL);
+        sizer->Add(styleguide().getControlLabelMargin(), 0);
+        sizer->Add(spinctrl_pagebuffers, 1, wxALIGN_CENTER_VERTICAL);
+
+        sizerCombo->Add(sizer);
+    }
+
+
 
 
     wxBoxSizer* sizerPanelV = new wxBoxSizer(wxVERTICAL);
@@ -351,6 +208,7 @@ void RestoreFrame::updateControls()
     checkbox_fix_fss_data->Enable(!running);
     checkbox_fix_fss_metadata->Enable(!running);
     checkbox_readonlyDB->Enable(!running);
+    spinctrl_pagebuffers->Enable(!running);
     
     //radiobox_replicamode->Enable(!running);
 
@@ -395,6 +253,11 @@ void RestoreFrame::doReadConfigSettings(const wxString& prefix)
         checkbox_readonlyDB->SetValue(
             flags.end() != std::find(flags.begin(), flags.end(), "readonlyDB"));
     }
+
+    int intValue = 0;
+    config().getValue(prefix + Config::pathSeparator + "page_buffers", intValue);
+    spinctrl_pagebuffers->SetValue(intValue);
+
     updateControls();
 }
 
@@ -426,6 +289,10 @@ void RestoreFrame::doWriteConfigSettings(const wxString& prefix) const
         flags.push_back("readonlyDB");
 
     config().setValue(prefix + Config::pathSeparator + "options", flags);
+
+    config().setValue(prefix + Config::pathSeparator + "page_buffers",
+        spinctrl_pagebuffers->GetValue());
+
 }
 
 const wxString RestoreFrame::getName() const
@@ -540,12 +407,35 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
 
     startThread(std::make_unique<RestoreThread>(this,
         server->getConnectionString(), username, password, rolename, charset,
-        text_ctrl_filename->GetValue(), database->getPath(), pagesize,
-        (IBPP::BRF)flags,
-        spinctrl_showlogInterval->GetValue(),
+        text_ctrl_filename->GetValue(), database->getPath(), pagesize, spinctrl_pagebuffers->GetValue(),
+        (IBPP::BRF)flags, spinctrl_showlogInterval->GetValue(), spinctrl_parallelworkers->GetValue(),
         textCtrl_skipdata->GetValue(), textCtrl_includedata->GetValue(),
         textCtrl_crypt->GetValue(), textCtrl_keyholder->GetValue(), textCtrl_keyname->GetValue()
         )
     );
     updateControls();
+}
+
+RestoreThread::RestoreThread(RestoreFrame* frame, wxString 
+    server, wxString username, wxString password, wxString 
+    rolename, wxString charset, wxString bkfilename, wxString dbfilename, 
+    int pagesize, int pagebuffers, IBPP::BRF flags, int interval, int parallel,
+    wxString skipData, wxString includeData, wxString cryptPluginName, wxString keyPlugin, 
+    wxString keyEncrypt)
+    :pagesizeM(pagesize), pagebuffersM(pagebuffers),
+    BackupRestoreThread(frame, server, username, password, rolename, charset,
+        dbfilename, bkfilename, flags, interval, parallel, skipData, includeData, cryptPluginName,
+        keyPlugin, keyEncrypt)
+
+{
+}
+
+void RestoreThread::Execute(IBPP::Service svc)
+{
+    svc->StartRestore(wx2std(bkfileM), wx2std(dbfileM), wx2std(outputFileM),
+        pagesizeM, pagebuffersM, brfM,
+        wx2std(cryptPluginNameM), wx2std(keyPluginM),
+        wx2std(keyEncryptM), wx2std(skipDataM), wx2std(includeDataM), 
+        intervalM, parallelM
+    );
 }

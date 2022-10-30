@@ -33,14 +33,14 @@
 #include <memory>
 
 #include "core/Observer.h"
-#include "gui/ThreadBaseFrame.h"
+#include "gui/ServiceBaseFrame.h"
 #include "metadata/database.h"
 #include "metadata/MetadataClasses.h"
 
 class FileTextControl;
 class LogTextControl;
 
-class BackupRestoreBaseFrame: public ThreadBaseFrame//, public Observer
+class BackupRestoreBaseFrame: public ServiceBaseFrame//, public Observer
 {
 public:
 
@@ -71,12 +71,11 @@ protected:
         ID_text_ctrl_filename = 101,
         ID_checkbox_showlog,
         ID_spinctrl_showlogInterval,
-
         ID_button_browse,
-        ID_button_showlog
+        ID_button_showlog,
+        ID_spinctrl_parallelworkers
 
-        //ID_text_ctrl_log,
-        //ID_button_start
+
     };
 
     wxStaticText* label_filename;
@@ -103,6 +102,7 @@ protected:
     wxCheckBox* checkbox_staticpageread;
     wxCheckBox* checkbox_staticpagewrite;
 
+    wxSpinCtrl* spinctrl_parallelworkers;
 
 
 private:
@@ -110,6 +110,31 @@ private:
     void OnVerboseLogChange(wxCommandEvent& event);
 
     DECLARE_EVENT_TABLE()
+};
+
+class BackupRestoreThread : public ServiceThread
+{
+public:
+    BackupRestoreThread(BackupRestoreBaseFrame* frame, wxString server,
+        wxString username, wxString password, wxString rolename, wxString charset,
+        wxString dbfilename, wxString bkfilename,
+        IBPP::BRF flags, int interval, int parallel,
+        wxString skipData, wxString includeData,
+        wxString cryptPluginName, wxString keyPlugin, wxString keyEncrypt
+    );
+protected:
+    wxString bkfileM;
+    wxString dbfileM;
+    wxString outputFileM;
+    wxString skipDataM;
+    wxString includeDataM;
+    wxString cryptPluginNameM;
+    wxString keyPluginM;
+    wxString keyEncryptM;
+
+    int intervalM;
+    int parallelM;
+    IBPP::BRF brfM;
 };
 
 #endif // BACKUPRESTOREBASEFRAME_H

@@ -66,4 +66,21 @@ private:
     DECLARE_EVENT_TABLE()
 };
 
+class BackupThread : public BackupRestoreThread
+{
+public:
+    BackupThread(BackupFrame* frame, wxString server,
+        wxString username, wxString password, wxString rolename, wxString charset,
+        wxString dbfilename, wxString bkfilename,
+        IBPP::BRF flags, int interval, int parallel,
+        wxString skipData, wxString includeData,
+        wxString cryptPluginName, wxString keyPlugin, wxString keyEncrypt
+    );
+protected:
+    virtual void Execute(IBPP::Service);
+
+    int factorM;
+
+};
 #endif // BACKUPFRAME_H
+

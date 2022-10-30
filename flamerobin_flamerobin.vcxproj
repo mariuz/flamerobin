@@ -1068,7 +1068,7 @@
     <ClCompile Include="src\gui\StartupFrame.cpp" />
     <ClCompile Include="src\gui\StatementHistoryDialog.cpp" />
     <ClCompile Include="src\gui\StyleGuide.cpp" />
-    <ClCompile Include="src\gui\ThreadBaseFrame.cpp" />
+    <ClCompile Include="src\gui\ServiceBaseFrame.cpp" />
     <ClCompile Include="src\gui\UserDialog.cpp" />
     <ClCompile Include="src\gui\UsernamePasswordDialog.cpp" />
     <ClCompile Include="src\logger.cpp" />
@@ -1184,7 +1184,7 @@
     <ClInclude Include="src\gui\StartupFrame.h" />
     <ClInclude Include="src\gui\StatementHistoryDialog.h" />
     <ClInclude Include="src\gui\StyleGuide.h" />
-    <ClInclude Include="src\gui\ThreadBaseFrame.h" />
+    <ClInclude Include="src\gui\ServiceBaseFrame.h" />
     <ClInclude Include="src\gui\UserDialog.h" />
     <ClInclude Include="src\gui\UsernamePasswordDialog.h" />
     <ClInclude Include="src\Isaac.h" />

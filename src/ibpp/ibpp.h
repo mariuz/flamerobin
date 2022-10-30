@@ -638,18 +638,18 @@ public:
 
         virtual void StartBackup(
             const std::string& dbfile,const std::string& bkfile, const std::string& outfile = "",
-            const int factor = 0,
-            BRF flags = BRF(0),
+            const int factor = 0, BRF flags = BRF(0),
             const std::string& cryptName = "", const std::string& keyHolder="", const std::string& keyName="",
-            const std::string& skipData = "", const std::string& includeData = "", const int verboseInteval = 0
+            const std::string& skipData = "", const std::string& includeData = "", const int verboseInteval = 0,
+            const int parallelWorkers = 0
         ) = 0;
 
         virtual void StartRestore(
             const std::string& bkfile, const std::string& dbfile, const std::string& outfile = "",
-            int pagesize = 0, int buffers = 0,  
-            BRF flags = BRF(0),
+            int pagesize = 0, int buffers = 0, BRF flags = BRF(0),
             const std::string & cryptName = "", const std::string & keyHolder = "", const std::string & keyName = "",
-            const std::string & skipData = "", const std::string & includeData = "", const int verboseInteval = 0
+            const std::string & skipData = "", const std::string & includeData = "", const int verboseInteval = 0,
+            const int parallelWorkers = 0
         ) = 0;
 
         virtual const char* WaitMsg() = 0;  // With reporting (does not block)

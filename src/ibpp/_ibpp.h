@@ -809,17 +809,17 @@ public:
 
     void StartBackup(
         const std::string& dbfile, const std::string& bkfile, const std::string& outfile = "",
-        const int factor = 0,
-        IBPP::BRF flags = IBPP::BRF(0),
+        const int factor = 0, IBPP::BRF flags = IBPP::BRF(0),
         const std::string& cryptName = "", const std::string& keyHolder = "", const std::string& keyName = "",
-        const std::string& skipData = "", const std::string& includeData = "", const int verboseInteval = 0
+        const std::string& skipData = "", const std::string& includeData = "", const int verboseInteval = 0,
+        const int parallelWorkers = 0
     );
     void StartRestore(
         const std::string& bkfile, const std::string& dbfile,  const std::string& outfile = "",
-        int pagesize = 0, int buffers = 0,
-        IBPP::BRF flags = IBPP::BRF(0),
+        int pagesize = 0, int buffers = 0, IBPP::BRF flags = IBPP::BRF(0),
         const std::string& cryptName = "", const std::string& keyHolder = "", const std::string& keyName = "",
-        const std::string& skipData = "", const std::string& includeData = "", const int verboseInteval = 0
+        const std::string& skipData = "", const std::string& includeData = "", const int verboseInteval = 0,
+        const int parallelWorkers = 0
     );
 
     const char* WaitMsg();

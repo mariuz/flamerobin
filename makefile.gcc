@@ -112,13 +112,13 @@ FLAMEROBIN_OBJECTS =  \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_ReorderFieldsDialog.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_RestoreFrame.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_ServiceBaseFrame.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_ShutdownStartupBaseFrame.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_ShutdownFrame.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_SimpleHtmlFrame.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_StatementHistoryDialog.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_StartupFrame.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_StyleGuide.o \
-	gccu$(R_OPT)$(D_OPT)\flamerobin_ThreadBaseFrame.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_UserDialog.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_UsernamePasswordDialog.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_logger.o \
@@ -452,6 +452,9 @@ gccu$(R_OPT)$(D_OPT)\flamerobin_RestoreFrame.o: ./src/gui/RestoreFrame.cpp
 gccu$(R_OPT)$(D_OPT)\flamerobin_ServerRegistrationDialog.o: ./src/gui/ServerRegistrationDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
+gccu$(R_OPT)$(D_OPT)\flamerobin_ServiceBaseFrame.o: ./${SOURCEDIR}/gui/ServiceBaseFrame.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
 gccu$(R_OPT)$(D_OPT)\flamerobin_ShutdownStartupBaseFrame.o: ./${SOURCEDIR}/gui/ShutdownStartupBaseFrame.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
@@ -468,9 +471,6 @@ gccu$(R_OPT)$(D_OPT)\flamerobin_StartupFrame.o: ./${SOURCEDIR}/gui/StartupFrame.
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gccu$(R_OPT)$(D_OPT)\flamerobin_StyleGuide.o: ./src/gui/StyleGuide.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
-
-gccu$(R_OPT)$(D_OPT)\flamerobin_ThreadBaseFrame.o: ./${SOURCEDIR}/gui/ThreadBaseFrame.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gccu$(R_OPT)$(D_OPT)\flamerobin_UserDialog.o: ./src/gui/UserDialog.cpp

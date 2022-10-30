@@ -47,161 +47,7 @@
 #include "gui/UsernamePasswordDialog.h"
 #include "metadata/database.h"
 #include "metadata/server.h"
-
-// worker thread class to perform database backup
-class BackupThread: public wxThread {
-public:
-    BackupThread(BackupFrame* frame, wxString server, 
-        wxString username, wxString password, wxString rolename, wxString charset,
-        wxString dbfilename, wxString bkfilename,
-        IBPP::BRF flags, int interval, wxString skipData, wxString includeData,
-        wxString cryptPluginName, wxString keyPlugin, wxString keyEncrypt
-    );
-
-    virtual void* Entry();
-    virtual void OnExit();
-private:
-    BackupFrame* frameM;
-    wxString serverM;
-    wxString usernameM;
-    wxString passwordM;
-    wxString rolenameM;
-    wxString charsetM;
-    wxString dbfileM;
-    wxString bkfileM;
-    IBPP::BRF brfM;
-    wxString outputFileM;
-    int factorM;
-    int intervalM;
-    wxString skipDataM;
-    wxString includeDataM;
-    wxString cryptPluginNameM;
-    wxString keyPluginM;
-    wxString keyEncryptM;
-
-    void logError(wxString& msg);
-    void logImportant(wxString& msg);
-    void logProgress(wxString& msg);
-};
-
-BackupThread::BackupThread(BackupFrame* frame, wxString server,
-        wxString username, wxString password, wxString rolename, wxString charset,
-        wxString dbfilename, wxString bkfilename, 
-        IBPP::BRF flags, int interval, 
-        wxString skipData, wxString includeData, wxString cryptPluginName, 
-        wxString keyPlugin, wxString keyEncrypt)
-    : wxThread()
-{
-    frameM = frame;
-    serverM = server;
-    usernameM = username;
-    passwordM = password;
-    rolenameM = rolename;
-    charsetM = charset;
-    dbfileM = dbfilename;
-    bkfileM = bkfilename;
-    // always use verbose flag
-    brfM = (IBPP::BRF)((int)flags | (int)IBPP::brVerbose);
-
-    intervalM = interval;
-    skipDataM = skipData;
-    includeDataM = includeData;
-    cryptPluginNameM = cryptPluginName;
-    keyPluginM = keyPlugin;
-    keyEncryptM = keyEncrypt;
-
-}
-
-void* BackupThread::Entry()
-{
-    wxDateTime now;
-    wxString msg;
-
-    try
-    {
-        msg.Printf(_("Connecting to server %s..."), serverM.c_str());
-        logImportant(msg);
-        IBPP::Service svc = IBPP::ServiceFactory(wx2std(serverM),
-            wx2std(usernameM), wx2std(passwordM), wx2std(rolenameM), wx2std(charsetM)
-        );
-        svc->Connect();
-
-        now = wxDateTime::Now();
-        msg.Printf(_("Database backup started %s"), now.FormatTime().c_str());
-        logImportant(msg);
-        svc->StartBackup(wx2std(dbfileM), wx2std(bkfileM), wx2std(outputFileM),
-            factorM, brfM, wx2std(cryptPluginNameM), wx2std(keyPluginM),
-            wx2std(keyEncryptM), wx2std(skipDataM), wx2std(includeDataM), intervalM
-        );
-        while (true)
-        {
-            if (TestDestroy())
-            {
-                now = wxDateTime::Now();
-                msg.Printf(_("Database backup canceled %s"),
-                    now.FormatTime().c_str());
-                logImportant(msg);
-                break;
-            }
-            const char* c = svc->WaitMsg();
-            if (c == 0)
-            {
-                now = wxDateTime::Now();
-                msg.Printf(_("Database backup finished %s"),
-                    now.FormatTime().c_str());
-                logImportant(msg);
-                break;
-            }
-            msg = c;
-            logProgress(msg);
-        }
-        svc->Disconnect();
-    }
-    catch (IBPP::Exception& e)
-    {
-        now = wxDateTime::Now();
-        msg.Printf(_("Database backup canceled %s due to IBPP exception:\n\n"),
-            now.FormatTime().c_str());
-        msg += e.what();
-        logError(msg);
-    }
-    catch (...)
-    {
-        now = wxDateTime::Now();
-        msg.Printf(_("Database backup canceled %s due to exception"),
-            now.FormatTime().c_str());
-        logError(msg);
-    }
-    return 0;
-}
-
-void BackupThread::OnExit()
-{
-    if (frameM != 0)
-    {
-        wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
-            BackupRestoreBaseFrame::ID_thread_finished);
-        wxPostEvent(frameM, event);
-    }
-}
-
-void BackupThread::logError(wxString& msg)
-{
-    if (frameM != 0)
-        frameM->threadOutputMsg(msg, BackupRestoreBaseFrame::error_message);
-}
-
-void BackupThread::logImportant(wxString& msg)
-{
-    if (frameM != 0)
-        frameM->threadOutputMsg(msg, BackupRestoreBaseFrame::important_message);
-}
-
-void BackupThread::logProgress(wxString& msg)
-{
-    if (frameM != 0)
-        frameM->threadOutputMsg(msg, BackupRestoreBaseFrame::progress_message);
-}
+#include "ShutdownFrame.h"
 
 BackupFrame::BackupFrame(wxWindow* parent, DatabasePtr db)
     : BackupRestoreBaseFrame(parent, db)
@@ -474,7 +320,7 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     startThread(std::make_unique<BackupThread>(this,
         server->getConnectionString(), username, password, rolename, charset,
         database->getPath(), text_ctrl_filename->GetValue(),
-        (IBPP::BRF)flags, spinctrl_showlogInterval->GetValue(), 
+        (IBPP::BRF)flags, spinctrl_showlogInterval->GetValue(), spinctrl_parallelworkers->GetValue(),
         textCtrl_skipdata->GetValue(), textCtrl_includedata->GetValue(), 
         textCtrl_crypt->GetValue(), textCtrl_keyholder->GetValue(), textCtrl_keyname->GetValue()
         )
@@ -483,3 +329,24 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     updateControls();
 }
 
+BackupThread::BackupThread(BackupFrame* frame,
+    wxString server, wxString username, wxString password,
+    wxString rolename, wxString charset, wxString dbfilename,
+    wxString bkfilename, IBPP::BRF flags, int interval, int parallel,
+    wxString skipData, wxString includeData, wxString cryptPluginName,
+    wxString keyPlugin, wxString keyEncrypt)
+    :factorM(0),
+    BackupRestoreThread(frame, server, username, password,rolename, charset, 
+        dbfilename,bkfilename, flags, interval, parallel, skipData, includeData, cryptPluginName,
+        keyPlugin, keyEncrypt)
+{
+}
+
+void BackupThread::Execute(IBPP::Service svc)
+{
+    svc->StartBackup(wx2std(dbfileM), wx2std(bkfileM), wx2std(outputFileM),
+        factorM, brfM, wx2std(cryptPluginNameM), wx2std(keyPluginM),
+        wx2std(keyEncryptM), wx2std(skipDataM), wx2std(includeDataM), 
+        intervalM, parallelM
+    );
+}

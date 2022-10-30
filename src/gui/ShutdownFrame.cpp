@@ -46,138 +46,6 @@
 #include "gui/UsernamePasswordDialog.h"
 #include "metadata/database.h"
 #include "metadata/server.h"
-
-// worker thread class to perform database Shutdown
-class ShutdownThread: public wxThread {
-public:
-    ShutdownThread(ShutdownFrame* frame, wxString server, 
-        wxString username, wxString password, wxString rolename, wxString charset,
-        wxString dbfilename,  IBPP::DSM flags,
-        int timeout);
-
-    virtual void* Entry();
-    virtual void OnExit();
-private:
-    ShutdownFrame* frameM;
-    wxString serverM;
-    wxString usernameM;
-    wxString passwordM;
-    wxString rolenameM;
-    wxString charsetM;
-    wxString dbfileM;
-    IBPP::DSM dsmM;
-    int timeoutM;
-    void logError(wxString& msg);
-    void logImportant(wxString& msg);
-    void logProgress(wxString& msg);
-};
-
-ShutdownThread::ShutdownThread(ShutdownFrame* frame, wxString server,
-        wxString username, wxString password, wxString rolename, wxString charset,
-        wxString dbfilename,
-        IBPP::DSM flags,  int timeout)
-    : wxThread()
-{
-    frameM = frame;
-    serverM = server;
-    usernameM = username;
-    passwordM = password;
-    rolenameM = rolename;
-    charsetM = charset;
-    dbfileM = dbfilename;
-    // always use verbose flag
-    dsmM = (IBPP::DSM)((int)flags | (int)IBPP::brVerbose);
-    timeoutM = timeout;
-}
-
-void* ShutdownThread::Entry()
-{
-    wxDateTime now;
-    wxString msg;
-
-    try
-    {
-        msg.Printf(_("Connecting to server %s..."), serverM.c_str());
-        logImportant(msg);
-        IBPP::Service svc = IBPP::ServiceFactory(wx2std(serverM),
-            wx2std(usernameM), wx2std(passwordM), wx2std(rolenameM), wx2std(charsetM) 
-        );
-        svc->Connect();
-
-        now = wxDateTime::Now();
-        msg.Printf(_("Database Shutdown started %s"), now.FormatTime().c_str());
-        logImportant(msg);
-        svc->Shutdown(wx2std(dbfileM),  dsmM, timeoutM);
-        while (true)
-        {
-            if (TestDestroy())
-            {
-                now = wxDateTime::Now();
-                msg.Printf(_("Database Shutdown canceled %s"),
-                    now.FormatTime().c_str());
-                logImportant(msg);
-                break;
-            }
-            const char* c = svc->WaitMsg();
-            if (c == 0)
-            {
-                now = wxDateTime::Now();
-                msg.Printf(_("Database Shutdown finished %s"),
-                    now.FormatTime().c_str());
-                logImportant(msg);
-                break;
-            }
-            msg = c;
-            logProgress(msg);
-        }
-        svc->Disconnect();
-    }
-    catch (IBPP::Exception& e)
-    {
-        now = wxDateTime::Now();
-        msg.Printf(_("Database Shutdown canceled %s due to IBPP exception:\n\n"),
-            now.FormatTime().c_str());
-        msg += e.what();
-        logError(msg);
-    }
-    catch (...)
-    {
-        now = wxDateTime::Now();
-        msg.Printf(_("Database Shutdown canceled %s due to exception"),
-            now.FormatTime().c_str());
-        logError(msg);
-    }
-    return 0;
-}
-
-void ShutdownThread::OnExit()
-{
-    if (frameM != 0)
-    {
-        wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
-            ShutdownStartupBaseFrame::ID_thread_finished);
-        wxPostEvent(frameM, event);
-    }
-}
-
-void ShutdownThread::logError(wxString& msg)
-{
-    if (frameM != 0)
-        frameM->threadOutputMsg(msg, ShutdownStartupBaseFrame::error_message);
-}
-
-void ShutdownThread::logImportant(wxString& msg)
-{
-    if (frameM != 0)
-        frameM->threadOutputMsg(msg, ShutdownStartupBaseFrame::important_message);
-}
-
-void ShutdownThread::logProgress(wxString& msg)
-{
-    if (frameM != 0)
-        frameM->threadOutputMsg(msg, ShutdownStartupBaseFrame::progress_message);
-}
-
 ShutdownFrame::ShutdownFrame(wxWindow* parent, DatabasePtr db)
     : ShutdownStartupBaseFrame(parent, db)
 {
@@ -373,3 +241,17 @@ void ShutdownFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     updateControls();
 }
 
+ShutdownThread::ShutdownThread(ShutdownFrame* frame,
+    wxString server, wxString username, wxString password,
+    wxString rolename, wxString charset, wxString dbfilename,
+    IBPP::DSM flags, int timeout)
+    :timeoutM(timeout),
+    ShutdownStartupThread(frame, server, username, password, 
+        rolename, charset, dbfilename, flags)
+{
+}
+
+void ShutdownThread::Execute(IBPP::Service svc)
+{
+    svc->Shutdown(wx2std(dbfileM), dsmM, timeoutM);
+}
