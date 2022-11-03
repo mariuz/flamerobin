@@ -2011,9 +2011,9 @@ void PrefDlgThemeSetting::addControlsToSizer(wxSizer* sizer)
         {
             wxStaticBoxSizer* sbz = new wxStaticBoxSizer(new wxStaticBox(getPage(), -1, "Language"), wxVERTICAL);
             sbz->Add(0, styleguide().getFrameMargin(wxTOP));
-            sbz->Add(stylersListBoxM, 0, wxSHAPED);
+            sbz->Add(stylersListBoxM, 1, wxEXPAND);
             sbz->Add(0, styleguide().getFrameMargin(wxBOTTOM));
-            sz->Add(sbz, 0, wxEXPAND);
+            sz->Add(sbz, 1, wxEXPAND);
 
         }
         sz->Add(0, styleguide().getRelatedControlMargin(wxHORIZONTAL));
@@ -2102,9 +2102,11 @@ void PrefDlgThemeSetting::addControlsToSizer(wxSizer* sizer)
 
         sz->Add(styleguide().getFrameMargin(wxRIGHT), 0);
         sizerV->Add(sz, 1, wxEXPAND);
+        
 
     }
     sizer->Add(sizerV, 1, wxEXPAND);
+    sizer->SetItemMinSize(sizerV, -1, -1);
 }
 
 void PrefDlgThemeSetting::enableControls(bool enabled)
