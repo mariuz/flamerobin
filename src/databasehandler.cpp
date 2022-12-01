@@ -82,7 +82,8 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
     IBPP::Database& db = d->getIBPPDatabase();
     IBPP::Service svc = IBPP::ServiceFactory(
         wx2std(d->getServer()->getConnectionString()),
-        db->Username(), db->UserPassword());
+        db->Username(), db->UserPassword(), db->RoleName(), db->CharSet()
+    );
     svc->Connect();
 
     if (isEditSweep || isEditPageBuffers || isEditLinger)
@@ -131,7 +132,7 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
             else if (isEditPageBuffers)
                 svc->SetPageBuffers(wx2std(d->getPath()), value);
             else if (isEditLinger)
-                execSql(NULL, wxString(_("Alter databse")), d, wxString::Format("ALTER DATABASE SET LINGER TO %d ; commit; ", value, w), true);
+                execSql(NULL, wxString(_("Alter database")), d, wxString::Format("ALTER DATABASE SET LINGER TO %d ; commit; ", value, w), true);
             // Before reloading the info, re-attach to the database
             // otherwise the sweep interval won't be changed for FB Classic
             // Server.

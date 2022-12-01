@@ -883,6 +883,31 @@
     <ClCompile Include="src\ibpp\_tpb.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\firebird\include\firebird\impl\blr.h" />
+    <ClInclude Include="src\firebird\include\firebird\impl\consts_pub.h" />
+    <ClInclude Include="src\firebird\include\firebird\impl\dsc_pub.h" />
+    <ClInclude Include="src\firebird\include\firebird\impl\inf_pub.h" />
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\all.h" />
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\dsql.h" />
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\dyn.h" />
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\fbsvcmgr.h" />
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\fbtracemgr.h" />
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\gbak.h" />
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\gfix.h" />
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\gsec.h" />
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\gstat.h" />
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\isql.h" />
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\jrd.h" />
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\jrd_bugchk.h" />
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\nbackup.h" />
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\sqlerr.h" />
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\sqlwarn.h" />
+    <ClInclude Include="src\firebird\include\firebird\impl\msg\utl.h" />
+    <ClInclude Include="src\firebird\include\firebird\impl\msg_helper.h" />
+    <ClInclude Include="src\firebird\include\firebird\impl\sqlda_pub.h" />
+    <ClInclude Include="src\firebird\include\firebird\impl\types_pub.h" />
+    <ClInclude Include="src\firebird\include\ibase.h" />
+    <ClInclude Include="src\firebird\include\iberror.h" />
     <ClInclude Include="src\ibpp\ibase.h" />
     <ClInclude Include="src\ibpp\iberror.h" />
     <ClInclude Include="src\ibpp\ibpp.h" />

@@ -38,6 +38,7 @@
 #include "gui/ThreadBaseFrame.h"
 #include "gui/controls/DndTextControls.h"
 #include "gui/controls/LogTextControl.h"
+#include "gui/StyleGuide.h"
 #include "metadata/database.h"
 #include "metadata/server.h"
 
@@ -165,8 +166,6 @@ void ThreadBaseFrame::createControls()
     panel_controls = new wxPanel(this, wxID_ANY, wxDefaultPosition,
         wxDefaultSize, wxTAB_TRAVERSAL | wxCLIP_CHILDREN);
 
-    checkbox_showlog = new wxCheckBox(panel_controls, ID_checkbox_showlog,
-        _("Show complete log"));
     button_start = new wxButton(panel_controls, ID_button_start,
         _("&Start Backup"));
 
@@ -176,6 +175,19 @@ void ThreadBaseFrame::createControls()
 
 void ThreadBaseFrame::layoutControls()
 {
+    sizerButtons = new wxBoxSizer(wxHORIZONTAL);
+    
+    /*sizerButtons->Add(checkbox_showlog, 0, wxALIGN_CENTER_VERTICAL);
+  
+    sizerButtons->Add(styleguide().getControlLabelMargin(), 0);
+    sizerButtons->Add(caption_showlogInterval, 0, wxALIGN_CENTER_VERTICAL);
+
+    sizerButtons->Add(styleguide().getControlLabelMargin(), 0);
+    sizerButtons->Add(spinctrl_showlogInterval, 0, wxALIGN_CENTER_VERTICAL);*/
+
+    sizerButtons->Add(0, 0, 1, wxEXPAND);
+    sizerButtons->Add(button_start);
+
 }
 
 void ThreadBaseFrame::update()
@@ -192,7 +204,6 @@ void ThreadBaseFrame::updateControls()
     bool running = getThreadRunning();
     
     button_start->Enable(!running);
-    checkbox_showlog->Enable(!running);
 }
 
 void ThreadBaseFrame::updateMessages(size_t firstmsg, size_t lastmsg)
@@ -216,6 +227,7 @@ void ThreadBaseFrame::updateMessages(size_t firstmsg, size_t lastmsg)
         }
     }
 }
+
 
 //! event handlers
 BEGIN_EVENT_TABLE(ThreadBaseFrame, BaseFrame)

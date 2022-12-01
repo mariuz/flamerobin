@@ -87,6 +87,8 @@
 #include "sql/StatementBuilder.h"
 #include "statementHistory.h"
 
+#include "gui/FRStyle.h"
+
 class SqlEditorDropTarget : public wxDropTarget
 {
 public:
@@ -253,7 +255,7 @@ bool SqlEditorDropTarget::OnDropText(wxCoord, wxCoord, const wxString& text)
 SqlEditor::SqlEditor(wxWindow *parent, wxWindowID id)
     : SearchableEditor(parent, id)
 {
-    wxString s;
+    /*wxString s;
     if (config().getValue("SqlEditorFont", s) && !s.empty())
     {
         wxFont f;
@@ -270,7 +272,7 @@ SqlEditor::SqlEditor(wxWindow *parent, wxWindowID id)
     int charset;
     if (config().getValue("SqlEditorCharset", charset))
         StyleSetCharacterSet(wxSTC_STYLE_DEFAULT, charset);
-
+        */
     setup();
 }
 
@@ -308,46 +310,29 @@ void SqlEditor::setChars(bool firebirdIdentifierOnly)
 //! This code has to be called each time the font has changed, so that the control updates
 void SqlEditor::setup()
 {
-    StyleClearAll();
-
-    StyleSetForeground(wxSTC_SQL_DEFAULT,        wxColour(0x80, 0x00, 0x00));
-    StyleSetForeground(wxSTC_SQL_COMMENT,        wxColour(0x00, 0xa0, 0x00));        // multiline comment
-    StyleSetForeground(wxSTC_SQL_COMMENTLINE,    wxColour(0x00, 0xa0, 0x00));        // one-line comment
-    StyleSetForeground(wxSTC_SQL_COMMENTDOC,     wxColour(0x00, 0xff, 0x00));
-    StyleSetForeground(wxSTC_SQL_NUMBER,         wxColour(0x00, 0x00, 0xff));        // number
-    StyleSetForeground(wxSTC_SQL_WORD,           wxColour(0x00, 0x00, 0x7f));        // keyword
-    StyleSetForeground(wxSTC_SQL_STRING,         wxColour(0x00, 0x00, 0xff));        // 'single quotes'
-    StyleSetForeground(wxSTC_SQL_CHARACTER,      wxColour(0xff, 0x00, 0xff));
-    StyleSetForeground(wxSTC_SQL_SQLPLUS,        wxColour(0x00, 0x7f, 0x7f));
-    StyleSetForeground(wxSTC_SQL_SQLPLUS_PROMPT, wxColour(0xff, 0x00, 0x00));
-    StyleSetForeground(wxSTC_SQL_OPERATOR,       wxColour(0x00, 0x00, 0x00));        // ops
-    StyleSetForeground(wxSTC_SQL_IDENTIFIER,     wxColour(0x00, 0x00, 0x00));
-    
-    StyleSetBackground(wxSTC_STYLE_BRACELIGHT,   wxColour(0xff, 0xcc, 0x00));        // brace highlight
-    StyleSetBackground(wxSTC_STYLE_BRACEBAD,     wxColour(0xff, 0x33, 0x33));        // brace bad highlight
-    
-    StyleSetBold(wxSTC_SQL_WORD,         TRUE);
-    StyleSetBold(wxSTC_SQL_OPERATOR,     TRUE);
-    StyleSetBold(wxSTC_STYLE_BRACELIGHT, TRUE);
-    StyleSetBold(wxSTC_STYLE_BRACEBAD,   TRUE);
-    
-    StyleSetItalic(wxSTC_SQL_COMMENT,     TRUE);
-    StyleSetItalic(wxSTC_SQL_COMMENTLINE, TRUE);
-
-    SetLexer(wxSTC_LEX_SQL);
-    setChars(false);
 
     int tabSize = config().get("sqlEditorTabSize", 4);
+
     SetTabWidth(tabSize);
     SetIndent(tabSize);
     SetUseTabs(false);
     SetTabIndents(true);
+
     SetBackSpaceUnIndents(true);
     AutoCompSetIgnoreCase(true);
     AutoCompSetAutoHide(true);        // info in ScintillaDoc.html file (in scintilla source package)
-    SetMarginWidth(0, 40);            // turn on the linenumbers margin, set width to 40pixels
+
+    /*SetMarginWidth(0, 40);            // turn on the linenumbers margin, set width to 40pixels
     SetMarginWidth(1, 0);             // turn off the folding margin
     SetMarginType(0, 1);              // set margin type to linenumbers
+    */
+    SetCaretLineVisible(true);
+
+    SetMargins(0, 0);
+    SetMarginWidth(FR_LINENUMBERNARGIN, 40);
+    SetMarginType(FR_LINENUMBERNARGIN, wxSTC_MARGIN_NUMBER);
+    SetAutomaticFold(wxSTC_AUTOMATICFOLD_SHOW);
+
     if (config().get("sqlEditorShowEdge", false))
     {
         SetEdgeMode(wxSTC_EDGE_LINE);
@@ -355,10 +340,19 @@ void SqlEditor::setup()
     }
 
     if (!config().get("sqlEditorSmartHomeKey", true))
-        CmdKeyAssign(wxSTC_KEY_HOME, wxSTC_SCMOD_NORM, wxSTC_CMD_HOMEDISPLAY);
+        CmdKeyAssign(wxSTC_KEY_HOME, wxSTC_KEYMOD_NORM, wxSTC_CMD_HOMEDISPLAY);
+        
+    stylerManager().assignGlobal(this);
+    StyleClearAll();
+    stylerManager().assignLexer(this);
+    SetLexer(wxSTC_LEX_SQL);
+    stylerManager().assignMargin(this);
+    setChars(false);
+
 
     centerCaret(false);
 }
+
 
 BEGIN_EVENT_TABLE(SqlEditor, wxStyledTextCtrl)
     EVT_CONTEXT_MENU(SqlEditor::OnContextMenu)
@@ -412,6 +406,7 @@ void SqlEditor::OnKillFocus(wxFocusEvent& event)
 
 void SqlEditor::setFont()
 {
+/*
     // step 1 of 2: set font
     wxFont f, f2;
     wxString s;        // since we can't get the font from control we ask config() for it
@@ -478,6 +473,7 @@ void SqlEditor::setFont()
     showInformationDialog(wxGetTopLevelParent(this), _("The SQL editor font has been changed."),
         _("This setting affects only the SQL editor font. The font used in the result set data grid has to be changed separately."),
         AdvancedMessageDialogButtonsOk(), config(), "DIALOG_WarnFont", _("Do not show this information again"));
+*/
 }
 
 class ScrollAtEnd
@@ -546,14 +542,22 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     splitter_window_1 = new wxSplitterWindow(panel_contents, -1);
     styled_text_ctrl_sql = new SqlEditor(splitter_window_1, ID_stc_sql);
 
+    //Fold
+    //styled_text_ctrl_sql->Bind(wxEVT_STC_MARGINCLICK, &ExecuteSqlFrame::onMarginClick, this);
+    //styled_text_ctrl_sql->Bind(wxEVT_STC_STYLENEEDED, &ExecuteSqlFrame::onStyleNeeded, this);
+
     notebook_1 = new wxNotebook(splitter_window_1, -1, wxDefaultPosition,
         wxDefaultSize, 0);
     notebook_pane_1 = new wxPanel(notebook_1, -1);
     styled_text_ctrl_stats = new wxStyledTextCtrl(notebook_pane_1, wxID_ANY,
         wxDefaultPosition, wxDefaultSize, wxBORDER_THEME);
+    stylerManager().assignGlobal(styled_text_ctrl_stats);
+
+    styled_text_ctrl_stats->StyleClearAll();
     styled_text_ctrl_stats->SetWrapMode(wxSTC_WRAP_WORD);
     styled_text_ctrl_stats->StyleSetForeground(1, *wxRED);
     styled_text_ctrl_stats->StyleSetForeground(2, *wxBLUE);
+    
     notebook_1->AddPage(notebook_pane_1, _("Statistics"));
 
     notebook_pane_2 = new wxPanel(notebook_1, -1);
@@ -589,6 +593,7 @@ Database* ExecuteSqlFrame::getDatabase() const
 {
     return databaseM;
 }
+
 
 void ExecuteSqlFrame::buildToolbar(CommandManager& cm)
 {
@@ -801,6 +806,7 @@ void ExecuteSqlFrame::set_properties()
     statusbar_1->SetStatusText("Transaction status", 3);
 
     grid_data->SetTable(new DataGridTable(statementM, databaseM), true);
+    grid_data->SetBackgroundColour(stylerManager().getDefaultStyle()->getbgColor());
     splitter_window_1->Initialize(styled_text_ctrl_sql);
     viewModeM = vmEditor;
 
@@ -2992,7 +2998,7 @@ void ExecuteSqlFrame::log(wxString s, TextType type)
     if (type == ttSql)
         style = 2;
 
-    styled_text_ctrl_stats->StartStyling(startpos, 0);
+    styled_text_ctrl_stats->StartStyling(startpos);
     styled_text_ctrl_stats->SetStyling(endpos-startpos-1, style);
 }
 

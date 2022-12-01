@@ -109,6 +109,7 @@ Source: ..\..\conf-defs\*.*; DestDir: {app}\conf-defs; Flags: ignoreversion
 Source: ..\..\code-templates\*.*; DestDir: {app}\code-templates; Flags: ignoreversion
 Source: ..\..\html-templates\*.*; DestDir: {app}\html-templates; Flags: ignoreversion
 Source: ..\..\sys-templates\*.*; DestDir: {app}\sys-templates; Flags: ignoreversion
+Source: ..\..\xml-styles\*.*; DestDir: {app}\xml-styles; Flags: ignoreversion
 #ifndef X64VERSION
 ;Source: ..\..\res\system32\msvcr71.dll; DestDir: {app}
 ;Source: ..\..\res\system32\msvcp71.dll; DestDir: {app}

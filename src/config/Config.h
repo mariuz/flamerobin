@@ -30,6 +30,7 @@
 
 #include "core/Observer.h"
 #include "core/Subject.h"
+#include "gui/FRStyle.h"
 
 enum StorageGranularity
 {
@@ -60,6 +61,7 @@ private:
     wxString homePathM;
     wxString userHomePathM;
     wxFileName configFileNameM;
+
 protected:
     virtual void lockedChanged(bool locked);
 public:
@@ -147,6 +149,9 @@ public:
     // Returns the full pathname of the specified system template, giving
     // precedence to any existing user override.
     const wxString getSysTemplateFileName(const wxString& templateName);
+    // returns the path containing the xml styles.
+    wxString getXmlStylesPath() const;
+
     bool getUseLocalConfig() const;
 };
 

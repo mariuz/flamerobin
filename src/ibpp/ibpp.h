@@ -67,7 +67,7 @@
 #include <string>
 #include <vector>
 
-#ifndef _MSC_VER
+#ifdef HAVE_DECIMAL128
 #include <decimal/decimal>
 #endif
 
@@ -129,21 +129,36 @@ namespace IBPP
 
     // Service::StartBackup && Service::StartRestore Flags
     enum BRF {
-        brVerbose = 0x1,
         // Backup flags
-        brIgnoreChecksums = 0x100, 
-        brIgnoreLimbo = 0x200,
-        brMetadataOnly = 0x400, 
-        brNoGarbageCollect = 0x800,
-        brNonTransportable = 0x1000, 
-        brConvertExtTables = 0x2000,
+        brConvertExtTables      = 0x0000001,
+        brExpand                = 0x0000002,
+        brNoGarbageCollect      = 0x0000004,
+        brIgnoreChecksums       = 0x0000008, 
+        brIgnoreLimbo           = 0x0000010,
+        brNoDBTriggers          = 0x0000020, //FB2.5+
+        brOldDescriptions       = 0x0000040,
+        brNonTransportable      = 0x0000080,
+        brZip                   = 0x0000100, //FB4.0+
         // Restore flags
-        brReplace = 0x10000, 
-        brDeactivateIdx = 0x20000,
-        brNoShadow = 0x40000, 
-        brNoValidity = 0x80000,
-        brPerTableCommit = 0x100000, 
-        brUseAllSpace = 0x200000
+        brFix_Fss_Data          = 0x0000200, //FB2.0+
+        brFix_Fss_Metadata      = 0x0000400, //FB2.0+
+        brDeactivateIdx         = 0x0000800,
+        brNoShadow              = 0x0001000,
+        brNoValidity            = 0x0002000,
+        brPerTableCommit        = 0x0040000,
+        brUseAllSpace           = 0x0080000,
+        brDatabase_readonly     = 0x0100000,
+        brReplicaMode_none      = 0x0200000, //FB4.0+
+        brReplicaMode_readonly  = 0x0400000, //FB4.0+
+        brReplicaMode_readwrite = 0x0800000, //FB4.0+
+        brReplace               = 0x1000000,
+        // General flags
+        brMetadataOnly          = 0x2000000, //FB2.5+
+        brVerbose               = 0x4000000,
+        brstatistics_time       = 0x8000000, //FB2.5+
+        brstatistics_delta      = 0x10000000,//FB2.5+
+        brstatistics_pagereads  = 0x20000000,//FB2.5+
+        brstatistics_pagewrites = 0x40000000 //FB2.5+
     };
 
     // Service::Repair Flags
@@ -160,17 +175,6 @@ namespace IBPP
 
     // int128 - FB4
     #pragma pack(push, 1)
-
-    // gcc has a builtin type __int128
-    // msvc does not have something we can use (AFICS)
-    // so we have to do it by own code.
-    #define HAVE_INT128
-    #define HAVE_DECFLOAT
-
-    #ifdef _MSC_VER
-    #undef HAVE_INT128
-    #undef HAVE_DECFLOAT
-    #endif
 
     #ifndef HAVE_INT128
     // NOTICE: could/should be replaced with int128_t if msvc supports this
@@ -225,7 +229,7 @@ public:
     typedef __uint128_t ibpp_uint128_t;
     #endif
 
-    #ifndef HAVE_DECFLOAT
+    #ifndef HAVE_DECIMAL128
     typedef struct IBPP_DEC16_T
     {
         int64_t lowPart;
@@ -613,6 +617,7 @@ public:
         virtual void Disconnect() = 0;
 
         virtual void GetVersion(std::string& version) = 0;
+        virtual bool versionIsHigherOrEqualTo(int versionMajor, int versionMinor) = 0;
 
         virtual void AddUser(const User&) = 0;
         virtual void GetUser(User&) = 0;
@@ -631,10 +636,21 @@ public:
         virtual void Sweep(const std::string& dbfile) = 0;
         virtual void Repair(const std::string& dbfile, RPF flags) = 0;
 
-        virtual void StartBackup(const std::string& dbfile,
-            const std::string& bkfile, BRF flags = BRF(0)) = 0;
-        virtual void StartRestore(const std::string& bkfile, const std::string& dbfile,
-            int pagesize = 0, BRF flags = BRF(0)) = 0;
+        virtual void StartBackup(
+            const std::string& dbfile,const std::string& bkfile, const std::string& outfile = "",
+            const int factor = 0,
+            BRF flags = BRF(0),
+            const std::string& cryptName = "", const std::string& keyHolder="", const std::string& keyName="",
+            const std::string& skipData = "", const std::string& includeData = "", const int verboseInteval = 0
+        ) = 0;
+
+        virtual void StartRestore(
+            const std::string& bkfile, const std::string& dbfile, const std::string& outfile = "",
+            int pagesize = 0, int buffers = 0,  
+            BRF flags = BRF(0),
+            const std::string & cryptName = "", const std::string & keyHolder = "", const std::string & keyName = "",
+            const std::string & skipData = "", const std::string & includeData = "", const int verboseInteval = 0
+        ) = 0;
 
         virtual const char* WaitMsg() = 0;  // With reporting (does not block)
         virtual void Wait() = 0;            // Without reporting (does block)
@@ -997,7 +1013,8 @@ public:
     //  }
 
     Service ServiceFactory(const std::string& ServerName,
-        const std::string& UserName, const std::string& UserPassword,
+        const std::string& UserName, const std::string& UserPassword, 
+        const std::string& RoleName, const std::string& CharSet,
         const std::string& FBClient = "");
 
     Database DatabaseFactory(const std::string& ServerName,

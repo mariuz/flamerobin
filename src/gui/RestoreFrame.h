@@ -40,8 +40,16 @@ private:
     wxCheckBox* checkbox_validity;
     wxCheckBox* checkbox_commit;
     wxCheckBox* checkbox_space;
+    
+    wxCheckBox* checkbox_fix_fss_data;
+    wxCheckBox* checkbox_fix_fss_metadata;
+    wxCheckBox* checkbox_readonlyDB;
+    
     wxStaticText* label_pagesize;
     wxChoice* choice_pagesize;
+
+    wxRadioBox* radiobox_replicamode;
+
     void createControls();
     void layoutControls();
     virtual void updateControls();

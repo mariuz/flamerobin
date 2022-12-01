@@ -83,6 +83,7 @@ public:
 
     Database* getDatabase() const;
 private:
+
     virtual bool doCanClose();
     virtual void doBeforeDestroy();
 

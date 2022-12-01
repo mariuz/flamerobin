@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--// DansLeRuSH's dark theme for Notepad++ / Notepad plus plus
+
+[ LEGAL DISCLAIMER ] Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions :
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Author       : This styler has been built by Franck ALBARET - https://dansleru.sh
+Date         : 28/04/2020
+Licence      : Creative Commons BY-NC-SA 3.0 // NonCommercial-ShareAlike - https://creativecommons.org/licenses/by-nc-sa/3.0/
+Requirements : This style is based on Consolas (or other nice monotype) font and need Notepad++ of course
+Installation : Copy this file to "%APPDATA%\Notepad++\themes" and in a portable installation to "%INSTALL FOLDER%\themes"
+
+//-->
+<Flamerobin>
+    <LexerStyles>
+        <LexerType name="diff" desc="DIFF" ext="">
+            <WordsStyle name="DEFAULT" styleID="0" fgColor="C7C7C7" bgColor="2E2E2E" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="COMMENT" styleID="1" fgColor="666666" bgColor="2E2E2E" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="COMMAND" styleID="2" fgColor="9865A8" bgColor="2E2E2E" fontName="" fontStyle="1" fontSize="" />
+            <WordsStyle name="HEADER" styleID="3" fgColor="C7C7C7" bgColor="2E2E2E" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="POSITION" styleID="4" fgColor="A88AB6" bgColor="2E2E2E" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="DELETED" styleID="5" fgColor="A88AB6" bgColor="2E2E2E" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="ADDED" styleID="6" fgColor="F57F3D" bgColor="2E2E2E" fontName="" fontStyle="0" fontSize="" />
+        </LexerType>
+        <LexerType name="sql" desc="SQL" ext="">
+            <WordsStyle name="KEYWORD" styleID="5" fgColor="9865A8" bgColor="2E2E2E" fontName="" fontStyle="1" fontSize="" keywordClass="instre1" />
+            <WordsStyle name="NUMBER" styleID="4" fgColor="E6C74E" bgColor="2E2E2E" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="STRING" styleID="6" fgColor="F57F3D" bgColor="2E2E2E" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="STRING2" styleID="7" fgColor="F57F3D" bgColor="2E2E2E" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="OPERATOR" styleID="10" fgColor="8F8F8F" bgColor="2E2E2E" fontName="" fontStyle="1" fontSize="" />
+            <WordsStyle name="COMMENT" styleID="1" fgColor="666666" bgColor="2E2E2E" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="COMMENT LINE" styleID="2" fgColor="666666" bgColor="2E2E2E" fontName="" fontStyle="0" fontSize="" />
+        </LexerType>
+        <LexerType name="searchResult" desc="Search result" ext="">
+            <WordsStyle name="Search Header" styleID="1" fgColor="000080" bgColor="BBBBFF" fontName="" fontStyle="1" fontSize="" />
+            <WordsStyle name="File Header" styleID="2" fgColor="666666" bgColor="D5FFD5" fontName="" fontStyle="1" fontSize="" />
+            <WordsStyle name="Line Number" styleID="3" fgColor="C7C7C7" bgColor="2E2E2E" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="Hit Word" styleID="4" fgColor="FF0000" bgColor="FFFFBF" fontName="" fontStyle="0" fontSize="" />
+            <WordsStyle name="Selected Line" styleID="5" fgColor="000080" bgColor="FFFF4F" fontName="" fontStyle="0" fontSize="">if else for while</WordsStyle>
+            <WordsStyle name="Current line background colour" styleID="6" bgColor="E8E8FF" fgColor="FF8000" fontSize="" fontStyle="0" />
+        </LexerType>
+    </LexerStyles>
+    <GlobalStyles>
+        <!-- Attention : Don't modify the name of styleID="0" -->
+        <WidgetStyle name="Global override" styleID="0" fgColor="C7C7C7" bgColor="2E2E2E" fontName="Source Code Pro" fontStyle="0" fontSize="10" />
+        <WidgetStyle name="Default Style" styleID="32" fgColor="C7C7C7" bgColor="2E2E2E" fontName="Source Code Pro" fontStyle="0" fontSize="10" />
+        <WidgetStyle name="Indent guideline style" styleID="37" fgColor="4D4D4D" bgColor="2E2E2E" fontName="" fontStyle="0" fontSize="10" />
+        <WidgetStyle name="Brace highlight style" styleID="34" fgColor="9865A8" bgColor="A88AB6" fontName="" fontStyle="1" fontSize="10" />
+        <WidgetStyle name="Bad brace colour" styleID="35" fgColor="A88AB6" bgColor="2E2E2E" fontName="" fontStyle="0" fontSize="10" />
+        <WidgetStyle name="Current line background colour" styleID="0" bgColor="363636" fontStyle="0" fgColor="C7C7C7" fontSize="" />
+        <WidgetStyle name="Mark colour" styleID="0" fgColor="A88AB6" bgColor="2E2E2E" fontStyle="0" />
+        <WidgetStyle name="Selected text colour" styleID="0" bgColor="4D4D4D" fgColor="C0C0C0" fontStyle="0" />
+        <WidgetStyle name="Caret colour" styleID="2069" fgColor="A7A7A7" fontStyle="0" bgColor="2E2E2E" fontSize="" />
+        <WidgetStyle name="Edge colour" styleID="0" fgColor="EEEEEC" bgColor="2E2E2E" fontStyle="0" fontSize="9" />
+        <WidgetStyle name="Line number margin" styleID="33" fgColor="8F8F8F" bgColor="363636" fontName="" fontStyle="0" fontSize="9" />
+        <WidgetStyle name="Bookmark margin" styleID="0" bgColor="363636" />
+        <WidgetStyle name="Fold" styleID="0" fgColor="4D4D4D" bgColor="2E2E2E" fontStyle="0" fontSize="" />
+        <WidgetStyle name="Fold margin" styleID="0" fgColor="2E2E2E" bgColor="2E2E2E" fontStyle="0" />
+        <WidgetStyle name="Fold active" styleID="0" fgColor="666666" fontStyle="0" bgColor="00FF00" fontSize="" />
+        <WidgetStyle name="White space symbol" styleID="0" fgColor="4D4D4D" bgColor="2E2E2E" fontStyle="0" fontSize="" />
+        <WidgetStyle name="Smart HighLighting" styleID="29" bgColor="2E2E2E" fgColor="555753" fontStyle="0" fontSize="10" />
+        <WidgetStyle name="Find Mark Style" styleID="31" bgColor="2E2E2E" fgColor="A88AB6" fontName="" fontSize="10" fontStyle="0" />
+        <WidgetStyle name="Mark Style 1" styleID="25" bgColor="2E2E2E" fontStyle="0" fgColor="E0E2E4" />
+        <WidgetStyle name="Mark Style 2" styleID="24" bgColor="2E2E2E" fontStyle="0" fgColor="E0E2E4" fontSize="14" />
+        <WidgetStyle name="Mark Style 3" styleID="23" bgColor="2E2E2E" fontStyle="0" fgColor="666666" fontSize="10" />
+        <WidgetStyle name="Mark Style 4" styleID="22" bgColor="2E2E2E" fontStyle="0" fgColor="F57F3D" fontSize="" />
+        <WidgetStyle name="Mark Style 5" styleID="21" bgColor="2E2E2E" fontStyle="0" fgColor="AB7967" />
+        <WidgetStyle name="Incremental highlight all" styleID="28" bgColor="2E2E2E" fgColor="B2CCD6" fontStyle="0" />
+        <WidgetStyle name="Tags match highlighting" styleID="27" bgColor="2E2E2E" fgColor="A88AB6" fontStyle="0" />
+        <WidgetStyle name="Tags attribute" styleID="26" bgColor="2E2E2E" fgColor="B2CCD6" fontStyle="0" />
+        <WidgetStyle name="Active tab focused indicator" styleID="0" fgColor="666666" bgColor="2E2E2E" fontStyle="0" />
+        <WidgetStyle name="Active tab unfocused indicator" styleID="0" fgColor="C792EA" bgColor="2E2E2E" fontStyle="0" />
+        <WidgetStyle name="Active tab text" styleID="0" fgColor="000000" bgColor="C0C0C0" fontStyle="0" />
+        <WidgetStyle name="Inactive tabs" styleID="0" fgColor="808080" bgColor="C0C0C0" fontStyle="0" />
+        <WidgetStyle name="URL hovered" styleID="0" fgColor="FFFFFF" />
+    </GlobalStyles>
+</Flamerobin>

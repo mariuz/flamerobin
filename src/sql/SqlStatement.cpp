@@ -262,11 +262,9 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
                 else
                     objectTypeM = ntFunctionSQL;
             }else{ 
-                if (actionM == actDROP) {
                     objectTypeM = ntFunctionSQL;
                     if (databaseM->findByNameAndType(ntUDF, nameM.get())) 
                         objectTypeM = ntUDF;
-                }
             }
             break;
         case kwGENERATOR:

@@ -34,6 +34,8 @@ using namespace ibpp_internals;
 #define Sleep(x) usleep(x)
 #endif
 
+#include <regex>
+
 //	(((((((( OBJECT INTERFACE IMPLEMENTATION ))))))))
 
 void ServiceImpl::Connect()
@@ -71,6 +73,38 @@ void ServiceImpl::Connect()
 		mHandle	= 0;		// Should be, but better be sure...
 		throw SQLExceptionImpl(status, "Service::Connect", _("isc_service_attach failed"));
 	}
+
+
+    std::string version;
+    GetVersion(version);
+
+    std::smatch m;
+
+    if (std::regex_search(version, m, std::regex("\\d+.\\d+.\\d+.\\d+"))) {
+        version = m[0];
+        
+        const std::regex re{ "((?:[^\\\\.]|\\\\.)+)(?:.|$)" };
+
+        const std::vector<std::string> m_vecFields{ std::sregex_token_iterator(cbegin(version), 
+            cend(version), re, 1), std::sregex_token_iterator() 
+        };
+        if (m_vecFields.size() == 4) {
+
+            std::string str = m_vecFields[0];
+            major_ver = atoi(str.c_str());
+
+            str = m_vecFields[1];
+            minor_ver = atoi(str.c_str());
+
+            str = m_vecFields[2];
+            rev_no = atoi(str.c_str());
+
+            str = m_vecFields[3];
+            build_no = atoi(str.c_str());
+        }
+    }
+
+
 }
 
 void ServiceImpl::Disconnect()
@@ -108,6 +142,12 @@ void ServiceImpl::GetVersion(std::string& version)
 		throw SQLExceptionImpl(status, "Service::GetVersion", _("isc_service_query failed"));
 
 	result.GetString(isc_info_svc_server_version, version);
+}
+
+bool ibpp_internals::ServiceImpl::versionIsHigherOrEqualTo(int versionMajor, int versionMinor)
+{
+    return major_ver > versionMajor
+        || (major_ver == versionMajor && minor_ver >= versionMinor);
 }
 
 void ServiceImpl::AddUser(const IBPP::User& user)
@@ -559,8 +599,12 @@ void ServiceImpl::Repair(const std::string& dbfile, IBPP::RPF flags)
 	Wait();
 }
 
-void ServiceImpl::StartBackup(const std::string& dbfile,
-	const std::string& bkfile, IBPP::BRF flags)
+void ServiceImpl::StartBackup(
+    const std::string& dbfile,	const std::string& bkfile, const std::string& outfile,
+    const int factor,
+    IBPP::BRF flags,
+    const std::string& cryptName, const std::string& keyHolder, const std::string& keyName,
+    const std::string& skipData, const std::string& includeData, const int verboseInteval)
 {
 	if (mHandle	== 0)
 		throw LogicExceptionImpl("Service::Backup", _("Service is not connected."));
@@ -575,24 +619,77 @@ void ServiceImpl::StartBackup(const std::string& dbfile,
 	spb.Insert(isc_action_svc_backup);
 	spb.InsertString(isc_spb_dbname, 2, dbfile.c_str());
 	spb.InsertString(isc_spb_bkp_file, 2, bkfile.c_str());
-	if (flags & IBPP::brVerbose) spb.Insert(isc_spb_verbose);
+
+    if (versionIsHigherOrEqualTo(3, 0)) {
+        if ((flags & IBPP::brVerbose) && (verboseInteval == 0)) 
+            spb.Insert(isc_spb_verbose);
+        if (verboseInteval > 0) 
+            spb.InsertQuad(isc_spb_verbint, verboseInteval);
+    }else
+        if (flags & IBPP::brVerbose) 
+            spb.Insert(isc_spb_verbose);
+
+    if (factor > 0) 
+        spb.InsertQuad(isc_spb_bkp_factor, factor);
+
+    if (!skipData.empty() && versionIsHigherOrEqualTo(3, 0)) 
+        spb.InsertString(isc_spb_bkp_skip_data, 2, skipData.c_str());
+    if (!includeData.empty() && versionIsHigherOrEqualTo(4, 0)) 
+        spb.InsertString(isc_spb_bkp_include_data, 2, includeData.c_str());
+
+    if (versionIsHigherOrEqualTo(4, 0)) {
+        if (!cryptName.empty()) 
+            spb.InsertString(isc_spb_bkp_crypt, 2, cryptName.c_str());
+        if (!keyHolder.empty()) 
+            spb.InsertString(isc_spb_bkp_keyholder, 2, keyHolder.c_str());
+        if (!keyName.empty()) 
+            spb.InsertString(isc_spb_bkp_keyname, 2, keyName.c_str());
+    }
 
 	unsigned int mask = 0;
-	if (flags & IBPP::brIgnoreChecksums)	mask |= isc_spb_bkp_ignore_checksums;
+    if (flags & IBPP::brConvertExtTables)	mask |= isc_spb_bkp_convert;
+    if (flags & IBPP::brExpand)             mask |= isc_spb_bkp_expand;
+    if (flags & IBPP::brNoGarbageCollect)	mask |= isc_spb_bkp_no_garbage_collect;
+    if (flags & IBPP::brIgnoreChecksums)	mask |= isc_spb_bkp_ignore_checksums;
 	if (flags & IBPP::brIgnoreLimbo)		mask |= isc_spb_bkp_ignore_limbo;
-	if (flags & IBPP::brMetadataOnly)		mask |= isc_spb_bkp_metadata_only;
-	if (flags & IBPP::brNoGarbageCollect)	mask |= isc_spb_bkp_no_garbage_collect;
-	if (flags & IBPP::brNonTransportable)	mask |= isc_spb_bkp_non_transportable;
-	if (flags & IBPP::brConvertExtTables)	mask |= isc_spb_bkp_convert;
+    if (flags & IBPP::brNonTransportable)	mask |= isc_spb_bkp_non_transportable;
+    if (flags & IBPP::brOldDescriptions)	mask |= isc_spb_bkp_old_descriptions;
+
+    if (versionIsHigherOrEqualTo(2, 5)) {
+        if (flags & IBPP::brNoDBTriggers)   mask |= isc_spb_bkp_no_triggers;
+        if (flags & IBPP::brMetadataOnly)   mask |= isc_spb_bkp_metadata_only;
+    }
+
+    if ((flags & IBPP::brZip) && versionIsHigherOrEqualTo(4, 0))    mask |= isc_spb_bkp_zip;
+
+    if (versionIsHigherOrEqualTo(2, 5)) {
+        std::string stFlags = "";
+
+        if (flags & IBPP::brstatistics_time)        stFlags += "T";
+        if (flags & IBPP::brstatistics_delta)       stFlags += "D";
+        if (flags & IBPP::brstatistics_pagereads)   stFlags += "R";
+        if (flags & IBPP::brstatistics_pagewrites)  stFlags += "W";
+
+        if(!stFlags.empty())
+            spb.InsertString(isc_spb_bkp_stat, 2, stFlags.c_str());
+    }
+
+
 	if (mask != 0) spb.InsertQuad(isc_spb_options, mask);
+
 
 	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
 		throw SQLExceptionImpl(status, "Service::Backup", _("isc_service_start failed"));
 }
 
-void ServiceImpl::StartRestore(const std::string& bkfile, const std::string& dbfile,
-	int	pagesize, IBPP::BRF flags)
+void ServiceImpl::StartRestore(
+    const std::string& bkfile, const std::string& dbfile, const std::string& outfile,
+    int pagesize, int buffers,
+    IBPP::BRF flags,
+    const std::string& cryptName, const std::string& keyHolder, const std::string& keyName,
+    const std::string& skipData, const std::string& includeData, const int verboseInteval
+)
 {
 	if (mHandle	== 0)
 		throw LogicExceptionImpl("Service::Restore", _("Service is not connected."));
@@ -605,21 +702,80 @@ void ServiceImpl::StartRestore(const std::string& bkfile, const std::string& dbf
 	SPB spb;
 
 	spb.Insert(isc_action_svc_restore);
-	spb.InsertString(isc_spb_bkp_file, 2, bkfile.c_str());
-	spb.InsertString(isc_spb_dbname, 2, dbfile.c_str());
-	if (flags & IBPP::brVerbose) spb.Insert(isc_spb_verbose);
-	if (pagesize !=	0) spb.InsertQuad(isc_spb_res_page_size, pagesize);
+	spb.InsertString(isc_spb_bkp_file, 2, bkfile.c_str());	spb.InsertString(isc_spb_dbname, 2, dbfile.c_str());
 
-	unsigned int mask;
-	if (flags & IBPP::brReplace) mask = isc_spb_res_replace;
-		else mask = isc_spb_res_create;	// Safe default mode
+    if (versionIsHigherOrEqualTo(3, 0)) {
+        if ((flags & IBPP::brVerbose) && (verboseInteval == 0)) 
+            spb.Insert(isc_spb_verbose);
+        if (verboseInteval > 0) 
+            spb.InsertQuad(isc_spb_verbint, verboseInteval);
+    }
+    else
+        if (flags & IBPP::brVerbose) 
+            spb.Insert(isc_spb_verbose);
 
-	if (flags & IBPP::brDeactivateIdx)	mask |= isc_spb_res_deactivate_idx;
-	if (flags & IBPP::brNoShadow)		mask |= isc_spb_res_no_shadow;
-	if (flags & IBPP::brNoValidity)		mask |= isc_spb_res_no_validity;
-	if (flags & IBPP::brPerTableCommit)	mask |= isc_spb_res_one_at_a_time;
-	if (flags & IBPP::brUseAllSpace)	mask |= isc_spb_res_use_all_space;
-	if (mask != 0) spb.InsertQuad(isc_spb_options, mask);
+	if (pagesize >	0) 
+        spb.InsertQuad(isc_spb_res_page_size, pagesize);
+    if (buffers > 0) 
+        spb.InsertQuad(isc_spb_res_buffers, buffers);
+
+
+    if (!skipData.empty() && versionIsHigherOrEqualTo(3, 0)) 
+        spb.InsertString(isc_spb_res_skip_data, 2, skipData.c_str());
+    if (!includeData.empty() && versionIsHigherOrEqualTo(4, 0)) 
+        spb.InsertString(isc_spb_res_include_data, 2, includeData.c_str());
+
+    if (versionIsHigherOrEqualTo(4, 0)) {
+        if (!cryptName.empty()) 
+            spb.InsertString(isc_spb_res_crypt, 2, cryptName.c_str());
+        if (!keyHolder.empty()) 
+            spb.InsertString(isc_spb_res_keyholder, 2, keyHolder.c_str());
+        if (!keyName.empty()) 
+            spb.InsertString(isc_spb_res_keyname, 2, keyName.c_str());
+    }
+
+    spb.InsertByte(isc_spb_res_access_mode, (flags & IBPP::brDatabase_readonly) ? isc_spb_res_am_readonly : isc_spb_res_am_readwrite);
+    
+
+    if (versionIsHigherOrEqualTo(4, 0)) {
+        if (flags & IBPP::brReplicaMode_none)
+            spb.InsertByte(isc_spb_res_replica_mode, isc_spb_res_rm_none);
+        if (flags & IBPP::brReplicaMode_readonly)
+            spb.InsertByte(isc_spb_res_replica_mode, isc_spb_res_rm_readonly);
+        if (flags & IBPP::brReplicaMode_readwrite)
+            spb.InsertByte(isc_spb_res_replica_mode, isc_spb_res_rm_readwrite);
+    }
+
+    unsigned int mask = (flags & IBPP::brReplace) ? isc_spb_res_replace : isc_spb_res_create;	// Safe default mode
+
+    if (flags & IBPP::brDeactivateIdx)	    mask |= isc_spb_res_deactivate_idx;
+	if (flags & IBPP::brNoShadow)		    mask |= isc_spb_res_no_shadow;
+	if (flags & IBPP::brNoValidity)		    mask |= isc_spb_res_no_validity;
+	if (flags & IBPP::brPerTableCommit)	    mask |= isc_spb_res_one_at_a_time;
+	if (flags & IBPP::brUseAllSpace)	    mask |= isc_spb_res_use_all_space;
+
+    if (versionIsHigherOrEqualTo(2, 5)) {
+        if (flags & IBPP::brMetadataOnly)		
+            mask |= isc_spb_res_metadata_only;
+        if (flags & IBPP::brFix_Fss_Data)
+            spb.InsertString(isc_spb_res_fix_fss_data, 2, mCharSet.c_str());
+        if (flags & IBPP::brFix_Fss_Metadata)
+            spb.InsertString(isc_spb_res_fix_fss_metadata, 2, mCharSet.c_str());
+
+        std::string stFlags = "";
+
+        if (flags & IBPP::brstatistics_time)        stFlags += "T";
+        if (flags & IBPP::brstatistics_delta)       stFlags += "D";
+        if (flags & IBPP::brstatistics_pagereads)   stFlags += "R";
+        if (flags & IBPP::brstatistics_pagewrites)  stFlags += "W";
+
+        if (!stFlags.empty())
+            spb.InsertString(isc_spb_bkp_stat, 2, stFlags.c_str());
+
+    }
+    
+    if (mask != 0) 
+        spb.InsertQuad(isc_spb_options, mask);
 
 	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
@@ -717,10 +873,28 @@ void ServiceImpl::SetUserPassword(const char* newPassword)
 	else mUserPassword = newPassword;
 }
 
+void ibpp_internals::ServiceImpl::SetCharSet(const char* newCharset)
+{
+    if (newCharset == 0) 
+        mCharSet.erase();
+    else 
+        mCharSet = newCharset;
+}
+
+void ibpp_internals::ServiceImpl::SetRoleName(const char* newRoleName)
+{
+    if (newRoleName == 0)
+        mRoleName.erase();
+    else
+        mRoleName = newRoleName;
+}
+
 ServiceImpl::ServiceImpl(const std::string& ServerName,
-			const std::string& UserName, const std::string& UserPassword)
+			const std::string& UserName, const std::string& UserPassword, 
+            const std::string& RoleName, const std::string& CharSet)
 	:	mRefCount(0), mHandle(0),
-		mServerName(ServerName), mUserName(UserName), mUserPassword(UserPassword)
+		mServerName(ServerName), mUserName(UserName), mUserPassword(UserPassword),
+        mRoleName(RoleName), mCharSet(CharSet)
 {
 }
 

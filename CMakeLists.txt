@@ -110,6 +110,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/FieldPropertiesDialog.cpp
         ${SOURCEDIR}/gui/FindDialog.cpp
         ${SOURCEDIR}/gui/FRLayoutConfig.cpp
+        ${SOURCEDIR}/gui/FRStyle.cpp
         ${SOURCEDIR}/gui/GUIURIHandlerHelper.cpp
         ${SOURCEDIR}/gui/HtmlHeaderMetadataItemVisitor.cpp
         ${SOURCEDIR}/gui/HtmlTemplateProcessor.cpp
@@ -196,6 +197,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/engine/MetadataLoader.h
         ${SOURCEDIR}/frutils.h
         ${SOURCEDIR}/frversion.h
+        ${SOURCEDIR}/firebird/constants.h
         ${SOURCEDIR}/gui/AboutBox.h
         ${SOURCEDIR}/gui/AdvancedMessageDialog.h
         ${SOURCEDIR}/gui/AdvancedSearchFrame.h
@@ -227,6 +229,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/gui/FieldPropertiesDialog.h
         ${SOURCEDIR}/gui/FindDialog.h
         ${SOURCEDIR}/gui/FRLayoutConfig.h
+        ${SOURCEDIR}/gui/FRStyle.h
         ${SOURCEDIR}/gui/HtmlHeaderMetadataItemVisitor.h
         ${SOURCEDIR}/gui/HtmlTemplateProcessor.h
         ${SOURCEDIR}/gui/GUIURIHandlerHelper.h
@@ -256,7 +259,6 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/MasterPassword.h
         ${SOURCEDIR}/metadata/collection.h
         ${SOURCEDIR}/metadata/column.h
-        ${SOURCEDIR}/metadata/constants.h
         ${SOURCEDIR}/metadata/constraints.h
         ${SOURCEDIR}/metadata/CreateDDLVisitor.h
         ${SOURCEDIR}/metadata/database.h
@@ -318,9 +320,32 @@ list(APPEND IBPP_SOURCE_LIST
         ${SOURCEDIR}/ibpp/user.cpp
 )
 list(APPEND IBPP_HEADER_LIST
+        ${SOURCEDIR}/firebird/include/ibase.h
+        ${SOURCEDIR}/firebird/include/iberror.h
+        ${SOURCEDIR}/firebird/include/firebird/impl/blr.h
+        ${SOURCEDIR}/firebird/include/firebird/impl/consts_pub.h
+        ${SOURCEDIR}/firebird/include/firebird/impl/dsc_pub.h
+        ${SOURCEDIR}/firebird/include/firebird/impl/inf_pub.h
+        ${SOURCEDIR}/firebird/include/firebird/impl/msg_helper.h
+        ${SOURCEDIR}/firebird/include/firebird/impl/sqlda_pub.h
+        ${SOURCEDIR}/firebird/include/firebird/impl/types_pub.h        
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/all.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/dsql.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/dyn.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/fbsvcmgr.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/fbtracemgr.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/gbak.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/gfix.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/gsec.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/gstat.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/isql.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/jrd.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/jrd_bugchk.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/nbackup.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/sqlerr.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/sqlwarn.h
+		${SOURCEDIR}/firebird/include/firebird/impl/msg/utl.h		
         ${SOURCEDIR}/ibpp/_ibpp.h
-        ${SOURCEDIR}/ibpp/ibase.h
-        ${SOURCEDIR}/ibpp/iberror.h
         ${SOURCEDIR}/ibpp/ibpp.h
 )
 
@@ -361,6 +386,30 @@ if (UNIX AND NOT APPLE)
 	add_definitions(-DFR_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
 	# Need to link the fbclient lib in *nix systems
 	list(APPEND FR_LIBS -lfbclient)
+
+	include(CheckCXXSourceCompiles)
+	check_cxx_source_compiles("
+int main() {
+    __int128 x;
+    return 0;
+}
+" HAVE_INT128)
+
+	if (HAVE_INT128)
+		add_definitions(-DHAVE_INT128)
+	endif()
+
+	check_cxx_source_compiles("
+#include <decimal/decimal>
+int main() {
+    std::decimal::decimal128 x;
+    return 0;
+}
+" HAVE_DECIMAL128)
+
+	if (HAVE_DECIMAL128)
+		add_definitions(-DHAVE_DECIMAL128)
+	endif()
 
 	# Create the revision include file
 	execute_process(
@@ -419,6 +468,7 @@ if(APPLE)
     add_resources(SYS_TEMPLATES ${CMAKE_SOURCE_DIR}/sys-templates SharedSupport/sys-templates *)
     add_resources(CODE_TEMPLATES ${CMAKE_SOURCE_DIR}/code-templates SharedSupport/code-templates *)
     add_resources(ICON ${CMAKE_SOURCE_DIR}/res Resources flamerobin.icns)
+    add_resources(XML_STYLES ${CMAKE_SOURCE_DIR}/xml-styles SharedSupport/xml-styles *)
 
     set(RESOURCE_FILES_MAC
             ${HTML_TEMPLATES}
@@ -427,6 +477,7 @@ if(APPLE)
             ${SYS_TEMPLATES}
             ${CODE_TEMPLATES}
             ${ICON}
+			${XML_STYLES}
     )
 
 endif (APPLE)
@@ -457,6 +508,7 @@ file(COPY ${CMAKE_SOURCE_DIR}/html-templates DESTINATION ${CMAKE_CURRENT_BINARY_
 file(COPY ${CMAKE_SOURCE_DIR}/code-templates DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_SOURCE_DIR}/sys-templates  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_SOURCE_DIR}/conf-defs  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_SOURCE_DIR}/xml-styles  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 if (APPLE)
     add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCE_LIST} ${HEADER_LIST} ${RESOURCE_FILES_MAC})
@@ -487,6 +539,7 @@ if (UNIX AND NOT APPLE)
 			code-templates
 			sys-templates
 			conf-defs 
+			xml-styles			
 		DESTINATION share/flamerobin
 	)
 	install(
