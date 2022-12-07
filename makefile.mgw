@@ -52,6 +52,7 @@ FLAMEROBIN_OBJECTS =  \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_addconstrainthandler.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_Config.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_LocalSettings.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_ArtProvider.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_CodeTemplateProcessor.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_FRError.o \
@@ -96,6 +97,7 @@ FLAMEROBIN_OBJECTS =  \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_FieldPropertiesDialog.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_FindDialog.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_FRLayoutConfig.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_FRStyle.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_GUIURIHandlerHelper.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_HtmlHeaderMetadataItemVisitor.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_HtmlTemplateProcessor.o \
@@ -251,7 +253,7 @@ revision-info:
 	update-revision-info.cmd
 
 gccu$(R_OPT)$(D_OPT)\flamerobin.exe: $(FLAMEROBIN_OBJECTS) gccu$(R_OPT)$(D_OPT)\libibpp.a gccu$(R_OPT)$(D_OPT)\flamerobin_flamerobin_rc.o gccu$(R_OPT)$(D_OPT)\libibpp.a
-	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS)  -mthreads $(__DEBUGINFO) $(______flamerobin_WX_LIB_DIR_FILENAMES_1_p) -L$(BOOST_LIB_DIR) -Wl,--subsystem,windows -mwindows $(LDFLAGS)  -lwxmsw30u$(D_OPT)_aui -lwxmsw30u$(D_OPT)_stc -lwxmsw30u$(D_OPT)_html -lwxmsw30u$(D_OPT)_adv -lwxmsw30u$(D_OPT)_core -lwxbase30u$(D_OPT)_xml -lwxbase30u$(D_OPT) -lwxscintilla$(D_OPT) -lwxexpat$(D_OPT) -lwxtiff$(D_OPT) -lwxjpeg$(D_OPT) -lwxpng$(D_OPT) -lwxzlib$(D_OPT) -lwxregexu$(D_OPT) -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lcomctl32 -lrpcrt4 -lwsock32 gccu$(R_OPT)$(D_OPT)\libibpp.a
+	$(CXX) -o $@ $(FLAMEROBIN_OBJECTS)  -mthreads $(__DEBUGINFO) $(______flamerobin_WX_LIB_DIR_FILENAMES_1_p) -L$(BOOST_LIB_DIR) -Wl,--subsystem,windows -mwindows $(LDFLAGS)  -lwxmsw31u$(D_OPT)_aui -lwxmsw31u$(D_OPT)_stc -lwxmsw31u$(D_OPT)_html -lwxmsw31u$(D_OPT)_adv -lwxmsw31u$(D_OPT)_core -lwxbase31u$(D_OPT)_xml -lwxbase31u$(D_OPT) -lwxscintilla$(D_OPT) -lwxexpat$(D_OPT) -lwxtiff$(D_OPT) -lwxjpeg$(D_OPT) -lwxpng$(D_OPT) -lwxzlib$(D_OPT) -lwxregexu$(D_OPT) -lkernel32 -luser32 -lgdi32 -lwinspool -lcomdlg32 -ladvapi32 -lshell32 -lole32 -loleaut32 -luuid -lcomctl32 -lrpcrt4 -lwsock32 gccu$(R_OPT)$(D_OPT)\libibpp.a
 
 gccu$(R_OPT)$(D_OPT)\libibpp.a: $(IBPP_OBJECTS)
 	if exist $@ del $@
@@ -265,6 +267,9 @@ gccu$(R_OPT)$(D_OPT)\flamerobin_Config.o: ./src/config/Config.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gccu$(R_OPT)$(D_OPT)\flamerobin_DatabaseConfig.o: ./src/config/DatabaseConfig.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gccu$(R_OPT)$(D_OPT)\flamerobin_LocalSettings.o: ./src/config/LocalSettings.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gccu$(R_OPT)$(D_OPT)\flamerobin_ArtProvider.o: ./src/core/ArtProvider.cpp
@@ -397,6 +402,9 @@ gccu$(R_OPT)$(D_OPT)\flamerobin_FindDialog.o: ./src/gui/FindDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gccu$(R_OPT)$(D_OPT)\flamerobin_FRLayoutConfig.o: ./src/gui/FRLayoutConfig.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gccu$(R_OPT)$(D_OPT)\flamerobin_FRStyle.o: ./${SOURCEDIR}/gui/FRStyle.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gccu$(R_OPT)$(D_OPT)\flamerobin_GUIURIHandlerHelper.o: ./src/gui/GUIURIHandlerHelper.cpp

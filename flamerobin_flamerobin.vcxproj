@@ -1046,6 +1046,7 @@
     <ClCompile Include="src\gui\FieldPropertiesDialog.cpp" />
     <ClCompile Include="src\gui\FindDialog.cpp" />
     <ClCompile Include="src\gui\FRLayoutConfig.cpp" />
+    <ClCompile Include="src\gui\FRStyle.cpp" />
     <ClCompile Include="src\gui\GUIURIHandlerHelper.cpp" />
     <ClCompile Include="src\gui\HtmlHeaderMetadataItemVisitor.cpp" />
     <ClCompile Include="src\gui\HtmlTemplateProcessor.cpp" />
@@ -1164,6 +1165,7 @@
     <ClInclude Include="src\gui\FieldPropertiesDialog.h" />
     <ClInclude Include="src\gui\FindDialog.h" />
     <ClInclude Include="src\gui\FRLayoutConfig.h" />
+    <ClInclude Include="src\gui\FRStyle.h" />
     <ClInclude Include="src\gui\GUIURIHandlerHelper.h" />
     <ClInclude Include="src\gui\HtmlHeaderMetadataItemVisitor.h" />
     <ClInclude Include="src\gui\HtmlTemplateProcessor.h" />

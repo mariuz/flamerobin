@@ -13,10 +13,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: wxWidgets 3.2
+      run: sudo apt-key adv --fetch-keys http://repos.codelite.org/CodeLite.asc
+    - name: add repository
+      run: sudo apt-add-repository 'deb http://repos.codelite.org/wx3.2/ubuntu/ jammy universe'
     - name: apt update
       run: sudo apt-get update 
     - name: Install tools and libs
-      run: sudo apt-get install build-essential git cmake firebird-dev libwxgtk*-gtk3-dev -y
+      run: sudo apt-get install build-essential git cmake firebird-dev libnotify-dev libwxgtk3.2unofficial-dev -y
     - name: CMake
       run: |
           mkdir build

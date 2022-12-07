@@ -98,6 +98,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_FieldPropertiesDialog.o \
 	flamerobin_FindDialog.o \
 	flamerobin_FRLayoutConfig.o \
+	flamerobin_FRStyle.o \
 	flamerobin_GUIURIHandlerHelper.o \
 	flamerobin_HtmlHeaderMetadataItemVisitor.o \
 	flamerobin_HtmlTemplateProcessor.o \
@@ -375,6 +376,9 @@ flamerobin_FindDialog.o: ./src/gui/FindDialog.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 flamerobin_FRLayoutConfig.o: ./src/gui/FRLayoutConfig.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+flamerobin_FRStyle.o: ./${SOURCEDIR}/gui/FRStyle.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 flamerobin_GUIURIHandlerHelper.o: ./src/gui/GUIURIHandlerHelper.cpp
