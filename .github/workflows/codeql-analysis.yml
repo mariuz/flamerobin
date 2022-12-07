@@ -59,9 +59,10 @@ jobs:
         sudo sh -c "echo deb-src http://security.ubuntu.com/ubuntu/ focal-security main restricted >> /etc/apt/sources.list"
         sudo sh -c "echo deb-src http://security.ubuntu.com/ubuntu/ focal-security universe >> /etc/apt/sources.list"
         sudo sh -c "echo deb-src http://security.ubuntu.com/ubuntu/ focal-security multiverse >> /etc/apt/sources.list"
+        sudo apt-key adv --fetch-keys http://repos.codelite.org/CodeLite.asc
+        sudo apt-add-repository 'deb http://repos.codelite.org/wx3.2/ubuntu/ jammy universe'
         sudo apt-get update
-        sudo apt-get install -y build-essential git
-        sudo apt-get build-dep -y flamerobin
+        sudo apt-get install -y build-essential git cmake firebird-dev libnotify-dev libwxgtk3.2unofficial-dev        
   
 
     # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
