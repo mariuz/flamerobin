@@ -43,7 +43,7 @@
 
 ShutdownStartupBaseFrame::ShutdownStartupBaseFrame(wxWindow* parent,
         DatabasePtr db)
-    : ThreadBaseFrame(parent, db)
+    : ServiceBaseFrame(parent, db)
 {
 
     verboseMsgsM = true;
@@ -62,7 +62,7 @@ void ShutdownStartupBaseFrame::cancelShutdownStartup()
 bool ShutdownStartupBaseFrame::Destroy()
 {
     cancelShutdownStartup();
-    return ThreadBaseFrame::Destroy();
+    return ServiceBaseFrame::Destroy();
 }
 
 void ShutdownStartupBaseFrame::doReadConfigSettings(const wxString& prefix)
@@ -93,7 +93,7 @@ const wxString ShutdownStartupBaseFrame::getStorageName() const
 
 void ShutdownStartupBaseFrame::createControls()
 {
-    ThreadBaseFrame::createControls();
+    ServiceBaseFrame::createControls();
     
     wxArrayString choices;
     choices.Add("normal");
@@ -108,7 +108,7 @@ void ShutdownStartupBaseFrame::createControls()
 
 void ShutdownStartupBaseFrame::layoutControls()
 {
-    ThreadBaseFrame::layoutControls();
+    ServiceBaseFrame::layoutControls();
 }
 
 void ShutdownStartupBaseFrame::subjectRemoved(Subject* subject)
@@ -141,7 +141,6 @@ IBPP::DSM ShutdownStartupBaseFrame::getDatabaseMode()
         case 2 :
             return IBPP::dsMulti;
             break;
-
         case 3 :
             return IBPP::dsFull;
             break;
@@ -152,7 +151,7 @@ IBPP::DSM ShutdownStartupBaseFrame::getDatabaseMode()
 
 void ShutdownStartupBaseFrame::updateControls()
 {
-    ThreadBaseFrame::updateControls();
+    ServiceBaseFrame::updateControls();
 
     bool running = getThreadRunning();
 
@@ -161,7 +160,7 @@ void ShutdownStartupBaseFrame::updateControls()
 }
 
 //! event handlers
-BEGIN_EVENT_TABLE(ShutdownStartupBaseFrame, ThreadBaseFrame)
+BEGIN_EVENT_TABLE(ShutdownStartupBaseFrame, ServiceBaseFrame)
     EVT_MENU(ShutdownStartupBaseFrame::ID_thread_finished, ShutdownStartupBaseFrame::OnThreadFinished)
     EVT_MENU(ShutdownStartupBaseFrame::ID_thread_output, ShutdownStartupBaseFrame::OnThreadOutput)
 END_EVENT_TABLE()
@@ -178,3 +177,11 @@ void ShutdownStartupBaseFrame::OnVerboseLogChange(wxCommandEvent& WXUNUSED(event
     updateMessages(0, msgsM.GetCount());
 }
 
+ShutdownStartupThread::ShutdownStartupThread(ShutdownStartupBaseFrame* frame, 
+    wxString server, wxString username, wxString password, wxString rolename, 
+    wxString charset, wxString dbfilename, IBPP::DSM flags)
+    :dbfileM(dbfilename), 
+    ServiceThread(frame, server, username, password, rolename, charset)
+{
+    dsmM = (IBPP::DSM)((int)flags | (int)IBPP::brVerbose);
+}

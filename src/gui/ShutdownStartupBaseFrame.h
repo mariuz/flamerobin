@@ -31,14 +31,11 @@
 #include <memory>
 
 #include "core/Observer.h"
-#include "gui/ThreadBaseFrame.h"
+#include "gui/ServiceBaseFrame.h"
 #include "metadata/database.h"
 #include "metadata/MetadataClasses.h"
 
-class FileTextControl;
-class LogTextControl;
-
-class ShutdownStartupBaseFrame: public ThreadBaseFrame//, public Observer
+class ShutdownStartupBaseFrame: public ServiceBaseFrame
 {
 public:
 
@@ -78,6 +75,18 @@ private:
     void OnVerboseLogChange(wxCommandEvent& event);
 
     DECLARE_EVENT_TABLE()
+};
+
+class ShutdownStartupThread : public ServiceThread
+{
+public:
+    ShutdownStartupThread(ShutdownStartupBaseFrame* frame,  wxString server,
+        wxString username, wxString password, wxString rolename, wxString charset,
+        wxString dbfilename, IBPP::DSM flags
+    );
+protected:
+    wxString dbfileM;
+    IBPP::DSM dsmM;
 };
 
 #endif // FR_SHUTDOWNSTARTUPBASEFRAME_H

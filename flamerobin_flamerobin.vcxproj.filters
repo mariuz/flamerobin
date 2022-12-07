@@ -357,7 +357,7 @@
     <ClCompile Include="src\core\FRDecimal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\gui\ThreadBaseFrame.cpp">
+    <ClCompile Include="src\gui\ServiceBaseFrame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ShutdownFrame.cpp">
@@ -712,7 +712,7 @@
     <ClInclude Include="src\core\FRDecimal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\gui\ThreadBaseFrame.h">
+    <ClInclude Include="src\gui\ServiceBaseFrame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\ShutdownFrame.h">

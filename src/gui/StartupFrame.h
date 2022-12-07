@@ -56,4 +56,17 @@ private:
     DECLARE_EVENT_TABLE()
 };
 
+
+class StartupThread : public ShutdownStartupThread
+{
+public:
+    StartupThread(StartupFrame* frame, wxString server,
+        wxString username, wxString password, wxString rolename, wxString charset,
+        wxString dbfilename, IBPP::DSM flags);
+protected:
+    virtual void Execute(IBPP::Service);
+
+
+};
+
 #endif // FR_STARTUPFRAME_H

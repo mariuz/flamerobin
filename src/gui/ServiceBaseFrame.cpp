@@ -33,16 +33,19 @@
 #include <wx/timer.h>
 #include <wx/wupdlock.h>
 
+#include <ibpp.h>
+
 #include "config/Config.h"
 #include "core/ArtProvider.h"
-#include "gui/ThreadBaseFrame.h"
+#include "core/StringUtils.h"
+#include "gui/ServiceBaseFrame.h"
 #include "gui/controls/DndTextControls.h"
 #include "gui/controls/LogTextControl.h"
 #include "gui/StyleGuide.h"
 #include "metadata/database.h"
 #include "metadata/server.h"
 
-ThreadBaseFrame::ThreadBaseFrame(wxWindow* parent,
+ServiceBaseFrame::ServiceBaseFrame(wxWindow* parent,
         DatabasePtr db)
     : BaseFrame(parent, wxID_ANY, wxEmptyString), databaseM(db), threadM(0)
 {
@@ -57,7 +60,7 @@ ThreadBaseFrame::ThreadBaseFrame(wxWindow* parent,
 }
 
 //! implementation details
-void ThreadBaseFrame::addThreadMsg(const wxString msg,
+void ServiceBaseFrame::addThreadMsg(const wxString msg,
     bool& notificationNeeded)
 {
     notificationNeeded = false;
@@ -74,7 +77,7 @@ void ThreadBaseFrame::addThreadMsg(const wxString msg,
     }
 }
 
-void ThreadBaseFrame::cancelThread()
+void ServiceBaseFrame::cancelThread()
 {
     if (threadM != 0)
     {
@@ -83,39 +86,39 @@ void ThreadBaseFrame::cancelThread()
     }
 }
 
-void ThreadBaseFrame::clearLog()
+void ServiceBaseFrame::clearLog()
 {
     msgKindsM.Clear();
     msgsM.Clear();
     text_ctrl_log->ClearAll();
 }
 
-bool ThreadBaseFrame::Destroy()
+bool ServiceBaseFrame::Destroy()
 {
     cancelThread();
     return BaseFrame::Destroy();
 }
 
 
-DatabasePtr ThreadBaseFrame::getDatabase() const
+DatabasePtr ServiceBaseFrame::getDatabase() const
 {
     return databaseM.lock();
 }
 
 
-bool ThreadBaseFrame::getThreadRunning() const
+bool ServiceBaseFrame::getThreadRunning() const
 {
     return threadM != 0;
 }
 
-void ThreadBaseFrame::subjectRemoved(Subject* subject)
+void ServiceBaseFrame::subjectRemoved(Subject* subject)
 {
     DatabasePtr db = getDatabase();
     if (!db || !db->isConnected() || subject == db.get())
         Close();
 }
 
-bool ThreadBaseFrame::startThread(std::unique_ptr<wxThread> thread)
+bool ServiceBaseFrame::startThread(std::unique_ptr<wxThread> thread)
 {
     wxASSERT(threadM == 0);
     if (wxTHREAD_NO_ERROR != thread->Create())
@@ -134,7 +137,7 @@ bool ThreadBaseFrame::startThread(std::unique_ptr<wxThread> thread)
     return true;
 }
 
-void ThreadBaseFrame::threadOutputMsg(const wxString msg, MsgKind kind)
+void ServiceBaseFrame::threadOutputMsg(const wxString msg, MsgKind kind)
 {
     wxString s(msg);
     switch (kind)
@@ -161,7 +164,7 @@ void ThreadBaseFrame::threadOutputMsg(const wxString msg, MsgKind kind)
     }
 }
 
-void ThreadBaseFrame::createControls()
+void ServiceBaseFrame::createControls()
 {
     panel_controls = new wxPanel(this, wxID_ANY, wxDefaultPosition,
         wxDefaultSize, wxTAB_TRAVERSAL | wxCLIP_CHILDREN);
@@ -173,7 +176,7 @@ void ThreadBaseFrame::createControls()
 
 }
 
-void ThreadBaseFrame::layoutControls()
+void ServiceBaseFrame::layoutControls()
 {
     sizerButtons = new wxBoxSizer(wxHORIZONTAL);
     
@@ -190,7 +193,7 @@ void ThreadBaseFrame::layoutControls()
 
 }
 
-void ThreadBaseFrame::update()
+void ServiceBaseFrame::update()
 {
     DatabasePtr db = getDatabase();
     if (db)
@@ -199,14 +202,14 @@ void ThreadBaseFrame::update()
         Close();
 }
 
-void ThreadBaseFrame::updateControls()
+void ServiceBaseFrame::updateControls()
 {
     bool running = getThreadRunning();
     
     button_start->Enable(!running);
 }
 
-void ThreadBaseFrame::updateMessages(size_t firstmsg, size_t lastmsg)
+void ServiceBaseFrame::updateMessages(size_t firstmsg, size_t lastmsg)
 {
     if (lastmsg > msgsM.GetCount())
         lastmsg = msgsM.GetCount();
@@ -230,25 +233,25 @@ void ThreadBaseFrame::updateMessages(size_t firstmsg, size_t lastmsg)
 
 
 //! event handlers
-BEGIN_EVENT_TABLE(ThreadBaseFrame, BaseFrame)
-    EVT_MENU(ThreadBaseFrame::ID_thread_finished, ThreadBaseFrame::OnThreadFinished)
-    EVT_MENU(ThreadBaseFrame::ID_thread_output, ThreadBaseFrame::OnThreadOutput)
+BEGIN_EVENT_TABLE(ServiceBaseFrame, BaseFrame)
+    EVT_MENU(ServiceBaseFrame::ID_thread_finished, ServiceBaseFrame::OnThreadFinished)
+    EVT_MENU(ServiceBaseFrame::ID_thread_output, ServiceBaseFrame::OnThreadOutput)
 END_EVENT_TABLE()
 
-void ThreadBaseFrame::OnSettingsChange(wxCommandEvent& WXUNUSED(event))
+void ServiceBaseFrame::OnSettingsChange(wxCommandEvent& WXUNUSED(event))
 {
     if (IsShown())
         updateControls();
 }
 
-void ThreadBaseFrame::OnThreadFinished(wxCommandEvent& event)
+void ServiceBaseFrame::OnThreadFinished(wxCommandEvent& event)
 {
     threadM = 0;
     OnThreadOutput(event);
     updateControls();
 }
 
-void ThreadBaseFrame::OnThreadOutput(wxCommandEvent& WXUNUSED(event))
+void ServiceBaseFrame::OnThreadOutput(wxCommandEvent& WXUNUSED(event))
 {
     wxCriticalSectionLocker locker(critsectM);
     threadMsgTimeMillisM = ::wxGetLocalTimeMillis();
@@ -281,4 +284,103 @@ void ThreadBaseFrame::OnThreadOutput(wxCommandEvent& WXUNUSED(event))
     updateMessages(first, msgsM.GetCount());
 }
 
+ServiceThread::ServiceThread(ServiceBaseFrame* frame, wxString server,
+    wxString username, wxString password, wxString rolename,
+    wxString charset) :
+    frameM(frame), serverM(server), usernameM(username), passwordM(password),
+    rolenameM(rolename), charsetM(charset),
+    wxThread()
+
+{
+}
+
+void* ServiceThread::Entry()
+{
+    wxDateTime now;
+    wxString msg;
+
+    try
+    {
+        msg.Printf(_("Connecting to server %s..."), serverM.c_str());
+        logImportant(msg);
+        IBPP::Service svc = IBPP::ServiceFactory(wx2std(serverM),
+            wx2std(usernameM), wx2std(passwordM), wx2std(rolenameM), wx2std(charsetM)
+        );
+        svc->Connect();
+
+        now = wxDateTime::Now();
+        msg.Printf(_("Database restore started %s"), now.FormatTime().c_str());
+        logImportant(msg);
+        Execute(svc);
+        while (true)
+        {
+            if (TestDestroy())
+            {
+                now = wxDateTime::Now();
+                msg.Printf(_("Database restore canceled %s"),
+                    now.FormatTime().c_str());
+                logImportant(msg);
+                break;
+            }
+            const char* c = svc->WaitMsg();
+            if (c == 0)
+            {
+                now = wxDateTime::Now();
+                msg.Printf(_("Database restore finished %s"),
+                    now.FormatTime().c_str());
+                logImportant(msg);
+                break;
+            }
+            msg = c;
+            logProgress(msg);
+        }
+        svc->Disconnect();
+    }
+    catch (IBPP::Exception& e)
+    {
+        now = wxDateTime::Now();
+        msg.Printf(_("Database restore canceled %s due to IBPP exception:\n\n"),
+            now.FormatTime().c_str());
+        msg += e.what();
+        logError(msg);
+    }
+    catch (...)
+    {
+        now = wxDateTime::Now();
+        msg.Printf(_("Database restore canceled %s due to exception"),
+            now.FormatTime().c_str());
+        logError(msg);
+    }
+    return 0;
+}
+
+void ServiceThread::OnExit()
+{
+    if (frameM != 0)
+    {
+        wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
+            ServiceBaseFrame::ID_thread_finished);
+        wxPostEvent(frameM, event);
+    }
+
+}
+
+void ServiceThread::logError(wxString& msg)
+{
+    if (frameM != 0)
+        frameM->threadOutputMsg(msg, ServiceBaseFrame::error_message);
+}
+
+void ServiceThread::logImportant(wxString& msg)
+{
+    if (frameM != 0)
+        frameM->threadOutputMsg(msg, ServiceBaseFrame::important_message);
+}
+
+void ServiceThread::logProgress(wxString& msg)
+{
+    if (frameM != 0)
+        frameM->threadOutputMsg(msg, ServiceBaseFrame::progress_message);
+
+}
 

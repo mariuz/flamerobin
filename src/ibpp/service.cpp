@@ -601,10 +601,11 @@ void ServiceImpl::Repair(const std::string& dbfile, IBPP::RPF flags)
 
 void ServiceImpl::StartBackup(
     const std::string& dbfile,	const std::string& bkfile, const std::string& outfile,
-    const int factor,
-    IBPP::BRF flags,
+    const int factor, IBPP::BRF flags,
     const std::string& cryptName, const std::string& keyHolder, const std::string& keyName,
-    const std::string& skipData, const std::string& includeData, const int verboseInteval)
+    const std::string& skipData, const std::string& includeData, const int verboseInteval,
+    const int parallelWorkers
+    )
 {
 	if (mHandle	== 0)
 		throw LogicExceptionImpl("Service::Backup", _("Service is not connected."));
@@ -636,6 +637,9 @@ void ServiceImpl::StartBackup(
         spb.InsertString(isc_spb_bkp_skip_data, 2, skipData.c_str());
     if (!includeData.empty() && versionIsHigherOrEqualTo(4, 0)) 
         spb.InsertString(isc_spb_bkp_include_data, 2, includeData.c_str());
+
+    if (parallelWorkers > 0 && versionIsHigherOrEqualTo(3, 0))
+        spb.InsertQuad(isc_spb_bkp_parallel_workers, parallelWorkers);
 
     if (versionIsHigherOrEqualTo(4, 0)) {
         if (!cryptName.empty()) 
@@ -685,11 +689,11 @@ void ServiceImpl::StartBackup(
 
 void ServiceImpl::StartRestore(
     const std::string& bkfile, const std::string& dbfile, const std::string& outfile,
-    int pagesize, int buffers,
-    IBPP::BRF flags,
+    int pagesize, int buffers, IBPP::BRF flags,
     const std::string& cryptName, const std::string& keyHolder, const std::string& keyName,
-    const std::string& skipData, const std::string& includeData, const int verboseInteval
-)
+    const std::string& skipData, const std::string& includeData, const int verboseInteval,
+    const int parallelWorkers
+    )
 {
 	if (mHandle	== 0)
 		throw LogicExceptionImpl("Service::Restore", _("Service is not connected."));
@@ -719,6 +723,8 @@ void ServiceImpl::StartRestore(
     if (buffers > 0) 
         spb.InsertQuad(isc_spb_res_buffers, buffers);
 
+    if (parallelWorkers > 0 && versionIsHigherOrEqualTo(3, 0))
+        spb.InsertQuad(isc_spb_bkp_parallel_workers, parallelWorkers);
 
     if (!skipData.empty() && versionIsHigherOrEqualTo(3, 0)) 
         spb.InsertString(isc_spb_res_skip_data, 2, skipData.c_str());
