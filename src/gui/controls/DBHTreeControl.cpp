@@ -34,6 +34,7 @@
 #include <wx/dataobj.h>
 #include <wx/dnd.h>
 #include <wx/imaglist.h>
+#include <wx/strvararg.h>
 
 #include <algorithm>
 #include <map>
@@ -492,7 +493,7 @@ void DBHTreeItemVisitor::visitFunctionSQL(FunctionSQL& function)
                 else
                     ++ins;
             }
-            nodeTextM += wxString::Format(" (%d, %d)", ins, outs);
+            nodeTextM += wxString::Format(" (%zu, %zu)", ins, outs);
         }
     }
     // show Parameter nodes if Config setting is on
@@ -528,7 +529,7 @@ void DBHTreeItemVisitor::visitUDF(UDF& function)
                 else
                     ++ins;
             }
-            nodeTextM += wxString::Format(" (%d, %d)", ins, outs);
+            nodeTextM += wxString::Format(" (%zu, %zu)", ins, outs);
         }
     }
     // show Parameter nodes if Config setting is on
@@ -617,7 +618,7 @@ void DBHTreeItemVisitor::visitPackage(Package& package)
                 else
                     ++ins;
             }
-            nodeTextM += wxString::Format(" (%d, %d)", ins, outs);
+            nodeTextM += wxString::Format(" (%zu, %zu)", ins, outs);
         }
     }
     // show Parameter nodes if Config setting is on
@@ -658,7 +659,7 @@ void DBHTreeItemVisitor::visitProcedure(Procedure& procedure)
                 else
                     ++ins;
             }
-            nodeTextM += wxString::Format(" (%d, %d)", ins, outs);
+            nodeTextM += wxString::Format(" (%zu, %zu)", ins, outs);
         }
     }
     // show Parameter nodes if Config setting is on
@@ -730,7 +731,7 @@ void DBHTreeItemVisitor::visitGTTable(GTTable& table)
         if (DBHTreeConfigCache::get().getShowColumnParamCount())
         {
             size_t colCount = table.getColumnCount();
-            nodeTextM += wxString::Format(" (%d)", colCount);
+            nodeTextM += wxString::Format(" (%zu)", colCount);
         }
     }
     // show Column nodes if Config setting is on
@@ -757,7 +758,8 @@ void DBHTreeItemVisitor::visitTable(Table& table)
         if (DBHTreeConfigCache::get().getShowColumnParamCount())
         {
             size_t colCount = table.getColumnCount();
-            nodeTextM += wxString::Format(" (%d)", colCount);
+            
+            nodeTextM += wxString::Format(" (%zu)", colCount);
         }
     }
     // show Column nodes if Config setting is on
@@ -783,7 +785,7 @@ void DBHTreeItemVisitor::visitSysTable(SysTable& table)
         if (DBHTreeConfigCache::get().getShowColumnParamCount())
         {
             size_t colCount = table.getColumnCount();
-            nodeTextM += wxString::Format(" (%d)", colCount);
+            nodeTextM += wxString::Format(" (%zu)", colCount);
         }
     }
     // show Column nodes if Config setting is on
@@ -837,7 +839,7 @@ void DBHTreeItemVisitor::visitView(View& view)
         if (DBHTreeConfigCache::get().getShowColumnParamCount())
         {
             size_t colCount = view.getColumnCount();
-            nodeTextM += wxString::Format(" (%d)", colCount);
+            nodeTextM += wxString::Format(" (%zu)", colCount);
         }
     }
     // show Column nodes if Config setting is on
