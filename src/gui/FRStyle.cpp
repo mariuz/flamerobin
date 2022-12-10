@@ -643,12 +643,19 @@ void FRStyleManager::assignGlobal(wxStyledTextCtrl* text)
             text->StyleResetDefault();
             text->SetBackgroundColour(style->getbgColor());
             text->SetForegroundColour(style->getfgColor());
+            
             assignWordStyle(text, style);
         }
         if (style->getStyleDesc() == "Default Style") {
             //defaultStyleM = style;
         }
-        if (style->getStyleDesc() == "Mark colour") {}
+        if (style->getStyleDesc() == "Caret colour") {
+            text->SetCaretForeground(style->getfgColor());
+            //text->SetCaret()
+        }
+        if (style->getStyleDesc() == "Mark colour") {
+            //text->setbackgroun
+        }
         if (style->getStyleDesc() == "Selected text colour") {
             text->SetSelBackground(true, style->getbgColor());
             //text->SetSelForeground(true, style->getfgColor());
@@ -676,7 +683,7 @@ void FRStyleManager::assignGlobal(wxStyledTextCtrl* text)
         if (style->getStyleDesc() == "URL hovered") {}
         if (style->getStyleDesc() == "Current line background colour") {
             text->SetCaretLineBackground(style->getbgColor());
-            text->SetCaretForeground(style->getfgColor());
+            //text->SetCaretForeground(style->getfgColor());
         }
     }
 
