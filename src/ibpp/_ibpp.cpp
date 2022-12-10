@@ -30,6 +30,7 @@
 #include <limits>
 
 #ifdef IBPP_WINDOWS
+#include <shlwapi.h>
 
 // Optional Registry Keys introduced by Firebird Server 1.5.x
 #define REG_KEY_ROOT_INSTANCES	"SOFTWARE\\Firebird Project\\Firebird Server\\Instances"
@@ -88,6 +89,33 @@ namespace ibpp_internals
 
 using namespace ibpp_internals;
 
+#ifdef IBPP_WINDOWS
+HMODULE IBPP_LoadLibrary(std::string library) {
+    HMODULE handle = 0;
+    handle = LoadLibrary(library.c_str());
+    if (handle == 0) {
+        DWORD errorMessageID = ::GetLastError();
+        if (errorMessageID != 0) {
+            if ((PathFileExists(library.c_str()) == 1) || (errorMessageID != 126)) {
+
+                LPSTR messageBuffer = nullptr;
+
+                    size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                        NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
+
+                    std::string message(messageBuffer, size);
+                    throw LogicExceptionImpl(library, messageBuffer);
+
+                    LocalFree(messageBuffer);
+            }
+
+        }
+
+    }
+    return handle;
+};
+#endif
+
 FBCLIENT* FBCLIENT::Call()
 {
 	// Let's load the CLIENT library, if it is not already loaded.
@@ -108,8 +136,10 @@ FBCLIENT* FBCLIENT::Call()
 		mHandle = 0;
 
         // try specific library
-        if (lstrlen(mfbdll.c_str()) > 0)
-            mHandle = LoadLibrary(mfbdll.c_str());
+        if (lstrlen(mfbdll.c_str()) > 0) {
+            //mHandle = LoadLibrary(mfbdll.c_str());
+            mHandle = IBPP_LoadLibrary(mfbdll);
+        }
 
         if (mHandle == 0) {
             std::string::size_type pos = 0;
@@ -151,12 +181,12 @@ FBCLIENT* FBCLIENT::Call()
 				do {--p;} while (*p != '\\');
 				*p = '\0';
 				lstrcat(fbdll, "\\fbembed.dll");// Local copy could be named fbembed.dll
-				mHandle = LoadLibrary(fbdll);
+				mHandle = IBPP_LoadLibrary(fbdll);
 				if (mHandle == 0)
 				{
 					*p = '\0';
 					lstrcat(fbdll, "\\fbclient.dll");	// Or possibly renamed fbclient.dll
-					mHandle = LoadLibrary(fbdll);
+					mHandle = IBPP_LoadLibrary(fbdll);
 				}
 			}
 		}
@@ -184,20 +214,20 @@ FBCLIENT* FBCLIENT::Call()
 					int len = lstrlen(fbdll);
                     // for Firebird 3+
                     lstrcat(fbdll, "fbclient.dll");
-                    mHandle = LoadLibrary(fbdll);
+                    mHandle = IBPP_LoadLibrary(fbdll);
                     // try 32 bit client library of 64 bit server too 
                     if (mHandle == 0) {
                         lstrcpy(fbdll + len, "WOW64\\fbclient.dll");
-                        mHandle = LoadLibrary(fbdll);
+                        mHandle = IBPP_LoadLibrary(fbdll);
                         // for Firebird 2.5 -
                         if (mHandle == 0){
                             lstrcpy(fbdll + len, "bin\\fbclient.dll");
-                            mHandle = LoadLibrary(fbdll);
+                            mHandle = IBPP_LoadLibrary(fbdll);
                             // try 32 bit client library of 64 bit server too
                             if (mHandle == 0)
                             {
                                 lstrcpy(fbdll + len, "bin\\WOW64\\fbclient.dll");
-                                mHandle = LoadLibrary(fbdll);
+                                mHandle = IBPP_LoadLibrary(fbdll);
                             }
                         }
                     }
@@ -209,12 +239,12 @@ FBCLIENT* FBCLIENT::Call()
 		if (mHandle == 0)
 		{
 			// Let's try from the PATH and System directories
-			mHandle = LoadLibrary("fbclient.dll");
+			mHandle = IBPP_LoadLibrary("fbclient.dll");
 			if (mHandle == 0)
 			{
 				// Not found. Last try : attemps loading gds32.dll from PATH and
 				// System directories
-				mHandle = LoadLibrary("gds32.dll");
+				mHandle = IBPP_LoadLibrary("gds32.dll");
 				if (mHandle == 0)
 					throw LogicExceptionImpl("GDS::Call()",
 						_("Can't find or load FBCLIENT.DLL or GDS32.DLL"));
