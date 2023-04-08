@@ -31,6 +31,7 @@
 #endif
 
 #include "core/FRInt128.h"
+#include <wx/numformatter.h>
 
 // enable only for debugging
 //#define DEBUG_DDU
@@ -95,12 +96,25 @@ bool DDUinitFromStr(DOUBLE_DABBLE_UNION& ddu, bool &isNegative, const wxString &
     wxString src2;
     int i1, iByte;
     uint8_t ch;
+    wxChar sep1000;
 
     isNegative = (src.GetChar(0) == _("-"));
     if (isNegative)
         src2 = src.Mid(1);
     else
         src2 = src;
+
+    // replace thousand separators - if used
+    if (wxNumberFormatter::GetThousandsSeparatorIfUsed(&sep1000))
+        src2.Replace(_(sep1000), _(""));
+
+    // Check: numeric?
+    for (i1 = 0; i1 < src2.Length(); i1++)
+    {
+        ch = src2.GetChar(i1);
+        if ((ch < '0') || (ch > '9'))
+            return false;
+    }
 
     // Check: number to big?
     // Its not really precise but prevents a buffer overflow.
