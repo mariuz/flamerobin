@@ -725,9 +725,37 @@ void Int128ColumnDef::setFromString(DataGridRowBuffer* buffer,
     const wxString& source)
 {
     wxASSERT(buffer);
-
     int128_t v128 = 0;
-    if (!StringToInt128(source, &v128))
+    int i1, decimalSeparatorIdx, localSourceScale;
+    wxString localSource = source;
+    wxChar ch;
+    wxChar decimalSeparator;
+
+    if (scaleM > 0)
+    {
+        decimalSeparator = wxNumberFormatter::GetDecimalSeparator();
+        decimalSeparatorIdx = localSource.rfind(decimalSeparator);
+
+        if (decimalSeparatorIdx > -1)
+        {
+            localSource.erase(decimalSeparatorIdx,1);
+            localSourceScale = localSource.Length() - decimalSeparatorIdx;
+        }
+        else
+            localSourceScale = 0;
+
+        // remove numbers if we are to big
+        if (localSourceScale > scaleM)
+            localSource.erase(localSource.Length() - localSourceScale + scaleM);
+        // add 0 if we are to small
+        while (localSourceScale < scaleM)
+        {
+            localSource = localSource + _("0");
+            localSourceScale++;
+        }
+    }
+
+    if (!StringToInt128(localSource, &v128))
         throw FRError(_("Invalid int128 numeric value"));
     buffer->setValue(offsetM, v128);
 }
