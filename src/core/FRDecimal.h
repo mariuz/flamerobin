@@ -31,8 +31,8 @@ typedef IBPP::ibpp_dec16_t dec16_t;
 typedef IBPP::ibpp_dec34_t dec34_t;
 
 wxString Dec34DPDToString(dec34_t value);
-bool StringToDec34DPD(const wxString& src, dec34_t* dst);
+bool StringToDec34DPD(const wxString& src, dec34_t* dst, wxString& errMsg);
 wxString Dec16DPDToString(dec16_t value);
-bool StringToDec16DPD(const wxString& src, dec16_t* dst);
+bool StringToDec16DPD(const wxString& src, dec16_t* dst, wxString& errMsg);
 
 #endif // FR_FRDECIMAL_H

@@ -727,6 +727,7 @@ void Int128ColumnDef::setFromString(DataGridRowBuffer* buffer,
     wxASSERT(buffer);
     int128_t v128 = 0;
     int i1, decimalSeparatorIdx, localSourceScale;
+    wxString errMsg;
     wxString localSource = source;
     wxChar ch;
     wxChar decimalSeparator;
@@ -755,8 +756,8 @@ void Int128ColumnDef::setFromString(DataGridRowBuffer* buffer,
         }
     }
 
-    if (!StringToInt128(localSource, &v128))
-        throw FRError(_("Invalid int128 numeric value"));
+    if (!StringToInt128(localSource, &v128, errMsg))
+        throw FRError(errMsg);
     buffer->setValue(offsetM, v128);
 }
 
@@ -1377,8 +1378,9 @@ void Dec16ColumnDef::setFromString(DataGridRowBuffer* buffer,
 {
     wxASSERT(buffer);
     dec16_t value;
-    if (!StringToDec16DPD(source, &value))
-        throw FRError(_("Invalid decimal34 numeric value"));
+    wxString errMsg;
+    if (!StringToDec16DPD(source, &value, errMsg))
+        throw FRError(errMsg);
     buffer->setValue(offsetM, value);
 }
 
@@ -1438,8 +1440,9 @@ void Dec34ColumnDef::setFromString(DataGridRowBuffer* buffer,
 {
     wxASSERT(buffer);
     dec34_t value;
-    if (!StringToDec34DPD(source, &value))
-        throw FRError(_("Invalid decimal34 numeric value"));
+    wxString errMsg;
+    if (!StringToDec34DPD(source, &value, errMsg))
+        throw FRError(errMsg);
     buffer->setValue(offsetM, value);
 }
 
