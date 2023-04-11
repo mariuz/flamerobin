@@ -30,6 +30,6 @@
 typedef IBPP::ibpp_int128_t int128_t;
 
 wxString Int128ToString(int128_t value);
-bool StringToInt128(const wxString& src, int128_t* dst);
+bool StringToInt128(const wxString& src, int128_t* dst, wxString& errMsg);
 
 #endif // FR_FRINT128_H
