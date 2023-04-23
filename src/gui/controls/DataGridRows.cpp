@@ -712,12 +712,21 @@ wxString Int128ColumnDef::getAsString(DataGridRowBuffer* buffer, Database*)
     wxASSERT(buffer);
     int128_t value;
     wxString result;
+    int numStart;
+
     if (!buffer->getValue(offsetM, value))
         return wxEmptyString;
     result = Int128ToString(value);
     if (scaleM > 0)
+    {
+        numStart = (result.GetChar(0) == '-') ? 1 : 0;
+
+        while (result.length() < scaleM + numStart + 1)
+            result.insert(numStart, "0");
+
         result.insert(result.length() - scaleM,
                       wxNumberFormatter::GetDecimalSeparator());
+    }
     return result;
 }
 
