@@ -450,9 +450,6 @@ wxString DecInfoToString(const DECFLOAT_DEFINITION& def, const DECFLOAT_DECINFO 
         return "Infinity";
 
     result = info.mantStr;
-    // add sign
-    if (info.negative)
-        result = _("-") + result;
 
     exp = info.exp;
 
@@ -470,6 +467,10 @@ wxString DecInfoToString(const DECFLOAT_DEFINITION& def, const DECFLOAT_DECINFO 
     }
     if (exp != 0)
         result = result + _(" E") << exp;
+
+    // add sign
+    if (info.negative)
+        result = _("-") + result;
 
     return result;
 }
