@@ -450,9 +450,6 @@ wxString DecInfoToString(const DECFLOAT_DEFINITION& def, const DECFLOAT_DECINFO 
         return "Infinity";
 
     result = info.mantStr;
-    // add sign
-    if (info.negative)
-        result = _("-") + result;
 
     exp = info.exp;
 
@@ -471,6 +468,10 @@ wxString DecInfoToString(const DECFLOAT_DEFINITION& def, const DECFLOAT_DECINFO 
     if (exp != 0)
         result = result + _(" E") << exp;
 
+    // add sign
+    if (info.negative)
+        result = _("-") + result;
+
     return result;
 }
 
@@ -482,10 +483,11 @@ wxString Dec34DPDToString(dec34_t value)
     return DecInfoToString(CDec34DPDDef, info);
 }
 
-// input definition + src
-// ouput dstInfo
+// input def + srcStr
+// ouput dstInfo + errMsg
 bool StringToDecParse(const DECFLOAT_DEFINITION& def,
-    const wxString& srcStr, DECFLOAT_DECINFO* dstInfo)
+    const wxString& srcStr, DECFLOAT_DECINFO* dstInfo,
+    wxString& errMsg)
 {
     wxString valueStr;
     wxString expStr;
@@ -501,7 +503,10 @@ bool StringToDecParse(const DECFLOAT_DEFINITION& def,
     *dstInfo = {0};
 
     if (srcStr.IsEmpty())
+    {
+        errMsg = _("SrcStr is empty!");
         return false;
+    }
 
     srcStrL = srcStr.Lower();
     if (srcStrL == _("nan"))
@@ -535,7 +540,12 @@ bool StringToDecParse(const DECFLOAT_DEFINITION& def,
         {
             // more than one dot?
             if (DecimalSeparatorPos != -1)
+            {
+                errMsg = wxString::Format(
+                    _("Not numeric. Found 2nd decimalseparator (%c) at position %d."),
+                    DecimalSeparator, i1+1);
                 return false;
+            }
             DecimalSeparatorPos = i1 - iStart;
             continue;
         }
@@ -550,7 +560,12 @@ bool StringToDecParse(const DECFLOAT_DEFINITION& def,
         }
         // not numeric
         if ((ch < '0') || (ch > '9'))
+        {
+            errMsg = wxString::Format(
+                _("Not numeric. Invalid char (%c) at position %d."),
+                ch, i1+1);
             return false;
+        }
         valueStr = valueStr + ch;
     }
     if (iStart < i1)
@@ -560,7 +575,10 @@ bool StringToDecParse(const DECFLOAT_DEFINITION& def,
     {
         // exponent expected (e.g becase trailing space like "123 ")
         if (NeedExponent)
+        {
+            errMsg = "Not numeric. Exponent expected or invalid trailing space.";
             return false;
+        }
         expStr = _("0");
     }
     else
@@ -584,14 +602,24 @@ bool StringToDecParse(const DECFLOAT_DEFINITION& def,
             }
             // numeric?
             if ((ch < '0') || (ch > '9'))
+            {
+                errMsg = wxString::Format(
+                    _("Not numeric. Invalid char (%c) at position %d."),
+                    ch, i1+1);
                 return false;
+            }
             expStr += ch;
         }
     }
 
 
     if (!expStr.ToLong(&tmpVal, 10))
+    {
+        errMsg = wxString::Format(
+            _("Not numeric. Invalid exponent (%c)."),
+            tmpVal);
         return false;
+    }
 
     // Add decimaldigits to exponent
     DecimalDigits = valueStr.Length() - DecimalSeparatorPos;
@@ -714,7 +742,7 @@ uint16_t Str3ToDeclet(const wxString& str, int& offset)
     return declet;
 }
 
-bool DecInfoToDec34DPD(const DECFLOAT_DECINFO &info, dec34_t* dst)
+bool DecInfoToDec34DPD(const DECFLOAT_DECINFO &info, dec34_t* dst, wxString& errMsg)
 {
     DECFLOAT128_UNION dfu = {0};
     DECFLOAT_DEFINITION def = CDec34DPDDef;
@@ -739,7 +767,11 @@ bool DecInfoToDec34DPD(const DECFLOAT_DECINFO &info, dec34_t* dst)
     // exponent in range?
     if ((info.exp < -def.minExp) ||
         (info.exp > def.maxExp))
+    {
+        errMsg = wxString::Format(
+            _("Exponent (%d) out of range!"), info.exp);
         return false;
+    }
 
     uint32_t exp = info.exp + def.minExp;
 
@@ -778,7 +810,7 @@ bool DecInfoToDec34DPD(const DECFLOAT_DECINFO &info, dec34_t* dst)
     return true;
 }
 
-bool DecInfoToDec16DPD(const DECFLOAT_DECINFO &info, dec16_t* dst)
+bool DecInfoToDec16DPD(const DECFLOAT_DECINFO &info, dec16_t* dst, wxString& errMsg)
 {
     DECFLOAT64_UNION dfu = {0};
     DECFLOAT_DEFINITION def = CDec16DPDDef;
@@ -803,7 +835,11 @@ bool DecInfoToDec16DPD(const DECFLOAT_DECINFO &info, dec16_t* dst)
     // exponent in range?
     if ((info.exp < -def.minExp) ||
         (info.exp > def.maxExp))
+    {
+        errMsg = wxString::Format(
+            _("Exponent (%d) out of range!"), info.exp);
         return false;
+    }
 
     uint32_t exp = info.exp + def.minExp;
 
@@ -830,12 +866,12 @@ bool DecInfoToDec16DPD(const DECFLOAT_DECINFO &info, dec16_t* dst)
     return true;
 }
 
-bool StringToDec34DPD(const wxString& src, dec34_t* dst)
+bool StringToDec34DPD(const wxString& src, dec34_t* dst, wxString& errMsg)
 {
     DECFLOAT_DECINFO info;
-    if (!StringToDecParse(CDec34DPDDef, src, &info))
+    if (!StringToDecParse(CDec34DPDDef, src, &info, errMsg))
         return false;
-    if (!DecInfoToDec34DPD(info, dst))
+    if (!DecInfoToDec34DPD(info, dst, errMsg))
         return false;
     return true;
 }
@@ -848,12 +884,12 @@ wxString Dec16DPDToString(dec16_t value)
     return DecInfoToString(CDec16DPDDef, info);
 }
 
-bool StringToDec16DPD(const wxString& src, dec16_t* dst)
+bool StringToDec16DPD(const wxString& src, dec16_t* dst, wxString& errMsg)
 {
     DECFLOAT_DECINFO info;
-    if (!StringToDecParse(CDec34DPDDef, src, &info))
+    if (!StringToDecParse(CDec34DPDDef, src, &info, errMsg))
         return false;
-    if (!DecInfoToDec16DPD(info, dst))
+    if (!DecInfoToDec16DPD(info, dst, errMsg))
         return false;
     return true;
 }

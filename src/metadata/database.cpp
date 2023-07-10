@@ -960,6 +960,7 @@ void Database::parseCommitedSql(const SqlStatement& stm)
                 tr->ensurePropertiesLoaded();
                 tr->notifyObservers();
                 notifyObservers();
+                break;
             }
             case ntDBTrigger:
             {
@@ -968,6 +969,7 @@ void Database::parseCommitedSql(const SqlStatement& stm)
                 tr->ensurePropertiesLoaded();
                 tr->notifyObservers();
                 notifyObservers();
+                break;
             }
             case ntDMLTrigger:
             {

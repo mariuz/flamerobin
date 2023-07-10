@@ -31,6 +31,7 @@
 #endif
 
 #include "core/FRInt128.h"
+#include <wx/numformatter.h>
 
 // enable only for debugging
 //#define DEBUG_DDU
@@ -90,11 +91,12 @@ void DDUdbg(DOUBLE_DABBLE_UNION& ddu)
 #define DDUdbg(x)
 #endif
 
-bool DDUinitFromStr(DOUBLE_DABBLE_UNION& ddu, bool &isNegative, const wxString &src)
+bool DDUinitFromStr(DOUBLE_DABBLE_UNION& ddu, bool &isNegative, const wxString &src, wxString& errMsg)
 {
     wxString src2;
     int i1, iByte;
     uint8_t ch;
+    wxChar sep1000;
 
     isNegative = (src.GetChar(0) == _("-"));
     if (isNegative)
@@ -102,10 +104,30 @@ bool DDUinitFromStr(DOUBLE_DABBLE_UNION& ddu, bool &isNegative, const wxString &
     else
         src2 = src;
 
+    // replace thousand separators - if used
+    if (wxNumberFormatter::GetThousandsSeparatorIfUsed(&sep1000))
+        src2.Replace(_(sep1000), _(""));
+
+    // Check: numeric?
+    for (i1 = 0; i1 < src2.Length(); i1++)
+    {
+        ch = src2.GetChar(i1);
+        if ((ch < '0') || (ch > '9'))
+        {
+            errMsg = wxString::Format(
+                _("Not numeric. Invalid char (%c) at position %d."),
+                ch, i1+1);
+            return false;
+        }
+    }
+
     // Check: number to big?
     // Its not really precise but prevents a buffer overflow.
     if (src2.Length() > (DOUBLE_DABBLE_BCD_LEN * 2))
+    {
+        errMsg = _("Int128: Value to big.");
         return false;
+    }
 
     for (i1 = 0; i1 < src2.Length(); i1++)
     {
@@ -207,7 +229,7 @@ void DDUadd(DOUBLE_DABBLE_UNION& ddu)
     }
 }
 
-bool StringToInt128(const wxString& src, int128_t* dst)
+bool StringToInt128(const wxString& src, int128_t* dst, wxString& errMsg)
 {
     DOUBLE_DABBLE_UNION ddu = {0};
     int i1;
@@ -215,7 +237,7 @@ bool StringToInt128(const wxString& src, int128_t* dst)
 
     // use double dabbl algorithm (reverse)
     // initialization
-    if (!DDUinitFromStr(ddu, isNegative, src))
+    if (!DDUinitFromStr(ddu, isNegative, src, errMsg))
         return false;
 
     for (i1 = 0; i1 < 128; i1++)
@@ -228,7 +250,10 @@ bool StringToInt128(const wxString& src, int128_t* dst)
     // So we have to check if all bits could be moved into the 128-bit
     // result.
     if (ddu.shift.bcd[DOUBLE_DABBLE_BCD_LEN - 1] != 0)
+    {
+        errMsg = _("Int128: Value to big.");
         return false;
+    }
 
     if (isNegative)
     {
@@ -237,13 +262,19 @@ bool StringToInt128(const wxString& src, int128_t* dst)
         ddu.shift.lowPart = ddu.shift.lowPart ^ 0xFFFFFFFFFFFFFFFF;
         // value to small?
         if (ddu.shift.highPart < 0x8000000000000000)
+        {
+            errMsg = _("Int128: Value to small.");
             return false;
+        }
     }
     else
     {
         // value to big?
         if (ddu.shift.highPart >= 0x8000000000000000)
+        {
+            errMsg = _("Int128: Value to big.");
             return false;
+        }
     }
 
     *dst = ddu.s.i128;

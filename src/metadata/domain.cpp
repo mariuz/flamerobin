@@ -225,8 +225,10 @@ wxString Domain::dataTypeToString(short datatype, short scale, short precision,
         return retval;
     }
 
-    // INTEGER(prec=0), DECIMAL(sub_type=2), NUMERIC(sub_t=1), BIGINT(sub_t=0)
-    if (datatype == 7 || datatype == 8 || datatype == 16)
+    // INTEGER(prec=0), DECIMAL(sub_type=2), NUMERIC(sub_t=1), BIGINT(sub_t=0), 
+    // Int128(sub_t=0)
+    if (datatype == 7 || datatype == 8 || datatype == 16 || 
+        datatype == 26)
     {
         if (scale == 0)
         {
@@ -237,15 +239,29 @@ wxString Domain::dataTypeToString(short datatype, short scale, short precision,
         }
 
         if (scale == 0 && subtype == 0)
-            return SqlTokenizer::getKeyword(kwBIGINT);
+        {
+            switch (length)
+            {
+                case  8: return SqlTokenizer::getKeyword(kwBIGINT);
+                case 16: return SqlTokenizer::getKeyword(kwINT128);
+            }
+        }
 
         retval = SqlTokenizer::getKeyword(
             (subtype == 2) ? kwDECIMAL : kwNUMERIC);
         retval << "(";
-        if (precision <= 0 || precision > 18)
-            retval << 18;
-        else
+        if (datatype == 26)
+        {
+            // Firebird v4 - Int128
             retval << precision;
+        }
+        else
+        {
+            if (precision <= 0 || precision > 18)
+                retval << 18;
+            else
+                retval << precision;
+        }
         retval << "," << -scale << ")";
         return retval;
     }
@@ -262,8 +278,18 @@ wxString Domain::dataTypeToString(short datatype, short scale, short precision,
             return SqlTokenizer::getKeyword(kwDATE);
         case 13:
             return SqlTokenizer::getKeyword(kwTIME);
+        case 28: // Firebird v4
+            return SqlTokenizer::getKeyword(kwTIME) + " " +
+                SqlTokenizer::getKeyword(kwWITH) + " " +
+                SqlTokenizer::getKeyword(kwTIME) + " " +
+                SqlTokenizer::getKeyword(kwZONE);
         case 35:
             return SqlTokenizer::getKeyword(kwTIMESTAMP);
+        case 29: // Firebird v4
+            return SqlTokenizer::getKeyword(kwTIMESTAMP) + " " +
+                SqlTokenizer::getKeyword(kwWITH) + " " +
+                SqlTokenizer::getKeyword(kwTIME) + " " +
+                SqlTokenizer::getKeyword(kwZONE);
 
         // add subtype for blob
         case 261:
@@ -274,6 +300,12 @@ wxString Domain::dataTypeToString(short datatype, short scale, short precision,
             
         case 23: // Firebird v3
             return SqlTokenizer::getKeyword(kwBOOLEAN);
+
+        case 24: // Firebird v4 - DecFloat(16)
+        case 25: // Firebird v4 - DecFloat(34)
+            retval = SqlTokenizer::getKeyword(kwDECFLOAT);
+            retval << "(" << precision << ")";
+            return retval;
 
         // add length for char, varchar and cstring
         case 14:

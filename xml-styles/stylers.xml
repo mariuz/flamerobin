@@ -11,9 +11,9 @@
             <WordsStyle name="ADDED" styleID="6" fgColor="0080FF" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
         </LexerType>
         <LexerType name="sql" desc="SQL" ext="">
-            <WordsStyle name="KEYWORD" styleID="5" fgColor="0000FF" bgColor="FFFFFF" fontName="" fontStyle="1" fontSize="" caseVisible="3"/>
-            <WordsStyle name="USER1" styleID="16" fgColor="0000FF" bgColor="FFFFFF" fontName="" fontStyle="1" fontSize="" caseVisible="2"/>
-            <WordsStyle name="KEYWORD2" styleID="19" fgColor="800080" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="1"/>
+            <WordsStyle name="KEYWORD" styleID="5" fgColor="0000FF" bgColor="FFFFFF" fontName="" fontStyle="1" fontSize="" caseVisible="0"/>
+            <WordsStyle name="USER1" styleID="16" fgColor="0000FF" bgColor="FFFFFF" fontName="" fontStyle="1" fontSize="" caseVisible="0"/>
+            <WordsStyle name="KEYWORD2" styleID="19" fgColor="800080" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
             <WordsStyle name="NUMBER" styleID="4" fgColor="FF8000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
             <WordsStyle name="STRING" styleID="6" fgColor="808080" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
             <WordsStyle name="STRING2" styleID="7" fgColor="808080" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
@@ -34,9 +34,9 @@
     <GlobalStyles>
         <!-- Attention : Don't modify the name of styleID="0" -->
         <WidgetStyle name="Global override" styleID="0" fgColor="FFFF80" bgColor="FF8000" fontName="Courier New" fontStyle="0" fontSize="10" caseVisible="0"/>
-        <WidgetStyle name="Default Style" styleID="32" fgColor="000000" bgColor="FFFFFF" fontName="Courier New" fontStyle="0" fontSize="10" caseVisible="0"/>
+        <WidgetStyle name="Default Style" styleID="32" fgColor="000000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
         <WidgetStyle name="Indent guideline style" styleID="37" fgColor="C0C0C0" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
-        <WidgetStyle name="Brace highlight style" styleID="34" fgColor="FF0000" bgColor="FFFFFF" fontName="" fontStyle="1" fontSize="10" caseVisible="0"/>
+        <WidgetStyle name="Brace highlight style" styleID="34" fgColor="FF0000" bgColor="FFFFFF" fontName="" fontStyle="1" fontSize="" caseVisible="0"/>
         <WidgetStyle name="Bad brace colour" styleID="35" fgColor="800000" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
         <WidgetStyle name="Current line background colour" styleID="0" bgColor="E8E8FF"/>
         <WidgetStyle name="Selected text colour" styleID="0" bgColor="C0C0C0"/>
