@@ -158,7 +158,9 @@ wxArrayString DatabaseRegistrationDialog::getDatabaseCharsetChoices() const
         "UNICODE_FSS", "UTF8",
 
         "WIN1250", "WIN1251", "WIN1252", "WIN1253",
-        "WIN1254", "WIN1255", "WIN1256", "WIN1257"
+        "WIN1254", "WIN1255", "WIN1256", "WIN1257", "WIN1258", 
+         
+        "KOI8R", "KOI8U" , "TIS620", "GBK", "GB18030", "CP943C"
     };
     const size_t cnt = sizeof(charset_choices) / sizeof(wxString);
 
