@@ -264,7 +264,7 @@ public:
     FRStyle* getStyleByName(wxString styleName);
     
     wxFileName getfileName() { return fileNameM; };
-    void setfileName(wxFileName fileName) { fileNameM = fileName; };
+    void setfileName(wxFileName fileName);
 
     
 
