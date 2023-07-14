@@ -1797,9 +1797,11 @@ PrefDlgThemeSetting::PrefDlgThemeSetting(wxPanel* page, PrefDlgSetting* parent)
 {
     const wxString STYLE = "StyleTheme";
     const wxString def = "stylers";
-
-
-    styleManagerM = new FRStyleManager(wxFileName(config().getXmlStylesPath(), config().get(STYLE, def) + ".xml"));
+    wxString fileName = config().get(STYLE, def);
+    if (fileName.IsEmpty()) {
+        fileName = def;
+    }
+    styleManagerM = new FRStyleManager(wxFileName(config().getXmlStylesPath(), fileName+ ".xml"));
 }
 
 PrefDlgThemeSetting::~PrefDlgThemeSetting()

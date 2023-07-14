@@ -617,7 +617,7 @@ void FRStyleManager::assignWordStyle(wxStyledTextCtrl* text, FRStyle* style)
 
 FRStyleManager::FRStyleManager(wxFileName style)
 {
-    fileNameM = style;
+    setfileName(style);
     globalStylerM = new FRStyler();
 
     loadStyle();
@@ -627,6 +627,14 @@ FRStyleManager::FRStyleManager(wxFileName style)
 FRStyle* FRStyleManager::getStyleByName(wxString styleName)
 {
     return globalStylerM->getStyleByName(styleName);
+}
+
+void FRStyleManager::setfileName(wxFileName fileName)
+{
+    if (fileName.FileExists())
+        fileNameM = fileName;
+    else
+        fileNameM = wxFileName(config().getXmlStylesPath(), "stylers.xml");
 }
 
 void FRStyleManager::assignGlobal(wxStyledTextCtrl* text)
@@ -780,8 +788,12 @@ void FRStyleManager::loadConfig()
 {
     const wxString STYLE = "StyleTheme";
     const wxString def = "stylers";
+    wxString fileName = config().get(STYLE, def);
+    if (fileName.IsEmpty()) {
+        fileName = def;
+    }
 
-    wxFileName file = wxFileName(config().getXmlStylesPath(), config().get(STYLE, def) + ".xml");
+    wxFileName file = wxFileName(config().getXmlStylesPath(), fileName + ".xml");
     setfileName(file);
     
     loadStyle();
