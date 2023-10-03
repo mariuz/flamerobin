@@ -44,7 +44,7 @@ class wxFileConfig;
 
 //! Do not instantiate objects of this class. Use config() function (see below).
 
-#if defined(__UNIX__) && !defined(__WXMAC_OSX__)
+#if defined(__UNIX__) && !defined(__WXOSX_COCOA__)
     #define FR_CONFIG_USE_PRIVATE_STDPATHS
 #else
     #undef FR_CONFIG_USE_PRIVATE_STDPATHS
