@@ -1995,7 +1995,7 @@ bool PrefDlgThemeSetting::saveToTargetConfig(Config& config)
         wxString fileSpec = _T("*.xml");
         wxArrayString files;
         if (wxDir::GetAllFiles(sourceDirName, &files, fileSpec, wxDIR_FILES) > 0) {
-            wxMkDir(userStyleFolder);
+            wxMkdir(userStyleFolder);
             wxString name, ext;
             for (size_t i = 0; i < files.GetCount(); i++) {
                 wxFileName::SplitPath(files[i], NULL, &name, &ext);
