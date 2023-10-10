@@ -530,6 +530,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     transactionIsolationLevelM = static_cast<IBPP::TIL>(config().get("transactionIsolationLevel", 0));
     transactionLockResolutionM = config().get("transactionLockResolution", true) ? IBPP::lrWait : IBPP::lrNoWait;
     transactionAccessModeM = config().get("transactionAccessMode", false) ? IBPP::amRead : IBPP::amWrite;
+    showStatisticsM = config().get("SQLEditorShowStats", true);
 
     timerBlobEditorM.SetOwner(this, TIMER_ID_UPDATE_BLOB);
 
@@ -730,6 +731,8 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
         cm.getMainMenuItemText(_("&Execute"), Cmds::Query_Execute));
     statementMenu->Append(Cmds::Query_Show_plan,
         cm.getMainMenuItemText(_("Show execution &plan"), Cmds::Query_Show_plan));
+    statementMenu->AppendCheckItem(Cmds::Query_Show_Statistics,
+        cm.getMainMenuItemText(_("Display detailed query statistics"), Cmds::Query_Show_Statistics));
     statementMenu->Append(Cmds::Query_Execute_selection,
         cm.getMainMenuItemText(_("Execute &selection"), Cmds::Query_Execute_selection));
     statementMenu->Append(Cmds::Query_Execute_from_cursor,
@@ -950,6 +953,8 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
 
     EVT_MENU(Cmds::Query_Execute,             ExecuteSqlFrame::OnMenuExecute)
     EVT_MENU(Cmds::Query_Show_plan,           ExecuteSqlFrame::OnMenuShowPlan)
+    EVT_MENU(Cmds::Query_Show_Statistics,     ExecuteSqlFrame::OnMenuShowStatistics)
+    EVT_UPDATE_UI(Cmds::Query_Show_Statistics, ExecuteSqlFrame::OnMenuUpdateShowStatistics)
     EVT_MENU(Cmds::Query_Execute_selection,   ExecuteSqlFrame::OnMenuExecuteSelection)
     EVT_MENU(Cmds::Query_Execute_from_cursor, ExecuteSqlFrame::OnMenuExecuteFromCursor)
     EVT_UPDATE_UI(Cmds::Query_Execute,             ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
@@ -1619,6 +1624,16 @@ void ExecuteSqlFrame::OnMenuShowPlan(wxCommandEvent& WXUNUSED(event))
     prepareAndExecute(true);
 }
 
+void ExecuteSqlFrame::OnMenuShowStatistics(wxCommandEvent& event)
+{
+    showStatisticsM = event.IsChecked();
+}
+
+void ExecuteSqlFrame::OnMenuUpdateShowStatistics(wxUpdateUIEvent& event)
+{
+    event.Check(showStatisticsM);
+}
+
 void ExecuteSqlFrame::OnMenuExecuteFromCursor(wxCommandEvent& WXUNUSED(event))
 {
     clearLogBeforeExecution();
@@ -2244,6 +2259,7 @@ wxString IBPPtype2string(Database *db, IBPP::SDT t, int subtype, int size,
         case IBPP::sdLargeint:  return "BIGINT";
         case IBPP::sdFloat:     return "FLOAT";
         case IBPP::sdDouble:    return "DOUBLE PRECISION";
+        case IBPP::sdBoolean:   return "BOOLEAN";
         case IBPP::sdTimeTz:    return "TIME WITH TIMEZONE";
         case IBPP::sdTimestampTz: return "TIMESTAMP WITH TIMEZONE";
         case IBPP::sdInt128:    return "INT128";
@@ -2272,6 +2288,10 @@ void ExecuteSqlFrame::compareCounts(IBPP::DatabaseCounts& one,
             str_log += wxString::Format(_("%d updates. "), r1.updates - r2.updates);
         if (r1.deletes > r2.deletes)
             str_log += wxString::Format(_("%d deletes. "), r1.deletes - r2.deletes);
+        if (r1.readIndex > r2.readIndex)
+            str_log += wxString::Format(_("%d reads index. "), r1.readIndex - r2.readIndex);
+        if (r1.readSequence > r2.readSequence)
+            str_log += wxString::Format(_("%d reads sequence. "), r1.readSequence - r2.readSequence);
         if (!str_log.IsEmpty())
         {
             wxString relName;
@@ -2386,7 +2406,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             del1 = 0, ridx1 = 0, rseq1 = 0, mem1 = 0;
         int fetch2, mark2, read2, write2, ins2, upd2, del2, ridx2, rseq2, mem2;
         IBPP::DatabaseCounts counts1, counts2;
-        bool doShowStats = config().get("SQLEditorShowStats", true);
+        bool doShowStats = showStatisticsM;
         if (!prepareOnly && doShowStats)
         {
             databaseM->getIBPPDatabase()->

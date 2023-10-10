@@ -670,10 +670,12 @@ public:
     class CountInfo
     {
     public:
-        CountInfo(): inserts(0), updates(0), deletes(0) {}
+        CountInfo(): inserts(0), updates(0), deletes(0), readIndex(0), readSequence(0) {}
         int inserts;
         int updates;
         int deletes;
+        int readIndex;
+        int readSequence;
     };
     typedef std::map<int, CountInfo> DatabaseCounts; // int = relation ID
 

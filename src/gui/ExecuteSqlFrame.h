@@ -121,6 +121,7 @@ private:
     IBPP::TIL transactionIsolationLevelM;
     IBPP::TLR transactionLockResolutionM;
     IBPP::TAM transactionAccessModeM;
+    bool showStatisticsM;
     void inTransaction(bool started);       // changes controls (enable/disable)
     bool commitTransaction();
     bool rollbackTransaction();
@@ -210,6 +211,8 @@ private:
 
     void OnMenuExecute(wxCommandEvent& event);
     void OnMenuShowPlan(wxCommandEvent& event);
+    void OnMenuShowStatistics(wxCommandEvent& event);
+    void OnMenuUpdateShowStatistics(wxUpdateUIEvent& event);
     void OnMenuExecuteSelection(wxCommandEvent& event);
     void OnMenuExecuteFromCursor(wxCommandEvent& event);
     void OnMenuCommit(wxCommandEvent& event);

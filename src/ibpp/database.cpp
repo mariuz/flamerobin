@@ -352,6 +352,8 @@ void DatabaseImpl::DetailedCounts(IBPP::DatabaseCounts& counts)
     char items[] = {isc_info_insert_count,
                     isc_info_update_count,
                     isc_info_delete_count,
+                    isc_info_read_idx_count,
+                    isc_info_read_seq_count,
                     isc_info_end};
     IBS status;
     RB result(1024);
@@ -365,6 +367,8 @@ void DatabaseImpl::DetailedCounts(IBPP::DatabaseCounts& counts)
     result.GetDetailedCounts(counts, isc_info_insert_count);
     result.GetDetailedCounts(counts, isc_info_update_count);
     result.GetDetailedCounts(counts, isc_info_delete_count);
+    result.GetDetailedCounts(counts, isc_info_read_idx_count);
+    result.GetDetailedCounts(counts, isc_info_read_seq_count);
 }
 
 void DatabaseImpl::Users(std::vector<std::string>& users)
