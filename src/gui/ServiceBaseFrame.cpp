@@ -44,6 +44,7 @@
 #include "gui/StyleGuide.h"
 #include "metadata/database.h"
 #include "metadata/server.h"
+#include <frutils.h>
 
 ServiceBaseFrame::ServiceBaseFrame(wxWindow* parent,
         DatabasePtr db)
@@ -304,7 +305,8 @@ void* ServiceThread::Entry()
         msg.Printf(_("Connecting to server %s..."), serverM.c_str());
         logImportant(msg);
         IBPP::Service svc = IBPP::ServiceFactory(wx2std(serverM),
-            wx2std(usernameM), wx2std(passwordM), wx2std(rolenameM), wx2std(charsetM)
+            wx2std(usernameM), wx2std(passwordM), wx2std(rolenameM), wx2std(charsetM),
+            wx2std(getClientLibrary())
         );
         svc->Connect();
 

@@ -1729,8 +1729,11 @@ wxString Database::getClientLibrary() const
 {
     /*Todo: Implement FB library per conexion */
     //return clientLibraryM;
-    wxString LValue = "";
-    return config().get("LibraryFile", LValue);
+#if defined(_WIN64)
+    return config().get("x64LibraryFile", wxString(""));
+#else
+    return config().get("x86LibraryFile", wxString(""));
+#endif
 }
 
 int Database::getSqlDialect() const
