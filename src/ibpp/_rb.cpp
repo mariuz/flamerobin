@@ -150,6 +150,10 @@ void RB::GetDetailedCounts(IBPP::DatabaseCounts& counts, char token)
             (*it).second.updates += value;
         if (token == isc_info_delete_count)
             (*it).second.deletes += value;
+        if (token == isc_info_read_idx_count)
+            (*it).second.readIndex += value;
+        if (token == isc_info_read_seq_count)
+            (*it).second.readSequence += value;
         p += 6;
         len -= 6;
 	}

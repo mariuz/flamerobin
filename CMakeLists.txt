@@ -428,14 +428,14 @@ if(APPLE)
 	                "Please get in contact to tell us of your results.")
 	add_definitions(-DIBPP_DARWIN)
 	list(APPEND FR_LIBS -lfbclient)
-
+        list(APPEND FR_LIBS -L/Library/Frameworks/Firebird.framework/Versions/Current/Libraries)
+        
     list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/mac/StyleGuideMAC.cpp
     )
 
     add_definitions(-DFR_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
-    list(APPEND FR_LIBS -lfbclient)
-
+ 
     # Create the revision include file
     execute_process(
         COMMAND "${CMAKE_SOURCE_DIR}/update-revision-info.sh"
@@ -525,6 +525,7 @@ if (APPLE)
 endif (APPLE)
 
 target_link_libraries(${PROJECT_NAME} IBPP ${wxWidgets_LIBRARIES} ${FR_LIBS})
+
 
 #--------------------------------------
 # Install

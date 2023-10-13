@@ -404,6 +404,10 @@ const wxString FRConfig::getSysTemplateFileName(const wxString& templateName)
 
 wxString FRConfig::getXmlStylesPath() const
 {
+    if (wxDirExists(getUserLocalDataDir() + wxFileName::GetPathSeparator() + "xml-styles"))
+        return getUserLocalDataDir() + wxFileName::GetPathSeparator()
+            + "xml-styles" + wxFileName::GetPathSeparator();
+
     return getHomePath() + "xml-styles"
         + wxFileName::GetPathSeparator();
 }

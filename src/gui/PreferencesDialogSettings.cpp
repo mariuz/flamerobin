@@ -1984,6 +1984,27 @@ bool PrefDlgThemeSetting::parseProperty(wxXmlNode* xmln)
 bool PrefDlgThemeSetting::saveToTargetConfig(Config& config)
 {
     config.setValue(keyM, fileComboBoxM->GetValue());
+    wxString userStyleFolder = config.getUserLocalDataDir() + wxFileName::GetPathSeparator() + "xml-styles" + wxFileName::GetPathSeparator();
+    if (!wxDirExists(userStyleFolder))
+    {
+        wxFileName mFile = getStyleManager()->getfileName();
+        mFile.SetPath(userStyleFolder);
+
+        wxString sourceDirName = config.getHomePath() + "xml-styles" + wxFileName::GetPathSeparator();
+
+        wxString fileSpec = _T("*.xml");
+        wxArrayString files;
+        if (wxDir::GetAllFiles(sourceDirName, &files, fileSpec, wxDIR_FILES) > 0) {
+            wxMkdir(userStyleFolder);
+            wxString name, ext;
+            for (size_t i = 0; i < files.GetCount(); i++) {
+                wxFileName::SplitPath(files[i], NULL, &name, &ext);
+                wxCopyFile(files[i], userStyleFolder + name + "." + ext);
+            }
+        }
+        getStyleManager()->setfileName(mFile);
+    }
+       
     getStyleManager()->saveStyle();
 
     return true;
