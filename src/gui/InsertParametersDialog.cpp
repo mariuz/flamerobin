@@ -41,6 +41,7 @@
 #include "gui/controls/DataGridTable.h"
 #include "gui/InsertParametersDialog.h"
 #include "gui/StyleGuide.h"
+#include "metadata/CharacterSet.h"
 #include "metadata/column.h"
 #include "metadata/database.h"
 #include "metadata/domain.h"

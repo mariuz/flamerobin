@@ -863,3 +863,7 @@ void CreateDDLVisitor::visitView(View& v)
 
     sqlM += preSqlM + "\n" + postSqlM + grantSqlM;
 }
+
+void CreateDDLVisitor::visitCharacterSet(CharacterSet& characterset)
+{
+}

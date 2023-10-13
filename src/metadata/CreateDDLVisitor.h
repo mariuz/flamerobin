@@ -91,6 +91,9 @@ public:
     virtual void visitView(View& view);
 //    virtual void visitViews(Views& views);
 //    virtual void visitMetadataItem(MetadataItem& metadataItem);
+    virtual void visitCharacterSet(CharacterSet& characterset);
+
+
 };
 
 #endif

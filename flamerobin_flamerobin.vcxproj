@@ -337,7 +337,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dynamic|x64'">
     <Midl>
       <PreprocessorDefinitions>WIN32;_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_lib\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_x64_lib\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </Midl>
     <ClCompile>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
@@ -361,7 +361,7 @@
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x0A00;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
-      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_lib\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_x64_lib\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
@@ -511,7 +511,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Dynamic|x64'">
     <Midl>
       <PreprocessorDefinitions>WIN32;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_lib\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_x64_lib\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </Midl>
     <ClCompile>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
@@ -534,7 +534,7 @@
     <ResourceCompile>
       <PreprocessorDefinitions>_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
-      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_lib\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_x64_lib\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
@@ -595,7 +595,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Static|x64'">
     <Midl>
       <PreprocessorDefinitions>WIN64;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_lib\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_x64_lib\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </Midl>
     <ClCompile>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
@@ -618,14 +618,14 @@
     <ResourceCompile>
       <PreprocessorDefinitions>_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
-      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_lib\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_x64_lib\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>wxmsw32u_aui.lib;wxmsw32u_stc.lib;wxmsw32u_html.lib;wxmsw32u_adv.lib;wxmsw32u_core.lib;wxbase32u_xml.lib;wxbase32u.lib;wxscintilla.lib;wxexpat.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;wxregexu.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcus\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>vcus\flamerobin.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_lib;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_x64_lib;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>vcus\flamerobin.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
     </Link>
@@ -682,12 +682,12 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug Dynamic|x64'">
     <Midl>
       <PreprocessorDefinitions>WIN32;_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_dll\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_x64_dll\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </Midl>
     <ClCompile>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_dll\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_x64_dll\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -706,14 +706,14 @@
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
-      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_dll\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_x64_dll\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>wxmsw32ud_aui.lib;wxmsw32ud_stc.lib;wxmsw32ud_html.lib;wxmsw32ud_adv.lib;wxmsw32ud_core.lib;wxbase32ud_xml.lib;wxbase32ud.lib;wxscintillad.lib;wxexpatd.lib;wxtiffd.lib;wxjpegd.lib;wxpngd.lib;wxzlibd.lib;wxregexud.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcud\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>vcud\flamerobin.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_dll;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_x64_dll;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>vcud\flamerobin.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
@@ -771,12 +771,12 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DLL Debug Static|x64'">
     <Midl>
       <PreprocessorDefinitions>WIN32;_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_dll\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_x64_dll\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </Midl>
     <ClCompile>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_dll\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_x64_dll\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -795,14 +795,14 @@
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;__WXDEBUG__;_DEBUG;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
-      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_dll\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_x64_dll\mswud;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>wxmsw32ud_aui.lib;wxmsw32ud_stc.lib;wxmsw32ud_html.lib;wxmsw32ud_adv.lib;wxmsw32ud_core.lib;wxbase32ud_xml.lib;wxbase32ud.lib;wxscintillad.lib;wxexpatd.lib;wxtiffd.lib;wxjpegd.lib;wxpngd.lib;wxzlibd.lib;wxregexud.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcusd\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>vcusd\flamerobin.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_dll;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_x64_dll;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>vcusd\flamerobin.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
@@ -857,12 +857,12 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release Dynamic|x64'">
     <Midl>
       <PreprocessorDefinitions>WIN32;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_dll\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_x64_dll\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </Midl>
     <ClCompile>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MinSpace</Optimization>
-      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_dll\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_x64_dll\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -880,14 +880,14 @@
     <ResourceCompile>
       <PreprocessorDefinitions>_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
-      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_dll\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_x64_dll\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>wxmsw32u_aui.lib;wxmsw32u_stc.lib;wxmsw32u_html.lib;wxmsw32u_adv.lib;wxmsw32u_core.lib;wxbase32u_xml.lib;wxbase32u.lib;wxscintilla.lib;wxexpat.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;wxregexu.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcu\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>vcu\flamerobin.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_dll;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_x64_dll;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>vcu\flamerobin.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
     </Link>
@@ -941,12 +941,12 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DLL Release Static|x64'">
     <Midl>
       <PreprocessorDefinitions>WIN32;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_dll\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_x64_dll\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </Midl>
     <ClCompile>
       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
       <Optimization>MinSpace</Optimization>
-      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_dll\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_x64_dll\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -964,14 +964,14 @@
     <ResourceCompile>
       <PreprocessorDefinitions>_WINDOWS;__WINDOWS__;WINVER=0x400;WIN32;__WIN32__;__WIN95__;STRICT;__WXMSW__;wxUSE_GUI=1;wxUSE_REGEX=1;wxUSE_UNICODE=1;WIN32_LEAN_AND_MEAN;_WINDOWS;IBPP_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <Culture>0x0409</Culture>
-      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_dll\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WXDIR)\lib\vc_x64_dll\mswu;$(WXDIR)\contrib\include;$(WXDIR)\include;$(BOOST_ROOT);.;.\src;.\src\ibpp;.\res;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>wxmsw32u_aui.lib;wxmsw32u_stc.lib;wxmsw32u_html.lib;wxmsw32u_adv.lib;wxmsw32u_core.lib;wxbase32u_xml.lib;wxbase32u.lib;wxscintilla.lib;wxexpat.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;wxregexu.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcus\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>vcus\flamerobin.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_dll;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_x64_dll;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>vcus\flamerobin.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
     </Link>
@@ -1077,6 +1077,8 @@
     <ClCompile Include="src\logger.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\MasterPassword.cpp" />
+    <ClCompile Include="src\metadata\CharacterSet.cpp" />
+    <ClCompile Include="src\metadata\Collation.cpp" />
     <ClCompile Include="src\metadata\column.cpp" />
     <ClCompile Include="src\metadata\constraints.cpp" />
     <ClCompile Include="src\metadata\CreateDDLVisitor.cpp" />
@@ -1195,6 +1197,8 @@
     <ClInclude Include="src\logger.h" />
     <ClInclude Include="src\main.h" />
     <ClInclude Include="src\MasterPassword.h" />
+    <ClInclude Include="src\metadata\CharacterSet.h" />
+    <ClInclude Include="src\metadata\Collation.h" />
     <ClInclude Include="src\metadata\collection.h" />
     <ClInclude Include="src\metadata\column.h" />
     <ClInclude Include="src\firebird\constants.h" />

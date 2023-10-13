@@ -41,6 +41,32 @@ MetadataItemVisitor::~MetadataItemVisitor()
 {
 }
 
+void MetadataItemVisitor::visitCharacterSet(CharacterSet&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitCharacterSets(CharacterSets&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitCollation(Collation& collation)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitCollations(Collations& collations)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitUserCollations(UserCollations& collations)
+{
+    defaultAction();
+}
+
+
 void MetadataItemVisitor::visitColumn(Column&)
 {
     defaultAction();

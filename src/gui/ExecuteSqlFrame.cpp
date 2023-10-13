@@ -68,6 +68,7 @@
 #include "frutils.h"
 #include "logger.h"
 #include "metadata/column.h"
+#include "metadata/CharacterSet.h"
 #include "metadata/CreateDDLVisitor.h"
 #include "metadata/database.h"
 #include "metadata/exception.h"
@@ -2228,7 +2229,9 @@ wxString IBPPtype2string(Database *db, IBPP::SDT t, int subtype, int size,
         return wxString::Format("NUMERIC(%d,%d)", size==4 ? 9:18, scale);
     if (t == IBPP::sdString)
     {
-        int bpc = db->getCharsetById(subtype).getBytesPerChar();
+        //CharacterSet cs = db->getCharacterSets()->findById(subtype)->getBytesPerChar();
+        //int bpc = cs.getBytesPerChar();
+        int bpc = db->getCharacterSets()->findById(subtype)->getBytesPerChar();
         return wxString::Format("STRING(%d)", bpc ? size/bpc : size);
     }
     switch (t)

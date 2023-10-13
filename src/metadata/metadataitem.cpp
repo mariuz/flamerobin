@@ -70,8 +70,10 @@ MetadataItem::MetadataItem()
 }
 
 MetadataItem::MetadataItem(NodeType type, MetadataItem* parent,
-        const wxString& name)
-   : Subject(), typeM(type), parentM(parent), identifierM(name, getDatabase() != nullptr ? getDatabase()->getSqlDialect() : 3),
+        const wxString& name, int id)
+   : Subject(), 
+        typeM(type), parentM(parent), identifierM(name, getDatabase() != nullptr ? getDatabase()->getSqlDialect() : 3),
+        idM(id),
         childrenLoadedM(lsNotLoaded), descriptionLoadedM(lsNotLoaded),
         propertiesLoadedM(lsNotLoaded)
 {
@@ -112,20 +114,21 @@ wxString getNameOfType(NodeType type)
 {
     switch (type)
     {
-        case ntTable:       return ("TABLE");
-        case ntGTT:         return ("TABLEGTT");
-        case ntView:        return ("VIEW");
-        case ntProcedure:   return ("PROCEDURE");
-        case ntDMLTrigger:  return ("TRIGGER");
-        case ntGenerator:   return ("GENERATOR");
-        case ntFunctionSQL: return ("FUNCTIONSQL");
-        case ntUDF:         return ("UDF");
-        case ntDomain:      return ("DOMAIN");
-        case ntRole:        return ("ROLE");
-        case ntColumn:      return ("COLUMN");
-        case ntException:   return ("EXCEPTION");
-        case ntPackage:     return ("PACKAGE");
-        case ntIndex:       return ("INDEX");
+        case ntTable:        return ("TABLE");
+        case ntGTT:          return ("TABLEGTT");
+        case ntView:         return ("VIEW");
+        case ntProcedure:    return ("PROCEDURE");
+        case ntDMLTrigger:   return ("TRIGGER");
+        case ntGenerator:    return ("GENERATOR");
+        case ntFunctionSQL:  return ("FUNCTIONSQL");
+        case ntUDF:          return ("UDF");
+        case ntDomain:       return ("DOMAIN");
+        case ntRole:         return ("ROLE");
+        case ntColumn:       return ("COLUMN");
+        case ntException:    return ("EXCEPTION");
+        case ntPackage:      return ("PACKAGE");
+        case ntIndex:        return ("INDEX");
+        case ntCharacterSet: return ("CHARACTERSET");
         default:
             return "";
     }
@@ -161,6 +164,8 @@ NodeType getTypeByName(const wxString& name)
         return ntPackage;
     else if (name == "INDEX")
         return ntIndex;
+    else if (name == "CHARACTERSET")
+        return ntCharacterSet;
     else
         return ntUnknown;
 }
@@ -722,6 +727,16 @@ NodeType MetadataItem::getType() const
 void MetadataItem::setType(NodeType type)
 {
     typeM = type;
+}
+
+int MetadataItem::getId()
+{
+    return idM;
+}
+
+void MetadataItem::setId(int id)
+{
+    idM = id;
 }
 
 bool MetadataItem::isSystem() const

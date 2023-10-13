@@ -216,6 +216,11 @@ wxString MetadataItemCreateStatementVisitor::getCreateDMLTriggerStatement()
         "SET TERM ; ^\n";
 }
 
+wxString MetadataItemCreateStatementVisitor::getCreateCharacterSetStatement()
+{
+    return "";
+}
+
 wxString MetadataItemCreateStatementVisitor::getCreateDBTriggerStatement()
 {
     return "SET TERM ^ ;\n\n"
@@ -344,6 +349,11 @@ void MetadataItemCreateStatementVisitor::visitRoles(Roles& /*roles*/)
 void MetadataItemCreateStatementVisitor::visitTables(Tables& /*tables*/)
 {
     statementM = getCreateTableStatement();
+}
+
+void MetadataItemCreateStatementVisitor::visitCharacterSets(CharacterSets& /*characterSets*/)
+{
+    statementM = getCreateCharacterSetStatement();
 }
 
 void MetadataItemCreateStatementVisitor::visitDBTriggers(DBTriggers& /*triggers*/)

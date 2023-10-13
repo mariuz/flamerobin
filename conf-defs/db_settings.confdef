@@ -5,6 +5,12 @@
         <caption>Main Tree View</caption>
         <image>2</image>
         <setting type="checkbox">
+            <caption>Show system characterset in tree</caption>
+            <description>If checked the system CharacterSet will be shown in the tree by default (can be overridden per database)</description>
+            <key>ShowSystemCharacterSet</key>
+            <default>0</default>
+        </setting>
+        <setting type="checkbox">
             <caption>show all indices in one node in tree</caption>
             <description>If checked the all indices for this database will be shown in one node in the tree</description>
             <key>ShowOneNodeIndices</key>

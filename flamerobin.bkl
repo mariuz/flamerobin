@@ -177,8 +177,8 @@ Accepted values: AMD64, IA64.
             <define>WIN32_LEAN_AND_MEAN</define>
 
             <set var="WX_PORT">wxmsw</set>
-<!-- set this to 28 for wxWidgets 2.8.X, to 30 for wxWidgets 3.1.x-->
-            <set var="WX_VERSION">31</set>
+<!-- set this to 28 for wxWidgets 2.8.X, to 30 for wxWidgets 3.2.x-->
+            <set var="WX_VERSION">32</set>
 
             <set var="WX_LIB_DIR" make_var="1">
                 <if cond="USEDLL=='1'">$(WXDIR)/lib/$(COMPILER)$(DIR_SUFFIX_CPU)_dll</if>
@@ -199,7 +199,7 @@ Accepted values: AMD64, IA64.
             <sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_core</sys-lib>
             <sys-lib>wxbase$(WX_VERSION)$(U_OPT)$(D_OPT)_xml</sys-lib>
             <sys-lib>wxbase$(WX_VERSION)$(U_OPT)$(D_OPT)</sys-lib>
-            <if cond="WX_VERSION>='31'">
+            <if cond="WX_VERSION>='32'">
                 <sys-lib>wxscintilla$(D_OPT)</sys-lib>
             </if>
             <sys-lib>wxexpat$(D_OPT)</sys-lib>
@@ -231,7 +231,9 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/config/LocalSettings.h
         $(SOURCEDIR)/core/ArtProvider.h
         $(SOURCEDIR)/core/CodeTemplateProcessor.h
+        $(SOURCEDIR)/core/FRDecimal.h
         $(SOURCEDIR)/core/FRError.h
+        $(SOURCEDIR)/core/FRInt128.h
         $(SOURCEDIR)/core/ObjectWithHandle.h
         $(SOURCEDIR)/core/Observer.h
         $(SOURCEDIR)/core/ProcessableObject.h
@@ -362,7 +364,9 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/config/LocalSettings.cpp
         $(SOURCEDIR)/core/ArtProvider.cpp
         $(SOURCEDIR)/core/CodeTemplateProcessor.cpp
-        $(SOURCEDIR)/core/FRError.cpp
+        $(SOURCEDIR)/core/FRDecimal.h
+        $(SOURCEDIR)/core/FRError.h
+        $(SOURCEDIR)/core/FRInt128.h
         $(SOURCEDIR)/core/Observer.cpp
         $(SOURCEDIR)/core/ProgressIndicator.cpp
         $(SOURCEDIR)/core/StringUtils.cpp
@@ -607,7 +611,7 @@ Accepted values: AMD64, IA64.
                 mkdir -p $(BUNDLE)/SharedSupport/conf-defs
                 mkdir -p $(BUNDLE)/SharedSupport/docs
                 mkdir -p $(BUNDLE)/SharedSupport/html-templates
-		mkdir -p $(BUNDLE)/SharedSupport/sys-templates
+				mkdir -p $(BUNDLE)/SharedSupport/sys-templates
 
                 <!-- PkgInfo: -->
                 echo -n "APPL????" >$(BUNDLE)/PkgInfo
@@ -629,7 +633,7 @@ Accepted values: AMD64, IA64.
                 cp -R $(DOLLAR)(srcdir)/conf-defs/* $(BUNDLE)/SharedSupport/conf-defs
                 cp -R $(DOLLAR)(srcdir)/docs/* $(BUNDLE)/SharedSupport/docs
                 cp -R $(DOLLAR)(srcdir)/html-templates/* $(BUNDLE)/SharedSupport/html-templates
-		cp -R $(DOLLAR)(srcdir)/sys-templates/* $(BUNDLE)/SharedSupport/sys-templates
+				cp -R $(DOLLAR)(srcdir)/sys-templates/* $(BUNDLE)/SharedSupport/sys-templates
             </command>
         </modify-target>
 
@@ -794,6 +798,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/ibpp/dbkey.cpp
         $(SOURCEDIR)/ibpp/events.cpp
         $(SOURCEDIR)/ibpp/exception.cpp
+		$(SOURCEDIR)/ibpp/ibint128.cpp
         $(SOURCEDIR)/ibpp/row.cpp
         $(SOURCEDIR)/ibpp/service.cpp
         $(SOURCEDIR)/ibpp/statement.cpp

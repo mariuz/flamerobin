@@ -31,6 +31,7 @@ class MetadataItemCreateStatementVisitor : public MetadataItemVisitor
 private:
     wxString statementM;
 public:
+    static wxString getCreateCharacterSetStatement();
     static wxString getCreateDBTriggerStatement();
     static wxString getCreateDDLTriggerStatement();
     static wxString getCreateDMLTriggerStatement();
@@ -49,6 +50,7 @@ public:
     static wxString getCreateViewStatement();
 
 
+    virtual void visitCharacterSets(CharacterSets& characterSets);
     virtual void visitDBTriggers(DBTriggers& triggers);
     virtual void visitDDLTriggers(DDLTriggers& triggers);
     virtual void visitDMLTriggers(DMLTriggers& triggers);

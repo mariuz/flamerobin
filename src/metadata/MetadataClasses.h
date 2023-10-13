@@ -28,6 +28,21 @@
 #include <vector>
 #include <memory>
 
+class CharacterSet;
+typedef std::shared_ptr<CharacterSet> CharacterSetPtr;
+typedef std::vector<CharacterSetPtr> CharacterSetPtrs;
+class CharacterSets;
+typedef std::shared_ptr<CharacterSets> CharacterSetsPtr;
+
+class Collation;
+typedef std::shared_ptr<Collation> CollationPtr;
+typedef std::vector<CollationPtr> CollationPtrs;
+class Collations;
+typedef std::shared_ptr<Collations> CollationsPtr;
+class UserCollations;
+typedef std::shared_ptr<UserCollations> UserCollationsPtr;
+
+
 class Column;
 typedef std::shared_ptr<Column> ColumnPtr;
 typedef std::vector<ColumnPtr> ColumnPtrs;

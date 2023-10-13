@@ -38,7 +38,7 @@ private:
 protected:
     MetadataCollectionBase(NodeType type, DatabasePtr database,
             const wxString& name)
-        : MetadataItem(type, database.get(), name), databaseM(database)
+        : MetadataItem(type, database.get(), name, -1), databaseM(database)
     {
     }
 
@@ -93,6 +93,16 @@ private:
         for (iterator it = itemsM.begin(); it != itemsM.end(); ++it)
         {
             if ((*it)->getIdentifier().equals(id))
+                return it;
+        }
+        return itemsM.end();
+    }
+
+    iterator getPositionId(const int id)
+    {
+        for (iterator it = itemsM.begin(); it != itemsM.end(); ++it)
+        {
+            if ((*it)->getId() == id)
                 return it;
         }
         return itemsM.end();
@@ -205,6 +215,12 @@ public:
     ItemType findByName(const wxString& name)
     {
         iterator it = getPosition(name);
+        return (it != itemsM.end()) ? (*it) : ItemType();
+    };
+
+    ItemType findById(const int id)
+    {
+        iterator it = getPositionId(id);
         return (it != itemsM.end()) ? (*it) : ItemType();
     };
 

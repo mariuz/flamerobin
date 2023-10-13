@@ -116,6 +116,10 @@ void LoadDescriptionVisitor::loadDescription(MetadataItem* object,
     }
 }
 
+void LoadDescriptionVisitor::visitCharcterSet(CharacterSet& charterSet)
+{
+}
+
 void LoadDescriptionVisitor::visitColumn(Column& column)
 {
     // TODO: use Column::GetRelation() / Column::getProcedure() instead
@@ -262,6 +266,10 @@ void SaveDescriptionVisitor::saveDescription(MetadataItem* object,
 
     st1->Execute();
     tr1->Commit();
+}
+
+void SaveDescriptionVisitor::visitCharacterSet(CharacterSet& charterSet)
+{
 }
 
 void SaveDescriptionVisitor::visitColumn(Column& column)

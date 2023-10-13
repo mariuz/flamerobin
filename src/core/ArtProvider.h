@@ -30,7 +30,11 @@
 #define ART_ExecuteSqlFrame         wxART_MAKE_ART_ID(ART_ExecuteSqlFrame)
 
 #define ART_Backup                  wxART_MAKE_ART_ID(ART_Backup)
+#define ART_CharacterSet            wxART_MAKE_ART_ID(ART_CharacterSet)
+#define ART_CharacterSets           wxART_MAKE_ART_ID(ART_CharacterSets)
 #define ART_Column                  wxART_MAKE_ART_ID(ART_Column)
+#define ART_Collation               wxART_MAKE_ART_ID(ART_Collation)
+#define ART_Collations              wxART_MAKE_ART_ID(ART_Ccollations)
 #define ART_Computed                wxART_MAKE_ART_ID(ART_Computed)
 #define ART_DatabaseConnected       wxART_MAKE_ART_ID(ART_DatabaseConnected)
 #define ART_DatabaseDisconnected    wxART_MAKE_ART_ID(ART_DatabaseDisconnected)
