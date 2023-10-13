@@ -120,6 +120,7 @@ FBCLIENT* FBCLIENT::Call()
 {
 	// Let's load the CLIENT library, if it is not already loaded.
 	// The load is guaranteed to be done only once per application.
+	// Loading order : specifically defined path > local directory fbembed > local directory fbclient > PATH and System directories > Look at Win registry for Fb setup folder > gds32.dll
 
 	if (! mReady)
 	{
@@ -191,6 +192,12 @@ FBCLIENT* FBCLIENT::Call()
 			}
 		}
 
+        if (mHandle == 0)
+        {
+            // Let's try from the PATH and System directories
+            mHandle = IBPP_LoadLibrary("fbclient.dll");
+        }
+
 		if (mHandle == 0)
 		{
 			// Try to locate FBCLIENT.DLL through the optional FB 1.5 registry
@@ -211,45 +218,44 @@ FBCLIENT* FBCLIENT::Call()
 						&buflen) == ERROR_SUCCESS
 					&& keytype == REG_SZ)
 				{
-					int len = lstrlen(fbdll);
-                    // for Firebird 3+
-                    lstrcat(fbdll, "fbclient.dll");
+                    int len = lstrlen(fbdll);
+
+#if !defined(_WIN64)
+                    // try 32 bit client library of 64 bit server
+                    lstrcpy(fbdll + len, "WOW64\\fbclient.dll");
                     mHandle = IBPP_LoadLibrary(fbdll);
-                    // try 32 bit client library of 64 bit server too 
-                    if (mHandle == 0) {
-                        lstrcpy(fbdll + len, "WOW64\\fbclient.dll");
+                    if (mHandle == 0)
+                    {
+                        lstrcpy(fbdll + len, "bin\\WOW64\\fbclient.dll");
                         mHandle = IBPP_LoadLibrary(fbdll);
-                        // for Firebird 2.5 -
-                        if (mHandle == 0){
-                            lstrcpy(fbdll + len, "bin\\fbclient.dll");
-                            mHandle = IBPP_LoadLibrary(fbdll);
-                            // try 32 bit client library of 64 bit server too
-                            if (mHandle == 0)
-                            {
-                                lstrcpy(fbdll + len, "bin\\WOW64\\fbclient.dll");
-                                mHandle = IBPP_LoadLibrary(fbdll);
-                            }
-                        }
                     }
-				}
+#endif
+                    // for Firebird 3+
+                    if (mHandle == 0) {
+                        lstrcpy(fbdll + len, "fbclient.dll");
+                        mHandle = IBPP_LoadLibrary(fbdll);
+                    }
+                    // for Firebird 2.5 -
+                    if (mHandle == 0) {
+                        lstrcpy(fbdll + len, "bin\\fbclient.dll");
+                        mHandle = IBPP_LoadLibrary(fbdll);
+                    }
+                }
 				RegCloseKey(hkey_instances);
 			}
 		}
 
+        if (mHandle == 0)
+        {
+            // Not found. Last try : attemps loading gds32.dll from PATH and
+            // System directories
+            mHandle = IBPP_LoadLibrary("gds32.dll");
+        }
+
 		if (mHandle == 0)
-		{
-			// Let's try from the PATH and System directories
-			mHandle = IBPP_LoadLibrary("fbclient.dll");
-			if (mHandle == 0)
-			{
-				// Not found. Last try : attemps loading gds32.dll from PATH and
-				// System directories
-				mHandle = IBPP_LoadLibrary("gds32.dll");
-				if (mHandle == 0)
-					throw LogicExceptionImpl("GDS::Call()",
-						_("Can't find or load FBCLIENT.DLL or GDS32.DLL"));
-			}
-		}
+			throw LogicExceptionImpl("GDS::Call()",
+				_("Can't find or load FBEMBED.DLL FBCLIENT.DLL or GDS32.DLL"));
+		
 #endif
 
 #ifdef IBPP_UNIX
