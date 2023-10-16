@@ -634,7 +634,7 @@ wxString FunctionSQL::getAlterSql(bool full)
 	if (full)
 		sql += getSource();
 	else
-		sql += "BEGIN SUSPEND; END";
+		sql += "as BEGIN END";
 	sql += "^\nSET TERM ; ^\n";
 	return sql;
 }
