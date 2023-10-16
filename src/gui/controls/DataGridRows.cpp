@@ -2514,6 +2514,9 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
             else
                 stm += " = '";
             stm += columnDefsM[col]->getAsFirebirdString(buffersM[row])
+            if (IBPP::isRationalNumber(statementM->ColumnType(col + 1))) //Fix locale problem for "," as decimal separator
+                lval.Replace(",", ".");
+            stm += lval
                 + "' WHERE ";
         }
 
