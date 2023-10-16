@@ -2513,7 +2513,7 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
                 stm += " = x'";
             else
                 stm += " = '";
-            stm += columnDefsM[col]->getAsFirebirdString(buffersM[row])
+            wxString lval = columnDefsM[col]->getAsFirebirdString(buffersM[row]);
             if (IBPP::isRationalNumber(statementM->ColumnType(col + 1))) //Fix locale problem for "," as decimal separator
                 lval.Replace(",", ".");
             stm += lval
