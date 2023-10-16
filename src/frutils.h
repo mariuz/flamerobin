@@ -55,4 +55,6 @@ bool connectDatabase(Database *db, wxWindow* parent,
 bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
     bool sysdba);
 
+wxString getClientLibrary();
+
 #endif // FRUTILS_H

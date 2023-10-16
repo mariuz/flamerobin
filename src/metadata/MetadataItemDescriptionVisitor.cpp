@@ -300,6 +300,10 @@ void SaveDescriptionVisitor::visitException(Exception& exception)
 
 void SaveDescriptionVisitor::visitFunctionSQL(FunctionSQL& function)
 {
+    if (function.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+        saveDescription(&function, "comment on function %s is '%s'");
+        return;
+    }
     saveDescription(&function,
         "update RDB$FUNCTIONS set rdb$description = ? "
         "where RDB$FUNCTION_NAME = ?");

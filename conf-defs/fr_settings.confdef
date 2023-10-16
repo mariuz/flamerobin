@@ -38,11 +38,17 @@
                 </setting>
             </enables>
         </setting>
-                <setting type="file">
-                    <caption>Library file name:</caption>
+				<setting type="file" platform="win" arch="x86">
+                    <caption>Library x86 file name:</caption>
                     <description>FbClient.dll or gds32.dll </description>
-                    <key>LibraryFile</key>
+                    <key>x86LibraryFile</key>
                 </setting>
+				<setting type="file" platform="win" arch="x64">
+                    <caption>Library x64 file name:</caption>
+                    <description>FbClient.dll or gds32.dll </description>
+                    <key>x64LibraryFile</key>
+                </setting>
+				
 		
         <!--
         <setting type="checkbox">

@@ -220,7 +220,7 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
         try
         {
             svc = IBPP::ServiceFactory(wx2std(getConnectionString()),
-                "SYSDBA", wx2std(serviceSysdbaPasswordM), wx2std(""), wx2std(""));
+                "SYSDBA", wx2std(serviceSysdbaPasswordM), wx2std(""), wx2std(""), wx2std(getClientLibrary()));
             svc->Connect();
             return true;
         }
@@ -243,7 +243,7 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
         try
         {
             svc = IBPP::ServiceFactory(wx2std(getConnectionString()),
-                wx2std(serviceUserM), wx2std(servicePasswordM), wx2std(""), wx2std(""));
+                wx2std(serviceUserM), wx2std(servicePasswordM), wx2std(""), wx2std(""), wx2std(getClientLibrary()));
             svc->Connect();
             return true;
         }
@@ -276,7 +276,7 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
         try
         {
             svc = IBPP::ServiceFactory(wx2std(getConnectionString()),
-                db->Username(), db->UserPassword(), db->RoleName(), db->CharSet());
+                db->Username(), db->UserPassword(), db->RoleName(), db->CharSet(), wx2std(getClientLibrary()));
             svc->Connect();
             if (sysdba)
                 serviceSysdbaPasswordM = db->UserPassword();
@@ -313,7 +313,7 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
         try
         {
             svc = IBPP::ServiceFactory(wx2std(getConnectionString()),
-                wx2std(user), wx2std(pwd), wx2std(""), wx2std(""));
+                wx2std(user), wx2std(pwd), wx2std(""), wx2std(""), wx2std(getClientLibrary()));
             svc->Connect();
             if (sysdba)
                 serviceSysdbaPasswordM = pwd;

@@ -735,10 +735,9 @@ void Int128ColumnDef::setFromString(DataGridRowBuffer* buffer,
 {
     wxASSERT(buffer);
     int128_t v128 = 0;
-    int i1, decimalSeparatorIdx, localSourceScale;
+    int decimalSeparatorIdx, localSourceScale;
     wxString errMsg;
     wxString localSource = source;
-    wxChar ch;
     wxChar decimalSeparator;
 
     if (scaleM > 0)

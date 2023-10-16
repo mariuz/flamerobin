@@ -40,6 +40,7 @@
 #include "metadata/column.h"
 #include "metadata/relation.h"
 #include "metadata/server.h"
+#include "config/Config.h"
 
 void adjustControlsMinWidth(std::list<wxWindow*> controls)
 {
@@ -199,7 +200,7 @@ bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
         try
         {
             svc = IBPP::ServiceFactory(wx2std(s->getConnectionString()),
-                wx2std(username), wx2std(password), wx2std(""), wx2std(""));
+                wx2std(username), wx2std(password), wx2std(""), wx2std(""), wx2std(getClientLibrary()));
             svc->Connect();
             // exception might be thrown. If not, we store the credentials:
             if (sysdba || username.Upper() == "SYSDBA")
@@ -215,4 +216,15 @@ bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
         }
     }
     return true;
+}
+
+wxString getClientLibrary()
+{
+    /*Todo: Implement FB library per conexion */
+#if defined(_WIN64)
+    return config().get("x64LibraryFile", wxString(""));
+#else
+    return config().get("x86LibraryFile", wxString(""));
+#endif
+
 }

@@ -692,7 +692,7 @@ void InsertParametersDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
     //preloadSpecialColumns();
 
     swWaitForParameterInputTime.Pause();
-    int resumedRow = 0;
+    size_t resumedRow = 0;
     parameterSaveList.clear();
     parameterSaveListOptionNull.clear();
     for (resumedRow = 0; resumedRow < statementM->ParametersByName().size(); ++resumedRow)

@@ -1,0 +1,80 @@
+name: Build Flamerobin for Windows
+
+env: 
+  wx-tag-version: v3.2.2.1
+  
+on:
+  push:
+    branches: [ "master", "dev" ]
+  pull_request:
+    branches: [ "master", "dev" ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+   
+    - uses: actions/checkout@v3
+    
+    - name: wxWidget cache
+      id: cache-wxwidget
+      uses: actions/cache@v3
+      with:
+        path: |
+            wxWidgets
+        key: ${{ runner.os }}-wxwidgets-${{env.wx-tag-version}}
+        restore-keys: ${{ runner.os }}-wxwidgets-${{env.wx-tag-version}}
+    
+    - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
+      name: clone wxWidgets
+      run:  git clone --recursive --branch ${{env.wx-tag-version}} --depth 1 https://github.com/wxWidgets/wxWidgets.git
+      
+    - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
+      name: replace /MD for /MT
+      run: 
+             $xmls = (Get-ChildItem -Path "wxWidgets\build\msw" -Recurse -Filter *.vcxproj).FullName ;
+             foreach ($xml in $xmls) {
+               echo $xml;
+               (Get-Content $xml).replace("MultiThreadedDebugDLL", "MultiThreadedDebug") | Set-Content $xml ;
+               (Get-Content $xml).replace("MultiThreadedDLL", "MultiThreaded") | Set-Content $xml
+             }
+
+    - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
+      name: Build wxWidgets x86
+      shell: cmd
+      run: |
+        "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" &&  msbuild.exe wxWidgets\build\msw\wx_vc17.sln /t:Build /p:Configuration=Release /p:Platform=Win32
+        
+    - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
+      name: Build wxWidgets x64
+      shell: cmd
+      run: | 
+        "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" && msbuild.exe wxWidgets\build\msw\wx_vc17.sln /t:Build /p:Configuration=Release /p:Platform=x64
+
+    - name: Generate CMake x86 project
+      run: cmake -S .\ -B .\Build32 -A Win32 -DWXDIR=wxWidgets
+      
+    - name: Generate CMake x64 project
+      run: cmake -S .\ -B .\Build64 -A x64 -DWXDIR=wxWidgets
+      
+    - name: Build Flamerobin x86
+      run: >
+        cmake --build .\Build32 --config Release -j 8
+        
+    - name: Build Flamerobin x64
+      run: >
+        cmake --build .\Build64 --config Release -j 8
+
+    - name: Innosetup 
+      run: >
+        ISCC.exe install\win32\FlameRobinSetup.iss
+        
+    - name: Innosetup64
+      run: >
+        ISCC.exe install\win32\FlameRobinSetup64.iss
+
+    - name: Upload installer
+      uses: actions/upload-artifact@main
+      with:
+          name: flamerobin-instaler
+          path: install/win32/output/flamerobin-*.exe
