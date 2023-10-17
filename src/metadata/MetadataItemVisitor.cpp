@@ -247,19 +247,19 @@ void MetadataItemVisitor::visitTriggers(Triggers&)
     defaultAction();
 }
 
-void MetadataItemVisitor::visitDBTrigger(DBTrigger&)
+void MetadataItemVisitor::visitDBTrigger(DBTrigger& trigger)
 {
-    defaultAction();
+    visitTrigger(*(Trigger*)&trigger);
 }
 
-void MetadataItemVisitor::visitDDLTrigger(DDLTrigger&)
+void MetadataItemVisitor::visitDDLTrigger(DDLTrigger& trigger)
 {
-    defaultAction();
+    visitTrigger(*(Trigger*)&trigger);
 }
 
-void MetadataItemVisitor::visitDMLTrigger(DMLTrigger&)
+void MetadataItemVisitor::visitDMLTrigger(DMLTrigger& trigger)
 {
-    defaultAction();
+    visitTrigger(*(Trigger*)&trigger);
 }
 
 void MetadataItemVisitor::visitDMLTriggers(DMLTriggers&)
