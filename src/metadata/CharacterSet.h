@@ -87,6 +87,8 @@ public:
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     void load(ProgressIndicator* progressIndicator);
     virtual const wxString getTypeName() const;
+
+
 };
 
 #endif // FR_CHARACTERSET_H

@@ -75,7 +75,7 @@ void CharacterSet::loadProperties(IBPP::Statement& statement, wxMBConv* converte
     int Lid;
     std::string Lstr;
     statement->Get(2, Lid);
-    setId(Lid);
+    setMetadataId(Lid);
     statement->Get(3, Lid);
     setBytesPerChar(Lid);
     
@@ -274,12 +274,52 @@ void CharacterSets::acceptVisitor(MetadataItemVisitor* visitor)
 
 void CharacterSets::load(ProgressIndicator* progressIndicator)
 {
+ 
+    
     DatabasePtr db = getDatabase();
-    wxString stmt("select rdb$character_set_name "
+    MetadataLoader* loader = db->getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+    wxMBConv* converter = db->getCharsetConverter();
+
+    IBPP::Statement& st1 = loader->getStatement(
+        CharacterSet::getLoadStatement(true));
+
+    CollectionType characters;
+    st1->Execute();
+    checkProgressIndicatorCanceled(progressIndicator);
+    while (st1->Fetch())
+    {
+        if (!st1->IsNull(1))
+        {
+            std::string s;
+            st1->Get(1, s);
+            wxString name(std2wxIdentifier(s, converter));
+
+            CharacterSetPtr character = findByName(name);
+            if (!character)
+            {
+                character.reset(new CharacterSet(db, name));
+                initializeLockCount(character, getLockCount());
+            }
+            characters.push_back(character);
+            character->loadProperties(st1, converter);
+        }
+        checkProgressIndicatorCanceled(progressIndicator);
+    }
+
+    setItems(characters);
+
+    
+    /*
+    DatabasePtr db = getDatabase();
+    wxString stmt("select rdb$character_set_name, "
+        "RDB$CHARACTER_SET_ID , "
+        "c.RDB$BYTES_PER_CHARACTER, "
+        "c.RDB$DEFAULT_COLLATE_NAME "
         "from rdb$character_sets "
         " order by rdb$character_set_name "
     );
-    setItems(db->loadIdentifiers(stmt, progressIndicator));
+    setItems(db->loadIdentifiers(stmt, progressIndicator));*/
 }
 
 const wxString CharacterSets::getTypeName() const

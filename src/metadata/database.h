@@ -253,6 +253,7 @@ public:
     void getCollections(std::vector<MetadataItem *>& temp, bool system);
 
     CharacterSetsPtr getCharacterSets();
+    UserCollationsPtr getUserCollations();
     DBTriggersPtr getDBTriggers();
     DDLTriggersPtr getDDLTriggers();
     DMLTriggersPtr getDMLTriggers();
@@ -307,7 +308,7 @@ public:
     void addObject(NodeType type, const wxString& name);
     void parseCommitedSql(const SqlStatement& stm);     // reads a DDL statement and does accordingly
 
-    CharacterSet getCharsetById(int id);
+    CharacterSetPtr getCharsetById(int id);
     wxArrayString getCharacterSet();
     wxArrayString getCollations(const wxString& charset);
     bool isDefaultCollation(const wxString& charset, const wxString& collate);

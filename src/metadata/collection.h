@@ -98,14 +98,15 @@ private:
         return itemsM.end();
     }
 
-    iterator getPositionId(const int id)
+    iterator getPositionMetadataId(const int id)
     {
         for (iterator it = itemsM.begin(); it != itemsM.end(); ++it)
         {
-            if ((*it)->getId() == id)
+            if ((*it)->getMetadataId() == id)
                 return it;
         }
         return itemsM.end();
+
     }
 
 protected:
@@ -218,11 +219,11 @@ public:
         return (it != itemsM.end()) ? (*it) : ItemType();
     };
 
-    ItemType findById(const int id)
+    ItemType findByMetadataId(const int id)
     {
-        iterator it = getPositionId(id);
+        iterator it = getPositionMetadataId(id);
         return (it != itemsM.end()) ? (*it) : ItemType();
-    };
+    }
 
     // returns vector of all subnodes
     virtual bool getChildren(std::vector<MetadataItem *>& temp)

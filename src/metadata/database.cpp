@@ -68,34 +68,6 @@
 #include "sql/SqlStatement.h"
 #include "sql/SqlTokenizer.h"
 
-/*
-// CharacterSet class
-CharacterSet::CharacterSet(const wxString& name, int id, int bytesPerChar)
-    : nameM(name), idM(id), bytesPerCharM(bytesPerChar)
-{
-}
-
-bool CharacterSet::operator< (const CharacterSet& other) const
-{
-    return nameM < other.nameM;
-}
-
-int CharacterSet::getBytesPerChar() const
-{
-    return bytesPerCharM;
-}
-
-int CharacterSet::getId() const
-{
-    return idM;
-}
-
-wxString CharacterSet::getName() const
-{
-    return nameM;
-}
-
-*/
 // Credentials class
 void Credentials::setCharset(const wxString& value)
 {
@@ -422,12 +394,13 @@ void Database::getDatabaseTriggers(std::vector<Trigger *>& list)
         std::back_inserter(list), std::mem_fn(&DBTriggerPtr::get));
 }
 
-CharacterSet Database::getCharsetById(int id)
+CharacterSetPtr Database::getCharsetById(int id)
 {
     // if it contains both charset and collation as 2 bytes
     id %= 256;
+    //CharacterSetPtr cs = getCharacterSets()->findByMetadataId(id);
 
-    return  reinterpret_cast<CharacterSet&>(characterSetsM->findById(id));
+    return  getCharacterSets()->findByMetadataId(id);
 }
 
 wxArrayString Database::getCharacterSet()
@@ -573,7 +546,7 @@ MetadataItem* Database::findByIdAndType(NodeType nt, const int id)
     switch (nt)
     {
         case ntCharacterSet:
-            return characterSetsM->findById(id).get();
+            return characterSetsM->findByMetadataId(id).get();
             break;
         default:
             return 0;
@@ -1653,6 +1626,13 @@ CharacterSetsPtr Database::getCharacterSets()
     wxASSERT(characterSetsM);
     characterSetsM->ensureChildrenLoaded();
     return characterSetsM;
+}
+
+UserCollationsPtr Database::getUserCollations()
+{
+    wxASSERT(userCollationsM);
+    userCollationsM->ensureChildrenLoaded();
+    return userCollationsM;
 }
 
 DBTriggersPtr Database::getDBTriggers()

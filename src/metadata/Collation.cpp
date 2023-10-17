@@ -46,14 +46,15 @@ std::string Collation::getLoadStatement(bool list)
         "c.RDB$COLLATION_ID, "         //2
         "c.RDB$COLLATION_ATTRIBUTES, " //3
         "c.RDB$BASE_COLLATION_NAME, "  //4
-        "c.RDB$SPECIFIC_ATTRIBUTES, "  //5
-        "from rdb$character_sets c ");
+        "c.RDB$SPECIFIC_ATTRIBUTES,  " //5
+        "c.RDB$CHARACTER_SET_ID "      //6
+        "from RDB$COLLATIONS c ");
     if (list)
     {
-        stmt += " order by c.rdb$character_set_name";
+        stmt += " order by c.RDB$COLLATION_NAME";
     }
     else
-        stmt += " where c.rdb$character_set_name = ?";
+        stmt += " where c.RDB$COLLATION_NAME = ?";
     return stmt;
 }
 
@@ -68,7 +69,7 @@ void Collation::loadProperties(IBPP::Statement& statement, wxMBConv* converter)
     //setName(std2wxIdentifier(Lstr, converter));
 
     statement->Get(2, Lid);
-    setId(Lid);
+    setMetadataId(Lid);
 
     statement->Get(3, Lid);
     setAttributes(Lid);
@@ -78,6 +79,9 @@ void Collation::loadProperties(IBPP::Statement& statement, wxMBConv* converter)
 
     statement->Get(5, Lstr);
     setSpecificAttributes(std2wxIdentifier(Lstr, converter));
+
+    statement->Get(6, Lid);
+    setCharacterSetId(Lid);
 
     setPropertiesLoaded(true);
 }
@@ -137,6 +141,16 @@ void Collation::setAttributes(int& attributes)
     attributesM = attributes;
 }
 
+int Collation::getCharacterSetId()
+{
+    return characterSetIdM;
+}
+
+void Collation::setCharacterSetId(int& characterSetId)
+{
+    characterSetIdM = characterSetId;
+}
+
 wxString Collation::getBaseCollectionName()
 {
     return baseCollectionNameM;
@@ -162,8 +176,35 @@ void Collation::acceptVisitor(MetadataItemVisitor* visitor)
     visitor->visitCollation(*this);
 }
 
+const wxString Collation::getTypeName() const
+{
+    return "COLLATION";
+}
+
+wxString Collation::getSource()
+{
+    ensurePropertiesLoaded();
+    wxString sql  ="FOR " + getDatabase()->getCharsetById(characterSetIdM)->getName_() + " \n";
+    if (!getBaseCollectionName().IsEmpty())
+        sql =+ "FROM EXTERNAL ('" + getBaseCollectionName() + "'),  \n";
+        
+        
+    if(getAttributes() & TEXTTYPE_ATTR_CASE_INSENSITIVE)
+        sql += "PAD SPACE,   \n";
+    if (getAttributes() & TEXTTYPE_ATTR_PAD_SPACE)
+        sql += "CASE INSENSITIVE,   \n";
+    if (getAttributes() & TEXTTYPE_ATTR_ACCENT_INSENSITIVE)
+        sql += "ACCENT INSENSITIVE   \n";
+    
+    if (!getSpecificAttibutes().IsEmpty())
+        sql += "'" + getSpecificAttibutes() + "'";
+
+    return sql;
+}
+
 void Collations::loadChildren()
 {
+
     load(0);
 }
 

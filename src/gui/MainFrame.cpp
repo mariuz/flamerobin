@@ -226,6 +226,7 @@ void MainFrame::buildMainMenu()
 
     objectMenuM = new wxMenu();
     wxMenu* newMenu = new wxMenu();
+    newMenu->Append(Cmds::Menu_CreateCollation, _("&Collation"));
     newMenu->Append(Cmds::Menu_CreateDBTrigger, _("D&B Trigger"));
     newMenu->Append(Cmds::Menu_CreateDDLTrigger, _("DD&L Trigger"));
     newMenu->Append(Cmds::Menu_CreateDMLTrigger, _("DML Tr&igger"));
@@ -233,7 +234,7 @@ void MainFrame::buildMainMenu()
     newMenu->Append(Cmds::Menu_CreateException, _("&Exception"));
     newMenu->Append(Cmds::Menu_CreateFunction, _("&Function"));
     newMenu->Append(Cmds::Menu_CreateGenerator, _("&Generator"));
-    newMenu->Append(Cmds::Menu_CreateGTTTable, _("Global Temporary"));
+    newMenu->Append(Cmds::Menu_CreateGTTTable, _("Global &Temporary"));
     newMenu->Append(Cmds::Menu_CreateIndex, _("&Index"));
     newMenu->Append(Cmds::Menu_CreatePackage, _("P&ackage"));
     newMenu->Append(Cmds::Menu_CreateProcedure, _("&Procedure"));
@@ -466,6 +467,7 @@ EVT_UPDATE_UI(Cmds::Menu_StartupDatabase, MainFrame::OnMenuUpdateIfDatabaseNotCo
     EVT_BUTTON(MainFrame::ID_button_prev, MainFrame::OnButtonPrevClick)
     EVT_BUTTON(MainFrame::ID_button_next, MainFrame::OnButtonNextClick)
 
+    EVT_MENU(Cmds::Menu_CreateCollation,  MainFrame::OnMenuCreateCollation)
     EVT_MENU(Cmds::Menu_CreateDBTrigger,  MainFrame::OnMenuCreateDBTrigger)
     EVT_MENU(Cmds::Menu_CreateDDLTrigger, MainFrame::OnMenuCreateDDLTrigger)
     EVT_MENU(Cmds::Menu_CreateDMLTrigger, MainFrame::OnMenuCreateDMLTrigger)
@@ -1518,6 +1520,12 @@ void MainFrame::showCreateTemplate(const wxString& statement)
         return;
 
     showSql(this, wxEmptyString, db, statement);
+}
+
+void MainFrame::OnMenuCreateCollation(wxCommandEvent& event)
+{
+    showCreateTemplate(
+        MetadataItemCreateStatementVisitor::getCreateCollationStatment());
 }
 
 void MainFrame::OnMenuAddColumn(wxCommandEvent& WXUNUSED(event))

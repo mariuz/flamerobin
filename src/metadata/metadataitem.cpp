@@ -64,7 +64,7 @@ template<>
 ObjectWithHandle<MetadataItem>::Handle ObjectWithHandle<MetadataItem>::nextHandle = 0;
 
 MetadataItem::MetadataItem()
-    : Subject(), typeM(ntUnknown), parentM(0), childrenLoadedM(lsNotLoaded),
+    : Subject(), typeM(ntUnknown), parentM(0), metadataIdM(-1), childrenLoadedM(lsNotLoaded),
         descriptionLoadedM(lsNotLoaded), propertiesLoadedM(lsNotLoaded)
 {
 }
@@ -73,7 +73,7 @@ MetadataItem::MetadataItem(NodeType type, MetadataItem* parent,
         const wxString& name, int id)
    : Subject(), 
         typeM(type), parentM(parent), identifierM(name, getDatabase() != nullptr ? getDatabase()->getSqlDialect() : 3),
-        idM(id),
+        metadataIdM(id),
         childrenLoadedM(lsNotLoaded), descriptionLoadedM(lsNotLoaded),
         propertiesLoadedM(lsNotLoaded)
 {
@@ -129,6 +129,7 @@ wxString getNameOfType(NodeType type)
         case ntPackage:      return ("PACKAGE");
         case ntIndex:        return ("INDEX");
         case ntCharacterSet: return ("CHARACTERSET");
+        case ntCollation:    return ("COLLATION");
         default:
             return "";
     }
@@ -166,6 +167,8 @@ NodeType getTypeByName(const wxString& name)
         return ntIndex;
     else if (name == "CHARACTERSET")
         return ntCharacterSet;
+    else if (name == "COLLATION")
+        return ntCollation;
     else
         return ntUnknown;
 }
@@ -729,14 +732,14 @@ void MetadataItem::setType(NodeType type)
     typeM = type;
 }
 
-int MetadataItem::getId()
+int MetadataItem::getMetadataId()
 {
-    return idM;
+    return metadataIdM;
 }
 
-void MetadataItem::setId(int id)
+void MetadataItem::setMetadataId(int id)
 {
-    idM = id;
+    metadataIdM = id;
 }
 
 bool MetadataItem::isSystem() const

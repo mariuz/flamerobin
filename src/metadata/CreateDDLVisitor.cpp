@@ -35,6 +35,7 @@
 
 #include "core/ProgressIndicator.h"
 #include "metadata/column.h"
+#include "metadata/Collation.h"
 #include "metadata/constraints.h"
 #include "metadata/CreateDDLVisitor.h"
 #include "metadata/database.h"
@@ -113,6 +114,14 @@ wxString CreateDDLVisitor::getPrefixSql() const
 wxString CreateDDLVisitor::getSuffixSql() const
 {
     return postSqlM + grantSqlM;
+}
+
+void CreateDDLVisitor::visitCollation(Collation& collation)
+{
+    preSqlM += "CREATE " + collation.getSource() + "; \n";
+    postSqlM << getCommentOn(collation);
+    sqlM = preSqlM + postSqlM;
+
 }
 
 // this one is not called from "outside", but from visit(Table) function
@@ -199,6 +208,10 @@ void CreateDDLVisitor::visitDatabase(Database& d)
 
     try
     {
+
+        preSqlM << "/********************* COLLATES **********************/\n\n";
+        iterateit<UserCollationsPtr, Collation>(this, d.getUserCollations(), progressIndicatorM);
+
         preSqlM << "/********************* ROLES **********************/\n\n";
         iterateit<RolesPtr, Role>(this, d.getRoles(), progressIndicatorM);
 

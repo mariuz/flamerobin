@@ -30,11 +30,17 @@
 #include "metadata/CharacterSet.h"
 //#include "metadata/privilege.h"
 
+/* attributes passed by the engine to texttype entry-point */
+#define TEXTTYPE_ATTR_PAD_SPACE				1
+#define TEXTTYPE_ATTR_CASE_INSENSITIVE		2
+#define TEXTTYPE_ATTR_ACCENT_INSENSITIVE	4
+
 class Collations;
 
 class Collation : public MetadataItem
 {
 private:
+    int characterSetIdM;
     int attributesM;
     wxString baseCollectionNameM;
     wxString specificAttibutesM;
@@ -55,12 +61,19 @@ public:
 
     int getAttributes();
     void setAttributes(int& attributes);
+    int getCharacterSetId();
+    void setCharacterSetId(int& characterSetId);
     wxString getBaseCollectionName();
     void setBaseCollectionName(wxString baseName);
     wxString getSpecificAttibutes();
     void setSpecificAttributes(wxString attibutes);
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    virtual const wxString getTypeName() const;
+
+    wxString getSource();
+
+
 };
 
 

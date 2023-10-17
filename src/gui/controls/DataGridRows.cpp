@@ -2123,9 +2123,7 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
 
                 case IBPP::sdString:
                 {
-                    //CharacterSet cs = databaseM->getCharsetById(statement->ColumnSubtype(col));
-                    //int bpc = cs.getBytesPerChar();
-                    int bpc = databaseM->getCharacterSets()->findById(statement->ColumnSubtype(col))->getBytesPerChar();
+                    int bpc = databaseM->getCharsetById(statement->ColumnSubtype(col))->getBytesPerChar();
                     int size = statement->ColumnSize(col);
                     if (bpc)
                         size /= bpc;

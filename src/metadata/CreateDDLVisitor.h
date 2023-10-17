@@ -51,6 +51,7 @@ public:
     wxString getPrefixSql() const;
     wxString getSuffixSql() const;
 
+    virtual void visitCollation(Collation& collation);
     virtual void visitColumn(Column& column);
     virtual void visitDatabase(Database& database);
     virtual void visitDomain(Domain& domain);

@@ -49,6 +49,7 @@ public:
     virtual void visitGTTable(GTTable& table);
     virtual void visitUDF(UDF & function);
     virtual void visitView(View& view);
+    virtual void visitCollation(Collation& collation);
 protected:
     virtual void defaultAction();
 private:

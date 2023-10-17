@@ -87,7 +87,7 @@ private:
     MetadataItem* parentM;
     NodeType typeM;
     Identifier identifierM;
-    int idM;
+    int metadataIdM;
 
     enum LoadState { lsNotLoaded, lsLoadPending, lsLoaded, lsNotAvailable };
     LoadState childrenLoadedM;
@@ -163,8 +163,8 @@ public:
     virtual void setName_(const wxString& name);
     virtual NodeType getType() const;
     void setType(NodeType type);
-    virtual int getId();
-    virtual void setId(int id);
+    virtual int getMetadataId();
+    virtual void setMetadataId(int id);
 
     // returns the name of the data type (f. ex. TABLE)
     virtual const wxString getTypeName() const;
