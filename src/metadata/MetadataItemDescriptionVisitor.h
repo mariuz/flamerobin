@@ -39,6 +39,7 @@ public:
     LoadDescriptionVisitor();
 
     virtual void visitCharcterSet(CharacterSet& characterSet);
+    virtual void visitCollation(Collation& collation);
     virtual void visitColumn(Column& column);
     virtual void visitDomain(Domain& domain);
     virtual void visitException(Exception& exception);
@@ -68,6 +69,7 @@ public:
     SaveDescriptionVisitor(wxString description);
 
     virtual void visitCharacterSet(CharacterSet& characterSet);
+    virtual void visitCollation(Collation& collation);
     virtual void visitColumn(Column& column);
     virtual void visitDomain(Domain& domain);
     virtual void visitException(Exception& exception);

@@ -186,20 +186,25 @@ wxString Collation::getSource()
     ensurePropertiesLoaded();
     wxString sql  ="FOR " + getDatabase()->getCharsetById(characterSetIdM)->getName_() + " \n";
     if (!getBaseCollectionName().IsEmpty())
-        sql =+ "FROM EXTERNAL ('" + getBaseCollectionName() + "'),  \n";
+        sql =+ "FROM EXTERNAL ('" + getBaseCollectionName() + "') ";
         
         
     if(getAttributes() & TEXTTYPE_ATTR_CASE_INSENSITIVE)
-        sql += "PAD SPACE,   \n";
+        sql += ", \nPAD SPACE";
     if (getAttributes() & TEXTTYPE_ATTR_PAD_SPACE)
-        sql += "CASE INSENSITIVE,   \n";
+        sql += ", \nCASE INSENSITIVE";
     if (getAttributes() & TEXTTYPE_ATTR_ACCENT_INSENSITIVE)
-        sql += "ACCENT INSENSITIVE   \n";
+        sql += ", \nACCENT INSENSITIVE";
     
     if (!getSpecificAttibutes().IsEmpty())
-        sql += "'" + getSpecificAttibutes() + "'";
+        sql += ", \n'" + getSpecificAttibutes() + "'";
 
     return sql;
+}
+
+wxString Collation::getAlterSql()
+{
+    return "ALTER COLLATION " + getName_() + "\n" + getSource() + ";\n";
 }
 
 void Collations::loadChildren()

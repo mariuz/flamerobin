@@ -664,6 +664,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
             case ntGenerator:
                 showGeneratorValue(dynamic_cast<Generator*>(m));
                 break;
+            case ntCollation:
             case ntColumn:
             case ntTable:
             case ntSysTable:
@@ -681,6 +682,8 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
             case ntException:
             case ntRole:
             case ntSysRole:
+            case ntIndex:
+            case ntSysIndices:
                 {
                     wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED,
                         Cmds::Menu_ObjectProperties);
@@ -1522,7 +1525,7 @@ void MainFrame::showCreateTemplate(const wxString& statement)
     showSql(this, wxEmptyString, db, statement);
 }
 
-void MainFrame::OnMenuCreateCollation(wxCommandEvent& event)
+void MainFrame::OnMenuCreateCollation(wxCommandEvent& WXUNUSED(event))
 {
     showCreateTemplate(
         MetadataItemCreateStatementVisitor::getCreateCollationStatment());
@@ -1699,7 +1702,9 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
         return;
 
     wxString sql;
-    if (View* v = dynamic_cast<View*>(mi))
+    if (Collation* c = dynamic_cast<Collation*>(mi))
+        sql = c->getAlterSql();
+    else if (View* v = dynamic_cast<View*>(mi))
         sql = v->getAlterSql();
         //        sql = v->getRebuildSql();
     else if (Trigger* t = dynamic_cast<Trigger*>(mi))

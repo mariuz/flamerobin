@@ -72,6 +72,8 @@ public:
     virtual const wxString getTypeName() const;
 
     wxString getSource();
+    wxString getAlterSql();
+
 
 
 };
