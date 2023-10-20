@@ -305,8 +305,8 @@ public:
     virtual void visitCharacterSet(CharacterSet& characterset);
     virtual void visitCharacterSets(CharacterSets& charactersets);
     virtual void visitCollation(Collation& collation);
+    virtual void visitSysCollations(SysCollations& collations);
     virtual void visitCollations(Collations& collations);
-    virtual void visitUserCollations(UserCollations& collations);
     virtual void visitColumn(Column& column);
     virtual void visitDatabase(Database& database);
     virtual void visitDomain(Domain& domain);
@@ -406,12 +406,12 @@ void DBHTreeItemVisitor::visitCollation(Collation& collation)
     setNodeProperties(&collation, ART_Collation);
 }
 
-void DBHTreeItemVisitor::visitCollations(Collations& collations)
+void DBHTreeItemVisitor::visitSysCollations(SysCollations& collations)
 {
     setNodeProperties(&collations, ART_Collations);
 }
 
-void DBHTreeItemVisitor::visitUserCollations(UserCollations& collations)
+void DBHTreeItemVisitor::visitCollations(Collations& collations)
 {
     setNodeProperties(&collations, ART_Collations);
 }

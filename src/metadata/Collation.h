@@ -35,7 +35,7 @@
 #define TEXTTYPE_ATTR_CASE_INSENSITIVE		2
 #define TEXTTYPE_ATTR_ACCENT_INSENSITIVE	4
 
-class Collations;
+class SysCollations;
 
 class Collation : public MetadataItem
 {
@@ -45,7 +45,7 @@ private:
     wxString baseCollectionNameM;
     wxString specificAttibutesM;
 
-    friend class Collations;
+    friend class SysCollations;
 protected:
     static std::string getLoadStatement(bool list);
     void loadProperties(IBPP::Statement& statement, wxMBConv* converter);
@@ -79,12 +79,12 @@ public:
 };
 
 
-class Collations : public MetadataCollection<Collation>
+class SysCollations : public MetadataCollection<Collation>
 {
 protected:
     virtual void loadChildren();
 public:
-    Collations(DatabasePtr database);
+    SysCollations(DatabasePtr database);
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     void load(ProgressIndicator* progressIndicator);
@@ -92,12 +92,12 @@ public:
 };
 
 
-class UserCollations : public MetadataCollection<Collation>
+class Collations : public MetadataCollection<Collation>
 {
 protected:
     virtual void loadChildren();
 public:
-    UserCollations(DatabasePtr database);
+    Collations(DatabasePtr database);
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     void load(ProgressIndicator* progressIndicator);

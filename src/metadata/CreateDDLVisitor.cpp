@@ -118,7 +118,8 @@ wxString CreateDDLVisitor::getSuffixSql() const
 
 void CreateDDLVisitor::visitCollation(Collation& collation)
 {
-    preSqlM += "CREATE " + collation.getName_() + " \n" + collation.getSource() + "; \n";
+    preSqlM += "CREATE COLLATION " + collation.getName_() + " \n" +
+        collation.getSource() + "\n; \n";
     postSqlM << getCommentOn(collation);
     sqlM = preSqlM + postSqlM;
 
@@ -210,7 +211,7 @@ void CreateDDLVisitor::visitDatabase(Database& d)
     {
 
         preSqlM << "/********************* COLLATES **********************/\n\n";
-        iterateit<UserCollationsPtr, Collation>(this, d.getUserCollations(), progressIndicatorM);
+        iterateit<CollationsPtr, Collation>(this, d.getCollations(), progressIndicatorM);
 
         preSqlM << "/********************* ROLES **********************/\n\n";
         iterateit<RolesPtr, Role>(this, d.getRoles(), progressIndicatorM);
@@ -877,6 +878,6 @@ void CreateDDLVisitor::visitView(View& v)
     sqlM += preSqlM + "\n" + postSqlM + grantSqlM;
 }
 
-void CreateDDLVisitor::visitCharacterSet(CharacterSet& characterset)
+void CreateDDLVisitor::visitCharacterSet(CharacterSet&  /*characterset*/)
 {
 }

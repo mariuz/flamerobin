@@ -69,8 +69,8 @@ typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
     ntUser, ntUsers,
     ntSystem, 
     ntCharacterSet, ntChartersets,
-    ntCollation, ntCollations, 
-    ntUserColletion, ntUserCollations,
+    ntSysCollation, ntSysCollations, 
+    ntCollation, ntCollations,
     ntLastType
 } NodeType;
 

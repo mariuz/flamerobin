@@ -52,7 +52,7 @@ public:
 
 
     virtual void visitCharacterSets(CharacterSets& characterSets);
-    virtual void visitUserCollations(UserCollations& collations);
+    virtual void visitCollations(Collations& collations);
     virtual void visitDBTriggers(DBTriggers& triggers);
     virtual void visitDDLTriggers(DDLTriggers& triggers);
     virtual void visitDMLTriggers(DMLTriggers& triggers);

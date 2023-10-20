@@ -39,8 +39,8 @@ typedef std::shared_ptr<Collation> CollationPtr;
 typedef std::vector<CollationPtr> CollationPtrs;
 class Collations;
 typedef std::shared_ptr<Collations> CollationsPtr;
-class UserCollations;
-typedef std::shared_ptr<UserCollations> UserCollationsPtr;
+class SysCollations;
+typedef std::shared_ptr<SysCollations> SysCollationsPtr;
 
 
 class Column;
@@ -81,6 +81,8 @@ typedef std::shared_ptr<Domain> DomainPtr;
 typedef std::vector<DomainPtr> DomainPtrs;
 class Domains;
 typedef std::shared_ptr<Domains> DomainsPtr;
+class SysDomains;
+typedef std::shared_ptr<SysDomains> SysDomainsPtr;
 
 class Exception;
 typedef std::shared_ptr<Exception> ExceptionPtr;
@@ -126,6 +128,8 @@ typedef std::shared_ptr<Package> PackagePtr;
 typedef std::vector<PackagePtr> PackagePtrs;
 class Packages;
 typedef std::shared_ptr<Packages> PackagesPtr;
+class SysPackages;
+typedef std::shared_ptr<SysPackages> SysPackagesPtr;
 
 class Parameter;
 typedef std::shared_ptr<Parameter> ParameterPtr;
@@ -146,6 +150,8 @@ typedef std::shared_ptr<Role> RolePtr;
 typedef std::vector<RolePtr> RolePtrs;
 class Roles;
 typedef std::shared_ptr<Roles> RolesPtr;
+class SysRoles;
+typedef std::shared_ptr<SysRoles> SysRolesPtr;
 
 class Root;
 typedef std::shared_ptr<Root> RootPtr;
@@ -154,15 +160,6 @@ class Server;
 typedef std::shared_ptr<Server> ServerPtr;
 typedef std::weak_ptr<Server> ServerWeakPtr;
 typedef std::vector<ServerPtr> ServerPtrs;
-
-class SysDomains;
-typedef std::shared_ptr<SysDomains> SysDomainsPtr;
-
-class SysPackages;
-typedef std::shared_ptr<SysPackages> SysPackagesPtr;
-
-class SysRoles;
-typedef std::shared_ptr<SysRoles> SysRolesPtr;
 
 class GTTable;
 typedef std::shared_ptr<GTTable> GTTablePtr;

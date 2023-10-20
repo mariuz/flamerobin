@@ -374,7 +374,7 @@ void MetadataItemCreateStatementVisitor::visitCharacterSets(CharacterSets& /*cha
     statementM = getCreateCharacterSetStatement();
 }
 
-void MetadataItemCreateStatementVisitor::visitUserCollations(UserCollations& collations)
+void MetadataItemCreateStatementVisitor::visitCollations(Collations& /*collations*/)
 {
     statementM = getCreateCollationStatment();
 

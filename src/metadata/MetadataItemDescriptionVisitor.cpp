@@ -117,7 +117,7 @@ void LoadDescriptionVisitor::loadDescription(MetadataItem* object,
     }
 }
 
-void LoadDescriptionVisitor::visitCharcterSet(CharacterSet& charterSet)
+void LoadDescriptionVisitor::visitCharcterSet(CharacterSet& /*charterSet*/)
 {
 }
 
@@ -276,7 +276,7 @@ void SaveDescriptionVisitor::saveDescription(MetadataItem* object,
     tr1->Commit();
 }
 
-void SaveDescriptionVisitor::visitCharacterSet(CharacterSet& charterSet)
+void SaveDescriptionVisitor::visitCharacterSet(CharacterSet& /*charterSet*/)
 {
 }
 

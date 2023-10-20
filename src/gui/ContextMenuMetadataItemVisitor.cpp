@@ -490,7 +490,7 @@ void MainObjectMenuMetadataItemVisitor::visitCharacterSet(CharacterSet& charset)
     addPropertiesItem();
 }
 
-void MainObjectMenuMetadataItemVisitor::visitCharacterSets(CharacterSets& charsets)
+void MainObjectMenuMetadataItemVisitor::visitCharacterSets(CharacterSets& /*charsets*/)
 {
     addRefreshItem();
 }
@@ -498,16 +498,17 @@ void MainObjectMenuMetadataItemVisitor::visitCharacterSets(CharacterSets& charse
 void MainObjectMenuMetadataItemVisitor::visitCollation(Collation& collation)
 {
     addAlterItem(collation);
+    addDropItem(collation);
     addSeparator();
     addPropertiesItem();
 }
 
-void MainObjectMenuMetadataItemVisitor::visitCollations(Collations& collations)
+void MainObjectMenuMetadataItemVisitor::visitSysCollations(SysCollations& /*collations*/)
 {
     addRefreshItem();
 }
 
-void MainObjectMenuMetadataItemVisitor::visitUserCollations(UserCollations& coolations)
+void MainObjectMenuMetadataItemVisitor::visitCollations(Collations& coolations)
 {
     addCreateItem();
     addSeparator();

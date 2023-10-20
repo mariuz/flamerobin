@@ -51,17 +51,17 @@ void MetadataItemVisitor::visitCharacterSets(CharacterSets&)
     defaultAction();
 }
 
-void MetadataItemVisitor::visitCollation(Collation& collation)
+void MetadataItemVisitor::visitCollation(Collation&)
 {
     defaultAction();
 }
 
-void MetadataItemVisitor::visitCollations(Collations& collations)
+void MetadataItemVisitor::visitSysCollations(SysCollations&)
 {
     defaultAction();
 }
 
-void MetadataItemVisitor::visitUserCollations(UserCollations& collations)
+void MetadataItemVisitor::visitCollations(Collations&)
 {
     defaultAction();
 }
@@ -122,12 +122,12 @@ void MetadataItemVisitor::visitUDFs(UDFs&)
     defaultAction();
 }
 
-void MetadataItemVisitor::visitUser(User& )
+void MetadataItemVisitor::visitUser(User&)
 {
 	defaultAction();
 }
 
-void MetadataItemVisitor::visitUsers(Users& )
+void MetadataItemVisitor::visitUsers(Users&)
 {
     defaultAction();
 }

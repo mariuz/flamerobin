@@ -184,32 +184,64 @@ const wxString Collation::getTypeName() const
 wxString Collation::getSource()
 {
     ensurePropertiesLoaded();
-    wxString sql  ="FOR " + getDatabase()->getCharsetById(characterSetIdM)->getName_() + " \n";
+    wxString sql  ="  FOR " + getDatabase()->getCharsetById(characterSetIdM)->getName_() + " \n";
     if (!getBaseCollectionName().IsEmpty())
-        sql =+ "FROM EXTERNAL ('" + getBaseCollectionName() + "') ";
+        sql += "  FROM EXTERNAL ('" + getBaseCollectionName() + "') ";
         
         
     if(getAttributes() & TEXTTYPE_ATTR_CASE_INSENSITIVE)
-        sql += ", \nPAD SPACE";
+        sql += "\n  PAD SPACE";
     if (getAttributes() & TEXTTYPE_ATTR_PAD_SPACE)
-        sql += ", \nCASE INSENSITIVE";
+        sql += "\n  CASE INSENSITIVE";
     if (getAttributes() & TEXTTYPE_ATTR_ACCENT_INSENSITIVE)
-        sql += ", \nACCENT INSENSITIVE";
+        sql += "\n  ACCENT INSENSITIVE";
     
     if (!getSpecificAttibutes().IsEmpty())
-        sql += ", \n'" + getSpecificAttibutes() + "'";
+        sql += "\n  '" + getSpecificAttibutes() + "'";
 
     return sql;
 }
 
 wxString Collation::getAlterSql()
 {
-    return "ALTER COLLATION " + getName_() + "\n" + getSource() + ";\n";
+    return getDropSqlStatement()+"\n\n "
+        
+        "CREATE COLLATION " + getName_() + "\n" + getSource() + ";\n";
+}
+
+void SysCollations::loadChildren()
+{
+
+    load(0);
+}
+
+SysCollations::SysCollations(DatabasePtr database)
+    : MetadataCollection<Collation>(ntCollations, database, _("SysCollation"))
+{
+}
+
+void SysCollations::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitSysCollations(*this);
+}
+
+void SysCollations::load(ProgressIndicator* progressIndicator)
+{
+    DatabasePtr db = getDatabase();
+    wxString stmt(  " Select RDB$COLLATION_NAME "
+                    " from RDB$COLLATIONS  "
+                    " Order By RDB$COLLATION_NAME "
+    );
+    setItems(db->loadIdentifiers(stmt, progressIndicator));
+}
+
+const wxString SysCollations::getTypeName() const
+{
+    return  "SYSCOLLATION_COLLECTION";
 }
 
 void Collations::loadChildren()
 {
-
     load(0);
 }
 
@@ -226,36 +258,6 @@ void Collations::acceptVisitor(MetadataItemVisitor* visitor)
 void Collations::load(ProgressIndicator* progressIndicator)
 {
     DatabasePtr db = getDatabase();
-    wxString stmt(  " Select RDB$COLLATION_NAME "
-                    " from RDB$COLLATIONS  "
-                    " Order By RDB$COLLATION_NAME "
-    );
-    setItems(db->loadIdentifiers(stmt, progressIndicator));
-}
-
-const wxString Collations::getTypeName() const
-{
-    return  "COLLATION_COLLECTION";
-}
-
-void UserCollations::loadChildren()
-{
-    load(0);
-}
-
-UserCollations::UserCollations(DatabasePtr database)
-    : MetadataCollection<Collation>(ntUserCollations, database, _("Collation"))
-{
-}
-
-void UserCollations::acceptVisitor(MetadataItemVisitor* visitor)
-{
-    visitor->visitUserCollations(*this);
-}
-
-void UserCollations::load(ProgressIndicator* progressIndicator)
-{
-    DatabasePtr db = getDatabase();
     wxString stmt(" Select RDB$COLLATION_NAME "
         " from RDB$COLLATIONS  "
         " where RDB$SYSTEM_FLAG = 0 "
@@ -263,7 +265,7 @@ void UserCollations::load(ProgressIndicator* progressIndicator)
     setItems(db->loadIdentifiers(stmt, progressIndicator));
 }
 
-const wxString UserCollations::getTypeName() const
+const wxString Collations::getTypeName() const
 {
-    return  "USERCOLLATION_COLLECTION";
+    return  "COLLATION_COLLECTION";
 }

@@ -1666,7 +1666,7 @@ unsigned StringColumnDef::getBufferSize()
 }
 
 void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
-    const IBPP::Statement& statement, wxMBConv* converter, Database* db)
+    const IBPP::Statement& statement, wxMBConv* converter, Database* /*db*/)
 {
     wxASSERT(buffer);
     if (statement->ColumnType(col) == IBPP::sdBoolean) // Firebird v3

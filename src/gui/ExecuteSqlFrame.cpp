@@ -3782,3 +3782,34 @@ bool EditPackageBodyHandler::handleURI(URI& uri)
         p->getAlterBody());
     return true;
 }
+
+
+class EditCollationHandler : public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
+{
+public:
+    EditCollationHandler() {}
+    bool handleURI(URI& uri);
+private:
+    // singleton; registers itself on creation.
+    static const EditCollationHandler handlerInstance;
+};
+
+const EditCollationHandler EditCollationHandler::handlerInstance;
+
+bool EditCollationHandler::handleURI(URI& uri)
+{
+    if (uri.action != "edit_collation")
+        return false;
+
+    Collation* c = extractMetadataItemFromURI<Collation>(uri);
+    wxWindow* w = getParentWindow(uri);
+    if (!c || !w)
+        return true;
+
+    CreateDDLVisitor cdv;
+    c->acceptVisitor(&cdv);
+    showSql(w->GetParent(), _("Editing Collation"), c->getDatabase(),
+        c->getAlterSql());
+    return true;
+}

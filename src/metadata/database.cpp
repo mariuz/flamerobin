@@ -323,7 +323,7 @@ void Database::getIdentifiers(std::vector<Identifier>& temp)
     checkConnected(_("getIdentifiers"));
     std::transform(characterSetsM->begin(), characterSetsM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
-    std::transform(userCollationsM->begin(), userCollationsM->end(),
+    std::transform(collationsM->begin(), collationsM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(tablesM->begin(), tablesM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
@@ -568,7 +568,7 @@ MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
             return characterSetsM->findByName(name).get();
             break;
         case ntCollation:
-            return userCollationsM->findByName(name).get();
+            return collationsM->findByName(name).get();
             break;
         case ntTable:
             return tablesM->findByName(name).get();
@@ -680,7 +680,7 @@ void Database::dropObject(MetadataItem* object)
             characterSetsM->remove((CharacterSet*)object);
             break;
         case ntCollation:
-            userCollationsM->remove((Collation*)object);
+            collationsM->remove((Collation*)object);
             break;
         case ntTable:
             tablesM->remove((Table*)object);
@@ -752,7 +752,7 @@ void Database::addObject(NodeType type, const wxString& name)
             characterSetsM->insert(name);
             break;
         case ntCollation:
-            userCollationsM->insert(name);
+            collationsM->insert(name);
             break;
         case ntTable:
             tablesM->insert(name);
@@ -1151,8 +1151,8 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
 
             characterSetsM.reset(new CharacterSets(me));
             initializeLockCount(characterSetsM, lockCount);
-            userCollationsM.reset(new UserCollations(me));
-            initializeLockCount(userCollationsM, lockCount);
+            collationsM.reset(new Collations(me));
+            initializeLockCount(collationsM, lockCount);
             userDomainsM.reset(new Domains(me));
             initializeLockCount(userDomainsM, lockCount);
             sysDomainsM.reset(new SysDomains(me));
@@ -1353,7 +1353,7 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
     characterSetsM->load(progressIndicator);
 
     pih.init(_("User Collations"), collectionCount, 22);
-    userCollationsM->load(progressIndicator);
+    collationsM->load(progressIndicator);
 
 }
 
@@ -1460,7 +1460,7 @@ void Database::setDisconnected()
     sysIndicesM.reset();
     usrIndicesM.reset();
     characterSetsM.reset();
-    userCollationsM.reset();
+    collationsM.reset();
 
     if (config().get("HideDisconnectedDatabases", false))
         getServer()->notifyObservers();
@@ -1628,11 +1628,11 @@ CharacterSetsPtr Database::getCharacterSets()
     return characterSetsM;
 }
 
-UserCollationsPtr Database::getUserCollations()
+CollationsPtr Database::getCollations()
 {
-    wxASSERT(userCollationsM);
-    userCollationsM->ensureChildrenLoaded();
-    return userCollationsM;
+    wxASSERT(collationsM);
+    collationsM->ensureChildrenLoaded();
+    return collationsM;
 }
 
 DBTriggersPtr Database::getDBTriggers()
@@ -1663,7 +1663,8 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
     ensureChildrenLoaded();
     if (system && showSystemCharacterSet())
         temp.push_back(characterSetsM.get());
-    temp.push_back(userCollationsM.get());
+    
+    temp.push_back(collationsM.get());
 
     if (getInfo().getODSVersionIsHigherOrEqualTo(11.1)) 
         temp.push_back(DBTriggersM.get());
@@ -1737,7 +1738,7 @@ void Database::lockChildren()
         sysIndicesM->lockSubject();
         usrIndicesM->lockSubject();
         characterSetsM->lockSubject();
-        userCollationsM->lockSubject();
+        collationsM->lockSubject();
     }
 }
 
@@ -1769,7 +1770,7 @@ void Database::unlockChildren()
         sysDomainsM->unlockSubject();
         userDomainsM->unlockSubject();
         characterSetsM->unlockSubject();
-        userCollationsM->unlockSubject();
+        collationsM->unlockSubject();
     }
 }
 

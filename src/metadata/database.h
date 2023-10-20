@@ -186,7 +186,7 @@ private:
     DatabaseInfo databaseInfoM;
 
     CharacterSetsPtr characterSetsM;
-    UserCollationsPtr userCollationsM;
+    CollationsPtr collationsM;
     DBTriggersPtr DBTriggersM;
     DDLTriggersPtr DDLTriggersM;
     DMLTriggersPtr DMLtriggersM;
@@ -253,7 +253,7 @@ public:
     void getCollections(std::vector<MetadataItem *>& temp, bool system);
 
     CharacterSetsPtr getCharacterSets();
-    UserCollationsPtr getUserCollations();
+    CollationsPtr getCollations();
     DBTriggersPtr getDBTriggers();
     DDLTriggersPtr getDDLTriggers();
     DMLTriggersPtr getDMLTriggers();
