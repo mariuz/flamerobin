@@ -130,9 +130,6 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_LogTextControl.o \
 	flamerobin_PrintableHtmlWindow.o \
 	flamerobin_TextControl.o \
-	flamerobin_StyleGuideGTK.o \
-	flamerobin_StyleGuideMAC.o \
-	flamerobin_StyleGuideMSW.o \
 	flamerobin_CharacterSet.o \
 	flamerobin_Collation.o \
 	flamerobin_column.o \
@@ -482,12 +479,6 @@ flamerobin_PrintableHtmlWindow.o: ./src/gui/controls/PrintableHtmlWindow.cpp
 flamerobin_TextControl.o: ./src/gui/controls/TextControl.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-flamerobin_StyleGuideMAC.o: ./src/gui/mac/StyleGuideMAC.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
-
-flamerobin_StyleGuideMSW.o: ./src/gui/msw/StyleGuideMSW.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
-
 flamerobin_CharacterSet.o: ./src/metadata/CharacterSet.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
@@ -597,9 +588,6 @@ flamerobin_SqlTokenizer.o: ./src/sql/SqlTokenizer.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 flamerobin_StatementBuilder.o: ./src/sql/StatementBuilder.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
-
-flamerobin_StyleGuideGTK.o: ./src/gui/gtk/StyleGuideGTK.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 flamerobin_StyleGuideGTK.o: ./src/gui/gtk/StyleGuideGTK.cpp

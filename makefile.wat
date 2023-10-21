@@ -195,9 +195,6 @@ FLAMEROBIN_OBJECTS =  &
 	watu$(R_OPT)$(D_OPT)\flamerobin_LogTextControl.obj &
 	watu$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.obj &
 	watu$(R_OPT)$(D_OPT)\flamerobin_TextControl.obj &
-	watu$(R_OPT)$(D_OPT)\flamerobin_StyleGuideGTK.obj &
-	watu$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMAC.obj &
-	watu$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMSW.obj &
 	watu$(R_OPT)$(D_OPT)\flamerobin_CharacterSet.obj &
 	watu$(R_OPT)$(D_OPT)\flamerobin_Collation.obj &
 	watu$(R_OPT)$(D_OPT)\flamerobin_column.obj &
@@ -539,12 +536,6 @@ watu$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.obj :  .AUTODEPEND .\src\gui
 watu$(R_OPT)$(D_OPT)\flamerobin_TextControl.obj :  .AUTODEPEND .\src\gui\controls\TextControl.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(FLAMEROBIN_CXXFLAGS) $<
 
-watu$(R_OPT)$(D_OPT)\flamerobin_StyleGuideGTK.obj :  .AUTODEPEND .\src\gui\gtk\StyleGuideGTK.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(FLAMEROBIN_CXXFLAGS) $<
-
-watu$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMAC.obj :  .AUTODEPEND .\src\gui\mac\StyleGuideMAC.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(FLAMEROBIN_CXXFLAGS) $<
-
 watu$(R_OPT)$(D_OPT)\flamerobin_CharacterSet.obj :  .AUTODEPEND .\src\metadata\CharacterSet.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(FLAMEROBIN_CXXFLAGS) $<
 
@@ -654,9 +645,6 @@ watu$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.obj :  .AUTODEPEND .\src\sql\SqlTok
 	$(CXX) -bt=nt -zq -fo=$^@ $(FLAMEROBIN_CXXFLAGS) $<
 
 watu$(R_OPT)$(D_OPT)\flamerobin_StatementBuilder.obj :  .AUTODEPEND .\src\sql\StatementBuilder.cpp
-	$(CXX) -bt=nt -zq -fo=$^@ $(FLAMEROBIN_CXXFLAGS) $<
-
-watu$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMSW.obj :  .AUTODEPEND .\src\gui\msw\StyleGuideMSW.cpp
 	$(CXX) -bt=nt -zq -fo=$^@ $(FLAMEROBIN_CXXFLAGS) $<
 
 watu$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMSW.obj :  .AUTODEPEND .\src\gui\msw\StyleGuideMSW.cpp

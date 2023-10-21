@@ -1108,14 +1108,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\gui\gtk\StyleGuideGTK.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\src\gui\mac\StyleGuideMAC.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\gui\msw\StyleGuideMSW.cpp"
 				>
 			</File>

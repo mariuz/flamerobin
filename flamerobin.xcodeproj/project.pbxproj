@@ -331,117 +331,121 @@
 			isa = PBXBuildFile;
 			fileRef = 0000000000000000000000c5;
 		};
-		0000000000000000000000c9 = {
+		0000000000000000000000c8 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000c8;
+			fileRef = 0000000000000000000000c7;
+		};
+		0000000000000000000000ca = {
+			isa = PBXBuildFile;
+			fileRef = 0000000000000000000000c9;
 		};
 		0000000000000000000000cc = {
 			isa = PBXBuildFile;
 			fileRef = 0000000000000000000000cb;
 		};
-		0000000000000000000000cf = {
+		0000000000000000000000ce = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000ce;
+			fileRef = 0000000000000000000000cd;
 		};
-		0000000000000000000000d1 = {
+		0000000000000000000000d0 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000d0;
+			fileRef = 0000000000000000000000cf;
 		};
-		0000000000000000000000d3 = {
+		0000000000000000000000d2 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000d2;
+			fileRef = 0000000000000000000000d1;
 		};
-		0000000000000000000000d5 = {
+		0000000000000000000000d4 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000d4;
+			fileRef = 0000000000000000000000d3;
 		};
-		0000000000000000000000d7 = {
+		0000000000000000000000d6 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000d6;
+			fileRef = 0000000000000000000000d5;
 		};
-		0000000000000000000000d9 = {
+		0000000000000000000000d8 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000d8;
+			fileRef = 0000000000000000000000d7;
 		};
-		0000000000000000000000db = {
+		0000000000000000000000da = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000da;
+			fileRef = 0000000000000000000000d9;
 		};
-		0000000000000000000000dd = {
+		0000000000000000000000dc = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000dc;
+			fileRef = 0000000000000000000000db;
 		};
-		0000000000000000000000df = {
+		0000000000000000000000de = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000de;
+			fileRef = 0000000000000000000000dd;
 		};
-		0000000000000000000000e1 = {
+		0000000000000000000000e0 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000e0;
+			fileRef = 0000000000000000000000df;
 		};
-		0000000000000000000000e3 = {
+		0000000000000000000000e2 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000e2;
+			fileRef = 0000000000000000000000e1;
 		};
-		0000000000000000000000e5 = {
+		0000000000000000000000e4 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000e4;
+			fileRef = 0000000000000000000000e3;
 		};
-		0000000000000000000000e7 = {
+		0000000000000000000000e6 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000e6;
+			fileRef = 0000000000000000000000e5;
 		};
-		0000000000000000000000e9 = {
+		0000000000000000000000e8 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000e8;
+			fileRef = 0000000000000000000000e7;
 		};
-		0000000000000000000000eb = {
+		0000000000000000000000ea = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000ea;
+			fileRef = 0000000000000000000000e9;
 		};
-		0000000000000000000000ed = {
+		0000000000000000000000ec = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000ec;
+			fileRef = 0000000000000000000000eb;
 		};
-		0000000000000000000000ef = {
+		0000000000000000000000ee = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000ee;
+			fileRef = 0000000000000000000000ed;
 		};
-		0000000000000000000000f1 = {
+		0000000000000000000000f0 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000f0;
+			fileRef = 0000000000000000000000ef;
 		};
-		0000000000000000000000f3 = {
+		0000000000000000000000f2 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000f2;
+			fileRef = 0000000000000000000000f1;
 		};
-		0000000000000000000000f5 = {
+		0000000000000000000000f4 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000f4;
+			fileRef = 0000000000000000000000f3;
 		};
-		0000000000000000000000f7 = {
+		0000000000000000000000f6 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000f6;
+			fileRef = 0000000000000000000000f5;
 		};
-		0000000000000000000000f9 = {
+		0000000000000000000000f8 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000f8;
+			fileRef = 0000000000000000000000f7;
 		};
-		0000000000000000000000fb = {
+		0000000000000000000000fa = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000fa;
+			fileRef = 0000000000000000000000f9;
 		};
-		0000000000000000000000fd = {
+		0000000000000000000000fc = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000fc;
+			fileRef = 0000000000000000000000fb;
 		};
-		0000000000000000000000ff = {
+		0000000000000000000000fe = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000fe;
+			fileRef = 0000000000000000000000fd;
 		};
-		000000000000000000000101 = {
+		000000000000000000000100 = {
 			isa = PBXBuildFile;
-			fileRef = 000000000000000000000100;
+			fileRef = 0000000000000000000000ff;
 		};
 		000000000000000000000103 = {
 			isa = PBXBuildFile;
@@ -459,117 +463,101 @@
 			isa = PBXBuildFile;
 			fileRef = 000000000000000000000108;
 		};
-		00000000000000000000010c = {
+		00000000000000000000010b = {
 			isa = PBXBuildFile;
-			fileRef = 00000000000000000000010b;
+			fileRef = 00000000000000000000010a;
 		};
-		00000000000000000000010e = {
+		00000000000000000000010d = {
 			isa = PBXBuildFile;
-			fileRef = 00000000000000000000010d;
+			fileRef = 00000000000000000000010c;
 		};
-		000000000000000000000110 = {
+		00000000000000000000010f = {
 			isa = PBXBuildFile;
-			fileRef = 00000000000000000000010f;
+			fileRef = 00000000000000000000010e;
 		};
 		000000000000000000000112 = {
 			isa = PBXBuildFile;
 			fileRef = 000000000000000000000111;
 		};
-		000000000000000000000114 = {
+		00000000000000000000019b = {
 			isa = PBXBuildFile;
-			fileRef = 000000000000000000000113;
+			fileRef = 00000000000000000000019a;
 		};
-		000000000000000000000116 = {
+		00000000000000000000019d = {
 			isa = PBXBuildFile;
-			fileRef = 000000000000000000000115;
+			fileRef = 00000000000000000000019c;
 		};
-		000000000000000000000118 = {
+		00000000000000000000019f = {
 			isa = PBXBuildFile;
-			fileRef = 000000000000000000000117;
+			fileRef = 00000000000000000000019e;
 		};
-		000000000000000000000119 = {
+		0000000000000000000001a1 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000000c8;
+			fileRef = 0000000000000000000001a0;
 		};
-		0000000000000000000001a2 = {
+		0000000000000000000001a3 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000001a1;
+			fileRef = 0000000000000000000001a2;
 		};
-		0000000000000000000001a4 = {
+		0000000000000000000001a5 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000001a3;
+			fileRef = 0000000000000000000001a4;
 		};
-		0000000000000000000001a6 = {
+		0000000000000000000001a7 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000001a5;
+			fileRef = 0000000000000000000001a6;
 		};
-		0000000000000000000001a8 = {
+		0000000000000000000001a9 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000001a7;
+			fileRef = 0000000000000000000001a8;
 		};
-		0000000000000000000001aa = {
+		0000000000000000000001ab = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000001a9;
+			fileRef = 0000000000000000000001aa;
 		};
-		0000000000000000000001ac = {
+		0000000000000000000001ad = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000001ab;
+			fileRef = 0000000000000000000001ac;
 		};
-		0000000000000000000001ae = {
+		0000000000000000000001af = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000001ad;
+			fileRef = 0000000000000000000001ae;
 		};
-		0000000000000000000001b0 = {
+		0000000000000000000001b1 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000001af;
+			fileRef = 0000000000000000000001b0;
 		};
-		0000000000000000000001b2 = {
+		0000000000000000000001b3 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000001b1;
+			fileRef = 0000000000000000000001b2;
 		};
-		0000000000000000000001b4 = {
+		0000000000000000000001b5 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000001b3;
+			fileRef = 0000000000000000000001b4;
 		};
-		0000000000000000000001b6 = {
+		0000000000000000000001b7 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000001b5;
+			fileRef = 0000000000000000000001b6;
 		};
-		0000000000000000000001b8 = {
+		0000000000000000000001b9 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000001b7;
+			fileRef = 0000000000000000000001b8;
 		};
-		0000000000000000000001ba = {
+		0000000000000000000001bb = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000001b9;
+			fileRef = 0000000000000000000001ba;
 		};
-		0000000000000000000001bc = {
+		0000000000000000000001bd = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000001bb;
+			fileRef = 0000000000000000000001bc;
 		};
-		0000000000000000000001be = {
+		0000000000000000000001bf = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000001bd;
+			fileRef = 0000000000000000000001be;
 		};
-		0000000000000000000001c0 = {
+		0000000000000000000001c1 = {
 			isa = PBXBuildFile;
-			fileRef = 0000000000000000000001bf;
-		};
-		0000000000000000000001c2 = {
-			isa = PBXBuildFile;
-			fileRef = 0000000000000000000001c1;
-		};
-		0000000000000000000001c4 = {
-			isa = PBXBuildFile;
-			fileRef = 0000000000000000000001c3;
-		};
-		0000000000000000000001c6 = {
-			isa = PBXBuildFile;
-			fileRef = 0000000000000000000001c5;
-		};
-		0000000000000000000001c8 = {
-			isa = PBXBuildFile;
-			fileRef = 0000000000000000000001c7;
+			fileRef = 0000000000000000000001c0;
 		};
 /* End PBXBuildFile section */
 
@@ -588,14 +576,14 @@
 			remoteGlobalIDString = 00000000000000000000000d;
 			remoteInfo = ibpp;
 		};
-		000000000000000000000191 = {
+		00000000000000000000018a = {
 			isa = PBXContainerItemProxy;
 			containerPortal = "39ACD7DD-98A0-5E99-B44E-57A2569BE8B1";
 			proxyType = 1;
 			remoteGlobalIDString = 00000000000000000000000d;
 			remoteInfo = ibpp;
 		};
-		000000000000000000000193 = {
+		00000000000000000000018c = {
 			isa = PBXContainerItemProxy;
 			containerPortal = "39ACD7DD-98A0-5E99-B44E-57A2569BE8B1";
 			proxyType = 1;
@@ -1009,1042 +997,1032 @@
 		};
 		0000000000000000000000c5 = {
 			isa = PBXFileReference;
-			path = StyleGuideGTK.cpp;
-			sourceTree = "<group>";
-		};
-		0000000000000000000000c8 = {
-			isa = PBXFileReference;
-			path = StyleGuideMAC.cpp;
-			sourceTree = "<group>";
-		};
-		0000000000000000000000cb = {
-			isa = PBXFileReference;
-			path = StyleGuideMSW.cpp;
-			sourceTree = "<group>";
-		};
-		0000000000000000000000ce = {
-			isa = PBXFileReference;
 			path = CharacterSet.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000000d0 = {
+		0000000000000000000000c7 = {
 			isa = PBXFileReference;
 			path = Collation.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000000d2 = {
+		0000000000000000000000c9 = {
 			isa = PBXFileReference;
 			path = column.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000000d4 = {
+		0000000000000000000000cb = {
 			isa = PBXFileReference;
 			path = constraints.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000000d6 = {
+		0000000000000000000000cd = {
 			isa = PBXFileReference;
 			path = CreateDDLVisitor.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000000d8 = {
+		0000000000000000000000cf = {
 			isa = PBXFileReference;
 			path = database.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000000da = {
+		0000000000000000000000d1 = {
 			isa = PBXFileReference;
 			path = domain.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000000dc = {
+		0000000000000000000000d3 = {
 			isa = PBXFileReference;
 			path = exception.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000000de = {
+		0000000000000000000000d5 = {
 			isa = PBXFileReference;
 			path = function.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000000e0 = {
+		0000000000000000000000d7 = {
 			isa = PBXFileReference;
 			path = generator.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000000e2 = {
+		0000000000000000000000d9 = {
 			isa = PBXFileReference;
 			path = Index.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000000e4 = {
+		0000000000000000000000db = {
 			isa = PBXFileReference;
 			path = metadataitem.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000000e6 = {
+		0000000000000000000000dd = {
 			isa = PBXFileReference;
 			path = MetadataItemCreateStatementVisitor.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000000e8 = {
+		0000000000000000000000df = {
 			isa = PBXFileReference;
 			path = MetadataItemDescriptionVisitor.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000000ea = {
+		0000000000000000000000e1 = {
 			isa = PBXFileReference;
 			path = MetadataItemURIHandlerHelper.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000000ec = {
+		0000000000000000000000e3 = {
 			isa = PBXFileReference;
 			path = MetadataItemVisitor.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000000ee = {
+		0000000000000000000000e5 = {
 			isa = PBXFileReference;
 			path = MetadataTemplateCmdHandler.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000000f0 = {
+		0000000000000000000000e7 = {
 			isa = PBXFileReference;
 			path = MetadataTemplateManager.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000000f2 = {
+		0000000000000000000000e9 = {
 			isa = PBXFileReference;
 			path = package.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000000f4 = {
+		0000000000000000000000eb = {
 			isa = PBXFileReference;
 			path = parameter.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000000f6 = {
+		0000000000000000000000ed = {
 			isa = PBXFileReference;
 			path = privilege.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000000f8 = {
+		0000000000000000000000ef = {
 			isa = PBXFileReference;
 			path = procedure.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000000fa = {
+		0000000000000000000000f1 = {
 			isa = PBXFileReference;
 			path = relation.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000000fc = {
+		0000000000000000000000f3 = {
 			isa = PBXFileReference;
 			path = role.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000000fe = {
+		0000000000000000000000f5 = {
 			isa = PBXFileReference;
 			path = root.cpp;
 			sourceTree = "<group>";
 		};
-		000000000000000000000100 = {
+		0000000000000000000000f7 = {
 			isa = PBXFileReference;
 			path = server.cpp;
 			sourceTree = "<group>";
 		};
-		000000000000000000000102 = {
+		0000000000000000000000f9 = {
 			isa = PBXFileReference;
 			path = table.cpp;
 			sourceTree = "<group>";
 		};
-		000000000000000000000104 = {
+		0000000000000000000000fb = {
 			isa = PBXFileReference;
 			path = trigger.cpp;
 			sourceTree = "<group>";
 		};
-		000000000000000000000106 = {
+		0000000000000000000000fd = {
 			isa = PBXFileReference;
 			path = User.cpp;
 			sourceTree = "<group>";
 		};
-		000000000000000000000108 = {
+		0000000000000000000000ff = {
 			isa = PBXFileReference;
 			path = view.cpp;
 			sourceTree = "<group>";
 		};
-		00000000000000000000010b = {
+		000000000000000000000102 = {
 			isa = PBXFileReference;
 			path = Identifier.cpp;
 			sourceTree = "<group>";
 		};
-		00000000000000000000010d = {
+		000000000000000000000104 = {
 			isa = PBXFileReference;
 			path = IncompleteStatement.cpp;
 			sourceTree = "<group>";
 		};
-		00000000000000000000010f = {
+		000000000000000000000106 = {
 			isa = PBXFileReference;
 			path = MultiStatement.cpp;
 			sourceTree = "<group>";
 		};
-		000000000000000000000111 = {
+		000000000000000000000108 = {
 			isa = PBXFileReference;
 			path = SelectStatement.cpp;
 			sourceTree = "<group>";
 		};
-		000000000000000000000113 = {
+		00000000000000000000010a = {
 			isa = PBXFileReference;
 			path = SqlStatement.cpp;
 			sourceTree = "<group>";
 		};
-		000000000000000000000115 = {
+		00000000000000000000010c = {
 			isa = PBXFileReference;
 			path = SqlTokenizer.cpp;
 			sourceTree = "<group>";
 		};
-		000000000000000000000117 = {
+		00000000000000000000010e = {
 			isa = PBXFileReference;
 			path = StatementBuilder.cpp;
 			sourceTree = "<group>";
 		};
-		00000000000000000000011a = {
+		000000000000000000000111 = {
+			isa = PBXFileReference;
+			path = StyleGuideMAC.cpp;
+			sourceTree = "<group>";
+		};
+		000000000000000000000113 = {
 			isa = PBXFileReference;
 			path = frutils.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000011b = {
+		000000000000000000000114 = {
 			isa = PBXFileReference;
 			path = frversion.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000011c = {
+		000000000000000000000115 = {
 			isa = PBXFileReference;
 			path = Isaac.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000011d = {
+		000000000000000000000116 = {
 			isa = PBXFileReference;
 			path = logger.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000011e = {
+		000000000000000000000117 = {
 			isa = PBXFileReference;
 			path = main.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000011f = {
+		000000000000000000000118 = {
 			isa = PBXFileReference;
 			path = MasterPassword.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000120 = {
+		000000000000000000000119 = {
 			isa = PBXFileReference;
 			path = revisioninfo.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000121 = {
+		00000000000000000000011a = {
 			isa = PBXFileReference;
 			path = statementHistory.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000122 = {
+		00000000000000000000011b = {
 			isa = PBXFileReference;
 			path = Config.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000123 = {
+		00000000000000000000011c = {
 			isa = PBXFileReference;
 			path = DatabaseConfig.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000124 = {
+		00000000000000000000011d = {
 			isa = PBXFileReference;
 			path = LocalSettings.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000125 = {
+		00000000000000000000011e = {
 			isa = PBXFileReference;
 			path = ArtProvider.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000126 = {
+		00000000000000000000011f = {
 			isa = PBXFileReference;
 			path = CodeTemplateProcessor.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000127 = {
+		000000000000000000000120 = {
 			isa = PBXFileReference;
 			path = FRDecimal.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000128 = {
+		000000000000000000000121 = {
 			isa = PBXFileReference;
 			path = FRError.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000129 = {
+		000000000000000000000122 = {
 			isa = PBXFileReference;
 			path = FRInt128.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000012a = {
+		000000000000000000000123 = {
 			isa = PBXFileReference;
 			path = ObjectWithHandle.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000012b = {
+		000000000000000000000124 = {
 			isa = PBXFileReference;
 			path = Observer.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000012c = {
+		000000000000000000000125 = {
 			isa = PBXFileReference;
 			path = ProcessableObject.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000012d = {
+		000000000000000000000126 = {
 			isa = PBXFileReference;
 			path = ProgressIndicator.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000012e = {
+		000000000000000000000127 = {
 			isa = PBXFileReference;
 			path = StringUtils.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000012f = {
+		000000000000000000000128 = {
 			isa = PBXFileReference;
 			path = Subject.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000130 = {
+		000000000000000000000129 = {
 			isa = PBXFileReference;
 			path = TemplateProcessor.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000131 = {
+		00000000000000000000012a = {
 			isa = PBXFileReference;
 			path = URIProcessor.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000132 = {
+		00000000000000000000012b = {
 			isa = PBXFileReference;
 			path = Visitor.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000133 = {
+		00000000000000000000012c = {
 			isa = PBXFileReference;
 			path = MetadataLoader.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000134 = {
+		00000000000000000000012d = {
 			isa = PBXFileReference;
 			path = AboutBox.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000135 = {
+		00000000000000000000012e = {
 			isa = PBXFileReference;
 			path = AdvancedMessageDialog.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000136 = {
+		00000000000000000000012f = {
 			isa = PBXFileReference;
 			path = AdvancedSearchFrame.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000137 = {
+		000000000000000000000130 = {
 			isa = PBXFileReference;
 			path = BackupFrame.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000138 = {
+		000000000000000000000131 = {
 			isa = PBXFileReference;
 			path = BackupRestoreBaseFrame.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000139 = {
+		000000000000000000000132 = {
 			isa = PBXFileReference;
 			path = BaseDialog.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000013a = {
+		000000000000000000000133 = {
 			isa = PBXFileReference;
 			path = BaseFrame.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000013b = {
+		000000000000000000000134 = {
 			isa = PBXFileReference;
 			path = CommandIds.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000013c = {
+		000000000000000000000135 = {
 			isa = PBXFileReference;
 			path = CommandManager.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000013d = {
+		000000000000000000000136 = {
 			isa = PBXFileReference;
 			path = ConfdefTemplateProcessor.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000013e = {
+		000000000000000000000137 = {
 			isa = PBXFileReference;
 			path = ContextMenuMetadataItemVisitor.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000013f = {
+		000000000000000000000138 = {
 			isa = PBXFileReference;
 			path = CreateIndexDialog.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000140 = {
+		000000000000000000000139 = {
 			isa = PBXFileReference;
 			path = DatabaseRegistrationDialog.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000141 = {
+		00000000000000000000013a = {
 			isa = PBXFileReference;
 			path = DataGeneratorFrame.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000142 = {
+		00000000000000000000013b = {
 			isa = PBXFileReference;
 			path = EditBlobDialog.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000143 = {
+		00000000000000000000013c = {
 			isa = PBXFileReference;
 			path = EventWatcherFrame.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000144 = {
+		00000000000000000000013d = {
 			isa = PBXFileReference;
 			path = ExecuteSql.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000145 = {
+		00000000000000000000013e = {
 			isa = PBXFileReference;
 			path = ExecuteSqlFrame.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000146 = {
+		00000000000000000000013f = {
 			isa = PBXFileReference;
 			path = FieldPropertiesDialog.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000147 = {
+		000000000000000000000140 = {
 			isa = PBXFileReference;
 			path = FindDialog.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000148 = {
+		000000000000000000000141 = {
 			isa = PBXFileReference;
 			path = FRLayoutConfig.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000149 = {
+		000000000000000000000142 = {
 			isa = PBXFileReference;
 			path = FRStyle.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000014a = {
+		000000000000000000000143 = {
 			isa = PBXFileReference;
 			path = GUIURIHandlerHelper.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000014b = {
+		000000000000000000000144 = {
 			isa = PBXFileReference;
 			path = HtmlHeaderMetadataItemVisitor.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000014c = {
+		000000000000000000000145 = {
 			isa = PBXFileReference;
 			path = HtmlTemplateProcessor.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000014d = {
+		000000000000000000000146 = {
 			isa = PBXFileReference;
 			path = InsertDialog.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000014e = {
+		000000000000000000000147 = {
 			isa = PBXFileReference;
 			path = InsertParametersDialog.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000014f = {
+		000000000000000000000148 = {
 			isa = PBXFileReference;
 			path = MainFrame.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000150 = {
+		000000000000000000000149 = {
 			isa = PBXFileReference;
 			path = MetadataItemPropertiesFrame.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000151 = {
+		00000000000000000000014a = {
 			isa = PBXFileReference;
 			path = MultilineEnterDialog.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000152 = {
+		00000000000000000000014b = {
 			isa = PBXFileReference;
 			path = PreferencesDialog.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000153 = {
+		00000000000000000000014c = {
 			isa = PBXFileReference;
 			path = PrivilegesDialog.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000154 = {
+		00000000000000000000014d = {
 			isa = PBXFileReference;
 			path = ProgressDialog.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000155 = {
+		00000000000000000000014e = {
 			isa = PBXFileReference;
 			path = ReorderFieldsDialog.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000156 = {
+		00000000000000000000014f = {
 			isa = PBXFileReference;
 			path = RestoreFrame.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000157 = {
+		000000000000000000000150 = {
 			isa = PBXFileReference;
 			path = ServerRegistrationDialog.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000158 = {
+		000000000000000000000151 = {
 			isa = PBXFileReference;
 			path = ServiceBaseFrame.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000159 = {
+		000000000000000000000152 = {
 			isa = PBXFileReference;
 			path = ShutdownFrame.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000015a = {
+		000000000000000000000153 = {
 			isa = PBXFileReference;
 			path = ShutdownStartupBaseFrame.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000015b = {
+		000000000000000000000154 = {
 			isa = PBXFileReference;
 			path = SimpleHtmlFrame.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000015c = {
+		000000000000000000000155 = {
 			isa = PBXFileReference;
 			path = StartupFrame.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000015d = {
+		000000000000000000000156 = {
 			isa = PBXFileReference;
 			path = StatementHistoryDialog.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000015e = {
+		000000000000000000000157 = {
 			isa = PBXFileReference;
 			path = StyleGuide.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000015f = {
+		000000000000000000000158 = {
 			isa = PBXFileReference;
 			path = UserDialog.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000160 = {
+		000000000000000000000159 = {
 			isa = PBXFileReference;
 			path = UsernamePasswordDialog.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000161 = {
+		00000000000000000000015a = {
 			isa = PBXFileReference;
 			path = ControlUtils.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000162 = {
+		00000000000000000000015b = {
 			isa = PBXFileReference;
 			path = DataGrid.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000163 = {
+		00000000000000000000015c = {
 			isa = PBXFileReference;
 			path = DataGridRowBuffer.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000164 = {
+		00000000000000000000015d = {
 			isa = PBXFileReference;
 			path = DataGridRows.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000165 = {
+		00000000000000000000015e = {
 			isa = PBXFileReference;
 			path = DataGridTable.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000166 = {
+		00000000000000000000015f = {
 			isa = PBXFileReference;
 			path = DBHTreeControl.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000167 = {
+		000000000000000000000160 = {
 			isa = PBXFileReference;
 			path = DndTextControls.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000168 = {
+		000000000000000000000161 = {
 			isa = PBXFileReference;
 			path = LogTextControl.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000169 = {
+		000000000000000000000162 = {
 			isa = PBXFileReference;
 			path = PrintableHtmlWindow.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000016a = {
+		000000000000000000000163 = {
 			isa = PBXFileReference;
 			path = TextControl.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000016b = {
+		000000000000000000000164 = {
 			isa = PBXFileReference;
 			path = CharacterSet.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000016c = {
+		000000000000000000000165 = {
 			isa = PBXFileReference;
 			path = Collation.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000016d = {
+		000000000000000000000166 = {
 			isa = PBXFileReference;
 			path = collection.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000016e = {
+		000000000000000000000167 = {
 			isa = PBXFileReference;
 			path = column.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000016f = {
+		000000000000000000000168 = {
 			isa = PBXFileReference;
 			path = constraints.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000170 = {
+		000000000000000000000169 = {
 			isa = PBXFileReference;
 			path = CreateDDLVisitor.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000171 = {
+		00000000000000000000016a = {
 			isa = PBXFileReference;
 			path = database.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000172 = {
+		00000000000000000000016b = {
 			isa = PBXFileReference;
 			path = domain.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000173 = {
+		00000000000000000000016c = {
 			isa = PBXFileReference;
 			path = exception.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000174 = {
+		00000000000000000000016d = {
 			isa = PBXFileReference;
 			path = function.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000175 = {
+		00000000000000000000016e = {
 			isa = PBXFileReference;
 			path = generator.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000176 = {
+		00000000000000000000016f = {
 			isa = PBXFileReference;
 			path = Index.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000177 = {
+		000000000000000000000170 = {
 			isa = PBXFileReference;
 			path = MetadataClasses.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000178 = {
+		000000000000000000000171 = {
 			isa = PBXFileReference;
 			path = metadataitem.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000179 = {
+		000000000000000000000172 = {
 			isa = PBXFileReference;
 			path = MetadataItemCreateStatementVisitor.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000017a = {
+		000000000000000000000173 = {
 			isa = PBXFileReference;
 			path = MetadataItemDescriptionVisitor.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000017b = {
+		000000000000000000000174 = {
 			isa = PBXFileReference;
 			path = MetadataItemURIHandlerHelper.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000017c = {
+		000000000000000000000175 = {
 			isa = PBXFileReference;
 			path = MetadataItemVisitor.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000017d = {
+		000000000000000000000176 = {
 			isa = PBXFileReference;
 			path = MetadataTemplateManager.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000017e = {
+		000000000000000000000177 = {
 			isa = PBXFileReference;
 			path = package.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000017f = {
+		000000000000000000000178 = {
 			isa = PBXFileReference;
 			path = parameter.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000180 = {
+		000000000000000000000179 = {
 			isa = PBXFileReference;
 			path = privilege.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000181 = {
+		00000000000000000000017a = {
 			isa = PBXFileReference;
 			path = procedure.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000182 = {
+		00000000000000000000017b = {
 			isa = PBXFileReference;
 			path = relation.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000183 = {
+		00000000000000000000017c = {
 			isa = PBXFileReference;
 			path = role.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000184 = {
+		00000000000000000000017d = {
 			isa = PBXFileReference;
 			path = root.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000185 = {
+		00000000000000000000017e = {
 			isa = PBXFileReference;
 			path = server.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000186 = {
+		00000000000000000000017f = {
 			isa = PBXFileReference;
 			path = table.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000187 = {
+		000000000000000000000180 = {
 			isa = PBXFileReference;
 			path = trigger.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000188 = {
+		000000000000000000000181 = {
 			isa = PBXFileReference;
 			path = User.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000189 = {
+		000000000000000000000182 = {
 			isa = PBXFileReference;
 			path = view.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000018a = {
+		000000000000000000000183 = {
 			isa = PBXFileReference;
 			path = Identifier.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000018b = {
+		000000000000000000000184 = {
 			isa = PBXFileReference;
 			path = IncompleteStatement.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000018c = {
+		000000000000000000000185 = {
 			isa = PBXFileReference;
 			path = MultiStatement.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000018d = {
+		000000000000000000000186 = {
 			isa = PBXFileReference;
 			path = SelectStatement.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000018e = {
+		000000000000000000000187 = {
 			isa = PBXFileReference;
 			path = SqlStatement.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000018f = {
+		000000000000000000000188 = {
 			isa = PBXFileReference;
 			path = SqlTokenizer.h;
 			sourceTree = "<group>";
 		};
-		000000000000000000000190 = {
+		000000000000000000000189 = {
 			isa = PBXFileReference;
 			path = StatementBuilder.h;
 			sourceTree = "<group>";
 		};
-		00000000000000000000019e = {
+		000000000000000000000197 = {
 			isa = PBXFileReference;
 			includeInIndex = 0;
 			lastKnownFileType = archive.ar;
 			path = ibpp;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		0000000000000000000001a1 = {
+		00000000000000000000019a = {
 			isa = PBXFileReference;
 			path = _dpb.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001a3 = {
+		00000000000000000000019c = {
 			isa = PBXFileReference;
 			path = _ibpp.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001a5 = {
+		00000000000000000000019e = {
 			isa = PBXFileReference;
 			path = _ibs.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001a7 = {
+		0000000000000000000001a0 = {
 			isa = PBXFileReference;
 			path = _rb.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001a9 = {
+		0000000000000000000001a2 = {
 			isa = PBXFileReference;
 			path = _spb.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001ab = {
+		0000000000000000000001a4 = {
 			isa = PBXFileReference;
 			path = _tpb.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001ad = {
+		0000000000000000000001a6 = {
 			isa = PBXFileReference;
 			path = array.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001af = {
+		0000000000000000000001a8 = {
 			isa = PBXFileReference;
 			path = blob.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001b1 = {
+		0000000000000000000001aa = {
 			isa = PBXFileReference;
 			path = database.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001b3 = {
+		0000000000000000000001ac = {
 			isa = PBXFileReference;
 			path = date.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001b5 = {
+		0000000000000000000001ae = {
 			isa = PBXFileReference;
 			path = dbkey.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001b7 = {
+		0000000000000000000001b0 = {
 			isa = PBXFileReference;
 			path = events.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001b9 = {
+		0000000000000000000001b2 = {
 			isa = PBXFileReference;
 			path = exception.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001bb = {
+		0000000000000000000001b4 = {
 			isa = PBXFileReference;
 			path = ibint128.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001bd = {
+		0000000000000000000001b6 = {
 			isa = PBXFileReference;
 			path = row.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001bf = {
+		0000000000000000000001b8 = {
 			isa = PBXFileReference;
 			path = service.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001c1 = {
+		0000000000000000000001ba = {
 			isa = PBXFileReference;
 			path = statement.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001c3 = {
+		0000000000000000000001bc = {
 			isa = PBXFileReference;
 			path = time.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001c5 = {
+		0000000000000000000001be = {
 			isa = PBXFileReference;
 			path = transaction.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001c7 = {
+		0000000000000000000001c0 = {
 			isa = PBXFileReference;
 			path = user.cpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001ca = {
+		0000000000000000000001c3 = {
 			isa = PBXFileReference;
 			path = constants.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001cc = {
+		0000000000000000000001c5 = {
 			isa = PBXFileReference;
 			path = ibase.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001cd = {
+		0000000000000000000001c6 = {
 			isa = PBXFileReference;
 			path = iberror.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001cf = {
+		0000000000000000000001c8 = {
 			isa = PBXFileReference;
 			path = blr.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001d0 = {
+		0000000000000000000001c9 = {
 			isa = PBXFileReference;
 			path = consts_pub.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001d1 = {
+		0000000000000000000001ca = {
 			isa = PBXFileReference;
 			path = dsc_pub.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001d2 = {
+		0000000000000000000001cb = {
 			isa = PBXFileReference;
 			path = inf_pub.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001d3 = {
+		0000000000000000000001cc = {
 			isa = PBXFileReference;
 			path = msg_helper.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001d4 = {
+		0000000000000000000001cd = {
 			isa = PBXFileReference;
 			path = sqlda_pub.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001d5 = {
+		0000000000000000000001ce = {
 			isa = PBXFileReference;
 			path = types_pub.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001d7 = {
+		0000000000000000000001d0 = {
 			isa = PBXFileReference;
 			path = all.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001d8 = {
+		0000000000000000000001d1 = {
 			isa = PBXFileReference;
 			path = dsql.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001d9 = {
+		0000000000000000000001d2 = {
 			isa = PBXFileReference;
 			path = dyn.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001da = {
+		0000000000000000000001d3 = {
 			isa = PBXFileReference;
 			path = fbsvcmgr.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001db = {
+		0000000000000000000001d4 = {
 			isa = PBXFileReference;
 			path = fbtracemgr.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001dc = {
+		0000000000000000000001d5 = {
 			isa = PBXFileReference;
 			path = gbak.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001dd = {
+		0000000000000000000001d6 = {
 			isa = PBXFileReference;
 			path = gfix.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001de = {
+		0000000000000000000001d7 = {
 			isa = PBXFileReference;
 			path = gsec.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001df = {
+		0000000000000000000001d8 = {
 			isa = PBXFileReference;
 			path = gstat.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001e0 = {
+		0000000000000000000001d9 = {
 			isa = PBXFileReference;
 			path = isql.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001e1 = {
+		0000000000000000000001da = {
 			isa = PBXFileReference;
 			path = jrd.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001e2 = {
+		0000000000000000000001db = {
 			isa = PBXFileReference;
 			path = jrd_bugchk.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001e3 = {
+		0000000000000000000001dc = {
 			isa = PBXFileReference;
 			path = nbackup.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001e4 = {
+		0000000000000000000001dd = {
 			isa = PBXFileReference;
 			path = sqlerr.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001e5 = {
+		0000000000000000000001de = {
 			isa = PBXFileReference;
 			path = sqlwarn.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001e6 = {
+		0000000000000000000001df = {
 			isa = PBXFileReference;
 			path = utl.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001e7 = {
+		0000000000000000000001e0 = {
 			isa = PBXFileReference;
 			path = _ibpp.h;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001e8 = {
+		0000000000000000000001e1 = {
 			isa = PBXFileReference;
 			path = ibpp.h;
 			sourceTree = "<group>";
@@ -2068,15 +2046,13 @@
 				000000000000000000000054,
 				0000000000000000000000af,
 				0000000000000000000000c4,
-				0000000000000000000000c7,
-				0000000000000000000000ca,
-				0000000000000000000000cd,
-				00000000000000000000010a,
-				0000000000000000000001a0,
-				0000000000000000000001c9,
-				0000000000000000000001cb,
-				0000000000000000000001ce,
-				0000000000000000000001d6,
+				000000000000000000000101,
+				000000000000000000000110,
+				000000000000000000000199,
+				0000000000000000000001c2,
+				0000000000000000000001c4,
+				0000000000000000000001c7,
+				0000000000000000000001cf,
 			);
 			name = flamerobin;
 			sourceTree = "<group>";
@@ -2085,7 +2061,7 @@
 			isa = PBXGroup;
 			children = (
 				00000000000000000000001c,
-				00000000000000000000019e,
+				000000000000000000000197,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2102,14 +2078,14 @@
 				00000000000000000000002b,
 				00000000000000000000002d,
 				00000000000000000000002f,
+				000000000000000000000113,
+				000000000000000000000114,
+				000000000000000000000115,
+				000000000000000000000116,
+				000000000000000000000117,
+				000000000000000000000118,
+				000000000000000000000119,
 				00000000000000000000011a,
-				00000000000000000000011b,
-				00000000000000000000011c,
-				00000000000000000000011d,
-				00000000000000000000011e,
-				00000000000000000000011f,
-				000000000000000000000120,
-				000000000000000000000121,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -2120,9 +2096,9 @@
 				000000000000000000000032,
 				000000000000000000000034,
 				000000000000000000000036,
-				000000000000000000000122,
-				000000000000000000000123,
-				000000000000000000000124,
+				00000000000000000000011b,
+				00000000000000000000011c,
+				00000000000000000000011d,
 			);
 			path = src/config;
 			sourceTree = "<group>";
@@ -2142,6 +2118,13 @@
 				00000000000000000000004b,
 				00000000000000000000004d,
 				00000000000000000000004f,
+				00000000000000000000011e,
+				00000000000000000000011f,
+				000000000000000000000120,
+				000000000000000000000121,
+				000000000000000000000122,
+				000000000000000000000123,
+				000000000000000000000124,
 				000000000000000000000125,
 				000000000000000000000126,
 				000000000000000000000127,
@@ -2149,13 +2132,6 @@
 				000000000000000000000129,
 				00000000000000000000012a,
 				00000000000000000000012b,
-				00000000000000000000012c,
-				00000000000000000000012d,
-				00000000000000000000012e,
-				00000000000000000000012f,
-				000000000000000000000130,
-				000000000000000000000131,
-				000000000000000000000132,
 			);
 			path = src/core;
 			sourceTree = "<group>";
@@ -2164,7 +2140,7 @@
 			isa = PBXGroup;
 			children = (
 				000000000000000000000052,
-				000000000000000000000133,
+				00000000000000000000012c,
 			);
 			path = src/engine;
 			sourceTree = "<group>";
@@ -2217,6 +2193,13 @@
 				0000000000000000000000a9,
 				0000000000000000000000ab,
 				0000000000000000000000ad,
+				00000000000000000000012d,
+				00000000000000000000012e,
+				00000000000000000000012f,
+				000000000000000000000130,
+				000000000000000000000131,
+				000000000000000000000132,
+				000000000000000000000133,
 				000000000000000000000134,
 				000000000000000000000135,
 				000000000000000000000136,
@@ -2255,13 +2238,6 @@
 				000000000000000000000157,
 				000000000000000000000158,
 				000000000000000000000159,
-				00000000000000000000015a,
-				00000000000000000000015b,
-				00000000000000000000015c,
-				00000000000000000000015d,
-				00000000000000000000015e,
-				00000000000000000000015f,
-				000000000000000000000160,
 			);
 			path = src/gui;
 			sourceTree = "<group>";
@@ -2279,16 +2255,16 @@
 				0000000000000000000000be,
 				0000000000000000000000c0,
 				0000000000000000000000c2,
+				00000000000000000000015a,
+				00000000000000000000015b,
+				00000000000000000000015c,
+				00000000000000000000015d,
+				00000000000000000000015e,
+				00000000000000000000015f,
+				000000000000000000000160,
 				000000000000000000000161,
 				000000000000000000000162,
 				000000000000000000000163,
-				000000000000000000000164,
-				000000000000000000000165,
-				000000000000000000000166,
-				000000000000000000000167,
-				000000000000000000000168,
-				000000000000000000000169,
-				00000000000000000000016a,
 			);
 			path = src/gui/controls;
 			sourceTree = "<group>";
@@ -2297,59 +2273,42 @@
 			isa = PBXGroup;
 			children = (
 				0000000000000000000000c5,
-			);
-			path = src/gui/gtk;
-			sourceTree = "<group>";
-		};
-		0000000000000000000000c7 = {
-			isa = PBXGroup;
-			children = (
-				0000000000000000000000c8,
-			);
-			path = src/gui/mac;
-			sourceTree = "<group>";
-		};
-		0000000000000000000000ca = {
-			isa = PBXGroup;
-			children = (
+				0000000000000000000000c7,
+				0000000000000000000000c9,
 				0000000000000000000000cb,
-			);
-			path = src/gui/msw;
-			sourceTree = "<group>";
-		};
-		0000000000000000000000cd = {
-			isa = PBXGroup;
-			children = (
-				0000000000000000000000ce,
-				0000000000000000000000d0,
-				0000000000000000000000d2,
-				0000000000000000000000d4,
-				0000000000000000000000d6,
-				0000000000000000000000d8,
-				0000000000000000000000da,
-				0000000000000000000000dc,
-				0000000000000000000000de,
-				0000000000000000000000e0,
-				0000000000000000000000e2,
-				0000000000000000000000e4,
-				0000000000000000000000e6,
-				0000000000000000000000e8,
-				0000000000000000000000ea,
-				0000000000000000000000ec,
-				0000000000000000000000ee,
-				0000000000000000000000f0,
-				0000000000000000000000f2,
-				0000000000000000000000f4,
-				0000000000000000000000f6,
-				0000000000000000000000f8,
-				0000000000000000000000fa,
-				0000000000000000000000fc,
-				0000000000000000000000fe,
-				000000000000000000000100,
-				000000000000000000000102,
-				000000000000000000000104,
-				000000000000000000000106,
-				000000000000000000000108,
+				0000000000000000000000cd,
+				0000000000000000000000cf,
+				0000000000000000000000d1,
+				0000000000000000000000d3,
+				0000000000000000000000d5,
+				0000000000000000000000d7,
+				0000000000000000000000d9,
+				0000000000000000000000db,
+				0000000000000000000000dd,
+				0000000000000000000000df,
+				0000000000000000000000e1,
+				0000000000000000000000e3,
+				0000000000000000000000e5,
+				0000000000000000000000e7,
+				0000000000000000000000e9,
+				0000000000000000000000eb,
+				0000000000000000000000ed,
+				0000000000000000000000ef,
+				0000000000000000000000f1,
+				0000000000000000000000f3,
+				0000000000000000000000f5,
+				0000000000000000000000f7,
+				0000000000000000000000f9,
+				0000000000000000000000fb,
+				0000000000000000000000fd,
+				0000000000000000000000ff,
+				000000000000000000000164,
+				000000000000000000000165,
+				000000000000000000000166,
+				000000000000000000000167,
+				000000000000000000000168,
+				000000000000000000000169,
+				00000000000000000000016a,
 				00000000000000000000016b,
 				00000000000000000000016c,
 				00000000000000000000016d,
@@ -2374,6 +2333,20 @@
 				000000000000000000000180,
 				000000000000000000000181,
 				000000000000000000000182,
+			);
+			path = src/metadata;
+			sourceTree = "<group>";
+		};
+		000000000000000000000101 = {
+			isa = PBXGroup;
+			children = (
+				000000000000000000000102,
+				000000000000000000000104,
+				000000000000000000000106,
+				000000000000000000000108,
+				00000000000000000000010a,
+				00000000000000000000010c,
+				00000000000000000000010e,
 				000000000000000000000183,
 				000000000000000000000184,
 				000000000000000000000185,
@@ -2382,93 +2355,87 @@
 				000000000000000000000188,
 				000000000000000000000189,
 			);
-			path = src/metadata;
-			sourceTree = "<group>";
-		};
-		00000000000000000000010a = {
-			isa = PBXGroup;
-			children = (
-				00000000000000000000010b,
-				00000000000000000000010d,
-				00000000000000000000010f,
-				000000000000000000000111,
-				000000000000000000000113,
-				000000000000000000000115,
-				000000000000000000000117,
-				00000000000000000000018a,
-				00000000000000000000018b,
-				00000000000000000000018c,
-				00000000000000000000018d,
-				00000000000000000000018e,
-				00000000000000000000018f,
-				000000000000000000000190,
-			);
 			path = src/sql;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001a0 = {
+		000000000000000000000110 = {
 			isa = PBXGroup;
 			children = (
-				0000000000000000000001a1,
-				0000000000000000000001a3,
-				0000000000000000000001a5,
-				0000000000000000000001a7,
-				0000000000000000000001a9,
-				0000000000000000000001ab,
-				0000000000000000000001ad,
-				0000000000000000000001af,
-				0000000000000000000001b1,
-				0000000000000000000001b3,
-				0000000000000000000001b5,
-				0000000000000000000001b7,
-				0000000000000000000001b9,
-				0000000000000000000001bb,
-				0000000000000000000001bd,
-				0000000000000000000001bf,
-				0000000000000000000001c1,
-				0000000000000000000001c3,
-				0000000000000000000001c5,
-				0000000000000000000001c7,
-				0000000000000000000001e7,
-				0000000000000000000001e8,
+				000000000000000000000111,
+			);
+			path = src/gui/mac;
+			sourceTree = "<group>";
+		};
+		000000000000000000000199 = {
+			isa = PBXGroup;
+			children = (
+				00000000000000000000019a,
+				00000000000000000000019c,
+				00000000000000000000019e,
+				0000000000000000000001a0,
+				0000000000000000000001a2,
+				0000000000000000000001a4,
+				0000000000000000000001a6,
+				0000000000000000000001a8,
+				0000000000000000000001aa,
+				0000000000000000000001ac,
+				0000000000000000000001ae,
+				0000000000000000000001b0,
+				0000000000000000000001b2,
+				0000000000000000000001b4,
+				0000000000000000000001b6,
+				0000000000000000000001b8,
+				0000000000000000000001ba,
+				0000000000000000000001bc,
+				0000000000000000000001be,
+				0000000000000000000001c0,
+				0000000000000000000001e0,
+				0000000000000000000001e1,
 			);
 			path = src/ibpp;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001c9 = {
+		0000000000000000000001c2 = {
 			isa = PBXGroup;
 			children = (
-				0000000000000000000001ca,
+				0000000000000000000001c3,
 			);
 			path = src/firebird;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001cb = {
+		0000000000000000000001c4 = {
 			isa = PBXGroup;
 			children = (
-				0000000000000000000001cc,
-				0000000000000000000001cd,
+				0000000000000000000001c5,
+				0000000000000000000001c6,
 			);
 			path = src/firebird/include;
 			sourceTree = "<group>";
 		};
-		0000000000000000000001ce = {
+		0000000000000000000001c7 = {
 			isa = PBXGroup;
 			children = (
-				0000000000000000000001cf,
+				0000000000000000000001c8,
+				0000000000000000000001c9,
+				0000000000000000000001ca,
+				0000000000000000000001cb,
+				0000000000000000000001cc,
+				0000000000000000000001cd,
+				0000000000000000000001ce,
+			);
+			path = src/firebird/include/firebird/impl;
+			sourceTree = "<group>";
+		};
+		0000000000000000000001cf = {
+			isa = PBXGroup;
+			children = (
 				0000000000000000000001d0,
 				0000000000000000000001d1,
 				0000000000000000000001d2,
 				0000000000000000000001d3,
 				0000000000000000000001d4,
 				0000000000000000000001d5,
-			);
-			path = src/firebird/include/firebird/impl;
-			sourceTree = "<group>";
-		};
-		0000000000000000000001d6 = {
-			isa = PBXGroup;
-			children = (
+				0000000000000000000001d6,
 				0000000000000000000001d7,
 				0000000000000000000001d8,
 				0000000000000000000001d9,
@@ -2478,13 +2445,6 @@
 				0000000000000000000001dd,
 				0000000000000000000001de,
 				0000000000000000000001df,
-				0000000000000000000001e0,
-				0000000000000000000001e1,
-				0000000000000000000001e2,
-				0000000000000000000001e3,
-				0000000000000000000001e4,
-				0000000000000000000001e5,
-				0000000000000000000001e6,
 			);
 			path = src/firebird/include/firebird/impl/msg;
 			sourceTree = "<group>";
@@ -2494,16 +2454,16 @@
 /* Begin PBXNativeTarget section */
 		00000000000000000000000d = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 00000000000000000000019d;
+			buildConfigurationList = 000000000000000000000196;
 			buildPhases = (
-				00000000000000000000019f,
+				000000000000000000000198,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			name = ibpp;
-			productReference = 00000000000000000000019e;
+			productReference = 000000000000000000000197;
 			productType = "com.apple.product-type.library.static";
 		};
 		000000000000000000000012 = {
@@ -2641,73 +2601,70 @@
 				0000000000000000000000c1,
 				0000000000000000000000c3,
 				0000000000000000000000c6,
-				0000000000000000000000c9,
+				0000000000000000000000c8,
+				0000000000000000000000ca,
 				0000000000000000000000cc,
-				0000000000000000000000cf,
-				0000000000000000000000d1,
-				0000000000000000000000d3,
-				0000000000000000000000d5,
-				0000000000000000000000d7,
-				0000000000000000000000d9,
-				0000000000000000000000db,
-				0000000000000000000000dd,
-				0000000000000000000000df,
-				0000000000000000000000e1,
-				0000000000000000000000e3,
-				0000000000000000000000e5,
-				0000000000000000000000e7,
-				0000000000000000000000e9,
-				0000000000000000000000eb,
-				0000000000000000000000ed,
-				0000000000000000000000ef,
-				0000000000000000000000f1,
-				0000000000000000000000f3,
-				0000000000000000000000f5,
-				0000000000000000000000f7,
-				0000000000000000000000f9,
-				0000000000000000000000fb,
-				0000000000000000000000fd,
-				0000000000000000000000ff,
-				000000000000000000000101,
+				0000000000000000000000ce,
+				0000000000000000000000d0,
+				0000000000000000000000d2,
+				0000000000000000000000d4,
+				0000000000000000000000d6,
+				0000000000000000000000d8,
+				0000000000000000000000da,
+				0000000000000000000000dc,
+				0000000000000000000000de,
+				0000000000000000000000e0,
+				0000000000000000000000e2,
+				0000000000000000000000e4,
+				0000000000000000000000e6,
+				0000000000000000000000e8,
+				0000000000000000000000ea,
+				0000000000000000000000ec,
+				0000000000000000000000ee,
+				0000000000000000000000f0,
+				0000000000000000000000f2,
+				0000000000000000000000f4,
+				0000000000000000000000f6,
+				0000000000000000000000f8,
+				0000000000000000000000fa,
+				0000000000000000000000fc,
+				0000000000000000000000fe,
+				000000000000000000000100,
 				000000000000000000000103,
 				000000000000000000000105,
 				000000000000000000000107,
 				000000000000000000000109,
-				00000000000000000000010c,
-				00000000000000000000010e,
-				000000000000000000000110,
+				00000000000000000000010b,
+				00000000000000000000010d,
+				00000000000000000000010f,
 				000000000000000000000112,
-				000000000000000000000114,
-				000000000000000000000116,
-				000000000000000000000118,
-				000000000000000000000119,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		00000000000000000000019f = {
+		000000000000000000000198 = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0000000000000000000001a2,
-				0000000000000000000001a4,
-				0000000000000000000001a6,
-				0000000000000000000001a8,
-				0000000000000000000001aa,
-				0000000000000000000001ac,
-				0000000000000000000001ae,
-				0000000000000000000001b0,
-				0000000000000000000001b2,
-				0000000000000000000001b4,
-				0000000000000000000001b6,
-				0000000000000000000001b8,
-				0000000000000000000001ba,
-				0000000000000000000001bc,
-				0000000000000000000001be,
-				0000000000000000000001c0,
-				0000000000000000000001c2,
-				0000000000000000000001c4,
-				0000000000000000000001c6,
-				0000000000000000000001c8,
+				00000000000000000000019b,
+				00000000000000000000019d,
+				00000000000000000000019f,
+				0000000000000000000001a1,
+				0000000000000000000001a3,
+				0000000000000000000001a5,
+				0000000000000000000001a7,
+				0000000000000000000001a9,
+				0000000000000000000001ab,
+				0000000000000000000001ad,
+				0000000000000000000001af,
+				0000000000000000000001b1,
+				0000000000000000000001b3,
+				0000000000000000000001b5,
+				0000000000000000000001b7,
+				0000000000000000000001b9,
+				0000000000000000000001bb,
+				0000000000000000000001bd,
+				0000000000000000000001bf,
+				0000000000000000000001c1,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2724,15 +2681,15 @@
 			target = 00000000000000000000000d;
 			targetProxy = 000000000000000000000010;
 		};
-		000000000000000000000192 = {
+		00000000000000000000018b = {
 			isa = PBXTargetDependency;
 			target = 00000000000000000000000d;
-			targetProxy = 000000000000000000000191;
+			targetProxy = 00000000000000000000018a;
 		};
-		000000000000000000000194 = {
+		00000000000000000000018d = {
 			isa = PBXTargetDependency;
 			target = 00000000000000000000000d;
-			targetProxy = 000000000000000000000193;
+			targetProxy = 00000000000000000000018c;
 		};
 /* End PBXTargetDependency section */
 
@@ -2913,7 +2870,7 @@
 			};
 			name = "DLL Debug Dynamic";
 		};
-		000000000000000000000195 = {
+		00000000000000000000018e = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_ENABLE_CPP_RTTI = YES;
@@ -2929,7 +2886,7 @@
 			};
 			name = "Release Static";
 		};
-		000000000000000000000196 = {
+		00000000000000000000018f = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_ENABLE_CPP_RTTI = YES;
@@ -2945,7 +2902,7 @@
 			};
 			name = "Debug Dynamic";
 		};
-		000000000000000000000197 = {
+		000000000000000000000190 = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_ENABLE_CPP_RTTI = YES;
@@ -2961,7 +2918,7 @@
 			};
 			name = "Release Dynamic";
 		};
-		000000000000000000000198 = {
+		000000000000000000000191 = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_ENABLE_CPP_RTTI = YES;
@@ -2977,7 +2934,7 @@
 			};
 			name = "DLL Debug Static";
 		};
-		000000000000000000000199 = {
+		000000000000000000000192 = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_ENABLE_CPP_RTTI = YES;
@@ -2993,7 +2950,7 @@
 			};
 			name = "Debug Static";
 		};
-		00000000000000000000019a = {
+		000000000000000000000193 = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_ENABLE_CPP_RTTI = YES;
@@ -3009,7 +2966,7 @@
 			};
 			name = "DLL Release Dynamic";
 		};
-		00000000000000000000019b = {
+		000000000000000000000194 = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_ENABLE_CPP_RTTI = YES;
@@ -3025,7 +2982,7 @@
 			};
 			name = "DLL Release Static";
 		};
-		00000000000000000000019c = {
+		000000000000000000000195 = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_ENABLE_CPP_RTTI = YES;
@@ -3074,17 +3031,17 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = "DLL Debug Dynamic";
 		};
-		00000000000000000000019d = {
+		000000000000000000000196 = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
+				00000000000000000000018e,
+				00000000000000000000018f,
+				000000000000000000000190,
+				000000000000000000000191,
+				000000000000000000000192,
+				000000000000000000000193,
+				000000000000000000000194,
 				000000000000000000000195,
-				000000000000000000000196,
-				000000000000000000000197,
-				000000000000000000000198,
-				000000000000000000000199,
-				00000000000000000000019a,
-				00000000000000000000019b,
-				00000000000000000000019c,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = "DLL Debug Dynamic";

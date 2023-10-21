@@ -580,42 +580,7 @@ SOURCE=.\src\gui\StyleGuide.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\gui\gtk\StyleGuideGTK.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\gui\mac\StyleGuideMAC.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\gui\msw\StyleGuideMSW.cpp
-
-!IF  "$(CFG)" == "flamerobin - Win32 DLL Release Static"
-
-
-!ELSEIF  "$(CFG)" == "flamerobin - Win32 DLL Release Dynamic"
-
-
-!ELSEIF  "$(CFG)" == "flamerobin - Win32 DLL Debug Static"
-
-
-!ELSEIF  "$(CFG)" == "flamerobin - Win32 DLL Debug Dynamic"
-
-
-!ELSEIF  "$(CFG)" == "flamerobin - Win32 Release Static"
-
-
-!ELSEIF  "$(CFG)" == "flamerobin - Win32 Release Dynamic"
-
-
-!ELSEIF  "$(CFG)" == "flamerobin - Win32 Debug Static"
-
-
-!ELSEIF  "$(CFG)" == "flamerobin - Win32 Debug Dynamic"
-
-
-!ENDIF
-
 # End Source File
 # Begin Source File
 

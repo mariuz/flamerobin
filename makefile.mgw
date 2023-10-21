@@ -129,9 +129,6 @@ FLAMEROBIN_OBJECTS =  \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_LogTextControl.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_TextControl.o \
-	gccu$(R_OPT)$(D_OPT)\flamerobin_StyleGuideGTK.o \
-	gccu$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMAC.o \
-	gccu$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMSW.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_CharacterSet.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_Collation.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_column.o \
@@ -518,12 +515,6 @@ gccu$(R_OPT)$(D_OPT)\flamerobin_PrintableHtmlWindow.o: ./src/gui/controls/Printa
 gccu$(R_OPT)$(D_OPT)\flamerobin_TextControl.o: ./src/gui/controls/TextControl.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
-gccu$(R_OPT)$(D_OPT)\flamerobin_StyleGuideGTK.o: ./src/gui/gtk/StyleGuideGTK.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
-
-gccu$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMAC.o: ./src/gui/mac/StyleGuideMAC.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
-
 gccu$(R_OPT)$(D_OPT)\flamerobin_CharacterSet.o: ./src/metadata/CharacterSet.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
@@ -633,9 +624,6 @@ gccu$(R_OPT)$(D_OPT)\flamerobin_SqlTokenizer.o: ./src/sql/SqlTokenizer.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gccu$(R_OPT)$(D_OPT)\flamerobin_StatementBuilder.o: ./src/sql/StatementBuilder.cpp
-	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
-
-gccu$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMSW.o: ./src/gui/msw/StyleGuideMSW.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gccu$(R_OPT)$(D_OPT)\flamerobin_StyleGuideMSW.o: ./src/gui/msw/StyleGuideMSW.cpp

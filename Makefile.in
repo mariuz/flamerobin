@@ -123,9 +123,6 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_LogTextControl.o \
 	flamerobin_PrintableHtmlWindow.o \
 	flamerobin_TextControl.o \
-	flamerobin_StyleGuideGTK.o \
-	flamerobin_StyleGuideMAC.o \
-	flamerobin_StyleGuideMSW.o \
 	flamerobin_CharacterSet.o \
 	flamerobin_Collation.o \
 	flamerobin_column.o \
@@ -688,20 +685,11 @@ flamerobin_StatementBuilder.o: $(srcdir)/src/sql/StatementBuilder.cpp $(FLAMEROB
 flamerobin_StyleGuideGTK.o: $(srcdir)/src/gui/gtk/StyleGuideGTK.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/gtk/StyleGuideGTK.cpp
 
-@COND_PLATFORM_UNIX_1@flamerobin_StyleGuideGTK.o: $(srcdir)/src/gui/gtk/StyleGuideGTK.cpp $(FLAMEROBIN_ODEP)
-@COND_PLATFORM_UNIX_1@	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/gtk/StyleGuideGTK.cpp
-
 flamerobin_StyleGuideMAC.o: $(srcdir)/src/gui/mac/StyleGuideMAC.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/mac/StyleGuideMAC.cpp
 
-@COND_PLATFORM_MACOSX_1@flamerobin_StyleGuideMAC.o: $(srcdir)/src/gui/mac/StyleGuideMAC.cpp $(FLAMEROBIN_ODEP)
-@COND_PLATFORM_MACOSX_1@	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/mac/StyleGuideMAC.cpp
-
 flamerobin_StyleGuideMSW.o: $(srcdir)/src/gui/msw/StyleGuideMSW.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/msw/StyleGuideMSW.cpp
-
-@COND_PLATFORM_WIN32_1@flamerobin_StyleGuideMSW.o: $(srcdir)/src/gui/msw/StyleGuideMSW.cpp $(FLAMEROBIN_ODEP)
-@COND_PLATFORM_WIN32_1@	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/msw/StyleGuideMSW.cpp
 
 flamerobin_flamerobin_rc.o: $(srcdir)/res/flamerobin.rc $(FLAMEROBIN_ODEP)
 	$(WINDRES) -i$< -o$@  --define HAVE_FRCONFIG_H $(____flamerobin_WXDEBUG_p_1) $(____flamerobin_DEBUGFLAG_p_1) $(__IBPPPLATFORMDEFINE_p_1) --include-dir . --include-dir $(srcdir)/src --include-dir $(srcdir)/src/ibpp --include-dir $(srcdir)/res @WX_INCLUDES@

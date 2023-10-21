@@ -140,9 +140,6 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/controls/LogTextControl.cpp
         ${SOURCEDIR}/gui/controls/PrintableHtmlWindow.cpp
         ${SOURCEDIR}/gui/controls/TextControl.cpp
-        ${SOURCEDIR}/gui/gtk/StyleGuideGTK.cpp
-        ${SOURCEDIR}/gui/mac/StyleGuideMAC.cpp
-        ${SOURCEDIR}/gui/msw/StyleGuideMSW.cpp
         ${SOURCEDIR}/metadata/CharacterSet.cpp
         ${SOURCEDIR}/metadata/Collation.cpp
         ${SOURCEDIR}/metadata/column.cpp

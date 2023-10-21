@@ -145,9 +145,6 @@ FLAMEROBIN_OBJECTS =  \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_LogTextControl.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_PrintableHtmlWindow.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_TextControl.obj \
-	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StyleGuideGTK.obj \
-	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StyleGuideMAC.obj \
-	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StyleGuideMSW.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_CharacterSet.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_Collation.obj \
 	vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_column.obj \
@@ -605,12 +602,6 @@ vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_PrintableHtmlWindow.obj: .\src\g
 vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_TextControl.obj: .\src\gui\controls\TextControl.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\controls\TextControl.cpp
 
-vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StyleGuideGTK.obj: .\src\gui\gtk\StyleGuideGTK.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\gtk\StyleGuideGTK.cpp
-
-vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StyleGuideMAC.obj: .\src\gui\mac\StyleGuideMAC.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\mac\StyleGuideMAC.cpp
-
 vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_CharacterSet.obj: .\src\metadata\CharacterSet.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\metadata\CharacterSet.cpp
 
@@ -721,9 +712,6 @@ vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_SqlTokenizer.obj: .\src\sql\SqlT
 
 vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StatementBuilder.obj: .\src\sql\StatementBuilder.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\sql\StatementBuilder.cpp
-
-vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StyleGuideMSW.obj: .\src\gui\msw\StyleGuideMSW.cpp
-	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\msw\StyleGuideMSW.cpp
 
 vcu$(R_OPT)$(D_OPT)$(DIR_SUFFIX_CPU)\flamerobin_StyleGuideMSW.obj: .\src\gui\msw\StyleGuideMSW.cpp
 	$(CXX) /c /nologo /TP /Fo$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\msw\StyleGuideMSW.cpp
