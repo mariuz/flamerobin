@@ -2049,7 +2049,7 @@ bool Database::showSystemCharacterSet()
     bool b;
     if (!DatabaseConfig(this, config()).getValue(SHOW_SYSCHARACTERSET, b))
         b = config().get(SHOW_SYSCHARACTERSET, true);
-
+    
     return b;
 }
 
