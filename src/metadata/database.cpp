@@ -1661,8 +1661,8 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
         return;
 
     ensureChildrenLoaded();
-    if (system && showSystemCharacterSet())
-        temp.push_back(characterSetsM.get());
+    //if (system && showSystemCharacterSet())
+    //    temp.push_back(characterSetsM.get());
     
     temp.push_back(collationsM.get());
 
