@@ -150,9 +150,11 @@ wxString Privilege::getSql(bool withGrantOption) const
     Identifier id(granteeM);
     ret += parentObjectM->getQuotedName() + " TO "
         + granteeTypeToString(granteeTypeM) + " " + id.getQuoted();
-
+    
     if (withGrantOption)
         ret += " WITH GRANT OPTION";
+    
+    ret += " GRANTED BY "+ (privilegeItemsM.begin())->second.grantor;
     ret += ";\n";
     return ret;
 }
@@ -173,6 +175,7 @@ wxString Privilege::getSql() const
             break;
         }
     }
+    ret += " GRANTED BY " + (privilegeItemsM.begin())->second.grantor;
     ret += ";\n";
     return ret;
 }

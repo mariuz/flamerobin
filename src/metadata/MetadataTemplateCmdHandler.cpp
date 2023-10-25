@@ -300,21 +300,21 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             Domain* dom = dynamic_cast<Domain*>(object);
             std::vector<Privilege>* p = 0;
             if (rel)
-                p = rel->getPrivileges();
+                p = rel->getPrivileges(false);
             if (proc)
-                p = proc->getPrivileges();
+                p = proc->getPrivileges(false);
             if (role)
-                p = role->getPrivileges();
+                p = role->getPrivileges(false);
             if (func)
-                p = func->getPrivileges();
+                p = func->getPrivileges(false);
             if (pack)
-                p = pack->getPrivileges();
+                p = pack->getPrivileges(false);
             if (gen)
-                p = gen->getPrivileges();
+                p = gen->getPrivileges(false);
             if (exc)
-                p = exc->getPrivileges();
+                p = exc->getPrivileges(false);
             if (dom)
-                p = dom->getPrivileges();
+                p = dom->getPrivileges(false);
             if (!p)
                 return;
             bool firstItem = true;

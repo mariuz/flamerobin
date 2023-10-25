@@ -66,7 +66,7 @@ public:
     wxString getAlterSqlTemplate() const;
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* v);
-    std::vector<Privilege>* getPrivileges();
+    std::vector<Privilege>* getPrivileges(bool splitPerGrantor=true);
 };
 
 class DomainCollectionBase: public MetadataCollection<Domain>

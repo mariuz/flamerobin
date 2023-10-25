@@ -51,7 +51,7 @@ public:
 
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
-    std::vector<Privilege>* getPrivileges();
+    std::vector<Privilege>* getPrivileges(bool splitPerGrantor=true);
 };
 
 class Exceptions : public MetadataCollection<Exception>

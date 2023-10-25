@@ -48,7 +48,7 @@ public:
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     wxString getSource();
-    std::vector<Privilege>* getPrivileges();
+    std::vector<Privilege>* getPrivileges(bool splitPerGrantor=true);
 };
 
 class Generators: public MetadataCollection<Generator>

@@ -83,7 +83,7 @@ public:
     ColumnPtr findColumn(const wxString& name) const;
 
     wxString getRebuildSql(const wxString& forColumn = "");
-    std::vector<Privilege>* getPrivileges();
+    std::vector<Privilege>* getPrivileges(bool splitPerGrantor=true);
     bool getChildren(std::vector<MetadataItem *>& temp);
     void getTriggers(std::vector<Trigger*>& list,
         Trigger::FiringTime time);
