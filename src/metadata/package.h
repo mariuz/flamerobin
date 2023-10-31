@@ -82,7 +82,7 @@ public:
     wxString getAlterHeader();
     wxString getAlterBody();
 
-    std::vector<Privilege>* getPrivileges();
+    std::vector<Privilege>* getPrivileges(bool splitPerGrantor=true);
 
     void checkDependentPackage();
 

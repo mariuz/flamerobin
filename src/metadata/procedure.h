@@ -61,7 +61,7 @@ public:
     wxString getDefinition();   // used for calltip in sql editor
     wxString getSqlSecurity();
 
-    std::vector<Privilege>* getPrivileges();
+    std::vector<Privilege>* getPrivileges(bool splitPerGrantor=true);
 
     void checkDependentProcedures();
 

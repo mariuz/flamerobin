@@ -314,7 +314,7 @@ wxString Function::getSqlSecurity()
 	}
 }
 
-std::vector<Privilege>* Function::getPrivileges()
+std::vector<Privilege>* Function::getPrivileges(bool splitPerGrantor)
 {
 	// load privileges from database and return the pointer to collection
 	DatabasePtr db = getDatabase();
@@ -334,11 +334,12 @@ std::vector<Privilege>* Function::getPrivileges()
 		"RDB$GRANT_OPTION, RDB$FIELD_NAME "
 		"from RDB$USER_PRIVILEGES "
 		"where RDB$RELATION_NAME = ? and rdb$object_type = 15 "
-		"order by rdb$user, rdb$user_type, rdb$privilege"
+		"order by rdb$user, rdb$user_type, rdb$grantor, rdb$privilege"
 	);
 	st1->Set(1, wx2std(getName_(), converter));
 	st1->Execute();
 	std::string lastuser;
+    std::string lastGrantor;
 	int lasttype = -1;
 	Privilege* pr = 0;
 	while (st1->Fetch())
@@ -352,13 +353,14 @@ std::vector<Privilege>* Function::getPrivileges()
 		if (!st1->IsNull(5))
 			st1->Get(5, grantoption);
 		st1->Get(6, field);
-		if (!pr || user != lastuser || usertype != lasttype)
+		if (!pr || user != lastuser || usertype != lasttype || (splitPerGrantor && grantor != lastGrantor))
 		{
 			Privilege p(this, std2wxIdentifier(user, converter),
 				usertype);
 			privilegesM.push_back(p);
 			pr = &privilegesM.back();
 			lastuser = user;
+            lastGrantor = grantor;
 			lasttype = usertype;
 		}
 		pr->addPrivilege(privilege[0], wxString(grantor.c_str(), *converter),

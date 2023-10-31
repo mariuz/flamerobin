@@ -130,7 +130,7 @@ void Exception::acceptVisitor(MetadataItemVisitor* visitor)
     visitor->visitException(*this);
 }
 
-std::vector<Privilege>* Exception::getPrivileges()
+std::vector<Privilege>* Exception::getPrivileges(bool splitPerGrantor)
 {
     // load privileges from database and return the pointer to collection
     DatabasePtr db = getDatabase();
@@ -151,11 +151,12 @@ std::vector<Privilege>* Exception::getPrivileges()
         "RDB$GRANT_OPTION, RDB$FIELD_NAME "
         "from RDB$USER_PRIVILEGES "
         "where RDB$RELATION_NAME = ? and rdb$object_type = 7 "
-        "order by rdb$user, rdb$user_type, rdb$grant_option, rdb$privilege"
+        "order by rdb$user, rdb$user_type, rdb$grantor, rdb$grant_option, rdb$privilege"
     );
     st1->Set(1, wx2std(getName_(), converter));
     st1->Execute();
     std::string lastuser;
+    std::string lastGrantor;
     int lasttype = -1;
     Privilege* pr = 0;
     while (st1->Fetch())
@@ -169,12 +170,13 @@ std::vector<Privilege>* Exception::getPrivileges()
         if (!st1->IsNull(5))
             st1->Get(5, grantoption);
         st1->Get(6, field);
-        if (!pr || user != lastuser || usertype != lasttype)
+        if (!pr || user != lastuser || usertype != lasttype || (splitPerGrantor && grantor != lastGrantor))
         {
             Privilege p(this, wxString(user.c_str(), *converter).Strip(), usertype);
             privilegesM.push_back(p);
             pr = &privilegesM.back();
             lastuser = user;
+            lastGrantor = grantor;
             lasttype = usertype;
         }
         pr->addPrivilege(privilege[0], std2wxIdentifier(grantor, converter),

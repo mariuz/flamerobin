@@ -40,7 +40,7 @@ private:
 public:
     Role(DatabasePtr database, const wxString& name);
     wxString getOwner();
-    std::vector<Privilege>* getPrivileges();
+    std::vector<Privilege>* getPrivileges(bool splitPerGrantor=true);
     virtual const wxString getTypeName() const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
 };
