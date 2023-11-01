@@ -253,9 +253,9 @@ void MainFrame::buildMainMenu()
     helpMenu->Append(Cmds::Menu_License, _("&License"));
     helpMenu->AppendSeparator();
     helpMenu->Append(Cmds::Menu_URLHomePage, _("FlameRobin &home page"));
-    helpMenu->Append(Cmds::Menu_URLProjectPage, _("SourceForge &project page"));
-    helpMenu->Append(Cmds::Menu_URLFeatureRequest, _("SourceForge &feature requests"));
-    helpMenu->Append(Cmds::Menu_URLBugReport, _("SourceForge &bug reports"));
+    helpMenu->Append(Cmds::Menu_URLProjectPage, _("Github &project page"));
+    helpMenu->Append(Cmds::Menu_URLFeatureRequest, _("Github &feature requests"));
+    helpMenu->Append(Cmds::Menu_URLBugReport, _("Github &bug reports"));
 #ifndef __WXMAC__
     helpMenu->AppendSeparator();
 #endif
@@ -768,7 +768,7 @@ void MainFrame::OnMenuURLHomePage(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::OnMenuURLProjectPage(wxCommandEvent& WXUNUSED(event))
 {
-    showUrl("http://sourceforge.net/projects/flamerobin");
+    showUrl("https://github.com/mariuz/flamerobin");
 }
 
 void MainFrame::OnMenuURLFeatureRequest(wxCommandEvent& WXUNUSED(event))
