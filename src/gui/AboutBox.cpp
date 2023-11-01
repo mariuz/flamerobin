@@ -73,7 +73,7 @@ void showAboutBox(wxWindow* parent)
 
     info.SetName("FlameRobin");
 
-    info.SetCopyright(_("Copyright (c) 2004-2022 FlameRobin Development Team"));
+    info.SetCopyright(_("Copyright (c) 2004-2023 FlameRobin Development Team"));
 
     info.SetVersion(ver);
 
