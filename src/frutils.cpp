@@ -218,6 +218,17 @@ bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
     return true;
 }
 
+wxString unquote(const wxString& input, const wxString& quoteChar)
+{
+    wxString result = input;
+
+    if (result.StartsWith(quoteChar) && result.EndsWith(quoteChar) && result.length() >= 2) {
+        result = result.Mid(1, result.length() - 2);
+    }
+
+    return result;
+}
+
 wxString getClientLibrary()
 {
     /*Todo: Implement FB library per conexion */

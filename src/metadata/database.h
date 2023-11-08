@@ -162,6 +162,7 @@ private:
     MetadataLoader* metadataLoaderM;
 
     bool connectedM;
+    bool volatileM;
     wxString databaseCharsetM;
     wxString connectionUserM;
     wxString connectionRoleM;
@@ -312,6 +313,7 @@ public:
     //! gets the database triggers (FB2.1+)
     void getDatabaseTriggers(std::vector<Trigger *>& list);
 
+    bool getIsVolative();
     wxString getPath() const;
     wxString getClientLibrary() const;
     int getSqlDialect() const;
@@ -325,6 +327,7 @@ public:
     DatabaseAuthenticationMode& getAuthenticationMode();
     wxString getRole() const;
     IBPP::Database& getIBPPDatabase();
+    void setIsVolatile(const bool isVolatile);
     void setPath(const wxString& value);
     void setClientLibrary(const wxString& value);
     void setConnectionCharset(const wxString& value);

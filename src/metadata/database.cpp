@@ -316,7 +316,7 @@ bool DatabaseAuthenticationMode::getUseEncryptedPassword() const
 // Database class
 Database::Database()
     : MetadataItem(ntDatabase), metadataLoaderM(0), connectedM(false),
-        connectionCredentialsM(0), dialectM(3), idM(0)
+        connectionCredentialsM(0), dialectM(3), idM(0), volatileM(false)
 {
     defaultTimezoneM.name = "";
     defaultTimezoneM.id = 0;
@@ -413,6 +413,11 @@ void Database::getDatabaseTriggers(std::vector<Trigger *>& list)
 {
     std::transform(DBTriggersM->begin(), DBTriggersM->end(),
         std::back_inserter(list), std::mem_fn(&DBTriggerPtr::get));
+}
+
+bool Database::getIsVolative()
+{
+    return volatileM;
 }
 
 CharacterSet Database::getCharsetById(int id)
@@ -1832,6 +1837,11 @@ wxString Database::getRole() const
 IBPP::Database& Database::getIBPPDatabase()
 {
     return databaseM;
+}
+
+void Database::setIsVolatile(const bool isVolatile)
+{
+    volatileM = isVolatile;
 }
 
 void Database::setPath(const wxString& value)

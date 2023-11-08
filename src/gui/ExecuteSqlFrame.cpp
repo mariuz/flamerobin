@@ -526,6 +526,8 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     loadingM = true;
     updateEditorCaretPosM = true;
     updateFrameTitleM = true;
+    if (db->getIsVolative())
+        prepareVolatileDatabase();
 
     transactionIsolationLevelM = static_cast<IBPP::TIL>(config().get("transactionIsolationLevel", 0));
     transactionLockResolutionM = config().get("transactionLockResolution", true) ? IBPP::lrWait : IBPP::lrNoWait;
@@ -574,11 +576,11 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     do_layout();
 
     // observe database object to close on disconnect / destruction
-    databaseM->attachObserver(this, false);
+    if (!db->getIsVolative()) databaseM->attachObserver(this, false);
 
     executedStatementsM.clear();
     inTransaction(false);    // enable/disable controls
-    setKeywords();           // set words for autocomplete feature
+    if (!db->getIsVolative()) setKeywords();           // set words for autocomplete feature
 
     historyPositionM = StatementHistory::get(databaseM).size();
 
@@ -803,7 +805,8 @@ void ExecuteSqlFrame::set_properties()
     int statusbar_widths[] = { -2, 100, 60, -1 };
     statusbar_1->SetStatusWidths(4, statusbar_widths);
 
-    statusbar_1->SetStatusText(databaseM->getConnectionInfoString(), 0);
+    if ( ! databaseM->getIsVolative() )
+        statusbar_1->SetStatusText(databaseM->getConnectionInfoString(), 0);
     statusbar_1->SetStatusText("Rows fetched", 1);
     statusbar_1->SetStatusText("Cursor position", 2);
     statusbar_1->SetStatusText("Transaction status", 3);
@@ -1609,8 +1612,8 @@ void ExecuteSqlFrame::OnMenuUpdateHistoryNext(wxUpdateUIEvent& event)
 
 void ExecuteSqlFrame::OnMenuUpdateHistoryPrev(wxUpdateUIEvent& event)
 {
-    StatementHistory& sh = StatementHistory::get(databaseM);
-    event.Enable(historyPositionM > 0 && sh.size() > 0);
+    //StatementHistory& sh = StatementHistory::get(databaseM);
+    //event.Enable(historyPositionM > 0 && sh.size() > 0);
 }
 
 void ExecuteSqlFrame::OnMenuExecute(wxCommandEvent& WXUNUSED(event))
@@ -2105,6 +2108,35 @@ void ExecuteSqlFrame::clearLogBeforeExecution()
         styled_text_ctrl_stats->ClearAll();
 }
 
+void ExecuteSqlFrame::prepareVolatileDatabase(wxString hostname, wxString port, wxString path, wxString user, wxString password, wxString role, wxString charset)
+{
+    /*DatabasePtr dbM = std::make_shared<Database>();
+    ServerPtr serverPtrM = std::make_shared<Server>();
+    dbM->setServer(serverPtrM);
+    databaseM = dbM.get();*/
+    //databaseM = new Database();
+    //databaseM = std::make_shared<Database>();
+    //databaseM->setId(UINT_MAX-30);
+    //this->serverM = new Server();
+    //serverPtrM = ServerPtr(serverM);
+    ServerPtr serverPtrM = databaseM->getServer();
+    if (!serverPtrM->getHostname().compare(hostname) || !serverPtrM->getPort().compare(port) || !databaseM->getPath().compare(path) || !databaseM->getUsername().compare(user) || !databaseM->getRawPassword().compare(password) || !databaseM->getRole().compare(role) || !databaseM->getDatabaseCharset().compare(charset))
+        databaseM->disconnect();
+    else
+        return;
+
+    serverPtrM->setHostname(hostname);
+    serverPtrM->setPort(port);
+
+    databaseM->setPath(path);
+    databaseM->setUsername(user);
+    databaseM->setRawPassword(password);
+    databaseM->setRole(role);
+    databaseM->setConnectionCharset(charset);
+    //databaseM->setServer(serverPtrM);
+
+}
+
 void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
 {
     bool hasSelection = styled_text_ctrl_sql->GetSelectionStart()
@@ -2362,7 +2394,26 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         log(_("Empty statement detected, bailing out..."));
         return true;
     }
+    
 
+    SqlStatement stm(sql, databaseM, terminator);
+
+    if (stm.getAction() == actCONNECT)
+    {
+        if (!databaseM->getIsVolative())
+        {
+
+            log(_("Cannot use 'connect' statement in a regular SQL Script"));
+            return true;
+        }
+        wxString connHostM, connDatabasePortM, connPathM, connUsernameM, connPasswordM, connRoleM, connCharsetM;
+        stm.getCONNECTION(connHostM, connDatabasePortM, connPathM, connUsernameM, connPasswordM, connRoleM, connCharsetM);
+        prepareVolatileDatabase(connHostM, connDatabasePortM, connPathM, connUsernameM, connPasswordM, connRoleM, connCharsetM);
+        log(wxString::Format("Connecting to host: %s, port: %s, database: %s, user: %s, password: %s, role: %s, charset: %s", connHostM, connDatabasePortM, connPathM, connUsernameM, connPasswordM, connRoleM, connCharsetM));
+        databaseM->connect(databaseM->getRawPassword());
+        return databaseM->isConnected();
+
+    }
     if (styled_text_ctrl_sql->AutoCompActive())
         styled_text_ctrl_sql->AutoCompCancel();    // remove the list if needed
     notebook_1->SetSelection(0);
@@ -2545,7 +2596,6 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
                 {
                 }
             }
-            SqlStatement stm(sql, databaseM, terminator);
             if (stm.isDDL())
                 type = IBPP::stDDL;
             executedStatementsM.push_back(stm);

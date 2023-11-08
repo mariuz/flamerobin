@@ -36,7 +36,7 @@ class Relation;
 typedef enum
 {
     actNONE, actALTER, actCREATE, actCREATE_OR_ALTER, actDECLARE, actDROP,
-    actRECREATE, actSET, actUPDATE, actGRANT, actCOMMENT
+    actRECREATE, actSET, actUPDATE, actGRANT, actCOMMENT, actCONNECT
 } SqlAction;
 
 class TokenList
@@ -56,6 +56,7 @@ public:
         const wxString& terminator = ";");
 
     bool isDDL() const;
+    bool getCONNECTION(wxString& host, wxString& port, wxString& db, wxString& user, wxString& password, wxString& role, wxString& charset);
     SqlAction getAction() const;
     bool actionIs(const SqlAction& act, NodeType nt = ntUnknown) const;
     NodeType getObjectType() const;
@@ -84,6 +85,9 @@ protected:
     bool isDatatypeM;
     wxString terminatorM;
     wxString statementM;
+    //CONNECT action
+    wxString connHostM, connServerPort, connPathM, connUsernameM, connPasswordM, connRoleM, connCharsetM;
+
 };
 
 #endif

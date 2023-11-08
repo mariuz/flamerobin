@@ -36,6 +36,7 @@
 #include "metadata/procedure.h"
 #include "metadata/relation.h"
 #include "sql/SqlStatement.h"
+#include "frutils.h"
 
 
 // TOKEN LIST - a helper class
@@ -145,6 +146,9 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
             actionM = actUPDATE; 
             objectTypeM = ntTable; 
             break;
+        case kwCONNECT:
+            actionM = actCONNECT;
+            break;
         default:
             return; // true;
     }
@@ -238,7 +242,7 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
     }
 
     // get object type
-    while (objectTypeM == ntUnknown && typeTokenIndex < tokensM.size())
+    while (objectTypeM == ntUnknown && typeTokenIndex < tokensM.size() && actionM != actCONNECT)
     {
         switch (tokensM[typeTokenIndex])
         {
@@ -346,10 +350,11 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
             
     }
 
-    if (objectTypeM == ntUnknown || !databaseM)
+    if ((objectTypeM == ntUnknown || !databaseM) && (actionM != actCONNECT))
         return; // false;
 
-    objectM = databaseM->findByNameAndType(objectTypeM, nameM.get());
+    if ( actionM != actCONNECT )
+        objectM = databaseM->findByNameAndType(objectTypeM, nameM.get());
 
 
     // map "CREATE OR ALTER" and "RECREATE" to correct action
@@ -430,6 +435,63 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
             }
         }
     }
+
+    // CONNECT "[database]" user '[username]' password '[password]' role '[role=]' character set '[charset=NONE]';    
+    if (actionM == actCONNECT)
+    {
+        //wxString database, user, password, role, charset;
+        size_t idx = 1;
+        connPathM = unquote(tokenStringsM[idx++], "'");
+        
+        
+        if (connPathM.Contains(":"))  //split "server/port:database"
+        {
+
+            // find ':' pos
+            int colonPos = connPathM.Find(':');
+
+            
+            connServerPort = "3050";
+            connHostM = connPathM.Left(colonPos);
+            // find '/' pos
+            int slashPos = connHostM.Find('/');
+            
+            if (slashPos >= 0)
+            {
+                connHostM = connPathM.Left(slashPos);
+                connServerPort = connPathM.Mid(slashPos + 1, colonPos - slashPos - 1);
+            }
+            connPathM = connPathM.Mid(colonPos + 1);
+        }
+        connUsernameM = "";
+        connRoleM = "";
+        connCharsetM = "NONE";
+        while (idx < tokensM.size())
+        {
+            if (tokensM[idx] == kwUSER)
+            {
+                idx++;
+                connUsernameM = unquote(tokenStringsM[idx++],"'");
+            }
+            if (tokensM[idx] == kwPASSWORD)
+            {
+                idx++;
+                connPasswordM = unquote(tokenStringsM[idx++], "'");
+            }
+            if (tokensM[idx] == kwROLE)
+            {
+                idx++;
+                connRoleM = unquote(tokenStringsM[idx++], "'");
+            }
+            if ((tokensM[idx] == kwCHARACTER) && (tokensM[idx+1] == kwSET))
+            {
+                idx++;
+                connCharsetM = unquote(tokenStringsM[idx++], "'");
+            }
+            idx++;
+        }
+        return;
+    }
 }
 
 wxString SqlStatement::getStatement() const
@@ -463,6 +525,19 @@ bool SqlStatement::isDDL() const
     // convert to actALTER (i.e. it's a regular update statement)
     return (objectTypeM != ntUnknown && actionM != actNONE
         && actionM != actUPDATE);
+}
+
+bool SqlStatement::getCONNECTION(wxString& host,wxString& port, wxString& path, wxString& user, wxString& password, wxString& role, wxString& charset)
+{
+    if (actionM != actCONNECT) return false;
+    host = connHostM;
+    port = connServerPort;
+    path = connPathM;
+    user = connUsernameM;
+    password = connPasswordM;
+    role = connRoleM;
+    charset = connCharsetM;
+    return true;
 }
 
 bool SqlStatement::isAlterColumn() const
