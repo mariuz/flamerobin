@@ -1612,8 +1612,8 @@ void ExecuteSqlFrame::OnMenuUpdateHistoryNext(wxUpdateUIEvent& event)
 
 void ExecuteSqlFrame::OnMenuUpdateHistoryPrev(wxUpdateUIEvent& event)
 {
-    //StatementHistory& sh = StatementHistory::get(databaseM);
-    //event.Enable(historyPositionM > 0 && sh.size() > 0);
+    StatementHistory& sh = StatementHistory::get(databaseM);
+    event.Enable(historyPositionM > 0 && sh.size() > 0);
 }
 
 void ExecuteSqlFrame::OnMenuExecute(wxCommandEvent& WXUNUSED(event))

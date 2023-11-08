@@ -969,7 +969,7 @@ void MainFrame::OnMenuNewVolatileSQLEditor(wxCommandEvent& WXUNUSED(event))
     if (db)
     {
         showInformationDialog(wxGetTopLevelParent(wxGetActiveWindow()),
-            _("Alert"), "For now, it's only possible to open one agnostic SQL Editor per run. If you are good at C++ and want help me fix the memory managment error I'm getting, let me know. I need 2 things: release a DatabasePtr and create a list of databaseM",
+            _("Alert"), "For now, it's only possible to open one Volatile SQL Editor per run. If you are good at C++ and want help me fix the memory managment error I'm getting, let me know. I need 2 things: declare locally the object or release the DatabasePtr when closing the editor and/or create a list of databaseM",
             AdvancedMessageDialogButtonsOk());
         return;
     }

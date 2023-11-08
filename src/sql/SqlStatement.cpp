@@ -371,7 +371,7 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
         if (stt != tkCOMMENT && stt != tkWHITESPACE)
         {
             tokensM.add(stt);
-            if (stt == tkIDENTIFIER || stt == tkSTRING)
+            //if (stt == tkIDENTIFIER || stt == tkSTRING) //Wy does this if exists?
             {
                 wxString ts(tokenizer.getCurrentTokenString());
                 tokenStringsM[tokensM.size() - 1] = ts;
@@ -436,7 +436,7 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
         }
     }
 
-    // CONNECT "[database]" user '[username]' password '[password]' role '[role=]' character set '[charset=NONE]';    
+    // CONNECT "[database]"  password '[password]' user '[username]' role '[role=]' character set '[charset=NONE]';    
     if (actionM == actCONNECT)
     {
         //wxString database, user, password, role, charset;
@@ -464,6 +464,7 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
             connPathM = connPathM.Mid(colonPos + 1);
         }
         connUsernameM = "";
+        connPasswordM = "";
         connRoleM = "";
         connCharsetM = "NONE";
         while (idx < tokensM.size())
@@ -471,22 +472,22 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
             if (tokensM[idx] == kwUSER)
             {
                 idx++;
-                connUsernameM = unquote(tokenStringsM[idx++],"'");
+                connUsernameM = unquote(tokenStringsM[idx],"'");
             }
-            if (tokensM[idx] == kwPASSWORD)
+            else if (tokensM[idx] == kwPASSWORD)
             {
                 idx++;
-                connPasswordM = unquote(tokenStringsM[idx++], "'");
+                connPasswordM = unquote(tokenStringsM[idx], "'");
             }
-            if (tokensM[idx] == kwROLE)
+            else if (tokensM[idx] == kwROLE)
             {
                 idx++;
-                connRoleM = unquote(tokenStringsM[idx++], "'");
+                connRoleM = unquote(tokenStringsM[idx], "'");
             }
-            if ((tokensM[idx] == kwCHARACTER) && (tokensM[idx+1] == kwSET))
+            else if ((tokensM[idx] == kwCHARACTER) && (tokensM[idx + 1] == kwSET) && (tokensM[idx + 2] == tkSTRING))
             {
-                idx++;
-                connCharsetM = unquote(tokenStringsM[idx++], "'");
+                idx++; idx++; //for character and set
+                connCharsetM = unquote(tokenStringsM[idx], "'");
             }
             idx++;
         }
