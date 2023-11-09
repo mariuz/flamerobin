@@ -38,7 +38,7 @@ private:
 protected:
     MetadataCollectionBase(NodeType type, DatabasePtr database,
             const wxString& name)
-        : MetadataItem(type, database.get(), name), databaseM(database)
+        : MetadataItem(type, database.get(), name, -1), databaseM(database)
     {
     }
 
@@ -96,6 +96,17 @@ private:
                 return it;
         }
         return itemsM.end();
+    }
+
+    iterator getPositionMetadataId(const int id)
+    {
+        for (iterator it = itemsM.begin(); it != itemsM.end(); ++it)
+        {
+            if ((*it)->getMetadataId() == id)
+                return it;
+        }
+        return itemsM.end();
+
     }
 
 protected:
@@ -207,6 +218,12 @@ public:
         iterator it = getPosition(name);
         return (it != itemsM.end()) ? (*it) : ItemType();
     };
+
+    ItemType findByMetadataId(const int id)
+    {
+        iterator it = getPositionMetadataId(id);
+        return (it != itemsM.end()) ? (*it) : ItemType();
+    }
 
     // returns vector of all subnodes
     virtual bool getChildren(std::vector<MetadataItem *>& temp)

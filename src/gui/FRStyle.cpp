@@ -214,7 +214,7 @@ FRStyles& FRStyles::operator=(const FRStyles& sa)
     return *this;
 }
 
-bool FRStyles::operator==(const FRStyles& sa)
+bool FRStyles::operator==(const FRStyles& /*sa*/)
 {
     return false;
 }

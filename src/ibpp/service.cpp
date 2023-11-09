@@ -524,7 +524,7 @@ void ServiceImpl::Shutdown(const std::string& dbfile, IBPP::DSM flags, int secti
 	Wait();
 }
 
-void ServiceImpl::Restart(const std::string& dbfile, IBPP::DSM flags )
+void ServiceImpl::Restart(const std::string& dbfile, IBPP::DSM /*flags*/)
 {
 	if (mHandle	== 0)
 		throw LogicExceptionImpl("Service::Restart", _("Service is not connected."));
@@ -600,7 +600,7 @@ void ServiceImpl::Repair(const std::string& dbfile, IBPP::RPF flags)
 }
 
 void ServiceImpl::StartBackup(
-    const std::string& dbfile,	const std::string& bkfile, const std::string& outfile,
+    const std::string& dbfile,	const std::string& bkfile, const std::string& /*outfile*/,
     const int factor, IBPP::BRF flags,
     const std::string& cryptName, const std::string& keyHolder, const std::string& keyName,
     const std::string& skipData, const std::string& includeData, const int verboseInteval,
@@ -688,7 +688,7 @@ void ServiceImpl::StartBackup(
 }
 
 void ServiceImpl::StartRestore(
-    const std::string& bkfile, const std::string& dbfile, const std::string& outfile,
+    const std::string& bkfile, const std::string& dbfile, const std::string& /*outfile*/,
     int pagesize, int buffers, IBPP::BRF flags,
     const std::string& cryptName, const std::string& keyHolder, const std::string& keyName,
     const std::string& skipData, const std::string& includeData, const int verboseInteval,

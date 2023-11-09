@@ -41,6 +41,32 @@ MetadataItemVisitor::~MetadataItemVisitor()
 {
 }
 
+void MetadataItemVisitor::visitCharacterSet(CharacterSet&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitCharacterSets(CharacterSets&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitCollation(Collation&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitSysCollations(SysCollations&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitCollations(Collations&)
+{
+    defaultAction();
+}
+
+
 void MetadataItemVisitor::visitColumn(Column&)
 {
     defaultAction();
@@ -96,12 +122,12 @@ void MetadataItemVisitor::visitUDFs(UDFs&)
     defaultAction();
 }
 
-void MetadataItemVisitor::visitUser(User& )
+void MetadataItemVisitor::visitUser(User&)
 {
 	defaultAction();
 }
 
-void MetadataItemVisitor::visitUsers(Users& )
+void MetadataItemVisitor::visitUsers(Users&)
 {
     defaultAction();
 }

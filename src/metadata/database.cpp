@@ -47,6 +47,7 @@
 #include "core/StringUtils.h"
 #include "engine/MetadataLoader.h"
 #include "MasterPassword.h"
+#include "metadata/CharacterSet.h"
 #include "metadata/column.h"
 #include "metadata/database.h"
 #include "metadata/domain.h"
@@ -66,32 +67,6 @@
 #include "metadata/view.h"
 #include "sql/SqlStatement.h"
 #include "sql/SqlTokenizer.h"
-
-// CharacterSet class
-CharacterSet::CharacterSet(const wxString& name, int id, int bytesPerChar)
-    : nameM(name), idM(id), bytesPerCharM(bytesPerChar)
-{
-}
-
-bool CharacterSet::operator< (const CharacterSet& other) const
-{
-    return nameM < other.nameM;
-}
-
-int CharacterSet::getBytesPerChar() const
-{
-    return bytesPerCharM;
-}
-
-int CharacterSet::getId() const
-{
-    return idM;
-}
-
-wxString CharacterSet::getName() const
-{
-    return nameM;
-}
 
 // Credentials class
 void Credentials::setCharset(const wxString& value)
@@ -346,6 +321,10 @@ void Database::resetCredentials()
 void Database::getIdentifiers(std::vector<Identifier>& temp)
 {
     checkConnected(_("getIdentifiers"));
+    std::transform(characterSetsM->begin(), characterSetsM->end(),
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(collationsM->begin(), collationsM->end(),
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(tablesM->begin(), tablesM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(sysTablesM->begin(), sysTablesM->end(),
@@ -420,31 +399,37 @@ bool Database::getIsVolative()
     return volatileM;
 }
 
-CharacterSet Database::getCharsetById(int id)
+CharacterSetPtr Database::getCharsetById(int id)
 {
     // if it contains both charset and collation as 2 bytes
     id %= 256;
+    //CharacterSetPtr cs = getCharacterSets()->findByMetadataId(id);
 
-    loadCollations();
-    for (std::multimap<CharacterSet, wxString>::iterator it =
-        collationsM.begin(); it != collationsM.end(); ++it)
-    {
-        if ((*it).first.getId() == id)
-            return (*it).first;
-    }
-    throw FRError(wxString::Format(_("Character set ID %d not found."), id));
+    return  getCharacterSets()->findByMetadataId(id);
 }
+
+wxArrayString Database::getCharacterSet()
+{
+    wxArrayString temp;
+    std::vector<CharacterSet*> list;
+
+    std::transform(characterSetsM->begin(), characterSetsM->end(),
+        std::back_inserter(list), std::mem_fn(&CharacterSetPtr::get));
+
+    for (MetadataItem* c : list)
+        temp.push_back(c->getName_());
+    
+    return temp;
+}
+
 
 //! returns all collations for a given charset
 wxArrayString Database::getCollations(const wxString& charset)
 {
-    loadCollations();
-    wxArrayString collations;
-    std::multimap<CharacterSet, wxString>::iterator low, high;
-    high = collationsM.upper_bound(charset);
-    for (low = collationsM.lower_bound(charset); low != high; ++low)
-        collations.push_back((*low).second);
-    return collations;
+    CharacterSetPtr  characterSet = characterSetsM->findByName(charset);
+    characterSet->ensureChildrenLoaded();
+
+    return characterSet->getCollations();
 }
 
 DomainPtr Database::getDomain(const wxString& name)
@@ -458,18 +443,20 @@ DomainPtr Database::getDomain(const wxString& name)
 bool Database::isDefaultCollation(const wxString& charset,
     const wxString& collate)
 {
-    loadCollations();
-    // no collations for charset
-    if (collationsM.lower_bound(charset) == collationsM.upper_bound(charset))
+    CharacterSetPtr  characterSet =  characterSetsM->findByName(charset);
+    if (!characterSet)
         return false;
-    return ((*(collationsM.lower_bound(charset))).second == collate);
+
+    characterSet->ensureChildrenLoaded();
+
+    return characterSet->getCollationDefault() == collate;
 }
 
 //! load charset-collation pairs if needed
 void Database::loadCollations()
 {
-    if (!collationsM.empty())
-        return;
+    //if (!collationsM.empty())
+    //    return;
 
     MetadataLoader* loader = getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
@@ -493,9 +480,9 @@ void Database::loadCollations()
         int charsetId, bytesPerChar;
         st1->Get(3, &charsetId);
         st1->Get(4, &bytesPerChar);
-        CharacterSet cs(charset, charsetId, bytesPerChar);
-        collationsM.insert(std::multimap<CharacterSet, wxString>::value_type(
-            cs, collation));
+        //CharacterSet cs(charset, charsetId, bytesPerChar);
+        //collationsM.insert(std::multimap<CharacterSet, wxString>::value_type(
+        //    cs, collation));
     }
 }
 
@@ -557,6 +544,20 @@ MetadataItem* Database::findByName(const wxString& name)
     return 0;
 }
 
+MetadataItem* Database::findByIdAndType(NodeType nt, const int id)
+{
+    if (!isConnected())
+        return 0;
+    switch (nt)
+    {
+        case ntCharacterSet:
+            return characterSetsM->findByMetadataId(id).get();
+            break;
+        default:
+            return 0;
+    }
+}
+
 MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
 {
     if (!isConnected())
@@ -567,6 +568,12 @@ MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
     {
         case ntDatabase:
             return this;
+            break;
+        case ntCharacterSet:
+            return characterSetsM->findByName(name).get();
+            break;
+        case ntCollation:
+            return collationsM->findByName(name).get();
             break;
         case ntTable:
             return tablesM->findByName(name).get();
@@ -674,6 +681,12 @@ void Database::dropObject(MetadataItem* object)
     NodeType nt = object->getType();
     switch (nt)
     {
+        case ntCharacterSet:
+            characterSetsM->remove((CharacterSet*)object);
+            break;
+        case ntCollation:
+            collationsM->remove((Collation*)object);
+            break;
         case ntTable:
             tablesM->remove((Table*)object);
             break;
@@ -740,6 +753,12 @@ void Database::addObject(NodeType type, const wxString& name)
 {
     switch (type)
     {
+        case ntCharacterSet:
+            characterSetsM->insert(name);
+            break;
+        case ntCollation:
+            collationsM->insert(name);
+            break;
         case ntTable:
             tablesM->insert(name);
             break;
@@ -1135,6 +1154,10 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             DatabasePtr me(shared_from_this());
             unsigned lockCount = getLockCount();
 
+            characterSetsM.reset(new CharacterSets(me));
+            initializeLockCount(characterSetsM, lockCount);
+            collationsM.reset(new Collations(me));
+            initializeLockCount(collationsM, lockCount);
             userDomainsM.reset(new Domains(me));
             initializeLockCount(userDomainsM, lockCount);
             sysDomainsM.reset(new SysDomains(me));
@@ -1250,7 +1273,7 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
         }
     };
 
-    const int collectionCount = 20;
+    const int collectionCount = 22;
     std::string loadStmt;
     ProgressIndicatorHelper pih(progressIndicator);
 
@@ -1330,6 +1353,12 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
 
     pih.init(_("indices"), collectionCount, 20);
     usrIndicesM->load(progressIndicator);
+
+    pih.init(_("CharacterSet"), collectionCount, 21);
+    characterSetsM->load(progressIndicator);
+
+    pih.init(_("User Collations"), collectionCount, 22);
+    collationsM->load(progressIndicator);
 
 }
 
@@ -1435,6 +1464,8 @@ void Database::setDisconnected()
     indicesM.reset();
     sysIndicesM.reset();
     usrIndicesM.reset();
+    characterSetsM.reset();
+    collationsM.reset();
 
     if (config().get("HideDisconnectedDatabases", false))
         getServer()->notifyObservers();
@@ -1595,6 +1626,20 @@ DMLTriggersPtr Database::getDMLTriggers()
     return DMLtriggersM;
 }
 
+CharacterSetsPtr Database::getCharacterSets()
+{
+    wxASSERT(characterSetsM);
+    characterSetsM->ensureChildrenLoaded();
+    return characterSetsM;
+}
+
+CollationsPtr Database::getCollations()
+{
+    wxASSERT(collationsM);
+    collationsM->ensureChildrenLoaded();
+    return collationsM;
+}
+
 DBTriggersPtr Database::getDBTriggers()
 {
     wxASSERT(DBTriggersM);
@@ -1621,6 +1666,10 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
         return;
 
     ensureChildrenLoaded();
+    //if (system && showSystemCharacterSet())
+    //    temp.push_back(characterSetsM.get());
+    
+    temp.push_back(collationsM.get());
 
     if (getInfo().getODSVersionIsHigherOrEqualTo(11.1)) 
         temp.push_back(DBTriggersM.get());
@@ -1660,6 +1709,7 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
     temp.push_back(DMLtriggersM.get());
     temp.push_back(UDFsM.get());
     temp.push_back(viewsM.get());
+
 }
 
 void Database::loadChildren()
@@ -1692,6 +1742,8 @@ void Database::lockChildren()
         indicesM->lockSubject();
         sysIndicesM->lockSubject();
         usrIndicesM->lockSubject();
+        characterSetsM->lockSubject();
+        collationsM->lockSubject();
     }
 }
 
@@ -1722,6 +1774,8 @@ void Database::unlockChildren()
         exceptionsM->unlockSubject();
         sysDomainsM->unlockSubject();
         userDomainsM->unlockSubject();
+        characterSetsM->unlockSubject();
+        collationsM->unlockSubject();
     }
 }
 
@@ -1999,6 +2053,17 @@ void Database::loadInfo()
     databaseInfoM.load(databaseM);
     loadDatabaseInfo();
     notifyObservers();
+}
+
+bool Database::showSystemCharacterSet()
+{
+    const wxString SHOW_SYSCHARACTERSET = "ShowSystemCharacterSet";
+
+    bool b;
+    if (!DatabaseConfig(this, config()).getValue(SHOW_SYSCHARACTERSET, b))
+        b = config().get(SHOW_SYSCHARACTERSET, true);
+    
+    return b;
 }
 
 bool Database::showSystemIndices()

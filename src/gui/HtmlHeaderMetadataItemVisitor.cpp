@@ -190,6 +190,14 @@ void HtmlHeaderMetadataItemVisitor::visitView(View& /*view*/)
     addDDL();
 }
 
+void HtmlHeaderMetadataItemVisitor::visitCollation(Collation& /*collation*/)
+{
+    emptyTitles();
+    addSummary();
+    addDependencies();
+    addDDL();
+}
+
 void HtmlHeaderMetadataItemVisitor::defaultAction()
 {
     emptyTitles();

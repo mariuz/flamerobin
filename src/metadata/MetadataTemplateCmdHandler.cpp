@@ -999,6 +999,15 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         if (cmdParams[0] == "source")
             processedText += tp->escapeChars(p->getSource(), false);
     }
+    else if ((cmdName == "collationinfo") && (cmdParams.Count() >= 1))
+    {
+        Collation* p = dynamic_cast<Collation*>(object);
+        if (!p)
+            return;
+        if (cmdParams[0] == "source")
+            processedText += tp->escapeChars(p->getSource(), false);
+
+    }
 
 }
 

@@ -277,3 +277,38 @@ wxString wrapText(const wxString& text, size_t maxWidth, size_t indent)
     return wrappedText;
 }
 
+
+wxString IBPPtype2string(Database* db, IBPP::SDT t, int subtype, int size,
+    int scale)
+{
+    if (scale > 0)
+        return wxString::Format("NUMERIC(%d,%d)", size == 4 ? 9 : 18, scale);
+    if (t == IBPP::sdString)
+    {
+        int bpc = db->getCharsetById(subtype)->getBytesPerChar();
+        if (subtype == 1) // charset OCTETS
+            return wxString::Format("OCTETS(%d)", bpc ? size / bpc : size);
+        return wxString::Format("STRING(%d)", bpc ? size / bpc : size);
+    }
+    switch (t)
+    {
+    case IBPP::sdArray:     return "ARRAY";
+    case IBPP::sdBlob:      return wxString::Format("BLOB SUB_TYPE %d", subtype);
+    case IBPP::sdDate:      return "DATE";
+    case IBPP::sdTime:      return "TIME";
+    case IBPP::sdTimestamp: return "TIMESTAMP";
+    case IBPP::sdSmallint:  return "SMALLINT";
+    case IBPP::sdInteger:   return "INTEGER";
+    case IBPP::sdLargeint:  return "BIGINT";
+    case IBPP::sdFloat:     return "FLOAT";
+    case IBPP::sdDouble:    return "DOUBLE PRECISION";
+    case IBPP::sdBoolean:   return "BOOLEAN";
+    case IBPP::sdTimeTz:    return "TIME WITH TIMEZONE";
+    case IBPP::sdTimestampTz: return "TIMESTAMP WITH TIMEZONE";
+    case IBPP::sdInt128:    return "INT128";
+    case IBPP::sdDec16:     return "DECFLOAT(16)";
+    case IBPP::sdDec34:     return "DECFLOAT(34)";
+    default:                return "UNKNOWN";
+    }
+}
+

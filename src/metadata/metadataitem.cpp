@@ -64,14 +64,16 @@ template<>
 ObjectWithHandle<MetadataItem>::Handle ObjectWithHandle<MetadataItem>::nextHandle = 0;
 
 MetadataItem::MetadataItem()
-    : Subject(), typeM(ntUnknown), parentM(0), childrenLoadedM(lsNotLoaded),
+    : Subject(), typeM(ntUnknown), parentM(0), metadataIdM(-1), childrenLoadedM(lsNotLoaded),
         descriptionLoadedM(lsNotLoaded), propertiesLoadedM(lsNotLoaded)
 {
 }
 
 MetadataItem::MetadataItem(NodeType type, MetadataItem* parent,
-        const wxString& name)
-   : Subject(), typeM(type), parentM(parent), identifierM(name, getDatabase() != nullptr ? getDatabase()->getSqlDialect() : 3),
+        const wxString& name, int id)
+   : Subject(), 
+        typeM(type), parentM(parent), identifierM(name, getDatabase() != nullptr ? getDatabase()->getSqlDialect() : 3),
+        metadataIdM(id),
         childrenLoadedM(lsNotLoaded), descriptionLoadedM(lsNotLoaded),
         propertiesLoadedM(lsNotLoaded)
 {
@@ -112,20 +114,22 @@ wxString getNameOfType(NodeType type)
 {
     switch (type)
     {
-        case ntTable:       return ("TABLE");
-        case ntGTT:         return ("TABLEGTT");
-        case ntView:        return ("VIEW");
-        case ntProcedure:   return ("PROCEDURE");
-        case ntDMLTrigger:  return ("TRIGGER");
-        case ntGenerator:   return ("GENERATOR");
-        case ntFunctionSQL: return ("FUNCTIONSQL");
-        case ntUDF:         return ("UDF");
-        case ntDomain:      return ("DOMAIN");
-        case ntRole:        return ("ROLE");
-        case ntColumn:      return ("COLUMN");
-        case ntException:   return ("EXCEPTION");
-        case ntPackage:     return ("PACKAGE");
-        case ntIndex:       return ("INDEX");
+        case ntTable:        return ("TABLE");
+        case ntGTT:          return ("TABLEGTT");
+        case ntView:         return ("VIEW");
+        case ntProcedure:    return ("PROCEDURE");
+        case ntDMLTrigger:   return ("TRIGGER");
+        case ntGenerator:    return ("GENERATOR");
+        case ntFunctionSQL:  return ("FUNCTIONSQL");
+        case ntUDF:          return ("UDF");
+        case ntDomain:       return ("DOMAIN");
+        case ntRole:         return ("ROLE");
+        case ntColumn:       return ("COLUMN");
+        case ntException:    return ("EXCEPTION");
+        case ntPackage:      return ("PACKAGE");
+        case ntIndex:        return ("INDEX");
+        case ntCharacterSet: return ("CHARACTERSET");
+        case ntCollation:    return ("COLLATION");
         default:
             return "";
     }
@@ -161,6 +165,10 @@ NodeType getTypeByName(const wxString& name)
         return ntPackage;
     else if (name == "INDEX")
         return ntIndex;
+    else if (name == "CHARACTERSET")
+        return ntCharacterSet;
+    else if (name == "COLLATION")
+        return ntCollation;
     else
         return ntUnknown;
 }
@@ -722,6 +730,16 @@ NodeType MetadataItem::getType() const
 void MetadataItem::setType(NodeType type)
 {
     typeM = type;
+}
+
+int MetadataItem::getMetadataId()
+{
+    return metadataIdM;
+}
+
+void MetadataItem::setMetadataId(int id)
+{
+    metadataIdM = id;
 }
 
 bool MetadataItem::isSystem() const

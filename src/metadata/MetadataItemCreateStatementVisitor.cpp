@@ -216,6 +216,29 @@ wxString MetadataItemCreateStatementVisitor::getCreateDMLTriggerStatement()
         "SET TERM ; ^\n";
 }
 
+wxString MetadataItemCreateStatementVisitor::getCreateCharacterSetStatement()
+{
+    return "";
+}
+
+wxString MetadataItemCreateStatementVisitor::getCreateCollationStatment()
+{
+    return "CREATE COLLATION collname \n"
+        "FOR charset \n"
+        "[FROM {basecoll | EXTERNAL('extname')}] \n"
+        "[NO PAD | PAD SPACE] \n"
+        "[CASE[IN]SENSITIVE] \n"
+        "[ACCENT[IN]SENSITIVE] \n"
+        "'DISABLE-COMPRESSIONS=0' \n"
+        "'DISABLE-EXPANSIONS=0' \n"
+        "'MULTI-LEVEL=0' \n"
+        "'ICU-VERSION=M.n' \n"
+        "'LOCALE=xx_YY' \n"
+        "'NUMERIC-SORT=0' \n"
+        "'SPECIALS-FIRST=0' \n"
+        ";";
+}
+
 wxString MetadataItemCreateStatementVisitor::getCreateDBTriggerStatement()
 {
     return "SET TERM ^ ;\n\n"
@@ -344,6 +367,17 @@ void MetadataItemCreateStatementVisitor::visitRoles(Roles& /*roles*/)
 void MetadataItemCreateStatementVisitor::visitTables(Tables& /*tables*/)
 {
     statementM = getCreateTableStatement();
+}
+
+void MetadataItemCreateStatementVisitor::visitCharacterSets(CharacterSets& /*characterSets*/)
+{
+    statementM = getCreateCharacterSetStatement();
+}
+
+void MetadataItemCreateStatementVisitor::visitCollations(Collations& /*collations*/)
+{
+    statementM = getCreateCollationStatment();
+
 }
 
 void MetadataItemCreateStatementVisitor::visitDBTriggers(DBTriggers& /*triggers*/)

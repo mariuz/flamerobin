@@ -33,6 +33,7 @@
 
 #include "core/StringUtils.h"
 #include "engine/MetadataLoader.h"
+#include "metadata/Collation.h"
 #include "metadata/column.h"
 #include "metadata/database.h"
 #include "metadata/domain.h"
@@ -114,6 +115,17 @@ void LoadDescriptionVisitor::loadDescription(MetadataItem* object,
         if (e.SqlCode() != -206) // column does not belong to referenced table.
             throw;
     }
+}
+
+void LoadDescriptionVisitor::visitCharcterSet(CharacterSet& /*charterSet*/)
+{
+}
+
+void LoadDescriptionVisitor::visitCollation(Collation& collation)
+{
+    loadDescription(&collation,
+        "select RDB$DESCRIPTION from RDB$COLLATIONS "
+        "where RDB$COLLATION_NAME = ?");
 }
 
 void LoadDescriptionVisitor::visitColumn(Column& column)
@@ -262,6 +274,22 @@ void SaveDescriptionVisitor::saveDescription(MetadataItem* object,
 
     st1->Execute();
     tr1->Commit();
+}
+
+void SaveDescriptionVisitor::visitCharacterSet(CharacterSet& /*charterSet*/)
+{
+}
+
+void SaveDescriptionVisitor::visitCollation(Collation& collation)
+{
+    if (collation.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+        saveDescription(&collation, "comment on exception %s is '%s'");
+        return;
+    }
+    saveDescription(&collation,
+        "update RDB$COLLATIONS set RDB$DESCRIPTION = ? "
+        "where RDB$COLLATION_NAME = ?");
+
 }
 
 void SaveDescriptionVisitor::visitColumn(Column& column)

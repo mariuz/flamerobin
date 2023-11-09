@@ -36,6 +36,11 @@ public:
     MetadataItemVisitor();
     virtual ~MetadataItemVisitor();
 
+    virtual void visitCharacterSet(CharacterSet& characterSet);
+    virtual void visitCharacterSets(CharacterSets& characterSets);
+    virtual void visitCollation(Collation& collation);
+    virtual void visitSysCollations(SysCollations& collations);
+    virtual void visitCollations(Collations& collations);
     virtual void visitColumn(Column& column);
     virtual void visitDatabase(Database& database);
     virtual void visitDBTrigger(DBTrigger& trigger);

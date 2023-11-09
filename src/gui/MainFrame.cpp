@@ -227,6 +227,7 @@ void MainFrame::buildMainMenu()
 
     objectMenuM = new wxMenu();
     wxMenu* newMenu = new wxMenu();
+    newMenu->Append(Cmds::Menu_CreateCollation, _("&Collation"));
     newMenu->Append(Cmds::Menu_CreateDBTrigger, _("D&B Trigger"));
     newMenu->Append(Cmds::Menu_CreateDDLTrigger, _("DD&L Trigger"));
     newMenu->Append(Cmds::Menu_CreateDMLTrigger, _("DML Tr&igger"));
@@ -234,7 +235,7 @@ void MainFrame::buildMainMenu()
     newMenu->Append(Cmds::Menu_CreateException, _("&Exception"));
     newMenu->Append(Cmds::Menu_CreateFunction, _("&Function"));
     newMenu->Append(Cmds::Menu_CreateGenerator, _("&Generator"));
-    newMenu->Append(Cmds::Menu_CreateGTTTable, _("Global Temporary"));
+    newMenu->Append(Cmds::Menu_CreateGTTTable, _("Global &Temporary"));
     newMenu->Append(Cmds::Menu_CreateIndex, _("&Index"));
     newMenu->Append(Cmds::Menu_CreatePackage, _("P&ackage"));
     newMenu->Append(Cmds::Menu_CreateProcedure, _("&Procedure"));
@@ -468,6 +469,7 @@ EVT_UPDATE_UI(Cmds::Menu_StartupDatabase, MainFrame::OnMenuUpdateIfDatabaseNotCo
     EVT_BUTTON(MainFrame::ID_button_prev, MainFrame::OnButtonPrevClick)
     EVT_BUTTON(MainFrame::ID_button_next, MainFrame::OnButtonNextClick)
 
+    EVT_MENU(Cmds::Menu_CreateCollation,  MainFrame::OnMenuCreateCollation)
     EVT_MENU(Cmds::Menu_CreateDBTrigger,  MainFrame::OnMenuCreateDBTrigger)
     EVT_MENU(Cmds::Menu_CreateDDLTrigger, MainFrame::OnMenuCreateDDLTrigger)
     EVT_MENU(Cmds::Menu_CreateDMLTrigger, MainFrame::OnMenuCreateDMLTrigger)
@@ -664,6 +666,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
             case ntGenerator:
                 showGeneratorValue(dynamic_cast<Generator*>(m));
                 break;
+            case ntCollation:
             case ntColumn:
             case ntTable:
             case ntSysTable:
@@ -681,6 +684,8 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
             case ntException:
             case ntRole:
             case ntSysRole:
+            case ntIndex:
+            case ntSysIndices:
                 {
                     wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED,
                         Cmds::Menu_ObjectProperties);
@@ -1543,6 +1548,12 @@ void MainFrame::showCreateTemplate(const wxString& statement)
     showSql(this, wxEmptyString, db, statement);
 }
 
+void MainFrame::OnMenuCreateCollation(wxCommandEvent& WXUNUSED(event))
+{
+    showCreateTemplate(
+        MetadataItemCreateStatementVisitor::getCreateCollationStatment());
+}
+
 void MainFrame::OnMenuAddColumn(wxCommandEvent& WXUNUSED(event))
 {
     Table* t = dynamic_cast<Table*>(treeMainM->getSelectedMetadataItem());
@@ -1714,7 +1725,9 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
         return;
 
     wxString sql;
-    if (View* v = dynamic_cast<View*>(mi))
+    if (Collation* c = dynamic_cast<Collation*>(mi))
+        sql = c->getAlterSql();
+    else if (View* v = dynamic_cast<View*>(mi))
         sql = v->getAlterSql();
         //        sql = v->getRebuildSql();
     else if (Trigger* t = dynamic_cast<Trigger*>(mi))

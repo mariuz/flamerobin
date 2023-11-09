@@ -37,6 +37,8 @@ class MetadataLoader;
 class ProgressIndicator;
 class SqlStatement;
 
+
+/*
 class CharacterSet
 {
 private:
@@ -51,7 +53,7 @@ public:
     int getId() const;
     wxString getName() const;
 };
-
+*/
 class Credentials
 {
 private:
@@ -184,6 +186,8 @@ private:
 
     DatabaseInfo databaseInfoM;
 
+    CharacterSetsPtr characterSetsM;
+    CollationsPtr collationsM;
     DBTriggersPtr DBTriggersM;
     DDLTriggersPtr DDLTriggersM;
     DMLTriggersPtr DMLtriggersM;
@@ -213,7 +217,7 @@ private:
 
     void setDisconnected();
 
-    std::multimap<CharacterSet, wxString> collationsM;
+    //std::multimap<CharacterSet, wxString> collationsM;
     void loadCollations();
 
     void loadCollections(ProgressIndicator* progressIndicator);
@@ -228,6 +232,7 @@ private:
 
     mutable unsigned idM;
 
+    bool showSystemCharacterSet();
     bool showSystemIndices();
     bool showSystemDomains();
     bool showSystemPackages();
@@ -248,6 +253,8 @@ public:
     virtual bool getChildren(std::vector<MetadataItem *>& temp);
     void getCollections(std::vector<MetadataItem *>& temp, bool system);
 
+    CharacterSetsPtr getCharacterSets();
+    CollationsPtr getCollations();
     DBTriggersPtr getDBTriggers();
     DDLTriggersPtr getDDLTriggers();
     DMLTriggersPtr getDMLTriggers();
@@ -295,12 +302,15 @@ public:
     virtual DatabasePtr getDatabase() const;
     MetadataItem* findByNameAndType(NodeType nt, const wxString& name);
     MetadataItem* findByName(const wxString& name);
+    MetadataItem* findByIdAndType(NodeType nt, const int id);
+
     Relation* findRelation(const Identifier& name);
     void dropObject(MetadataItem *object);
     void addObject(NodeType type, const wxString& name);
     void parseCommitedSql(const SqlStatement& stm);     // reads a DDL statement and does accordingly
 
-    CharacterSet getCharsetById(int id);
+    CharacterSetPtr getCharsetById(int id);
+    wxArrayString getCharacterSet();
     wxArrayString getCollations(const wxString& charset);
     bool isDefaultCollation(const wxString& charset, const wxString& collate);
 

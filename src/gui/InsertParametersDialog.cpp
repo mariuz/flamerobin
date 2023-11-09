@@ -41,6 +41,7 @@
 #include "gui/controls/DataGridTable.h"
 #include "gui/InsertParametersDialog.h"
 #include "gui/StyleGuide.h"
+#include "metadata/CharacterSet.h"
 #include "metadata/column.h"
 #include "metadata/database.h"
 #include "metadata/domain.h"
@@ -116,37 +117,8 @@ namespace InsertParametersOptions
     }
 
 
-wxString IBPPtype2string(Database *db, IBPP::SDT t, int subtype, int size,
-    int scale)
-{
-    if (scale > 0)
-        return wxString::Format("NUMERIC(%d,%d)", size==4 ? 9:18, scale);
-    if (t == IBPP::sdString)
-    {
-        int bpc = db->getCharsetById(subtype).getBytesPerChar();
-        if (subtype == 1) // charset OCTETS
-            return wxString::Format("OCTETS(%d)", bpc ? size / bpc : size);
-        return wxString::Format("STRING(%d)", bpc ? size/bpc : size);
-    }
-    switch (t)
-    {
-        case IBPP::sdArray:     return "ARRAY";
-        case IBPP::sdBlob:      return wxString::Format(
-                                    "BLOB SUB_TYPE %d", subtype);
-        case IBPP::sdDate:      return "DATE";
-        case IBPP::sdTime:      return "TIME";
-        case IBPP::sdTimestamp: return "TIMESTAMP";
-        case IBPP::sdSmallint:  return "SMALLINT";
-        case IBPP::sdInteger:   return "INTEGER";
-        case IBPP::sdLargeint:  return "BIGINT";
-        case IBPP::sdFloat:     return "FLOAT";
-        case IBPP::sdDouble:    return "DOUBLE PRECISION";
-        case IBPP::sdBoolean:   return "BOOLEAN";
-        default:                return "UNKNOWN";
-    }
-}
-
 };
+
 using namespace InsertParametersOptions;
 /*
 Generator *findAutoincGenerator2(std::vector<Trigger *>& triggers, Column *c)

@@ -70,7 +70,11 @@
 #include "toggle24.xpm"
 
 // these have size 16x16
+#include "characterset.xpm"
+#include "charactersets.xpm"
 #include "column.xpm"
+#include "collation.xpm"
+#include "collations.xpm"
 #include "database.xpm"
 #include "databaseserver.xpm"
 #include "dbtrigger.xpm"
@@ -211,8 +215,16 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
 
     if (size == wxSize(16, 16))
     {
+        if (id == ART_CharacterSet)
+            return wxBitmap(characterset_xpm);
+        if (id == ART_CharacterSets)
+            return wxBitmap(charactersets_xpm);
         if (id == ART_Column)
             return wxBitmap(column_xpm);
+        if (id == ART_Collation)
+            return wxBitmap(collation_xpm);
+        if (id == ART_Collations)
+            return wxBitmap(collations_xpm);
         if (id == ART_CommitTransaction)
             return wxBitmap(ok_xpm);
         if (id == ART_Computed)

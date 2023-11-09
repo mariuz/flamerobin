@@ -47,6 +47,7 @@
 #include "core/StringUtils.h"
 #include "gui/controls/DataGridRowBuffer.h"
 #include "gui/controls/DataGridRows.h"
+#include "metadata/CharacterSet.h"
 #include "metadata/column.h"
 #include "metadata/database.h"
 #include "metadata/table.h"
@@ -1665,7 +1666,7 @@ unsigned StringColumnDef::getBufferSize()
 }
 
 void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
-    const IBPP::Statement& statement, wxMBConv* converter, Database* db)
+    const IBPP::Statement& statement, wxMBConv* converter, Database* /*db*/)
 {
     wxASSERT(buffer);
     if (statement->ColumnType(col) == IBPP::sdBoolean) // Firebird v3
@@ -1687,7 +1688,7 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     else
     {
         std::string value;
-        wxMBConv* converter = db->getCharsetConverter();
+        //wxMBConv* converter = db->getCharsetConverter();
         statement->Get(col, value);
         wxString val = wxString(value.c_str(), *converter);
         size_t trimLen = val.Strip().Length();
@@ -2122,8 +2123,7 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
 
                 case IBPP::sdString:
                 {
-                    CharacterSet cs = databaseM->getCharsetById(statement->ColumnSubtype(col));
-                    int bpc = cs.getBytesPerChar();
+                    int bpc = databaseM->getCharsetById(statement->ColumnSubtype(col))->getBytesPerChar();
                     int size = statement->ColumnSize(col);
                     if (bpc)
                         size /= bpc;

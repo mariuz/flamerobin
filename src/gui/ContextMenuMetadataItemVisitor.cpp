@@ -33,6 +33,8 @@
 #include "config/Config.h"
 #include "gui/CommandIds.h"
 #include "gui/ContextMenuMetadataItemVisitor.h"
+#include "metadata/CharacterSet.h"
+#include "metadata/Collation.h"
 #include "metadata/column.h"
 #include "metadata/domain.h"
 #include "metadata/database.h"
@@ -477,6 +479,40 @@ void MainObjectMenuMetadataItemVisitor::visitViews(Views& views)
     addCreateItem();
     addSeparator();
     addGenerateCodeMenu(views);
+    addSeparator();
+    addRefreshItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitCharacterSet(CharacterSet& charset)
+{
+    addAlterItem(charset);
+    addSeparator();
+    addPropertiesItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitCharacterSets(CharacterSets& /*charsets*/)
+{
+    addRefreshItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitCollation(Collation& collation)
+{
+    addAlterItem(collation);
+    addDropItem(collation);
+    addSeparator();
+    addPropertiesItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitSysCollations(SysCollations& /*collations*/)
+{
+    addRefreshItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitCollations(Collations& coolations)
+{
+    addCreateItem();
+    addSeparator();
+    addGenerateCodeMenu(coolations);
     addSeparator();
     addRefreshItem();
 }

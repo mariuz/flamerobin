@@ -136,6 +136,7 @@ enum {
         Menu_ToggleDisconnected,
 
         // create new ... (stuff)
+        Menu_CreateCollation,
         Menu_CreateDBTrigger,
         Menu_CreateDDLTrigger,
         Menu_CreateDMLTrigger,
