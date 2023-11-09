@@ -13,14 +13,47 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
-    <Filter Include="Source Files\Metadata">
-      <UniqueIdentifier>{0f09e77a-5c5b-43de-8cca-a5e23a946588}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\gui">
       <UniqueIdentifier>{66289fbe-1c79-498d-adfc-caae5c0e9e11}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\sql">
       <UniqueIdentifier>{06d639b2-18b7-4a91-932f-f7e78d6e8308}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\metadata">
+      <UniqueIdentifier>{0f09e77a-5c5b-43de-8cca-a5e23a946588}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui">
+      <UniqueIdentifier>{42ab8ac6-775a-4a26-a0cc-aff9b0f4b3a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\metadata">
+      <UniqueIdentifier>{42734afe-4b08-442f-8ac0-ba8f4561cff2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\sql">
+      <UniqueIdentifier>{6251d77b-877a-4265-9e9c-c755e259f55d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\config">
+      <UniqueIdentifier>{2481ae47-59f2-49b4-aeb7-d5e007bfada2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\core">
+      <UniqueIdentifier>{9c059eb7-c978-4485-b3a6-65e3fbbaf5a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\engine">
+      <UniqueIdentifier>{e7096b8c-84f5-46f2-8920-ba81a3e47a5e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\firebird">
+      <UniqueIdentifier>{ee762f34-2912-4b7e-8a2d-e9075839d446}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\config">
+      <UniqueIdentifier>{90e62111-8271-479f-a71a-4f5816a4c1fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\core">
+      <UniqueIdentifier>{4399195b-3f5c-414a-95f6-2b313bdd926e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\engine">
+      <UniqueIdentifier>{72189ac6-9143-4b28-bcf5-789b2d5cdaf7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\firebird">
+      <UniqueIdentifier>{03ec6670-5d69-4bf4-a2eb-10529ba472d4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -34,7 +67,7 @@
       <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\core\ArtProvider.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\BackupFrame.cpp">
       <Filter>Source Files\gui</Filter>
@@ -49,7 +82,7 @@
       <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\core\CodeTemplateProcessor.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\CommandManager.cpp">
       <Filter>Source Files\gui</Filter>
@@ -58,7 +91,7 @@
       <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\config\Config.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\config</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ContextMenuMetadataItemVisitor.cpp">
       <Filter>Source Files\gui</Filter>
@@ -67,7 +100,7 @@
       <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\CreateDDLVisitor.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\CreateIndexDialog.cpp">
       <Filter>Source Files\gui</Filter>
@@ -91,7 +124,7 @@
       <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\config\DatabaseConfig.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\config</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\DatabaseRegistrationDialog.cpp">
       <Filter>Source Files\gui</Filter>
@@ -112,7 +145,7 @@
       <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\core\FRError.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\FRLayoutConfig.cpp">
       <Filter>Source Files\gui</Filter>
@@ -139,7 +172,7 @@
       <Filter>Source Files\sql</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\Index.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\InsertDialog.cpp">
       <Filter>Source Files\gui</Filter>
@@ -154,28 +187,28 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\MetadataItemCreateStatementVisitor.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\MetadataItemDescriptionVisitor.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\MetadataItemPropertiesFrame.cpp">
       <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\MetadataItemURIHandlerHelper.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\MetadataItemVisitor.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\MetadataLoader.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\engine</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\MetadataTemplateCmdHandler.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\MetadataTemplateManager.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\sql\MultiStatement.cpp">
       <Filter>Source Files\sql</Filter>
@@ -184,7 +217,7 @@
       <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\core\Observer.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\PreferencesDialog.cpp">
       <Filter>Source Files\gui</Filter>
@@ -202,7 +235,7 @@
       <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\core\ProgressIndicator.cpp">
-      <Filter>Source Files\gui</Filter>
+      <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ReorderFieldsDialog.cpp">
       <Filter>Source Files\gui</Filter>
@@ -232,7 +265,7 @@
       <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\core\StringUtils.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\StyleGuide.cpp">
       <Filter>Source Files\gui</Filter>
@@ -241,19 +274,19 @@
       <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\core\Subject.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="src\core\TemplateProcessor.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\controls\TextControl.cpp">
       <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\core\URIProcessor.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\User.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\UserDialog.cpp">
       <Filter>Source Files\gui</Filter>
@@ -262,28 +295,28 @@
       <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\core\Visitor.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="src\addconstrainthandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\column.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\constraints.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\database.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\databasehandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\domain.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\exception.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\frprec.cpp">
       <Filter>Source Files</Filter>
@@ -292,10 +325,10 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\function.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\generator.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\logger.cpp">
       <Filter>Source Files</Filter>
@@ -304,61 +337,61 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\metadataitem.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\objectdescriptionhandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\parameter.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\privilege.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\procedure.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\relation.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\role.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\root.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\server.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\statementHistory.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\table.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\trigger.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\view.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\InsertParametersDialog.cpp">
       <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\metadata\package.cpp">
-      <Filter>Source Files\Metadata</Filter>
+      <Filter>Source Files\metadata</Filter>
     </ClCompile>
     <ClCompile Include="src\config\LocalSettings.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\config</Filter>
     </ClCompile>
     <ClCompile Include="src\core\FRInt128.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="src\core\FRDecimal.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ServiceBaseFrame.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="src\gui\ShutdownFrame.cpp">
       <Filter>Source Files\gui</Filter>
@@ -369,279 +402,283 @@
     <ClCompile Include="src\gui\StartupFrame.cpp">
       <Filter>Source Files\gui</Filter>
     </ClCompile>
-
-    <ClCompile Include="src\gui\FRStyle.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\core\FRInt128.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\core</Filter>
     </ClCompile>
-
+    <ClCompile Include="src\gui\FRStyle.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\metadata\Collation.cpp">
+      <Filter>Source Files\metadata</Filter>
+    </ClCompile>
+    <ClCompile Include="src\metadata\CharacterSet.cpp">
+      <Filter>Source Files\metadata</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\gui\AboutBox.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\AdvancedMessageDialog.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\AdvancedSearchFrame.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\core\ArtProvider.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\BackupFrame.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\BackupRestoreBaseFrame.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\BaseDialog.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\BaseFrame.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\core\CodeTemplateProcessor.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\CommandIds.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\CommandManager.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\ConfdefTemplateProcessor.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\config\Config.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\config</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\ContextMenuMetadataItemVisitor.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\controls\ControlUtils.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\CreateDDLVisitor.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\CreateIndexDialog.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\controls\DBHTreeControl.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\DataGeneratorFrame.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\controls\DataGrid.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\controls\DataGridRowBuffer.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\controls\DataGridRows.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\controls\DataGridTable.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\config\DatabaseConfig.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\config</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\DatabaseRegistrationDialog.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\controls\DndTextControls.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\EditBlobDialog.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\EventWatcherFrame.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\ExecuteSql.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\ExecuteSqlFrame.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\core\FRError.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\FRLayoutConfig.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\FieldPropertiesDialog.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\FindDialog.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\GUIURIHandlerHelper.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\HtmlHeaderMetadataItemVisitor.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\HtmlTemplateProcessor.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\sql\Identifier.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\sql</Filter>
     </ClInclude>
     <ClInclude Include="src\sql\IncompleteStatement.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\sql</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\Index.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\InsertDialog.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\Isaac.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\controls\LogTextControl.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\MainFrame.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\MasterPassword.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\MetadataClasses.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\MetadataItemCreateStatementVisitor.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\MetadataItemDescriptionVisitor.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\MetadataItemPropertiesFrame.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\MetadataItemURIHandlerHelper.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\MetadataItemVisitor.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\MetadataLoader.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\engine</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\MetadataTemplateManager.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\sql\MultiStatement.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\sql</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\MultilineEnterDialog.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\core\ObjectWithHandle.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="src\core\Observer.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\PreferencesDialog.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\controls\PrintableHtmlWindow.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\PrivilegesDialog.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\core\ProcessableObject.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\ProgressDialog.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\core\ProgressIndicator.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\ReorderFieldsDialog.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\RestoreFrame.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\sql\SelectStatement.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\sql</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\ServerRegistrationDialog.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\SimpleHtmlFrame.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\sql\SqlStatement.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\sql</Filter>
     </ClInclude>
     <ClInclude Include="src\sql\SqlTokenizer.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\sql</Filter>
     </ClInclude>
     <ClInclude Include="src\sql\StatementBuilder.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\sql</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\StatementHistoryDialog.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\core\StringUtils.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\StyleGuide.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\core\Subject.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="src\core\TemplateProcessor.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\controls\TextControl.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\core\URIProcessor.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\User.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\UserDialog.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\UsernamePasswordDialog.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\core\Visitor.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\collection.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\column.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\constraints.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\database.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\domain.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\exception.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\frutils.h">
       <Filter>Header Files</Filter>
@@ -650,10 +687,10 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\function.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\generator.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\logger.h">
       <Filter>Header Files</Filter>
@@ -662,76 +699,82 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\metadataitem.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\parameter.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\privilege.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\procedure.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\relation.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\role.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\root.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\server.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\statementHistory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\table.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\trigger.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\view.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\InsertParametersDialog.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\metadata\package.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
     <ClInclude Include="src\config\LocalSettings.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\config</Filter>
     </ClInclude>
     <ClInclude Include="src\core\FRInt128.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="src\core\FRDecimal.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\ServiceBaseFrame.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\ShutdownFrame.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\ShutdownStartupBaseFrame.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\StartupFrame.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\firebird\constants.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\firebird</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\FRStyle.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\core\FRInt128.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\metadata\CharacterSet.h">
+      <Filter>Header Files\metadata</Filter>
+    </ClInclude>
+    <ClInclude Include="src\metadata\Collation.h">
+      <Filter>Header Files\metadata</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

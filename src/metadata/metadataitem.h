@@ -42,22 +42,35 @@ class MetadataItemVisitor;
 
 typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
     // each item type and (if applicable) its parent type
-    ntTable, ntTables, ntGTT, ntGTTs,
-    ntView, ntViews, ntProcedure, ntProcedures,
-    ntTrigger, ntTriggers, ntGenerator, ntGenerators, 
+    ntTable, ntTables, 
+    ntGTT, ntGTTs,
+    ntView, ntViews, 
+    ntProcedure, ntProcedures,
+    ntTrigger, ntTriggers, 
+    ntGenerator, ntGenerators, 
     ntFunction, ntFunctions, 
-    ntFunctionSQL, ntFunctionSQLs, ntUDF,  ntUDFs,
-    ntSysTable, ntSysTables, ntException, ntExceptions,
-    ntDomain, ntDomains, ntSysDomain, ntSysDomains,
-    ntRole, ntRoles, ntSysRole, ntSysRoles, ntColumn, ntParameter, 
-    ntIndex, ntIndices, ntSysIndices, ntUsrIndices,
-    ntPackage, ntPackages, ntSysPackage, ntSysPackages,
+    ntFunctionSQL, ntFunctionSQLs, 
+    ntUDF,  ntUDFs,
+    ntSysTable, ntSysTables, 
+    ntException, ntExceptions,
+    ntDomain, ntDomains, 
+    ntSysDomain, ntSysDomains,
+    ntRole, ntRoles, 
+    ntSysRole, ntSysRoles, 
+    ntColumn, ntParameter, 
+    ntIndex, ntIndices, 
+    ntSysIndices, ntUsrIndices,
+    ntPackage, ntPackages, 
+    ntSysPackage, ntSysPackages,
     ntDMLTrigger, ntDMLTriggers,
     ntDBTrigger, ntDBTriggers, 
     ntDDLTrigger, ntDDLTriggers,
     ntMethod,
     ntUser, ntUsers,
     ntSystem, 
+    ntCharacterSet, ntChartersets,
+    ntSysCollation, ntSysCollations, 
+    ntCollation, ntCollations,
     ntLastType
 } NodeType;
 
@@ -73,6 +86,8 @@ class MetadataItem: public Subject, public ObjectWithHandle<MetadataItem>,
 private:
     MetadataItem* parentM;
     NodeType typeM;
+    Identifier identifierM;
+    int metadataIdM;
 
     enum LoadState { lsNotLoaded, lsLoadPending, lsLoaded, lsNotAvailable };
     LoadState childrenLoadedM;
@@ -83,8 +98,6 @@ private:
     void ensureDescriptionLoaded();
 
 protected:
-    Identifier identifierM;
-
     virtual void loadDescription();
     virtual void saveDescription(const wxString& description);
     void saveDescription(const wxString& saveStatement,
@@ -105,7 +118,7 @@ protected:
 public:
     MetadataItem();
     MetadataItem(NodeType type, MetadataItem* parent = 0,
-        const wxString& name = wxEmptyString);
+        const wxString& name = wxEmptyString, int id = -1);
     virtual ~MetadataItem();
 
     virtual void lockSubject();
@@ -150,6 +163,8 @@ public:
     virtual void setName_(const wxString& name);
     virtual NodeType getType() const;
     void setType(NodeType type);
+    virtual int getMetadataId();
+    virtual void setMetadataId(int id);
 
     // returns the name of the data type (f. ex. TABLE)
     virtual const wxString getTypeName() const;

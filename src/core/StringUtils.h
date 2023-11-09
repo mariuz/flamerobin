@@ -29,6 +29,8 @@
 
 #include <string>
 
+#include "metadata/CharacterSet.h"
+#include "metadata/database.h"
 
 std::string wx2std(const wxString& input, wxMBConv* conv = wxConvCurrent);
 
@@ -59,5 +61,8 @@ wxString loadEntireFile(const wxFileName& filename);
 //  <indent> spaces.
 //  Code adapted from wxWidgets' wxTextWrapper function.
 wxString wrapText(const wxString& text, size_t maxWidth, size_t indent);
+
+
+wxString IBPPtype2string(Database* db, IBPP::SDT t, int subtype, int size, int scale);
 
 #endif // FR_STRINGUTILS_H

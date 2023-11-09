@@ -177,8 +177,8 @@ Accepted values: AMD64, IA64.
             <define>WIN32_LEAN_AND_MEAN</define>
 
             <set var="WX_PORT">wxmsw</set>
-<!-- set this to 28 for wxWidgets 2.8.X, to 30 for wxWidgets 3.1.x-->
-            <set var="WX_VERSION">31</set>
+<!-- set this to 28 for wxWidgets 2.8.X, to 30 for wxWidgets 3.2.x-->
+            <set var="WX_VERSION">32</set>
 
             <set var="WX_LIB_DIR" make_var="1">
                 <if cond="USEDLL=='1'">$(WXDIR)/lib/$(COMPILER)$(DIR_SUFFIX_CPU)_dll</if>
@@ -199,7 +199,7 @@ Accepted values: AMD64, IA64.
             <sys-lib>$(WX_PORT)$(WX_VERSION)$(U_OPT)$(D_OPT)_core</sys-lib>
             <sys-lib>wxbase$(WX_VERSION)$(U_OPT)$(D_OPT)_xml</sys-lib>
             <sys-lib>wxbase$(WX_VERSION)$(U_OPT)$(D_OPT)</sys-lib>
-            <if cond="WX_VERSION>='31'">
+            <if cond="WX_VERSION>='32'">
                 <sys-lib>wxscintilla$(D_OPT)</sys-lib>
             </if>
             <sys-lib>wxexpat$(D_OPT)</sys-lib>
@@ -226,12 +226,22 @@ Accepted values: AMD64, IA64.
     </template>
 
     <set var="FR_HEADERFILES">
+        $(SOURCEDIR)/frutils.h
+        $(SOURCEDIR)/frversion.h
+        $(SOURCEDIR)/Isaac.h
+        $(SOURCEDIR)/logger.h
+        $(SOURCEDIR)/main.h
+        $(SOURCEDIR)/MasterPassword.h
+        $(SOURCEDIR)/revisioninfo.h
+        $(SOURCEDIR)/statementHistory.h
         $(SOURCEDIR)/config/Config.h
         $(SOURCEDIR)/config/DatabaseConfig.h
         $(SOURCEDIR)/config/LocalSettings.h
         $(SOURCEDIR)/core/ArtProvider.h
         $(SOURCEDIR)/core/CodeTemplateProcessor.h
+        $(SOURCEDIR)/core/FRDecimal.h
         $(SOURCEDIR)/core/FRError.h
+        $(SOURCEDIR)/core/FRInt128.h
         $(SOURCEDIR)/core/ObjectWithHandle.h
         $(SOURCEDIR)/core/Observer.h
         $(SOURCEDIR)/core/ProcessableObject.h
@@ -242,9 +252,6 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/core/URIProcessor.h
         $(SOURCEDIR)/core/Visitor.h
         $(SOURCEDIR)/engine/MetadataLoader.h
-        $(SOURCEDIR)/frutils.h
-        $(SOURCEDIR)/frversion.h
-		${SOURCEDIR}/firebird/constants.h
         $(SOURCEDIR)/gui/AboutBox.h
         $(SOURCEDIR)/gui/AdvancedMessageDialog.h
         $(SOURCEDIR)/gui/AdvancedSearchFrame.h
@@ -256,6 +263,40 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/CommandManager.h
         $(SOURCEDIR)/gui/ConfdefTemplateProcessor.h
         $(SOURCEDIR)/gui/ContextMenuMetadataItemVisitor.h
+        $(SOURCEDIR)/gui/CreateIndexDialog.h
+        $(SOURCEDIR)/gui/DatabaseRegistrationDialog.h
+        $(SOURCEDIR)/gui/DataGeneratorFrame.h
+        $(SOURCEDIR)/gui/EditBlobDialog.h
+        $(SOURCEDIR)/gui/EventWatcherFrame.h
+        $(SOURCEDIR)/gui/ExecuteSql.h
+        $(SOURCEDIR)/gui/ExecuteSqlFrame.h
+        $(SOURCEDIR)/gui/FieldPropertiesDialog.h
+        $(SOURCEDIR)/gui/FindDialog.h
+        $(SOURCEDIR)/gui/FRLayoutConfig.h
+        $(SOURCEDIR)/gui/FRStyle.h
+        $(SOURCEDIR)/gui/GUIURIHandlerHelper.h
+        $(SOURCEDIR)/gui/HtmlHeaderMetadataItemVisitor.h
+        $(SOURCEDIR)/gui/HtmlTemplateProcessor.h
+        $(SOURCEDIR)/gui/InsertDialog.h
+        $(SOURCEDIR)/gui/InsertParametersDialog.h
+        $(SOURCEDIR)/gui/MainFrame.h
+        $(SOURCEDIR)/gui/MetadataItemPropertiesFrame.h
+        $(SOURCEDIR)/gui/MultilineEnterDialog.h
+        $(SOURCEDIR)/gui/PreferencesDialog.h
+        $(SOURCEDIR)/gui/PrivilegesDialog.h
+        $(SOURCEDIR)/gui/ProgressDialog.h
+        $(SOURCEDIR)/gui/ReorderFieldsDialog.h
+        $(SOURCEDIR)/gui/RestoreFrame.h
+        $(SOURCEDIR)/gui/ServerRegistrationDialog.h
+        $(SOURCEDIR)/gui/ServiceBaseFrame.h
+        $(SOURCEDIR)/gui/ShutdownFrame.h
+        $(SOURCEDIR)/gui/ShutdownStartupBaseFrame.h
+        $(SOURCEDIR)/gui/SimpleHtmlFrame.h
+        $(SOURCEDIR)/gui/StartupFrame.h
+        $(SOURCEDIR)/gui/StatementHistoryDialog.h
+        $(SOURCEDIR)/gui/StyleGuide.h
+        $(SOURCEDIR)/gui/UserDialog.h
+        $(SOURCEDIR)/gui/UsernamePasswordDialog.h
         $(SOURCEDIR)/gui/controls/ControlUtils.h
         $(SOURCEDIR)/gui/controls/DataGrid.h
         $(SOURCEDIR)/gui/controls/DataGridRowBuffer.h
@@ -266,44 +307,8 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/controls/LogTextControl.h
         $(SOURCEDIR)/gui/controls/PrintableHtmlWindow.h
         $(SOURCEDIR)/gui/controls/TextControl.h
-        $(SOURCEDIR)/gui/CreateIndexDialog.h
-        $(SOURCEDIR)/gui/DataGeneratorFrame.h
-        $(SOURCEDIR)/gui/DatabaseRegistrationDialog.h
-        $(SOURCEDIR)/gui/EditBlobDialog.h
-        $(SOURCEDIR)/gui/EventWatcherFrame.h
-        $(SOURCEDIR)/gui/ExecuteSqlFrame.h
-        $(SOURCEDIR)/gui/ExecuteSql.h
-        $(SOURCEDIR)/gui/FieldPropertiesDialog.h
-        $(SOURCEDIR)/gui/FindDialog.h
-        $(SOURCEDIR)/gui/FRLayoutConfig.h
-        ${SOURCEDIR}/gui/FRStyle.h
-        $(SOURCEDIR)/gui/HtmlHeaderMetadataItemVisitor.h
-        $(SOURCEDIR)/gui/HtmlTemplateProcessor.h
-        $(SOURCEDIR)/gui/GUIURIHandlerHelper.h
-        $(SOURCEDIR)/gui/InsertDialog.h
-        ${SOURCEDIR}/gui/InsertParametersDialog.h
-        $(SOURCEDIR)/gui/MainFrame.h
-        $(SOURCEDIR)/gui/MetadataItemPropertiesFrame.h
-        $(SOURCEDIR)/gui/MultilineEnterDialog.h
-        $(SOURCEDIR)/gui/PreferencesDialog.h
-        $(SOURCEDIR)/gui/PrivilegesDialog.h
-        $(SOURCEDIR)/gui/ProgressDialog.h
-        $(SOURCEDIR)/gui/ReorderFieldsDialog.h
-        $(SOURCEDIR)/gui/RestoreFrame.h
-        $(SOURCEDIR)/gui/ServerRegistrationDialog.h
-        ${SOURCEDIR}/gui/ServiceBaseFrame.h
-        ${SOURCEDIR}/gui/ShutdownStartupBaseFrame.h
-        ${SOURCEDIR}/gui/ShutdownFrame.h
-        $(SOURCEDIR)/gui/SimpleHtmlFrame.h
-        $(SOURCEDIR)/gui/StatementHistoryDialog.h
-        ${SOURCEDIR}/gui/StartupFrame.h
-        $(SOURCEDIR)/gui/StyleGuide.h
-        $(SOURCEDIR)/gui/UserDialog.h
-        $(SOURCEDIR)/gui/UsernamePasswordDialog.h
-        $(SOURCEDIR)/Isaac.h
-        $(SOURCEDIR)/logger.h
-        $(SOURCEDIR)/main.h
-        $(SOURCEDIR)/MasterPassword.h
+        $(SOURCEDIR)/metadata/CharacterSet.h
+        $(SOURCEDIR)/metadata/Collation.h
         $(SOURCEDIR)/metadata/collection.h
         $(SOURCEDIR)/metadata/column.h
         $(SOURCEDIR)/metadata/constraints.h
@@ -321,7 +326,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/metadata/MetadataItemURIHandlerHelper.h
         $(SOURCEDIR)/metadata/MetadataItemVisitor.h
         $(SOURCEDIR)/metadata/MetadataTemplateManager.h
-        ${SOURCEDIR}/metadata/package.h
+        $(SOURCEDIR)/metadata/package.h
         $(SOURCEDIR)/metadata/parameter.h
         $(SOURCEDIR)/metadata/privilege.h
         $(SOURCEDIR)/metadata/procedure.h
@@ -331,8 +336,8 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/metadata/server.h
         $(SOURCEDIR)/metadata/table.h
         $(SOURCEDIR)/metadata/trigger.h
-        $(SOURCEDIR)/metadata/view.h
         $(SOURCEDIR)/metadata/User.h
+        $(SOURCEDIR)/metadata/view.h
         $(SOURCEDIR)/sql/Identifier.h
         $(SOURCEDIR)/sql/IncompleteStatement.h
         $(SOURCEDIR)/sql/MultiStatement.h
@@ -340,7 +345,6 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/sql/SqlStatement.h
         $(SOURCEDIR)/sql/SqlTokenizer.h
         $(SOURCEDIR)/sql/StatementBuilder.h
-        $(SOURCEDIR)/statementHistory.h
     </set>
 
     <set var="FR_PLATFORMSPECIFICSOURCES">
@@ -357,12 +361,22 @@ Accepted values: AMD64, IA64.
 
     <set var="FR_SOURCEFILES">
         $(SOURCEDIR)/addconstrainthandler.cpp
+        $(SOURCEDIR)/databasehandler.cpp
+        $(SOURCEDIR)/frprec.cpp
+        $(SOURCEDIR)/frutils.cpp
+        $(SOURCEDIR)/logger.cpp
+        $(SOURCEDIR)/main.cpp
+        $(SOURCEDIR)/MasterPassword.cpp
+        $(SOURCEDIR)/objectdescriptionhandler.cpp
+        $(SOURCEDIR)/statementHistory.cpp
         $(SOURCEDIR)/config/Config.cpp
         $(SOURCEDIR)/config/DatabaseConfig.cpp
         $(SOURCEDIR)/config/LocalSettings.cpp
         $(SOURCEDIR)/core/ArtProvider.cpp
         $(SOURCEDIR)/core/CodeTemplateProcessor.cpp
+        $(SOURCEDIR)/core/FRDecimal.cpp
         $(SOURCEDIR)/core/FRError.cpp
+        $(SOURCEDIR)/core/FRInt128.cpp
         $(SOURCEDIR)/core/Observer.cpp
         $(SOURCEDIR)/core/ProgressIndicator.cpp
         $(SOURCEDIR)/core/StringUtils.cpp
@@ -370,10 +384,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/core/TemplateProcessor.cpp
         $(SOURCEDIR)/core/URIProcessor.cpp
         $(SOURCEDIR)/core/Visitor.cpp
-        $(SOURCEDIR)/databasehandler.cpp
         $(SOURCEDIR)/engine/MetadataLoader.cpp
-        $(SOURCEDIR)/frprec.cpp
-        $(SOURCEDIR)/frutils.cpp
         $(SOURCEDIR)/gui/AboutBox.cpp
         $(SOURCEDIR)/gui/AdvancedMessageDialog.cpp
         $(SOURCEDIR)/gui/AdvancedSearchFrame.cpp
@@ -384,32 +395,22 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/CommandManager.cpp
         $(SOURCEDIR)/gui/ConfdefTemplateProcessor.cpp
         $(SOURCEDIR)/gui/ContextMenuMetadataItemVisitor.cpp
-        $(SOURCEDIR)/gui/controls/ControlUtils.cpp
-        $(SOURCEDIR)/gui/controls/DataGrid.cpp
-        $(SOURCEDIR)/gui/controls/DataGridRowBuffer.cpp
-        $(SOURCEDIR)/gui/controls/DataGridRows.cpp
-        $(SOURCEDIR)/gui/controls/DataGridTable.cpp
-        $(SOURCEDIR)/gui/controls/DBHTreeControl.cpp
-        $(SOURCEDIR)/gui/controls/DndTextControls.cpp
-        $(SOURCEDIR)/gui/controls/LogTextControl.cpp
-        $(SOURCEDIR)/gui/controls/PrintableHtmlWindow.cpp
-        $(SOURCEDIR)/gui/controls/TextControl.cpp
         $(SOURCEDIR)/gui/CreateIndexDialog.cpp
-        $(SOURCEDIR)/gui/DataGeneratorFrame.cpp
         $(SOURCEDIR)/gui/DatabaseRegistrationDialog.cpp
+        $(SOURCEDIR)/gui/DataGeneratorFrame.cpp
         $(SOURCEDIR)/gui/EditBlobDialog.cpp
         $(SOURCEDIR)/gui/EventWatcherFrame.cpp
-        $(SOURCEDIR)/gui/ExecuteSqlFrame.cpp
         $(SOURCEDIR)/gui/ExecuteSql.cpp
+        $(SOURCEDIR)/gui/ExecuteSqlFrame.cpp
         $(SOURCEDIR)/gui/FieldPropertiesDialog.cpp
         $(SOURCEDIR)/gui/FindDialog.cpp
         $(SOURCEDIR)/gui/FRLayoutConfig.cpp
-        ${SOURCEDIR}/gui/FRStyle.cpp
+        $(SOURCEDIR)/gui/FRStyle.cpp
         $(SOURCEDIR)/gui/GUIURIHandlerHelper.cpp
         $(SOURCEDIR)/gui/HtmlHeaderMetadataItemVisitor.cpp
         $(SOURCEDIR)/gui/HtmlTemplateProcessor.cpp
         $(SOURCEDIR)/gui/InsertDialog.cpp
-        ${SOURCEDIR}/gui/InsertParametersDialog.cpp
+        $(SOURCEDIR)/gui/InsertParametersDialog.cpp
         $(SOURCEDIR)/gui/MainFrame.cpp
         $(SOURCEDIR)/gui/MetadataItemPropertiesFrame.cpp
         $(SOURCEDIR)/gui/MultilineEnterDialog.cpp
@@ -420,18 +421,27 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/ReorderFieldsDialog.cpp
         $(SOURCEDIR)/gui/RestoreFrame.cpp
         $(SOURCEDIR)/gui/ServerRegistrationDialog.cpp
-        ${SOURCEDIR}/gui/ServiceBaseFrame.cpp
-        ${SOURCEDIR}/gui/ShutdownStartupBaseFrame.cpp
-        ${SOURCEDIR}/gui/ShutdownFrame.cpp
+        $(SOURCEDIR)/gui/ServiceBaseFrame.cpp
+        $(SOURCEDIR)/gui/ShutdownFrame.cpp
+        $(SOURCEDIR)/gui/ShutdownStartupBaseFrame.cpp
         $(SOURCEDIR)/gui/SimpleHtmlFrame.cpp
+        $(SOURCEDIR)/gui/StartupFrame.cpp
         $(SOURCEDIR)/gui/StatementHistoryDialog.cpp
-        ${SOURCEDIR}/gui/StartupFrame.cpp
         $(SOURCEDIR)/gui/StyleGuide.cpp
         $(SOURCEDIR)/gui/UserDialog.cpp
         $(SOURCEDIR)/gui/UsernamePasswordDialog.cpp
-        $(SOURCEDIR)/logger.cpp
-        $(SOURCEDIR)/main.cpp
-        $(SOURCEDIR)/MasterPassword.cpp
+        $(SOURCEDIR)/gui/controls/ControlUtils.cpp
+        $(SOURCEDIR)/gui/controls/DataGrid.cpp
+        $(SOURCEDIR)/gui/controls/DataGridRowBuffer.cpp
+        $(SOURCEDIR)/gui/controls/DataGridRows.cpp
+        $(SOURCEDIR)/gui/controls/DataGridTable.cpp
+        $(SOURCEDIR)/gui/controls/DBHTreeControl.cpp
+        $(SOURCEDIR)/gui/controls/DndTextControls.cpp
+        $(SOURCEDIR)/gui/controls/LogTextControl.cpp
+        $(SOURCEDIR)/gui/controls/PrintableHtmlWindow.cpp
+        $(SOURCEDIR)/gui/controls/TextControl.cpp
+        $(SOURCEDIR)/metadata/CharacterSet.cpp
+        $(SOURCEDIR)/metadata/Collation.cpp
         $(SOURCEDIR)/metadata/column.cpp
         $(SOURCEDIR)/metadata/constraints.cpp
         $(SOURCEDIR)/metadata/CreateDDLVisitor.cpp
@@ -448,7 +458,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/metadata/MetadataItemVisitor.cpp
         $(SOURCEDIR)/metadata/MetadataTemplateCmdHandler.cpp
         $(SOURCEDIR)/metadata/MetadataTemplateManager.cpp
-        ${SOURCEDIR}/metadata/package.cpp
+        $(SOURCEDIR)/metadata/package.cpp
         $(SOURCEDIR)/metadata/parameter.cpp
         $(SOURCEDIR)/metadata/privilege.cpp
         $(SOURCEDIR)/metadata/procedure.cpp
@@ -460,7 +470,6 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/metadata/trigger.cpp
         $(SOURCEDIR)/metadata/User.cpp
         $(SOURCEDIR)/metadata/view.cpp
-        $(SOURCEDIR)/objectdescriptionhandler.cpp
         $(SOURCEDIR)/sql/Identifier.cpp
         $(SOURCEDIR)/sql/IncompleteStatement.cpp
         $(SOURCEDIR)/sql/MultiStatement.cpp
@@ -468,7 +477,6 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/sql/SqlStatement.cpp
         $(SOURCEDIR)/sql/SqlTokenizer.cpp
         $(SOURCEDIR)/sql/StatementBuilder.cpp
-        $(SOURCEDIR)/statementHistory.cpp
 
         $(FR_PLATFORMSPECIFICSOURCES)
     </set>
@@ -531,36 +539,48 @@ Accepted values: AMD64, IA64.
         <if cond="FORMAT!='autoconf'">html-templates</if>
     </set>
     <set var="HTMLTEMPLATEFILES">
-        ALLloading.html
-        DATABASE.html
-        DATABASEtriggers.html
-        DDL.html
-        DOMAIN.html
-        EXCEPTION.html
-        FUNCTION.html
-        GENERATOR.html
-        PROCEDURE.html
-        PROCEDUREprivileges.html
-        ROLE.html
-        ROLEprivileges.html
-        SERVER.html
-        TABLE.html
-        TABLEconstraints.html
-        TABLEtriggers.html
-        TABLEindices.html
-        TABLEprivileges.html
-        TRIGGER.html
-        VIEW.html
-        VIEWprivileges.html
-        VIEWtriggers.html
-        dependencies.html
-        header.html
-        compute.png
-        drop.png
-        ok.png
-        ok2.png
-        redx.png
-        view.png
+		ALLloading.html
+		COLLATION.html
+		COLLATIONprivileges.html
+		DATABASE.html
+		DATABASEtriggers.html
+		DDL.html
+		dependencies.html
+		DOMAIN.html
+		DOMAINprivileges.html
+		EXCEPTION.html
+		EXCEPTIONprivileges.html
+		FUNCTION.html
+		FUNCTIONprivileges.html
+		GENERATOR.html
+		GENERATORprivileges.html
+		header.html
+		INDEX.html
+		INDEXprivileges.html
+		PACKAGE.html
+		PACKAGEprivileges.html
+		PROCEDURE.html
+		PROCEDUREprivileges.html
+		ROLE.html
+		ROLEprivileges.html
+		SERVER.html
+		TABLE.html
+		TABLEconstraints.html
+		TABLEindices.html
+		TABLEprivileges.html
+		TABLEtriggers.html
+		TRIGGER.html
+		UDF.html
+		UDFprivileges.html
+		VIEW.html
+		VIEWprivileges.html
+		VIEWtriggers.html
+		compute.png
+		drop.png
+		ok.png
+		ok2.png
+		redx.png
+		view.png
     </set>
 
     <set var="RESOURCEDIR">
@@ -577,6 +597,36 @@ Accepted values: AMD64, IA64.
         execute_procedure.template
         save_as_csv.confdef
         save_as_csv.template
+    </set>
+
+    <set var="XMLSTYLEDIR">
+        <if cond="FORMAT=='autoconf'">$(DOLLAR)(srcdir)/xml-styles</if>
+        <if cond="FORMAT!='autoconf'">xml-styles</if>
+    </set>
+    <set var="XMLSTYLEFILES">
+		Bespin.xml
+		Black board.xml
+		Choco.xml
+		DansLeRuSH-Dark.xml
+		DarkModeDefault.xml
+		Deep Black.xml
+		Hello Kitty.xml
+		HotFudgeSundae.xml
+		khaki.xml
+		Mono Industrial.xml
+		Monokai.xml
+		MossyLawn.xml
+		Navajo.xml
+		Obsidian.xml
+		Plastic Code Wrap.xml
+		Ruby Blue.xml
+		Solarized.xml
+		Solarized-light.xml
+		stylers.xml
+		Twilight.xml
+		Vibrant Ink.xml
+		vim Dark Blue.xml
+		Zenburn.xml
     </set>
 
     <define-tag name="mac-app-bundle" rules="exe">
@@ -607,7 +657,8 @@ Accepted values: AMD64, IA64.
                 mkdir -p $(BUNDLE)/SharedSupport/conf-defs
                 mkdir -p $(BUNDLE)/SharedSupport/docs
                 mkdir -p $(BUNDLE)/SharedSupport/html-templates
-		mkdir -p $(BUNDLE)/SharedSupport/sys-templates
+				mkdir -p $(BUNDLE)/SharedSupport/sys-templates
+				mkdir -p $(BUNDLE)/SharedSupport/xml-styles
 
                 <!-- PkgInfo: -->
                 echo -n "APPL????" >$(BUNDLE)/PkgInfo
@@ -629,7 +680,8 @@ Accepted values: AMD64, IA64.
                 cp -R $(DOLLAR)(srcdir)/conf-defs/* $(BUNDLE)/SharedSupport/conf-defs
                 cp -R $(DOLLAR)(srcdir)/docs/* $(BUNDLE)/SharedSupport/docs
                 cp -R $(DOLLAR)(srcdir)/html-templates/* $(BUNDLE)/SharedSupport/html-templates
-		cp -R $(DOLLAR)(srcdir)/sys-templates/* $(BUNDLE)/SharedSupport/sys-templates
+				cp -R $(DOLLAR)(srcdir)/sys-templates/* $(BUNDLE)/SharedSupport/sys-templates
+				cp -R $(DOLLAR)(srcdir)/xml-styles/* $(BUNDLE)/SharedSupport/xml-styles
             </command>
         </modify-target>
 
@@ -745,37 +797,43 @@ Accepted values: AMD64, IA64.
             <files>$(SYSTEMPLATEFILES)</files>
             <install-to>$(DATADIR)/flamerobin/sys-templates</install-to>
         </data-files>
+        <data-files>
+            <srcdir>$(XMLSTYLEDIR)</srcdir>
+            <files>$(XMLSTYLEFILES)</files>
+            <install-to>$(DATADIR)/flamerobin/xml-styles</install-to>
+        </data-files>
     </if>
 
 
 <!-- build IBPP library -->
 
     <set var="IBPP_HEADERFILES">
-        ${SOURCEDIR}/firebird/include/ibase.h
-        ${SOURCEDIR}/firebird/include/ierror.h
-        ${SOURCEDIR}/firebird/include/firebird/impl/blr.h
-        ${SOURCEDIR}/firebird/include/firebird/impl/consts_pub.h
-        ${SOURCEDIR}/firebird/include/firebird/impl/dsc_pub.h
-        ${SOURCEDIR}/firebird/include/firebird/impl/inf_pub.h
-        ${SOURCEDIR}/firebird/include/firebird/impl/msg_helper.h
-        ${SOURCEDIR}/firebird/include/firebird/impl/sqlda_pub.h
-        ${SOURCEDIR}/firebird/include/firebird/impl/types_pub.h        
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/all.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/dsql.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/dyn.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/fbsvcmgr.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/fbtracemgr.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/gbak.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/gfix.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/gsec.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/gstat.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/isql.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/jrd.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/jrd_bugchk.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/nbackup.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/sqlerr.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/sqlwarn.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/utl.h		
+        $(SOURCEDIR)/firebird/constants.h
+        $(SOURCEDIR)/firebird/include/ibase.h
+        $(SOURCEDIR)/firebird/include/iberror.h
+        $(SOURCEDIR)/firebird/include/firebird/impl/blr.h
+        $(SOURCEDIR)/firebird/include/firebird/impl/consts_pub.h
+        $(SOURCEDIR)/firebird/include/firebird/impl/dsc_pub.h
+        $(SOURCEDIR)/firebird/include/firebird/impl/inf_pub.h
+        $(SOURCEDIR)/firebird/include/firebird/impl/msg_helper.h
+        $(SOURCEDIR)/firebird/include/firebird/impl/sqlda_pub.h
+        $(SOURCEDIR)/firebird/include/firebird/impl/types_pub.h
+        $(SOURCEDIR)/firebird/include/firebird/impl/msg/all.h
+        $(SOURCEDIR)/firebird/include/firebird/impl/msg/dsql.h
+        $(SOURCEDIR)/firebird/include/firebird/impl/msg/dyn.h
+        $(SOURCEDIR)/firebird/include/firebird/impl/msg/fbsvcmgr.h
+        $(SOURCEDIR)/firebird/include/firebird/impl/msg/fbtracemgr.h
+        $(SOURCEDIR)/firebird/include/firebird/impl/msg/gbak.h
+        $(SOURCEDIR)/firebird/include/firebird/impl/msg/gfix.h
+        $(SOURCEDIR)/firebird/include/firebird/impl/msg/gsec.h
+        $(SOURCEDIR)/firebird/include/firebird/impl/msg/gstat.h
+        $(SOURCEDIR)/firebird/include/firebird/impl/msg/isql.h
+        $(SOURCEDIR)/firebird/include/firebird/impl/msg/jrd.h
+        $(SOURCEDIR)/firebird/include/firebird/impl/msg/jrd_bugchk.h
+        $(SOURCEDIR)/firebird/include/firebird/impl/msg/nbackup.h
+        $(SOURCEDIR)/firebird/include/firebird/impl/msg/sqlerr.h
+        $(SOURCEDIR)/firebird/include/firebird/impl/msg/sqlwarn.h
+        $(SOURCEDIR)/firebird/include/firebird/impl/msg/utl.h
         $(SOURCEDIR)/ibpp/_ibpp.h
         $(SOURCEDIR)/ibpp/ibpp.h
     </set>
@@ -794,6 +852,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/ibpp/dbkey.cpp
         $(SOURCEDIR)/ibpp/events.cpp
         $(SOURCEDIR)/ibpp/exception.cpp
+        $(SOURCEDIR)/ibpp/ibint128.cpp
         $(SOURCEDIR)/ibpp/row.cpp
         $(SOURCEDIR)/ibpp/service.cpp
         $(SOURCEDIR)/ibpp/statement.cpp

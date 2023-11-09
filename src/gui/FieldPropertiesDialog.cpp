@@ -541,15 +541,22 @@ void FieldPropertiesDialog::loadCharsets()
     wxWindowUpdateLocker freeze(choice_charset);
 
     choice_charset->Clear();
-    choice_charset->Append("NONE");
-    if (DatabasePtr db = tableM->getDatabase())
+    //choice_charset->Append("NONE");
+    DatabasePtr db = tableM->getDatabase();
+    choice_charset->Append(db->getCharacterSet());
+    choice_charset->SetStringSelection(db->getDatabaseCharset());
+    //choice_charset->FindString();
+
+    
+
+    /*if (DatabasePtr db = tableM->getDatabase())
     {
         wxString stmt = "select rdb$character_set_name"
             " from rdb$character_sets order by 1";
         wxArrayString charsets(db->loadIdentifiers(stmt));
         charsets.Remove("NONE");
         choice_charset->Append(charsets);
-    }
+    }*/
 }
 
 void FieldPropertiesDialog::loadCollations()

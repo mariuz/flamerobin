@@ -109,6 +109,7 @@ public:
 
     // create new object
     void showCreateTemplate(const wxString& statement);
+    void OnMenuCreateCollation(wxCommandEvent& event);
     void OnMenuCreateDBTrigger(wxCommandEvent& event);
     void OnMenuCreateDDLTrigger(wxCommandEvent& event);
     void OnMenuCreateDMLTrigger(wxCommandEvent& event);

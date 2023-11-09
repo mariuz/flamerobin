@@ -26,6 +26,7 @@
 
 #include <wx/wx.h>
 #include <wx/wxhtml.h>
+#include <wx/webview.h>
 
 class wxHtmlEasyPrinting;
 

@@ -93,6 +93,12 @@
             <key>ShowSystemIndices</key>
             <default>1</default>
         </setting>
+        <!--<setting type="checkbox">
+            <caption>Show system characterset in tree</caption>
+            <description>If checked the system CharacterSet will be shown in the tree by default (can be overridden per database)</description>
+            <key>ShowSystemCharacterSet</key>
+            <default>0</default>
+        </setting> -->
         <setting type="checkbox">
             <caption>Show system domains in tree</caption>
             <description>If checked the system domains will be shown in the tree by default (can be overridden per database)</description>

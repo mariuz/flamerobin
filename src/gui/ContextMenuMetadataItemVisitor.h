@@ -75,6 +75,12 @@ public:
     virtual void visitUsers(Users& users);
     virtual void visitView(View& view);
     virtual void visitViews(Views& views);
+    virtual void visitCharacterSet(CharacterSet& charset);
+    virtual void visitCharacterSets(CharacterSets& charsets);
+    virtual void visitCollation(Collation& collation);
+    virtual void visitSysCollations(SysCollations& collations);
+    virtual void visitCollations(Collations& coolations);
+
 protected:
     wxMenu* menuM;
     virtual void addCreateItem();

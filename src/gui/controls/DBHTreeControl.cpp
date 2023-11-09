@@ -34,7 +34,6 @@
 #include <wx/dataobj.h>
 #include <wx/dnd.h>
 #include <wx/imaglist.h>
-#include <wx/strvararg.h>
 
 #include <algorithm>
 #include <map>
@@ -47,6 +46,9 @@
 #include "core/Subject.h"
 #include "gui/ContextMenuMetadataItemVisitor.h"
 #include "gui/controls/DBHTreeControl.h"
+
+#include "metadata/CharacterSet.h"
+#include "metadata/Collation.h"
 #include "metadata/database.h"
 #include "metadata/domain.h"
 #include "metadata/exception.h"
@@ -181,6 +183,10 @@ DBHTreeImageList::DBHTreeImageList()
 {
     addImage(ART_Object);
     addImage(ART_Column);
+    addImage(ART_CharacterSet);
+    addImage(ART_CharacterSets);
+    addImage(ART_Collation);
+    addImage(ART_Collations);
     addImage(ART_Computed);
     addImage(ART_DatabaseConnected);
     addImage(ART_DatabaseDisconnected);
@@ -296,6 +302,11 @@ public:
     bool getSortChildren() { return sortChildrenM; }
     bool isConfigSensitive() { return nodeConfigSensitiveM; }
 
+    virtual void visitCharacterSet(CharacterSet& characterset);
+    virtual void visitCharacterSets(CharacterSets& charactersets);
+    virtual void visitCollation(Collation& collation);
+    virtual void visitSysCollations(SysCollations& collations);
+    virtual void visitCollations(Collations& collations);
     virtual void visitColumn(Column& column);
     virtual void visitDatabase(Database& database);
     virtual void visitDomain(Domain& domain);
@@ -378,6 +389,31 @@ void DBHTreeItemVisitor::setNodeProperties(MetadataItem* metadataItem,
 
     showChildrenM = childCount > 0;
     sortChildrenM = false;
+}
+
+void DBHTreeItemVisitor::visitCharacterSet(CharacterSet& characterset)
+{
+    setNodeProperties(&characterset, ART_CharacterSet);
+}
+
+void DBHTreeItemVisitor::visitCharacterSets(CharacterSets& charactersets)
+{
+    setNodeProperties(&charactersets, ART_CharacterSets);
+}
+
+void DBHTreeItemVisitor::visitCollation(Collation& collation)
+{
+    setNodeProperties(&collation, ART_Collation);
+}
+
+void DBHTreeItemVisitor::visitSysCollations(SysCollations& collations)
+{
+    setNodeProperties(&collations, ART_Collations);
+}
+
+void DBHTreeItemVisitor::visitCollations(Collations& collations)
+{
+    setNodeProperties(&collations, ART_Collations);
 }
 
 void DBHTreeItemVisitor::visitColumn(Column& column)

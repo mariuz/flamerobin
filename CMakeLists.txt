@@ -61,6 +61,14 @@ set(SOURCEDIR src/) # Hold over from old build system, probably overkill, but do
 # FlameRobin app source files
 list(APPEND SOURCE_LIST
         ${SOURCEDIR}/addconstrainthandler.cpp
+        ${SOURCEDIR}/databasehandler.cpp
+        ${SOURCEDIR}/frprec.cpp
+        ${SOURCEDIR}/frutils.cpp
+        ${SOURCEDIR}/logger.cpp
+        ${SOURCEDIR}/main.cpp
+        ${SOURCEDIR}/MasterPassword.cpp
+        ${SOURCEDIR}/objectdescriptionhandler.cpp
+        ${SOURCEDIR}/statementHistory.cpp
         ${SOURCEDIR}/config/Config.cpp
         ${SOURCEDIR}/config/DatabaseConfig.cpp
         ${SOURCEDIR}/config/LocalSettings.cpp
@@ -76,10 +84,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/core/TemplateProcessor.cpp
         ${SOURCEDIR}/core/URIProcessor.cpp
         ${SOURCEDIR}/core/Visitor.cpp
-        ${SOURCEDIR}/databasehandler.cpp
         ${SOURCEDIR}/engine/MetadataLoader.cpp
-        ${SOURCEDIR}/frprec.cpp
-        ${SOURCEDIR}/frutils.cpp
         ${SOURCEDIR}/gui/AboutBox.cpp
         ${SOURCEDIR}/gui/AdvancedMessageDialog.cpp
         ${SOURCEDIR}/gui/AdvancedSearchFrame.cpp
@@ -90,23 +95,13 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/CommandManager.cpp
         ${SOURCEDIR}/gui/ConfdefTemplateProcessor.cpp
         ${SOURCEDIR}/gui/ContextMenuMetadataItemVisitor.cpp
-        ${SOURCEDIR}/gui/controls/ControlUtils.cpp
-        ${SOURCEDIR}/gui/controls/DataGrid.cpp
-        ${SOURCEDIR}/gui/controls/DataGridRowBuffer.cpp
-        ${SOURCEDIR}/gui/controls/DataGridRows.cpp
-        ${SOURCEDIR}/gui/controls/DataGridTable.cpp
-        ${SOURCEDIR}/gui/controls/DBHTreeControl.cpp
-        ${SOURCEDIR}/gui/controls/DndTextControls.cpp
-        ${SOURCEDIR}/gui/controls/LogTextControl.cpp
-        ${SOURCEDIR}/gui/controls/PrintableHtmlWindow.cpp
-        ${SOURCEDIR}/gui/controls/TextControl.cpp
         ${SOURCEDIR}/gui/CreateIndexDialog.cpp
-        ${SOURCEDIR}/gui/DataGeneratorFrame.cpp
         ${SOURCEDIR}/gui/DatabaseRegistrationDialog.cpp
+        ${SOURCEDIR}/gui/DataGeneratorFrame.cpp
         ${SOURCEDIR}/gui/EditBlobDialog.cpp
         ${SOURCEDIR}/gui/EventWatcherFrame.cpp
-        ${SOURCEDIR}/gui/ExecuteSqlFrame.cpp
         ${SOURCEDIR}/gui/ExecuteSql.cpp
+        ${SOURCEDIR}/gui/ExecuteSqlFrame.cpp
         ${SOURCEDIR}/gui/FieldPropertiesDialog.cpp
         ${SOURCEDIR}/gui/FindDialog.cpp
         ${SOURCEDIR}/gui/FRLayoutConfig.cpp
@@ -127,17 +122,26 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/RestoreFrame.cpp
         ${SOURCEDIR}/gui/ServerRegistrationDialog.cpp
         ${SOURCEDIR}/gui/ServiceBaseFrame.cpp
-        ${SOURCEDIR}/gui/ShutdownStartupBaseFrame.cpp
         ${SOURCEDIR}/gui/ShutdownFrame.cpp
+        ${SOURCEDIR}/gui/ShutdownStartupBaseFrame.cpp
         ${SOURCEDIR}/gui/SimpleHtmlFrame.cpp
-        ${SOURCEDIR}/gui/StatementHistoryDialog.cpp
         ${SOURCEDIR}/gui/StartupFrame.cpp
+        ${SOURCEDIR}/gui/StatementHistoryDialog.cpp
         ${SOURCEDIR}/gui/StyleGuide.cpp
         ${SOURCEDIR}/gui/UserDialog.cpp
         ${SOURCEDIR}/gui/UsernamePasswordDialog.cpp
-        ${SOURCEDIR}/logger.cpp
-        ${SOURCEDIR}/main.cpp
-        ${SOURCEDIR}/MasterPassword.cpp
+        ${SOURCEDIR}/gui/controls/ControlUtils.cpp
+        ${SOURCEDIR}/gui/controls/DataGrid.cpp
+        ${SOURCEDIR}/gui/controls/DataGridRowBuffer.cpp
+        ${SOURCEDIR}/gui/controls/DataGridRows.cpp
+        ${SOURCEDIR}/gui/controls/DataGridTable.cpp
+        ${SOURCEDIR}/gui/controls/DBHTreeControl.cpp
+        ${SOURCEDIR}/gui/controls/DndTextControls.cpp
+        ${SOURCEDIR}/gui/controls/LogTextControl.cpp
+        ${SOURCEDIR}/gui/controls/PrintableHtmlWindow.cpp
+        ${SOURCEDIR}/gui/controls/TextControl.cpp
+        ${SOURCEDIR}/metadata/CharacterSet.cpp
+        ${SOURCEDIR}/metadata/Collation.cpp
         ${SOURCEDIR}/metadata/column.cpp
         ${SOURCEDIR}/metadata/constraints.cpp
         ${SOURCEDIR}/metadata/CreateDDLVisitor.cpp
@@ -166,7 +170,6 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/metadata/trigger.cpp
         ${SOURCEDIR}/metadata/User.cpp
         ${SOURCEDIR}/metadata/view.cpp
-        ${SOURCEDIR}/objectdescriptionhandler.cpp
         ${SOURCEDIR}/sql/Identifier.cpp
         ${SOURCEDIR}/sql/IncompleteStatement.cpp
         ${SOURCEDIR}/sql/MultiStatement.cpp
@@ -174,9 +177,16 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/sql/SqlStatement.cpp
         ${SOURCEDIR}/sql/SqlTokenizer.cpp
         ${SOURCEDIR}/sql/StatementBuilder.cpp
-        ${SOURCEDIR}/statementHistory.cpp
 )
 list(APPEND HEADER_LIST
+        ${SOURCEDIR}/frutils.h
+        ${SOURCEDIR}/frversion.h
+        ${SOURCEDIR}/Isaac.h
+        ${SOURCEDIR}/logger.h
+        ${SOURCEDIR}/main.h
+        ${SOURCEDIR}/MasterPassword.h
+        ${SOURCEDIR}/revisioninfo.h
+        ${SOURCEDIR}/statementHistory.h
         ${SOURCEDIR}/config/Config.h
         ${SOURCEDIR}/config/DatabaseConfig.h
         ${SOURCEDIR}/config/LocalSettings.h
@@ -195,9 +205,6 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/core/URIProcessor.h
         ${SOURCEDIR}/core/Visitor.h
         ${SOURCEDIR}/engine/MetadataLoader.h
-        ${SOURCEDIR}/frutils.h
-        ${SOURCEDIR}/frversion.h
-        ${SOURCEDIR}/firebird/constants.h
         ${SOURCEDIR}/gui/AboutBox.h
         ${SOURCEDIR}/gui/AdvancedMessageDialog.h
         ${SOURCEDIR}/gui/AdvancedSearchFrame.h
@@ -209,30 +216,20 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/gui/CommandManager.h
         ${SOURCEDIR}/gui/ConfdefTemplateProcessor.h
         ${SOURCEDIR}/gui/ContextMenuMetadataItemVisitor.h
-        ${SOURCEDIR}/gui/controls/ControlUtils.h
-        ${SOURCEDIR}/gui/controls/DataGrid.h
-        ${SOURCEDIR}/gui/controls/DataGridRowBuffer.h
-        ${SOURCEDIR}/gui/controls/DataGridRows.h
-        ${SOURCEDIR}/gui/controls/DataGridTable.h
-        ${SOURCEDIR}/gui/controls/DBHTreeControl.h
-        ${SOURCEDIR}/gui/controls/DndTextControls.h
-        ${SOURCEDIR}/gui/controls/LogTextControl.h
-        ${SOURCEDIR}/gui/controls/PrintableHtmlWindow.h
-        ${SOURCEDIR}/gui/controls/TextControl.h
         ${SOURCEDIR}/gui/CreateIndexDialog.h
-        ${SOURCEDIR}/gui/DataGeneratorFrame.h
         ${SOURCEDIR}/gui/DatabaseRegistrationDialog.h
+        ${SOURCEDIR}/gui/DataGeneratorFrame.h
         ${SOURCEDIR}/gui/EditBlobDialog.h
         ${SOURCEDIR}/gui/EventWatcherFrame.h
-        ${SOURCEDIR}/gui/ExecuteSqlFrame.h
         ${SOURCEDIR}/gui/ExecuteSql.h
+        ${SOURCEDIR}/gui/ExecuteSqlFrame.h
         ${SOURCEDIR}/gui/FieldPropertiesDialog.h
         ${SOURCEDIR}/gui/FindDialog.h
         ${SOURCEDIR}/gui/FRLayoutConfig.h
         ${SOURCEDIR}/gui/FRStyle.h
+        ${SOURCEDIR}/gui/GUIURIHandlerHelper.h
         ${SOURCEDIR}/gui/HtmlHeaderMetadataItemVisitor.h
         ${SOURCEDIR}/gui/HtmlTemplateProcessor.h
-        ${SOURCEDIR}/gui/GUIURIHandlerHelper.h
         ${SOURCEDIR}/gui/InsertDialog.h
         ${SOURCEDIR}/gui/InsertParametersDialog.h
         ${SOURCEDIR}/gui/MainFrame.h
@@ -245,18 +242,26 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/gui/RestoreFrame.h
         ${SOURCEDIR}/gui/ServerRegistrationDialog.h
         ${SOURCEDIR}/gui/ServiceBaseFrame.h
-        ${SOURCEDIR}/gui/ShutdownStartupBaseFrame.h
         ${SOURCEDIR}/gui/ShutdownFrame.h
+        ${SOURCEDIR}/gui/ShutdownStartupBaseFrame.h
         ${SOURCEDIR}/gui/SimpleHtmlFrame.h
-        ${SOURCEDIR}/gui/StatementHistoryDialog.h
         ${SOURCEDIR}/gui/StartupFrame.h
+        ${SOURCEDIR}/gui/StatementHistoryDialog.h
         ${SOURCEDIR}/gui/StyleGuide.h
         ${SOURCEDIR}/gui/UserDialog.h
         ${SOURCEDIR}/gui/UsernamePasswordDialog.h
-        ${SOURCEDIR}/Isaac.h
-        ${SOURCEDIR}/logger.h
-        ${SOURCEDIR}/main.h
-        ${SOURCEDIR}/MasterPassword.h
+        ${SOURCEDIR}/gui/controls/ControlUtils.h
+        ${SOURCEDIR}/gui/controls/DataGrid.h
+        ${SOURCEDIR}/gui/controls/DataGridRowBuffer.h
+        ${SOURCEDIR}/gui/controls/DataGridRows.h
+        ${SOURCEDIR}/gui/controls/DataGridTable.h
+        ${SOURCEDIR}/gui/controls/DBHTreeControl.h
+        ${SOURCEDIR}/gui/controls/DndTextControls.h
+        ${SOURCEDIR}/gui/controls/LogTextControl.h
+        ${SOURCEDIR}/gui/controls/PrintableHtmlWindow.h
+        ${SOURCEDIR}/gui/controls/TextControl.h
+        ${SOURCEDIR}/metadata/CharacterSet.h
+        ${SOURCEDIR}/metadata/Collation.h
         ${SOURCEDIR}/metadata/collection.h
         ${SOURCEDIR}/metadata/column.h
         ${SOURCEDIR}/metadata/constraints.h
@@ -284,8 +289,8 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/metadata/server.h
         ${SOURCEDIR}/metadata/table.h
         ${SOURCEDIR}/metadata/trigger.h
-        ${SOURCEDIR}/metadata/view.h
         ${SOURCEDIR}/metadata/User.h
+        ${SOURCEDIR}/metadata/view.h
         ${SOURCEDIR}/sql/Identifier.h
         ${SOURCEDIR}/sql/IncompleteStatement.h
         ${SOURCEDIR}/sql/MultiStatement.h
@@ -293,7 +298,6 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/sql/SqlStatement.h
         ${SOURCEDIR}/sql/SqlTokenizer.h
         ${SOURCEDIR}/sql/StatementBuilder.h
-        ${SOURCEDIR}/statementHistory.h
 )
 
 # IBPP static lib source files

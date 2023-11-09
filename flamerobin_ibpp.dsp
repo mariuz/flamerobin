@@ -289,6 +289,10 @@ SOURCE=.\src\ibpp\exception.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\ibpp\ibint128.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\ibpp\row.cpp
 # End Source File
 # Begin Source File
@@ -321,15 +325,111 @@ SOURCE=.\src\ibpp\_ibpp.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\ibpp\ibase.h
+SOURCE=.\src\firebird\include\firebird\impl\msg\all.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\ibpp\iberror.h
+SOURCE=.\src\firebird\include\firebird\impl\blr.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\firebird\constants.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\firebird\include\firebird\impl\consts_pub.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\firebird\include\firebird\impl\dsc_pub.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\firebird\include\firebird\impl\msg\dsql.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\firebird\include\firebird\impl\msg\dyn.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\firebird\include\firebird\impl\msg\fbsvcmgr.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\firebird\include\firebird\impl\msg\fbtracemgr.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\firebird\include\firebird\impl\msg\gbak.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\firebird\include\firebird\impl\msg\gfix.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\firebird\include\firebird\impl\msg\gsec.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\firebird\include\firebird\impl\msg\gstat.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\firebird\include\ibase.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\firebird\include\iberror.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\ibpp\ibpp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\firebird\include\firebird\impl\inf_pub.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\firebird\include\firebird\impl\msg\isql.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\firebird\include\firebird\impl\msg\jrd.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\firebird\include\firebird\impl\msg\jrd_bugchk.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\firebird\include\firebird\impl\msg_helper.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\firebird\include\firebird\impl\msg\nbackup.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\firebird\include\firebird\impl\sqlda_pub.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\firebird\include\firebird\impl\msg\sqlerr.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\firebird\include\firebird\impl\msg\sqlwarn.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\firebird\include\firebird\impl\types_pub.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\firebird\include\firebird\impl\msg\utl.h
 # End Source File
 # End Group
 # End Target
