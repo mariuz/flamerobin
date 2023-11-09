@@ -520,9 +520,12 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
         wxString title,
         DatabasePtr db, const wxPoint& pos, const wxSize& size, long style)
     : BaseFrame(wxTheApp->GetTopWindow(), id, title, pos, size, style),
-        Observer(), databaseM(db.get())
+        Observer(), databasePtrM(db) //changed for volatile SQL Editor, as we only have a fake server and database
 {
     wxASSERT(db);
+    //Need this 2 PtrM lines especifically to keep a reference for both original objects in volatile SQL Editor else the serverptr is released as soon as exists MainFrame event call
+    databaseM = databasePtrM.get();
+    serverPtrM = databasePtrM->getServer();
 
     loadingM = true;
     updateEditorCaretPosM = true;
@@ -882,7 +885,11 @@ void ExecuteSqlFrame::doBeforeDestroy()
     if (grid_data->IsCellEditControlEnabled())
         grid_data->EnableCellEditControl(false);
     // make sure that further calls to update() will not call Close() again
+    if (databaseM->getIsVolative() && databaseM->isConnected())
+        databaseM->disconnect();
     databaseM = 0;
+    databasePtrM = 0;
+    serverPtrM = 0;
 }
 
 void ExecuteSqlFrame::showProperties(wxString objectName)

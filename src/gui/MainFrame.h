@@ -165,9 +165,6 @@ public:
     bool handleURI(URI& uri);
 private:
     RootPtr rootM;
-    //Volatile SQL Editor
-    DatabasePtr db;
-    ServerPtr serverPtrM;
 
     virtual bool doCanClose();
     virtual void doBeforeDestroy();

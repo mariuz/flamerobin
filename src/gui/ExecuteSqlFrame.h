@@ -111,6 +111,8 @@ private:
 
     void splitScreen();
     Database* databaseM;
+    DatabasePtr databasePtrM;
+    ServerPtr serverPtrM;
 
     StatementHistory::Position historyPositionM;
     wxString localBuffer;
