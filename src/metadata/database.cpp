@@ -2197,7 +2197,7 @@ void Database::getConnectedUsers(wxArrayString& users) const
         {
             wxString name((*it).first);
             if ((*it).second > 1)
-                name += wxString::Format(" (%d)", (*it).second);
+                name += wxString::Format(" (%zu)", (*it).second);
             users.Add(name);
         }
     }
