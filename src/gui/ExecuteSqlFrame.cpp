@@ -2129,7 +2129,10 @@ void ExecuteSqlFrame::prepareVolatileDatabase(wxString hostname, wxString port, 
     //serverPtrM = ServerPtr(serverM);
     ServerPtr serverPtrM = databaseM->getServer();
     if (!serverPtrM->getHostname().compare(hostname) || !serverPtrM->getPort().compare(port) || !databaseM->getPath().compare(path) || !databaseM->getUsername().compare(user) || !databaseM->getRawPassword().compare(password) || !databaseM->getRole().compare(role) || !databaseM->getDatabaseCharset().compare(charset))
+    {
         databaseM->disconnect();
+        transactionM = 0;
+    }
     else
         return;
 
@@ -2137,6 +2140,7 @@ void ExecuteSqlFrame::prepareVolatileDatabase(wxString hostname, wxString port, 
     serverPtrM->setPort(port);
 
     databaseM->setPath(path);
+    databaseM->setName_("VOLATILECONNECTION");
     databaseM->setUsername(user);
     databaseM->setRawPassword(password);
     databaseM->setRole(role);
@@ -2373,21 +2377,40 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
 
     SqlStatement stm(sql, databaseM, terminator);
 
-    if (stm.getAction() == actCONNECT)
+    if ((stm.getAction() == actCONNECT) || (stm.getAction() == actCREATE_DATABASE))
     {
         if (!databaseM->getIsVolative())
         {
-
-            log(_("Cannot use 'connect' statement in a regular SQL Script"));
-            return true;
+            log(_("Cannot use 'connect' or 'create' statement in a regular SQL Script"), ttError);
+            splitScreen();
+            return false;
         }
-        wxString connHostM, connDatabasePortM, connPathM, connUsernameM, connPasswordM, connRoleM, connCharsetM;
+        wxString connHostM, connDatabasePortM, connPathM, connUsernameM, connPasswordM, connRoleM, connCharsetM; int createPageSizeM, createDialecM;
         stm.getCONNECTION(connHostM, connDatabasePortM, connPathM, connUsernameM, connPasswordM, connRoleM, connCharsetM);
         prepareVolatileDatabase(connHostM, connDatabasePortM, connPathM, connUsernameM, connPasswordM, connRoleM, connCharsetM);
-        log(wxString::Format("Connecting to host: %s, port: %s, database: %s, user: %s, password: %s, role: %s, charset: %s", connHostM, connDatabasePortM, connPathM, connUsernameM, connPasswordM, connRoleM, connCharsetM));
+        if (stm.getAction() == actCREATE_DATABASE) {
+            createPageSizeM = stm.getCreatePageSize();
+            createDialecM = stm.getCreateDialect();
+            log(wxString::Format("Creating database: %s, port: %s, database: %s, user: %s, password: %s, role: %s, charset: %s, page size: %d, dialect %d", connHostM, connDatabasePortM, connPathM, connUsernameM, connPasswordM, connRoleM, connCharsetM, createPageSizeM, createDialecM), ttSql);
+            databaseM->create(createPageSizeM, createDialecM);
+        }
+        log(wxString::Format("Connecting to host: %s, port: %s, database: %s, user: %s, password: %s, role: %s, charset: %s", connHostM, connDatabasePortM, connPathM, connUsernameM, connPasswordM, connRoleM, connCharsetM), ttSql);
         databaseM->connect(databaseM->getRawPassword());
         return databaseM->isConnected();
 
+    }
+    else
+    if (stm.getAction() == actDISCONNECT) 
+    {
+        if (!databaseM->getIsVolative())
+        {
+            log(_("Cannot use 'disconnect' statement in a regular SQL Script"), ttError);
+            splitScreen();
+            return false;
+        }
+        databaseM->disconnect();
+        transactionM = 0;
+        return true;
     }
     if (styled_text_ctrl_sql->AutoCompActive())
         styled_text_ctrl_sql->AutoCompCancel();    // remove the list if needed

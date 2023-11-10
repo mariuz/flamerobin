@@ -123,7 +123,7 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
             actionM = actCOMMENT; 
             break;
         case kwCREATE:
-            actionM = actCREATE; 
+            actionM = (tokensM[1] == kwDATABASE ? actCREATE_DATABASE : actCREATE);
             break;
         case kwDECLARE:
             actionM = actDECLARE; 
@@ -148,6 +148,9 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
             break;
         case kwCONNECT:
             actionM = actCONNECT;
+            break;
+        case kwDISCONNECT:
+            actionM = actDISCONNECT;
             break;
         default:
             return; // true;
@@ -437,10 +440,12 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
     }
 
     // CONNECT "[database]"  password '[password]' user '[username]' role '[role=]' character set '[charset=NONE]';    
-    if (actionM == actCONNECT)
+    if ((actionM == actCONNECT) || (actionM == actCREATE_DATABASE))
     {
         //wxString database, user, password, role, charset;
         size_t idx = 1;
+        if (actionM == actCREATE_DATABASE)
+            idx++;
         connPathM = unquote(tokenStringsM[idx++], "'");
         
         
@@ -467,6 +472,8 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
         connPasswordM = "";
         connRoleM = "";
         connCharsetM = "NONE";
+        createPageSizeM = 8096;
+        createDialectM = 3;
         while (idx < tokensM.size())
         {
             if (tokensM[idx] == kwUSER)
@@ -488,6 +495,16 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
             {
                 idx++; idx++; //for character and set
                 connCharsetM = unquote(tokenStringsM[idx], "'");
+            }
+            else if (tokensM[idx] == kwPAGE_SIZE)
+            {
+                idx++;
+                tokenStringsM[idx].ToInt(&createPageSizeM);
+            }
+            else if (tokensM[idx] == kwDIALECT)
+            {
+                idx++;
+                tokenStringsM[idx].ToInt(&createDialectM);
             }
             idx++;
         }
@@ -530,7 +547,7 @@ bool SqlStatement::isDDL() const
 
 bool SqlStatement::getCONNECTION(wxString& host,wxString& port, wxString& path, wxString& user, wxString& password, wxString& role, wxString& charset)
 {
-    if (actionM != actCONNECT) return false;
+    if ((actionM != actCONNECT) && ((actionM != actCREATE_DATABASE))) return false;
     host = connHostM;
     port = connServerPort;
     path = connPathM;
@@ -539,6 +556,16 @@ bool SqlStatement::getCONNECTION(wxString& host,wxString& port, wxString& path, 
     role = connRoleM;
     charset = connCharsetM;
     return true;
+}
+
+int SqlStatement::getCreatePageSize() const
+{
+    return createPageSizeM;
+}
+
+int SqlStatement::getCreateDialect() const
+{
+    return createDialectM;
 }
 
 bool SqlStatement::isAlterColumn() const
