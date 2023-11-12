@@ -107,9 +107,12 @@ private:
     typedef enum { ttNormal, ttSql, ttError } TextType;
     void log(wxString s, TextType type = ttNormal);     // write messages to textbox
     void clearLogBeforeExecution();
+    void prepareVolatileDatabase(wxString server = "", wxString port = "3050", wxString db = "", wxString user = "", wxString password = "", wxString role = "", wxString charset = "NONE");
 
     void splitScreen();
     Database* databaseM;
+    DatabasePtr databasePtrM;
+    ServerPtr serverPtrM;
 
     StatementHistory::Position historyPositionM;
     wxString localBuffer;

@@ -86,6 +86,7 @@ enum {
     Menu_URLBugReport,
     Menu_NewObject,
     Menu_DatabaseRegistrationInfo,
+    Menu_NewVolatileSQLEditor,
     Menu_RegisterDatabase,
     Menu_CreateDatabase,
     Menu_ManageUsers,
