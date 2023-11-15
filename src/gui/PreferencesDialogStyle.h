@@ -25,6 +25,8 @@
 #ifndef PREFERENCESDIALOG_STYLE_H
 #define PREFERENCESDIALOG_STYLE_H
 
+#include <memory>
+
 #include <wx/xml/xml.h>
 
 #include "PreferencesDialog.h"
