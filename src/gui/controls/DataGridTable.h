@@ -30,7 +30,7 @@
 #include <ibpp.h>
 
 #include "gui/controls/DataGridRows.h"
-#include "gui/FRStyle.h"
+#include "gui/FRStyleManager.h"
 
 class Column;
 class Database;

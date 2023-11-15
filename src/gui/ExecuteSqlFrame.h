@@ -58,6 +58,7 @@ public:
     void markText(int start, int end);
     void setChars(bool firebirdIdentifierOnly);
     void setFont();
+    void setupStyles();
 
     bool hasSelection();
 
@@ -77,12 +78,14 @@ public:
     bool loadSqlFile(const wxString& filename);
     bool setSql(wxString sql);
 
+
     void executeAllStatements(bool autoExecute = false);
 
     virtual bool Show(bool show = TRUE);
 
     Database* getDatabase() const;
 private:
+    void setupStyles();
 
     virtual bool doCanClose();
     virtual void doBeforeDestroy();

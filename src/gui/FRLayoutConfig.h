@@ -29,7 +29,7 @@
 
 #include <wx/wx.h>
 
-#include "gui/FRStyle.h"
+#include "gui/FRStyleManager.h"
 
 class FRLayoutConfig
 {

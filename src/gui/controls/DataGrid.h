@@ -85,6 +85,7 @@ public:
 
     void cancelFetchAll();
     void fetchAll();
+    void setupStyles();
 
     std::vector<bool> getColumnsWithSelectedCells();
     std::vector<bool> getRowsWithSelectedCells();

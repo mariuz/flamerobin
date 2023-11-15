@@ -65,6 +65,7 @@
 #include "gui/InsertParametersDialog.h"
 #include "gui/StatementHistoryDialog.h"
 #include "gui/StyleGuide.h"
+#include "gui/FRStyleManager.h"
 #include "frutils.h"
 #include "logger.h"
 #include "metadata/column.h"
@@ -343,13 +344,7 @@ void SqlEditor::setup()
     if (!config().get("sqlEditorSmartHomeKey", true))
         CmdKeyAssign(wxSTC_KEY_HOME, wxSTC_KEYMOD_NORM, wxSTC_CMD_HOMEDISPLAY);
         
-    stylerManager().assignGlobal(this);
-    StyleClearAll();
-    stylerManager().assignLexer(this);
-    SetLexer(wxSTC_LEX_SQL);
-    stylerManager().assignMargin(this);
-    setChars(false);
-
+    setupStyles();
 
     centerCaret(false);
 }
@@ -477,6 +472,17 @@ void SqlEditor::setFont()
 */
 }
 
+void SqlEditor::setupStyles()
+{
+    stylerManager().assignGlobal(this);
+    StyleClearAll();
+    stylerManager().assignLexer(this);
+    SetLexer(wxSTC_LEX_SQL);
+    stylerManager().assignMargin(this);
+    setChars(false);
+
+}
+
 class ScrollAtEnd
 {
 private:
@@ -553,6 +559,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     notebook_pane_1 = new wxPanel(notebook_1, -1);
     styled_text_ctrl_stats = new wxStyledTextCtrl(notebook_pane_1, wxID_ANY,
         wxDefaultPosition, wxDefaultSize, wxBORDER_THEME);
+    stylerManager().attachObserver(this, false);
     stylerManager().assignGlobal(styled_text_ctrl_stats);
 
     styled_text_ctrl_stats->StyleClearAll();
@@ -2100,6 +2107,24 @@ bool ExecuteSqlFrame::setSql(wxString sql)
     return true;
 }
 
+void ExecuteSqlFrame::setupStyles()
+{
+    stylerManager().loadConfig();
+
+    styled_text_ctrl_sql->setupStyles();
+
+    stylerManager().assignGlobal(styled_text_ctrl_stats);
+
+    styled_text_ctrl_stats->StyleClearAll();
+    styled_text_ctrl_stats->SetWrapMode(wxSTC_WRAP_WORD);
+    styled_text_ctrl_stats->StyleSetForeground(1, *wxRED);
+    styled_text_ctrl_stats->StyleSetForeground(2, *wxBLUE);
+
+    grid_data->SetBackgroundColour(stylerManager().getDefaultStyle()->getbgColor());
+    grid_data->setupStyles();
+
+}
+
 void ExecuteSqlFrame::clearLogBeforeExecution()
 {
     if (config().get("SQLEditorExecuteClears", false))
@@ -2914,6 +2939,7 @@ void ExecuteSqlFrame::update()
 {
     if (databaseM && !databaseM->isConnected())
         Close();
+    setupStyles();
 }
 
 //! closes window if database is removed (unregistered)

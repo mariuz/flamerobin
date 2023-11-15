@@ -35,6 +35,7 @@
 #include "config/Config.h"
 #include "core/TemplateProcessor.h"
 #include "gui/BaseDialog.h"
+#include "gui/FRStyleManager.h"
 
 class Optionbook;
 class wxXmlNode;
@@ -151,6 +152,27 @@ protected:
     virtual const wxString getName() const;
 
     DECLARE_EVENT_TABLE()
+};
+
+
+// PrefDlgEventHandler helper
+typedef std::function<void(wxCommandEvent&)> CommandEventHandler;
+
+class PrefDlgEventHandler : public wxEvtHandler
+{
+public:
+    PrefDlgEventHandler(CommandEventHandler handler)
+        : wxEvtHandler(), handlerM(handler)
+    {
+    }
+
+    void OnCommandEvent(wxCommandEvent& event)
+    {
+        if (handlerM)
+            handlerM(event);
+    }
+private:
+    CommandEventHandler handlerM;
 };
 
 #endif // PREFERENCESDIALOG_H
