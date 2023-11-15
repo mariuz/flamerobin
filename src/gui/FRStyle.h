@@ -236,52 +236,5 @@ public:
 };
 
 
-// <Flamerobin>
-class FRStyleManager {
-private:
-    wxFileName fileNameM;
-    FRStyles* globalStylerM;
-    FRStylers stylersM;
-    wxColor m_GCodecolor{ 255,130,0 };
-protected:
-    void loadLexerStyles(wxXmlNode* node);
-    void loadGlobalStyles(wxXmlNode* node);
-
-    void saveLexerStyles(wxXmlNode* node);
-    void saveGlobalStyles(wxXmlNode* node);
-
-    void assignWordStyle(wxStyledTextCtrl* text, FRStyle* style);
-public:
-    FRStyleManager(wxFileName style);
-    
-    FRStyles* getGlobalStyler() { return globalStylerM; };
-    FRStylers getLexerStylers() { return stylersM; };
-    FRStyles* getStylerByName(wxString stylerName) { return stylerName == "Global Styles" ? getGlobalStyler() : getLexerStylers().getStylerByName(stylerName); };
-    FRStyles* getStylerByDesc(wxString stylerDesc) { return stylerDesc == "Global Styles" ? getGlobalStyler() : getLexerStylers().getStylerByDesc(stylerDesc); };
-
-    FRStyle* getGlobalStyle() { return globalStylerM->getStyleByName("Global override"); };
-    FRStyle* getDefaultStyle() { return globalStylerM->getStyleByName("Default Style"); };
-    FRStyle* getStyleByName(wxString styleName);
-    
-    wxFileName getfileName() { return fileNameM; };
-    void setfileName(wxFileName fileName);
-
-    
-
-    void assignGlobal(wxStyledTextCtrl* text);
-
-    void assignLexer(wxStyledTextCtrl* text);
-
-    void assignMargin(wxStyledTextCtrl* text);
-
-    void loadConfig();
-    void loadStyle();
-    void saveStyle();
-
-};
-
-FRStyleManager& stylerManager();
-
-
 
 #endif
