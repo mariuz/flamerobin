@@ -396,29 +396,13 @@
             <description>SQL Style Editor </description>
             <image>0</image>
 			<setting type="themecombobox">
-				<caption>Select theme:</caption>
-                <description>Select the file with the style</description>
+				<caption>Select primary theme:</caption>
+                <description>Select the file with the primary style</description>
                 <key>StyleTheme</key>
-				<default>Default</default>
+				<default>styles</default>
 				<aligngroup>1</aligngroup>
                 <file>StyleTheme</file>
             </setting>
-			<!--
-			<setting type="colour">
-				<caption>Foreground Colour:</caption>
-                <description>Foregound Colour with the style</description>
-                <key>ForegroundColour</key>
-				<default>BDAE9D</default>
-				<aligngroup>1</aligngroup>
-            </setting>
-			<setting type="colour">
-				<caption>Background Colour:</caption>
-                <description>Background Colour with the style</description>
-                <key>BackgroundColour</key>
-				<default>2A211C</default>
-				<aligngroup>2</aligngroup>
-            </setting>
-			-->
 		</node>
     </node>
     <node>
