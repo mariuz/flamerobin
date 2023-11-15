@@ -113,6 +113,7 @@ FLAMEROBIN_OBJECTS =  \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_FindDialog.obj \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_FRLayoutConfig.obj \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_FRStyle.obj \
+	bccu$(R_OPT)$(D_OPT)\flamerobin_FRStyleManager.obj \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_GUIURIHandlerHelper.obj \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_HtmlHeaderMetadataItemVisitor.obj \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_HtmlTemplateProcessor.obj \
@@ -123,6 +124,7 @@ FLAMEROBIN_OBJECTS =  \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_MultilineEnterDialog.obj \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialog.obj \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogSettings.obj \
+	bccu$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogStyle.obj \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_PrivilegesDialog.obj \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_ProgressDialog.obj \
 	bccu$(R_OPT)$(D_OPT)\flamerobin_ReorderFieldsDialog.obj \
@@ -428,6 +430,9 @@ bccu$(R_OPT)$(D_OPT)\flamerobin_FRLayoutConfig.obj: .\src\gui\FRLayoutConfig.cpp
 bccu$(R_OPT)$(D_OPT)\flamerobin_FRStyle.obj: .\src\gui\FRStyle.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\FRStyle.cpp
 
+bccu$(R_OPT)$(D_OPT)\flamerobin_FRStyleManager.obj: .\src\gui\FRStyleManager.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\FRStyleManager.cpp
+
 bccu$(R_OPT)$(D_OPT)\flamerobin_GUIURIHandlerHelper.obj: .\src\gui\GUIURIHandlerHelper.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\GUIURIHandlerHelper.cpp
 
@@ -457,6 +462,9 @@ bccu$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialog.obj: .\src\gui\PreferencesDial
 
 bccu$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogSettings.obj: .\src\gui\PreferencesDialogSettings.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\PreferencesDialogSettings.cpp
+
+bccu$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogStyle.obj: .\src\gui\PreferencesDialogStyle.cpp
+	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\PreferencesDialogStyle.cpp
 
 bccu$(R_OPT)$(D_OPT)\flamerobin_PrivilegesDialog.obj: .\src\gui\PrivilegesDialog.cpp
 	$(CXX) -q -c -P -o$@ $(FLAMEROBIN_CXXFLAGS) .\src\gui\PrivilegesDialog.cpp

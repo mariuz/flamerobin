@@ -208,7 +208,7 @@
     <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Dynamic|Win32'">
-    <OutDir>vcud\</OutDir>
+    <OutDir>.</OutDir>
     <IntDir>vcud\flamerobin\</IntDir>
     <LinkIncremental>true</LinkIncremental>
     <GenerateManifest>true</GenerateManifest>
@@ -454,7 +454,7 @@
     <Link>
       <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>wxmsw32ud_aui.lib;wxmsw32ud_stc.lib;wxmsw32ud_html.lib;wxmsw32ud_adv.lib;wxmsw32ud_core.lib;wxbase32ud_xml.lib;wxbase32ud.lib;wxscintillad.lib;wxexpatd.lib;wxtiffd.lib;wxjpegd.lib;wxpngd.lib;wxzlibd.lib;wxregexud.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcusd\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>vcusd\flamerobin.exe</OutputFile>
+      <OutputFile>flamerobin.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_x64_lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -496,7 +496,7 @@
     <Link>
       <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>wxmsw32u_aui.lib;wxmsw32u_stc.lib;wxmsw32u_html.lib;wxmsw32u_adv.lib;wxmsw32u_core.lib;wxbase32u_xml.lib;wxbase32u.lib;wxscintilla.lib;wxexpat.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;wxregexu.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcu\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>vcu\flamerobin.exe</OutputFile>
+      <OutputFile>flamerobin.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_lib;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>vcu\flamerobin.pdb</ProgramDatabaseFile>
@@ -539,7 +539,7 @@
     <Link>
       <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>wxmsw32u_aui.lib;wxmsw32u_stc.lib;wxmsw32u_html.lib;wxmsw32u_adv.lib;wxmsw32u_core.lib;wxbase32u_xml.lib;wxbase32u.lib;wxscintilla.lib;wxexpat.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;wxregexu.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcu\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>vcu\flamerobin.exe</OutputFile>
+      <OutputFile>flamerobin.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_x64_lib;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>vcu\flamerobin.pdb</ProgramDatabaseFile>
@@ -580,7 +580,7 @@
     <Link>
       <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>wxmsw32u_aui.lib;wxmsw32u_stc.lib;wxmsw32u_html.lib;wxmsw32u_adv.lib;wxmsw32u_core.lib;wxbase32u_xml.lib;wxbase32u.lib;wxscintilla.lib;wxexpat.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;wxregexu.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcus\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>vcus\flamerobin.exe</OutputFile>
+      <OutputFile>flamerobin.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_lib;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>vcus\flamerobin.pdb</ProgramDatabaseFile>
@@ -623,7 +623,7 @@
     <Link>
       <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>wxmsw32u_aui.lib;wxmsw32u_stc.lib;wxmsw32u_html.lib;wxmsw32u_adv.lib;wxmsw32u_core.lib;wxbase32u_xml.lib;wxbase32u.lib;wxscintilla.lib;wxexpat.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;wxregexu.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcus\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>vcus\flamerobin.exe</OutputFile>
+      <OutputFile>flamerobin.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_x64_lib;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>vcus\flamerobin.pdb</ProgramDatabaseFile>
@@ -666,7 +666,7 @@
     <Link>
       <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>wxmsw32ud_aui.lib;wxmsw32ud_stc.lib;wxmsw32ud_html.lib;wxmsw32ud_adv.lib;wxmsw32ud_core.lib;wxbase32ud_xml.lib;wxbase32ud.lib;wxscintillad.lib;wxexpatd.lib;wxtiffd.lib;wxjpegd.lib;wxpngd.lib;wxzlibd.lib;wxregexud.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcud\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>vcud\flamerobin.exe</OutputFile>
+      <OutputFile>flamerobin.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_dll;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -711,7 +711,7 @@
     <Link>
       <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>wxmsw32ud_aui.lib;wxmsw32ud_stc.lib;wxmsw32ud_html.lib;wxmsw32ud_adv.lib;wxmsw32ud_core.lib;wxbase32ud_xml.lib;wxbase32ud.lib;wxscintillad.lib;wxexpatd.lib;wxtiffd.lib;wxjpegd.lib;wxpngd.lib;wxzlibd.lib;wxregexud.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcud\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>vcud\flamerobin.exe</OutputFile>
+      <OutputFile>flamerobin.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_x64_dll;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -755,7 +755,7 @@
     <Link>
       <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>wxmsw32ud_aui.lib;wxmsw32ud_stc.lib;wxmsw32ud_html.lib;wxmsw32ud_adv.lib;wxmsw32ud_core.lib;wxbase32ud_xml.lib;wxbase32ud.lib;wxscintillad.lib;wxexpatd.lib;wxtiffd.lib;wxjpegd.lib;wxpngd.lib;wxzlibd.lib;wxregexud.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcusd\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>vcusd\flamerobin.exe</OutputFile>
+      <OutputFile>flamerobin.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_dll;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -800,7 +800,7 @@
     <Link>
       <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>wxmsw32ud_aui.lib;wxmsw32ud_stc.lib;wxmsw32ud_html.lib;wxmsw32ud_adv.lib;wxmsw32ud_core.lib;wxbase32ud_xml.lib;wxbase32ud.lib;wxscintillad.lib;wxexpatd.lib;wxtiffd.lib;wxjpegd.lib;wxpngd.lib;wxzlibd.lib;wxregexud.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcusd\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>vcusd\flamerobin.exe</OutputFile>
+      <OutputFile>flamerobin.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_x64_dll;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -842,7 +842,7 @@
     <Link>
       <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>wxmsw32u_aui.lib;wxmsw32u_stc.lib;wxmsw32u_html.lib;wxmsw32u_adv.lib;wxmsw32u_core.lib;wxbase32u_xml.lib;wxbase32u.lib;wxscintilla.lib;wxexpat.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;wxregexu.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcu\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>vcu\flamerobin.exe</OutputFile>
+      <OutputFile>flamerobin.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_dll;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>vcu\flamerobin.pdb</ProgramDatabaseFile>
@@ -885,7 +885,7 @@
     <Link>
       <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>wxmsw32u_aui.lib;wxmsw32u_stc.lib;wxmsw32u_html.lib;wxmsw32u_adv.lib;wxmsw32u_core.lib;wxbase32u_xml.lib;wxbase32u.lib;wxscintilla.lib;wxexpat.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;wxregexu.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcu\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>vcu\flamerobin.exe</OutputFile>
+      <OutputFile>flamerobin.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_x64_dll;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>vcu\flamerobin.pdb</ProgramDatabaseFile>
@@ -926,7 +926,7 @@
     <Link>
       <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>wxmsw32u_aui.lib;wxmsw32u_stc.lib;wxmsw32u_html.lib;wxmsw32u_adv.lib;wxmsw32u_core.lib;wxbase32u_xml.lib;wxbase32u.lib;wxscintilla.lib;wxexpat.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;wxregexu.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcus\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>vcus\flamerobin.exe</OutputFile>
+      <OutputFile>flamerobin.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_dll;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>vcus\flamerobin.pdb</ProgramDatabaseFile>
@@ -969,7 +969,7 @@
     <Link>
       <AdditionalOptions>/nologo /subsystem:windows %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>wxmsw32u_aui.lib;wxmsw32u_stc.lib;wxmsw32u_html.lib;wxmsw32u_adv.lib;wxmsw32u_core.lib;wxbase32u_xml.lib;wxbase32u.lib;wxscintilla.lib;wxexpat.lib;wxtiff.lib;wxjpeg.lib;wxpng.lib;wxzlib.lib;wxregexu.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comctl32.lib;rpcrt4.lib;wsock32.lib;vcus\ibpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>vcus\flamerobin.exe</OutputFile>
+      <OutputFile>flamerobin.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(WXDIR)\lib\vc_x64_dll;$(BOOST_LIB_DIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>vcus\flamerobin.pdb</ProgramDatabaseFile>
@@ -1049,6 +1049,7 @@
     <ClCompile Include="src\gui\FindDialog.cpp" />
     <ClCompile Include="src\gui\FRLayoutConfig.cpp" />
     <ClCompile Include="src\gui\FRStyle.cpp" />
+    <ClCompile Include="src\gui\FRStyleManager.cpp" />
     <ClCompile Include="src\gui\GUIURIHandlerHelper.cpp" />
     <ClCompile Include="src\gui\HtmlHeaderMetadataItemVisitor.cpp" />
     <ClCompile Include="src\gui\HtmlTemplateProcessor.cpp" />
@@ -1060,6 +1061,7 @@
     <ClCompile Include="src\gui\MultilineEnterDialog.cpp" />
     <ClCompile Include="src\gui\PreferencesDialog.cpp" />
     <ClCompile Include="src\gui\PreferencesDialogSettings.cpp" />
+    <ClCompile Include="src\gui\PreferencesDialogStyle.cpp" />
     <ClCompile Include="src\gui\PrivilegesDialog.cpp" />
     <ClCompile Include="src\gui\ProgressDialog.cpp" />
     <ClCompile Include="src\gui\ReorderFieldsDialog.cpp" />
@@ -1118,6 +1120,7 @@
     <ClCompile Include="src\statementHistory.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Header.h" />
     <ClInclude Include="src\config\Config.h" />
     <ClInclude Include="src\config\DatabaseConfig.h" />
     <ClInclude Include="src\config\LocalSettings.h" />
@@ -1170,6 +1173,7 @@
     <ClInclude Include="src\gui\FindDialog.h" />
     <ClInclude Include="src\gui\FRLayoutConfig.h" />
     <ClInclude Include="src\gui\FRStyle.h" />
+    <ClInclude Include="src\gui\FRStyleManager.h" />
     <ClInclude Include="src\gui\GUIURIHandlerHelper.h" />
     <ClInclude Include="src\gui\HtmlHeaderMetadataItemVisitor.h" />
     <ClInclude Include="src\gui\HtmlTemplateProcessor.h" />
@@ -1179,6 +1183,7 @@
     <ClInclude Include="src\gui\MetadataItemPropertiesFrame.h" />
     <ClInclude Include="src\gui\MultilineEnterDialog.h" />
     <ClInclude Include="src\gui\PreferencesDialog.h" />
+    <ClInclude Include="src\gui\PreferencesDialogStyle.h" />
     <ClInclude Include="src\gui\PrivilegesDialog.h" />
     <ClInclude Include="src\gui\ProgressDialog.h" />
     <ClInclude Include="src\gui\ReorderFieldsDialog.h" />

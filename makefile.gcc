@@ -95,6 +95,7 @@ FLAMEROBIN_OBJECTS =  \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_FindDialog.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_FRLayoutConfig.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_FRStyle.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_FRStyleManager.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_GUIURIHandlerHelper.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_HtmlHeaderMetadataItemVisitor.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_HtmlTemplateProcessor.o \
@@ -105,6 +106,7 @@ FLAMEROBIN_OBJECTS =  \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_MultilineEnterDialog.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialog.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogSettings.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogStyle.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_PrivilegesDialog.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_ProgressDialog.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_ReorderFieldsDialog.o \
@@ -413,6 +415,9 @@ gccu$(R_OPT)$(D_OPT)\flamerobin_FRLayoutConfig.o: ./src/gui/FRLayoutConfig.cpp
 gccu$(R_OPT)$(D_OPT)\flamerobin_FRStyle.o: ./src/gui/FRStyle.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
+gccu$(R_OPT)$(D_OPT)\flamerobin_FRStyleManager.o: ./src/gui/FRStyleManager.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
 gccu$(R_OPT)$(D_OPT)\flamerobin_GUIURIHandlerHelper.o: ./src/gui/GUIURIHandlerHelper.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
@@ -441,6 +446,9 @@ gccu$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialog.o: ./src/gui/PreferencesDialog
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gccu$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogSettings.o: ./src/gui/PreferencesDialogSettings.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gccu$(R_OPT)$(D_OPT)\flamerobin_PreferencesDialogStyle.o: ./src/gui/PreferencesDialogStyle.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gccu$(R_OPT)$(D_OPT)\flamerobin_PrivilegesDialog.o: ./src/gui/PrivilegesDialog.cpp
