@@ -74,6 +74,14 @@ wxString CreateDDLVisitor::getCommentOn(MetadataItem& object)
             comment << "COLUMN ";
             break;
         };
+        case ntParameter:
+        {
+            Parameter p = dynamic_cast<Parameter&>(object);
+            wxString tabname(p.getParent()->getQuotedName());
+            name = tabname << "." << name;
+            comment << "PARAMETER ";
+            break;
+        };
         case ntUDF:
             comment << "EXTERNAL FUNCTION ";
             break;
