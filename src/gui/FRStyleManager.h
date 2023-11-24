@@ -68,7 +68,7 @@ public:
     FRStyle* getDefaultStyle() { return globalStylerM->getStyleByName("Default Style"); };
     FRStyle* getStyleByName(wxString styleName);
 
-    wxFileName getFileName() { return fileNameM; };
+    wxFileName getFileName();
     void setFileName(wxFileName fileName);
     wxFileName getFileNamePrimary() { return fileNamePrimaryM; };
     void setFileNamePrimary(wxFileName fileName);

@@ -124,12 +124,21 @@ FRStyle* FRStyleManager::getStyleByName(wxString styleName)
     return globalStylerM->getStyleByName(styleName);
 }
 
+wxFileName FRStyleManager::getFileName()
+{
+    return !getSytyleActive() ? getFileNamePrimary() : getFileNameSecondary(); /*fileNameM */;
+}
+
 void FRStyleManager::setFileName(wxFileName fileName)
 {
-    if (fileName.FileExists())
+    /*if (fileName.FileExists())
         fileNameM = fileName;
     else
-        fileNameM = wxFileName(config().getXmlStylesPath(), _default + ".xml");
+        fileNameM = wxFileName(config().getXmlStylesPath(), _default + ".xml");*/
+    if (!getSytyleActive())
+        setFileNamePrimary(fileName);
+    else
+        setFileNameSecondary(fileName);
 }
 
 void FRStyleManager::setFileNamePrimary(wxFileName fileName)

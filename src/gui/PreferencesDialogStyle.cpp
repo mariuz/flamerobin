@@ -306,7 +306,7 @@ bool PrefDlgStyleSetting::saveToTargetConfig(Config& config)
     return true;
 }
 
-bool PrefDlgStyleSetting::cancelChanges(Config& config)
+bool PrefDlgStyleSetting::cancelChanges(Config& )
 {
     stylerManager().loadConfig();
     stylerManager().loadStyle();
@@ -499,6 +499,7 @@ void PrefDlgStyleSetting::loadStylers(const wxString& styleFileName)
     getStyleManager().setFileNamePrimary(wxFileName(config().getXmlStylesPath(), styleFileName.IsEmpty() ? "stylers.xml" : styleFileName + ".xml"));
     getStyleManager().loadStyle();
 
+
     stylersListBoxM->Clear();
     stylersListBoxM->Insert("Global Styles", 0);
 
@@ -585,6 +586,7 @@ void PrefDlgStyleSetting::saveStyle(const wxString& styleName)
 
     style->setCaseVisible(caseRadioBoxM->GetSelection());
 
+    getStyleManager().notifyObservers();
 
 }
 
