@@ -45,7 +45,9 @@ public:
     virtual bool loadFromTargetConfig(Config& config);
     virtual bool parseProperty(wxXmlNode* xmln);
     virtual bool saveToTargetConfig(Config& config);
-    FRStyleManager* getStyleManager() { return styleManagerM; };
+    virtual bool cancelChanges(Config& config);
+
+    FRStyleManager& getStyleManager();
 protected:
     wxString defaultM;
 

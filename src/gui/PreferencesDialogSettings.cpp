@@ -255,6 +255,8 @@ public:
     virtual bool createControl(bool ignoreerrors);
     virtual bool loadFromTargetConfig(Config& config);
     virtual bool saveToTargetConfig(Config& config);
+    virtual bool cancelChanges(Config& config) { return true; };
+
 protected:
     virtual void addControlsToSizer(wxSizer* sizer);
     virtual void enableControls(bool enabled);
@@ -363,6 +365,8 @@ public:
     virtual bool loadFromTargetConfig(Config& config);
     virtual bool parseProperty(wxXmlNode* xmln);
     virtual bool saveToTargetConfig(Config& config);
+    virtual bool cancelChanges(Config& config) { return true; };
+
 protected:
     virtual void addControlsToSizer(wxSizer* sizer);
     virtual void enableControls(bool enabled);
@@ -479,6 +483,8 @@ public:
     virtual bool loadFromTargetConfig(Config& config);
     virtual bool parseProperty(wxXmlNode* xmln);
     virtual bool saveToTargetConfig(Config& config);
+    virtual bool cancelChanges(Config& config) { return true; };
+
 protected:
     virtual void addControlsToSizer(wxSizer* sizer);
     virtual void enableControls(bool enabled);
@@ -633,6 +639,8 @@ public:
     virtual bool loadFromTargetConfig(Config& config);
     virtual bool parseProperty(wxXmlNode* xmln);
     virtual bool saveToTargetConfig(Config& config);
+    virtual bool cancelChanges(Config& config) { return true; };
+
 protected:
     virtual void addControlsToSizer(wxSizer* sizer);
     virtual void enableControls(bool enabled);
@@ -780,6 +788,8 @@ public:
     virtual bool createControl(bool ignoreerrors);
     virtual bool loadFromTargetConfig(Config& config);
     virtual bool saveToTargetConfig(Config& config);
+    virtual bool cancelChanges(Config& config) { return true; };
+
 protected:
     wxTextCtrl* textCtrlM;
     wxButton* browsebtnM;
@@ -1044,6 +1054,8 @@ public:
     virtual bool createControl(bool ignoreerrors);
     virtual bool loadFromTargetConfig(Config& config);
     virtual bool saveToTargetConfig(Config& config);
+    virtual bool cancelChanges(Config& config) { return true; };
+
 protected:
     wxString defaultM;
     virtual void addControlsToSizer(wxSizer* sizer);
@@ -1346,6 +1358,8 @@ public:
     virtual bool loadFromTargetConfig(Config& config);
     virtual bool parseProperty(wxXmlNode* xmln);
     virtual bool saveToTargetConfig(Config& config);
+    virtual bool cancelChanges(Config& config) { return true; };
+
 protected:
     wxString defaultM;
     wxArrayString itemsM;
@@ -1563,6 +1577,8 @@ public:
     virtual bool loadFromTargetConfig(Config& config);
     virtual bool parseProperty(wxXmlNode* xmln);
     virtual bool saveToTargetConfig(Config& config);
+    virtual bool cancelChanges(Config& config) { return true; };
+
 protected:
     wxString defaultM;
 

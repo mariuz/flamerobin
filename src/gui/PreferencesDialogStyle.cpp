@@ -48,8 +48,9 @@
 #include <wx/xml/xml.h>
 
 
-
 #include "PreferencesDialogStyle.h"
+#include "FRStyleManager.h"
+
 
 PrefDlgStyleSetting::PrefDlgStyleSetting(wxPanel* page, PrefDlgSetting* parent)
     : PrefDlgSetting(page, parent), styleManagerM(0), fileComboBoxM(0), captionBeforeM(0),
@@ -280,7 +281,7 @@ bool PrefDlgStyleSetting::saveToTargetConfig(Config& config)
     wxString userStyleFolder = config.getUserLocalDataDir() + wxFileName::GetPathSeparator() + "xml-styles" + wxFileName::GetPathSeparator();
     if (!wxDirExists(userStyleFolder))
     {
-        wxFileName mFile = getStyleManager()->getFileNamePrimary();
+        wxFileName mFile = getStyleManager().getFileNamePrimary();
         mFile.SetPath(userStyleFolder);
 
         wxString sourceDirName = config.getHomePath() + "xml-styles" + wxFileName::GetPathSeparator();
@@ -295,14 +296,27 @@ bool PrefDlgStyleSetting::saveToTargetConfig(Config& config)
                 wxCopyFile(files[i], userStyleFolder + name + "." + ext);
             }
         }
-        getStyleManager()->setFileNamePrimary(mFile);
+        getStyleManager().setFileNamePrimary(mFile);
     }
 
-    getStyleManager()->saveStyle();
+    getStyleManager().saveStyle();
     stylerManager().loadConfig();
     stylerManager().loadStyle();
 
     return true;
+}
+
+bool PrefDlgStyleSetting::cancelChanges(Config& config)
+{
+    stylerManager().loadConfig();
+    stylerManager().loadStyle();
+
+    return true;
+}
+
+FRStyleManager& PrefDlgStyleSetting::getStyleManager()
+{
+    return stylerManager();
 }
 
 void PrefDlgStyleSetting::addControlsToSizer(wxSizer* sizer)
@@ -482,13 +496,13 @@ wxArrayString PrefDlgStyleSetting::getComboBoxItems()
 
 void PrefDlgStyleSetting::loadStylers(const wxString& styleFileName)
 {
-    getStyleManager()->setFileNamePrimary(wxFileName(config().getXmlStylesPath(), styleFileName.IsEmpty() ? "stylers.xml" : styleFileName + ".xml"));
-    getStyleManager()->loadStyle();
+    getStyleManager().setFileNamePrimary(wxFileName(config().getXmlStylesPath(), styleFileName.IsEmpty() ? "stylers.xml" : styleFileName + ".xml"));
+    getStyleManager().loadStyle();
 
     stylersListBoxM->Clear();
     stylersListBoxM->Insert("Global Styles", 0);
 
-    FRStylers stylers = getStyleManager()->getLexerStylers();
+    FRStylers stylers = getStyleManager().getLexerStylers();
 
     //if (stylers) 
     {
@@ -509,10 +523,10 @@ void PrefDlgStyleSetting::loadStyles(const wxString& language)
     styleListBoxM->Clear();
 
     if (language == "Global Styles") {
-        styles = getStyleManager()->getGlobalStyler();
+        styles = getStyleManager().getGlobalStyler();
     }
     else {
-        styles = getStyleManager()->getLexerStylers().getStylerByDesc(language);
+        styles = getStyleManager().getLexerStylers().getStylerByDesc(language);
     }
 
     if (styles) {
@@ -529,7 +543,7 @@ void PrefDlgStyleSetting::loadStyles(const wxString& language)
 void PrefDlgStyleSetting::loadStyle(const wxString& styleName)
 {
 
-    FRStyle* style = getStyleManager()->getStylerByDesc(stylersListBoxM->GetString(stylersListBoxM->GetSelection()))->getStyleByName(styleName);
+    FRStyle* style = getStyleManager().getStylerByDesc(stylersListBoxM->GetString(stylersListBoxM->GetSelection()))->getStyleByName(styleName);
 
     wxString fontName = style->getFontName();
     fontNameComboBoxM->SetSelection(fontNameComboBoxM->FindString(fontName));
@@ -548,7 +562,7 @@ void PrefDlgStyleSetting::loadStyle(const wxString& styleName)
 
 void PrefDlgStyleSetting::saveStyle(const wxString& styleName)
 {
-    FRStyle* style = getStyleManager()->getStylerByDesc(stylersListBoxM->GetString(stylersListBoxM->GetSelection()))->getStyleByName(styleName);
+    FRStyle* style = getStyleManager().getStylerByDesc(stylersListBoxM->GetString(stylersListBoxM->GetSelection()))->getStyleByName(styleName);
 
     int i = fontNameComboBoxM->GetSelection();
     if (i>0)
