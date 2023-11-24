@@ -718,8 +718,6 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
     viewMenu->AppendCheckItem(Cmds::View_SplitView,
         cm.getMainMenuItemText(_("&Split view"), Cmds::View_SplitView));
     viewMenu->AppendSeparator();
-    viewMenu->Append(Cmds::View_Set_editor_font, _("Set editor &font"));
-    viewMenu->AppendSeparator();
     viewMenu->AppendCheckItem(Cmds::View_Wrap_long_lines,
         _("&Wrap long lines"));
     menuBarM->Append(viewMenu, _("&View"));
@@ -791,9 +789,6 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
     gridMenu->AppendSeparator();
     gridMenu->Append(Cmds::DataGrid_Save_as_html,    _("Save as &html"));
     gridMenu->Append(Cmds::DataGrid_Save_as_csv,     _("Save as cs&v"));
-    gridMenu->AppendSeparator();
-    gridMenu->Append(Cmds::DataGrid_Set_header_font, _("Set h&eader font"));
-    gridMenu->Append(Cmds::DataGrid_Set_cell_font,   _("Set cell f&ont"));
     gridMenu->AppendSeparator();
     gridMenu->AppendCheckItem(Cmds::DataGrid_Log_changes, _("&Log data changes"));
     menuBarM->Append(gridMenu, _("&Grid"));
@@ -948,7 +943,6 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_UPDATE_UI(Cmds::View_Data, ExecuteSqlFrame::OnMenuUpdateSelectView)
     EVT_MENU(Cmds::View_SplitView, ExecuteSqlFrame::OnMenuSplitView)
     EVT_UPDATE_UI(Cmds::View_SplitView, ExecuteSqlFrame::OnMenuUpdateSplitView)
-    EVT_MENU(Cmds::View_Set_editor_font, ExecuteSqlFrame::OnMenuSetEditorFont)
     EVT_MENU(Cmds::View_Wrap_long_lines, ExecuteSqlFrame::OnMenuToggleWrap)
 
     EVT_MENU(Cmds::Find_Selected_Object,   ExecuteSqlFrame::OnMenuFindSelectedObject)
@@ -993,8 +987,6 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_MENU(Cmds::DataGrid_ExportBlob,      ExecuteSqlFrame::OnMenuGridExportBlob)
     EVT_MENU(Cmds::DataGrid_Save_as_html,    ExecuteSqlFrame::OnMenuGridSaveAsHtml)
     EVT_MENU(Cmds::DataGrid_Save_as_csv,     ExecuteSqlFrame::OnMenuGridSaveAsCsv)
-    EVT_MENU(Cmds::DataGrid_Set_header_font, ExecuteSqlFrame::OnMenuGridGridHeaderFont)
-    EVT_MENU(Cmds::DataGrid_Set_cell_font,   ExecuteSqlFrame::OnMenuGridGridCellFont)
     EVT_MENU(Cmds::DataGrid_FetchAll,        ExecuteSqlFrame::OnMenuGridFetchAll)
     EVT_MENU(Cmds::DataGrid_CancelFetchAll,  ExecuteSqlFrame::OnMenuGridCancelFetchAll)
 
@@ -1561,11 +1553,6 @@ void ExecuteSqlFrame::OnMenuUpdateSplitView(wxUpdateUIEvent& event)
     event.Check(splitter_window_1->IsSplit());
 }
 
-void ExecuteSqlFrame::OnMenuSetEditorFont(wxCommandEvent& WXUNUSED(event))
-{
-    styled_text_ctrl_sql->setFont();
-}
-
 void ExecuteSqlFrame::OnMenuToggleWrap(wxCommandEvent& WXUNUSED(event))
 {
     const int mode = styled_text_ctrl_sql->GetWrapMode();
@@ -1995,15 +1982,6 @@ void ExecuteSqlFrame::OnMenuGridSaveAsCsv(wxCommandEvent& WXUNUSED(event))
     grid_data->saveAsCSV(fileName, fieldDelimiter, textDelimiter);
 }
 
-void ExecuteSqlFrame::OnMenuGridGridHeaderFont(wxCommandEvent& WXUNUSED(event))
-{
-    grid_data->setHeaderFont();
-}
-
-void ExecuteSqlFrame::OnMenuGridGridCellFont(wxCommandEvent& WXUNUSED(event))
-{
-    grid_data->setCellFont();
-}
 
 void ExecuteSqlFrame::OnMenuUpdateGridHasSelection(wxUpdateUIEvent& event)
 {

@@ -209,8 +209,6 @@ void DataGrid::showPopupMenu(wxPoint cursorPos)
     m.Append(Cmds::DataGrid_SetFieldToNULL, _("Set field to NULL"));
     m.AppendSeparator();
 
-    m.Append(Cmds::DataGrid_Set_header_font, _("Set header font"));
-    m.Append(Cmds::DataGrid_Set_cell_font, _("Set cell font"));
     PopupMenu(&m, cursorPos);
 }
 
@@ -243,17 +241,6 @@ void DataGrid::refreshAndInvalidateAttributes()
     Refresh();
 }
 
-void DataGrid::setCellFont()
-{
-    wxFont f = ::wxGetFontFromUser(this, GetDefaultCellFont());
-    if (f.Ok())
-    {
-        SetDefaultCellFont(f);
-        config().setValue("DataGridFont", f.GetNativeFontInfoDesc());
-        updateRowHeights();
-        ForceRefresh();
-    }
-}
 
 void DataGrid::copyToClipboard(bool headers)
 {
@@ -681,19 +668,6 @@ void DataGrid::copyToClipboardAsUpdateInsert()
     }   // end busy cursor
     if (all)
         notifyIfUnfetchedData();
-}
-void DataGrid::setHeaderFont()
-{
-    wxFont f = ::wxGetFontFromUser(this, GetLabelFont());
-    if (f.Ok())
-    {
-        SetLabelFont(f);
-        config().setValue("DataGridHeaderFont",
-            f.GetNativeFontInfoDesc());
-        updateRowHeights();
-        AutoSizeColumns(false);
-        ForceRefresh();
-    }
 }
 
 void DataGrid::saveAsCSV(const wxString& fileName,
@@ -1227,23 +1201,10 @@ void DataGrid::setupStyles()
 
     SetCellHighlightColour(stylerManager().getDefaultStyle()->getfgColor());
 
-    wxString s;
-    wxFont f;
 
     SetDefaultCellFont(stylerManager().getDefaultStyle()->getFont());
-    /*if (config().getValue("DataGridFont", s) && !s.empty())
-    {
-        f.SetNativeFontInfo(s);
-        if (f.Ok())
-            SetDefaultCellFont(f);
-    }*/
-
     SetLabelFont(stylerManager().getDefaultStyle()->getFont());
-    if (config().getValue("DataGridHeaderFont", s) && !s.empty())
-    {
-        f.SetNativeFontInfo(s);
-        if (f.Ok())
-            SetLabelFont(f);
-    }
 
+    updateRowHeights();
+    ForceRefresh();
 }

@@ -203,7 +203,6 @@ private:
     void OnMenuUpdateSelectView(wxUpdateUIEvent& event);
     void OnMenuSplitView(wxCommandEvent& event);
     void OnMenuUpdateSplitView(wxUpdateUIEvent& event);
-    void OnMenuSetEditorFont(wxCommandEvent& event);
     void OnMenuToggleWrap(wxCommandEvent& event);
 
     void OnMenuHistoryNext(wxCommandEvent& event);
@@ -244,8 +243,6 @@ private:
     void OnMenuGridCopyAsUpdateInsert(wxCommandEvent& event);
     void OnMenuGridSaveAsHtml(wxCommandEvent& event);
     void OnMenuGridSaveAsCsv(wxCommandEvent& event);
-    void OnMenuGridGridHeaderFont(wxCommandEvent& event);
-    void OnMenuGridGridCellFont(wxCommandEvent& event);
     void OnMenuGridFetchAll(wxCommandEvent& event);
     void OnMenuGridCancelFetchAll(wxCommandEvent& event);
     void OnMenuUpdateGridHasSelection(wxUpdateUIEvent& event);

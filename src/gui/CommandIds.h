@@ -32,7 +32,6 @@ enum {
     View_Data,
     View_SplitView,
     View_Wrap_long_lines,
-    View_Set_editor_font,
     Find_Selected_Object,
 
     // SQL History
@@ -72,8 +71,6 @@ enum {
     DataGrid_Copy_as_upins,
     DataGrid_Save_as_html,
     DataGrid_Save_as_csv,
-    DataGrid_Set_header_font,
-    DataGrid_Set_cell_font,
     DataGrid_Log_changes,
 
     Menu_RegisterServer = 600,
