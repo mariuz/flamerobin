@@ -69,6 +69,8 @@ void RestoreFrame::createControls()
 {
     BackupRestoreBaseFrame::createControls();
 
+    button_start->SetLabel(_("&Start Restore"));
+
     checkbox_replace = new wxCheckBox(panel_controls, wxID_ANY,
         _("Replace existing database"));
     checkbox_noshadow = new wxCheckBox(panel_controls, wxID_ANY,

@@ -52,8 +52,8 @@ private:
 
     wxSpinCtrl* spinctrl_pagebuffers;
 
-    void createControls();
-    void layoutControls();
+    virtual void createControls();
+    virtual void layoutControls();
     virtual void updateControls();
 
     static wxString getFrameId(DatabasePtr db);
