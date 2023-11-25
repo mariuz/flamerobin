@@ -246,7 +246,7 @@ void Collations::loadChildren()
 }
 
 Collations::Collations(DatabasePtr database)
-    : MetadataCollection<Collation>(ntCollations, database, _("Collation"))
+    : MetadataCollection<Collation>(ntCollations, database, _("Collations"))
 {
 }
 
