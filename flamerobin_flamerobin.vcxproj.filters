@@ -789,7 +789,7 @@
       <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="src\gui\PreferencesDialogStyle.h">
-      <Filter>Source Files\gui</Filter>
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
