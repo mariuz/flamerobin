@@ -56,7 +56,7 @@ LicenseFile=..\..\docs-src\fr_license.txt
 InfoBeforeFile=info_before_win64.rtf
 #endif
 InfoAfterFile=
-MinVersion=0,5.0.2195
+MinVersion=0,6.0
 #ifdef DEBUG
 Compression=lzma/ultra
 #ifdef X64VERSION
@@ -93,15 +93,15 @@ Name: quicklaunchicon; Description: {cm:CreateQuickLaunchIcon}; GroupDescription
 [Files]
 #ifdef DEBUG
 #ifdef X64VERSION
-Source: ..\..\vcud\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; Check: Is64BitInstallMode
+Source: ..\..\build64\Debug\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; Check: Is64BitInstallMode
 #else
-Source: ..\..\vcud\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; Check: not Is64BitInstallMode
+Source: ..\..\build32\Debug\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; Check: not Is64BitInstallMode
 #endif
 #else
 #ifdef X64VERSION
-Source: ..\..\vcu\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; Check: Is64BitInstallMode
+Source: ..\..\build64\Release\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; Check: Is64BitInstallMode
 #else
-Source: ..\..\vcu\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; Check: not Is64BitInstallMode
+Source: ..\..\build32\Release\flamerobin.exe; DestDir: {app}; Flags: ignoreversion; Check: not Is64BitInstallMode
 #endif
 #endif
 Source: ..\..\docs\*.*; Excludes: flamerobin.1; DestDir: {app}\docs; Flags: ignoreversion
@@ -110,6 +110,7 @@ Source: ..\..\code-templates\*.*; DestDir: {app}\code-templates; Flags: ignoreve
 Source: ..\..\html-templates\*.*; DestDir: {app}\html-templates; Flags: ignoreversion
 Source: ..\..\sys-templates\*.*; DestDir: {app}\sys-templates; Flags: ignoreversion
 Source: ..\..\xml-styles\*.*; DestDir: {app}\xml-styles; Flags: ignoreversion
+;Source: ..\..\xml-styles\*.*; DestDir: {localappdata}\flamerobin\xml-styles; Flags: onlyifdoesntexist
 #ifndef X64VERSION
 ;Source: ..\..\res\system32\msvcr71.dll; DestDir: {app}
 ;Source: ..\..\res\system32\msvcp71.dll; DestDir: {app}

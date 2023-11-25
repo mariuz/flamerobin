@@ -86,10 +86,19 @@ wxString getPlatformName()
 #endif
 }
 
+wxString getPlatformArchitecture()
+{
+#if defined(_WIN64)
+    return "x64";
+#else
+    return "x86";
+#endif
+}
+
 static void processPlatformAttribute(wxXmlNode *node)
 {
     wxString s;
-    bool isok;
+    bool isok, isokarch;
 
     wxXmlNode *c = node->GetChildren();
     while (c)
@@ -107,8 +116,21 @@ static void processPlatformAttribute(wxXmlNode *node)
                     isok = true;
             }
         }
+        isokarch = false;
+        if (!c->GetAttribute("arch", &s))
+            isokarch = true;
+        else
+        {
+            wxStringTokenizer tkn(s, " |");
 
-        if (isok)
+            while (!isokarch && tkn.HasMoreTokens())
+            {
+                if (tkn.GetNextToken().compare(getPlatformArchitecture()) == 0)
+                    isokarch = true;
+            }
+        }
+
+        if (isok && isokarch)
         {
             processPlatformAttribute(c);
             c = c->GetNext();

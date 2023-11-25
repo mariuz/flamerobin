@@ -291,7 +291,7 @@ bool DatabaseAuthenticationMode::getUseEncryptedPassword() const
 // Database class
 Database::Database()
     : MetadataItem(ntDatabase), metadataLoaderM(0), connectedM(false),
-        connectionCredentialsM(0), dialectM(3), idM(0)
+        connectionCredentialsM(0), dialectM(3), idM(0), volatileM(false)
 {
     defaultTimezoneM.name = "";
     defaultTimezoneM.id = 0;
@@ -392,6 +392,11 @@ void Database::getDatabaseTriggers(std::vector<Trigger *>& list)
 {
     std::transform(DBTriggersM->begin(), DBTriggersM->end(),
         std::back_inserter(list), std::mem_fn(&DBTriggerPtr::get));
+}
+
+bool Database::getIsVolative()
+{
+    return volatileM;
 }
 
 CharacterSetPtr Database::getCharsetById(int id)
@@ -1783,8 +1788,11 @@ wxString Database::getClientLibrary() const
 {
     /*Todo: Implement FB library per conexion */
     //return clientLibraryM;
-    wxString LValue = "";
-    return config().get("LibraryFile", LValue);
+#if defined(_WIN64)
+    return config().get("x64LibraryFile", wxString(""));
+#else
+    return config().get("x86LibraryFile", wxString(""));
+#endif
 }
 
 int Database::getSqlDialect() const
@@ -1883,6 +1891,11 @@ wxString Database::getRole() const
 IBPP::Database& Database::getIBPPDatabase()
 {
     return databaseM;
+}
+
+void Database::setIsVolatile(const bool isVolatile)
+{
+    volatileM = isVolatile;
 }
 
 void Database::setPath(const wxString& value)
@@ -2194,7 +2207,7 @@ void Database::getConnectedUsers(wxArrayString& users) const
         {
             wxString name((*it).first);
             if ((*it).second > 1)
-                name += wxString::Format(" (%d)", (*it).second);
+                name += wxString::Format(" (%zu)", (*it).second);
             users.Add(name);
         }
     }

@@ -717,7 +717,7 @@ std::string StatementImpl::ParametersParser(std::string sql)
     //Here we verify, the job done recently was time lost?
     std::string isDML(sql);
 
-    isDML.erase(isDML.begin(), std::find_if(isDML.begin(), isDML.end(), std::not1(std::ptr_fun<int, int>(std::isspace)))); //lTrim
+    isDML.erase(isDML.begin(), std::find_if(isDML.begin(), isDML.end(), [](int c) { return !std::isspace(c); })); //lTrim
 
     std::transform(isDML.begin(), isDML.end(), isDML.begin(), [](char c) { return (char)std::toupper(c); }); //UpperCase (only bothered about ASCII text, cast is okay)
 
@@ -790,7 +790,7 @@ std::string StatementImpl::ParametersParser(std::string sql)
         if (i > 0)
             previousChar=sql.at(i-1);
 
-        if ((sql.at(i)=='\n') | (sql.at(i)=='\r')) {
+        if ((sql.at(i)=='\n') || (sql.at(i)=='\r')) {
             comment = false;
             //sProcessedSQL << sql.at(i);
         }else if (sql.at(i)=='-' && nextChar=='-' && !quote && !doubleQuote  && !blockComment) {

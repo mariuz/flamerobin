@@ -1,5 +1,5 @@
+cmake_minimum_required(VERSION 3.5)
 project(flamerobin)
-cmake_minimum_required(VERSION 3.0)
 
 # Don't allow in-source builds. Keeps things nice and tidy
 if( "${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}" )

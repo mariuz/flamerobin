@@ -526,13 +526,18 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
         wxString title,
         DatabasePtr db, const wxPoint& pos, const wxSize& size, long style)
     : BaseFrame(wxTheApp->GetTopWindow(), id, title, pos, size, style),
-        Observer(), databaseM(db.get())
+        Observer(), databasePtrM(db) //changed for volatile SQL Editor, as we only have a fake server and database
 {
     wxASSERT(db);
+    //Need this 2 PtrM lines especifically to keep a reference for both original objects in volatile SQL Editor else the serverptr is released as soon as exists MainFrame event call
+    databaseM = databasePtrM.get();
+    serverPtrM = databasePtrM->getServer();
 
     loadingM = true;
     updateEditorCaretPosM = true;
     updateFrameTitleM = true;
+    if (db->getIsVolative())
+        prepareVolatileDatabase();
 
     transactionIsolationLevelM = static_cast<IBPP::TIL>(config().get("transactionIsolationLevel", 0));
     transactionLockResolutionM = config().get("transactionLockResolution", true) ? IBPP::lrWait : IBPP::lrNoWait;
@@ -582,11 +587,11 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     do_layout();
 
     // observe database object to close on disconnect / destruction
-    databaseM->attachObserver(this, false);
+    if (!db->getIsVolative()) databaseM->attachObserver(this, false);
 
     executedStatementsM.clear();
     inTransaction(false);    // enable/disable controls
-    setKeywords();           // set words for autocomplete feature
+    if (!db->getIsVolative()) setKeywords();           // set words for autocomplete feature
 
     historyPositionM = StatementHistory::get(databaseM).size();
 
@@ -806,7 +811,8 @@ void ExecuteSqlFrame::set_properties()
     int statusbar_widths[] = { -2, 100, 60, -1 };
     statusbar_1->SetStatusWidths(4, statusbar_widths);
 
-    statusbar_1->SetStatusText(databaseM->getConnectionInfoString(), 0);
+    if ( ! databaseM->getIsVolative() )
+        statusbar_1->SetStatusText(databaseM->getConnectionInfoString(), 0);
     statusbar_1->SetStatusText("Rows fetched", 1);
     statusbar_1->SetStatusText("Cursor position", 2);
     statusbar_1->SetStatusText("Transaction status", 3);
@@ -881,7 +887,11 @@ void ExecuteSqlFrame::doBeforeDestroy()
     if (grid_data->IsCellEditControlEnabled())
         grid_data->EnableCellEditControl(false);
     // make sure that further calls to update() will not call Close() again
+    if (databaseM->getIsVolative() && databaseM->isConnected())
+        databaseM->disconnect();
     databaseM = 0;
+    databasePtrM = 0;
+    serverPtrM = 0;
 }
 
 void ExecuteSqlFrame::showProperties(wxString objectName)
@@ -2109,6 +2119,39 @@ void ExecuteSqlFrame::clearLogBeforeExecution()
         styled_text_ctrl_stats->ClearAll();
 }
 
+void ExecuteSqlFrame::prepareVolatileDatabase(wxString hostname, wxString port, wxString path, wxString user, wxString password, wxString role, wxString charset)
+{
+    /*DatabasePtr dbM = std::make_shared<Database>();
+    ServerPtr serverPtrM = std::make_shared<Server>();
+    dbM->setServer(serverPtrM);
+    databaseM = dbM.get();*/
+    //databaseM = new Database();
+    //databaseM = std::make_shared<Database>();
+    //databaseM->setId(UINT_MAX-30);
+    //this->serverM = new Server();
+    //serverPtrM = ServerPtr(serverM);
+    ServerPtr serverPtrM = databaseM->getServer();
+    if (!serverPtrM->getHostname().compare(hostname) || !serverPtrM->getPort().compare(port) || !databaseM->getPath().compare(path) || !databaseM->getUsername().compare(user) || !databaseM->getRawPassword().compare(password) || !databaseM->getRole().compare(role) || !databaseM->getDatabaseCharset().compare(charset))
+    {
+        databaseM->disconnect();
+        transactionM = 0;
+    }
+    else
+        return;
+
+    serverPtrM->setHostname(hostname);
+    serverPtrM->setPort(port);
+
+    databaseM->setPath(path);
+    databaseM->setName_("VOLATILECONNECTION");
+    databaseM->setUsername(user);
+    databaseM->setRawPassword(password);
+    databaseM->setRole(role);
+    databaseM->setConnectionCharset(charset);
+    //databaseM->setServer(serverPtrM);
+
+}
+
 void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
 {
     bool hasSelection = styled_text_ctrl_sql->GetSelectionStart()
@@ -2333,7 +2376,45 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         log(_("Empty statement detected, bailing out..."));
         return true;
     }
+    
 
+    SqlStatement stm(sql, databaseM, terminator);
+
+    if ((stm.getAction() == actCONNECT) || (stm.getAction() == actCREATE_DATABASE))
+    {
+        if (!databaseM->getIsVolative())
+        {
+            log(_("Cannot use 'connect' or 'create' statement in a regular SQL Script"), ttError);
+            splitScreen();
+            return false;
+        }
+        wxString connHostM, connDatabasePortM, connPathM, connUsernameM, connPasswordM, connRoleM, connCharsetM; int createPageSizeM, createDialecM;
+        stm.getCONNECTION(connHostM, connDatabasePortM, connPathM, connUsernameM, connPasswordM, connRoleM, connCharsetM);
+        prepareVolatileDatabase(connHostM, connDatabasePortM, connPathM, connUsernameM, connPasswordM, connRoleM, connCharsetM);
+        if (stm.getAction() == actCREATE_DATABASE) {
+            createPageSizeM = stm.getCreatePageSize();
+            createDialecM = stm.getCreateDialect();
+            log(wxString::Format("Creating database: %s, port: %s, database: %s, user: %s, password: %s, role: %s, charset: %s, page size: %d, dialect %d", connHostM, connDatabasePortM, connPathM, connUsernameM, connPasswordM, connRoleM, connCharsetM, createPageSizeM, createDialecM), ttSql);
+            databaseM->create(createPageSizeM, createDialecM);
+        }
+        log(wxString::Format("Connecting to host: %s, port: %s, database: %s, user: %s, password: %s, role: %s, charset: %s", connHostM, connDatabasePortM, connPathM, connUsernameM, connPasswordM, connRoleM, connCharsetM), ttSql);
+        databaseM->connect(databaseM->getRawPassword());
+        return databaseM->isConnected();
+
+    }
+    else
+    if (stm.getAction() == actDISCONNECT) 
+    {
+        if (!databaseM->getIsVolative())
+        {
+            log(_("Cannot use 'disconnect' statement in a regular SQL Script"), ttError);
+            splitScreen();
+            return false;
+        }
+        databaseM->disconnect();
+        transactionM = 0;
+        return true;
+    }
     if (styled_text_ctrl_sql->AutoCompActive())
         styled_text_ctrl_sql->AutoCompCancel();    // remove the list if needed
     notebook_1->SetSelection(0);
@@ -2516,7 +2597,6 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
                 {
                 }
             }
-            SqlStatement stm(sql, databaseM, terminator);
             if (stm.isDDL())
                 type = IBPP::stDDL;
             executedStatementsM.push_back(stm);

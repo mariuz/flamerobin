@@ -62,7 +62,7 @@ public:
 	virtual wxString getSource() = 0;
 	wxString getSqlSecurity();
 	virtual const wxString getTypeName()  const = 0;
-	std::vector<Privilege>* getPrivileges();
+	std::vector<Privilege>* getPrivileges(bool splitPerGrantor=true);
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     virtual void checkDependentFunction();

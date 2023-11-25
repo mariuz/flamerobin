@@ -36,6 +36,7 @@
 #include "metadata/procedure.h"
 #include "metadata/relation.h"
 #include "sql/SqlStatement.h"
+#include "frutils.h"
 
 
 // TOKEN LIST - a helper class
@@ -122,7 +123,7 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
             actionM = actCOMMENT; 
             break;
         case kwCREATE:
-            actionM = actCREATE; 
+            actionM = (tokensM[1] == kwDATABASE ? actCREATE_DATABASE : actCREATE);
             break;
         case kwDECLARE:
             actionM = actDECLARE; 
@@ -144,6 +145,12 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
             // it's the only statement we care for which has implicit type
             actionM = actUPDATE; 
             objectTypeM = ntTable; 
+            break;
+        case kwCONNECT:
+            actionM = actCONNECT;
+            break;
+        case kwDISCONNECT:
+            actionM = actDISCONNECT;
             break;
         default:
             return; // true;
@@ -238,7 +245,7 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
     }
 
     // get object type
-    while (objectTypeM == ntUnknown && typeTokenIndex < tokensM.size())
+    while (objectTypeM == ntUnknown && typeTokenIndex < tokensM.size() && actionM != actCONNECT)
     {
         switch (tokensM[typeTokenIndex])
         {
@@ -346,10 +353,11 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
             
     }
 
-    if (objectTypeM == ntUnknown || !databaseM)
+    if ((objectTypeM == ntUnknown || !databaseM) && (actionM != actCONNECT))
         return; // false;
 
-    objectM = databaseM->findByNameAndType(objectTypeM, nameM.get());
+    if ( actionM != actCONNECT )
+        objectM = databaseM->findByNameAndType(objectTypeM, nameM.get());
 
 
     // map "CREATE OR ALTER" and "RECREATE" to correct action
@@ -366,7 +374,7 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
         if (stt != tkCOMMENT && stt != tkWHITESPACE)
         {
             tokensM.add(stt);
-            if (stt == tkIDENTIFIER || stt == tkSTRING)
+            //if (stt == tkIDENTIFIER || stt == tkSTRING) //Wy does this if exists?
             {
                 wxString ts(tokenizer.getCurrentTokenString());
                 tokenStringsM[tokensM.size() - 1] = ts;
@@ -430,6 +438,78 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
             }
         }
     }
+
+    // CONNECT "[database]"  password '[password]' user '[username]' role '[role=]' character set '[charset=NONE]';    
+    if ((actionM == actCONNECT) || (actionM == actCREATE_DATABASE))
+    {
+        //wxString database, user, password, role, charset;
+        size_t idx = 1;
+        if (actionM == actCREATE_DATABASE)
+            idx++;
+        connPathM = unquote(tokenStringsM[idx++], "'");
+        
+        
+        if (connPathM.Contains(":"))  //split "server/port:database"
+        {
+
+            // find ':' pos
+            int colonPos = connPathM.Find(':');
+
+            
+            connServerPort = "3050";
+            connHostM = connPathM.Left(colonPos);
+            // find '/' pos
+            int slashPos = connHostM.Find('/');
+            
+            if (slashPos >= 0)
+            {
+                connHostM = connPathM.Left(slashPos);
+                connServerPort = connPathM.Mid(slashPos + 1, colonPos - slashPos - 1);
+            }
+            connPathM = connPathM.Mid(colonPos + 1);
+        }
+        connUsernameM = "";
+        connPasswordM = "";
+        connRoleM = "";
+        connCharsetM = "NONE";
+        createPageSizeM = 8096;
+        createDialectM = 3;
+        while (idx < tokensM.size())
+        {
+            if (tokensM[idx] == kwUSER)
+            {
+                idx++;
+                connUsernameM = unquote(tokenStringsM[idx],"'");
+            }
+            else if (tokensM[idx] == kwPASSWORD)
+            {
+                idx++;
+                connPasswordM = unquote(tokenStringsM[idx], "'");
+            }
+            else if (tokensM[idx] == kwROLE)
+            {
+                idx++;
+                connRoleM = unquote(tokenStringsM[idx], "'");
+            }
+            else if ((tokensM[idx] == kwCHARACTER) && (tokensM[idx + 1] == kwSET) && (tokensM[idx + 2] == tkSTRING))
+            {
+                idx++; idx++; //for character and set
+                connCharsetM = unquote(tokenStringsM[idx], "'");
+            }
+            else if (tokensM[idx] == kwPAGE_SIZE)
+            {
+                idx++;
+                tokenStringsM[idx].ToInt(&createPageSizeM);
+            }
+            else if (tokensM[idx] == kwDIALECT)
+            {
+                idx++;
+                tokenStringsM[idx].ToInt(&createDialectM);
+            }
+            idx++;
+        }
+        return;
+    }
 }
 
 wxString SqlStatement::getStatement() const
@@ -463,6 +543,29 @@ bool SqlStatement::isDDL() const
     // convert to actALTER (i.e. it's a regular update statement)
     return (objectTypeM != ntUnknown && actionM != actNONE
         && actionM != actUPDATE);
+}
+
+bool SqlStatement::getCONNECTION(wxString& host,wxString& port, wxString& path, wxString& user, wxString& password, wxString& role, wxString& charset)
+{
+    if ((actionM != actCONNECT) && ((actionM != actCREATE_DATABASE))) return false;
+    host = connHostM;
+    port = connServerPort;
+    path = connPathM;
+    user = connUsernameM;
+    password = connPasswordM;
+    role = connRoleM;
+    charset = connCharsetM;
+    return true;
+}
+
+int SqlStatement::getCreatePageSize() const
+{
+    return createPageSizeM;
+}
+
+int SqlStatement::getCreateDialect() const
+{
+    return createDialectM;
 }
 
 bool SqlStatement::isAlterColumn() const
