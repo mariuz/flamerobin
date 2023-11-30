@@ -65,6 +65,7 @@
 #include "gui/InsertParametersDialog.h"
 #include "gui/StatementHistoryDialog.h"
 #include "gui/StyleGuide.h"
+#include "gui/FRStyleManager.h"
 #include "frutils.h"
 #include "logger.h"
 #include "metadata/column.h"
@@ -343,13 +344,7 @@ void SqlEditor::setup()
     if (!config().get("sqlEditorSmartHomeKey", true))
         CmdKeyAssign(wxSTC_KEY_HOME, wxSTC_KEYMOD_NORM, wxSTC_CMD_HOMEDISPLAY);
         
-    stylerManager().assignGlobal(this);
-    StyleClearAll();
-    stylerManager().assignLexer(this);
-    SetLexer(wxSTC_LEX_SQL);
-    stylerManager().assignMargin(this);
-    setChars(false);
-
+    setupStyles();
 
     centerCaret(false);
 }
@@ -477,6 +472,17 @@ void SqlEditor::setFont()
 */
 }
 
+void SqlEditor::setupStyles()
+{
+    stylerManager().assignGlobal(this);
+    StyleClearAll();
+    stylerManager().assignLexer(this);
+    SetLexer(wxSTC_LEX_SQL);
+    stylerManager().assignMargin(this);
+    setChars(false);
+
+}
+
 class ScrollAtEnd
 {
 private:
@@ -558,6 +564,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     notebook_pane_1 = new wxPanel(notebook_1, -1);
     styled_text_ctrl_stats = new wxStyledTextCtrl(notebook_pane_1, wxID_ANY,
         wxDefaultPosition, wxDefaultSize, wxBORDER_THEME);
+    stylerManager().attachObserver(this, false);
     stylerManager().assignGlobal(styled_text_ctrl_stats);
 
     styled_text_ctrl_stats->StyleClearAll();
@@ -716,8 +723,6 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
     viewMenu->AppendCheckItem(Cmds::View_SplitView,
         cm.getMainMenuItemText(_("&Split view"), Cmds::View_SplitView));
     viewMenu->AppendSeparator();
-    viewMenu->Append(Cmds::View_Set_editor_font, _("Set editor &font"));
-    viewMenu->AppendSeparator();
     viewMenu->AppendCheckItem(Cmds::View_Wrap_long_lines,
         _("&Wrap long lines"));
     menuBarM->Append(viewMenu, _("&View"));
@@ -789,9 +794,6 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
     gridMenu->AppendSeparator();
     gridMenu->Append(Cmds::DataGrid_Save_as_html,    _("Save as &html"));
     gridMenu->Append(Cmds::DataGrid_Save_as_csv,     _("Save as cs&v"));
-    gridMenu->AppendSeparator();
-    gridMenu->Append(Cmds::DataGrid_Set_header_font, _("Set h&eader font"));
-    gridMenu->Append(Cmds::DataGrid_Set_cell_font,   _("Set cell f&ont"));
     gridMenu->AppendSeparator();
     gridMenu->AppendCheckItem(Cmds::DataGrid_Log_changes, _("&Log data changes"));
     menuBarM->Append(gridMenu, _("&Grid"));
@@ -951,7 +953,6 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_UPDATE_UI(Cmds::View_Data, ExecuteSqlFrame::OnMenuUpdateSelectView)
     EVT_MENU(Cmds::View_SplitView, ExecuteSqlFrame::OnMenuSplitView)
     EVT_UPDATE_UI(Cmds::View_SplitView, ExecuteSqlFrame::OnMenuUpdateSplitView)
-    EVT_MENU(Cmds::View_Set_editor_font, ExecuteSqlFrame::OnMenuSetEditorFont)
     EVT_MENU(Cmds::View_Wrap_long_lines, ExecuteSqlFrame::OnMenuToggleWrap)
 
     EVT_MENU(Cmds::Find_Selected_Object,   ExecuteSqlFrame::OnMenuFindSelectedObject)
@@ -996,8 +997,6 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_MENU(Cmds::DataGrid_ExportBlob,      ExecuteSqlFrame::OnMenuGridExportBlob)
     EVT_MENU(Cmds::DataGrid_Save_as_html,    ExecuteSqlFrame::OnMenuGridSaveAsHtml)
     EVT_MENU(Cmds::DataGrid_Save_as_csv,     ExecuteSqlFrame::OnMenuGridSaveAsCsv)
-    EVT_MENU(Cmds::DataGrid_Set_header_font, ExecuteSqlFrame::OnMenuGridGridHeaderFont)
-    EVT_MENU(Cmds::DataGrid_Set_cell_font,   ExecuteSqlFrame::OnMenuGridGridCellFont)
     EVT_MENU(Cmds::DataGrid_FetchAll,        ExecuteSqlFrame::OnMenuGridFetchAll)
     EVT_MENU(Cmds::DataGrid_CancelFetchAll,  ExecuteSqlFrame::OnMenuGridCancelFetchAll)
 
@@ -1564,11 +1563,6 @@ void ExecuteSqlFrame::OnMenuUpdateSplitView(wxUpdateUIEvent& event)
     event.Check(splitter_window_1->IsSplit());
 }
 
-void ExecuteSqlFrame::OnMenuSetEditorFont(wxCommandEvent& WXUNUSED(event))
-{
-    styled_text_ctrl_sql->setFont();
-}
-
 void ExecuteSqlFrame::OnMenuToggleWrap(wxCommandEvent& WXUNUSED(event))
 {
     const int mode = styled_text_ctrl_sql->GetWrapMode();
@@ -1998,15 +1992,6 @@ void ExecuteSqlFrame::OnMenuGridSaveAsCsv(wxCommandEvent& WXUNUSED(event))
     grid_data->saveAsCSV(fileName, fieldDelimiter, textDelimiter);
 }
 
-void ExecuteSqlFrame::OnMenuGridGridHeaderFont(wxCommandEvent& WXUNUSED(event))
-{
-    grid_data->setHeaderFont();
-}
-
-void ExecuteSqlFrame::OnMenuGridGridCellFont(wxCommandEvent& WXUNUSED(event))
-{
-    grid_data->setCellFont();
-}
 
 void ExecuteSqlFrame::OnMenuUpdateGridHasSelection(wxUpdateUIEvent& event)
 {
@@ -2108,6 +2093,24 @@ bool ExecuteSqlFrame::setSql(wxString sql)
     filenameModificationTimeM = wxDateTime();
     updateFrameTitleM = true;
     return true;
+}
+
+void ExecuteSqlFrame::setupStyles()
+{
+    stylerManager().loadConfig();
+
+    styled_text_ctrl_sql->setupStyles();
+
+    stylerManager().assignGlobal(styled_text_ctrl_stats);
+
+    styled_text_ctrl_stats->StyleClearAll();
+    styled_text_ctrl_stats->SetWrapMode(wxSTC_WRAP_WORD);
+    styled_text_ctrl_stats->StyleSetForeground(1, *wxRED);
+    styled_text_ctrl_stats->StyleSetForeground(2, *wxBLUE);
+
+    grid_data->SetBackgroundColour(stylerManager().getDefaultStyle()->getbgColor());
+    grid_data->setupStyles();
+
 }
 
 void ExecuteSqlFrame::clearLogBeforeExecution()
@@ -2994,6 +2997,7 @@ void ExecuteSqlFrame::update()
 {
     if (databaseM && !databaseM->isConnected())
         Close();
+    setupStyles();
 }
 
 //! closes window if database is removed (unregistered)

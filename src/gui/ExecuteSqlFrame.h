@@ -58,6 +58,7 @@ public:
     void markText(int start, int end);
     void setChars(bool firebirdIdentifierOnly);
     void setFont();
+    void setupStyles();
 
     bool hasSelection();
 
@@ -77,12 +78,14 @@ public:
     bool loadSqlFile(const wxString& filename);
     bool setSql(wxString sql);
 
+
     void executeAllStatements(bool autoExecute = false);
 
     virtual bool Show(bool show = TRUE);
 
     Database* getDatabase() const;
 private:
+    void setupStyles();
 
     virtual bool doCanClose();
     virtual void doBeforeDestroy();
@@ -203,7 +206,6 @@ private:
     void OnMenuUpdateSelectView(wxUpdateUIEvent& event);
     void OnMenuSplitView(wxCommandEvent& event);
     void OnMenuUpdateSplitView(wxUpdateUIEvent& event);
-    void OnMenuSetEditorFont(wxCommandEvent& event);
     void OnMenuToggleWrap(wxCommandEvent& event);
 
     void OnMenuHistoryNext(wxCommandEvent& event);
@@ -244,8 +246,6 @@ private:
     void OnMenuGridCopyAsUpdateInsert(wxCommandEvent& event);
     void OnMenuGridSaveAsHtml(wxCommandEvent& event);
     void OnMenuGridSaveAsCsv(wxCommandEvent& event);
-    void OnMenuGridGridHeaderFont(wxCommandEvent& event);
-    void OnMenuGridGridCellFont(wxCommandEvent& event);
     void OnMenuGridFetchAll(wxCommandEvent& event);
     void OnMenuGridCancelFetchAll(wxCommandEvent& event);
     void OnMenuUpdateGridHasSelection(wxUpdateUIEvent& event);

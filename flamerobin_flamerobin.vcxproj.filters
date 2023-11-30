@@ -414,6 +414,12 @@
     <ClCompile Include="src\metadata\CharacterSet.cpp">
       <Filter>Source Files\metadata</Filter>
     </ClCompile>
+    <ClCompile Include="src\gui\FRStyleManager.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\gui\PreferencesDialogStyle.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\gui\AboutBox.h">
@@ -775,6 +781,15 @@
     </ClInclude>
     <ClInclude Include="src\metadata\Collation.h">
       <Filter>Header Files\metadata</Filter>
+    </ClInclude>
+    <ClInclude Include="Header.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\FRStyleManager.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\gui\PreferencesDialogStyle.h">
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -80,11 +80,10 @@ public:
         const wxChar& fieldDelimiter, const wxChar& textDelimiter);
 
     void refreshAndInvalidateAttributes();
-    void setHeaderFont();
-    void setCellFont();
 
     void cancelFetchAll();
     void fetchAll();
+    void setupStyles();
 
     std::vector<bool> getColumnsWithSelectedCells();
     std::vector<bool> getRowsWithSelectedCells();

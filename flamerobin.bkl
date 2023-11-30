@@ -274,6 +274,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/FindDialog.h
         $(SOURCEDIR)/gui/FRLayoutConfig.h
         $(SOURCEDIR)/gui/FRStyle.h
+        $(SOURCEDIR)/gui/FRStyleManager.h
         $(SOURCEDIR)/gui/GUIURIHandlerHelper.h
         $(SOURCEDIR)/gui/HtmlHeaderMetadataItemVisitor.h
         $(SOURCEDIR)/gui/HtmlTemplateProcessor.h
@@ -283,6 +284,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/MetadataItemPropertiesFrame.h
         $(SOURCEDIR)/gui/MultilineEnterDialog.h
         $(SOURCEDIR)/gui/PreferencesDialog.h
+        $(SOURCEDIR)/gui/PreferencesDialogStyle.h
         $(SOURCEDIR)/gui/PrivilegesDialog.h
         $(SOURCEDIR)/gui/ProgressDialog.h
         $(SOURCEDIR)/gui/ReorderFieldsDialog.h
@@ -406,6 +408,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/FindDialog.cpp
         $(SOURCEDIR)/gui/FRLayoutConfig.cpp
         $(SOURCEDIR)/gui/FRStyle.cpp
+        $(SOURCEDIR)/gui/FRStyleManager.cpp
         $(SOURCEDIR)/gui/GUIURIHandlerHelper.cpp
         $(SOURCEDIR)/gui/HtmlHeaderMetadataItemVisitor.cpp
         $(SOURCEDIR)/gui/HtmlTemplateProcessor.cpp
@@ -416,6 +419,7 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/gui/MultilineEnterDialog.cpp
         $(SOURCEDIR)/gui/PreferencesDialog.cpp
         $(SOURCEDIR)/gui/PreferencesDialogSettings.cpp
+        $(SOURCEDIR)/gui/PreferencesDialogStyle.cpp
         $(SOURCEDIR)/gui/PrivilegesDialog.cpp
         $(SOURCEDIR)/gui/ProgressDialog.cpp
         $(SOURCEDIR)/gui/ReorderFieldsDialog.cpp

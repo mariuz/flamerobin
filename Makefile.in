@@ -89,6 +89,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_FindDialog.o \
 	flamerobin_FRLayoutConfig.o \
 	flamerobin_FRStyle.o \
+	flamerobin_FRStyleManager.o \
 	flamerobin_GUIURIHandlerHelper.o \
 	flamerobin_HtmlHeaderMetadataItemVisitor.o \
 	flamerobin_HtmlTemplateProcessor.o \
@@ -99,6 +100,7 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_MultilineEnterDialog.o \
 	flamerobin_PreferencesDialog.o \
 	flamerobin_PreferencesDialogSettings.o \
+	flamerobin_PreferencesDialogStyle.o \
 	flamerobin_PrivilegesDialog.o \
 	flamerobin_ProgressDialog.o \
 	flamerobin_ReorderFieldsDialog.o \
@@ -469,6 +471,9 @@ flamerobin_FRLayoutConfig.o: $(srcdir)/src/gui/FRLayoutConfig.cpp $(FLAMEROBIN_O
 flamerobin_FRStyle.o: $(srcdir)/src/gui/FRStyle.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/FRStyle.cpp
 
+flamerobin_FRStyleManager.o: $(srcdir)/src/gui/FRStyleManager.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/FRStyleManager.cpp
+
 flamerobin_GUIURIHandlerHelper.o: $(srcdir)/src/gui/GUIURIHandlerHelper.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/GUIURIHandlerHelper.cpp
 
@@ -498,6 +503,9 @@ flamerobin_PreferencesDialog.o: $(srcdir)/src/gui/PreferencesDialog.cpp $(FLAMER
 
 flamerobin_PreferencesDialogSettings.o: $(srcdir)/src/gui/PreferencesDialogSettings.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/PreferencesDialogSettings.cpp
+
+flamerobin_PreferencesDialogStyle.o: $(srcdir)/src/gui/PreferencesDialogStyle.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/PreferencesDialogStyle.cpp
 
 flamerobin_PrivilegesDialog.o: $(srcdir)/src/gui/PrivilegesDialog.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/gui/PrivilegesDialog.cpp

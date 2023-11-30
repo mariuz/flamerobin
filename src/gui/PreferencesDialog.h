@@ -35,6 +35,7 @@
 #include "config/Config.h"
 #include "core/TemplateProcessor.h"
 #include "gui/BaseDialog.h"
+#include "gui/FRStyleManager.h"
 
 class Optionbook;
 class wxXmlNode;
@@ -66,6 +67,7 @@ public:
     virtual bool loadFromTargetConfig(Config& targetConfig) = 0;
     virtual bool parseProperty(wxXmlNode* xmln);
     virtual bool saveToTargetConfig(Config& targetConfig) = 0;
+    virtual bool cancelChanges(Config& targetConfig) = 0;
 protected:
     wxString captionM;
     wxString descriptionM;
@@ -114,9 +116,11 @@ public:
     bool isOk();
     bool loadFromTargetConfig();
     bool saveToTargetConfig();
+    bool cancelChanges();
     void selectPage(int index);
 
     void OnSaveButtonClick(wxCommandEvent& event);
+    void OnCancelButtonClick(wxCommandEvent& event);
     void OnTreeSelChanged(wxTreeEvent& event);
     virtual bool Show(bool show);
 private:
@@ -151,6 +155,27 @@ protected:
     virtual const wxString getName() const;
 
     DECLARE_EVENT_TABLE()
+};
+
+
+// PrefDlgEventHandler helper
+typedef std::function<void(wxCommandEvent&)> CommandEventHandler;
+
+class PrefDlgEventHandler : public wxEvtHandler
+{
+public:
+    PrefDlgEventHandler(CommandEventHandler handler)
+        : wxEvtHandler(), handlerM(handler)
+    {
+    }
+
+    void OnCommandEvent(wxCommandEvent& event)
+    {
+        if (handlerM)
+            handlerM(event);
+    }
+private:
+    CommandEventHandler handlerM;
 };
 
 #endif // PREFERENCESDIALOG_H
