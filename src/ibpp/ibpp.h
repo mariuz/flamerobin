@@ -935,6 +935,7 @@ public:
         virtual const char* ColumnAlias(int) = 0;
         virtual const char* ColumnTable(int) = 0;
         virtual SDT ColumnType(int) = 0;
+        virtual int ColumnSQLType(int) = 0;
         virtual int ColumnSubtype(int) = 0;
         virtual int ColumnSize(int) = 0;
         virtual int ColumnScale(int) = 0;
