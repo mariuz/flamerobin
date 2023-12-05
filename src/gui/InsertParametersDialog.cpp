@@ -686,6 +686,7 @@ void InsertParametersDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
             row = (*it)-1;
             IBPP::SDT parameterType = statementM->ParameterType(parameterslist.back()); //statementM->ParameterType(row + 1);
             int subtype = statementM->ParameterSubtype(parameterslist.back());
+            int scale = statementM->ParameterScale(parameterslist.back());
 
             if (sel == ioNull)
             {
@@ -780,6 +781,14 @@ void InsertParametersDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
                 statementM->Set(row + 1, (int)d1);
                 break;
             case IBPP::SDT::sdLargeint:
+                if (scale != 0)
+                {
+                    double d3;
+                    if (!value.ToDouble(&d3))
+                        throw FRError(_("Invalid float numeric value"));
+                    statementM->Set(row + 1, (float)d3);
+                    break;
+                }
                 wxLongLong_t d2;
                 if (!value.ToLongLong(&d2))
                     throw FRError(_("Invalid large integer value"));
