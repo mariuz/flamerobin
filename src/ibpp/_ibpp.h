@@ -36,7 +36,10 @@
 #endif
 #endif
 
-#include "../firebird/include/ibase.h"      // From Firebird installation
+// From Firebird installation
+#include "../firebird/include/ibase.h"
+// Firebird 3+ interfaces
+#include "../firebird/include/firebird/Interface.h"
 
 #if (defined(__GNUC__) && defined(IBPP_WINDOWS))
 //  UNSETTING flags used above for ibase.h -- Huge conflicts with libstdc++ !

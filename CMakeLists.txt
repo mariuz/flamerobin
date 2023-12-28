@@ -349,6 +349,8 @@ list(APPEND IBPP_HEADER_LIST
 		${SOURCEDIR}/firebird/include/firebird/impl/msg/sqlerr.h
 		${SOURCEDIR}/firebird/include/firebird/impl/msg/sqlwarn.h
 		${SOURCEDIR}/firebird/include/firebird/impl/msg/utl.h		
+		${SOURCEDIR}/firebird/include/firebird/Interface.h
+		${SOURCEDIR}/firebird/include/firebird/IdlFbInterfaces.h
         ${SOURCEDIR}/ibpp/_ibpp.h
         ${SOURCEDIR}/ibpp/ibpp.h
 )
