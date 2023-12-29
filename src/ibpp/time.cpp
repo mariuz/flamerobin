@@ -172,27 +172,6 @@ namespace ibpp_internals
 //	These helper functions are used from row.cpp and from array.cpp.
 //
 
-/* FB3+: get the IMaster-interface.
- * This is needed to convert times with time zone correctly */
-const int FB_MAX_TIME_ZONE_NAME_LENGTH = 32;
-typedef struct FBINTF
-{
-    Firebird::IMaster* master;
-    Firebird::ThrowStatusWrapper* status;
-    Firebird::IUtil* util;
-} *PFBINTF;
-static FBINTF gFbIntf = {};
-PFBINTF getFbIntf(void)
-{
-    if (gFbIntf.master != NULL)
-        return &gFbIntf;
-
-    gFbIntf.master = Firebird::fb_get_master_interface();
-    gFbIntf.status = new Firebird::ThrowStatusWrapper(gFbIntf.master->getStatus());
-    gFbIntf.util   = gFbIntf.master->getUtilInterface();
-    return &gFbIntf;
-}
-
 void encodeDate(ISC_DATE& isc_dt, const IBPP::Date& dt)
 {
 	// There simply has a shift of 15019 between the native Firebird
@@ -222,9 +201,9 @@ void decodeTimeTz(IBPP::Time& tm, const ISC_TIME_TZ& isc_tm)
     unsigned h, m, s, frac;
     char tzBuf[FB_MAX_TIME_ZONE_NAME_LENGTH];
 
-    PFBINTF fbIntf = getFbIntf();
-    fbIntf->util->decodeTimeTz(fbIntf->status, &isc_tm, &h, &m, &s, &frac, 
-                               sizeof(tzBuf), tzBuf);
+    fbIntfClass* fbIntf = fbIntfClass::getInstance();
+    fbIntf->mUtil->decodeTimeTz(fbIntf->mStatus, &isc_tm, &h, &m, &s, &frac,
+                                sizeof(tzBuf), tzBuf);
 
     tm.SetTime(IBPP::Time::tmTimezone, h, m, s, frac, isc_tm.time_zone);
 }
@@ -247,9 +226,9 @@ void decodeTimestampTz(IBPP::Timestamp& ts, const ISC_TIMESTAMP_TZ& isc_ts)
     unsigned y, m, d;
     char tzBuf[FB_MAX_TIME_ZONE_NAME_LENGTH];
 
-    PFBINTF fbIntf = getFbIntf();
-    fbIntf->util->decodeTimeStampTz(fbIntf->status, &isc_ts, &y, &m, &d, &h, &n, &s, &frac, 
-                                    sizeof(tzBuf), tzBuf);
+    fbIntfClass* fbIntf = fbIntfClass::getInstance();
+    fbIntf->mUtil->decodeTimeStampTz(fbIntf->mStatus, &isc_ts, &y, &m, &d, &h, &n, &s, &frac,
+                                     sizeof(tzBuf), tzBuf);
 
     ts.Clear();
     ts.SetDate(y, m, d);
