@@ -30,8 +30,8 @@
 #include "metadata/MetadataClasses.h"
 #include "metadata/metadataitem.h"
 
-class User: public MetadataItem,
-    public std::enable_shared_from_this<User>
+class User: public MetadataItem
+    ,public std::enable_shared_from_this<User>
 {
 private:
     ServerWeakPtr serverM;
@@ -45,6 +45,8 @@ private:
 public:
     User(ServerPtr server);
     User(ServerPtr server, const IBPP::User& src);
+    User(DatabasePtr database, const wxString& name);
+
 
     ServerPtr getServer() const;
     virtual bool isSystem() const;
@@ -66,8 +68,12 @@ public:
     void setGroupId(uint32_t value);
 
     void assignTo(IBPP::User& dest) const;
+
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+
 };
-/*
+
+//template <class U>
 class Users : public MetadataCollection<User>
 {
 protected:
@@ -80,6 +86,22 @@ public:
     virtual const wxString getTypeName() const;
 
 };
-*/
+
+class Users20 : public Users//<User>
+{
+public:
+    Users20(DatabasePtr database);
+    void load(ProgressIndicator* progressIndicator);
+};
+
+class Users30 : public Users//<User>
+{
+public:
+    Users30(DatabasePtr database);
+    void load(ProgressIndicator* progressIndicator);
+};
+
+
+
 
 #endif

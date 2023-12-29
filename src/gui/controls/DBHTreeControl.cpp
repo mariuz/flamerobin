@@ -586,9 +586,9 @@ void DBHTreeItemVisitor::visitUser(User& user)
     setNodeProperties(&user, ART_User);
 }
 
-void DBHTreeItemVisitor::visitUsers(Users& /*users*/)
+void DBHTreeItemVisitor::visitUsers(Users& users)
 {
-    //setNodeProperties(&users, ART_Users);
+    setNodeProperties(&users, ART_Users);
 }
 
 void DBHTreeItemVisitor::visitGenerator(Generator& generator)

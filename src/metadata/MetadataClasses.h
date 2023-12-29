@@ -118,6 +118,12 @@ typedef std::shared_ptr<UsrIndices> UsrIndicesPtr;
 
 class MetadataItem;
 typedef std::shared_ptr<MetadataItem> MetadataItemPtr;
+typedef std::vector<MetadataItemPtr> MetadataItemPtrs;
+template <class T>
+class MetadataCollection;
+typedef std::shared_ptr<MetadataCollection<class T>> MetadataCollectionPtr;
+
+
 
 class Method;
 typedef std::shared_ptr<Method> MethodPtr;

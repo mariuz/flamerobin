@@ -51,6 +51,11 @@ User::User(ServerPtr server, const IBPP::User& src)
     lastnameM = src.lastname;
 }
 
+User::User(DatabasePtr database, const wxString& name)
+    : MetadataItem(ntUser, database.get(), name)
+{
+}
+
 ServerPtr User::getServer() const
 {
     return ServerPtr(serverM);
@@ -165,12 +170,17 @@ void User::assignTo(IBPP::User& dest) const
     dest.groupid = groupidM;
 }
 
+void User::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitUser(*this);
+}
+
 bool User::isSystem() const
 {
     return usernameM == "SYSDBA";
 }
 
-/*
+
 void Users::loadChildren()
 {
     load(0);
@@ -188,9 +198,26 @@ void Users::acceptVisitor(MetadataItemVisitor* visitor)
 
 void Users::load(ProgressIndicator* progressIndicator)
 {
+
     DatabasePtr db = getDatabase();
-    wxString stmt = "select sec$user_name from sec$users a order by 1 ";
-    setItems(db->loadIdentifiers(stmt, progressIndicator));
+    if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
+        wxString stmt = "select sec$user_name from sec$users a order by 1 ";
+        setItems(db->loadIdentifiers(stmt, progressIndicator));
+    }
+    else {
+        IBPP::Service svc;
+        if (db->getServer()->getService(svc, NULL, true)) {   // true = SYSDBA
+
+            std::vector<IBPP::User> usr;
+            svc->GetUsers(usr);
+            for (std::vector<IBPP::User>::iterator it = usr.begin();
+                it != usr.end(); ++it)
+            {
+                insert(it->username);
+            }
+        }
+
+    }
 }
 
 const wxString Users::getTypeName() const
@@ -198,4 +225,37 @@ const wxString Users::getTypeName() const
     return "USERS_COLLECTION";
 }
 
-*/
+Users20::Users20(DatabasePtr database)
+    :Users(database)
+{
+}
+
+void Users20::load(ProgressIndicator* progressIndicator)
+{
+    DatabasePtr db = getDatabase();
+    IBPP::Service svc;
+    if (db->getServer()->getService(svc, NULL, true)) {   // true = SYSDBA
+
+        std::vector<IBPP::User> usr;
+        svc->GetUsers(usr);
+        for (std::vector<IBPP::User>::iterator it = usr.begin();
+            it != usr.end(); ++it)
+        {
+            insert(it->username);
+        }
+    }
+
+}
+
+
+Users30::Users30(DatabasePtr database)
+    :Users(database)
+{
+}
+
+void Users30::load(ProgressIndicator* progressIndicator)
+{
+    DatabasePtr db = getDatabase();
+    wxString stmt = "select sec$user_name from sec$users a order by 1 ";
+    setItems(db->loadIdentifiers(stmt, progressIndicator));
+}
