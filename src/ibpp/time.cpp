@@ -30,11 +30,13 @@
 
 using namespace ibpp_internals;
 
+const std::string IBPP::Time::TZ_GMT_FALLBACK = "GMT*";
+
 void IBPP::Time::Now()
 {
 	time_t systime = time(0);
 	tm* loctime = localtime(&systime);
-	SetTime(IBPP::Time::tmNone, loctime->tm_hour, loctime->tm_min, loctime->tm_sec, 0, IBPP::Time::TZ_NONE);
+	SetTime(IBPP::Time::tmNone, loctime->tm_hour, loctime->tm_min, loctime->tm_sec, 0, IBPP::Time::TZ_NONE, NULL);
 }
 
 void IBPP::Time::SetTime(TimezoneMode tzMode, int tm, int timezone)
@@ -47,17 +49,23 @@ void IBPP::Time::SetTime(TimezoneMode tzMode, int tm, int timezone)
     SetTimezone(timezone);
 }
 
-void IBPP::Time::SetTime(TimezoneMode tzMode, int hour, int minute, int second, int tenthousandths, int timezone)
+void IBPP::Time::SetTime(TimezoneMode tzMode, int hour, int minute, int second, int tenthousandths, int timezone, char* fbTimezoneName)
 {
-	if (hour < 0 || hour > 23 ||
-		minute < 0 || minute > 59 ||
-			second < 0 || second > 59 ||
-				tenthousandths < 0 || tenthousandths > 9999)
-					throw LogicExceptionImpl("Time::SetTime",
-						_("Invalid hour, minute, second values"));
-	int tm;
-	IBPP::itot(&tm, hour, minute, second, tenthousandths);
-	SetTime(tzMode, tm, timezone);
+    if (hour < 0 || hour > 23 ||
+        minute < 0 || minute > 59 ||
+            second < 0 || second > 59 ||
+                tenthousandths < 0 || tenthousandths > 9999)
+                    throw LogicExceptionImpl("Time::SetTime",
+                        _("Invalid hour, minute, second values"));
+
+    // Check, if fbclient fails to load icu. In this case
+    // TimeZoneName "GMT*" ist returned.
+    if ((tzMode = tmTimezone) && (fbTimezoneName == TZ_GMT_FALLBACK))
+        tzMode = tmTimezoneGmtFallback;
+
+    int tm;
+    IBPP::itot(&tm, hour, minute, second, tenthousandths);
+    SetTime(tzMode, tm, timezone);
 }
 
 void IBPP::Time::SetTimezone(int tz)
@@ -108,9 +116,9 @@ int IBPP::Time::SubSeconds() const	// Actually tenthousandths of seconds
 	return tenthousandths;
 }
 
-IBPP::Time::Time(TimezoneMode tzMode, int hour, int minute, int second, int tenthousandths, int timezone)
+IBPP::Time::Time(TimezoneMode tzMode, int hour, int minute, int second, int tenthousandths, int timezone, char* fbTimezoneName)
 {
-	SetTime(tzMode, hour, minute, second, tenthousandths, timezone);
+	SetTime(tzMode, hour, minute, second, tenthousandths, timezone, fbTimezoneName);
 }
 
 IBPP::Time::Time(const IBPP::Time& copied)
@@ -200,12 +208,13 @@ void decodeTimeTz(IBPP::Time& tm, const ISC_TIME_TZ& isc_tm)
 {
     unsigned h, m, s, frac;
     char tzBuf[FB_MAX_TIME_ZONE_NAME_LENGTH];
+    IBPP::Time::TimezoneMode tzMode = IBPP::Time::tmTimezone;
 
     fbIntfClass* fbIntf = fbIntfClass::getInstance();
     fbIntf->mUtil->decodeTimeTz(fbIntf->mStatus, &isc_tm, &h, &m, &s, &frac,
                                 sizeof(tzBuf), tzBuf);
 
-    tm.SetTime(IBPP::Time::tmTimezone, h, m, s, frac, isc_tm.time_zone);
+    tm.SetTime(tzMode, h, m, s, frac, isc_tm.time_zone, tzBuf);
 }
 
 void encodeTimestamp(ISC_TIMESTAMP& isc_ts, const IBPP::Timestamp& ts)
@@ -232,7 +241,7 @@ void decodeTimestampTz(IBPP::Timestamp& ts, const ISC_TIMESTAMP_TZ& isc_ts)
 
     ts.Clear();
     ts.SetDate(y, m, d);
-    ts.SetTime(IBPP::Time::tmTimezone, h, n, s, frac, isc_ts.time_zone);
+    ts.SetTime(IBPP::Time::tmTimezone, h, n, s, frac, isc_ts.time_zone, tzBuf);
 }
 
 }
