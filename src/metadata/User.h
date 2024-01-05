@@ -42,6 +42,8 @@ private:
     wxString lastnameM;
     uint32_t useridM;
     uint32_t groupidM;
+protected:
+    virtual void loadProperties();
 public:
     User(ServerPtr server);
     User(ServerPtr server, const IBPP::User& src);
@@ -58,6 +60,7 @@ public:
     wxString getLastName() const;
     uint32_t getUserId() const;
     uint32_t getGroupId() const;
+    IBPP::User& getUserIBPP() const;
 
     void setUsername(const wxString& value);
     void setPassword(const wxString& value);
@@ -66,14 +69,39 @@ public:
     void setLastName(const wxString& value);
     void setUserId(uint32_t value);
     void setGroupId(uint32_t value);
+    void setUserIBPP(const IBPP::User& usr);
 
     void assignTo(IBPP::User& dest) const;
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    virtual const wxString getTypeName() const;
+    virtual wxString getSource();
+
 
 };
 
-//template <class U>
+class User20: public User
+{
+protected:
+    virtual void loadProperties();
+public:
+    User20(ServerPtr server);
+    User20(ServerPtr server, const IBPP::User& src);
+    User20(DatabasePtr database, const wxString& name);
+};
+
+class User30 : public User
+{
+protected:
+    virtual void loadProperties();
+public:
+    User30(ServerPtr server);
+    User30(ServerPtr server, const IBPP::User& src);
+    User30(DatabasePtr database, const wxString& name);
+
+};
+
+
 class Users : public MetadataCollection<User>
 {
 protected:
@@ -81,24 +109,36 @@ protected:
 public:
     Users(DatabasePtr database);
 
+
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
-    void load(ProgressIndicator* progressIndicator);
+    virtual void load(ProgressIndicator* progressIndicator);
     virtual const wxString getTypeName() const;
 
 };
 
-class Users20 : public Users//<User>
+class Users20 : public Users
 {
 public:
     Users20(DatabasePtr database);
-    void load(ProgressIndicator* progressIndicator);
+    virtual void load(ProgressIndicator* progressIndicator);
+
+    virtual ItemType newItem(const wxString & name) {
+        ItemType item(new User20(getDatabase(), name));
+        return item;
+    }
+
 };
 
-class Users30 : public Users//<User>
+class Users30 : public Users
 {
 public:
     Users30(DatabasePtr database);
-    void load(ProgressIndicator* progressIndicator);
+    virtual void load(ProgressIndicator* progressIndicator);
+
+    virtual ItemType newItem(const wxString& name) {
+        ItemType item(new User30(getDatabase(), name));
+        return item;
+    }
 };
 
 

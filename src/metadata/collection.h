@@ -117,13 +117,18 @@ protected:
     }
 
 public:
+    virtual ItemType newItem(const wxString& name) {
+        ItemType item(new T(getDatabase(), name));
+        return item;
+    }
+
     // inserts new item into list at correct position to preserve alphabetical
     // order of item names, and returns pointer to it
     ItemType insert(const wxString& name)
     {
         iterator pos = std::find_if(itemsM.begin(), itemsM.end(),
             InsertionPosByName(name));
-        ItemType item(new T(getDatabase(), name));
+        ItemType item = newItem(name);// (new T(getDatabase(), name));
         initializeLockCount(item, getLockCount());
         itemsM.insert(pos, item);
         notifyObservers();
@@ -154,7 +159,7 @@ public:
             iterator oldPos = getPosition(itemName);
             if (oldPos == itemsM.end())
             {
-               ItemType item(new T(database, names[i]));
+               ItemType item = newItem(names[i]);//(new T(database, names[i]));
                 newItems.push_back(item);
                 initializeLockCount(item, getLockCount());
             }

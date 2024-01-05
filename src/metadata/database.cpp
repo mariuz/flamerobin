@@ -1212,7 +1212,7 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             initializeLockCount(sysIndicesM, lockCount);
             usrIndicesM.reset(new UsrIndices(me));
             initializeLockCount(usrIndicesM, lockCount);
-            usersM.reset(new Users30(me));
+            usersM.reset(new Users20(me));
             initializeLockCount(usersM, lockCount);
 
             // first start a transaction for metadata loading, then lock the

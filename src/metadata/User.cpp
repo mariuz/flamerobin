@@ -30,10 +30,18 @@
     #include "wx/wx.h"
 #endif
 
+#include <ibpp.h>
+
+#include "core/FRError.h"
 #include "core/StringUtils.h"
+#include "engine/MetadataLoader.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/server.h"
 #include "metadata/User.h"
+
+void User::loadProperties()
+{
+}
 
 User::User(ServerPtr server)
     : MetadataItem(ntUnknown, server.get()), serverM(server)
@@ -94,6 +102,21 @@ uint32_t User::getUserId() const
 uint32_t User::getGroupId() const
 {
     return groupidM;
+}
+
+IBPP::User& User::getUserIBPP() const
+{
+    IBPP::User usr;
+
+    usr.username = wx2std(usernameM);
+    usr.password = wx2std(passwordM);
+    usr.firstname = wx2std(firstnameM);
+    usr.lastname = wx2std(lastnameM);
+    usr.middlename = wx2std(middlenameM);
+    usr.userid = useridM;
+    usr.groupid = groupidM;
+
+    return usr;
 }
 
 void User::setUsername(const wxString& value)
@@ -159,15 +182,23 @@ void User::setGroupId(uint32_t value)
     }
 }
 
+void User::setUserIBPP(const IBPP::User& usr) 
+{
+    setUsername(usr.username);
+    setUsername(usr.username);
+    setPassword(usr.password);
+    setFirstName(usr.firstname);
+    setMiddleName(usr.middlename);
+    setLastName(usr.lastname);
+    setUserId(usr.userid);
+    setGroupId(usr.groupid);
+
+    notifyObservers();
+}
+
 void User::assignTo(IBPP::User& dest) const
 {
-    dest.username = wx2std(usernameM);
-    dest.password = wx2std(passwordM);
-    dest.firstname = wx2std(firstnameM);
-    dest.lastname = wx2std(lastnameM);
-    dest.middlename = wx2std(middlenameM);
-    dest.userid = useridM;
-    dest.groupid = groupidM;
+    dest = getUserIBPP();
 }
 
 void User::acceptVisitor(MetadataItemVisitor* visitor)
@@ -175,11 +206,27 @@ void User::acceptVisitor(MetadataItemVisitor* visitor)
     visitor->visitUser(*this);
 }
 
+const wxString User::getTypeName() const
+{
+    return "USER";
+}
+
+wxString User::getSource()
+{
+    ensurePropertiesLoaded();
+    wxString sql = "FIRSTNAME '" + getFirstName() + "' \n" +
+        "MIDDLENAME '" + getMiddleName() + "' \n"
+        "LASTNAME '" + getLastName() + "' \n"
+        "USING PLUGIN "+" \n"
+
+        ;
+    return sql;
+}
+
 bool User::isSystem() const
 {
     return usernameM == "SYSDBA";
 }
-
 
 void Users::loadChildren()
 {
@@ -199,7 +246,7 @@ void Users::acceptVisitor(MetadataItemVisitor* visitor)
 void Users::load(ProgressIndicator* progressIndicator)
 {
 
-    DatabasePtr db = getDatabase();
+    /*DatabasePtr db = getDatabase();
     if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
         wxString stmt = "select sec$user_name from sec$users a order by 1 ";
         setItems(db->loadIdentifiers(stmt, progressIndicator));
@@ -217,13 +264,14 @@ void Users::load(ProgressIndicator* progressIndicator)
             }
         }
 
-    }
+    }*/
 }
 
 const wxString Users::getTypeName() const
 {
     return "USERS_COLLECTION";
 }
+
 
 Users20::Users20(DatabasePtr database)
     :Users(database)
@@ -243,6 +291,9 @@ void Users20::load(ProgressIndicator* progressIndicator)
         {
             insert(it->username);
         }
+        notifyObservers();
+        setChildrenLoaded(true);
+
     }
 
 }
@@ -256,6 +307,112 @@ Users30::Users30(DatabasePtr database)
 void Users30::load(ProgressIndicator* progressIndicator)
 {
     DatabasePtr db = getDatabase();
-    wxString stmt = "select sec$user_name from sec$users a order by 1 ";
+    wxString stmt = "select sec$user_name from sec$users order by 1 ";
     setItems(db->loadIdentifiers(stmt, progressIndicator));
 }
+
+void User20::loadProperties()
+{
+    setPropertiesLoaded(false);
+
+    DatabasePtr db = getDatabase();
+    IBPP::Service svc;
+    if (db->getServer()->getService(svc, NULL, true)) {
+        IBPP::User usr;
+        usr.username = getName_();
+        svc->GetUser(usr);
+        setUserIBPP(usr);
+    }
+
+    setPropertiesLoaded(true);
+    notifyObservers();
+}
+
+User20::User20(ServerPtr server) 
+    : User(server)
+{
+}
+
+User20::User20(ServerPtr server, const IBPP::User& src)
+    :User(server, src)
+{
+}
+
+User20::User20(DatabasePtr database, const wxString& name)
+    :User(database, name)
+{
+}
+
+void User30::loadProperties()
+{
+
+    DatabasePtr db = getDatabase();
+
+    MetadataLoader* loader = db->getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+    wxMBConv* converter = db->getCharsetConverter();
+
+    IBPP::Statement& st1 = loader->getStatement(
+        "select sec$user_name, "
+        "sec$first_name, "
+        "sec$middle_name, "
+        "sec$last_name, "
+        "sec$active, "
+        "sec$admin, "
+        "sec$description, "
+        "sec$plugin "
+        "from sec$users "
+        "where sec$user_name = ? "
+    );
+    st1->Set(1, wx2std(getName_(), converter));
+    st1->Execute();
+    if (!st1->Fetch())
+        throw FRError(_("User not found: ") + getName_());
+
+    setPropertiesLoaded(false);
+    std::string lstr;
+
+
+    if (st1->IsNull(2)) 
+        lstr = ""; 
+    else  
+        st1->Get(2, lstr);
+    setFirstName(lstr);
+    
+    if (st1->IsNull(3))
+        lstr = "";
+    else
+        st1->Get(3, lstr);
+    setMiddleName(lstr);
+
+    if (st1->IsNull(4))
+        lstr = "";
+    else
+        st1->Get(4, lstr);
+    setLastName(lstr);
+
+    if (st1->IsNull(4))
+        lstr = "";
+    else
+        st1->Get(4, lstr);
+    setLastName(lstr);
+
+    setPropertiesLoaded(true);
+    notifyObservers();
+}
+
+User30::User30(ServerPtr server)
+    : User(server)
+{
+}
+
+User30::User30(ServerPtr server, const IBPP::User& src)
+    :User(server, src)
+{
+}
+
+User30::User30(DatabasePtr database, const wxString& name)
+    :User(database, name)
+{
+}
+

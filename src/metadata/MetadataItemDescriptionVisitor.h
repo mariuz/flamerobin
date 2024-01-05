@@ -53,6 +53,7 @@ public:
     virtual void visitRelation(Relation& relation);
     virtual void visitRole(Role& role);
     virtual void visitTrigger(Trigger& trigger);
+    virtual void visitUser(User& user);
 
     bool descriptionAvailable() const;
     wxString getDescription() const;
@@ -82,6 +83,7 @@ public:
     virtual void visitRelation(Relation& relation);
     virtual void visitRole(Role& role);
     virtual void visitTrigger(Trigger& trigger);
+    virtual void visitUser(User& user);
 };
 
 #endif // FR_DESCRIPTIONVISITOR_H

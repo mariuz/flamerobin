@@ -399,9 +399,8 @@ wxIcon getMetadataItemIcon(NodeType type)
             return wxArtProvider::GetIcon(ART_Function, wxART_OTHER, sz);
         case ntGenerator:
             return wxArtProvider::GetIcon(ART_Generator, wxART_OTHER, sz);
-// TODO: replace package art
         case ntPackage: 
-            return wxArtProvider::GetIcon(ART_Procedure, wxART_OTHER, sz);
+            return wxArtProvider::GetIcon(ART_Package, wxART_OTHER, sz);
         case ntProcedure:
             return wxArtProvider::GetIcon(ART_Procedure, wxART_OTHER, sz);
         case ntServer:
@@ -414,6 +413,8 @@ wxIcon getMetadataItemIcon(NodeType type)
             return wxArtProvider::GetIcon(ART_Trigger, wxART_OTHER, sz);
         case ntView:
             return wxArtProvider::GetIcon(ART_View, wxART_OTHER, sz);
+        case ntUser:
+            return wxArtProvider::GetIcon(ART_User, wxART_OTHER, sz);
         default:
             break;
     }

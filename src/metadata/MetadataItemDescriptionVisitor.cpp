@@ -49,6 +49,7 @@
 #include "metadata/relation.h"
 #include "metadata/role.h"
 #include "metadata/trigger.h"
+#include "metadata/user.h"
 
 
 // class LoadDescriptionVisitor
@@ -219,6 +220,13 @@ void LoadDescriptionVisitor::visitTrigger(Trigger& trigger)
     loadDescription(&trigger,
         "select RDB$DESCRIPTION from RDB$TRIGGERS "
         "where RDB$TRIGGER_NAME = ?");
+}
+
+void LoadDescriptionVisitor::visitUser(User& user)
+{
+    loadDescription(&user,
+        "select SEC$DESCRIPTION from SEC$USERS  "
+        "where SEC$USER_NAME = ?");
 }
 
 // class SaveDescriptionVisitor
@@ -427,5 +435,10 @@ void SaveDescriptionVisitor::visitTrigger(Trigger& trigger)
     saveDescription(&trigger,
         "update RDB$TRIGGERS set RDB$DESCRIPTION = ? "
         "where RDB$TRIGGER_NAME = ?");
+}
+
+void SaveDescriptionVisitor::visitUser(User& user)
+{
+    saveDescription(&user, "comment on trigger %s is '%s'");
 }
 
