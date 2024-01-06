@@ -577,7 +577,6 @@ void MainObjectMenuMetadataItemVisitor::addActiveItem(MetadataItem& metadataItem
     }
 
 }
-
 void MainObjectMenuMetadataItemVisitor::addCreateItem()
 {
     // This menu command is redundant in the main Object menu.

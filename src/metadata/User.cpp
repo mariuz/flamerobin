@@ -106,8 +106,9 @@ uint32_t User::getGroupId() const
 
 IBPP::User& User::getUserIBPP() const
 {
-    IBPP::User usr;
-
+    
+     IBPP::User usr;
+    
     usr.username = wx2std(usernameM);
     usr.password = wx2std(passwordM);
     usr.firstname = wx2std(firstnameM);

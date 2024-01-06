@@ -224,9 +224,11 @@ void LoadDescriptionVisitor::visitTrigger(Trigger& trigger)
 
 void LoadDescriptionVisitor::visitUser(User& user)
 {
-    loadDescription(&user,
-        "select SEC$DESCRIPTION from SEC$USERS  "
-        "where SEC$USER_NAME = ?");
+    if (user.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
+        loadDescription(&user,
+            "select SEC$DESCRIPTION from SEC$USERS  "
+            "where SEC$USER_NAME = ?");
+    }
 }
 
 // class SaveDescriptionVisitor
@@ -439,6 +441,8 @@ void SaveDescriptionVisitor::visitTrigger(Trigger& trigger)
 
 void SaveDescriptionVisitor::visitUser(User& user)
 {
-    saveDescription(&user, "comment on trigger %s is '%s'");
+    if (user.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
+        saveDescription(&user, "comment on trigger %s is '%s'");
+    }
 }
 
