@@ -49,7 +49,7 @@
 #include "metadata/relation.h"
 #include "metadata/role.h"
 #include "metadata/trigger.h"
-#include "metadata/user.h"
+#include "metadata/User.h"
 
 
 // class LoadDescriptionVisitor
