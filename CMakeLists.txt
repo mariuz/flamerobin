@@ -171,6 +171,8 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/metadata/table.cpp
         ${SOURCEDIR}/metadata/trigger.cpp
         ${SOURCEDIR}/metadata/User.cpp
+        ${SOURCEDIR}/metadata/FB20/User20.cpp
+        ${SOURCEDIR}/metadata/FB30/User30.cpp
         ${SOURCEDIR}/metadata/view.cpp
         ${SOURCEDIR}/sql/Identifier.cpp
         ${SOURCEDIR}/sql/IncompleteStatement.cpp
@@ -294,6 +296,8 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/metadata/table.h
         ${SOURCEDIR}/metadata/trigger.h
         ${SOURCEDIR}/metadata/User.h
+        ${SOURCEDIR}/metadata/FB20/User20.h
+        ${SOURCEDIR}/metadata/FB20/User30.h
         ${SOURCEDIR}/metadata/view.h
         ${SOURCEDIR}/sql/Identifier.h
         ${SOURCEDIR}/sql/IncompleteStatement.h

@@ -164,6 +164,8 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_table.o \
 	flamerobin_trigger.o \
 	flamerobin_User.o \
+	flamerobin_User20.o \
+	flamerobin_User30.o \
 	flamerobin_view.o \
 	flamerobin_Identifier.o \
 	flamerobin_IncompleteStatement.o \
@@ -569,6 +571,12 @@ flamerobin_trigger.o: ./src/metadata/trigger.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 flamerobin_User.o: ./src/metadata/User.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+flamerobin_User20.o: ./src/metadata/FB20/User20.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+flamerobin_User30.o: ./src/metadata/FB30/User30.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 flamerobin_view.o: ./src/metadata/view.cpp

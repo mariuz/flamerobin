@@ -160,6 +160,8 @@ FLAMEROBIN_OBJECTS =  \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_table.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_trigger.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_User.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_User20.o \
+	gccu$(R_OPT)$(D_OPT)\flamerobin_User30.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_view.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_Identifier.o \
 	gccu$(R_OPT)$(D_OPT)\flamerobin_IncompleteStatement.o \
@@ -608,6 +610,12 @@ gccu$(R_OPT)$(D_OPT)\flamerobin_trigger.o: ./src/metadata/trigger.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gccu$(R_OPT)$(D_OPT)\flamerobin_User.o: ./src/metadata/User.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gccu$(R_OPT)$(D_OPT)\flamerobin_User20.o: ./src/metadata/FB20/User20.cpp
+	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
+
+gccu$(R_OPT)$(D_OPT)\flamerobin_User30.o: ./src/metadata/FB30/User30.cpp
 	$(CXX) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(CPPDEPS) $<
 
 gccu$(R_OPT)$(D_OPT)\flamerobin_view.o: ./src/metadata/view.cpp

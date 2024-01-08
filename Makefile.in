@@ -154,6 +154,8 @@ FLAMEROBIN_OBJECTS =  \
 	flamerobin_table.o \
 	flamerobin_trigger.o \
 	flamerobin_User.o \
+	flamerobin_User20.o \
+	flamerobin_User30.o \
 	flamerobin_view.o \
 	flamerobin_Identifier.o \
 	flamerobin_IncompleteStatement.o \
@@ -244,7 +246,7 @@ install:
 	$(INSTALL_DIR) $(DESTDIR)@mandir@/man1
 	(cd $(srcdir)/docs ; $(INSTALL_DATA)  flamerobin.1 $(DESTDIR)@mandir@/man1)
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/flamerobin/html-templates
-	(cd $(srcdir)/html-templates ; $(INSTALL_DATA)  ALLloading.html COLLATION.html COLLATIONprivileges.html DATABASE.html DATABASEtriggers.html DDL.html dependencies.html DOMAIN.html DOMAINprivileges.html EXCEPTION.html EXCEPTIONprivileges.html FUNCTION.html FUNCTIONprivileges.html GENERATOR.html GENERATORprivileges.html header.html INDEX.html INDEXprivileges.html PACKAGE.html PACKAGEprivileges.html PROCEDURE.html PROCEDUREprivileges.html ROLE.html ROLEprivileges.html SERVER.html TABLE.html TABLEconstraints.html TABLEindices.html TABLEprivileges.html TABLEtriggers.html TRIGGER.html UDF.html UDFprivileges.html VIEW.html VIEWprivileges.html VIEWtriggers.html compute.png drop.png ok.png ok2.png redx.png view.png $(DESTDIR)$(datadir)/flamerobin/html-templates)
+	(cd $(srcdir)/html-templates ; $(INSTALL_DATA)  ALLloading.html COLLATION.html COLLATIONprivileges.html DATABASE.html DATABASEtriggers.html DDL.html dependencies.html DOMAIN.html DOMAINprivileges.html EXCEPTION.html EXCEPTIONprivileges.html FUNCTION.html FUNCTIONprivileges.html GENERATOR.html GENERATORprivileges.html header.html INDEX.html INDEXprivileges.html PACKAGE.html PACKAGEprivileges.html PROCEDURE.html PROCEDUREprivileges.html ROLE.html ROLEprivileges.html SERVER.html TABLE.html TABLEconstraints.html TABLEindices.html TABLEprivileges.html TABLEtriggers.html TRIGGER.html UDF.html UDFprivileges.html User.html VIEW.html VIEWprivileges.html VIEWtriggers.html compute.png drop.png ok.png ok2.png redx.png view.png $(DESTDIR)$(datadir)/flamerobin/html-templates)
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/applications
 	(cd $(srcdir)/res ; $(INSTALL_DATA)  flamerobin.desktop $(DESTDIR)$(datadir)/applications)
 	$(INSTALL_DIR) $(DESTDIR)$(datadir)/pixmaps
@@ -260,7 +262,7 @@ uninstall:
 	(cd $(DESTDIR)$(datadir)/flamerobin/conf-defs ; rm -f fr_settings.confdef db_settings.confdef)
 	(cd $(DESTDIR)$(datadir)/flamerobin/docs ; rm -f fr_license.html fr_whatsnew.html html.css)
 	(cd $(DESTDIR)@mandir@/man1 ; rm -f flamerobin.1)
-	(cd $(DESTDIR)$(datadir)/flamerobin/html-templates ; rm -f ALLloading.html COLLATION.html COLLATIONprivileges.html DATABASE.html DATABASEtriggers.html DDL.html dependencies.html DOMAIN.html DOMAINprivileges.html EXCEPTION.html EXCEPTIONprivileges.html FUNCTION.html FUNCTIONprivileges.html GENERATOR.html GENERATORprivileges.html header.html INDEX.html INDEXprivileges.html PACKAGE.html PACKAGEprivileges.html PROCEDURE.html PROCEDUREprivileges.html ROLE.html ROLEprivileges.html SERVER.html TABLE.html TABLEconstraints.html TABLEindices.html TABLEprivileges.html TABLEtriggers.html TRIGGER.html UDF.html UDFprivileges.html VIEW.html VIEWprivileges.html VIEWtriggers.html compute.png drop.png ok.png ok2.png redx.png view.png)
+	(cd $(DESTDIR)$(datadir)/flamerobin/html-templates ; rm -f ALLloading.html COLLATION.html COLLATIONprivileges.html DATABASE.html DATABASEtriggers.html DDL.html dependencies.html DOMAIN.html DOMAINprivileges.html EXCEPTION.html EXCEPTIONprivileges.html FUNCTION.html FUNCTIONprivileges.html GENERATOR.html GENERATORprivileges.html header.html INDEX.html INDEXprivileges.html PACKAGE.html PACKAGEprivileges.html PROCEDURE.html PROCEDUREprivileges.html ROLE.html ROLEprivileges.html SERVER.html TABLE.html TABLEconstraints.html TABLEindices.html TABLEprivileges.html TABLEtriggers.html TRIGGER.html UDF.html UDFprivileges.html User.html VIEW.html VIEWprivileges.html VIEWtriggers.html compute.png drop.png ok.png ok2.png redx.png view.png)
 	(cd $(DESTDIR)$(datadir)/applications ; rm -f flamerobin.desktop)
 	(cd $(DESTDIR)$(datadir)/pixmaps ; rm -f flamerobin.png)
 	(cd $(DESTDIR)$(datadir)/flamerobin/sys-templates ; rm -f browse_data.template execute_procedure.template save_as_csv.confdef save_as_csv.template)
@@ -665,6 +667,12 @@ flamerobin_trigger.o: $(srcdir)/src/metadata/trigger.cpp $(FLAMEROBIN_ODEP)
 
 flamerobin_User.o: $(srcdir)/src/metadata/User.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/User.cpp
+
+flamerobin_User20.o: $(srcdir)/src/metadata/FB20/User20.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/FB20/User20.cpp
+
+flamerobin_User30.o: $(srcdir)/src/metadata/FB30/User30.cpp $(FLAMEROBIN_ODEP)
+	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/FB30/User30.cpp
 
 flamerobin_view.o: $(srcdir)/src/metadata/view.cpp $(FLAMEROBIN_ODEP)
 	$(CXXC) -c -o $@ $(FLAMEROBIN_CXXFLAGS) $(srcdir)/src/metadata/view.cpp

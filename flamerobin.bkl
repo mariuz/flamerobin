@@ -339,6 +339,8 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/metadata/table.h
         $(SOURCEDIR)/metadata/trigger.h
         $(SOURCEDIR)/metadata/User.h
+        $(SOURCEDIR)/metadata/FB20/User20.h
+        $(SOURCEDIR)/metadata/FB30/User30.h
         $(SOURCEDIR)/metadata/view.h
         $(SOURCEDIR)/sql/Identifier.h
         $(SOURCEDIR)/sql/IncompleteStatement.h
@@ -473,6 +475,8 @@ Accepted values: AMD64, IA64.
         $(SOURCEDIR)/metadata/table.cpp
         $(SOURCEDIR)/metadata/trigger.cpp
         $(SOURCEDIR)/metadata/User.cpp
+        $(SOURCEDIR)/metadata/FB20/User20.cpp
+        $(SOURCEDIR)/metadata/FB30/User30.cpp
         $(SOURCEDIR)/metadata/view.cpp
         $(SOURCEDIR)/sql/Identifier.cpp
         $(SOURCEDIR)/sql/IncompleteStatement.cpp
@@ -576,6 +580,7 @@ Accepted values: AMD64, IA64.
 		TRIGGER.html
 		UDF.html
 		UDFprivileges.html
+		User.html
 		VIEW.html
 		VIEWprivileges.html
 		VIEWtriggers.html
