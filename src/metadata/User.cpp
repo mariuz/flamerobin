@@ -107,8 +107,8 @@ uint32_t User::getGroupId() const
 
 IBPP::User& User::getUserIBPP() const
 {
-    
-     IBPP::User usr;
+    // TODO: review
+     /*IBPP::User usr;
     
     usr.username = wx2std(usernameM);
     usr.password = wx2std(passwordM);
@@ -118,7 +118,7 @@ IBPP::User& User::getUserIBPP() const
     usr.userid = useridM;
     usr.groupid = groupidM;
 
-    return usr;
+    return usr;*/
 }
 
 void User::setServer(ServerPtr srv)
