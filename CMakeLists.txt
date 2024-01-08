@@ -297,7 +297,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/metadata/trigger.h
         ${SOURCEDIR}/metadata/User.h
         ${SOURCEDIR}/metadata/FB20/User20.h
-        ${SOURCEDIR}/metadata/FB20/User30.h
+        ${SOURCEDIR}/metadata/FB30/User30.h
         ${SOURCEDIR}/metadata/view.h
         ${SOURCEDIR}/sql/Identifier.h
         ${SOURCEDIR}/sql/IncompleteStatement.h
