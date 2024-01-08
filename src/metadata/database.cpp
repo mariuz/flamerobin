@@ -142,6 +142,11 @@ int DatabaseInfo::getODSMinor() const
     return odsMinorM;
 }
 
+int DatabaseInfo::getFullODS() const
+{
+    return odsM * 10 + odsMinorM;
+}
+
 bool DatabaseInfo::getODSVersionIsHigherOrEqualTo(int versionMajor) const
 {
     return odsM >= versionMajor;
@@ -1212,7 +1217,28 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             initializeLockCount(sysIndicesM, lockCount);
             usrIndicesM.reset(new UsrIndices(me));
             initializeLockCount(usrIndicesM, lockCount);
-            usersM.reset(new Users20(me));
+            
+            
+            switch (getInfo().getFullODS()) {
+            case 110:                          // FB2.0
+                usersM.reset(new Users20(me));
+                break;
+            case 111:                          // FB2.1
+                usersM.reset(new Users20(me));
+                break;
+            case 112:                          // FB2.5
+                usersM.reset(new Users20(me));
+                break;
+            case 120:                          // FB3.0
+                usersM.reset(new Users30(me));
+                break;
+            case 130:                          // FB4.0
+                usersM.reset(new Users30(me));
+                break;
+            default:
+                usersM.reset(new Users30(me));
+
+            }
             initializeLockCount(usersM, lockCount);
 
             // first start a transaction for metadata loading, then lock the

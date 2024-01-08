@@ -1772,16 +1772,18 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
     else if (FunctionSQL* fn = dynamic_cast<FunctionSQL*>(mi))
         sql = fn->getAlterSql();
     else if (User* u = dynamic_cast<User*>(mi)) {
-        /*if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
-            sql = u->getAlterSql();
+        if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
+            sql = u->getAlterSqlStatement();
         }
-        else*/{
+        else{
             ServerPtr server = getServer(treeMainM->getSelectedMetadataItem());
+
             u->ensurePropertiesLoaded();
-            IBPP::User usr1 = u->getUserIBPP();
+            IBPP::User usr1;
+            u->assignTo(usr1);
             UserPtr user (new User(server, usr1));
 
-            UserDialog d(this, _("Modify User"), true);
+            UserDialog d(this, _("Modify User"), false);
             d.setUser(user);
             if (d.ShowModal() == wxID_OK)
             {
@@ -1793,7 +1795,8 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
 
                 try
                 {
-                    IBPP::User usr = user->getUserIBPP();
+                    IBPP::User usr;// = user->getUserIBPP();
+                    user->assignTo(usr);
                     svc->ModifyUser (usr);
                     server->notifyObservers();
                 }

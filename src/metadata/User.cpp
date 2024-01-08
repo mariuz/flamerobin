@@ -199,7 +199,15 @@ void User::setUserIBPP(const IBPP::User& usr)
 
 void User::assignTo(IBPP::User& dest) const
 {
-    dest = getUserIBPP();
+    //dest = getUserIBPP();
+    dest.username = wx2std(usernameM);
+    dest.password = wx2std(passwordM);
+    dest.firstname = wx2std(firstnameM);
+    dest.lastname = wx2std(lastnameM);
+    dest.middlename = wx2std(middlenameM);
+    dest.userid = useridM;
+    dest.groupid = groupidM;
+
 }
 
 void User::acceptVisitor(MetadataItemVisitor* visitor)
@@ -219,7 +227,6 @@ wxString User::getSource()
         "MIDDLENAME '" + getMiddleName() + "' \n"
         "LASTNAME '" + getLastName() + "' \n"
         "USING PLUGIN "+" \n"
-
         ;
     return sql;
 }
@@ -242,30 +249,6 @@ Users::Users(DatabasePtr database)
 void Users::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitUsers(*this);
-}
-
-void Users::load(ProgressIndicator* progressIndicator)
-{
-
-    /*DatabasePtr db = getDatabase();
-    if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
-        wxString stmt = "select sec$user_name from sec$users a order by 1 ";
-        setItems(db->loadIdentifiers(stmt, progressIndicator));
-    }
-    else {
-        IBPP::Service svc;
-        if (db->getServer()->getService(svc, NULL, true)) {   // true = SYSDBA
-
-            std::vector<IBPP::User> usr;
-            svc->GetUsers(usr);
-            for (std::vector<IBPP::User>::iterator it = usr.begin();
-                it != usr.end(); ++it)
-            {
-                insert(it->username);
-            }
-        }
-
-    }*/
 }
 
 const wxString Users::getTypeName() const
@@ -344,6 +327,7 @@ User20::User20(DatabasePtr database, const wxString& name)
 {
 }
 
+
 void User30::loadProperties()
 {
 
@@ -402,18 +386,22 @@ void User30::loadProperties()
     notifyObservers();
 }
 
-User30::User30(ServerPtr server)
-    : User(server)
-{
-}
-
-User30::User30(ServerPtr server, const IBPP::User& src)
-    :User(server, src)
-{
-}
 
 User30::User30(DatabasePtr database, const wxString& name)
     :User(database, name)
 {
+}
+
+wxString User30::getAlterSqlStatement()
+{
+    ensurePropertiesLoaded();
+    wxString sql = "ALTER USER " + getName_() + " \n" +
+        "PASSWORD '' \n"
+        "FIRSTNAME '" + getFirstName() + "' \n"
+        "MIDDLENAME '" + getMiddleName() + "' \n"
+        "LASTNAME '" + getLastName() + "' \n"
+        "{GRANT | REVOKE} ADMIN ROLE \n"
+        ;
+    return sql;
 }
 

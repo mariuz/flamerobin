@@ -76,6 +76,7 @@ public:
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     virtual const wxString getTypeName() const;
     virtual wxString getSource();
+    
 
 
 };
@@ -95,9 +96,9 @@ class User30 : public User
 protected:
     virtual void loadProperties();
 public:
-    User30(ServerPtr server);
-    User30(ServerPtr server, const IBPP::User& src);
     User30(DatabasePtr database, const wxString& name);
+
+    virtual wxString getAlterSqlStatement();
 
 };
 
@@ -109,9 +110,9 @@ protected:
 public:
     Users(DatabasePtr database);
 
+    virtual void load(ProgressIndicator* progressIndicator) {};
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
-    virtual void load(ProgressIndicator* progressIndicator);
     virtual const wxString getTypeName() const;
 
 };
