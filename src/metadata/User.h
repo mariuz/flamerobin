@@ -60,7 +60,7 @@ public:
     wxString getLastName() const;
     uint32_t getUserId() const;
     uint32_t getGroupId() const;
-    IBPP::User& getUserIBPP() const;
+    IBPP::User getUserIBPP();
 
     void setServer(ServerPtr srv);
     void setUsername(const wxString& value);
