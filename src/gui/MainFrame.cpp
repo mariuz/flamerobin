@@ -1505,6 +1505,12 @@ void MainFrame::OnMenuCreateUser(wxCommandEvent& WXUNUSED(event))
     }
     else
     {
+        /*URI uri("fr://add_user");
+        uri.addParam(wxString::Format("parent_window=%p", this));
+        uri.addParam(wxString::Format("object_handle=%lu", treeMainM->getSelectedMetadataItem()->getHandle()));
+        getURIProcessor().handleURI(uri);
+        return;*/
+
         ServerPtr server = getServer(treeMainM->getSelectedMetadataItem());
         UserPtr user (new User(server));
 
@@ -1776,40 +1782,13 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
             sql = u->getAlterSqlStatement();
         }
         else{
-            ServerPtr server = getServer(treeMainM->getSelectedMetadataItem());
-
             u->ensurePropertiesLoaded();
-            IBPP::User usr1;
-            u->assignTo(usr1);
-            UserPtr user (new User(server, usr1));
-
-            UserDialog d(this, _("Modify User"), false);
-            d.setUser(user);
-            if (d.ShowModal() == wxID_OK)
-            {
-                ProgressDialog pd(this, _("Connecting to Server..."), 1);
-                pd.doShow();
-                IBPP::Service svc;
-                if (!getService(server.get(), svc, &pd, true)) // true = need SYSDBA password
-                    return;
-
-                try
-                {
-                    IBPP::User usr;// = user->getUserIBPP();
-                    user->assignTo(usr);
-                    svc->ModifyUser (usr);
-                    server->notifyObservers();
-                }
-                catch (IBPP::Exception& e)
-                {
-                    wxMessageBox(e.what(), _("Error"),
-                        wxOK | wxICON_WARNING);
-                }
-            }
-
+            URI uri("fr://edit_user");
+            uri.addParam(wxString::Format("parent_window=%p", this));
+            uri.addParam(wxString::Format("object_handle=%lu", u->getHandle()));
+            getURIProcessor().handleURI(uri);
         }
     }
-
     if (!sql.empty())
         showSql(this, wxString(_("Alter object")), db, sql);
 }
@@ -1892,16 +1871,23 @@ void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
     DatabasePtr db = getDatabase(mi);
     if (!checkValidDatabase(db))
         return;
-    if (!confirmDropItem(mi))
-        return;
-
     // TODO: We could first check if there are some dependant objects,
     //       and offer the user to either drop dependencies, or drop those
     //       objects too.
     //       Then we should create a bunch of sql statements that do it.
-    wxString stmt(mi->getDropSqlStatement());
-    if (!stmt.empty())
-        execSql(this, wxEmptyString, db, stmt, true);
+    if (mi->getType() == ntUser) {
+        URI uri("fr://drop_user");
+        uri.addParam(wxString::Format("parent_window=%p", this));
+        uri.addParam(wxString::Format("object_handle=%lu", mi->getHandle()));
+        getURIProcessor().handleURI(uri);
+    }
+    else {
+        if (!confirmDropItem(mi))
+            return;
+        wxString  stmt  (mi->getDropSqlStatement());
+        if (!stmt.empty())
+            execSql(this, wxEmptyString, db, stmt, true);
+    }
 }
 
 //! create new ExecSqlFrame and attach database object to it

@@ -62,6 +62,7 @@ public:
     uint32_t getGroupId() const;
     IBPP::User& getUserIBPP() const;
 
+    void setServer(ServerPtr srv);
     void setUsername(const wxString& value);
     void setPassword(const wxString& value);
     void setFirstName(const wxString& value);

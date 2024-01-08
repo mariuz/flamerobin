@@ -72,6 +72,8 @@ void User20::loadProperties()
     setPropertiesLoaded(false);
 
     DatabasePtr db = getDatabase();
+    setServer(db->getServer());
+
     IBPP::Service svc;
     if (db->getServer()->getService(svc, NULL, true)) {
         IBPP::User usr;

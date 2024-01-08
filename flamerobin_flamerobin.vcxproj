@@ -1087,6 +1087,8 @@
     <ClCompile Include="src\metadata\database.cpp" />
     <ClCompile Include="src\metadata\domain.cpp" />
     <ClCompile Include="src\metadata\exception.cpp" />
+    <ClCompile Include="src\metadata\FB20\User20.cpp" />
+    <ClCompile Include="src\metadata\FB30\User30.cpp" />
     <ClCompile Include="src\metadata\function.cpp" />
     <ClCompile Include="src\metadata\generator.cpp" />
     <ClCompile Include="src\metadata\Index.cpp" />
@@ -1212,6 +1214,8 @@
     <ClInclude Include="src\metadata\database.h" />
     <ClInclude Include="src\metadata\domain.h" />
     <ClInclude Include="src\metadata\exception.h" />
+    <ClInclude Include="src\metadata\FB20\User20.h" />
+    <ClInclude Include="src\metadata\FB30\User30.h" />
     <ClInclude Include="src\metadata\function.h" />
     <ClInclude Include="src\metadata\generator.h" />
     <ClInclude Include="src\metadata\Index.h" />

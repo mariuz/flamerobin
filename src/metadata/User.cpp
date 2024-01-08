@@ -41,6 +41,7 @@
 
 void User::loadProperties()
 {
+    serverM = getDatabase()->getServer();
 }
 
 User::User(ServerPtr server)
@@ -118,6 +119,11 @@ IBPP::User& User::getUserIBPP() const
     usr.groupid = groupidM;
 
     return usr;
+}
+
+void User::setServer(ServerPtr srv)
+{
+    serverM = srv;
 }
 
 void User::setUsername(const wxString& value)

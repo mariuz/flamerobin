@@ -66,6 +66,7 @@
 #include "gui/StatementHistoryDialog.h"
 #include "gui/StyleGuide.h"
 #include "gui/FRStyleManager.h"
+#include "gui/UserDialog.h"
 #include "frutils.h"
 #include "logger.h"
 #include "metadata/column.h"
@@ -3897,3 +3898,69 @@ bool EditCollationHandler::handleURI(URI& uri)
         c->getAlterSql());
     return true;
 }
+
+/*
+class EditUserHandler : public URIHandler,
+    private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
+{
+public:
+    EditUserHandler() {}
+    bool handleURI(URI& uri);
+private:
+    // singleton; registers itself on creation.
+    static const EditUserHandler handlerInstance;
+};
+
+const EditUserHandler EditUserHandler::handlerInstance;
+
+bool EditUserHandler::handleURI(URI& uri)
+{
+    if (uri.action != "edit_user")
+        return false;
+
+    User* u = extractMetadataItemFromURI<User>(uri);
+    if (u->getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
+        wxWindow* w = getParentWindow(uri);
+        if (!u || !w)
+            return true;
+
+        CreateDDLVisitor cdv;
+        u->acceptVisitor(&cdv);
+        showSql(w->GetParent(), _("Editing User"), u->getDatabase(),
+            u->getAlterSqlStatement());
+    }
+    else {
+        ServerPtr server = u->getDatabase()->getServer();
+
+        u->ensurePropertiesLoaded();
+        IBPP::User usr1;
+        u->assignTo(usr1);
+        UserPtr user(new User(server, usr1));
+
+        UserDialog d(this, _("Modify User"), false);
+        d.setUser(user);
+        if (d.ShowModal() == wxID_OK)
+        {
+            ProgressDialog pd(this, _("Connecting to Server..."), 1);
+            pd.doShow();
+            IBPP::Service svc;
+            if (!getService(server.get(), svc, &pd, true)) // true = need SYSDBA password
+                return;
+
+            try
+            {
+                IBPP::User usr;// = user->getUserIBPP();
+                user->assignTo(usr);
+                svc->ModifyUser(usr);
+                server->notifyObservers();
+            }
+            catch (IBPP::Exception& e)
+            {
+                wxMessageBox(e.what(), _("Error"),
+                    wxOK | wxICON_WARNING);
+            }
+        }
+    }
+    return true;
+}
+*/

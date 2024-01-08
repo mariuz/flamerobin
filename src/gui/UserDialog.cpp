@@ -45,6 +45,7 @@
 #include "metadata/MetadataItemURIHandlerHelper.h"
 #include "metadata/server.h"
 #include "core/URIProcessor.h"
+#include "ExecuteSql.h"
 
 UserDialog::UserDialog(wxWindow* parent, const wxString& title, bool isNewUser)
     : BaseDialog(parent, wxID_ANY, title), isNewUserM(isNewUser)
@@ -315,31 +316,40 @@ bool DropUserHandler::handleURI(URI& uri)
 
     wxWindow* w = getParentWindow(uri);
     UserPtr u = extractMetadataItemPtrFromURI<User>(uri);
-    if (!u || !w)
-        return true;
-    ServerPtr s = u->getServer();
-    if (!s)
-        return true;
+    u->ensurePropertiesLoaded();
 
-    if (wxNO == wxMessageBox(_("Are you sure?"), _("Removing User"),
-        wxYES_NO|wxICON_QUESTION))
-        return true;
-
-    ProgressDialog pd(w, _("Connecting to Server..."), 1);
-    pd.doShow();
-    IBPP::Service svc;
-    if (!getService(s.get(), svc, &pd, true)) // true = need SYSDBA password
-        return true;
-
-    try
-    {
-        svc->RemoveUser(wx2std(u->getUsername()));
-        s->notifyObservers();
+    if (u->getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
+        wxString stmt(u->getDropSqlStatement());
+        if (!stmt.empty())
+            execSql(w, "Drop user", u->getDatabase(), stmt, true);
     }
-    catch(IBPP::Exception& e)
-    {
-        wxMessageBox(e.what(), _("Error"),
-            wxOK | wxICON_WARNING);
+    else {
+        if (!u || !w)
+            return true;
+            ServerPtr s = u->getServer();
+            if (!s)
+                return true;
+
+            if (wxNO == wxMessageBox(_("Are you sure?"), _("Removing User"),
+                wxYES_NO | wxICON_QUESTION))
+                return true;
+
+        ProgressDialog pd(w, _("Connecting to Server..."), 1);
+        pd.doShow();
+        IBPP::Service svc;
+        if (!getService(s.get(), svc, &pd, true)) // true = need SYSDBA password
+            return true;
+
+        try
+        {
+            svc->RemoveUser(wx2std(u->getUsername()));
+            s->notifyObservers();
+        }
+        catch (IBPP::Exception& e)
+        {
+            wxMessageBox(e.what(), _("Error"),
+                wxOK | wxICON_WARNING);
+        }
     }
     return true;
 }

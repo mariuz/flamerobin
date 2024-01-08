@@ -442,7 +442,7 @@ void SaveDescriptionVisitor::visitTrigger(Trigger& trigger)
 void SaveDescriptionVisitor::visitUser(User& user)
 {
     if (user.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
-        saveDescription(&user, "comment on trigger %s is '%s'");
+        saveDescription(&user, "comment on user %s is '%s'");
     }
 }
 
