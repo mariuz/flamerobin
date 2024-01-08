@@ -395,10 +395,10 @@ void FRStyleManager::cleanStyles()
         stylersM.clear();
 }
 
-void FRStyleManager::saveLexerStyles(wxXmlNode* node)
+void FRStyleManager::saveLexerStyles(wxXmlNode* )
 {
 }
 
-void FRStyleManager::saveGlobalStyles(wxXmlNode* node)
+void FRStyleManager::saveGlobalStyles(wxXmlNode* )
 {
 }
