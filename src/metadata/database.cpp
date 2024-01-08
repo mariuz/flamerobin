@@ -66,6 +66,9 @@
 #include "metadata/table.h"
 #include "metadata/trigger.h"
 #include "metadata/view.h"
+#include "metadata/User.h"
+#include "metadata/FB20/User20.h"
+#include "metadata/FB30/User30.h"
 
 #include "sql/SqlStatement.h"
 #include "sql/SqlTokenizer.h"

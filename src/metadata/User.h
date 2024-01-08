@@ -77,31 +77,7 @@ public:
     virtual const wxString getTypeName() const;
     virtual wxString getSource();
     
-
-
 };
-
-class User20: public User
-{
-protected:
-    virtual void loadProperties();
-public:
-    User20(ServerPtr server);
-    User20(ServerPtr server, const IBPP::User& src);
-    User20(DatabasePtr database, const wxString& name);
-};
-
-class User30 : public User
-{
-protected:
-    virtual void loadProperties();
-public:
-    User30(DatabasePtr database, const wxString& name);
-
-    virtual wxString getAlterSqlStatement();
-
-};
-
 
 class Users : public MetadataCollection<User>
 {
@@ -110,39 +86,13 @@ protected:
 public:
     Users(DatabasePtr database);
 
-    virtual void load(ProgressIndicator* progressIndicator) {};
+    virtual void load(ProgressIndicator* ) {};
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
     virtual const wxString getTypeName() const;
 
 };
 
-class Users20 : public Users
-{
-public:
-    Users20(DatabasePtr database);
-    virtual void load(ProgressIndicator* progressIndicator);
-
-    virtual ItemType newItem(const wxString & name) {
-        ItemType item(new User20(getDatabase(), name));
-        return item;
-    }
-
-};
-
-class Users30 : public Users
-{
-public:
-    Users30(DatabasePtr database);
-    virtual void load(ProgressIndicator* progressIndicator);
-
-    virtual ItemType newItem(const wxString& name) {
-        ItemType item(new User30(getDatabase(), name));
-        return item;
-    }
-};
 
 
-
-
-#endif
+#endif // FR_USER_H
