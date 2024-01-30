@@ -2503,10 +2503,10 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
                             statementM->ColumnSubtype(i),
                             statementM->ColumnSize(i),
                             statementM->ColumnScale(i)).c_str(),
-                        statementM->ColumnSQLType(i),
-                        statementM->ColumnSubtype(i),
-                        statementM->ColumnSize(i),
-                        statementM->ColumnScale(i)
+                            statementM->ColumnSQLType(i),
+                            statementM->ColumnSubtype(i),
+                            statementM->ColumnSize(i),
+                            statementM->ColumnScale(i)
                         ), ttSql);
                 }
             }
