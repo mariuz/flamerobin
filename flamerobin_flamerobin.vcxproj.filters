@@ -55,6 +55,36 @@
     <Filter Include="Source Files\firebird">
       <UniqueIdentifier>{03ec6670-5d69-4bf4-a2eb-10529ba472d4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\metadata\FB20">
+      <UniqueIdentifier>{67a3ec36-909d-4c0a-be77-21ca7cd3abaf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\metadata\FB21">
+      <UniqueIdentifier>{87dc48ef-df38-4564-b5df-0859833eb681}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\metadata\FB25">
+      <UniqueIdentifier>{7ae87b6d-5702-4f58-b6e1-cf7d220be12d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\metadata\FB30">
+      <UniqueIdentifier>{db08434e-69be-4ec2-b22f-4d673671bc1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\metadata\FB40">
+      <UniqueIdentifier>{a6ff2c34-c96d-4602-986f-0e73b3b88d99}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\metadata\FB20">
+      <UniqueIdentifier>{2f15c2a1-c77d-4af7-b931-6018110e2742}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\metadata\FB21">
+      <UniqueIdentifier>{206a5b21-ce46-4427-aee7-faf4bc239458}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\metadata\FB25">
+      <UniqueIdentifier>{75c73954-88ee-406c-a819-d2974d2d1468}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\metadata\FB30">
+      <UniqueIdentifier>{a402d690-8064-4bee-bc53-71a68a864da5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\metadata\FB40">
+      <UniqueIdentifier>{b4ea120f-e41a-4ce0-abad-cd56d33d396e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\gui\AboutBox.cpp">
@@ -419,6 +449,12 @@
     </ClCompile>
     <ClCompile Include="src\gui\PreferencesDialogStyle.cpp">
       <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\metadata\FB20\User20.cpp">
+      <Filter>Source Files\metadata\FB20</Filter>
+    </ClCompile>
+    <ClCompile Include="src\metadata\FB30\User30.cpp">
+      <Filter>Source Files\metadata\FB30</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -790,6 +826,12 @@
     </ClInclude>
     <ClInclude Include="src\gui\PreferencesDialogStyle.h">
       <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\metadata\FB20\User20.h">
+      <Filter>Header Files\metadata\FB20</Filter>
+    </ClInclude>
+    <ClInclude Include="src\metadata\FB30\User30.h">
+      <Filter>Header Files\metadata\FB30</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
