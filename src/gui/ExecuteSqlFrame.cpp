@@ -2495,14 +2495,18 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
                         databaseM->getCharsetConverter()));
                     wxString aliasname(std2wxIdentifier(statementM->ColumnAlias(i),
                         databaseM->getCharsetConverter()));
-                    log(wxString::Format(_("Field #%02d: %s.%s Alias:%s Type:%s"),
+                    log(wxString::Format(_("Field #%02d: %s.%s Alias:%s Type:%s sqlype: %d subtype: %d len: %d scale: %d"),
                         i, tablename.c_str(), colname.c_str(), aliasname.c_str(),
                         IBPPtype2string(
                             databaseM,
                             statementM->ColumnType(i),
                             statementM->ColumnSubtype(i),
                             statementM->ColumnSize(i),
-                            statementM->ColumnScale(i)).c_str()
+                            statementM->ColumnScale(i)).c_str(),
+                            statementM->ColumnSQLType(i),
+                            statementM->ColumnSubtype(i),
+                            statementM->ColumnSize(i),
+                            statementM->ColumnScale(i)
                         ), ttSql);
                 }
             }

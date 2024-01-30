@@ -259,7 +259,7 @@ wxString wrapText(const wxString& text, size_t maxWidth, size_t indent)
             if (lastSpace != text.end())
             {
                 size_t width = line.Length();
-                if (width > maxWidth - indentStr.Length())
+                if ((width > maxWidth - indentStr.Length()) && (wrapState == none))
                 {
                     // remove the last word from this line
                     line.erase(lastSpace - lineStart, it + 1 - lineStart);

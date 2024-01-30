@@ -1072,6 +1072,7 @@ public:
     const char* ColumnAlias(int);
     const char* ColumnTable(int);
     IBPP::SDT ColumnType(int);
+    int ColumnSQLType(int);
     int ColumnSubtype(int);
     int ColumnSize(int);
     int ColumnScale(int);
@@ -1241,6 +1242,7 @@ public:
     const char* ColumnAlias(int);
     const char* ColumnTable(int);
     IBPP::SDT ColumnType(int);
+    int ColumnSQLType(int);
     int ColumnSubtype(int);
     int ColumnSize(int);
     int ColumnScale(int);
