@@ -1185,7 +1185,7 @@ void setFromFile(IBPP::Statement st, int param,
             int y, mo, d, h, mi, s, t;
             IBPP::dtoi(mydate, &y, &mo, &d);
             IBPP::ttoi(mytime, &h, &mi, &s, &t);
-            st->Set(param, IBPP::Timestamp(y, mo, d, IBPP::Time::tmNone, h, mi, s, t, IBPP::Time::TZ_NONE));
+            st->Set(param, IBPP::Timestamp(y, mo, d, IBPP::Time::tmNone, h, mi, s, t, IBPP::Time::TZ_NONE, NULL));
             break;
         }
         case IBPP::sdBlob:
@@ -1451,7 +1451,7 @@ void setDatetime(IBPP::Statement st, int param, GeneratorSettings* gs,
         int y, mo, d, h, mi, s, t;
         IBPP::dtoi(myDate, &y, &mo, &d);
         IBPP::ttoi(myTime, &h, &mi, &s, &t);
-        st->Set(param, IBPP::Timestamp(y, mo, d, IBPP::Time::tmNone, h, mi, s, t, IBPP::Time::TZ_NONE));
+        st->Set(param, IBPP::Timestamp(y, mo, d, IBPP::Time::tmNone, h, mi, s, t, IBPP::Time::TZ_NONE, NULL));
     }
 }
 

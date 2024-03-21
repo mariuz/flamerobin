@@ -369,11 +369,17 @@ void GridCellFormats::formatAppendTz(wxString &s, IBPP::Time &t, bool hasTz,
     int timezone = t.GetTimezone();
     if (showTimezoneInfoM == tzRawId)
     {
+        if (t.IsTimeZoneGmtFallback())
+            timezone = 0;
         s += wxString::Format(" (%05d)", timezone);
     }
     else
     {
-        wxString tzName = db->getTimezoneName(timezone);
+        wxString tzName;
+        if (t.IsTimeZoneGmtFallback())
+            tzName = "GMT*";
+        else
+            tzName = db->getTimezoneName(timezone);
         s += wxString::Format(" (%s)", tzName);
     }
 }
@@ -993,9 +999,14 @@ bool TimeColumnDef::readFromBuffer(DataGridRowBuffer* buffer, IBPP::Time &t)
 
     if (withTimezoneM)
     {
-        tzMode = IBPP::Time::tmTimezone;
-        if (!buffer->getValue(offsetM + sizeof(int), vTimezone))
+        bool vIsGmtFallback;
+        if (!buffer->getValue32(offsetM + sizeof(int),
+                                vTimezone, vIsGmtFallback))
             return wxEmptyString;
+
+        tzMode = IBPP::Time::tmTimezone;
+        if (vIsGmtFallback)
+            tzMode = IBPP::Time::tmTimezoneGmtFallback;
     }
     else
     {
@@ -1011,7 +1022,8 @@ void TimeColumnDef::writeToBuffer(DataGridRowBuffer* buffer, IBPP::Time &t)
     wxASSERT(buffer);
     buffer->setValue(offsetM, t.GetTime());
     if (withTimezoneM)
-        buffer->setValue(offsetM + sizeof(int), t.GetTimezone());
+        buffer->setValue32(offsetM + sizeof(int),
+            t.GetTimezone(), t.IsTimeZoneGmtFallback());
 }
 
 wxString TimeColumnDef::getAsString(DataGridRowBuffer* buffer, Database* db)
@@ -1053,7 +1065,7 @@ void TimeColumnDef::setFromString(DataGridRowBuffer* buffer,
         int hr = 0, mn = 0, sc = 0, ms = 0;
         if (!GridCellFormats::get().parseTime(it, temp.end(), hr, mn, sc, ms))
             throw FRError(_("Cannot parse time"));
-        itm.SetTime(IBPP::Time::tmNone, hr, mn, sc, 10 * ms, IBPP::Time::TZ_NONE);
+        itm.SetTime(IBPP::Time::tmNone, hr, mn, sc, 10 * ms, IBPP::Time::TZ_NONE, NULL);
     }
     writeToBuffer(buffer, itm);
 }
@@ -1108,7 +1120,8 @@ void TimestampColumnDef::writeToBuffer(DataGridRowBuffer* buffer, IBPP::Timestam
     buffer->setValue(offsetM, ts.GetDate());
     buffer->setValue(offsetM + sizeof(int), ts.GetTime());
     if (withTimezoneM)
-        buffer->setValue(offsetM + sizeof(int) * 2, ts.GetTimezone());
+        buffer->setValue32(offsetM + sizeof(int) * 2,
+            ts.GetTimezone(), ts.IsTimeZoneGmtFallback());
 }
 
 bool TimestampColumnDef::readFromBuffer(DataGridRowBuffer* buffer, IBPP::Timestamp &ts)
@@ -1126,9 +1139,14 @@ bool TimestampColumnDef::readFromBuffer(DataGridRowBuffer* buffer, IBPP::Timesta
     int vTimezone = 0;
     if (withTimezoneM)
     {
-        tzMode = IBPP::Time::tmTimezone;
-        if (!buffer->getValue(offsetM + sizeof(int) * 2, vTimezone))
+        bool vIsGmtFallback;
+        if (!buffer->getValue32(offsetM + sizeof(int) * 2,
+                                vTimezone, vIsGmtFallback))
             return wxEmptyString;
+
+        tzMode = IBPP::Time::tmTimezone;
+        if (vIsGmtFallback)
+            tzMode = IBPP::Time::tmTimezoneGmtFallback;
     }
     else
     {
@@ -1199,7 +1217,7 @@ void TimestampColumnDef::setFromString(DataGridRowBuffer* buffer,
             throw FRError(_("Cannot parse timestamp"));
         }
         its.SetDate(y, m, d);
-        its.SetTime(IBPP::Time::tmNone, hr, mn, sc, 10 * ms, IBPP::Time::TZ_NONE);
+        its.SetTime(IBPP::Time::tmNone, hr, mn, sc, 10 * ms, IBPP::Time::TZ_NONE, NULL);
     }
 
     writeToBuffer(buffer, its);

@@ -353,9 +353,14 @@ public:
             tmNone,
             // ISC_TIME_TZ / ISC_TIMESTAMP_TZ
             tmTimezone,
+            // small case when fbclient fails to load ICU
+            // in this case fbclient returns time zone name "GMT*"
+            tmTimezoneGmtFallback
         };
-		/* no time zone -> utc = local */
-		const static int TZ_NONE     =  0;
+        // no time zone -> utc = local
+        const static int TZ_NONE     =  0;
+        // GMT-fallback (returned by fbclient)
+        const static std::string TZ_GMT_FALLBACK;
     protected:
         // The time, in ten-thousandths of seconds since midnight - UTC and TZ
         mutable int mTime;
@@ -367,7 +372,8 @@ public:
     public:
         void Clear()    { mTime = 0; mTimezoneMode = tmNone; mTimezone = TZ_NONE; }
         void Now();
-        void SetTime(TimezoneMode tzMode, int hour, int minute, int second, int tenthousandths, int timezone);
+        void SetTime(TimezoneMode tzMode, int hour, int minute, int second, int tenthousandths, int timezone, 
+                     char* fbTimezoneName);
         void SetTime(TimezoneMode tzMode, int tm, int timezone);
         void GetTime(int& hour, int& minute, int& second) const;
         void GetTime(int& hour, int& minute, int& second, int& tenthousandths) const;
@@ -379,13 +385,16 @@ public:
         int SubSeconds() const;     // Actually tenthousandths of seconds
         Time()          { Clear(); }
         Time(TimezoneMode tzMode, int tm, int timezone)    { SetTime(tzMode, tm, timezone); }
-        Time(TimezoneMode tzMode, int hour, int minute, int second, int tenthousandths, int timezone);
+        Time(TimezoneMode tzMode, int hour, int minute, int second, int tenthousandths, int timezone, 
+            char* fbTimezoneName);
         Time(const Time&);                          // Copy Constructor
         Time& operator=(const Timestamp&);          // Timestamp Assignment operator
         Time& operator=(const Time&);               // Time Assignment operator
 
         bool operator==(const Time& rv) { return mTime == rv.GetTime(); }
         bool operator<(const Time& rv) { return mTime < rv.GetTime(); }
+
+        bool IsTimeZoneGmtFallback() { return mTimezoneMode == tmTimezoneGmtFallback; }
     };
 
     /* Class Timestamp represent a date AND a time. It is usefull in
@@ -405,8 +414,8 @@ public:
         Timestamp(int y, int m, int d)
             { Date::SetDate(y, m, d); Time::Clear(); }
 
-        Timestamp(int y, int mo, int d, TimezoneMode tzMode, int h, int mi, int s, int t, int tz)
-            { Date::SetDate(y, mo, d); Time::SetTime(tzMode, h, mi, s, t, tz); }
+        Timestamp(int y, int mo, int d, TimezoneMode tzMode, int h, int mi, int s, int t, int tz, char* fbTimezoneName)
+            { Date::SetDate(y, mo, d); Time::SetTime(tzMode, h, mi, s, t, tz, fbTimezoneName); }
 
         Timestamp(const Timestamp& rv)
             : Date(rv.mDate), Time::Time(rv) {} // Copy Constructor

@@ -36,7 +36,10 @@
 #endif
 #endif
 
-#include "../firebird/include/ibase.h"      // From Firebird installation
+// From Firebird installation
+#include "../firebird/include/ibase.h"
+// Firebird 3+ interfaces
+#include "../firebird/include/firebird/Interface.h"
 
 #if (defined(__GNUC__) && defined(IBPP_WINDOWS))
 //  UNSETTING flags used above for ibase.h -- Huge conflicts with libstdc++ !
@@ -384,6 +387,11 @@ typedef void        ISC_EXPORT proto_encode_timestamp (void *,
                     ISC_TIMESTAMP *);
 
 //
+//  FB3+ / get master-interface (fb_get_master_interface)
+//
+typedef Firebird::IMaster* ISC_EXPORT proto_get_master_interface();
+
+//
 //  Internal binding structure to the FBCLIENT DLL
 //
 
@@ -398,9 +406,7 @@ struct FBCLIENT
     std::string mSearchPaths;   // Optional additional search paths
 #endif
 #ifdef IBPP_UNIX
-#ifdef IBPP_LATE_BIND
-               void *mHandle;
-#endif
+    void *mHandle;
 #endif
 
 
@@ -466,6 +472,8 @@ struct FBCLIENT
     //proto_encode_sql_date*            m_encode_sql_date;
     //proto_encode_sql_time*            m_encode_sql_time;
     //proto_encode_timestamp*           m_encode_timestamp;
+
+    proto_get_master_interface*     m_get_master_interface;
 
     // Constructor (No need for a specific destructor)
     FBCLIENT()
@@ -1476,6 +1484,26 @@ struct consts   // See _ibpp.cpp for initializations of these constants
     static const int16_t max16;
     static const int32_t min32;
     static const int32_t max32;
+};
+
+/* FB3+: get the IMaster-interface.
+ * This is needed to convert times with time zone correctly (FB4+).
+ * Implemented in fbinterfaces.cpp */
+const int FB_MAX_TIME_ZONE_NAME_LENGTH = 32;
+class fbIntfClass
+{
+    private:
+        static fbIntfClass gmFbIntf;
+        bool init(std::string& errmsg);
+    public:
+        Firebird::IMaster* mMaster;
+        Firebird::ThrowStatusWrapper* mStatus;
+        Firebird::IUtil* mUtil;
+
+        fbIntfClass();
+        ~fbIntfClass();
+
+        static fbIntfClass* getInstance();
 };
 
 }   // namespace ibpp_internal

@@ -616,7 +616,7 @@ void InsertParametersDialog::parseTime(int row, const wxString& source)
         int hr = 0, mn = 0, sc = 0, ms = 0;
         if (!GridCellFormats::get().parseTime(it, temp.end(), hr, mn, sc, ms))
             throw FRError(_("Cannot parse time"));
-        itm.SetTime(IBPP::Time::tmNone, hr, mn, sc, 10 * ms, IBPP::Time::TZ_NONE);
+        itm.SetTime(IBPP::Time::tmNone, hr, mn, sc, 10 * ms, IBPP::Time::TZ_NONE, NULL);
     }
     statementM->Set(row+1, itm);
 }
@@ -651,7 +651,7 @@ void InsertParametersDialog::parseTimeStamp(int row, const wxString& source)
             throw FRError(_("Cannot parse timestamp"));
         }
         its.SetDate(y, m, d);
-        its.SetTime(IBPP::Time::tmNone, hr, mn, sc, 10 * ms, IBPP::Time::TZ_NONE);
+        its.SetTime(IBPP::Time::tmNone, hr, mn, sc, 10 * ms, IBPP::Time::TZ_NONE, NULL);
     }
 
     // all done, set the value

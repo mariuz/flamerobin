@@ -32,6 +32,17 @@
 
 #include "gui/controls/DataGridRowBuffer.h"
 
+// Time + timestamp internal struct
+union TimeZoneBufferValue
+{
+    int rawValue;
+    struct _s
+    {
+        uint16_t timeZone16;
+        uint8_t isGmtFallback:1;
+    } s;
+};
+
 DataGridRowBuffer::DataGridRowBuffer(unsigned fieldCount)
 {
     isModifiedM = 0;
@@ -135,6 +146,16 @@ bool DataGridRowBuffer::getValue(unsigned offset, IBPP::DBKey& value,
     if (offset + size > dataM.size())
         return false;
     value.SetKey(&dataM[offset], size);
+    return true;
+}
+
+bool DataGridRowBuffer::getValue32(unsigned offset, int& timeZone, bool& isGmtFallback)
+{
+    TimeZoneBufferValue value;
+    if (!getValue(offset, value.rawValue))
+        return false;
+    timeZone = value.s.timeZone16;
+    isGmtFallback = (bool)value.s.isGmtFallback;
     return true;
 }
 
@@ -256,6 +277,14 @@ void DataGridRowBuffer::setValue(unsigned offset, IBPP::DBKey value)
         dataM.resize(offset + value.Size(), 0);
     value.GetKey(&dataM[offset], value.Size());
     invalidateIsDeletable();
+}
+
+void DataGridRowBuffer::setValue32(unsigned offset, int timeZone, bool isGmtFallback)
+{
+    TimeZoneBufferValue value;
+    value.s.timeZone16 = (uint16_t)timeZone;
+    value.s.isGmtFallback = isGmtFallback;
+    setValue(offset, value.rawValue);
 }
 
 bool DataGridRowBuffer::isInserted()
