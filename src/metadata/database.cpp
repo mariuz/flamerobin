@@ -427,6 +427,8 @@ wxArrayString Database::getCharacterSet()
 wxArrayString Database::getCollations(const wxString& charset)
 {
     CharacterSetPtr  characterSet = characterSetsM->findByName(charset);
+    if (!characterSet)
+        return wxArrayString();
     characterSet->ensureChildrenLoaded();
 
     return characterSet->getCollations();
