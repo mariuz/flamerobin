@@ -47,6 +47,7 @@
 #include "core/StringUtils.h"
 #include "engine/MetadataLoader.h"
 #include "MasterPassword.h"
+
 #include "metadata/CharacterSet.h"
 #include "metadata/column.h"
 #include "metadata/database.h"
@@ -65,6 +66,10 @@
 #include "metadata/table.h"
 #include "metadata/trigger.h"
 #include "metadata/view.h"
+#include "metadata/User.h"
+#include "metadata/FB20/User20.h"
+#include "metadata/FB30/User30.h"
+
 #include "sql/SqlStatement.h"
 #include "sql/SqlTokenizer.h"
 
@@ -138,6 +143,11 @@ int DatabaseInfo::getODS() const
 int DatabaseInfo::getODSMinor() const
 {
     return odsMinorM;
+}
+
+int DatabaseInfo::getFullODS() const
+{
+    return odsM * 10 + odsMinorM;
 }
 
 bool DatabaseInfo::getODSVersionIsHigherOrEqualTo(int versionMajor) const
@@ -364,6 +374,8 @@ void Database::getIdentifiers(std::vector<Identifier>& temp)
     std::transform(sysIndicesM->begin(), sysIndicesM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
     std::transform(usrIndicesM->begin(), usrIndicesM->end(),
+        std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
+    std::transform(usersM->begin(), usersM->end(),
         std::back_inserter(temp), std::mem_fn(&MetadataItem::getIdentifier));
 }
 
@@ -648,6 +660,9 @@ MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
         case ntUsrIndices:
             return usrIndicesM->findByName(name).get();
             break;
+        case ntUser:
+            return usersM->findByName(name).get();
+            break;
         default:
             return 0;
     };
@@ -746,6 +761,9 @@ void Database::dropObject(MetadataItem* object)
         case ntIndex:
             indicesM->remove((Index*)object);
             break;
+        case ntUser:
+            usersM->remove((Index*)object);
+            break;
         default:
             return;
     };
@@ -817,6 +835,9 @@ void Database::addObject(NodeType type, const wxString& name)
             break;
         case ntIndex:
             indicesM->insert(name);
+            break;
+        case ntUser:
+            usersM->insert(name);
             break;
         default:
             break;
@@ -1201,6 +1222,29 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             initializeLockCount(sysIndicesM, lockCount);
             usrIndicesM.reset(new UsrIndices(me));
             initializeLockCount(usrIndicesM, lockCount);
+            
+            
+            switch (getInfo().getFullODS()) {
+            case 110:                          // FB2.0
+                usersM.reset(new Users20(me));
+                break;
+            case 111:                          // FB2.1
+                usersM.reset(new Users20(me));
+                break;
+            case 112:                          // FB2.5
+                usersM.reset(new Users20(me));
+                break;
+            case 120:                          // FB3.0
+                usersM.reset(new Users30(me));
+                break;
+            case 130:                          // FB4.0
+                usersM.reset(new Users30(me));
+                break;
+            default:
+                usersM.reset(new Users30(me));
+
+            }
+            initializeLockCount(usersM, lockCount);
 
             // first start a transaction for metadata loading, then lock the
             // database
@@ -1275,7 +1319,7 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
         }
     };
 
-    const int collectionCount = 22;
+    const int collectionCount = 23;
     std::string loadStmt;
     ProgressIndicatorHelper pih(progressIndicator);
 
@@ -1361,6 +1405,9 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
 
     pih.init(_("User Collations"), collectionCount, 22);
     collationsM->load(progressIndicator);
+
+    pih.init(_("Users"), collectionCount, 23);
+    usersM->load(progressIndicator);
 
 }
 
@@ -1468,6 +1515,7 @@ void Database::setDisconnected()
     usrIndicesM.reset();
     characterSetsM.reset();
     collationsM.reset();
+    usersM.reset();
 
     if (config().get("HideDisconnectedDatabases", false))
         getServer()->notifyObservers();
@@ -1526,7 +1574,7 @@ UDFsPtr Database::getUDFs()
 UsersPtr Database::getUsers()
 {
     wxASSERT(usersM);
-//    usersM->ensureChildrenLoaded();
+    usersM->ensureChildrenLoaded();
     return usersM;
 }
 
@@ -1710,6 +1758,7 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
     temp.push_back(tablesM.get());
     temp.push_back(DMLtriggersM.get());
     temp.push_back(UDFsM.get());
+    temp.push_back(usersM.get());
     temp.push_back(viewsM.get());
 
 }
@@ -1746,6 +1795,7 @@ void Database::lockChildren()
         usrIndicesM->lockSubject();
         characterSetsM->lockSubject();
         collationsM->lockSubject();
+        usersM->lockSubject();
     }
 }
 
@@ -1778,6 +1828,7 @@ void Database::unlockChildren()
         userDomainsM->unlockSubject();
         characterSetsM->unlockSubject();
         collationsM->unlockSubject();
+        usersM->unlockSubject();
     }
 }
 

@@ -49,6 +49,7 @@
 #include "metadata/relation.h"
 #include "metadata/role.h"
 #include "metadata/trigger.h"
+#include "metadata/User.h"
 
 
 // class LoadDescriptionVisitor
@@ -219,6 +220,15 @@ void LoadDescriptionVisitor::visitTrigger(Trigger& trigger)
     loadDescription(&trigger,
         "select RDB$DESCRIPTION from RDB$TRIGGERS "
         "where RDB$TRIGGER_NAME = ?");
+}
+
+void LoadDescriptionVisitor::visitUser(User& user)
+{
+    if (user.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
+        loadDescription(&user,
+            "select SEC$DESCRIPTION from SEC$USERS  "
+            "where SEC$USER_NAME = ?");
+    }
 }
 
 // class SaveDescriptionVisitor
@@ -427,5 +437,12 @@ void SaveDescriptionVisitor::visitTrigger(Trigger& trigger)
     saveDescription(&trigger,
         "update RDB$TRIGGERS set RDB$DESCRIPTION = ? "
         "where RDB$TRIGGER_NAME = ?");
+}
+
+void SaveDescriptionVisitor::visitUser(User& user)
+{
+    if (user.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
+        saveDescription(&user, "comment on user %s is '%s'");
+    }
 }
 

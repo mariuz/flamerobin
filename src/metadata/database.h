@@ -101,6 +101,7 @@ private:
 public:
     int getODS() const;
     int getODSMinor() const;
+    int getFullODS() const;
     bool getODSVersionIsHigherOrEqualTo(int versionMajor) const;
     bool getODSVersionIsHigherOrEqualTo(int versionMajor, int versionMinor) const;
 
