@@ -499,12 +499,16 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
             else if (tokensM[idx] == kwPAGE_SIZE)
             {
                 idx++;
-                tokenStringsM[idx].ToInt(&createPageSizeM);
+                //tokenStringsM[idx].ToInt(&createPageSizeM);
+                int value = wxAtoi(tokenStringsM[idx]);
+		createPageSizeM = value;
             }
             else if (tokensM[idx] == kwDIALECT)
             {
                 idx++;
-                tokenStringsM[idx].ToInt(&createDialectM);
+                //tokenStringsM[idx].ToInt(&createDialectM);
+                int value = wxAtoi(tokenStringsM[idx]);
+		createPageSizeM = value;
             }
             idx++;
         }

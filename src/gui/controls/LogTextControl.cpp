@@ -56,7 +56,7 @@ void LogTextControl::addStyledText(const wxString& message, LogStyle style)
     bool atEnd = lenBefore == GetCurrentPos();
     AppendText(message);
     int len = GetLength();
-    StartStyling(lenBefore);
+    StartStyling(lenBefore, 0);
     SetStyling(len - lenBefore - 1, int(style));
     if (atEnd)
         GotoPos(len);
