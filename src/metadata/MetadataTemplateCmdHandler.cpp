@@ -966,6 +966,9 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             processedText << u->getUserId();
         else if (cmdParams[0] == "unix_group")
             processedText << u->getGroupId();
+        else if (cmdParams[0] == "source")
+            processedText += tp->escapeChars(u->getSource(), false);
+
     }
     // {%sql_security%}
     // If the current object is a data base, procedure, relation, 
@@ -1001,11 +1004,11 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
     }
     else if ((cmdName == "collationinfo") && (cmdParams.Count() >= 1))
     {
-        Collation* p = dynamic_cast<Collation*>(object);
-        if (!p)
+        Collation* c = dynamic_cast<Collation*>(object);
+        if (!c)
             return;
         if (cmdParams[0] == "source")
-            processedText += tp->escapeChars(p->getSource(), false);
+            processedText += tp->escapeChars(c->getSource(), false);
 
     }
 
