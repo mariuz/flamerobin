@@ -63,6 +63,7 @@
 #include "gui/SimpleHtmlFrame.h"
 #include "gui/ShutdownFrame.h"
 #include "gui/StartupFrame.h"
+#include "gui/UserDialog.h"
 #include "main.h"
 #include "metadata/column.h"
 #include "metadata/domain.h"
@@ -1497,8 +1498,46 @@ void MainFrame::OnMenuCreateUDF(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::OnMenuCreateUser(wxCommandEvent& WXUNUSED(event))
 {
-    showCreateTemplate(
-        MetadataItemCreateStatementVisitor::getCreateUserStatement());
+    DatabasePtr db = getDatabase(treeMainM->getSelectedMetadataItem());
+    if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
+        showCreateTemplate(
+            MetadataItemCreateStatementVisitor::getCreateUserStatement());
+    }
+    else
+    {
+        /*URI uri("fr://add_user");
+        uri.addParam(wxString::Format("parent_window=%p", this));
+        uri.addParam(wxString::Format("object_handle=%lu", treeMainM->getSelectedMetadataItem()->getHandle()));
+        getURIProcessor().handleURI(uri);
+        return;*/
+
+        ServerPtr server = getServer(treeMainM->getSelectedMetadataItem());
+        UserPtr user (new User(server));
+
+        UserDialog d(this, _("Create New User"), true);
+        d.setUser(user);
+        if (d.ShowModal() == wxID_OK)
+        {
+            ProgressDialog pd(this, _("Connecting to Server..."), 1);
+            pd.doShow();
+            IBPP::Service svc;
+            if (!getService(server.get(), svc, &pd, true)) // true = need SYSDBA password
+                return;
+
+            try
+            {
+                IBPP::User u;
+                user->assignTo(u);
+                svc->AddUser(u);
+                server->notifyObservers();
+            }
+            catch (IBPP::Exception& e)
+            {
+                wxMessageBox(e.what(), _("Error"),
+                    wxOK | wxICON_WARNING);
+            }
+        }
+    }
 }
 
 void MainFrame::OnMenuCreateView(wxCommandEvent& WXUNUSED(event))
@@ -1507,15 +1546,22 @@ void MainFrame::OnMenuCreateView(wxCommandEvent& WXUNUSED(event))
         MetadataItemCreateStatementVisitor::getCreateViewStatement());
 }
 
-void MainFrame::OnMenuCreateObject(wxCommandEvent& WXUNUSED(event))
+void MainFrame::OnMenuCreateObject(wxCommandEvent& event)
 {
     MetadataItem* item = treeMainM->getSelectedMetadataItem();
     if (!item)
         return;
-
-    MetadataItemCreateStatementVisitor csv;
-    item->acceptVisitor(&csv);
-    showCreateTemplate(csv.getStatement());
+    switch (item->getType())
+    {
+    case ntUsers:
+        OnMenuCreateUser(event);
+        break;
+    default: 
+        MetadataItemCreateStatementVisitor csv;
+        item->acceptVisitor(&csv);
+        showCreateTemplate(csv.getStatement());
+        break;
+    }
 }
 
 void MainFrame::showCreateTemplate(const wxString& statement)
@@ -1731,7 +1777,18 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
         sql = pk->getAlterSql();
     else if (FunctionSQL* fn = dynamic_cast<FunctionSQL*>(mi))
         sql = fn->getAlterSql();
-
+    else if (User* u = dynamic_cast<User*>(mi)) {
+        if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
+            sql = u->getAlterSqlStatement();
+        }
+        else{
+            u->ensurePropertiesLoaded();
+            URI uri("fr://edit_user");
+            uri.addParam(wxString::Format("parent_window=%p", this));
+            uri.addParam(wxString::Format("object_handle=%lu", u->getHandle()));
+            getURIProcessor().handleURI(uri);
+        }
+    }
     if (!sql.empty())
         showSql(this, wxString(_("Alter object")), db, sql);
 }
@@ -1814,16 +1871,23 @@ void MainFrame::OnMenuDropObject(wxCommandEvent& WXUNUSED(event))
     DatabasePtr db = getDatabase(mi);
     if (!checkValidDatabase(db))
         return;
-    if (!confirmDropItem(mi))
-        return;
-
     // TODO: We could first check if there are some dependant objects,
     //       and offer the user to either drop dependencies, or drop those
     //       objects too.
     //       Then we should create a bunch of sql statements that do it.
-    wxString stmt(mi->getDropSqlStatement());
-    if (!stmt.empty())
-        execSql(this, wxEmptyString, db, stmt, true);
+    if (mi->getType() == ntUser) {
+        URI uri("fr://drop_user");
+        uri.addParam(wxString::Format("parent_window=%p", this));
+        uri.addParam(wxString::Format("object_handle=%lu", mi->getHandle()));
+        getURIProcessor().handleURI(uri);
+    }
+    else {
+        if (!confirmDropItem(mi))
+            return;
+        wxString  stmt  (mi->getDropSqlStatement());
+        if (!stmt.empty())
+            execSql(this, wxEmptyString, db, stmt, true);
+    }
 }
 
 //! create new ExecSqlFrame and attach database object to it
