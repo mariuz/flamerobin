@@ -151,6 +151,8 @@ NodeType getTypeByName(const wxString& name)
         return ntGenerator;
     else if (name == "FUNCTIONSQL")
         return ntFunctionSQL;
+    else if (name == "FUNCTION")
+        return ntFunctionSQL;
     else if (name == "UDF")
         return ntUDF;
     else if (name == "DOMAIN")
@@ -329,7 +331,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
     NodeType dep_types[] = {    ntTable,    ntView,     ntTrigger,  ntUnknown,  ntUnknown,
                                 ntProcedure,ntUnknown,  ntException,ntUnknown,  ntUnknown,
                                 ntUnknown,  ntUnknown,  ntUnknown,  ntUnknown,  ntGenerator,
-                                ntFunction, ntUnknown,  ntUnknown,  ntUnknown,  ntPackage
+                                ntFunctionSQL, ntUnknown,  ntUnknown,  ntUnknown,  ntPackage
     };
     const int type_count = sizeof(dep_types)/sizeof(NodeType);
     for (int i = 0; i < type_count; i++)
