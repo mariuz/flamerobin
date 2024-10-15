@@ -89,6 +89,7 @@
 #include "sql/StatementBuilder.h"
 #include "statementHistory.h"
 
+
 #include "gui/FRStyle.h"
 
 class SqlEditorDropTarget : public wxDropTarget
@@ -333,7 +334,7 @@ void SqlEditor::setup()
     SetMargins(0, 0);
     SetMarginWidth(FR_LINENUMBERNARGIN, 40);
     SetMarginType(FR_LINENUMBERNARGIN, wxSTC_MARGIN_NUMBER);
-    SetAutomaticFold(wxSTC_AUTOMATICFOLD_SHOW);
+    //SetAutomaticFold(wxSTC_AUTOMATICFOLD_SHOW);
 
     if (config().get("sqlEditorShowEdge", false))
     {
@@ -342,7 +343,7 @@ void SqlEditor::setup()
     }
 
     if (!config().get("sqlEditorSmartHomeKey", true))
-        CmdKeyAssign(wxSTC_KEY_HOME, wxSTC_KEYMOD_NORM, wxSTC_CMD_HOMEDISPLAY);
+        CmdKeyAssign(wxSTC_KEY_HOME, wxSTC_SCMOD_NORM, wxSTC_CMD_HOMEDISPLAY);
         
     setupStyles();
 
@@ -3074,7 +3075,7 @@ void ExecuteSqlFrame::log(wxString s, TextType type)
     if (type == ttSql)
         style = 2;
 
-    styled_text_ctrl_stats->StartStyling(startpos);
+    styled_text_ctrl_stats->StartStyling(startpos, 0);
     styled_text_ctrl_stats->SetStyling(endpos-startpos-1, style);
 }
 
