@@ -30,8 +30,8 @@
 #include "metadata/MetadataClasses.h"
 #include "metadata/metadataitem.h"
 
-class User: public MetadataItem,
-    public std::enable_shared_from_this<User>
+class User: public MetadataItem
+    ,public std::enable_shared_from_this<User>
 {
 private:
     ServerWeakPtr serverM;
@@ -42,9 +42,13 @@ private:
     wxString lastnameM;
     uint32_t useridM;
     uint32_t groupidM;
+protected:
+    virtual void loadProperties();
 public:
     User(ServerPtr server);
     User(ServerPtr server, const IBPP::User& src);
+    User(DatabasePtr database, const wxString& name);
+
 
     ServerPtr getServer() const;
     virtual bool isSystem() const;
@@ -56,7 +60,9 @@ public:
     wxString getLastName() const;
     uint32_t getUserId() const;
     uint32_t getGroupId() const;
+    IBPP::User getUserIBPP();
 
+    void setServer(ServerPtr srv);
     void setUsername(const wxString& value);
     void setPassword(const wxString& value);
     void setFirstName(const wxString& value);
@@ -64,10 +70,16 @@ public:
     void setLastName(const wxString& value);
     void setUserId(uint32_t value);
     void setGroupId(uint32_t value);
+    void setUserIBPP(const IBPP::User& usr);
 
     void assignTo(IBPP::User& dest) const;
+
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    virtual const wxString getTypeName() const;
+    virtual wxString getSource();
+    
 };
-/*
+
 class Users : public MetadataCollection<User>
 {
 protected:
@@ -75,11 +87,13 @@ protected:
 public:
     Users(DatabasePtr database);
 
+    virtual void load(ProgressIndicator* ) {};
+
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
-    void load(ProgressIndicator* progressIndicator);
     virtual const wxString getTypeName() const;
 
 };
-*/
 
-#endif
+
+
+#endif // FR_USER_H

@@ -761,6 +761,11 @@ wxString MetadataItem::getDropSqlStatement() const
     return "DROP " + getTypeName() + " " + getQuotedName() + ";";
 }
 
+wxString MetadataItem::getAlterSqlStatement()
+{
+    return wxString();
+}
+
 void MetadataItem::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitMetadataItem(*this);
