@@ -60,7 +60,7 @@ void IBPP::Time::SetTime(TimezoneMode tzMode, int hour, int minute, int second, 
 
     // Check, if fbclient fails to load icu. In this case
     // TimeZoneName "GMT*" ist returned.
-    if ((tzMode = tmTimezone) && (fbTimezoneName == TZ_GMT_FALLBACK))
+    if ((tzMode == tmTimezone) && (fbTimezoneName == TZ_GMT_FALLBACK))
         tzMode = tmTimezoneGmtFallback;
 
     int tm;
