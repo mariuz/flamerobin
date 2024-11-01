@@ -72,6 +72,7 @@ public:
     bool getValue(unsigned offset, int64_t& value);
     bool getValue(unsigned offset, int128_t& value);
     bool getValue(unsigned offset, IBPP::DBKey& value, unsigned size);
+    bool getValue32(unsigned offset, int& timeZone, bool& isGmtFallback);
     bool isFieldNull(unsigned num);
     void setFieldNull(unsigned num, bool isNull);
     virtual bool isFieldNA(unsigned num);
@@ -88,6 +89,7 @@ public:
     void setValue(unsigned offset, int64_t value);
     void setValue(unsigned offset, int128_t value);
     void setValue(unsigned offset, IBPP::DBKey value);
+    void setValue32(unsigned offset, int timeZone, bool isGmtFallback);
 
     virtual bool isInserted();
     bool isFieldModified(unsigned num);

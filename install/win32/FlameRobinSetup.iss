@@ -56,7 +56,7 @@ LicenseFile=..\..\docs-src\fr_license.txt
 InfoBeforeFile=info_before_win64.rtf
 #endif
 InfoAfterFile=
-MinVersion=0,6.0
+MinVersion=0,6.1
 #ifdef DEBUG
 Compression=lzma/ultra
 #ifdef X64VERSION

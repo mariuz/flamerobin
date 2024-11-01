@@ -733,6 +733,18 @@ const char* RowImpl::ColumnTable(int varnum)
 	return var->relname;
 }
 
+int RowImpl::ColumnSQLType(int varnum)
+{
+    if (mDescrArea == 0)
+        throw LogicExceptionImpl("Row::ColumnType", _("The row is not initialized."));
+    if (varnum < 1 || varnum > mDescrArea->sqld)
+        throw LogicExceptionImpl("Row::ColumnType", _("Variable index out of range."));
+
+    IBPP::SDT value;
+    XSQLVAR* var = &(mDescrArea->sqlvar[varnum - 1]);
+    return var->sqltype & ~1;
+}
+
 IBPP::SDT RowImpl::ColumnType(int varnum)
 {
 	if (mDescrArea == 0)

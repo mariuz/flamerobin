@@ -1474,6 +1474,16 @@ const char* StatementImpl::ColumnTable(int varnum)
 	return mOutRow->ColumnTable(varnum);
 }
 
+int StatementImpl::ColumnSQLType(int varnum)
+{
+    if (mHandle == 0)
+        throw LogicExceptionImpl("Statement::ColumnType", _("No statement has been prepared."));
+    if (mOutRow == 0)
+        throw LogicExceptionImpl("Statement::ColumnType", _("The statement does not return results."));
+
+    return mOutRow->ColumnSQLType(varnum);
+}
+
 IBPP::SDT StatementImpl::ColumnType(int varnum)
 {
 	if (mHandle == 0)

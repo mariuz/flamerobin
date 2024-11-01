@@ -616,7 +616,7 @@ void InsertParametersDialog::parseTime(int row, const wxString& source)
         int hr = 0, mn = 0, sc = 0, ms = 0;
         if (!GridCellFormats::get().parseTime(it, temp.end(), hr, mn, sc, ms))
             throw FRError(_("Cannot parse time"));
-        itm.SetTime(IBPP::Time::tmNone, hr, mn, sc, 10 * ms, IBPP::Time::TZ_NONE);
+        itm.SetTime(IBPP::Time::tmNone, hr, mn, sc, 10 * ms, IBPP::Time::TZ_NONE, NULL);
     }
     statementM->Set(row+1, itm);
 }
@@ -651,7 +651,7 @@ void InsertParametersDialog::parseTimeStamp(int row, const wxString& source)
             throw FRError(_("Cannot parse timestamp"));
         }
         its.SetDate(y, m, d);
-        its.SetTime(IBPP::Time::tmNone, hr, mn, sc, 10 * ms, IBPP::Time::TZ_NONE);
+        its.SetTime(IBPP::Time::tmNone, hr, mn, sc, 10 * ms, IBPP::Time::TZ_NONE, NULL);
     }
 
     // all done, set the value
@@ -686,6 +686,7 @@ void InsertParametersDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
             row = (*it)-1;
             IBPP::SDT parameterType = statementM->ParameterType(parameterslist.back()); //statementM->ParameterType(row + 1);
             int subtype = statementM->ParameterSubtype(parameterslist.back());
+            int scale = statementM->ParameterScale(parameterslist.back());
 
             if (sel == ioNull)
             {
@@ -780,6 +781,14 @@ void InsertParametersDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
                 statementM->Set(row + 1, (int)d1);
                 break;
             case IBPP::SDT::sdLargeint:
+                if (scale != 0)
+                {
+                    double d3;
+                    if (!value.ToDouble(&d3))
+                        throw FRError(_("Invalid float numeric value"));
+                    statementM->Set(row + 1, (float)d3);
+                    break;
+                }
                 wxLongLong_t d2;
                 if (!value.ToLongLong(&d2))
                     throw FRError(_("Invalid large integer value"));

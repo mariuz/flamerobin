@@ -39,7 +39,6 @@
 #endif
 
 #ifdef IBPP_UNIX
-#ifdef IBPP_LATE_BIND
 
 #include <dlfcn.h>
 #include <stdlib.h>
@@ -47,7 +46,6 @@
 //empty string terminated list of Firebird SO libraries to try in turn
 static const char* fblibs[] = {"libfbembed.so.2.5","libfbembed.so.2.1","libfbclient.so.2",""};
 
-#endif
 #endif
 
 
@@ -259,8 +257,6 @@ FBCLIENT* FBCLIENT::Call()
 #endif
 
 #ifdef IBPP_UNIX
-#ifdef IBPP_LATE_BIND
-
                mHandle = 0;
                if (getenv("FBLIB") != 0)
                        mHandle = dlopen(getenv("FBLIB"),RTLD_LAZY);
@@ -280,7 +276,6 @@ FBCLIENT* FBCLIENT::Call()
                                                _("Can't find or load the Firebird Client Library"));
 
 #endif
-#endif
 
 
 		// Get the entry points that we need
@@ -292,6 +287,9 @@ FBCLIENT* FBCLIENT::Call()
 #define FB_ENTRYPOINT(X) \
             if ((m_##X = (proto_##X*)GetProcAddress(mHandle, "fb_"#X)) == 0) \
                 throw LogicExceptionImpl("FBCLIENT:gds()", _("Entry-point fb_"#X" not found"))
+#define FB_ENTRYPOINT_NOTHROW(X) \
+            if ((m_##X = (proto_##X*)GetProcAddress(mHandle, "fb_"#X)) == 0) \
+                m_##X = NULL;
 #endif
 #ifdef IBPP_UNIX
 #ifdef IBPP_LATE_BIND
@@ -305,6 +303,9 @@ FBCLIENT* FBCLIENT::Call()
 #define IB_ENTRYPOINT(X) m_##X = (proto_##X*)isc_##X
 #define FB_ENTRYPOINT(X) m_##X = (proto_##X*)fb_##X
 #endif
+#define FB_ENTRYPOINT_NOTHROW(X) \
+    if ((m_##X = (proto_##X*)dlsym(mHandle,"fb_"#X)) == 0) \
+        m_##X = NULL;
 #endif
 
 		IB_ENTRYPOINT(create_database);
@@ -353,6 +354,8 @@ FBCLIENT* FBCLIENT::Call()
 		IB_ENTRYPOINT(service_detach);
 		IB_ENTRYPOINT(service_start);
 		IB_ENTRYPOINT(service_query);
+
+		FB_ENTRYPOINT_NOTHROW(get_master_interface);
 
 		mReady = true;
 	}

@@ -86,7 +86,7 @@ wxString CreateDDLVisitor::getCommentOn(MetadataItem& object)
             comment << "EXTERNAL FUNCTION ";
             break;
         case ntGenerator:
-            comment << "SECUENCE ";
+            comment << "SEQUENCE ";
             break;
         default:
             comment << object.getTypeName() << " ";

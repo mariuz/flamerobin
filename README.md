@@ -16,6 +16,9 @@ The following people also made a significant non-coding contributions:
 * Alex Stanciu
 * Barbara Del Vecchio
 
+Notice:
+Now you can download latest Windows snapshot builds directly from the `Build Flamerobin for Windows` Action
+
 License
 ---------------------------
 FlameRobin code is licensed under the MIT license.

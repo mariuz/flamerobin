@@ -323,6 +323,7 @@ list(APPEND IBPP_SOURCE_LIST
         ${SOURCEDIR}/ibpp/dbkey.cpp
         ${SOURCEDIR}/ibpp/events.cpp
         ${SOURCEDIR}/ibpp/exception.cpp
+        ${SOURCEDIR}/ibpp/fbinterfaces.cpp
         ${SOURCEDIR}/ibpp/ibint128.cpp
         ${SOURCEDIR}/ibpp/row.cpp
         ${SOURCEDIR}/ibpp/service.cpp
@@ -357,6 +358,8 @@ list(APPEND IBPP_HEADER_LIST
 		${SOURCEDIR}/firebird/include/firebird/impl/msg/sqlerr.h
 		${SOURCEDIR}/firebird/include/firebird/impl/msg/sqlwarn.h
 		${SOURCEDIR}/firebird/include/firebird/impl/msg/utl.h		
+		${SOURCEDIR}/firebird/include/firebird/Interface.h
+		${SOURCEDIR}/firebird/include/firebird/IdlFbInterfaces.h
         ${SOURCEDIR}/ibpp/_ibpp.h
         ${SOURCEDIR}/ibpp/ibpp.h
 )
@@ -397,7 +400,7 @@ if (UNIX AND NOT APPLE)
 	add_definitions(-DIBPP_LINUX)
 	add_definitions(-DFR_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
 	# Need to link the fbclient lib in *nix systems
-	list(APPEND FR_LIBS -lfbclient)
+	list(APPEND FR_LIBS -lfbclient -ldl)
 
 	include(CheckCXXSourceCompiles)
 	check_cxx_source_compiles("
