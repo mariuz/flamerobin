@@ -139,7 +139,7 @@ Assumes a 'project' dir in you home directory, change to suit
 The usual 'make install' will work as normal, you may want to configure the
 build for 'release':
  $ cmake -DCMAKE_BUILD_TYPE=Release ..
- $ make
+ $ make -j4
  $ sudo make install
 
 ------------
