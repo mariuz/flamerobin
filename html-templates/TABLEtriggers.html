@@ -86,7 +86,8 @@ href="fr://deactivate_triggers?parent_window={%parent_window%}&amp;object_handle
     <br><br>
     <table cellspacing=1 cellpadding=2 border=0 bgcolor=black width="98%">
     <tr bgcolor="navy">
-      <td nowrap><font color=white><b>{%object_name%}</b>
+      <td nowrap><a href="fr://{%ifeq:{%triggerinfo:is_active%}:true:deactivate_trigger:activate_trigger%}?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">
+          <img src="{%template_root%}{%ifeq:{%triggerinfo:is_active%}:true:ok.png:redx.png%}"></a> <font color=white><b>{%object_name%}</b>
         [<a href="fr://edit_trigger?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><font
         color="yellow">edit</font></a>] {%triggerinfo:type%}</font></td>
     </tr>
@@ -100,7 +101,8 @@ href="fr://deactivate_triggers?parent_window={%parent_window%}&amp;object_handle
     <br><br>
     <table cellspacing=1 cellpadding=2 border=0 bgcolor=black width="98%">
     <tr bgcolor="navy">
-      <td nowrap><font color=white><b>{%object_name%}</b>
+      <td nowrap><a href="fr://{%ifeq:{%triggerinfo:is_active%}:true:deactivate_trigger:activate_trigger%}?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">
+          <img src="{%template_root%}{%ifeq:{%triggerinfo:is_active%}:true:ok.png:redx.png%}"></a> <font color=white><b>{%object_name%}</b>
         [<a href="fr://edit_trigger?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><font
         color="yellow">edit</font></a>] {%triggerinfo:type%}</font></td>
     </tr>
