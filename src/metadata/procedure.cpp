@@ -355,11 +355,11 @@ wxString Procedure::getAlterSql(bool full)
     ensureChildrenLoaded();
 
     DatabasePtr db = getDatabase();
+    wxString input, output;
 
     wxString sql = "SET TERM ^ ;\nALTER PROCEDURE " + getQuotedName();
     if (!parametersM.empty())
     {
-        wxString input, output;
         for (ParameterPtrs::const_iterator it = parametersM.begin();
             it != parametersM.end(); ++it)
         {
@@ -432,8 +432,13 @@ wxString Procedure::getAlterSql(bool full)
     sql += +"\n" + getSqlSecurity() + "\n";
     if (full)
         sql += getSource();
-    else
-        sql += "AS \nBEGIN SUSPEND; \nEND";
+    else {
+        if (!output.empty())
+            sql += "AS \nBEGIN SUSPEND; \nEND";
+        else
+        sql += "AS \nBEGIN \nEND";
+    }
+        
     sql += "^\nSET TERM ; ^\n";
     return sql;
 }
