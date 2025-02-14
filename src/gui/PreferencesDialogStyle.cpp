@@ -568,8 +568,7 @@ void PrefDlgStyleSetting::saveStyle(const wxString& styleName)
     int i = fontNameComboBoxM->GetSelection();
     if (i>0)
         style->setFontName(fontNameComboBoxM->GetString(fontNameComboBoxM->GetSelection()));
-    style->setFontSize(atoi(fontSizeComboBoxM->GetString(fontSizeComboBoxM->GetSelection())));
-
+    style->setFontSize(atoi(fontSizeComboBoxM->GetString(fontSizeComboBoxM->GetSelection()).ToStdString().c_str()));
 
     style->setfgColor(foregroundPickerM->GetColour());
     style->setbgColor(backgroundPickerM->GetColour());
