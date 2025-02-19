@@ -30,10 +30,19 @@
     #include "wx/wx.h"
 #endif
 
+#include <ibpp.h>
+
+#include "core/FRError.h"
 #include "core/StringUtils.h"
+#include "engine/MetadataLoader.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/server.h"
 #include "metadata/User.h"
+
+void User::loadProperties()
+{
+    serverM = getDatabase()->getServer();
+}
 
 User::User(ServerPtr server)
     : MetadataItem(ntUnknown, server.get()), serverM(server)
@@ -49,6 +58,11 @@ User::User(ServerPtr server, const IBPP::User& src)
     firstnameM = src.firstname;
     middlenameM = src.middlename;
     lastnameM = src.lastname;
+}
+
+User::User(DatabasePtr database, const wxString& name)
+    : MetadataItem(ntUser, database.get(), name)
+{
 }
 
 ServerPtr User::getServer() const
@@ -89,6 +103,28 @@ uint32_t User::getUserId() const
 uint32_t User::getGroupId() const
 {
     return groupidM;
+}
+
+IBPP::User User::getUserIBPP() 
+{
+    ensurePropertiesLoaded();
+
+    IBPP::User usr;
+    
+    usr.username = wx2std(usernameM);
+    usr.password = wx2std(passwordM);
+    usr.firstname = wx2std(firstnameM);
+    usr.lastname = wx2std(lastnameM);
+    usr.middlename = wx2std(middlenameM);
+    usr.userid = useridM;
+    usr.groupid = groupidM;
+
+    return usr;
+}
+
+void User::setServer(ServerPtr srv)
+{
+    serverM = srv;
 }
 
 void User::setUsername(const wxString& value)
@@ -154,8 +190,23 @@ void User::setGroupId(uint32_t value)
     }
 }
 
+void User::setUserIBPP(const IBPP::User& usr) 
+{
+    setUsername(usr.username);
+    setUsername(usr.username);
+    setPassword(usr.password);
+    setFirstName(usr.firstname);
+    setMiddleName(usr.middlename);
+    setLastName(usr.lastname);
+    setUserId(usr.userid);
+    setGroupId(usr.groupid);
+
+    notifyObservers();
+}
+
 void User::assignTo(IBPP::User& dest) const
 {
+    //dest = getUserIBPP();
     dest.username = wx2std(usernameM);
     dest.password = wx2std(passwordM);
     dest.firstname = wx2std(firstnameM);
@@ -163,6 +214,28 @@ void User::assignTo(IBPP::User& dest) const
     dest.middlename = wx2std(middlenameM);
     dest.userid = useridM;
     dest.groupid = groupidM;
+
+}
+
+void User::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitUser(*this);
+}
+
+const wxString User::getTypeName() const
+{
+    return "USER";
+}
+
+wxString User::getSource()
+{
+    ensurePropertiesLoaded();
+    wxString sql = "FIRSTNAME '" + getFirstName() + "' \n" +
+        "MIDDLENAME '" + getMiddleName() + "' \n"
+        "LASTNAME '" + getLastName() + "' \n"
+        "USING PLUGIN "+" \n"
+        ;
+    return sql;
 }
 
 bool User::isSystem() const
@@ -170,7 +243,6 @@ bool User::isSystem() const
     return usernameM == "SYSDBA";
 }
 
-/*
 void Users::loadChildren()
 {
     load(0);
@@ -186,16 +258,10 @@ void Users::acceptVisitor(MetadataItemVisitor* visitor)
     visitor->visitUsers(*this);
 }
 
-void Users::load(ProgressIndicator* progressIndicator)
-{
-    DatabasePtr db = getDatabase();
-    wxString stmt = "select sec$user_name from sec$users a order by 1 ";
-    setItems(db->loadIdentifiers(stmt, progressIndicator));
-}
-
 const wxString Users::getTypeName() const
 {
     return "USERS_COLLECTION";
 }
 
-*/
+
+
