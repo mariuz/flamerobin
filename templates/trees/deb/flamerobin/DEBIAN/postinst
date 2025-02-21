@@ -11,6 +11,8 @@ set -o pipefail
 #
 ldconfig 
 
+
+
 ### Check to see who executes the `flamerobin` program, then get the personnal directory
 #   of this user -> start tag[k0]
 
@@ -32,6 +34,49 @@ fi
 
 ### Check to see who executes the `flamerobin` program, then get the personnel directory
 #   of this user -> end tag[k0]
+
+
+
+### Copy the `*.desktop` file of the flamerobin app to an appropriate directory -> start tag[df0]
+
+if [[ ! -e "/usr/local/share/applications/" ]]
+then
+    mkdir -p  "/usr/local/share/applications" &> /dev/null 
+fi
+
+#
+cp -r /opt/flamerobin/share/applications/flamerobin.desktop /usr/local/share/applications/ 
+
+#
+sudo update-desktop-database /usr/local/share/applications/ &> /dev/null 
+
+### Copy the `*.desktop` file of the flamerobin app to an appropriate directory -> end tag[df0]
+
+
+
+# Symbolic link for the executable (flamerobin) 
+checkBinDir="false"
+if [[ -e "/usr/local/bin/" ]] && [[ -d "/usr/local/bin/" ]] && [[ ` echo "$PATH" | grep "\/usr\/local\/bin" ` ]]
+then
+    ln -sf /opt/flamerobin/bin/flamerobin "/usr/local/bin/flamerobin" &> /dev/null 
+
+    #
+    checkBinDir="true"
+fi
+
+#
+if [[ $checkBinDir == "false" ]]
+then
+
+    #
+    if [[ -e "/usr/bin/" ]] && [[ -d "/usr/bin/" ]] && [[ ` echo "$PATH" | grep "\/usr\/bin" ` ]]
+    then
+        ln -sf /opt/flamerobin/bin/flamerobin "/usr/bin/flamerobin" &> /dev/null 
+
+        #
+        checkBinDir="true"
+    fi
+fi
 
 
 

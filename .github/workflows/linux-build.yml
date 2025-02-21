@@ -22,7 +22,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install -y build-essential cmake libwxgtk3.2-dev dpkg-dev libfbclient2 firebird3.0-server firebird3.0-utils firebird-dev firebird3.0-server-core firebird3.0-common
+        sudo apt install -y build-essential cmake libwxgtk3.2-dev dpkg-dev libfbclient2 firebird3.0-server firebird3.0-utils firebird-dev firebird3.0-server-core firebird3.0-common rsync
         sudo ldconfig
 
     # Cache wxWidgets if already built
@@ -44,18 +44,24 @@ jobs:
       run: |
         cd wxWidgets
         mkdir build && cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DwxBUILD_SHARED=OFF
         make -j$(nproc)
         sudo make install
         sudo ldconfig
 
     # Building the CMake project for Flamerobin
     - name: Generate CMake project
-      run: cmake -S . -B Build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
+      run: |
+        export PATH="/usr/local/bin:/opt/firebird/bin:${PATH:-}"
+        export LD_LIBRARY_PATH="/usr/local/lib:/usr/lib/x86_64-linux-gnu:/opt/firebird/lib:${LD_LIBRARY_PATH:-}"
+        cmake -S . -B Build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/flamerobin/
 
     # FlameRobin Compilation
     - name: Build Flamerobin
-      run: cmake --build Build --config Release -j$(nproc)
+      run: |
+        export PATH="/usr/local/bin:/opt/firebird/bin:${PATH:-}"
+        export LD_LIBRARY_PATH="/usr/local/lib:/usr/lib/x86_64-linux-gnu:/opt/firebird/lib:${LD_LIBRARY_PATH:-}"
+        cmake --build Build --config Release -j$(nproc)
 
     # Check where the generated binary is (flamerobin)
     - name: Locate the compiled executable file for flamerobin
@@ -63,14 +69,26 @@ jobs:
         find Build/ -name "flamerobin" -type f
         du -skh Build/flamerobin
 
-    # Set the version of the flamerobin program and move its executable to templates/trees/deb/flamerobin/usr/local/bin 
-    - name: Set the version of the Flamerobin program and move its executable to "templates/trees/deb/flamerobin/usr/local/bin"
+     # Add the lib depends of the flamerobin build app to -> templates/trees/deb/flamerobin/opt/flamerobin/lib/
+    - name: Add the lib depends of the flamerobin app to "templates/trees/deb/flamerobin/opt/flamerobin/lib/"
+      run: |
+        mkdir -p templates/trees/deb/flamerobin/opt/flamerobin/lib 2> /dev/null
+        ldd Build/flamerobin | awk '{print $3}' | grep -E '/lib|/usr/lib' | grep -v "not found" | xargs -I {} cp -v {} templates/trees/deb/flamerobin/opt/flamerobin/lib/
+        
+    # Set the version of the flamerobin program and move its executable to -> templates/trees/deb/flamerobin/opt/flamerobin/bin/ 
+    - name: Set the version of the Flamerobin program and move its executable to "templates/trees/deb/flamerobin/opt/flamerobin/bin/"
       run: |
         sed -i "s/^Version: .*/Version: ${FLAMEROBIN_VERSION}/" templates/trees/deb/flamerobin/DEBIAN/control
-        mkdir -p templates/trees/deb/flamerobin/usr/local/bin 2> /dev/null
-        cp -r Build/flamerobin templates/trees/deb/flamerobin/usr/local/bin
+        mkdir -p templates/trees/deb/flamerobin/opt/flamerobin/bin 2> /dev/null
+        cp -r Build/flamerobin templates/trees/deb/flamerobin/opt/flamerobin/bin/
       env:
         FLAMEROBIN_VERSION: ${{ env.flamerobin-version }}
+    
+    # Copy some necessary files except "flamerobin" to -> /opt/flamerobin/share/flamerobin
+    - name: Copy necessary files to package directory "/opt/flamerobin/share/flamerobin/"
+      run: |
+        mkdir -p templates/trees/deb/flamerobin/opt/flamerobin/share/flamerobin 2> /dev/null
+        rsync -av --exclude=flamerobin Build/ templates/trees/deb/flamerobin/opt/flamerobin/share/flamerobin/
 
     # Generate the .deb file
     - name: Build .deb package
