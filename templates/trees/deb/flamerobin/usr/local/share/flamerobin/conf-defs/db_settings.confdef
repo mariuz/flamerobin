@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+    <debug />
+    <node>
+        <caption>Main Tree View</caption>
+        <image>2</image>
+        <setting type="checkbox">
+            <caption>Show system characterset in tree</caption>
+            <description>If checked the system CharacterSet will be shown in the tree by default (can be overridden per database)</description>
+            <key>ShowSystemCharacterSet</key>
+            <default>0</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>show all indices in one node in tree</caption>
+            <description>If checked the all indices for this database will be shown in one node in the tree</description>
+            <key>ShowOneNodeIndices</key>
+            <default>0</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Show system indices in tree</caption>
+            <description>If checked the system indices for this database will be shown in the tree</description>
+            <key>ShowSystemIndices</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Show system domains in tree</caption>
+            <description>If checked the system domains for this database will be shown in the tree</description>
+            <key>ShowSystemDomains</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Show system packages in tree (Firebird 3.0 and later)</caption>
+            <description>If checked the system packages for this database will be shown in the tree</description>
+            <key>ShowSystemPackages</key>
+            <default>1</default>
+            <related /><!-- this moves the checkbox closer to the previous one -->
+        </setting>
+        <setting type="checkbox">
+            <caption>Show system roles in tree (Firebird 2.5 and later)</caption>
+            <description>If checked the system roles for this database will be shown in the tree</description>
+            <key>ShowSystemRoles</key>
+            <default>0</default>
+            <related /><!-- this moves the checkbox closer to the previous one -->
+        </setting><setting type="checkbox">
+            <caption>Show system tables in tree</caption>
+            <description>If checked the system tables for this database will be shown in the tree</description>
+            <key>ShowSystemTables</key>
+            <default>1</default>
+            <related /><!-- this moves the checkbox closer to the previous one -->
+
+        </setting>
+    </node>
+    <node>
+        <caption>Connection</caption>
+        <image>3</image>
+        <setting type="checkbox">
+            <caption>Warn when connection charset is different from database charset</caption>
+            <key>differentCharsetWarning</key>
+            <default>1</default>
+        </setting>
+    </node>
+    <node>
+        <caption>Logging</caption>
+        <image>1</image>
+        <setting type="checkbox">
+            <caption>Exclude this database from global logging</caption>
+            <description>If checked only settings on this screen would work.</description>
+            <key>ExcludeFromGlobalLogging</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Log DML statements</caption>
+            <description>Should the logging work for DML statements too.<br />If unchecked only DDL statements are logged.</description>
+            <key>LogDML</key>
+            <default>0</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Enable logging to file</caption>
+            <description>Logs all successful DDL statements to file</description>
+            <key>LogToFile</key>
+            <default>0</default>
+            <enables>
+                <setting type="file">
+                    <caption>Log file name:</caption>
+                    <description>For multiple files place %d mark where you want numbers to be inserted.<br />If you wish leading zeros use %0xd, where x is a number of digits (ex. %02d)</description>
+                    <key>LogFile</key>
+                </setting>
+                <setting type="checkbox">
+                    <caption>Use multiple files</caption>
+                    <key>LogToFileType</key>
+                    <default>0</default>
+                    <enables>
+                        <setting type="int">
+                            <caption>Incremental file numbers start at:</caption>
+                            <key>IncrementalLogFileStart</key>
+                            <minvalue>0</minvalue>
+                            <maxvalue>10000</maxvalue>
+                            <default>1</default>
+                        </setting>
+                    </enables>
+                </setting>
+                <setting type="checkbox">
+                    <caption>Add header to each statement</caption>
+                    <description>Should logging add a header showing the context in which statement was run:<br />FlameRobin version, database, username, timestamp</description>
+                    <key>LoggingAddHeader</key>
+                    <default>1</default>
+                </setting>
+                <setting type="checkbox">
+                    <caption>Add SET TERM when different terminator is used in editor</caption>
+                    <key>LogSetTerm</key>
+                    <default>0</default>
+                </setting>
+            </enables>
+        </setting>
+        <setting type="checkbox">
+            <caption>Enable logging to database</caption>
+            <description>Logs all successful DDL statements to database.<br />This will create a table named FLAMEROBIN$LOG in the databases.</description>
+            <key>LogToDatabase</key>
+            <default>0</default>
+            <enables>
+                <setting type="checkbox">
+                    <caption>Use custom select instead of generator</caption>
+                    <description>If not checked, FLAMEROBIN$GEN generator will be used.</description>
+                    <key>LoggingUsesCustomSelect</key>
+                    <default>0</default>
+                    <enables>
+                        <setting type="string">
+                            <caption>Custom select:</caption>
+                            <description>The following statement will be used to obtain change ID.</description>
+                            <key>LoggingCustomSelect</key>
+                            <default>SELECT 1+MAX(ID) FROM FLAMEROBIN$LOG</default>
+                            <aligngroup>1</aligngroup>
+                            <expand>1</expand>
+                        </setting>
+                    </enables>
+                </setting>
+            </enables>
+        </setting>
+    </node>
+</root>

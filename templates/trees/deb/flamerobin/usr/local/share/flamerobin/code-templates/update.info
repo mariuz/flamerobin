@@ -1,0 +1,5 @@
+[templateInfo]
+menuCaption=Update {%object_name%} set ... where ...
+menuPosition=30
+matchesType=^TABLE$
+matchesWhen={%!:{%is_system%}%}

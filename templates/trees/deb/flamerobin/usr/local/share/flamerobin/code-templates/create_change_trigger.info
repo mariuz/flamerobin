@@ -1,0 +1,5 @@
+[templateInfo]
+menuCaption=Create change trigger for {%object_name%}
+menuPosition=40
+matchesType=^TABLE$
+matchesWhen={%!:{%is_system%}%}

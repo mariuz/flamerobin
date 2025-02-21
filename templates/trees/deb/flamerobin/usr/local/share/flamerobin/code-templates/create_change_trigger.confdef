@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+    <node>
+        <caption>Create change trigger for {%object_name%}</caption>
+        <setting type="relation_columns" style="list">
+            <caption>Which column changes would you like to log?</caption>
+            <key>{%object_path%}/columnNames</key>
+            <default>{%foreach:column:, :{%object_name%}%}</default>
+            <relation>{%object_handle%}</relation>
+            <aligngroup>1</aligngroup>
+            <proportion>1</proportion>
+        </setting>
+        <setting type="int">
+            <caption>Trigger position (0..32767)</caption>
+            <key>{%object_path%}/triggerPosition</key>
+            <default>99</default>
+            <relation>{%object_handle%}</relation>
+            <aligngroup>1</aligngroup>
+        </setting>
+    </node>
+</root>

@@ -1,0 +1,69 @@
+<html>
+<head>
+  <title>Table</title>
+</head>
+<body>
+{%header:Summary%}
+<br><br>
+<font size=+2>{%object_name%}</font><br>
+Owner: {%owner_name%}<br>
+{%sql_security%}<br>
+{%object_description%} {%ifeq:{%is_system%}:false:[<a
+ href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=TABLE&amp;object_name={%object_name%}">edit</a>]%}
+<br><br>
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=black>
+  <tbody>
+    <tr bgcolor="navy">
+      {%ifeq:{%is_system%}:false:
+      <td></td>
+      %}
+      <td><b><font color=white>Field</font></b></td>
+      <td><b><font color=white>Type</font></b></td>
+      <td><b><font color=white>Not Null</font></b></td>
+      {%ifeq:{%getglobalconf:DisplayColumnDefault%}:1:
+      <td><b><font color=white>Default</font></b></td>%}
+      {%ifeq:{%getglobalconf:DisplayColumnDescription%}:1:
+      <td><b><font color=white>Description</font></b></td>%}
+    </tr>
+    {%foreach:column::
+    <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
+      {%ifeq:{%is_system%}:false:
+      <td valign="top" nowrap>
+          <a href="fr://drop_field?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}drop.png"></a>
+          <a href="fr://edit_field?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}view.png"></a>
+          <a href="fr://alter_field?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}compute.png"></a>
+      </td>
+      %}
+      <td nowrap valign="top">{%object_name%}</td>
+      <td nowrap valign="top">{%columninfo:datatype%}</td>
+      <td nowrap valign="top"><center>{%ifeq:{%columninfo:is_nullable%}:false:<img src="{%template_root%}ok.png">%}</center></td>
+      {%ifeq:{%getglobalconf:DisplayColumnDefault%}:1:
+      <td nowrap valign="top">{%columninfo:default_expression%}</td>%}
+      {%ifeq:{%getglobalconf:DisplayColumnDescription%}:1:
+      <td valign="top"><font size=-1>{%object_description%} {%ifeq:{%is_system%}:false:[<a
+        href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=COLUMN&amp;object_name={%object_name%}">edit</a>]</font>%}
+      </td>%}
+    </tr>
+    %}
+  </tbody>
+</table>
+<br><br>
+{%ifeq:{%is_system%}:false:
+    <a href="fr://add_field?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Add field</a> | <a
+ href="fr://reorder_fields?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Reorder fields</a> | <a
+ href="fr://drop_fields?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Drop fields</a> | <a
+ href="fr://alter_relation?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Generate rebuild script</a>
+%}
+<br>
+<br>
+<table border=0 cellspacing=1 cellpadding=3 bgcolor="#999999">
+    <tr bgcolor="#CCCCFF">
+        <td>Icon</td>
+        <td nowrap>click to...</td>
+    </tr>
+    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}drop.png"></td><td>Drop column</td></tr>
+    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}view.png"></td><td>View column properties</td></tr>
+    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}compute.png"></td><td>Generate rebuild script for that column</td></tr>
+</table>
+</body>
+</html>

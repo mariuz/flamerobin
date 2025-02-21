@@ -1,0 +1,3 @@
+{%edit_conf%}{%kw:delete from%} {%object_quoted_name%} a {%ifeq:{%countall:{%getconf:{%object_path%}/whereColumnNames%}%}:0:;:
+{%kw:where%}{%foreach:column: {%kw:and%} :{%ifcontains:{%getconf:{%object_path%}/whereColumnNames%}:{%object_name%}:
+{%tab%}a.{%object_quoted_name%} = '?'%}%}%}

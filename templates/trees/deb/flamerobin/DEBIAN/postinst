@@ -1,0 +1,43 @@
+#!/usr/bin/bash
+
+#####
+# postinst script
+####
+
+set -o pipefail
+
+
+
+#
+ldconfig 
+
+### Check to see who executes the `flamerobin` program, then get the personnal directory
+#   of this user -> start tag[k0]
+
+# Declaration variables
+flagBehalfSudo=""
+getPersonalUserDir="$HOME"
+getTheRealUser="$USER"
+
+#
+if [[ -n "$SUDO_USER" ]]
+then
+    #
+    flagBehalfSudo="$SUDO_USER"
+    getTheRealUser="$SUDO_USER"
+
+    # Get the personnel directory of the user
+    getPersonalUserDir=` getent passwd "$flagBehalfSudo" | cut -d ":" -f6 `
+fi
+
+### Check to see who executes the `flamerobin` program, then get the personnel directory
+#   of this user -> end tag[k0]
+
+
+
+# Just to print the name of the author
+echo ""
+echo ""
+echo "~"
+
+tput setaf 6; tput bold; echo "By Baldé ~" `tput sgr0` 2> /dev/null

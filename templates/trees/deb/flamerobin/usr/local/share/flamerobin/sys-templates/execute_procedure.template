@@ -1,0 +1,2 @@
+{%ifeq:{%procedureinfo:paramcount:output%}:0:{%wrap:{%kw:execute procedure%} {%object_quoted_name%} {%ifeq:{%procedureinfo:paramcount:input%}:0::({%foreach:parameter:, :input:'{%object_quoted_name%}'%})%}%}:{%wrap:{%kw:select%} {%foreach:parameter:, :output:p.{%object_quoted_name%}%}%}
+{%wrap:{%kw:from%} {%object_quoted_name%} {%ifeq:{%procedureinfo:paramcount:input%}:0::({%foreach:parameter:, :input:'{%object_quoted_name%}'%})%}%} p%};

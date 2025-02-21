@@ -1,0 +1,5 @@
+{%edit_conf%}{%kw:update%} {%object_quoted_name%} a
+{%kw:set%} {%foreach:column:, :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:
+{%tab%}a.{%object_quoted_name%} = '{%object_name%}{%ifeq:{%columninfo:is_nullable%}:false:*%}'%}%}{%ifeq:{%countall:{%getconf:{%object_path%}/whereColumnNames%}%}:0:;:
+{%kw:where%}{%foreach:column: {%kw:and%} :{%ifcontains:{%getconf:{%object_path%}/whereColumnNames%}:{%object_name%}:
+{%tab%}a.{%object_quoted_name%} = '?'%}%}%}

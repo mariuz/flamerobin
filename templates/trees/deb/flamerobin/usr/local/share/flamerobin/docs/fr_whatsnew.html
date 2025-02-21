@@ -1,0 +1,894 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Changes</title>
+</head>
+<body bgcolor="#FFFFCC">
+<font size=-1>For known issues please see our bug tracker at:
+http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
+<br><br>
+<!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.9.10</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+- New "Volatile" SQL Editor, allows you to use CREATE DATABASE, CONNECT and DISCONNECT in your script, increasing the flexibility to do maintenance across several databases. To use this feature you need to go to <strong>Database->Open new Volatile SQL Editor<strong>. Use with attention<br>
+<br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- New collation tree view<br>
+- Many other small fixes, see commit history for more details :)<br>
+<br>
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.9.9</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- New theme selector<br>
+- New statistics detail per table<br>
+- Changed priority of DLL loading<br>
+- Separate per architeture the library selector configuration in View->Preferences. If you used this before you'll need to reconfigurate per arch version<br>
+- New CI module, will generate automatically windows installers for x86 and x64<br>
+- Many other small fixes, see commit history for more details :)<br>
+<br>
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.9.4 ALPHA 10</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- Fixed problems with numeric types<br>
+- Fix encoding at blob editor<br>
+- Fix UDF property loading at Fb<=2.5<br>
+- Implementing Fb4 datatypes by @andy-123(in progress)<br>
+<br>
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.9.4 ALPHA 9</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- Error loading package's functions/procedures properties #208<br>
+LogicException asking properties of a procedure #207<br>
+Fixes #207 and #208<br><br>
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.9.4 ALPHA 8</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+- Indexes, Functions, Packages, Global Temporaries, DB Triggers and DDL Triggers supported<br>
+- New localized grid support, allows to use commas or dots for decimal separator (View->Preferences->General: Use language locale settings<br>
+<br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- Fix Dependency tab not showing Functions and triggers<br><br>
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.9.4 ALPHA 7</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+- Initial implementation Indexes node #48<br>
+- "Functions" and "Global Temporaries" context popup menu #162<br>
+- Index node experimental.<br>
+- PSQL Functions<br>
+- Package DDL<br>
+- Packages<br>
+<br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- Fix "Total execution time"<br>
+- add Columns titles in copyToClipboard<br>
+- Can't find external file table on FlameRobin<br>
+- Fix add "AS" in procedure empty in script of full database #171<br>
+- Some fixes DB Trigger, DML Trigger and DDL Trigger #48, #70, #73 and #154<br>
+- Some fixes Package implementation #55<br>
+- Unable to change Field Datatype #165<br>
+- Initial implementation node users #149<br>
+- Fix DB Trigers error.<br>
+- Fix DML Triggers.<br>
+- Support GRANT USAGE for Domain, Generator/Sequence and Exception.<br>
+- Fix notifyObservers for triggers.<br>
+- Some fixes to trigger implementation.<br>
+- Fix Linux build<br>
+- Newly created function is not displayed #158<br>
+- Context popup menu is not shown for Database and Table Triggers #154<br>
+- IBPP: Add "Clone" connection method<br>
+- new icons from RedExpert https://github.com/red-soft-ru/redexpert (proper references to be done yet)<br><br>
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.9.4 ALPHA 6</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+- Fix Incomplete table list with 0.9.3.5 #142<br>
+- Fix DDL export #142<br>
+<br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- New configurations at View->Preferences menu:<br>
+-- Main Tree View: Hide system objects (domains, packages, roles, and tables) <br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.9.4 ALPHA 5</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+- Experimental Firebird 3 support for Functions, UDR, DDL Triggers and Packages<br>
+<br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- New configurations at View->Preferences menu:<br>
+-- Transaction Settings: change default behaviour (isolation mode, wait for lock and read-only) <br>
+-- SQL Editor->Code Completion: sort object columns alphabetically <br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.9.4 ALPHA 4</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+-Basic octets support #28 <br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- Fix icon "Question" at dropping database dialog #64 <br>
+- Improvements at new pivoted dependency tab, shows FK reference too #77 <br>
+- Add support for SQL statements longer than 64KB #82 Thanks @Michele Abbrescia<br>
+- Correct some spelling mistakes #81 <br>
+- Pointer Format Fix #80 and #90 thanks @scott @blumf<br>
+- Improve new ":parameters" support #85 <br>
+- Support boolean parameters #8 <br>
+- Warning: this time I kept active asserts warnings, please let me know if you find anything<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.9.4 ALPHA 3</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+- #69 Pivoted dependency table, relating dependencies by field, insted of only by objects By: @Arvanus<br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- #58 Fix: change description of objects in Firebird 3 and 4 @Arvanus<br>
+- #57 Fix: Nullability of columns in Firebird 3 @Arvanus<br>
+- Minor fix at templating files @Arvanus<br>
+- #47 Fix: removed Firebird 3 SEC$DOMAINs @Arvanus<br>
+- #46 Fix Bottom Search Bar hang application @Arvanus<br>
+- #53 Fix Unable to alter Database On Connect Trigger By @Mariuz<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.9.4 ALPHA 2</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+- Additional support for parametrized SQLs<br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- Support for queries like "select fields from table where field=:parameter" By: @Arvanus<br>
+- Fix at sorting popup members on auto-completion By: @Arvanus<br>
+- TODO: If in your SQL you have more than one parameter with the same name, it'll appear "n" times to be informed by the user<br> 
+- Fix bug#269 (Long procedure or function hangs flamerobin) By: @thankap <br>
+- Fixes the issues on advanced search frame By: @thankap<br>
+- Fix MixedUpperLowerCaseChars for quoted names By: @arvanus<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.9.4 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+- New templating system allows you to add you own SQL statement templates to the menu<br>
+- BLOB editor<br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- Extended dialog with SQL statement history makes it easier to search<br>
+- View dependencies are resolved properly for Firebird 2.5<br>
+- Fixed statistics for UPDATE OR INSERT statements<br>
+- DataGrid: implemented Copy as IN list<br>
+- DataGrid: Fixed keyboard navigation<br>
+- Added new context menu options<br>
+- Fixed error messages when different character set is used in statements<br>
+- Warn when closing SQL editor with active transactions<br>
+- Ability to refresh list of objects in the main tree<br>
+- Fixed bug with quoted identifier when altering column type<br>
+- Generate change script is now available for columns as well<br>
+- Fixed truncating of Unicode characters with Firebird 1.5<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.9.2 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+- Allowed deleting from system tables (ex. to stop queries via MON$STATEMENTS)<br>
+- Added support for trusted authentication<br>
+- Databases can now be recreated from existing registration info<br>
+- Transaction isolation level can now be selected in SQL editor<br>
+- Win64 port<br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- Fixed problems with mangled UTF8 identifiers<br>
+- Improved autoincrement triggers<br>
+- Drop FK only once for self-referencing tables in Rebuild script<br>
+- Improved management of passwords in connection dialogs<br>
+- Case insensitive DoMaIn keyword detection<br>
+- Fixed reported length of char fields in DDL extraction of system tables<br>
+- Fixed minor DDL extraction problem with BIGINT and scale<br>
+- Search words are now highlighted in advanced metadata search results<br>
+- DataGrid: sum of values of selected cells in the grid is shown in status bar<br>
+- Data grid cell editor now has a popup menu of a standard edit control<br>
+- Data of CHAR type using multibyte character set has correct padding now<br>
+- Database file size is now reported correctly for databases over 2GB<br>
+- Opening pages in tabs can now be controlled with Shift/Control keys<br>
+- Information on database property page is reloaded without reconnecting<br>
+- Fixed focus problem with property pages<br>
+- Fixed broken descriptions of system table columns in property pages<br>
+- Optionally display sources of all triggers on table property page<br>
+- Controls are now focused before their popup menus are shown<br>
+- Improved usability of menus and commands via keyboard<br>
+- SQL Editor: Improved detection of field sizes in resulting dataset<br>
+- Fixed statement parsing when SUBSTRING function is present<br>
+- Fixed column autocompletion for JOINed tables<br>
+- Fixed code completion when tables are listed in SQL89 order<br>
+- Fixed crash when opening query window and pressing F5 or F8 at once<br>
+- Improved the way views are switched in SQL editor<br>
+- Fixed completion under Mac OS X<br>
+- Other minor improvements and fixes to SQL editor<br>
+- Statement execution time is now displayed with milliseconds precision<br>
+- Minimum required version of wxWidgets is now 2.8.<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.9.0 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+- 100% Firebird 2.1 compatible<br>
+- Tab-based property pages for database object (like Firefox browser)<br>
+- DataGrid: load and save to file options for BLOB data.<br>
+- A new, improved dialog for inserting new rows.<br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- Firebird 2.1: Support for database triggers<br>
+- Firebird 2.1: Support for global temporary tables<br>
+- Firebird 2.1: Descriptions can be set for generators<br>
+- Firebird 2.1: Support for domains as stored procedure parameter types<br>
+- Firebird 2.1: Detect when the equals sign (=) is used instead of DEFAULT<br>
+- SQL Editor: Improved autocomplete for table columns<br>
+- SQL Editor: Smarter window title, user configurable<br>
+- SQL Editor: fixed problems with scrolling of log control<br>
+- SQL Editor: removed flicker when executing scripts with COMMITs or AUTODLL ON<br>
+- SQL Editor: fixed crashes when COMMIT closes the window<br>
+- DataGrid: Copy as Update and Insert for single cell does not require cell to be selected anymore<br>
+- DataGrid: Timestamps have display format of their own (not date+time anymore)<br>
+- DataGrid: Fixed doubling of quotes entered in edited fields.<br>
+- DataGrid: BLOB data is now transliterated to GUI character set<br>
+- Procedure nodes in tree indicate when parameter info has been loaded<br>
+- DDL extraction for GRANTs fixed<br>
+- DDL extraction for BIGINT separated from NUMERIC(18,0)<br>
+- DDL extraction for CHAR columns in system tables fixed<br>
+- Fixed random crashes when dropping object from its property page<br>
+- Implemented missing prompt for dropping of some objects<br>
+- GRANT statements moved to end of database DDL script for easier diffs<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.8.6 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+- DataGrid: BLOB data is now (optionally) shown in cells. Read-only for now.<br>
+- DataGrid: A basic ORDER BY clause building when column header is double-clicked<br>
+- Support for LIST function in Firebird 2.1<br>
+- Support for MON tables in Firebird 2.1 (Read-only for now.)<br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- DataGrid: FR no longer crashes when transaction has ended (commit/rollback) and grid edit control is active<br>
+- DataGrid: Complete string is now shown for editing and copying multiline text<br>
+- DataGrid: Copy command now copies a single cell if nothing is selected<br>
+- DataGrid: Fixed mixup between BLOB ID and data it contains<br>
+- DataGrid: Fixed bug when editing or deleting in grid causes exceptions.<br>
+- DataGrid: Successfully deleted rows are deselected, so user can easily see what is done.<br>
+- DDL extraction for GRANTs now only quotes names when needed<br>
+- DDL extraction for defaults does not use double quotes anymore.<br>
+- Database property page now shows minor ODS version when it is not zero<br>
+- Hovering over icons in privileges window, now really shows the grantor<br>
+- Improved parsing of SELECT statements<br>
+- Support for INSERT..RETURNING and EXECUTE STATEMENT that return a single record<br>
+- Fixed messagebox flood when Execute Procedure called and it doesn't return anything<br>
+- Print preview and SaveToHtmlFile works again for manual and changelog<br>
+- Extracting invalid DDL (missing domain data in system tables) does not crash FR anymore<br>
+- Silent installation (on Windows) does not show changelog window anymore<br>
+- Autogenerated domains (system domains) do not show up in the tree anymore<br>
+- Added ALTER DOMAIN action for domains<br>
+- Tree now shows NOT NULL for columns that inherit NOT NULL from domain<br>
+- Fixed parsing bug when non-reserved keyword is used as identifier<br>
+- Fixed autocomplete for selectable procedure alias when procedure call contains parameters (in PSQL)<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.8.3 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+- Even more detailed query execution statistics showing number of inserted, updated and deleted records for each table<br>
+- Fully customizable icon theme (you can create you own icon theme for FlameRobin without recompiling anything)<br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- Optimizations for work over slow networks<br>
+- Configurable default action for tree items now also allow to SELECT FROM table, view or procedure<br>
+- Select and Execute for procedures merged into a single action depending on procedure type<br>
+- Better handling of exceptions, FlameRobin should not 'just crash' on Linux anymore<br>
+- Added Extract DDL for entire database to Advanced menu - opens directly in SQL editor<br>
+- SQL Editor: Minor cleanup of menus (both context and main menu)<br>
+- SQL Editor: Fixed enabling of Delete and Insert icons<br>
+- SQL Editor: Logging can now optionally be disabled for the current editor window<br>
+- SQL Editor: Upper or lower case keywords are now a customizable option<br>
+- SQL Editor: Database path in status bar is no longer overwritten<br>
+- SQL Editor: Faster and more correct parsing of large statements<br>
+- SQL Editor: Fixed problem with query plan not being shown for DML statements<br>
+- ALTER PROCEDURE now keeps objects' descriptions<br>
+- Tree view: System table columns behave like regular table columns<br>
+- Tree view: Only show first line for multiline text (computed columns and such)<br>
+- Tree view: Show special icon for foreign keys<br>
+- Fixes in generator of selectable stored procedures<br>
+- Aliases added to generated SELECT queries (makes easier editing afterwards)<br>
+- DataGrid: Fixed problems with speed when large dataset it loaded<br>
+- DataGrid: handles Shift+Space to select rows, Ctrl+Space to select columns<br>
+- DataGrid: deleted rows are not removed, but colored differently until user commits<br>
+- DataGrid: date and timestamp columns support "NOW", "DATE", "TODAY", "TOMORROW", "YESTERDAY"<br>
+- DataGrid: time columns support "NOW" and "TIME"<br>
+- DataGrid: parsing of milliseconds fixed<br>
+- DataGrid: all the edits can optionally be logged (as if they were statements typed into editor)<br>
+- DataGrid: date, time and timestamp entry now respects user's formatting<br>
+- Increased the default size of main FlameRobin window<br>
+- Option to remember window positions and sizes in now ON by default<br>
+- Find dialog is left as-is on subsequent searches<br>
+- Backup file extensions now default to .fbk and .gbk<br>
+- Backup and restore fixes regarding password entry<br>
+- Warning message when logging fails<br>
+- Nicer password dialog<br>
+- Fixed problem that a random number was shown when index statistics is NULL<br>
+- Fixed a dialog-loop bug that would pop up a lot of message boxes under some conditions<br>
+- Fixed crashes when working with objects with long names on Gtk<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.8.1 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+- SQL Editor: added command to Execute statements from cursor position<br>
+- SQL Editor: themable toolbar icons (support for entire FR in next version)<br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- SQL Editor window now has a standard menu and toolbar<br>
+- Editable grid: fields are now set to NULL when DELETE key is pressed in empty box<br>
+- Fixed crash when Insert clicked after transaction Commit/Rollback<br>
+- Fixed crash when Insert clicked while editing field value<br>
+- Fixed problem with Insert being disabled until column info is loaded<br>
+- Fixed charset conversion problems with editable grid and insert dialog<br>
+- Insert and Delete buttons are now properly enabled and disabled<br>
+- Fixed DDL extraction for usernames in privileges<br>
+- Windows version can be installed without administrative privileges<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<font size=+2>Changes in FlameRobin 0.8.0 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+- DataGrid: ability to edit (UPDATE) existing rows directly in the grid<br>
+- DataGrid: ability to add (INSERT) rows in the grid (with BLOB support)<br>
+- DataGrid: ability to remove (DELETE) one or multiple rows from the grid<br>
+- DataGrid: all features of editable grid work even for joins and complex queries<br>
+- DataGrid: data can now be exported as CSV values<br>
+- A basic Test Data Generator (please test, we need your feedback to improve it)<br>
+- Ability to create a selectable stored procedure for a table<br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- DataGrid: Major improvement on memory consumption and speed<br>
+- DataGrid: Columns are named after aliases when available<br>
+- DataGrid: CHARACTER SET OCTETS columns shown as hexadecimal strings<br>
+- DataGrid: Proper display of DB_KEY columns<br>
+- DataGrid: New config option: automatically fetch all records (use with care)<br>
+- Property pages show database path instead of useless internal link info<br>
+- Property pages of system tables are now closed upon disconnecting<br>
+- Property pages now show owner for tables, views and procedures<br>
+- Fixed DDL extraction for usernames in GRANT statements<br>
+- Fixed DDL extraction for expression based indexes<br>
+- Fixed DDL extraction for multisegment indexes<br>
+- Fixed DDL extraction for external tables<br>
+- Fixed DDL extraction for computed columns (char and varchar size)<br>
+- Fixed DDL extraction for DEFAULTs<br>
+- SQL Editor: Enabled autocompletion for columns of system tables<br>
+- SQL Editor: Filename shown in dialog title<br>
+- SQL Editor: Files can be opened by drag&amp;drop into editor window<br>
+- SQL Editor: Detailed query execution statistics<br>
+- SQL Editor: Improved startup speed<br>
+- Database size display now supports databases bigger than 2GB<br>
+- Database read-only status is now reported correctly<br>
+- Enabled drag&amp;drop of files into backup, restore and database dialog<br>
+- Generator values can be reloaded now<br>
+- Basic 'edit domain' functionality via SQL<br>
+- Fixed charset conversion for ISO8859_x character sets<br>
+- Fixed charset conversion for UTF8 in ANSI build<br>
+- Fixed parsing bug that can hang the program at 100% CPU usage<br>
+- Fixed crash when Manage Users option is called from the Server menu<br>
+- Fixed crash when charset conversion fails<br>
+- Start arguments -u and -uh are now respected for fr_settings.conf as well<br>
+- UDFs that views depend on are now shown in Dependencies page<br>
+- Various minor bugfixes<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.7.6 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+- Logging changes to database table (so far only logging to textual files was available)<br>
+- Finally, FlameRobin is 100% compatible with Firebird 2.0<br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- Improved parsing of committed statements<br>
+- Fixed bug #1591149 when reserved XML characters were used in database properties<br>
+- Fixed bug #1582935 with drag and drop query building<br>
+- Setting to clear log when executing is now respected<br>
+- Added META tag to exported HTML data: set to UTF-8 encoding<br>
+- Fixed invalid columns when fetching data fails<br>
+- Autocompletion now works properly with quoted identifiers<br>
+- Fixed crash when loading of property page fails<br>
+- Fixed crash when automatic DDL commit was active<br>
+- Fixed ALTER VIEW script - triggers are now included<br>
+- Fixed DDL extraction for UNIQUE INDEX<br>
+- Fixed DDL extraction for NUMERIC(x, 0) types<br>
+- Fixed problem with selection becoming invisible on Linux/Gtk<br>
+- Main tree view now behaves consistently on both double-click and Enter pressed<br>
+- Fixed minor UI glitches<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.7.5 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+- System tables now are available in main tree view<br>
+- Autocompletion of column/parameter names and old/new aliases in triggers<br>
+- Compatibility with Firebird 2.0<br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- SQL Editor: Use row:col instead of col:row in statusbar<br>
+- SQL Editor: Autocompletion now works for case-sensitive object names<br>
+- SQL Editor: Autocompletion now works for names containing $ character<br>
+- Data grid: &quot;Fetch all records&quot; and &quot;Cancel fetching all records&quot; commands<br>
+- Data grid: &quot;Copy records as Update&quot; command<br>
+- SQL script execution now always stops on error<br>
+- Confirm dropping of items from main tree<br>
+- Fixed bugs related to character set conversions<br>
+- Fixed DDL extraction for various object types<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.7.2 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- Fixed crash when opening role's property page with Firebird 1.x<br>
+- Fixed DDL extraction for unique constraints<br>
+- Fixed updating of privileges page for procedures<br>
+- Removed dependency on Firebird 2.0 for Gtk2 package<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.7.1 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- Firebird client library version is removed from About box<br>
+- This version works with Firebird 1.0<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.7.0 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+- User management<br>
+- View, grant and revoke privileges on database objects<br>
+- Encrypted password storage<br>
+- Search SQL statement history and remove chosen entries<br>
+- Property page for databases<br>
+- License changed from IDPL to MIT/Expat<br>
+- Advanced metadata search (experimental - please provide feedback, so we can improve it)<br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- Consistent property pages navigation<br>
+- UTF-8 charset changed to proper UTF8<br>
+- Identify user-named system-generated indices (needed for FB > 1.0)<br>
+- Fixed DDL extraction for various objects<br>
+- Two-step loading of property pages (more user friendly)<br>
+- Option to show objects DDL in SQL editor<br>
+- SQL Editor: ignore function keys when Ctrl or Alt are down<br>
+- Data grid: right-align nulls for numeric columns<br>
+- Data grid: display of milliseconds for time values<br>
+- Data grid: improved display of Unicode characters<br>
+- Various changes of user preferences are now instantly applied<br>
+- GTK: changes of tree control to look like native one<br>
+- GTK: Use of standard button IDs adds icons and localized captions<br>
+- Statement parser: identifiers of one char are no longer handled as empty<br>
+- Property pages now display much faster<br>
+- Autogenerated INSERT statements now show default values where available<br>
+- Firebird client library version is shown in About box<br>
+- various UI fixes and enhancements<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 0.6.0 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+- DDL extraction for all object types<br>
+- Rebuild View option (drop and recreate dependent objects)<br>
+- Option to drop database<br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- TCP port setting is not longer ignored when creating, backing up and restoring databases<br>
+- New dialog for index creation.<br>
+- Field properties dialog can now be closed when no changes are made.<br>
+- Main tree control now behaves natively on all platforms.<br>
+- Progress dialog when connecting has ability to cancel<br>
+- Windows: FlameRobin doesn't destroy Clipboard contents when exiting<br>
+- Gtk2: Reduced font size for property pages.<br>
+- Gtk2: allow user to enter filename in dialogs.<br>
+- Other minor UI improvements.<br>
+- Faster disconnecting.<br>
+- Faster startup of SQL editor, statement history stored in separate files.<br>
+- Warn when copying data from the grid and not all rows have been fetched.<br>
+- If error happens while executing selection, the executed statement is selected in SQL editor.<br>
+- Fixed problem with context menu and large selection in SQL Editor.<br>
+- Fixed hiding of SQL editor behind other windows.<br>
+- Data grid is now scrolled by rows<br>
+- Triggers can be added/dropped from table's &quot;Triggers&quot; page.<br>
+- Take character set and collation into account when adding new columns.<br>
+- Configurable columns (default value, description) on table's property page.<br>
+- All UPDATE statements were treated as DDL. Fixed.<br>
+- Fixed bugs in statement parser.<br>
+- Preserve character sets when altering procedures.<br>
+- Added missing whitespace between AS and procedure source.<br>
+- Privileges are restored after ALTER VIEW.<br>
+- Property pages are now updated after ALTER INDEX and SET STATISTICS<br>
+- Custom charsets are now really used when connecting to database.<br>
+- Logging can now log SET TERM statements if desired.<br>
+- Logging now detects if target directory doesn't exist.<br>
+- Updated documentation about building FlameRobin.<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<font size=+2>Changes in FlameRobin 0.5.0 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+- Event monitor: a dialog to register for and monitor posted events<br>
+- Support for quoted identifiers (case sensitive, etc.)<br>
+- Quick metadata search from the main screen<br>
+- Ability to retrive server version<br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- Parsing of executed statements rewritten to work properly<br>
+- &quot;Alter&quot; menu item for procedures, triggers and views<br>
+- Allow user to enter backup filename with GTK2<br>
+- Fixed message dialogs which didn't have any buttons on GTK1<br>
+- Improved dependency detection (objects referenced in CHECK constraints)<br>
+- Support for 64-bit platforms<br>
+- SQL editor is no longer created beneath other windows<br>
+- Option to change tab size in SQL editor<br>
+- Option to show long line marker in SQL editor<br>
+- Many minor fixes and improvements for SQL editor<br>
+- Fixed problem with visible caret when SQL editor doesn't have focus<br>
+- Improved running of large SQL scripts<br>
+- Fixed problem with auto-completion on GTK2<br>
+- Option to limit size of single item in statement history<br>
+- Fixed drag and drop query building with multiple foreign keys<br>
+- Fixed disconnect problems on some Linux distributions<br>
+- Registered server and databases are saved instantly (for multiple instances of FlameRobin)<br>
+- Display name was used instead of hostname for backup and restore<br>
+- Fixed backup and restore problems on PPC<br>
+- Backup and restore dialogs show file selector with path of current file name<br>
+- Backup and restore settings are remembered on database basis<br>
+- FlameRobin is buildable with Borland's compiler again<br>
+- Improved overall speed in some areas<br>
+- Fixed reported character field lengths for multibyte character sets<br>
+- Fixed problems with datatypes when there aren't any user-defined domains in database<br>
+- Links included in saved .html Property pages<br>
+- Changed the way strings are translated in Unicode versions<br>
+- Cancel button isn't ignored anymore when adding unique constraints<br>
+- Cancel button isn't ignored anymore when reordering fields<br>
+- Improved Field editor<br>
+- Allow usage of various formats for multiple log files<br>
+<br>
+<br>
+<br>
+<br>
+<font size=+2>Changes in FlameRobin 0.4.0 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+- History of SQL statements, presistent even after closing program<br>
+- Activate/deactivate option for triggers<br>
+- "Drop multiple columns" option for tables<br>
+- Execute option for procedures<br>
+- Preferences can be set on database basis (ex. logging)<br>
+- Option to restore backup into new database<br>
+- Support for SET AUTODDL isql feature and option to automatically commit DDL statements<br>
+- Support for RECREATE and CREATE OR ALTER statements<br>
+- FreeBSD port<br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- Fixed bug when password is supplied upon connecting<br>
+- Fixed parsing of committed statements when statement starts with a comment<br>
+- Main menu system reorganized<br>
+- Configuration files reorganized: user configuration files stored in user's directories<br>
+- Option to hide the status bar<br>
+- Option to hide databases that are not connected<br>
+- Fixed background colors of read-only fields in various dialogs<br>
+- Fixed "no database assigned" error for new databases<br>
+- Made sure the statement with error is visible in large scripts<br>
+- Changed the execute key to F4, as F9 has a special meaning on some platforms<br>
+- Long text now wraps on Dependencies page, making to easier to read<br>
+- Fixed scrollbar bugs of data grid with Linux port<br>
+- Mousewheel now works on Linux<br>
+- IBPP library sources added to the project<br>
+- Compare database's and connection charset and warn user if they differ<br>
+- Bigint datatype added to field properties dialog<br>
+- Option to disable autocompletion inside quoted text<br>
+- Fixed bug that sql editor dialog can have an empty title<br>
+- Improved handling of fatal exceptions<br>
+<br>
+<br>
+<br>
+<br>
+<font size=+2>Changes in FlameRobin 0.3.0 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+- Support for computed columns (shown in tree, removed from insert statements) <br>
+- Calltips for UDFs <br>
+- Properties page for UDFs <br>
+- Option "create new trigger" for tables and views <br>
+- Support for table indices - display, add, drop, recompute stats., edit descriptions <br>
+- Property page for view's triggers <br>
+- Select object's name in SQL editor and get its properties page<br>
+- Context menu for properties windows with options to print and save contents <br>
+- Implemented "open in new window" context menu option for properties page links <br>
+- Added main menu for main application window <br>
+- Added "diplay name" to servers and databases <br>
+- "Connect as" option for databases: ability to connect as different user/role without need to register new database<br><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- ALTER TABLE x ALTER COLUMN y updates the tree/properties page <br>
+- Improved handling when adding NOT NULL columns <br>
+- Fixed bug when SP and triggers contained ampersand (&amp;) in source (FR would hang) <br>
+- Size and position of minimized windows is not stored anymore <br>
+- Pressing function keys and clicking buttons in SQL editor now does the same <br>
+- Prompt to overwrite files when saving in SQL editor <br>
+- Faster startup upon connection since domains are loaded on-demand <br>
+- Dropping tables and views now properly removes triggers from tree <br>
+- Fixed parsing of CREATE,ALTER,DROP trigger statements (tables/views get notified) <br>
+- Saving data to html file now uses default .html extension if user does not supply it <br>
+- Fixed and improved dependencies detection for database objects<br>
+- Fixed logging to file: newlines are added when headers are off<br>
+- Registration of Firebird embedded server is now possible from application <br>
+- Firebird 1.5 charsets made available, charset box is user editable to support future charsets <br>
+- Current tree item's database printed in status bar instead of tooltip <br>
+- Improved connecting speed by postponing loading of autogenerated domain info <br>
+<br>
+<br>
+<br>
+<br>
+<font size=+2>Changes in FlameRobin 0.2.5 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+- New Preferences dialog.<br>
+- Option to show/hide datatype and/or domain name in tree.<br>
+- Ability to keep working after fatal errors.<br>
+- Ability to prepare a statement (and show its PLAN) without actually executing it.<br>
+- New context menu for the SQL Editor and new "Execute selected" command.<br>
+- Ability to set a custom font for the SQL Editor.<br>
+- Ability to set a custom font for the data grid header and cells.<br>
+- Option to maximize the data grid when a certain number of rows has been fetched.<br>
+- SQL Editor: auto-completion can be disabled and invoked manually.<br>
+- Calltips for stored procedures in the SQL Editor.<br>
+- Basic drag&amp;drop stuff (drag columns/tables from the tree to the SQL Editor).<br>
+- SQL Editor: new Option to clear old messages when executing new statements.<br>
+- You can set up logging of DDL (and optionally DML) statements to user defined log file(s).<br>
+- Configurable double-click action for tables, views and SPs in main tree.<br>
+- Option to prompt on exit.<br>
+- Option to alphabetically sort server and database entries in tree.<br>
+- Option to center dialogs on the screen.<br>
+- SQL Editor: new Search &amp; replace tool (with support for regular expressions).<br>
+- Ability to add a new column to a table directly from the tree.<br>
+- Option to disallow showing table/view columns and stored procedure parameters as tree nodes.<br>
+- Option to make it so that a double click on a tree item shows the properties dialog instead of expanding the subtree.<br>
+- Added context menu for table columns in tree.<br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- Data grid: tabs used as separators instead of spaces when copying data to the clipboard.<br>
+- Added server name (beside user@host) to the SQL Editor status bar.<br>
+- "Insert into" command now puts VALUES clause on a new line.<br>
+- Data grid: fixed display issue for non-null blobs.<br>
+- Better automatic name suggestion for constraints (avoids duplicate names).<br>
+- Fixed bug that caused FR to consume 100% CPU while doing nothing.<br>
+- Databases couldn't be created if Page size was left to the default value.<br>
+- SQL Editor: FR did hang when "set term" was issued without terminator.<br>
+- SQL Editor: fixed bug when statement consisting solely of comments is executed.<br>
+- SQL Editor: comments before SET statements were not handled correctly.<br>
+- Data grid: platform-standard line breaks are now used when copying data to the clipboard.<br>
+- Undo/redo/cut/copy/paste now work properly in the SQL Editor.<br>
+- The Data grid is now much more responsive even with a lot of NULLs in it.<br>
+- SQl Editor: added NULL to autocomplete list (solves known NULLIF problem).<br>
+- Fixed constant 1-pixel frame growth for Windows 98.<br>
+- Made database connections actually respect the charset.<br>
+- Maintain separate size for database creation/registration info dialogs.<br>
+- ALTER PROCEDURE now correctly reloads procedure parameters.<br>
+- Changing column datatype for field editor now works.<br>
+- Tree nodes can now be activated with double-click/Enter key on Linux too.<br>
+- Enabled clicking inside selection in the SQL Editor.<br>
+- Copy/paste of descriptions now works on Linux too.<br>
+- Fixed crash when changing field type from one to another user defined domain.<br>
+- Fixed known issue: if the connection credentials (username and password) of a registered database were modified, the new credentials were not used until FlameRobin was restarted.<br>
+<br>
+<br>
+<br>
+<br>
+<font size=+2>Changes in FlameRobin 0.2.0 ALPHA</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+- Brand new Backup/Restore dialogs that work in background, let you suppress the output messages and store their settings among invocations. Plus, the output messages can be copied to the clipboard.<br>
+- Many dialogs have been redesigned and now feature a cleaner GUI.<br>
+- "Show value" and "Show all values" context menu commands implemented for generators.<br>
+- Exceptions are now shown in the tree view and have Create/Drop menu commands and a property page.<br>
+- Property pages for triggers, table constraints, dependencies (all objects), generators were added. Plus, a special empty property page now appears for not yet supported object types, instead of an error message.<br>
+- Ability to view/add/drop table constraints.<br>
+- Reconnect menu command for databases will physically disconnect and reconnect a database in one shot.<br>
+- "Create new" and "Drop" commands added for external functions.<br>
+- New MacOS X port.</p>
+<br><br>
+<font size=+1 color="#AA0000"><B>Enhancements and Bug fixes</B></font><br>
+<br>
+- When new objects are added to the database through a "CREATE" DDL statement, they are inserted in the right place in the tree view, instead of at the end of the lists.<br>
+- The tree view shows primary key table fields with a different icon.<br>
+- It is now possible to edit triggers.<br>
+- User-defined domain names appear together with column datatypes in the property pages.<br>
+- Improved startup speed.<br>
+- config.ini entry "FrameStorage=1" now works for all frames and dialogs (it only stores size - not position - for dialogs).<br>
+- New multi-format program icon that looks OK at all sizes (16x16, 32x32, 48x48 and 128x128).<br>
+- In the SQL Window you can press Ctrl + "+" and Ctrl + "-" to increase and decrease the font size. The setting is remembered across sessions of FlameRobin.<br>
+- In the Server Registration dialog the controls are now read-only if any database is connected.<br>
+- New program icon.<br>
+- Assorted bug fixes.</p>
+<br>
+<hr>
+<br>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<html>
+<head>
+  <title>DDL</title>
+</head>
+<body>
+{%header:DDL%}
+<br><br>
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=black width="98%">
+  <tbody>
+    <tr bgcolor="navy">
+      <td><font color=white><b>{%object_name%}</b> [<a
+    href="fr://edit_ddl?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><font
+    color="yellow">open in SQL editor</font></a>]</font></td>
+    </tr>
+    <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
+      <td valign="top" nowrap><font size=-1><pre>{%object_ddl%}</pre></font></td>
+    </tr>
+  </tbody>
+</table>
+<br>
+</body>
+</html>

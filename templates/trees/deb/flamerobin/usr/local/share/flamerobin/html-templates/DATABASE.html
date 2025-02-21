@@ -1,0 +1,116 @@
+<html>
+<head>
+ <title>DB</title>
+</head>
+<body>
+{%header:Summary%}
+<br>
+<br>
+<font size=+2>{%object_name%}</font><br>
+{%dbinfo:connection_string%}<br>
+{%dbinfo:sql_security%}<br>
+<table bgcolor="white" border=0 cellpadding=2 cellspacing=0 valign=top>
+    <tr><td>
+
+<!-- left table -->
+<table cellspacing=1 cellpadding=2 border=0 bgcolor="black">
+  <tbody>
+    <tr bgcolor="navy">
+       <td nowrap colspan=2><b><font color=white>Database info</font></b></td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+        <td nowrap>ODS Version</td><td align="right" bgcolor="#CCCCFF" nowrap>{%dbinfo:ods_version%}</td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+        <td nowrap>Page Size</td><td align="right" bgcolor="#CCCCFF" nowrap>{%dbinfo:page_size%}</td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+        <td nowrap>Pages</td><td align="right" bgcolor="#CCCCFF" nowrap>{%dbinfo:pages%}</td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+        <td nowrap>Size on Disk</td><td align="right" bgcolor="#CCCCFF" nowrap>{%dbinfo:size%}</td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+        <td nowrap>SQL Dialect</td><td align="right" bgcolor="#CCCCFF" nowrap>{%dbinfo:sql_dialect%}</td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+        <td nowrap>Default Character Set</td><td align="right" bgcolor="#CCCCFF" nowrap>{%dbinfo:default_charset%}</td>
+    </tr>
+  </tbody>
+</table>
+<!-- left table end-->
+</td><td> &nbsp; </td><td>
+<!-- middle table -->
+<table cellspacing=1 cellpadding=2 border=0 bgcolor="black">
+  <tbody>
+    <tr bgcolor="navy">
+       <td colspan=2><b><font color=white>Settings</font></b></td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+        <td nowrap>Page Buffers</td>
+        <td align="right" bgcolor="#CCCCFF" nowrap><a href="fr://edit_db_page_buffers?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">{%dbinfo:page_buffers%}</a></td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+        <td nowrap>Sweep Interval</td>
+        <td align="right" bgcolor="#CCCCFF" nowrap><a href="fr://edit_db_sweep_interval?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">{%dbinfo:sweep_interval%}</a></td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+        <td nowrap>Linger</td>
+        <td align="right" bgcolor="#CCCCFF" nowrap><a href="fr://edit_db_linger?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">{%dbinfo:linger%}</a></td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+        <td nowrap>Forced Writes</td>
+        <td align="center" bgcolor="#CCCCFF" nowrap><a href="fr://edit_db_forced_writes?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}{%ifeq:{%dbinfo:forced_writes%}:true:ok.png:redx.png%}"></a></td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+        <td nowrap>Reserve Space</td>
+        <td align="center" bgcolor="#CCCCFF" nowrap><a href="fr://edit_db_reserve_space?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}{%ifeq:{%dbinfo:reserve_space%}:true:ok.png:redx.png%}"></a></td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+        <td nowrap>Read-Only</td>
+        <td align="center" bgcolor="#CCCCFF" nowrap><a href="fr://edit_db_read_only?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}{%ifeq:{%dbinfo:is_read_only%}:true:ok.png:redx.png%}"></a></td>
+    </tr>
+  </tbody>
+</table>
+<!-- left middle table end -->
+</td><td> &nbsp; </td><td>
+<!-- rigth middle table -->
+<table cellspacing=1 cellpadding=2 border=0 bgcolor="black">
+  <tbody>
+    <tr bgcolor="navy">
+       <td nowrap colspan=2><b><font color=white>Transaction info</font></b></td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+        <td nowrap>Oldest transaction</td><td align="right" bgcolor="#CCCCFF" nowrap>{%dbinfo:oldest_transaction%}</td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+        <td nowrap>Oldest active transaction</td><td align="right" bgcolor="#CCCCFF" nowrap>{%dbinfo:oldest_active_transaction%}</td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+        <td nowrap>Oldest snapshot</td><td align="right" bgcolor="#CCCCFF" nowrap>{%dbinfo:oldest_snapshot%}</td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+        <td nowrap>Next transaction</td><td align="right" bgcolor="#CCCCFF" nowrap>{%dbinfo:next_transaction%}</td>
+    </tr>
+  </tbody>
+</table>
+<!-- rigth middle table end -->
+</td><td> &nbsp; </td><td>
+<!-- right table -->
+<table cellspacing=1 cellpadding=2 border=0 bgcolor="black">
+  <tbody>
+    <tr bgcolor="navy">
+       <td nowrap><b><font color=white>Connected users</font></b></td>
+    </tr>
+    {%forall:{%dbinfo:connected_users%}::
+    <tr bgcolor="#DDDDFF">
+        <td bgcolor="#CCCCFF" nowrap>%%current_value%%</td>
+    </tr>
+    %}
+  </tbody>
+</table>
+<!-- right table end -->
+    </td></tr>
+</table>
+</body>
+</html>

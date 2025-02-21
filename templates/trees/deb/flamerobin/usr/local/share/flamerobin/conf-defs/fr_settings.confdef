@@ -1,0 +1,653 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+    <debug />
+    <node>
+        <caption>General</caption>
+        <image>3</image>
+        <setting type="checkbox">
+            <caption>Center dialogs on their parent window</caption>
+            <key>centerDialogOnParent</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Use language locale settings</caption>
+            <key>UseLocalConfig</key>
+            <default>0</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Remember window positions and sizes</caption>
+            <related />
+            <description>Newly created windows get previous size and position</description>
+            <key>FrameStorage</key>
+            <default>1</default>
+            <enables>
+                <setting type="radiobox">
+                    <caption>Metadata properties windows</caption>
+                    <description>Select how size and position of metadata properties windows should be stored</description>
+                    <key>MetadataFrameStorageGranularity</key>
+                    <default>0</default>
+                    <option>
+                        <caption>Same settings for all objects</caption>
+                    </option>
+                    <option>
+                        <caption>Same settings for all objects of same type</caption>
+                    </option>
+                    <option>
+                        <caption>Separate settings for individual objects</caption>
+                    </option>
+                </setting>
+            </enables>
+        </setting>
+				<setting type="file" platform="win" arch="x86">
+                    <caption>Library x86 file name:</caption>
+                    <description>FbClient.dll or gds32.dll </description>
+                    <key>x86LibraryFile</key>
+                </setting>
+				<setting type="file" platform="win" arch="x64">
+                    <caption>Library x64 file name:</caption>
+                    <description>FbClient.dll or gds32.dll </description>
+                    <key>x64LibraryFile</key>
+                </setting>
+				
+		
+        <!--
+        <setting type="checkbox">
+            <caption>Confirm quit</caption>
+            <description>Asks the "Are you sure you wish to exit FlameRobin?" question when closing</description>
+            <key>ConfirmQuit</key>
+            <default>0</default>
+        </setting>
+        <setting type="checkbox" platform="win">
+            <caption>Minimize to system tray</caption>
+            <description>Minimizes to system tray instead of taskbar</description>
+            <key>MinimizeToTray</key>
+            <default>0</default>
+        </setting>
+        -->
+    </node>
+    <node>
+        <caption>Main Tree View</caption>
+        <image>2</image>
+        <setting type="checkbox">
+            <caption>Sort server entries alphabetically</caption>
+            <description>If unchecked the server entries will be shown in registration order.</description>
+            <key>OrderServersInTree</key>
+            <default>0</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Sort database entries alphabetically</caption>
+            <description>If unchecked the database entries will be shown in registration order.</description>
+            <key>OrderDatabasesInTree</key>
+            <default>0</default>
+            <related /><!-- this moves the checkbox closer to the previous one -->
+        </setting>
+        <setting type="checkbox">
+            <caption>Show all indices in one node in tree</caption>
+            <description>If checked the all indices will be shown in one node in the tree by default (can be overridden per database)</description>
+            <key>ShowOneNodeIndices</key>
+            <default>0</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Show system indices in tree</caption>
+            <description>If checked the system indices will be shown in the tree by default (can be overridden per database)</description>
+            <key>ShowSystemIndices</key>
+            <default>1</default>
+        </setting>
+        <!--<setting type="checkbox">
+            <caption>Show system characterset in tree</caption>
+            <description>If checked the system CharacterSet will be shown in the tree by default (can be overridden per database)</description>
+            <key>ShowSystemCharacterSet</key>
+            <default>0</default>
+        </setting> -->
+        <setting type="checkbox">
+            <caption>Show system domains in tree</caption>
+            <description>If checked the system domains will be shown in the tree by default (can be overridden per database)</description>
+            <key>ShowSystemDomains</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Show system packages in tree (Firebird 3.0 and later)</caption>
+            <description>If checked the system packages will be shown in the tree by default (can be overridden per database)</description>
+            <key>ShowSystemPackages</key>
+            <default>1</default>
+            <related /><!-- this moves the checkbox closer to the previous one -->
+        </setting>
+        <setting type="checkbox">
+            <caption>Show system roles in tree (Firebird 2.5 and later)</caption>
+            <description>If checked the system roles will be shown in the tree by default (can be overridden per database)</description>
+            <key>ShowSystemRoles</key>
+            <default>1</default>
+            <related /><!-- this moves the checkbox closer to the previous one -->
+        </setting>
+        <setting type="checkbox">
+            <caption>Show system tables in tree</caption>
+            <description>If checked the system tables will be shown in the tree by default (can be overridden per database)</description>
+            <key>ShowSystemTables</key>
+            <default>1</default>
+            <related /><!-- this moves the checkbox closer to the previous one -->
+        </setting>
+        <setting type="checkbox">
+            <caption>Show columns and parameters in tree</caption>
+            <description>If checked the table and view columns and stored procedure parameters will be shown in the tree</description>
+            <key>ShowColumnsInTree</key>
+            <default>1</default>
+            <related /><!-- this moves the checkbox closer to the previous one -->
+        </setting>
+        <setting type="checkbox">
+            <caption>Show the column/parameter count for relations/procedures</caption>
+            <description>If checked the number of relation columns and the number of stored procedure parameters will be shown in the node text</description>
+            <key>ShowColumnAndParameterCountInTree</key>
+            <default>0</default>
+            <related /><!-- this moves the checkbox closer to the previous one -->
+        </setting>
+        <setting type="radiobox">
+            <caption>When table, view or stored procedure is activated</caption>
+            <key>OnTreeActivate</key>
+            <default>0</default>
+            <option>
+                <caption>Open Properties page</caption>
+            </option>
+            <option>
+                <caption>Load relation columns and procedure parameters info only</caption>
+            </option>
+            <option>
+                <caption>Select from relation or execute procedure</caption>
+            </option>
+            <related /><!-- this moves the radiobox closer to the checkbox -->
+        </setting>
+        <setting type="checkbox">
+            <caption>Allow drag and drop query building</caption>
+            <description>This option can cause X11 lockup on Linux if you don't have patched version of wxWidgets</description>
+            <key>allowDragAndDrop</key>
+            <default>0</default>
+        </setting>
+    </node>
+	<node>
+        <caption>Transaction Settings</caption>
+        <image>0</image>
+		<setting type="radiobox">
+            <caption>Isolation Mode</caption>
+            <key>transactionIsolationLevel</key>
+            <default>0</default>
+            <option>
+                <caption>Concurrency isolation mode (default of Flamerobin behavior)</caption>
+            </option>
+            <option>
+                <caption>Dirty read isolation mode</caption>
+            </option>
+            <option>
+                <caption>Read committed isolation mode</caption>
+            </option>
+            <option>
+                <caption>Consistency isolation mode</caption>
+            </option>
+        </setting>
+        <setting type="checkbox">
+            <caption>Wait for lock resolution</caption>
+            <key>transactionLockResolution</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Read only transaction mode</caption>
+            <key>transactionAccessMode</key>
+            <default>0</default>
+        </setting>
+	</node>
+    <node>
+        <caption>SQL Editor</caption>
+        <image>0</image>
+        <setting type="checkbox">
+            <caption>Automatically commit DDL statements</caption>
+            <key>autoCommitDDL</key>
+            <default>0</default>
+        </setting>
+        <setting type="radiobox">
+            <caption>When text is selected in editor</caption>
+            <key>OnlyExecuteSelected</key>
+            <default>0</default>
+            <option>
+                <caption>Execute the entire buffer</caption>
+            </option>
+            <option>
+                <caption>Execute only the selection</caption>
+            </option>
+        </setting>
+        <setting type="checkbox">
+            <caption>Treat selected text as a single statement</caption>
+            <description>If unchecked the parser will search the selected text for multiple statements</description>
+            <key>TreatAsSingleStatement</key>
+            <default>0</default>
+        </setting>
+        <!--
+        <setting type="checkbox">
+            <caption>Automatically copy successfully executed statements to clipboard</caption>
+            <key>SQLEditorAutoCopy</key>
+            <default>0</default>
+        </setting>
+        -->
+        <setting type="checkbox">
+            <caption>Clear the messages when executing new statements</caption>
+            <key>SQLEditorExecuteClears</key>
+            <default>0</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Display detailed query statistics</caption>
+            <key>SQLEditorShowStats</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Enable call-tips for procedures and functions</caption>
+            <description>Shows call-tips for stored procedures and UDFs when bracket is opened</description>
+            <key>SQLEditorCalltips</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Show long line marker</caption>
+            <description>Whether a vertical line showing the edge of text is shown</description>
+            <key>sqlEditorShowEdge</key>
+            <default>1</default>
+            <enables>
+                <setting type="int">
+                    <caption>Draw long line marker after column [VALUE]</caption>
+                    <key>sqlEditorEdgeColumn</key>
+                    <default>80</default>
+                </setting>
+            </enables>
+        </setting>
+        <setting type="int">
+            <caption>Tab size</caption>
+            <key>sqlEditorTabSize</key>
+            <default>4</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Home key positions on first non-whitespace character in line</caption>
+            <key>sqlEditorSmartHomeKey</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Auto-indent new lines to same level as previous line</caption>
+            <key>sqlEditorAutoIndent</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Use alternate save SQL file method (don't change this option if not necessary)</caption>
+            <key>useAlternativeSaveMode</key>
+            <default>0</default>
+        </setting>
+        <node>
+            <caption>Code Completion</caption>
+            <description>SQL Code Completion</description>
+            <image>0</image>
+            <setting type="checkbox">
+                <caption>Enable automatic invocation of completion list</caption>
+                <key>AutocompleteEnabled</key>
+                <default>1</default>
+                <enables>
+                    <setting type="int">
+                        <caption>Show completion list after [VALUE] chars</caption>
+                        <key>AutocompleteChars</key>
+                        <minvalue>1</minvalue>
+                        <maxvalue>10</maxvalue>
+                        <default>3</default>
+                    </setting>
+                    <setting type="checkbox">
+                        <caption>Disable while calltip is shown</caption>
+                        <key>AutoCompleteDisableWhenCalltipShown</key>
+                        <default>1</default>
+                    </setting>
+                    <setting type="checkbox">
+                        <caption>Allow auto-completion inside quoted text</caption>
+                        <key>autoCompleteQuoted</key>
+                        <default>1</default>
+                    </setting>
+                </enables>
+            </setting>
+            <setting type="radiobox">
+                <caption>Manually invoke completion list on</caption>
+                <key>AutoCompleteKey</key>
+                <default>0</default>
+                <option>
+                    <caption>Ctrl + Space</caption>
+                </option>
+                <option>
+                    <caption>Tab</caption>
+            </option>
+            </setting>
+            <setting type="checkbox">
+                <caption>Confirm completion with Enter</caption>
+                <key>AutoCompleteWithEnter</key>
+                <default>1</default>
+            </setting>
+            <setting type="checkbox">
+                <caption>Load columns when required for completion</caption>
+                <key>autoCompleteLoadColumns</key>
+                <default>1</default>
+            </setting>
+			<setting type="checkbox">
+				<caption>Sort object columns alphabetically</caption>
+				<key>autoCompleteLoadColumnsSort</key>
+				<default>0</default>
+			</setting>
+        </node>
+        <node>
+            <caption>Statement History</caption>
+            <description>History of Executed SQL Statements</description>
+            <image>0</image>
+            <setting type="radiobox">
+                <caption>Share SQL statement history</caption>
+                <description>History can be shared accross databases, which is useful if they have similar structure</description>
+                <key>statementHistoryGranularity</key>
+                <default>2</default>
+                <option>
+                    <caption>Between all databases</caption>
+                </option>
+                <option>
+                    <caption>Between databases with same display name</caption>
+                </option>
+                <option>
+                    <caption>Don't share (each database has its own)</caption>
+                </option>
+            </setting>
+            <setting type="checkbox">
+                <caption>Limit history item size</caption>
+                <key>limitHistoryItemSize</key>
+                <default>0</default>
+                <enables>
+                    <setting type="int">
+                        <caption>Don't store buffers bigger than [VALUE] kilobytes</caption>
+                        <key>statementHistoryItemSize</key>
+                        <minvalue>0</minvalue>
+                        <maxvalue>10000</maxvalue>
+                        <default>500</default>
+                    </setting>
+                </enables>
+            </setting>
+            <setting type="checkbox">
+                <caption>Remember unsuccessfully executed buffers</caption>
+                <key>historyStoreUnsuccessful</key>
+                <default>1</default>
+            </setting>
+            <setting type="checkbox">
+                <caption>Remember statements generated by FlameRobin</caption>
+                <description>If unchecked, stores only the statements typed by user</description>
+                <key>historyStoreGenerated</key>
+                <default>1</default>
+            </setting>
+        </node>
+        <node>
+            <caption>Window Title</caption>
+            <description>SQL Editor Window Title</description>
+            <image>0</image>
+            <setting type="radiobox">
+                <caption>SQL keywords are shown in window title</caption>
+                <description>Keywords like SELECT, INSERT, CREATE, etc. can be abbreviated so more text can fit in the title and taskbar entry</description>
+                <key>sqlEditorWindowKeywords</key>
+                <default>1</default>
+                <option>
+                    <caption>exactly as typed (ex. INSERT or insert)</caption>
+                </option>
+                <option>
+                    <caption>in short form (ex. ins)</caption>
+                </option>
+                <option>
+                    <caption>in very short form (ex. i)</caption>
+                </option>
+                <option>
+                    <caption>as first line of statement (ex. INSERT INTO t1 VALUES ...)</caption>
+                </option>
+            </setting>
+        </node>
+		<node>
+            <caption>Style Configurator</caption>
+            <description>SQL Style Editor </description>
+            <image>0</image>
+			<setting type="themecombobox">
+				<caption>	</caption>
+                <description>Select the file with the primary style</description>
+                <key>StyleTheme</key>
+				<default>styles</default>
+				<aligngroup>1</aligngroup>
+                <file>StyleTheme</file>
+            </setting>
+		</node>
+    </node>
+    <node>
+        <caption>Data Grid</caption>
+        <image>4</image>
+        <setting type="string">
+            <caption>Date format:</caption>
+            <description>The following letters will be replaced:<br />d - day of month, 1-31<br />D - day of month, 01-31<br />m - month, 1-12<br />M - month, 01-12<br />y - year, 00-99<br />Y - year, 0000-9999<br />All other characters are copied.</description>
+            <key>DateFormat</key>
+            <default>D.M.Y</default>
+            <aligngroup>1</aligngroup>
+        </setting>
+        <setting type="string">
+            <caption>Time format:</caption>
+            <description>The following letters will be replaced:<br />h - hour, 0-24<br />H - hour, 00-24<br />m - minute, 0-59<br />M - minute, 00-59<br />s - second, 0-59<br />S - second, 00-59<br />T - millisecond, 000-999<br />All other characters are copied.</description>
+            <key>TimeFormat</key>
+            <default>H:M:S.T</default>
+            <aligngroup>1</aligngroup>
+        </setting>
+        <setting type="string">
+            <caption>Timestamp format:</caption>
+            <description>The following letters will be replaced:<br />d - day of month, 1-31<br />D - day of month, 01-31<br />n - month, 1-12<br />N - month, 01-12<br />y - year, 00-99<br />Y - year, 0000-9999<br />h - hour, 0-24<br />H - hour, 00-24<br />m - minute, 0-59<br />M - minute, 00-59<br />s - second, 0-59<br />S - second, 00-59<br />T - millisecond, 000-999<br />All other characters are copied.</description>
+            <key>TimestampFormat</key>
+            <default>D.N.Y, H:M:S.T</default>
+            <aligngroup>1</aligngroup>
+            <expand>1</expand>
+        </setting>
+        <setting type="radiobox">
+            <caption>Time an timestamp fields with time zone</caption>
+            <key>ShowTimezoneInfo</key>
+            <default>2</default>
+            <option>
+                <caption>Don't show time zone info.</caption>
+            </option>
+            <option>
+                <caption>Append time zone id.</caption>
+            </option>
+            <option>
+                <caption>Append time zone name.</caption>
+            </option>
+        </setting>
+        <setting type="checkbox">
+            <caption>Re-format float and double precision numbers</caption>
+            <description>If unchecked, prints decimal numbers as returned from server</description>
+            <key>ReformatNumbers</key>
+            <default>0</default>
+            <enables>
+                <setting type="int">
+                    <caption>Number of decimals:</caption>
+                    <key>NumberPrecision</key>
+                    <minvalue>0</minvalue>
+                    <maxvalue>18</maxvalue>
+                    <default>2</default>
+                </setting>
+            </enables>
+        </setting>
+        <setting type="checkbox">
+            <caption>Maximize data grid after execution of SELECT statement</caption>
+            <key>SelectMaximizeGrid</key>
+            <default>0</default>
+            <enables>
+                <setting type="int">
+                    <caption>Only when result set has more than [VALUE] records</caption>
+                    <key>MaximizeGridRowsNeeded</key>
+                    <minvalue>0</minvalue>
+                    <maxvalue>10000</maxvalue>
+                    <default>10</default>
+                </setting>
+            </enables>
+        </setting>
+        <setting type="checkbox">
+            <caption>Automatically fetch all records in result set</caption>
+            <key>GridFetchAllRecords</key>
+            <default>0</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Show BLOB data in the grid</caption>
+            <key>DataGridFetchBlobs</key>
+            <default>1</default>
+            <enables>
+                <setting type="int">
+                    <caption>Fetch up to [VALUE] kilobytes</caption>
+                    <key>DataGridFetchBlobAmount</key>
+                    <minvalue>0</minvalue>
+                    <maxvalue>16000</maxvalue>
+                    <default>1</default>
+                </setting>
+                <setting type="checkbox">
+                    <caption>Show data for binary BLOBs</caption>
+                    <key>GridShowBinaryBlobs</key>
+                    <default>0</default>
+                </setting>
+            </enables>
+        </setting>
+    </node>
+    <node>
+        <caption>Property Pages</caption>
+        <image>4</image>
+        <setting type="checkbox">
+            <caption>Show default column values</caption>
+            <key>displayColumnDefault</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Show column descriptions</caption>
+            <key>displayColumnDescription</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Show source for all triggers</caption>
+            <key>displayTriggerSource</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Open in tabs</caption>
+            <key>linksOpenInTabs</key>
+            <default>1</default>
+        </setting>
+    </node>
+    <node>
+        <caption>Sql Statement Generation</caption>
+        <image>5</image>
+        <setting type="checkbox">
+            <caption>Use UPPER CASE keywords</caption>
+            <key>SQLKeywordsUpperCase</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Quote names only when needed</caption>
+            <key>quoteOnlyWhenNeeded</key>
+            <default>1</default>
+            <enables>
+                <setting type="checkbox">
+                    <caption>Quote names in mixed case (both upper case and lower case characters)</caption>
+                    <key>quoteMixedCase</key>
+                    <default>0</default>
+                </setting>
+            </enables>
+        </setting>
+        <setting type="checkbox">
+            <caption>Treat quote characters like other characters</caption>
+            <key>quoteCharsAreRegular</key>
+            <default>0</default>
+            <related /><!-- this moves the checkbox closer to the previous one -->
+        </setting>
+    </node>
+    <node>
+        <caption>Fields</caption>
+        <image>5</image>
+        <setting type="radiobox">
+            <caption>When a column has a user-defined domain</caption>
+            <key>ShowDomains</key>
+            <default>2</default>
+            <option>
+                <caption>Only show datatype</caption>
+            </option>
+            <option>
+                <caption>Only show domain</caption>
+            </option>
+            <option>
+                <caption>Show both domain and datatype</caption>
+            </option>
+        </setting>
+        <setting type="radiobox">
+            <caption>When a table column is computed</caption>
+            <key>ShowComputed</key>
+            <default>1</default>
+            <option>
+                <caption>Only show datatype</caption>
+            </option>
+            <option>
+                <caption>Only show computation formula</caption>
+            </option>
+            <option>
+                <caption>Show both datatype and formula</caption>
+            </option>
+        </setting>
+    </node>
+    <node>
+        <caption>Logging</caption>
+        <image>1</image>
+        <setting type="checkbox">
+            <caption>Log DML statements</caption>
+            <description>Should the logging work for DML statements too.<br />If unchecked only DDL statements are logged.</description>
+            <key>LogDML</key>
+            <default>0</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Enable logging to file</caption>
+            <description>Logs all successful DDL statements to file</description>
+            <key>LogToFile</key>
+            <default>0</default>
+            <enables>
+                <setting type="file">
+                    <caption>Log file name:</caption>
+                    <description>For multiple files place %d mark where you want numbers to be inserted.<br />If you wish leading zeros use %0xd, where x is a number of digits (ex. %02d)</description>
+                    <key>LogFile</key>
+                </setting>
+                <setting type="checkbox">
+                    <caption>Use multiple files</caption>
+                    <key>LogToFileType</key>
+                    <default>0</default>
+                    <enables>
+                        <setting type="int">
+                            <caption>Incremental file numbers start at:</caption>
+                            <key>IncrementalLogFileStart</key>
+                            <minvalue>0</minvalue>
+                            <maxvalue>10000</maxvalue>
+                            <default>1</default>
+                        </setting>
+                    </enables>
+                </setting>
+                <setting type="checkbox">
+                    <caption>Add header to each statement</caption>
+                    <description>Should logging add a header showing the context in which statement was run:<br />FlameRobin version, database, username, timestamp</description>
+                    <key>LoggingAddHeader</key>
+                    <default>1</default>
+                </setting>
+                <setting type="checkbox">
+                    <caption>Add SET TERM when different terminator is used in editor</caption>
+                    <key>LogSetTerm</key>
+                    <default>0</default>
+                </setting>
+            </enables>
+        </setting>
+        <!--
+        <setting type="checkbox">
+            <caption>Enable logging to database</caption>
+            <description>Logs all successful DDL statements to database.<br />This will create a table named FLAMEROBIN_LOG into your databases.</description>
+            <key>LogToDatabase</key>
+            <default>0</default>
+            <enables>
+                <setting type="checkbox">
+                    <caption>Use generator instead of 1+max(id)</caption>
+                    <description>If not checked, logging will do a "select max(id)+1" to create<br />keys for flamerobin_log table. This can be slow if<br />there is a huge amount of records in it.</description>
+                    <key>LoggingUsesGenerator</key>
+                </setting>
+            </enables>
+        </setting>
+        -->
+    </node>
+</root>

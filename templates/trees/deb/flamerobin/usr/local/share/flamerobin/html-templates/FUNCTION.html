@@ -1,0 +1,60 @@
+<html>
+<head>
+  <title>Function</title>
+</head>
+<body>
+{%header:Summary%}
+<br>
+<br>
+<font size=+2>{%object_name%}</font><br>
+Owner: {%owner_name%}<br>
+{%sql_security%}<br>
+{%object_description%} [<a
+ href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=FUNCTION&amp;object_name={%object_name%}">edit</a>]
+<br>
+<br>
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=black>
+  <tbody>
+    <tr bgcolor="navy">
+      <td nowrap><b><font color=white>Input parameter</font></b></td>
+      <td nowrap><b><font color=white>Type</font></b></td>
+      <td><b><font color=white>Not Null</font></b></td>
+      <td><b><font color=white>Default</font></b></td>
+      <td nowrap><b><font color=white>Description</font></b></td>
+    </tr>
+    {%foreach:parameter::input:
+    <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
+      <td nowrap valign="top">{%object_name%}</td>
+      <td nowrap valign="top">{%columninfo:datatype%}</td>
+      <td nowrap valign="top"><center>{%ifeq:{%columninfo:is_nullable%}:false:<img src="{%template_root%}ok.png">%}</center></td>
+      <td nowrap valign="top">{%columninfo:default_expression%}</td>
+      <td valign="top"><font size=-1>{%object_description%} [<a
+        href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=COLUMN&amp;object_name={%object_name%}">edit</a>]</font></td>
+    </tr>%}
+  </tbody>
+</table>
+<br><br>
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=black>
+  <tbody>
+    {%foreach:parameter::output:
+    <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
+	  <td nowrap valign="top" bgcolor="navy"><b><font color=white>Return Type</font></b></td>
+      <td nowrap valign="top"><b>{%columninfo:datatype%}</b></td>
+      <td nowrap valign="top"><center>{%ifeq:{%columninfo:is_nullable%}:false:<img src="{%template_root%}ok.png">%}</center></td>
+      <td nowrap valign="top">{%columninfo:default_expression%}</td>
+      <td valign="top"><font size=-1>{%object_description%} [<a
+        href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=COLUMN&amp;object_name={%object_name%}">edit</a>]</font></td>
+    </tr>%}
+  </tbody>
+</table>
+<br><br>
+<table cellspacing=1 cellpadding=3 border=0 width="98%" bgcolor="black">
+<tr><td bgcolor="navy"><font color=white><b>Source</b> [<a
+    href="fr://edit_function?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><font
+    color="yellow">edit</font></a>]</font></td>
+</tr>
+<tr><td bgcolor="#DDDDFF"><font size=-1><pre>{%functioninfo:source%}</pre></font></td></tr>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+    <node>
+        <caption>Create trigger for {%object_name%}</caption>
+        <setting type="string">
+            <caption>&amp;Name (leave empty for auto-name):</caption>
+            <key>{%object_path%}/triggerName</key>
+            <aligngroup>1</aligngroup>
+            <expand>1</expand>
+            <!--TODO add support for checks-->
+            <!--May be empty, must be valid if non-empty-->
+            <validity-checks>
+                <validity-check><valid-identifier /></validity-check>
+            </validity-checks>
+        </setting>
+        <setting type="radiobox">
+            <caption>&amp;Firing time:</caption>
+            <key>{%object_path%}/triggerFiringTime</key>
+            <default>0</default>
+            <option>
+                <caption>Before</caption>
+            </option>
+            <option>
+                <caption>After</caption>
+            </option>
+        </setting>
+        <setting type="checklistbox">
+            <caption>&amp;Actions:</caption>
+            <key>{%object_path%}/triggerActions</key>
+            <default>insert,update,delete</default>
+            <aligngroup>2</aligngroup>
+            <expand>1</expand>
+            <option>
+                <caption>insert</caption>
+            </option>
+            <option>
+                <caption>update</caption>
+            </option>
+            <option>
+                <caption>delete</caption>
+            </option>
+            <validity-checks>
+                <validity-check><non-empty /></validity-check>
+            </validity-checks>
+        </setting>
+        <setting type="int">
+            <caption>&amp;Position:</caption>
+            <key>{%object_path%}/triggerPosition</key>
+            <default>0</default>
+            <minvalue>0</minvalue>
+            <maxvalue>32767</maxvalue>
+            <aligngroup>2</aligngroup>
+        </setting>
+    </node>
+</root>

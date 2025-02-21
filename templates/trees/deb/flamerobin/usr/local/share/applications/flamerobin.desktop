@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Flamerobin
+GenericName=Database administration tool
+Comment=Administration Tool for Firebird DBMS
+Exec=/usr/local/bin/flamerobin
+Icon=/usr/local/share/pixmaps/flamerobin.png
+Type=Application
+Terminal=false
+Categories=Development;Database;GTK
+Keywords=flamerobin,firebird

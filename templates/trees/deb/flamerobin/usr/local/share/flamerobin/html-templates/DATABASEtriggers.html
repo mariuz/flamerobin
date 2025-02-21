@@ -1,0 +1,53 @@
+<html>
+<head>
+  <title>Triggers</title>
+</head>
+<body>
+{%header:Triggers%}
+<br><br>
+<font size=+2>Triggers on database: {%object_name%}</font>
+<br><br>
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=black>
+  <tbody>
+    <tr bgcolor="navy">
+      <td></td>
+      <td nowrap><font color=white><b>Name</b></font></td>
+      <td bgcolor="navy"><font color="white"><b>Active</b></font></td>
+      <td bgcolor="navy"><font color="white"><b>Position</b></font></td>
+      <td bgcolor="navy"><font color="white"><b>Type</b></font></td>
+    </tr>
+      {%foreach:trigger:::
+      <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
+      <td valign="top" nowrap>
+          <a href="fr://drop_object?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}drop.png"></a>
+          <a href="fr://edit_trigger?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}view.png"></a>
+      </td>
+      <td nowrap valign="top"><a
+          href="fr://properties?object_type=TRIGGER&amp;object_name={%object_name%}&amp;parent_window={%parent_window%}">{%object_name%}</a></td>
+      <td nowrap valign="top" bgcolor="#DDDDFF" align="center">
+        <a href="fr://{%ifeq:{%triggerinfo:is_active%}:true:deactivate_trigger:activate_trigger%}?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">
+          <img src="{%template_root%}{%ifeq:{%triggerinfo:is_active%}:true:ok.png:redx.png%}"></a>
+      </td>
+      <td nowrap valign="top" bgcolor="#DDDDFF" align="right">{%triggerinfo:position%}</td>
+      <td nowrap valign="top" bgcolor="#DDDDFF">{%triggerinfo:type%}</td>
+    </tr>%}
+  </tbody>
+</table>
+<br><br>
+<table border=0 cellspacing=1 cellpadding=2 bgcolor="#CCCCCC">
+    <tr bgcolor="#CCCCFF">
+        <td><B>Icon</B></td>
+        <td nowrap><B>Click to...</B></td>
+    </tr>
+    <tr><td><img src="{%template_root%}drop.png"></td><td>Drop trigger</td></tr>
+    <tr><td><img src="{%template_root%}view.png"></td><td>Alter trigger</td></tr>
+    <tr><td><img src="{%template_root%}ok.png"></td><td>Deactivate trigger</td></tr>
+    <tr><td><img src="{%template_root%}redx.png"></td><td>Activate trigger</td></tr>
+</table>
+<br>
+<br>
+<a
+href="fr://activate_triggers?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Activate all triggers</a> | <a
+href="fr://deactivate_triggers?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Deactivate all triggers</a>
+</body>
+</html>

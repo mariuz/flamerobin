@@ -1,0 +1,69 @@
+<html>
+<head>
+  <title>Indices</title>
+</head>
+<body>
+{%header:Indices%}
+<br><br>
+<font size=+2>Indices for table {%object_name%}</font><br>
+<br><br>
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=black>
+  <tbody>
+    <tr bgcolor="navy">
+      {%ifeq:{%is_system%}:false:
+      <td></td>
+      %}
+      <td valign="top"><b><font color=white>Index name</font></b></td>
+      <td valign="top"><b><font color=white>Type</font></b></td>
+      <td valign="top"><b><font color=white>Active</font></b></td>
+      <td valign="top"><b><font color=white>Unique</font></b></td>
+      <td valign="top"><b><font color=white>Fields/Expression</font></b></td>
+      <td valign="top"><b><font color=white>Statistics</font></b></td>
+      <td valign="top"><b><font color=white>Description</font></b></td>
+    </tr>
+    {%foreach:index::
+    <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
+      {%ifeq:{%parent:{%is_system%}%}:false:
+      <td valign="top" nowrap>
+          <a href="fr://index_action?type=DROP&amp;parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}drop.png"></a>
+          <a href="fr://index_action?type=RECOMPUTE&amp;parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}compute.png"></a>
+      </td>
+      %}
+      <td nowrap valign="top">{%object_name%}</td>
+      <td nowrap valign="top" align="center">{%indexinfo:type%}</td>
+      <td nowrap valign="top" align="center">
+      {%ifeq:{%parent:{%is_system%}%}:false:
+        <a href="fr://index_action?type=TOGGLE_ACTIVE&amp;parent_window={%parent_window%}&amp;object_handle={%object_handle%}">
+      %}
+      <img src="{%template_root%}{%ifeq:{%indexinfo:is_active%}:true:ok.png:redx.png%}">{%ifeq:{%parent:{%is_system%}%}:false:</a>
+      %}
+      </td>
+      <td nowrap valign="top" align="center"><img src="{%template_root%}{%ifeq:{%indexinfo:is_unique%}:true:ok.png:redx.png%}"></td>
+      <td valign="top">{%indexinfo:fields%}</td>
+      <td nowrap valign="top" align="right">{%indexinfo:stats%}</td>
+      <td nowrap valign="top"><font size=-1>{%object_description%} {%parent:{%ifeq:{%is_system%}:false:[<a
+        href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=INDEX&amp;object_name={%object_name%}">edit</a>]%}%}</font></td>
+    </tr>
+    %}
+  </tbody>
+</table>
+<br><br>
+{%ifeq:{%is_system%}:false:
+<a
+href="fr://add_index?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Create new index</a> | <a
+href="fr://recompute_all?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Recompute
+statistics for all indices</a>
+<br><br>
+<table border=0 cellspacing=1 cellpadding=3 bgcolor="#999999">
+    <tr bgcolor="#CCCCFF">
+        <td>Icon</td>
+        <td nowrap>click to...</td>
+    </tr>
+    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}drop.png"></td><td>Drop index</td></tr>
+    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}compute.png"></td><td>Recompute statistics for index</td></tr>
+    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}ok.png"></td><td>Make index inactive</td></tr>
+    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}redx.png"></td><td>Make index active</td></tr>
+</table>
+%}
+</body>
+</html>

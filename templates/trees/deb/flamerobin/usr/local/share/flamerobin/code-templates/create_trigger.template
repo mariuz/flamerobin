@@ -1,0 +1,10 @@
+{%edit_conf%}{%kw:set term ^;
+
+create trigger%} {%ifeq:{%getconf:{%object_path%}/triggerName%}::{%object_name%}_{%ifeq:{%getconf:{%object_path%}/triggerFiringTime%}:0:B:A%}{%uppercase:{%forall:{%getconf:{%object_path%}/triggerActions%}::{%substr:%%current_value%%:0:1%}%}%}:{%getconf:{%object_path%}/triggerName%}%} {%kw:for%} {%object_quoted_name%}
+{%kw:active {%ifeq:{%getconf:{%object_path%}/triggerFiringTime%}:0:before:after%} {%forall:{%getconf:{%object_path%}/triggerActions%}: or :%%current_value%%%} position {%getconf:{%object_path%}/triggerPosition%}
+as
+begin%}
+{%tab%}/* enter trigger code here */ 
+{%kw:end^
+
+set term%} ;^

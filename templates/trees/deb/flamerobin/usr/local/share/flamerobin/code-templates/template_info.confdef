@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+    <node>
+        <caption>Edit template metadata</caption>
+        <setting type="string">
+            <caption>Menu item caption</caption>
+            <key>templateInfo/menuCaption</key>
+            <default></default>
+            <expand>1</expand>
+        </setting>
+        <setting type="int">
+            <caption>Menu item position</caption>
+            <key>templateInfo/menuPosition</key>
+            <default></default>
+        </setting>
+        <setting type="string">
+            <caption>Matches objects by type (regex)</caption>
+            <key>templateInfo/matchesType</key>
+            <default>.*</default>
+            <expand>1</expand>
+        </setting>
+        <setting type="string">
+            <caption>Matches objects by name (regex)</caption>
+            <key>templateInfo/matchesName</key>
+            <default>.*</default>
+            <expand>1</expand>
+        </setting>
+        <setting type="string">
+            <caption>Matches objects when (true/false)</caption>
+            <key>templateInfo/matchesWhen</key>
+            <default>true</default>
+            <expand>1</expand>
+        </setting>
+    </node>
+</root>

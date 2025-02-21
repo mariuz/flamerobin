@@ -1,0 +1,86 @@
+#!/usr/bin/bash
+
+#
+set -o pipefail
+
+
+#####
+# Action before deploying the program 
+#####
+
+
+
+# Declaration variables
+getOS=""
+
+
+
+### Action on the directory `/tmp` and others -> start tag[v0]
+
+if [[ ! ( -e "/tmp" ) ]]
+then
+    
+    #
+    mkdir -p /tmp 2> /dev/null
+    chmod 777 /tmp 2> /dev/null
+
+    # Check the value of return  of the last command
+    if [[ $? -ne 0 ]]
+    then
+        echo "~"
+        echo "This program is not compatible with your system ."
+        exit 1
+    fi
+
+    # Get kernel
+    getOS=` uname --operating-system `
+
+    #
+    if [[ $getOS != "GNU/Linux" ]]
+    then
+        echo "~"
+        echo "This program is not compatible with your system ."
+        exit 1
+    fi
+
+fi
+
+### Action on the directory `/tmp` and others -> end tag[v0]
+
+
+
+### The system must have a GLIBC greater or equal to 2.39 -> start tag[m0]
+
+# Retrieve the current version of GLIBC
+GLIBC_VERSION=$(ldd --version | head -n 1 | awk '{print $NF}')
+
+#
+if [[ -z "$GLIBC_VERSION" ]]
+then
+    #
+    echo "~"
+    echo -e "\033[1;31mError\033[0m : An error when \033[1;32mldd\033[0m command is executed ."
+    exit 1
+fi
+
+# Extract the major and minor part
+GLIBC_MAJOR=$(echo "$GLIBC_VERSION" | cut -d "." -f 1)
+GLIBC_MINOR=$(echo "$GLIBC_VERSION" | cut -d "." -f 2)
+
+# Checking the minimum required version (2.39)
+if [[ $GLIBC_MAJOR -lt 2 ]]
+then
+    #
+    echo "~"
+    echo -e "\033[1;31mError\033[0m : Your system must have \033[1;32mGLIBC 2.39 or higher\033[0m ."
+    exit 1
+
+elif [[ $GLIBC_MAJOR -eq 2 && $GLIBC_MINOR -lt 39 ]];
+then
+    #
+    echo "~"
+    echo -e "\033[1;31mError\033[0m : Your system must have \033[1;32mGLIBC 2.39 or higher\033[0m ."
+    exit 1
+fi
+
+### The system must have a GLIBC greater or equal to 2.39 -> end tag[m0]
