@@ -1,0 +1,27 @@
+<html>
+<head>
+  <title>Generator</title>
+</head>
+<body>
+{%header:Summary%}
+<br><br><font size=+2>{%object_name%}</font><br>
+{%object_description%} [<a
+ href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=GENERATOR&amp;object_name={%object_name%}">edit</a>]
+<br><br>
+<table cellspacing=1 cellpadding=3 border=0 bgcolor="black">
+<tr><td bgcolor="#DDDDFF" nowrap><b>Value</b></td>
+<td nowrap width=80 align=right bgcolor="#CCCCFF">
+  <a href="fr://edit_generator_value?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">{%generatorinfo:value%}</a>
+</td>
+</tr>
+</table>
+<br><br>
+<table cellspacing=1 cellpadding=3 border=0 width="98%" bgcolor="black">
+<tr><td bgcolor="navy"><font color=white><b>Source</b> [<a
+    href="fr://edit_function?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><font
+    color="yellow">edit</font></a>]</font></td>
+</tr>
+<tr><td bgcolor="#DDDDFF"><font size=-1><pre>{%generatorinfo:source%}</pre></font></td></tr>
+</table>
+</body>
+</html>

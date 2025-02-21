@@ -1,0 +1,53 @@
+<html>
+<head>
+  <title>Privileges</title>
+</head>
+<body>
+{%header:Privileges%}
+<br><br>
+<font size=+2>Privileges on {%object_name%}</font>
+<br><br>
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=black>
+  <tbody>
+    <tr bgcolor="navy">
+      <td><b><font color="white">Grantee</font></b></td>
+      <td><b><font color="white">MEMBERSHIP</font></b></td>
+    </tr>
+    {%foreach:privilege::
+    <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
+      <td nowrap valign="top">{%privilegeinfo:grantee_name%}</td>
+      <td nowrap valign="top" align="center">{%foreach:privilegeitem:<br>:MEMBER OF:<a href="info://Granted by {%privilegeiteminfo:grantor%}">
+          <img src="{%template_root%}{%ifeq:{%privilegeiteminfo:grant_option%}:true:ok2.png:ok.png%}"></a><font size="-1">{%privilegeiteminfo:columns%}</font>%}
+          {%ifeq:{%privilegeitemcount:MEMBER OF%}:0:<img src="{%template_root%}redx.png">%}
+      </td>
+    </tr>%}
+  </tbody>
+</table>
+<br>
+<br>
+<a href="fr://manage_privileges?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Grant
+and revoke privileges</a>
+<br>
+<br>
+<table border="0" cellpadding="3" cellspacing="1" bgcolor="#CCCCCC">
+    <tr>
+        <td colspan="2" bgcolor="#CCCCFF"><B>Icons</B></td>
+    </tr>
+    <tr bgcolor="#DDDDDD">
+        <td width="20"><img src="{%template_root%}redx.png"></td>
+        <td>privilege not granted</td>
+    </tr>
+    <tr bgcolor="#DDDDDD">
+        <td width="20"><img src="{%template_root%}ok.png"></td>
+        <td>privilege granted</td>
+    </tr>
+    <tr bgcolor="#DDDDDD">
+        <td width="20"><img src="{%template_root%}ok2.png"></td>
+        <td>privilege granted with admin option</td>
+    </tr>
+    <tr bgcolor="silver">
+        <td colspan=2><font size=-1>Hover over icons to see the grantor</font></td>
+    </tr>
+</table>
+</body>
+</html>

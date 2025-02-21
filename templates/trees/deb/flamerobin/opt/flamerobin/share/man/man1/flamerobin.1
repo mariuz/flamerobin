@@ -1,0 +1,157 @@
+.\" Copyright (c) 2006 Tamas Tevesz <ice@extreme.hu>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.Dd April 12, 2006
+.Dt FLAMEROBIN 1
+.ds volume Firebird Administration Tool
+.Os "FlameRobin 0.7"
+.Sh NAME
+.Nm flamerobin
+.Nd management and data manipulation tool for the Firebird DBMS
+.Sh SYNOPSIS
+.Nm flamerobin
+.\" with thanks to jmc
+.Oo Xo Fl h Ar directory \*(Ba
+.Fl -home Ns = Ns Ar directory Oc Xc
+.Oo Xo Fl uh Ar directory \*(Ba
+.Fl -user-home Ns = Ns Ar directory Oc Xc
+.Sh DESCRIPTION
+.Nm
+is a graphical frontend to the Firebird DBMS.
+It is small and simple, yet offers all the basic features needed to create
+and manipulate databases, execute queries and perform administrative tasks.
+.Pp
+This manual page only documents the run-time options and environment of
+.Nm .
+Information about using the GUI may be obtained by selecting the Help -\*(Gt
+Manual menu item once the application is running.
+.Pp
+.Nm
+uses two directory hierarchies for its normal operation.
+The
+.Em data directory
+contains the templates for property pages, the default configuration and the
+on-line documentation grouped into three sub-directories as follows:
+.Bl -tag -width xxxxxxxxxxxxxx -compact
+.Pp
+.It Pa conf-defs
+default configuration
+.It Pa docs
+on-line documentation
+.It Pa html-templates
+templates for property pages
+.El
+.Pp
+The
+.Em user home directory
+contains the per-user configuration, comprising three entries:
+.Pp
+.Bl -tag -width xxxxxxxxxxxxxxxxx -compact
+.It Pa fr_databases.conf
+this file stores the user's registered databases.
+.It Pa fr_settings.conf
+this file stores the user's preferences related to the
+.Nm
+GUI.
+.It Pa history
+this directory holds the SQL statement history, one item per file.
+.El
+.Pp
+.Nm
+accepts several options, which are described as follows:
+.Bl -tag -width Ds -compact
+.Pp
+.It Fl h Ar directory
+.It Fl -home Ns = Ns Ar directory
+Use
+.Ar directory
+as the
+.Em data directory
+(but see
+.Sx ENVIRONMENT
+below).
+.Pp
+.It Fl uh Ar directory
+.It Fl -user-home Ns = Ns Ar directory
+Use
+.Ar directory
+as the
+.Em user home directory
+(but see
+.Sx ENVIRONMENT
+and
+.Sx CAVEATS
+below).
+.El
+.Sh ENVIRONMENT
+.Bl -tag -width Ds
+.It Ev FR_HOME
+Specifies an alternate location for the
+.Nm
+.Em data directory .
+.Pp
+If both
+.Fl h
+(or
+.Fl -home )
+and this environment variable are set, the command line argument takes precedence.
+.It Ev FR_USER_HOME
+Specifies an alternate location for the
+.Nm
+.Em user home directory .
+.Pp
+If both
+.Fl uh
+(or
+.Fl -user-home )
+and this environment variable are set, the command line argument takes precedence.
+.El
+.Sh FILES
+.Bl -tag -width Ds
+.It Pa /usr/share/flamerobin
+The default
+.Nm
+.Em data directory .
+.It Pa ~/.flamerobin
+The default
+.Nm
+.Em user home directory .
+.El
+.Sh AUTHORS
+.Nm
+was written by
+.An The FlameRobin Development Team
+.Aq Pa http://www.flamerobin.org/ .
+.Sh CAVEATS
+.Nm
+only writes files under the
+.Em user home directory .
+If
+.Nm
+is configured so that this directory and the files contained therein are
+shared among several users or concurrent instances of
+.Nm ,
+no precaution is taken to avoid overwriting settings created by other users
+or other application instances.
+.Sh NOTES
+The specification of the
+.Em data directory
+and the
+.Em user home directory
+(regardless of whether they occur in the environment or on the command line)
+may be the literal string
+.Dq $app
+which translates to a common data folder determined at compilation time, or
+.Dq $user
+which translates to the user local data directory. These options currently have
+effect only on Windows platform.

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<root>
+    <node>
+        <caption>Update {%object_name%} set ... where ...</caption>
+        <setting type="relation_columns" style="list">
+            <caption>Columns to &amp;update:</caption>
+            <key>{%object_path%}/columnNames</key>
+            <default>{%foreach:column:, :{%object_name%}%}</default>
+            <relation>{%object_handle%}</relation>
+            <aligngroup>1</aligngroup>
+            <proportion>1</proportion>
+        </setting>
+        <setting type="relation_columns" style="list">
+            <caption>Columns to &amp;filter on:</caption>
+            <key>{%object_path%}/whereColumnNames</key>
+            <default>{%primary_key:{%constraintinfo:columns:, %}%}</default>
+            <relation>{%object_handle%}</relation>
+            <aligngroup>1</aligngroup>
+            <proportion>1</proportion>
+        </setting>
+    </node>
+</root>

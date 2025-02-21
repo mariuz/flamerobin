@@ -1,0 +1,4 @@
+{%--:Uncomment to edit template info visually.%}{%--:{%edit_info%}{%abort%}%}{%edit_conf%}{%wrap:{%kw:insert into%} {%object_quoted_name%} ({%foreach:column:, :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:{%object_quoted_name%}%}%})%}
+{%kw:values%} ({%foreach:column:, :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:
+{%tab%}'{%object_name%}{%if:{%columninfo:is_nullable%}::*%}'%}%}
+);

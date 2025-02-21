@@ -1,0 +1,23 @@
+<html>
+<head>
+  <title>Exception</title>
+</head>
+<body>
+{%header:Summary%}
+<br>
+<br>
+<font size=+2>{%object_name%}</font><br>
+{%object_description%} [<a
+ href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=EXCEPTION&amp;object_name={%object_name%}">edit</a>]
+<br><br>
+<table cellspacing=1 cellpadding=3 border=0 width="98%" bgcolor="black">
+<tr>
+  <td width="20" bgcolor="navy"><font color="white"><b>Number</b></font></td>
+  <td bgcolor="navy"><font color="white"><b>Message</b> [<a href="fr://edit_exception?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><font color="yellow">edit</font></a>]</font></td>
+</tr>
+<tr>
+  <td width="20" bgcolor="#DDDDFF" align="right">{%exceptioninfo:number%}</td></tr>
+  <td bgcolor="#DDDDFF">{%exceptioninfo:message%}</td></tr>
+</table>
+</body>
+</html>

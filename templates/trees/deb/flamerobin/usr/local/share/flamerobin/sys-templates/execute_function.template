@@ -1,0 +1,2 @@
+{%wrap:{%kw:select%} {%object_quoted_name%} {%ifeq:{%functioninfo:paramcount:input%}:0::({%foreach:parameter:, :input:'{%object_quoted_name%}'%})%}%}
+{%wrap:{%kw:from%} {%kw:RDB$DATABASE%}%};

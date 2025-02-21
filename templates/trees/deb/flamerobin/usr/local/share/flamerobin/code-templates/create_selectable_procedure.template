@@ -1,0 +1,20 @@
+{%--:Uncomment to edit template info visually.%}{%--:{%edit_info%}{%abort%}%}{%edit_conf%}{%kw:set term !! ;
+
+create procedure%} SP_{%object_name%}
+{%kw:returns%} ( {%foreach:column:, :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:
+{%tab%}{%object_quoted_name%} {%columninfo:typeof%}%}%}
+)
+{%kw:as
+begin
+{%tab%}for select%} {%foreach:column:, :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:
+{%tab%}{%tab%}a.{%object_quoted_name%}%}%}
+{%tab%}{%kw:from%} {%object_quoted_name%} a
+{%tab%}{%kw:into%} {%foreach:column:, :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:
+{%tab%}{%tab%}{%object_quoted_name%}%}%} 
+{%tab%}{%kw:do
+{%tab%}begin
+{%tab%}{%tab%}suspend;
+{%tab%}end
+end!!
+
+set term%} ; !!

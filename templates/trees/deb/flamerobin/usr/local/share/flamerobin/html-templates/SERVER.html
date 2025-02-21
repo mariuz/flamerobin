@@ -1,0 +1,38 @@
+<html>
+<head>
+  <title>User Management</title>
+</head>
+<body>
+<font size=+2>{%object_name%}</font><br>
+<br>
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=black>
+  <tbody>
+    <tr bgcolor="navy">
+      <td></td>
+      <td><b><font color=white>Username</font></b></td>
+      <td><b><font color=white>First name</font></b></td>
+      <td><b><font color=white>Middle name</font></b></td>
+      <td><b><font color=white>Last name</font></b></td>
+      <td><b><font color=white>Unix user ID</font></b></td>
+      <td><b><font color=white>Unix group ID</font></b></td>
+    </tr>
+    {%foreach:user::
+    <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
+      <td valign="top" nowrap>
+          <a href="fr://edit_user?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}view.png"></a>
+          {%ifeq:{%is_system%}:false:<a href="fr://drop_user?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}drop.png"></a>%}
+      </td>
+      <td nowrap valign="top">{%userinfo:username%}</td>
+      <td nowrap valign="top">{%userinfo:first_name%}</td>
+      <td nowrap valign="top">{%userinfo:middle_name%}</td>
+      <td nowrap valign="top">{%userinfo:last_name%}</td>
+      <td nowrap valign="top" align="right">{%userinfo:unix_user%}</td>
+      <td nowrap valign="top" align="right">{%userinfo:unix_group%}</td>
+    </tr>%}
+  </tbody>
+</table>
+<br><br>
+<a href="fr://add_user?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Add user</a>
+<br>
+</body>
+</html>

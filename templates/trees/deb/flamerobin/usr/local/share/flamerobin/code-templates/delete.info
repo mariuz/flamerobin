@@ -1,0 +1,5 @@
+[templateInfo]
+menuCaption=Delete from {%object_name%} where ...
+menuPosition=35
+matchesType=^TABLE$
+

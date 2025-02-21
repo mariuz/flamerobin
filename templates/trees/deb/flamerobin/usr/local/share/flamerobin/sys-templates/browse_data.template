@@ -1,0 +1,2 @@
+{%wrap:{%kw:select%} {%if:{%no_pk_or_unique%}:r.RDB$DB_KEY, %}{%foreach:column:, :r.{%object_quoted_name%}%}%}
+{%kw:from%} {%object_quoted_name%} r{%setvar:output.autoexec:true%}

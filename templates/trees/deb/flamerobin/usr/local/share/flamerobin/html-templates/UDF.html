@@ -1,0 +1,32 @@
+<html>
+<head>
+  <title>UDF</title>
+</head>
+<body>
+{%header:Summary%}
+<br>
+<br><font size=+2>{%object_name%}</font><br>
+Owner: {%owner_name%}<br>
+{%sql_security%}<br>
+{%object_description%} [<a
+ href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=UDF&amp;object_name={%object_name%}">edit</a>]
+<br>
+<br>
+<table cellspacing=1 cellpadding=3 border=0 width="98%" bgcolor="black">
+    <tr>
+        <td nowrap bgcolor="navy"><font color="white"><b>Library Name</b></font></td>
+        <td nowrap bgcolor="navy"><font color="white"><b>Entry Point</b></font></td>
+    </tr>
+    <tr bgcolor="#CCCCFF">
+        <td nowrap>{%udfinfo:library%}</td>
+        <td nowrap>{%udfinfo:entry_point%}</td>
+    </tr>
+  <tr>
+    <td bgcolor="navy" colspan=2><font color=white><b>Source</b></font></td>
+  </tr>
+  <tr>
+    <td bgcolor="#DDDDFF" colspan=2 ><font size=-1><pre>{%udfinfo:definition%}</pre></font></td>
+  </tr>
+</table>
+</body>
+</html>

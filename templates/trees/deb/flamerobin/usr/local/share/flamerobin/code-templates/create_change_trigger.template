@@ -1,0 +1,14 @@
+{%--:Uncomment to edit template info visually.%}{%--:{%edit_info%}{%abort%}%}{%edit_conf%}{%kw:set term !! ;
+create trigger%} CT_{%object_name%} {%kw:for%} {%object_quoted_name%}
+{%kw:active after update position {%getconf:{%object_path%}/triggerPosition:99%}
+as
+begin
+{%tab%}if%} ({%foreach:column:
+{%tab%}{%tab%}{%kw:or%} :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:{%kw:old%}.{%object_quoted_name%} {%kw:is distinct from new%}.{%object_quoted_name%}%}%})
+{%tab%}{%kw:then
+{%tab%}begin%}
+{%tab%}{%tab%}/* do something */
+{%tab%}{%kw:end
+end!!
+
+set term%} ; !!

@@ -1,0 +1,59 @@
+<html>
+<head>
+  <title>Dependencies</title>
+</head>
+<body>
+{%header:Dependencies%}
+<br><br>
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=black width="98%">
+  <tbody>
+    <tr bgcolor="navy">
+      <td width="40%"><b><font color=white>{%object_name%} depends on...</font></b></td>
+      <td><b><font color=white>Fields</font></b></td>
+    </tr>
+    {%foreach:depends_on::
+    <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
+      <td valign="top" nowrap>{%object_type%} <a
+          href="fr://properties?object_type={%object_type%}&amp;object_name={%object_name%}&amp;parent_window={%parent_window%}">{%object_name%}</a></td>
+      <td valign="top"><font size="-1">{%dependencyinfo:fields%}</font></td>
+    </tr>%}
+  </tbody>
+</table>
+<br><br>
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=black width="98%">
+  <tbody>
+    <tr bgcolor="navy">
+      <td width="40%"><b><font color=white>Objects that depend on {%object_name%}</font></b></td>
+      <td><b><font color=white>Fields</font></b></td>
+    </tr>
+    {%foreach:dependent::
+    <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
+      <td valign="top" nowrap>{%object_type%} <a
+          href="fr://properties?object_type={%object_type%}&amp;object_name={%object_name%}&amp;parent_window={%parent_window%}">{%object_name%}</a></td>
+      <td valign="top"><font size="-1">{%dependencyinfo:fields%}</font></td>
+    </tr>%}
+  </tbody>
+</table>
+<br><br>
+
+
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=black width="98%">
+  <tbody>
+    <tr bgcolor="navy">
+      <td width="40%"><b><font color=white>{%object_name%} field</font></b></td>
+      <td><b><font color=white>Objects that depend on {%object_name%} field</font></b></td>
+    </tr>
+    {%foreach:fieldDependencyInfo::
+    <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
+      <td valign="top" nowrap>{%object_name%}</td>
+      <td valign="top"><font size="-1">{%foreach:fieldDependencyObjects:<br />:
+	  {%object_type%} <a
+          href="fr://properties?object_type={%object_type%}&amp;object_name={%object_name%}&amp;parent_window={%parent_window%}">{%object_name%}</a>{%ifeq:{%auxiliar:isnull%}:true:: (dependency of {%auxiliar%})%}
+	  %}
+	  </font></td>
+    </tr>%}
+  </tbody>
+</table>
+<br>
+</body>
+</html>

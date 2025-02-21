@@ -1,0 +1,4 @@
+{%edit_conf%}{%wrap:{%kw:select%} {%foreach:column:, :{%ifcontains:{%getconf:{%object_path%}/columnNames%}:{%object_name%}:a.{%object_quoted_name%}%}%}%}
+{%kw:from%} {%object_quoted_name%} a {%ifeq:{%countall:{%getconf:{%object_path%}/whereColumnNames%}%}:0:;:
+{%kw:where%}{%foreach:column: {%kw:and%} :{%ifcontains:{%getconf:{%object_path%}/whereColumnNames%}:{%object_name%}:
+{%tab%}a.{%object_quoted_name%} = '?'%}%}%}
