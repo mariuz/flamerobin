@@ -226,6 +226,11 @@
         </setting>
         -->
         <setting type="checkbox">
+            <caption>Enable text selection/cursor highlights</caption>
+            <key>highlightWordText</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
             <caption>Clear the messages when executing new statements</caption>
             <key>SQLEditorExecuteClears</key>
             <default>0</default>

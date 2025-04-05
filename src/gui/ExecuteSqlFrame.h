@@ -56,6 +56,8 @@ private:
 public:
     SqlEditor(wxWindow *parent, wxWindowID id);
     void markText(int start, int end);
+    void highlightText(int start, int end);
+    void clearHighlights();
     void setChars(bool firebirdIdentifierOnly);
     void setFont();
     void setupStyles();
@@ -120,6 +122,10 @@ private:
     StatementHistory::Position historyPositionM;
     wxString localBuffer;
 
+    
+    bool highlightWordText; //enable word highlight feature.
+    bool highlightWordUnderCaret = true; // use word under caret if no text is selected?
+    bool highlightWordTextMatchCase = false; //use sensitive search?
     bool autoCommitM;
     bool inTransactionM;
     IBPP::Transaction transactionM;
@@ -132,6 +138,8 @@ private:
     bool commitTransaction();
     bool rollbackTransaction();
 
+    void highlightOccurrences(const wxString& word);
+    void OnTextSelected(wxStyledTextEvent& event);
     void autoComplete(bool force);
     void autoCompleteColumns(int pos, int len = 0);
     void OnSqlEditUpdateUI(wxStyledTextEvent& event);
