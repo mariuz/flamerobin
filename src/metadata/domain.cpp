@@ -295,7 +295,7 @@ wxString Domain::dataTypeToString(short datatype, short scale, short precision,
         case 261:
             retval = SqlTokenizer::getKeyword(kwBLOB) + " "
                 + SqlTokenizer::getKeyword(kwSUB_TYPE) + " ";
-            retval << subtype;
+            retval << (subtype == 0 ? "BINARY" : "TEXT");
             return retval;
             
         case 23: // Firebird v3
