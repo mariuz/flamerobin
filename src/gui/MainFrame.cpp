@@ -755,7 +755,7 @@ void MainFrame::OnMenuAbout(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::OnMenuManual(wxCommandEvent& WXUNUSED(event))
 {
-    showUrl("http://flamerobin.org/dokuwiki/wiki/manual");
+    showUrl("https://github.com/mariuz/flamerobin/wiki/Flamerobin-Manual");
 }
 
 void MainFrame::OnMenuRelNotes(wxCommandEvent& WXUNUSED(event))
