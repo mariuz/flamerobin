@@ -48,7 +48,7 @@ fi
 cp -r /opt/flamerobin/share/applications/flamerobin.desktop /usr/local/share/applications/ 
 
 #
-sudo update-desktop-database /usr/local/share/applications/ &> /dev/null 
+update-desktop-database /usr/local/share/applications/ &> /dev/null 
 
 ### Copy the `*.desktop` file of the flamerobin app to an appropriate directory -> end tag[df0]
 
