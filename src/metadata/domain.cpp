@@ -265,12 +265,6 @@ wxString Domain::dataTypeToString(short datatype, short scale, short precision,
         retval << "," << -scale << ")";
         return retval;
     }
-    if (datatype == 452) // BINARY(X)
-    {
-        
-        return SqlTokenizer::getKeyword(kwCHAR) + "(" << length << ")";
-
-    }
 
     switch (datatype)
     {
