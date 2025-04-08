@@ -24,7 +24,7 @@ then
     getTheRealUser="$SUDO_USER"
 
     # Get the personnel directory of the user
-    getPersonalUserDir=` getent passwd "$flagBehalfSudo" | cut -d ":" -f6 `
+    getPersonalUserDir=$( getent passwd "$flagBehalfSudo" | cut -d ":" -f6 )
 fi
 
 ### Check to see who executes the `flamerobin` program, then get the personnel directory
@@ -49,7 +49,8 @@ then
 fi
 
 #
-cp -r /opt/flamerobin/share/applications/flamerobin.desktop /usr/local/share/applications/ || exit 1
+cp -r /opt/flamerobin/share/applications/flamerobin.desktop /usr/local/share/applications/ || \
+    echo -e "Failed to copy the desktop file [ ...flamerobin.desktop -> /usr/local/share/applications ]" && exit 1
 
 
 #
@@ -64,13 +65,15 @@ if [[ -e "/usr/local/bin/" ]] && [[ -d "/usr/local/bin/" ]] && [[ ` echo "$PATH"
 then
 
     #
-    ln -sf /opt/flamerobin/bin/flamerobin-launcher "/usr/local/bin/flamerobin" || exit 1
+    ln -sf /opt/flamerobin/bin/flamerobin-launcher "/usr/local/bin/flamerobin" || \
+        echo -e "Failed to create symlink in [ /usr/local/bin/ ]" && exit 1
 
 elif [[ -e "/usr/bin/" ]] && [[ -d "/usr/bin/" ]] && [[ ` echo "$PATH" | grep "\/usr\/bin" ` ]]
 then
 
     #
-    ln -sf /opt/flamerobin/bin/flamerobin-launcher "/usr/bin/flamerobin" || exit 1
+    ln -sf /opt/flamerobin/bin/flamerobin-launcher "/usr/bin/flamerobin" || \
+        echo -e "Failed to create symlink in [ /usr/bin/ ]" && exit 1
 fi
 
 

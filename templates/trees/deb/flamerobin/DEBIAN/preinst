@@ -15,9 +15,9 @@ getOS=""
 
 
 
-### Action on the directory `/tmp` and others -> start tag[v0]
+### Action on the directory `/tmp` then ... -> start tag[v0]
 
-if [[ ! ( -e "/tmp" ) ]]
+if [[ ! ( -e "/tmp/flamerobin" ) ]]
 then
     
     #
@@ -31,18 +31,6 @@ then
         echo "This program is not compatible with your system ."
         exit 1
     fi
-
-    # Get kernel
-    getOS=` uname --operating-system `
-
-    #
-    if [[ $getOS != "GNU/Linux" ]]
-    then
-        echo "~"
-        echo "This program is not compatible with your system ."
-        exit 1
-    fi
-
 fi
 
 ### Action on the directory `/tmp` and others -> end tag[v0]
@@ -50,6 +38,8 @@ fi
 
 
 ### The system must have a GLIBC greater or equal to 2.39 -> start tag[m0]
+
+: '
 
 # Retrieve the current version of GLIBC
 GLIBC_VERSION=$(ldd --version | head -n 1 | awk '{print $NF}')
@@ -84,3 +74,6 @@ then
 fi
 
 ### The system must have a GLIBC greater or equal to 2.39 -> end tag[m0]
+
+    '
+
