@@ -2,7 +2,6 @@ name: Build FlameRobin for Debian
 
 env:
   wx-tag-version: v3.2.6
-  flamerobin-version: 0.9.13 
 
 on:
   push:
@@ -78,11 +77,21 @@ jobs:
     # Set the version of the flamerobin program and move its executable to -> templates/trees/deb/flamerobin/opt/flamerobin/bin/ 
     - name: Set the version of the Flamerobin program and move its executable to "templates/trees/deb/flamerobin/opt/flamerobin/bin/"
       run: |
+        FLAMEROBIN_VERSION=$(awk '
+          /FR_VERSION_MAJOR/ { major = $3 } 
+          /FR_VERSION_MINOR/ { minor = $3 }
+          /FR_VERSION_RLS/   { rls   = $3 }
+          END { print major "." minor "." rls }
+          ' src/frversion.h)
+        #
+        echo "flamerobin version : $FLAMEROBIN_VERSION"
+
+        # Adding the `FLAMEROBIN_VERSION` variable in the GitHub environment
+        echo "FLAMEROBIN_VERSION=$FLAMEROBIN_VERSION" >> $GITHUB_ENV
+
         sed -i "s/^Version: .*/Version: ${FLAMEROBIN_VERSION}/" templates/trees/deb/flamerobin/DEBIAN/control
         mkdir -p templates/trees/deb/flamerobin/opt/flamerobin/bin 2> /dev/null
         cp -r Build/flamerobin templates/trees/deb/flamerobin/opt/flamerobin/bin/
-      env:
-        FLAMEROBIN_VERSION: ${{ env.flamerobin-version }}
     
     # Copy some necessary files except "flamerobin" to -> /opt/flamerobin/share/flamerobin
     - name: Copy necessary files to package directory "/opt/flamerobin/share/flamerobin/"
@@ -93,11 +102,11 @@ jobs:
     # Generate the .deb file
     - name: Build .deb package
       run: |
-        dpkg-deb --build templates/trees/deb/flamerobin templates/trees/deb/flamerobin-${{ env.flamerobin-version }}.deb
+        dpkg-deb --build templates/trees/deb/flamerobin templates/trees/deb/flamerobin-${FLAMEROBIN_VERSION}.deb
 
     # Uploading the installer as a GitHub Actions artifact
     - name: Upload .deb package
       uses: actions/upload-artifact@v4
       with:
         name: flamerobin-deb
-        path: templates/trees/deb/flamerobin-${{ env.flamerobin-version }}.deb
+        path: templates/trees/deb/flamerobin-${{ env.FLAMEROBIN_VERSION }}.deb
