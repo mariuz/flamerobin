@@ -1,0 +1,96 @@
+#!/bin/bash
+
+#####
+# postinst script
+####
+
+set -o pipefail
+
+
+
+### Copy the `*.desktop` file of the flamerobin app to an appropriate directory -> start tag[df0]
+
+if [[ ! -d "/usr/local/share/applications/" ]]
+then
+
+    #
+    if ! mkdir -p  "/usr/local/share/applications" &> /dev/null 
+    then
+        echo "~"
+        echo -e "\033[1;31mMissing directory\033[0m -> [ /usr/local/share/applications ]"
+
+        exit 1
+    fi 
+fi
+
+#
+if [[ -f "/opt/flamerobin/share/applications/flamerobin.desktop" ]]
+then
+    
+    #
+    cp /opt/flamerobin/share/applications/flamerobin.desktop /usr/local/share/applications/ || \
+        { echo -e "Failed to copy the desktop file [ ...flamerobin.desktop -> /usr/local/share/applications ]"; exit 1; }
+
+else
+    
+    #
+    echo "~"
+    echo -e "\033[1;31mMissing file\033[0m -> [ /opt/flamerobin/share/applications/flamerobin.desktop ]"
+
+    exit 1
+fi
+
+#
+update-desktop-database /usr/local/share/applications/ &> /dev/null 
+
+### Copy the `*.desktop` file of the flamerobin app to an appropriate directory -> end tag[df0]
+
+
+
+### Symbolic link for the executable (flamerobin) -> start tag[sle0] 
+
+#
+if [[ ! -f "/opt/flamerobin/bin/flamerobin-launcher" ]]
+then
+
+    #
+    echo "~"
+    echo -e "\033[1;31mMissing file\033[0m -> [ /opt/flamerobin/bin/flamerobin-launcher ]"
+
+    exit 1
+fi
+
+
+#
+if [[ -e "/usr/local/bin/" ]] && [[ -d "/usr/local/bin/" ]] && [[ ` echo "$PATH" | grep "\/usr\/local\/bin" ` ]]
+then 
+    
+    #
+    ln -sf /opt/flamerobin/bin/flamerobin-launcher /usr/local/bin/flamerobin || \
+        { echo -e "Failed to create symlink [ ...flamerobin-launcher -> /usr/local/bin/flamerobin ]"; exit 1; } 
+
+elif [[ -e "/usr/bin/" ]] && [[ -d "/usr/bin/" ]] && [[ ` echo "$PATH" | grep "\/usr\/bin" ` ]]
+then
+
+    #
+    ln -sf /opt/flamerobin/bin/flamerobin-launcher /usr/bin/flamerobin || \
+        { echo -e "Failed to create symlink [ ...flamerobin-launcher ->  /usr/bin/flamerobin ]"; exit 1; }
+
+else
+    
+    echo "~"
+    echo -e "\033[1;31mMissing directories\033[0m -> [ /usr/local/bin/ , /usr/bin/ ]"
+
+    exit 1
+fi
+
+### Symbolic link for the executable (flamerobin) -> end tag[sle0] 
+
+
+# Just to print the name of the author
+echo ""
+echo ""
+echo "~"
+
+tput setaf 6; tput bold; echo "By Baldé ~" `tput sgr0` 2> /dev/null
+

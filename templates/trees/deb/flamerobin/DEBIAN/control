@@ -1,0 +1,13 @@
+Package: flamerobin
+Version: 0.9.13
+Section: base   
+Priority: optional
+Architecture: all
+Maintainer: Baldé <baldeuniversel@protonmail.com>
+Depends: bash, coreutils, tar, acl, libc6, libtommath-dev, libstdc++6, build-essential, systemd, software-properties-common, curl, bc, gzip, awk, gawk, zsh, util-linux
+Description: FlameRobin is a lightweight, cross-platform software tool designed for the 
+             administration of databases using the Firebird DBMS (Database Management System). 
+             It allows developers and database administrators to easily interact with their Firebird 
+             databases, providing practical features to manage, manipulate, and optimize database structures 
+             and data.
+
