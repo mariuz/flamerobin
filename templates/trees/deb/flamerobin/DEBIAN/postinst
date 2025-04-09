@@ -50,8 +50,7 @@ fi
 
 #
 cp -r /opt/flamerobin/share/applications/flamerobin.desktop /usr/local/share/applications/ || \
-    echo -e "Failed to copy the desktop file [ ...flamerobin.desktop -> /usr/local/share/applications ]" && exit 1
-
+    { echo -e "Failed to copy the desktop file [ ...flamerobin.desktop -> /usr/local/share/applications ]"; exit 1; }
 
 #
 update-desktop-database /usr/local/share/applications/ &> /dev/null 
@@ -62,18 +61,18 @@ update-desktop-database /usr/local/share/applications/ &> /dev/null
 
 # Symbolic link for the executable (flamerobin) 
 if [[ -e "/usr/local/bin/" ]] && [[ -d "/usr/local/bin/" ]] && [[ ` echo "$PATH" | grep "\/usr\/local\/bin" ` ]]
-then
-
+then 
+    
     #
-    ln -sf /opt/flamerobin/bin/flamerobin-launcher "/usr/local/bin/flamerobin" || \
-        echo -e "Failed to create symlink in [ /usr/local/bin/ ]" && exit 1
+    ln -sf /opt/flamerobin/bin/flamerobin-launcher /usr/local/bin/flamerobin || \
+        { echo -e "Failed to create symlink in [ /usr/local/bin/ ]"; exit 1; }
 
 elif [[ -e "/usr/bin/" ]] && [[ -d "/usr/bin/" ]] && [[ ` echo "$PATH" | grep "\/usr\/bin" ` ]]
 then
 
     #
-    ln -sf /opt/flamerobin/bin/flamerobin-launcher "/usr/bin/flamerobin" || \
-        echo -e "Failed to create symlink in [ /usr/bin/ ]" && exit 1
+    ln -sf /opt/flamerobin/bin/flamerobin-launcher /usr/bin/flamerobin || \
+        { echo -e "Failed to create symlink in [ /usr/bin/ ]"; exit 1; }
 fi
 
 
