@@ -1,0 +1,112 @@
+name: Build FlameRobin for Debian
+
+env:
+  wx-tag-version: v3.2.6
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # Installing required dependencies
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y build-essential cmake libwxgtk3.2-dev dpkg-dev libfbclient2 firebird3.0-server firebird3.0-utils firebird-dev firebird3.0-server-core firebird3.0-common rsync
+        sudo ldconfig
+
+    # Cache wxWidgets if already built
+    - name: wxWidget cache
+      id: cache-wxwidget
+      uses: actions/cache@v4
+      with:
+        path: wxWidgets
+        key: ${{ runner.os }}-wxwidgets-${{env.wx-tag-version}}
+        restore-keys: ${{ runner.os }}-wxwidgets-${{env.wx-tag-version}}
+
+    # Clone and compile wxWidgets if not already cached
+    - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
+      name: Clone wxWidgets
+      run: git clone --recursive --branch ${{ env.wx-tag-version }} --depth 1 https://github.com/wxWidgets/wxWidgets.git
+
+    - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
+      name: Build wxWidgets
+      run: |
+        cd wxWidgets
+        mkdir build && cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DwxBUILD_SHARED=OFF
+        make -j$(nproc)
+        sudo make install
+        sudo ldconfig
+
+    # Building the CMake project for Flamerobin
+    - name: Generate CMake project
+      run: |
+        export PATH="/usr/local/bin:/opt/firebird/bin:${PATH:-}"
+        export LD_LIBRARY_PATH="/usr/local/lib:/usr/lib/x86_64-linux-gnu:/opt/firebird/lib:${LD_LIBRARY_PATH:-}"
+        cmake -S . -B Build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/flamerobin/
+
+    # FlameRobin Compilation
+    - name: Build Flamerobin
+      run: |
+        export PATH="/usr/local/bin:/opt/firebird/bin:${PATH:-}"
+        export LD_LIBRARY_PATH="/usr/local/lib:/usr/lib/x86_64-linux-gnu:/opt/firebird/lib:${LD_LIBRARY_PATH:-}"
+        cmake --build Build --config Release -j$(nproc)
+
+    # Check where the generated binary is (flamerobin)
+    - name: Locate the compiled executable file for flamerobin
+      run: |
+        find Build/ -name "flamerobin" -type f
+        du -skh Build/flamerobin
+
+     # Add the lib depends of the flamerobin build app to -> templates/trees/deb/flamerobin/opt/flamerobin/lib/
+    - name: Add the lib depends of the flamerobin app to "templates/trees/deb/flamerobin/opt/flamerobin/lib/"
+      run: |
+        mkdir -p templates/trees/deb/flamerobin/opt/flamerobin/lib 2> /dev/null
+        ldd Build/flamerobin | awk '{print $3}' | grep -E '/lib|/usr/lib' | grep -v "not found" | xargs -I {} cp -v {} templates/trees/deb/flamerobin/opt/flamerobin/lib/
+        
+    # Set the version of the flamerobin program and move its executable to -> templates/trees/deb/flamerobin/opt/flamerobin/bin/ 
+    - name: Set the version of the Flamerobin program and move its executable to "templates/trees/deb/flamerobin/opt/flamerobin/bin/"
+      run: |
+        FLAMEROBIN_VERSION=$(awk '
+          /FR_VERSION_MAJOR/ { major = $3 } 
+          /FR_VERSION_MINOR/ { minor = $3 }
+          /FR_VERSION_RLS/   { rls   = $3 }
+          END { print major "." minor "." rls }
+          ' src/frversion.h)
+        #
+        echo "flamerobin version : $FLAMEROBIN_VERSION"
+
+        # Adding the `FLAMEROBIN_VERSION` variable in the GitHub environment
+        echo "FLAMEROBIN_VERSION=$FLAMEROBIN_VERSION" >> $GITHUB_ENV
+
+        sed -i "s/^Version: .*/Version: ${FLAMEROBIN_VERSION}/" templates/trees/deb/flamerobin/DEBIAN/control
+        mkdir -p templates/trees/deb/flamerobin/opt/flamerobin/bin 2> /dev/null
+        cp -r Build/flamerobin templates/trees/deb/flamerobin/opt/flamerobin/bin/
+    
+    # Copy some necessary files except "flamerobin" to -> /opt/flamerobin/share/flamerobin
+    - name: Copy necessary files to package directory "/opt/flamerobin/share/flamerobin/"
+      run: |
+        mkdir -p templates/trees/deb/flamerobin/opt/flamerobin/share/flamerobin 2> /dev/null
+        rsync -av --exclude=flamerobin Build/ templates/trees/deb/flamerobin/opt/flamerobin/share/flamerobin/
+
+    # Generate the .deb file
+    - name: Build .deb package
+      run: |
+        dpkg-deb --build templates/trees/deb/flamerobin templates/trees/deb/flamerobin-${FLAMEROBIN_VERSION}.deb
+
+    # Uploading the installer as a GitHub Actions artifact
+    - name: Upload .deb package
+      uses: actions/upload-artifact@v4
+      with:
+        name: flamerobin-deb
+        path: templates/trees/deb/flamerobin-${{ env.FLAMEROBIN_VERSION }}.deb
