@@ -41,6 +41,8 @@
 #include "metadata/CreateDDLVisitor.h"
 #include "metadata/database.h"
 #include "metadata/procedure.h"
+#include "metadata/function.h"
+#include "metadata/package.h"
 #include "metadata/table.h"
 #include "metadata/view.h"
 #include "sql/StatementBuilder.h"
@@ -84,6 +86,19 @@ ColumnPtr Relation::findColumn(const wxString& name) const
             return *it;
     }
     return ColumnPtr();
+}
+
+int Relation::findColumnPosition(const wxString& name) const
+{
+    int pos = 0;
+    for (ColumnPtrs::const_iterator it = columnsM.begin();
+        it != columnsM.end(); ++it)
+    {
+        pos++;
+        if ((*it)->getName_() == name)
+            return pos;
+    }
+    return -1;
 }
 
 size_t Relation::getColumnCount() const
@@ -378,9 +393,13 @@ wxString Relation::getRebuildSql(const wxString& forColumn)
 {
     // 0. prepare stuff
     std::vector<Procedure *> procedures;
+    std::vector<FunctionSQL *> functions;
+    std::vector<Package *> packages;
     std::vector<CheckConstraint> checks;
     wxString privileges, createTriggers, dropTriggers, dropViews, createViews;
     wxString fkDrop, fkDropSelf, fkCreate, fkCreateSelf, pkDrop, pkCreate;
+    wxString idxDrop, idxCreate;
+    wxString alterColumnSample;
 
     // 1. build view list (dependency tree) - ordered by DROP
     std::vector<Relation *> viewList;
@@ -422,6 +441,14 @@ wxString Relation::getRebuildSql(const wxString& forColumn)
             Trigger *t = dynamic_cast<Trigger *>((*it).getDependentObject());
             if (t && trigs.end() == std::find(trigs.begin(), trigs.end(), t))
                 trigs.push_back(t);
+
+            FunctionSQL *f = dynamic_cast<FunctionSQL *>((*it).getDependentObject());
+            if (f && functions.end() == std::find(functions.begin(), functions.end(), f))
+                functions.push_back(f);
+
+            Package *pkg = dynamic_cast<Package *>((*it).getDependentObject());
+            if (pkg && packages.end() == std::find(packages.begin(), packages.end(), pkg))
+                packages.push_back(pkg);
         }
         (*vi)->getDependentChecks(checks);
 
@@ -496,6 +523,7 @@ wxString Relation::getRebuildSql(const wxString& forColumn)
                 }
             }
         }
+
         // b) drop own primary and unique keys
         PrimaryKeyConstraint* pk = t1->getPrimaryKey();
         if (pk && (forColumn.IsEmpty() || pk->hasColumn(forColumn)))
@@ -538,6 +566,55 @@ wxString Relation::getRebuildSql(const wxString& forColumn)
             (*i2).acceptVisitor(&cdv);
             fkCreate += cdv.getSql();
         }
+
+        //Finally drop indexes for column
+        std::vector<Index>* idx = t1->getIndices();
+        if (idx)
+        {
+            for (std::vector<Index>::iterator i3 = idx->begin(); i3 != idx->end(); ++i3)
+            {
+                if (!forColumn.IsEmpty() && !(*i3).hasColumn(forColumn) || (*i3).isSystem())
+                    continue;
+                
+                idxDrop += (*i3).getDropSqlStatement() + "\n";
+                CreateDDLVisitor cdv(0);
+                (*i3).acceptVisitor(&cdv);
+                idxCreate += cdv.getSql();
+
+            }
+        }
+
+        //Create a sample "recreate" column SQL like this:
+        /*
+        alter table TBL add TMP$COLUMN OLD SAME TYPE;
+        update TBL set TMP$COLUMN = OLD_COLUMN;
+        alter table TBL drop OLD_COLUMN;
+        alter table TBL alter column TMP$COLUMN to OLD_COLUMN;
+        alter table TBL alter OLD_COLUMN position OLD_POSITION;
+        */
+        
+        alterColumnSample += "/* --Sample to recreate column-- \n\n";
+        ColumnPtr col = t1->findColumn(forColumn);
+        col->setName_("TMP$COLUMN");
+        CreateDDLVisitor cdv(0);
+        (*col).acceptVisitor(&cdv);
+        alterColumnSample += "ALTER TABLE " +
+                t1->getQuotedName() + " ADD " + cdv.getPrefixSql() + "; --here you can change the type if necessary" + "\n";
+        alterColumnSample += cdv.getSuffixSql();
+        col->setName_(forColumn);
+
+        alterColumnSample += "COMMIT;\n";
+
+        alterColumnSample += "UPDATE " +
+            t1->getQuotedName() + " SET TMP$COLUMN = " + forColumn + ";--here you can put your logic" + "\n";
+        
+        alterColumnSample += col ->getDropSqlStatement() + ";" + "\n";
+        alterColumnSample += "ALTER TABLE " +
+            t1->getQuotedName() + " ALTER COLUMN TMP$COLUMN TO " + forColumn + ";" + "\n";
+        alterColumnSample += "ALTER TABLE " +
+            t1->getQuotedName() + " ALTER COLUMN " + forColumn +
+            " POSITION " + wxString::Format("%d", t1->findColumnPosition(forColumn)) + ";" + "\n";
+        alterColumnSample += " */\n\n\n";
     }
 
     wxString createChecks, dropChecks;
@@ -562,15 +639,46 @@ wxString Relation::getRebuildSql(const wxString& forColumn)
     sql += fkDrop;
     sql += fkDropSelf;
     sql += pkDrop;
-    for (std::vector<Procedure *>::iterator it = procedures.begin();
+    sql += idxDrop;
+    for (std::vector<Procedure*>::iterator it = procedures.begin();
         it != procedures.end(); ++it)
     {
         sql += "\n/* ------------------------------------------ */\n\n"
             + (*it)->getAlterSql(false);
     }
+    for (std::vector<FunctionSQL*>::iterator it = functions.begin();
+        it != functions.end(); ++it)
+    {
+        sql += "\n/* ------------------------------------------ */\n\n"
+            + (*it)->getAlterSql(false);
+    }
+    for (std::vector<Package*>::iterator it = packages.begin();
+        it != packages.end(); ++it)
+    {
+        sql += "\n/* ------------------------------------------ */\n\n";
+        sql += "DROP PACKAGE BODY " + (*it)->getQuotedName() + ";\n";
+    }
     sql += dropViews;
     sql += "\n/**************** DROPPING COMPLETE ***************/\n\n";
+    
+    sql += alterColumnSample;
+
     sql += createViews;
+
+
+    for (std::vector<Package*>::iterator it = packages.begin();
+        it != packages.end(); ++it)
+    {
+        sql += "\n/* ------------------------------------------ */\n\n"
+            + (*it)->getAlterBody() + ";\n";
+    }
+
+    for (std::vector<FunctionSQL*>::iterator it = functions.begin();
+        it != functions.end(); ++it)
+    {
+        sql += "\n/* ------------------------------------------ */\n\n"
+            + (*it)->getAlterSql(true);
+    }
     for (std::vector<Procedure *>::iterator it = procedures.begin();
         it != procedures.end(); ++it)
     {
@@ -581,6 +689,7 @@ wxString Relation::getRebuildSql(const wxString& forColumn)
     sql += createChecks;
     sql += pkCreate;
     sql += fkCreateSelf;
+    sql += idxCreate;
     sql += fkCreate;
     sql += privileges;
 

@@ -60,6 +60,7 @@ public:
     wxString getExpression() const;
     IndexType getIndexType();
     virtual const wxString getTypeName() const;
+    bool hasColumn(wxString segment) const;
     // Returns a list of index fields, or the expression source if
     // the index is an expression-based index.
     wxString getFieldsAsString();

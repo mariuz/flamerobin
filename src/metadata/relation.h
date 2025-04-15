@@ -81,6 +81,7 @@ public:
 
     size_t getColumnCount() const;
     ColumnPtr findColumn(const wxString& name) const;
+    int findColumnPosition(const wxString& name) const;
 
     wxString getRebuildSql(const wxString& forColumn = "");
     std::vector<Privilege>* getPrivileges(bool splitPerGrantor=true);
