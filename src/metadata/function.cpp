@@ -586,7 +586,7 @@ wxString FunctionSQL::getAlterSql(bool full)
 				else
 				{
                     if ((*it)->getMechanism() == 1 && full)
-                        param += param += (*it)->getTypeOf();
+                        param += (*it)->getTypeOf();
                     else
                         param += dm->getQuotedName();
 				}
