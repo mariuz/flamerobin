@@ -366,7 +366,7 @@ wxString Procedure::getAlterSql(bool full)
             wxString charset;
             wxString param = (*it)->getQuotedName() + " ";
             DomainPtr dm = (*it)->getDomain();
-            if ((*it)->getMechanism() == 1) {
+            if ((*it)->getMechanism() == 1 && full) { //when header only, it's better to get the type from the domain to avoud dependency lock
                 param += (*it)->getTypeOf();
             }else
             if (dm){
@@ -384,7 +384,7 @@ wxString Procedure::getAlterSql(bool full)
                 }
                 else
                 {
-                    if ((*it)->getMechanism() == 1)
+                    if ((*it)->getMechanism() == 1 && full) //when header only, it's better to get the type from the domain to avoud dependency lock
                         param += (*it)->getTypeOf();
                     else
                         param += dm->getQuotedName();

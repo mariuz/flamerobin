@@ -565,7 +565,7 @@ wxString FunctionSQL::getAlterSql(bool full)
 			wxString charset;
 			wxString param = (*it)->isOutputParameter() ? "" : (*it)->getQuotedName() + " ";
 			DomainPtr dm = (*it)->getDomain();
-            if ((*it)->getMechanism() == 1) {
+            if ((*it)->getMechanism() == 1 && full) { //when header only, it's better to get the type from the domain to avoid dependency lock
                 param += (*it)->getTypeOf();
             }
             else
@@ -585,8 +585,8 @@ wxString FunctionSQL::getAlterSql(bool full)
 				}
 				else
 				{
-                    if ((*it)->getMechanism() == 1)
-                        param += param += (*it)->getTypeOf();
+                    if ((*it)->getMechanism() == 1 && full)
+                        param += (*it)->getTypeOf();
                     else
                         param += dm->getQuotedName();
 				}

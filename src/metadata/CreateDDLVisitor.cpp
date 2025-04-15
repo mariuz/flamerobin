@@ -426,7 +426,8 @@ void CreateDDLVisitor::visitIndex(Index& i)
         preSqlM += "UNIQUE ";
     if (i.getIndexType() == Index::itDescending)
         preSqlM += "DESCENDING ";
-    preSqlM += "INDEX " + i.getQuotedName() + " ON " /*+ t.getQuotedName()*/;
+    preSqlM += "INDEX " + i.getQuotedName() + " ON " + i.getParent()->getQuotedName();
+    
     wxString expre = i.getExpression();
     if (!expre.IsEmpty())
         preSqlM += " COMPUTED BY " + expre;

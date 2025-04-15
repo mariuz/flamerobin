@@ -198,6 +198,23 @@ const wxString Index::getTypeName() const
     return "INDEX";
 }
 
+bool Index::hasColumn(wxString segment) const
+{
+    if (!expressionM.IsEmpty())
+        return expressionM.compare(segment) == 0;
+    else
+    {
+        wxString retval;
+        for (std::vector<wxString>::const_iterator it = segmentsM.begin();
+            it != segmentsM.end(); ++it)
+        {
+            if ((*it).compare(segment) == 0)
+                return true;
+        }
+    }
+    return false;
+}
+
 wxString Index::getExpression() const
 {
     return expressionM;
