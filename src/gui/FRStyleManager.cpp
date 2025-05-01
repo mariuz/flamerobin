@@ -254,7 +254,7 @@ void FRStyleManager::assignMargin(wxStyledTextCtrl* text)
     text->SetProperty(wxT("fold.comment"), wxT("1"));
     text->SetProperty(wxT("fold.sql.only.begin"), wxT("1"));
     text->SetFoldFlags(wxSTC_FOLDFLAG_LINEBEFORE_CONTRACTED | wxSTC_FOLDFLAG_LINEAFTER_CONTRACTED);
-    text->SetAutomaticFold(wxSTC_AUTOMATICFOLD_SHOW | wxSTC_AUTOMATICFOLD_CLICK | wxSTC_AUTOMATICFOLD_CHANGE);
+    //text->SetAutomaticFold(wxSTC_AUTOMATICFOLD_SHOW | wxSTC_AUTOMATICFOLD_CLICK | wxSTC_AUTOMATICFOLD_CHANGE);
 
     text->SetMarginWidth(FR_FOLDMARGIN, 14);
     text->SetMarginMask(FR_FOLDMARGIN, wxSTC_MASK_FOLDERS);
