@@ -436,13 +436,74 @@ BEGIN_EVENT_TABLE(DatabaseRegistrationDialog, BaseDialog)
     EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_library, DatabaseRegistrationDialog::OnSettingsChange)
 END_EVENT_TABLE()
 
+// void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
+// {
+//     wxString path = ::wxFileSelector(_("Select database file"), "", "", "",
+//         _("Firebird database files (*.fdb, *.gdb)|*.fdb;*.gdb|All files (*.*)|*.*"),
+//         wxFD_OPEN, this);
+//     if (!path.empty())
+//         text_ctrl_dbpath->SetValue(path);
+// }
+
 void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    wxString path = ::wxFileSelector(_("Select database file"), "", "", "",
+    wxString lastUsedDirectory;
+
+    // If available, retrieve the last directory used to create a database file. 
+    // The value in question is stored using FlameRobin's internal configuration 
+    // system (this is not a blocking action)
+    if ( ! config().getValue("LastDatabaseDir", lastUsedDirectory) )
+    {
+        wxLogWarning("Could not retrieve [ LastDatabaseDir ] from configuration (normal for first use).");
+    }
+  
+
+    // Show a file selector dialog for the `user` to choose where to create the database file.
+    // If it was saved, the initial directory will be the last one used.
+    wxString path = ::wxFileSelector(
+        _("Create database file"),
+        lastUsedDirectory, "", "", 
         _("Firebird database files (*.fdb, *.gdb)|*.fdb;*.gdb|All files (*.*)|*.*"),
-        wxFD_OPEN, this);
-    if (!path.empty())
-        text_ctrl_dbpath->SetValue(path);
+        wxFD_SAVE | wxFD_OVERWRITE_PROMPT,
+        this
+    );
+
+    // If the `user` selected/encoded a file path
+    if ( ! path.empty() )
+    {
+        // Wrap the full selected/encoded file path for extracting the directory part later
+        wxFileName fileName(path); 
+
+        // Extract the directory from the full file path
+        wxString path_dir = fileName.GetPath();
+
+        // Check if the `dirname` of the encoded/selected path exists
+        if ( ! wxFileName::DirExists(path_dir) ) 
+        {
+            // Log the error for debugging or tracking purposes
+            wxLogError("The specified directory does not exist : %s", path_dir);
+
+            return;
+        }
+    
+        // Check if the `user` is allowed to write to the target directory
+        if ( ! wxFileName::IsDirWritable(path_dir) ) 
+        {
+            wxLogError("Write access denied, the specified directory is not writable : %s", path_dir);
+
+            return;
+        }
+
+        // Display the selected/encoded path in the associated text control
+        text_ctrl_dbpath -> SetValue(path);
+
+
+        // Store the path as the last used directory for future use (this is not a blocking action)
+        if ( ! config().setValue("LastDatabaseDir", fileName.GetPath()) )
+        {
+            wxLogWarning("Unable to save [ LastDatabaseDir ] to the configuration.");
+        }
+    }
 }
 
 void DatabaseRegistrationDialog::OnBrowseLibraryButtonClick(wxCommandEvent& WXUNUSED(event))
