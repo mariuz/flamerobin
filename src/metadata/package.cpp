@@ -312,6 +312,8 @@ wxString Package::getSqlSecurity()
         st1->Set(1, wx2std(getName_(), converter));
         st1->Execute();
         st1->Fetch();
+        if (st1->IsNull(1))
+            return wxString();
         bool b;
         st1->Get(1, b);
         return wxString(b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER");
