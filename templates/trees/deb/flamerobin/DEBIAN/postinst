@@ -87,6 +87,23 @@ fi
 ### Symbolic link for the executable (flamerobin) -> end tag[sle0] 
 
 
+
+### Required GLIBC version to use `flamerobin` (>= 0.9.12) -> start tag[rvu0]
+
+glibcVersion=$(getconf GNU_LIBC_VERSION | grep -oE '[0-9]+\.[0-9]+')
+requiredVersion="2.39"
+
+if [[ ( "$(printf '%s\n' "$requiredVersion" "$glibcVersion" | sort -V | head -n 1)" == "$requiredVersion" ) ]]
+then
+
+    # Not necessary to load this lib if the version of GLIBC >= 2.39
+    rm -rf /opt/flamerobin/lib/libc.so*
+fi
+
+### Required GLIBC version to use `flamerobin` (>= 0.9.12) -> end tag[rvu0]
+
+
+
 # Just to print the name of the author
 echo ""
 echo ""
