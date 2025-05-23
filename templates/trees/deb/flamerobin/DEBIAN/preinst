@@ -1,0 +1,19 @@
+#!/bin/bash 
+
+
+### Required GLIBC version to install `flamerobin` (>= 0.9.12)
+
+
+set -eo pipefail 
+
+
+glibcVersion=$(getconf GNU_LIBC_VERSION | grep -oE '[0-9]+\.[0-9]+')
+requiredVersion="2.39"
+
+if [[ ! ( "$(printf '%s\n' "$requiredVersion" "$glibcVersion" | sort -V | head -n 1)" == "$requiredVersion" ) ]]
+then
+    echo "~"
+    echo -e "\033[031;1mFlag\033[0m, required GLIBC version : GLIBC >= $requiredVersion"
+
+    exit 1
+fi
