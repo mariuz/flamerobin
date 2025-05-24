@@ -74,6 +74,9 @@ jobs:
         mkdir -p templates/trees/deb/flamerobin/opt/flamerobin/lib 2> /dev/null
         ldd Build/flamerobin | awk '{print $3}' | grep -E '/lib|/usr/lib' | grep -v "not found" | xargs -I {} cp -v {} templates/trees/deb/flamerobin/opt/flamerobin/lib/
         
+        # Remove `libc.so*` (to avoid crashes ...) 
+        rm -rf templates/trees/deb/flamerobin/opt/flamerobin/lib/libc.so*
+
     # Set the version of the flamerobin program and move its executable to -> templates/trees/deb/flamerobin/opt/flamerobin/bin/ 
     - name: Set the version of the Flamerobin program and move its executable to "templates/trees/deb/flamerobin/opt/flamerobin/bin/"
       run: |

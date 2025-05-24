@@ -84,7 +84,11 @@ else
     exit 1
 fi
 
+echo "~"
+echo -e "\033[032;1mflamerobin\033[0m installed \U002705"
+
 ### Symbolic link for the executable (flamerobin) -> end tag[sle0] 
+
 
 
 # Just to print the name of the author
