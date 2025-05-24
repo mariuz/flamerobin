@@ -1,6 +1,6 @@
 Package: flamerobin
-Version: 0.9.13
-Section: base   
+Version: 0.9.14
+Section: base 
 Priority: optional
 Architecture: all
 Maintainer: Baldé <baldeuniversel@protonmail.com>
