@@ -1289,6 +1289,13 @@ void ExecuteSqlFrame::OnKeyDown(wxKeyEvent& event)
         styled_text_ctrl_sql->find(false);
         return;
     }
+    
+    if (event.ControlDown() && 
+        (event.GetKeyCode() == '/' || event.GetKeyCode() == WXK_NUMPAD_DIVIDE))
+    {
+        toggleBlockComment();
+        return;
+    }
 
     if (wxWindow::FindFocus() == styled_text_ctrl_sql)
     {
@@ -2889,6 +2896,83 @@ bool ExecuteSqlFrame::rollbackTransaction()
     notebook_1->SetSelection(0);
     setViewMode(vmEditor);
     return true;
+}
+
+
+void ExecuteSqlFrame::toggleBlockComment()
+{
+    // Get the current selection
+    int start = styled_text_ctrl_sql->GetSelectionStart();
+    int end = styled_text_ctrl_sql->GetSelectionEnd();
+
+    int startLine = styled_text_ctrl_sql->LineFromPosition(start);
+    int endLine = styled_text_ctrl_sql->LineFromPosition(end);
+
+    // If the selection ends at the start of the next line, don't include that line
+    if (end > start && styled_text_ctrl_sql->PositionFromLine(endLine) == end)
+        endLine--;
+
+    // Determine if we should uncomment (if first selected line starts with "--")
+    bool shouldUncomment = false;
+    wxString firstLine = styled_text_ctrl_sql->GetLine(startLine);
+    if (firstLine.Trim(false).StartsWith("--"))
+        shouldUncomment = true;
+
+    styled_text_ctrl_sql->BeginUndoAction();
+
+    for (int line = startLine; line <= endLine; ++line)
+    {
+        int lineStart = styled_text_ctrl_sql->PositionFromLine(line);
+        int lineEnd = styled_text_ctrl_sql->GetLineEndPosition(line);
+        wxString text = styled_text_ctrl_sql->GetTextRange(lineStart, lineEnd);
+
+        if (shouldUncomment)
+        {
+            // Remove '--' if present at the beginning (ignoring leading whitespace)
+            wxString trimmed = text.Trim(false);
+            if (trimmed.StartsWith("--"))
+            {
+                int idx = text.Find("--");
+                if (idx != wxNOT_FOUND)
+                {
+                    styled_text_ctrl_sql->SetTargetStart(lineStart + idx);
+                    styled_text_ctrl_sql->SetTargetEnd(lineStart + idx + 2);
+                    styled_text_ctrl_sql->ReplaceTarget("");
+                }
+            }
+        }
+        else
+        {
+            styled_text_ctrl_sql->InsertText(lineStart, "--");
+        }
+    }
+
+    styled_text_ctrl_sql->EndUndoAction();
+
+    // Move caret or restore selection
+    if (startLine == endLine)
+    {
+        // Single line: move caret to the start of the next line
+        int nextLine = startLine + 1;
+        int lineCount = styled_text_ctrl_sql->GetLineCount();
+        int newPos;
+        if (nextLine < lineCount)
+            newPos = styled_text_ctrl_sql->PositionFromLine(nextLine);
+        else
+            newPos = styled_text_ctrl_sql->GetLength();
+        styled_text_ctrl_sql->SetSelection(newPos, newPos);
+    }
+    else
+    {
+        // Multi-line: keep selection over the affected block
+        int maxLine = styled_text_ctrl_sql->GetLineCount() - 1;
+        if (endLine > maxLine)
+            endLine = maxLine;
+
+        int newStart = styled_text_ctrl_sql->PositionFromLine(startLine);
+        int newEnd = styled_text_ctrl_sql->GetLineEndPosition(endLine);
+        styled_text_ctrl_sql->SetSelection(newStart, newEnd);
+    }
 }
 
 void ExecuteSqlFrame::OnMenuUpdateGridInsertRow(wxUpdateUIEvent& event)
