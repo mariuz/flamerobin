@@ -51,7 +51,8 @@ void StatementImpl::Prepare(const std::string& sql)
 		throw LogicExceptionImpl("Statement::Prepare", _("SQL statement can't be 0."));
 
 	// Saves the SQL sentence, only for reporting reasons in case of errors
-	mSql = ParametersParser(sql);
+	mSql = sql;
+	mSqlWithParams = ParametersParser(sql);
 
 	IBS status;
 
@@ -71,11 +72,11 @@ void StatementImpl::Prepare(const std::string& sql)
 	// So we prefer to get them a little bit larger than needed than the other way.
 	int16_t inEstimate = 0;
 	int16_t outEstimate = 1;
-	size_t len = strlen(mSql.c_str());
+	size_t len = strlen(mSqlWithParams.c_str());
 	for (size_t i = 0; i < len; i++)
 	{
-		if (mSql[i] == '?') ++inEstimate;
-		if (mSql[i] == ',') ++outEstimate;
+		if (mSqlWithParams[i] == '?') ++inEstimate;
+		if (mSqlWithParams[i] == ',') ++outEstimate;
 	}
 
 	/*
@@ -90,7 +91,7 @@ void StatementImpl::Prepare(const std::string& sql)
 
 	status.Reset();
 	(*getGDS().Call()->m_dsql_prepare)(status.Self(), mTransaction->GetHandlePtr(),
-		&mHandle, 0, const_cast<char*>(mSql.c_str()),
+		&mHandle, 0, const_cast<char*>(mSqlWithParams.c_str()),
 			short(mDatabase->Dialect()), mOutRow->Self());
 	if (status.Errors())
 	{
@@ -701,12 +702,76 @@ std::vector<std::string> StatementImpl::ParametersByName() {
   return vt;
 }
 
+void removeSqlComments(std::string& sql) {
+    bool in_single_comment = false;
+    bool in_multi_comment = false;
+    bool in_string = false;
+    char quote_char = 0;
+
+    for (size_t i = 0; i < sql.size(); ++i) {
+        char c = sql[i];
+
+        // Handle string entry/exit
+        if (!in_single_comment && !in_multi_comment) {
+            if (!in_string && (c == '\'' || c == '\"')) {
+                in_string = true;
+                quote_char = c;
+            }
+            else if (in_string && c == quote_char) {
+                // Handle escaped quote by doubling (e.g. 'O''Reilly')
+                if (i + 1 < sql.size() && sql[i + 1] == quote_char) {
+                    ++i;  // skip escaped quote
+                }
+                else {
+                    in_string = false;
+                }
+            }
+        }
+
+        // If inside string, skip all
+        if (in_string) continue;
+
+        // Handle comments
+        if (!in_single_comment && !in_multi_comment) {
+            if (c == '-' && i + 1 < sql.size() && sql[i + 1] == '-') {
+                in_single_comment = true;
+                sql[i] = sql[i + 1] = ' ';
+                ++i;
+            }
+            else if (c == '/' && i + 1 < sql.size() && sql[i + 1] == '*') {
+                in_multi_comment = true;
+                sql[i] = sql[i + 1] = ' ';
+                ++i;
+            }
+        }
+        else if (in_single_comment) {
+            if (c != '\n') {
+                sql[i] = ' ';
+            }
+            else {
+                in_single_comment = false;
+            }
+        }
+        else if (in_multi_comment) {
+            sql[i] = ' ';
+            if (c == '*' && i + 1 < sql.size() && sql[i + 1] == '/') {
+                sql[i + 1] = ' ';
+                ++i;
+                in_multi_comment = false;
+            }
+        }
+    }
+}
+
 std::string StatementImpl::ParametersParser(std::string sql)
 {
 
 
     unsigned int i;
     bool isDMLcheck = false;
+
+    bool isExecuteBlock = false;
+    size_t executeBlockBeginPos = std::string::npos;
     
     parametersByName_.clear();
     parametersDetailedByName_.clear();
@@ -716,6 +781,8 @@ std::string StatementImpl::ParametersParser(std::string sql)
 
     //Here we verify, the job done recently was time lost?
     std::string isDML(sql);
+    //remove any line or block comment to avoid missfindings 
+    removeSqlComments(isDML);
 
     isDML.erase(isDML.begin(), std::find_if(isDML.begin(), isDML.end(), [](int c) { return !std::isspace(c); })); //lTrim
 
@@ -749,15 +816,17 @@ std::string StatementImpl::ParametersParser(std::string sql)
                 auto x = dml.at(i).size();
                 while (std::isspace(isDML.at(x)) && x<isDML.size())
                     x++;
-                char p = isDML.at(x);
-                //std::cout << "Char:"<<p << std::endl;
-                if (p != 'P')//Procedure: execute procedure $sp(:params), OK to replace, else, use original, break loop
-                    break;     //I don't want to replace :parameters inside an execute block..
-                               //TODO:
-                               //It is possible to insert parameters in the begin of the block, example:
-                               //execute block (x double precision = ?, y double precision = ?)
-                               //But it will need more work to do it
-                               //Source: http://www.firebirdsql.org/refdocs/langrefupd20-execblock.html
+                if (isDML.compare(x, 5, "BLOCK") == 0) {
+                    isExecuteBlock = true;
+                    executeBlockBeginPos = isDML.find("BEGIN", 0);
+                }
+                else
+                {
+                    char p = isDML.at(x);
+                    //std::cout << "Char:"<<p << std::endl;
+                    if (p != 'P')//Procedure: execute procedure $sp(:params), OK to replace, else, use original, break loop
+                        break;     //I don't want to replace :parameters inside an execute block..
+                }
 
             }            
             isDMLcheck = true;
@@ -779,26 +848,37 @@ std::string StatementImpl::ParametersParser(std::string sql)
 
     //ctor
     bool comment = false, blockComment = false, palavra = false, quote = false, doubleQuote = false;
-    std::ostringstream temp, sProcessedSQL;
+    std::ostringstream temp, paramName, sProcessedSQL;
     std::string debugProcessedSQL="";
 
     for(i= 0; i < sql.length(); i++){
         char nextChar=0;
         char previousChar=0;
+        char currentChar = sql.at(i);
         if (i < sql.length()-1)
             nextChar=sql.at(i+1);
         if (i > 0)
             previousChar=sql.at(i-1);
+
+        if (isExecuteBlock && i > executeBlockBeginPos)
+        {  
+            //did everything I needed for execute block, copy the remaining SQL and go home
+            sProcessedSQL << sql.at(i);
+            continue;
+        }
 
         if ((sql.at(i)=='\n') || (sql.at(i)=='\r')) {
             comment = false;
             //sProcessedSQL << sql.at(i);
         }else if (sql.at(i)=='-' && nextChar=='-' && !quote && !doubleQuote  && !blockComment) {
             comment = true;
+            sProcessedSQL << sql.at(i);
         }else if (sql.at(i)=='/' && nextChar=='*' && !quote && !doubleQuote  && !blockComment) {
             blockComment = true;
+            sProcessedSQL << sql.at(i);
         }else if (previousChar=='*' && sql.at(i)=='/' && blockComment) {
             blockComment = false;
+            sProcessedSQL << sql.at(i);
             continue;
         }else if (sql.at(i)=='\'' && !doubleQuote && !quote && !comment && !blockComment) {
             quote = true;
@@ -814,6 +894,9 @@ std::string StatementImpl::ParametersParser(std::string sql)
 
         } else if (quote || doubleQuote)
         {
+            sProcessedSQL << sql.at(i);
+        }
+        else if (comment || blockComment) {
             sProcessedSQL << sql.at(i);
         }
         if (!(comment || blockComment || quote || doubleQuote ) || palavra || sql.at(i)=='\n' || sql.at(i)=='\r')
@@ -832,6 +915,7 @@ std::string StatementImpl::ParametersParser(std::string sql)
                 if (std::isalnum(sql.at(i)) || sql.at(i)=='_' || sql.at(i)=='$')
                 { //A-Z 0-9 _
                     temp << (char)std::toupper(sql.at(i));
+                    paramName << sql.at(i);
                     if (i==sql.length()-1)  //se o I esta no fim do SQL...
                         goto fimPalavra;
                 }else{
@@ -839,14 +923,15 @@ std::string StatementImpl::ParametersParser(std::string sql)
                     palavra = false;
 
                     //cout << "sqletro encontrado: \""<< temp.str()<<"\""<<endl;
-                    sProcessedSQL << "?"<<"/*:"<<temp.str()<<"*/";
+                    sProcessedSQL << "?"<<"/*:"<< paramName.str()<<"*/";
                     if (!(std::isalnum(sql.at(i)) || sql.at(i)=='_' || sql.at(i)=='$'))
                         sProcessedSQL << sql.at(i);
                     std::vector<int> tmp = FindParamsByName(temp.str());
                     if (tmp.size() == 0)//If first time
                         parametersByName_.push_back(temp.str());
                     parametersDetailedByName_.push_back(temp.str());
-                    temp.str(std::string());temp.clear(); //Limpar StringStream
+                    temp.str(std::string()); temp.clear(); //Limpar StringStream
+                    paramName.str(std::string()); paramName.clear(); //Limpar StringStream
                 }
             }
             else
