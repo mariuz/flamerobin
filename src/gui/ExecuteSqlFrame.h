@@ -138,6 +138,7 @@ private:
     bool commitTransaction();
     bool rollbackTransaction();
 
+    void toggleBlockComment();
     void highlightOccurrences(const wxString& word);
     void OnTextSelected(wxStyledTextEvent& event);
     void autoComplete(bool force);
