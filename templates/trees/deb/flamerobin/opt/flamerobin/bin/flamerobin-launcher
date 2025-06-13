@@ -1,9 +1,8 @@
 #!/bin/bash 
 
-
-
 #
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:-}:/opt/flamerobin/lib"
+export PATH="$PATH:/opt/firebird/bin"
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}/opt/flamerobin/lib"
 
 /opt/flamerobin/bin/flamerobin
 
