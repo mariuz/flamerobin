@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout repository
@@ -20,9 +20,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install -y build-essential cmake libwxgtk3.2-dev dpkg-dev \
-          libfbclient2 firebird3.0-server firebird3.0-utils firebird-dev \
-          firebird3.0-server-core firebird3.0-common rsync wget
+        sudo apt install -y build-essential cmake dpkg-dev libwxgtk3.2-dev libtommath1 libtommath-dev libicu-dev libfbclient2 firebird-dev rsync wget
 
     - name: wxWidgets Cache
       id: cache-wxwidget
@@ -88,6 +86,15 @@ jobs:
         sed -i "s/^Version: .*/Version: ${FLAMEROBIN_VERSION}/" templates/trees/deb/flamerobin/DEBIAN/control
         mkdir -p templates/trees/deb/flamerobin/opt/flamerobin/bin
         cp -r Build/flamerobin templates/trees/deb/flamerobin/opt/flamerobin/bin/
+
+    - name: Patch binary
+      run: |
+        patchelf --set-rpath '$ORIGIN/../lib' templates/trees/deb/flamerobin/opt/flamerobin/bin/flamerobin 
+
+    - name: Strip binaries
+      run: |
+        strip templates/trees/deb/flamerobin/opt/flamerobin/bin/flamerobin || true
+        strip templates/trees/deb/flamerobin/opt/flamerobin/lib/*.so* || true
 
     - name: Copy extra files to /share
       run: |
