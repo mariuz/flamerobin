@@ -70,7 +70,6 @@ jobs:
       run: |
         mkdir -p templates/trees/deb/flamerobin/opt/flamerobin/lib
         ldd Build/flamerobin | awk '{print $3}' | grep -E '/lib|/usr/lib' | grep -v "not found" | xargs -I {} cp -v {} templates/trees/deb/flamerobin/opt/flamerobin/lib/
-        cp /opt/icu/lib/libicu*.so* templates/trees/deb/flamerobin/opt/flamerobin/lib/
         rm -rf templates/trees/deb/flamerobin/opt/flamerobin/lib/libc.so*
 
     - name: Set version and move executable
@@ -103,7 +102,7 @@ jobs:
 
     - name: Build .deb package
       run: |
-        dpkg-deb --build templates/trees/deb/flamerobin templates/trees/deb/flamerobin-${FLAMEROBIN_VERSION}.deb
+        dpkg-deb --build templates/trees/deb/flamerobin templates/trees/deb/flamerobin-${{ env.FLAMEROBIN_VERSION }}.deb
 
     - name: Upload .deb package
       uses: actions/upload-artifact@v4
