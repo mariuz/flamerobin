@@ -856,7 +856,7 @@ std::string StatementImpl::ParametersParser(std::string sql)
         }
         debugProcessedSQL = sProcessedSQL.str();
     }
-  std::cout << "sProcessedSQL: " << sProcessedSQL.str() << std::endl;
+  //std::cout << "sProcessedSQL: " << sProcessedSQL.str() << std::endl;
 
   return sProcessedSQL.str();
 }
