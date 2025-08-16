@@ -154,8 +154,6 @@ void CreateDDLVisitor::visitColumn(Column& c)
         if (d->isSystem())
         {
             preSqlM << d->getDatatypeAsString();
-            if (c.isIdentity())
-                preSqlM << c.getSource(true);
             wxString charset = d->getCharset();
             DatabasePtr db = d->getDatabase();
             if (!charset.IsEmpty())
@@ -171,6 +169,9 @@ void CreateDDLVisitor::visitColumn(Column& c)
     }
     else
         preSqlM <<  c.getSource();  // shouldn't happen
+
+    if (c.isIdentity())
+        preSqlM << c.getSource(true);
 
     wxString defaultValue;
     if (c.getDefault(IgnoreDomainDefault, defaultValue))
