@@ -227,7 +227,7 @@ void CreateDDLVisitor::visitDatabase(Database& d)
         preSqlM << "/********************* UDFS ***********************/\n\n";
         iterateit<UDFsPtr, UDF>(this, d.getUDFs(), progressIndicatorM);
         
-        if (d.getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
+        if (d.getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
             preSqlM << "/********************* FUNCTIONS ***********************/\n\n";
             iterateit<FunctionSQLsPtr, FunctionSQL>(this, d.getFunctionSQLs(),
                 progressIndicatorM);
@@ -245,7 +245,7 @@ void CreateDDLVisitor::visitDatabase(Database& d)
         iterateit<ProceduresPtr, Procedure>(this, d.getProcedures(),
             progressIndicatorM);
 
-        if (d.getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
+        if (d.getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
             preSqlM << "/******************* PACKAGES ******************/\n\n";
             iterateit<PackagesPtr, Package>(this, d.getPackages(),
                 progressIndicatorM);
@@ -253,7 +253,7 @@ void CreateDDLVisitor::visitDatabase(Database& d)
       
         preSqlM << "/******************** TABLES **********************/\n\n";
         iterateit<TablesPtr, Table>(this, d.getTables(), progressIndicatorM);
-        if (d.getInfo().getODSVersionIsHigherOrEqualTo(11.1)) {
+        if (d.getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) {
             iterateit<GTTablesPtr, GTTable>(this, d.getGTTables(), progressIndicatorM);
         }
 
@@ -270,12 +270,12 @@ void CreateDDLVisitor::visitDatabase(Database& d)
         iterateit<DMLTriggersPtr, DMLTrigger>(this, d.getDMLTriggers(),
             progressIndicatorM);
 
-        if (d.getInfo().getODSVersionIsHigherOrEqualTo(11.1)) {
+        if (d.getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) {
             preSqlM << "/******************** DB TRIGGERS ********************/\n\n";
             iterateit<DBTriggersPtr, DBTrigger>(this, d.getDBTriggers(),
                 progressIndicatorM);
         }
-        if (d.getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
+        if (d.getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
             preSqlM << "/******************** DDL TRIGGERS ********************/\n\n";
             iterateit<DDLTriggersPtr, DDLTrigger>(this, d.getDDLTriggers(),
                 progressIndicatorM);
