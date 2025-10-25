@@ -141,7 +141,7 @@ void FieldPropertiesDialog::createControls()
     checkbox_notnull = new wxCheckBox(getControlsPanel(), wxID_ANY, _("Not null"));
     {
         DatabasePtr db = tableM->getDatabase();
-        if (db->getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
+        if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
             checkbox_identity = new wxCheckBox(getControlsPanel(), ID_checkbox_identity, _("Identity"));
             label_initialValue = new wxStaticText(getControlsPanel(), wxID_ANY, _("Initial Value:"));
             textctrl_initialValue = new wxTextCtrl(getControlsPanel(), wxID_ANY, wxEmptyString);
@@ -214,7 +214,7 @@ void FieldPropertiesDialog::layoutControls()
         wxALIGN_CENTER_VERTICAL | wxEXPAND);
     {
         DatabasePtr db = tableM->getDatabase();
-        if (db->getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
+        if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
             sizerTop->Add(checkbox_identity, wxGBPosition(4, 0), wxDefaultSpan,
                 wxALIGN_CENTER_VERTICAL | wxEXPAND);
             sizerTop->Add(label_initialValue, wxGBPosition(4, 2), wxDefaultSpan,
@@ -354,8 +354,8 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
     wxString dtSize = textctrl_size->GetValue();
     wxString dtScale = textctrl_scale->GetValue();
     bool isNullable = !checkbox_notnull->IsChecked();
-    bool isIdentity = tableM->getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12.0) ? checkbox_identity->IsChecked() : false;
-    wxString initialValue = tableM->getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12.0) ? textctrl_initialValue->GetValue() : "";
+    bool isIdentity = tableM->getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? checkbox_identity->IsChecked() : false;
+    wxString initialValue = tableM->getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? textctrl_initialValue->GetValue() : "";
 
     int n = choice_datatype->GetSelection();
     if (n >= 0 && n < datatypescnt)
@@ -660,7 +660,7 @@ void FieldPropertiesDialog::updateColumnControls()
         loadCollations();
         choice_collate->SetSelection(
             choice_collate->FindString(columnM->getCollation()));
-        if (tableM->getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
+        if (tableM->getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
             checkbox_identity->SetValue(columnM->isIdentity());
             if (columnM->isIdentity()) {
                 textctrl_initialValue->SetValue(std::to_string(columnM->getInitialValue()));
@@ -704,7 +704,7 @@ void FieldPropertiesDialog::updateDatatypeInfo()
     choice_collate->Enable(columnM == 0 && indexOk && datatypes[n].isChar);
     if (!choice_collate->IsEnabled())
         choice_collate->SetSelection(wxNOT_FOUND);
-    if (tableM->getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12.0)) {
+    if (tableM->getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
         checkbox_identity->Enable(datatypes[n].identity);
         textctrl_initialValue->SetEditable(datatypes[n].identity);
         //textctrl_incrementalValue->SetEditable(datatypes[n].identity);
