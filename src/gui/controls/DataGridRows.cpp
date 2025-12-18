@@ -610,7 +610,6 @@ void IntegerColumnDef::setFromString(DataGridRowBuffer* buffer,
         const wxString& source)
 {
     wxASSERT(buffer);
-    int v32 = 0;
     int decimalSeparatorIdx, localSourceScale;
     wxString localSource = source;
     wxChar decimalSeparator;
@@ -620,7 +619,7 @@ void IntegerColumnDef::setFromString(DataGridRowBuffer* buffer,
         decimalSeparator = wxNumberFormatter::GetDecimalSeparator();
         decimalSeparatorIdx = localSource.rfind(decimalSeparator);
 
-        if (decimalSeparatorIdx > -1)
+        if (decimalSeparatorIdx != wxString::npos)
         {
             localSource.erase(decimalSeparatorIdx, 1);
             localSourceScale = localSource.Length() - decimalSeparatorIdx;
@@ -716,7 +715,6 @@ void Int64ColumnDef::setFromString(DataGridRowBuffer* buffer,
     const wxString& source)
 {
     wxASSERT(buffer);
-    int64_t v64 = 0;
     int decimalSeparatorIdx, localSourceScale;
     wxString localSource = source;
     wxChar decimalSeparator;
@@ -726,7 +724,7 @@ void Int64ColumnDef::setFromString(DataGridRowBuffer* buffer,
         decimalSeparator = wxNumberFormatter::GetDecimalSeparator();
         decimalSeparatorIdx = localSource.rfind(decimalSeparator);
 
-        if (decimalSeparatorIdx > -1)
+        if (decimalSeparatorIdx != wxString::npos)
         {
             localSource.erase(decimalSeparatorIdx, 1);
             localSourceScale = localSource.Length() - decimalSeparatorIdx;
