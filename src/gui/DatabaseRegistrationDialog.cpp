@@ -438,11 +438,77 @@ END_EVENT_TABLE()
 
 void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    wxString path = ::wxFileSelector(_("Select database file"), "", "", "",
+    // Declaration variables
+    wxString lastUsedDirectory;
+    long style; // For whether we are creating or registering a database
+    wxString dialogTitle; // For whether we are creating or registering a database
+
+
+    // Attempt to retrieve the last used directory from configuration (non-blocking)
+    try
+    {
+        config().getValue("LastDatabaseDir", lastUsedDirectory);
+
+    } catch (...)
+    {
+        //
+    }
+
+    if (createM)
+    {
+        // In create mode : allow file creation, prompt if the file exists
+        style = wxFD_SAVE | wxFD_OVERWRITE_PROMPT;
+        dialogTitle = _("Create new database");
+
+    } else
+    {
+        // In register mode : only allow to select an existing file
+        style = wxFD_OPEN | wxFD_FILE_MUST_EXIST;
+        dialogTitle = _("Register existing database");
+    }
+
+    // Show the file selection dialog.
+    wxString path = ::wxFileSelector(
+        dialogTitle,
+        lastUsedDirectory, "", "", 
         _("Firebird database files (*.fdb, *.gdb)|*.fdb;*.gdb|All files (*.*)|*.*"),
-        wxFD_OPEN, this);
-    if (!path.empty())
+        style,
+        this
+    );
+
+    // If the user selected a path (did not cancel the dialog)
+    if ( ! path.empty() )
+    {
+        wxFileName fileName(path);
+        wxString path_dir = fileName.GetPath();
+
+        // Ensure the directory exists
+        if ( ! wxFileName::DirExists(path_dir) )
+        {
+            wxLogError("The specified directory does not exist : %s", path_dir);
+            return;
+        }
+
+        // For creation mode, verify that the directory is writable
+        if ( createM && ! wxFileName::IsDirWritable(path_dir) )
+        {
+            wxLogError("Write access denied : the specified directory is not writable : %s", path_dir);
+            return;
+        }
+
+        // Update the UI with the selected path
         text_ctrl_dbpath->SetValue(path);
+
+        // Store the directory for future use
+        try
+        {
+            config().setValue("LastDatabaseDir", path_dir);
+
+        } catch (...)
+        {
+            //
+        }
+    }
 }
 
 void DatabaseRegistrationDialog::OnBrowseLibraryButtonClick(wxCommandEvent& WXUNUSED(event))

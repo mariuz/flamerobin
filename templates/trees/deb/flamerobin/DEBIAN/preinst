@@ -1,0 +1,29 @@
+#!/bin/bash
+
+#
+set -eo pipefail
+
+
+#####
+# Action before deploying the program 
+#####
+
+
+
+### Required GLIBC version to use `flamerobin` (>= 0.9.12) -> start tag[rvu0]
+
+glibcVersion=$(getconf GNU_LIBC_VERSION | grep -oE '[0-9]+\.[0-9]+')
+requiredVersion="2.39"
+
+if [[ ! ( "$(printf '%s\n' "$requiredVersion" "$glibcVersion" | sort -V | head -n 1)" == "$requiredVersion" ) ]]
+then
+    
+    #
+    echo "~"
+    echo -e "\033[031;1mFlag\033[0m, required GLIBC version : GLIBC >= $requiredVersion"
+
+    exit 1
+fi
+
+### Required GLIBC version to use `flamerobin` (>= 0.9.12) -> end tag[rvu0]
+
