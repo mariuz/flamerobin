@@ -29,6 +29,7 @@ build*/
 *.db
 # Visual Studio 2015 cache/options directory
 .vs/
+.vscode/
 #XCode
 .DS_Store
 xcuserdata
