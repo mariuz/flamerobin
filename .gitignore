@@ -33,3 +33,7 @@ build*/
 .DS_Store
 xcuserdata
 project.xcworkspace
+# Build artifacts
+config.log
+configure~
+_codeql_detected_source_root
