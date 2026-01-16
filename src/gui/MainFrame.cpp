@@ -740,7 +740,11 @@ void MainFrame::doBeforeDestroy()
     wxSafeYield();
     treeMainM->Thaw();
 
+#if defined(__WXMSW__) || defined(__WXGTK__)
+    // Flush() is only implemented on MSW and GTK platforms in wxWidgets
+    // According to wxWidgets documentation, calling it on unsupported platforms causes assertion failure
     wxTheClipboard->Flush();
+#endif
 }
 
 void MainFrame::OnMenuQuit(wxCommandEvent& WXUNUSED(event))

@@ -1116,6 +1116,7 @@ private:
     bool mCursorOpened;         // dsql_set_cursor_name was called
     IBPP::STT mType;            // Type de requète
     std::string mSql;           // Last SQL statement prepared or executed
+    std::string mSqlWithParams; // Last SQL statement with parameters replaced by '?'
 
     // Internal Methods
     void CursorFree();

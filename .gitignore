@@ -40,3 +40,7 @@ config.status
 configure~
 _codeql_detected_source_root
 
+# Build artifacts
+config.log
+configure~
+_codeql_detected_source_root
