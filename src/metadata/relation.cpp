@@ -614,7 +614,7 @@ wxString Relation::getRebuildSql(const wxString& forColumn)
         alterColumnSample += "ALTER TABLE " +
             t1->getQuotedName() + " ALTER COLUMN " + forColumn +
             " POSITION " + wxString::Format("%d", t1->findColumnPosition(forColumn)) + ";" + "\n";
-        alterColumnSample += " */\n\n\n";
+        alterColumnSample += "-- */\n\n\n";
     }
 
     wxString createChecks, dropChecks;
@@ -691,6 +691,7 @@ wxString Relation::getRebuildSql(const wxString& forColumn)
     sql += fkCreateSelf;
     sql += idxCreate;
     sql += fkCreate;
+    sql += "/* ------------------------------------------ */\n\n";
     sql += privileges;
 
     // TODO: restore view and trigger descriptions
