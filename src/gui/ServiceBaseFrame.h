@@ -130,6 +130,7 @@ public:
 
 protected:
         virtual void Execute(IBPP::Service ) = 0;
+        virtual wxString getOperationName() const;
 private:
     ServiceBaseFrame* frameM;
     wxString serverM;

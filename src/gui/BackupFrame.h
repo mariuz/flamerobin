@@ -78,6 +78,7 @@ public:
     );
 protected:
     virtual void Execute(IBPP::Service);
+    virtual wxString getOperationName() const;
 
     int factorM;
 
