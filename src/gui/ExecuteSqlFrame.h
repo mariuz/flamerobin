@@ -126,6 +126,7 @@ private:
     bool highlightWordText; //enable word highlight feature.
     bool highlightWordUnderCaret = true; // use word under caret if no text is selected?
     bool highlightWordTextMatchCase = false; //use sensitive search?
+    bool inHighlightUpdateM = false; // reentrancy guard for OnSqlEditUpdateUI
     bool autoCommitM;
     bool inTransactionM;
     IBPP::Transaction transactionM;
@@ -140,7 +141,6 @@ private:
 
     void toggleBlockComment();
     void highlightOccurrences(const wxString& word);
-    void OnTextSelected(wxStyledTextEvent& event);
     void autoComplete(bool force);
     void autoCompleteColumns(int pos, int len = 0);
     void OnSqlEditUpdateUI(wxStyledTextEvent& event);
