@@ -106,7 +106,7 @@ bool DDUinitFromStr(DOUBLE_DABBLE_UNION& ddu, bool &isNegative, const wxString &
 
     // replace thousand separators - if used
     if (wxNumberFormatter::GetThousandsSeparatorIfUsed(&sep1000))
-        src2.Replace(_(sep1000), _(""));
+        src2.Replace(wxString(sep1000), "");
 
     // Check: numeric?
     for (i1 = 0; i1 < src2.Length(); i1++)
