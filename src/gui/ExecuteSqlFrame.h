@@ -126,7 +126,7 @@ private:
     bool highlightWordText; //enable word highlight feature.
     bool highlightWordUnderCaret = true; // use word under caret if no text is selected?
     bool highlightWordTextMatchCase = false; //use sensitive search?
-    bool inHighlightUpdateM = false; // reentrancy guard for OnTextSelected
+    bool inHighlightUpdateM = false; // reentrancy guard for OnSqlEditUpdateUI
     bool autoCommitM;
     bool inTransactionM;
     IBPP::Transaction transactionM;

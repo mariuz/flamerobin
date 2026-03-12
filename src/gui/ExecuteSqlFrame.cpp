@@ -30,6 +30,7 @@
     #include "wx/wx.h"
 #endif
 
+#include <wx/wupdlock.h>
 #include <wx/artprov.h>
 #include <wx/dnd.h>
 #include <wx/file.h>
@@ -1098,7 +1099,13 @@ void ExecuteSqlFrame::OnSqlEditUpdateUI(wxStyledTextEvent& WXUNUSED(event))
     // Word highlight feature
     if (!highlightWordText || inHighlightUpdateM)
         return;
-    inHighlightUpdateM = true;
+
+    struct ReentrancyGuard {
+        bool& m_flag;
+        ReentrancyGuard(bool& flag) : m_flag(flag) { m_flag = true; }
+        ~ReentrancyGuard() { m_flag = false; }
+    };
+    ReentrancyGuard guard(inHighlightUpdateM);
 
     int wordStartPos = styled_text_ctrl_sql->WordStartPosition(p, true);
     int wordEndPos = styled_text_ctrl_sql->WordEndPosition(p, true);
@@ -1120,8 +1127,6 @@ void ExecuteSqlFrame::OnSqlEditUpdateUI(wxStyledTextEvent& WXUNUSED(event))
     {
         styled_text_ctrl_sql->clearHighlights();
     }
-
-    inHighlightUpdateM = false;
 }
 
 //! returns true if there is a word in "wordlist" that starts with "word"
@@ -3235,10 +3240,10 @@ const wxRect ExecuteSqlFrame::getDefaultRect() const
 
 void ExecuteSqlFrame::highlightOccurrences(const wxString& word)
 {
-    if (word.IsEmpty() || wxString(word).Trim().IsEmpty())
+    if (word.find_first_not_of(wxT(" \t\r\n")) == wxString::npos)
         return;
 
-    styled_text_ctrl_sql->Freeze();
+    wxWindowUpdateLocker noUpdates(styled_text_ctrl_sql);
     styled_text_ctrl_sql->clearHighlights();
 
     int start = 0;
@@ -3262,8 +3267,6 @@ void ExecuteSqlFrame::highlightOccurrences(const wxString& word)
     // If fewer than two occurrences, clear (highlighting a single match looks weird)
     if (occurrenceCount < 2)
         styled_text_ctrl_sql->clearHighlights();
-
-    styled_text_ctrl_sql->Thaw();
 }
 
 bool ExecuteSqlFrame::Show(bool show)
