@@ -120,7 +120,7 @@ file will be set to ignore those directories.
 Assumes a 'project' dir in you home directory, change to suit
 
  1. Setup the tools and libs needed:
-    $ sudo apt-get install build-essential git cmake firebird-dev libwxgtk3.0-gtk3-dev
+    $ sudo apt-get install build-essential git cmake firebird-dev libwxgtk3.2-dev
     (wxWidgets version may change in the future, update to match)
  2. $ cd ~/project
  3. $ git clone https://github.com/mariuz/flamerobin.git
