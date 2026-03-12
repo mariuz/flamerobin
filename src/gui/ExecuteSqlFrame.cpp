@@ -345,6 +345,7 @@ void SqlEditor::setup()
     SetMarginType(0, 1);              // set margin type to linenumbers
     */
     SetCaretLineVisible(true);
+    SetAdditionalSelectionTyping(true);
 
     SetMargins(0, 0);
     SetMarginWidth(FR_LINENUMBERNARGIN, 40);
