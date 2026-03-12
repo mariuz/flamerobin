@@ -296,11 +296,10 @@ void SqlEditor::markText(int start, int end)
 
 void SqlEditor::highlightText(int start, int end)
 {
-    StartStyling(start);
     SetIndicatorCurrent(0);
     IndicatorSetStyle(0, wxSTC_INDIC_ROUNDBOX);
     //TODO: If you don't like blue, please change to use global style configuration and send your patch
-    IndicatorSetForeground(0, wxColour(wxT("blue"))); //I liked how it looks like in blue
+    IndicatorSetForeground(0, wxColour(wxT("blue")));
     IndicatorFillRange(start, end - start);
 }
 
@@ -308,9 +307,7 @@ void SqlEditor::clearHighlights()
 {
     SetIndicatorCurrent(0);
     IndicatorClearRange(0, GetTextLength());
-    // Ensure the editor updates its visual state after clearing the indicators. When I highlight a word and then move to an empty area, some of the previously highlighted words retain their highlighting
     Refresh();
-    //Update(); //adds lag
 }
 
 void SqlEditor::setChars(bool firebirdIdentifierOnly)
@@ -574,8 +571,6 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
         wxTAB_TRAVERSAL);
     splitter_window_1 = new wxSplitterWindow(panel_contents, -1);
     styled_text_ctrl_sql = new SqlEditor(splitter_window_1, ID_stc_sql);
-    if (highlightWordText)
-        styled_text_ctrl_sql->Bind(wxEVT_STC_UPDATEUI, &ExecuteSqlFrame::OnTextSelected, this);
 
     //Fold
     //styled_text_ctrl_sql->Bind(wxEVT_STC_MARGINCLICK, &ExecuteSqlFrame::onMarginClick, this);
@@ -1098,6 +1093,34 @@ void ExecuteSqlFrame::OnSqlEditUpdateUI(wxStyledTextEvent& WXUNUSED(event))
     }
     else
         styled_text_ctrl_sql->BraceBadLight(wxSTC_INVALID_POSITION);    // remove light
+
+    // Word highlight feature
+    if (!highlightWordText || inHighlightUpdateM)
+        return;
+    inHighlightUpdateM = true;
+
+    int wordStartPos = styled_text_ctrl_sql->WordStartPosition(p, true);
+    int wordEndPos = styled_text_ctrl_sql->WordEndPosition(p, true);
+
+    if (styled_text_ctrl_sql->hasSelection())
+    {
+        highlightOccurrences(styled_text_ctrl_sql->GetSelectedText());
+    }
+    else if (highlightWordUnderCaret
+        && p != wordStartPos && p != wordEndPos && wordStartPos != wordEndPos)
+    {
+        wxString wordUnderCaret = styled_text_ctrl_sql->GetTextRange(wordStartPos, wordEndPos);
+        if (!wordUnderCaret.IsEmpty())
+            highlightOccurrences(wordUnderCaret);
+        else
+            styled_text_ctrl_sql->clearHighlights();
+    }
+    else
+    {
+        styled_text_ctrl_sql->clearHighlights();
+    }
+
+    inHighlightUpdateM = false;
 }
 
 //! returns true if there is a word in "wordlist" that starts with "word"
@@ -3211,77 +3234,35 @@ const wxRect ExecuteSqlFrame::getDefaultRect() const
 
 void ExecuteSqlFrame::highlightOccurrences(const wxString& word)
 {
-    styled_text_ctrl_sql->Freeze();
+    if (word.IsEmpty() || wxString(word).Trim().IsEmpty())
+        return;
 
-    // Clear previous highlights
+    styled_text_ctrl_sql->Freeze();
     styled_text_ctrl_sql->clearHighlights();
 
     int start = 0;
     int end = 0;
-    int flags = (highlightWordTextMatchCase ? wxSTC_FIND_MATCHCASE : 0); // No flags for case-insensitive search, use 0 instead TODO: add config to allow case (in)sensitive
+    int textLen = styled_text_ctrl_sql->GetTextLength();
+    int flags = (highlightWordTextMatchCase ? wxSTC_FIND_MATCHCASE : 0);
     int occurrenceCount = 0;
 
-    while (true)
+    while (end < textLen)
     {
-        start = styled_text_ctrl_sql->FindText(end, styled_text_ctrl_sql->GetTextLength(), word, flags);
+        start = styled_text_ctrl_sql->FindText(end, textLen, word, flags);
         if (start == wxSTC_INVALID_POSITION)
             break;
         end = start + word.length();
+        if (end <= start) // safety: prevent infinite loop
+            break;
         styled_text_ctrl_sql->highlightText(start, end);
         occurrenceCount++;
     }
 
-    styled_text_ctrl_sql->Thaw();
-    // If fewer than two occurrences are found, clear the highlights because otherwise it looks weird.
+    // If fewer than two occurrences, clear (highlighting a single match looks weird)
     if (occurrenceCount < 2)
-    {
         styled_text_ctrl_sql->clearHighlights();
-    }
-}
 
-void ExecuteSqlFrame::OnTextSelected(wxStyledTextEvent& event)
-{
-    int currentPos = styled_text_ctrl_sql->GetCurrentPos();
-    int wordStartPos = styled_text_ctrl_sql->WordStartPosition(currentPos, true);
-    int wordEndPos = styled_text_ctrl_sql->WordEndPosition(currentPos, true);
-
-    if (styled_text_ctrl_sql->hasSelection())
-    {
-        wxString selectedText = styled_text_ctrl_sql->GetSelectedText();
-        highlightOccurrences(selectedText);
-    }
-    else if (highlightWordUnderCaret)
-    {
-        // Check if cursor is at the start or the end of the word
-        if (currentPos == wordStartPos || currentPos == wordEndPos)
-        {
-            styled_text_ctrl_sql->clearHighlights();
-            return;
-        }
-
-        wxString wordUnderCaret = styled_text_ctrl_sql->GetTextRange(wordStartPos, wordEndPos);
-
-        if (!wordUnderCaret.IsEmpty())
-        {
-            highlightOccurrences(wordUnderCaret);
-        }
-        else
-        {
-            // Clear highlights if no text is selected and no word under caret
-            styled_text_ctrl_sql->clearHighlights();
-        }
-    }
-    else
-    {
-        // Clear highlights if no text is selected and highlightWordUnderCaret is false
-        styled_text_ctrl_sql->clearHighlights();
-    }
-
-    // Additional check: clear highlights if the caret is moved out of any word
-    if (currentPos != wordStartPos && currentPos != wordEndPos && wordStartPos == wordEndPos)
-    {
-        styled_text_ctrl_sql->clearHighlights();
-    }
+    styled_text_ctrl_sql->Thaw();
 }
 
 bool ExecuteSqlFrame::Show(bool show)
