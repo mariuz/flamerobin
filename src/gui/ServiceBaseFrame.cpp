@@ -295,6 +295,11 @@ ServiceThread::ServiceThread(ServiceBaseFrame* frame, wxString server,
 {
 }
 
+wxString ServiceThread::getOperationName() const
+{
+    return _("restore");
+}
+
 void* ServiceThread::Entry()
 {
     wxDateTime now;
@@ -311,7 +316,7 @@ void* ServiceThread::Entry()
         svc->Connect();
 
         now = wxDateTime::Now();
-        msg.Printf(_("Database restore started %s"), now.FormatTime().c_str());
+        msg.Printf(_("Database %s started %s"), getOperationName().c_str(), now.FormatTime().c_str());
         logImportant(msg);
         Execute(svc);
         while (true)
@@ -319,8 +324,8 @@ void* ServiceThread::Entry()
             if (TestDestroy())
             {
                 now = wxDateTime::Now();
-                msg.Printf(_("Database restore canceled %s"),
-                    now.FormatTime().c_str());
+                msg.Printf(_("Database %s canceled %s"),
+                    getOperationName().c_str(), now.FormatTime().c_str());
                 logImportant(msg);
                 break;
             }
@@ -328,8 +333,8 @@ void* ServiceThread::Entry()
             if (c == 0)
             {
                 now = wxDateTime::Now();
-                msg.Printf(_("Database restore finished %s"),
-                    now.FormatTime().c_str());
+                msg.Printf(_("Database %s finished %s"),
+                    getOperationName().c_str(), now.FormatTime().c_str());
                 logImportant(msg);
                 break;
             }
@@ -341,16 +346,16 @@ void* ServiceThread::Entry()
     catch (IBPP::Exception& e)
     {
         now = wxDateTime::Now();
-        msg.Printf(_("Database restore canceled %s due to IBPP exception:\n\n"),
-            now.FormatTime().c_str());
+        msg.Printf(_("Database %s canceled %s due to IBPP exception:\n\n"),
+            getOperationName().c_str(), now.FormatTime().c_str());
         msg += e.what();
         logError(msg);
     }
     catch (...)
     {
         now = wxDateTime::Now();
-        msg.Printf(_("Database restore canceled %s due to exception"),
-            now.FormatTime().c_str());
+        msg.Printf(_("Database %s canceled %s due to exception"),
+            getOperationName().c_str(), now.FormatTime().c_str());
         logError(msg);
     }
     return 0;

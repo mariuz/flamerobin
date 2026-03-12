@@ -350,3 +350,8 @@ void BackupThread::Execute(IBPP::Service svc)
         intervalM, parallelM
     );
 }
+
+wxString BackupThread::getOperationName() const
+{
+    return _("backup");
+}
