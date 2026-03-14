@@ -158,7 +158,7 @@ Assumes Homebrew (https://brew.sh/) is installed.
  7. $ cmake ..
     Note: if CMake cannot find wxWidgets (e.g. on Apple Silicon where Homebrew
     installs to /opt/homebrew), pass the Homebrew prefix explicitly:
-    $ cmake -DCMAKE_PREFIX_PATH=$(brew --prefix) ..
+    $ cmake -DCMAKE_PREFIX_PATH="$(brew --prefix)" ..
  8. $ make
  9. To run FlameRobin:
     $ open flamerobin.app

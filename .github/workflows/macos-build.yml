@@ -1,7 +1,6 @@
 name: Build FlameRobin for macOS
 
 env:
-  wx-tag-version: v3.2.6
   fb-tag: v5.0.3
   fb-build: 5.0.3.1683-0
 
@@ -21,29 +20,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # Cache wxWidgets if already built
-    - name: wxWidget cache
-      id: cache-wxwidget
-      uses: actions/cache@v4
-      with:
-        path: wxWidgets
-        key: ${{ runner.os }}-${{ runner.arch }}-wxwidgets-${{env.wx-tag-version}}
-        restore-keys: ${{ runner.os }}-${{ runner.arch }}-wxwidgets-
-
-    # Clone and compile wxWidgets if not already cached
-    - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
-      name: Clone wxWidgets
-      run: git clone --recursive --branch ${{ env.wx-tag-version }} --depth 1 https://github.com/wxWidgets/wxWidgets.git
-
-    - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
-      name: Build wxWidgets
-      run: |
-        cmake -S wxWidgets -B wxWidgets/cmake_build -DCMAKE_BUILD_TYPE=Release -DwxBUILD_SHARED=OFF
-        cmake --build wxWidgets/cmake_build -j$(sysctl -n hw.ncpu)
-
-    # Install wxWidgets — runs whether wxWidgets was just built or restored from cache
+    # Install wxWidgets via Homebrew (avoids building from source with cmake 4.0+
+    # which is incompatible with wxWidgets 3.2.x cmake_minimum_required VERSION)
     - name: Install wxWidgets
-      run: sudo cmake --install wxWidgets/cmake_build
+      run: brew install wxwidgets
 
     # Install Firebird
     - name: Install Firebird
@@ -55,7 +35,8 @@ jobs:
     # Building the CMake project for FlameRobin
     - name: Generate CMake project
       run: |
-        cmake -S . -B Build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/Applications
+        cmake -S . -B Build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/Applications \
+              -DCMAKE_PREFIX_PATH="$(brew --prefix)"
 
     # FlameRobin Compilation
     - name: Build FlameRobin
