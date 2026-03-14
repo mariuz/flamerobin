@@ -593,17 +593,14 @@ MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
         case ntDMLTrigger:
             if ((item = DMLtriggersM->findByName(name).get())) {
                 return item;
-                break;
             }
         case ntDBTrigger:
             if ((item = DBTriggersM->findByName(name).get())) {
                 return item;
-                break;
             }
         case ntDDLTrigger:
             if ((item = DDLTriggersM->findByName(name).get())) {
                 return item;
-                break;
             }
         case ntProcedure:
             return proceduresM->findByName(name).get();

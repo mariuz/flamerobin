@@ -563,13 +563,6 @@ void DataGridTable::importBlobFile(const wxString& filename, int row, int col,
     ProgressIndicator *pi)
 {
     rowsM.importBlobFile(filename, row, col, pi);
-
-    // tell the grid it's done
-    if (GetView())
-    {
-        wxGridTableMessage msg(this, wxGRIDTABLE_REQUEST_VIEW_GET_VALUES);
-        GetView()->ProcessTableMessage(msg);
-    }
 }
 
 void DataGridTable::exportBlobFile(const wxString& filename, int row, int col,
