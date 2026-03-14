@@ -2,6 +2,8 @@ name: Build FlameRobin for macOS
 
 env:
   wx-tag-version: v3.2.6
+  fb-tag: v5.0.3
+  fb-build: 5.0.3.1683-0
 
 on:
   push:
@@ -11,7 +13,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-13
+    runs-on: macos-14
     permissions:
       contents: read
     steps:
@@ -25,8 +27,8 @@ jobs:
       uses: actions/cache@v4
       with:
         path: wxWidgets
-        key: ${{ runner.os }}-wxwidgets-${{env.wx-tag-version}}
-        restore-keys: ${{ runner.os }}-wxwidgets-
+        key: ${{ runner.os }}-${{ runner.arch }}-wxwidgets-${{env.wx-tag-version}}
+        restore-keys: ${{ runner.os }}-${{ runner.arch }}-wxwidgets-
 
     # Clone and compile wxWidgets if not already cached
     - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
@@ -46,7 +48,7 @@ jobs:
     - name: Install Firebird
       run: |
         wget -nv -O Firebird-macOS.pkg \
-            "https://github.com/FirebirdSQL/firebird/releases/download/v4.0.5/Firebird-4.0.5.3140-0-x86_64.pkg"
+            "https://github.com/FirebirdSQL/firebird/releases/download/${{ env.fb-tag }}/Firebird-${{ env.fb-build }}-macos-arm64.pkg"
         sudo installer -pkg Firebird-macOS.pkg -target /
 
     # Building the CMake project for FlameRobin
