@@ -58,11 +58,6 @@ void initializeLockCount(MetadataItemPtr item, unsigned count)
     initializeLockCount(item.get(), count);
 }
 
-template<>
-ObjectWithHandle<MetadataItem>::HandleMap ObjectWithHandle<MetadataItem>::handleMap = ObjectWithHandle<MetadataItem>::HandleMap();
-template<>
-ObjectWithHandle<MetadataItem>::Handle ObjectWithHandle<MetadataItem>::nextHandle = 0;
-
 MetadataItem::MetadataItem()
     : Subject(), typeM(ntUnknown), parentM(0), metadataIdM(-1), childrenLoadedM(lsNotLoaded),
         descriptionLoadedM(lsNotLoaded), propertiesLoadedM(lsNotLoaded)
