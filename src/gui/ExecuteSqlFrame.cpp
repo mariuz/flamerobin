@@ -1450,7 +1450,7 @@ void ExecuteSqlFrame::OnMenuSaveOrSaveAs(wxCommandEvent& event)
     if (useAlternativeSaveMode)
     {
         wxFile file(filename, wxFile::write);
-        if (saveStatus = file.Write(styled_text_ctrl_sql->GetValue()))
+        if ((saveStatus = file.Write(styled_text_ctrl_sql->GetValue())))
         {
             file.Close();
             styled_text_ctrl_sql->SetModified(false);
@@ -2527,7 +2527,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         }
         grid_data->ClearGrid(); // statement object will be invalidated, so clear the grid
         statementM = IBPP::StatementFactory(databaseM->getIBPPDatabase(), transactionM);
-        log(_("Preparing statement: " + sql), ttSql);
+        log(_("Preparing statement: ") + sql, ttSql);
         sae.scroll();
         {
             wxStopWatch sw;
