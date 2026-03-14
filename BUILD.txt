@@ -146,6 +146,20 @@ build for 'release':
 -- Mac OS --
 ------------
 
-TODO: We currently have no MacOS devs. The UNIX build above may work, with some
-      tweaks.
+Assumes Homebrew (https://brew.sh/) is installed.
+
+ 1. Install the required tools and libraries:
+    $ brew install cmake firebird-client wxwidgets
+ 2. $ cd ~/projects
+ 3. $ git clone https://github.com/mariuz/flamerobin.git
+ 4. $ cd flamerobin
+ 5. $ mkdir build
+ 6. $ cd build
+ 7. $ cmake ..
+    Note: if CMake cannot find wxWidgets (e.g. on Apple Silicon where Homebrew
+    installs to /opt/homebrew), pass the Homebrew prefix explicitly:
+    $ cmake -DCMAKE_PREFIX_PATH=$(brew --prefix) ..
+ 8. $ make
+ 9. To run FlameRobin:
+    $ open flamerobin.app
 

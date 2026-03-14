@@ -34,10 +34,11 @@ if (WIN32)
 		endif ()
 	endif()
 	set(wxWidgets_ROOT_DIR ${WXDIR})
+	# On Windows we want the static build of wxWidgets
+	set(wxWidgets_USE_STATIC ON)
 endif (WIN32)
 
-# We want the wx static build, and Unicode support
-set(wxWidgets_USE_STATIC ON)
+# Unicode support is always required
 set(wxWidgets_USE_UNICODE ON)
 
 # Find the wxWidgets library
