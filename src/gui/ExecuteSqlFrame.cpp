@@ -2430,7 +2430,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     while (tk.nextToken());
     if (!hasStatements)
     {
-        log(_("Parsed statement: " + sql), ttSql);
+        log(_("Parsed statement: ") + sql, ttSql);
         log(_("Empty statement detected, bailing out..."));
         return true;
     }
