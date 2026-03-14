@@ -38,11 +38,12 @@ jobs:
     - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
       name: Build wxWidgets
       run: |
-        cd wxWidgets
-        mkdir build && cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release -DwxBUILD_SHARED=OFF
-        make -j$(sysctl -n hw.ncpu)
-        sudo make install
+        cmake -S wxWidgets -B wxWidgets/cmake_build -DCMAKE_BUILD_TYPE=Release -DwxBUILD_SHARED=OFF
+        cmake --build wxWidgets/cmake_build -j$(sysctl -n hw.ncpu)
+
+    # Install wxWidgets — runs whether wxWidgets was just built or restored from cache
+    - name: Install wxWidgets
+      run: sudo cmake --install wxWidgets/cmake_build
 
     # Install Firebird
     - name: Install Firebird
