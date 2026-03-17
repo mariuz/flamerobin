@@ -1,0 +1,69 @@
+name: Build FlameRobin for macOS
+
+env:
+  fb-tag: v5.0.3
+  fb-build: 5.0.3.1683-0
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  build:
+    runs-on: macos-14
+    permissions:
+      contents: read
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # Install wxWidgets via Homebrew (avoids building from source with cmake 4.0+
+    # which is incompatible with wxWidgets 3.2.x cmake_minimum_required VERSION)
+    - name: Install wxWidgets
+      run: brew install wxwidgets
+
+    # Install Firebird
+    - name: Install Firebird
+      run: |
+        wget -nv -O Firebird-macOS.pkg \
+            "https://github.com/FirebirdSQL/firebird/releases/download/${{ env.fb-tag }}/Firebird-${{ env.fb-build }}-macos-arm64.pkg"
+        sudo installer -pkg Firebird-macOS.pkg -target /
+
+    # Building the CMake project for FlameRobin
+    - name: Generate CMake project
+      run: |
+        cmake -S . -B Build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/Applications \
+              -DCMAKE_PREFIX_PATH="$(brew --prefix)"
+
+    # FlameRobin Compilation
+    - name: Build FlameRobin
+      run: |
+        cmake --build Build --config Release -j$(sysctl -n hw.ncpu)
+
+    # Check where the generated app bundle is
+    - name: Locate the compiled app bundle
+      run: |
+        find Build/ -name "flamerobin.app" -type d
+        du -skh Build/flamerobin.app
+
+    # Set the version of the flamerobin program
+    - name: Set the version of the FlameRobin program
+      run: |
+        FLAMEROBIN_VERSION=$(awk '
+          /FR_VERSION_MAJOR/ { major = $3 }
+          /FR_VERSION_MINOR/ { minor = $3 }
+          /FR_VERSION_RLS/   { rls   = $3 }
+          END { print major "." minor "." rls }
+          ' src/frversion.h)
+        echo "flamerobin version : $FLAMEROBIN_VERSION"
+        echo "FLAMEROBIN_VERSION=$FLAMEROBIN_VERSION" >> $GITHUB_ENV
+
+    # Upload the app bundle as a GitHub Actions artifact
+    - name: Upload macOS app bundle
+      uses: actions/upload-artifact@v4
+      with:
+        name: flamerobin-macos-${{ env.FLAMEROBIN_VERSION }}
+        path: Build/flamerobin.app

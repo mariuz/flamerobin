@@ -102,4 +102,10 @@ public:
     }
 };
 
+template<class T>
+typename ObjectWithHandle<T>::HandleMap ObjectWithHandle<T>::handleMap;
+
+template<class T>
+typename ObjectWithHandle<T>::Handle ObjectWithHandle<T>::nextHandle = 0;
+
 #endif // FR_OBJECTWITHHANDLE_H

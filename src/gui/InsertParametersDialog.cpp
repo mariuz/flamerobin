@@ -261,7 +261,7 @@ InsertParametersDialog::InsertParametersDialog(wxWindow* parent, IBPP::Statement
         updateControls(row);
         //Show prevoius data
         //TODO: load SPECIAL selected option too
-        if (statementM->ParametersByName().at(row)!='?')
+        if (statementM->ParametersByName().at(row)!="?")
         {
             if (parameterSaveList.count(statementM->ParametersByName().at(row))) {
                 gridM->SetCellValue(wxGridCellCoords(row, 3), parameterSaveList.at(statementM->ParametersByName().at(row)));

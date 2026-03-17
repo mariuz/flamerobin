@@ -35,5 +35,6 @@ xcuserdata
 project.xcworkspace
 # Build artifacts
 config.log
+config.status
 configure~
 _codeql_detected_source_root

@@ -562,10 +562,11 @@ void DummyColumnDef::setFromString(DataGridRowBuffer* /* buffer */,
 class IntegerColumnDef : public ResultsetColumnDef
 {
 private:
+    short scaleM;
     unsigned offsetM;
 public:
     IntegerColumnDef(const wxString& name, unsigned offset, bool readOnly,
-        bool nullable);
+        bool nullable, short scale);
     virtual wxString getAsString(DataGridRowBuffer* buffer, Database* db);
     virtual unsigned getBufferSize();
     virtual bool isNumeric();
@@ -576,8 +577,9 @@ public:
 };
 
 IntegerColumnDef::IntegerColumnDef(const wxString& name, unsigned offset,
-    bool readOnly, bool nullable)
-    : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
+    bool readOnly, bool nullable, short scale)
+    : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset),
+        scaleM(scale)
 {
 }
 
@@ -585,17 +587,59 @@ wxString IntegerColumnDef::getAsString(DataGridRowBuffer* buffer, Database*)
 {
     wxASSERT(buffer);
     int value;
+    wxString result;
+    int numStart;
+
     if (!buffer->getValue(offsetM, value))
         return wxEmptyString;
-    return wxString::Format("%d", value);
+    result = wxString::Format("%d", value);
+    if (scaleM > 0)
+    {
+        numStart = (result.GetChar(0) == '-') ? 1 : 0;
+
+        while (result.length() < scaleM + numStart + 1)
+            result.insert(numStart, "0");
+
+        result.insert(result.length() - scaleM,
+                      wxNumberFormatter::GetDecimalSeparator());
+    }
+    return result;
 }
 
 void IntegerColumnDef::setFromString(DataGridRowBuffer* buffer,
         const wxString& source)
 {
     wxASSERT(buffer);
+    int decimalSeparatorIdx, localSourceScale;
+    wxString localSource = source;
+    wxChar decimalSeparator;
+
+    if (scaleM > 0)
+    {
+        decimalSeparator = wxNumberFormatter::GetDecimalSeparator();
+        decimalSeparatorIdx = localSource.rfind(decimalSeparator);
+
+        if (decimalSeparatorIdx != wxString::npos)
+        {
+            localSource.erase(decimalSeparatorIdx, 1);
+            localSourceScale = localSource.Length() - decimalSeparatorIdx;
+        }
+        else
+            localSourceScale = 0;
+
+        // remove numbers if we are too big
+        if (localSourceScale > scaleM)
+            localSource.erase(localSource.Length() - localSourceScale + scaleM);
+        // add 0 if we are too small
+        while (localSourceScale < scaleM)
+        {
+            localSource = localSource + _("0");
+            localSourceScale++;
+        }
+    }
+
     long value;
-    if (!source.ToLong(&value))
+    if (!localSource.ToLong(&value))
         throw FRError(_("Invalid integer numeric value"));
     buffer->setValue(offsetM, (int)value);
 }
@@ -623,10 +667,11 @@ void IntegerColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
 class Int64ColumnDef : public ResultsetColumnDef
 {
 private:
+    short scaleM;
     unsigned offsetM;
 public:
     Int64ColumnDef(const wxString& name, unsigned offset, bool readOnly,
-        bool nullable);
+        bool nullable, short scale);
     virtual wxString getAsString(DataGridRowBuffer* buffer, Database* db);
     virtual unsigned getBufferSize();
     virtual bool isNumeric();
@@ -637,8 +682,9 @@ public:
 };
 
 Int64ColumnDef::Int64ColumnDef(const wxString& name, unsigned offset,
-    bool readOnly, bool nullable)
-    : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset)
+    bool readOnly, bool nullable, short scale)
+    : ResultsetColumnDef(name, readOnly, nullable), offsetM(offset),
+        scaleM(scale)
 {
 }
 
@@ -646,18 +692,59 @@ wxString Int64ColumnDef::getAsString(DataGridRowBuffer* buffer, Database*)
 {
     wxASSERT(buffer);
     int64_t value;
+    wxString result;
+    int numStart;
+
     if (!buffer->getValue(offsetM, value))
         return wxEmptyString;
-    return wxLongLong(value).ToString();
+    result = wxLongLong(value).ToString();
+    if (scaleM > 0)
+    {
+        numStart = (result.GetChar(0) == '-') ? 1 : 0;
+
+        while (result.length() < scaleM + numStart + 1)
+            result.insert(numStart, "0");
+
+        result.insert(result.length() - scaleM,
+                      wxNumberFormatter::GetDecimalSeparator());
+    }
+    return result;
 }
 
 void Int64ColumnDef::setFromString(DataGridRowBuffer* buffer,
     const wxString& source)
 {
     wxASSERT(buffer);
+    int decimalSeparatorIdx, localSourceScale;
+    wxString localSource = source;
+    wxChar decimalSeparator;
+
+    if (scaleM > 0)
+    {
+        decimalSeparator = wxNumberFormatter::GetDecimalSeparator();
+        decimalSeparatorIdx = localSource.rfind(decimalSeparator);
+
+        if (decimalSeparatorIdx != wxString::npos)
+        {
+            localSource.erase(decimalSeparatorIdx, 1);
+            localSourceScale = localSource.Length() - decimalSeparatorIdx;
+        }
+        else
+            localSourceScale = 0;
+
+        // remove numbers if we are too big
+        if (localSourceScale > scaleM)
+            localSource.erase(localSource.Length() - localSourceScale + scaleM);
+        // add 0 if we are too small
+        while (localSourceScale < scaleM)
+        {
+            localSource = localSource + _("0");
+            localSourceScale++;
+        }
+    }
 
     wxLongLong_t ll;
-    if (source.ToLongLong(&ll))
+    if (localSource.ToLongLong(&ll))
     {
         buffer->setValue(offsetM, (int64_t)ll);
         return;
@@ -665,7 +752,7 @@ void Int64ColumnDef::setFromString(DataGridRowBuffer* buffer,
 
     // perhaps underlying library doesn't support 64bit, we try 32:
     long l;
-    if (!source.ToLong(&l)) // nope, that fails as well
+    if (!localSource.ToLong(&l)) // nope, that fails as well
         throw FRError(_("Invalid 64bit numeric value"));
     buffer->setValue(offsetM, (int64_t)l);
 }
@@ -2083,6 +2170,9 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
         IBPP::SDT type = statement->ColumnType(col);
         short scale = statement->ColumnScale(col);
         if ((scale > 0) &&
+            (type != IBPP::sdSmallint) &&
+            (type != IBPP::sdInteger) &&
+            (type != IBPP::sdLargeint) &&
             (type != IBPP::sdInt128) &&
             (type != IBPP::sdDec16) &&
             (type != IBPP::sdDec34))
@@ -2117,10 +2207,10 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
 
                 case IBPP::sdSmallint:
                 case IBPP::sdInteger:
-                    columnDef = new IntegerColumnDef(colName, bufferSizeM, readOnly, nullable);
+                    columnDef = new IntegerColumnDef(colName, bufferSizeM, readOnly, nullable, scale);
                     break;
                 case IBPP::sdLargeint:
-                    columnDef = new Int64ColumnDef(colName, bufferSizeM, readOnly, nullable);
+                    columnDef = new Int64ColumnDef(colName, bufferSizeM, readOnly, nullable, scale);
                     break;
                 case IBPP::sdInt128:
                     columnDef = new Int128ColumnDef(colName, bufferSizeM, readOnly, nullable, scale);
