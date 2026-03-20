@@ -1,0 +1,45 @@
+name: Build FlameRobin Flatpak (Fedora)
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  flatpak:
+    name: Build Flatpak
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-24.08
+      options: --privileged
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set FlameRobin version
+        run: |
+          FLAMEROBIN_VERSION=$(awk '
+            /FR_VERSION_MAJOR/ { major = $3 }
+            /FR_VERSION_MINOR/ { minor = $3 }
+            /FR_VERSION_RLS/   { rls   = $3 }
+            END { print major "." minor "." rls }
+            ' src/frversion.h)
+          echo "FLAMEROBIN_VERSION=$FLAMEROBIN_VERSION" >> $GITHUB_ENV
+
+      - name: Build Flatpak
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: flamerobin-${{ env.FLAMEROBIN_VERSION }}.flatpak
+          manifest-path: flatpak/org.flamerobin.FlameRobin.yml
+          cache-key: flatpak-builder-${{ github.sha }}
+          upload-artifact: false
+
+      - name: Upload Flatpak bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: flamerobin-flatpak
+          path: flamerobin-${{ env.FLAMEROBIN_VERSION }}.flatpak
