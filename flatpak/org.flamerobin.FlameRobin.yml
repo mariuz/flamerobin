@@ -1,0 +1,48 @@
+app-id: org.flamerobin.FlameRobin
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+command: flamerobin
+
+finish-args:
+  - --share=ipc
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --device=dri
+  - --filesystem=home
+  - --share=network
+
+modules:
+  - name: firebird-client
+    buildsystem: simple
+    build-commands:
+      # The outer tarball contains buildroot.tar.gz (after strip-components: 1).
+      # Extract only the client library from the inner buildroot.tar.gz.
+      - tar -xzf buildroot.tar.gz ./opt/firebird/lib/libfbclient.so.5.0.3
+      - install -Dm755 opt/firebird/lib/libfbclient.so.5.0.3 /app/lib/libfbclient.so.5.0.3
+      - ln -s libfbclient.so.5.0.3 /app/lib/libfbclient.so.2
+      - ln -s libfbclient.so.2 /app/lib/libfbclient.so
+    sources:
+      - type: archive
+        # This tarball contains buildroot.tar.gz; strip-components: 1 places it at the root.
+        url: https://github.com/FirebirdSQL/firebird/releases/download/v5.0.3/Firebird-5.0.3.1683-0-linux-x64.tar.gz
+        sha256: ef281c53f85756288151a86831375c9ae668caaeccd1b18103d523ba8f444779
+        strip-components: 1
+
+  - name: wxWidgets
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DwxBUILD_SHARED=OFF
+    sources:
+      - type: archive
+        url: https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.6/wxWidgets-3.2.6.tar.bz2
+        sha256: 939e5b77ddc5b6092d1d7d29491fe67010a2433cf9b9c0d841ee4d04acb9dce7
+
+  - name: flamerobin
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+    sources:
+      - type: dir
+        path: ..
