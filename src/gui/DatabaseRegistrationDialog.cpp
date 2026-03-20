@@ -438,11 +438,52 @@ END_EVENT_TABLE()
 
 void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    wxString path = ::wxFileSelector(_("Select database file"), "", "", "",
+    // Style, for whether we are creating or registering a database
+    long style = createM
+        ? wxFD_SAVE | wxFD_OVERWRITE_PROMPT
+        : wxFD_OPEN | wxFD_FILE_MUST_EXIST;
+
+    // Dialog title
+    wxString dialogTitle = createM
+        ? _("Create new database")
+        : _("Register existing database");
+
+    // Show the file selection dialog
+    wxString path = ::wxFileSelector(
+        dialogTitle,
+        "", "", "",
         _("Firebird database files (*.fdb, *.gdb)|*.fdb;*.gdb|All files (*.*)|*.*"),
-        wxFD_OPEN, this);
-    if (!path.empty())
+        style,
+        this
+    );
+
+    if (!path.IsEmpty())
+    {
+        wxFileName fileName(path);
+
+        // Ensure the directory exists
+        if (!wxFileName::DirExists(fileName.GetPath()))
+        {
+            wxLogError(wxString::Format(
+                _("The specified directory does not exist: %s"),
+                fileName.GetPath()
+            ));
+            return;
+        }
+
+        // For creation mode, verify that the directory is writable
+        if (createM && !wxFileName::IsDirWritable(fileName.GetPath()))
+        {
+            wxLogError(wxString::Format(
+                _("Write access denied: the specified directory is not writable: %s"),
+                fileName.GetPath()
+            ));
+            return;
+        }
+
+        // Update the UI with the selected path
         text_ctrl_dbpath->SetValue(path);
+    }
 }
 
 void DatabaseRegistrationDialog::OnBrowseLibraryButtonClick(wxCommandEvent& WXUNUSED(event))
