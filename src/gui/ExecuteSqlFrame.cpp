@@ -1514,6 +1514,8 @@ void ExecuteSqlFrame::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
 {
     if (viewModeM == vmEditor)
         styled_text_ctrl_sql->Copy();
+    else if (viewModeM == vmLogCtrl)
+        styled_text_ctrl_stats->Copy();
     else if (viewModeM == vmGrid)
         grid_data->copyToClipboard(false);
 }
@@ -1531,6 +1533,8 @@ void ExecuteSqlFrame::OnMenuUpdateCopy(wxUpdateUIEvent& event)
     bool enableCmd = false;
     if (viewModeM == vmEditor)
         enableCmd = styled_text_ctrl_sql->hasSelection();
+    else if (viewModeM == vmLogCtrl)
+        enableCmd = styled_text_ctrl_stats->GetSelectionStart() != styled_text_ctrl_stats->GetSelectionEnd();
     else if (viewModeM == vmGrid)
         enableCmd = grid_data->getDataGridTable() && grid_data->GetNumberRows();
     event.Enable(enableCmd);
