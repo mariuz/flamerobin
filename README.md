@@ -16,8 +16,40 @@ The following people also made a significant non-coding contributions:
 * Alex Stanciu
 * Barbara Del Vecchio
 
+Build Status
+---------------------------
+| Platform | Status |
+|----------|--------|
+| Windows  | [![Build Flamerobin for Windows](https://github.com/mariuz/flamerobin/actions/workflows/windows-build.yml/badge.svg)](https://github.com/mariuz/flamerobin/actions/workflows/windows-build.yml) |
+| Debian/Linux | [![Build FlameRobin for Debian](https://github.com/mariuz/flamerobin/actions/workflows/linux-build.yml/badge.svg)](https://github.com/mariuz/flamerobin/actions/workflows/linux-build.yml) |
+| macOS    | [![Build FlameRobin for macOS](https://github.com/mariuz/flamerobin/actions/workflows/macos-build.yml/badge.svg)](https://github.com/mariuz/flamerobin/actions/workflows/macos-build.yml) |
+| Fedora Flatpak | [![Build FlameRobin Flatpak (Fedora)](https://github.com/mariuz/flamerobin/actions/workflows/fedora-flatpak-build.yml/badge.svg)](https://github.com/mariuz/flamerobin/actions/workflows/fedora-flatpak-build.yml) |
+
 Notice:
-Now you can download latest Windows snapshot builds directly from the `Build Flamerobin for Windows` Action
+Now you can download latest Windows snapshot builds directly from the [Build Flamerobin for Windows](https://github.com/mariuz/flamerobin/actions/workflows/windows-build.yml) Action
+
+Building
+---------------------------
+For detailed build instructions for all supported platforms (Windows, Linux, macOS), see the
+[BUILD.txt](https://github.com/mariuz/flamerobin/blob/master/BUILD.txt) file.
+
+Wiki
+---------------------------
+Additional documentation and guides are available on the [FlameRobin Wiki](https://github.com/mariuz/flamerobin/wiki).
+
+Documentation
+---------------------------
+* [What's New](https://github.com/mariuz/flamerobin/blob/master/docs/fr_whatsnew.html)
+* [License](https://github.com/mariuz/flamerobin/blob/master/docs/fr_license.html)
+
+Developer Documentation
+---------------------------
+Developer-focused documentation can be found in the [devdocs](https://github.com/mariuz/flamerobin/tree/master/devdocs) folder:
+
+* [Creating Linux Packages](https://github.com/mariuz/flamerobin/blob/master/devdocs/Creating_Linux_Packages.txt)
+* [Building with Dev-C++](https://github.com/mariuz/flamerobin/blob/master/devdocs/Dev-Cpp_How_to_build.txt)
+* [Building with MSVC.NET](https://github.com/mariuz/flamerobin/blob/master/devdocs/MSVC.NET_How_to_build.txt)
+* [Files and Paths](https://github.com/mariuz/flamerobin/blob/master/devdocs/Files_and_paths.txt)
 
 License
 ---------------------------
