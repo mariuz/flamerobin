@@ -492,8 +492,13 @@ void SqlEditor::setFont()
 
 void SqlEditor::setupStyles()
 {
+    // 1) Set STYLE_DEFAULT (fg/bg) from the theme.
     stylerManager().assignGlobal(this);
+    // 2) Propagate STYLE_DEFAULT to every token ID (fixes unspecified tokens
+    //    like identifiers that would otherwise inherit system dark defaults).
     StyleClearAll();
+    // 3) Re-apply global styles that StyleClearAll just wiped (brace highlight, etc.).
+    stylerManager().assignGlobal(this);
     stylerManager().assignLexer(this);
     SetLexer(wxSTC_LEX_SQL);
     stylerManager().assignMargin(this);

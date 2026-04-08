@@ -439,8 +439,24 @@ if(APPLE)
 	message(WARNING "MacOS build is untested.\n"
 	                "Please get in contact to tell us of your results.")
 	add_definitions(-DIBPP_DARWIN)
-	list(APPEND FR_LIBS -lfbclient)
-        list(APPEND FR_LIBS -L/Library/Frameworks/Firebird.framework/Versions/Current/Libraries)
+        set(FR_FIREBIRD_HINT_DIRS
+                "/Library/Frameworks/Firebird.framework/Resources/lib"
+                "/Library/Frameworks/Firebird.framework/Libraries"
+                "/opt/homebrew/lib"
+                "/usr/local/lib"
+        )
+        find_library(FBCLIENT_LIBRARY
+                NAMES fbclient libfbclient
+                HINTS ${FR_FIREBIRD_HINT_DIRS}
+        )
+        if (FBCLIENT_LIBRARY)
+                message(STATUS "Using Firebird client library: ${FBCLIENT_LIBRARY}")
+                list(APPEND FR_LIBS ${FBCLIENT_LIBRARY})
+                get_filename_component(FBCLIENT_LIBRARY_DIR ${FBCLIENT_LIBRARY} DIRECTORY)
+                list(APPEND FR_RPATHS ${FBCLIENT_LIBRARY_DIR})
+        else ()
+                message(FATAL_ERROR "Could not find libfbclient on macOS. Set CMAKE_PREFIX_PATH or FBLIB to a valid Firebird client location.")
+        endif ()
         
     list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/mac/StyleGuideMAC.cpp
@@ -538,6 +554,15 @@ endif (APPLE)
 
 target_link_libraries(${PROJECT_NAME} IBPP ${wxWidgets_LIBRARIES} ${FR_LIBS})
 
+if (APPLE)
+        set_target_properties(${PROJECT_NAME} PROPERTIES
+                BUILD_WITH_INSTALL_RPATH FALSE
+                BUILD_RPATH "${FR_RPATHS}"
+                INSTALL_RPATH "${FR_RPATHS}"
+                MACOSX_RPATH TRUE
+        )
+endif (APPLE)
+
 
 #--------------------------------------
 # Install
@@ -578,9 +603,10 @@ if (UNIX AND NOT APPLE)
 endif (UNIX AND NOT APPLE)
 
 if (APPLE)
-        install(
-                TARGETS flamerobin
-                DESTINATION /Applications
-        )
+	install(
+		TARGETS flamerobin
+		BUNDLE DESTINATION /Applications
+		RUNTIME DESTINATION bin
+	)
 endif (APPLE)
 
