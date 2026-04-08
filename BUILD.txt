@@ -152,21 +152,18 @@ Tested on Apple Silicon (arm64) with macOS 26.3.1.
 -- Firebird client library
 
 FlameRobin requires the Firebird client library (libfbclient) at build
-and runtime. Either of these installations is supported:
+and runtime.
 
- a) System Firebird install (https://www.firebirdsql.org/):
+    System Firebird install (https://www.firebirdsql.org/):
     The installer places the framework at:
     /Library/Frameworks/Firebird.framework/
     CMake will find it automatically.
 
- b) Homebrew:
-    $ brew install firebird-client
 
 -- Build steps
 
  1. Install the required tools and libraries:
     $ brew install cmake wxwidgets
-    (and firebird-client if using the Homebrew Firebird option above)
  2. $ cd ~/projects
  3. $ git clone https://github.com/mariuz/flamerobin.git
  4. $ cd flamerobin
