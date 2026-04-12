@@ -41,7 +41,7 @@
 #include <wx/xml/xml.h>
 
 #include "config/Config.h"
-#include "config/LocalSettings.h"
+#include "config/LocaleManager.h"
 #include "core/ArtProvider.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
@@ -730,7 +730,7 @@ void PreferencesDialog::OnSaveButtonClick(wxCommandEvent& )
 {
     wxBusyCursor wait;
     if (saveToTargetConfig()) {
-        LocalSettings locSet;
+        LocaleManager::get().reinitFromConfig();
         EndModal(wxID_OK);
     }
 }
@@ -739,7 +739,6 @@ void PreferencesDialog::OnCancelButtonClick(wxCommandEvent& )
 {
     wxBusyCursor wait;
     if (cancelChanges()) {
-        LocalSettings locSet;
         EndModal(wxID_CANCEL);
     }
 }

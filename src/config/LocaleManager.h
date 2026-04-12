@@ -21,37 +21,38 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef MAIN_H
-#define MAIN_H
+#ifndef FR_LOCALEMANAGER_H
+#define FR_LOCALEMANAGER_H
 
+#include <wx/intl.h>
 
-#include "config/LocaleManager.h"
-class MainFrame;
-
-class Application: public wxApp
+// Application-lifetime locale manager.
+// Holds a single wxLocale instance initialized from application config.
+// Call initFromConfig() once at startup and reinitFromConfig() whenever
+// the locale preference changes (e.g. after saving preferences).
+class LocaleManager
 {
-private:
-    // Open databases whose file names were given as command line parameters
-    wxArrayString cmdlineParamsM;
-    void openDatabasesFromParams(MainFrame* frFrame);
-    // Reads the environment variables that influence FR's behaviour.
-    void checkEnvironment();
-    // Reads the command line params that influence FR's behaviour.
-    void parseCommandLine();
-    // Translates the supported macros (like $app and $user) in path
-    // specifications coming from the command line or the environment.
-    const wxString translatePathMacros(const wxString path) const;
-protected:
-    virtual const wxString getConfigurableObjectId() const;
 public:
-    bool OnInit();
-    virtual bool OnExceptionInMainLoop();
-    void OnFatalException();
-    virtual void HandleEvent(wxEvtHandler* handler, wxEventFunction func,
-        wxEvent& event) const;
-    int OnExit();
+    static LocaleManager& get();
+
+    // Initialize locale from config (UseLocalConfig preference).
+    // Should be called once during Application::OnInit().
+    void initFromConfig();
+
+    // Re-initialize locale from config after preferences have been saved.
+    void reinitFromConfig();
+
+private:
+    LocaleManager();
+    ~LocaleManager();
+
+    // Non-copyable
+    LocaleManager(const LocaleManager&);
+    LocaleManager& operator=(const LocaleManager&);
+
+    void applyConfig();
+
+    wxLocale* localeM;
 };
 
-DECLARE_APP(Application)
-
-#endif // MAIN_H
+#endif // FR_LOCALEMANAGER_H

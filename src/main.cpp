@@ -37,6 +37,7 @@
 #include <ibpp.h>
 
 #include "config/Config.h"
+#include "config/LocaleManager.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "gui/MainFrame.h"
@@ -78,6 +79,7 @@ bool Application::OnInit()
 
     std::set_terminate(parachute);
     checkEnvironment();
+    LocaleManager::get().initFromConfig();
     parseCommandLine();
 
 #if defined(__WXOSX_COCOA__)
@@ -141,7 +143,6 @@ void Application::checkEnvironment()
         config().setHomePath(translatePathMacros(envVar));
     if (wxGetEnv("FR_USER_HOME", &envVar))
         config().setUserHomePath(translatePathMacros(envVar));
-    LocalSettings localSet;
 }
 
 void Application::parseCommandLine()

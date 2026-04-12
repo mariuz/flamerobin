@@ -262,6 +262,11 @@ wxString DataGridTable::getCellValueForInsert(int row, int col)
         return "NULL";
     // return quoted text, but escape embedded quotes
     wxString s(rowsM.getFieldValue(row, col));
+    // Normalize decimal separator for SQL: Firebird always uses dot.
+    // If the display value uses a comma as decimal separator (locale-
+    // dependent formatting), replace it so the generated SQL is valid.
+    if (rowsM.isColumnNumeric(col))
+        s.Replace(",", ".");
     s.Replace("'", "''");
     return "'" + s + "'";
 }

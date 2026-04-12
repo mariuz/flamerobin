@@ -31,19 +31,54 @@
 #endif
 
 #include "Config.h"
-#include "LocalSettings.h"
+#include "LocaleManager.h"
 
-
-
-LocalSettings::LocalSettings()
+LocaleManager::LocaleManager()
+    : localeM(0)
 {
 }
 
-LocalSettings::~LocalSettings()
+LocaleManager::~LocaleManager()
 {
+    delete localeM;
+    localeM = 0;
 }
 
-
-void LocalSettings::setDataBaseLenguage()
+// static
+LocaleManager& LocaleManager::get()
 {
+    static LocaleManager instance;
+    return instance;
+}
+
+void LocaleManager::initFromConfig()
+{
+    applyConfig();
+}
+
+void LocaleManager::reinitFromConfig()
+{
+    applyConfig();
+}
+
+void LocaleManager::applyConfig()
+{
+    int lang = config().getUseLocalConfig()
+        ? wxLANGUAGE_DEFAULT
+        : wxLANGUAGE_ENGLISH;
+
+    delete localeM;
+    localeM = new wxLocale();
+    if (!localeM->Init(lang))
+    {
+        const wxLanguageInfo* info = wxLocale::GetLanguageInfo(lang);
+        wxString langName = info ? info->Description : wxString("unknown");
+        wxLogWarning(
+            "Failed to initialize locale \"%s\". "
+            "FlameRobin will continue with the current locale. "
+            "If you experience number or date formatting issues, "
+            "try enabling \"Use language locale settings\" in preferences "
+            "or install the missing locale on your system.",
+            langName);
+    }
 }

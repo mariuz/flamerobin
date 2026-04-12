@@ -39,7 +39,6 @@
 #include <wx/intl.h>
 
 #include "config/Config.h"
-#include "config/LocalSettings.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "gui/AdvancedMessageDialog.h"
@@ -340,11 +339,6 @@ void DataGrid::copyToClipboardAsInsert()
         {
             wxString sRows;
 
-            LocalSettings localSet;
-
-            localSet.setDataBaseLenguage();
-            
-            
             for (int i = 0; i < GetNumberRows(); i++)
             {
                 wxString sCols;
@@ -461,9 +455,6 @@ void DataGrid::copyToClipboardAsUpdate()
         }
 
         {
-            LocalSettings localSet;
-            localSet.setDataBaseLenguage();
-
             wxString sRows;
 
 
@@ -578,9 +569,6 @@ void DataGrid::copyToClipboardAsUpdateInsert()
         }
 
         {
-            LocalSettings localSet;
-            localSet.setDataBaseLenguage();
-
             wxString sRows;
             wxString sCols;
             wxString sValues;
