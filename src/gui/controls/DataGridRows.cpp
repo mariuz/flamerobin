@@ -39,7 +39,6 @@
 #include <bitset>
 #include <string>
 
-#include "config/LocalSettings.h"
 #include "core/FRError.h"
 #include "core/FRInt128.h"
 #include "core/Observer.h"
@@ -2551,24 +2550,16 @@ void DataGridRows::importBlobFile(const wxString& filename, unsigned row,
 wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
     const wxString& value, bool setNull)
 {
-    LocalSettings localSet;
-
     wxString localValue = value;
-    double localDouble = 0;
-    
-    if (IBPP::isRationalNumber(statementM->ColumnType(col + 1)) && localValue.ToDouble(&localDouble) && (value.Contains(",") || value.Contains(".")))
-    {
-        if (localValue.ToDouble(&localDouble) && localValue.Contains(","))
-        {
-            localSet.setDataBaseLenguage();
 
-            localValue = std::to_string(localDouble);
-            if (localValue.Contains(",")) {
-                localValue.Replace(",", ".", true);
-            }
-        }
+    if (IBPP::isRationalNumber(statementM->ColumnType(col + 1)))
+    {
+        // Normalize decimal separator: if the value contains a comma but no
+        // dot, treat the comma as decimal separator and replace it with a dot
+        // so Firebird SQL always receives a dot as decimal separator.
+        if (localValue.Contains(",") && !localValue.Contains("."))
+            localValue.Replace(",", ".", true);
     }
-    
 
     if (columnDefsM[col]->isReadOnly())
         throw FRError(_("This column is not editable."));

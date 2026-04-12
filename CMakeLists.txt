@@ -72,6 +72,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/statementHistory.cpp
         ${SOURCEDIR}/config/Config.cpp
         ${SOURCEDIR}/config/DatabaseConfig.cpp
+        ${SOURCEDIR}/config/LocaleManager.cpp
         ${SOURCEDIR}/config/LocalSettings.cpp
         ${SOURCEDIR}/core/ArtProvider.cpp
         ${SOURCEDIR}/core/CodeTemplateProcessor.cpp
@@ -192,6 +193,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/statementHistory.h
         ${SOURCEDIR}/config/Config.h
         ${SOURCEDIR}/config/DatabaseConfig.h
+        ${SOURCEDIR}/config/LocaleManager.h
         ${SOURCEDIR}/config/LocalSettings.h
         ${SOURCEDIR}/core/ArtProvider.h
         ${SOURCEDIR}/core/CodeTemplateProcessor.h
