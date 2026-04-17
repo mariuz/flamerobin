@@ -2298,32 +2298,31 @@ TimezoneInfo Database::getDefaultTimezone()
 
 wxString Database::getTimezoneName(int timezone)
 {
+    // Fast path 1: already decoded and cached
+    auto cacheIt = timezonesCacheM.find(timezone);
+    if (cacheIt != timezonesCacheM.end())
+        return cacheIt->second;
+
+    // Fast path 2: loaded from RDB$TIME_ZONES
     std::vector<TimezoneInfo*>::iterator it;
     for (it = timezonesM.begin(); it != timezonesM.end(); it++)
     {
         if ((*it)->id != timezone)
             continue;
+        timezonesCacheM[timezone] = (*it)->name;
         return (*it)->name;
     }
 
+    // Fallback: ask the Firebird client to decode the ID (handles offset-based
+    // timezone IDs that are not present in RDB$TIME_ZONES, e.g. "+02:00").
     try
     {
-        if (timezone >= 0 && timezone <= 0xFFFF)
+        std::string tzName;
+        if (ibpp_internals::getTimezoneNameById(timezone, tzName))
         {
-            ISC_TIME_TZ iscTmTz = {};
-            iscTmTz.time_zone = static_cast<ISC_USHORT>(timezone);
-
-            unsigned dummy = 0;
-            char tzBuf[ibpp_internals::FB_MAX_TIME_ZONE_NAME_LENGTH] = {};
-
-            ibpp_internals::fbIntfClass* fbIntf =
-                ibpp_internals::fbIntfClass::getInstance();
-
-            fbIntf->mUtil->decodeTimeTz(fbIntf->mStatus, &iscTmTz,
-                &dummy, &dummy, &dummy, &dummy, sizeof(tzBuf), tzBuf);
-
-            if (tzBuf[0])
-                return wxString::FromUTF8(tzBuf);
+            wxString result = wxString::FromUTF8(tzName.c_str());
+            timezonesCacheM[timezone] = result;
+            return result;
         }
     }
     catch (const std::exception& ex)

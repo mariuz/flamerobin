@@ -70,4 +70,32 @@ fbIntfClass::~fbIntfClass()
     mUtil = NULL;
 }
 
+bool getTimezoneNameById(int tzId, std::string& name)
+{
+    // Map a timezone ID to its printable name using the Firebird client util
+    // interface.  We pass a zeroed ISC_TIME_TZ with only time_zone set.
+    // This is intentional: decodeTimeTz fills the tzBuf from the zone ID
+    // alone — for named zones it is a simple table lookup, and for
+    // offset-encoded zones (IDs 0x0000–0x2BAF) the offset string is derived
+    // purely from the ID.  The utc_time/time fields affect only the decoded
+    // hour/minute/second outputs (ignored here), not the zone name.
+    //
+    // ThrowStatusWrapper converts Firebird IStatus errors into C++ exceptions,
+    // so no explicit status check is required after the call.
+    if (tzId < 0 || tzId > 0xFFFF)
+        return false;
+
+    fbIntfClass* fbIntf = fbIntfClass::getInstance(); // throws if unavailable
+    ISC_TIME_TZ iscTmTz = {};
+    iscTmTz.time_zone = static_cast<ISC_USHORT>(tzId);
+    char tzBuf[FB_MAX_TIME_ZONE_NAME_LENGTH] = {};
+    unsigned dummy = 0;
+    fbIntf->mUtil->decodeTimeTz(fbIntf->mStatus, &iscTmTz,
+        &dummy, &dummy, &dummy, &dummy, sizeof(tzBuf), tzBuf);
+    if (!tzBuf[0])
+        return false;
+    name = tzBuf;
+    return true;
+}
+
 } // ibpp_internals
