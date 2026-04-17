@@ -2314,7 +2314,7 @@ wxString Database::getTimezoneName(int timezone)
             iscTmTz.time_zone = static_cast<ISC_USHORT>(timezone);
 
             unsigned dummy = 0;
-            char tzBuf[FB_MAX_TIME_ZONE_NAME_LENGTH] = {};
+            char tzBuf[ibpp_internals::FB_MAX_TIME_ZONE_NAME_LENGTH] = {};
 
             ibpp_internals::fbIntfClass* fbIntf =
                 ibpp_internals::fbIntfClass::getInstance();
