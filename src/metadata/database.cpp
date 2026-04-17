@@ -34,6 +34,7 @@
 #include <wx/fontmap.h>
 
 #include <algorithm>
+#include <exception>
 #include <functional>
 
 #include <thread>
@@ -2312,21 +2313,26 @@ wxString Database::getTimezoneName(int timezone)
             ISC_TIME_TZ iscTmTz = {};
             iscTmTz.time_zone = static_cast<ISC_USHORT>(timezone);
 
-            unsigned h, m, s, frac;
+            unsigned dummy = 0;
             char tzBuf[FB_MAX_TIME_ZONE_NAME_LENGTH] = {};
 
             ibpp_internals::fbIntfClass* fbIntf =
                 ibpp_internals::fbIntfClass::getInstance();
 
             fbIntf->mUtil->decodeTimeTz(fbIntf->mStatus, &iscTmTz,
-                &h, &m, &s, &frac, sizeof(tzBuf), tzBuf);
+                &dummy, &dummy, &dummy, &dummy, sizeof(tzBuf), tzBuf);
 
             if (tzBuf[0])
                 return wxString::FromUTF8(tzBuf);
         }
     }
+    catch (const std::exception& ex)
+    {
+        wxLogDebug("Could not decode time zone id %d: %s", timezone, ex.what());
+    }
     catch (...)
     {
+        wxLogDebug("Could not decode time zone id %d", timezone);
     }
 
     // not found
