@@ -34,6 +34,7 @@
 #include <wx/fontmap.h>
 
 #include <algorithm>
+#include <exception>
 #include <functional>
 
 #include <thread>
@@ -67,6 +68,7 @@
 #include "metadata/view.h"
 #include "sql/SqlStatement.h"
 #include "sql/SqlTokenizer.h"
+#include "ibpp/_ibpp.h"
 
 // Credentials class
 void Credentials::setCharset(const wxString& value)
@@ -2296,13 +2298,43 @@ TimezoneInfo Database::getDefaultTimezone()
 
 wxString Database::getTimezoneName(int timezone)
 {
+    // Check the decoded-name cache first (avoids both vector scan and API call
+    // on repeated lookups of the same ID, e.g. during grid rendering).
+    auto cacheIt = timezonesCacheM.find(timezone);
+    if (cacheIt != timezonesCacheM.end())
+        return cacheIt->second;
+
+    // Look up in metadata loaded from RDB$TIME_ZONES.
     std::vector<TimezoneInfo*>::iterator it;
     for (it = timezonesM.begin(); it != timezonesM.end(); it++)
     {
         if ((*it)->id != timezone)
             continue;
+        timezonesCacheM[timezone] = (*it)->name;
         return (*it)->name;
     }
+
+    // Fallback: ask the Firebird client to decode the ID (handles offset-based
+    // timezone IDs that are not present in RDB$TIME_ZONES, e.g. "+02:00").
+    try
+    {
+        std::string tzName;
+        if (ibpp_internals::getTimezoneNameById(timezone, tzName))
+        {
+            wxString result = wxString::FromUTF8(tzName.c_str());
+            timezonesCacheM[timezone] = result;
+            return result;
+        }
+    }
+    catch (const std::exception& ex)
+    {
+        wxLogDebug("Could not decode time zone id %d: %s", timezone, ex.what());
+    }
+    catch (...)
+    {
+        wxLogDebug("Could not decode time zone id %d", timezone);
+    }
+
     // not found
     return wxString::Format("TZ %d", timezone);
 }

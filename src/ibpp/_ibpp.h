@@ -1507,6 +1507,12 @@ class fbIntfClass
         static fbIntfClass* getInstance();
 };
 
+/* Map a Firebird timezone ID to its printable name (e.g. "Europe/Prague" or
+ * "+02:00").  Returns true and fills 'name' on success; returns false when
+ * the Firebird client interface is not available or the id cannot be decoded.
+ * Implemented in fbinterfaces.cpp */
+bool getTimezoneNameById(int tzId, std::string& name);
+
 }   // namespace ibpp_internal
 
 #endif // __INTERNAL_IBPP_H__

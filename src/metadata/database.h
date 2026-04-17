@@ -27,6 +27,7 @@
 #include <wx/strconv.h>
 
 #include <map>
+#include <unordered_map>
 
 #include <ibpp.h>
 
@@ -180,6 +181,7 @@ private:
     DatabaseAuthenticationMode authenticationModeM;
     std::vector<TimezoneInfo*> timezonesM;
     TimezoneInfo defaultTimezoneM;
+    std::unordered_map<int, wxString> timezonesCacheM;
 
     std::unique_ptr<wxMBConv> charsetConverterM;
     void createCharsetConverter();
