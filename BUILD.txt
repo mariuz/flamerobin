@@ -147,19 +147,44 @@ build for 'release':
 ------------
 
 Assumes Homebrew (https://brew.sh/) is installed.
+Tested on Apple Silicon (arm64) with macOS 26.3.1.
+
+-- Firebird client library
+
+FlameRobin requires the Firebird client library (libfbclient) at build
+and runtime.
+
+    System Firebird install (https://www.firebirdsql.org/):
+    The installer places the framework at:
+    /Library/Frameworks/Firebird.framework/
+    CMake will find it automatically.
+
+
+-- Build steps
 
  1. Install the required tools and libraries:
-    $ brew install cmake firebird-client wxwidgets
+    $ brew install cmake wxwidgets
  2. $ cd ~/projects
  3. $ git clone https://github.com/mariuz/flamerobin.git
  4. $ cd flamerobin
  5. $ mkdir build
  6. $ cd build
- 7. $ cmake ..
-    Note: if CMake cannot find wxWidgets (e.g. on Apple Silicon where Homebrew
-    installs to /opt/homebrew), pass the Homebrew prefix explicitly:
-    $ cmake -DCMAKE_PREFIX_PATH="$(brew --prefix)" ..
+ 7. $ cmake -DCMAKE_PREFIX_PATH="$(brew --prefix)" ..
+    CMake will locate libfbclient automatically from the Firebird
+    framework or Homebrew. If your Firebird client is in a custom
+    location, set CMAKE_PREFIX_PATH or FBLIB accordingly:
+    $ cmake -DCMAKE_PREFIX_PATH="/path/to/firebird" ..
  8. $ make
- 9. To run FlameRobin:
+ 9. To run FlameRobin directly from the build directory:
     $ open flamerobin.app
+
+-- Install to /Applications (optional)
+
+    $ sudo cmake --install .
+
+-- Notes
+
+ * The app bundle embeds an rpath pointing to where libfbclient was
+   found at build time, so the app runs without DYLD_LIBRARY_PATH.
+ * If you move or reinstall Firebird after building, rebuild from step 7.
 

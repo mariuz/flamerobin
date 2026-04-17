@@ -44,7 +44,18 @@
 #include <stdlib.h>
 
 //empty string terminated list of Firebird SO libraries to try in turn
+#ifdef IBPP_DARWIN
+static const char* fblibs[] = {
+	"/Library/Frameworks/Firebird.framework/Resources/lib/libfbclient.dylib",
+	"/Library/Frameworks/Firebird.framework/Libraries/libfbclient.dylib",
+	"/opt/homebrew/lib/libfbclient.dylib",
+	"/usr/local/lib/libfbclient.dylib",
+	"libfbclient.dylib",
+	""
+};
+#else
 static const char* fblibs[] = {"libfbembed.so.2.5","libfbembed.so.2.1","libfbclient.so.2",""};
+#endif
 
 #endif
 
