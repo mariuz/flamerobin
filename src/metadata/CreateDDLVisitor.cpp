@@ -44,6 +44,7 @@
 #include "metadata/function.h"
 #include "metadata/generator.h"
 #include "metadata/Index.h"
+#include "metadata/IndexDDL.h"
 #include "metadata/package.h"
 #include "metadata/parameter.h"
 #include "metadata/procedure.h"
@@ -428,23 +429,14 @@ void CreateDDLVisitor::visitIndex(Index& i)
     if (i.getIndexType() == Index::itDescending)
         preSqlM += "DESCENDING ";
     preSqlM += "INDEX " + i.getQuotedName() + " ON " + i.getParent()->getQuotedName();
-    
-    wxString expre = i.getExpression();
-    if (!expre.IsEmpty())
-        preSqlM += " COMPUTED BY " + expre;
-    else
+    std::vector<wxString> quotedSegments;
+    std::vector<wxString>* cols = i.getSegments();
+    for (std::vector<wxString>::const_iterator it = cols->begin(); it != cols->end(); ++it)
     {
-        preSqlM += " (";
-        std::vector<wxString>* cols = i.getSegments();
-        for (std::vector<wxString>::const_iterator it = cols->begin(); it != cols->end(); ++it)
-        {
-            if (it != cols->begin())
-                preSqlM += ",";
-            Identifier id(*it);
-            preSqlM += id.getQuoted();
-        }
-        preSqlM += ")";
+        Identifier id(*it);
+        quotedSegments.push_back(id.getQuoted());
     }
+    preSqlM += buildIndexBodySql(i.getExpression(), quotedSegments, i.getCondition());
     preSqlM += ";\n";
 
 
@@ -640,22 +632,15 @@ void CreateDDLVisitor::visitTable(Table& t)
             if ((*ci).getIndexType() == Index::itDescending)
                 postSqlM += "DESCENDING ";
             postSqlM += "INDEX " + (*ci).getQuotedName() + " ON " + t.getQuotedName();
-            wxString expre = (*ci).getExpression();
-            if (!expre.IsEmpty())
-                postSqlM += " COMPUTED BY " + expre;
-            else
+            std::vector<wxString> quotedSegments;
+            std::vector<wxString>* cols = (*ci).getSegments();
+            for (std::vector<wxString>::const_iterator it = cols->begin(); it != cols->end(); ++it)
             {
-                postSqlM += " (";
-                std::vector<wxString> *cols = (*ci).getSegments();
-                for (std::vector<wxString>::const_iterator it = cols->begin(); it != cols->end(); ++it)
-                {
-                    if (it != cols->begin())
-                        postSqlM += ",";
-                    Identifier id(*it);
-                    postSqlM += id.getQuoted();
-                }
-                postSqlM += ")";
+                Identifier id(*it);
+                quotedSegments.push_back(id.getQuoted());
             }
+            postSqlM += buildIndexBodySql((*ci).getExpression(), quotedSegments,
+                (*ci).getCondition());
             postSqlM += ";\n";
         }
     }
@@ -743,22 +728,15 @@ void CreateDDLVisitor::visitGTTable(GTTable& t)
             if ((*ci).getIndexType() == Index::itDescending)
                 postSqlM += "DESCENDING ";
             postSqlM += "INDEX " + (*ci).getQuotedName() + " ON " + t.getQuotedName();
-            wxString expre = (*ci).getExpression();
-            if (!expre.IsEmpty())
-                postSqlM += " COMPUTED BY " + expre;
-            else
+            std::vector<wxString> quotedSegments;
+            std::vector<wxString>* cols = (*ci).getSegments();
+            for (std::vector<wxString>::const_iterator it = cols->begin(); it != cols->end(); ++it)
             {
-                postSqlM += " (";
-                std::vector<wxString>* cols = (*ci).getSegments();
-                for (std::vector<wxString>::const_iterator it = cols->begin(); it != cols->end(); ++it)
-                {
-                    if (it != cols->begin())
-                        postSqlM += ",";
-                    Identifier id(*it);
-                    postSqlM += id.getQuoted();
-                }
-                postSqlM += ")";
+                Identifier id(*it);
+                quotedSegments.push_back(id.getQuoted());
             }
+            postSqlM += buildIndexBodySql((*ci).getExpression(), quotedSegments,
+                (*ci).getCondition());
             postSqlM += ";\n";
         }
     }
