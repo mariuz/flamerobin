@@ -2298,12 +2298,13 @@ TimezoneInfo Database::getDefaultTimezone()
 
 wxString Database::getTimezoneName(int timezone)
 {
-    // Fast path 1: already decoded and cached
+    // Check the decoded-name cache first (avoids both vector scan and API call
+    // on repeated lookups of the same ID, e.g. during grid rendering).
     auto cacheIt = timezonesCacheM.find(timezone);
     if (cacheIt != timezonesCacheM.end())
         return cacheIt->second;
 
-    // Fast path 2: loaded from RDB$TIME_ZONES
+    // Look up in metadata loaded from RDB$TIME_ZONES.
     std::vector<TimezoneInfo*>::iterator it;
     for (it = timezonesM.begin(); it != timezonesM.end(); it++)
     {
