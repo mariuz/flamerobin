@@ -67,6 +67,7 @@
 #include "metadata/view.h"
 #include "sql/SqlStatement.h"
 #include "sql/SqlTokenizer.h"
+#include "ibpp/_ibpp.h"
 
 // Credentials class
 void Credentials::setCharset(const wxString& value)
@@ -2303,6 +2304,31 @@ wxString Database::getTimezoneName(int timezone)
             continue;
         return (*it)->name;
     }
+
+    try
+    {
+        if (timezone >= 0 && timezone <= 0xFFFF)
+        {
+            ISC_TIME_TZ iscTmTz = {};
+            iscTmTz.time_zone = static_cast<ISC_USHORT>(timezone);
+
+            unsigned h, m, s, frac;
+            char tzBuf[FB_MAX_TIME_ZONE_NAME_LENGTH] = {};
+
+            ibpp_internals::fbIntfClass* fbIntf =
+                ibpp_internals::fbIntfClass::getInstance();
+
+            fbIntf->mUtil->decodeTimeTz(fbIntf->mStatus, &iscTmTz,
+                &h, &m, &s, &frac, sizeof(tzBuf), tzBuf);
+
+            if (tzBuf[0])
+                return wxString::FromUTF8(tzBuf);
+        }
+    }
+    catch (...)
+    {
+    }
+
     // not found
     return wxString::Format("TZ %d", timezone);
 }
