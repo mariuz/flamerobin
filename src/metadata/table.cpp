@@ -384,17 +384,21 @@ void Table::loadIndices()
     MetadataLoaderTransaction tr(loader);
     SubjectLocker lock(this);
 
-    IBPP::Statement& st1 = loader->getStatement(
+    std::string sql(
         "SELECT i.rdb$index_name, i.rdb$unique_flag, i.rdb$index_inactive, "
         " i.rdb$index_type, i.rdb$statistics, "
-        " s.rdb$field_name, rc.rdb$constraint_name, i.rdb$expression_source "
+        " s.rdb$field_name, rc.rdb$constraint_name, i.rdb$expression_source, "
+    );
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0) ? " i.rdb$condition_source " : " null ";
+    sql +=
         " from rdb$indices i "
         " left join rdb$index_segments s on i.rdb$index_name = s.rdb$index_name "
         " left join rdb$relation_constraints rc "
         "   on rc.rdb$index_name = i.rdb$index_name "
         " where i.rdb$relation_name = ? "
-        " order by i.rdb$index_name, s.rdb$field_position "
-    );
+        " order by i.rdb$index_name, s.rdb$field_position ";
+
+    IBPP::Statement& st1 = loader->getStatement(sql);
 
     st1->Set(1, wx2std(getName_(), conv));
     st1->Execute();
@@ -428,6 +432,8 @@ void Table::loadIndices()
         wxString fname(std2wxIdentifier(s, conv));
         wxString expression;
         readBlob(st1, 8, expression, conv);
+        wxString condition;
+        readBlob(st1, 9, condition, conv);
 
         if (i && i->getName_() == ixname)
             i->getSegments()->push_back(fname);
@@ -439,7 +445,8 @@ void Table::loadIndices()
                 type == 0,
                 statistics,
                 !st1->IsNull(7),
-                expression
+                expression,
+                condition
             );
             indicesM.push_back(x);
             i = &indicesM.back();
@@ -625,4 +632,3 @@ void GTTable::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitGTTable(*this);
 }
-

@@ -51,17 +51,21 @@ void Index::loadProperties()
     wxMBConv* converter = db->getCharsetConverter();
 
 
-    IBPP::Statement& st1 = loader->getStatement(
+    std::string sql(
         "SELECT i.rdb$index_name, i.rdb$unique_flag, i.rdb$index_inactive, "
         " i.rdb$index_type, i.rdb$statistics, "
-        " s.rdb$field_name, rc.rdb$constraint_name, i.rdb$expression_source "
+        " s.rdb$field_name, rc.rdb$constraint_name, i.rdb$expression_source, "
+    );
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0) ? " i.rdb$condition_source " : " null ";
+    sql +=
         " from rdb$indices i "
         " left join rdb$index_segments s on i.rdb$index_name = s.rdb$index_name "
         " left join rdb$relation_constraints rc "
         "   on rc.rdb$index_name = i.rdb$index_name "
         " where i.rdb$index_name = ? "
-        " order by i.rdb$index_name, s.rdb$field_position "
-    );
+        " order by i.rdb$index_name, s.rdb$field_position ";
+
+    IBPP::Statement& st1 = loader->getStatement(sql);
 
     st1->Set(1, wx2std(getName_(), converter));
     st1->Execute();
@@ -97,6 +101,7 @@ void Index::loadProperties()
         wxString fname(std2wxIdentifier(s, converter));
         wxString expression;
         readBlob(st1, 8, expressionM, converter);
+        readBlob(st1, 9, conditionM, converter);
 
         if (i && i->getName_() == ixname)
             i->getSegments()->push_back(fname);
@@ -128,10 +133,11 @@ Index::Index(DatabasePtr database, const wxString& name)
 }
 
 Index::Index(bool unique, bool active, bool ascending, double statistics,
-        bool system, wxString expression)
+        bool system, wxString expression, wxString condition)
     : MetadataItem(ntIndex), isSystemM(system), uniqueFlagM(unique),
         activeM(active), indexTypeM(ascending ? itAscending : itDescending),
-        statisticsM(statistics), segmentsM(), expressionM(expression)
+        statisticsM(statistics), segmentsM(), expressionM(expression),
+        conditionM(condition)
 {
 }
 
@@ -218,6 +224,11 @@ bool Index::hasColumn(wxString segment) const
 wxString Index::getExpression() const
 {
     return expressionM;
+}
+
+wxString Index::getCondition() const
+{
+    return conditionM;
 }
 
 void Index::acceptVisitor(MetadataItemVisitor* visitor)

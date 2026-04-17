@@ -44,12 +44,13 @@ private:
     double statisticsM;
     std::vector<wxString> segmentsM;
     wxString expressionM;
+    wxString conditionM;
 protected:
     virtual void loadProperties();
 public:
     Index(DatabasePtr database, const wxString& name);
     Index(bool unique, bool active, bool ascending, double statistics,
-        bool system, wxString expression);
+        bool system, wxString expression, wxString condition = wxEmptyString);
 
     virtual bool isSystem() const;
     void setActive(bool active);
@@ -58,6 +59,7 @@ public:
     bool isUnique() const;
     double getStatistics();
     wxString getExpression() const;
+    wxString getCondition() const;
     IndexType getIndexType();
     virtual const wxString getTypeName() const;
     bool hasColumn(wxString segment) const;

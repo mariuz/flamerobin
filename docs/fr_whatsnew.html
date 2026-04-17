@@ -8,6 +8,49 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin (development)</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>New features</B></font><br>
+<br>
+- Firebird 5 partial index support: generated index DDL now preserves the WHERE predicate so recreated schemas no longer lose partial-index conditions (issue #392)<br>
+<br>
+<b>Details of the partial index fix:</b><br>
+<br>
+Firebird 5 partial indexes were not fully extracted: generated index DDL omitted the index predicate,
+so recreated schemas lost WHERE conditions.<br>
+This change adds Firebird 5-aware metadata loading and emits partial-index predicates
+in extracted CREATE INDEX statements.<br>
+<br>
+<b>Metadata loading (Firebird 5 / ODS 13+)</b><br>
+- Extend index metadata queries to read RDB$INDICES.RDB$CONDITION_SOURCE<br>
+- Gate the column by ODS version (&gt;= 13.0) and fall back to NULL on older servers to keep compatibility<br>
+- Store condition text in Index (conditionM) with accessor support<br>
+<br>
+<b>DDL generation</b><br>
+- Centralize index body rendering in a helper (buildIndexBodySql)<br>
+- Emit: regular index columns or COMPUTED BY ... ; optional WHERE &lt;condition&gt; when a partial predicate exists<br>
+- Apply the same rendering path across index extraction call sites to keep output consistent<br>
+<br>
+<b>Create statement template update</b><br>
+- Update index create-statement template text to include optional WHERE search_condition<br>
+<br>
+<b>Regression coverage</b><br>
+- Add a focused test target (index_ddl_test) covering: regular index body, partial index body, computed + partial index body<br>
+<br>
+Example of generated output:<br>
+<pre>
+CREATE INDEX IDX_T_A ON T (A,B) WHERE A IS NOT NULL;
+CREATE INDEX IDX_T_EXPR ON T COMPUTED BY UPPER(A) WHERE A IS NOT NULL;
+</pre>
+<br>
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 0.9.10</font><br>
 <br><br>
 <font size=+1 color="#AA0000"><B>New features</B></font><br>

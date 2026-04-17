@@ -155,6 +155,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/metadata/function.cpp
         ${SOURCEDIR}/metadata/generator.cpp
         ${SOURCEDIR}/metadata/Index.cpp
+        ${SOURCEDIR}/metadata/IndexDDL.cpp
         ${SOURCEDIR}/metadata/metadataitem.cpp
         ${SOURCEDIR}/metadata/MetadataItemCreateStatementVisitor.cpp
         ${SOURCEDIR}/metadata/MetadataItemDescriptionVisitor.cpp
@@ -279,6 +280,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/metadata/function.h
         ${SOURCEDIR}/metadata/generator.h
         ${SOURCEDIR}/metadata/Index.h
+        ${SOURCEDIR}/metadata/IndexDDL.h
         ${SOURCEDIR}/metadata/MetadataClasses.h
         ${SOURCEDIR}/metadata/metadataitem.h
         ${SOURCEDIR}/metadata/MetadataItemCreateStatementVisitor.h
@@ -556,6 +558,13 @@ endif (APPLE)
 
 target_link_libraries(${PROJECT_NAME} IBPP ${wxWidgets_LIBRARIES} ${FR_LIBS})
 
+enable_testing()
+add_executable(index_ddl_test
+    ${SOURCEDIR}/metadata/IndexDDLTest.cpp
+    ${SOURCEDIR}/metadata/IndexDDL.cpp
+)
+target_link_libraries(index_ddl_test ${wxWidgets_LIBRARIES})
+add_test(NAME index_ddl_test COMMAND index_ddl_test)
 if (APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES
                 BUILD_WITH_INSTALL_RPATH FALSE
@@ -611,4 +620,3 @@ if (APPLE)
 		RUNTIME DESTINATION bin
 	)
 endif (APPLE)
-
