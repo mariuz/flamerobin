@@ -43,6 +43,7 @@
 #include "metadata/database.h"
 #include "metadata/metadataitem.h"
 #include "metadata/domain.h"
+#include "metadata/Index.h"
 #include "metadata/parameter.h"
 #include "metadata/procedure.h"
 #include "metadata/root.h"
@@ -115,7 +116,7 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent, RootPtr root)
     {
         "TABLE", "VIEW", "PROCEDURE",
         "TRIGGER", "GENERATOR", "FUNCTION", "DOMAIN",
-        "ROLE", "COLUMN", "EXCEPTION"
+        "ROLE", "COLUMN", "EXCEPTION", "INDEX"
     };
     int nchoices1 = sizeof(choices1) / sizeof(wxString);
     choice_type = new wxChoice(mainPanel, wxID_ANY, wxDefaultPosition,
@@ -609,7 +610,8 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& WXUNUSED(event))
                 {
                     Relation* r = dynamic_cast<Relation*>(*it);
                     Procedure* p = dynamic_cast<Procedure*>(*it);
-                    if (r || p)
+                    Index* idx = dynamic_cast<Index*>(*it);
+                    if (r || p || idx)
                     {
                         (*it)->ensureChildrenLoaded();
                         bool found = false;
@@ -622,6 +624,19 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& WXUNUSED(event))
                         {
                             found |= std::any_of(p->begin(), p->end(),
                                                  [this](ParameterPtr i) { return match(CriteriaItem::ctField, i->getName_()); });
+                        }
+                        if (idx)
+                        {
+                            (*it)->ensurePropertiesLoaded();
+                            const std::vector<wxString>& segments = *idx->getSegments();
+                            found |= std::any_of(segments.begin(), segments.end(),
+                                [this](const wxString& segment)
+                                {
+                                    return match(CriteriaItem::ctField, segment);
+                                }
+                            );
+                            if (!found && !idx->getExpression().IsEmpty())
+                                found |= match(CriteriaItem::ctField, idx->getExpression());
                         }
                         if (!found)     // object doesn't contain that field
                             continue;
@@ -686,4 +701,3 @@ void AdvancedSearchFrame::OnButtonAddDatabaseClick(
             db);
     }
 }
-
