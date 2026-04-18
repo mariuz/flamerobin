@@ -294,14 +294,21 @@ void Column::acceptVisitor(MetadataItemVisitor* visitor)
 
 wxString Column::getSource(bool identity)
 {
-    if (isIdentity()&& identity) {
+    if (isIdentity() && identity) {
         wxString sql;
-        sql = " GENERATED " + identityTypeM + " AS IDENTITY ";
-        if (initialValueM != 0) {
-            sql += "(START WITH " + wxString::Format("%d", initialValueM) + ")";
-            if (incrementalValueM != 1)
-                sql += "INCREMENT BY " + wxString::Format("%d", incrementalValueM);
+        sql = " GENERATED " + identityTypeM + " AS IDENTITY";
+        if (initialValueM != 0 || incrementalValueM != 1) {
+            sql += " (";
+            if (initialValueM != 0)
+                sql += "START WITH " + wxString::Format("%ld", initialValueM);
+            if (incrementalValueM != 1) {
+                if (initialValueM != 0)
+                    sql += " ";
+                sql += "INCREMENT BY " + wxString::Format("%ld", incrementalValueM);
+            }
+            sql += ")";
         }
+        sql += " ";
         return sql;
     }
     else {
