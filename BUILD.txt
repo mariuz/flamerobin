@@ -24,6 +24,9 @@ Optional:
 
 -- Notes
 
+FlameRobin is currently compiled as C++14 (`CMAKE_CXX_STANDARD=14`).
+Please keep code changes compatible with C++14.
+
 FR must be built with the same settings for debug/release etc.  as the
 wxWidgets library (Unicode build is required). Failing to do so will usually
 lead to compile or link errors. This does not apply completely to Linux/GCC
@@ -187,4 +190,3 @@ and runtime.
  * The app bundle embeds an rpath pointing to where libfbclient was
    found at build time, so the app runs without DYLD_LIBRARY_PATH.
  * If you move or reinstall Firebird after building, rebuild from step 7.
-

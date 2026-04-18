@@ -33,6 +33,9 @@ Building
 For detailed build instructions for all supported platforms (Windows, Linux, macOS), see the
 [BUILD.txt](https://github.com/mariuz/flamerobin/blob/master/BUILD.txt) file.
 
+Compile-time C++ standard notice: FlameRobin is currently built as C++14
+(`CMAKE_CXX_STANDARD=14`). Please keep contributions compatible with C++14.
+
 Wiki
 ---------------------------
 Additional documentation and guides are available on the [FlameRobin Wiki](https://github.com/mariuz/flamerobin/wiki).
