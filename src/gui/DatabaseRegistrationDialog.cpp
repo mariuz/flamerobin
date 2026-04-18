@@ -421,6 +421,7 @@ int DatabaseRegistrationDialog::getSuggestedPageSizeByServerVersion() const
     }
     catch (...)
     {
+        // Version detection is best-effort; keep existing default on failure.
     }
     return 0;
 }
