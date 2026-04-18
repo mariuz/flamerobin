@@ -44,6 +44,40 @@
 #include "metadata/trigger.h"
 #include "metadata/view.h"
 
+namespace
+{
+const char* const systemPrivileges[] =
+{
+    "ACCESS_ANY_OBJECT_IN_DATABASE",
+    "ACCESS_SHUTDOWN_DATABASE",
+    "CHANGE_HEADER_SETTINGS",
+    "CHANGE_MAPPING_RULES",
+    "CHANGE_SHUTDOWN_MODE",
+    "CREATE_DATABASE",
+    "CREATE_PRIVILEGED_ROLES",
+    "CREATE_USER_TYPES",
+    "DROP_DATABASE",
+    "GET_DBCRYPT_INFO",
+    "GRANT_REVOKE_ANY_DDL_RIGHT",
+    "GRANT_REVOKE_ON_ANY_OBJECT",
+    "IGNORE_DB_TRIGGERS",
+    "MODIFY_ANY_OBJECT_IN_DATABASE",
+    "MODIFY_EXT_CONN_POOL",
+    "MONITOR_ANY_ATTACHMENT",
+    "PROFILE_ANY_ATTACHMENT",
+    "READ_RAW_PAGES",
+    "REPLICATE_INTO_DATABASE",
+    "SELECT_ANY_OBJECT_IN_DATABASE",
+    "TRACE_ANY_ATTACHMENT",
+    "USE_GBAK_UTILITY",
+    "USE_GFIX_UTILITY",
+    "USE_GRANTED_BY_CLAUSE",
+    "USE_GSTAT_UTILITY",
+    "USE_NBACKUP_UTILITY",
+    "USER_MANAGEMENT"
+};
+}
+
 
 PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     const wxString& title)
@@ -53,6 +87,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     // since not all objects are created by that time - event handling code
     // crashes
     inConstructor = true;
+    objectM = object;
     databaseM = object->getDatabase().get();
 
     wxBoxSizer *innerSizer = new wxBoxSizer(wxVERTICAL);
@@ -277,6 +312,23 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
     }
     choice_memberof->Enable(false);
     fgSizer4->Add(choice_memberof, 0, wxEXPAND, 0);
+
+    // system privileges
+    radiobtn_systemprivilege = new wxRadioButton(privilegesPanel, ID_radiobtn,
+        _("System Privilege"));
+    fgSizer4->Add(radiobtn_systemprivilege, 0, wxALL|wxALIGN_CENTER_VERTICAL,
+        5);
+    {
+        wxArrayString choices;
+        for (const char* privilege : systemPrivileges)
+            choices.Add(privilege);
+        choice_systemprivilege = new wxChoice(privilegesPanel, ID_choice,
+            wxDefaultPosition, wxDefaultSize, choices);
+        if (!choices.IsEmpty())
+            choice_systemprivilege->SetSelection(0);
+    }
+    choice_systemprivilege->Enable(false);
+    fgSizer4->Add(choice_systemprivilege, 0, wxEXPAND, 0);
     privilegesSizer->Add(fgSizer4, 1, wxEXPAND|wxALL, 5);
     privilegesPanel->SetSizer(privilegesSizer);
     topSizer->Add(privilegesPanel, 1, wxEXPAND, 0);
@@ -357,16 +409,25 @@ void PrivilegesDialog::updateControls()
     if (inConstructor)
         return;
 
+    bool roleObject = dynamic_cast<Role*>(objectM) != 0;
+
     // enable left-size choices
-    textctrl_user->Enable(radiobtn_user->GetValue());
-    choice_trigger->Enable(radiobtn_trigger->GetValue());
-    choice_procedure->Enable(radiobtn_procedure->GetValue());
-    choice_view->Enable(radiobtn_view->GetValue());
+    bool isSystemPrivilege = radiobtn_systemprivilege->GetValue();
+    bool useObjectRoleAsGrantee = roleObject && isSystemPrivilege;
+    textctrl_user->Enable(radiobtn_user->GetValue() && !useObjectRoleAsGrantee);
+    choice_trigger->Enable(radiobtn_trigger->GetValue() && !useObjectRoleAsGrantee);
+    choice_procedure->Enable(radiobtn_procedure->GetValue() && !useObjectRoleAsGrantee);
+    choice_view->Enable(radiobtn_view->GetValue() && !useObjectRoleAsGrantee);
+    granteePanel->Enable(!useObjectRoleAsGrantee);
 
     // disable role granting for non-user grantees
-    if (!radiobtn_user->GetValue() && radiobtn_memberof->GetValue())
+    if ((!radiobtn_user->GetValue() || useObjectRoleAsGrantee)
+        && radiobtn_memberof->GetValue())
         radiobtn_relation->SetValue(true);
-    radiobtn_memberof->Enable(radiobtn_user->GetValue());
+    radiobtn_memberof->Enable(radiobtn_user->GetValue() && !useObjectRoleAsGrantee);
+    radiobtn_systemprivilege->Enable(roleObject);
+    if (!roleObject && isSystemPrivilege)
+        radiobtn_relation->SetValue(true);
 
     // enable right-side choices
     bool isRelation = radiobtn_relation->GetValue();
@@ -376,6 +437,7 @@ void PrivilegesDialog::updateControls()
     enableRelationCheckboxes(isRelation, true);
     choice_execute->Enable(isProcedure);
     choice_memberof->Enable(isRole);
+    choice_systemprivilege->Enable(isSystemPrivilege && roleObject);
 
     bool hasRelPriv = false;
     for (const auto box : {
@@ -409,7 +471,8 @@ void PrivilegesDialog::updateControls()
     REVOKE [AOF] rolename                  FROM grantee
     */
 
-    bool hasSomething = (isRelation && hasRelPriv) || isProcedure || isRole;
+    bool hasSomething = (isRelation && hasRelPriv) || isProcedure || isRole
+        || (isSystemPrivilege && roleObject);
     button_add->Enable(hasSomething);
     if (!hasSomething)
     {
@@ -418,8 +481,12 @@ void PrivilegesDialog::updateControls()
     }
 
     wxString grantee;
+    if (useObjectRoleAsGrantee)
+    {
+        grantee = objectM->getQuotedName();
+    }
     // some usernames need quoting
-    if (radiobtn_user->GetValue())
+    else if (radiobtn_user->GetValue())
     {
         grantee = Identifier::userString(textctrl_user->GetValue());
     }
@@ -440,11 +507,14 @@ void PrivilegesDialog::updateControls()
     }
     bool grant = radiobox_action->GetSelection() < 2;
     bool grantoption = (radiobox_action->GetSelection() % 2 == 1);
+    bool adminOption = isRole || isSystemPrivilege;
     wxString sql(grant ? "GRANT " : "REVOKE ");
     if (!grant && grantoption)
-        sql << (isRole ? "ADMIN" : "GRANT") << " OPTION FOR ";
+        sql << (adminOption ? "ADMIN" : "GRANT") << " OPTION FOR ";
     if (isRole)
         sql << Identifier(choice_memberof->GetStringSelection()).getQuoted();
+    else if (isSystemPrivilege)
+        sql << choice_systemprivilege->GetStringSelection();
     else if (isRelation)
     {
         wxString priv;
@@ -483,7 +553,7 @@ void PrivilegesDialog::updateControls()
     sql << (grant ? " TO " : " FROM ") << grantee;
     if (grant && grantoption)
     {
-        sql << " WITH " << (isRole ? "ADMIN" : "GRANT")
+        sql << " WITH " << (adminOption ? "ADMIN" : "GRANT")
             << " OPTION";
     }
 
@@ -607,5 +677,3 @@ bool ManagePrivilegesHandler::handleURI(URI& uri)
     }
     return true;
 }
-
-

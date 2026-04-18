@@ -29,10 +29,12 @@
 #include "gui/BaseDialog.h"
 
 class Database;
+class MetadataItem;
 
 class PrivilegesDialog : public BaseDialog
 {
 private:
+    MetadataItem* objectM;
     Database *databaseM;
     void enableRelationCheckboxes(bool enable, bool all);
     bool inConstructor;
@@ -53,6 +55,7 @@ protected:
     wxRadioButton *radiobtn_relation;
     wxRadioButton *radiobtn_execute;
     wxRadioButton *radiobtn_memberof;
+    wxRadioButton *radiobtn_systemprivilege;
     wxTextCtrl *textctrl_update;
     wxTextCtrl *textctrl_references;
     wxButton *button_update_browse;
@@ -66,6 +69,7 @@ protected:
     wxChoice *choice_relations;
     wxChoice *choice_execute;
     wxChoice *choice_memberof;
+    wxChoice *choice_systemprivilege;
     wxStaticText *label_sql;
     wxTextCtrl *textbox_current_sql;
     wxButton *button_add;
