@@ -439,7 +439,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
         MetadataItem* current = d->findByNameAndType(t, objname);
         if (!current)
         {
-            if (t == ntDomain)
+            if (!current && t == ntDomain)
             {
                 // Dependencies can refer to both user and system domains.
                 current = d->findByNameAndType(ntSysDomain, objname);
