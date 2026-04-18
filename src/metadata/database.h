@@ -27,6 +27,7 @@
 #include <wx/strconv.h>
 
 #include <map>
+#include <mutex>
 #include <unordered_map>
 
 #include <ibpp.h>
@@ -182,6 +183,7 @@ private:
     std::vector<TimezoneInfo*> timezonesM;
     TimezoneInfo defaultTimezoneM;
     std::unordered_map<int, wxString> timezonesCacheM;
+    mutable std::mutex timezoneDataMutexM;
 
     std::unique_ptr<wxMBConv> charsetConverterM;
     void createCharsetConverter();
@@ -228,6 +230,7 @@ private:
 
     void loadDefaultTimezone();
     void loadTimezones();
+    void clearTimezones(bool clearDefaultTimezone);
 
     // small help for parser
     wxString getTableForIndex(const wxString& indexName);

@@ -301,6 +301,7 @@ Database::Database()
 
 Database::~Database()
 {
+    clearTimezones(true);
     resetCredentials();
 }
 
@@ -1467,6 +1468,7 @@ void Database::setDisconnected()
     usrIndicesM.reset();
     characterSetsM.reset();
     collationsM.reset();
+    clearTimezones(true);
 
     if (config().get("HideDisconnectedDatabases", false))
         getServer()->notifyObservers();
@@ -2242,7 +2244,12 @@ void Database::loadDefaultTimezone()
 
     // RDB$TIME_ZONES is available on Firebird 4 (ODS Ver 13) or higher
     if (!getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
+    {
+        std::lock_guard<std::mutex> lock(timezoneDataMutexM);
+        defaultTimezoneM.name.clear();
+        defaultTimezoneM.id = 0;
         return;
+    }
 
     IBPP::Statement& st1 = loader->getStatement(
         "select z.RDB$TIME_ZONE_ID, "
@@ -2255,8 +2262,26 @@ void Database::loadDefaultTimezone()
     st1->Get(1, tzId);
     st1->Get(2, tzName);
 
+    std::lock_guard<std::mutex> lock(timezoneDataMutexM);
     defaultTimezoneM.id = tzId;
     defaultTimezoneM.name = std2wxIdentifier(tzName, converter);
+}
+
+void Database::clearTimezones(bool clearDefaultTimezone)
+{
+    std::lock_guard<std::mutex> lock(timezoneDataMutexM);
+    for (std::vector<TimezoneInfo*>::iterator it = timezonesM.begin();
+        it != timezonesM.end(); ++it)
+    {
+        delete *it;
+    }
+    timezonesM.clear();
+    timezonesCacheM.clear();
+    if (clearDefaultTimezone)
+    {
+        defaultTimezoneM.name.clear();
+        defaultTimezoneM.id = 0;
+    }
 }
 
 void Database::loadTimezones()
@@ -2269,7 +2294,10 @@ void Database::loadTimezones()
 
     // RDB$TIME_ZONES is available on Firebird 4 (ODS Ver 13) or higher
     if (!getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
+    {
+        clearTimezones(false);
         return;
+    }
 
     IBPP::Statement& st1 = loader->getStatement(
         "select z.RDB$TIME_ZONE_ID, "
@@ -2277,22 +2305,49 @@ void Database::loadTimezones()
         "from RDB$TIME_ZONES z");
 
     st1->Execute();
+    std::vector<TimezoneInfo*> loadedTimezones;
 
-    while (st1->Fetch())
+    try
     {
-        st1->Get(1, tzId);
-        st1->Get(2, tzName);
+        while (st1->Fetch())
+        {
+            st1->Get(1, tzId);
+            st1->Get(2, tzName);
 
-        tzItm = new TimezoneInfo;
-        tzItm->id = tzId;
-        tzItm->name = std2wxIdentifier(tzName, converter);
-        timezonesM.push_back(tzItm);
+            tzItm = new TimezoneInfo;
+            tzItm->id = tzId;
+            tzItm->name = std2wxIdentifier(tzName, converter);
+            loadedTimezones.push_back(tzItm);
+        }
+    }
+    catch (...)
+    {
+        for (std::vector<TimezoneInfo*>::iterator it = loadedTimezones.begin();
+            it != loadedTimezones.end(); ++it)
+        {
+            delete *it;
+        }
+        throw;
+    }
+
+    std::vector<TimezoneInfo*> oldTimezones;
+    {
+        std::lock_guard<std::mutex> lock(timezoneDataMutexM);
+        oldTimezones.swap(timezonesM);
+        timezonesM.swap(loadedTimezones);
+        timezonesCacheM.clear();
+    }
+    for (std::vector<TimezoneInfo*>::iterator it = oldTimezones.begin();
+        it != oldTimezones.end(); ++it)
+    {
+        delete *it;
     }
 }
 
 TimezoneInfo Database::getDefaultTimezone()
 {
     loadDefaultTimezone();
+    std::lock_guard<std::mutex> lock(timezoneDataMutexM);
     return defaultTimezoneM;
 }
 
@@ -2300,18 +2355,21 @@ wxString Database::getTimezoneName(int timezone)
 {
     // Check the decoded-name cache first (avoids both vector scan and API call
     // on repeated lookups of the same ID, e.g. during grid rendering).
-    auto cacheIt = timezonesCacheM.find(timezone);
-    if (cacheIt != timezonesCacheM.end())
-        return cacheIt->second;
-
-    // Look up in metadata loaded from RDB$TIME_ZONES.
-    std::vector<TimezoneInfo*>::iterator it;
-    for (it = timezonesM.begin(); it != timezonesM.end(); it++)
     {
-        if ((*it)->id != timezone)
-            continue;
-        timezonesCacheM[timezone] = (*it)->name;
-        return (*it)->name;
+        std::lock_guard<std::mutex> lock(timezoneDataMutexM);
+        auto cacheIt = timezonesCacheM.find(timezone);
+        if (cacheIt != timezonesCacheM.end())
+            return cacheIt->second;
+
+        // Look up in metadata loaded from RDB$TIME_ZONES.
+        std::vector<TimezoneInfo*>::iterator it;
+        for (it = timezonesM.begin(); it != timezonesM.end(); it++)
+        {
+            if ((*it)->id != timezone)
+                continue;
+            timezonesCacheM[timezone] = (*it)->name;
+            return (*it)->name;
+        }
     }
 
     // Fallback: ask the Firebird client to decode the ID (handles offset-based
@@ -2322,6 +2380,7 @@ wxString Database::getTimezoneName(int timezone)
         if (ibpp_internals::getTimezoneNameById(timezone, tzName))
         {
             wxString result = wxString::FromUTF8(tzName.c_str());
+            std::lock_guard<std::mutex> lock(timezoneDataMutexM);
             timezonesCacheM[timezone] = result;
             return result;
         }
