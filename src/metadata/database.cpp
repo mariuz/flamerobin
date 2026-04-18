@@ -2270,10 +2270,9 @@ void Database::loadDefaultTimezone()
 void Database::clearTimezones(bool clearDefaultTimezone)
 {
     std::lock_guard<std::mutex> lock(timezoneDataMutexM);
-    for (std::vector<TimezoneInfo*>::iterator it = timezonesM.begin();
-        it != timezonesM.end(); ++it)
+    for (auto* tz : timezonesM)
     {
-        delete *it;
+        delete tz;
     }
     timezonesM.clear();
     timezonesCacheM.clear();
@@ -2322,10 +2321,9 @@ void Database::loadTimezones()
     }
     catch (...)
     {
-        for (std::vector<TimezoneInfo*>::iterator it = loadedTimezones.begin();
-            it != loadedTimezones.end(); ++it)
+        for (auto* tz : loadedTimezones)
         {
-            delete *it;
+            delete tz;
         }
         throw;
     }
@@ -2337,10 +2335,9 @@ void Database::loadTimezones()
         timezonesM.swap(loadedTimezones);
         timezonesCacheM.clear();
     }
-    for (std::vector<TimezoneInfo*>::iterator it = oldTimezones.begin();
-        it != oldTimezones.end(); ++it)
+    for (auto* tz : oldTimezones)
     {
-        delete *it;
+        delete tz;
     }
 }
 
@@ -2362,13 +2359,12 @@ wxString Database::getTimezoneName(int timezone)
             return cacheIt->second;
 
         // Look up in metadata loaded from RDB$TIME_ZONES.
-        std::vector<TimezoneInfo*>::iterator it;
-        for (it = timezonesM.begin(); it != timezonesM.end(); it++)
+        for (const auto* tz : timezonesM)
         {
-            if ((*it)->id != timezone)
+            if (tz->id != timezone)
                 continue;
-            timezonesCacheM[timezone] = (*it)->name;
-            return (*it)->name;
+            timezonesCacheM[timezone] = tz->name;
+            return tz->name;
         }
     }
 
