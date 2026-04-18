@@ -111,7 +111,7 @@ namespace
     {
         std::lock_guard<std::mutex> lock(gCryptCallbackMutex);
         const unsigned required = (unsigned)gCryptCallbackKeyData.size();
-        if (bufferLength == 0 || buffer == 0)
+        if (bufferLength == 0 || buffer == nullptr)
             return required;
 
         const unsigned bytesToCopy = std::min(required, bufferLength);
@@ -421,7 +421,7 @@ namespace IBPP
 
         IBS status;
         void* callback = keyData.empty()
-            ? 0
+            ? nullptr
             : reinterpret_cast<void*>(&databaseCryptKeyCallback);
         (*fbClient->m_database_crypt_callback)(status.Self(), callback);
         if (status.Errors())
