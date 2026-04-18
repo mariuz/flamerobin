@@ -31,8 +31,8 @@
 #endif
 
 #include <algorithm>
-
 #include "config/Config.h"
+#include "sql/firebird_keyword_sets.hpp"
 #include "sql/SqlTokenizer.h"
 
 // SqlTokenizerConfigCache: class to cache user preference for keyword case
@@ -72,6 +72,29 @@ SqlTokenizer::SqlTokenizer(const wxString& statement)
     : sqlM(statement), termM(";")
 {
     init();
+}
+
+namespace
+{
+const FirebirdKeywordSetData& getKeywordSetForVersion(int major)
+{
+    if (major <= 2)
+        return fbKeywordSet25;
+    if (major == 3)
+        return fbKeywordSet30;
+    if (major == 4)
+        return fbKeywordSet40;
+    if (major == 5)
+        return fbKeywordSet50;
+    return fbKeywordSet60;
+}
+
+void appendCaseKeyword(wxArrayString& keywords, const char* keyword,
+    bool upperCase)
+{
+    wxString word(wxString::FromUTF8(keyword));
+    keywords.Add(upperCase ? word.Upper() : word.Lower());
+}
 }
 
 /*static*/
@@ -146,19 +169,25 @@ const SqlTokenizer::KeywordToTokenMap& SqlTokenizer::getKeywordToTokenMap()
 /*static*/
 wxArrayString SqlTokenizer::getKeywords(KeywordCase kwc)
 {
-    const KeywordToTokenMap& keywordsMap = getKeywordToTokenMap();
+    return getKeywords(kwc, -1, -1);
+}
+
+/*static*/
+wxArrayString SqlTokenizer::getKeywords(KeywordCase kwc, int odsMajor,
+    int odsMinor)
+{
     wxArrayString keywords;
-    keywords.Alloc(keywordsMap.size());
+    const FirebirdKeywordVersion version(
+        normalizeKeywordVersion(odsMajor, odsMinor));
+    const FirebirdKeywordSetData& keywordSet(
+        getKeywordSetForVersion(version.major));
+    keywords.Alloc(keywordSet.keywordsCount);
 
     bool upperCase = (kwc == kwUpperCase) || (kwc == kwDefaultCase
         && config().get("SQLKeywordsUpperCase", false));
-    for (KeywordToTokenMap::const_iterator it = keywordsMap.begin();
-        it != keywordsMap.end(); ++it)
+    for (size_t i = 0; i < keywordSet.keywordsCount; ++i)
     {
-        if (upperCase)
-            keywords.Add(((*it).first).Upper());
-        else
-            keywords.Add(((*it).first).Lower());
+        appendCaseKeyword(keywords, keywordSet.keywords[i], upperCase);
     }
     keywords.Sort();
     return keywords;
@@ -167,7 +196,14 @@ wxArrayString SqlTokenizer::getKeywords(KeywordCase kwc)
 /*static*/
 wxString SqlTokenizer::getKeywordsString(KeywordCase kwc)
 {
-    wxArrayString keywordsArray(getKeywords(kwc));
+    return getKeywordsString(kwc, -1, -1);
+}
+
+/*static*/
+wxString SqlTokenizer::getKeywordsString(KeywordCase kwc, int odsMajor,
+    int odsMinor)
+{
+    wxArrayString keywordsArray(getKeywords(kwc, odsMajor, odsMinor));
     wxString keywords;
     for (size_t i = 0; i < keywordsArray.size(); ++i)
     {
@@ -194,12 +230,50 @@ SqlTokenType SqlTokenizer::getKeywordTokenType(const wxString& word)
 /*static*/
 bool SqlTokenizer::isReservedWord(const wxString& word)
 {
+    return isReservedWord(word, -1, -1);
+}
+
+/*static*/
+bool SqlTokenizer::isReservedWord(const wxString& word, int odsMajor,
+    int odsMinor)
+{
     if (word.IsEmpty())
         return false;
 
-    const KeywordToTokenMap& keywords = getKeywordToTokenMap();
-    KeywordToTokenMap::const_iterator pos = keywords.find(word);
-    return pos != keywords.end();
+    const FirebirdKeywordVersion version(
+        normalizeKeywordVersion(odsMajor, odsMinor));
+    const FirebirdKeywordSetData& keywordSet(
+        getKeywordSetForVersion(version.major));
+    const wxString searchWord(word.Upper());
+    for (size_t i = 0; i < keywordSet.reservedCount; ++i)
+    {
+        if (searchWord == wxString::FromUTF8(keywordSet.reserved[i]).Upper())
+            return true;
+    }
+    return false;
+}
+
+/*static*/
+SqlTokenizer::FirebirdKeywordVersion SqlTokenizer::normalizeKeywordVersion(
+    int odsMajor, int odsMinor)
+{
+    if (odsMajor <= 0)
+        return FirebirdKeywordVersion{2, 5};
+
+    if (odsMajor <= 11)
+        return FirebirdKeywordVersion{2, 5};
+    if (odsMajor == 12)
+        return FirebirdKeywordVersion{3, 0};
+    if (odsMajor == 13)
+    {
+        if (odsMinor <= 0)
+            return FirebirdKeywordVersion{4, 0};
+        if (odsMinor == 1)
+            return FirebirdKeywordVersion{5, 0};
+        return FirebirdKeywordVersion{6, 0};
+    }
+
+    return FirebirdKeywordVersion{6, 0};
 }
 
 SqlTokenType SqlTokenizer::getCurrentToken()
@@ -432,4 +506,3 @@ void SqlTokenizer::whitespaceToken()
     while (*sqlTokenEndM != 0 && wxIsspace(*sqlTokenEndM))
         sqlTokenEndM++;
 }
-
