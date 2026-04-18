@@ -158,6 +158,12 @@ enum SqlTokenType {
 class SqlTokenizer
 {
 private:
+    struct FirebirdKeywordVersion
+    {
+        int major;
+        int minor;
+    };
+
     typedef std::map<wxString, SqlTokenType> KeywordToTokenMap;
     typedef std::map<wxString, SqlTokenType>::value_type KeywordToTokenEntry;
 
@@ -172,6 +178,8 @@ private:
     void init();
 
     static const KeywordToTokenMap& getKeywordToTokenMap();
+    static FirebirdKeywordVersion normalizeKeywordVersion(
+        int odsMajor, int odsMinor);
 
     void defaultToken();
     void keywordIdentifierToken();
@@ -200,12 +208,18 @@ public:
     static wxString getKeyword(SqlTokenType token, bool upperCase);
     // returns array of keyword strings
     static wxArrayString getKeywords(KeywordCase kwc);
+    static wxArrayString getKeywords(KeywordCase kwc, int odsMajor,
+        int odsMinor);
     // returns all keywords in one string, separated by spaces
     static wxString getKeywordsString(KeywordCase kwc);
+    static wxString getKeywordsString(KeywordCase kwc, int odsMajor,
+        int odsMinor);
     // returns TokenType of parameter string if word is a keyword,
     // returns tkIdentifier otherwise
     static SqlTokenType getKeywordTokenType(const wxString& word);
     static bool isReservedWord(const wxString& word);
+    static bool isReservedWord(const wxString& word, int odsMajor,
+        int odsMinor);
 };
 
 #endif // FR_SQLTOKENIZER_H

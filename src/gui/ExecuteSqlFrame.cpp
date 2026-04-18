@@ -3186,7 +3186,9 @@ void ExecuteSqlFrame::setKeywords()
     // we can also make ExecuteSqlFrame observer of YTables/YViews/... objects
     // so it can reload this list if something changes
 
-    wxArrayString as(SqlTokenizer::getKeywords(SqlTokenizer::kwDefaultCase));
+    const DatabaseInfo& dbInfo(databaseM->getInfo());
+    wxArrayString as(SqlTokenizer::getKeywords(SqlTokenizer::kwDefaultCase,
+        dbInfo.getODS(), dbInfo.getODSMinor()));
 
     // get list od database objects' names
     std::vector<Identifier> v;
