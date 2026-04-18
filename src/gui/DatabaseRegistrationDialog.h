@@ -83,6 +83,8 @@ private:
     void updateButtons();
     wxString getDefaultDatabaseName() const;
     void updateIsDefaultDatabaseName();
+    void suggestDefaultPageSizeByServerVersion();
+    int getSuggestedPageSizeByServerVersion() const;
 
     wxArrayString getAuthenticationChoices() const;
     wxArrayString getDatabaseCharsetChoices() const;
