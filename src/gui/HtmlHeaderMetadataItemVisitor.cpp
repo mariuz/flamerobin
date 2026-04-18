@@ -56,8 +56,7 @@ void HtmlHeaderMetadataItemVisitor::visitDomain(Domain& /*domain*/)
     emptyTitles();
     addSummary();
     addPrivileges();
-    // TODO: Support dependencies retrieval in MetadataItem::getDependencies().
-    //addDependencies();
+    addDependencies();
     addDDL();
 }
 
@@ -202,4 +201,3 @@ void HtmlHeaderMetadataItemVisitor::defaultAction()
 {
     emptyTitles();
 } 
-
