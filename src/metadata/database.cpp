@@ -91,6 +91,11 @@ void Credentials::setRole(const wxString& value)
     roleM = value;
 }
 
+void Credentials::setCryptKeyData(const wxString& value)
+{
+    cryptKeyDataM = value;
+}
+
 wxString Credentials::getCharset() const
 {
     return charsetM;
@@ -109,6 +114,11 @@ wxString Credentials::getPassword() const
 wxString Credentials::getRole() const
 {
     return roleM;
+}
+
+wxString Credentials::getCryptKeyData() const
+{
+    return cryptKeyDataM;
 }
 
 int DatabaseInfo::getBuffers() const
@@ -310,6 +320,7 @@ void Database::prepareTemporaryCredentials()
     resetCredentials();
     connectionCredentialsM = new Credentials;
     connectionCredentialsM->setCharset(credentialsM.getCharset()); // default to database charset
+    connectionCredentialsM->setCryptKeyData(credentialsM.getCryptKeyData());
 }
 
 void Database::resetCredentials()
@@ -1053,7 +1064,7 @@ void Database::create(int pagesize, int dialect)
         (useUserNamePwd ? wx2std(getUsername()) : ""),
         (useUserNamePwd ? wx2std(getDecryptedPassword()) : ""),
         "", wx2std(charset), wx2std(extra_params),
-        wx2std(getClientLibrary())
+        wx2std(getClientLibrary()), wx2std(getCryptKeyData())
     );
     db->Create(dialect);
 }
@@ -1100,7 +1111,7 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
                 (useUserNamePwd ? wx2std(getUsername()) : ""),
                 (useUserNamePwd ? wx2std(password) : ""),
                 wx2std(getRole()), wx2std(getConnectionCharset()), 
-                "", wx2std(getClientLibrary())
+                "", wx2std(getClientLibrary()), wx2std(getCryptKeyData())
             );
             db->Connect();  // As standard, will block for 180 seconds or until connected
             return db;
@@ -1891,6 +1902,14 @@ wxString Database::getRole() const
         return credentialsM.getRole();
 }
 
+wxString Database::getCryptKeyData() const
+{
+    if (connectionCredentialsM)
+        return connectionCredentialsM->getCryptKeyData();
+    else
+        return credentialsM.getCryptKeyData();
+}
+
 IBPP::Database& Database::getIBPPDatabase()
 {
     return databaseM;
@@ -1963,6 +1982,14 @@ void Database::setRole(const wxString& value)
         connectionCredentialsM->setRole(value);
     else
         credentialsM.setRole(value);
+}
+
+void Database::setCryptKeyData(const wxString& value)
+{
+    if (connectionCredentialsM)
+        connectionCredentialsM->setCryptKeyData(value);
+    else
+        credentialsM.setCryptKeyData(value);
 }
 
 const wxString Database::getTypeName() const

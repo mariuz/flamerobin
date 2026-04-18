@@ -94,6 +94,10 @@ void DatabaseRegistrationDialog::createControls()
 
     label_role = new wxStaticText(getControlsPanel(), -1, _("Role:"));
     text_ctrl_role = new wxTextCtrl(getControlsPanel(), -1, "");
+    label_keydata = new wxStaticText(getControlsPanel(), -1,
+        _("Encryption key data:"));
+    text_ctrl_keydata = new wxTextCtrl(getControlsPanel(),
+        ID_textcontrol_keydata, wxEmptyString);
     /*
     Todo: Implement FB library per conexion
     label_library = new wxStaticText(getControlsPanel(), -1,
@@ -298,6 +302,8 @@ void DatabaseRegistrationDialog::layoutControls()
     sizerControls->Add(combobox_charset, wxGBPosition(4, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
     sizerControls->Add(label_role, wxGBPosition(4, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
     sizerControls->Add(text_ctrl_role, wxGBPosition(4, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    sizerControls->Add(label_keydata, wxGBPosition(5, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
+    sizerControls->Add(text_ctrl_keydata, wxGBPosition(5, 1), wxGBSpan(1, 3), wxALIGN_CENTER_VERTICAL | wxEXPAND);
     
     /*
     * Todo: Implement FB library per conexion
@@ -310,10 +316,10 @@ void DatabaseRegistrationDialog::layoutControls()
 
     if (createM)
     {
-        sizerControls->Add(label_pagesize, wxGBPosition(5, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-        sizerControls->Add(choice_pagesize, wxGBPosition(5, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
-        sizerControls->Add(label_dialect, wxGBPosition(5, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
-        sizerControls->Add(choice_dialect, wxGBPosition(5, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+        sizerControls->Add(label_pagesize, wxGBPosition(6, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
+        sizerControls->Add(choice_pagesize, wxGBPosition(6, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+        sizerControls->Add(label_dialect, wxGBPosition(6, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
+        sizerControls->Add(choice_dialect, wxGBPosition(6, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
     }
 
     sizerControls->AddGrowableCol(1);
@@ -354,6 +360,7 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
     text_ctrl_username->SetValue(databaseM->getUsername());
     text_ctrl_password->SetValue(databaseM->getDecryptedPassword());
     text_ctrl_role->SetValue(databaseM->getRole());
+    text_ctrl_keydata->SetValue(databaseM->getCryptKeyData());
     /*
     * Todo: Implement FB library per conexion
     text_ctrl_library->SetValue(databaseM->getClientLibrary());
@@ -377,6 +384,7 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
     choice_authentication->Enable(!connectAsM && !isConnected);
     combobox_charset->Enable(!isConnected);
     text_ctrl_role->SetEditable(!isConnected);
+    text_ctrl_keydata->SetEditable(!isConnected);
     if (connectAsM)
         button_ok->SetLabel(_("Connect"));
     else
@@ -470,6 +478,7 @@ BEGIN_EVENT_TABLE(DatabaseRegistrationDialog, BaseDialog)
     EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_dbpath, DatabaseRegistrationDialog::OnSettingsChange)
     EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_name, DatabaseRegistrationDialog::OnNameChange)
     EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_username, DatabaseRegistrationDialog::OnSettingsChange)
+    EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_keydata, DatabaseRegistrationDialog::OnSettingsChange)
     EVT_CHOICE(DatabaseRegistrationDialog::ID_choice_authentication, DatabaseRegistrationDialog::OnAuthenticationChange)
     EVT_TEXT(DatabaseRegistrationDialog::ID_textcontrol_library, DatabaseRegistrationDialog::OnSettingsChange)
 END_EVENT_TABLE()
@@ -563,6 +572,7 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
     databaseM->setPath(text_ctrl_dbpath->GetValue());
     databaseM->setUsername(text_ctrl_username->GetValue());
     databaseM->setEncryptedPassword(text_ctrl_password->GetValue());
+    databaseM->setCryptKeyData(text_ctrl_keydata->GetValue());
     /*
     * Todo: Implement FB library per conexion
     databaseM->setClientLibrary(text_ctrl_library->GetValue());

@@ -71,6 +71,8 @@ void DatabaseImpl::Connect()
     if (mDatabaseName.empty())
         throw LogicExceptionImpl("Database::Connect", _("Unspecified database name."));
 
+    IBPP::DatabaseCryptCallbackSetKeyData(mCryptKeyData);
+
     // Build a DPB based on the properties
     DPB dpb;
     if (! mUserName.empty())
@@ -215,7 +217,7 @@ IBPP::IDatabase * DatabaseImpl::Clone()
     // By definition the clone of an IBPP Database is a new Database.
     DatabaseImpl* clone = new DatabaseImpl(mServerName, mDatabaseName,
         mUserName, mUserPassword, mRoleName,
-        mCharSet, mCreateParams);
+        mCharSet, mCreateParams, mCryptKeyData);
     return clone;
 }
 
@@ -511,12 +513,13 @@ void DatabaseImpl::DetachEventsImpl(EventsImpl* ev)
 DatabaseImpl::DatabaseImpl(const std::string& ServerName, const std::string& DatabaseName,
                            const std::string& UserName, const std::string& UserPassword,
                            const std::string& RoleName, const std::string& CharSet,
-                           const std::string& CreateParams) :
+                           const std::string& CreateParams,
+                           const std::string& CryptKeyData) :
 
     mRefCount(0), mHandle(0),
     mServerName(ServerName), mDatabaseName(DatabaseName),
     mUserName(UserName), mUserPassword(UserPassword), mRoleName(RoleName),
-    mCharSet(CharSet), mCreateParams(CreateParams),
+    mCharSet(CharSet), mCreateParams(CreateParams), mCryptKeyData(CryptKeyData),
     mDialect(3)
 {
 }

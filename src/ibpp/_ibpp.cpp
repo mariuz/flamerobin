@@ -28,6 +28,9 @@
 #endif
 
 #include <limits>
+#include <algorithm>
+#include <cstring>
+#include <mutex>
 
 #ifdef IBPP_WINDOWS
 #include <shlwapi.h>
@@ -97,6 +100,26 @@ namespace ibpp_internals
 }
 
 using namespace ibpp_internals;
+
+namespace
+{
+    std::mutex gCryptCallbackMutex;
+    std::string gCryptCallbackKeyData;
+
+    unsigned ISC_EXPORT databaseCryptKeyCallback(unsigned /*dataLength*/,
+        const void* /*data*/, unsigned bufferLength, void* buffer)
+    {
+        std::lock_guard<std::mutex> lock(gCryptCallbackMutex);
+        const unsigned required = (unsigned)gCryptCallbackKeyData.size();
+        if (bufferLength == 0 || buffer == 0)
+            return required;
+
+        const unsigned bytesToCopy = std::min(required, bufferLength);
+        if (bytesToCopy > 0)
+            std::memcpy(buffer, gCryptCallbackKeyData.data(), bytesToCopy);
+        return bytesToCopy;
+    }
+}
 
 #ifdef IBPP_WINDOWS
 HMODULE IBPP_LoadLibrary(std::string library) {
@@ -367,6 +390,7 @@ FBCLIENT* FBCLIENT::Call()
 		IB_ENTRYPOINT(service_query);
 
 		FB_ENTRYPOINT_NOTHROW(get_master_interface);
+		FB_ENTRYPOINT_NOTHROW(database_crypt_callback);
 
 		mReady = true;
 	}
@@ -383,6 +407,27 @@ namespace IBPP
 		return (AppVersion & 0xFFFFFF00) ==
 				(IBPP::Version & 0xFFFFFF00) ? true : false;
 	}
+
+    void DatabaseCryptCallbackSetKeyData(const std::string& keyData)
+    {
+        FBCLIENT* fbClient = gds.Call();
+        if (fbClient->m_database_crypt_callback == 0)
+            return;
+
+        {
+            std::lock_guard<std::mutex> lock(gCryptCallbackMutex);
+            gCryptCallbackKeyData = keyData;
+        }
+
+        IBS status;
+        void* callback = keyData.empty()
+            ? 0
+            : reinterpret_cast<void*>(&databaseCryptKeyCallback);
+        (*fbClient->m_database_crypt_callback)(status.Self(), callback);
+        if (status.Errors())
+            throw SQLExceptionImpl(status, "DatabaseCryptCallbackSetKeyData",
+                _("fb_database_crypt_callback failed"));
+    }
 
 #ifdef IBPP_WINDOWS
 	void ClientLibSearchPaths(const std::string& paths)
@@ -412,14 +457,15 @@ namespace IBPP
 		const std::string& DatabaseName, const std::string& UserName,
 		const std::string& UserPassword, const std::string& RoleName,
 		const std::string& CharSet, const std::string& CreateParams,
-        const std::string& FBClient)
+        const std::string& FBClient, const std::string& CryptKeyData)
 	{
         
         if (FBClient.length() != 0)
             gds.mfbdll = FBClient;
 		(void)gds.Call();			// Triggers the initialization, if needed
 		return new DatabaseImpl(ServerName, DatabaseName, UserName,
-								UserPassword, RoleName, CharSet, CreateParams);
+								UserPassword, RoleName, CharSet, CreateParams,
+                                CryptKeyData);
 	}
 
 	Transaction TransactionFactory(Database db, TAM am,
