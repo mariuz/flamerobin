@@ -628,8 +628,8 @@ void AdvancedSearchFrame::OnButtonStartClick(wxCommandEvent& WXUNUSED(event))
                         if (idx)
                         {
                             (*it)->ensurePropertiesLoaded();
-                            std::vector<wxString>* segments = idx->getSegments();
-                            found |= std::any_of(segments->begin(), segments->end(),
+                            const std::vector<wxString>& segments = *idx->getSegments();
+                            found |= std::any_of(segments.begin(), segments.end(),
                                 [this](const wxString& segment)
                                 {
                                     return match(CriteriaItem::ctField, segment);
