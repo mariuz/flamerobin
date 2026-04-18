@@ -351,7 +351,7 @@ void SaveDescriptionVisitor::visitUDF(UDF& function)
 void SaveDescriptionVisitor::visitGenerator(Generator& generator)
 {
 	if (generator.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
-		saveDescription(&generator, "comment on generator %s is '%s'");
+		saveDescription(&generator, "comment on sequence %s is '%s'");
 		return;
 	}
     saveDescription(&generator,
@@ -428,4 +428,3 @@ void SaveDescriptionVisitor::visitTrigger(Trigger& trigger)
         "update RDB$TRIGGERS set RDB$DESCRIPTION = ? "
         "where RDB$TRIGGER_NAME = ?");
 }
-

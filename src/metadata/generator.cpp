@@ -94,7 +94,7 @@ void Generator::loadProperties()
 
 const wxString Generator::getTypeName() const
 {
-    return "GENERATOR";
+    return "SEQUENCE";
 }
 
 void Generator::acceptVisitor(MetadataItemVisitor* visitor)
@@ -173,7 +173,7 @@ std::vector<Privilege>* Generator::getPrivileges(bool splitPerGrantor)
 
 // Generators collection
 Generators::Generators(DatabasePtr database)
-    : MetadataCollection<Generator>(ntGenerators, database, _("Generators"))
+    : MetadataCollection<Generator>(ntGenerators, database, _("Sequences"))
 {
 }
 
@@ -197,6 +197,5 @@ void Generators::loadChildren()
 
 const wxString Generators::getTypeName() const
 {
-    return "GENERATOR_COLLECTION";
+    return "SEQUENCE_COLLECTION";
 }
-

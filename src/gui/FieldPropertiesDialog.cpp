@@ -153,12 +153,12 @@ void FieldPropertiesDialog::createControls()
     label_autoinc = new wxStaticText(getControlsPanel(), wxID_ANY, _("Autoincrement"));
 
     radio_generator_new = new wxRadioButton(getControlsPanel(),
-        ID_radio_generator_new, _("Create new generator:"));
+        ID_radio_generator_new, _("Create new sequence:"));
     textctrl_generator_name = new wxTextCtrl(getControlsPanel(),
         ID_textctrl_generator_name, wxEmptyString);
 
     radio_generator_existing = new wxRadioButton(getControlsPanel(),
-        ID_radio_generator_existing, _("Use existing generator:"));
+        ID_radio_generator_existing, _("Use existing sequence:"));
     choice_generator = new wxChoice(getControlsPanel(), ID_choice_generator,
         wxDefaultPosition, wxDefaultSize, 0, 0);
 
@@ -757,7 +757,7 @@ void FieldPropertiesDialog::updateSqlStatement()
     if (radio_generator_new->GetValue())
     {
         generator.setText(textctrl_generator_name->GetValue());
-        sql = "CREATE GENERATOR " + generator.getQuoted() + ";\n\n";
+        sql = "CREATE SEQUENCE " + generator.getQuoted() + ";\n\n";
     }
 
     if (checkbox_trigger->IsChecked())
@@ -958,4 +958,3 @@ bool ColumnPropertiesHandler::handleURI(URI& uri)
         execSql(w, title, t->getDatabase(), statements, true);
     return true;
 }
-
