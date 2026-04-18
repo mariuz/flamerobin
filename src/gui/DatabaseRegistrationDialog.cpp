@@ -362,6 +362,8 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
     if (charset.empty())
         charset = "NONE";
     combobox_charset->SetValue(charset);
+    if (createM)
+        suggestDefaultPageSizeByServerVersion();
     // see whether the database has an empty or default name; knowing that will be
     // useful to keep the name in sync when other attributes change.
     updateIsDefaultDatabaseName();
@@ -386,6 +388,42 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
     updateAuthenticationMode();
     updateButtons();
     updateColors();
+}
+
+void DatabaseRegistrationDialog::suggestDefaultPageSizeByServerVersion()
+{
+    if (choice_pagesize->GetSelection() != 0)
+        return;
+
+    int pageSize = getSuggestedPageSizeByServerVersion();
+    if (pageSize <= 0)
+        return;
+
+    choice_pagesize->SetStringSelection(wxString::Format("%d", pageSize));
+}
+
+int DatabaseRegistrationDialog::getSuggestedPageSizeByServerVersion() const
+{
+    if (!databaseM)
+        return 0;
+
+    ServerPtr server(databaseM->getServer());
+    if (!server)
+        return 0;
+
+    try
+    {
+        IBPP::Service service;
+        if (!server->getService(service, nullptr, false))
+            return 0;
+
+        return service->versionIsHigherOrEqualTo(3, 0) ? 8192 : 4096;
+    }
+    catch (...)
+    {
+        // Version detection is best-effort; keep existing default on failure.
+    }
+    return 0;
 }
 
 void DatabaseRegistrationDialog::updateAuthenticationMode()
@@ -588,4 +626,3 @@ void DatabaseRegistrationDialog::OnAuthenticationChange(
         updateColors();
     }
 }
-
