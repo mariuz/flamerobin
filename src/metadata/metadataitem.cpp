@@ -332,8 +332,8 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
     for (int i = 0; i < type_count; i++)
         if (typeM == dep_types[i])
             mytype = i;
-    // system tables should be treated as tables
-    if (typeM == ntSysTable)
+    // system tables and global temporary tables should be treated as tables
+    if (typeM == ntSysTable || typeM == ntGTT)
         mytype = 0;
     if (typeM == ntDBTrigger || typeM == ntDDLTrigger || typeM == ntDMLTrigger)
         mytype = 2;
@@ -363,7 +363,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
         " from RDB$DEPENDENCIES \n "
         " where RDB$" + o1 + "_TYPE in (?,?) and RDB$" + o1 + "_NAME = ? \n ";
     int params = 1;
-    if ((typeM == ntTable || typeM == ntSysTable || typeM == ntView) && ofObject)  // get deps for computed columns
+    if ((typeM == ntTable || typeM == ntSysTable || typeM == ntGTT || typeM == ntView) && ofObject)  // get deps for computed columns
     {                                                       // view needed to bind with generators
         sql += " union  \n"
             " SELECT DISTINCT d.rdb$depended_on_type, d.rdb$depended_on_name, d.rdb$field_name \n"
@@ -396,7 +396,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
     }
     // views can depend on other views as well
     // we might need to add procedures here one day when Firebird gains support for it
-    if (!ofObject && (typeM == ntView || typeM == ntTable || typeM == ntSysTable))
+    if (!ofObject && (typeM == ntView || typeM == ntTable || typeM == ntSysTable || typeM == ntGTT))
     {
         sql += " union \n"
             " select distinct cast(0 as smallint), f.RDB$RELATION_NAME, f.RDB$BASE_FIELD \n"

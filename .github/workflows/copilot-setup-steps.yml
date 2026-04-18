@@ -10,8 +10,6 @@ on:
         paths:
             - .github/workflows/copilot-setup-steps.yml
 
-env:
-    wx-tag-version: v3.2.6
 
 jobs:
     # The job MUST be called `copilot-setup-steps` or it will not be picked up by Copilot.
@@ -39,29 +37,4 @@ jobs:
                   firebird-dev \
                   firebird3.0-server-core \
                   firebird3.0-common
-                sudo ldconfig
-
-            # Cache a from-source wxWidgets build so repeated Copilot runs are fast
-            - name: Restore wxWidgets cache
-              id: cache-wxwidgets
-              uses: actions/cache@v4
-              with:
-                path: wxWidgets
-                key: ${{ runner.os }}-wxwidgets-${{ env.wx-tag-version }}
-                restore-keys: ${{ runner.os }}-wxwidgets-${{ env.wx-tag-version }}
-
-            - name: Clone wxWidgets
-              if: steps.cache-wxwidgets.outputs.cache-hit != 'true'
-              run: |
-                git clone --recursive --branch ${{ env.wx-tag-version }} --depth 1 \
-                  https://github.com/wxWidgets/wxWidgets.git
-
-            - name: Build and install wxWidgets
-              if: steps.cache-wxwidgets.outputs.cache-hit != 'true'
-              run: |
-                cd wxWidgets
-                mkdir build && cd build
-                cmake .. -DCMAKE_BUILD_TYPE=Release -DwxBUILD_SHARED=OFF
-                make -j$(nproc)
-                sudo make install
                 sudo ldconfig
