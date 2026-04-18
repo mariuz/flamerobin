@@ -152,6 +152,8 @@ bool Root::parseDatabase(ServerPtr server, wxXmlNode* xmln)
             database->getAuthenticationMode().setConfigValue(value);
         else if (xmln->GetName() == "role")
             database->setRole(value);
+        else if (xmln->GetName() == "cryptkeydata")
+            database->setCryptKeyData(value);
         else if (xmln->GetName() == "id")
         {
             unsigned long id;
@@ -311,6 +313,7 @@ bool Root::save()
             rsAddChildNode(dbn, "username", (*itdb)->getUsername());
             rsAddChildNode(dbn, "password", (*itdb)->getRawPassword());
             rsAddChildNode(dbn, "role", (*itdb)->getRole());
+            rsAddChildNode(dbn, "cryptkeydata", (*itdb)->getCryptKeyData());
             rsAddChildNode(dbn, "fbclient", (*itdb)->getClientLibrary());
             rsAddChildNode(dbn, "authentication",
                 (*itdb)->getAuthenticationMode().getConfigValue());
@@ -367,4 +370,3 @@ const wxString Root::getTypeName() const
 {
     return "ROOT";
 }
-

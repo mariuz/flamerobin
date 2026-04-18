@@ -59,6 +59,9 @@ private:
     
     wxStaticText* label_role;
     wxTextCtrl* text_ctrl_role;
+
+    wxStaticText* label_keydata;
+    wxTextCtrl* text_ctrl_keydata;
     
     wxStaticText* label_pagesize;
     wxChoice* choice_pagesize;
@@ -109,6 +112,7 @@ private:
         ID_textcontrol_name,
         ID_textcontrol_username,
         ID_textcontrol_password,
+        ID_textcontrol_keydata,
         ID_button_browse,
         ID_choice_authentication,
         ID_textcontrol_library,

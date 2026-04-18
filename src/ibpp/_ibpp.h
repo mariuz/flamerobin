@@ -390,6 +390,7 @@ typedef void        ISC_EXPORT proto_encode_timestamp (void *,
 //  FB3+ / get master-interface (fb_get_master_interface)
 //
 typedef Firebird::IMaster* ISC_EXPORT proto_get_master_interface();
+typedef ISC_STATUS ISC_EXPORT proto_database_crypt_callback(ISC_STATUS*, void*);
 
 //
 //  Internal binding structure to the FBCLIENT DLL
@@ -474,6 +475,7 @@ struct FBCLIENT
     //proto_encode_timestamp*           m_encode_timestamp;
 
     proto_get_master_interface*     m_get_master_interface;
+    proto_database_crypt_callback*  m_database_crypt_callback;
 
     // Constructor (No need for a specific destructor)
     FBCLIENT()
@@ -852,6 +854,7 @@ class DatabaseImpl : public IBPP::IDatabase
     std::string mRoleName;      // Role used for the duration of the connection
     std::string mCharSet;       // Character Set used for the connection
     std::string mCreateParams;  // Other parameters (creation only)
+    std::string mCryptKeyData;  // Crypt key callback data
 
     int mDialect;                           // 1 if IB5, 1 or 3 if IB6/FB1
     std::vector<TransactionImpl*> mTransactions;// Table of Transaction*
@@ -878,7 +881,8 @@ public:
     DatabaseImpl(const std::string& ServerName, const std::string& DatabaseName,
                 const std::string& UserName, const std::string& UserPassword,
                 const std::string& RoleName, const std::string& CharSet,
-                const std::string& CreateParams);
+                const std::string& CreateParams,
+                const std::string& CryptKeyData = "");
     ~DatabaseImpl();
     FBCLIENT getGDS() const { return gds; };
 

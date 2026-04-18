@@ -1033,7 +1033,8 @@ public:
         const std::string& DatabaseName, const std::string& UserName,
             const std::string& UserPassword, const std::string& RoleName,
                 const std::string& CharSet, const std::string& CreateParams,
-                    const std::string& FBClient = "");
+                    const std::string& FBClient = "",
+                    const std::string& CryptKeyData = "");
 
     inline Database DatabaseFactory(const std::string& ServerName,
         const std::string& DatabaseName, const std::string& UserName,
@@ -1069,6 +1070,8 @@ public:
      * against a compatible version of the library. */
 
     bool CheckVersion(uint32_t);
+
+    void DatabaseCryptCallbackSetKeyData(const std::string& keyData);
 
     /* On Win32 platform, ClientLibSearchPaths() allows to setup
      * one or multiple additional paths (separated with a ';') where IBPP

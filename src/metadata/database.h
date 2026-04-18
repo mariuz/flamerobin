@@ -63,16 +63,19 @@ private:
     wxString roleM;
     wxString usernameM;
     wxString passwordM;
+    wxString cryptKeyDataM;
 
 public:
     wxString getCharset() const;
     wxString getUsername() const;
     wxString getPassword() const;
     wxString getRole() const;
+    wxString getCryptKeyData() const;
     void setCharset(const wxString& value);
     void setUsername(const wxString& value);
     void setPassword(const wxString& value);
     void setRole(const wxString& value);
+    void setCryptKeyData(const wxString& value);
 };
 
 class DatabaseInfo
@@ -341,6 +344,7 @@ public:
     wxString getDecryptedPassword() const;
     DatabaseAuthenticationMode& getAuthenticationMode();
     wxString getRole() const;
+    wxString getCryptKeyData() const;
     IBPP::Database& getIBPPDatabase();
     void setIsVolatile(const bool isVolatile);
     void setPath(const wxString& value);
@@ -350,6 +354,7 @@ public:
     void setRawPassword(const wxString& value);
     void setEncryptedPassword(const wxString& value);
     void setRole(const wxString& value);
+    void setCryptKeyData(const wxString& value);
     virtual const wxString getTypeName() const;
     ServerPtr getServer() const;
     void setServer(ServerPtr server);
