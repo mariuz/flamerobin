@@ -35,7 +35,7 @@ Owner: {%owner_name%}<br>
       </td>
       %}
       <td nowrap valign="top">{%object_name%}</td>
-      <td nowrap valign="top">{%columninfo:datatype%}</td>
+      <td nowrap valign="top">{%columninfo:datatype%}{%columninfo:identity%}</td>
       <td nowrap valign="top"><center>{%ifeq:{%columninfo:is_nullable%}:false:<img src="{%template_root%}ok.png">%}</center></td>
       {%ifeq:{%getglobalconf:DisplayColumnDefault%}:1:
       <td nowrap valign="top">{%columninfo:default_expression%}</td>%}

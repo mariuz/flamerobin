@@ -647,6 +647,12 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
                 processedText += tp->escapeChars(defaultValue, false);
             }
         }
+        else if (cmdParams[0] == "identity")
+        {
+            Column* col = dynamic_cast<Column*>(object);
+            if (col && col->isIdentity())
+                processedText += tp->escapeChars(col->getSource(true).Trim());
+        }
     }
 
     // {%viewinfo:<property>%}
