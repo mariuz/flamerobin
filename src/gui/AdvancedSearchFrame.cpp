@@ -115,7 +115,7 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent, RootPtr root)
     wxString choices1[] =
     {
         "TABLE", "VIEW", "PROCEDURE",
-        "TRIGGER", "GENERATOR", "FUNCTION", "DOMAIN",
+        "TRIGGER", "SEQUENCE", "FUNCTION", "DOMAIN",
         "ROLE", "COLUMN", "EXCEPTION", "INDEX"
     };
     int nchoices1 = sizeof(choices1) / sizeof(wxString);

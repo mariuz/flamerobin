@@ -3809,7 +3809,7 @@ bool EditGeneratorValueHandler::handleURI(URI& uri)
     int64_t oldvalue = g->getValue();
     DatabasePtr db = g->getDatabase();
 
-    wxString value = wxGetTextFromUser(_("Changing generator value"),
+    wxString value = wxGetTextFromUser(_("Changing sequence value"),
         _("Enter new value"),
 #ifndef wxLongLong
     // MH: I have no idea if this works on all systems... but it should be better
@@ -3821,8 +3821,8 @@ bool EditGeneratorValueHandler::handleURI(URI& uri)
 
     if (value != "")
     {
-        wxString sql = "SET GENERATOR " + g->getQuotedName()
-            + " TO " + value + ";";
+        wxString sql = "ALTER SEQUENCE " + g->getQuotedName()
+            + " RESTART WITH " + value + ";";
         execSql(w, sql, db, sql, true);
     }
     return true;

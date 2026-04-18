@@ -123,10 +123,10 @@ wxString MetadataItemCreateStatementVisitor::getCreateUserStatement()
 wxString MetadataItemCreateStatementVisitor::getCreateGeneratorStatement()
 {
     StatementBuilder sb;
-    sb << kwCREATE << ' ' << kwGENERATOR << " name;"
+    sb << kwCREATE << " SEQUENCE name;"
         << StatementBuilder::NewLine
-        << kwSET << ' ' << kwGENERATOR << " name " << kwTO
-        << " value;" << StatementBuilder::NewLine;
+        << "ALTER SEQUENCE name RESTART WITH value;"
+        << StatementBuilder::NewLine;
     return sb;
 }
 

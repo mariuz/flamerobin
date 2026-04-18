@@ -114,7 +114,7 @@ wxString getNameOfType(NodeType type)
         case ntView:         return ("VIEW");
         case ntProcedure:    return ("PROCEDURE");
         case ntDMLTrigger:   return ("TRIGGER");
-        case ntGenerator:    return ("GENERATOR");
+        case ntGenerator:    return ("SEQUENCE");
         case ntFunctionSQL:  return ("FUNCTIONSQL");
         case ntUDF:          return ("UDF");
         case ntDomain:       return ("DOMAIN");
@@ -142,7 +142,7 @@ NodeType getTypeByName(const wxString& name)
         return ntProcedure;
     else if (name == "TRIGGER")
         return ntDMLTrigger;
-    else if (name == "GENERATOR")
+    else if (name == "SEQUENCE" || name == "GENERATOR")
         return ntGenerator;
     else if (name == "FUNCTIONSQL")
         return ntFunctionSQL;
