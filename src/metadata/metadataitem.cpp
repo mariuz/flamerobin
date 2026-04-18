@@ -324,7 +324,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
 
     int mytype = -1;            // map DBH type to RDB$DEPENDENT TYPE
     NodeType dep_types[] = {    ntTable,    ntView,     ntTrigger,  ntUnknown,  ntUnknown,
-                                ntProcedure,ntUnknown,  ntException,ntUnknown,  ntUnknown,
+                                ntProcedure,ntUnknown,  ntException,ntUnknown,  ntDomain,
                                 ntUnknown,  ntUnknown,  ntUnknown,  ntUnknown,  ntGenerator,
                                 ntFunctionSQL, ntUnknown,  ntUnknown,  ntUnknown,  ntPackage
     };
@@ -439,6 +439,11 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
         MetadataItem* current = d->findByNameAndType(t, objname);
         if (!current)
         {
+            if (t == ntDomain)
+            {
+                // Dependencies can refer to both user and system domains.
+                current = d->findByNameAndType(ntSysDomain, objname);
+            }
             if (t == ntTable) {
                 // maybe it's a view masked as table
                 current = d->findByNameAndType(ntView, objname);
