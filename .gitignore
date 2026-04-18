@@ -1,5 +1,4 @@
 src/revisioninfo.h
-flamerobin_vs2010.*
 flamerobin.ncb
 flamerobin*.suo
 Debug
@@ -8,7 +7,6 @@ ipch
 bcc*
 gcc*
 vc*
-.bakefile_gen.state
 *.opensdf
 *.sdf
 *.user
