@@ -415,8 +415,20 @@ void CreateDDLVisitor::visitUDF(UDF& f)
 void CreateDDLVisitor::visitGenerator(Generator& g)
 {
     preSqlM += "CREATE " + g.getSource() + ";\n";
+
+    // grant usage on [name] to [user/role]
+    const std::vector<Privilege>* priv = g.getPrivileges();
+    if (priv)
+    {
+        for (std::vector<Privilege>::const_iterator ci = priv->begin();
+            ci != priv->end(); ++ci)
+        {
+            grantSqlM += (*ci).getSql() + "\n";
+        }
+    }
+
     postSqlM << getCommentOn(g);
-    sqlM = preSqlM + postSqlM;
+    sqlM = preSqlM + postSqlM + grantSqlM;
 }
 
 void CreateDDLVisitor::visitIndex(Index& i)
