@@ -220,11 +220,14 @@ void Relation::loadChildren()
             " join rdb$relation_fields r "
             "     on f.rdb$field_name=r.rdb$field_source"
             " left outer join rdb$collations l "
-            "     on l.rdb$collation_id = coalesce(r.rdb$collation_id, f.rdb$collation_id) "
-            "     and l.rdb$character_set_id = case"
-            "         when r.rdb$collation_id is null then f.rdb$character_set_id"
-            "         else coalesce(r.rdb$character_set_id, f.rdb$character_set_id)"
-            "     end";
+            "     on l.rdb$collation_id = coalesce(r.rdb$collation_id, f.rdb$collation_id) ";
+    if (db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
+        sql += " and l.rdb$character_set_id = case"
+               "     when r.rdb$collation_id is null then f.rdb$character_set_id"
+               "     else coalesce(r.rdb$character_set_id, f.rdb$character_set_id)"
+               " end";
+    else
+        sql += " and l.rdb$character_set_id = f.rdb$character_set_id";
     
     if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
         sql += " left join RDB$GENERATORS g on g.RDB$GENERATOR_NAME = r.RDB$GENERATOR_NAME ";
