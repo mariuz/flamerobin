@@ -131,6 +131,7 @@ private:
     bool inTransactionM;
     IBPP::Transaction transactionM;
     IBPP::Statement statementM;
+    bool isTransactionStarted();
     IBPP::TIL transactionIsolationLevelM;
     IBPP::TLR transactionLockResolutionM;
     IBPP::TAM transactionAccessModeM;

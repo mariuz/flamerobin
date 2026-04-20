@@ -632,6 +632,24 @@ Database* ExecuteSqlFrame::getDatabase() const
     return databaseM;
 }
 
+bool ExecuteSqlFrame::isTransactionStarted()
+{
+    if (transactionM == 0)
+        return false;
+    try
+    {
+        return transactionM->Started();
+    }
+    catch (IBPP::LogicException&)
+    {
+        transactionM = 0;
+        statementM = 0;
+        inTransaction(false);
+        executedStatementsM.clear();
+        return false;
+    }
+}
+
 
 void ExecuteSqlFrame::buildToolbar(CommandManager& cm)
 {
@@ -887,7 +905,7 @@ bool ExecuteSqlFrame::doCanClose()
         saveFile = res == wxYES;
     }
 
-    if (transactionM != 0 && transactionM->Started())
+    if (isTransactionStarted())
     {
         Raise();
         int res = showQuestionDialog(this, _("Do you want to commit the active transaction?"),
@@ -2490,14 +2508,14 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     long waitForParameterInputTime = 0;
     try
     {
-        if (transactionM == 0 || !transactionM->Started())
+        if (!isTransactionStarted())
         {
             log(_("Starting transaction..."));
 
             // fix the IBPP::LogicException "No Database is attached."
             // which happens after a database reconnect
             // (this action detaches the database from all its transactions)
-            if (transactionM != 0 && !transactionM->Started())
+            if (transactionM != 0 && !isTransactionStarted())
             {
                 try
                 {
@@ -2725,7 +2743,7 @@ void ExecuteSqlFrame::OnMenuTransactionIsolationLevel(wxCommandEvent& event)
     else if (event.GetId() == Cmds::Query_TransactionReadDirty)
         transactionIsolationLevelM = IBPP::ilReadDirty;
 
-    wxCHECK_RET(transactionM == 0 || !transactionM->Started(),
+    wxCHECK_RET(!isTransactionStarted(),
         "Can't change transaction isolation level while started");
     transactionM = 0;
 }
@@ -2733,7 +2751,7 @@ void ExecuteSqlFrame::OnMenuTransactionIsolationLevel(wxCommandEvent& event)
 void ExecuteSqlFrame::OnMenuUpdateTransactionIsolationLevel(
     wxUpdateUIEvent& event)
 {
-    event.Enable(transactionM == 0 || !transactionM->Started());
+    event.Enable(!isTransactionStarted());
     if (event.GetId() == Cmds::Query_TransactionConcurrency)
         event.Check(transactionIsolationLevelM == IBPP::ilConcurrency);
     else if (event.GetId() == Cmds::Query_TransactionConsistency)
@@ -2749,7 +2767,7 @@ void ExecuteSqlFrame::OnMenuTransactionLockResolution(wxCommandEvent& event)
     transactionLockResolutionM =
         event.IsChecked() ? IBPP::lrWait : IBPP::lrNoWait;
 
-    wxCHECK_RET(transactionM == 0 || !transactionM->Started(),
+    wxCHECK_RET(!isTransactionStarted(),
         "Can't change transaction lock resolution while started");
     transactionM = 0;
 }
@@ -2757,7 +2775,7 @@ void ExecuteSqlFrame::OnMenuTransactionLockResolution(wxCommandEvent& event)
 void ExecuteSqlFrame::OnMenuUpdateTransactionLockResolution(
     wxUpdateUIEvent& event)
 {
-    event.Enable(transactionM == 0 || !transactionM->Started());
+    event.Enable(!isTransactionStarted());
     event.Check(transactionLockResolutionM == IBPP::lrWait);
 }
 
@@ -2765,14 +2783,14 @@ void ExecuteSqlFrame::OnMenuTransactionReadOnly(wxCommandEvent& event)
 {
     transactionAccessModeM = event.IsChecked() ? IBPP::amRead : IBPP::amWrite;
 
-    wxCHECK_RET(transactionM == 0 || !transactionM->Started(),
+    wxCHECK_RET(!isTransactionStarted(),
         "Can't change transaction access mode while started");
     transactionM = 0;
 }
 
 void ExecuteSqlFrame::OnMenuUpdateTransactionReadOnly(wxUpdateUIEvent& event)
 {
-    event.Enable(transactionM == 0 || !transactionM->Started());
+    event.Enable(!isTransactionStarted());
     event.Check(transactionAccessModeM == IBPP::amRead);
 }
 
@@ -2789,7 +2807,7 @@ void ExecuteSqlFrame::OnMenuCommit(wxCommandEvent& WXUNUSED(event))
 
 bool ExecuteSqlFrame::commitTransaction()
 {
-    if (transactionM == 0 || !transactionM->Started())    // check
+    if (!isTransactionStarted())    // check
     {
         inTransaction(false);
         return true;    // nothing to commit, but it wasn't error
@@ -2806,7 +2824,8 @@ bool ExecuteSqlFrame::commitTransaction()
         sae.scroll();
         {
             wxStopWatch sw;
-            statementM->Close();
+            if (statementM != 0)
+                statementM->Close();
             transactionM->Commit();
             log(wxString::Format(_("Transaction committed (elapsed time: %s)."),
                 millisToTimeString(sw.Time()).c_str()));
@@ -2852,6 +2871,14 @@ bool ExecuteSqlFrame::commitTransaction()
             return true;
         }
     }
+    catch (IBPP::LogicException&)
+    {
+        transactionM = 0;
+        statementM = 0;
+        inTransaction(false);
+        executedStatementsM.clear();
+        return true;
+    }
     catch (IBPP::Exception &e)
     {
         splitScreen();
@@ -2884,7 +2911,7 @@ void ExecuteSqlFrame::OnMenuRollback(wxCommandEvent& WXUNUSED(event))
 
 bool ExecuteSqlFrame::rollbackTransaction()
 {
-    if (transactionM == 0 || !transactionM->Started())    // check
+    if (!isTransactionStarted())    // check
     {
         executedStatementsM.clear();
         inTransaction(false);
@@ -2901,7 +2928,8 @@ bool ExecuteSqlFrame::rollbackTransaction()
         sae.scroll();
         {
             wxStopWatch sw;
-            statementM->Close();
+            if (statementM != 0)
+                statementM->Close();
             transactionM->Rollback();
             log(wxString::Format(_("Transaction rolled back (elapsed time: %s)."),
                 millisToTimeString(sw.Time()).c_str()));
@@ -2916,6 +2944,14 @@ bool ExecuteSqlFrame::rollbackTransaction()
             Close();
             return true;
         }
+    }
+    catch (IBPP::LogicException&)
+    {
+        transactionM = 0;
+        statementM = 0;
+        inTransaction(false);
+        executedStatementsM.clear();
+        return true;
     }
     catch (IBPP::Exception &e)
     {
