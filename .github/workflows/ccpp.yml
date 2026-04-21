@@ -29,4 +29,12 @@ jobs:
     - name: Build
       run: make
       working-directory: ./build
-
+    - name: Test
+      run: ctest --output-on-failure --output-junit ctest-results.xml
+      working-directory: ./build
+    - name: Publish test report
+      if: always()
+      uses: mikepenz/action-junit-report@v5
+      with:
+        report_paths: ./build/ctest-results.xml
+        check_name: Google Test Results

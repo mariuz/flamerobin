@@ -565,6 +565,33 @@ add_executable(index_ddl_test
 )
 target_link_libraries(index_ddl_test ${wxWidgets_LIBRARIES})
 add_test(NAME index_ddl_test COMMAND index_ddl_test)
+
+# Common source files shared by the SQL parsing tests.
+# TestStringUtils.cpp provides a minimal wx2std() stub so that FRError.cpp
+# links without dragging in the full Database / IBPP symbol chain.
+set(SQL_TEST_COMMON_SOURCES
+    ${SOURCEDIR}/sql/SqlTokenizer.cpp
+    ${SOURCEDIR}/config/Config.cpp
+    ${SOURCEDIR}/core/Observer.cpp
+    ${SOURCEDIR}/core/Subject.cpp
+    ${SOURCEDIR}/core/FRError.cpp
+    ${SOURCEDIR}/sql/TestStringUtils.cpp
+)
+
+add_executable(multi_statement_test
+    ${SOURCEDIR}/sql/MultiStatementTest.cpp
+    ${SOURCEDIR}/sql/MultiStatement.cpp
+    ${SQL_TEST_COMMON_SOURCES}
+)
+target_link_libraries(multi_statement_test ${wxWidgets_LIBRARIES})
+add_test(NAME multi_statement_test COMMAND multi_statement_test)
+
+add_executable(sql_tokenizer_test
+    ${SOURCEDIR}/sql/SqlTokenizerTest.cpp
+    ${SQL_TEST_COMMON_SOURCES}
+)
+target_link_libraries(sql_tokenizer_test ${wxWidgets_LIBRARIES})
+add_test(NAME sql_tokenizer_test COMMAND sql_tokenizer_test)
 if (APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES
                 BUILD_WITH_INSTALL_RPATH FALSE
