@@ -645,54 +645,49 @@ int RowImpl::ColumnNum(const std::string& name)
 	if (name.empty())
 		throw LogicExceptionImpl("Row::ColumnNum", _("Column name <empty> not found."));
 
-	XSQLVAR* var;
-	char Uname[sizeof(var->sqlname)+1];		// Max size of sqlname + '\0'
-
-	// Local upper case copy of the column name
-	size_t len = name.length();
-	if (len > sizeof(var->sqlname)) len = sizeof(var->sqlname);
-	strncpy(Uname, name.c_str(), len);
-	Uname[len] = '\0';
-	char* p = Uname;
-	while (*p != '\0') { *p = char(toupper(*p)); ++p; }
+	std::string uName(name);
+	for (size_t i = 0; i < uName.length(); ++i)
+		uName[i] = char(toupper(uName[i]));
 
 	// Loop through the columns of the descriptor
 	for (int i = 0; i < mDescrArea->sqld; i++)
 	{
-		var = &(mDescrArea->sqlvar[i]);
-		if (var->sqlname_length != (int16_t)len) continue;
-		if (strncmp(Uname, var->sqlname, len) == 0) return i+1;
+		XSQLVAR* var = &(mDescrArea->sqlvar[i]);
+		size_t len = static_cast<size_t>(std::max<int>(0, var->sqlname_length));
+		if (len > sizeof(var->sqlname))
+			len = sizeof(var->sqlname);
+		if (uName.length() != len)
+			continue;
+		std::string col(var->sqlname, len);
+		for (size_t j = 0; j < col.length(); ++j)
+			col[j] = char(toupper(col[j]));
+		if (col == uName)
+			return i + 1;
 	}
 
 	// Failed finding the column name, let's retry using the aliases
-	char Ualias[sizeof(var->aliasname)+1];		// Max size of aliasname + '\0'
-
-	// Local upper case copy of the column name
-	len = name.length();
-	if (len > sizeof(var->aliasname)) len = sizeof(var->aliasname);
-	strncpy(Ualias, name.c_str(), len);
-	Ualias[len] = '\0';
-	p = Ualias;
-	while (*p != '\0') { *p = char(toupper(*p)); ++p; }
+	std::string uAlias(name);
+	for (size_t i = 0; i < uAlias.length(); ++i)
+		uAlias[i] = char(toupper(uAlias[i]));
 
 	// Loop through the columns of the descriptor
 	for (int i = 0; i < mDescrArea->sqld; i++)
 	{
-		var = &(mDescrArea->sqlvar[i]);
-		if (var->aliasname_length != (int16_t)len) continue;
-		if (strncmp(Ualias, var->aliasname, len) == 0) return i+1;
+		XSQLVAR* var = &(mDescrArea->sqlvar[i]);
+		size_t len = static_cast<size_t>(std::max<int>(0, var->aliasname_length));
+		if (len > sizeof(var->aliasname))
+			len = sizeof(var->aliasname);
+		if (uAlias.length() != len)
+			continue;
+		std::string alias(var->aliasname, len);
+		for (size_t j = 0; j < alias.length(); ++j)
+			alias[j] = char(toupper(alias[j]));
+		if (alias == uAlias)
+			return i + 1;
 	}
 
 	throw LogicExceptionImpl("Row::ColumnNum", _("Could not find matching column."));
 }
-
-/*
-ColumnName, ColumnAlias, ColumnTable : all these 3 have a mistake.
-Ideally, the strings should be stored elsewhere (like _Numerics and so on) to
-take into account the final '\0' which needs to be added. For now, we insert
-the '\0' in the original data, which will cut the 32th character. Not terribly
-bad, but should be cleanly rewritten.
-*/
 
 const char* RowImpl::ColumnName(int varnum)
 {
@@ -702,9 +697,11 @@ const char* RowImpl::ColumnName(int varnum)
 		throw LogicExceptionImpl("Row::ColumName", _("Variable index out of range."));
 
 	XSQLVAR* var = &(mDescrArea->sqlvar[varnum-1]);
-	if (var->sqlname_length >= 31) var->sqlname_length = 31;
-	var->sqlname[var->sqlname_length] = '\0';
-	return var->sqlname;
+	size_t len = static_cast<size_t>(std::max<int>(0, var->sqlname_length));
+	if (len > sizeof(var->sqlname))
+		len = sizeof(var->sqlname);
+	mColumnNames[varnum-1].assign(var->sqlname, len);
+	return mColumnNames[varnum-1].c_str();
 }
 
 const char* RowImpl::ColumnAlias(int varnum)
@@ -715,9 +712,11 @@ const char* RowImpl::ColumnAlias(int varnum)
 		throw LogicExceptionImpl("Row::ColumnAlias", _("Variable index out of range."));
 
 	XSQLVAR* var = &(mDescrArea->sqlvar[varnum-1]);
-	if (var->aliasname_length >= 31) var->aliasname_length = 31;
-	var->aliasname[var->aliasname_length] = '\0';
-	return var->aliasname;
+	size_t len = static_cast<size_t>(std::max<int>(0, var->aliasname_length));
+	if (len > sizeof(var->aliasname))
+		len = sizeof(var->aliasname);
+	mColumnAliases[varnum-1].assign(var->aliasname, len);
+	return mColumnAliases[varnum-1].c_str();
 }
 
 const char* RowImpl::ColumnTable(int varnum)
@@ -728,9 +727,11 @@ const char* RowImpl::ColumnTable(int varnum)
 		throw LogicExceptionImpl("Row::ColumnTable", _("Variable index out of range."));
 
 	XSQLVAR* var = &(mDescrArea->sqlvar[varnum-1]);
-	if (var->relname_length >= 31) var->relname_length = 31;
-	var->relname[var->relname_length] = '\0';
-	return var->relname;
+	size_t len = static_cast<size_t>(std::max<int>(0, var->relname_length));
+	if (len > sizeof(var->relname))
+		len = sizeof(var->relname);
+	mColumnTables[varnum-1].assign(var->relname, len);
+	return mColumnTables[varnum-1].c_str();
 }
 
 int RowImpl::ColumnSQLType(int varnum)
@@ -1536,6 +1537,9 @@ void RowImpl::Free()
 	mInt16s.clear();
 	mBools.clear();
 	mStrings.clear();
+	mColumnNames.clear();
+	mColumnAliases.clear();
+	mColumnTables.clear();
 	mUpdated.clear();
 
 	mDialect = 0;
@@ -1558,6 +1562,9 @@ void RowImpl::Resize(int n)
 	mInt16s.resize(n);
 	mBools.resize(n);
 	mStrings.resize(n);
+	mColumnNames.resize(n);
+	mColumnAliases.resize(n);
+	mColumnTables.resize(n);
 	mUpdated.resize(n);
 	for (int i = 0; i < n; i++)
 	{
@@ -1568,6 +1575,9 @@ void RowImpl::Resize(int n)
 		mInt16s[i] = 0;
 		mBools[i] = 0;
 		mStrings[i].erase();
+		mColumnNames[i].erase();
+		mColumnAliases[i].erase();
+		mColumnTables[i].erase();
 		mUpdated[i] = false;
 	}
 
@@ -1700,6 +1710,9 @@ RowImpl& RowImpl::operator=(const RowImpl& copied)
 	mInt16s = copied.mInt16s;
 	mBools = copied.mBools;
 	mStrings = copied.mStrings;
+	mColumnNames = copied.mColumnNames;
+	mColumnAliases = copied.mColumnAliases;
+	mColumnTables = copied.mColumnTables;
 
 	mDialect = copied.mDialect;
 	mDatabase = copied.mDatabase;
