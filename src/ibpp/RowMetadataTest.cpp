@@ -26,6 +26,10 @@
 #include <iostream>
 #include <string>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include "ibpp/ibpp.h"
 
 namespace
@@ -77,12 +81,23 @@ int main()
         return 0;
     }
 
+    // Firebird 3.0 supports identifiers up to 31 characters; use 31 to test
+    // that IBPP does not truncate the maximum-length names it returns.
+    const std::string tableName = makeIdentifier("TBL_", 'T', 31);
+    const std::string columnName = makeIdentifier("COL_", 'C', 31);
+    const std::string aliasName = makeIdentifier("ALIAS_", 'A', 31);
+
+    // Build a temporary database path that works on both POSIX and Windows.
+#ifdef _WIN32
+    char tmpDir[MAX_PATH];
+    DWORD tmpLen = GetTempPathA(MAX_PATH, tmpDir);
+    std::string dbName = (tmpLen > 0 ? std::string(tmpDir, tmpLen) : "C:\\Temp\\") +
+        "flamerobin_row_metadata_test_" +
+        std::to_string(static_cast<long long>(std::time(0))) + ".fdb";
+#else
     const std::string dbName = "/tmp/flamerobin_row_metadata_test_" +
         std::to_string(static_cast<long long>(std::time(0))) + ".fdb";
-
-    const std::string tableName = makeIdentifier("TBL_", 'T', 32);
-    const std::string columnName = makeIdentifier("COL_", 'C', 32);
-    const std::string aliasName = makeIdentifier("ALIAS_", 'A', 32);
+#endif
 
     IBPP::Database db;
 
@@ -115,7 +130,7 @@ int main()
 
         ok = check(query->ColumnNum(columnName) == 1, "ColumnNum by name") && ok;
         ok = check(query->ColumnNum(aliasName) == 1, "ColumnNum by alias") && ok;
-        ok = check(query->ColumnNum(makeIdentifier("alias_", 'a', 32)) == 1,
+        ok = check(query->ColumnNum(makeIdentifier("alias_", 'a', 31)) == 1,
             "ColumnNum is case-insensitive for aliases") && ok;
 
         tr->Rollback();
