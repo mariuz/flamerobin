@@ -889,8 +889,9 @@ void CreateDDLVisitor::visitCharacterSet(CharacterSet& characterset)
     wxString original = characterset.getOriginalCollationDefault();
     if (!current.IsEmpty() && current != original)
     {
+        Identifier collationId(current);
         preSqlM += "ALTER CHARACTER SET " + characterset.getQuotedName()
-            + " SET DEFAULT COLLATION " + current + ";\n";
+            + " SET DEFAULT COLLATION " + collationId.getQuoted() + ";\n";
         sqlM = preSqlM;
     }
 }
