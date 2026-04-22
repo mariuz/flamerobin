@@ -130,17 +130,23 @@ void Domain::loadProperties(IBPP::Statement& statement, wxMBConv* converter)
         statement->Get(3, &subtypeM);
 
     // determine the (var)char field length
-    // - system tables use field_len and char_len is null
-    // - computed columns have field_len/bytes_per_char, char_len is 0
-    // - view columns have field_len/bytes_per_char, char_len is null
-    // - regular table columns and SP params have field_len/bytes_per_char
-    //   they also have proper char_len, but we don't use it now
+    // - use char_len when available (> 0), this handles special system fields
+    // - computed columns have char_len = 0, use field_len/bytes_per_char
+    // - older metadata can have char_len null, keep existing fallback behavior
     statement->Get(4, &lengthM);
-    int bpc = 0;   // bytes per char
-    if (!statement->IsNull(14))
-        statement->Get(14, &bpc);
-    if (bpc && (!statement->IsNull(8) || !statement->IsNull(13)))
-        lengthM /= bpc;
+    short charLength = 0;
+    if (!statement->IsNull(8))
+        statement->Get(8, &charLength);
+    if (charLength > 0)
+        lengthM = charLength;
+    else
+    {
+        int bpc = 0;   // bytes per char
+        if (!statement->IsNull(14))
+            statement->Get(14, &bpc);
+        if (bpc && (!statement->IsNull(8) || !statement->IsNull(13)))
+            lengthM /= bpc;
+    }
 
     if (statement->IsNull(5))
         precisionM = 0;
@@ -546,4 +552,3 @@ const wxString SysDomains::getTypeName() const
 {
     return "SYSDOMAIN_COLLECTION";
 }
-
