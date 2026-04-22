@@ -90,6 +90,7 @@ int main()
     {
         db = IBPP::DatabaseFactory(serverName, dbName, "SYSDBA", "masterkey");
         db->Create(3);
+        db->Connect();
 
         IBPP::Transaction tr = IBPP::TransactionFactory(db);
         tr->Start();
