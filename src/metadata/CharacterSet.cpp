@@ -56,8 +56,12 @@ std::string CharacterSet::getLoadStatement(bool list)
                      "c.rdb$character_set_name,  " //1
                      "c.RDB$CHARACTER_SET_ID,    " //2
                      "c.RDB$BYTES_PER_CHARACTER, " //3
-                     "c.RDB$DEFAULT_COLLATE_NAME " //4
+                     "c.RDB$DEFAULT_COLLATE_NAME," //4 current default (may have been altered)
+                     "k.RDB$COLLATION_NAME       " //5 original built-in default (collation_id=0)
                      "from rdb$character_sets c  "
+                     "left join rdb$collations k "
+                     "    on c.rdb$character_set_id = k.rdb$character_set_id "
+                     "    and k.rdb$collation_id = 0 "
         );
     if (list)
     {
@@ -81,6 +85,14 @@ void CharacterSet::loadProperties(IBPP::Statement& statement, wxMBConv* converte
     
     statement->Get(4, Lstr);
     setCollationDefault(std2wxIdentifier(Lstr, converter));
+
+    if (!statement->IsNull(5))
+    {
+        statement->Get(5, Lstr);
+        setOriginalCollationDefault(std2wxIdentifier(Lstr, converter));
+    }
+    else
+        setOriginalCollationDefault(wxEmptyString);
 
     setPropertiesLoaded(true);
 }
@@ -174,7 +186,7 @@ CharacterSet::CharacterSet()
 
 CharacterSet::CharacterSet(DatabasePtr database, const wxString& name, int id, int bytesPerChar)
     :MetadataItem(ntCharacterSet, database.get(), name, id), bytesPerCharM(bytesPerChar), 
-    collationDefaultM("")
+    collationDefaultM(""), originalCollationDefaultM("")
 
 {
 }
@@ -223,6 +235,16 @@ wxString CharacterSet::getCollationDefault() const
 void CharacterSet::setCollationDefault(wxString collation)
 {
     collationDefaultM = collation;
+}
+
+wxString CharacterSet::getOriginalCollationDefault() const
+{
+    return originalCollationDefaultM;
+}
+
+void CharacterSet::setOriginalCollationDefault(wxString collation)
+{
+    originalCollationDefaultM = collation;
 }
 
 const wxString CharacterSet::getTypeName() const

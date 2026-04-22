@@ -38,6 +38,7 @@ class CharacterSet: public MetadataItem
 private:
     int bytesPerCharM;
     wxString collationDefaultM;
+    wxString originalCollationDefaultM;
     CollationPtrs collationsM;
 
     friend class CharacterSets;
@@ -68,6 +69,8 @@ public:
     void setBytesPerChar(int bytes);
     wxString getCollationDefault() const;
     void setCollationDefault(wxString collation);
+    wxString getOriginalCollationDefault() const;
+    void setOriginalCollationDefault(wxString collation);
     bool getChildren(std::vector<MetadataItem*>& temp);
     wxArrayString getCollations();
 

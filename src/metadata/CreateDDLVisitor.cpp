@@ -35,6 +35,7 @@
 
 #include "core/ProgressIndicator.h"
 #include "metadata/column.h"
+#include "metadata/CharacterSet.h"
 #include "metadata/Collation.h"
 #include "metadata/constraints.h"
 #include "metadata/CreateDDLVisitor.h"
@@ -222,6 +223,9 @@ void CreateDDLVisitor::visitDatabase(Database& d)
 
         preSqlM << "/********************* COLLATES **********************/\n\n";
         iterateit<CollationsPtr, Collation>(this, d.getCollations(), progressIndicatorM);
+
+        preSqlM << "/************* CHARACTER SET DEFAULT COLLATIONS *******/\n\n";
+        iterateit<CharacterSetsPtr, CharacterSet>(this, d.getCharacterSets(), progressIndicatorM);
 
         preSqlM << "/********************* ROLES **********************/\n\n";
         iterateit<RolesPtr, Role>(this, d.getRoles(), progressIndicatorM);
@@ -878,6 +882,16 @@ void CreateDDLVisitor::visitView(View& v)
     sqlM += preSqlM + "\n" + postSqlM + grantSqlM;
 }
 
-void CreateDDLVisitor::visitCharacterSet(CharacterSet&  /*characterset*/)
+void CreateDDLVisitor::visitCharacterSet(CharacterSet& characterset)
 {
+    characterset.ensurePropertiesLoaded();
+    wxString current = characterset.getCollationDefault();
+    wxString original = characterset.getOriginalCollationDefault();
+    if (!current.IsEmpty() && current != original)
+    {
+        Identifier collationId(current);
+        preSqlM += "ALTER CHARACTER SET " + characterset.getQuotedName()
+            + " SET DEFAULT COLLATION " + collationId.getQuoted() + ";\n";
+        sqlM = preSqlM;
+    }
 }
