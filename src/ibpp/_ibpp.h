@@ -996,6 +996,9 @@ private:
     std::vector<int16_t> mInt16s;   // Temporary storage for 16 bits
     std::vector<char> mBools;       // Temporary storage for Bools
     std::vector<std::string> mStrings;  // Temporary storage for Strings
+    std::vector<std::string> mColumnNames;   // Null-terminated copies of column names
+    std::vector<std::string> mColumnAliases; // Null-terminated copies of aliases
+    std::vector<std::string> mColumnTables;  // Null-terminated copies of relation names
     std::vector<bool> mUpdated;     // Which columns where updated (Set()) ?
 
     int mDialect;                   // Related database dialect
