@@ -592,6 +592,12 @@ add_executable(sql_tokenizer_test
 )
 target_link_libraries(sql_tokenizer_test ${wxWidgets_LIBRARIES})
 add_test(NAME sql_tokenizer_test COMMAND sql_tokenizer_test)
+
+add_executable(ibpp_row_metadata_test
+    ${SOURCEDIR}/ibpp/RowMetadataTest.cpp
+)
+target_link_libraries(ibpp_row_metadata_test IBPP ${FR_LIBS})
+add_test(NAME ibpp_row_metadata_test COMMAND ibpp_row_metadata_test)
 if (APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES
                 BUILD_WITH_INSTALL_RPATH FALSE
