@@ -67,6 +67,18 @@ bool checkStr(const char* actual, const std::string& expected, const char* testN
     return false;
 }
 
+// Firebird system-table columns are CHAR and are padded with trailing spaces.
+// Trim them before comparing.
+std::string rtrim(std::string s)
+{
+    const std::string::size_type end = s.find_last_not_of(' ');
+    if (end == std::string::npos)
+        s.clear();
+    else
+        s.erase(end + 1);
+    return s;
+}
+
 } // namespace
 
 int main()
@@ -138,6 +150,62 @@ int main()
         ok = check(query->ColumnNum(aliasName) == 1, "ColumnNum by alias") && ok;
         ok = check(query->ColumnNum(makeIdentifier("alias_", 'a', 31)) == 1,
             "ColumnNum is case-insensitive for aliases") && ok;
+
+        tr->Commit();
+
+        // Regression coverage for PR #510:
+        // Relation metadata query must use f.rdb$character_set_id in the
+        // rdb$collations join and execute successfully on Firebird 3/4/5/6.
+        const std::string domainName = makeIdentifier("DM_", 'D', 31);
+        const std::string relationName = makeIdentifier("REL_", 'R', 31);
+        const std::string relationColumnName = makeIdentifier("TXT_", 'X', 31);
+
+        tr->Start();
+        st->Execute("CREATE DOMAIN " + quoteIdentifier(domainName) +
+            " AS VARCHAR(20) CHARACTER SET UTF8");
+        st->Execute("CREATE TABLE " + quoteIdentifier(relationName) + " (" +
+            quoteIdentifier(relationColumnName) + " " + quoteIdentifier(domainName) +
+            " COLLATE UNICODE)");
+        tr->Commit();
+
+        tr->Start();
+        IBPP::Statement metadataQuery = IBPP::StatementFactory(db, tr);
+        metadataQuery->Prepare(
+            "select r.rdb$field_name, r.rdb$null_flag, r.rdb$field_source,"
+            " l.rdb$collation_name, f.rdb$computed_source, r.rdb$default_source,"
+            " r.rdb$description"
+            " from rdb$fields f"
+            " join rdb$relation_fields r"
+            "     on f.rdb$field_name=r.rdb$field_source"
+            " left outer join rdb$collations l"
+            "     on l.rdb$collation_id = coalesce(r.rdb$collation_id, f.rdb$collation_id)"
+            " and l.rdb$character_set_id = f.rdb$character_set_id"
+            " where r.rdb$relation_name = ?"
+            " order by r.rdb$field_position");
+        metadataQuery->Set(1, relationName);
+        metadataQuery->Execute();
+
+        const bool hasMetadataRow = metadataQuery->Fetch();
+        ok = check(hasMetadataRow, "relation metadata query returned rows") && ok;
+        if (hasMetadataRow)
+        {
+            std::string metadataFieldName;
+            metadataQuery->Get(1, metadataFieldName);
+            ok = checkStr(rtrim(metadataFieldName).c_str(), relationColumnName,
+                "relation metadata field name") && ok;
+
+            if (metadataQuery->IsNull(4))
+            {
+                ok = check(false, "relation metadata collation is null") && ok;
+            }
+            else
+            {
+                std::string collationName;
+                metadataQuery->Get(4, collationName);
+                ok = checkStr(rtrim(collationName).c_str(), "UNICODE",
+                    "relation metadata collation join") && ok;
+            }
+        }
 
         tr->Rollback();
         db->Drop();
