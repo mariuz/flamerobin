@@ -182,11 +182,17 @@ int main()
             ok = checkStr(metadataFieldName.c_str(), relationColumnName,
                 "relation metadata field name") && ok;
 
-            std::string collationName;
-            if (!metadataQuery->IsNull(4))
+            if (metadataQuery->IsNull(4))
+            {
+                ok = check(false, "relation metadata collation is null") && ok;
+            }
+            else
+            {
+                std::string collationName;
                 metadataQuery->Get(4, collationName);
-            ok = check(!collationName.empty(),
-                "relation metadata collation join") && ok;
+                ok = checkStr(collationName.c_str(), "UNICODE",
+                    "relation metadata collation join") && ok;
+            }
         }
 
         tr->Rollback();
