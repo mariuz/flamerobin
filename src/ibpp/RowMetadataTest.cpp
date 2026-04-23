@@ -107,12 +107,18 @@ int main()
         db->Create(3);
         db->Connect();
 
+        // DDL transaction: Firebird 3.0 requires DDL to be committed before
+        // the new table is visible to subsequent DML in a fresh transaction.
         IBPP::Transaction tr = IBPP::TransactionFactory(db);
         tr->Start();
 
         IBPP::Statement st = IBPP::StatementFactory(db, tr);
         st->Execute("CREATE TABLE " + quoteIdentifier(tableName) + " (" +
             quoteIdentifier(columnName) + " INTEGER)");
+        tr->Commit();
+
+        // DML transaction
+        tr->Start();
         st->Execute("INSERT INTO " + quoteIdentifier(tableName) + " (" +
             quoteIdentifier(columnName) + ") VALUES (1)");
 
