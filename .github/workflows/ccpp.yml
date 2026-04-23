@@ -8,9 +8,38 @@ on:
 
 jobs:
   build:
+    name: Build and test (Firebird ${{ matrix.firebird_version }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - firebird_version: "3"
+            firebird_image_tag: "3"
+            allow_failure: false
+          - firebird_version: "4"
+            firebird_image_tag: "4"
+            allow_failure: false
+          - firebird_version: "5"
+            firebird_image_tag: "5"
+            allow_failure: false
+          - firebird_version: "6"
+            # Firebird 6 Docker tags are not yet available in the official image.
+            # Keep this matrix entry in place and run it against latest for now.
+            firebird_image_tag: "latest"
+            allow_failure: true
+    continue-on-error: ${{ matrix.allow_failure }}
 
     #runs-on: ubuntu-latest
     runs-on: ubuntu-24.04
+    services:
+      firebird:
+        image: firebirdsql/firebird:${{ matrix.firebird_image_tag }}
+        ports:
+          - 3050:3050
+        env:
+          FIREBIRD_USER: SYSDBA
+          FIREBIRD_PASSWORD: masterkey
+          FIREBIRD_ROOT_PASSWORD: masterkey
 
     permissions:
       contents: read
@@ -29,7 +58,19 @@ jobs:
     - name: Build
       run: make
       working-directory: ./build
+    - name: Wait for Firebird service
+      run: |
+        for i in {1..60}; do
+          if (echo > /dev/tcp/127.0.0.1/3050) >/dev/null 2>&1; then
+            exit 0
+          fi
+          sleep 1
+        done
+        echo "Firebird service did not start in time."
+        exit 1
     - name: Test
+      env:
+        IBPP_TEST_SERVER: localhost/3050
       run: ctest --output-on-failure --output-junit ctest-results.xml
       working-directory: ./build
     - name: Publish test report

@@ -33,8 +33,6 @@
 #include <mutex>
 
 #ifdef IBPP_WINDOWS
-#include <shlwapi.h>
-
 // Optional Registry Keys introduced by Firebird Server 1.5.x
 #define REG_KEY_ROOT_INSTANCES	"SOFTWARE\\Firebird Project\\Firebird Server\\Instances"
 #define FB_DEFAULT_INSTANCE	  	"DefaultInstance"
@@ -128,7 +126,7 @@ HMODULE IBPP_LoadLibrary(std::string library) {
     if (handle == 0) {
         DWORD errorMessageID = ::GetLastError();
         if (errorMessageID != 0) {
-            if ((PathFileExists(library.c_str()) == 1) || (errorMessageID != 126)) {
+            if ((GetFileAttributesA(library.c_str()) != INVALID_FILE_ATTRIBUTES) || (errorMessageID != 126)) {
 
                 LPSTR messageBuffer = nullptr;
 
