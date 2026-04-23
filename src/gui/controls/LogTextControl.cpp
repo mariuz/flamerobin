@@ -31,6 +31,7 @@
 #endif
 
 #include "gui/CommandManager.h"
+#include "gui/FRStyleManager.h"
 #include "gui/controls/ControlUtils.h"
 #include "gui/controls/LogTextControl.h"
 
@@ -87,8 +88,21 @@ void LogTextControl::logMsg(const wxString& message)
 
 void LogTextControl::setDefaultStyles()
 {
-    StyleSetForeground(int(logStyleImportant), *wxBLUE);
-    StyleSetForeground(int(logStyleError), *wxRED);
+    wxColour importantColor = *wxBLUE;
+    wxColour errorColor = *wxRED;
+
+    if (FRStyle* style = stylerManager().getStyleByName("Log message important"))
+        importantColor = style->getfgColor();
+    else if (FRStyle* style = stylerManager().getStyleByName("URL hovered"))
+        importantColor = style->getfgColor();
+
+    if (FRStyle* style = stylerManager().getStyleByName("Log message error"))
+        errorColor = style->getfgColor();
+    else if (FRStyle* style = stylerManager().getStyleByName("Find Mark Style"))
+        errorColor = style->getfgColor();
+
+    StyleSetForeground(int(logStyleImportant), importantColor);
+    StyleSetForeground(int(logStyleError), errorColor);
 }
 
 //! event handling
@@ -125,4 +139,3 @@ void LogTextControl::OnContextMenu(wxContextMenuEvent& event)
 
     PopupMenu(&m, calcContextMenuPosition(event.GetPosition(), this));
 }
-

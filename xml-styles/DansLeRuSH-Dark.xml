@@ -79,5 +79,7 @@ Installation : Copy this file to "%APPDATA%\Notepad++\themes" and in a portable 
         <WidgetStyle name="Active tab text" styleID="0" fgColor="000000" bgColor="C0C0C0" fontStyle="0" />
         <WidgetStyle name="Inactive tabs" styleID="0" fgColor="808080" bgColor="C0C0C0" fontStyle="0" />
         <WidgetStyle name="URL hovered" styleID="0" fgColor="FFFFFF" />
+        <WidgetStyle name="Log message important" styleID="1" fgColor="FFFFFF"/>
+        <WidgetStyle name="Log message error" styleID="2" fgColor="A88AB6"/>
     </GlobalStyles>
 </Flamerobin>
