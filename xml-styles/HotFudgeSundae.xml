@@ -105,6 +105,6 @@ Installation:
         <WidgetStyle name="Inactive tabs" styleID="0" fgColor="43250B" bgColor="D5BC93" fontStyle="0" />
         <WidgetStyle name="URL hovered" styleID="0" fgColor="FFFFFF" />
         <WidgetStyle name="Log message important" styleID="1" fgColor="FFFFFF"/>
-        <WidgetStyle name="Log message error" styleID="2" fgColor="555753"/>
+        <WidgetStyle name="Log message error" styleID="2" fgColor="FF0000"/>
     </GlobalStyles>
 </Flamerobin>
