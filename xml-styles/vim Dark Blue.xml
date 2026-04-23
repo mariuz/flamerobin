@@ -67,5 +67,7 @@
         <WidgetStyle name="Unsaved change marker" styleID="0" bgColor="FF0000" />
         <WidgetStyle name="Saved change marker" styleID="0" bgColor="80FF00" />
         <WidgetStyle name="URL hovered" styleID="0" fgColor="FFFFFF" />
+        <WidgetStyle name="Log message important" styleID="1" fgColor="FFFFFF"/>
+        <WidgetStyle name="Log message error" styleID="2" fgColor="FFFF00"/>
     </GlobalStyles>
 </Flamerobin>
