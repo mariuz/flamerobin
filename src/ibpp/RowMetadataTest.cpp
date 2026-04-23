@@ -67,6 +67,18 @@ bool checkStr(const char* actual, const std::string& expected, const char* testN
     return false;
 }
 
+// Firebird system-table columns are CHAR and are padded with trailing spaces.
+// Trim them before comparing.
+std::string rtrim(std::string s)
+{
+    const std::string::size_type end = s.find_last_not_of(' ');
+    if (end == std::string::npos)
+        s.clear();
+    else
+        s.erase(end + 1);
+    return s;
+}
+
 } // namespace
 
 int main()
@@ -179,7 +191,7 @@ int main()
         {
             std::string metadataFieldName;
             metadataQuery->Get(1, metadataFieldName);
-            ok = checkStr(metadataFieldName.c_str(), relationColumnName,
+            ok = checkStr(rtrim(metadataFieldName).c_str(), relationColumnName,
                 "relation metadata field name") && ok;
 
             if (metadataQuery->IsNull(4))
@@ -190,7 +202,7 @@ int main()
             {
                 std::string collationName;
                 metadataQuery->Get(4, collationName);
-                ok = checkStr(collationName.c_str(), "UNICODE",
+                ok = checkStr(rtrim(collationName).c_str(), "UNICODE",
                     "relation metadata collation join") && ok;
             }
         }
