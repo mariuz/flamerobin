@@ -343,8 +343,13 @@ int main()
                 ok = check(localTime.GetTime() == currentTime.GetTime(),
                     "issue#338: LOCALTIME == CURRENT_TIME (legacy bind)") && ok;
 
-                // The time portion of CURRENT_TIMESTAMP must match too.
-                ok = check(localTime.GetTime() == currentTimestamp.GetTime(),
+                // The time portion of CURRENT_TIMESTAMP must match at
+                // whole-second granularity.  CURRENT_TIMESTAMP defaults to 0
+                // sub-second precision (tenthousandths == 0) while LOCALTIME
+                // carries full sub-second precision, so exact GetTime()
+                // equality is not guaranteed; compare seconds only.
+                ok = check(localTime.GetTime() / 10000 ==
+                               currentTimestamp.GetTime() / 10000,
                     "issue#338: LOCALTIME == CURRENT_TIMESTAMP time part (legacy bind)") && ok;
 
                 tr->Rollback();
