@@ -52,14 +52,15 @@ jobs:
       run: sudo apt-get install build-essential git cmake libnotify-dev libwxgtk3.2-dev -y
     - name: Install Firebird 5 client
       run: |
-        wget -nv -O Firebird-5.0.3.1683-0-linux-x64.tar.gz \
-            "https://github.com/FirebirdSQL/firebird/releases/download/v5.0.3/Firebird-5.0.3.1683-0-linux-x64.tar.gz"
-        tar xzf Firebird-5.0.3.1683-0-linux-x64.tar.gz
-        # Copy only the client library from the buildroot – do NOT run install.sh
-        # which aborts when it detects the Docker Firebird service running on port 3050.
+        wget -nv -O Firebird-5.0.4.1812-0-linux-x64.tar.gz \
+            "https://github.com/FirebirdSQL/firebird/releases/download/v5.0.4/Firebird-5.0.4.1812-0-linux-x64.tar.gz"
+        tar xzf Firebird-5.0.4.1812-0-linux-x64.tar.gz
+        # The outer tarball contains a nested buildroot.tar.gz; extract it.
+        # Do NOT run install.sh which aborts when it detects the Docker Firebird service running on port 3050.
+        tar xzf Firebird-5.0.4.1812-0-linux-x64/buildroot.tar.gz -C Firebird-5.0.4.1812-0-linux-x64
         sudo mkdir -p /opt/firebird/lib /opt/firebird/include
-        sudo cp -P Firebird-5.0.3.1683-0-linux-x64/buildroot/opt/firebird/lib/libfbclient.so* /opt/firebird/lib/
-        sudo cp -r Firebird-5.0.3.1683-0-linux-x64/buildroot/opt/firebird/include/. /opt/firebird/include/
+        sudo cp -P Firebird-5.0.4.1812-0-linux-x64/opt/firebird/lib/libfbclient.so* /opt/firebird/lib/
+        sudo cp -r Firebird-5.0.4.1812-0-linux-x64/opt/firebird/include/. /opt/firebird/include/
         echo "/opt/firebird/lib" | sudo tee /etc/ld.so.conf.d/firebird.conf
         sudo ldconfig
     - name: CMake
