@@ -21,24 +21,24 @@
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
       <td nowrap valign="top">{%privilegeinfo:grantee_name%}</td>
       <td valign="top" align="center">{%foreach:privilegeitem: :SELECT:<a href="info://Granted by {%privilegeiteminfo:grantor%}">
-          <img src="{%template_root%}{%ifeq:{%privilegeiteminfo:grant_option%}:true:ok2.png:ok.png%}"></a><font size="-1">{%privilegeiteminfo:columns%}</font>%}
-          {%ifeq:{%privilegeitemcount:SELECT%}:0:<img src="{%template_root%}redx.png">%}
+          <img src="{%template_root%}{%ifeq:{%privilegeiteminfo:grant_option%}:true:ok2.png:ok.png%}" height="16" width="16"></a><font size="-1">{%privilegeiteminfo:columns%}</font>%}
+          {%ifeq:{%privilegeitemcount:SELECT%}:0:<img src="{%template_root%}redx.png" height="16" width="16">%}
       </td>
       <td valign="top" align="center">{%foreach:privilegeitem: :INSERT:<a href="info://Granted by {%privilegeiteminfo:grantor%}">
-          <img src="{%template_root%}{%ifeq:{%privilegeiteminfo:grant_option%}:true:ok2.png:ok.png%}"></a><font size="-1">{%privilegeiteminfo:columns%}</font>%}
-          {%ifeq:{%privilegeitemcount:INSERT%}:0:<img src="{%template_root%}redx.png">%}
+          <img src="{%template_root%}{%ifeq:{%privilegeiteminfo:grant_option%}:true:ok2.png:ok.png%}" height="16" width="16"></a><font size="-1">{%privilegeiteminfo:columns%}</font>%}
+          {%ifeq:{%privilegeitemcount:INSERT%}:0:<img src="{%template_root%}redx.png" height="16" width="16">%}
       </td>
       <td valign="top" align="center">{%foreach:privilegeitem: :UPDATE:<a href="info://Granted by {%privilegeiteminfo:grantor%}">
-          <img src="{%template_root%}{%ifeq:{%privilegeiteminfo:grant_option%}:true:ok2.png:ok.png%}"></a><font size="-1">{%privilegeiteminfo:columns%}</font>%}
-          {%ifeq:{%privilegeitemcount:UPDATE%}:0:<img src="{%template_root%}redx.png">%}
+          <img src="{%template_root%}{%ifeq:{%privilegeiteminfo:grant_option%}:true:ok2.png:ok.png%}" height="16" width="16"></a><font size="-1">{%privilegeiteminfo:columns%}</font>%}
+          {%ifeq:{%privilegeitemcount:UPDATE%}:0:<img src="{%template_root%}redx.png" height="16" width="16">%}
       </td>
       <td valign="top" align="center">{%foreach:privilegeitem: :DELETE:<a href="info://Granted by {%privilegeiteminfo:grantor%}">
-          <img src="{%template_root%}{%ifeq:{%privilegeiteminfo:grant_option%}:true:ok2.png:ok.png%}"></a><font size="-1">{%privilegeiteminfo:columns%}</font>%}
-          {%ifeq:{%privilegeitemcount:DELETE%}:0:<img src="{%template_root%}redx.png">%}
+          <img src="{%template_root%}{%ifeq:{%privilegeiteminfo:grant_option%}:true:ok2.png:ok.png%}" height="16" width="16"></a><font size="-1">{%privilegeiteminfo:columns%}</font>%}
+          {%ifeq:{%privilegeitemcount:DELETE%}:0:<img src="{%template_root%}redx.png" height="16" width="16">%}
       </td>
       <td valign="top" align="center">{%foreach:privilegeitem: :REFERENCES:<a href="info://Granted by {%privilegeiteminfo:grantor%}">
-          <img src="{%template_root%}{%ifeq:{%privilegeiteminfo:grant_option%}:true:ok2.png:ok.png%}"></a><font size="-1">{%privilegeiteminfo:columns%}</font>%}
-          {%ifeq:{%privilegeitemcount:REFERENCES%}:0:<img src="{%template_root%}redx.png">%}
+          <img src="{%template_root%}{%ifeq:{%privilegeiteminfo:grant_option%}:true:ok2.png:ok.png%}" height="16" width="16"></a><font size="-1">{%privilegeiteminfo:columns%}</font>%}
+          {%ifeq:{%privilegeitemcount:REFERENCES%}:0:<img src="{%template_root%}redx.png" height="16" width="16">%}
       </td>
     </tr>%}
   </tbody>
@@ -55,15 +55,15 @@ and revoke privileges</a>%}
         <td colspan="2" bgcolor="#CCCCFF">Icons</td>
     </tr>
     <tr bgcolor="#CCCCCC">
-        <td align="center" width="20"><img src="{%template_root%}redx.png"></td>
+        <td align="center" width="20"><img src="{%template_root%}redx.png" height="16" width="16"></td>
         <td>privilege not granted</td>
     </tr>
     <tr bgcolor="#CCCCCC">
-        <td align="center" width="20"><img src="{%template_root%}ok.png"></td>
+        <td align="center" width="20"><img src="{%template_root%}ok.png" height="16" width="16"></td>
         <td>privilege granted</td>
     </tr>
     <tr bgcolor="#CCCCCC">
-        <td align="center" width="20"><img src="{%template_root%}ok2.png"></td>
+        <td align="center" width="20"><img src="{%template_root%}ok2.png" height="16" width="20"></td>
         <td>privilege granted with grant option</td>
     </tr>
     <tr bgcolor="silver">

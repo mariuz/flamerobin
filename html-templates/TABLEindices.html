@@ -25,8 +25,8 @@
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
       {%ifeq:{%parent:{%is_system%}%}:false:
       <td valign="top" nowrap>
-          <a href="fr://index_action?type=DROP&amp;parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}drop.png"></a>
-          <a href="fr://index_action?type=RECOMPUTE&amp;parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}compute.png"></a>
+          <a href="fr://index_action?type=DROP&amp;parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}drop.png" height="16" width="16"></a>
+          <a href="fr://index_action?type=RECOMPUTE&amp;parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}compute.png" height="16" width="16"></a>
       </td>
       %}
       <td nowrap valign="top">{%object_name%}</td>
@@ -35,10 +35,10 @@
       {%ifeq:{%parent:{%is_system%}%}:false:
         <a href="fr://index_action?type=TOGGLE_ACTIVE&amp;parent_window={%parent_window%}&amp;object_handle={%object_handle%}">
       %}
-      <img src="{%template_root%}{%ifeq:{%indexinfo:is_active%}:true:ok.png:redx.png%}">{%ifeq:{%parent:{%is_system%}%}:false:</a>
+      <img src="{%template_root%}{%ifeq:{%indexinfo:is_active%}:true:ok.png:redx.png%}" height="16" width="16">{%ifeq:{%parent:{%is_system%}%}:false:</a>
       %}
       </td>
-      <td nowrap valign="top" align="center"><img src="{%template_root%}{%ifeq:{%indexinfo:is_unique%}:true:ok.png:redx.png%}"></td>
+      <td nowrap valign="top" align="center"><img src="{%template_root%}{%ifeq:{%indexinfo:is_unique%}:true:ok.png:redx.png%}" height="16" width="16"></td>
       <td valign="top">{%indexinfo:fields%}</td>
       <td nowrap valign="top" align="right">{%indexinfo:stats%}</td>
       <td nowrap valign="top"><font size=-1>{%object_description%} {%parent:{%ifeq:{%is_system%}:false:[<a
@@ -59,10 +59,10 @@ statistics for all indices</a>
         <td>Icon</td>
         <td nowrap>click to...</td>
     </tr>
-    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}drop.png"></td><td>Drop index</td></tr>
-    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}compute.png"></td><td>Recompute statistics for index</td></tr>
-    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}ok.png"></td><td>Make index inactive</td></tr>
-    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}redx.png"></td><td>Make index active</td></tr>
+    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}drop.png" height="16" width="16"></td><td>Drop index</td></tr>
+    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}compute.png" height="16" width="16"></td><td>Recompute statistics for index</td></tr>
+    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}ok.png" height="16" width="16"></td><td>Make index inactive</td></tr>
+    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}redx.png" height="16" width="16"></td><td>Make index active</td></tr>
 </table>
 %}
 </body>

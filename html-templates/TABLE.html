@@ -29,14 +29,14 @@ Owner: {%owner_name%}<br>
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
       {%ifeq:{%is_system%}:false:
       <td valign="top" nowrap>
-          <a href="fr://drop_field?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}drop.png"></a>
-          <a href="fr://edit_field?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}view.png"></a>
-          <a href="fr://alter_field?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}compute.png"></a>
+          <a href="fr://drop_field?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}drop.png" height="16" width="16"></a>
+          <a href="fr://edit_field?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}view.png" height="16" width="16"></a>
+          <a href="fr://alter_field?parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}compute.png" height="16" width="16"></a>
       </td>
       %}
       <td nowrap valign="top">{%object_name%}</td>
       <td nowrap valign="top">{%columninfo:datatype%}{%columninfo:identity%}</td>
-      <td nowrap valign="top"><center>{%ifeq:{%columninfo:is_nullable%}:false:<img src="{%template_root%}ok.png">%}</center></td>
+      <td nowrap valign="top"><center>{%ifeq:{%columninfo:is_nullable%}:false:<img src="{%template_root%}ok.png" height="16" width="16">%}</center></td>
       {%ifeq:{%getglobalconf:DisplayColumnDefault%}:1:
       <td nowrap valign="top">{%columninfo:default_expression%}</td>%}
       {%ifeq:{%getglobalconf:DisplayColumnDescription%}:1:
@@ -61,9 +61,9 @@ Owner: {%owner_name%}<br>
         <td>Icon</td>
         <td nowrap>click to...</td>
     </tr>
-    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}drop.png"></td><td>Drop column</td></tr>
-    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}view.png"></td><td>View column properties</td></tr>
-    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}compute.png"></td><td>Generate rebuild script for that column</td></tr>
+    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}drop.png" height="16" width="16"></td><td>Drop column</td></tr>
+    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}view.png" height="16" width="16"></td><td>View column properties</td></tr>
+    <tr bgcolor="#CCCCCC"><td align="center"><img src="{%template_root%}compute.png" height="16" width="16"></td><td>Generate rebuild script for that column</td></tr>
 </table>
 </body>
 </html>

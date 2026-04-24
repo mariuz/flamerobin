@@ -17,8 +17,8 @@
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
       <td nowrap valign="top">{%privilegeinfo:grantee_name%}</td>
       <td nowrap valign="top" align="center">{%foreach:privilegeitem:<br>:MEMBER OF:<a href="info://Granted by {%privilegeiteminfo:grantor%}">
-          <img src="{%template_root%}{%ifeq:{%privilegeiteminfo:grant_option%}:true:ok2.png:ok.png%}"></a><font size="-1">{%privilegeiteminfo:columns%}</font>%}
-          {%ifeq:{%privilegeitemcount:MEMBER OF%}:0:<img src="{%template_root%}redx.png">%}
+          <img src="{%template_root%}{%ifeq:{%privilegeiteminfo:grant_option%}:true:ok2.png:ok.png%}" height="16" width="16"></a><font size="-1">{%privilegeiteminfo:columns%}</font>%}
+          {%ifeq:{%privilegeitemcount:MEMBER OF%}:0:<img src="{%template_root%}redx.png" height="16" width="16">%}
       </td>
     </tr>%}
   </tbody>
@@ -34,15 +34,15 @@ and revoke privileges</a>
         <td colspan="2" bgcolor="#CCCCFF"><B>Icons</B></td>
     </tr>
     <tr bgcolor="#DDDDDD">
-        <td width="20"><img src="{%template_root%}redx.png"></td>
+        <td width="20"><img src="{%template_root%}redx.png" height="16" width="16"></td>
         <td>privilege not granted</td>
     </tr>
     <tr bgcolor="#DDDDDD">
-        <td width="20"><img src="{%template_root%}ok.png"></td>
+        <td width="20"><img src="{%template_root%}ok.png" height="16" width="16"></td>
         <td>privilege granted</td>
     </tr>
     <tr bgcolor="#DDDDDD">
-        <td width="20"><img src="{%template_root%}ok2.png"></td>
+        <td width="20"><img src="{%template_root%}ok2.png" height="16" width="20"></td>
         <td>privilege granted with admin option</td>
     </tr>
     <tr bgcolor="silver">

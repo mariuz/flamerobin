@@ -26,7 +26,7 @@ Owner: {%owner_name%}<br>
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
       <td nowrap valign="top">{%object_name%}</td>
       <td nowrap valign="top">{%columninfo:datatype%}</td>
-      <td nowrap valign="top"><center>{%ifeq:{%columninfo:is_nullable%}:false:<img src="{%template_root%}ok.png">%}</center></td>
+      <td nowrap valign="top"><center>{%ifeq:{%columninfo:is_nullable%}:false:<img src="{%template_root%}ok.png" height="16" width="16">%}</center></td>
       <td nowrap valign="top">{%columninfo:default_expression%}</td>
       <td valign="top"><font size=-1>{%object_description%} [<a
         href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=COLUMN&amp;object_name={%object_name%}">edit</a>]</font></td>
@@ -40,7 +40,7 @@ Owner: {%owner_name%}<br>
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
 	  <td nowrap valign="top" bgcolor="navy"><b><font color=white>Return Type</font></b></td>
       <td nowrap valign="top"><b>{%columninfo:datatype%}</b></td>
-      <td nowrap valign="top"><center>{%ifeq:{%columninfo:is_nullable%}:false:<img src="{%template_root%}ok.png">%}</center></td>
+      <td nowrap valign="top"><center>{%ifeq:{%columninfo:is_nullable%}:false:<img src="{%template_root%}ok.png" height="16" width="16">%}</center></td>
       <td nowrap valign="top">{%columninfo:default_expression%}</td>
       <td valign="top"><font size=-1>{%object_description%} [<a
         href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=COLUMN&amp;object_name={%object_name%}">edit</a>]</font></td>
