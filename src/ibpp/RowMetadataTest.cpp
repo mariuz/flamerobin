@@ -290,6 +290,90 @@ int main()
             std::cout << "Skipping issue #368 regression scenario: requires Firebird 4.0+.\n";
         }
 
+        // Regression coverage for issue #338:
+        // After applying SET BIND OF TIME WITH TIME ZONE TO LEGACY and
+        // SET BIND OF TIMESTAMP WITH TIME ZONE TO LEGACY, the values of
+        // LOCALTIME and CURRENT_TIME (and CURRENT_TIMESTAMP) must represent
+        // the same local moment - i.e. the time zone conversion must not be
+        // applied a second time by FlameRobin/IBPP.
+        // Requires Firebird 4.0+ (ODS 13+) which introduced TIME WITH TIME ZONE.
+        if (odsMajor >= 13)
+        {
+            try
+            {
+                tr->Start();
+
+                // Pin the session time zone to a fixed UTC offset so the test
+                // is deterministic regardless of the server's system clock.
+                st->Execute("SET TIME ZONE '+00:00'");
+                st->Execute("SET BIND OF TIME WITH TIME ZONE TO LEGACY");
+                st->Execute("SET BIND OF TIMESTAMP WITH TIME ZONE TO LEGACY");
+
+                IBPP::Statement tzQuery = IBPP::StatementFactory(db, tr);
+                tzQuery->Prepare(
+                    "SELECT localtime, current_time, CURRENT_TIMESTAMP"
+                    " FROM rdb$database");
+                tzQuery->Execute();
+
+                ok = check(tzQuery->Fetch(),
+                    "issue#338: fetched a row") && ok;
+                ok = check(tzQuery->Columns() == 3,
+                    "issue#338: three result columns") && ok;
+
+                // With the legacy bind active both LOCALTIME and CURRENT_TIME
+                // are returned as plain TIME (sdTime), not as TIME WITH TIME
+                // ZONE (sdTimeTz).
+                ok = check(tzQuery->ColumnType(1) == IBPP::sdTime,
+                    "issue#338: LOCALTIME column type is sdTime") && ok;
+                ok = check(tzQuery->ColumnType(2) == IBPP::sdTime,
+                    "issue#338: CURRENT_TIME (legacy) column type is sdTime") && ok;
+                ok = check(tzQuery->ColumnType(3) == IBPP::sdTimestamp,
+                    "issue#338: CURRENT_TIMESTAMP (legacy) column type is sdTimestamp") && ok;
+
+                IBPP::Time localTime;
+                IBPP::Time currentTime;
+                IBPP::Timestamp currentTimestamp;
+                tzQuery->Get(1, localTime);
+                tzQuery->Get(2, currentTime);
+                tzQuery->Get(3, currentTimestamp);
+
+                // LOCALTIME and CURRENT_TIME must carry the same local-clock
+                // value.  Both are computed at statement execution time so
+                // they are identical down to the sub-second.
+                ok = check(localTime.GetTime() == currentTime.GetTime(),
+                    "issue#338: LOCALTIME == CURRENT_TIME (legacy bind)") && ok;
+
+                // The time portion of CURRENT_TIMESTAMP must match too.
+                ok = check(localTime.GetTime() == currentTimestamp.GetTime(),
+                    "issue#338: LOCALTIME == CURRENT_TIMESTAMP time part (legacy bind)") && ok;
+
+                tr->Rollback();
+            }
+            catch (const IBPP::Exception& e)
+            {
+                std::string msg(e.what());
+                // An older fbclient (< 4.0) may not understand the SET BIND
+                // or SET TIME ZONE statements.  Treat that as a skip.
+                if (msg.find("feature is not supported") != std::string::npos ||
+                    msg.find("Data type unknown") != std::string::npos ||
+                    msg.find("token unknown") != std::string::npos)
+                {
+                    std::cout << "Skipping issue #338 TZ scenario: client "
+                                 "library does not support SET TIME ZONE / "
+                                 "SET BIND (upgrade to Firebird 4+ client).\n";
+                    try { tr->Rollback(); } catch (...) {}
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
+        else
+        {
+            std::cout << "Skipping issue #338 regression scenario: requires Firebird 4.0+.\n";
+        }
+
         db->Drop();
     }
     catch (const IBPP::Exception& e)
