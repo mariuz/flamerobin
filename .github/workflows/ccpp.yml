@@ -49,12 +49,24 @@ jobs:
     - name: apt update
       run: sudo apt-get update
     - name: Install tools and libs
-      run: sudo apt-get install build-essential git cmake firebird-dev libnotify-dev libwxgtk3.2-dev -y
+      run: sudo apt-get install build-essential git cmake libnotify-dev libwxgtk3.2-dev -y
+    - name: Install Firebird 5 client
+      run: |
+        wget -nv -O Firebird-5.0.3.1683-0-linux-x64.tar.gz \
+            "https://github.com/FirebirdSQL/firebird/releases/download/v5.0.3/Firebird-5.0.3.1683-0-linux-x64.tar.gz"
+        tar xzf Firebird-5.0.3.1683-0-linux-x64.tar.gz
+        # Copy only the client library from the buildroot – do NOT run install.sh
+        # which aborts when it detects the Docker Firebird service running on port 3050.
+        sudo mkdir -p /opt/firebird/lib /opt/firebird/include
+        sudo cp -P Firebird-5.0.3.1683-0-linux-x64/buildroot/opt/firebird/lib/libfbclient.so* /opt/firebird/lib/
+        sudo cp -r Firebird-5.0.3.1683-0-linux-x64/buildroot/opt/firebird/include/. /opt/firebird/include/
+        echo "/opt/firebird/lib" | sudo tee /etc/ld.so.conf.d/firebird.conf
+        sudo ldconfig
     - name: CMake
       run: |
           mkdir build
           cd build
-          cmake ..
+          cmake .. -DCMAKE_EXE_LINKER_FLAGS="-L/opt/firebird/lib"
     - name: Build
       run: make
       working-directory: ./build
@@ -71,6 +83,7 @@ jobs:
     - name: Test
       env:
         IBPP_TEST_SERVER: localhost/3050
+        LD_LIBRARY_PATH: /opt/firebird/lib
       run: ctest --output-on-failure --output-junit ctest-results.xml
       working-directory: ./build
     - name: Publish test report

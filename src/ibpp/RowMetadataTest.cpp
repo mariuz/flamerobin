@@ -119,6 +119,9 @@ int main()
         db->Create(3);
         db->Connect();
 
+        int odsMajor = 0;
+        db->Info(&odsMajor, 0, 0, 0, 0, 0, 0, 0, 0);
+
         // DDL transaction: Firebird 3.0 requires DDL to be committed before
         // the new table is visible to subsequent DML in a fresh transaction.
         IBPP::Transaction tr = IBPP::TransactionFactory(db);
@@ -208,6 +211,85 @@ int main()
         }
 
         tr->Rollback();
+
+        // Regression coverage for issue #368:
+        // Ensure TIMESTAMP WITH TIME ZONE values are fetched successfully from
+        // a quoted table name containing a dot (Firebird 4.0+ only).
+        if (odsMajor >= 13)
+        {
+            const std::string tzTableName = "stg.Actions";
+            const std::string tzColumnName = "Time_Stamp";
+
+            try
+            {
+                tr->Start();
+                st->Execute("CREATE TABLE " + quoteIdentifier(tzTableName) + " (" +
+                    quoteIdentifier(tzColumnName) + " TIMESTAMP WITH TIME ZONE NOT NULL)");
+                tr->Commit();
+
+                tr->Start();
+                st->Execute("INSERT INTO " + quoteIdentifier(tzTableName) + " (" +
+                    quoteIdentifier(tzColumnName) + ") VALUES ('2022-05-19 16:27:11.0000 +00:00')");
+
+                IBPP::Statement tzQuery = IBPP::StatementFactory(db, tr);
+                tzQuery->Prepare("SELECT a." + quoteIdentifier(tzColumnName) +
+                    " FROM " + quoteIdentifier(tzTableName) + " a");
+                tzQuery->Execute();
+
+                ok = check(tzQuery->Fetch(), "timestamp with time zone row fetch") && ok;
+                ok = check(tzQuery->Columns() == 1, "timestamp with time zone column count") && ok;
+                ok = check(tzQuery->ColumnType(1) == IBPP::sdTimestampTz,
+                    "timestamp with time zone column type") && ok;
+                ok = checkStr(tzQuery->ColumnName(1), tzColumnName,
+                    "timestamp with time zone column name") && ok;
+                ok = checkStr(tzQuery->ColumnTable(1), tzTableName,
+                    "timestamp with time zone table name") && ok;
+
+                IBPP::Timestamp timestampTz;
+                ok = check(tzQuery->Get(1, timestampTz), "timestamp with time zone value read") && ok;
+
+                int year = 0, month = 0, day = 0;
+                int hour = 0, minute = 0, second = 0;
+                timestampTz.GetDate(year, month, day);
+                timestampTz.GetTime(hour, minute, second);
+
+                ok = check(year == 2022 && month == 5 && day == 19,
+                    "timestamp with time zone date value") && ok;
+                ok = check(hour == 16 && minute == 27 && second == 11,
+                    "timestamp with time zone time value") && ok;
+                ok = check(timestampTz.GetTimezone() != IBPP::Time::TZ_NONE,
+                    "timestamp with time zone timezone is present") && ok;
+
+                tr->Rollback();
+            }
+            catch (const IBPP::Exception& e)
+            {
+                // The system Firebird client library may be an older version
+                // (e.g. Firebird 3.x from the OS package manager) that does
+                // not understand the TIMESTAMP WITH TIME ZONE wire type
+                // introduced in Firebird 4.  In that case isc_dsql_prepare
+                // returns engine code 335544573 ("Data type unknown").  Treat
+                // this as a skip rather than a test failure; any other
+                // IBPP exception is re-thrown so real regressions still fail.
+                std::string msg(e.what());
+                if (msg.find("Data type unknown") != std::string::npos)
+                {
+                    std::cout << "Skipping issue #368 TZ scenario: client "
+                                 "library does not support TIMESTAMP WITH TIME "
+                                 "ZONE (upgrade to Firebird 4+ client).\n";
+                    try { tr->Rollback(); } catch (...) {}
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
+        else
+        {
+            std::cout << "Skipping issue #368 regression scenario: requires Firebird 4.0+.\n";
+        }
+
         db->Drop();
     }
     catch (const IBPP::Exception& e)
