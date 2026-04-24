@@ -599,6 +599,16 @@ add_executable(ibpp_row_metadata_test
 target_link_libraries(ibpp_row_metadata_test IBPP ${FR_LIBS})
 add_test(NAME ibpp_row_metadata_test COMMAND ibpp_row_metadata_test)
 
+# Regression test for issue #78 (EXECUTE BLOCK / Selectable SP emitting
+# internal RDB$xxx domain names instead of actual datatypes).
+# Tests the system-domain classification predicate (name prefix check) that
+# drives Parameter::getTypeOf() and Procedure::getAlterSql().
+add_executable(domain_is_system_test
+    ${SOURCEDIR}/metadata/DomainIsSystemTest.cpp
+)
+target_link_libraries(domain_is_system_test ${wxWidgets_LIBRARIES})
+add_test(NAME domain_is_system_test COMMAND domain_is_system_test)
+
 # Regression test for issue #436 (fatal crash when dropping a trigger).
 # Tests the Observer/Subject subjectRemoved() contract: observers must
 # receive subjectRemoved() when a Subject is destroyed so they can clear
