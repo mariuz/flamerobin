@@ -527,8 +527,8 @@ wxString FunctionSQL::getSource()
 			{
 				wxString source1;
 				readBlob(st1, 1, source1, converter);
-				source1.Trim(false);     // remove leading whitespace
-				source += "\nAS\n" + source1 + "\n";
+				source1.Trim();
+				source += source1 + "\n";
 			}
 		}
 	}
@@ -536,8 +536,8 @@ wxString FunctionSQL::getSource()
 	{
 		wxString source1;
 		readBlob(st1, 1, source1, converter);
-		source1.Trim(false);     // remove leading whitespace
-		source += "\nAS\n" + source1 + "\n";
+		source1.Trim();
+		source += source1 + "\n";
 	}
 
     if (!st1->IsNull(4)) {
