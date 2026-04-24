@@ -109,47 +109,45 @@ jobs:
       # The test verifies that the application starts, shows a window, and
       # shuts down cleanly – catching regressions that crash on startup or on
       # the first UI interaction.
+      # xvfb-run --auto-servernum is used so a fresh display is always chosen,
+      # avoiding conflicts with display :99 that may still be active from the
+      # preceding Desktop smoke test step.
       env:
         LD_LIBRARY_PATH: /opt/firebird/lib
       run: |
-        export DISPLAY=:99
-        Xvfb :99 -screen 0 1280x720x24 &
-        XVFB_PID=$!
-        sleep 2
+        xvfb-run --auto-servernum bash -c '
+          ./flamerobin &
+          APP_PID=$!
 
-        ./flamerobin &
-        APP_PID=$!
+          # Wait up to 15 s for the flamerobin window to appear.
+          FOUND=0
+          for i in $(seq 1 15); do
+            if xdotool search --onlyvisible --name "FlameRobin" > /dev/null 2>&1; then
+              FOUND=1
+              break
+            fi
+            sleep 1
+          done
 
-        # Wait up to 15 s for the flamerobin window to appear.
-        FOUND=0
-        for i in $(seq 1 15); do
-          if xdotool search --onlyvisible --name "FlameRobin" > /dev/null 2>&1; then
-            FOUND=1
-            break
+          if [ "$FOUND" -ne 1 ]; then
+            echo "UI test: flamerobin window not found within 15 s"
+            kill "$APP_PID" 2>/dev/null || true
+            exit 1
           fi
-          sleep 1
-        done
 
-        if [ "$FOUND" -ne 1 ]; then
-          echo "UI test: flamerobin window not found within 15 s"
-          kill "$APP_PID" 2>/dev/null || true
-          kill "$XVFB_PID" 2>/dev/null || true
-          exit 1
-        fi
+          echo "UI test: flamerobin window appeared successfully"
 
-        echo "UI test: flamerobin window appeared successfully"
+          # Close the application gracefully via keyboard shortcut.
+          xdotool search --onlyvisible --name "FlameRobin" key "alt+F4"
+          sleep 2
 
-        # Close the application gracefully via keyboard shortcut.
-        xdotool search --onlyvisible --name "FlameRobin" key "alt+F4"
-        sleep 2
+          # Give the process a moment to exit, then check exit status.
+          wait "$APP_PID"
+          APP_EXIT=$?
 
-        # Give the process a moment to exit, then check exit status.
-        wait "$APP_PID"
-        APP_EXIT=$?
-        kill "$XVFB_PID" 2>/dev/null || true
-
-        # Any exit code is acceptable here (graceful close or SIGTERM).
-        echo "UI automation test passed (flamerobin exit code $APP_EXIT)"
+          # Any exit code is acceptable here (graceful close or SIGTERM).
+          echo "UI automation test passed (flamerobin exit code $APP_EXIT)"
+        '
       working-directory: ./build
     - name: Publish test report
       if: always()
