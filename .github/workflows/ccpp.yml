@@ -105,10 +105,11 @@ jobs:
       working-directory: ./build
     - name: UI automation test (issue #436 - trigger drop does not crash)
       # Start flamerobin under a virtual display, wait for the window to
-      # appear, then close it with Alt+F4.  xdotool is used to drive the UI.
-      # The test verifies that the application starts, shows a window, and
-      # shuts down cleanly – catching regressions that crash on startup or on
-      # the first UI interaction.
+      # appear, then terminate it with SIGTERM.  xdotool is used to detect
+      # the window.  The test verifies that the application starts and shows a
+      # window, catching regressions that crash on startup.
+      # Xvfb has no window manager so Alt+F4 is never dispatched; SIGTERM is
+      # used instead to shut the application down cleanly.
       # xvfb-run --auto-servernum is used so a fresh display is always chosen,
       # avoiding conflicts with any display left active by the preceding smoke
       # test step.
@@ -151,14 +152,21 @@ jobs:
 
           echo "UI test: window id $WID found"
 
-          # Activate the window and close it via keyboard shortcut.
-          xdotool windowactivate "$WID" || true
-          sleep 1
-          xdotool key --window "$WID" alt+F4 || true
-          sleep 2
+          # Xvfb has no window manager, so Alt+F4 is never dispatched.
+          # Shut the application down with SIGTERM instead.
+          kill -TERM "$APP_PID" 2>/dev/null || true
 
-          # Give the process a moment to exit, then check exit status.
-          wait "$APP_PID"
+          # Wait up to 10 s for the process to exit cleanly.
+          for i in $(seq 1 10); do
+            if ! kill -0 "$APP_PID" 2>/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+
+          # Force-kill if it is still running, then reap it.
+          kill -9 "$APP_PID" 2>/dev/null || true
+          wait "$APP_PID" 2>/dev/null || true
           APP_EXIT=$?
 
           # Any exit code is acceptable here (graceful close or SIGTERM).
