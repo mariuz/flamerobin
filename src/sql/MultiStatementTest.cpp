@@ -262,5 +262,97 @@ int main()
         ok = check(!s.isValid(), "default SingleStatement: invalid") && ok;
     }
 
+    // Tests 20-23: issue #338 - timezone-related SET statements must parse
+    // as ordinary (stOther) statements, not as commit/rollback/set-term/etc.
+
+    // Test 20: SET TIME ZONE 'America/Sao_Paulo'
+    {
+        SingleStatement s("SET TIME ZONE 'America/Sao_Paulo'");
+        ok = check(s.isValid(), "SET TIME ZONE: valid") && ok;
+        ok = check(!s.isEmptyStatement(), "SET TIME ZONE: not empty") && ok;
+        ok = check(!s.isCommitStatement(), "SET TIME ZONE: not commit") && ok;
+        ok = check(!s.isRollbackStatement(), "SET TIME ZONE: not rollback") && ok;
+        wxString dummy;
+        ok = check(!s.isSetTermStatement(dummy),
+            "SET TIME ZONE: not set term") && ok;
+        ok = check(!s.isSetAutoDDLStatement(dummy),
+            "SET TIME ZONE: not set autoddl") && ok;
+        ok = checkStr(s.getSql(), "SET TIME ZONE 'America/Sao_Paulo'",
+            "SET TIME ZONE: SQL preserved") && ok;
+    }
+
+    // Test 21: SET BIND OF TIME WITH TIME ZONE TO LEGACY
+    {
+        SingleStatement s("SET BIND OF TIME WITH TIME ZONE TO LEGACY");
+        ok = check(s.isValid(), "SET BIND TIME TZ: valid") && ok;
+        ok = check(!s.isEmptyStatement(), "SET BIND TIME TZ: not empty") && ok;
+        ok = check(!s.isCommitStatement(), "SET BIND TIME TZ: not commit") && ok;
+        ok = check(!s.isRollbackStatement(),
+            "SET BIND TIME TZ: not rollback") && ok;
+        wxString dummy;
+        ok = check(!s.isSetTermStatement(dummy),
+            "SET BIND TIME TZ: not set term") && ok;
+        ok = check(!s.isSetAutoDDLStatement(dummy),
+            "SET BIND TIME TZ: not set autoddl") && ok;
+        ok = checkStr(s.getSql(),
+            "SET BIND OF TIME WITH TIME ZONE TO LEGACY",
+            "SET BIND TIME TZ: SQL preserved") && ok;
+    }
+
+    // Test 22: SET BIND OF TIMESTAMP WITH TIME ZONE TO LEGACY
+    {
+        SingleStatement s("SET BIND OF TIMESTAMP WITH TIME ZONE TO LEGACY");
+        ok = check(s.isValid(), "SET BIND TIMESTAMP TZ: valid") && ok;
+        ok = check(!s.isEmptyStatement(),
+            "SET BIND TIMESTAMP TZ: not empty") && ok;
+        ok = check(!s.isCommitStatement(),
+            "SET BIND TIMESTAMP TZ: not commit") && ok;
+        ok = check(!s.isRollbackStatement(),
+            "SET BIND TIMESTAMP TZ: not rollback") && ok;
+        wxString dummy;
+        ok = check(!s.isSetTermStatement(dummy),
+            "SET BIND TIMESTAMP TZ: not set term") && ok;
+        ok = check(!s.isSetAutoDDLStatement(dummy),
+            "SET BIND TIMESTAMP TZ: not set autoddl") && ok;
+        ok = checkStr(s.getSql(),
+            "SET BIND OF TIMESTAMP WITH TIME ZONE TO LEGACY",
+            "SET BIND TIMESTAMP TZ: SQL preserved") && ok;
+    }
+
+    // Test 23: issue #338 - full four-statement sequence splits correctly
+    {
+        MultiStatement ms(
+            "SET TIME ZONE 'America/Sao_Paulo';\n"
+            "SET BIND OF TIME WITH TIME ZONE TO LEGACY;\n"
+            "SET BIND OF TIMESTAMP WITH TIME ZONE TO LEGACY;\n"
+            "SELECT localtime, current_time, CURRENT_TIMESTAMP"
+            " FROM rdb$database");
+
+        SingleStatement s1 = ms.getNextStatement();
+        ok = check(s1.isValid(), "issue#338 seq: s1 valid") && ok;
+        ok = checkStr(s1.getSql(), "SET TIME ZONE 'America/Sao_Paulo'",
+            "issue#338 seq: s1 SQL") && ok;
+
+        SingleStatement s2 = ms.getNextStatement();
+        ok = check(s2.isValid(), "issue#338 seq: s2 valid") && ok;
+        ok = checkStr(s2.getSql(),
+            "\nSET BIND OF TIME WITH TIME ZONE TO LEGACY",
+            "issue#338 seq: s2 SQL") && ok;
+
+        SingleStatement s3 = ms.getNextStatement();
+        ok = check(s3.isValid(), "issue#338 seq: s3 valid") && ok;
+        ok = checkStr(s3.getSql(),
+            "\nSET BIND OF TIMESTAMP WITH TIME ZONE TO LEGACY",
+            "issue#338 seq: s3 SQL") && ok;
+
+        SingleStatement s4 = ms.getNextStatement();
+        ok = check(s4.isValid(), "issue#338 seq: s4 valid") && ok;
+        ok = check(!s4.isEmptyStatement(),
+            "issue#338 seq: s4 not empty") && ok;
+
+        SingleStatement s5 = ms.getNextStatement();
+        ok = check(!s5.isValid(), "issue#338 seq: no more") && ok;
+    }
+
     return ok ? 0 : 1;
 }
