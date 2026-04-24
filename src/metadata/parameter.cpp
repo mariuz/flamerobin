@@ -94,11 +94,12 @@ void Parameter::acceptVisitor(MetadataItemVisitor* visitor)
 wxString Parameter::getTypeOf(bool large)
 {
     if (relationM.empty()) {
-        if (getDomain()->isSystem())
+        DomainPtr domain = getDomain();
+        if (!domain || domain->isSystem())
             return "";
         else
-            if (getSource() == "") {
-                return (large ? "TYPE OF " : "") + getDomain()->getDatatypeAsString();
+            if (getSource().empty()) {
+                return (large ? "TYPE OF " : "") + domain->getDatatypeAsString();
             }
             else
                 return (large ? "TYPE OF " : "") + getSource();
