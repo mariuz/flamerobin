@@ -253,7 +253,7 @@ void MetadataItemPropertiesPanel::setPage(const wxString& type)
         pageTypeM = ptDependencies;
     else if (type == "triggers")
         pageTypeM = ptTriggers;
-    else if (type == "indices")
+    else if (type == "indexes" || type == "indices")
         pageTypeM = ptTableIndices;
     else if (type == "ddl")
         pageTypeM = ptDDL;
