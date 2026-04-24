@@ -55,7 +55,7 @@
 namespace
 {
 
-bool check(bool condition, const char* testName)
+static bool check(bool condition, const char* testName)
 {
     if (condition)
         return true;
@@ -193,11 +193,9 @@ int main()
             TestSubject s2;
             s1.attachObserver(&obs, false);
             s2.attachObserver(&obs, false);
-
-            // Destroying s1 calls subjectRemoved() once; obs.rawPtrM is not
-            // used here (the observer is tracking the count, not a pointer).
         }
-        // Both subjects destroyed: subjectRemoved() called twice.
+        // Both subjects destroyed at the closing brace above.
+        // subjectRemoved() must have been called once per subject.
         ok = check(obs.subjectRemovedCallCount == 2,
             "two subjects: subjectRemoved() called for each") && ok;
     }

@@ -89,7 +89,8 @@ jobs:
       working-directory: ./build
     - name: Desktop smoke test (issue #436 - flamerobin starts without crash)
       # Run flamerobin under a virtual X display. The process is killed after
-      # a few seconds via timeout; exit code 124 (SIGTERM from timeout) is
+      # a few seconds via timeout; exit code 124 (SIGTERM from timeout/SIGALRM)
+      # and 143 (128+15, SIGTERM forwarded by timeout on some systems) are both
       # expected. Any other non-zero code indicates a crash on startup.
       env:
         LD_LIBRARY_PATH: /opt/firebird/lib
