@@ -246,7 +246,7 @@ int main()
                     "timestamp with time zone table name") && ok;
 
                 IBPP::Timestamp timestampTz;
-                ok = check(tzQuery->Get(1, timestampTz), "timestamp with time zone value read") && ok;
+                ok = check(!tzQuery->Get(1, timestampTz), "timestamp with time zone value read") && ok;
 
                 int year = 0, month = 0, day = 0;
                 int hour = 0, minute = 0, second = 0;
