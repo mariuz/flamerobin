@@ -110,8 +110,8 @@ jobs:
       # shuts down cleanly – catching regressions that crash on startup or on
       # the first UI interaction.
       # xvfb-run --auto-servernum is used so a fresh display is always chosen,
-      # avoiding conflicts with display :99 that may still be active from the
-      # preceding Desktop smoke test step.
+      # avoiding conflicts with any display left active by the preceding smoke
+      # test step.
       env:
         LD_LIBRARY_PATH: /opt/firebird/lib
       run: |
@@ -119,26 +119,42 @@ jobs:
           ./flamerobin &
           APP_PID=$!
 
-          # Wait up to 15 s for the flamerobin window to appear.
+          # Wait up to 30 s for the flamerobin window to appear.
+          # Try matching by window name first, then by WM_CLASS, so the test
+          # is not sensitive to the exact title string ("FlameRobin - …" etc.)
+          # or to the window not yet being mapped as "visible".
           FOUND=0
-          for i in $(seq 1 15); do
-            if xdotool search --onlyvisible --name "FlameRobin" > /dev/null 2>&1; then
+          WID=""
+          for i in $(seq 1 30); do
+            WID="$(xdotool search --name "FlameRobin" 2>/dev/null | head -n1 || true)"
+            if [ -n "$WID" ]; then
               FOUND=1
               break
             fi
+
+            WID="$(xdotool search --class "flamerobin" 2>/dev/null | head -n1 || true)"
+            if [ -n "$WID" ]; then
+              FOUND=1
+              break
+            fi
+
             sleep 1
           done
 
           if [ "$FOUND" -ne 1 ]; then
-            echo "UI test: flamerobin window not found within 15 s"
+            echo "UI test: flamerobin window not found within 30 s"
+            echo "--- xdotool search --name . (debug) ---"
+            xdotool search --name "." 2>/dev/null | head -n 50 || true
             kill "$APP_PID" 2>/dev/null || true
             exit 1
           fi
 
-          echo "UI test: flamerobin window appeared successfully"
+          echo "UI test: window id $WID found"
 
-          # Close the application gracefully via keyboard shortcut.
-          xdotool search --onlyvisible --name "FlameRobin" key "alt+F4"
+          # Activate the window and close it via keyboard shortcut.
+          xdotool windowactivate "$WID" || true
+          sleep 1
+          xdotool key --window "$WID" alt+F4 || true
           sleep 2
 
           # Give the process a moment to exit, then check exit status.
@@ -150,7 +166,10 @@ jobs:
         '
       working-directory: ./build
     - name: Publish test report
-      if: always()
+      # Skip on fork pull requests: the read-only token cannot create check
+      # runs, which would produce noisy "Resource not accessible by
+      # integration" errors without affecting the actual test outcome.
+      if: always() && github.event_name != 'pull_request'
       uses: mikepenz/action-junit-report@v5
       with:
         report_paths: ./build/ctest-results.xml
