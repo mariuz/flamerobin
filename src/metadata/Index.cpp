@@ -242,7 +242,7 @@ void Indices::loadChildren()
 }
 
 Indices::Indices(DatabasePtr database)
-    : MetadataCollection<Index>(ntIndices, database, _("Indices")) 
+    : MetadataCollection<Index>(ntIndices, database, _("Indexes")) 
 {
 }
 
@@ -314,7 +314,7 @@ void UsrIndices::loadChildren()
 }
 
 UsrIndices::UsrIndices(DatabasePtr database)
-    : MetadataCollection<Index>(ntUsrIndices, database, _("Indices"))
+    : MetadataCollection<Index>(ntUsrIndices, database, _("Indexes"))
 {
 }
 
@@ -327,16 +327,12 @@ void UsrIndices::load(ProgressIndicator* progressIndicator)
 {
     DatabasePtr db = getDatabase();
     wxString stmt = "select a.rdb$index_name from rdb$indices a "
-        "   left join rdb$relation_constraints b on b.rdb$index_name = a.rdb$index_name "
         " where (rdb$system_flag = 0 or rdb$system_flag is null) "
-        "   and b.rdb$index_name is null "
         " order by 1 ";
     setItems(db->loadIdentifiers(stmt, progressIndicator));
 
     stmt = "select a.rdb$index_name from rdb$indices a "
-        "   left join rdb$relation_constraints b on b.rdb$index_name = a.rdb$index_name "
         " where (rdb$system_flag = 0 or rdb$system_flag is null) and a.rdb$index_inactive = 1 "
-        "   and b.rdb$index_name is null "
         " order by 1 ";
     setInactiveItems(db->loadIdentifiers(stmt, progressIndicator));
 }

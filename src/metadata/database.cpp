@@ -1358,13 +1358,13 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
     pih.init(_("system domains"), collectionCount, 17);
     sysDomainsM->load(progressIndicator);
 
-    pih.init(_("indices"), collectionCount, 18);
+    pih.init(_("indexes"), collectionCount, 18);
     indicesM->load(progressIndicator);
 
     pih.init(_("system indices"), collectionCount, 19);
     sysIndicesM->load(progressIndicator);
 
-    pih.init(_("indices"), collectionCount, 20);
+    pih.init(_("indexes"), collectionCount, 20);
     usrIndicesM->load(progressIndicator);
 
     pih.init(_("CharacterSet"), collectionCount, 21);

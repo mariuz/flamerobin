@@ -60,7 +60,7 @@ private:
     void addPrivileges()   { titlesM.push_back("Privileges"); }
     void addTriggers()     { titlesM.push_back("Triggers"); }
     void addConstraints()  { titlesM.push_back("Constraints"); }
-    void addIndices()      { titlesM.push_back("Indices"); }
+    void addIndices()      { titlesM.push_back("Indexes"); }
     void addDependencies() { titlesM.push_back("Dependencies"); }
     void addDDL()          { titlesM.push_back("DDL"); }
 };
