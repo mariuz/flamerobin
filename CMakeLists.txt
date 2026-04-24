@@ -598,6 +598,18 @@ add_executable(ibpp_row_metadata_test
 )
 target_link_libraries(ibpp_row_metadata_test IBPP ${FR_LIBS})
 add_test(NAME ibpp_row_metadata_test COMMAND ibpp_row_metadata_test)
+
+# Regression test for issue #436 (fatal crash when dropping a trigger).
+# Tests the Observer/Subject subjectRemoved() contract: observers must
+# receive subjectRemoved() when a Subject is destroyed so they can clear
+# any raw pointer they hold to it.
+add_executable(subject_observer_test
+    ${SOURCEDIR}/core/SubjectObserverTest.cpp
+    ${SOURCEDIR}/core/Observer.cpp
+    ${SOURCEDIR}/core/Subject.cpp
+)
+target_link_libraries(subject_observer_test ${wxWidgets_LIBRARIES})
+add_test(NAME subject_observer_test COMMAND subject_observer_test)
 if (APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES
                 BUILD_WITH_INSTALL_RPATH FALSE
