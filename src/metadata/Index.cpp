@@ -327,8 +327,8 @@ void UsrIndices::load(ProgressIndicator* progressIndicator)
 {
     DatabasePtr db = getDatabase();
     wxString stmt = "select a.rdb$index_name from rdb$indices a "
-        " where (rdb$system_flag = 0 or rdb$system_flag is null) "
-        " order by 1 ";
+            " where (rdb$system_flag = 0 or rdb$system_flag is null) "
+            " order by 1 ";
     setItems(db->loadIdentifiers(stmt, progressIndicator));
 
     stmt = "select a.rdb$index_name from rdb$indices a "
