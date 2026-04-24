@@ -290,6 +290,65 @@ int main()
             std::cout << "Skipping issue #368 regression scenario: requires Firebird 4.0+.\n";
         }
 
+        // Regression coverage for issue #436:
+        // Creating and then dropping a trigger must not crash the application.
+        // The FlameRobin tree observer (DBHTreeItemData) held a raw pointer
+        // to the MetadataItem representing the trigger.  When the trigger was
+        // dropped the MetadataItem was destroyed but the pointer was never
+        // cleared, causing a read-access violation on the next UI action.
+        // This section verifies that the SQL operations (create + drop trigger)
+        // complete successfully on the Firebird side.
+        {
+            const std::string triggerTable = makeIdentifier("TRG_TBL_", 'T', 31);
+            const std::string triggerName  = makeIdentifier("TRG_", 'G', 31);
+
+            tr->Start();
+            st->Execute("CREATE TABLE " + quoteIdentifier(triggerTable) +
+                " (ID INTEGER)");
+            tr->Commit();
+
+            // Create the trigger.
+            tr->Start();
+            st->Execute(
+                "CREATE TRIGGER " + quoteIdentifier(triggerName) +
+                " FOR " + quoteIdentifier(triggerTable) +
+                " ACTIVE BEFORE INSERT POSITION 0"
+                " AS BEGIN END");
+            tr->Commit();
+
+            // Verify the trigger exists in the system catalogue.
+            tr->Start();
+            IBPP::Statement checkSt = IBPP::StatementFactory(db, tr);
+            checkSt->Prepare(
+                "SELECT COUNT(*) FROM rdb$triggers"
+                " WHERE rdb$trigger_name = ?");
+            checkSt->Set(1, triggerName);
+            checkSt->Execute();
+            checkSt->Fetch();
+            int countAfterCreate = 0;
+            checkSt->Get(1, &countAfterCreate);
+            tr->Rollback();
+
+            ok = check(countAfterCreate == 1,
+                "issue #436: trigger exists after CREATE") && ok;
+
+            // Drop the trigger – this is the operation that used to crash.
+            tr->Start();
+            st->Execute("DROP TRIGGER " + quoteIdentifier(triggerName));
+            tr->Commit();
+
+            // Verify the trigger was removed from the system catalogue.
+            tr->Start();
+            checkSt->Execute();
+            checkSt->Fetch();
+            int countAfterDrop = 0;
+            checkSt->Get(1, &countAfterDrop);
+            tr->Rollback();
+
+            ok = check(countAfterDrop == 0,
+                "issue #436: trigger absent after DROP") && ok;
+        }
+
         db->Drop();
     }
     catch (const IBPP::Exception& e)

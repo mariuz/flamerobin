@@ -981,6 +981,11 @@ private:
     MetadataItem* observedItemM;
 protected:
     virtual void update();
+    // Fix for issue #436: clear observedItemM when the subject (MetadataItem)
+    // is destroyed (e.g. when a trigger is dropped via SQL).  Without this
+    // override the pointer becomes dangling and causes a read-access violation
+    // the next time getSelectedMetadataItem() → getDatabase() is called.
+    virtual void subjectRemoved(Subject* subject) override;
 public:
     DBHTreeItemData(DBHTreeControl* tree);
 
@@ -992,6 +997,17 @@ public:
 DBHTreeItemData::DBHTreeItemData(DBHTreeControl* tree)
     : Observer(), treeM(tree), observedItemM(0)
 {
+}
+
+void DBHTreeItemData::subjectRemoved(Subject* subject)
+{
+    // The MetadataItem (subject) is being destroyed – clear the raw pointer
+    // so that subsequent calls to getObservedMetadata() return nullptr
+    // instead of a dangling pointer.  This fixes the fatal crash described in
+    // issue #436 where dropping a trigger caused a read-access violation in
+    // MainFrame::getDatabase().
+    if (observedItemM == static_cast<MetadataItem*>(subject))
+        observedItemM = nullptr;
 }
 
 //! returns tree subnode that points to given metadata object
