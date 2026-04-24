@@ -1744,6 +1744,19 @@ void StatementImpl::CursorFree()
 	}
 }
 
+void StatementImpl::ResetCursorState()
+{
+	// Called by TransactionImpl::Commit() and Rollback() to clear the
+	// cursor-open flag without issuing an isc_dsql_free_statement call.
+	// When the transaction ends, Firebird already closes all cursors on
+	// the server side, so attempting to close them again via CursorFree()
+	// would fail with "Attempt to reclose a closed cursor" (engine code
+	// 335544577).  Simply resetting the flags here lets the statement be
+	// safely reused in the next transaction.
+	mCursorOpened = false;
+	mResultSetAvailable = false;
+}
+
 StatementImpl::StatementImpl(DatabaseImpl* database, TransactionImpl* transaction)
 	: mRefCount(0), mHandle(0), mDatabase(0), mTransaction(0),
 	mInRow(0), mOutRow(0),

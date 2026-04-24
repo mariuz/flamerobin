@@ -1127,6 +1127,7 @@ private:
 
     // Internal Methods
     void CursorFree();
+    void ResetCursorState();    // Reset state flags after transaction end
 
 public:
     // Properties and Attributes Access Methods

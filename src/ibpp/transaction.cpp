@@ -153,11 +153,9 @@ void TransactionImpl::Commit()
         throw SQLExceptionImpl(status, "Transaction::Commit");
     mHandle = 0;    // Should be, better be sure
 
-    /*
     size_t i;
     for (i = mStatements.size(); i != 0; i--)
-        mStatements[i-1]->CursorFree();
-    */
+        mStatements[i-1]->ResetCursorState();
 }
 
 void TransactionImpl::CommitRetain()
@@ -183,11 +181,9 @@ void TransactionImpl::Rollback()
         throw SQLExceptionImpl(status, "Transaction::Rollback");
     mHandle = 0;    // Should be, better be sure
 
-    /*
     size_t i;
     for (i = mStatements.size(); i != 0; i--)
-        mStatements[i-1]->CursorFree();
-    */
+        mStatements[i-1]->ResetCursorState();
 }
 
 void TransactionImpl::RollbackRetain()
