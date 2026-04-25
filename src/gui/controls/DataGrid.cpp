@@ -190,6 +190,12 @@ void DataGrid::showPopupMenu(wxPoint cursorPos)
     m.Append(Cmds::DataGrid_CancelFetchAll, _("Stop fetching all records"));
     m.AppendSeparator();
 
+    // Issue #228: best-fit columns to their content on demand. Also
+    // available as an automatic step after query execution via the
+    // "autofitColumnsOnExecute" Preference.
+    m.Append(Cmds::DataGrid_AutofitColumns, _("Best fit all columns"));
+    m.AppendSeparator();
+
     m.Append(wxID_COPY, _("Copy"));
     m.Append(Cmds::DataGrid_Copy_with_header, _("Copy with headers"));
     m.Append(Cmds::DataGrid_Copy_as_insert, _("Copy as INSERT statements"));
