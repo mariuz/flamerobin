@@ -245,7 +245,21 @@ void DatabaseImpl::Info(int* ODSMajor, int* ODSMinor,
     (*getGDS().Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
         result.Size(), result.Self());
     if (status.Errors())
+    {
+        // If the server has invalidated our connection (e.g. idle timeout
+        // or restart) the local mHandle is stale. Drop it so the
+        // Database object reports as disconnected and the user can
+        // reconnect, instead of blowing up every metadata refresh with a
+        // cryptic "invalid database handle" SQLException. Engine code
+        // 335544324 == isc_bad_db_handle (no active connection).
+        if (status.EngineCode() == 335544324L)
+        {
+            mHandle = 0;
+            throw LogicExceptionImpl("Database::Info",
+                _("Connection to the database has been lost. Please reconnect."));
+        }
         throw SQLExceptionImpl(status, "Database::Info", _("isc_database_info failed"));
+    }
 
     if (ODSMajor != 0) *ODSMajor = result.GetValue(isc_info_ods_version);
     if (ODSMinor != 0) *ODSMinor = result.GetValue(isc_info_ods_minor_version);
