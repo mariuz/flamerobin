@@ -91,19 +91,14 @@ void FRStyleManager::assignWordStyle(wxStyledTextCtrl* text, FRStyle* style)
 
     text->StyleSetCase(style->getStyleID(), style->getCaseVisible());
 
-    // Build the font through the FRStyle helper so the system-default
-    // minimum size lift applies to the SQL editor too — not just the
-    // data grid. Falls back to the global style's name/size when this
-    // style does not define its own (matches the previous inline
-    // behaviour).
+    // Fall back to the global style's size when this style doesn't
+    // define its own (matches the previous inline behaviour), then
+    // route the result through the shared FRStyle helper so the SQL
+    // editor gets the same hi-DPI minimum lift as everything else.
     int size = style->getFontSize();
     if (size == 0)
         size = getGlobalStyle()->getFontSize();
-
-    wxFont sysFont = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
-    int sysSize = sysFont.GetPointSize();
-    if (size <= 0 || size < sysSize)
-        size = sysSize;
+    size = FRStyle::liftToSystemMinimum(size);
 
     wxFontInfo fontInfo(size);
 
