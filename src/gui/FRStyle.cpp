@@ -33,6 +33,7 @@
 #include <algorithm>
 
 #include "wx/filename.h"
+#include "wx/settings.h"
 #include "wx/xml/xml.h"
 
 #include "FRStyle.h"
@@ -186,7 +187,20 @@ void FRStyle::write2Element(wxXmlNode* element)
 
 wxFont FRStyle::getFont()
 {
-    wxFontInfo fontInfo(getFontSize());
+    // Most theme XMLs specify fontSize="10" (a Notepad++ heritage), and
+    // some leave it empty (parsed as STYLE_NOT_USED == -1). Both render
+    // as barely-readable tiny text on Retina / hi-DPI displays where the
+    // platform UI font is 13pt+. Treat the XML size as a *minimum*: lift
+    // anything below the system default GUI font size up to the system
+    // size, so labels and editor text stay legible. Users who want a
+    // larger code font (15pt, 18pt, ...) still get exactly what they
+    // asked for.
+    wxFont sysFont = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
+    int sysSize = sysFont.GetPointSize();
+    int size = getFontSize();
+    if (size <= 0 || size < sysSize)
+        size = sysSize;
+    wxFontInfo fontInfo(size);
 
     if (!getFontName().IsEmpty()) 
         fontInfo.FaceName(getFontName());

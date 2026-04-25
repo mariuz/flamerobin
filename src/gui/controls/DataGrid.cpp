@@ -33,6 +33,7 @@
 #include <wx/clipbrd.h>
 #include <wx/fontdlg.h>
 #include <wx/grid.h>
+#include <wx/settings.h>
 #include <wx/textbuf.h>
 #include <wx/txtstrm.h>
 #include <wx/wfstream.h>
@@ -1190,8 +1191,15 @@ void DataGrid::setupStyles()
     SetCellHighlightColour(stylerManager().getDefaultStyle()->getfgColor());
 
 
-    SetDefaultCellFont(stylerManager().getDefaultStyle()->getFont());
-    SetLabelFont(stylerManager().getDefaultStyle()->getFont());
+    // The active style's font is sized for the SQL editor (often 10pt
+    // monospace from Consolas/Courier); applying it to the data grid
+    // produced cells too small to read on Retina displays. Use the
+    // system GUI font for grid cells/labels — it follows the user's
+    // OS-level text size and stays consistent with the rest of the
+    // wxWidgets controls in the app.
+    wxFont sysFont = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
+    SetDefaultCellFont(sysFont);
+    SetLabelFont(sysFont);
 
     updateRowHeights();
     ForceRefresh();
