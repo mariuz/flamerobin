@@ -140,15 +140,16 @@ void HtmlTemplateProcessor::applyDarkModeIfNeeded(wxString& html)
     // their explicit color since attribute beats inheritance.
     //
     // HTML attribute names are case-insensitive, and external templates
-    // (the user manual, license viewer) may use mixed casing. Use the
-    // wxString::Find overload that takes a case-sensitivity flag — that
-    // searches in place rather than copying the document, which matters
-    // for multi-MB files.
-    int rawBodyStart = html.Find(wxT("<body"), false /* caseSensitive */);
-    if (rawBodyStart != wxNOT_FOUND)
+    // (the user manual, license viewer) may use mixed casing. wx 3.3's
+    // wxString::Find(const wxString&) doesn't expose a case-insensitive
+    // flag, so search a bounded lower-cased prefix instead — <body> is
+    // virtually always within the first few KB of any HTML document and
+    // copying 8 KB is cheap even for multi-MB inputs.
+    const size_t kBodySearchPrefix = 8 * 1024;
+    wxString lowerPrefix = html.Mid(0, kBodySearchPrefix).Lower();
+    wxString::size_type bodyStart = lowerPrefix.find(wxT("<body"));
+    if (bodyStart != wxString::npos)
     {
-        wxString::size_type bodyStart =
-            static_cast<wxString::size_type>(rawBodyStart);
         wxString::size_type bodyEnd = html.find('>', bodyStart);
         if (bodyEnd != wxString::npos)
         {
