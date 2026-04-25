@@ -116,7 +116,11 @@ void CreateIndexDialog::setControlsProperties()
     std::vector<Index>* indices = tableM->getIndices();
     while (indexName.IsEmpty())
     {
-        indexName = wxString::Format("IDX_%s%d",
+        // Issue #214: include the underscore between table name and
+        // sequence so the suggested name matches the convention Firebird
+        // itself uses for auto-named PK/FK/UNIQUE/CHECK constraints
+        // (e.g. IDX_FB3_TEST_1 instead of IDX_FB3_TEST1).
+        indexName = wxString::Format("IDX_%s_%d",
             tableM->getName_().c_str(), nr++);
         std::vector<Index>::iterator itIdx;
         for (itIdx = indices->begin(); itIdx != indices->end(); ++itIdx)
