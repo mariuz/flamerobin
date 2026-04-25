@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTD/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!--
+        FlameRobin needs to load libfbclient from /Library/Frameworks/Firebird.framework
+        at runtime. That dylib is signed by the Firebird project, not by our Developer ID,
+        so under the hardened runtime macOS would otherwise refuse to map it.
+        Disable library validation so the user can pair the app with whatever Firebird
+        client they have installed.
+    -->
+    <key>com.apple.security.cs.disable-library-validation</key>
+    <true/>
+</dict>
+</plist>
