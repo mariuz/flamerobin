@@ -28,6 +28,7 @@
 // need because it includes almost all "standard" wxWindows headers
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
+#include "wx/settings.h"
 #endif
 
 #include <algorithm>
@@ -314,17 +315,25 @@ void FRStyleManager::assignMargin(wxStyledTextCtrl* text)
 
 void FRStyleManager::loadConfig()
 {
+    // If no theme has been picked yet, fall back to the dark-mode default
+    // when the system is in dark mode so the SQL editor and data grid don't
+    // render as a bright white panel inside an otherwise dark window. The
+    // user's explicit Preferences choice still wins.
+    const wxString systemDefault =
+        wxSystemSettings::GetAppearance().IsDark()
+            ? wxString("DarkModeDefault")
+            : _default;
 
-    wxString fileName = config().get(_PRYMARY, _default);
+    wxString fileName = config().get(_PRYMARY, systemDefault);
     if (fileName.IsEmpty()) {
-        fileName =_default;
+        fileName = systemDefault;
     }
     wxFileName file = wxFileName(config().getXmlStylesPath(), fileName + ".xml");
     setFileNamePrimary(file);
 
-    fileName = config().get(_SECONDARY, _default);
+    fileName = config().get(_SECONDARY, systemDefault);
     if (fileName.IsEmpty()) {
-        fileName = _default;
+        fileName = systemDefault;
     }
     file = wxFileName(config().getXmlStylesPath(), fileName + ".xml");
     setFileNameSecondary(file);
