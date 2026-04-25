@@ -1879,8 +1879,10 @@ wxArrayInt getSelectedGridRows(DataGrid* grid)
     wxArrayInt rows;
     if (grid)
     {
-        // add fully selected rows
-        rows = grid->GetSelectedRows();
+        // Don't include grid->GetSelectedRows(): on macOS (and some wx versions)
+        // a single-cell click is reported in both GetSelectedRows() and the
+        // selection blocks below, so the row gets counted twice. The blocks
+        // alone correctly cover both row-header clicks and cell selections.
 
         // add rows in selection blocks that span all columns
         wxGridCellCoordsArray tlCells(grid->GetSelectionBlockTopLeft());
@@ -1921,7 +1923,7 @@ void ExecuteSqlFrame::OnMenuGridDeleteRow(wxCommandEvent& WXUNUSED(event))
     {
         bool agreed = wxOK == showQuestionDialog(this,
             _("Do you really want to delete multiple rows?"),
-            wxString::Format(_("You have more than one row selected. Are you sure you wish to delete all %d selected rows?"), count),
+            wxString::Format(_("You have more than one row selected. Are you sure you wish to delete all %d selected rows?"), int(count)),
             AdvancedMessageDialogButtonsOkCancel(_("Delete")));
         if (!agreed)
             return;
