@@ -36,6 +36,16 @@ For detailed build instructions for all supported platforms (Windows, Linux, mac
 Compile-time C++ standard notice: FlameRobin is currently built as C++14
 (`CMAKE_CXX_STANDARD=14`). Please keep contributions compatible with C++14.
 
+macOS distribution builds
+---------------------------
+For producing a signed, notarized `FlameRobin.app` distributable to other
+Macs (build + bundle dylibs + sign + notarize + staple + zip in one step),
+see [dist/macos/README.md](dist/macos/README.md). One-shot release:
+
+```sh
+dist/macos/release.sh
+```
+
 Wiki
 ---------------------------
 Additional documentation and guides are available on the [FlameRobin Wiki](https://github.com/mariuz/flamerobin/wiki).
