@@ -33,6 +33,7 @@
 #include <wx/wupdlock.h>
 #include <wx/artprov.h>
 #include <wx/dnd.h>
+#include <wx/evtloop.h>
 #include <wx/file.h>
 #include <wx/fontdlg.h>
 #include <wx/stopwatch.h>
@@ -2355,17 +2356,19 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
         // Issue #447: long scripts (hundreds-to-thousands of statements)
         // blocked the UI thread for so long that the OS marked the window
         // as "Not Responding". Pump the event loop periodically so the log
-        // pane repaints and the window stays responsive. We use
-        // YieldFor(wxEVT_CATEGORY_UI) rather than Yield(): the latter does
-        // not filter user-input events, which would let the user re-trigger
-        // execute mid-run and re-enter parseStatements (the wxBusyCursor
-        // blocks the cursor but not the keyboard accelerator). Yielding for
-        // UI events only keeps repaints flowing without that re-entrancy
-        // hole. We also throttle to every 100 statements so the yield cost
-        // doesn't dominate runtime on huge scripts.
-        if (++statementsSinceYield >= 100 && wxTheApp != NULL)
+        // pane repaints and the window stays responsive. YieldFor with
+        // wxEVT_CATEGORY_UI processes UI events only — repaints and other
+        // visual updates flow but user-input events (keypresses, clicks)
+        // are deferred, so the user can't accidentally re-trigger execute
+        // mid-run and re-enter parseStatements (wxBusyCursor blocks the
+        // cursor but not the keyboard accelerator). Throttle to every 100
+        // statements so the yield cost doesn't dominate runtime on huge
+        // scripts. Use the active event loop rather than wxApp because
+        // wxApp::YieldFor is not exposed on every wx port.
+        if (++statementsSinceYield >= 100)
         {
-            wxTheApp->YieldFor(wxEVT_CATEGORY_UI);
+            if (wxEventLoopBase* loop = wxEventLoopBase::GetActive())
+                loop->YieldFor(wxEVT_CATEGORY_UI);
             statementsSinceYield = 0;
         }
     }
