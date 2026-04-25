@@ -2099,21 +2099,21 @@ void ExecuteSqlFrame::OnMenuUpdateGridCancelFetchAll(wxUpdateUIEvent& event)
 
 void ExecuteSqlFrame::OnMenuUpdateGridCanSetFieldToNULL(wxUpdateUIEvent& event)
 {
+    // Issue #390: avoid the expensive getColumnsWithSelectedCells() call
+    // here. The set-to-NULL menu item just needs to know "is at least one
+    // column writable" — that is a property of the underlying statement
+    // and is independent of how many rows are selected. The actual command
+    // re-validates per cell when invoked.
     if (DataGridTable* dgt = grid_data->getDataGridTable())
     {
-        std::vector<bool> selCols(grid_data->getColumnsWithSelectedCells());
-        for (size_t i = 0; i < selCols.size(); i++)
+        int cols = grid_data->GetNumberCols();
+        for (int i = 0; i < cols; ++i)
         {
-            if (selCols[i] && !dgt->isReadonlyColumn(i))
+            if (!dgt->isReadonlyColumn(i))
             {
                 event.Enable(true);
                 return;
             }
-        }
-        if (!dgt->isReadonlyColumn(grid_data->GetGridCursorRow()))
-        {
-            event.Enable(true);
-            return;
         }
     }
     event.Enable(false);
@@ -3070,20 +3070,21 @@ void ExecuteSqlFrame::OnMenuUpdateGridDeleteRow(wxUpdateUIEvent& event)
         return;
     }
 
-    bool colsSelected = grid_data->GetSelectedCols().GetCount() > 0;
-    bool deletableRows = false;
-
-    if (!colsSelected)
-    {
-        wxArrayInt selRows(getSelectedGridRows(grid_data));
-        for (size_t i = 0; !deletableRows && i < selRows.GetCount(); ++i)
-        {
-            if (tb->canRemoveRow(selRows[i]))
-                deletableRows = true;
-        }
-    }
-
-    event.Enable(!colsSelected && deletableRows);
+    // Issue #390: this update handler runs for every menu item every
+    // time wxGrid emits a UI update (including before showing the
+    // context menu). The previous implementation built a full
+    // wxArrayInt of every selected row index via getSelectedGridRows()
+    // and then per-row canRemoveRow() calls — with 100k+ selected
+    // rows the menu took 8 seconds to appear (300k → ~115s).
+    //
+    // canRemoveRow(0) answers "does the underlying statement support
+    // row deletion at all" in O(1) (it's a property of the SQL, not
+    // the selection, and is cached after the first call). The real
+    // delete handler re-validates per row before deleting, so it is
+    // safe to use that cheap probe here. This also resolves the
+    // #444 case where Ctrl+A previously disabled the menu item
+    // because both rows AND columns were reported as selected.
+    event.Enable(tb->canRemoveRow(0));
 }
 
 void ExecuteSqlFrame::OnGridCellChange(wxGridEvent& event)
