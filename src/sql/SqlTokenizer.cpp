@@ -44,7 +44,7 @@ protected:
     virtual void loadFromConfig()
     {
         sqlKeywordsUpperCaseM = config().get("SQLKeywordsUpperCase",
-            false);
+            true);
     }
 public:
     SqlTokenizerConfigCache() : ConfigCache(config()) {}
@@ -184,7 +184,7 @@ wxArrayString SqlTokenizer::getKeywords(KeywordCase kwc, int odsMajor,
     keywords.Alloc(keywordSet.keywordsCount);
 
     bool upperCase = (kwc == kwUpperCase) || (kwc == kwDefaultCase
-        && config().get("SQLKeywordsUpperCase", false));
+        && config().get("SQLKeywordsUpperCase", true));
     for (size_t i = 0; i < keywordSet.keywordsCount; ++i)
     {
         appendCaseKeyword(keywords, keywordSet.keywords[i], upperCase);
