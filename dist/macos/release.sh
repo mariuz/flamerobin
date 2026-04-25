@@ -178,7 +178,7 @@ VERSION="$(grep -E '^#define FR_VERSION_' src/frversion.h \
     | awk '{print $3}' \
     | paste -sd. - 2>/dev/null || echo "unknown")"
 
-DIST_ZIP="$DIST_DIR/FlameRobin-${VERSION}-macos-arm64.zip"
+DIST_ZIP="$DIST_DIR/FlameRobin-${VERSION}-macos-$(uname -m).zip"
 log "Creating distribution archive: $DIST_ZIP"
 rm -f "$DIST_ZIP"
 ditto -c -k --keepParent "$APP_PATH" "$DIST_ZIP"
