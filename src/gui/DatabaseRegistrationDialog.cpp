@@ -407,12 +407,14 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
 
     // Issue #451 follow-up: focus the first empty editable field so the
     // user can start typing immediately on dialog open. Order:
-    // database path → username → password.
+    // database path → password. The username branch was removed after
+    // the SYSDBA pre-fill above made it permanently non-empty (Gemini
+    // review noted the dead branch); for the password we now also check
+    // emptiness so an editable-but-already-filled password field doesn't
+    // steal focus.
     if (text_ctrl_dbpath->IsEditable() && text_ctrl_dbpath->GetValue().IsEmpty())
         text_ctrl_dbpath->SetFocus();
-    else if (text_ctrl_username->IsEditable() && text_ctrl_username->GetValue().IsEmpty())
-        text_ctrl_username->SetFocus();
-    else if (text_ctrl_password->IsEditable())
+    else if (text_ctrl_password->IsEditable() && text_ctrl_password->GetValue().IsEmpty())
         text_ctrl_password->SetFocus();
 }
 
