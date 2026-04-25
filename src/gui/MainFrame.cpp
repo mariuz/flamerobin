@@ -1103,14 +1103,15 @@ void MainFrame::OnMenuMoveDatabaseToServer(wxCommandEvent& WXUNUSED(event))
         return;     // user cancelled
 
     ServerPtr target = serverChoices[idx];
-    // Wrap the move in a SubjectLocker on the Root so the tree control
-    // sees a single batched update instead of three separate refreshes
-    // (remove from current server, add to target server, save). Without
-    // it the tree was rebuilt three times for a single user action —
-    // perceptible flicker on large registration lists, and Gemini's PR
-    // review flagged the redundant refreshes.
+    // Batch the tree refreshes around the move. removeDatabase /
+    // addDatabase notifications are emitted by the Server objects (not
+    // by Root), so SubjectLockers on both source and target servers are
+    // what actually defer the tree rebuilds. Locking Root in addition
+    // covers the save() call.
     {
-        SubjectLocker lock(rootM.get());
+        SubjectLocker lockRoot(rootM.get());
+        SubjectLocker lockSource(currentServer.get());
+        SubjectLocker lockTarget(target.get());
         currentServer->removeDatabase(d);
         target->addDatabase(d);
         rootM->save();
