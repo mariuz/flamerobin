@@ -40,6 +40,7 @@
 #include "core/ArtProvider.h"
 #include "core/CodeTemplateProcessor.h"
 #include "core/FRError.h"
+#include "core/Subject.h"
 #include "core/URIProcessor.h"
 #include "frutils.h"
 #include "gui/AboutBox.h"
@@ -1102,9 +1103,18 @@ void MainFrame::OnMenuMoveDatabaseToServer(wxCommandEvent& WXUNUSED(event))
         return;     // user cancelled
 
     ServerPtr target = serverChoices[idx];
-    currentServer->removeDatabase(d);
-    target->addDatabase(d);
-    rootM->save();
+    // Wrap the move in a SubjectLocker on the Root so the tree control
+    // sees a single batched update instead of three separate refreshes
+    // (remove from current server, add to target server, save). Without
+    // it the tree was rebuilt three times for a single user action —
+    // perceptible flicker on large registration lists, and Gemini's PR
+    // review flagged the redundant refreshes.
+    {
+        SubjectLocker lock(rootM.get());
+        currentServer->removeDatabase(d);
+        target->addDatabase(d);
+        rootM->save();
+    }
     treeMainM->selectMetadataItem(d.get());
 }
 
