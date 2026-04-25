@@ -6,13 +6,15 @@
 #   2. Firebird installed (creates /Library/Frameworks/Firebird.framework)
 #      (Firebird is treated as an external runtime dependency; users must
 #       install Firebird separately to use FlameRobin.)
-#   3. Developer ID Application certificate in your login keychain
-#      Verify: security find-identity -v -p codesigning
+#   3. Developer ID Application certificate in your login keychain.
+#      Verify with: security find-identity -v -p codesigning
+#      The script auto-detects a single "Developer ID Application: ..."
+#      identity. If you have more than one, set SIGN_IDENTITY explicitly.
 #   4. Notarization credentials stored in keychain. From an Apple ID with an
 #      app-specific password (https://account.apple.com → App-Specific Passwords):
 #        xcrun notarytool store-credentials FlameRobinNotary \
 #            --apple-id "you@example.com" \
-#            --team-id  "5CSH5U4F8F" \
+#            --team-id  "ABCDEFGHIJ" \
 #            --password "abcd-efgh-ijkl-mnop"
 #
 # Usage:
@@ -20,7 +22,8 @@
 #   dist/macos/release.sh --skip-notarize   # sign only, skip notary submission (faster, for testing)
 #
 # Override defaults via env vars:
-#   SIGN_IDENTITY    Codesigning identity (default: Code Infinity Developer ID)
+#   SIGN_IDENTITY    Codesigning identity. Default: auto-detect the single
+#                    "Developer ID Application: ..." in your keychain.
 #   NOTARY_PROFILE   Keychain profile name created above (default: FlameRobinNotary)
 #   BUILD_DIR        Build directory (default: build-release)
 
@@ -29,7 +32,6 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
-SIGN_IDENTITY="${SIGN_IDENTITY:-Developer ID Application: Code Infinity (Pty) Ltd (5CSH5U4F8F)}"
 NOTARY_PROFILE="${NOTARY_PROFILE:-FlameRobinNotary}"
 BUILD_DIR="${BUILD_DIR:-build-release}"
 ENTITLEMENTS="$REPO_ROOT/dist/macos/entitlements.plist"
@@ -42,14 +44,39 @@ fi
 log() { printf '\n\033[1;34m==> %s\033[0m\n' "$*"; }
 fail() { printf '\033[1;31mERROR: %s\033[0m\n' "$*" >&2; exit 1; }
 
+# Auto-detect the local Developer ID if SIGN_IDENTITY isn't set explicitly.
+# Pulls every "Developer ID Application: ..." line from the keychain; if
+# exactly one exists, use it. Otherwise we ask the maintainer to choose.
+# Uses a while-read loop instead of mapfile so this stays compatible with
+# Apple's bundled bash 3.2.
+if [[ -z "${SIGN_IDENTITY:-}" ]]; then
+    devids=()
+    while IFS= read -r line; do
+        [[ -n "$line" ]] && devids+=("$line")
+    done < <(
+        security find-identity -v -p codesigning 2>/dev/null \
+            | sed -nE 's/^[[:space:]]*[0-9]+\)[[:space:]]+[A-F0-9]{40}[[:space:]]+"(Developer ID Application:[^"]*)"$/\1/p'
+    )
+    if [[ ${#devids[@]} -eq 1 ]]; then
+        SIGN_IDENTITY="${devids[0]}"
+    elif [[ ${#devids[@]} -eq 0 ]]; then
+        fail "No 'Developer ID Application' identity found in keychain. Install one from https://developer.apple.com or set SIGN_IDENTITY explicitly."
+    else
+        printf 'Multiple Developer ID identities found:\n' >&2
+        printf '  %s\n' "${devids[@]}" >&2
+        fail "Set SIGN_IDENTITY env var to the one you want to use."
+    fi
+fi
+
 # ---- Prerequisite checks ----
 log "Checking prerequisites"
 command -v cmake >/dev/null || fail "cmake not found (brew install cmake)"
 command -v xcodebuild >/dev/null || fail "xcodebuild not found (install Xcode command-line tools)"
 command -v dylibbundler >/dev/null || fail "dylibbundler not found (brew install dylibbundler)"
 [[ -d /Library/Frameworks/Firebird.framework ]] || fail "Firebird framework not found at /Library/Frameworks/Firebird.framework"
-security find-identity -v -p codesigning | grep -q "$SIGN_IDENTITY" \
+security find-identity -v -p codesigning | grep -qF "$SIGN_IDENTITY" \
     || fail "Signing identity not found in keychain: $SIGN_IDENTITY"
+log "Using signing identity: $SIGN_IDENTITY"
 if [[ $SKIP_NOTARIZE -eq 0 ]]; then
     xcrun notarytool history --keychain-profile "$NOTARY_PROFILE" >/dev/null 2>&1 \
         || fail "Notary keychain profile '$NOTARY_PROFILE' not found. See script header for setup."

@@ -87,7 +87,7 @@ Store it in your keychain under the profile name the script uses
 ```sh
 xcrun notarytool store-credentials FlameRobinNotary \
     --apple-id "you@example.com" \
-    --team-id  "5CSH5U4F8F" \
+    --team-id  "ABCDEFGHIJ" \
     --password "xxxx-xxxx-xxxx-xxxx"
 ```
 
@@ -101,14 +101,15 @@ Override defaults with environment variables:
 
 | Variable         | Default                                                                  |
 |------------------|--------------------------------------------------------------------------|
-| `SIGN_IDENTITY`  | `Developer ID Application: Code Infinity (Pty) Ltd (5CSH5U4F8F)`         |
+| `SIGN_IDENTITY`  | Auto-detect a single `Developer ID Application: ...` from your keychain. |
 | `NOTARY_PROFILE` | `FlameRobinNotary`                                                       |
 | `BUILD_DIR`      | `build-release`                                                          |
 
-Example:
+If you have multiple Developer ID certificates the script will list them
+and ask you to set `SIGN_IDENTITY` explicitly:
 
 ```sh
-SIGN_IDENTITY="Developer ID Application: Other Org (XXXXXXXX)" \
+SIGN_IDENTITY="Developer ID Application: Your Org (XXXXXXXXXX)" \
 NOTARY_PROFILE=MyNotary \
 dist/macos/release.sh
 ```
