@@ -2731,14 +2731,9 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     log(wxString::Format(_("Total execution time: %s"),
         millisToTimeString(swTotal.Time() - waitForParameterInputTime).c_str()));
 
-    // Issue #228: optionally best-fit columns to their content after a
-    // successful execution. Off by default (matches existing behavior);
-    // set "autofitColumnsOnExecute" in Preferences to enable.
-    if (retval && grid_data->getDataGridTable() && grid_data->GetNumberRows()
-        && config().get("autofitColumnsOnExecute", false))
-    {
-        grid_data->AutoSizeColumns(false);
-    }
+    // Note: autofit-on-execute is handled inside DataGrid::fetchData,
+    // which is the single place a fresh result set is rendered. A second
+    // pass here would just resize the same already-sized columns.
 
     return retval;
 }

@@ -147,11 +147,10 @@ void DataGrid::fetchData(bool readonly)
         ca->SetOverflow(false);
         SetColAttr(i, ca);
     }
-    // Issue #228: gate this initial autofit on the same preference that
-    // controls the post-execute autofit, otherwise the toggle in
-    // Preferences only affects the second pass and the user can't
-    // actually opt out of resizing.
-    if (config().get("autofitColumnsOnExecute", false))
+    // Gate the initial autofit on the same preference as the post-execute
+    // autofit so the user can actually opt out. Default to true to match
+    // existing behaviour (this call was previously unconditional).
+    if (config().get("autofitColumnsOnExecute", true))
         AutoSizeColumns(false);
     EndBatch();
 

@@ -421,9 +421,9 @@
         <image>4</image>
         <setting type="checkbox">
             <caption>Autofit columns on query execution</caption>
-            <description>After a query returns rows, automatically size every column to fit its content. Also available on demand from the grid context menu ("Best fit all columns"). May be slow on very wide result sets.</description>
+            <description>After a query returns rows, automatically size every column to fit its content. Also available on demand from the grid context menu ("Best fit all columns"). On by default to match the historical behaviour; uncheck to keep equal-width columns and skip the resize on very wide result sets.</description>
             <key>autofitColumnsOnExecute</key>
-            <default>0</default>
+            <default>1</default>
         </setting>
         <setting type="string">
             <caption>Date format:</caption>
