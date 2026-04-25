@@ -2,8 +2,10 @@
 # Build, sign, notarize, and package FlameRobin.app for macOS distribution.
 #
 # Prerequisites (one-time setup):
-#   1. brew install cmake wxwidgets
+#   1. brew install cmake wxwidgets dylibbundler
 #   2. Firebird installed (creates /Library/Frameworks/Firebird.framework)
+#      (Firebird is treated as an external runtime dependency; users must
+#       install Firebird separately to use FlameRobin.)
 #   3. Developer ID Application certificate in your login keychain
 #      Verify: security find-identity -v -p codesigning
 #   4. Notarization credentials stored in keychain. From an Apple ID with an
@@ -30,6 +32,7 @@ cd "$REPO_ROOT"
 SIGN_IDENTITY="${SIGN_IDENTITY:-Developer ID Application: Code Infinity (Pty) Ltd (5CSH5U4F8F)}"
 NOTARY_PROFILE="${NOTARY_PROFILE:-FlameRobinNotary}"
 BUILD_DIR="${BUILD_DIR:-build-release}"
+ENTITLEMENTS="$REPO_ROOT/dist/macos/entitlements.plist"
 
 SKIP_NOTARIZE=0
 if [[ "${1:-}" == "--skip-notarize" ]]; then
@@ -43,6 +46,7 @@ fail() { printf '\033[1;31mERROR: %s\033[0m\n' "$*" >&2; exit 1; }
 log "Checking prerequisites"
 command -v cmake >/dev/null || fail "cmake not found (brew install cmake)"
 command -v xcodebuild >/dev/null || fail "xcodebuild not found (install Xcode command-line tools)"
+command -v dylibbundler >/dev/null || fail "dylibbundler not found (brew install dylibbundler)"
 [[ -d /Library/Frameworks/Firebird.framework ]] || fail "Firebird framework not found at /Library/Frameworks/Firebird.framework"
 security find-identity -v -p codesigning | grep -q "$SIGN_IDENTITY" \
     || fail "Signing identity not found in keychain: $SIGN_IDENTITY"
@@ -67,11 +71,49 @@ xcodebuild -project "$BUILD_DIR/flamerobin.xcodeproj" \
 
 APP_PATH="$BUILD_DIR/Release/flamerobin.app"
 [[ -d "$APP_PATH" ]] || fail "Build did not produce $APP_PATH"
+BIN_PATH="$APP_PATH/Contents/MacOS/flamerobin"
+
+# ---- Bundle third-party dylibs ----
+# The hardened runtime requires every loaded dylib to be signed by the same
+# Team ID as the main binary (or be an Apple system library). Homebrew and
+# Firebird dylibs are signed by their respective projects, not by us, so they
+# fail validation. dylibbundler copies them into Contents/Frameworks/ and
+# rewrites the binary's load commands to @rpath/... so we can re-sign them
+# with our own Developer ID. The resulting .app is fully self-contained:
+# users do not need Homebrew or a system Firebird install to launch it.
+log "Bundling third-party dylibs into $APP_PATH/Contents/Frameworks"
+mkdir -p "$APP_PATH/Contents/Frameworks"
+dylibbundler --overwrite-dir --bundle-deps \
+    --fix-file "$BIN_PATH" \
+    --dest-dir "$APP_PATH/Contents/Frameworks/" \
+    --install-path "@rpath/" \
+    --search-path /opt/homebrew/lib \
+    --search-path /Library/Frameworks/Firebird.framework/Libraries \
+    --search-path /Library/Frameworks/Firebird.framework/Resources/lib
+
+# CMake/Xcode adds stray "@rpath/" LC_RPATH entries to the binary. They were
+# inert before bundling (the loader never actually used them since dylibs were
+# loaded by absolute path), but with bundled dylibs that resolve through
+# @rpath, dyld walks the rpath list — and modern dyld fatally rejects duplicate
+# LC_RPATH entries. Strip every "@rpath/" rpath, then add our real one.
+while otool -l "$BIN_PATH" | grep -q 'path @rpath/ '; do
+    install_name_tool -delete_rpath "@rpath/" "$BIN_PATH"
+done
+install_name_tool -add_rpath "@executable_path/../Frameworks" "$BIN_PATH" 2>/dev/null || true
 
 # ---- Sign ----
-log "Signing $APP_PATH with hardened runtime + secure timestamp"
-codesign --force --deep --options runtime \
+# Sign bundled dylibs first (innermost-out), then the app bundle. --deep on
+# the outer sign would also work but signing the dylibs explicitly is more
+# predictable and Apple's recommended approach.
+log "Signing bundled dylibs with hardened runtime + secure timestamp"
+find "$APP_PATH/Contents/Frameworks" -type f \( -name "*.dylib" -o -name "*.so" \) -print0 \
+    | xargs -0 -I {} codesign --force --options runtime \
+        --sign "$SIGN_IDENTITY" --timestamp {}
+
+log "Signing $APP_PATH with hardened runtime + secure timestamp + entitlements"
+codesign --force --options runtime \
     --sign "$SIGN_IDENTITY" \
+    --entitlements "$ENTITLEMENTS" \
     --timestamp \
     "$APP_PATH"
 
