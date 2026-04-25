@@ -1191,15 +1191,16 @@ void DataGrid::setupStyles()
     SetCellHighlightColour(stylerManager().getDefaultStyle()->getfgColor());
 
 
-    // The active style's font is sized for the SQL editor (often 10pt
-    // monospace from Consolas/Courier); applying it to the data grid
-    // produced cells too small to read on Retina displays. Use the
-    // system GUI font for grid cells/labels — it follows the user's
-    // OS-level text size and stays consistent with the rest of the
-    // wxWidgets controls in the app.
-    wxFont sysFont = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
-    SetDefaultCellFont(sysFont);
-    SetLabelFont(sysFont);
+    // Use the active theme's font. FRStyleManager::assignWordStyle (and
+    // FRStyle::getFont) now lift theme font sizes below the system
+    // default GUI font size up to that minimum, so themes like
+    // DarkModeDefault that set fontSize="10" no longer produce
+    // unreadable grid cells on Retina displays. Users with explicit
+    // larger fonts in their theme still get exactly what they asked
+    // for — the previous wxSYS_DEFAULT_GUI_FONT bypass was a
+    // regression for that case.
+    SetDefaultCellFont(stylerManager().getDefaultStyle()->getFont());
+    SetLabelFont(stylerManager().getDefaultStyle()->getFont());
 
     updateRowHeights();
     ForceRefresh();

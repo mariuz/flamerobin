@@ -32,6 +32,8 @@
 
 #include <algorithm>
 
+#include <wx/settings.h>
+
 #include "FRStyleManager.h"
 
 
@@ -88,7 +90,21 @@ void FRStyleManager::assignWordStyle(wxStyledTextCtrl* text, FRStyle* style)
 
 
     text->StyleSetCase(style->getStyleID(), style->getCaseVisible());
-    double size = style->getFontSize() == 0 ? getGlobalStyle()->getFontSize() : style->getFontSize();
+
+    // Build the font through the FRStyle helper so the system-default
+    // minimum size lift applies to the SQL editor too — not just the
+    // data grid. Falls back to the global style's name/size when this
+    // style does not define its own (matches the previous inline
+    // behaviour).
+    int size = style->getFontSize();
+    if (size == 0)
+        size = getGlobalStyle()->getFontSize();
+
+    wxFont sysFont = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
+    int sysSize = sysFont.GetPointSize();
+    if (size <= 0 || size < sysSize)
+        size = sysSize;
+
     wxFontInfo fontInfo(size);
 
     wxString fontName = style->getFontName().IsEmpty() ? getGlobalStyle()->getFontName() : style->getFontName();
