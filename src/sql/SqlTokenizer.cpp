@@ -183,9 +183,9 @@ wxArrayString SqlTokenizer::getKeywords(KeywordCase kwc, int odsMajor,
         getKeywordSetForVersion(version.major));
     keywords.Alloc(keywordSet.keywordsCount);
 
-    // Use the cached config value (Gemini feedback) so we do not hit the
-    // config map on every getKeywords call. The cache invalidates itself
-    // when the user changes the setting in Preferences.
+    // Use the cached config value so we do not hit the config map on
+    // every getKeywords call. The cache invalidates itself when the
+    // user changes the setting in Preferences.
     bool upperCase = (kwc == kwUpperCase) || (kwc == kwDefaultCase
         && SqlTokenizerConfigCache::get().getSqlKeywordsUpperCase());
     for (size_t i = 0; i < keywordSet.keywordsCount; ++i)
