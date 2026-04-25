@@ -2299,6 +2299,7 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
 {
     wxBusyCursor cr;
     MultiStatement ms(statements);
+    int statementsSinceYield = 0;
     while (true)
     {
         SingleStatement ss = ms.getNextStatement();
@@ -2351,14 +2352,22 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
             return false;
         }
 
-        // Issue #447: long scripts (hundreds-to-thousands of statements) blocked
-        // the UI thread for so long that the OS marked the window as
-        // "Not Responding". Pump the event loop between statements so the log
-        // pane repaints, the window stays responsive, and the user can move /
-        // close other dialogs while the script runs. Yield(true) filters input
-        // events so the script can't be re-triggered mid-run.
-        if (wxTheApp != NULL)
-            wxTheApp->Yield(true);
+        // Issue #447: long scripts (hundreds-to-thousands of statements)
+        // blocked the UI thread for so long that the OS marked the window
+        // as "Not Responding". Pump the event loop periodically so the log
+        // pane repaints and the window stays responsive. We use
+        // YieldFor(wxEVT_CATEGORY_UI) rather than Yield(): the latter does
+        // not filter user-input events, which would let the user re-trigger
+        // execute mid-run and re-enter parseStatements (the wxBusyCursor
+        // blocks the cursor but not the keyboard accelerator). Yielding for
+        // UI events only keeps repaints flowing without that re-entrancy
+        // hole. We also throttle to every 100 statements so the yield cost
+        // doesn't dominate runtime on huge scripts.
+        if (++statementsSinceYield >= 100 && wxTheApp != NULL)
+        {
+            wxTheApp->YieldFor(wxEVT_CATEGORY_UI);
+            statementsSinceYield = 0;
+        }
     }
 
     if (closeWhenDone)
