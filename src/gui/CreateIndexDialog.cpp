@@ -131,7 +131,7 @@ void CreateIndexDialog::setControlsProperties()
     DatabasePtr db = tableM->getDatabase();
     if (db && db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
         maxIdLen = 63;     // Firebird 4+ (ODS 13.0)
-    wxMBConv* conv = db ? db->getCharsetConverter() : &wxConvCurrent;
+    wxMBConv* conv = db ? db->getCharsetConverter() : wxConvCurrent;
 
     while (indexName.IsEmpty())
     {
