@@ -385,8 +385,17 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
     text_ctrl_library->SetValue(databaseM->getClientLibrary());
     */
     wxString charset(databaseM->getConnectionCharset());
-    if (isNewRegistration && charset.IsEmpty())
-        charset = config().get("databaseDefaultCharset", wxString("NONE"));
+    if (charset.IsEmpty())
+    {
+        // For a new registration, prefer the user-configured default
+        // (which itself defaults to "NONE"). For an existing entry with
+        // an empty stored charset, preserve the original UI behaviour
+        // of showing "NONE" so the combobox isn't blank — that was the
+        // visible default before the configurable default existed.
+        charset = isNewRegistration
+            ? config().get("databaseDefaultCharset", wxString("NONE"))
+            : wxString("NONE");
+    }
     combobox_charset->SetValue(charset);
     if (createM)
         suggestDefaultPageSizeByServerVersion();
