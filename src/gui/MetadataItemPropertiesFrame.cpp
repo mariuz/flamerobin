@@ -203,6 +203,7 @@ void MetadataItemPropertiesPanel::loadPage()
     wxString htmlpage;
     HtmlTemplateProcessor tp(objectM, this);
     tp.processTemplateFile(htmlpage, fileName, 0, &pd);
+    HtmlTemplateProcessor::applyDarkModeIfNeeded(htmlpage);
 
     pd.SetTitle(_("Rendering page..."));
 

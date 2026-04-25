@@ -38,6 +38,13 @@ public:
     HtmlTemplateProcessor(ProcessableObject* object, wxWindow* window);
     virtual wxString escapeChars(const wxString& input,
         bool processNewlines = true);
+
+    // If the system appearance is dark, rewrite the rendered HTML to use
+    // dark-mode colors. The metadata templates use legacy bgcolor="white"
+    // / "#DDDDFF" / "#CCCCFF" attributes which clash with a dark window
+    // chrome; this is a post-processing pass so the templates themselves
+    // stay portable.
+    static void applyDarkModeIfNeeded(wxString& html);
 };
 
 #endif // FR_HTMLTEMPLATEPROCESSOR_H
