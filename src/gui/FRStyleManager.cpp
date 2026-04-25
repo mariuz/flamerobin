@@ -170,6 +170,8 @@ void FRStyleManager::assignGlobal(wxStyledTextCtrl* text)
 {
     //text->StyleClearAll();
 
+    FRStyle* globalOverrideStyle = nullptr;
+
     for (int i = 0; i < globalStylerM->getNbStyler(); i++) {
         FRStyle* style = globalStylerM->getStyle(i);
         //if (style->getStyleID() != 0) {
@@ -177,6 +179,7 @@ void FRStyleManager::assignGlobal(wxStyledTextCtrl* text)
         //}
         if (style->getStyleDesc() == "Global override") {
             //globalStyleM = style;
+            globalOverrideStyle = style;
             text->StyleResetDefault();
             text->SetBackgroundColour(style->getbgColor());
             text->SetForegroundColour(style->getfgColor());
@@ -224,6 +227,20 @@ void FRStyleManager::assignGlobal(wxStyledTextCtrl* text)
         }
     }
 
+    // Many WidgetStyle entries in the theme XMLs reuse styleID="0" even
+    // though they only configure widget-level properties (caret line,
+    // selection bg, edge, fold). Each iteration above blindly calls
+    // assignWordStyle, so style slot 0 ends up holding whichever entry
+    // was iterated last (often a near-white selection or current-line
+    // colour). On dark themes that surfaces as light blocks behind every
+    // unstyled token. Re-apply Global override last and propagate it to
+    // every style slot via StyleClearAll so unset lexer styles inherit a
+    // sensible background instead of Scintilla's hard-coded white.
+    if (globalOverrideStyle != nullptr) {
+        text->StyleSetBackground(wxSTC_STYLE_DEFAULT, globalOverrideStyle->getbgColor());
+        text->StyleSetForeground(wxSTC_STYLE_DEFAULT, globalOverrideStyle->getfgColor());
+        text->StyleClearAll();
+    }
 }
 
 void FRStyleManager::assignLexer(wxStyledTextCtrl* text)
