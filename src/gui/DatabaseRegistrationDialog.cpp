@@ -360,13 +360,23 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
     // Issue #238: read default username / charset / role from config so
     // the user does not have to retype them for every new registration.
     // Saved-per-database values still take precedence.
+    //
+    // Gemini-flagged: only apply defaults to NEW registrations. The
+    // database path is the load-bearing field — it is empty for a
+    // fresh "Register existing database" / "Create new database" /
+    // "Connect as" dialog and non-empty when editing a saved entry.
+    // Without this gate, opening an existing entry that intentionally
+    // has an empty username (e.g. trusted-auth) would silently rewrite
+    // it to the configured default on the next Save.
+    bool isNewRegistration = databaseM->getPath().IsEmpty();
+
     wxString savedUsername = databaseM->getUsername();
-    if (savedUsername.IsEmpty())
+    if (isNewRegistration && savedUsername.IsEmpty())
         savedUsername = config().get("databaseDefaultUsername", wxString("SYSDBA"));
     text_ctrl_username->SetValue(savedUsername);
     text_ctrl_password->SetValue(databaseM->getDecryptedPassword());
     wxString savedRole = databaseM->getRole();
-    if (savedRole.IsEmpty())
+    if (isNewRegistration && savedRole.IsEmpty())
         savedRole = config().get("databaseDefaultRole", wxString());
     text_ctrl_role->SetValue(savedRole);
     text_ctrl_keydata->SetValue(databaseM->getCryptKeyData());
@@ -375,7 +385,7 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
     text_ctrl_library->SetValue(databaseM->getClientLibrary());
     */
     wxString charset(databaseM->getConnectionCharset());
-    if (charset.empty())
+    if (isNewRegistration && charset.IsEmpty())
         charset = config().get("databaseDefaultCharset", wxString("NONE"));
     combobox_charset->SetValue(charset);
     if (createM)
