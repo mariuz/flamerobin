@@ -2350,6 +2350,15 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
             styled_text_ctrl_sql->SetFocus();
             return false;
         }
+
+        // Issue #447: long scripts (hundreds-to-thousands of statements) blocked
+        // the UI thread for so long that the OS marked the window as
+        // "Not Responding". Pump the event loop between statements so the log
+        // pane repaints, the window stays responsive, and the user can move /
+        // close other dialogs while the script runs. Yield(true) filters input
+        // events so the script can't be re-triggered mid-run.
+        if (wxTheApp != NULL)
+            wxTheApp->Yield(true);
     }
 
     if (closeWhenDone)
