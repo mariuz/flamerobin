@@ -2101,15 +2101,15 @@ void ExecuteSqlFrame::OnMenuUpdateGridCanSetFieldToNULL(wxUpdateUIEvent& event)
 {
     // Issue #390: avoid the expensive getColumnsWithSelectedCells() call
     // here. The set-to-NULL menu item just needs to know "is at least one
-    // column writable" — that is a property of the underlying statement
-    // and is independent of how many rows are selected. The actual command
-    // re-validates per cell when invoked.
+    // column writable AND nullable" — both are properties of the
+    // underlying statement and independent of how many rows are selected.
+    // The actual command re-validates per cell when invoked.
     if (DataGridTable* dgt = grid_data->getDataGridTable())
     {
         int cols = grid_data->GetNumberCols();
         for (int i = 0; i < cols; ++i)
         {
-            if (!dgt->isReadonlyColumn(i))
+            if (!dgt->isReadonlyColumn(i) && dgt->isNullableColumn(i))
             {
                 event.Enable(true);
                 return;
