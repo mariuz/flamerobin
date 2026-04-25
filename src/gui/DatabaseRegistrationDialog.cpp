@@ -361,13 +361,13 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
     // the user does not have to retype them for every new registration.
     // Saved-per-database values still take precedence.
     //
-    // Gemini-flagged: only apply defaults to NEW registrations. The
-    // database path is the load-bearing field — it is empty for a
-    // fresh "Register existing database" / "Create new database" /
-    // "Connect as" dialog and non-empty when editing a saved entry.
-    // Without this gate, opening an existing entry that intentionally
-    // has an empty username (e.g. trusted-auth) would silently rewrite
-    // it to the configured default on the next Save.
+    // Only apply defaults to NEW registrations. The database path is the
+    // load-bearing field — it is empty for a fresh "Register existing
+    // database" / "Create new database" / "Connect as" dialog and non-
+    // empty when editing a saved entry. Without this gate, opening an
+    // existing entry that intentionally has an empty username (e.g.
+    // trusted-auth) would silently rewrite it to the configured default
+    // on the next Save.
     bool isNewRegistration = databaseM->getPath().IsEmpty();
 
     wxString savedUsername = databaseM->getUsername();
