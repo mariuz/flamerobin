@@ -113,15 +113,37 @@ void CreateIndexDialog::setControlsProperties()
     // suggest name for new index
     wxString indexName;
     int nr = 1;
-    std::vector<Index>* indices = tableM->getIndices();
+
+    // Issue #214: include an underscore between the table name and the
+    // sequence number so the suggested name matches the convention
+    // Firebird itself uses for auto-named PK/FK/UNIQUE/CHECK constraints
+    // (e.g. IDX_FB3_TEST_1 instead of IDX_FB3_TEST1).
+    //
+    // Gemini-flagged caveat: object identifiers are limited to 31 bytes
+    // on Firebird < 4.0 (FB 4 raised it to 63). For long table names the
+    // extra underscore can push the suggestion over that limit, which
+    // would surface as a server-side ALTER error. Truncate the table-name
+    // portion of the suggestion if needed so the assembled name still
+    // fits the maximum the connected ODS supports. Existing indexes (if
+    // the truncated name collides with one) cause the loop below to bump
+    // the sequence number, same as before.
+    int maxIdLen = 31;
+    DatabasePtr db = tableM->getDatabase();
+    if (db && db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
+        maxIdLen = 63;     // Firebird 4+ (ODS 13.0)
+
     while (indexName.IsEmpty())
     {
-        // Issue #214: include the underscore between table name and
-        // sequence so the suggested name matches the convention Firebird
-        // itself uses for auto-named PK/FK/UNIQUE/CHECK constraints
-        // (e.g. IDX_FB3_TEST_1 instead of IDX_FB3_TEST1).
-        indexName = wxString::Format("IDX_%s_%d",
-            tableM->getName_().c_str(), nr++);
+        // Reserve room for "IDX_", the underscore, and the sequence digits.
+        wxString seq = wxString::Format("%d", nr);
+        int reserved = 4 /* "IDX_" */ + 1 /* "_" */ + (int)seq.length();
+        wxString tableName = tableM->getName_();
+        if ((int)tableName.length() > maxIdLen - reserved)
+            tableName = tableName.Left(maxIdLen - reserved);
+
+        indexName = "IDX_" + tableName + "_" + seq;
+        nr++;
+
         std::vector<Index>::iterator itIdx;
         for (itIdx = indices->begin(); itIdx != indices->end(); ++itIdx)
         {
