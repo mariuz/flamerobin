@@ -114,7 +114,7 @@ dylibbundler --overwrite-dir --bundle-deps \
     --fix-file "$BIN_PATH" \
     --dest-dir "$APP_PATH/Contents/Frameworks/" \
     --install-path "@rpath/" \
-    --search-path /opt/homebrew/lib \
+    --search-path "$(brew --prefix)/lib" \
     --search-path /Library/Frameworks/Firebird.framework/Libraries \
     --search-path /Library/Frameworks/Firebird.framework/Resources/lib
 
