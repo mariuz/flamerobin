@@ -33,10 +33,12 @@
 #include <wx/wupdlock.h>
 #include <wx/artprov.h>
 #include <wx/dnd.h>
+#include <wx/evtloop.h>
 #include <wx/file.h>
 #include <wx/fontdlg.h>
 #include <wx/stopwatch.h>
 #include <wx/tokenzr.h>
+#include <wx/weakref.h>
 
 #include <algorithm>
 #include <map>
@@ -2299,8 +2301,23 @@ void ExecuteSqlFrame::executeAllStatements(bool closeWhenDone)
 bool ExecuteSqlFrame::parseStatements(const wxString& statements,
     bool closeWhenDone, bool prepareOnly, int selectionOffset)
 {
+    // Re-entrancy guard. The periodic YieldFor() calls below allow the UI
+    // event loop to dispatch any *queued* events; even though we filter to
+    // wxEVT_CATEGORY_UI (no user input), some UI paths (e.g. menu accelerator
+    // synthesised events, idle events) can still re-enter this frame. If
+    // we'd already begun parsing, return early rather than nesting.
+    if (inParseStatementsM)
+        return false;
+    inParseStatementsM = true;
+    struct ResetGuard { bool& flag; ~ResetGuard() { flag = false; } } g{inParseStatementsM};
+
+    // Hold a weak ref to ourselves so we can detect window destruction
+    // across a Yield without deferencing a freed pointer in the loop body.
+    wxWeakRef<wxWindow> selfRef(this);
+
     wxBusyCursor cr;
     MultiStatement ms(statements);
+    int statementsSinceYield = 0;
     while (true)
     {
         SingleStatement ss = ms.getNextStatement();
@@ -2351,6 +2368,29 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
             styled_text_ctrl_sql->markText(stmtStart, stmtEnd);
             styled_text_ctrl_sql->SetFocus();
             return false;
+        }
+
+        // Long scripts (hundreds-to-thousands of statements) blocked the UI
+        // thread for so long that the OS marked the window as "Not
+        // Responding". Pump the event loop periodically so the log pane
+        // repaints and the window stays responsive. YieldFor with
+        // wxEVT_CATEGORY_UI processes UI events only — repaints and other
+        // visual updates flow but user-input events (keypresses, clicks)
+        // are deferred. Combined with the re-entrancy guard above, this
+        // keeps the loop safe. Throttle to every 100 statements so yield
+        // cost doesn't dominate runtime. Use the active event loop rather
+        // than wxApp because wxApp::YieldFor is not exposed on every wx
+        // port.
+        if (++statementsSinceYield >= 100)
+        {
+            if (wxEventLoopBase* loop = wxEventLoopBase::GetActive())
+                loop->YieldFor(wxEVT_CATEGORY_UI);
+            statementsSinceYield = 0;
+            // If the window was destroyed while we yielded (e.g. user
+            // closed the parent frame from a non-input event), stop
+            // before we touch any of our members.
+            if (!selfRef)
+                return false;
         }
     }
 
