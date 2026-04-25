@@ -30,6 +30,34 @@
 
 using namespace ibpp_internals;
 
+// isc_bad_db_handle is part of the system Firebird SDK headers, but the
+// bundled ibase.h headers we ship here for portable builds don't provide
+// it (the impl header it would come from isn't included). Define a local
+// fallback if the SDK header didn't expose it; the value is fixed in the
+// Firebird wire protocol, so this is safe.
+#ifndef isc_bad_db_handle
+#define isc_bad_db_handle 335544324L
+#endif
+
+namespace
+{
+    // Helper used by every "issue an isc_database_info call and throw" site
+    // below: if the server told us our handle is no longer valid (idle
+    // timeout, server restart), drop the local handle so the Database
+    // reports as disconnected and the user gets a clean "please reconnect"
+    // dialog instead of a cryptic SQLException popup on every refresh.
+    void ResetHandleIfLost(IBS& status, isc_db_handle& handle,
+        const char* context)
+    {
+        if (status.EngineCode() == isc_bad_db_handle)
+        {
+            handle = 0;
+            throw LogicExceptionImpl(context,
+                _("Connection to the database has been lost. Please reconnect."));
+        }
+    }
+}
+
 //  (((((((( OBJECT INTERFACE IMPLEMENTATION ))))))))
 
 void DatabaseImpl::Create(int dialect)
@@ -246,18 +274,7 @@ void DatabaseImpl::Info(int* ODSMajor, int* ODSMinor,
         result.Size(), result.Self());
     if (status.Errors())
     {
-        // If the server has invalidated our connection (e.g. idle timeout
-        // or restart) the local mHandle is stale. Drop it so the
-        // Database object reports as disconnected and the user can
-        // reconnect, instead of blowing up every metadata refresh with a
-        // cryptic "invalid database handle" SQLException. Engine code
-        // 335544324 == isc_bad_db_handle (no active connection).
-        if (status.EngineCode() == 335544324L)
-        {
-            mHandle = 0;
-            throw LogicExceptionImpl("Database::Info",
-                _("Connection to the database has been lost. Please reconnect."));
-        }
+        ResetHandleIfLost(status, mHandle, "Database::Info");
         throw SQLExceptionImpl(status, "Database::Info", _("isc_database_info failed"));
     }
 
@@ -293,7 +310,10 @@ void DatabaseImpl::TransactionInfo(int* Oldest, int* OldestActive,
     (*getGDS().Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
         result.Size(), result.Self());
     if (status.Errors())
+    {
+        ResetHandleIfLost(status, mHandle, "Database::TransactionInfo");
         throw SQLExceptionImpl(status, "Database::TransactionInfo", _("isc_database_info failed"));
+    }
 
     if (Oldest != 0)
         *Oldest = result.GetValue(isc_info_oldest_transaction);
@@ -323,7 +343,10 @@ void DatabaseImpl::Statistics(int* Fetches, int* Marks, int* Reads, int* Writes,
     (*getGDS().Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
         result.Size(), result.Self());
     if (status.Errors())
+    {
+        ResetHandleIfLost(status, mHandle, "Database::Statistics");
         throw SQLExceptionImpl(status, "Database::Statistics", _("isc_database_info failed"));
+    }
 
     if (Fetches != 0) *Fetches = result.GetValue(isc_info_fetches);
     if (Marks != 0) *Marks = result.GetValue(isc_info_marks);
@@ -351,7 +374,10 @@ void DatabaseImpl::Counts(int* Insert, int* Update, int* Delete,
     (*getGDS().Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
         result.Size(), result.Self());
     if (status.Errors())
+    {
+        ResetHandleIfLost(status, mHandle, "Database::Counts");
         throw SQLExceptionImpl(status, "Database::Counts", _("isc_database_info failed"));
+    }
 
     if (Insert != 0) *Insert = result.GetCountValue(isc_info_insert_count);
     if (Update != 0) *Update = result.GetCountValue(isc_info_update_count);
@@ -378,7 +404,10 @@ void DatabaseImpl::DetailedCounts(IBPP::DatabaseCounts& counts)
     (*getGDS().Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
         result.Size(), result.Self());
     if (status.Errors())
+    {
+        ResetHandleIfLost(status, mHandle, "Database::DetailedCounts");
         throw SQLExceptionImpl(status, "Database::DetailedCounts", _("isc_database_info failed"));
+    }
 
     result.GetDetailedCounts(counts, isc_info_insert_count);
     result.GetDetailedCounts(counts, isc_info_update_count);
@@ -401,7 +430,10 @@ void DatabaseImpl::Users(std::vector<std::string>& users)
     (*getGDS().Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
         result.Size(), result.Self());
     if (status.Errors())
+    {
+        ResetHandleIfLost(status, mHandle, "Database::Users");
         throw SQLExceptionImpl(status, "Database::Users", _("isc_database_info failed"));
+    }
 
     users.clear();
     char* p = result.Self();
