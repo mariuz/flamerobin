@@ -357,9 +357,18 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
     */
     text_ctrl_name->SetValue(databaseM->getName_());
     text_ctrl_dbpath->SetValue(databaseM->getPath());
-    text_ctrl_username->SetValue(databaseM->getUsername());
+    // Issue #238: read default username / charset / role from config so
+    // the user does not have to retype them for every new registration.
+    // Saved-per-database values still take precedence.
+    wxString savedUsername = databaseM->getUsername();
+    if (savedUsername.IsEmpty())
+        savedUsername = config().get("databaseDefaultUsername", wxString("SYSDBA"));
+    text_ctrl_username->SetValue(savedUsername);
     text_ctrl_password->SetValue(databaseM->getDecryptedPassword());
-    text_ctrl_role->SetValue(databaseM->getRole());
+    wxString savedRole = databaseM->getRole();
+    if (savedRole.IsEmpty())
+        savedRole = config().get("databaseDefaultRole", wxString());
+    text_ctrl_role->SetValue(savedRole);
     text_ctrl_keydata->SetValue(databaseM->getCryptKeyData());
     /*
     * Todo: Implement FB library per conexion
@@ -367,7 +376,7 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
     */
     wxString charset(databaseM->getConnectionCharset());
     if (charset.empty())
-        charset = "NONE";
+        charset = config().get("databaseDefaultCharset", wxString("NONE"));
     combobox_charset->SetValue(charset);
     if (createM)
         suggestDefaultPageSizeByServerVersion();

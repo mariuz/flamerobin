@@ -162,6 +162,28 @@
             <default>0</default>
         </setting>
     </node>
+    <node>
+        <caption>Database Registration Defaults</caption>
+        <image>3</image>
+        <setting type="string">
+            <caption>Default user name:</caption>
+            <description>Pre-fill the user name field when registering or creating a database. Leave blank for no default.</description>
+            <key>databaseDefaultUsername</key>
+            <default>SYSDBA</default>
+        </setting>
+        <setting type="string">
+            <caption>Default character set:</caption>
+            <description>Pre-fill the character set field when registering or creating a database. Common choices: NONE, UTF8, ISO8859_1.</description>
+            <key>databaseDefaultCharset</key>
+            <default>NONE</default>
+        </setting>
+        <setting type="string">
+            <caption>Default role:</caption>
+            <description>Pre-fill the role field when registering or creating a database. Leave blank for no default.</description>
+            <key>databaseDefaultRole</key>
+            <default></default>
+        </setting>
+    </node>
 	<node>
         <caption>Transaction Settings</caption>
         <image>0</image>
