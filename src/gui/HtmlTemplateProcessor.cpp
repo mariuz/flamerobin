@@ -139,22 +139,28 @@ void HtmlTemplateProcessor::applyDarkModeIfNeeded(wxString& html)
     // a light foreground. font color="white" cells (header rows) keep
     // their explicit color since attribute beats inheritance.
     //
-    // Gemini-flagged: search case-insensitively (HTML is case-insensitive
-    // and templates outside this repo may use <BODY>) and use a single
-    // wxString::size_type for both ends so the slice math doesn't mix
-    // signed int with unsigned indices (the previous version returned
-    // int from html.Find but size_t from html.find).
-    wxString lower = html.Lower();
-    wxString::size_type bodyStart = lower.find(wxT("<body"));
-    if (bodyStart != wxString::npos)
+    // HTML attribute names are case-insensitive, and external templates
+    // (the user manual, license viewer) may use mixed casing. Use the
+    // wxString::Find overload that takes a case-sensitivity flag — that
+    // searches in place rather than copying the document, which matters
+    // for multi-MB files.
+    int rawBodyStart = html.Find(wxT("<body"), false /* caseSensitive */);
+    if (rawBodyStart != wxNOT_FOUND)
     {
+        wxString::size_type bodyStart =
+            static_cast<wxString::size_type>(rawBodyStart);
         wxString::size_type bodyEnd = html.find('>', bodyStart);
         if (bodyEnd != wxString::npos)
         {
-            // If the existing <body...> already specifies text=, leave it
-            // alone; otherwise insert text="#e0e0e0" before the closing >.
+            // Look for an existing text= attribute, but require a
+            // leading separator (' ', '\t' or '\n') so we don't false-
+            // positive on attribute values that contain "text=" as a
+            // substring (e.g. <body class="main-text-area">).
             wxString bodyTag = html.Mid(bodyStart, bodyEnd - bodyStart + 1);
-            if (bodyTag.Lower().Find(wxT("text=")) == wxNOT_FOUND)
+            wxString lowerTag = bodyTag.Lower();
+            if (lowerTag.Find(wxT(" text=")) == wxNOT_FOUND
+                && lowerTag.Find(wxT("\ttext=")) == wxNOT_FOUND
+                && lowerTag.Find(wxT("\ntext=")) == wxNOT_FOUND)
             {
                 html.insert(bodyEnd, wxT(" text=\"#e0e0e0\""));
             }
