@@ -107,6 +107,7 @@ void MainObjectMenuMetadataItemVisitor::visitDatabase(Database& database)
     menuM->Append(Cmds::Menu_DatabaseRegistrationInfo,
         _("Database registration &info"));
     menuM->Append(Cmds::Menu_CloneDatabase, _("C&lone registration info"));
+    menuM->Append(Cmds::Menu_MoveDatabaseToServer, _("&Move registration to server..."));
     menuM->Append(Cmds::Menu_UnRegisterDatabase, _("&Unregister database"));
     menuM->Append(Cmds::Menu_DatabasePreferences,
         _("Database &preferences"));
