@@ -138,18 +138,25 @@ void HtmlTemplateProcessor::applyDarkModeIfNeeded(wxString& html)
     // text color via the first <body...> tag so all unstyled text inherits
     // a light foreground. font color="white" cells (header rows) keep
     // their explicit color since attribute beats inheritance.
-    int bodyStart = html.Find("<body");
-    if (bodyStart != wxNOT_FOUND)
+    //
+    // Gemini-flagged: search case-insensitively (HTML is case-insensitive
+    // and templates outside this repo may use <BODY>) and use a single
+    // wxString::size_type for both ends so the slice math doesn't mix
+    // signed int with unsigned indices (the previous version returned
+    // int from html.Find but size_t from html.find).
+    wxString lower = html.Lower();
+    wxString::size_type bodyStart = lower.find(wxT("<body"));
+    if (bodyStart != wxString::npos)
     {
-        int bodyEnd = html.find('>', bodyStart);
-        if (bodyEnd != wxNOT_FOUND)
+        wxString::size_type bodyEnd = html.find('>', bodyStart);
+        if (bodyEnd != wxString::npos)
         {
-            // If the existing <body> already specifies text=, leave it
+            // If the existing <body...> already specifies text=, leave it
             // alone; otherwise insert text="#e0e0e0" before the closing >.
             wxString bodyTag = html.Mid(bodyStart, bodyEnd - bodyStart + 1);
-            if (bodyTag.Lower().Find("text=") == wxNOT_FOUND)
+            if (bodyTag.Lower().Find(wxT("text=")) == wxNOT_FOUND)
             {
-                html.insert(bodyEnd, " text=\"#e0e0e0\"");
+                html.insert(bodyEnd, wxT(" text=\"#e0e0e0\""));
             }
         }
     }
