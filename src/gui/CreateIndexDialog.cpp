@@ -113,6 +113,7 @@ void CreateIndexDialog::setControlsProperties()
     // suggest name for new index
     wxString indexName;
     int nr = 1;
+    std::vector<Index>* indices = tableM->getIndices();
 
     // Issue #214: include an underscore between the table name and the
     // sequence number so the suggested name matches the convention
