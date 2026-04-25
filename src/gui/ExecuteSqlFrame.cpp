@@ -3070,20 +3070,21 @@ void ExecuteSqlFrame::OnMenuUpdateGridDeleteRow(wxUpdateUIEvent& event)
         return;
     }
 
-    bool colsSelected = grid_data->GetSelectedCols().GetCount() > 0;
+    // Issue #444: when the user does Ctrl+A or clicks the corner cell,
+    // wxGrid reports both rows AND columns as selected. The previous
+    // colsSelected short-circuit then disabled the delete-row button,
+    // even though getSelectedGridRows correctly returns every row in
+    // that case. Compute selRows first; only block when it is purely a
+    // column selection (no row data identified).
+    wxArrayInt selRows(getSelectedGridRows(grid_data));
     bool deletableRows = false;
-
-    if (!colsSelected)
+    for (size_t i = 0; !deletableRows && i < selRows.GetCount(); ++i)
     {
-        wxArrayInt selRows(getSelectedGridRows(grid_data));
-        for (size_t i = 0; !deletableRows && i < selRows.GetCount(); ++i)
-        {
-            if (tb->canRemoveRow(selRows[i]))
-                deletableRows = true;
-        }
+        if (tb->canRemoveRow(selRows[i]))
+            deletableRows = true;
     }
 
-    event.Enable(!colsSelected && deletableRows);
+    event.Enable(deletableRows);
 }
 
 void ExecuteSqlFrame::OnGridCellChange(wxGridEvent& event)
