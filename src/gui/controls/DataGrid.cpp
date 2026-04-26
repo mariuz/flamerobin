@@ -148,7 +148,11 @@ void DataGrid::fetchData(bool readonly)
         ca->SetOverflow(false);
         SetColAttr(i, ca);
     }
-    AutoSizeColumns(false);
+    // Gate the initial autofit on the same preference as the post-execute
+    // autofit so the user can actually opt out. Default to true to match
+    // existing behaviour (this call was previously unconditional).
+    if (config().get("autofitColumnsOnExecute", true))
+        AutoSizeColumns(false);
     EndBatch();
 
     // event handler is only needed if not all rows have already been
@@ -189,6 +193,12 @@ void DataGrid::showPopupMenu(wxPoint cursorPos)
     // TODO: merge this with ExecuteSqlFrame's menu
     m.Append(Cmds::DataGrid_FetchAll, _("Fetch all records"));
     m.Append(Cmds::DataGrid_CancelFetchAll, _("Stop fetching all records"));
+    m.AppendSeparator();
+
+    // Issue #228: best-fit columns to their content on demand. Also
+    // available as an automatic step after query execution via the
+    // "autofitColumnsOnExecute" Preference.
+    m.Append(Cmds::DataGrid_AutofitColumns, _("Best fit all columns"));
     m.AppendSeparator();
 
     m.Append(wxID_COPY, _("Copy"));

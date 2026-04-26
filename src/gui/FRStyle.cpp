@@ -203,9 +203,9 @@ wxFont FRStyle::getFont()
     int size = liftToSystemMinimum(getFontSize());
     wxFontInfo fontInfo(size);
 
-    if (!getFontName().IsEmpty()) 
+    if (!getFontName().IsEmpty())
         fontInfo.FaceName(getFontName());
-    
+
     fontInfo.Bold(getFontStyle() & FONTSTYLE_BOLD);
     fontInfo.Italic(getFontStyle() & FONTSTYLE_ITALIC);
     fontInfo.Underlined(getFontStyle() & FONTSTYLE_UNDERLINE);

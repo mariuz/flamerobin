@@ -34,6 +34,7 @@
 #include "core/ArtProvider.h"
 #include "core/StringUtils.h"
 #include "gui/controls/PrintableHtmlWindow.h"
+#include "gui/HtmlTemplateProcessor.h"
 #include "gui/SimpleHtmlFrame.h"
 
 bool showHtmlFile(wxWindow* parent, const wxFileName& fileName)
@@ -68,7 +69,9 @@ SimpleHtmlFrame::SimpleHtmlFrame(wxWindow* parent, const wxFileName& fileName)
 
     // we don't use LoadPage here since we need PrintableHtmlWindow to
     // store a copy of HTML source for printing and SaveAsFile actions
-    html_window->setPageSource(loadEntireFile(fileName));
+    wxString htmlSource = loadEntireFile(fileName);
+    HtmlTemplateProcessor::applyDarkModeIfNeeded(htmlSource);
+    html_window->setPageSource(htmlSource);
 
     fileNameM = fileName.GetFullName();
     setIdString(this, getFrameId(fileName));

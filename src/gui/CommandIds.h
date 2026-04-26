@@ -72,6 +72,7 @@ enum {
     DataGrid_Save_as_html,
     DataGrid_Save_as_csv,
     DataGrid_Log_changes,
+    DataGrid_AutofitColumns,
 
     Menu_RegisterServer = 600,
     Menu_Manual,
@@ -117,6 +118,7 @@ enum {
     Menu_DatabaseProperties,
     Menu_GenerateData,
     Menu_CloneDatabase,
+    Menu_MoveDatabaseToServer,
     Menu_ExecuteFunction,
     Menu_ShowStatisticsValue,
     Menu_SetStatisticsValue,

@@ -162,6 +162,28 @@
             <default>0</default>
         </setting>
     </node>
+    <node>
+        <caption>Database Registration Defaults</caption>
+        <image>3</image>
+        <setting type="string">
+            <caption>Default user name:</caption>
+            <description>Pre-fill the user name field when registering or creating a database. Leave blank for no default.</description>
+            <key>databaseDefaultUsername</key>
+            <default>SYSDBA</default>
+        </setting>
+        <setting type="string">
+            <caption>Default character set:</caption>
+            <description>Pre-fill the character set field when registering or creating a database. Common choices: NONE, UTF8, ISO8859_1.</description>
+            <key>databaseDefaultCharset</key>
+            <default>NONE</default>
+        </setting>
+        <setting type="string">
+            <caption>Default role:</caption>
+            <description>Pre-fill the role field when registering or creating a database. Leave blank for no default.</description>
+            <key>databaseDefaultRole</key>
+            <default></default>
+        </setting>
+    </node>
 	<node>
         <caption>Transaction Settings</caption>
         <image>0</image>
@@ -419,6 +441,12 @@
     <node>
         <caption>Data Grid</caption>
         <image>4</image>
+        <setting type="checkbox">
+            <caption>Autofit columns on query execution</caption>
+            <description>After a query returns rows, automatically size every column to fit its content. Also available on demand from the grid context menu ("Best fit all columns"). On by default to match the historical behaviour; uncheck to keep equal-width columns and skip the resize on very wide result sets.</description>
+            <key>autofitColumnsOnExecute</key>
+            <default>1</default>
+        </setting>
         <setting type="string">
             <caption>Date format:</caption>
             <description>The following letters will be replaced:<br />d - day of month, 1-31<br />D - day of month, 01-31<br />m - month, 1-12<br />M - month, 01-12<br />y - year, 00-99<br />Y - year, 0000-9999<br />All other characters are copied.</description>
@@ -538,6 +566,7 @@
         <image>5</image>
         <setting type="checkbox">
             <caption>Use UPPER CASE keywords</caption>
+            <description>Show SQL keywords in upper case in code completion suggestions, in highlighted SQL, and in generated DDL/DML. Identifiers (table, column, procedure names) always retain their actual case from the database.</description>
             <key>SQLKeywordsUpperCase</key>
             <default>1</default>
         </setting>

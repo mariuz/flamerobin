@@ -30,6 +30,8 @@
     #include "wx/wx.h"
 #endif
 
+#include <wx/settings.h>
+
 #include "core/StringUtils.h"
 #include "frutils.h"
 #include "gui/HtmlHeaderMetadataItemVisitor.h"
@@ -97,5 +99,73 @@ void HtmlTemplateProcessor::processCommand(const wxString& cmdName,
 wxString HtmlTemplateProcessor::escapeChars(const wxString& input, bool processNewlines)
 {
     return escapeHtmlChars(input, processNewlines);
+}
+
+/*static*/
+void HtmlTemplateProcessor::applyDarkModeIfNeeded(wxString& html)
+{
+    // wxSystemAppearance::IsDark is the right check on every platform that
+    // exposes a dark mode (macOS Mojave+, Win10+, GTK with dark theme).
+    if (!wxSystemSettings::GetAppearance().IsDark())
+        return;
+
+    // Replace the legacy hard-coded bgcolor= attributes from the metadata
+    // templates with darker equivalents. We only touch the literal
+    // bgcolor="…" forms the templates emit, so user-provided values in
+    // descriptions or other content are unaffected.
+    struct ColorMap { const wxChar* from; const wxChar* to; };
+    static const ColorMap mapping[] = {
+        { wxT("bgcolor=\"white\""),   wxT("bgcolor=\"#1e1e1e\"") }, // outer wrapper
+        { wxT("bgcolor=\"black\""),   wxT("bgcolor=\"#3a3a3a\"") }, // table border
+        { wxT("bgcolor=\"silver\""),  wxT("bgcolor=\"#3a3a3a\"") }, // = #C0C0C0
+        { wxT("bgcolor=\"#999999\""), wxT("bgcolor=\"#3a3a3a\"") }, // dark legend border
+        { wxT("bgcolor=\"#CCCCCC\""), wxT("bgcolor=\"#2c2c2c\"") }, // legend row
+        { wxT("bgcolor=\"#DDDDDD\""), wxT("bgcolor=\"#34343c\"") }, // legend alt row
+        { wxT("bgcolor=\"#DDDDFF\""), wxT("bgcolor=\"#2c2c40\"") }, // metadata odd row
+        { wxT("bgcolor=\"#CCCCFF\""), wxT("bgcolor=\"#23233a\"") }, // metadata value cell
+    };
+    for (const ColorMap& m : mapping)
+        html.Replace(m.from, m.to);
+
+    // Some templates emit <font color="black"> for cells that sit on the
+    // grey backgrounds — that becomes black-on-dark after we recolor the
+    // backgrounds. Lift those explicit blacks to a light shade.
+    html.Replace(wxT("<font color=\"black\">"), wxT("<font color=\"#e0e0e0\">"));
+    html.Replace(wxT("<font color=black>"),     wxT("<font color=\"#e0e0e0\">"));
+
+    // Default text color in legacy wxHtmlWindow is black, which is
+    // unreadable on the dark backgrounds we just inserted. Inject a body
+    // text color via the first <body...> tag so all unstyled text inherits
+    // a light foreground. font color="white" cells (header rows) keep
+    // their explicit color since attribute beats inheritance.
+    //
+    // HTML attribute names are case-insensitive, and external templates
+    // (the user manual, license viewer) may use mixed casing. wx 3.3's
+    // wxString::Find(const wxString&) doesn't expose a case-insensitive
+    // flag, so search a bounded lower-cased prefix instead — <body> is
+    // virtually always within the first few KB of any HTML document and
+    // copying 8 KB is cheap even for multi-MB inputs.
+    const size_t kBodySearchPrefix = 8 * 1024;
+    wxString lowerPrefix = html.Mid(0, kBodySearchPrefix).Lower();
+    wxString::size_type bodyStart = lowerPrefix.find(wxT("<body"));
+    if (bodyStart != wxString::npos)
+    {
+        wxString::size_type bodyEnd = html.find('>', bodyStart);
+        if (bodyEnd != wxString::npos)
+        {
+            // Look for an existing text= attribute, but require a
+            // leading separator (' ', '\t' or '\n') so we don't false-
+            // positive on attribute values that contain "text=" as a
+            // substring (e.g. <body class="main-text-area">).
+            wxString bodyTag = html.Mid(bodyStart, bodyEnd - bodyStart + 1);
+            wxString lowerTag = bodyTag.Lower();
+            if (lowerTag.Find(wxT(" text=")) == wxNOT_FOUND
+                && lowerTag.Find(wxT("\ttext=")) == wxNOT_FOUND
+                && lowerTag.Find(wxT("\ntext=")) == wxNOT_FOUND)
+            {
+                html.insert(bodyEnd, wxT(" text=\"#e0e0e0\""));
+            }
+        }
+    }
 }
 

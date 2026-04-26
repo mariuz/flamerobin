@@ -143,7 +143,7 @@ void DBHTreeConfigCache::loadFromConfig()
     changes += setValue(showDomainsM,
         cfg.get("ShowDomains", 2));
     changes += setValue(sqlKeywordsUpperCaseM,
-        cfg.get("SQLKeywordsUpperCase", false));
+        cfg.get("SQLKeywordsUpperCase", true));
 
     if (changes)
         notifyObservers();

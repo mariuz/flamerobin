@@ -127,6 +127,7 @@ private:
     bool highlightWordUnderCaret = true; // use word under caret if no text is selected?
     bool highlightWordTextMatchCase = false; //use sensitive search?
     bool inHighlightUpdateM = false; // reentrancy guard for OnSqlEditUpdateUI
+    bool inParseStatementsM = false; // reentrancy guard for parseStatements yields
     bool autoCommitM;
     bool inTransactionM;
     IBPP::Transaction transactionM;
@@ -258,6 +259,7 @@ private:
     void OnMenuGridSaveAsCsv(wxCommandEvent& event);
     void OnMenuGridFetchAll(wxCommandEvent& event);
     void OnMenuGridCancelFetchAll(wxCommandEvent& event);
+    void OnMenuGridAutofitColumns(wxCommandEvent& event);
     void OnMenuUpdateGridHasSelection(wxUpdateUIEvent& event);
     void OnMenuUpdateGridHasData(wxUpdateUIEvent& event);
     void OnMenuUpdateGridFetchAll(wxUpdateUIEvent& event);
