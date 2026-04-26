@@ -40,6 +40,7 @@
 #include "core/ArtProvider.h"
 #include "core/CodeTemplateProcessor.h"
 #include "core/FRError.h"
+#include "core/Subject.h"
 #include "core/URIProcessor.h"
 #include "frutils.h"
 #include "gui/AboutBox.h"
@@ -399,6 +400,8 @@ EVT_MENU(Cmds::Menu_GenerateData, MainFrame::OnMenuGenerateData)
 EVT_UPDATE_UI(Cmds::Menu_GenerateData, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
 EVT_MENU(Cmds::Menu_CloneDatabase, MainFrame::OnMenuCloneDatabase)
 EVT_UPDATE_UI(Cmds::Menu_CloneDatabase, MainFrame::OnMenuUpdateIfDatabaseSelected)
+EVT_MENU(Cmds::Menu_MoveDatabaseToServer, MainFrame::OnMenuMoveDatabaseToServer)
+EVT_UPDATE_UI(Cmds::Menu_MoveDatabaseToServer, MainFrame::OnMenuUpdateIfDatabaseSelected)
 EVT_MENU(Cmds::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuDatabaseRegistrationInfo)
 EVT_UPDATE_UI(Cmds::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuUpdateIfDatabaseSelected)
 EVT_MENU(Cmds::Menu_Backup, MainFrame::OnMenuBackup)
@@ -1052,6 +1055,68 @@ void MainFrame::OnMenuCloneDatabase(wxCommandEvent& WXUNUSED(event))
         rootM->save();
         treeMainM->selectMetadataItem(db.get());
     }
+}
+
+void MainFrame::OnMenuMoveDatabaseToServer(wxCommandEvent& WXUNUSED(event))
+{
+    // Issue #450: re-home a registered database under a different server,
+    // so users do not have to manually re-register identical databases on
+    // each newly-added server.
+    DatabasePtr d = getDatabase(treeMainM->getSelectedMetadataItem());
+    if (!checkValidDatabase(d))
+        return;
+    if (d->isConnected())
+    {
+        wxMessageBox(_("Disconnect the database before moving its registration."),
+            _("Cannot move connected database"), wxOK | wxICON_WARNING);
+        return;
+    }
+
+    ServerPtr currentServer = getServer(treeMainM->getSelectedMetadataItem());
+    if (!checkValidServer(currentServer))
+        return;
+
+    // Build the picker list of all OTHER registered servers.
+    ServerPtrs allServers = rootM->getServers();
+    wxArrayString serverNames;
+    std::vector<ServerPtr> serverChoices;
+    for (ServerPtrs::const_iterator it = allServers.begin();
+        it != allServers.end(); ++it)
+    {
+        if (*it == currentServer)
+            continue;
+        serverNames.Add((*it)->getName_() + " (" + (*it)->getHostname() + ")");
+        serverChoices.push_back(*it);
+    }
+    if (serverChoices.empty())
+    {
+        wxMessageBox(_("There are no other registered servers to move this "
+            "database to. Register another server first."),
+            _("No target server available"), wxOK | wxICON_INFORMATION);
+        return;
+    }
+
+    int idx = ::wxGetSingleChoiceIndex(
+        wxString::Format(_("Move \"%s\" to which server?"), d->getName_()),
+        _("Move registration to server"), serverNames, this);
+    if (idx == -1)
+        return;     // user cancelled
+
+    ServerPtr target = serverChoices[idx];
+    // Batch the tree refreshes around the move. removeDatabase /
+    // addDatabase notifications are emitted by the Server objects (not
+    // by Root), so SubjectLockers on both source and target servers are
+    // what actually defer the tree rebuilds. Locking Root in addition
+    // covers the save() call.
+    {
+        SubjectLocker lockRoot(rootM.get());
+        SubjectLocker lockSource(currentServer.get());
+        SubjectLocker lockTarget(target.get());
+        currentServer->removeDatabase(d);
+        target->addDatabase(d);
+        rootM->save();
+    }
+    treeMainM->selectMetadataItem(d.get());
 }
 
 void MainFrame::OnMenuDatabaseRegistrationInfo(wxCommandEvent& WXUNUSED(event))

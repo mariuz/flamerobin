@@ -118,6 +118,7 @@ enum {
     Menu_DatabaseProperties,
     Menu_GenerateData,
     Menu_CloneDatabase,
+    Menu_MoveDatabaseToServer,
     Menu_ExecuteFunction,
     Menu_ShowStatisticsValue,
     Menu_SetStatisticsValue,
