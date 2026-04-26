@@ -357,7 +357,15 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
     */
     text_ctrl_name->SetValue(databaseM->getName_());
     text_ctrl_dbpath->SetValue(databaseM->getPath());
-    text_ctrl_username->SetValue(databaseM->getUsername());
+    // Issue #451: pre-fill the username with the universally-default
+    // SYSDBA when the database has no saved value yet. We deliberately
+    // do NOT pre-fill the password — modern Firebird installs (FB 2+ on
+    // Posix, FB 3+ on Windows) prompt for an admin password during setup,
+    // so the legacy "masterkey" default is rarely correct anymore.
+    wxString savedUsername = databaseM->getUsername();
+    if (savedUsername.IsEmpty())
+        savedUsername = "SYSDBA";
+    text_ctrl_username->SetValue(savedUsername);
     text_ctrl_password->SetValue(databaseM->getDecryptedPassword());
     text_ctrl_role->SetValue(databaseM->getRole());
     text_ctrl_keydata->SetValue(databaseM->getCryptKeyData());
@@ -396,6 +404,16 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
     updateAuthenticationMode();
     updateButtons();
     updateColors();
+
+    // Focus the first empty editable field so the user can start typing
+    // immediately on dialog open. The username field is always non-empty
+    // here (the SYSDBA pre-fill above), so it is skipped. The password
+    // emptiness check prevents an already-populated password field from
+    // stealing focus from the path field.
+    if (text_ctrl_dbpath->IsEditable() && text_ctrl_dbpath->GetValue().IsEmpty())
+        text_ctrl_dbpath->SetFocus();
+    else if (text_ctrl_password->IsEditable() && text_ctrl_password->GetValue().IsEmpty())
+        text_ctrl_password->SetFocus();
 }
 
 void DatabaseRegistrationDialog::suggestDefaultPageSizeByServerVersion()
