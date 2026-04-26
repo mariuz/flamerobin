@@ -378,7 +378,6 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
     // do NOT pre-fill the password — modern Firebird installs (FB 2+ on
     // Posix, FB 3+ on Windows) prompt for an admin password during setup,
     // so the legacy "masterkey" default is rarely correct anymore.
-    wxString savedUsername = databaseM->getUsername();
     if (savedUsername.IsEmpty())
         savedUsername = "SYSDBA";
     text_ctrl_username->SetValue(savedUsername);
