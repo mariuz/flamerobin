@@ -1043,7 +1043,9 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_MENU(Cmds::DataGrid_Save_as_csv,     ExecuteSqlFrame::OnMenuGridSaveAsCsv)
     EVT_MENU(Cmds::DataGrid_FetchAll,        ExecuteSqlFrame::OnMenuGridFetchAll)
     EVT_MENU(Cmds::DataGrid_CancelFetchAll,  ExecuteSqlFrame::OnMenuGridCancelFetchAll)
+    EVT_MENU(Cmds::DataGrid_AutofitColumns,  ExecuteSqlFrame::OnMenuGridAutofitColumns)
 
+    EVT_UPDATE_UI(Cmds::DataGrid_AutofitColumns, ExecuteSqlFrame::OnMenuUpdateGridHasData)
     EVT_UPDATE_UI(Cmds::DataGrid_Insert_row,     ExecuteSqlFrame::OnMenuUpdateGridInsertRow)
     EVT_UPDATE_UI(Cmds::DataGrid_Delete_row,     ExecuteSqlFrame::OnMenuUpdateGridDeleteRow)
     EVT_UPDATE_UI(Cmds::DataGrid_SetFieldToNULL, ExecuteSqlFrame::OnMenuUpdateGridCanSetFieldToNULL)
@@ -1760,6 +1762,14 @@ void ExecuteSqlFrame::OnMenuGridFetchAll(wxCommandEvent& WXUNUSED(event))
 void ExecuteSqlFrame::OnMenuGridCancelFetchAll(wxCommandEvent& WXUNUSED(event))
 {
     grid_data->cancelFetchAll();
+}
+
+void ExecuteSqlFrame::OnMenuGridAutofitColumns(wxCommandEvent& WXUNUSED(event))
+{
+    // Issue #228: best-fit columns to their content. wxGrid::AutoSizeColumns
+    // measures the visible / fetched cells; on very large data sets this can
+    // be expensive, but it is initiated by the user so the cost is acceptable.
+    grid_data->AutoSizeColumns(false);
 }
 
 void ExecuteSqlFrame::OnMenuUpdateGridCellIsBlob(wxUpdateUIEvent& event)
@@ -2762,6 +2772,11 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
 
     log(wxString::Format(_("Total execution time: %s"),
         millisToTimeString(swTotal.Time() - waitForParameterInputTime).c_str()));
+
+    // Note: autofit-on-execute is handled inside DataGrid::fetchData,
+    // which is the single place a fresh result set is rendered. A second
+    // pass here would just resize the same already-sized columns.
+
     return retval;
 }
 
