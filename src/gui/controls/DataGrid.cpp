@@ -33,6 +33,7 @@
 #include <wx/clipbrd.h>
 #include <wx/fontdlg.h>
 #include <wx/grid.h>
+#include <wx/settings.h>
 #include <wx/textbuf.h>
 #include <wx/txtstrm.h>
 #include <wx/wfstream.h>
@@ -1200,6 +1201,14 @@ void DataGrid::setupStyles()
     SetCellHighlightColour(stylerManager().getDefaultStyle()->getfgColor());
 
 
+    // Use the active theme's font. FRStyleManager::assignWordStyle (and
+    // FRStyle::getFont) now lift theme font sizes below the system
+    // default GUI font size up to that minimum, so themes like
+    // DarkModeDefault that set fontSize="10" no longer produce
+    // unreadable grid cells on Retina displays. Users with explicit
+    // larger fonts in their theme still get exactly what they asked
+    // for — the previous wxSYS_DEFAULT_GUI_FONT bypass was a
+    // regression for that case.
     SetDefaultCellFont(stylerManager().getDefaultStyle()->getFont());
     SetLabelFont(stylerManager().getDefaultStyle()->getFont());
 

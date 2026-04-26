@@ -185,19 +185,22 @@ void FRStyle::write2Element(wxXmlNode* element)
     }
 }
 
+/*static*/
+int FRStyle::liftToSystemMinimum(int size)
+{
+    // Pull the system default GUI font size once and treat the caller's
+    // value as a *minimum*: anything smaller (or unset, which parses as
+    // STYLE_NOT_USED == -1) is lifted up to the system size. Larger
+    // explicit sizes are left alone so users who chose a bigger code
+    // font still get exactly what they asked for.
+    int sysSize =
+        wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT).GetPointSize();
+    return (size <= 0 || size < sysSize) ? sysSize : size;
+}
+
 wxFont FRStyle::getFont()
 {
-    // The XML style defines fontSize as a string and may leave it empty
-    // (parsed as STYLE_NOT_USED == -1). Passing a negative size to
-    // wxFontInfo produces a barely-readable tiny font on macOS — pick the
-    // system default font size instead so labels and grid cells stay
-    // legible. Same goes for an empty fontName.
-    int size = getFontSize();
-    if (size <= 0)
-    {
-        wxFont sys = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
-        size = sys.GetPointSize();
-    }
+    int size = liftToSystemMinimum(getFontSize());
     wxFontInfo fontInfo(size);
 
     if (!getFontName().IsEmpty())

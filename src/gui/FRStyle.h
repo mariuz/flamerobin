@@ -138,7 +138,15 @@ public:
     void setKeywords(wxString keywords) { keywordsM = keywords; };
 
     wxFont getFont();
-         
+
+    // Lift a raw point size to at least the system default GUI font size.
+    // Theme XMLs often hard-code 10pt (Notepad++ heritage) or leave the
+    // size unset (parsed as STYLE_NOT_USED == -1), both of which read as
+    // tiny on Retina / hi-DPI. Centralising the clamp here keeps the SQL
+    // editor (FRStyleManager::assignWordStyle) and the rest of the theme
+    // (FRStyle::getFont) on identical rules.
+    static int liftToSystemMinimum(int size);
+
 };
 
 

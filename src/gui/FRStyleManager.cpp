@@ -33,6 +33,8 @@
 
 #include <algorithm>
 
+#include <wx/settings.h>
+
 #include "FRStyleManager.h"
 
 
@@ -89,7 +91,16 @@ void FRStyleManager::assignWordStyle(wxStyledTextCtrl* text, FRStyle* style)
 
 
     text->StyleSetCase(style->getStyleID(), style->getCaseVisible());
-    double size = style->getFontSize() == 0 ? getGlobalStyle()->getFontSize() : style->getFontSize();
+
+    // Fall back to the global style's size when this style doesn't
+    // define its own (matches the previous inline behaviour), then
+    // route the result through the shared FRStyle helper so the SQL
+    // editor gets the same hi-DPI minimum lift as everything else.
+    int size = style->getFontSize();
+    if (size == 0)
+        size = getGlobalStyle()->getFontSize();
+    size = FRStyle::liftToSystemMinimum(size);
+
     wxFontInfo fontInfo(size);
 
     wxString fontName = style->getFontName().IsEmpty() ? getGlobalStyle()->getFontName() : style->getFontName();
