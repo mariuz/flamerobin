@@ -114,10 +114,49 @@ void CreateIndexDialog::setControlsProperties()
     wxString indexName;
     int nr = 1;
     std::vector<Index>* indices = tableM->getIndices();
+
+    // Include an underscore between the table name and the sequence
+    // number so the suggested name matches the convention Firebird
+    // itself uses for auto-named PK/FK/UNIQUE/CHECK constraints
+    // (e.g. IDX_FB3_TEST_1 instead of IDX_FB3_TEST1).
+    //
+    // Object identifiers are limited to 31 BYTES on Firebird < 4.0 and
+    // 63 bytes on FB 4+ (ODS 13). Bytes, not characters — for non-ASCII
+    // table names a single character may take multiple bytes in the
+    // database's metadata charset, so size with the connection's
+    // character set converter rather than wxString::length(). Truncate
+    // the table-name portion of the suggestion if needed so the
+    // assembled name still fits the maximum the connected ODS supports.
+    int maxIdLen = 31;
+    DatabasePtr db = tableM->getDatabase();
+    if (db && db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
+        maxIdLen = 63;     // Firebird 4+ (ODS 13.0)
+    wxMBConv* conv = db ? db->getCharsetConverter() : wxConvCurrent;
+
     while (indexName.IsEmpty())
     {
-        indexName = wxString::Format("IDX_%s%d",
-            tableM->getName_().c_str(), nr++);
+        // Reserve room for "IDX_", the underscore, and the sequence
+        // digits — those are all single-byte ASCII so byte length and
+        // character length are equivalent for the prefix/suffix.
+        wxString seq = wxString::Format("%d", nr);
+        int reserved = 4 /* "IDX_" */ + 1 /* "_" */ + (int)seq.length();
+        int budget = maxIdLen - reserved;
+        if (budget < 0) budget = 0;
+
+        wxString tableName = tableM->getName_();
+        // Trim character-by-character from the right until the encoded
+        // byte length fits the remaining budget. For ASCII names this
+        // is one check; for multi-byte charsets it converges in a
+        // handful of iterations.
+        while (!tableName.IsEmpty() &&
+            tableName.mb_str(*conv).length() > static_cast<size_t>(budget))
+        {
+            tableName.Truncate(tableName.length() - 1);
+        }
+
+        indexName = "IDX_" + tableName + "_" + seq;
+        nr++;
+
         std::vector<Index>::iterator itIdx;
         for (itIdx = indices->begin(); itIdx != indices->end(); ++itIdx)
         {
