@@ -566,6 +566,7 @@
         <image>5</image>
         <setting type="checkbox">
             <caption>Use UPPER CASE keywords</caption>
+            <description>Show SQL keywords in upper case in code completion suggestions, in highlighted SQL, and in generated DDL/DML. Identifiers (table, column, procedure names) always retain their actual case from the database.</description>
             <key>SQLKeywordsUpperCase</key>
             <default>1</default>
         </setting>
