@@ -28,6 +28,7 @@
 // need because it includes almost all "standard" wxWindows headers
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
+#include "wx/settings.h"
 #endif
 
 #include <algorithm>
@@ -169,6 +170,8 @@ void FRStyleManager::assignGlobal(wxStyledTextCtrl* text)
 {
     //text->StyleClearAll();
 
+    FRStyle* globalOverrideStyle = nullptr;
+
     for (int i = 0; i < globalStylerM->getNbStyler(); i++) {
         FRStyle* style = globalStylerM->getStyle(i);
         //if (style->getStyleID() != 0) {
@@ -176,6 +179,7 @@ void FRStyleManager::assignGlobal(wxStyledTextCtrl* text)
         //}
         if (style->getStyleDesc() == "Global override") {
             //globalStyleM = style;
+            globalOverrideStyle = style;
             text->StyleResetDefault();
             text->SetBackgroundColour(style->getbgColor());
             text->SetForegroundColour(style->getfgColor());
@@ -223,6 +227,20 @@ void FRStyleManager::assignGlobal(wxStyledTextCtrl* text)
         }
     }
 
+    // Many WidgetStyle entries in the theme XMLs reuse styleID="0" even
+    // though they only configure widget-level properties (caret line,
+    // selection bg, edge, fold). Each iteration above blindly calls
+    // assignWordStyle, so style slot 0 ends up holding whichever entry
+    // was iterated last (often a near-white selection or current-line
+    // colour). On dark themes that surfaces as light blocks behind every
+    // unstyled token. Re-apply Global override last and propagate it to
+    // every style slot via StyleClearAll so unset lexer styles inherit a
+    // sensible background instead of Scintilla's hard-coded white.
+    if (globalOverrideStyle != nullptr) {
+        text->StyleSetBackground(wxSTC_STYLE_DEFAULT, globalOverrideStyle->getbgColor());
+        text->StyleSetForeground(wxSTC_STYLE_DEFAULT, globalOverrideStyle->getfgColor());
+        text->StyleClearAll();
+    }
 }
 
 void FRStyleManager::assignLexer(wxStyledTextCtrl* text)
@@ -314,17 +332,25 @@ void FRStyleManager::assignMargin(wxStyledTextCtrl* text)
 
 void FRStyleManager::loadConfig()
 {
+    // If no theme has been picked yet, fall back to the dark-mode default
+    // when the system is in dark mode so the SQL editor and data grid don't
+    // render as a bright white panel inside an otherwise dark window. The
+    // user's explicit Preferences choice still wins.
+    const wxString systemDefault =
+        wxSystemSettings::GetAppearance().IsDark()
+            ? wxString("DarkModeDefault")
+            : _default;
 
-    wxString fileName = config().get(_PRYMARY, _default);
+    wxString fileName = config().get(_PRYMARY, systemDefault);
     if (fileName.IsEmpty()) {
-        fileName =_default;
+        fileName = systemDefault;
     }
     wxFileName file = wxFileName(config().getXmlStylesPath(), fileName + ".xml");
     setFileNamePrimary(file);
 
-    fileName = config().get(_SECONDARY, _default);
+    fileName = config().get(_SECONDARY, systemDefault);
     if (fileName.IsEmpty()) {
-        fileName = _default;
+        fileName = systemDefault;
     }
     file = wxFileName(config().getXmlStylesPath(), fileName + ".xml");
     setFileNameSecondary(file);

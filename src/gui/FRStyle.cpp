@@ -33,6 +33,7 @@
 #include <algorithm>
 
 #include "wx/filename.h"
+#include "wx/settings.h"
 #include "wx/xml/xml.h"
 
 #include "FRStyle.h"
@@ -186,11 +187,22 @@ void FRStyle::write2Element(wxXmlNode* element)
 
 wxFont FRStyle::getFont()
 {
-    wxFontInfo fontInfo(getFontSize());
+    // The XML style defines fontSize as a string and may leave it empty
+    // (parsed as STYLE_NOT_USED == -1). Passing a negative size to
+    // wxFontInfo produces a barely-readable tiny font on macOS — pick the
+    // system default font size instead so labels and grid cells stay
+    // legible. Same goes for an empty fontName.
+    int size = getFontSize();
+    if (size <= 0)
+    {
+        wxFont sys = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
+        size = sys.GetPointSize();
+    }
+    wxFontInfo fontInfo(size);
 
-    if (!getFontName().IsEmpty()) 
+    if (!getFontName().IsEmpty())
         fontInfo.FaceName(getFontName());
-    
+
     fontInfo.Bold(getFontStyle() & FONTSTYLE_BOLD);
     fontInfo.Italic(getFontStyle() & FONTSTYLE_ITALIC);
     fontInfo.Underlined(getFontStyle() & FONTSTYLE_UNDERLINE);

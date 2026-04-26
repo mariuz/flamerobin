@@ -58,7 +58,7 @@ License:             GPL2
         <WidgetStyle name="Fold" styleID="0" fgColor="707070" bgColor="101010"/>
         <WidgetStyle name="Fold active" styleID="0" fgColor="7F9F7F"/>
         <WidgetStyle name="Fold margin" styleID="0" fgColor="181818" bgColor="101010"/>
-        <WidgetStyle name="White space symbol" styleID="0" fgColor="5F5F5F"/>
+        <WidgetStyle name="White space symbol" styleID="0" fgColor="5F5F5F" bgColor="3F3F3F"/>
         <WidgetStyle name="Smart HighLighting" styleID="29" bgColor="358A35"/>
         <WidgetStyle name="Find Mark Style" styleID="31" bgColor="FF0080"/>
         <WidgetStyle name="Mark Style 1" styleID="25" bgColor="88B090"/>
