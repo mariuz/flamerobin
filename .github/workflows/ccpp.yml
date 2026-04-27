@@ -53,7 +53,7 @@ jobs:
       run: ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
     - name: Patch fb-cpp for aggregate initialization
       run: |
-        sed -i 's/\.emplace_back(value, \([^)]*\))/.push_back({value, \1})/g' src/fb-cpp/src/fb-cpp/BackupManager.h
+        sed -E -i 's/\.emplace_back\(value, ([^)]+)\)/.push_back({value, \1})/g' src/fb-cpp/src/fb-cpp/BackupManager.h
     - name: Cache vcpkg binaries
       uses: actions/cache@v4
       with:
