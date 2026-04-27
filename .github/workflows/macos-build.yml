@@ -43,7 +43,7 @@ jobs:
     # Install wxWidgets via Homebrew (avoids building from source with cmake 4.0+
     # which is incompatible with wxWidgets 3.2.x cmake_minimum_required VERSION)
     - name: Install dependencies
-      run: brew install wxwidgets autoconf automake libtool
+      run: brew install wxwidgets autoconf automake libtool boost icu4c
 
     # Install Firebird
     - name: Install Firebird
@@ -59,7 +59,7 @@ jobs:
       run: |
         mkdir -p vcpkg_archives
         cmake -S . -B Build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/Applications \
-              -DCMAKE_PREFIX_PATH="$(brew --prefix)" -DENABLE_VCPKG=OFF
+              -DCMAKE_PREFIX_PATH="$(brew --prefix);$(brew --prefix icu4c)" -DENABLE_VCPKG=OFF
 
     # FlameRobin Compilation
     - name: Build FlameRobin
