@@ -64,6 +64,7 @@
 #include "gui/SimpleHtmlFrame.h"
 #include "gui/ShutdownFrame.h"
 #include "gui/StartupFrame.h"
+#include "gui/UpdateChecker.h"
 #include "main.h"
 #include "metadata/column.h"
 #include "metadata/domain.h"
@@ -184,6 +185,12 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title,
         searchPanelSizerM->Show(searchPanelM, false, true);    // recursive
         searchPanelSizerM->Layout();
     }
+
+    bool autoUpdate = false;
+    if (config().getValue("checkForUpdates", autoUpdate) && autoUpdate)
+    {
+        UpdateChecker::check(this, true);
+    }
 }
 
 void MainFrame::buildMainMenu()
@@ -259,6 +266,7 @@ void MainFrame::buildMainMenu()
     helpMenu->Append(Cmds::Menu_URLProjectPage, _("Github &project page"));
     helpMenu->Append(Cmds::Menu_URLFeatureRequest, _("Github &feature requests"));
     helpMenu->Append(Cmds::Menu_URLBugReport, _("Github &bug reports"));
+    helpMenu->Append(Cmds::Menu_CheckForUpdates, _("&Check for updates..."));
 #ifndef __WXMAC__
     helpMenu->AppendSeparator();
 #endif
@@ -374,8 +382,8 @@ EVT_MENU(Cmds::Menu_URLHomePage, MainFrame::OnMenuURLHomePage)
 EVT_MENU(Cmds::Menu_URLProjectPage, MainFrame::OnMenuURLProjectPage)
 EVT_MENU(Cmds::Menu_URLFeatureRequest, MainFrame::OnMenuURLFeatureRequest)
 EVT_MENU(Cmds::Menu_URLBugReport, MainFrame::OnMenuURLBugReport)
+EVT_MENU(Cmds::Menu_CheckForUpdates, MainFrame::OnMenuCheckForUpdates)
 EVT_MENU(wxID_PREFERENCES, MainFrame::OnMenuConfigure)
-
 EVT_MENU(Cmds::Menu_NewVolatileSQLEditor, MainFrame::OnMenuNewVolatileSQLEditor)
 EVT_MENU(Cmds::Menu_RegisterDatabase, MainFrame::OnMenuRegisterDatabase)
 EVT_UPDATE_UI(Cmds::Menu_RegisterDatabase, MainFrame::OnMenuUpdateIfServerSelected)
@@ -793,6 +801,11 @@ void MainFrame::OnMenuURLFeatureRequest(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuURLBugReport(wxCommandEvent& WXUNUSED(event))
 {
     showUrl("https://github.com/mariuz/flamerobin/issues");
+}
+
+void MainFrame::OnMenuCheckForUpdates(wxCommandEvent& WXUNUSED(event))
+{
+    UpdateChecker::check(this);
 }
 
 void MainFrame::OnMenuConfigure(wxCommandEvent& WXUNUSED(event))

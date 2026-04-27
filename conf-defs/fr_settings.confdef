@@ -684,4 +684,13 @@
         </setting>
         -->
     </node>
+    <node>
+        <caption>Updates</caption>
+        <image>3</image>
+        <setting type="checkbox">
+            <caption>Automatically check for updates on startup</caption>
+            <key>checkForUpdates</key>
+            <default>0</default>
+        </setting>
+    </node>
 </root>
