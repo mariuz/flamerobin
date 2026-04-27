@@ -21,9 +21,9 @@ so recreated schemas lost WHERE conditions.<br>
 This change adds Firebird 5-aware metadata loading and emits partial-index predicates
 in extracted CREATE INDEX statements.<br>
 <br>
-<b>Metadata loading (Firebird 5 / ODS 13+)</b><br>
+<b>Metadata loading (Firebird 5 / ODS 13.1+)</b><br>
 - Extend index metadata queries to read RDB$INDICES.RDB$CONDITION_SOURCE<br>
-- Gate the column by ODS version (&gt;= 13.0) and fall back to NULL on older servers to keep compatibility<br>
+- Gate the column by ODS version (&gt;= 13.1) and fall back to NULL on older servers to keep compatibility<br>
 - Store condition text in Index (conditionM) with accessor support<br>
 <br>
 <b>DDL generation</b><br>

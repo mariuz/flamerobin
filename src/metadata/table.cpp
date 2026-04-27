@@ -389,7 +389,7 @@ void Table::loadIndices()
         " i.rdb$index_type, i.rdb$statistics, "
         " s.rdb$field_name, rc.rdb$constraint_name, i.rdb$expression_source, "
     );
-    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0) ? " i.rdb$condition_source " : " null ";
+    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(13, 1) ? " i.rdb$condition_source " : " null ";
     sql +=
         " from rdb$indices i "
         " left join rdb$index_segments s on i.rdb$index_name = s.rdb$index_name "
