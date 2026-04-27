@@ -30,7 +30,11 @@ set(FB_CPP_SKIP_INSTALL ON CACHE BOOL "Skip fb-cpp installation")
 set(FB_CPP_BUILD_TESTS OFF CACHE BOOL "Build fb-cpp tests")
 option(FB_CPP_USE_BOOST_DLL "Enable Boost.DLL support for loading fbclient at runtime" OFF)
 option(FB_CPP_USE_BOOST_MULTIPRECISION "Enable Boost.Multiprecision helpers for INT128 and DECFLOAT types" OFF)
+
+set(OLD_BUILD_TESTING ${BUILD_TESTING})
+set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
 add_subdirectory(src/fb-cpp EXCLUDE_FROM_ALL)
+set(BUILD_TESTING ${OLD_BUILD_TESTING} CACHE BOOL "" FORCE)
 
 #--------------------------------------
 # wxWidgets location
