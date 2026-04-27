@@ -1,0 +1,3 @@
+[submodule "src/fb-cpp"]
+	path = src/fb-cpp
+	url = https://github.com/asfernandes/fb-cpp.git

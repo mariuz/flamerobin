@@ -13,7 +13,16 @@ if( "${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}" )
    )
 endif()
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+#--------------------------------------
+# fb-cpp location
+set(firebird_DIR "${CMAKE_SOURCE_DIR}/cmake")
+set(FB_CPP_SKIP_INSTALL ON CACHE BOOL "Skip fb-cpp installation")
+option(FB_CPP_USE_BOOST_DLL "Enable Boost.DLL support for loading fbclient at runtime" OFF)
+option(FB_CPP_USE_BOOST_MULTIPRECISION "Enable Boost.Multiprecision helpers for INT128 and DECFLOAT types" OFF)
+add_subdirectory(src/fb-cpp EXCLUDE_FROM_ALL)
 
 #--------------------------------------
 # wxWidgets location
@@ -74,6 +83,14 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/config/DatabaseConfig.cpp
         ${SOURCEDIR}/config/LocaleManager.cpp
         ${SOURCEDIR}/config/LocalSettings.cpp
+        ${SOURCEDIR}/engine/db/DatabaseFactory.cpp
+        ${SOURCEDIR}/engine/db/ibpp/IbppDatabase.cpp
+        ${SOURCEDIR}/engine/db/ibpp/IbppTransaction.cpp
+        ${SOURCEDIR}/engine/db/ibpp/IbppStatement.cpp
+        ${SOURCEDIR}/engine/db/ibpp/IbppService.cpp
+        ${SOURCEDIR}/engine/db/fbcpp/FbCppDatabase.cpp
+        ${SOURCEDIR}/engine/db/fbcpp/FbCppTransaction.cpp
+        ${SOURCEDIR}/engine/db/fbcpp/FbCppStatement.cpp
         ${SOURCEDIR}/core/ArtProvider.cpp
         ${SOURCEDIR}/core/CodeTemplateProcessor.cpp
         ${SOURCEDIR}/core/FRDecimal.cpp
@@ -197,6 +214,19 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/config/DatabaseConfig.h
         ${SOURCEDIR}/config/LocaleManager.h
         ${SOURCEDIR}/config/LocalSettings.h
+        ${SOURCEDIR}/engine/db/DatabaseBackend.h
+        ${SOURCEDIR}/engine/db/IDatabase.h
+        ${SOURCEDIR}/engine/db/ITransaction.h
+        ${SOURCEDIR}/engine/db/IStatement.h
+        ${SOURCEDIR}/engine/db/IService.h
+        ${SOURCEDIR}/engine/db/DatabaseFactory.h
+        ${SOURCEDIR}/engine/db/ibpp/IbppDatabase.h
+        ${SOURCEDIR}/engine/db/ibpp/IbppTransaction.h
+        ${SOURCEDIR}/engine/db/ibpp/IbppStatement.h
+        ${SOURCEDIR}/engine/db/ibpp/IbppService.h
+        ${SOURCEDIR}/engine/db/fbcpp/FbCppDatabase.h
+        ${SOURCEDIR}/engine/db/fbcpp/FbCppTransaction.h
+        ${SOURCEDIR}/engine/db/fbcpp/FbCppStatement.h
         ${SOURCEDIR}/core/ArtProvider.h
         ${SOURCEDIR}/core/CodeTemplateProcessor.h
         ${SOURCEDIR}/core/FRDecimal.h
@@ -558,7 +588,7 @@ if (APPLE)
     )
 endif (APPLE)
 
-target_link_libraries(${PROJECT_NAME} IBPP ${wxWidgets_LIBRARIES} ${FR_LIBS})
+target_link_libraries(${PROJECT_NAME} IBPP fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
 
 enable_testing()
 add_executable(index_ddl_test

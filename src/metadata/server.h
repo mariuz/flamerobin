@@ -25,8 +25,7 @@
 #ifndef FR_SERVER_H
 #define FR_SERVER_H
 
-#include <ibpp.h>
-
+#include "engine/db/DatabaseFactory.h"
 #include "metadata/collection.h"
 #include "metadata/database.h"
 #include "metadata/MetadataClasses.h"
@@ -62,6 +61,7 @@ public:
     // returns *connected* service
     bool getService(IBPP::Service& svc, ProgressIndicator* progressind,
         bool sysdba);
+    fr::IServicePtr getDALService(ProgressIndicator* progressind, bool sysdba);
     void setServiceCredentials(const wxString& user, const wxString& pass);
     void setServiceSysdbaPassword(const wxString& pass);
 

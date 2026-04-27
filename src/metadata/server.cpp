@@ -33,6 +33,7 @@
 #include <algorithm>
 
 #include "config/Config.h"
+#include "engine/db/DatabaseFactory.h"
 #include "core/ProgressIndicator.h"
 #include "core/StringUtils.h"
 #include "frutils.h"
@@ -136,6 +137,22 @@ const wxString Server::getTypeName() const
 void Server::acceptVisitor(MetadataItemVisitor* visitor)
 {
     visitor->visitServer(*this);
+}
+
+fr::IServicePtr Server::getDALService(ProgressIndicator* progressind, bool sysdba)
+{
+    fr::IServicePtr svc = fr::DatabaseFactory::createService();
+    svc->setConnectionString(wx2std(getConnectionString()));
+    if (sysdba)
+    {
+        svc->setCredentials("SYSDBA", wx2std(serviceSysdbaPasswordM));
+    }
+    else
+    {
+        svc->setCredentials(wx2std(serviceUserM), wx2std(servicePasswordM));
+    }
+    svc->connect();
+    return svc;
 }
 
 /* static */

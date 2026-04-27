@@ -32,6 +32,7 @@
 
 #include <ibpp.h>
 
+#include "engine/db/IDatabase.h"
 #include "metadata/MetadataClasses.h"
 #include "metadata/metadataitem.h"
 
@@ -166,6 +167,7 @@ class Database: public MetadataItem,
 private:
     ServerWeakPtr serverM;
     IBPP::Database databaseM;
+    fr::IDatabasePtr databaseDAL_M;
     MetadataLoader* metadataLoaderM;
 
     bool connectedM;
@@ -346,6 +348,7 @@ public:
     wxString getRole() const;
     wxString getCryptKeyData() const;
     IBPP::Database& getIBPPDatabase();
+    fr::IDatabasePtr getDALDatabase();
     void setIsVolatile(const bool isVolatile);
     void setPath(const wxString& value);
     void setClientLibrary(const wxString& value);
