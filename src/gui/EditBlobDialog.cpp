@@ -413,8 +413,7 @@ EditBlobDialog::EditBlobDialog(wxWindow* parent, wxMBConv* converterM)
     button_reset = new wxButton(getControlsPanel(), wxID_RESET, _("&Reset"));
     button_save  = new wxButton(getControlsPanel(), wxID_SAVE, _("&Save"));
 
-    CommandManager cm;
-    buildMenus(cm);
+    buildMenus(CommandManager::get());
 
     set_properties();
     do_layout();

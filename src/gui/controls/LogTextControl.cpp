@@ -31,87 +31,27 @@
 #endif
 
 #include "gui/CommandManager.h"
-#include "gui/FRStyleManager.h"
 #include "gui/controls/ControlUtils.h"
 #include "gui/controls/LogTextControl.h"
 
-LogTextControl::LogTextControl(wxWindow *parent, wxWindowID id)
-    : TextControl(parent, id)
-{
-    SetReadOnly(true);
-    setDefaultStyles();
-}
-
-void LogTextControl::addStyledText(const wxString& message, LogStyle style)
-{
-    if (message.empty())
-        return;
-
-    SetReadOnly(false);
-    // This implements the typical behaviour for log text controls:
-    // When the caret is at the end of the text it will be kept there, keeping
-    // the last logged text visible.
-    // Otherwise the caret position is not altered, so user can navigate
-    // in the already logged text.
-    int lenBefore = GetLength();
-    bool atEnd = lenBefore == GetCurrentPos();
-    AppendText(message);
-    int len = GetLength();
-    StartStyling(lenBefore);
-    SetStyling(len - lenBefore - 1, int(style));
-    if (atEnd)
-        GotoPos(len);
-    SetReadOnly(true);
-}
-
-void LogTextControl::ClearAll()
-{
-    SetReadOnly(false);
-    TextControl::ClearAll();
-    SetReadOnly(true);
-}
-
-void LogTextControl::logErrorMsg(const wxString& message)
-{
-    addStyledText(message, logStyleError);
-}
-
-void LogTextControl::logImportantMsg(const wxString& message)
-{
-    addStyledText(message, logStyleImportant);
-}
-
-void LogTextControl::logMsg(const wxString& message)
-{
-    addStyledText(message, logStyleDefault);
-}
-
-void LogTextControl::setDefaultStyles()
-{
-    wxColour importantColor = *wxBLUE;
-    wxColour errorColor = *wxRED;
-
-    if (FRStyle* style = stylerManager().getStyleByName("Log message important"))
-        importantColor = style->getfgColor();
-    else if (FRStyle* style = stylerManager().getStyleByName("URL hovered"))
-        importantColor = style->getfgColor();
-
-    if (FRStyle* style = stylerManager().getStyleByName("Log message error"))
-        errorColor = style->getfgColor();
-    else if (FRStyle* style = stylerManager().getStyleByName("Find Mark Style"))
-        errorColor = style->getfgColor();
-
-    StyleSetForeground(int(logStyleImportant), importantColor);
-    StyleSetForeground(int(logStyleError), errorColor);
-}
-
-//! event handling
-BEGIN_EVENT_TABLE(LogTextControl, TextControl)
-    EVT_CONTEXT_MENU(LogTextControl::OnContextMenu)
+BEGIN_EVENT_TABLE(LogTextControl, wxStyledTextCtrl)
+    EVT_MENU(wxID_COPY, LogTextControl::OnCommandCopy)
     EVT_MENU(wxID_DELETE, LogTextControl::OnCommandClearAll)
+    EVT_UPDATE_UI(wxID_COPY, LogTextControl::OnCommandUpdate)
     EVT_UPDATE_UI(wxID_DELETE, LogTextControl::OnCommandUpdate)
-    EVT_UPDATE_UI(wxID_SELECTALL, LogTextControl::OnCommandUpdate)
+    EVT_CONTEXT_MENU(LogTextControl::OnContextMenu)
 END_EVENT_TABLE()
+
+LogTextControl::LogTextControl(wxWindow* parent, wxWindowID id,
+    const wxPoint& pos, const wxSize& size, long style)
+    : wxStyledTextCtrl(parent, id, pos, size, style)
+{
+}
+
+void LogTextControl::OnCommandCopy(wxCommandEvent& WXUNUSED(event))
+{
+    Copy();
+}
 
 void LogTextControl::OnCommandClearAll(wxCommandEvent& WXUNUSED(event))
 {
@@ -127,15 +67,14 @@ void LogTextControl::OnContextMenu(wxContextMenuEvent& event)
 {
     SetFocus();
 
-    CommandManager cm;
     wxMenu m;
-    m.Append(wxID_COPY, cm.getPopupMenuItemText(_("&Copy"), wxID_COPY));
+    m.Append(wxID_COPY, CommandManager::get().getPopupMenuItemText(_("&Copy"), wxID_COPY));
     m.AppendSeparator();
     m.Append(wxID_DELETE,
-        cm.getPopupMenuItemText(_("Clear al&l"), wxID_DELETE));
+        CommandManager::get().getPopupMenuItemText(_("Clear al&l"), wxID_DELETE));
     m.AppendSeparator();
     m.Append(wxID_SELECTALL,
-        cm.getPopupMenuItemText(_("Select &all"), wxID_SELECTALL));
+        CommandManager::get().getPopupMenuItemText(_("Select &all"), wxID_SELECTALL));
 
     PopupMenu(&m, calcContextMenuPosition(event.GetPosition(), this));
 }

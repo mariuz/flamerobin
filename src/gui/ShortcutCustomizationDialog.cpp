@@ -75,7 +75,7 @@ void ShortcutCustomizationDialog::populateList()
     for (size_t i = 0; i < commandsM.size(); ++i)
     {
         long index = listCtrlM->InsertItem((long)i, commandsM[i].name);
-        listCtrlM->SetItem(index, 1, commandManagerM.getShortcutText(commandsM[i].id));
+        listCtrlM->SetItem(index, 1, CommandManager::get().getShortcutText(commandsM[i].id));
         listCtrlM->SetItemData(index, (long)i);
     }
 }
@@ -90,8 +90,8 @@ void ShortcutCustomizationDialog::OnChangeShortcut(wxCommandEvent& WXUNUSED(even
     ShortcutCaptureDialog dlg(this, commandsM[cmdIndex].name);
     if (dlg.ShowModal() == wxID_OK)
     {
-        commandManagerM.setShortcut(commandsM[cmdIndex].id, dlg.getFlags(), dlg.getKeyCode());
-        commandManagerM.save();
+        CommandManager::get().setShortcut(commandsM[cmdIndex].id, dlg.getFlags(), dlg.getKeyCode());
+        CommandManager::get().save();
         populateList();
     }
 }
@@ -130,6 +130,13 @@ void ShortcutCaptureDialog::OnKeyDown(wxKeyEvent& event)
     // Ignore pure modifier keys
     if (keyCode == WXK_CONTROL || keyCode == WXK_SHIFT || keyCode == WXK_ALT 
         || keyCode == WXK_WINDOWS_LEFT || keyCode == WXK_WINDOWS_RIGHT)
+    {
+        event.Skip();
+        return;
+    }
+
+    // Allow Escape to cancel the dialog
+    if (keyCode == WXK_ESCAPE)
     {
         event.Skip();
         return;

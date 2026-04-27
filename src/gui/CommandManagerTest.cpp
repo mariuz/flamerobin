@@ -60,7 +60,7 @@ int main(int argc, char** argv)
 
     bool ok = true;
     std::cout << "Starting CommandManager tests..." << std::endl;
-    CommandManager cm;
+    CommandManager& cm = CommandManager::get();
 
     // Test 1: getShortcutText is public and works for default commands
     std::cout << "Test 1: getShortcutText..." << std::endl;
@@ -70,7 +70,7 @@ int main(int argc, char** argv)
     // Test 2: setShortcut and getShortcutText
     std::cout << "Test 2: setShortcut..." << std::endl;
     cm.setShortcut(wxID_ABOUT, wxACCEL_CTRL | wxACCEL_SHIFT, 'H');
-    ok = checkString(cm.getShortcutText(wxID_ABOUT), "Shift+Ctrl+H", "setShortcut/getShortcutText") && ok;
+    ok = checkString(cm.getShortcutText(wxID_ABOUT), "Ctrl+Shift+H", "setShortcut/getShortcutText") && ok;
 
     // Test 3: getShortcutString static method
     std::cout << "Test 3: getShortcutString..." << std::endl;

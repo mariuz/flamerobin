@@ -36,7 +36,6 @@ public:
 
 private:
     wxListCtrl* listCtrlM;
-    CommandManager commandManagerM;
     CommandManager::CommandInfoVector commandsM;
 
     void populateList();

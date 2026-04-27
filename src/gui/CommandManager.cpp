@@ -44,6 +44,12 @@ CommandManager::CommandManager()
     load();
 }
 
+CommandManager& CommandManager::get()
+{
+    static CommandManager instance;
+    return instance;
+}
+
 bool CommandManager::findShortcutFor(int id, int& flags, int& keyCode)
 {
     // our own commands
@@ -81,44 +87,16 @@ wxString CommandManager::getShortcutText(int id)
 
 wxString CommandManager::getShortcutString(int flags, int keyCode)
 {
-    wxString flagsText;
-    if (flags & wxACCEL_SHIFT)
-        flagsText += _("Shift+");
-    if (flags & wxACCEL_CTRL)
-        flagsText += _("Ctrl+");
-    if (flags & wxACCEL_ALT)
-        flagsText += _("Alt+");
-
-    wxAcceleratorEntry ae(wxACCEL_NORMAL, keyCode);
-    return flagsText + ae.ToString();
+    wxAcceleratorEntry ae(flags, keyCode);
+    return ae.ToString();
 }
 
 bool CommandManager::parseShortcutString(const wxString& s, int& flags, int& keyCode)
 {
-    flags = wxACCEL_NORMAL;
-    wxStringTokenizer tkz(s, "+-");
-    wxString lastToken;
-    while (tkz.HasMoreTokens())
-    {
-        lastToken = tkz.GetNextToken().Trim(false).Trim(true);
-        if (lastToken.IsSameAs("Ctrl", false))
-            flags |= wxACCEL_CTRL;
-        else if (lastToken.IsSameAs("Alt", false))
-            flags |= wxACCEL_ALT;
-        else if (lastToken.IsSameAs("Shift", false))
-            flags |= wxACCEL_SHIFT;
-        else
-            break;
-    }
-    
-    if (lastToken.empty())
-        return false;
-
-    // Use wxAcceleratorEntry to parse the key part if possible, 
-    // or handle it manually for simple chars
     wxAcceleratorEntry ae;
-    if (ae.FromString("Ctrl+" + lastToken))
+    if (ae.FromString(s))
     {
+        flags = ae.GetFlags();
         keyCode = ae.GetKeyCode();
         return true;
     }
@@ -246,8 +224,18 @@ wxString CommandManager::getToolbarHint(const wxString& text, int id)
 
 void CommandManager::init()
 {
-    ShortCutData scd;
+    CommandInfoVector commands;
+    getCustomizableCommands(commands);
+    for (size_t i = 0; i < commands.size(); ++i)
+    {
+        wxAcceleratorEntry ae(wxGetStockAccelerator(commands[i].id));
+        if (ae.IsOk())
+        {
+            setShortcut(commands[i].id, ae.GetFlags(), ae.GetKeyCode());
+        }
+    }
 
+    ShortCutData scd;
     // missing from the stock command list: "Select All"
     scd.flags = wxACCEL_CTRL;
     scd.keyCode = 'A';

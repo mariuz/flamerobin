@@ -43,6 +43,7 @@ private:
     void init();
 public:
     CommandManager();
+    static CommandManager& get();
 
     wxString getShortcutText(int id);
     wxString getMainMenuItemText(const wxString& text, int id);
