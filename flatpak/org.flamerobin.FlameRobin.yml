@@ -63,3 +63,7 @@ modules:
     sources:
       - type: dir
         path: ..
+      - type: git
+        url: https://github.com/asfernandes/fb-cpp.git
+        commit: c318a4abc7e3cf259ed95c184b33a3f5c3a01655
+        dest: src/fb-cpp
