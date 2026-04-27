@@ -19,6 +19,8 @@ jobs:
 
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
     # Install wxWidgets via Homebrew (avoids building from source with cmake 4.0+
     # which is incompatible with wxWidgets 3.2.x cmake_minimum_required VERSION)

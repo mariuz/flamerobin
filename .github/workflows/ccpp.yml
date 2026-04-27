@@ -46,6 +46,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: recursive
     - name: apt update
       run: sudo apt-get update
     - name: Install tools and libs
