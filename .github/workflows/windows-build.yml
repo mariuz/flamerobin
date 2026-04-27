@@ -11,9 +11,24 @@ on:
 
 jobs:
   build:
+    name: Build Windows (${{ matrix.arch }})
     runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86
+            cmake_arch: Win32
+            msbuild_platform: Win32
+            setup_script: FlameRobinSetup.iss
+            artifact_name: flamerobin-installer-x86
+          - arch: x64
+            cmake_arch: x64
+            msbuild_platform: x64
+            setup_script: FlameRobinSetup64.iss
+            artifact_name: flamerobin-installer-x64
+
     steps:
-   
     - uses: actions/checkout@v4
       with:
         submodules: recursive
@@ -26,9 +41,9 @@ jobs:
       uses: actions/cache@v4
       with:
         path: vcpkg_archives
-        key: ${{ runner.os }}-vcpkg-bin-${{ hashFiles('vcpkg.json') }}
+        key: ${{ runner.os }}-vcpkg-bin-${{ matrix.arch }}-${{ hashFiles('vcpkg.json') }}
         restore-keys: |
-            ${{ runner.os }}-vcpkg-bin-
+            ${{ runner.os }}-vcpkg-bin-${{ matrix.arch }}-
     
     - name: wxWidget cache
       id: cache-wxwidget
@@ -36,67 +51,45 @@ jobs:
       with:
         path: |
             wxWidgets
-        key: ${{ runner.os }}-wxwidgets-${{env.wx-tag-version}}
-        restore-keys: ${{ runner.os }}-wxwidgets-${{env.wx-tag-version}}
+        key: ${{ runner.os }}-wxwidgets-${{ matrix.arch }}-${{ env.wx-tag-version }}
+        restore-keys: ${{ runner.os }}-wxwidgets-${{ matrix.arch }}-${{ env.wx-tag-version }}
     
     - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
       name: clone wxWidgets
-      run:  git clone --recursive --branch ${{env.wx-tag-version}} --depth 1 https://github.com/wxWidgets/wxWidgets.git
+      run: git clone --recursive --branch ${{ env.wx-tag-version }} --depth 1 https://github.com/wxWidgets/wxWidgets.git
       
     - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
       name: replace /MD for /MT
       run: 
              $xmls = (Get-ChildItem -Path "wxWidgets\build\msw" -Recurse -Filter *.vcxproj).FullName ;
              foreach ($xml in $xmls) {
-               echo $xml;
                (Get-Content $xml).replace("MultiThreadedDebugDLL", "MultiThreadedDebug") | Set-Content $xml ;
                (Get-Content $xml).replace("MultiThreadedDLL", "MultiThreaded") | Set-Content $xml
              }
 
     - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
-      name: Build wxWidgets x86
+      name: Build wxWidgets
       shell: cmd
       run: |
-        "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" &&  msbuild.exe wxWidgets\build\msw\wx_vc17.sln /t:Build /p:Configuration=Release /p:Platform=Win32
+        "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" && msbuild.exe wxWidgets\build\msw\wx_vc17.sln /t:Build /p:Configuration=Release /p:Platform=${{ matrix.msbuild_platform }} -m
         
-    - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
-      name: Build wxWidgets x64
-      shell: cmd
-      run: | 
-        "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" && msbuild.exe wxWidgets\build\msw\wx_vc17.sln /t:Build /p:Configuration=Release /p:Platform=x64
-
-    - name: Generate CMake x86 project
+    - name: Generate CMake project
       env:
         VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}\vcpkg_archives
       run: |
         if (!(Test-Path vcpkg_archives)) { New-Item -ItemType Directory -Path vcpkg_archives }
-        cmake -S .\ -B .\Build32 -A Win32 -DWXDIR=wxWidgets
+        cmake -S .\ -B .\Build -A ${{ matrix.cmake_arch }} -DWXDIR=wxWidgets
       
-    - name: Generate CMake x64 project
-      env:
-        VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}\vcpkg_archives
-      run: |
-        if (!(Test-Path vcpkg_archives)) { New-Item -ItemType Directory -Path vcpkg_archives }
-        cmake -S .\ -B .\Build64 -A x64 -DWXDIR=wxWidgets
-      
-    - name: Build Flamerobin x86
+    - name: Build Flamerobin
       run: >
-        cmake --build .\Build32 --config Release -j 8
-        
-    - name: Build Flamerobin x64
-      run: >
-        cmake --build .\Build64 --config Release -j 8
+        cmake --build .\Build --config Release -j 8
 
     - name: Innosetup 
       run: >
-        ISCC.exe install\win32\FlameRobinSetup.iss
-        
-    - name: Innosetup64
-      run: >
-        ISCC.exe install\win32\FlameRobinSetup64.iss
+        ISCC.exe install\win32\${{ matrix.setup_script }}
 
     - name: Upload installer
-      uses: actions/upload-artifact@main
+      uses: actions/upload-artifact@v4
       with:
-          name: flamerobin-instaler
+          name: ${{ matrix.artifact_name }}
           path: install/win32/output/flamerobin-*.exe
