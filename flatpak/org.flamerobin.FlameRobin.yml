@@ -53,6 +53,24 @@ modules:
         url: https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.6/wxWidgets-3.2.6.tar.bz2
         sha256: 939e5b77ddc5b6092d1d7d29491fe67010a2433cf9b9c0d841ee4d04acb9dce7
 
+  - name: fb-cpp
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DFB_CPP_BUILD_TESTS=OFF
+      - -DFB_CPP_USE_BOOST_DLL=OFF
+      - -DFB_CPP_USE_BOOST_MULTIPRECISION=OFF
+      - -Dfirebird_DIR=.
+    sources:
+      - type: git
+        url: https://github.com/asfernandes/fb-cpp.git
+        commit: c318a4abc7e3cf259ed95c184b33a3f5c3a01655
+      - type: file
+        path: ../cmake/firebirdConfig.cmake
+      - type: dir
+        path: ../src/firebird/include
+        dest: src/firebird/include
+
   - name: flamerobin
     buildsystem: cmake-ninja
     builddir: true
@@ -61,7 +79,5 @@ modules:
       - -DENABLE_VCPKG=OFF
       - -DFB_CPP_BUILD_TESTS=OFF
     sources:
-      - type: git
-        url: https://github.com/mariuz/flamerobin.git
-        branch: feature/switch-to-fb-cpp-542
-        submodules: true
+      - type: dir
+        path: ..
