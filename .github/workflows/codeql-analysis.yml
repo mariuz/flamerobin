@@ -41,6 +41,9 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        fetch-depth: 0
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
@@ -54,8 +57,10 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential git cmake firebird-dev libnotify-dev libwxgtk3.2-dev
+        sudo apt-get install -y build-essential git cmake firebird-dev libnotify-dev libwxgtk3.2-dev autoconf automake libtool
   
+    - name: Configure CMake
+      run: cmake -S . -B Build -DENABLE_VCPKG=OFF -DFB_CPP_BUILD_TESTS=OFF
 
     # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
     # If this step fails, then you should remove it and run the build manually (see below)
