@@ -18,6 +18,9 @@ jobs:
       with:
         submodules: recursive
     
+    - name: Bootstrap vcpkg
+      run: .\vcpkg\bootstrap-vcpkg.bat -disableMetrics
+    
     - name: wxWidget cache
       id: cache-wxwidget
       uses: actions/cache@v4

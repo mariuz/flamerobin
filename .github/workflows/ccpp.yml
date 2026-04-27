@@ -48,6 +48,8 @@ jobs:
     - uses: actions/checkout@v4
       with:
         submodules: recursive
+    - name: Bootstrap vcpkg
+      run: ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
     - name: apt update
       run: sudo apt-get update
     - name: Install tools and libs

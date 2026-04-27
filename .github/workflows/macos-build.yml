@@ -22,6 +22,9 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Bootstrap vcpkg
+      run: ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
+
     # Install wxWidgets via Homebrew (avoids building from source with cmake 4.0+
     # which is incompatible with wxWidgets 3.2.x cmake_minimum_required VERSION)
     - name: Install wxWidgets

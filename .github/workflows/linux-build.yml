@@ -19,6 +19,9 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Bootstrap vcpkg
+      run: ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
+
     # Installing required dependencies
     - name: Install dependencies
       run: |
