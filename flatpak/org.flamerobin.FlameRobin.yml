@@ -54,14 +54,16 @@ modules:
         sha256: 939e5b77ddc5b6092d1d7d29491fe67010a2433cf9b9c0d841ee4d04acb9dce7
 
   - name: fb-cpp
-    buildsystem: cmake-ninja
-    config-opts:
-      - -DCMAKE_BUILD_TYPE=Release
-      - -DFB_CPP_BUILD_TESTS=OFF
-      - -DFB_CPP_USE_BOOST_DLL=OFF
-      - -DFB_CPP_USE_BOOST_MULTIPRECISION=OFF
-      - -Dfirebird_DIR=.
-      - -DENABLE_VCPKG=OFF
+    buildsystem: simple
+    build-commands:
+      # Patch CMakeLists.txt to make vcpkg optional
+      - sed -i 's/set(VCPKG_ROOT "vcpkg")/option(ENABLE_VCPKG "Enable vcpkg" ON)\nif(ENABLE_VCPKG)\nset(VCPKG_ROOT "vcpkg")/' CMakeLists.txt
+      - sed -i 's/set(CMAKE_TOOLCHAIN_FILE/if(EXISTS "${VCPKG_ROOT}\/scripts\/buildsystems\/vcpkg.cmake")\nset(CMAKE_TOOLCHAIN_FILE/' CMakeLists.txt
+      - sed -i '/set(CMAKE_TOOLCHAIN_FILE/a endif()\nendif()' CMakeLists.txt
+      # Configure and build
+      - mkdir build && cd build && cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release -DFB_CPP_BUILD_TESTS=OFF -DFB_CPP_USE_BOOST_DLL=OFF -DFB_CPP_USE_BOOST_MULTIPRECISION=OFF -Dfirebird_DIR=/app -DENABLE_VCPKG=OFF -DCMAKE_INSTALL_PREFIX=/app
+      - ninja -C build
+      - ninja -C build install
     sources:
       - type: dir
         path: ../src/fb-cpp

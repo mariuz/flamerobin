@@ -26,9 +26,16 @@ jobs:
     - name: Bootstrap vcpkg
       run: ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
 
-    - name: Patch fb-cpp for macOS aggregate initialization
+    - name: Patch fb-cpp for macOS aggregate initialization and optional vcpkg
       run: |
         sed -E -i '' 's/\.emplace_back\(value, ([^)]+)\)/.push_back({value, \1})/g' src/fb-cpp/src/fb-cpp/BackupManager.h
+        sed -i '' 's/set(VCPKG_ROOT "vcpkg")/option(ENABLE_VCPKG "Enable vcpkg" ON)\' src/fb-cpp/CMakeLists.txt
+        sed -i '' 's/option(ENABLE_VCPKG "Enable vcpkg" ON)/option(ENABLE_VCPKG "Enable vcpkg" ON)\nif(ENABLE_VCPKG)\nset(VCPKG_ROOT "vcpkg")/' src/fb-cpp/CMakeLists.txt
+        sed -i '' 's/set(CMAKE_TOOLCHAIN_FILE/if(EXISTS "${VCPKG_ROOT}\/scripts\/buildsystems\/vcpkg.cmake")\nset(CMAKE_TOOLCHAIN_FILE/' src/fb-cpp/CMakeLists.txt
+        sed -i '' '/set(CMAKE_TOOLCHAIN_FILE/a \
+        endif()' src/fb-cpp/CMakeLists.txt
+        sed -i '' '/set(CMAKE_TOOLCHAIN_FILE/a \
+        endif()' src/fb-cpp/CMakeLists.txt
 
     - name: Cache vcpkg binaries
       uses: actions/cache@v4
