@@ -46,13 +46,22 @@ modules:
         strip-components: 1
 
   - name: wxWidgets
-    buildsystem: cmake-ninja
+    buildsystem: autotools
     config-opts:
-      - -DCMAKE_BUILD_TYPE=Release
-      - -DwxBUILD_SHARED=ON
-      - -DwxUSE_WEBVIEW=ON
-      - -DwxUSE_GTK3=ON
-      - -DwxUSE_LIBSECRET=OFF
+      - --disable-shared
+      - --enable-unicode
+      - --enable-webview
+      - --enable-aui
+      - --enable-stc
+      - --enable-graphics_ctx
+      - --with-gtk=3
+      - --with-libnotify
+      - --with-opengl
+      - --with-expat=builtin
+      - --with-zlib=builtin
+      - --with-libpng=builtin
+      - --with-libjpeg=builtin
+      - --with-libtiff=builtin
     sources:
       - type: archive
         url: https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.6/wxWidgets-3.2.6.tar.bz2
