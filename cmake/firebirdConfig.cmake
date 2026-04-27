@@ -18,10 +18,16 @@ else()
     set(FIREBIRD_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/../src/firebird/include")
 endif()
 
+# We MUST wrap source-prefixed paths in BUILD_INTERFACE to avoid CMake errors 
+# when the target is used by other projects (like fb-cpp).
 target_include_directories(firebird INTERFACE 
     $<BUILD_INTERFACE:${FIREBIRD_INCLUDE_DIRS}>
     $<INSTALL_INTERFACE:include>
-    ${FIREBIRD_INCLUDE_DIRS}
 )
+
+# For Flatpak environment where paths are outside source/binary tree
+if(FIREBIRD_INCLUDE_DIRS STREQUAL "/app/include")
+    target_include_directories(firebird INTERFACE "/app/include")
+endif()
 
 install(TARGETS firebird EXPORT fb-cppTargets)
