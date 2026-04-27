@@ -61,10 +61,10 @@ modules:
       - -DFB_CPP_USE_BOOST_DLL=OFF
       - -DFB_CPP_USE_BOOST_MULTIPRECISION=OFF
       - -Dfirebird_DIR=.
+      - -DENABLE_VCPKG=OFF
     sources:
-      - type: git
-        url: https://github.com/asfernandes/fb-cpp.git
-        commit: c318a4abc7e3cf259ed95c184b33a3f5c3a01655
+      - type: dir
+        path: ../src/fb-cpp
       - type: file
         path: ../cmake/firebirdConfig.cmake
       - type: dir

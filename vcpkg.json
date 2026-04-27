@@ -15,8 +15,7 @@
     {
       "name": "wxwidgets",
       "features": [
-        "webview",
-        "stc"
+        "webview"
       ]
     }
   ],
