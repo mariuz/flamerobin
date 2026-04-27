@@ -27,12 +27,13 @@ jobs:
       run: |
         sed -i 's/\.emplace_back(value, \([^)]*\))/.push_back({value, \1})/g' src/fb-cpp/src/fb-cpp/BackupManager.h
 
-    - name: Setup vcpkg binary caching
-      uses: actions/github-script@v7
+    - name: Cache vcpkg binaries
+      uses: actions/cache@v4
       with:
-        script: |
-          core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-          core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+        path: vcpkg_archives
+        key: ${{ runner.os }}-vcpkg-bin-${{ hashFiles('vcpkg.json') }}
+        restore-keys: |
+            ${{ runner.os }}-vcpkg-bin-
 
     # Installing required dependencies
     - name: Install dependencies
@@ -68,8 +69,9 @@ jobs:
     # Building the CMake project for Flamerobin
     - name: Generate CMake project
       env:
-        VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
+        VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg_archives
       run: |
+        mkdir -p vcpkg_archives
         export PATH="/usr/local/bin:/opt/firebird/bin:${PATH:-}"
         export LD_LIBRARY_PATH="/usr/local/lib:/usr/lib/x86_64-linux-gnu:/opt/firebird/lib:${LD_LIBRARY_PATH:-}"
         cmake -S . -B Build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/flamerobin/ -DBUILD_TESTING=OFF
