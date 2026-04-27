@@ -23,17 +23,12 @@ jobs:
     - name: Bootstrap vcpkg
       run: ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
 
-    - name: Cache vcpkg artifacts
-      uses: actions/cache@v4
+    - name: Setup vcpkg binary caching
+      uses: actions/github-script@v7
       with:
-        path: |
-            vcpkg/downloads
-            vcpkg/buildtrees
-            vcpkg/packages
-            Build/vcpkg_installed
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
-        restore-keys: |
-            ${{ runner.os }}-vcpkg-
+        script: |
+          core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+          core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
     # Installing required dependencies
     - name: Install dependencies
@@ -68,6 +63,8 @@ jobs:
 
     # Building the CMake project for Flamerobin
     - name: Generate CMake project
+      env:
+        VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
       run: |
         export PATH="/usr/local/bin:/opt/firebird/bin:${PATH:-}"
         export LD_LIBRARY_PATH="/usr/local/lib:/usr/lib/x86_64-linux-gnu:/opt/firebird/lib:${LD_LIBRARY_PATH:-}"
