@@ -27,15 +27,16 @@ modules:
     buildsystem: simple
     build-commands:
       # The outer tarball contains buildroot.tar.gz (after strip-components: 1).
-      # Extract the Firebird client libraries from the inner buildroot.tar.gz.
-      - tar -xzf buildroot.tar.gz ./opt/firebird/lib/libfbclient.so.5.0.3 ./opt/firebird/lib/libib_util.so ./opt/firebird/lib/libtomcrypt.so.1.0.1
+      # Extract the Firebird client libraries and headers from the inner buildroot.tar.gz.
+      - tar -xzf buildroot.tar.gz ./opt/firebird/lib/libfbclient.so.5.0.3 ./opt/firebird/lib/libib_util.so ./opt/firebird/lib/libtomcrypt.so.1.0.1 ./opt/firebird/include
       - install -Dm755 opt/firebird/lib/libfbclient.so.5.0.3 /app/lib/libfbclient.so.5.0.3
       - ln -sf libfbclient.so.5.0.3 /app/lib/libfbclient.so.2
       - ln -sf libfbclient.so.2 /app/lib/libfbclient.so
       - install -Dm755 opt/firebird/lib/libib_util.so /app/lib/libib_util.so
       - install -Dm755 opt/firebird/lib/libtomcrypt.so.1.0.1 /app/lib/libtomcrypt.so.1.0.1
-      - ln -sf libtomcrypt.so.1.0.1 /app/lib/libtomcrypt.so.1
       - ln -sf libtomcrypt.so.1 /app/lib/libtomcrypt.so
+      - ln -sf libtomcrypt.so.1 /app/lib/libtomcrypt.so
+      - cp -r opt/firebird/include/* /app/include/
     sources:
       - type: archive
         # This tarball contains buildroot.tar.gz; strip-components: 1 places it at the root.
@@ -54,15 +55,13 @@ modules:
         sha256: 939e5b77ddc5b6092d1d7d29491fe67010a2433cf9b9c0d841ee4d04acb9dce7
 
   - name: fb-cpp
-    buildsystem: simple
-    build-commands:
-      # Patch CMakeLists.txt to make vcpkg optional and unset CMAKE_TOOLCHAIN_FILE
-      - perl -i -0777 -pe 's/set\(VCPKG_ROOT "vcpkg"\)\nset\(CMAKE_TOOLCHAIN_FILE/option(ENABLE_VCPKG "Enable vcpkg" ON)\nif(ENABLE_VCPKG)\nset(VCPKG_ROOT "vcpkg")\nif(EXISTS "\${VCPKG_ROOT}\/scripts\/buildsystems\/vcpkg.cmake")\nset(CMAKE_TOOLCHAIN_FILE/g' CMakeLists.txt
-      - perl -i -0777 -pe 's/(set\(CMAKE_TOOLCHAIN_FILE.*"\)\n)/$1endif()\nelse()\nif(CMAKE_TOOLCHAIN_FILE MATCHES "vcpkg.cmake\$")\nunset(CMAKE_TOOLCHAIN_FILE CACHE)\nunset(CMAKE_TOOLCHAIN_FILE)\nendif()\nendif()\n/g' CMakeLists.txt
-      # Configure and build
-      - mkdir build && cd build && cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DFB_CPP_USE_BOOST_DLL=OFF -DFB_CPP_USE_BOOST_MULTIPRECISION=OFF -Dfirebird_DIR=../cmake -DENABLE_VCPKG=OFF -DCMAKE_INSTALL_PREFIX=/app
-      - ninja -C build
-      - ninja -C build install
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DBUILD_TESTING=OFF
+      - -DFB_CPP_USE_BOOST_DLL=OFF
+      - -DFB_CPP_USE_BOOST_MULTIPRECISION=OFF
+      - -DENABLE_VCPKG=OFF
     sources:
       - type: dir
         path: ../src/fb-cpp
@@ -72,6 +71,12 @@ modules:
       - type: dir
         path: ../src/firebird/include
         dest: src/firebird/include
+      - type: shell
+        commands:
+          - rm -rf vcpkg vcpkg.json CMakePresets.json
+          - perl -i -0777 -pe 's/set\(VCPKG_ROOT "vcpkg"\)\nset\(CMAKE_TOOLCHAIN_FILE/option(ENABLE_VCPKG "Enable vcpkg" ON)\nif(ENABLE_VCPKG)\nset(VCPKG_ROOT "vcpkg")\nif(EXISTS "\${VCPKG_ROOT}\/scripts\/buildsystems\/vcpkg.cmake")\nset(CMAKE_TOOLCHAIN_FILE/g' CMakeLists.txt
+          - perl -i -0777 -pe 's/(set\(CMAKE_TOOLCHAIN_FILE.*"\)\n)/$1endif()\nelse()\nif(CMAKE_TOOLCHAIN_FILE MATCHES "vcpkg.cmake\$")\nunset(CMAKE_TOOLCHAIN_FILE CACHE)\nunset(CMAKE_TOOLCHAIN_FILE)\nendif()\nendif()\n/g' CMakeLists.txt
+          - sed -i '1i set(firebird_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake" CACHE PATH "" FORCE)' CMakeLists.txt
 
   - name: flamerobin
     buildsystem: cmake-ninja

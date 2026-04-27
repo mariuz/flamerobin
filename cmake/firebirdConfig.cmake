@@ -14,6 +14,10 @@ endif()
 # Create a directory structure that satisfies the weird include in Interface.h:
 # We fixed Interface.h to use a proper relative path, so we don't need the symlinks anymore.
 
-target_include_directories(firebird INTERFACE $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src/firebird/include>)
+target_include_directories(firebird INTERFACE 
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../src/firebird/include>
+    $<INSTALL_INTERFACE:include>
+    /app/include
+)
 
 install(TARGETS firebird EXPORT fb-cppTargets)
