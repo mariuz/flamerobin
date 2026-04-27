@@ -4,6 +4,12 @@ option(ENABLE_VCPKG "Enable vcpkg for dependency management" ON)
 set(VCPKG_ROOT "${CMAKE_SOURCE_DIR}/vcpkg")
 if(ENABLE_VCPKG AND EXISTS "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
     set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
+elseif(NOT ENABLE_VCPKG)
+    # If VCPKG is disabled, ensure toolchain file is not set to a relative path from presets
+    if(CMAKE_TOOLCHAIN_FILE MATCHES "vcpkg.cmake$")
+        unset(CMAKE_TOOLCHAIN_FILE CACHE)
+        unset(CMAKE_TOOLCHAIN_FILE)
+    endif()
 endif()
 
 project(flamerobin)

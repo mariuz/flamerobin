@@ -54,14 +54,14 @@ modules:
         sha256: 939e5b77ddc5b6092d1d7d29491fe67010a2433cf9b9c0d841ee4d04acb9dce7
 
   - name: fb-cpp
-    buildsystem: simple
-    build-commands:
-      # Remove vcpkg to prevent automatic discovery or accidental use
-      - rm -rf vcpkg vcpkg.json
-      # Configure and build using standard Makefiles to avoid Ninja dependency issues in 'simple' buildsystem
-      - mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DFB_CPP_USE_BOOST_DLL=OFF -DFB_CPP_USE_BOOST_MULTIPRECISION=OFF -Dfirebird_DIR=../cmake -DENABLE_VCPKG=OFF -DCMAKE_INSTALL_PREFIX=/app
-      - make -C build -j$(nproc)
-      - make -C build install
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DBUILD_TESTING=OFF
+      - -DFB_CPP_USE_BOOST_DLL=OFF
+      - -DFB_CPP_USE_BOOST_MULTIPRECISION=OFF
+      - -Dfirebird_DIR=cmake
+      - -DENABLE_VCPKG=OFF
     sources:
       - type: dir
         path: ../src/fb-cpp
