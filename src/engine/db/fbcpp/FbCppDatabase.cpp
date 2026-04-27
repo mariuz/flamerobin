@@ -27,9 +27,6 @@
 #include <stdexcept>
 #include <firebird/Interface.h>
 
-// Forward declaration of the Firebird entry point
-extern "C" Firebird::IMaster* fb_get_master_interface();
-
 namespace fr
 {
 
