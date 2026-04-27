@@ -2,7 +2,6 @@
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "flamerobin",
   "version-semver": "26.4.0",
-  "builtin-baseline": "d46283cf33cf5de7bd88e12156ce03882be1f179",
   "description": "FlameRobin is a database administration tool for Firebird DBMS",
   "homepage": "https://www.flamerobin.org",
   "license": "MIT",
