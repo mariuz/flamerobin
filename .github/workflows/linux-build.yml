@@ -23,7 +23,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install -y build-essential cmake libwxgtk3.2-dev dpkg-dev libfbclient2 firebird3.0-server firebird3.0-utils firebird-dev firebird3.0-server-core firebird3.0-common rsync
+        sudo apt install -y build-essential cmake libwxgtk3.2-dev dpkg-dev libfbclient2 firebird3.0-server firebird3.0-utils firebird-dev firebird3.0-server-core firebird3.0-common rsync doxygen libboost-all-dev
         sudo ldconfig
 
     # Cache wxWidgets if already built
@@ -55,7 +55,7 @@ jobs:
       run: |
         export PATH="/usr/local/bin:/opt/firebird/bin:${PATH:-}"
         export LD_LIBRARY_PATH="/usr/local/lib:/usr/lib/x86_64-linux-gnu:/opt/firebird/lib:${LD_LIBRARY_PATH:-}"
-        cmake -S . -B Build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/flamerobin/
+        cmake -S . -B Build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/flamerobin/ -DBUILD_TESTING=OFF
 
     # FlameRobin Compilation
     - name: Build Flamerobin
