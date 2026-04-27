@@ -572,9 +572,8 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
 
     timerBlobEditorM.SetOwner(this, TIMER_ID_UPDATE_BLOB);
 
-    CommandManager cm;
-    buildToolbar(cm);
-    buildMainMenu(cm);
+    buildToolbar(CommandManager::get());
+    buildMainMenu(CommandManager::get());
 
     panel_contents = new wxPanel(this, -1, wxDefaultPosition, wxDefaultSize,
         wxTAB_TRAVERSAL);

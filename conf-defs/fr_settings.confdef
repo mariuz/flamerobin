@@ -693,4 +693,11 @@
             <default>0</default>
         </setting>
     </node>
+    <node>
+        <caption>Keyboard Shortcuts</caption>
+        <image>0</image>
+        <setting type="keyboardshortcuts">
+            <key>KeyboardShortcuts</key>
+        </setting>
+    </node>
 </root>

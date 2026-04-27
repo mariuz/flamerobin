@@ -40,14 +40,33 @@ private:
     ShortCutDataMap shortcutsM;
 
     bool findShortcutFor(int id, int& flags, int& keyCode);
-    wxString getShortcutText(int id);
     void init();
 public:
     CommandManager();
+    static CommandManager& get();
 
+    wxString getShortcutText(int id);
     wxString getMainMenuItemText(const wxString& text, int id);
     wxString getPopupMenuItemText(const wxString& text, int id);
     wxString getToolbarHint(const wxString& text, int id);
+
+    void setShortcut(int id, int flags, int keyCode);
+    void getShortcut(int id, int& flags, int& keyCode);
+    
+    void load();
+    void save();
+
+    struct CommandInfo
+    {
+        int id;
+        wxString name;
+        wxString description;
+    };
+    typedef std::vector<CommandInfo> CommandInfoVector;
+    static void getCustomizableCommands(CommandInfoVector& commands);
+
+    static wxString getShortcutString(int flags, int keyCode);
+    static bool parseShortcutString(const wxString& s, int& flags, int& keyCode);
 };
 
 #endif // FR_COMMANDMANAGER_H

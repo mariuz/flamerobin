@@ -980,7 +980,7 @@ private:
     DBHTreeControl* treeM;
     MetadataItem* observedItemM;
 protected:
-    virtual void update();
+    virtual void update() override;
     // Fix for issue #436: clear observedItemM when the subject (MetadataItem)
     // is destroyed (e.g. when a trigger is dropped via SQL).  Without this
     // override the pointer becomes dangling and causes a read-access violation

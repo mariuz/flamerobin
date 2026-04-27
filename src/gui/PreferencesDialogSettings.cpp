@@ -55,6 +55,8 @@
 #include "metadata/column.h"
 #include "metadata/relation.h"
 
+#include "gui/ShortcutCustomizationDialog.h"
+
 static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)
 {
     wxString content;
@@ -1721,6 +1723,89 @@ void PrefDlgColourPickerSetting::setDefault(const wxString& defValue)
 
 
 
+class PrefDlgKeyboardShortcutsSetting : public PrefDlgSetting
+{
+public:
+    PrefDlgKeyboardShortcutsSetting(wxPanel* page, PrefDlgSetting* parent);
+    ~PrefDlgKeyboardShortcutsSetting();
+
+    virtual bool createControl(bool ignoreerrors);
+    virtual bool loadFromTargetConfig(Config& config);
+    virtual bool saveToTargetConfig(Config& config);
+    virtual bool cancelChanges(Config&) { return true; };
+
+protected:
+    virtual void addControlsToSizer(wxSizer* sizer);
+    virtual void enableControls(bool enabled);
+    virtual bool hasControls() const;
+
+private:
+    wxButton* buttonM;
+    std::unique_ptr<wxEvtHandler> buttonHandlerM;
+    void OnButton(wxCommandEvent& event);
+};
+
+PrefDlgKeyboardShortcutsSetting::PrefDlgKeyboardShortcutsSetting(wxPanel* page, PrefDlgSetting* parent)
+    : PrefDlgSetting(page, parent), buttonM(0)
+{
+}
+
+PrefDlgKeyboardShortcutsSetting::~PrefDlgKeyboardShortcutsSetting()
+{
+    if (buttonM && buttonHandlerM.get())
+        buttonM->PopEventHandler();
+}
+
+void PrefDlgKeyboardShortcutsSetting::addControlsToSizer(wxSizer* sizer)
+{
+    if (buttonM)
+        sizer->Add(buttonM, 0, wxFIXED_MINSIZE);
+}
+
+bool PrefDlgKeyboardShortcutsSetting::createControl(bool /*ignoreerrors*/)
+{
+    buttonM = new wxButton(getPage(), wxID_ANY, _("Customize Shortcuts..."));
+    if (!descriptionM.empty())
+        buttonM->SetToolTip(descriptionM);
+
+    buttonHandlerM.reset(new PrefDlgEventHandler(
+        std::bind(&PrefDlgKeyboardShortcutsSetting::OnButton, this, std::placeholders::_1)));
+    buttonM->PushEventHandler(buttonHandlerM.get());
+    buttonHandlerM->Connect(buttonM->GetId(),
+        wxEVT_COMMAND_BUTTON_CLICKED,
+        wxCommandEventHandler(PrefDlgEventHandler::OnCommandEvent));
+
+    return true;
+}
+
+void PrefDlgKeyboardShortcutsSetting::enableControls(bool enabled)
+{
+    if (buttonM)
+        buttonM->Enable(enabled);
+}
+
+bool PrefDlgKeyboardShortcutsSetting::hasControls() const
+{
+    return buttonM != 0;
+}
+
+bool PrefDlgKeyboardShortcutsSetting::loadFromTargetConfig(Config& /*config*/)
+{
+    return true;
+}
+
+bool PrefDlgKeyboardShortcutsSetting::saveToTargetConfig(Config& /*config*/)
+{
+    return true;
+}
+
+void PrefDlgKeyboardShortcutsSetting::OnButton(wxCommandEvent& /*event*/)
+{
+    ShortcutCustomizationDialog dlg(getPage());
+    dlg.ShowModal();
+}
+
+
 // PrefDlgSetting factory
 /* static */
 PrefDlgSetting* PrefDlgSetting::createPrefDlgSetting(wxPanel* page,
@@ -1741,6 +1826,8 @@ PrefDlgSetting* PrefDlgSetting::createPrefDlgSetting(wxPanel* page,
         return new PrefDlgRadioboxSetting(page, parent);
     if (type == "int")
         return new PrefDlgIntEditSetting(page, parent);
+    if (type == "keyboardshortcuts")
+        return new PrefDlgKeyboardShortcutsSetting(page, parent);
     if (type == "string")
         return new PrefDlgStringEditSetting(page, parent);
     if (type == "file")

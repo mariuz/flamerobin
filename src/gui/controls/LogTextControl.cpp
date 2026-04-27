@@ -127,15 +127,14 @@ void LogTextControl::OnContextMenu(wxContextMenuEvent& event)
 {
     SetFocus();
 
-    CommandManager cm;
     wxMenu m;
-    m.Append(wxID_COPY, cm.getPopupMenuItemText(_("&Copy"), wxID_COPY));
+    m.Append(wxID_COPY, CommandManager::get().getPopupMenuItemText(_("&Copy"), wxID_COPY));
     m.AppendSeparator();
     m.Append(wxID_DELETE,
-        cm.getPopupMenuItemText(_("Clear al&l"), wxID_DELETE));
+        CommandManager::get().getPopupMenuItemText(_("Clear al&l"), wxID_DELETE));
     m.AppendSeparator();
     m.Append(wxID_SELECTALL,
-        cm.getPopupMenuItemText(_("Select &all"), wxID_SELECTALL));
+        CommandManager::get().getPopupMenuItemText(_("Select &all"), wxID_SELECTALL));
 
     PopupMenu(&m, calcContextMenuPosition(event.GetPosition(), this));
 }
