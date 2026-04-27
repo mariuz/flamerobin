@@ -78,6 +78,7 @@ jobs:
       env:
         VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg_archives
       run: |
+        mkdir -p vcpkg_archives
         for i in {1..3}; do
           ./vcpkg/vcpkg install --triplet ${{ matrix.arch }}-windows && break
           echo "vcpkg install failed, retrying in 10 seconds..."
