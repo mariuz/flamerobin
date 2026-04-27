@@ -22,6 +22,18 @@ jobs:
     - name: Bootstrap vcpkg
       run: ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
 
+    - name: Cache vcpkg artifacts
+      uses: actions/cache@v4
+      with:
+        path: |
+            vcpkg/downloads
+            vcpkg/buildtrees
+            vcpkg/packages
+            Build/vcpkg_installed
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
+        restore-keys: |
+            ${{ runner.os }}-vcpkg-
+
     # Installing required dependencies
     - name: Install dependencies
       run: |

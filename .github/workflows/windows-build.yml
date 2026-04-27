@@ -21,6 +21,19 @@ jobs:
     - name: Bootstrap vcpkg
       run: .\vcpkg\bootstrap-vcpkg.bat -disableMetrics
     
+    - name: Cache vcpkg artifacts
+      uses: actions/cache@v4
+      with:
+        path: |
+            vcpkg/downloads
+            vcpkg/buildtrees
+            vcpkg/packages
+            Build32/vcpkg_installed
+            Build64/vcpkg_installed
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
+        restore-keys: |
+            ${{ runner.os }}-vcpkg-
+    
     - name: wxWidget cache
       id: cache-wxwidget
       uses: actions/cache@v4

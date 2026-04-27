@@ -25,6 +25,18 @@ jobs:
     - name: Bootstrap vcpkg
       run: ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
 
+    - name: Cache vcpkg artifacts
+      uses: actions/cache@v4
+      with:
+        path: |
+            vcpkg/downloads
+            vcpkg/buildtrees
+            vcpkg/packages
+            Build/vcpkg_installed
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
+        restore-keys: |
+            ${{ runner.os }}-vcpkg-
+
     # Install wxWidgets via Homebrew (avoids building from source with cmake 4.0+
     # which is incompatible with wxWidgets 3.2.x cmake_minimum_required VERSION)
     - name: Install wxWidgets

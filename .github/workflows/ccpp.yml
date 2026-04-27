@@ -50,6 +50,17 @@ jobs:
         submodules: recursive
     - name: Bootstrap vcpkg
       run: ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
+    - name: Cache vcpkg artifacts
+      uses: actions/cache@v4
+      with:
+        path: |
+            vcpkg/downloads
+            vcpkg/buildtrees
+            vcpkg/packages
+            build/vcpkg_installed
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
+        restore-keys: |
+            ${{ runner.os }}-vcpkg-
     - name: apt update
       run: sudo apt-get update
     - name: Install tools and libs
