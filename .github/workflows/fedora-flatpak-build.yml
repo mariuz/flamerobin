@@ -22,11 +22,12 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-
-      - name: Set FlameRobin version
-        run: |
-          FLAMEROBIN_VERSION=$(awk '
-            /FR_VERSION_MAJOR/ { major = $3 }
+- name: Set FlameRobin version
+  run: |
+    rm -rf src/fb-cpp/vcpkg
+    FLAMEROBIN_VERSION=$(awk '
+      /FR_VERSION_MAJOR/ { major = $3 }
+...
             /FR_VERSION_MINOR/ { minor = $3 }
             /FR_VERSION_RLS/   { rls   = $3 }
             END { print major "." minor "." rls }
