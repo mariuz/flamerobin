@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg-configuration.schema.json",
+  "default-registry": {
+    "kind": "git",
+    "repository": "https://github.com/microsoft/vcpkg",
+    "baseline": "8fbf295ab5283313932f65a597a2c1f09a73fafd"
+  },
+  "registries": [
+    {
+      "kind": "git",
+      "repository": "https://github.com/asfernandes/firebird-vcpkg-registry.git",
+      "baseline": "1f7b80aad8fed039d710b735bd0c038beef7b7ee",
+      "packages": [ "firebird" ]
+    }
+  ],
+  "overlay-triplets": [
+    "src/fb-cpp/cmake/triplets"
+  ]
+}
