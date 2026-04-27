@@ -81,7 +81,11 @@ endif (WIN32)
 set(wxWidgets_USE_UNICODE ON)
 
 # Find the wxWidgets library
-find_package(wxWidgets REQUIRED core base html xml aui stc adv net webview OPTIONAL_COMPONENTS scintilla)
+if (UNIX AND NOT APPLE)
+    find_package(wxWidgets REQUIRED core base html xml aui stc adv net OPTIONAL_COMPONENTS webview scintilla)
+else()
+    find_package(wxWidgets REQUIRED core base html xml aui stc adv net webview OPTIONAL_COMPONENTS scintilla)
+endif()
 message(STATUS "wxWidgets version : ${wxWidgets_VERSION_STRING}")
 
 # For wx3.0 the Scintilla lib is not present, but older wx find_package doesn't seem to
