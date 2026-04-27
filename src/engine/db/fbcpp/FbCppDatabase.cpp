@@ -27,6 +27,10 @@
 #include <stdexcept>
 #include <firebird/Interface.h>
 
+// Forward declaration of the Firebird entry point
+// We use ISC_EXPORT to match the declaration in Interface.h and avoid redefinition errors on MSVC
+extern "C" Firebird::IMaster* ISC_EXPORT fb_get_master_interface();
+
 namespace fr
 {
 
@@ -38,7 +42,7 @@ void FbCppDatabase::connect()
 {
     if (!clientM)
     {
-        Firebird::IMaster* master = Firebird::fb_get_master_interface();
+        Firebird::IMaster* master = fb_get_master_interface();
         if (!master)
             throw std::runtime_error("Failed to get Firebird master interface");
         clientM.emplace(master);
