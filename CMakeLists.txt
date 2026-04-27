@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.18)
 
+option(ENABLE_VCPKG "Enable vcpkg for dependency management" ON)
 set(VCPKG_ROOT "${CMAKE_SOURCE_DIR}/vcpkg")
-if(EXISTS "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
+if(ENABLE_VCPKG AND EXISTS "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
     set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
 endif()
 

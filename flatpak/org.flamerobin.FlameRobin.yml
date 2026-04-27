@@ -58,6 +58,8 @@ modules:
     builddir: true
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release
+      - -DENABLE_VCPKG=OFF
+      - -DFB_CPP_BUILD_TESTS=OFF
     sources:
       - type: dir
         path: ..
