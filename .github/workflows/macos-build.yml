@@ -40,8 +40,8 @@ jobs:
 
     # Install wxWidgets via Homebrew (avoids building from source with cmake 4.0+
     # which is incompatible with wxWidgets 3.2.x cmake_minimum_required VERSION)
-    - name: Install wxWidgets
-      run: brew install wxwidgets
+    - name: Install dependencies
+      run: brew install wxwidgets autoconf automake libtool
 
     # Install Firebird
     - name: Install Firebird
