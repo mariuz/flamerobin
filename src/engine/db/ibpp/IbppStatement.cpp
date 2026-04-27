@@ -132,9 +132,24 @@ std::string IbppStatement::getColumnName(int index)
     return statementM->ColumnName(index + 1);
 }
 
-int IbppStatement::getColumnType(int index)
+ColumnType IbppStatement::getColumnType(int index)
 {
-    return (int)statementM->ColumnType(index + 1);
+    IBPP::SDT type = statementM->ColumnType(index + 1);
+    switch (type)
+    {
+        case IBPP::sdString: return ColumnType::Varchar;
+        case IBPP::sdLargeint: return ColumnType::BigInt;
+        case IBPP::sdInteger: return ColumnType::Integer;
+        case IBPP::sdSmallint: return ColumnType::Integer;
+        case IBPP::sdFloat: return ColumnType::Float;
+        case IBPP::sdDouble: return ColumnType::Double;
+        case IBPP::sdDate: return ColumnType::Date;
+        case IBPP::sdTime: return ColumnType::Time;
+        case IBPP::sdTimestamp: return ColumnType::Timestamp;
+        case IBPP::sdBlob: return ColumnType::Blob;
+        case IBPP::sdBoolean: return ColumnType::Boolean;
+        default: return ColumnType::Unknown;
+    }
 }
 
 } // namespace fr

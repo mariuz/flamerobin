@@ -27,6 +27,7 @@
 #include "engine/db/IDatabase.h"
 #include <fb-cpp/fb-cpp.h>
 #include <optional>
+#include <stdexcept>
 
 namespace fr
 {
@@ -51,7 +52,12 @@ public:
 
     virtual DatabaseBackend getBackendType() const override { return DatabaseBackend::FbCpp; }
 
-    fbcpp::Attachment& getAttachment() { return *attachmentM; }
+    fbcpp::Attachment& getAttachment() 
+    { 
+        if (!attachmentM)
+            throw std::runtime_error("Database not connected");
+        return *attachmentM; 
+    }
 
 private:
     std::optional<fbcpp::Client> clientM;

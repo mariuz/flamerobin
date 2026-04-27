@@ -60,7 +60,7 @@ public:
 
     virtual int getColumnCount() = 0;
     virtual std::string getColumnName(int index) = 0;
-    virtual int getColumnType(int index) = 0;
+    virtual ColumnType getColumnType(int index) = 0;
 };
 
 } // namespace fr

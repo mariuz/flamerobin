@@ -139,7 +139,7 @@ void Server::acceptVisitor(MetadataItemVisitor* visitor)
     visitor->visitServer(*this);
 }
 
-fr::IServicePtr Server::getDALService(ProgressIndicator* progressind, bool sysdba)
+fr::IServicePtr Server::getDALService(ProgressIndicator* /*progressind*/, bool sysdba)
 {
     fr::IServicePtr svc = fr::DatabaseFactory::createService();
     svc->setConnectionString(wx2std(getConnectionString()));

@@ -27,9 +27,8 @@ namespace fr
 {
 
 IbppTransaction::IbppTransaction(IBPP::Database db)
-    : modeM(TransactionAccessMode::Read), levelM(TransactionIsolationLevel::ReadCommitted)
+    : databaseM(db), modeM(TransactionAccessMode::Read), levelM(TransactionIsolationLevel::ReadCommitted)
 {
-    transactionM = IBPP::TransactionFactory(db);
 }
 
 void IbppTransaction::start()
@@ -39,33 +38,43 @@ void IbppTransaction::start()
     if (levelM == TransactionIsolationLevel::Consistency) il = IBPP::ilConsistency;
     else if (levelM == TransactionIsolationLevel::Concurrency) il = IBPP::ilConcurrency;
     
-    // In IBPP, you must attach databases before starting, but TransactionFactory(db) already attached one.
+    transactionM = IBPP::TransactionFactory(databaseM, am, il);
     transactionM->Start();
 }
 
 void IbppTransaction::commit()
 {
-    transactionM->Commit();
+    if (transactionM.intf())
+    {
+        transactionM->Commit();
+        transactionM = nullptr;
+    }
 }
 
 void IbppTransaction::rollback()
 {
-    transactionM->Rollback();
+    if (transactionM.intf())
+    {
+        transactionM->Rollback();
+        transactionM = nullptr;
+    }
 }
 
 void IbppTransaction::commitRetain()
 {
-    transactionM->CommitRetain();
+    if (transactionM.intf())
+        transactionM->CommitRetain();
 }
 
 void IbppTransaction::rollbackRetain()
 {
-    transactionM->RollbackRetain();
+    if (transactionM.intf())
+        transactionM->RollbackRetain();
 }
 
 bool IbppTransaction::isActive()
 {
-    return transactionM->Started();
+    return transactionM.intf() && transactionM->Started();
 }
 
 void IbppTransaction::setAccessMode(TransactionAccessMode mode)

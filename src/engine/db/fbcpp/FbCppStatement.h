@@ -60,7 +60,7 @@ public:
 
     virtual int getColumnCount() override;
     virtual std::string getColumnName(int index) override;
-    virtual int getColumnType(int index) override;
+    virtual ColumnType getColumnType(int index) override;
 
 private:
     fbcpp::Attachment& attachmentM;

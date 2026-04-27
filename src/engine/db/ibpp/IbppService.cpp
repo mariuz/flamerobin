@@ -32,7 +32,7 @@ IbppService::IbppService()
 
 void IbppService::connect()
 {
-    serviceM = IBPP::ServiceFactory("", userM, passwordM, "", "");
+    serviceM = IBPP::ServiceFactory(connStrM, userM, passwordM, "", "");
     serviceM->Connect();
 }
 

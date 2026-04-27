@@ -159,14 +159,29 @@ std::string FbCppStatement::getColumnName(int index)
     return descriptors[index].alias.empty() ? descriptors[index].name : descriptors[index].alias;
 }
 
-int FbCppStatement::getColumnType(int index)
+ColumnType FbCppStatement::getColumnType(int index)
 {
     if (!statementM)
-        return 0;
+        return ColumnType::Unknown;
     const auto& descriptors = statementM->getOutputDescriptors();
     if ((unsigned)index >= descriptors.size())
-        return 0;
-    return (int)descriptors[index].adjustedType;
+        return ColumnType::Unknown;
+    
+    switch (descriptors[index].adjustedType)
+    {
+        case fbcpp::DescriptorAdjustedType::STRING: return ColumnType::Varchar;
+        case fbcpp::DescriptorAdjustedType::INT32: return ColumnType::Integer;
+        case fbcpp::DescriptorAdjustedType::INT16: return ColumnType::Integer;
+        case fbcpp::DescriptorAdjustedType::INT64: return ColumnType::BigInt;
+        case fbcpp::DescriptorAdjustedType::FLOAT: return ColumnType::Float;
+        case fbcpp::DescriptorAdjustedType::DOUBLE: return ColumnType::Double;
+        case fbcpp::DescriptorAdjustedType::TIME: return ColumnType::Time;
+        case fbcpp::DescriptorAdjustedType::DATE: return ColumnType::Date;
+        case fbcpp::DescriptorAdjustedType::TIMESTAMP: return ColumnType::Timestamp;
+        case fbcpp::DescriptorAdjustedType::BLOB: return ColumnType::Blob;
+        case fbcpp::DescriptorAdjustedType::BOOLEAN: return ColumnType::Boolean;
+        default: return ColumnType::Unknown;
+    }
 }
 
 } // namespace fr

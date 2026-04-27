@@ -50,6 +50,7 @@ public:
     IBPP::Transaction& getIBPPTransaction() { return transactionM; }
 
 private:
+    IBPP::Database databaseM;
     IBPP::Transaction transactionM;
     TransactionAccessMode modeM;
     TransactionIsolationLevel levelM;

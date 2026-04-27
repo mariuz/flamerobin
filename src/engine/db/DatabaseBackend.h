@@ -37,6 +37,24 @@ enum class DatabaseBackend
     FbCpp
 };
 
+enum class ColumnType
+{
+    Unknown,
+    Char,
+    Varchar,
+    Integer,
+    BigInt,
+    Float,
+    Double,
+    Boolean,
+    Date,
+    Time,
+    Timestamp,
+    Blob,
+    Numeric,
+    Decimal
+};
+
 // Common types and forward declarations
 class IDatabase;
 class ITransaction;
