@@ -55,9 +55,9 @@ ShortcutCustomizationDialog::ShortcutCustomizationDialog(wxWindow* parent)
     wxBoxSizer* sizerButtons = new wxBoxSizer(wxHORIZONTAL);
     wxButton* btnChange = new wxButton(this, ID_button_change, _("Change Shortcut..."));
     sizerButtons->Add(btnChange, 0, wxALL, styleguide().getRelatedControlMargin(wxHORIZONTAL));
-    
+
     sizerButtons->AddStretchSpacer();
-    
+
     sizerButtons->Add(CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL, styleguide().getRelatedControlMargin(wxHORIZONTAL));
 
     sizerMain->Add(sizerButtons, 0, wxEXPAND | wxALL, styleguide().getDialogMargin(wxTOP));
