@@ -1,3 +1,6 @@
 [submodule "src/fb-cpp"]
 	path = src/fb-cpp
 	url = https://github.com/asfernandes/fb-cpp.git
+[submodule "vcpkg"]
+	path = vcpkg
+	url = https://github.com/microsoft/vcpkg.git

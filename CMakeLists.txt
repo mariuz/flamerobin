@@ -1,4 +1,10 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.18)
+
+set(VCPKG_ROOT "${CMAKE_SOURCE_DIR}/vcpkg")
+if(EXISTS "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
+    set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
+endif()
+
 project(flamerobin)
 
 # Don't allow in-source builds. Keeps things nice and tidy
