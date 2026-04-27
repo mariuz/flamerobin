@@ -24,12 +24,13 @@ jobs:
           fetch-depth: 0
       - name: Set FlameRobin version
         run: |
-          pwd
-          ls -la
-          ls -la src/ || true
-          ls -la src/fb-cpp || true
-          [ -f src/fb-cpp/CMakeLists.txt ] && echo "fb-cpp CMakeLists.txt found" || echo "fb-cpp CMakeLists.txt NOT found"
-          rm -rf src/fb-cpp/vcpkg
+          # If src/fb-cpp exists but has no CMakeLists.txt, remove it so flamerobin
+          # doesn't try to use it as a submodule and instead uses find_package.
+          if [ -d src/fb-cpp ] && [ ! -f src/fb-cpp/CMakeLists.txt ]; then
+            echo "Removing incomplete fb-cpp submodule directory"
+            rm -rf src/fb-cpp
+          fi
+          rm -rf src/fb-cpp/vcpkg || true
           FLAMEROBIN_VERSION=$(awk '
             /FR_VERSION_MAJOR/ { major = $3 }
 ...            /FR_VERSION_MINOR/ { minor = $3 }
