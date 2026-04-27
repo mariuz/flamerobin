@@ -126,6 +126,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/RestoreFrame.cpp
         ${SOURCEDIR}/gui/ServerRegistrationDialog.cpp
         ${SOURCEDIR}/gui/ServiceBaseFrame.cpp
+        ${SOURCEDIR}/gui/ShortcutCustomizationDialog.cpp
         ${SOURCEDIR}/gui/ShutdownFrame.cpp
         ${SOURCEDIR}/gui/ShutdownStartupBaseFrame.cpp
         ${SOURCEDIR}/gui/SimpleHtmlFrame.cpp
@@ -251,6 +252,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/gui/RestoreFrame.h
         ${SOURCEDIR}/gui/ServerRegistrationDialog.h
         ${SOURCEDIR}/gui/ServiceBaseFrame.h
+        ${SOURCEDIR}/gui/ShortcutCustomizationDialog.h
         ${SOURCEDIR}/gui/ShutdownFrame.h
         ${SOURCEDIR}/gui/ShutdownStartupBaseFrame.h
         ${SOURCEDIR}/gui/SimpleHtmlFrame.h
