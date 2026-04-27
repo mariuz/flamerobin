@@ -56,7 +56,8 @@ modules:
       - --enable-graphics_ctx
       - --with-gtk=3
       - --with-libnotify
-      - --with-opengl
+      - --without-opengl
+      - --without-liblzma
       - --with-expat=builtin
       - --with-zlib=builtin
       - --with-libpng=builtin
