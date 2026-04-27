@@ -51,7 +51,6 @@ modules:
       - -DCMAKE_BUILD_TYPE=Release
       - -DwxBUILD_SHARED=ON
       - -DwxUSE_WEBVIEW=ON
-      - -DwxUSE_WEBVIEW_WEBKIT=ON
       - -DwxUSE_GTK3=ON
       - -DwxUSE_LIBSECRET=OFF
     sources:
@@ -82,6 +81,7 @@ modules:
           - perl -i -0777 -pe 's/set\(VCPKG_ROOT "vcpkg"\)\nset\(CMAKE_TOOLCHAIN_FILE/option(ENABLE_VCPKG "Enable vcpkg" ON)\nif(ENABLE_VCPKG)\nset(VCPKG_ROOT "vcpkg")\nif(EXISTS "\${VCPKG_ROOT}\/scripts\/buildsystems\/vcpkg.cmake")\nset(CMAKE_TOOLCHAIN_FILE/g' CMakeLists.txt
           - perl -i -0777 -pe 's/(set\(CMAKE_TOOLCHAIN_FILE.*"\)\n)/$1endif()\nelse()\nif(CMAKE_TOOLCHAIN_FILE MATCHES "vcpkg.cmake\$")\nunset(CMAKE_TOOLCHAIN_FILE CACHE)\nunset(CMAKE_TOOLCHAIN_FILE)\nendif()\nendif()\n/g' CMakeLists.txt
           - sed -i '1i set(firebird_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake" CACHE PATH "" FORCE)' CMakeLists.txt
+          - sed -i 's|DESTINATION fb-cpp/cmake/${PROJECT_NAME}|DESTINATION lib/cmake/${PROJECT_NAME}|g' CMakeLists.txt
 
   - name: flamerobin
     buildsystem: cmake-ninja
@@ -91,7 +91,9 @@ modules:
       - -DENABLE_VCPKG=OFF
       - -DENABLE_INTERNAL_FBCPP=OFF
       - -DFB_CPP_BUILD_TESTS=OFF
-      - -Dfirebird_DIR=/app/fb-cpp/cmake/fb-cpp
+      - -Dfirebird_DIR=/app/lib/cmake/fb-cpp
+      - -DwxWidgets_CONFIG_EXECUTABLE=/app/bin/wx-config
+      - -DCMAKE_PREFIX_PATH=/app
     sources:
       - type: dir
         path: ..
