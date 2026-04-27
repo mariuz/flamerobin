@@ -38,7 +38,7 @@ void FbCppDatabase::connect()
 {
     if (!clientM)
     {
-        Firebird::IMaster* master = fb_get_master_interface();
+        Firebird::IMaster* master = Firebird::fb_get_master_interface();
         if (!master)
             throw std::runtime_error("Failed to get Firebird master interface");
         clientM.emplace(master);
