@@ -67,14 +67,14 @@ endif (WIN32)
 set(wxWidgets_USE_UNICODE ON)
 
 # Find the wxWidgets library
-find_package(wxWidgets REQUIRED core base html xml aui stc adv net OPTIONAL_COMPONENTS scintilla)
+find_package(wxWidgets REQUIRED core base html xml aui stc adv net webview OPTIONAL_COMPONENTS scintilla)
 message(STATUS "wxWidgets version : ${wxWidgets_VERSION_STRING}")
 
 # For wx3.0 the Scintilla lib is not present, but older wx find_package doesn't seem to
 # understand this (even if marked optional), so we have to recheck, without Scintilla
 if ( (${CMAKE_VERSION} VERSION_LESS "3.16") AND (${wxWidgets_VERSION_STRING} VERSION_LESS "3.1") )
 	message(STATUS "Re-doing find_package for wx3.0 builds...")
-	find_package(wxWidgets REQUIRED core base html xml aui stc adv net)
+	find_package(wxWidgets REQUIRED core base html xml aui stc adv net webview)
 endif ()
 
 # Add wxWidgets to include path

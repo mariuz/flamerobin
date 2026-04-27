@@ -12,7 +12,13 @@
     "boost-test",
     "firebird",
     "icu",
-    "wxwidgets"
+    {
+      "name": "wxwidgets",
+      "features": [
+        "webview",
+        "stc"
+      ]
+    }
   ],
   "overrides": [
     {
