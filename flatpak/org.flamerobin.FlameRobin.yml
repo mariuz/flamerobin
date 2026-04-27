@@ -60,7 +60,7 @@ modules:
       - perl -i -0777 -pe 's/set\(VCPKG_ROOT "vcpkg"\)\nset\(CMAKE_TOOLCHAIN_FILE/option(ENABLE_VCPKG "Enable vcpkg" ON)\nif(ENABLE_VCPKG)\nset(VCPKG_ROOT "vcpkg")\nif(EXISTS "\${VCPKG_ROOT}\/scripts\/buildsystems\/vcpkg.cmake")\nset(CMAKE_TOOLCHAIN_FILE/g' CMakeLists.txt
       - perl -i -0777 -pe 's/(set\(CMAKE_TOOLCHAIN_FILE.*"\)\n)/$1endif()\nendif()\n/g' CMakeLists.txt
       # Configure and build
-      - mkdir build && cd build && cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release -DFB_CPP_BUILD_TESTS=OFF -DFB_CPP_USE_BOOST_DLL=OFF -DFB_CPP_USE_BOOST_MULTIPRECISION=OFF -Dfirebird_DIR=/app -DENABLE_VCPKG=OFF -DCMAKE_INSTALL_PREFIX=/app
+      - mkdir build && cd build && cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release -DFB_CPP_BUILD_TESTS=OFF -DFB_CPP_USE_BOOST_DLL=OFF -DFB_CPP_USE_BOOST_MULTIPRECISION=OFF -Dfirebird_DIR=.. -DENABLE_VCPKG=OFF -DCMAKE_INSTALL_PREFIX=/app
       - ninja -C build
       - ninja -C build install
     sources:
