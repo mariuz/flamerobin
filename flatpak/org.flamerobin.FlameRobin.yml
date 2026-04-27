@@ -34,8 +34,9 @@ modules:
       - ln -sf libfbclient.so.2 /app/lib/libfbclient.so
       - install -Dm755 opt/firebird/lib/libib_util.so /app/lib/libib_util.so
       - install -Dm755 opt/firebird/lib/libtomcrypt.so.1.0.1 /app/lib/libtomcrypt.so.1.0.1
+      - ln -sf libtomcrypt.so.1 /app/lib/libtomcrypt.so.1
       - ln -sf libtomcrypt.so.1 /app/lib/libtomcrypt.so
-      - ln -sf libtomcrypt.so.1 /app/lib/libtomcrypt.so
+      - mkdir -p /app/include
       - cp -r opt/firebird/include/* /app/include/
     sources:
       - type: archive
@@ -49,6 +50,9 @@ modules:
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release
       - -DwxBUILD_SHARED=OFF
+      - -DwxUSE_WEBVIEW=ON
+      - -DwxUSE_GTK3=ON
+      - -DwxUSE_LIBSECRET=OFF
     sources:
       - type: archive
         url: https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.6/wxWidgets-3.2.6.tar.bz2
@@ -86,6 +90,7 @@ modules:
       - -DENABLE_VCPKG=OFF
       - -DENABLE_INTERNAL_FBCPP=OFF
       - -DFB_CPP_BUILD_TESTS=OFF
+      - -Dfirebird_DIR=/app/lib/fb-cpp/cmake/fb-cpp
     sources:
       - type: dir
         path: ..

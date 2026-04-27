@@ -11,13 +11,17 @@ elseif (WIN32)
     target_link_libraries(firebird INTERFACE fbclient)
 endif()
 
-# Create a directory structure that satisfies the weird include in Interface.h:
-# We fixed Interface.h to use a proper relative path, so we don't need the symlinks anymore.
+# Firebird headers
+if(EXISTS "/app/include/ibase.h")
+    set(FIREBIRD_INCLUDE_DIRS "/app/include")
+else()
+    set(FIREBIRD_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/../src/firebird/include")
+endif()
 
 target_include_directories(firebird INTERFACE 
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/../src/firebird/include>
+    $<BUILD_INTERFACE:${FIREBIRD_INCLUDE_DIRS}>
     $<INSTALL_INTERFACE:include>
-    /app/include
+    ${FIREBIRD_INCLUDE_DIRS}
 )
 
 install(TARGETS firebird EXPORT fb-cppTargets)
