@@ -32,13 +32,19 @@ option(FB_CPP_USE_BOOST_DLL "Enable Boost.DLL support for loading fbclient at ru
 option(FB_CPP_USE_BOOST_MULTIPRECISION "Enable Boost.Multiprecision helpers for INT128 and DECFLOAT types" OFF)
 
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/fb-cpp/CMakeLists.txt")
-    message(STATUS "Found fb-cpp submodule, building internally")
+    option(ENABLE_INTERNAL_FBCPP "Build fb-cpp from internal submodule" ON)
+else()
+    option(ENABLE_INTERNAL_FBCPP "Build fb-cpp from internal submodule" OFF)
+endif()
+
+if(ENABLE_INTERNAL_FBCPP)
+    message(STATUS "Building fb-cpp internally from submodule")
     set(OLD_BUILD_TESTING ${BUILD_TESTING})
     set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
     add_subdirectory(src/fb-cpp EXCLUDE_FROM_ALL)
     set(BUILD_TESTING ${OLD_BUILD_TESTING} CACHE BOOL "" FORCE)
 else()
-    message(STATUS "fb-cpp submodule not found, searching for system package")
+    message(STATUS "Searching for system fb-cpp package")
     find_package(fb-cpp CONFIG REQUIRED)
 endif()
 
