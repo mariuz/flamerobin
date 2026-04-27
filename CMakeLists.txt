@@ -624,6 +624,18 @@ add_executable(subject_observer_test
 )
 target_link_libraries(subject_observer_test ${wxWidgets_LIBRARIES})
 add_test(NAME subject_observer_test COMMAND subject_observer_test)
+
+add_executable(command_manager_test
+    ${SOURCEDIR}/gui/CommandManagerTest.cpp
+    ${SOURCEDIR}/gui/CommandManager.cpp
+    ${SOURCEDIR}/config/Config.cpp
+    ${SOURCEDIR}/core/Observer.cpp
+    ${SOURCEDIR}/core/Subject.cpp
+    ${SOURCEDIR}/core/FRError.cpp
+    ${SOURCEDIR}/sql/TestStringUtils.cpp
+)
+target_link_libraries(command_manager_test ${wxWidgets_LIBRARIES})
+add_test(NAME command_manager_test COMMAND command_manager_test)
 if (APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES
                 BUILD_WITH_INSTALL_RPATH FALSE

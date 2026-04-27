@@ -50,7 +50,7 @@ ShortcutCustomizationDialog::ShortcutCustomizationDialog(wxWindow* parent)
     listCtrlM->InsertColumn(0, _("Command"), wxLIST_FORMAT_LEFT, 250);
     listCtrlM->InsertColumn(1, _("Shortcut"), wxLIST_FORMAT_LEFT, 150);
 
-    sizerMain->Add(listCtrlM, 1, wxEXPAND | wxALL, styleguide().getMargin(wxVERTICAL));
+    sizerMain->Add(listCtrlM, 1, wxEXPAND | wxALL, styleguide().getDialogMargin(wxTOP));
 
     wxBoxSizer* sizerButtons = new wxBoxSizer(wxHORIZONTAL);
     wxButton* btnChange = new wxButton(this, ID_button_change, _("Change Shortcut..."));
@@ -60,7 +60,7 @@ ShortcutCustomizationDialog::ShortcutCustomizationDialog(wxWindow* parent)
     
     sizerButtons->Add(CreateButtonSizer(wxOK | wxCANCEL), 0, wxALL, styleguide().getRelatedControlMargin(wxHORIZONTAL));
 
-    sizerMain->Add(sizerButtons, 0, wxEXPAND | wxALL, styleguide().getMargin(wxVERTICAL));
+    sizerMain->Add(sizerButtons, 0, wxEXPAND | wxALL, styleguide().getDialogMargin(wxTOP));
 
     SetSizerAndFit(sizerMain);
     SetSize(500, 400);
@@ -128,7 +128,8 @@ void ShortcutCaptureDialog::OnKeyDown(wxKeyEvent& event)
     int keyCode = event.GetKeyCode();
     
     // Ignore pure modifier keys
-    if (keyCode == WXK_CONTROL || keyCode == WXK_SHIFT || keyCode == WXK_ALT || keyCode == WXK_WINDOWS)
+    if (keyCode == WXK_CONTROL || keyCode == WXK_SHIFT || keyCode == WXK_ALT 
+        || keyCode == WXK_WINDOWS_LEFT || keyCode == WXK_WINDOWS_RIGHT)
     {
         event.Skip();
         return;

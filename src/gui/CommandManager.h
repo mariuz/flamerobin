@@ -40,11 +40,11 @@ private:
     ShortCutDataMap shortcutsM;
 
     bool findShortcutFor(int id, int& flags, int& keyCode);
-    wxString getShortcutText(int id);
     void init();
 public:
     CommandManager();
 
+    wxString getShortcutText(int id);
     wxString getMainMenuItemText(const wxString& text, int id);
     wxString getPopupMenuItemText(const wxString& text, int id);
     wxString getToolbarHint(const wxString& text, int id);
