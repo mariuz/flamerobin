@@ -1,0 +1,183 @@
+name: Upload Release Artifacts
+
+on:
+  release:
+    types: [published, edited]
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential cmake libwxgtk3.2-dev dpkg-dev libfbclient2 firebird3.0-server firebird3.0-utils firebird-dev firebird3.0-server-core firebird3.0-common rsync
+          sudo ldconfig
+
+      - name: wxWidget cache
+        id: cache-wxwidget
+        uses: actions/cache@v4
+        with:
+          path: wxWidgets
+          key: ${{ runner.os }}-wxwidgets-v3.2.6
+          restore-keys: ${{ runner.os }}-wxwidgets-v3.2.6
+
+      - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
+        name: Clone wxWidgets
+        run: git clone --recursive --branch v3.2.6 --depth 1 https://github.com/wxWidgets/wxWidgets.git
+
+      - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
+        name: Build wxWidgets
+        run: |
+          cd wxWidgets
+          mkdir build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DwxBUILD_SHARED=OFF
+          make -j$(nproc)
+          sudo make install
+          sudo ldconfig
+
+      - name: Generate CMake project
+        run: |
+          export PATH="/usr/local/bin:/opt/firebird/bin:${PATH:-}"
+          export LD_LIBRARY_PATH="/usr/local/lib:/usr/lib/x86_64-linux-gnu:/opt/firebird/lib:${LD_LIBRARY_PATH:-}"
+          cmake -S . -B Build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/flamerobin/
+
+      - name: Build Flamerobin
+        run: |
+          export PATH="/usr/local/bin:/opt/firebird/bin:${PATH:-}"
+          export LD_LIBRARY_PATH="/usr/local/lib:/usr/lib/x86_64-linux-gnu:/opt/firebird/lib:${LD_LIBRARY_PATH:-}"
+          cmake --build Build --config Release -j$(nproc)
+
+      - name: Prepare .deb package
+        run: |
+          FLAMEROBIN_VERSION=$(awk '
+            /FR_VERSION_MAJOR/ { major = $3 } 
+            /FR_VERSION_MINOR/ { minor = $3 }
+            /FR_VERSION_RLS/   { rls   = $3 }
+            END { print major "." minor "." rls }
+            ' src/frversion.h)
+          echo "FLAMEROBIN_VERSION=$FLAMEROBIN_VERSION" >> $GITHUB_ENV
+          
+          mkdir -p templates/trees/deb/flamerobin/opt/flamerobin/lib
+          ldd Build/flamerobin | awk '{print $3}' | grep -E '/lib|/usr/lib' | grep -v "not found" | xargs -I {} cp -v {} templates/trees/deb/flamerobin/opt/flamerobin/lib/
+          
+          sed -i "s/^Version: .*/Version: ${FLAMEROBIN_VERSION}/" templates/trees/deb/flamerobin/DEBIAN/control
+          mkdir -p templates/trees/deb/flamerobin/opt/flamerobin/bin
+          cp -r Build/flamerobin templates/trees/deb/flamerobin/opt/flamerobin/bin/
+          
+          mkdir -p templates/trees/deb/flamerobin/opt/flamerobin/share/flamerobin
+          rsync -av --exclude=flamerobin Build/ templates/trees/deb/flamerobin/opt/flamerobin/share/flamerobin/
+          
+          dpkg-deb --build templates/trees/deb/flamerobin templates/trees/deb/flamerobin-${FLAMEROBIN_VERSION}.deb
+
+      - name: Upload Linux Artifact to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: templates/trees/deb/flamerobin-*.deb
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: wxWidget cache
+        id: cache-wxwidget
+        uses: actions/cache@v4
+        with:
+          path: wxWidgets
+          key: ${{ runner.os }}-wxwidgets-v3.2.2.1
+          restore-keys: ${{ runner.os }}-wxwidgets-v3.2.2.1
+
+      - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
+        name: clone wxWidgets
+        run: git clone --recursive --branch v3.2.2.1 --depth 1 https://github.com/wxWidgets/wxWidgets.git
+
+      - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
+        name: replace /MD for /MT
+        run: |
+          $xmls = (Get-ChildItem -Path "wxWidgets\build\msw" -Recurse -Filter *.vcxproj).FullName
+          foreach ($xml in $xmls) {
+            echo $xml
+            (Get-Content $xml).replace("MultiThreadedDebugDLL", "MultiThreadedDebug") | Set-Content $xml
+            (Get-Content $xml).replace("MultiThreadedDLL", "MultiThreaded") | Set-Content $xml
+          }
+
+      - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
+        name: Build wxWidgets x86
+        shell: cmd
+        run: |
+          "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" && msbuild.exe wxWidgets\build\msw\wx_vc17.sln /t:Build /p:Configuration=Release /p:Platform=Win32
+
+      - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
+        name: Build wxWidgets x64
+        shell: cmd
+        run: |
+          "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" && msbuild.exe wxWidgets\build\msw\wx_vc17.sln /t:Build /p:Configuration=Release /p:Platform=x64
+
+      - name: Generate CMake projects
+        run: |
+          cmake -S .\ -B .\Build32 -A Win32 -DWXDIR=wxWidgets
+          cmake -S .\ -B .\Build64 -A x64 -DWXDIR=wxWidgets
+
+      - name: Build Flamerobin
+        run: |
+          cmake --build .\Build32 --config Release -j 8
+          cmake --build .\Build64 --config Release -j 8
+
+      - name: Innosetup
+        run: |
+          ISCC.exe install\win32\FlameRobinSetup.iss
+          ISCC.exe install\win32\FlameRobinSetup64.iss
+
+      - name: Upload Windows Artifact to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: install/win32/output/flamerobin-*.exe
+
+  build-macos:
+    runs-on: macos-14
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install wxWidgets
+        run: brew install wxwidgets
+
+      - name: Install Firebird
+        run: |
+          wget -nv -O Firebird-macOS.pkg \
+              "https://github.com/FirebirdSQL/firebird/releases/download/v5.0.3/Firebird-5.0.3.1683-0-macos-arm64.pkg"
+          sudo installer -pkg Firebird-macOS.pkg -target /
+
+      - name: Generate CMake project
+        run: |
+          cmake -S . -B Build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/Applications \
+                -DCMAKE_PREFIX_PATH="$(brew --prefix)"
+
+      - name: Build FlameRobin
+        run: |
+          cmake --build Build --config Release -j$(sysctl -n hw.ncpu)
+
+      - name: Prepare macOS Artifact
+        run: |
+          FLAMEROBIN_VERSION=$(awk '
+            /FR_VERSION_MAJOR/ { major = $3 }
+            /FR_VERSION_MINOR/ { minor = $3 }
+            /FR_VERSION_RLS/   { rls   = $3 }
+            END { print major "." minor "." rls }
+            ' src/frversion.h)
+          echo "FLAMEROBIN_VERSION=$FLAMEROBIN_VERSION" >> $GITHUB_ENV
+          cd Build
+          zip -r ../flamerobin-macos-${FLAMEROBIN_VERSION}.zip flamerobin.app
+
+      - name: Upload macOS Artifact to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: flamerobin-macos-*.zip
