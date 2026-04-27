@@ -22,13 +22,17 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-- name: Set FlameRobin version
-  run: |
-    rm -rf src/fb-cpp/vcpkg
-    FLAMEROBIN_VERSION=$(awk '
-      /FR_VERSION_MAJOR/ { major = $3 }
-...
-            /FR_VERSION_MINOR/ { minor = $3 }
+      - name: Set FlameRobin version
+        run: |
+          pwd
+          ls -la
+          ls -la src/ || true
+          ls -la src/fb-cpp || true
+          [ -f src/fb-cpp/CMakeLists.txt ] && echo "fb-cpp CMakeLists.txt found" || echo "fb-cpp CMakeLists.txt NOT found"
+          rm -rf src/fb-cpp/vcpkg
+          FLAMEROBIN_VERSION=$(awk '
+            /FR_VERSION_MAJOR/ { major = $3 }
+...            /FR_VERSION_MINOR/ { minor = $3 }
             /FR_VERSION_RLS/   { rls   = $3 }
             END { print major "." minor "." rls }
             ' src/frversion.h)

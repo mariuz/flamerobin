@@ -61,9 +61,7 @@ modules:
       - -DENABLE_VCPKG=OFF
       - -DFB_CPP_BUILD_TESTS=OFF
     sources:
-      - type: dir
-        path: ..
       - type: git
-        url: https://github.com/asfernandes/fb-cpp.git
-        commit: c318a4abc7e3cf259ed95c184b33a3f5c3a01655
-        dest: src/fb-cpp
+        url: https://github.com/mariuz/flamerobin.git
+        branch: feature/switch-to-fb-cpp-542
+        submodules: true
