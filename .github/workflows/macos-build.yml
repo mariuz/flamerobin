@@ -59,7 +59,7 @@ jobs:
       run: |
         mkdir -p vcpkg_archives
         cmake -S . -B Build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/Applications \
-              -DCMAKE_PREFIX_PATH="$(brew --prefix)"
+              -DCMAKE_PREFIX_PATH="$(brew --prefix)" -DENABLE_VCPKG=OFF
 
     # FlameRobin Compilation
     - name: Build FlameRobin

@@ -76,7 +76,7 @@ jobs:
         mkdir -p vcpkg_archives
         export PATH="/usr/local/bin:/opt/firebird/bin:${PATH:-}"
         export LD_LIBRARY_PATH="/usr/local/lib:/usr/lib/x86_64-linux-gnu:/opt/firebird/lib:${LD_LIBRARY_PATH:-}"
-        cmake -S . -B Build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/flamerobin/ -DBUILD_TESTING=OFF
+        cmake -S . -B Build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/flamerobin/ -DBUILD_TESTING=OFF -DENABLE_VCPKG=OFF
 
     # FlameRobin Compilation
     - name: Build Flamerobin
