@@ -29,7 +29,7 @@
 #ifndef FB_INTERFACE_H
 #define FB_INTERFACE_H
 
-#include "../firebird/include/ibase.h"
+#include "../ibase.h"
 #include <assert.h>
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
