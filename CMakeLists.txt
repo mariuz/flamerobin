@@ -67,22 +67,27 @@ endif (WIN32)
 set(wxWidgets_USE_UNICODE ON)
 
 # Find the wxWidgets library
-if (UNIX AND NOT APPLE)
+if (WIN32)
+    # On Windows with vcpkg, CONFIG mode is preferred to get correct targets and dependencies
+    find_package(wxWidgets REQUIRED CONFIG COMPONENTS base core html xml aui stc adv net webview)
+    message(STATUS "Found wxWidgets via CONFIG: ${wxWidgets_FOUND}")
+    # When using CONFIG mode, we might need to use the targets instead of variables
+    if (TARGET wx::base)
+        set(wxWidgets_LIBRARIES wx::base wx::core wx::html wx::xml wx::aui wx::stc wx::adv wx::net wx::webview)
+        message(STATUS "Using wxWidgets targets: ${wxWidgets_LIBRARIES}")
+    endif()
+elseif (UNIX AND NOT APPLE)
     find_package(wxWidgets REQUIRED core base html xml aui stc adv net OPTIONAL_COMPONENTS webview scintilla)
 else()
     find_package(wxWidgets REQUIRED core base html xml aui stc adv net webview OPTIONAL_COMPONENTS scintilla)
 endif()
-message(STATUS "wxWidgets version : ${wxWidgets_VERSION_STRING}")
 
-# For wx3.0 the Scintilla lib is not present, but older wx find_package doesn't seem to
-# understand this (even if marked optional), so we have to recheck, without Scintilla
-if ( (${CMAKE_VERSION} VERSION_LESS "3.16") AND (${wxWidgets_VERSION_STRING} VERSION_LESS "3.1") )
-	message(STATUS "Re-doing find_package for wx3.0 builds...")
-	find_package(wxWidgets REQUIRED core base html xml aui stc adv net webview)
-endif ()
-
-# Add wxWidgets to include path
-include(${wxWidgets_USE_FILE})
+if (wxWidgets_FOUND)
+    message(STATUS "wxWidgets version : ${wxWidgets_VERSION_STRING}")
+    if (NOT TARGET wx::base)
+        include(${wxWidgets_USE_FILE})
+    endif()
+endif()
 
 #--------------------------------------
 # Source files
