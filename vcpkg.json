@@ -15,9 +15,13 @@
     {
       "name": "wxwidgets",
       "features": [
-        "webview",
-        "stc",
-        "scintilla"
+        "webview"
+      ]
+    },
+    {
+      "name": "pcre2",
+      "features": [
+        "pcre2-16"
       ]
     }
   ],

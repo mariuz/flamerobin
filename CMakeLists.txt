@@ -444,11 +444,14 @@ if (WIN32)
     
     # When using vcpkg and static linking, we need to explicitly link some wxWidgets dependencies
     # that are not always automatically pulled in by find_package(wxWidgets).
+    # pcre2 is a dependency of wxWidgets.
     find_library(PCRE2_LIB NAMES pcre2-16 pcre2-16-static pcre2-16d pcre2-16-staticd)
     if (PCRE2_LIB)
         list(APPEND FR_LIBS ${PCRE2_LIB})
     endif()
     
+    # Lexilla and Scintilla are used by wxSTC. In vcpkg's wxwidgets port, 
+    # they are often built and merged, but sometimes need explicit linking.
     find_library(LEXILLA_LIB NAMES lexilla lexillad)
     if (LEXILLA_LIB)
         list(APPEND FR_LIBS ${LEXILLA_LIB})
