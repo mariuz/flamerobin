@@ -18,12 +18,7 @@
         "webview"
       ]
     },
-    {
-      "name": "pcre2",
-      "features": [
-        "pcre2-16"
-      ]
-    }
+    "pcre2"
   ],
   "overrides": [
     {
