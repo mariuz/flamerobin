@@ -441,32 +441,41 @@ if (WIN32)
 		WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 	)
     list(APPEND FR_LIBS ws2_32 mswsock shlwapi version advapi32 gdi32 user32 comctl32 comdlg32 shell32 ole32 oleaut32 uuid imm32 msimg32)
-    
+    add_definitions(-DPCRE2_STATIC)
+
     # When using vcpkg and static linking, we need to explicitly link some wxWidgets dependencies
     # that are not always automatically pulled in by find_package(wxWidgets).
     include(SelectLibraryConfigurations)
 
+    set(FR_VCPKG_LIB_HINT "")
+    if (VCPKG_INSTALLED_DIR AND VCPKG_TARGET_TRIPLET)
+        set(FR_VCPKG_LIB_HINT HINTS "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib")
+    endif()
+
     # pcre2
-    find_library(PCRE2_RELEASE NAMES pcre2-16 pcre2-16-static wxpcre2 wxpcre2-static)
-    find_library(PCRE2_DEBUG NAMES pcre2-16d pcre2-16-staticd wxpcre2d wxpcre2-staticd)
+    find_library(PCRE2_RELEASE NAMES pcre2-16 pcre2-16-static wxpcre2 wxpcre2-static ${FR_VCPKG_LIB_HINT})
+    find_library(PCRE2_DEBUG NAMES pcre2-16d pcre2-16-staticd wxpcre2d wxpcre2-staticd ${FR_VCPKG_LIB_HINT})
     select_library_configurations(PCRE2)
     if (PCRE2_LIBRARY)
+        message(STATUS "Found PCRE2 library: ${PCRE2_LIBRARY}")
         list(APPEND FR_LIBS ${PCRE2_LIBRARY})
     endif()
     
     # Lexilla
-    find_library(LEXILLA_RELEASE NAMES lexilla wxlexilla)
-    find_library(LEXILLA_DEBUG NAMES lexillad wxlexillad)
+    find_library(LEXILLA_RELEASE NAMES lexilla wxlexilla ${FR_VCPKG_LIB_HINT})
+    find_library(LEXILLA_DEBUG NAMES lexillad wxlexillad ${FR_VCPKG_LIB_HINT})
     select_library_configurations(LEXILLA)
     if (LEXILLA_LIBRARY)
+        message(STATUS "Found Lexilla library: ${LEXILLA_LIBRARY}")
         list(APPEND FR_LIBS ${LEXILLA_LIBRARY})
     endif()
 
     # Scintilla
-    find_library(SCINTILLA_RELEASE NAMES scintilla wxscintilla)
-    find_library(SCINTILLA_DEBUG NAMES scintillad wxscintillad)
+    find_library(SCINTILLA_RELEASE NAMES scintilla wxscintilla ${FR_VCPKG_LIB_HINT})
+    find_library(SCINTILLA_DEBUG NAMES scintillad wxscintillad ${FR_VCPKG_LIB_HINT})
     select_library_configurations(SCINTILLA)
     if (SCINTILLA_LIBRARY)
+        message(STATUS "Found Scintilla library: ${SCINTILLA_LIBRARY}")
         list(APPEND FR_LIBS ${SCINTILLA_LIBRARY})
     endif()
 endif (WIN32)
