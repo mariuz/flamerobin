@@ -440,7 +440,7 @@ if (WIN32)
 		COMMAND update-revision-info.cmd
 		WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 	)
-    list(APPEND FR_LIBS ws2_32 mswsock shlwapi version advapi32 gdi32 user32 comctl32 comdlg32 shell32 ole32 oleaut32 uuid imm32 msimg32)
+    list(APPEND FR_LIBS ws2_32 mswsock shlwapi version advapi32 gdi32 user32 comctl32 comdlg32 shell32 ole32 oleaut32 uuid imm32 msimg32 winmm uxtheme rpcrt4 winspool)
     add_definitions(-DPCRE2_STATIC)
 
     # When using vcpkg and static linking, we need to explicitly link some wxWidgets dependencies
@@ -450,20 +450,27 @@ if (WIN32)
     set(FR_VCPKG_LIB_HINT "")
     if (VCPKG_INSTALLED_DIR AND VCPKG_TARGET_TRIPLET)
         set(FR_VCPKG_LIB_HINT HINTS "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib")
+        set(FR_VCPKG_DEBUG_LIB_HINT HINTS "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/debug/lib")
     endif()
 
     # pcre2
-    find_library(PCRE2_RELEASE NAMES pcre2-16 pcre2-16-static wxpcre2 wxpcre2-static ${FR_VCPKG_LIB_HINT})
-    find_library(PCRE2_DEBUG NAMES pcre2-16d pcre2-16-staticd wxpcre2d wxpcre2-staticd ${FR_VCPKG_LIB_HINT})
-    select_library_configurations(PCRE2)
-    if (PCRE2_LIBRARY)
-        message(STATUS "Found PCRE2 library: ${PCRE2_LIBRARY}")
-        list(APPEND FR_LIBS ${PCRE2_LIBRARY})
+    find_package(pcre2 CONFIG REQUIRED)
+    if (TARGET pcre2::pcre2-16)
+        message(STATUS "Using vcpkg pcre2::pcre2-16 target")
+        list(APPEND FR_LIBS pcre2::pcre2-16)
+    else()
+        find_library(PCRE2_RELEASE NAMES pcre2-16 pcre2-16-static wxpcre2 wxpcre2-static ${FR_VCPKG_LIB_HINT})
+        find_library(PCRE2_DEBUG NAMES pcre2-16d pcre2-16-staticd wxpcre2d wxpcre2-staticd ${FR_VCPKG_DEBUG_LIB_HINT})
+        select_library_configurations(PCRE2)
+        if (PCRE2_LIBRARY)
+            message(STATUS "Found PCRE2 library: ${PCRE2_LIBRARY}")
+            list(APPEND FR_LIBS ${PCRE2_LIBRARY})
+        endif()
     endif()
     
     # Lexilla
-    find_library(LEXILLA_RELEASE NAMES lexilla wxlexilla ${FR_VCPKG_LIB_HINT})
-    find_library(LEXILLA_DEBUG NAMES lexillad wxlexillad ${FR_VCPKG_LIB_HINT})
+    find_library(LEXILLA_RELEASE NAMES Lexilla lexilla wxlexilla ${FR_VCPKG_LIB_HINT})
+    find_library(LEXILLA_DEBUG NAMES Lexillad lexillad wxlexillad ${FR_VCPKG_DEBUG_LIB_HINT})
     select_library_configurations(LEXILLA)
     if (LEXILLA_LIBRARY)
         message(STATUS "Found Lexilla library: ${LEXILLA_LIBRARY}")
@@ -471,13 +478,15 @@ if (WIN32)
     endif()
 
     # Scintilla
-    find_library(SCINTILLA_RELEASE NAMES scintilla wxscintilla ${FR_VCPKG_LIB_HINT})
-    find_library(SCINTILLA_DEBUG NAMES scintillad wxscintillad ${FR_VCPKG_LIB_HINT})
+    find_library(SCINTILLA_RELEASE NAMES Scintilla scintilla wxscintilla ${FR_VCPKG_LIB_HINT})
+    find_library(SCINTILLA_DEBUG NAMES Scintillad scintillad wxscintillad ${FR_VCPKG_DEBUG_LIB_HINT})
     select_library_configurations(SCINTILLA)
     if (SCINTILLA_LIBRARY)
         message(STATUS "Found Scintilla library: ${SCINTILLA_LIBRARY}")
         list(APPEND FR_LIBS ${SCINTILLA_LIBRARY})
     endif()
+    
+    message(STATUS "Final FR_LIBS on Windows: ${FR_LIBS}")
 endif (WIN32)
 
 if (UNIX AND NOT APPLE)
