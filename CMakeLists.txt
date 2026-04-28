@@ -444,22 +444,30 @@ if (WIN32)
     
     # When using vcpkg and static linking, we need to explicitly link some wxWidgets dependencies
     # that are not always automatically pulled in by find_package(wxWidgets).
-    # pcre2 is a dependency of wxWidgets.
-    find_library(PCRE2_LIB NAMES pcre2-16 pcre2-16-static pcre2-16d pcre2-16-staticd)
-    if (PCRE2_LIB)
-        list(APPEND FR_LIBS ${PCRE2_LIB})
+    include(SelectLibraryConfigurations)
+
+    # pcre2
+    find_library(PCRE2_RELEASE NAMES pcre2-16 pcre2-16-static wxpcre2 wxpcre2-static)
+    find_library(PCRE2_DEBUG NAMES pcre2-16d pcre2-16-staticd wxpcre2d wxpcre2-staticd)
+    select_library_configurations(PCRE2)
+    if (PCRE2_LIBRARY)
+        list(APPEND FR_LIBS ${PCRE2_LIBRARY})
     endif()
     
-    # Lexilla and Scintilla are used by wxSTC. We explicitly added lexilla to vcpkg.json
-    # to ensure the libraries are available and can be linked.
-    find_library(LEXILLA_LIB NAMES lexilla lexillad wxlexilla wxlexillad)
-    if (LEXILLA_LIB)
-        list(APPEND FR_LIBS ${LEXILLA_LIB})
+    # Lexilla
+    find_library(LEXILLA_RELEASE NAMES lexilla wxlexilla)
+    find_library(LEXILLA_DEBUG NAMES lexillad wxlexillad)
+    select_library_configurations(LEXILLA)
+    if (LEXILLA_LIBRARY)
+        list(APPEND FR_LIBS ${LEXILLA_LIBRARY})
     endif()
 
-    find_library(SCINTILLA_LIB NAMES scintilla scintillad wxscintilla wxscintillad)
-    if (SCINTILLA_LIB)
-        list(APPEND FR_LIBS ${SCINTILLA_LIB})
+    # Scintilla
+    find_library(SCINTILLA_RELEASE NAMES scintilla wxscintilla)
+    find_library(SCINTILLA_DEBUG NAMES scintillad wxscintillad)
+    select_library_configurations(SCINTILLA)
+    if (SCINTILLA_LIBRARY)
+        list(APPEND FR_LIBS ${SCINTILLA_LIBRARY})
     endif()
 endif (WIN32)
 
