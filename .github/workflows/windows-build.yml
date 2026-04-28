@@ -1,8 +1,5 @@
 name: Build Flamerobin for Windows
 
-env: 
-  wx-tag-version: v3.2.2.1
-  
 on:
   push:
     branches: [ "**" ]
@@ -45,34 +42,6 @@ jobs:
         restore-keys: |
             ${{ runner.os }}-vcpkg-bin-${{ matrix.arch }}-
     
-    - name: wxWidget cache
-      id: cache-wxwidget
-      uses: actions/cache@v4
-      with:
-        path: |
-            wxWidgets
-        key: ${{ runner.os }}-wxwidgets-${{ matrix.arch }}-${{ env.wx-tag-version }}
-        restore-keys: ${{ runner.os }}-wxwidgets-${{ matrix.arch }}-${{ env.wx-tag-version }}
-    
-    - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
-      name: clone wxWidgets
-      run: git clone --recursive --branch ${{ env.wx-tag-version }} --depth 1 https://github.com/wxWidgets/wxWidgets.git
-      
-    - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
-      name: replace /MD for /MT
-      run: 
-             $xmls = (Get-ChildItem -Path "wxWidgets\build\msw" -Recurse -Filter *.vcxproj).FullName ;
-             foreach ($xml in $xmls) {
-               (Get-Content $xml).replace("MultiThreadedDebugDLL", "MultiThreadedDebug") | Set-Content $xml ;
-               (Get-Content $xml).replace("MultiThreadedDLL", "MultiThreaded") | Set-Content $xml
-             }
-
-    - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
-      name: Build wxWidgets
-      shell: cmd
-      run: |
-        "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" && msbuild.exe wxWidgets\build\msw\wx_vc17.sln /t:Build /p:Configuration=Release /p:Platform=${{ matrix.msbuild_platform }} -m
-        
     - name: Install dependencies (vcpkg)
       shell: bash
       env:
@@ -90,7 +59,7 @@ jobs:
         VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}\vcpkg_archives
       run: |
         if (!(Test-Path vcpkg_archives)) { New-Item -ItemType Directory -Path vcpkg_archives }
-        cmake -S .\ -B .\Build -A ${{ matrix.cmake_arch }} -DWXDIR=wxWidgets "-DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-windows-static
+        cmake -S .\ -B .\Build -A ${{ matrix.cmake_arch }} "-DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-windows-static
       
     - name: Build Flamerobin
       run: >

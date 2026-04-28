@@ -12,6 +12,7 @@ elseif(NOT ENABLE_VCPKG)
     endif()
 endif()
 
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 project(flamerobin)
 
 # Don't allow in-source builds. Keeps things nice and tidy
@@ -57,22 +58,7 @@ endif()
 #--------------------------------------
 # wxWidgets location
 
-# Attempt to get wxWidgets root dir from environment, or user
-# From command line you can:
-#   cmake -DWXDIR:PATH=C:\path\to\wxWidgets ..
 if (WIN32)
-	message(STATUS "Checking for user suppllied wxWidgets location (WXDIR)...")
-	if(DEFINED WXDIR)
-		message(STATUS "User set the WXDIR property directly : ${WXDIR}")
-	else ()
-		if(DEFINED ENV{WXDIR})
-			message(STATUS "Using the WXDIR environment variable : $ENV{WXDIR}")
-			set(WXDIR $ENV{WXDIR} CACHE PATH "wxWidgits root dir")
-		else ()
-			message(WARNING "WXDIR has not been set!")
-		endif ()
-	endif()
-	set(wxWidgets_ROOT_DIR ${WXDIR})
 	# On Windows we want the static build of wxWidgets
 	set(wxWidgets_USE_STATIC ON)
 endif (WIN32)
@@ -447,9 +433,6 @@ if (WIN32)
 
 	if (MSVC)
 		# Visual Studio specific stuff
-		# Make sure we use static MSVC libs
-		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
-		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
 	endif (MSVC)
 
 	# Create the revision include file
@@ -457,6 +440,15 @@ if (WIN32)
 		COMMAND update-revision-info.cmd
 		WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 	)
+    list(APPEND FR_LIBS ws2_32 mswsock shlwapi version advapi32 gdi32 user32 comctl32 comdlg32 shell32 ole32 oleaut32 uuid)
+    find_library(PCRE2_LIB NAMES pcre2-16 pcre2-16-static pcre2-16d pcre2-16-staticd)
+    if (PCRE2_LIB)
+        list(APPEND FR_LIBS ${PCRE2_LIB})
+    endif()
+    find_library(LEXILLA_LIB NAMES lexilla)
+    if (LEXILLA_LIB)
+        list(APPEND FR_LIBS ${LEXILLA_LIB})
+    endif()
 endif (WIN32)
 
 if (UNIX AND NOT APPLE)
