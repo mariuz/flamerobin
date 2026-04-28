@@ -8,7 +8,14 @@ elseif (APPLE)
     # macOS logic from main CMakeLists.txt
     target_link_libraries(firebird INTERFACE ${FBCLIENT_LIBRARY})
 elseif (WIN32)
-    target_link_libraries(firebird INTERFACE fbclient)
+    find_library(FIREBIRD_LIBRARY fbclient)
+    if (FIREBIRD_LIBRARY)
+        message(STATUS "Found Firebird client library: ${FIREBIRD_LIBRARY}")
+        target_link_libraries(firebird INTERFACE ${FIREBIRD_LIBRARY})
+    else ()
+        # Fallback to just name if find_library fails
+        target_link_libraries(firebird INTERFACE fbclient)
+    endif()
 endif()
 
 # Firebird headers
