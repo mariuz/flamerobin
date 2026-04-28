@@ -440,7 +440,7 @@ if (WIN32)
 		COMMAND update-revision-info.cmd
 		WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 	)
-    list(APPEND FR_LIBS ws2_32 mswsock shlwapi version advapi32 gdi32 user32 comctl32 comdlg32 shell32 ole32 oleaut32 uuid)
+    list(APPEND FR_LIBS ws2_32 mswsock shlwapi version advapi32 gdi32 user32 comctl32 comdlg32 shell32 ole32 oleaut32 uuid imm32 msimg32)
     
     # When using vcpkg and static linking, we need to explicitly link some wxWidgets dependencies
     # that are not always automatically pulled in by find_package(wxWidgets).
@@ -450,14 +450,14 @@ if (WIN32)
         list(APPEND FR_LIBS ${PCRE2_LIB})
     endif()
     
-    # Lexilla and Scintilla are used by wxSTC. In vcpkg's wxwidgets port, 
-    # they are often built and merged, but sometimes need explicit linking.
-    find_library(LEXILLA_LIB NAMES lexilla lexillad)
+    # Lexilla and Scintilla are used by wxSTC. We explicitly added lexilla to vcpkg.json
+    # to ensure the libraries are available and can be linked.
+    find_library(LEXILLA_LIB NAMES lexilla lexillad wxlexilla wxlexillad)
     if (LEXILLA_LIB)
         list(APPEND FR_LIBS ${LEXILLA_LIB})
     endif()
 
-    find_library(SCINTILLA_LIB NAMES scintilla scintillad)
+    find_library(SCINTILLA_LIB NAMES scintilla scintillad wxscintilla wxscintillad)
     if (SCINTILLA_LIB)
         list(APPEND FR_LIBS ${SCINTILLA_LIB})
     endif()

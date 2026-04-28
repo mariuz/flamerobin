@@ -18,7 +18,8 @@
         "webview"
       ]
     },
-    "pcre2"
+    "pcre2",
+    "lexilla"
   ],
   "overrides": [
     {
