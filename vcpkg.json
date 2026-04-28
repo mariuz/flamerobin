@@ -19,7 +19,10 @@
       ]
     },
     "pcre2",
-    "lexilla"
+    {
+      "name": "lexilla",
+      "platform": "windows"
+    }
   ],
   "overrides": [
     {
