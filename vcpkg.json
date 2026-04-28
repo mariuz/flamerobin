@@ -15,7 +15,9 @@
     {
       "name": "wxwidgets",
       "features": [
-        "webview"
+        "webview",
+        "stc",
+        "scintilla"
       ]
     }
   ],

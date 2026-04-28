@@ -441,13 +441,22 @@ if (WIN32)
 		WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 	)
     list(APPEND FR_LIBS ws2_32 mswsock shlwapi version advapi32 gdi32 user32 comctl32 comdlg32 shell32 ole32 oleaut32 uuid)
+    
+    # When using vcpkg and static linking, we need to explicitly link some wxWidgets dependencies
+    # that are not always automatically pulled in by find_package(wxWidgets).
     find_library(PCRE2_LIB NAMES pcre2-16 pcre2-16-static pcre2-16d pcre2-16-staticd)
     if (PCRE2_LIB)
         list(APPEND FR_LIBS ${PCRE2_LIB})
     endif()
-    find_library(LEXILLA_LIB NAMES lexilla)
+    
+    find_library(LEXILLA_LIB NAMES lexilla lexillad)
     if (LEXILLA_LIB)
         list(APPEND FR_LIBS ${LEXILLA_LIB})
+    endif()
+
+    find_library(SCINTILLA_LIB NAMES scintilla scintillad)
+    if (SCINTILLA_LIB)
+        list(APPEND FR_LIBS ${SCINTILLA_LIB})
     endif()
 endif (WIN32)
 
