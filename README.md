@@ -33,8 +33,12 @@ Building
 For detailed build instructions for all supported platforms (Windows, Linux, macOS), see the
 [BUILD.txt](https://github.com/mariuz/flamerobin/blob/master/BUILD.txt) file.
 
-Compile-time C++ standard notice: FlameRobin is currently built as C++14
-(`CMAKE_CXX_STANDARD=14`). Please keep contributions compatible with C++14.
+**Notice:** FlameRobin is currently undergoing a major migration to the `fb-cpp` database library and has been upgraded to **C++20**. Please ensure contributions are compatible with the C++20 standard.
+
+Roadmap & Modernization
+---------------------------
+*   [Project Roadmap](ROADMAP.md) - Track the progress of the migration to `fb-cpp`.
+*   [Database Abstraction Layer (DAL) & fb-cpp Migration](docs/migration-to-fb-cpp.md) - Detailed architectural documentation.
 
 macOS distribution builds
 ---------------------------
