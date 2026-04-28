@@ -90,7 +90,7 @@ jobs:
         VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}\vcpkg_archives
       run: |
         if (!(Test-Path vcpkg_archives)) { New-Item -ItemType Directory -Path vcpkg_archives }
-        cmake -S .\ -B .\Build -A ${{ matrix.cmake_arch }} -DWXDIR=wxWidgets -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-windows-static
+        cmake -S .\ -B .\Build -A ${{ matrix.cmake_arch }} -DWXDIR=wxWidgets "-DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-windows-static
       
     - name: Build Flamerobin
       run: >
