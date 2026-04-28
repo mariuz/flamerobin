@@ -13,6 +13,9 @@
       "packages": [ "firebird" ]
     }
   ],
+  "overlay-ports": [
+    "ports"
+  ],
   "overlay-triplets": [
     "src/fb-cpp/cmake/triplets"
   ]
