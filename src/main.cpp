@@ -87,9 +87,9 @@ bool Application::OnInit()
 #if wxCHECK_VERSION(3, 3, 0)
     int theme = config().get(FRStyleManager::_DARKMODE_KEY, (int)FRStyleManager::ThemeSystem);
     if (theme == FRStyleManager::ThemeLight)
-        wxSystemSettings::SetAppearance(wxAppAppearance::Light);
+        wxSystemSettings::SetAppearance(wxSystemSettings::Appearance_Light);
     else if (theme == FRStyleManager::ThemeDark)
-        wxSystemSettings::SetAppearance(wxAppAppearance::Dark);
+        wxSystemSettings::SetAppearance(wxSystemSettings::Appearance_Dark);
 
 #ifdef __WXMSW__
     MSWEnableDarkMode();
