@@ -527,8 +527,10 @@ if (UNIX AND NOT APPLE)
 	)
 	add_definitions(-DIBPP_LINUX)
 	add_definitions(-DFR_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
+
+	find_package(firebird REQUIRED)
 	# Need to link the fbclient lib in *nix systems
-	list(APPEND FR_LIBS -ldl)
+	list(APPEND FR_LIBS firebird::firebird -ldl)
 
 	include(CheckCXXSourceCompiles)
 	check_cxx_source_compiles("
