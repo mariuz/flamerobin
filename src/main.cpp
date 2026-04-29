@@ -41,6 +41,7 @@
 #include "config/LocaleManager.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
+#include "gui/FRStyleManager.h"
 #include "gui/MainFrame.h"
 #include "main.h"
 
@@ -84,10 +85,10 @@ bool Application::OnInit()
     parseCommandLine();
 
 #if wxCHECK_VERSION(3, 3, 0)
-    int theme = config().get("darkMode", 0);
-    if (theme == 1)
+    int theme = config().get(FRStyleManager::_DARKMODE_KEY, (int)FRStyleManager::ThemeSystem);
+    if (theme == FRStyleManager::ThemeLight)
         wxSystemSettings::SetAppearance(wxAppAppearance::Light);
-    else if (theme == 2)
+    else if (theme == FRStyleManager::ThemeDark)
         wxSystemSettings::SetAppearance(wxAppAppearance::Dark);
 
 #ifdef __WXMSW__

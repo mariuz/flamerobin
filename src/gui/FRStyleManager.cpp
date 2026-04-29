@@ -38,6 +38,7 @@
 #include "FRStyleManager.h"
 
 const wxString FRStyleManager::_DARKMODEDEFAULT = "DarkModeDefault";
+const wxString FRStyleManager::_DARKMODE_KEY = "darkMode";
 
 FRStyleManager& stylerManager()
 {
@@ -351,10 +352,10 @@ void FRStyleManager::loadConfig()
     
     bool useDark = false;
 #if wxCHECK_VERSION(3, 3, 0)
-    int theme = config().get("darkMode", 0);
-    if (theme == 2)
+    int theme = config().get(_DARKMODE_KEY, (int)ThemeSystem);
+    if (theme == ThemeDark)
         useDark = true;
-    else if (theme == 0 && wxSystemSettings::GetAppearance().IsDark())
+    else if (theme == ThemeSystem && wxSystemSettings::GetAppearance().IsDark())
         useDark = true;
 #else
     if (wxSystemSettings::GetAppearance().IsDark())
