@@ -355,7 +355,7 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
     wxString dtScale = textctrl_scale->GetValue();
     bool isNullable = !checkbox_notnull->IsChecked();
     bool isIdentity = tableM->getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12.0) ? checkbox_identity->IsChecked() : false;
-    wxString initialValue = tableM->getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12.0) ? textctrl_initialValue->GetValue() : "";
+    wxString initialValue = tableM->getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12.0) ? textctrl_initialValue->GetValue() : wxString("");
 
     int n = choice_datatype->GetSelection();
     if (n >= 0 && n < datatypescnt)

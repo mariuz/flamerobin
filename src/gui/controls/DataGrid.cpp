@@ -698,7 +698,7 @@ void DataGrid::saveAsCSV(const wxString& fileName,
         const wxString sEOL("\n");
         const wxString sFieldDelim(fieldDelimiter);
         const wxString sTextDelim =
-            (textDelimiter != '\0') ? wxString(textDelimiter) : "";
+            (textDelimiter != '\0') ? wxString(textDelimiter) : wxString("");
 
         wxString sHeader;
         for (size_t col = 0; col < selCols.size(); col++)

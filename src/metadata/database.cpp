@@ -43,6 +43,7 @@
 
 #include "config/Config.h"
 #include "config/DatabaseConfig.h"
+#include "engine/db/DatabaseFactory.h"
 #include "core/FRError.h"
 #include "core/ProgressIndicator.h"
 #include "core/StringUtils.h"
@@ -305,6 +306,7 @@ Database::Database()
     : MetadataItem(ntDatabase), metadataLoaderM(0), connectedM(false),
         connectionCredentialsM(0), dialectM(3), idM(0), volatileM(false)
 {
+    databaseDAL_M = fr::DatabaseFactory::createDatabase();
     defaultTimezoneM.name = "";
     defaultTimezoneM.id = 0;
 }
@@ -1913,6 +1915,11 @@ wxString Database::getCryptKeyData() const
 IBPP::Database& Database::getIBPPDatabase()
 {
     return databaseM;
+}
+
+fr::IDatabasePtr Database::getDALDatabase()
+{
+    return databaseDAL_M;
 }
 
 void Database::setIsVolatile(const bool isVolatile)

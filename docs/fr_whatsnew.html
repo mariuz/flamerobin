@@ -10,6 +10,13 @@ http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issue
 <!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin (development)</font><br>
 <br><br>
+<font size=+1 color="#AA0000"><B>Major Refactoring: Migration to fb-cpp (In Progress)</B></font><br>
+<br>
+- **fb-cpp Integration**: Started the transition from the legacy IBPP library to `fb-cpp`, a modern C++20 wrapper for the Firebird database API. This enables support for Firebird 3.0, 4.0, and 5.0 features.<br>
+- **C++20 Upgrade**: The entire codebase has been upgraded to the **C++20** standard to leverage modern language features and improve resource management.<br>
+- **Database Abstraction Layer (DAL)**: Introduced a new architectural layer that decouples FlameRobin's core logic from the specific database backend. For more details, see the <a href="../docs/migration-to-fb-cpp.md">Migration Documentation</a>.<br>
+- **vcpkg Integration**: Transitioned to `vcpkg` for streamlined dependency management and reproducible builds across platforms.<br>
+<br>
 <font size=+1 color="#AA0000"><B>New features</B></font><br>
 <br>
 - Firebird 5 partial index support: generated index DDL now preserves the WHERE predicate so recreated schemas no longer lose partial-index conditions (issue #392)<br>

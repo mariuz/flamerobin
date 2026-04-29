@@ -496,7 +496,7 @@ wxArrayString PrefDlgStyleSetting::getComboBoxItems()
 
 void PrefDlgStyleSetting::loadStylers(const wxString& styleFileName)
 {
-    getStyleManager().setFileNamePrimary(wxFileName(config().getXmlStylesPath(), styleFileName.IsEmpty() ? "stylers.xml" : styleFileName + ".xml"));
+    getStyleManager().setFileNamePrimary(wxFileName(config().getXmlStylesPath(), styleFileName.IsEmpty() ? wxString("stylers.xml") : styleFileName + ".xml"));
     getStyleManager().loadStyle();
 
 

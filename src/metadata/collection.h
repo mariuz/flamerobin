@@ -110,7 +110,7 @@ private:
     }
 
 protected:
-    MetadataCollection<T>(NodeType type, DatabasePtr database,
+    MetadataCollection(NodeType type, DatabasePtr database,
             const wxString& name)
         : MetadataCollectionBase(type, database, name)
     {

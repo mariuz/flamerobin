@@ -1,4 +1,18 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.18)
+
+option(ENABLE_VCPKG "Enable vcpkg for dependency management" ON)
+set(VCPKG_ROOT "${CMAKE_SOURCE_DIR}/vcpkg")
+if(ENABLE_VCPKG AND EXISTS "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
+    set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
+elseif(NOT ENABLE_VCPKG)
+    # If VCPKG is disabled, ensure toolchain file is not set to a relative path from presets
+    if(CMAKE_TOOLCHAIN_FILE MATCHES "vcpkg.cmake$")
+        unset(CMAKE_TOOLCHAIN_FILE CACHE)
+        unset(CMAKE_TOOLCHAIN_FILE)
+    endif()
+endif()
+
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 project(flamerobin)
 
 # Don't allow in-source builds. Keeps things nice and tidy
@@ -13,27 +27,38 @@ if( "${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}" )
    )
 endif()
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+#--------------------------------------
+# fb-cpp location
+set(firebird_DIR "${CMAKE_SOURCE_DIR}/cmake")
+set(FB_CPP_SKIP_INSTALL ON CACHE BOOL "Skip fb-cpp installation")
+set(FB_CPP_BUILD_TESTS OFF CACHE BOOL "Build fb-cpp tests")
+option(FB_CPP_USE_BOOST_DLL "Enable Boost.DLL support for loading fbclient at runtime" OFF)
+option(FB_CPP_USE_BOOST_MULTIPRECISION "Enable Boost.Multiprecision helpers for INT128 and DECFLOAT types" OFF)
+
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/fb-cpp/CMakeLists.txt")
+    option(ENABLE_INTERNAL_FBCPP "Build fb-cpp from internal submodule" ON)
+else()
+    option(ENABLE_INTERNAL_FBCPP "Build fb-cpp from internal submodule" OFF)
+endif()
+
+if(ENABLE_INTERNAL_FBCPP)
+    message(STATUS "Building fb-cpp internally from submodule")
+    set(OLD_BUILD_TESTING ${BUILD_TESTING})
+    set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+    add_subdirectory(src/fb-cpp EXCLUDE_FROM_ALL)
+    set(BUILD_TESTING ${OLD_BUILD_TESTING} CACHE BOOL "" FORCE)
+else()
+    message(STATUS "Searching for system fb-cpp package")
+    find_package(fb-cpp CONFIG REQUIRED)
+endif()
 
 #--------------------------------------
 # wxWidgets location
 
-# Attempt to get wxWidgets root dir from environment, or user
-# From command line you can:
-#   cmake -DWXDIR:PATH=C:\path\to\wxWidgets ..
 if (WIN32)
-	message(STATUS "Checking for user suppllied wxWidgets location (WXDIR)...")
-	if(DEFINED WXDIR)
-		message(STATUS "User set the WXDIR property directly : ${WXDIR}")
-	else ()
-		if(DEFINED ENV{WXDIR})
-			message(STATUS "Using the WXDIR environment variable : $ENV{WXDIR}")
-			set(WXDIR $ENV{WXDIR} CACHE PATH "wxWidgits root dir")
-		else ()
-			message(WARNING "WXDIR has not been set!")
-		endif ()
-	endif()
-	set(wxWidgets_ROOT_DIR ${WXDIR})
 	# On Windows we want the static build of wxWidgets
 	set(wxWidgets_USE_STATIC ON)
 endif (WIN32)
@@ -42,18 +67,27 @@ endif (WIN32)
 set(wxWidgets_USE_UNICODE ON)
 
 # Find the wxWidgets library
-find_package(wxWidgets REQUIRED core base html xml aui stc adv net OPTIONAL_COMPONENTS scintilla)
-message(STATUS "wxWidgets version : ${wxWidgets_VERSION_STRING}")
+if (WIN32)
+    # On Windows with vcpkg, CONFIG mode is preferred to get correct targets and dependencies
+    find_package(wxWidgets REQUIRED CONFIG COMPONENTS base core html xml aui stc adv net webview)
+    message(STATUS "Found wxWidgets via CONFIG: ${wxWidgets_FOUND}")
+    # When using CONFIG mode, we might need to use the targets instead of variables
+    if (TARGET wx::base)
+        set(wxWidgets_LIBRARIES wx::base wx::core wx::html wx::xml wx::aui wx::stc wx::adv wx::net wx::webview)
+        message(STATUS "Using wxWidgets targets: ${wxWidgets_LIBRARIES}")
+    endif()
+elseif (UNIX AND NOT APPLE)
+    find_package(wxWidgets REQUIRED core base html xml aui stc adv net OPTIONAL_COMPONENTS webview scintilla)
+else()
+    find_package(wxWidgets REQUIRED core base html xml aui stc adv net webview OPTIONAL_COMPONENTS scintilla)
+endif()
 
-# For wx3.0 the Scintilla lib is not present, but older wx find_package doesn't seem to
-# understand this (even if marked optional), so we have to recheck, without Scintilla
-if ( (${CMAKE_VERSION} VERSION_LESS "3.16") AND (${wxWidgets_VERSION_STRING} VERSION_LESS "3.1") )
-	message(STATUS "Re-doing find_package for wx3.0 builds...")
-	find_package(wxWidgets REQUIRED core base html xml aui stc adv net)
-endif ()
-
-# Add wxWidgets to include path
-include(${wxWidgets_USE_FILE})
+if (wxWidgets_FOUND)
+    message(STATUS "wxWidgets version : ${wxWidgets_VERSION_STRING}")
+    if (NOT TARGET wx::base)
+        include(${wxWidgets_USE_FILE})
+    endif()
+endif()
 
 #--------------------------------------
 # Source files
@@ -74,6 +108,14 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/config/DatabaseConfig.cpp
         ${SOURCEDIR}/config/LocaleManager.cpp
         ${SOURCEDIR}/config/LocalSettings.cpp
+        ${SOURCEDIR}/engine/db/DatabaseFactory.cpp
+        ${SOURCEDIR}/engine/db/ibpp/IbppDatabase.cpp
+        ${SOURCEDIR}/engine/db/ibpp/IbppTransaction.cpp
+        ${SOURCEDIR}/engine/db/ibpp/IbppStatement.cpp
+        ${SOURCEDIR}/engine/db/ibpp/IbppService.cpp
+        ${SOURCEDIR}/engine/db/fbcpp/FbCppDatabase.cpp
+        ${SOURCEDIR}/engine/db/fbcpp/FbCppTransaction.cpp
+        ${SOURCEDIR}/engine/db/fbcpp/FbCppStatement.cpp
         ${SOURCEDIR}/core/ArtProvider.cpp
         ${SOURCEDIR}/core/CodeTemplateProcessor.cpp
         ${SOURCEDIR}/core/FRDecimal.cpp
@@ -198,6 +240,19 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/config/DatabaseConfig.h
         ${SOURCEDIR}/config/LocaleManager.h
         ${SOURCEDIR}/config/LocalSettings.h
+        ${SOURCEDIR}/engine/db/DatabaseBackend.h
+        ${SOURCEDIR}/engine/db/IDatabase.h
+        ${SOURCEDIR}/engine/db/ITransaction.h
+        ${SOURCEDIR}/engine/db/IStatement.h
+        ${SOURCEDIR}/engine/db/IService.h
+        ${SOURCEDIR}/engine/db/DatabaseFactory.h
+        ${SOURCEDIR}/engine/db/ibpp/IbppDatabase.h
+        ${SOURCEDIR}/engine/db/ibpp/IbppTransaction.h
+        ${SOURCEDIR}/engine/db/ibpp/IbppStatement.h
+        ${SOURCEDIR}/engine/db/ibpp/IbppService.h
+        ${SOURCEDIR}/engine/db/fbcpp/FbCppDatabase.h
+        ${SOURCEDIR}/engine/db/fbcpp/FbCppTransaction.h
+        ${SOURCEDIR}/engine/db/fbcpp/FbCppStatement.h
         ${SOURCEDIR}/core/ArtProvider.h
         ${SOURCEDIR}/core/CodeTemplateProcessor.h
         ${SOURCEDIR}/core/FRDecimal.h
@@ -385,9 +440,6 @@ if (WIN32)
 
 	if (MSVC)
 		# Visual Studio specific stuff
-		# Make sure we use static MSVC libs
-		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
-		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
 	endif (MSVC)
 
 	# Create the revision include file
@@ -395,6 +447,65 @@ if (WIN32)
 		COMMAND update-revision-info.cmd
 		WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 	)
+    list(APPEND FR_LIBS ws2_32 mswsock shlwapi version advapi32 gdi32 user32 comctl32 comdlg32 shell32 ole32 oleaut32 uuid imm32 msimg32 winmm uxtheme rpcrt4 winspool)
+    add_definitions(-DPCRE2_STATIC)
+
+    # When using vcpkg and static linking, we need to explicitly link some wxWidgets dependencies
+    # that are not always automatically pulled in by find_package(wxWidgets).
+    include(SelectLibraryConfigurations)
+
+    set(FR_VCPKG_LIB_HINT "")
+    if (VCPKG_INSTALLED_DIR AND VCPKG_TARGET_TRIPLET)
+        set(FR_VCPKG_LIB_HINT HINTS "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib")
+        set(FR_VCPKG_DEBUG_LIB_HINT HINTS "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/debug/lib")
+    endif()
+
+    # pcre2
+    find_package(pcre2 CONFIG REQUIRED)
+    if (TARGET pcre2::pcre2-16)
+        message(STATUS "Using vcpkg pcre2::pcre2-16 target")
+        list(APPEND FR_LIBS pcre2::pcre2-16)
+    else()
+        find_library(PCRE2_RELEASE NAMES pcre2-16 pcre2-16-static wxpcre2 wxpcre2-static ${FR_VCPKG_LIB_HINT})
+        find_library(PCRE2_DEBUG NAMES pcre2-16d pcre2-16-staticd wxpcre2d wxpcre2-staticd ${FR_VCPKG_DEBUG_LIB_HINT})
+        select_library_configurations(PCRE2)
+        if (PCRE2_LIBRARY)
+            message(STATUS "Found PCRE2 library: ${PCRE2_LIBRARY}")
+            list(APPEND FR_LIBS ${PCRE2_LIBRARY})
+        endif()
+    endif()
+    
+    # Lexilla
+    find_package(lexilla CONFIG QUIET)
+    if (TARGET lexilla::lexilla)
+        message(STATUS "Using vcpkg lexilla::lexilla target")
+        list(APPEND FR_LIBS lexilla::lexilla)
+    else()
+        find_library(LEXILLA_RELEASE NAMES Lexilla lexilla wxlexilla wxlexilla-static ${FR_VCPKG_LIB_HINT})
+        find_library(LEXILLA_DEBUG NAMES Lexillad lexillad wxlexillad wxlexillad-static ${FR_VCPKG_DEBUG_LIB_HINT})
+        select_library_configurations(LEXILLA)
+        if (LEXILLA_LIBRARY)
+            message(STATUS "Found Lexilla library: ${LEXILLA_LIBRARY}")
+            list(APPEND FR_LIBS ${LEXILLA_LIBRARY})
+        endif()
+    endif()
+
+    # Scintilla
+    find_package(scintilla CONFIG QUIET)
+    if (TARGET scintilla::scintilla)
+        message(STATUS "Using vcpkg scintilla::scintilla target")
+        list(APPEND FR_LIBS scintilla::scintilla)
+    else()
+        find_library(SCINTILLA_RELEASE NAMES Scintilla scintilla wxscintilla wxscintilla-static ${FR_VCPKG_LIB_HINT})
+        find_library(SCINTILLA_DEBUG NAMES Scintillad scintillad wxscintillad wxscintillad-static ${FR_VCPKG_DEBUG_LIB_HINT})
+        select_library_configurations(SCINTILLA)
+        if (SCINTILLA_LIBRARY)
+            message(STATUS "Found Scintilla library: ${SCINTILLA_LIBRARY}")
+            list(APPEND FR_LIBS ${SCINTILLA_LIBRARY})
+        endif()
+    endif()
+    
+    message(STATUS "Final FR_LIBS on Windows: ${FR_LIBS}")
 endif (WIN32)
 
 if (UNIX AND NOT APPLE)
@@ -560,7 +671,7 @@ if (APPLE)
     )
 endif (APPLE)
 
-target_link_libraries(${PROJECT_NAME} IBPP ${wxWidgets_LIBRARIES} ${FR_LIBS})
+target_link_libraries(${PROJECT_NAME} IBPP fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
 
 enable_testing()
 add_executable(index_ddl_test

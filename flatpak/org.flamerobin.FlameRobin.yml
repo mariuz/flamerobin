@@ -27,15 +27,17 @@ modules:
     buildsystem: simple
     build-commands:
       # The outer tarball contains buildroot.tar.gz (after strip-components: 1).
-      # Extract the Firebird client libraries from the inner buildroot.tar.gz.
-      - tar -xzf buildroot.tar.gz ./opt/firebird/lib/libfbclient.so.5.0.3 ./opt/firebird/lib/libib_util.so ./opt/firebird/lib/libtomcrypt.so.1.0.1
+      # Extract the Firebird client libraries and headers from the inner buildroot.tar.gz.
+      - tar -xzf buildroot.tar.gz ./opt/firebird/lib/libfbclient.so.5.0.3 ./opt/firebird/lib/libib_util.so ./opt/firebird/lib/libtomcrypt.so.1.0.1 ./opt/firebird/include
       - install -Dm755 opt/firebird/lib/libfbclient.so.5.0.3 /app/lib/libfbclient.so.5.0.3
       - ln -sf libfbclient.so.5.0.3 /app/lib/libfbclient.so.2
       - ln -sf libfbclient.so.2 /app/lib/libfbclient.so
       - install -Dm755 opt/firebird/lib/libib_util.so /app/lib/libib_util.so
       - install -Dm755 opt/firebird/lib/libtomcrypt.so.1.0.1 /app/lib/libtomcrypt.so.1.0.1
-      - ln -sf libtomcrypt.so.1.0.1 /app/lib/libtomcrypt.so.1
       - ln -sf libtomcrypt.so.1 /app/lib/libtomcrypt.so
+      - ln -sf libtomcrypt.so.1 /app/lib/libtomcrypt.so
+      - mkdir -p /app/include
+      - cp -r opt/firebird/include/* /app/include/
     sources:
       - type: archive
         # This tarball contains buildroot.tar.gz; strip-components: 1 places it at the root.
@@ -47,17 +49,53 @@ modules:
     buildsystem: cmake-ninja
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release
-      - -DwxBUILD_SHARED=OFF
+      - -DwxBUILD_SHARED=ON
+      - -DCMAKE_INSTALL_LIBDIR=lib
+      - -DwxUSE_WEBVIEW=ON
+      - -DwxUSE_GTK3=ON
+      - -DwxUSE_LIBSECRET=OFF
+      - -DwxUSE_OPENGL=OFF
     sources:
       - type: archive
         url: https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.6/wxWidgets-3.2.6.tar.bz2
         sha256: 939e5b77ddc5b6092d1d7d29491fe67010a2433cf9b9c0d841ee4d04acb9dce7
+
+  - name: fb-cpp
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DBUILD_TESTING=OFF
+      - -DFB_CPP_USE_BOOST_DLL=OFF
+      - -DFB_CPP_USE_BOOST_MULTIPRECISION=OFF
+      - -DENABLE_VCPKG=OFF
+    sources:
+      - type: dir
+        path: ../src/fb-cpp
+      - type: file
+        path: ../cmake/firebirdConfig.cmake
+        dest: cmake
+      - type: dir
+        path: ../src/firebird/include
+        dest: src/firebird/include
+      - type: shell
+        commands:
+          - rm -rf vcpkg vcpkg.json CMakePresets.json
+          - perl -i -0777 -pe 's/set\(VCPKG_ROOT "vcpkg"\)\nset\(CMAKE_TOOLCHAIN_FILE/option(ENABLE_VCPKG "Enable vcpkg" ON)\nif(ENABLE_VCPKG)\nset(VCPKG_ROOT "vcpkg")\nif(EXISTS "\${VCPKG_ROOT}\/scripts\/buildsystems\/vcpkg.cmake")\nset(CMAKE_TOOLCHAIN_FILE/g' CMakeLists.txt
+          - perl -i -0777 -pe 's/(set\(CMAKE_TOOLCHAIN_FILE.*"\)\n)/$1endif()\nelse()\nif(CMAKE_TOOLCHAIN_FILE MATCHES "vcpkg.cmake\$")\nunset(CMAKE_TOOLCHAIN_FILE CACHE)\nunset(CMAKE_TOOLCHAIN_FILE)\nendif()\nendif()\n/g' CMakeLists.txt
+          - sed -i '1i set(firebird_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake" CACHE PATH "" FORCE)' CMakeLists.txt
+          - sed -i 's|DESTINATION fb-cpp/cmake/${PROJECT_NAME}|DESTINATION lib/cmake/${PROJECT_NAME}|g' CMakeLists.txt
 
   - name: flamerobin
     buildsystem: cmake-ninja
     builddir: true
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release
+      - -DENABLE_VCPKG=OFF
+      - -DENABLE_INTERNAL_FBCPP=OFF
+      - -DFB_CPP_BUILD_TESTS=OFF
+      - -Dfirebird_DIR=/app/lib/cmake/fb-cpp
+      - -DwxWidgets_CONFIG_EXECUTABLE=/app/bin/wx-config
+      - -DCMAKE_PREFIX_PATH=/app
     sources:
       - type: dir
         path: ..
