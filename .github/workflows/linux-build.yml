@@ -20,6 +20,13 @@ jobs:
         submodules: recursive
         fetch-depth: 0
 
+    # Installing required dependencies
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y build-essential cmake libicu-dev dpkg-dev libfbclient2 firebird3.0-server firebird3.0-utils firebird-dev firebird3.0-server-core firebird3.0-common rsync doxygen libboost-all-dev autoconf autoconf-archive automake libtool libx11-dev libxft-dev libxext-dev libwayland-dev libxkbcommon-dev libegl1-mesa-dev libibus-1.0-dev libdbus-1-dev libglib2.0-dev libatk1.0-dev gettext libxi-dev libxtst-dev libpango1.0-dev libcairo2-dev libgdk-pixbuf-2.0-dev libxrender-dev libxinerama-dev libxrandr-dev libxcursor-dev libxcomposite-dev libxdamage-dev libxfixes-dev libepoxy-dev libcups2-dev libfontconfig1-dev libwebkit2gtk-4.1-dev
+        sudo ldconfig
+
     - name: Bootstrap vcpkg
       run: ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
 
@@ -47,13 +54,6 @@ jobs:
         key: ${{ runner.os }}-vcpkg-bin-${{ hashFiles('vcpkg.json') }}
         restore-keys: |
             ${{ runner.os }}-vcpkg-bin-
-
-    # Installing required dependencies
-    - name: Install dependencies
-      run: |
-        sudo apt update
-        sudo apt install -y build-essential cmake libwxgtk3.2-dev libwxgtk-webview3.2-dev libicu-dev dpkg-dev libfbclient2 firebird3.0-server firebird3.0-utils firebird-dev firebird3.0-server-core firebird3.0-common rsync doxygen libboost-all-dev autoconf autoconf-archive automake libtool libx11-dev libxft-dev libxext-dev libwayland-dev libxkbcommon-dev libegl1-mesa-dev libibus-1.0-dev libdbus-1-dev libglib2.0-dev libatk1.0-dev gettext libxi-dev libxtst-dev libpango1.0-dev libcairo2-dev libgdk-pixbuf-2.0-dev libxrender-dev libxinerama-dev libxrandr-dev libxcursor-dev libxcomposite-dev libxdamage-dev libxfixes-dev libepoxy-dev libcups2-dev libfontconfig1-dev libwebkit2gtk-4.1-dev
-        sudo ldconfig
 
     # Building the CMake project for Flamerobin
     - name: Generate CMake project
