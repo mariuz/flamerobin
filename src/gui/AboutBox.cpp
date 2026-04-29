@@ -34,7 +34,16 @@
     #include <wx/aboutdlg.h>
 #endif
 
+#include <ibase.h>
 #include <ibpp.h>
+
+#ifndef FB_API_VER
+    #define FB_API_VER 0
+#endif
+
+#ifndef FBCPP_VERSION
+    #define FBCPP_VERSION "unknown"
+#endif
 
 #include "frversion.h"
 #include "gui/AboutBox.h"
@@ -42,11 +51,17 @@
 void showAboutBox(wxWindow* parent)
 {
     wxString libs;
-    libs.Printf(_("This tool uses IBPP library version %d.%d.%d.%d\nwxWidgets library version %d.%d.%d"),
+    libs.Printf(_("This tool uses IBPP library version %d.%d.%d.%d\n"
+                  "Firebird C++ API version %d.%d\n"
+                  "fb-cpp library version %s\n"
+                  "wxWidgets library version %d.%d.%d"),
         (IBPP::Version & 0xFF000000) >> 24,
         (IBPP::Version & 0x00FF0000) >> 16,
         (IBPP::Version & 0x0000FF00) >> 8,
         (IBPP::Version & 0x000000FF),
+        FB_API_VER / 10,
+        FB_API_VER % 10,
+        FBCPP_VERSION,
         wxMAJOR_VERSION,
         wxMINOR_VERSION,
         wxRELEASE_NUMBER

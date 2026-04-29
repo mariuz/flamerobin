@@ -55,6 +55,16 @@ else()
     find_package(fb-cpp CONFIG REQUIRED)
 endif()
 
+if(ENABLE_INTERNAL_FBCPP)
+    set(FBCPP_VERSION_STR "${fb-cpp-main_VERSION}")
+else()
+    set(FBCPP_VERSION_STR "${fb-cpp_VERSION}")
+endif()
+
+if (NOT FBCPP_VERSION_STR)
+    set(FBCPP_VERSION_STR "unknown")
+endif()
+
 #--------------------------------------
 # wxWidgets location
 
@@ -643,7 +653,7 @@ add_library(IBPP STATIC ${IBPP_SOURCE_LIST} ${IBPP_HEADER_LIST})
 
 #--------------------------------------
 # FlameRobin app
-include_directories(BEFORE src src/ibpp res)
+include_directories(BEFORE src src/ibpp src/firebird/include res)
 
 if (NOT APPLE)
     add_executable(${PROJECT_NAME} WIN32 ${SOURCE_LIST} ${HEADER_LIST} ${RESOURCE_LIST})
@@ -672,6 +682,7 @@ if (APPLE)
 endif (APPLE)
 
 target_link_libraries(${PROJECT_NAME} IBPP fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
+target_compile_definitions(${PROJECT_NAME} PRIVATE FBCPP_VERSION="${FBCPP_VERSION_STR}")
 
 enable_testing()
 add_executable(index_ddl_test
