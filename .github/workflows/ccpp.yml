@@ -97,7 +97,7 @@ jobs:
           mkdir -p vcpkg_archives
           mkdir build
           cd build
-          cmake .. -DCMAKE_EXE_LINKER_FLAGS="-L/opt/firebird/lib" -DBUILD_TESTING=OFF -DENABLE_VCPKG=OFF
+          cmake .. -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake -DENABLE_VCPKG=ON -DBUILD_TESTING=OFF
     - name: Build
       run: make
       working-directory: ./build

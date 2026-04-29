@@ -70,7 +70,7 @@ jobs:
       run: |
         mkdir -p vcpkg_archives
         cmake -S . -B Build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/Applications \
-              -DCMAKE_PREFIX_PATH="$(brew --prefix);$(brew --prefix icu4c)" -DENABLE_VCPKG=OFF
+              -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DENABLE_VCPKG=ON
 
     # FlameRobin Compilation
     - name: Build FlameRobin
