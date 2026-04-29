@@ -220,7 +220,12 @@ bool PrefDlgStyleSetting::loadFromTargetConfig(Config& config)
     if (fileComboBoxM)
     {
         wxString value = defaultM;
-        config.getValue(keyM, value);
+        // If system is dark and no value in config, use DarkModeDefault
+        if (wxSystemSettings::GetAppearance().IsDark() && !config.keyExists(keyM))
+            value = "DarkModeDefault";
+        else
+            config.getValue(keyM, value);
+
         fileComboBoxM->SetValue(value);
 
         loadStylers(fileComboBoxM->GetValue());
@@ -229,7 +234,10 @@ bool PrefDlgStyleSetting::loadFromTargetConfig(Config& config)
     if (fileSecondaryComboBoxM)
     {
         wxString value = defaultM;
-        config.getValue("StyleThemeSecondary", value);
+        if (wxSystemSettings::GetAppearance().IsDark() && !config.keyExists("StyleThemeSecondary"))
+            value = "DarkModeDefault";
+        else
+            config.getValue("StyleThemeSecondary", value);
         fileSecondaryComboBoxM->SetValue(value);
     }
 
