@@ -132,6 +132,7 @@ public:
 
     // returned shared ptr may be unassigned
     virtual DatabasePtr getDatabase() const;
+    virtual fr::IDatabasePtr getDALDatabase() const;
 
     virtual void invalidate();
 

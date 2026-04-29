@@ -266,6 +266,14 @@ DatabasePtr MetadataItem::getDatabase() const
     return DatabasePtr();
 }
 
+fr::IDatabasePtr MetadataItem::getDALDatabase() const
+{
+    DatabasePtr db = getDatabase();
+    if (db)
+        return db->getDALDatabase();
+    return nullptr;
+}
+
 void MetadataItem::getDependencies(std::vector<Dependency>& list,
     bool ofObject, const wxString& field)
 {
