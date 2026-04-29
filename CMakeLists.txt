@@ -32,7 +32,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #--------------------------------------
 # fb-cpp location
-set(firebird_DIR "${CMAKE_SOURCE_DIR}/cmake")
+set(firebird_DIR "${CMAKE_SOURCE_DIR}/cmake" CACHE PATH "Path to firebirdConfig.cmake")
 set(FB_CPP_SKIP_INSTALL ON CACHE BOOL "Skip fb-cpp installation")
 set(FB_CPP_BUILD_TESTS OFF CACHE BOOL "Build fb-cpp tests")
 option(FB_CPP_USE_BOOST_DLL "Enable Boost.DLL support for loading fbclient at runtime" OFF)

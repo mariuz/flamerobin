@@ -1,3 +1,7 @@
+if (TARGET firebird)
+    return()
+endif()
+
 add_library(firebird INTERFACE)
 add_library(firebird::firebird ALIAS firebird)
 
