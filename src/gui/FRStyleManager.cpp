@@ -345,13 +345,23 @@ void FRStyleManager::assignMargin(wxStyledTextCtrl* text)
 void FRStyleManager::loadConfig()
 {
     // If no theme has been picked yet, fall back to the dark-mode default
-    // when the system is in dark mode so the SQL editor and data grid don't
-    // render as a bright white panel inside an otherwise dark window. The
-    // user's explicit Preferences choice still wins.
-    const wxString systemDefault =
-        wxSystemSettings::GetAppearance().IsDark()
-            ? _DARKMODEDEFAULT
-            : _default;
+    // when the system is in dark mode (or forced by user) so the SQL editor 
+    // and data grid don't render as a bright white panel inside an 
+    // otherwise dark window. The user's explicit Preferences choice still wins.
+    
+    bool useDark = false;
+#if wxCHECK_VERSION(3, 3, 0)
+    int theme = config().get("darkMode", 0);
+    if (theme == 2)
+        useDark = true;
+    else if (theme == 0 && wxSystemSettings::GetAppearance().IsDark())
+        useDark = true;
+#else
+    if (wxSystemSettings::GetAppearance().IsDark())
+        useDark = true;
+#endif
+
+    const wxString systemDefault = useDark ? _DARKMODEDEFAULT : _default;
 
     wxString fileName = config().get(_PRYMARY, systemDefault);
     if (fileName.IsEmpty()) {

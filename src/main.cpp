@@ -29,6 +29,7 @@
 #endif
 
 #include <wx/cmdline.h>
+#include <wx/settings.h>
 #include <wx/sysopt.h>
 #include <wx/utils.h>
 
@@ -81,6 +82,18 @@ bool Application::OnInit()
     checkEnvironment();
     LocaleManager::get().initFromConfig();
     parseCommandLine();
+
+#if wxCHECK_VERSION(3, 3, 0)
+    int theme = config().get("darkMode", 0);
+    if (theme == 1)
+        wxSystemSettings::SetAppearance(wxAppAppearance::Light);
+    else if (theme == 2)
+        wxSystemSettings::SetAppearance(wxAppAppearance::Dark);
+
+#ifdef __WXMSW__
+    MSWEnableDarkMode();
+#endif
+#endif
 
 #if defined(__WXOSX_COCOA__)
     std::locale::global(std::locale(""));
