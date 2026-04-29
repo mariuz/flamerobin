@@ -1,6 +1,9 @@
 name: Upload Release Artifacts
 
 on:
+  push:
+    tags:
+      - 'v*'
   release:
     types: [published, edited]
 
