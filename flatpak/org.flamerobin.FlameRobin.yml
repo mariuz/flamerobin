@@ -34,7 +34,7 @@ modules:
       - ln -sf libfbclient.so.2 /app/lib/libfbclient.so
       - install -Dm755 opt/firebird/lib/libib_util.so /app/lib/libib_util.so
       - install -Dm755 opt/firebird/lib/libtomcrypt.so.1.0.1 /app/lib/libtomcrypt.so.1.0.1
-      - ln -sf libtomcrypt.so.1 /app/lib/libtomcrypt.so
+      - ln -sf libtomcrypt.so.1.0.1 /app/lib/libtomcrypt.so.1
       - ln -sf libtomcrypt.so.1 /app/lib/libtomcrypt.so
       - mkdir -p /app/include
       - cp -r opt/firebird/include/* /app/include/
