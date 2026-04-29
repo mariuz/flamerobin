@@ -28,6 +28,14 @@ jobs:
         sudo apt install -y build-essential cmake libicu-dev dpkg-dev libfbclient2 firebird3.0-server firebird3.0-utils firebird-dev firebird3.0-server-core firebird3.0-common rsync doxygen libboost-all-dev autoconf autoconf-archive automake libtool libx11-dev libxft-dev libxext-dev libwayland-dev libxkbcommon-dev libegl1-mesa-dev libibus-1.0-dev libdbus-1-dev libglib2.0-dev libatk1.0-dev gettext libxi-dev libxtst-dev libpango1.0-dev libcairo2-dev libgdk-pixbuf-2.0-dev libxrender-dev libxinerama-dev libxrandr-dev libxcursor-dev libxcomposite-dev libxdamage-dev libxfixes-dev libepoxy-dev libcups2-dev libfontconfig1-dev libwebkit2gtk-4.1-dev
         sudo ldconfig
 
+    - name: Cache vcpkg binaries
+      uses: actions/cache@v4
+      with:
+        path: vcpkg_archives
+        key: ${{ runner.os }}-vcpkg-bin-${{ hashFiles('vcpkg.json') }}
+        restore-keys: |
+            ${{ runner.os }}-vcpkg-bin-
+
     - name: Bootstrap vcpkg
       run: ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
 
@@ -47,14 +55,6 @@ jobs:
         perl -i -pe 's/\.emplace_back\(value, ([^)]+)\)/.push_back({value, $1})/g' src/fb-cpp/src/fb-cpp/BackupManager.h
         perl -i -0777 -pe 's/set\(VCPKG_ROOT "vcpkg"\)\nset\(CMAKE_TOOLCHAIN_FILE/option(ENABLE_VCPKG "Enable vcpkg" ON)\nif(ENABLE_VCPKG)\nset(VCPKG_ROOT "vcpkg")\nif(EXISTS "\${VCPKG_ROOT}\/scripts\/buildsystems\/vcpkg.cmake")\nset(CMAKE_TOOLCHAIN_FILE/g' src/fb-cpp/CMakeLists.txt
         perl -i -0777 -pe 's/(set\(CMAKE_TOOLCHAIN_FILE.*"\)\n)/$1endif()\nelse()\nif(CMAKE_TOOLCHAIN_FILE MATCHES "vcpkg.cmake\$")\nunset(CMAKE_TOOLCHAIN_FILE CACHE)\nunset(CMAKE_TOOLCHAIN_FILE)\nendif()\nendif()\n/g' src/fb-cpp/CMakeLists.txt
-
-    - name: Cache vcpkg binaries
-      uses: actions/cache@v4
-      with:
-        path: vcpkg_archives
-        key: ${{ runner.os }}-vcpkg-bin-${{ hashFiles('vcpkg.json') }}
-        restore-keys: |
-            ${{ runner.os }}-vcpkg-bin-
 
     # Building the CMake project for Flamerobin
     - name: Generate CMake project
