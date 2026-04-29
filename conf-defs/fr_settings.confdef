@@ -432,7 +432,7 @@
 				<caption>	</caption>
                 <description>Select the file with the primary style</description>
                 <key>StyleTheme</key>
-				<default>styles</default>
+				<default>stylers</default>
 				<aligngroup>1</aligngroup>
                 <file>StyleTheme</file>
             </setting>
