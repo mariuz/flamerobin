@@ -36,6 +36,8 @@ private:
     const wxString _SECONDARY = "StyleThemeSecondary";
     const wxString _STYLEACTIVE = "StyleActive";
     const wxString _default = "stylers";
+public:
+    static const wxString _DARKMODEDEFAULT;
 
     wxFileName fileNamePrimaryM;
     wxFileName fileNameSecondaryM;

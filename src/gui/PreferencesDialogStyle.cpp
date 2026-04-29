@@ -221,10 +221,8 @@ bool PrefDlgStyleSetting::loadFromTargetConfig(Config& config)
     {
         wxString value = defaultM;
         // If system is dark and no value in config, use DarkModeDefault
-        if (wxSystemSettings::GetAppearance().IsDark() && !config.keyExists(keyM))
-            value = "DarkModeDefault";
-        else
-            config.getValue(keyM, value);
+        if (!config.getValue(keyM, value) && wxSystemSettings::GetAppearance().IsDark())
+            value = FRStyleManager::_DARKMODEDEFAULT;
 
         fileComboBoxM->SetValue(value);
 
@@ -234,10 +232,8 @@ bool PrefDlgStyleSetting::loadFromTargetConfig(Config& config)
     if (fileSecondaryComboBoxM)
     {
         wxString value = defaultM;
-        if (wxSystemSettings::GetAppearance().IsDark() && !config.keyExists("StyleThemeSecondary"))
-            value = "DarkModeDefault";
-        else
-            config.getValue("StyleThemeSecondary", value);
+        if (!config.getValue("StyleThemeSecondary", value) && wxSystemSettings::GetAppearance().IsDark())
+            value = FRStyleManager::_DARKMODEDEFAULT;
         fileSecondaryComboBoxM->SetValue(value);
     }
 

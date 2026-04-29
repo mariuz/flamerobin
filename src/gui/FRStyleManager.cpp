@@ -37,6 +37,7 @@
 
 #include "FRStyleManager.h"
 
+const wxString FRStyleManager::_DARKMODEDEFAULT = "DarkModeDefault";
 
 FRStyleManager& stylerManager()
 {
@@ -349,7 +350,7 @@ void FRStyleManager::loadConfig()
     // user's explicit Preferences choice still wins.
     const wxString systemDefault =
         wxSystemSettings::GetAppearance().IsDark()
-            ? wxString("DarkModeDefault")
+            ? _DARKMODEDEFAULT
             : _default;
 
     wxString fileName = config().get(_PRYMARY, systemDefault);
