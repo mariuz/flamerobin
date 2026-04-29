@@ -34,16 +34,20 @@ modules:
       - ln -sf libfbclient.so.2 /app/lib/libfbclient.so
       - install -Dm755 opt/firebird/lib/libib_util.so /app/lib/libib_util.so
       - install -Dm755 opt/firebird/lib/libtomcrypt.so.1.0.1 /app/lib/libtomcrypt.so.1.0.1
-      - ln -sf libtomcrypt.so.1 /app/lib/libtomcrypt.so
+      - ln -sf libtomcrypt.so.1.0.1 /app/lib/libtomcrypt.so.1
       - ln -sf libtomcrypt.so.1 /app/lib/libtomcrypt.so
       - mkdir -p /app/include
       - cp -r opt/firebird/include/* /app/include/
+      - install -Dm644 firebirdConfig.cmake /app/lib/cmake/firebird/firebirdConfig.cmake
     sources:
       - type: archive
         # This tarball contains buildroot.tar.gz; strip-components: 1 places it at the root.
         url: https://github.com/FirebirdSQL/firebird/releases/download/v5.0.3/Firebird-5.0.3.1683-0-linux-x64.tar.gz
         sha256: ef281c53f85756288151a86831375c9ae668caaeccd1b18103d523ba8f444779
         strip-components: 1
+      - type: file
+        path: ../cmake/firebirdConfig.cmake
+        dest: .
 
   - name: wxWidgets
     buildsystem: cmake-ninja
@@ -51,8 +55,10 @@ modules:
       - -DCMAKE_BUILD_TYPE=Release
       - -DwxBUILD_SHARED=ON
       - -DCMAKE_INSTALL_LIBDIR=lib
-      - -DwxUSE_WEBVIEW=ON
       - -DwxUSE_GTK3=ON
+      - -DwxUSE_STC=ON
+      - -DwxUSE_AUI=ON
+      - -DwxUSE_WEBVIEW=OFF
       - -DwxUSE_LIBSECRET=OFF
       - -DwxUSE_OPENGL=OFF
     sources:
@@ -83,7 +89,7 @@ modules:
           - perl -i -0777 -pe 's/set\(VCPKG_ROOT "vcpkg"\)\nset\(CMAKE_TOOLCHAIN_FILE/option(ENABLE_VCPKG "Enable vcpkg" ON)\nif(ENABLE_VCPKG)\nset(VCPKG_ROOT "vcpkg")\nif(EXISTS "\${VCPKG_ROOT}\/scripts\/buildsystems\/vcpkg.cmake")\nset(CMAKE_TOOLCHAIN_FILE/g' CMakeLists.txt
           - perl -i -0777 -pe 's/(set\(CMAKE_TOOLCHAIN_FILE.*"\)\n)/$1endif()\nelse()\nif(CMAKE_TOOLCHAIN_FILE MATCHES "vcpkg.cmake\$")\nunset(CMAKE_TOOLCHAIN_FILE CACHE)\nunset(CMAKE_TOOLCHAIN_FILE)\nendif()\nendif()\n/g' CMakeLists.txt
           - sed -i '1i set(firebird_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake" CACHE PATH "" FORCE)' CMakeLists.txt
-          - sed -i 's|DESTINATION fb-cpp/cmake/${PROJECT_NAME}|DESTINATION lib/cmake/${PROJECT_NAME}|g' CMakeLists.txt
+          - find . -name CMakeLists.txt -exec sed -i 's|fb-cpp/cmake|lib/cmake|g' {} +
 
   - name: flamerobin
     buildsystem: cmake-ninja
@@ -93,8 +99,8 @@ modules:
       - -DENABLE_VCPKG=OFF
       - -DENABLE_INTERNAL_FBCPP=OFF
       - -DFB_CPP_BUILD_TESTS=OFF
-      - -Dfirebird_DIR=/app/lib/cmake/fb-cpp
-      - -DwxWidgets_CONFIG_EXECUTABLE=/app/bin/wx-config
+      - -Dfirebird_DIR=/app/lib/cmake/firebird
+      - -Dfb-cpp_DIR=/app/lib/cmake/fb-cpp
       - -DCMAKE_PREFIX_PATH=/app
     sources:
       - type: dir

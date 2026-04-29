@@ -1,9 +1,18 @@
+if (TARGET firebird)
+    return()
+endif()
+
 add_library(firebird INTERFACE)
 add_library(firebird::firebird ALIAS firebird)
 
 # On Linux/Unix, FlameRobin uses -lfbclient -ldl
 if (UNIX AND NOT APPLE)
-    target_link_libraries(firebird INTERFACE fbclient dl)
+    find_library(FIREBIRD_LIBRARY NAMES fbclient HINTS /app/lib)
+    if (FIREBIRD_LIBRARY)
+        target_link_libraries(firebird INTERFACE "${FIREBIRD_LIBRARY}" "${CMAKE_DL_LIBS}")
+    else()
+        target_link_libraries(firebird INTERFACE fbclient "${CMAKE_DL_LIBS}")
+    endif()
 elseif (APPLE)
     # macOS logic from main CMakeLists.txt
     target_link_libraries(firebird INTERFACE ${FBCLIENT_LIBRARY})

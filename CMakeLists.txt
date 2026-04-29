@@ -32,7 +32,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #--------------------------------------
 # fb-cpp location
-set(firebird_DIR "${CMAKE_SOURCE_DIR}/cmake")
+set(firebird_DIR "${CMAKE_SOURCE_DIR}/cmake" CACHE PATH "Path to firebirdConfig.cmake")
 set(FB_CPP_SKIP_INSTALL ON CACHE BOOL "Skip fb-cpp installation")
 set(FB_CPP_BUILD_TESTS OFF CACHE BOOL "Build fb-cpp tests")
 option(FB_CPP_USE_BOOST_DLL "Enable Boost.DLL support for loading fbclient at runtime" OFF)
@@ -77,19 +77,21 @@ endif (WIN32)
 set(wxWidgets_USE_UNICODE ON)
 
 # Find the wxWidgets library
-if (WIN32)
-    # On Windows with vcpkg, CONFIG mode is preferred to get correct targets and dependencies
-    find_package(wxWidgets REQUIRED CONFIG COMPONENTS base core html xml aui stc adv net webview)
-    message(STATUS "Found wxWidgets via CONFIG: ${wxWidgets_FOUND}")
-    # When using CONFIG mode, we might need to use the targets instead of variables
-    if (TARGET wx::base)
-        set(wxWidgets_LIBRARIES wx::base wx::core wx::html wx::xml wx::aui wx::stc wx::adv wx::net wx::webview)
-        message(STATUS "Using wxWidgets targets: ${wxWidgets_LIBRARIES}")
-    endif()
-elseif (UNIX AND NOT APPLE)
-    find_package(wxWidgets REQUIRED core base html xml aui stc adv net OPTIONAL_COMPONENTS webview scintilla)
+# Try CONFIG mode first (vcpkg provides this), then fall back to standard FindwxWidgets.cmake
+find_package(wxWidgets CONFIG QUIET COMPONENTS base core html xml aui stc adv net)
+if (wxWidgets_FOUND AND TARGET wx::base)
+    message(STATUS "Found wxWidgets via CONFIG: ${wxWidgets_VERSION}")
+    set(wxWidgets_LIBRARIES wx::base wx::core wx::html wx::xml wx::aui wx::stc wx::adv wx::net)
 else()
-    find_package(wxWidgets REQUIRED core base html xml aui stc adv net webview OPTIONAL_COMPONENTS scintilla)
+    message(STATUS "wxWidgets CONFIG not found, trying standard search")
+    if (WIN32)
+        set(wxWidgets_USE_STATIC ON)
+        find_package(wxWidgets REQUIRED core base html xml aui stc adv net)
+    elseif (UNIX AND NOT APPLE)
+        find_package(wxWidgets REQUIRED core base html xml aui stc adv net)
+    else()
+        find_package(wxWidgets REQUIRED core base html xml aui stc adv net)
+    endif()
 endif()
 
 if (wxWidgets_FOUND)
@@ -525,8 +527,10 @@ if (UNIX AND NOT APPLE)
 	)
 	add_definitions(-DIBPP_LINUX)
 	add_definitions(-DFR_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
+
+	find_package(firebird REQUIRED)
 	# Need to link the fbclient lib in *nix systems
-	list(APPEND FR_LIBS -lfbclient -ldl)
+	list(APPEND FR_LIBS firebird::firebird -ldl)
 
 	include(CheckCXXSourceCompiles)
 	check_cxx_source_compiles("

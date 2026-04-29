@@ -22,6 +22,10 @@
     {
       "name": "lexilla",
       "platform": "windows"
+    },
+    {
+      "name": "scintilla",
+      "platform": "windows"
     }
   ],
   "overrides": [

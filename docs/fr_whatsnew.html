@@ -12,6 +12,7 @@ http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issue
 <br><br>
 <font size=+1 color="#AA0000"><B>Security & UI Enhancements</B></font><br>
 <br>
+- **Full Dark Mode Support**: FlameRobin now leverages wxWidgets 3.3.0+ capabilities to provide comprehensive dark mode support, including native menus and dialogs on Windows. A new "Application theme" setting in Preferences allows choosing between System Default, Always Light, and Always Dark. (fixes issue #553)<br>
 - **Encrypted Password Storage (Default)**: Database registration now defaults to the "Use saved user name and encrypted password" option. This significantly improves security by ensuring passwords are not stored in plain text in the configuration file. (fixes issue #549)<br>
 - **Style Configurator Improvements**: Fixed a bug where the SQL editor would incorrectly turn orange after saving preferences, especially in Dark Mode. Added robust Dark Mode detection to ensure a consistent visual experience. (fixes issue #550)<br>
 - **About Box Details**: The About box now displays the version of the `fb-cpp` library and the Firebird C++ API, providing better visibility into the underlying database interface components.<br>

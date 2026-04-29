@@ -6,6 +6,7 @@ env:
 on:
   push:
     branches: [ "**" ]
+    tags: [ "v*" ]
   pull_request:
     branches: [ "**" ]
 
@@ -19,6 +20,21 @@ jobs:
       with:
         submodules: recursive
         fetch-depth: 0
+
+    # Installing required dependencies
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y build-essential cmake libicu-dev dpkg-dev libfbclient2 firebird3.0-server firebird3.0-utils firebird-dev firebird3.0-server-core firebird3.0-common rsync doxygen libboost-all-dev autoconf autoconf-archive automake libtool libx11-dev libxft-dev libxext-dev libwayland-dev libxkbcommon-dev libegl1-mesa-dev libibus-1.0-dev libdbus-1-dev libglib2.0-dev libatk1.0-dev gettext libxi-dev libxtst-dev libpango1.0-dev libcairo2-dev libgdk-pixbuf-2.0-dev libxrender-dev libxinerama-dev libxrandr-dev libxcursor-dev libxcomposite-dev libxdamage-dev libxfixes-dev libepoxy-dev libcups2-dev libfontconfig1-dev libwebkit2gtk-4.1-dev
+        sudo ldconfig
+
+    - name: Cache vcpkg binaries
+      uses: actions/cache@v4
+      with:
+        path: vcpkg_archives
+        key: ${{ runner.os }}-vcpkg-bin-${{ hashFiles('vcpkg.json') }}
+        restore-keys: |
+            ${{ runner.os }}-vcpkg-bin-
 
     - name: Bootstrap vcpkg
       run: ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
@@ -40,45 +56,6 @@ jobs:
         perl -i -0777 -pe 's/set\(VCPKG_ROOT "vcpkg"\)\nset\(CMAKE_TOOLCHAIN_FILE/option(ENABLE_VCPKG "Enable vcpkg" ON)\nif(ENABLE_VCPKG)\nset(VCPKG_ROOT "vcpkg")\nif(EXISTS "\${VCPKG_ROOT}\/scripts\/buildsystems\/vcpkg.cmake")\nset(CMAKE_TOOLCHAIN_FILE/g' src/fb-cpp/CMakeLists.txt
         perl -i -0777 -pe 's/(set\(CMAKE_TOOLCHAIN_FILE.*"\)\n)/$1endif()\nelse()\nif(CMAKE_TOOLCHAIN_FILE MATCHES "vcpkg.cmake\$")\nunset(CMAKE_TOOLCHAIN_FILE CACHE)\nunset(CMAKE_TOOLCHAIN_FILE)\nendif()\nendif()\n/g' src/fb-cpp/CMakeLists.txt
 
-    - name: Cache vcpkg binaries
-      uses: actions/cache@v4
-      with:
-        path: vcpkg_archives
-        key: ${{ runner.os }}-vcpkg-bin-${{ hashFiles('vcpkg.json') }}
-        restore-keys: |
-            ${{ runner.os }}-vcpkg-bin-
-
-    # Installing required dependencies
-    - name: Install dependencies
-      run: |
-        sudo apt update
-        sudo apt install -y build-essential cmake libwxgtk3.2-dev libwxgtk-webview3.2-dev libicu-dev dpkg-dev libfbclient2 firebird3.0-server firebird3.0-utils firebird-dev firebird3.0-server-core firebird3.0-common rsync doxygen libboost-all-dev autoconf autoconf-archive automake libtool libx11-dev libxft-dev libxext-dev libwayland-dev libxkbcommon-dev libegl1-mesa-dev libibus-1.0-dev libdbus-1-dev libglib2.0-dev libatk1.0-dev gettext libxi-dev libxtst-dev libpango1.0-dev libcairo2-dev libgdk-pixbuf-2.0-dev libxrender-dev libxinerama-dev libxrandr-dev libxcursor-dev libxcomposite-dev libxdamage-dev libxfixes-dev libepoxy-dev libcups2-dev libfontconfig1-dev libwebkit2gtk-4.1-dev
-        sudo ldconfig
-
-    # Cache wxWidgets if already built
-    - name: wxWidget cache
-      id: cache-wxwidget
-      uses: actions/cache@v4
-      with:
-        path: wxWidgets
-        key: ${{ runner.os }}-wxwidgets-${{env.wx-tag-version}}
-        restore-keys: ${{ runner.os }}-wxwidgets-${{env.wx-tag-version}}
-
-    # Clone and compile wxWidgets if not already cached
-    - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
-      name: Clone wxWidgets
-      run: git clone --recursive --branch ${{ env.wx-tag-version }} --depth 1 https://github.com/wxWidgets/wxWidgets.git
-
-    - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
-      name: Build wxWidgets
-      run: |
-        cd wxWidgets
-        mkdir build && cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release -DwxBUILD_SHARED=OFF
-        make -j$(nproc)
-        sudo make install
-        sudo ldconfig
-
     # Building the CMake project for Flamerobin
     - name: Generate CMake project
       env:
@@ -87,7 +64,7 @@ jobs:
         mkdir -p vcpkg_archives
         export PATH="/usr/local/bin:/opt/firebird/bin:${PATH:-}"
         export LD_LIBRARY_PATH="/usr/local/lib:/usr/lib/x86_64-linux-gnu:/opt/firebird/lib:${LD_LIBRARY_PATH:-}"
-        cmake -S . -B Build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/flamerobin/ -DBUILD_TESTING=OFF -DENABLE_VCPKG=OFF
+        cmake -S . -B Build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/flamerobin/ -DBUILD_TESTING=OFF -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DENABLE_VCPKG=ON
 
     # FlameRobin Compilation
     - name: Build Flamerobin

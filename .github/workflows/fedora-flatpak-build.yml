@@ -3,6 +3,7 @@ name: Build FlameRobin Flatpak (Fedora)
 on:
   push:
     branches: [ "**" ]
+    tags: [ "v*" ]
   pull_request:
     branches: [ "**" ]
 

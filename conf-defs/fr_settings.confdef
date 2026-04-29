@@ -14,6 +14,21 @@
             <key>UseLocalConfig</key>
             <default>0</default>
         </setting>
+        <setting type="radiobox">
+            <caption>Application theme</caption>
+            <description>Select the preferred application theme (requires wxWidgets 3.3+)</description>
+            <key>darkMode</key>
+            <default>0</default>
+            <option>
+                <caption>System Default</caption>
+            </option>
+            <option>
+                <caption>Always Light</caption>
+            </option>
+            <option>
+                <caption>Always Dark</caption>
+            </option>
+        </setting>
         <setting type="checkbox">
             <caption>Remember window positions and sizes</caption>
             <related />
