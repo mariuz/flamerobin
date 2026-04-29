@@ -336,7 +336,7 @@ void DatabaseRegistrationDialog::setControlsProperties()
     int wh = text_ctrl_dbpath->GetMinHeight();
     button_browse->SetSize(wh, wh);
 
-    choice_authentication->SetSelection(0);
+    choice_authentication->SetSelection(1);
     combobox_charset->SetStringSelection("NONE");
     if (createM)
     {

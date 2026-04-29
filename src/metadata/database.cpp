@@ -226,7 +226,7 @@ void DatabaseInfo::reloadIfNecessary(const IBPP::Database database)
 
 // DatabaseAuthenticationMode class
 DatabaseAuthenticationMode::DatabaseAuthenticationMode()
-    : modeM(UseSavedPassword)
+    : modeM(UseSavedEncryptedPwd)
 {
 }
 
