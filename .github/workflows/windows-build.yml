@@ -3,6 +3,7 @@ name: Build Flamerobin for Windows
 on:
   push:
     branches: [ "**" ]
+    tags: [ "v*" ]
   pull_request:
     branches: [ "**" ]
 
