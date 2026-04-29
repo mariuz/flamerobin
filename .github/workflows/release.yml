@@ -12,44 +12,56 @@ permissions:
 
 jobs:
   build-linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
 
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential cmake libwxgtk3.2-dev dpkg-dev libfbclient2 firebird3.0-server firebird3.0-utils firebird-dev firebird3.0-server-core firebird3.0-common rsync
+          sudo apt install -y build-essential cmake libicu-dev dpkg-dev libfbclient2 firebird3.0-server firebird3.0-utils firebird-dev firebird3.0-server-core firebird3.0-common rsync doxygen libboost-all-dev autoconf autoconf-archive automake libtool libx11-dev libxft-dev libxext-dev libwayland-dev libxkbcommon-dev libegl1-mesa-dev libibus-1.0-dev libdbus-1-dev libglib2.0-dev libatk1.0-dev gettext libxi-dev libxtst-dev libpango1.0-dev libcairo2-dev libgdk-pixbuf-2.0-dev libxrender-dev libxinerama-dev libxrandr-dev libxcursor-dev libxcomposite-dev libxdamage-dev libxfixes-dev libepoxy-dev libcups2-dev libfontconfig1-dev libwebkit2gtk-4.1-dev
           sudo ldconfig
 
-      - name: wxWidget cache
-        id: cache-wxwidget
+      - name: Restore vcpkg binaries
         uses: actions/cache@v4
         with:
-          path: wxWidgets
-          key: ${{ runner.os }}-wxwidgets-v3.2.6
-          restore-keys: ${{ runner.os }}-wxwidgets-v3.2.6
+          path: vcpkg_archives
+          key: ${{ runner.os }}-vcpkg-bin-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+              ${{ runner.os }}-vcpkg-bin-
 
-      - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
-        name: Clone wxWidgets
-        run: git clone --recursive --branch v3.2.6 --depth 1 https://github.com/wxWidgets/wxWidgets.git
+      - name: Bootstrap vcpkg
+        run: ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
 
-      - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
-        name: Build wxWidgets
+      - name: Install dependencies (vcpkg)
+        env:
+          VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg_archives
         run: |
-          cd wxWidgets
-          mkdir build && cd build
-          cmake .. -DCMAKE_BUILD_TYPE=Release -DwxBUILD_SHARED=OFF
-          make -j$(nproc)
-          sudo make install
-          sudo ldconfig
+          mkdir -p vcpkg_archives
+          for i in {1..3}; do
+            ./vcpkg/vcpkg install && break
+            echo "vcpkg install failed, retrying in 10 seconds..."
+            sleep 10
+          done
+
+      - name: Patch fb-cpp for aggregate initialization and optional vcpkg
+        run: |
+          perl -i -pe 's/\.emplace_back\(value, ([^)]+)\)/.push_back({value, $1})/g' src/fb-cpp/src/fb-cpp/BackupManager.h
+          perl -i -0777 -pe 's/set\(VCPKG_ROOT "vcpkg"\)\nset\(CMAKE_TOOLCHAIN_FILE/option(ENABLE_VCPKG "Enable vcpkg" ON)\nif(ENABLE_VCPKG)\nset(VCPKG_ROOT "vcpkg")\nif(EXISTS "\${VCPKG_ROOT}\/scripts\/buildsystems\/vcpkg.cmake")\nset(CMAKE_TOOLCHAIN_FILE/g' src/fb-cpp/CMakeLists.txt
+          perl -i -0777 -pe 's/(set\(CMAKE_TOOLCHAIN_FILE.*"\)\n)/$1endif()\nelse()\nif(CMAKE_TOOLCHAIN_FILE MATCHES "vcpkg.cmake\$")\nunset(CMAKE_TOOLCHAIN_FILE CACHE)\nunset(CMAKE_TOOLCHAIN_FILE)\nendif()\nendif()\n/g' src/fb-cpp/CMakeLists.txt
 
       - name: Generate CMake project
+        env:
+          VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg_archives
         run: |
+          mkdir -p vcpkg_archives
           export PATH="/usr/local/bin:/opt/firebird/bin:${PATH:-}"
           export LD_LIBRARY_PATH="/usr/local/lib:/usr/lib/x86_64-linux-gnu:/opt/firebird/lib:${LD_LIBRARY_PATH:-}"
-          cmake -S . -B Build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/flamerobin/
+          cmake -S . -B Build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/flamerobin/ -DBUILD_TESTING=OFF -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DENABLE_VCPKG=ON
 
       - name: Build Flamerobin
         run: |
@@ -89,6 +101,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
 
       - name: wxWidget cache
         id: cache-wxwidget
@@ -149,6 +164,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
 
       - name: Install wxWidgets
         run: brew install wxwidgets
