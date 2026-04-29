@@ -51,8 +51,10 @@ modules:
       - -DCMAKE_BUILD_TYPE=Release
       - -DwxBUILD_SHARED=ON
       - -DCMAKE_INSTALL_LIBDIR=lib
-      - -DwxUSE_WEBVIEW=ON
       - -DwxUSE_GTK3=ON
+      - -DwxUSE_STC=ON
+      - -DwxUSE_AUI=ON
+      - -DwxUSE_WEBVIEW=OFF
       - -DwxUSE_LIBSECRET=OFF
       - -DwxUSE_OPENGL=OFF
     sources:
@@ -94,7 +96,7 @@ modules:
       - -DENABLE_INTERNAL_FBCPP=OFF
       - -DFB_CPP_BUILD_TESTS=OFF
       - -Dfirebird_DIR=/app/lib/cmake/fb-cpp
-      - -DwxWidgets_CONFIG_EXECUTABLE=/app/bin/wx-config
+      - -DwxWidgets_DIR=/app/lib/cmake/wxWidgets
       - -DCMAKE_PREFIX_PATH=/app
     sources:
       - type: dir
