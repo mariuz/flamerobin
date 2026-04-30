@@ -48,6 +48,7 @@
 #include "core/ProgressIndicator.h"
 #include "core/StringUtils.h"
 #include "engine/MetadataLoader.h"
+#include "engine/db/ibpp/IbppDatabase.h"
 #include "MasterPassword.h"
 #include "metadata/CharacterSet.h"
 #include "metadata/column.h"
@@ -1102,17 +1103,28 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
 
         databaseM.clear();
 
-        auto connect = [this, &password]() {
+        auto connect = [this, &password]() -> IBPP::Database {
             bool useUserNamePwd = !authenticationModeM.getIgnoreUsernamePassword();
-            IBPP::Database db = IBPP::DatabaseFactory("",
-                wx2std(getConnectionString()),
+
+            databaseDAL_M->setConnectionString(wx2std(getConnectionString()));
+            databaseDAL_M->setCredentials(
                 (useUserNamePwd ? wx2std(getUsername()) : ""),
-                (useUserNamePwd ? wx2std(password) : ""),
-                wx2std(getRole()), wx2std(getConnectionCharset()), 
-                "", wx2std(getClientLibrary()), wx2std(getCryptKeyData())
+                (useUserNamePwd ? wx2std(password) : "")
             );
-            db->Connect();  // As standard, will block for 180 seconds or until connected
-            return db;
+            databaseDAL_M->setRole(wx2std(getRole()));
+            databaseDAL_M->setCharset(wx2std(getConnectionCharset()));
+            databaseDAL_M->setClientLibrary(wx2std(getClientLibrary()));
+            databaseDAL_M->setCryptKeyData(wx2std(getCryptKeyData()));
+
+            databaseDAL_M->connect();
+
+            if (databaseDAL_M->getBackendType() == fr::DatabaseBackend::IBPP)
+            {
+                auto ibppDb = std::dynamic_pointer_cast<fr::IbppDatabase>(databaseDAL_M);
+                if (ibppDb)
+                    return ibppDb->getIBPPDatabase();
+            }
+            return IBPP::Database();
         };
 
         if (indicator)

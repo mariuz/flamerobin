@@ -88,6 +88,16 @@ void FbCppDatabase::setCharset(const std::string& charset)
     charsetM = charset;
 }
 
+void FbCppDatabase::setClientLibrary(const std::string& clientLib)
+{
+    clientLibM = clientLib;
+}
+
+void FbCppDatabase::setCryptKeyData(const std::string& cryptKeyData)
+{
+    cryptKeyDataM = cryptKeyData;
+}
+
 ITransactionPtr FbCppDatabase::createTransaction()
 {
     if (!attachmentM)
