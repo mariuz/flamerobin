@@ -37,6 +37,11 @@ void IbppStatement::prepare(const std::string& sql)
     statementM->Prepare(sql);
 }
 
+std::string IbppStatement::getSql() const
+{
+    return statementM->Sql();
+}
+
 void IbppStatement::execute()
 {
     statementM->Execute();
@@ -89,6 +94,31 @@ bool IbppStatement::isNull(int index)
 
 std::string IbppStatement::getString(int index)
 {
+    if (getColumnType(index) == ColumnType::Blob)
+    {
+        IBPP::Blob b = IBPP::BlobFactory(statementM->DatabasePtr(), statementM->TransactionPtr());
+        statementM->Get(index + 1, b);
+        try
+        {
+            b->Open();
+        }
+        catch (...)
+        {
+            return "";
+        }
+        std::string result;
+        char buffer[8192];
+        while (true)
+        {
+            int size = b->Read(buffer, 8192 - 1);
+            if (size <= 0)
+                break;
+            buffer[size] = 0;
+            result += buffer;
+        }
+        b->Close();
+        return result;
+    }
     std::string value;
     statementM->Get(index + 1, value);
     return value;

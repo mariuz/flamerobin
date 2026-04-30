@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2022 The FlameRobin Development Team
+  Copyright (c) 2004-2026 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -34,7 +34,7 @@
 #include "metadata/database.h"
 
 MetadataLoader::MetadataLoader(Database& database, unsigned maxStatements)
-    : databaseM(database.getIBPPDatabase()), transactionM(),
+    : databaseM(database.getDALDatabase()), transactionM(),
         transactionLevelM(0), statementsM(), maxStatementsM(maxStatements)
 {
 }
@@ -43,67 +43,68 @@ void MetadataLoader::transactionStart()
 {
     ++transactionLevelM;
 
-    // fix the IBPP::LogicException "No Database is attached."
-    // which happens after a database reconnect
-    // (this action detaches the database from all its transactions)
-    if (transactionM != 0 && !transactionM->Started())
+    if (transactionM != nullptr && !transactionM->isActive())
     {
         try
         {
-            transactionM->Start();
+            transactionM->start();
         }
-        catch (IBPP::LogicException&)
+        catch (...)
         {
-            transactionM = 0;
+            transactionM = nullptr;
         }
     }
 
-    if (transactionM == 0)
-        transactionM = IBPP::TransactionFactory(databaseM, IBPP::amRead);
-    if (!transactionM->Started())
-        transactionM->Start();
+    if (transactionM == nullptr)
+    {
+        transactionM = databaseM->createTransaction();
+        transactionM->setAccessMode(fr::TransactionAccessMode::Read);
+    }
+    if (!transactionM->isActive())
+        transactionM->start();
 }
 
 void MetadataLoader::transactionCommit()
 {
-    if (--transactionLevelM == 0 && transactionM != 0)
+    if (--transactionLevelM == 0 && transactionM != nullptr)
     {
         statementsM.clear();
-        transactionM->Commit();
-        transactionM = 0;
+        transactionM->commit();
+        transactionM = nullptr;
     }
 }
 
 bool MetadataLoader::transactionStarted()
 {
-    return (transactionM != 0 && transactionM->Started());
+    return (transactionM != nullptr && transactionM->isActive());
 }
 
-IBPP::Statement MetadataLoader::createStatement(const std::string& sql)
+fr::IStatementPtr MetadataLoader::createStatement(const std::string& sql)
 {
     wxASSERT(transactionStarted());
-
-    return IBPP::StatementFactory(databaseM, transactionM, sql);
+    fr::IStatementPtr stmt = databaseM->createStatement(transactionM);
+    stmt->prepare(sql);
+    return stmt;
 }
 
-MetadataLoader::IBPPStatementListIterator MetadataLoader::findStatement(
+MetadataLoader::StatementListIterator MetadataLoader::findStatement(
     const std::string& sql)
 {
-    for (IBPPStatementListIterator it = statementsM.begin();
+    for (StatementListIterator it = statementsM.begin();
         it != statementsM.end(); ++it)
     {
-        if ((*it)->Sql() == sql)
+        if ((*it)->getSql() == sql)
             return it;
     }
     return statementsM.end();
 }
 
-IBPP::Statement& MetadataLoader::getStatement(const std::string& sql)
+fr::IStatementPtr& MetadataLoader::getStatement(const std::string& sql)
 {
     wxASSERT(transactionStarted());
 
-    IBPP::Statement stmt;
-    IBPPStatementListIterator it = findStatement(sql);
+    fr::IStatementPtr stmt;
+    StatementListIterator it = findStatement(sql);
     if (it != statementsM.end())
     {
         stmt = (*it);
@@ -111,7 +112,8 @@ IBPP::Statement& MetadataLoader::getStatement(const std::string& sql)
     }
     else
     {
-        stmt = IBPP::StatementFactory(databaseM, transactionM, sql);
+        stmt = databaseM->createStatement(transactionM);
+        stmt->prepare(sql);
     }
     statementsM.push_front(stmt);
     limitListSize();
@@ -123,16 +125,16 @@ void MetadataLoader::limitListSize()
     if (maxStatementsM)
     {
         while (statementsM.size() > maxStatementsM)
-            statementsM.remove(statementsM.back());
+            statementsM.pop_back();
     }
 }
 
 void MetadataLoader::releaseStatements()
 {
     statementsM.clear();
-    if (transactionM != 0 && transactionM->Started())
+    if (transactionM != nullptr && transactionM->isActive())
     {
-        transactionM->Commit();
+        transactionM->commit();
         transactionLevelM = 0;
     }
 }
@@ -144,13 +146,6 @@ void MetadataLoader::setMaximumConcurrentStatements(unsigned count)
         maxStatementsM = count;
         limitListSize();
     }
-}
-
-IBPP::Blob MetadataLoader::createBlob()
-{
-    wxASSERT(transactionStarted());
-
-    return IBPP::BlobFactory(databaseM, transactionM);
 }
 
 MetadataLoaderTransaction::MetadataLoaderTransaction(MetadataLoader* loader)
@@ -165,4 +160,3 @@ MetadataLoaderTransaction::~MetadataLoaderTransaction()
     if (loaderM)
         loaderM->transactionCommit();
 }
-

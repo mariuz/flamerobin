@@ -480,24 +480,22 @@ void Database::loadCollations()
     MetadataLoaderTransaction tr(loader);
     wxMBConv* converter = getCharsetConverter();
 
-    IBPP::Statement& st1 = loader->getStatement(
+    fr::IStatementPtr& st1 = loader->getStatement(
         "select c.rdb$character_set_name, k.rdb$collation_name, "
         " c.RDB$CHARACTER_SET_ID, c.RDB$BYTES_PER_CHARACTER "
         " from rdb$character_sets c"
         " left outer join rdb$collations k "
         "   on c.rdb$character_set_id = k.rdb$character_set_id "
         " order by c.rdb$character_set_name, k.rdb$collation_id");
-    st1->Execute();
-    while (st1->Fetch())
+    st1->execute();
+    while (st1->fetch())
     {
-        std::string s;
-        st1->Get(1, s);
+        std::string s = st1->getString(0);
         wxString charset(std2wxIdentifier(s, converter));
-        st1->Get(2, s);
+        s = st1->getString(1);
         wxString collation(std2wxIdentifier(s, converter));
-        int charsetId, bytesPerChar;
-        st1->Get(3, &charsetId);
-        st1->Get(4, &bytesPerChar);
+        int charsetId = st1->getInt32(2);
+        int bytesPerChar = st1->getInt32(3);
         //CharacterSet cs(charset, charsetId, bytesPerChar);
         //collationsM.insert(std::multimap<CharacterSet, wxString>::value_type(
         //    cs, collation));
@@ -509,16 +507,15 @@ wxString Database::getTableForIndex(const wxString& indexName)
     MetadataLoader* loader = getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
 
-    IBPP::Statement& st1 = loader->getStatement(
+    fr::IStatementPtr& st1 = loader->getStatement(
         "SELECT rdb$relation_name from rdb$indices where rdb$index_name = ?");
-    st1->Set(1, wx2std(indexName, getCharsetConverter()));
-    st1->Execute();
+    st1->setString(0, wx2std(indexName, getCharsetConverter()));
+    st1->execute();
 
     wxString tableName;
-    if (st1->Fetch())
+    if (st1->fetch())
     {
-        std::string s;
-        st1->Get(1, s);
+        std::string s = st1->getString(0);
         tableName = std2wxIdentifier(s, getCharsetConverter());
     }
     return tableName;
@@ -1387,28 +1384,26 @@ void Database::loadDatabaseInfo()
     stmt += getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " rdb$linger, " : " null, ";
     stmt += getInfo().getODSVersionIsHigherOrEqualTo(13, 0) ? " rdb$sql_security   " : " null  ";
     stmt += " from rdb$database ";
-    IBPP::Statement& st1 = loader->getStatement(stmt);
+    fr::IStatementPtr& st1 = loader->getStatement(stmt);
 
-    st1->Execute();
-    if (st1->Fetch())
+    st1->execute();
+    if (st1->fetch())
     {
-        std::string s;
-        st1->Get(1, s);
+        std::string s = st1->getString(0);
         databaseCharsetM = std2wxIdentifier(s, getCharsetConverter());
-        st1->Get(2, s);
+        s = st1->getString(1);
         connectionUserM = std2wxIdentifier(s, getCharsetConverter());
-        st1->Get(3, s);
+        s = st1->getString(2);
         connectionRoleM = std2wxIdentifier(s, getCharsetConverter());
         if (connectionRoleM == "NONE")
             connectionRoleM.clear();
-        if (!st1->IsNull(4))
-            st1->Get(4, lingerM);
+        if (!st1->isNull(3))
+            lingerM = st1->getInt32(3);
         else
             lingerM = 0;
-        if (!st1->IsNull(5))
+        if (!st1->isNull(4))
         {
-            bool b;
-            st1->Get(5, b);
+            bool b = st1->getBool(4);
             sqlSecurityM = wxString(b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER");
         }
         else
@@ -1423,18 +1418,17 @@ wxArrayString Database::loadIdentifiers(const wxString& loadStatement,
     MetadataLoaderTransaction tr(loader);
     wxMBConv* converter = getCharsetConverter();
 
-    IBPP::Statement& st1 = loader->getStatement(
+    fr::IStatementPtr& st1 = loader->getStatement(
         wx2std(loadStatement, getCharsetConverter()));
-    st1->Execute();
+    st1->execute();
 
     wxArrayString names;
-    while (st1->Fetch())
+    while (st1->fetch())
     {
         checkProgressIndicatorCanceled(progressIndicator);
-        if (!st1->IsNull(1))
+        if (!st1->isNull(0))
         {
-            std::string s;
-            st1->Get(1, s);
+            std::string s = st1->getString(0);
             names.push_back(std2wxIdentifier(s, converter));
         }
     }
@@ -2285,16 +2279,16 @@ void Database::loadDefaultTimezone()
         return;
     }
 
-    IBPP::Statement& st1 = loader->getStatement(
+    fr::IStatementPtr& st1 = loader->getStatement(
         "select z.RDB$TIME_ZONE_ID, "
         "       z.RDB$TIME_ZONE_NAME "
         "from RDB$TIME_ZONES z "
         "where z.RDB$TIME_ZONE_NAME = RDB$GET_CONTEXT('SYSTEM', 'SESSION_TIMEZONE');");
 
-    st1->Execute();
-    st1->Fetch();
-    st1->Get(1, tzId);
-    st1->Get(2, tzName);
+    st1->execute();
+    st1->fetch();
+    tzId = st1->getInt32(0);
+    tzName = st1->getString(1);
 
     std::lock_guard<std::mutex> lock(timezoneDataMutexM);
     defaultTimezoneM.id = tzId;
@@ -2332,20 +2326,20 @@ void Database::loadTimezones()
         return;
     }
 
-    IBPP::Statement& st1 = loader->getStatement(
+    fr::IStatementPtr& st1 = loader->getStatement(
         "select z.RDB$TIME_ZONE_ID, "
         "       z.RDB$TIME_ZONE_NAME "
         "from RDB$TIME_ZONES z");
 
-    st1->Execute();
+    st1->execute();
     std::vector<TimezoneInfo*> loadedTimezones;
 
     try
     {
-        while (st1->Fetch())
+        while (st1->fetch())
         {
-            st1->Get(1, tzId);
-            st1->Get(2, tzName);
+            tzId = st1->getInt32(0);
+            tzName = st1->getString(1);
 
             tzItm = new TimezoneInfo;
             tzItm->id = tzId;

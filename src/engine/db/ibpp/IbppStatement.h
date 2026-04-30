@@ -37,6 +37,7 @@ public:
     virtual ~IbppStatement() = default;
 
     virtual void prepare(const std::string& sql) override;
+    virtual std::string getSql() const override;
     virtual void execute() override;
     virtual bool fetch() override;
     virtual void close() override;

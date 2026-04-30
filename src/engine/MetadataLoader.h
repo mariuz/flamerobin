@@ -27,7 +27,9 @@
 #include <list>
 #include <string>
 
-#include <ibpp.h>
+#include "engine/db/IDatabase.h"
+#include "engine/db/ITransaction.h"
+#include "engine/db/IStatement.h"
 
 class Database;
 class MetadataLoaderTransaction;
@@ -35,20 +37,20 @@ class MetadataLoaderTransaction;
 class MetadataLoader
 {
 private:
-    typedef std::list<IBPP::Statement> IBPPStatementList;
-    typedef std::list<IBPP::Statement>::iterator IBPPStatementListIterator;
+    typedef std::list<fr::IStatementPtr> StatementList;
+    typedef std::list<fr::IStatementPtr>::iterator StatementListIterator;
 
     friend class MetadataLoaderTransaction;
 
-    IBPP::Database databaseM;
-    IBPP::Transaction transactionM;
+    fr::IDatabasePtr databaseM;
+    fr::ITransactionPtr transactionM;
     unsigned transactionLevelM;
 
-    std::list<IBPP::Statement> statementsM;
+    std::list<fr::IStatementPtr> statementsM;
     unsigned maxStatementsM;
-    // Returns an iterator to the prepared IBPP::Statement object
+    // Returns an iterator to the prepared fr::IStatementPtr object
     // for the sql statement if available, else returns statementsM.end().
-    IBPPStatementListIterator findStatement(const std::string& sql);
+    StatementListIterator findStatement(const std::string& sql);
     // Releases any assigned statement objects beyond the list size limit.
     void limitListSize();
 
@@ -66,34 +68,32 @@ private:
 
 public:
     // Creates MetadataLoader object for the database, which will use
-    // a maximum of maxStatements assigned IBPP::Statement objects to
+    // a maximum of maxStatements assigned fr::IStatementPtr objects to
     // improve load times of metadata items.
     // Setting the parameter maxStatements to 0 will disable the size limit
     // of the statementsM list, and could possibly consume a lot of the
     // available server ressources!
     MetadataLoader(Database& database, unsigned maxStatements = 1);
 
-    // Creates a prepared IBPP::Statement object for the sql statement.
+    // Creates a prepared fr::IStatementPtr object for the sql statement.
     // Should be used in cases where sql is unique and can not be reused,
     // but should still use the same transaction.  This way the cached
     // statements will not be replaced.
-    IBPP::Statement createStatement(const std::string& sql);
-    // returns a reference to a prepared IBPP::Statement object for the
+    fr::IStatementPtr createStatement(const std::string& sql);
+    // returns a reference to a prepared fr::IStatementPtr object for the
     // sql statement, either recycled, newly created, or newly prepared
-    // using the least recently used IBPP::Statement in statementsM
-    IBPP::Statement& getStatement(const std::string& sql);
-    // releases any assigned IBPP::Statement objects while keeping the maximum
+    // using the least recently used fr::IStatementPtr in statementsM
+    fr::IStatementPtr& getStatement(const std::string& sql);
+    // releases any assigned fr::IStatementPtr objects while keeping the maximum
     // number of objects untouched
     void releaseStatements();
-    // readjusts maximum number of IBPP::Statement objects in statementsM,
+    // readjusts maximum number of fr::IStatementPtr objects in statementsM,
     // releasing any assigned statement objects beyond the new limit
     // setting the parameter count to 0 will disable the size limit of the
     // statementsM list, and could possibly consume a lot of the available
     // server ressources!
     void setMaximumConcurrentStatements(unsigned count);
 
-    // Creates an IBPP::Blob object using the database and transaction
-    IBPP::Blob createBlob();
 };
 
 class MetadataLoaderTransaction

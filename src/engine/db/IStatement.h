@@ -38,6 +38,7 @@ public:
     virtual ~IStatement() = default;
 
     virtual void prepare(const std::string& sql) = 0;
+    virtual std::string getSql() const = 0;
     virtual void execute() = 0;
     virtual bool fetch() = 0;
     virtual void close() = 0;

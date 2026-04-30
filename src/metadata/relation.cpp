@@ -124,40 +124,37 @@ void Relation::loadProperties()
     sql += db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0)? ", rdb$sql_security " : ", null ";
     sql += "from rdb$relations where rdb$relation_name = ?";
 
-    IBPP::Statement& st1 = loader->getStatement(sql);
-    st1->Set(1, wx2std(getName_(), converter));
-    st1->Execute();
-    if (st1->Fetch())
+    fr::IStatementPtr& st1 = loader->getStatement(sql);
+    st1->setString(0, wx2std(getName_(), converter));
+    st1->execute();
+    if (st1->fetch())
     {
-        std::string name;
-        st1->Get(1, name);
+        std::string name = st1->getString(0);
         ownerM = std2wxIdentifier(name, converter);
-        st1->Get(2, relationTypeM);
+        relationTypeM = st1->getInt32(1);
 
         wxString value;
         // for tables: path to external file
-        if (!st1->IsNull(3))
+        if (!st1->isNull(2))
         {
-            std::string s;
-            st1->Get(3, s);
+            std::string s = st1->getString(2);
             setExternalFilePath(wxString(s.c_str(), *converter));
         }
         else
             setExternalFilePath(wxEmptyString);
 
         // for views: source
-        if (!st1->IsNull(4))
+        if (!st1->isNull(3))
         {
-            readBlob(st1, 4, value, converter);
+            value = wxString(st1->getString(3).c_str(), *converter);
             setSource(value);
         }
         else
             setSource(wxEmptyString);
         // Sql Security
-        if (!st1->IsNull(5))
+        if (!st1->isNull(4))
         {
-            bool b;
-            st1->Get(5, b);
+            bool b = st1->getBool(4);
             sqlSecurityM = wxString(b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER");
 
         }
@@ -228,44 +225,43 @@ void Relation::loadChildren()
     sql +=  " where r.rdb$relation_name = ?"
             " order by r.rdb$field_position";
     
-    IBPP::Statement& st1 = loader->getStatement(sql);
-    st1->Set(1, wx2std(getName_(), converter));
-    st1->Execute();
+    fr::IStatementPtr& st1 = loader->getStatement(sql);
+    st1->setString(0, wx2std(getName_(), converter));
+    st1->execute();
 
     ColumnPtrs columns;
-    while (st1->Fetch())
+    while (st1->fetch())
     {
-        std::string s, coll;
-        st1->Get(1, s);
+        std::string s = st1->getString(0);
         wxString fname(std2wxIdentifier(s, converter));
         bool notNull = false;
-        if (!st1->IsNull(2))
-            st1->Get(2, &notNull);
-        st1->Get(3, s);
+        if (!st1->isNull(1))
+            notNull = st1->getBool(1);
+        s = st1->getString(2);
         wxString source(std2wxIdentifier(s, converter));
-        if (!st1->IsNull(4))
-            st1->Get(4, coll);
-        wxString collation(std2wxIdentifier(coll, converter));
-        wxString computedSrc, defaultSrc;
-        readBlob(st1, 5, computedSrc, converter);
-        bool hasDefault = !st1->IsNull(6);
+        wxString collation;
+        if (!st1->isNull(3))
+            collation = std2wxIdentifier(st1->getString(3), converter);
+        
+        wxString computedSrc = wxString(st1->getString(4).c_str(), *converter);
+        bool hasDefault = !st1->isNull(5);
+        wxString defaultSrc;
         if (hasDefault)
         {
-            readBlob(st1, 6, defaultSrc, converter);
+            defaultSrc = wxString(st1->getString(5).c_str(), *converter);
             // Some users reported two spaces before DEFAULT word in source
             // Perhaps some other tools can put garbage here? Should we
             // parse it as SQL to clean up comments, whitespace, etc?
             defaultSrc.Trim(false).Remove(0, 8);
         }
-        bool hasDescription = !st1->IsNull(7);
+        bool hasDescription = !st1->isNull(6);
         wxString identityType = "";
         int initialValue = 0, incrementValue = 0;
-        if (!st1->IsNull(8)) {
-            int i;
-            st1->Get(9, i);
+        if (!st1->isNull(7)) {
+            int i = st1->getInt32(8);
             identityType = i == IDENT_TYPE_BY_DEFAULT ? "BY DEFAULT" : i == IDENT_TYPE_ALWAYS ? "ALWAYS" : "";
-            st1->Get(10, initialValue);
-            st1->Get(11, incrementValue);
+            initialValue = st1->getInt32(9);
+            incrementValue = st1->getInt32(10);
         }
 
 
@@ -321,7 +317,7 @@ void Relation::getDependentChecks(std::vector<CheckConstraint>& checks)
     SubjectLocker lock(this);
     wxMBConv* converter = db->getCharsetConverter();
 
-    IBPP::Statement& st1 = loader->getStatement(
+    fr::IStatementPtr& st1 = loader->getStatement(
         "select c.rdb$constraint_name, t.rdb$relation_name, "
         "   t.rdb$trigger_source "
         "from rdb$check_constraints c "
@@ -333,18 +329,16 @@ void Relation::getDependentChecks(std::vector<CheckConstraint>& checks)
         "and t.rdb$trigger_type = 1 and d.rdb$field_name is null "
     );
 
-    st1->Set(1, wx2std(getName_(), converter));
-    st1->Execute();
-    while (st1->Fetch())
+    st1->setString(0, wx2std(getName_(), converter));
+    st1->execute();
+    while (st1->fetch())
     {
-        std::string s;
-        st1->Get(1, s);
+        std::string s = st1->getString(0);
         wxString cname(std2wxIdentifier(s, converter));
-        st1->Get(2, s);
+        s = st1->getString(1);
         wxString table(std2wxIdentifier(s, converter));
 
-        wxString source;
-        readBlob(st1, 3, source, converter);
+        wxString source = wxString(st1->getString(2).c_str(), *converter);
 
         Table* tab = dynamic_cast<Table*>(db->findByNameAndType(ntTable,
             table));
@@ -715,30 +709,29 @@ std::vector<Privilege>* Relation::getPrivileges(bool splitPerGrantor)
     SubjectLocker lock(this);
     wxMBConv* converter = db->getCharsetConverter();
 
-    IBPP::Statement& st1 = loader->getStatement(
+    fr::IStatementPtr& st1 = loader->getStatement(
         "select RDB$USER, RDB$USER_TYPE, RDB$GRANTOR, RDB$PRIVILEGE, "
         "RDB$GRANT_OPTION, RDB$FIELD_NAME "
         "from RDB$USER_PRIVILEGES "
         "where RDB$RELATION_NAME = ? and rdb$object_type = 0 "
         "order by rdb$user, rdb$user_type, rdb$grantor, rdb$grant_option, rdb$privilege"
     );
-    st1->Set(1, wx2std(getName_(), converter));
-    st1->Execute();
+    st1->setString(0, wx2std(getName_(), converter));
+    st1->execute();
     std::string lastuser;
     std::string lastGrantor;
     int lasttype = -1;
     Privilege *pr = 0;
-    while (st1->Fetch())
+    while (st1->fetch())
     {
-        std::string user, grantor, privilege, field;
-        int usertype, grantoption = 0;
-        st1->Get(1, user);
-        st1->Get(2, usertype);
-        st1->Get(3, grantor);
-        st1->Get(4, privilege);
-        if (!st1->IsNull(5))
-            st1->Get(5, grantoption);
-        st1->Get(6, field);
+        std::string user = st1->getString(0);
+        int usertype = st1->getInt32(1);
+        std::string grantor = st1->getString(2);
+        std::string privilege = st1->getString(3);
+        int grantoption = 0;
+        if (!st1->isNull(4))
+            grantoption = st1->getInt32(4);
+        std::string field = st1->getString(5);
         if (!pr || user != lastuser || usertype != lasttype || (splitPerGrantor && grantor != lastGrantor))
         {
             Privilege p(this, wxString(user.c_str(), *converter).Strip(), usertype);
@@ -764,17 +757,16 @@ void Relation::getTriggers(std::vector<Trigger *>& list,
     MetadataLoaderTransaction tr(loader);
     wxMBConv* converter = db->getCharsetConverter();
 
-    IBPP::Statement& st1 = loader->getStatement(
+    fr::IStatementPtr& st1 = loader->getStatement(
         "select rdb$trigger_name from rdb$triggers"
         " where rdb$relation_name = ?"
         " order by rdb$trigger_sequence"
     );
-    st1->Set(1, wx2std(getName_(), converter));
-    st1->Execute();
-    while (st1->Fetch())
+    st1->setString(0, wx2std(getName_(), converter));
+    st1->execute();
+    while (st1->fetch())
     {
-        std::string name;
-        st1->Get(1, name);
+        std::string name = st1->getString(0);
         Trigger* t = dynamic_cast<Trigger*>(db->findByNameAndType(ntDMLTrigger,
             std2wxIdentifier(name, converter)));
         if (t && t->getFiringTime() == time)
