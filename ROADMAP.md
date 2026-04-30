@@ -18,7 +18,7 @@ The primary goal is to replace the legacy and unmaintained IBPP library with `fb
 - [x] Standardize the **CMake** build system across Windows, Linux, and macOS.
 
 ### Phase 2: Metadata & Core Refactoring (In Progress)
-- [ ] Systematic refactoring of `MetadataItem` classes to use DAL interfaces.
+- [x] Systematic refactoring of `MetadataItem` classes to use DAL interfaces.
 - [ ] Implement `DECFLOAT` and `INT128` support in the DAL and UI.
 - [ ] Improve Timezone handling using modern Firebird API.
 - [ ] Refactor `Database` and `Server` classes to fully decouple from IBPP.
