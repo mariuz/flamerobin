@@ -35,7 +35,8 @@ IbppDatabase::IbppDatabase()
 
 void IbppDatabase::connect()
 {
-    databaseM = IBPP::DatabaseFactory("", connStrM, userM, passwordM, roleM, charsetM, "");
+    databaseM = IBPP::DatabaseFactory("", connStrM, userM, passwordM, roleM,
+        charsetM, "", clientLibM, cryptKeyDataM);
     databaseM->Connect();
 }
 
@@ -69,6 +70,16 @@ void IbppDatabase::setRole(const std::string& role)
 void IbppDatabase::setCharset(const std::string& charset)
 {
     charsetM = charset;
+}
+
+void IbppDatabase::setClientLibrary(const std::string& clientLib)
+{
+    clientLibM = clientLib;
+}
+
+void IbppDatabase::setCryptKeyData(const std::string& cryptKeyData)
+{
+    cryptKeyDataM = cryptKeyData;
 }
 
 ITransactionPtr IbppDatabase::createTransaction()

@@ -42,6 +42,8 @@ public:
     virtual void setCredentials(const std::string& user, const std::string& password) = 0;
     virtual void setRole(const std::string& role) = 0;
     virtual void setCharset(const std::string& charset) = 0;
+    virtual void setClientLibrary(const std::string& clientLib) = 0;
+    virtual void setCryptKeyData(const std::string& cryptKeyData) = 0;
 
     virtual ITransactionPtr createTransaction() = 0;
     virtual IStatementPtr createStatement(ITransactionPtr tr) = 0;

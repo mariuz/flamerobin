@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2022 The FlameRobin Development Team
+  Copyright (c) 2004-2026 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -34,8 +34,6 @@
 #include <wx/textbuf.h>
 
 #include <string>
-
-#include <ibpp.h>
 
 #include "core/FRError.h"
 #include "core/StringUtils.h"
@@ -84,19 +82,17 @@ void Package::loadChildren()
         "order by 1,2 "
     );
 
-    IBPP::Statement st1 = loader->getStatement(sql);
-    st1->Set(1, wx2std(getName_(), converter));
-    st1->Set(2, wx2std(getName_(), converter));
-    st1->Execute();
+    fr::IStatementPtr& st1 = loader->getStatement(sql);
+    st1->setString(0, wx2std(getName_(), converter));
+    st1->setString(1, wx2std(getName_(), converter));
+    st1->execute();
 
     FunctionSQLPtrs functions;
     ProcedurePtrs procedures;
-    while (st1->Fetch())
+    while (st1->fetch())
     {
-        short objtype = -1;
-        st1->Get(1, &objtype);
-        std::string s;
-        st1->Get(2, s);
+        short objtype = (short)st1->getInt32(0);
+        std::string s = st1->getString(1);
         wxString method_name(std2wxIdentifier(s, converter));
 
         if (objtype == 15) {
@@ -233,12 +229,11 @@ wxString Package::getOwner()
 	std::string sql(
 		"select rdb$owner_name from rdb$packages where rdb$package_name = ?"
 	);
-	IBPP::Statement st1 = loader->getStatement(sql);
-	st1->Set(1, wx2std(getName_(), converter));
-    st1->Execute();
-    st1->Fetch();
-    std::string name;
-    st1->Get(1, name);
+	fr::IStatementPtr& st1 = loader->getStatement(sql);
+	st1->setString(0, wx2std(getName_(), converter));
+    st1->execute();
+    st1->fetch();
+    std::string name = st1->getString(0);
     return std2wxIdentifier(name, converter);
 }
 
@@ -254,15 +249,15 @@ wxString Package::getSource()
         "from rdb$packages "
         "where rdb$package_name = ? "
 	);
-	IBPP::Statement st1 = loader->getStatement( sql );
-	st1->Set(1, wx2std(getName_(), converter));
-    st1->Execute();
-    st1->Fetch();
+	fr::IStatementPtr& st1 = loader->getStatement( sql );
+	st1->setString(0, wx2std(getName_(), converter));
+    st1->execute();
+    st1->fetch();
     wxString source;
-	if (!st1->IsNull(1))
+	if (!st1->isNull(0))
 	{
         wxString source1;
-        readBlob(st1, 1, source1, converter);
+        readBlob(st1, 0, source1, converter);
         source1.Trim(false);     // remove leading whitespace
         source += source1;
     }
@@ -281,15 +276,15 @@ wxString Package::getDefinition()
         "from rdb$packages "
         "where rdb$package_name = ? "
     );
-    IBPP::Statement st1 = loader->getStatement(sql);
-    st1->Set(1, wx2std(getName_(), converter));
-    st1->Execute();
-    st1->Fetch();
+    fr::IStatementPtr& st1 = loader->getStatement(sql);
+    st1->setString(0, wx2std(getName_(), converter));
+    st1->execute();
+    st1->fetch();
     wxString source;
-    if (!st1->IsNull(1))
+    if (!st1->isNull(0))
     {
         wxString source1;
-        readBlob(st1, 1, source1, converter);
+        readBlob(st1, 0, source1, converter);
         source1.Trim(false);     // remove leading whitespace
         source += source1;
     }
@@ -308,14 +303,13 @@ wxString Package::getSqlSecurity()
             "select rdb$sql_security "
             "from rdb$packages where rdb$package_name = ? "
             );
-        IBPP::Statement st1 = loader->getStatement(sql);
-        st1->Set(1, wx2std(getName_(), converter));
-        st1->Execute();
-        st1->Fetch();
-        if (st1->IsNull(1))
+        fr::IStatementPtr& st1 = loader->getStatement(sql);
+        st1->setString(0, wx2std(getName_(), converter));
+        st1->execute();
+        st1->fetch();
+        if (st1->isNull(0))
             return wxString();
-        bool b;
-        st1->Get(1, b);
+        bool b = st1->getBool(0);
         return wxString(b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER");
     }
     else
@@ -429,30 +423,29 @@ std::vector<Privilege>* Package::getPrivileges(bool splitPerGrantor)
 
     privilegesM.clear();
 
-    IBPP::Statement st1 = loader->getStatement(
+    fr::IStatementPtr& st1 = loader->getStatement(
         "select RDB$USER, RDB$USER_TYPE, RDB$GRANTOR, RDB$PRIVILEGE, "
         "RDB$GRANT_OPTION, RDB$FIELD_NAME "
         "from RDB$USER_PRIVILEGES "
         "where RDB$RELATION_NAME = ? and rdb$object_type in( 18, 19 ) "
         "order by rdb$user, rdb$user_type, rdb$grantor, rdb$privilege"
     );
-    st1->Set(1, wx2std(getName_(), converter));
-    st1->Execute();
+    st1->setString(0, wx2std(getName_(), converter));
+    st1->execute();
     std::string lastuser;
     std::string lastGrantor;
     int lasttype = -1;
     Privilege *pr = 0;
-    while (st1->Fetch())
+    while (st1->fetch())
     {
-        std::string user, grantor, privilege, field;
-        int usertype, grantoption = 0;
-        st1->Get(1, user);
-        st1->Get(2, usertype);
-        st1->Get(3, grantor);
-        st1->Get(4, privilege);
-        if (!st1->IsNull(5))
-            st1->Get(5, grantoption);
-        st1->Get(6, field);
+        std::string user = st1->getString(0);
+        int usertype = st1->getInt32(1);
+        std::string grantor = st1->getString(2);
+        std::string privilege = st1->getString(3);
+        int grantoption = 0;
+        if (!st1->isNull(4))
+            grantoption = st1->getInt32(4);
+        std::string field = st1->getString(5);
         if (!pr || user != lastuser || usertype != lasttype || (splitPerGrantor && grantor != lastGrantor))
         {
             Privilege p(this, std2wxIdentifier(user, converter),

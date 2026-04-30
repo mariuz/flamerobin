@@ -34,7 +34,13 @@ FbCppStatement::FbCppStatement(fbcpp::Attachment& attachment, fbcpp::Transaction
 
 void FbCppStatement::prepare(const std::string& sql)
 {
+    sqlM = sql;
     statementM.emplace(attachmentM, transactionM, sql);
+}
+
+std::string FbCppStatement::getSql() const
+{
+    return sqlM;
 }
 
 void FbCppStatement::execute()

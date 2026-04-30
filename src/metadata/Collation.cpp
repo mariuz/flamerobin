@@ -58,29 +58,29 @@ std::string Collation::getLoadStatement(bool list)
     return stmt;
 }
 
-void Collation::loadProperties(IBPP::Statement& statement, wxMBConv* converter)
+void Collation::loadProperties(fr::IStatementPtr& statement, wxMBConv* converter)
 {
     setPropertiesLoaded(false);
 
     int Lid;
     std::string Lstr;
 
-    //statement->Get(1, Lstr);
+    //Lstr = statement->getString(0);
     //setName(std2wxIdentifier(Lstr, converter));
 
-    statement->Get(2, Lid);
+    Lid = statement->getInt32(1);
     setMetadataId(Lid);
 
-    statement->Get(3, Lid);
+    Lid = statement->getInt32(2);
     setAttributes(Lid);
 
-    statement->Get(4, Lstr);
+    Lstr = statement->getString(3);
     setBaseCollectionName(std2wxIdentifier(Lstr, converter));
 
-    statement->Get(5, Lstr);
+    Lstr = statement->getString(4);
     setSpecificAttributes(std2wxIdentifier(Lstr, converter));
 
-    statement->Get(6, Lid);
+    Lid = statement->getInt32(5);
     setCharacterSetId(Lid);
 
     setPropertiesLoaded(true);
@@ -95,10 +95,10 @@ void Collation::loadProperties()
     MetadataLoaderTransaction tr(loader);
     wxMBConv* converter = db->getCharsetConverter();
 
-    IBPP::Statement& st1 = loader->getStatement(getLoadStatement(false));
-    st1->Set(1, wx2std(getName_(), converter));
-    st1->Execute();
-    if (!st1->Fetch())
+    fr::IStatementPtr& st1 = loader->getStatement(getLoadStatement(false));
+    st1->setString(0, wx2std(getName_(), converter));
+    st1->execute();
+    if (!st1->fetch())
         throw FRError(_("Exception not found: ") + getName_());
 
     loadProperties(st1, converter);

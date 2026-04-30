@@ -41,7 +41,7 @@ private:
     std::vector<Privilege> privilegesM;
 
     static std::string getLoadStatement(bool list);
-    void loadProperties(IBPP::Statement& statement, wxMBConv* converter);
+    void loadProperties(fr::IStatementPtr& statement, wxMBConv* converter);
     friend class DomainCollectionBase;
     friend class Domains;
 protected:

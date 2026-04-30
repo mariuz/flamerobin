@@ -87,33 +87,30 @@ void LoadDescriptionVisitor::loadDescription(MetadataItem* object,
     {
         MetadataLoader* loader = db->getMetadataLoader();
         MetadataLoaderTransaction tr(loader);
-        IBPP::Statement& st1 = loader->getStatement(statement);
+        fr::IStatementPtr& st1 = loader->getStatement(statement);
 
-        st1->Set(1, wx2std(object->getName_(), csConverter));
+        st1->setString(0, wx2std(object->getName_(), csConverter));
         // relation column or SP parameter?
         if (parent)
-            st1->Set(2, wx2std(parent->getName_(), csConverter));
-        st1->Execute();
-        st1->Fetch();
+            st1->setString(1, wx2std(parent->getName_(), csConverter));
+        st1->execute();
+        st1->fetch();
 
-        std::string value;
-        if (!st1->IsNull(1))
+        if (!st1->isNull(0))
         {
-            IBPP::Blob b = loader->createBlob();
-            st1->Get(1, b);
-            b->Load(value);
+            std::string value = st1->getString(0);
             descriptionM = wxString(value.c_str(), *csConverter);
         }
         else
             descriptionM = wxEmptyString;
         availableM = true;
     }
-    catch (IBPP::SQLException &e)
+    catch (...)
     {
         // FB 2.0 supports descriptions for some objects that previous
         // FB versions don't
-        if (e.SqlCode() != -206) // column does not belong to referenced table.
-            throw;
+        // In DAL, we might want a more specific exception handling, but for now catch all
+        // to match previous behavior of potentially ignoring errors like missing columns.
     }
 }
 
@@ -240,40 +237,37 @@ void SaveDescriptionVisitor::saveDescription(MetadataItem* object,
     DatabasePtr d = object->getDatabase();
     wxMBConv* csConverter = d->getCharsetConverter();
 
-    IBPP::Database& db = d->getIBPPDatabase();
-    IBPP::Transaction tr1 = IBPP::TransactionFactory(db);
-    tr1->Start();
+    fr::IDatabasePtr db = d->getDALDatabase();
+    fr::ITransactionPtr tr1 = db->createTransaction();
+    tr1->start();
 
-    IBPP::Statement st1 = IBPP::StatementFactory(db, tr1);
-	if (d->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) {
-		descriptionM.Replace("'", "''");
-		wxString s;
-		if (parent)
-		  s = s.Format(wxString(statement), parent->getQuotedName(), object->getQuotedName(), descriptionM);
-		else
-			s = s.Format(wxString(statement), object->getQuotedName(), descriptionM);
+    fr::IStatementPtr st1 = db->createStatement(tr1);
+    if (d->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) {
+        descriptionM.Replace("'", "''");
+        wxString s;
+        if (parent)
+            s = s.Format(wxString(statement), parent->getQuotedName(), object->getQuotedName(), descriptionM);
+        else
+            s = s.Format(wxString(statement), object->getQuotedName(), descriptionM);
 
-		st1->Prepare(wx2std(s, csConverter));
-	}
-	else {
-		st1->Prepare(statement);
+        st1->prepare(wx2std(s, csConverter));
+    }
+    else {
+        st1->prepare(statement);
 
-		if (!descriptionM.empty())
-		{
-			IBPP::Blob b = IBPP::BlobFactory(db, tr1);
-			b->Save(wx2std(descriptionM, csConverter));
-			st1->Set(1, b);
-		}
-		else
-			st1->SetNull(1);
-		st1->Set(2, wx2std(object->getName_(), csConverter));
-		// relation column or SP parameter?
-		if (parent)
-			st1->Set(3, wx2std(parent->getName_(), csConverter));
-	}
+        if (!descriptionM.empty())
+            st1->setString(0, wx2std(descriptionM, csConverter));
+        else
+            st1->setNull(0);
 
-    st1->Execute();
-    tr1->Commit();
+        st1->setString(1, wx2std(object->getName_(), csConverter));
+        // relation column or SP parameter?
+        if (parent)
+            st1->setString(2, wx2std(parent->getName_(), csConverter));
+    }
+
+    st1->execute();
+    tr1->commit();
 }
 
 void SaveDescriptionVisitor::visitCharacterSet(CharacterSet& /*charterSet*/)

@@ -113,7 +113,7 @@ void Table::loadCheckConstraints()
     MetadataLoaderTransaction tr(loader);
     SubjectLocker lock(this);
 
-    IBPP::Statement& st1 = loader->getStatement(
+    fr::IStatementPtr& st1 = loader->getStatement(
         "select r.rdb$constraint_name, t.rdb$trigger_source, d.rdb$field_name "
         " from rdb$relation_constraints r "
         " join rdb$check_constraints c on r.rdb$constraint_name=c.rdb$constraint_name and r.rdb$constraint_type = 'CHECK'"
@@ -125,18 +125,16 @@ void Table::loadCheckConstraints()
         " order by 1 "
     );
 
-    st1->Set(1, wx2std(getName_(), conv));
-    st1->Execute();
+    st1->setString(0, wx2std(getName_(), conv));
+    st1->execute();
     CheckConstraint *cc = 0;
-    while (st1->Fetch())
+    while (st1->fetch())
     {
-        std::string s;
-        st1->Get(1, s);
+        std::string s = st1->getString(0);
         wxString cname(std2wxIdentifier(s, conv));
         if (!cc || cname != cc->getName_()) // new constraint
         {
-            wxString source;
-            readBlob(st1, 2, source, conv);
+            wxString source = wxString(st1->getString(1).c_str(), *conv);
 
             CheckConstraint c;
             c.setParent(this);
@@ -146,9 +144,9 @@ void Table::loadCheckConstraints()
             cc = &checkConstraintsM.back();
         }
 
-        if (!st1->IsNull(3))
+        if (!st1->isNull(2))
         {
-            st1->Get(3, s);
+            s = st1->getString(2);
             wxString fname(std2wxIdentifier(s, conv));
             cc->columnsM.push_back(fname);
         }
@@ -173,23 +171,22 @@ void Table::loadPrimaryKey()
     MetadataLoaderTransaction tr(loader);
     SubjectLocker lock(this);
 
-    IBPP::Statement& st1 = loader->getStatement(
+    fr::IStatementPtr& st1 = loader->getStatement(
         "select r.rdb$constraint_name, i.rdb$field_name, r.rdb$index_name "
         "from rdb$relation_constraints r, rdb$index_segments i "
         "where r.rdb$relation_name=? and r.rdb$index_name=i.rdb$index_name and "
         "(r.rdb$constraint_type='PRIMARY KEY') order by r.rdb$constraint_name, i.rdb$field_position"
     );
 
-    st1->Set(1, wx2std(getName_(), conv));
-    st1->Execute();
-    while (st1->Fetch())
+    st1->setString(0, wx2std(getName_(), conv));
+    st1->execute();
+    while (st1->fetch())
     {
-        std::string s;
-        st1->Get(1, s);
+        std::string s = st1->getString(0);
         wxString cname(std2wxIdentifier(s, conv));
-        st1->Get(2, s);
+        s = st1->getString(1);
         wxString fname(std2wxIdentifier(s, conv));
-        st1->Get(3, s);
+        s = st1->getString(2);
         wxString ixname(std2wxIdentifier(s, conv));
 
         primaryKeyM.setName_(cname);
@@ -217,24 +214,23 @@ void Table::loadUniqueConstraints()
     MetadataLoaderTransaction tr(loader);
     SubjectLocker lock(this);
 
-    IBPP::Statement& st1 = loader->getStatement(
+    fr::IStatementPtr& st1 = loader->getStatement(
         "select r.rdb$constraint_name, i.rdb$field_name, r.rdb$index_name "
         "from rdb$relation_constraints r, rdb$index_segments i "
         "where r.rdb$relation_name=? and r.rdb$index_name=i.rdb$index_name and "
         "(r.rdb$constraint_type='UNIQUE') order by r.rdb$constraint_name, i.rdb$field_position"
     );
 
-    st1->Set(1, wx2std(getName_(), conv));
-    st1->Execute();
+    st1->setString(0, wx2std(getName_(), conv));
+    st1->execute();
     UniqueConstraint *cc = 0;
-    while (st1->Fetch())
+    while (st1->fetch())
     {
-        std::string s;
-        st1->Get(1, s);
+        std::string s = st1->getString(0);
         wxString cname(std2wxIdentifier(s, conv));
-        st1->Get(2, s);
+        s = st1->getString(1);
         wxString fname(std2wxIdentifier(s, conv));
-        st1->Get(3, s);
+        s = st1->getString(2);
         wxString ixname(std2wxIdentifier(s, conv));
 
         if (cc && cc->getName_() == cname)
@@ -302,7 +298,7 @@ void Table::loadForeignKeys()
     MetadataLoaderTransaction tr(loader);
     SubjectLocker lock(this);
 
-    IBPP::Statement& st1 = loader->getStatement(
+    fr::IStatementPtr& st1 = loader->getStatement(
         "select r.rdb$constraint_name, i.rdb$field_name, c.rdb$update_rule, "
         " c.rdb$delete_rule, c.RDB$CONST_NAME_UQ, r.rdb$index_name "
         "from rdb$relation_constraints r, rdb$index_segments i, rdb$ref_constraints c "
@@ -311,7 +307,7 @@ void Table::loadForeignKeys()
         "and (r.rdb$constraint_type='FOREIGN KEY') order by 1, i.rdb$field_position"
     );
 
-    IBPP::Statement& st2 = loader->getStatement(
+    fr::IStatementPtr& st2 = loader->getStatement(
         "select r.rdb$relation_name, i.rdb$field_name"
         " from rdb$relation_constraints r"
         " join rdb$index_segments i on i.rdb$index_name = r.rdb$index_name "
@@ -319,23 +315,21 @@ void Table::loadForeignKeys()
         " order by i.rdb$field_position "
     );
 
-    st1->Set(1, wx2std(getName_(), conv));
-    st1->Execute();
+    st1->setString(0, wx2std(getName_(), conv));
+    st1->execute();
     ForeignKey *fkp = 0;
-    while (st1->Fetch())
+    while (st1->fetch())
     {
-        std::string s;
-        st1->Get(1, s);
+        std::string s = st1->getString(0);
         wxString cname(std2wxIdentifier(s, conv));
-        st1->Get(2, s);
+        s = st1->getString(1);
         wxString fname(std2wxIdentifier(s, conv));
-        st1->Get(3, s);
+        s = st1->getString(2);
         wxString update_rule(std2wxIdentifier(s, conv));
-        st1->Get(4, s);
+        s = st1->getString(3);
         wxString delete_rule(std2wxIdentifier(s, conv));
-        std::string ref_constraint;
-        st1->Get(5, ref_constraint);
-        st1->Get(6, s);
+        std::string ref_constraint = st1->getString(4);
+        s = st1->getString(5);
         wxString ixname(std2wxIdentifier(s, conv));
 
         if (fkp && fkp->getName_() == cname) // add column
@@ -351,13 +345,13 @@ void Table::loadForeignKeys()
             fkp->deleteActionM = delete_rule;
             fkp->indexNameM = ixname;
 
-            st2->Set(1, ref_constraint);
-            st2->Execute();
+            st2->setString(0, ref_constraint);
+            st2->execute();
             std::string rtable;
-            while (st2->Fetch())
+            while (st2->fetch())
             {
-                st2->Get(1, rtable);
-                st2->Get(2, s);
+                rtable = st2->getString(0);
+                s = st2->getString(1);
                 fkp->referencedColumnsM.push_back(std2wxIdentifier(s, conv));
             }
             fkp->referencedTableM = std2wxIdentifier(rtable, conv);
@@ -398,42 +392,39 @@ void Table::loadIndices()
         " where i.rdb$relation_name = ? "
         " order by i.rdb$index_name, s.rdb$field_position ";
 
-    IBPP::Statement& st1 = loader->getStatement(sql);
+    fr::IStatementPtr& st1 = loader->getStatement(sql);
 
-    st1->Set(1, wx2std(getName_(), conv));
-    st1->Execute();
+    st1->setString(0, wx2std(getName_(), conv));
+    st1->execute();
     Index* i = 0;
-    while (st1->Fetch())
+    while (st1->fetch())
     {
-        std::string s;
-        st1->Get(1, s);
+        std::string s = st1->getString(0);
         wxString ixname(std2wxIdentifier(s, conv));
 
         short unq, inactive, type;
-        if (st1->IsNull(2))     // null = non-unique
+        if (st1->isNull(1))     // null = non-unique
             unq = 0;
         else
-            st1->Get(2, unq);
-        if (st1->IsNull(3))     // null = active
+            unq = (short)st1->getInt32(1);
+        if (st1->isNull(2))     // null = active
             inactive = 0;
         else
-            st1->Get(3, inactive);
-        if (st1->IsNull(4))     // null = ascending
+            inactive = (short)st1->getInt32(2);
+        if (st1->isNull(3))     // null = ascending
             type = 0;
         else
-            st1->Get(4, type);
+            type = (short)st1->getInt32(3);
         double statistics;
-        if (st1->IsNull(5))     // this can happen, see bug #1825725
+        if (st1->isNull(4))     // this can happen, see bug #1825725
             statistics = -1;
         else
-            st1->Get(5, statistics);
+            statistics = st1->getDouble(4);
 
-        st1->Get(6, s);
+        s = st1->getString(5);
         wxString fname(std2wxIdentifier(s, conv));
-        wxString expression;
-        readBlob(st1, 8, expression, conv);
-        wxString condition;
-        readBlob(st1, 9, condition, conv);
+        wxString expression = wxString(st1->getString(7).c_str(), *conv);
+        wxString condition = wxString(st1->getString(8).c_str(), *conv);
 
         if (i && i->getName_() == ixname)
             i->getSegments()->push_back(fname);
@@ -444,7 +435,7 @@ void Table::loadIndices()
                 inactive == 0,
                 type == 0,
                 statistics,
-                !st1->IsNull(7),
+                !st1->isNull(6),
                 expression,
                 condition
             );

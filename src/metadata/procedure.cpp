@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2022 The FlameRobin Development Team
+  Copyright (c) 2004-2026 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -34,8 +34,6 @@
 #include <wx/textbuf.h>
 
 #include <string>
-
-#include <ibpp.h>
 
 #include "core/FRError.h"
 #include "core/StringUtils.h"
@@ -93,48 +91,47 @@ void Procedure::loadChildren()
         }
     sql += "order by rdb$parameter_type, rdb$parameter_number";
 
-    IBPP::Statement st1 = loader->getStatement(sql);
-    st1->Set(1, wx2std(getName_(), converter));
+    fr::IStatementPtr& st1 = loader->getStatement(sql);
+    st1->setString(0, wx2std(getName_(), converter));
     if (getParent()->getType() == ntPackage) {
-        st1->Set(2, wx2std(getParent()->getName_(), converter));
+        st1->setString(1, wx2std(getParent()->getName_(), converter));
     }
-    st1->Execute();
+    st1->execute();
 
     ParameterPtrs parameters;
-    while (st1->Fetch())
+    while (st1->fetch())
     {
-        std::string s;
-        st1->Get(1, s);
+        std::string s = st1->getString(0);
         wxString param_name(std2wxIdentifier(s, converter));
-        st1->Get(2, s);
+        s = st1->getString(1);
         wxString source(std2wxIdentifier(s, converter));
 
-        short partype, mechanism = -1;
-        st1->Get(3, &partype);
-        bool hasDefault = !st1->IsNull(4);
+        short partype = (short)st1->getInt32(2);
+        short mechanism = -1;
+        bool hasDefault = !st1->isNull(3);
         wxString defaultSrc;
         if (hasDefault)
         {
-            st1->Get(4, s);
+            s = st1->getString(3);
             defaultSrc = std2wxIdentifier(s, converter);
         }
         bool notNull = false;
-        if (!st1->IsNull(5))
-            st1->Get(5, &notNull);
-        if (!st1->IsNull(6))
-            st1->Get(6, mechanism);
+        if (!st1->isNull(4))
+            notNull = st1->getBool(4);
+        if (!st1->isNull(5))
+            mechanism = (short)st1->getInt32(5);
         wxString field;
-        if (!st1->IsNull(7)){
-            st1->Get(7, s);
+        if (!st1->isNull(6)){
+            s = st1->getString(6);
             field = std2wxIdentifier(s, converter);
         }
         wxString relation;
-        if (!st1->IsNull(8)) {
-            st1->Get(8, s);
+        if (!st1->isNull(7)) {
+            s = st1->getString(7);
             relation = std2wxIdentifier(s, converter);
         }
 
-        bool hasDescription = !st1->IsNull(9);
+        bool hasDescription = !st1->isNull(8);
 
         ParameterPtr par = findParameter(param_name);
         if (!par)
@@ -223,13 +220,12 @@ wxString Procedure::getOwner()
     MetadataLoader* loader = db->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
 
-    IBPP::Statement st1 = loader->getStatement(
+    fr::IStatementPtr& st1 = loader->getStatement(
         "select rdb$owner_name from rdb$procedures where rdb$procedure_name = ?");
-    st1->Set(1, wx2std(getName_(), db->getCharsetConverter()));
-    st1->Execute();
-    st1->Fetch();
-    std::string name;
-    st1->Get(1, name);
+    st1->setString(0, wx2std(getName_(), db->getCharsetConverter()));
+    st1->execute();
+    st1->fetch();
+    std::string name = st1->getString(0);
     return std2wxIdentifier(name, db->getCharsetConverter());
 }
 
@@ -247,25 +243,23 @@ wxString Procedure::getSource()
 	sql += "from rdb$procedures where rdb$procedure_name = ?";
 	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
 		sql += " and rdb$package_name is null ";
-	IBPP::Statement st1 = loader->getStatement( sql );
-	st1->Set(1, wx2std(getName_(), converter));
-    st1->Execute();
-    st1->Fetch();
+	fr::IStatementPtr& st1 = loader->getStatement( sql );
+	st1->setString(0, wx2std(getName_(), converter));
+    st1->execute();
+    st1->fetch();
     wxString source;
-	if (!st1->IsNull(2))
+	if (!st1->isNull(1))
 	{
-		std::string s;
-		st1->Get(2, s);
+		std::string s = st1->getString(1);
 		source += "EXTERNAL NAME '"+std2wxIdentifier(s, converter)+ "' \n";
-        if (!st1->IsNull(3))
+        if (!st1->isNull(2))
         {
-            s.clear();
-            st1->Get(3, s);
+            s = st1->getString(2);
             source += "ENGINE " + std2wxIdentifier(s, converter) + "\n";
-            if (!st1->IsNull(1))
+            if (!st1->isNull(0))
             {
                 wxString source1;
-                readBlob(st1, 1, source1, converter);
+                readBlob(st1, 0, source1, converter);
                 source1.Trim();
                 source += source1 + "\n";
             }
@@ -274,7 +268,7 @@ wxString Procedure::getSource()
 	else
 	{
 		wxString source1;
-		readBlob(st1, 1, source1, converter);
+		readBlob(st1, 0, source1, converter);
 		source1.Trim();
 		source += source1 + "\n";
 	}
@@ -336,14 +330,13 @@ wxString Procedure::getSqlSecurity()
         std::string sql(
             "select rdb$sql_security from rdb$procedures where rdb$procedure_name = ?"
             " and rdb$package_name is null ");
-        IBPP::Statement st1 = loader->getStatement(sql);
-        st1->Set(1, wx2std(getName_(), converter));
-        st1->Execute();
-        st1->Fetch();
-        if (st1->IsNull(1))
+        fr::IStatementPtr& st1 = loader->getStatement(sql);
+        st1->setString(0, wx2std(getName_(), converter));
+        st1->execute();
+        st1->fetch();
+        if (st1->isNull(0))
             return wxString();
-        bool b;
-        st1->Get(1, b);
+        bool b = st1->getBool(0);
         return wxString(b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER");
     }
     else
@@ -522,30 +515,29 @@ std::vector<Privilege>* Procedure::getPrivileges(bool splitPerGrantor)
 
     privilegesM.clear();
 
-    IBPP::Statement st1 = loader->getStatement(
+    fr::IStatementPtr& st1 = loader->getStatement(
         "select RDB$USER, RDB$USER_TYPE, RDB$GRANTOR, RDB$PRIVILEGE, "
         "RDB$GRANT_OPTION, RDB$FIELD_NAME "
         "from RDB$USER_PRIVILEGES "
         "where RDB$RELATION_NAME = ? and rdb$object_type = 5 "
         "order by rdb$user, rdb$user_type, rdb$grantor, rdb$privilege"
     );
-    st1->Set(1, wx2std(getName_(), converter));
-    st1->Execute();
+    st1->setString(0, wx2std(getName_(), converter));
+    st1->execute();
     std::string lastuser;
     std::string lastGrantor;
     int lasttype = -1;
     Privilege *pr = 0;
-    while (st1->Fetch())
+    while (st1->fetch())
     {
-        std::string user, grantor, privilege, field;
-        int usertype, grantoption = 0;
-        st1->Get(1, user);
-        st1->Get(2, usertype);
-        st1->Get(3, grantor);
-        st1->Get(4, privilege);
-        if (!st1->IsNull(5))
-            st1->Get(5, grantoption);
-        st1->Get(6, field);
+        std::string user = st1->getString(0);
+        int usertype = st1->getInt32(1);
+        std::string grantor = st1->getString(2);
+        std::string privilege = st1->getString(3);
+        int grantoption = 0;
+        if (!st1->isNull(4))
+            grantoption = st1->getInt32(4);
+        std::string field = st1->getString(5);
         if (!pr || user != lastuser || usertype != lasttype || (splitPerGrantor && grantor != lastGrantor))
         {
             Privilege p(this, std2wxIdentifier(user, converter),
@@ -609,4 +601,3 @@ const wxString Procedures::getTypeName() const
 {
     return "PROCEDURE_COLLECTION";
 }
-

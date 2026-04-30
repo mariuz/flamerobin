@@ -72,23 +72,23 @@ std::string CharacterSet::getLoadStatement(bool list)
     return stmt;
 }
 
-void CharacterSet::loadProperties(IBPP::Statement& statement, wxMBConv* converter)
+void CharacterSet::loadProperties(fr::IStatementPtr& statement, wxMBConv* converter)
 {
     setPropertiesLoaded(false);
 
     int Lid;
     std::string Lstr;
-    statement->Get(2, Lid);
+    Lid = statement->getInt32(1);
     setMetadataId(Lid);
-    statement->Get(3, Lid);
+    Lid = statement->getInt32(2);
     setBytesPerChar(Lid);
-    
-    statement->Get(4, Lstr);
+
+    Lstr = statement->getString(3);
     setCollationDefault(std2wxIdentifier(Lstr, converter));
 
-    if (!statement->IsNull(5))
+    if (!statement->isNull(4))
     {
-        statement->Get(5, Lstr);
+        Lstr = statement->getString(4);
         setOriginalCollationDefault(std2wxIdentifier(Lstr, converter));
     }
     else
@@ -96,7 +96,6 @@ void CharacterSet::loadProperties(IBPP::Statement& statement, wxMBConv* converte
 
     setPropertiesLoaded(true);
 }
-
 void CharacterSet::loadProperties()
 {
     setPropertiesLoaded(false);
@@ -106,10 +105,10 @@ void CharacterSet::loadProperties()
     MetadataLoaderTransaction tr(loader);
     wxMBConv* converter = db->getCharsetConverter();
 
-    IBPP::Statement& st1 = loader->getStatement(getLoadStatement(false));
-    st1->Set(1, wx2std(getName_(), converter));
-    st1->Execute();
-    if (!st1->Fetch())
+    fr::IStatementPtr& st1 = loader->getStatement(getLoadStatement(false));
+    st1->setString(0, wx2std(getName_(), converter));
+    st1->execute();
+    if (!st1->fetch())
         throw FRError(_("Exception not found: ") + getName_());
 
     loadProperties(st1, converter);
@@ -135,25 +134,23 @@ void CharacterSet::loadChildren()
         "Order by c.RDB$CHARACTER_SET_NAME, k.RDB$COLLATION_ID "
     );
 
-    IBPP::Statement st1 = loader->getStatement(sql);
-    st1->Set(1, wx2std(getName_(), converter));
-    st1->Execute();
+    fr::IStatementPtr& st1 = loader->getStatement(sql);
+    st1->setString(0, wx2std(getName_(), converter));
+    st1->execute();
 
     CollationPtrs collations;
-    while (st1->Fetch())
+    while (st1->fetch())
     {
-        std::string s;
-        st1->Get(1, s);
+        std::string s = st1->getString(0);
         wxString name(std2wxIdentifier(s, converter));
-        
+
         CollationPtr coll = findCollation(name);
         if (!coll) {
-            coll.reset(new Collation(this, name));
+            coll.reset(new Collation(db, name));
             initializeLockCount(coll, getLockCount());
         }
         collations.push_back(coll);
-
-
+        coll->loadProperties(st1, converter);
     }
 
     setChildrenLoaded(true);
@@ -303,18 +300,17 @@ void CharacterSets::load(ProgressIndicator* progressIndicator)
     MetadataLoaderTransaction tr(loader);
     wxMBConv* converter = db->getCharsetConverter();
 
-    IBPP::Statement& st1 = loader->getStatement(
+    fr::IStatementPtr& st1 = loader->getStatement(
         CharacterSet::getLoadStatement(true));
 
     CollectionType characters;
-    st1->Execute();
+    st1->execute();
     checkProgressIndicatorCanceled(progressIndicator);
-    while (st1->Fetch())
+    while (st1->fetch())
     {
-        if (!st1->IsNull(1))
+        if (!st1->isNull(0))
         {
-            std::string s;
-            st1->Get(1, s);
+            std::string s = st1->getString(0);
             wxString name(std2wxIdentifier(s, converter));
 
             CharacterSetPtr character = findByName(name);

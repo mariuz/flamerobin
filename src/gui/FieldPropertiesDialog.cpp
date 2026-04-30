@@ -319,7 +319,7 @@ bool FieldPropertiesDialog::getNotNullConstraintName(const wxString& fieldName,
         MetadataLoader* loader = db->getMetadataLoader();
         MetadataLoaderTransaction tr(loader);
 
-        IBPP::Statement& st1 = loader->getStatement(
+        fr::IStatementPtr& st1 = loader->getStatement(
             "SELECT rc.RDB$CONSTRAINT_NAME FROM RDB$RELATION_CONSTRAINTS rc "
             "JOIN RDB$CHECK_CONSTRAINTS cc "
             "ON rc.RDB$CONSTRAINT_NAME = cc.RDB$CONSTRAINT_NAME "
@@ -327,13 +327,12 @@ bool FieldPropertiesDialog::getNotNullConstraintName(const wxString& fieldName,
             "AND rc.RDB$RELATION_NAME = ?"
             "AND cc.RDB$TRIGGER_NAME = ?");
 
-        st1->Set(1, wx2std(tableM->getName_(), conv));
-        st1->Set(2, wx2std(fieldName, conv));
-        st1->Execute();
-        if (st1->Fetch())
+        st1->setString(0, wx2std(tableM->getName_(), conv));
+        st1->setString(1, wx2std(fieldName, conv));
+        st1->execute();
+        if (st1->fetch())
         {
-            std::string s;
-            st1->Get(1, s);
+            std::string s = st1->getString(0);
             constraintName = std2wxIdentifier(s, conv);
             return true;
         }

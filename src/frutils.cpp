@@ -64,37 +64,15 @@ void adjustControlsMinWidth(std::list<wxWindow*> controls)
     }
 }
 
-void readBlob(IBPP::Statement& st, int column, wxString& result,
+void readBlob(fr::IStatementPtr& st, int column, wxString& result,
     wxMBConv* conv)
 {
     result = "";
-    if (st->IsNull(column))
+    if (st->isNull(column))
         return;
 
-    IBPP::Blob b = IBPP::BlobFactory(st->DatabasePtr(), st->TransactionPtr());
-    st->Get(column, b);
-
-    try              // if blob is empty the exception is thrown
-    {                // I tried to check st1->IsNull(1) but it doesn't work
-        b->Open();   // to this hack is the only way (for the time being)
-    }
-    catch (...)
-    {
-        return;
-    }
-
-    std::string resultBuffer;
-    char readBuffer[8192];        // 8K block
-    while (true)
-    {
-        int size = b->Read(readBuffer, 8192-1);
-        if (size <= 0)
-            break;
-        readBuffer[size] = 0;
-        resultBuffer += readBuffer;
-    }
-    result = wxString(resultBuffer.c_str(), *conv);
-    b->Close();
+    std::string s = st->getString(column);
+    result = wxString(s.c_str(), *conv);
 }
 
 wxString selectRelationColumns(Relation* t, wxWindow* parent)

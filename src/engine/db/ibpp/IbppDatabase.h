@@ -44,6 +44,8 @@ public:
     virtual void setCredentials(const std::string& user, const std::string& password) override;
     virtual void setRole(const std::string& role) override;
     virtual void setCharset(const std::string& charset) override;
+    virtual void setClientLibrary(const std::string& clientLib) override;
+    virtual void setCryptKeyData(const std::string& cryptKeyData) override;
 
     virtual ITransactionPtr createTransaction() override;
     virtual IStatementPtr createStatement(ITransactionPtr tr) override;
@@ -59,6 +61,8 @@ private:
     std::string passwordM;
     std::string roleM;
     std::string charsetM;
+    std::string clientLibM;
+    std::string cryptKeyDataM;
 };
 
 } // namespace fr

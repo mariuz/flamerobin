@@ -38,7 +38,7 @@ private:
     int numberM;
     std::vector<Privilege> privilegesM;
     static std::string getLoadStatement(bool list);
-    void loadProperties(IBPP::Statement& statement, wxMBConv* converter);
+    void loadProperties(fr::IStatementPtr& statement, wxMBConv* converter);
     friend class Exceptions;
 protected:
     virtual void loadProperties();

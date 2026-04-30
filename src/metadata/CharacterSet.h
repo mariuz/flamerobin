@@ -47,7 +47,7 @@ protected:
     CollationPtr findCollation(const wxString& name) const;
 
     static std::string getLoadStatement(bool list);
-    void loadProperties(IBPP::Statement& statement, wxMBConv* converter);
+    void loadProperties(fr::IStatementPtr& statement, wxMBConv* converter);
     virtual void loadProperties();
 
     virtual void loadChildren();

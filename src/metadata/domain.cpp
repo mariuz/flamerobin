@@ -93,11 +93,11 @@ void Domain::loadProperties()
     MetadataLoaderTransaction tr(loader);
     wxMBConv* converter = db->getCharsetConverter();
 
-    IBPP::Statement& st1 = loader->getStatement(getLoadStatement(false));
-    st1->Set(1, wx2std("RDB$FIELD_TYPE", converter)); 
-    st1->Set(2, wx2std(getName_(), converter));
-    st1->Execute();
-    if (!st1->Fetch())
+    fr::IStatementPtr& st1 = loader->getStatement(getLoadStatement(false));
+    st1->setString(0, wx2std("RDB$FIELD_TYPE", converter)); 
+    st1->setString(1, wx2std(getName_(), converter));
+    st1->execute();
+    if (!st1->fetch())
         throw FRError(_("Domain not found: ") + getName_());
 
     loadProperties(st1, converter);
@@ -119,75 +119,73 @@ wxString Domain::trimDefaultValue(const wxString& value)
     return defValue;
 }
 
-void Domain::loadProperties(IBPP::Statement& statement, wxMBConv* converter)
+void Domain::loadProperties(fr::IStatementPtr& statement, wxMBConv* converter)
 {
     setPropertiesLoaded(false);
 
-    statement->Get(2, &datatypeM);
-    if (statement->IsNull(3))
+    datatypeM = (short)statement->getInt32(1);
+    if (statement->isNull(2))
         subtypeM = 0;
     else
-        statement->Get(3, &subtypeM);
+        subtypeM = (short)statement->getInt32(2);
 
     // determine the (var)char field length
     // - use char_len when available (> 0), this handles special system fields
     // - computed columns have char_len = 0, use field_len/bytes_per_char
     // - older metadata can have char_len null, keep existing fallback behavior
-    statement->Get(4, &lengthM);
+    lengthM = (short)statement->getInt32(3);
     short charLength = 0;
-    if (!statement->IsNull(8))
-        statement->Get(8, &charLength);
+    if (!statement->isNull(7))
+        charLength = (short)statement->getInt32(7);
     if (charLength > 0)
         lengthM = charLength;
     else
     {
         int bpc = 0;   // bytes per char
-        if (!statement->IsNull(14))
-            statement->Get(14, &bpc);
-        if (bpc && (!statement->IsNull(8) || !statement->IsNull(13)))
+        if (!statement->isNull(13))
+            bpc = statement->getInt32(13);
+        if (bpc && (!statement->isNull(7) || !statement->isNull(12)))
             lengthM /= bpc;
     }
 
-    if (statement->IsNull(5))
+    if (statement->isNull(4))
         precisionM = 0;
     else
-        statement->Get(5, &precisionM);
-    if (statement->IsNull(6))
+        precisionM = (short)statement->getInt32(4);
+    if (statement->isNull(5))
         scaleM = 0;
     else
-        statement->Get(6, &scaleM);
-    if (statement->IsNull(7))
+        scaleM = (short)statement->getInt32(5);
+    if (statement->isNull(6))
         charsetM = "";
     else
     {
-        std::string s;
-        statement->Get(7, s);
+        std::string s = statement->getString(6);
         charsetM = std2wxIdentifier(s, converter);
     }
     bool notNull = false;
-    if (!statement->IsNull(9))
+    if (!statement->isNull(8))
     {
-        statement->Get(9, notNull);
+        notNull = statement->getBool(8);
     }
     nullableM = !notNull;
-    hasDefaultM = !statement->IsNull(10);
+    hasDefaultM = !statement->isNull(9);
     if (hasDefaultM)
     {
-        readBlob(statement, 10, defaultM, converter);
+        readBlob(statement, 9, defaultM, converter);
         defaultM = trimDefaultValue(defaultM);
     }
     else
         defaultM = wxEmptyString;
 
-    if (statement->IsNull(11))
+    if (statement->isNull(10))
         collationM = wxEmptyString;
     else
     {
-        std::string s;
-        statement->Get(11, s);
+        std::string s = statement->getString(10);
         collationM = std2wxIdentifier(s, converter);
     }
-    readBlob(statement, 12, checkM, converter);
+    readBlob(statement, 11, checkM, converter);
 
     setPropertiesLoaded(true);
 }
@@ -428,30 +426,29 @@ std::vector<Privilege>* Domain::getPrivileges(bool splitPerGrantor)
     SubjectLocker lock(this);
     wxMBConv* converter = db->getCharsetConverter();
 
-    IBPP::Statement& st1 = loader->getStatement(
+    fr::IStatementPtr& st1 = loader->getStatement(
         "select RDB$USER, RDB$USER_TYPE, RDB$GRANTOR, RDB$PRIVILEGE, "
         "RDB$GRANT_OPTION, RDB$FIELD_NAME "
         "from RDB$USER_PRIVILEGES "
         "where RDB$RELATION_NAME = ? and rdb$object_type = 9 "
         "order by rdb$user, rdb$user_type, rdb$grantor, rdb$grant_option, rdb$privilege"
     );
-    st1->Set(1, wx2std(getName_(), converter));
-    st1->Execute();
+    st1->setString(0, wx2std(getName_(), converter));
+    st1->execute();
     std::string lastuser;
     std::string lastGrantor;
     int lasttype = -1;
     Privilege* pr = 0;
-    while (st1->Fetch())
+    while (st1->fetch())
     {
-        std::string user, grantor, privilege, field;
-        int usertype, grantoption = 0;
-        st1->Get(1, user);
-        st1->Get(2, usertype);
-        st1->Get(3, grantor);
-        st1->Get(4, privilege);
-        if (!st1->IsNull(5))
-            st1->Get(5, grantoption);
-        st1->Get(6, field);
+        std::string user = st1->getString(0);
+        int usertype = st1->getInt32(1);
+        std::string grantor = st1->getString(2);
+        std::string privilege = st1->getString(3);
+        int grantoption = 0;
+        if (!st1->isNull(4))
+            grantoption = st1->getInt32(4);
+        std::string field = st1->getString(5);
         if (!pr || user != lastuser || usertype != lasttype || (splitPerGrantor && grantor != lastGrantor))
         {
             Privilege p(this, wxString(user.c_str(), *converter).Strip(), usertype);
@@ -486,12 +483,12 @@ DomainPtr DomainCollectionBase::getDomain(const wxString& name)
         MetadataLoaderTransaction tr(loader);
         wxMBConv* converter = db->getCharsetConverter();
 
-        IBPP::Statement& st1 = loader->getStatement(
+        fr::IStatementPtr& st1 = loader->getStatement(
             Domain::getLoadStatement(false));
-        st1->Set(1, wx2std("RDB$FIELD_TYPE", converter)); 
-        st1->Set(2, wx2std(name, converter));
-        st1->Execute();
-        if (st1->Fetch())
+        st1->setString(0, wx2std("RDB$FIELD_TYPE", converter)); 
+        st1->setString(1, wx2std(name, converter));
+        st1->execute();
+        if (st1->fetch())
         {
             domain = insert(name);
             domain->loadProperties(st1, converter);
