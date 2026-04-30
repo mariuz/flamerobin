@@ -98,6 +98,18 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86
+            cmake_arch: Win32
+            setup_script: FlameRobinSetup.iss
+            build_dir: Build32
+          - arch: x64
+            cmake_arch: x64
+            setup_script: FlameRobinSetup64.iss
+            build_dir: Build64
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -105,54 +117,43 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
-      - name: wxWidget cache
-        id: cache-wxwidget
+      - name: Bootstrap vcpkg
+        run: .\vcpkg\bootstrap-vcpkg.bat -disableMetrics
+
+      - name: Cache vcpkg binaries
         uses: actions/cache@v4
         with:
-          path: wxWidgets
-          key: ${{ runner.os }}-wxwidgets-v3.2.2.1
-          restore-keys: ${{ runner.os }}-wxwidgets-v3.2.2.1
+          path: vcpkg_archives
+          key: ${{ runner.os }}-vcpkg-bin-${{ matrix.arch }}-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+              ${{ runner.os }}-vcpkg-bin-${{ matrix.arch }}-
 
-      - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
-        name: clone wxWidgets
-        run: git clone --recursive --branch v3.2.2.1 --depth 1 https://github.com/wxWidgets/wxWidgets.git
-
-      - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
-        name: replace /MD for /MT
+      - name: Install dependencies (vcpkg)
+        shell: bash
+        env:
+          VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg_archives
         run: |
-          $xmls = (Get-ChildItem -Path "wxWidgets\build\msw" -Recurse -Filter *.vcxproj).FullName
-          foreach ($xml in $xmls) {
-            echo $xml
-            (Get-Content $xml).replace("MultiThreadedDebugDLL", "MultiThreadedDebug") | Set-Content $xml
-            (Get-Content $xml).replace("MultiThreadedDLL", "MultiThreaded") | Set-Content $xml
-          }
+          mkdir -p vcpkg_archives
+          for i in {1..3}; do
+            ./vcpkg/vcpkg install --triplet ${{ matrix.arch }}-windows-static && break
+            echo "vcpkg install failed, retrying in 10 seconds..."
+            sleep 10
+          done
 
-      - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
-        name: Build wxWidgets x86
-        shell: cmd
+      - name: Generate CMake project
+        env:
+          VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}\vcpkg_archives
         run: |
-          "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" && msbuild.exe wxWidgets\build\msw\wx_vc17.sln /t:Build /p:Configuration=Release /p:Platform=Win32
-
-      - if: ${{ steps.cache-wxwidget.outputs.cache-hit != 'true' }}
-        name: Build wxWidgets x64
-        shell: cmd
-        run: |
-          "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" && msbuild.exe wxWidgets\build\msw\wx_vc17.sln /t:Build /p:Configuration=Release /p:Platform=x64
-
-      - name: Generate CMake projects
-        run: |
-          cmake -S .\ -B .\Build32 -A Win32 -DWXDIR=wxWidgets
-          cmake -S .\ -B .\Build64 -A x64 -DWXDIR=wxWidgets
+          if (!(Test-Path vcpkg_archives)) { New-Item -ItemType Directory -Path vcpkg_archives }
+          cmake -S .\ -B .\${{ matrix.build_dir }} -A ${{ matrix.cmake_arch }} "-DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-windows-static -DVCPKG_INSTALLED_DIR="${{ github.workspace }}\vcpkg_installed"
 
       - name: Build Flamerobin
         run: |
-          cmake --build .\Build32 --config Release -j 8
-          cmake --build .\Build64 --config Release -j 8
+          cmake --build .\${{ matrix.build_dir }} --config Release -j 8
 
       - name: Innosetup
         run: |
-          ISCC.exe install\win32\FlameRobinSetup.iss
-          ISCC.exe install\win32\FlameRobinSetup64.iss
+          ISCC.exe install\win32\${{ matrix.setup_script }}
 
       - name: Upload Windows Artifact to Release
         uses: softprops/action-gh-release@v2
