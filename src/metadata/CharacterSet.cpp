@@ -152,7 +152,6 @@ void CharacterSet::loadChildren()
         collations.push_back(coll);
         coll->loadProperties(st1, converter);
     }
-    }
 
     setChildrenLoaded(true);
 

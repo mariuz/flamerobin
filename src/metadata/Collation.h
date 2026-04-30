@@ -46,16 +46,15 @@ private:
     wxString specificAttibutesM;
 
     friend class SysCollations;
-protected:
-    static std::string getLoadStatement(bool list);
-    void loadProperties(fr::IStatementPtr& statement, wxMBConv* converter);
-    virtual void loadProperties();
-
 public:
     Collation();
     Collation(DatabasePtr database, const wxString& name, int id = -1);
     Collation(MetadataItem* parent, const wxString& name, int id = -1);
     ~Collation();
+
+    static std::string getLoadStatement(bool list);
+    void loadProperties(fr::IStatementPtr& statement, wxMBConv* converter);
+    virtual void loadProperties();
 
     CharacterSet* getCharacterSet() const;
 

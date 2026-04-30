@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2022 The FlameRobin Development Team
+  Copyright (c) 2004-2026 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -30,8 +30,6 @@
     #include "wx/wx.h"
 #endif
 
-#include <ibpp.h>
-
 #include "core/FRError.h"
 #include "core/StringUtils.h"
 #include "engine/MetadataLoader.h"
@@ -59,29 +57,28 @@ std::vector<Privilege>* Role::getPrivileges(bool splitPerGrantor)
 
     privilegesM.clear();
 
-    IBPP::Statement st1 = loader->getStatement(
+    fr::IStatementPtr& st1 = loader->getStatement(
         "select RDB$USER, RDB$USER_TYPE, RDB$GRANTOR, RDB$PRIVILEGE, "
         "RDB$GRANT_OPTION "
         "from RDB$USER_PRIVILEGES "
         "where RDB$RELATION_NAME = ? and rdb$object_type = 13 "
         "order by rdb$user, rdb$user_type, rdb$grantor, rdb$grant_option, rdb$privilege"
     );
-    st1->Set(1, wx2std(getName_(), db->getCharsetConverter()));
-    st1->Execute();
+    st1->setString(0, wx2std(getName_(), db->getCharsetConverter()));
+    st1->execute();
     std::string lastuser;
     std::string lastGrantor;
     int lasttype = -1;
     Privilege *pr = 0;
-    while (st1->Fetch())
+    while (st1->fetch())
     {
-        std::string user, grantor, privilege;
-        int usertype, grantoption = 0;
-        st1->Get(1, user);
-        st1->Get(2, usertype);
-        st1->Get(3, grantor);
-        st1->Get(4, privilege);
-        if (!st1->IsNull(5))
-            st1->Get(5, grantoption);
+        std::string user = st1->getString(0);
+        int usertype = st1->getInt32(1);
+        std::string grantor = st1->getString(2);
+        std::string privilege = st1->getString(3);
+        int grantoption = 0;
+        if (!st1->isNull(4))
+            grantoption = st1->getInt32(4);
         if (!pr || user != lastuser || usertype != lasttype || (splitPerGrantor && grantor != lastGrantor))
         {
             Privilege p(this, wxString(user).Strip(), usertype);
@@ -103,13 +100,12 @@ wxString Role::getOwner()
     MetadataLoader* loader = db->getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
 
-    IBPP::Statement st1 = loader->getStatement(
+    fr::IStatementPtr& st1 = loader->getStatement(
         "select rdb$owner_name from rdb$roles where rdb$role_name = ?");
-    st1->Set(1, wx2std(getName_(), db->getCharsetConverter()));
-    st1->Execute();
-    st1->Fetch();
-    std::string name;
-    st1->Get(1, name);
+    st1->setString(0, wx2std(getName_(), db->getCharsetConverter()));
+    st1->execute();
+    st1->fetch();
+    std::string name = st1->getString(0);
     return wxString(name).Trim();
 }
 
@@ -190,4 +186,3 @@ const wxString Roles::getTypeName() const
 {
     return "ROLE_COLLECTION";
 }
-
