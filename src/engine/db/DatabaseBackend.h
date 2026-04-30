@@ -52,7 +52,10 @@ enum class ColumnType
     Timestamp,
     Blob,
     Numeric,
-    Decimal
+    Decimal,
+    Decfloat16,
+    Decfloat34,
+    Int128
 };
 
 // Common types and forward declarations

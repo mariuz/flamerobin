@@ -186,6 +186,9 @@ ColumnType FbCppStatement::getColumnType(int index)
         case fbcpp::DescriptorAdjustedType::TIMESTAMP: return ColumnType::Timestamp;
         case fbcpp::DescriptorAdjustedType::BLOB: return ColumnType::Blob;
         case fbcpp::DescriptorAdjustedType::BOOLEAN: return ColumnType::Boolean;
+        case fbcpp::DescriptorAdjustedType::INT128: return ColumnType::Int128;
+        case fbcpp::DescriptorAdjustedType::DECFLOAT16: return ColumnType::Decfloat16;
+        case fbcpp::DescriptorAdjustedType::DECFLOAT34: return ColumnType::Decfloat34;
         default: return ColumnType::Unknown;
     }
 }

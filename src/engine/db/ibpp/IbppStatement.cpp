@@ -23,6 +23,9 @@
 
 #include "engine/db/ibpp/IbppStatement.h"
 #include <stdexcept>
+#include "core/FRInt128.h"
+#include "core/FRDecimal.h"
+#include "core/StringUtils.h"
 
 namespace fr
 {
@@ -94,7 +97,8 @@ bool IbppStatement::isNull(int index)
 
 std::string IbppStatement::getString(int index)
 {
-    if (getColumnType(index) == ColumnType::Blob)
+    ColumnType type = getColumnType(index);
+    if (type == ColumnType::Blob)
     {
         IBPP::Blob b = IBPP::BlobFactory(statementM->DatabasePtr(), statementM->TransactionPtr());
         statementM->Get(index + 1, b);
@@ -118,6 +122,24 @@ std::string IbppStatement::getString(int index)
         }
         b->Close();
         return result;
+    }
+    if (type == ColumnType::Int128)
+    {
+        IBPP::ibpp_int128_t value;
+        statementM->Get(index + 1, value);
+        return wx2std(Int128ToString(value));
+    }
+    if (type == ColumnType::Decfloat16)
+    {
+        IBPP::ibpp_dec16_t value;
+        statementM->Get(index + 1, value);
+        return wx2std(Dec16DPDToString(value));
+    }
+    if (type == ColumnType::Decfloat34)
+    {
+        IBPP::ibpp_dec34_t value;
+        statementM->Get(index + 1, value);
+        return wx2std(Dec34DPDToString(value));
     }
     std::string value;
     statementM->Get(index + 1, value);
@@ -178,6 +200,9 @@ ColumnType IbppStatement::getColumnType(int index)
         case IBPP::sdTimestamp: return ColumnType::Timestamp;
         case IBPP::sdBlob: return ColumnType::Blob;
         case IBPP::sdBoolean: return ColumnType::Boolean;
+        case IBPP::sdInt128: return ColumnType::Int128;
+        case IBPP::sdDec16: return ColumnType::Decfloat16;
+        case IBPP::sdDec34: return ColumnType::Decfloat34;
         default: return ColumnType::Unknown;
     }
 }
