@@ -86,24 +86,23 @@ void Exception::loadProperties()
     MetadataLoaderTransaction tr(loader);
     wxMBConv* converter = db->getCharsetConverter();
 
-    IBPP::Statement& st1 = loader->getStatement(getLoadStatement(false));
-    st1->Set(1, wx2std(getName_(), converter));
-    st1->Execute();
-    if (!st1->Fetch())
+    fr::IStatementPtr& st1 = loader->getStatement(getLoadStatement(false));
+    st1->setString(0, wx2std(getName_(), converter));
+    st1->execute();
+    if (!st1->fetch())
         throw FRError(_("Exception not found: ") + getName_());
 
     loadProperties(st1, converter);
 }
 
-void Exception::loadProperties(IBPP::Statement& statement, wxMBConv* converter)
+void Exception::loadProperties(fr::IStatementPtr& statement, wxMBConv* converter)
 {
     setPropertiesLoaded(false);
 
-    std::string message;
-    statement->Get(2, message);
+    std::string message = statement->getString(1);
     messageM = wxString(message.c_str(), *converter);
-    statement->Get(3, numberM);
-    if (statement->IsNull(4))
+    numberM = statement->getInt32(2);
+    if (statement->isNull(3))
         setDescriptionIsEmpty();
 
     setPropertiesLoaded(true);
@@ -146,30 +145,29 @@ std::vector<Privilege>* Exception::getPrivileges(bool splitPerGrantor)
     SubjectLocker lock(this);
     wxMBConv* converter = db->getCharsetConverter();
 
-    IBPP::Statement& st1 = loader->getStatement(
+    fr::IStatementPtr& st1 = loader->getStatement(
         "select RDB$USER, RDB$USER_TYPE, RDB$GRANTOR, RDB$PRIVILEGE, "
         "RDB$GRANT_OPTION, RDB$FIELD_NAME "
         "from RDB$USER_PRIVILEGES "
         "where RDB$RELATION_NAME = ? and rdb$object_type = 7 "
         "order by rdb$user, rdb$user_type, rdb$grantor, rdb$grant_option, rdb$privilege"
     );
-    st1->Set(1, wx2std(getName_(), converter));
-    st1->Execute();
+    st1->setString(0, wx2std(getName_(), converter));
+    st1->execute();
     std::string lastuser;
     std::string lastGrantor;
     int lasttype = -1;
     Privilege* pr = 0;
-    while (st1->Fetch())
+    while (st1->fetch())
     {
-        std::string user, grantor, privilege, field;
-        int usertype, grantoption = 0;
-        st1->Get(1, user);
-        st1->Get(2, usertype);
-        st1->Get(3, grantor);
-        st1->Get(4, privilege);
-        if (!st1->IsNull(5))
-            st1->Get(5, grantoption);
-        st1->Get(6, field);
+        std::string user = st1->getString(0);
+        int usertype = st1->getInt32(1);
+        std::string grantor = st1->getString(2);
+        std::string privilege = st1->getString(3);
+        int grantoption = 0;
+        if (!st1->isNull(4))
+            grantoption = st1->getInt32(4);
+        std::string field = st1->getString(5);
         if (!pr || user != lastuser || usertype != lasttype || (splitPerGrantor && grantor != lastGrantor))
         {
             Privilege p(this, wxString(user.c_str(), *converter).Strip(), usertype);
@@ -203,18 +201,17 @@ void Exceptions::load(ProgressIndicator* progressIndicator)
     MetadataLoaderTransaction tr(loader);
     wxMBConv* converter = db->getCharsetConverter();
 
-    IBPP::Statement& st1 = loader->getStatement(
+    fr::IStatementPtr& st1 = loader->getStatement(
         Exception::getLoadStatement(true));
 
     CollectionType exceptions;
-    st1->Execute();
+    st1->execute();
     checkProgressIndicatorCanceled(progressIndicator);
-    while (st1->Fetch())
+    while (st1->fetch())
     {
-        if (!st1->IsNull(1))
+        if (!st1->isNull(0))
         {
-            std::string s;
-            st1->Get(1, s);
+            std::string s = st1->getString(0);
             wxString name(std2wxIdentifier(s, converter));
 
             ExceptionPtr exception = findByName(name);

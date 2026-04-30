@@ -33,6 +33,7 @@
 #include "core/ObjectWithHandle.h"
 #include "core/ProcessableObject.h"
 #include "core/Subject.h"
+#include "engine/db/DatabaseBackend.h"
 #include "metadata/MetadataClasses.h"
 #include "sql/Identifier.h"
 

@@ -268,8 +268,7 @@ DatabasePtr MetadataItem::getDatabase() const
 
 fr::IDatabasePtr MetadataItem::getDALDatabase() const
 {
-    DatabasePtr db = getDatabase();
-    if (db)
+    if (DatabasePtr db = getDatabase())
         return db->getDALDatabase();
     return nullptr;
 }

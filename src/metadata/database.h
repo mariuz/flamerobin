@@ -348,7 +348,7 @@ public:
     wxString getRole() const;
     wxString getCryptKeyData() const;
     IBPP::Database& getIBPPDatabase();
-    fr::IDatabasePtr getDALDatabase();
+    fr::IDatabasePtr getDALDatabase() const override;
     void setIsVolatile(const bool isVolatile);
     void setPath(const wxString& value);
     void setClientLibrary(const wxString& value);

@@ -391,16 +391,15 @@ wxString Database::loadDomainNameForColumn(const wxString& table,
     MetadataLoaderTransaction tr(loader);
     wxMBConv* converter = getCharsetConverter();
 
-    IBPP::Statement& st1 = loader->getStatement(
+    fr::IStatementPtr& st1 = loader->getStatement(
         "select rdb$field_source from rdb$relation_fields"
         " where rdb$relation_name = ? and rdb$field_name = ?"
     );
-    st1->Set(1, wx2std(table, converter));
-    st1->Set(2, wx2std(field, converter));
-    st1->Execute();
-    st1->Fetch();
-    std::string domain;
-    st1->Get(1, domain);
+    st1->setString(0, wx2std(table, converter));
+    st1->setString(1, wx2std(field, converter));
+    st1->execute();
+    st1->fetch();
+    std::string domain = st1->getString(0);
     return std2wxIdentifier(domain, converter);
 }
 
@@ -1911,7 +1910,7 @@ IBPP::Database& Database::getIBPPDatabase()
     return databaseM;
 }
 
-fr::IDatabasePtr Database::getDALDatabase()
+fr::IDatabasePtr Database::getDALDatabase() const
 {
     return databaseDAL_M;
 }

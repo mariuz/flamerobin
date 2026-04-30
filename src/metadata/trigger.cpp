@@ -235,52 +235,47 @@ void Trigger::loadProperties()
 
     sql += "from rdb$triggers t where rdb$trigger_name = ? ";
 
-    IBPP::Statement& st1 = loader->getStatement(sql);
+    fr::IStatementPtr& st1 = loader->getStatement(sql);
 
-    st1->Set(1, wx2std(getName_(), converter));
-    st1->Execute();
-    if (st1->Fetch())
+    st1->setString(0, wx2std(getName_(), converter));
+    st1->execute();
+    if (st1->fetch())
     {
-        if (st1->IsNull(1))
+        if (st1->isNull(0))
             relationNameM.clear();
         else
         {
-            std::string objname;
-            st1->Get(1, objname);
+            std::string objname = st1->getString(0);
             relationNameM = std2wxIdentifier(objname, converter);
         }
-        st1->Get(2, &positionM);
+        positionM = st1->getInt32(1);
 
         short temp;
-        if (st1->IsNull(3))
+        if (st1->isNull(2))
             temp = 0;
         else
-            st1->Get(3, &temp);
+            temp = (short)st1->getInt32(2);
         activeM = (temp == 0);
 
-        st1->Get(4, &typeM);
-        st1->Get(4, typeM);
+        typeM = st1->getInt32(3);
 
 
-        if (!st1->IsNull(8))
+        if (!st1->isNull(7))
         {
-            bool b;
-            st1->Get(8, b);
+            bool b = st1->getBool(7);
             sqlSecurityM = b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER";
         }
         else
             sqlSecurityM.clear();
 
-		if (!st1->IsNull(6))
+		if (!st1->isNull(5))
 		{
-			std::string s;
-			st1->Get(6, s);
+			std::string s = st1->getString(5);
 			sourceM += "EXTERNAL NAME '" + std2wxIdentifier(s, converter) + "'\n";
 			entryPointM = std2wxIdentifier(s, converter);
-            if (!st1->IsNull(7))
+            if (!st1->isNull(6))
             {
-                //std::string s;
-                st1->Get(7, s);
+                s = st1->getString(6);
                 sourceM += "ENGINE " + std2wxIdentifier(s, converter) + "\n";
                 engineNameM = std2wxIdentifier(s, converter);
             }
@@ -292,10 +287,10 @@ void Trigger::loadProperties()
             entryPointM.clear();
             engineNameM.clear();
         }
-        if (!st1->IsNull(5))
+        if (!st1->isNull(4))
         {
             wxString source1;
-            readBlob(st1, 5, source1, converter);
+            readBlob(st1, 4, source1, converter);
             source1.Trim(false);     // remove leading whitespace
             sourceM += "\n" + source1 + "\n";
         }

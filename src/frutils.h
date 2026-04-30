@@ -31,6 +31,7 @@
 
 #include <ibpp.h>
 
+#include "engine/db/IStatement.h"
 #include "metadata/MetadataClasses.h"
 
 class ProgressDialog;
@@ -40,7 +41,7 @@ class ProgressIndicator;
 void adjustControlsMinWidth(std::list<wxWindow*> controls);
 
 //! reads blob from statement into wxString
-void readBlob(IBPP::Statement& st, int column, wxString& result,
+void readBlob(fr::IStatementPtr& st, int column, wxString& result,
     wxMBConv* conv);
 
 //! displays a list of table columns and lets user select some

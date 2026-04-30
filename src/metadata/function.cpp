@@ -106,40 +106,38 @@ void Function::loadChildren()
     sql += "order by iif(a.rdb$argument_name is null,255, a.rdb$argument_position) ";
  //    sql += "order by iif(a.rdb$argument_name is null, 2014, a.rdb$argument_position) ";
 
-    IBPP::Statement st1 = loader->getStatement(sql);
-    st1->Set(1, wx2std(getName_(), converter));
+    fr::IStatementPtr st1 = loader->createStatement(sql);
+    st1->setString(0, wx2std(getName_(), converter));
     if (getParent()->getType() == ntPackage) {
-        st1->Set(2, wx2std(getParent()->getName_(), converter));
+        st1->setString(1, wx2std(getParent()->getName_(), converter));
     }
-    st1->Execute();
+    st1->execute();
 
     ParameterPtrs parameters;
-    while (st1->Fetch())
+    while (st1->fetch())
     {
         std::string s;
         
-        short returnarg, retpos;
-        st1->Get(9, returnarg);
-        st1->Get(10, retpos);
+        short returnarg = (short)st1->getInt32(8);
+        short retpos = (short)st1->getInt32(9);
 
-        if (!st1->IsNull(1)) {
-            st1->Get(1, s);
+        if (!st1->isNull(0)) {
+            s = st1->getString(0);
         }
         else {
             s = (returnarg == retpos) ? "RETURN " : "";
         }
         wxString param_name(std2wxIdentifier(s, converter));
-        if (!st1->IsNull(2)) {
-            st1->Get(2, s);
+        if (!st1->isNull(1)) {
+            s = st1->getString(1);
         }
         else {
-            if (!st1->IsNull(4)) {
-                short  type, scale, length, subtype, precision;
-                st1->Get(4, type);
-                st1->Get(5, scale);
-                st1->Get(6, length);
-                st1->Get(7, subtype);
-                st1->Get(8, precision);
+            if (!st1->isNull(3)) {
+                short type = (short)st1->getInt32(3);
+                short scale = (short)st1->getInt32(4);
+                short length = (short)st1->getInt32(5);
+                short subtype = (short)st1->getInt32(6);
+                short precision = (short)st1->getInt32(7);
                 s = Domain::dataTypeToString(type, scale, precision, subtype, length);
             }
         }
@@ -147,41 +145,41 @@ void Function::loadChildren()
 
         short partype, mechanism = -1;
         partype = (returnarg == retpos) ? 1 : 0;
-        /*if (st1->IsNull(3)) {
-            partype = st1->IsNull(1) ? 1 : 0;
+        /*if (st1->isNull(2)) {
+            partype = st1->isNull(0) ? 1 : 0;
         }
         else {
-            st1->Get(3, partype);
+            partype = (short)st1->getInt32(2);
         }*/
-        bool hasDefault = !st1->IsNull(11);
+        bool hasDefault = !st1->isNull(10);
         wxString defaultSrc;
         if (hasDefault)
         {
-            st1->Get(11, s);
+            s = st1->getString(10);
             defaultSrc = std2wxIdentifier(s, converter);
         }
         bool notNull = false;
-        if (!st1->IsNull(12))
-            st1->Get(12, &notNull);
-        if (!st1->IsNull(13)) {
-            st1->Get(13, mechanism);
+        if (!st1->isNull(11))
+            notNull = st1->getBool(11);
+        if (!st1->isNull(12)) {
+            mechanism = (short)st1->getInt32(12);
         }
         else {
-            if (!st1->IsNull(3))
-                st1->Get(3, mechanism);
+            if (!st1->isNull(2))
+                mechanism = (short)st1->getInt32(2);
         }
         wxString field;
-        if (!st1->IsNull(14)) {
-            st1->Get(14, s);
+        if (!st1->isNull(13)) {
+            s = st1->getString(13);
             field = std2wxIdentifier(s, converter);
         }
         wxString relation;
-        if (!st1->IsNull(15)) {
-            st1->Get(15, s);
+        if (!st1->isNull(14)) {
+            s = st1->getString(14);
             relation = std2wxIdentifier(s, converter);
         }
 
-        bool hasDescription = !st1->IsNull(16);
+        bool hasDescription = !st1->isNull(15);
 
         ParameterPtr par = findParameter(param_name);
         if (!par)
@@ -275,12 +273,11 @@ wxString Function::getOwner()
 		std::string sql(
 			"select rdb$owner_name from rdb$functions where rdb$function_name = ?"
 		     " and rdb$package_name is null ");
-		IBPP::Statement st1 = loader->getStatement(sql);
-		st1->Set(1, wx2std(getName_(), converter));
-		st1->Execute();
-		st1->Fetch();
-		std::string name;
-		st1->Get(1, name);
+		fr::IStatementPtr st1 = loader->createStatement(sql);
+		st1->setString(0, wx2std(getName_(), converter));
+		st1->execute();
+		st1->fetch();
+		std::string name = st1->getString(0);
 		return std2wxIdentifier(name, converter);
 	}
 	else
@@ -300,14 +297,13 @@ wxString Function::getSqlSecurity()
 		std::string sql(
 			"select rdb$sql_security from rdb$functions where rdb$function_name = ?"
 			" and rdb$package_name is null ");
-		IBPP::Statement st1 = loader->getStatement(sql);
-		st1->Set(1, wx2std(getName_(), converter));
-		st1->Execute();
-		st1->Fetch();
-		if (st1->IsNull(1))
+		fr::IStatementPtr st1 = loader->createStatement(sql);
+		st1->setString(0, wx2std(getName_(), converter));
+		st1->execute();
+		st1->fetch();
+		if (st1->isNull(0))
 			return wxString();
-		bool b;
-		st1->Get(1, b);
+		bool b = st1->getBool(0);
 		return wxString(b ? "SQL SECURITY DEFINER" : "SQL SECURITY INVOKER");
 	}
 	else
@@ -331,30 +327,30 @@ std::vector<Privilege>* Function::getPrivileges(bool splitPerGrantor)
 
 	privilegesM.clear();
 
-	IBPP::Statement st1 = loader->getStatement(
+	fr::IStatementPtr st1 = loader->createStatement(
 		"select RDB$USER, RDB$USER_TYPE, RDB$GRANTOR, RDB$PRIVILEGE, "
 		"RDB$GRANT_OPTION, RDB$FIELD_NAME "
 		"from RDB$USER_PRIVILEGES "
 		"where RDB$RELATION_NAME = ? and rdb$object_type = 15 "
 		"order by rdb$user, rdb$user_type, rdb$grantor, rdb$privilege"
 	);
-	st1->Set(1, wx2std(getName_(), converter));
-	st1->Execute();
+	st1->setString(0, wx2std(getName_(), converter));
+	st1->execute();
 	std::string lastuser;
     std::string lastGrantor;
 	int lasttype = -1;
 	Privilege* pr = 0;
-	while (st1->Fetch())
+	while (st1->fetch())
 	{
 		std::string user, grantor, privilege, field;
 		int usertype, grantoption = 0;
-		st1->Get(1, user);
-		st1->Get(2, usertype);
-		st1->Get(3, grantor);
-		st1->Get(4, privilege);
-		if (!st1->IsNull(5))
-			st1->Get(5, grantoption);
-		st1->Get(6, field);
+		user = st1->getString(0);
+		usertype = st1->getInt32(1);
+		grantor = st1->getString(2);
+		privilege = st1->getString(3);
+		if (!st1->isNull(4))
+			grantoption = st1->getInt32(4);
+		field = st1->getString(5);
 		if (!pr || user != lastuser || usertype != lasttype || (splitPerGrantor && grantor != lastGrantor))
 		{
 			Privilege p(this, std2wxIdentifier(user, converter),
@@ -508,25 +504,23 @@ wxString FunctionSQL::getSource()
 	sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? "rdb$entrypoint, rdb$engine_name, rdb$deterministic_flag  " : "null, null, null ";
 	sql += "from rdb$functions where rdb$function_name = ?";
 	sql += " and rdb$package_name is null ";
-	IBPP::Statement st1 = loader->getStatement(sql);
-	st1->Set(1, wx2std(getName_(), converter));
-	st1->Execute();
-	st1->Fetch();
+	fr::IStatementPtr st1 = loader->createStatement(sql);
+	st1->setString(0, wx2std(getName_(), converter));
+	st1->execute();
+	st1->fetch();
 	wxString source;
-	if (!st1->IsNull(2))
+	if (!st1->isNull(1))
 	{
-		std::string s;
-		st1->Get(2, s);
+		std::string s = st1->getString(1);
 		source += "EXTERNAL NAME '" + std2wxIdentifier(s, converter) + "'\n";
-		if (!st1->IsNull(3))
+		if (!st1->isNull(2))
 		{
-			s.clear();
-			st1->Get(3, s);
+			s = st1->getString(2);
 			source += "ENGINE " + std2wxIdentifier(s, converter) + "\n";
-			if (!st1->IsNull(1))
+			if (!st1->isNull(0))
 			{
 				wxString source1;
-				readBlob(st1, 1, source1, converter);
+				readBlob(st1, 0, source1, converter);
 				source1.Trim();
 				source += source1 + "\n";
 			}
@@ -535,15 +529,13 @@ wxString FunctionSQL::getSource()
 	else
 	{
 		wxString source1;
-		readBlob(st1, 1, source1, converter);
+		readBlob(st1, 0, source1, converter);
 		source1.Trim();
 		source += source1 + "\n";
 	}
 
-    if (!st1->IsNull(4)) {
-        int i = 0;
-        st1->Get(4, i);
-        deterministicM = (i == 1);
+    if (!st1->isNull(3)) {
+        deterministicM = (st1->getInt32(3) == 1);
     }
 
 	return source;
@@ -742,31 +734,28 @@ void UDF::loadProperties()
 		stmt +=	" ORDER BY a.RDB$ARGUMENT_POSITION";
 
 
-		IBPP::Statement& st1 = loader->getStatement(stmt);
-		st1->Set(1, wx2std(getName_(), converter));
-		st1->Execute();
-		while (st1->Fetch())
+		fr::IStatementPtr& st1 = loader->getStatement(stmt);
+		st1->setString(0, wx2std(getName_(), converter));
+		st1->execute();
+		while (st1->fetch())
 		{
-			short returnarg, mechanism, type, scale, length, subtype, precision,
-				retpos;
-			std::string libraryName, entryPoint, charset;
-			st1->Get(1, returnarg);
-			st1->Get(2, mechanism);
-			st1->Get(3, retpos);
-			st1->Get(4, type);
-			st1->Get(5, scale);
-			st1->Get(6, length);
-			st1->Get(7, subtype);
-			st1->Get(8, precision);
-			st1->Get(9, libraryName);
+			short returnarg = (short)st1->getInt32(0);
+			short mechanism = (short)st1->getInt32(1);
+			short retpos = (short)st1->getInt32(2);
+			short type = (short)st1->getInt32(3);
+			short scale = (short)st1->getInt32(4);
+			short length = (short)st1->getInt32(5);
+			short subtype = (short)st1->getInt32(6);
+			short precision = (short)st1->getInt32(7);
+			std::string libraryName = st1->getString(8);
 			libraryNameM = wxString(libraryName.c_str(), *converter).Strip();
-			st1->Get(10, entryPoint);
+			std::string entryPoint = st1->getString(9);
 			entryPointM = wxString(entryPoint.c_str(), *converter).Strip();
 			wxString datatype = Domain::dataTypeToString(type, scale,
 				precision, subtype, length);
-			if (!st1->IsNull(11))
+			if (!st1->isNull(10))
 			{
-				st1->Get(11, charset);
+				std::string charset = st1->getString(10);
 				wxString chset = wxString(charset.c_str(), *converter).Strip();
 				if (db->getDatabaseCharset() != chset)
 				{
