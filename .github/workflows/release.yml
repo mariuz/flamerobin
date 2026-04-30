@@ -79,15 +79,20 @@ jobs:
             ' src/frversion.h)
           echo "FLAMEROBIN_VERSION=$FLAMEROBIN_VERSION" >> $GITHUB_ENV
           
+          # Use cmake install to stage files correctly
+          mkdir -p staging
+          DESTDIR=$(pwd)/staging cmake --install Build
+          
+          # Clean up and prepare deb tree
+          # Keep what's in templates (like flamerobin-launcher and DEBIAN/) but update from build
+          cp -rv staging/opt/flamerobin/* templates/trees/deb/flamerobin/opt/flamerobin/
+          
+          # Optional: bundle libraries if needed for portability
           mkdir -p templates/trees/deb/flamerobin/opt/flamerobin/lib
-          ldd Build/flamerobin | awk '{print $3}' | grep -E '/lib|/usr/lib' | grep -v "not found" | xargs -I {} cp -v {} templates/trees/deb/flamerobin/opt/flamerobin/lib/
+          ldd Build/flamerobin | awk '{print $3}' | grep -E '/lib|/usr/lib' | grep -v "not found" | xargs -I {} cp -v {} templates/trees/deb/flamerobin/opt/flamerobin/lib/ || true
           
           sed -i "s/^Version: .*/Version: ${FLAMEROBIN_VERSION}/" templates/trees/deb/flamerobin/DEBIAN/control
-          mkdir -p templates/trees/deb/flamerobin/opt/flamerobin/bin
-          cp -r Build/flamerobin templates/trees/deb/flamerobin/opt/flamerobin/bin/
-          
-          mkdir -p templates/trees/deb/flamerobin/opt/flamerobin/share/flamerobin
-          rsync -av --exclude=flamerobin Build/ templates/trees/deb/flamerobin/opt/flamerobin/share/flamerobin/
+          sed -i "s/^Architecture: .*/Architecture: amd64/" templates/trees/deb/flamerobin/DEBIAN/control
           
           dpkg-deb --build templates/trees/deb/flamerobin templates/trees/deb/flamerobin-${FLAMEROBIN_VERSION}.deb
 
@@ -95,6 +100,41 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: templates/trees/deb/flamerobin-*.deb
+
+  build-flatpak:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-24.08
+      options: --privileged
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set FlameRobin version
+        run: |
+          FLAMEROBIN_VERSION=$(awk '
+            /FR_VERSION_MAJOR/ { major = $3 }
+            /FR_VERSION_MINOR/ { minor = $3 }
+            /FR_VERSION_RLS/   { rls   = $3 }
+            END { print major "." minor "." rls }
+            ' src/frversion.h)
+          echo "FLAMEROBIN_VERSION=$FLAMEROBIN_VERSION" >> $GITHUB_ENV
+
+      - name: Build Flatpak
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: flamerobin-${{ env.FLAMEROBIN_VERSION }}.flatpak
+          manifest-path: flatpak/org.flamerobin.FlameRobin.yml
+          cache-key: flatpak-builder-${{ github.sha }}
+          upload-artifact: false
+
+      - name: Upload Flatpak Artifact to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: flamerobin-*.flatpak
 
   build-windows:
     runs-on: windows-latest
