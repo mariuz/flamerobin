@@ -39,6 +39,8 @@
 // This test verifies that classification contract in isolation, without
 // requiring a live database connection.
 
+#include <iostream>
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -47,8 +49,6 @@
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
-
-#include <iostream>
 
 namespace
 {
