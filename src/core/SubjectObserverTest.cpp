@@ -38,6 +38,8 @@
 // explicitly detached or destroyed, giving observers a chance to clear
 // any raw pointer they hold to it.
 
+#include <iostream>
+
 // For compilers that support precompilation, includes "wx/wx.h".
 #include "wx/wxprec.h"
 
@@ -46,8 +48,6 @@
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
-
-#include <iostream>
 
 #include "core/Observer.h"
 #include "core/Subject.h"
