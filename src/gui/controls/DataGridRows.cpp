@@ -1952,7 +1952,22 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     fr::IStatementPtr statement, wxMBConv* converter, Database* /*db*/)
 {
     wxASSERT(buffer);
-    buffer->setString(indexM, wxString(statement->getString(col - 1).c_str(), *converter));
+    if (statement->getColumnSubtype(col - 1) == 1) // charset OCTETS
+    {
+        std::string value = statement->getString(col - 1);
+        wxString val;
+        for (std::string::size_type p = 0; p < value.length(); p++)
+            val += wxString::Format("%02x", uint8_t(value[p]));
+        buffer->setString(indexM, val);
+    }
+    else
+    {
+        wxString val = wxString(statement->getString(col - 1).c_str(), *converter);
+        size_t trimLen = val.Strip().Length();
+        if (val.Length() > size_t(charSizeM))
+            val.Truncate(trimLen > size_t(charSizeM) ? trimLen : charSizeM);
+        buffer->setString(indexM, val);
+    }
 }
 
 class BooleanColumnDef : public StringColumnDef // Firebird v3
@@ -2049,18 +2064,17 @@ void DataGridRows::addRow(fr::IStatementPtr statement)
         // starts with last column -> with highest buffer offset and
         // string array index to allocate all needed memory at once
         unsigned col = columnDefsM.size();
-        do
+        while (col > 0)
         {
-            unsigned colDAL = col--;
-            bool isNull = statement->isNull(colDAL);
-            buffer->setFieldNull(col, isNull);
+            unsigned idx = --col;
+            bool isNull = statement->isNull(idx);
+            buffer->setFieldNull(idx, isNull);
             if (!isNull)
             {
-                columnDefsM[col]->setValue(buffer, colDAL + 1, statement,
+                columnDefsM[idx]->setValue(buffer, idx + 1, statement,
                     databaseM->getCharsetConverter(), databaseM);
             }
         }
-        while (col > 0);
     }
     catch(...)
     {
@@ -2237,6 +2251,35 @@ void checkColumnsPresent(const Database* database,
         }
     }
 }
+
+void checkColumnsPresent(const Database* database,
+    fr::IStatementPtr statement, UniqueConstraint** locator)
+{
+    wxString tableName = (*locator)->getTable()->getName_();
+    for (ColumnConstraint::const_iterator ci = (*locator)->begin(); ci !=
+        (*locator)->end(); ++ci)
+    {
+        bool found = false;
+        int colCount = statement->getColumnCount();
+        for (int c2 = 0; c2 < colCount; ++c2)
+        {
+            wxString cn(wxString(statement->getColumnName(c2).c_str(),
+                *database->getCharsetConverter()));
+            wxString tn(wxString(statement->getColumnTable(c2).c_str(),
+                *database->getCharsetConverter()));
+            if (cn == (*ci) && tn == tableName)
+            {
+                found = true;
+                break;
+            }
+        }
+        if (!found)     // some columns missing
+        {
+            *locator = 0;
+            break;
+        }
+    }
+}
 // We need collect all the table names and find their primary/unique keys.
 // If all PK/UNQ columns are available in the list, that table's fields are
 // editable (unless they are computed fields). We also read NULL info here.
@@ -2250,15 +2293,35 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
         return;
     }
 
-    if (statementM->ColumnType(col) == IBPP::sdString
-        && statementM->ColumnSubtype(col) == 1) // charset OCTETS
+    wxString tabName;
+    wxString colName;
+    bool isOctets = false;
+
+    if (statementDALM)
+    {
+        isOctets = (statementDALM->getColumnType(col - 1) == fr::ColumnType::Varchar
+            && statementDALM->getColumnSubtype(col - 1) == 1);
+        tabName = wxString(statementDALM->getColumnTable(col - 1).c_str(),
+            *databaseM->getCharsetConverter());
+        colName = wxString(statementDALM->getColumnName(col - 1).c_str(),
+            *databaseM->getCharsetConverter());
+    }
+    else
+    {
+        isOctets = (statementM->ColumnType(col) == IBPP::sdString
+            && statementM->ColumnSubtype(col) == 1);
+        tabName = std2wxIdentifier(statementM->ColumnTable(col),
+            databaseM->getCharsetConverter());
+        colName = std2wxIdentifier(statementM->ColumnName(col),
+            databaseM->getCharsetConverter());
+    }
+
+    if (isOctets)
     {                       // TODO: to make those editable, we need to
         //readOnly = true;    // enter values as parameters. This should
         //return;             // probably be done together with BLOB support
     }
 
-    wxString tabName(std2wxIdentifier(statementM->ColumnTable(col),
-        databaseM->getCharsetConverter()));
     Table *t = dynamic_cast<Table *>(db->findRelation(Identifier(tabName)));
     if (!t)
     {
@@ -2275,7 +2338,12 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
     {
         locator = t->getPrimaryKey();
         if (locator)    // check if this PK is usable (all fields present)
-            checkColumnsPresent(databaseM, statementM, &locator);
+        {
+            if (statementDALM)
+                checkColumnsPresent(databaseM, statementDALM, &locator);
+            else
+                checkColumnsPresent(databaseM, statementM, &locator);
+        }
         if (!locator)   // PK not present or not usable, try UNQ
         {
             std::vector<UniqueConstraint> *uq = t->getUniqueConstraints();
@@ -2285,7 +2353,10 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
                     ui != uq->end(); ++ui)
                 {
                     locator = &(*ui);
-                    checkColumnsPresent(databaseM, statementM, &locator);
+                    if (statementDALM)
+                        checkColumnsPresent(databaseM, statementDALM, &locator);
+                    else
+                        checkColumnsPresent(databaseM, statementM, &locator);
                     if (locator)
                         break;
                 }
@@ -2297,7 +2368,10 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
             uc.getColumns().push_back("DB_KEY");
             uc.setParent(t);
             locator = &uc;
-            checkColumnsPresent(databaseM, statementM, &locator);
+            if (statementDALM)
+                checkColumnsPresent(databaseM, statementDALM, &locator);
+            else
+                checkColumnsPresent(databaseM, statementM, &locator);
             if (locator)    // DB_KEY present
             {
                 dbKeysM.push_back(uc);
@@ -2312,22 +2386,12 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
     nullable = false;
     if (!readOnly)  // table is not RO, but column might be, so we search
     {
-        wxString cn(std2wxIdentifier(statementM->ColumnName(col),
-            databaseM->getCharsetConverter()));
         t->ensureChildrenLoaded();
-        Column* c = t->findColumn(cn).get();
+        Column* c = t->findColumn(colName).get();
         readOnly = (c == 0 || !c->getComputedSource().empty());
         if (!readOnly)  // it is editable, so check if nullable
             nullable = c->isNullable(CheckDomainNullability);
     }
-
-    /* wxMessageBox(wxString::Format("TABLE: %s (RO=%d), COLUMN: %s (RO=%d, NULL=%d)"),
-        tabName.c_str(),
-        locator ? 0 : 1,
-        wxString(statementM->ColumnName(col)).c_str(),
-        readOnly ? 1 : 0,
-        nullable ? 1 : 0)
-    );*/
 }
 
 bool DataGridRows::initialize(const IBPP::Statement& statement)
