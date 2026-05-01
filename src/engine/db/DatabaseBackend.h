@@ -60,6 +60,35 @@ enum class ColumnType
     TimestampTz
 };
 
+struct DatabaseInfoData
+{
+    int ods;
+    int odsMinor;
+    int pageSize;
+    int pages;
+    int buffers;
+    int sweep;
+    bool forcedWrites;
+    bool reserve;
+    bool readOnly;
+
+    int oldestTransaction;
+    int oldestActiveTransaction;
+    int oldestSnapshot;
+    int nextTransaction;
+};
+
+struct UserData
+{
+    std::string username;
+    std::string password;
+    std::string firstName;
+    std::string middleName;
+    std::string lastName;
+    uint32_t userId;
+    uint32_t groupId;
+};
+
 // Common types and forward declarations
 class IDatabase;
 class ITransaction;

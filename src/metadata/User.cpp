@@ -40,15 +40,15 @@ User::User(ServerPtr server)
 {
 }
 
-User::User(ServerPtr server, const IBPP::User& src)
+User::User(ServerPtr server, const fr::UserData& src)
     : MetadataItem(ntUnknown, server.get()), serverM(server),
-        useridM(src.userid), groupidM(src.groupid)
+        useridM(src.userId), groupidM(src.groupId)
 {
     usernameM = src.username;
     passwordM = src.password;
-    firstnameM = src.firstname;
-    middlenameM = src.middlename;
-    lastnameM = src.lastname;
+    firstnameM = src.firstName;
+    middlenameM = src.middleName;
+    lastnameM = src.lastName;
 }
 
 ServerPtr User::getServer() const
@@ -154,15 +154,15 @@ void User::setGroupId(uint32_t value)
     }
 }
 
-void User::assignTo(IBPP::User& dest) const
+void User::assignTo(fr::UserData& dest) const
 {
     dest.username = wx2std(usernameM);
     dest.password = wx2std(passwordM);
-    dest.firstname = wx2std(firstnameM);
-    dest.lastname = wx2std(lastnameM);
-    dest.middlename = wx2std(middlenameM);
-    dest.userid = useridM;
-    dest.groupid = groupidM;
+    dest.firstName = wx2std(firstnameM);
+    dest.lastName = wx2std(lastnameM);
+    dest.middleName = wx2std(middlenameM);
+    dest.userId = useridM;
+    dest.groupId = groupidM;
 }
 
 bool User::isSystem() const

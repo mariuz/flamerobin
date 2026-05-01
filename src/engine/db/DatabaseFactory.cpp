@@ -25,6 +25,7 @@
 #include "engine/db/ibpp/IbppDatabase.h"
 #include "engine/db/ibpp/IbppService.h"
 #include "engine/db/fbcpp/FbCppDatabase.h"
+#include "engine/db/fbcpp/FbCppService.h"
 #include <stdexcept>
 
 namespace fr
@@ -63,8 +64,7 @@ IServicePtr DatabaseFactory::createService(DatabaseBackend backend)
     }
     else if (backend == DatabaseBackend::FbCpp)
     {
-        // return std::make_shared<FbCppService>();
-        throw std::runtime_error("fb-cpp service not implemented yet in DAL");
+        return std::make_shared<FbCppService>();
     }
     throw std::runtime_error("Unknown service backend");
 }

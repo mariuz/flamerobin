@@ -1254,14 +1254,14 @@ void MainFrame::OnMenuGetServerVersion(wxCommandEvent& WXUNUSED(event))
         // retieving is complete
         ProgressDialog pd(this, _("Retrieving server version"), 1);
         pd.doShow();
-        IBPP::Service svc;
-        if (!getService(s.get(), svc, &pd, false))    // false = no need for sysdba
+        fr::IServicePtr svc = s->getDALService(&pd, false);    // false = no need for sysdba
+        if (!svc)
             return;
-        svc->GetVersion(version);
+        version = svc->getVersion();
     }
-    catch (IBPP::Exception& e)
+    catch (const std::exception& e)
     {
-        wxMessageBox(e.what(), _("Error"));
+        wxMessageBox(wxString::FromUTF8(e.what()), _("Error"));
         return;
     }
 

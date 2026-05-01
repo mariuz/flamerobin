@@ -102,8 +102,8 @@ private:
     bool reserveM;
 
     mutable wxLongLong loadTimeMillisM;
-    void load(const IBPP::Database database);
-    void reloadIfNecessary(const IBPP::Database database);
+    void load(fr::IDatabasePtr database);
+    void reloadIfNecessary(fr::IDatabasePtr database);
 public:
     int getODS() const;
     int getODSMinor() const;
@@ -166,7 +166,6 @@ class Database: public MetadataItem,
 {
 private:
     ServerWeakPtr serverM;
-    IBPP::Database databaseM;
     fr::IDatabasePtr databaseDAL_M;
     MetadataLoader* metadataLoaderM;
 

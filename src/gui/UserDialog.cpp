@@ -272,23 +272,23 @@ bool UserPropertiesHandler::handleURI(URI& uri)
     {
         ProgressDialog pd(w, _("Connecting to Server..."), 1);
         pd.doShow();
-        IBPP::Service svc;
-        if (!getService(server.get(), svc, &pd, true)) // true = need SYSDBA password
+        fr::IServicePtr svc = server->getDALService(&pd, true); // true = need SYSDBA password
+        if (!svc)
             return true;
 
         try
         {
-            IBPP::User u;
-            user->assignTo(u);
+            fr::UserData ud;
+            user->assignTo(ud);
             if (addUser)
-                svc->AddUser(u);
+                svc->addUser(ud);
             else
-                svc->ModifyUser(u);
+                svc->modifyUser(ud);
             server->notifyObservers();
         }
-        catch(IBPP::Exception& e)
+        catch(const std::exception& e)
         {
-            wxMessageBox(e.what(), _("Error"),
+            wxMessageBox(wxString::FromUTF8(e.what()), _("Error"),
                 wxOK | wxICON_WARNING);
         }
     }
@@ -327,18 +327,18 @@ bool DropUserHandler::handleURI(URI& uri)
 
     ProgressDialog pd(w, _("Connecting to Server..."), 1);
     pd.doShow();
-    IBPP::Service svc;
-    if (!getService(s.get(), svc, &pd, true)) // true = need SYSDBA password
+    fr::IServicePtr svc = s->getDALService(&pd, true); // true = need SYSDBA password
+    if (!svc)
         return true;
 
     try
     {
-        svc->RemoveUser(wx2std(u->getUsername()));
+        svc->removeUser(wx2std(u->getUsername()));
         s->notifyObservers();
     }
-    catch(IBPP::Exception& e)
+    catch(const std::exception& e)
     {
-        wxMessageBox(e.what(), _("Error"),
+        wxMessageBox(wxString::FromUTF8(e.what()), _("Error"),
             wxOK | wxICON_WARNING);
     }
     return true;

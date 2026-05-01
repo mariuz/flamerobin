@@ -25,6 +25,7 @@
 #define FR_ISERVICE_H
 
 #include <string>
+#include <vector>
 #include "engine/db/DatabaseBackend.h"
 
 namespace fr
@@ -43,6 +44,14 @@ public:
 
     virtual void backup(const std::string& dbPath, const std::string& backupPath) = 0;
     virtual void restore(const std::string& backupPath, const std::string& dbPath) = 0;
+
+    virtual void getUsers(std::vector<UserData>& users) = 0;
+    virtual void addUser(const UserData& user) = 0;
+    virtual void modifyUser(const UserData& user) = 0;
+    virtual void removeUser(const std::string& username) = 0;
+
+    virtual bool versionIsHigherOrEqualTo(int major, int minor) = 0;
+    virtual std::string getVersion() = 0;
 };
 
 } // namespace fr

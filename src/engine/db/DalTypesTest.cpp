@@ -175,6 +175,15 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
             }
         }
 
+        // Test getDialect and getInfo
+        std::cout << "  Testing database metadata methods...\n";
+        ok = check(db->getDialect() == 3, "getDialect") && ok;
+
+        fr::DatabaseInfoData info;
+        db->getInfo(&info);
+        ok = check(info.ods > 0, "getInfo ODS") && ok;
+        ok = check(info.pageSize > 0, "getInfo PageSize") && ok;
+        ok = check(info.nextTransaction > 0, "getInfo NextTransaction") && ok;
         // Check if Firebird 4.0+ by trying to CAST to DECFLOAT
         std::cout << "  Checking for Firebird 4.0+ types support...\n";
         try 

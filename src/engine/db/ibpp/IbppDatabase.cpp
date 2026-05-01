@@ -48,11 +48,58 @@ void IbppDatabase::disconnect()
 
 bool IbppDatabase::isConnected()
 {
-    return databaseM.intf() && databaseM->Connected();
+    return databaseM != 0 && databaseM->Connected();
+}
+
+void IbppDatabase::create(int dialect)
+{
+    databaseM = IBPP::DatabaseFactory(clientLibM, connStrM, userM, passwordM, roleM, charsetM, cryptKeyDataM);
+    databaseM->Create(dialect);
+}
+
+void IbppDatabase::drop()
+{
+    if (databaseM != 0)
+        databaseM->Drop();
+}
+
+int IbppDatabase::getDialect()
+{
+    if (databaseM != 0)
+        return databaseM->Dialect();
+    return 3;
+}
+
+std::string IbppDatabase::getUserPassword()
+{
+    if (databaseM != 0)
+        return databaseM->UserPassword();
+    return "";
+}
+
+std::string IbppDatabase::getUsername()
+{
+    if (databaseM != 0)
+        return databaseM->Username();
+    return "";
+}
+
+std::string IbppDatabase::getRole()
+{
+    if (databaseM != 0)
+        return databaseM->RoleName();
+    return "";
+}
+
+void IbppDatabase::getConnectedUsers(std::vector<std::string>& users)
+{
+    if (databaseM != 0)
+        databaseM->Users(users);
 }
 
 void IbppDatabase::setConnectionString(const std::string& connStr)
 {
+
     connStrM = connStr;
 }
 
@@ -111,6 +158,16 @@ std::string IbppDatabase::getTimezoneName(int timezoneId)
     if (ibpp_internals::getTimezoneNameById(timezoneId, name))
         return name;
     return "";
+}
+
+void IbppDatabase::getInfo(DatabaseInfoData* data)
+{
+    if (!data)
+        return;
+    databaseM->Info(&data->ods, &data->odsMinor, &data->pageSize, &data->pages,
+        &data->buffers, &data->sweep, &data->forcedWrites, &data->reserve, &data->readOnly);
+    databaseM->TransactionInfo(&data->oldestTransaction, &data->oldestActiveTransaction,
+        &data->oldestSnapshot, &data->nextTransaction);
 }
 
 } // namespace fr

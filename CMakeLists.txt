@@ -128,6 +128,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/engine/db/fbcpp/FbCppDatabase.cpp
         ${SOURCEDIR}/engine/db/fbcpp/FbCppTransaction.cpp
         ${SOURCEDIR}/engine/db/fbcpp/FbCppStatement.cpp
+        ${SOURCEDIR}/engine/db/fbcpp/FbCppService.cpp
         ${SOURCEDIR}/core/ArtProvider.cpp
         ${SOURCEDIR}/core/CodeTemplateProcessor.cpp
         ${SOURCEDIR}/core/FRDecimal.cpp
@@ -739,6 +740,7 @@ add_executable(dal_types_test
     ${SOURCEDIR}/engine/db/fbcpp/FbCppDatabase.cpp
     ${SOURCEDIR}/engine/db/fbcpp/FbCppTransaction.cpp
     ${SOURCEDIR}/engine/db/fbcpp/FbCppStatement.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppService.cpp
     ${SOURCEDIR}/core/FRError.cpp
     ${SOURCEDIR}/core/FRInt128.cpp
     ${SOURCEDIR}/core/FRDecimal.cpp
