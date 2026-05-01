@@ -154,7 +154,7 @@ HMODULE IBPP_LoadLibrary(std::string library) {
                     message = messageBuffer;
                     LocalFree(messageBuffer);
                 }
-                throw LogicExceptionImpl(library, message);
+                throw LogicExceptionImpl(library, message.c_str());
             }
         }
     }
