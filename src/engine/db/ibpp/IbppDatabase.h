@@ -39,6 +39,14 @@ public:
     virtual void connect() override;
     virtual void disconnect() override;
     virtual bool isConnected() override;
+    virtual void create(int dialect) override;
+    virtual void drop() override;
+    virtual int getDialect() override;
+    virtual std::string getUserPassword() override;
+    virtual std::string getUsername() override;
+    virtual std::string getRole() override;
+
+    virtual void getConnectedUsers(std::vector<std::string>& users) override;
 
     virtual void setConnectionString(const std::string& connStr) override;
     virtual void setCredentials(const std::string& user, const std::string& password) override;
@@ -51,6 +59,7 @@ public:
     virtual IStatementPtr createStatement(ITransactionPtr tr) override;
 
     virtual std::string getTimezoneName(int timezoneId) override;
+    virtual void getInfo(DatabaseInfoData* data) override;
 
     virtual DatabaseBackend getBackendType() const override { return DatabaseBackend::IBPP; }
 

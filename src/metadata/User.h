@@ -25,8 +25,7 @@
 #ifndef FR_USER_H
 #define FR_USER_H
 
-#include <ibpp.h>
-
+#include "engine/db/DatabaseBackend.h"
 #include "metadata/MetadataClasses.h"
 #include "metadata/metadataitem.h"
 
@@ -44,7 +43,7 @@ private:
     uint32_t groupidM;
 public:
     User(ServerPtr server);
-    User(ServerPtr server, const IBPP::User& src);
+    User(ServerPtr server, const fr::UserData& src);
 
     ServerPtr getServer() const;
     virtual bool isSystem() const;
@@ -65,7 +64,7 @@ public:
     void setUserId(uint32_t value);
     void setGroupId(uint32_t value);
 
-    void assignTo(IBPP::User& dest) const;
+    void assignTo(fr::UserData& dest) const;
 };
 /*
 class Users : public MetadataCollection<User>

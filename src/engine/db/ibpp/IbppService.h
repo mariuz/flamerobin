@@ -45,6 +45,16 @@ public:
     virtual void backup(const std::string& dbPath, const std::string& backupPath) override;
     virtual void restore(const std::string& backupPath, const std::string& dbPath) override;
 
+    virtual void getUsers(std::vector<UserData>& users) override;
+    virtual void addUser(const UserData& user) override;
+    virtual void modifyUser(const UserData& user) override;
+    virtual void removeUser(const std::string& username) override;
+
+    virtual bool versionIsHigherOrEqualTo(int major, int minor) override;
+    virtual std::string getVersion() override;
+
+    IBPP::Service& getIBPPService() { return serviceM; }
+
 private:
     IBPP::Service serviceM;
     std::string connStrM;

@@ -139,37 +139,6 @@ void Server::acceptVisitor(MetadataItemVisitor* visitor)
     visitor->visitServer(*this);
 }
 
-fr::IServicePtr Server::getDALService(ProgressIndicator* /*progressind*/, bool sysdba)
-{
-    fr::IServicePtr svc = fr::DatabaseFactory::createService();
-    svc->setConnectionString(wx2std(getConnectionString()));
-    if (sysdba)
-    {
-        svc->setCredentials("SYSDBA", wx2std(serviceSysdbaPasswordM));
-    }
-    else
-    {
-        svc->setCredentials(wx2std(serviceUserM), wx2std(servicePasswordM));
-    }
-    svc->connect();
-    return svc;
-}
-
-/* static */
-wxString Server::makeConnectionString(const wxString& hostname,
-    const wxString& port)
-{
-    if (!hostname.empty() && !port.empty())
-        return hostname + "/" + port;
-    else
-        return hostname;
-}
-
-wxString Server::getConnectionString() const
-{
-    return makeConnectionString(getHostname(), getPort());
-}
-
 const wxString Server::getItemPath() const
 {
     // Since database Ids are already unique, let's shorten the item paths
@@ -185,22 +154,29 @@ struct SortUsers
         return user1->getUsername() < user2->getUsername();
     }
 };
+
 UserPtrs Server::getUsers(ProgressIndicator* progressind)
 {
     usersM.clear();
-    IBPP::Service svc;
-    if (!::getService(this, svc, progressind, true))   // true = SYSDBA
+    fr::IServicePtr svc = getDALService(progressind, true);   // true = SYSDBA
+    if (!svc)
         return usersM;
 
-    std::vector<IBPP::User> usr;
-    svc->GetUsers(usr);
-    for (std::vector<IBPP::User>::iterator it = usr.begin();
-        it != usr.end(); ++it)
+    std::vector<fr::UserData> usr;
+    svc->getUsers(usr);
+    for (const auto& u : usr)
     {
-        UserPtr u(new User(shared_from_this(), *it));
-        usersM.push_back(u);
+        IBPP::User ibppUser;
+        ibppUser.username = u.username;
+        ibppUser.password = u.password;
+        ibppUser.firstname = u.firstName;
+        ibppUser.middlename = u.middleName;
+        ibppUser.lastname = u.lastName;
+        ibppUser.userid = u.userId;
+        ibppUser.groupid = u.groupId;
+        UserPtr uptr(new User(shared_from_this(), ibppUser));
+        usersM.push_back(uptr);
     }
-
 
     std::sort(usersM.begin(), usersM.end(), SortUsers());
     return usersM;
@@ -217,14 +193,29 @@ void Server::setServiceSysdbaPassword(const wxString& pass)
     serviceSysdbaPasswordM = pass;
 }
 
-bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
-    bool sysdba)
+fr::IServicePtr Server::getDALService(ProgressIndicator* progressind, bool sysdba)
 {
     if (progressind)
     {
         progressind->initProgress(_("Connecting..."),
             databasesM.size() + 2, 0, 1);
     }
+
+    auto createAndConnect = [this, progressind](const std::string& user, const std::string& pass, const std::string& role = "", const std::string& charset = "") -> fr::IServicePtr {
+        try
+        {
+            fr::IServicePtr svc = fr::DatabaseFactory::createService();
+            svc->setConnectionString(wx2std(getConnectionString()));
+            svc->setCredentials(user, pass);
+            // TODO: support role and charset in IService if needed
+            svc->connect();
+            return svc;
+        }
+        catch(...)
+        {
+            return nullptr;
+        }
+    };
 
     // check if we already had some successful connections
     if (!serviceSysdbaPasswordM.empty())  // we have sysdba pass
@@ -234,20 +225,14 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
             progressind->setProgressMessage(_("Using current SYSDBA password"));
             progressind->stepProgress();
         }
-        try
-        {
-            svc = IBPP::ServiceFactory(wx2std(getConnectionString()),
-                "SYSDBA", wx2std(serviceSysdbaPasswordM), wx2std(""), wx2std(""), wx2std(getClientLibrary()));
-            svc->Connect();
-            return true;
-        }
-        catch(IBPP::Exception&)   // keep going if connect fails
-        {
-            serviceSysdbaPasswordM.clear();
-        }
+        fr::IServicePtr svc = createAndConnect("SYSDBA", wx2std(serviceSysdbaPasswordM));
+        if (svc) return svc;
+        serviceSysdbaPasswordM.clear();
     }
+
     if (progressind && progressind->isCanceled())
-        return false;
+        return nullptr;
+
     // check if we have non-sysdba connection
     if (!sysdba && !serviceUserM.IsEmpty())
     {
@@ -257,18 +242,10 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
                 _("Using current %s password"), serviceUserM.c_str()));
             progressind->stepProgress();
         }
-        try
-        {
-            svc = IBPP::ServiceFactory(wx2std(getConnectionString()),
-                wx2std(serviceUserM), wx2std(servicePasswordM), wx2std(""), wx2std(""), wx2std(getClientLibrary()));
-            svc->Connect();
-            return true;
-        }
-        catch(IBPP::Exception&)   // keep going if connect fails
-        {
-            serviceUserM.Clear();
-            servicePasswordM.Clear();
-        }
+        fr::IServicePtr svc = createAndConnect(wx2std(serviceUserM), wx2std(servicePasswordM));
+        if (svc) return svc;
+        serviceUserM.Clear();
+        servicePasswordM.Clear();
     }
 
     // first try connected databases
@@ -276,36 +253,32 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
         ci != databasesM.end(); ++ci)
     {
         if (progressind && progressind->isCanceled())
-            return false;
+            return nullptr;
         if (!(*ci)->isConnected())
             continue;
         // Use the user name and password of the connected user
         // instead of the stored ones.
-        IBPP::Database& db = (*ci)->getIBPPDatabase();
-        if (sysdba && wxString(db->Username()).Upper() != "SYSDBA")
+        fr::IDatabasePtr db = (*ci)->getDALDatabase();
+        if (sysdba && wxString(db->getUsername()).Upper() != "SYSDBA")
             continue;
         if (progressind)
         {
             progressind->setProgressMessage(_("Using password of: ") +
-                db->Username() + "@" + (*ci)->getName_());
+                wxString(db->getUsername()) + "@" + (*ci)->getName_());
             progressind->stepProgress();
         }
-        try
+        
+        fr::IServicePtr svc = createAndConnect(db->getUsername(), db->getUserPassword());
+        if (svc)
         {
-            svc = IBPP::ServiceFactory(wx2std(getConnectionString()),
-                db->Username(), db->UserPassword(), db->RoleName(), db->CharSet(), wx2std(getClientLibrary()));
-            svc->Connect();
             if (sysdba)
-                serviceSysdbaPasswordM = db->UserPassword();
+                serviceSysdbaPasswordM = wxString(db->getUserPassword());
             else
             {
-                serviceUserM = db->Username();
-                servicePasswordM = db->UserPassword();
+                serviceUserM = wxString(db->getUsername());
+                servicePasswordM = wxString(db->getUserPassword());
             }
-            return true;
-        }
-        catch(IBPP::Exception&)   // keep going if connect fails
-        {
+            return svc;
         }
     }
 
@@ -314,7 +287,7 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
         ci != databasesM.end(); ++ci)
     {
         if (progressind && progressind->isCanceled())
-            return false;
+            return nullptr;
         if ((*ci)->isConnected())
             continue;
         wxString user = (*ci)->getUsername();
@@ -327,11 +300,10 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
                 user + "@" + (*ci)->getName_());
             progressind->stepProgress();
         }
-        try
+        
+        fr::IServicePtr svc = createAndConnect(wx2std(user), wx2std(pwd));
+        if (svc)
         {
-            svc = IBPP::ServiceFactory(wx2std(getConnectionString()),
-                wx2std(user), wx2std(pwd), wx2std(""), wx2std(""), wx2std(getClientLibrary()));
-            svc->Connect();
             if (sysdba)
                 serviceSysdbaPasswordM = pwd;
             else
@@ -339,11 +311,23 @@ bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
                 serviceUserM = user;
                 servicePasswordM = pwd;
             }
-            return true;
+            return svc;
         }
-        catch(IBPP::Exception&)   // keep going if connect fails
-        {
-        }
+    }
+    return nullptr;
+}
+
+bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
+    bool sysdba)
+{
+    fr::IServicePtr dalSvc = getDALService(progressind, sysdba);
+    if (!dalSvc)
+        return false;
+
+    if (auto ibppSvc = std::dynamic_pointer_cast<fr::IbppService>(dalSvc))
+    {
+        svc = ibppSvc->getIBPPService();
+        return true;
     }
     return false;
 }

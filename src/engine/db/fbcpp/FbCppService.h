@@ -21,69 +21,47 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef FR_FBCPP_DATABASE_H
-#define FR_FBCPP_DATABASE_H
+#ifndef FR_FBCPP_SERVICE_H
+#define FR_FBCPP_SERVICE_H
 
-#include "engine/db/IDatabase.h"
+#include "engine/db/IService.h"
 #include <fb-cpp/fb-cpp.h>
 #include <optional>
-#include <stdexcept>
 
 namespace fr
 {
 
-class FbCppDatabase : public IDatabase
+class FbCppService : public IService
 {
 public:
-    FbCppDatabase();
-    virtual ~FbCppDatabase() = default;
+    FbCppService();
+    virtual ~FbCppService() = default;
 
     virtual void connect() override;
     virtual void disconnect() override;
-    virtual bool isConnected() override;
-    virtual void create(int dialect) override;
-    virtual void drop() override;
-    virtual int getDialect() override;
-    virtual std::string getUserPassword() override;
-    virtual std::string getUsername() override;
-    virtual std::string getRole() override;
-
-    virtual void getConnectedUsers(std::vector<std::string>& users) override;
 
     virtual void setConnectionString(const std::string& connStr) override;
     virtual void setCredentials(const std::string& user, const std::string& password) override;
-    virtual void setRole(const std::string& role) override;
-    virtual void setCharset(const std::string& charset) override;
-    virtual void setClientLibrary(const std::string& clientLib) override;
-    virtual void setCryptKeyData(const std::string& cryptKeyData) override;
 
-    virtual ITransactionPtr createTransaction() override;
-    virtual IStatementPtr createStatement(ITransactionPtr tr) override;
+    virtual void backup(const std::string& dbPath, const std::string& backupPath) override;
+    virtual void restore(const std::string& backupPath, const std::string& dbPath) override;
 
-    virtual std::string getTimezoneName(int timezoneId) override;
-    virtual void getInfo(DatabaseInfoData* data) override;
+    virtual void getUsers(std::vector<UserData>& users) override;
+    virtual void addUser(const UserData& user) override;
+    virtual void modifyUser(const UserData& user) override;
+    virtual void removeUser(const std::string& username) override;
 
-    virtual DatabaseBackend getBackendType() const override { return DatabaseBackend::FbCpp; }
-
-    fbcpp::Attachment& getAttachment() 
-    { 
-        if (!attachmentM)
-            throw std::runtime_error("Database not connected");
-        return *attachmentM; 
-    }
+    virtual bool versionIsHigherOrEqualTo(int major, int minor) override;
+    virtual std::string getVersion() override;
 
 private:
     std::optional<fbcpp::Client> clientM;
-    std::optional<fbcpp::Attachment> attachmentM;
+    std::optional<fbcpp::ServiceManager> serviceM;
     std::string connStrM;
     std::string userM;
     std::string passwordM;
-    std::string roleM;
-    std::string charsetM;
-    std::string clientLibM;
-    std::string cryptKeyDataM;
 };
 
 } // namespace fr
 
-#endif // FR_FBCPP_DATABASE_H
+#endif // FR_FBCPP_SERVICE_H

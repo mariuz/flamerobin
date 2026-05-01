@@ -37,6 +37,14 @@ public:
     virtual void connect() = 0;
     virtual void disconnect() = 0;
     virtual bool isConnected() = 0;
+    virtual void create(int dialect) = 0;
+    virtual void drop() = 0;
+    virtual int getDialect() = 0;
+    virtual std::string getUserPassword() = 0;
+    virtual std::string getUsername() = 0;
+    virtual std::string getRole() = 0;
+
+    virtual void getConnectedUsers(std::vector<std::string>& users) = 0;
 
     virtual void setConnectionString(const std::string& connStr) = 0;
     virtual void setCredentials(const std::string& user, const std::string& password) = 0;
@@ -49,6 +57,7 @@ public:
     virtual IStatementPtr createStatement(ITransactionPtr tr) = 0;
 
     virtual std::string getTimezoneName(int timezoneId) = 0;
+    virtual void getInfo(DatabaseInfoData* data) = 0;
 
     virtual DatabaseBackend getBackendType() const = 0;
 };

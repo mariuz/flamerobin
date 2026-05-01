@@ -24,6 +24,7 @@
 #include "engine/db/fbcpp/FbCppDatabase.h"
 #include "engine/db/fbcpp/FbCppTransaction.h"
 #include "engine/db/fbcpp/FbCppStatement.h"
+#include <cstring>
 #include <stdexcept>
 #include <firebird/Interface.h>
 
@@ -65,6 +66,62 @@ void FbCppDatabase::disconnect()
 bool FbCppDatabase::isConnected()
 {
     return attachmentM.has_value();
+}
+
+void FbCppDatabase::create(int dialect)
+{
+    if (!clientM)
+    {
+        Firebird::IMaster* master = fb_get_master_interface();
+        if (!master)
+            throw std::runtime_error("Failed to get Firebird master interface");
+        clientM.emplace(master);
+    }
+
+    auto options = fbcpp::AttachmentOptions()
+        .setConnectionCharSet(charsetM)
+        .setUserName(userM)
+        .setPassword(passwordM)
+        .setRole(roleM)
+        .setSqlDialect(static_cast<uint32_t>(dialect))
+        .setCreateDatabase(true);
+
+    attachmentM.emplace(*clientM, connStrM, options);
+}
+
+void FbCppDatabase::drop()
+{
+    if (attachmentM)
+    {
+        attachmentM->dropDatabase();
+        attachmentM.reset();
+    }
+}
+
+int FbCppDatabase::getDialect()
+{
+    // TODO: implement using fbcpp or low-level API
+    return 3;
+}
+
+std::string FbCppDatabase::getUserPassword()
+{
+    return passwordM;
+}
+
+std::string FbCppDatabase::getUsername()
+{
+    return userM;
+}
+
+std::string FbCppDatabase::getRole()
+{
+    return roleM;
+}
+
+void FbCppDatabase::getConnectedUsers(std::vector<std::string>& /*users*/)
+{
+    // TODO: implement using fbcpp or low-level API
 }
 
 void FbCppDatabase::setConnectionString(const std::string& connStr)
@@ -139,6 +196,14 @@ std::string FbCppDatabase::getTimezoneName(int timezoneId)
     {
         return "";
     }
+}
+
+void FbCppDatabase::getInfo(DatabaseInfoData* data)
+{
+    if (!data)
+        return;
+    // TODO: implement using fbcpp or low-level API
+    memset(data, 0, sizeof(DatabaseInfoData));
 }
 
 } // namespace fr

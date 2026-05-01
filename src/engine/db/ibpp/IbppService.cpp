@@ -63,4 +63,65 @@ void IbppService::restore(const std::string& backupPath, const std::string& dbPa
     serviceM->StartRestore(backupPath, dbPath);
 }
 
+void IbppService::getUsers(std::vector<UserData>& users)
+{
+    std::vector<IBPP::User> ibppUsers;
+    serviceM->GetUsers(ibppUsers);
+    for (const auto& u : ibppUsers)
+    {
+        UserData ud;
+        ud.username = u.username;
+        ud.password = u.password;
+        ud.firstName = u.firstname;
+        ud.middleName = u.middlename;
+        ud.lastName = u.lastname;
+        ud.userId = u.userid;
+        ud.groupId = u.groupid;
+        users.push_back(ud);
+    }
+}
+
+static void userDataToIbpp(const UserData& src, IBPP::User& dest)
+{
+    dest.username = src.username;
+    dest.password = src.password;
+    dest.firstname = src.firstName;
+    dest.middlename = src.middleName;
+    dest.lastname = src.lastName;
+    dest.userid = src.userId;
+    dest.groupid = src.groupId;
+}
+
+void IbppService::addUser(const UserData& user)
+{
+    IBPP::User u;
+    userDataToIbpp(user, u);
+    serviceM->AddUser(u);
+}
+
+void IbppService::modifyUser(const UserData& user)
+{
+    IBPP::User u;
+    userDataToIbpp(user, u);
+    serviceM->ModifyUser(u);
+}
+
+void IbppService::removeUser(const std::string& username)
+{
+    serviceM->RemoveUser(username);
+}
+
+bool IbppService::versionIsHigherOrEqualTo(int major, int minor)
+{
+    return serviceM->versionIsHigherOrEqualTo(major, minor);
+}
+
+std::string IbppService::getVersion()
+{
+    std::string version;
+    serviceM->GetVersion(version);
+    return version;
+}
+
 } // namespace fr
+

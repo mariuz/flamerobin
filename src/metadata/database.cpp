@@ -206,16 +206,30 @@ int DatabaseInfo::getSweep() const
     return sweepM;
 }
 
-void DatabaseInfo::load(const IBPP::Database database)
+void DatabaseInfo::load(fr::IDatabasePtr database)
 {
-    database->Info(&odsM, &odsMinorM, &pageSizeM, &pagesM,
-        &buffersM, &sweepM, &forcedWritesM, &reserveM, &readOnlyM);
-    database->TransactionInfo(&oldestTransactionM, &oldestActiveTransactionM,
-        &oldestSnapshotM, &nextTransactionM);
+    fr::DatabaseInfoData data;
+    database->getInfo(&data);
+
+    odsM = data.ods;
+    odsMinorM = data.odsMinor;
+    pageSizeM = data.pageSize;
+    pagesM = data.pages;
+    buffersM = data.buffers;
+    sweepM = data.sweep;
+    forcedWritesM = data.forcedWrites;
+    reserveM = data.reserve;
+    readOnlyM = data.readOnly;
+
+    oldestTransactionM = data.oldestTransaction;
+    oldestActiveTransactionM = data.oldestActiveTransaction;
+    oldestSnapshotM = data.oldestSnapshot;
+    nextTransactionM = data.nextTransaction;
+
     loadTimeMillisM = ::wxGetLocalTimeMillis();
 }
 
-void DatabaseInfo::reloadIfNecessary(const IBPP::Database database)
+void DatabaseInfo::reloadIfNecessary(fr::IDatabasePtr database)
 {
     wxLongLong millisNow = ::wxGetLocalTimeMillis();
     // value may jump or even actually decrease, for instance on timezone
@@ -1047,30 +1061,26 @@ void Database::parseCommitedSql(const SqlStatement& stm)
     }
 }
 
-void Database::create(int pagesize, int dialect)
+void Database::create(int /*pagesize*/, int dialect)
 {
-    wxString extra_params;
-    if (pagesize)
-        extra_params << " PAGE_SIZE " << pagesize;
-
-    wxString charset(getConnectionCharset());
-    if (!charset.empty())
-        extra_params << " DEFAULT CHARACTER SET " << charset;
-
     bool useUserNamePwd = !authenticationModeM.getIgnoreUsernamePassword();
-    IBPP::Database db = IBPP::DatabaseFactory("",
-        wx2std(getConnectionString()),
+
+    databaseDAL_M->setConnectionString(wx2std(getConnectionString()));
+    databaseDAL_M->setCredentials(
         (useUserNamePwd ? wx2std(getUsername()) : ""),
-        (useUserNamePwd ? wx2std(getDecryptedPassword()) : ""),
-        "", wx2std(charset), wx2std(extra_params),
-        wx2std(getClientLibrary()), wx2std(getCryptKeyData())
+        (useUserNamePwd ? wx2std(getDecryptedPassword()) : "")
     );
-    db->Create(dialect);
+    databaseDAL_M->setRole(wx2std(getRole()));
+    databaseDAL_M->setCharset(wx2std(getConnectionCharset()));
+    databaseDAL_M->setClientLibrary(wx2std(getClientLibrary()));
+    databaseDAL_M->setCryptKeyData(wx2std(getCryptKeyData()));
+
+    databaseDAL_M->create(dialect);
 }
 
 void Database::drop()
 {
-    databaseM->Drop();
+    databaseDAL_M->drop();
     setDisconnected();
 }
 
@@ -1080,8 +1090,8 @@ void Database::reconnect()
     delete metadataLoaderM;
     metadataLoaderM = 0;
 
-    databaseM->Disconnect();
-    databaseM->Connect();
+    databaseDAL_M->disconnect();
+    databaseDAL_M->connect();
 }
 
 // the caller of this function should check whether the database object has the
@@ -1101,9 +1111,9 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             indicator->initProgressIndeterminate("Establishing connection...");
         }
 
-        databaseM.clear();
+        // databaseM.clear(); removed
 
-        auto connect = [this, &password]() -> IBPP::Database {
+        auto connect = [this, &password]() {
             bool useUserNamePwd = !authenticationModeM.getIgnoreUsernamePassword();
 
             databaseDAL_M->setConnectionString(wx2std(getConnectionString()));
@@ -1117,24 +1127,17 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             databaseDAL_M->setCryptKeyData(wx2std(getCryptKeyData()));
 
             databaseDAL_M->connect();
-
-            if (databaseDAL_M->getBackendType() == fr::DatabaseBackend::IBPP)
-            {
-                auto ibppDb = std::dynamic_pointer_cast<fr::IbppDatabase>(databaseDAL_M);
-                if (ibppDb)
-                    return ibppDb->getIBPPDatabase();
-            }
-            return IBPP::Database();
         };
 
         if (indicator)
         {
             // We can't just do a std::async here, we need to detach the thread to allow for user canceling
-            std::promise<IBPP::Database> promise;
+            std::promise<void> promise;
             auto future = promise.get_future();
-            std::thread thread([&connect](std::promise<IBPP::Database> p) {
+            std::thread thread([&connect](std::promise<void> p) {
                 try {
-                    p.set_value(connect());
+                    connect();
+                    p.set_value();
                 }
                 catch (...) {
                     try {
@@ -1161,14 +1164,14 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             if (!indicator->isCanceled())
             {
                 // Will throw exception in this thread context if Connect() call failed
-                databaseM = future.get();
+                future.get();
             }
         } else
         {
-            databaseM = connect();
+            connect();
         }
 
-        if (databaseM != 0 && databaseM->Connected())
+        if (databaseDAL_M->isConnected())
         {
             connectedM = true;
 
@@ -1239,8 +1242,8 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
                 checkProgressIndicatorCanceled(indicator);
                 // load database information
                 setPropertiesLoaded(false);
-                dialectM = databaseM->Dialect();
-                databaseInfoM.load(databaseM);
+                dialectM = databaseDAL_M->getDialect();
+                databaseInfoM.load(databaseDAL_M);
                 setPropertiesLoaded(true);
 
                 // load default timezone
@@ -1266,7 +1269,7 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
         try
         {
             disconnect();
-            databaseM.clear();
+            // databaseM.clear(); removed
         }
         catch (...) // we don't care as we already have an error to report
         {
@@ -1450,7 +1453,7 @@ void Database::disconnect()
 {
     if (connectedM)
     {
-        databaseM->Disconnect();
+        databaseDAL_M->disconnect();
         setDisconnected();
     }
 }
@@ -1880,8 +1883,8 @@ wxString Database::getRawPassword() const
 wxString Database::getDecryptedPassword() const
 {
     // if we already have an established connection return that password
-    if (databaseM != 0 && databaseM->Connected())
-        return databaseM->UserPassword();
+    if (databaseDAL_M->isConnected())
+        return wxString::FromUTF8(databaseDAL_M->getUserPassword().c_str());
 
     // temporary connection
     if (connectionCredentialsM)
@@ -1919,7 +1922,14 @@ wxString Database::getCryptKeyData() const
 
 IBPP::Database& Database::getIBPPDatabase()
 {
-    return databaseM;
+    if (databaseDAL_M->getBackendType() == fr::DatabaseBackend::IBPP)
+    {
+        auto ibppDb = std::dynamic_pointer_cast<fr::IbppDatabase>(databaseDAL_M);
+        if (ibppDb)
+            return ibppDb->getIBPPDatabase();
+    }
+    static IBPP::Database empty;
+    return empty;
 }
 
 fr::IDatabasePtr Database::getDALDatabase() const
@@ -2086,13 +2096,13 @@ void Database::setUIDGeneratorValue(unsigned value)
 
 const DatabaseInfo& Database::getInfo()
 {
-    databaseInfoM.reloadIfNecessary(databaseM);
+    databaseInfoM.reloadIfNecessary(databaseDAL_M);
     return databaseInfoM;
 }
 
 void Database::loadInfo()
 {
-    databaseInfoM.load(databaseM);
+    databaseInfoM.load(databaseDAL_M);
     loadDatabaseInfo();
     notifyObservers();
 }
@@ -2231,10 +2241,10 @@ wxMBConv* Database::getCharsetConverter() const
 
 void Database::getConnectedUsers(wxArrayString& users) const
 {
-    if (databaseM != 0 && databaseM->Connected())
+    if (databaseDAL_M->isConnected())
     {
         std::vector<std::string> userNames;
-        databaseM->Users(userNames);
+        databaseDAL_M->getConnectedUsers(userNames);
 
         // replace multiple occurences of same user name by "username (N)"
         std::map<std::string, size_t> counts;

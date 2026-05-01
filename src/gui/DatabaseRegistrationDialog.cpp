@@ -466,8 +466,8 @@ int DatabaseRegistrationDialog::getSuggestedPageSizeByServerVersion() const
 
     try
     {
-        IBPP::Service service;
-        if (!server->getService(service, nullptr, false))
+        fr::IServicePtr service = server->getDALService(nullptr, false);
+        if (!service)
             return 0;
 
         return service->versionIsHigherOrEqualTo(3, 0) ? 8192 : 4096;
