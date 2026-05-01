@@ -1244,18 +1244,19 @@ void TimeColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     if (withTimezoneM)
     {
         std::string tzStr = statement->getTimeTz(col - 1);
-        int h, m, s, t;
-        char tzBuf[64];
-        if (sscanf(tzStr.c_str(), "%d:%d:%d.%d %63s", &h, &m, &s, &t, tzBuf) >= 4)
+        int h = 0, m = 0, s = 0, t = 0;
+        char tzBuf[64] = {0};
+        int res = sscanf(tzStr.c_str(), "%d:%d:%d.%d %63s", &h, &m, &s, &t, tzBuf);
+        if (res >= 4)
         {
             IBPP::Time value;
-            value.SetTime(IBPP::Time::tmTimezone, h, m, s, t, 0, tzBuf);
+            value.SetTime(res > 4 ? IBPP::Time::tmTimezone : IBPP::Time::tmNone, h, m, s, t, 0, res > 4 ? tzBuf : nullptr);
             writeToBuffer(buffer, value);
         }
     }
     else
     {
-        int h, m, s, t;
+        int h = 0, m = 0, s = 0, t = 0;
         if (sscanf(statement->getTime(col - 1).c_str(), "%d:%d:%d.%d", &h, &m, &s, &t) >= 3)
         {
             IBPP::Time value;
@@ -1427,19 +1428,20 @@ void TimestampColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     if (withTimezoneM)
     {
         std::string tzStr = statement->getTimestampTz(col - 1);
-        int ye, mo, d, h, mi, s, t;
-        char tzBuf[64];
-        if (sscanf(tzStr.c_str(), "%d-%d-%d %d:%d:%d.%d %63s", &ye, &mo, &d, &h, &mi, &s, &t, tzBuf) >= 7)
+        int ye = 0, mo = 0, d = 0, h = 0, mi = 0, s = 0, t = 0;
+        char tzBuf[64] = {0};
+        int res = sscanf(tzStr.c_str(), "%d-%d-%d %d:%d:%d.%d %63s", &ye, &mo, &d, &h, &mi, &s, &t, tzBuf);
+        if (res >= 7)
         {
             IBPP::Timestamp value;
             value.SetDate(ye, mo, d);
-            value.SetTime(IBPP::Time::tmTimezone, h, mi, s, t, 0, tzBuf);
+            value.SetTime(res > 7 ? IBPP::Time::tmTimezone : IBPP::Time::tmNone, h, mi, s, t, 0, res > 7 ? tzBuf : nullptr);
             writeToBuffer(buffer, value);
         }
     }
     else
     {
-        int ye, mo, d, h, mi, s, t;
+        int ye = 0, mo = 0, d = 0, h = 0, mi = 0, s = 0, t = 0;
         if (sscanf(statement->getTimestamp(col - 1).c_str(), "%d-%d-%d %d:%d:%d.%d", &ye, &mo, &d, &h, &mi, &s, &t) >= 6)
         {
             IBPP::Timestamp value;
