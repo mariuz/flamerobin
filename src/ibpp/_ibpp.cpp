@@ -122,25 +122,41 @@ namespace
 #ifdef IBPP_WINDOWS
 HMODULE IBPP_LoadLibrary(std::string library) {
     HMODULE handle = 0;
+
+    // When loading from a full path, temporarily add the DLL's own directory
+    // to the search path so its dependencies (e.g. ICU DLLs for fbclient)
+    // can be found even if that directory is not in PATH.
+    std::string dllDir;
+    size_t lastSlash = library.rfind('\\');
+    if (lastSlash != std::string::npos) {
+        dllDir = library.substr(0, lastSlash);
+        SetDllDirectoryA(dllDir.c_str());
+    }
+
     handle = LoadLibrary(library.c_str());
+
+    if (!dllDir.empty())
+        SetDllDirectoryA(NULL);  // Restore default DLL search directory
+
     if (handle == 0) {
         DWORD errorMessageID = ::GetLastError();
-        if (errorMessageID != 0) {
-            if ((GetFileAttributesA(library.c_str()) != INVALID_FILE_ATTRIBUTES) || (errorMessageID != 126)) {
-
+        // ERROR_MOD_NOT_FOUND (126) means the DLL or one of its dependencies
+        // could not be found.  Allow the caller to fall through to the next
+        // search location rather than aborting here.
+        if (errorMessageID != 0 && errorMessageID != ERROR_MOD_NOT_FOUND) {
+            if (GetFileAttributesA(library.c_str()) != INVALID_FILE_ATTRIBUTES) {
                 LPSTR messageBuffer = nullptr;
-
-                    size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                        NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
-
-                    std::string message(messageBuffer, size);
-                    throw LogicExceptionImpl(library, messageBuffer);
-
+                std::string message;
+                if (FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                        NULL, errorMessageID, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL) > 0
+                    && messageBuffer != nullptr)
+                {
+                    message = messageBuffer;
                     LocalFree(messageBuffer);
+                }
+                throw LogicExceptionImpl(library, message.c_str());
             }
-
         }
-
     }
     return handle;
 };
@@ -249,6 +265,12 @@ FBCLIENT* FBCLIENT::Call()
 					&& keytype == REG_SZ)
 				{
                     int len = lstrlen(fbdll);
+                    // Ensure the registry path ends with a backslash before
+                    // appending the DLL name; some Firebird versions omit it.
+                    if (len > 0 && fbdll[len - 1] != '\\') {
+                        fbdll[len++] = '\\';
+                        fbdll[len]   = '\0';
+                    }
 
 #if !defined(_WIN64)
                     // try 32 bit client library of 64 bit server
@@ -284,7 +306,9 @@ FBCLIENT* FBCLIENT::Call()
 
 		if (mHandle == 0)
 			throw LogicExceptionImpl("GDS::Call()",
-				_("Can't find or load FBEMBED.DLL FBCLIENT.DLL or GDS32.DLL"));
+				_("Can't find or load fbembed.dll, fbclient.dll or gds32.dll.\n"
+				  "Please install Firebird (https://firebirdsql.org) or place "
+				  "fbclient.dll in the application directory."));
 		
 #endif
 
