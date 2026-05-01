@@ -729,6 +729,23 @@ add_executable(ibpp_row_metadata_test
 target_link_libraries(ibpp_row_metadata_test IBPP ${FR_LIBS})
 add_test(NAME ibpp_row_metadata_test COMMAND ibpp_row_metadata_test)
 
+add_executable(dal_types_test
+    ${SOURCEDIR}/engine/db/DalTypesTest.cpp
+    ${SOURCEDIR}/engine/db/DatabaseFactory.cpp
+    ${SOURCEDIR}/engine/db/ibpp/IbppDatabase.cpp
+    ${SOURCEDIR}/engine/db/ibpp/IbppTransaction.cpp
+    ${SOURCEDIR}/engine/db/ibpp/IbppStatement.cpp
+    ${SOURCEDIR}/engine/db/ibpp/IbppService.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppDatabase.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppTransaction.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppStatement.cpp
+    ${SOURCEDIR}/core/FRError.cpp
+    ${SOURCEDIR}/core/FRInt128.cpp
+    ${SOURCEDIR}/core/FRDecimal.cpp
+)
+target_link_libraries(dal_types_test IBPP fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
+add_test(NAME dal_types_test COMMAND dal_types_test)
+
 # Regression test for issue #78 (EXECUTE BLOCK / Selectable SP emitting
 # internal RDB$xxx domain names instead of actual datatypes).
 # Tests the system-domain classification predicate (name prefix check) that

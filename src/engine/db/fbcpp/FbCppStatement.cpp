@@ -231,7 +231,7 @@ int FbCppStatement::getColumnScale(int index)
     const auto& descriptors = statementM->getOutputDescriptors();
     if ((unsigned)index >= descriptors.size())
         return 0;
-    return descriptors[index].scale;
+    return -descriptors[index].scale;
 }
 
 int FbCppStatement::getColumnSize(int index)
