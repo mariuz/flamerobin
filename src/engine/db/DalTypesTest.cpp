@@ -145,6 +145,36 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
         ok = check(st->getTime(1).find("12:34:56") != std::string::npos, "getTime content") && ok;
         ok = check(st->getTimestamp(2).find("2023-05-20 12:34:56") != std::string::npos, "getTimestamp content") && ok;
 
+        // Check for Timezone support
+        std::cout << "  Checking for Timezone support...\n";
+        try
+        {
+            st->prepare("SELECT CAST('12:34:56.7890 UTC' AS TIME WITH TIME ZONE), "
+                        "CAST('2023-05-20 12:34:56.7890 UTC' AS TIMESTAMP WITH TIME ZONE) FROM RDB$DATABASE");
+            st->execute();
+            st->fetch();
+            ok = check(st->getColumnType(0) == fr::ColumnType::TimeTz, "ColumnType::TimeTz identification") && ok;
+            ok = check(st->getColumnType(1) == fr::ColumnType::TimestampTz, "ColumnType::TimestampTz identification") && ok;
+
+            ok = check(st->getTimeTz(0).find("12:34:56") != std::string::npos, "getTimeTz content") && ok;
+            ok = check(st->getTimeTz(0).find("UTC") != std::string::npos, "getTimeTz timezone content") && ok;
+            ok = check(st->getTimestampTz(1).find("2023-05-20 12:34:56") != std::string::npos, "getTimestampTz content") && ok;
+            ok = check(st->getTimestampTz(1).find("UTC") != std::string::npos, "getTimestampTz timezone content") && ok;
+        }
+        catch (const std::exception& e)
+        {
+            std::string msg = e.what();
+            if (msg.find("Token unknown") != std::string::npos || msg.find("Data type unknown") != std::string::npos)
+            {
+                std::cout << "  Skipping Timezone support tests (unsupported by server/backend).\n";
+            }
+            else
+            {
+                std::cerr << "  ERROR: Unexpected exception during Timezone test: " << e.what() << "\n";
+                ok = false;
+            }
+        }
+
         // Check if Firebird 4.0+ by trying to CAST to DECFLOAT
         std::cout << "  Checking for Firebird 4.0+ types support...\n";
         try 

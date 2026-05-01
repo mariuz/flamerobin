@@ -202,10 +202,15 @@ std::string IbppStatement::getTimestamp(int index)
     return wx2std(wxString::Format("%04d-%02d-%02d %02d:%02d:%02d.%04d", y, mo, d, h, mi, s, t));
 }
 
+} // namespace fr
+
 namespace ibpp_internals
 {
     bool getTimezoneNameById(int tzId, std::string& name);
 }
+
+namespace fr
+{
 
 std::string IbppStatement::getTimeTz(int index)
 {
