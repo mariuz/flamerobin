@@ -63,7 +63,7 @@ public:
 
     virtual DatabaseBackend getBackendType() const override { return DatabaseBackend::IBPP; }
 
-    IBPP::Database& getIBPPDatabase() { return databaseM; }
+    IBPP::Database getIBPPDatabase() { return databaseM; }
 
 private:
     IBPP::Database databaseM;
