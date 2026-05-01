@@ -1241,12 +1241,27 @@ void TimeColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     fr::IStatementPtr statement, wxMBConv*, Database*)
 {
     wxASSERT(buffer);
-    int h, m, s, t;
-    if (sscanf(statement->getTime(col - 1).c_str(), "%d:%d:%d.%d", &h, &m, &s, &t) >= 3)
+    if (withTimezoneM)
     {
-        IBPP::Time value;
-        value.SetTime(IBPP::Time::tmNone, h, m, s, t, 0, nullptr);
-        writeToBuffer(buffer, value);
+        std::string tzStr = statement->getTimeTz(col - 1);
+        int h, m, s, t;
+        char tzBuf[64];
+        if (sscanf(tzStr.c_str(), "%d:%d:%d.%d %63s", &h, &m, &s, &t, tzBuf) >= 4)
+        {
+            IBPP::Time value;
+            value.SetTime(IBPP::Time::tmTimezone, h, m, s, t, 0, tzBuf);
+            writeToBuffer(buffer, value);
+        }
+    }
+    else
+    {
+        int h, m, s, t;
+        if (sscanf(statement->getTime(col - 1).c_str(), "%d:%d:%d.%d", &h, &m, &s, &t) >= 3)
+        {
+            IBPP::Time value;
+            value.SetTime(IBPP::Time::tmNone, h, m, s, t, 0, nullptr);
+            writeToBuffer(buffer, value);
+        }
     }
 }
 
@@ -1409,13 +1424,29 @@ void TimestampColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     fr::IStatementPtr statement, wxMBConv*, Database*)
 {
     wxASSERT(buffer);
-    int ye, mo, d, h, mi, s, t;
-    if (sscanf(statement->getTimestamp(col - 1).c_str(), "%d-%d-%d %d:%d:%d.%d", &ye, &mo, &d, &h, &mi, &s, &t) >= 6)
+    if (withTimezoneM)
     {
-        IBPP::Timestamp value;
-        value.SetDate(ye, mo, d);
-        value.SetTime(IBPP::Time::tmNone, h, mi, s, t, 0, nullptr);
-        writeToBuffer(buffer, value);
+        std::string tzStr = statement->getTimestampTz(col - 1);
+        int ye, mo, d, h, mi, s, t;
+        char tzBuf[64];
+        if (sscanf(tzStr.c_str(), "%d-%d-%d %d:%d:%d.%d %63s", &ye, &mo, &d, &h, &mi, &s, &t, tzBuf) >= 7)
+        {
+            IBPP::Timestamp value;
+            value.SetDate(ye, mo, d);
+            value.SetTime(IBPP::Time::tmTimezone, h, mi, s, t, 0, tzBuf);
+            writeToBuffer(buffer, value);
+        }
+    }
+    else
+    {
+        int ye, mo, d, h, mi, s, t;
+        if (sscanf(statement->getTimestamp(col - 1).c_str(), "%d-%d-%d %d:%d:%d.%d", &ye, &mo, &d, &h, &mi, &s, &t) >= 6)
+        {
+            IBPP::Timestamp value;
+            value.SetDate(ye, mo, d);
+            value.SetTime(IBPP::Time::tmNone, h, mi, s, t, 0, nullptr);
+            writeToBuffer(buffer, value);
+        }
     }
 }
 
@@ -2560,8 +2591,14 @@ bool DataGridRows::initialize(fr::IStatementPtr statement)
                 case fr::ColumnType::Time:
                     columnDef = new TimeColumnDef(colName, bufferSizeM, readOnly, nullable, false);
                     break;
+                case fr::ColumnType::TimeTz:
+                    columnDef = new TimeColumnDef(colName, bufferSizeM, readOnly, nullable, true);
+                    break;
                 case fr::ColumnType::Timestamp:
                     columnDef = new TimestampColumnDef(colName, bufferSizeM, readOnly, nullable, false);
+                    break;
+                case fr::ColumnType::TimestampTz:
+                    columnDef = new TimestampColumnDef(colName, bufferSizeM, readOnly, nullable, true);
                     break;
 
                 case fr::ColumnType::Integer:

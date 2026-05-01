@@ -169,6 +169,20 @@ std::string FbCppStatement::getTimestamp(int index)
     return statementM->getString((unsigned)index).value_or("");
 }
 
+std::string FbCppStatement::getTimeTz(int index)
+{
+    if (!statementM)
+        throw std::runtime_error("No statement available");
+    return statementM->getString((unsigned)index).value_or("");
+}
+
+std::string FbCppStatement::getTimestampTz(int index)
+{
+    if (!statementM)
+        throw std::runtime_error("No statement available");
+    return statementM->getString((unsigned)index).value_or("");
+}
+
 int FbCppStatement::getColumnCount()
 {
     if (!statementM)
@@ -205,6 +219,8 @@ ColumnType FbCppStatement::getColumnType(int index)
         case fbcpp::DescriptorAdjustedType::TIME: return ColumnType::Time;
         case fbcpp::DescriptorAdjustedType::DATE: return ColumnType::Date;
         case fbcpp::DescriptorAdjustedType::TIMESTAMP: return ColumnType::Timestamp;
+        case fbcpp::DescriptorAdjustedType::TIME_TZ: return ColumnType::TimeTz;
+        case fbcpp::DescriptorAdjustedType::TIMESTAMP_TZ: return ColumnType::TimestampTz;
         case fbcpp::DescriptorAdjustedType::BLOB: return ColumnType::Blob;
         case fbcpp::DescriptorAdjustedType::BOOLEAN: return ColumnType::Boolean;
         case fbcpp::DescriptorAdjustedType::INT128: return ColumnType::Int128;

@@ -202,6 +202,40 @@ std::string IbppStatement::getTimestamp(int index)
     return wx2std(wxString::Format("%04d-%02d-%02d %02d:%02d:%02d.%04d", y, mo, d, h, mi, s, t));
 }
 
+namespace ibpp_internals
+{
+    bool getTimezoneNameById(int tzId, std::string& name);
+}
+
+std::string IbppStatement::getTimeTz(int index)
+{
+    IBPP::Time t;
+    statementM->Get(index + 1, t);
+    int h, m, s, t10;
+    t.GetTime(h, m, s, t10);
+
+    std::string tzName;
+    if (t.GetTimezone() != IBPP::Time::TZ_NONE)
+        ibpp_internals::getTimezoneNameById(t.GetTimezone(), tzName);
+
+    return wx2std(wxString::Format("%02d:%02d:%02d.%04d %s", h, m, s, t10, tzName.c_str()));
+}
+
+std::string IbppStatement::getTimestampTz(int index)
+{
+    IBPP::Timestamp ts;
+    statementM->Get(index + 1, ts);
+    int y, mo, d, h, mi, s, t;
+    ts.GetDate(y, mo, d);
+    ts.GetTime(h, mi, s, t);
+
+    std::string tzName;
+    if (ts.GetTimezone() != IBPP::Time::TZ_NONE)
+        ibpp_internals::getTimezoneNameById(ts.GetTimezone(), tzName);
+
+    return wx2std(wxString::Format("%04d-%02d-%02d %02d:%02d:%02d.%04d %s", y, mo, d, h, mi, s, t, tzName.c_str()));
+}
+
 int IbppStatement::getColumnCount()
 {
     return statementM->Columns();
@@ -226,6 +260,8 @@ ColumnType IbppStatement::getColumnType(int index)
         case IBPP::sdDate: return ColumnType::Date;
         case IBPP::sdTime: return ColumnType::Time;
         case IBPP::sdTimestamp: return ColumnType::Timestamp;
+        case IBPP::sdTimeTz: return ColumnType::TimeTz;
+        case IBPP::sdTimestampTz: return ColumnType::TimestampTz;
         case IBPP::sdBlob: return ColumnType::Blob;
         case IBPP::sdBoolean: return ColumnType::Boolean;
         case IBPP::sdInt128: return ColumnType::Int128;

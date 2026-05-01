@@ -48,6 +48,8 @@ public:
     virtual ITransactionPtr createTransaction() = 0;
     virtual IStatementPtr createStatement(ITransactionPtr tr) = 0;
 
+    virtual std::string getTimezoneName(int timezoneId) = 0;
+
     virtual DatabaseBackend getBackendType() const = 0;
 };
 
