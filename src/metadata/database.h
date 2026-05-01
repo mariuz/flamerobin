@@ -346,7 +346,7 @@ public:
     DatabaseAuthenticationMode& getAuthenticationMode();
     wxString getRole() const;
     wxString getCryptKeyData() const;
-    IBPP::Database& getIBPPDatabase();
+    IBPP::Database getIBPPDatabase();
     fr::IDatabasePtr getDALDatabase() const override;
     void setIsVolatile(const bool isVolatile);
     void setPath(const wxString& value);

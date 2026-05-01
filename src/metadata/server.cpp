@@ -166,15 +166,7 @@ UserPtrs Server::getUsers(ProgressIndicator* progressind)
     svc->getUsers(usr);
     for (const auto& u : usr)
     {
-        IBPP::User ibppUser;
-        ibppUser.username = u.username;
-        ibppUser.password = u.password;
-        ibppUser.firstname = u.firstName;
-        ibppUser.middlename = u.middleName;
-        ibppUser.lastname = u.lastName;
-        ibppUser.userid = u.userId;
-        ibppUser.groupid = u.groupId;
-        UserPtr uptr(new User(shared_from_this(), ibppUser));
+        UserPtr uptr(new User(shared_from_this(), u));
         usersM.push_back(uptr);
     }
 

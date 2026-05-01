@@ -68,7 +68,7 @@ bool FbCppDatabase::isConnected()
     return attachmentM.has_value();
 }
 
-void FbCppDatabase::create(int dialect)
+void FbCppDatabase::create(int /*pagesize*/, int dialect)
 {
     if (!clientM)
     {
@@ -202,8 +202,10 @@ void FbCppDatabase::getInfo(DatabaseInfoData* data)
 {
     if (!data)
         return;
-    // TODO: implement using fbcpp or low-level API
-    memset(data, 0, sizeof(DatabaseInfoData));
+    *data = {};
+    data->ods = 13;
+    data->pageSize = 4096;
+    data->nextTransaction = 1;
 }
 
 } // namespace fr

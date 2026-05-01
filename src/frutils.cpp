@@ -34,6 +34,7 @@
 #include <wx/tokenzr.h>
 
 #include "core/StringUtils.h"
+#include "engine/db/ibpp/IbppService.h"
 #include "frutils.h"
 #include "gui/ProgressDialog.h"
 #include "gui/UsernamePasswordDialog.h"
