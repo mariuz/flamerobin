@@ -41,7 +41,7 @@ public:
     virtual void connect() override;
     virtual void disconnect() override;
     virtual bool isConnected() override;
-    virtual void create(int dialect) override;
+    virtual void create(int pagesize, int dialect) override;
     virtual void drop() override;
     virtual int getDialect() override;
     virtual std::string getUserPassword() override;

@@ -51,9 +51,18 @@ bool IbppDatabase::isConnected()
     return databaseM != 0 && databaseM->Connected();
 }
 
-void IbppDatabase::create(int dialect)
+void IbppDatabase::create(int pagesize, int dialect)
 {
-    databaseM = IBPP::DatabaseFactory(clientLibM, connStrM, userM, passwordM, roleM, charsetM, cryptKeyDataM);
+    std::string extra;
+    if (pagesize > 0)
+        extra = "PAGE_SIZE " + std::to_string(pagesize);
+    if (!charsetM.empty())
+    {
+        if (!extra.empty()) extra += " ";
+        extra += "DEFAULT CHARACTER SET " + charsetM;
+    }
+
+    databaseM = IBPP::DatabaseFactory(clientLibM, connStrM, userM, passwordM, roleM, charsetM, extra, cryptKeyDataM);
     databaseM->Create(dialect);
 }
 

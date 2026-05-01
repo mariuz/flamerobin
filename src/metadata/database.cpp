@@ -1061,7 +1061,7 @@ void Database::parseCommitedSql(const SqlStatement& stm)
     }
 }
 
-void Database::create(int /*pagesize*/, int dialect)
+void Database::create(int pagesize, int dialect)
 {
     bool useUserNamePwd = !authenticationModeM.getIgnoreUsernamePassword();
 
@@ -1075,7 +1075,7 @@ void Database::create(int /*pagesize*/, int dialect)
     databaseDAL_M->setClientLibrary(wx2std(getClientLibrary()));
     databaseDAL_M->setCryptKeyData(wx2std(getCryptKeyData()));
 
-    databaseDAL_M->create(dialect);
+    databaseDAL_M->create(pagesize, dialect);
 }
 
 void Database::drop()
@@ -1920,7 +1920,7 @@ wxString Database::getCryptKeyData() const
         return credentialsM.getCryptKeyData();
 }
 
-IBPP::Database& Database::getIBPPDatabase()
+IBPP::Database Database::getIBPPDatabase()
 {
     if (databaseDAL_M->getBackendType() == fr::DatabaseBackend::IBPP)
     {
@@ -1928,8 +1928,7 @@ IBPP::Database& Database::getIBPPDatabase()
         if (ibppDb)
             return ibppDb->getIBPPDatabase();
     }
-    static IBPP::Database empty;
-    return empty;
+    return IBPP::Database();
 }
 
 fr::IDatabasePtr Database::getDALDatabase() const

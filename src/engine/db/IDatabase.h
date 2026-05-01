@@ -37,7 +37,7 @@ public:
     virtual void connect() = 0;
     virtual void disconnect() = 0;
     virtual bool isConnected() = 0;
-    virtual void create(int dialect) = 0;
+    virtual void create(int pagesize, int dialect) = 0;
     virtual void drop() = 0;
     virtual int getDialect() = 0;
     virtual std::string getUserPassword() = 0;
