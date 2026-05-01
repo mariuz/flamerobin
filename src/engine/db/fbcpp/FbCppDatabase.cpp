@@ -127,10 +127,9 @@ std::string FbCppDatabase::getTimezoneName(int timezoneId)
         char tzBuf[64] = {}; // FB_MAX_TIME_ZONE_NAME_LENGTH is 64
         unsigned dummyHour = 0, dummyMinute = 0, dummySecond = 0, dummyFractions = 0;
         
-        // We need a Status object. fb-cpp usually wraps it.
-        // For simplicity and matching IBPP backend style, we can try to use a local status.
-        Firebird::ThrowStatusWrapper status(clientM->getMaster()->getStatus());
-        clientM->getUtil()->decodeTimeTz(&status, &iscTmTz,
+        auto status = clientM->newStatus();
+        Firebird::ThrowStatusWrapper statusWrapper(status.get());
+        clientM->getUtil()->decodeTimeTz(&statusWrapper, &iscTmTz,
             &dummyHour, &dummyMinute, &dummySecond, &dummyFractions,
             sizeof(tzBuf), tzBuf);
         

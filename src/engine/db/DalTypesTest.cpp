@@ -214,6 +214,8 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
         }
 
         tr->commit();
+        st.reset();
+        tr.reset();
         db->disconnect();
     }
     catch (const std::exception& e)
