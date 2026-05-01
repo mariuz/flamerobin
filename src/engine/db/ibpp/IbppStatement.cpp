@@ -174,6 +174,34 @@ bool IbppStatement::getBool(int index)
     return value;
 }
 
+std::string IbppStatement::getDate(int index)
+{
+    IBPP::Date value;
+    statementM->Get(index + 1, value);
+    int y, m, d;
+    value.GetDate(y, m, d);
+    return wx2std(wxString::Format("%04d-%02d-%02d", y, m, d));
+}
+
+std::string IbppStatement::getTime(int index)
+{
+    IBPP::Time value;
+    statementM->Get(index + 1, value);
+    int h, m, s, t;
+    value.GetTime(h, m, s, t);
+    return wx2std(wxString::Format("%02d:%02d:%02d.%04d", h, m, s, t));
+}
+
+std::string IbppStatement::getTimestamp(int index)
+{
+    IBPP::Timestamp value;
+    statementM->Get(index + 1, value);
+    int y, mo, d, h, mi, s, t;
+    value.GetDate(y, mo, d);
+    value.GetTime(h, mi, s, t);
+    return wx2std(wxString::Format("%04d-%02d-%02d %02d:%02d:%02d.%04d", y, mo, d, h, mi, s, t));
+}
+
 int IbppStatement::getColumnCount()
 {
     return statementM->Columns();
@@ -205,6 +233,31 @@ ColumnType IbppStatement::getColumnType(int index)
         case IBPP::sdDec34: return ColumnType::Decfloat34;
         default: return ColumnType::Unknown;
     }
+}
+
+int IbppStatement::getColumnSubtype(int index)
+{
+    return statementM->ColumnSubtype(index + 1);
+}
+
+int IbppStatement::getColumnScale(int index)
+{
+    return statementM->ColumnScale(index + 1);
+}
+
+int IbppStatement::getColumnSize(int index)
+{
+    return statementM->ColumnSize(index + 1);
+}
+
+std::string IbppStatement::getColumnAlias(int index)
+{
+    return statementM->ColumnAlias(index + 1);
+}
+
+std::string IbppStatement::getColumnTable(int index)
+{
+    return statementM->ColumnTable(index + 1);
 }
 
 } // namespace fr

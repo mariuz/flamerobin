@@ -24,6 +24,7 @@
 #ifndef FR_FRINT128_H
 #define FR_FRINT128_H
 
+#include <wx/wx.h>
 #include <ibpp.h>
 
 // Base class for Flamerobin int128 type.

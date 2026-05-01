@@ -65,13 +65,15 @@ private:
     bool nullFlagM;
 
     Database *databaseM;
-    IBPP::Statement& statementM;
+    IBPP::Statement statementM;
+    fr::IStatementPtr statementDALM;
     wxMBConv* charsetConverterM;
 
     int getStatementColCount();
     bool isValidCellPos(int row, int col);
 public:
     DataGridTable(IBPP::Statement& s, Database* db);
+    DataGridTable(fr::IStatementPtr s, Database* db);
     ~DataGridTable();
 
     bool canFetchMoreRows();

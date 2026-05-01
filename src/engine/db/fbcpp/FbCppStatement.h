@@ -59,9 +59,18 @@ public:
     virtual double getDouble(int index) override;
     virtual bool getBool(int index) override;
 
+    virtual std::string getDate(int index) override;
+    virtual std::string getTime(int index) override;
+    virtual std::string getTimestamp(int index) override;
+
     virtual int getColumnCount() override;
     virtual std::string getColumnName(int index) override;
     virtual ColumnType getColumnType(int index) override;
+    virtual int getColumnSubtype(int index) override;
+    virtual int getColumnScale(int index) override;
+    virtual int getColumnSize(int index) override;
+    virtual std::string getColumnAlias(int index) override;
+    virtual std::string getColumnTable(int index) override;
 
 private:
     fbcpp::Attachment& attachmentM;

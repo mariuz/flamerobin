@@ -29,6 +29,7 @@
 #include <list>
 
 #include <ibpp.h>
+#include "engine/db/IStatement.h"
 
 #include "metadata/constraints.h"
 #include "config/Config.h"
@@ -112,6 +113,8 @@ public:
     bool isNullable();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter, Database* db) = 0;
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
+        fr::IStatementPtr statement, wxMBConv* converter, Database* db) = 0;
 };
 
 struct DataGridFieldInfo
@@ -139,6 +142,7 @@ private:
     Database* databaseM;
     const bool readOnlyM;
     IBPP::Statement statementM;
+    fr::IStatementPtr statementDALM;
     std::vector<ResultsetColumnDef*> columnDefsM;
     std::vector<DataGridRowBuffer*> buffersM;
     std::map<wxString, UniqueConstraint *> statementTablesM;
@@ -155,11 +159,13 @@ public:
     ~DataGridRows();
 
     void addRow(const IBPP::Statement& statement);
+    void addRow(fr::IStatementPtr statement);
     void clear();
     unsigned getRowCount();
     unsigned getRowFieldCount();
     wxString getRowFieldName(unsigned col);
     bool initialize(const IBPP::Statement& statement);
+    bool initialize(fr::IStatementPtr statement);
 
     bool isColumnNullable(unsigned col);
     bool isColumnNumeric(unsigned col);

@@ -148,6 +148,27 @@ bool FbCppStatement::getBool(int index)
     return statementM->getBool((unsigned)index).value_or(false);
 }
 
+std::string FbCppStatement::getDate(int index)
+{
+    if (!statementM)
+        throw std::runtime_error("No statement available");
+    return statementM->getString((unsigned)index).value_or("");
+}
+
+std::string FbCppStatement::getTime(int index)
+{
+    if (!statementM)
+        throw std::runtime_error("No statement available");
+    return statementM->getString((unsigned)index).value_or("");
+}
+
+std::string FbCppStatement::getTimestamp(int index)
+{
+    if (!statementM)
+        throw std::runtime_error("No statement available");
+    return statementM->getString((unsigned)index).value_or("");
+}
+
 int FbCppStatement::getColumnCount()
 {
     if (!statementM)
@@ -191,6 +212,56 @@ ColumnType FbCppStatement::getColumnType(int index)
         case fbcpp::DescriptorAdjustedType::DECFLOAT34: return ColumnType::Decfloat34;
         default: return ColumnType::Unknown;
     }
+}
+
+int FbCppStatement::getColumnSubtype(int index)
+{
+    if (!statementM)
+        return 0;
+    const auto& descriptors = statementM->getOutputDescriptors();
+    if ((unsigned)index >= descriptors.size())
+        return 0;
+    return descriptors[index].subType;
+}
+
+int FbCppStatement::getColumnScale(int index)
+{
+    if (!statementM)
+        return 0;
+    const auto& descriptors = statementM->getOutputDescriptors();
+    if ((unsigned)index >= descriptors.size())
+        return 0;
+    return descriptors[index].scale;
+}
+
+int FbCppStatement::getColumnSize(int index)
+{
+    if (!statementM)
+        return 0;
+    const auto& descriptors = statementM->getOutputDescriptors();
+    if ((unsigned)index >= descriptors.size())
+        return 0;
+    return (int)descriptors[index].length;
+}
+
+std::string FbCppStatement::getColumnAlias(int index)
+{
+    if (!statementM)
+        return "";
+    const auto& descriptors = statementM->getOutputDescriptors();
+    if ((unsigned)index >= descriptors.size())
+        return "";
+    return descriptors[index].alias;
+}
+
+std::string FbCppStatement::getColumnTable(int index)
+{
+    if (!statementM)
+        return "";
+    const auto& descriptors = statementM->getOutputDescriptors();
+    if ((unsigned)index >= descriptors.size())
+        return "";
+    return descriptors[index].relation;
 }
 
 } // namespace fr

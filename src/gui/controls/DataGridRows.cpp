@@ -41,6 +41,7 @@
 
 #include "core/FRError.h"
 #include "core/FRInt128.h"
+#include "core/FRDecimal.h"
 #include "core/Observer.h"
 #include "core/ProgressIndicator.h"
 #include "core/StringUtils.h"
@@ -528,6 +529,8 @@ public:
     virtual unsigned getBufferSize();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv*, Database* db);
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
+        fr::IStatementPtr statement, wxMBConv*, Database* db) override;
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source);
 };
@@ -552,6 +555,11 @@ void DummyColumnDef::setValue(DataGridRowBuffer* /*buffer*/, unsigned /*col*/,
 {
 }
 
+void DummyColumnDef::setValue(DataGridRowBuffer* /*buffer*/, unsigned /*col*/,
+    fr::IStatementPtr /*statement*/, wxMBConv* /*converter*/, Database* /*db*/)
+{
+}
+
 void DummyColumnDef::setFromString(DataGridRowBuffer* /* buffer */,
          const wxString& /* source */)
 {
@@ -571,6 +579,8 @@ public:
     virtual bool isNumeric();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter, Database* db);
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
+        fr::IStatementPtr statement, wxMBConv* converter, Database* db) override;
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source);
 };
@@ -662,6 +672,13 @@ void IntegerColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     buffer->setValue(offsetM, value);
 }
 
+void IntegerColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    fr::IStatementPtr statement, wxMBConv*, Database*)
+{
+    wxASSERT(buffer);
+    buffer->setValue(offsetM, statement->getInt32(col - 1));
+}
+
 // Int64ColumnDef class
 class Int64ColumnDef : public ResultsetColumnDef
 {
@@ -676,6 +693,8 @@ public:
     virtual bool isNumeric();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter, Database* db);
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
+        fr::IStatementPtr statement, wxMBConv* converter, Database* db) override;
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source);
 };
@@ -775,6 +794,13 @@ void Int64ColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     buffer->setValue(offsetM, value);
 }
 
+void Int64ColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    fr::IStatementPtr statement, wxMBConv*, Database*)
+{
+    wxASSERT(buffer);
+    buffer->setValue(offsetM, statement->getInt64(col - 1));
+}
+
 // Int128ColumnDef class
 class Int128ColumnDef : public ResultsetColumnDef
 {
@@ -789,6 +815,8 @@ public:
     virtual bool isNumeric();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter, Database* db);
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
+        fr::IStatementPtr statement, wxMBConv* converter, Database* db) override;
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source);
 };
@@ -881,6 +909,16 @@ void Int128ColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     buffer->setValue(offsetM, *reinterpret_cast<int128_t*>(&value));
 }
 
+void Int128ColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    fr::IStatementPtr statement, wxMBConv*, Database*)
+{
+    wxASSERT(buffer);
+    int128_t value;
+    wxString errMsg;
+    StringToInt128(wxString::FromUTF8(statement->getString(col - 1)), &value, errMsg);
+    buffer->setValue(offsetM, value);
+}
+
 // DBKeyColumnDef class
 class DBKeyColumnDef : public ResultsetColumnDef
 {
@@ -894,6 +932,8 @@ public:
     virtual bool isNumeric();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter, Database* db);
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
+        fr::IStatementPtr statement, wxMBConv* converter, Database* db) override;
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source);
     void getDBKey(IBPP::DBKey& dbkey, DataGridRowBuffer* buffer);
@@ -946,6 +986,13 @@ void DBKeyColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     buffer->setValue(offsetM, value);
 }
 
+void DBKeyColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    fr::IStatementPtr statement, wxMBConv*, Database*)
+{
+    wxASSERT(buffer);
+    // TODO: Implement DB_KEY support for DAL
+}
+
 void DBKeyColumnDef::getDBKey(IBPP::DBKey& dbkey, DataGridRowBuffer* buffer)
 {
     wxASSERT(buffer);
@@ -965,6 +1012,8 @@ public:
     virtual unsigned getBufferSize();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter, Database* db);
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
+        fr::IStatementPtr statement, wxMBConv* converter, Database* db) override;
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source);
 };
@@ -1046,6 +1095,19 @@ void DateColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     buffer->setValue(offsetM, value.GetDate());
 }
 
+void DateColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    fr::IStatementPtr statement, wxMBConv*, Database*)
+{
+    wxASSERT(buffer);
+    int y, m, d;
+    if (sscanf(statement->getDate(col - 1).c_str(), "%d-%d-%d", &y, &m, &d) == 3)
+    {
+        IBPP::Date value;
+        value.SetDate(y, m, d);
+        buffer->setValue(offsetM, value.GetDate());
+    }
+}
+
 // TimeColumnDef class
 class TimeColumnDef : public ResultsetColumnDef
 {
@@ -1062,6 +1124,8 @@ public:
     virtual unsigned getBufferSize();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter, Database* db);
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
+        fr::IStatementPtr statement, wxMBConv* converter, Database* db) override;
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source);
 };
@@ -1173,6 +1237,19 @@ void TimeColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     writeToBuffer(buffer, value);
 }
 
+void TimeColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    fr::IStatementPtr statement, wxMBConv*, Database*)
+{
+    wxASSERT(buffer);
+    int h, m, s, t;
+    if (sscanf(statement->getTime(col - 1).c_str(), "%d:%d:%d.%d", &h, &m, &s, &t) >= 3)
+    {
+        IBPP::Time value;
+        value.SetTime(IBPP::Time::tmNone, h, m, s, t, 0, nullptr);
+        writeToBuffer(buffer, value);
+    }
+}
+
 // TimestampColumnDef class
 class TimestampColumnDef : public ResultsetColumnDef
 {
@@ -1189,6 +1266,8 @@ public:
     virtual unsigned getBufferSize();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter, Database* db);
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
+        fr::IStatementPtr statement, wxMBConv* converter, Database* db) override;
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source);
 };
@@ -1326,6 +1405,20 @@ void TimestampColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     writeToBuffer(buffer, value);
 }
 
+void TimestampColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    fr::IStatementPtr statement, wxMBConv*, Database*)
+{
+    wxASSERT(buffer);
+    int ye, mo, d, h, mi, s, t;
+    if (sscanf(statement->getTimestamp(col - 1).c_str(), "%d-%d-%d %d:%d:%d.%d", &ye, &mo, &d, &h, &mi, &s, &t) >= 6)
+    {
+        IBPP::Timestamp value;
+        value.SetDate(ye, mo, d);
+        value.SetTime(IBPP::Time::tmNone, h, mi, s, t, 0, nullptr);
+        writeToBuffer(buffer, value);
+    }
+}
+
 // FloatColumnDef class
 class FloatColumnDef : public ResultsetColumnDef
 {
@@ -1339,6 +1432,8 @@ public:
     virtual bool isNumeric();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter, Database* db);
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
+        fr::IStatementPtr statement, wxMBConv* converter, Database* db) override;
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source);
 };
@@ -1388,6 +1483,13 @@ void FloatColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     buffer->setValue(offsetM, value);
 }
 
+void FloatColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    fr::IStatementPtr statement, wxMBConv*, Database*)
+{
+    wxASSERT(buffer);
+    buffer->setValue(offsetM, (float)statement->getDouble(col - 1));
+}
+
 // DoubleColumnDef class
 class DoubleColumnDef : public ResultsetColumnDef
 {
@@ -1402,6 +1504,8 @@ public:
     virtual bool isNumeric();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter, Database* db);
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
+        fr::IStatementPtr statement, wxMBConv* converter, Database* db) override;
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source);
 };
@@ -1454,6 +1558,13 @@ void DoubleColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     buffer->setValue(offsetM, value);
 }
 
+void DoubleColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    fr::IStatementPtr statement, wxMBConv*, Database*)
+{
+    wxASSERT(buffer);
+    buffer->setValue(offsetM, statement->getDouble(col - 1));
+}
+
 // Dec16ColumnDef class
 class Dec16ColumnDef : public ResultsetColumnDef
 {
@@ -1467,6 +1578,8 @@ public:
     virtual bool isNumeric();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter, Database* db);
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
+        fr::IStatementPtr statement, wxMBConv* converter, Database* db) override;
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source);
 };
@@ -1516,6 +1629,16 @@ void Dec16ColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     buffer->setValue(offsetM, value);
 }
 
+void Dec16ColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    fr::IStatementPtr statement, wxMBConv*, Database*)
+{
+    wxASSERT(buffer);
+    dec16_t value;
+    wxString errMsg;
+    StringToDec16DPD(wxString::FromUTF8(statement->getString(col - 1)), &value, errMsg);
+    buffer->setValue(offsetM, value);
+}
+
 // Dec34ColumnDef class
 class Dec34ColumnDef : public ResultsetColumnDef
 {
@@ -1529,6 +1652,8 @@ public:
     virtual bool isNumeric();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter, Database* db);
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
+        fr::IStatementPtr statement, wxMBConv* converter, Database* db) override;
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source);
 };
@@ -1578,6 +1703,16 @@ void Dec34ColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     buffer->setValue(offsetM, value);
 }
 
+void Dec34ColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    fr::IStatementPtr statement, wxMBConv*, Database*)
+{
+    wxASSERT(buffer);
+    dec34_t value;
+    wxString errMsg;
+    StringToDec34DPD(wxString::FromUTF8(statement->getString(col - 1)), &value, errMsg);
+    buffer->setValue(offsetM, value);
+}
+
 // BlobColumnDef class
 class BlobColumnDef : public ResultsetColumnDef
 {
@@ -1594,6 +1729,8 @@ public:
     virtual unsigned getBufferSize();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter, Database* db);
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
+        fr::IStatementPtr statement, wxMBConv* converter, Database* db) override;
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source);
     bool isTextual() { return textualM; };
@@ -1698,7 +1835,6 @@ unsigned BlobColumnDef::getBufferSize()
 {
     return 0;
 }
-
 void BlobColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     const IBPP::Statement& statement, wxMBConv*, Database* db)
 {
@@ -1707,7 +1843,15 @@ void BlobColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
         statement->TransactionPtr());
     statement->Get(col, b);
     buffer->setBlob(indexM, b);
-    converterM = db->getCharsetConverter(); // store for later when we fetch the data
+}
+
+void BlobColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    fr::IStatementPtr statement, wxMBConv*, Database*)
+{
+    wxASSERT(buffer);
+    // TODO: Implement blob support for DAL
+    // For now, we fetch as string if it's not too big
+    buffer->setString(stringIndexM, wxString::FromUTF8(statement->getString(col - 1)));
 }
 
 // StringColumnDef class
@@ -1725,6 +1869,8 @@ public:
     virtual unsigned getBufferSize();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter, Database* db);
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
+        fr::IStatementPtr statement, wxMBConv* converter, Database* db) override;
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source);
 };
@@ -1802,11 +1948,19 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     }
 }
 
+void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    fr::IStatementPtr statement, wxMBConv* converter, Database* /*db*/)
+{
+    wxASSERT(buffer);
+    buffer->setString(indexM, wxString(statement->getString(col - 1).c_str(), *converter));
+}
+
 class BooleanColumnDef : public StringColumnDef // Firebird v3
 {
 public:
     BooleanColumnDef(const wxString& name, unsigned stringIndex, bool readOnly, bool nullable);
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col, const IBPP::Statement& statement);
+    virtual void setValue(DataGridRowBuffer* buffer, unsigned col, fr::IStatementPtr statement);
 };
 
 BooleanColumnDef::BooleanColumnDef(const wxString& name, unsigned stringIndex,
@@ -1821,6 +1975,14 @@ void BooleanColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     bool value;
     statement->Get(col, value);
     wxString val = value ? "true" : "false";
+    buffer->setString(StringColumnDef::indexM, val);
+}
+
+void BooleanColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
+    fr::IStatementPtr statement)
+{
+    wxASSERT(buffer);
+    wxString val = statement->getBool(col - 1) ? "true" : "false";
     buffer->setString(StringColumnDef::indexM, val);
 }
 
@@ -1865,6 +2027,36 @@ void DataGridRows::addRow(const IBPP::Statement& statement)
             if (!isNull)
             {
                 columnDefsM[col]->setValue(buffer, colIBPP, statement,
+                    databaseM->getCharsetConverter(), databaseM);
+            }
+        }
+        while (col > 0);
+    }
+    catch(...)
+    {
+        delete buffer;
+        throw;
+    }
+    addRow(buffer);
+}
+
+void DataGridRows::addRow(fr::IStatementPtr statement)
+{
+    DataGridRowBuffer* buffer = new DataGridRowBuffer(columnDefsM.size());
+    // if anything fails, make sure we release the memory
+    try
+    {
+        // starts with last column -> with highest buffer offset and
+        // string array index to allocate all needed memory at once
+        unsigned col = columnDefsM.size();
+        do
+        {
+            unsigned colDAL = col--;
+            bool isNull = statement->isNull(colDAL);
+            buffer->setFieldNull(col, isNull);
+            if (!isNull)
+            {
+                columnDefsM[col]->setValue(buffer, colDAL + 1, statement,
                     databaseM->getCharsetConverter(), databaseM);
             }
         }
@@ -2245,6 +2437,109 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
                     break;
                 default:
                     // IBPP::sdArray not really handled ATM
+                    columnDef = new DummyColumnDef(colName);
+                    break;
+            }
+        }
+        wxASSERT(columnDef);
+        bufferSizeM += columnDef->getBufferSize();
+        columnDefsM.push_back(columnDef);
+    }
+    return true;
+}
+
+bool DataGridRows::initialize(fr::IStatementPtr statement)
+{
+    statementDALM = statement;
+
+    clear();
+    // column definitions may have an index into the string array,
+    // an offset into the buffer, or use no data at all
+    unsigned colCount = statement->getColumnCount();
+    columnDefsM.reserve(colCount);
+    bufferSizeM = 0;
+    unsigned stringIndex = 0;
+    unsigned blobIndex = 0;
+
+    // Create column definitions and compute the necessary buffer size
+    // and string array length when all fields contain data
+    for (unsigned col = 1; col <= colCount; ++col)
+    {
+        bool readOnly, nullable;
+        getColumnInfo(databaseM, col, readOnly, nullable);
+
+        wxString colName(wxString(statement->getColumnAlias(col - 1).c_str(),
+            *databaseM->getCharsetConverter()));
+        if (colName.empty())
+        {
+            colName = wxString(statement->getColumnName(col - 1).c_str(),
+                *databaseM->getCharsetConverter());
+        }
+
+        fr::ColumnType type = statement->getColumnType(col - 1);
+        short scale = (short)statement->getColumnScale(col - 1);
+
+        ResultsetColumnDef* columnDef = 0;
+        if (statement->getColumnName(col - 1) == "DB_KEY")
+            columnDef = new DBKeyColumnDef(colName, bufferSizeM, statement->getColumnSize(col - 1));
+        else
+        {
+            switch (type)
+            {
+                case fr::ColumnType::Boolean:
+                    columnDef = new BooleanColumnDef(colName, stringIndex, readOnly, nullable);
+                    ++stringIndex;
+                    break;
+                case fr::ColumnType::Date:
+                    columnDef = new DateColumnDef(colName, bufferSizeM, readOnly, nullable);
+                    break;
+                case fr::ColumnType::Time:
+                    columnDef = new TimeColumnDef(colName, bufferSizeM, readOnly, nullable, false);
+                    break;
+                case fr::ColumnType::Timestamp:
+                    columnDef = new TimestampColumnDef(colName, bufferSizeM, readOnly, nullable, false);
+                    break;
+
+                case fr::ColumnType::Integer:
+                    columnDef = new IntegerColumnDef(colName, bufferSizeM, readOnly, nullable, scale);
+                    break;
+                case fr::ColumnType::BigInt:
+                    columnDef = new Int64ColumnDef(colName, bufferSizeM, readOnly, nullable, scale);
+                    break;
+                case fr::ColumnType::Int128:
+                    columnDef = new Int128ColumnDef(colName, bufferSizeM, readOnly, nullable, scale);
+                    break;
+
+                case fr::ColumnType::Float:
+                    columnDef = new FloatColumnDef(colName, bufferSizeM, readOnly, nullable);
+                    break;
+                case fr::ColumnType::Double:
+                    columnDef = new DoubleColumnDef(colName, bufferSizeM, readOnly, nullable, scale);
+                    break;
+                case fr::ColumnType::Decfloat16:
+                    columnDef = new Dec16ColumnDef(colName, bufferSizeM, readOnly, nullable);
+                    break;
+                case fr::ColumnType::Decfloat34:
+                    columnDef = new Dec34ColumnDef(colName, bufferSizeM, readOnly, nullable);
+                    break;
+
+                case fr::ColumnType::Char:
+                case fr::ColumnType::Varchar:
+                {
+                    int bpc = databaseM->getCharsetById(statement->getColumnSubtype(col - 1))->getBytesPerChar();
+                    int size = statement->getColumnSize(col - 1);
+                    if (bpc)
+                        size /= bpc;
+                    columnDef = new StringColumnDef(colName, stringIndex, readOnly, nullable, size);
+                    ++stringIndex;
+                    break;
+                }
+                case fr::ColumnType::Blob:
+                    columnDef = new BlobColumnDef(colName, readOnly, nullable, stringIndex, blobIndex, statement->getColumnSubtype(col - 1) == 1, this->databaseM->getCharsetConverter());
+                    ++blobIndex;
+                    ++stringIndex;
+                    break;
+                default:
                     columnDef = new DummyColumnDef(colName);
                     break;
             }

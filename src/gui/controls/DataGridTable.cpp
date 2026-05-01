@@ -47,8 +47,22 @@
 #include "metadata/table.h"
 
 DataGridTable::DataGridTable(IBPP::Statement& s, Database* db)
-    : wxGridTableBase(), statementM(s), databaseM(db), nullFlagM(false),
-        rowsM(db)
+    : wxGridTableBase(), statementM(s), statementDALM(), databaseM(db),
+        nullFlagM(false), rowsM(db)
+{
+    allRowsFetchedM = false;
+    fetchAllRowsM = false;
+    readOnlyM = false;
+    canInsertRowsIsSetM = false;
+    canInsertRowsM = false;
+    config().getValue("GridFetchAllRecords", fetchAllRowsM);
+    maxRowToFetchM = 100;
+    cellAttriM = new wxGridCellAttr();
+}
+
+DataGridTable::DataGridTable(fr::IStatementPtr s, Database* db)
+    : wxGridTableBase(), statementM(), statementDALM(s), databaseM(db),
+        nullFlagM(false), rowsM(db)
 {
     allRowsFetchedM = false;
     fetchAllRowsM = false;

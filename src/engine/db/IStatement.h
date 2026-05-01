@@ -59,9 +59,19 @@ public:
     virtual double getDouble(int index) = 0;
     virtual bool getBool(int index) = 0;
 
+    // Firebird specific types (as strings for common exchange)
+    virtual std::string getDate(int index) = 0;
+    virtual std::string getTime(int index) = 0;
+    virtual std::string getTimestamp(int index) = 0;
+
     virtual int getColumnCount() = 0;
     virtual std::string getColumnName(int index) = 0;
     virtual ColumnType getColumnType(int index) = 0;
+    virtual int getColumnSubtype(int index) = 0;
+    virtual int getColumnScale(int index) = 0;
+    virtual int getColumnSize(int index) = 0;
+    virtual std::string getColumnAlias(int index) = 0;
+    virtual std::string getColumnTable(int index) = 0;
 };
 
 } // namespace fr
