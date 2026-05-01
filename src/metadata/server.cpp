@@ -34,6 +34,7 @@
 
 #include "config/Config.h"
 #include "engine/db/DatabaseFactory.h"
+#include "engine/db/ibpp/IbppService.h"
 #include "core/ProgressIndicator.h"
 #include "core/StringUtils.h"
 #include "frutils.h"
@@ -145,6 +146,21 @@ const wxString Server::getItemPath() const
     // by not including the server part. Even more so if this class is bound
     // to disappear in the future.
     return "";
+}
+
+/* static */
+wxString Server::makeConnectionString(const wxString& hostname,
+    const wxString& port)
+{
+    if (!hostname.empty() && !port.empty())
+        return hostname + "/" + port;
+    else
+        return hostname;
+}
+
+wxString Server::getConnectionString() const
+{
+    return makeConnectionString(getHostname(), getPort());
 }
 
 struct SortUsers
