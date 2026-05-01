@@ -55,7 +55,9 @@ enum class ColumnType
     Decimal,
     Decfloat16,
     Decfloat34,
-    Int128
+    Int128,
+    TimeTz,
+    TimestampTz
 };
 
 // Common types and forward declarations

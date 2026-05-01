@@ -115,4 +115,31 @@ IStatementPtr FbCppDatabase::createStatement(ITransactionPtr tr)
     return std::make_shared<FbCppStatement>(*attachmentM, fbTr->getFbCppTransaction());
 }
 
+std::string FbCppDatabase::getTimezoneName(int timezoneId)
+{
+    if (!clientM)
+        return "";
+
+    try
+    {
+        ISC_TIME_TZ iscTmTz = {};
+        iscTmTz.time_zone = static_cast<ISC_USHORT>(timezoneId);
+        char tzBuf[64] = {}; // FB_MAX_TIME_ZONE_NAME_LENGTH is 64
+        unsigned dummyHour = 0, dummyMinute = 0, dummySecond = 0, dummyFractions = 0;
+        
+        // We need a Status object. fb-cpp usually wraps it.
+        // For simplicity and matching IBPP backend style, we can try to use a local status.
+        Firebird::ThrowStatusWrapper status(clientM->getMaster()->getStatus());
+        clientM->getUtil()->decodeTimeTz(&status, &iscTmTz,
+            &dummyHour, &dummyMinute, &dummySecond, &dummyFractions,
+            sizeof(tzBuf), tzBuf);
+        
+        return std::string(tzBuf);
+    }
+    catch (...)
+    {
+        return "";
+    }
+}
+
 } // namespace fr

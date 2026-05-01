@@ -95,4 +95,17 @@ IStatementPtr IbppDatabase::createStatement(ITransactionPtr tr)
     return std::make_shared<IbppStatement>(databaseM, ibppTr->getIBPPTransaction());
 }
 
+namespace ibpp_internals
+{
+    bool getTimezoneNameById(int tzId, std::string& name);
+}
+
+std::string IbppDatabase::getTimezoneName(int timezoneId)
+{
+    std::string name;
+    if (ibpp_internals::getTimezoneNameById(timezoneId, name))
+        return name;
+    return "";
+}
+
 } // namespace fr

@@ -50,6 +50,8 @@ public:
     virtual ITransactionPtr createTransaction() override;
     virtual IStatementPtr createStatement(ITransactionPtr tr) override;
 
+    virtual std::string getTimezoneName(int timezoneId) override;
+
     virtual DatabaseBackend getBackendType() const override { return DatabaseBackend::IBPP; }
 
     IBPP::Database& getIBPPDatabase() { return databaseM; }

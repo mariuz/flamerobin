@@ -63,6 +63,8 @@ public:
     virtual std::string getDate(int index) = 0;
     virtual std::string getTime(int index) = 0;
     virtual std::string getTimestamp(int index) = 0;
+    virtual std::string getTimeTz(int index) = 0;
+    virtual std::string getTimestampTz(int index) = 0;
 
     virtual int getColumnCount() = 0;
     virtual std::string getColumnName(int index) = 0;
