@@ -20,7 +20,7 @@ The primary goal is to replace the legacy and unmaintained IBPP library with `fb
 ### Phase 2: Metadata & Core Refactoring (In Progress)
 - [x] Systematic refactoring of `MetadataItem` classes to use DAL interfaces.
 - [x] Implement `DECFLOAT` and `INT128` support in the DAL and UI.
-- [ ] Improve Timezone handling using modern Firebird API.
+- [x] Improve Timezone handling using modern Firebird API.
 - [ ] Refactor `Database` and `Server` classes to fully decouple from IBPP.
 
 ### Phase 3: SQL Editor & UI Integration
