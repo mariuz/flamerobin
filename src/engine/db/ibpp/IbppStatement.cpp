@@ -398,7 +398,7 @@ void IbppStatement::getTimestamp(int index, int& year, int& month, int& day,
 
 int IbppStatement::getColumnCount()
 {
-    if (!statementM)
+    if (!statementM.intf())
         return 0;
     try
     {
@@ -490,7 +490,7 @@ StatementType IbppStatement::getType()
 
 int IbppStatement::getParameterCount()
 {
-    if (!statementM)
+    if (!statementM.intf())
         return 0;
     try
     {

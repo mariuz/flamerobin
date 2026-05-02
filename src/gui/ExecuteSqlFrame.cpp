@@ -2675,6 +2675,9 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         fr::StatementType type = statementM->getType();
         if (hasColumns)            // for select statements: show data
         {
+            DataGridTable* tb = grid_data->getDataGridTable();
+            if (tb)
+                tb->setStatement(statementM);
             grid_data->fetchData(transactionAccessModeM == fr::TransactionAccessMode::Read);
             setViewMode(vmGrid);
         }
