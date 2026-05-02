@@ -102,7 +102,7 @@ void IbppStatement::setDate(int index, int year, int month, int day)
 void IbppStatement::setTime(int index, int hour, int minute, int second, int fraction)
 {
     IBPP::Time t;
-    t.SetTime(IBPP::Time::tmNone, hour, minute, second, fraction * 10, IBPP::Time::TZ_NONE, nullptr);
+    t.SetTime(IBPP::Time::tmNone, hour, minute, second, fraction, IBPP::Time::TZ_NONE, nullptr);
     statementM->Set(index + 1, t);
 }
 
@@ -111,7 +111,7 @@ void IbppStatement::setTimestamp(int index, int year, int month, int day,
 {
     IBPP::Timestamp ts;
     ts.SetDate(year, month, day);
-    ts.SetTime(IBPP::Time::tmNone, hour, minute, second, fraction * 10, IBPP::Time::TZ_NONE, nullptr);
+    ts.SetTime(IBPP::Time::tmNone, hour, minute, second, fraction, IBPP::Time::TZ_NONE, nullptr);
     statementM->Set(index + 1, ts);
 }
 
@@ -181,13 +181,41 @@ std::string IbppStatement::getString(int index)
         statementM->Get(index + 1, value);
         return wx2std(Dec34DPDToString(value));
     }
+    if (type == fr::ColumnType::Date)
+        return getDate(index);
+    if (type == fr::ColumnType::Time || type == fr::ColumnType::TimeTz)
+        return getTime(index);
+    if (type == fr::ColumnType::Timestamp || type == fr::ColumnType::TimestampTz)
+        return getTimestamp(index);
+
     std::string value;
-    statementM->Get(index + 1, value);
+    try
+    {
+        statementM->Get(index + 1, value);
+    }
+    catch (...)
+    {
+        // If IBPP cannot convert to string, we do it manually for common types
+        switch (type)
+        {
+            case ColumnType::Integer: return std::to_string(getInt32(index));
+            case ColumnType::BigInt: return std::to_string(getInt64(index));
+            case ColumnType::Double: return std::to_string(getDouble(index));
+            case ColumnType::Boolean: return getBool(index) ? "true" : "false";
+            default: break;
+        }
+    }
     return value;
 }
 
 int32_t IbppStatement::getInt32(int index)
 {
+    if (statementM->ColumnType(index + 1) == IBPP::sdSmallint)
+    {
+        int16_t value;
+        statementM->Get(index + 1, value);
+        return (int32_t)value;
+    }
     int32_t value;
     statementM->Get(index + 1, value);
     return value;
@@ -195,6 +223,25 @@ int32_t IbppStatement::getInt32(int index)
 
 int64_t IbppStatement::getInt64(int index)
 {
+    IBPP::SDT type = statementM->ColumnType(index + 1);
+    if (type == IBPP::sdLargeint)
+    {
+        int64_t value;
+        statementM->Get(index + 1, value);
+        return value;
+    }
+    if (type == IBPP::sdInteger)
+    {
+        int32_t value;
+        statementM->Get(index + 1, value);
+        return (int64_t)value;
+    }
+    if (type == IBPP::sdSmallint)
+    {
+        int16_t value;
+        statementM->Get(index + 1, value);
+        return (int64_t)value;
+    }
     int64_t value;
     statementM->Get(index + 1, value);
     return value;
@@ -202,6 +249,12 @@ int64_t IbppStatement::getInt64(int index)
 
 double IbppStatement::getDouble(int index)
 {
+    if (statementM->ColumnType(index + 1) == IBPP::sdFloat)
+    {
+        float value;
+        statementM->Get(index + 1, value);
+        return (double)value;
+    }
     double value;
     statementM->Get(index + 1, value);
     return value;
@@ -326,7 +379,7 @@ void IbppStatement::getTime(int index, int& hour, int& minute, int& second, int&
     hour = t.Hours();
     minute = t.Minutes();
     second = t.Seconds();
-    fraction = t.SubSeconds() / 10; // Convert to fraction (0-999)
+    fraction = t.SubSeconds();
 }
 
 void IbppStatement::getTimestamp(int index, int& year, int& month, int& day,
@@ -340,7 +393,7 @@ void IbppStatement::getTimestamp(int index, int& year, int& month, int& day,
     hour = ts.Hours();
     minute = ts.Minutes();
     second = ts.Seconds();
-    fraction = ts.SubSeconds() / 10;
+    fraction = ts.SubSeconds();
 }
 
 int IbppStatement::getColumnCount()

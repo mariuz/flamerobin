@@ -68,6 +68,19 @@ bool check(bool condition, const char* testName)
     return false;
 }
 
+bool checkInt(int actual, int expected, const char* testName)
+{
+    if (actual == expected)
+    {
+        std::cout << "  PASSED: " << testName << " (" << actual << ")\n";
+        return true;
+    }
+    std::cerr << "  FAILED: " << testName << "\n"
+        << "    Expected: " << expected << "\n"
+        << "    Actual:   " << actual << "\n";
+    return false;
+}
+
 bool checkStr(const std::string& actual, const std::string& expected, const char* testName)
 {
     if (actual == expected)
@@ -105,10 +118,10 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
         st->prepare("SELECT CAST(1.23 AS NUMERIC(18,4)) AS MY_ALIAS FROM RDB$DATABASE");
         st->execute();
         st->fetch();
-        ok = check(st->getColumnCount() == 1, "getColumnCount") && ok;
+        ok = checkInt(st->getColumnCount(), 1, "getColumnCount") && ok;
         ok = check(st->getColumnType(0) == fr::ColumnType::BigInt, "ColumnType::BigInt identification") && ok;
-        ok = check(st->getColumnScale(0) == 4, "getColumnScale") && ok;
-        ok = check(st->getColumnSize(0) == 8, "getColumnSize (int64)") && ok;
+        ok = checkInt(st->getColumnScale(0), 4, "getColumnScale") && ok;
+        ok = checkInt(st->getColumnSize(0), 8, "getColumnSize (int64)") && ok;
         ok = checkStr(st->getColumnAlias(0), "MY_ALIAS", "getColumnAlias") && ok;
         
         // Subtype test (OCTETS)
@@ -142,9 +155,13 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
         ok = check(st->getColumnType(1) == fr::ColumnType::Time, "ColumnType::Time identification") && ok;
         ok = check(st->getColumnType(2) == fr::ColumnType::Timestamp, "ColumnType::Timestamp identification") && ok;
         
-        ok = check(st->getDate(0).find("2023-05-20") != std::string::npos, "getDate content") && ok;
-        ok = check(st->getTime(1).find("12:34:56") != std::string::npos, "getTime content") && ok;
-        ok = check(st->getTimestamp(2).find("2023-05-20 12:34:56") != std::string::npos, "getTimestamp content") && ok;
+        int y, mo, d, h, mi, s, f;
+        st->getDate(0, y, mo, d);
+        ok = check(y == 2023 && mo == 5 && d == 20, "getDate content") && ok;
+        st->getTime(1, h, mi, s, f);
+        ok = check(h == 12 && mi == 34 && s == 56 && f == 7890, "getTime content") && ok;
+        st->getTimestamp(2, y, mo, d, h, mi, s, f);
+        ok = check(y == 2023 && mo == 5 && d == 20 && h == 12 && mi == 34 && s == 56 && f == 7890, "getTimestamp content") && ok;
 
         // Check for Timezone support
         std::cout << "  Checking for Timezone support...\n";
@@ -231,7 +248,7 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
         // Parameter tests
         std::cout << "  Testing statement parameters...\n";
         st->prepare("UPDATE DAL_TEST SET ID = ? WHERE ID = ?");
-        ok = check(st->getParameterCount() == 2, "getParameterCount") && ok;
+        ok = checkInt(st->getParameterCount(), 2, "getParameterCount") && ok;
         ok = check(st->getParameterType(0) == fr::ColumnType::Integer, "getParameterType 0") && ok;
         ok = check(st->getParameterType(1) == fr::ColumnType::Integer, "getParameterType 1") && ok;
 
@@ -239,11 +256,13 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
         if (backend == fr::DatabaseBackend::IBPP)
         {
             st->prepare("UPDATE DAL_TEST SET ID = :newid WHERE ID = :oldid");
-            ok = check(st->getParameterCount() == 2, "getParameterCount (named)") && ok;
+            ok = checkInt(st->getParameterCount(), 2, "getParameterCount (named)") && ok;
             ok = checkStr(st->getParameterName(0), "newid", "getParameterName 0") && ok;
             ok = checkStr(st->getParameterName(1), "oldid", "getParameterName 1") && ok;
             auto indices = st->findParameterIndicesByName("oldid");
-            ok = check(indices.size() == 1 && indices[0] == 1, "findParameterIndicesByName") && ok;
+            ok = checkInt(indices.size(), 1, "findParameterIndicesByName size") && ok;
+            if (!indices.empty())
+                ok = checkInt(indices[0], 1, "findParameterIndicesByName[0]") && ok;
         }
 
         // Typed parameter setting
@@ -264,9 +283,14 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
         st->setTimestamp(2, 2023, 5, 25, 14, 30, 45, 0);
         st->execute();
         ok = check(st->fetch(), "fetch date/time results") && ok;
-        ok = check(st->getDate(0).find("2023-05-25") != std::string::npos, "setDate result") && ok;
-        ok = check(st->getTime(1).find("14:30:45") != std::string::npos, "setTime result") && ok;
-        ok = check(st->getTimestamp(2).find("2023-05-25 14:30:45") != std::string::npos, "setTimestamp result") && ok;
+        
+        int ty, tmo, td, th, tmi, ts, tf;
+        st->getDate(0, ty, tmo, td);
+        ok = check(ty == 2023 && tmo == 5 && td == 25, "setDate result") && ok;
+        st->getTime(1, th, tmi, ts, tf);
+        ok = check(th == 14 && tmi == 30 && ts == 45, "setTime result") && ok;
+        st->getTimestamp(2, ty, tmo, td, th, tmi, ts, tf);
+        ok = check(ty == 2023 && tmo == 5 && td == 25 && th == 14 && tmi == 30 && ts == 45, "setTimestamp result") && ok;
 
         // BLOB tests
         std::cout << "  Testing BLOB operations...\n";

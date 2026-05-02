@@ -444,8 +444,21 @@ std::vector<int> FbCppStatement::findParameterIndicesByName(const std::string& n
     const auto& descriptors = statementM->getInputDescriptors();
     for (size_t i = 0; i < descriptors.size(); ++i)
     {
-        if (descriptors[i].name == name)
-            result.push_back((int)i);
+        // Case-insensitive comparison
+        if (descriptors[i].name.size() == name.size())
+        {
+            bool match = true;
+            for (size_t j = 0; j < name.size(); ++j)
+            {
+                if (std::toupper(descriptors[i].name[j]) != std::toupper(name[j]))
+                {
+                    match = false;
+                    break;
+                }
+            }
+            if (match)
+                result.push_back((int)i);
+        }
     }
     return result;
 }
@@ -559,12 +572,9 @@ int FbCppStatement::getAffectedRows()
             while (i < end)
             {
                 unsigned char subitem = buffer[i++];
-                if (i + 2 > end) break;
-                int sublen = (int)decode(&buffer[i], 2);
-                i += 2;
-                if (i + sublen > end) break;
-                int count = (int)decode(&buffer[i], sublen);
-                i += sublen;
+                if (i + 4 > end) break;
+                int count = (int)decode(&buffer[i], 4);
+                i += 4;
                 if (subitem == isc_info_req_insert_count ||
                     subitem == isc_info_req_update_count ||
                     subitem == isc_info_req_delete_count)
