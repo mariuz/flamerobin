@@ -97,7 +97,7 @@ jobs:
             firebird_image_tag: "5"
             allow_failure: false
           - firebird_version: "6"
-            firebird_image_tag: "latest"
+            firebird_image_tag: "6-snapshot"
             allow_failure: true
     continue-on-error: ${{ matrix.allow_failure }}
     runs-on: ubuntu-24.04
