@@ -147,6 +147,7 @@ void DataGridTable::fetch()
     if (!canFetchMoreRows())
         return;
 
+    wxLogDebug("DataGridTable::fetch starting.");
     // fetch the first 100 rows no matter how long it takes
     unsigned oldRows = rowsM.getRowCount();
     bool initial = oldRows == 0;
@@ -167,15 +168,17 @@ void DataGridTable::fetch()
                     allRowsFetchedM = true;
             }
         }
-        catch (std::exception& e)
+        catch (const std::exception& e)
         {
             allRowsFetchedM = true;
+            wxLogError("Error fetching row %u: %s", rowsM.getRowCount(), e.what());
             ::wxMessageBox(wxString::FromUTF8(e.what()),
                 _("A database error occurred."), wxOK|wxICON_ERROR);
         }
         catch (...)
         {
             allRowsFetchedM = true;
+            wxLogError("Unknown error fetching row %u.", rowsM.getRowCount());
             ::wxMessageBox(_("A system error occurred!"), _("Error"),
                 wxOK|wxICON_ERROR);
         }
@@ -192,10 +195,13 @@ void DataGridTable::fetch()
     }
     while ((fetchAllRowsM && !initial) || rowsM.getRowCount() < maxRowToFetchM);
 
-    if (rowsM.getRowCount() > oldRows && GetView())   // notify the grid
+    unsigned newRows = rowsM.getRowCount() - oldRows;
+    wxLogDebug("DataGridTable::fetch finished. Fetched %u new rows.", newRows);
+
+    if (newRows > 0 && GetView())   // notify the grid
     {
         wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED,
-            rowsM.getRowCount() - oldRows);
+            newRows);
         GetView()->ProcessTableMessage(msg);
         // used in frame to update status bar
         wxCommandEvent evt(wxEVT_FRDG_ROWCOUNT_CHANGED, GetView()->GetId());
