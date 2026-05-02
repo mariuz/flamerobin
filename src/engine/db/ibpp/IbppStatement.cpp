@@ -481,7 +481,7 @@ StatementType IbppStatement::getType()
 
 int IbppStatement::getParameterCount()
 {
-    return (int)statementM->ParametersByName().size();
+    return statementM->Parameters();
 }
 
 std::string IbppStatement::getParameterName(int index)
@@ -492,6 +492,12 @@ std::string IbppStatement::getParameterName(int index)
 std::vector<int> IbppStatement::findParameterIndicesByName(const std::string& name)
 {
     std::vector<int> result = statementM->FindParamsByName(name);
+    if (result.empty())
+    {
+        std::string upperName = name;
+        for (auto& c : upperName) c = (char)std::toupper(c);
+        result = statementM->FindParamsByName(upperName);
+    }
     for (size_t i = 0; i < result.size(); ++i)
         result[i]--;
     return result;

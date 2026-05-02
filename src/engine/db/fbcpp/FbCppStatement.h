@@ -111,6 +111,8 @@ private:
     std::string sqlM;
     std::optional<fbcpp::Statement> statementM;
     std::optional<fbcpp::RowSet> rowSetM;
+    std::optional<bool> firstRowFetchedM;
+    bool eofReachedM;
 };
 
 } // namespace fr

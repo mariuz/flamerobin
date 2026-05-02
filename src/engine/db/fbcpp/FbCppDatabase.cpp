@@ -102,7 +102,32 @@ void FbCppDatabase::drop()
 
 int FbCppDatabase::getDialect()
 {
-    // TODO: implement using fbcpp or low-level API
+    if (!attachmentM)
+        return 3;
+
+    auto& client = attachmentM->getClient();
+    fbcpp::impl::StatusWrapper status(client);
+    unsigned char item = isc_info_db_sql_dialect;
+    unsigned char buffer[16];
+
+    try
+    {
+        attachmentM->getHandle()->getInfo(&status, 1, &item, sizeof(buffer), buffer);
+        if (status.getState() & Firebird::IStatus::STATE_ERRORS)
+            return 3;
+
+        if (buffer[0] == isc_info_db_sql_dialect)
+        {
+            int len = buffer[1] | (buffer[2] << 8);
+            if (len == 1)
+                return buffer[3];
+            if (len == 4)
+                return buffer[3] | (buffer[4] << 8) | (buffer[5] << 16) | (buffer[6] << 24);
+        }
+    }
+    catch (...)
+    {
+    }
     return 3;
 }
 
@@ -121,9 +146,35 @@ std::string FbCppDatabase::getRole()
     return roleM;
 }
 
-void FbCppDatabase::getConnectedUsers(std::vector<std::string>& /*users*/)
+void FbCppDatabase::getConnectedUsers(std::vector<std::string>& users)
 {
-    // TODO: implement using fbcpp or low-level API
+    users.clear();
+    if (!attachmentM)
+        return;
+
+    try
+    {
+        auto tr = createTransaction();
+        tr->start();
+        auto st = createStatement(tr);
+        st->prepare("SELECT DISTINCT MON$USER FROM MON$ATTACHMENTS");
+        st->execute();
+        while (st->fetch())
+        {
+            std::string user = st->getString(0);
+            // Trim trailing spaces
+            size_t last = user.find_last_not_of(" ");
+            if (last != std::string::npos)
+                user.erase(last + 1);
+            else if (user.size() > 0 && user[0] == ' ')
+                user.clear();
+            users.push_back(user);
+        }
+        tr->commit();
+    }
+    catch (...)
+    {
+    }
 }
 
 void FbCppDatabase::setConnectionString(const std::string& connStr)

@@ -1,0 +1,112 @@
+/*
+  Copyright (c) 2004-2026 The FlameRobin Development Team
+
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
+
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <thread>
+#include <chrono>
+
+#include "engine/db/DatabaseFactory.h"
+#include "engine/db/IService.h"
+#include "engine/db/IDatabase.h"
+
+namespace
+{
+
+bool check(bool condition, const char* testName)
+{
+    if (condition)
+    {
+        std::cout << "  PASSED: " << testName << "\n";
+        return true;
+    }
+    std::cerr << "  FAILED: " << testName << "\n";
+    return false;
+}
+
+} // namespace
+
+int main()
+{
+    const char* envServer = std::getenv("IBPP_TEST_SERVER");
+    const std::string serverName = envServer ? envServer : "";
+    if (serverName.empty())
+    {
+        std::cout << "IBPP_TEST_SERVER is not set, skipping FbCppServiceTest.\n";
+        return 0;
+    }
+
+    bool ok = true;
+    std::cout << "Starting FbCppService tests...\n";
+
+    try 
+    {
+        fr::IServicePtr svc = fr::DatabaseFactory::createService(fr::DatabaseBackend::FbCpp);
+        svc->setConnectionString(serverName);
+        svc->setCredentials("SYSDBA", "masterkey");
+        
+        std::cout << "  Testing getVersion...\n";
+        std::string version = svc->getVersion();
+        ok = check(!version.empty(), "getVersion") && ok;
+        std::cout << "    Version: " << version << "\n";
+
+        std::cout << "  Testing getConnectedUsers (via IDatabase)...\n";
+        fr::IDatabasePtr db = fr::DatabaseFactory::createDatabase(fr::DatabaseBackend::FbCpp);
+        db->setConnectionString("employee"); // Use standard sample DB
+        db->setCredentials("SYSDBA", "masterkey");
+        db->connect();
+        
+        std::vector<std::string> users;
+        db->getConnectedUsers(users);
+        ok = check(!users.empty(), "getConnectedUsers not empty") && ok;
+        bool foundSysdba = false;
+        for (const auto& u : users)
+        {
+            if (u == "SYSDBA") foundSysdba = true;
+            std::cout << "    Connected user: " << u << "\n";
+        }
+        ok = check(foundSysdba, "found SYSDBA in connected users") && ok;
+
+        std::cout << "  Testing getDialect...\n";
+        ok = check(db->getDialect() == 3, "getDialect") && ok;
+
+        db->disconnect();
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "EXCEPTION in FbCppServiceTest: " << e.what() << "\n";
+        ok = false;
+    }
+
+    if (ok)
+    {
+        std::cout << "ALL FbCppService TESTS PASSED\n";
+        return 0;
+    }
+    else
+    {
+        std::cout << "SOME FbCppService TESTS FAILED\n";
+        return 1;
+    }
+}

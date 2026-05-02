@@ -35,25 +35,6 @@
 #include "engine/db/IBlob.h"
 #include "core/StringUtils.h"
 
-// Minimal wx2std implementation for tests to avoid linking StringUtils.cpp
-std::string wx2std(const wxString& input, wxMBConv* conv)
-{
-    if (input.empty())
-        return "";
-    if (!conv)
-        conv = wxConvCurrent;
-    const wxWX2MBbuf buf(input.mb_str(*conv));
-    if (!buf)
-        return "";
-    return std::string(buf);
-}
-
-// Stub for std2wxIdentifier if needed (though not used in DalTypesTest directly)
-wxString std2wxIdentifier(const std::string& input, wxMBConv* /*conv*/)
-{
-    return wxString::FromUTF8(input.c_str());
-}
-
 namespace
 {
 
@@ -257,8 +238,8 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
         {
             st->prepare("UPDATE DAL_TEST SET ID = :newid WHERE ID = :oldid");
             ok = checkInt(st->getParameterCount(), 2, "getParameterCount (named)") && ok;
-            ok = checkStr(st->getParameterName(0), "newid", "getParameterName 0") && ok;
-            ok = checkStr(st->getParameterName(1), "oldid", "getParameterName 1") && ok;
+            ok = check(wxString(st->getParameterName(0)).Lower() == "newid", "getParameterName 0") && ok;
+            ok = check(wxString(st->getParameterName(1)).Lower() == "oldid", "getParameterName 1") && ok;
             auto indices = st->findParameterIndicesByName("oldid");
             ok = checkInt(indices.size(), 1, "findParameterIndicesByName size") && ok;
             if (!indices.empty())

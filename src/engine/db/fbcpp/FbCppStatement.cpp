@@ -31,7 +31,7 @@ namespace fr
 {
 
 FbCppStatement::FbCppStatement(IDatabasePtr db, ITransactionPtr tr, fbcpp::Attachment& attachment, fbcpp::Transaction& transaction)
-    : databasePtrM(db), transactionPtrM(tr), attachmentM(attachment), transactionM(transaction)
+    : databasePtrM(db), transactionPtrM(tr), attachmentM(attachment), transactionM(transaction), eofReachedM(false)
 {
 }
 
@@ -39,6 +39,8 @@ void FbCppStatement::prepare(const std::string& sql)
 {
     sqlM = sql;
     statementM.emplace(attachmentM, transactionM, sql);
+    firstRowFetchedM.reset();
+    eofReachedM = false;
 }
 
 std::string FbCppStatement::getSql() const
@@ -50,14 +52,37 @@ void FbCppStatement::execute()
 {
     if (!statementM)
         throw std::runtime_error("Statement not prepared");
-    statementM->execute(transactionM);
+    
+    firstRowFetchedM.reset();
+    eofReachedM = false;
+
+    bool hasRow = statementM->execute(transactionM);
+    if (getType() == StatementType::Select)
+    {
+        firstRowFetchedM = hasRow;
+        eofReachedM = !hasRow;
+    }
 }
 
 bool FbCppStatement::fetch()
 {
     if (!statementM)
         return false;
-    return statementM->fetchNext();
+
+    if (firstRowFetchedM.has_value())
+    {
+        bool res = *firstRowFetchedM;
+        firstRowFetchedM.reset();
+        return res;
+    }
+
+    if (eofReachedM)
+        return false;
+
+    bool res = statementM->fetchNext();
+    if (!res)
+        eofReachedM = true;
+    return res;
 }
 
 void FbCppStatement::close()
@@ -65,6 +90,8 @@ void FbCppStatement::close()
     if (statementM)
         statementM->free();
     statementM.reset();
+    firstRowFetchedM.reset();
+    eofReachedM = false;
 }
 
 void FbCppStatement::setNull(int index)
@@ -572,9 +599,13 @@ int FbCppStatement::getAffectedRows()
             while (i < end)
             {
                 unsigned char subitem = buffer[i++];
-                if (i + 4 > end) break;
-                int count = (int)decode(&buffer[i], 4);
-                i += 4;
+                if (i + 2 > end) break;
+                int sublen = (int)decode(&buffer[i], 2);
+                i += 2;
+                if (i + sublen > end) break;
+                int count = (int)decode(&buffer[i], sublen);
+                i += sublen;
+
                 if (subitem == isc_info_req_insert_count ||
                     subitem == isc_info_req_update_count ||
                     subitem == isc_info_req_delete_count)

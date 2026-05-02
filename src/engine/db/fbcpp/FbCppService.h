@@ -27,6 +27,10 @@
 #include "engine/db/IService.h"
 #include <fb-cpp/fb-cpp.h>
 #include <optional>
+#include <queue>
+#include <mutex>
+#include <thread>
+#include <functional>
 
 namespace fr
 {
@@ -35,7 +39,7 @@ class FbCppService : public IService
 {
 public:
     FbCppService();
-    virtual ~FbCppService() = default;
+    virtual ~FbCppService();
 
     virtual void connect() override;
     virtual void disconnect() override;
@@ -63,6 +67,9 @@ public:
     virtual std::string getVersion() override;
 
 private:
+    void pushLine(std::string_view line);
+    void runService(std::function<void()> func);
+
     std::optional<fbcpp::Client> clientM;
     std::optional<fbcpp::ServiceManager> serviceM;
     std::string connStrM;
@@ -71,6 +78,10 @@ private:
     std::string roleM;
     std::string charsetM;
     std::string libraryPathM;
+
+    std::queue<std::string> outputQueueM;
+    std::mutex queueMutexM;
+    std::thread serviceThreadM;
 };
 
 } // namespace fr
