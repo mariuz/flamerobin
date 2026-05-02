@@ -85,8 +85,8 @@ bool Application::OnInit()
     LocaleManager::get().initFromConfig();
     parseCommandLine();
 
-    int backend = config().get("databaseBackend", 0);
-    if (backend == 1)
+    int backend = config().get("databaseBackend", static_cast<int>(fr::DatabaseBackend::IBPP));
+    if (backend == static_cast<int>(fr::DatabaseBackend::FbCpp))
         fr::DatabaseFactory::setDefaultBackend(fr::DatabaseBackend::FbCpp);
     else
         fr::DatabaseFactory::setDefaultBackend(fr::DatabaseBackend::IBPP);
