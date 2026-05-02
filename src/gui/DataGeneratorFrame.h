@@ -59,9 +59,9 @@ protected:
     bool sortTables(std::list<Table *>& order);
     void generateData(std::list<Table *>& order);
 
-    void setParam( IBPP::Statement st, int param, GeneratorSettings* gs,
+    void setParam(fr::IStatementPtr st, int param, GeneratorSettings* gs,
         int recNo);
-    void setString(IBPP::Statement st, int param, GeneratorSettings* gs,
+    void setString(fr::IStatementPtr st, int param, GeneratorSettings* gs,
         int recNo);
 
     enum

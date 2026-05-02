@@ -153,10 +153,23 @@ public:
 InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
     DataGridTable *gridTable, IBPP::Statement& st, Database *db)
     :BaseDialog(parent, -1, wxEmptyString), tableNameM(tableName), bufferM(0),
-    gridTableM(gridTable), statementM(st), databaseM(db)
+    gridTableM(gridTable), statementM(st), statementDALM(nullptr), databaseM(db)
+{
+    createGrid(gridTable);
+}
+
+InsertDialog::InsertDialog(wxWindow* parent, const wxString& tableName,
+    DataGridTable *gridTable, fr::IStatementPtr st, Database *db)
+    :BaseDialog(parent, -1, wxEmptyString), tableNameM(tableName), bufferM(0),
+    gridTableM(gridTable), statementM(nullptr), statementDALM(st), databaseM(db)
+{
+    createGrid(gridTable);
+}
+
+void InsertDialog::createGrid(DataGridTable *gridTable)
 {
     DataGridTable::FieldSet fields;
-    gridTable->getFields(tableName, fields);
+    gridTable->getFields(tableNameM, fields);
 
     // 500 should be reasonable for enough rows on the screen, but not too much
     gridM = new wxGrid(getControlsPanel(), ID_Grid, wxDefaultPosition,
@@ -452,37 +465,75 @@ void InsertDialog::preloadSpecialColumns()
     }
 
     // step 2: load those from the database
-    IBPP::Statement st1 = IBPP::StatementFactory(statementM->DatabasePtr(),
-        statementM->TransactionPtr());
-    if (!first) // we do need some data
+    if (statementDALM)
     {
-        sql += " FROM RDB$DATABASE";
-        st1->Prepare(wx2std(sql));
-        st1->Execute();
-        st1->Fetch();
-    }
+        fr::IStatementPtr st1 = databaseM->getDALDatabase()->createStatement(
+            statementDALM->getTransaction());
+        if (!first) // we do need some data
+        {
+            sql += " FROM RDB$DATABASE";
+            st1->prepare(wx2std(sql));
+            st1->execute();
+            st1->fetch();
+        }
 
-    // step 3: save values into buffer and edit controls
-    //         so that the next run doesn't reload generators
-    unsigned col = 1;
-    for (std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
-        it != columnsM.end(); ++it)
+        // step 3: save values into buffer and edit controls
+        //         so that the next run doesn't reload generators
+        unsigned col = 1;
+        for (std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
+            it != columnsM.end(); ++it)
+        {
+            InsertOption sel = getInsertOption(gridM, (*it).row);
+            if (!optionValueLoadedFromDatabase(sel))
+                continue;
+            bufferM->setFieldNA((*it).index, false);
+            bufferM->setFieldNull((*it).index, st1->isNull(col - 1));
+            if (!st1->isNull(col - 1))
+                (*it).columnDef->setValue(bufferM, col, st1, wxConvCurrent, databaseM);
+            ++col;
+            if (sel != ioGenerator)  // what follows is only for generators
+                continue;
+            gridM->SetCellValue((*it).row, 3,
+                (*it).columnDef->getAsString(bufferM, databaseM));
+            gridM->SetCellValue((*it).row, 2,
+                insertOptionStrings[ioRegular]);  // treat as regular value
+            updateControls((*it).row);
+        }
+    }
+    else
     {
-        InsertOption sel = getInsertOption(gridM, (*it).row);
-        if (!optionValueLoadedFromDatabase(sel))
-            continue;
-        bufferM->setFieldNA((*it).index, false);
-        bufferM->setFieldNull((*it).index, st1->IsNull(col));
-        if (!st1->IsNull(col))
-            (*it).columnDef->setValue(bufferM, col, st1, wxConvCurrent, databaseM);
-        ++col;
-        if (sel != ioGenerator)  // what follows is only for generators
-            continue;
-        gridM->SetCellValue((*it).row, 3,
-            (*it).columnDef->getAsString(bufferM, databaseM));
-        gridM->SetCellValue((*it).row, 2,
-            insertOptionStrings[ioRegular]);  // treat as regular value
-        updateControls((*it).row);
+        IBPP::Statement st1 = IBPP::StatementFactory(statementM->DatabasePtr(),
+            statementM->TransactionPtr());
+        if (!first) // we do need some data
+        {
+            sql += " FROM RDB$DATABASE";
+            st1->Prepare(wx2std(sql));
+            st1->Execute();
+            st1->Fetch();
+        }
+
+        // step 3: save values into buffer and edit controls
+        //         so that the next run doesn't reload generators
+        unsigned col = 1;
+        for (std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
+            it != columnsM.end(); ++it)
+        {
+            InsertOption sel = getInsertOption(gridM, (*it).row);
+            if (!optionValueLoadedFromDatabase(sel))
+                continue;
+            bufferM->setFieldNA((*it).index, false);
+            bufferM->setFieldNull((*it).index, st1->IsNull(col));
+            if (!st1->IsNull(col))
+                (*it).columnDef->setValue(bufferM, col, st1, wxConvCurrent, databaseM);
+            ++col;
+            if (sel != ioGenerator)  // what follows is only for generators
+                continue;
+            gridM->SetCellValue((*it).row, 3,
+                (*it).columnDef->getAsString(bufferM, databaseM));
+            gridM->SetCellValue((*it).row, 2,
+                insertOptionStrings[ioRegular]);  // treat as regular value
+            updateControls((*it).row);
+        }
     }
 }
 
@@ -561,39 +612,79 @@ void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
         }
     }
 
-    IBPP::Statement st1 = IBPP::StatementFactory(statementM->DatabasePtr(),
-        statementM->TransactionPtr());
     stm += val + ")";
-    st1->Prepare(wx2std(stm, databaseM->getCharsetConverter()));
 
-    // load blobs
-    int index = 1;
-    for (std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
-        it != columnsM.end(); ++it)
+    if (statementDALM)
     {
-        if (getInsertOption(gridM, (*it).row) != ioFile)
-            continue;
-        wxFFile fl(gridM->GetCellValue((*it).row, 3), "rb");
-        if (!fl.IsOpened())
-            throw FRError(_("Cannot open BLOB file."));
-        IBPP::Blob b = IBPP::BlobFactory(st1->DatabasePtr(),
-            st1->TransactionPtr());
-        b->Create();
-        uint8_t buffer[32768];
-        while (!fl.Eof())
-        {
-            size_t len = fl.Read(buffer, 32767);    // slow when not 32k
-            if (len < 1)
-                break;
-            b->Write(buffer, len);
-        }
-        fl.Close();
-        b->Close();
-        st1->Set(index++, b);
-        bufferM->setBlob((*it).columnDef->getIndex(), b);
-    }
+        fr::IStatementPtr st1 = databaseM->getDALDatabase()->createStatement(
+            statementDALM->getTransaction());
+        st1->prepare(wx2std(stm, databaseM->getCharsetConverter()));
 
-    st1->Execute();
+        // load blobs
+        int index = 1;
+        for (std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
+            it != columnsM.end(); ++it)
+        {
+            if (getInsertOption(gridM, (*it).row) != ioFile)
+                continue;
+            wxFFile fl(gridM->GetCellValue((*it).row, 3), "rb");
+            if (!fl.IsOpened())
+                throw FRError(_("Cannot open BLOB file."));
+
+            fr::IBlobPtr b = databaseM->getDALDatabase()->createBlob(
+                statementDALM->getTransaction());
+            b->create();
+            uint8_t buffer[32768];
+            while (!fl.Eof())
+            {
+                size_t len = fl.Read(buffer, 32767);
+                if (len < 1)
+                    break;
+                b->write(buffer, len);
+            }
+            fl.Close();
+            b->close();
+            st1->setBlob(index++ - 1, b);
+            bufferM->setBlob((*it).columnDef->getIndex(), b);
+        }
+
+        st1->execute();
+    }
+    else
+    {
+        IBPP::Statement st1 = IBPP::StatementFactory(statementM->DatabasePtr(),
+            statementM->TransactionPtr());
+        st1->Prepare(wx2std(stm, databaseM->getCharsetConverter()));
+
+        // load blobs
+        int index = 1;
+        for (std::vector<InsertColumnInfo>::iterator it = columnsM.begin();
+            it != columnsM.end(); ++it)
+        {
+            if (getInsertOption(gridM, (*it).row) != ioFile)
+                continue;
+            wxFFile fl(gridM->GetCellValue((*it).row, 3), "rb");
+            if (!fl.IsOpened())
+                throw FRError(_("Cannot open BLOB file."));
+            IBPP::Blob b = IBPP::BlobFactory(st1->DatabasePtr(),
+                st1->TransactionPtr());
+            b->Create();
+            uint8_t buffer[32768];
+            while (!fl.Eof())
+            {
+                size_t len = fl.Read(buffer, 32767);    // slow when not 32k
+                if (len < 1)
+                    break;
+                b->Write(buffer, len);
+            }
+            fl.Close();
+            b->Close();
+            st1->Set(index++, b);
+            bufferM->setBlob((*it).columnDef->getIndex(), b);
+        }
+
+        st1->Execute();
+    }
 
     // add buffer to the table and set internal buffer marker to zero
     // (to prevent deletion in destructor)

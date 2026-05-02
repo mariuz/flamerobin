@@ -63,6 +63,12 @@ public:
     virtual std::string getTimezoneName(int timezoneId) override;
     virtual void getInfo(DatabaseInfoData* data) override;
 
+    virtual void getStatistics(int* fetch, int* mark, int* read, int* write, int* mem) override;
+    virtual void getCounts(int* ins, int* upd, int* del, int* ridx, int* rseq) override;
+    virtual void getDetailedCounts(std::map<int, CountInfo>& counts) override;
+
+    virtual IBlobPtr createBlob(ITransactionPtr tr) override;
+
     virtual DatabaseBackend getBackendType() const override { return DatabaseBackend::FbCpp; }
 
     fbcpp::Attachment& getAttachment() 

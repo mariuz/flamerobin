@@ -21,44 +21,65 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef FR_FBCPP_TRANSACTION_H
-#define FR_FBCPP_TRANSACTION_H
-
-#include "engine/db/ITransaction.h"
-#include <fb-cpp/fb-cpp.h>
-#include <optional>
+#include "engine/db/ibpp/IbppBlob.h"
 
 namespace fr
 {
 
-class FbCppTransaction : public ITransaction
+IbppBlob::IbppBlob(IBPP::Database db, IBPP::Transaction tr)
 {
-public:
-    FbCppTransaction(fbcpp::Attachment& attachment);
-    virtual ~FbCppTransaction() = default;
+    blobM = IBPP::BlobFactory(db, tr);
+}
 
-    virtual void start() override;
-    virtual void commit() override;
-    virtual void rollback() override;
-    virtual void commitRetain() override;
-    virtual void rollbackRetain() override;
+void IbppBlob::open()
+{
+    blobM->Open();
+}
 
-    virtual bool isActive() override;
+void IbppBlob::create()
+{
+    blobM->Create();
+}
 
-    virtual void setAccessMode(TransactionAccessMode mode) override;
-    virtual void setIsolationLevel(TransactionIsolationLevel level) override;
-    virtual void setLockResolution(TransactionLockResolution resolution) override;
+void IbppBlob::close()
+{
+    blobM->Close();
+}
 
-    fbcpp::Transaction& getFbCppTransaction();
+void IbppBlob::cancel()
+{
+    blobM->Cancel();
+}
 
-private:
-    fbcpp::Attachment& attachmentM;
-    std::optional<fbcpp::Transaction> transactionM;
-    TransactionAccessMode modeM;
-    TransactionIsolationLevel levelM;
-    TransactionLockResolution resolutionM;
-};
+int IbppBlob::read(void* buffer, int size)
+{
+    return blobM->Read(buffer, size);
+}
+
+void IbppBlob::write(const void* buffer, int size)
+{
+    blobM->Write(buffer, size);
+}
+
+long IbppBlob::getLength()
+{
+    int size, segments, maxsegment;
+    blobM->Info(&size, &segments, &maxsegment);
+    return (long)size;
+}
+
+int IbppBlob::getSegmentCount()
+{
+    int size, segments, maxsegment;
+    blobM->Info(&size, &segments, &maxsegment);
+    return segments;
+}
+
+int IbppBlob::getMaxSegmentSize()
+{
+    int size, segments, maxsegment;
+    blobM->Info(&size, &segments, &maxsegment);
+    return maxsegment;
+}
 
 } // namespace fr
-
-#endif // FR_FBCPP_TRANSACTION_H

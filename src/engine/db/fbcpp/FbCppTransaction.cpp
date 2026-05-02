@@ -25,9 +25,10 @@
 
 namespace fr
 {
-
 FbCppTransaction::FbCppTransaction(fbcpp::Attachment& attachment)
-    : attachmentM(attachment), modeM(TransactionAccessMode::Read), levelM(TransactionIsolationLevel::ReadCommitted)
+    : attachmentM(attachment), modeM(TransactionAccessMode::Write), 
+      levelM(TransactionIsolationLevel::Concurrency),
+      resolutionM(TransactionLockResolution::Wait)
 {
 }
 
@@ -43,8 +44,15 @@ void FbCppTransaction::start()
         options.setIsolationLevel(fbcpp::TransactionIsolationLevel::CONSISTENCY);
     else if (levelM == TransactionIsolationLevel::Concurrency)
         options.setIsolationLevel(fbcpp::TransactionIsolationLevel::SNAPSHOT);
-    else
+    else if (levelM == TransactionIsolationLevel::ReadCommitted)
         options.setIsolationLevel(fbcpp::TransactionIsolationLevel::READ_COMMITTED);
+    else if (levelM == TransactionIsolationLevel::ReadDirty)
+        options.setIsolationLevel(fbcpp::TransactionIsolationLevel::READ_COMMITTED); // fallback
+
+    if (resolutionM == TransactionLockResolution::Wait)
+        options.setWaitMode(fbcpp::TransactionWaitMode::WAIT);
+    else
+        options.setWaitMode(fbcpp::TransactionWaitMode::NO_WAIT);
 
     transactionM.emplace(attachmentM, options);
 }
@@ -92,6 +100,18 @@ void FbCppTransaction::setAccessMode(TransactionAccessMode mode)
 void FbCppTransaction::setIsolationLevel(TransactionIsolationLevel level)
 {
     levelM = level;
+}
+
+void FbCppTransaction::setLockResolution(TransactionLockResolution resolution)
+{
+    resolutionM = resolution;
+}
+
+fbcpp::Transaction& FbCppTransaction::getFbCppTransaction()
+{
+    if (!transactionM)
+        throw std::runtime_error("Transaction not started");
+    return *transactionM;
 }
 
 } // namespace fr

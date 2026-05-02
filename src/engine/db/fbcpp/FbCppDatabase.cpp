@@ -169,7 +169,7 @@ IStatementPtr FbCppDatabase::createStatement(ITransactionPtr tr)
     auto fbTr = std::dynamic_pointer_cast<FbCppTransaction>(tr);
     if (!fbTr)
         throw std::runtime_error("Invalid transaction type for fb-cpp backend");
-    return std::make_shared<FbCppStatement>(*attachmentM, fbTr->getFbCppTransaction());
+    return std::make_shared<FbCppStatement>(shared_from_this(), tr, *attachmentM, fbTr->getFbCppTransaction());
 }
 
 std::string FbCppDatabase::getTimezoneName(int timezoneId)
@@ -206,6 +206,38 @@ void FbCppDatabase::getInfo(DatabaseInfoData* data)
     data->ods = 13;
     data->pageSize = 4096;
     data->nextTransaction = 1;
+}
+
+void FbCppDatabase::getStatistics(int* fetch, int* mark, int* read, int* write, int* mem)
+{
+    if (fetch) *fetch = 0;
+    if (mark) *mark = 0;
+    if (read) *read = 0;
+    if (write) *write = 0;
+    if (mem) *mem = 0;
+}
+
+void FbCppDatabase::getCounts(int* ins, int* upd, int* del, int* ridx, int* rseq)
+{
+    if (ins) *ins = 0;
+    if (upd) *upd = 0;
+    if (del) *del = 0;
+    if (ridx) *ridx = 0;
+    if (rseq) *rseq = 0;
+}
+
+void FbCppDatabase::getDetailedCounts(std::map<int, CountInfo>& /*counts*/)
+{
+}
+
+IBlobPtr FbCppDatabase::createBlob(ITransactionPtr tr)
+{
+    if (!attachmentM)
+        throw std::runtime_error("Database not connected");
+    auto fbCppTr = std::dynamic_pointer_cast<FbCppTransaction>(tr);
+    if (!fbCppTr)
+        throw std::runtime_error("Invalid transaction type for fb-cpp backend");
+    return std::make_shared<FbCppBlob>(*attachmentM, fbCppTr->getFbCppTransaction());
 }
 
 } // namespace fr

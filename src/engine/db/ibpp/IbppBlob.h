@@ -21,44 +21,39 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef FR_FBCPP_TRANSACTION_H
-#define FR_FBCPP_TRANSACTION_H
+#ifndef FR_IBPP_BLOB_H
+#define FR_IBPP_BLOB_H
 
-#include "engine/db/ITransaction.h"
-#include <fb-cpp/fb-cpp.h>
-#include <optional>
+#include "engine/db/IBlob.h"
+#include <ibpp.h>
 
 namespace fr
 {
 
-class FbCppTransaction : public ITransaction
+class IbppBlob : public IBlob
 {
 public:
-    FbCppTransaction(fbcpp::Attachment& attachment);
-    virtual ~FbCppTransaction() = default;
+    IbppBlob(IBPP::Database db, IBPP::Transaction tr);
+    virtual ~IbppBlob() = default;
 
-    virtual void start() override;
-    virtual void commit() override;
-    virtual void rollback() override;
-    virtual void commitRetain() override;
-    virtual void rollbackRetain() override;
+    virtual void open() override;
+    virtual void create() override;
+    virtual void close() override;
+    virtual void cancel() override;
 
-    virtual bool isActive() override;
+    virtual int read(void* buffer, int size) override;
+    virtual void write(const void* buffer, int size) override;
+    
+    virtual long getLength() override;
+    virtual int getSegmentCount() override;
+    virtual int getMaxSegmentSize() override;
 
-    virtual void setAccessMode(TransactionAccessMode mode) override;
-    virtual void setIsolationLevel(TransactionIsolationLevel level) override;
-    virtual void setLockResolution(TransactionLockResolution resolution) override;
-
-    fbcpp::Transaction& getFbCppTransaction();
+    IBPP::Blob& getIBPPBlob() { return blobM; }
 
 private:
-    fbcpp::Attachment& attachmentM;
-    std::optional<fbcpp::Transaction> transactionM;
-    TransactionAccessMode modeM;
-    TransactionIsolationLevel levelM;
-    TransactionLockResolution resolutionM;
+    IBPP::Blob blobM;
 };
 
 } // namespace fr
 
-#endif // FR_FBCPP_TRANSACTION_H
+#endif // FR_IBPP_BLOB_H

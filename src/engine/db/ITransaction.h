@@ -30,7 +30,8 @@ namespace fr
 {
 
 enum class TransactionAccessMode { Read, Write };
-enum class TransactionIsolationLevel { Consistency, Concurrency, ReadCommitted };
+enum class TransactionIsolationLevel { Consistency, Concurrency, ReadCommitted, ReadDirty };
+enum class TransactionLockResolution { Wait, NoWait };
 
 class ITransaction
 {
@@ -47,6 +48,7 @@ public:
 
     virtual void setAccessMode(TransactionAccessMode mode) = 0;
     virtual void setIsolationLevel(TransactionIsolationLevel level) = 0;
+    virtual void setLockResolution(TransactionLockResolution resolution) = 0;
 };
 
 } // namespace fr

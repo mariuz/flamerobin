@@ -77,11 +77,11 @@ wxString DataGridRowBuffer::getString(unsigned index)
     return stringsM[index];
 }
 
-IBPP::Blob* DataGridRowBuffer::getBlob(unsigned index)
+fr::IBlobPtr DataGridRowBuffer::getBlob(unsigned index)
 {
     if (index >= blobsM.size())
-        return 0;
-    return &(blobsM[index]);
+        return nullptr;
+    return blobsM[index];
 }
 
 bool DataGridRowBuffer::getValue(unsigned offset, double& value)
@@ -140,12 +140,12 @@ bool DataGridRowBuffer::getValue(unsigned offset, int128_t& value)
     return true;
 }
 
-bool DataGridRowBuffer::getValue(unsigned offset, IBPP::DBKey& value,
+bool DataGridRowBuffer::getValue(unsigned offset, fr::DBKey& value,
     unsigned size)
 {
     if (offset + size > dataM.size())
         return false;
-    value.SetKey(&dataM[offset], size);
+    memcpy(value.data(), &dataM[offset], std::min((unsigned)value.size(), size));
     return true;
 }
 
@@ -207,7 +207,7 @@ void DataGridRowBuffer::setString(unsigned num, const wxString& value)
     invalidateIsDeletable();
 }
 
-void DataGridRowBuffer::setBlob(unsigned num, IBPP::Blob value)
+void DataGridRowBuffer::setBlob(unsigned num, fr::IBlobPtr value)
 {
     if (num >= blobsM.size())
         blobsM.resize(num + 1);
@@ -271,11 +271,11 @@ void  DataGridRowBuffer::setValue(unsigned offset, int128_t value)
     invalidateIsDeletable();
 }
 
-void DataGridRowBuffer::setValue(unsigned offset, IBPP::DBKey value)
+void DataGridRowBuffer::setValue(unsigned offset, fr::DBKey value)
 {
-    if (offset + value.Size() > dataM.size())
-        dataM.resize(offset + value.Size(), 0);
-    value.GetKey(&dataM[offset], value.Size());
+    if (offset + value.size() > dataM.size())
+        dataM.resize(offset + value.size(), 0);
+    memcpy(&dataM[offset], value.data(), value.size());
     invalidateIsDeletable();
 }
 
@@ -368,4 +368,3 @@ void InsertedGridRowBuffer::setFieldNA(unsigned num, bool isNA)
     }
     invalidateIsDeletable();
 }
-

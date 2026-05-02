@@ -241,27 +241,27 @@ END_EVENT_TABLE()
 class FRInputBlobStream : public wxInputStream
 {
     public:
-        FRInputBlobStream(IBPP::Blob blob);
+        FRInputBlobStream(fr::IBlobPtr blob);
         virtual ~FRInputBlobStream();
         virtual size_t GetSize() const;
     protected:
         virtual size_t OnSysRead(void *buffer, size_t size);          
     private:
-        IBPP::Blob blobM;
+        fr::IBlobPtr blobM;
         int sizeM;
 };
 
 class FROutputBlobStream : public wxOutputStream
 {
     public:
-        FROutputBlobStream(IBPP::Blob blob);
+        FROutputBlobStream(fr::IBlobPtr blob);
         virtual ~FROutputBlobStream();
         
         virtual bool Close();
     protected:
         virtual size_t OnSysWrite(const void *buffer, size_t bufsize);
     private:
-        IBPP::Blob blobM;
+        fr::IBlobPtr blobM;
 };
 
 
@@ -392,8 +392,10 @@ EditBlobDialog::EditBlobDialog(wxWindow* parent, wxMBConv* converterM)
     rowM = 0;
     colM = 0;
     blobM = 0;
+    blobDALM = nullptr;
     loadingM = false;
     statementM = 0;
+    statementDALM = nullptr;
     readonlyM = false;
 
     this->converterM = converterM;
@@ -531,13 +533,14 @@ bool EditBlobDialog::setBlob(DataGrid* dg, DataGridTable* dgt,
 {
     // cancel load progress or wait for save progress
     progressCancel();
-    
+
     // Save last blob value if modified
     if (saveOldValue)
         saveBlob();
     dataGridTableM = dgt;
     dataGridM = dg;
     statementM = st;
+    statementDALM = nullptr;
     rowM = row;
     colM = col;
     readonlyM = dataGridTableM->isReadonlyColumn(colM);
@@ -545,9 +548,37 @@ bool EditBlobDialog::setBlob(DataGrid* dg, DataGridTable* dgt,
     // generator blob fieldname
     wxString tableName = dgt->getTableName();
     wxString fieldName = dg->GetColLabelValue(dg->GetGridCursorCol());
-    fieldNameM  = tableName + "." + fieldName;
+    fieldNameM = tableName + "." + fieldName;
 
-    dialogCaptionM = wxString::Format(_("Edit BLOB: %s #%i"), fieldNameM.c_str(), rowM+1);
+    dialogCaptionM = wxString::Format(_("Edit BLOB: %s #%i"), fieldNameM.c_str(), rowM + 1);
+    SetTitle(dialogCaptionM);
+
+    return loadBlob();
+}
+
+bool EditBlobDialog::setBlob(DataGrid* dg, DataGridTable* dgt,
+    fr::IStatementPtr st, unsigned row, unsigned col, bool saveOldValue)
+{
+    // cancel load progress or wait for save progress
+    progressCancel();
+
+    // Save last blob value if modified
+    if (saveOldValue)
+        saveBlob();
+    dataGridTableM = dgt;
+    dataGridM = dg;
+    statementM = nullptr;
+    statementDALM = st;
+    rowM = row;
+    colM = col;
+    readonlyM = dataGridTableM->isReadonlyColumn(colM);
+
+    // generator blob fieldname
+    wxString tableName = dgt->getTableName();
+    wxString fieldName = dg->GetColLabelValue(dg->GetGridCursorCol());
+    fieldNameM = tableName + "." + fieldName;
+
+    dialogCaptionM = wxString::Format(_("Edit BLOB: %s #%i"), fieldNameM.c_str(), rowM + 1);
     SetTitle(dialogCaptionM);
 
     return loadBlob();
@@ -570,22 +601,18 @@ bool EditBlobDialog::loadBlob()
     if (isBlob)
     {
         // Loading BLOB into Editor
-        IBPP::Blob* tmpBlob = dataGridTableM->getBlob(rowM, colM, false);
-        if (tmpBlob != 0)
-            blobM = *tmpBlob;
-        else
-            blobM = 0;
+        blobDALM = dataGridTableM->getBlob(rowM, colM, false);
 
-        FRInputBlobStream inpblob(blobM);
+        FRInputBlobStream inpblob(blobDALM);
 
         if (!isTextual)
         {
-            res = loadFromStreamAsBinary(inpblob, blobM == 0, _("Loading BLOB into editor."));
+            res = loadFromStreamAsBinary(inpblob, !blobDALM, _("Loading BLOB into editor."));
             editorModeM = binary;
         }
         else
         {
-            res = loadFromStreamAsText(inpblob, blobM == 0, _("Loading BLOB into editor."));
+            res = loadFromStreamAsText(inpblob, !blobDALM, _("Loading BLOB into editor."));
             editorModeM = text;
         }
 
@@ -605,6 +632,7 @@ bool EditBlobDialog::loadBlob()
     }
     else
     {
+        blobDALM = nullptr;
         blobM = 0;
         notebookAddPageById(noData);
         notebookRemovePageById(binary);
@@ -1005,23 +1033,22 @@ void EditBlobDialog::saveBlob()
 
         if (cacheIsNullM)
         {
-
-            b.blob = 0;
+            b.blob = nullptr;
         }
         else
         {
             wxMemoryInputStream inBuf(*cacheM);
 
             inBuf.Read((void*)buffer, 32767);
-            int bufLen = inBuf.LastRead();
-            b.blob->Create();
+            int bufLen = (int)inBuf.LastRead();
+            b.blob->create();
             while ((bufLen > 0) && (!progress->isCanceled()))
             {
-                b.blob->Write(buffer, bufLen);
+                b.blob->write(buffer, bufLen);
                 inBuf.Read((void*)buffer, 32767);
-                bufLen = inBuf.LastRead();
+                bufLen = (int)inBuf.LastRead();
             }
-            b.blob->Close();
+            b.blob->close();
         }
 
         ok = !progress->isCanceled();
@@ -1036,30 +1063,22 @@ void EditBlobDialog::saveBlob()
         bs.Close();
 
         if (isNull)
-            b.blob = 0;
+            b.blob = nullptr;
     }
 
     if (!ok)
         return;
 
-    if (b.blob == 0)
+    if (!b.blob)
         dataGridTableM->setValueToNull(b.row, b.col);
     else
     {
         dataGridTableM->setBlob(b);
     }
-    blobM = b.blob;
+    blobDALM = b.blob;
+    blobM = 0; // Clear IBPP blob if any
 
     // update datagrid to force an update (in GUI) of the changed blob-value
-    // NOTE: There are two reasons to call it
-    // 1) The data grid has to be updated to show the new blob value
-    // 2) There will be a error if user changes to another blob and
-    //    then again to the same. If the blob is selected again the
-    //    cell will be updated and opens the blob. This will happen
-    //    while the cancel-dialog in loadBlob is shown. (wxYieldIfNeeded)
-    //    At this moment the blob is already opend by loadBlob and
-    //    the IBPP::LocicalException - blob already open will occur.
-    // amaier/2009-07-19
     dataGridM->refreshAndInvalidateAttributes();
 
     cacheDelete();
@@ -1342,15 +1361,14 @@ END_EVENT_TABLE()
 
 // Helper-Class for streaming into blob / buffer
 // frInputBlobStream
-FRInputBlobStream::FRInputBlobStream(IBPP::Blob blob)
+FRInputBlobStream::FRInputBlobStream(fr::IBlobPtr blob)
     :wxInputStream()
 {
     blobM = blob;
-    if (blobM != 0)
+    if (blobM)
     {
-        blobM->Close();
-        blobM->Open();
-        blobM->Info(&sizeM, 0, 0);
+        blobM->open();
+        sizeM = (int)blobM->getLength();
     }
     else
         sizeM = 0;
@@ -1358,30 +1376,30 @@ FRInputBlobStream::FRInputBlobStream(IBPP::Blob blob)
 
 FRInputBlobStream::~FRInputBlobStream()
 {
-    if (blobM != 0)
-        blobM->Close();
+    if (blobM)
+        blobM->close();
 }
 
 size_t FRInputBlobStream::OnSysRead(void* buffer, size_t size)
 {
-    if ((blobM != 0) && (sizeM > 0))
-        return blobM->Read(buffer, size);
+    if (blobM && (sizeM > 0))
+        return (size_t)blobM->read(buffer, (int)size);
     else
         return 0;
 }
 
 size_t FRInputBlobStream::GetSize() const
 {
-    return sizeM;
+    return (size_t)sizeM;
 }
 
 // Helper-Class for streaming into blob / buffer
 // frOutputBlobStream
-FROutputBlobStream::FROutputBlobStream(IBPP::Blob blob)
+FROutputBlobStream::FROutputBlobStream(fr::IBlobPtr blob)
     :wxOutputStream()
 {
     blobM = blob;
-    blobM->Create();
+    blobM->create();
 }
 
 FROutputBlobStream::~FROutputBlobStream()
@@ -1394,14 +1412,14 @@ size_t FROutputBlobStream::OnSysWrite(const void* buffer, size_t bufsize)
     if (bufsize == 0)
         return 0;
 
-    blobM->Write(buffer, bufsize);
+    blobM->write(buffer, (int)bufsize);
     return bufsize;
 }
 
 bool FROutputBlobStream::Close()
 {
-    if (blobM != 0)
-        blobM->Close();
+    if (blobM)
+        blobM->close();
     return true;
 }
 

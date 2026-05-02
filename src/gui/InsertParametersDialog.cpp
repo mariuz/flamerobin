@@ -169,10 +169,24 @@ public:
 //  it's better to merge both, in a single one parameter, and use Set(name, value)
 //  let IBPP set the values by itself
 InsertParametersDialog::InsertParametersDialog(wxWindow* parent, IBPP::Statement& st, Database *db, std::map<std::string, wxString>& pParameterSaveList, std::map<std::string, wxString>& pParameterSaveListOptionNull)
-    :BaseDialog(parent, -1, wxEmptyString), bufferM(0), statementM(st), databaseM(db), parameterSaveList(pParameterSaveList), parameterSaveListOptionNull(pParameterSaveListOptionNull)
+    :BaseDialog(parent, -1, wxEmptyString), bufferM(0), statementM(st), statementDALM(nullptr), databaseM(db), parameterSaveList(pParameterSaveList), parameterSaveListOptionNull(pParameterSaveListOptionNull)
 {
+    createGrid();
+}
 
-    int count = statementM->ParametersByName().size();
+InsertParametersDialog::InsertParametersDialog(wxWindow* parent, fr::IStatementPtr st, Database *db, std::map<std::string, wxString>& pParameterSaveList, std::map<std::string, wxString>& pParameterSaveListOptionNull)
+    :BaseDialog(parent, -1, wxEmptyString), bufferM(0), statementM(nullptr), statementDALM(st), databaseM(db), parameterSaveList(pParameterSaveList), parameterSaveListOptionNull(pParameterSaveListOptionNull)
+{
+    createGrid();
+}
+
+void InsertParametersDialog::createGrid()
+{
+    int count = 0;
+    if (statementDALM)
+        count = statementDALM->getParameterCount();
+    else
+        count = statementM->ParametersByName().size();
 
     // 500 should be reasonable for enough rows on the screen, but not too much
     gridM = new wxGrid(getControlsPanel(), ID_Grid, wxDefaultPosition,
@@ -189,7 +203,7 @@ InsertParametersDialog::InsertParametersDialog(wxWindow* parent, IBPP::Statement
         wxTRANSLATE("Special"),    wxTRANSLATE("Value") };
 
     bufferM = new InsertedGridRowBuffer(count);
-    for (unsigned u = 0; (int)u < count; u++)
+    for (unsigned u = 0; (int)u < (unsigned)count; u++)
         bufferM->setFieldNA(u, true);
 
     gridM->CreateGrid(count, sizeof(labels)/sizeof(wxString));
@@ -501,37 +515,75 @@ void InsertParametersDialog::preloadSpecialColumns()
     }
 
     // step 2: load those from the database
-    IBPP::Statement st1 = IBPP::StatementFactory(statementM->DatabasePtr(),
-        statementM->TransactionPtr());
-    if (!first) // we do need some data
+    if (statementDALM)
     {
-        sql += " FROM RDB$DATABASE";
-        st1->Prepare(wx2std(sql));
-        st1->Execute();
-        st1->Fetch();
-    }
+        fr::IStatementPtr st1 = databaseM->getDALDatabase()->createStatement(
+            statementDALM->getTransaction());
+        if (!first) // we do need some data
+        {
+            sql += " FROM RDB$DATABASE";
+            st1->prepare(wx2std(sql));
+            st1->execute();
+            st1->fetch();
+        }
 
-    // step 3: save values into buffer and edit controls
-    //         so that the next run doesn't reload generators
-    unsigned col = 1;
-    for (std::vector<InsertParametersColumnInfo>::iterator it = columnsM.begin();
-        it != columnsM.end(); ++it)
+        // step 3: save values into buffer and edit controls
+        //         so that the next run doesn't reload generators
+        unsigned col = 1;
+        for (std::vector<InsertParametersColumnInfo>::iterator it = columnsM.begin();
+            it != columnsM.end(); ++it)
+        {
+            InsertParametersOption sel = getInsertParametersOption(gridM, (*it).row);
+            if (!optionValueLoadedFromDatabase(sel))
+                continue;
+            bufferM->setFieldNA((*it).index, false);
+            bufferM->setFieldNull((*it).index, st1->isNull(col - 1));
+            if (!st1->isNull(col - 1))
+                (*it).columnDef->setValue(bufferM, col, st1, wxConvCurrent, databaseM);
+            ++col;
+            //if (sel != ioGenerator)  // what follows is only for generators
+                continue;
+            gridM->SetCellValue((*it).row, 3,
+                (*it).columnDef->getAsString(bufferM, databaseM));
+            gridM->SetCellValue((*it).row, 2,
+                insertParametersOptionStrings[ioRegular]);  // treat as regular value
+            updateControls((*it).row);
+        }
+    }
+    else
     {
-        InsertParametersOption sel = getInsertParametersOption(gridM, (*it).row);
-        if (!optionValueLoadedFromDatabase(sel))
-            continue;
-        bufferM->setFieldNA((*it).index, false);
-        bufferM->setFieldNull((*it).index, st1->IsNull(col));
-        if (!st1->IsNull(col))
-            (*it).columnDef->setValue(bufferM, col, st1, wxConvCurrent, databaseM);
-        ++col;
-        //if (sel != ioGenerator)  // what follows is only for generators
-            continue;
-        gridM->SetCellValue((*it).row, 3,
-            (*it).columnDef->getAsString(bufferM, databaseM));
-        gridM->SetCellValue((*it).row, 2,
-            insertParametersOptionStrings[ioRegular]);  // treat as regular value
-        updateControls((*it).row);
+        IBPP::Statement st1 = IBPP::StatementFactory(statementM->DatabasePtr(),
+            statementM->TransactionPtr());
+        if (!first) // we do need some data
+        {
+            sql += " FROM RDB$DATABASE";
+            st1->Prepare(wx2std(sql));
+            st1->Execute();
+            st1->Fetch();
+        }
+
+        // step 3: save values into buffer and edit controls
+        //         so that the next run doesn't reload generators
+        unsigned col = 1;
+        for (std::vector<InsertParametersColumnInfo>::iterator it = columnsM.begin();
+            it != columnsM.end(); ++it)
+        {
+            InsertParametersOption sel = getInsertParametersOption(gridM, (*it).row);
+            if (!optionValueLoadedFromDatabase(sel))
+                continue;
+            bufferM->setFieldNA((*it).index, false);
+            bufferM->setFieldNull((*it).index, st1->IsNull(col));
+            if (!st1->IsNull(col))
+                (*it).columnDef->setValue(bufferM, col, st1, wxConvCurrent, databaseM);
+            ++col;
+            //if (sel != ioGenerator)  // what follows is only for generators
+                continue;
+            gridM->SetCellValue((*it).row, 3,
+                (*it).columnDef->getAsString(bufferM, databaseM));
+            gridM->SetCellValue((*it).row, 2,
+                insertParametersOptionStrings[ioRegular]);  // treat as regular value
+            updateControls((*it).row);
+        }
     }
 }
 
@@ -576,7 +628,7 @@ void InsertParametersDialog::OnCancelButtonClick(wxCommandEvent& WXUNUSED(event)
 {
     Close();
 }
-void InsertParametersDialog::parseDate(int row, const wxString& source)
+void InsertParametersDialog::parseDate(int index, const wxString& source)
 {
     IBPP::Date idt;
     idt.Today();
@@ -600,9 +652,14 @@ void InsertParametersDialog::parseDate(int row, const wxString& source)
             throw FRError(_("Cannot parse date"));
         idt.SetDate(y, m, d);
     }
-    statementM->Set(row+1, idt);
+
+    if (statementDALM)
+        statementDALM->setDate(index, idt.Year(), idt.Month(), idt.Day());
+    else
+        statementM->Set(index + 1, idt);
 }
-void InsertParametersDialog::parseTime(int row, const wxString& source)
+
+void InsertParametersDialog::parseTime(int index, const wxString& source)
 {
     IBPP::Time itm;
     itm.Now();
@@ -618,10 +675,18 @@ void InsertParametersDialog::parseTime(int row, const wxString& source)
             throw FRError(_("Cannot parse time"));
         itm.SetTime(IBPP::Time::tmNone, hr, mn, sc, 10 * ms, IBPP::Time::TZ_NONE, NULL);
     }
-    statementM->Set(row+1, itm);
+
+    if (statementDALM)
+    {
+        int hr, mn, sc, ms;
+        itm.GetTime(hr, mn, sc, ms);
+        statementDALM->setTime(index, hr, mn, sc, ms);
+    }
+    else
+        statementM->Set(index + 1, itm);
 }
 
-void InsertParametersDialog::parseTimeStamp(int row, const wxString& source)
+void InsertParametersDialog::parseTimeStamp(int index, const wxString& source)
 {
 
     IBPP::Timestamp its;
@@ -655,7 +720,15 @@ void InsertParametersDialog::parseTimeStamp(int row, const wxString& source)
     }
 
     // all done, set the value
-    statementM->Set(row+1, its);
+    if (statementDALM)
+    {
+        int y, mo, d, hr, mi, s, ms;
+        its.GetDate(y, mo, d);
+        its.GetTime(hr, mi, s, ms);
+        statementDALM->setTimestamp(index, y, mo, d, hr, mi, s, ms);
+    }
+    else
+        statementM->Set(index + 1, its);
 }
 
 void InsertParametersDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))

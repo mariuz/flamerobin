@@ -312,3 +312,37 @@ wxString IBPPtype2string(Database* db, IBPP::SDT t, int subtype, int size,
     }
 }
 
+wxString DALtype2string(Database* db, fr::ColumnType t, int subtype, int size,
+    int scale)
+{
+    if (scale > 0)
+        return wxString::Format("NUMERIC(%d,%d)", size == 4 ? 9 : 18, scale);
+
+    switch (t)
+    {
+    case fr::ColumnType::Varchar:
+    case fr::ColumnType::Char:
+    {
+        int bpc = db->getCharsetById(subtype)->getBytesPerChar();
+        if (subtype == 1) // charset OCTETS
+            return wxString::Format("OCTETS(%d)", bpc ? size / bpc : size);
+        return wxString::Format("STRING(%d)", bpc ? size / bpc : size);
+    }
+    case fr::ColumnType::Blob:      return wxString::Format("BLOB SUB_TYPE %d", subtype);
+    case fr::ColumnType::Date:      return "DATE";
+    case fr::ColumnType::Time:      return "TIME";
+    case fr::ColumnType::Timestamp: return "TIMESTAMP";
+    case fr::ColumnType::Integer:   return "INTEGER";
+    case fr::ColumnType::BigInt:    return "BIGINT";
+    case fr::ColumnType::Float:     return "FLOAT";
+    case fr::ColumnType::Double:    return "DOUBLE PRECISION";
+    case fr::ColumnType::Boolean:   return "BOOLEAN";
+    case fr::ColumnType::TimeTz:    return "TIME WITH TIMEZONE";
+    case fr::ColumnType::TimestampTz: return "TIMESTAMP WITH TIMEZONE";
+    case fr::ColumnType::Int128:    return "INT128";
+    case fr::ColumnType::Decfloat16:     return "DECFLOAT(16)";
+    case fr::ColumnType::Decfloat34:     return "DECFLOAT(34)";
+    default:                return "UNKNOWN";
+    }
+}
+

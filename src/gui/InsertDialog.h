@@ -56,6 +56,8 @@ class InsertDialog: public BaseDialog
 public:
     InsertDialog(wxWindow* parent, const wxString& tableName, DataGridTable *,
         IBPP::Statement& st, Database *db);
+    InsertDialog(wxWindow* parent, const wxString& tableName, DataGridTable *,
+        fr::IStatementPtr st, Database *db);
     virtual ~InsertDialog();
     void OnOkButtonClick(wxCommandEvent& event);
     void OnCancelButtonClick(wxCommandEvent& event);
@@ -71,7 +73,9 @@ private:
     Database *databaseM;
     void storeValues();
     void preloadSpecialColumns();
-    IBPP::Statement& statementM;
+    void createGrid(DataGridTable *gridTable);
+    IBPP::Statement statementM;
+    fr::IStatementPtr statementDALM;
     std::vector<InsertColumnInfo> columnsM;
     DataGridTable *gridTableM;
     InsertedGridRowBuffer *bufferM;

@@ -25,11 +25,13 @@
 #define FR_IDATABASE_H
 
 #include "engine/db/DatabaseBackend.h"
+#include <memory>
+#include <map>
 
 namespace fr
 {
 
-class IDatabase
+class IDatabase : public std::enable_shared_from_this<IDatabase>
 {
 public:
     virtual ~IDatabase() = default;
@@ -58,6 +60,12 @@ public:
 
     virtual std::string getTimezoneName(int timezoneId) = 0;
     virtual void getInfo(DatabaseInfoData* data) = 0;
+
+    virtual void getStatistics(int* fetch, int* mark, int* read, int* write, int* mem) = 0;
+    virtual void getCounts(int* ins, int* upd, int* del, int* ridx, int* rseq) = 0;
+    virtual void getDetailedCounts(std::map<int, CountInfo>& counts) = 0;
+
+    virtual IBlobPtr createBlob(ITransactionPtr tr) = 0;
 
     virtual DatabaseBackend getBackendType() const = 0;
 };

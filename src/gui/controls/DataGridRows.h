@@ -130,8 +130,9 @@ struct DataGridFieldInfo
 };
 struct DataGridRowsBlob
 {
-    IBPP::Blob blob;
+    fr::IBlobPtr blob;
     IBPP::Statement st;
+    fr::IStatementPtr stDAL;
     unsigned row;
     unsigned col;
 };
@@ -190,7 +191,7 @@ public:
     void addRow(DataGridRowBuffer* buffer);
 
     // BLOB-Stuff
-    IBPP::Blob* getBlob(unsigned row, unsigned col, bool validateBlob);
+    fr::IBlobPtr getBlob(unsigned row, unsigned col, bool validateBlob);
     DataGridRowsBlob setBlobPrepare(unsigned row, unsigned col);
     void setBlob(DataGridRowsBlob &b);
 };

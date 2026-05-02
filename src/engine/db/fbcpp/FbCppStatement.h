@@ -34,7 +34,7 @@ namespace fr
 class FbCppStatement : public IStatement
 {
 public:
-    FbCppStatement(fbcpp::Attachment& attachment, fbcpp::Transaction& transaction);
+    FbCppStatement(IDatabasePtr db, ITransactionPtr tr, fbcpp::Attachment& attachment, fbcpp::Transaction& transaction);
     virtual ~FbCppStatement() = default;
 
     virtual void prepare(const std::string& sql) override;
@@ -50,6 +50,11 @@ public:
     virtual void setInt64(int index, int64_t value) override;
     virtual void setDouble(int index, double value) override;
     virtual void setBool(int index, bool value) override;
+    virtual void setDate(int index, int year, int month, int day) override;
+    virtual void setTime(int index, int hour, int minute, int second, int fraction) override;
+    virtual void setTimestamp(int index, int year, int month, int day,
+        int hour, int minute, int second, int fraction) override;
+    virtual void setBytes(int index, const void* data, int size) override;
 
     // Result fetching (0-based)
     virtual bool isNull(int index) override;
@@ -58,6 +63,10 @@ public:
     virtual int64_t getInt64(int index) override;
     virtual double getDouble(int index) override;
     virtual bool getBool(int index) override;
+
+    virtual void getBytes(int index, void* data, int size) override;
+    virtual IBlobPtr getBlob(int index) override;
+    virtual void setBlob(int index, IBlobPtr blob) override;
 
     virtual std::string getDate(int index) override;
     virtual std::string getTime(int index) override;
@@ -74,7 +83,24 @@ public:
     virtual std::string getColumnAlias(int index) override;
     virtual std::string getColumnTable(int index) override;
 
+    virtual std::string getPlan() override;
+    virtual StatementType getType() override;
+    virtual int getParameterCount() override;
+    virtual std::string getParameterName(int index) override;
+    virtual std::vector<int> findParameterIndicesByName(const std::string& name) override;
+    virtual ColumnType getParameterType(int index) override;
+    virtual int getParameterSubtype(int index) override;
+    virtual int getParameterScale(int index) override;
+    virtual int getParameterSize(int index) override;
+
+    virtual int getAffectedRows() override;
+
+    virtual IDatabasePtr getDatabase() override { return databasePtrM; }
+    virtual ITransactionPtr getTransaction() override { return transactionPtrM; }
+
 private:
+    IDatabasePtr databasePtrM;
+    ITransactionPtr transactionPtrM;
     fbcpp::Attachment& attachmentM;
     fbcpp::Transaction& transactionM;
     std::string sqlM;

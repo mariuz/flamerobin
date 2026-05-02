@@ -22,6 +22,7 @@
 */
 
 #include "engine/db/ibpp/IbppStatement.h"
+#include "engine/db/ibpp/IbppBlob.h"
 #include <stdexcept>
 #include "core/FRInt128.h"
 #include "core/FRDecimal.h"
@@ -30,9 +31,10 @@
 namespace fr
 {
 
-IbppStatement::IbppStatement(IBPP::Database db, IBPP::Transaction tr)
+IbppStatement::IbppStatement(IDatabasePtr db, ITransactionPtr tr, IBPP::Database ibppDb, IBPP::Transaction ibppTr)
+    : databasePtrM(db), transactionPtrM(tr)
 {
-    statementM = IBPP::StatementFactory(db, tr);
+    statementM = IBPP::StatementFactory(ibppDb, ibppTr);
 }
 
 void IbppStatement::prepare(const std::string& sql)
@@ -88,6 +90,44 @@ void IbppStatement::setDouble(int index, double value)
 void IbppStatement::setBool(int index, bool value)
 {
     statementM->Set(index + 1, value);
+}
+
+void IbppStatement::setDate(int index, int year, int month, int day)
+{
+    IBPP::Date d;
+    d.SetDate(year, month, day);
+    statementM->Set(index + 1, d);
+}
+
+void IbppStatement::setTime(int index, int hour, int minute, int second, int fraction)
+{
+    IBPP::Time t;
+    t.SetTime(hour, minute, second, fraction);
+    statementM->Set(index + 1, t);
+}
+
+void IbppStatement::setTimestamp(int index, int year, int month, int day,
+    int hour, int minute, int second, int fraction)
+{
+    IBPP::Timestamp ts;
+    ts.SetDate(year, month, day);
+    ts.SetTime(hour, minute, second, fraction);
+    statementM->Set(index + 1, ts);
+}
+
+void IbppStatement::setBytes(int index, const void* data, int size)
+{
+    if (size == 8)
+    {
+        IBPP::DBKey key;
+        key.SetKey(data, size);
+        statementM->Set(index + 1, key);
+    }
+    else
+    {
+        // For other sizes, we might need a different approach or just throw
+        throw std::runtime_error("setBytes only supported for size 8 (DB_KEY) in IBPP for now");
+    }
 }
 
 bool IbppStatement::isNull(int index)
@@ -172,6 +212,35 @@ bool IbppStatement::getBool(int index)
     bool value;
     statementM->Get(index + 1, value);
     return value;
+}
+
+void IbppStatement::getBytes(int index, void* data, int size)
+{
+    if (size == 8)
+    {
+        IBPP::DBKey key;
+        statementM->Get(index + 1, key);
+        key.GetKey(data, size);
+    }
+    else
+    {
+        throw std::runtime_error("getBytes only supported for size 8 (DB_KEY) in IBPP for now");
+    }
+}
+
+IBlobPtr IbppStatement::getBlob(int index)
+{
+    auto blob = std::make_shared<IbppBlob>(statementM->DatabasePtr(), statementM->TransactionPtr());
+    statementM->Get(index + 1, blob->getIBPPBlob());
+    return blob;
+}
+
+void IbppStatement::setBlob(int index, IBlobPtr blob)
+{
+    auto ibppBlob = std::dynamic_pointer_cast<IbppBlob>(blob);
+    if (!ibppBlob)
+        throw std::runtime_error("Invalid blob type for IBPP backend");
+    statementM->Set(index + 1, ibppBlob->getIBPPBlob());
 }
 
 std::string IbppStatement::getDate(int index)
@@ -299,6 +368,89 @@ std::string IbppStatement::getColumnAlias(int index)
 std::string IbppStatement::getColumnTable(int index)
 {
     return statementM->ColumnTable(index + 1);
+}
+
+std::string IbppStatement::getPlan()
+{
+    std::string plan;
+    statementM->Plan(plan);
+    return plan;
+}
+
+StatementType IbppStatement::getType()
+{
+    IBPP::STT type = statementM->Type();
+    switch (type)
+    {
+        case IBPP::stSelect: return StatementType::Select;
+        case IBPP::stInsert: return StatementType::Insert;
+        case IBPP::stUpdate: return StatementType::Update;
+        case IBPP::stDelete: return StatementType::Delete;
+        case IBPP::stDDL: return StatementType::DDL;
+        case IBPP::stExecProcedure: return StatementType::ExecProcedure;
+        case IBPP::stSetGenerator: return StatementType::SetGenerator;
+        default: return StatementType::Unknown;
+    }
+}
+
+int IbppStatement::getParameterCount()
+{
+    return (int)statementM->ParametersByName().size();
+}
+
+std::string IbppStatement::getParameterName(int index)
+{
+    return statementM->ParametersByName().at(index);
+}
+
+std::vector<int> IbppStatement::findParameterIndicesByName(const std::string& name)
+{
+    return statementM->FindParamsByName(name);
+}
+
+ColumnType IbppStatement::getParameterType(int index)
+{
+    IBPP::SDT type = statementM->ParameterType(index + 1);
+    switch (type)
+    {
+        case IBPP::sdString: return ColumnType::Varchar;
+        case IBPP::sdLargeint: return ColumnType::BigInt;
+        case IBPP::sdInteger: return ColumnType::Integer;
+        case IBPP::sdSmallint: return ColumnType::Integer;
+        case IBPP::sdFloat: return ColumnType::Float;
+        case IBPP::sdDouble: return ColumnType::Double;
+        case IBPP::sdDate: return ColumnType::Date;
+        case IBPP::sdTime: return ColumnType::Time;
+        case IBPP::sdTimestamp: return ColumnType::Timestamp;
+        case IBPP::sdTimeTz: return ColumnType::TimeTz;
+        case IBPP::sdTimestampTz: return ColumnType::TimestampTz;
+        case IBPP::sdBlob: return ColumnType::Blob;
+        case IBPP::sdBoolean: return ColumnType::Boolean;
+        case IBPP::sdInt128: return ColumnType::Int128;
+        case IBPP::sdDec16: return ColumnType::Decfloat16;
+        case IBPP::sdDec34: return ColumnType::Decfloat34;
+        default: return ColumnType::Unknown;
+    }
+}
+
+int IbppStatement::getParameterSubtype(int index)
+{
+    return statementM->ParameterSubtype(index + 1);
+}
+
+int IbppStatement::getParameterScale(int index)
+{
+    return statementM->ParameterScale(index + 1);
+}
+
+int IbppStatement::getParameterSize(int index)
+{
+    return statementM->ParameterSize(index + 1);
+}
+
+int IbppStatement::getAffectedRows()
+{
+    return statementM->AffectedRows();
 }
 
 } // namespace fr

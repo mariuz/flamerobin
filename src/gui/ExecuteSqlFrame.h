@@ -105,7 +105,7 @@ private:
     wxFileName filenameM;
     wxDateTime filenameModificationTimeM;
 
-    void compareCounts(IBPP::DatabaseCounts& one, IBPP::DatabaseCounts& two);
+    void compareCounts(std::map<int, fr::CountInfo>& one, std::map<int, fr::CountInfo>& two);
 
     void showProperties(wxString objectName);
 
@@ -130,12 +130,12 @@ private:
     bool inParseStatementsM = false; // reentrancy guard for parseStatements yields
     bool autoCommitM;
     bool inTransactionM;
-    IBPP::Transaction transactionM;
-    IBPP::Statement statementM;
+    fr::ITransactionPtr transactionM;
+    fr::IStatementPtr statementM;
     bool isTransactionStarted();
-    IBPP::TIL transactionIsolationLevelM;
-    IBPP::TLR transactionLockResolutionM;
-    IBPP::TAM transactionAccessModeM;
+    fr::TransactionIsolationLevel transactionIsolationLevelM;
+    fr::TransactionLockResolution transactionLockResolutionM;
+    fr::TransactionAccessMode transactionAccessModeM;
     bool showStatisticsM;
     void inTransaction(bool started);       // changes controls (enable/disable)
     bool commitTransaction();

@@ -24,6 +24,7 @@
 #include "engine/db/ibpp/IbppDatabase.h"
 #include "engine/db/ibpp/IbppTransaction.h"
 #include "engine/db/ibpp/IbppStatement.h"
+#include "engine/db/ibpp/IbppBlob.h"
 #include <stdexcept>
 
 namespace fr
@@ -148,7 +149,7 @@ IStatementPtr IbppDatabase::createStatement(ITransactionPtr tr)
     auto ibppTr = std::dynamic_pointer_cast<IbppTransaction>(tr);
     if (!ibppTr)
         throw std::runtime_error("Invalid transaction type for IBPP backend");
-    return std::make_shared<IbppStatement>(databaseM, ibppTr->getIBPPTransaction());
+    return std::make_shared<IbppStatement>(shared_from_this(), tr, databaseM, ibppTr->getIBPPTransaction());
 }
 
 } // namespace fr
@@ -177,6 +178,45 @@ void IbppDatabase::getInfo(DatabaseInfoData* data)
         &data->buffers, &data->sweep, &data->forcedWrites, &data->reserve, &data->readOnly);
     databaseM->TransactionInfo(&data->oldestTransaction, &data->oldestActiveTransaction,
         &data->oldestSnapshot, &data->nextTransaction);
+}
+
+void IbppDatabase::getStatistics(int* fetch, int* mark, int* read, int* write, int* mem)
+{
+    if (databaseM.intf())
+        databaseM->Statistics(fetch, mark, read, write, mem);
+}
+
+void IbppDatabase::getCounts(int* ins, int* upd, int* del, int* ridx, int* rseq)
+{
+    if (databaseM.intf())
+        databaseM->Counts(ins, upd, del, ridx, rseq);
+}
+
+void IbppDatabase::getDetailedCounts(std::map<int, CountInfo>& counts)
+{
+    if (!databaseM.intf())
+        return;
+
+    IBPP::DatabaseCounts ibppCounts;
+    databaseM->DetailedCounts(ibppCounts);
+    for (auto const& [relId, ibppInfo] : ibppCounts)
+    {
+        CountInfo info;
+        info.inserts = ibppInfo.inserts;
+        info.updates = ibppInfo.updates;
+        info.deletes = ibppInfo.deletes;
+        info.readIndex = ibppInfo.readIndex;
+        info.readSequence = ibppInfo.readSequence;
+        counts[relId] = info;
+    }
+}
+
+IBlobPtr IbppDatabase::createBlob(ITransactionPtr tr)
+{
+    auto ibppTr = std::dynamic_pointer_cast<IbppTransaction>(tr);
+    if (!ibppTr)
+        throw std::runtime_error("Invalid transaction type for IBPP backend");
+    return std::make_shared<IbppBlob>(databaseM, ibppTr->getIBPPTransaction());
 }
 
 } // namespace fr

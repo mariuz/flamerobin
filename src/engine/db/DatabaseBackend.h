@@ -27,9 +27,13 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <map>
+#include <array>
 
 namespace fr
 {
+
+typedef std::array<uint8_t, 8> DBKey;
 
 enum class DatabaseBackend
 {
@@ -60,6 +64,22 @@ enum class ColumnType
     TimestampTz
 };
 
+enum class StatementType
+{
+    Unknown,
+    Select,
+    Insert,
+    Update,
+    Delete,
+    DDL,
+    ExecProcedure,
+    StartTransaction,
+    Commit,
+    Rollback,
+    SetGenerator,
+    Savepoint
+};
+
 struct DatabaseInfoData
 {
     int ods;
@@ -78,6 +98,17 @@ struct DatabaseInfoData
     int nextTransaction;
 };
 
+struct CountInfo
+{
+    int inserts;
+    int updates;
+    int deletes;
+    int readIndex;
+    int readSequence;
+
+    CountInfo() : inserts(0), updates(0), deletes(0), readIndex(0), readSequence(0) {}
+};
+
 struct UserData
 {
     std::string username;
@@ -94,11 +125,13 @@ class IDatabase;
 class ITransaction;
 class IStatement;
 class IService;
+class IBlob;
 
 typedef std::shared_ptr<IDatabase> IDatabasePtr;
 typedef std::shared_ptr<ITransaction> ITransactionPtr;
 typedef std::shared_ptr<IStatement> IStatementPtr;
 typedef std::shared_ptr<IService> IServicePtr;
+typedef std::shared_ptr<IBlob> IBlobPtr;
 
 } // namespace fr
 

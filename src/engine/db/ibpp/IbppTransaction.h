@@ -46,14 +46,16 @@ public:
 
     virtual void setAccessMode(TransactionAccessMode mode) override;
     virtual void setIsolationLevel(TransactionIsolationLevel level) override;
+    virtual void setLockResolution(TransactionLockResolution resolution) override;
 
-    IBPP::Transaction& getIBPPTransaction() { return transactionM; }
+    IBPP::Transaction getIBPPTransaction();
 
 private:
     IBPP::Database databaseM;
     IBPP::Transaction transactionM;
     TransactionAccessMode modeM;
     TransactionIsolationLevel levelM;
+    TransactionLockResolution resolutionM;
 };
 
 } // namespace fr

@@ -25,20 +25,25 @@
 
 namespace fr
 {
-
 IbppTransaction::IbppTransaction(IBPP::Database db)
-    : databaseM(db), modeM(TransactionAccessMode::Read), levelM(TransactionIsolationLevel::ReadCommitted)
+    : databaseM(db), modeM(TransactionAccessMode::Write), 
+      levelM(TransactionIsolationLevel::Concurrency),
+      resolutionM(TransactionLockResolution::Wait)
 {
 }
 
 void IbppTransaction::start()
 {
     IBPP::TAM am = (modeM == TransactionAccessMode::Read) ? IBPP::amRead : IBPP::amWrite;
-    IBPP::TIL il = IBPP::ilReadCommitted;
+    IBPP::TIL il = IBPP::ilConcurrency;
     if (levelM == TransactionIsolationLevel::Consistency) il = IBPP::ilConsistency;
     else if (levelM == TransactionIsolationLevel::Concurrency) il = IBPP::ilConcurrency;
-    
-    transactionM = IBPP::TransactionFactory(databaseM, am, il);
+    else if (levelM == TransactionIsolationLevel::ReadCommitted) il = IBPP::ilReadCommitted;
+    else if (levelM == TransactionIsolationLevel::ReadDirty) il = IBPP::ilReadDirty;
+
+    IBPP::TLR lr = (resolutionM == TransactionLockResolution::Wait) ? IBPP::lrWait : IBPP::lrNoWait;
+
+    transactionM = IBPP::TransactionFactory(databaseM, am, il, lr);
     transactionM->Start();
 }
 
@@ -85,6 +90,16 @@ void IbppTransaction::setAccessMode(TransactionAccessMode mode)
 void IbppTransaction::setIsolationLevel(TransactionIsolationLevel level)
 {
     levelM = level;
+}
+
+void IbppTransaction::setLockResolution(TransactionLockResolution resolution)
+{
+    resolutionM = resolution;
+}
+
+IBPP::Transaction IbppTransaction::getIBPPTransaction()
+{
+    return transactionM;
 }
 
 } // namespace fr

@@ -49,14 +49,17 @@ public:
     // close without saving (for rollback-transaction)
     void closeDontSave(); 
     // DataGrid is needed to update a blob-cell due to blob is saved
-    bool setBlob(DataGrid* dg, DataGridTable* dgt, 
+    bool setBlob(DataGrid* dg, DataGridTable* dgt,
         IBPP::Statement* st, unsigned row, unsigned col, bool saveOldValue = true);
+    bool setBlob(DataGrid* dg, DataGridTable* dgt,
+        fr::IStatementPtr st, unsigned row, unsigned col, bool saveOldValue = true);
 private:
     enum EditorMode { noData = wxID_HIGHEST+1, 
                       binary = wxID_HIGHEST+2, 
                       text = wxID_HIGHEST+3 };
 
     IBPP::Blob blobM;
+    fr::IBlobPtr blobDALM;
     DataGridTable* dataGridTableM;
     DataGrid* dataGridM;
     wxString dialogCaptionM;
@@ -65,7 +68,8 @@ private:
     unsigned colM;
     unsigned rowM;
     bool runningM;
-    IBPP::Statement* statementM; 
+    IBPP::Statement* statementM;
+    fr::IStatementPtr statementDALM;
     wxMBConv* converterM;  //TODO: if possible, use directly from the database object
 
     std::set<EditorMode> dataValidM;

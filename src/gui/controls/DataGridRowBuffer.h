@@ -25,6 +25,7 @@
 #define FR_DATAGRIDROWBUFFER_H
 
 #include <ibpp.h>
+#include "engine/db/IBlob.h"
 #include <core/FRInt128.h>
 #include <core/FRDecimal.h>
 
@@ -54,7 +55,7 @@ protected:
     std::vector<DataGridRowBufferFieldAttr> fieldAttrM;
     std::vector<uint8_t> dataM;
     std::vector<wxString> stringsM;
-    std::vector<IBPP::Blob> blobsM;
+    std::vector<fr::IBlobPtr> blobsM;
     void invalidateIsDeletable();
     void setIsModified(bool value);
 public:
@@ -63,7 +64,7 @@ public:
     virtual ~DataGridRowBuffer() {}
 
     wxString getString(unsigned index);
-    IBPP::Blob *getBlob(unsigned index);
+    fr::IBlobPtr getBlob(unsigned index);
     bool getValue(unsigned offset, double& value);
     bool getValue(unsigned offset, float& value);
     bool getValue(unsigned offset, dec16_t& value);
@@ -71,7 +72,7 @@ public:
     bool getValue(unsigned offset, int& value);
     bool getValue(unsigned offset, int64_t& value);
     bool getValue(unsigned offset, int128_t& value);
-    bool getValue(unsigned offset, IBPP::DBKey& value, unsigned size);
+    bool getValue(unsigned offset, fr::DBKey& value, unsigned size);
     bool getValue32(unsigned offset, int& timeZone, bool& isGmtFallback);
     bool isFieldNull(unsigned num);
     void setFieldNull(unsigned num, bool isNull);
@@ -80,7 +81,7 @@ public:
     bool isStringLoaded(unsigned num);
     void setStringLoaded(unsigned num, bool isLoaded);
     void setString(unsigned num, const wxString& value);
-    void setBlob(unsigned num, IBPP::Blob b);
+    void setBlob(unsigned num, fr::IBlobPtr b);
     void setValue(unsigned offset, double value);
     void setValue(unsigned offset, float value);
     void setValue(unsigned offset, dec16_t value);
@@ -88,7 +89,7 @@ public:
     void setValue(unsigned offset, int value);
     void setValue(unsigned offset, int64_t value);
     void setValue(unsigned offset, int128_t value);
-    void setValue(unsigned offset, IBPP::DBKey value);
+    void setValue(unsigned offset, fr::DBKey value);
     void setValue32(unsigned offset, int timeZone, bool isGmtFallback);
 
     virtual bool isInserted();

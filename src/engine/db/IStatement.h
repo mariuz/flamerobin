@@ -50,14 +50,24 @@ public:
     virtual void setInt64(int index, int64_t value) = 0;
     virtual void setDouble(int index, double value) = 0;
     virtual void setBool(int index, bool value) = 0;
+    virtual void setDate(int index, int year, int month, int day) = 0;
+    virtual void setTime(int index, int hour, int minute, int second, int fraction) = 0;
+    virtual void setTimestamp(int index, int year, int month, int day,
+        int hour, int minute, int second, int fraction) = 0;
+    virtual void setBytes(int index, const void* data, int size) = 0;
 
-    // Result fetching
+    // Result fetching (0-based)
     virtual bool isNull(int index) = 0;
     virtual std::string getString(int index) = 0;
     virtual int32_t getInt32(int index) = 0;
     virtual int64_t getInt64(int index) = 0;
     virtual double getDouble(int index) = 0;
     virtual bool getBool(int index) = 0;
+
+    // Binary and BLOB support
+    virtual void getBytes(int index, void* data, int size) = 0;
+    virtual IBlobPtr getBlob(int index) = 0;
+    virtual void setBlob(int index, IBlobPtr blob) = 0;
 
     // Firebird specific types (as strings for common exchange)
     virtual std::string getDate(int index) = 0;
@@ -74,6 +84,21 @@ public:
     virtual int getColumnSize(int index) = 0;
     virtual std::string getColumnAlias(int index) = 0;
     virtual std::string getColumnTable(int index) = 0;
+
+    virtual std::string getPlan() = 0;
+    virtual StatementType getType() = 0;
+    virtual int getParameterCount() = 0;
+    virtual std::string getParameterName(int index) = 0;
+    virtual std::vector<int> findParameterIndicesByName(const std::string& name) = 0;
+    virtual ColumnType getParameterType(int index) = 0;
+    virtual int getParameterSubtype(int index) = 0;
+    virtual int getParameterScale(int index) = 0;
+    virtual int getParameterSize(int index) = 0;
+
+    virtual int getAffectedRows() = 0;
+
+    virtual IDatabasePtr getDatabase() = 0;
+    virtual ITransactionPtr getTransaction() = 0;
 };
 
 } // namespace fr

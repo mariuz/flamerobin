@@ -56,6 +56,7 @@ class InsertParametersDialog: public BaseDialog
 {
 public:
     InsertParametersDialog(wxWindow* parent, IBPP::Statement& st, Database *db, std::map<std::string, wxString>& pParameterSaveList, std::map<std::string, wxString>& pParameterSaveListOptionNull);
+    InsertParametersDialog(wxWindow* parent, fr::IStatementPtr st, Database *db, std::map<std::string, wxString>& pParameterSaveList, std::map<std::string, wxString>& pParameterSaveListOptionNull);
     virtual ~InsertParametersDialog();
     void OnOkButtonClick(wxCommandEvent& event);
     void OnCancelButtonClick(wxCommandEvent& event);
@@ -72,7 +73,9 @@ private:
     Database *databaseM;
     void storeValues();
     void preloadSpecialColumns();
-    IBPP::Statement& statementM;
+    void createGrid();
+    IBPP::Statement statementM;
+    fr::IStatementPtr statementDALM;
     std::vector<InsertParametersColumnInfo> columnsM;
     std::map<std::string, wxString>& parameterSaveList;
     std::map<std::string, wxString>& parameterSaveListOptionNull;
@@ -98,9 +101,9 @@ protected:
     virtual bool getConfigStoresWidth() const;
     virtual bool getConfigStoresHeight() const;
 
-    void parseDate(int row, const wxString& source);
-    void parseTime(int row, const wxString& source);
-    void parseTimeStamp(int row, const wxString& source);
+    void parseDate(int index, const wxString& source);
+    void parseTime(int index, const wxString& source);
+    void parseTimeStamp(int index, const wxString& source);
 
     DECLARE_EVENT_TABLE()
 };

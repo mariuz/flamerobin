@@ -32,6 +32,7 @@
 #include "engine/db/IDatabase.h"
 #include "engine/db/ITransaction.h"
 #include "engine/db/IStatement.h"
+#include "engine/db/IBlob.h"
 #include "core/StringUtils.h"
 
 // Minimal wx2std implementation for tests to avoid linking StringUtils.cpp
@@ -184,6 +185,130 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
         ok = check(info.ods > 0, "getInfo ODS") && ok;
         ok = check(info.pageSize > 0, "getInfo PageSize") && ok;
         ok = check(info.nextTransaction > 0, "getInfo NextTransaction") && ok;
+
+        // Statistics and Counts
+        std::cout << "  Testing statistics and counts...\n";
+        int fetch, mark, read, write, mem;
+        db->getStatistics(&fetch, &mark, &read, &write, &mem);
+        ok = check(fetch >= 0, "getStatistics") && ok;
+
+        int ins, upd, del, ridx, rseq;
+        db->getCounts(&ins, &upd, &del, &ridx, &rseq);
+        ok = check(ridx >= 0, "getCounts") && ok;
+
+        std::map<int, fr::CountInfo> detailedCounts;
+        db->getDetailedCounts(detailedCounts);
+        ok = check(detailedCounts.size() >= 0, "getDetailedCounts") && ok;
+
+        // Statement Type and Plan
+        std::cout << "  Testing statement type and plan...\n";
+        st->prepare("SELECT * FROM RDB$DATABASE");
+        ok = check(st->getType() == fr::StatementType::Select, "getType Select") && ok;
+        std::string plan = st->getPlan();
+        ok = check(!plan.empty(), "getPlan") && ok;
+
+        // Create a dummy table for testing UPDATE and affected rows
+        try {
+            st->prepare("DROP TABLE DAL_TEST");
+            st->execute();
+            tr->commitRetain();
+        } catch (...) {}
+
+        st->prepare("CREATE TABLE DAL_TEST (ID INTEGER)");
+        st->execute();
+        tr->commitRetain();
+
+        st->prepare("INSERT INTO DAL_TEST (ID) VALUES (1)");
+        st->execute();
+
+        st->prepare("UPDATE DAL_TEST SET ID = 2 WHERE ID = 1");
+        ok = check(st->getType() == fr::StatementType::Update, "getType Update") && ok;
+
+        // Affected rows
+        st->execute();
+        ok = check(st->getAffectedRows() == 1, "getAffectedRows") && ok;
+
+        // Parameter tests
+        std::cout << "  Testing statement parameters...\n";
+        st->prepare("UPDATE DAL_TEST SET ID = ? WHERE ID = ?");
+        ok = check(st->getParameterCount() == 2, "getParameterCount") && ok;
+        ok = check(st->getParameterType(0) == fr::ColumnType::Integer, "getParameterType 0") && ok;
+        ok = check(st->getParameterType(1) == fr::ColumnType::Integer, "getParameterType 1") && ok;
+
+        // Named parameter simulation (IBPP supports it)
+        if (backend == fr::DatabaseBackend::IBPP)
+        {
+            st->prepare("UPDATE DAL_TEST SET ID = :newid WHERE ID = :oldid");
+            ok = check(st->getParameterCount() == 2, "getParameterCount (named)") && ok;
+            ok = checkStr(st->getParameterName(0), "newid", "getParameterName 0") && ok;
+            ok = checkStr(st->getParameterName(1), "oldid", "getParameterName 1") && ok;
+            auto indices = st->findParameterIndicesByName("oldid");
+            ok = check(indices.size() == 1 && indices[0] == 2, "findParameterIndicesByName") && ok;
+        }
+
+        // Typed parameter setting
+        std::cout << "  Testing typed parameter setting...\n";
+        st->prepare("INSERT INTO DAL_TEST (ID) VALUES (?)");
+        st->setInt32(0, 123);
+        st->execute();
+        st->prepare("SELECT ID FROM DAL_TEST WHERE ID = 123");
+        st->execute();
+        ok = check(st->fetch(), "fetch inserted row") && ok;
+        ok = check(st->getInt32(0) == 123, "getInt32 matches setInt32") && ok;
+
+        // Date/Time parameter setting
+        std::cout << "  Testing date/time parameter setting...\n";
+        st->prepare("SELECT CAST(? AS DATE), CAST(? AS TIME), CAST(? AS TIMESTAMP) FROM RDB$DATABASE");
+        st->setDate(0, 2023, 5, 25);
+        st->setTime(1, 14, 30, 45, 0);
+        st->setTimestamp(2, 2023, 5, 25, 14, 30, 45, 0);
+        st->execute();
+        ok = check(st->fetch(), "fetch date/time results") && ok;
+        ok = check(st->getDate(0).find("2023-05-25") != std::string::npos, "setDate result") && ok;
+        ok = check(st->getTime(1).find("14:30:45") != std::string::npos, "setTime result") && ok;
+        ok = check(st->getTimestamp(2).find("2023-05-25 14:30:45") != std::string::npos, "setTimestamp result") && ok;
+
+        // BLOB tests
+        std::cout << "  Testing BLOB operations...\n";
+        try {
+            st->prepare("DROP TABLE BLOB_TEST");
+            st->execute();
+            tr->commitRetain();
+        } catch (...) {}
+        st->prepare("CREATE TABLE BLOB_TEST (ID INTEGER, B BLOB SUB_TYPE TEXT)");
+        st->execute();
+        tr->commitRetain();
+
+        st->prepare("INSERT INTO BLOB_TEST (ID, B) VALUES (2, 'Direct SQL blob')");
+        st->execute();
+        tr->commitRetain();
+
+        st->prepare("SELECT B FROM BLOB_TEST WHERE ID = 2");
+        st->execute();
+        ok = check(st->fetch(), "fetch row with blob") && ok;
+        fr::IBlobPtr b = st->getBlob(0);
+        ok = check(b != nullptr, "getBlob not null") && ok;
+        if (b)
+        {
+            b->open();
+            char buf[100];
+            int len = b->read(buf, sizeof(buf)-1);
+            if (len < 0) len = 0;
+            buf[len] = '\0';
+            ok = checkStr(buf, "Direct SQL blob", "read blob content") && ok;
+            b->close();
+        }
+
+        // Transaction configuration
+        std::cout << "  Testing transaction configuration...\n";
+        fr::ITransactionPtr tr2 = db->createTransaction();
+        tr2->setAccessMode(fr::TransactionAccessMode::Read);
+        tr2->setIsolationLevel(fr::TransactionIsolationLevel::ReadCommitted);
+        tr2->setLockResolution(fr::TransactionLockResolution::NoWait);
+        tr2->start();
+        ok = check(tr2->isActive(), "Transaction configuration and start") && ok;
+        tr2->commit();
+
         // Check if Firebird 4.0+ by trying to CAST to DECFLOAT
         std::cout << "  Checking for Firebird 4.0+ types support...\n";
         try 
