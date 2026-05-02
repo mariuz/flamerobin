@@ -39,6 +39,11 @@
 #include "core/StringUtils.h"
 #include "gui/controls/DataGridRowBuffer.h"
 #include "gui/controls/DataGridTable.h"
+#include "engine/db/IDatabase.h"
+#include "engine/db/ITransaction.h"
+#include "engine/db/IStatement.h"
+#include "engine/db/IBlob.h"
+#include "engine/db/ibpp/IbppBlob.h"
 #include "gui/InsertDialog.h"
 #include "gui/StyleGuide.h"
 #include "metadata/column.h"
@@ -666,20 +671,20 @@ void InsertDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
             wxFFile fl(gridM->GetCellValue((*it).row, 3), "rb");
             if (!fl.IsOpened())
                 throw FRError(_("Cannot open BLOB file."));
-            IBPP::Blob b = IBPP::BlobFactory(st1->DatabasePtr(),
+            fr::IBlobPtr b = std::make_shared<fr::IbppBlob>(st1->DatabasePtr(),
                 st1->TransactionPtr());
-            b->Create();
+            b->create();
             uint8_t buffer[32768];
             while (!fl.Eof())
             {
                 size_t len = fl.Read(buffer, 32767);    // slow when not 32k
                 if (len < 1)
                     break;
-                b->Write(buffer, len);
+                b->write(buffer, (int)len);
             }
             fl.Close();
-            b->Close();
-            st1->Set(index++, b);
+            b->close();
+            st1->Set(index++, std::dynamic_pointer_cast<fr::IbppBlob>(b)->getIBPPBlob());
             bufferM->setBlob((*it).columnDef->getIndex(), b);
         }
 

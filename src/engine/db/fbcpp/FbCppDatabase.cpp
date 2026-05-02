@@ -24,7 +24,9 @@
 #include "engine/db/fbcpp/FbCppDatabase.h"
 #include "engine/db/fbcpp/FbCppTransaction.h"
 #include "engine/db/fbcpp/FbCppStatement.h"
-#include <cstring>
+#include "engine/db/fbcpp/FbCppBlob.h"
+#include "core/StringUtils.h"
+
 #include <stdexcept>
 #include <firebird/Interface.h>
 

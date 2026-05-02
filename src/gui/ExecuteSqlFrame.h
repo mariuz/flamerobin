@@ -36,6 +36,7 @@
 
 #include "core/Observer.h"
 #include "core/StringUtils.h"
+#include "engine/db/ITransaction.h"
 #include "controls/DataGridTable.h"
 #include "gui/BaseFrame.h"
 #include "gui/EditBlobDialog.h"

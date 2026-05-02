@@ -95,6 +95,18 @@ void FbCppService::restore(const RestoreConfig& /*config*/)
     throw std::runtime_error("Restore not implemented yet in FbCppService");
 }
 
+void FbCppService::shutdown(const ShutdownConfig& /*config*/)
+{
+    // TODO: implement
+    throw std::runtime_error("Shutdown not implemented yet in FbCppService");
+}
+
+void FbCppService::startup(const std::string& /*dbPath*/)
+{
+    // TODO: implement
+    throw std::runtime_error("Startup not implemented yet in FbCppService");
+}
+
 std::string FbCppService::getNextLine()
 {
     // TODO: implement

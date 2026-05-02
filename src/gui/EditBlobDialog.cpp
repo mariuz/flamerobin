@@ -40,6 +40,9 @@
 #include "gui/CommandManager.h"
 #include "gui/controls/ControlUtils.h"
 #include "gui/controls/DataGridTable.h"
+#include "engine/db/IDatabase.h"
+#include "engine/db/IStatement.h"
+#include "engine/db/IBlob.h"
 #include "gui/EditBlobDialog.h"
 #include "gui/FRLayoutConfig.h"
 #include "gui/StyleGuide.h"
@@ -1159,8 +1162,8 @@ void EditBlobDialog::OnNotebookPageChanged(wxNotebookEvent& event)
         }
         else
         {
-            inBuf = new FRInputBlobStream(blobM);
-            isNull = (blobM == 0);
+            inBuf = new FRInputBlobStream(blobDALM);
+            isNull = !blobDALM;
         }
 
         switch (pageId)

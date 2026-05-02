@@ -92,12 +92,10 @@ static IBPP::BRF backupFlagsToIbpp(BackupFlags flags)
 static IBPP::BRF restoreFlagsToIbpp(RestoreFlags flags)
 {
     int res = 0;
-    if ((int)flags & (int)RestoreFlags::DeactivateIndices) res |= IBPP::brDeactivateIndices;
+    if ((int)flags & (int)RestoreFlags::DeactivateIndices) res |= IBPP::brDeactivateIdx;
     if ((int)flags & (int)RestoreFlags::NoShadow) res |= IBPP::brNoShadow;
-    if ((int)flags & (int)RestoreFlags::NoValidityCheck) res |= IBPP::brNoValidityCheck;
-    if ((int)flags & (int)RestoreFlags::OneAtATime) res |= IBPP::brOneAtATime;
+    if ((int)flags & (int)RestoreFlags::NoValidityCheck) res |= IBPP::brNoValidity;
     if ((int)flags & (int)RestoreFlags::Replace) res |= IBPP::brReplace;
-    if ((int)flags & (int)RestoreFlags::Create) res |= IBPP::brCreate;
     if ((int)flags & (int)RestoreFlags::UseAllSpace) res |= IBPP::brUseAllSpace;
     if ((int)flags & (int)RestoreFlags::MetadataOnly) res |= IBPP::brMetadataOnly;
     if ((int)flags & (int)RestoreFlags::Verbose) res |= IBPP::brVerbose;
@@ -128,9 +126,23 @@ void IbppService::restore(const RestoreConfig& config)
         config.includeData, config.interval, config.parallel);
 }
 
+void IbppService::shutdown(const ShutdownConfig& config)
+{
+    int flags = 0;
+    if (config.mode == ShutdownMode::Forced) flags = IBPP::dsForce;
+    else if (config.mode == ShutdownMode::DenyTransactions) flags = IBPP::dsDenyTrans;
+    else if (config.mode == ShutdownMode::DenyAttachments) flags = IBPP::dsDenyAttach;
+    serviceM->Shutdown(config.dbPath, (IBPP::DSM)flags, config.timeout);
+}
+
+void IbppService::startup(const std::string& dbPath)
+{
+    serviceM->Restart(dbPath, (IBPP::DSM)0);
+}
+
 std::string IbppService::getNextLine()
 {
-    const char* line = serviceM->Wait();
+    const char* line = serviceM->WaitMsg();
     return line ? line : "";
 }
 

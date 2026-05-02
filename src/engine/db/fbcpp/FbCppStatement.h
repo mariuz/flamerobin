@@ -74,6 +74,11 @@ public:
     virtual std::string getTimeTz(int index) override;
     virtual std::string getTimestampTz(int index) override;
 
+    virtual void getDate(int index, int& year, int& month, int& day) override;
+    virtual void getTime(int index, int& hour, int& minute, int& second, int& fraction) override;
+    virtual void getTimestamp(int index, int& year, int& month, int& day,
+        int& hour, int& minute, int& second, int& fraction) override;
+
     virtual int getColumnCount() override;
     virtual std::string getColumnName(int index) override;
     virtual ColumnType getColumnType(int index) override;

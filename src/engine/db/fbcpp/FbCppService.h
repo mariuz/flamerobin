@@ -49,6 +49,9 @@ public:
     virtual void backup(const BackupConfig& config) override;
     virtual void restore(const RestoreConfig& config) override;
 
+    virtual void shutdown(const ShutdownConfig& config) override;
+    virtual void startup(const std::string& dbPath) override;
+
     virtual std::string getNextLine() override;
 
     virtual void getUsers(std::vector<UserData>& users) override;

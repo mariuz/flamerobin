@@ -71,10 +71,7 @@ class BackupThread : public BackupRestoreThread
 public:
     BackupThread(BackupFrame* frame, wxString server,
         wxString username, wxString password, wxString rolename, wxString charset,
-        wxString dbfilename, wxString bkfilename,
-        fr::BackupFlags flags, int interval, int parallel,
-        wxString skipData, wxString includeData,
-        wxString cryptPluginName, wxString keyPlugin, wxString keyEncrypt
+        const fr::BackupConfig& config
     );
 protected:
     virtual void Execute(fr::IServicePtr);

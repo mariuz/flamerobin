@@ -67,7 +67,7 @@ protected:
     };
 
     wxRadioBox* radiobox_state;
-    IBPP::DSM getDatabaseMode();
+    fr::ShutdownMode getDatabaseMode();
 
 private:
     // event handling
@@ -82,11 +82,10 @@ class ShutdownStartupThread : public ServiceThread
 public:
     ShutdownStartupThread(ShutdownStartupBaseFrame* frame,  wxString server,
         wxString username, wxString password, wxString rolename, wxString charset,
-        wxString dbfilename, IBPP::DSM flags
+        wxString dbfilename
     );
 protected:
     wxString dbfileM;
-    IBPP::DSM dsmM;
 };
 
 #endif // FR_SHUTDOWNSTARTUPBASEFRAME_H

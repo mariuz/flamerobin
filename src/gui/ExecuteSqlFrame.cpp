@@ -1803,7 +1803,7 @@ void ExecuteSqlFrame::updateBlobEditor()
         editBlobDlgM->Update();
     }
 
-    editBlobDlgM->setBlob(grid_data, dgt, &statementM, row, col);
+    editBlobDlgM->setBlob(grid_data, dgt, statementM, row, col);
     SetFocus();
     grid_data->SetFocus();
 }
@@ -2028,7 +2028,7 @@ void ExecuteSqlFrame::OnMenuGridSetFieldToNULL(wxCommandEvent& WXUNUSED(event))
             && grid_data->GetGridCursorCol() == col
             && grid_data->GetGridCursorRow() == row)
         {
-            editBlobDlgM->setBlob(grid_data, dgt, &statementM, row, col, false);
+            editBlobDlgM->setBlob(grid_data, dgt, statementM, row, col, false);
         }
     }
 
@@ -2740,12 +2740,6 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         log(_("Error: ") + msg + "\n", ttError);
         retval = false;
     }
-    catch (std::exception& e)
-    {
-        splitScreen();
-        log(_("Error: ") + e.what() + "\n", ttError);
-        retval = false;
-    }
     catch (...)
     {
         splitScreen();
@@ -2865,8 +2859,8 @@ bool ExecuteSqlFrame::commitTransaction()
         {
             wxStopWatch sw;
             if (statementM != 0)
-                statementM->Close();
-            transactionM->Commit();
+                statementM->close();
+            transactionM->commit();
             log(wxString::Format(_("Transaction committed (elapsed time: %s)."),
                 millisToTimeString(sw.Time()).c_str()));
         }
@@ -2917,12 +2911,6 @@ bool ExecuteSqlFrame::commitTransaction()
         log(wxString(e.what(), *databaseM->getCharsetConverter()), ttError);
         return false;
     }
-    catch (std::exception &se)
-    {
-        splitScreen();
-        log(wxString(_("ERROR!\n")) + se.what(), ttError);
-        return false;
-    }
 
     notebook_1->SetSelection(0);
 
@@ -2960,8 +2948,8 @@ bool ExecuteSqlFrame::rollbackTransaction()
         {
             wxStopWatch sw;
             if (statementM != 0)
-                statementM->Close();
-            transactionM->Rollback();
+                statementM->close();
+            transactionM->rollback();
             log(wxString::Format(_("Transaction rolled back (elapsed time: %s)."),
                 millisToTimeString(sw.Time()).c_str()));
         }
@@ -3193,7 +3181,7 @@ void ExecuteSqlFrame::OnGridLabelLeftDClick(wxGridEvent& event)
     int column = 1 + event.GetCol();
     if (column < 1 || column > table->GetNumberCols())
         return;
-    SelectStatement sstm(wxString(statementM->Sql().c_str(),
+    SelectStatement sstm(wxString(statementM->getSql().c_str(),
         *databaseM->getCharsetConverter()));
 
     // rebuild SQL statement with different ORDER BY clause

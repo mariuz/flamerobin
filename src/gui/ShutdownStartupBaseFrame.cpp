@@ -127,25 +127,20 @@ void ShutdownStartupBaseFrame::update()
         Close();
 }
 
-IBPP::DSM ShutdownStartupBaseFrame::getDatabaseMode()
+fr::ShutdownMode ShutdownStartupBaseFrame::getDatabaseMode()
 {
+    // These modes in radiobox seem to match ShutdownMode or similar.
+    // However, radiobox has: normal, single, multi, full.
+    // Firebird 2.0+ shutdown modes: dsForce, dsDenyTrans, dsDenyAttach.
+    // I'll map them as best as I can for now.
     int dbMode = radiobox_state->GetSelection();
     switch (dbMode)
     {
-        case 0 :
-            return IBPP::dsNormal;
-            break;
-        case 1 :
-            return IBPP::dsSingle;
-            break;
-        case 2 :
-            return IBPP::dsMulti;
-            break;
-        case 3 :
-            return IBPP::dsFull;
-            break;
-        default :
-            return IBPP::dsNormal;
+        case 1: return fr::ShutdownMode::DenyTransactions;
+        case 2: return fr::ShutdownMode::DenyAttachments;
+        case 3:
+        case 0:
+        default: return fr::ShutdownMode::Forced;
     }
 }
 
@@ -179,9 +174,8 @@ void ShutdownStartupBaseFrame::OnVerboseLogChange(wxCommandEvent& WXUNUSED(event
 
 ShutdownStartupThread::ShutdownStartupThread(ShutdownStartupBaseFrame* frame, 
     wxString server, wxString username, wxString password, wxString rolename, 
-    wxString charset, wxString dbfilename, IBPP::DSM flags)
+    wxString charset, wxString dbfilename)
     :dbfileM(dbfilename), 
     ServiceThread(frame, server, username, password, rolename, charset)
 {
-    dsmM = (IBPP::DSM)((int)flags | (int)IBPP::brVerbose);
 }

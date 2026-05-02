@@ -39,6 +39,10 @@
 #include "core/StringUtils.h"
 #include "gui/controls/DataGridRowBuffer.h"
 #include "gui/controls/DataGridTable.h"
+#include "engine/db/IDatabase.h"
+#include "engine/db/ITransaction.h"
+#include "engine/db/IStatement.h"
+#include "engine/db/IBlob.h"
 #include "gui/InsertParametersDialog.h"
 #include "gui/StyleGuide.h"
 #include "metadata/CharacterSet.h"
@@ -541,7 +545,7 @@ void InsertParametersDialog::preloadSpecialColumns()
             if (!st1->isNull(col - 1))
                 (*it).columnDef->setValue(bufferM, col, st1, wxConvCurrent, databaseM);
             ++col;
-            if (sel != ioGenerator)  // what follows is only for generators
+            //if (sel != ioGenerator)  // what follows is only for generators
                 continue;
             gridM->SetCellValue((*it).row, 3,
                 (*it).columnDef->getAsString(bufferM, databaseM));
@@ -576,7 +580,7 @@ void InsertParametersDialog::preloadSpecialColumns()
             if (!st1->IsNull(col))
                 (*it).columnDef->setValue(bufferM, col, st1, wxConvCurrent, databaseM);
             ++col;
-            if (sel != ioGenerator)  // what follows is only for generators
+            //if (sel != ioGenerator)  // what follows is only for generators
                 continue;
             gridM->SetCellValue((*it).row, 3,
                 (*it).columnDef->getAsString(bufferM, databaseM));

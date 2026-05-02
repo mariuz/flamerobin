@@ -102,7 +102,7 @@ void IbppStatement::setDate(int index, int year, int month, int day)
 void IbppStatement::setTime(int index, int hour, int minute, int second, int fraction)
 {
     IBPP::Time t;
-    t.SetTime(hour, minute, second, fraction);
+    t.SetTime(IBPP::Time::tmNone, hour, minute, second, fraction * 10, IBPP::Time::TZ_NONE, nullptr);
     statementM->Set(index + 1, t);
 }
 
@@ -111,7 +111,7 @@ void IbppStatement::setTimestamp(int index, int year, int month, int day,
 {
     IBPP::Timestamp ts;
     ts.SetDate(year, month, day);
-    ts.SetTime(hour, minute, second, fraction);
+    ts.SetTime(IBPP::Time::tmNone, hour, minute, second, fraction * 10, IBPP::Time::TZ_NONE, nullptr);
     statementM->Set(index + 1, ts);
 }
 

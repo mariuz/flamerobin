@@ -221,37 +221,42 @@ void ShutdownFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     rolename = database->getRole();
     charset = database->getConnectionCharset();
 
-    int flags = (int)IBPP::dsVerbose; 
+    fr::ShutdownConfig config;
+    config.dbPath = wx2std(database->getPath());
+    config.timeout = spinctrl_timeout->GetValue();
 
     if (checkbox_attach->IsChecked())
-        flags |= (int)IBPP::dsDenyAttach;
-    if (checkbox_tran->IsChecked())
-        flags |= (int)IBPP::dsDenyTrans;
-    if (checkbox_force->IsChecked())
-        flags |= (int)IBPP::dsForce;
-
-    flags |= getDatabaseMode();
-
-    int ltimeout = spinctrl_timeout->GetValue();
+        config.mode = fr::ShutdownMode::DenyAttachments;
+    else if (checkbox_tran->IsChecked())
+        config.mode = fr::ShutdownMode::DenyTransactions;
+    else if (checkbox_force->IsChecked())
+        config.mode = fr::ShutdownMode::Forced;
+    else
+        config.mode = getDatabaseMode();
 
     startThread(std::make_unique<ShutdownThread>(this,
         server->getConnectionString(), username, password, rolename, charset,
-        database->getPath(), (IBPP::DSM)flags, ltimeout));
+        config));
 
     updateControls();
 }
 
 ShutdownThread::ShutdownThread(ShutdownFrame* frame,
     wxString server, wxString username, wxString password,
-    wxString rolename, wxString charset, wxString dbfilename,
-    IBPP::DSM flags, int timeout)
-    :timeoutM(timeout),
-    ShutdownStartupThread(frame, server, username, password, 
-        rolename, charset, dbfilename, flags)
+    wxString rolename, wxString charset,
+    const fr::ShutdownConfig& config)
+    : ShutdownStartupThread(frame, server, username, password, 
+        rolename, charset, wxString(config.dbPath)),
+    configM(config)
 {
 }
 
-void ShutdownThread::Execute(IBPP::Service svc)
+void ShutdownThread::Execute(fr::IServicePtr svc)
 {
-    svc->Shutdown(wx2std(dbfileM), dsmM, timeoutM);
+    svc->shutdown(configM);
+}
+
+wxString ShutdownThread::getOperationName() const
+{
+    return _("shutdown");
 }

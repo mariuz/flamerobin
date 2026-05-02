@@ -195,6 +195,20 @@ struct RestoreConfig
     int parallel = 0;
 };
 
+enum class ShutdownMode
+{
+    Forced = 1,
+    DenyTransactions = 2,
+    DenyAttachments = 4
+};
+
+struct ShutdownConfig
+{
+    std::string dbPath;
+    ShutdownMode mode = ShutdownMode::Forced;
+    int timeout = 0;
+};
+
 // Common types and forward declarations
 class IDatabase;
 class ITransaction;

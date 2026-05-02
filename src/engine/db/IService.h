@@ -48,6 +48,9 @@ public:
     virtual void backup(const BackupConfig& config) = 0;
     virtual void restore(const RestoreConfig& config) = 0;
 
+    virtual void shutdown(const ShutdownConfig& config) = 0;
+    virtual void startup(const std::string& dbPath) = 0;
+
     virtual std::string getNextLine() = 0;
 
     virtual void getUsers(std::vector<UserData>& users) = 0;

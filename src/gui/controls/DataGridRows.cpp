@@ -47,10 +47,17 @@
 #include "core/StringUtils.h"
 #include "gui/controls/DataGridRowBuffer.h"
 #include "gui/controls/DataGridRows.h"
+#include "engine/db/IDatabase.h"
+#include "engine/db/ITransaction.h"
+#include "engine/db/IStatement.h"
+#include "engine/db/IBlob.h"
+#include "engine/db/ibpp/IbppBlob.h"
 #include "metadata/CharacterSet.h"
 #include "metadata/column.h"
 #include "metadata/database.h"
 #include "metadata/table.h"
+
+using namespace fr;
 
 
 GridCellFormats::GridCellFormats()
@@ -981,8 +988,10 @@ void DBKeyColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     const IBPP::Statement& statement, wxMBConv*, Database*)
 {
     wxASSERT(buffer);
-    IBPP::DBKey value;
-    statement->Get(col, value);
+    IBPP::DBKey ibppValue;
+    statement->Get(col, ibppValue);
+    fr::DBKey value;
+    ibppValue.GetKey(value.data(), 8);
     buffer->setValue(offsetM, value);
 }
 
@@ -998,7 +1007,9 @@ void DBKeyColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
 void DBKeyColumnDef::getDBKey(IBPP::DBKey& dbkey, DataGridRowBuffer* buffer)
 {
     wxASSERT(buffer);
-    buffer->getValue(offsetM, dbkey, sizeM);
+    fr::DBKey value;
+    buffer->getValue(offsetM, value, sizeM);
+    dbkey.SetKey(value.data(), (int)sizeM);
 }
 
 // DateColumnDef class
@@ -1870,12 +1881,15 @@ unsigned BlobColumnDef::getBufferSize()
     return 0;
 }
 void BlobColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
-    const IBPP::Statement& statement, wxMBConv*, Database* db)
+    const IBPP::Statement& statement, wxMBConv*, Database* /*db*/)
 {
     wxASSERT(buffer);
-    IBPP::Blob b = IBPP::BlobFactory(statement->DatabasePtr(),
+    IBPP::Blob ibppBlob = IBPP::BlobFactory(statement->DatabasePtr(),
         statement->TransactionPtr());
-    statement->Get(col, b);
+    statement->Get(col, ibppBlob);
+    fr::IBlobPtr b = std::make_shared<fr::IbppBlob>(statement->DatabasePtr(),
+        statement->TransactionPtr());
+    std::dynamic_pointer_cast<fr::IbppBlob>(b)->getIBPPBlob() = ibppBlob;
     buffer->setBlob(indexM, b);
 }
 
@@ -2812,6 +2826,72 @@ bool DataGridRows::isFieldNA(unsigned row, unsigned col)
     return buffersM[row]->isFieldNA(col);
 }
 
+IBPP::Statement DataGridRows::addWhere(UniqueConstraint* uq, wxString& stm,
+    const wxString& table, DataGridRowBuffer *buffer)
+{
+    bool have_dbkey = false;
+    for (ColumnConstraint::const_iterator ci = uq->begin(); ci !=
+        uq->end(); ++ci)
+    {
+        if ((*ci) == "DB_KEY")
+        {
+            stm += " RDB$DB_KEY = ?";
+            have_dbkey = true;
+            break;
+        }
+        for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
+        {
+            wxString cn(std2wxIdentifier(statementM->ColumnName(c2),
+                databaseM->getCharsetConverter()));
+            wxString tn(std2wxIdentifier(statementM->ColumnTable(c2),
+                databaseM->getCharsetConverter()));
+            if (cn == (*ci) && tn == table) // found it, add to WHERE list
+            {
+                if (buffer->isFieldNA(c2-1))
+                    throw FRError(_("N/A value in key column."));
+                if (ci != uq->begin())
+                    stm += " AND ";
+                if ((statementM->ColumnType(c2) == IBPP::sdString) && (statementM->ColumnSubtype(c2) == 1) ) //OCTET
+                    stm += Identifier(cn).getQuoted() + " = x'";
+                else
+                    stm += Identifier(cn).getQuoted() + " = '";
+
+                stm += columnDefsM[c2-1]->getAsFirebirdString(buffer);
+                stm += "'";
+                break;
+            }
+        }
+    }
+
+    IBPP::Statement st = IBPP::StatementFactory(statementM->DatabasePtr(),
+        statementM->TransactionPtr());
+    st->Prepare(wx2std(stm, databaseM->getCharsetConverter()));
+    if (have_dbkey)  // find the column and set the parameter
+    {
+        for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
+        {
+            wxString cn(std2wxIdentifier(statementM->ColumnName(c2),
+                databaseM->getCharsetConverter()));
+            wxString tn(std2wxIdentifier(statementM->ColumnTable(c2),
+                databaseM->getCharsetConverter()));
+            if (cn == "DB_KEY" && tn == table)
+            {
+                DBKeyColumnDef *dbk =
+                    dynamic_cast<DBKeyColumnDef *>(columnDefsM[c2-1]);
+                if (!dbk)
+                    throw FRError(_("Invalid Column"));
+                if (buffer->isFieldNA(c2-1))
+                    throw FRError(_("N/A value in DB_KEY column."));
+                IBPP::DBKey dbkey;
+                dbk->getDBKey(dbkey, buffer);
+                // if updating BLOB, param = 2, else param = 1
+                st->Set(st->Parameters(), dbkey);
+            }
+        }
+    }
+    return st;
+}
+
 fr::IStatementPtr DataGridRows::addWhereDAL(UniqueConstraint* uq, wxString& stm,
     const wxString& table, DataGridRowBuffer *buffer)
 {
@@ -2900,7 +2980,9 @@ fr::IStatementPtr DataGridRows::addWhereDAL(UniqueConstraint* uq, wxString& stm,
                 if (buffer->isFieldNA(c2)) throw FRError(_("N/A value in DB_KEY column."));
                 IBPP::DBKey dbkey;
                 dbk->getDBKey(dbkey, buffer);
-                st->setBytes(st->getParameterCount() - 1, dbkey.Self(), 8);
+                uint8_t keyBuf[8];
+                dbkey.GetKey(keyBuf, 8);
+                st->setBytes(st->getParameterCount() - 1, keyBuf, 8);
             }
         }
     }

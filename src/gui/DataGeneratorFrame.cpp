@@ -49,6 +49,9 @@
 #include "gui/controls/DBHTreeControl.h"
 #include "gui/DataGeneratorFrame.h"
 #include "gui/ProgressDialog.h"
+#include "engine/db/IDatabase.h"
+#include "engine/db/ITransaction.h"
+#include "engine/db/IStatement.h"
 #include "metadata/column.h"
 #include "metadata/database.h"
 #include "metadata/domain.h"
@@ -1188,7 +1191,7 @@ void setFromFile(fr::IStatementPtr st, int param,
 }
 
 void setFromOther(fr::IStatementPtr st, int param,
-    GeneratorSettings *gs, size_t recNo)
+    GeneratorSettings *gs, size_t recNo, Database* db)
 {
     fr::IStatementPtr st2 =
         st->getDatabase()->createStatement(st->getTransaction());
@@ -1198,7 +1201,7 @@ void setFromOther(fr::IStatementPtr st, int param,
         + " IS NOT NULL";
     if (!gs->randomValues)
         sql += " ORDER BY 1";
-    st2->prepare(wx2std(sql, st->getDatabase()->getCharsetConverter()));
+    st2->prepare(wx2std(sql, db->getCharsetConverter()));
     st2->execute();
 
     // Since we need to store values and select one, and they can be of any type,
@@ -1519,31 +1522,34 @@ void DataGeneratorFrame::setParam(fr::IStatementPtr st, int param,
         switch (st->getParameterType(param))
         {
             case fr::ColumnType::Boolean:
-                setFromOther(st, param, gs, recNo);
+                setFromOther(st, param, gs, recNo, databaseM);
   break;
             case fr::ColumnType::Varchar:
-                setFromOther(st, param, gs, recNo);
+                setFromOther(st, param, gs, recNo, databaseM);
   break;
             case fr::ColumnType::Integer:
-                setFromOther(st, param, gs, recNo);
+                setFromOther(st, param, gs, recNo, databaseM);
       break;
             case fr::ColumnType::BigInt:
-                setFromOther(st, param, gs, recNo);
+                setFromOther(st, param, gs, recNo, databaseM);
       break;
             case fr::ColumnType::Float:
-                setFromOther(st, param, gs, recNo);
+                setFromOther(st, param, gs, recNo, databaseM);
         break;
             case fr::ColumnType::Double:
-                setFromOther(st, param, gs, recNo);
+                setFromOther(st, param, gs, recNo, databaseM);
        break;
             case fr::ColumnType::Date:
-                setFromOther(st, param, gs, recNo);               break;
+                setFromOther(st, param, gs, recNo, databaseM);
+               break;
             case fr::ColumnType::Time:
             case fr::ColumnType::TimeTz:
-                setFromOther(st, param, gs, recNo);               break;
+                setFromOther(st, param, gs, recNo, databaseM);
+               break;
             case fr::ColumnType::Timestamp:
             case fr::ColumnType::TimestampTz:
-                setFromOther(st, param, gs, recNo);               break;
+                setFromOther(st, param, gs, recNo, databaseM);
+               break;
             case fr::ColumnType::Blob:
                 throw FRError(_("Blob datatype not supported"));
             default:

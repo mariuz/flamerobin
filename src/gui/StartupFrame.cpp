@@ -171,15 +171,9 @@ void StartupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     rolename = database->getRole();
     charset = database->getConnectionCharset();
 
-    int flags = (int)IBPP::dsVerbose; 
-
-
-    flags |= getDatabaseMode();
-
-
     startThread(std::make_unique<StartupThread>(this,
         server->getConnectionString(), username, password, rolename, charset,
-        database->getPath(), (IBPP::DSM)flags));
+        database->getPath()));
 
     updateControls();
 }
@@ -187,13 +181,18 @@ void StartupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
 StartupThread::StartupThread(StartupFrame* frame, 
     wxString server, wxString username, wxString password, 
     wxString rolename, wxString charset, wxString 
-    dbfilename, IBPP::DSM flags)
+    dbfilename)
     :ShutdownStartupThread(frame, server, username, password,
-        rolename, charset, dbfilename, flags)
+        rolename, charset, dbfilename)
 {
 }
 
-void StartupThread::Execute(IBPP::Service svc)
+void StartupThread::Execute(fr::IServicePtr svc)
 {
-    svc->Restart(wx2std(dbfileM), dsmM);
+    svc->startup(wx2std(dbfileM));
+}
+
+wxString StartupThread::getOperationName() const
+{
+    return _("startup");
 }

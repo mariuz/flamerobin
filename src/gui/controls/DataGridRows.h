@@ -153,8 +153,11 @@ private:
 
     void getColumnInfo(Database* db, unsigned col, bool& readOnly,
         bool& nullable);
+    fr::IStatementPtr addWhereDAL(UniqueConstraint* uq, wxString& stm,
+        const wxString& tableName, DataGridRowBuffer* buffer);
     IBPP::Statement addWhere(UniqueConstraint* uq, wxString& stm,
-        const wxString& table, DataGridRowBuffer *buffer);
+        const wxString& tableName, DataGridRowBuffer* buffer);
+
 public:
     DataGridRows(Database* db);
     ~DataGridRows();
