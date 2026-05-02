@@ -243,7 +243,7 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
             ok = checkStr(st->getParameterName(0), "newid", "getParameterName 0") && ok;
             ok = checkStr(st->getParameterName(1), "oldid", "getParameterName 1") && ok;
             auto indices = st->findParameterIndicesByName("oldid");
-            ok = check(indices.size() == 1 && indices[0] == 2, "findParameterIndicesByName") && ok;
+            ok = check(indices.size() == 1 && indices[0] == 1, "findParameterIndicesByName") && ok;
         }
 
         // Typed parameter setting

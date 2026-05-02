@@ -541,7 +541,7 @@ void InsertParametersDialog::preloadSpecialColumns()
             if (!st1->isNull(col - 1))
                 (*it).columnDef->setValue(bufferM, col, st1, wxConvCurrent, databaseM);
             ++col;
-            //if (sel != ioGenerator)  // what follows is only for generators
+            if (sel != ioGenerator)  // what follows is only for generators
                 continue;
             gridM->SetCellValue((*it).row, 3,
                 (*it).columnDef->getAsString(bufferM, databaseM));
@@ -576,7 +576,7 @@ void InsertParametersDialog::preloadSpecialColumns()
             if (!st1->IsNull(col))
                 (*it).columnDef->setValue(bufferM, col, st1, wxConvCurrent, databaseM);
             ++col;
-            //if (sel != ioGenerator)  // what follows is only for generators
+            if (sel != ioGenerator)  // what follows is only for generators
                 continue;
             gridM->SetCellValue((*it).row, 3,
                 (*it).columnDef->getAsString(bufferM, databaseM));

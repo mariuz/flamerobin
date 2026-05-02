@@ -32,7 +32,7 @@ IbppService::IbppService()
 
 void IbppService::connect()
 {
-    serviceM = IBPP::ServiceFactory(connStrM, userM, passwordM, "", "");
+    serviceM = IBPP::ServiceFactory(connStrM, userM, passwordM, roleM, charsetM, libraryPathM);
     serviceM->Connect();
 }
 
@@ -53,14 +53,85 @@ void IbppService::setCredentials(const std::string& user, const std::string& pas
     passwordM = password;
 }
 
-void IbppService::backup(const std::string& dbPath, const std::string& backupPath)
+void IbppService::setRole(const std::string& role)
 {
-    serviceM->StartBackup(dbPath, backupPath);
+    roleM = role;
 }
 
-void IbppService::restore(const std::string& backupPath, const std::string& dbPath)
+void IbppService::setCharset(const std::string& charset)
 {
-    serviceM->StartRestore(backupPath, dbPath);
+    charsetM = charset;
+}
+
+void IbppService::setClientLibrary(const std::string& libraryPath)
+{
+    libraryPathM = libraryPath;
+}
+
+static IBPP::BRF backupFlagsToIbpp(BackupFlags flags)
+{
+    int res = 0;
+    if ((int)flags & (int)BackupFlags::IgnoreChecksums) res |= IBPP::brIgnoreChecksums;
+    if ((int)flags & (int)BackupFlags::IgnoreLimbo) res |= IBPP::brIgnoreLimbo;
+    if ((int)flags & (int)BackupFlags::MetadataOnly) res |= IBPP::brMetadataOnly;
+    if ((int)flags & (int)BackupFlags::NoGarbageCollect) res |= IBPP::brNoGarbageCollect;
+    if ((int)flags & (int)BackupFlags::NonTransportable) res |= IBPP::brNonTransportable;
+    if ((int)flags & (int)BackupFlags::ConvertExtTables) res |= IBPP::brConvertExtTables;
+    if ((int)flags & (int)BackupFlags::Expand) res |= IBPP::brExpand;
+    if ((int)flags & (int)BackupFlags::OldDescriptions) res |= IBPP::brOldDescriptions;
+    if ((int)flags & (int)BackupFlags::NoDBTriggers) res |= IBPP::brNoDBTriggers;
+    if ((int)flags & (int)BackupFlags::Zip) res |= IBPP::brZip;
+    if ((int)flags & (int)BackupFlags::Verbose) res |= IBPP::brVerbose;
+    if ((int)flags & (int)BackupFlags::StatTime) res |= IBPP::brstatistics_time;
+    if ((int)flags & (int)BackupFlags::StatDelta) res |= IBPP::brstatistics_delta;
+    if ((int)flags & (int)BackupFlags::StatPageReads) res |= IBPP::brstatistics_pagereads;
+    if ((int)flags & (int)BackupFlags::StatPageWrites) res |= IBPP::brstatistics_pagewrites;
+    return (IBPP::BRF)res;
+}
+
+static IBPP::BRF restoreFlagsToIbpp(RestoreFlags flags)
+{
+    int res = 0;
+    if ((int)flags & (int)RestoreFlags::DeactivateIndices) res |= IBPP::brDeactivateIndices;
+    if ((int)flags & (int)RestoreFlags::NoShadow) res |= IBPP::brNoShadow;
+    if ((int)flags & (int)RestoreFlags::NoValidityCheck) res |= IBPP::brNoValidityCheck;
+    if ((int)flags & (int)RestoreFlags::OneAtATime) res |= IBPP::brOneAtATime;
+    if ((int)flags & (int)RestoreFlags::Replace) res |= IBPP::brReplace;
+    if ((int)flags & (int)RestoreFlags::Create) res |= IBPP::brCreate;
+    if ((int)flags & (int)RestoreFlags::UseAllSpace) res |= IBPP::brUseAllSpace;
+    if ((int)flags & (int)RestoreFlags::MetadataOnly) res |= IBPP::brMetadataOnly;
+    if ((int)flags & (int)RestoreFlags::Verbose) res |= IBPP::brVerbose;
+    if ((int)flags & (int)RestoreFlags::PerTableCommit) res |= IBPP::brPerTableCommit;
+    if ((int)flags & (int)RestoreFlags::FixFssData) res |= IBPP::brFix_Fss_Data;
+    if ((int)flags & (int)RestoreFlags::FixFssMetadata) res |= IBPP::brFix_Fss_Metadata;
+    if ((int)flags & (int)RestoreFlags::ReadOnly) res |= IBPP::brDatabase_readonly;
+    if ((int)flags & (int)RestoreFlags::StatTime) res |= IBPP::brstatistics_time;
+    if ((int)flags & (int)RestoreFlags::StatDelta) res |= IBPP::brstatistics_delta;
+    if ((int)flags & (int)RestoreFlags::StatPageReads) res |= IBPP::brstatistics_pagereads;
+    if ((int)flags & (int)RestoreFlags::StatPageWrites) res |= IBPP::brstatistics_pagewrites;
+    return (IBPP::BRF)res;
+}
+
+void IbppService::backup(const BackupConfig& config)
+{
+    serviceM->StartBackup(config.dbPath, config.backupPath, config.outputFile,
+        config.factor, backupFlagsToIbpp(config.flags), config.cryptPlugin,
+        config.keyHolder, config.keyName, config.skipData, config.includeData,
+        config.interval, config.parallel);
+}
+
+void IbppService::restore(const RestoreConfig& config)
+{
+    serviceM->StartRestore(config.backupPath, config.dbPath, config.outputFile,
+        config.pageSize, config.cacheBuffers, restoreFlagsToIbpp(config.flags),
+        config.cryptPlugin, config.keyHolder, config.keyName, config.skipData,
+        config.includeData, config.interval, config.parallel);
+}
+
+std::string IbppService::getNextLine()
+{
+    const char* line = serviceM->Wait();
+    return line ? line : "";
 }
 
 void IbppService::getUsers(std::vector<UserData>& users)

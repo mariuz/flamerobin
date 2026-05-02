@@ -36,8 +36,6 @@
 
 #include <algorithm>
 
-#include <ibpp.h>
-
 #include "core/StringUtils.h"
 #include "config/Config.h"
 #include "gui/BackupFrame.h"
@@ -285,45 +283,52 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     rolename = database->getRole();
     charset = database->getConnectionCharset();
 
-    int flags = (int)IBPP::brVerbose; // this will be ORed in anyway
+    fr::BackupConfig config;
+    config.dbPath = wx2std(database->getPath());
+    config.backupPath = wx2std(text_ctrl_filename->GetValue());
+    config.flags = fr::BackupFlags::Verbose;
     if (checkbox_checksum->IsChecked())
-        flags |= (int)IBPP::brIgnoreChecksums;
+        config.flags = (fr::BackupFlags)((int)config.flags | (int)fr::BackupFlags::IgnoreChecksums);
     if (checkbox_limbo->IsChecked())
-        flags |= (int)IBPP::brIgnoreLimbo;
+        config.flags = (fr::BackupFlags)((int)config.flags | (int)fr::BackupFlags::IgnoreLimbo);
     if (checkbox_garbage->IsChecked())
-        flags |= (int)IBPP::brNoGarbageCollect;
+        config.flags = (fr::BackupFlags)((int)config.flags | (int)fr::BackupFlags::NoGarbageCollect);
     if (checkbox_transport->IsChecked())
-        flags |= (int)IBPP::brNonTransportable;
+        config.flags = (fr::BackupFlags)((int)config.flags | (int)fr::BackupFlags::NonTransportable);
     if (checkbox_extern->IsChecked())
-        flags |= (int)IBPP::brConvertExtTables;
+        config.flags = (fr::BackupFlags)((int)config.flags | (int)fr::BackupFlags::ConvertExtTables);
     if (checkbox_expand->IsChecked())
-        flags |= (int)IBPP::brConvertExtTables;
+        config.flags = (fr::BackupFlags)((int)config.flags | (int)fr::BackupFlags::Expand);
     if (checkbox_olddescription->IsChecked())
-        flags |= (int)IBPP::brOldDescriptions;
+        config.flags = (fr::BackupFlags)((int)config.flags | (int)fr::BackupFlags::OldDescriptions);
     if (checkbox_noDBtrigger->IsChecked())
-        flags |= (int)IBPP::brNoDBTriggers;
+        config.flags = (fr::BackupFlags)((int)config.flags | (int)fr::BackupFlags::NoDBTriggers);
     if (checkbox_zip->IsChecked())
-        flags |= (int)IBPP::brZip;
+        config.flags = (fr::BackupFlags)((int)config.flags | (int)fr::BackupFlags::Zip);
 
     if (checkbox_metadata->IsChecked())
-        flags |= (int)IBPP::brMetadataOnly;
+        config.flags = (fr::BackupFlags)((int)config.flags | (int)fr::BackupFlags::MetadataOnly);
 
     if (checkbox_statictime->IsChecked())
-        flags |= (int)IBPP::brstatistics_time;
+        config.flags = (fr::BackupFlags)((int)config.flags | (int)fr::BackupFlags::StatTime);
     if (checkbox_staticdelta->IsChecked())
-        flags |= (int)IBPP::brstatistics_delta;
+        config.flags = (fr::BackupFlags)((int)config.flags | (int)fr::BackupFlags::StatDelta);
     if (checkbox_staticpageread->IsChecked())
-        flags |= (int)IBPP::brstatistics_pagereads;
+        config.flags = (fr::BackupFlags)((int)config.flags | (int)fr::BackupFlags::StatPageReads);
     if (checkbox_staticpagewrite->IsChecked())
-        flags |= (int)IBPP::brstatistics_pagewrites;
+        config.flags = (fr::BackupFlags)((int)config.flags | (int)fr::BackupFlags::StatPageWrites);
+
+    config.interval = spinctrl_showlogInterval->GetValue();
+    config.parallel = spinctrl_parallelworkers->GetValue();
+    config.skipData = wx2std(textCtrl_skipdata->GetValue());
+    config.includeData = wx2std(textCtrl_includedata->GetValue());
+    config.cryptPlugin = wx2std(textCtrl_crypt->GetValue());
+    config.keyHolder = wx2std(textCtrl_keyholder->GetValue());
+    config.keyName = wx2std(textCtrl_keyname->GetValue());
 
     startThread(std::make_unique<BackupThread>(this,
         server->getConnectionString(), username, password, rolename, charset,
-        database->getPath(), text_ctrl_filename->GetValue(),
-        (IBPP::BRF)flags, spinctrl_showlogInterval->GetValue(), spinctrl_parallelworkers->GetValue(),
-        textCtrl_skipdata->GetValue(), textCtrl_includedata->GetValue(), 
-        textCtrl_crypt->GetValue(), textCtrl_keyholder->GetValue(), textCtrl_keyname->GetValue()
-        )
+        config)
     );
     
     updateControls();
@@ -331,24 +336,16 @@ void BackupFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
 
 BackupThread::BackupThread(BackupFrame* frame,
     wxString server, wxString username, wxString password,
-    wxString rolename, wxString charset, wxString dbfilename,
-    wxString bkfilename, IBPP::BRF flags, int interval, int parallel,
-    wxString skipData, wxString includeData, wxString cryptPluginName,
-    wxString keyPlugin, wxString keyEncrypt)
-    :factorM(0),
-    BackupRestoreThread(frame, server, username, password,rolename, charset, 
-        dbfilename,bkfilename, flags, interval, parallel, skipData, includeData, cryptPluginName,
-        keyPlugin, keyEncrypt)
+    wxString rolename, wxString charset,
+    const fr::BackupConfig& config)
+    : BackupRestoreThread(frame, server, username, password, rolename, charset),
+    configM(config)
 {
 }
 
-void BackupThread::Execute(IBPP::Service svc)
+void BackupThread::Execute(fr::IServicePtr svc)
 {
-    svc->StartBackup(wx2std(dbfileM), wx2std(bkfileM), wx2std(outputFileM),
-        factorM, brfM, wx2std(cryptPluginNameM), wx2std(keyPluginM),
-        wx2std(keyEncryptM), wx2std(skipDataM), wx2std(includeDataM), 
-        intervalM, parallelM
-    );
+    svc->backup(configM);
 }
 
 wxString BackupThread::getOperationName() const

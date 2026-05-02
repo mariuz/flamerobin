@@ -436,16 +436,7 @@ void BackupRestoreBaseFrame::OnVerboseLogChange(wxCommandEvent& WXUNUSED(event))
 
 BackupRestoreThread::BackupRestoreThread(BackupRestoreBaseFrame* frame,
     wxString server, wxString username, wxString password,
-    wxString rolename, wxString charset, wxString dbfilename,
-    wxString bkfilename, IBPP::BRF flags, int interval, int parallel,
-    wxString skipData, wxString includeData, wxString cryptPluginName,
-    wxString keyPlugin, wxString keyEncrypt)
-    :
-    dbfileM(dbfilename), bkfileM(bkfilename), intervalM(interval), parallelM(parallel),
-    skipDataM(skipData), includeDataM(includeData),
-    cryptPluginNameM(cryptPluginName), keyPluginM(keyPlugin), keyEncryptM(keyEncrypt),
-    ServiceThread(frame, server, username, password, rolename, charset)
+    wxString rolename, wxString charset)
+    : ServiceThread(frame, server, username, password, rolename, charset)
 {
-    // always use verbose flag
-    brfM = (IBPP::BRF)((int)flags | (int)IBPP::brVerbose);
 }

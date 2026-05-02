@@ -281,8 +281,11 @@ wxString wrapText(const wxString& text, size_t maxWidth, size_t indent)
 wxString IBPPtype2string(Database* db, IBPP::SDT t, int subtype, int size,
     int scale)
 {
-    if (scale > 0)
-        return wxString::Format("NUMERIC(%d,%d)", size == 4 ? 9 : 18, scale);
+    if (scale != 0)
+    {
+        int precision = (size == 2) ? 4 : (size == 4 ? 9 : 18);
+        return wxString::Format("NUMERIC(%d,%d)", precision, scale < 0 ? -scale : scale);
+    }
     if (t == IBPP::sdString)
     {
         int bpc = db->getCharsetById(subtype)->getBytesPerChar();
@@ -315,8 +318,11 @@ wxString IBPPtype2string(Database* db, IBPP::SDT t, int subtype, int size,
 wxString DALtype2string(Database* db, fr::ColumnType t, int subtype, int size,
     int scale)
 {
-    if (scale > 0)
-        return wxString::Format("NUMERIC(%d,%d)", size == 4 ? 9 : 18, scale);
+    if (scale != 0)
+    {
+        int precision = (size == 2) ? 4 : (size == 4 ? 9 : 18);
+        return wxString::Format("NUMERIC(%d,%d)", precision, scale < 0 ? -scale : scale);
+    }
 
     switch (t)
     {

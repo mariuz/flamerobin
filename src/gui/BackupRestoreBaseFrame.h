@@ -116,25 +116,9 @@ class BackupRestoreThread : public ServiceThread
 {
 public:
     BackupRestoreThread(BackupRestoreBaseFrame* frame, wxString server,
-        wxString username, wxString password, wxString rolename, wxString charset,
-        wxString dbfilename, wxString bkfilename,
-        IBPP::BRF flags, int interval, int parallel,
-        wxString skipData, wxString includeData,
-        wxString cryptPluginName, wxString keyPlugin, wxString keyEncrypt
+        wxString username, wxString password, wxString rolename, wxString charset
     );
 protected:
-    wxString bkfileM;
-    wxString dbfileM;
-    wxString outputFileM;
-    wxString skipDataM;
-    wxString includeDataM;
-    wxString cryptPluginNameM;
-    wxString keyPluginM;
-    wxString keyEncryptM;
-
-    int intervalM;
-    int parallelM;
-    IBPP::BRF brfM;
 };
 
 #endif // BACKUPRESTOREBASEFRAME_H

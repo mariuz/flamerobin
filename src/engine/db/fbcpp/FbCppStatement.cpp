@@ -254,6 +254,42 @@ std::string FbCppStatement::getTimestampTz(int index)
     return statementM->get<std::optional<std::string>>((unsigned)index).value_or("");
 }
 
+void FbCppStatement::getDate(int index, int& year, int& month, int& day)
+{
+    if (!statementM)
+        throw std::runtime_error("No statement available");
+    auto d = statementM->get<std::optional<fbcpp::Date>>((unsigned)index).value_or(fbcpp::Date{});
+    year = (int)d.year();
+    month = (unsigned)d.month();
+    day = (unsigned)d.day();
+}
+
+void FbCppStatement::getTime(int index, int& hour, int& minute, int& second, int& fraction)
+{
+    if (!statementM)
+        throw std::runtime_error("No statement available");
+    auto t = statementM->get<std::optional<fbcpp::Time>>((unsigned)index).value_or(fbcpp::Time{});
+    hour = (int)t.hours().count();
+    minute = (int)t.minutes().count();
+    second = (int)t.seconds().count();
+    fraction = (int)std::chrono::duration_cast<std::chrono::microseconds>(t.subseconds()).count() / 100;
+}
+
+void FbCppStatement::getTimestamp(int index, int& year, int& month, int& day,
+    int& hour, int& minute, int& second, int& fraction)
+{
+    if (!statementM)
+        throw std::runtime_error("No statement available");
+    auto ts = statementM->get<std::optional<fbcpp::Timestamp>>((unsigned)index).value_or(fbcpp::Timestamp{});
+    year = (int)ts.date.year();
+    month = (unsigned)ts.date.month();
+    day = (unsigned)ts.date.day();
+    hour = (int)ts.time.hours().count();
+    minute = (int)ts.time.minutes().count();
+    second = (int)ts.time.seconds().count();
+    fraction = (int)std::chrono::duration_cast<std::chrono::microseconds>(ts.time.subseconds()).count() / 100;
+}
+
 int FbCppStatement::getColumnCount()
 {
     if (!statementM)
@@ -409,7 +445,7 @@ std::vector<int> FbCppStatement::findParameterIndicesByName(const std::string& n
     for (size_t i = 0; i < descriptors.size(); ++i)
     {
         if (descriptors[i].name == name)
-            result.push_back((int)i + 1);
+            result.push_back((int)i);
     }
     return result;
 }

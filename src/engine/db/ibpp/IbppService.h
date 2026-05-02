@@ -41,9 +41,14 @@ public:
 
     virtual void setConnectionString(const std::string& connStr) override;
     virtual void setCredentials(const std::string& user, const std::string& password) override;
+    virtual void setRole(const std::string& role) override;
+    virtual void setCharset(const std::string& charset) override;
+    virtual void setClientLibrary(const std::string& libraryPath) override;
 
-    virtual void backup(const std::string& dbPath, const std::string& backupPath) override;
-    virtual void restore(const std::string& backupPath, const std::string& dbPath) override;
+    virtual void backup(const BackupConfig& config) override;
+    virtual void restore(const RestoreConfig& config) override;
+
+    virtual std::string getNextLine() override;
 
     virtual void getUsers(std::vector<UserData>& users) override;
     virtual void addUser(const UserData& user) override;
@@ -60,6 +65,9 @@ private:
     std::string connStrM;
     std::string userM;
     std::string passwordM;
+    std::string roleM;
+    std::string charsetM;
+    std::string libraryPathM;
 };
 
 } // namespace fr

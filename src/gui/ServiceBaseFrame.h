@@ -129,7 +129,7 @@ public:
     virtual void OnExit();
 
 protected:
-        virtual void Execute(IBPP::Service ) = 0;
+        virtual void Execute(fr::IServicePtr ) = 0;
         virtual wxString getOperationName() const;
 private:
     ServiceBaseFrame* frameM;

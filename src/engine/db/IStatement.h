@@ -76,6 +76,11 @@ public:
     virtual std::string getTimeTz(int index) = 0;
     virtual std::string getTimestampTz(int index) = 0;
 
+    virtual void getDate(int index, int& year, int& month, int& day) = 0;
+    virtual void getTime(int index, int& hour, int& minute, int& second, int& fraction) = 0;
+    virtual void getTimestamp(int index, int& year, int& month, int& day,
+        int& hour, int& minute, int& second, int& fraction) = 0;
+
     virtual int getColumnCount() = 0;
     virtual std::string getColumnName(int index) = 0;
     virtual ColumnType getColumnType(int index) = 0;

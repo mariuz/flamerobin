@@ -35,8 +35,6 @@
 
 #include <algorithm>
 
-#include <ibpp.h>
-
 #include "config/Config.h"
 #include "core/StringUtils.h"
 #include "frutils.h"
@@ -356,88 +354,78 @@ void RestoreFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     rolename = database->getRole();
     charset = database->getConnectionCharset();
 
-    int flags = (int)IBPP::brVerbose; // this will be ORed in anyway
+    fr::RestoreConfig config;
+    config.flags = fr::RestoreFlags::Verbose;
     if (checkbox_replace->IsChecked())
-        flags |= (int)IBPP::brReplace;
+        config.flags = (fr::RestoreFlags)((int)config.flags | (int)fr::RestoreFlags::Replace);
     if (checkbox_deactivate->IsChecked())
-        flags |= (int)IBPP::brDeactivateIdx;
+        config.flags = (fr::RestoreFlags)((int)config.flags | (int)fr::RestoreFlags::DeactivateIndices);
     if (checkbox_noshadow->IsChecked())
-        flags |= (int)IBPP::brNoShadow;
+        config.flags = (fr::RestoreFlags)((int)config.flags | (int)fr::RestoreFlags::NoShadow);
     if (checkbox_validity->IsChecked())
-        flags |= (int)IBPP::brNoValidity;
+        config.flags = (fr::RestoreFlags)((int)config.flags | (int)fr::RestoreFlags::NoValidityCheck);
     if (checkbox_commit->IsChecked())
-        flags |= (int)IBPP::brPerTableCommit;
+        config.flags = (fr::RestoreFlags)((int)config.flags | (int)fr::RestoreFlags::PerTableCommit);
     if (checkbox_space->IsChecked())
-        flags |= (int)IBPP::brUseAllSpace;
+        config.flags = (fr::RestoreFlags)((int)config.flags | (int)fr::RestoreFlags::UseAllSpace);
 
     if (checkbox_fix_fss_data->IsChecked())
-        flags |= (int)IBPP::brFix_Fss_Data;
+        config.flags = (fr::RestoreFlags)((int)config.flags | (int)fr::RestoreFlags::FixFssData);
     if (checkbox_fix_fss_metadata->IsChecked())
-        flags |= (int)IBPP::brFix_Fss_Metadata;
+        config.flags = (fr::RestoreFlags)((int)config.flags | (int)fr::RestoreFlags::FixFssMetadata);
     if (checkbox_readonlyDB->IsChecked())
-        flags |= (int)IBPP::brDatabase_readonly;
+        config.flags = (fr::RestoreFlags)((int)config.flags | (int)fr::RestoreFlags::ReadOnly);
 
     if (checkbox_statictime->IsChecked())
-        flags |= (int)IBPP::brstatistics_time;
+        config.flags = (fr::RestoreFlags)((int)config.flags | (int)fr::RestoreFlags::StatTime);
     if (checkbox_staticdelta->IsChecked())
-        flags |= (int)IBPP::brstatistics_delta;
+        config.flags = (fr::RestoreFlags)((int)config.flags | (int)fr::RestoreFlags::StatDelta);
     if (checkbox_staticpageread->IsChecked())
-        flags |= (int)IBPP::brstatistics_pagereads;
+        config.flags = (fr::RestoreFlags)((int)config.flags | (int)fr::RestoreFlags::StatPageReads);
     if (checkbox_staticpagewrite->IsChecked())
-        flags |= (int)IBPP::brstatistics_pagewrites;
-
-    
-    /*switch (radiobox_replicamode->GetSelection())
-    {
-    case 0: 
-        flags |= (int)IBPP::brReplicaMode_none; 
-        break;
-    case 1:
-        flags |= (int)IBPP::brReplicaMode_readonly; 
-        break;
-    case 2:
-        flags |= (int)IBPP::brReplicaMode_readwrite;
-        break;
-    }*/
+        config.flags = (fr::RestoreFlags)((int)config.flags | (int)fr::RestoreFlags::StatPageWrites);
 
     if (checkbox_metadata->IsChecked())
-        flags |= (int)IBPP::brMetadataOnly;
+        config.flags = (fr::RestoreFlags)((int)config.flags | (int)fr::RestoreFlags::MetadataOnly);
 
-    unsigned long pagesize;
-    if (!choice_pagesize->GetStringSelection().ToULong(&pagesize))
-        pagesize = 0;
+    unsigned long ps;
+    if (choice_pagesize->GetStringSelection().ToULong(&ps))
+        config.pageSize = (int)ps;
+    config.cacheBuffers = spinctrl_pagebuffers->GetValue();
+    config.interval = spinctrl_showlogInterval->GetValue();
+    config.parallel = spinctrl_parallelworkers->GetValue();
+
+    config.backupPath = wx2std(text_ctrl_filename->GetValue());
+    config.dbPath = wx2std(database->getPath());
+    config.skipData = wx2std(textCtrl_skipdata->GetValue());
+    config.includeData = wx2std(textCtrl_includedata->GetValue());
+    config.cryptPlugin = wx2std(textCtrl_crypt->GetValue());
+    config.keyHolder = wx2std(textCtrl_keyholder->GetValue());
+    config.keyName = wx2std(textCtrl_keyname->GetValue());
 
     startThread(std::make_unique<RestoreThread>(this,
         server->getConnectionString(), username, password, rolename, charset,
-        text_ctrl_filename->GetValue(), database->getPath(), pagesize, spinctrl_pagebuffers->GetValue(),
-        (IBPP::BRF)flags, spinctrl_showlogInterval->GetValue(), spinctrl_parallelworkers->GetValue(),
-        textCtrl_skipdata->GetValue(), textCtrl_includedata->GetValue(),
-        textCtrl_crypt->GetValue(), textCtrl_keyholder->GetValue(), textCtrl_keyname->GetValue()
-        )
+        config)
     );
+
     updateControls();
 }
 
+
 RestoreThread::RestoreThread(RestoreFrame* frame, wxString 
     server, wxString username, wxString password, wxString 
-    rolename, wxString charset, wxString bkfilename, wxString dbfilename, 
-    int pagesize, int pagebuffers, IBPP::BRF flags, int interval, int parallel,
-    wxString skipData, wxString includeData, wxString cryptPluginName, wxString keyPlugin, 
-    wxString keyEncrypt)
-    :pagesizeM(pagesize), pagebuffersM(pagebuffers),
-    BackupRestoreThread(frame, server, username, password, rolename, charset,
-        dbfilename, bkfilename, flags, interval, parallel, skipData, includeData, cryptPluginName,
-        keyPlugin, keyEncrypt)
-
+    rolename, wxString charset, const fr::RestoreConfig& config)
+    : BackupRestoreThread(frame, server, username, password, rolename, charset),
+    configM(config)
 {
 }
 
-void RestoreThread::Execute(IBPP::Service svc)
+void RestoreThread::Execute(fr::IServicePtr svc)
 {
-    svc->StartRestore(wx2std(bkfileM), wx2std(dbfileM), wx2std(outputFileM),
-        pagesizeM, pagebuffersM, brfM,
-        wx2std(cryptPluginNameM), wx2std(keyPluginM),
-        wx2std(keyEncryptM), wx2std(skipDataM), wx2std(includeDataM), 
-        intervalM, parallelM
-    );
+    svc->restore(configM);
+}
+
+wxString RestoreThread::getOperationName() const
+{
+    return _("restore");
 }

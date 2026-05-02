@@ -33,8 +33,6 @@
 #include <wx/timer.h>
 #include <wx/wupdlock.h>
 
-#include <ibpp.h>
-
 #include "config/Config.h"
 #include "core/ArtProvider.h"
 #include "core/StringUtils.h"
@@ -300,6 +298,8 @@ wxString ServiceThread::getOperationName() const
     return _("restore");
 }
 
+#include "engine/db/DatabaseFactory.h"
+
 void* ServiceThread::Entry()
 {
     wxDateTime now;
@@ -309,11 +309,15 @@ void* ServiceThread::Entry()
     {
         msg.Printf(_("Connecting to server %s..."), serverM.c_str());
         logImportant(msg);
-        IBPP::Service svc = IBPP::ServiceFactory(wx2std(serverM),
-            wx2std(usernameM), wx2std(passwordM), wx2std(rolenameM), wx2std(charsetM),
-            wx2std(getClientLibrary())
-        );
-        svc->Connect();
+        
+        fr::IServicePtr svc = fr::DatabaseFactory::createService(
+            fr::DatabaseFactory::getDefaultBackend());
+        svc->setConnectionString(wx2std(serverM));
+        svc->setCredentials(wx2std(usernameM), wx2std(passwordM));
+        svc->setRole(wx2std(rolenameM));
+        svc->setCharset(wx2std(charsetM));
+        svc->setClientLibrary(wx2std(getClientLibrary()));
+        svc->connect();
 
         now = wxDateTime::Now();
         msg.Printf(_("Database %s started %s"), getOperationName().c_str(), now.FormatTime().c_str());
@@ -329,8 +333,8 @@ void* ServiceThread::Entry()
                 logImportant(msg);
                 break;
             }
-            const char* c = svc->WaitMsg();
-            if (c == 0)
+            std::string line = svc->getNextLine();
+            if (line.empty())
             {
                 now = wxDateTime::Now();
                 msg.Printf(_("Database %s finished %s"),
@@ -338,15 +342,15 @@ void* ServiceThread::Entry()
                 logImportant(msg);
                 break;
             }
-            msg = c;
+            msg = line;
             logProgress(msg);
         }
-        svc->Disconnect();
+        svc->disconnect();
     }
-    catch (IBPP::Exception& e)
+    catch (std::exception& e)
     {
         now = wxDateTime::Now();
-        msg.Printf(_("Database %s canceled %s due to IBPP exception:\n\n"),
+        msg.Printf(_("Database %s canceled %s due to exception:\n\n"),
             getOperationName().c_str(), now.FormatTime().c_str());
         msg += e.what();
         logError(msg);
@@ -354,7 +358,7 @@ void* ServiceThread::Entry()
     catch (...)
     {
         now = wxDateTime::Now();
-        msg.Printf(_("Database %s canceled %s due to exception"),
+        msg.Printf(_("Database %s canceled %s due to unknown exception"),
             getOperationName().c_str(), now.FormatTime().c_str());
         logError(msg);
     }
