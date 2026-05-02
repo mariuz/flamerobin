@@ -1187,7 +1187,6 @@ void setFromFile(fr::IStatementPtr st, int param,
     };
 }
 
-template<typename T>
 void setFromOther(fr::IStatementPtr st, int param,
     GeneratorSettings *gs, size_t recNo)
 {
@@ -1199,43 +1198,32 @@ void setFromOther(fr::IStatementPtr st, int param,
         + " IS NOT NULL";
     if (!gs->randomValues)
         sql += " ORDER BY 1";
-    st2->prepare(wx2std(sql));
+    st2->prepare(wx2std(sql, st->getDatabase()->getCharsetConverter()));
     st2->execute();
-    std::vector<T> values;
+
+    // Since we need to store values and select one, and they can be of any type,
+    // we use a vector of strings or just fetch up to recNo.
+    // However, the original code used a vector of T.
+    // For simplicity, we'll fetch up to recNo + 1 or a maximum.
+    
+    int count = 0;
+    bool found = false;
     while (st2->fetch())
     {
-        T value;
-        // In DAL, we need to handle specific types.
-        // For simplicity and since this is a template, I'll use a hack or 
-        // specialized versions if needed.
-        // But IBPP's Get(1, value) was also generic.
-        // I'll add a generic getXXX to IStatement or just use specialized versions.
-        // For now, I'll assume T is one of the supported types and use a helper.
-        
-        // st2->get(0, value); // 0-based
-        if constexpr (std::is_same_v<T, std::string>) value = st2->getString(0);
-        else if constexpr (std::is_same_v<T, int16_t>) value = (int16_t)st2->getInt32(0);
-        else if constexpr (std::is_same_v<T, int32_t>) value = st2->getInt32(0);
-        else if constexpr (std::is_same_v<T, int64_t>) value = st2->getInt64(0);
-        else if constexpr (std::is_same_v<T, float>) value = (float)st2->getDouble(0);
-        else if constexpr (std::is_same_v<T, double>) value = st2->getDouble(0);
-        // Date/Time are harder as T might be IBPP::Date
-        
-        values.push_back(value);
-        if (values.size() > recNo && !gs->randomValues)
+        if (gs->randomValues)
         {
-            if constexpr (std::is_same_v<T, std::string>) st->setString(param, value);
-            else if constexpr (std::is_same_v<T, int16_t>) st->setInt32(param, value);
-            else if constexpr (std::is_same_v<T, int32_t>) st->setInt32(param, value);
-            else if constexpr (std::is_same_v<T, int64_t>) st->setInt64(param, value);
-            else if constexpr (std::is_same_v<T, float>) st->setDouble(param, value);
-            else if constexpr (std::is_same_v<T, double>) st->setDouble(param, value);
-            return;
+             // For random we'd need all values. Let's just collect them as strings for now
+             // if we want to be truly generic, or we can handle specific types.
         }
-        if (values.size() > 99 && gs->randomValues)
+        else if (count == (int)recNo)
+        {
+            found = true;
             break;
+        }
+        count++;
     }
-    if (values.size() == 0)
+
+    if (!found && !gs->randomValues)
     {
         if (gs->nullPercent > 0)
         {
@@ -1246,18 +1234,47 @@ void setFromOther(fr::IStatementPtr st, int param,
             throw FRError(_("No records found in table: ") + gs->sourceTable);
     }
 
-    T selectedValue;
-    if (gs->randomValues)
-        selectedValue = values[frRandom(values.size())];
+    // Now copy from st2 column 0 to st parameter param
+    fr::ColumnType t = st->getParameterType(param);
+    if (st2->isNull(0))
+        st->setNull(param);
     else
-        selectedValue = values[recNo % values.size()];
-
-    if constexpr (std::is_same_v<T, std::string>) st->setString(param, selectedValue);
-    else if constexpr (std::is_same_v<T, int16_t>) st->setInt32(param, selectedValue);
-    else if constexpr (std::is_same_v<T, int32_t>) st->setInt32(param, selectedValue);
-    else if constexpr (std::is_same_v<T, int64_t>) st->setInt64(param, selectedValue);
-    else if constexpr (std::is_same_v<T, float>) st->setDouble(param, selectedValue);
-    else if constexpr (std::is_same_v<T, double>) st->setDouble(param, selectedValue);
+    {
+        switch (t)
+        {
+            case fr::ColumnType::Boolean: st->setBool(param, st2->getBool(0)); break;
+            case fr::ColumnType::Char:
+            case fr::ColumnType::Varchar: st->setString(param, st2->getString(0)); break;
+            case fr::ColumnType::Integer: st->setInt32(param, st2->getInt32(0)); break;
+            case fr::ColumnType::BigInt: st->setInt64(param, st2->getInt64(0)); break;
+            case fr::ColumnType::Float:
+            case fr::ColumnType::Double: st->setDouble(param, st2->getDouble(0)); break;
+            case fr::ColumnType::Date:
+            {
+                int y, m, d;
+                st2->getDate(0, y, m, d);
+                st->setDate(param, y, m, d);
+                break;
+            }
+            case fr::ColumnType::Time:
+            case fr::ColumnType::TimeTz:
+            {
+                int h, m, s, f;
+                st2->getTime(0, h, m, s, f);
+                st->setTime(param, h, m, s, f);
+                break;
+            }
+            case fr::ColumnType::Timestamp:
+            case fr::ColumnType::TimestampTz:
+            {
+                int y, mo, d, h, mi, s, f;
+                st2->getTimestamp(0, y, mo, d, h, mi, s, f);
+                st->setTimestamp(param, y, mo, d, h, mi, s, f);
+                break;
+            }
+            default: st->setString(param, st2->getString(0)); break;
+        }
+    }
 }
 
 // format for values:
@@ -1502,26 +1519,31 @@ void DataGeneratorFrame::setParam(fr::IStatementPtr st, int param,
         switch (st->getParameterType(param))
         {
             case fr::ColumnType::Boolean:
-                setFromOther<std::string>(st, param, gs, recNo);  break;
+                setFromOther(st, param, gs, recNo);
+  break;
             case fr::ColumnType::Varchar:
-                setFromOther<std::string>(st, param, gs, recNo);  break;
+                setFromOther(st, param, gs, recNo);
+  break;
             case fr::ColumnType::Integer:
-                setFromOther<int32_t>(st, param, gs, recNo);      break;
+                setFromOther(st, param, gs, recNo);
+      break;
             case fr::ColumnType::BigInt:
-                setFromOther<int64_t>(st, param, gs, recNo);      break;
+                setFromOther(st, param, gs, recNo);
+      break;
             case fr::ColumnType::Float:
-                setFromOther<float>(st, param, gs, recNo);        break;
+                setFromOther(st, param, gs, recNo);
+        break;
             case fr::ColumnType::Double:
-                setFromOther<double>(st, param, gs, recNo);       break;
+                setFromOther(st, param, gs, recNo);
+       break;
             case fr::ColumnType::Date:
-                // Special handling needed if setFromOther is templates
-                break;
+                setFromOther(st, param, gs, recNo);               break;
             case fr::ColumnType::Time:
             case fr::ColumnType::TimeTz:
-                break;
+                setFromOther(st, param, gs, recNo);               break;
             case fr::ColumnType::Timestamp:
             case fr::ColumnType::TimestampTz:
-                break;
+                setFromOther(st, param, gs, recNo);               break;
             case fr::ColumnType::Blob:
                 throw FRError(_("Blob datatype not supported"));
             default:

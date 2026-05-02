@@ -310,6 +310,39 @@ std::string IbppStatement::getTimestampTz(int index)
     return wx2std(wxString::Format("%04d-%02d-%02d %02d:%02d:%02d.%04d %s", y, mo, d, h, mi, s, t, tzName.c_str()));
 }
 
+void IbppStatement::getDate(int index, int& year, int& month, int& day)
+{
+    IBPP::Date d;
+    statementM->Get(index + 1, d);
+    year = d.Year();
+    month = d.Month();
+    day = d.Day();
+}
+
+void IbppStatement::getTime(int index, int& hour, int& minute, int& second, int& fraction)
+{
+    IBPP::Time t;
+    statementM->Get(index + 1, t);
+    hour = t.Hours();
+    minute = t.Minutes();
+    second = t.Seconds();
+    fraction = t.SubSeconds() / 10; // Convert to fraction (0-999)
+}
+
+void IbppStatement::getTimestamp(int index, int& year, int& month, int& day,
+    int& hour, int& minute, int& second, int& fraction)
+{
+    IBPP::Timestamp ts;
+    statementM->Get(index + 1, ts);
+    year = ts.Year();
+    month = ts.Month();
+    day = ts.Day();
+    hour = ts.Hours();
+    minute = ts.Minutes();
+    second = ts.Seconds();
+    fraction = ts.SubSeconds() / 10;
+}
+
 int IbppStatement::getColumnCount()
 {
     return statementM->Columns();
@@ -405,7 +438,10 @@ std::string IbppStatement::getParameterName(int index)
 
 std::vector<int> IbppStatement::findParameterIndicesByName(const std::string& name)
 {
-    return statementM->FindParamsByName(name);
+    std::vector<int> result = statementM->FindParamsByName(name);
+    for (size_t i = 0; i < result.size(); ++i)
+        result[i]--;
+    return result;
 }
 
 ColumnType IbppStatement::getParameterType(int index)

@@ -120,6 +120,81 @@ struct UserData
     uint32_t groupId;
 };
 
+enum class BackupFlags
+{
+    None = 0,
+    IgnoreChecksums = 1,
+    IgnoreLimbo = 2,
+    MetadataOnly = 4,
+    NoGarbageCollect = 8,
+    NonTransportable = 16,
+    ConvertExtTables = 32,
+    Expand = 64, // No data compression
+    OldDescriptions = 128,
+    NoDBTriggers = 256,
+    Zip = 512,
+    Verbose = 1024,
+    StatTime = 2048,
+    StatDelta = 4096,
+    StatPageReads = 8192,
+    StatPageWrites = 16384
+};
+
+enum class RestoreFlags
+{
+    None = 0,
+    DeactivateIndices = 1,
+    NoShadow = 2,
+    NoValidityCheck = 4,
+    OneAtATime = 8,
+    Replace = 16,
+    Create = 32,
+    UseAllSpace = 64,
+    MetadataOnly = 128,
+    Verbose = 256,
+    PerTableCommit = 512,
+    FixFssData = 1024,
+    FixFssMetadata = 2048,
+    ReadOnly = 4096,
+    StatTime = 8192,
+    StatDelta = 16384,
+    StatPageReads = 32768,
+    StatPageWrites = 65536
+};
+
+struct BackupConfig
+{
+    std::string dbPath;
+    std::string backupPath;
+    std::string outputFile;
+    int factor = 0;
+    BackupFlags flags = BackupFlags::None;
+    std::string cryptPlugin;
+    std::string keyHolder;
+    std::string keyName;
+    std::string skipData;
+    std::string includeData;
+    int interval = 0;
+    int parallel = 0;
+};
+
+struct RestoreConfig
+{
+    std::string backupPath;
+    std::string dbPath;
+    std::string outputFile;
+    RestoreFlags flags = RestoreFlags::None;
+    int pageSize = 0;
+    int cacheBuffers = 0;
+    std::string cryptPlugin;
+    std::string keyHolder;
+    std::string keyName;
+    std::string skipData;
+    std::string includeData;
+    int interval = 0;
+    int parallel = 0;
+};
+
 // Common types and forward declarations
 class IDatabase;
 class ITransaction;

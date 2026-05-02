@@ -79,16 +79,12 @@ class RestoreThread : public BackupRestoreThread
 public:
     RestoreThread(RestoreFrame* frame, wxString server,
         wxString username, wxString password, wxString rolename, wxString charset,
-        wxString bkfilename, wxString dbfilename,
-        int pagesize, int pagebuffers, IBPP::BRF flags, int interval, int parallel,
-        wxString skipData, wxString includeData,
-        wxString cryptPluginName, wxString keyPlugin, wxString keyEncrypt
+        const fr::RestoreConfig& config
     );
 protected:
-    virtual void Execute(IBPP::Service);
+    virtual void Execute(fr::IServicePtr);
+    virtual wxString getOperationName() const;
 
-    int pagesizeM;
-    int pagebuffersM;
-
+    fr::RestoreConfig configM;
 };
 #endif // RESTOREFRAME_H

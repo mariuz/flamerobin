@@ -68,16 +68,37 @@ void FbCppService::setCredentials(const std::string& user, const std::string& pa
     passwordM = password;
 }
 
-void FbCppService::backup(const std::string& /*dbPath*/, const std::string& /*backupPath*/)
+void FbCppService::setRole(const std::string& role)
+{
+    roleM = role;
+}
+
+void FbCppService::setCharset(const std::string& charset)
+{
+    charsetM = charset;
+}
+
+void FbCppService::setClientLibrary(const std::string& libraryPath)
+{
+    libraryPathM = libraryPath;
+}
+
+void FbCppService::backup(const BackupConfig& /*config*/)
 {
     // TODO: implement using fbcpp::BackupManager
     throw std::runtime_error("Backup not implemented yet in FbCppService");
 }
 
-void FbCppService::restore(const std::string& /*backupPath*/, const std::string& /*dbPath*/)
+void FbCppService::restore(const RestoreConfig& /*config*/)
 {
     // TODO: implement using fbcpp::BackupManager
     throw std::runtime_error("Restore not implemented yet in FbCppService");
+}
+
+std::string FbCppService::getNextLine()
+{
+    // TODO: implement
+    return "";
 }
 
 void FbCppService::getUsers(std::vector<UserData>& /*users*/)
