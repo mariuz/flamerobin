@@ -398,7 +398,16 @@ void IbppStatement::getTimestamp(int index, int& year, int& month, int& day,
 
 int IbppStatement::getColumnCount()
 {
-    return statementM->Columns();
+    if (!statementM.intf())
+        return 0;
+    try
+    {
+        return statementM->Columns();
+    }
+    catch (...)
+    {
+        return 0;
+    }
 }
 
 std::string IbppStatement::getColumnName(int index)
@@ -481,12 +490,28 @@ StatementType IbppStatement::getType()
 
 int IbppStatement::getParameterCount()
 {
-    return statementM->Parameters();
+    if (!statementM.intf())
+        return 0;
+    try
+    {
+        return statementM->Parameters();
+    }
+    catch (...)
+    {
+        return 0;
+    }
 }
 
 std::string IbppStatement::getParameterName(int index)
 {
-    return statementM->ParametersByName().at(index);
+    try
+    {
+        return statementM->ParametersByName().at(index);
+    }
+    catch (...)
+    {
+        return "";
+    }
 }
 
 std::vector<int> IbppStatement::findParameterIndicesByName(const std::string& name)

@@ -26,6 +26,9 @@
 #include <vector>
 #include <thread>
 #include <chrono>
+#include <ctime>
+
+#include <ibpp.h>
 
 #include "engine/db/DatabaseFactory.h"
 #include "engine/db/IService.h"
@@ -57,6 +60,21 @@ int main()
         return 0;
     }
 
+    const std::string dbName = "/tmp/flamerobin_svc_test_" +
+        std::to_string(static_cast<long long>(std::time(0))) + ".fdb";
+
+    // Create DB using IBPP
+    try 
+    {
+        IBPP::Database db = IBPP::DatabaseFactory(serverName, dbName, "SYSDBA", "masterkey");
+        db->Create(3);
+    }
+    catch (const IBPP::Exception& e)
+    {
+        std::cerr << "Failed to create test database: " << e.what() << "\n";
+        return 1;
+    }
+
     bool ok = true;
     std::cout << "Starting FbCppService tests...\n";
 
@@ -73,7 +91,7 @@ int main()
 
         std::cout << "  Testing getConnectedUsers (via IDatabase)...\n";
         fr::IDatabasePtr db = fr::DatabaseFactory::createDatabase(fr::DatabaseBackend::FbCpp);
-        db->setConnectionString("employee"); // Use standard sample DB
+        db->setConnectionString(dbName);
         db->setCredentials("SYSDBA", "masterkey");
         db->connect();
         
@@ -98,6 +116,15 @@ int main()
         std::cerr << "EXCEPTION in FbCppServiceTest: " << e.what() << "\n";
         ok = false;
     }
+
+    // Cleanup
+    try 
+    {
+        IBPP::Database db = IBPP::DatabaseFactory(serverName, dbName, "SYSDBA", "masterkey");
+        db->Connect();
+        db->Drop();
+    }
+    catch (...) {}
 
     if (ok)
     {

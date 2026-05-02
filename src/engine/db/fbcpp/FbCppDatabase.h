@@ -78,8 +78,9 @@ public:
         return *attachmentM; 
     }
 
+    static fbcpp::Client& getClient();
+
 private:
-    std::optional<fbcpp::Client> clientM;
     std::optional<fbcpp::Attachment> attachmentM;
     std::string connStrM;
     std::string userM;

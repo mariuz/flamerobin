@@ -69,7 +69,12 @@ void LocaleManager::applyConfig()
 
     delete localeM;
     localeM = new wxLocale();
-    if (!localeM->Init(lang))
+    bool initOk = false;
+    {
+        wxLogNull noLog;
+        initOk = localeM->Init(lang);
+    }
+    if (!initOk && lang != wxLANGUAGE_ENGLISH)
     {
         const wxLanguageInfo* info = wxLocale::GetLanguageInfo(lang);
         wxString langName = info ? info->Description : wxString("unknown");

@@ -45,6 +45,11 @@ void DatabaseFactory::setDefaultBackend(DatabaseBackend backend)
 
 IDatabasePtr DatabaseFactory::createDatabase(DatabaseBackend backend)
 {
+    if (backend == DatabaseBackend::Default)
+    {
+        backend = defaultBackendM;
+    }
+
     if (backend == DatabaseBackend::IBPP)
     {
         return std::make_shared<IbppDatabase>();
@@ -58,6 +63,11 @@ IDatabasePtr DatabaseFactory::createDatabase(DatabaseBackend backend)
 
 IServicePtr DatabaseFactory::createService(DatabaseBackend backend)
 {
+    if (backend == DatabaseBackend::Default)
+    {
+        backend = defaultBackendM;
+    }
+
     if (backend == DatabaseBackend::IBPP)
     {
         return std::make_shared<IbppService>();

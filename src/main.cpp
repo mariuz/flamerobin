@@ -41,6 +41,7 @@
 #include "config/LocaleManager.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
+#include "engine/db/DatabaseFactory.h"
 #include "gui/FRStyleManager.h"
 #include "gui/MainFrame.h"
 #include "main.h"
@@ -83,6 +84,12 @@ bool Application::OnInit()
     checkEnvironment();
     LocaleManager::get().initFromConfig();
     parseCommandLine();
+
+    int backend = config().get("databaseBackend", static_cast<int>(fr::DatabaseBackend::IBPP));
+    if (backend == static_cast<int>(fr::DatabaseBackend::FbCpp))
+        fr::DatabaseFactory::setDefaultBackend(fr::DatabaseBackend::FbCpp);
+    else
+        fr::DatabaseFactory::setDefaultBackend(fr::DatabaseBackend::IBPP);
 
 #if wxCHECK_VERSION(3, 3, 0)
     int theme = config().get(FRStyleManager::_DARKMODE_KEY, (int)FRStyleManager::ThemeSystem);

@@ -41,23 +41,28 @@ FbCppDatabase::FbCppDatabase()
 {
 }
 
-void FbCppDatabase::connect()
+fbcpp::Client& FbCppDatabase::getClient()
 {
-    if (!clientM)
+    static std::optional<fbcpp::Client> client;
+    if (!client)
     {
         Firebird::IMaster* master = fb_get_master_interface();
         if (!master)
             throw std::runtime_error("Failed to get Firebird master interface");
-        clientM.emplace(master);
+        client.emplace(master);
     }
+    return *client;
+}
 
+void FbCppDatabase::connect()
+{
     auto options = fbcpp::AttachmentOptions()
         .setConnectionCharSet(charsetM)
         .setUserName(userM)
         .setPassword(passwordM)
         .setRole(roleM);
 
-    attachmentM.emplace(*clientM, connStrM, options);
+    attachmentM.emplace(getClient(), connStrM, options);
 }
 
 void FbCppDatabase::disconnect()
@@ -72,14 +77,6 @@ bool FbCppDatabase::isConnected()
 
 void FbCppDatabase::create(int /*pagesize*/, int dialect)
 {
-    if (!clientM)
-    {
-        Firebird::IMaster* master = fb_get_master_interface();
-        if (!master)
-            throw std::runtime_error("Failed to get Firebird master interface");
-        clientM.emplace(master);
-    }
-
     auto options = fbcpp::AttachmentOptions()
         .setConnectionCharSet(charsetM)
         .setUserName(userM)
@@ -88,7 +85,7 @@ void FbCppDatabase::create(int /*pagesize*/, int dialect)
         .setSqlDialect(static_cast<uint32_t>(dialect))
         .setCreateDatabase(true);
 
-    attachmentM.emplace(*clientM, connStrM, options);
+    attachmentM.emplace(getClient(), connStrM, options);
 }
 
 void FbCppDatabase::drop()
@@ -227,9 +224,6 @@ IStatementPtr FbCppDatabase::createStatement(ITransactionPtr tr)
 
 std::string FbCppDatabase::getTimezoneName(int timezoneId)
 {
-    if (!clientM)
-        return "";
-
     try
     {
         ISC_TIME_TZ iscTmTz = {};
@@ -237,9 +231,9 @@ std::string FbCppDatabase::getTimezoneName(int timezoneId)
         char tzBuf[64] = {}; // FB_MAX_TIME_ZONE_NAME_LENGTH is 64
         unsigned dummyHour = 0, dummyMinute = 0, dummySecond = 0, dummyFractions = 0;
         
-        auto status = clientM->newStatus();
+        auto status = getClient().newStatus();
         Firebird::ThrowStatusWrapper statusWrapper(status.get());
-        clientM->getUtil()->decodeTimeTz(&statusWrapper, &iscTmTz,
+        getClient().getUtil()->decodeTimeTz(&statusWrapper, &iscTmTz,
             &dummyHour, &dummyMinute, &dummySecond, &dummyFractions,
             sizeof(tzBuf), tzBuf);
         

@@ -34,8 +34,8 @@ namespace fr
 class DatabaseFactory
 {
 public:
-    static IDatabasePtr createDatabase(DatabaseBackend backend = DatabaseBackend::IBPP);
-    static IServicePtr createService(DatabaseBackend backend = DatabaseBackend::IBPP);
+    static IDatabasePtr createDatabase(DatabaseBackend backend = DatabaseBackend::Default);
+    static IServicePtr createService(DatabaseBackend backend = DatabaseBackend::Default);
 
     static DatabaseBackend getDefaultBackend();
     static void setDefaultBackend(DatabaseBackend backend);

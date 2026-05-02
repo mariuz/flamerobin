@@ -76,6 +76,9 @@ public:
     DataGridTable(fr::IStatementPtr s, Database* db);
     ~DataGridTable();
 
+    void setStatement(IBPP::Statement s) { statementM = s; }
+    void setStatement(fr::IStatementPtr s) { statementDALM = s; }
+
     bool canFetchMoreRows();
     void fetch();
     void fetchOne();
