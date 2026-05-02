@@ -29,6 +29,18 @@
                 <caption>Always Dark</caption>
             </option>
         </setting>
+        <setting type="radiobox">
+            <caption>Database backend</caption>
+            <description>Select the Firebird access library to use</description>
+            <key>databaseBackend</key>
+            <default>0</default>
+            <option>
+                <caption>IBPP (Standard)</caption>
+            </option>
+            <option>
+                <caption>fb-cpp (New)</caption>
+            </option>
+        </setting>
         <setting type="checkbox">
             <caption>Remember window positions and sizes</caption>
             <related />
@@ -713,22 +725,6 @@
         <image>0</image>
         <setting type="keyboardshortcuts">
             <key>KeyboardShortcuts</key>
-        </setting>
-    </node>
-    <node>
-        <caption>Backends</caption>
-        <image>3</image>
-        <setting type="radiobox">
-            <caption>Database backend</caption>
-            <description>Select the Firebird access library to use</description>
-            <key>databaseBackend</key>
-            <default>0</default>
-            <option>
-                <caption>IBPP (Standard)</caption>
-            </option>
-            <option>
-                <caption>fb-cpp (New)</caption>
-            </option>
         </setting>
     </node>
 </root>
