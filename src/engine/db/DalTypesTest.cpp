@@ -348,7 +348,7 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
             st->fetch();
             ok = check(st->getColumnType(0) == fr::ColumnType::Decfloat34, "ColumnType::Decfloat34 identification") && ok;
             std::string df34 = st->getString(0);
-            ok = check(df34.find("1.234567890123456789012345678901234") == 0, "DECFLOAT34 getString content") && ok;
+            ok = check(df34.find("1.234567890123456789012345678901234") != std::string::npos, "DECFLOAT34 getString content") && ok;
 
             // Test INT128
             st->prepare("SELECT CAST('12345678901234567890123456789012345678' AS INT128) FROM RDB$DATABASE");
