@@ -714,7 +714,8 @@
         <setting type="keyboardshortcuts">
             <key>KeyboardShortcuts</key>
         </setting>
-        <node>
+    </node>
+    <node>
         <caption>Backends</caption>
         <image>3</image>
         <setting type="radiobox">
