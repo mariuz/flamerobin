@@ -17,16 +17,16 @@ The primary goal is to replace the legacy and unmaintained IBPP library with `fb
 - [x] Implement the initial **fb-cpp backend** for the DAL.
 - [x] Standardize the **CMake** build system across Windows, Linux, and macOS.
 
-### Phase 2: Metadata & Core Refactoring (In Progress)
+### Phase 2: Metadata & Core Refactoring (Completed)
 - [x] Systematic refactoring of `MetadataItem` classes to use DAL interfaces.
 - [x] Implement `DECFLOAT` and `INT128` support in the DAL and UI.
 - [x] Improve Timezone handling using modern Firebird API.
 - [x] Refactor `Database` and `Server` classes to fully decouple from IBPP.
 
-### Phase 3: SQL Editor & UI Integration
-- [ ] Port the SQL execution engine to the DAL.
-- [ ] Update DataGrid and other UI components to use DAL result sets.
-- [ ] Refactor asynchronous service operations (Backup/Restore) to use `IService` DAL interface.
+### Phase 3: SQL Editor & UI Integration (Completed)
+- [x] Port the SQL execution engine to the DAL.
+- [x] Update DataGrid and other UI components to use DAL result sets.
+- [x] Refactor asynchronous service operations (Backup/Restore) to use `IService` DAL interface.
 
 ### Phase 4: Finalization
 - [ ] Full validation of all FlameRobin features using the `fb-cpp` backend.
