@@ -93,6 +93,18 @@ int main()
         return 0;
     }
 
+    // Build a temporary database path that works on both POSIX and Windows.
+#ifdef _WIN32
+    char tmpDir[MAX_PATH];
+    DWORD tmpLen = GetTempPathA(MAX_PATH, tmpDir);
+    std::string dbName = (tmpLen > 0 ? std::string(tmpDir, tmpLen) : "C:\\Temp\\") +
+        "flamerobin_row_metadata_test_" +
+        std::to_string(static_cast<long long>(std::time(0))) + ".fdb";
+#else
+    const std::string dbName = "/tmp/flamerobin_row_metadata_test_" +
+        std::to_string(static_cast<long long>(std::time(0))) + ".fdb";
+#endif
+
     IBPP::Database db;
 
     try
