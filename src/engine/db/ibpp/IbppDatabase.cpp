@@ -178,6 +178,37 @@ void IbppDatabase::getInfo(DatabaseInfoData* data)
         &data->buffers, &data->sweep, &data->forcedWrites, &data->reserve, &data->readOnly);
     databaseM->TransactionInfo(&data->oldestTransaction, &data->oldestActiveTransaction,
         &data->oldestSnapshot, &data->nextTransaction);
+
+    // Get active transactions
+    try
+    {
+        ITransactionPtr tr = createTransaction();
+        tr->start();
+        IStatementPtr st = createStatement(tr);
+        st->prepare("SELECT MON$TRANSACTION_ID, MON$ISOLATION_MODE, MON$READ_ONLY, MON$WAIT_MODE "
+                    "FROM MON$TRANSACTIONS WHERE MON$ATTACHMENT_ID = CURRENT_CONNECTION");
+        st->execute();
+        while (st->fetch())
+        {
+            TransactionInfo info;
+            info.id = st->getInt32(0);
+            int mode = st->getInt32(1);
+            switch (mode)
+            {
+                case 0: info.isolationLevel = TransactionIsolationLevel::Consistency; break;
+                case 1: info.isolationLevel = TransactionIsolationLevel::Concurrency; break;
+                case 2: info.isolationLevel = TransactionIsolationLevel::ReadDirty; break;
+                case 3: info.isolationLevel = TransactionIsolationLevel::ReadCommitted; break;
+                case 4: info.isolationLevel = TransactionIsolationLevel::ReadConsistency; break;
+                default: info.isolationLevel = TransactionIsolationLevel::Concurrency; break;
+            }
+            info.readOnly = st->getBool(2);
+            info.wait = (st->getInt32(3) != 0);
+            data->activeTransactions.push_back(info);
+        }
+        tr->commit();
+    }
+    catch (...) {}
 }
 
 void IbppDatabase::getStatistics(int* fetch, int* mark, int* read, int* write, int* mem)

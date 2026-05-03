@@ -46,6 +46,8 @@ void FbCppTransaction::start()
         options.setIsolationLevel(fbcpp::TransactionIsolationLevel::SNAPSHOT);
     else if (levelM == TransactionIsolationLevel::ReadCommitted)
         options.setIsolationLevel(fbcpp::TransactionIsolationLevel::READ_COMMITTED);
+    else if (levelM == TransactionIsolationLevel::ReadConsistency)
+        options.setIsolationLevel(fbcpp::TransactionIsolationLevel::READ_CONSISTENCY);
     else if (levelM == TransactionIsolationLevel::ReadDirty)
         options.setIsolationLevel(fbcpp::TransactionIsolationLevel::READ_COMMITTED); // fallback
 

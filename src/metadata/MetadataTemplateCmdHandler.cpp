@@ -50,6 +50,7 @@
 #include "metadata/User.h"
 #include "metadata/view.h"
 #include "metadata/package.h"
+#include "metadata/TransactionInfoObject.h"
 
 
 class MetadataTemplateCmdHandler: public TemplateCmdHandler
@@ -465,9 +466,43 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
                     cmdParams.from(2), (*it).get());
             }
         }
+        // {%foreach:active_transaction:<separator>:<text>%}
+        else if (cmdParams[0] == "active_transaction")
+        {
+            Database* db = dynamic_cast<Database*>(object);
+            if (!db)
+                return;
+
+            const std::vector<fr::TransactionInfo>& transactions = db->getInfo().getActiveTransactions();
+            bool firstItem = true;
+            for (const auto& info : transactions)
+            {
+                TransactionInfoObject tio(info);
+                Local::foreachIteration(firstItem, tp, processedText, sep,
+                    cmdParams.from(2), &tio);
+            }
+        }
         // add more collections here.
         else
             return;
+    }
+
+    // {%transactioninfo:<property>%}
+    else if (cmdName == "transactioninfo" && !cmdParams.IsEmpty())
+    {
+        TransactionInfoObject* tio = dynamic_cast<TransactionInfoObject*>(object);
+        if (!tio)
+            return;
+
+        const fr::TransactionInfo& info = tio->getInfo();
+        if (cmdParams[0] == "id")
+            processedText += wxString::Format("%d", info.id);
+        else if (cmdParams[0] == "isolation_level")
+            processedText += isolationLevelToString(info.isolationLevel);
+        else if (cmdParams[0] == "read_only")
+            processedText += getBooleanAsString(info.readOnly);
+        else if (cmdParams[0] == "wait")
+            processedText += getBooleanAsString(info.wait);
     }
 
     // {%owner_name%}

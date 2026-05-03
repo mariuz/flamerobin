@@ -247,12 +247,88 @@ std::string FbCppDatabase::getTimezoneName(int timezoneId)
 
 void FbCppDatabase::getInfo(DatabaseInfoData* data)
 {
-    if (!data)
+    if (!data || !attachmentM)
         return;
+
     *data = {};
-    data->ods = 13;
-    data->pageSize = 4096;
-    data->nextTransaction = 1;
+    auto tr = createTransaction();
+    tr->start();
+    auto st = createStatement(tr);
+
+    auto& client = attachmentM->getClient();
+    fbcpp::impl::StatusWrapper status(client);
+
+    // Get basic DB info
+    unsigned char items[] = {
+        isc_info_db_ods_version,
+        isc_info_db_ods_minor_version,
+        isc_info_page_size,
+        isc_info_allocation,
+        isc_info_db_read_only,
+        isc_info_oldest_transaction,
+        isc_info_oldest_active,
+        isc_info_oldest_snapshot,
+        isc_info_next_transaction
+    };
+    unsigned char buffer[256];
+    attachmentM->getHandle()->getInfo(&status, sizeof(items), items, sizeof(buffer), buffer);
+    if (!(status.getState() & Firebird::IStatus::STATE_ERRORS))
+    {
+        unsigned char* p = buffer;
+        while (*p != isc_info_end && p < buffer + sizeof(buffer))
+        {
+            unsigned char item = *p++;
+            unsigned short len = p[0] | (p[1] << 8);
+            p += 2;
+            int64_t value = 0;
+            if (len == 1) value = *p;
+            else if (len == 2) value = p[0] | (p[1] << 8);
+            else if (len == 4) value = p[0] | (p[1] << 8) | (p[2] << 16) | (p[3] << 24);
+            else if (len == 8) value = (int64_t)p[0] | ((int64_t)p[1] << 8) | ((int64_t)p[2] << 16) | ((int64_t)p[3] << 24)
+                                    | ((int64_t)p[4] << 32) | ((int64_t)p[5] << 40) | ((int64_t)p[6] << 48) | ((int64_t)p[7] << 56);
+
+            if (item == isc_info_db_ods_version) data->ods = (int)value;
+            else if (item == isc_info_db_ods_minor_version) data->odsMinor = (int)value;
+            else if (item == isc_info_page_size) data->pageSize = (int)value;
+            else if (item == isc_info_allocation) data->pages = (int)value;
+            else if (item == isc_info_db_read_only) data->readOnly = (value != 0);
+            else if (item == isc_info_oldest_transaction) data->oldestTransaction = (int)value;
+            else if (item == isc_info_oldest_active) data->oldestActiveTransaction = (int)value;
+            else if (item == isc_info_oldest_snapshot) data->oldestSnapshot = (int)value;
+            else if (item == isc_info_next_transaction) data->nextTransaction = (int)value;
+
+            p += len;
+        }
+    }
+
+    // Get active transactions
+    try
+    {
+        st->prepare("SELECT MON$TRANSACTION_ID, MON$ISOLATION_MODE, MON$READ_ONLY, MON$WAIT_MODE "
+                    "FROM MON$TRANSACTIONS WHERE MON$ATTACHMENT_ID = CURRENT_CONNECTION");
+        st->execute();
+        while (st->fetch())
+        {
+            TransactionInfo info;
+            info.id = st->getInt32(0);
+            int mode = st->getInt32(1);
+            switch (mode)
+            {
+                case 0: info.isolationLevel = TransactionIsolationLevel::Consistency; break;
+                case 1: info.isolationLevel = TransactionIsolationLevel::Concurrency; break;
+                case 2: info.isolationLevel = TransactionIsolationLevel::ReadDirty; break;
+                case 3: info.isolationLevel = TransactionIsolationLevel::ReadCommitted; break;
+                case 4: info.isolationLevel = TransactionIsolationLevel::ReadConsistency; break;
+                default: info.isolationLevel = TransactionIsolationLevel::Concurrency; break;
+            }
+            info.readOnly = st->getBool(2);
+            info.wait = (st->getInt32(3) != 0);
+            data->activeTransactions.push_back(info);
+        }
+    }
+    catch (...) {}
+
+    tr->commit();
 }
 
 void FbCppDatabase::getStatistics(int* fetch, int* mark, int* read, int* write, int* mem)

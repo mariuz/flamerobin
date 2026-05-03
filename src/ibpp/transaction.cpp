@@ -304,6 +304,7 @@ void TransactionImpl::AttachDatabaseImpl(DatabaseImpl* dbi,
                                         tpb->Insert(isc_tpb_rec_version); break;
         case IBPP::ilReadCommitted :    tpb->Insert(isc_tpb_read_committed);
                                         tpb->Insert(isc_tpb_no_rec_version); break;
+        case IBPP::ilReadConsistency:   tpb->Insert(isc_tpb_read_consistency); break;
         default :                       tpb->Insert(isc_tpb_concurrency); break;
     }
 

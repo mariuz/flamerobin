@@ -95,6 +95,8 @@ private:
     int oldestSnapshotM;
     int nextTransactionM;
 
+    std::vector<fr::TransactionInfo> activeTransactionsM;
+
     int sweepM;
 
     bool readOnlyM;
@@ -119,6 +121,7 @@ public:
     int getOldestActiveTransaction() const;
     int getOldestSnapshot() const;
     int getNextTransaction() const;
+    const std::vector<fr::TransactionInfo>& getActiveTransactions() const;
 
     int getSweep() const;
 

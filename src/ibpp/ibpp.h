@@ -85,7 +85,7 @@ namespace IBPP
     enum TAM {amWrite, amRead};
 
     //  Transaction Isolation Levels
-    enum TIL {ilConcurrency, ilReadDirty, ilReadCommitted, ilConsistency};
+    enum TIL {ilConcurrency, ilReadDirty, ilReadCommitted, ilConsistency, ilReadConsistency};
 
     //  Transaction Lock Resolution
     enum TLR {lrWait, lrNoWait};

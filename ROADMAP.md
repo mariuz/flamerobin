@@ -50,7 +50,7 @@ The following phases track FlameRobin UI/metadata support for features introduce
 - [x] **Named Time Zone Display** — Show IANA-named time zones (e.g., Europe/Berlin, America/New_York) in column metadata and property views, not just UTC offsets.
 - [x] **`DECFLOAT` and `INT128` DDL Generation** — Ensure `CREATE TABLE` / `CREATE DOMAIN` DDL templates emit correct `DECFLOAT(16)`, `DECFLOAT(34)`, and `INT128` syntax (data type support in the DAL already exists).
 - [x] **Scrollable Cursor Display** — Show the `SCROLL` attribute in stored-procedure and trigger DDL when present.
-- [ ] **Read Committed Read Consistency** — Display the new transaction isolation level in transaction info and monitoring views.
+- [x] **Read Committed Read Consistency** — Display the new transaction isolation level in transaction info and monitoring views.
 - [ ] **Database Encryption Status** — Show whether a database is encrypted in the database properties panel.
 - [ ] **Built-in Replication Monitoring** — Display `RDB$PUBLICATIONS` / `RDB$PUBLICATION_TABLES` system tables (ODS 13.0) in the metadata tree under a dedicated *Replication* node.
 - [ ] **SQL Syntax Highlighting for FB4 Keywords** — Activate the FB4 keyword set (already defined in `firebird_keyword_sets.hpp`) based on the connected server version.

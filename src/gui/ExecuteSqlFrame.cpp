@@ -800,6 +800,8 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
         cm.getMainMenuItemText(_("Dirty read isolation mode"), Cmds::Query_TransactionReadDirty));
     stmtPropMenu->AppendRadioItem(Cmds::Query_TransactionReadCommitted,
         cm.getMainMenuItemText(_("Read committed isolation mode"), Cmds::Query_TransactionReadCommitted));
+    stmtPropMenu->AppendRadioItem(Cmds::Query_TransactionReadConsistency,
+        cm.getMainMenuItemText(_("Read consistency isolation mode"), Cmds::Query_TransactionReadConsistency));
     stmtPropMenu->AppendRadioItem(Cmds::Query_TransactionConsistency,
         cm.getMainMenuItemText(_("Consistency isolation mode"), Cmds::Query_TransactionConsistency));
     stmtPropMenu->AppendSeparator();
@@ -2161,7 +2163,10 @@ void ExecuteSqlFrame::inTransaction(bool started)
     inTransactionM = started;
     splitScreen();
     if (started)
-        statusbar_1->SetStatusText(_("Transaction started"), 3);
+    {
+        wxString il = isolationLevelToString(transactionIsolationLevelM);
+        statusbar_1->SetStatusText(wxString::Format(_("Transaction started (%s)"), il.c_str()), 3);
+    }
     else
     {
         grid_data->ClearGrid();
@@ -2777,6 +2782,8 @@ void ExecuteSqlFrame::OnMenuTransactionIsolationLevel(wxCommandEvent& event)
         transactionIsolationLevelM = fr::TransactionIsolationLevel::Consistency;
     else if (event.GetId() == Cmds::Query_TransactionReadCommitted)
         transactionIsolationLevelM = fr::TransactionIsolationLevel::ReadCommitted;
+    else if (event.GetId() == Cmds::Query_TransactionReadConsistency)
+        transactionIsolationLevelM = fr::TransactionIsolationLevel::ReadConsistency;
     else if (event.GetId() == Cmds::Query_TransactionReadDirty)
         transactionIsolationLevelM = fr::TransactionIsolationLevel::ReadDirty;
 
@@ -2795,6 +2802,8 @@ void ExecuteSqlFrame::OnMenuUpdateTransactionIsolationLevel(
         event.Check(transactionIsolationLevelM == fr::TransactionIsolationLevel::Consistency);
     else if (event.GetId() == Cmds::Query_TransactionReadCommitted)
         event.Check(transactionIsolationLevelM == fr::TransactionIsolationLevel::ReadCommitted);
+    else if (event.GetId() == Cmds::Query_TransactionReadConsistency)
+        event.Check(transactionIsolationLevelM == fr::TransactionIsolationLevel::ReadConsistency);
     else if (event.GetId() == Cmds::Query_TransactionReadDirty)
         event.Check(transactionIsolationLevelM == fr::TransactionIsolationLevel::ReadDirty);
 }

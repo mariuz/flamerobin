@@ -81,6 +81,14 @@ enum class StatementType
     Savepoint
 };
 
+struct TransactionInfo
+{
+    int id;
+    TransactionIsolationLevel isolationLevel;
+    bool readOnly;
+    bool wait;
+};
+
 struct DatabaseInfoData
 {
     int ods;
@@ -97,6 +105,8 @@ struct DatabaseInfoData
     int oldestActiveTransaction;
     int oldestSnapshot;
     int nextTransaction;
+
+    std::vector<TransactionInfo> activeTransactions;
 };
 
 struct CountInfo

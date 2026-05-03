@@ -21,36 +21,20 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#ifndef FR_ITRANSACTION_H
-#define FR_ITRANSACTION_H
 
+#ifndef FR_TRANSACTION_INFO_OBJECT_H
+#define FR_TRANSACTION_INFO_OBJECT_H
+
+#include "core/ProcessableObject.h"
 #include "engine/db/DatabaseBackend.h"
 
-namespace fr
-{
-
-enum class TransactionAccessMode { Read, Write };
-enum class TransactionIsolationLevel { Consistency, Concurrency, ReadDirty, ReadCommitted, ReadConsistency };
-enum class TransactionLockResolution { Wait, NoWait };
-
-class ITransaction
+class TransactionInfoObject : public ProcessableObject
 {
 public:
-    virtual ~ITransaction() = default;
-
-    virtual void start() = 0;
-    virtual void commit() = 0;
-    virtual void rollback() = 0;
-    virtual void commitRetain() = 0;
-    virtual void rollbackRetain() = 0;
-
-    virtual bool isActive() = 0;
-
-    virtual void setAccessMode(TransactionAccessMode mode) = 0;
-    virtual void setIsolationLevel(TransactionIsolationLevel level) = 0;
-    virtual void setLockResolution(TransactionLockResolution resolution) = 0;
+    TransactionInfoObject(const fr::TransactionInfo& info) : infoM(info) {}
+    const fr::TransactionInfo& getInfo() const { return infoM; }
+private:
+    fr::TransactionInfo infoM;
 };
 
-} // namespace fr
-
-#endif // FR_ITRANSACTION_H
+#endif

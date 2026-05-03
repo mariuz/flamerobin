@@ -118,5 +118,29 @@
 <!-- right table end -->
     </td></tr>
 </table>
+
+<br>
+<table cellspacing=1 cellpadding=2 border=0 bgcolor="black">
+  <tbody>
+    <tr bgcolor="navy">
+       <td nowrap colspan=4><b><font color=white>Active Transactions (Current Connection)</font></b></td>
+    </tr>
+    <tr bgcolor="navy">
+       <td nowrap><b><font color=white>ID</font></b></td>
+       <td nowrap><b><font color=white>Isolation Level</font></b></td>
+       <td nowrap><b><font color=white>Read Only</font></b></td>
+       <td nowrap><b><font color=white>Wait</font></b></td>
+    </tr>
+    {%foreach:active_transaction::
+    <tr bgcolor="#DDDDFF">
+        <td bgcolor="#CCCCFF" align="right" nowrap>{%transactioninfo:id%}</td>
+        <td bgcolor="#CCCCFF" nowrap>{%transactioninfo:isolation_level%}</td>
+        <td bgcolor="#CCCCFF" align="center" nowrap><img src="{%template_root%}{%ifeq:{%transactioninfo:read_only%}:true:ok.png:redx.png%}" height="16" width="16"></td>
+        <td bgcolor="#CCCCFF" align="center" nowrap><img src="{%template_root%}{%ifeq:{%transactioninfo:wait%}:true:ok.png:redx.png%}" height="16" width="16"></td>
+    </tr>
+    %}
+  </tbody>
+</table>
+
 </body>
 </html>

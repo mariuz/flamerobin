@@ -225,8 +225,14 @@ void DatabaseInfo::load(fr::IDatabasePtr database)
     oldestActiveTransactionM = data.oldestActiveTransaction;
     oldestSnapshotM = data.oldestSnapshot;
     nextTransactionM = data.nextTransaction;
+    activeTransactionsM = data.activeTransactions;
 
     loadTimeMillisM = ::wxGetLocalTimeMillis();
+}
+
+const std::vector<fr::TransactionInfo>& DatabaseInfo::getActiveTransactions() const
+{
+    return activeTransactionsM;
 }
 
 void DatabaseInfo::reloadIfNecessary(fr::IDatabasePtr database)

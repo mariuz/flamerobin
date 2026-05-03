@@ -104,3 +104,16 @@ wxString DALtype2string(Database* db, fr::ColumnType t, int subtype, int size,
     default:                return "UNKNOWN";
     }
 }
+
+wxString isolationLevelToString(fr::TransactionIsolationLevel level)
+{
+    switch (level)
+    {
+    case fr::TransactionIsolationLevel::Consistency:     return _("Consistency");
+    case fr::TransactionIsolationLevel::Concurrency:     return _("Concurrency");
+    case fr::TransactionIsolationLevel::ReadCommitted:   return _("Read Committed");
+    case fr::TransactionIsolationLevel::ReadDirty:       return _("Read Dirty");
+    case fr::TransactionIsolationLevel::ReadConsistency: return _("Read Consistency");
+    default:                                             return _("Unknown");
+    }
+}
