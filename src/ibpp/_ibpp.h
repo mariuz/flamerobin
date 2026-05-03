@@ -814,8 +814,8 @@ public:
 
     void Shutdown(const std::string& dbfile, IBPP::DSM flags,  int sectimeout);
     void Restart(const std::string& dbfile, IBPP::DSM flags);
-    void Sweep(const std::string& dbfile);
-    void Repair(const std::string& dbfile, IBPP::RPF flags);
+    void Sweep(const std::string& dbfile, const int parallelWorkers = 0);
+    void Repair(const std::string& dbfile, IBPP::RPF flags, const int parallelWorkers = 0);
 
     void StartBackup(
         const std::string& dbfile, const std::string& bkfile, const std::string& outfile = "",

@@ -170,6 +170,11 @@ void FbCppService::restore(const RestoreConfig& config)
     });
 }
 
+void FbCppService::maintain(const MaintenanceConfig& config)
+{
+    throw std::runtime_error("Maintenance not implemented yet in FbCppService");
+}
+
 void FbCppService::shutdown(const ShutdownConfig& config)
 {
     // Firebird 3.0+ shutdown using service manager is complex via low-level API.

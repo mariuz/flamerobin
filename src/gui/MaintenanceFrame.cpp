@@ -35,6 +35,7 @@
 #include <algorithm>
 
 #include "config/Config.h"
+#include "core/StringUtils.h"
 #include "gui/MaintenanceFrame.h"
 #include "gui/controls/LogTextControl.h"
 #include "gui/StyleGuide.h"
