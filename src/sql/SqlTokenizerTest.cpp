@@ -324,5 +324,19 @@ int main()
         ok = checkToken(t.getCurrentToken(), kwSET, "SET: kwSET") && ok;
     }
 
+    // Test 28: Modern Firebird keywords (FB4+)
+    {
+        SqlTokenizer t("DECFLOAT");
+        ok = checkToken(t.getCurrentToken(), kwDECFLOAT, "DECFLOAT: kwDECFLOAT") && ok;
+    }
+    {
+        SqlTokenizer t("INT128");
+        ok = checkToken(t.getCurrentToken(), kwINT128, "INT128: kwINT128") && ok;
+    }
+    {
+        SqlTokenizer t("ZONE");
+        ok = checkToken(t.getCurrentToken(), kwZONE, "ZONE: kwZONE") && ok;
+    }
+
     return ok ? 0 : 1;
 }
