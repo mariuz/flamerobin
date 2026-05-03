@@ -93,24 +93,6 @@ int main()
         return 0;
     }
 
-    // Firebird 3.0 supports identifiers up to 31 characters; use 31 to test
-    // that IBPP does not truncate the maximum-length names it returns.
-    const std::string tableName = makeIdentifier("TBL_", 'T', 31);
-    const std::string columnName = makeIdentifier("COL_", 'C', 31);
-    const std::string aliasName = makeIdentifier("ALIAS_", 'A', 31);
-
-    // Build a temporary database path that works on both POSIX and Windows.
-#ifdef _WIN32
-    char tmpDir[MAX_PATH];
-    DWORD tmpLen = GetTempPathA(MAX_PATH, tmpDir);
-    std::string dbName = (tmpLen > 0 ? std::string(tmpDir, tmpLen) : "C:\\Temp\\") +
-        "flamerobin_row_metadata_test_" +
-        std::to_string(static_cast<long long>(std::time(0))) + ".fdb";
-#else
-    const std::string dbName = "/tmp/flamerobin_row_metadata_test_" +
-        std::to_string(static_cast<long long>(std::time(0))) + ".fdb";
-#endif
-
     IBPP::Database db;
 
     try
@@ -121,6 +103,12 @@ int main()
 
         int odsMajor = 0;
         db->Info(&odsMajor, 0, 0, 0, 0, 0, 0, 0, 0);
+        int idLen = (odsMajor >= 13 ? 63 : 31);
+        std::cout << "Detected ODS " << odsMajor << ". Testing identifiers with length: " << idLen << "\n";
+
+        const std::string tableName = makeIdentifier("TBL_", 'T', idLen);
+        const std::string columnName = makeIdentifier("COL_", 'C', idLen);
+        const std::string aliasName = makeIdentifier("ALIAS_", 'A', idLen);
 
         // DDL transaction: Firebird 3.0 requires DDL to be committed before
         // the new table is visible to subsequent DML in a fresh transaction.
@@ -151,7 +139,7 @@ int main()
 
         ok = check(query->ColumnNum(columnName) == 1, "ColumnNum by name") && ok;
         ok = check(query->ColumnNum(aliasName) == 1, "ColumnNum by alias") && ok;
-        ok = check(query->ColumnNum(makeIdentifier("alias_", 'a', 31)) == 1,
+        ok = check(query->ColumnNum(makeIdentifier("alias_", 'a', idLen)) == 1,
             "ColumnNum is case-insensitive for aliases") && ok;
 
         tr->Commit();
@@ -159,9 +147,9 @@ int main()
         // Regression coverage for PR #510:
         // Relation metadata query must use f.rdb$character_set_id in the
         // rdb$collations join and execute successfully on Firebird 3/4/5/6.
-        const std::string domainName = makeIdentifier("DM_", 'D', 31);
-        const std::string relationName = makeIdentifier("REL_", 'R', 31);
-        const std::string relationColumnName = makeIdentifier("TXT_", 'X', 31);
+        const std::string domainName = makeIdentifier("DM_", 'D', idLen);
+        const std::string relationName = makeIdentifier("REL_", 'R', idLen);
+        const std::string relationColumnName = makeIdentifier("TXT_", 'X', idLen);
 
         tr->Start();
         st->Execute("CREATE DOMAIN " + quoteIdentifier(domainName) +
@@ -388,8 +376,8 @@ int main()
         // This section verifies that the SQL operations (create + drop trigger)
         // complete successfully on the Firebird side.
         {
-            const std::string triggerTable = makeIdentifier("TRG_TBL_", 'T', 31);
-            const std::string triggerName  = makeIdentifier("TRG_", 'G', 31);
+            const std::string triggerTable = makeIdentifier("TRG_TBL_", 'T', idLen);
+            const std::string triggerName  = makeIdentifier("TRG_", 'G', idLen);
 
             tr->Start();
             st->Execute("CREATE TABLE " + quoteIdentifier(triggerTable) +

@@ -212,10 +212,10 @@ bool Logger::prepareDatabase(Database *db)
             st->Prepare("create table FLAMEROBIN$LOG ( \
                 id integer not null, \
                 object_type varchar(10), \
-                object_name char(31), \
+                object_name char(63), \
                 sql_statement blob sub_type 1, \
                 executed_at timestamp default current_timestamp, \
-                user_name char(31) default current_user )");
+                user_name char(63) default current_user )");
             st->Execute();
             tr->Commit();
             db->addObject(ntTable, "FLAMEROBIN$LOG");
