@@ -60,6 +60,7 @@ public:
     void highlightText(int start, int end);
     void clearHighlights();
     void setChars(bool firebirdIdentifierOnly);
+    void setKeywords(int odsMajor, int odsMinor);
     void setFont();
     void setupStyles();
 

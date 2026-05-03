@@ -315,7 +315,6 @@ void SqlEditor::clearHighlights()
 
 void SqlEditor::setChars(bool firebirdIdentifierOnly)
 {
-    SetKeyWords(0, SqlTokenizer::getKeywordsString(SqlTokenizer::kwLowerCase));
     wxString chars("_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz\"$");
 
     if (!firebirdIdentifierOnly)
@@ -326,6 +325,12 @@ void SqlEditor::setChars(bool firebirdIdentifierOnly)
                 chars += wxChar(ch);
     }
     SetWordChars(chars);
+}
+
+void SqlEditor::setKeywords(int odsMajor, int odsMinor)
+{
+    SetKeyWords(0, SqlTokenizer::getKeywordsString(SqlTokenizer::kwLowerCase,
+        odsMajor, odsMinor));
 }
 
 //! This code has to be called each time the font has changed, so that the control updates
@@ -504,6 +509,7 @@ void SqlEditor::setupStyles()
     stylerManager().assignLexer(this);
     SetLexer(wxSTC_LEX_SQL);
     stylerManager().assignMargin(this);
+    setKeywords(-1, -1);
     setChars(false);
 
 }
@@ -3261,8 +3267,14 @@ void ExecuteSqlFrame::setKeywords()
     // so it can reload this list if something changes
 
     const DatabaseInfo& dbInfo(databaseM->getInfo());
+    int odsMajor = dbInfo.getODS();
+    int odsMinor = dbInfo.getODSMinor();
+
     wxArrayString as(SqlTokenizer::getKeywords(SqlTokenizer::kwDefaultCase,
-        dbInfo.getODS(), dbInfo.getODSMinor()));
+        odsMajor, odsMinor));
+
+    // Update syntax highlighting keywords
+    styled_text_ctrl_sql->setKeywords(odsMajor, odsMinor);
 
     // get list od database objects' names
     std::vector<Identifier> v;

@@ -353,5 +353,23 @@ int main()
         ok = checkToken(t.getCurrentToken(), kwCURSOR, "CURSOR: kwCURSOR") && ok;
     }
 
+    // Test 30: Version-based keyword strings
+    {
+        wxString fb25 = SqlTokenizer::getKeywordsString(SqlTokenizer::kwUpperCase, 11, 1); // ODS 11.1 (FB 2.5)
+        wxString fb40 = SqlTokenizer::getKeywordsString(SqlTokenizer::kwUpperCase, 13, 0); // ODS 13.0 (FB 4.0)
+        
+        ok = check(fb25.Contains("SELECT"), "FB2.5 has SELECT") && ok;
+        ok = check(!fb25.Contains("DECFLOAT"), "FB2.5 does not have DECFLOAT") && ok;
+        ok = check(!fb25.Contains("PUBLICATION"), "FB2.5 does not have PUBLICATION") && ok;
+        
+        ok = check(fb40.Contains("SELECT"), "FB4.0 has SELECT") && ok;
+        ok = check(fb40.Contains("DECFLOAT"), "FB4.0 has DECFLOAT") && ok;
+        ok = check(fb40.Contains("PUBLICATION"), "FB4.0 has PUBLICATION") && ok;
+
+        wxString fb50 = SqlTokenizer::getKeywordsString(SqlTokenizer::kwUpperCase, 13, 1); // ODS 13.1 (FB 5.0)
+        ok = check(fb50.Contains("SKIP"), "FB5.0 has SKIP") && ok;
+        ok = check(fb50.Contains("LOCKED"), "FB5.0 has LOCKED") && ok;
+    }
+
     return ok ? 0 : 1;
 }
