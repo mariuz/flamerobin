@@ -57,7 +57,7 @@ The following phases track FlameRobin UI/metadata support for features introduce
 
 ### Phase 6: Firebird 5.0 Feature Support (ODS 13.1, released January 2024)
 
-- [ ] **Partial (Conditional) Index DDL** — Emit `WHERE <condition>` in generated DDL for partial indexes (`rdb$condition_source` is already read; the DDL output path needs to include it).
+- [x] **Partial (Conditional) Index DDL** — Emit `WHERE <condition>` in generated DDL for partial indexes (`rdb$condition_source` is already read; the DDL output path needs to include it).
 - [ ] **Parallel Operations UI** — Expose a *parallel worker count* option in the Backup, Restore, and Sweep dialogs (`ParallelWorkers` service parameter).
 - [ ] **`SKIP LOCKED` Clause Highlighting** — Add `SKIP LOCKED` to SQL keyword/syntax highlighting.
 - [ ] **`LATERAL` JOIN Support** — Ensure the SQL editor tokenizer/parser handles `LATERAL` joins without producing false "incomplete statement" warnings.

@@ -833,7 +833,7 @@ add_executable(publication_test
     ${SOURCEDIR}/metadata/PublicationTest.cpp
     ${SOURCEDIR}/metadata/publication.cpp
     ${SOURCEDIR}/metadata/metadataitem.cpp
-    ${SOURCEDIR}/core/Identifier.cpp
+    ${SOURCEDIR}/sql/Identifier.cpp
     ${SOURCEDIR}/core/Subject.cpp
     ${SOURCEDIR}/core/StringUtils.cpp
     ${SOURCEDIR}/core/FRError.cpp

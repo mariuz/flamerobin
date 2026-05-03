@@ -34,6 +34,8 @@
 #include "metadata/database.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/publication.h"
+#include "core/StringUtils.h"
+#include "frutils.h"
 
 Publication::Publication(DatabasePtr database, const wxString& name)
     : MetadataItem(ntPublication, database.get(), name), allTablesM(false)

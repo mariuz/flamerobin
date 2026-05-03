@@ -677,6 +677,30 @@ void MetadataItem::saveDescription(const wxString& WXUNUSED(description))
         getTypeName().c_str()));
 }
 
+void MetadataItem::saveDescription(const wxString& saveStatement,
+    const wxString& description)
+{
+    DatabasePtr d = getDatabase();
+    fr::IDatabasePtr db = d->getDALDatabase();
+    fr::ITransactionPtr tr1 = db->createTransaction();
+    tr1->start();
+
+    fr::IStatementPtr st1 = db->createStatement(tr1);
+    wxString sql(saveStatement);
+    if (!description.IsEmpty())
+    {
+        wxString desc(description);
+        desc.Replace("'", "''");
+        sql += "'" + desc + "'";
+    }
+    else
+        sql += "NULL";
+
+    st1->prepare(wx2std(sql, d->getCharsetConverter()));
+    st1->execute();
+    tr1->commit();
+}
+
 void MetadataItem::setDescription(const wxString& description)
 {
     if (getDescription() != description)

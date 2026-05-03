@@ -45,6 +45,7 @@
 #include "metadata/MetadataTemplateManager.h"
 #include "metadata/package.h"
 #include "metadata/procedure.h"
+#include "metadata/publication.h"
 #include "metadata/role.h"
 #include "metadata/root.h"
 #include "metadata/server.h"

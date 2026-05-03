@@ -445,7 +445,8 @@ void CreateDDLVisitor::visitIndex(Index& i)
         preSqlM += "UNIQUE ";
     if (i.getIndexType() == Index::itDescending)
         preSqlM += "DESCENDING ";
-    preSqlM += "INDEX " + i.getQuotedName() + " ON " + i.getParent()->getQuotedName();
+    Identifier relId(i.getRelationName());
+    preSqlM += "INDEX " + i.getQuotedName() + " ON " + relId.getQuoted();
     std::vector<wxString> quotedSegments;
     std::vector<wxString>* cols = i.getSegments();
     for (std::vector<wxString>::const_iterator it = cols->begin(); it != cols->end(); ++it)

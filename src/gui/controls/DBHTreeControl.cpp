@@ -58,6 +58,7 @@
 #include "metadata/parameter.h"
 #include "metadata/package.h"
 #include "metadata/procedure.h"
+#include "metadata/publication.h"
 #include "metadata/role.h"
 #include "metadata/root.h"
 #include "metadata/server.h"
@@ -351,6 +352,9 @@ public:
     virtual void visitUsers(Users& users);
     virtual void visitView(View& view);
     virtual void visitViews(Views& views);
+    virtual void visitPublication(Publication& publication);
+    virtual void visitPublications(Publications& publications);
+    virtual void visitReplication(Replication& replication);
     virtual void visitIndex(Index& index);
     virtual void visitIndices(Indices& indices);
     virtual void visitSysIndices(SysIndices& sysIndices);

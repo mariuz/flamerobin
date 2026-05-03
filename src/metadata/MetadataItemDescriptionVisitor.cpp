@@ -46,6 +46,7 @@
 #include "metadata/parameter.h"
 #include "metadata/package.h"
 #include "metadata/procedure.h"
+#include "metadata/publication.h"
 #include "metadata/relation.h"
 #include "metadata/role.h"
 #include "metadata/trigger.h"

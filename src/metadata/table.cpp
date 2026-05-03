@@ -437,7 +437,8 @@ void Table::loadIndices()
                 statistics,
                 !st1->isNull(6),
                 expression,
-                condition
+                condition,
+                getName_()
             );
             indicesM.push_back(x);
             i = &indicesM.back();

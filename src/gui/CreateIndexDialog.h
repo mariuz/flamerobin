@@ -42,7 +42,11 @@ private:
     wxRadioBox* radiobox_order;
     wxStaticText* label_columns;
     wxListBox* listbox_columns;
+    wxStaticText* label_condition;
+    wxTextCtrl* textctrl_condition;
+
     wxButton* button_ok;
+
     wxButton* button_cancel;
 
     void createControls();

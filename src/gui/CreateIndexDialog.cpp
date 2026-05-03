@@ -75,6 +75,11 @@ void CreateIndexDialog::createControls()
     listbox_columns = new wxListBox(getControlsPanel(), ID_list_columns,
         wxDefaultPosition, wxDefaultSize, 0, 0, wxLB_MULTIPLE);
 
+    label_condition = new wxStaticText(getControlsPanel(), -1,
+        _("Condition (WHERE clause):"));
+    textctrl_condition = new wxTextCtrl(getControlsPanel(), -1,
+        wxEmptyString);
+
     button_ok = new wxButton(getControlsPanel(), wxID_OK, _("Create"));
     button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL, _("Cancel"));
 }
@@ -100,6 +105,24 @@ void CreateIndexDialog::layoutControls()
     sizerControls->AddSpacer(
         styleguide().getRelatedControlMargin(wxVERTICAL));
     sizerControls->Add(listbox_columns, 1, wxEXPAND);
+    sizerControls->AddSpacer(
+        styleguide().getUnrelatedControlMargin(wxVERTICAL));
+
+    DatabasePtr db = tableM->getDatabase();
+    if (db && db->getInfo().getODSVersionIsHigherOrEqualTo(13, 1))
+    {
+        sizerControls->Add(label_condition, 0, wxEXPAND);
+        sizerControls->AddSpacer(
+            styleguide().getRelatedControlMargin(wxVERTICAL));
+        sizerControls->Add(textctrl_condition, 0, wxEXPAND);
+        sizerControls->AddSpacer(
+            styleguide().getUnrelatedControlMargin(wxVERTICAL));
+    }
+    else
+    {
+        label_condition->Hide();
+        textctrl_condition->Hide();
+    }
 
     // create sizer for buttons -> styleguide class will align it correctly
     wxSizer* sizerButtons = styleguide().createButtonSizer(button_ok,
@@ -209,7 +232,12 @@ const wxString CreateIndexDialog::getStatementsToExecute()
         sql += "DESCENDING ";
     sql += "INDEX " + Identifier::userString(textctrl_name->GetValue())
         + " ON " + tableM->getQuotedName() + "\n"
-        + "  (" + getSelectedColumnsList() + ");\n";
+        + "  (" + getSelectedColumnsList() + ")";
+    
+    wxString condition = textctrl_condition->GetValue();
+    if (!condition.Trim().IsEmpty())
+        sql += "\n  WHERE " + condition;
+    sql += ";\n";
     return sql;
 }
 

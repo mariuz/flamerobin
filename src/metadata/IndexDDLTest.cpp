@@ -67,5 +67,17 @@ int main()
         "computed partial index body")
         && ok;
 
+    ok = check(
+        buildIndexBodySql("EXTRACT(YEAR FROM COL_C)", std::vector<wxString>(), "COL_A > 0 AND COL_B < 10"),
+        " COMPUTED BY EXTRACT(YEAR FROM COL_C) WHERE COL_A > 0 AND COL_B < 10",
+        "complex computed partial index body")
+        && ok;
+
+    ok = check(
+        buildIndexBodySql(wxEmptyString, segments, "COL_A IN (1, 2, 3)"),
+        " (\"COL_A\",\"COL_B\") WHERE COL_A IN (1, 2, 3)",
+        "partial index body with IN clause")
+        && ok;
+
     return ok ? 0 : 1;
 }
