@@ -50,6 +50,7 @@ public:
     virtual void visitParameter(Parameter& parameter);
     virtual void visitPackage(Package& package);
     virtual void visitProcedure(Procedure& procedure);
+    virtual void visitPublication(Publication& publication);
     virtual void visitRelation(Relation& relation);
     virtual void visitRole(Role& role);
     virtual void visitTrigger(Trigger& trigger);

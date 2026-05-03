@@ -221,6 +221,7 @@ private:
     SysRolesPtr sysRolesM;
     SysTablesPtr sysTablesM;
     TablesPtr tablesM;
+    ReplicationPtr replicationM;
     UDFsPtr UDFsM;
     UsersPtr usersM;
     UsrIndicesPtr usrIndicesM;
@@ -289,6 +290,7 @@ public:
     SysRolesPtr getSysRoles();
     SysTablesPtr getSysTables();
     TablesPtr getTables();
+    ReplicationPtr getReplication();
     UDFsPtr getUDFs();
     UsersPtr getUsers();
     UsrIndicesPtr getUsrIndices();

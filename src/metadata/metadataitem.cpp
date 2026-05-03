@@ -125,6 +125,9 @@ wxString getNameOfType(NodeType type)
         case ntIndex:        return ("INDEX");
         case ntCharacterSet: return ("CHARACTERSET");
         case ntCollation:    return ("COLLATION");
+        case ntPublication:  return ("PUBLICATION");
+        case ntPublications: return ("PUBLICATIONS");
+        case ntReplication:  return ("REPLICATION");
         default:
             return "";
     }
@@ -166,6 +169,8 @@ NodeType getTypeByName(const wxString& name)
         return ntCharacterSet;
     else if (name == "COLLATION")
         return ntCollation;
+    else if (name == "PUBLICATION")
+        return ntPublication;
     else
         return ntUnknown;
 }

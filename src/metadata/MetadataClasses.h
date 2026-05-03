@@ -143,6 +143,15 @@ typedef std::vector<ProcedurePtr> ProcedurePtrs;
 class Procedures;
 typedef std::shared_ptr<Procedures> ProceduresPtr;
 
+class Publication;
+typedef std::shared_ptr<Publication> PublicationPtr;
+typedef std::vector<PublicationPtr> PublicationPtrs;
+class Publications;
+typedef std::shared_ptr<Publications> PublicationsPtr;
+
+class Replication;
+typedef std::shared_ptr<Replication> ReplicationPtr;
+
 class Relation;
 
 class Role;

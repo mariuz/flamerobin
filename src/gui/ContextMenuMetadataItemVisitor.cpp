@@ -307,6 +307,32 @@ void MainObjectMenuMetadataItemVisitor::visitProcedures(Procedures& procedures)
     addRefreshItem();
 }
 
+void MainObjectMenuMetadataItemVisitor::visitPublication(Publication& publication)
+{
+    addDropItem(publication);
+    addSeparator();
+    addGenerateCodeMenu(publication);
+    addSeparator();
+    addRefreshItem();
+    addPropertiesItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitPublications(Publications& publications)
+{
+    addSeparator();
+    addGenerateCodeMenu(publications);
+    addSeparator();
+    addRefreshItem();
+}
+
+void MainObjectMenuMetadataItemVisitor::visitReplication(Replication& replication)
+{
+    addSeparator();
+    addGenerateCodeMenu(replication);
+    addSeparator();
+    addRefreshItem();
+}
+
 void MainObjectMenuMetadataItemVisitor::visitRole(Role& role)
 {
     addDropItem(role);

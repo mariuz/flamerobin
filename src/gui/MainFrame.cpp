@@ -693,6 +693,8 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
             case ntDDLTrigger:
             case ntDMLTrigger:
             case ntException:
+            case ntPublication:
+            case ntReplication:
             case ntRole:
             case ntSysRole:
             case ntIndex:

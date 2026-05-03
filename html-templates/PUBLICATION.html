@@ -1,0 +1,49 @@
+{%header%}
+<div class="metadata">
+    <div class="name">{%object_name%}</div>
+    <div class="type">Publication</div>
+</div>
+
+<div class="description">
+    <h2>Description</h2>
+    {%object_description%}
+</div>
+
+<div class="properties">
+    <h2>Properties</h2>
+    <table>
+        <tr>
+            <th>Name</th>
+            <td>{%object_name%}</td>
+        </tr>
+        <tr>
+            <th>Defined for</th>
+            <td>
+                {%if:publicationinfo:all_tables%}
+                    All user-defined tables
+                {%else%}
+                    Specific tables
+                {%endif%}
+            </td>
+        </tr>
+    </table>
+</div>
+
+{%ifnot:publicationinfo:all_tables%}
+<div class="tables">
+    <h2>Tables</h2>
+    <table>
+        <tr>
+            <th>Table Name</th>
+        </tr>
+        {%foreach:publicationinfo:tables: , :<tr><td>{%item%}</td></tr>%}
+    </table>
+</div>
+{%endif%}
+
+<div class="ddl">
+    <h2>DDL</h2>
+    <pre>{%object_ddl%}</pre>
+</div>
+</body>
+</html>

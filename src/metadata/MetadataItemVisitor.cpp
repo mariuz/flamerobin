@@ -187,7 +187,22 @@ void MetadataItemVisitor::visitProcedures(Procedures&)
     defaultAction();
 }
 
+void MetadataItemVisitor::visitPublication(Publication&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitPublications(Publications&)
+{
+    defaultAction();
+}
+
 void MetadataItemVisitor::visitRelation(Relation&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitReplication(Replication&)
 {
     defaultAction();
 }

@@ -43,6 +43,7 @@
 #include "metadata/parameter.h"
 #include "metadata/privilege.h"
 #include "metadata/procedure.h"
+#include "metadata/publication.h"
 #include "metadata/relation.h"
 #include "metadata/role.h"
 #include "metadata/server.h"
@@ -942,6 +943,29 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             processedText += wxString() << db->getLinger();
         else if (cmdParams[0] == "sql_security")
             processedText += wxString() << db->getSqlSecurity();
+    }
+
+    // {%publicationinfo:<property>%}
+    // If the current object is a publication, expands to the publication's
+    // requested property.
+    else if (cmdName == "publicationinfo" && !cmdParams.IsEmpty())
+    {
+        Publication* p = dynamic_cast<Publication*>(object);
+        if (!p)
+            return;
+
+        if (cmdParams[0] == "tables")
+        {
+            wxArrayString tables = p->getTables();
+            for (size_t i = 0; i < tables.size(); ++i)
+            {
+                if (i > 0)
+                    processedText += ", ";
+                processedText += tables[i];
+            }
+        }
+        else if (cmdParams[0] == "all_tables")
+            processedText += getBooleanAsString(p->getAllTables());
     }
 
     // {%privilegeinfo:<property>%}

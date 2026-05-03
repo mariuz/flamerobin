@@ -291,6 +291,12 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(procedure_xpm);
         if (id == ART_Procedures)
             return wxBitmap(procedures_xpm);
+        if (id == ART_Publication)
+            return wxBitmap(table_xpm);
+        if (id == ART_Publications)
+            return wxBitmap(tables_xpm);
+        if (id == ART_Replication)
+            return wxBitmap(databaseserver_xpm);
         if (id == ART_Role)
             return bitmapFromEmbeddedPNG(role16_png, sizeof(role16_png));
         if (id == ART_Roles)

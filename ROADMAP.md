@@ -52,7 +52,7 @@ The following phases track FlameRobin UI/metadata support for features introduce
 - [x] **Scrollable Cursor Display** — Show the `SCROLL` attribute in stored-procedure and trigger DDL when present.
 - [x] **Read Committed Read Consistency** — Display the new transaction isolation level in transaction info and monitoring views.
 - [x] **Database Encryption Status** — Show whether a database is encrypted in the database properties panel.
-- [ ] **Built-in Replication Monitoring** — Display `RDB$PUBLICATIONS` / `RDB$PUBLICATION_TABLES` system tables (ODS 13.0) in the metadata tree under a dedicated *Replication* node.
+- [x] **Built-in Replication Monitoring** — Display `RDB$PUBLICATIONS` / `RDB$PUBLICATION_TABLES` system tables (ODS 13.0) in the metadata tree under a dedicated *Replication* node.
 - [ ] **SQL Syntax Highlighting for FB4 Keywords** — Activate the FB4 keyword set (already defined in `firebird_keyword_sets.hpp`) based on the connected server version.
 
 ### Phase 6: Firebird 5.0 Feature Support (ODS 13.1, released January 2024)

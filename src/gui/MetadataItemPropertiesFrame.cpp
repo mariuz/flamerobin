@@ -405,6 +405,8 @@ wxIcon getMetadataItemIcon(NodeType type)
             return wxArtProvider::GetIcon(ART_Procedure, wxART_OTHER, sz);
         case ntProcedure:
             return wxArtProvider::GetIcon(ART_Procedure, wxART_OTHER, sz);
+        case ntPublication:
+            return wxArtProvider::GetIcon(ART_Table, wxART_OTHER, sz);
         case ntServer:
             return wxArtProvider::GetIcon(ART_Server, wxART_OTHER, sz);
         case ntSysTable:

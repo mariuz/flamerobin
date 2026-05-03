@@ -237,6 +237,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/metadata/parameter.cpp
         ${SOURCEDIR}/metadata/privilege.cpp
         ${SOURCEDIR}/metadata/procedure.cpp
+        ${SOURCEDIR}/metadata/publication.cpp
         ${SOURCEDIR}/metadata/relation.cpp
         ${SOURCEDIR}/metadata/role.cpp
         ${SOURCEDIR}/metadata/root.cpp
@@ -827,6 +828,18 @@ add_executable(firebird_type_utils_test
 )
 target_link_libraries(firebird_type_utils_test ${wxWidgets_LIBRARIES})
 add_test(NAME firebird_type_utils_test COMMAND firebird_type_utils_test)
+
+add_executable(publication_test
+    ${SOURCEDIR}/metadata/PublicationTest.cpp
+    ${SOURCEDIR}/metadata/publication.cpp
+    ${SOURCEDIR}/metadata/metadataitem.cpp
+    ${SOURCEDIR}/core/Identifier.cpp
+    ${SOURCEDIR}/core/Subject.cpp
+    ${SOURCEDIR}/core/StringUtils.cpp
+    ${SOURCEDIR}/core/FRError.cpp
+)
+target_link_libraries(publication_test ${wxWidgets_LIBRARIES})
+add_test(NAME publication_test COMMAND publication_test)
 
 if (APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES

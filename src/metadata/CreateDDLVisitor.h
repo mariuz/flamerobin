@@ -74,6 +74,7 @@ public:
 //        virtual void visitSysPackages(SysPackages& packages);
     virtual void visitProcedure(Procedure& procedure);
 //    virtual void visitProcedures(Procedures& procedures);
+    virtual void visitPublication(Publication& publication);
 //    virtual void visitRelation(Relation& relation);
     virtual void visitRole(Role& role);
 //    virtual void visitRoles(Roles& roles);

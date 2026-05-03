@@ -197,6 +197,13 @@ void LoadDescriptionVisitor::visitProcedure(Procedure& procedure)
         "where RDB$PROCEDURE_NAME = ?");
 }
 
+void LoadDescriptionVisitor::visitPublication(Publication& publication)
+{
+    loadDescription(&publication,
+        "select RDB$DESCRIPTION from RDB$PUBLICATIONS "
+        "where RDB$PUBLICATION_NAME = ?");
+}
+
 void LoadDescriptionVisitor::visitRelation(Relation& relation)
 {
     loadDescription(&relation,
@@ -385,6 +392,11 @@ void SaveDescriptionVisitor::visitProcedure(Procedure& procedure)
     saveDescription(&procedure,
         "update RDB$PROCEDURES set RDB$DESCRIPTION = ? "
         "where RDB$PROCEDURE_NAME = ?");
+}
+
+void SaveDescriptionVisitor::visitPublication(Publication& publication)
+{
+    saveDescription(&publication, "comment on publication %s is '%s'");
 }
 
 void SaveDescriptionVisitor::visitRelation(Relation& relation)

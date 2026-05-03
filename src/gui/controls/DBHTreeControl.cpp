@@ -220,6 +220,9 @@ DBHTreeImageList::DBHTreeImageList()
     addImage(ART_PrimaryKey);
     addImage(ART_Procedure);
     addImage(ART_Procedures);
+    addImage(ART_Publication);
+    addImage(ART_Publications);
+    addImage(ART_Replication);
     addImage(ART_Role);
     addImage(ART_Roles);
     addImage(ART_Root);
@@ -708,6 +711,21 @@ void DBHTreeItemVisitor::visitProcedure(Procedure& procedure)
 void DBHTreeItemVisitor::visitProcedures(Procedures& procedures)
 {
     setNodeProperties(&procedures, ART_Procedures);
+}
+
+void DBHTreeItemVisitor::visitPublication(Publication& publication)
+{
+    setNodeProperties(&publication, ART_Publication);
+}
+
+void DBHTreeItemVisitor::visitPublications(Publications& publications)
+{
+    setNodeProperties(&publications, ART_Publications);
+}
+
+void DBHTreeItemVisitor::visitReplication(Replication& replication)
+{
+    setNodeProperties(&replication, ART_Replication);
 }
 
 void DBHTreeItemVisitor::visitRole(Role& role)

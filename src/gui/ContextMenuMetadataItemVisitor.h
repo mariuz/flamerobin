@@ -60,6 +60,9 @@ public:
     virtual void visitPackages(Packages& packages);
     virtual void visitProcedure(Procedure& procedure);
     virtual void visitProcedures(Procedures& procedures);
+    virtual void visitPublication(Publication& publication);
+    virtual void visitPublications(Publications& publications);
+    virtual void visitReplication(Replication& replication);
     virtual void visitRole(Role& role);
     virtual void visitRoles(Roles& roles);
     virtual void visitRoot(Root& root);

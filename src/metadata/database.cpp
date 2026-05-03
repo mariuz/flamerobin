@@ -62,6 +62,7 @@
 #include "metadata/parameter.h"
 #include "metadata/package.h"
 #include "metadata/procedure.h"
+#include "metadata/publication.h"
 #include "metadata/role.h"
 #include "metadata/root.h"
 #include "metadata/server.h"
@@ -1233,6 +1234,8 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             initializeLockCount(DDLTriggersM, lockCount);
             indicesM.reset(new Indices(me));
             initializeLockCount(indicesM, lockCount);
+            replicationM.reset(new Replication(me));
+            initializeLockCount(replicationM, lockCount);
             sysIndicesM.reset(new SysIndices(me));
             initializeLockCount(sysIndicesM, lockCount);
             usrIndicesM.reset(new UsrIndices(me));
@@ -1655,6 +1658,13 @@ TablesPtr Database::getTables()
     return tablesM;
 }
 
+ReplicationPtr Database::getReplication()
+{
+    wxASSERT(replicationM);
+    replicationM->ensureChildrenLoaded();
+    return replicationM;
+}
+
 DMLTriggersPtr Database::getDMLTriggers()
 {
     wxASSERT(DMLtriggersM);
@@ -1742,6 +1752,8 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
     if (system && showSystemTables())
         temp.push_back(sysTablesM.get());
     temp.push_back(tablesM.get());
+    if (getInfo().getODSVersionIsHigherOrEqualTo(13.0))
+        temp.push_back(replicationM.get());
     temp.push_back(DMLtriggersM.get());
     temp.push_back(UDFsM.get());
     temp.push_back(viewsM.get());
