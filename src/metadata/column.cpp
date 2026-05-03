@@ -99,6 +99,17 @@ wxString ColumnBase::getDatatype(bool useConfig)
         ret += "(" + d->getName_() + ")";
     }
 
+    if (useConfig && datatype.Contains("WITH TIME ZONE"))
+    {
+        DatabasePtr db = getDatabase();
+        if (db)
+        {
+            wxString tz = db->getDefaultTimezone().name;
+            if (!tz.IsEmpty())
+                ret += " (" + tz + ")";
+        }
+    }
+
     if (flag == showAll && !getComputedSource().empty())
         ret += " (" + getComputedSource() + ")";
     return ret;

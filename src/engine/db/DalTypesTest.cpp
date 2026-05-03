@@ -159,17 +159,44 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
             ok = check(st->getTimeTz(0).find("UTC") != std::string::npos, "getTimeTz timezone content") && ok;
             ok = check(st->getTimestampTz(1).find("2023-05-20 12:34:56") != std::string::npos, "getTimestampTz content") && ok;
             ok = check(st->getTimestampTz(1).find("UTC") != std::string::npos, "getTimestampTz timezone content") && ok;
+
+            // Test Named Timezone support
+            std::cout << "  Testing Named Timezone decoding...\n";
+            fr::DatabaseInfoData dbInfo;
+            db->getInfo(&dbInfo);
+            if (dbInfo.ods >= 13)
+            {
+                st->prepare("SET TIME ZONE 'Europe/Berlin'");
+                st->execute();
+
+                st->prepare("SELECT CAST('2023-01-01 12:00 Europe/Berlin' AS TIMESTAMP WITH TIME ZONE) FROM RDB$DATABASE");
+                st->execute();
+                st->fetch();
+
+                std::string tztStr = st->getTimestampTz(0);
+                ok = check(tztStr.find("Europe/Berlin") != std::string::npos, "getTimestampTz with named timezone") && ok;
+
+                // Check getTimezoneName
+                st->prepare("SELECT RDB$TIME_ZONE_ID FROM RDB$TIME_ZONES WHERE RDB$TIME_ZONE_NAME = 'Europe/Berlin'");
+                st->execute();
+                if (st->fetch())
+                {
+                    int tzId = st->getInt32(0);
+                    std::string tzName = db->getTimezoneName(tzId);
+                    ok = checkStr(tzName, "Europe/Berlin", "getTimezoneName") && ok;
+                }
+            }
         }
         catch (const std::exception& e)
         {
             std::string msg = e.what();
-            if (msg.find("Token unknown") != std::string::npos || msg.find("Data type unknown") != std::string::npos)
+            if (msg.find("Token unknown") != std::string::npos || msg.find("Data type unknown") != std::string::npos || msg.find("feature is not supported") != std::string::npos)
             {
-                std::cout << "  Skipping Timezone support tests (unsupported by server/backend).\n";
+                std::cout << "  Skipping Named Timezone tests (unsupported).\n";
             }
             else
             {
-                std::cerr << "  ERROR: Unexpected exception during Timezone test: " << e.what() << "\n";
+                std::cerr << "  ERROR: Unexpected exception during Named Timezone test: " << e.what() << "\n";
                 ok = false;
             }
         }

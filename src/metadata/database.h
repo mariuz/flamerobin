@@ -186,6 +186,7 @@ private:
     DatabaseAuthenticationMode authenticationModeM;
     std::vector<TimezoneInfo*> timezonesM;
     TimezoneInfo defaultTimezoneM;
+    TimezoneInfo databaseTimezoneM;
     std::unordered_map<int, wxString> timezonesCacheM;
     mutable std::mutex timezoneDataMutexM;
 
@@ -324,6 +325,7 @@ public:
     bool isDefaultCollation(const wxString& charset, const wxString& collate);
 
     TimezoneInfo getDefaultTimezone();
+    TimezoneInfo getDatabaseTimezone();
     wxString getTimezoneName(int timezone);
 
     //! fill vector with names of all tables, views, etc.

@@ -2296,9 +2296,12 @@ void Database::loadDefaultTimezone()
         std::lock_guard<std::mutex> lock(timezoneDataMutexM);
         defaultTimezoneM.name.clear();
         defaultTimezoneM.id = 0;
+        databaseTimezoneM.name.clear();
+        databaseTimezoneM.id = 0;
         return;
     }
 
+    // Session Timezone
     fr::IStatementPtr& st1 = loader->getStatement(
         "select z.RDB$TIME_ZONE_ID, "
         "       z.RDB$TIME_ZONE_NAME "
@@ -2306,13 +2309,33 @@ void Database::loadDefaultTimezone()
         "where z.RDB$TIME_ZONE_NAME = RDB$GET_CONTEXT('SYSTEM', 'SESSION_TIMEZONE');");
 
     st1->execute();
-    st1->fetch();
-    tzId = st1->getInt32(0);
-    tzName = st1->getString(1);
+    if (st1->fetch())
+    {
+        tzId = st1->getInt32(0);
+        tzName = st1->getString(1);
 
-    std::lock_guard<std::mutex> lock(timezoneDataMutexM);
-    defaultTimezoneM.id = tzId;
-    defaultTimezoneM.name = std2wxIdentifier(tzName, converter);
+        std::lock_guard<std::mutex> lock(timezoneDataMutexM);
+        defaultTimezoneM.id = tzId;
+        defaultTimezoneM.name = std2wxIdentifier(tzName, converter);
+    }
+
+    // Database Timezone
+    fr::IStatementPtr& st2 = loader->getStatement(
+        "select z.RDB$TIME_ZONE_ID, "
+        "       z.RDB$TIME_ZONE_NAME "
+        "from RDB$TIME_ZONES z "
+        "where z.RDB$TIME_ZONE_NAME = RDB$GET_CONTEXT('SYSTEM', 'DATABASE_TIMEZONE');");
+
+    st2->execute();
+    if (st2->fetch())
+    {
+        tzId = st2->getInt32(0);
+        tzName = st2->getString(1);
+
+        std::lock_guard<std::mutex> lock(timezoneDataMutexM);
+        databaseTimezoneM.id = tzId;
+        databaseTimezoneM.name = std2wxIdentifier(tzName, converter);
+    }
 }
 
 void Database::clearTimezones(bool clearDefaultTimezone)
@@ -2328,6 +2351,8 @@ void Database::clearTimezones(bool clearDefaultTimezone)
     {
         defaultTimezoneM.name.clear();
         defaultTimezoneM.id = 0;
+        databaseTimezoneM.name.clear();
+        databaseTimezoneM.id = 0;
     }
 }
 
@@ -2394,6 +2419,13 @@ TimezoneInfo Database::getDefaultTimezone()
     loadDefaultTimezone();
     std::lock_guard<std::mutex> lock(timezoneDataMutexM);
     return defaultTimezoneM;
+}
+
+TimezoneInfo Database::getDatabaseTimezone()
+{
+    loadDefaultTimezone();
+    std::lock_guard<std::mutex> lock(timezoneDataMutexM);
+    return databaseTimezoneM;
 }
 
 wxString Database::getTimezoneName(int timezone)

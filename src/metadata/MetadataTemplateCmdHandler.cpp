@@ -840,6 +840,10 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
 
         if (cmdParams[0] == "connection_string")
             processedText += db->getConnectionString();
+        else if (cmdParams[0] == "session_timezone")
+            processedText += db->getDefaultTimezone().name;
+        else if (cmdParams[0] == "database_timezone")
+            processedText += db->getDatabaseTimezone().name;
         else if (cmdParams[0] == "ods_version")
         {
             processedText += wxString() << db->getInfo().getODS();

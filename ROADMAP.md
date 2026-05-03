@@ -47,7 +47,7 @@ The following phases track FlameRobin UI/metadata support for features introduce
 ### Phase 5: Firebird 4.0 Feature Support (ODS 13.x, released June 2021)
 
 - [x] **Long Identifier Names (63 chars)** — Update the UI (tree, DDL editor, all dialogs) to allow identifiers up to 63 characters; remove any hard-coded 31-character limits inherited from Firebird 2.x/3.x.
-- [ ] **Named Time Zone Display** — Show IANA-named time zones (e.g., `Europe/Berlin`, `America/New_York`) in column metadata and property views, not just UTC offsets.
+- [x] **Named Time Zone Display** — Show IANA-named time zones (e.g., Europe/Berlin, America/New_York) in column metadata and property views, not just UTC offsets.
 - [ ] **`DECFLOAT` and `INT128` DDL Generation** — Ensure `CREATE TABLE` / `CREATE DOMAIN` DDL templates emit correct `DECFLOAT(16)`, `DECFLOAT(34)`, and `INT128` syntax (data type support in the DAL already exists).
 - [ ] **Scrollable Cursor Display** — Show the `SCROLL` attribute in stored-procedure and trigger DDL when present.
 - [ ] **Read Committed Read Consistency** — Display the new transaction isolation level in transaction info and monitoring views.
