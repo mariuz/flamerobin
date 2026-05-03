@@ -704,8 +704,9 @@ public:
             bool* Reserve, bool* ReadOnly) = 0;
         virtual void TransactionInfo(int* Oldest, int* OldestActive,
             int* OldestSnapshot, int* Next) = 0;
+        virtual void CryptState(int* state) = 0;
         virtual void Statistics(int* Fetches, int* Marks,
-            int* Reads, int* Writes, int* CurrentMemory ) = 0;
+            int* Reads, int* Writes, int* CurrentMemory) = 0;
         virtual void Counts(int* Insert, int* Update, int* Delete,
             int* ReadIdx, int* ReadSeq) = 0;
         virtual void DetailedCounts(DatabaseCounts& counts) = 0;

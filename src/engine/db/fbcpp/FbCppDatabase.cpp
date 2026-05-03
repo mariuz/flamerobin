@@ -260,15 +260,16 @@ void FbCppDatabase::getInfo(DatabaseInfoData* data)
 
     // Get basic DB info
     unsigned char items[] = {
-        isc_info_db_ods_version,
-        isc_info_db_ods_minor_version,
+        isc_info_ods_version,
+        isc_info_ods_minor_version,
         isc_info_page_size,
         isc_info_allocation,
         isc_info_db_read_only,
         isc_info_oldest_transaction,
         isc_info_oldest_active,
         isc_info_oldest_snapshot,
-        isc_info_next_transaction
+        isc_info_next_transaction,
+        fb_info_crypt_state
     };
     unsigned char buffer[256];
     attachmentM->getHandle()->getInfo(&status, sizeof(items), items, sizeof(buffer), buffer);
@@ -287,8 +288,8 @@ void FbCppDatabase::getInfo(DatabaseInfoData* data)
             else if (len == 8) value = (int64_t)p[0] | ((int64_t)p[1] << 8) | ((int64_t)p[2] << 16) | ((int64_t)p[3] << 24)
                                     | ((int64_t)p[4] << 32) | ((int64_t)p[5] << 40) | ((int64_t)p[6] << 48) | ((int64_t)p[7] << 56);
 
-            if (item == isc_info_db_ods_version) data->ods = (int)value;
-            else if (item == isc_info_db_ods_minor_version) data->odsMinor = (int)value;
+            if (item == isc_info_ods_version) data->ods = (int)value;
+            else if (item == isc_info_ods_minor_version) data->odsMinor = (int)value;
             else if (item == isc_info_page_size) data->pageSize = (int)value;
             else if (item == isc_info_allocation) data->pages = (int)value;
             else if (item == isc_info_db_read_only) data->readOnly = (value != 0);
@@ -296,6 +297,7 @@ void FbCppDatabase::getInfo(DatabaseInfoData* data)
             else if (item == isc_info_oldest_active) data->oldestActiveTransaction = (int)value;
             else if (item == isc_info_oldest_snapshot) data->oldestSnapshot = (int)value;
             else if (item == isc_info_next_transaction) data->nextTransaction = (int)value;
+            else if (item == fb_info_crypt_state) data->cryptState = (int)value;
 
             p += len;
         }

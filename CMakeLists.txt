@@ -819,6 +819,15 @@ add_executable(fbcpp_service_test
 target_link_libraries(fbcpp_service_test IBPP fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
 add_test(NAME fbcpp_service_test COMMAND fbcpp_service_test)
 
+add_executable(firebird_type_utils_test
+    ${SOURCEDIR}/core/FirebirdTypeUtilsTest.cpp
+    ${SOURCEDIR}/core/FirebirdTypeUtils.cpp
+    ${SOURCEDIR}/core/StringUtils.cpp
+    ${SOURCEDIR}/core/FRError.cpp
+)
+target_link_libraries(firebird_type_utils_test ${wxWidgets_LIBRARIES})
+add_test(NAME firebird_type_utils_test COMMAND firebird_type_utils_test)
+
 if (APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES
                 BUILD_WITH_INSTALL_RPATH FALSE

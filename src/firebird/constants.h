@@ -296,7 +296,6 @@ enum tra_iso_mode_t {
 // statistics groups
 
 enum stat_group_t {
-	stat_database = 0,
 	stat_attachment = 1,
 	stat_transaction = 2,
 	stat_statement = 3,

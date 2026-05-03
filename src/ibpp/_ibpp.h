@@ -902,6 +902,7 @@ public:
         bool* SyncWrites, bool* Reserve, bool* ReadOnly);
     void TransactionInfo(int* Oldest, int* OldestActive,
         int* OldestSnapshot, int* Next);
+    void CryptState(int* state);
     void Statistics(int* Fetches, int* Marks, int* Reads, int* Writes, int* CurrentMemory);
     void Counts(int* Insert, int* Update, int* Delete,
         int* ReadIdx, int* ReadSeq);

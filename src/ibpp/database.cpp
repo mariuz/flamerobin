@@ -325,6 +325,28 @@ void DatabaseImpl::TransactionInfo(int* Oldest, int* OldestActive,
         *Next = result.GetValue(isc_info_next_transaction);
 }
 
+void DatabaseImpl::CryptState(int* state)
+{
+    if (mHandle == 0)
+        throw LogicExceptionImpl("Database::CryptState", _("Database is not connected."));
+
+    unsigned char items[] = {fb_info_crypt_state, isc_info_end};
+    IBS status;
+    RB result(256);
+
+    status.Reset();
+    (*getGDS().Call()->m_database_info)(status.Self(), &mHandle, sizeof(items),
+        reinterpret_cast<char*>(items), result.Size(), result.Self());
+    if (status.Errors())
+    {
+        ResetHandleIfLost(status, mHandle, "Database::CryptState");
+        throw SQLExceptionImpl(status, "Database::CryptState", _("isc_database_info failed"));
+    }
+
+    if (state != 0)
+        *state = result.GetValue(fb_info_crypt_state);
+}
+
 void DatabaseImpl::Statistics(int* Fetches, int* Marks, int* Reads, int* Writes, int* CurrentMemory)
 {
     if (mHandle == 0)

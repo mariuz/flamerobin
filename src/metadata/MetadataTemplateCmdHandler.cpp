@@ -51,6 +51,7 @@
 #include "metadata/view.h"
 #include "metadata/package.h"
 #include "metadata/TransactionInfoObject.h"
+#include "firebird/constants.h"
 
 
 class MetadataTemplateCmdHandler: public TemplateCmdHandler
@@ -927,6 +928,10 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             processedText += wxString() << db->getInfo().getOldestSnapshot();
         else if (cmdParams[0] == "next_transaction")
             processedText += wxString() << db->getInfo().getNextTransaction();
+        else if (cmdParams[0] == "crypt_state")
+        {
+            processedText += cryptStateToString(db->getInfo().getCryptState());
+        }
         else if (cmdParams[0] == "connected_users")
         {
             wxArrayString users;

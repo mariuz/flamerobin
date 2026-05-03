@@ -95,6 +95,8 @@ private:
     int oldestSnapshotM;
     int nextTransactionM;
 
+    int cryptStateM;
+
     std::vector<fr::TransactionInfo> activeTransactionsM;
 
     int sweepM;
@@ -121,6 +123,7 @@ public:
     int getOldestActiveTransaction() const;
     int getOldestSnapshot() const;
     int getNextTransaction() const;
+    int getCryptState() const;
     const std::vector<fr::TransactionInfo>& getActiveTransactions() const;
 
     int getSweep() const;

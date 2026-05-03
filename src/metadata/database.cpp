@@ -225,9 +225,15 @@ void DatabaseInfo::load(fr::IDatabasePtr database)
     oldestActiveTransactionM = data.oldestActiveTransaction;
     oldestSnapshotM = data.oldestSnapshot;
     nextTransactionM = data.nextTransaction;
+    cryptStateM = data.cryptState;
     activeTransactionsM = data.activeTransactions;
 
     loadTimeMillisM = ::wxGetLocalTimeMillis();
+}
+
+int DatabaseInfo::getCryptState() const
+{
+    return cryptStateM;
 }
 
 const std::vector<fr::TransactionInfo>& DatabaseInfo::getActiveTransactions() const

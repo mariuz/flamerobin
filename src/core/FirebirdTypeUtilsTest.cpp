@@ -24,6 +24,7 @@
 #include <wx/wx.h>
 #include "core/StringUtils.h"
 #include "engine/db/ITransaction.h"
+#include "firebird/constants.h"
 
 // Simple test framework mock for FlameRobin
 bool check(bool condition, const wxString& message)
@@ -45,6 +46,11 @@ int main()
     ok = check(isolationLevelToString(fr::TransactionIsolationLevel::ReadDirty) == "Read Dirty", "Read Dirty isolation level string") && ok;
     ok = check(isolationLevelToString(fr::TransactionIsolationLevel::ReadCommitted) == "Read Committed", "Read Committed isolation level string") && ok;
     ok = check(isolationLevelToString(fr::TransactionIsolationLevel::ReadConsistency) == "Read Consistency", "Read Consistency isolation level string") && ok;
+
+    ok = check(cryptStateToString(0) == "Not encrypted", "Not encrypted state") && ok;
+    ok = check(cryptStateToString(fb_info_crypt_encrypted) == "Encrypted", "Encrypted state") && ok;
+    ok = check(cryptStateToString(fb_info_crypt_process) == "Encryption in progress", "Encryption in progress state") && ok;
+    ok = check(cryptStateToString(fb_info_crypt_encrypted | fb_info_crypt_process) == "Decryption in progress", "Decryption in progress state") && ok;
 
     if (ok)
     {

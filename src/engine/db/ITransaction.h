@@ -29,10 +29,6 @@
 namespace fr
 {
 
-enum class TransactionAccessMode { Read, Write };
-enum class TransactionIsolationLevel { Consistency, Concurrency, ReadDirty, ReadCommitted, ReadConsistency };
-enum class TransactionLockResolution { Wait, NoWait };
-
 class ITransaction
 {
 public:

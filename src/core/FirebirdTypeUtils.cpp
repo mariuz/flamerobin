@@ -30,6 +30,7 @@
 #include "core/StringUtils.h"
 #include "metadata/database.h"
 #include "metadata/CharacterSet.h"
+#include "firebird/constants.h"
 
 wxString IBPPtype2string(Database* db, IBPP::SDT t, int subtype, int size,
     int scale)
@@ -115,5 +116,23 @@ wxString isolationLevelToString(fr::TransactionIsolationLevel level)
     case fr::TransactionIsolationLevel::ReadDirty:       return _("Read Dirty");
     case fr::TransactionIsolationLevel::ReadConsistency: return _("Read Consistency");
     default:                                             return _("Unknown");
+    }
+}
+
+wxString cryptStateToString(int state)
+{
+    if (state & fb_info_crypt_encrypted)
+    {
+        if (state & fb_info_crypt_process)
+            return _("Decryption in progress");
+        else
+            return _("Encrypted");
+    }
+    else
+    {
+        if (state & fb_info_crypt_process)
+            return _("Encryption in progress");
+        else
+            return _("Not encrypted");
     }
 }

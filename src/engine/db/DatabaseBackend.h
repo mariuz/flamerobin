@@ -81,6 +81,10 @@ enum class StatementType
     Savepoint
 };
 
+enum class TransactionAccessMode { Read, Write };
+enum class TransactionIsolationLevel { Consistency, Concurrency, ReadDirty, ReadCommitted, ReadConsistency };
+enum class TransactionLockResolution { Wait, NoWait };
+
 struct TransactionInfo
 {
     int id;
@@ -105,6 +109,8 @@ struct DatabaseInfoData
     int oldestActiveTransaction;
     int oldestSnapshot;
     int nextTransaction;
+
+    int cryptState;
 
     std::vector<TransactionInfo> activeTransactions;
 };

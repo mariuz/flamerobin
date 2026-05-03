@@ -178,6 +178,7 @@ void IbppDatabase::getInfo(DatabaseInfoData* data)
         &data->buffers, &data->sweep, &data->forcedWrites, &data->reserve, &data->readOnly);
     databaseM->TransactionInfo(&data->oldestTransaction, &data->oldestActiveTransaction,
         &data->oldestSnapshot, &data->nextTransaction);
+    databaseM->CryptState(&data->cryptState);
 
     // Get active transactions
     try
