@@ -22,6 +22,7 @@
 */
 
 #include "engine/db/fbcpp/FbCppTransaction.h"
+#include "firebird/constants.h"
 
 namespace fr
 {
@@ -47,7 +48,12 @@ void FbCppTransaction::start()
     else if (levelM == TransactionIsolationLevel::ReadCommitted)
         options.setIsolationLevel(fbcpp::TransactionIsolationLevel::READ_COMMITTED);
     else if (levelM == TransactionIsolationLevel::ReadConsistency)
-        options.setIsolationLevel(fbcpp::TransactionIsolationLevel::READ_CONSISTENCY);
+    {
+        // Manual TPB for Read Consistency since fb-cpp doesn't support it in high-level API yet.
+        // We set the version and the mandatory tags for Read Committed Read Consistency.
+        // Other options (access mode, lock resolution) will be added by fb-cpp's buildTpb.
+        options.setTpb({isc_tpb_version3, isc_tpb_read_committed, isc_tpb_read_consistency});
+    }
     else if (levelM == TransactionIsolationLevel::ReadDirty)
         options.setIsolationLevel(fbcpp::TransactionIsolationLevel::READ_COMMITTED); // fallback
 
