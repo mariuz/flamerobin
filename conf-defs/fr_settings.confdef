@@ -35,10 +35,10 @@
             <key>databaseBackend</key>
             <default>0</default>
             <option>
-                <caption>IBPP (Standard)</caption>
+                <caption>fb-cpp (Standard)</caption>
             </option>
             <option>
-                <caption>fb-cpp (New)</caption>
+                <caption>IBPP (Legacy)</caption>
             </option>
         </setting>
         <setting type="checkbox">

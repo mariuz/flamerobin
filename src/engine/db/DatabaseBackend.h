@@ -37,8 +37,8 @@ typedef std::array<uint8_t, 8> DBKey;
 
 enum class DatabaseBackend
 {
-    IBPP,
     FbCpp,
+    IBPP,
     Default
 };
 

@@ -85,11 +85,11 @@ bool Application::OnInit()
     LocaleManager::get().initFromConfig();
     parseCommandLine();
 
-    int backend = config().get("databaseBackend", static_cast<int>(fr::DatabaseBackend::IBPP));
-    if (backend == static_cast<int>(fr::DatabaseBackend::FbCpp))
-        fr::DatabaseFactory::setDefaultBackend(fr::DatabaseBackend::FbCpp);
-    else
+    int backend = config().get("databaseBackend", static_cast<int>(fr::DatabaseBackend::FbCpp));
+    if (backend == static_cast<int>(fr::DatabaseBackend::IBPP))
         fr::DatabaseFactory::setDefaultBackend(fr::DatabaseBackend::IBPP);
+    else
+        fr::DatabaseFactory::setDefaultBackend(fr::DatabaseBackend::FbCpp);
 
 #if wxCHECK_VERSION(3, 3, 0)
     int theme = config().get(FRStyleManager::_DARKMODE_KEY, (int)FRStyleManager::ThemeSystem);

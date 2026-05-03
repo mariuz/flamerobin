@@ -31,7 +31,7 @@
 namespace fr
 {
 
-DatabaseBackend DatabaseFactory::defaultBackendM = DatabaseBackend::IBPP;
+DatabaseBackend DatabaseFactory::defaultBackendM = DatabaseBackend::FbCpp;
 
 DatabaseBackend DatabaseFactory::getDefaultBackend()
 {

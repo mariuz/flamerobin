@@ -2,9 +2,9 @@
 
 This document outlines the planned development and major milestones for FlameRobin.
 
-## Current Priority: Migration to fb-cpp (In Progress)
+## Priority: Migration to fb-cpp (Completed)
 
-The primary goal is to replace the legacy and unmaintained IBPP library with `fb-cpp`, a modern C++20 wrapper for the Firebird database API. This will enable support for Firebird 3.0, 4.0, and 5.0 features.
+The legacy IBPP library has been replaced by `fb-cpp` as the default engine. This modern C++20 wrapper for the Firebird database API enables full support for Firebird 3.0, 4.0, and 5.0 features.
 
 **GitHub Issue:** [#542](https://github.com/mariuz/flamerobin/issues/542)
 
@@ -28,10 +28,11 @@ The primary goal is to replace the legacy and unmaintained IBPP library with `fb
 - [x] Update DataGrid and other UI components to use DAL result sets.
 - [x] Refactor asynchronous service operations (Backup/Restore) to use `IService` DAL interface.
 
-### Phase 4: Finalization
-- [ ] Full validation of all FlameRobin features using the `fb-cpp` backend.
+### Phase 4: Finalization (Completed)
+- [x] Full validation of all FlameRobin features using the `fb-cpp` backend.
+- [x] Set `fb-cpp` as the default database engine.
 - [ ] Optional: Remove IBPP library from the source tree.
-- [ ] Enhance performance by leveraging `fb-cpp`'s modern architecture.
+- [x] Enhance performance by leveraging `fb-cpp`'s modern architecture.
 
 ---
 
@@ -39,7 +40,7 @@ For more details on the architectural changes, see [Migration to fb-cpp document
 
 ---
 
-## Firebird Version Feature Support
+## Current Focus: Firebird Feature Support
 
 The following phases track FlameRobin UI/metadata support for features introduced in each major Firebird release. ODS version mapping: FB 2.5 → ODS 11.1, FB 3.0 → ODS 12.0, FB 4.0 → ODS 13.0, FB 5.0 → ODS 13.1, FB 6.0 → ODS 14.x.
 
