@@ -59,7 +59,7 @@ The following phases track FlameRobin UI/metadata support for features introduce
 
 - [x] **Partial (Conditional) Index DDL** — Emit `WHERE <condition>` in generated DDL for partial indexes (`rdb$condition_source` is already read; the DDL output path needs to include it).
 - [x] **Parallel Operations UI** — Expose a *parallel worker count* option in the Backup, Restore, and Sweep dialogs (`ParallelWorkers` service parameter).
-- [ ] **`SKIP LOCKED` Clause Highlighting** — Add `SKIP LOCKED` to SQL keyword/syntax highlighting.
+- [x] **`SKIP LOCKED` Clause Highlighting** — Add `SKIP LOCKED` to SQL keyword/syntax highlighting.
 - [ ] **`LATERAL` JOIN Support** — Ensure the SQL editor tokenizer/parser handles `LATERAL` joins without producing false "incomplete statement" warnings.
 - [ ] **`MERGE … WHEN NOT MATCHED BY SOURCE`** — Update the SQL statement recognizer to handle the extended MERGE syntax introduced in FB5.
 - [ ] **Multiple-Row DML `RETURNING`** — Support displaying multi-row results from `INSERT … RETURNING`, `UPDATE … RETURNING`, and `DELETE … RETURNING` in the results grid.

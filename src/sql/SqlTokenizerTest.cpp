@@ -353,6 +353,62 @@ int main()
         ok = checkToken(t.getCurrentToken(), kwCURSOR, "CURSOR: kwCURSOR") && ok;
     }
 
+    // Test 29.5: SKIP LOCKED syntax and full statements
+    {
+        SqlTokenizer t1("SKIP LOCKED");
+        ok = checkToken(t1.getCurrentToken(), kwSKIP, "SKIP: kwSKIP") && ok;
+        t1.jumpToken(false);
+        ok = checkToken(t1.getCurrentToken(), kwLOCKED, "LOCKED: kwLOCKED") && ok;
+
+        SqlTokenizer t1_lower("skip locked");
+        ok = checkToken(t1_lower.getCurrentToken(), kwSKIP, "SKIP (lower): kwSKIP") && ok;
+        t1_lower.jumpToken(false);
+        ok = checkToken(t1_lower.getCurrentToken(), kwLOCKED, "LOCKED (lower): kwLOCKED") && ok;
+
+        SqlTokenizer t1_mixed("sKiP lOcKeD");
+        ok = checkToken(t1_mixed.getCurrentToken(), kwSKIP, "SKIP (mixed): kwSKIP") && ok;
+        t1_mixed.jumpToken(false);
+        ok = checkToken(t1_mixed.getCurrentToken(), kwLOCKED, "LOCKED (mixed): kwLOCKED") && ok;
+
+        SqlTokenizer t2("SELECT * FROM table WITH LOCK SKIP LOCKED");
+        ok = checkToken(t2.getCurrentToken(), kwSELECT, "SELECT: kwSELECT") && ok;
+        t2.jumpToken(false); // *
+        t2.jumpToken(false);
+        ok = checkToken(t2.getCurrentToken(), kwFROM, "FROM: kwFROM") && ok;
+        t2.jumpToken(false); // table
+        t2.jumpToken(false);
+        ok = checkToken(t2.getCurrentToken(), kwWITH, "WITH: kwWITH") && ok;
+        t2.jumpToken(false);
+        ok = checkToken(t2.getCurrentToken(), kwLOCK, "LOCK: kwLOCK") && ok;
+        t2.jumpToken(false);
+        ok = checkToken(t2.getCurrentToken(), kwSKIP, "SKIP: kwSKIP") && ok;
+        t2.jumpToken(false);
+        ok = checkToken(t2.getCurrentToken(), kwLOCKED, "LOCKED: kwLOCKED") && ok;
+
+        SqlTokenizer t3("UPDATE table SET col = 1 SKIP LOCKED");
+        ok = checkToken(t3.getCurrentToken(), kwUPDATE, "UPDATE: kwUPDATE") && ok;
+        t3.jumpToken(false); // table
+        t3.jumpToken(false);
+        ok = checkToken(t3.getCurrentToken(), kwSET, "SET: kwSET") && ok;
+        t3.jumpToken(false); // col
+        t3.jumpToken(false); // =
+        t3.jumpToken(false); // 1
+        t3.jumpToken(false);
+        ok = checkToken(t3.getCurrentToken(), kwSKIP, "SKIP: kwSKIP") && ok;
+        t3.jumpToken(false);
+        ok = checkToken(t3.getCurrentToken(), kwLOCKED, "LOCKED: kwLOCKED") && ok;
+
+        SqlTokenizer t4("DELETE FROM table SKIP LOCKED");
+        ok = checkToken(t4.getCurrentToken(), kwDELETE, "DELETE: kwDELETE") && ok;
+        t4.jumpToken(false);
+        ok = checkToken(t4.getCurrentToken(), kwFROM, "FROM: kwFROM") && ok;
+        t4.jumpToken(false); // table
+        t4.jumpToken(false);
+        ok = checkToken(t4.getCurrentToken(), kwSKIP, "SKIP: kwSKIP") && ok;
+        t4.jumpToken(false);
+        ok = checkToken(t4.getCurrentToken(), kwLOCKED, "LOCKED: kwLOCKED") && ok;
+    }
+
     // Test 30: Version-based keyword strings
     {
         wxString fb25 = SqlTokenizer::getKeywordsString(SqlTokenizer::kwUpperCase, 11, 1); // ODS 11.1 (FB 2.5)
