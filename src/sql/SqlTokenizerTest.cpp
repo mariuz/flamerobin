@@ -338,5 +338,20 @@ int main()
         ok = checkToken(t.getCurrentToken(), kwZONE, "ZONE: kwZONE") && ok;
     }
 
+    {
+        SqlTokenizer t("SCROLL");
+        ok = checkToken(t.getCurrentToken(), kwSCROLL, "SCROLL: kwSCROLL") && ok;
+    }
+
+    // Test 29: Scrollable cursor syntax (FB 4.0)
+    {
+        SqlTokenizer t("DECLARE SCROLL CURSOR C1 FOR SELECT * FROM T");
+        ok = checkToken(t.getCurrentToken(), kwDECLARE, "DECLARE: kwDECLARE") && ok;
+        t.jumpToken(false);
+        ok = checkToken(t.getCurrentToken(), kwSCROLL, "SCROLL: kwSCROLL") && ok;
+        t.jumpToken(false);
+        ok = checkToken(t.getCurrentToken(), kwCURSOR, "CURSOR: kwCURSOR") && ok;
+    }
+
     return ok ? 0 : 1;
 }

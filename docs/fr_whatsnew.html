@@ -13,6 +13,7 @@ http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issue
 <font size=+1 color="#AA0000"><B>Modern Engine Transition</B></font><br>
 <br>
 - **fb-cpp as Default Engine**: The modern `fb-cpp` database library is now the default engine for FlameRobin. This transition provides better support for modern Firebird features (3.0 through 6.0) and improved performance.<br>
+- **Scrollable Cursor Support**: Stored procedures and triggers using the new Firebird 4.0 `SCROLL` cursors now have their DDL correctly displayed and keywords highlighted.<br>
 - **Legacy Support**: The IBPP library remains available as a secondary option for users requiring the legacy backend, but it is now marked as "Legacy" in the preferences.<br>
 - **Architecture**: Completed the migration to the Database Abstraction Layer (DAL), ensuring that all core features are now fully compatible with the `fb-cpp` backend.<br>
 <br>
