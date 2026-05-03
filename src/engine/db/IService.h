@@ -47,6 +47,7 @@ public:
 
     virtual void backup(const BackupConfig& config) = 0;
     virtual void restore(const RestoreConfig& config) = 0;
+    virtual void maintain(const MaintenanceConfig& config) = 0;
 
     virtual void shutdown(const ShutdownConfig& config) = 0;
     virtual void startup(const std::string& dbPath) = 0;

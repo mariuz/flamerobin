@@ -642,8 +642,8 @@ public:
 
         virtual void Shutdown(const std::string& dbfile, DSM flags, int sectimeout) = 0;
         virtual void Restart(const std::string& dbfile, DSM flags) = 0;
-        virtual void Sweep(const std::string& dbfile) = 0;
-        virtual void Repair(const std::string& dbfile, RPF flags) = 0;
+        virtual void Sweep(const std::string& dbfile, const int parallelWorkers = 0) = 0;
+        virtual void Repair(const std::string& dbfile, RPF flags, const int parallelWorkers = 0) = 0;
 
         virtual void StartBackup(
             const std::string& dbfile,const std::string& bkfile, const std::string& outfile = "",

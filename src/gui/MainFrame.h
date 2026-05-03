@@ -75,6 +75,7 @@ public:
     void OnMenuMonitorEvents(wxCommandEvent& event);
     void OnMenuGenerateData(wxCommandEvent& event);
     void OnMenuBackup(wxCommandEvent& event);
+    void OnMenuMaintenance(wxCommandEvent& event);
     void OnMenuExecuteStatements(wxCommandEvent& event);
     void OnMenuInsert(wxCommandEvent& event);
     void OnMenuBrowseData(wxCommandEvent& event);

@@ -179,6 +179,18 @@ enum class RestoreFlags
     StatPageWrites = 65536
 };
 
+enum class MaintenanceFlags
+{
+    None = 0,
+    Sweep = 1,
+    Validate = 2,
+    Full = 4,
+    Mend = 8,
+    ReadOnly = 16,
+    IgnoreChecksums = 32,
+    KillShadows = 64
+};
+
 struct BackupConfig
 {
     std::string dbPath;
@@ -209,6 +221,13 @@ struct RestoreConfig
     std::string skipData;
     std::string includeData;
     int interval = 0;
+    int parallel = 0;
+};
+
+struct MaintenanceConfig
+{
+    std::string dbPath;
+    MaintenanceFlags flags = MaintenanceFlags::None;
     int parallel = 0;
 };
 

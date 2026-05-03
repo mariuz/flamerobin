@@ -126,6 +126,27 @@ void IbppService::restore(const RestoreConfig& config)
         config.includeData, config.interval, config.parallel);
 }
 
+void IbppService::maintain(const MaintenanceConfig& config)
+{
+    if ((int)config.flags & (int)MaintenanceFlags::Sweep)
+    {
+        serviceM->Sweep(config.dbPath, config.parallel);
+    }
+    else
+    {
+        int flags = 0;
+        if ((int)config.flags & (int)MaintenanceFlags::Full) flags |= IBPP::rpValidateFull;
+        else if ((int)config.flags & (int)MaintenanceFlags::Validate) flags |= IBPP::rpValidatePages;
+        else if ((int)config.flags & (int)MaintenanceFlags::Mend) flags |= IBPP::rpMendRecords;
+
+        if ((int)config.flags & (int)MaintenanceFlags::ReadOnly) flags |= IBPP::rpReadOnly;
+        if ((int)config.flags & (int)MaintenanceFlags::IgnoreChecksums) flags |= IBPP::rpIgnoreChecksums;
+        if ((int)config.flags & (int)MaintenanceFlags::KillShadows) flags |= IBPP::rpKillShadows;
+
+        serviceM->Repair(config.dbPath, (IBPP::RPF)flags, config.parallel);
+    }
+}
+
 void IbppService::shutdown(const ShutdownConfig& config)
 {
     int flags = 0;

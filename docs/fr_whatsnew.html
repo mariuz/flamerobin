@@ -17,6 +17,12 @@ http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issue
 - **Legacy Support**: The IBPP library remains available as a secondary option for users requiring the legacy backend, but it is now marked as "Legacy" in the preferences.<br>
 - **Architecture**: Completed the migration to the Database Abstraction Layer (DAL), ensuring that all core features are now fully compatible with the `fb-cpp` backend.<br>
 <br>
+<font size=+1 color="#AA0000"><B>Firebird 5.0 Parallel Operations Support</B></font><br>
+<br>
+- **Parallel Workers UI**: Exposed the *parallel worker count* option in the Backup, Restore, and the new Maintenance dialogs. This leverages the `ParallelWorkers` service parameter introduced in Firebird 5.0 to speed up operations on multi-core systems.<br>
+- **New Maintenance Dialog**: Introduced a dedicated "Maintenance..." option in the Database tools menu, allowing manual Sweep and Validation/Repair tasks with support for parallel processing.<br>
+- **IBPP Enhancements**: Updated the underlying IBPP library to correctly handle the new Firebird 5.0 SPB parameters for parallel backup and repair tasks.<br>
+<br>
 For more info please read commit history log<br>
 <br>
 <br>

@@ -56,6 +56,7 @@
 #include "gui/ExecuteSql.h"
 #include "gui/ExecuteSqlFrame.h"
 #include "gui/MainFrame.h"
+#include "gui/MaintenanceFrame.h"
 #include "gui/MetadataItemPropertiesFrame.h"
 #include "gui/PreferencesDialog.h"
 #include "gui/ProgressDialog.h"
@@ -414,8 +415,9 @@ EVT_MENU(Cmds::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuDatabaseRegistrat
 EVT_UPDATE_UI(Cmds::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuUpdateIfDatabaseSelected)
 EVT_MENU(Cmds::Menu_Backup, MainFrame::OnMenuBackup)
 EVT_UPDATE_UI(Cmds::Menu_Backup, MainFrame::OnMenuUpdateIfDatabaseSelected)
-EVT_MENU(Cmds::Menu_Restore, MainFrame::OnMenuRestore)
-EVT_UPDATE_UI(Cmds::Menu_Restore, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
+EVT_MENU(Cmds::Menu_Maintenance, MainFrame::OnMenuMaintenance)
+EVT_UPDATE_UI(Cmds::Menu_Maintenance, MainFrame::OnMenuUpdateIfDatabaseSelected)
+EVT_MENU(Cmds::Menu_Restore, MainFrame::OnMenuRestore)EVT_UPDATE_UI(Cmds::Menu_Restore, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
 EVT_MENU(Cmds::Menu_Connect, MainFrame::OnMenuConnect)
 EVT_UPDATE_UI(Cmds::Menu_Connect, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
 EVT_MENU(Cmds::Menu_ConnectAs, MainFrame::OnMenuConnectAs)
@@ -1315,6 +1317,22 @@ void MainFrame::OnMenuBackup(wxCommandEvent& WXUNUSED(event))
     }
     bf = new BackupFrame(this, db);
     bf->Show();
+}
+
+void MainFrame::OnMenuMaintenance(wxCommandEvent& WXUNUSED(event))
+{
+    DatabasePtr db = getDatabase(treeMainM->getSelectedMetadataItem());
+    if (!checkValidDatabase(db))
+        return;
+
+    MaintenanceFrame* mf = MaintenanceFrame::findFrameFor(db);
+    if (mf)
+    {
+        mf->Raise();
+        return;
+    }
+    mf = new MaintenanceFrame(this, db);
+    mf->Show();
 }
 
 void MainFrame::OnMenuRestore(wxCommandEvent& WXUNUSED(event))

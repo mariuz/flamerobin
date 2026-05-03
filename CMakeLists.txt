@@ -183,6 +183,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/InsertDialog.cpp
         ${SOURCEDIR}/gui/InsertParametersDialog.cpp
         ${SOURCEDIR}/gui/MainFrame.cpp
+        ${SOURCEDIR}/gui/MaintenanceFrame.cpp
         ${SOURCEDIR}/gui/MetadataItemPropertiesFrame.cpp
         ${SOURCEDIR}/gui/MultilineEnterDialog.cpp
         ${SOURCEDIR}/gui/PreferencesDialog.cpp
@@ -840,6 +841,14 @@ add_executable(publication_test
 )
 target_link_libraries(publication_test ${wxWidgets_LIBRARIES})
 add_test(NAME publication_test COMMAND publication_test)
+
+add_executable(maintenance_config_test
+    ${SOURCEDIR}/engine/db/MaintenanceConfigTest.cpp
+    ${SOURCEDIR}/core/FRError.cpp
+    ${SOURCEDIR}/core/StringUtils.cpp
+)
+target_link_libraries(maintenance_config_test ${wxWidgets_LIBRARIES})
+add_test(NAME maintenance_config_test COMMAND maintenance_config_test)
 
 if (APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES

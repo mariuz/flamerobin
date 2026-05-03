@@ -131,6 +131,7 @@ enum {
     Menu_InactiveObject,
     Menu_ShutdownDatabase,
     Menu_StartupDatabase,
+    Menu_Maintenance,
 
         // view menu
         Menu_ToggleStatusBar, 

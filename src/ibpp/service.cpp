@@ -545,7 +545,7 @@ void ServiceImpl::Restart(const std::string& dbfile, IBPP::DSM /*flags*/)
 	Wait();
 }
 
-void ServiceImpl::Sweep(const std::string& dbfile)
+void ServiceImpl::Sweep(const std::string& dbfile, const int parallelWorkers)
 {
 	if (mHandle	== 0)
 		throw LogicExceptionImpl("Service::Sweep", _("Service is not connected."));
@@ -558,6 +558,8 @@ void ServiceImpl::Sweep(const std::string& dbfile)
 	spb.Insert(isc_action_svc_repair);
 	spb.InsertString(isc_spb_dbname, 2, dbfile.c_str());
 	spb.InsertQuad(isc_spb_options, isc_spb_rpr_sweep_db);
+	if (parallelWorkers > 0 && versionIsHigherOrEqualTo(5, 0))
+		spb.InsertQuad(isc_spb_rpr_par_workers, parallelWorkers);
 
 	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
@@ -566,7 +568,7 @@ void ServiceImpl::Sweep(const std::string& dbfile)
 	Wait();
 }
 
-void ServiceImpl::Repair(const std::string& dbfile, IBPP::RPF flags)
+void ServiceImpl::Repair(const std::string& dbfile, IBPP::RPF flags, const int parallelWorkers)
 {
 	if (mHandle	== 0)
 		throw LogicExceptionImpl("Service::Repair", _("Service is not connected."));
@@ -591,6 +593,8 @@ void ServiceImpl::Repair(const std::string& dbfile, IBPP::RPF flags)
 	if (flags & IBPP::rpKillShadows)		mask |= isc_spb_rpr_kill_shadows;
 	
 	spb.InsertQuad(isc_spb_options, mask);
+	if (parallelWorkers > 0 && versionIsHigherOrEqualTo(5, 0))
+		spb.InsertQuad(isc_spb_rpr_par_workers, parallelWorkers);
 
 	(*getGDS().Call()->m_service_start)(status.Self(), &mHandle, 0, spb.Size(), spb.Self());
 	if (status.Errors())
@@ -638,7 +642,7 @@ void ServiceImpl::StartBackup(
     if (!includeData.empty() && versionIsHigherOrEqualTo(4, 0)) 
         spb.InsertString(isc_spb_bkp_include_data, 2, includeData.c_str());
 
-    if (parallelWorkers > 0 && versionIsHigherOrEqualTo(3, 0))
+    if (parallelWorkers > 0 && versionIsHigherOrEqualTo(5, 0))
         spb.InsertQuad(isc_spb_bkp_parallel_workers, parallelWorkers);
 
     if (versionIsHigherOrEqualTo(4, 0)) {
@@ -723,7 +727,7 @@ void ServiceImpl::StartRestore(
     if (buffers > 0) 
         spb.InsertQuad(isc_spb_res_buffers, buffers);
 
-    if (parallelWorkers > 0 && versionIsHigherOrEqualTo(3, 0))
+    if (parallelWorkers > 0 && versionIsHigherOrEqualTo(5, 0))
         spb.InsertQuad(isc_spb_bkp_parallel_workers, parallelWorkers);
 
     if (!skipData.empty() && versionIsHigherOrEqualTo(3, 0)) 

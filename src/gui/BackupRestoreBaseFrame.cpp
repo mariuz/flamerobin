@@ -263,7 +263,7 @@ void BackupRestoreBaseFrame::layoutControls()
         {
             wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
             sizer->Add(new wxStaticText(panel_controls, wxID_ANY,
-                _("Parallel (FB3.0+)")), 0, wxALIGN_CENTER_VERTICAL);
+                _("Parallel workers (FB5.0+)")), 0, wxALIGN_CENTER_VERTICAL);
             sizer->Add(styleguide().getControlLabelMargin(), 0);
             sizer->Add(spinctrl_parallelworkers, 1, wxALIGN_CENTER_VERTICAL);
 
