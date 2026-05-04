@@ -61,7 +61,7 @@ The following phases track FlameRobin UI/metadata support for features introduce
 - [x] **Parallel Operations UI** — Expose a *parallel worker count* option in the Backup, Restore, and Sweep dialogs (`ParallelWorkers` service parameter).
 - [x] **`SKIP LOCKED` Clause Highlighting** — Add `SKIP LOCKED` to SQL keyword/syntax highlighting.
 - [x] **`LATERAL` JOIN Support** — Ensure the SQL editor tokenizer/parser handles `LATERAL` joins without producing false "incomplete statement" warnings.
-- [ ] **`MERGE … WHEN NOT MATCHED BY SOURCE`** — Update the SQL statement recognizer to handle the extended MERGE syntax introduced in FB5.
+- [x] **`MERGE … WHEN NOT MATCHED BY SOURCE`** — Update the SQL statement recognizer to handle the extended MERGE syntax introduced in FB5.
 - [ ] **Multiple-Row DML `RETURNING`** — Support displaying multi-row results from `INSERT … RETURNING`, `UPDATE … RETURNING`, and `DELETE … RETURNING` in the results grid.
 - [ ] **SQL / PSQL Profiler Integration** — Add a UI panel or menu option to run and display output from the Firebird 5 built-in profiler (`RDB$PROFILER` package).
 - [ ] **Inline ODS Upgrade Option** — Expose the *upgrade ODS without backup/restore* option in the database maintenance dialogs.
