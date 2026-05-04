@@ -724,6 +724,17 @@ set(SQL_TEST_COMMON_SOURCES
     ${SOURCEDIR}/sql/TestStringUtils.cpp
 )
 
+# Sources for tests that need to stub out heavy dependencies like Database
+set(SQL_TEST_STUB_SOURCES
+    ${SOURCEDIR}/sql/TestStubs.cpp
+    ${SOURCEDIR}/sql/SqlTokenizer.cpp
+    ${SOURCEDIR}/core/Observer.cpp
+    ${SOURCEDIR}/core/Subject.cpp
+    ${SOURCEDIR}/core/FRError.cpp
+    ${SOURCEDIR}/core/Visitor.cpp
+    ${SOURCEDIR}/sql/TestStringUtils.cpp
+)
+
 add_executable(multi_statement_test
     ${SOURCEDIR}/sql/MultiStatementTest.cpp
     ${SOURCEDIR}/sql/MultiStatement.cpp
@@ -743,7 +754,7 @@ add_executable(merge_repro
     ${SOURCEDIR}/sql/MERGE_Repro.cpp
     ${SOURCEDIR}/sql/SqlStatement.cpp
     ${SOURCEDIR}/sql/Identifier.cpp
-    ${SQL_TEST_COMMON_SOURCES}
+    ${SQL_TEST_STUB_SOURCES}
 )
 target_link_libraries(merge_repro ${wxWidgets_LIBRARIES})
 add_test(NAME merge_repro COMMAND merge_repro)
@@ -843,18 +854,16 @@ add_executable(publication_test
     ${SOURCEDIR}/metadata/PublicationTest.cpp
     ${SOURCEDIR}/metadata/publication.cpp
     ${SOURCEDIR}/metadata/metadataitem.cpp
+    ${SOURCEDIR}/metadata/MetadataItemVisitor.cpp
     ${SOURCEDIR}/sql/Identifier.cpp
-    ${SOURCEDIR}/core/Subject.cpp
-    ${SOURCEDIR}/core/StringUtils.cpp
-    ${SOURCEDIR}/core/FRError.cpp
+    ${SQL_TEST_STUB_SOURCES}
 )
 target_link_libraries(publication_test ${wxWidgets_LIBRARIES})
 add_test(NAME publication_test COMMAND publication_test)
 
 add_executable(maintenance_config_test
     ${SOURCEDIR}/engine/db/MaintenanceConfigTest.cpp
-    ${SOURCEDIR}/core/FRError.cpp
-    ${SOURCEDIR}/core/StringUtils.cpp
+    ${SQL_TEST_STUB_SOURCES}
 )
 target_link_libraries(maintenance_config_test ${wxWidgets_LIBRARIES})
 add_test(NAME maintenance_config_test COMMAND maintenance_config_test)
