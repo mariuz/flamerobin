@@ -1,0 +1,239 @@
+/*
+  Copyright (c) 2004-2026 The FlameRobin Development Team
+
+  Permission is hereby granted, free of charge, to any person obtaining
+  a copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
+
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <ctime>
+
+#include <ibpp.h>
+
+#include "engine/db/DatabaseFactory.h"
+#include "engine/db/IDatabase.h"
+#include "engine/db/ITransaction.h"
+#include "engine/db/IStatement.h"
+
+namespace
+{
+
+bool check(bool condition, const char* testName)
+{
+    if (condition)
+    {
+        std::cout << "  PASSED: " << testName << "\n";
+        return true;
+    }
+    std::cerr << "  FAILED: " << testName << "\n";
+    return false;
+}
+
+} // namespace
+
+int main()
+{
+    const char* envServer = std::getenv("IBPP_TEST_SERVER");
+    const std::string serverName = envServer ? envServer : "";
+    if (serverName.empty())
+    {
+        std::cout << "IBPP_TEST_SERVER is not set, skipping ProfilerTest.\n";
+        return 0;
+    }
+
+    const std::string dbName = "/tmp/flamerobin_profiler_test_" +
+        std::to_string(static_cast<long long>(std::time(0))) + ".fdb";
+
+    // Create DB using IBPP
+    try 
+    {
+        IBPP::Database db = IBPP::DatabaseFactory(serverName, dbName, "SYSDBA", "masterkey");
+        db->Create(3);
+    }
+    catch (const IBPP::Exception& e)
+    {
+        std::cerr << "Failed to create test database: " << e.what() << "\n";
+        return 1;
+    }
+
+    bool ok = true;
+    std::cout << "Starting RDB$PROFILER extensive tests...\n";
+
+    try 
+    {
+        fr::IDatabasePtr db = fr::DatabaseFactory::createDatabase(fr::DatabaseBackend::FbCpp);
+        db->setConnectionString(dbName);
+        db->setCredentials("SYSDBA", "masterkey");
+        db->connect();
+
+        fr::ITransactionPtr tr = db->createTransaction();
+        tr->start();
+
+        fr::IStatementPtr st = db->createStatement(tr);
+        
+        // Check if RDB$PROFILER exists
+        try {
+            st->prepare("SELECT 1 FROM RDB$PACKAGES WHERE RDB$PACKAGE_NAME = 'RDB$PROFILER'");
+            st->execute();
+            if (!st->fetch())
+            {
+                std::cout << "RDB$PROFILER package not found, skipping tests.\n";
+                tr->rollback();
+                db->disconnect();
+                return 0;
+            }
+        } catch(...) {
+            std::cout << "Error checking for RDB$PROFILER, skipping tests.\n";
+            return 0;
+        }
+
+        // Test 1: Simple Profiling Session
+        std::cout << "  Test 1: Simple Profiling Session...\n";
+        st->prepare("SELECT RDB$PROFILER.START_SESSION('Test Session') FROM RDB$DATABASE");
+        st->execute();
+        int64_t sessionId = 0;
+        if (st->fetch())
+            sessionId = st->getInt64(0);
+        
+        ok = check(sessionId != 0, "Session started") && ok;
+
+        st->prepare("CREATE TABLE t1 (id INT PRIMARY KEY, val VARCHAR(100))");
+        st->execute();
+        st->prepare("INSERT INTO t1 VALUES (1, 'test')");
+        st->execute();
+
+        st->prepare("EXECUTE PROCEDURE RDB$PROFILER.FINISH_SESSION(TRUE)");
+        st->execute();
+
+        st->prepare("SELECT COUNT(*) FROM PLG$PROF_RECORD_SOURCE_STATS WHERE PROFILE_ID = ?");
+        st->setInt64(0, sessionId);
+        st->execute();
+        int count = 0;
+        if (st->fetch())
+            count = st->getInt32(0);
+        ok = check(count > 0, "Record source stats collected for simple INSERT") && ok;
+
+        // Test 2: Nested PSQL calls
+        std::cout << "  Test 2: Nested PSQL calls...\n";
+        st->prepare("CREATE PROCEDURE p_child AS BEGIN END");
+        st->execute();
+        st->prepare("CREATE PROCEDURE p_parent AS BEGIN EXECUTE PROCEDURE p_child; END");
+        st->execute();
+
+        st->prepare("SELECT RDB$PROFILER.START_SESSION('Nested Session') FROM RDB$DATABASE");
+        st->execute();
+        sessionId = 0;
+        if (st->fetch())
+            sessionId = st->getInt64(0);
+
+        st->prepare("EXECUTE PROCEDURE p_parent");
+        st->execute();
+
+        st->prepare("EXECUTE PROCEDURE RDB$PROFILER.FINISH_SESSION(TRUE)");
+        st->execute();
+
+        st->prepare("SELECT COUNT(DISTINCT REQUEST_NAME) FROM PLG$PROF_REQUESTS WHERE PROFILE_ID = ?");
+        st->setInt64(0, sessionId);
+        st->execute();
+        count = 0;
+        if (st->fetch())
+            count = st->getInt32(0);
+        ok = check(count >= 2, "Stats collected for both parent and child procedures") && ok;
+
+        // Test 3: Triggers
+        std::cout << "  Test 3: Triggers...\n";
+        st->prepare("CREATE TABLE t2 (id INT)");
+        st->execute();
+        st->prepare("CREATE TRIGGER t2_ai FOR t2 AFTER INSERT AS BEGIN END");
+        st->execute();
+
+        st->prepare("SELECT RDB$PROFILER.START_SESSION('Trigger Session') FROM RDB$DATABASE");
+        st->execute();
+        sessionId = 0;
+        if (st->fetch())
+            sessionId = st->getInt64(0);
+
+        st->prepare("INSERT INTO t2 VALUES (1)");
+        st->execute();
+
+        st->prepare("EXECUTE PROCEDURE RDB$PROFILER.FINISH_SESSION(TRUE)");
+        st->execute();
+
+        st->prepare("SELECT COUNT(*) FROM PLG$PROF_REQUESTS WHERE PROFILE_ID = ? AND REQUEST_NAME = 'T2_AI'");
+        st->setInt64(0, sessionId);
+        st->execute();
+        count = 0;
+        if (st->fetch())
+            count = st->getInt32(0);
+        ok = check(count > 0, "Stats collected for trigger") && ok;
+
+        // Test 4: Record Source Stats with JOIN
+        std::cout << "  Test 4: Record Source Stats with JOIN...\n";
+        st->prepare("SELECT RDB$PROFILER.START_SESSION('JOIN Session') FROM RDB$DATABASE");
+        st->execute();
+        sessionId = 0;
+        if (st->fetch())
+            sessionId = st->getInt64(0);
+
+        st->prepare("SELECT COUNT(*) FROM t1 a JOIN t2 b ON a.id = b.id");
+        st->execute();
+        if (st->fetch()) {}
+
+        st->prepare("EXECUTE PROCEDURE RDB$PROFILER.FINISH_SESSION(TRUE)");
+        st->execute();
+
+        st->prepare("SELECT COUNT(*) FROM PLG$PROF_RECORD_SOURCE_STATS WHERE PROFILE_ID = ?");
+        st->setInt64(0, sessionId);
+        st->execute();
+        count = 0;
+        if (st->fetch())
+            count = st->getInt32(0);
+        ok = check(count >= 2, "Record source stats collected for JOIN") && ok;
+
+        tr->commit();
+        db->disconnect();
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "EXCEPTION in ProfilerTest: " << e.what() << "\n";
+        ok = false;
+    }
+
+    // Cleanup
+    try 
+    {
+        IBPP::Database db = IBPP::DatabaseFactory(serverName, dbName, "SYSDBA", "masterkey");
+        db->Connect();
+        db->Drop();
+    }
+    catch (...) {}
+
+    if (ok)
+    {
+        std::cout << "ALL Profiler TESTS PASSED\n";
+        return 0;
+    }
+    else
+    {
+        std::cout << "SOME Profiler TESTS FAILED\n";
+        return 1;
+    }
+}

@@ -389,6 +389,8 @@ public:
 
     const DatabaseInfo& getInfo();
     void loadInfo();
+    int getODSMajor() const;
+    int getODSMinor() const;
 
     void getConnectedUsers(wxArrayString& users) const;
     int getLinger() const; // ODS:12

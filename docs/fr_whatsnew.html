@@ -22,6 +22,7 @@ http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issue
 - **LATERAL JOIN Support**: The SQL editor tokenizer and parser have been updated to correctly handle the new `LATERAL` join syntax introduced in Firebird 5.0. This ensures accurate statement splitting and avoids false "incomplete statement" warnings during script execution.<br>
 - **SKIP LOCKED Highlighting**: Added syntax highlighting for the `SKIP LOCKED` clause in `SELECT ... WITH LOCK`, `UPDATE`, and `DELETE` statements. This improves readability for high-concurrency SQL queries.<br>
 - **Multiple-Row DML RETURNING**: Added support for displaying multi-row results from `INSERT`, `UPDATE`, and `DELETE` statements that use a `RETURNING` clause. These results are now correctly displayed in the SQL results grid, matching the behavior for standard `SELECT` statements.<br>
+- **SQL/PSQL Profiler**: Integrated the Firebird 5.0 built-in profiler (`RDB$PROFILER` package). Users can now enable profiling for their SQL sessions and view detailed line-by-line PSQL execution statistics and record source performance data in a dedicated "Profiler" tab.<br>
 - **Version-Aware Keywords**: The keyword set is now dynamically adjusted based on the ODS version of the active connection, preventing keyword conflicts when working with older Firebird versions.<br>
 <br>
 <font size=+1 color="#AA0000"><B>Firebird 5.0 Parallel Operations Support</B></font><br>

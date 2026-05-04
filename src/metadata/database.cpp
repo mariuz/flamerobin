@@ -2130,6 +2130,16 @@ void Database::loadInfo()
     notifyObservers();
 }
 
+int Database::getODSMajor() const
+{
+    return databaseInfoM.odsM;
+}
+
+int Database::getODSMinor() const
+{
+    return databaseInfoM.odsMinorM;
+}
+
 bool Database::showSystemCharacterSet()
 {
     const wxString SHOW_SYSCHARACTERSET = "ShowSystemCharacterSet";

@@ -574,6 +574,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     transactionLockResolutionM = config().get("transactionLockResolution", true) ? fr::TransactionLockResolution::Wait : fr::TransactionLockResolution::NoWait;
     transactionAccessModeM = config().get("transactionAccessMode", false) ? fr::TransactionAccessMode::Read : fr::TransactionAccessMode::Write;
     showStatisticsM = config().get("SQLEditorShowStats", true);
+    showProfilerM = config().get("SQLEditorShowProfiler", false);
     highlightWordText = config().get("highlightWordText", true);
 
     timerBlobEditorM.SetOwner(this, TIMER_ID_UPDATE_BLOB);
@@ -608,6 +609,26 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     notebook_pane_2 = new wxPanel(notebook_1, -1);
     grid_data = new DataGrid(notebook_pane_2, ID_grid_data);
     notebook_1->AddPage(notebook_pane_2, _("Data"));
+
+    if ((databaseM->getODSMajor() > 13) || (databaseM->getODSMajor() == 13 && databaseM->getODSMinor() >= 1))
+    {
+        notebook_pane_3 = new wxPanel(notebook_1, -1);
+        wxBoxSizer* sizer_profiler = new wxBoxSizer(wxVERTICAL);
+        grid_profiler_psql = new DataGrid(notebook_pane_3, -1);
+        grid_profiler_rs = new DataGrid(notebook_pane_3, -1);
+        sizer_profiler->Add(new wxStaticText(notebook_pane_3, -1, _("PSQL Statistics")), 0, wxALL, 5);
+        sizer_profiler->Add(grid_profiler_psql, 1, wxEXPAND);
+        sizer_profiler->Add(new wxStaticText(notebook_pane_3, -1, _("Record Source Statistics")), 0, wxALL, 5);
+        sizer_profiler->Add(grid_profiler_rs, 1, wxEXPAND);
+        notebook_pane_3->SetSizer(sizer_profiler);
+        notebook_1->AddPage(notebook_pane_3, _("Profiler"));
+    }
+    else
+    {
+        notebook_pane_3 = nullptr;
+        grid_profiler_psql = nullptr;
+        grid_profiler_rs = nullptr;
+    }
 
     statusbar_1 = CreateStatusBar(4);
     SetStatusBarPane(-1);
@@ -698,6 +719,9 @@ void ExecuteSqlFrame::buildToolbar(CommandManager& cm)
     toolBarM->AddTool( Cmds::Query_Show_plan, _("Show plan"),
         wxArtProvider::GetBitmap(ART_ShowExecutionPlan, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_NORMAL, cm.getToolbarHint(_("Show query execution plan"), Cmds::Query_Show_plan));
+    toolBarM->AddTool(Cmds::Query_Show_Profiler, _("Profiler"),
+        wxArtProvider::GetBitmap(ART_ShowProfiler, wxART_TOOLBAR, bmpSize), wxNullBitmap,
+        wxITEM_CHECK, cm.getToolbarHint(_("Display SQL/PSQL Profiler"), Cmds::Query_Show_Profiler));
     toolBarM->AddTool( Cmds::Query_Commit, _("Commit"),
         wxArtProvider::GetBitmap(ART_CommitTransaction, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_NORMAL, cm.getToolbarHint(_("Commit transaction"), Cmds::Query_Commit));
@@ -793,6 +817,8 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
         cm.getMainMenuItemText(_("Show execution &plan"), Cmds::Query_Show_plan));
     statementMenu->AppendCheckItem(Cmds::Query_Show_Statistics,
         cm.getMainMenuItemText(_("Display detailed query statistics"), Cmds::Query_Show_Statistics));
+    statementMenu->AppendCheckItem(Cmds::Query_Show_Profiler,
+        cm.getMainMenuItemText(_("Display SQL/PSQL Profiler"), Cmds::Query_Show_Profiler));
     statementMenu->Append(Cmds::Query_Execute_selection,
         cm.getMainMenuItemText(_("Execute &selection"), Cmds::Query_Execute_selection));
     statementMenu->Append(Cmds::Query_Execute_from_cursor,
@@ -1018,6 +1044,8 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_MENU(Cmds::Query_Show_plan,           ExecuteSqlFrame::OnMenuShowPlan)
     EVT_MENU(Cmds::Query_Show_Statistics,     ExecuteSqlFrame::OnMenuShowStatistics)
     EVT_UPDATE_UI(Cmds::Query_Show_Statistics, ExecuteSqlFrame::OnMenuUpdateShowStatistics)
+    EVT_MENU(Cmds::Query_Show_Profiler,       ExecuteSqlFrame::OnMenuShowProfiler)
+    EVT_UPDATE_UI(Cmds::Query_Show_Profiler,   ExecuteSqlFrame::OnMenuUpdateShowProfiler)
     EVT_MENU(Cmds::Query_Execute_selection,   ExecuteSqlFrame::OnMenuExecuteSelection)
     EVT_MENU(Cmds::Query_Execute_from_cursor, ExecuteSqlFrame::OnMenuExecuteFromCursor)
     EVT_UPDATE_UI(Cmds::Query_Execute,             ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
@@ -1733,6 +1761,17 @@ void ExecuteSqlFrame::OnMenuShowStatistics(wxCommandEvent& event)
 void ExecuteSqlFrame::OnMenuUpdateShowStatistics(wxUpdateUIEvent& event)
 {
     event.Check(showStatisticsM);
+}
+
+void ExecuteSqlFrame::OnMenuShowProfiler(wxCommandEvent& WXUNUSED(event))
+{
+    showProfilerM = !showProfilerM;
+    config().setValue("SQLEditorShowProfiler", showProfilerM);
+}
+
+void ExecuteSqlFrame::OnMenuUpdateShowProfiler(wxUpdateUIEvent& event)
+{
+    event.Check(showProfilerM);
 }
 
 void ExecuteSqlFrame::OnMenuExecuteFromCursor(wxCommandEvent& WXUNUSED(event))
@@ -2675,6 +2714,21 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
 
         log(wxEmptyString);
         log(wxEmptyString);
+
+        int64_t profileSessionId = 0;
+        bool profilingStarted = false;
+        if (showProfilerM && ((databaseM->getODSMajor() > 13) || (databaseM->getODSMajor() == 13 && databaseM->getODSMinor() >= 1)))
+        {
+            try {
+                fr::IStatementPtr stProf = databaseM->getDALDatabase()->createStatement(transactionM);
+                stProf->prepare("SELECT RDB$PROFILER.START_SESSION('FlameRobin') FROM RDB$DATABASE");
+                stProf->execute();
+                if (stProf->fetch())
+                    profileSessionId = stProf->getInt64(0);
+                profilingStarted = (profileSessionId != 0);
+            } catch(...) {}
+        }
+
         log(_("Executing statement..."));
         sae.scroll();
         {
@@ -2682,6 +2736,53 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             statementM->execute();
             log(wxString::Format(_("Statement executed (elapsed time: %s)."),
                 millisToTimeString(sw.Time()).c_str()));
+        }
+
+        if (profilingStarted)
+        {
+            try {
+                fr::IStatementPtr stProf = databaseM->getDALDatabase()->createStatement(transactionM);
+                stProf->prepare("EXECUTE PROCEDURE RDB$PROFILER.FINISH_SESSION(TRUE)");
+                stProf->execute();
+                
+                // PSQL Stats
+                fr::IStatementPtr stPsql = databaseM->getDALDatabase()->createStatement(transactionM);
+                stPsql->prepare("SELECT REQ.REQUEST_NAME, STAT.LINE_NUM, STAT.COLUMN_NUM, STAT.COUNTER, STAT.TOTAL_TIME / 1000000.0, STAT.MAX_TIME / 1000000.0 "
+                                "FROM PLG$PROF_PSQL_STATS STAT "
+                                "JOIN PLG$PROF_REQUESTS REQ ON STAT.PROFILE_ID = REQ.PROFILE_ID AND STAT.REQUEST_ID = REQ.REQUEST_ID "
+                                "WHERE STAT.PROFILE_ID = ? "
+                                "ORDER BY STAT.TOTAL_TIME DESC");
+                stPsql->setInt64(0, profileSessionId);
+                stPsql->execute();
+                
+                DataGridTable* tbPsql = new DataGridTable(stPsql, databaseM);
+                if (grid_profiler_psql)
+                {
+                    grid_profiler_psql->SetTable(tbPsql, true);
+                    grid_profiler_psql->fetchData(true);
+                }
+                else
+                    delete tbPsql;
+
+                // Record Source Stats
+                fr::IStatementPtr stRs = databaseM->getDALDatabase()->createStatement(transactionM);
+                stRs->prepare("SELECT RS.SOURCE_NAME, RSS.COUNTER, RSS.TOTAL_TIME / 1000000.0 "
+                               "FROM PLG$PROF_RECORD_SOURCE_STATS RSS "
+                               "JOIN PLG$PROF_RECORD_SOURCES RS ON RSS.PROFILE_ID = RS.PROFILE_ID AND RSS.CURSOR_ID = RS.CURSOR_ID AND RSS.SOURCE_ID = RS.SOURCE_ID "
+                               "WHERE RSS.PROFILE_ID = ? "
+                               "ORDER BY RSS.TOTAL_TIME DESC");
+                stRs->setInt64(0, profileSessionId);
+                stRs->execute();
+                
+                DataGridTable* tbRs = new DataGridTable(stRs, databaseM);
+                if (grid_profiler_rs)
+                {
+                    grid_profiler_rs->SetTable(tbRs, true);
+                    grid_profiler_rs->fetchData(true);
+                }
+                else
+                    delete tbRs;
+            } catch(...) {}
         }
         fr::StatementType type = statementM->getType();
         if (hasColumns)            // for select statements: show data
