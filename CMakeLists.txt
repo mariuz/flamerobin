@@ -886,6 +886,7 @@ add_test(NAME profiler_test COMMAND profiler_test)
 add_executable(firebird_type_utils_test
     ${SOURCEDIR}/core/FirebirdTypeUtilsTest.cpp
     ${SOURCEDIR}/core/FirebirdTypeUtils.cpp
+    ${SOURCEDIR}/core/FirebirdTypeUtilsStub.cpp
     ${SOURCEDIR}/core/StringUtils.cpp
     ${SOURCEDIR}/core/FRError.cpp
 )

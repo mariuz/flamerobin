@@ -25,6 +25,8 @@
 #include "core/StringUtils.h"
 #include "engine/db/ITransaction.h"
 #include "firebird/constants.h"
+#include "metadata/CharacterSet.h"
+#include "metadata/database.h"
 
 // Simple test framework mock for FlameRobin
 bool check(bool condition, const wxString& message)
@@ -41,6 +43,7 @@ int main()
 {
     bool ok = true;
 
+    // Existing tests
     ok = check(isolationLevelToString(fr::TransactionIsolationLevel::Consistency) == "Consistency", "Consistency isolation level string") && ok;
     ok = check(isolationLevelToString(fr::TransactionIsolationLevel::Concurrency) == "Concurrency", "Concurrency isolation level string") && ok;
     ok = check(isolationLevelToString(fr::TransactionIsolationLevel::ReadDirty) == "Read Dirty", "Read Dirty isolation level string") && ok;
