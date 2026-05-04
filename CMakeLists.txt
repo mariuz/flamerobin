@@ -841,6 +841,27 @@ add_executable(fbcpp_service_test
 target_link_libraries(fbcpp_service_test IBPP fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
 add_test(NAME fbcpp_service_test COMMAND fbcpp_service_test)
 
+add_executable(dml_returning_test
+    ${SOURCEDIR}/engine/db/fbcpp/DmlReturningTest.cpp
+    ${SOURCEDIR}/engine/db/DatabaseFactory.cpp
+    ${SOURCEDIR}/engine/db/ibpp/IbppDatabase.cpp
+    ${SOURCEDIR}/engine/db/ibpp/IbppTransaction.cpp
+    ${SOURCEDIR}/engine/db/ibpp/IbppStatement.cpp
+    ${SOURCEDIR}/engine/db/ibpp/IbppService.cpp
+    ${SOURCEDIR}/engine/db/ibpp/IbppBlob.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppDatabase.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppTransaction.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppStatement.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppService.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppBlob.cpp
+    ${SOURCEDIR}/core/FRError.cpp
+    ${SOURCEDIR}/core/FRInt128.cpp
+    ${SOURCEDIR}/core/FRDecimal.cpp
+    ${SOURCEDIR}/core/StringUtils.cpp
+)
+target_link_libraries(dml_returning_test IBPP fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
+add_test(NAME dml_returning_test COMMAND dml_returning_test)
+
 add_executable(firebird_type_utils_test
     ${SOURCEDIR}/core/FirebirdTypeUtilsTest.cpp
     ${SOURCEDIR}/core/FirebirdTypeUtils.cpp

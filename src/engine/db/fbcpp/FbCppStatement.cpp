@@ -57,7 +57,10 @@ void FbCppStatement::execute()
     eofReachedM = false;
 
     bool hasRow = statementM->execute(transactionM);
-    if (getType() == StatementType::Select)
+    // Support Multiple-Row DML RETURNING (Firebird 5.0+)
+    // If the statement has output columns, we must handle the first row
+    // and subsequent fetches, even if it's not a SELECT statement.
+    if (getColumnCount() > 0)
     {
         firstRowFetchedM = hasRow;
         eofReachedM = !hasRow;

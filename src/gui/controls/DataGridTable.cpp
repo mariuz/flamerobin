@@ -364,13 +364,8 @@ int DataGridTable::getStatementColCount()
 {
     if (statementDALM)
     {
-        switch (statementDALM->getType())
-        {
-            case fr::StatementType::Select:
-                return statementDALM->getColumnCount();
-            default:
-                return 0;
-        }
+        // Support any statement that returns columns (Select, Insert/Update/Delete Returning, ExecProcedure)
+        return statementDALM->getColumnCount();
     }
 
     if (statementM == 0)

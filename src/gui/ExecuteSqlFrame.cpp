@@ -2710,7 +2710,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             compareCounts(counts1, counts2);
         }
 
-        if (type != fr::StatementType::Select) // for other statements: show rows affected
+        if (type != fr::StatementType::Select && !hasColumns) // for other statements: show rows affected
         {   // left trim
             wxString::size_type p = sql.find_first_not_of(" \n\t\r");
             if (p != wxString::npos && p > 0)
@@ -2744,6 +2744,20 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
                 if (!commitTransaction())
                     retval = false;
             }
+        }
+        else if (type != fr::StatementType::Select && hasColumns)
+        {
+            // For DML with RETURNING, still show affected rows in the log
+            try
+            {
+                int affectedRows = statementM->getAffectedRows();
+                wxString addon = (affectedRows % 10 != 1) ? "s" : "";
+                wxString s = wxString::Format(_("%d row%s affected directly."),
+                    affectedRows, addon.c_str());
+                log("" + s);
+            }
+            catch (...) {}
+            executedStatementsM.push_back(stm);
         }
     }
     catch(std::exception& e)
