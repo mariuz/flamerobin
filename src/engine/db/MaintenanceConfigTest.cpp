@@ -56,6 +56,9 @@ int main()
     int flags = (int)fr::MaintenanceFlags::Validate | (int)fr::MaintenanceFlags::Full;
     ok = check(flags == 6, "bitwise OR of flags") && ok;
 
+    config.flags = fr::MaintenanceFlags::UpgradeODS;
+    ok = check((int)config.flags == 128, "UpgradeODS flag initialization") && ok;
+
     if (ok)
         std::cout << "All MaintenanceConfig tests PASSED." << std::endl;
     return ok ? 0 : 1;

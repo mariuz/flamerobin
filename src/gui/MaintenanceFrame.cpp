@@ -76,6 +76,8 @@ void MaintenanceFrame::createControls()
         _("Ignore checksums"));
     checkbox_kill_shadows = new wxCheckBox(panel_controls, wxID_ANY,
         _("Kill unavailable shadows"));
+    checkbox_upgrade = new wxCheckBox(panel_controls, wxID_ANY,
+        _("Upgrade ODS (FB 5.0+)"));
 
     spinctrl_parallelworkers = new wxSpinCtrl(panel_controls, wxID_ANY);
     spinctrl_parallelworkers->SetRange(0, 32767);
@@ -95,6 +97,7 @@ void MaintenanceFrame::layoutControls()
     sizerChecks->Add(checkbox_readonly, 0, wxEXPAND);
     sizerChecks->Add(checkbox_ignore_checksums, 0, wxEXPAND);
     sizerChecks->Add(checkbox_kill_shadows, 0, wxEXPAND);
+    sizerChecks->Add(checkbox_upgrade, 0, wxEXPAND);
 
     wxBoxSizer* sizerParallel = new wxBoxSizer(wxHORIZONTAL);
     sizerParallel->Add(new wxStaticText(panel_controls, wxID_ANY,
@@ -136,6 +139,11 @@ void MaintenanceFrame::updateControls()
     checkbox_readonly->Enable(!running);
     checkbox_ignore_checksums->Enable(!running);
     checkbox_kill_shadows->Enable(!running);
+
+    DatabasePtr db = getDatabase();
+    bool canUpgrade = db && ((db->getODSMajor() > 13) || (db->getODSMajor() == 13 && db->getODSMinor() >= 1));
+    checkbox_upgrade->Enable(!running && canUpgrade);
+
     spinctrl_parallelworkers->Enable(!running);
 
     button_start->Enable(!running);
@@ -155,6 +163,7 @@ void MaintenanceFrame::doReadConfigSettings(const wxString& prefix)
         checkbox_readonly->SetValue(flags.Index("readonly") != wxNOT_FOUND);
         checkbox_ignore_checksums->SetValue(flags.Index("ignore_checksums") != wxNOT_FOUND);
         checkbox_kill_shadows->SetValue(flags.Index("kill_shadows") != wxNOT_FOUND);
+        checkbox_upgrade->SetValue(flags.Index("upgrade") != wxNOT_FOUND);
     }
     int parallel = 0;
     config().getValue(prefix + Config::pathSeparator + "parallel", parallel);
@@ -173,6 +182,7 @@ void MaintenanceFrame::doWriteConfigSettings(const wxString& prefix) const
     if (checkbox_readonly->IsChecked()) flags.push_back("readonly");
     if (checkbox_ignore_checksums->IsChecked()) flags.push_back("ignore_checksums");
     if (checkbox_kill_shadows->IsChecked()) flags.push_back("kill_shadows");
+    if (checkbox_upgrade->IsChecked()) flags.push_back("upgrade");
     config().setValue(prefix + Config::pathSeparator + "options", flags);
     config().setValue(prefix + Config::pathSeparator + "parallel", spinctrl_parallelworkers->GetValue());
 }
@@ -224,6 +234,7 @@ void MaintenanceFrame::OnStartButtonClick(wxCommandEvent& WXUNUSED(event))
     if (checkbox_readonly->IsChecked()) flags |= (int)fr::MaintenanceFlags::ReadOnly;
     if (checkbox_ignore_checksums->IsChecked()) flags |= (int)fr::MaintenanceFlags::IgnoreChecksums;
     if (checkbox_kill_shadows->IsChecked()) flags |= (int)fr::MaintenanceFlags::KillShadows;
+    if (checkbox_upgrade->IsChecked()) flags |= (int)fr::MaintenanceFlags::UpgradeODS;
     config.flags = (fr::MaintenanceFlags)flags;
 
     startThread(std::make_unique<MaintenanceThread>(this,

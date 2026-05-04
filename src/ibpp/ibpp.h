@@ -167,7 +167,8 @@ namespace IBPP
         // Mandatory and mutually exclusives
         rpMendRecords = 0x1, rpValidatePages = 0x2, rpValidateFull = 0x4,
         // Options
-        rpReadOnly = 0x100, rpIgnoreChecksums = 0x200, rpKillShadows = 0x400
+        rpReadOnly = 0x100, rpIgnoreChecksums = 0x200, rpKillShadows = 0x400,
+        rpUpgrade = 0x1000
     };
 
     // TransactionFactory Flags

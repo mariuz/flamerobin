@@ -142,6 +142,7 @@ void IbppService::maintain(const MaintenanceConfig& config)
         if ((int)config.flags & (int)MaintenanceFlags::ReadOnly) flags |= IBPP::rpReadOnly;
         if ((int)config.flags & (int)MaintenanceFlags::IgnoreChecksums) flags |= IBPP::rpIgnoreChecksums;
         if ((int)config.flags & (int)MaintenanceFlags::KillShadows) flags |= IBPP::rpKillShadows;
+        if ((int)config.flags & (int)MaintenanceFlags::UpgradeODS) flags |= IBPP::rpUpgrade;
 
         serviceM->Repair(config.dbPath, (IBPP::RPF)flags, config.parallel);
     }

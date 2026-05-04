@@ -188,7 +188,8 @@ enum class MaintenanceFlags
     Mend = 8,
     ReadOnly = 16,
     IgnoreChecksums = 32,
-    KillShadows = 64
+    KillShadows = 64,
+    UpgradeODS = 128
 };
 
 struct BackupConfig

@@ -43,6 +43,7 @@ private:
     wxCheckBox* checkbox_readonly;
     wxCheckBox* checkbox_ignore_checksums;
     wxCheckBox* checkbox_kill_shadows;
+    wxCheckBox* checkbox_upgrade;
 
     wxSpinCtrl* spinctrl_parallelworkers;
 

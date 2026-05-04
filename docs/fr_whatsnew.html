@@ -29,6 +29,7 @@ http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issue
 <br>
 - **Parallel Workers UI**: Exposed the *parallel worker count* option in the Backup, Restore, and the new Maintenance dialogs. This leverages the `ParallelWorkers` service parameter introduced in Firebird 5.0 to speed up operations on multi-core systems.<br>
 - **New Maintenance Dialog**: Introduced a dedicated "Maintenance..." option in the Database tools menu, allowing manual Sweep and Validation/Repair tasks with support for parallel processing.<br>
+- **Inline ODS Upgrade**: Exposed the new Firebird 5.0 "upgrade ODS" option in the Maintenance dialog. This allows users to upgrade a database to the latest On-Disk Structure version without a full backup and restore cycle.<br>
 - **IBPP Enhancements**: Updated the underlying IBPP library to correctly handle the new Firebird 5.0 SPB parameters for parallel backup and repair tasks.<br>
 <br>
 For more info please read commit history log<br>
