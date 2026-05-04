@@ -354,5 +354,18 @@ int main()
         ok = check(!s5.isValid(), "issue#338 seq: no more") && ok;
     }
 
+    // Test 24: LATERAL join
+    {
+        MultiStatement ms("SELECT * FROM T1 JOIN LATERAL (SELECT 1 FROM T2) ON 1=1; SELECT * FROM T3");
+        SingleStatement s1 = ms.getNextStatement();
+        ok = check(s1.isValid(), "LATERAL: first valid") && ok;
+        ok = checkStr(s1.getSql(), "SELECT * FROM T1 JOIN LATERAL (SELECT 1 FROM T2) ON 1=1",
+            "LATERAL: first SQL") && ok;
+
+        SingleStatement s2 = ms.getNextStatement();
+        ok = check(s2.isValid(), "LATERAL: second valid") && ok;
+        ok = checkStr(s2.getSql(), " SELECT * FROM T3", "LATERAL: second SQL") && ok;
+    }
+
     return ok ? 0 : 1;
 }

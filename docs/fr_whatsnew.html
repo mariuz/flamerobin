@@ -17,6 +17,12 @@ http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issue
 - **Legacy Support**: The IBPP library remains available as a secondary option for users requiring the legacy backend, but it is now marked as "Legacy" in the preferences.<br>
 - **Architecture**: Completed the migration to the Database Abstraction Layer (DAL), ensuring that all core features are now fully compatible with the `fb-cpp` backend.<br>
 <br>
+<font size=+1 color="#AA0000"><B>Firebird 5.0 SQL Editor Enhancements</B></font><br>
+<br>
+- **LATERAL JOIN Support**: The SQL editor tokenizer and parser have been updated to correctly handle the new `LATERAL` join syntax introduced in Firebird 5.0. This ensures accurate statement splitting and avoids false "incomplete statement" warnings during script execution.<br>
+- **SKIP LOCKED Highlighting**: Added syntax highlighting for the `SKIP LOCKED` clause in `SELECT ... WITH LOCK`, `UPDATE`, and `DELETE` statements. This improves readability for high-concurrency SQL queries.<br>
+- **Version-Aware Keywords**: The keyword set is now dynamically adjusted based on the ODS version of the active connection, preventing keyword conflicts when working with older Firebird versions.<br>
+<br>
 <font size=+1 color="#AA0000"><B>Firebird 5.0 Parallel Operations Support</B></font><br>
 <br>
 - **Parallel Workers UI**: Exposed the *parallel worker count* option in the Backup, Restore, and the new Maintenance dialogs. This leverages the `ParallelWorkers` service parameter introduced in Firebird 5.0 to speed up operations on multi-core systems.<br>

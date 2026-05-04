@@ -428,5 +428,18 @@ int main()
         ok = check(fb50.Contains("LOCKED"), "FB5.0 has LOCKED") && ok;
     }
 
+    // Test: LATERAL join
+    {
+        wxString sql = "SELECT * FROM RDB$DATABASE JOIN LATERAL (SELECT 1 FROM RDB$DATABASE) ON 1=1";
+        SqlTokenizer tk(sql);
+        ok = check(tk.getCurrentToken() == kwSELECT, "LATERAL test: Start with SELECT") && ok;
+        ok = check(tk.jumpToken(false) && tk.getCurrentToken() == tkUNKNOWN, "LATERAL test: Jump to *") && ok;
+        ok = check(tk.jumpToken(false) && tk.getCurrentToken() == kwFROM, "LATERAL test: Jump to FROM") && ok;
+        ok = check(tk.jumpToken(false) && tk.getCurrentToken() == tkIDENTIFIER, "LATERAL test: Jump to RDB$DATABASE") && ok;
+        ok = check(tk.jumpToken(false) && tk.getCurrentToken() == kwJOIN, "LATERAL test: Jump to JOIN") && ok;
+        ok = check(tk.jumpToken(false) && tk.getCurrentToken() == kwLATERAL, "LATERAL test: Jump to LATERAL") && ok;
+        ok = check(tk.jumpToken(true) && tk.getCurrentToken() == kwON, "LATERAL test: Jump past LATERAL subquery to ON") && ok;
+    }
+
     return ok ? 0 : 1;
 }
