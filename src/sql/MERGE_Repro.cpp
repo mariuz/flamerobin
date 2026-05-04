@@ -12,36 +12,6 @@
 #include "metadata/view.h"
 #include "frutils.h"
 
-// --- MINIMAL STUBS TO ALLOW LINKING WITHOUT FULL METADATA ENGINE ---
-
-MetadataItem::MetadataItem() : parentM(0), typeM(ntUnknown), metadataIdM(-1) {}
-MetadataItem::MetadataItem(NodeType type, MetadataItem* parent, const wxString& name, int id) 
-    : parentM(parent), typeM(type), identifierM(name), metadataIdM(id) {}
-MetadataItem::~MetadataItem() {}
-wxString MetadataItem::getName_() const { return identifierM.get(); }
-NodeType MetadataItem::getType() const { return typeM; }
-void MetadataItem::ensureChildrenLoaded() {}
-
-Relation::Relation(NodeType type, DatabasePtr database, const wxString& name) 
-    : MetadataItem(type, (MetadataItem*)database.get(), name, 0) {}
-ColumnPtr Relation::findColumn(const wxString&) const { return ColumnPtr(); }
-
-Table::Table(DatabasePtr database, const wxString& name) 
-    : Relation(ntTable, database, name) {}
-
-View::View(DatabasePtr database, const wxString& name) 
-    : Relation(ntView, database, name) {}
-
-Procedure::Procedure(DatabasePtr database, const wxString& name) 
-    : MetadataItem(ntProcedure, (MetadataItem*)database.get(), name, 0) {}
-ParameterPtr Procedure::findParameter(const wxString&) const { return ParameterPtr(); }
-
-MetadataItem* Database::findByNameAndType(NodeType, const wxString&) { return nullptr; }
-Relation* Database::findRelation(const Identifier&) { return nullptr; }
-CharacterSetPtr Database::getCharsetById(int) { return CharacterSetPtr(); }
-
-wxString unquote(const wxString& s, const wxString&) { return s; }
-
 // --- TEST CODE ---
 
 namespace
@@ -68,7 +38,7 @@ int main()
     {
         wxString sql = "MERGE INTO target t USING source s ON t.id = s.id WHEN MATCHED THEN UPDATE SET t.val = s.val";
         SqlStatement stm(sql, nullptr);
-        ok = check(stm.getName() == "target", "Standard MERGE: target name recognition") && ok;
+        ok = check(stm.getName() == "TARGET", "Standard MERGE: target name recognition") && ok;
         ok = check(stm.getAction() == actMERGE, "Standard MERGE: identified as actMERGE") && ok;
         ok = check(!stm.isDDL(), "Standard MERGE: not identified as DDL") && ok;
     }
@@ -77,7 +47,7 @@ int main()
     {
         wxString sql = "MERGE target t USING source s ON t.id = s.id WHEN MATCHED THEN DELETE";
         SqlStatement stm(sql, nullptr);
-        ok = check(stm.getName() == "target", "MERGE without INTO: target name recognition") && ok;
+        ok = check(stm.getName() == "TARGET", "MERGE without INTO: target name recognition") && ok;
         ok = check(stm.getAction() == actMERGE, "MERGE without INTO: identified as actMERGE") && ok;
     }
 
@@ -85,7 +55,7 @@ int main()
     {
         wxString sql = "MERGE target t USING source s ON t.id = s.id WHEN NOT MATCHED BY SOURCE THEN DELETE";
         SqlStatement stm(sql, nullptr);
-        ok = check(stm.getName() == "target", "MERGE 5.0: target name recognition") && ok;
+        ok = check(stm.getName() == "TARGET", "MERGE 5.0: target name recognition") && ok;
         ok = check(stm.getAction() == actMERGE, "MERGE 5.0: identified as actMERGE") && ok;
     }
 
@@ -96,7 +66,7 @@ int main()
                        "WHEN NOT MATCHED BY TARGET THEN INSERT (id, val) VALUES (s.id, s.val) "
                        "WHEN NOT MATCHED BY SOURCE THEN DELETE";
         SqlStatement stm(sql, nullptr);
-        ok = check(stm.getName() == "target", "Full MERGE: target name recognition") && ok;
+        ok = check(stm.getName() == "TARGET", "Full MERGE: target name recognition") && ok;
         ok = check(stm.getAction() == actMERGE, "Full MERGE: identified as actMERGE") && ok;
     }
 
@@ -123,4 +93,3 @@ int main()
 
     return ok ? 0 : 1;
 }
-

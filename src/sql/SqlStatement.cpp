@@ -103,21 +103,18 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
     if (tokensM.size() < 1)
         return; // true;
 
-    if (nameM.get().IsEmpty()) // non-reserved keyword used as identifier?
-    {
-        size_t idx = 2;
-        if (tokensM[0] == kwUPDATE)
-            idx = 1;
-        else if (tokensM[0] == kwMERGE)
-            idx = (tokensM.size() > 1 && tokensM[1] == kwINTO) ? 2 : 1;
+    size_t idx = 0;
+    if (tokensM[0] == kwUPDATE)
+        idx = 1;
+    else if (tokensM[0] == kwMERGE)
+        idx = (tokensM.size() > 1 && tokensM[1] == kwINTO) ? 2 : 1;
 
-        if (tokensM.size() > idx)
-        {
-            nameM.setFromSql(tokenStringsM[idx]);
-            identifierTokenIndexM = idx;
-        }
+    if (idx > 0 && tokensM.size() > idx)
+    {
+        nameM.setFromSql(tokenStringsM[idx]);
+        identifierTokenIndexM = idx;
     }
-    else
+    else if (!nameM.get().IsEmpty())
         identifierTokenIndexM = tokensM.size() - 1;
 
     size_t typeTokenIndex = 1;
