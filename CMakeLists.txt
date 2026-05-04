@@ -728,6 +728,7 @@ set(SQL_TEST_COMMON_SOURCES
 set(SQL_TEST_STUB_SOURCES
     ${SOURCEDIR}/sql/TestStubs.cpp
     ${SOURCEDIR}/sql/SqlTokenizer.cpp
+    ${SOURCEDIR}/sql/Identifier.cpp
     ${SOURCEDIR}/core/Observer.cpp
     ${SOURCEDIR}/core/Subject.cpp
     ${SOURCEDIR}/core/FRError.cpp
@@ -753,7 +754,6 @@ add_test(NAME sql_tokenizer_test COMMAND sql_tokenizer_test)
 add_executable(merge_repro
     ${SOURCEDIR}/sql/MERGE_Repro.cpp
     ${SOURCEDIR}/sql/SqlStatement.cpp
-    ${SOURCEDIR}/sql/Identifier.cpp
     ${SQL_TEST_STUB_SOURCES}
 )
 target_link_libraries(merge_repro ${wxWidgets_LIBRARIES})
@@ -895,9 +895,6 @@ add_test(NAME firebird_type_utils_test COMMAND firebird_type_utils_test)
 add_executable(publication_test
     ${SOURCEDIR}/metadata/PublicationTest.cpp
     ${SOURCEDIR}/metadata/publication.cpp
-    ${SOURCEDIR}/metadata/metadataitem.cpp
-    ${SOURCEDIR}/metadata/MetadataItemVisitor.cpp
-    ${SOURCEDIR}/sql/Identifier.cpp
     ${SQL_TEST_STUB_SOURCES}
 )
 target_link_libraries(publication_test ${wxWidgets_LIBRARIES})

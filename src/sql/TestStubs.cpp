@@ -71,8 +71,13 @@ void MetadataItem::loadChildren() {}
 void MetadataItem::lockChildren() {}
 void MetadataItem::unlockChildren() {}
 void MetadataItem::doSetChildrenLoaded(bool) {}
+bool MetadataItem::childrenLoaded() const { return false; }
+void MetadataItem::setChildrenLoaded(bool) {}
 bool MetadataItem::getChildren(std::vector<MetadataItem *>&) { return false; }
 void MetadataItem::ensureChildrenLoaded() {}
+
+void initializeLockCount(MetadataItem*, unsigned) {}
+void initializeLockCount(MetadataItemPtr, unsigned) {}
 
 void MetadataItem::lockSubject() {}
 void MetadataItem::unlockSubject() {}
