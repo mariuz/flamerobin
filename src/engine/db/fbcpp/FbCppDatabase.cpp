@@ -174,6 +174,34 @@ void FbCppDatabase::getConnectedUsers(std::vector<std::string>& users)
     }
 }
 
+std::string FbCppDatabase::getEngineVersion()
+{
+    if (!attachmentM)
+        return "";
+
+    auto& client = attachmentM->getClient();
+    fbcpp::impl::StatusWrapper status(client);
+    unsigned char item = isc_info_version;
+    unsigned char buffer[256];
+
+    try
+    {
+        attachmentM->getHandle()->getInfo(&status, 1, &item, sizeof(buffer), buffer);
+        if (status.getState() & Firebird::IStatus::STATE_ERRORS)
+            return "";
+
+        if (buffer[0] == isc_info_version)
+        {
+            int len = buffer[1] | (buffer[2] << 8);
+            return std::string((char*)&buffer[3], len);
+        }
+    }
+    catch (...)
+    {
+    }
+    return "";
+}
+
 void FbCppDatabase::setConnectionString(const std::string& connStr)
 {
     connStrM = connStr;

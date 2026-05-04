@@ -47,6 +47,7 @@ public:
     virtual std::string getRole() = 0;
 
     virtual void getConnectedUsers(std::vector<std::string>& users) = 0;
+    virtual std::string getEngineVersion() = 0;
 
     virtual void setConnectionString(const std::string& connStr) = 0;
     virtual void setCredentials(const std::string& user, const std::string& password) = 0;

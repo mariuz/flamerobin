@@ -107,6 +107,14 @@ void IbppDatabase::getConnectedUsers(std::vector<std::string>& users)
         databaseM->Users(users);
 }
 
+std::string IbppDatabase::getEngineVersion()
+{
+    std::string version;
+    if (databaseM != 0)
+        databaseM->Version(version);
+    return version;
+}
+
 void IbppDatabase::setConnectionString(const std::string& connStr)
 {
 

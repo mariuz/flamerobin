@@ -470,6 +470,27 @@ void DatabaseImpl::Users(std::vector<std::string>& users)
     return;
 }
 
+void DatabaseImpl::Version(std::string& version)
+{
+    if (mHandle == 0)
+        throw LogicExceptionImpl("Database::Version", _("Database is not connected."));
+
+    char items[] = { isc_info_version, isc_info_end };
+    IBS status;
+    RB result(256);
+
+    status.Reset();
+    (*getGDS().Call()->m_database_info)(status.Self(), &mHandle, sizeof(items), items,
+        result.Size(), result.Self());
+    if (status.Errors())
+    {
+        ResetHandleIfLost(status, mHandle, "Database::Version");
+        throw SQLExceptionImpl(status, "Database::Version", _("isc_database_info failed"));
+    }
+
+    result.GetString(isc_info_version, version);
+}
+
 IBPP::IDatabase* DatabaseImpl::AddRef()
 {
     ASSERTION(mRefCount >= 0);

@@ -712,6 +712,7 @@ public:
             int* ReadIdx, int* ReadSeq) = 0;
         virtual void DetailedCounts(DatabaseCounts& counts) = 0;
         virtual void Users(std::vector<std::string>& users) = 0;
+        virtual void Version(std::string& version) = 0;
         virtual int Dialect() = 0;
 
         virtual void Create(int dialect) = 0;

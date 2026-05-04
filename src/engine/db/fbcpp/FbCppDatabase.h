@@ -49,6 +49,7 @@ public:
     virtual std::string getRole() override;
 
     virtual void getConnectedUsers(std::vector<std::string>& users) override;
+    virtual std::string getEngineVersion() override;
 
     virtual void setConnectionString(const std::string& connStr) override;
     virtual void setCredentials(const std::string& user, const std::string& password) override;

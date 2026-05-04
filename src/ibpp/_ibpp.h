@@ -908,7 +908,8 @@ public:
         int* ReadIdx, int* ReadSeq);
     void DetailedCounts(IBPP::DatabaseCounts& counts);
     void Users(std::vector<std::string>& users);
-    int Dialect() { return mDialect; }
+    void Version(std::string& version);
+    int Dialect()                       { return mDialect; }
 
     void Create(int dialect);
     void Connect();
