@@ -22,21 +22,21 @@ wxString MetadataItem::getName_() const { return identifierM.get(); }
 NodeType MetadataItem::getType() const { return typeM; }
 void MetadataItem::ensureChildrenLoaded() {}
 
-Relation::Relation(NodeType type, Database* database, const wxString& name) 
-    : MetadataItem(type, (MetadataItem*)database, name, 0) {}
+Relation::Relation(NodeType type, DatabasePtr database, const wxString& name) 
+    : MetadataItem(type, (MetadataItem*)database.get(), name, 0) {}
 Relation::~Relation() {}
 ColumnPtr Relation::findColumn(const wxString&) const { return ColumnPtr(); }
 
-Table::Table(Database* database, const wxString& name) 
+Table::Table(DatabasePtr database, const wxString& name) 
     : Relation(ntTable, database, name) {}
 Table::~Table() {}
 
-View::View(Database* database, const wxString& name) 
+View::View(DatabasePtr database, const wxString& name) 
     : Relation(ntView, database, name) {}
 View::~View() {}
 
-Procedure::Procedure(Database* database, const wxString& name) 
-    : MetadataItem(ntProcedure, (MetadataItem*)database, name, 0) {}
+Procedure::Procedure(DatabasePtr database, const wxString& name) 
+    : MetadataItem(ntProcedure, (MetadataItem*)database.get(), name, 0) {}
 Procedure::~Procedure() {}
 ParameterPtr Procedure::findParameter(const wxString&) const { return ParameterPtr(); }
 
