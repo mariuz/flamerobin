@@ -498,6 +498,7 @@
 { "TAGS", kwTAGS },
 { "TAN", kwTAN },
 { "TANH", kwTANH },
+{ "TARGET", kwTARGET },
 { "TEMPORARY", kwTEMPORARY },
 { "TERM", kwTERMINATOR },
 { "TERMINATOR", kwTERMINATOR },

@@ -105,8 +105,17 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
 
     if (nameM.get().IsEmpty()) // non-reserved keyword used as identifier?
     {
-        nameM.setFromSql(tokenStringsM[2]); // we take a lucky guess
-        identifierTokenIndexM = 2;          // ex.: CREATE DOMAIN CASCADE
+        size_t idx = 2;
+        if (tokensM[0] == kwUPDATE)
+            idx = 1;
+        else if (tokensM[0] == kwMERGE)
+            idx = (tokensM.size() > 1 && tokensM[1] == kwINTO) ? 2 : 1;
+
+        if (tokensM.size() > idx)
+        {
+            nameM.setFromSql(tokenStringsM[idx]);
+            identifierTokenIndexM = idx;
+        }
     }
     else
         identifierTokenIndexM = tokensM.size() - 1;
@@ -145,6 +154,10 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
             // it's the only statement we care for which has implicit type
             actionM = actUPDATE; 
             objectTypeM = ntTable; 
+            break;
+        case kwMERGE:
+            actionM = actMERGE;
+            objectTypeM = ntTable;
             break;
         case kwCONNECT:
             actionM = actCONNECT;
@@ -542,7 +555,7 @@ bool SqlStatement::isDDL() const
     // actUPDATE means that we did have the UPDATE statment, but it didn't
     // convert to actALTER (i.e. it's a regular update statement)
     return (objectTypeM != ntUnknown && actionM != actNONE
-        && actionM != actUPDATE);
+        && actionM != actUPDATE && actionM != actMERGE);
 }
 
 bool SqlStatement::getCONNECTION(wxString& host,wxString& port, wxString& path, wxString& user, wxString& password, wxString& role, wxString& charset)

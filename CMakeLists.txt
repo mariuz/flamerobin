@@ -739,6 +739,15 @@ add_executable(sql_tokenizer_test
 target_link_libraries(sql_tokenizer_test ${wxWidgets_LIBRARIES})
 add_test(NAME sql_tokenizer_test COMMAND sql_tokenizer_test)
 
+add_executable(merge_repro
+    ${SOURCEDIR}/sql/MERGE_Repro.cpp
+    ${SOURCEDIR}/sql/SqlStatement.cpp
+    ${SOURCEDIR}/sql/Identifier.cpp
+    ${SQL_TEST_COMMON_SOURCES}
+)
+target_link_libraries(merge_repro ${wxWidgets_LIBRARIES})
+add_test(NAME merge_repro COMMAND merge_repro)
+
 add_executable(ibpp_row_metadata_test
     ${SOURCEDIR}/ibpp/RowMetadataTest.cpp
 )

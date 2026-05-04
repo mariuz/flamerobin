@@ -97,6 +97,18 @@ int main()
             "select lowercase: kwSELECT") && ok;
     }
 
+    // Test for Firebird 5.0 keywords
+    {
+        SqlTokenizer t("TARGET SOURCE MATCHED");
+        ok = checkToken(t.getCurrentToken(), kwTARGET, "TARGET: kwTARGET") && ok;
+        t.nextToken();
+        t.nextToken(); // skip whitespace
+        ok = checkToken(t.getCurrentToken(), kwSOURCE, "SOURCE: kwSOURCE") && ok;
+        t.nextToken();
+        t.nextToken(); // skip whitespace
+        ok = checkToken(t.getCurrentToken(), kwMATCHED, "MATCHED: kwMATCHED") && ok;
+    }
+
     // Test 4: identifier that is not a keyword
     {
         SqlTokenizer t("MYTABLE");

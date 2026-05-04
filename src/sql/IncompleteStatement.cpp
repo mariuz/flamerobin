@@ -237,7 +237,7 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
     if (!r)
     {
         SqlTokenizer tokenizer(extractBlockAtPosition(sql, cursorPos));
-        SqlTokenType search[] = { kwFROM, kwJOIN, kwUPDATE, kwINSERT };
+        SqlTokenType search[] = { kwFROM, kwJOIN, kwUPDATE, kwINSERT, kwMERGE, kwUSING };
         SqlTokenType stt;
         while (tkEOF != (stt = tokenizer.getCurrentToken()))
         {
@@ -252,27 +252,30 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
             }
 
             bool keepNextToken = false;
-            // find all [DELETE] FROM, JOIN, UPDATE, INSERT INTO tokens
+            // find all [DELETE] FROM, JOIN, UPDATE, INSERT INTO, MERGE [INTO], USING tokens
             for (int i = 0; i < sizeof(search) / sizeof(SqlTokenType); ++i)
             {
                 if (search[i] != stt)
                     continue;
 
-                if (stt == kwINSERT)    // find INTO
+                if (stt == kwINSERT || stt == kwMERGE)    // find INTO
                 {
                     tokenizer.jumpToken(false);
-                    if (kwINTO != tokenizer.getCurrentToken())
-                        break;
+                    if (kwINTO == tokenizer.getCurrentToken())
+                        tokenizer.jumpToken(false);
                 }
-                tokenizer.jumpToken(false);  // table/view/procedure name
+                else
+                {
+                    tokenizer.jumpToken(false);  // table/view/procedure name
+                }
 
-                while (tkIDENTIFIER == tokenizer.getCurrentToken())
+                while (tkIDENTIFIER == tokenizer.getCurrentToken() || tokenizer.isKeywordToken())
                 {
                     Identifier id;
                     id.setFromSql(tokenizer.getCurrentTokenString());
                     wxString alias;
                     tokenizer.jumpToken(true);
-                    if (tkIDENTIFIER == tokenizer.getCurrentToken())
+                    if (tkIDENTIFIER == tokenizer.getCurrentToken() || tokenizer.isKeywordToken())
                     {   // aliases can also be quoted, and case insensitive
                         Identifier ida;
                         ida.setFromSql(tokenizer.getCurrentTokenString());

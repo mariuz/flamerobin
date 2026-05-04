@@ -36,7 +36,8 @@ class Relation;
 typedef enum
 {
     actNONE, actALTER, actCREATE, actCREATE_OR_ALTER, actDECLARE, actDROP,
-    actRECREATE, actSET, actUPDATE, actGRANT, actCOMMENT, actCONNECT, actDISCONNECT, actCREATE_DATABASE
+    actRECREATE, actSET, actUPDATE, actGRANT, actCOMMENT, actCONNECT, actDISCONNECT, actCREATE_DATABASE,
+    actMERGE
 } SqlAction;
 
 class TokenList
