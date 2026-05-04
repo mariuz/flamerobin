@@ -24,25 +24,21 @@ void MetadataItem::ensureChildrenLoaded() {}
 
 Relation::Relation(NodeType type, DatabasePtr database, const wxString& name) 
     : MetadataItem(type, (MetadataItem*)database.get(), name, 0) {}
-Relation::~Relation() {}
 ColumnPtr Relation::findColumn(const wxString&) const { return ColumnPtr(); }
 
 Table::Table(DatabasePtr database, const wxString& name) 
     : Relation(ntTable, database, name) {}
-Table::~Table() {}
 
 View::View(DatabasePtr database, const wxString& name) 
     : Relation(ntView, database, name) {}
-View::~View() {}
 
 Procedure::Procedure(DatabasePtr database, const wxString& name) 
     : MetadataItem(ntProcedure, (MetadataItem*)database.get(), name, 0) {}
-Procedure::~Procedure() {}
 ParameterPtr Procedure::findParameter(const wxString&) const { return ParameterPtr(); }
 
 MetadataItem* Database::findByNameAndType(NodeType, const wxString&) { return nullptr; }
 Relation* Database::findRelation(const Identifier&) { return nullptr; }
-wxString Database::getCharsetById(int) { return ""; }
+CharacterSetPtr Database::getCharsetById(int) { return CharacterSetPtr(); }
 
 wxString unquote(const wxString& s, const wxString&) { return s; }
 
