@@ -421,6 +421,7 @@ int main()
         ok = check(fb40.Contains("SELECT"), "FB4.0 has SELECT") && ok;
         ok = check(fb40.Contains("DECFLOAT"), "FB4.0 has DECFLOAT") && ok;
         ok = check(fb40.Contains("PUBLICATION"), "FB4.0 has PUBLICATION") && ok;
+        ok = check(!fb40.Contains("LOCKED"), "FB4.0 does not have LOCKED") && ok;
 
         wxString fb50 = SqlTokenizer::getKeywordsString(SqlTokenizer::kwUpperCase, 13, 1); // ODS 13.1 (FB 5.0)
         ok = check(fb50.Contains("SKIP"), "FB5.0 has SKIP") && ok;
