@@ -39,6 +39,7 @@ void FbCppStatement::prepare(const std::string& sql)
 {
     sqlM = sql;
     statementM.emplace(attachmentM, transactionM, sql);
+    resultSetM.reset();
     firstRowFetchedM.reset();
     eofReachedM = false;
 }
@@ -55,9 +56,35 @@ void FbCppStatement::execute()
     
     firstRowFetchedM.reset();
     eofReachedM = false;
+    resultSetM.reset();
+
+    // Support Multiple-Row DML RETURNING (Firebird 5.0+)
+    // If fb-cpp's Statement class doesn't open a cursor for DML statements
+    // (it only does for SELECT), we do it manually here if the statement
+    // has a cursor.
+    auto type = statementM->getType();
+    if (type != fbcpp::StatementType::SELECT && type != fbcpp::StatementType::SELECT_FOR_UPDATE)
+    {
+        auto handle = statementM->getStatementHandle();
+        auto& attachment = statementM->getAttachment();
+        auto& client = attachment.getClient();
+        fbcpp::impl::StatusWrapper status(client);
+
+        unsigned flags = handle->getFlags(&status);
+        if (flags & Firebird::IStatement::FLAG_HAS_CURSOR)
+        {
+            resultSetM.reset(handle->openCursor(&status, transactionM.getHandle().get(),
+                statementM->getInputMetadata().get(), statementM->getInputMessage().data(),
+                statementM->getOutputMetadata().get(), 0));
+
+            bool hasRow = resultSetM->fetchNext(&status, statementM->getOutputMessage().data()) == Firebird::IStatus::RESULT_OK;
+            firstRowFetchedM = hasRow;
+            eofReachedM = !hasRow;
+            return;
+        }
+    }
 
     bool hasRow = statementM->execute(transactionM);
-    // Support Multiple-Row DML RETURNING (Firebird 5.0+)
     // If the statement has output columns, we must handle the first row
     // and subsequent fetches, even if it's not a SELECT statement.
     if (getColumnCount() > 0)
@@ -82,6 +109,17 @@ bool FbCppStatement::fetch()
     if (eofReachedM)
         return false;
 
+    if (resultSetM)
+    {
+        auto& attachment = statementM->getAttachment();
+        auto& client = attachment.getClient();
+        fbcpp::impl::StatusWrapper status(client);
+        bool res = resultSetM->fetchNext(&status, statementM->getOutputMessage().data()) == Firebird::IStatus::RESULT_OK;
+        if (!res)
+            eofReachedM = true;
+        return res;
+    }
+
     bool res = statementM->fetchNext();
     if (!res)
         eofReachedM = true;
@@ -90,6 +128,14 @@ bool FbCppStatement::fetch()
 
 void FbCppStatement::close()
 {
+    if (resultSetM)
+    {
+        auto& attachment = statementM->getAttachment();
+        auto& client = attachment.getClient();
+        fbcpp::impl::StatusWrapper status(client);
+        resultSetM->close(&status);
+        resultSetM.reset();
+    }
     if (statementM)
         statementM->free();
     statementM.reset();

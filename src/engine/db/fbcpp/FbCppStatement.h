@@ -111,6 +111,7 @@ private:
     std::string sqlM;
     std::optional<fbcpp::Statement> statementM;
     std::optional<fbcpp::RowSet> rowSetM;
+    fbcpp::FbRef<fbcpp::fb::IResultSet> resultSetM;
     std::optional<bool> firstRowFetchedM;
     bool eofReachedM;
 };
