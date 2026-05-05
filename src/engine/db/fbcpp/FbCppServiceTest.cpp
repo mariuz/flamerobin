@@ -70,7 +70,12 @@ int main()
         fr::IDatabasePtr db = fr::DatabaseFactory::createDatabase(fr::DatabaseBackend::FbCpp);
         db->setConnectionString(dbName);
         db->setCredentials("SYSDBA", "masterkey");
-        db->connect();
+        try {
+            db->connect();
+        } catch (const std::exception& e) {
+            std::cerr << "    FAILED to connect to " << dbName << "\n";
+            throw;
+        }
         
         std::vector<std::string> users;
         db->getConnectedUsers(users);

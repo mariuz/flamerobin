@@ -58,9 +58,11 @@ jobs:
         mkdir -p fb-client
         cp -P Firebird-5.0.4.1812-0-linux-x64/opt/firebird/lib/libfbclient.so* fb-client/
         cp -r Firebird-5.0.4.1812-0-linux-x64/opt/firebird/include fb-client/
-        sudo mkdir -p /opt/firebird/lib /opt/firebird/include
+        cp -r Firebird-5.0.4.1812-0-linux-x64/opt/firebird/plugins fb-client/
+        sudo mkdir -p /opt/firebird/lib /opt/firebird/include /opt/firebird/plugins
         sudo cp -P fb-client/libfbclient.so* /opt/firebird/lib/
         sudo cp -r fb-client/include/. /opt/firebird/include/
+        sudo cp -r fb-client/plugins/. /opt/firebird/plugins/
         echo "/opt/firebird/lib" | sudo tee /etc/ld.so.conf.d/firebird.conf
         sudo ldconfig
     - name: CMake
@@ -130,9 +132,10 @@ jobs:
       run: sudo apt-get install libnotify-dev libwxgtk3.2-dev libwxgtk-webview3.2-dev libicu-dev xvfb xdotool libboost-all-dev libx11-dev libxft-dev libxext-dev libwayland-dev libxkbcommon-dev libegl1-mesa-dev libglib2.0-dev libatk1.0-dev gettext libxi-dev libxtst-dev libpango1.0-dev libcairo2-dev libgdk-pixbuf-2.0-dev libxrender-dev libxinerama-dev libxrandr-dev libxcursor-dev libxcomposite-dev libxdamage-dev libxfixes-dev libepoxy-dev libcups2-dev libfontconfig1-dev libwebkit2gtk-4.1-dev -y
     - name: Install Firebird client
       run: |
-        sudo mkdir -p /opt/firebird/lib /opt/firebird/include
+        sudo mkdir -p /opt/firebird/lib /opt/firebird/include /opt/firebird/plugins
         sudo cp -P fb-client/libfbclient.so* /opt/firebird/lib/
         sudo cp -r fb-client/include/. /opt/firebird/include/
+        sudo cp -r fb-client/plugins/. /opt/firebird/plugins/
         echo "/opt/firebird/lib" | sudo tee /etc/ld.so.conf.d/firebird.conf
         sudo ldconfig
     - name: Wait for Firebird service
@@ -148,6 +151,7 @@ jobs:
     - name: Test
       env:
         IBPP_TEST_SERVER: localhost/3050
+        FIREBIRD: /opt/firebird
         LD_LIBRARY_PATH: /opt/firebird/lib
       run: ctest --output-on-failure --output-junit ctest-results.xml
       working-directory: ./build

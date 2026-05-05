@@ -61,7 +61,12 @@ int main()
         fr::IDatabasePtr db = fr::DatabaseFactory::createDatabase(fr::DatabaseBackend::FbCpp);
         db->setConnectionString(dbName);
         db->setCredentials("SYSDBA", "masterkey");
-        db->connect();
+        try {
+            db->connect();
+        } catch (const std::exception& e) {
+            std::cerr << "    FAILED to connect to " << dbName << " using fb-cpp backend\n";
+            throw;
+        }
 
         // Check version - multi-row RETURNING requires FB 5.0+
         std::string version = db->getEngineVersion();

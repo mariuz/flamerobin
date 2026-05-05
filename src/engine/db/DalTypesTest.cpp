@@ -71,7 +71,13 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
         fr::IDatabasePtr db = fr::DatabaseFactory::createDatabase(backend);
         db->setConnectionString(dbName);
         db->setCredentials("SYSDBA", "masterkey");
-        db->connect();
+        try {
+            db->connect();
+        } catch (const std::exception& e) {
+            std::cerr << "    FAILED to connect to " << dbName << " using " 
+                      << (backend == fr::DatabaseBackend::IBPP ? "IBPP" : "FbCpp") << " backend\n";
+            throw;
+        }
 
         fr::ITransactionPtr tr = db->createTransaction();
         tr->start();
