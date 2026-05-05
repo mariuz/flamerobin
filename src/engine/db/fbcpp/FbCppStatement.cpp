@@ -63,49 +63,32 @@ void FbCppStatement::execute()
     resultSetM.reset();
 
     // Support Multiple-Row DML RETURNING (Firebird 5.0+)
-    auto type = (unsigned)statementM->getType();
-    if (getColumnCount() > 0 && 
-        (type == (unsigned)fbcpp::StatementType::INSERT || 
-         type == (unsigned)fbcpp::StatementType::UPDATE || 
-         type == (unsigned)fbcpp::StatementType::DELETE ||
-         type == 25)) // 25 is isc_info_sql_stmt_merge
+    if (getColumnCount() > 0)
     {
-        // Check if we are on Firebird 5.0 or later
-        bool isFb5 = false;
-        try {
-            std::string version = databasePtrM->getEngineVersion();
-            if (version.find("V5.0") != std::string::npos || 
-                version.find("V6.0") != std::string::npos ||
-                version.find("V7.0") != std::string::npos)
-            {
-                isFb5 = true;
-            }
-        } catch (...) {}
-
-        if (isFb5)
+        auto handle = statementM->getStatementHandle();
+        if (handle->cloopVTable->version >= 5)
         {
-            auto handle = statementM->getStatementHandle();
             auto& attachment = statementM->getAttachment();
             auto& client = attachment.getClient();
-            
-            // We use a separate status here to avoid throwing if openCursor is not supported
             auto status = client.newStatus();
             fbcpp::impl::StatusWrapper statusWrapper(client, status.get());
 
-            // Try to open a cursor (Firebird 5.0+ Multiple-Row RETURNING)
-            Firebird::IResultSet* rs = handle->openCursor(&statusWrapper, transactionM.getHandle().get(),
-                statementM->getInputMetadata().get(), statementM->getInputMessage().data(),
-                statementM->getOutputMetadata().get(), 0);
-            
-            if (rs)
+            if (handle->getFlags(&statusWrapper) & Firebird::IStatement::FLAG_HAS_CURSOR)
             {
-                resultSetM.reset(rs);
-                bool hasRow = resultSetM->fetchNext(&statusWrapper, statementM->getOutputMessage().data()) == Firebird::IStatus::RESULT_OK;
-                firstRowFetchedM = hasRow;
-                eofReachedM = !hasRow;
-                return;
+                // Try to open a cursor (Firebird 5.0+ Multiple-Row RETURNING)
+                Firebird::IResultSet* rs = handle->openCursor(&statusWrapper, transactionM.getHandle().get(),
+                    statementM->getInputMetadata().get(), statementM->getInputMessage().data(),
+                    statementM->getOutputMetadata().get(), 0);
+                
+                if (rs)
+                {
+                    resultSetM.reset(rs);
+                    bool hasRow = resultSetM->fetchNext(&statusWrapper, statementM->getOutputMessage().data()) == Firebird::IStatus::RESULT_OK;
+                    firstRowFetchedM = hasRow;
+                    eofReachedM = !hasRow;
+                    return;
+                }
             }
-            // If openCursor failed, fallback to normal execute
             statusWrapper.clearException();
         }
     }
