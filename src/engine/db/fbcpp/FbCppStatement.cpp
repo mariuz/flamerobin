@@ -186,87 +186,46 @@ std::string FbCppStatement::getString(int index)
 {
     if (!statementM)
         throw std::runtime_error("No statement available");
-    try
-    {
-        return statementM->get<std::optional<std::string>>((unsigned)index).value_or("");
-    }
-    catch (...)
-    {
-        return "";
-    }
+    return statementM->get<std::optional<std::string>>((unsigned)index).value_or("");
 }
 
 int32_t FbCppStatement::getInt32(int index)
 {
     if (!statementM)
         throw std::runtime_error("No statement available");
-    try
-    {
-        return statementM->get<std::optional<std::int32_t>>((unsigned)index).value_or(0);
-    }
-    catch (...)
-    {
-        return 0;
-    }
+    return statementM->get<std::optional<std::int32_t>>((unsigned)index).value_or(0);
 }
 
 int64_t FbCppStatement::getInt64(int index)
 {
     if (!statementM)
         throw std::runtime_error("No statement available");
-    try
-    {
-        return statementM->get<std::optional<std::int64_t>>((unsigned)index).value_or(0);
-    }
-    catch (...)
-    {
-        return 0;
-    }
+    return statementM->get<std::optional<std::int64_t>>((unsigned)index).value_or(0);
 }
 
 double FbCppStatement::getDouble(int index)
 {
     if (!statementM)
         throw std::runtime_error("No statement available");
-    try
-    {
-        return statementM->get<std::optional<double>>((unsigned)index).value_or(0.0);
-    }
-    catch (...)
-    {
-        return 0.0;
-    }
+    return statementM->get<std::optional<double>>((unsigned)index).value_or(0.0);
 }
 
 bool FbCppStatement::getBool(int index)
 {
     if (!statementM)
         throw std::runtime_error("No statement available");
-    try
-    {
-        return statementM->get<std::optional<bool>>((unsigned)index).value_or(false);
-    }
-    catch (...)
-    {
-        return false;
-    }
+    return statementM->get<std::optional<bool>>((unsigned)index).value_or(false);
 }
 
 void FbCppStatement::getBytes(int index, void* data, int size)
 {
     if (!statementM)
         throw std::runtime_error("No statement available");
-    try
+    auto val = statementM->get<std::optional<std::string>>((unsigned)index);
+    if (val)
     {
-        auto val = statementM->get<std::optional<std::string>>((unsigned)index);
-        if (val)
-        {
-            int toCopy = std::min((int)val->size(), size);
-            memcpy(data, val->data(), toCopy);
-        }
-    }
-    catch (...)
-    {
+        int toCopy = std::min((int)val->size(), size);
+        memcpy(data, val->data(), toCopy);
     }
 }
 
@@ -274,139 +233,76 @@ IBlobPtr FbCppStatement::getBlob(int index)
 {
     if (!statementM)
         throw std::runtime_error("No statement available");
-    try
-    {
-        auto blobId = statementM->get<std::optional<fbcpp::BlobId>>((unsigned)index);
-        if (!blobId || blobId->isEmpty())
-            return nullptr;
-        return std::make_shared<FbCppBlob>(attachmentM, transactionM, *blobId);
-    }
-    catch (...)
-    {
+    auto blobId = statementM->get<std::optional<fbcpp::BlobId>>((unsigned)index);
+    if (!blobId || blobId->isEmpty())
         return nullptr;
-    }
+    return std::make_shared<FbCppBlob>(attachmentM, transactionM, *blobId);
 }
 
 void FbCppStatement::setBlob(int index, IBlobPtr blob)
 {
     if (!statementM)
         throw std::runtime_error("Statement not prepared");
-    try
-    {
-        auto fbCppBlob = std::dynamic_pointer_cast<FbCppBlob>(blob);
-        if (!fbCppBlob)
-            throw std::runtime_error("Invalid blob type for fb-cpp backend");
-        statementM->set((unsigned)index, fbCppBlob->getBlobId());
-    }
-    catch (...)
-    {
-        throw;
-    }
+    auto fbCppBlob = std::dynamic_pointer_cast<FbCppBlob>(blob);
+    if (!fbCppBlob)
+        throw std::runtime_error("Invalid blob type for fb-cpp backend");
+    statementM->set((unsigned)index, fbCppBlob->getBlobId());
 }
 
 std::string FbCppStatement::getDate(int index)
 {
     if (!statementM)
         throw std::runtime_error("No statement available");
-    try
-    {
-        return statementM->get<std::optional<std::string>>((unsigned)index).value_or("");
-    }
-    catch (...)
-    {
-        return "";
-    }
+    return statementM->get<std::optional<std::string>>((unsigned)index).value_or("");
 }
 
 std::string FbCppStatement::getTime(int index)
 {
     if (!statementM)
         throw std::runtime_error("No statement available");
-    try
-    {
-        return statementM->get<std::optional<std::string>>((unsigned)index).value_or("");
-    }
-    catch (...)
-    {
-        return "";
-    }
+    return statementM->get<std::optional<std::string>>((unsigned)index).value_or("");
 }
 
 std::string FbCppStatement::getTimestamp(int index)
 {
     if (!statementM)
         throw std::runtime_error("No statement available");
-    try
-    {
-        return statementM->get<std::optional<std::string>>((unsigned)index).value_or("");
-    }
-    catch (...)
-    {
-        return "";
-    }
+    return statementM->get<std::optional<std::string>>((unsigned)index).value_or("");
 }
 
 std::string FbCppStatement::getTimeTz(int index)
 {
     if (!statementM)
         throw std::runtime_error("No statement available");
-    try
-    {
-        return statementM->get<std::optional<std::string>>((unsigned)index).value_or("");
-    }
-    catch (...)
-    {
-        return "";
-    }
+    return statementM->get<std::optional<std::string>>((unsigned)index).value_or("");
 }
 
 std::string FbCppStatement::getTimestampTz(int index)
 {
     if (!statementM)
         throw std::runtime_error("No statement available");
-    try
-    {
-        return statementM->get<std::optional<std::string>>((unsigned)index).value_or("");
-    }
-    catch (...)
-    {
-        return "";
-    }
+    return statementM->get<std::optional<std::string>>((unsigned)index).value_or("");
 }
 
 void FbCppStatement::getDate(int index, int& year, int& month, int& day)
 {
     if (!statementM)
         throw std::runtime_error("No statement available");
-    try
-    {
-        auto d = statementM->get<std::optional<fbcpp::Date>>((unsigned)index).value_or(fbcpp::Date{});
-        year = (int)d.year();
-        month = (unsigned)d.month();
-        day = (unsigned)d.day();
-    }
-    catch (...)
-    {
-        year = month = day = 0;
-    }
+    auto d = statementM->get<std::optional<fbcpp::Date>>((unsigned)index).value_or(fbcpp::Date{});
+    year = (int)d.year();
+    month = (unsigned)d.month();
+    day = (unsigned)d.day();
 }
 
 void FbCppStatement::getTime(int index, int& hour, int& minute, int& second, int& fraction)
 {
     if (!statementM)
         throw std::runtime_error("No statement available");
-    try
-    {
-        auto t = statementM->get<std::optional<fbcpp::Time>>((unsigned)index).value_or(fbcpp::Time{});
-        hour = (int)t.hours().count();
-        minute = (int)t.minutes().count();
-        second = (int)t.seconds().count();
-        fraction = (int)std::chrono::duration_cast<std::chrono::microseconds>(t.subseconds()).count() / 100;
-    }
-    catch (...)
-    {
-        hour = minute = second = fraction = 0;
-    }
+    auto t = statementM->get<std::optional<fbcpp::Time>>((unsigned)index).value_or(fbcpp::Time{});
+    hour = (int)t.hours().count();
+    minute = (int)t.minutes().count();
+    second = (int)t.seconds().count();
+    fraction = (int)std::chrono::duration_cast<std::chrono::microseconds>(t.subseconds()).count() / 100;
 }
 
 void FbCppStatement::getTimestamp(int index, int& year, int& month, int& day,
@@ -414,21 +310,14 @@ void FbCppStatement::getTimestamp(int index, int& year, int& month, int& day,
 {
     if (!statementM)
         throw std::runtime_error("No statement available");
-    try
-    {
-        auto ts = statementM->get<std::optional<fbcpp::Timestamp>>((unsigned)index).value_or(fbcpp::Timestamp{});
-        year = (int)ts.date.year();
-        month = (unsigned)ts.date.month();
-        day = (unsigned)ts.date.day();
-        hour = (int)ts.time.hours().count();
-        minute = (int)ts.time.minutes().count();
-        second = (int)ts.time.seconds().count();
-        fraction = (int)std::chrono::duration_cast<std::chrono::microseconds>(ts.time.subseconds()).count() / 100;
-    }
-    catch (...)
-    {
-        year = month = day = hour = minute = second = fraction = 0;
-    }
+    auto ts = statementM->get<std::optional<fbcpp::Timestamp>>((unsigned)index).value_or(fbcpp::Timestamp{});
+    year = (int)ts.date.year();
+    month = (unsigned)ts.date.month();
+    day = (unsigned)ts.date.day();
+    hour = (int)ts.time.hours().count();
+    minute = (int)ts.time.minutes().count();
+    second = (int)ts.time.seconds().count();
+    fraction = (int)std::chrono::duration_cast<std::chrono::microseconds>(ts.time.subseconds()).count() / 100;
 }
 
 int FbCppStatement::getColumnCount()
@@ -537,40 +426,26 @@ std::string FbCppStatement::getPlan()
 {
     if (!statementM)
         return "";
-    try
-    {
-        return statementM->getPlan();
-    }
-    catch (...)
-    {
-        return "";
-    }
+    return statementM->getPlan();
 }
 
 StatementType FbCppStatement::getType()
 {
     if (!statementM)
         return StatementType::Unknown;
-    try
+    switch (statementM->getType())
     {
-        switch (statementM->getType())
-        {
-            case fbcpp::StatementType::SELECT: return StatementType::Select;
-            case fbcpp::StatementType::INSERT: return StatementType::Insert;
-            case fbcpp::StatementType::UPDATE: return StatementType::Update;
-            case fbcpp::StatementType::DELETE: return StatementType::Delete;
-            case fbcpp::StatementType::DDL: return StatementType::DDL;
-            case fbcpp::StatementType::EXEC_PROCEDURE: return StatementType::ExecProcedure;
-            case fbcpp::StatementType::START_TRANSACTION: return StatementType::StartTransaction;
-            case fbcpp::StatementType::COMMIT: return StatementType::Commit;
-            case fbcpp::StatementType::ROLLBACK: return StatementType::Rollback;
-            case fbcpp::StatementType::SAVEPOINT: return StatementType::Savepoint;
-            default: return StatementType::Unknown;
-        }
-    }
-    catch (...)
-    {
-        return StatementType::Unknown;
+        case fbcpp::StatementType::SELECT: return StatementType::Select;
+        case fbcpp::StatementType::INSERT: return StatementType::Insert;
+        case fbcpp::StatementType::UPDATE: return StatementType::Update;
+        case fbcpp::StatementType::DELETE: return StatementType::Delete;
+        case fbcpp::StatementType::DDL: return StatementType::DDL;
+        case fbcpp::StatementType::EXEC_PROCEDURE: return StatementType::ExecProcedure;
+        case fbcpp::StatementType::START_TRANSACTION: return StatementType::StartTransaction;
+        case fbcpp::StatementType::COMMIT: return StatementType::Commit;
+        case fbcpp::StatementType::ROLLBACK: return StatementType::Rollback;
+        case fbcpp::StatementType::SAVEPOINT: return StatementType::Savepoint;
+        default: return StatementType::Unknown;
     }
 }
 
@@ -578,31 +453,17 @@ int FbCppStatement::getParameterCount()
 {
     if (!statementM)
         return 0;
-    try
-    {
-        return (int)statementM->getInputDescriptors().size();
-    }
-    catch (...)
-    {
-        return 0;
-    }
+    return (int)statementM->getInputDescriptors().size();
 }
 
 std::string FbCppStatement::getParameterName(int index)
 {
     if (!statementM)
         return "";
-    try
-    {
-        const auto& descriptors = statementM->getInputDescriptors();
-        if ((unsigned)index >= descriptors.size())
-            return "";
-        return descriptors[index].name.empty() ? "?" : descriptors[index].name;
-    }
-    catch (...)
-    {
+    const auto& descriptors = statementM->getInputDescriptors();
+    if ((unsigned)index >= descriptors.size())
         return "";
-    }
+    return descriptors[index].name.empty() ? "?" : descriptors[index].name;
 }
 
 std::vector<int> FbCppStatement::findParameterIndicesByName(const std::string& name)
@@ -610,30 +471,24 @@ std::vector<int> FbCppStatement::findParameterIndicesByName(const std::string& n
     std::vector<int> result;
     if (!statementM)
         return result;
-    try
+    const auto& descriptors = statementM->getInputDescriptors();
+    for (size_t i = 0; i < descriptors.size(); ++i)
     {
-        const auto& descriptors = statementM->getInputDescriptors();
-        for (size_t i = 0; i < descriptors.size(); ++i)
+        // Case-insensitive comparison
+        if (descriptors[i].name.size() == name.size())
         {
-            // Case-insensitive comparison
-            if (descriptors[i].name.size() == name.size())
+            bool match = true;
+            for (size_t j = 0; j < name.size(); ++j)
             {
-                bool match = true;
-                for (size_t j = 0; j < name.size(); ++j)
+                if (std::toupper(descriptors[i].name[j]) != std::toupper(name[j]))
                 {
-                    if (std::toupper(descriptors[i].name[j]) != std::toupper(name[j]))
-                    {
-                        match = false;
-                        break;
-                    }
+                    match = false;
+                    break;
                 }
-                if (match)
-                    result.push_back((int)i);
             }
+            if (match)
+                result.push_back((int)i);
         }
-    }
-    catch (...)
-    {
     }
     return result;
 }
@@ -642,36 +497,29 @@ ColumnType FbCppStatement::getParameterType(int index)
 {
     if (!statementM)
         return ColumnType::Unknown;
-    try
-    {
-        const auto& descriptors = statementM->getInputDescriptors();
-        if ((unsigned)index >= descriptors.size())
-            return ColumnType::Unknown;
-
-        switch (descriptors[index].adjustedType)
-        {
-            case fbcpp::DescriptorAdjustedType::STRING: return ColumnType::Varchar;
-            case fbcpp::DescriptorAdjustedType::INT32: return ColumnType::Integer;
-            case fbcpp::DescriptorAdjustedType::INT16: return ColumnType::Integer;
-            case fbcpp::DescriptorAdjustedType::INT64: return ColumnType::BigInt;
-            case fbcpp::DescriptorAdjustedType::FLOAT: return ColumnType::Float;
-            case fbcpp::DescriptorAdjustedType::DOUBLE: return ColumnType::Double;
-            case fbcpp::DescriptorAdjustedType::TIME: return ColumnType::Time;
-            case fbcpp::DescriptorAdjustedType::DATE: return ColumnType::Date;
-            case fbcpp::DescriptorAdjustedType::TIMESTAMP: return ColumnType::Timestamp;
-            case fbcpp::DescriptorAdjustedType::TIME_TZ: return ColumnType::TimeTz;
-            case fbcpp::DescriptorAdjustedType::TIMESTAMP_TZ: return ColumnType::TimestampTz;
-            case fbcpp::DescriptorAdjustedType::BLOB: return ColumnType::Blob;
-            case fbcpp::DescriptorAdjustedType::BOOLEAN: return ColumnType::Boolean;
-            case fbcpp::DescriptorAdjustedType::INT128: return ColumnType::Int128;
-            case fbcpp::DescriptorAdjustedType::DECFLOAT16: return ColumnType::Decfloat16;
-            case fbcpp::DescriptorAdjustedType::DECFLOAT34: return ColumnType::Decfloat34;
-            default: return ColumnType::Unknown;
-        }
-    }
-    catch (...)
-    {
+    const auto& descriptors = statementM->getInputDescriptors();
+    if ((unsigned)index >= descriptors.size())
         return ColumnType::Unknown;
+
+    switch (descriptors[index].adjustedType)
+    {
+        case fbcpp::DescriptorAdjustedType::STRING: return ColumnType::Varchar;
+        case fbcpp::DescriptorAdjustedType::INT32: return ColumnType::Integer;
+        case fbcpp::DescriptorAdjustedType::INT16: return ColumnType::Integer;
+        case fbcpp::DescriptorAdjustedType::INT64: return ColumnType::BigInt;
+        case fbcpp::DescriptorAdjustedType::FLOAT: return ColumnType::Float;
+        case fbcpp::DescriptorAdjustedType::DOUBLE: return ColumnType::Double;
+        case fbcpp::DescriptorAdjustedType::TIME: return ColumnType::Time;
+        case fbcpp::DescriptorAdjustedType::DATE: return ColumnType::Date;
+        case fbcpp::DescriptorAdjustedType::TIMESTAMP: return ColumnType::Timestamp;
+        case fbcpp::DescriptorAdjustedType::TIME_TZ: return ColumnType::TimeTz;
+        case fbcpp::DescriptorAdjustedType::TIMESTAMP_TZ: return ColumnType::TimestampTz;
+        case fbcpp::DescriptorAdjustedType::BLOB: return ColumnType::Blob;
+        case fbcpp::DescriptorAdjustedType::BOOLEAN: return ColumnType::Boolean;
+        case fbcpp::DescriptorAdjustedType::INT128: return ColumnType::Int128;
+        case fbcpp::DescriptorAdjustedType::DECFLOAT16: return ColumnType::Decfloat16;
+        case fbcpp::DescriptorAdjustedType::DECFLOAT34: return ColumnType::Decfloat34;
+        default: return ColumnType::Unknown;
     }
 }
 
@@ -679,51 +527,30 @@ int FbCppStatement::getParameterSubtype(int index)
 {
     if (!statementM)
         return 0;
-    try
-    {
-        const auto& descriptors = statementM->getInputDescriptors();
-        if ((unsigned)index >= descriptors.size())
-            return 0;
-        return descriptors[index].subType;
-    }
-    catch (...)
-    {
+    const auto& descriptors = statementM->getInputDescriptors();
+    if ((unsigned)index >= descriptors.size())
         return 0;
-    }
+    return descriptors[index].subType;
 }
 
 int FbCppStatement::getParameterScale(int index)
 {
     if (!statementM)
         return 0;
-    try
-    {
-        const auto& descriptors = statementM->getInputDescriptors();
-        if ((unsigned)index >= descriptors.size())
-            return 0;
-        return descriptors[index].scale;
-    }
-    catch (...)
-    {
+    const auto& descriptors = statementM->getInputDescriptors();
+    if ((unsigned)index >= descriptors.size())
         return 0;
-    }
+    return descriptors[index].scale;
 }
 
 int FbCppStatement::getParameterSize(int index)
 {
     if (!statementM)
         return 0;
-    try
-    {
-        const auto& descriptors = statementM->getInputDescriptors();
-        if ((unsigned)index >= descriptors.size())
-            return 0;
-        return (int)descriptors[index].length;
-    }
-    catch (...)
-    {
+    const auto& descriptors = statementM->getInputDescriptors();
+    if ((unsigned)index >= descriptors.size())
         return 0;
-    }
+    return (int)descriptors[index].length;
 }
 
 int FbCppStatement::getAffectedRows()
@@ -739,16 +566,9 @@ int FbCppStatement::getAffectedRows()
     unsigned char buffer[1024];
     memset(buffer, isc_info_end, sizeof(buffer));
 
-    try 
-    {
-        statementM->getStatementHandle()->getInfo(&status, sizeof(items), items, sizeof(buffer), buffer);
-        if (status.getState() & Firebird::IStatus::STATE_ERRORS)
-            return 0;
-    }
-    catch (...)
-    {
+    statementM->getStatementHandle()->getInfo(&status, sizeof(items), items, sizeof(buffer), buffer);
+    if (status.getState() & Firebird::IStatus::STATE_ERRORS)
         return 0;
-    }
 
     auto decode = [](const unsigned char* p, int len) -> intptr_t {
         intptr_t v = 0;

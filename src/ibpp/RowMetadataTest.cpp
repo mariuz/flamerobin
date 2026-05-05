@@ -115,7 +115,8 @@ int main()
 
         int odsMajor = 0;
         db->Info(&odsMajor, 0, 0, 0, 0, 0, 0, 0, 0);
-        int idLen = (odsMajor >= 13 ? 63 : 31);
+        // IBPP's legacy XSQLDA is limited to 31 character identifiers.
+        int idLen = (odsMajor >= 13 ? 31 : 31);
         std::cout << "Detected ODS " << odsMajor << ". Testing identifiers with length: " << idLen << "\n";
 
         const std::string tableName = makeIdentifier("TBL_", 'T', idLen);
