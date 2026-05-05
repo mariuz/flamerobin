@@ -117,7 +117,10 @@ int main()
 
         st->prepare("CREATE TABLE t1 (id INT PRIMARY KEY, val VARCHAR(100))");
         st->execute();
+        tr->commitRetain();
+
         st->prepare("INSERT INTO t1 VALUES (1, 'test')");
+
         st->execute();
 
         st->prepare("EXECUTE PROCEDURE RDB$PROFILER.FINISH_SESSION(TRUE)");
@@ -137,6 +140,7 @@ int main()
         st->execute();
         st->prepare("CREATE PROCEDURE p_parent AS BEGIN EXECUTE PROCEDURE p_child; END");
         st->execute();
+        tr->commitRetain();
 
         st->prepare("SELECT RDB$PROFILER.START_SESSION('Nested Session') FROM RDB$DATABASE");
         st->execute();
@@ -164,6 +168,7 @@ int main()
         st->execute();
         st->prepare("CREATE TRIGGER t2_ai FOR t2 AFTER INSERT AS BEGIN END");
         st->execute();
+        tr->commitRetain();
 
         st->prepare("SELECT RDB$PROFILER.START_SESSION('Trigger Session') FROM RDB$DATABASE");
         st->execute();

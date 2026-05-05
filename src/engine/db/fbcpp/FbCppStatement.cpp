@@ -26,6 +26,8 @@
 #include <fb-cpp/Exception.h>
 #include <cstring>
 #include <stdexcept>
+#include <algorithm>
+#include <firebird/Interface.h>
 
 namespace fr
 {
@@ -39,6 +41,7 @@ void FbCppStatement::prepare(const std::string& sql)
 {
     sqlM = sql;
     statementM.emplace(attachmentM, transactionM, sql);
+    resultSetM.reset();
     firstRowFetchedM.reset();
     eofReachedM = false;
 }
@@ -55,6 +58,54 @@ void FbCppStatement::execute()
     
     firstRowFetchedM.reset();
     eofReachedM = false;
+    resultSetM.reset();
+
+    // Support Multiple-Row DML RETURNING (Firebird 5.0+)
+    auto type = statementM->getType();
+    if (getColumnCount() > 0 && 
+        (type == fbcpp::StatementType::INSERT || 
+         type == fbcpp::StatementType::UPDATE || 
+         type == fbcpp::StatementType::DELETE))
+    {
+        // Check if we are on Firebird 5.0 or later
+        bool isFb5 = false;
+        try {
+            std::string version = databasePtrM->getEngineVersion();
+            if (version.find("V5.0") != std::string::npos || 
+                version.find("V6.0") != std::string::npos ||
+                version.find("V7.0") != std::string::npos)
+            {
+                isFb5 = true;
+            }
+        } catch (...) {}
+
+        if (isFb5)
+        {
+            auto handle = statementM->getStatementHandle();
+            auto& attachment = statementM->getAttachment();
+            auto& client = attachment.getClient();
+            
+            // We use a separate status here to avoid throwing if openCursor is not supported
+            auto status = client.newStatus();
+            fbcpp::impl::StatusWrapper statusWrapper(client, status.get());
+
+            // Try to open a cursor (Firebird 5.0+ Multiple-Row RETURNING)
+            Firebird::IResultSet* rs = handle->openCursor(&statusWrapper, transactionM.getHandle().get(),
+                statementM->getInputMetadata().get(), statementM->getInputMessage().data(),
+                statementM->getOutputMetadata().get(), 0);
+            
+            if (rs)
+            {
+                resultSetM.reset(rs);
+                bool hasRow = resultSetM->fetchNext(&statusWrapper, statementM->getOutputMessage().data()) == Firebird::IStatus::RESULT_OK;
+                firstRowFetchedM = hasRow;
+                eofReachedM = !hasRow;
+                return;
+            }
+            // If openCursor failed, fallback to normal execute
+            statusWrapper.clearException();
+        }
+    }
 
     bool hasRow = statementM->execute(transactionM);
     // If the statement has output columns, we must handle the first row
@@ -81,6 +132,17 @@ bool FbCppStatement::fetch()
     if (eofReachedM)
         return false;
 
+    if (resultSetM)
+    {
+        auto& attachment = statementM->getAttachment();
+        auto& client = attachment.getClient();
+        fbcpp::impl::StatusWrapper status(client);
+        bool res = resultSetM->fetchNext(&status, statementM->getOutputMessage().data()) == Firebird::IStatus::RESULT_OK;
+        if (!res)
+            eofReachedM = true;
+        return res;
+    }
+
     bool res = statementM->fetchNext();
     if (!res)
         eofReachedM = true;
@@ -89,6 +151,14 @@ bool FbCppStatement::fetch()
 
 void FbCppStatement::close()
 {
+    if (resultSetM)
+    {
+        auto& attachment = statementM->getAttachment();
+        auto& client = attachment.getClient();
+        fbcpp::impl::StatusWrapper status(client);
+        resultSetM->close(&status);
+        resultSetM.reset();
+    }
     if (statementM)
         statementM->free();
     statementM.reset();
