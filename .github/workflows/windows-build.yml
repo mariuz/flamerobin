@@ -38,6 +38,21 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: ${{ matrix.arch }}
+
+    - name: Set VS COMNTOOLS environment variables
+      shell: pwsh
+      run: |
+        $vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath
+        if (-not $vsPath) {
+            Write-Error "Visual Studio installation not found"
+            exit 1
+        }
+        $toolsPath = Join-Path $vsPath "Common7\Tools"
+        Write-Host "Found VS at $vsPath"
+        Write-Host "Setting VS COMNTOOLS variables to $toolsPath"
+        echo "VS170COMNTOOLS=$toolsPath" >> $env:GITHUB_ENV
+        echo "VS160COMNTOOLS=$toolsPath" >> $env:GITHUB_ENV
+        echo "VS150COMNTOOLS=$toolsPath" >> $env:GITHUB_ENV
     
     - name: Bootstrap vcpkg
       run: .\vcpkg\bootstrap-vcpkg.bat -disableMetrics
