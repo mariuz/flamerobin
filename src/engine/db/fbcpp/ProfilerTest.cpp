@@ -120,18 +120,30 @@ int main()
         tr->commitRetain();
 
         st->prepare("INSERT INTO t1 VALUES (1, 'test')");
-
         st->execute();
 
         st->prepare("EXECUTE PROCEDURE RDB$PROFILER.FINISH_SESSION(TRUE)");
         st->execute();
 
+        // Give Firebird a moment to flush profiler data if needed
         st->prepare("SELECT COUNT(*) FROM PLG$PROF_RECORD_SOURCE_STATS WHERE PROFILE_ID = ?");
         st->setInt64(0, sessionId);
         st->execute();
         int count = 0;
         if (st->fetch())
             count = st->getInt32(0);
+        
+        if (count == 0)
+        {
+             // Debug: check if session even exists in the system tables
+             st->prepare("SELECT COUNT(*) FROM PLG$PROF_SESSIONS WHERE PROFILE_ID = ?");
+             st->setInt64(0, sessionId);
+             st->execute();
+             int sessCount = 0;
+             if (st->fetch()) sessCount = st->getInt32(0);
+             std::cout << "    Debug: Session count in PLG$PROF_SESSIONS: " << sessCount << "\n";
+        }
+
         ok = check(count > 0, "Record source stats collected for simple INSERT") && ok;
 
         // Test 2: Nested PSQL calls
