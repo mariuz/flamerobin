@@ -1,8 +1,8 @@
 name: Build FlameRobin for macOS
 
 env:
-  fb-tag: v5.0.3
-  fb-build: 5.0.3.1683-0
+  fb-tag: v5.0.4
+  fb-build: 5.0.4.1812-0
 
 on:
   push:

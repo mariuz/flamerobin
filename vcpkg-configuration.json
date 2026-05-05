@@ -3,13 +3,13 @@
   "default-registry": {
     "kind": "git",
     "repository": "https://github.com/microsoft/vcpkg",
-    "baseline": "d46283cf33cf5de7bd88e12156ce03882be1f179"
+    "baseline": "12dcccadfe573d0eaa6c67a968413ded7805d256"
   },
   "registries": [
     {
       "kind": "git",
       "repository": "https://github.com/asfernandes/firebird-vcpkg-registry.git",
-      "baseline": "1f7b80aad8fed039d710b735bd0c038beef7b7ee",
+      "baseline": "a27c4ed5a8316cd3d6a5f2426592a6f1d8eb5fd4",
       "packages": [ "firebird" ]
     }
   ],

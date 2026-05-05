@@ -43,11 +43,12 @@
     },
     {
       "name": "firebird",
-      "version": "5.0.3"
+      "version": "5.0.4"
     },
     {
       "name": "icu",
       "version": "78.1"
     }
-  ]
+  ],
+  "builtin-baseline": "12dcccadfe573d0eaa6c67a968413ded7805d256"
 }

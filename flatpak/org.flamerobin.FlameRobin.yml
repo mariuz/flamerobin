@@ -28,9 +28,9 @@ modules:
     build-commands:
       # The outer tarball contains buildroot.tar.gz (after strip-components: 1).
       # Extract the Firebird client libraries and headers from the inner buildroot.tar.gz.
-      - tar -xzf buildroot.tar.gz ./opt/firebird/lib/libfbclient.so.5.0.3 ./opt/firebird/lib/libib_util.so ./opt/firebird/lib/libtomcrypt.so.1.0.1 ./opt/firebird/include
-      - install -Dm755 opt/firebird/lib/libfbclient.so.5.0.3 /app/lib/libfbclient.so.5.0.3
-      - ln -sf libfbclient.so.5.0.3 /app/lib/libfbclient.so.2
+      - tar -xzf buildroot.tar.gz ./opt/firebird/lib/libfbclient.so.5.0.4 ./opt/firebird/lib/libib_util.so ./opt/firebird/lib/libtomcrypt.so.1.0.1 ./opt/firebird/include
+      - install -Dm755 opt/firebird/lib/libfbclient.so.5.0.4 /app/lib/libfbclient.so.5.0.4
+      - ln -sf libfbclient.so.5.0.4 /app/lib/libfbclient.so.2
       - ln -sf libfbclient.so.2 /app/lib/libfbclient.so
       - install -Dm755 opt/firebird/lib/libib_util.so /app/lib/libib_util.so
       - install -Dm755 opt/firebird/lib/libtomcrypt.so.1.0.1 /app/lib/libtomcrypt.so.1.0.1
@@ -42,8 +42,8 @@ modules:
     sources:
       - type: archive
         # This tarball contains buildroot.tar.gz; strip-components: 1 places it at the root.
-        url: https://github.com/FirebirdSQL/firebird/releases/download/v5.0.3/Firebird-5.0.3.1683-0-linux-x64.tar.gz
-        sha256: ef281c53f85756288151a86831375c9ae668caaeccd1b18103d523ba8f444779
+        url: https://github.com/FirebirdSQL/firebird/releases/download/v5.0.4/Firebird-5.0.4.1812-0-linux-x64.tar.gz
+        sha256: ab6a15a0258f38b022be496bb5e038c14e8628ce9acd0f9a06288a3baedd917b
         strip-components: 1
       - type: file
         path: ../cmake/firebirdConfig.cmake
