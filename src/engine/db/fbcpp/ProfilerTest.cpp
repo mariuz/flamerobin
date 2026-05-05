@@ -93,6 +93,7 @@ int main()
             sessionId = st->getInt64(0);
         
         ok = fr_test::check(sessionId != 0, "Session started") && ok;
+        std::cout << "    Debug: Session ID = " << sessionId << "\n";
 
         st->prepare("CREATE TABLE t1 (id INT PRIMARY KEY, val VARCHAR(100))");
         st->execute();
@@ -100,6 +101,12 @@ int main()
 
         st->prepare("INSERT INTO t1 VALUES (1, 'test')");
         st->execute();
+
+        // Flush and finish
+        try {
+            st->prepare("EXECUTE PROCEDURE RDB$PROFILER.FLUSH_STATS");
+            st->execute();
+        } catch(...) {}
 
         st->prepare("EXECUTE PROCEDURE RDB$PROFILER.FINISH_SESSION(TRUE)");
         st->execute();
@@ -114,13 +121,22 @@ int main()
         
         if (count == 0)
         {
-             // Debug: check if session even exists in the system tables
-             st->prepare("SELECT COUNT(*) FROM PLG$PROF_SESSIONS WHERE PROFILE_ID = ?");
+             std::cout << "    FAILURE: No record source stats found for session " << sessionId << "\n";
+             // Debug: check session
+             st->prepare("SELECT PROFILE_ID, SESSION_NAME, DESCRIPTION FROM PLG$PROF_SESSIONS WHERE PROFILE_ID = ?");
              st->setInt64(0, sessionId);
              st->execute();
-             int sessCount = 0;
-             if (st->fetch()) sessCount = st->getInt32(0);
-             std::cout << "    Debug: Session count in PLG$PROF_SESSIONS: " << sessCount << "\n";
+             if (st->fetch())
+                 std::cout << "    Debug: Session exists: " << st->getInt64(0) << " (" << st->getString(1) << ")\n";
+             else
+                 std::cout << "    Debug: Session NOT FOUND in PLG$PROF_SESSIONS\n";
+
+             // Check all sessions to see what is there
+             std::cout << "    Debug: Listing all sessions:\n";
+             st->prepare("SELECT PROFILE_ID, SESSION_NAME FROM PLG$PROF_SESSIONS");
+             st->execute();
+             while (st->fetch())
+                 std::cout << "      ID: " << st->getInt64(0) << ", Name: " << st->getString(1) << "\n";
         }
 
         ok = fr_test::check(count > 0, "Record source stats collected for simple INSERT") && ok;
@@ -141,6 +157,11 @@ int main()
 
         st->prepare("EXECUTE PROCEDURE p_parent");
         st->execute();
+
+        try {
+            st->prepare("EXECUTE PROCEDURE RDB$PROFILER.FLUSH_STATS");
+            st->execute();
+        } catch(...) {}
 
         st->prepare("EXECUTE PROCEDURE RDB$PROFILER.FINISH_SESSION(TRUE)");
         st->execute();
@@ -170,6 +191,11 @@ int main()
         st->prepare("INSERT INTO t2 VALUES (1)");
         st->execute();
 
+        try {
+            st->prepare("EXECUTE PROCEDURE RDB$PROFILER.FLUSH_STATS");
+            st->execute();
+        } catch(...) {}
+
         st->prepare("EXECUTE PROCEDURE RDB$PROFILER.FINISH_SESSION(TRUE)");
         st->execute();
 
@@ -192,6 +218,11 @@ int main()
         st->prepare("SELECT COUNT(*) FROM t1 a JOIN t2 b ON a.id = b.id");
         st->execute();
         if (st->fetch()) {}
+
+        try {
+            st->prepare("EXECUTE PROCEDURE RDB$PROFILER.FLUSH_STATS");
+            st->execute();
+        } catch(...) {}
 
         st->prepare("EXECUTE PROCEDURE RDB$PROFILER.FINISH_SESSION(TRUE)");
         st->execute();
