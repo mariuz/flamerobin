@@ -30,6 +30,10 @@
 #pragma hdrstop
 #endif
 
+#ifndef isc_info_sql_stmt_merge
+#define isc_info_sql_stmt_merge 25
+#endif
+
 #include <iostream>
 #include <algorithm>
 
@@ -122,6 +126,7 @@ void StatementImpl::Prepare(const std::string& sql)
 			case isc_info_sql_stmt_insert :		mType = IBPP::stInsert; break;
 			case isc_info_sql_stmt_update :		mType = IBPP::stUpdate; break;
 			case isc_info_sql_stmt_delete :		mType = IBPP::stDelete; break;
+			case isc_info_sql_stmt_merge :		mType = IBPP::stMerge; break;
 			case isc_info_sql_stmt_ddl :		mType = IBPP::stDDL; break;
 			case isc_info_sql_stmt_exec_procedure :	mType = IBPP::stExecProcedure; break;
 			case isc_info_sql_stmt_start_trans:	mType = IBPP::stStartTransaction; break;

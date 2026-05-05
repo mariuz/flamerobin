@@ -23,7 +23,9 @@
 
 #include "engine/db/fbcpp/FbCppStatement.h"
 #include "engine/db/fbcpp/FbCppBlob.h"
+#include "engine/db/IDatabase.h"
 #include <fb-cpp/Exception.h>
+#include <fb-cpp/Statement.h>
 #include <cstring>
 #include <stdexcept>
 #include <algorithm>
@@ -61,11 +63,12 @@ void FbCppStatement::execute()
     resultSetM.reset();
 
     // Support Multiple-Row DML RETURNING (Firebird 5.0+)
-    auto type = statementM->getType();
+    auto type = (unsigned)statementM->getType();
     if (getColumnCount() > 0 && 
-        (type == fbcpp::StatementType::INSERT || 
-         type == fbcpp::StatementType::UPDATE || 
-         type == fbcpp::StatementType::DELETE))
+        (type == (unsigned)fbcpp::StatementType::INSERT || 
+         type == (unsigned)fbcpp::StatementType::UPDATE || 
+         type == (unsigned)fbcpp::StatementType::DELETE ||
+         type == 25)) // 25 is isc_info_sql_stmt_merge
     {
         // Check if we are on Firebird 5.0 or later
         bool isFb5 = false;
@@ -508,12 +511,14 @@ StatementType FbCppStatement::getType()
         case fbcpp::StatementType::INSERT: return StatementType::Insert;
         case fbcpp::StatementType::UPDATE: return StatementType::Update;
         case fbcpp::StatementType::DELETE: return StatementType::Delete;
+        case (fbcpp::StatementType)25: return StatementType::Merge;
         case fbcpp::StatementType::DDL: return StatementType::DDL;
         case fbcpp::StatementType::EXEC_PROCEDURE: return StatementType::ExecProcedure;
         case fbcpp::StatementType::START_TRANSACTION: return StatementType::StartTransaction;
         case fbcpp::StatementType::COMMIT: return StatementType::Commit;
         case fbcpp::StatementType::ROLLBACK: return StatementType::Rollback;
         case fbcpp::StatementType::SAVEPOINT: return StatementType::Savepoint;
+        case fbcpp::StatementType::SET_GENERATOR: return StatementType::SetGenerator;
         default: return StatementType::Unknown;
     }
 }

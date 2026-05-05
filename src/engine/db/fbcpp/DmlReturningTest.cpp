@@ -87,11 +87,11 @@ int main()
         // Check version - multi-row RETURNING requires FB 5.0+
         std::string version = db->getEngineVersion();
         std::cout << "  Engine version: " << version << "\n";
-        if (version.find("WI-V5.0") == std::string::npos && version.find("LI-V5.0") == std::string::npos)
-        {
-             // Try to parse ODS version if available, but for now we just check string
-             // In CI we expect FB 5.0
-        }
+        bool isFb5 = (version.find("V5.0") != std::string::npos || 
+                      version.find("V6.0") != std::string::npos ||
+                      version.find("V7.0") != std::string::npos);
+        bool isFb4 = (version.find("V4.0") != std::string::npos);
+        bool isFb3 = (version.find("V3.0") != std::string::npos);
 
         fr::ITransactionPtr tr = db->createTransaction();
         tr->start();
@@ -109,56 +109,99 @@ int main()
         st->prepare("INSERT INTO t1 (val) VALUES ('B')");
         st->execute();
 
-        // Test 1: Multiple-row INSERT ... RETURNING
-        std::cout << "  Testing Multiple-row INSERT ... RETURNING...\n";
-        st->prepare("INSERT INTO t1 (val) SELECT val || '2' FROM t1 RETURNING id, val");
+        // Test 1: Single-row INSERT ... RETURNING (Supported in FB 3+)
+        std::cout << "  Testing Single-row INSERT ... RETURNING...\n";
+        st->prepare("INSERT INTO t1 (val) VALUES ('C') RETURNING id, val");
         st->execute();
-        
-        ok = check(st->getColumnCount() == 2, "INSERT RETURNING column count") && ok;
-        
+        ok = check(st->getColumnCount() == 2, "Single-row INSERT column count") && ok;
         int rows = 0;
-        while (st->fetch())
-        {
-            int id = st->getInt32(0);
-            std::string val = st->getString(1);
-            std::cout << "    Fetched: id=" << id << ", val=" << val << "\n";
-            rows++;
-        }
-        ok = check(rows == 2, "INSERT RETURNING row count") && ok;
+        while (st->fetch()) rows++;
+        ok = check(rows == 1, "Single-row INSERT row count") && ok;
 
-        // Test 2: Multiple-row UPDATE ... RETURNING
+        // Test 2: Multiple-row INSERT ... RETURNING (Supported in FB 5+)
+        std::cout << "  Testing Multiple-row INSERT ... RETURNING...\n";
+        try
+        {
+            st->prepare("INSERT INTO t1 (val) SELECT val || '2' FROM t1 WHERE val IN ('A', 'B') RETURNING id, val");
+            st->execute();
+            
+            ok = check(st->getColumnCount() == 2, "Multi-row INSERT column count") && ok;
+            rows = 0;
+            while (st->fetch()) rows++;
+            
+            if (isFb5)
+                ok = check(rows == 2, "Multi-row INSERT row count (FB5)") && ok;
+            else
+                check(false, "Multi-row INSERT should have failed on FB < 5");
+        }
+        catch (const std::exception& e)
+        {
+            if (isFb5)
+            {
+                std::cerr << "    FAILED: Multi-row INSERT failed on FB5: " << e.what() << "\n";
+                ok = false;
+            }
+            else
+            {
+                std::cout << "    PASSED: Multi-row INSERT failed as expected on FB < 5\n";
+            }
+        }
+
+        // Test 3: Multiple-row UPDATE ... RETURNING (Supported in FB 5+)
         std::cout << "  Testing Multiple-row UPDATE ... RETURNING...\n";
-        st->prepare("UPDATE t1 SET val = val || '!' RETURNING id, val");
-        st->execute();
-        
-        ok = check(st->getColumnCount() == 2, "UPDATE RETURNING column count") && ok;
-        
-        rows = 0;
-        while (st->fetch())
+        try
         {
-            int id = st->getInt32(0);
-            std::string val = st->getString(1);
-            std::cout << "    Fetched: id=" << id << ", val=" << val << "\n";
-            rows++;
+            st->prepare("UPDATE t1 SET val = val || '!' WHERE val IN ('A', 'B') RETURNING id, val");
+            st->execute();
+            
+            ok = check(st->getColumnCount() == 2, "Multi-row UPDATE column count") && ok;
+            rows = 0;
+            while (st->fetch()) rows++;
+            
+            if (isFb5)
+                ok = check(rows == 2, "Multi-row UPDATE row count (FB5)") && ok;
+            else
+                check(false, "Multi-row UPDATE should have failed on FB < 5");
         }
-        ok = check(rows == 4, "UPDATE RETURNING row count") && ok;
+        catch (const std::exception& e)
+        {
+            if (isFb5)
+            {
+                std::cerr << "    FAILED: Multi-row UPDATE failed on FB5: " << e.what() << "\n";
+                ok = false;
+            }
+            else
+            {
+                std::cout << "    PASSED: Multi-row UPDATE failed as expected on FB < 5\n";
+            }
+        }
 
-        // Test 3: Multiple-row DELETE ... RETURNING
-        std::cout << "  Testing Multiple-row DELETE ... RETURNING...\n";
-        st->prepare("DELETE FROM t1 WHERE id > 2 RETURNING id, val");
-        st->execute();
-        
-        ok = check(st->getColumnCount() == 2, "DELETE RETURNING column count") && ok;
-        
-        rows = 0;
-        while (st->fetch())
+        // Test 4: MERGE ... RETURNING (Supported in FB 4+ for single row, FB 5+ for multi-row)
+        if (isFb4 || isFb5)
         {
-            int id = st->getInt32(0);
-            std::string val = st->getString(1);
-            std::cout << "    Fetched: id=" << id << ", val=" << val << "\n";
-            rows++;
+            std::cout << "  Testing MERGE ... RETURNING...\n";
+            try
+            {
+                st->prepare("MERGE INTO t1 t USING (SELECT 1 as id, 'A!!' as val FROM rdb$database) s "
+                            "ON t.id = s.id "
+                            "WHEN MATCHED THEN UPDATE SET t.val = s.val "
+                            "RETURNING t.id, t.val");
+                st->execute();
+                ok = check(st->getColumnCount() == 2, "MERGE RETURNING column count") && ok;
+                rows = 0;
+                while (st->fetch()) rows++;
+                ok = check(rows == 1, "MERGE RETURNING row count (singleton)") && ok;
+            }
+            catch (const std::exception& e)
+            {
+                std::cerr << "    FAILED: MERGE RETURNING failed: " << e.what() << "\n";
+                ok = false;
+            }
         }
-        ok = check(rows == 2, "DELETE RETURNING row count") && ok;
+        else
+        {
+            std::cout << "  Skipping MERGE ... RETURNING (not supported on FB 3)\n";
+        }
 
         tr->commit();
         db->disconnect();

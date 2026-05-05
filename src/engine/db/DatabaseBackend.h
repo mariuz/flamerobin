@@ -72,6 +72,7 @@ enum class StatementType
     Insert,
     Update,
     Delete,
+    Merge,
     DDL,
     ExecProcedure,
     StartTransaction,

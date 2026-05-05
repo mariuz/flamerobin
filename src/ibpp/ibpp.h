@@ -95,7 +95,7 @@ namespace IBPP
 
     //  Prepared Statement Types
     enum STT {stUnknown, stUnsupported,
-        stSelect, stInsert, stUpdate, stDelete, stDDL, stExecProcedure,
+        stSelect, stInsert, stUpdate, stDelete, stMerge, stDDL, stExecProcedure,
         stStartTransaction, stCommitTransaction, stRollbackTransaction,
         stSelectUpdate, stSetGenerator, stSavePoint};
 

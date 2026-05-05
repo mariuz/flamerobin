@@ -2817,7 +2817,8 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             if (p != wxString::npos && p > 0)
                 sql.erase(0, p);
             if (type == fr::StatementType::Insert || type == fr::StatementType::Delete
-                || type == fr::StatementType::ExecProcedure || type == fr::StatementType::Update)
+                || type == fr::StatementType::ExecProcedure || type == fr::StatementType::Update
+                || type == fr::StatementType::Merge)
             {
                 // INSERT INTO..RETURNING and EXECUTE PROCEDURE may throw
                 // when they return a single record

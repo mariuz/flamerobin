@@ -481,6 +481,7 @@ StatementType IbppStatement::getType()
         case IBPP::stInsert: return StatementType::Insert;
         case IBPP::stUpdate: return StatementType::Update;
         case IBPP::stDelete: return StatementType::Delete;
+        case IBPP::stMerge: return StatementType::Merge;
         case IBPP::stDDL: return StatementType::DDL;
         case IBPP::stExecProcedure: return StatementType::ExecProcedure;
         case IBPP::stSetGenerator: return StatementType::SetGenerator;
