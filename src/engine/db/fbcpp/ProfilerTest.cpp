@@ -21,33 +21,13 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <iostream>
-#include <string>
-#include <vector>
-#include <ctime>
-
 #include <ibpp.h>
 
 #include "engine/db/DatabaseFactory.h"
 #include "engine/db/IDatabase.h"
 #include "engine/db/ITransaction.h"
 #include "engine/db/IStatement.h"
-
-namespace
-{
-
-bool check(bool condition, const char* testName)
-{
-    if (condition)
-    {
-        std::cout << "  PASSED: " << testName << "\n";
-        return true;
-    }
-    std::cerr << "  FAILED: " << testName << "\n";
-    return false;
-}
-
-} // namespace
+#include "engine/db/TestUtils.h"
 
 int main()
 {
@@ -59,8 +39,7 @@ int main()
         return 0;
     }
 
-    const std::string dbName = "/tmp/flamerobin_profiler_test_" +
-        std::to_string(static_cast<long long>(std::time(0))) + ".fdb";
+    const std::string dbName = fr_test::getTestDbPath("profiler_test");
 
     // Create DB using IBPP
     try 
@@ -70,7 +49,7 @@ int main()
     }
     catch (const IBPP::Exception& e)
     {
-        std::cerr << "Failed to create test database: " << e.what() << "\n";
+        fr_test::printException(e, "create test database");
         return 1;
     }
 
@@ -100,8 +79,8 @@ int main()
                 db->disconnect();
                 return 0;
             }
-        } catch(...) {
-            std::cout << "Error checking for RDB$PROFILER, skipping tests.\n";
+        } catch(const std::exception& e) {
+            fr_test::printException(e, "checking for RDB$PROFILER");
             return 0;
         }
 
@@ -113,7 +92,7 @@ int main()
         if (st->fetch())
             sessionId = st->getInt64(0);
         
-        ok = check(sessionId != 0, "Session started") && ok;
+        ok = fr_test::check(sessionId != 0, "Session started") && ok;
 
         st->prepare("CREATE TABLE t1 (id INT PRIMARY KEY, val VARCHAR(100))");
         st->execute();
@@ -144,7 +123,7 @@ int main()
              std::cout << "    Debug: Session count in PLG$PROF_SESSIONS: " << sessCount << "\n";
         }
 
-        ok = check(count > 0, "Record source stats collected for simple INSERT") && ok;
+        ok = fr_test::check(count > 0, "Record source stats collected for simple INSERT") && ok;
 
         // Test 2: Nested PSQL calls
         std::cout << "  Test 2: Nested PSQL calls...\n";
@@ -172,7 +151,7 @@ int main()
         count = 0;
         if (st->fetch())
             count = st->getInt32(0);
-        ok = check(count >= 2, "Stats collected for both parent and child procedures") && ok;
+        ok = fr_test::check(count >= 2, "Stats collected for both parent and child procedures") && ok;
 
         // Test 3: Triggers
         std::cout << "  Test 3: Triggers...\n";
@@ -200,7 +179,7 @@ int main()
         count = 0;
         if (st->fetch())
             count = st->getInt32(0);
-        ok = check(count > 0, "Stats collected for trigger") && ok;
+        ok = fr_test::check(count > 0, "Stats collected for trigger") && ok;
 
         // Test 4: Record Source Stats with JOIN
         std::cout << "  Test 4: Record Source Stats with JOIN...\n";
@@ -223,14 +202,14 @@ int main()
         count = 0;
         if (st->fetch())
             count = st->getInt32(0);
-        ok = check(count >= 2, "Record source stats collected for JOIN") && ok;
+        ok = fr_test::check(count >= 2, "Record source stats collected for JOIN") && ok;
 
         tr->commit();
         db->disconnect();
     }
     catch (const std::exception& e)
     {
-        std::cerr << "EXCEPTION in ProfilerTest: " << e.what() << "\n";
+        fr_test::printException(e, "ProfilerTest");
         ok = false;
     }
 
@@ -254,3 +233,4 @@ int main()
         return 1;
     }
 }
+

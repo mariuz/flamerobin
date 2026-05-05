@@ -21,33 +21,13 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <iostream>
-#include <string>
-#include <vector>
-#include <ctime>
-
 #include <ibpp.h>
 
 #include "engine/db/DatabaseFactory.h"
 #include "engine/db/IDatabase.h"
 #include "engine/db/ITransaction.h"
 #include "engine/db/IStatement.h"
-
-namespace
-{
-
-bool check(bool condition, const char* testName)
-{
-    if (condition)
-    {
-        std::cout << "  PASSED: " << testName << "\n";
-        return true;
-    }
-    std::cerr << "  FAILED: " << testName << "\n";
-    return false;
-}
-
-} // namespace
+#include "engine/db/TestUtils.h"
 
 int main()
 {
@@ -59,8 +39,7 @@ int main()
         return 0;
     }
 
-    const std::string dbName = "/tmp/flamerobin_dml_returning_test_" +
-        std::to_string(static_cast<long long>(std::time(0))) + ".fdb";
+    const std::string dbName = fr_test::getTestDbPath("dml_returning_test");
 
     // Create DB using IBPP
     try 
@@ -70,7 +49,7 @@ int main()
     }
     catch (const IBPP::Exception& e)
     {
-        std::cerr << "Failed to create test database: " << e.what() << "\n";
+        fr_test::printException(e, "create test database");
         return 1;
     }
 
@@ -113,10 +92,10 @@ int main()
         std::cout << "  Testing Single-row INSERT ... RETURNING...\n";
         st->prepare("INSERT INTO t1 (val) VALUES ('C') RETURNING id, val");
         st->execute();
-        ok = check(st->getColumnCount() == 2, "Single-row INSERT column count") && ok;
+        ok = fr_test::check(st->getColumnCount() == 2, "Single-row INSERT column count") && ok;
         int rows = 0;
         while (st->fetch()) rows++;
-        ok = check(rows == 1, "Single-row INSERT row count") && ok;
+        ok = fr_test::check(rows == 1, "Single-row INSERT row count") && ok;
 
         // Test 2: Multiple-row INSERT ... RETURNING (Supported in FB 5+)
         std::cout << "  Testing Multiple-row INSERT ... RETURNING...\n";
@@ -125,20 +104,20 @@ int main()
             st->prepare("INSERT INTO t1 (val) SELECT val || '2' FROM t1 WHERE val IN ('A', 'B') RETURNING id, val");
             st->execute();
             
-            ok = check(st->getColumnCount() == 2, "Multi-row INSERT column count") && ok;
+            ok = fr_test::check(st->getColumnCount() == 2, "Multi-row INSERT column count") && ok;
             rows = 0;
             while (st->fetch()) rows++;
             
             if (isFb5)
-                ok = check(rows == 2, "Multi-row INSERT row count (FB5)") && ok;
+                ok = fr_test::check(rows == 2, "Multi-row INSERT row count (FB5)") && ok;
             else
-                check(false, "Multi-row INSERT should have failed on FB < 5");
+                fr_test::check(false, "Multi-row INSERT should have failed on FB < 5");
         }
         catch (const std::exception& e)
         {
             if (isFb5)
             {
-                std::cerr << "    FAILED: Multi-row INSERT failed on FB5: " << e.what() << "\n";
+                fr_test::printException(e, "Multi-row INSERT");
                 ok = false;
             }
             else
@@ -154,20 +133,20 @@ int main()
             st->prepare("UPDATE t1 SET val = val || '!' WHERE val IN ('A', 'B') RETURNING id, val");
             st->execute();
             
-            ok = check(st->getColumnCount() == 2, "Multi-row UPDATE column count") && ok;
+            ok = fr_test::check(st->getColumnCount() == 2, "Multi-row UPDATE column count") && ok;
             rows = 0;
             while (st->fetch()) rows++;
             
             if (isFb5)
-                ok = check(rows == 2, "Multi-row UPDATE row count (FB5)") && ok;
+                ok = fr_test::check(rows == 2, "Multi-row UPDATE row count (FB5)") && ok;
             else
-                check(false, "Multi-row UPDATE should have failed on FB < 5");
+                fr_test::check(false, "Multi-row UPDATE should have failed on FB < 5");
         }
         catch (const std::exception& e)
         {
             if (isFb5)
             {
-                std::cerr << "    FAILED: Multi-row UPDATE failed on FB5: " << e.what() << "\n";
+                fr_test::printException(e, "Multi-row UPDATE");
                 ok = false;
             }
             else
@@ -187,14 +166,14 @@ int main()
                             "WHEN MATCHED THEN UPDATE SET t.val = s.val "
                             "RETURNING t.id, t.val");
                 st->execute();
-                ok = check(st->getColumnCount() == 2, "MERGE RETURNING column count") && ok;
+                ok = fr_test::check(st->getColumnCount() == 2, "MERGE RETURNING column count") && ok;
                 rows = 0;
                 while (st->fetch()) rows++;
-                ok = check(rows == 1, "MERGE RETURNING row count (singleton)") && ok;
+                ok = fr_test::check(rows == 1, "MERGE RETURNING row count (singleton)") && ok;
             }
             catch (const std::exception& e)
             {
-                std::cerr << "    FAILED: MERGE RETURNING failed: " << e.what() << "\n";
+                fr_test::printException(e, "MERGE RETURNING");
                 ok = false;
             }
         }
@@ -208,7 +187,7 @@ int main()
     }
     catch (const std::exception& e)
     {
-        std::cerr << "EXCEPTION in DmlReturningTest: " << e.what() << "\n";
+        fr_test::printException(e, "DmlReturningTest");
         ok = false;
     }
 
@@ -232,3 +211,4 @@ int main()
         return 1;
     }
 }
+

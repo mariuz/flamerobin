@@ -21,33 +21,17 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <cstdlib>
-#include <ctime>
-#include <iostream>
-#include <string>
-#include <vector>
-
 #include "ibpp/ibpp.h"
 #include "engine/db/DatabaseFactory.h"
 #include "engine/db/IDatabase.h"
 #include "engine/db/ITransaction.h"
 #include "engine/db/IStatement.h"
 #include "engine/db/IBlob.h"
+#include "engine/db/TestUtils.h"
 #include "core/StringUtils.h"
 
 namespace
 {
-
-bool check(bool condition, const char* testName)
-{
-    if (condition)
-    {
-        std::cout << "  PASSED: " << testName << "\n";
-        return true;
-    }
-    std::cerr << "  FAILED: " << testName << "\n";
-    return false;
-}
 
 bool checkInt(int actual, int expected, const char* testName)
 {
@@ -100,7 +84,7 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
         st->execute();
         st->fetch();
         ok = checkInt(st->getColumnCount(), 1, "getColumnCount") && ok;
-        ok = check(st->getColumnType(0) == fr::ColumnType::BigInt, "ColumnType::BigInt identification") && ok;
+        ok = fr_test::check(st->getColumnType(0) == fr::ColumnType::BigInt, "ColumnType::BigInt identification") && ok;
         ok = checkInt(st->getColumnScale(0), 4, "getColumnScale") && ok;
         ok = checkInt(st->getColumnSize(0), 8, "getColumnSize (int64)") && ok;
         ok = checkStr(st->getColumnAlias(0), "MY_ALIAS", "getColumnAlias") && ok;
@@ -115,7 +99,7 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
             std::cout << "    INFO: Subtype reported as " << subtype << " (expected 1 for OCTETS)\n";
             // Some API versions might report charset ID differently in subtype field for strings
         }
-        ok = check(subtype != 0, "getColumnSubtype (non-zero for OCTETS)") && ok;
+        ok = fr_test::check(subtype != 0, "getColumnSubtype (non-zero for OCTETS)") && ok;
 
         // Table name test
         st->prepare("SELECT RDB$RELATION_NAME FROM RDB$RELATIONS");
@@ -125,24 +109,24 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
         // Trim trailing spaces if any (IBPP might return padded strings for metadata)
         size_t last = tableName.find_last_not_of(' ');
         if (last != std::string::npos) tableName = tableName.substr(0, last + 1);
-        ok = check(tableName == "RDB$RELATIONS", "getColumnTable") && ok;
+        ok = fr_test::check(tableName == "RDB$RELATIONS", "getColumnTable") && ok;
 
         // Temporal types
         std::cout << "  Running temporal types tests...\n";
         st->prepare("SELECT CAST('2023-05-20' AS DATE), CAST('12:34:56.7890' AS TIME), CAST('2023-05-20 12:34:56.7890' AS TIMESTAMP) FROM RDB$DATABASE");
         st->execute();
         st->fetch();
-        ok = check(st->getColumnType(0) == fr::ColumnType::Date, "ColumnType::Date identification") && ok;
-        ok = check(st->getColumnType(1) == fr::ColumnType::Time, "ColumnType::Time identification") && ok;
-        ok = check(st->getColumnType(2) == fr::ColumnType::Timestamp, "ColumnType::Timestamp identification") && ok;
+        ok = fr_test::check(st->getColumnType(0) == fr::ColumnType::Date, "ColumnType::Date identification") && ok;
+        ok = fr_test::check(st->getColumnType(1) == fr::ColumnType::Time, "ColumnType::Time identification") && ok;
+        ok = fr_test::check(st->getColumnType(2) == fr::ColumnType::Timestamp, "ColumnType::Timestamp identification") && ok;
         
         int y, mo, d, h, mi, s, f;
         st->getDate(0, y, mo, d);
-        ok = check(y == 2023 && mo == 5 && d == 20, "getDate content") && ok;
+        ok = fr_test::check(y == 2023 && mo == 5 && d == 20, "getDate content") && ok;
         st->getTime(1, h, mi, s, f);
-        ok = check(h == 12 && mi == 34 && s == 56 && f == 7890, "getTime content") && ok;
+        ok = fr_test::check(h == 12 && mi == 34 && s == 56 && f == 7890, "getTime content") && ok;
         st->getTimestamp(2, y, mo, d, h, mi, s, f);
-        ok = check(y == 2023 && mo == 5 && d == 20 && h == 12 && mi == 34 && s == 56 && f == 7890, "getTimestamp content") && ok;
+        ok = fr_test::check(y == 2023 && mo == 5 && d == 20 && h == 12 && mi == 34 && s == 56 && f == 7890, "getTimestamp content") && ok;
 
         // Check for Timezone support
         std::cout << "  Checking for Timezone support...\n";
@@ -152,13 +136,13 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
                         "CAST('2023-05-20 12:34:56.7890 UTC' AS TIMESTAMP WITH TIME ZONE) FROM RDB$DATABASE");
             st->execute();
             st->fetch();
-            ok = check(st->getColumnType(0) == fr::ColumnType::TimeTz, "ColumnType::TimeTz identification") && ok;
-            ok = check(st->getColumnType(1) == fr::ColumnType::TimestampTz, "ColumnType::TimestampTz identification") && ok;
+            ok = fr_test::check(st->getColumnType(0) == fr::ColumnType::TimeTz, "ColumnType::TimeTz identification") && ok;
+            ok = fr_test::check(st->getColumnType(1) == fr::ColumnType::TimestampTz, "ColumnType::TimestampTz identification") && ok;
 
-            ok = check(st->getTimeTz(0).find("12:34:56") != std::string::npos, "getTimeTz content") && ok;
-            ok = check(st->getTimeTz(0).find("UTC") != std::string::npos, "getTimeTz timezone content") && ok;
-            ok = check(st->getTimestampTz(1).find("2023-05-20 12:34:56") != std::string::npos, "getTimestampTz content") && ok;
-            ok = check(st->getTimestampTz(1).find("UTC") != std::string::npos, "getTimestampTz timezone content") && ok;
+            ok = fr_test::check(st->getTimeTz(0).find("12:34:56") != std::string::npos, "getTimeTz content") && ok;
+            ok = fr_test::check(st->getTimeTz(0).find("UTC") != std::string::npos, "getTimeTz timezone content") && ok;
+            ok = fr_test::check(st->getTimestampTz(1).find("2023-05-20 12:34:56") != std::string::npos, "getTimestampTz content") && ok;
+            ok = fr_test::check(st->getTimestampTz(1).find("UTC") != std::string::npos, "getTimestampTz timezone content") && ok;
 
             // Test Named Timezone support
             std::cout << "  Testing Named Timezone decoding...\n";
@@ -174,7 +158,7 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
                 st->fetch();
 
                 std::string tztStr = st->getTimestampTz(0);
-                ok = check(tztStr.find("Europe/Berlin") != std::string::npos, "getTimestampTz with named timezone") && ok;
+                ok = fr_test::check(tztStr.find("Europe/Berlin") != std::string::npos, "getTimestampTz with named timezone") && ok;
 
                 // Check getTimezoneName
                 st->prepare("SELECT RDB$TIME_ZONE_ID FROM RDB$TIME_ZONES WHERE RDB$TIME_ZONE_NAME = 'Europe/Berlin'");
@@ -196,41 +180,41 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
             }
             else
             {
-                std::cerr << "  ERROR: Unexpected exception during Named Timezone test: " << e.what() << "\n";
+                fr_test::printException(e, "Named Timezone test");
                 ok = false;
             }
         }
 
         // Test getDialect and getInfo
         std::cout << "  Testing database metadata methods...\n";
-        ok = check(db->getDialect() == 3, "getDialect") && ok;
+        ok = fr_test::check(db->getDialect() == 3, "getDialect") && ok;
 
         fr::DatabaseInfoData info;
         db->getInfo(&info);
-        ok = check(info.ods > 0, "getInfo ODS") && ok;
-        ok = check(info.pageSize > 0, "getInfo PageSize") && ok;
-        ok = check(info.nextTransaction > 0, "getInfo NextTransaction") && ok;
+        ok = fr_test::check(info.ods > 0, "getInfo ODS") && ok;
+        ok = fr_test::check(info.pageSize > 0, "getInfo PageSize") && ok;
+        ok = fr_test::check(info.nextTransaction > 0, "getInfo NextTransaction") && ok;
 
         // Statistics and Counts
         std::cout << "  Testing statistics and counts...\n";
         int fetch, mark, read, write, mem;
         db->getStatistics(&fetch, &mark, &read, &write, &mem);
-        ok = check(fetch >= 0, "getStatistics") && ok;
+        ok = fr_test::check(fetch >= 0, "getStatistics") && ok;
 
         int ins, upd, del, ridx, rseq;
         db->getCounts(&ins, &upd, &del, &ridx, &rseq);
-        ok = check(ridx >= 0, "getCounts") && ok;
+        ok = fr_test::check(ridx >= 0, "getCounts") && ok;
 
         std::map<int, fr::CountInfo> detailedCounts;
         db->getDetailedCounts(detailedCounts);
-        ok = check(detailedCounts.size() >= 0, "getDetailedCounts") && ok;
+        ok = fr_test::check(detailedCounts.size() >= 0, "getDetailedCounts") && ok;
 
         // Statement Type and Plan
         std::cout << "  Testing statement type and plan...\n";
         st->prepare("SELECT * FROM RDB$DATABASE");
-        ok = check(st->getType() == fr::StatementType::Select, "getType Select") && ok;
+        ok = fr_test::check(st->getType() == fr::StatementType::Select, "getType Select") && ok;
         std::string plan = st->getPlan();
-        ok = check(!plan.empty(), "getPlan") && ok;
+        ok = fr_test::check(!plan.empty(), "getPlan") && ok;
 
         // Create a dummy table for testing UPDATE and affected rows
         try {
@@ -247,26 +231,26 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
         st->execute();
 
         st->prepare("UPDATE DAL_TEST SET ID = 2 WHERE ID = 1");
-        ok = check(st->getType() == fr::StatementType::Update, "getType Update") && ok;
+        ok = fr_test::check(st->getType() == fr::StatementType::Update, "getType Update") && ok;
 
         // Affected rows
         st->execute();
-        ok = check(st->getAffectedRows() == 1, "getAffectedRows") && ok;
+        ok = fr_test::check(st->getAffectedRows() == 1, "getAffectedRows") && ok;
 
         // Parameter tests
         std::cout << "  Testing statement parameters...\n";
         st->prepare("UPDATE DAL_TEST SET ID = ? WHERE ID = ?");
         ok = checkInt(st->getParameterCount(), 2, "getParameterCount") && ok;
-        ok = check(st->getParameterType(0) == fr::ColumnType::Integer, "getParameterType 0") && ok;
-        ok = check(st->getParameterType(1) == fr::ColumnType::Integer, "getParameterType 1") && ok;
+        ok = fr_test::check(st->getParameterType(0) == fr::ColumnType::Integer, "getParameterType 0") && ok;
+        ok = fr_test::check(st->getParameterType(1) == fr::ColumnType::Integer, "getParameterType 1") && ok;
 
         // Named parameter simulation (IBPP supports it)
         if (backend == fr::DatabaseBackend::IBPP)
         {
             st->prepare("UPDATE DAL_TEST SET ID = :newid WHERE ID = :oldid");
             ok = checkInt(st->getParameterCount(), 2, "getParameterCount (named)") && ok;
-            ok = check(wxString(st->getParameterName(0)).Lower() == "newid", "getParameterName 0") && ok;
-            ok = check(wxString(st->getParameterName(1)).Lower() == "oldid", "getParameterName 1") && ok;
+            ok = fr_test::check(wxString(st->getParameterName(0)).Lower() == "newid", "getParameterName 0") && ok;
+            ok = fr_test::check(wxString(st->getParameterName(1)).Lower() == "oldid", "getParameterName 1") && ok;
             auto indices = st->findParameterIndicesByName("oldid");
             ok = checkInt(indices.size(), 1, "findParameterIndicesByName size") && ok;
             if (!indices.empty())
@@ -280,8 +264,8 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
         st->execute();
         st->prepare("SELECT ID FROM DAL_TEST WHERE ID = 123");
         st->execute();
-        ok = check(st->fetch(), "fetch inserted row") && ok;
-        ok = check(st->getInt32(0) == 123, "getInt32 matches setInt32") && ok;
+        ok = fr_test::check(st->fetch(), "fetch inserted row") && ok;
+        ok = fr_test::check(st->getInt32(0) == 123, "getInt32 matches setInt32") && ok;
 
         // Date/Time parameter setting
         std::cout << "  Testing date/time parameter setting...\n";
@@ -290,15 +274,15 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
         st->setTime(1, 14, 30, 45, 0);
         st->setTimestamp(2, 2023, 5, 25, 14, 30, 45, 0);
         st->execute();
-        ok = check(st->fetch(), "fetch date/time results") && ok;
+        ok = fr_test::check(st->fetch(), "fetch date/time results") && ok;
         
         int ty, tmo, td, th, tmi, ts, tf;
         st->getDate(0, ty, tmo, td);
-        ok = check(ty == 2023 && tmo == 5 && td == 25, "setDate result") && ok;
+        ok = fr_test::check(ty == 2023 && tmo == 5 && td == 25, "setDate result") && ok;
         st->getTime(1, th, tmi, ts, tf);
-        ok = check(th == 14 && tmi == 30 && ts == 45, "setTime result") && ok;
+        ok = fr_test::check(th == 14 && tmi == 30 && ts == 45, "setTime result") && ok;
         st->getTimestamp(2, ty, tmo, td, th, tmi, ts, tf);
-        ok = check(ty == 2023 && tmo == 5 && td == 25 && th == 14 && tmi == 30 && ts == 45, "setTimestamp result") && ok;
+        ok = fr_test::check(ty == 2023 && tmo == 5 && td == 25 && th == 14 && tmi == 30 && ts == 45, "setTimestamp result") && ok;
 
         // BLOB tests
         std::cout << "  Testing BLOB operations...\n";
@@ -317,9 +301,9 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
 
         st->prepare("SELECT B FROM BLOB_TEST WHERE ID = 2");
         st->execute();
-        ok = check(st->fetch(), "fetch row with blob") && ok;
+        ok = fr_test::check(st->fetch(), "fetch row with blob") && ok;
         fr::IBlobPtr b = st->getBlob(0);
-        ok = check(b != nullptr, "getBlob not null") && ok;
+        ok = fr_test::check(b != nullptr, "getBlob not null") && ok;
         if (b)
         {
             b->open();
@@ -338,7 +322,7 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
         tr2->setIsolationLevel(fr::TransactionIsolationLevel::ReadCommitted);
         tr2->setLockResolution(fr::TransactionLockResolution::NoWait);
         tr2->start();
-        ok = check(tr2->isActive(), "Transaction configuration and start") && ok;
+        ok = fr_test::check(tr2->isActive(), "Transaction configuration and start") && ok;
         tr2->commit();
 
         // Check if Firebird 4.0+ by trying to CAST to DECFLOAT
@@ -348,21 +332,21 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
             st->prepare("SELECT CAST(1 AS DECFLOAT(16)) FROM RDB$DATABASE");
             st->execute();
             st->fetch();
-            ok = check(st->getColumnType(0) == fr::ColumnType::Decfloat16, "ColumnType::Decfloat16 identification") && ok;
+            ok = fr_test::check(st->getColumnType(0) == fr::ColumnType::Decfloat16, "ColumnType::Decfloat16 identification") && ok;
 
             // Test DECFLOAT34
             st->prepare("SELECT CAST('1.234567890123456789012345678901234' AS DECFLOAT(34)) FROM RDB$DATABASE");
             st->execute();
             st->fetch();
-            ok = check(st->getColumnType(0) == fr::ColumnType::Decfloat34, "ColumnType::Decfloat34 identification") && ok;
+            ok = fr_test::check(st->getColumnType(0) == fr::ColumnType::Decfloat34, "ColumnType::Decfloat34 identification") && ok;
             std::string df34 = st->getString(0);
-            ok = check(df34.find("1.234567890123456789012345678901234") != std::string::npos, "DECFLOAT34 getString content") && ok;
+            ok = fr_test::check(df34.find("1.234567890123456789012345678901234") != std::string::npos, "DECFLOAT34 getString content") && ok;
 
             // Test INT128
             st->prepare("SELECT CAST('12345678901234567890123456789012345678' AS INT128) FROM RDB$DATABASE");
             st->execute();
             st->fetch();
-            ok = check(st->getColumnType(0) == fr::ColumnType::Int128, "ColumnType::Int128 identification") && ok;
+            ok = fr_test::check(st->getColumnType(0) == fr::ColumnType::Int128, "ColumnType::Int128 identification") && ok;
             ok = checkStr(st->getString(0), "12345678901234567890123456789012345678", "INT128 getString") && ok;
         }
         catch (const std::exception& e)
@@ -374,7 +358,7 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
             }
             else
             {
-                std::cerr << "  ERROR: Unexpected exception during FB 4.0+ types test: " << e.what() << "\n";
+                fr_test::printException(e, "FB 4.0+ types test");
                 ok = false;
             }
         }
@@ -386,7 +370,7 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
     }
     catch (const std::exception& e)
     {
-        std::cerr << "EXCEPTION in backend tests: " << e.what() << "\n";
+        fr_test::printException(e, "backend tests");
         return false;
     }
     return ok;
@@ -402,9 +386,7 @@ int main()
         return 0;
     }
 
-    const std::string dbName = "/tmp/flamerobin_dal_types_test_" +
-        std::to_string(static_cast<long long>(std::time(0))) + ".fdb";
-
+    const std::string dbName = fr_test::getTestDbPath("dal_types_test");
     std::cout << "Creating test database: " << dbName << "\n";
 
     // Create DB using IBPP
@@ -415,7 +397,7 @@ int main()
     }
     catch (const IBPP::Exception& e)
     {
-        std::cerr << "Failed to create test database: " << e.what() << "\n";
+        fr_test::printException(e, "create test database");
         return 1;
     }
 
@@ -428,7 +410,7 @@ int main()
     }
     catch (const std::exception& e)
     {
-        std::cerr << "FbCpp backend tests failed to even start: " << e.what() << "\n";
+        fr_test::printException(e, "FbCpp backend tests start");
         all_ok = false;
     }
 

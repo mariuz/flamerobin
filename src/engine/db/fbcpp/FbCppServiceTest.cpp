@@ -21,34 +21,12 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include <iostream>
-#include <string>
-#include <vector>
-#include <thread>
-#include <chrono>
-#include <ctime>
-
 #include <ibpp.h>
 
 #include "engine/db/DatabaseFactory.h"
 #include "engine/db/IService.h"
 #include "engine/db/IDatabase.h"
-
-namespace
-{
-
-bool check(bool condition, const char* testName)
-{
-    if (condition)
-    {
-        std::cout << "  PASSED: " << testName << "\n";
-        return true;
-    }
-    std::cerr << "  FAILED: " << testName << "\n";
-    return false;
-}
-
-} // namespace
+#include "engine/db/TestUtils.h"
 
 int main()
 {
@@ -60,8 +38,7 @@ int main()
         return 0;
     }
 
-    const std::string dbName = "/tmp/flamerobin_svc_test_" +
-        std::to_string(static_cast<long long>(std::time(0))) + ".fdb";
+    const std::string dbName = fr_test::getTestDbPath("fbcpp_svc_test");
 
     // Create DB using IBPP
     try 
@@ -71,7 +48,7 @@ int main()
     }
     catch (const IBPP::Exception& e)
     {
-        std::cerr << "Failed to create test database: " << e.what() << "\n";
+        fr_test::printException(e, "create test database");
         return 1;
     }
 
@@ -86,7 +63,7 @@ int main()
         
         std::cout << "  Testing getVersion...\n";
         std::string version = svc->getVersion();
-        ok = check(!version.empty(), "getVersion") && ok;
+        ok = fr_test::check(!version.empty(), "getVersion") && ok;
         std::cout << "    Version: " << version << "\n";
 
         std::cout << "  Testing getConnectedUsers (via IDatabase)...\n";
@@ -97,23 +74,23 @@ int main()
         
         std::vector<std::string> users;
         db->getConnectedUsers(users);
-        ok = check(!users.empty(), "getConnectedUsers not empty") && ok;
+        ok = fr_test::check(!users.empty(), "getConnectedUsers not empty") && ok;
         bool foundSysdba = false;
         for (const auto& u : users)
         {
             if (u == "SYSDBA") foundSysdba = true;
             std::cout << "    Connected user: " << u << "\n";
         }
-        ok = check(foundSysdba, "found SYSDBA in connected users") && ok;
+        ok = fr_test::check(foundSysdba, "found SYSDBA in connected users") && ok;
 
         std::cout << "  Testing getDialect...\n";
-        ok = check(db->getDialect() == 3, "getDialect") && ok;
+        ok = fr_test::check(db->getDialect() == 3, "getDialect") && ok;
 
         db->disconnect();
     }
     catch (const std::exception& e)
     {
-        std::cerr << "EXCEPTION in FbCppServiceTest: " << e.what() << "\n";
+        fr_test::printException(e, "FbCppServiceTest");
         ok = false;
     }
 
@@ -137,3 +114,4 @@ int main()
         return 1;
     }
 }
+
