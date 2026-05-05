@@ -42,11 +42,16 @@ jobs:
           VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg_archives
         run: |
           mkdir -p vcpkg_archives
+          success=0
           for i in {1..3}; do
-            ./vcpkg/vcpkg install && break
+            ./vcpkg/vcpkg install && { success=1; break; }
             echo "vcpkg install failed, retrying in 10 seconds..."
             sleep 10
           done
+          if [ $success -ne 1 ]; then
+            echo "vcpkg install failed after 3 attempts"
+            exit 1
+          fi
 
       - name: Patch fb-cpp for aggregate initialization and optional vcpkg
         run: |
@@ -157,6 +162,11 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Set up MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.arch }}
+
       - name: Bootstrap vcpkg
         run: .\vcpkg\bootstrap-vcpkg.bat -disableMetrics
 
@@ -169,16 +179,24 @@ jobs:
               ${{ runner.os }}-vcpkg-bin-${{ matrix.arch }}-
 
       - name: Install dependencies (vcpkg)
-        shell: bash
         env:
-          VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg_archives
+          VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}\vcpkg_archives
         run: |
-          mkdir -p vcpkg_archives
-          for i in {1..3}; do
-            ./vcpkg/vcpkg install --triplet ${{ matrix.arch }}-windows-static && break
-            echo "vcpkg install failed, retrying in 10 seconds..."
-            sleep 10
-          done
+          if (!(Test-Path vcpkg_archives)) { New-Item -ItemType Directory -Path vcpkg_archives }
+          $success = $false
+          for ($i = 1; $i -le 3; $i++) {
+            & .\vcpkg\vcpkg.exe install --triplet ${{ matrix.arch }}-windows-static
+            if ($LASTEXITCODE -eq 0) {
+              $success = $true
+              break
+            }
+            Write-Host "vcpkg install failed, retrying in 10 seconds..."
+            Start-Sleep -Seconds 10
+          }
+          if (-not $success) {
+            Write-Error "vcpkg install failed after 3 attempts"
+            exit 1
+          }
 
       - name: Generate CMake project
         env:
@@ -228,11 +246,16 @@ jobs:
           VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg_archives
         run: |
           mkdir -p vcpkg_archives
+          success=0
           for i in {1..3}; do
-            ./vcpkg/vcpkg install && break
+            ./vcpkg/vcpkg install && { success=1; break; }
             echo "vcpkg install failed, retrying in 10 seconds..."
             sleep 10
           done
+          if [ $success -ne 1 ]; then
+            echo "vcpkg install failed after 3 attempts"
+            exit 1
+          fi
 
       - name: Patch fb-cpp for macOS aggregate initialization and optional vcpkg
         run: |
