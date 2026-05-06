@@ -72,7 +72,8 @@ The following phases track FlameRobin UI/metadata support for features introduce
 - [ ] **SQL Schemas** — Restructure the metadata tree to show schemas as a first-class container; generate schema-qualified DDL (`SCHEMA.OBJECT`); add CREATE / ALTER / DROP SCHEMA management dialogs.
 - [ ] **JSON Functions** — Add keyword highlighting and code completion for native JSON functions (`JSON_VALUE`, `JSON_QUERY`, `JSON_OBJECT`, `JSON_ARRAY`, etc.).
 - [ ] **Tablespaces** — Display tablespace assignments in table and index properties; expose tablespace selection in CREATE TABLE / CREATE INDEX dialogs.
-- [ ] **`EXPLAIN` Statement** — Show query execution plans from the new `EXPLAIN` statement (distinct from the `PLAN` clause) in the SQL execution frame.
+- [x] **`EXPLAIN` Statement** — Show query execution plans from the new `EXPLAIN` statement (distinct from the `PLAN` clause) in the SQL execution frame.
+
 - [ ] **Named Arguments for Procedure/Function Calls** — SQL editor support and code completion for named-argument call syntax (`proc(arg1 => val1)`).
 - [ ] **`GREATEST` / `LEAST` Functions** — Add to SQL keyword completion (SQL:2023).
 - [ ] **`UNLIST` Function** — Add to SQL keyword completion for string-splitting into result rows.

@@ -104,6 +104,7 @@
 #define ART_History                 wxART_MAKE_ART_ID(ART_History)
 #define ART_ExecuteStatement        wxART_MAKE_ART_ID(ART_ExecuteStatement)
 #define ART_ShowExecutionPlan       wxART_MAKE_ART_ID(ART_ShowExecutionPlan)
+#define ART_Explain                 wxART_MAKE_ART_ID(ART_Explain)
 #define ART_ShowProfiler            wxART_MAKE_ART_ID(ART_ShowProfiler)
 #define ART_CommitTransaction       wxART_MAKE_ART_ID(ART_CommitTransaction)
 #define ART_RollbackTransaction     wxART_MAKE_ART_ID(ART_RollbackTransaction)

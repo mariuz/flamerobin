@@ -207,7 +207,7 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(insert24_xpm);
         if (id == ART_RollbackTransaction)
             return wxBitmap(redx24_xpm);
-        if (id == ART_ShowExecutionPlan)
+        if (id == ART_ShowExecutionPlan || id == ART_Explain)
             return wxBitmap(plan24_xpm);
         if (id == ART_ShowProfiler)
             return wxBitmap(history24_xpm);
@@ -309,7 +309,7 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
             return wxBitmap(root_xpm);
         if (id == ART_Server)
             return wxBitmap(databaseserver_xpm);
-        if (id == ART_ShowExecutionPlan)
+        if (id == ART_ShowExecutionPlan || id == ART_Explain)
             return wxBitmap(plan16_xpm);
         if (id == ART_ShowProfiler)
             return wxBitmap(history_xpm);

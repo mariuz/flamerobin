@@ -187,6 +187,7 @@ void CommandManager::getCustomizableCommands(CommandInfoVector& commands)
     ci.id = Cmds::Query_Commit; ci.name = _("Commit Transaction"); commands.push_back(ci);
     ci.id = Cmds::Query_Rollback; ci.name = _("Rollback Transaction"); commands.push_back(ci);
     ci.id = Cmds::Query_Show_plan; ci.name = _("Show Execution Plan"); commands.push_back(ci);
+    ci.id = Cmds::Query_Explain; ci.name = _("Explain Statement (FB 6.0+)"); commands.push_back(ci);
 
     // View commands
     ci.id = Cmds::View_Editor; ci.name = _("View Editor"); commands.push_back(ci);

@@ -42,6 +42,7 @@ enum {
     // SQL Query
     Query_Execute,
     Query_Show_plan,
+    Query_Explain,
     Query_Show_Statistics,
     Query_Show_Profiler,
     Query_Execute_selection,

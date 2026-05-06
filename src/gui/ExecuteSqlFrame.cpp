@@ -719,6 +719,9 @@ void ExecuteSqlFrame::buildToolbar(CommandManager& cm)
     toolBarM->AddTool( Cmds::Query_Show_plan, _("Show plan"),
         wxArtProvider::GetBitmap(ART_ShowExecutionPlan, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_NORMAL, cm.getToolbarHint(_("Show query execution plan"), Cmds::Query_Show_plan));
+    toolBarM->AddTool(Cmds::Query_Explain, _("Explain statement"),
+        wxArtProvider::GetBitmap(ART_Explain, wxART_TOOLBAR, bmpSize), wxNullBitmap,
+        wxITEM_NORMAL, cm.getToolbarHint(_("Show explained query plan (FB 6.0+)"), Cmds::Query_Explain));
     toolBarM->AddTool(Cmds::Query_Show_Profiler, _("Profiler"),
         wxArtProvider::GetBitmap(ART_ShowProfiler, wxART_TOOLBAR, bmpSize), wxNullBitmap,
         wxITEM_CHECK, cm.getToolbarHint(_("Display SQL/PSQL Profiler"), Cmds::Query_Show_Profiler));
@@ -815,6 +818,8 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
         cm.getMainMenuItemText(_("&Execute"), Cmds::Query_Execute));
     statementMenu->Append(Cmds::Query_Show_plan,
         cm.getMainMenuItemText(_("Show execution &plan"), Cmds::Query_Show_plan));
+    statementMenu->Append(Cmds::Query_Explain,
+        cm.getMainMenuItemText(_("Explain statement (FB 6.0+)"), Cmds::Query_Explain));
     statementMenu->AppendCheckItem(Cmds::Query_Show_Statistics,
         cm.getMainMenuItemText(_("Display detailed query statistics"), Cmds::Query_Show_Statistics));
     statementMenu->AppendCheckItem(Cmds::Query_Show_Profiler,
@@ -1042,6 +1047,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
 
     EVT_MENU(Cmds::Query_Execute,             ExecuteSqlFrame::OnMenuExecute)
     EVT_MENU(Cmds::Query_Show_plan,           ExecuteSqlFrame::OnMenuShowPlan)
+    EVT_MENU(Cmds::Query_Explain,             ExecuteSqlFrame::OnMenuExplain)
     EVT_MENU(Cmds::Query_Show_Statistics,     ExecuteSqlFrame::OnMenuShowStatistics)
     EVT_UPDATE_UI(Cmds::Query_Show_Statistics, ExecuteSqlFrame::OnMenuUpdateShowStatistics)
     EVT_MENU(Cmds::Query_Show_Profiler,       ExecuteSqlFrame::OnMenuShowProfiler)
@@ -1050,6 +1056,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_MENU(Cmds::Query_Execute_from_cursor, ExecuteSqlFrame::OnMenuExecuteFromCursor)
     EVT_UPDATE_UI(Cmds::Query_Execute,             ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
     EVT_UPDATE_UI(Cmds::Query_Show_plan,           ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
+    EVT_UPDATE_UI(Cmds::Query_Explain,             ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
     EVT_UPDATE_UI(Cmds::Query_Execute_selection,   ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
     EVT_UPDATE_UI(Cmds::Query_Execute_from_cursor, ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
     EVT_MENU(Cmds::Query_Commit,              ExecuteSqlFrame::OnMenuCommit)
@@ -1751,6 +1758,27 @@ void ExecuteSqlFrame::OnMenuExecute(wxCommandEvent& WXUNUSED(event))
 void ExecuteSqlFrame::OnMenuShowPlan(wxCommandEvent& WXUNUSED(event))
 {
     prepareAndExecute(true);
+}
+
+void ExecuteSqlFrame::OnMenuExplain(wxCommandEvent& WXUNUSED(event))
+{
+    if (databaseM && !databaseM->getInfo().getODSVersionIsHigherOrEqualTo(14))
+    {
+        wxMessageBox(_("The EXPLAIN statement is only supported by Firebird 6.0 and later (ODS 14+)."),
+            _("Not Supported"), wxOK | wxICON_INFORMATION, this);
+        return;
+    }
+
+    wxString sql = styled_text_ctrl_sql->GetSelectedText();
+    if (sql.IsEmpty())
+        sql = styled_text_ctrl_sql->GetText();
+
+    if (sql.Trim().IsEmpty())
+        return;
+
+    // Execute with EXPLAIN prefix. 
+    // This will return a result set which FlameRobin will display in the grid.
+    execute("EXPLAIN (FORMAT TREE) " + sql, ";");
 }
 
 void ExecuteSqlFrame::OnMenuShowStatistics(wxCommandEvent& event)

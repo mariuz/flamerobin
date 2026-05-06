@@ -230,6 +230,7 @@ private:
 
     void OnMenuExecute(wxCommandEvent& event);
     void OnMenuShowPlan(wxCommandEvent& event);
+    void OnMenuExplain(wxCommandEvent& event);
     void OnMenuShowStatistics(wxCommandEvent& event);
     void OnMenuUpdateShowStatistics(wxUpdateUIEvent& event);
     void OnMenuShowProfiler(wxCommandEvent& event);
