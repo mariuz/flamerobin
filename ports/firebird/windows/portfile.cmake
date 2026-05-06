@@ -1,6 +1,10 @@
 vcpkg_acquire_msys(MSYS_ROOT PACKAGES unzip)
 vcpkg_add_to_path(${MSYS_ROOT}/usr/bin)
 
+vcpkg_find_acquire_program(MSBUILD)
+get_filename_component(MSBUILD_DIR "${MSBUILD}" DIRECTORY)
+vcpkg_add_to_path("${MSBUILD_DIR}")
+
 if(VCPKG_TARGET_ARCHITECTURE STREQUAL "x86")
     set(FB_ARCH_OUT "Win32")
     set(FB_PROCESSOR_ARCHITECTURE "x86")
@@ -13,12 +17,19 @@ elseif(VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64")
 endif()
 
 
+message(STATUS "DEBUG: FB_PROCESSOR_ARCHITECTURE=${FB_PROCESSOR_ARCHITECTURE}")
+message(STATUS "DEBUG: FB_ARCH_OUT=${FB_ARCH_OUT}")
+message(STATUS "DEBUG: MSBUILD=${MSBUILD}")
+
+if (NOT EXISTS "${SOURCE_PATH}/builds/win32/run_all.bat")
+    message(FATAL_ERROR "run_all.bat NOT FOUND at ${SOURCE_PATH}/builds/win32/run_all.bat")
+endif()
+
 # Release build
 
 vcpkg_execute_build_process(
-    COMMAND ${CMAKE_COMMAND} -E env
-        "FB_PROCESSOR_ARCHITECTURE=${FB_PROCESSOR_ARCHITECTURE}"
-        run_all.bat
+    COMMAND ${CMAKE_COMMAND} -E env "FB_PROCESSOR_ARCHITECTURE=${FB_PROCESSOR_ARCHITECTURE}"
+        cmd /c run_all.bat
         JUSTBUILD
         RELEASE
         CLIENT_ONLY
@@ -41,7 +52,20 @@ foreach(dir IN LISTS FB_RELEASE_INCLUDE_CANDIDATES)
 endforeach()
 
 if(FB_RELEASE_INCLUDE_DIR STREQUAL "")
-    message(FATAL_ERROR "Firebird headers not found in expected locations")
+    message(STATUS "DEBUG: Listing top-level directories in SOURCE_PATH: ${SOURCE_PATH}")
+    file(GLOB TOP_DIRS LIST_DIRECTORIES true "${SOURCE_PATH}/*")
+    foreach(dir IN LISTS TOP_DIRS)
+        message(STATUS "  ${dir}")
+    endforeach()
+    
+    set(WIN_OUT_DIR "${SOURCE_PATH}/builds/win32")
+    message(STATUS "DEBUG: Listing files in ${WIN_OUT_DIR}")
+    file(GLOB WIN_FILES "${WIN_OUT_DIR}/*")
+    foreach(file IN LISTS WIN_FILES)
+        message(STATUS "  ${file}")
+    endforeach()
+
+    message(FATAL_ERROR "Firebird headers not found in expected locations. Check configure-${TARGET_TRIPLET}-rel-out.log for details.")
 endif()
 
 get_filename_component(FB_RELEASE_OUT_DIR "${FB_RELEASE_INCLUDE_DIR}" DIRECTORY)
@@ -88,9 +112,8 @@ file(
 # Debug build
 
 vcpkg_execute_build_process(
-    COMMAND ${CMAKE_COMMAND} -E env
-        "FB_PROCESSOR_ARCHITECTURE=${FB_PROCESSOR_ARCHITECTURE}"
-        run_all.bat
+    COMMAND ${CMAKE_COMMAND} -E env "FB_PROCESSOR_ARCHITECTURE=${FB_PROCESSOR_ARCHITECTURE}"
+        cmd /c run_all.bat
         JUSTBUILD
         DEBUG
         CLIENT_ONLY
