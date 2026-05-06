@@ -98,12 +98,15 @@ endforeach()
 if(FB_RELEASE_LIB_PATH STREQUAL "")
     # Broad recursive fallback: find fbclient.lib anywhere under temp/<arch>/
     file(GLOB_RECURSE FB_RELEASE_LIB_GLOB LIST_DIRECTORIES false
-        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/**/fbclient.lib"
-        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/**/fbclient_ms.lib"
+        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/*.lib"
     )
-    if(FB_RELEASE_LIB_GLOB)
-        list(GET FB_RELEASE_LIB_GLOB 0 FB_RELEASE_LIB_PATH)
-    endif()
+    foreach(lib IN LISTS FB_RELEASE_LIB_GLOB)
+        get_filename_component(lib_name "${lib}" NAME)
+        if(lib_name STREQUAL "fbclient.lib" OR lib_name STREQUAL "fbclient_ms.lib")
+            set(FB_RELEASE_LIB_PATH "${lib}")
+            break()
+        endif()
+    endforeach()
 endif()
 
 if(FB_RELEASE_LIB_PATH STREQUAL "")
@@ -112,13 +115,15 @@ if(FB_RELEASE_LIB_PATH STREQUAL "")
     foreach(f IN LISTS LIB_FILES)
         message(STATUS "  ${f}")
     endforeach()
-    message(STATUS "DEBUG: Listing .lib files under ${SOURCE_PATH}/temp/${FB_ARCH_OUT}")
+    message(STATUS "DEBUG: Searching for fbclient*.lib under ${SOURCE_PATH}/temp/${FB_ARCH_OUT}")
     file(GLOB_RECURSE ALL_TEMP_LIBS LIST_DIRECTORIES false
-        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/**/fbclient.lib"
-        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/**/fbclient_ms.lib"
+        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/*.lib"
     )
     foreach(f IN LISTS ALL_TEMP_LIBS)
-        message(STATUS "  ${f}")
+        get_filename_component(fn "${f}" NAME)
+        if(fn MATCHES "^fbclient")
+            message(STATUS "  ${f}")
+        endif()
     endforeach()
     message(FATAL_ERROR "Firebird release client library (fbclient_ms.lib / fbclient.lib) not found. Check configure-${TARGET_TRIPLET}-rel-out.log for build details.")
 endif()
@@ -192,12 +197,15 @@ endforeach()
 if(FB_DEBUG_LIB_PATH STREQUAL "")
     # Broad recursive fallback: find fbclient.lib anywhere under temp/<arch>/
     file(GLOB_RECURSE FB_DEBUG_LIB_GLOB LIST_DIRECTORIES false
-        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/**/fbclient.lib"
-        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/**/fbclient_ms.lib"
+        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/*.lib"
     )
-    if(FB_DEBUG_LIB_GLOB)
-        list(GET FB_DEBUG_LIB_GLOB 0 FB_DEBUG_LIB_PATH)
-    endif()
+    foreach(lib IN LISTS FB_DEBUG_LIB_GLOB)
+        get_filename_component(lib_name "${lib}" NAME)
+        if(lib_name STREQUAL "fbclient.lib" OR lib_name STREQUAL "fbclient_ms.lib")
+            set(FB_DEBUG_LIB_PATH "${lib}")
+            break()
+        endif()
+    endforeach()
 endif()
 
 if(FB_DEBUG_LIB_PATH STREQUAL "")
@@ -206,13 +214,15 @@ if(FB_DEBUG_LIB_PATH STREQUAL "")
     foreach(f IN LISTS DBG_LIB_FILES)
         message(STATUS "  ${f}")
     endforeach()
-    message(STATUS "DEBUG: Listing .lib files under ${SOURCE_PATH}/temp/${FB_ARCH_OUT}")
+    message(STATUS "DEBUG: Searching for fbclient*.lib under ${SOURCE_PATH}/temp/${FB_ARCH_OUT}")
     file(GLOB_RECURSE ALL_DBG_LIBS LIST_DIRECTORIES false
-        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/**/fbclient.lib"
-        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/**/fbclient_ms.lib"
+        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/*.lib"
     )
     foreach(f IN LISTS ALL_DBG_LIBS)
-        message(STATUS "  ${f}")
+        get_filename_component(fn "${f}" NAME)
+        if(fn MATCHES "^fbclient")
+            message(STATUS "  ${f}")
+        endif()
     endforeach()
     message(FATAL_ERROR "Firebird debug client library (fbclient_ms.lib / fbclient.lib) not found. Check configure-${TARGET_TRIPLET}-dbg-out.log for build details.")
 endif()
