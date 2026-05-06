@@ -96,7 +96,7 @@ int main()
 
         // Test 1: Simple Profiling Session
         std::cout << "  Test 1: Simple Profiling Session...\n";
-        st->prepare("SELECT RDB$PROFILER.START_SESSION(?, NULL, 'Default_Profiler') FROM RDB$DATABASE");
+        st->prepare("SELECT RDB$PROFILER.START_SESSION(?) FROM RDB$DATABASE");
         st->setString(0, "Test Session");
         st->execute();
         int64_t sessionId = 0;
@@ -159,7 +159,7 @@ int main()
         st->execute();
         tr->commitRetain();
 
-        st->prepare("SELECT RDB$PROFILER.START_SESSION(?, NULL, 'Default_Profiler') FROM RDB$DATABASE");
+        st->prepare("SELECT RDB$PROFILER.START_SESSION(?) FROM RDB$DATABASE");
         st->setString(0, "Nested Session");
         st->execute();
         sessionId = 0;
@@ -193,7 +193,7 @@ int main()
         st->execute();
         tr->commitRetain();
 
-        st->prepare("SELECT RDB$PROFILER.START_SESSION(?, NULL, 'Default_Profiler') FROM RDB$DATABASE");
+        st->prepare("SELECT RDB$PROFILER.START_SESSION(?) FROM RDB$DATABASE");
         st->setString(0, "Trigger Session");
         st->execute();
         sessionId = 0;
@@ -221,7 +221,7 @@ int main()
 
         // Test 4: Record Source Stats with JOIN
         std::cout << "  Test 4: Record Source Stats with JOIN...\n";
-        st->prepare("SELECT RDB$PROFILER.START_SESSION(?, NULL, 'Default_Profiler') FROM RDB$DATABASE");
+        st->prepare("SELECT RDB$PROFILER.START_SESSION(?) FROM RDB$DATABASE");
         st->setString(0, "JOIN Session");
         st->execute();
         sessionId = 0;
