@@ -35,7 +35,6 @@ vcpkg_execute_build_process(
     COMMAND ${CMAKE_COMMAND} -E env "FB_PROCESSOR_ARCHITECTURE=${FB_PROCESSOR_ARCHITECTURE}"
         cmd /c run_all.bat
         ${FB_ARCH_OUT}
-        JUSTBUILD
     WORKING_DIRECTORY "${SOURCE_PATH}/builds/win32"
     LOGNAME configure-${TARGET_TRIPLET}-rel
 )
@@ -97,14 +96,31 @@ foreach(path IN LISTS FB_RELEASE_LIB_CANDIDATES)
 endforeach()
 
 if(FB_RELEASE_LIB_PATH STREQUAL "")
+    # Broad recursive fallback: find fbclient.lib anywhere under temp/<arch>/
+    file(GLOB_RECURSE FB_RELEASE_LIB_GLOB LIST_DIRECTORIES false
+        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/fbclient.lib"
+        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/fbclient_ms.lib"
+    )
+    foreach(path IN LISTS FB_RELEASE_LIB_GLOB)
+        if(NOT IS_DIRECTORY "${path}")
+            set(FB_RELEASE_LIB_PATH "${path}")
+            break()
+        endif()
+    endforeach()
+endif()
+
+if(FB_RELEASE_LIB_PATH STREQUAL "")
     message(STATUS "DEBUG: Listing files in ${FB_RELEASE_OUT_DIR}/lib")
     file(GLOB LIB_FILES "${FB_RELEASE_OUT_DIR}/lib/*")
     foreach(f IN LISTS LIB_FILES)
         message(STATUS "  ${f}")
     endforeach()
-    message(STATUS "DEBUG: Listing files in ${SOURCE_PATH}/temp/${FB_ARCH_OUT}/release/yvalve")
-    file(GLOB YVALVE_FILES "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/release/yvalve/*")
-    foreach(f IN LISTS YVALVE_FILES)
+    message(STATUS "DEBUG: Listing .lib files under ${SOURCE_PATH}/temp/${FB_ARCH_OUT}")
+    file(GLOB_RECURSE ALL_TEMP_LIBS LIST_DIRECTORIES false
+        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/fbclient.lib"
+        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/fbclient_ms.lib"
+    )
+    foreach(f IN LISTS ALL_TEMP_LIBS)
         message(STATUS "  ${f}")
     endforeach()
     message(FATAL_ERROR "Firebird release client library (fbclient_ms.lib / fbclient.lib) not found. Check configure-${TARGET_TRIPLET}-rel-out.log for build details.")
@@ -152,7 +168,6 @@ vcpkg_execute_build_process(
         cmd /c run_all.bat
         DEBUG
         ${FB_ARCH_OUT}
-        JUSTBUILD
     WORKING_DIRECTORY "${SOURCE_PATH}/builds/win32"
     LOGNAME configure-${TARGET_TRIPLET}-dbg
 )
@@ -169,7 +184,6 @@ set(FB_DEBUG_LIB_CANDIDATES
     "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/debug/firebird/fbclient.lib"
 )
 
-
 set(FB_DEBUG_LIB_PATH "")
 foreach(path IN LISTS FB_DEBUG_LIB_CANDIDATES)
     if(EXISTS "${path}" AND NOT IS_DIRECTORY "${path}")
@@ -179,14 +193,31 @@ foreach(path IN LISTS FB_DEBUG_LIB_CANDIDATES)
 endforeach()
 
 if(FB_DEBUG_LIB_PATH STREQUAL "")
+    # Broad recursive fallback: find fbclient.lib anywhere under temp/<arch>/
+    file(GLOB_RECURSE FB_DEBUG_LIB_GLOB LIST_DIRECTORIES false
+        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/fbclient.lib"
+        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/fbclient_ms.lib"
+    )
+    foreach(path IN LISTS FB_DEBUG_LIB_GLOB)
+        if(NOT IS_DIRECTORY "${path}")
+            set(FB_DEBUG_LIB_PATH "${path}")
+            break()
+        endif()
+    endforeach()
+endif()
+
+if(FB_DEBUG_LIB_PATH STREQUAL "")
     message(STATUS "DEBUG: Listing files in ${SOURCE_PATH}/output_${FB_ARCH_OUT}_debug/lib")
     file(GLOB DBG_LIB_FILES "${SOURCE_PATH}/output_${FB_ARCH_OUT}_debug/lib/*")
     foreach(f IN LISTS DBG_LIB_FILES)
         message(STATUS "  ${f}")
     endforeach()
-    message(STATUS "DEBUG: Listing files in ${SOURCE_PATH}/temp/${FB_ARCH_OUT}/debug/yvalve")
-    file(GLOB DBG_YVALVE_FILES "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/debug/yvalve/*")
-    foreach(f IN LISTS DBG_YVALVE_FILES)
+    message(STATUS "DEBUG: Listing .lib files under ${SOURCE_PATH}/temp/${FB_ARCH_OUT}")
+    file(GLOB_RECURSE ALL_DBG_LIBS LIST_DIRECTORIES false
+        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/fbclient.lib"
+        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/fbclient_ms.lib"
+    )
+    foreach(f IN LISTS ALL_DBG_LIBS)
         message(STATUS "  ${f}")
     endforeach()
     message(FATAL_ERROR "Firebird debug client library (fbclient_ms.lib / fbclient.lib) not found. Check configure-${TARGET_TRIPLET}-dbg-out.log for build details.")
