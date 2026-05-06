@@ -1,9 +1,12 @@
-vcpkg_acquire_msys(MSYS_ROOT PACKAGES unzip)
+vcpkg_acquire_msys(MSYS_ROOT PACKAGES unzip sed grep awk coreutils)
 vcpkg_add_to_path(${MSYS_ROOT}/usr/bin)
 
 find_program(MSBUILD_EXE msbuild)
 if (NOT MSBUILD_EXE)
     message(STATUS "DEBUG: msbuild not found in path")
+else()
+    get_filename_component(MSBUILD_DIR "${MSBUILD_EXE}" DIRECTORY)
+    vcpkg_add_to_path("${MSBUILD_DIR}")
 endif()
 
 if(VCPKG_TARGET_ARCHITECTURE STREQUAL "x86")
@@ -40,7 +43,9 @@ vcpkg_execute_build_process(
 
 set(FB_RELEASE_INCLUDE_CANDIDATES
     "${SOURCE_PATH}/output_${FB_ARCH_OUT}_release/include"
+    "${SOURCE_PATH}/output_${FB_ARCH_OUT}/include"
     "${SOURCE_PATH}/output_release/include"
+    "${SOURCE_PATH}/output/include"
     "${SOURCE_PATH}/output_${VCPKG_TARGET_ARCHITECTURE}_release/include"
     "${SOURCE_PATH}/include"
 )
@@ -125,10 +130,13 @@ vcpkg_execute_build_process(
 
 set(FB_DEBUG_LIB_CANDIDATES
     "${SOURCE_PATH}/output_${FB_ARCH_OUT}_debug/lib/fbclient_ms.lib"
+    "${SOURCE_PATH}/output_${FB_ARCH_OUT}/lib/fbclient_ms.lib"
     "${SOURCE_PATH}/output_debug/lib/fbclient_ms.lib"
+    "${SOURCE_PATH}/output/lib/fbclient_ms.lib"
     "${SOURCE_PATH}/output_${VCPKG_TARGET_ARCHITECTURE}_debug/lib/fbclient_ms.lib"
     "${SOURCE_PATH}/lib/fbclient_ms.lib"
 )
+
 
 set(FB_DEBUG_LIB_PATH "")
 foreach(path IN LISTS FB_DEBUG_LIB_CANDIDATES)
