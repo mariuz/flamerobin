@@ -53,16 +53,14 @@ jobs:
             Write-Error "Tools path not found: $toolsPath"
             exit 1
         }
-        # Many legacy scripts expect the trailing backslash
-        $toolsPathWithBackslash = $toolsPath + "\"
-        Write-Host "Found VS Tools at: $toolsPathWithBackslash"
-        "tools_path=$toolsPathWithBackslash" | Add-Content -Path $env:GITHUB_OUTPUT
+        Write-Host "Found VS Tools at: $toolsPath"
+        "tools_path=$toolsPath" | Add-Content -Path $env:GITHUB_OUTPUT
         
         # Set for global use in subsequent steps
-        "VS170COMNTOOLS=$toolsPathWithBackslash" | Add-Content -Path $env:GITHUB_ENV
-        "VS160COMNTOOLS=$toolsPathWithBackslash" | Add-Content -Path $env:GITHUB_ENV
-        "VS150COMNTOOLS=$toolsPathWithBackslash" | Add-Content -Path $env:GITHUB_ENV
-        "VS140COMNTOOLS=$toolsPathWithBackslash" | Add-Content -Path $env:GITHUB_ENV
+        "VS170COMNTOOLS=$toolsPath" | Add-Content -Path $env:GITHUB_ENV
+        "VS160COMNTOOLS=$toolsPath" | Add-Content -Path $env:GITHUB_ENV
+        "VS150COMNTOOLS=$toolsPath" | Add-Content -Path $env:GITHUB_ENV
+        "VS140COMNTOOLS=$toolsPath" | Add-Content -Path $env:GITHUB_ENV
     
     - name: Bootstrap vcpkg
       run: .\vcpkg\bootstrap-vcpkg.bat -disableMetrics
@@ -83,6 +81,7 @@ jobs:
         VS150COMNTOOLS: ${{ steps.vs.outputs.tools_path }}
         VS140COMNTOOLS: ${{ steps.vs.outputs.tools_path }}
         VCPKG_KEEP_ENV_VARS: VS170COMNTOOLS;VS160COMNTOOLS;VS150COMNTOOLS;VS140COMNTOOLS
+        VCPKG_MAX_CONCURRENCY: 1
       run: |
         if (!(Test-Path vcpkg_archives)) { New-Item -ItemType Directory -Path vcpkg_archives }
         $success = $false

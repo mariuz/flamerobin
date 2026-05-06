@@ -119,6 +119,12 @@ int main()
 
         st->prepare("EXECUTE PROCEDURE RDB$PROFILER.FINISH_SESSION(TRUE)");
         st->execute();
+        tr->commit();
+
+        // Start new transaction to check results
+        tr = db->createTransaction();
+        tr->start();
+        st = db->createStatement(tr);
 
         // Check statements first
         st->prepare("SELECT COUNT(*) FROM PLG$PROF_STATEMENTS WHERE PROFILE_ID = ?");
@@ -126,7 +132,7 @@ int main()
         st->execute();
         int stmtCount = 0;
         if (st->fetch()) stmtCount = st->getInt32(0);
-        std::cout << "    Debug: Statement count in PLG$PROF_STATEMENTS: " << stmtCount << "\n";
+        std::cout << "    Debug: Statement count in PLG$PROF_STATEMENTS for session " << sessionId << ": " << stmtCount << "\n";
 
         // Give Firebird a moment to flush profiler data if needed
         st->prepare("SELECT COUNT(*) FROM PLG$PROF_RECORD_SOURCE_STATS WHERE PROFILE_ID = ?");
@@ -140,19 +146,18 @@ int main()
         {
              std::cout << "    FAILURE: No record source stats found for session " << sessionId << "\n";
              // Debug: check session
-             st->prepare("SELECT PROFILE_ID, DESCRIPTION FROM PLG$PROF_SESSIONS WHERE PROFILE_ID = ?");
+             st->prepare("SELECT PROFILE_ID, ATTACHMENT_ID, DESCRIPTION FROM PLG$PROF_SESSIONS WHERE PROFILE_ID = ?");
              st->setInt64(0, sessionId);
              st->execute();
              if (st->fetch())
-                 std::cout << "    Debug: Session exists: " << st->getInt64(0) << " (" << st->getString(1) << ")\n";
+             {
+                 std::cout << "    Debug: Session exists: " << st->getInt64(0) 
+                           << ", Attachment: " << st->getInt64(1)
+                           << " (" << st->getString(2) << ")\n";
+             }
              else
              {
                  std::cout << "    Debug: Session NOT FOUND in PLG$PROF_SESSIONS for ID " << sessionId << "\n";
-                 st->prepare("SELECT COUNT(*) FROM PLG$PROF_SESSIONS");
-                 st->execute();
-                 int totalSessions = 0;
-                 if (st->fetch()) totalSessions = st->getInt32(0);
-                 std::cout << "    Debug: Total sessions in PLG$PROF_SESSIONS: " << totalSessions << "\n";
              }
 
              st->prepare("SELECT COUNT(*) FROM PLG$PROF_STATEMENTS");
@@ -160,6 +165,14 @@ int main()
              int totalStmts = 0;
              if (st->fetch()) totalStmts = st->getInt32(0);
              std::cout << "    Debug: Total statements across ALL sessions: " << totalStmts << "\n";
+
+             st->prepare("SELECT PROFILE_ID, ATTACHMENT_ID FROM PLG$PROF_SESSIONS");
+             st->execute();
+             while (st->fetch())
+             {
+                 std::cout << "    Debug: Existing Session ID: " << st->getInt64(0) 
+                           << ", Attachment ID: " << st->getInt64(1) << "\n";
+             }
         }
 
         ok = fr_test::check(count > 0, "Record source stats collected for INSERT ... SELECT") && ok;
