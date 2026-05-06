@@ -98,15 +98,12 @@ endforeach()
 if(FB_RELEASE_LIB_PATH STREQUAL "")
     # Broad recursive fallback: find fbclient.lib anywhere under temp/<arch>/
     file(GLOB_RECURSE FB_RELEASE_LIB_GLOB LIST_DIRECTORIES false
-        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/fbclient.lib"
-        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/fbclient_ms.lib"
+        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/**/fbclient.lib"
+        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/**/fbclient_ms.lib"
     )
-    foreach(path IN LISTS FB_RELEASE_LIB_GLOB)
-        if(NOT IS_DIRECTORY "${path}")
-            set(FB_RELEASE_LIB_PATH "${path}")
-            break()
-        endif()
-    endforeach()
+    if(FB_RELEASE_LIB_GLOB)
+        list(GET FB_RELEASE_LIB_GLOB 0 FB_RELEASE_LIB_PATH)
+    endif()
 endif()
 
 if(FB_RELEASE_LIB_PATH STREQUAL "")
@@ -117,8 +114,8 @@ if(FB_RELEASE_LIB_PATH STREQUAL "")
     endforeach()
     message(STATUS "DEBUG: Listing .lib files under ${SOURCE_PATH}/temp/${FB_ARCH_OUT}")
     file(GLOB_RECURSE ALL_TEMP_LIBS LIST_DIRECTORIES false
-        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/fbclient.lib"
-        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/fbclient_ms.lib"
+        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/**/fbclient.lib"
+        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/**/fbclient_ms.lib"
     )
     foreach(f IN LISTS ALL_TEMP_LIBS)
         message(STATUS "  ${f}")
@@ -195,15 +192,12 @@ endforeach()
 if(FB_DEBUG_LIB_PATH STREQUAL "")
     # Broad recursive fallback: find fbclient.lib anywhere under temp/<arch>/
     file(GLOB_RECURSE FB_DEBUG_LIB_GLOB LIST_DIRECTORIES false
-        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/fbclient.lib"
-        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/fbclient_ms.lib"
+        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/**/fbclient.lib"
+        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/**/fbclient_ms.lib"
     )
-    foreach(path IN LISTS FB_DEBUG_LIB_GLOB)
-        if(NOT IS_DIRECTORY "${path}")
-            set(FB_DEBUG_LIB_PATH "${path}")
-            break()
-        endif()
-    endforeach()
+    if(FB_DEBUG_LIB_GLOB)
+        list(GET FB_DEBUG_LIB_GLOB 0 FB_DEBUG_LIB_PATH)
+    endif()
 endif()
 
 if(FB_DEBUG_LIB_PATH STREQUAL "")
@@ -214,8 +208,8 @@ if(FB_DEBUG_LIB_PATH STREQUAL "")
     endforeach()
     message(STATUS "DEBUG: Listing .lib files under ${SOURCE_PATH}/temp/${FB_ARCH_OUT}")
     file(GLOB_RECURSE ALL_DBG_LIBS LIST_DIRECTORIES false
-        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/fbclient.lib"
-        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/fbclient_ms.lib"
+        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/**/fbclient.lib"
+        "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/**/fbclient_ms.lib"
     )
     foreach(f IN LISTS ALL_DBG_LIBS)
         message(STATUS "  ${f}")
