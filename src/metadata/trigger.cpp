@@ -330,6 +330,7 @@ wxString Trigger::getAlterSql()
         << ' ' << kwPOSITION << ' ' << wxString::Format("%d", positionM)
         << StatementBuilder::NewLine;
     sb << getSqlSecurity() << StatementBuilder::NewLine;
+    sb << kwAS << StatementBuilder::NewLine;
 
     sb << sourceM + "^" << StatementBuilder::NewLine;
 
