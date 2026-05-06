@@ -39,7 +39,8 @@ jobs:
       with:
         arch: ${{ matrix.arch }}
 
-    - name: Set VS COMNTOOLS environment variables
+    - name: Get VS Path
+      id: vs
       shell: pwsh
       run: |
         $vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath
@@ -47,12 +48,19 @@ jobs:
             Write-Error "Visual Studio installation not found"
             exit 1
         }
-        $toolsPath = Join-Path $vsPath "Common7\Tools"
-        Write-Host "Found VS at $vsPath"
-        Write-Host "Setting VS COMNTOOLS variables to $toolsPath"
-        echo "VS170COMNTOOLS=$toolsPath" >> $env:GITHUB_ENV
-        echo "VS160COMNTOOLS=$toolsPath" >> $env:GITHUB_ENV
-        echo "VS150COMNTOOLS=$toolsPath" >> $env:GITHUB_ENV
+        $toolsPath = (Join-Path $vsPath "Common7\Tools")
+        if (-not (Test-Path $toolsPath)) {
+            Write-Error "Tools path not found: $toolsPath"
+            exit 1
+        }
+        # Many legacy scripts expect the trailing backslash
+        $toolsPathWithBackslash = $toolsPath + "\"
+        Write-Host "Found VS Tools at: $toolsPathWithBackslash"
+        echo "tools_path=$toolsPathWithBackslash" >> $env:GITHUB_OUTPUT
+        # Also set for global use just in case
+        echo "VS170COMNTOOLS=$toolsPathWithBackslash" >> $env:GITHUB_ENV
+        echo "VS160COMNTOOLS=$toolsPathWithBackslash" >> $env:GITHUB_ENV
+        echo "VS150COMNTOOLS=$toolsPathWithBackslash" >> $env:GITHUB_ENV
     
     - name: Bootstrap vcpkg
       run: .\vcpkg\bootstrap-vcpkg.bat -disableMetrics
@@ -68,6 +76,9 @@ jobs:
     - name: Install dependencies (vcpkg)
       env:
         VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}\vcpkg_archives
+        VS170COMNTOOLS: ${{ steps.vs.outputs.tools_path }}
+        VS160COMNTOOLS: ${{ steps.vs.outputs.tools_path }}
+        VS150COMNTOOLS: ${{ steps.vs.outputs.tools_path }}
       run: |
         if (!(Test-Path vcpkg_archives)) { New-Item -ItemType Directory -Path vcpkg_archives }
         $success = $false
