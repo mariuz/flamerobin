@@ -32,6 +32,7 @@
 
 #include <algorithm>
 #include "config/Config.h"
+#include "firebird_ods.h"
 #include "sql/firebird_keyword_sets.hpp"
 #include "sql/SqlTokenizer.h"
 
@@ -263,20 +264,21 @@ SqlTokenizer::FirebirdKeywordVersion SqlTokenizer::normalizeKeywordVersion(
     if (odsMajor <= 0)
         return FirebirdKeywordVersion{2, 5};
 
-    if (odsMajor <= 11)
+    if (odsMajor <= ODS_MAJOR_FB25)
         return FirebirdKeywordVersion{2, 5};
-    if (odsMajor == 12)
+    if (odsMajor == ODS_MAJOR_FB30)
         return FirebirdKeywordVersion{3, 0};
-    if (odsMajor == 13)
+    if (odsMajor == ODS_MAJOR_FB40) // also ODS_MAJOR_FB50
     {
-        if (odsMinor <= 0)
+        if (odsMinor <= ODS_MINOR_FB40)
             return FirebirdKeywordVersion{4, 0};
-        if (odsMinor == 1)
-            return FirebirdKeywordVersion{5, 0};
-        return FirebirdKeywordVersion{6, 0};
+        return FirebirdKeywordVersion{5, 0};
     }
 
-    return FirebirdKeywordVersion{6, 0};
+    if (odsMajor >= ODS_MAJOR_FB60)
+        return FirebirdKeywordVersion{6, 0};
+
+    return FirebirdKeywordVersion{5, 0};
 }
 
 SqlTokenType SqlTokenizer::getCurrentToken()
@@ -349,7 +351,15 @@ bool SqlTokenizer::nextToken()
     else if (c == ')')
         symbolToken(tkPARENCLOSE);
     else if (c == '=')
-        symbolToken(tkEQUALS);
+    {
+        if (*(sqlTokenEndM + 1) == '>')
+        {
+            sqlTokenTypeM = kwNAMED_ARG_ASSIGN;
+            sqlTokenEndM += 2;
+        }
+        else
+            symbolToken(tkEQUALS);
+    }
     else if (c == ',')
         symbolToken(tkCOMMA);
     else if (c == '/' && *(sqlTokenEndM + 1) == '*')
@@ -358,6 +368,26 @@ bool SqlTokenizer::nextToken()
         singleLineCommentToken();
     else if (wxIsspace(c))
         whitespaceToken();
+    else if (c == ':')
+    {
+        if (*(sqlTokenEndM + 1) == '=')
+        {
+            sqlTokenTypeM = kwBIND_PARAM;
+            sqlTokenEndM += 2;
+        }
+        else
+            defaultToken();
+    }
+    else if (c == '|')
+    {
+        if (*(sqlTokenEndM + 1) == '|')
+        {
+            sqlTokenTypeM = kwCONCATENATE;
+            sqlTokenEndM += 2;
+        }
+        else
+            defaultToken();
+    }
     else
         defaultToken();
     return true;
@@ -385,7 +415,7 @@ void SqlTokenizer::defaultToken()
         // or some of significant characters
         sqlTokenEndM++;
         if (*sqlTokenEndM == 0
-            || *sqlTokenEndM == ',' || *sqlTokenEndM == '='
+            || *sqlTokenEndM == ','
             || *sqlTokenEndM == '(' || *sqlTokenEndM == ')'
             || *sqlTokenEndM == '+' || *sqlTokenEndM == '-'
             || *sqlTokenEndM == '/' || *sqlTokenEndM == '*'
@@ -395,7 +425,13 @@ void SqlTokenizer::defaultToken()
             break;
         }
     }
-    sqlTokenTypeM = tkUNKNOWN;
+    // check whether it's a keyword (for operators like ||, !=, etc.)
+    wxString checkKW(sqlTokenStartM, sqlTokenEndM);
+    SqlTokenType keywordType = getKeywordTokenType(checkKW);
+    if (keywordType != tkIDENTIFIER)
+        sqlTokenTypeM = keywordType;
+    else
+        sqlTokenTypeM = tkUNKNOWN;
 }
 
 void SqlTokenizer::keywordIdentifierToken()

@@ -43,6 +43,7 @@
 
 #include "config/Config.h"
 #include "config/DatabaseConfig.h"
+#include "firebird_ods.h"
 #include "engine/db/DatabaseFactory.h"
 #include "core/FRError.h"
 #include "core/ProgressIndicator.h"

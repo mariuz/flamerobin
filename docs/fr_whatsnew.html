@@ -17,6 +17,15 @@ http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issue
 - **Legacy Support**: The IBPP library remains available as a secondary option for users requiring the legacy backend, but it is now marked as "Legacy" in the preferences.<br>
 - **Architecture**: Completed the migration to the Database Abstraction Layer (DAL), ensuring that all core features are now fully compatible with the `fb-cpp` backend.<br>
 <br>
+<font size=+1 color="#AA0000"><B>Firebird 6.0 SQL Support</B></font><br>
+<br>
+- **Named Arguments**: Added support for the Firebird 6.0 named argument syntax (`proc(arg1 => val1)`) in the SQL editor. Both the `=>` operator and the `NAMED_ARG_ASSIGN` keyword are correctly recognized and highlighted.<br>
+- **GREATEST and LEAST Functions**: Added SQL editor support for the new `GREATEST` and `LEAST` functions. These functions allow comparing multiple values and returning the maximum or minimum. They are now correctly highlighted and appear in the autocompletion list.<br>
+- **ANY_VALUE and UNLIST**: Integrated support for the `ANY_VALUE` aggregate and the `UNLIST` string-splitting function. These Firebird 6.0 features are now fully recognized by the SQL editor for syntax highlighting and code completion.<br>
+- **Native JSON Support**: Added full keyword highlighting and autocompletion for native SQL-standard JSON functions (`JSON_VALUE`, `JSON_QUERY`, `JSON_OBJECT`, `JSON_ARRAY`, `JSON_EXISTS`, `JSON_TABLE`, etc.). This support is available for both Firebird 5.0 and 6.0 databases.<br>
+- **SQL:2023 Compliance**: Many of these new features follow the SQL:2023 standard, and FlameRobin's SQL editor has been updated to reflect these latest improvements in the Firebird engine.<br>
+- **Improved Tokenizer Robustness**: The SQL tokenizer has been enhanced to correctly handle multi-character operators like `=>`, `||`, `:=`, `>=` and `<=`, even when written without surrounding spaces. This ensures more accurate statement parsing and highlighting.<br>
+<br>
 <font size=+1 color="#AA0000"><B>Firebird 5.0 SQL Editor Enhancements</B></font><br>
 <br>
 - **LATERAL JOIN Support**: The SQL editor tokenizer and parser have been updated to correctly handle the new `LATERAL` join syntax introduced in Firebird 5.0. This ensures accurate statement splitting and avoids false "incomplete statement" warnings during script execution.<br>

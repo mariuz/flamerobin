@@ -70,14 +70,14 @@ The following phases track FlameRobin UI/metadata support for features introduce
 ### Phase 7: Firebird 6.0 Feature Support (ODS 14.x, planned ~2026)
 
 - [ ] **SQL Schemas** — Restructure the metadata tree to show schemas as a first-class container; generate schema-qualified DDL (`SCHEMA.OBJECT`); add CREATE / ALTER / DROP SCHEMA management dialogs.
-- [ ] **JSON Functions** — Add keyword highlighting and code completion for native JSON functions (`JSON_VALUE`, `JSON_QUERY`, `JSON_OBJECT`, `JSON_ARRAY`, etc.).
+- [x] **JSON Functions** — Add keyword highlighting and code completion for native JSON functions (`JSON_VALUE`, `JSON_QUERY`, `JSON_OBJECT`, `JSON_ARRAY`, etc.).
 - [ ] **Tablespaces** — Display tablespace assignments in table and index properties; expose tablespace selection in CREATE TABLE / CREATE INDEX dialogs.
 - [x] **`EXPLAIN` Statement** — Show query execution plans from the new `EXPLAIN` statement (distinct from the `PLAN` clause) in the SQL execution frame.
 
-- [ ] **Named Arguments for Procedure/Function Calls** — SQL editor support and code completion for named-argument call syntax (`proc(arg1 => val1)`).
-- [ ] **`GREATEST` / `LEAST` Functions** — Add to SQL keyword completion (SQL:2023).
-- [ ] **`UNLIST` Function** — Add to SQL keyword completion for string-splitting into result rows.
-- [ ] **`ANY_VALUE` Aggregate** — Add to SQL keyword completion (SQL:2023).
+- [x] **Named Arguments for Procedure/Function Calls** — SQL editor support and code completion for named-argument call syntax (`proc(arg1 => val1)`).
+- [x] **`GREATEST` / `LEAST` Functions** — Add to SQL keyword completion (SQL:2023).
+- [x] **`UNLIST` Function** — Add to SQL keyword completion for string-splitting into result rows.
+- [x] **`ANY_VALUE` Aggregate** — Add to SQL keyword completion (SQL:2023).
 - [ ] **Optional String Max Lengths** — Ensure `VARCHAR` / `CHAR` column DDL handles implicit-length syntax per SQL:2023.
 - [ ] **CSV External Tables** — UI support for defining external tables backed by CSV files when the engine supports it.
 - [ ] **Enhanced Security: Owner Assignment on CREATE DATABASE** — Expose ownership and initial-user options in the Create Database dialog.

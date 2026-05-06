@@ -438,6 +438,72 @@ int main()
         wxString fb50 = SqlTokenizer::getKeywordsString(SqlTokenizer::kwUpperCase, 13, 1); // ODS 13.1 (FB 5.0)
         ok = check(fb50.Contains("SKIP"), "FB5.0 has SKIP") && ok;
         ok = check(fb50.Contains("LOCKED"), "FB5.0 has LOCKED") && ok;
+        ok = check(fb50.Contains("GREATEST"), "FB5.0 has GREATEST") && ok;
+        ok = check(fb50.Contains("LEAST"), "FB5.0 has LEAST") && ok;
+        ok = check(fb50.Contains("JSON_VALUE"), "FB5.0 has JSON_VALUE") && ok;
+        ok = check(fb50.Contains("JSON_TABLE"), "FB5.0 has JSON_TABLE") && ok;
+
+        wxString fb60 = SqlTokenizer::getKeywordsString(SqlTokenizer::kwUpperCase, 14, 0); // ODS 14.0 (FB 6.0)
+        ok = check(fb60.Contains("GREATEST"), "FB6.0 has GREATEST") && ok;
+        ok = check(fb60.Contains("LEAST"), "FB6.0 has LEAST") && ok;
+        ok = check(fb60.Contains("ANY_VALUE"), "FB6.0 has ANY_VALUE") && ok;
+        ok = check(fb60.Contains("UNLIST"), "FB6.0 has UNLIST") && ok;
+        ok = check(fb60.Contains("JSON_VALUE"), "FB6.0 has JSON_VALUE") && ok;
+        ok = check(fb60.Contains("NAMED_ARG_ASSIGN"), "FB6.0 has NAMED_ARG_ASSIGN") && ok;
+
+        // Verify reserved status in FB 6.0
+        ok = check(SqlTokenizer::isReservedWord("ANY_VALUE", 14, 0), "ANY_VALUE is reserved in FB 6.0") && ok;
+        ok = check(SqlTokenizer::isReservedWord("UNLIST", 14, 0), "UNLIST is reserved in FB 6.0") && ok;
+
+        // Verify they are NOT in FB 5.0 (ODS 13.1)
+        ok = check(!fb50.Contains("ANY_VALUE"), "FB5.0 does NOT have ANY_VALUE") && ok;
+        ok = check(!fb50.Contains("UNLIST"), "FB5.0 does NOT have UNLIST") && ok;
+        ok = check(!SqlTokenizer::isReservedWord("ANY_VALUE", 13, 1), "ANY_VALUE is NOT reserved in FB 5.0") && ok;
+        ok = check(!SqlTokenizer::isReservedWord("UNLIST", 13, 1), "UNLIST is NOT reserved in FB 5.0") && ok;
+    }
+
+    // Test: JSON functions (FB 5.0+)
+    {
+        SqlTokenizer t("JSON_VALUE(col, '$.path') JSON_QUERY(col, '$.path') JSON_OBJECT(KEY 'a' VALUE 1)");
+        ok = checkToken(t.getCurrentToken(), kwJSON_VALUE, "JSON_VALUE: kwJSON_VALUE") && ok;
+        t.jumpToken(false); // (
+        t.jumpToken(false); // col
+        t.jumpToken(false); // ,
+        t.jumpToken(false); // '$.path'
+        t.jumpToken(false); // )
+        t.jumpToken(false); // JSON_QUERY
+        ok = checkToken(t.getCurrentToken(), kwJSON_QUERY, "JSON_QUERY: kwJSON_QUERY") && ok;
+        t.jumpToken(false); // (
+        t.jumpToken(false); // col
+        t.jumpToken(false); // ,
+        t.jumpToken(false); // '$.path'
+        t.jumpToken(false); // )
+        t.jumpToken(false); // JSON_OBJECT
+        ok = checkToken(t.getCurrentToken(), kwJSON_OBJECT, "JSON_OBJECT: kwJSON_OBJECT") && ok;
+    }
+
+    // Test: GREATEST / LEAST (FB 5.0+)
+    {
+        SqlTokenizer t("GREATEST(1, 2) LEAST(1, 2)");
+        ok = checkToken(t.getCurrentToken(), kwGREATEST, "GREATEST: kwGREATEST") && ok;
+        t.jumpToken(false); // (
+        t.jumpToken(false); // 1
+        t.jumpToken(false); // ,
+        t.jumpToken(false); // 2
+        t.jumpToken(false); // )
+        t.jumpToken(false); // LEAST
+        ok = checkToken(t.getCurrentToken(), kwLEAST, "LEAST: kwLEAST") && ok;
+    }
+
+    // Test: ANY_VALUE / UNLIST (FB 6.0+)
+    {
+        SqlTokenizer t("ANY_VALUE(col) UNLIST(str)");
+        ok = checkToken(t.getCurrentToken(), kwANY_VALUE, "ANY_VALUE: kwANY_VALUE") && ok;
+        t.jumpToken(false); // (
+        t.jumpToken(false); // col
+        t.jumpToken(false); // )
+        t.jumpToken(false); // UNLIST
+        ok = checkToken(t.getCurrentToken(), kwUNLIST, "UNLIST: kwUNLIST") && ok;
     }
 
     // Test: LATERAL join
@@ -451,6 +517,28 @@ int main()
         ok = check(tk.jumpToken(false) && tk.getCurrentToken() == kwJOIN, "LATERAL test: Jump to JOIN") && ok;
         ok = check(tk.jumpToken(false) && tk.getCurrentToken() == kwLATERAL, "LATERAL test: Jump to LATERAL") && ok;
         ok = check(tk.jumpToken(true) && tk.getCurrentToken() == kwON, "LATERAL test: Jump past LATERAL subquery to ON") && ok;
+    }
+
+    // Test: Operators
+    {
+        SqlTokenizer t1(">=");
+        ok = checkToken(t1.getCurrentToken(), kwGEQ, ">=: kwGEQ") && ok;
+        SqlTokenizer t2("||");
+        ok = checkToken(t2.getCurrentToken(), kwCONCATENATE, "||: kwCONCATENATE") && ok;
+        SqlTokenizer t3("=>");
+        ok = checkToken(t3.getCurrentToken(), kwNAMED_ARG_ASSIGN, "=>: kwNAMED_ARG_ASSIGN") && ok;
+        SqlTokenizer t4("NAMED_ARG_ASSIGN");
+        ok = checkToken(t4.getCurrentToken(), kwNAMED_ARG_ASSIGN, "NAMED_ARG_ASSIGN: kwNAMED_ARG_ASSIGN") && ok;
+        SqlTokenizer t5(":=");
+        ok = checkToken(t5.getCurrentToken(), kwBIND_PARAM, ":=: kwBIND_PARAM") && ok;
+        SqlTokenizer t6("<>");
+        ok = checkToken(t6.getCurrentToken(), kwNEQ, "<>: kwNEQ") && ok;
+        SqlTokenizer t7("!=");
+        ok = checkToken(t7.getCurrentToken(), kwNEQ, "!=: kwNEQ") && ok;
+        SqlTokenizer t8("<=");
+        ok = checkToken(t8.getCurrentToken(), kwLEQ, "<=: kwLEQ") && ok;
+        SqlTokenizer t9("!>");
+        ok = checkToken(t9.getCurrentToken(), kwNOT_GTR, "!>: kwNOT_GTR") && ok;
     }
 
     return ok ? 0 : 1;

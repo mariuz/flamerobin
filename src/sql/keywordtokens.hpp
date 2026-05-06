@@ -9,6 +9,7 @@
 { "^=", kwNEQ }, // Alias of !=
 { "^>", kwNOT_GTR }, // Alias of !>
 { "||", kwCONCATENATE },
+{ "=>", kwNAMED_ARG_ASSIGN },
 { "~<", kwNOT_LSS }, // Alias of !<
 { "~=", kwNEQ }, // Alias of !=
 { "~>", kwNOT_GTR }, // Alias of !>
@@ -33,6 +34,7 @@
 { "ALWAYS", kwALWAYS },
 { "AND", kwAND },
 { "ANY", kwANY },
+{ "ANY_VALUE", kwANY_VALUE },
 { "AS", kwAS },
 { "ASC", kwASCENDING },  // Alias of ASCENDING
 { "ASCENDING", kwASCENDING },
@@ -214,6 +216,7 @@
 { "GOTO", kwGOTO },
 { "GRANT", kwGRANT },
 { "GRANTED", kwGRANTED },
+{ "GREATEST", kwGREATEST },
 { "GROUP", kwGROUP },
 { "GROUP_COMMIT_", kwGROUP_COMMIT_ },
 { "GROUP_COMMIT_WAIT", kwGROUP_COMMIT_WAIT },
@@ -253,6 +256,15 @@
 { "ISQL", kwISQL },
 { "IV", kwIV },
 { "JOIN", kwJOIN },
+{ "JSON", kwJSON },
+{ "JSON_ARRAY", kwJSON_ARRAY },
+{ "JSON_ARRAYAGG", kwJSON_ARRAYAGG },
+{ "JSON_EXISTS", kwJSON_EXISTS },
+{ "JSON_OBJECT", kwJSON_OBJECT },
+{ "JSON_OBJECTAGG", kwJSON_OBJECTAGG },
+{ "JSON_QUERY", kwJSON_QUERY },
+{ "JSON_TABLE", kwJSON_TABLE },
+{ "JSON_VALUE", kwJSON_VALUE },
 { "KEY", kwKEY },
 { "LAG", kwLAG },
 { "LAST", kwLAST },
@@ -264,6 +276,7 @@
 { "LC_TYPE", kwLC_TYPE },
 { "LEAD", kwLEAD },
 { "LEADING", kwLEADING }, //fb2.0
+{ "LEAST", kwLEAST },
 { "LEAVE", kwLEAVE },
 { "LEFT", kwLEFT },
 { "LEGACY", kwLEGACY },
@@ -312,6 +325,7 @@
 { "MODULE_NAME", kwMODULE_NAME },
 { "MONTH", kwMONTH },
 { "NAME", kwNAME },
+{ "NAMED_ARG_ASSIGN", kwNAMED_ARG_ASSIGN },
 { "NAMES", kwNAMES },
 { "NATIONAL", kwNATIONAL },
 { "NATIVE", kwNATIVE },
@@ -530,6 +544,7 @@
 { "UNION", kwUNION },
 { "UNIQUE", kwUNIQUE },
 { "UNKNOWN", kwUNKNOWN },
+{ "UNLIST", kwUNLIST },
 { "UPDATE", kwUPDATE },
 { "UPDATING", kwUPDATING },
 { "UPPER", kwUPPER },
