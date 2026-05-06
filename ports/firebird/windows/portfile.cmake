@@ -29,7 +29,9 @@ endif()
 set(FB_VSCOMNTOOLS "")
 if(MSBUILD_EXE)
     get_filename_component(FB_VS_TMP "${MSBUILD_EXE}" DIRECTORY)
-    foreach(_unused RANGE 9)
+    # Walk up at most 9 levels (typical VS path depth: Bin/amd64 → Bin → Current →
+    # MSBuild → Enterprise/<edition> → VS root with Common7/Tools is 4-5 levels up).
+    foreach(_depth RANGE 9)
         if(EXISTS "${FB_VS_TMP}/Common7/Tools")
             set(FB_VSCOMNTOOLS "${FB_VS_TMP}/Common7/Tools")
             break()
