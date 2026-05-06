@@ -6,7 +6,7 @@ Release
 ipch
 bcc*
 gcc*
-vc*
+vc[0-9]*
 *.opensdf
 *.sdf
 *.user
