@@ -61,7 +61,12 @@ int main()
         fr::IDatabasePtr db = fr::DatabaseFactory::createDatabase(fr::DatabaseBackend::FbCpp);
         db->setConnectionString(dbName);
         db->setCredentials("SYSDBA", "masterkey");
-        db->connect();
+        try {
+            db->connect();
+        } catch (const std::exception& e) {
+            std::cerr << "    FAILED to connect to " << dbName << " using fb-cpp backend\n";
+            throw;
+        }
 
         fr::ITransactionPtr tr = db->createTransaction();
         tr->start();
@@ -84,6 +89,11 @@ int main()
             return 0;
         }
 
+        // Create table first, then profile
+        st->prepare("CREATE TABLE t1 (id INT PRIMARY KEY, val VARCHAR(100))");
+        st->execute();
+        tr->commitRetain();
+
         // Test 1: Simple Profiling Session
         std::cout << "  Test 1: Simple Profiling Session...\n";
         st->prepare("SELECT RDB$PROFILER.START_SESSION('Test Session') FROM RDB$DATABASE");
@@ -95,12 +105,10 @@ int main()
         ok = fr_test::check(sessionId != 0, "Session started") && ok;
         std::cout << "    Debug: Session ID = " << sessionId << "\n";
 
-        st->prepare("CREATE TABLE t1 (id INT PRIMARY KEY, val VARCHAR(100))");
+        // Use INSERT ... SELECT to ensure there is a record source to profile
+        st->prepare("INSERT INTO t1 (id, val) SELECT 1, 'test' FROM RDB$DATABASE");
         st->execute();
         tr->commitRetain();
-
-        st->prepare("INSERT INTO t1 VALUES (1, 'test')");
-        st->execute();
 
         // Flush and finish
         try {
@@ -110,6 +118,14 @@ int main()
 
         st->prepare("EXECUTE PROCEDURE RDB$PROFILER.FINISH_SESSION(TRUE)");
         st->execute();
+
+        // Check statements first
+        st->prepare("SELECT COUNT(*) FROM PLG$PROF_STATEMENTS WHERE PROFILE_ID = ?");
+        st->setInt64(0, sessionId);
+        st->execute();
+        int stmtCount = 0;
+        if (st->fetch()) stmtCount = st->getInt32(0);
+        std::cout << "    Debug: Statement count in PLG$PROF_STATEMENTS: " << stmtCount << "\n";
 
         // Give Firebird a moment to flush profiler data if needed
         st->prepare("SELECT COUNT(*) FROM PLG$PROF_RECORD_SOURCE_STATS WHERE PROFILE_ID = ?");
@@ -130,16 +146,9 @@ int main()
                  std::cout << "    Debug: Session exists: " << st->getInt64(0) << " (" << st->getString(1) << ")\n";
              else
                  std::cout << "    Debug: Session NOT FOUND in PLG$PROF_SESSIONS\n";
-
-             // Check all sessions to see what is there
-             std::cout << "    Debug: Listing all sessions:\n";
-             st->prepare("SELECT PROFILE_ID, SESSION_NAME FROM PLG$PROF_SESSIONS");
-             st->execute();
-             while (st->fetch())
-                 std::cout << "      ID: " << st->getInt64(0) << ", Name: " << st->getString(1) << "\n";
         }
 
-        ok = fr_test::check(count > 0, "Record source stats collected for simple INSERT") && ok;
+        ok = fr_test::check(count > 0, "Record source stats collected for INSERT ... SELECT") && ok;
 
         // Test 2: Nested PSQL calls
         std::cout << "  Test 2: Nested PSQL calls...\n";
