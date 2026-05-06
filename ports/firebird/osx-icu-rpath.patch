@@ -1,0 +1,15 @@
+diff --git a/src/common/unicode_util.cpp b/src/common/unicode_util.cpp
+index 86eec7d86b..ada37a96bd 100644
+--- a/src/common/unicode_util.cpp
++++ b/src/common/unicode_util.cpp
+@@ -60,8 +60,8 @@ namespace {
+ const char* const inTemplate = "icuin%s.dll";
+ const char* const ucTemplate = "icuuc%s.dll";
+ #elif defined(DARWIN)
+-const char* const inTemplate = "lib/libicui18n.%s.dylib";
+-const char* const ucTemplate = "lib/libicuuc.%s.dylib";
++const char* const inTemplate = "@rpath/libicui18n.%s.dylib";
++const char* const ucTemplate = "@rpath/libicuuc.%s.dylib";
+ #elif defined(HPUX)
+ const char* const inTemplate = "libicui18n.sl.%s";
+ const char* const ucTemplate = "libicuuc.sl.%s";
