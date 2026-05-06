@@ -117,6 +117,7 @@ jobs:
           FIREBIRD_USER: SYSDBA
           FIREBIRD_PASSWORD: masterkey
           FIREBIRD_ROOT_PASSWORD: masterkey
+          FIREBIRD_CONF_DefaultProfilerPlugin: Default_Profiler
 
     steps:
     - uses: actions/checkout@v4

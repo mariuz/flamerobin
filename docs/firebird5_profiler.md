@@ -42,7 +42,7 @@ This grid shows performance data for each record source (table scan, index seek,
 
 When the profiler is enabled, FlameRobin performs the following steps automatically for each execution:
 
-1.  **Start Session**: Calls `SELECT RDB$PROFILER.START_SESSION('FlameRobin') FROM RDB$DATABASE` before executing your SQL. This returns a unique Session ID.
+1.  **Start Session**: Calls `SELECT RDB$PROFILER.START_SESSION('FlameRobin', NULL, 'Default_Profiler') FROM RDB$DATABASE` before executing your SQL. This returns a unique Session ID.
 2.  **Execute SQL**: Runs your statement(s) as part of the profiled session.
 3.  **Finish Session**: Calls `EXECUTE PROCEDURE RDB$PROFILER.FINISH_SESSION(TRUE)` to flush collected data from memory to the profiling global temporary tables.
 4.  **Fetch Data**: Queries `PLG$PROF_PSQL_STATS` and `PLG$PROF_RECORD_SOURCE_STATS` for the generated session ID and populates the UI grids.

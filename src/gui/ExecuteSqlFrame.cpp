@@ -2721,7 +2721,8 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         {
             try {
                 fr::IStatementPtr stProf = databaseM->getDALDatabase()->createStatement(transactionM);
-                stProf->prepare("SELECT RDB$PROFILER.START_SESSION('FlameRobin') FROM RDB$DATABASE");
+                stProf->prepare("SELECT RDB$PROFILER.START_SESSION(?, NULL, 'Default_Profiler') FROM RDB$DATABASE");
+                stProf->setString(0, "FlameRobin");
                 stProf->execute();
                 if (stProf->fetch())
                     profileSessionId = stProf->getInt64(0);
