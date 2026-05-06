@@ -11,18 +11,22 @@ endif()
 
 if(VCPKG_TARGET_ARCHITECTURE STREQUAL "x86")
     set(FB_ARCH_OUT "Win32")
+    set(FB_ARCH_ARG "32")
     set(FB_PROCESSOR_ARCHITECTURE "x86")
 elseif(VCPKG_TARGET_ARCHITECTURE STREQUAL "x64")
     set(FB_ARCH_OUT "x64")
+    set(FB_ARCH_ARG "64")
     set(FB_PROCESSOR_ARCHITECTURE "AMD64")
 elseif(VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64")
     set(FB_ARCH_OUT "arm64")
+    set(FB_ARCH_ARG "arm64")
     set(FB_PROCESSOR_ARCHITECTURE "ARM64")
 endif()
 
 
 message(STATUS "DEBUG: FB_PROCESSOR_ARCHITECTURE=${FB_PROCESSOR_ARCHITECTURE}")
 message(STATUS "DEBUG: FB_ARCH_OUT=${FB_ARCH_OUT}")
+message(STATUS "DEBUG: FB_ARCH_ARG=${FB_ARCH_ARG}")
 message(STATUS "DEBUG: MSBUILD_EXE=${MSBUILD_EXE}")
 
 if (NOT EXISTS "${SOURCE_PATH}/builds/win32/run_all.bat")
@@ -34,7 +38,9 @@ endif()
 vcpkg_execute_build_process(
     COMMAND ${CMAKE_COMMAND} -E env "FB_PROCESSOR_ARCHITECTURE=${FB_PROCESSOR_ARCHITECTURE}"
         cmd /c run_all.bat
-        ${FB_ARCH_OUT}
+        ${FB_ARCH_ARG}
+        JUSTBUILD
+        CLIENT_ONLY
     WORKING_DIRECTORY "${SOURCE_PATH}/builds/win32"
     LOGNAME configure-${TARGET_TRIPLET}-rel
 )
@@ -75,13 +81,73 @@ endif()
 
 get_filename_component(FB_RELEASE_OUT_DIR "${FB_RELEASE_INCLUDE_DIR}" DIRECTORY)
 
+set(FB_RELEASE_LIB_CANDIDATES
+    "${FB_RELEASE_OUT_DIR}/lib/fbclient_ms.lib"
+    "${FB_RELEASE_OUT_DIR}/lib/fbclient.lib"
+    "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/release/yvalve/fbclient.lib"
+    "${SOURCE_PATH}/output_${FB_ARCH_OUT}/lib/fbclient_ms.lib"
+    "${SOURCE_PATH}/output_${FB_ARCH_OUT}/lib/fbclient.lib"
+)
+
+set(FB_RELEASE_LIB_PATH "")
+foreach(path IN LISTS FB_RELEASE_LIB_CANDIDATES)
+    if(EXISTS "${path}")
+        set(FB_RELEASE_LIB_PATH "${path}")
+        break()
+    endif()
+endforeach()
+
+if(FB_RELEASE_LIB_PATH STREQUAL "")
+    # Fallback to a recursive search if candidates fail
+    file(GLOB_RECURSE FB_RELEASE_LIB_FALLBACK "${SOURCE_PATH}/fbclient.lib" "${SOURCE_PATH}/fbclient_ms.lib")
+    foreach(path IN LISTS FB_RELEASE_LIB_FALLBACK)
+        if(path MATCHES "release" OR path MATCHES "${FB_ARCH_OUT}")
+             set(FB_RELEASE_LIB_PATH "${path}")
+             message(STATUS "DEBUG: Found release library via fallback glob: ${FB_RELEASE_LIB_PATH}")
+             break()
+        endif()
+    endforeach()
+endif()
+
+if(FB_RELEASE_LIB_PATH STREQUAL "")
+    message(STATUS "DEBUG: Listing all .lib files in ${SOURCE_PATH} to help diagnose:")
+    file(GLOB_RECURSE ALL_LIBS "${SOURCE_PATH}/*.lib")
+    foreach(lib IN LISTS ALL_LIBS)
+        message(STATUS "  ${lib}")
+    endforeach()
+
+    message(STATUS "DEBUG: All fbclient*.lib files under ${SOURCE_PATH}/temp")
+    file(GLOB_RECURSE FB_LIBS_IN_TEMP "${SOURCE_PATH}/temp/fbclient*.lib")
+    if(FB_LIBS_IN_TEMP)
+        foreach(lib IN LISTS FB_LIBS_IN_TEMP)
+            message(STATUS "  ${lib}")
+        endforeach()
+    else()
+        message(STATUS "  (no .lib files found under ${SOURCE_PATH}/temp — build may have failed silently)")
+    endif()
+
+    message(STATUS "DEBUG: All fbclient*.lib files under ${SOURCE_PATH}/output*")
+    file(GLOB_RECURSE FB_LIBS_IN_OUT "${SOURCE_PATH}/output*/fbclient*.lib")
+    if(FB_LIBS_IN_OUT)
+        foreach(lib IN LISTS FB_LIBS_IN_OUT)
+            message(STATUS "  ${lib}")
+        endforeach()
+    endif()
+
+    message(FATAL_ERROR "Firebird release client library (fbclient_ms.lib / fbclient.lib) not found. Check configure-${TARGET_TRIPLET}-rel-out.log for build details.")
+endif()
+
+# Re-derive FB_RELEASE_OUT_DIR from the found library path to ensure dlls/plugins are found relative to it
+get_filename_component(FB_RELEASE_LIB_DIR "${FB_RELEASE_LIB_PATH}" DIRECTORY)
+get_filename_component(FB_RELEASE_OUT_DIR "${FB_RELEASE_LIB_DIR}" DIRECTORY)
+
 file(
     INSTALL "${FB_RELEASE_INCLUDE_DIR}"
     DESTINATION "${CURRENT_PACKAGES_DIR}"
 )
 
 file(
-    INSTALL "${FB_RELEASE_OUT_DIR}/lib/fbclient_ms.lib"
+    INSTALL "${FB_RELEASE_LIB_PATH}"
     DESTINATION "${CURRENT_PACKAGES_DIR}/lib"
 )
 
@@ -119,15 +185,20 @@ file(
 vcpkg_execute_build_process(
     COMMAND ${CMAKE_COMMAND} -E env "FB_PROCESSOR_ARCHITECTURE=${FB_PROCESSOR_ARCHITECTURE}"
         cmd /c run_all.bat
+        ${FB_ARCH_ARG}
         DEBUG
-        ${FB_ARCH_OUT}
+        JUSTBUILD
+        CLIENT_ONLY
     WORKING_DIRECTORY "${SOURCE_PATH}/builds/win32"
     LOGNAME configure-${TARGET_TRIPLET}-dbg
 )
 
 set(FB_DEBUG_LIB_CANDIDATES
     "${SOURCE_PATH}/output_${FB_ARCH_OUT}_debug/lib/fbclient_ms.lib"
+    "${SOURCE_PATH}/output_${FB_ARCH_OUT}_debug/lib/fbclient.lib"
     "${SOURCE_PATH}/output_${FB_ARCH_OUT}/lib/fbclient_ms.lib"
+    "${SOURCE_PATH}/output_${FB_ARCH_OUT}/lib/fbclient.lib"
+    "${SOURCE_PATH}/temp/${FB_ARCH_OUT}/debug/yvalve/fbclient.lib"
     "${SOURCE_PATH}/output_debug/lib/fbclient_ms.lib"
     "${SOURCE_PATH}/output/lib/fbclient_ms.lib"
     "${SOURCE_PATH}/output_${VCPKG_TARGET_ARCHITECTURE}_debug/lib/fbclient_ms.lib"
@@ -144,6 +215,25 @@ foreach(path IN LISTS FB_DEBUG_LIB_CANDIDATES)
 endforeach()
 
 if(FB_DEBUG_LIB_PATH STREQUAL "")
+    # Fallback to a recursive search
+    file(GLOB_RECURSE FB_DEBUG_LIB_FALLBACK "${SOURCE_PATH}/fbclient.lib" "${SOURCE_PATH}/fbclient_ms.lib")
+    foreach(path IN LISTS FB_DEBUG_LIB_FALLBACK)
+        if(path MATCHES "debug" AND (path MATCHES "${FB_ARCH_OUT}" OR path MATCHES "yvalve"))
+             set(FB_DEBUG_LIB_PATH "${path}")
+             message(STATUS "DEBUG: Found debug library via fallback glob: ${FB_DEBUG_LIB_PATH}")
+             break()
+        endif()
+    endforeach()
+endif()
+
+if(FB_DEBUG_LIB_PATH STREQUAL "")
+    message(STATUS "DEBUG: All fbclient*.lib files under ${SOURCE_PATH}/temp")
+    file(GLOB_RECURSE FB_LIBS_IN_TEMP_DBG "${SOURCE_PATH}/temp/fbclient*.lib")
+    if(FB_LIBS_IN_TEMP_DBG)
+        foreach(lib IN LISTS FB_LIBS_IN_TEMP_DBG)
+            message(STATUS "  ${lib}")
+        endforeach()
+    endif()
     message(FATAL_ERROR "Firebird debug library not found in expected locations")
 endif()
 
