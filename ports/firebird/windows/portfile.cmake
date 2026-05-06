@@ -1,9 +1,10 @@
 vcpkg_acquire_msys(MSYS_ROOT PACKAGES unzip)
 vcpkg_add_to_path(${MSYS_ROOT}/usr/bin)
 
-vcpkg_find_acquire_program(MSBUILD)
-get_filename_component(MSBUILD_DIR "${MSBUILD}" DIRECTORY)
-vcpkg_add_to_path("${MSBUILD_DIR}")
+find_program(MSBUILD_EXE msbuild)
+if (NOT MSBUILD_EXE)
+    message(STATUS "DEBUG: msbuild not found in path")
+endif()
 
 if(VCPKG_TARGET_ARCHITECTURE STREQUAL "x86")
     set(FB_ARCH_OUT "Win32")
@@ -19,7 +20,7 @@ endif()
 
 message(STATUS "DEBUG: FB_PROCESSOR_ARCHITECTURE=${FB_PROCESSOR_ARCHITECTURE}")
 message(STATUS "DEBUG: FB_ARCH_OUT=${FB_ARCH_OUT}")
-message(STATUS "DEBUG: MSBUILD=${MSBUILD}")
+message(STATUS "DEBUG: MSBUILD_EXE=${MSBUILD_EXE}")
 
 if (NOT EXISTS "${SOURCE_PATH}/builds/win32/run_all.bat")
     message(FATAL_ERROR "run_all.bat NOT FOUND at ${SOURCE_PATH}/builds/win32/run_all.bat")
@@ -40,6 +41,7 @@ vcpkg_execute_build_process(
 set(FB_RELEASE_INCLUDE_CANDIDATES
     "${SOURCE_PATH}/output_${FB_ARCH_OUT}_release/include"
     "${SOURCE_PATH}/output_release/include"
+    "${SOURCE_PATH}/output_${VCPKG_TARGET_ARCHITECTURE}_release/include"
     "${SOURCE_PATH}/include"
 )
 
@@ -124,6 +126,7 @@ vcpkg_execute_build_process(
 set(FB_DEBUG_LIB_CANDIDATES
     "${SOURCE_PATH}/output_${FB_ARCH_OUT}_debug/lib/fbclient_ms.lib"
     "${SOURCE_PATH}/output_debug/lib/fbclient_ms.lib"
+    "${SOURCE_PATH}/output_${VCPKG_TARGET_ARCHITECTURE}_debug/lib/fbclient_ms.lib"
     "${SOURCE_PATH}/lib/fbclient_ms.lib"
 )
 
