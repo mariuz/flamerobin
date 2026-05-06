@@ -145,7 +145,7 @@ int main()
         if (count == 0)
         {
              std::cout << "    FAILURE: No record source stats found for session " << sessionId << "\n";
-             // Debug: check session
+             // Debug: check session and profiling setup
              st->prepare("SELECT PROFILE_ID, ATTACHMENT_ID, DESCRIPTION FROM PLG$PROF_SESSIONS WHERE PROFILE_ID = ?");
              st->setInt64(0, sessionId);
              st->execute();
@@ -158,6 +158,15 @@ int main()
              else
              {
                  std::cout << "    Debug: Session NOT FOUND in PLG$PROF_SESSIONS for ID " << sessionId << "\n";
+             }
+
+             st->prepare("SELECT MON$ATTACHMENT_ID, MON$USER, MON$REMOTE_PROTOCOL FROM MON$ATTACHMENTS WHERE MON$ATTACHMENT_ID = CURRENT_CONNECTION");
+             st->execute();
+             if (st->fetch())
+             {
+                 std::cout << "    Debug: Current Connection: " << st->getInt64(0) 
+                           << ", User: " << st->getString(1) 
+                           << ", Protocol: " << st->getString(2) << "\n";
              }
 
              st->prepare("SELECT COUNT(*) FROM PLG$PROF_STATEMENTS");

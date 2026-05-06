@@ -90,7 +90,7 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& /*server
         st->execute();
         st->fetch();
         ok = checkInt(st->getColumnCount(), 1, "getColumnCount") && ok;
-        ok = fr_test::check(st->getColumnType(0) == fr::ColumnType::BigInt, "ColumnType::BigInt identification") && ok;
+        ok = fr_test::check(st->getColumnType(0) == fr::ColumnType::Numeric, "ColumnType::Numeric identification") && ok;
         ok = checkInt(st->getColumnScale(0), 4, "getColumnScale") && ok;
         ok = checkInt(st->getColumnSize(0), 8, "getColumnSize (int64)") && ok;
         ok = checkStr(st->getColumnAlias(0), "MY_ALIAS", "getColumnAlias") && ok;

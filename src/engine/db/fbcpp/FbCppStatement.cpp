@@ -403,9 +403,11 @@ ColumnType FbCppStatement::getColumnType(int index)
     switch (descriptors[index].adjustedType)
     {
         case fbcpp::DescriptorAdjustedType::STRING: return ColumnType::Varchar;
-        case fbcpp::DescriptorAdjustedType::INT32: return ColumnType::Integer;
-        case fbcpp::DescriptorAdjustedType::INT16: return ColumnType::Integer;
-        case fbcpp::DescriptorAdjustedType::INT64: return ColumnType::BigInt;
+        case fbcpp::DescriptorAdjustedType::INT32: 
+        case fbcpp::DescriptorAdjustedType::INT16: 
+            return descriptors[index].scale != 0 ? ColumnType::Numeric : ColumnType::Integer;
+        case fbcpp::DescriptorAdjustedType::INT64: 
+            return descriptors[index].scale != 0 ? ColumnType::Numeric : ColumnType::BigInt;
         case fbcpp::DescriptorAdjustedType::FLOAT: return ColumnType::Float;
         case fbcpp::DescriptorAdjustedType::DOUBLE: return ColumnType::Double;
         case fbcpp::DescriptorAdjustedType::TIME: return ColumnType::Time;
@@ -561,9 +563,11 @@ ColumnType FbCppStatement::getParameterType(int index)
     switch (descriptors[index].adjustedType)
     {
         case fbcpp::DescriptorAdjustedType::STRING: return ColumnType::Varchar;
-        case fbcpp::DescriptorAdjustedType::INT32: return ColumnType::Integer;
-        case fbcpp::DescriptorAdjustedType::INT16: return ColumnType::Integer;
-        case fbcpp::DescriptorAdjustedType::INT64: return ColumnType::BigInt;
+        case fbcpp::DescriptorAdjustedType::INT32: 
+        case fbcpp::DescriptorAdjustedType::INT16: 
+            return descriptors[index].scale != 0 ? ColumnType::Numeric : ColumnType::Integer;
+        case fbcpp::DescriptorAdjustedType::INT64: 
+            return descriptors[index].scale != 0 ? ColumnType::Numeric : ColumnType::BigInt;
         case fbcpp::DescriptorAdjustedType::FLOAT: return ColumnType::Float;
         case fbcpp::DescriptorAdjustedType::DOUBLE: return ColumnType::Double;
         case fbcpp::DescriptorAdjustedType::TIME: return ColumnType::Time;
