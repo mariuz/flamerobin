@@ -418,12 +418,13 @@ std::string IbppStatement::getColumnName(int index)
 ColumnType IbppStatement::getColumnType(int index)
 {
     IBPP::SDT type = statementM->ColumnType(index + 1);
+    int scale = statementM->ColumnScale(index + 1);
     switch (type)
     {
         case IBPP::sdString: return ColumnType::Varchar;
-        case IBPP::sdLargeint: return ColumnType::BigInt;
-        case IBPP::sdInteger: return ColumnType::Integer;
-        case IBPP::sdSmallint: return ColumnType::Integer;
+        case IBPP::sdLargeint: return scale != 0 ? ColumnType::Numeric : ColumnType::BigInt;
+        case IBPP::sdInteger: return scale != 0 ? ColumnType::Numeric : ColumnType::Integer;
+        case IBPP::sdSmallint: return scale != 0 ? ColumnType::Numeric : ColumnType::Integer;
         case IBPP::sdFloat: return ColumnType::Float;
         case IBPP::sdDouble: return ColumnType::Double;
         case IBPP::sdDate: return ColumnType::Date;
@@ -532,12 +533,13 @@ std::vector<int> IbppStatement::findParameterIndicesByName(const std::string& na
 ColumnType IbppStatement::getParameterType(int index)
 {
     IBPP::SDT type = statementM->ParameterType(index + 1);
+    int scale = statementM->ParameterScale(index + 1);
     switch (type)
     {
         case IBPP::sdString: return ColumnType::Varchar;
-        case IBPP::sdLargeint: return ColumnType::BigInt;
-        case IBPP::sdInteger: return ColumnType::Integer;
-        case IBPP::sdSmallint: return ColumnType::Integer;
+        case IBPP::sdLargeint: return scale != 0 ? ColumnType::Numeric : ColumnType::BigInt;
+        case IBPP::sdInteger: return scale != 0 ? ColumnType::Numeric : ColumnType::Integer;
+        case IBPP::sdSmallint: return scale != 0 ? ColumnType::Numeric : ColumnType::Integer;
         case IBPP::sdFloat: return ColumnType::Float;
         case IBPP::sdDouble: return ColumnType::Double;
         case IBPP::sdDate: return ColumnType::Date;
