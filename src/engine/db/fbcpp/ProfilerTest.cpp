@@ -140,13 +140,26 @@ int main()
         {
              std::cout << "    FAILURE: No record source stats found for session " << sessionId << "\n";
              // Debug: check session
-             st->prepare("SELECT PROFILE_ID, SESSION_NAME, DESCRIPTION FROM PLG$PROF_SESSIONS WHERE PROFILE_ID = ?");
+             st->prepare("SELECT PROFILE_ID, DESCRIPTION FROM PLG$PROF_SESSIONS WHERE PROFILE_ID = ?");
              st->setInt64(0, sessionId);
              st->execute();
              if (st->fetch())
                  std::cout << "    Debug: Session exists: " << st->getInt64(0) << " (" << st->getString(1) << ")\n";
              else
-                 std::cout << "    Debug: Session NOT FOUND in PLG$PROF_SESSIONS\n";
+             {
+                 std::cout << "    Debug: Session NOT FOUND in PLG$PROF_SESSIONS for ID " << sessionId << "\n";
+                 st->prepare("SELECT COUNT(*) FROM PLG$PROF_SESSIONS");
+                 st->execute();
+                 int totalSessions = 0;
+                 if (st->fetch()) totalSessions = st->getInt32(0);
+                 std::cout << "    Debug: Total sessions in PLG$PROF_SESSIONS: " << totalSessions << "\n";
+             }
+
+             st->prepare("SELECT COUNT(*) FROM PLG$PROF_STATEMENTS");
+             st->execute();
+             int totalStmts = 0;
+             if (st->fetch()) totalStmts = st->getInt32(0);
+             std::cout << "    Debug: Total statements across ALL sessions: " << totalStmts << "\n";
         }
 
         ok = fr_test::check(count > 0, "Record source stats collected for INSERT ... SELECT") && ok;
