@@ -34,9 +34,7 @@ endif()
 vcpkg_execute_build_process(
     COMMAND ${CMAKE_COMMAND} -E env "FB_PROCESSOR_ARCHITECTURE=${FB_PROCESSOR_ARCHITECTURE}"
         cmd /c run_all.bat
-        JUSTBUILD
-        RELEASE
-        CLIENT_ONLY
+        ${FB_ARCH_OUT}
     WORKING_DIRECTORY "${SOURCE_PATH}/builds/win32"
     LOGNAME configure-${TARGET_TRIPLET}-rel
 )
@@ -121,9 +119,8 @@ file(
 vcpkg_execute_build_process(
     COMMAND ${CMAKE_COMMAND} -E env "FB_PROCESSOR_ARCHITECTURE=${FB_PROCESSOR_ARCHITECTURE}"
         cmd /c run_all.bat
-        JUSTBUILD
         DEBUG
-        CLIENT_ONLY
+        ${FB_ARCH_OUT}
     WORKING_DIRECTORY "${SOURCE_PATH}/builds/win32"
     LOGNAME configure-${TARGET_TRIPLET}-dbg
 )
