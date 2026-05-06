@@ -427,14 +427,14 @@ wxString Procedure::getAlterSql(bool full)
         if (!output.empty())
             sql += output + " )";
     }
-    sql += +"\n" + getSqlSecurity() + "\n";
+    sql += +"\n" + getSqlSecurity() + "\nAS\n";
     if (full)
         sql += getSource();
     else {
         if (!output.empty())
-            sql += "AS \nBEGIN SUSPEND; \nEND";
+            sql += "BEGIN SUSPEND; \nEND";
         else
-        sql += "AS \nBEGIN \nEND";
+            sql += "BEGIN \nEND";
     }
         
     sql += "^\nSET TERM ; ^\n";

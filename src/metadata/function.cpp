@@ -626,11 +626,11 @@ wxString FunctionSQL::getAlterSql(bool full)
 		if (!output.empty())
 			sql += output ;
 	}
-    sql += +"\n" + getSqlSecurity() + "\n";
+    sql += +"\n" + getSqlSecurity() + "\nAS\n";
 	if (full)
 		sql += getSource();
 	else
-		sql += "as BEGIN END";
+		sql += "BEGIN END";
 	sql += "^\nSET TERM ; ^\n";
 	return sql;
 }
