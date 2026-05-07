@@ -506,6 +506,34 @@ int main()
         ok = checkToken(t.getCurrentToken(), kwUNLIST, "UNLIST: kwUNLIST") && ok;
     }
 
+    // Test: Firebird 6.0 Enhanced Security keywords (OWNER, INITIAL)
+    {
+        SqlTokenizer t("OWNER INITIAL");
+        ok = checkToken(t.getCurrentToken(), kwOWNER, "OWNER: kwOWNER") && ok;
+        t.jumpToken(false);
+        ok = checkToken(t.getCurrentToken(), kwINITIAL, "INITIAL: kwINITIAL") && ok;
+    }
+
+    // Test: CREATE DATABASE with OWNER and INITIAL USER
+    {
+        SqlTokenizer t("CREATE DATABASE 'test.fdb' OWNER 'admin' INITIAL USER 'user'");
+        ok = checkToken(t.getCurrentToken(), kwCREATE, "CREATE: kwCREATE") && ok;
+        t.jumpToken(false);
+        ok = checkToken(t.getCurrentToken(), kwDATABASE, "DATABASE: kwDATABASE") && ok;
+        t.jumpToken(false);
+        ok = checkToken(t.getCurrentToken(), tkSTRING, "string: 'test.fdb'") && ok;
+        t.jumpToken(false);
+        ok = checkToken(t.getCurrentToken(), kwOWNER, "OWNER: kwOWNER") && ok;
+        t.jumpToken(false);
+        ok = checkToken(t.getCurrentToken(), tkSTRING, "string: 'admin'") && ok;
+        t.jumpToken(false);
+        ok = checkToken(t.getCurrentToken(), kwINITIAL, "INITIAL: kwINITIAL") && ok;
+        t.jumpToken(false);
+        ok = checkToken(t.getCurrentToken(), kwUSER, "USER: kwUSER") && ok;
+        t.jumpToken(false);
+        ok = checkToken(t.getCurrentToken(), tkSTRING, "string: 'user'") && ok;
+    }
+
     // Test: LATERAL join
     {
         wxString sql = "SELECT * FROM RDB$DATABASE JOIN LATERAL (SELECT 1 FROM RDB$DATABASE) ON 1=1";
