@@ -397,7 +397,7 @@ public:
 
     void getConnectedUsers(wxArrayString& users) const;
     int getLinger() const; // ODS:12
-    wxString getSqlSecurity() const; // ODS:13
+    wxString getSqlSecurity(); // ODS:13
 
     wxMBConv* getCharsetConverter() const;
 };

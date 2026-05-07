@@ -96,6 +96,7 @@ private:
     void addDropItem(MetadataItem& metadataItem);
     void addGenerateCodeMenu(MetadataItem& metadataItem, wxMenu* parent = 0);
     void addPropertiesItem();
+    void addSqlSecurityItem(MetadataItem& item);
     void addRefreshItem();
     void addSeparator();
 };

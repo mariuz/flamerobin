@@ -117,6 +117,7 @@ void MainObjectMenuMetadataItemVisitor::visitDatabase(Database& database)
         _("Database &preferences"));
     addSeparator();
     addRefreshItem();
+    addSqlSecurityItem(database);
     menuM->Append(Cmds::Menu_DatabaseProperties, _("P&roperties"));
 }
 
@@ -170,7 +171,10 @@ void MainObjectMenuMetadataItemVisitor::visitFunctionSQL(FunctionSQL& function)
     addGenerateCodeMenu(function);
     addSeparator();
     if (function.getParent()->getType() == ntDatabase)
+    {
         addRefreshItem();
+        addSqlSecurityItem(function);
+    }
     addPropertiesItem();
 }
 
@@ -267,6 +271,7 @@ void MainObjectMenuMetadataItemVisitor::visitPackage(Package& package)
     addGenerateCodeMenu(package);
     addSeparator();
     addRefreshItem();
+    addSqlSecurityItem(package);
     addPropertiesItem();
 }
 
@@ -297,7 +302,10 @@ void MainObjectMenuMetadataItemVisitor::visitProcedure(Procedure& procedure)
     addGenerateCodeMenu(procedure);
     addSeparator();
     if (procedure.getParent()->getType() == ntDatabase)
+    {
         addRefreshItem();
+        addSqlSecurityItem(procedure);
+    }
     addPropertiesItem();
 }
 
@@ -402,6 +410,7 @@ void MainObjectMenuMetadataItemVisitor::visitTable(Table& table)
     addDropItem(table);
     addSeparator();
     addRefreshItem();
+    addSqlSecurityItem(table);
     addPropertiesItem();
 }
 
@@ -440,6 +449,7 @@ void MainObjectMenuMetadataItemVisitor::visitDMLTrigger(DMLTrigger& trigger)
     addGenerateCodeMenu(trigger);
     addSeparator();
     addRefreshItem();
+    addSqlSecurityItem(trigger);
     addPropertiesItem();
 }
 void MainObjectMenuMetadataItemVisitor::visitDBTrigger(DBTrigger& trigger)
@@ -451,6 +461,7 @@ void MainObjectMenuMetadataItemVisitor::visitDBTrigger(DBTrigger& trigger)
     addGenerateCodeMenu(trigger);
     addSeparator();
     addRefreshItem();
+    addSqlSecurityItem(trigger);
     addPropertiesItem();
 }
 void MainObjectMenuMetadataItemVisitor::visitDDLTrigger(DDLTrigger& trigger)
@@ -462,6 +473,7 @@ void MainObjectMenuMetadataItemVisitor::visitDDLTrigger(DDLTrigger& trigger)
     addGenerateCodeMenu(trigger);
     addSeparator();
     addRefreshItem();
+    addSqlSecurityItem(trigger);
     addPropertiesItem();
 }
 
@@ -502,6 +514,7 @@ void MainObjectMenuMetadataItemVisitor::visitView(View& view)
     addDropItem(view);
     addSeparator();
     addRefreshItem();
+    addSqlSecurityItem(view);
     addPropertiesItem();
 }
 
@@ -647,6 +660,15 @@ void MainObjectMenuMetadataItemVisitor::addGenerateCodeMenu(
 void MainObjectMenuMetadataItemVisitor::addPropertiesItem()
 {
     menuM->Append(Cmds::Menu_ObjectProperties, _("P&roperties"));
+}
+
+void MainObjectMenuMetadataItemVisitor::addSqlSecurityItem(MetadataItem& item)
+{
+    DatabasePtr db = item.getDatabase();
+    if (db && db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
+    {
+        menuM->Append(Cmds::Menu_SetSqlSecurity, _("Set SQL Security..."));
+    }
 }
 
 void MainObjectMenuMetadataItemVisitor::addRefreshItem()

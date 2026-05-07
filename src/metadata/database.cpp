@@ -2306,7 +2306,7 @@ int Database::getLinger() const
     return lingerM;
 }
 
-wxString Database::getSqlSecurity() const
+wxString Database::getSqlSecurity()
 {
     return sqlSecurityM;
 }

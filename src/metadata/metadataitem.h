@@ -158,6 +158,9 @@ public:
     // returns complete DROP SQL statement
     virtual wxString getDropSqlStatement() const;
 
+    // returns SQL SECURITY property
+    virtual wxString getSqlSecurity();
+
     // getters/setters
     virtual MetadataItem* getParent() const;
     void setParent(MetadataItem* parent);

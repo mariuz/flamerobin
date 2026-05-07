@@ -132,6 +132,7 @@ enum {
     Menu_RebuildObject,
     Menu_ActiveObject,
     Menu_InactiveObject,
+    Menu_SetSqlSecurity,
     Menu_ShutdownDatabase,
     Menu_StartupDatabase,
     Menu_Maintenance,

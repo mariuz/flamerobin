@@ -19,6 +19,7 @@ http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issue
 <br>
 <font size=+1 color="#AA0000"><B>Firebird 6.0 SQL Support</B></font><br>
 <br>
+- **Enhanced SQL Security Management**: Added a dedicated UI for managing SQL Security (`DEFINER` vs `INVOKER`) across all supported metadata objects (Databases, Tables, Views, Procedures, Functions, Packages, and Triggers). Users can now easily alter the security context or drop explicit security settings to use the database default.<br>
 - **Named Arguments**: Added support for the Firebird 6.0 named argument syntax (`proc(arg1 => val1)`) in the SQL editor. Both the `=>` operator and the `NAMED_ARG_ASSIGN` keyword are correctly recognized and highlighted.<br>
 - **GREATEST and LEAST Functions**: Added SQL editor support for the new `GREATEST` and `LEAST` functions. These functions allow comparing multiple values and returning the maximum or minimum. They are now correctly highlighted and appear in the autocompletion list.<br>
 - **ANY_VALUE and UNLIST**: Integrated support for the `ANY_VALUE` aggregate and the `UNLIST` string-splitting function. These Firebird 6.0 features are now fully recognized by the SQL editor for syntax highlighting and code completion.<br>

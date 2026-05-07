@@ -471,6 +471,7 @@ EVT_UPDATE_UI(Cmds::Menu_StartupDatabase, MainFrame::OnMenuUpdateIfDatabaseNotCo
     EVT_MENU(Cmds::Menu_RebuildObject, MainFrame::OnMenRebuildObject)
     EVT_MENU(Cmds::Menu_ActiveObject, MainFrame::OnMenActiveObject)
     EVT_MENU(Cmds::Menu_InactiveObject, MainFrame::OnMenInactiveObject)
+    EVT_MENU(Cmds::Menu_SetSqlSecurity, MainFrame::OnMenuSetSqlSecurity)
 
     EVT_MENU(Cmds::Menu_ToggleStatusBar, MainFrame::OnMenuToggleStatusBar)
     EVT_MENU(Cmds::Menu_ToggleSearchBar, MainFrame::OnMenuToggleSearchBar)
@@ -880,6 +881,71 @@ void MainFrame::OnMenInactiveObject(wxCommandEvent& WXUNUSED(event))
     uri.addParam(wxString::Format("object_handle=%lu", mi->getHandle()));
     getURIProcessor().handleURI(uri);
     return;
+}
+
+void MainFrame::OnMenuSetSqlSecurity(wxCommandEvent& WXUNUSED(event))
+{
+    MetadataItem* mi = treeMainM->getSelectedMetadataItem();
+    if (!mi)
+        return;
+
+    DatabasePtr db = mi->getDatabase();
+    if (!db || !tryAutoConnectDatabase())
+        return;
+
+    wxString currentSecurity = mi->getSqlSecurity();
+    if (currentSecurity.IsEmpty())
+        currentSecurity = _("DEFAULT (Database Default)");
+
+    wxArrayString choices;
+    choices.Add(_("DEFINER"));
+    choices.Add(_("INVOKER"));
+    choices.Add(_("DEFAULT (Use Database Default)"));
+
+    wxSingleChoiceDialog dialog(this, _("Select SQL Security for ") + mi->getName_(),
+        _("SQL Security"), choices);
+    
+    if (currentSecurity.Contains("DEFINER"))
+        dialog.SetSelection(0);
+    else if (currentSecurity.Contains("INVOKER"))
+        dialog.SetSelection(1);
+    else
+        dialog.SetSelection(2);
+
+    if (dialog.ShowModal() == wxID_OK)
+    {
+        int sel = dialog.GetSelection();
+        wxString sql;
+        wxString typeName;
+        
+        if (dynamic_cast<Database*>(mi)) typeName = "DATABASE";
+        else if (dynamic_cast<Table*>(mi)) typeName = "TABLE";
+        else if (dynamic_cast<View*>(mi)) typeName = "VIEW";
+        else if (dynamic_cast<Procedure*>(mi)) typeName = "PROCEDURE";
+        else if (dynamic_cast<FunctionSQL*>(mi)) typeName = "FUNCTION";
+        else if (dynamic_cast<Package*>(mi)) typeName = "PACKAGE";
+        else if (dynamic_cast<Trigger*>(mi)) typeName = "TRIGGER";
+
+        if (typeName.IsEmpty())
+            return;
+
+        if (typeName == "DATABASE")
+        {
+             if (sel == 2) return; // Database doesn't have "DEFAULT" SQL Security
+             sql = wxString::Format("ALTER DATABASE SET SQL SECURITY %s", (sel == 0 ? "DEFINER" : "INVOKER"));
+        }
+        else
+        {
+            if (sel == 2)
+                sql = wxString::Format("ALTER %s %s DROP SQL SECURITY", typeName, mi->getQuotedName());
+            else
+                sql = wxString::Format("ALTER %s %s SET SQL SECURITY %s", typeName, mi->getQuotedName(), (sel == 0 ? "DEFINER" : "INVOKER"));
+        }
+
+        execSql(this, _("Setting SQL Security"), db, sql, true);
+        mi->invalidate();
+        mi->notifyObservers();
+    }
 }
 
 void MainFrame::OnMenuShowAllStatisticsValues(wxCommandEvent& WXUNUSED(event))
