@@ -1,0 +1,36 @@
+diff --git a/builds/win32/msvc15/build_msg.vcxproj b/builds/win32/msvc15/build_msg.vcxproj
+index 97595b1cf4..2f2ff43fd7 100644
+--- a/builds/win32/msvc15/build_msg.vcxproj
++++ b/builds/win32/msvc15/build_msg.vcxproj
+@@ -29,6 +29,7 @@
+     <ConfigurationType>Application</ConfigurationType>
+     <UseOfMfc>false</UseOfMfc>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v143</PlatformToolset>
+     <PlatformToolset Condition="'$(VisualStudioVersion)'=='15.0'">v141</PlatformToolset>
+     <PlatformToolset Condition="'$(VisualStudioVersion)'=='16.0'">v142</PlatformToolset>
+     <PlatformToolset Condition="'$(VisualStudioVersion)'=='17.0'">v143</PlatformToolset>
+@@ -38,6 +39,7 @@
+     <ConfigurationType>Application</ConfigurationType>
+     <UseOfMfc>false</UseOfMfc>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v143</PlatformToolset>
+     <PlatformToolset Condition="'$(VisualStudioVersion)'=='15.0'">v141</PlatformToolset>
+     <PlatformToolset Condition="'$(VisualStudioVersion)'=='16.0'">v142</PlatformToolset>
+     <PlatformToolset Condition="'$(VisualStudioVersion)'=='17.0'">v143</PlatformToolset>
+@@ -47,6 +49,7 @@
+     <ConfigurationType>Application</ConfigurationType>
+     <UseOfMfc>false</UseOfMfc>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v143</PlatformToolset>
+     <PlatformToolset Condition="'$(VisualStudioVersion)'=='15.0'">v141</PlatformToolset>
+     <PlatformToolset Condition="'$(VisualStudioVersion)'=='16.0'">v142</PlatformToolset>
+     <PlatformToolset Condition="'$(VisualStudioVersion)'=='17.0'">v143</PlatformToolset>
+@@ -56,6 +59,7 @@
+     <ConfigurationType>Application</ConfigurationType>
+     <UseOfMfc>false</UseOfMfc>
+     <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v143</PlatformToolset>
+     <PlatformToolset Condition="'$(VisualStudioVersion)'=='15.0'">v141</PlatformToolset>
+     <PlatformToolset Condition="'$(VisualStudioVersion)'=='16.0'">v142</PlatformToolset>
+     <PlatformToolset Condition="'$(VisualStudioVersion)'=='17.0'">v143</PlatformToolset>

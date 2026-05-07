@@ -8,6 +8,7 @@ vcpkg_from_github(
     HEAD_REF master
     PATCHES
         windows-paths.diff
+        windows-build-msg-toolset.patch
         windows-timeout.patch
         osx-icu-rpath.patch
         osx-unvcpkg.patch
