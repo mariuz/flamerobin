@@ -80,7 +80,7 @@ The following phases track FlameRobin UI/metadata support for features introduce
 - [x] **`ANY_VALUE` Aggregate** — Add to SQL keyword completion (SQL:2023).
 - [ ] **Optional String Max Lengths** — Ensure `VARCHAR` / `CHAR` column DDL handles implicit-length syntax per SQL:2023.
 - [ ] **CSV External Tables** — UI support for defining external tables backed by CSV files when the engine supports it.
-- [ ] **Enhanced Security: Owner Assignment on CREATE DATABASE** — Expose ownership and initial-user options in the Create Database dialog.
+- [x] **Enhanced Security: Owner Assignment on CREATE DATABASE** — Expose ownership and initial-user options in the Create Database dialog.
 
 ---
 
