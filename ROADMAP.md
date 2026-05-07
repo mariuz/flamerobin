@@ -78,6 +78,10 @@ The following phases track FlameRobin UI/metadata support for features introduce
 - [x] **`GREATEST` / `LEAST` Functions** — Add to SQL keyword completion (SQL:2023).
 - [x] **`UNLIST` Function** — Add to SQL keyword completion for string-splitting into result rows.
 - [x] **`ANY_VALUE` Aggregate** — Add to SQL keyword completion (SQL:2023).
+- [ ] **SQL-Standard `ROW` Data Type** — Support for defining and using `ROW` type variables and columns in PSQL and DDL.
+- [ ] **Underscores in Numeric Literals** — Support for `1_000_000` style numeric literals and non-decimal integer literals (SQL:2023) in the SQL editor.
+- [ ] **Collation as Data Type Property** — Display and manage collation defined directly on table columns as part of the data type (SQL:2023).
+- [ ] **Enhanced SQL Security Management** — UI for `ALTER ... SQL SECURITY {DEFINER | INVOKER}` across all applicable metadata objects.
 - [ ] **Optional String Max Lengths** — Ensure `VARCHAR` / `CHAR` column DDL handles implicit-length syntax per SQL:2023.
 - [ ] **CSV External Tables** — UI support for defining external tables backed by CSV files when the engine supports it.
 - [x] **Enhanced Security: Owner Assignment on CREATE DATABASE** — Expose ownership and initial-user options in the Create Database dialog.
