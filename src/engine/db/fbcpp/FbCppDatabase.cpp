@@ -98,7 +98,7 @@ void FbCppDatabase::create(int /*pagesize*/, int dialect, const std::string& own
     {
         auto status = getClient().newStatus();
         Firebird::ThrowStatusWrapper statusWrapper(status.get());
-        auto dpbBuilder = fbUnique(getClient().getUtil()->getXpbBuilder(&statusWrapper, 
+        auto dpbBuilder = fbcpp::fbUnique(getClient().getUtil()->getXpbBuilder(&statusWrapper, 
             Firebird::IXpbBuilder::DPB, nullptr, 0));
 
         if (!owner.empty())
