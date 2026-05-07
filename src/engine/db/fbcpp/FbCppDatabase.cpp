@@ -30,6 +30,14 @@
 #include <stdexcept>
 #include <firebird/Interface.h>
 
+#ifndef isc_dpb_owner
+#define isc_dpb_owner 102
+#endif
+
+#ifndef isc_dpb_initial_user
+#define isc_dpb_initial_user 103
+#endif
+
 // Forward declaration of the Firebird entry point
 // We use ISC_EXPORT to match the declaration in Interface.h and avoid redefinition errors on MSVC
 extern "C" Firebird::IMaster* ISC_EXPORT fb_get_master_interface();
@@ -84,9 +92,24 @@ void FbCppDatabase::create(int /*pagesize*/, int dialect, const std::string& own
         .setPassword(passwordM)
         .setRole(roleM)
         .setSqlDialect(static_cast<uint32_t>(dialect))
-        .setOwner(owner)
-        .setInitialUser(initialUser)
         .setCreateDatabase(true);
+
+    if (!owner.empty() || !initialUser.empty())
+    {
+        auto status = getClient().newStatus();
+        Firebird::ThrowStatusWrapper statusWrapper(status.get());
+        auto dpbBuilder = fbUnique(getClient().getUtil()->getXpbBuilder(&statusWrapper, 
+            Firebird::IXpbBuilder::DPB, nullptr, 0));
+
+        if (!owner.empty())
+            dpbBuilder->insertString(&statusWrapper, isc_dpb_owner, owner.c_str());
+        if (!initialUser.empty())
+            dpbBuilder->insertString(&statusWrapper, isc_dpb_initial_user, initialUser.c_str());
+
+        std::vector<uint8_t> dpb(dpbBuilder->getBufferLength(&statusWrapper));
+        memcpy(dpb.data(), dpbBuilder->getBuffer(&statusWrapper), dpb.size());
+        options.setDpb(std::move(dpb));
+    }
 
     attachmentM.emplace(getClient(), connStrM, options);
 }
