@@ -75,7 +75,8 @@ bool FbCppDatabase::isConnected()
     return attachmentM.has_value();
 }
 
-void FbCppDatabase::create(int /*pagesize*/, int dialect)
+void FbCppDatabase::create(int /*pagesize*/, int dialect, const std::string& owner,
+    const std::string& initialUser)
 {
     auto options = fbcpp::AttachmentOptions()
         .setConnectionCharSet(charsetM)
@@ -83,6 +84,8 @@ void FbCppDatabase::create(int /*pagesize*/, int dialect)
         .setPassword(passwordM)
         .setRole(roleM)
         .setSqlDialect(static_cast<uint32_t>(dialect))
+        .setOwner(owner)
+        .setInitialUser(initialUser)
         .setCreateDatabase(true);
 
     attachmentM.emplace(getClient(), connStrM, options);

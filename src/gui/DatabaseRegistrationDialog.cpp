@@ -119,6 +119,14 @@ void DatabaseRegistrationDialog::createControls()
             _("SQL dialect:"));
         choice_dialect = new wxChoice(getControlsPanel(), -1,
             wxDefaultPosition, wxDefaultSize, getDatabaseDialectChoices());
+
+        label_owner = new wxStaticText(getControlsPanel(), -1,
+            _("Owner:"));
+        text_ctrl_owner = new wxTextCtrl(getControlsPanel(), -1, wxEmptyString);
+
+        label_initialuser = new wxStaticText(getControlsPanel(), -1,
+            _("Initial user:"));
+        text_ctrl_initialuser = new wxTextCtrl(getControlsPanel(), -1, wxEmptyString);
     }
 
     button_ok = new wxButton(getControlsPanel(), wxID_SAVE,
@@ -320,6 +328,11 @@ void DatabaseRegistrationDialog::layoutControls()
         sizerControls->Add(choice_pagesize, wxGBPosition(6, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
         sizerControls->Add(label_dialect, wxGBPosition(6, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
         sizerControls->Add(choice_dialect, wxGBPosition(6, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+
+        sizerControls->Add(label_owner, wxGBPosition(7, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
+        sizerControls->Add(text_ctrl_owner, wxGBPosition(7, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+        sizerControls->Add(label_initialuser, wxGBPosition(7, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
+        sizerControls->Add(text_ctrl_initialuser, wxGBPosition(7, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
     }
 
     sizerControls->AddGrowableCol(1);
@@ -637,7 +650,8 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
             long dialect = 3;
             if (choice_dialect->GetStringSelection() == "1")
                 dialect = 1;
-            databaseM->create(ps, dialect);
+            databaseM->create(ps, dialect, text_ctrl_owner->GetValue(),
+                text_ctrl_initialuser->GetValue());
         }
         EndModal(wxID_OK);
     }

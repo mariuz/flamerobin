@@ -482,6 +482,8 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
         connPasswordM = "";
         connRoleM = "";
         connCharsetM = "NONE";
+        connOwnerM = "";
+        connInitialUserM = "";
         createPageSizeM = 8096;
         createDialectM = 3;
         while (idx < tokensM.size())
@@ -500,6 +502,16 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
             {
                 idx++;
                 connRoleM = unquote(tokenStringsM[idx], "'");
+            }
+            else if (tokensM[idx] == kwOWNER)
+            {
+                idx++;
+                connOwnerM = unquote(tokenStringsM[idx], "'");
+            }
+            else if (tokensM[idx] == kwINITIAL && tokensM[idx+1] == kwUSER)
+            {
+                idx += 2;
+                connInitialUserM = unquote(tokenStringsM[idx], "'");
             }
             else if ((tokensM[idx] == kwCHARACTER) && (tokensM[idx + 1] == kwSET) && (tokensM[idx + 2] == tkSTRING))
             {
@@ -520,6 +532,16 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
         }
         return;
     }
+}
+
+wxString SqlStatement::getCreateOwner() const
+{
+    return connOwnerM;
+}
+
+wxString SqlStatement::getCreateInitialUser() const
+{
+    return connInitialUserM;
 }
 
 wxString SqlStatement::getStatement() const

@@ -99,16 +99,28 @@ jobs:
           exit 1
         }
 
+    - name: Show vcpkg logs on failure
+      if: failure()
+      shell: pwsh
+      run: |
+        $logDir = "vcpkg/buildtrees"
+        if (Test-Path $logDir) {
+          Get-ChildItem -Path $logDir -Filter "*.log" -Recurse | ForEach-Object {
+            Write-Host "--- CONTENT OF $($_.FullName) ---"
+            Get-Content $_.FullName -Tail 200
+          }
+        }
+
     - name: Generate CMake project
       env:
         VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}\vcpkg_archives
       run: |
         if (!(Test-Path vcpkg_archives)) { New-Item -ItemType Directory -Path vcpkg_archives }
-        cmake -S .\ -B .\${{ matrix.build_dir }} -A ${{ matrix.cmake_arch }} "-DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-windows-static -DVCPKG_INSTALLED_DIR="${{ github.workspace }}\vcpkg_installed"
+        cmake -S .\ -B .\${{ matrix.build_dir }} -A ${{ matrix.cmake_arch }} "-DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-windows-static -DVCPKG_INSTALLED_DIR="${{ github.workspace }}\vcpkg_installed" -DCMAKE_VERBOSE_MAKEFILE=ON
       
     - name: Build Flamerobin
       run: >
-        cmake --build .\${{ matrix.build_dir }} --config Release -j 8
+        cmake --build .\${{ matrix.build_dir }} --config Release -j 8 --verbose
 
     - name: Innosetup 
       run: >

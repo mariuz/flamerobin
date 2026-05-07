@@ -52,7 +52,8 @@ bool IbppDatabase::isConnected()
     return databaseM != 0 && databaseM->Connected();
 }
 
-void IbppDatabase::create(int pagesize, int dialect)
+void IbppDatabase::create(int pagesize, int dialect, const std::string& owner,
+    const std::string& initialUser)
 {
     std::string extra;
     if (pagesize > 0)
@@ -62,8 +63,19 @@ void IbppDatabase::create(int pagesize, int dialect)
         if (!extra.empty()) extra += " ";
         extra += "DEFAULT CHARACTER SET " + charsetM;
     }
+    if (!owner.empty())
+    {
+        if (!extra.empty()) extra += " ";
+        extra += "OWNER '" + owner + "'";
+    }
+    if (!initialUser.empty())
+    {
+        if (!extra.empty()) extra += " ";
+        extra += "INITIAL USER '" + initialUser + "'";
+    }
 
-    databaseM = IBPP::DatabaseFactory(clientLibM, connStrM, userM, passwordM, roleM, charsetM, extra, cryptKeyDataM);
+    databaseM = IBPP::DatabaseFactory(clientLibM, connStrM, userM, passwordM,
+        roleM, charsetM, extra, cryptKeyDataM);
     databaseM->Create(dialect);
 }
 

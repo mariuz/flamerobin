@@ -68,6 +68,12 @@ private:
     
     wxStaticText* label_dialect;
     wxChoice* choice_dialect;
+
+    wxStaticText* label_owner;
+    wxTextCtrl* text_ctrl_owner;
+
+    wxStaticText* label_initialuser;
+    wxTextCtrl* text_ctrl_initialuser;
     
     /*
     * Todo: Implement FB library per conexion

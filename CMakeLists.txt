@@ -14,6 +14,11 @@ endif()
 
 project(flamerobin)
 
+message(STATUS "DEBUG: CMAKE_GENERATOR=${CMAKE_GENERATOR}")
+message(STATUS "DEBUG: CMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}")
+message(STATUS "DEBUG: VCPKG_TARGET_TRIPLET=${VCPKG_TARGET_TRIPLET}")
+message(STATUS "DEBUG: VCPKG_INSTALLED_DIR=${VCPKG_INSTALLED_DIR}")
+
 # Set a default build type if none was specified
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to 'Debug' as none was specified.")

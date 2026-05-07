@@ -1075,7 +1075,8 @@ void Database::parseCommitedSql(const SqlStatement& stm)
     }
 }
 
-void Database::create(int pagesize, int dialect)
+void Database::create(int pagesize, int dialect, const wxString& owner,
+    const wxString& initialUser)
 {
     bool useUserNamePwd = !authenticationModeM.getIgnoreUsernamePassword();
 
@@ -1089,7 +1090,8 @@ void Database::create(int pagesize, int dialect)
     databaseDAL_M->setClientLibrary(wx2std(getClientLibrary()));
     databaseDAL_M->setCryptKeyData(wx2std(getCryptKeyData()));
 
-    databaseDAL_M->create(pagesize, dialect);
+    databaseDAL_M->create(pagesize, dialect, wx2std(owner),
+        wx2std(initialUser));
 }
 
 void Database::drop()

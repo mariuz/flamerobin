@@ -183,6 +183,8 @@ private:
 
     int lingerM; // ODS 12
     wxString sqlSecurityM; // ODS 13
+    wxString ownerM; // ODS 14
+    wxString initialUserM; // ODS 14
 
     wxString pathM;
     wxString clientLibraryM;
@@ -297,7 +299,8 @@ public:
     ViewsPtr getViews();
 
     bool isConnected() const;
-    void create(int pagesize, int dialect);
+    void create(int pagesize, int dialect, const wxString& owner = "",
+        const wxString& initialUser = "");
     void connect(const wxString& password, ProgressIndicator* indicator = 0);
     void disconnect();
     void reconnect();

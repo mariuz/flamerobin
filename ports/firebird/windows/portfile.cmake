@@ -11,22 +11,18 @@ endif()
 
 if(VCPKG_TARGET_ARCHITECTURE STREQUAL "x86")
     set(FB_ARCH_OUT "Win32")
-    set(FB_ARCH_ARG "32")
     set(FB_PROCESSOR_ARCHITECTURE "x86")
 elseif(VCPKG_TARGET_ARCHITECTURE STREQUAL "x64")
     set(FB_ARCH_OUT "x64")
-    set(FB_ARCH_ARG "64")
     set(FB_PROCESSOR_ARCHITECTURE "AMD64")
 elseif(VCPKG_TARGET_ARCHITECTURE STREQUAL "arm64")
     set(FB_ARCH_OUT "arm64")
-    set(FB_ARCH_ARG "arm64")
     set(FB_PROCESSOR_ARCHITECTURE "ARM64")
 endif()
 
 
 message(STATUS "DEBUG: FB_PROCESSOR_ARCHITECTURE=${FB_PROCESSOR_ARCHITECTURE}")
 message(STATUS "DEBUG: FB_ARCH_OUT=${FB_ARCH_OUT}")
-message(STATUS "DEBUG: FB_ARCH_ARG=${FB_ARCH_ARG}")
 message(STATUS "DEBUG: MSBUILD_EXE=${MSBUILD_EXE}")
 
 if (NOT EXISTS "${SOURCE_PATH}/builds/win32/run_all.bat")
@@ -38,7 +34,7 @@ endif()
 vcpkg_execute_build_process(
     COMMAND ${CMAKE_COMMAND} -E env "FB_PROCESSOR_ARCHITECTURE=${FB_PROCESSOR_ARCHITECTURE}"
         cmd /c run_all.bat
-        ${FB_ARCH_ARG}
+        ${FB_ARCH_OUT}
         JUSTBUILD
         CLIENT_ONLY
     WORKING_DIRECTORY "${SOURCE_PATH}/builds/win32"
@@ -185,7 +181,7 @@ file(
 vcpkg_execute_build_process(
     COMMAND ${CMAKE_COMMAND} -E env "FB_PROCESSOR_ARCHITECTURE=${FB_PROCESSOR_ARCHITECTURE}"
         cmd /c run_all.bat
-        ${FB_ARCH_ARG}
+        ${FB_ARCH_OUT}
         DEBUG
         JUSTBUILD
         CLIENT_ONLY

@@ -2597,14 +2597,18 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             splitScreen();
             return false;
         }
-        wxString connHostM, connDatabasePortM, connPathM, connUsernameM, connPasswordM, connRoleM, connCharsetM; int createPageSizeM, createDialecM;
+        wxString connHostM, connDatabasePortM, connPathM, connUsernameM, connPasswordM, connRoleM, connCharsetM, connOwnerM, connInitialUserM;
+        int createPageSizeM, createDialecM;
         stm.getCONNECTION(connHostM, connDatabasePortM, connPathM, connUsernameM, connPasswordM, connRoleM, connCharsetM);
         prepareVolatileDatabase(connHostM, connDatabasePortM, connPathM, connUsernameM, connPasswordM, connRoleM, connCharsetM);
         if (stm.getAction() == actCREATE_DATABASE) {
             createPageSizeM = stm.getCreatePageSize();
             createDialecM = stm.getCreateDialect();
-            log(wxString::Format("Creating database: %s, port: %s, database: %s, user: %s, password: %s, role: %s, charset: %s, page size: %d, dialect %d", connHostM, connDatabasePortM, connPathM, connUsernameM, connPasswordM, connRoleM, connCharsetM, createPageSizeM, createDialecM), ttSql);
-            databaseM->create(createPageSizeM, createDialecM);
+            connOwnerM = stm.getCreateOwner();
+            connInitialUserM = stm.getCreateInitialUser();
+            log(wxString::Format("Creating database: %s, port: %s, database: %s, user: %s, password: %s, role: %s, charset: %s, page size: %d, dialect %d, owner: %s, initial user: %s",
+                connHostM, connDatabasePortM, connPathM, connUsernameM, connPasswordM, connRoleM, connCharsetM, createPageSizeM, createDialecM, connOwnerM, connInitialUserM), ttSql);
+            databaseM->create(createPageSizeM, createDialecM, connOwnerM, connInitialUserM);
         }
         log(wxString::Format("Connecting to host: %s, port: %s, database: %s, user: %s, password: %s, role: %s, charset: %s", connHostM, connDatabasePortM, connPathM, connUsernameM, connPasswordM, connRoleM, connCharsetM), ttSql);
         databaseM->connect(databaseM->getRawPassword());
