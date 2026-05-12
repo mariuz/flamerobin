@@ -123,7 +123,19 @@ Statement::Statement(
 						builder.reset(metadata->getBuilder(&statusWrapper));
 
 					builder->setType(&statusWrapper, index, SQL_VARYING);
+					builder->setLength(&statusWrapper, index, descriptor.length + 2);
+					builder->setCharSet(&statusWrapper, index, 127); // CS_dynamic
 					descriptor.adjustedType = DescriptorAdjustedType::STRING;
+					descriptor.length += 2;
+					descriptor.charSetId = 127;
+					break;
+
+				case DescriptorOriginalType::VARYING:
+					if (!builder)
+						builder.reset(metadata->getBuilder(&statusWrapper));
+
+					builder->setCharSet(&statusWrapper, index, 127); // CS_dynamic
+					descriptor.charSetId = 127;
 					break;
 
 				case DescriptorOriginalType::TIME_TZ_EX:
@@ -167,6 +179,7 @@ Statement::Statement(
 				auto& descriptor = descriptors[index];
 				descriptor.offset = metadata->getOffset(&statusWrapper, index);
 				descriptor.nullOffset = metadata->getNullOffset(&statusWrapper, index);
+				descriptor.length = metadata->getLength(&statusWrapper, index);
 
 				*reinterpret_cast<std::int16_t*>(&message[descriptor.nullOffset]) = FB_TRUE;
 			}

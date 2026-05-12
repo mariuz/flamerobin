@@ -1295,7 +1295,7 @@ namespace fbcpp
 #endif
 
 				case DescriptorAdjustedType::STRING:
-					if (value.length() > descriptor.length)
+					if (value.length() > descriptor.length - sizeof(std::uint16_t))
 					{
 						static constexpr std::intptr_t STATUS_STRING_TRUNCATION[] = {
 							isc_arith_except,
