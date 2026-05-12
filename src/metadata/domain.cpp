@@ -81,6 +81,8 @@ Domain::Domain(DatabasePtr database, const wxString& name)
     : MetadataItem((hasSystemPrefix(name) ? ntSysDomain : ntDomain),
         database.get(), name)
 {
+    datatypeM = subtypeM = lengthM = precisionM = scaleM = 0;
+    nullableM = hasDefaultM = false;
 }
 
 void Domain::loadProperties()
@@ -96,7 +98,14 @@ void Domain::loadProperties()
     st1->setString(0, wx2std(getName_(), converter));
     st1->execute();
     if (!st1->fetch())
+    {
+        if (isSystem())
+        {
+            setPropertiesLoaded(true);
+            return;
+        }
         throw FRError(_("Domain not found: ") + getName_());
+    }
 
     loadProperties(st1, converter);
 }

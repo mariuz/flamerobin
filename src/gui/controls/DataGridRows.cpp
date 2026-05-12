@@ -2574,7 +2574,10 @@ bool DataGridRows::initialize(const IBPP::Statement& statement)
 
                 case IBPP::sdString:
                 {
-                    int bpc = databaseM->getCharsetById(statement->ColumnSubtype(col))->getBytesPerChar();
+                    int bpc = 1;
+                    CharacterSetPtr cs = databaseM->getCharsetById(statement->ColumnSubtype(col));
+                    if (cs)
+                        bpc = cs->getBytesPerChar();
                     int size = statement->ColumnSize(col);
                     if (bpc)
                         size /= bpc;
@@ -2684,7 +2687,10 @@ bool DataGridRows::initialize(fr::IStatementPtr statement)
                 case fr::ColumnType::Char:
                 case fr::ColumnType::Varchar:
                 {
-                    int bpc = databaseM->getCharsetById(statement->getColumnSubtype(col - 1))->getBytesPerChar();
+                    int bpc = 1;
+                    CharacterSetPtr cs = databaseM->getCharsetById(statement->getColumnSubtype(col - 1));
+                    if (cs)
+                        bpc = cs->getBytesPerChar();
                     int size = statement->getColumnSize(col - 1);
                     if (bpc)
                         size /= bpc;

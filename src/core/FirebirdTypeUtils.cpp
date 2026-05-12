@@ -42,7 +42,10 @@ wxString IBPPtype2string(Database* db, IBPP::SDT t, int subtype, int size,
     }
     if (t == IBPP::sdString)
     {
-        int bpc = db->getCharsetById(subtype)->getBytesPerChar();
+        int bpc = 1;
+        CharacterSetPtr cs = db->getCharsetById(subtype);
+        if (cs)
+            bpc = cs->getBytesPerChar();
         if (subtype == 1) // charset OCTETS
             return wxString::Format("OCTETS(%d)", bpc ? size / bpc : size);
         return wxString::Format("STRING(%d)", bpc ? size / bpc : size);
@@ -83,7 +86,10 @@ wxString DALtype2string(Database* db, fr::ColumnType t, int subtype, int size,
     case fr::ColumnType::Varchar:
     case fr::ColumnType::Char:
     {
-        int bpc = db->getCharsetById(subtype)->getBytesPerChar();
+        int bpc = 1;
+        CharacterSetPtr cs = db->getCharsetById(subtype);
+        if (cs)
+            bpc = cs->getBytesPerChar();
         if (subtype == 1) // charset OCTETS
             return wxString::Format("OCTETS(%d)", bpc ? size / bpc : size);
         return wxString::Format("STRING(%d)", bpc ? size / bpc : size);

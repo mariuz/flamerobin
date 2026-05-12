@@ -2663,7 +2663,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
                 fr::TransactionAccessMode mode = transactionAccessModeM;
                 fr::TransactionLockResolution resolution = transactionLockResolutionM;
 
-                if (sql.Upper().Contains("MON$"))
+                if (sql.Upper().Contains("MON$") || sql.Upper().Contains("RDB$") || sql.Upper().Contains("SEC$"))
                 {
                     // For MON$ tables, use Read Committed (or Read Consistency on FB4+)
                     // for better stability and to avoid hangs with Snapshot isolation.
@@ -2671,10 +2671,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
                         level != fr::TransactionIsolationLevel::ReadConsistency &&
                         level != fr::TransactionIsolationLevel::ReadDirty)
                     {
-                        if (databaseM->getODSMajor() >= 13)
-                            level = fr::TransactionIsolationLevel::ReadConsistency;
-                        else
-                            level = fr::TransactionIsolationLevel::ReadCommitted;
+                        level = fr::TransactionIsolationLevel::ReadCommitted;
                     }
 
                     // Only switch to Read mode if it's likely a SELECT

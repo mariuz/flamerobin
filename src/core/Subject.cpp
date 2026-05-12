@@ -156,7 +156,14 @@ SubjectLocker::SubjectLocker(Subject* subject)
 
 SubjectLocker::~SubjectLocker()
 {
-    setSubject(0);
+    try
+    {
+        setSubject(0);
+    }
+    catch (...)
+    {
+        // Do not let exceptions escape from destructor (causes std::terminate)
+    }
 }
 
 Subject* SubjectLocker::getSubject()

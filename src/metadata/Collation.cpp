@@ -184,7 +184,8 @@ const wxString Collation::getTypeName() const
 wxString Collation::getSource()
 {
     ensurePropertiesLoaded();
-    wxString sql  ="  FOR " + getDatabase()->getCharsetById(characterSetIdM)->getName_() + " \n";
+    CharacterSetPtr cs = getDatabase()->getCharsetById(characterSetIdM);
+    wxString sql  ="  FOR " + (cs ? cs->getName_() : wxString::Format("ID %d", characterSetIdM)) + " \n";
     if (!getBaseCollectionName().IsEmpty())
         sql += "  FROM EXTERNAL ('" + getBaseCollectionName() + "') ";
         
