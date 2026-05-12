@@ -168,6 +168,9 @@ private:
     bool updateFrameTitleM;
     void updateFrameTitle();
 
+    bool profilerCheckedM;
+    bool profilerAvailableM;
+
     // blob-editor-timer
     enum {
         TIMER_ID_UPDATE_BLOB = 1

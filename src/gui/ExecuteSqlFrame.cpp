@@ -567,10 +567,12 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     loadingM = true;
     updateEditorCaretPosM = true;
     updateFrameTitleM = true;
+    profilerCheckedM = false;
+    profilerAvailableM = false;
     if (db->getIsVolative())
         prepareVolatileDatabase();
 
-    transactionIsolationLevelM = static_cast<fr::TransactionIsolationLevel>(config().get("transactionIsolationLevel", 0));
+    transactionIsolationLevelM = static_cast<fr::TransactionIsolationLevel>(config().get("transactionIsolationLevel", 1));
     transactionLockResolutionM = config().get("transactionLockResolution", true) ? fr::TransactionLockResolution::Wait : fr::TransactionLockResolution::NoWait;
     transactionAccessModeM = config().get("transactionAccessMode", false) ? fr::TransactionAccessMode::Read : fr::TransactionAccessMode::Write;
     showStatisticsM = config().get("SQLEditorShowStats", true);
@@ -2656,7 +2658,16 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             {
                 transactionM = databaseM->getDALDatabase()->createTransaction();
                 transactionM->setAccessMode(transactionAccessModeM);
-                transactionM->setIsolationLevel(transactionIsolationLevelM);
+
+                fr::TransactionIsolationLevel level = transactionIsolationLevelM;
+                if (sql.Upper().Contains("MON$") &&
+                    level != fr::TransactionIsolationLevel::ReadCommitted &&
+                    level != fr::TransactionIsolationLevel::ReadConsistency &&
+                    level != fr::TransactionIsolationLevel::ReadDirty)
+                {
+                    level = fr::TransactionIsolationLevel::ReadCommitted;
+                }
+                transactionM->setIsolationLevel(level);
                 transactionM->setLockResolution(transactionLockResolutionM);
             }
             transactionM->start();
@@ -2749,17 +2760,59 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
 
         int64_t profileSessionId = 0;
         bool profilingStarted = false;
-        if (showProfilerM && ((databaseM->getODSMajor() > 13) || (databaseM->getODSMajor() == 13 && databaseM->getODSMinor() >= 1)))
+        bool profilerEnabled = config().get("SQLEditorEnableProfiler", false);
+        if (profilerEnabled && showProfilerM && ((databaseM->getODSMajor() > 13) || (databaseM->getODSMajor() == 13 && databaseM->getODSMinor() >= 1)))
         {
-            try {
-                fr::IStatementPtr stProf = databaseM->getDALDatabase()->createStatement(transactionM);
-                stProf->prepare("SELECT RDB$PROFILER.START_SESSION(?) FROM RDB$DATABASE");
-                stProf->setString(0, "FlameRobin");
-                stProf->execute();
-                if (stProf->fetch())
-                    profileSessionId = stProf->getInt64(0);
-                profilingStarted = (profileSessionId != 0);
-            } catch(...) {}
+            // Extra check to see if RDB$PROFILER package is actually available
+            if (!profilerCheckedM)
+            {
+                profilerCheckedM = true;
+                wxLogDebug("ExecuteSqlFrame::execute() - Checking if RDB$PROFILER is available.");
+                try {
+                    fr::ITransactionPtr trCheck = databaseM->getDALDatabase()->createTransaction();
+                    trCheck->setAccessMode(fr::TransactionAccessMode::Read);
+                    trCheck->start();
+                    {
+                        fr::IStatementPtr stCheck = databaseM->getDALDatabase()->createStatement(trCheck);
+                        stCheck->prepare("SELECT 1 FROM RDB$PACKAGES WHERE RDB$PACKAGE_NAME = 'RDB$PROFILER'");
+                        stCheck->execute();
+                        profilerAvailableM = stCheck->fetch();
+                    }
+                    trCheck->commit();
+                } catch(...) {
+                    profilerAvailableM = false;
+                }
+                wxLogDebug("ExecuteSqlFrame::execute() - RDB$PROFILER available: %d", (int)profilerAvailableM);
+            }
+
+            if (profilerAvailableM)
+            {
+                wxLogDebug("ExecuteSqlFrame::execute() - Starting profiler session.");
+                try {
+                    fr::IStatementPtr stProf = databaseM->getDALDatabase()->createStatement(transactionM);
+                    stProf->prepare("SELECT RDB$PROFILER.START_SESSION(?) FROM RDB$DATABASE");
+                    stProf->setString(0, "FlameRobin");
+                    wxLogDebug("ExecuteSqlFrame::execute() - Executing profiler start statement.");
+                    stProf->execute();
+                    wxLogDebug("ExecuteSqlFrame::execute() - Fetching profiler session ID.");
+                    if (stProf->fetch())
+                        profileSessionId = stProf->getInt64(0);
+                    profilingStarted = (profileSessionId != 0);
+                    wxLogDebug("ExecuteSqlFrame::execute() - Profiler session ID: %lld", (long long)profileSessionId);
+                } catch(const std::exception& e) {
+                    wxLogDebug("ExecuteSqlFrame::execute() - Profiler start failed: %s", e.what());
+                } catch(...) {
+                    wxLogDebug("ExecuteSqlFrame::execute() - Profiler start failed with unknown error.");
+                }
+            }
+            else
+            {
+                wxLogDebug("ExecuteSqlFrame::execute() - RDB$PROFILER package not found or disabled, skipping profiling.");
+            }
+        }
+        else if (!profilerEnabled)
+        {
+            wxLogDebug("ExecuteSqlFrame::execute() - Profiling disabled by configuration.");
         }
 
         log(_("Executing statement..."));

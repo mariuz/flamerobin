@@ -65,8 +65,7 @@ std::string Domain::getLoadStatement(bool list)
         " left outer join rdb$collations l"
             " on l.rdb$collation_id = f.rdb$collation_id"
             " and l.rdb$character_set_id = f.rdb$character_set_id"
-        " left outer join rdb$types t on f.rdb$field_type=t.rdb$type"
-        " where t.rdb$field_name = ? and f.rdb$field_name ");
+        " where f.rdb$field_name ");
 	if (list) {
 		stmt += "not starting with 'RDB$' ";
 		//if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) //If Firebird 3 ODS, remove SEC$DOMAINs, this is a static method, so I wont be able to get ODS
@@ -94,8 +93,7 @@ void Domain::loadProperties()
     wxMBConv* converter = db->getCharsetConverter();
 
     fr::IStatementPtr& st1 = loader->getStatement(getLoadStatement(false));
-    st1->setString(0, wx2std("RDB$FIELD_TYPE", converter)); 
-    st1->setString(1, wx2std(getName_(), converter));
+    st1->setString(0, wx2std(getName_(), converter));
     st1->execute();
     if (!st1->fetch())
         throw FRError(_("Domain not found: ") + getName_());
@@ -485,8 +483,7 @@ DomainPtr DomainCollectionBase::getDomain(const wxString& name)
 
         fr::IStatementPtr& st1 = loader->getStatement(
             Domain::getLoadStatement(false));
-        st1->setString(0, wx2std("RDB$FIELD_TYPE", converter)); 
-        st1->setString(1, wx2std(name, converter));
+        st1->setString(0, wx2std(name, converter));
         st1->execute();
         if (st1->fetch())
         {

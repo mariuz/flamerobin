@@ -197,6 +197,8 @@ private:
     TimezoneInfo databaseTimezoneM;
     std::unordered_map<int, wxString> timezonesCacheM;
     mutable std::mutex timezoneDataMutexM;
+    bool timezonesLoadedM;
+    bool defaultTimezonesLoadedM;
 
     std::unique_ptr<wxMBConv> charsetConverterM;
     void createCharsetConverter();

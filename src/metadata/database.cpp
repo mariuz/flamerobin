@@ -333,7 +333,8 @@ bool DatabaseAuthenticationMode::getUseEncryptedPassword() const
 // Database class
 Database::Database()
     : MetadataItem(ntDatabase), metadataLoaderM(0), connectedM(false),
-        connectionCredentialsM(0), dialectM(3), idM(0), volatileM(false)
+        connectionCredentialsM(0), dialectM(3), idM(0), volatileM(false),
+        timezonesLoadedM(false), defaultTimezonesLoadedM(false)
 {
     databaseDAL_M = fr::DatabaseFactory::createDatabase();
     defaultTimezoneM.name = "";
@@ -2322,6 +2323,12 @@ void Database::checkConnected(const wxString& operation) const
 
 void Database::loadDefaultTimezone()
 {
+    {
+        std::lock_guard<std::mutex> lock(timezoneDataMutexM);
+        if (defaultTimezonesLoadedM)
+            return;
+    }
+
     MetadataLoader* loader = getMetadataLoader();
     wxMBConv* converter = getCharsetConverter();
     std::string tzName;
@@ -2335,6 +2342,7 @@ void Database::loadDefaultTimezone()
         defaultTimezoneM.id = 0;
         databaseTimezoneM.name.clear();
         databaseTimezoneM.id = 0;
+        defaultTimezonesLoadedM = true;
         return;
     }
 
@@ -2385,6 +2393,11 @@ void Database::loadDefaultTimezone()
     catch (...)
     {
     }
+
+    {
+        std::lock_guard<std::mutex> lock(timezoneDataMutexM);
+        defaultTimezonesLoadedM = true;
+    }
 }
 
 void Database::clearTimezones(bool clearDefaultTimezone)
@@ -2396,17 +2409,25 @@ void Database::clearTimezones(bool clearDefaultTimezone)
     }
     timezonesM.clear();
     timezonesCacheM.clear();
+    timezonesLoadedM = false;
     if (clearDefaultTimezone)
     {
         defaultTimezoneM.name.clear();
         defaultTimezoneM.id = 0;
         databaseTimezoneM.name.clear();
         databaseTimezoneM.id = 0;
+        defaultTimezonesLoadedM = false;
     }
 }
 
 void Database::loadTimezones()
 {
+    {
+        std::lock_guard<std::mutex> lock(timezoneDataMutexM);
+        if (timezonesLoadedM)
+            return;
+    }
+
     MetadataLoader* loader = getMetadataLoader();
     wxMBConv* converter = getCharsetConverter();
     std::string tzName;
@@ -2417,6 +2438,8 @@ void Database::loadTimezones()
     if (!getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
     {
         clearTimezones(false);
+        std::lock_guard<std::mutex> lock(timezoneDataMutexM);
+        timezonesLoadedM = true;
         return;
     }
 
@@ -2456,6 +2479,7 @@ void Database::loadTimezones()
         oldTimezones.swap(timezonesM);
         timezonesM.swap(loadedTimezones);
         timezonesCacheM.clear();
+        timezonesLoadedM = true;
     }
     for (auto* tz : oldTimezones)
     {

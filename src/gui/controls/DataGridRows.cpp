@@ -2124,8 +2124,15 @@ void DataGridRows::addRow(fr::IStatementPtr statement)
             }
         }
     }
+    catch(const std::exception& e)
+    {
+        wxLogDebug("DataGridRows::addRow() error: %s", e.what());
+        delete buffer;
+        throw;
+    }
     catch(...)
     {
+        wxLogDebug("DataGridRows::addRow() unknown error.");
         delete buffer;
         throw;
     }
@@ -2404,7 +2411,7 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
     }
 
     Table *t = dynamic_cast<Table *>(db->findRelation(Identifier(tabName)));
-    if (!t)
+    if (!t || t->isSystem())
     {
         readOnly = true;
         return;

@@ -30,6 +30,7 @@
 #include <fb-cpp/Exception.h>
 #include <stdexcept>
 #include <firebird/Interface.h>
+#include <wx/log.h>
 
 #ifndef isc_dpb_owner
 #define isc_dpb_owner 102
@@ -89,14 +90,15 @@ std::vector<uint8_t> FbCppDatabase::buildDpb(bool creating, const std::string& o
 
 void FbCppDatabase::connect()
 {
+    wxLogDebug("FbCppDatabase::connect() called for: %s", connStrM.c_str());
     auto options = fbcpp::AttachmentOptions()
         .setConnectionCharSet(charsetM)
         .setUserName(userM)
         .setPassword(passwordM)
-        .setRole(roleM)
-        .setDpb(buildDpb(false));
+        .setRole(roleM);
 
     attachmentM.emplace(getClient(), connStrM, options);
+    wxLogDebug("FbCppDatabase::connect() finished.");
 }
 
 void FbCppDatabase::disconnect()
@@ -112,6 +114,7 @@ bool FbCppDatabase::isConnected()
 void FbCppDatabase::create(int /*pagesize*/, int dialect, const std::string& owner,
     const std::string& initialUser)
 {
+    wxLogDebug("FbCppDatabase::create() called for: %s", connStrM.c_str());
     auto options = fbcpp::AttachmentOptions()
         .setConnectionCharSet(charsetM)
         .setUserName(userM)
@@ -122,6 +125,7 @@ void FbCppDatabase::create(int /*pagesize*/, int dialect, const std::string& own
         .setDpb(buildDpb(true, owner, initialUser));
 
     attachmentM.emplace(getClient(), connStrM, options);
+    wxLogDebug("FbCppDatabase::create() finished.");
 }
 
 void FbCppDatabase::drop()
@@ -188,26 +192,27 @@ void FbCppDatabase::getConnectedUsers(std::vector<std::string>& users)
     try
     {
         auto tr = createTransaction();
+        tr->setAccessMode(TransactionAccessMode::Read);
         tr->start();
-        auto st = createStatement(tr);
-        st->prepare("SELECT DISTINCT MON$USER FROM MON$ATTACHMENTS");
-        st->execute();
-        while (st->fetch())
         {
-            std::string user = st->getString(0);
-            // Trim trailing spaces
-            size_t last = user.find_last_not_of(" ");
-            if (last != std::string::npos)
-                user.erase(last + 1);
-            else if (user.size() > 0 && user[0] == ' ')
-                user.clear();
-            users.push_back(user);
+            auto st = createStatement(tr);
+            st->prepare("SELECT DISTINCT MON$USER FROM MON$ATTACHMENTS");
+            st->execute();
+            while (st->fetch())
+            {
+                std::string user = st->getString(0);
+                // Trim trailing spaces
+                size_t last = user.find_last_not_of(" ");
+                if (last != std::string::npos)
+                    user.erase(last + 1);
+                else if (user.size() > 0 && user[0] == ' ')
+                    user.clear();
+                users.push_back(user);
+            }
         }
-        tr->commit();
+        try { tr->commit(); } catch (...) {}
     }
-    catch (...)
-    {
-    }
+    catch (...) {}
 }
 
 std::string FbCppDatabase::getEngineVersion()
@@ -316,8 +321,9 @@ void FbCppDatabase::getInfo(DatabaseInfoData* data)
 
     *data = {};
     auto tr = createTransaction();
+    tr->setAccessMode(TransactionAccessMode::Read);
+    tr->setIsolationLevel(TransactionIsolationLevel::ReadCommitted);
     tr->start();
-    auto st = createStatement(tr);
 
     auto& client = attachmentM->getClient();
     fbcpp::impl::StatusWrapper status(client);
@@ -368,33 +374,10 @@ void FbCppDatabase::getInfo(DatabaseInfoData* data)
     }
 
     // Get active transactions
-    try
-    {
-        st->prepare("SELECT MON$TRANSACTION_ID, MON$ISOLATION_MODE, MON$READ_ONLY, MON$WAIT_MODE "
-                    "FROM MON$TRANSACTIONS WHERE MON$ATTACHMENT_ID = CURRENT_CONNECTION");
-        st->execute();
-        while (st->fetch())
-        {
-            TransactionInfo info;
-            info.id = st->getInt32(0);
-            int mode = st->getInt32(1);
-            switch (mode)
-            {
-                case 0: info.isolationLevel = TransactionIsolationLevel::Consistency; break;
-                case 1: info.isolationLevel = TransactionIsolationLevel::Concurrency; break;
-                case 2: info.isolationLevel = TransactionIsolationLevel::ReadDirty; break;
-                case 3: info.isolationLevel = TransactionIsolationLevel::ReadCommitted; break;
-                case 4: info.isolationLevel = TransactionIsolationLevel::ReadConsistency; break;
-                default: info.isolationLevel = TransactionIsolationLevel::Concurrency; break;
-            }
-            info.readOnly = st->getBool(2);
-            info.wait = (st->getInt32(3) != 0);
-            data->activeTransactions.push_back(info);
-        }
-    }
-    catch (...) {}
+    // Bypassed for now because it causes hangs with the fb-cpp backend
+    // due to monitoring tables interaction issues.
 
-    tr->commit();
+    try { tr->commit(); } catch (...) {}
 }
 
 void FbCppDatabase::getStatistics(int* fetch, int* mark, int* read, int* write, int* mem)

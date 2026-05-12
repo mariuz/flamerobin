@@ -23,11 +23,14 @@
 
 #include "engine/db/fbcpp/FbCppTransaction.h"
 #include "firebird/constants.h"
+#include <wx/log.h>
 
 namespace fr
 {
 FbCppTransaction::FbCppTransaction(fbcpp::Attachment& attachment)
-    : attachmentM(attachment), modeM(TransactionAccessMode::Write), 
+    : attachmentM(attachment), 
+      transactionM(std::make_unique<fbcpp::Transaction>(attachment.getClient())),
+      modeM(TransactionAccessMode::Write), 
       levelM(TransactionIsolationLevel::Concurrency),
       resolutionM(TransactionLockResolution::Wait)
 {
@@ -35,6 +38,12 @@ FbCppTransaction::FbCppTransaction(fbcpp::Attachment& attachment)
 
 void FbCppTransaction::start()
 {
+    if (startedM)
+        return;
+
+    wxLogDebug("FbCppTransaction::start() called. Mode: %d, Level: %d, Resolution: %d",
+        (int)modeM, (int)levelM, (int)resolutionM);
+
     auto options = fbcpp::TransactionOptions();
     if (modeM == TransactionAccessMode::Read)
         options.setAccessMode(fbcpp::TransactionAccessMode::READ_ONLY);
@@ -62,42 +71,63 @@ void FbCppTransaction::start()
     else
         options.setWaitMode(fbcpp::TransactionWaitMode::NO_WAIT);
 
-    transactionM.emplace(attachmentM, options);
+    wxLogDebug("FbCppTransaction::start() initializing fbcpp::Transaction.");
+    transactionM->start(attachmentM, options);
+    startedM = true;
+    wxLogDebug("FbCppTransaction::start() finished.");
 }
 
 void FbCppTransaction::commit()
 {
-    if (transactionM)
+    if (transactionM && startedM)
     {
-        transactionM->commit();
-        transactionM.reset();
+        wxLogDebug("FbCppTransaction::commit() called.");
+        try
+        {
+            transactionM->commit();
+            startedM = false;
+            wxLogDebug("FbCppTransaction::commit() finished.");
+        }
+        catch (...)
+        {
+            startedM = false;
+            throw;
+        }
     }
 }
 
 void FbCppTransaction::rollback()
 {
-    if (transactionM)
+    if (transactionM && startedM)
     {
-        transactionM->rollback();
-        transactionM.reset();
+        try
+        {
+            transactionM->rollback();
+            startedM = false;
+        }
+        catch (...)
+        {
+            startedM = false;
+            throw;
+        }
     }
 }
 
 void FbCppTransaction::commitRetain()
 {
-    if (transactionM)
+    if (transactionM && startedM)
         transactionM->commitRetaining();
 }
 
 void FbCppTransaction::rollbackRetain()
 {
-    if (transactionM)
+    if (transactionM && startedM)
         transactionM->rollbackRetaining();
 }
 
 bool FbCppTransaction::isActive()
 {
-    return transactionM.has_value();
+    return startedM;
 }
 
 void FbCppTransaction::setAccessMode(TransactionAccessMode mode)

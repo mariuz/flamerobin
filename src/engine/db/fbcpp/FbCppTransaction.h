@@ -53,7 +53,8 @@ public:
 
 private:
     fbcpp::Attachment& attachmentM;
-    std::optional<fbcpp::Transaction> transactionM;
+    std::unique_ptr<fbcpp::Transaction> transactionM;
+    bool startedM = false;
     TransactionAccessMode modeM;
     TransactionIsolationLevel levelM;
     TransactionLockResolution resolutionM;

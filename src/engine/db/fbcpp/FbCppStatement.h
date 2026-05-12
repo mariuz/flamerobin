@@ -35,7 +35,7 @@ class FbCppStatement : public IStatement
 {
 public:
     FbCppStatement(IDatabasePtr db, ITransactionPtr tr, fbcpp::Attachment& attachment, fbcpp::Transaction& transaction);
-    virtual ~FbCppStatement() = default;
+    virtual ~FbCppStatement();
 
     virtual void prepare(const std::string& sql) override;
     virtual std::string getSql() const override;
@@ -114,6 +114,7 @@ private:
     fbcpp::FbRef<fbcpp::fb::IResultSet> resultSetM;
     std::optional<bool> firstRowFetchedM;
     bool eofReachedM;
+    bool rowAvailableM;
 };
 
 } // namespace fr

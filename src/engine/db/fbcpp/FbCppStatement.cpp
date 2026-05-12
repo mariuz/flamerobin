@@ -24,28 +24,49 @@
 #include "engine/db/fbcpp/FbCppStatement.h"
 #include "engine/db/fbcpp/FbCppBlob.h"
 #include "engine/db/IDatabase.h"
+#include "engine/db/ITransaction.h"
 #include <fb-cpp/Exception.h>
 #include <fb-cpp/Statement.h>
 #include <cstring>
 #include <stdexcept>
 #include <algorithm>
 #include <firebird/Interface.h>
+#include <wx/log.h>
 
 namespace fr
 {
 
 FbCppStatement::FbCppStatement(IDatabasePtr db, ITransactionPtr tr, fbcpp::Attachment& attachment, fbcpp::Transaction& transaction)
-    : databasePtrM(db), transactionPtrM(tr), attachmentM(attachment), transactionM(transaction), eofReachedM(false)
+    : databasePtrM(db), transactionPtrM(tr), attachmentM(attachment), transactionM(transaction), eofReachedM(false), rowAvailableM(false)
 {
+}
+
+FbCppStatement::~FbCppStatement()
+{
+    try
+    {
+        close();
+    }
+    catch (...)
+    {
+        // Never allow destructor to throw
+    }
 }
 
 void FbCppStatement::prepare(const std::string& sql)
 {
     sqlM = sql;
-    statementM.emplace(attachmentM, transactionM, sql);
+    wxLogDebug("FbCppStatement::prepare() for SQL: %s", sqlM.c_str());
+    try {
+        statementM.emplace(attachmentM, transactionM, sql);
+    } catch (const std::exception& e) {
+        wxLogDebug("FbCppStatement::prepare() failed: %s", e.what());
+        throw;
+    }
     resultSetM.reset();
     firstRowFetchedM.reset();
     eofReachedM = false;
+    rowAvailableM = false;
 }
 
 std::string FbCppStatement::getSql() const
@@ -58,16 +79,21 @@ void FbCppStatement::execute()
     if (!statementM)
         throw std::runtime_error("Statement not prepared");
     
+    if (!transactionPtrM || !transactionPtrM->isActive())
+        throw std::runtime_error("Transaction not active");
+
+    wxLogDebug("FbCppStatement::execute() for SQL: %s", sqlM.c_str());
     firstRowFetchedM.reset();
     eofReachedM = false;
+    rowAvailableM = false;
     resultSetM.reset();
 
-    // Determine if we should use a cursor (SELECT or multi-row RETURNING)
+    wxLogDebug("FbCppStatement::execute() checking for cursor.");
     auto stType = statementM->getType();
     bool isSelect = (stType == fbcpp::StatementType::SELECT || stType == fbcpp::StatementType::SELECT_FOR_UPDATE);
     
     bool hasCursor = isSelect;
-    if (!hasCursor)
+    if (!isSelect)
     {
         auto handle = statementM->getStatementHandle();
         if (handle->cloopVTable->version >= 5)
@@ -76,12 +102,14 @@ void FbCppStatement::execute()
             auto& client = attachment.getClient();
             auto status = client.newStatus();
             fbcpp::impl::StatusWrapper statusWrapper(client, status.get());
+            wxLogDebug("FbCppStatement::execute() getting statement flags.");
             hasCursor = (handle->getFlags(&statusWrapper) & Firebird::IStatement::FLAG_HAS_CURSOR);
         }
     }
 
     if (hasCursor)
     {
+        wxLogDebug("FbCppStatement::execute() opening manual cursor.");
         auto& attachment = statementM->getAttachment();
         auto& client = attachment.getClient();
         auto status = client.newStatus();
@@ -100,31 +128,41 @@ void FbCppStatement::execute()
             }
         }
 
+        wxLogDebug("FbCppStatement::execute() calling openCursor().");
         resultSetM.reset(handle->openCursor(&statusWrapper, transactionM.getHandle().get(),
             statementM->getInputMetadata().get(), statementM->getInputMessage().data(),
             statementM->getOutputMetadata().get(), 0));
+
+        wxLogDebug("FbCppStatement::execute() manual cursor opened.");
         return;
     }
 
-    bool hasRow = statementM->execute(transactionM);
-    // If the statement has output columns, we must handle the first row
-    // and subsequent fetches, even if it's not a SELECT statement.
-    if (getColumnCount() > 0)
-    {
-        firstRowFetchedM = hasRow;
-        eofReachedM = !hasRow;
-    }
+    wxLogDebug("FbCppStatement::execute() calling library execute().");
+    // For non-cursor statements (like DML without RETURNING or most DDL),
+    // we can use the library's execute() directly.
+    statementM->execute(transactionM);
 }
 
 bool FbCppStatement::fetch()
 {
     if (!statementM)
+    {
+        wxLogDebug("FbCppStatement::fetch() - no statement.");
         return false;
+    }
+
+    if (!transactionPtrM || !transactionPtrM->isActive())
+    {
+        wxLogDebug("FbCppStatement::fetch() - transaction not active.");
+        return false;
+    }
 
     if (firstRowFetchedM.has_value())
     {
         bool res = *firstRowFetchedM;
         firstRowFetchedM.reset();
+        rowAvailableM = res;
+        wxLogDebug("FbCppStatement::fetch() returning pre-fetched row: %d", (int)res);
         return res;
     }
 
@@ -133,36 +171,60 @@ bool FbCppStatement::fetch()
 
     if (resultSetM)
     {
+        wxLogDebug("FbCppStatement::fetch() fetching from manual IResultSet.");
         auto& attachment = statementM->getAttachment();
         auto& client = attachment.getClient();
         fbcpp::impl::StatusWrapper status(client);
         bool res = resultSetM->fetchNext(&status, statementM->getOutputMessage().data()) == Firebird::IStatus::RESULT_OK;
+        rowAvailableM = res;
         if (!res)
+        {
+            wxLogDebug("FbCppStatement::fetch() - manual IResultSet EOF.");
             eofReachedM = true;
+        }
+        else
+        {
+            wxLogDebug("FbCppStatement::fetch() - manual IResultSet row fetched.");
+        }
         return res;
     }
 
+    wxLogDebug("FbCppStatement::fetch() calling library fetchNext().");
     bool res = statementM->fetchNext();
+    rowAvailableM = res;
     if (!res)
+    {
+        wxLogDebug("FbCppStatement::fetch() - library EOF.");
         eofReachedM = true;
+    }
+    else
+    {
+        wxLogDebug("FbCppStatement::fetch() - library row fetched.");
+    }
     return res;
 }
 
 void FbCppStatement::close()
 {
-    if (resultSetM)
+    try
     {
-        auto& attachment = statementM->getAttachment();
-        auto& client = attachment.getClient();
-        fbcpp::impl::StatusWrapper status(client);
-        resultSetM->close(&status);
-        resultSetM.reset();
+        if (resultSetM)
+        {
+            auto& attachment = statementM->getAttachment();
+            auto& client = attachment.getClient();
+            fbcpp::impl::StatusWrapper status(client);
+            resultSetM->close(&status);
+            resultSetM.reset();
+        }
+        if (statementM)
+            statementM->closeCursor();
     }
-    if (statementM)
-        statementM->free();
-    statementM.reset();
+    catch (...)
+    {
+    }
     firstRowFetchedM.reset();
     eofReachedM = false;
+    rowAvailableM = false;
 }
 
 void FbCppStatement::setNull(int index)
@@ -179,11 +241,17 @@ void FbCppStatement::setString(int index, const std::string& value)
     if (!statementM)
         throw std::runtime_error("Statement not prepared");
     if (index < 0 || (unsigned)index >= statementM->getInputDescriptors().size())
+    {
+        wxLogDebug("FbCppStatement::setString(%d) - index out of range", index);
         return;
+    }
+
+    wxLogDebug("FbCppStatement::setString(%d, '%s') [len=%d]", index, value.c_str(), (int)value.length());
 
     ColumnType type = getParameterType(index);
     if (type == ColumnType::Blob)
     {
+        wxLogDebug("FbCppStatement::setString(%d) - creating blob from string", index);
         IBlobPtr b = std::make_shared<FbCppBlob>(attachmentM, transactionM);
         b->create();
         b->open();
@@ -312,6 +380,8 @@ bool FbCppStatement::isNull(int index)
 {
     if (!statementM)
         throw std::runtime_error("No statement available");
+    if (!rowAvailableM)
+        return true;
     if (index < 0 || (unsigned)index >= statementM->getOutputDescriptors().size())
         return true;
     return statementM->isNull((unsigned)index);
@@ -319,9 +389,7 @@ bool FbCppStatement::isNull(int index)
 
 std::string FbCppStatement::getString(int index)
 {
-    if (!statementM)
-        throw std::runtime_error("No statement available");
-    if (index < 0 || (unsigned)index >= statementM->getOutputDescriptors().size())
+    if (isNull(index))
         return "";
 
     ColumnType type = getColumnType(index);
@@ -356,10 +424,7 @@ std::string FbCppStatement::getString(int index)
 
 int32_t FbCppStatement::getInt32(int index)
 {
-    if (!statementM)
-        throw std::runtime_error("No statement available");
-
-    if (index < 0 || (unsigned)index >= statementM->getOutputDescriptors().size())
+    if (isNull(index))
         return 0;
 
     ColumnType type = getColumnType(index);
@@ -373,10 +438,7 @@ int32_t FbCppStatement::getInt32(int index)
 
 int64_t FbCppStatement::getInt64(int index)
 {
-    if (!statementM)
-        throw std::runtime_error("No statement available");
-
-    if (index < 0 || (unsigned)index >= statementM->getOutputDescriptors().size())
+    if (isNull(index))
         return 0;
 
     ColumnType type = getColumnType(index);
@@ -390,19 +452,14 @@ int64_t FbCppStatement::getInt64(int index)
 
 double FbCppStatement::getDouble(int index)
 {
-    if (!statementM)
-        throw std::runtime_error("No statement available");
-    if (index < 0 || (unsigned)index >= statementM->getOutputDescriptors().size())
+    if (isNull(index))
         return 0.0;
     return statementM->get<std::optional<double>>((unsigned)index).value_or(0.0);
 }
 
 bool FbCppStatement::getBool(int index)
 {
-    if (!statementM)
-        throw std::runtime_error("No statement available");
-
-    if (index < 0 || (unsigned)index >= statementM->getOutputDescriptors().size())
+    if (isNull(index))
         return false;
 
     ColumnType type = getColumnType(index);

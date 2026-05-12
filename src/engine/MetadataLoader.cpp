@@ -59,6 +59,7 @@ void MetadataLoader::transactionStart()
     {
         transactionM = databaseM->createTransaction();
         transactionM->setAccessMode(fr::TransactionAccessMode::Read);
+        transactionM->setIsolationLevel(fr::TransactionIsolationLevel::ReadCommitted);
     }
     if (!transactionM->isActive())
         transactionM->start();
@@ -158,5 +159,16 @@ MetadataLoaderTransaction::MetadataLoaderTransaction(MetadataLoader* loader)
 MetadataLoaderTransaction::~MetadataLoaderTransaction()
 {
     if (loaderM)
-        loaderM->transactionCommit();
+    {
+        try
+        {
+            loaderM->transactionCommit();
+        }
+        catch (...)
+        {
+            // Do not allow exceptions to escape from destructor,
+            // as it would lead to std::terminate if another
+            // exception is already active.
+        }
+    }
 }

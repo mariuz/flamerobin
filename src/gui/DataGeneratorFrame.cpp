@@ -497,7 +497,7 @@ bool DataGeneratorFrame::loadColumns(const wxString& tableName, wxChoice* c)
     Identifier id;
     id.setFromSql(tableName);
     Table *t = dynamic_cast<Table *>(databaseM->findRelation(id));
-    if (!t)
+    if (!t || t->isSystem())
         return false;
     t->ensureChildrenLoaded();
     c->Clear();

@@ -206,8 +206,30 @@ void IbppDatabase::getInfo(DatabaseInfoData* data)
         ITransactionPtr tr = createTransaction();
         tr->start();
         IStatementPtr st = createStatement(tr);
-        st->prepare("SELECT MON$TRANSACTION_ID, MON$ISOLATION_MODE, MON$READ_ONLY, MON$WAIT_MODE "
-                    "FROM MON$TRANSACTIONS WHERE MON$ATTACHMENT_ID = CURRENT_CONNECTION");
+
+        std::string sql = "SELECT MON$TRANSACTION_ID, MON$ISOLATION_MODE, MON$READ_ONLY";
+        bool hasWaitMode = (data->ods >= 13);
+        if (hasWaitMode)
+            sql += ", MON$WAIT_MODE";
+        sql += " FROM MON$TRANSACTIONS WHERE MON$ATTACHMENT_ID = CURRENT_CONNECTION";
+
+        try
+        {
+            st->prepare(sql);
+        }
+        catch (...)
+        {
+            if (hasWaitMode)
+            {
+                hasWaitMode = false;
+                sql = "SELECT MON$TRANSACTION_ID, MON$ISOLATION_MODE, MON$READ_ONLY "
+                      "FROM MON$TRANSACTIONS WHERE MON$ATTACHMENT_ID = CURRENT_CONNECTION";
+                st->prepare(sql);
+            }
+            else
+                throw;
+        }
+
         st->execute();
         while (st->fetch())
         {
@@ -224,7 +246,10 @@ void IbppDatabase::getInfo(DatabaseInfoData* data)
                 default: info.isolationLevel = TransactionIsolationLevel::Concurrency; break;
             }
             info.readOnly = st->getBool(2);
-            info.wait = (st->getInt32(3) != 0);
+            if (hasWaitMode)
+                info.wait = (st->getInt32(3) != 0);
+            else
+                info.wait = true;
             data->activeTransactions.push_back(info);
         }
         tr->commit();

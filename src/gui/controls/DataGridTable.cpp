@@ -125,20 +125,31 @@ void DataGridTable::Clear()
 
 void DataGridTable::fetchOne()
 {
-    if (statementDALM)
-        rowsM.addRow(statementDALM);
-    else
-        rowsM.addRow(statementM);
-    allRowsFetchedM = true;
-
-    if (GetView())   // notify the grid
+    try
     {
-        wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, 1);
-        GetView()->ProcessTableMessage(msg);
-        // used in frame to update status bar
-        wxCommandEvent evt(wxEVT_FRDG_ROWCOUNT_CHANGED, GetView()->GetId());
-        evt.SetExtraLong(1);
-        wxPostEvent(GetView(), evt);
+        if (statementDALM)
+            rowsM.addRow(statementDALM);
+        else
+            rowsM.addRow(statementM);
+        allRowsFetchedM = true;
+
+        if (GetView())   // notify the grid
+        {
+            wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, 1);
+            GetView()->ProcessTableMessage(msg);
+            // used in frame to update status bar
+            wxCommandEvent evt(wxEVT_FRDG_ROWCOUNT_CHANGED, GetView()->GetId());
+            evt.SetExtraLong(1);
+            wxPostEvent(GetView(), evt);
+        }
+    }
+    catch (std::exception& e)
+    {
+        wxLogError("DataGridTable::fetchOne() error: %s", e.what());
+    }
+    catch (...)
+    {
+        wxLogError("DataGridTable::fetchOne() unknown error.");
     }
 }
 
@@ -147,7 +158,6 @@ void DataGridTable::fetch()
     if (!canFetchMoreRows())
         return;
 
-    wxLogDebug("DataGridTable::fetch starting.");
     // fetch the first 100 rows no matter how long it takes
     unsigned oldRows = rowsM.getRowCount();
     bool initial = oldRows == 0;
@@ -196,8 +206,6 @@ void DataGridTable::fetch()
     while ((fetchAllRowsM && !initial) || rowsM.getRowCount() < maxRowToFetchM);
 
     unsigned newRows = rowsM.getRowCount() - oldRows;
-    wxLogDebug("DataGridTable::fetch finished. Fetched %u new rows.", newRows);
-
     if (newRows > 0 && GetView())   // notify the grid
     {
         wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED,
@@ -425,7 +433,7 @@ void DataGridTable::getTableNames(wxArrayString& tables)
             // check if table exists in metadata
             Table *t = dynamic_cast<Table *>(databaseM->findRelation(
                 Identifier(tn)));
-            if (!t)
+            if (!t || t->isSystem())
                 continue;
             t->ensureChildrenLoaded();
 
@@ -448,7 +456,7 @@ void DataGridTable::getFields(const wxString& table,
         return;
     Table *t = dynamic_cast<Table *>(databaseM->findRelation(
         Identifier(table)));
-    if (!t)
+    if (!t || t->isSystem())
         return;
     t->ensureChildrenLoaded();
 
@@ -526,6 +534,7 @@ wxString DataGridTable::GetValue(int row, int col)
 
 void DataGridTable::initialFetch(bool readonly)
 {
+    wxLogDebug("DataGridTable::initialFetch() starting.");
     Clear();
     allRowsFetchedM = false;
     readOnlyM = readonly;
@@ -536,17 +545,27 @@ void DataGridTable::initialFetch(bool readonly)
     try
     {
         if (statementDALM)
+        {
+            wxLogDebug("DataGridTable::initialFetch() initializing rowsM with statementDALM. Col count: %d", statementDALM->getColumnCount());
             rowsM.initialize(statementDALM);
+            wxLogDebug("DataGridTable::initialFetch() rowsM initialized.");
+        }
         else
+        {
+            wxLogDebug("DataGridTable::initialFetch() initializing rowsM with statementM.");
             rowsM.initialize(statementM);
+            wxLogDebug("DataGridTable::initialFetch() rowsM initialized.");
+        }
     }
     catch (std::exception& e)
     {
+        wxLogError("DataGridTable::initialFetch() error: %s", e.what());
         ::wxMessageBox(wxString::FromUTF8(e.what()),
             _("A database error occurred."), wxOK | wxICON_ERROR);
     }
     catch (...)
     {
+        wxLogError("DataGridTable::initialFetch() unknown error.");
         ::wxMessageBox(_("A system error occurred!"), _("Error"),
             wxOK | wxICON_ERROR);
     }
@@ -565,9 +584,16 @@ void DataGridTable::initialFetch(bool readonly)
         execProc = (statementM->Type() == IBPP::stExecProcedure);
 
     if (execProc)
+    {
+        wxLogDebug("DataGridTable::initialFetch() calling fetchOne() for procedure.");
         fetchOne();
+    }
     else
+    {
+        wxLogDebug("DataGridTable::initialFetch() calling fetch() for SELECT.");
         fetch();
+    }
+    wxLogDebug("DataGridTable::initialFetch() finished.");
 }
 
 bool DataGridTable::IsEmptyCell(int row, int col)
