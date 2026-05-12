@@ -335,29 +335,63 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
     DatabasePtr d = getDatabase();
 
     int mytype = -1;            // map DBH type to RDB$DEPENDENT TYPE
-    NodeType dep_types[] = {    ntTable,    ntView,     ntTrigger,  ntUnknown,  ntUnknown,
-                                ntProcedure,ntUnknown,  ntException,ntUnknown,  ntDomain,
-                                ntUnknown,  ntUnknown,  ntUnknown,  ntUnknown,  ntGenerator,
-                                ntFunctionSQL, ntUnknown,  ntUnknown,  ntUnknown,  ntPackage
+    // Map based on Firebird RDB$DEPENDENCIES types:
+    // 0:Relation, 1:View, 2:Trigger, 3:Computed field, 4:Validation, 5:Procedure,
+    // 6:Expression Index, 7:Exception, 8:User, 9:Field (Domain), 10:Index,
+    // 11:Dependent field, 12:Generator, 13:Function, 14:Filter, 15:Role,
+    // 17:Package, 18:Method
+    NodeType dep_types[] = {    
+        ntTable,       // 0
+        ntView,        // 1
+        ntTrigger,     // 2
+        ntUnknown,     // 3
+        ntUnknown,     // 4
+        ntProcedure,   // 5
+        ntIndex,       // 6
+        ntException,   // 7
+        ntUnknown,     // 8
+        ntDomain,      // 9
+        ntIndex,       // 10
+        ntUnknown,     // 11
+        ntGenerator,   // 12
+        ntFunctionSQL, // 13
+        ntUnknown,     // 14
+        ntRole,        // 15
+        ntUnknown,     // 16
+        ntPackage,     // 17
+        ntMethod       // 18
     };
+
     const int type_count = sizeof(dep_types)/sizeof(NodeType);
     for (int i = 0; i < type_count; i++)
+    {
         if (typeM == dep_types[i])
+        {
             mytype = i;
-    // system tables and global temporary tables should be treated as tables
+            break;
+        }
+    }
+
+    // Special cases and overrides
     if (typeM == ntSysTable || typeM == ntGTT)
         mytype = 0;
     if (typeM == ntDBTrigger || typeM == ntDDLTrigger || typeM == ntDMLTrigger)
         mytype = 2;
     if (typeM == ntFunctionSQL || typeM == ntUDF)
-        mytype = 15;
+        mytype = 13;
 
     int mytype2 = mytype;
+    // For indexes, search for both expression (6) and normal (10) types
+    if (typeM == ntIndex)
+    {
+        mytype = 6;
+        mytype2 = 10;
+    }
     // views count as relations(tables) when other object refer to them
     if (mytype == 1 && !ofObject)
         mytype2 = 0;
     // package header and package body
-    if (mytype == ntPackage)
+    if (typeM == ntPackage)
         mytype2 = 18;
 
     if (typeM == ntUnknown || mytype == -1)
