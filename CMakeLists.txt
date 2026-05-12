@@ -60,31 +60,18 @@ else()
 endif()
 
 if(ENABLE_INTERNAL_FBCPP)
-    message(STATUS "Building fb-cpp internally from submodule with patches")
+    message(STATUS "Building fb-cpp internally from patched sources")
     
-    set(FBCPP_SUBMODULE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/fb-cpp")
     set(FBCPP_PATCH_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/engine/db/fbcpp/patches")
     
-    file(GLOB FBCPP_SUBMODULE_SOURCES 
-        "${FBCPP_SUBMODULE_DIR}/src/fb-cpp/*.cpp"
-        "${FBCPP_SUBMODULE_DIR}/src/fb-cpp/*.h"
+    file(GLOB FBCPP_FINAL_SOURCES 
+        "${FBCPP_PATCH_DIR}/fb-cpp/*.cpp"
+        "${FBCPP_PATCH_DIR}/fb-cpp/*.h"
     )
-    
-    set(FBCPP_FINAL_SOURCES "")
-    foreach(SRC_FILE ${FBCPP_SUBMODULE_SOURCES})
-        get_filename_component(FNAME ${SRC_FILE} NAME)
-        if(EXISTS "${FBCPP_PATCH_DIR}/${FNAME}")
-            list(APPEND FBCPP_FINAL_SOURCES "${FBCPP_PATCH_DIR}/${FNAME}")
-            message(STATUS "Using patched file for fb-cpp: ${FNAME}")
-        else()
-            list(APPEND FBCPP_FINAL_SOURCES "${SRC_FILE}")
-        endif()
-    endforeach()
     
     add_library(fb-cpp STATIC ${FBCPP_FINAL_SOURCES})
     target_include_directories(fb-cpp PUBLIC 
-        "${FBCPP_SUBMODULE_DIR}/src"
-        "${FBCPP_SUBMODULE_DIR}/src/fb-cpp"
+        "${FBCPP_PATCH_DIR}"
     )
     
     find_package(firebird CONFIG REQUIRED)
