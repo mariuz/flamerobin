@@ -695,6 +695,12 @@ MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
 Relation* Database::findRelation(const Identifier& name)
 {
     wxString s(name.get());
+    if (MetadataItem::hasSystemPrefix(s))
+    {
+        if (TablePtr t = sysTablesM->findByName(s))
+            return t.get();
+    }
+
     if (TablePtr t = tablesM->findByName(s))
         return t.get();
     if (ViewPtr v = viewsM->findByName(s))

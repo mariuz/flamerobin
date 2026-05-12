@@ -2655,24 +2655,38 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             }
 
             if (transactionM == nullptr)
-            {
                 transactionM = databaseM->getDALDatabase()->createTransaction();
+
+            if (!transactionM->isActive())
+            {
                 fr::TransactionIsolationLevel level = transactionIsolationLevelM;
                 fr::TransactionAccessMode mode = transactionAccessModeM;
+                fr::TransactionLockResolution resolution = transactionLockResolutionM;
 
                 if (sql.Upper().Contains("MON$"))
                 {
-                    mode = fr::TransactionAccessMode::Read;
+                    // For MON$ tables, use Read Committed (or Read Consistency on FB4+)
+                    // for better stability and to avoid hangs with Snapshot isolation.
                     if (level != fr::TransactionIsolationLevel::ReadCommitted &&
                         level != fr::TransactionIsolationLevel::ReadConsistency &&
                         level != fr::TransactionIsolationLevel::ReadDirty)
                     {
-                        level = fr::TransactionIsolationLevel::ReadCommitted;
+                        if (databaseM->getODSMajor() >= 13)
+                            level = fr::TransactionIsolationLevel::ReadConsistency;
+                        else
+                            level = fr::TransactionIsolationLevel::ReadCommitted;
+                    }
+
+                    // Only switch to Read mode if it's likely a SELECT
+                    if (sql.Upper().Trim(false).StartsWith("SELECT"))
+                    {
+                        mode = fr::TransactionAccessMode::Read;
+                        resolution = fr::TransactionLockResolution::NoWait;
                     }
                 }
                 transactionM->setAccessMode(mode);
                 transactionM->setIsolationLevel(level);
-                transactionM->setLockResolution(transactionLockResolutionM);
+                transactionM->setLockResolution(resolution);
             }
             transactionM->start();
             inTransaction(true);

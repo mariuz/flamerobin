@@ -86,61 +86,23 @@ void FbCppStatement::execute()
     firstRowFetchedM.reset();
     eofReachedM = false;
     rowAvailableM = false;
-    resultSetM.reset();
 
-    wxLogDebug("FbCppStatement::execute() checking for cursor.");
-    auto stType = statementM->getType();
-    bool isSelect = (stType == fbcpp::StatementType::SELECT || stType == fbcpp::StatementType::SELECT_FOR_UPDATE);
-    
-    bool hasCursor = isSelect;
-    if (!isSelect)
-    {
-        auto handle = statementM->getStatementHandle();
-        if (handle->cloopVTable->version >= 5)
+    try {
+        wxLogDebug("FbCppStatement::execute() calling library execute().");
+        bool hasRow = statementM->execute(transactionM);
+        
+        // If the statement has output columns but is not a SELECT (e.g. INSERT ... RETURNING),
+        // fb-cpp might already have the first row.
+        if (getColumnCount() > 0 && statementM->getType() != fbcpp::StatementType::SELECT)
         {
-            auto& attachment = statementM->getAttachment();
-            auto& client = attachment.getClient();
-            auto status = client.newStatus();
-            fbcpp::impl::StatusWrapper statusWrapper(client, status.get());
-            wxLogDebug("FbCppStatement::execute() getting statement flags.");
-            hasCursor = (handle->getFlags(&statusWrapper) & Firebird::IStatement::FLAG_HAS_CURSOR);
+            firstRowFetchedM = hasRow;
+            eofReachedM = !hasRow;
+            wxLogDebug("FbCppStatement::execute() - non-SELECT statement with output. hasRow: %d", (int)hasRow);
         }
+    } catch (const std::exception& e) {
+        wxLogDebug("FbCppStatement::execute() failed: %s", e.what());
+        throw;
     }
-
-    if (hasCursor)
-    {
-        wxLogDebug("FbCppStatement::execute() opening manual cursor.");
-        auto& attachment = statementM->getAttachment();
-        auto& client = attachment.getClient();
-        auto status = client.newStatus();
-        fbcpp::impl::StatusWrapper statusWrapper(client, status.get());
-        auto handle = statementM->getStatementHandle();
-
-        // Initialize null indicators for output columns (as fb-cpp would)
-        auto outMessageData = statementM->getOutputMessage().data();
-        if (outMessageData)
-        {
-            const auto& descriptors = statementM->getOutputDescriptors();
-            for (const auto& desc : descriptors)
-            {
-                // Mark as NULL initially (1 in Firebird null indicators)
-                *reinterpret_cast<std::int16_t*>(&outMessageData[desc.nullOffset]) = 1;
-            }
-        }
-
-        wxLogDebug("FbCppStatement::execute() calling openCursor().");
-        resultSetM.reset(handle->openCursor(&statusWrapper, transactionM.getHandle().get(),
-            statementM->getInputMetadata().get(), statementM->getInputMessage().data(),
-            statementM->getOutputMetadata().get(), 0));
-
-        wxLogDebug("FbCppStatement::execute() manual cursor opened.");
-        return;
-    }
-
-    wxLogDebug("FbCppStatement::execute() calling library execute().");
-    // For non-cursor statements (like DML without RETURNING or most DDL),
-    // we can use the library's execute() directly.
-    statementM->execute(transactionM);
 }
 
 bool FbCppStatement::fetch()
@@ -169,53 +131,31 @@ bool FbCppStatement::fetch()
     if (eofReachedM)
         return false;
 
-    if (resultSetM)
-    {
-        wxLogDebug("FbCppStatement::fetch() fetching from manual IResultSet.");
-        auto& attachment = statementM->getAttachment();
-        auto& client = attachment.getClient();
-        fbcpp::impl::StatusWrapper status(client);
-        bool res = resultSetM->fetchNext(&status, statementM->getOutputMessage().data()) == Firebird::IStatus::RESULT_OK;
+    try {
+        wxLogDebug("FbCppStatement::fetch() calling library fetchNext().");
+        bool res = statementM->fetchNext();
         rowAvailableM = res;
         if (!res)
         {
-            wxLogDebug("FbCppStatement::fetch() - manual IResultSet EOF.");
+            wxLogDebug("FbCppStatement::fetch() - library EOF.");
             eofReachedM = true;
         }
         else
         {
-            wxLogDebug("FbCppStatement::fetch() - manual IResultSet row fetched.");
+            wxLogDebug("FbCppStatement::fetch() - library row fetched.");
         }
         return res;
-    }
-
-    wxLogDebug("FbCppStatement::fetch() calling library fetchNext().");
-    bool res = statementM->fetchNext();
-    rowAvailableM = res;
-    if (!res)
-    {
-        wxLogDebug("FbCppStatement::fetch() - library EOF.");
+    } catch (const std::exception& e) {
+        wxLogDebug("FbCppStatement::fetch() failed: %s", e.what());
         eofReachedM = true;
+        throw;
     }
-    else
-    {
-        wxLogDebug("FbCppStatement::fetch() - library row fetched.");
-    }
-    return res;
 }
 
 void FbCppStatement::close()
 {
     try
     {
-        if (resultSetM)
-        {
-            auto& attachment = statementM->getAttachment();
-            auto& client = attachment.getClient();
-            fbcpp::impl::StatusWrapper status(client);
-            resultSetM->close(&status);
-            resultSetM.reset();
-        }
         if (statementM)
             statementM->closeCursor();
     }
@@ -538,8 +478,8 @@ void FbCppStatement::setBlob(int index, IBlobPtr blob)
 
 std::string FbCppStatement::getDate(int index)
 {
-    if (!statementM)
-        throw std::runtime_error("No statement available");
+    if (!statementM || !rowAvailableM)
+        return "";
     if (index < 0 || (unsigned)index >= statementM->getOutputDescriptors().size())
         return "";
     return statementM->get<std::optional<std::string>>((unsigned)index).value_or("");
@@ -547,8 +487,8 @@ std::string FbCppStatement::getDate(int index)
 
 std::string FbCppStatement::getTime(int index)
 {
-    if (!statementM)
-        throw std::runtime_error("No statement available");
+    if (!statementM || !rowAvailableM)
+        return "";
     if (index < 0 || (unsigned)index >= statementM->getOutputDescriptors().size())
         return "";
     return statementM->get<std::optional<std::string>>((unsigned)index).value_or("");
@@ -556,8 +496,8 @@ std::string FbCppStatement::getTime(int index)
 
 std::string FbCppStatement::getTimestamp(int index)
 {
-    if (!statementM)
-        throw std::runtime_error("No statement available");
+    if (!statementM || !rowAvailableM)
+        return "";
     if (index < 0 || (unsigned)index >= statementM->getOutputDescriptors().size())
         return "";
     return statementM->get<std::optional<std::string>>((unsigned)index).value_or("");
@@ -565,8 +505,8 @@ std::string FbCppStatement::getTimestamp(int index)
 
 std::string FbCppStatement::getTimeTz(int index)
 {
-    if (!statementM)
-        throw std::runtime_error("No statement available");
+    if (!statementM || !rowAvailableM)
+        return "";
     if (index < 0 || (unsigned)index >= statementM->getOutputDescriptors().size())
         return "";
     return statementM->get<std::optional<std::string>>((unsigned)index).value_or("");
@@ -574,8 +514,8 @@ std::string FbCppStatement::getTimeTz(int index)
 
 std::string FbCppStatement::getTimestampTz(int index)
 {
-    if (!statementM)
-        throw std::runtime_error("No statement available");
+    if (!statementM || !rowAvailableM)
+        return "";
     if (index < 0 || (unsigned)index >= statementM->getOutputDescriptors().size())
         return "";
     return statementM->get<std::optional<std::string>>((unsigned)index).value_or("");
@@ -583,8 +523,11 @@ std::string FbCppStatement::getTimestampTz(int index)
 
 void FbCppStatement::getDate(int index, int& year, int& month, int& day)
 {
-    if (!statementM)
-        throw std::runtime_error("No statement available");
+    if (!statementM || !rowAvailableM)
+    {
+        year = 0; month = 0; day = 0;
+        return;
+    }
     if (index < 0 || (unsigned)index >= statementM->getOutputDescriptors().size())
     {
         year = 0; month = 0; day = 0;
@@ -598,8 +541,11 @@ void FbCppStatement::getDate(int index, int& year, int& month, int& day)
 
 void FbCppStatement::getTime(int index, int& hour, int& minute, int& second, int& fraction)
 {
-    if (!statementM)
-        throw std::runtime_error("No statement available");
+    if (!statementM || !rowAvailableM)
+    {
+        hour = 0; minute = 0; second = 0; fraction = 0;
+        return;
+    }
     if (index < 0 || (unsigned)index >= statementM->getOutputDescriptors().size())
     {
         hour = 0; minute = 0; second = 0; fraction = 0;
@@ -615,8 +561,11 @@ void FbCppStatement::getTime(int index, int& hour, int& minute, int& second, int
 void FbCppStatement::getTimestamp(int index, int& year, int& month, int& day,
     int& hour, int& minute, int& second, int& fraction)
 {
-    if (!statementM)
-        throw std::runtime_error("No statement available");
+    if (!statementM || !rowAvailableM)
+    {
+        year = 0; month = 0; day = 0; hour = 0; minute = 0; second = 0; fraction = 0;
+        return;
+    }
     if (index < 0 || (unsigned)index >= statementM->getOutputDescriptors().size())
     {
         year = 0; month = 0; day = 0; hour = 0; minute = 0; second = 0; fraction = 0;
