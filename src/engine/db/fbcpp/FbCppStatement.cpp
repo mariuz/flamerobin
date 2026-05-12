@@ -63,7 +63,6 @@ void FbCppStatement::prepare(const std::string& sql)
         wxLogDebug("FbCppStatement::prepare() failed: %s", e.what());
         throw;
     }
-    resultSetM.reset();
     firstRowFetchedM.reset();
     eofReachedM = false;
     rowAvailableM = false;
