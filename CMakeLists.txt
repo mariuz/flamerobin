@@ -60,19 +60,57 @@ else()
 endif()
 
 if(ENABLE_INTERNAL_FBCPP)
-    message(STATUS "Building fb-cpp internally from submodule")
-    set(OLD_BUILD_TESTING ${BUILD_TESTING})
-    set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
-    add_subdirectory(src/fb-cpp EXCLUDE_FROM_ALL)
-    set(BUILD_TESTING ${OLD_BUILD_TESTING} CACHE BOOL "" FORCE)
+    message(STATUS "Building fb-cpp internally from submodule with patches")
+    
+    set(FBCPP_SUBMODULE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/fb-cpp")
+    set(FBCPP_PATCH_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/engine/db/fbcpp/patches")
+    
+    file(GLOB FBCPP_SUBMODULE_SOURCES 
+        "${FBCPP_SUBMODULE_DIR}/src/fb-cpp/*.cpp"
+        "${FBCPP_SUBMODULE_DIR}/src/fb-cpp/*.h"
+    )
+    
+    set(FBCPP_FINAL_SOURCES "")
+    foreach(SRC_FILE ${FBCPP_SUBMODULE_SOURCES})
+        get_filename_component(FNAME ${SRC_FILE} NAME)
+        if(EXISTS "${FBCPP_PATCH_DIR}/${FNAME}")
+            list(APPEND FBCPP_FINAL_SOURCES "${FBCPP_PATCH_DIR}/${FNAME}")
+            message(STATUS "Using patched file for fb-cpp: ${FNAME}")
+        else()
+            list(APPEND FBCPP_FINAL_SOURCES "${SRC_FILE}")
+        endif()
+    endforeach()
+    
+    add_library(fb-cpp STATIC ${FBCPP_FINAL_SOURCES})
+    target_include_directories(fb-cpp PUBLIC "${FBCPP_SUBMODULE_DIR}/src")
+    
+    find_package(firebird CONFIG REQUIRED)
+    target_link_libraries(fb-cpp PUBLIC firebird PRIVATE ${CMAKE_DL_LIBS})
+    
+    if(FB_CPP_USE_BOOST_DLL OR FB_CPP_USE_BOOST_MULTIPRECISION)
+        set(_fb_cpp_boost_components "")
+        if(FB_CPP_USE_BOOST_DLL)
+            list(APPEND _fb_cpp_boost_components dll)
+        endif()
+        if(FB_CPP_USE_BOOST_MULTIPRECISION)
+            list(APPEND _fb_cpp_boost_components multiprecision)
+        endif()
+        find_package(Boost REQUIRED COMPONENTS ${_fb_cpp_boost_components})
+    endif()
+
+    target_compile_definitions(fb-cpp PUBLIC 
+        FB_CPP_USE_BOOST_DLL=$<BOOL:${FB_CPP_USE_BOOST_DLL}>
+        FB_CPP_USE_BOOST_MULTIPRECISION=$<BOOL:${FB_CPP_USE_BOOST_MULTIPRECISION}>
+    )
+    
+    if(FB_CPP_USE_BOOST_MULTIPRECISION)
+        target_link_libraries(fb-cpp PRIVATE Boost::multiprecision)
+    endif()
+
+    set(FBCPP_VERSION_STR "0.0.2-patched")
 else()
     message(STATUS "Searching for system fb-cpp package")
     find_package(fb-cpp CONFIG REQUIRED)
-endif()
-
-if(ENABLE_INTERNAL_FBCPP)
-    set(FBCPP_VERSION_STR "${fb-cpp-main_VERSION}")
-else()
     set(FBCPP_VERSION_STR "${fb-cpp_VERSION}")
 endif()
 
