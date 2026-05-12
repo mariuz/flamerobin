@@ -589,6 +589,12 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         if (!t)
             return;
 
+        if (t->isSystem())
+        {
+            processedText += getBooleanAsString(true);
+            return;
+        }
+
         if (!t->getPrimaryKey() && t->getUniqueConstraints()->size() == 0)
             processedText += getBooleanAsString(true);
         else

@@ -2657,16 +2657,20 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             if (transactionM == nullptr)
             {
                 transactionM = databaseM->getDALDatabase()->createTransaction();
-                transactionM->setAccessMode(transactionAccessModeM);
-
                 fr::TransactionIsolationLevel level = transactionIsolationLevelM;
-                if (sql.Upper().Contains("MON$") &&
-                    level != fr::TransactionIsolationLevel::ReadCommitted &&
-                    level != fr::TransactionIsolationLevel::ReadConsistency &&
-                    level != fr::TransactionIsolationLevel::ReadDirty)
+                fr::TransactionAccessMode mode = transactionAccessModeM;
+
+                if (sql.Upper().Contains("MON$"))
                 {
-                    level = fr::TransactionIsolationLevel::ReadCommitted;
+                    mode = fr::TransactionAccessMode::Read;
+                    if (level != fr::TransactionIsolationLevel::ReadCommitted &&
+                        level != fr::TransactionIsolationLevel::ReadConsistency &&
+                        level != fr::TransactionIsolationLevel::ReadDirty)
+                    {
+                        level = fr::TransactionIsolationLevel::ReadCommitted;
+                    }
                 }
+                transactionM->setAccessMode(mode);
                 transactionM->setIsolationLevel(level);
                 transactionM->setLockResolution(transactionLockResolutionM);
             }
