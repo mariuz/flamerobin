@@ -27,6 +27,8 @@
 #include "Attachment.h"
 #include "Client.h"
 
+#include <wx/log.h>
+
 using namespace fbcpp;
 using namespace fbcpp::impl;
 
@@ -61,31 +63,7 @@ Statement::Statement(
 
 	type = static_cast<StatementType>(statementHandle->getType(&statusWrapper));
 
-	switch (type)
-	{
-		case StatementType::START_TRANSACTION:
-			free();
-			throw FbCppException("Cannot use SET TRANSACTION command with Statement class. Use Transaction class");
-
-		case StatementType::COMMIT:
-			free();
-			throw FbCppException(
-				"Cannot use COMMIT command with Statement class. Use the commit method from the Transaction class");
-
-		case StatementType::ROLLBACK:
-			free();
-			throw FbCppException(
-				"Cannot use ROLLBACK command with Statement class. Use the rollback method from the Transaction class");
-
-		case StatementType::GET_SEGMENT:
-		case StatementType::PUT_SEGMENT:
-			throw FbCppException("Unsupported statement type: BLOB segment operations");
-
-		default:
-			break;
-	}
-
-	const auto processMetadata = [&](FbRef<fb::IMessageMetadata>& metadata, std::vector<Descriptor>& descriptors,
+	const auto processMetadata = [&](const char* label, FbRef<fb::IMessageMetadata>& metadata, std::vector<Descriptor>& descriptors,
 									 std::vector<std::byte>& message)
 	{
 		if (!metadata)
@@ -116,6 +94,10 @@ Statement::Statement(
 				.subType = metadata->getSubType(&statusWrapper, index),
 			};
 
+			wxLogDebug("fb-cpp: %s metadata [%u]: name=%s, rel=%s, type=%u, len=%u, charset=%u, scale=%d",
+				label, index, descriptor.name.c_str(), descriptor.relation.c_str(), 
+				(unsigned)descriptor.originalType, descriptor.length, descriptor.charSetId, descriptor.scale);
+
 			switch (descriptor.originalType)
 			{
 				case DescriptorOriginalType::TEXT:
@@ -128,6 +110,7 @@ Statement::Statement(
 					descriptor.adjustedType = DescriptorAdjustedType::STRING;
 					descriptor.length += 2;
 					descriptor.charSetId = 127;
+					wxLogDebug("fb-cpp:   converted TEXT to VARYING(len=%u, charset=127)", descriptor.length);
 					break;
 
 				case DescriptorOriginalType::VARYING:
@@ -136,6 +119,7 @@ Statement::Statement(
 
 					builder->setCharSet(&statusWrapper, index, 127); // CS_dynamic
 					descriptor.charSetId = 127;
+					wxLogDebug("fb-cpp:   set VARYING charset to 127");
 					break;
 
 				case DescriptorOriginalType::TIME_TZ_EX:
@@ -182,15 +166,18 @@ Statement::Statement(
 				descriptor.length = metadata->getLength(&statusWrapper, index);
 
 				*reinterpret_cast<std::int16_t*>(&message[descriptor.nullOffset]) = FB_TRUE;
+
+				wxLogDebug("fb-cpp: %s metadata [%u] updated: type=%u, len=%u, offset=%u, nulloffset=%u",
+					label, index, (unsigned)descriptor.adjustedType, descriptor.length, descriptor.offset, descriptor.nullOffset);
 			}
 		}
 	};
 
 	inMetadata.reset(statementHandle->getInputMetadata(&statusWrapper));
-	processMetadata(inMetadata, inDescriptors, inMessage);
+	processMetadata("Input", inMetadata, inDescriptors, inMessage);
 
 	outMetadata.reset(statementHandle->getOutputMetadata(&statusWrapper));
-	processMetadata(outMetadata, outDescriptors, outMessage);
+	processMetadata("Output", outMetadata, outDescriptors, outMessage);
 
 	outRow = std::make_unique<Row>(attachment.getClient(), outDescriptors, std::span{outMessage});
 }
