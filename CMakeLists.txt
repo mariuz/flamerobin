@@ -82,7 +82,10 @@ if(ENABLE_INTERNAL_FBCPP)
     endforeach()
     
     add_library(fb-cpp STATIC ${FBCPP_FINAL_SOURCES})
-    target_include_directories(fb-cpp PUBLIC "${FBCPP_SUBMODULE_DIR}/src")
+    target_include_directories(fb-cpp PUBLIC 
+        "${FBCPP_SUBMODULE_DIR}/src"
+        "${FBCPP_SUBMODULE_DIR}/src/fb-cpp"
+    )
     
     find_package(firebird CONFIG REQUIRED)
     target_link_libraries(fb-cpp PUBLIC firebird PRIVATE ${CMAKE_DL_LIBS})
