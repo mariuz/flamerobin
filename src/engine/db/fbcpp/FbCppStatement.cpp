@@ -90,13 +90,13 @@ void FbCppStatement::execute()
         wxLogDebug("FbCppStatement::execute() calling library execute().");
         bool hasRow = statementM->execute(transactionM);
         
-        // If the statement has output columns but is not a SELECT (e.g. INSERT ... RETURNING),
-        // fb-cpp might already have the first row.
-        if (getColumnCount() > 0 && statementM->getType() != fbcpp::StatementType::SELECT)
+        // If the statement has output columns, fb-cpp might already have the first row.
+        // We must capture this result so that the first fetch() call returns it.
+        if (getColumnCount() > 0)
         {
             firstRowFetchedM = hasRow;
             eofReachedM = !hasRow;
-            wxLogDebug("FbCppStatement::execute() - non-SELECT statement with output. hasRow: %d", (int)hasRow);
+            wxLogDebug("FbCppStatement::execute() - statement with output. hasRow: %d", (int)hasRow);
         }
     } catch (const std::exception& e) {
         wxLogDebug("FbCppStatement::execute() failed: %s", e.what());
