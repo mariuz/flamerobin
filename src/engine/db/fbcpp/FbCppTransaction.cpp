@@ -29,7 +29,7 @@ namespace fr
 {
 FbCppTransaction::FbCppTransaction(fbcpp::Attachment& attachment)
     : attachmentM(attachment), 
-      transactionM(std::make_unique<fbcpp::Transaction>(attachment.getClient())),
+      transactionM(std::make_unique<fbcpp::TransactionExt>(attachment.getClient())),
       modeM(TransactionAccessMode::Write), 
       levelM(TransactionIsolationLevel::Concurrency),
       resolutionM(TransactionLockResolution::Wait)

@@ -25,8 +25,8 @@
 #define FR_FBCPP_TRANSACTION_H
 
 #include "engine/db/ITransaction.h"
-#include <fb-cpp/fb-cpp.h>
-#include <optional>
+#include "engine/db/fbcpp/FbCppExtensions.h"
+#include <memory>
 
 namespace fr
 {
@@ -42,7 +42,6 @@ public:
     virtual void rollback() override;
     virtual void commitRetain() override;
     virtual void rollbackRetain() override;
-
     virtual bool isActive() override;
 
     virtual void setAccessMode(TransactionAccessMode mode) override;
@@ -53,7 +52,7 @@ public:
 
 private:
     fbcpp::Attachment& attachmentM;
-    std::unique_ptr<fbcpp::Transaction> transactionM;
+    std::unique_ptr<fbcpp::TransactionExt> transactionM;
     bool startedM = false;
     TransactionAccessMode modeM;
     TransactionIsolationLevel levelM;

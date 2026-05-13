@@ -25,7 +25,7 @@
 #define FR_FBCPP_STATEMENT_H
 
 #include "engine/db/IStatement.h"
-#include <fb-cpp/fb-cpp.h>
+#include "engine/db/fbcpp/FbCppExtensions.h"
 #include <optional>
 
 namespace fr
@@ -109,7 +109,7 @@ private:
     fbcpp::Attachment& attachmentM;
     fbcpp::Transaction& transactionM;
     std::string sqlM;
-    std::optional<fbcpp::Statement> statementM;
+    std::optional<fbcpp::StatementExt> statementM;
     std::optional<fbcpp::RowSet> rowSetM;
     std::optional<bool> firstRowFetchedM;
     bool eofReachedM;
