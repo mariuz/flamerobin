@@ -2667,6 +2667,16 @@ bool DataGridRows::initialize(fr::IStatementPtr statement)
                 case fr::ColumnType::BigInt:
                     columnDef = new Int64ColumnDef(colName, bufferSizeM, readOnly, nullable, scale);
                     break;
+                case fr::ColumnType::Numeric:
+                case fr::ColumnType::Decimal:
+                {
+                    int size = statement->getColumnSize(col - 1);
+                    if (size > 4)
+                        columnDef = new Int64ColumnDef(colName, bufferSizeM, readOnly, nullable, scale);
+                    else
+                        columnDef = new IntegerColumnDef(colName, bufferSizeM, readOnly, nullable, scale);
+                    break;
+                }
                 case fr::ColumnType::Int128:
                     columnDef = new Int128ColumnDef(colName, bufferSizeM, readOnly, nullable, scale);
                     break;
