@@ -368,10 +368,17 @@ int32_t FbCppStatement::getInt32(int index)
 
     ColumnType type = getColumnType(index);
     if (type == ColumnType::Boolean)
-        return statementM->get<std::optional<bool>>((unsigned)index).value_or(false) ? 1 : 0;
+        return getBool(index) ? 1 : 0;
     if (type == ColumnType::Float || type == ColumnType::Double)
         return (int32_t)statementM->get<std::optional<double>>((unsigned)index).value_or(0.0);
 
+    // Explicitly handle 16-bit and 32-bit types to ensure sign extension
+    const auto& descriptors = statementM->getOutputDescriptors();
+    if ((unsigned)index < descriptors.size())
+    {
+        if (descriptors[index].adjustedType == fbcpp::DescriptorAdjustedType::INT16)
+            return statementM->get<std::optional<std::int16_t>>((unsigned)index).value_or(0);
+    }
     return statementM->get<std::optional<std::int32_t>>((unsigned)index).value_or(0);
 }
 
@@ -382,10 +389,18 @@ int64_t FbCppStatement::getInt64(int index)
 
     ColumnType type = getColumnType(index);
     if (type == ColumnType::Boolean)
-        return statementM->get<std::optional<bool>>((unsigned)index).value_or(false) ? 1 : 0;
+        return getBool(index) ? 1 : 0;
     if (type == ColumnType::Float || type == ColumnType::Double)
         return (int64_t)statementM->get<std::optional<double>>((unsigned)index).value_or(0.0);
 
+    const auto& descriptors = statementM->getOutputDescriptors();
+    if ((unsigned)index < descriptors.size())
+    {
+        if (descriptors[index].adjustedType == fbcpp::DescriptorAdjustedType::INT16)
+            return statementM->get<std::optional<std::int16_t>>((unsigned)index).value_or(0);
+        if (descriptors[index].adjustedType == fbcpp::DescriptorAdjustedType::INT32)
+            return statementM->get<std::optional<std::int32_t>>((unsigned)index).value_or(0);
+    }
     return statementM->get<std::optional<std::int64_t>>((unsigned)index).value_or(0);
 }
 
