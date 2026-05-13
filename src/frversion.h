@@ -1,6 +1,6 @@
 #define FR_VERSION_MAJOR    26
 #define FR_VERSION_MINOR    5
-#define FR_VERSION_RLS      7
+#define FR_VERSION_RLS      8
 
 // if this file can't be found you need to run the update-revision-info script
 #include "revisioninfo.h"
