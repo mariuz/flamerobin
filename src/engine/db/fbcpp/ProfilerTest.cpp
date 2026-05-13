@@ -78,7 +78,6 @@ int main()
         fr::IStatementPtr st = db->createStatement(tr);
         
         int64_t sessionId = 0;
-        std::string reqNameCol = "NAME";
         int count = 0;
 
         // Check if RDB$PROFILER exists
@@ -96,6 +95,8 @@ int main()
             fr_test::printException(e, "checking for RDB$PROFILER");
             return 0;
         }
+
+        std::string reqNameCol = "NAME";
 
         // Check active profiler plugin
         try {
@@ -145,6 +146,16 @@ int main()
                 sessionStarted = true;
                 ok = fr_test::check(true, "Session started") && ok;
 
+                // Determine correct column name for requests (NAME or REQUEST_NAME)
+                // Now that the session started, tables should definitely exist.
+                try {
+                    st->prepare("SELECT REQUEST_NAME FROM PLG$PROF_REQUESTS WHERE 1=0");
+                    reqNameCol = "REQUEST_NAME";
+                } catch(...) {
+                    reqNameCol = "NAME";
+                }
+                std::cout << "    Debug: Using request name column: " << reqNameCol << "\n";
+
                 // Use INSERT ... SELECT to ensure there is a record source to profile
                 std::cout << "    Executing INSERT ... SELECT...\n";
                 st->prepare("INSERT INTO t1 (id, val) SELECT 1, 'test' FROM RDB$DATABASE");
@@ -168,14 +179,6 @@ int main()
                 tr = db->createTransaction();
                 tr->start();
                 st = db->createStatement(tr);
-
-                // Determine correct column name for requests (NAME or REQUEST_NAME)
-                std::string reqNameCol = "NAME";
-                try {
-                    st->prepare("SELECT REQUEST_NAME FROM PLG$PROF_REQUESTS WHERE 1=0");
-                    reqNameCol = "REQUEST_NAME";
-                } catch(...) {}
-                std::cout << "    Debug: Using request name column: " << reqNameCol << "\n";
 
                 // Check statements first
                 st->prepare("SELECT COUNT(*) FROM PLG$PROF_STATEMENTS WHERE PROFILE_ID = ?");
@@ -229,11 +232,6 @@ int main()
 
             st->prepare("EXECUTE PROCEDURE RDB$PROFILER.FINISH_SESSION(TRUE)");
             st->execute();
-
-            try {
-                st->prepare("SELECT REQUEST_NAME FROM PLG$PROF_REQUESTS WHERE 1=0");
-                reqNameCol = "REQUEST_NAME";
-            } catch(...) {}
 
             st->prepare("SELECT COUNT(DISTINCT " + reqNameCol + ") FROM PLG$PROF_REQUESTS WHERE PROFILE_ID = ?");
             st->setInt64(0, sessionId);
