@@ -123,14 +123,16 @@ file will be set to ignore those directories.
 Assumes a 'project' dir in you home directory, change to suit
 
  1. Setup the tools and libs needed:
-    $ sudo apt-get install build-essential git cmake firebird-dev libwxgtk3.2-dev
-    (wxWidgets version may change in the future, update to match)
+    $ sudo apt-get install build-essential git cmake libwxgtk3.2-dev
+    (Firebird client and other dependencies will be handled by vcpkg)
  2. $ cd ~/project
- 3. $ git clone https://github.com/mariuz/flamerobin.git
+ 3. $ git clone --recursive https://github.com/mariuz/flamerobin.git
  4. $ cd flamerobin
  5. $ mkdir build
  6. $ cd build
  7. $ cmake ..
+    Note: vcpkg is enabled by default. If you need to disable it, use -DENABLE_VCPKG=OFF,
+    but you will need to provide all dependencies (including fb-cpp) manually.
  8. $ make
  9. To run FlameRobin use the run_flamerobin.sh script. This sets up an
     environment variable that points the FlameRobin app to the build directory
