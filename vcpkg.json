@@ -11,6 +11,13 @@
     "boost-multiprecision",
     "boost-test",
     "firebird",
+    {
+      "name": "fb-cpp",
+      "features": [
+        "boost-dll",
+        "boost-multiprecision"
+      ]
+    },
     "icu",
     {
       "name": "wxwidgets",

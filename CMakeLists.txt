@@ -47,66 +47,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #--------------------------------------
 # fb-cpp location
-set(firebird_DIR "${CMAKE_SOURCE_DIR}/cmake" CACHE PATH "Path to firebirdConfig.cmake")
-set(FB_CPP_SKIP_INSTALL ON CACHE BOOL "Skip fb-cpp installation")
-set(FB_CPP_BUILD_TESTS OFF CACHE BOOL "Build fb-cpp tests")
-option(FB_CPP_USE_BOOST_DLL "Enable Boost.DLL support for loading fbclient at runtime" OFF)
-option(FB_CPP_USE_BOOST_MULTIPRECISION "Enable Boost.Multiprecision helpers for INT128 and DECFLOAT types" OFF)
-
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/fb-cpp/CMakeLists.txt")
-    option(ENABLE_INTERNAL_FBCPP "Build fb-cpp from internal submodule" ON)
-else()
-    option(ENABLE_INTERNAL_FBCPP "Build fb-cpp from internal submodule" OFF)
-endif()
-
-if(ENABLE_INTERNAL_FBCPP)
-    message(STATUS "Building fb-cpp internally from patched sources")
-    
-    set(FBCPP_PATCH_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/engine/db/fbcpp/patches")
-    
-    file(GLOB FBCPP_FINAL_SOURCES 
-        "${FBCPP_PATCH_DIR}/fb-cpp/*.cpp"
-        "${FBCPP_PATCH_DIR}/fb-cpp/*.h"
-    )
-    
-    add_library(fb-cpp STATIC ${FBCPP_FINAL_SOURCES})
-    target_include_directories(fb-cpp PUBLIC 
-        "${FBCPP_PATCH_DIR}"
-    )
-    
-    find_package(firebird CONFIG REQUIRED)
-    target_link_libraries(fb-cpp PUBLIC firebird PRIVATE ${CMAKE_DL_LIBS})
-    
-    if(FB_CPP_USE_BOOST_DLL OR FB_CPP_USE_BOOST_MULTIPRECISION)
-        set(_fb_cpp_boost_components "")
-        if(FB_CPP_USE_BOOST_DLL)
-            list(APPEND _fb_cpp_boost_components dll)
-        endif()
-        if(FB_CPP_USE_BOOST_MULTIPRECISION)
-            list(APPEND _fb_cpp_boost_components multiprecision)
-        endif()
-        find_package(Boost REQUIRED COMPONENTS ${_fb_cpp_boost_components})
-    endif()
-
-    target_compile_definitions(fb-cpp PUBLIC 
-        FB_CPP_USE_BOOST_DLL=$<BOOL:${FB_CPP_USE_BOOST_DLL}>
-        FB_CPP_USE_BOOST_MULTIPRECISION=$<BOOL:${FB_CPP_USE_BOOST_MULTIPRECISION}>
-    )
-    
-    if(FB_CPP_USE_BOOST_MULTIPRECISION)
-        target_link_libraries(fb-cpp PRIVATE Boost::multiprecision)
-    endif()
-
-    set(FBCPP_VERSION_STR "0.0.2-patched")
-else()
-    message(STATUS "Searching for system fb-cpp package")
-    find_package(fb-cpp CONFIG REQUIRED)
-    set(FBCPP_VERSION_STR "${fb-cpp_VERSION}")
-endif()
+find_package(fb-cpp CONFIG REQUIRED)
+set(FBCPP_VERSION_STR "${fb-cpp_VERSION}")
 
 if (NOT FBCPP_VERSION_STR)
     set(FBCPP_VERSION_STR "unknown")
 endif()
+
 
 #--------------------------------------
 # wxWidgets location
@@ -174,6 +121,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/engine/db/fbcpp/FbCppStatement.cpp
         ${SOURCEDIR}/engine/db/fbcpp/FbCppService.cpp
         ${SOURCEDIR}/engine/db/fbcpp/FbCppBlob.cpp
+        ${SOURCEDIR}/engine/db/fbcpp/FbCppExtensions.cpp
         ${SOURCEDIR}/core/ArtProvider.cpp
         ${SOURCEDIR}/core/CodeTemplateProcessor.cpp
         ${SOURCEDIR}/core/FRDecimal.cpp
@@ -314,6 +262,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/engine/db/fbcpp/FbCppDatabase.h
         ${SOURCEDIR}/engine/db/fbcpp/FbCppTransaction.h
         ${SOURCEDIR}/engine/db/fbcpp/FbCppStatement.h
+        ${SOURCEDIR}/engine/db/fbcpp/FbCppExtensions.h
         ${SOURCEDIR}/core/ArtProvider.h
         ${SOURCEDIR}/core/CodeTemplateProcessor.h
         ${SOURCEDIR}/core/FRDecimal.h
@@ -811,6 +760,7 @@ add_executable(dal_types_test
     ${SOURCEDIR}/engine/db/fbcpp/FbCppStatement.cpp
     ${SOURCEDIR}/engine/db/fbcpp/FbCppService.cpp
     ${SOURCEDIR}/engine/db/fbcpp/FbCppBlob.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppExtensions.cpp
     ${SOURCEDIR}/core/FRError.cpp
     ${SOURCEDIR}/core/FRInt128.cpp
     ${SOURCEDIR}/core/FRDecimal.cpp
@@ -866,6 +816,7 @@ add_executable(fbcpp_service_test
     ${SOURCEDIR}/engine/db/fbcpp/FbCppStatement.cpp
     ${SOURCEDIR}/engine/db/fbcpp/FbCppService.cpp
     ${SOURCEDIR}/engine/db/fbcpp/FbCppBlob.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppExtensions.cpp
     ${SOURCEDIR}/core/FRError.cpp
     ${SOURCEDIR}/core/FRInt128.cpp
     ${SOURCEDIR}/core/FRDecimal.cpp
@@ -887,6 +838,7 @@ add_executable(dml_returning_test
     ${SOURCEDIR}/engine/db/fbcpp/FbCppStatement.cpp
     ${SOURCEDIR}/engine/db/fbcpp/FbCppService.cpp
     ${SOURCEDIR}/engine/db/fbcpp/FbCppBlob.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppExtensions.cpp
     ${SOURCEDIR}/core/FRError.cpp
     ${SOURCEDIR}/core/FRInt128.cpp
     ${SOURCEDIR}/core/FRDecimal.cpp
@@ -908,6 +860,7 @@ add_executable(profiler_test
     ${SOURCEDIR}/engine/db/fbcpp/FbCppStatement.cpp
     ${SOURCEDIR}/engine/db/fbcpp/FbCppService.cpp
     ${SOURCEDIR}/engine/db/fbcpp/FbCppBlob.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppExtensions.cpp
     ${SOURCEDIR}/core/FRError.cpp
     ${SOURCEDIR}/core/FRInt128.cpp
     ${SOURCEDIR}/core/FRDecimal.cpp

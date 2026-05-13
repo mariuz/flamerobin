@@ -81,24 +81,15 @@ Internal fb-cpp Library
 ---------------------------
 FlameRobin uses a patched version of the [fb-cpp](https://github.com/asfernandes/fb-cpp) library. These patches are necessary to support delayed transaction starts and transaction-less statement preparation, which are critical for FlameRobin's Data Access Layer (DAL).
 
-The library is built from an isolated source tree located in `src/engine/db/fbcpp/patches/fb-cpp/`. This ensures that all internal headers consistently see our modifications and avoids build conflicts with the clean upstream submodule in `src/fb-cpp/`.
+The library is built using a custom vcpkg port located in `ports/fb-cpp/`. The patches are applied automatically during the vcpkg build process from `ports/fb-cpp/fb-cpp-flamerobin.patch`. This ensures that the upstream submodule in `src/fb-cpp/` remains clean.
 
-### Synchronizing with Upstream
+### Updating Patches
 
-If you need to update the internal `fb-cpp` source from the submodule (e.g., to pull in new upstream features), use the provided synchronization script:
+If you need to update the patches (e.g., after updating the submodule):
+1. Use the synchronization script to generate a new patch:
+   ```bash
+   ./utils/sync-fbcpp.sh
+   ```
+2. The script will now automatically update `ports/fb-cpp/fb-cpp-flamerobin.patch`.
+3. Verify that the project still compiles and then commit the changes.
 
-```bash
-./utils/sync-fbcpp.sh
-```
-
-This script will:
-1. Sync the source files from `src/fb-cpp/src/fb-cpp/` to the internal patches directory.
-2. Automatically re-apply all FlameRobin-specific patches using `perl` regex.
-
-After running the script, verify that the project still compiles and then commit the changes.
-
-### Manual Patching (Gemini CLI Prompt)
-
-If you need to re-apply the patches manually or the synchronization script fails due to upstream changes, you can use the following prompt with Gemini CLI:
-
-> "Copy the clean `fb-cpp` source from `src/fb-cpp/src/fb-cpp/` to `src/engine/db/fbcpp/patches/fb-cpp/` and apply the FlameRobin patches: 1) Add `Transaction(Client&)` and `start()` to `Transaction`, 2) decouple `Statement::prepare` from transaction, 3) implement `closeCursor()` in `Statement`, and 4) fix aggregate initialization in `BackupManager.h`."

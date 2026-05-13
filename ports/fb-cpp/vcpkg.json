@@ -1,0 +1,24 @@
+{
+  "name": "fb-cpp",
+  "version-semver": "0.0.4",
+  "description": "C++20 Firebird API wrapper",
+  "homepage": "https://github.com/asfernandes/fb-cpp",
+  "license": "MIT",
+  "dependencies": [
+    "firebird"
+  ],
+  "features": {
+    "boost-dll": {
+      "description": "Enable Boost.DLL support",
+      "dependencies": [
+        "boost-dll"
+      ]
+    },
+    "boost-multiprecision": {
+      "description": "Enable Boost.Multiprecision support",
+      "dependencies": [
+        "boost-multiprecision"
+      ]
+    }
+  }
+}

@@ -1,0 +1,370 @@
+diff --git a/src/fb-cpp/Attachment.h b/src/fb-cpp/Attachment.h
+index 0f98a61..c45887c 100644
+--- a/src/fb-cpp/Attachment.h
++++ b/src/fb-cpp/Attachment.h
+@@ -45,7 +45,7 @@ namespace fbcpp
+ 	///
+ 	/// Represents options used when creating an Attachment object.
+ 	///
+-	class AttachmentOptions final
++	class AttachmentOptions
+ 	{
+ 	public:
+ 		///
+@@ -193,7 +193,7 @@ namespace fbcpp
+ 			return *this;
+ 		}
+ 
+-	private:
++	protected:
+ 		std::optional<std::string> connectionCharSet;
+ 		std::optional<std::string> userName;
+ 		std::optional<std::string> password;
+@@ -209,7 +209,7 @@ namespace fbcpp
+ 	/// The Attachment must exist and remain valid while there are other objects using it, such as Transaction and
+ 	/// Statement.
+ 	///
+-	class Attachment final
++	class Attachment
+ 	{
+ 	public:
+ 		///
+@@ -301,10 +301,10 @@ namespace fbcpp
+ 		///
+ 		void dropDatabase();
+ 
+-	private:
++	protected:
+ 		void disconnectOrDrop(bool drop);
+ 
+-	private:
++	protected:
+ 		Client* client;
+ 		FbRef<fb::IAttachment> handle;
+ 	};
+diff --git a/src/fb-cpp/BackupManager.h b/src/fb-cpp/BackupManager.h
+index 137c3d9..9692e3e 100644
+--- a/src/fb-cpp/BackupManager.h
++++ b/src/fb-cpp/BackupManager.h
+@@ -81,7 +81,7 @@ namespace fbcpp
+ 		///
+ 		BackupOptions& addBackupFile(const std::string& value)
+ 		{
+-			backupFiles.emplace_back(value, std::nullopt);
++			backupFiles.push_back({value, std::nullopt});
+ 			return *this;
+ 		}
+ 
+@@ -93,7 +93,7 @@ namespace fbcpp
+ 			if (!backupFiles.empty() && !backupFiles.back().length)
+ 				throw std::invalid_argument{"Cannot add a backup file with length after a backup file without length"};
+ 
+-			backupFiles.emplace_back(value, length);
++			backupFiles.push_back({value, length});
+ 			return *this;
+ 		}
+ 
+@@ -200,7 +200,7 @@ namespace fbcpp
+ 		///
+ 		RestoreOptions& addDatabaseFile(const std::string& value)
+ 		{
+-			databaseFiles.emplace_back(value, std::nullopt);
++			databaseFiles.push_back({value, std::nullopt});
+ 			return *this;
+ 		}
+ 
+@@ -215,7 +215,7 @@ namespace fbcpp
+ 					"Cannot add a database file with length after a database file without length"};
+ 			}
+ 
+-			databaseFiles.emplace_back(value, length);
++			databaseFiles.push_back({value, length});
+ 			return *this;
+ 		}
+ 
+diff --git a/src/fb-cpp/Blob.h b/src/fb-cpp/Blob.h
+index 3464819..7dbdf73 100644
+--- a/src/fb-cpp/Blob.h
++++ b/src/fb-cpp/Blob.h
+@@ -48,7 +48,7 @@ namespace fbcpp
+ 	///
+ 	/// Represents a Firebird blob identifier.
+ 	///
+-	class BlobId final
++	class BlobId
+ 	{
+ 	public:
+ 		/// Returns whether this blob identifier is empty.
+@@ -99,7 +99,7 @@ namespace fbcpp
+ 	///
+ 	/// Additional options used when creating or opening blobs.
+ 	///
+-	class BlobOptions final
++	class BlobOptions
+ 	{
+ 	public:
+ 		///
+@@ -230,7 +230,7 @@ namespace fbcpp
+ 			return *this;
+ 		}
+ 
+-	private:
++	protected:
+ 		std::vector<std::uint8_t> bpb;
+ 		std::optional<BlobType> type;
+ 		std::optional<BlobType> sourceType;
+@@ -264,7 +264,7 @@ namespace fbcpp
+ 	///
+ 	/// Provides read and write access to Firebird blobs.
+ 	///
+-	class Blob final
++	class Blob
+ 	{
+ 	public:
+ 		///
+@@ -419,10 +419,10 @@ namespace fbcpp
+ 		///
+ 		void close();
+ 
+-	private:
++	protected:
+ 		std::vector<std::uint8_t> prepareBpb(const BlobOptions& options);
+ 
+-	private:
++	protected:
+ 		Attachment& attachment;
+ 		Transaction& transaction;
+ 		BlobId id;
+diff --git a/src/fb-cpp/Statement.cpp b/src/fb-cpp/Statement.cpp
+index 28564b1..1ba3b49 100644
+--- a/src/fb-cpp/Statement.cpp
++++ b/src/fb-cpp/Statement.cpp
+@@ -31,6 +31,15 @@ using namespace fbcpp;
+ using namespace fbcpp::impl;
+ 
+ 
++Statement::Statement(Attachment& attachment)
++	: attachment{&attachment},
++	  statusWrapper{attachment.getClient()},
++	  calendarConverter{attachment.getClient()},
++	  numericConverter{attachment.getClient()}
++{
++}
++
++
+ Statement::Statement(
+ 	Attachment& attachment, Transaction& transaction, std::string_view sql, const StatementOptions& options)
+ 	: attachment{&attachment},
+@@ -49,7 +58,7 @@ Statement::Statement(
+ 	if (options.getPrefetchPlan())
+ 		flags |= fb::IStatement::PREPARE_PREFETCH_DETAILED_PLAN;
+ 
+-	statementHandle.reset(attachment.getHandle()->prepare(&statusWrapper, transaction.getHandle().get(),
++	statementHandle.reset(attachment.getHandle()->prepare(&statusWrapper, nullptr,
+ 		static_cast<unsigned>(sql.length()), sql.data(), options.getDialect(), flags));
+ 
+ 	if (options.getCursorName().has_value())
+@@ -122,7 +131,11 @@ Statement::Statement(
+ 						builder.reset(metadata->getBuilder(&statusWrapper));
+ 
+ 					builder->setType(&statusWrapper, index, SQL_VARYING);
++					builder->setLength(&statusWrapper, index, descriptor.length + 2);
++					builder->setCharSet(&statusWrapper, index, 127); // CS_dynamic
+ 					descriptor.adjustedType = DescriptorAdjustedType::STRING;
++					descriptor.length += 2;
++					descriptor.charSetId = 127;
+ 					break;
+ 
+ 				case DescriptorOriginalType::TIME_TZ_EX:
+@@ -149,6 +162,7 @@ Statement::Statement(
+ 			{
+ 				descriptor.offset = metadata->getOffset(&statusWrapper, index);
+ 				descriptor.nullOffset = metadata->getNullOffset(&statusWrapper, index);
++				descriptor.length = metadata->getLength(&statusWrapper, index);
+ 
+ 				*reinterpret_cast<std::int16_t*>(&message[descriptor.nullOffset]) = FB_TRUE;
+ 			}
+@@ -166,6 +180,7 @@ Statement::Statement(
+ 				auto& descriptor = descriptors[index];
+ 				descriptor.offset = metadata->getOffset(&statusWrapper, index);
+ 				descriptor.nullOffset = metadata->getNullOffset(&statusWrapper, index);
++				descriptor.length = metadata->getLength(&statusWrapper, index);
+ 
+ 				*reinterpret_cast<std::int16_t*>(&message[descriptor.nullOffset]) = FB_TRUE;
+ 			}
+@@ -185,14 +200,21 @@ void Statement::free()
+ {
+ 	assert(isValid());
+ 
++	closeCursor();
++
++	statementHandle->free(&statusWrapper);
++	statementHandle.reset();
++}
++
++void Statement::closeCursor()
++{
++	assert(isValid());
++
+ 	if (resultSetHandle)
+ 	{
+ 		resultSetHandle->close(&statusWrapper);
+ 		resultSetHandle.reset();
+ 	}
+-
+-	statementHandle->free(&statusWrapper);
+-	statementHandle.reset();
+ }
+ 
+ std::string Statement::getLegacyPlan()
+diff --git a/src/fb-cpp/Statement.h b/src/fb-cpp/Statement.h
+index 7ae32eb..9bb9dd4 100644
+--- a/src/fb-cpp/Statement.h
++++ b/src/fb-cpp/Statement.h
+@@ -86,7 +86,7 @@ namespace fbcpp
+ 	///
+ 	/// Represents options used when preparing a Statement.
+ 	///
+-	class StatementOptions final
++	class StatementOptions
+ 	{
+ 	public:
+ 		///
+@@ -184,7 +184,7 @@ namespace fbcpp
+ 			return *this;
+ 		}
+ 
+-	private:
++	protected:
+ 		bool prefetchLegacyPlan = false;
+ 		bool prefetchPlan = false;
+ 		std::optional<std::string> cursorName;
+@@ -258,8 +258,10 @@ namespace fbcpp
+ 	///
+ 	/// Prepares, executes, and fetches SQL statements against a Firebird attachment.
+ 	///
+-	class Statement final
++	class Statement
+ 	{
++	public:
++		explicit Statement(Attachment& attachment);
+ 	public:
+ 		///
+ 		/// Prepares an SQL statement.
+@@ -1290,7 +1292,7 @@ namespace fbcpp
+ #endif
+ 
+ 				case DescriptorAdjustedType::STRING:
+-					if (value.length() > descriptor.length)
++					if (value.length() > descriptor.length - sizeof(std::uint16_t))
+ 					{
+ 						static constexpr std::intptr_t STATUS_STRING_TRUNCATION[] = {
+ 							isc_arith_except,
+@@ -2003,7 +2005,7 @@ namespace fbcpp
+ 				value);
+ 		}
+ 
+-	private:
++	protected:
+ 		///
+ 		/// @brief Validates and returns the descriptor for the given input parameter index.
+ 		///
+@@ -2191,7 +2193,7 @@ namespace fbcpp
+ 			}
+ 		}
+ 
+-	private:
++	protected:
+ 		Attachment* attachment;
+ 		impl::StatusWrapper statusWrapper;
+ 		impl::CalendarConverter calendarConverter;
+diff --git a/src/fb-cpp/Transaction.cpp b/src/fb-cpp/Transaction.cpp
+index de8e6f4..db0a54e 100644
+--- a/src/fb-cpp/Transaction.cpp
++++ b/src/fb-cpp/Transaction.cpp
+@@ -32,7 +32,15 @@ using namespace fbcpp;
+ using namespace fbcpp::impl;
+ 
+ 
+-static FbUniquePtr<fb::IXpbBuilder> buildTpb(
++Transaction::Transaction(Client& client)
++	: client{client},
++	  handle{nullptr},
++	  state{TransactionState::ROLLED_BACK}
++{
++}
++
++
++FbUniquePtr<fb::IXpbBuilder> Transaction::buildTpb(
+ 	fb::IMaster* master, StatusWrapper& statusWrapper, const TransactionOptions& options)
+ {
+ 	auto tpbBuilder = fbUnique(master->getUtilInterface()->getXpbBuilder(&statusWrapper, fb::IXpbBuilder::TPB,
+@@ -239,6 +247,21 @@ void Transaction::rollbackRetaining()
+ 	handle->rollbackRetaining(&statusWrapper);
+ }
+ 
++void Transaction::start(Attachment& attachment, const TransactionOptions& options)
++{
++	assert(!isValid());
++
++	const auto master = client.getMaster();
++	StatusWrapper statusWrapper{client};
++
++	auto tpbBuilder = buildTpb(master, statusWrapper, options);
++	const auto tpbBuffer = tpbBuilder->getBuffer(&statusWrapper);
++	const auto tpbBufferLen = tpbBuffer->getBufferLength(&statusWrapper);
++
++	handle.reset(attachment.getHandle()->startTransaction(&statusWrapper, tpbBufferLen, tpbBuffer));
++	state = TransactionState::ACTIVE;
++}
++
+ void Transaction::prepare()
+ {
+ 	prepare(std::span<const std::uint8_t>{});
+diff --git a/src/fb-cpp/Transaction.h b/src/fb-cpp/Transaction.h
+index 66d4594..a676feb 100644
+--- a/src/fb-cpp/Transaction.h
++++ b/src/fb-cpp/Transaction.h
+@@ -116,7 +116,7 @@ namespace fbcpp
+ 	///
+ 	/// Represents options used when creating a Transaction object.
+ 	///
+-	class TransactionOptions final
++	class TransactionOptions
+ 	{
+ 	public:
+ 		///
+@@ -286,7 +286,7 @@ namespace fbcpp
+ 			return *this;
+ 		}
+ 
+-	private:
++	protected:
+ 		std::vector<std::uint8_t> tpb;
+ 		std::optional<TransactionIsolationLevel> isolationLevel;
+ 		std::optional<TransactionReadCommittedMode> readCommittedMode;
+@@ -347,8 +347,10 @@ namespace fbcpp
+ 	/// being committed or rolled back (and not prepared), it will be automatically
+ 	/// rolled back.
+ 	///
+-	class Transaction final
++	class Transaction
+ 	{
++	public:
++		explicit Transaction(Client& client);
+ 	public:
+ 		///
+ 		/// Constructs a Transaction object that starts a transaction in the specified
+@@ -492,7 +494,11 @@ namespace fbcpp
+ 		///
+ 		void rollbackRetaining();
+ 
+-	private:
++		void start(Attachment& attachment, const TransactionOptions& options = {});
++
++		static FbUniquePtr<fb::IXpbBuilder> buildTpb(fb::IMaster* master, impl::StatusWrapper& statusWrapper, const TransactionOptions& options);
++
++	protected:
+ 		Client& client;
+ 		FbRef<fb::ITransaction> handle;
+ 		TransactionState state = TransactionState::ACTIVE;
