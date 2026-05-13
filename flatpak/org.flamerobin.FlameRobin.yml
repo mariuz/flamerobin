@@ -83,9 +83,10 @@ modules:
       - type: dir
         path: ../src/firebird/include
         dest: src/firebird/include
+      - type: patch
+        path: ../ports/fb-cpp/fb-cpp-flamerobin.patch
       - type: shell
         commands:
-          - patch -p1 < ../../ports/fb-cpp/fb-cpp-flamerobin.patch
           - rm -rf vcpkg vcpkg.json CMakePresets.json
           - sed -i '1i set(firebird_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake" CACHE PATH "" FORCE)' CMakeLists.txt
           - find . -name CMakeLists.txt -exec sed -i 's|fb-cpp/cmake|lib/cmake|g' {} +
