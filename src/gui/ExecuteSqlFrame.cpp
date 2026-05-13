@@ -971,7 +971,7 @@ void ExecuteSqlFrame::doBeforeDestroy()
     if (grid_data->IsCellEditControlEnabled())
         grid_data->EnableCellEditControl(false);
     // make sure that further calls to update() will not call Close() again
-    if (databaseM->getIsVolative() && databaseM->isConnected())
+    if (databaseM && databaseM->getIsVolative() && databaseM->isConnected())
         databaseM->disconnect();
     databaseM = 0;
     databasePtrM = 0;
