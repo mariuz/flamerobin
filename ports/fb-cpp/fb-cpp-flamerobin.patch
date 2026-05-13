@@ -239,7 +239,7 @@ index 7ae32eb..9bb9dd4 100644
  		bool prefetchLegacyPlan = false;
  		bool prefetchPlan = false;
  		std::optional<std::string> cursorName;
-@@ -258,8 +258,10 @@ namespace fbcpp
+@@ -258,8 +259,11 @@ namespace fbcpp
  	///
  	/// Prepares, executes, and fetches SQL statements against a Firebird attachment.
  	///
@@ -248,6 +248,7 @@ index 7ae32eb..9bb9dd4 100644
  	{
 +	public:
 +		explicit Statement(Attachment& attachment);
++		void closeCursor();
  	public:
  		///
  		/// Prepares an SQL statement.
@@ -312,7 +313,7 @@ index de8e6f4..db0a54e 100644
 +
 +	auto tpbBuilder = buildTpb(master, statusWrapper, options);
 +	const auto tpbBuffer = tpbBuilder->getBuffer(&statusWrapper);
-+	const auto tpbBufferLen = tpbBuffer->getBufferLength(&statusWrapper);
++	const auto tpbBufferLen = tpbBuilder->getBufferLength(&statusWrapper);
 +
 +	handle.reset(attachment.getHandle()->startTransaction(&statusWrapper, tpbBufferLen, tpbBuffer));
 +	state = TransactionState::ACTIVE;
@@ -325,7 +326,19 @@ diff --git a/src/fb-cpp/Transaction.h b/src/fb-cpp/Transaction.h
 index 66d4594..a676feb 100644
 --- a/src/fb-cpp/Transaction.h
 +++ b/src/fb-cpp/Transaction.h
-@@ -116,7 +116,7 @@ namespace fbcpp
+@@ -38,6 +38,11 @@ namespace fbcpp
+ {
+ 	class Attachment;
+ 
++	namespace impl
++	{
++		class StatusWrapper;
++	}
++
+ 	///
+ 	/// Transaction isolation level.
+ 	///
+@@ -116,7 +121,7 @@ namespace fbcpp
  	///
  	/// Represents options used when creating a Transaction object.
  	///

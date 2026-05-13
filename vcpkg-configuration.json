@@ -7,9 +7,9 @@
   },
   "registries": [],
   "overlay-ports": [
-    "ports"
+    "./ports"
   ],
   "overlay-triplets": [
-    "src/fb-cpp/cmake/triplets"
+    "./src/fb-cpp/cmake/triplets"
   ]
 }

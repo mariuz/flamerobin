@@ -38,24 +38,27 @@
   "overrides": [
     {
       "name": "boost-dll",
-      "version": "1.89.0"
+      "version": "1.90.0"
     },
     {
       "name": "boost-multiprecision",
-      "version": "1.89.0"
+      "version": "1.90.0"
     },
     {
       "name": "boost-test",
-      "version": "1.89.0"
+      "version": "1.90.0"
     },
     {
       "name": "firebird",
       "version": "5.0.4"
     },
     {
+      "name": "fb-cpp",
+      "version": "0.0.4"
+    },
+    {
       "name": "icu",
       "version": "78.1"
     }
-  ],
-  "builtin-baseline": "bc71aa640f89933294f16e004b212c7fd3183eed"
+  ]
 }

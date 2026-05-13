@@ -5,7 +5,15 @@
   "homepage": "https://github.com/asfernandes/fb-cpp",
   "license": "MIT",
   "dependencies": [
-    "firebird"
+    "firebird",
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "host": true
+    }
   ],
   "features": {
     "boost-dll": {

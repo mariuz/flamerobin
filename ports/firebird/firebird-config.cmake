@@ -24,6 +24,7 @@ if(NOT WIN32)
 endif()
 
 add_library(firebird SHARED IMPORTED)
+add_library(firebird::firebird ALIAS firebird)
 
 set_target_properties(firebird PROPERTIES
     IMPORTED_CONFIGURATIONS "DEBUG;RELEASE"
