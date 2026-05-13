@@ -85,9 +85,8 @@ modules:
         dest: src/firebird/include
       - type: shell
         commands:
+          - patch -p1 < ../../ports/fb-cpp/fb-cpp-flamerobin.patch
           - rm -rf vcpkg vcpkg.json CMakePresets.json
-          - perl -i -0777 -pe 's/set\(VCPKG_ROOT "vcpkg"\)\nset\(CMAKE_TOOLCHAIN_FILE/option(ENABLE_VCPKG "Enable vcpkg" ON)\nif(ENABLE_VCPKG)\nset(VCPKG_ROOT "vcpkg")\nif(EXISTS "\${VCPKG_ROOT}\/scripts\/buildsystems\/vcpkg.cmake")\nset(CMAKE_TOOLCHAIN_FILE/g' CMakeLists.txt
-          - perl -i -0777 -pe 's/(set\(CMAKE_TOOLCHAIN_FILE.*"\)\n)/$1endif()\nelse()\nif(CMAKE_TOOLCHAIN_FILE MATCHES "vcpkg.cmake\$")\nunset(CMAKE_TOOLCHAIN_FILE CACHE)\nunset(CMAKE_TOOLCHAIN_FILE)\nendif()\nendif()\n/g' CMakeLists.txt
           - sed -i '1i set(firebird_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake" CACHE PATH "" FORCE)' CMakeLists.txt
           - find . -name CMakeLists.txt -exec sed -i 's|fb-cpp/cmake|lib/cmake|g' {} +
 
@@ -97,7 +96,6 @@ modules:
     config-opts:
       - -DCMAKE_BUILD_TYPE=Release
       - -DENABLE_VCPKG=OFF
-      - -DENABLE_INTERNAL_FBCPP=OFF
       - -DFB_CPP_BUILD_TESTS=OFF
       - -Dfirebird_DIR=/app/lib/cmake/firebird
       - -Dfb-cpp_DIR=/app/lib/cmake/fb-cpp
