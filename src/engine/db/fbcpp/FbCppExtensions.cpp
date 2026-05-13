@@ -43,8 +43,8 @@ StatementExt::StatementExt(Attachment& attachment, Transaction& transaction, std
     if (options.getPrefetchPlan())
         flags |= fb::IStatement::PREPARE_PREFETCH_DETAILED_PLAN;
 
-    // Use nullptr for transaction during prepare to decouple from specific transaction.
-    statementHandle.reset(attachment.getHandle()->prepare(&statusWrapper, nullptr,
+    // Use transaction for prepare to avoid "invalid transaction handle" on FB 3.
+    statementHandle.reset(attachment.getHandle()->prepare(&statusWrapper, transaction.getHandle().get(),
         static_cast<unsigned>(sql.length()), sql.data(), options.getDialect(), flags));
 
     if (options.getCursorName().has_value())
