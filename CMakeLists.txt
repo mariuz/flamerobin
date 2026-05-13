@@ -683,7 +683,7 @@ if (APPLE)
     )
 endif (APPLE)
 
-target_link_libraries(${PROJECT_NAME} IBPP fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
+target_link_libraries(${PROJECT_NAME} IBPP fb-cpp::fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
 target_compile_definitions(${PROJECT_NAME} PRIVATE FBCPP_VERSION="${FBCPP_VERSION_STR}")
 
 enable_testing()
@@ -766,7 +766,7 @@ add_executable(dal_types_test
     ${SOURCEDIR}/core/FRDecimal.cpp
     ${SOURCEDIR}/core/StringUtils.cpp
 )
-target_link_libraries(dal_types_test IBPP fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
+target_link_libraries(dal_types_test IBPP fb-cpp::fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
 add_test(NAME dal_types_test COMMAND dal_types_test)
 
 # Regression test for issue #78 (EXECUTE BLOCK / Selectable SP emitting
@@ -822,7 +822,7 @@ add_executable(fbcpp_service_test
     ${SOURCEDIR}/core/FRDecimal.cpp
     ${SOURCEDIR}/core/StringUtils.cpp
 )
-target_link_libraries(fbcpp_service_test IBPP fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
+target_link_libraries(fbcpp_service_test IBPP fb-cpp::fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
 add_test(NAME fbcpp_service_test COMMAND fbcpp_service_test)
 
 add_executable(dml_returning_test
@@ -844,7 +844,7 @@ add_executable(dml_returning_test
     ${SOURCEDIR}/core/FRDecimal.cpp
     ${SOURCEDIR}/core/StringUtils.cpp
 )
-target_link_libraries(dml_returning_test IBPP fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
+target_link_libraries(dml_returning_test IBPP fb-cpp::fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
 add_test(NAME dml_returning_test COMMAND dml_returning_test)
 
 add_executable(profiler_test
@@ -866,7 +866,7 @@ add_executable(profiler_test
     ${SOURCEDIR}/core/FRDecimal.cpp
     ${SOURCEDIR}/core/StringUtils.cpp
 )
-target_link_libraries(profiler_test IBPP fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
+target_link_libraries(profiler_test IBPP fb-cpp::fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
 add_test(NAME profiler_test COMMAND profiler_test)
 
 add_executable(firebird_type_utils_test
