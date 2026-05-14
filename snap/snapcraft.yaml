@@ -63,7 +63,7 @@ parts:
       - -DwxUSE_STC=ON
       - -DwxUSE_AUI=ON
       - -DwxUSE_WEBVIEW=OFF
-      - -DwxUSE_SECRETSTORE=OFF
+      - -DwxUSE_SECRETSTORE=ON
       - -DwxUSE_OPENGL=OFF
     build-packages:
       - libgtk-3-dev

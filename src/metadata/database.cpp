@@ -51,6 +51,7 @@
 #include "engine/MetadataLoader.h"
 #include "engine/db/ibpp/IbppDatabase.h"
 #include "MasterPassword.h"
+#include "SecretStore.h"
 #include "metadata/CharacterSet.h"
 #include "metadata/column.h"
 #include "metadata/database.h"
@@ -272,6 +273,7 @@ void DatabaseAuthenticationMode::setMode(int mode)
         case UseSavedEncryptedPwd:
         case AlwaysEnterPassword:
         case TrustedUser:
+        case UseSecretStore:
             modeM = Mode(mode);
             break;
         default:
@@ -289,6 +291,8 @@ wxString DatabaseAuthenticationMode::getConfigValue() const
             return "askpwd";
         case TrustedUser:
             return "trusted";
+        case UseSecretStore:
+            return "vault";
         default:
             return "pwd";
     }
@@ -304,6 +308,8 @@ void DatabaseAuthenticationMode::setConfigValue(const wxString& value)
         modeM = AlwaysEnterPassword;
     else if (value == "trusted")
         modeM = TrustedUser;
+    else if (value == "vault")
+        modeM = UseSecretStore;
     else
         wxASSERT(false);
 }
@@ -328,6 +334,11 @@ bool DatabaseAuthenticationMode::getIgnoreUsernamePassword() const
 bool DatabaseAuthenticationMode::getUseEncryptedPassword() const
 {
     return modeM == UseSavedEncryptedPwd;
+}
+
+bool DatabaseAuthenticationMode::getUseSecretStore() const
+{
+    return modeM == UseSecretStore;
 }
 
 // Database class
@@ -1929,6 +1940,13 @@ wxString Database::getDecryptedPassword() const
 
     if (authenticationModeM.getUseEncryptedPassword())
         return decryptPassword(raw, getUsername() + getConnectionString());
+    else if (authenticationModeM.getUseSecretStore())
+    {
+        wxString password;
+        if (loadPasswordFromSecretStore(getConnectionString(), getUsername(), password))
+            return password;
+        return wxEmptyString;
+    }
     else
         return raw;
 }
@@ -2024,6 +2042,11 @@ void Database::setEncryptedPassword(const wxString& value)
     {
         credentialsM.setPassword(
             encryptPassword(value, getUsername() + getConnectionString()));
+    }
+    else if (authenticationModeM.getUseSecretStore() && !value.empty())
+    {
+        savePasswordInSecretStore(getConnectionString(), getUsername(), value);
+        credentialsM.setPassword(wxEmptyString);
     }
     else
     {

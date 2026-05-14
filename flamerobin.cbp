@@ -100,6 +100,8 @@
 		<Unit filename="src/Isaac.h" />
 		<Unit filename="src/MasterPassword.cpp" />
 		<Unit filename="src/MasterPassword.h" />
+		<Unit filename="src/SecretStore.cpp" />
+		<Unit filename="src/SecretStore.h" />
 		<Unit filename="src/addconstrainthandler.cpp" />
 		<Unit filename="src/config/Config.cpp" />
 		<Unit filename="src/config/Config.h" />

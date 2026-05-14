@@ -11,6 +11,7 @@ finish-args:
   - --device=dri
   - --filesystem=home
   - --share=network
+  - --talk-name=org.freedesktop.secrets
 
 modules:
   - name: libtommath
@@ -59,7 +60,7 @@ modules:
       - -DwxUSE_STC=ON
       - -DwxUSE_AUI=ON
       - -DwxUSE_WEBVIEW=OFF
-      - -DwxUSE_LIBSECRET=OFF
+      - -DwxUSE_SECRETSTORE=ON
       - -DwxUSE_OPENGL=OFF
     sources:
       - type: archive

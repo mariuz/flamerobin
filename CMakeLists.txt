@@ -104,6 +104,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/logger.cpp
         ${SOURCEDIR}/main.cpp
         ${SOURCEDIR}/MasterPassword.cpp
+        ${SOURCEDIR}/SecretStore.cpp
         ${SOURCEDIR}/objectdescriptionhandler.cpp
         ${SOURCEDIR}/statementHistory.cpp
         ${SOURCEDIR}/config/Config.cpp
@@ -243,6 +244,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/logger.h
         ${SOURCEDIR}/main.h
         ${SOURCEDIR}/MasterPassword.h
+        ${SOURCEDIR}/SecretStore.h
         ${SOURCEDIR}/revisioninfo.h
         ${SOURCEDIR}/statementHistory.h
         ${SOURCEDIR}/config/Config.h

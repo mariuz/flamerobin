@@ -22,7 +22,8 @@
     {
       "name": "wxwidgets",
       "features": [
-        "webview"
+        "webview",
+        "secretstore"
       ]
     },
     "pcre2",

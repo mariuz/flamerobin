@@ -95,6 +95,9 @@ private:
     void suggestDefaultPageSizeByServerVersion();
     int getSuggestedPageSizeByServerVersion() const;
 
+    int modeToIndex(int mode) const;
+    int indexToMode(int index) const;
+
     wxArrayString getAuthenticationChoices() const;
     wxArrayString getDatabaseCharsetChoices() const;
     wxArrayString getDatabaseDialectChoices() const;

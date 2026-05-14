@@ -34,6 +34,7 @@
 #include <wx/gbsizer.h>
 
 #include "config/Config.h"
+#include "SecretStore.h"
 #include "core/StringUtils.h"
 #include "gui/controls/DndTextControls.h"
 #include "gui/DatabaseRegistrationDialog.h"
@@ -143,6 +144,8 @@ wxArrayString DatabaseRegistrationDialog::getAuthenticationChoices() const
     {
         choices.Add(_("Use saved user name and password"));
         choices.Add(_("Use saved user name and encrypted password"));
+        if (isSecretStoreAvailable())
+            choices.Add(_("Use saved user name and password in OS vault"));
         choices.Add(_("Use saved user name, but always enter password"));
         choices.Add(_("Use trusted user authentication"));
     }
@@ -438,7 +441,7 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
     else
     {
         choice_authentication->SetSelection(
-            databaseM->getAuthenticationMode().getMode());
+            modeToIndex(databaseM->getAuthenticationMode().getMode()));
     }
 
     updateAuthenticationMode();
@@ -492,15 +495,62 @@ int DatabaseRegistrationDialog::getSuggestedPageSizeByServerVersion() const
     return 0;
 }
 
+int DatabaseRegistrationDialog::modeToIndex(int mode) const
+{
+    if (connectAsM)
+        return 0;
+
+    int index = 0;
+    if (mode == DatabaseAuthenticationMode::UseSavedPassword) return 0;
+    index++;
+    if (mode == DatabaseAuthenticationMode::UseSavedEncryptedPwd) return index;
+    index++;
+    if (isSecretStoreAvailable())
+    {
+        if (mode == DatabaseAuthenticationMode::UseSecretStore) return index;
+        index++;
+    }
+    if (mode == DatabaseAuthenticationMode::AlwaysEnterPassword) return index;
+    index++;
+    if (mode == DatabaseAuthenticationMode::TrustedUser) return index;
+    return 0;
+}
+
+int DatabaseRegistrationDialog::indexToMode(int index) const
+{
+    if (connectAsM)
+        return DatabaseAuthenticationMode::AlwaysEnterPassword;
+
+    int current = 0;
+    if (index == current) return DatabaseAuthenticationMode::UseSavedPassword;
+    current++;
+    if (index == current) return DatabaseAuthenticationMode::UseSavedEncryptedPwd;
+    current++;
+    if (isSecretStoreAvailable())
+    {
+        if (index == current) return DatabaseAuthenticationMode::UseSecretStore;
+        current++;
+    }
+    if (index == current) return DatabaseAuthenticationMode::AlwaysEnterPassword;
+    current++;
+    if (index == current) return DatabaseAuthenticationMode::TrustedUser;
+    return DatabaseAuthenticationMode::UseSavedPassword;
+}
+
 void DatabaseRegistrationDialog::updateAuthenticationMode()
 {
     bool isConnected = databaseM->isConnected();
     int sel = choice_authentication->GetSelection();
+    int mode = indexToMode(sel);
+
     // user name not for trusted user authentication
-    text_ctrl_username->SetEditable(!isConnected && sel < 3);
+    text_ctrl_username->SetEditable(!isConnected
+        && mode != DatabaseAuthenticationMode::TrustedUser);
     // password not if always to be entered
     // password not for trusted user authentication
-    text_ctrl_password->SetEditable(!isConnected && sel < 2);
+    text_ctrl_password->SetEditable(!isConnected
+        && mode != DatabaseAuthenticationMode::AlwaysEnterPassword
+        && mode != DatabaseAuthenticationMode::TrustedUser);
     updateButtons();
 }
 
@@ -624,7 +674,7 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
     if (!connectAsM)
     {
         int sel = choice_authentication->GetSelection();
-        databaseM->getAuthenticationMode().setMode(sel);
+        databaseM->getAuthenticationMode().setMode(indexToMode(sel));
     }
     databaseM->setName_(text_ctrl_name->GetValue());
     databaseM->setPath(text_ctrl_dbpath->GetValue());

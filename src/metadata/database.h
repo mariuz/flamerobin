@@ -140,7 +140,7 @@ public:
     DatabaseAuthenticationMode();
 
     enum Mode { UseSavedPassword, UseSavedEncryptedPwd, AlwaysEnterPassword,
-        TrustedUser };
+        TrustedUser, UseSecretStore };
     int getMode() const;
     void setMode(int mode);
 
@@ -152,6 +152,7 @@ public:
     bool getAlwaysAskForPassword() const;
     bool getIgnoreUsernamePassword() const;
     bool getUseEncryptedPassword() const;
+    bool getUseSecretStore() const;
 private:
     Mode modeM;
 };
