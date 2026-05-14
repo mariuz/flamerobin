@@ -69,6 +69,8 @@ parts:
       - libtiff-dev
       - libpng-dev
       - libsecret-1-dev
+      - libpango1.0-dev
+      - libglib2.0-dev
       - ninja-build
     cmake-generator: Ninja
 
@@ -115,6 +117,7 @@ parts:
       - -DFB_CPP_BUILD_TESTS=OFF
       - -Dfirebird_DIR=$SNAPCRAFT_STAGE/usr/lib/cmake/firebird
       - -Dfb-cpp_DIR=$SNAPCRAFT_STAGE/usr/lib/cmake/fb-cpp
+      - -DCMAKE_EXE_LINKER_FLAGS="-Wl,--no-as-needed -Wl,-rpath-link,$SNAPCRAFT_STAGE/usr/lib"
     override-build: |
       craftctl default
       # Extract version for adopt-info
@@ -128,12 +131,12 @@ parts:
       - libicu-dev
       - libboost-all-dev
       - libsecret-1-dev
+      - libpango1.0-dev
+      - libglib2.0-dev
       - libtommath-dev
       - gettext
       - ninja-build
     stage-packages:
       - libtommath1
       - libsecret-1-0
-      - libpango-1.0-0
-      - libglib2.0-0
     cmake-generator: Ninja
