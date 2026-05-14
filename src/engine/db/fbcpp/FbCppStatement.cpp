@@ -363,7 +363,11 @@ std::string FbCppStatement::getString(int index)
     {
         auto val = statementM->get<std::optional<fbcpp::ScaledOpaqueInt128>>((unsigned)index);
         if (!val) return "";
-        return std::string(Int128ToString(val->value).ToUTF8());
+        // Convert fbcpp::OpaqueInt128 (struct) to int128_t (primitive)
+        int128_t i128 = static_cast<int128_t>(static_cast<int64_t>(val->value.fb_data[1]));
+        i128 <<= 64;
+        i128 |= static_cast<int128_t>(val->value.fb_data[0]);
+        return std::string(Int128ToString(i128).ToUTF8());
     }
 
     return statementM->get<std::optional<std::string>>((unsigned)index).value_or("");
