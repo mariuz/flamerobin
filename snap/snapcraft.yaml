@@ -121,9 +121,9 @@ parts:
     override-build: |
       craftctl default
       # Extract version for adopt-info
-      MAJOR=$(grep FR_VERSION_MAJOR $SNAPCRAFT_PROJECT_DIR/../src/frversion.h | awk '{print $3}')
-      MINOR=$(grep FR_VERSION_MINOR $SNAPCRAFT_PROJECT_DIR/../src/frversion.h | awk '{print $3}')
-      RLS=$(grep FR_VERSION_RLS $SNAPCRAFT_PROJECT_DIR/../src/frversion.h | awk '{print $3}')
+      MAJOR=$(grep FR_VERSION_MAJOR $SNAPCRAFT_PROJECT_ROOT/src/frversion.h | awk '{print $3}')
+      MINOR=$(grep FR_VERSION_MINOR $SNAPCRAFT_PROJECT_ROOT/src/frversion.h | awk '{print $3}')
+      RLS=$(grep FR_VERSION_RLS $SNAPCRAFT_PROJECT_ROOT/src/frversion.h | awk '{print $3}')
       craftctl set version="$MAJOR.$MINOR.$RLS"
     build-packages:
       - libgtk-3-dev
