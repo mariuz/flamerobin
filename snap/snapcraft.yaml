@@ -29,7 +29,6 @@ parts:
     source: https://github.com/libtom/libtommath/releases/download/v1.3.0/ltm-1.3.0.tar.xz
     source-checksum: sha256/296272d93435991308eb73607600c034b558807a07e829e751142e65ccfa9d08
     cmake-parameters:
-      - -DCMAKE_INSTALL_PREFIX=/
       - -DCMAKE_BUILD_TYPE=Release
       - -DBUILD_SHARED_LIBS=ON
     build-packages:
@@ -42,23 +41,22 @@ parts:
     source-checksum: sha256/ab6a15a0258f38b022be496bb5e038c14e8628ce9acd0f9a06288a3baedd917b
     override-build: |
       tar -xzf buildroot.tar.gz ./opt/firebird/lib/libfbclient.so.5.0.4 ./opt/firebird/lib/libib_util.so ./opt/firebird/lib/libtomcrypt.so.1.0.1 ./opt/firebird/include
-      install -Dm755 opt/firebird/lib/libfbclient.so.5.0.4 $SNAPCRAFT_PART_INSTALL/lib/libfbclient.so.5.0.4
-      ln -sf libfbclient.so.5.0.4 $SNAPCRAFT_PART_INSTALL/lib/libfbclient.so.2
-      ln -sf libfbclient.so.2 $SNAPCRAFT_PART_INSTALL/lib/libfbclient.so
-      install -Dm755 opt/firebird/lib/libib_util.so $SNAPCRAFT_PART_INSTALL/lib/libib_util.so
-      install -Dm755 opt/firebird/lib/libtomcrypt.so.1.0.1 $SNAPCRAFT_PART_INSTALL/lib/libtomcrypt.so.1.0.1
-      ln -sf libtomcrypt.so.1.0.1 $SNAPCRAFT_PART_INSTALL/lib/libtomcrypt.so.1
-      ln -sf libtomcrypt.so.1 $SNAPCRAFT_PART_INSTALL/lib/libtomcrypt.so
-      mkdir -p $SNAPCRAFT_PART_INSTALL/include
-      cp -r opt/firebird/include/* $SNAPCRAFT_PART_INSTALL/include/
-      install -Dm644 $SNAPCRAFT_PROJECT_DIR/cmake/firebirdConfig.cmake $SNAPCRAFT_PART_INSTALL/lib/cmake/firebird/firebirdConfig.cmake
+      install -Dm755 opt/firebird/lib/libfbclient.so.5.0.4 $SNAPCRAFT_PART_INSTALL/usr/lib/libfbclient.so.5.0.4
+      ln -sf libfbclient.so.5.0.4 $SNAPCRAFT_PART_INSTALL/usr/lib/libfbclient.so.2
+      ln -sf libfbclient.so.2 $SNAPCRAFT_PART_INSTALL/usr/lib/libfbclient.so
+      install -Dm755 opt/firebird/lib/libib_util.so $SNAPCRAFT_PART_INSTALL/usr/lib/libib_util.so
+      install -Dm755 opt/firebird/lib/libtomcrypt.so.1.0.1 $SNAPCRAFT_PART_INSTALL/usr/lib/libtomcrypt.so.1.0.1
+      ln -sf libtomcrypt.so.1.0.1 $SNAPCRAFT_PART_INSTALL/usr/lib/libtomcrypt.so.1
+      ln -sf libtomcrypt.so.1 $SNAPCRAFT_PART_INSTALL/usr/lib/libtomcrypt.so
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/include
+      cp -r opt/firebird/include/* $SNAPCRAFT_PART_INSTALL/usr/include/
+      install -Dm644 $SNAPCRAFT_PROJECT_DIR/cmake/firebirdConfig.cmake $SNAPCRAFT_PART_INSTALL/usr/lib/cmake/firebird/firebirdConfig.cmake
 
   wxwidgets:
     plugin: cmake
     source: https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.6/wxWidgets-3.2.6.tar.bz2
     source-checksum: sha256/939e5b77ddc5b6092d1d7d29491fe67010a2433cf9b9c0d841ee4d04acb9dce7
     cmake-parameters:
-      - -DCMAKE_INSTALL_PREFIX=/
       - -DCMAKE_BUILD_TYPE=Release
       - -DwxBUILD_SHARED=ON
       - -DwxBUILD_TOOLKIT=gtk3
@@ -83,13 +81,12 @@ parts:
     source: .
     source-subdir: src/fb-cpp
     cmake-parameters:
-      - -DCMAKE_INSTALL_PREFIX=/
       - -DCMAKE_BUILD_TYPE=Release
       - -DBUILD_TESTING=OFF
       - -DFB_CPP_USE_BOOST_DLL=OFF
       - -DFB_CPP_USE_BOOST_MULTIPRECISION=OFF
       - -DENABLE_VCPKG=OFF
-      - -Dfirebird_DIR=$SNAPCRAFT_STAGE/lib/cmake/firebird
+      - -Dfirebird_DIR=$SNAPCRAFT_STAGE/usr/lib/cmake/firebird
     override-pull: |
       craftctl default
       cd src/fb-cpp
@@ -97,7 +94,7 @@ parts:
       rm -rf vcpkg vcpkg.json CMakePresets.json
       sed -i '/set(VCPKG_ROOT/d' CMakeLists.txt
       sed -i '/set(CMAKE_TOOLCHAIN_FILE/d' CMakeLists.txt
-      sed -i "1i set(firebird_DIR \"$SNAPCRAFT_STAGE/lib/cmake/firebird\" CACHE PATH \"\" FORCE)" CMakeLists.txt
+      sed -i "1i set(firebird_DIR \"$SNAPCRAFT_STAGE/usr/lib/cmake/firebird\" CACHE PATH \"\" FORCE)" CMakeLists.txt
       find . -name CMakeLists.txt -exec sed -i 's|fb-cpp/cmake|lib/cmake|g' {} +
       
       # Prepare firebird include as expected by fb-cpp
@@ -114,12 +111,11 @@ parts:
     plugin: cmake
     source: .
     cmake-parameters:
-      - -DCMAKE_INSTALL_PREFIX=/
       - -DCMAKE_BUILD_TYPE=Release
       - -DENABLE_VCPKG=OFF
       - -DFB_CPP_BUILD_TESTS=OFF
-      - -Dfirebird_DIR=$SNAPCRAFT_STAGE/lib/cmake/firebird
-      - -Dfb-cpp_DIR=$SNAPCRAFT_STAGE/lib/cmake/fb-cpp
+      - -Dfirebird_DIR=$SNAPCRAFT_STAGE/usr/lib/cmake/firebird
+      - -Dfb-cpp_DIR=$SNAPCRAFT_STAGE/usr/lib/cmake/fb-cpp
     override-build: |
       craftctl default
       # Extract version for adopt-info
@@ -132,6 +128,7 @@ parts:
       - libnotify-dev
       - libicu-dev
       - libboost-all-dev
+      - libsecret-1-dev
       - gettext
       - ninja-build
     cmake-generator: Ninja
