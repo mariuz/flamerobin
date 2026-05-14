@@ -42,7 +42,8 @@ bool savePasswordInSecretStore(const wxString& service, const wxString& user, co
     wxSecretStore store = wxSecretStore::GetDefault();
     if (!store.IsOk())
         return false;
-    return store.Save("org.flamerobin.FlameRobin:" + service, user, password);
+    wxString secretService = "org.flamerobin.FlameRobin:" + service + ":" + user;
+    return store.Save(secretService, user, wxSecretValue(password));
 }
 
 bool loadPasswordFromSecretStore(const wxString& service, const wxString& user, wxString& password)
@@ -50,8 +51,10 @@ bool loadPasswordFromSecretStore(const wxString& service, const wxString& user, 
     wxSecretStore store = wxSecretStore::GetDefault();
     if (!store.IsOk())
         return false;
+    wxString secretService = "org.flamerobin.FlameRobin:" + service + ":" + user;
+    wxString returnedUser;
     wxSecretValue value;
-    if (store.Load("org.flamerobin.FlameRobin:" + service, user, value))
+    if (store.Load(secretService, returnedUser, value))
     {
         password = value.GetAsString();
         return true;
@@ -64,7 +67,8 @@ bool deletePasswordFromSecretStore(const wxString& service, const wxString& user
     wxSecretStore store = wxSecretStore::GetDefault();
     if (!store.IsOk())
         return false;
-    return store.Delete("org.flamerobin.FlameRobin:" + service, user);
+    wxString secretService = "org.flamerobin.FlameRobin:" + service + ":" + user;
+    return store.Delete(secretService);
 }
 
 #else
