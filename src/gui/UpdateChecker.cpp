@@ -53,13 +53,19 @@ void UpdateChecker::check(wxWindow* parent, bool quiet)
             int pos = content.Find("\"tag_name\":");
             if (pos != wxNOT_FOUND)
             {
-                int start = content.Find("\"", pos + 11);
-                int end = content.Find("\"", start + 1);
-                if (start != wxNOT_FOUND && end != wxNOT_FOUND)
+                wxString tail = content.Mid(pos + 11);
+                int startRel = tail.Find("\"");
+                if (startRel != wxNOT_FOUND)
                 {
-                    wxString tag = content.SubString(start + 1, end - 1);
-                    if (tag.StartsWith("v"))
-                        tag = tag.Mid(1);
+                    int start = pos + 11 + startRel;
+                    wxString afterQuote = content.Mid(start + 1);
+                    int endRel = afterQuote.Find("\"");
+                    if (endRel != wxNOT_FOUND)
+                    {
+                        int end = start + 1 + endRel;
+                        wxString tag = content.SubString(start + 1, end - 1);
+                        if (tag.StartsWith("v"))
+                            tag = tag.Mid(1);
 
                     wxStringTokenizer tkz(tag, ".");
                     long major = 0, minor = 0, rls = 0;
