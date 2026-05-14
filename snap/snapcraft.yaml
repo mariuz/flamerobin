@@ -29,6 +29,7 @@ parts:
     source: https://github.com/libtom/libtommath/releases/download/v1.3.0/ltm-1.3.0.tar.xz
     source-checksum: sha256/296272d93435991308eb73607600c034b558807a07e829e751142e65ccfa9d08
     cmake-parameters:
+      - -DCMAKE_INSTALL_PREFIX=/
       - -DCMAKE_BUILD_TYPE=Release
       - -DBUILD_SHARED_LIBS=ON
     build-packages:
@@ -57,6 +58,7 @@ parts:
     source: https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.6/wxWidgets-3.2.6.tar.bz2
     source-checksum: sha256/939e5b77ddc5b6092d1d7d29491fe67010a2433cf9b9c0d841ee4d04acb9dce7
     cmake-parameters:
+      - -DCMAKE_INSTALL_PREFIX=/
       - -DCMAKE_BUILD_TYPE=Release
       - -DwxBUILD_SHARED=ON
       - -DwxBUILD_TOOLKIT=gtk3
@@ -81,6 +83,7 @@ parts:
     source: .
     source-subdir: src/fb-cpp
     cmake-parameters:
+      - -DCMAKE_INSTALL_PREFIX=/
       - -DCMAKE_BUILD_TYPE=Release
       - -DBUILD_TESTING=OFF
       - -DFB_CPP_USE_BOOST_DLL=OFF
@@ -111,6 +114,7 @@ parts:
     plugin: cmake
     source: .
     cmake-parameters:
+      - -DCMAKE_INSTALL_PREFIX=/
       - -DCMAKE_BUILD_TYPE=Release
       - -DENABLE_VCPKG=OFF
       - -DFB_CPP_BUILD_TESTS=OFF
