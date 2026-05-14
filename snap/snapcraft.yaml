@@ -15,8 +15,8 @@ confinement: strict
 
 apps:
   flamerobin:
-    command: bin/flamerobin
-    desktop: share/applications/flamerobin.desktop
+    command: usr/bin/flamerobin
+    desktop: usr/share/applications/flamerobin.desktop
     extensions: [gnome]
     common-id: org.flamerobin.FlameRobin
     plugs:
