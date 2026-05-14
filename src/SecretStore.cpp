@@ -30,7 +30,7 @@
 #include "SecretStore.h"
 
 #if wxUSE_SECRETSTORE
-#include <wx/secrets.h>
+#include <wx/secretstore.h>
 
 bool isSecretStoreAvailable()
 {
