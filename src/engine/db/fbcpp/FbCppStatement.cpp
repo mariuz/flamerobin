@@ -25,6 +25,7 @@
 #include "engine/db/fbcpp/FbCppBlob.h"
 #include "engine/db/IDatabase.h"
 #include "engine/db/ITransaction.h"
+#include "core/FRInt128.h"
 #include <fb-cpp/Exception.h>
 #include <fb-cpp/Statement.h>
 #include <cstring>
@@ -358,6 +359,13 @@ std::string FbCppStatement::getString(int index)
         }
     }
 
+    if (type == ColumnType::Int128)
+    {
+        auto val = statementM->get<std::optional<fbcpp::ScaledOpaqueInt128>>((unsigned)index);
+        if (!val) return "";
+        return std::string(Int128ToString(val->value).ToUTF8());
+    }
+
     return statementM->get<std::optional<std::string>>((unsigned)index).value_or("");
 }
 
@@ -372,12 +380,21 @@ int32_t FbCppStatement::getInt32(int index)
     if (type == ColumnType::Float || type == ColumnType::Double)
         return (int32_t)statementM->get<std::optional<double>>((unsigned)index).value_or(0.0);
 
-    // Explicitly handle 16-bit and 32-bit types to ensure sign extension
+    // For Numeric columns, we want the raw integer value as DataGrid handles the scale.
+    // fb-cpp's get<int32_t> would adjust the scale to 0.
     const auto& descriptors = statementM->getOutputDescriptors();
     if ((unsigned)index < descriptors.size())
     {
         if (descriptors[index].adjustedType == fbcpp::DescriptorAdjustedType::INT16)
-            return statementM->get<std::optional<std::int16_t>>((unsigned)index).value_or(0);
+        {
+            auto val = statementM->get<std::optional<fbcpp::ScaledInt16>>((unsigned)index);
+            return val ? (int32_t)val->value : 0;
+        }
+        if (descriptors[index].adjustedType == fbcpp::DescriptorAdjustedType::INT32)
+        {
+            auto val = statementM->get<std::optional<fbcpp::ScaledInt32>>((unsigned)index);
+            return val ? (int32_t)val->value : 0;
+        }
     }
     return statementM->get<std::optional<std::int32_t>>((unsigned)index).value_or(0);
 }
@@ -397,9 +414,20 @@ int64_t FbCppStatement::getInt64(int index)
     if ((unsigned)index < descriptors.size())
     {
         if (descriptors[index].adjustedType == fbcpp::DescriptorAdjustedType::INT16)
-            return statementM->get<std::optional<std::int16_t>>((unsigned)index).value_or(0);
+        {
+            auto val = statementM->get<std::optional<fbcpp::ScaledInt16>>((unsigned)index);
+            return val ? (int64_t)val->value : 0;
+        }
         if (descriptors[index].adjustedType == fbcpp::DescriptorAdjustedType::INT32)
-            return statementM->get<std::optional<std::int32_t>>((unsigned)index).value_or(0);
+        {
+            auto val = statementM->get<std::optional<fbcpp::ScaledInt32>>((unsigned)index);
+            return val ? (int64_t)val->value : 0;
+        }
+        if (descriptors[index].adjustedType == fbcpp::DescriptorAdjustedType::INT64)
+        {
+            auto val = statementM->get<std::optional<fbcpp::ScaledInt64>>((unsigned)index);
+            return val ? (int64_t)val->value : 0;
+        }
     }
     return statementM->get<std::optional<std::int64_t>>((unsigned)index).value_or(0);
 }
