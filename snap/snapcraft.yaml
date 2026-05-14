@@ -133,7 +133,7 @@ parts:
       - ninja-build
     stage-packages:
       - libtommath1
-      - libsecret-1-0t64
+      - libsecret-1-0
       - libpango-1.0-0
       - libglib2.0-0
     cmake-generator: Ninja
