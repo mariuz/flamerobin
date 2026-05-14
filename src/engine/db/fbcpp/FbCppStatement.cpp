@@ -386,20 +386,23 @@ int32_t FbCppStatement::getInt32(int index)
 
     // For Numeric columns, we want the raw integer value as DataGrid handles the scale.
     // fb-cpp's get<int32_t> would adjust the scale to 0.
-    const auto& descriptors = statementM->getOutputDescriptors();
-    if ((unsigned)index < descriptors.size())
+    // We use ScaledInt64 to fetch the raw value regardless of underlying integer size.
+    if (type == ColumnType::Numeric || type == ColumnType::Integer || type == ColumnType::BigInt)
     {
-        if (descriptors[index].adjustedType == fbcpp::DescriptorAdjustedType::INT16)
-        {
-            auto val = statementM->get<std::optional<fbcpp::ScaledInt16>>((unsigned)index);
-            return val ? (int32_t)val->value : 0;
-        }
-        if (descriptors[index].adjustedType == fbcpp::DescriptorAdjustedType::INT32)
-        {
-            auto val = statementM->get<std::optional<fbcpp::ScaledInt32>>((unsigned)index);
-            return val ? (int32_t)val->value : 0;
-        }
+        auto val = statementM->get<std::optional<fbcpp::ScaledInt64>>((unsigned)index);
+        return val ? (int32_t)val->value : 0;
     }
+
+    if (type == ColumnType::Int128)
+    {
+        auto val = statementM->get<std::optional<fbcpp::ScaledOpaqueInt128>>((unsigned)index);
+        if (!val) return 0;
+        int128_t i128 = static_cast<int128_t>(static_cast<int64_t>(val->value.fb_data[1]));
+        i128 <<= 64;
+        i128 |= static_cast<int128_t>(val->value.fb_data[0]);
+        return (int32_t)i128;
+    }
+
     return statementM->get<std::optional<std::int32_t>>((unsigned)index).value_or(0);
 }
 
@@ -414,25 +417,22 @@ int64_t FbCppStatement::getInt64(int index)
     if (type == ColumnType::Float || type == ColumnType::Double)
         return (int64_t)statementM->get<std::optional<double>>((unsigned)index).value_or(0.0);
 
-    const auto& descriptors = statementM->getOutputDescriptors();
-    if ((unsigned)index < descriptors.size())
+    if (type == ColumnType::Numeric || type == ColumnType::Integer || type == ColumnType::BigInt)
     {
-        if (descriptors[index].adjustedType == fbcpp::DescriptorAdjustedType::INT16)
-        {
-            auto val = statementM->get<std::optional<fbcpp::ScaledInt16>>((unsigned)index);
-            return val ? (int64_t)val->value : 0;
-        }
-        if (descriptors[index].adjustedType == fbcpp::DescriptorAdjustedType::INT32)
-        {
-            auto val = statementM->get<std::optional<fbcpp::ScaledInt32>>((unsigned)index);
-            return val ? (int64_t)val->value : 0;
-        }
-        if (descriptors[index].adjustedType == fbcpp::DescriptorAdjustedType::INT64)
-        {
-            auto val = statementM->get<std::optional<fbcpp::ScaledInt64>>((unsigned)index);
-            return val ? (int64_t)val->value : 0;
-        }
+        auto val = statementM->get<std::optional<fbcpp::ScaledInt64>>((unsigned)index);
+        return val ? (int64_t)val->value : 0;
     }
+
+    if (type == ColumnType::Int128)
+    {
+        auto val = statementM->get<std::optional<fbcpp::ScaledOpaqueInt128>>((unsigned)index);
+        if (!val) return 0;
+        int128_t i128 = static_cast<int128_t>(static_cast<int64_t>(val->value.fb_data[1]));
+        i128 <<= 64;
+        i128 |= static_cast<int128_t>(val->value.fb_data[0]);
+        return (int64_t)i128;
+    }
+
     return statementM->get<std::optional<std::int64_t>>((unsigned)index).value_or(0);
 }
 
