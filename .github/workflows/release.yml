@@ -328,3 +328,21 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: flamerobin-macos-*.zip
+
+  build-snap:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Build Snap
+        uses: snapcore/action-build@v1
+        id: build
+
+      - name: Upload Snap Artifact to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.build.outputs.snap }}
