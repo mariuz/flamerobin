@@ -27,110 +27,88 @@
     #include "wx/wx.h"
 #endif
 
-#include <wx/protocol/http.h>
-#include <wx/sstream.h>
-#include <wx/txtstrm.h>
+#include <wx/webrequest.h>
+#include <wx/tokenzr.h>
 
 #include "frversion.h"
 #include "gui/UpdateChecker.h"
 
 void UpdateChecker::check(wxWindow* parent, bool quiet)
 {
-    wxHTTP http;
-    http.SetHeader("User-Agent", "FlameRobin");
-    http.SetTimeout(10); // 10 seconds
-
-    // We should probably use a stable URL for version info
-    // For now, let's use a placeholder that points to flamerobin.org
-    // In a real scenario, this could be a GitHub Gist or a file on the website
-    wxString versionUrl = "http://www.flamerobin.org/version.txt";
-    
     if (!quiet)
         wxBeginBusyCursor();
 
-    if (http.Connect("www.flamerobin.org"))
-    {
-        wxInputStream* stream = http.GetInputStream("/version.txt");
-        if (http.GetResponse() == 200 && stream)
-        {
-            wxString content;
-            wxStringOutputStream out_stream(&content);
-            stream->Read(out_stream);
-            delete stream;
+    wxWebSession& session = wxWebSession::GetDefault();
+    wxWebRequest request = session.CreateRequest(parent, "https://api.github.com/repos/mariuz/flamerobin/releases/latest");
+    request.SetHeader("User-Agent", "FlameRobin");
 
+    parent->Bind(wxEVT_WEBREQUEST_STATE, [parent, quiet](wxWebRequestEvent& evt) {
+        if (evt.GetState() == wxWebRequest::State_Completed)
+        {
             if (!quiet)
                 wxEndBusyCursor();
 
-            // Expected format: MAJOR.MINOR.RLS
-            // e.g. 0.9.3
-            long major = 0, minor = 0, rls = 0;
-            wxString versionStr = content.BeforeFirst('\n').Trim();
-            
-            bool parsed = false;
-            wxString rest;
-            if (versionStr.BeforeFirst('.').ToLong(&major))
+            wxString content = evt.GetResponse().AsString();
+            // Simple JSON parsing for "tag_name": "vX.Y.Z"
+            int pos = content.Find("\"tag_name\":");
+            if (pos != wxNOT_FOUND)
             {
-                rest = versionStr.AfterFirst('.');
-                if (rest.BeforeFirst('.').ToLong(&minor))
+                int start = content.Find("\"", pos + 11);
+                int end = content.Find("\"", start + 1);
+                if (start != wxNOT_FOUND && end != wxNOT_FOUND)
                 {
-                    rest = rest.AfterFirst('.');
-                    if (rest.ToLong(&rls))
+                    wxString tag = content.SubString(start + 1, end - 1);
+                    if (tag.StartsWith("v"))
+                        tag = tag.Mid(1);
+
+                    wxStringTokenizer tkz(tag, ".");
+                    long major = 0, minor = 0, rls = 0;
+                    if (tkz.HasMoreTokens() && tkz.GetNextToken().ToLong(&major) &&
+                        tkz.HasMoreTokens() && tkz.GetNextToken().ToLong(&minor) &&
+                        tkz.HasMoreTokens() && tkz.GetNextToken().ToLong(&rls))
                     {
-                        parsed = true;
+                        bool newVersion = false;
+                        if (major > FR_VERSION_MAJOR)
+                            newVersion = true;
+                        else if (major == FR_VERSION_MAJOR && minor > FR_VERSION_MINOR)
+                            newVersion = true;
+                        else if (major == FR_VERSION_MAJOR && minor == FR_VERSION_MINOR && rls > FR_VERSION_RLS)
+                            newVersion = true;
+
+                        if (newVersion)
+                        {
+                            int res = wxMessageBox(
+                                wxString::Format(_("A new version of FlameRobin is available: %ld.%ld.%ld\nYour current version is: %d.%d.%d\n\nWould you like to visit the release page?"),
+                                    major, minor, rls, FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RLS),
+                                _("Update Available"),
+                                wxYES_NO | wxICON_INFORMATION,
+                                parent
+                            );
+                            if (res == wxYES)
+                            {
+                                wxLaunchDefaultBrowser("https://github.com/mariuz/flamerobin/releases/latest");
+                            }
+                        }
+                        else if (!quiet)
+                        {
+                            wxMessageBox(_("Your version of FlameRobin is up to date."), _("No Updates"), wxOK | wxICON_INFORMATION, parent);
+                        }
+                        return;
                     }
                 }
             }
-
-            if (parsed)
-            {
-                bool newVersion = false;
-                if (major > FR_VERSION_MAJOR)
-                    newVersion = true;
-                else if (major == FR_VERSION_MAJOR && minor > FR_VERSION_MINOR)
-                    newVersion = true;
-                else if (major == FR_VERSION_MAJOR && minor == FR_VERSION_MINOR && rls > FR_VERSION_RLS)
-                    newVersion = true;
-
-                if (newVersion)
-                {
-                    int res = wxMessageBox(
-                        wxString::Format(_("A new version of FlameRobin is available: %ld.%ld.%ld\nYour current version is: %d.%d.%d\n\nWould you like to visit the download page?"),
-                            major, minor, rls, FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RLS),
-                        _("Update Available"),
-                        wxYES_NO | wxICON_INFORMATION,
-                        parent
-                    );
-                    if (res == wxYES)
-                    {
-                        wxLaunchDefaultBrowser("http://www.flamerobin.org/downloads.html");
-                    }
-                }
-                else if (!quiet)
-                {
-                    wxMessageBox(_("Your version of FlameRobin is up to date."), _("No Updates"), wxOK | wxICON_INFORMATION, parent);
-                }
-            }
-            else if (!quiet)
-            {
-                wxMessageBox(_("Could not parse version information from server."), _("Error"), wxOK | wxICON_ERROR, parent);
-            }
+            if (!quiet)
+                wxMessageBox(_("Could not parse version information from GitHub."), _("Error"), wxOK | wxICON_ERROR, parent);
         }
-        else
+        else if (evt.GetState() == wxWebRequest::State_Failed)
         {
             if (!quiet)
             {
                 wxEndBusyCursor();
-                wxMessageBox(_("Could not retrieve version information from server."), _("Error"), wxOK | wxICON_ERROR, parent);
+                wxMessageBox(wxString::Format(_("Could not retrieve version information from GitHub:\n%s"), evt.GetErrorDescription()), _("Error"), wxOK | wxICON_ERROR, parent);
             }
-            delete stream;
         }
-    }
-    else
-    {
-        if (!quiet)
-        {
-            wxEndBusyCursor();
-            wxMessageBox(_("Could not connect to update server."), _("Error"), wxOK | wxICON_ERROR, parent);
-        }
-    }
+    });
+
+    request.Start();
 }
