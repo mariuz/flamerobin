@@ -264,15 +264,15 @@ private:
 
     inline void checkConnected(const wxString& operation) const;
 protected:
-    virtual void loadChildren();
-    virtual void lockChildren();
-    virtual void unlockChildren();
+    virtual void loadChildren() override;
+    virtual void lockChildren() override;
+    virtual void unlockChildren() override;
 
 public:
     Database();
     ~Database();
 
-    virtual bool getChildren(std::vector<MetadataItem *>& temp);
+    virtual bool getChildren(std::vector<MetadataItem *>& temp) override;
     void getCollections(std::vector<MetadataItem *>& temp, bool system);
 
     CharacterSetsPtr getCharacterSets();

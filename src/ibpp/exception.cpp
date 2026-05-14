@@ -292,6 +292,8 @@ WrongTypeImpl::WrongTypeImpl(const std::string& context, int sqlType, IITYPE var
 		case ivBool :		info.append("bool"); break;
 		case ivDBKey :		info.append("DBKey"); break;
 		case ivByte :		info.append("int8_t"); break;
+		case ivDec16 :		info.append("decimal128"); break;
+		case ivDec34 :		info.append("decimal128"); break;
 	}
 	mWhat.append(info).append("\n");
 }

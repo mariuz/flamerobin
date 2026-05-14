@@ -52,10 +52,10 @@ static const char* fblibs[] = {
 	"/opt/homebrew/lib/libfbclient.dylib",
 	"/usr/local/lib/libfbclient.dylib",
 	"libfbclient.dylib",
-	""
+	0
 };
 #else
-static const char* fblibs[] = {"libfbembed.so.2.5","libfbembed.so.2.1","libfbclient.so.2",""};
+static const char* fblibs[] = {"libfbembed.so.2.5","libfbembed.so.2.1","libfbclient.so.2",0};
 #endif
 
 #endif
@@ -319,7 +319,7 @@ FBCLIENT* FBCLIENT::Call()
                else
                {
                        int ixlib = 0;
-                       while (fblibs[ixlib] != "")
+                       while (fblibs[ixlib] != 0)
                        {
                                mHandle = dlopen(fblibs[ixlib],RTLD_LAZY);
                                if (mHandle != 0) break;
@@ -533,6 +533,8 @@ namespace IBPP
         case SDT::sdLargeint:
         case SDT::sdInt128:
             return true;
+        default:
+            break;
         }
         return false;
 
@@ -548,6 +550,8 @@ namespace IBPP
         case SDT::sdDec16:
         case SDT::sdDec34:
             return true;
+        default:
+            break;
         }
         return false;
 
