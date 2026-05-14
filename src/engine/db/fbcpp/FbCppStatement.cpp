@@ -363,10 +363,9 @@ std::string FbCppStatement::getString(int index)
     {
         auto val = statementM->get<std::optional<fbcpp::ScaledOpaqueInt128>>((unsigned)index);
         if (!val) return "";
-        // Convert fbcpp::OpaqueInt128 (struct) to int128_t (primitive)
-        int128_t i128 = static_cast<int128_t>(static_cast<int64_t>(val->value.fb_data[1]));
-        i128 <<= 64;
-        i128 |= static_cast<int128_t>(val->value.fb_data[0]);
+        int128_t i128;
+        std::uint64_t parts[2] = { val->value.fb_data[0], val->value.fb_data[1] };
+        std::memcpy(&i128, parts, 16);
         return std::string(Int128ToString(i128).ToUTF8());
     }
 
@@ -397,10 +396,14 @@ int32_t FbCppStatement::getInt32(int index)
     {
         auto val = statementM->get<std::optional<fbcpp::ScaledOpaqueInt128>>((unsigned)index);
         if (!val) return 0;
-        int128_t i128 = static_cast<int128_t>(static_cast<int64_t>(val->value.fb_data[1]));
-        i128 <<= 64;
-        i128 |= static_cast<int128_t>(val->value.fb_data[0]);
+        int128_t i128;
+        std::uint64_t parts[2] = { val->value.fb_data[0], val->value.fb_data[1] };
+        std::memcpy(&i128, parts, 16);
+#ifdef HAVE_INT128
         return (int32_t)i128;
+#else
+        return (int32_t)i128.data.us2.lowPart;
+#endif
     }
 
     return statementM->get<std::optional<std::int32_t>>((unsigned)index).value_or(0);
@@ -427,10 +430,14 @@ int64_t FbCppStatement::getInt64(int index)
     {
         auto val = statementM->get<std::optional<fbcpp::ScaledOpaqueInt128>>((unsigned)index);
         if (!val) return 0;
-        int128_t i128 = static_cast<int128_t>(static_cast<int64_t>(val->value.fb_data[1]));
-        i128 <<= 64;
-        i128 |= static_cast<int128_t>(val->value.fb_data[0]);
+        int128_t i128;
+        std::uint64_t parts[2] = { val->value.fb_data[0], val->value.fb_data[1] };
+        std::memcpy(&i128, parts, 16);
+#ifdef HAVE_INT128
         return (int64_t)i128;
+#else
+        return (int64_t)i128.data.us2.lowPart;
+#endif
     }
 
     return statementM->get<std::optional<std::int64_t>>((unsigned)index).value_or(0);
@@ -742,6 +749,11 @@ StatementType FbCppStatement::getType()
 {
     if (!statementM)
         return StatementType::Unknown;
+
+#ifdef DELETE
+#undef DELETE
+#endif
+
     switch (statementM->getType())
     {
         case fbcpp::StatementType::SELECT: return StatementType::Select;
@@ -791,7 +803,7 @@ std::vector<int> FbCppStatement::findParameterIndicesByName(const std::string& n
             bool match = true;
             for (size_t j = 0; j < name.size(); ++j)
             {
-                if (std::toupper(descriptors[i].name[j]) != std::toupper(name[j]))
+                if ((std::toupper)(descriptors[i].name[j]) != (std::toupper)(name[j]))
                 {
                     match = false;
                     break;
