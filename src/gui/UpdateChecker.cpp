@@ -67,39 +67,40 @@ void UpdateChecker::check(wxWindow* parent, bool quiet)
                         if (tag.StartsWith("v"))
                             tag = tag.Mid(1);
 
-                    wxStringTokenizer tkz(tag, ".");
-                    long major = 0, minor = 0, rls = 0;
-                    if (tkz.HasMoreTokens() && tkz.GetNextToken().ToLong(&major) &&
-                        tkz.HasMoreTokens() && tkz.GetNextToken().ToLong(&minor) &&
-                        tkz.HasMoreTokens() && tkz.GetNextToken().ToLong(&rls))
-                    {
-                        bool newVersion = false;
-                        if (major > FR_VERSION_MAJOR)
-                            newVersion = true;
-                        else if (major == FR_VERSION_MAJOR && minor > FR_VERSION_MINOR)
-                            newVersion = true;
-                        else if (major == FR_VERSION_MAJOR && minor == FR_VERSION_MINOR && rls > FR_VERSION_RLS)
-                            newVersion = true;
+                        wxStringTokenizer tkz(tag, ".");
+                        long major = 0, minor = 0, rls = 0;
+                        if (tkz.HasMoreTokens() && tkz.GetNextToken().ToLong(&major) &&
+                            tkz.HasMoreTokens() && tkz.GetNextToken().ToLong(&minor) &&
+                            tkz.HasMoreTokens() && tkz.GetNextToken().ToLong(&rls))
+                        {
+                            bool newVersion = false;
+                            if (major > FR_VERSION_MAJOR)
+                                newVersion = true;
+                            else if (major == FR_VERSION_MAJOR && minor > FR_VERSION_MINOR)
+                                newVersion = true;
+                            else if (major == FR_VERSION_MAJOR && minor == FR_VERSION_MINOR && rls > FR_VERSION_RLS)
+                                newVersion = true;
 
-                        if (newVersion)
-                        {
-                            int res = wxMessageBox(
-                                wxString::Format(_("A new version of FlameRobin is available: %ld.%ld.%ld\nYour current version is: %d.%d.%d\n\nWould you like to visit the release page?"),
-                                    major, minor, rls, FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RLS),
-                                _("Update Available"),
-                                wxYES_NO | wxICON_INFORMATION,
-                                parent
-                            );
-                            if (res == wxYES)
+                            if (newVersion)
                             {
-                                wxLaunchDefaultBrowser("https://github.com/mariuz/flamerobin/releases/latest");
+                                int res = wxMessageBox(
+                                    wxString::Format(_("A new version of FlameRobin is available: %ld.%ld.%ld\nYour current version is: %d.%d.%d\n\nWould you like to visit the release page?"),
+                                        major, minor, rls, FR_VERSION_MAJOR, FR_VERSION_MINOR, FR_VERSION_RLS),
+                                    _("Update Available"),
+                                    wxYES_NO | wxICON_INFORMATION,
+                                    parent
+                                );
+                                if (res == wxYES)
+                                {
+                                    wxLaunchDefaultBrowser("https://github.com/mariuz/flamerobin/releases/latest");
+                                }
                             }
+                            else if (!quiet)
+                            {
+                                wxMessageBox(_("Your version of FlameRobin is up to date."), _("No Updates"), wxOK | wxICON_INFORMATION, parent);
+                            }
+                            return;
                         }
-                        else if (!quiet)
-                        {
-                            wxMessageBox(_("Your version of FlameRobin is up to date."), _("No Updates"), wxOK | wxICON_INFORMATION, parent);
-                        }
-                        return;
                     }
                 }
             }
