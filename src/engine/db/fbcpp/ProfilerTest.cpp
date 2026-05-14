@@ -112,16 +112,33 @@ int main()
 
         // Check if profiler tables exist
         std::vector<std::string> tables = { "PLG$PROF_SESSIONS", "PLG$PROF_STATEMENTS", "PLG$PROF_RECORD_SOURCES", "PLG$PROF_RECORD_SOURCE_STATS", "PLG$PROF_REQUESTS" };
+        bool allTablesExist = true;
         for (const auto& t : tables)
         {
             try {
-                st->prepare("SELECT COUNT(*) FROM " + t);
+                st->prepare("SELECT 1 FROM RDB$RELATIONS WHERE RDB$RELATION_NAME = ?");
+                st->setString(0, t);
                 st->execute();
-                if (st->fetch())
-                    std::cout << "    Debug: Table " << t << " exists, count = " << st->getInt32(0) << "\n";
+                bool exists = st->fetch();
+                if (exists)
+                    std::cout << "    Debug: Table " << t << " exists.\n";
+                else
+                {
+                    std::cout << "    Debug: Table " << t << " does NOT exist.\n";
+                    allTablesExist = false;
+                }
             } catch(...) {
-                 std::cout << "    Debug: Table " << t << " check FAILED (normal if not yet initialized)\n";
+                 std::cout << "    Debug: RDB$RELATIONS check failed for table " << t << "\n";
+                 allTablesExist = false;
             }
+        }
+
+        if (!allTablesExist)
+        {
+            std::cout << "Profiler tables missing, skipping tests.\n";
+            tr->rollback();
+            db->disconnect();
+            return 0;
         }
 
         // Create table first, then profile

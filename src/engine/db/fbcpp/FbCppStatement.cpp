@@ -60,8 +60,7 @@ void FbCppStatement::prepare(const std::string& sql)
     wxLogDebug("FbCppStatement::prepare() for SQL: %s", sqlM.c_str());
     try {
         statementM.emplace(attachmentM, transactionM, sql);
-    } catch (const std::exception& e) {
-        wxLogDebug("FbCppStatement::prepare() failed: %s", e.what());
+    } catch (const std::exception&) {
         throw;
     }
     firstRowFetchedM.reset();
