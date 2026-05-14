@@ -24,33 +24,23 @@ apps:
       - network
 
 parts:
-  libtommath:
-    plugin: cmake
-    source: https://github.com/libtom/libtommath/releases/download/v1.3.0/ltm-1.3.0.tar.xz
-    source-checksum: sha256/296272d93435991308eb73607600c034b558807a07e829e751142e65ccfa9d08
-    cmake-parameters:
-      - -DCMAKE_INSTALL_PREFIX=/usr
-      - -DCMAKE_BUILD_TYPE=Release
-      - -DBUILD_SHARED_LIBS=ON
-    build-packages:
-      - ninja-build
-    cmake-generator: Ninja
-
   firebird-client:
     plugin: nil
     source: https://github.com/FirebirdSQL/firebird/releases/download/v5.0.4/Firebird-5.0.4.1812-0-linux-x64.tar.gz
     source-checksum: sha256/ab6a15a0258f38b022be496bb5e038c14e8628ce9acd0f9a06288a3baedd917b
     override-build: |
-      tar -xzf buildroot.tar.gz ./opt/firebird/lib/libfbclient.so.5.0.4 ./opt/firebird/lib/libib_util.so ./opt/firebird/lib/libtomcrypt.so.1.0.1 ./opt/firebird/include
-      install -Dm755 opt/firebird/lib/libfbclient.so.5.0.4 $SNAPCRAFT_PART_INSTALL/usr/lib/libfbclient.so.5.0.4
-      ln -sf libfbclient.so.5.0.4 $SNAPCRAFT_PART_INSTALL/usr/lib/libfbclient.so.2
-      ln -sf libfbclient.so.2 $SNAPCRAFT_PART_INSTALL/usr/lib/libfbclient.so
-      install -Dm755 opt/firebird/lib/libib_util.so $SNAPCRAFT_PART_INSTALL/usr/lib/libib_util.so
-      install -Dm755 opt/firebird/lib/libtomcrypt.so.1.0.1 $SNAPCRAFT_PART_INSTALL/usr/lib/libtomcrypt.so.1.0.1
-      ln -sf libtomcrypt.so.1.0.1 $SNAPCRAFT_PART_INSTALL/usr/lib/libtomcrypt.so.1
-      ln -sf libtomcrypt.so.1 $SNAPCRAFT_PART_INSTALL/usr/lib/libtomcrypt.so
+      tar -xzf buildroot.tar.gz
+      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/lib
+      cp -av opt/firebird/lib/*.so* $SNAPCRAFT_PART_INSTALL/usr/lib/
+      # Ensure libfbclient.so symlinks exist for development and runtime
+      cd $SNAPCRAFT_PART_INSTALL/usr/lib
+      if [ -f libfbclient.so.5.0.4 ]; then
+        ln -sf libfbclient.so.5.0.4 libfbclient.so
+        ln -sf libfbclient.so.5.0.4 libfbclient.so.2
+      fi
+      cd -
       mkdir -p $SNAPCRAFT_PART_INSTALL/usr/include
-      cp -r opt/firebird/include/* $SNAPCRAFT_PART_INSTALL/usr/include/
+      cp -rv opt/firebird/include/* $SNAPCRAFT_PART_INSTALL/usr/include/
       install -Dm644 $SNAPCRAFT_PROJECT_DIR/cmake/firebirdConfig.cmake $SNAPCRAFT_PART_INSTALL/usr/lib/cmake/firebird/firebirdConfig.cmake
 
   wxwidgets:
@@ -78,7 +68,7 @@ parts:
     cmake-generator: Ninja
 
   fb-cpp:
-    after: [firebird-client, libtommath]
+    after: [firebird-client]
     plugin: cmake
     source: .
     source-subdir: src/fb-cpp
@@ -133,6 +123,8 @@ parts:
       - libicu-dev
       - libboost-all-dev
       - libsecret-1-dev
+      - libpango1.0-dev
+      - libglib2.0-dev
       - gettext
       - ninja-build
     cmake-generator: Ninja
