@@ -38,6 +38,11 @@ parts:
         ln -sf libfbclient.so.5.0.4 libfbclient.so
         ln -sf libfbclient.so.5.0.4 libfbclient.so.2
       fi
+      # Firebird 5.0 client depends on libtommath.so.1
+      if [ -f libtommath.so.1.0.1 ]; then
+        ln -sf libtommath.so.1.0.1 libtommath.so.1
+        ln -sf libtommath.so.1.0.1 libtommath.so
+      fi
       cd -
       mkdir -p $SNAPCRAFT_PART_INSTALL/usr/include
       cp -rv opt/firebird/include/* $SNAPCRAFT_PART_INSTALL/usr/include/
@@ -123,8 +128,12 @@ parts:
       - libicu-dev
       - libboost-all-dev
       - libsecret-1-dev
-      - libpango1.0-dev
-      - libglib2.0-dev
+      - libtommath-dev
       - gettext
       - ninja-build
+    stage-packages:
+      - libtommath1
+      - libsecret-1-0t64
+      - libpango-1.0-0
+      - libglib2.0-0
     cmake-generator: Ninja
