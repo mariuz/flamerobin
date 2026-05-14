@@ -59,12 +59,11 @@ parts:
     cmake-parameters:
       - -DCMAKE_BUILD_TYPE=Release
       - -DwxBUILD_SHARED=ON
-      - -DCMAKE_INSTALL_LIBDIR=lib
-      - -DwxUSE_GTK3=ON
+      - -DwxBUILD_TOOLKIT=gtk3
       - -DwxUSE_STC=ON
       - -DwxUSE_AUI=ON
       - -DwxUSE_WEBVIEW=OFF
-      - -DwxUSE_LIBSECRET=OFF
+      - -DwxUSE_SECRETSTORE=OFF
       - -DwxUSE_OPENGL=OFF
     build-packages:
       - libgtk-3-dev
@@ -72,6 +71,7 @@ parts:
       - libjpeg-dev
       - libtiff-dev
       - libpng-dev
+      - libsecret-1-dev
       - ninja-build
     cmake-generator: Ninja
 
