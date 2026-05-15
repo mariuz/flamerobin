@@ -38,7 +38,8 @@ END_EVENT_TABLE()
 ReplicationStatusFrame::ReplicationStatusFrame(wxWindow* parent, DatabasePtr db)
     : BaseFrame(parent, wxID_ANY, wxEmptyString), databaseM(db)
 {
-    SetTitle(_("Replication Status for ") + db->getName());
+    setIdString(this, getFrameId(db));
+    SetTitle(_("Replication Status for ") + db->getName_());
     createControls();
     layoutControls();
     
@@ -117,7 +118,13 @@ void ReplicationStatusFrame::OnRefresh(wxCommandEvent& WXUNUSED(event))
 
 ReplicationStatusFrame* ReplicationStatusFrame::findFrameFor(DatabasePtr db)
 {
-    return dynamic_cast<ReplicationStatusFrame*>(BaseFrame::findFrame(db));
+    return dynamic_cast<ReplicationStatusFrame*>(
+        BaseFrame::frameFromIdString(getFrameId(db)));
+}
+
+wxString ReplicationStatusFrame::getFrameId(DatabasePtr db)
+{
+    return wxString::Format("ReplicationStatusFrame/%p", db.get());
 }
 
 } // namespace fr

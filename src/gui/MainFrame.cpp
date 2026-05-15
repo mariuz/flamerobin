@@ -42,6 +42,8 @@
 #include "core/FRError.h"
 #include "core/Subject.h"
 #include "core/URIProcessor.h"
+#include "engine/db/DatabaseBackend.h"
+#include "engine/db/DatabaseFactory.h"
 #include "frutils.h"
 #include "gui/AboutBox.h"
 #include "gui/AdvancedMessageDialog.h"
@@ -1028,16 +1030,16 @@ void MainFrame::OnMenuSetReplicaMode(wxCommandEvent& WXUNUSED(event))
     
     try 
     {
-        fr::IDatabasePtr idb = db->getDatabase();
+        fr::IDatabasePtr idb = db->getDALDatabase();
         if (!idb)
             throw std::runtime_error("Cannot access internal database object");
             
-        fr::IServicePtr svc = idb->getBackend()->createService();
-        svc->setConnectionString(db->getServer()->getConnectionString());
-        svc->setCredentials(std::string(db->getUsername().mb_str()), 
-            std::string(db->getRawPassword().mb_str()));
+        fr::IServicePtr svc = fr::DatabaseFactory::createService(idb->getBackendType());
+        svc->setConnectionString(std::string(db->getServer()->getConnectionString().utf8_str()));
+        svc->setCredentials(std::string(db->getUsername().utf8_str()), 
+            std::string(db->getRawPassword().utf8_str()));
         
-        svc->setReplicaMode(std::string(db->getPath().mb_str()), mode);
+        svc->setReplicaMode(std::string(db->getPath().utf8_str()), mode);
         
         wxString output;
         std::string line;

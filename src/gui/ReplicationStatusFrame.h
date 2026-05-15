@@ -42,6 +42,7 @@ public:
     static ReplicationStatusFrame* findFrameFor(DatabasePtr db);
 
 private:
+    static wxString getFrameId(DatabasePtr db);
     DatabaseWeakPtr databaseM;
     wxListCtrl* listCtrlM;
     wxTimer timerM;
