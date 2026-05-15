@@ -1028,15 +1028,16 @@ void MainFrame::OnMenuSetReplicaMode(wxCommandEvent& WXUNUSED(event))
     
     try 
     {
-        IDatabasePtr idb = db->getDatabase();
+        fr::IDatabasePtr idb = db->getDatabase();
         if (!idb)
             throw std::runtime_error("Cannot access internal database object");
             
-        IServicePtr svc = idb->getBackend()->createService();
+        fr::IServicePtr svc = idb->getBackend()->createService();
         svc->setConnectionString(db->getServer()->getConnectionString());
-        svc->setCredentials(db->getUserName(), db->getPassword());
+        svc->setCredentials(std::string(db->getUsername().mb_str()), 
+            std::string(db->getRawPassword().mb_str()));
         
-        svc->setReplicaMode(db->getPath(), mode);
+        svc->setReplicaMode(std::string(db->getPath().mb_str()), mode);
         
         wxString output;
         std::string line;
@@ -1058,13 +1059,13 @@ void MainFrame::OnMenuReplicationStatus(wxCommandEvent& WXUNUSED(event))
     if (!checkValidDatabase(db))
         return;
 
-    ReplicationStatusFrame* rf = ReplicationStatusFrame::findFrameFor(db);
+    fr::ReplicationStatusFrame* rf = fr::ReplicationStatusFrame::findFrameFor(db);
     if (rf)
     {
         rf->Raise();
         return;
     }
-    rf = new ReplicationStatusFrame(this, db);
+    rf = new fr::ReplicationStatusFrame(this, db);
     rf->Show();
 }
 
