@@ -923,6 +923,11 @@ if (UNIX AND NOT APPLE)
 		DESTINATION share/flamerobin
 	)
 	install(
+		DIRECTORY
+			res/svg
+		DESTINATION share/flamerobin/images
+	)
+	install(
 		FILES res/flamerobin.png
 		DESTINATION share/pixmaps
 	)
