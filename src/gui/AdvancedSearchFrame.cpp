@@ -27,6 +27,7 @@
     #include <wx/wx.h>
 #endif
 
+#include <wx/artprov.h>
 #include <wx/stc/stc.h>
 
 #include <set>

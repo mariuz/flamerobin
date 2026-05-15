@@ -30,6 +30,7 @@
     #include "wx/wx.h"
 #endif
 
+#include <wx/artprov.h>
 #include <string>
 
 #include "core/ArtProvider.h"

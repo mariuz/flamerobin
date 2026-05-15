@@ -27,6 +27,7 @@
 #include <wx/wx.h>
 #endif //WX_PRECOMP
 
+#include <wx/artprov.h>
 #include <wx/splitter.h>
 #include <wx/stc/stc.h>
 

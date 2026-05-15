@@ -30,6 +30,7 @@
     #include "wx/wx.h"
 #endif
 
+#include <wx/artprov.h>
 #include <wx/datetime.h>
 #include <wx/ffile.h>
 #include <wx/file.h>
