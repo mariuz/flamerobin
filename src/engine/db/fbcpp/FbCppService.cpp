@@ -186,12 +186,43 @@ void FbCppService::setReplicaMode(const std::string& dbPath, int mode)
         try
         {
             pushLine("Setting replica mode for " + dbPath + "...");
-            
-            // NOTE: In a production environment with a complete fb-cpp wrapper,
-            // we would use the Service Manager API here to set the replica mode.
-            // For now, we simulate the operation to verify the UI integration.
-            
-            pushLine("Replica mode successfully set to " + std::to_string(mode));
+
+            // Access low-level Firebird API via fb-cpp
+            Firebird::IMaster* master = clientM->getMaster();
+            Firebird::IUtil* utl = clientM->getUtil();
+            auto svc = serviceM->getHandle();
+
+            // Create a StatusWrapper for error handling
+            fbcpp::impl::StatusWrapper status(*clientM);
+
+            // Construct the Service Parameter Block (SPB) for the action
+            // Kind 3 is IXpbBuilder::SPB_START
+            Firebird::IXpbBuilder* spb = utl->getXpbBuilder(&status, 3, nullptr, 0);
+            if (status.isDirty())
+                fbcpp::impl::StatusWrapper::checkException(&status);
+
+            try
+            {
+                spb->insertTag(&status, isc_action_svc_properties);
+                spb->insertString(&status, isc_spb_dbname, dbPath.c_str());
+                spb->insertInt(&status, isc_spb_prp_replica_mode, mode);
+
+                if (status.isDirty())
+                    fbcpp::impl::StatusWrapper::checkException(&status);
+
+                // Start the service action
+                svc->start(&status, spb->getBufferLength(&status), spb->getBuffer(&status));
+                if (status.isDirty())
+                    fbcpp::impl::StatusWrapper::checkException(&status);
+
+                pushLine("Replica mode successfully set to " + std::to_string(mode));
+            }
+            catch (...)
+            {
+                spb->dispose();
+                throw;
+            }
+            spb->dispose();
         }
         catch (const std::exception& e)
         {
