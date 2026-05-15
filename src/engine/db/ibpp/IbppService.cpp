@@ -22,6 +22,7 @@
 */
 
 #include "engine/db/ibpp/IbppService.h"
+#include <stdexcept>
 
 namespace fr
 {
