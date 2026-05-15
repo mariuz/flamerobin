@@ -148,6 +148,11 @@ void IbppService::maintain(const MaintenanceConfig& config)
     }
 }
 
+void IbppService::setReplicaMode(const std::string& /*dbPath*/, int /*mode*/)
+{
+    throw std::runtime_error("setReplicaMode not implemented for IBPP backend");
+}
+
 void IbppService::shutdown(const ShutdownConfig& config)
 {
     int flags = 0;

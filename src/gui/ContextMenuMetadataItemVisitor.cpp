@@ -100,6 +100,9 @@ void MainObjectMenuMetadataItemVisitor::visitDatabase(Database& database)
     toolsMenu->Append(Cmds::Menu_ShutdownDatabase, _("Shutdown database"));
     toolsMenu->Append(Cmds::Menu_StartupDatabase, _("Startup database"));
     addSeparator();
+    toolsMenu->Append(Cmds::Menu_SetReplicaMode, _("Set replication &mode..."));
+    toolsMenu->Append(Cmds::Menu_ReplicationStatus, _("Replication &status..."));
+    addSeparator();
     toolsMenu->Append(Cmds::Menu_Maintenance, _("&Maintenance..."));
     addSeparator();
     toolsMenu->Append(Cmds::Menu_MonitorEvents, _("&Monitor events"));
@@ -338,6 +341,7 @@ void MainObjectMenuMetadataItemVisitor::visitPublications(Publications& publicat
 
 void MainObjectMenuMetadataItemVisitor::visitReplication(Replication& replication)
 {
+    menuM->Append(Cmds::Menu_ReplicationStatus, _("Replication &status..."));
     addSeparator();
     addGenerateCodeMenu(replication);
     addSeparator();

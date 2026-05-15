@@ -174,6 +174,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/PrivilegesDialog.cpp
         ${SOURCEDIR}/gui/ProgressDialog.cpp
         ${SOURCEDIR}/gui/ReorderFieldsDialog.cpp
+        ${SOURCEDIR}/gui/ReplicationStatusFrame.cpp
         ${SOURCEDIR}/gui/RestoreFrame.cpp
         ${SOURCEDIR}/gui/ServerRegistrationDialog.cpp
         ${SOURCEDIR}/gui/ServiceBaseFrame.cpp
@@ -316,6 +317,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/gui/PrivilegesDialog.h
         ${SOURCEDIR}/gui/ProgressDialog.h
         ${SOURCEDIR}/gui/ReorderFieldsDialog.h
+        ${SOURCEDIR}/gui/ReplicationStatusFrame.h
         ${SOURCEDIR}/gui/RestoreFrame.h
         ${SOURCEDIR}/gui/ServerRegistrationDialog.h
         ${SOURCEDIR}/gui/ServiceBaseFrame.h

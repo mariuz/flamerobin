@@ -137,6 +137,8 @@ enum {
     Menu_ShutdownDatabase,
     Menu_StartupDatabase,
     Menu_Maintenance,
+    Menu_SetReplicaMode,
+    Menu_ReplicationStatus,
 
         // view menu
         Menu_ToggleStatusBar, 

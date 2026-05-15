@@ -60,6 +60,7 @@
 #include "gui/MetadataItemPropertiesFrame.h"
 #include "gui/PreferencesDialog.h"
 #include "gui/ProgressDialog.h"
+#include "gui/ReplicationStatusFrame.h"
 #include "gui/RestoreFrame.h"
 #include "gui/ServerRegistrationDialog.h"
 #include "gui/SimpleHtmlFrame.h"
@@ -414,6 +415,10 @@ EVT_MENU(Cmds::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuDatabaseRegistrat
 EVT_UPDATE_UI(Cmds::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuUpdateIfDatabaseSelected)
 EVT_MENU(Cmds::Menu_Backup, MainFrame::OnMenuBackup)
 EVT_UPDATE_UI(Cmds::Menu_Backup, MainFrame::OnMenuUpdateIfDatabaseSelected)
+EVT_MENU(Cmds::Menu_SetReplicaMode, MainFrame::OnMenuSetReplicaMode)
+EVT_UPDATE_UI(Cmds::Menu_SetReplicaMode, MainFrame::OnMenuUpdateIfDatabaseSelected)
+EVT_MENU(Cmds::Menu_ReplicationStatus, MainFrame::OnMenuReplicationStatus)
+EVT_UPDATE_UI(Cmds::Menu_ReplicationStatus, MainFrame::OnMenuUpdateIfDatabaseSelected)
 EVT_MENU(Cmds::Menu_Maintenance, MainFrame::OnMenuMaintenance)
 EVT_UPDATE_UI(Cmds::Menu_Maintenance, MainFrame::OnMenuUpdateIfDatabaseSelected)
 EVT_MENU(Cmds::Menu_Restore, MainFrame::OnMenuRestore)EVT_UPDATE_UI(Cmds::Menu_Restore, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
@@ -1001,6 +1006,66 @@ void MainFrame::OnMenuStartupDatabase(wxCommandEvent& WXUNUSED(event))
     rf = new StartupFrame(this, db);
     rf->Show();
 
+}
+
+void MainFrame::OnMenuSetReplicaMode(wxCommandEvent& WXUNUSED(event))
+{
+    DatabasePtr db = getDatabase(treeMainM->getSelectedMetadataItem());
+    if (!checkValidDatabase(db))
+        return;
+
+    wxArrayString choices;
+    choices.Add(_("None (Disabled)"));
+    choices.Add(_("Read-Only"));
+    choices.Add(_("Read-Write"));
+
+    wxSingleChoiceDialog dialog(this, _("Select replication mode:"),
+        _("Set Replication Mode"), choices);
+    if (dialog.ShowModal() != wxID_OK)
+        return;
+
+    int mode = dialog.GetSelection();
+    
+    try 
+    {
+        IDatabasePtr idb = db->getDatabase();
+        if (!idb)
+            throw std::runtime_error("Cannot access internal database object");
+            
+        IServicePtr svc = idb->getBackend()->createService();
+        svc->setConnectionString(db->getServer()->getConnectionString());
+        svc->setCredentials(db->getUserName(), db->getPassword());
+        
+        svc->setReplicaMode(db->getPath(), mode);
+        
+        wxString output;
+        std::string line;
+        while (!(line = svc->getNextLine()).empty())
+            output += wxString::FromUTF8(line.c_str()) + "\n";
+            
+        wxMessageBox(output.IsEmpty() ? _("Replica mode set successfully") : output, 
+            _("Success"), wxOK | wxICON_INFORMATION);
+    }
+    catch (const std::exception& e)
+    {
+        wxMessageBox(wxString::FromUTF8(e.what()), _("Error"), wxOK | wxICON_ERROR);
+    }
+}
+
+void MainFrame::OnMenuReplicationStatus(wxCommandEvent& WXUNUSED(event))
+{
+    DatabasePtr db = getDatabase(treeMainM->getSelectedMetadataItem());
+    if (!checkValidDatabase(db))
+        return;
+
+    ReplicationStatusFrame* rf = ReplicationStatusFrame::findFrameFor(db);
+    if (rf)
+    {
+        rf->Raise();
+        return;
+    }
+    rf = new ReplicationStatusFrame(this, db);
+    rf->Show();
 }
 
 

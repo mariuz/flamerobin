@@ -53,6 +53,7 @@ public:
     virtual void backup(const BackupConfig& config) override;
     virtual void restore(const RestoreConfig& config) override;
     virtual void maintain(const MaintenanceConfig& config) override;
+    virtual void setReplicaMode(const std::string& dbPath, int mode) override;
 
     virtual void shutdown(const ShutdownConfig& config) override;
     virtual void startup(const std::string& dbPath) override;

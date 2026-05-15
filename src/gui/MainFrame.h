@@ -113,6 +113,8 @@ public:
     void OnMenuSetStatisticsValue(wxCommandEvent& event);
     void OnMenuShutdownDatabase(wxCommandEvent& event);
     void OnMenuStartupDatabase(wxCommandEvent& event);
+    void OnMenuSetReplicaMode(wxCommandEvent& event);
+    void OnMenuReplicationStatus(wxCommandEvent& event);
 
     // create new object
     void showCreateTemplate(const wxString& statement);
