@@ -296,8 +296,8 @@ wxBitmapBundle ArtProvider::CreateBitmapBundle(const wxArtID& id,
         v.push_back(wxBitmap(plan24_xpm));
         return wxBitmapBundle::FromBitmaps(v);
     }
-    if (id == ART_SystemIndex) return fromXPM(systemindex_xpm, systemindex32_xpm);
-    if (id == ART_SystemIndices) return fromXPM(systemindices_xpm, systemindex32_xpm);
+    if (id == ART_SystemIndex) return fromXPM(systemindex32_xpm);
+    if (id == ART_SystemIndices) return fromXPM(systemindices_xpm);
     if (id == ART_SystemDomain) return fromXPM(systemdomain_xpm, systemdomain32_xpm);
     if (id == ART_SystemDomains) return fromXPM(systemdomains_xpm, systemdomain32_xpm);
     if (id == ART_SystemPackage) return fromXPM(systempackage_xpm, systempackage32_xpm);
@@ -339,9 +339,6 @@ wxBitmapBundle ArtProvider::CreateBitmapBundle(const wxArtID& id,
     }
 
     return wxBitmapBundle();
-}
-//    return wxBitmap(toggle16_xpm);
-    return wxNullBitmap;
 }
 
 wxBitmap ArtProvider::loadBitmapFromFile(const wxArtID& id, wxSize size)
