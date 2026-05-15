@@ -33,6 +33,7 @@
 
 #include "statementHistory.h"
 #include "config/Config.h"
+#include "core/ArtProvider.h"
 #include "gui/StatementHistoryDialog.h"
 #include "gui/StyleGuide.h"
 
