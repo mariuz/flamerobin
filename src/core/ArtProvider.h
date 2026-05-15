@@ -113,9 +113,12 @@ class ArtProvider : public wxArtProvider
 {
 private:
     wxBitmap loadBitmapFromFile(const wxArtID& id, wxSize size);
+    wxBitmapBundle loadBitmapBundleFromFile(const wxArtID& id);
 protected:
     virtual wxBitmap CreateBitmap(const wxArtID& id, const wxArtClient& client,
-        const wxSize& size);
+        const wxSize& size) override;
+    virtual wxBitmapBundle CreateBitmapBundle(const wxArtID& id,
+        const wxArtClient& client, const wxSize& size) override;
 };
 
 #endif // FR_ARTPROVIDER_H

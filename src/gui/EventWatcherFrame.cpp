@@ -89,11 +89,7 @@ EventWatcherFrame::EventWatcherFrame(wxWindow* parent, DatabasePtr db)
 
     button_add->SetFocus();
 
-    #include "new.xpm"
-    wxBitmap bmp(new_xpm);
-    wxIcon icon;
-    icon.CopyFromBitmap(bmp);
-    SetIcon(icon);
+    SetIcon(wxArtProvider::GetIcon(wxART_NEW, wxART_FRAME_ICON));
 }
 
 void EventWatcherFrame::createControls()

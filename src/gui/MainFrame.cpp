@@ -162,13 +162,12 @@ MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title,
 #endif 
     searchBoxM = new wxComboBox(searchPanelM, ID_search_box, wxEmptyString,
         wxDefaultPosition, wxDefaultSize, choices, comboStyle);
-        wxSize btnBmpSize(16, 16);
     button_prev = new wxBitmapButton(searchPanelM, ID_button_prev,
-        wxArtProvider::GetBitmap(wxART_GO_BACK, wxART_TOOLBAR, btnBmpSize));
+        wxArtProvider::GetBitmapBundle(wxART_GO_BACK, wxART_BUTTON));
     button_next = new wxBitmapButton(searchPanelM, ID_button_next,
-        wxArtProvider::GetBitmap(wxART_GO_FORWARD, wxART_TOOLBAR, btnBmpSize));
+        wxArtProvider::GetBitmapBundle(wxART_GO_FORWARD, wxART_BUTTON));
     button_advanced = new wxBitmapButton(searchPanelM, ID_button_advanced,
-        wxArtProvider::GetBitmap(wxART_FIND, wxART_TOOLBAR, btnBmpSize));
+        wxArtProvider::GetBitmapBundle(wxART_FIND, wxART_BUTTON));
     button_advanced->SetToolTip(_("Advanced metadata search"));
     button_prev->SetToolTip(_("Previous match"));
     button_next->SetToolTip(_("Next match"));

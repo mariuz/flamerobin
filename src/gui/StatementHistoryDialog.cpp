@@ -113,12 +113,7 @@ StatementHistoryDialog::StatementHistoryDialog(wxWindow *parent,
     // use method in base class to set everything up
     layoutSizers(innerSizer, sizerButtons, true);
 
-    // TODO: size(32, 32) missing for HISTORY icon
-    #include "history.xpm"
-    wxBitmap bmp = wxBitmap(history_xpm);
-    wxIcon icon;
-    icon.CopyFromBitmap(bmp);
-    SetIcon(icon);
+    SetIcon(wxArtProvider::GetIcon(ART_History, wxART_FRAME_ICON));
 
     button_search->SetDefault();
     button_copy->Enable(false);

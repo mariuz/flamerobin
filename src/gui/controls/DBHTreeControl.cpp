@@ -258,12 +258,13 @@ DBHTreeImageList::DBHTreeImageList()
 
 void DBHTreeImageList::addImage(const wxArtID& art)
 {
-    wxBitmap bmp(wxArtProvider::GetBitmap(art, wxART_OTHER, wxSize(16, 16)));
-    if (!bmp.Ok())
+    wxSize size = wxArtProvider::GetSizeHint(wxART_OTHER);
+    if (size == wxDefaultSize)
+        size = wxSize(16, 16);
+    wxBitmap bmp(wxArtProvider::GetBitmap(art, wxART_OTHER, size));
+    if (!bmp.IsOk())
         return;
-    wxIcon icon;
-    icon.CopyFromBitmap(bmp);
-    artIdIndicesM[art] = Add(icon);
+    artIdIndicesM[art] = Add(bmp);
 }
 
 int DBHTreeImageList::getImageIndex(const wxArtID& id)

@@ -251,12 +251,7 @@ AdvancedSearchFrame::AdvancedSearchFrame(MainFrame* parent, RootPtr root)
     SetSizerAndFit(mainSizer);
     Centre();
 
-    // TODO: size(32, 32) missing for SEARCH icon
-    #include "search.xpm"
-    wxBitmap bmp = wxBitmap(search_xpm);
-    wxIcon icon;
-    icon.CopyFromBitmap(bmp);
-    SetIcon(icon);
+    SetIcon(wxArtProvider::GetIcon(wxART_FIND, wxART_FRAME_ICON));
 }
 
 void AdvancedSearchFrame::addCriteria(CriteriaItem::Type type, wxString

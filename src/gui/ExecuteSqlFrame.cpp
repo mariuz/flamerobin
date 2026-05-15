@@ -683,69 +683,71 @@ bool ExecuteSqlFrame::isTransactionStarted()
 
 void ExecuteSqlFrame::buildToolbar(CommandManager& cm)
 {
-    //toolBarM = CreateToolBar( wxTB_FLAT|wxTB_HORIZONTAL|wxTB_TEXT, wxID_ANY );
-    toolBarM = CreateToolBar( wxTB_FLAT | wxTB_HORIZONTAL, wxID_ANY );
+    toolBarM = CreateToolBar(wxTB_FLAT | wxTB_HORIZONTAL, wxID_ANY);
 
-
-    wxSize bmpSize(24, 24);
+    wxSize bmpSize = wxArtProvider::GetSizeHint(wxART_TOOLBAR);
+    if (bmpSize == wxDefaultSize)
+        bmpSize = wxSize(24, 24);
     toolBarM->SetToolBitmapSize(bmpSize);
 
-    toolBarM->AddTool( wxID_NEW, _("New"),
-        wxArtProvider::GetBitmap(wxART_NEW, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, cm.getToolbarHint(_("New window"), wxID_NEW));
-    toolBarM->AddTool( wxID_OPEN, _("Open"),
-        wxArtProvider::GetBitmap(wxART_FILE_OPEN, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, cm.getToolbarHint(_("Load a file"), wxID_OPEN));
-    toolBarM->AddTool( wxID_SAVE, _("Save"),
-        wxArtProvider::GetBitmap(wxART_FILE_SAVE, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, cm.getToolbarHint(_("Save to file"), wxID_SAVE));
-    toolBarM->AddTool( wxID_SAVEAS, _("Save as"),
-        wxArtProvider::GetBitmap(wxART_FILE_SAVE_AS, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, cm.getToolbarHint(_("Save under different name"), wxID_SAVEAS));
+    toolBarM->AddTool(wxID_NEW, _("New"),
+        wxArtProvider::GetBitmapBundle(wxART_NEW, wxART_TOOLBAR),
+        cm.getToolbarHint(_("New window"), wxID_NEW));
+    toolBarM->AddTool(wxID_OPEN, _("Open"),
+        wxArtProvider::GetBitmapBundle(wxART_FILE_OPEN, wxART_TOOLBAR),
+        cm.getToolbarHint(_("Load a file"), wxID_OPEN));
+    toolBarM->AddTool(wxID_SAVE, _("Save"),
+        wxArtProvider::GetBitmapBundle(wxART_FILE_SAVE, wxART_TOOLBAR),
+        cm.getToolbarHint(_("Save to file"), wxID_SAVE));
+    toolBarM->AddTool(wxID_SAVEAS, _("Save as"),
+        wxArtProvider::GetBitmapBundle(wxART_FILE_SAVE_AS, wxART_TOOLBAR),
+        cm.getToolbarHint(_("Save under different name"), wxID_SAVEAS));
     toolBarM->AddSeparator();
 
-    toolBarM->AddTool( wxID_BACKWARD, _("Back"),
-        wxArtProvider::GetBitmap(wxART_GO_BACK, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, cm.getToolbarHint(_("Go to previous statement"), wxID_BACKWARD));
-    toolBarM->AddTool( wxID_FORWARD, _("Next"),
-        wxArtProvider::GetBitmap(wxART_GO_FORWARD, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, cm.getToolbarHint(_("Go to next statement"), wxID_FORWARD));
-    toolBarM->AddTool( Cmds::History_Search, _("History"),
-        wxArtProvider::GetBitmap(ART_History, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, cm.getToolbarHint(_("Browse and search statement history"), Cmds::History_Search));
+    toolBarM->AddTool(wxID_BACKWARD, _("Back"),
+        wxArtProvider::GetBitmapBundle(wxART_GO_BACK, wxART_TOOLBAR),
+        cm.getToolbarHint(_("Go to previous statement"), wxID_BACKWARD));
+    toolBarM->AddTool(wxID_FORWARD, _("Next"),
+        wxArtProvider::GetBitmapBundle(wxART_GO_FORWARD, wxART_TOOLBAR),
+        cm.getToolbarHint(_("Go to next statement"), wxID_FORWARD));
+    toolBarM->AddTool(Cmds::History_Search, _("History"),
+        wxArtProvider::GetBitmapBundle(ART_History, wxART_TOOLBAR),
+        cm.getToolbarHint(_("Browse and search statement history"), Cmds::History_Search));
     toolBarM->AddSeparator();
 
-    toolBarM->AddTool( Cmds::Query_Execute, _("Execute"),
-        wxArtProvider::GetBitmap(ART_ExecuteStatement, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, cm.getToolbarHint(_("Execute statement(s)"), Cmds::Query_Execute));
-    toolBarM->AddTool( Cmds::Query_Show_plan, _("Show plan"),
-        wxArtProvider::GetBitmap(ART_ShowExecutionPlan, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, cm.getToolbarHint(_("Show query execution plan"), Cmds::Query_Show_plan));
+    toolBarM->AddTool(Cmds::Query_Execute, _("Execute"),
+        wxArtProvider::GetBitmapBundle(ART_ExecuteStatement, wxART_TOOLBAR),
+        cm.getToolbarHint(_("Execute statement(s)"), Cmds::Query_Execute));
+    toolBarM->AddTool(Cmds::Query_Show_plan, _("Show plan"),
+        wxArtProvider::GetBitmapBundle(ART_ShowExecutionPlan, wxART_TOOLBAR),
+        cm.getToolbarHint(_("Show query execution plan"), Cmds::Query_Show_plan));
     toolBarM->AddTool(Cmds::Query_Explain, _("Explain statement"),
-        wxArtProvider::GetBitmap(ART_Explain, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, cm.getToolbarHint(_("Show explained query plan (FB 6.0+)"), Cmds::Query_Explain));
+        wxArtProvider::GetBitmapBundle(ART_Explain, wxART_TOOLBAR),
+        cm.getToolbarHint(_("Show explained query plan (FB 6.0+)"), Cmds::Query_Explain));
     toolBarM->AddTool(Cmds::Query_Show_Profiler, _("Profiler"),
-        wxArtProvider::GetBitmap(ART_ShowProfiler, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_CHECK, cm.getToolbarHint(_("Display SQL/PSQL Profiler"), Cmds::Query_Show_Profiler));
-    toolBarM->AddTool( Cmds::Query_Commit, _("Commit"),
-        wxArtProvider::GetBitmap(ART_CommitTransaction, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, cm.getToolbarHint(_("Commit transaction"), Cmds::Query_Commit));
-    toolBarM->AddTool( Cmds::Query_Rollback, _("Rollback"),
-         wxArtProvider::GetBitmap(ART_RollbackTransaction, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, cm.getToolbarHint(_("Rollback transaction"), Cmds::Query_Rollback));
+        wxArtProvider::GetBitmapBundle(ART_ShowProfiler, wxART_TOOLBAR),
+        cm.getToolbarHint(_("Display SQL/PSQL Profiler"), Cmds::Query_Show_Profiler),
+        wxITEM_CHECK);
+    toolBarM->AddTool(Cmds::Query_Commit, _("Commit"),
+        wxArtProvider::GetBitmapBundle(ART_CommitTransaction, wxART_TOOLBAR),
+        cm.getToolbarHint(_("Commit transaction"), Cmds::Query_Commit));
+    toolBarM->AddTool(Cmds::Query_Rollback, _("Rollback"),
+        wxArtProvider::GetBitmapBundle(ART_RollbackTransaction, wxART_TOOLBAR),
+        cm.getToolbarHint(_("Rollback transaction"), Cmds::Query_Rollback));
     toolBarM->AddSeparator();
 
-    toolBarM->AddTool( Cmds::DataGrid_Insert_row, _("Insert row(s)"),
-        wxArtProvider::GetBitmap(ART_InsertRow, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, cm.getToolbarHint(_("Insert row(s) into recordset"), Cmds::DataGrid_Insert_row));
-    toolBarM->AddTool( Cmds::DataGrid_Delete_row, _("Delete row(s)"),
-        wxArtProvider::GetBitmap(ART_DeleteRow, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_NORMAL, cm.getToolbarHint(_("Delete row(s) from recordset"), Cmds::DataGrid_Delete_row));
+    toolBarM->AddTool(Cmds::DataGrid_Insert_row, _("Insert row(s)"),
+        wxArtProvider::GetBitmapBundle(ART_InsertRow, wxART_TOOLBAR),
+        cm.getToolbarHint(_("Insert row(s) into recordset"), Cmds::DataGrid_Insert_row));
+    toolBarM->AddTool(Cmds::DataGrid_Delete_row, _("Delete row(s)"),
+        wxArtProvider::GetBitmapBundle(ART_DeleteRow, wxART_TOOLBAR),
+        cm.getToolbarHint(_("Delete row(s) from recordset"), Cmds::DataGrid_Delete_row));
     toolBarM->AddSeparator();
 
-    toolBarM->AddTool( Cmds::View_SplitView, _("Toggle split view"),
-        wxArtProvider::GetBitmap(ART_ToggleView, wxART_TOOLBAR, bmpSize), wxNullBitmap,
-        wxITEM_CHECK, cm.getToolbarHint(_("Toggle split view"), Cmds::View_SplitView));
+    toolBarM->AddTool(Cmds::View_SplitView, _("Toggle split view"),
+        wxArtProvider::GetBitmapBundle(ART_ToggleView, wxART_TOOLBAR),
+        cm.getToolbarHint(_("Toggle split view"), Cmds::View_SplitView),
+        wxITEM_CHECK);
 
     toolBarM->Realize();
 }

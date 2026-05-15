@@ -69,15 +69,16 @@ void ReorderFieldsDialog::createControls()
     };
     list_box_fields = new wxListBox(getControlsPanel(), ID_list_box_fields,
         wxDefaultPosition, wxDefaultSize, 1, fields_choices, wxLB_SINGLE);
-    wxSize bmpSize(16, 16);
-    // TODO: ART_GO_UP_FIRST missing
-    button_first = new wxBitmapButton(getControlsPanel(), ID_button_first, wxBitmap(reorder_icons::up_xpm));
+
+    button_first = new wxBitmapButton(getControlsPanel(), ID_button_first,
+        wxArtProvider::GetBitmapBundle(wxART_GO_UP, wxART_BUTTON));
     button_up = new wxBitmapButton(getControlsPanel(), ID_button_up,
-        wxArtProvider::GetBitmap(wxART_GO_UP, wxART_TOOLBAR, bmpSize));
+        wxArtProvider::GetBitmapBundle(wxART_GO_UP, wxART_BUTTON));
     button_down = new wxBitmapButton(getControlsPanel(), ID_button_down,
-        wxArtProvider::GetBitmap(wxART_GO_DOWN, wxART_TOOLBAR, bmpSize));
-    // TODO: ART_GO_DOWN_LAST missing
-    button_last = new wxBitmapButton(getControlsPanel(), ID_button_last, wxBitmap(reorder_icons::down_xpm));
+        wxArtProvider::GetBitmapBundle(wxART_GO_DOWN, wxART_BUTTON));
+    button_last = new wxBitmapButton(getControlsPanel(), ID_button_last,
+        wxArtProvider::GetBitmapBundle(wxART_GO_DOWN, wxART_BUTTON));
+
     button_ok = new wxButton(getControlsPanel(), wxID_OK, _("Reorder"));
     button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL, _("Cancel"));
 }
