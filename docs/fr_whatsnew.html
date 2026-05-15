@@ -8,6 +8,32 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.5.12</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>HiDPI & 4K Display Support</B></font><br>
+<br>
+- **SVG Icon System**: Introduced a brand-new SVG-based icon library. All core database objects and toolbar actions now use vector graphics, ensuring the interface remains crisp and professional on 4K monitors and high-DPI laptops.<br>
+- **Modernized ArtProvider**: The internal icon management system has been rewritten to leverage `wxBitmapBundle`. This allows for automatic, high-quality scaling based on the system's current DPI settings, eliminating blurry icons in scaled environments.<br>
+<br>
+<font size=+1 color="#AA0000"><B>Firebird 4.0 Replication Support</B></font><br>
+<br>
+- **Replica Configuration**: Added the ability to set the replication mode (`NONE`, `READ_ONLY`, `READ_WRITE`) for any database directly from the "Tools" context menu. This utilizes the Firebird 4.0 Services API, providing a GUI equivalent to the `gfix -replica` command.<br>
+- **Live Replication Monitor**: Introduced a new "Replication Status" window that provides real-time monitoring of the replication state. It displays the current mode, active replicator processes (from `MON$ATTACHMENTS`), and replication sequence information.<br>
+- **fb-cpp Integration**: The replication management features are built on the modern `fb-cpp` API, ensuring robust performance and compatibility with the latest Firebird standards.<br>
+<br>
+<font size=+1 color="#AA0000"><B>Build & Stability Fixes</B></font><br>
+<br>
+- **Installation Improvement**: Updated CMake build rules to ensure SVG assets are correctly installed to the system-wide images directory on Linux/Unix platforms.<br>
+- **Code Cleanup**: Resolved several compilation warnings and missing header issues in GUI components related to the new icon system.<br>
+<br>
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.5.0</font><br>
 <br><br>
 <font size=+1 color="#AA0000"><B>Modern Engine Transition</B></font><br>
