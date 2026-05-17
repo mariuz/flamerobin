@@ -59,7 +59,7 @@ void MetadataLoader::transactionStart()
     {
         transactionM = databaseM->createTransaction();
         transactionM->setAccessMode(fr::TransactionAccessMode::Read);
-        transactionM->setIsolationLevel(fr::TransactionIsolationLevel::ReadCommitted);
+        transactionM->setIsolationLevel(fr::TransactionIsolationLevel::ReadDirty);
     }
     if (!transactionM->isActive())
         transactionM->start();

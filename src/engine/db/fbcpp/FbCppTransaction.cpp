@@ -64,7 +64,10 @@ void FbCppTransaction::start()
         options.setTpb({isc_tpb_version3, isc_tpb_read_committed, isc_tpb_read_consistency});
     }
     else if (levelM == TransactionIsolationLevel::ReadDirty)
-        options.setIsolationLevel(fbcpp::TransactionIsolationLevel::READ_COMMITTED); // fallback
+    {
+        options.setIsolationLevel(fbcpp::TransactionIsolationLevel::READ_COMMITTED);
+        options.setReadCommittedMode(fbcpp::TransactionReadCommittedMode::RECORD_VERSION);
+    }
 
     if (resolutionM == TransactionLockResolution::Wait)
         options.setWaitMode(fbcpp::TransactionWaitMode::WAIT);

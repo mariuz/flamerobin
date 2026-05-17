@@ -60,6 +60,72 @@ void FbCppStatement::prepare(const std::string& sql)
     wxLogDebug("FbCppStatement::prepare() for SQL: %s", sqlM.c_str());
     try {
         statementM.emplace(attachmentM, transactionM, sql);
+
+        columnTypesM.clear();
+        const auto& outDescs = statementM->getOutputDescriptors();
+        columnTypesM.reserve(outDescs.size());
+        for (const auto& desc : outDescs)
+        {
+            ColumnType type = ColumnType::Unknown;
+            switch (desc.adjustedType)
+            {
+                case fbcpp::DescriptorAdjustedType::STRING: type = ColumnType::Varchar; break;
+                case fbcpp::DescriptorAdjustedType::INT32:
+                case fbcpp::DescriptorAdjustedType::INT16:
+                    type = desc.scale != 0 ? ColumnType::Numeric : ColumnType::Integer;
+                    break;
+                case fbcpp::DescriptorAdjustedType::INT64:
+                    type = desc.scale != 0 ? ColumnType::Numeric : ColumnType::BigInt;
+                    break;
+                case fbcpp::DescriptorAdjustedType::FLOAT: type = ColumnType::Float; break;
+                case fbcpp::DescriptorAdjustedType::DOUBLE: type = ColumnType::Double; break;
+                case fbcpp::DescriptorAdjustedType::TIME: type = ColumnType::Time; break;
+                case fbcpp::DescriptorAdjustedType::DATE: type = ColumnType::Date; break;
+                case fbcpp::DescriptorAdjustedType::TIMESTAMP: type = ColumnType::Timestamp; break;
+                case fbcpp::DescriptorAdjustedType::TIME_TZ: type = ColumnType::TimeTz; break;
+                case fbcpp::DescriptorAdjustedType::TIMESTAMP_TZ: type = ColumnType::TimestampTz; break;
+                case fbcpp::DescriptorAdjustedType::BLOB: type = ColumnType::Blob; break;
+                case fbcpp::DescriptorAdjustedType::BOOLEAN: type = ColumnType::Boolean; break;
+                case fbcpp::DescriptorAdjustedType::INT128: type = ColumnType::Int128; break;
+                case fbcpp::DescriptorAdjustedType::DECFLOAT16: type = ColumnType::Decfloat16; break;
+                case fbcpp::DescriptorAdjustedType::DECFLOAT34: type = ColumnType::Decfloat34; break;
+                default: type = ColumnType::Unknown; break;
+            }
+            columnTypesM.push_back(type);
+        }
+
+        parameterTypesM.clear();
+        const auto& inDescs = statementM->getInputDescriptors();
+        parameterTypesM.reserve(inDescs.size());
+        for (const auto& desc : inDescs)
+        {
+            ColumnType type = ColumnType::Unknown;
+            switch (desc.adjustedType)
+            {
+                case fbcpp::DescriptorAdjustedType::STRING: type = ColumnType::Varchar; break;
+                case fbcpp::DescriptorAdjustedType::INT32:
+                case fbcpp::DescriptorAdjustedType::INT16:
+                    type = desc.scale != 0 ? ColumnType::Numeric : ColumnType::Integer;
+                    break;
+                case fbcpp::DescriptorAdjustedType::INT64:
+                    type = desc.scale != 0 ? ColumnType::Numeric : ColumnType::BigInt;
+                    break;
+                case fbcpp::DescriptorAdjustedType::FLOAT: type = ColumnType::Float; break;
+                case fbcpp::DescriptorAdjustedType::DOUBLE: type = ColumnType::Double; break;
+                case fbcpp::DescriptorAdjustedType::TIME: type = ColumnType::Time; break;
+                case fbcpp::DescriptorAdjustedType::DATE: type = ColumnType::Date; break;
+                case fbcpp::DescriptorAdjustedType::TIMESTAMP: type = ColumnType::Timestamp; break;
+                case fbcpp::DescriptorAdjustedType::TIME_TZ: type = ColumnType::TimeTz; break;
+                case fbcpp::DescriptorAdjustedType::TIMESTAMP_TZ: type = ColumnType::TimestampTz; break;
+                case fbcpp::DescriptorAdjustedType::BLOB: type = ColumnType::Blob; break;
+                case fbcpp::DescriptorAdjustedType::BOOLEAN: type = ColumnType::Boolean; break;
+                case fbcpp::DescriptorAdjustedType::INT128: type = ColumnType::Int128; break;
+                case fbcpp::DescriptorAdjustedType::DECFLOAT16: type = ColumnType::Decfloat16; break;
+                case fbcpp::DescriptorAdjustedType::DECFLOAT34: type = ColumnType::Decfloat34; break;
+                default: type = ColumnType::Unknown; break;
+            }
+            parameterTypesM.push_back(type);
+        }
     } catch (const std::exception&) {
         throw;
     }
@@ -635,9 +701,7 @@ void FbCppStatement::getTimestamp(int index, int& year, int& month, int& day,
 
 int FbCppStatement::getColumnCount()
 {
-    if (!statementM)
-        return 0;
-    return (int)statementM->getOutputDescriptors().size();
+    return (int)columnTypesM.size();
 }
 
 std::string FbCppStatement::getColumnName(int index)
@@ -652,34 +716,9 @@ std::string FbCppStatement::getColumnName(int index)
 
 ColumnType FbCppStatement::getColumnType(int index)
 {
-    if (!statementM)
+    if ((unsigned)index >= columnTypesM.size())
         return ColumnType::Unknown;
-    const auto& descriptors = statementM->getOutputDescriptors();
-    if ((unsigned)index >= descriptors.size())
-        return ColumnType::Unknown;
-    
-    switch (descriptors[index].adjustedType)
-    {
-        case fbcpp::DescriptorAdjustedType::STRING: return ColumnType::Varchar;
-        case fbcpp::DescriptorAdjustedType::INT32: 
-        case fbcpp::DescriptorAdjustedType::INT16: 
-            return descriptors[index].scale != 0 ? ColumnType::Numeric : ColumnType::Integer;
-        case fbcpp::DescriptorAdjustedType::INT64: 
-            return descriptors[index].scale != 0 ? ColumnType::Numeric : ColumnType::BigInt;
-        case fbcpp::DescriptorAdjustedType::FLOAT: return ColumnType::Float;
-        case fbcpp::DescriptorAdjustedType::DOUBLE: return ColumnType::Double;
-        case fbcpp::DescriptorAdjustedType::TIME: return ColumnType::Time;
-        case fbcpp::DescriptorAdjustedType::DATE: return ColumnType::Date;
-        case fbcpp::DescriptorAdjustedType::TIMESTAMP: return ColumnType::Timestamp;
-        case fbcpp::DescriptorAdjustedType::TIME_TZ: return ColumnType::TimeTz;
-        case fbcpp::DescriptorAdjustedType::TIMESTAMP_TZ: return ColumnType::TimestampTz;
-        case fbcpp::DescriptorAdjustedType::BLOB: return ColumnType::Blob;
-        case fbcpp::DescriptorAdjustedType::BOOLEAN: return ColumnType::Boolean;
-        case fbcpp::DescriptorAdjustedType::INT128: return ColumnType::Int128;
-        case fbcpp::DescriptorAdjustedType::DECFLOAT16: return ColumnType::Decfloat16;
-        case fbcpp::DescriptorAdjustedType::DECFLOAT34: return ColumnType::Decfloat34;
-        default: return ColumnType::Unknown;
-    }
+    return columnTypesM[index];
 }
 
 int FbCppStatement::getColumnSubtype(int index)
@@ -773,9 +812,7 @@ StatementType FbCppStatement::getType()
 
 int FbCppStatement::getParameterCount()
 {
-    if (!statementM)
-        return 0;
-    return (int)statementM->getInputDescriptors().size();
+    return (int)parameterTypesM.size();
 }
 
 std::string FbCppStatement::getParameterName(int index)
@@ -817,34 +854,9 @@ std::vector<int> FbCppStatement::findParameterIndicesByName(const std::string& n
 
 ColumnType FbCppStatement::getParameterType(int index)
 {
-    if (!statementM)
+    if ((unsigned)index >= parameterTypesM.size())
         return ColumnType::Unknown;
-    const auto& descriptors = statementM->getInputDescriptors();
-    if ((unsigned)index >= descriptors.size())
-        return ColumnType::Unknown;
-
-    switch (descriptors[index].adjustedType)
-    {
-        case fbcpp::DescriptorAdjustedType::STRING: return ColumnType::Varchar;
-        case fbcpp::DescriptorAdjustedType::INT32: 
-        case fbcpp::DescriptorAdjustedType::INT16: 
-            return descriptors[index].scale != 0 ? ColumnType::Numeric : ColumnType::Integer;
-        case fbcpp::DescriptorAdjustedType::INT64: 
-            return descriptors[index].scale != 0 ? ColumnType::Numeric : ColumnType::BigInt;
-        case fbcpp::DescriptorAdjustedType::FLOAT: return ColumnType::Float;
-        case fbcpp::DescriptorAdjustedType::DOUBLE: return ColumnType::Double;
-        case fbcpp::DescriptorAdjustedType::TIME: return ColumnType::Time;
-        case fbcpp::DescriptorAdjustedType::DATE: return ColumnType::Date;
-        case fbcpp::DescriptorAdjustedType::TIMESTAMP: return ColumnType::Timestamp;
-        case fbcpp::DescriptorAdjustedType::TIME_TZ: return ColumnType::TimeTz;
-        case fbcpp::DescriptorAdjustedType::TIMESTAMP_TZ: return ColumnType::TimestampTz;
-        case fbcpp::DescriptorAdjustedType::BLOB: return ColumnType::Blob;
-        case fbcpp::DescriptorAdjustedType::BOOLEAN: return ColumnType::Boolean;
-        case fbcpp::DescriptorAdjustedType::INT128: return ColumnType::Int128;
-        case fbcpp::DescriptorAdjustedType::DECFLOAT16: return ColumnType::Decfloat16;
-        case fbcpp::DescriptorAdjustedType::DECFLOAT34: return ColumnType::Decfloat34;
-        default: return ColumnType::Unknown;
-    }
+    return parameterTypesM[index];
 }
 
 int FbCppStatement::getParameterSubtype(int index)

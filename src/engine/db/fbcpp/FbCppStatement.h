@@ -114,6 +114,8 @@ private:
     std::optional<bool> firstRowFetchedM;
     bool eofReachedM;
     bool rowAvailableM;
+    std::vector<ColumnType> columnTypesM;
+    std::vector<ColumnType> parameterTypesM;
 };
 
 } // namespace fr
