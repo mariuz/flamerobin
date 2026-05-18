@@ -46,8 +46,7 @@ FlameRobin now uses:
  * vcpkg manifest mode for dependencies
  * a custom overlay port for the patched fb-cpp library
 
-The current Windows build no longer follows the older manual wxWidgets setup as the
-primary path. The recommended configuration is via CMake + vcpkg.
+The recommended Windows build path is CMake + vcpkg.
 
 -- Requirements
 
@@ -60,6 +59,7 @@ Required:
 
 Notes:
  * FlameRobin now builds as C++20.
+ * Most third-party build dependencies are resolved through vcpkg.
  * The build expects the repository root to contain:
    - vcpkg.json
    - vcpkg-configuration.json
@@ -72,18 +72,27 @@ Notes:
    > git clone https://github.com/mariuz/flamerobin.git
    > cd flamerobin
 
-2. Obtain vcpkg if you do not already have it:
+2. Provide vcpkg using one of these methods:
+
+   Option A: clone vcpkg into the repository root so CMake can detect it automatically:
+   > git clone https://github.com/microsoft/vcpkg vcpkg
+   > vcpkg\bootstrap-vcpkg.bat
+
+   Option B: use an existing external vcpkg checkout:
    > git clone https://github.com/microsoft/vcpkg C:\src\vcpkg
    > C:\src\vcpkg\bootstrap-vcpkg.bat
 
 -- Configure with CMake
 
-Use a clean out-of-source build directory:
+Use a clean out-of-source build directory.
 
-   > cmake -S . -B build -G "Visual Studio 18 2026" -A x64 -DCMAKE_TOOLCHAIN_FILE=C:\src\vcpkg\scripts\buildsystems\vcpkg.cmake
+If vcpkg is cloned into the repository as .\vcpkg, CMake should detect it automatically:
+   > cmake -S . -B build -A x64
 
-This enables vcpkg manifest mode so CMake can install and find dependencies,
-including the patched fb-cpp package from the repository's overlay port.
+If you are using an external vcpkg checkout, specify the toolchain file explicitly:
+   > cmake -S . -B build -A x64 -DCMAKE_TOOLCHAIN_FILE=C:\src\vcpkg\scripts\buildsystems\vcpkg.cmake
+
+If needed, add a generator matching your installed build tools.
 
 -- Build
 
@@ -103,9 +112,10 @@ Check the configure output for:
    DEBUG: VCPKG_INSTALLED_DIR=...
 
 If those values are empty, delete the build directory and re-run CMake with
--DCMAKE_TOOLCHAIN_FILE pointing to your vcpkg checkout.
+vcpkg enabled.
 
 Always reconfigure from a clean build directory after changing toolchain settings.
+
 ---------------------------------------------------
 -- Unix (Debian and related; Ubuntu, Mint, etc.) --
 ---------------------------------------------------
