@@ -8,6 +8,22 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.5.17</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Performance & Tree Optimizations</B></font><br>
+<br>
+- **Metadata Loading Speedup**: Further improved metadata loading performance by increasing the default statement cache size in `MetadataLoader`. This reduces the overhead of re-preparing common queries when exploring large databases. (fixes issue #587)<br>
+- **Tree Update Efficiency**: Optimized the database tree control to use $O(N)$ updates instead of $O(N^2)$ for existing objects. This significantly improves responsiveness when refreshing large collections (hundreds of tables, indices, etc.).<br>
+- **Algorithmic Fixes**: Corrected an $O(N^3)$ bottleneck in the tree deletion logic and implemented binary search for metadata item lookups in sorted collections.<br>
+<br>
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.5.16</font><br>
 <br><br>
 <font size=+1 color="#AA0000"><B>Style Configurator Improvements</B></font><br>
