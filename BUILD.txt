@@ -40,82 +40,72 @@ https://github.com/mariuz/flamerobin
 -- MSW - Visual C++ Build Instructions --
 -----------------------------------------
 
-First, make sure you have git and CMake installed and aviable in your PATH.
-The installers for these utils should give you that option.
+FlameRobin now uses:
+ * CMake
+ * C++20
+ * vcpkg manifest mode for dependencies
+ * a custom overlay port for the patched fb-cpp library
 
-Install Visual Studio with C++ support, and make sure you can find the 'Native
-Tool Command Prompt' in your start menu (there will be versions of x86 and x64)
+The current Windows build no longer follows the older manual wxWidgets setup as the
+primary path. The recommended configuration is via CMake + vcpkg.
 
-We're going to assume there's a 'C:\projects' directory where all the relevant
-files are going to be placed, but any location that suits your install should
-be fine (avoid spaces in dir/files names)
+-- Requirements
 
--- Build wxWidgets
+Required:
+ * Visual Studio with Desktop C++ support
+ * CMake
+ * Git
+ * vcpkg
+ * A Firebird installation for runtime/testing
 
-(written for wxWidgets 3.1 series, there may be newer versions)
+Notes:
+ * FlameRobin now builds as C++20.
+ * The build expects the repository root to contain:
+   - vcpkg.json
+   - vcpkg-configuration.json
+   - ports/fb-cpp
+ * The fb-cpp dependency is provided through the repo's vcpkg overlay port.
 
- 1. Download the wxWdigets source zip: https://www.wxwidgets.org/downloads/
- 2. Unzip file to a sensible location (e.g. C:\projects\wxWidgets-3.1.4)
-    Keep a note of this, as it will be the WXDIR used to build FlameRobin
- 3. Start the Visual Studio 'Native Tool Command Prompt'
- 4. CD to the wxWidgets root
-    > cd C:\projects\wxWidgets-3.1.4
- 5. CD to the Windows build sub-dir
-    > cd build\msw
- 6. Build the static debug lib
-    > nmake /f makefile.vc RUNTIME_LIBS=static
- 7. Build the static release lib
-    > nmake /f makefile.vc BUILD=release RUNTIME_LIBS=static
+-- Initial setup
 
-That's it for wxWidgets, until you need a newer version.
+1. Clone FlameRobin:
+   > git clone https://github.com/mariuz/flamerobin.git
+   > cd flamerobin
 
--- Setup FlameRobin build (using CMake GUI)
+2. Obtain vcpkg if you do not already have it:
+   > git clone https://github.com/microsoft/vcpkg C:\src\vcpkg
+   > C:\src\vcpkg\bootstrap-vcpkg.bat
 
- 1. Download the FlameRobin source code
-    * Plain git on command line:
-      > cd c:\projects
-      > git clone https://github.com/mariuz/flamerobin.git
-    * GitHub, TortoiseGit follow relevant instructions.
- 2. Run the CMake GUI
-    a. Point 'Where is the source code' to the FlameRobin root
-       (C:\projects\flamerobin)
-    b. Point 'Where to build the binaries' to a 'build' sub-dir that you need
-       to create
-       (C:\projects\flamerobin\build)
-    c. Click 'Add Entry' (button to the right of window)
-       * Give it the name WXDIR
-       * Set Type to 'PATH'
-	  * Select the root dir of wxWdigets
-         (C:\projects\wxWidgets-3.1.4)
-    d. Click on 'Configure', you'll be prompted for compiler type
-       * Select your version of Visual Studio
-       * Select the platform (Win32 or x64)
-    e. Click on 'Generate' to create the Visual Studio project files
-    f. You can now click on 'Open Project' to launch Visual Studio or you can
-       directly open the build/flamerobin.sln file that was created
- 3. Try building the solution : <ctrl>+<shift>+B
- 4. Run with <ctrl>+<F5>
+-- Configure with CMake
 
--- Setup FlameRobin build (using command line)
+Use a clean out-of-source build directory:
 
- 1. > cd C:\projects
- 2. > git clone https://github.com/mariuz/flamerobin.git
- 3. > cd flamerobin
- 4. > mkdir build
- 5. > cd build
- 6. > cmake -DWXDIR:PATH=C:\projects\wxWidgets-3.1.4 ..
- 7. Open resulting flamerobin.sln file in Visual Studio, or from VS command
-    prompt, build with:
-    > devenv flamerobin.sln /release
+   > cmake -S . -B build -G "Visual Studio 18 2026" -A x64 -DCMAKE_TOOLCHAIN_FILE=C:\src\vcpkg\scripts\buildsystems\vcpkg.cmake
 
-You can delete the whole build directory and re-run CMake as above to make a
-clean start, if needed.
+This enables vcpkg manifest mode so CMake can install and find dependencies,
+including the patched fb-cpp package from the repository's overlay port.
 
-Different version of wxWidgets or platform builds (x86, x64) can be created to
-suit your needs at the same time, just use different build dirs (e.g
-build-wx302-x64). Recomended to start the name with 'build' as the .gitignore
-file will be set to ignore those directories.
+-- Build
 
+   > cmake --build build --config Release
+
+-- Troubleshooting
+
+If CMake fails with an error like:
+
+   Could not find a package configuration file provided by "fb-cpp"
+
+then the vcpkg toolchain was not active during configure.
+
+Check the configure output for:
+   DEBUG: CMAKE_TOOLCHAIN_FILE=...
+   DEBUG: VCPKG_TARGET_TRIPLET=...
+   DEBUG: VCPKG_INSTALLED_DIR=...
+
+If those values are empty, delete the build directory and re-run CMake with
+-DCMAKE_TOOLCHAIN_FILE pointing to your vcpkg checkout.
+
+Always reconfigure from a clean build directory after changing toolchain settings.
 ---------------------------------------------------
 -- Unix (Debian and related; Ubuntu, Mint, etc.) --
 ---------------------------------------------------
