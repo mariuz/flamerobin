@@ -13,19 +13,19 @@ Below are build instructions for FlameRobin on all supported build environments.
 Required:
  * FirebirdSQL, the client libs (e.g. fbclient.dll) at a minimum, but the whole
    server install to test with - https://www.firebirdsql.org/
- * A C++14 compiler (Visual Studio on Windows, G++ on Linux, others may work but untested)
+ * A C++20 compiler (Visual Studio on Windows, G++ on Linux, others may work but untested)
    https://visualstudio.microsoft.com/ https://gcc.gnu.org/
- * The wxWidgets library - https://www.wxwidgets.org/
+ * wxWidgets (typically resolved via vcpkg on supported configurations) - https://www.wxwidgets.org/
  * CMake - https://cmake.org/
- * git - https://git-scm.com/
+ * Git - https://git-scm.com/
 Optional:
  * GitHub desktop app (for interacting with this project) - https://github.com/
  * TortoiseGit (Windows extension) - https://tortoisegit.org/
 
 -- Notes
 
-FlameRobin is currently compiled as C++14 (`CMAKE_CXX_STANDARD=14`).
-Please keep code changes compatible with C++14.
+FlameRobin is currently compiled as C++20 (`CMAKE_CXX_STANDARD=20`).
+Please keep code changes compatible with C++20.
 
 FR must be built with the same settings for debug/release etc.  as the
 wxWidgets library (Unicode build is required). Failing to do so will usually
@@ -120,7 +120,7 @@ Always reconfigure from a clean build directory after changing toolchain setting
 -- Unix (Debian and related; Ubuntu, Mint, etc.) --
 ---------------------------------------------------
 
-Assumes a 'project' dir in you home directory, change to suit
+Assumes a 'project' dir in your home directory, change to suit
 
  1. Setup the tools and libs needed:
     $ sudo apt-get install build-essential git cmake libwxgtk3.2-dev
