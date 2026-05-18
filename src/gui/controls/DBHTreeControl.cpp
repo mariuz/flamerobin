@@ -1176,6 +1176,8 @@ void DBHTreeItemData::update()
             }
 
             wxTreeItemId prevId;
+            wxTreeItemIdValue cookie;
+            wxTreeItemId ci = treeM->GetFirstChild(id, cookie);
             // create or update child nodes
             for (itChild = children.begin(); itChild != children.end(); ++itChild)
             {
@@ -1186,7 +1188,17 @@ void DBHTreeItemData::update()
                     continue;
                 ++numVisibleChildren;
 
-                wxTreeItemId childId = findSubNode(*itChild);
+                wxTreeItemId childId;
+                if (ci.IsOk() && treeM->getMetadataItem(ci) == *itChild)
+                {
+                    childId = ci;
+                    ci = treeM->GetNextChild(id, cookie);
+                }
+                else
+                {
+                    childId = findSubNode(*itChild);
+                }
+
                 // order of child nodes may have changed
                 // since nodes can't be moved they have to be recreated
                 if (childId.IsOk())
@@ -1264,32 +1276,39 @@ void DBHTreeItemData::update()
     }
     treeM->SetItemHasChildren(id, true);
 
-    // remove delete items - one by one
+    // remove deleted items - one by one
     bool itemsDeleted = false;
     wxTreeItemIdValue cookie;
     wxTreeItemId item = treeM->GetFirstChild(id, cookie);
+    MetadataItemSorter sorter;
     while (item.IsOk())
     {
-        itChild = find(children.begin(), children.end(),
-            treeM->getMetadataItem(item));
+        MetadataItem* mitem = treeM->getMetadataItem(item);
+        if (tivObject.getSortChildren())
+            itChild = std::lower_bound(children.begin(), children.end(), mitem, sorter);
+        else
+            itChild = find(children.begin(), children.end(), mitem);
+
+        bool found = (itChild != children.end() && *itChild == mitem);
+
         // we may need to hide disconnected databases
-        if (DBHTreeConfigCache::get().getHideDisconnectedDatabases()
-            && itChild != children.end())
+        if (found && DBHTreeConfigCache::get().getHideDisconnectedDatabases())
         {
             Database* db = dynamic_cast<Database*>(*itChild);
             if (db && !db->isConnected())
-                itChild = children.end();
+                found = false;
         }
         // delete tree node and all children if metadata item not found
-        if (itChild == children.end())
+        if (!found)
         {
             itemsDeleted = true;
             treeM->DeleteChildren(item);
+            wxTreeItemId next = treeM->GetNextChild(id, cookie);
             treeM->Delete(item);
-            item = treeM->GetFirstChild(id, cookie);
-            continue;
+            item = next;
         }
-        item = treeM->GetNextChild(id, cookie);
+        else
+            item = treeM->GetNextChild(id, cookie);
     }
     // force-collapse node if all children deleted
     if (itemsDeleted && 0 == treeM->GetChildrenCount(id, false)

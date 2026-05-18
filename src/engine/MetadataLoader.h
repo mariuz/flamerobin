@@ -73,7 +73,7 @@ public:
     // Setting the parameter maxStatements to 0 will disable the size limit
     // of the statementsM list, and could possibly consume a lot of the
     // available server ressources!
-    MetadataLoader(Database& database, unsigned maxStatements = 1);
+    MetadataLoader(Database& database, unsigned maxStatements = 20);
 
     // Creates a prepared fr::IStatementPtr object for the sql statement.
     // Should be used in cases where sql is unique and can not be reused,
