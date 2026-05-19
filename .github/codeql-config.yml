@@ -1,6 +1,7 @@
 name: "FlameRobin CodeQL config"
 
 paths-ignore:
+  - 'vcpkg/**'
   - 'Build/vcpkg_installed/**'
   - 'build/vcpkg_installed/**'
   - 'vcpkg_installed/**'
@@ -8,6 +9,7 @@ paths-ignore:
 query-filters:
   - exclude:
       filepath:
+        - "vcpkg/.*"
         - "Build/vcpkg_installed/.*"
         - "build/vcpkg_installed/.*"
         - "vcpkg_installed/.*"
