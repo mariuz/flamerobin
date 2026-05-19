@@ -8,6 +8,23 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.5.18</font><br>
+<br><br>
+<font size=+1 color="#AA0000"><B>Advanced Performance & Batching</B></font><br>
+<br>
+- **Metadata Batching**: Significantly reduced database round-trips by batching metadata fetching. Tables, Views, GTTs, and System Tables are now loaded in a single query. All trigger types (DML, DB, DDL) are also combined into one operation, including their activation state.<br>
+- **Index Loading Optimization**: Unified active and inactive index state fetching into a single efficient query.<br>
+- **GUI Batching**: Implemented `Freeze()`/`Thaw()` for large collection updates in the database tree, preventing redundant layout and redraw cycles.<br>
+- **Redundant Update Elimination**: Optimized observer attachment to avoid double-visiting and redrawing newly created tree nodes, saving thousands of operations on large schemas.<br>
+<br>
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.5.17</font><br>
 <br><br>
 <font size=+1 color="#AA0000"><B>Performance & Tree Optimizations</B></font><br>
