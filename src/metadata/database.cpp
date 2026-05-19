@@ -73,6 +73,7 @@
 #include "metadata/view.h"
 #include "sql/SqlStatement.h"
 #include "sql/SqlTokenizer.h"
+#include "firebird/constants.h"
 #include "ibpp/_ibpp.h"
 
 // Credentials class
