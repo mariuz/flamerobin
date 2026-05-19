@@ -38,6 +38,7 @@ For detailed build instructions for all supported platforms (Windows, Linux, mac
 Roadmap & Modernization
 ---------------------------
 *   [Project Roadmap](ROADMAP.md) - Track the progress of the migration to `fb-cpp`.
+*   [Security Roadmap](SECURITY_ROADMAP.md) - Track hardening and supply-chain security improvements.
 *   [Database Abstraction Layer (DAL) & fb-cpp Migration](docs/migration-to-fb-cpp.md) - Detailed architectural documentation.
 
 macOS distribution builds
@@ -92,4 +93,3 @@ If you need to update the patches (e.g., after updating the submodule):
    ```
 2. The script will now automatically update `ports/fb-cpp/fb-cpp-flamerobin.patch`.
 3. Verify that the project still compiles and then commit the changes.
-
