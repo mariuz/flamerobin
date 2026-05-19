@@ -1236,7 +1236,8 @@ void DBHTreeItemData::update()
                     // calls update() on the newly created child node
                     // this will correctly populate the tree
                     // We pass false for callUpdate because we just set the text and image
-                    newItem->setObservedMetadata(*itChild, false);
+                    newItem->setObservedMetadata(*itChild,
+                        (*itChild)->getType() == ntServer);
                     // tree node data objects may optionally observe the settings
                     // cache object, for example to create / delete column and
                     // parameter nodes if the "ShowColumnsInTree" setting changes
@@ -1413,7 +1414,10 @@ void DBHTreeControl::OnTreeItemExpanding(wxTreeEvent& event)
 {
     MetadataItem* mi = getMetadataItem(event.GetItem());
     if (mi)
+    {
         mi->ensureChildrenLoaded();
+        mi->notifyObservers();
+    }
     event.Skip();
 }
 
