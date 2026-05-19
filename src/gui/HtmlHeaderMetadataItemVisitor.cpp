@@ -197,6 +197,18 @@ void HtmlHeaderMetadataItemVisitor::visitCollation(Collation& /*collation*/)
     addDDL();
 }
 
+void HtmlHeaderMetadataItemVisitor::visitUser(User& /*user*/)
+{
+    emptyTitles();
+    addSummary();
+}
+
+void HtmlHeaderMetadataItemVisitor::visitUsers(Users& /*users*/)
+{
+    emptyTitles();
+    addSummary();
+}
+
 void HtmlHeaderMetadataItemVisitor::defaultAction()
 {
     emptyTitles();

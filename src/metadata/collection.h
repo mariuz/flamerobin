@@ -70,7 +70,7 @@ protected:
 public:
     virtual DatabasePtr getDatabase() const
     {
-        return DatabasePtr(databaseM);
+        return databaseM.lock();
     }
 
     virtual bool isSystem() const { return false; }

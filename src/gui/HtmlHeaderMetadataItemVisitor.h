@@ -50,6 +50,8 @@ public:
     virtual void visitUDF(UDF & function);
     virtual void visitView(View& view);
     virtual void visitCollation(Collation& collation);
+    virtual void visitUser(User& user);
+    virtual void visitUsers(Users& users);
 protected:
     virtual void defaultAction();
 private:

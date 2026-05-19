@@ -440,32 +440,46 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             }
         }
         // {%foreach:user:<separator>:<text>%}
-        // If the current object is a server, processes
+        // If the current object is a server or a Users collection, processes
         // the specified text once for each defined user,
         // switching each time the current object to the nth user.
         else if (cmdParams[0] == "user")
         {
             Server* s = dynamic_cast<Server*>(object);
-            if (!s)
-                return;
-
-            ProgressIndicator* pi = tp->getProgressIndicator();
-            if (pi)
+            if (s)
             {
-                pi->initProgress(_("Connecting to Server..."));
-                pi->doShow();
+                ProgressIndicator* pi = tp->getProgressIndicator();
+                if (pi)
+                {
+                    pi->initProgress(_("Connecting to Server..."));
+                    pi->doShow();
+                }
+
+                UserPtrs users = s->getUsers(pi);
+                if (users.empty())
+                    return;
+
+                bool firstItem = true;
+                for (UserPtrs::iterator it = users.begin(); it != users.end();
+                    ++it)
+                {
+                    Local::foreachIteration(firstItem, tp, processedText, sep,
+                        cmdParams.from(2), (*it).get());
+                }
             }
-
-            UserPtrs users = s->getUsers(pi);
-            if (users.empty())
-                return;
-
-            bool firstItem = true;
-            for (UserPtrs::iterator it = users.begin(); it != users.end();
-                ++it)
+            else
             {
-                Local::foreachIteration(firstItem, tp, processedText, sep,
-                    cmdParams.from(2), (*it).get());
+                Users* u = dynamic_cast<Users*>(object);
+                if (u)
+                {
+                    u->ensureChildrenLoaded();
+                    bool firstItem = true;
+                    for (UserPtrs::iterator it = u->begin(); it != u->end(); ++it)
+                    {
+                        Local::foreachIteration(firstItem, tp, processedText, sep,
+                            cmdParams.from(2), (*it).get());
+                    }
+                }
             }
         }
         // {%foreach:active_transaction:<separator>:<text>%}

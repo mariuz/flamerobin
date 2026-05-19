@@ -30,7 +30,11 @@
     #include "wx/wx.h"
 #endif
 
+#include "core/ProgressIndicator.h"
 #include "core/StringUtils.h"
+#include "engine/MetadataLoader.h"
+#include "engine/db/IStatement.h"
+#include "metadata/database.h"
 #include "metadata/MetadataItemVisitor.h"
 #include "metadata/server.h"
 #include "metadata/User.h"
@@ -58,11 +62,19 @@ User::User(DatabasePtr database, const wxString& name)
 
 ServerPtr User::getServer() const
 {
-    return ServerPtr(serverM);
+    ServerPtr s = serverM.lock();
+    if (s)
+        return s;
+    DatabasePtr db = getDatabase();
+    if (db)
+        return db->getServer();
+    return ServerPtr();
 }
 
 wxString User::getUsername() const
 {
+    if (usernameM.IsEmpty())
+        return getName_();
     return usernameM;
 }
 
@@ -203,8 +215,38 @@ void Users::acceptVisitor(MetadataItemVisitor* visitor)
 void Users::load(ProgressIndicator* progressIndicator)
 {
     DatabasePtr db = getDatabase();
-    wxString stmt = "select sec$user_name from sec$users a order by 1 ";
-    setItems(db->loadIdentifiers(stmt, progressIndicator));
+    if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+    {
+        MetadataLoader* loader = db->getMetadataLoader();
+        MetadataLoaderTransaction tr(loader);
+        wxMBConv* converter = db->getCharsetConverter();
+
+        std::string stmt = "select sec$user_name, sec$first_name, sec$middle_name, "
+            "sec$last_name from sec$users order by 1";
+        fr::IStatementPtr& st1 = loader->getStatement(stmt);
+        st1->execute();
+
+        std::vector<UserPtr> users;
+        while (st1->fetch())
+        {
+            checkProgressIndicatorCanceled(progressIndicator);
+            wxString name = std2wxIdentifier(st1->getString(0), converter);
+            UserPtr u(new User(db, name));
+            if (!st1->isNull(1))
+                u->setFirstName(std2wxIdentifier(st1->getString(1), converter));
+            if (!st1->isNull(2))
+                u->setMiddleName(std2wxIdentifier(st1->getString(2), converter));
+            if (!st1->isNull(3))
+                u->setLastName(std2wxIdentifier(st1->getString(3), converter));
+            users.push_back(u);
+        }
+        setItems(users);
+    }
+    else
+    {
+        wxString stmt = "select sec$user_name from sec$users a order by 1 ";
+        setItems(db->loadIdentifiers(stmt, progressIndicator));
+    }
 }
 
 const wxString Users::getTypeName() const

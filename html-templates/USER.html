@@ -1,0 +1,37 @@
+<html>
+<head>
+  <title>User: {%object_name%}</title>
+</head>
+<body>
+<font size=+2>User: {%object_name%}</font><br>
+<br>
+<table cellspacing=1 cellpadding=2 border=0 bgcolor=black>
+  <tbody>
+    <tr bgcolor="#CCCCFF">
+      <td><b>Username</b></td>
+      <td>{%userinfo:username%}</td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+      <td><b>First name</b></td>
+      <td>{%userinfo:first_name%}</td>
+    </tr>
+    <tr bgcolor="#CCCCFF">
+      <td><b>Middle name</b></td>
+      <td>{%userinfo:middle_name%}</td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+      <td><b>Last name</b></td>
+      <td>{%userinfo:last_name%}</td>
+    </tr>
+    <tr bgcolor="#CCCCFF">
+      <td><b>Unix user ID</b></td>
+      <td>{%userinfo:unix_user%}</td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+      <td><b>Unix group ID</b></td>
+      <td>{%userinfo:unix_group%}</td>
+    </tr>
+  </tbody>
+</table>
+</body>
+</html>

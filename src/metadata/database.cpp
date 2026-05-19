@@ -2179,7 +2179,7 @@ void Database::acceptVisitor(MetadataItemVisitor* visitor)
 
 ServerPtr Database::getServer() const
 {
-    return ServerPtr(serverM);
+    return serverM.lock();
 }
 
 void Database::setServer(ServerPtr server)
