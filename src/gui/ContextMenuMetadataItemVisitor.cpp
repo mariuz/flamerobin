@@ -224,8 +224,6 @@ void MainObjectMenuMetadataItemVisitor::visitUsers(Users& /*users*/)
 {
     addCreateItem();
     addSeparator();
-    //addGenerateCodeMenu(users);
-    addSeparator();
     addRefreshItem();
 }
 

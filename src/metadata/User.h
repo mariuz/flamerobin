@@ -44,6 +44,7 @@ private:
 public:
     User(ServerPtr server);
     User(ServerPtr server, const fr::UserData& src);
+    User(DatabasePtr database, const wxString& name);
 
     ServerPtr getServer() const;
     virtual bool isSystem() const;
@@ -65,8 +66,10 @@ public:
     void setGroupId(uint32_t value);
 
     void assignTo(fr::UserData& dest) const;
+    virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    virtual const wxString getTypeName() const;
 };
-/*
+
 class Users : public MetadataCollection<User>
 {
 protected:
@@ -79,6 +82,5 @@ public:
     virtual const wxString getTypeName() const;
 
 };
-*/
 
 #endif

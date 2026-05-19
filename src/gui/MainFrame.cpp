@@ -707,6 +707,8 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
             case ntReplication:
             case ntRole:
             case ntSysRole:
+            case ntUser:
+            case ntUsers:
             case ntIndex:
             case ntSysIndices:
                 {

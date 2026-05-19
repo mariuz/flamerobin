@@ -1262,6 +1262,8 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             initializeLockCount(sysIndicesM, lockCount);
             usrIndicesM.reset(new UsrIndices(me));
             initializeLockCount(usrIndicesM, lockCount);
+            usersM.reset(new Users(me));
+            initializeLockCount(usersM, lockCount);
 
             // first start a transaction for metadata loading, then lock the
             // database
@@ -1504,7 +1506,12 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
     pih.init(_("indexes"), collectionCount, 15);
     usrIndicesM->load(progressIndicator);
 
-    pih.init(_("CharacterSet"), collectionCount, 16);
+    if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
+        pih.init(_("users"), collectionCount, 16);
+        usersM->load(progressIndicator);
+    }
+
+    pih.init(_("CharacterSet"), collectionCount, 17);
     characterSetsM->load(progressIndicator);
 
     pih.init(_("User Collations"), collectionCount, 17);
@@ -1672,7 +1679,7 @@ UDFsPtr Database::getUDFs()
 UsersPtr Database::getUsers()
 {
     wxASSERT(usersM);
-//    usersM->ensureChildrenLoaded();
+    usersM->ensureChildrenLoaded();
     return usersM;
 }
 
@@ -1864,6 +1871,8 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
     if (getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
         temp.push_back(replicationM.get());
     temp.push_back(DMLtriggersM.get());
+    if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        temp.push_back(usersM.get());
     temp.push_back(UDFsM.get());
     temp.push_back(viewsM.get());
 

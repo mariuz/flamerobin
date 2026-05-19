@@ -41,7 +41,7 @@ User::User(ServerPtr server)
 }
 
 User::User(ServerPtr server, const fr::UserData& src)
-    : MetadataItem(ntUnknown, server.get()), serverM(server),
+    : MetadataItem(ntUser, server.get()), serverM(server),
         useridM(src.userId), groupidM(src.groupId)
 {
     usernameM = src.username;
@@ -49,6 +49,11 @@ User::User(ServerPtr server, const fr::UserData& src)
     firstnameM = src.firstName;
     middlenameM = src.middleName;
     lastnameM = src.lastName;
+}
+
+User::User(DatabasePtr database, const wxString& name)
+    : MetadataItem(ntUser, database.get(), name)
+{
 }
 
 ServerPtr User::getServer() const
@@ -165,12 +170,21 @@ void User::assignTo(fr::UserData& dest) const
     dest.groupId = groupidM;
 }
 
+void User::acceptVisitor(MetadataItemVisitor* visitor)
+{
+    visitor->visitUser(*this);
+}
+
+const wxString User::getTypeName() const
+{
+    return "USER";
+}
+
 bool User::isSystem() const
 {
     return usernameM == "SYSDBA";
 }
 
-/*
 void Users::loadChildren()
 {
     load(0);
@@ -197,5 +211,3 @@ const wxString Users::getTypeName() const
 {
     return "USERS_COLLECTION";
 }
-
-*/
