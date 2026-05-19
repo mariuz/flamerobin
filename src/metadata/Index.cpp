@@ -268,15 +268,38 @@ void Indices::acceptVisitor(MetadataItemVisitor* visitor)
 void Indices::load(ProgressIndicator* progressIndicator)
 {
     DatabasePtr db = getDatabase();
-    wxString stmt = "select a.rdb$index_name from rdb$indices a "
-            " where (rdb$system_flag = 0 or rdb$system_flag is null) "
-            " order by 1 ";
-    setItems(db->loadIdentifiers(stmt, progressIndicator));
-    
-    stmt = "select a.rdb$index_name from rdb$indices a "
-        " where (rdb$system_flag = 0 or rdb$system_flag is null) and a.rdb$index_inactive = 1 "
-        " order by 1 ";
-    setInactiveItems(db->loadIdentifiers(stmt, progressIndicator));
+    MetadataLoader* loader = db->getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+    wxMBConv* converter = db->getCharsetConverter();
+
+    wxString stmt = "select rdb$index_name, rdb$index_inactive from rdb$indices "
+                    " where (rdb$system_flag = 0 or rdb$system_flag is null) "
+                    " order by 1 ";
+
+    fr::IStatementPtr& st1 = loader->getStatement(wx2std(stmt, converter));
+    st1->execute();
+
+    CollectionType indices;
+    wxArrayString inactiveNames;
+    while (st1->fetch())
+    {
+        checkProgressIndicatorCanceled(progressIndicator);
+        std::string s = st1->getString(0);
+        wxString name(std2wxIdentifier(s, converter));
+        
+        IndexPtr index = findByName(name);
+        if (!index)
+        {
+            index.reset(new Index(db, name));
+            initializeLockCount(index, getLockCount());
+        }
+        indices.push_back(index);
+
+        if (!st1->isNull(1) && st1->getInt32(1) == 1)
+            inactiveNames.push_back(name);
+    }
+    setItems(indices);
+    setInactiveItems(inactiveNames);
 }
 
 const wxString Indices::getTypeName() const
@@ -302,19 +325,40 @@ void SysIndices::acceptVisitor(MetadataItemVisitor* visitor)
 void SysIndices::load(ProgressIndicator* progressIndicator)
 {
     DatabasePtr db = getDatabase();
-    wxString stmt = "select a.rdb$index_name from rdb$indices a "
-        "   left join rdb$relation_constraints b on b.rdb$index_name = a.rdb$index_name "
-        " where (rdb$system_flag = 0 or rdb$system_flag is null) "
-        "   and b.rdb$index_name is not null "
-        " order by 1 ";
-    setItems(db->loadIdentifiers(stmt, progressIndicator));
+    MetadataLoader* loader = db->getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+    wxMBConv* converter = db->getCharsetConverter();
 
-    stmt = "select a.rdb$index_name from rdb$indices a "
+    wxString stmt = "select a.rdb$index_name, a.rdb$index_inactive from rdb$indices a "
         "   left join rdb$relation_constraints b on b.rdb$index_name = a.rdb$index_name "
-        " where (rdb$system_flag = 0 or rdb$system_flag is null) and a.rdb$index_inactive = 1 "
+        " where (a.rdb$system_flag = 0 or a.rdb$system_flag is null) "
         "   and b.rdb$index_name is not null "
         " order by 1 ";
-    setInactiveItems(db->loadIdentifiers(stmt, progressIndicator));
+
+    fr::IStatementPtr& st1 = loader->getStatement(wx2std(stmt, converter));
+    st1->execute();
+
+    CollectionType indices;
+    wxArrayString inactiveNames;
+    while (st1->fetch())
+    {
+        checkProgressIndicatorCanceled(progressIndicator);
+        std::string s = st1->getString(0);
+        wxString name(std2wxIdentifier(s, converter));
+        
+        IndexPtr index = findByName(name);
+        if (!index)
+        {
+            index.reset(new Index(db, name));
+            initializeLockCount(index, getLockCount());
+        }
+        indices.push_back(index);
+
+        if (!st1->isNull(1) && st1->getInt32(1) == 1)
+            inactiveNames.push_back(name);
+    }
+    setItems(indices);
+    setInactiveItems(inactiveNames);
 }
 
 const wxString SysIndices::getTypeName() const
@@ -340,15 +384,38 @@ void UsrIndices::acceptVisitor(MetadataItemVisitor* visitor)
 void UsrIndices::load(ProgressIndicator* progressIndicator)
 {
     DatabasePtr db = getDatabase();
-    wxString stmt = "select a.rdb$index_name from rdb$indices a "
-            " where (rdb$system_flag = 0 or rdb$system_flag is null) "
-            " order by 1 ";
-    setItems(db->loadIdentifiers(stmt, progressIndicator));
+    MetadataLoader* loader = db->getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+    wxMBConv* converter = db->getCharsetConverter();
 
-    stmt = "select a.rdb$index_name from rdb$indices a "
-        " where (rdb$system_flag = 0 or rdb$system_flag is null) and a.rdb$index_inactive = 1 "
-        " order by 1 ";
-    setInactiveItems(db->loadIdentifiers(stmt, progressIndicator));
+    wxString stmt = "select rdb$index_name, rdb$index_inactive from rdb$indices "
+                    " where (rdb$system_flag = 0 or rdb$system_flag is null) "
+                    " order by 1 ";
+
+    fr::IStatementPtr& st1 = loader->getStatement(wx2std(stmt, converter));
+    st1->execute();
+
+    CollectionType indices;
+    wxArrayString inactiveNames;
+    while (st1->fetch())
+    {
+        checkProgressIndicatorCanceled(progressIndicator);
+        std::string s = st1->getString(0);
+        wxString name(std2wxIdentifier(s, converter));
+        
+        IndexPtr index = findByName(name);
+        if (!index)
+        {
+            index.reset(new Index(db, name));
+            initializeLockCount(index, getLockCount());
+        }
+        indices.push_back(index);
+
+        if (!st1->isNull(1) && st1->getInt32(1) == 1)
+            inactiveNames.push_back(name);
+    }
+    setItems(indices);
+    setInactiveItems(inactiveNames);
 }
 
 

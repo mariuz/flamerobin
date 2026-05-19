@@ -242,6 +242,8 @@ private:
     void loadCollations();
 
     void loadCollections(ProgressIndicator* progressIndicator);
+    void loadRelationCollections(ProgressIndicator* progressIndicator);
+    void loadTriggerCollections(ProgressIndicator* progressIndicator);
 
     void loadDatabaseInfo();
 

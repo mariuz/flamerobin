@@ -1014,7 +1014,7 @@ public:
 
     wxTreeItemId findSubNode(MetadataItem* item);
     MetadataItem* getObservedMetadata();
-    void setObservedMetadata(MetadataItem* item);
+    void setObservedMetadata(MetadataItem* item, bool callUpdate = true);
 };
 
 DBHTreeItemData::DBHTreeItemData(DBHTreeControl* tree)
@@ -1052,7 +1052,7 @@ MetadataItem* DBHTreeItemData::getObservedMetadata()
     return observedItemM;
 }
 
-void DBHTreeItemData::setObservedMetadata(MetadataItem* item)
+void DBHTreeItemData::setObservedMetadata(MetadataItem* item, bool callUpdate)
 {
     if (observedItemM != item)
     {
@@ -1060,7 +1060,7 @@ void DBHTreeItemData::setObservedMetadata(MetadataItem* item)
             observedItemM->detachObserver(this);
         observedItemM = item;
         if (observedItemM)
-            observedItemM->attachObserver(this, true);
+            observedItemM->attachObserver(this, callUpdate);
     }
 }
 
@@ -1168,6 +1168,13 @@ void DBHTreeItemData::update()
     {
         if (object->getChildren(children))
         {
+            bool frozen = false;
+            if (children.size() > 50)
+            {
+                treeM->Freeze();
+                frozen = true;
+            }
+
             // sort child nodes if necessary
             if (tivObject.getSortChildren())
             {
@@ -1228,7 +1235,8 @@ void DBHTreeItemData::update()
                     // setObservedMetadata() calls attachObserver(), which
                     // calls update() on the newly created child node
                     // this will correctly populate the tree
-                    newItem->setObservedMetadata(*itChild);
+                    // We pass false for callUpdate because we just set the text and image
+                    newItem->setObservedMetadata(*itChild, false);
                     // tree node data objects may optionally observe the settings
                     // cache object, for example to create / delete column and
                     // parameter nodes if the "ShowColumnsInTree" setting changes
@@ -1244,6 +1252,9 @@ void DBHTreeItemData::update()
                 }
                 prevId = childId;
             }
+
+            if (frozen)
+                treeM->Thaw();
         }
     }
 

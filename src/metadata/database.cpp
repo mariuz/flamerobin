@@ -1314,6 +1314,114 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
     }
 }
 
+void Database::loadRelationCollections(ProgressIndicator* progressIndicator)
+{
+    MetadataLoader* loader = getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+    wxMBConv* converter = getCharsetConverter();
+
+    // Combined query for tables, views, system tables and GTTs
+    // rdb$relation_type: 0=table, 1=view, 2=external, 3=monitoring, 4=GTT preserve, 5=GTT delete
+    std::string sql = "select rdb$relation_name, rdb$relation_type, rdb$view_source, rdb$system_flag "
+                      "from rdb$relations order by 1";
+
+    fr::IStatementPtr& st = loader->getStatement(sql);
+    st->execute();
+
+    wxArrayString tables, sysTables, gttTables, views;
+    while (st->fetch())
+    {
+        checkProgressIndicatorCanceled(progressIndicator);
+        wxString name = std2wxIdentifier(st->getString(0), converter);
+        int type = st->getInt32(1);
+        bool isView = !st->isNull(2);
+        int sysFlag = st->isNull(3) ? 0 : st->getInt32(3);
+
+        if (sysFlag == 1)
+            sysTables.push_back(name);
+        else if (isView)
+            views.push_back(name);
+        else if (type == 4 || type == 5)
+            gttTables.push_back(name);
+        else
+            tables.push_back(name);
+    }
+
+    tablesM->setItems(tables);
+    sysTablesM->setItems(sysTables);
+    if (GTTablesM)
+        GTTablesM->setItems(gttTables);
+    viewsM->setItems(views);
+}
+
+void Database::loadTriggerCollections(ProgressIndicator* progressIndicator)
+{
+    MetadataLoader* loader = getMetadataLoader();
+    MetadataLoaderTransaction tr(loader);
+    wxMBConv* converter = getCharsetConverter();
+
+    bool hasBinAnd = getInfo().getODSVersionIsHigherOrEqualTo(11, 1); // FB 2.1+
+
+    std::string sql = "select rdb$trigger_name, rdb$trigger_inactive, rdb$trigger_type from rdb$triggers ";
+    sql += " where (rdb$system_flag = 0 or rdb$system_flag is null) ";
+    sql += " order by 1";
+
+    fr::IStatementPtr& st = loader->getStatement(sql);
+    st->execute();
+
+    wxArrayString dmlNames, dmlInactive;
+    wxArrayString dbNames, dbInactive;
+    wxArrayString ddlNames, ddlInactive;
+
+    while (st->fetch())
+    {
+        checkProgressIndicatorCanceled(progressIndicator);
+        wxString name = std2wxIdentifier(st->getString(0), converter);
+        bool inactive = (!st->isNull(1) && st->getInt32(1) == 1);
+        int64_t type = st->getInt64(2);
+
+        int triggerKind = -1; // 0=DML, 1=DB, 2=DDL
+        if (hasBinAnd)
+        {
+            int kind = (int)(type & TRIGGER_TYPE_MASK);
+            if (kind == TRIGGER_TYPE_DML) triggerKind = 0;
+            else if (kind == TRIGGER_TYPE_DB) triggerKind = 1;
+            else if (kind == TRIGGER_TYPE_DDL) triggerKind = 2;
+        }
+        else
+        {
+            // Old FB versions only had DML triggers (rdb$relation_name was always set)
+            triggerKind = 0;
+        }
+
+        if (triggerKind == 0) {
+            dmlNames.push_back(name);
+            if (inactive) dmlInactive.push_back(name);
+        }
+        else if (triggerKind == 1) {
+            dbNames.push_back(name);
+            if (inactive) dbInactive.push_back(name);
+        }
+        else if (triggerKind == 2) {
+            ddlNames.push_back(name);
+            if (inactive) ddlInactive.push_back(name);
+        }
+    }
+
+    if (DMLtriggersM) {
+        DMLtriggersM->setItems(dmlNames);
+        DMLtriggersM->setInactiveItems(dmlInactive);
+    }
+    if (DBTriggersM) {
+        DBTriggersM->setItems(dbNames);
+        DBTriggersM->setInactiveItems(dbInactive);
+    }
+    if (DDLTriggersM) {
+        DDLTriggersM->setItems(ddlNames);
+        DDLTriggersM->setInactiveItems(ddlInactive);
+    }
+}
+
 void Database::loadCollections(ProgressIndicator* progressIndicator)
 {
     // use a small helper to cut down on the repetition...
@@ -1335,7 +1443,7 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
         }
     };
 
-    const int collectionCount = 22;
+    const int collectionCount = 18;
     std::string loadStmt;
     ProgressIndicatorHelper pih(progressIndicator);
 
@@ -1343,83 +1451,62 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
     MetadataLoaderTransaction tr(loader);
     SubjectLocker lock(this);
 
-    pih.init(_("tables"), collectionCount, 0);
-    tablesM->load(progressIndicator);
+    pih.init(_("Relations (Tables, Views, etc.)"), collectionCount, 0);
+    loadRelationCollections(progressIndicator);
 
-    pih.init(_("system tables"), collectionCount, 1);
-    sysTablesM->load(progressIndicator);
-
-    if (getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) {
-        pih.init(_("global temporary table"), collectionCount, 2);
-        GTTablesM->load(progressIndicator);
-    }
-
-    pih.init(_("views"), collectionCount, 3);
-    viewsM->load(progressIndicator);
-
-    pih.init(_("procedures"), collectionCount, 4);
+    pih.init(_("procedures"), collectionCount, 1);
     proceduresM->load(progressIndicator);
 
-    pih.init(_("DML triggers"), collectionCount, 5);
-    DMLtriggersM->load(progressIndicator);
+    pih.init(_("Triggers (DML, DB, DDL)"), collectionCount, 2);
+    loadTriggerCollections(progressIndicator);
 
-    pih.init(_("roles"), collectionCount, 6);
+    pih.init(_("roles"), collectionCount, 3);
     rolesM->load(progressIndicator);
 
-    pih.init(_("system roles"), collectionCount, 7);
+    pih.init(_("system roles"), collectionCount, 4);
     sysRolesM->load(progressIndicator);
 
-    pih.init(_("domains"), collectionCount, 8);
+    pih.init(_("domains"), collectionCount, 5);
     userDomainsM->load(progressIndicator);
 
     if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
-        pih.init(_("functions SQL"), collectionCount, 9);
+        pih.init(_("functions SQL"), collectionCount, 6);
         functionSQLsM->load(progressIndicator);
     }
 
-    pih.init(_("functions UDF"), collectionCount, 10);
+    pih.init(_("functions UDF"), collectionCount, 7);
     UDFsM->load(progressIndicator);
 
-    pih.init(_("generators"), collectionCount, 11);
+    pih.init(_("generators"), collectionCount, 8);
     generatorsM->load(progressIndicator);
 
-    pih.init(_("exceptions"), collectionCount, 12);
+    pih.init(_("exceptions"), collectionCount, 9);
     exceptionsM->load(progressIndicator);
 
     if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
-        pih.init(_("packages"), collectionCount, 13);
+        pih.init(_("packages"), collectionCount, 10);
         packagesM->load(progressIndicator);
 
-        pih.init(_("system packages"), collectionCount, 14);
+        pih.init(_("system packages"), collectionCount, 11);
         sysPackagesM->load(progressIndicator);
     }
 
-    if (getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) {
-        pih.init(_("DBTriggers"), collectionCount, 15);
-        DBTriggersM->load(progressIndicator);
-    }
-
-    if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
-        pih.init(_("DDLTriggers"), collectionCount, 16);
-        DDLTriggersM->load(progressIndicator);
-    }
-
-    pih.init(_("system domains"), collectionCount, 17);
+    pih.init(_("system domains"), collectionCount, 12);
     sysDomainsM->load(progressIndicator);
 
-    pih.init(_("indexes"), collectionCount, 18);
+    pih.init(_("indexes"), collectionCount, 13);
     indicesM->load(progressIndicator);
 
-    pih.init(_("system indices"), collectionCount, 19);
+    pih.init(_("system indices"), collectionCount, 14);
     sysIndicesM->load(progressIndicator);
 
-    pih.init(_("indexes"), collectionCount, 20);
+    pih.init(_("indexes"), collectionCount, 15);
     usrIndicesM->load(progressIndicator);
 
-    pih.init(_("CharacterSet"), collectionCount, 21);
+    pih.init(_("CharacterSet"), collectionCount, 16);
     characterSetsM->load(progressIndicator);
 
-    pih.init(_("User Collations"), collectionCount, 22);
+    pih.init(_("User Collations"), collectionCount, 17);
     collationsM->load(progressIndicator);
 
 }
