@@ -53,7 +53,7 @@ void parachute()
     wxString msg = ::wxGetTranslation(
         "A fatal error has occurred. If you know how to\n"
         "reproduce the problem, please submit the bug report at:\n"
-        "http://flamerobin.org/bugs.php\n\n"
+        "https://github.com/mariuz/flamerobin/issues/new\n\n"
         "The program can try to keep running so that you\n"
         "can save your data. Do you wish to try?\n");
 
@@ -221,4 +221,3 @@ void Application::openDatabasesFromParams(MainFrame* frFrame)
         cmdlineParamsM.Clear();
     }
 }
-
