@@ -31,7 +31,7 @@ if(NOT MSVC)
 endif()
 
 if(MSVC)
-  if(VCPKG_CRT_LINKAGE STREQUAL "static")
+  if(VCPKG_TARGET_TRIPLET MATCHES "-static$" OR VCPKG_CRT_LINKAGE STREQUAL "static")
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
   else()
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
