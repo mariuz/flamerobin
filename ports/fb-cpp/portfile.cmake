@@ -7,6 +7,13 @@ vcpkg_from_github(
         fb-cpp-flamerobin.patch
 )
 
+# Force STATIC library build on Windows since fb-cpp has no exports for a DLL build
+if(VCPKG_TARGET_IS_WINDOWS)
+    file(READ "${SOURCE_PATH}/src/fb-cpp/CMakeLists.txt" CONTENTS)
+    string(REPLACE "add_library(\${PROJECT_NAME}" "add_library(\${PROJECT_NAME} STATIC" CONTENTS "${CONTENTS}")
+    file(WRITE "${SOURCE_PATH}/src/fb-cpp/CMakeLists.txt" "${CONTENTS}")
+endif()
+
 vcpkg_check_features(OUT_FEATURE_OPTIONS FEATURE_OPTIONS
     FEATURES
         boost-dll           FB_CPP_USE_BOOST_DLL

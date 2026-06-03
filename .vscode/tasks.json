@@ -1,0 +1,51 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "CMake: Configure",
+      "type": "shell",
+      "command": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+      "args": [
+        "-S",
+        ".",
+        "-B",
+        "build",
+        "-A",
+        "x64"
+      ],
+      "problemMatcher": [],
+      "detail": "Configure CMake build directory"
+    },
+    {
+      "label": "CMake: Build Debug",
+      "type": "shell",
+      "command": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+      "args": [
+        "--build",
+        "build",
+        "--config",
+        "Debug"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": "$msCompile",
+      "detail": "Build all targets in Debug configuration"
+    },
+    {
+      "label": "CMake: Build Release",
+      "type": "shell",
+      "command": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community\\Common7\\IDE\\CommonExtensions\\Microsoft\\CMake\\CMake\\bin\\cmake.exe",
+      "args": [
+        "--build",
+        "build",
+        "--config",
+        "Release"
+      ],
+      "group": "build",
+      "problemMatcher": "$msCompile",
+      "detail": "Build all targets in Release configuration"
+    }
+  ]
+}

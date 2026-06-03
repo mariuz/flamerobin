@@ -163,8 +163,38 @@ index 28564b1..1ba3b49 100644
 +	statementHandle.reset(attachment.getHandle()->prepare(&statusWrapper, nullptr,
  		static_cast<unsigned>(sql.length()), sql.data(), options.getDialect(), flags));
  
- 	if (options.getCursorName().has_value())
-@@ -122,7 +131,11 @@ Statement::Statement(
+  	if (options.getCursorName().has_value())
+@@ -95,19 +104,24 @@ Statement::Statement(
+ 		FbRef<fb::IMetadataBuilder> builder;
+ 
+ 		const auto count = metadata->getCount(&statusWrapper);
+ 		descriptors.reserve(count);
++		auto safeString = [](const char* s) -> std::string {
++			return s ? std::string(s) : std::string();
++		};
+ 
+ 		for (unsigned index = 0u; index < count; ++index)
+ 		{
+ 			Descriptor descriptor{
+ 				.originalType = static_cast<DescriptorOriginalType>(metadata->getType(&statusWrapper, index)),
+ 				.adjustedType = static_cast<DescriptorAdjustedType>(metadata->getType(&statusWrapper, index)),
+ 				.scale = metadata->getScale(&statusWrapper, index),
+ 				.length = metadata->getLength(&statusWrapper, index),
+ 				.offset = 0,
+ 				.nullOffset = 0,
+ 				.isNullable = static_cast<bool>(metadata->isNullable(&statusWrapper, index)),
+-				.name = metadata->getField(&statusWrapper, index),
+-				.relation = metadata->getRelation(&statusWrapper, index),
+-				.alias = metadata->getAlias(&statusWrapper, index),
+-				.owner = metadata->getOwner(&statusWrapper, index),
++				.name = safeString(metadata->getField(&statusWrapper, index)),
++				.relation = safeString(metadata->getRelation(&statusWrapper, index)),
++				.alias = safeString(metadata->getAlias(&statusWrapper, index)),
++				.owner = safeString(metadata->getOwner(&statusWrapper, index)),
+ 				.charSetId = metadata->getCharSet(&statusWrapper, index),
+ 				.subType = metadata->getSubType(&statusWrapper, index),
+ 			};
+@@ -122,7 +136,11 @@ Statement::Statement(
  						builder.reset(metadata->getBuilder(&statusWrapper));
  
  					builder->setType(&statusWrapper, index, SQL_VARYING);
@@ -176,7 +206,7 @@ index 28564b1..1ba3b49 100644
  					break;
  
  				case DescriptorOriginalType::TIME_TZ_EX:
-@@ -149,6 +162,7 @@ Statement::Statement(
+@@ -149,6 +167,7 @@ Statement::Statement(
  			{
  				descriptor.offset = metadata->getOffset(&statusWrapper, index);
  				descriptor.nullOffset = metadata->getNullOffset(&statusWrapper, index);
@@ -184,7 +214,7 @@ index 28564b1..1ba3b49 100644
  
  				*reinterpret_cast<std::int16_t*>(&message[descriptor.nullOffset]) = FB_TRUE;
  			}
-@@ -166,6 +180,7 @@ Statement::Statement(
+@@ -166,6 +185,7 @@ Statement::Statement(
  				auto& descriptor = descriptors[index];
  				descriptor.offset = metadata->getOffset(&statusWrapper, index);
  				descriptor.nullOffset = metadata->getNullOffset(&statusWrapper, index);
@@ -192,7 +222,7 @@ index 28564b1..1ba3b49 100644
  
  				*reinterpret_cast<std::int16_t*>(&message[descriptor.nullOffset]) = FB_TRUE;
  			}
-@@ -185,14 +200,21 @@ void Statement::free()
+@@ -185,14 +205,21 @@ void Statement::free()
  {
  	assert(isValid());
  

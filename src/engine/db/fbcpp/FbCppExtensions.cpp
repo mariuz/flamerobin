@@ -67,6 +67,9 @@ StatementExt::StatementExt(Attachment& attachment, Transaction& transaction, std
 
         const auto count = metadata->getCount(&statusWrapper);
         descriptors.reserve(count);
+        auto safeString = [](const char* s) -> std::string {
+            return s ? std::string(s) : std::string();
+        };
 
         for (unsigned index = 0u; index < count; ++index)
         {
@@ -78,10 +81,10 @@ StatementExt::StatementExt(Attachment& attachment, Transaction& transaction, std
                 .offset = 0,
                 .nullOffset = 0,
                 .isNullable = static_cast<bool>(metadata->isNullable(&statusWrapper, index)),
-                .name = metadata->getField(&statusWrapper, index),
-                .relation = metadata->getRelation(&statusWrapper, index),
-                .alias = metadata->getAlias(&statusWrapper, index),
-                .owner = metadata->getOwner(&statusWrapper, index),
+                .name = safeString(metadata->getField(&statusWrapper, index)),
+                .relation = safeString(metadata->getRelation(&statusWrapper, index)),
+                .alias = safeString(metadata->getAlias(&statusWrapper, index)),
+                .owner = safeString(metadata->getOwner(&statusWrapper, index)),
                 .charSetId = metadata->getCharSet(&statusWrapper, index),
                 .subType = metadata->getSubType(&statusWrapper, index),
             };

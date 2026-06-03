@@ -1,7 +1,52 @@
 {
-  // Use IntelliSense to learn about possible attributes.
-  // Hover to view descriptions of existing attributes.
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
-  "configurations": []
+  "configurations": [
+    {
+      "name": "Debug FlameRobin (MSVC)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/Debug/flamerobin.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/build/Debug",
+      "environment": [],
+      "console": "integratedTerminal",
+      "preLaunchTask": "CMake: Build Debug"
+    },
+    {
+      "name": "Run FlameRobin (No Debug)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/Debug/flamerobin.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/build/Debug",
+      "environment": [],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Debug Command Manager Test (MSVC)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/Debug/command_manager_test.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/build/Debug",
+      "environment": [],
+      "console": "integratedTerminal",
+      "preLaunchTask": "CMake: Build Debug"
+    },
+    {
+      "name": "Debug SQL Tokenizer Test (MSVC)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/Debug/sql_tokenizer_test.exe",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/build/Debug",
+      "environment": [],
+      "console": "integratedTerminal",
+      "preLaunchTask": "CMake: Build Debug"
+    }
+  ]
 }

@@ -346,7 +346,6 @@ void ConfigCache::ensureCacheValid() {}
 void ConfigCache::update() {}
 void ConfigCache::loadFromConfig() {}
 
-template<> bool Config::get<bool>(const wxString&, const bool& def) { return def; }
 bool Config::getValue(const wxString&, bool&) { return false; }
 
 // --- Utils Stubs ---

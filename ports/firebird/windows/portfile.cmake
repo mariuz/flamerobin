@@ -1,6 +1,38 @@
 vcpkg_acquire_msys(MSYS_ROOT PACKAGES unzip sed grep awk coreutils)
 vcpkg_add_to_path(${MSYS_ROOT}/usr/bin)
 
+# Fix PlatformToolset for VS 2025/2026 (version 18+) in all vcxproj files
+file(GLOB_RECURSE VCXPROJ_FILES "${SOURCE_PATH}/*.vcxproj")
+foreach(VCXPROJ_FILE IN LISTS VCXPROJ_FILES)
+    file(READ "${VCXPROJ_FILE}" CONTENTS)
+    
+    # 1. Update 17.0 condition to >= 17.0 to cover future versions
+    string(REPLACE
+        "<PlatformToolset Condition=\"'\$(VisualStudioVersion)'=='17.0'\">v143</PlatformToolset>"
+        "<PlatformToolset Condition=\"'\$(VisualStudioVersion)'&gt;='17.0'\">v143</PlatformToolset>"
+        CONTENTS "${CONTENTS}"
+    )
+    string(REPLACE
+        "<PlatformToolset Condition=\"'\$(VisualStudioVersion)' == '17.0'\">v143</PlatformToolset>"
+        "<PlatformToolset Condition=\"'\$(VisualStudioVersion)'&gt;='17.0'\">v143</PlatformToolset>"
+        CONTENTS "${CONTENTS}"
+    )
+    
+    # 2. Add fallback default v143 toolset before the 15.0 condition
+    string(REPLACE
+        "<PlatformToolset Condition=\"'\$(VisualStudioVersion)'=='15.0'\">v141</PlatformToolset>"
+        "<PlatformToolset>v143</PlatformToolset><PlatformToolset Condition=\"'\$(VisualStudioVersion)'=='15.0'\">v141</PlatformToolset>"
+        CONTENTS "${CONTENTS}"
+    )
+    string(REPLACE
+        "<PlatformToolset Condition=\"'\$(VisualStudioVersion)' == '15.0'\">v141</PlatformToolset>"
+        "<PlatformToolset>v143</PlatformToolset><PlatformToolset Condition=\"'\$(VisualStudioVersion)' == '15.0'\">v141</PlatformToolset>"
+        CONTENTS "${CONTENTS}"
+    )
+    
+    file(WRITE "${VCXPROJ_FILE}" "${CONTENTS}")
+endforeach()
+
 find_program(MSBUILD_EXE msbuild)
 if (NOT MSBUILD_EXE)
     message(STATUS "DEBUG: msbuild not found in path")
@@ -25,6 +57,17 @@ message(STATUS "DEBUG: FB_PROCESSOR_ARCHITECTURE=${FB_PROCESSOR_ARCHITECTURE}")
 message(STATUS "DEBUG: FB_ARCH_OUT=${FB_ARCH_OUT}")
 message(STATUS "DEBUG: MSBUILD_EXE=${MSBUILD_EXE}")
 
+set(MY_VSCOMNTOOLS "")
+if(MSBUILD_EXE)
+    get_filename_component(VS_ROOT1 "${MSBUILD_EXE}" DIRECTORY)
+    get_filename_component(VS_ROOT2 "${VS_ROOT1}" DIRECTORY)
+    get_filename_component(VS_ROOT3 "${VS_ROOT2}" DIRECTORY)
+    get_filename_component(VS_ROOT4 "${VS_ROOT3}" DIRECTORY)
+    get_filename_component(VS_ROOT5 "${VS_ROOT4}" DIRECTORY)
+    set(MY_VSCOMNTOOLS "${VS_ROOT5}/Common7/Tools")
+    message(STATUS "DEBUG: Deduced Visual Studio Common Tools path: ${MY_VSCOMNTOOLS}")
+endif()
+
 if (NOT EXISTS "${SOURCE_PATH}/builds/win32/run_all.bat")
     message(FATAL_ERROR "run_all.bat NOT FOUND at ${SOURCE_PATH}/builds/win32/run_all.bat")
 endif()
@@ -33,6 +76,9 @@ endif()
 
 vcpkg_execute_build_process(
     COMMAND ${CMAKE_COMMAND} -E env "FB_PROCESSOR_ARCHITECTURE=${FB_PROCESSOR_ARCHITECTURE}"
+        "VS170COMNTOOLS=${MY_VSCOMNTOOLS}"
+        "VS160COMNTOOLS=${MY_VSCOMNTOOLS}"
+        "VS150COMNTOOLS=${MY_VSCOMNTOOLS}"
         cmd /c run_all.bat
         ${FB_ARCH_OUT}
         JUSTBUILD
@@ -180,6 +226,9 @@ file(
 
 vcpkg_execute_build_process(
     COMMAND ${CMAKE_COMMAND} -E env "FB_PROCESSOR_ARCHITECTURE=${FB_PROCESSOR_ARCHITECTURE}"
+        "VS170COMNTOOLS=${MY_VSCOMNTOOLS}"
+        "VS160COMNTOOLS=${MY_VSCOMNTOOLS}"
+        "VS150COMNTOOLS=${MY_VSCOMNTOOLS}"
         cmd /c run_all.bat
         ${FB_ARCH_OUT}
         DEBUG
