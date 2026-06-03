@@ -218,7 +218,7 @@ index 28564b1..1d4ee86 100644
  
  				*reinterpret_cast<std::int16_t*>(&message[descriptor.nullOffset]) = FB_TRUE;
  			}
-@@ -185,14 +204,21 @@ void Statement::free()
+@@ -185,26 +204,35 @@ void Statement::free()
  {
  	assert(isValid());
  
@@ -243,6 +243,22 @@ index 28564b1..1d4ee86 100644
  }
  
  std::string Statement::getLegacyPlan()
+ {
+ 	assert(isValid());
+ 
+-	return statementHandle->getPlan(&statusWrapper, false);
++	const char* plan = statementHandle->getPlan(&statusWrapper, false);
++	return plan ? plan : "";
+ }
+ 
+ std::string Statement::getPlan()
+ {
+ 	assert(isValid());
+ 
+-	return statementHandle->getPlan(&statusWrapper, true);
++	const char* plan = statementHandle->getPlan(&statusWrapper, true);
++	return plan ? plan : "";
+ }
 diff --git a/src/fb-cpp/Statement.h b/src/fb-cpp/Statement.h
 index 7ae32eb..46b0184 100644
 --- a/src/fb-cpp/Statement.h
