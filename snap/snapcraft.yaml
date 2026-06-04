@@ -59,7 +59,7 @@ parts:
       - -DwxBUILD_TOOLKIT=gtk3
       - -DwxUSE_STC=ON
       - -DwxUSE_AUI=ON
-      - -DwxUSE_WEBVIEW=OFF
+      - -DwxUSE_WEBVIEW=ON
       - -DwxUSE_SECRETSTORE=ON
       - -DwxUSE_OPENGL=OFF
     build-packages:
@@ -69,6 +69,7 @@ parts:
       - libtiff-dev
       - libpng-dev
       - libsecret-1-dev
+      - libwebkit2gtk-4.1-dev
       - libpango1.0-dev
       - libglib2.0-dev
       - ninja-build
