@@ -23,7 +23,8 @@
       "name": "gtk3",
       "features": [
         "wayland"
-      ]
+      ],
+      "platform": "linux | freebsd | openbsd"
     },
     {
       "name": "wxwidgets",
