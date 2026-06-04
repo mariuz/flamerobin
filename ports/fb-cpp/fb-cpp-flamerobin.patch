@@ -136,7 +136,7 @@ index 3464819..7dbdf73 100644
  		Transaction& transaction;
  		BlobId id;
 diff --git a/src/fb-cpp/Statement.cpp b/src/fb-cpp/Statement.cpp
-index 28564b1..1d4ee86 100644
+index 28564b1..1ba3b49 100644
 --- a/src/fb-cpp/Statement.cpp
 +++ b/src/fb-cpp/Statement.cpp
 @@ -31,6 +31,15 @@ using namespace fbcpp;
@@ -164,33 +164,7 @@ index 28564b1..1d4ee86 100644
  		static_cast<unsigned>(sql.length()), sql.data(), options.getDialect(), flags));
  
  	if (options.getCursorName().has_value())
-@@ -97,6 +106,10 @@ Statement::Statement(
- 		const auto count = metadata->getCount(&statusWrapper);
- 		descriptors.reserve(count);
- 
-+		auto safeString = [](const char* s) -> std::string {
-+			return s ? std::string(s) : std::string();
-+		};
-+
- 		for (unsigned index = 0u; index < count; ++index)
- 		{
- 			Descriptor descriptor{
-@@ -107,10 +120,10 @@ Statement::Statement(
- 				.offset = 0,
- 				.nullOffset = 0,
- 				.isNullable = static_cast<bool>(metadata->isNullable(&statusWrapper, index)),
--				.name = metadata->getField(&statusWrapper, index),
--				.relation = metadata->getRelation(&statusWrapper, index),
--				.alias = metadata->getAlias(&statusWrapper, index),
--				.owner = metadata->getOwner(&statusWrapper, index),
-+				.name = safeString(metadata->getField(&statusWrapper, index)),
-+				.relation = safeString(metadata->getRelation(&statusWrapper, index)),
-+				.alias = safeString(metadata->getAlias(&statusWrapper, index)),
-+				.owner = safeString(metadata->getOwner(&statusWrapper, index)),
- 				.charSetId = metadata->getCharSet(&statusWrapper, index),
- 				.subType = metadata->getSubType(&statusWrapper, index),
- 			};
-@@ -122,7 +135,11 @@ Statement::Statement(
+@@ -122,7 +131,11 @@ Statement::Statement(
  						builder.reset(metadata->getBuilder(&statusWrapper));
  
  					builder->setType(&statusWrapper, index, SQL_VARYING);
@@ -202,7 +176,7 @@ index 28564b1..1d4ee86 100644
  					break;
  
  				case DescriptorOriginalType::TIME_TZ_EX:
-@@ -149,6 +166,7 @@ Statement::Statement(
+@@ -149,6 +162,7 @@ Statement::Statement(
  			{
  				descriptor.offset = metadata->getOffset(&statusWrapper, index);
  				descriptor.nullOffset = metadata->getNullOffset(&statusWrapper, index);
@@ -210,7 +184,7 @@ index 28564b1..1d4ee86 100644
  
  				*reinterpret_cast<std::int16_t*>(&message[descriptor.nullOffset]) = FB_TRUE;
  			}
-@@ -166,6 +184,7 @@ Statement::Statement(
+@@ -166,6 +180,7 @@ Statement::Statement(
  				auto& descriptor = descriptors[index];
  				descriptor.offset = metadata->getOffset(&statusWrapper, index);
  				descriptor.nullOffset = metadata->getNullOffset(&statusWrapper, index);
@@ -218,7 +192,7 @@ index 28564b1..1d4ee86 100644
  
  				*reinterpret_cast<std::int16_t*>(&message[descriptor.nullOffset]) = FB_TRUE;
  			}
-@@ -185,26 +204,35 @@ void Statement::free()
+@@ -185,14 +200,21 @@ void Statement::free()
  {
  	assert(isValid());
  
@@ -243,24 +217,8 @@ index 28564b1..1d4ee86 100644
  }
  
  std::string Statement::getLegacyPlan()
- {
- 	assert(isValid());
- 
--	return statementHandle->getPlan(&statusWrapper, false);
-+	const char* plan = statementHandle->getPlan(&statusWrapper, false);
-+	return plan ? plan : "";
- }
- 
- std::string Statement::getPlan()
- {
- 	assert(isValid());
- 
--	return statementHandle->getPlan(&statusWrapper, true);
-+	const char* plan = statementHandle->getPlan(&statusWrapper, true);
-+	return plan ? plan : "";
- }
 diff --git a/src/fb-cpp/Statement.h b/src/fb-cpp/Statement.h
-index 7ae32eb..46b0184 100644
+index 7ae32eb..9bb9dd4 100644
 --- a/src/fb-cpp/Statement.h
 +++ b/src/fb-cpp/Statement.h
 @@ -86,7 +86,7 @@ namespace fbcpp
@@ -281,7 +239,7 @@ index 7ae32eb..46b0184 100644
  		bool prefetchLegacyPlan = false;
  		bool prefetchPlan = false;
  		std::optional<std::string> cursorName;
-@@ -258,8 +258,11 @@ namespace fbcpp
+@@ -258,8 +258,10 @@ namespace fbcpp
  	///
  	/// Prepares, executes, and fetches SQL statements against a Firebird attachment.
  	///
@@ -290,11 +248,10 @@ index 7ae32eb..46b0184 100644
  	{
 +	public:
 +		explicit Statement(Attachment& attachment);
-+		void closeCursor();
  	public:
  		///
  		/// Prepares an SQL statement.
-@@ -1290,7 +1293,7 @@ namespace fbcpp
+@@ -1290,7 +1292,7 @@ namespace fbcpp
  #endif
  
  				case DescriptorAdjustedType::STRING:
@@ -303,7 +260,7 @@ index 7ae32eb..46b0184 100644
  					{
  						static constexpr std::intptr_t STATUS_STRING_TRUNCATION[] = {
  							isc_arith_except,
-@@ -2003,7 +2006,7 @@ namespace fbcpp
+@@ -2003,7 +2005,7 @@ namespace fbcpp
  				value);
  		}
  
@@ -312,7 +269,7 @@ index 7ae32eb..46b0184 100644
  		///
  		/// @brief Validates and returns the descriptor for the given input parameter index.
  		///
-@@ -2191,7 +2194,7 @@ namespace fbcpp
+@@ -2191,7 +2193,7 @@ namespace fbcpp
  			}
  		}
  
@@ -322,7 +279,7 @@ index 7ae32eb..46b0184 100644
  		impl::StatusWrapper statusWrapper;
  		impl::CalendarConverter calendarConverter;
 diff --git a/src/fb-cpp/Transaction.cpp b/src/fb-cpp/Transaction.cpp
-index de8e6f4..233e1ce 100644
+index de8e6f4..db0a54e 100644
 --- a/src/fb-cpp/Transaction.cpp
 +++ b/src/fb-cpp/Transaction.cpp
 @@ -32,7 +32,15 @@ using namespace fbcpp;
@@ -355,7 +312,7 @@ index de8e6f4..233e1ce 100644
 +
 +	auto tpbBuilder = buildTpb(master, statusWrapper, options);
 +	const auto tpbBuffer = tpbBuilder->getBuffer(&statusWrapper);
-+	const auto tpbBufferLen = tpbBuilder->getBufferLength(&statusWrapper);
++	const auto tpbBufferLen = tpbBuffer->getBufferLength(&statusWrapper);
 +
 +	handle.reset(attachment.getHandle()->startTransaction(&statusWrapper, tpbBufferLen, tpbBuffer));
 +	state = TransactionState::ACTIVE;
@@ -365,22 +322,18 @@ index de8e6f4..233e1ce 100644
  {
  	prepare(std::span<const std::uint8_t>{});
 diff --git a/src/fb-cpp/Transaction.h b/src/fb-cpp/Transaction.h
-index 66d4594..b71e451 100644
+index 66d4594..0802447 100644
 --- a/src/fb-cpp/Transaction.h
 +++ b/src/fb-cpp/Transaction.h
-@@ -44,6 +44,11 @@ namespace fbcpp
- {
- 	class Attachment;
- 
-+	namespace impl
-+	{
-+		class StatusWrapper;
-+	}
-+
- 	///
- 	/// Transaction isolation level.
- 	///
-@@ -116,7 +121,7 @@ namespace fbcpp
+@@ -29,6 +29,7 @@
+ #include "SmartPtrs.h"
+ #include <memory>
+ #include <optional>
++#include <cstdint>
+ #include <span>
+ #include <stdexcept>
+ #include <string>
+@@ -116,7 +117,7 @@ namespace fbcpp
  	///
  	/// Represents options used when creating a Transaction object.
  	///
@@ -389,7 +342,7 @@ index 66d4594..b71e451 100644
  	{
  	public:
  		///
-@@ -286,7 +291,7 @@ namespace fbcpp
+@@ -286,7 +287,7 @@ namespace fbcpp
  			return *this;
  		}
  
@@ -398,7 +351,7 @@ index 66d4594..b71e451 100644
  		std::vector<std::uint8_t> tpb;
  		std::optional<TransactionIsolationLevel> isolationLevel;
  		std::optional<TransactionReadCommittedMode> readCommittedMode;
-@@ -347,8 +352,10 @@ namespace fbcpp
+@@ -347,8 +348,10 @@ namespace fbcpp
  	/// being committed or rolled back (and not prepared), it will be automatically
  	/// rolled back.
  	///
@@ -410,7 +363,7 @@ index 66d4594..b71e451 100644
  	public:
  		///
  		/// Constructs a Transaction object that starts a transaction in the specified
-@@ -492,7 +499,11 @@ namespace fbcpp
+@@ -492,7 +495,11 @@ namespace fbcpp
  		///
  		void rollbackRetaining();
  

@@ -34,6 +34,7 @@ for f in Attachment.h Blob.h Statement.h Transaction.h; do
 done
 
 # 1. Transaction.h - Add Client constructor and start()
+perl -i -pe 's/#include <span>/#include <cstdint>\n#include <span>/g' "$PATCH_SRC_DIR/Transaction.h"
 perl -i -0777 -pe 's/class Transaction\n\t\{/class Transaction\n\t\{\n\tpublic:\n\t\texplicit Transaction(Client& client);/g' "$PATCH_SRC_DIR/Transaction.h"
 perl -i -0777 -pe 's/void rollbackRetaining\(\);\n\n\tprotected:/void rollbackRetaining();\n\n\t\tvoid start(Attachment& attachment, const TransactionOptions& options = {});\n\n\tprotected:/g' "$PATCH_SRC_DIR/Transaction.h"
 
