@@ -135,7 +135,14 @@ void PrintableHtmlWindow::setPageSource(const wxString& html)
         wxString templatesPathForward = templatesPath;
         templatesPathForward.Replace("\\", "/");
 
-        processedHtml.Replace(templatesPath, fileUrl);
+        // Standardize all template path separators in the HTML to forward slashes
+        processedHtml.Replace(templatesPath, templatesPathForward);
+
+        // Strip any existing file:// or file:/// prefixes to prevent double prefixing
+        processedHtml.Replace("file:///" + templatesPathForward, templatesPathForward);
+        processedHtml.Replace("file://" + templatesPathForward, templatesPathForward);
+
+        // Convert all raw template paths to file:// URLs
         processedHtml.Replace(templatesPathForward, fileUrl);
 
         webViewM->SetPage(processedHtml, fileUrl);
