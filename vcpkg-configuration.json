@@ -10,6 +10,6 @@
     "./ports"
   ],
   "overlay-triplets": [
-    "./src/fb-cpp/cmake/triplets"
+    "./triplets"
   ]
 }

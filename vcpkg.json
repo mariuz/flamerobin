@@ -20,6 +20,12 @@
     },
     "icu",
     {
+      "name": "gtk3",
+      "features": [
+        "wayland"
+      ]
+    },
+    {
       "name": "wxwidgets",
       "features": [
         "webview",
