@@ -44,8 +44,10 @@ class PrintableHtmlWindow: public wxPanel
 private:
     wxWebView* webViewM;
     wxString pageSourceM;
+    wxString tempFileM;
 public:
     PrintableHtmlWindow(wxWindow* parent, wxWindowID id = wxID_ANY);
+    virtual ~PrintableHtmlWindow();
     void setPageSource(const wxString& html);
 
     bool LoadFile(const wxString& filepath);

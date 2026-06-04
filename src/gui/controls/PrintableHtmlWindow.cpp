@@ -35,6 +35,8 @@
 #include <wx/filedlg.h>
 #include <wx/platform.h>
 #include <wx/wxhtml.h>
+#include <wx/stdpaths.h>
+#include <wx/filename.h>
 
 #include "core/URIProcessor.h"
 #include "core/FRError.h"
@@ -81,6 +83,14 @@ PrintableHtmlWindow::PrintableHtmlWindow(wxWindow* parent, wxWindowID id)
         webViewM->EnableAccessToDevTools(true);
         webViewM->Bind(wxEVT_WEBVIEW_NAVIGATING, &PrintableHtmlWindow::OnWebViewNavigating, this);
         webViewM->Bind(wxEVT_RIGHT_UP, &PrintableHtmlWindow::OnRightUp, this);
+    }
+}
+
+PrintableHtmlWindow::~PrintableHtmlWindow()
+{
+    if (!tempFileM.IsEmpty() && wxFileExists(tempFileM))
+    {
+        wxRemoveFile(tempFileM);
     }
 }
 
@@ -145,7 +155,29 @@ void PrintableHtmlWindow::setPageSource(const wxString& html)
         // Convert all raw template paths to file:// URLs
         processedHtml.Replace(templatesPathForward, fileUrl);
 
-        webViewM->SetPage(processedHtml, fileUrl);
+        // Remove old temp file if it exists
+        if (!tempFileM.IsEmpty() && wxFileExists(tempFileM))
+        {
+            wxRemoveFile(tempFileM);
+            tempFileM.Clear();
+        }
+
+        // Generate a unique temp file in the system temp directory
+        wxString tempDir = wxStandardPaths::Get().GetTempDir();
+        tempFileM = wxFileName(tempDir, wxString::Format("fr_temp_%p.html", this)).GetFullPath();
+
+        wxFile file(tempFileM, wxFile::write);
+        if (file.IsOpened())
+        {
+            file.Write(processedHtml);
+            file.Close();
+            LoadFile(tempFileM);
+        }
+        else
+        {
+            // Fallback to SetPage if file cannot be created
+            webViewM->SetPage(processedHtml, fileUrl);
+        }
     }
 }
 
