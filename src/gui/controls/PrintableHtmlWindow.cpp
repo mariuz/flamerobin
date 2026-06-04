@@ -41,11 +41,12 @@
 #include "config/Config.h"
 #include "gui/controls/PrintableHtmlWindow.h"
 
+enum {
+    CmdShowDevTools = wxID_HIGHEST + 1
+};
+
 #ifdef _DEBUG
-    enum {
-        CmdCopyAllHtml = wxID_HIGHEST + 1,
-        CmdShowDevTools
-    };
+    enum { CmdCopyAllHtml = wxID_HIGHEST + 2 };
 #endif
 
 HtmlPrinter::HtmlPrinter()
@@ -77,9 +78,7 @@ PrintableHtmlWindow::PrintableHtmlWindow(wxWindow* parent, wxWindowID id)
 
     if (webViewM)
     {
-        #ifdef _DEBUG
-            webViewM->EnableAccessToDevTools(true);
-        #endif
+        webViewM->EnableAccessToDevTools(true);
         webViewM->Bind(wxEVT_WEBVIEW_NAVIGATING, &PrintableHtmlWindow::OnWebViewNavigating, this);
         webViewM->Bind(wxEVT_RIGHT_UP, &PrintableHtmlWindow::OnRightUp, this);
     }
@@ -90,8 +89,8 @@ BEGIN_EVENT_TABLE(PrintableHtmlWindow, wxPanel)
     EVT_MENU(wxID_COPY, PrintableHtmlWindow::OnMenuCopy)
     #ifdef _DEBUG
         EVT_MENU(CmdCopyAllHtml, PrintableHtmlWindow::OnMenuCopyAllHtml)
-        EVT_MENU(CmdShowDevTools, PrintableHtmlWindow::OnMenuShowDevTools)
     #endif
+    EVT_MENU(CmdShowDevTools, PrintableHtmlWindow::OnMenuShowDevTools)
     EVT_MENU(wxID_SAVE, PrintableHtmlWindow::OnMenuSave)
     EVT_MENU(wxID_PRINT, PrintableHtmlWindow::OnMenuPrint)
     EVT_MENU(wxID_PREVIEW, PrintableHtmlWindow::OnMenuPreview)
@@ -104,17 +103,16 @@ void PrintableHtmlWindow::OnRightUp(wxMouseEvent& WXUNUSED(event))
     #ifdef _DEBUG
         m.AppendSeparator();
         m.Append(CmdCopyAllHtml, _("Copy &HTML code"));
-        m.Append(CmdShowDevTools, _("Developer &Tools"));
     #endif
+    m.AppendSeparator();
+    m.Append(CmdShowDevTools, _("Developer &Tools"));
     m.AppendSeparator();
     m.Append(wxID_SAVE, _("&Save as HTML file..."));
     m.Append(wxID_PREVIEW, _("Print pre&view..."));
     m.Append(wxID_PRINT, _("&Print..."));
 
     m.Enable(wxID_COPY, webViewM && webViewM->CanCopy());
-    #ifdef _DEBUG
-        m.Enable(CmdShowDevTools, webViewM != nullptr);
-    #endif
+    m.Enable(CmdShowDevTools, webViewM != nullptr);
     PopupMenu(&m, ScreenToClient(::wxGetMousePosition()));
 }
 
