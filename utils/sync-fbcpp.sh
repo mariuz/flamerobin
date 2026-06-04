@@ -56,6 +56,9 @@ perl -i -0777 -pe 's/using namespace fbcpp::impl;\n\n\nStatement::Statement/usin
 perl -i -0777 -pe 's/statementHandle.reset\(attachment.getHandle\(\)->prepare\(&statusWrapper, transaction.getHandle\(\).get\(\),/statementHandle.reset(attachment.getHandle()->prepare(&statusWrapper, nullptr,/g' "$PATCH_SRC_DIR/Statement.cpp"
 perl -i -0777 -pe 's/void Statement::free\(\)\n\{\n\tassert\(isValid\(\)\);\n\n\tif \(resultSetHandle\)\n\t\{\n\t\tresultSetHandle->close\(&statusWrapper\);\n\t\tresultSetHandle.reset\(\);\n\t\}\n\n\tstatementHandle->free\(&statusWrapper\);\n\tstatementHandle.reset\(\);\n\}/void Statement::free()\n{\n\tassert(isValid());\n\n\tcloseCursor();\n\n\tstatementHandle->free(&statusWrapper);\n\tstatementHandle.reset();\n}\n\nvoid Statement::closeCursor()\n{\n\tassert(isValid());\n\n\tif (resultSetHandle)\n\t{\n\t\tresultSetHandle->close(&statusWrapper);\n\t\tresultSetHandle.reset();\n\t}\n}/g' "$PATCH_SRC_DIR/Statement.cpp"
 
+# Wrap getPlan and getLegacyPlan to avoid constructing std::string from nullptr
+perl -i -pe 's/(\t)return statementHandle->getPlan\(&statusWrapper, (false|true)\);/$1const char* plan = statementHandle->getPlan(&statusWrapper, $2);\n$1return plan ? plan : "";/g' "$PATCH_SRC_DIR/Statement.cpp"
+
 # Add safeString wrapper to protect against null metadata string values
 perl -i -0777 -pe 's/descriptors\.reserve\(count\);\n\n\t\tfor/descriptors.reserve(count);\n\t\tauto safeString = [](const char* s) -> std::string {\n\t\t\treturn s ? std::string(s) : std::string();\n\t\t};\n\n\t\tfor/g' "$PATCH_SRC_DIR/Statement.cpp"
 perl -i -pe 's/\.name = metadata->getField\(&statusWrapper, index\)/.name = safeString(metadata->getField(&statusWrapper, index))/g' "$PATCH_SRC_DIR/Statement.cpp"

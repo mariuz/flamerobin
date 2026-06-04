@@ -136,7 +136,7 @@ index 3464819..7dbdf73 100644
  		Transaction& transaction;
  		BlobId id;
 diff --git a/src/fb-cpp/Statement.cpp b/src/fb-cpp/Statement.cpp
-index 28564b1..b5bb06f 100644
+index 28564b1..9f63c40 100644
 --- a/src/fb-cpp/Statement.cpp
 +++ b/src/fb-cpp/Statement.cpp
 @@ -31,6 +31,15 @@ using namespace fbcpp;
@@ -217,7 +217,7 @@ index 28564b1..b5bb06f 100644
  
  				*reinterpret_cast<std::int16_t*>(&message[descriptor.nullOffset]) = FB_TRUE;
  			}
-@@ -185,14 +203,21 @@ void Statement::free()
+@@ -185,28 +203,37 @@ void Statement::free()
  {
  	assert(isValid());
  
@@ -242,6 +242,24 @@ index 28564b1..b5bb06f 100644
  }
  
  std::string Statement::getLegacyPlan()
+ {
+ 	assert(isValid());
+ 
+-	return statementHandle->getPlan(&statusWrapper, false);
++	const char* plan = statementHandle->getPlan(&statusWrapper, false);
++	return plan ? plan : "";
+ }
+ 
+ std::string Statement::getPlan()
+ {
+ 	assert(isValid());
+ 
+-	return statementHandle->getPlan(&statusWrapper, true);
++	const char* plan = statementHandle->getPlan(&statusWrapper, true);
++	return plan ? plan : "";
+ }
+ 
+ bool Statement::execute(Transaction& transaction)
 diff --git a/src/fb-cpp/Statement.h b/src/fb-cpp/Statement.h
 index 7ae32eb..9bb9dd4 100644
 --- a/src/fb-cpp/Statement.h
