@@ -56,6 +56,13 @@ perl -i -0777 -pe 's/using namespace fbcpp::impl;\n\n\nStatement::Statement/usin
 perl -i -0777 -pe 's/statementHandle.reset\(attachment.getHandle\(\)->prepare\(&statusWrapper, transaction.getHandle\(\).get\(\),/statementHandle.reset(attachment.getHandle()->prepare(&statusWrapper, nullptr,/g' "$PATCH_SRC_DIR/Statement.cpp"
 perl -i -0777 -pe 's/void Statement::free\(\)\n\{\n\tassert\(isValid\(\)\);\n\n\tif \(resultSetHandle\)\n\t\{\n\t\tresultSetHandle->close\(&statusWrapper\);\n\t\tresultSetHandle.reset\(\);\n\t\}\n\n\tstatementHandle->free\(&statusWrapper\);\n\tstatementHandle.reset\(\);\n\}/void Statement::free()\n{\n\tassert(isValid());\n\n\tcloseCursor();\n\n\tstatementHandle->free(&statusWrapper);\n\tstatementHandle.reset();\n}\n\nvoid Statement::closeCursor()\n{\n\tassert(isValid());\n\n\tif (resultSetHandle)\n\t{\n\t\tresultSetHandle->close(&statusWrapper);\n\t\tresultSetHandle.reset();\n\t}\n}/g' "$PATCH_SRC_DIR/Statement.cpp"
 
+# Add safeString wrapper to protect against null metadata string values
+perl -i -0777 -pe 's/descriptors\.reserve\(count\);\n\n\t\tfor/descriptors.reserve(count);\n\t\tauto safeString = [](const char* s) -> std::string {\n\t\t\treturn s ? std::string(s) : std::string();\n\t\t};\n\n\t\tfor/g' "$PATCH_SRC_DIR/Statement.cpp"
+perl -i -pe 's/\.name = metadata->getField\(&statusWrapper, index\)/.name = safeString(metadata->getField(&statusWrapper, index))/g' "$PATCH_SRC_DIR/Statement.cpp"
+perl -i -pe 's/\.relation = metadata->getRelation\(&statusWrapper, index\)/.relation = safeString(metadata->getRelation(&statusWrapper, index))/g' "$PATCH_SRC_DIR/Statement.cpp"
+perl -i -pe 's/\.alias = metadata->getAlias\(&statusWrapper, index\)/.alias = safeString(metadata->getAlias(&statusWrapper, index))/g' "$PATCH_SRC_DIR/Statement.cpp"
+perl -i -pe 's/\.owner = metadata->getOwner\(&statusWrapper, index\)/.owner = safeString(metadata->getOwner(&statusWrapper, index))/g' "$PATCH_SRC_DIR/Statement.cpp"
+
 # Add charset 127 and length + 2 fix for TEXT to VARYING conversion
 perl -i -0777 -pe 's/builder->setType\(&statusWrapper, index, SQL_VARYING\);\n\t\t\t\t\tdescriptor.adjustedType = DescriptorAdjustedType::STRING;/builder->setType(&statusWrapper, index, SQL_VARYING);\n\t\t\t\t\tbuilder->setLength(&statusWrapper, index, descriptor.length + 2);\n\t\t\t\t\tbuilder->setCharSet(&statusWrapper, index, 127); \/\/ CS_dynamic\n\t\t\t\t\tdescriptor.adjustedType = DescriptorAdjustedType::STRING;\n\t\t\t\t\tdescriptor.length += 2;\n\t\t\t\t\tdescriptor.charSetId = 127;/g' "$PATCH_SRC_DIR/Statement.cpp"
 
