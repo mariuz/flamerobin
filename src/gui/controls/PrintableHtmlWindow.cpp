@@ -37,6 +37,7 @@
 #include <wx/wxhtml.h>
 #include <wx/stdpaths.h>
 #include <wx/filename.h>
+#include <wx/settings.h>
 
 #include "core/URIProcessor.h"
 #include "core/FRError.h"
@@ -154,6 +155,81 @@ void PrintableHtmlWindow::setPageSource(const wxString& html)
 
         // Convert all raw template paths to file:// URLs
         processedHtml.Replace(templatesPathForward, fileUrl);
+
+        // Construct and inject a modern, responsive CSS stylesheet
+        bool isDark = wxSystemSettings::GetAppearance().IsDark();
+        wxString bgColor = isDark ? "#1e1e1e" : "#ffffff";
+        wxString textColor = isDark ? "#e0e0e0" : "#2d3748";
+        wxString borderColor = isDark ? "#3d3d3d" : "#e2e8f0";
+        wxString headerBgColor = isDark ? "#2c2c3e" : "#edf2f7";
+        wxString headerTextColor = isDark ? "#ffffff" : "#1a202c";
+        wxString altRowBgColor = isDark ? "#252535" : "#f7fafc";
+        wxString linkColor = isDark ? "#4a90e2" : "#3182ce";
+        wxString linkHoverColor = isDark ? "#6ba4e8" : "#2b6cb0";
+
+        wxString css = wxString::Format(
+            "<style>\n"
+            "html, body {\n"
+            "    margin: 0 !important;\n"
+            "    padding: 12px !important;\n"
+            "    font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif !important;\n"
+            "    font-size: 13px !important;\n"
+            "    line-height: 1.5 !important;\n"
+            "    background-color: %s !important;\n"
+            "    color: %s !important;\n"
+            "}\n"
+            "table {\n"
+            "    width: 100%% !important;\n"
+            "    max-width: 100%% !important;\n"
+            "    border-collapse: separate !important;\n"
+            "    border-spacing: 0 !important;\n"
+            "    border: 1px solid %s !important;\n"
+            "    border-radius: 6px !important;\n"
+            "    margin: 12px 0 !important;\n"
+            "    overflow: hidden !important;\n"
+            "    background-color: transparent !important;\n"
+            "}\n"
+            "tr[bgcolor=\"navy\"], tr[bgcolor=\"#CCCCFF\"] {\n"
+            "    background-color: %s !important;\n"
+            "    color: %s !important;\n"
+            "}\n"
+            "tr[bgcolor=\"navy\"] td, tr[bgcolor=\"#CCCCFF\"] td {\n"
+            "    color: %s !important;\n"
+            "    font-weight: 600 !important;\n"
+            "}\n"
+            "tr[bgcolor=\"#DDDDFF\"] {\n"
+            "    background-color: %s !important;\n"
+            "}\n"
+            "tr[bgcolor=\"#DDDDDD\"] {\n"
+            "    background-color: %s !important;\n"
+            "}\n"
+            "td {\n"
+            "    padding: 8px 12px !important;\n"
+            "    border-bottom: 1px solid %s !important;\n"
+            "}\n"
+            "tr:last-child td {\n"
+            "    border-bottom: none !important;\n"
+            "}\n"
+            "a {\n"
+            "    color: %s !important;\n"
+            "    text-decoration: none !important;\n"
+            "}\n"
+            "a:hover {\n"
+            "    text-decoration: underline !important;\n"
+            "    color: %s !important;\n"
+            "}\n"
+            "img {\n"
+            "    vertical-align: middle !important;\n"
+            "}\n"
+            "</style>\n",
+            bgColor, textColor, borderColor, headerBgColor, headerTextColor, headerTextColor, altRowBgColor, altRowBgColor, borderColor, linkColor, linkHoverColor
+        );
+
+        wxString::size_type headPos = processedHtml.Lower().find("</head>");
+        if (headPos != wxString::npos)
+            processedHtml.insert(headPos, css);
+        else
+            processedHtml.insert(0, css);
 
         // Remove old temp file if it exists
         if (!tempFileM.IsEmpty() && wxFileExists(tempFileM))
