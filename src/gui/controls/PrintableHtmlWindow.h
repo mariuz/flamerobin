@@ -25,7 +25,7 @@
 #define FR_PRINTABLE_HTML_WINDOW_H
 
 #include <wx/wx.h>
-#include <wx/wxhtml.h>
+#include <wx/webview.h>
 
 class wxHtmlEasyPrinting;
 
@@ -39,22 +39,27 @@ public:
     ~HtmlPrinter();
 };
 
-class PrintableHtmlWindow: public wxHtmlWindow
+class PrintableHtmlWindow: public wxPanel
 {
 private:
+    wxWebView* webViewM;
     wxString pageSourceM;
-    wxString tempLinkM;     // set before context menu pops up, and used in handler for menu item
 public:
     PrintableHtmlWindow(wxWindow* parent, wxWindowID id = wxID_ANY);
     void setPageSource(const wxString& html);
+
+    bool LoadFile(const wxString& filepath);
+    void GetViewStart(int* x, int* y);
+    void Scroll(int x, int y);
+    wxString GetOpenedPageTitle();
+    void SetRelatedFrame(wxFrame* frame, const wxString& format);
+    void SetRelatedStatusBar(int bar);
 protected:
-    virtual void OnLinkClicked(const wxHtmlLinkInfo& link);
+    void OnWebViewNavigating(wxWebViewEvent& event);
 
     void OnRightUp(wxMouseEvent& event);
     void OnMenuCopy(wxCommandEvent& event);
     void OnMenuCopyAllHtml(wxCommandEvent& event);
-    void OnMenuNewWindow(wxCommandEvent& event);
-    void OnMenuNewTab(wxCommandEvent& event);
     void OnMenuSave(wxCommandEvent& event);
     void OnMenuPrint(wxCommandEvent& event);
     void OnMenuPreview(wxCommandEvent& event);

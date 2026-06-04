@@ -34,9 +34,9 @@
 #include <wx/file.h>
 #include <wx/filedlg.h>
 #include <wx/platform.h>
+#include <wx/wxhtml.h>
 
 #include "core/URIProcessor.h"
-
 #include "core/FRError.h"
 #include "gui/controls/PrintableHtmlWindow.h"
 
@@ -63,33 +63,35 @@ HtmlPrinter::~HtmlPrinter()
 
 //! PrintableHtmlWindow class
 PrintableHtmlWindow::PrintableHtmlWindow(wxWindow* parent, wxWindowID id)
-    : wxHtmlWindow(parent, id)
+    : wxPanel(parent, id)
 {
-#ifdef __WXGTK20__
-    // default fonts are just too big on GTK2
-    int sizes[] = { 7, 8, 10, 12, 16, 22, 30 };
-    SetFonts(wxEmptyString, wxEmptyString, sizes);
-#endif
+    webViewM = wxWebView::New(this, wxID_ANY);
+    wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+    sizer->Add(webViewM, 1, wxEXPAND);
+    SetSizer(sizer);
+    Layout();
+
+    if (webViewM)
+    {
+        webViewM->Bind(wxEVT_WEBVIEW_NAVIGATING, &PrintableHtmlWindow::OnWebViewNavigating, this);
+        webViewM->Bind(wxEVT_RIGHT_UP, &PrintableHtmlWindow::OnRightUp, this);
+    }
 }
 
-BEGIN_EVENT_TABLE(PrintableHtmlWindow, wxHtmlWindow)
+BEGIN_EVENT_TABLE(PrintableHtmlWindow, wxPanel)
     EVT_RIGHT_UP(PrintableHtmlWindow::OnRightUp)
     EVT_MENU(wxID_COPY, PrintableHtmlWindow::OnMenuCopy)
     #ifdef _DEBUG
         EVT_MENU(CmdCopyAllHtml, PrintableHtmlWindow::OnMenuCopyAllHtml)
     #endif
-    EVT_MENU(wxID_NEW, PrintableHtmlWindow::OnMenuNewWindow)
-    EVT_MENU(wxID_ADD, PrintableHtmlWindow::OnMenuNewTab)
     EVT_MENU(wxID_SAVE, PrintableHtmlWindow::OnMenuSave)
     EVT_MENU(wxID_PRINT, PrintableHtmlWindow::OnMenuPrint)
     EVT_MENU(wxID_PREVIEW, PrintableHtmlWindow::OnMenuPreview)
 END_EVENT_TABLE()
 
-void PrintableHtmlWindow::OnRightUp(wxMouseEvent& event)
+void PrintableHtmlWindow::OnRightUp(wxMouseEvent& WXUNUSED(event))
 {
     wxMenu m;
-    m.Append(wxID_NEW, _("&Open link in a new window"));
-    m.Append(wxID_ADD, _("Open link in a new &tab"));
     m.Append(wxID_COPY, _("&Copy"));
     #ifdef _DEBUG
         m.AppendSeparator();
@@ -100,39 +102,65 @@ void PrintableHtmlWindow::OnRightUp(wxMouseEvent& event)
     m.Append(wxID_PREVIEW, _("Print pre&view..."));
     m.Append(wxID_PRINT, _("&Print..."));
 
-    bool isLink = false;
-    if (m_Cell) // taken from wx's htmlwin.cpp
-    {
-        wxPoint pos = CalcUnscrolledPosition(event.GetPosition());
-        wxHtmlCell *cell = m_Cell->FindCellByPos(pos.x, pos.y);
-        if (cell)
-        {
-            int ix = cell->GetPosX();
-            int iy = cell->GetPosY();
-            wxHtmlLinkInfo *i = cell->GetLink(pos.x-ix, pos.y-iy);
-            if (i)
-            {
-                tempLinkM = i->GetHref();
-                isLink = true;
-            }
-        }
-    }
-
-    m.Enable(wxID_NEW, isLink);
-    m.Enable(wxID_ADD, isLink);
-    m.Enable(wxID_COPY, !SelectionToText().IsEmpty());
+    m.Enable(wxID_COPY, webViewM && webViewM->CanCopy());
     PopupMenu(&m, ScreenToClient(::wxGetMousePosition()));
 }
 
 void PrintableHtmlWindow::setPageSource(const wxString& html)
 {
     pageSourceM = html;
-    SetPage(pageSourceM);
+    if (webViewM)
+        webViewM->SetPage(html, "");
+}
+
+bool PrintableHtmlWindow::LoadFile(const wxString& filepath)
+{
+    if (webViewM)
+    {
+        wxString url = filepath;
+        url.Replace("\\", "/");
+        if (!url.StartsWith("file://"))
+        {
+            if (url.StartsWith("/"))
+                url = "file://" + url;
+            else
+                url = "file:///" + url;
+        }
+        webViewM->LoadURL(url);
+        return true;
+    }
+    return false;
+}
+
+void PrintableHtmlWindow::GetViewStart(int* x, int* y)
+{
+    if (x) *x = 0;
+    if (y) *y = 0;
+}
+
+void PrintableHtmlWindow::Scroll(int /*x*/, int /*y*/)
+{
+}
+
+wxString PrintableHtmlWindow::GetOpenedPageTitle()
+{
+    if (webViewM)
+        return webViewM->GetCurrentTitle();
+    return wxEmptyString;
+}
+
+void PrintableHtmlWindow::SetRelatedFrame(wxFrame* /*frame*/, const wxString& /*format*/)
+{
+}
+
+void PrintableHtmlWindow::SetRelatedStatusBar(int /*bar*/)
+{
 }
 
 void PrintableHtmlWindow::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
 {
-    CopySelection();
+    if (webViewM)
+        webViewM->Copy();
 }
 
 void PrintableHtmlWindow::OnMenuCopyAllHtml(wxCommandEvent& WXUNUSED(event))
@@ -148,30 +176,6 @@ void notImplementedMessage(wxWindow* parent)
 {
     ::wxMessageBox(_("Feature not yet implemented."), _("Information"),
         wxICON_INFORMATION | wxOK, parent);
-}
-
-void PrintableHtmlWindow::OnMenuNewTab(wxCommandEvent& WXUNUSED(event))
-{
-    wxString addr = tempLinkM;
-    URI uri(addr);
-    // we don't support "new tab" for non-fr protocols
-    if (uri.protocol != "fr")
-        return;
-    uri.addParam("target=new_tab");
-    if (!getURIProcessor().handleURI(uri))
-        notImplementedMessage(this);
-}
-
-void PrintableHtmlWindow::OnMenuNewWindow(wxCommandEvent& WXUNUSED(event))
-{
-    wxString addr = tempLinkM;
-    URI uri(addr);
-    // we don't support "new window" for non-fr protocols
-    if (uri.protocol != "fr")
-        return;
-    uri.addParam("target=new");
-    if (!getURIProcessor().handleURI(uri))
-        notImplementedMessage(this);
 }
 
 void PrintableHtmlWindow::OnMenuSave(wxCommandEvent& WXUNUSED(event))
@@ -223,17 +227,19 @@ void PrintableHtmlWindow::OnMenuPrint(wxCommandEvent& WXUNUSED(event))
 }
 
 //! Link is in format: "protocol://action?name=value&amp;name=value...etc.
-void PrintableHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
+void PrintableHtmlWindow::OnWebViewNavigating(wxWebViewEvent& event)
 {
-    wxString addr = link.GetHref();
+    wxString addr = event.GetURL();
     URI uri(addr);
     if (uri.protocol == "info")    // not really a link
-        return;
-    if (uri.protocol != "fr") // call default handler for other protocols
     {
-        wxHtmlWindow::OnLinkClicked(link);
+        event.Veto();
         return;
     }
+    if (uri.protocol != "fr") // let default handler handle other protocols
+        return;
+
+    event.Veto();
 
     // open in new tab if control/command key is down
     // open in new window if shift key is down
@@ -250,4 +256,3 @@ void PrintableHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
     if (!getURIProcessor().handleURI(uri))
         notImplementedMessage(this);
 }
-
