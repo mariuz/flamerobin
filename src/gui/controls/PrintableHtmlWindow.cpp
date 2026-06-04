@@ -38,6 +38,7 @@
 
 #include "core/URIProcessor.h"
 #include "core/FRError.h"
+#include "config/Config.h"
 #include "gui/controls/PrintableHtmlWindow.h"
 
 #ifdef _DEBUG
@@ -110,7 +111,26 @@ void PrintableHtmlWindow::setPageSource(const wxString& html)
 {
     pageSourceM = html;
     if (webViewM)
-        webViewM->SetPage(html, "");
+    {
+        wxString processedHtml = html;
+
+        // Convert templates path to a file:// URL format
+        wxString templatesPath = config().getHtmlTemplatesPath();
+        wxString fileUrl = templatesPath;
+        fileUrl.Replace("\\", "/");
+        if (!fileUrl.StartsWith("/"))
+            fileUrl = "file:///" + fileUrl;
+        else
+            fileUrl = "file://" + fileUrl;
+
+        wxString templatesPathForward = templatesPath;
+        templatesPathForward.Replace("\\", "/");
+
+        processedHtml.Replace(templatesPath, fileUrl);
+        processedHtml.Replace(templatesPathForward, fileUrl);
+
+        webViewM->SetPage(processedHtml, fileUrl);
+    }
 }
 
 bool PrintableHtmlWindow::LoadFile(const wxString& filepath)
