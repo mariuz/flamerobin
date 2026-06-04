@@ -59,7 +59,7 @@ modules:
       - -DwxUSE_GTK3=ON
       - -DwxUSE_STC=ON
       - -DwxUSE_AUI=ON
-      - -DwxUSE_WEBVIEW=ON
+      - -DwxUSE_WEBVIEW=OFF
       - -DwxUSE_SECRETSTORE=ON
       - -DwxUSE_OPENGL=OFF
     sources:

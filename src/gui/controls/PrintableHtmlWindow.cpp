@@ -62,7 +62,15 @@ HtmlPrinter::~HtmlPrinter()
     prnM = 0;
 }
 
-//! PrintableHtmlWindow class
+void notImplementedMessage(wxWindow* parent)
+{
+    ::wxMessageBox(_("Feature not yet implemented."), _("Information"),
+        wxICON_INFORMATION | wxOK, parent);
+}
+
+#if wxUSE_WEBVIEW
+
+//! PrintableHtmlWindow class for wxWebView
 PrintableHtmlWindow::PrintableHtmlWindow(wxWindow* parent, wxWindowID id)
     : wxPanel(parent, id)
 {
@@ -192,12 +200,6 @@ void PrintableHtmlWindow::OnMenuCopyAllHtml(wxCommandEvent& WXUNUSED(event))
     }
 }
 
-void notImplementedMessage(wxWindow* parent)
-{
-    ::wxMessageBox(_("Feature not yet implemented."), _("Information"),
-        wxICON_INFORMATION | wxOK, parent);
-}
-
 void PrintableHtmlWindow::OnMenuSave(wxCommandEvent& WXUNUSED(event))
 {
     wxString filename = wxFileSelector(_("Save as HTML..."), wxEmptyString,
@@ -276,3 +278,191 @@ void PrintableHtmlWindow::OnWebViewNavigating(wxWebViewEvent& event)
     if (!getURIProcessor().handleURI(uri))
         notImplementedMessage(this);
 }
+
+#else
+
+//! PrintableHtmlWindow class for wxHtmlWindow fallback
+PrintableHtmlWindow::PrintableHtmlWindow(wxWindow* parent, wxWindowID id)
+    : wxHtmlWindow(parent, id)
+{
+#ifdef __WXGTK20__
+    // default fonts are just too big on GTK2
+    int sizes[] = { 7, 8, 10, 12, 16, 22, 30 };
+    SetFonts(wxEmptyString, wxEmptyString, sizes);
+#endif
+}
+
+BEGIN_EVENT_TABLE(PrintableHtmlWindow, wxHtmlWindow)
+    EVT_RIGHT_UP(PrintableHtmlWindow::OnRightUp)
+    EVT_MENU(wxID_COPY, PrintableHtmlWindow::OnMenuCopy)
+    #ifdef _DEBUG
+        EVT_MENU(CmdCopyAllHtml, PrintableHtmlWindow::OnMenuCopyAllHtml)
+    #endif
+    EVT_MENU(wxID_NEW, PrintableHtmlWindow::OnMenuNewWindow)
+    EVT_MENU(wxID_ADD, PrintableHtmlWindow::OnMenuNewTab)
+    EVT_MENU(wxID_SAVE, PrintableHtmlWindow::OnMenuSave)
+    EVT_MENU(wxID_PRINT, PrintableHtmlWindow::OnMenuPrint)
+    EVT_MENU(wxID_PREVIEW, PrintableHtmlWindow::OnMenuPreview)
+END_EVENT_TABLE()
+
+void PrintableHtmlWindow::OnRightUp(wxMouseEvent& event)
+{
+    wxMenu m;
+    m.Append(wxID_NEW, _("&Open link in a new window"));
+    m.Append(wxID_ADD, _("Open link in a new &tab"));
+    m.Append(wxID_COPY, _("&Copy"));
+    #ifdef _DEBUG
+        m.AppendSeparator();
+        m.Append(CmdCopyAllHtml, _("Copy &HTML code"));
+    #endif
+    m.AppendSeparator();
+    m.Append(wxID_SAVE, _("&Save as HTML file..."));
+    m.Append(wxID_PREVIEW, _("Print pre&view..."));
+    m.Append(wxID_PRINT, _("&Print..."));
+
+    bool isLink = false;
+    if (m_Cell) // taken from wx's htmlwin.cpp
+    {
+        wxPoint pos = CalcUnscrolledPosition(event.GetPosition());
+        wxHtmlCell *cell = m_Cell->FindCellByPos(pos.x, pos.y);
+        if (cell)
+        {
+            int ix = cell->GetPosX();
+            int iy = cell->GetPosY();
+            wxHtmlLinkInfo *i = cell->GetLink(pos.x-ix, pos.y-iy);
+            if (i)
+            {
+                tempLinkM = i->GetHref();
+                isLink = true;
+            }
+        }
+    }
+
+    m.Enable(wxID_NEW, isLink);
+    m.Enable(wxID_ADD, isLink);
+    m.Enable(wxID_COPY, !SelectionToText().IsEmpty());
+    PopupMenu(&m, ScreenToClient(::wxGetMousePosition()));
+}
+
+void PrintableHtmlWindow::setPageSource(const wxString& html)
+{
+    pageSourceM = html;
+    SetPage(pageSourceM);
+}
+
+void PrintableHtmlWindow::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
+{
+    CopySelection();
+}
+
+void PrintableHtmlWindow::OnMenuCopyAllHtml(wxCommandEvent& WXUNUSED(event))
+{
+    if (wxTheClipboard->Open())
+    {
+        wxTheClipboard->SetData(new wxTextDataObject(pageSourceM));
+        wxTheClipboard->Close();
+    }
+}
+
+void PrintableHtmlWindow::OnMenuNewTab(wxCommandEvent& WXUNUSED(event))
+{
+    wxString addr = tempLinkM;
+    URI uri(addr);
+    // we don't support "new tab" for non-fr protocols
+    if (uri.protocol != "fr")
+        return;
+    uri.addParam("target=new_tab");
+    if (!getURIProcessor().handleURI(uri))
+        notImplementedMessage(this);
+}
+
+void PrintableHtmlWindow::OnMenuNewWindow(wxCommandEvent& WXUNUSED(event))
+{
+    wxString addr = tempLinkM;
+    URI uri(addr);
+    // we don't support "new window" for non-fr protocols
+    if (uri.protocol != "fr")
+        return;
+    uri.addParam("target=new");
+    if (!getURIProcessor().handleURI(uri))
+        notImplementedMessage(this);
+}
+
+void PrintableHtmlWindow::OnMenuSave(wxCommandEvent& WXUNUSED(event))
+{
+    wxString filename = wxFileSelector(_("Save as HTML..."), wxEmptyString,
+        GetOpenedPageTitle(), "*.html",
+        _("HTML files (*.html)|*.html|All files (*.*)|*.*"),
+        wxFD_SAVE | wxFD_OVERWRITE_PROMPT, this);
+    if (filename.IsEmpty())
+        return;
+
+    wxFile f;
+    if (f.Open(filename, wxFile::write))
+    {
+        wxString ns(pageSourceM.Upper());
+        while (true)    // remove links, but leave text
+        {
+            size_t p1 = ns.find("<A");
+            if (p1 == wxNOT_FOUND)
+                break;
+            size_t pb = ns.find(">", p1);
+            if (pb == wxNOT_FOUND)
+                break;
+            size_t p2 = ns.find("</A>", pb);
+            if (p2 == wxNOT_FOUND)
+                break;
+            ns.Remove(p2, 4);
+            ns.Remove(p1, pb - p1 + 1);
+        }
+        f.Write(ns);
+        f.Close();
+    }
+}
+
+void PrintableHtmlWindow::OnMenuPreview(wxCommandEvent& WXUNUSED(event))
+{
+    HtmlPrinter::getHEP()->SetHeader(GetOpenedPageTitle());
+    HtmlPrinter::getHEP()->SetFooter(
+        _("Printed from FlameRobin - www.flamerobin.org"));
+    HtmlPrinter::getHEP()->PreviewText(pageSourceM);
+}
+
+void PrintableHtmlWindow::OnMenuPrint(wxCommandEvent& WXUNUSED(event))
+{
+    HtmlPrinter::getHEP()->SetHeader(GetOpenedPageTitle());
+    HtmlPrinter::getHEP()->SetFooter(
+        _("Printed from FlameRobin - www.flamerobin.org"));
+    HtmlPrinter::getHEP()->PrintText(pageSourceM);
+}
+
+//! Link is in format: "protocol://action?name=value&amp;name=value...etc.
+void PrintableHtmlWindow::OnLinkClicked(const wxHtmlLinkInfo& link)
+{
+    wxString addr = link.GetHref();
+    URI uri(addr);
+    if (uri.protocol == "info")    // not really a link
+        return;
+    if (uri.protocol != "fr") // call default handler for other protocols
+    {
+        wxHtmlWindow::OnLinkClicked(link);
+        return;
+    }
+
+    // open in new tab if control/command key is down
+    // open in new window if shift key is down
+    bool openInTab;
+    if (wxPlatformInfo::Get().GetOperatingSystemId() & wxOS_MAC)
+        openInTab = ::wxGetKeyState(WXK_COMMAND);
+    else
+        openInTab = ::wxGetKeyState(WXK_CONTROL);
+    if (openInTab)
+        uri.addParam("target=new_tab");
+    else if (::wxGetKeyState(WXK_SHIFT))
+        uri.addParam("target=new");
+
+    if (!getURIProcessor().handleURI(uri))
+        notImplementedMessage(this);
+}
+
+#endif
