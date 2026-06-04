@@ -62,7 +62,9 @@ protected:
     void OnRightUp(wxMouseEvent& event);
     void OnMenuCopy(wxCommandEvent& event);
     void OnMenuCopyAllHtml(wxCommandEvent& event);
+#if wxCHECK_VERSION(3, 3, 0)
     void OnMenuShowDevTools(wxCommandEvent& event);
+#endif
     void OnMenuSave(wxCommandEvent& event);
     void OnMenuPrint(wxCommandEvent& event);
     void OnMenuPreview(wxCommandEvent& event);

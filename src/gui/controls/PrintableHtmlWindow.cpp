@@ -82,7 +82,9 @@ PrintableHtmlWindow::PrintableHtmlWindow(wxWindow* parent, wxWindowID id)
 
     if (webViewM)
     {
+#if wxCHECK_VERSION(3, 1, 5)
         webViewM->EnableAccessToDevTools(true);
+#endif
         webViewM->Bind(wxEVT_WEBVIEW_NAVIGATING, &PrintableHtmlWindow::OnWebViewNavigating, this);
         webViewM->Bind(wxEVT_RIGHT_UP, &PrintableHtmlWindow::OnRightUp, this);
     }
@@ -102,7 +104,9 @@ BEGIN_EVENT_TABLE(PrintableHtmlWindow, wxPanel)
     #ifdef _DEBUG
         EVT_MENU(CmdCopyAllHtml, PrintableHtmlWindow::OnMenuCopyAllHtml)
     #endif
+#if wxCHECK_VERSION(3, 3, 0)
     EVT_MENU(CmdShowDevTools, PrintableHtmlWindow::OnMenuShowDevTools)
+#endif
     EVT_MENU(wxID_SAVE, PrintableHtmlWindow::OnMenuSave)
     EVT_MENU(wxID_PRINT, PrintableHtmlWindow::OnMenuPrint)
     EVT_MENU(wxID_PREVIEW, PrintableHtmlWindow::OnMenuPreview)
@@ -117,14 +121,18 @@ void PrintableHtmlWindow::OnRightUp(wxMouseEvent& WXUNUSED(event))
         m.Append(CmdCopyAllHtml, _("Copy &HTML code"));
     #endif
     m.AppendSeparator();
+#if wxCHECK_VERSION(3, 3, 0)
     m.Append(CmdShowDevTools, _("Developer &Tools"));
     m.AppendSeparator();
+#endif
     m.Append(wxID_SAVE, _("&Save as HTML file..."));
     m.Append(wxID_PREVIEW, _("Print pre&view..."));
     m.Append(wxID_PRINT, _("&Print..."));
 
     m.Enable(wxID_COPY, webViewM && webViewM->CanCopy());
+#if wxCHECK_VERSION(3, 3, 0)
     m.Enable(CmdShowDevTools, webViewM != nullptr);
+#endif
     PopupMenu(&m, ScreenToClient(::wxGetMousePosition()));
 }
 
@@ -374,11 +382,13 @@ void PrintableHtmlWindow::OnMenuCopyAllHtml(wxCommandEvent& WXUNUSED(event))
     }
 }
 
+#if wxCHECK_VERSION(3, 3, 0)
 void PrintableHtmlWindow::OnMenuShowDevTools(wxCommandEvent& WXUNUSED(event))
 {
     if (webViewM)
         webViewM->ShowDevTools();
 }
+#endif
 
 void notImplementedMessage(wxWindow* parent)
 {
