@@ -296,9 +296,9 @@ void PrintableHtmlWindow::setPageSource(const wxString& html)
             tempFileM.Clear();
         }
 
-        // Generate a unique temp file in the system temp directory
-        wxString tempDir = wxStandardPaths::Get().GetTempDir();
-        tempFileM = wxFileName(tempDir, wxString::Format("fr_temp_%p.html", this)).GetFullPath();
+        // Generate a unique temp file in the templates directory
+        // to avoid "Unsafe attempt to load URL" same-origin file:// security restrictions
+        tempFileM = wxString::Format("%sfr_temp_%p.html", templatesPath, this);
 
         wxFile file(tempFileM, wxFile::write);
         if (file.IsOpened())
