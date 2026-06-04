@@ -42,7 +42,10 @@
 #include "gui/controls/PrintableHtmlWindow.h"
 
 #ifdef _DEBUG
-    enum { CmdCopyAllHtml = wxID_HIGHEST + 1 };
+    enum {
+        CmdCopyAllHtml = wxID_HIGHEST + 1,
+        CmdShowDevTools
+    };
 #endif
 
 HtmlPrinter::HtmlPrinter()
@@ -74,6 +77,9 @@ PrintableHtmlWindow::PrintableHtmlWindow(wxWindow* parent, wxWindowID id)
 
     if (webViewM)
     {
+        #ifdef _DEBUG
+            webViewM->EnableAccessToDevTools(true);
+        #endif
         webViewM->Bind(wxEVT_WEBVIEW_NAVIGATING, &PrintableHtmlWindow::OnWebViewNavigating, this);
         webViewM->Bind(wxEVT_RIGHT_UP, &PrintableHtmlWindow::OnRightUp, this);
     }
@@ -84,6 +90,7 @@ BEGIN_EVENT_TABLE(PrintableHtmlWindow, wxPanel)
     EVT_MENU(wxID_COPY, PrintableHtmlWindow::OnMenuCopy)
     #ifdef _DEBUG
         EVT_MENU(CmdCopyAllHtml, PrintableHtmlWindow::OnMenuCopyAllHtml)
+        EVT_MENU(CmdShowDevTools, PrintableHtmlWindow::OnMenuShowDevTools)
     #endif
     EVT_MENU(wxID_SAVE, PrintableHtmlWindow::OnMenuSave)
     EVT_MENU(wxID_PRINT, PrintableHtmlWindow::OnMenuPrint)
@@ -97,6 +104,7 @@ void PrintableHtmlWindow::OnRightUp(wxMouseEvent& WXUNUSED(event))
     #ifdef _DEBUG
         m.AppendSeparator();
         m.Append(CmdCopyAllHtml, _("Copy &HTML code"));
+        m.Append(CmdShowDevTools, _("Developer &Tools"));
     #endif
     m.AppendSeparator();
     m.Append(wxID_SAVE, _("&Save as HTML file..."));
@@ -104,6 +112,9 @@ void PrintableHtmlWindow::OnRightUp(wxMouseEvent& WXUNUSED(event))
     m.Append(wxID_PRINT, _("&Print..."));
 
     m.Enable(wxID_COPY, webViewM && webViewM->CanCopy());
+    #ifdef _DEBUG
+        m.Enable(CmdShowDevTools, webViewM != nullptr);
+    #endif
     PopupMenu(&m, ScreenToClient(::wxGetMousePosition()));
 }
 
@@ -190,6 +201,12 @@ void PrintableHtmlWindow::OnMenuCopyAllHtml(wxCommandEvent& WXUNUSED(event))
         wxTheClipboard->SetData(new wxTextDataObject(pageSourceM));
         wxTheClipboard->Close();
     }
+}
+
+void PrintableHtmlWindow::OnMenuShowDevTools(wxCommandEvent& WXUNUSED(event))
+{
+    if (webViewM)
+        webViewM->ShowDevTools();
 }
 
 void notImplementedMessage(wxWindow* parent)

@@ -60,6 +60,7 @@ protected:
     void OnRightUp(wxMouseEvent& event);
     void OnMenuCopy(wxCommandEvent& event);
     void OnMenuCopyAllHtml(wxCommandEvent& event);
+    void OnMenuShowDevTools(wxCommandEvent& event);
     void OnMenuSave(wxCommandEvent& event);
     void OnMenuPrint(wxCommandEvent& event);
     void OnMenuPreview(wxCommandEvent& event);
