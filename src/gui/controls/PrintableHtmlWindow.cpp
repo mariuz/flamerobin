@@ -38,6 +38,7 @@
 #include <wx/stdpaths.h>
 #include <wx/filename.h>
 #include <wx/settings.h>
+#include <wx/regex.h>
 
 #include "core/URIProcessor.h"
 #include "core/FRError.h"
@@ -168,6 +169,7 @@ void PrintableHtmlWindow::setPageSource(const wxString& html)
         wxString linkHoverColor = isDark ? "#6ba4e8" : "#2b6cb0";
 
         wxString css = wxString::Format(
+            "<link href=\"https://fonts.googleapis.com/icon?family=Material+Icons\" rel=\"stylesheet\">\n"
             "<style>\n"
             "html, body {\n"
             "    margin: 0 !important;\n"
@@ -221,6 +223,36 @@ void PrintableHtmlWindow::setPageSource(const wxString& html)
             "img {\n"
             "    vertical-align: middle !important;\n"
             "}\n"
+            ".material-icons {\n"
+            "    font-size: 16px !important;\n"
+            "    width: 16px !important;\n"
+            "    height: 16px !important;\n"
+            "    display: inline-block !important;\n"
+            "    vertical-align: middle !important;\n"
+            "    text-align: center !important;\n"
+            "    line-height: 16px !important;\n"
+            "}\n"
+            ".icon-ok {\n"
+            "    color: #4caf50 !important;\n"
+            "    font-size: 18px !important;\n"
+            "}\n"
+            ".icon-ok2 {\n"
+            "    color: #00bcd4 !important;\n"
+            "    font-size: 18px !important;\n"
+            "}\n"
+            ".icon-redx {\n"
+            "    color: #f44336 !important;\n"
+            "    font-size: 18px !important;\n"
+            "}\n"
+            ".icon-drop {\n"
+            "    color: #f44336 !important;\n"
+            "}\n"
+            ".icon-view {\n"
+            "    color: #2196f3 !important;\n"
+            "}\n"
+            ".icon-compute {\n"
+            "    color: #ff9800 !important;\n"
+            "}\n"
             "</style>\n",
             bgColor, textColor, borderColor, headerBgColor, headerTextColor, headerTextColor, altRowBgColor, altRowBgColor, borderColor, linkColor, linkHoverColor
         );
@@ -230,6 +262,32 @@ void PrintableHtmlWindow::setPageSource(const wxString& html)
             processedHtml.insert(headPos, css);
         else
             processedHtml.insert(0, css);
+
+        // Replace vector SVG img tags with Google Material Icons dynamically
+        wxRegEx imgRegex("<img[^>]*src=\"" + fileUrl + "([^/\"\\?#]+)\\.svg\"[^>]*>");
+        while (imgRegex.Matches(processedHtml))
+        {
+            size_t start, len;
+            imgRegex.GetMatch(&start, &len, 0);
+            wxString iconName = imgRegex.GetMatch(processedHtml, 1);
+            wxString spanTag;
+            if (iconName == "ok")
+                spanTag = "<span class=\"material-icons icon-ok\">check_circle</span>";
+            else if (iconName == "ok2")
+                spanTag = "<span class=\"material-icons icon-ok2\">done_all</span>";
+            else if (iconName == "redx")
+                spanTag = "<span class=\"material-icons icon-redx\">cancel</span>";
+            else if (iconName == "drop")
+                spanTag = "<span class=\"material-icons icon-drop\">delete</span>";
+            else if (iconName == "view")
+                spanTag = "<span class=\"material-icons icon-view\">visibility</span>";
+            else if (iconName == "compute")
+                spanTag = "<span class=\"material-icons icon-compute\">build</span>";
+            else
+                spanTag = "<span class=\"material-icons\">help</span>";
+
+            processedHtml.replace(start, len, spanTag);
+        }
 
         // Remove old temp file if it exists
         if (!tempFileM.IsEmpty() && wxFileExists(tempFileM))
