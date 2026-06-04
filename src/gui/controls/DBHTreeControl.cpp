@@ -1083,10 +1083,10 @@ struct MetadataItemSorter
             // partial strings from consecutive non-digits
             size_t end1 = wxMin(name1.find_first_of(digits, start1), len1);
             size_t end2 = wxMin(name2.find_first_of(digits, start2), len2);
-            if (end1 > 0 || end2 > 0)
+            if (end1 > start1 || end2 > start2)
             {
-                wxString chunk1(name1, start1, end1);
-                wxString chunk2(name2, start2, end2);
+                wxString chunk1(name1, start1, end1 - start1);
+                wxString chunk2(name2, start2, end2 - start2);
                 // return immediately when case-insensitive comparison
                 // gives a result
                 int i = chunk1.CmpNoCase(chunk2);
@@ -1104,10 +1104,10 @@ struct MetadataItemSorter
             // partial strings from consecutive digits
             end1 = wxMin(name1.find_first_not_of(digits, start1), len1);
             end2 = wxMin(name2.find_first_not_of(digits, start2), len2);
-            if (end1 > 0 || end2 > 0)
+            if (end1 > start1 || end2 > start2)
             {
-                wxString chunk1(name1, start1, end1);
-                wxString chunk2(name2, start2, end2);
+                wxString chunk1(name1, start1, end1 - start1);
+                wxString chunk2(name2, start2, end2 - start2);
                 wxLongLong_t l1, l2;
                 if (!chunk1.ToLongLong(&l1))
                     l1 = 0;
