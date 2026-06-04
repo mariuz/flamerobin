@@ -35,19 +35,20 @@ done
 
 # 1. Transaction.h - Add Client constructor and start()
 perl -i -pe 's/#include <span>/#include <cstdint>\n#include <span>/g' "$PATCH_SRC_DIR/Transaction.h"
+perl -i -0777 -pe 's/namespace fbcpp\n\{\n\tclass Attachment;/namespace fbcpp\n{\n\tclass Attachment;\n\n\tnamespace impl\n\t{\n\t\tclass StatusWrapper;\n\t}/g' "$PATCH_SRC_DIR/Transaction.h"
 perl -i -0777 -pe 's/class Transaction\n\t\{/class Transaction\n\t\{\n\tpublic:\n\t\texplicit Transaction(Client& client);/g' "$PATCH_SRC_DIR/Transaction.h"
 perl -i -0777 -pe 's/void rollbackRetaining\(\);\n\n\tprotected:/void rollbackRetaining();\n\n\t\tvoid start(Attachment& attachment, const TransactionOptions& options = {});\n\n\tprotected:/g' "$PATCH_SRC_DIR/Transaction.h"
 
 # 2. Transaction.cpp - Implementations
 perl -i -0777 -pe 's/using namespace fbcpp::impl;\n\n\nstatic/using namespace fbcpp::impl;\n\n\nTransaction::Transaction(Client& client)\n\t: client{client},\n\t  handle{nullptr},\n\t  state{TransactionState::ROLLED_BACK}\n{\n}\n\n\nstatic/g' "$PATCH_SRC_DIR/Transaction.cpp"
-perl -i -0777 -pe 's/void Transaction::rollbackRetaining\(\)\n\{\n\tassert\(isValid\(\)\);\n\tassert\(state == TransactionState::ACTIVE\);\n\n\tStatusWrapper statusWrapper\{client\};\n\n\thandle->rollbackRetaining\(&statusWrapper\);\n\}/void Transaction::rollbackRetaining()\n{\n\tassert(isValid());\n\tassert(state == TransactionState::ACTIVE);\n\n\tStatusWrapper statusWrapper{client};\n\n\thandle->rollbackRetaining(&statusWrapper);\n}\n\nvoid Transaction::start(Attachment& attachment, const TransactionOptions& options)\n{\n\tassert(!isValid());\n\n\tconst auto master = client.getMaster();\n\tStatusWrapper statusWrapper{client};\n\n\tauto tpbBuilder = buildTpb(master, statusWrapper, options);\n\tconst auto tpbBuffer = tpbBuilder->getBuffer(&statusWrapper);\n\tconst auto tpbBufferLen = tpbBuffer->getBufferLength(&statusWrapper);\n\n\thandle.reset(attachment.getHandle()->startTransaction(&statusWrapper, tpbBufferLen, tpbBuffer));\n\tstate = TransactionState::ACTIVE;\n}/g' "$PATCH_SRC_DIR/Transaction.cpp"
+perl -i -0777 -pe 's/void Transaction::rollbackRetaining\(\)\n\{\n\tassert\(isValid\(\)\);\n\tassert\(state == TransactionState::ACTIVE\);\n\n\tStatusWrapper statusWrapper\{client\};\n\n\thandle->rollbackRetaining\(&statusWrapper\);\n\}/void Transaction::rollbackRetaining()\n{\n\tassert(isValid());\n\tassert(state == TransactionState::ACTIVE);\n\n\tStatusWrapper statusWrapper{client};\n\n\thandle->rollbackRetaining(&statusWrapper);\n}\n\nvoid Transaction::start(Attachment& attachment, const TransactionOptions& options)\n{\n\tassert(!isValid());\n\n\tconst auto master = client.getMaster();\n\tStatusWrapper statusWrapper{client};\n\n\tauto tpbBuilder = buildTpb(master, statusWrapper, options);\n\tconst auto tpbBuffer = tpbBuilder->getBuffer(&statusWrapper);\n\tconst auto tpbBufferLen = tpbBuilder->getBufferLength(&statusWrapper);\n\n\thandle.reset(attachment.getHandle()->startTransaction(&statusWrapper, tpbBufferLen, tpbBuffer));\n\tstate = TransactionState::ACTIVE;\n}/g' "$PATCH_SRC_DIR/Transaction.cpp"
 
 # Export buildTpb for extensions
 perl -i -pe 's/static FbUniquePtr<fb::IXpbBuilder> buildTpb/FbUniquePtr<fb::IXpbBuilder> Transaction::buildTpb/g' "$PATCH_SRC_DIR/Transaction.cpp"
 perl -i -0777 -pe 's/void start\(Attachment& attachment, const TransactionOptions& options = \{\}\);\n\n\tprotected:/void start(Attachment& attachment, const TransactionOptions& options = {});\n\n\t\tstatic FbUniquePtr<fb::IXpbBuilder> buildTpb(fb::IMaster* master, impl::StatusWrapper& statusWrapper, const TransactionOptions& options);\n\n\tprotected:/g' "$PATCH_SRC_DIR/Transaction.h"
 
 # 3. Statement.h - Add closeCursor(), fix truncation check, and add Attachment constructor
-perl -i -0777 -pe 's/void free\(\);\n\n\t\t\/\/\/\n\t\t\/\/\/\ @brief Retrieves the textual legacy plan/void free();\n\n\t\tvoid closeCursor();\n\n\t\t\/\/\/\n\t\t\/\/\/\ @brief Retrieves the textual legacy plan/g' "$PATCH_SRC_DIR/Statement.h"
+perl -i -pe 's/(\t+)void free\(\);/$1void free();\n$1void closeCursor();/g' "$PATCH_SRC_DIR/Statement.h"
 perl -i -pe 's/if \(value.length\(\) > descriptor.length\)/if (value.length() > descriptor.length - sizeof(std::uint16_t))/g' "$PATCH_SRC_DIR/Statement.h"
 perl -i -0777 -pe 's/class Statement\n\t\{/class Statement\n\t\{\n\tpublic:\n\t\texplicit Statement(Attachment& attachment);/g' "$PATCH_SRC_DIR/Statement.h"
 

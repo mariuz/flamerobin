@@ -261,7 +261,7 @@ index 28564b1..9f63c40 100644
  
  bool Statement::execute(Transaction& transaction)
 diff --git a/src/fb-cpp/Statement.h b/src/fb-cpp/Statement.h
-index 7ae32eb..9bb9dd4 100644
+index 7ae32eb..91aa374 100644
 --- a/src/fb-cpp/Statement.h
 +++ b/src/fb-cpp/Statement.h
 @@ -86,7 +86,7 @@ namespace fbcpp
@@ -294,7 +294,15 @@ index 7ae32eb..9bb9dd4 100644
  	public:
  		///
  		/// Prepares an SQL statement.
-@@ -1290,7 +1292,7 @@ namespace fbcpp
+@@ -462,6 +464,7 @@ namespace fbcpp
+ 		/// @brief Releases the prepared handle and any associated result set.
+ 		///
+ 		void free();
++		void closeCursor();
+ 
+ 		///
+ 		/// @brief Retrieves the textual legacy plan if the server produced one.
+@@ -1290,7 +1293,7 @@ namespace fbcpp
  #endif
  
  				case DescriptorAdjustedType::STRING:
@@ -303,7 +311,7 @@ index 7ae32eb..9bb9dd4 100644
  					{
  						static constexpr std::intptr_t STATUS_STRING_TRUNCATION[] = {
  							isc_arith_except,
-@@ -2003,7 +2005,7 @@ namespace fbcpp
+@@ -2003,7 +2006,7 @@ namespace fbcpp
  				value);
  		}
  
@@ -312,7 +320,7 @@ index 7ae32eb..9bb9dd4 100644
  		///
  		/// @brief Validates and returns the descriptor for the given input parameter index.
  		///
-@@ -2191,7 +2193,7 @@ namespace fbcpp
+@@ -2191,7 +2194,7 @@ namespace fbcpp
  			}
  		}
  
@@ -322,7 +330,7 @@ index 7ae32eb..9bb9dd4 100644
  		impl::StatusWrapper statusWrapper;
  		impl::CalendarConverter calendarConverter;
 diff --git a/src/fb-cpp/Transaction.cpp b/src/fb-cpp/Transaction.cpp
-index de8e6f4..db0a54e 100644
+index de8e6f4..233e1ce 100644
 --- a/src/fb-cpp/Transaction.cpp
 +++ b/src/fb-cpp/Transaction.cpp
 @@ -32,7 +32,15 @@ using namespace fbcpp;
@@ -355,7 +363,7 @@ index de8e6f4..db0a54e 100644
 +
 +	auto tpbBuilder = buildTpb(master, statusWrapper, options);
 +	const auto tpbBuffer = tpbBuilder->getBuffer(&statusWrapper);
-+	const auto tpbBufferLen = tpbBuffer->getBufferLength(&statusWrapper);
++	const auto tpbBufferLen = tpbBuilder->getBufferLength(&statusWrapper);
 +
 +	handle.reset(attachment.getHandle()->startTransaction(&statusWrapper, tpbBufferLen, tpbBuffer));
 +	state = TransactionState::ACTIVE;
@@ -365,7 +373,7 @@ index de8e6f4..db0a54e 100644
  {
  	prepare(std::span<const std::uint8_t>{});
 diff --git a/src/fb-cpp/Transaction.h b/src/fb-cpp/Transaction.h
-index 66d4594..0802447 100644
+index 66d4594..092a2c2 100644
 --- a/src/fb-cpp/Transaction.h
 +++ b/src/fb-cpp/Transaction.h
 @@ -29,6 +29,7 @@
@@ -376,7 +384,19 @@ index 66d4594..0802447 100644
  #include <span>
  #include <stdexcept>
  #include <string>
-@@ -116,7 +117,7 @@ namespace fbcpp
+@@ -44,6 +45,11 @@ namespace fbcpp
+ {
+ 	class Attachment;
+ 
++	namespace impl
++	{
++		class StatusWrapper;
++	}
++
+ 	///
+ 	/// Transaction isolation level.
+ 	///
+@@ -116,7 +122,7 @@ namespace fbcpp
  	///
  	/// Represents options used when creating a Transaction object.
  	///
@@ -385,7 +405,7 @@ index 66d4594..0802447 100644
  	{
  	public:
  		///
-@@ -286,7 +287,7 @@ namespace fbcpp
+@@ -286,7 +292,7 @@ namespace fbcpp
  			return *this;
  		}
  
@@ -394,7 +414,7 @@ index 66d4594..0802447 100644
  		std::vector<std::uint8_t> tpb;
  		std::optional<TransactionIsolationLevel> isolationLevel;
  		std::optional<TransactionReadCommittedMode> readCommittedMode;
-@@ -347,8 +348,10 @@ namespace fbcpp
+@@ -347,8 +353,10 @@ namespace fbcpp
  	/// being committed or rolled back (and not prepared), it will be automatically
  	/// rolled back.
  	///
@@ -406,7 +426,7 @@ index 66d4594..0802447 100644
  	public:
  		///
  		/// Constructs a Transaction object that starts a transaction in the specified
-@@ -492,7 +495,11 @@ namespace fbcpp
+@@ -492,7 +500,11 @@ namespace fbcpp
  		///
  		void rollbackRetaining();
  
