@@ -120,7 +120,7 @@ jobs:
       
     - name: Build Flamerobin
       run: >
-        cmake --build .\${{ matrix.build_dir }} --config Release -j 8 --verbose
+        cmake --build .\${{ matrix.build_dir }} --config Release --target flamerobin -j 8 --verbose
 
     - name: Innosetup 
       run: >

@@ -66,7 +66,7 @@ jobs:
         run: |
           export PATH="/usr/local/bin:/opt/firebird/bin:${PATH:-}"
           export LD_LIBRARY_PATH="/usr/local/lib:/usr/lib/x86_64-linux-gnu:/opt/firebird/lib:${LD_LIBRARY_PATH:-}"
-          cmake --build Build --config Release -j$(nproc)
+          cmake --build Build --config Release --target flamerobin -j$(nproc)
 
       - name: Prepare .deb package
         run: |
@@ -244,7 +244,7 @@ jobs:
 
       - name: Build Flamerobin
         run: |
-          cmake --build .\${{ matrix.build_dir }} --config Release -j 8
+          cmake --build .\${{ matrix.build_dir }} --config Release --target flamerobin -j 8
 
       - name: Innosetup
         run: |
@@ -310,7 +310,7 @@ jobs:
 
       - name: Build FlameRobin
         run: |
-          cmake --build Build --config Release -j$(sysctl -n hw.ncpu)
+          cmake --build Build --config Release --target flamerobin -j$(sysctl -n hw.ncpu)
 
       - name: Prepare macOS Artifact
         run: |
