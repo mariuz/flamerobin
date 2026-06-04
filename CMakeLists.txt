@@ -480,6 +480,8 @@ if (WIN32)
     if (VCPKG_INSTALLED_DIR AND VCPKG_TARGET_TRIPLET)
         set(FR_VCPKG_LIB_HINT HINTS "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib")
         set(FR_VCPKG_DEBUG_LIB_HINT HINTS "${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/debug/lib")
+        link_directories("${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib/manual-link")
+        link_directories("${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/debug/lib/manual-link")
     endif()
 
     # pcre2
