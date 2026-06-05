@@ -8,6 +8,45 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.6.0</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>wxWebView Integration for Printable HTML Window</B></font><br>
+<br>
+- **Modern Renderer**: Replaced the legacy `wxHtmlWindow` with a modern, feature-rich `wxWebView` component for rendering printable HTML content and table info pages.<br>
+- **Graceful Fallback**: Implemented support for building and running with fallback to `wxHtmlWindow` on systems where the `wxWebView` backend is unavailable (e.g., specific Flatpak/Snap sandboxed environments).<br>
+- **Developer Tools**: Unconditionally enabled developer tools (Inspector) for the HTML panel in all build configurations, allowing developers and administrators to inspect styling and DOM elements.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>HTML Template Modernization & Google Material Icons</B></font><br>
+<br>
+- **Vector Graphics**: Replaced all old raster PNG icons used in HTML templates (e.g., `ok.png`, `redx.png`, `view.png`) with clean vector SVGs to ensure crisp rendering on HiDPI and 4K displays.<br>
+- **Material Icons Integration**: Integrated the Google Material Icons system. The template rendering engine dynamically converts standard SVG image tags to Google Material Icons (`<span>` tags) for a modernized look.<br>
+- **Responsive CSS Layouts**: Injected a modern, responsive stylesheet dynamically into the rendered pages to ensure text, tables, and icons adjust gracefully to varying window and screen sizes.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>Local Resource Access & Security Compliance</B></font><br>
+<br>
+- **Same-Origin Security Policy**: Solved chromium/webview origin security violations (such as `file://` cross-origin blocks) by dynamically writing temporary rendered pages directly inside the HTML templates directory.<br>
+- **Path Resolution Fix**: Fixed a bug causing double prefixing (`file:///file:///`) of local image assets during URI resolution on Windows.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>Build System & Compatibility Fixes</B></font><br>
+<br>
+- **Static Linking Fix for Windows**: Resolved static linking error (`LNK1104: cannot open file 'WebView2LoaderStatic.lib'`) on MSVC by configuration-specifically extracting and adding the library directories of the found WebView2Loader static libraries to the link search directories in CMake.<br>
+- **GCC 13+ Compatibility**: Added missing `<cstdint>` header inclusion in `fb-cpp` to resolve compilation errors under newer GCC toolchains on Linux.<br>
+- **wxWidgets 3.2 Compatibility**: Wrapped the newer `ShowDevTools()` API calls inside preprocessor version guards to preserve backward compatibility with wxWidgets 3.2.<br>
+- **Multi-Platform Tweaks**: Restricted wayland-specific GTK3 dependencies strictly to Linux and BSD operating systems.<br>
+<br>
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.5.23</font><br>
 <br><br>
 <font size=+1 color="#AA0000"><B>Bug Fixes</B></font><br>
