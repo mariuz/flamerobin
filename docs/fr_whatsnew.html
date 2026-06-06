@@ -8,6 +8,23 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.6.2</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>User Manager & Sizer Consistency Fixes</B></font><br>
+<br>
+- **Client Library Dynamic Loading in FbCpp Backend**: Fixed the unhandled error "User management plugin is missing or failed to load" when accessing user management under the `fbcpp` backend on Windows. FlameRobin now dynamically loads the user-configured `fbclient.dll` using `Boost.DLL` to ensure correct resolution of the native `plugins/` directory containing the `Srp` and `Legacy_UserManager` plugins.<br>
+- **wxWidgets Sizer Debug Alerts**: Fixed multiple debug assertions/alerts on modern wxWidgets builds by removing invalid combinations of sizer alignment flags alongside the `wxEXPAND` flag in `DataGeneratorFrame`, `FindDialog`, `PrivilegesDialog`, and `ReorderFieldsDialog`.<br>
+<br>
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.6.1</font><br>
 <br><br>
 
