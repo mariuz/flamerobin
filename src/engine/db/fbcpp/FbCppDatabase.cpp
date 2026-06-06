@@ -105,11 +105,15 @@ std::vector<uint8_t> FbCppDatabase::buildDpb(bool creating, const std::string& o
 void FbCppDatabase::connect()
 {
     wxLogDebug("FbCppDatabase::connect() called for: %s", connStrM.c_str());
-    auto options = fbcpp::AttachmentOptions()
-        .setConnectionCharSet(charsetM)
-        .setUserName(userM)
-        .setPassword(passwordM)
-        .setRole(roleM);
+    auto options = fbcpp::AttachmentOptions();
+    if (!charsetM.empty())
+        options.setConnectionCharSet(charsetM);
+    if (!userM.empty())
+        options.setUserName(userM);
+    if (!passwordM.empty())
+        options.setPassword(passwordM);
+    if (!roleM.empty())
+        options.setRole(roleM);
 
     attachmentM.emplace(getClient(), connStrM, options);
     wxLogDebug("FbCppDatabase::connect() finished.");
@@ -129,14 +133,18 @@ void FbCppDatabase::create(int /*pagesize*/, int dialect, const std::string& own
     const std::string& initialUser)
 {
     wxLogDebug("FbCppDatabase::create() called for: %s", connStrM.c_str());
-    auto options = fbcpp::AttachmentOptions()
-        .setConnectionCharSet(charsetM)
-        .setUserName(userM)
-        .setPassword(passwordM)
-        .setRole(roleM)
-        .setSqlDialect(static_cast<uint32_t>(dialect))
-        .setCreateDatabase(true)
-        .setDpb(buildDpb(true, owner, initialUser));
+    auto options = fbcpp::AttachmentOptions();
+    if (!charsetM.empty())
+        options.setConnectionCharSet(charsetM);
+    if (!userM.empty())
+        options.setUserName(userM);
+    if (!passwordM.empty())
+        options.setPassword(passwordM);
+    if (!roleM.empty())
+        options.setRole(roleM);
+    options.setSqlDialect(static_cast<uint32_t>(dialect));
+    options.setCreateDatabase(true);
+    options.setDpb(buildDpb(true, owner, initialUser));
 
     attachmentM.emplace(getClient(), connStrM, options);
     wxLogDebug("FbCppDatabase::create() finished.");
