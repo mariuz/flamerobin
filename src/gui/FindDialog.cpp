@@ -350,9 +350,9 @@ void FindDialog::do_layout()
         styleguide().getControlLabelMargin());
 
     sizerEdits->Add(label_find, 0, wxALIGN_CENTER_VERTICAL);
-    sizerEdits->Add(text_ctrl_find, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL);
+    sizerEdits->Add(text_ctrl_find, 1, wxEXPAND);
     sizerEdits->Add(label_replace, 0, wxALIGN_CENTER_VERTICAL);
-    sizerEdits->Add(text_ctrl_replace, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL);
+    sizerEdits->Add(text_ctrl_replace, 1, wxEXPAND);
     sizerEdits->AddGrowableCol(1, 1);
 
     wxGridSizer* sizerChecks = new wxGridSizer(3, 2,

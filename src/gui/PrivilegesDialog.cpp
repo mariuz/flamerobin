@@ -212,7 +212,7 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
             choice_relations->SetSelection(static_cast<int>(to_select));
     }
     choice_relations->Enable(false);
-    fgSizer4->Add(choice_relations, 0, wxALIGN_CENTER_VERTICAL|wxEXPAND, 0);
+    fgSizer4->Add(choice_relations, 0, wxEXPAND, 0);
 
     checkbox_all = new wxCheckBox(privilegesPanel, ID_checkbox, "All");
     checkbox_select = new wxCheckBox(privilegesPanel, ID_checkbox,
@@ -227,41 +227,41 @@ PrivilegesDialog::PrivilegesDialog(wxWindow *parent, MetadataItem *object,
         "References");
 
     int indentation = 20;
-    fgSizer4->Add(checkbox_all, 0, wxLEFT|wxALIGN_CENTER_VERTICAL|wxEXPAND,
+    fgSizer4->Add(checkbox_all, 0, wxLEFT|wxEXPAND,
         indentation);
     fgSizer4->AddSpacer(1);
-    fgSizer4->Add(checkbox_select, 0, wxLEFT|wxALIGN_CENTER_VERTICAL|wxEXPAND,
+    fgSizer4->Add(checkbox_select, 0, wxLEFT|wxEXPAND,
         indentation);
     fgSizer4->AddSpacer(1);
-    fgSizer4->Add(checkbox_insert, 0, wxLEFT|wxALIGN_CENTER_VERTICAL|wxEXPAND,
+    fgSizer4->Add(checkbox_insert, 0, wxLEFT|wxEXPAND,
         indentation);
     fgSizer4->AddSpacer(1);
 
-    fgSizer4->Add(checkbox_update, 0, wxLEFT|wxALIGN_CENTER_VERTICAL|wxEXPAND,
+    fgSizer4->Add(checkbox_update, 0, wxLEFT|wxEXPAND,
         indentation);
     wxBoxSizer *bSizer2 = new wxBoxSizer(wxHORIZONTAL);
     textctrl_update = new wxTextCtrl(privilegesPanel, ID_textctrl, "",
         wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
     textctrl_update->SetBackgroundColour(
         wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
-    bSizer2->Add(textctrl_update, 1, wxALIGN_CENTER_VERTICAL|wxEXPAND, 0);
+    bSizer2->Add(textctrl_update, 1, wxEXPAND, 0);
     button_update_browse = new wxButton(privilegesPanel, ID_button_browse,
         "...", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
     bSizer2->Add(button_update_browse, 0, wxLEFT | wxALIGN_CENTER_VERTICAL,
         styleguide().getBrowseButtonMargin());
     fgSizer4->Add(bSizer2, 1, wxEXPAND, 0);
 
-    fgSizer4->Add(checkbox_delete, 0, wxLEFT|wxALIGN_CENTER_VERTICAL|wxEXPAND,
+    fgSizer4->Add(checkbox_delete, 0, wxLEFT|wxEXPAND,
         indentation);
     fgSizer4->AddSpacer(1);
     fgSizer4->Add(checkbox_references, 0,
-        wxLEFT|wxALIGN_CENTER_VERTICAL|wxEXPAND, indentation);
+        wxLEFT|wxEXPAND, indentation);
     wxBoxSizer *bSizer3 = new wxBoxSizer(wxHORIZONTAL);
     textctrl_references = new wxTextCtrl(privilegesPanel, ID_textctrl,
         "", wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
     textctrl_references->SetBackgroundColour(
         wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
-    bSizer3->Add(textctrl_references, 1, wxALIGN_CENTER_VERTICAL|wxEXPAND, 0);
+    bSizer3->Add(textctrl_references, 1, wxEXPAND, 0);
     button_references_browse = new wxButton(privilegesPanel,
         ID_button_browse, "...", wxDefaultPosition,
         wxDefaultSize, wxBU_EXACTFIT);

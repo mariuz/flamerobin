@@ -98,7 +98,7 @@ void ReorderFieldsDialog::layoutControls()
     sizerBtns1->Add(0, 0, 1, wxEXPAND);
 
     wxBoxSizer* sizerControls = new wxBoxSizer(wxHORIZONTAL);
-    sizerControls->Add(list_box_fields, 1, wxALIGN_CENTER_VERTICAL|wxEXPAND);
+    sizerControls->Add(list_box_fields, 1, wxEXPAND);
     sizerControls->Add(styleguide().getUnrelatedControlMargin(wxHORIZONTAL), 0);
     sizerControls->Add(sizerBtns1, 0, wxEXPAND);
 

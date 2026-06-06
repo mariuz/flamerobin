@@ -345,7 +345,7 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     flexSizer->Add( radioRange, 0, wxALIGN_CENTER_VERTICAL, 5 );
 
     rangeText = new wxTextCtrl( rightPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-    flexSizer->Add( rangeText, 0, wxEXPAND|wxALIGN_CENTER_VERTICAL, 5 );
+    flexSizer->Add( rangeText, 0, wxEXPAND, 5 );
 
     radioColumn = new wxRadioButton( rightPanel, wxID_ANY, "Value from column:", wxDefaultPosition, wxDefaultSize, 0);
     flexSizer->Add( radioColumn, 0, wxALIGN_CENTER_VERTICAL, 5 );
@@ -361,8 +361,8 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     valueChoice = new wxChoice( rightPanel, ID_choice_value, wxDefaultPosition, wxDefaultSize, tables);
     valueSizer->Add( valueChoice, 1, wxALIGN_CENTER_VERTICAL, 5 );
     valueColumnChoice = new wxChoice( rightPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, empty);
-    valueSizer->Add( valueColumnChoice, 0, wxALIGN_CENTER_VERTICAL|wxEXPAND|wxLEFT, 5 );
-    flexSizer->Add( valueSizer, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL, 5 );
+    valueSizer->Add( valueColumnChoice, 0, wxEXPAND|wxLEFT, 5 );
+    flexSizer->Add( valueSizer, 1, wxEXPAND, 5 );
 
     radioFile = new wxRadioButton( rightPanel, wxID_ANY, "Value from file:", wxDefaultPosition, wxDefaultSize, 0);
     flexSizer->Add( radioFile, 0, wxALIGN_CENTER_VERTICAL, 5 );
@@ -375,7 +375,7 @@ DataGeneratorFrame::DataGeneratorFrame(wxWindow* parent, Database* db)
     fileButton = new wxButton( rightPanel, ID_button_file, "...", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT );
     filenameSizer->Add( fileButton, 0, wxLEFT, 5 );
 
-    flexSizer->Add( filenameSizer, 1, wxEXPAND|wxALIGN_CENTER_VERTICAL, 5 );
+    flexSizer->Add( filenameSizer, 1, wxEXPAND, 5 );
 
     rightPanelSizer->Add( flexSizer, 0, wxEXPAND|wxBOTTOM|wxRIGHT|wxLEFT, 10 );
 
