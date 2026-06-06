@@ -41,102 +41,7 @@
 #include "flamerobin.xpm"
 #include "sqlicon.xpm"
 
-#include "backup32.xpm"
-#include "column32.xpm"
-#include "database32.xpm"
-#include "domain32.xpm"
-#include "function32.xpm"
-#include "generator32.xpm"
-#include "index32.xpm"
-#include "package32.xpm"
-#include "procedure32.xpm"
-#include "server32.xpm"
-#include "systemdomain32.xpm"
-#include "systempackage32.xpm"
-#include "systemtable32.xpm"
-#include "table32.xpm"
-#include "toggle32.xpm"
-#include "trigger32.xpm"
-#include "view32.xpm"
-
-// these have size 24x24
-#include "delete24.xpm"
-#include "insert24.xpm"
-#include "history24.xpm"
-#include "execute24.xpm"
-#include "ok24.xpm"
-#include "plan24.xpm"
-#include "redx24.xpm"
-#include "toggle24.xpm"
-
-// these have size 16x16
-#include "characterset.xpm"
-#include "charactersets.xpm"
-#include "column.xpm"
-#include "collation.xpm"
-#include "collations.xpm"
-#include "database.xpm"
-#include "databaseserver.xpm"
-#include "dbtrigger.xpm"
-#include "dbtriggers.xpm"
-#include "ddltrigger.xpm"
-#include "ddltriggers.xpm"
-#include "delete16.xpm"
-#include "dmltrigger.xpm"
-#include "dmltriggers.xpm"
-#include "domain.xpm"
-#include "exception16_png.cpp"
-#include "execute16.xpm"
-#include "fk16_png.cpp"
-#include "function.xpm"
-#include "functions.xpm"
-#include "generator.xpm"
-#include "generators.xpm"
-#include "globaltemporary.xpm"
-#include "globaltemporaries.xpm"
-#include "history.xpm"
-#include "index.xpm"
-#include "indices.xpm"
-#include "insert16.xpm"
-#include "input.xpm"
-#include "pk16_png.cpp"
-#include "pkfk16_png.cpp"
-#include "object.xpm"
-#include "ok.xpm"
-#include "output.xpm"
-#include "plan16.xpm"
-#include "package.xpm"
-#include "packages.xpm"
-#include "procedure.xpm"
-#include "procedures.xpm"
-#include "redx.xpm"
-#include "role16_png.cpp"
-#include "root.xpm"
-#include "server.xpm"
-#include "systemindex.xpm"
-#include "systemindices.xpm"
-#include "systemdomain.xpm"
-#include "systemdomains.xpm"
-#include "systempackage.xpm"
-#include "systempackages.xpm"
-#include "systemtable.xpm"
-#include "systemtables.xpm"
-#include "table.xpm"
-#include "tables.xpm"
-#include "toggle16.xpm"
-#include "trigger.xpm"
-#include "UDF.xpm"
-#include "UDFs.xpm"
-#include "user.xpm"
-#include "users.xpm"
-#include "view.xpm"
-
-wxBitmap bitmapFromEmbeddedPNG(const unsigned char* data, size_t len)
-{
-    wxMemoryInputStream is(data, len);
-    wxImage img(is);
-    return wxBitmap(img);
-}
+#include "core/EmbeddedSVGs.h"
 
 wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
     const wxArtClient& client, const wxSize& size)
@@ -201,142 +106,81 @@ wxBitmapBundle ArtProvider::CreateBitmapBundle(const wxArtID& id,
     if (id == ART_ExecuteSqlFrame)
         return wxBitmapBundle::FromBitmap(wxBitmap(sqlicon32_xpm));
 
-    // Map ART IDs to embedded XPMs (wrapping them in bundles)
-    // We can provide both 16x16 and 32x32 versions if available
-    auto fromXPM = [](const char* const* xpm16, const char* const* xpm32 = nullptr) {
-        if (xpm32)
-        {
-            wxVector<wxBitmap> v;
-            v.push_back(wxBitmap(xpm16));
-            v.push_back(wxBitmap(xpm32));
-            return wxBitmapBundle::FromBitmaps(v);
-        }
-        return wxBitmapBundle::FromBitmap(wxBitmap(xpm16));
+    // Map ART IDs to embedded SVGs
+    auto fromSVG = [](const char* svg_data) {
+        return wxBitmapBundle::FromSVG(svg_data, wxSize(16, 16));
     };
 
-    if (id == ART_Backup) return fromXPM(database_xpm, backup32_xpm);
-    if (id == ART_CharacterSet) return fromXPM(characterset_xpm);
-    if (id == ART_CharacterSets) return fromXPM(charactersets_xpm);
-    if (id == ART_Column) return fromXPM(column_xpm, column32_xpm);
-    if (id == ART_Collation) return fromXPM(collation_xpm);
-    if (id == ART_Collations) return fromXPM(collations_xpm);
-    if (id == ART_CommitTransaction)
-    {
-        wxVector<wxBitmap> v;
-        v.push_back(wxBitmap(ok_xpm));
-        v.push_back(wxBitmap(ok24_xpm));
-        return wxBitmapBundle::FromBitmaps(v);
-    }
-    if (id == ART_Computed) return fromXPM(function_xpm);
+    if (id == ART_Backup) return fromSVG(svg_backup);
+    if (id == ART_CharacterSet) return fromSVG(svg_characterset);
+    if (id == ART_CharacterSets) return fromSVG(svg_characterset);
+    if (id == ART_Column) return fromSVG(svg_column);
+    if (id == ART_Collation) return fromSVG(svg_collation);
+    if (id == ART_Collations) return fromSVG(svg_collation);
+    if (id == ART_CommitTransaction) return fromSVG(svg_committransaction);
+    if (id == ART_Computed) return fromSVG(svg_function);
     if (id == ART_DatabaseConnected || id == ART_DatabaseDisconnected)
-        return fromXPM(database_xpm, database32_xpm);
+        return fromSVG(svg_database);
     if (id == ART_DatabaseServer || id == ART_Server)
-        return fromXPM(databaseserver_xpm, server32_xpm);
-    if (id == ART_DBTrigger) return fromXPM(DBTrigger_xpm, trigger32_xpm);
-    if (id == ART_DBTriggers) return fromXPM(DBTriggers_xpm, trigger32_xpm);
-    if (id == ART_DMLTrigger) return fromXPM(DMLTrigger_xpm, trigger32_xpm);
-    if (id == ART_DMLTriggers) return fromXPM(DMLTriggers_xpm, trigger32_xpm);
-    if (id == ART_DDLTrigger) return fromXPM(DDLTrigger_xpm, trigger32_xpm);
-    if (id == ART_DDLTriggers) return fromXPM(DDLTriggers_xpm, trigger32_xpm);
-    if (id == ART_Domain) return fromXPM(domain_xpm, domain32_xpm);
-    if (id == ART_Domains) return fromXPM(domain_xpm, domain32_xpm);
+        return fromSVG(svg_database);
+    if (id == ART_DBTrigger) return fromSVG(svg_trigger);
+    if (id == ART_DBTriggers) return fromSVG(svg_trigger);
+    if (id == ART_DMLTrigger) return fromSVG(svg_trigger);
+    if (id == ART_DMLTriggers) return fromSVG(svg_trigger);
+    if (id == ART_DDLTrigger) return fromSVG(svg_trigger);
+    if (id == ART_DDLTriggers) return fromSVG(svg_trigger);
+    if (id == ART_Domain) return fromSVG(svg_domain);
+    if (id == ART_Domains) return fromSVG(svg_domain);
     if (id == ART_Exception || id == ART_Exceptions)
-        return wxBitmapBundle::FromBitmap(bitmapFromEmbeddedPNG(exception16_png, sizeof(exception16_png)));
-    if (id == ART_ExecuteStatement)
-    {
-        wxVector<wxBitmap> v;
-        v.push_back(wxBitmap(execute16_xpm));
-        v.push_back(wxBitmap(execute24_xpm));
-        return wxBitmapBundle::FromBitmaps(v);
-    }
-    if (id == ART_ForeignKey)
-        return wxBitmapBundle::FromBitmap(bitmapFromEmbeddedPNG(fk16_png, sizeof(fk16_png)));
-    if (id == ART_Function) return fromXPM(function_xpm, function32_xpm);
-    if (id == ART_Functions) return fromXPM(functions_xpm, function32_xpm);
-    if (id == ART_Generator) return fromXPM(generator_xpm, generator32_xpm);
-    if (id == ART_Generators) return fromXPM(generators_xpm, generator32_xpm);
+        return fromSVG(svg_exception);
+    if (id == ART_ExecuteStatement) return fromSVG(svg_executestatement);
+    if (id == ART_ForeignKey) return fromSVG(svg_fk);
+    if (id == ART_Function) return fromSVG(svg_function);
+    if (id == ART_Functions) return fromSVG(svg_functions);
+    if (id == ART_Generator) return fromSVG(svg_generator);
+    if (id == ART_Generators) return fromSVG(svg_generators);
     if (id == ART_GlobalTemporary || id == ART_GlobalTemporaries)
-        return fromXPM(globaltemporary_xpm);
-    if (id == ART_History || id == ART_ShowProfiler)
-    {
-        wxVector<wxBitmap> v;
-        v.push_back(wxBitmap(history_xpm));
-        v.push_back(wxBitmap(history24_xpm));
-        return wxBitmapBundle::FromBitmaps(v);
-    }
-    if (id == ART_Object) return fromXPM(object_xpm);
-    if (id == ART_Output) return fromXPM(output_xpm);
-    if (id == ART_ParameterInput || id == ART_Input) return fromXPM(input_xpm);
-    if (id == ART_ParameterOutput) return fromXPM(output_xpm);
-    if (id == ART_PrimaryAndForeignKey)
-        return wxBitmapBundle::FromBitmap(bitmapFromEmbeddedPNG(pkfk16_png, sizeof(pkfk16_png)));
-    if (id == ART_PrimaryKey)
-        return wxBitmapBundle::FromBitmap(bitmapFromEmbeddedPNG(pk16_png, sizeof(pk16_png)));
-    if (id == ART_Package) return fromXPM(package_xpm, package32_xpm);
-    if (id == ART_Packages) return fromXPM(packages_xpm, package32_xpm);
-    if (id == ART_Procedure) return fromXPM(procedure_xpm, procedure32_xpm);
-    if (id == ART_Procedures) return fromXPM(procedures_xpm, procedure32_xpm);
-    if (id == ART_Publication) return fromXPM(table_xpm, table32_xpm);
-    if (id == ART_Publications) return fromXPM(tables_xpm, table32_xpm);
-    if (id == ART_Replication) return fromXPM(databaseserver_xpm, server32_xpm);
+        return fromSVG(svg_table);
+    if (id == ART_History || id == ART_ShowProfiler) return fromSVG(svg_history);
+    if (id == ART_Object) return fromSVG(svg_package);
+    if (id == ART_Output || id == ART_ParameterOutput) return fromSVG(svg_go_back);
+    if (id == ART_ParameterInput || id == ART_Input) return fromSVG(svg_go_forward);
+    if (id == ART_PrimaryAndForeignKey) return fromSVG(svg_pkfk);
+    if (id == ART_PrimaryKey) return fromSVG(svg_pk);
+    if (id == ART_Package) return fromSVG(svg_package);
+    if (id == ART_Packages) return fromSVG(svg_package);
+    if (id == ART_Procedure) return fromSVG(svg_procedure);
+    if (id == ART_Procedures) return fromSVG(svg_procedures);
+    if (id == ART_Publication) return fromSVG(svg_table);
+    if (id == ART_Publications) return fromSVG(svg_tables);
+    if (id == ART_Replication) return fromSVG(svg_database);
     if (id == ART_Role || id == ART_Roles || id == ART_SystemRole || id == ART_SystemRoles)
-        return wxBitmapBundle::FromBitmap(bitmapFromEmbeddedPNG(role16_png, sizeof(role16_png)));
-    if (id == ART_RollbackTransaction)
-    {
-        wxVector<wxBitmap> v;
-        v.push_back(wxBitmap(redx_xpm));
-        v.push_back(wxBitmap(redx24_xpm));
-        return wxBitmapBundle::FromBitmaps(v);
-    }
-    if (id == ART_Root) return fromXPM(root_xpm);
-    if (id == ART_ShowExecutionPlan || id == ART_Explain)
-    {
-        wxVector<wxBitmap> v;
-        v.push_back(wxBitmap(plan16_xpm));
-        v.push_back(wxBitmap(plan24_xpm));
-        return wxBitmapBundle::FromBitmaps(v);
-    }
-    if (id == ART_SystemIndex) return fromXPM(systemindex32_xpm);
-    if (id == ART_SystemIndices) return fromXPM(systemindices_xpm);
-    if (id == ART_SystemDomain) return fromXPM(systemdomain_xpm, systemdomain32_xpm);
-    if (id == ART_SystemDomains) return fromXPM(systemdomains_xpm, systemdomain32_xpm);
-    if (id == ART_SystemPackage) return fromXPM(systempackage_xpm, systempackage32_xpm);
-    if (id == ART_SystemPackages) return fromXPM(systempackages_xpm, systempackage32_xpm);
-    if (id == ART_SystemTable) return fromXPM(systemtable_xpm, systemtable32_xpm);
-    if (id == ART_SystemTables) return fromXPM(systemtables_xpm, systemtable32_xpm);
-    if (id == ART_Table) return fromXPM(table_xpm, table32_xpm);
-    if (id == ART_Tables) return fromXPM(tables_xpm, table32_xpm);
-    if (id == ART_Trigger) return fromXPM(trigger_xpm, trigger32_xpm);
-    if (id == ART_Triggers) return fromXPM(trigger_xpm, trigger32_xpm);
-    if (id == ART_UDF) return fromXPM(UDF_xpm);
-    if (id == ART_UDFs) return fromXPM(UDFs_xpm);
-    if (id == ART_User || id == ART_Users) return fromXPM(user_xpm);
-    if (id == ART_View) return fromXPM(view_xpm, view32_xpm);
-    if (id == ART_Views) return fromXPM(view_xpm, view32_xpm);
-    if (id == ART_Index) return fromXPM(index_xpm, index32_xpm);
-    if (id == ART_Indices) return fromXPM(indices_xpm, index32_xpm);
-    if (id == ART_DeleteRow)
-    {
-        wxVector<wxBitmap> v;
-        v.push_back(wxBitmap(delete16_xpm));
-        v.push_back(wxBitmap(delete24_xpm));
-        return wxBitmapBundle::FromBitmaps(v);
-    }
-    if (id == ART_InsertRow)
-    {
-        wxVector<wxBitmap> v;
-        v.push_back(wxBitmap(insert16_xpm));
-        v.push_back(wxBitmap(insert24_xpm));
-        return wxBitmapBundle::FromBitmaps(v);
-    }
-    if (id == ART_ToggleView)
-    {
-        wxVector<wxBitmap> v;
-        v.push_back(wxBitmap(toggle16_xpm));
-        v.push_back(wxBitmap(toggle24_xpm));
-        v.push_back(wxBitmap(toggle32_xpm));
-        return wxBitmapBundle::FromBitmaps(v);
-    }
+        return fromSVG(svg_role);
+    if (id == ART_RollbackTransaction) return fromSVG(svg_rollbacktransaction);
+    if (id == ART_Root) return fromSVG(svg_database);
+    if (id == ART_ShowExecutionPlan || id == ART_Explain) return fromSVG(svg_plan);
+    if (id == ART_SystemIndex) return fromSVG(svg_index);
+    if (id == ART_SystemIndices) return fromSVG(svg_indices);
+    if (id == ART_SystemDomain) return fromSVG(svg_domain);
+    if (id == ART_SystemDomains) return fromSVG(svg_domains);
+    if (id == ART_SystemPackage) return fromSVG(svg_package);
+    if (id == ART_SystemPackages) return fromSVG(svg_package);
+    if (id == ART_SystemTable) return fromSVG(svg_table);
+    if (id == ART_SystemTables) return fromSVG(svg_tables);
+    if (id == ART_Table) return fromSVG(svg_table);
+    if (id == ART_Tables) return fromSVG(svg_tables);
+    if (id == ART_Trigger) return fromSVG(svg_trigger);
+    if (id == ART_Triggers) return fromSVG(svg_triggers);
+    if (id == ART_UDF) return fromSVG(svg_function);
+    if (id == ART_UDFs) return fromSVG(svg_functions);
+    if (id == ART_User || id == ART_Users) return fromSVG(svg_user);
+    if (id == ART_View) return fromSVG(svg_view);
+    if (id == ART_Views) return fromSVG(svg_views);
+    if (id == ART_Index) return fromSVG(svg_index);
+    if (id == ART_Indices) return fromSVG(svg_indices);
+    if (id == ART_DeleteRow) return fromSVG(svg_redx);
+    if (id == ART_InsertRow) return fromSVG(svg_new);
+    if (id == ART_ToggleView) return fromSVG(svg_view);
 
     return wxBitmapBundle();
 }

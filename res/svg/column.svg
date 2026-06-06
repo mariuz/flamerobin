@@ -1,5 +1,1 @@
-<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect x="6" y="2" width="4" height="12" rx="1" stroke="#7ED321" stroke-width="1.5"/>
-  <line x1="4" y1="5" x2="12" y2="5" stroke="#7ED321" stroke-width="1.5"/>
-  <line x1="4" y1="11" x2="12" y2="11" stroke="#7ED321" stroke-width="1.5"/>
-</svg>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="#4CAF50" d="M3 5v14h18V5H3zm5.33 12H5V7h3.33v10zm5.34 0h-3.33V7h3.33v10zM19 17h-3.33V7H19v10z"/></svg>

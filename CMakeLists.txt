@@ -670,6 +670,7 @@ if(APPLE)
     add_resources(CODE_TEMPLATES ${CMAKE_SOURCE_DIR}/code-templates SharedSupport/code-templates *)
     add_resources(ICON ${CMAKE_SOURCE_DIR}/res Resources flamerobin.icns)
     add_resources(XML_STYLES ${CMAKE_SOURCE_DIR}/xml-styles SharedSupport/xml-styles *)
+    add_resources(SVG_IMAGES ${CMAKE_SOURCE_DIR}/res/svg SharedSupport/images/svg *)
 
     set(RESOURCE_FILES_MAC
             ${HTML_TEMPLATES}
@@ -679,6 +680,7 @@ if(APPLE)
             ${CODE_TEMPLATES}
             ${ICON}
 			${XML_STYLES}
+			${SVG_IMAGES}
     )
 
 endif (APPLE)
@@ -710,6 +712,8 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/code-templates DESTINATION ${CMAKE_CURRENT
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/sys-templates  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/conf-defs  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/xml-styles  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res/svg DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/images)
+
 
 if (APPLE)
     add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCE_LIST} ${HEADER_LIST} ${RESOURCE_FILES_MAC})
