@@ -8,6 +8,23 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.6.3</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Modernized UI & Firebird 6 Connection Fixes</B></font><br>
+<br>
+- **Google Material Icons Integration**: Completely replaced legacy pixelated XPM and PNG icons with customized vector-based Google Material Icons SVGs. This modernizes the UI, providing clean, sharp, high-resolution visuals across all database objects (tables, views, indices, roles, packages, triggers, procedures) and command buttons/menus.<br>
+- **Firebird 6 Connection Fixes**: Fixed connection failures (resulting in `isc_invalid_name` errors) by conditionally setting parameters like character set, username, password, and role in `AttachmentOptions` only when they are not empty. This ensures correct compatibility with newer Firebird 6 clients and servers.<br>
+<br>
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.6.2</font><br>
 <br><br>
 
