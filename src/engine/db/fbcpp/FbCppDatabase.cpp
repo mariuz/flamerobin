@@ -31,6 +31,7 @@
 #include <stdexcept>
 #include <firebird/Interface.h>
 #include <wx/log.h>
+#include <boost/dll.hpp>
 
 #ifndef isc_dpb_owner
 #define isc_dpb_owner 102
@@ -47,6 +48,8 @@ extern "C" Firebird::IMaster* ISC_EXPORT fb_get_master_interface();
 namespace fr
 {
 
+std::string FbCppDatabase::clientLibStaticM;
+
 FbCppDatabase::FbCppDatabase()
 {
 }
@@ -56,10 +59,17 @@ fbcpp::Client& FbCppDatabase::getClient()
     static std::optional<fbcpp::Client> client;
     if (!client)
     {
-        Firebird::IMaster* master = fb_get_master_interface();
-        if (!master)
-            throw std::runtime_error("Failed to get Firebird master interface");
-        client.emplace(master);
+        if (!clientLibStaticM.empty())
+        {
+            client.emplace(boost::dll::fs::path(clientLibStaticM));
+        }
+        else
+        {
+            Firebird::IMaster* master = fb_get_master_interface();
+            if (!master)
+                throw std::runtime_error("Failed to get Firebird master interface");
+            client.emplace(master);
+        }
     }
     return *client;
 }
@@ -267,6 +277,8 @@ void FbCppDatabase::setCharset(const std::string& charset)
 void FbCppDatabase::setClientLibrary(const std::string& clientLib)
 {
     clientLibM = clientLib;
+    if (!clientLib.empty())
+        clientLibStaticM = clientLib;
 }
 
 void FbCppDatabase::setCryptKeyData(const std::string& cryptKeyData)

@@ -94,6 +94,8 @@ private:
     std::string charsetM;
     std::string clientLibM;
     std::string cryptKeyDataM;
+
+    static std::string clientLibStaticM;
 };
 
 } // namespace fr
