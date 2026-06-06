@@ -604,28 +604,34 @@ wxString Relation::getRebuildSql(const wxString& forColumn)
         alter table TBL alter OLD_COLUMN position OLD_POSITION;
         */
         
-        alterColumnSample += "/* --Sample to recreate column-- \n\n";
-        ColumnPtr col = t1->findColumn(forColumn);
-        col->setName_("TMP$COLUMN");
-        CreateDDLVisitor cdv(0);
-        (*col).acceptVisitor(&cdv);
-        alterColumnSample += "ALTER TABLE " +
-                t1->getQuotedName() + " ADD " + cdv.getPrefixSql() + "; --here you can change the type if necessary" + "\n";
-        alterColumnSample += cdv.getSuffixSql();
-        col->setName_(forColumn);
+        if (!forColumn.IsEmpty())
+        {
+            ColumnPtr col = t1->findColumn(forColumn);
+            if (col)
+            {
+                alterColumnSample += "/* --Sample to recreate column-- \n\n";
+                col->setName_("TMP$COLUMN");
+                CreateDDLVisitor cdv(0);
+                (*col).acceptVisitor(&cdv);
+                alterColumnSample += "ALTER TABLE " +
+                        t1->getQuotedName() + " ADD " + cdv.getPrefixSql() + "; --here you can change the type if necessary" + "\n";
+                alterColumnSample += cdv.getSuffixSql();
+                col->setName_(forColumn);
 
-        alterColumnSample += "COMMIT;\n";
+                alterColumnSample += "COMMIT;\n";
 
-        alterColumnSample += "UPDATE " +
-            t1->getQuotedName() + " SET TMP$COLUMN = " + forColumn + ";--here you can put your logic" + "\n";
-        
-        alterColumnSample += col ->getDropSqlStatement() + ";" + "\n";
-        alterColumnSample += "ALTER TABLE " +
-            t1->getQuotedName() + " ALTER COLUMN TMP$COLUMN TO " + forColumn + ";" + "\n";
-        alterColumnSample += "ALTER TABLE " +
-            t1->getQuotedName() + " ALTER COLUMN " + forColumn +
-            " POSITION " + wxString::Format("%d", t1->findColumnPosition(forColumn)) + ";" + "\n";
-        alterColumnSample += "-- */\n\n\n";
+                alterColumnSample += "UPDATE " +
+                    t1->getQuotedName() + " SET TMP$COLUMN = " + forColumn + ";--here you can put your logic" + "\n";
+                
+                alterColumnSample += col->getDropSqlStatement() + ";" + "\n";
+                alterColumnSample += "ALTER TABLE " +
+                    t1->getQuotedName() + " ALTER COLUMN TMP$COLUMN TO " + forColumn + ";" + "\n";
+                alterColumnSample += "ALTER TABLE " +
+                    t1->getQuotedName() + " ALTER COLUMN " + forColumn +
+                    " POSITION " + wxString::Format("%d", t1->findColumnPosition(forColumn)) + ";" + "\n";
+                alterColumnSample += "-- */\n\n\n";
+            }
+        }
     }
 
     wxString createChecks, dropChecks;
