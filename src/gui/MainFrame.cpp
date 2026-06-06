@@ -1309,7 +1309,13 @@ void MainFrame::OnMenuCreateDatabase(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuManageUsers(wxCommandEvent& WXUNUSED(event))
 {
     ServerPtr s = getServer(treeMainM->getSelectedMetadataItem());
-    if (checkValidServer(s))
+    if (!checkValidServer(s))
+        return;
+
+    ProgressDialog pd(this, _("Connecting to Server..."), 1);
+    pd.doShow();
+    fr::IServicePtr svc = getDALService(s.get(), &pd, true); // true = need SYSDBA password
+    if (svc)
         MetadataItemPropertiesFrame::showPropertyPage(s.get());
 }
 
@@ -1392,9 +1398,9 @@ void MainFrame::OnMenuGetServerVersion(wxCommandEvent& WXUNUSED(event))
     {
         // progress dialog will get closed in case of fatal exception or when
         // retieving is complete
-    ProgressDialog pd(0, _("Retrieving server version"), 1);
-    pd.doShow();
-        fr::IServicePtr svc = s->getDALService(&pd, false);    // false = no need for sysdba
+        ProgressDialog pd(0, _("Retrieving server version"), 1);
+        pd.doShow();
+        fr::IServicePtr svc = getDALService(s.get(), &pd, false);    // false = no need for sysdba
         if (!svc)
             return;
         version = svc->getVersion();

@@ -154,14 +154,13 @@ bool connectDatabase(Database* db, wxWindow* parent,
     return true;
 }
 
-bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
-    bool sysdba)
+fr::IServicePtr getDALService(Server* s, ProgressIndicator* p, bool sysdba)
 {
     fr::IServicePtr dalSvc = s->getDALService(p, sysdba);
     if (!dalSvc)
     {
         wxString msg;
-        if (p->isCanceled())
+        if (p && p->isCanceled())
             msg = _("You have canceled the search for usable existing connection credentials.");
         else
             msg = _("None of the known database connection credentials could be used.");
@@ -173,7 +172,7 @@ bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
         UsernamePasswordDialog upd(wxGetActiveWindow(), msg, "SYSDBA",
             flags);
         if (upd.ShowModal() != wxID_OK)
-            return false;
+            return nullptr;
         wxString username(upd.getUsername());
         wxString password(upd.getPassword());
 
@@ -194,9 +193,18 @@ bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
         {
             wxMessageBox(wxString::FromUTF8(e.what()), _("Error"),
                 wxICON_ERROR | wxOK);
-            return false;
+            return nullptr;
         }
     }
+    return dalSvc;
+}
+
+bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
+    bool sysdba)
+{
+    fr::IServicePtr dalSvc = getDALService(s, p, sysdba);
+    if (!dalSvc)
+        return false;
 
     if (auto ibppSvc = std::dynamic_pointer_cast<fr::IbppService>(dalSvc))
     {

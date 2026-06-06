@@ -32,6 +32,7 @@
 #include <ibpp.h>
 
 #include "engine/db/IStatement.h"
+#include "engine/db/DatabaseBackend.h"
 #include "metadata/MetadataClasses.h"
 
 class ProgressDialog;
@@ -52,6 +53,8 @@ bool selectRelationColumnsIntoVector(Relation* t, wxWindow* parent,
 //! prompts for password if needed and connects to database
 bool connectDatabase(Database *db, wxWindow* parent,
     ProgressDialog* progressdialog = 0);
+
+fr::IServicePtr getDALService(Server* s, ProgressIndicator* p, bool sysdba);
 
 bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
     bool sysdba);
