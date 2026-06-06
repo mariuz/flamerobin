@@ -8,6 +8,28 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.6.1</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>User Management & Service Connection Fixes</B></font><br>
+<br>
+- **Credential Prompting for Services**: Fixed silent failures in "Manage Users" and "Server Version" actions when credentials are not cached. The application now properly prompts the user for credentials (e.g. SYSDBA password) when establishing service connections.<br>
+- **Native User Management in FbCpp Backend**: Implemented native Firebird Service API calls for adding, modifying, deleting, and displaying users directly in `FbCppService` using Service Parameter Blocks (SPB). This secures full user management support on the default `FbCpp` backend without delegating to IBPP.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>Bug Fixes</B></font><br>
+<br>
+- **"Generate Rebuild Script" Crash**: Fixed a fatal error / null pointer dereference crash when executing the "Generate rebuild script" under Table Properties. Wrapped the sample column-recreation DDL generator in safety checks to prevent crashes when rebuilding a whole table.<br>
+<br>
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.6.0</font><br>
 <br><br>
 
