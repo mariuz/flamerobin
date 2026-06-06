@@ -8,6 +8,7 @@
   "supports": "(windows & !uwp) | linux | osx",
   "dependencies": [
     "boost-dll",
+    "boost-filesystem",
     "boost-multiprecision",
     "boost-test",
     "firebird",
@@ -46,6 +47,10 @@
   "overrides": [
     {
       "name": "boost-dll",
+      "version": "1.90.0"
+    },
+    {
+      "name": "boost-filesystem",
       "version": "1.90.0"
     },
     {
