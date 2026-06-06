@@ -725,8 +725,10 @@ if (APPLE)
     )
 endif (APPLE)
 
-find_package(Boost REQUIRED COMPONENTS filesystem)
-list(APPEND FR_LIBS Boost::filesystem)
+if (ENABLE_VCPKG)
+    find_package(Boost REQUIRED COMPONENTS filesystem)
+    list(APPEND FR_LIBS Boost::filesystem)
+endif ()
 
 target_link_libraries(${PROJECT_NAME} IBPP fb-cpp::fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
 target_compile_definitions(${PROJECT_NAME} PRIVATE FBCPP_VERSION="${FBCPP_VERSION_STR}")
