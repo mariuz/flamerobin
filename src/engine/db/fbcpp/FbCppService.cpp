@@ -28,7 +28,9 @@
 #include <thread>
 #include <fb-cpp/Exception.h>
 #include <firebird/Interface.h>
+#if FB_CPP_USE_BOOST_DLL != 0
 #include <boost/dll.hpp>
+#endif
 
 extern "C" Firebird::IMaster* ISC_EXPORT fb_get_master_interface();
 
@@ -73,11 +75,13 @@ void FbCppService::connect()
 {
     if (!clientM)
     {
+#if FB_CPP_USE_BOOST_DLL != 0
         if (!libraryPathM.empty())
         {
             clientM.emplace(boost::dll::fs::path(libraryPathM));
         }
         else
+#endif
         {
             Firebird::IMaster* master = fb_get_master_interface();
             if (!master)

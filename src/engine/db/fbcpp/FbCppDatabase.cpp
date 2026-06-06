@@ -31,7 +31,9 @@
 #include <stdexcept>
 #include <firebird/Interface.h>
 #include <wx/log.h>
+#if FB_CPP_USE_BOOST_DLL != 0
 #include <boost/dll.hpp>
+#endif
 
 #ifndef isc_dpb_owner
 #define isc_dpb_owner 102
@@ -59,11 +61,13 @@ fbcpp::Client& FbCppDatabase::getClient()
     static std::optional<fbcpp::Client> client;
     if (!client)
     {
+#if FB_CPP_USE_BOOST_DLL != 0
         if (!clientLibStaticM.empty())
         {
             client.emplace(boost::dll::fs::path(clientLibStaticM));
         }
         else
+#endif
         {
             Firebird::IMaster* master = fb_get_master_interface();
             if (!master)
