@@ -24,6 +24,8 @@
 #include "engine/db/fbcpp/FbCppService.h"
 #include <stdexcept>
 #include <cstdio>
+#include <chrono>
+#include <thread>
 #include <fb-cpp/Exception.h>
 #include <firebird/Interface.h>
 
@@ -31,6 +33,36 @@ extern "C" Firebird::IMaster* ISC_EXPORT fb_get_master_interface();
 
 namespace fr
 {
+
+static unsigned short readVal16(const unsigned char* p)
+{
+    return (unsigned short)(p[0] | (p[1] << 8));
+}
+
+static uint32_t readVal32(const unsigned char* p)
+{
+    return (uint32_t)(p[0] | (p[1] << 8) | (p[2] << 16) | (p[3] << 24));
+}
+
+static void waitService(Firebird::IService* svc, fbcpp::impl::StatusWrapper* status)
+{
+    unsigned char request[] = { isc_info_svc_line };
+    unsigned char result[1024];
+    for (;;)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        svc->query(status, 0, nullptr, sizeof(request), request, sizeof(result), result);
+        if (status->isDirty())
+            fbcpp::impl::StatusWrapper::checkException(status);
+
+        if (result[0] != isc_info_svc_line)
+            break;
+
+        unsigned short len = readVal16(result + 1);
+        if (len == 0)
+            break;
+    }
+}
 
 FbCppService::FbCppService()
 {
@@ -257,22 +289,220 @@ std::string FbCppService::getNextLine()
 
 void FbCppService::getUsers(std::vector<UserData>& users)
 {
-    // Firebird user management via services uses a specific set of SPB items.
-    // Since fb-cpp doesn't wrap this, we would need to go low-level.
-    // For now, we'll keep it as a TODO or implement a basic version if possible.
     users.clear();
+    if (!clientM)
+        connect();
+
+    Firebird::IUtil* utl = clientM->getUtil();
+    fbcpp::impl::StatusWrapper status(*clientM);
+    Firebird::IXpbBuilder* spb = utl->getXpbBuilder(&status, Firebird::IXpbBuilder::SPB_START, nullptr, 0);
+    if (status.isDirty())
+        fbcpp::impl::StatusWrapper::checkException(&status);
+
+    try
+    {
+        spb->insertTag(&status, isc_action_svc_display_user);
+        if (status.isDirty())
+            fbcpp::impl::StatusWrapper::checkException(&status);
+
+        auto svc = serviceM->getHandle();
+        svc->start(&status, spb->getBufferLength(&status), spb->getBuffer(&status));
+        if (status.isDirty())
+            fbcpp::impl::StatusWrapper::checkException(&status);
+    }
+    catch (...)
+    {
+        spb->dispose();
+        throw;
+    }
+    spb->dispose();
+
+    unsigned char request[] = { isc_info_svc_get_users };
+    std::vector<unsigned char> result(65535);
+    auto svc = serviceM->getHandle();
+    svc->query(&status, 0, nullptr, sizeof(request), request, result.size(), result.data());
+    if (status.isDirty())
+        fbcpp::impl::StatusWrapper::checkException(&status);
+
+    if (result[0] != isc_info_svc_get_users)
+        throw std::runtime_error("Service query returned unexpected answer");
+
+    unsigned short totalLen = (unsigned short)(result[1] | (result[2] << 8));
+    const unsigned char* p = result.data();
+    const unsigned char* pEnd = p + 3 + totalLen;
+    p += 3; // Skip tag and length
+
+    UserData user;
+    while (p < pEnd && *p != isc_info_end)
+    {
+        unsigned char tag = *p;
+        if (tag == isc_spb_sec_userid)
+        {
+            user.userId = (int)readVal32(p + 1);
+            p += 5;
+        }
+        else if (tag == isc_spb_sec_groupid)
+        {
+            user.groupId = (int)readVal32(p + 1);
+            p += 5;
+        }
+        else
+        {
+            unsigned short len = readVal16(p + 1);
+            std::string val((const char*)(p + 3), len);
+            switch (tag)
+            {
+                case isc_spb_sec_username:
+                    if (!user.username.empty())
+                    {
+                        users.push_back(user);
+                        user = UserData();
+                    }
+                    user.username = val;
+                    break;
+                case isc_spb_sec_password:
+                    user.password = val;
+                    break;
+                case isc_spb_sec_firstname:
+                    user.firstName = val;
+                    break;
+                case isc_spb_sec_middlename:
+                    user.middleName = val;
+                    break;
+                case isc_spb_sec_lastname:
+                    user.lastName = val;
+                    break;
+            }
+            p += 3 + len;
+        }
+    }
+    if (!user.username.empty())
+        users.push_back(user);
 }
 
-void FbCppService::addUser(const UserData& /*user*/)
+void FbCppService::addUser(const UserData& user)
 {
+    if (!clientM)
+        connect();
+
+    Firebird::IUtil* utl = clientM->getUtil();
+    fbcpp::impl::StatusWrapper status(*clientM);
+    Firebird::IXpbBuilder* spb = utl->getXpbBuilder(&status, Firebird::IXpbBuilder::SPB_START, nullptr, 0);
+    if (status.isDirty())
+        fbcpp::impl::StatusWrapper::checkException(&status);
+
+    try
+    {
+        spb->insertTag(&status, isc_action_svc_add_user);
+        spb->insertString(&status, isc_spb_sec_username, user.username.c_str());
+        spb->insertString(&status, isc_spb_sec_password, user.password.c_str());
+        if (!user.firstName.empty())
+            spb->insertString(&status, isc_spb_sec_firstname, user.firstName.c_str());
+        if (!user.middleName.empty())
+            spb->insertString(&status, isc_spb_sec_middlename, user.middleName.c_str());
+        if (!user.lastName.empty())
+            spb->insertString(&status, isc_spb_sec_lastname, user.lastName.c_str());
+        if (user.userId != 0)
+            spb->insertInt(&status, isc_spb_sec_userid, user.userId);
+        if (user.groupId != 0)
+            spb->insertInt(&status, isc_spb_sec_groupid, user.groupId);
+
+        if (status.isDirty())
+            fbcpp::impl::StatusWrapper::checkException(&status);
+
+        auto svc = serviceM->getHandle();
+        svc->start(&status, spb->getBufferLength(&status), spb->getBuffer(&status));
+        if (status.isDirty())
+            fbcpp::impl::StatusWrapper::checkException(&status);
+
+        waitService(svc.get(), &status);
+    }
+    catch (...)
+    {
+        spb->dispose();
+        throw;
+    }
+    spb->dispose();
 }
 
-void FbCppService::modifyUser(const UserData& /*user*/)
+void FbCppService::modifyUser(const UserData& user)
 {
+    if (!clientM)
+        connect();
+
+    Firebird::IUtil* utl = clientM->getUtil();
+    fbcpp::impl::StatusWrapper status(*clientM);
+    Firebird::IXpbBuilder* spb = utl->getXpbBuilder(&status, Firebird::IXpbBuilder::SPB_START, nullptr, 0);
+    if (status.isDirty())
+        fbcpp::impl::StatusWrapper::checkException(&status);
+
+    try
+    {
+        spb->insertTag(&status, isc_action_svc_modify_user);
+        spb->insertString(&status, isc_spb_sec_username, user.username.c_str());
+        if (!user.password.empty())
+            spb->insertString(&status, isc_spb_sec_password, user.password.c_str());
+        if (!user.firstName.empty())
+            spb->insertString(&status, isc_spb_sec_firstname, user.firstName.c_str());
+        if (!user.middleName.empty())
+            spb->insertString(&status, isc_spb_sec_middlename, user.middleName.c_str());
+        if (!user.lastName.empty())
+            spb->insertString(&status, isc_spb_sec_lastname, user.lastName.c_str());
+        if (user.userId != 0)
+            spb->insertInt(&status, isc_spb_sec_userid, user.userId);
+        if (user.groupId != 0)
+            spb->insertInt(&status, isc_spb_sec_groupid, user.groupId);
+
+        if (status.isDirty())
+            fbcpp::impl::StatusWrapper::checkException(&status);
+
+        auto svc = serviceM->getHandle();
+        svc->start(&status, spb->getBufferLength(&status), spb->getBuffer(&status));
+        if (status.isDirty())
+            fbcpp::impl::StatusWrapper::checkException(&status);
+
+        waitService(svc.get(), &status);
+    }
+    catch (...)
+    {
+        spb->dispose();
+        throw;
+    }
+    spb->dispose();
 }
 
-void FbCppService::removeUser(const std::string& /*username*/)
+void FbCppService::removeUser(const std::string& username)
 {
+    if (!clientM)
+        connect();
+
+    Firebird::IUtil* utl = clientM->getUtil();
+    fbcpp::impl::StatusWrapper status(*clientM);
+    Firebird::IXpbBuilder* spb = utl->getXpbBuilder(&status, Firebird::IXpbBuilder::SPB_START, nullptr, 0);
+    if (status.isDirty())
+        fbcpp::impl::StatusWrapper::checkException(&status);
+
+    try
+    {
+        spb->insertTag(&status, isc_action_svc_delete_user);
+        spb->insertString(&status, isc_spb_sec_username, username.c_str());
+
+        if (status.isDirty())
+            fbcpp::impl::StatusWrapper::checkException(&status);
+
+        auto svc = serviceM->getHandle();
+        svc->start(&status, spb->getBufferLength(&status), spb->getBuffer(&status));
+        if (status.isDirty())
+            fbcpp::impl::StatusWrapper::checkException(&status);
+
+        waitService(svc.get(), &status);
+    }
+    catch (...)
+    {
+        spb->dispose();
+        throw;
+    }
+    spb->dispose();
 }
 
 bool FbCppService::versionIsHigherOrEqualTo(int major, int minor)
