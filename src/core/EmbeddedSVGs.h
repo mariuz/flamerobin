@@ -96,4 +96,8 @@ const char* const svg_view = R"svg(<svg width="16" height="16" viewBox="0 0 24 2
 
 const char* const svg_views = R"svg(<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="#9C27B0" d="M12 6a9.77 9.77 0 0 1 8.82 5.5C19.17 14.87 15.79 17 12 17s-7.17-2.13-8.82-5.5A9.77 9.77 0 0 1 12 6m0-2C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4zm0 5a2.5 2.5 0 0 1 0 5 2.5 2.5 0 0 1 0-5m0-2c-2.48 0-4.5 2.02-4.5 4.5S9.52 16 12 16s4.5-2.02 4.5-4.5S14.48 7 12 7z"/></svg>)svg";
 
+const char* const svg_flamerobin = R"svg(<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="#FF5722" d="M13.5.67s.07 10.3-8.37 13.92c-5.58 2.4-7.37-2.23-7.37-2.23S0 14.15 0 16.4C0 20.6 3.4 24 7.6 24c5.1 0 11.2-2.9 12.8-10.2 1.6-7.3-6.9-13.13-6.9-13.13z"/></svg>)svg";
+
+const char* const svg_sqlicon = R"svg(<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="#2E7D32" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM11 7l-4.5 4.5L11 16l1.4-1.4-3.1-3.1 3.1-3.1L11 7zm2 0l1.4 1.4 3.1 3.1-3.1 3.1L13 16l4.5-4.5L13 7z"/></svg>)svg";
+
 #endif // FR_EMBEDDED_SVGS_H

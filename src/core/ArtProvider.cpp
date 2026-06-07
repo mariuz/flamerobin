@@ -37,10 +37,6 @@
 #include "config/Config.h"
 #include "core/ArtProvider.h"
 
-// these have size 32x32
-#include "flamerobin.xpm"
-#include "sqlicon.xpm"
-
 #include "core/EmbeddedSVGs.h"
 
 wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
@@ -99,17 +95,17 @@ wxBitmapBundle ArtProvider::CreateBitmapBundle(const wxArtID& id,
     if (loadedBundle.IsOk())
         return loadedBundle;
 
-    // Special case for FlameRobin icon
-    if (id == ART_FlameRobin)
-        return wxBitmapBundle::FromBitmap(wxBitmap(flamerobin32_xpm));
-
-    if (id == ART_ExecuteSqlFrame)
-        return wxBitmapBundle::FromBitmap(wxBitmap(sqlicon32_xpm));
-
     // Map ART IDs to embedded SVGs
     auto fromSVG = [](const char* svg_data) {
         return wxBitmapBundle::FromSVG(svg_data, wxSize(16, 16));
     };
+
+    // Special case for FlameRobin icon
+    if (id == ART_FlameRobin)
+        return fromSVG(svg_flamerobin);
+
+    if (id == ART_ExecuteSqlFrame)
+        return fromSVG(svg_sqlicon);
 
     if (id == ART_Backup) return fromSVG(svg_backup);
     if (id == ART_CharacterSet) return fromSVG(svg_characterset);
