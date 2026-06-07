@@ -43,13 +43,6 @@
 #include "metadata/database.h"
 #include "metadata/MetadataItemURIHandlerHelper.h"
 #include "metadata/table.h"
-
-//! included xpm files, so that icons are compiled into executable
-namespace reorder_icons {
-    #include "up.xpm"
-    #include "down.xpm"
-};
-
 ReorderFieldsDialog::ReorderFieldsDialog(wxWindow* parent, Table* table)
     : BaseDialog(parent, -1, wxEmptyString)
 {
