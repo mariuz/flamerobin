@@ -1,1 +1,54 @@
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="#FF5722" d="M13.5.67s.07 10.3-8.37 13.92c-5.58 2.4-7.37-2.23-7.37-2.23S0 14.15 0 16.4C0 20.6 3.4 24 7.6 24c5.1 0 11.2-2.9 12.8-10.2 1.6-7.3-6.9-13.13-6.9-13.13z"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 135.586 176.174">
+  <!--
+    FlameRobin logo - converted from frlogo_right.eps (Adobe Illustrator 12, 2006)
+    Original by Stefano Pennuto. EPS BoundingBox: 0 0 136 177.
+    Coordinates used as-is (EPS drawing commands already in screen orientation).
+
+    CMYK colors:
+      0 0 0 1  = Black   (#000000)
+      0 0 0 0  = White   (#ffffff)
+      0 1 1 0  = Red     (#ff0000)  [flame]
+      0 0 1 0  = Yellow  (#ffff00)  [bird wing/body]
+  -->
+
+  <!-- Black circle fill (badge) -->
+  <circle cx="66.336" cy="56.332" r="52.5" fill="#000000"/>
+
+  <!-- White circle border stroke -->
+  <circle cx="66.336" cy="56.332" r="52.5" fill="none" stroke="#ffffff" stroke-width="7" stroke-linejoin="miter" stroke-miterlimit="4"/>
+
+  <!-- Flame: CMYK(0,1,1,0) = pure red -->
+  <path fill="#ff0000"
+    d="M 52.478 5.215
+       C 50.397 10.372 49.739 16.128 49.739 21.997
+       C 49.739 43.289 58.836 61.435 80.631 69.649
+       C 103.756 79.119 118.836 96.125 118.836 120.163
+       C 118.836 149.157 95.332 172.663 66.336 172.663
+       C 66.052 172.663 65.773 172.646 65.490 172.642
+       L 65.486 172.663
+       C -13.013 172.372 -16.513 23.872 52.478 5.215 Z"/>
+
+  <!-- Robin eye: white circle -->
+  <circle cx="90.908" cy="36.478" r="5.666" fill="#ffffff"/>
+
+  <!-- Robin wing/body: CMYK(0,0,1,0) = yellow -->
+  <path fill="#ffff00"
+    d="M 46.728 108.688
+       C 48.261 109.821 49.488 111.384 50.542 113.098
+       C 54.367 119.315 53.923 126.891 50.080 132.561
+       C 44.761 138.337 43.680 147.153 47.998 154.173
+       C 53.205 162.639 64.287 165.280 72.749 160.073
+       C 72.833 160.022 72.911 159.967 72.993 159.914
+       L 72.998 159.921
+       C 95.869 145.735 70.217 101.745 46.728 108.688 Z"/>
+
+  <!-- Robin beak: black -->
+  <path fill="#000000"
+    d="M 122.029 55.267
+       C 121.908 48.825 120.707 42.643 118.578 36.904
+       C 118.068 35.529 117.500 34.183 116.888 32.861
+       L 116.885 32.849
+       L 135.586 40.206
+       L 122.040 55.314
+       L 122.029 55.267 Z"/>
+</svg>
