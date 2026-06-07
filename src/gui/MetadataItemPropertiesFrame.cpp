@@ -208,7 +208,7 @@ void MetadataItemPropertiesPanel::loadPage()
     }
     catch (const std::exception& e)
     {
-        pd.doClose();
+        pd.doHide();
         wxMessageBox(wxString::FromUTF8(e.what()), _("Error Loading Properties"),
             wxOK | wxICON_WARNING, this);
         return;
