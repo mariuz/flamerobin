@@ -179,7 +179,23 @@ UserPtrs Server::getUsers(ProgressIndicator* progressind)
         return usersM;
 
     std::vector<fr::UserData> usr;
-    svc->getUsers(usr);
+    try
+    {
+        svc->getUsers(usr);
+    }
+    catch (const std::exception& e)
+    {
+        std::string msg = e.what();
+        if (msg.find("Install incomplete") != std::string::npos ||
+            msg.find("CREATE USER") != std::string::npos ||
+            msg.find("security_database") != std::string::npos)
+        {
+            throw std::runtime_error("The Firebird security database has not been initialized.\n"
+                "To resolve this, please create a user first (e.g. by using the CREATE USER SQL command).");
+        }
+        throw;
+    }
+
     for (const auto& u : usr)
     {
         UserPtr uptr(new User(shared_from_this(), u));

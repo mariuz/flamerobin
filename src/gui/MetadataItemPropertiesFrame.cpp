@@ -202,7 +202,17 @@ void MetadataItemPropertiesPanel::loadPage()
 
     wxString htmlpage;
     HtmlTemplateProcessor tp(objectM, this);
-    tp.processTemplateFile(htmlpage, fileName, 0, &pd);
+    try
+    {
+        tp.processTemplateFile(htmlpage, fileName, 0, &pd);
+    }
+    catch (const std::exception& e)
+    {
+        pd.doClose();
+        wxMessageBox(wxString::FromUTF8(e.what()), _("Error Loading Properties"),
+            wxOK | wxICON_WARNING, this);
+        return;
+    }
     HtmlTemplateProcessor::applyDarkModeIfNeeded(htmlpage);
 
     pd.SetTitle(_("Rendering page..."));
