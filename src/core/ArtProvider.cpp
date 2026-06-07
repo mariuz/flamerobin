@@ -33,6 +33,7 @@
 #include <wx/filename.h>
 #include <wx/image.h>
 #include <wx/mstream.h>
+#include <wx/settings.h>
 
 #include "config/Config.h"
 #include "core/ArtProvider.h"
@@ -56,7 +57,15 @@ wxBitmapBundle ArtProvider::loadBitmapBundleFromFile(const wxArtID& id)
     else if (name.substr(0, 6) == "wxart_")
         name.erase(0, 6);
 
-    // Try SVG first
+    // Try SVG first, with a dark-mode variant if applicable.
+    // Convention: <name>_dark.svg is preferred when the system is in dark mode.
+    bool isDarkMode = wxSystemSettings::GetAppearance().IsDark();
+    if (isDarkMode)
+    {
+        wxFileName svgDark(config().getImagesPath() + "svg/" + name + "_dark.svg");
+        if (svgDark.FileExists())
+            return wxBitmapBundle::FromSVGFile(svgDark.GetFullPath(), wxSize(16, 16));
+    }
     wxFileName svgName(config().getImagesPath() + "svg/" + name + ".svg");
     if (svgName.FileExists())
     {
@@ -100,9 +109,11 @@ wxBitmapBundle ArtProvider::CreateBitmapBundle(const wxArtID& id,
         return wxBitmapBundle::FromSVG(svg_data, wxSize(16, 16));
     };
 
-    // Special case for FlameRobin icon
-    if (id == ART_FlameRobin)
-        return fromSVG(svg_flamerobin);
+    // Special case for FlameRobin icon: pick light vs dark SVG variant.
+    if (id == ART_FlameRobin) {
+        bool dark = wxSystemSettings::GetAppearance().IsDark();
+        return fromSVG(dark ? svg_flamerobin_dark : svg_flamerobin);
+    }
 
     if (id == ART_ExecuteSqlFrame)
         return fromSVG(svg_sqlicon);
