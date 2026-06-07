@@ -115,10 +115,10 @@ wxBitmapBundle ArtProvider::CreateBitmapBundle(const wxArtID& id,
     if (id == ART_Collations) return fromSVG(svg_collation);
     if (id == ART_CommitTransaction) return fromSVG(svg_committransaction);
     if (id == ART_Computed) return fromSVG(svg_function);
-    if (id == ART_DatabaseConnected || id == ART_DatabaseDisconnected)
-        return fromSVG(svg_database);
+    if (id == ART_DatabaseConnected) return fromSVG(svg_database_connected);
+    if (id == ART_DatabaseDisconnected) return fromSVG(svg_database_disconnected);
     if (id == ART_DatabaseServer || id == ART_Server)
-        return fromSVG(svg_database);
+        return fromSVG(svg_server);
     if (id == ART_DBTrigger) return fromSVG(svg_trigger);
     if (id == ART_DBTriggers) return fromSVG(svg_trigger);
     if (id == ART_DMLTrigger) return fromSVG(svg_trigger);
@@ -153,7 +153,7 @@ wxBitmapBundle ArtProvider::CreateBitmapBundle(const wxArtID& id,
     if (id == ART_Role || id == ART_Roles || id == ART_SystemRole || id == ART_SystemRoles)
         return fromSVG(svg_role);
     if (id == ART_RollbackTransaction) return fromSVG(svg_rollbacktransaction);
-    if (id == ART_Root) return fromSVG(svg_database);
+    if (id == ART_Root) return fromSVG(svg_home);
     if (id == ART_ShowExecutionPlan || id == ART_Explain) return fromSVG(svg_plan);
     if (id == ART_SystemIndex) return fromSVG(svg_index);
     if (id == ART_SystemIndices) return fromSVG(svg_indices);

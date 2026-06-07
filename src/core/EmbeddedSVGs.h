@@ -100,4 +100,12 @@ const char* const svg_flamerobin = R"svg(<svg width="16" height="16" viewBox="0 
 
 const char* const svg_sqlicon = R"svg(<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="#2E7D32" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM11 7l-4.5 4.5L11 16l1.4-1.4-3.1-3.1 3.1-3.1L11 7zm2 0l1.4 1.4 3.1 3.1-3.1 3.1L13 16l4.5-4.5L13 7z"/></svg>)svg";
 
+const char* const svg_home = R"svg(<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="#607D8B" d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>)svg";
+
+const char* const svg_server = R"svg(<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="#607D8B" d="M20 13H4c-1.1 0-2 .9-2 2v4c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-4c0-1.1-.9-2-2-2zm-16 6v-4h16v4H4zm16-14H4c-1.1 0-2 .9-2 2v4c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-16 6V7h16v4H4zM7 8h2v2H7V8zm0 8h2v2H7v-2z"/></svg>)svg";
+
+const char* const svg_database_connected = R"svg(<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="#4A90E2" d="M2 20h20v-4H2v4z M2 4v4h20V4H2z M2 14h20v-4H2v4z"/><path fill="#4CAF50" d="M4 17h2v2H4v-2z M4 5h2v2H4V5z M4 11h2v2H4v-2z"/></svg>)svg";
+
+const char* const svg_database_disconnected = R"svg(<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="#90A4AE" d="M2 20h20v-4H2v4z M2 4v4h20V4H2z M2 14h20v-4H2v4z"/><path fill="#B0BEC5" d="M4 17h2v2H4v-2z M4 5h2v2H4V5z M4 11h2v2H4v-2z"/></svg>)svg";
+
 #endif // FR_EMBEDDED_SVGS_H
