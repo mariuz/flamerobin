@@ -750,6 +750,10 @@ bool MainFrame::doCanClose()
 
 void MainFrame::doBeforeDestroy()
 {
+    // Save the size and position of every open frame before any of them
+    // are destroyed or database connections are torn down.
+    BaseFrame::saveAllFrameSettings();
+
     Raise();
     //frameManager().setWindowMenu(0);    // tell it not to update menus anymore
 

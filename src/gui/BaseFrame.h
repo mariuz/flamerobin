@@ -96,6 +96,10 @@ public:
     bool canClose();
 
     static std::vector<BaseFrame*> getFrames();
+    // Saves config settings (size, position) for ALL currently registered
+    // frames. Call this at application exit to ensure all window placements
+    // are persisted regardless of the order in which frames are destroyed.
+    static void saveAllFrameSettings();
 
 private:
     // event handling

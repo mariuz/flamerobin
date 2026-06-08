@@ -94,7 +94,7 @@ void BaseFrame::readConfigSettings()
     wxRect rc = rcDefault;
     bool enabled = false;
     maximizedM = false;
-    if (config().getValue("FrameStorage", enabled) && enabled)
+    if (config().get("FrameStorage", true))
     {
         wxString itemPrefix = getStorageName();
         if (!itemPrefix.empty())
@@ -145,7 +145,7 @@ void BaseFrame::writeConfigSettings() const
             f->writeConfigSettings();
     }
 
-    if (config().get("FrameStorage", false) && !IsIconized())    // don't save for minimized windows
+    if (config().get("FrameStorage", true) && !IsIconized())    // don't save for minimized windows
     {
         // save window position and size to config.
         wxString itemPrefix = getStorageName();
@@ -227,6 +227,24 @@ std::vector<BaseFrame*> BaseFrame::getFrames()
     for (it = frameIdsM.begin(); it != frameIdsM.end(); it++)
         frames.push_back((*it).first);
     return frames;
+}
+
+/* static */
+void BaseFrame::saveAllFrameSettings()
+{
+    // Take a snapshot of the frame list to avoid iterator invalidation.
+    // Wrap in a SubjectLocker so that all setValue() calls are batched and
+    // config is flushed only once at the end of the scope.
+    SubjectLocker locker(&config());
+    std::vector<BaseFrame*> frames = getFrames();
+    for (std::vector<BaseFrame*>::iterator it = frames.begin();
+        it != frames.end(); ++it)
+    {
+        // Check the frame is still registered (could have been destroyed
+        // concurrently) before saving its settings.
+        if (frameIdsM.find(*it) != frameIdsM.end())
+            (*it)->writeConfigSettings();
+    }
 }
 
 // event handling
