@@ -14,20 +14,22 @@ if(VCPKG_TARGET_IS_OSX)
         execute_process(
             COMMAND otool -l "${target_lib}"
             OUTPUT_VARIABLE _otool_output
+            ERROR_VARIABLE _otool_error
             RESULT_VARIABLE _otool_result
         )
         if(NOT _otool_result EQUAL 0)
-            message(FATAL_ERROR "Failed to inspect ${target_lib} with otool.")
+            message(FATAL_ERROR "Failed to inspect ${target_lib} with otool: ${_otool_error}")
         endif()
 
-        string(FIND "${_otool_output}" "path @loader_path/.. " _has_loader_parent_rpath)
+        string(FIND "${_otool_output}" "path @loader_path/.." _has_loader_parent_rpath)
         if(_has_loader_parent_rpath EQUAL -1)
             execute_process(
                 COMMAND install_name_tool -add_rpath "@loader_path/.." "${target_lib}"
+                ERROR_VARIABLE _add_rpath_error
                 RESULT_VARIABLE _add_rpath_result
             )
             if(NOT _add_rpath_result EQUAL 0)
-                message(FATAL_ERROR "Failed adding LC_RPATH @loader_path/.. to ${target_lib}.")
+                message(FATAL_ERROR "Failed adding LC_RPATH @loader_path/.. to ${target_lib}: ${_add_rpath_error}")
             endif()
         endif()
     endfunction()
