@@ -8,6 +8,35 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.6.5</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Window Placement Persistence & UX Polish</B></font><br>
+<br>
+- **Save All Window Sizes and Placements at Exit**: All open frame windows (SQL editors, property panels, main frame) now have their geometry — position, size, and maximized state — reliably saved to the configuration at application exit. A new static <code>BaseFrame::saveAllFrameSettings()</code> method iterates all registered <code>BaseFrame</code> instances and calls <code>writeConfigSettings()</code> on each before any frame is destroyed. A single outer <code>SubjectLocker</code> batches all config writes into one flush for efficiency.<br>
+- **Correct Exit Ordering**: <code>saveAllFrameSettings()</code> is now called as the very first action in <code>MainFrame::doBeforeDestroy()</code>, before database connections are torn down and before any frame is destroyed. This guarantees that every open window's geometry is persisted to config regardless of the order in which frames are subsequently closed or destroyed.<br>
+- **FrameStorage Default Fix**: Corrected the <code>FrameStorage</code> default from <code>false</code> to <code>true</code> in <code>writeConfigSettings()</code> so the "Remember window positions and sizes" setting behaves consistently with <code>readConfigSettings()</code>. Previously, a window could be restored from a saved position but then fail to save its updated position on exit.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>User Management Plugin Error Handling</B></font><br>
+<br>
+- **Graceful Handling of Missing Firebird Plugins (Fix #601)**: When using a portable or incomplete Firebird installation, the authentication plugins <code>Srp.dll</code> / <code>Legacy_UserManager.dll</code> may be absent. Firebird raises error <code>-901 'User management plugin is missing or failed to load'</code> in this case. Previously, the existing catch block in <code>Server::getUsers()</code> did not recognise this error pattern and re-threw the raw exception, producing an unhelpful "Unhandled Error" dialog.<br>
+&nbsp;&nbsp;The fix adds a targeted pattern check for the <code>'User management plugin'</code> / <code>'failed to load'</code> error message and throws a <code>std::runtime_error</code> with a friendly, actionable message telling the user which plugin files are expected and where they should be located.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>Copyright & Branding</B></font><br>
+<br>
+- **About Box Copyright Year Updated (Fix #604)**: Updated the copyright text in the About dialog from <code>2004–2024</code> to <code>2004–2026</code>, correcting the displayed year across all dialog code paths.<br>
+<br>
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.6.4</font><br>
 <br><br>
 
