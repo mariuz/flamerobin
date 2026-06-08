@@ -117,7 +117,7 @@ void BaseDialog::readConfigSettings()
 {
     // default to centered dialogs
     bool centered = config().get("centerDialogOnParent", true);
-    if (config().get("FrameStorage", false))
+    if (config().get("FrameStorage", true))
     {
         wxString itemPrefix = getStorageName();
         if (!itemPrefix.empty())
@@ -151,7 +151,7 @@ void BaseDialog::doReadConfigSettings(const wxString& WXUNUSED(prefix))
 
 void BaseDialog::writeConfigSettings() const
 {
-    if (config().get("FrameStorage", false) && !IsIconized())
+    if (config().get("FrameStorage", true) && !IsIconized())
     {
         // wxFileConfig::Flush() should only be called once
         SubjectLocker locker(&config());

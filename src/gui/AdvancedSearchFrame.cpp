@@ -697,3 +697,8 @@ void AdvancedSearchFrame::OnButtonAddDatabaseClick(
             db);
     }
 }
+
+const wxString AdvancedSearchFrame::getName() const
+{
+    return "AdvancedSearchFrame";
+}

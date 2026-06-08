@@ -148,6 +148,8 @@ public:
     void OnListCtrlResultsItemSelected(wxListEvent& event);
     void OnListCtrlCriteriaActivate(wxListEvent& event);
     DECLARE_EVENT_TABLE()
+protected:
+    virtual const wxString getName() const;
 };
 
 #endif
