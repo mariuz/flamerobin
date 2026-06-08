@@ -193,6 +193,14 @@ UserPtrs Server::getUsers(ProgressIndicator* progressind)
             throw std::runtime_error("The Firebird security database has not been initialized.\n"
                 "To resolve this, please create a user first (e.g. by using the CREATE USER SQL command).");
         }
+        if (msg.find("User management plugin") != std::string::npos ||
+            msg.find("failed to load") != std::string::npos)
+        {
+            throw std::runtime_error("The Firebird user management plugin is missing or failed to load.\n"
+                "This usually happens with a portable or incomplete Firebird installation.\n"
+                "Ensure the Firebird plugins directory (e.g. Srp.dll / Legacy_UserManager.dll) "
+                "is present alongside fbclient.dll.");
+        }
         throw;
     }
 
