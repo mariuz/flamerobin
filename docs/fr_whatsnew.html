@@ -8,6 +8,30 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.6.4</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>FlameRobin Logo SVG & Dark Mode Icon Support</B></font><br>
+<br>
+- **Authentic FlameRobin Logo in SVG**: The original FlameRobin icon — created in Adobe Illustrator 12 by Stefano Pennuto in 2006 — has been faithfully converted from its PostScript EPS source (<code>frlogo_right.eps</code>) to a clean, scalable SVG. All vector paths, curves, and CMYK colour values are extracted directly from the original artwork: the circular badge, the red flame, the yellow robin body, the white eye, and the beak.<br>
+- **Windows Dark Mode Support for Icons**: The ArtProvider now detects the system colour scheme via <code>wxSystemSettings::GetAppearance().IsDark()</code> — the same API already used by FlameRobin's style manager — and automatically selects the appropriate icon variant:<br>
+&nbsp;&nbsp;• <b>Light mode</b>: the original black badge renders with full contrast against light backgrounds.<br>
+&nbsp;&nbsp;• <b>Dark mode</b>: a new <code>flamerobin_dark.svg</code> variant adds a white outer halo ring around the badge and switches the beak to white, ensuring the icon is clearly visible on dark window backgrounds.<br>
+- **Extensible Dark-Mode Icon Convention**: <code>loadBitmapBundleFromFile()</code> now automatically checks for a <code>&lt;name&gt;_dark.svg</code> counterpart for <em>any</em> icon when the system is in dark mode. This means future icon dark-mode overrides can be provided as plain SVG files, without any C++ changes.<br>
+- **Build Fix — MetadataItemPropertiesPanel**: Fixed a build error caused by calling the removed <code>doClose()</code> method; replaced with <code>doHide()</code> to match the current API.<br>
+- **Firebird Security Database Resilience**: Improved handling of uninitialized or unavailable Firebird security databases; the properties panel now gracefully degrades instead of crashing or showing spurious errors.<br>
+- **Distinct Tree Icons**: Home, Server, Connected Database, and Disconnected Database nodes in the database tree now each have their own distinct SVG icon, improving visual clarity when browsing multiple server connections simultaneously.<br>
+- **XPM/PNG Resource Cleanup**: Removed all remaining obsolete XPM and PNG raster resources and unused includes, reducing binary size and eliminating legacy low-resolution assets.<br>
+<br>
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.6.3</font><br>
 <br><br>
 
