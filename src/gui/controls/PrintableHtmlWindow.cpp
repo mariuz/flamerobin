@@ -304,9 +304,14 @@ void PrintableHtmlWindow::setPageSource(const wxString& html)
             tempFileM.Clear();
         }
 
-        // Generate a unique temp file in the templates directory
-        // to avoid "Unsafe attempt to load URL" same-origin file:// security restrictions
-        tempFileM = wxString::Format("%sfr_temp_%p.html", templatesPath, this);
+        // Generate a unique temp file in the user-writable temp directory
+        // (e.g. %TEMP% on Windows) so that the file can always be written even
+        // when the application is installed in a read-only location such as
+        // Program Files.  All resource references in the HTML have already been
+        // rewritten to absolute file:// URLs above, so the WebView can load
+        // them regardless of where this temp file lives.
+        tempFileM = wxFileName(wxFileName::GetTempDir(),
+            wxString::Format("fr_temp_%p.html", this)).GetFullPath();
 
         wxFile file(tempFileM, wxFile::write);
         if (file.IsOpened())
