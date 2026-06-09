@@ -91,6 +91,8 @@ std::vector<uint8_t> FbCppDatabase::buildDpb(bool creating, const std::string& o
     
     if (creating)
     {
+        if (!charsetM.empty())
+            dpbBuilder->insertString(&statusWrapper, isc_dpb_set_db_charset, charsetM.c_str());
         if (!owner.empty())
             dpbBuilder->insertString(&statusWrapper, isc_dpb_owner, owner.c_str());
         if (!initialUser.empty())
