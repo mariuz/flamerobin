@@ -8,6 +8,28 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.6.7</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Database Charset Fix for CREATE DATABASE (FbCpp Backend)</B></font><br>
+<br>
+- <b>Charset Propagation to CREATE DATABASE (PR #606)</b>: Fixed a bug in the default <code>FbCpp</code> backend where creating a new database with an explicit charset selection (e.g. <code>UTF8</code>) would result in a database defaulting to <code>NONE</code>. The <code>FbCppDatabase::buildDpb()</code> create path now correctly inserts the <code>isc_dpb_set_db_charset</code> parameter into the Database Parameter Block when a charset is selected. Previously, the charset was applied to connection options but not to the database creation request itself.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>Build Fix: Unresolved External Symbol in AdvancedSearchFrame</B></font><br>
+<br>
+- <b>Missing <code>AdvancedSearchFrame::getName()</code> Implementation</b>: Fixed a linker error (<code>LNK2001</code> unresolved external symbol) caused by a missing implementation for the <code>virtual const wxString getName() const</code> method declared in <code>AdvancedSearchFrame</code>'s header but never defined in the corresponding <code>.cpp</code> file. The method now returns <code>&quot;AdvancedSearchFrame&quot;</code>, which is used by <code>BaseFrame::getStorageName()</code> to key the config section for saving and restoring window geometry.<br>
+<br>
+
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.6.5</font><br>
 <br><br>
 
