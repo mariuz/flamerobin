@@ -8,6 +8,39 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.6.8</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>SQL Editor Splitter Position Persistence</B></font><br>
+<br>
+- <b>Save/Restore Splitter Position (Commit #39aff3d8)</b>: Added support for saving and restoring the splitter window's sash position in the SQL execution window. The position is now remembered between sessions, preventing the user from needing to manually resize the SQL editor and results pane every time they open a new SQL editor.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>Windows Portable Release Packaging</B></font><br>
+<br>
+- <b>Automated Portable ZIP Release (PR #ed97eba6)</b>: Added a new GitHub Actions step to package portable Windows ZIP files for both 32-bit and 64-bit architectures. These portable releases contain the FlameRobin binary, assets, a pre-configured `firebird.conf`, `fbclient.dll`, and all necessary dependencies (including the srp authentication plugins and unicode/ICU libraries) out-of-the-box.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>UI Contrast and Icon Polish (Dark Mode & Toolbar)</B></font><br>
+<br>
+- <b>High-contrast Statistics in Dark Mode (Commit #7f6adc36)</b>: Statistics tab text automatically switches to high-contrast colors (light red for errors, light blue for SQL statements) when Dark Mode is active to ensure readability.<br>
+- <b>Unified Material Design Toolbar Icons</b>: Standard toolbar actions (New, Open, Save, Save As, Go Back, Go Forward) are now mapped to unified, high-quality Material Design SVGs in the ArtProvider, ensuring a clean and consistent appearance across the toolbar.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>Bug Fixes</B></font><br>
+<br>
+- <b>Write Temporary HTML Files to System Temp Directory on Windows (PR #610)</b>: Fixed an issue where printing or rendering HTML templates would fail for non-admin users if FlameRobin was installed in a read-only directory (e.g. <code>Program Files</code>). Temporary HTML files are now written to the user-writable system temp directory (via <code>wxFileName::GetTempDir()</code>) instead of the templates installation directory.<br>
+<br>
+
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.6.7</font><br>
 <br><br>
 
