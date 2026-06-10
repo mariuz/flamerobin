@@ -241,7 +241,6 @@ jobs:
         run: |
           if (!(Test-Path vcpkg_archives)) { New-Item -ItemType Directory -Path vcpkg_archives }
           cmake -S .\ -B .\${{ matrix.build_dir }} -A ${{ matrix.cmake_arch }} "-DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-windows-static -DVCPKG_INSTALLED_DIR="${{ github.workspace }}\vcpkg_installed"
-
       - name: Build Flamerobin
         run: |
           cmake --build .\${{ matrix.build_dir }} --config Release --target flamerobin -j 8
@@ -250,10 +249,84 @@ jobs:
         run: |
           ISCC.exe install\win32\${{ matrix.setup_script }}
 
+      - name: Build Portable Release
+        shell: pwsh
+        run: |
+          $versionFile = Get-Content src/frversion.h -Raw
+          $major = [regex]::Match($versionFile, '#define\s+FR_VERSION_MAJOR\s+(\d+)').Groups[1].Value
+          $minor = [regex]::Match($versionFile, '#define\s+FR_VERSION_MINOR\s+(\d+)').Groups[1].Value
+          $rls = [regex]::Match($versionFile, '#define\s+FR_VERSION_RLS\s+(\d+)').Groups[1].Value
+          $version = "${major}.${minor}.${rls}"
+          Add-Content -Path $env:GITHUB_ENV -Value "FLAMEROBIN_VERSION=$version"
+          
+          $arch = "${{ matrix.arch }}"
+          $buildDir = "${{ matrix.build_dir }}"
+          $fbArch = if ($arch -eq "x86") { "x86" } else { "x64" }
+          
+          $fbUrl = "https://github.com/FirebirdSQL/firebird/releases/download/v5.0.4/Firebird-5.0.4.1812-0-windows-$fbArch.zip"
+          $fbZip = "firebird-$arch.zip"
+          $fbExtractDir = "firebird-$arch-extracted"
+          
+          # Download Firebird client ZIP
+          Write-Host "Downloading Firebird client from $fbUrl ..."
+          [System.Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+          Invoke-WebRequest -Uri $fbUrl -OutFile $fbZip
+          
+          # Extract Firebird client ZIP
+          Write-Host "Extracting Firebird client ZIP ..."
+          Expand-Archive -Path $fbZip -DestinationPath $fbExtractDir -Force
+          
+          # Create portable staging directory
+          $stagingDir = "flamerobin-portable-$version-$arch"
+          if (Test-Path $stagingDir) { Remove-Item -Path $stagingDir -Recurse -Force }
+          New-Item -ItemType Directory -Path $stagingDir -Force
+          
+          # Copy Flamerobin executable
+          Copy-Item -Path "$buildDir\Release\flamerobin.exe" -Destination "$stagingDir\" -Force
+          
+          # Copy resources
+          $assets = @("docs", "conf-defs", "code-templates", "html-templates", "sys-templates", "xml-styles")
+          foreach ($asset in $assets) {
+              if (Test-Path $asset) {
+                  Copy-Item -Path $asset -Destination "$stagingDir\" -Recurse -Force
+              }
+          }
+          
+          # Copy Firebird client DLLs and config
+          Copy-Item -Path "$fbExtractDir\fbclient.dll" -Destination "$stagingDir\" -Force
+          Copy-Item -Path "$fbExtractDir\ib_util.dll" -Destination "$stagingDir\" -Force
+          Copy-Item -Path "$fbExtractDir\firebird.conf" -Destination "$stagingDir\" -Force
+          
+          # Copy ICU files
+          Get-ChildItem -Path $fbExtractDir -Filter "icu*.dll" | Copy-Item -Destination "$stagingDir\" -Force
+          Get-ChildItem -Path $fbExtractDir -Filter "icu*.dat" | Copy-Item -Destination "$stagingDir\" -Force
+          
+          # Plugins directory
+          $pluginsDir = Join-Path $stagingDir "plugins"
+          New-Item -ItemType Directory -Path $pluginsDir -Force
+          Copy-Item -Path "$fbExtractDir\plugins\srp.dll" -Destination "$pluginsDir\" -Force
+          Copy-Item -Path "$fbExtractDir\plugins\legacy_auth.dll" -Destination "$pluginsDir\" -Force
+          Copy-Item -Path "$fbExtractDir\plugins\legacy_usermanager.dll" -Destination "$pluginsDir\" -Force
+          
+          # Intl directory
+          $intlDir = Join-Path $stagingDir "intl"
+          New-Item -ItemType Directory -Path $intlDir -Force
+          Copy-Item -Path "$fbExtractDir\intl\fbintl.dll" -Destination "$intlDir\" -Force
+          Copy-Item -Path "$fbExtractDir\intl\fbintl.conf" -Destination "$intlDir\" -Force
+          
+          # Compress to Zip
+          $zipPath = "flamerobin-portable-$version-$arch.zip"
+          if (Test-Path $zipPath) { Remove-Item -Path $zipPath -Force }
+          Compress-Archive -Path "$stagingDir" -DestinationPath $zipPath -Force
+          
+          Write-Host "Portable release created successfully at $zipPath"
+
       - name: Upload Windows Artifact to Release
         uses: softprops/action-gh-release@v2
         with:
-          files: install/win32/output/flamerobin-*.exe
+          files: |
+            install/win32/output/flamerobin-*.exe
+            flamerobin-portable-*.zip
 
   build-macos:
     runs-on: macos-14
