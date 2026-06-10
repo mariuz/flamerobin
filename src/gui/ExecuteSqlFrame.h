@@ -293,6 +293,7 @@ protected:
 
     bool closeWhenTransactionDoneM;
     bool loadingM;
+    int sashPositionM;
 
     wxPanel* panel_contents;
 

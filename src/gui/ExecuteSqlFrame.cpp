@@ -565,6 +565,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     serverPtrM = databasePtrM->getServer();
 
     loadingM = true;
+    sashPositionM = 0;
     updateEditorCaretPosM = true;
     updateFrameTitleM = true;
     profilerCheckedM = false;
@@ -3000,7 +3001,7 @@ void ExecuteSqlFrame::splitScreen()
 {
     if (!splitter_window_1->IsSplit()) // split screen if needed
     {
-        splitter_window_1->SplitHorizontally(styled_text_ctrl_sql, notebook_1);
+        splitter_window_1->SplitHorizontally(styled_text_ctrl_sql, notebook_1, sashPositionM);
         ::wxYield();
     }
 }
@@ -3435,6 +3436,7 @@ void ExecuteSqlFrame::OnGridLabelLeftDClick(wxGridEvent& event)
 
 void ExecuteSqlFrame::OnSplitterUnsplit(wxSplitterEvent& WXUNUSED(event))
 {
+    sashPositionM = splitter_window_1->GetSashPosition();
     if (splitter_window_1->GetWindow1() == styled_text_ctrl_sql)
         setViewMode(vmEditor);
     else if (splitter_window_1->GetWindow1() == notebook_1)
@@ -3546,6 +3548,7 @@ void ExecuteSqlFrame::doReadConfigSettings(const wxString& prefix)
     int zoom;
     if (config().getValue(prefix + Config::pathSeparator + "zoom", zoom))
         styled_text_ctrl_sql->SetZoom(zoom);
+    config().getValue(prefix + Config::pathSeparator + "sashPosition", sashPositionM);
 }
 
 void ExecuteSqlFrame::doWriteConfigSettings(const wxString& prefix) const
@@ -3553,6 +3556,11 @@ void ExecuteSqlFrame::doWriteConfigSettings(const wxString& prefix) const
     BaseFrame::doWriteConfigSettings(prefix);
     config().setValue(prefix + Config::pathSeparator + "zoom",
         styled_text_ctrl_sql->GetZoom());
+
+    int sashPos = sashPositionM;
+    if (splitter_window_1->IsSplit())
+        sashPos = splitter_window_1->GetSashPosition();
+    config().setValue(prefix + Config::pathSeparator + "sashPosition", sashPos);
 }
 
 const wxRect ExecuteSqlFrame::getDefaultRect() const
@@ -3624,12 +3632,15 @@ void ExecuteSqlFrame::setViewMode(bool splitView, ViewMode mode)
         styled_text_ctrl_sql->Show();
         notebook_1->Show();
         splitter_window_1->SplitHorizontally(styled_text_ctrl_sql,
-            notebook_1);
+            notebook_1, sashPositionM);
     }
 
     // unsplit or switch panes if necessary
     if (!splitView)
     {
+        if (splitter_window_1->IsSplit())
+            sashPositionM = splitter_window_1->GetSashPosition();
+
         if (mode == vmEditor)
         {
             if (splitter_window_1->IsSplit())
