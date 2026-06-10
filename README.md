@@ -59,6 +59,7 @@ Documentation
 ---------------------------
 * [What's New](https://github.com/mariuz/flamerobin/blob/master/docs/fr_whatsnew.html)
 * [Using Firebird Embedded](docs/firebird_embedded.md)
+* [Windows Portable Releases](docs/portable_release.md)
 * [License](https://github.com/mariuz/flamerobin/blob/master/docs/fr_license.html)
 
 Developer Documentation
