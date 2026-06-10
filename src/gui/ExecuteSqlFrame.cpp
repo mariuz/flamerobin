@@ -604,8 +604,33 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
 
     styled_text_ctrl_stats->StyleClearAll();
     styled_text_ctrl_stats->SetWrapMode(wxSTC_WRAP_WORD);
-    styled_text_ctrl_stats->StyleSetForeground(1, *wxRED);
-    styled_text_ctrl_stats->StyleSetForeground(2, *wxBLUE);
+    
+    {
+        bool isDark = false;
+        FRStyle* globalStyle = stylerManager().getGlobalStyle();
+        if (globalStyle)
+        {
+            wxColour bg = globalStyle->getbgColor();
+            double luminance = bg.Red() * 0.299 + bg.Green() * 0.587 + bg.Blue() * 0.114;
+            if (luminance < 128)
+                isDark = true;
+        }
+        else
+        {
+            isDark = wxSystemSettings::GetAppearance().IsDark();
+        }
+
+        if (isDark)
+        {
+            styled_text_ctrl_stats->StyleSetForeground(1, wxColour(255, 110, 110));
+            styled_text_ctrl_stats->StyleSetForeground(2, wxColour(135, 206, 250));
+        }
+        else
+        {
+            styled_text_ctrl_stats->StyleSetForeground(1, *wxRED);
+            styled_text_ctrl_stats->StyleSetForeground(2, *wxBLUE);
+        }
+    }
     
     notebook_1->AddPage(notebook_pane_1, _("Statistics"));
 
@@ -2286,8 +2311,33 @@ void ExecuteSqlFrame::setupStyles()
 
     styled_text_ctrl_stats->StyleClearAll();
     styled_text_ctrl_stats->SetWrapMode(wxSTC_WRAP_WORD);
-    styled_text_ctrl_stats->StyleSetForeground(1, *wxRED);
-    styled_text_ctrl_stats->StyleSetForeground(2, *wxBLUE);
+    
+    {
+        bool isDark = false;
+        FRStyle* globalStyle = stylerManager().getGlobalStyle();
+        if (globalStyle)
+        {
+            wxColour bg = globalStyle->getbgColor();
+            double luminance = bg.Red() * 0.299 + bg.Green() * 0.587 + bg.Blue() * 0.114;
+            if (luminance < 128)
+                isDark = true;
+        }
+        else
+        {
+            isDark = wxSystemSettings::GetAppearance().IsDark();
+        }
+
+        if (isDark)
+        {
+            styled_text_ctrl_stats->StyleSetForeground(1, wxColour(255, 110, 110));
+            styled_text_ctrl_stats->StyleSetForeground(2, wxColour(135, 206, 250));
+        }
+        else
+        {
+            styled_text_ctrl_stats->StyleSetForeground(1, *wxRED);
+            styled_text_ctrl_stats->StyleSetForeground(2, *wxBLUE);
+        }
+    }
 
     grid_data->SetBackgroundColour(stylerManager().getDefaultStyle()->getbgColor());
     grid_data->setupStyles();

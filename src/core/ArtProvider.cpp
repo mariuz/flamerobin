@@ -118,6 +118,13 @@ wxBitmapBundle ArtProvider::CreateBitmapBundle(const wxArtID& id,
     if (id == ART_ExecuteSqlFrame)
         return fromSVG(svg_sqlicon);
 
+    if (id == wxART_NEW) return fromSVG(svg_new);
+    if (id == wxART_FILE_OPEN) return fromSVG(svg_file_open);
+    if (id == wxART_FILE_SAVE) return fromSVG(svg_file_save);
+    if (id == wxART_FILE_SAVE_AS) return fromSVG(svg_file_save_as);
+    if (id == wxART_GO_BACK) return fromSVG(svg_go_back);
+    if (id == wxART_GO_FORWARD) return fromSVG(svg_go_forward);
+
     if (id == ART_Backup) return fromSVG(svg_backup);
     if (id == ART_CharacterSet) return fromSVG(svg_characterset);
     if (id == ART_CharacterSets) return fromSVG(svg_characterset);
