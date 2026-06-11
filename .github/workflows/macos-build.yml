@@ -27,7 +27,7 @@ jobs:
 
     # Install tools
     - name: Install dependencies
-      run: brew install autoconf automake libtool icu4c
+      run: brew install autoconf automake libtool icu4c || true
 
     - name: Bootstrap vcpkg
       run: ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
