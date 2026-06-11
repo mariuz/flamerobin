@@ -8,6 +8,40 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.6.9</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>SQL Editor "Execute and Fetch All" Shortcut</B></font><br>
+<br>
+- <b>New command and Shift+F4 shortcut (Commit #0463a5d3)</b>: Added a new "Execute and Fetch All" command (mapped to Shift+F4) in the SQL Editor. It allows executing SQL queries and automatically fetching all matching records in the background, rather than manually requesting remaining records batch by batch.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>Debian Packaging & Debian 13 (Trixie) Support</B></font><br>
+<br>
+- <b>Cleaned up Dependencies (Commit #7b4f9ab6)</b>: Fixed an installation blocker on Debian 13 (trixie) by removing obsolete dependencies (such as software-properties-common) and build-time/development requirements from the control file. Corrected package architecture to amd64.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>CI/CD and Infrastructure Updates</B></font><br>
+<br>
+- <b>Node.js 24 and Actions Upgrades (Commit #ed775334)</b>: Upgraded GitHub Actions configurations to run with Node.js 24 to resolve actions deprecation warnings.<br>
+- <b>macOS Build Fix (Commit #33340a78)</b>: Handled pre-installed brew dependencies to prevent icu4c package conflicts on macOS build runners.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>Documentation Improvements</B></font><br>
+<br>
+- <b>Embedded Firebird Guide (Commit #dd6a76e0)</b>: Added documentation on using Firebird Embedded (fbclient.dll) when the port is omitted.<br>
+- <b>Windows Portable Guide (Commit #7033719a)</b>: Added documentation detailing portable release architecture and configuration on Windows.<br>
+<br>
+
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.6.8</font><br>
 <br><br>
 
