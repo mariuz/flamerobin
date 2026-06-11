@@ -182,8 +182,8 @@ void CommandManager::getCustomizableCommands(CommandInfoVector& commands)
     ci.id = wxID_SELECTALL; ci.name = _("Select All"); commands.push_back(ci);
     ci.id = wxID_FIND; ci.name = _("Find"); commands.push_back(ci);
 
-    // Query commands
     ci.id = Cmds::Query_Execute; ci.name = _("Execute Query"); commands.push_back(ci);
+    ci.id = Cmds::Query_Execute_and_Fetch_All; ci.name = _("Execute and Fetch All"); commands.push_back(ci);
     ci.id = Cmds::Query_Commit; ci.name = _("Commit Transaction"); commands.push_back(ci);
     ci.id = Cmds::Query_Rollback; ci.name = _("Rollback Transaction"); commands.push_back(ci);
     ci.id = Cmds::Query_Show_plan; ci.name = _("Show Execution Plan"); commands.push_back(ci);
@@ -256,6 +256,10 @@ void CommandManager::init()
     scd.flags = wxACCEL_NORMAL;
     scd.keyCode = WXK_F4;
     shortcutsM.insert(ShortCutDataPair(Cmds::Query_Execute, scd));
+    scd.flags = wxACCEL_SHIFT;
+    scd.keyCode = WXK_F4;
+    shortcutsM.insert(ShortCutDataPair(Cmds::Query_Execute_and_Fetch_All, scd));
+    scd.flags = wxACCEL_NORMAL;
     scd.keyCode = WXK_F5;
     shortcutsM.insert(ShortCutDataPair(Cmds::Query_Commit, scd));
     scd.keyCode = WXK_F8;

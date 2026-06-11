@@ -95,11 +95,11 @@ private:
     virtual void doBeforeDestroy();
 
     // query parsing and execution
-    void prepareAndExecute(bool prepareOnly = false);
+    void prepareAndExecute(bool prepareOnly = false, bool fetchAll = false);
     bool parseStatements(const wxString& statements, bool autoExecute = false,
-        bool prepareOnly = false, int selectionOffset = 0);
+        bool prepareOnly = false, int selectionOffset = 0, bool fetchAll = false);
     bool execute(wxString sql, const wxString& terminator,
-        bool prepareOnly = false);
+        bool prepareOnly = false, bool fetchAll = false);
 
     std::vector<SqlStatement> executedStatementsM;
     std::map<std::string, wxString> parameterSaveList;
@@ -232,6 +232,7 @@ private:
     void OnMenuHistorySearch(wxCommandEvent& event);
 
     void OnMenuExecute(wxCommandEvent& event);
+    void OnMenuExecuteAndFetchAll(wxCommandEvent& event);
     void OnMenuShowPlan(wxCommandEvent& event);
     void OnMenuExplain(wxCommandEvent& event);
     void OnMenuShowStatistics(wxCommandEvent& event);

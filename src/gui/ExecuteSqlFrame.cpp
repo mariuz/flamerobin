@@ -846,6 +846,8 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
     wxMenu* statementMenu = new wxMenu();
     statementMenu->Append(Cmds::Query_Execute,
         cm.getMainMenuItemText(_("&Execute"), Cmds::Query_Execute));
+    statementMenu->Append(Cmds::Query_Execute_and_Fetch_All,
+        cm.getMainMenuItemText(_("Execute and Fetch &All"), Cmds::Query_Execute_and_Fetch_All));
     statementMenu->Append(Cmds::Query_Show_plan,
         cm.getMainMenuItemText(_("Show execution &plan"), Cmds::Query_Show_plan));
     statementMenu->Append(Cmds::Query_Explain,
@@ -1076,6 +1078,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_UPDATE_UI(wxID_BACKWARD,   ExecuteSqlFrame::OnMenuUpdateHistoryPrev)
 
     EVT_MENU(Cmds::Query_Execute,             ExecuteSqlFrame::OnMenuExecute)
+    EVT_MENU(Cmds::Query_Execute_and_Fetch_All, ExecuteSqlFrame::OnMenuExecuteAndFetchAll)
     EVT_MENU(Cmds::Query_Show_plan,           ExecuteSqlFrame::OnMenuShowPlan)
     EVT_MENU(Cmds::Query_Explain,             ExecuteSqlFrame::OnMenuExplain)
     EVT_MENU(Cmds::Query_Show_Statistics,     ExecuteSqlFrame::OnMenuShowStatistics)
@@ -1085,6 +1088,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_MENU(Cmds::Query_Execute_selection,   ExecuteSqlFrame::OnMenuExecuteSelection)
     EVT_MENU(Cmds::Query_Execute_from_cursor, ExecuteSqlFrame::OnMenuExecuteFromCursor)
     EVT_UPDATE_UI(Cmds::Query_Execute,             ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
+    EVT_UPDATE_UI(Cmds::Query_Execute_and_Fetch_All, ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
     EVT_UPDATE_UI(Cmds::Query_Show_plan,           ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
     EVT_UPDATE_UI(Cmds::Query_Explain,             ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
     EVT_UPDATE_UI(Cmds::Query_Execute_selection,   ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
@@ -1785,6 +1789,12 @@ void ExecuteSqlFrame::OnMenuExecute(wxCommandEvent& WXUNUSED(event))
     prepareAndExecute(false);
 }
 
+void ExecuteSqlFrame::OnMenuExecuteAndFetchAll(wxCommandEvent& WXUNUSED(event))
+{
+    clearLogBeforeExecution();
+    prepareAndExecute(false, true);
+}
+
 void ExecuteSqlFrame::OnMenuShowPlan(wxCommandEvent& WXUNUSED(event))
 {
     prepareAndExecute(true);
@@ -2383,7 +2393,7 @@ void ExecuteSqlFrame::prepareVolatileDatabase(wxString hostname, wxString port, 
 
 }
 
-void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
+void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly, bool fetchAll)
 {
     bool hasSelection = styled_text_ctrl_sql->GetSelectionStart()
         != styled_text_ctrl_sql->GetSelectionEnd();
@@ -2393,18 +2403,18 @@ void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly)
         if (config().get("TreatAsSingleStatement", false))
         {
             ok = execute(styled_text_ctrl_sql->GetSelectedText(), ";",
-                prepareOnly);
+                prepareOnly, fetchAll);
         }
         else
         {
             ok = parseStatements(styled_text_ctrl_sql->GetSelectedText(),
-                false, prepareOnly, styled_text_ctrl_sql->GetSelectionStart());
+                false, prepareOnly, styled_text_ctrl_sql->GetSelectionStart(), fetchAll);
         }
     }
     else
     {
         ok = parseStatements(styled_text_ctrl_sql->GetText(), false,
-            prepareOnly);
+            prepareOnly, 0, fetchAll);
     }
 
     if (ok || config().get("historyStoreUnsuccessful", true))
@@ -2441,7 +2451,7 @@ void ExecuteSqlFrame::executeAllStatements(bool closeWhenDone)
 //! when autoexecute is TRUE, program just waits user to click Commit/Rollback and closes window
 //! when autocommit DDL is also set then frame is closed at once if commit was successful
 bool ExecuteSqlFrame::parseStatements(const wxString& statements,
-    bool closeWhenDone, bool prepareOnly, int selectionOffset)
+    bool closeWhenDone, bool prepareOnly, int selectionOffset, bool fetchAll)
 {
     // Re-entrancy guard. The periodic YieldFor() calls below allow the UI
     // event loop to dispatch any *queued* events; even though we filter to
@@ -2499,7 +2509,7 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
             }
         }
         else if (!ss.isEmptyStatement()
-            && !execute(ss.getSql(), ms.getTerminator(), prepareOnly))
+            && !execute(ss.getSql(), ms.getTerminator(), prepareOnly, fetchAll))
         {
             int stmtStart = selectionOffset + ms.getStart();
             // STC uses UTF-8 internally in Unicode build
@@ -2617,7 +2627,7 @@ wxString millisToTimeString(long millis)
 }
 
 bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
-    bool prepareOnly)
+    bool prepareOnly, bool fetchAll)
 {
     ScrollAtEnd sae(styled_text_ctrl_stats);
 
@@ -2952,6 +2962,8 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             if (tb)
                 tb->setStatement(statementM);
             grid_data->fetchData(transactionAccessModeM == fr::TransactionAccessMode::Read);
+            if (fetchAll)
+                grid_data->fetchAll();
             setViewMode(vmGrid);
         }
 

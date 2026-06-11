@@ -47,6 +47,7 @@ enum {
     Query_Show_Profiler,
     Query_Execute_selection,
     Query_Execute_from_cursor,
+    Query_Execute_and_Fetch_All,
     Query_Commit,
     Query_Rollback,
     // next 4: order is important, because EVT_MENU_RANGE is used
