@@ -2,6 +2,7 @@ name: Build FlameRobin for Debian
 
 env:
   wx-tag-version: v3.2.6
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 on:
   push:

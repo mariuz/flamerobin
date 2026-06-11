@@ -3,6 +3,7 @@ name: Build FlameRobin for macOS
 env:
   fb-tag: v5.0.4
   fb-build: 5.0.4.1812-0
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 on:
   push:
