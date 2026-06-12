@@ -319,7 +319,17 @@ void CreateDDLVisitor::visitDomain(Domain& d)
         preSqlM += " NOT NULL\n";
     wxString check = d.getCheckConstraint();
     if (!check.IsEmpty())
-        preSqlM += " " + check + "\n";  // already contains CHECK keyword
+    {
+        wxString trimmedCheck = check;
+        trimmedCheck.Trim(false);
+        if (!trimmedCheck.IsEmpty())
+        {
+            if (trimmedCheck.Upper().StartsWith("CHECK"))
+                preSqlM += " " + trimmedCheck + "\n";
+            else
+                preSqlM += " CHECK " + trimmedCheck + "\n";
+        }
+    }
     wxString collate = d.getCollation();
     if (!collate.IsEmpty())
         preSqlM += " COLLATE " + collate;
