@@ -115,6 +115,7 @@ public:
     void OnMenuStartupDatabase(wxCommandEvent& event);
     void OnMenuSetReplicaMode(wxCommandEvent& event);
     void OnMenuReplicationStatus(wxCommandEvent& event);
+    void OnMenuVisualizeSchema(wxCommandEvent& event);
 
     // create new object
     void showCreateTemplate(const wxString& statement);

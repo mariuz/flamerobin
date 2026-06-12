@@ -185,6 +185,8 @@
 		<Unit filename="src/gui/ReorderFieldsDialog.h" />
 		<Unit filename="src/gui/RestoreFrame.cpp" />
 		<Unit filename="src/gui/RestoreFrame.h" />
+		<Unit filename="src/gui/SchemaVisualizationFrame.cpp" />
+		<Unit filename="src/gui/SchemaVisualizationFrame.h" />
 		<Unit filename="src/gui/ServerRegistrationDialog.cpp" />
 		<Unit filename="src/gui/ServerRegistrationDialog.h" />
 		<Unit filename="src/gui/ServiceBaseFrame.cpp" />

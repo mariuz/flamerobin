@@ -64,6 +64,7 @@
 #include "gui/ProgressDialog.h"
 #include "gui/ReplicationStatusFrame.h"
 #include "gui/RestoreFrame.h"
+#include "gui/SchemaVisualizationFrame.h"
 #include "gui/ServerRegistrationDialog.h"
 #include "gui/SimpleHtmlFrame.h"
 #include "gui/ShutdownFrame.h"
@@ -421,6 +422,8 @@ EVT_MENU(Cmds::Menu_SetReplicaMode, MainFrame::OnMenuSetReplicaMode)
 EVT_UPDATE_UI(Cmds::Menu_SetReplicaMode, MainFrame::OnMenuUpdateIfDatabaseSelected)
 EVT_MENU(Cmds::Menu_ReplicationStatus, MainFrame::OnMenuReplicationStatus)
 EVT_UPDATE_UI(Cmds::Menu_ReplicationStatus, MainFrame::OnMenuUpdateIfDatabaseSelected)
+EVT_MENU(Cmds::Menu_VisualizeSchema, MainFrame::OnMenuVisualizeSchema)
+EVT_UPDATE_UI(Cmds::Menu_VisualizeSchema, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
 EVT_MENU(Cmds::Menu_Maintenance, MainFrame::OnMenuMaintenance)
 EVT_UPDATE_UI(Cmds::Menu_Maintenance, MainFrame::OnMenuUpdateIfDatabaseSelected)
 EVT_MENU(Cmds::Menu_Restore, MainFrame::OnMenuRestore)EVT_UPDATE_UI(Cmds::Menu_Restore, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
@@ -1075,6 +1078,15 @@ void MainFrame::OnMenuReplicationStatus(wxCommandEvent& WXUNUSED(event))
     }
     rf = new fr::ReplicationStatusFrame(this, db);
     rf->Show();
+}
+
+void MainFrame::OnMenuVisualizeSchema(wxCommandEvent& WXUNUSED(event))
+{
+    DatabasePtr db = getDatabase(treeMainM->getSelectedMetadataItem());
+    if (checkValidDatabase(db) && tryAutoConnectDatabase(db))
+    {
+        SchemaVisualizationFrame::showFrame(this, db);
+    }
 }
 
 

@@ -184,6 +184,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/ReorderFieldsDialog.cpp
         ${SOURCEDIR}/gui/ReplicationStatusFrame.cpp
         ${SOURCEDIR}/gui/RestoreFrame.cpp
+        ${SOURCEDIR}/gui/SchemaVisualizationFrame.cpp
         ${SOURCEDIR}/gui/ServerRegistrationDialog.cpp
         ${SOURCEDIR}/gui/ServiceBaseFrame.cpp
         ${SOURCEDIR}/gui/ShortcutCustomizationDialog.cpp
@@ -327,6 +328,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/gui/ReorderFieldsDialog.h
         ${SOURCEDIR}/gui/ReplicationStatusFrame.h
         ${SOURCEDIR}/gui/RestoreFrame.h
+        ${SOURCEDIR}/gui/SchemaVisualizationFrame.h
         ${SOURCEDIR}/gui/ServerRegistrationDialog.h
         ${SOURCEDIR}/gui/ServiceBaseFrame.h
         ${SOURCEDIR}/gui/ShortcutCustomizationDialog.h

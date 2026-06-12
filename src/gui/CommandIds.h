@@ -140,6 +140,7 @@ enum {
     Menu_Maintenance,
     Menu_SetReplicaMode,
     Menu_ReplicationStatus,
+    Menu_VisualizeSchema,
 
         // view menu
         Menu_ToggleStatusBar, 
