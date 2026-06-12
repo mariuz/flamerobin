@@ -47,6 +47,10 @@
 #include "gui/ContextMenuMetadataItemVisitor.h"
 #include "gui/controls/DBHTreeControl.h"
 
+namespace {
+    wxTreeItemId g_expandingItem;
+}
+
 #include "metadata/CharacterSet.h"
 #include "metadata/Collation.h"
 #include "metadata/database.h"
@@ -1159,6 +1163,27 @@ void DBHTreeItemData::update()
         treeM->SetItemText(id, tivObject.getNodeText());
     if (treeM->GetItemImage(id) != tivObject.getNodeImage())
         treeM->SetItemImage(id, tivObject.getNodeImage());
+
+    // Defer populating/updating child nodes if the item is collapsed
+    bool isExpanded = (id == treeM->GetRootItem())
+        || treeM->IsExpanded(id)
+        || (g_expandingItem == id);
+
+    bool showExpander = tivObject.getShowChildren();
+    if (Database* db = dynamic_cast<Database*>(object))
+        showExpander = db->isConnected();
+
+    if (!isExpanded)
+    {
+        treeM->SetItemHasChildren(id, showExpander);
+        treeM->SetItemBold(id, tivObject.getNodeTextBold());
+        if (!tivObject.getNodeEnabled())
+            treeM->SetItemTextColour(id, wxColour(0x080, 0x080, 0x080));
+        else
+            treeM->SetItemTextColour(id, wxSystemSettings::GetColour(wxSYS_COLOUR_CAPTIONTEXT));
+        return;
+    }
+
     // track number of visible child nodes for SetItemHasChildren() calls
     unsigned numVisibleChildren = 0;
     // check subitems
@@ -1233,11 +1258,10 @@ void DBHTreeItemData::update()
                             tivChild.getNodeImage(), -1, newItem);
                     }
                     // setObservedMetadata() calls attachObserver(), which
-                    // calls update() on the newly created child node
-                    // this will correctly populate the tree
-                    // We pass false for callUpdate because we just set the text and image
-                    newItem->setObservedMetadata(*itChild,
-                        (*itChild)->getType() == ntServer);
+                    // calls update() on the newly created child node.
+                    // This runs update() once in collapsed mode, setting the
+                    // has-children state and expander button correctly.
+                    newItem->setObservedMetadata(*itChild, true);
                     // tree node data objects may optionally observe the settings
                     // cache object, for example to create / delete column and
                     // parameter nodes if the "ShowColumnsInTree" setting changes
@@ -1415,8 +1439,18 @@ void DBHTreeControl::OnTreeItemExpanding(wxTreeEvent& event)
     MetadataItem* mi = getMetadataItem(event.GetItem());
     if (mi)
     {
-        mi->ensureChildrenLoaded();
-        mi->notifyObservers();
+        g_expandingItem = event.GetItem();
+        try
+        {
+            mi->ensureChildrenLoaded();
+            mi->notifyObservers();
+        }
+        catch (...)
+        {
+            g_expandingItem = wxTreeItemId();
+            throw;
+        }
+        g_expandingItem = wxTreeItemId();
     }
     event.Skip();
 }
