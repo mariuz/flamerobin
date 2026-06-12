@@ -156,6 +156,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/ConfdefTemplateProcessor.cpp
         ${SOURCEDIR}/gui/ContextMenuMetadataItemVisitor.cpp
         ${SOURCEDIR}/gui/CreateIndexDialog.cpp
+        ${SOURCEDIR}/gui/CreateDockerFirebirdDialog.cpp
         ${SOURCEDIR}/gui/DatabaseRegistrationDialog.cpp
         ${SOURCEDIR}/gui/DataGeneratorFrame.cpp
         ${SOURCEDIR}/gui/EditBlobDialog.cpp
@@ -302,6 +303,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/gui/ConfdefTemplateProcessor.h
         ${SOURCEDIR}/gui/ContextMenuMetadataItemVisitor.h
         ${SOURCEDIR}/gui/CreateIndexDialog.h
+        ${SOURCEDIR}/gui/CreateDockerFirebirdDialog.h
         ${SOURCEDIR}/gui/DatabaseRegistrationDialog.h
         ${SOURCEDIR}/gui/DataGeneratorFrame.h
         ${SOURCEDIR}/gui/EditBlobDialog.h

@@ -152,6 +152,8 @@
 		<Unit filename="src/gui/ContextMenuMetadataItemVisitor.h" />
 		<Unit filename="src/gui/CreateIndexDialog.cpp" />
 		<Unit filename="src/gui/CreateIndexDialog.h" />
+		<Unit filename="src/gui/CreateDockerFirebirdDialog.cpp" />
+		<Unit filename="src/gui/CreateDockerFirebirdDialog.h" />
 		<Unit filename="src/gui/DataGeneratorFrame.cpp" />
 		<Unit filename="src/gui/DataGeneratorFrame.h" />
 		<Unit filename="src/gui/DatabaseRegistrationDialog.cpp" />

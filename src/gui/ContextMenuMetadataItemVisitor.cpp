@@ -376,6 +376,7 @@ void MainObjectMenuMetadataItemVisitor::visitSysRoles(SysRoles& sysRoles)
 void MainObjectMenuMetadataItemVisitor::visitRoot(Root& root)
 {
     menuM->Append(Cmds::Menu_RegisterServer, _("&Register server"));
+    menuM->Append(Cmds::Menu_CreateDockerFirebird, _("Create Firebird in Docker..."));
     addSeparator();
     addGenerateCodeMenu(root);
     addSeparator();
@@ -392,6 +393,7 @@ void MainObjectMenuMetadataItemVisitor::visitServer(Server& server)
     menuM->Append(Cmds::Menu_CreateDatabase, _("Create &new database"));
     menuM->Append(Cmds::Menu_RestoreIntoNew,
         _("Restore bac&kup into new database"));
+    menuM->Append(Cmds::Menu_CreateDockerFirebird, _("Create Firebird in Docker..."));
     addSeparator();
     addGenerateCodeMenu(server);
     addSeparator();

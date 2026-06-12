@@ -143,6 +143,7 @@ enum {
     Menu_SetReplicaMode,
     Menu_ReplicationStatus,
     Menu_VisualizeSchema,
+    Menu_CreateDockerFirebird,
 
         // view menu
         Menu_ToggleStatusBar, 

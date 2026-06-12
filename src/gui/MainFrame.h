@@ -47,6 +47,7 @@ class MainFrame: public BaseFrame, private URIHandler,
 public:
     // menu handling events
     void OnMenuRegisterServer(wxCommandEvent& event);
+    void OnMenuCreateDockerFirebird(wxCommandEvent& event);
     void OnMenuQuit(wxCommandEvent& event);
     void OnMenuAbout(wxCommandEvent& event);
     void OnMenuManual(wxCommandEvent& event);

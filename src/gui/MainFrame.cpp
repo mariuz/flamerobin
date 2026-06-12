@@ -66,6 +66,7 @@
 #include "gui/RestoreFrame.h"
 #include "gui/SchemaVisualizationFrame.h"
 #include "gui/ServerRegistrationDialog.h"
+#include "gui/CreateDockerFirebirdDialog.h"
 #include "gui/SimpleHtmlFrame.h"
 #include "gui/ShutdownFrame.h"
 #include "gui/StartupFrame.h"
@@ -377,6 +378,7 @@ DBHTreeControl* MainFrame::getTreeCtrl()
 
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 EVT_MENU(Cmds::Menu_RegisterServer, MainFrame::OnMenuRegisterServer)
+EVT_MENU(Cmds::Menu_CreateDockerFirebird, MainFrame::OnMenuCreateDockerFirebird)
 EVT_MENU(wxID_EXIT, MainFrame::OnMenuQuit)
 EVT_MENU(wxID_ABOUT, MainFrame::OnMenuAbout)
 EVT_MENU(Cmds::Menu_Manual, MainFrame::OnMenuManual)
@@ -1371,6 +1373,27 @@ void MainFrame::OnMenuRegisterServer(wxCommandEvent& WXUNUSED(event))
         rootM->addServer(s);
         rootM->save();
         treeMainM->selectMetadataItem(s.get());
+    }
+}
+
+void MainFrame::OnMenuCreateDockerFirebird(wxCommandEvent& WXUNUSED(event))
+{
+    CreateDockerFirebirdDialog cdfd(this, rootM);
+    if (cdfd.ShowModal() == wxID_OK)
+    {
+        if (cdfd.getAutoRegister())
+        {
+            ServerPtr s(new Server());
+            s->setName_(cdfd.getContainerName());
+            s->setHostname("localhost");
+            s->setPort(cdfd.getHostPort());
+            s->setServiceCredentials("SYSDBA", cdfd.getPassword());
+            s->setServiceSysdbaPassword(cdfd.getPassword());
+
+            rootM->addServer(s);
+            rootM->save();
+            treeMainM->selectMetadataItem(s.get());
+        }
     }
 }
 
