@@ -78,6 +78,8 @@ public:
     void saveAsHTML();
     void saveAsCSV(const wxString& fileName,
         const wxChar& fieldDelimiter, const wxChar& textDelimiter);
+    void saveAsJSON(const wxString& fileName);
+    void saveAsExcel(const wxString& fileName);
 
     void refreshAndInvalidateAttributes();
 

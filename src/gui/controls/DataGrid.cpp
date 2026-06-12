@@ -209,6 +209,8 @@ void DataGrid::showPopupMenu(wxPoint cursorPos)
     m.Append(Cmds::DataGrid_Copy_as_inList, _("Copy as IN list"));
     m.Append(Cmds::DataGrid_Save_as_html, _("Save as HTML file..."));
     m.Append(Cmds::DataGrid_Save_as_csv, _("Save as CSV file..."));
+    m.Append(Cmds::DataGrid_Save_as_json, _("Save as JSON file..."));
+    m.Append(Cmds::DataGrid_Save_as_excel, _("Save as Excel XML file..."));
     m.AppendSeparator();
 
     m.Append(Cmds::DataGrid_EditBlob, _("Edit BLOB..."));
@@ -732,6 +734,181 @@ void DataGrid::saveAsCSV(const wxString& fileName,
             if (!sRow.empty())
                 outStr.WriteString(sRow + sEOL);
         }
+    }
+    if (all)
+        notifyIfUnfetchedData();
+}
+
+void DataGrid::saveAsJSON(const wxString& fileName)
+{
+    DataGridTable* table = getDataGridTable();
+    if (!table)
+        return;
+
+    if (fileName.empty())
+        return;
+
+    bool all = true;
+    {
+        wxBusyCursor cr;
+        std::vector<bool> selCols(getColumnsWithSelectedCells());
+        if (std::find(selCols.begin(), selCols.end(), false) != selCols.end())
+            all = false;
+
+        wxFileOutputStream fos(fileName);
+        if (!fos.Ok())
+            return;
+        wxTextOutputStream outStr(fos);
+
+        // Escape JSON helper
+        auto escapeJson = [](const wxString& str) -> wxString {
+            wxString res = str;
+            res.Replace("\\", "\\\\");
+            res.Replace("\"", "\\\"");
+            res.Replace("\n", "\\n");
+            res.Replace("\r", "\\r");
+            res.Replace("\t", "\\t");
+            return res;
+        };
+
+        outStr.WriteString("[\n");
+
+        std::vector<bool> selRows(getRowsWithSelectedCells());
+        if (std::find(selRows.begin(), selRows.end(), false) != selRows.end())
+            all = false;
+
+        bool firstRow = true;
+        for (size_t row = 0; row < selRows.size(); row++)
+        {
+            if (!selRows[row])
+                continue;
+
+            if (!firstRow)
+                outStr.WriteString(",\n");
+            firstRow = false;
+
+            outStr.WriteString("  {\n");
+            bool firstCol = true;
+            for (size_t col = 0; col < selCols.size(); col++)
+            {
+                if (selCols[col])
+                {
+                    if (!firstCol)
+                        outStr.WriteString(",\n");
+                    firstCol = false;
+
+                    wxString colName = GetColLabelValue(col);
+                    wxString cellValue = table->GetValue(row, col);
+
+                    outStr.WriteString(wxString::Format(
+                        "    \"%s\": \"%s\"",
+                        escapeJson(colName).c_str(),
+                        escapeJson(cellValue).c_str()
+                    ));
+                }
+            }
+            outStr.WriteString("\n  }");
+        }
+        outStr.WriteString("\n]\n");
+    }
+    if (all)
+        notifyIfUnfetchedData();
+}
+
+void DataGrid::saveAsExcel(const wxString& fileName)
+{
+    DataGridTable* table = getDataGridTable();
+    if (!table)
+        return;
+
+    if (fileName.empty())
+        return;
+
+    bool all = true;
+    {
+        wxBusyCursor cr;
+        std::vector<bool> selCols(getColumnsWithSelectedCells());
+        if (std::find(selCols.begin(), selCols.end(), false) != selCols.end())
+            all = false;
+
+        wxFileOutputStream fos(fileName);
+        if (!fos.Ok())
+            return;
+        wxTextOutputStream outStr(fos);
+
+        // Escape XML helper
+        auto escapeXml = [](const wxString& str) -> wxString {
+            wxString res = str;
+            res.Replace("&", "&amp;");
+            res.Replace("<", "&lt;");
+            res.Replace(">", "&gt;");
+            res.Replace("\"", "&quot;");
+            res.Replace("'", "&apos;");
+            return res;
+        };
+
+        outStr.WriteString(
+            "<?xml version=\"1.0\"?>\n"
+            "<?mso-application progid=\"Excel.Sheet\"?>\n"
+            "<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"\n"
+            " xmlns:o=\"urn:schemas-microsoft-com:office:office\"\n"
+            " xmlns:x=\"urn:schemas-microsoft-com:office:excel\"\n"
+            " xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\"\n"
+            " xmlns:html=\"http://www.w3.org/TR/REC-html40\">\n"
+            " <Worksheet ss:Name=\"Query Results\">\n"
+            "  <Table>\n"
+        );
+
+        // Header row
+        outStr.WriteString("   <Row>\n");
+        for (size_t col = 0; col < selCols.size(); col++)
+        {
+            if (selCols[col])
+            {
+                outStr.WriteString(wxString::Format(
+                    "    <Cell><Data ss:Type=\"String\">%s</Data></Cell>\n",
+                    escapeXml(GetColLabelValue(col)).c_str()
+                ));
+            }
+        }
+        outStr.WriteString("   </Row>\n");
+
+        std::vector<bool> selRows(getRowsWithSelectedCells());
+        if (std::find(selRows.begin(), selRows.end(), false) != selRows.end())
+            all = false;
+
+        for (size_t row = 0; row < selRows.size(); row++)
+        {
+            if (!selRows[row])
+                continue;
+
+            outStr.WriteString("   <Row>\n");
+            for (size_t col = 0; col < selCols.size(); col++)
+            {
+                if (selCols[col])
+                {
+                    wxString cellValue = table->GetValue(row, col);
+                    // Determine if numeric for Excel
+                    bool isNumeric = false;
+                    double dummy;
+                    if (cellValue.ToDouble(&dummy))
+                        isNumeric = true;
+
+                    outStr.WriteString(wxString::Format(
+                        "    <Cell><Data ss:Type=\"%s\">%s</Data></Cell>\n",
+                        isNumeric ? "Number" : "String",
+                        escapeXml(cellValue).c_str()
+                    ));
+                }
+            }
+            outStr.WriteString("   </Row>\n");
+        }
+
+        outStr.WriteString(
+            "  </Table>\n"
+            " </Worksheet>\n"
+            "</Workbook>\n"
+        );
     }
     if (all)
         notifyIfUnfetchedData();

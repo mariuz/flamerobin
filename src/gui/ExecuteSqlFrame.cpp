@@ -908,6 +908,8 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
     gridMenu->AppendSeparator();
     gridMenu->Append(Cmds::DataGrid_Save_as_html,    _("Save as &html"));
     gridMenu->Append(Cmds::DataGrid_Save_as_csv,     _("Save as cs&v"));
+    gridMenu->Append(Cmds::DataGrid_Save_as_json,    _("Save as &json"));
+    gridMenu->Append(Cmds::DataGrid_Save_as_excel,   _("Save as &excel"));
     gridMenu->AppendSeparator();
     gridMenu->AppendCheckItem(Cmds::DataGrid_Log_changes, _("&Log data changes"));
     menuBarM->Append(gridMenu, _("&Grid"));
@@ -1117,6 +1119,8 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_MENU(Cmds::DataGrid_ExportBlob,      ExecuteSqlFrame::OnMenuGridExportBlob)
     EVT_MENU(Cmds::DataGrid_Save_as_html,    ExecuteSqlFrame::OnMenuGridSaveAsHtml)
     EVT_MENU(Cmds::DataGrid_Save_as_csv,     ExecuteSqlFrame::OnMenuGridSaveAsCsv)
+    EVT_MENU(Cmds::DataGrid_Save_as_json,    ExecuteSqlFrame::OnMenuGridSaveAsJson)
+    EVT_MENU(Cmds::DataGrid_Save_as_excel,   ExecuteSqlFrame::OnMenuGridSaveAsExcel)
     EVT_MENU(Cmds::DataGrid_FetchAll,        ExecuteSqlFrame::OnMenuGridFetchAll)
     EVT_MENU(Cmds::DataGrid_CancelFetchAll,  ExecuteSqlFrame::OnMenuGridCancelFetchAll)
     EVT_MENU(Cmds::DataGrid_AutofitColumns,  ExecuteSqlFrame::OnMenuGridAutofitColumns)
@@ -1133,6 +1137,8 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_UPDATE_UI(Cmds::DataGrid_ExportBlob,     ExecuteSqlFrame::OnMenuUpdateGridCellIsBlob)
     EVT_UPDATE_UI(Cmds::DataGrid_Save_as_html,   ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
     EVT_UPDATE_UI(Cmds::DataGrid_Save_as_csv,    ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
+    EVT_UPDATE_UI(Cmds::DataGrid_Save_as_json,   ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
+    EVT_UPDATE_UI(Cmds::DataGrid_Save_as_excel,  ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
     EVT_UPDATE_UI(Cmds::DataGrid_FetchAll,       ExecuteSqlFrame::OnMenuUpdateGridFetchAll)
     EVT_UPDATE_UI(Cmds::DataGrid_CancelFetchAll, ExecuteSqlFrame::OnMenuUpdateGridCancelFetchAll)
 
@@ -2203,6 +2209,30 @@ void ExecuteSqlFrame::OnMenuGridSaveAsCsv(wxCommandEvent& WXUNUSED(event))
     wxChar textDelimiter(textDelimiters[i]);
 
     grid_data->saveAsCSV(fileName, fieldDelimiter, textDelimiter);
+}
+
+void ExecuteSqlFrame::OnMenuGridSaveAsJson(wxCommandEvent& WXUNUSED(event))
+{
+    wxString fname = ::wxFileSelector(_("Save data in selected cells as JSON"),
+        wxEmptyString, wxEmptyString, "*.json",
+        _("JSON files (*.json)|*.json|All files (*.*)|*.*"),
+        wxFD_SAVE | wxFD_CHANGE_DIR | wxFD_OVERWRITE_PROMPT, this);
+    if (!fname.empty())
+    {
+        grid_data->saveAsJSON(fname);
+    }
+}
+
+void ExecuteSqlFrame::OnMenuGridSaveAsExcel(wxCommandEvent& WXUNUSED(event))
+{
+    wxString fname = ::wxFileSelector(_("Save data in selected cells as Excel XML"),
+        wxEmptyString, wxEmptyString, "*.xls",
+        _("Excel files (*.xls)|*.xls|XML Spreadsheet (*.xml)|*.xml|All files (*.*)|*.*"),
+        wxFD_SAVE | wxFD_CHANGE_DIR | wxFD_OVERWRITE_PROMPT, this);
+    if (!fname.empty())
+    {
+        grid_data->saveAsExcel(fname);
+    }
 }
 
 
