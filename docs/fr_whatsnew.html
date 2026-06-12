@@ -8,6 +8,30 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.6.10</font><br>
+<br><br>
+
+
+<font size=+1 color="#AA0000"><B>Domain DDL Check Constraint Keyword Fix</B></font><br>
+<br>
+- <b>Ensure valid DDL (Commit #f9b6af51)</b>: Fixed an issue where domain DDL extraction would generate invalid DDL output (missing the <code>CHECK</code> keyword) if the database validation source in <code>RDB$VALIDATION_SOURCE</code> did not explicitly contain it (which occurs under newer Firebird versions). The extraction visitor now checks for the keyword and prepends it when absent to keep the SQL valid and consistent.<br>
+<br>
+
+
+<font size=+1 color="#AA0000"><B>Database Tree Performance & Expanded State Optimizations</B></font><br>
+<br>
+- <b>Deferred Node Populating & Expander Visibility (Commit #0a4d8f4f)</b>: Significantly optimized database explorer tree loading by deferring child node generation for collapsed items. FlameRobin now checks if tree nodes are expanded and only populates subitems on-demand. Fixed expander button state bugs and addressed safety issues where database tree traversal could cause access violations or hang.<br>
+<br>
+
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.6.9</font><br>
 <br><br>
 
