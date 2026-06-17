@@ -1,38 +1,6 @@
 vcpkg_acquire_msys(MSYS_ROOT PACKAGES unzip sed grep awk coreutils)
 vcpkg_add_to_path(${MSYS_ROOT}/usr/bin)
 
-# Fix PlatformToolset for VS 2025/2026 (version 18+) in all vcxproj files
-file(GLOB_RECURSE VCXPROJ_FILES "${SOURCE_PATH}/*.vcxproj")
-foreach(VCXPROJ_FILE IN LISTS VCXPROJ_FILES)
-    file(READ "${VCXPROJ_FILE}" CONTENTS)
-    
-    # 1. Update 17.0 condition to >= 17.0 to cover future versions
-    string(REPLACE
-        "<PlatformToolset Condition=\"'\$(VisualStudioVersion)'=='17.0'\">v143</PlatformToolset>"
-        "<PlatformToolset Condition=\"'\$(VisualStudioVersion)'&gt;='17.0'\">v143</PlatformToolset>"
-        CONTENTS "${CONTENTS}"
-    )
-    string(REPLACE
-        "<PlatformToolset Condition=\"'\$(VisualStudioVersion)' == '17.0'\">v143</PlatformToolset>"
-        "<PlatformToolset Condition=\"'\$(VisualStudioVersion)'&gt;='17.0'\">v143</PlatformToolset>"
-        CONTENTS "${CONTENTS}"
-    )
-    
-    # 2. Add fallback default v143 toolset before the 15.0 condition
-    string(REPLACE
-        "<PlatformToolset Condition=\"'\$(VisualStudioVersion)'=='15.0'\">v141</PlatformToolset>"
-        "<PlatformToolset>v143</PlatformToolset><PlatformToolset Condition=\"'\$(VisualStudioVersion)'=='15.0'\">v141</PlatformToolset>"
-        CONTENTS "${CONTENTS}"
-    )
-    string(REPLACE
-        "<PlatformToolset Condition=\"'\$(VisualStudioVersion)' == '15.0'\">v141</PlatformToolset>"
-        "<PlatformToolset>v143</PlatformToolset><PlatformToolset Condition=\"'\$(VisualStudioVersion)' == '15.0'\">v141</PlatformToolset>"
-        CONTENTS "${CONTENTS}"
-    )
-    
-    file(WRITE "${VCXPROJ_FILE}" "${CONTENTS}")
-endforeach()
-
 find_program(MSBUILD_EXE msbuild)
 if (NOT MSBUILD_EXE)
     message(STATUS "DEBUG: msbuild not found in path")
@@ -40,6 +8,57 @@ else()
     get_filename_component(MSBUILD_DIR "${MSBUILD_EXE}" DIRECTORY)
     vcpkg_add_to_path("${MSBUILD_DIR}")
 endif()
+
+# Fix PlatformToolset for VS 2025/2026 (version 18+) in all vcxproj files
+if(NOT VCPKG_PLATFORM_TOOLSET)
+    if(MSBUILD_EXE MATCHES "/18/")
+        set(VCPKG_PLATFORM_TOOLSET "v145")
+    elseif(MSBUILD_EXE MATCHES "/17/")
+        set(VCPKG_PLATFORM_TOOLSET "v143")
+    else()
+        set(VCPKG_PLATFORM_TOOLSET "v143")
+    endif()
+endif()
+
+message(STATUS "DEBUG: VCPKG_PLATFORM_TOOLSET=${VCPKG_PLATFORM_TOOLSET}")
+
+file(GLOB_RECURSE VCXPROJ_FILES "${SOURCE_PATH}/*.vcxproj")
+foreach(VCXPROJ_FILE IN LISTS VCXPROJ_FILES)
+    file(READ "${VCXPROJ_FILE}" CONTENTS)
+    
+    # 1. Update 17.0 condition to >= 17.0 to cover future versions
+    string(REPLACE
+        "<PlatformToolset Condition=\"'\$(VisualStudioVersion)'=='17.0'\">v143</PlatformToolset>"
+        "<PlatformToolset Condition=\"'\$(VisualStudioVersion)'&gt;='17.0'\">${VCPKG_PLATFORM_TOOLSET}</PlatformToolset>"
+        CONTENTS "${CONTENTS}"
+    )
+    string(REPLACE
+        "<PlatformToolset Condition=\"'\$(VisualStudioVersion)' == '17.0'\">v143</PlatformToolset>"
+        "<PlatformToolset Condition=\"'\$(VisualStudioVersion)'&gt;='17.0'\">${VCPKG_PLATFORM_TOOLSET}</PlatformToolset>"
+        CONTENTS "${CONTENTS}"
+    )
+    
+    # 2. Add fallback default v143 toolset before the 15.0 condition
+    string(REPLACE
+        "<PlatformToolset Condition=\"'\$(VisualStudioVersion)'=='15.0'\">v141</PlatformToolset>"
+        "<PlatformToolset>${VCPKG_PLATFORM_TOOLSET}</PlatformToolset><PlatformToolset Condition=\"'\$(VisualStudioVersion)'=='15.0'\">v141</PlatformToolset>"
+        CONTENTS "${CONTENTS}"
+    )
+    string(REPLACE
+        "<PlatformToolset Condition=\"'\$(VisualStudioVersion)' == '15.0'\">v141</PlatformToolset>"
+        "<PlatformToolset>${VCPKG_PLATFORM_TOOLSET}</PlatformToolset><PlatformToolset Condition=\"'\$(VisualStudioVersion)' == '15.0'\">v141</PlatformToolset>"
+        CONTENTS "${CONTENTS}"
+    )
+
+    # 3. Replace any hardcoded v143 toolsets from patches
+    string(REPLACE
+        "<PlatformToolset>v143</PlatformToolset>"
+        "<PlatformToolset>${VCPKG_PLATFORM_TOOLSET}</PlatformToolset>"
+        CONTENTS "${CONTENTS}"
+    )
+    
+    file(WRITE "${VCXPROJ_FILE}" "${CONTENTS}")
+endforeach()
 
 if(VCPKG_TARGET_ARCHITECTURE STREQUAL "x86")
     set(FB_ARCH_OUT "Win32")
