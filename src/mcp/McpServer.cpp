@@ -46,12 +46,107 @@
 #include "metadata/table.h"
 #include "metadata/column.h"
 #include "metadata/view.h"
+#include "metadata/procedure.h"
+#include "metadata/trigger.h"
+#include "metadata/generator.h"
+#include "metadata/domain.h"
+#include "metadata/role.h"
+#include "metadata/exception.h"
+#include "metadata/function.h"
+#include "metadata/package.h"
+#include "metadata/CreateDDLVisitor.h"
 #include "core/StringUtils.h"
 
 using json = nlohmann::json;
 
 namespace fr
 {
+
+static MetadataItem* findMetadataObject(DatabasePtr db, const std::string& name)
+{
+    wxString wxName = wxString::FromUTF8(name.c_str());
+    
+    // Check Tables
+    {
+        auto c = db->getTables();
+        c->ensureChildrenLoaded();
+        if (auto item = c->findByName(wxName)) return item.get();
+    }
+    // Check Views
+    {
+        auto c = db->getViews();
+        c->ensureChildrenLoaded();
+        if (auto item = c->findByName(wxName)) return item.get();
+    }
+    // Check Procedures
+    {
+        auto c = db->getProcedures();
+        c->ensureChildrenLoaded();
+        if (auto item = c->findByName(wxName)) return item.get();
+    }
+    // Check DML Triggers
+    {
+        auto c = db->getDMLTriggers();
+        c->ensureChildrenLoaded();
+        if (auto item = c->findByName(wxName)) return item.get();
+    }
+    // Check DDL Triggers
+    {
+        auto c = db->getDDLTriggers();
+        c->ensureChildrenLoaded();
+        if (auto item = c->findByName(wxName)) return item.get();
+    }
+    // Check DB Triggers
+    {
+        auto c = db->getDBTriggers();
+        c->ensureChildrenLoaded();
+        if (auto item = c->findByName(wxName)) return item.get();
+    }
+    // Check Generators
+    {
+        auto c = db->getGenerators();
+        c->ensureChildrenLoaded();
+        if (auto item = c->findByName(wxName)) return item.get();
+    }
+    // Check Domains
+    {
+        auto c = db->getDomains();
+        c->ensureChildrenLoaded();
+        if (auto item = c->findByName(wxName)) return item.get();
+    }
+    // Check Roles
+    {
+        auto c = db->getRoles();
+        c->ensureChildrenLoaded();
+        if (auto item = c->findByName(wxName)) return item.get();
+    }
+    // Check Exceptions
+    {
+        auto c = db->getExceptions();
+        c->ensureChildrenLoaded();
+        if (auto item = c->findByName(wxName)) return item.get();
+    }
+    // Check UDFs
+    {
+        auto c = db->getUDFs();
+        c->ensureChildrenLoaded();
+        if (auto item = c->findByName(wxName)) return item.get();
+    }
+    // Check Packages
+    {
+        auto c = db->getPackages();
+        c->ensureChildrenLoaded();
+        if (auto item = c->findByName(wxName)) return item.get();
+    }
+    // Check GT Tables
+    {
+        auto c = db->getGTTables();
+        c->ensureChildrenLoaded();
+        if (auto item = c->findByName(wxName)) return item.get();
+    }
+
+    return nullptr;
+}
 
 void McpServer::run()
 {
@@ -166,6 +261,50 @@ void McpServer::run()
                 {"required", json::array({"database_name", "sql"})}
             };
             tools.push_back(execQuery);
+
+            // get_metadata_ddl tool
+            json getDdl;
+            getDdl["name"] = "get_metadata_ddl";
+            getDdl["description"] = "Retrieve the SQL Data Definition Language (DDL) statement used to create or define a specific database object (table, view, procedure, trigger, generator, domain, role, exception, package).";
+            getDdl["inputSchema"] = {
+                {"type", "object"},
+                {"properties", {
+                    {"database_name", {
+                        {"type", "string"},
+                        {"description", "The name of the database as registered in FlameRobin."}
+                    }},
+                    {"object_name", {
+                        {"type", "string"},
+                        {"description", "The name of the metadata object (case-insensitive)."}
+                    }},
+                    {"password", {
+                        {"type", "string"},
+                        {"description", "Optional connection password if not saved."}
+                    }}
+                }},
+                {"required", json::array({"database_name", "object_name"})}
+            };
+            tools.push_back(getDdl);
+
+            // get_database_info tool
+            json getDbInfo;
+            getDbInfo["name"] = "get_database_info";
+            getDbInfo["description"] = "Retrieve detailed system information, file pages, sweep, configuration, transaction history, encryption state, and active transaction list of a database.";
+            getDbInfo["inputSchema"] = {
+                {"type", "object"},
+                {"properties", {
+                    {"database_name", {
+                        {"type", "string"},
+                        {"description", "The name of the database as registered in FlameRobin."}
+                    }},
+                    {"password", {
+                        {"type", "string"},
+                        {"description", "Optional connection password if not saved."}
+                    }}
+                }},
+                {"required", json::array({"database_name"})}
+            };
+            tools.push_back(getDbInfo);
 
             response["result"] = {
                 {"tools", tools}
@@ -406,6 +545,116 @@ void McpServer::run()
                     toolResult["rows"] = rows;
                     toolResult["column_count"] = colCount;
                     toolResult["affected_rows"] = st->getAffectedRows();
+                }
+                else if (toolName == "get_metadata_ddl")
+                {
+                    std::string dbName = args.value("database_name", "");
+                    std::string objName = args.value("object_name", "");
+                    std::string password = args.value("password", "");
+
+                    std::shared_ptr<Root> root(new Root());
+                    root->load();
+                    DatabasePtr targetDb;
+                    for (const auto& server : root->getServers())
+                    {
+                        for (const auto& db : server->getDatabases())
+                        {
+                            if (wx2std(db->getName_()) == dbName)
+                            {
+                                targetDb = db;
+                                break;
+                            }
+                        }
+                        if (targetDb) break;
+                    }
+
+                    if (!targetDb)
+                    {
+                        throw std::runtime_error("Database '" + dbName + "' not found in FlameRobin configuration.");
+                    }
+
+                    wxString pwd = targetDb->getDecryptedPassword();
+                    if (!password.empty())
+                        pwd = wxString::FromUTF8(password.c_str());
+
+                    targetDb->connect(pwd, nullptr);
+
+                    MetadataItem* obj = findMetadataObject(targetDb, objName);
+                    if (!obj)
+                    {
+                        throw std::runtime_error("Metadata object '" + objName + "' not found in database '" + dbName + "'.");
+                    }
+
+                    CreateDDLVisitor cdv;
+                    obj->acceptVisitor(&cdv);
+                    
+                    toolResult["object_name"] = objName;
+                    toolResult["ddl"] = wx2std(cdv.getSql());
+                }
+                else if (toolName == "get_database_info")
+                {
+                    std::string dbName = args.value("database_name", "");
+                    std::string password = args.value("password", "");
+
+                    std::shared_ptr<Root> root(new Root());
+                    root->load();
+                    DatabasePtr targetDb;
+                    for (const auto& server : root->getServers())
+                    {
+                        for (const auto& db : server->getDatabases())
+                        {
+                            if (wx2std(db->getName_()) == dbName)
+                            {
+                                targetDb = db;
+                                break;
+                            }
+                        }
+                        if (targetDb) break;
+                    }
+
+                    if (!targetDb)
+                    {
+                        throw std::runtime_error("Database '" + dbName + "' not found in FlameRobin configuration.");
+                    }
+
+                    wxString pwd = targetDb->getDecryptedPassword();
+                    if (!password.empty())
+                        pwd = wxString::FromUTF8(password.c_str());
+
+                    targetDb->connect(pwd, nullptr);
+
+                    auto dalDb = targetDb->getDALDatabase();
+                    fr::DatabaseInfoData info;
+                    dalDb->getInfo(&info);
+
+                    json dbInfo;
+                    dbInfo["ods_version"] = std::to_string(info.ods) + "." + std::to_string(info.odsMinor);
+                    dbInfo["page_size"] = info.pageSize;
+                    dbInfo["pages_allocated"] = info.pages;
+                    dbInfo["buffers"] = info.buffers;
+                    dbInfo["sweep_interval"] = info.sweep;
+                    dbInfo["forced_writes"] = info.forcedWrites;
+                    dbInfo["reserve_space"] = info.reserve;
+                    dbInfo["read_only"] = info.readOnly;
+                    dbInfo["oldest_transaction"] = info.oldestTransaction;
+                    dbInfo["oldest_active_transaction"] = info.oldestActiveTransaction;
+                    dbInfo["oldest_snapshot"] = info.oldestSnapshot;
+                    dbInfo["next_transaction"] = info.nextTransaction;
+                    dbInfo["crypt_state"] = wx2std(cryptStateToString(info.cryptState));
+
+                    json activeTxs = json::array();
+                    for (const auto& tx : info.activeTransactions)
+                    {
+                        json t;
+                        t["id"] = tx.id;
+                        t["isolation_level"] = wx2std(isolationLevelToString(tx.isolationLevel));
+                        t["read_only"] = tx.readOnly;
+                        t["wait"] = tx.wait;
+                        activeTxs.push_back(t);
+                    }
+                    dbInfo["active_transactions"] = activeTxs;
+
+                    toolResult = dbInfo;
                 }
                 else
                 {

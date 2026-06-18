@@ -16,5 +16,7 @@ FlameRobin has a built-in Model Context Protocol (MCP) server that can be run to
    - `list_databases`: List registered databases.
    - `get_schema`: Retrieve the schema of a database.
    - `execute_query`: Run standard read-only or DML SQL queries.
+   - `get_metadata_ddl`: Retrieve the DDL representation of any database metadata object.
+   - `get_database_info`: Retrieve system statistics, transaction info, and active transactions.
 
 For detailed integration guides (e.g. for Claude desktop or other systems), refer to [docs/mcp_howto.md](file:///C:/Work/flamerobin/docs/mcp_howto.md).

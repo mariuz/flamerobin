@@ -77,6 +77,21 @@ Executes an arbitrary SQL statement against the specified database and returns t
   - `password` (string, optional): Connection password if not saved.
 - **Response**: List of JSON rows, column count, and affected rows count.
 
+### `get_metadata_ddl`
+Retrieves the complete SQL Data Definition Language (DDL) string used to create/define any database metadata object (table, view, trigger, procedure, generator, domain, role, exception, package).
+- **Arguments**:
+  - `database_name` (string, required): The registered name of the database.
+  - `object_name` (string, required): The name of the metadata object.
+  - `password` (string, optional): Connection password if not saved.
+- **Response**: Object definition DDL string.
+
+### `get_database_info`
+Retrieves detailed operational and transaction information from the database (ODS version, page size, total pages, sweeps, transaction statistics, and active transactions list).
+- **Arguments**:
+  - `database_name` (string, required): The registered name of the database.
+  - `password` (string, optional): Connection password if not saved.
+- **Response**: Database diagnostic details.
+
 ---
 
 ## 4. Troubleshooting
