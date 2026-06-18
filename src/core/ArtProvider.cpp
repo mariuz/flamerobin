@@ -57,22 +57,33 @@ wxBitmapBundle ArtProvider::loadBitmapBundleFromFile(const wxArtID& id)
     else if (name.substr(0, 6) == "wxart_")
         name.erase(0, 6);
 
-    // Try SVG first, with a dark-mode variant if applicable.
-    // Convention: <name>_dark.svg is preferred when the system is in dark mode.
+    bool useClassic = config().getClassicIcons();
+    wxString folder = useClassic ? "svg_classic/" : "svg/";
     bool isDarkMode = wxSystemSettings::GetAppearance().IsDark();
+
     if (isDarkMode)
     {
-        wxFileName svgDark(config().getImagesPath() + "svg/" + name + "_dark.svg");
+        wxFileName svgDark(config().getImagesPath() + folder + name + "_dark.svg");
         if (svgDark.FileExists())
             return wxBitmapBundle::FromSVGFile(svgDark.GetFullPath(), wxSize(16, 16));
     }
-    wxFileName svgName(config().getImagesPath() + "svg/" + name + ".svg");
+    wxFileName svgName(config().getImagesPath() + folder + name + ".svg");
     if (svgName.FileExists())
     {
-        // For SVGs, we don't need to specify a size here, wxBitmapBundle 
-        // will use the SVG to generate any size requested later.
-        // We use a base size of 16x16 as a hint.
         return wxBitmapBundle::FromSVGFile(svgName.GetFullPath(), wxSize(16, 16));
+    }
+
+    if (useClassic)
+    {
+        if (isDarkMode)
+        {
+            wxFileName svgDark(config().getImagesPath() + "svg/" + name + "_dark.svg");
+            if (svgDark.FileExists())
+                return wxBitmapBundle::FromSVGFile(svgDark.GetFullPath(), wxSize(16, 16));
+        }
+        wxFileName svgName(config().getImagesPath() + "svg/" + name + ".svg");
+        if (svgName.FileExists())
+            return wxBitmapBundle::FromSVGFile(svgName.GetFullPath(), wxSize(16, 16));
     }
 
     // Try traditional multi-size PNGs if SVG is not found

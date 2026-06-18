@@ -30,6 +30,18 @@
             </option>
         </setting>
         <setting type="radiobox">
+            <caption>Icon style</caption>
+            <description>Select the style of icons in the application</description>
+            <key>classicIcons</key>
+            <default>0</default>
+            <option>
+                <caption>Material Icons (Modern)</caption>
+            </option>
+            <option>
+                <caption>Classic Icons (Legacy)</caption>
+            </option>
+        </setting>
+        <setting type="radiobox">
             <caption>Database backend</caption>
             <description>Select the Firebird access library to use</description>
             <key>databaseBackend</key>

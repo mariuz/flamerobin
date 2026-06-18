@@ -153,6 +153,7 @@ public:
     wxString getXmlStylesPath() const;
 
     bool getUseLocalConfig() const;
+    bool getClassicIcons() const;
 };
 
 FRConfig& config();

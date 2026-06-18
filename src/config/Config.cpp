@@ -420,3 +420,11 @@ bool FRConfig::getUseLocalConfig() const
     return b;
 }
 
+bool FRConfig::getClassicIcons() const
+{
+    int val = 0;
+    if (config().getValue("classicIcons", val))
+        return val == 1;
+    return config().get("classicIcons", 0) == 1;
+}
+

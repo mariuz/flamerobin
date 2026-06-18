@@ -675,6 +675,7 @@ if(APPLE)
     add_resources(ICON ${CMAKE_SOURCE_DIR}/res Resources flamerobin.icns)
     add_resources(XML_STYLES ${CMAKE_SOURCE_DIR}/xml-styles SharedSupport/xml-styles *)
     add_resources(SVG_IMAGES ${CMAKE_SOURCE_DIR}/res/svg SharedSupport/images/svg *)
+    add_resources(SVG_CLASSIC_IMAGES ${CMAKE_SOURCE_DIR}/res/svg_classic SharedSupport/images/svg_classic *)
 
     set(RESOURCE_FILES_MAC
             ${HTML_TEMPLATES}
@@ -685,6 +686,7 @@ if(APPLE)
             ${ICON}
 			${XML_STYLES}
 			${SVG_IMAGES}
+			${SVG_CLASSIC_IMAGES}
     )
 
 endif (APPLE)
@@ -717,6 +719,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/sys-templates  DESTINATION ${CMAKE_CURRENT
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/conf-defs  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/xml-styles  DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res/svg DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/images)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res/svg_classic DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/images)
 
 
 if (APPLE)
@@ -978,6 +981,7 @@ if (UNIX AND NOT APPLE)
 	install(
 		DIRECTORY
 			res/svg
+			res/svg_classic
 		DESTINATION share/flamerobin/images
 	)
 	install(
