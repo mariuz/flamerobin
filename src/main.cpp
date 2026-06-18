@@ -133,7 +133,7 @@ bool Application::OnInit()
     if (mcpModeM)
     {
         fr::McpServer::run();
-        return false;
+        exit(0);
     }
 
     wxImage::AddHandler(new wxPNGHandler);
