@@ -1,0 +1,184 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
+     xmlns:fw="http://wixtoolset.org/schemas/v4/wxs/firewall">
+
+  <Package Name="FlameRobin"
+           Manufacturer="The FlameRobin Project"
+           Version="26.6.11"
+           UpgradeCode="2364bd16-7a55-46d9-8809-b747dee99cda"
+           Scope="perMachine">
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Property Id="ADD_FIREWALL_EXCEPTION" Value="1" />
+
+    <!-- License agreement file -->
+    <WixVariable Id="WixUILicenseRtf" Value="fr_license.rtf" />
+
+    <!-- Directory structure -->
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="FlameRobin">
+        <Directory Id="DocsFolder" Name="docs" />
+        <Directory Id="ConfDefsFolder" Name="conf-defs" />
+        <Directory Id="CodeTemplatesFolder" Name="code-templates" />
+        <Directory Id="HtmlTemplatesFolder" Name="html-templates" />
+        <Directory Id="SysTemplatesFolder" Name="sys-templates" />
+        <Directory Id="XmlStylesFolder" Name="xml-styles" />
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="ApplicationProgramsFolder" Name="FlameRobin" />
+    </StandardDirectory>
+
+    <StandardDirectory Id="DesktopFolder" />
+
+    <!-- Application Components -->
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <!-- Executable Component -->
+      <Component Id="FlameRobinExeComponent" Guid="a6f3b0e1-fb6d-4972-8822-491a92e21245">
+        <File Id="flamerobin.exe" Source="..\..\build\Debug\flamerobin.exe" KeyPath="yes" />
+      </Component>
+
+      <!-- URL Shortcut Component -->
+      <Component Id="UrlShortcutComponent" Guid="cb3689ea-6b2c-473d-9d41-e945112eb89d">
+        <File Id="flamerobin.url" Source="flamerobin.url" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <!-- Harvested Folder Component Groups -->
+    <ComponentGroup Id="DocsFiles" Directory="DocsFolder">
+      <!-- Explicitly declare files that are targeted by shortcuts -->
+      <Component Id="fr_license.html_comp" Guid="3a2b1c0d-4e5f-6a7b-8c9d-0e1f2a3b4c5d">
+        <File Id="fr_license.html" Source="..\..\docs\fr_license.html" KeyPath="yes" />
+      </Component>
+      
+      <Component Id="fr_whatsnew.html_comp" Guid="2b1c0d3a-4e5f-6a7b-8c9d-0e1f2a3b4c5d">
+        <File Id="fr_whatsnew.html" Source="..\..\docs\fr_whatsnew.html" KeyPath="yes" />
+      </Component>
+
+      <!-- Harvest the remaining files in docs -->
+      <Files Include="..\..\docs\**">
+        <Exclude Files="..\..\docs\flamerobin.1" />
+        <Exclude Files="..\..\docs\fr_license.html" />
+        <Exclude Files="..\..\docs\fr_whatsnew.html" />
+      </Files>
+    </ComponentGroup>
+
+    <ComponentGroup Id="ConfDefsFiles" Directory="ConfDefsFolder">
+      <Files Include="..\..\conf-defs\**" />
+    </ComponentGroup>
+
+    <ComponentGroup Id="CodeTemplatesFiles" Directory="CodeTemplatesFolder">
+      <Files Include="..\..\code-templates\**" />
+    </ComponentGroup>
+
+    <ComponentGroup Id="HtmlTemplatesFiles" Directory="HtmlTemplatesFolder">
+      <Files Include="..\..\html-templates\**" />
+    </ComponentGroup>
+
+    <ComponentGroup Id="SysTemplatesFiles" Directory="SysTemplatesFolder">
+      <Files Include="..\..\sys-templates\**" />
+    </ComponentGroup>
+
+    <ComponentGroup Id="XmlStylesFiles" Directory="XmlStylesFolder">
+      <Files Include="..\..\xml-styles\**" />
+    </ComponentGroup>
+
+    <!-- Firewall Exception Component -->
+    <ComponentGroup Id="FirewallComponents" Directory="INSTALLFOLDER">
+      <Component Id="FlameRobinFWExceptionComponent" Guid="72e39c81-8c43-4318-ae31-89e4312ab62a" Condition="ADD_FIREWALL_EXCEPTION = 1">
+        <RegistryValue Root="HKLM" Key="Software\FlameRobin" Name="FirewallRuleAdded" Type="integer" Value="1" KeyPath="yes" />
+        <fw:FirewallException Id="FlameRobinFWException"
+                              Name="FlameRobin Database Client"
+                              Program="[#flamerobin.exe]"
+                              Scope="any"
+                              Profile="all" />
+      </Component>
+    </ComponentGroup>
+
+    <!-- Start Menu & Desktop Shortcuts -->
+    <ComponentGroup Id="ShortcutsComponents" Directory="ApplicationProgramsFolder">
+      <Component Id="ApplicationShortcuts" Guid="d83f605a-8b89-49bb-bde6-89d892a0134f">
+        <Shortcut Id="ApplicationStartMenuShortcut"
+                  Name="FlameRobin"
+                  Description="FlameRobin Database Administration Tool"
+                  Target="[#flamerobin.exe]"
+                  WorkingDirectory="INSTALLFOLDER" />
+
+        <Shortcut Id="LicenseShortcut"
+                  Name="License"
+                  Description="FlameRobin License"
+                  Target="[#fr_license.html]" />
+
+        <Shortcut Id="WhatsNewShortcut"
+                  Name="What's New"
+                  Description="FlameRobin Release Notes"
+                  Target="[#fr_whatsnew.html]" />
+
+        <Shortcut Id="WebShortcut"
+                  Name="FlameRobin on the Web"
+                  Description="Visit FlameRobin Website"
+                  Target="[#flamerobin.url]" />
+
+        <RemoveFolder Id="CleanUpShortcuts" On="uninstall" />
+        <RegistryValue Root="HKCU" Key="Software\FlameRobin" Name="StartMenuShortcuts" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+
+      <Component Id="DesktopShortcutComponent" Directory="DesktopFolder" Guid="bfbca658-29de-448f-9a06-a89e9f9c065f">
+        <Shortcut Id="ApplicationDesktopShortcut"
+                  Name="FlameRobin"
+                  Description="FlameRobin Database Administration Tool"
+                  Target="[#flamerobin.exe]"
+                  WorkingDirectory="INSTALLFOLDER" />
+        <RegistryValue Root="HKCU" Key="Software\FlameRobin" Name="DesktopShortcut" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <!-- Feature layout -->
+    <Feature Id="Main" Title="FlameRobin Application" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+      <ComponentGroupRef Id="DocsFiles" />
+      <ComponentGroupRef Id="ConfDefsFiles" />
+      <ComponentGroupRef Id="CodeTemplatesFiles" />
+      <ComponentGroupRef Id="HtmlTemplatesFiles" />
+      <ComponentGroupRef Id="SysTemplatesFiles" />
+      <ComponentGroupRef Id="XmlStylesFiles" />
+      <ComponentGroupRef Id="FirewallComponents" />
+      <ComponentGroupRef Id="ShortcutsComponents" />
+    </Feature>
+
+    <!-- User Interface Customization -->
+    <UI>
+      <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+      
+      <!-- Define the FirewallDlg dialog -->
+      <Dialog Id="FirewallDlg" Width="370" Height="270" Title="Windows Firewall Configuration">
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="&amp;Next" />
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="&amp;Back" />
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="Cancel">
+          <Publish Event="SpawnDialog" Value="CancelDlg" />
+        </Control>
+        
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="!(loc.InstallDirDlgBannerBitmap)" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+        
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes" Text="{\WixUI_Font_Title}Windows Firewall Security" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes" Text="Configure database port permissions and Windows security settings." />
+        
+        <Control Id="ExplanationText" Type="Text" X="25" Y="70" Width="320" Height="60" Text="FlameRobin needs to connect to Firebird database servers (typically using port 3050). Under Windows security guidelines, adding a firewall exception allows FlameRobin to communicate cleanly without encountering blocked connections or prompts." />
+        
+        <Control Id="FirewallCheckbox" Type="CheckBox" X="25" Y="140" Width="320" Height="30" Property="ADD_FIREWALL_EXCEPTION" CheckBoxValue="1" Text="&amp;Add an exception to Windows Defender Firewall for FlameRobin" />
+      </Dialog>
+
+      <!-- Hook our new FirewallDlg into the standard WixUI_InstallDir sequence -->
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="FirewallDlg" Order="4" />
+      <Publish Dialog="FirewallDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg" />
+      <Publish Dialog="FirewallDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" />
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="FirewallDlg" Order="2" />
+    </UI>
+
+  </Package>
+</Wix>

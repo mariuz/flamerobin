@@ -39,3 +39,7 @@ configure~
 _codeql_detected_source_root
 wxWidgets/
 vcpkg_installed/
+.wix/
+install/win32/bin/
+install/win32/obj/
+
