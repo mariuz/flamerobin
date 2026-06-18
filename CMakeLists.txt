@@ -113,6 +113,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/main.cpp
         ${SOURCEDIR}/MasterPassword.cpp
         ${SOURCEDIR}/SecretStore.cpp
+        ${SOURCEDIR}/mcp/McpServer.cpp
         ${SOURCEDIR}/objectdescriptionhandler.cpp
         ${SOURCEDIR}/statementHistory.cpp
         ${SOURCEDIR}/config/Config.cpp
@@ -739,6 +740,8 @@ endif (APPLE)
 if (ENABLE_VCPKG)
     find_package(Boost REQUIRED COMPONENTS filesystem)
     list(APPEND FR_LIBS Boost::filesystem)
+    find_package(nlohmann_json CONFIG REQUIRED)
+    list(APPEND FR_LIBS nlohmann_json::nlohmann_json)
 endif ()
 
 target_link_libraries(${PROJECT_NAME} IBPP fb-cpp::fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})

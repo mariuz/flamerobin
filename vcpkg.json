@@ -42,7 +42,8 @@
     {
       "name": "scintilla",
       "platform": "windows"
-    }
+    },
+    "nlohmann-json"
   ],
   "overrides": [
     {

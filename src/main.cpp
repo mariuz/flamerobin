@@ -45,6 +45,7 @@
 #include "gui/FRStyleManager.h"
 #include "gui/MainFrame.h"
 #include "main.h"
+#include "mcp/McpServer.h"
 
 IMPLEMENT_APP(Application)
 
@@ -129,6 +130,12 @@ bool Application::OnInit()
         return false;
     }
 
+    if (mcpModeM)
+    {
+        fr::McpServer::run();
+        return false;
+    }
+
     wxImage::AddHandler(new wxPNGHandler);
 
     wxSystemOptions::SetOption("mac.listctrl.always_use_generic", true);
@@ -179,10 +186,12 @@ void Application::parseCommandLine()
     parser.AddOption("h", "home", _("Set FlameRobin's home path"));
     parser.AddOption("uh", "user-home",
         _("Set FlameRobin's user home path"));
+    parser.AddSwitch("m", "mcp", _("Run FlameRobin as an MCP server"));
     // open databases given as command line parameters
     parser.AddParam(_("File name of database to open"), wxCMD_LINE_VAL_STRING,
         wxCMD_LINE_PARAM_OPTIONAL | wxCMD_LINE_PARAM_MULTIPLE);
 
+    mcpModeM = false;
     if (parser.Parse() == 0)
     {
         wxString paramValue;
@@ -191,6 +200,8 @@ void Application::parseCommandLine()
 
         if (parser.Found("user-home", &paramValue))
             config().setUserHomePath(translatePathMacros(paramValue));
+
+        mcpModeM = parser.Found("mcp");
 
         for (size_t i = 0; i < parser.GetParamCount(); i++)
             cmdlineParamsM.Add(parser.GetParam(i));

@@ -33,6 +33,7 @@ class Application: public wxApp
 private:
     // Open databases whose file names were given as command line parameters
     wxArrayString cmdlineParamsM;
+    bool mcpModeM;
     void openDatabasesFromParams(MainFrame* frFrame);
     // Reads the environment variables that influence FR's behaviour.
     void checkEnvironment();
@@ -45,6 +46,7 @@ protected:
     virtual const wxString getConfigurableObjectId() const;
 public:
     bool OnInit();
+    bool getMcpMode() const { return mcpModeM; }
     virtual bool OnExceptionInMainLoop();
     void OnFatalException();
     virtual void HandleEvent(wxEvtHandler* handler, wxEventFunction func,
