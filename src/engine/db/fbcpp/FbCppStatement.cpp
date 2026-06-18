@@ -59,7 +59,12 @@ void FbCppStatement::prepare(const std::string& sql)
     sqlM = sql;
     wxLogDebug("FbCppStatement::prepare() for SQL: %s", sqlM.c_str());
     try {
-        statementM.emplace(attachmentM, transactionM, sql);
+        fbcpp::StatementOptions options;
+        if (databasePtrM)
+        {
+            options.setDialect(static_cast<unsigned>(databasePtrM->getDialect()));
+        }
+        statementM.emplace(attachmentM, transactionM, sql, options);
 
         columnTypesM.clear();
         const auto& outDescs = statementM->getOutputDescriptors();
