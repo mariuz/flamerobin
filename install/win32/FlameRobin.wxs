@@ -38,7 +38,7 @@
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <!-- Executable Component -->
       <Component Id="FlameRobinExeComponent" Guid="a6f3b0e1-fb6d-4972-8822-491a92e21245">
-        <File Id="flamerobin.exe" Source="..\..\build\Debug\flamerobin.exe" KeyPath="yes" />
+        <File Id="flamerobin.exe" Source="$(var.FlameRobinExeSource)" KeyPath="yes" />
       </Component>
 
       <!-- URL Shortcut Component -->

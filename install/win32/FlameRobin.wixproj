@@ -2,8 +2,10 @@
   <PropertyGroup>
     <OutputName>FlameRobin</OutputName>
     <OutputType>Package</OutputType>
-    <Platforms>x64</Platforms>
-    <Platform>x64</Platform>
+    <Platforms>x64;x86</Platforms>
+    <Platform Condition="'$(Platform)' == ''">x64</Platform>
+    <FlameRobinExeSource Condition="'$(FlameRobinExeSource)' == ''">..\..\build\Debug\flamerobin.exe</FlameRobinExeSource>
+    <DefineConstants>FlameRobinExeSource=$(FlameRobinExeSource)</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="WixToolset.UI.wixext" Version="7.0.0" />

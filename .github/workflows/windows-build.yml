@@ -125,9 +125,16 @@ jobs:
       run: >
         cmake --build .\${{ matrix.build_dir }} --config Release --target flamerobin -j 8 --verbose
 
-    - name: Innosetup 
-      run: >
-        ISCC.exe install\win32\${{ matrix.setup_script }}
+    - name: Build MSI Installer
+      shell: pwsh
+      run: |
+        dotnet build install/win32/FlameRobin.wixproj -c Release -p:Platform=${{ matrix.arch }} -p:FlameRobinExeSource=..\..\${{ matrix.build_dir }}\Release\flamerobin.exe
+        $versionFile = Get-Content src/frversion.h -Raw
+        $major = [regex]::Match($versionFile, '#define\s+FR_VERSION_MAJOR\s+(\d+)').Groups[1].Value
+        $minor = [regex]::Match($versionFile, '#define\s+FR_VERSION_MINOR\s+(\d+)').Groups[1].Value
+        $rls = [regex]::Match($versionFile, '#define\s+FR_VERSION_RLS\s+(\d+)').Groups[1].Value
+        $version = "${major}.${minor}.${rls}"
+        Copy-Item -Path "install/win32/bin/${{ matrix.arch }}/Release/FlameRobin.msi" -Destination "install/win32/bin/${{ matrix.arch }}/Release/FlameRobin-$version-${{ matrix.arch }}.msi" -Force
 
     - name: Build Portable Release
       shell: pwsh
@@ -204,7 +211,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
           name: ${{ matrix.artifact_name }}
-          path: install/win32/output/flamerobin-*.exe
+          path: install/win32/bin/${{ matrix.arch }}/Release/FlameRobin-*.msi
 
     - name: Upload portable ZIP
       uses: actions/upload-artifact@v4
