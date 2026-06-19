@@ -79,8 +79,13 @@ static wxString getFbClientPath()
 }
 #endif
 
+extern "C" bool fbcpp_is_client_initialized();
+
 static wxString getLoadedPlugins()
 {
+    if (!fbcpp_is_client_initialized())
+        return wxEmptyString;
+
     wxString pluginsList;
     try
     {

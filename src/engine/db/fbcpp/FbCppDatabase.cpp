@@ -56,15 +56,21 @@ FbCppDatabase::FbCppDatabase()
 {
 }
 
+std::optional<fbcpp::Client> FbCppDatabase::clientM;
+
+bool FbCppDatabase::isClientInitialized()
+{
+    return clientM.has_value();
+}
+
 fbcpp::Client& FbCppDatabase::getClient()
 {
-    static std::optional<fbcpp::Client> client;
-    if (!client)
+    if (!clientM)
     {
 #if FB_CPP_USE_BOOST_DLL != 0
         if (!clientLibStaticM.empty())
         {
-            client.emplace(boost::dll::fs::path(clientLibStaticM));
+            clientM.emplace(boost::dll::fs::path(clientLibStaticM));
         }
         else
 #endif
@@ -72,10 +78,10 @@ fbcpp::Client& FbCppDatabase::getClient()
             Firebird::IMaster* master = fb_get_master_interface();
             if (!master)
                 throw std::runtime_error("Failed to get Firebird master interface");
-            client.emplace(master);
+            clientM.emplace(master);
         }
     }
-    return *client;
+    return *clientM;
 }
 
 std::vector<uint8_t> FbCppDatabase::buildDpb(bool creating, const std::string& owner,
@@ -439,3 +445,8 @@ IBlobPtr FbCppDatabase::createBlob(ITransactionPtr tr)
 }
 
 } // namespace fr
+
+extern "C" bool fbcpp_is_client_initialized()
+{
+    return fr::FbCppDatabase::isClientInitialized();
+}

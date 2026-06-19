@@ -81,6 +81,10 @@ public:
     }
 
     static fbcpp::Client& getClient();
+    static bool isClientInitialized();
+
+private:
+    static std::optional<fbcpp::Client> clientM;
 
 private:
     std::vector<uint8_t> buildDpb(bool creating, const std::string& owner = "",
