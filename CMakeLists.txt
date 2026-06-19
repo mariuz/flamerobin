@@ -756,11 +756,24 @@ if (ENABLE_VCPKG AND WIN32)
     if (NOT VCPKG_TARGET_TRIPLET)
         set(VCPKG_TARGET_TRIPLET "x64-windows")
     endif()
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/tools/crashpad/crashpad_handler.exe"
-        $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    find_program(CRASHPAD_HANDLER_EXE
+        NAMES crashpad_handler
+        PATHS
+            "${CMAKE_SOURCE_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/tools/crashpad"
+            "${CMAKE_SOURCE_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/tools"
+            "${CMAKE_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/tools/crashpad"
+            "${CMAKE_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/tools"
+        NO_DEFAULT_PATH
     )
+    if (CRASHPAD_HANDLER_EXE)
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CRASHPAD_HANDLER_EXE}"
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>
+        )
+    else()
+        message(WARNING "crashpad_handler.exe not found! Dumps might not be writeable.")
+    endif()
 endif()
 
 enable_testing()
