@@ -1,8 +1,8 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO asfernandes/fb-cpp
-    REF a73eda3
-    SHA512 c47cdcc9bd589bec3f868c804930bf5daa849abab2aa1813df003ffad7c974620b8dc756d6168bc2a2abbd12e660e0ae6c60b1f3cdb163b643f1fc69731f1238
+    REF 85227271e5d6581bdf834efb47cf900ce06ec0f7
+    SHA512 800068522e1349031ce009fd34ad75b7cb76ea648d7182d8f5eb1d17128a5bd1c4587ce9b0cff50dc9c84ca0e69dc6ebc873ff340f0d3f0a08ecc6a2ede3f31f
     PATCHES
         fb-cpp-flamerobin.patch
 )
