@@ -6,6 +6,7 @@
     <Platform Condition="'$(Platform)' == ''">x64</Platform>
     <FlameRobinExeSource Condition="'$(FlameRobinExeSource)' == ''">..\..\build\Debug\flamerobin.exe</FlameRobinExeSource>
     <DefineConstants>FlameRobinExeSource=$(FlameRobinExeSource)</DefineConstants>
+    <AcceptEula>wix7</AcceptEula>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="WixToolset.UI.wixext" Version="7.0.0" />
