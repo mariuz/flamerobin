@@ -107,8 +107,20 @@ parts:
       - ninja-build
     cmake-generator: Ninja
 
+  nlohmann-json:
+    plugin: cmake
+    source: https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
+    source-checksum: sha256/d6c65aca6b1ed68e7a182f4757257b107ae403032760ed6ef121c9d55e81757d
+    cmake-parameters:
+      - -DCMAKE_INSTALL_PREFIX=/usr
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DJSON_BuildTests=OFF
+    cmake-generator: Ninja
+    build-packages:
+      - ninja-build
+
   flamerobin:
-    after: [wxwidgets, fb-cpp]
+    after: [wxwidgets, fb-cpp, nlohmann-json]
     plugin: cmake
     source: .
     cmake-parameters:
