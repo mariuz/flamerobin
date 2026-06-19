@@ -73,6 +73,8 @@ public:
     wxString getStatement() const;
     bool isAlterColumn() const;
     bool isDatatype() const;
+    bool isRename() const;
+    wxString getNewName() const;
     Relation* getCreateTriggerRelation() const;
 
 protected:

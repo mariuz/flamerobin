@@ -144,6 +144,14 @@ public:
         }
     }
 
+    void insertItem(ItemType item)
+    {
+        iterator pos = std::find_if(itemsM.begin(), itemsM.end(),
+            InsertionPosByName(item->getName_()));
+        itemsM.insert(pos, item);
+        notifyObservers();
+    }
+
     void setItems(wxArrayString names)
     {
         DatabasePtr database = getDatabase();

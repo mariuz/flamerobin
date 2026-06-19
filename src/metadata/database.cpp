@@ -1069,19 +1069,45 @@ void Database::parseCommitedSql(const SqlStatement& stm)
                 break;
             }
             case ntDomain:
-                object->invalidate();
-                // notify all table columns with that domain
-                for (Tables::iterator it = tablesM->begin();
-                    it != tablesM->end(); ++it)
+            {
+                if (stm.isRename())
                 {
-                    for (ColumnPtrs::iterator itColumn = (*it)->begin();
-                        itColumn != (*it)->end(); ++itColumn)
+                    DomainPtr dom = userDomainsM->findByName(stm.getName());
+                    if (dom)
                     {
-                        if ((*itColumn)->getSource() == stm.getName())
-                            (*itColumn)->invalidate();
+                        userDomainsM->remove(dom.get());
+                        dom->setName_(stm.getNewName());
+                        userDomainsM->insertItem(dom);
+                    }
+                    else
+                    {
+                        dom = sysDomainsM->findByName(stm.getName());
+                        if (dom)
+                        {
+                            sysDomainsM->remove(dom.get());
+                            dom->setName_(stm.getNewName());
+                            sysDomainsM->insertItem(dom);
+                        }
+                    }
+                    notifyObservers();
+                }
+                else
+                {
+                    object->invalidate();
+                    // notify all table columns with that domain
+                    for (Tables::iterator it = tablesM->begin();
+                        it != tablesM->end(); ++it)
+                    {
+                        for (ColumnPtrs::iterator itColumn = (*it)->begin();
+                            itColumn != (*it)->end(); ++itColumn)
+                        {
+                            if ((*itColumn)->getSource() == stm.getName())
+                                (*itColumn)->invalidate();
+                        }
                     }
                 }
                 break;
+            }
             default:
                 // calls notifyObservers() only in the base class
                 // descendent classes are free to put there whatever it takes...

@@ -648,3 +648,27 @@ bool SqlStatement::actionIs(const SqlAction& act, NodeType nt) const
         return (actionM == act && objectTypeM == nt);
 }
 
+bool SqlStatement::isRename() const
+{
+    if (actionM == actALTER && objectTypeM == ntDomain)
+    {
+        if (identifierTokenIndexM + 2 < tokensM.size())
+        {
+            if (tokensM[identifierTokenIndexM + 1] == kwTO && tokensM[identifierTokenIndexM + 2] == tkIDENTIFIER)
+                return true;
+        }
+    }
+    return false;
+}
+
+wxString SqlStatement::getNewName() const
+{
+    if (isRename())
+    {
+        auto it = tokenStringsM.find((int)(identifierTokenIndexM + 2));
+        if (it != tokenStringsM.end())
+            return it->second;
+    }
+    return "";
+}
+
