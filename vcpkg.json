@@ -43,7 +43,8 @@
       "name": "scintilla",
       "platform": "windows"
     },
-    "nlohmann-json"
+    "nlohmann-json",
+    "crashpad"
   ],
   "overrides": [
     {

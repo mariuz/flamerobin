@@ -47,10 +47,78 @@
 #include "main.h"
 #include "mcp/McpServer.h"
 
+#ifdef FR_USE_CRASHPAD
+#include "client/crashpad_client.h"
+#include "client/crash_report_database.h"
+#include "client/settings.h"
+#include <wx/stdpaths.h>
+#include <wx/filename.h>
+#endif
+
 IMPLEMENT_APP(Application)
+
+#ifdef FR_USE_CRASHPAD
+bool startCrashpad()
+{
+    wxFileName handlerPath(wxStandardPaths::Get().GetExecutablePath());
+    handlerPath.SetFullName("crashpad_handler.exe");
+    base::FilePath handler(handlerPath.GetFullPath().ToStdWstring());
+
+    wxFileName dbPath(wxStandardPaths::Get().GetUserLocalDataDir(), "");
+    dbPath.AppendDir("crashes");
+    if (!wxDirExists(dbPath.GetPath()))
+        wxMkdir(dbPath.GetPath());
+    base::FilePath database(dbPath.GetPath().ToStdWstring());
+
+    wxFileName metricsPath(wxStandardPaths::Get().GetUserLocalDataDir(), "");
+    metricsPath.AppendDir("crashes_metrics");
+    if (!wxDirExists(metricsPath.GetPath()))
+        wxMkdir(metricsPath.GetPath());
+    base::FilePath metrics(metricsPath.GetPath().ToStdWstring());
+
+    std::string url = "";
+
+    std::map<std::string, std::string> annotations;
+    annotations["format"] = "minidump";
+    annotations["prod"] = "FlameRobin";
+    annotations["ver"] = "26.6.10";
+
+    std::vector<std::string> arguments;
+    arguments.push_back("--no-rate-limit");
+
+    crashpad::CrashpadClient client;
+    bool status = client.StartHandler(
+        handler,
+        database,
+        metrics,
+        url,
+        annotations,
+        arguments,
+        true, // restartable
+        false // asynchronous_start
+    );
+
+    if (status)
+    {
+        std::unique_ptr<crashpad::CrashReportDatabase> db =
+            crashpad::CrashReportDatabase::Initialize(database);
+        if (db && db->GetSettings())
+        {
+            db->GetSettings()->SetUploadsEnabled(false);
+        }
+    }
+    return status;
+}
+#endif
 
 void parachute()
 {
+#ifdef FR_USE_CRASHPAD
+    CONTEXT context;
+    RtlCaptureContext(&context);
+    crashpad::CrashpadClient::DumpWithoutCrash(context);
+#endif
+
     wxString msg = ::wxGetTranslation(
         "A fatal error has occurred. If you know how to\n"
         "reproduce the problem, please submit the bug report at:\n"
@@ -82,6 +150,10 @@ void Application::OnFatalException()
 
 bool Application::OnInit()
 {
+#ifdef FR_USE_CRASHPAD
+    startCrashpad();
+#endif
+
 #if wxUSE_ON_FATAL_EXCEPTION
     ::wxHandleFatalExceptions();
 #endif

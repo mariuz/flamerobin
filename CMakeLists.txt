@@ -744,10 +744,24 @@ if (ENABLE_VCPKG)
     list(APPEND FR_LIBS Boost::filesystem)
     find_package(nlohmann_json CONFIG REQUIRED)
     list(APPEND FR_LIBS nlohmann_json::nlohmann_json)
+    find_package(crashpad CONFIG REQUIRED)
+    list(APPEND FR_LIBS crashpad::crashpad)
 endif ()
 
 target_link_libraries(${PROJECT_NAME} IBPP fb-cpp::fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
 target_compile_definitions(${PROJECT_NAME} PRIVATE FBCPP_VERSION="${FBCPP_VERSION_STR}")
+
+if (ENABLE_VCPKG AND WIN32)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE FR_USE_CRASHPAD)
+    if (NOT VCPKG_TARGET_TRIPLET)
+        set(VCPKG_TARGET_TRIPLET "x64-windows")
+    endif()
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/tools/crashpad/crashpad_handler.exe"
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    )
+endif()
 
 enable_testing()
 add_executable(index_ddl_test

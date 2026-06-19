@@ -979,7 +979,7 @@ bool ExecuteSqlFrame::doCanClose()
         saveFile = res == wxYES;
     }
 
-    if (isTransactionStarted())
+    if (databaseM && databaseM->isConnected() && isTransactionStarted())
     {
         Raise();
         int res = showQuestionDialog(this, _("Do you want to commit the active transaction?"),
@@ -989,6 +989,8 @@ bool ExecuteSqlFrame::doCanClose()
         if (res != wxYES && res != wxNO)
             return false;
         if (res == wxYES && !commitTransaction())
+            return false;
+        if (res == wxNO && !rollbackTransaction())
             return false;
     }
 
