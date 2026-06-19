@@ -72,7 +72,14 @@ wxString getSchemaHtmlTemplate(const wxString& schemaJson)
 "<body id=\"viz-body\">\n"
 "    <div id=\"root\"></div>\n"
 "\n"
-"    <script type=\"text/babel\" data-options='{\"presets\": [[\"react\", {\"runtime\": \"classic\"}]]}'>\n"
+"    <script>\n"
+"        Babel.registerPreset(\"react-classic\", {\n"
+"            presets: [\n"
+"                [Babel.availablePresets[\"react\"], { \"runtime\": \"classic\" }]\n"
+"            ]\n"
+"        });\n"
+"    </script>\n"
+"    <script type=\"text/babel\" data-presets=\"react-classic\">\n"
 "        /** @jsxRuntime classic */\n"
 "        /** @jsx React.createElement */\n"
 "        const { useState, useEffect, useRef, useMemo } = React;\n"
@@ -391,7 +398,7 @@ wxString getSchemaHtmlTemplate(const wxString& schemaJson)
 +"    </script>\n"
 +"</body>\n"
 +"</html>\n";
-+    return html;
-+}
-+
-+} // namespace fr
+    return html;
+}
+
+} // namespace fr
