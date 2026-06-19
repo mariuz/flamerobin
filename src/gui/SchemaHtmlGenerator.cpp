@@ -73,6 +73,8 @@ wxString getSchemaHtmlTemplate(const wxString& schemaJson)
 "    <div id=\"root\"></div>\n"
 "\n"
 "    <script type=\"text/babel\" data-type=\"module\" data-options='{\"runtime\": \"classic\"}'>\n"
+"        /** @jsxRuntime classic */\n"
+"        /** @jsx React.createElement */\n"
 "        const { useState, useEffect, useRef, useMemo } = React;\n"
 "\n"
 "        const dbSchema = " + schemaJson + ";\n"

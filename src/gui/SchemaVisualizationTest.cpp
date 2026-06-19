@@ -67,8 +67,13 @@ int main(int argc, char** argv)
     std::cout << "Test 4: Contains classic runtime option..." << std::endl;
     ok = check(html.Contains("data-options='{\"runtime\": \"classic\"}'"), "HTML contains classic runtime data-options") && ok;
 
-    // Test 5: Contains the embedded dummy JSON
-    std::cout << "Test 5: Contains embedded JSON schema..." << std::endl;
+    // Test 5: Contains comment directives for classic runtime
+    std::cout << "Test 5: Contains jsxRuntime classic comments..." << std::endl;
+    ok = check(html.Contains("@jsxRuntime classic"), "HTML contains @jsxRuntime classic comment") && ok;
+    ok = check(html.Contains("@jsx React.createElement"), "HTML contains @jsx React.createElement comment") && ok;
+
+    // Test 6: Contains the embedded dummy JSON
+    std::cout << "Test 6: Contains embedded JSON schema..." << std::endl;
     ok = check(html.Contains(dummyJson), "HTML contains embedded JSON schema") && ok;
 
     if (ok)
