@@ -1,6 +1,6 @@
 #define FR_VERSION_MAJOR    26
 #define FR_VERSION_MINOR    6
-#define FR_VERSION_RLS      11
+#define FR_VERSION_RLS      12
 
 
 
