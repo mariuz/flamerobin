@@ -69,6 +69,39 @@ void FbCppTransaction::start()
         options.setReadCommittedMode(fbcpp::TransactionReadCommittedMode::RECORD_VERSION);
     }
 
+    if (levelM != TransactionIsolationLevel::ReadConsistency)
+    {
+        int odsVersion = 0;
+        try
+        {
+            auto& client = attachmentM.getClient();
+            fbcpp::impl::StatusWrapper status(client);
+            unsigned char item = isc_info_ods_version;
+            unsigned char buffer[256];
+            attachmentM.getHandle()->getInfo(&status, 1, &item, sizeof(buffer), buffer);
+            if (!(status.getState() & Firebird::IStatus::STATE_ERRORS))
+            {
+                if (buffer[0] == isc_info_ods_version)
+                {
+                    unsigned short len = buffer[1] | (buffer[2] << 8);
+                    if (len == 1) odsVersion = buffer[3];
+                    else if (len == 2) odsVersion = buffer[3] | (buffer[4] << 8);
+                    else if (len == 4) odsVersion = buffer[3] | (buffer[4] << 8) | (buffer[5] << 16) | (buffer[6] << 24);
+                }
+            }
+        }
+        catch (...)
+        {
+        }
+
+        if (odsVersion > 0 && odsVersion < 12)
+        {
+            // For Firebird 2.5 and older (ODS version < 12), we must use isc_tpb_version1
+            // to maintain backward compatibility.
+            options.setTpb({isc_tpb_version1});
+        }
+    }
+
     if (resolutionM == TransactionLockResolution::Wait)
         options.setWaitMode(fbcpp::TransactionWaitMode::WAIT);
     else

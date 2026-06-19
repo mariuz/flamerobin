@@ -273,7 +273,7 @@ wxString SchemaVisualizationFrame::getHtmlTemplate(const wxString& schemaJson)
 "<body id=\"viz-body\">\n"
 "    <div id=\"root\"></div>\n"
 "\n"
-"    <script type=\"text/babel\">\n"
+"    <script type=\"text/babel\" data-type=\"module\">\n"
 "        const { useState, useEffect, useRef, useMemo } = React;\n"
 "\n"
 "        const dbSchema = " + schemaJson + ";\n"
