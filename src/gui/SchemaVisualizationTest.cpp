@@ -59,13 +59,13 @@ int main(int argc, char** argv)
     std::cout << "Test 2: Contains text/babel..." << std::endl;
     ok = check(html.Contains("type=\"text/babel\""), "HTML contains type=\"text/babel\"") && ok;
 
-    // Test 3: Contains data-type="module"
-    std::cout << "Test 3: Contains data-type=\"module\"..." << std::endl;
-    ok = check(html.Contains("data-type=\"module\""), "HTML contains data-type=\"module\"") && ok;
+    // Test 3: Does NOT contain data-type="module" (prevents file:// CORS security errors)
+    std::cout << "Test 3: Does NOT contain data-type=\"module\"..." << std::endl;
+    ok = check(!html.Contains("data-type=\"module\""), "HTML does not contain data-type=\"module\"") && ok;
 
-    // Test 4: Contains data-options with classic runtime
+    // Test 4: Contains data-options with classic runtime configuration in react preset
     std::cout << "Test 4: Contains classic runtime option..." << std::endl;
-    ok = check(html.Contains("data-options='{\"runtime\": \"classic\"}'"), "HTML contains classic runtime data-options") && ok;
+    ok = check(html.Contains("data-options='{\"presets\": [[\"react\", {\"runtime\": \"classic\"}]]}'"), "HTML contains classic runtime data-options config") && ok;
 
     // Test 5: Contains comment directives for classic runtime
     std::cout << "Test 5: Contains jsxRuntime classic comments..." << std::endl;

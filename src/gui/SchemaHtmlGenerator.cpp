@@ -72,7 +72,7 @@ wxString getSchemaHtmlTemplate(const wxString& schemaJson)
 "<body id=\"viz-body\">\n"
 "    <div id=\"root\"></div>\n"
 "\n"
-"    <script type=\"text/babel\" data-type=\"module\" data-options='{\"runtime\": \"classic\"}'>\n"
+"    <script type=\"text/babel\" data-options='{\"presets\": [[\"react\", {\"runtime\": \"classic\"}]]}'>\n"
 "        /** @jsxRuntime classic */\n"
 "        /** @jsx React.createElement */\n"
 "        const { useState, useEffect, useRef, useMemo } = React;\n"
