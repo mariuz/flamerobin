@@ -8,6 +8,45 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.6.16</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Auto Refresh Metadata Tree on Domain Rename</B></font><br>
+<br>
+- <b>Refresh domain tree after alter domain TO (Commit #cd0fc8c4)</b>: Added support for auto-refreshing the metadata tree when a domain is renamed using <code>ALTER DOMAIN old_name TO new_name;</code>. The database cache now detects the rename, updates the domain object's internal identifier, and reorders it inside the collection to preserve alphabetical sorting, notifying tree observers.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>SQL Editor Parameter Prompt Crash Fix</B></font><br>
+<br>
+- <b>DAL Statement integration in InsertParametersDialog (Commit #2742ecb8)</b>: Fixed an access violation crash (`0xC0000005`) that occurred when executing parameterized queries. The parameter value input dialog was fully migrated to use the unified DAL statement object (`fr::IStatementPtr`) instead of dereferencing a null legacy statement object.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>About Box Enhancements & Crash Safeguards</B></font><br>
+<br>
+- <b>Loaded fbclient path and plugins (Commit #2242e6e7)</b>: The About Box now displays the directory path of the active <code>fbclient</code> library and lists all loaded Firebird plugins (e.g. authentication, cryptographic, key holders).<br>
+- <b>Plugin query stability (Commits #074542e3, #201ea995)</b>: Bypassed plugin loading queries if the client is not initialized, and wrapped client plugin querying in structured exception handling (SEH) on Windows to prevent application crashes under unsupported clients or configurations.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>Database Properties Alignment</B></font><br>
+<br>
+- <b>Top justify tables (Commit #ebb8919c)</b>: Changed vertical alignment of tables (Database Info, Settings, and Transaction Info) on the Database Properties screen from Middle justify to Top justify for improved readability and UI layout consistency.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>Submodules & CI Improvements</B></font><br>
+<br>
+- <b>Sync fb-cpp submodule (Commit #bfe7f81a)</b>: Synced the `fb-cpp` client library with upstream changes.<br>
+- <b>Robust Crashpad Handler path resolution (Commit #bf522ff8)</b>: Made resolution of `crashpad_handler.exe` path robust for both static and CI builds.<br>
+<br>
+
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.6.15</font><br>
 <br><br>
 
