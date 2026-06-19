@@ -94,6 +94,13 @@ modules:
           - sed -i '1i set(firebird_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake" CACHE PATH "" FORCE)' CMakeLists.txt
           - find . -name CMakeLists.txt -exec sed -i 's|fb-cpp/cmake|lib/cmake|g' {} +
 
+  - name: nlohmann-json
+    buildsystem: cmake-ninja
+    sources:
+      - type: archive
+        url: https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
+        sha256: d6c65aca6b1ed68e7a182f4757257b107ae403032760ed6ef121c9d55e81757d
+
   - name: flamerobin
     buildsystem: cmake-ninja
     builddir: true
