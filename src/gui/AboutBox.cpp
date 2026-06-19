@@ -81,12 +81,124 @@ static wxString getFbClientPath()
 
 extern "C" bool fbcpp_is_client_initialized();
 
+#if defined(_WIN32) || defined(WIN32)
+#include <excpt.h>
+#include <stdio.h>
+#include <string.h>
+
+static bool queryPluginsSEH(char* buffer, size_t bufferSize)
+{
+    bool success = false;
+    __try
+    {
+        Firebird::IMaster* master = Firebird::fb_get_master_interface();
+        if (master)
+        {
+            Firebird::IStatus* status = master->getStatus();
+            if (status)
+            {
+                Firebird::IPluginManager* pm = master->getPluginManager();
+                if (pm && pm->cloopVTable)
+                {
+                    auto* pmVtable = static_cast<Firebird::IPluginManager::VTable*>(pm->cloopVTable);
+
+                    Firebird::IConfigManager* cm = master->getConfigManager();
+                    Firebird::IFirebirdConf* conf = nullptr;
+                    if (cm && cm->cloopVTable)
+                    {
+                        auto* cmVtable = static_cast<Firebird::IConfigManager::VTable*>(cm->cloopVTable);
+                        conf = cmVtable->getFirebirdConf(cm);
+                    }
+
+                    unsigned types[] = {
+                        Firebird::IPluginManager::TYPE_PROVIDER,
+                        Firebird::IPluginManager::TYPE_AUTH_SERVER,
+                        Firebird::IPluginManager::TYPE_AUTH_CLIENT,
+                        Firebird::IPluginManager::TYPE_AUTH_USER_MANAGEMENT,
+                        Firebird::IPluginManager::TYPE_EXTERNAL_ENGINE,
+                        Firebird::IPluginManager::TYPE_TRACE,
+                        Firebird::IPluginManager::TYPE_WIRE_CRYPT,
+                        Firebird::IPluginManager::TYPE_DB_CRYPT,
+                        Firebird::IPluginManager::TYPE_KEY_HOLDER,
+                        Firebird::IPluginManager::TYPE_REPLICATOR
+                    };
+
+                    size_t offset = 0;
+                    buffer[0] = '\0';
+
+                    for (size_t i = 0; i < sizeof(types)/sizeof(types[0]); ++i)
+                    {
+                        unsigned type = types[i];
+                        Firebird::IPluginSet* pluginSet = pmVtable->getPlugins(pm, status, type, nullptr, conf);
+                        if (pluginSet)
+                        {
+                            if (pluginSet->cloopVTable)
+                            {
+                                auto* psVtable = static_cast<Firebird::IPluginSet::VTable*>(pluginSet->cloopVTable);
+                                while (true)
+                                {
+                                    const char* name = psVtable->getName(pluginSet);
+                                    if (!name)
+                                        break;
+                                    const char* moduleName = psVtable->getModuleName(pluginSet);
+
+                                    char temp[512];
+                                    if (moduleName && *moduleName)
+                                    {
+                                        _snprintf(temp, sizeof(temp), "%s (%s)", name, moduleName);
+                                    }
+                                    else
+                                    {
+                                        _snprintf(temp, sizeof(temp), "%s", name);
+                                    }
+                                    temp[sizeof(temp) - 1] = '\0';
+
+                                    size_t tempLen = strlen(temp);
+                                    if (offset + tempLen + 3 < bufferSize)
+                                    {
+                                        if (offset > 0)
+                                        {
+                                            strcat(buffer, ", ");
+                                            offset += 2;
+                                        }
+                                        strcat(buffer, temp);
+                                        offset += tempLen;
+                                    }
+                                    psVtable->next(pluginSet, status);
+                                }
+                            }
+                            pluginSet->release();
+                        }
+                    }
+                    if (conf)
+                        conf->release();
+                    success = true;
+                }
+                status->dispose();
+            }
+        }
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+        success = false;
+    }
+    return success;
+}
+#endif
+
 static wxString getLoadedPlugins()
 {
     if (!fbcpp_is_client_initialized())
         return wxEmptyString;
 
     wxString pluginsList;
+#if defined(_WIN32) || defined(WIN32)
+    char buffer[4096];
+    if (queryPluginsSEH(buffer, sizeof(buffer)))
+    {
+        pluginsList = wxString::FromUTF8(buffer);
+    }
+#else
     try
     {
         Firebird::IMaster* master = Firebird::fb_get_master_interface();
@@ -99,6 +211,15 @@ static wxString getLoadedPlugins()
                 if (pm && pm->cloopVTable)
                 {
                     auto* pmVtable = static_cast<Firebird::IPluginManager::VTable*>(pm->cloopVTable);
+
+                    Firebird::IConfigManager* cm = master->getConfigManager();
+                    Firebird::IFirebirdConf* conf = nullptr;
+                    if (cm && cm->cloopVTable)
+                    {
+                        auto* cmVtable = static_cast<Firebird::IConfigManager::VTable*>(cm->cloopVTable);
+                        conf = cmVtable->getFirebirdConf(cm);
+                    }
+
                     unsigned types[] = {
                         Firebird::IPluginManager::TYPE_PROVIDER,
                         Firebird::IPluginManager::TYPE_AUTH_SERVER,
@@ -114,7 +235,7 @@ static wxString getLoadedPlugins()
 
                     for (unsigned type : types)
                     {
-                        Firebird::IPluginSet* pluginSet = pmVtable->getPlugins(pm, status, type, nullptr, nullptr);
+                        Firebird::IPluginSet* pluginSet = pmVtable->getPlugins(pm, status, type, nullptr, conf);
                         if (pluginSet)
                         {
                             if (pluginSet->cloopVTable)
@@ -139,6 +260,8 @@ static wxString getLoadedPlugins()
                             pluginSet->release();
                         }
                     }
+                    if (conf)
+                        conf->release();
                 }
                 status->dispose();
             }
@@ -147,6 +270,7 @@ static wxString getLoadedPlugins()
     catch (...)
     {
     }
+#endif
     return pluginsList;
 }
 
