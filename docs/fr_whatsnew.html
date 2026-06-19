@@ -8,6 +8,28 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.6.15</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Database Disconnection & Open Transaction Crash Fix</B></font><br>
+<br>
+- <b>Clean close and rollback (Commit #29c4c9ac)</b>: Fixed a fatal error/crash that occurred when disconnecting a database with active transactions. Checked database connection status in <code>doCanClose()</code> and added explicit rollback support when requested or pre-configured (value <code>8</code> / <code>wxNO</code>). If the database is already disconnected, transaction prompts are bypassed so the window closes cleanly.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>Crashpad Crash Dump Integration</B></font><br>
+<br>
+- <b>Minidump collection and documentation (Commit #29c4c9ac)</b>: Integrated Google Crashpad to automatically capture and write minidumps locally upon application crash or unhandled/fatal exceptions, facilitating post-mortem debugging. Added a user manual at <code>docs/crashpad_howto.md</code>.<br>
+<br>
+
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.6.14</font><br>
 <br><br>
 
