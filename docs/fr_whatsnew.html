@@ -8,6 +8,28 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.6.14</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Firebird 2.5 and Older Backward Compatibility Fix</B></font><br>
+<br>
+- <b>ODS Compatibility checking (Commit #1bcc9d09)</b>: Fixed an issue where connecting or interacting with older Firebird 2.5 (or older ODS version &lt; 12) databases would throw a transaction block error: <code>"invalid format for transaction parameter block - wrong version of transaction parameter block"</code>. We resolved this by querying the ODS version of the attachment and forcing the transaction parameter block version back to <code>isc_tpb_version1</code> for older servers.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>Schema Visualizer React JSX Runtime Crash Fix</B></font><br>
+<br>
+- <b>Automatic Runtime bypass via Custom Preset (Commits #c235146a, #4f0c84dd, #9a9cbd02, #be8db54e)</b>: Resolved an issue where the Schema Visualizer would remain empty/blank when running under browser Tracking Prevention or in-browser Babel transform environments due to <code>"Failed to resolve module specifier 'react/jsx-runtime'"</code>. We registered a custom Babel preset named <code>"react-classic"</code> that configures the React transpiler to use the legacy <code>classic</code> runtime (i.e. generating <code>React.createElement</code> calls) rather than attempting to fetch external ES module files. In addition, we removed <code>data-type="module"</code> to avoid CORS-related blocks when loading page templates from local <code>file://</code> paths, and added C++ tests verifying the HTML generator output.<br>
+<br>
+
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.6.10</font><br>
 <br><br>
 
