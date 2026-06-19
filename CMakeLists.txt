@@ -187,6 +187,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/ReplicationStatusFrame.cpp
         ${SOURCEDIR}/gui/RestoreFrame.cpp
         ${SOURCEDIR}/gui/SchemaVisualizationFrame.cpp
+        ${SOURCEDIR}/gui/SchemaHtmlGenerator.cpp
         ${SOURCEDIR}/gui/ServerRegistrationDialog.cpp
         ${SOURCEDIR}/gui/ServiceBaseFrame.cpp
         ${SOURCEDIR}/gui/ShortcutCustomizationDialog.cpp
@@ -332,6 +333,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/gui/ReplicationStatusFrame.h
         ${SOURCEDIR}/gui/RestoreFrame.h
         ${SOURCEDIR}/gui/SchemaVisualizationFrame.h
+        ${SOURCEDIR}/gui/SchemaHtmlGenerator.h
         ${SOURCEDIR}/gui/ServerRegistrationDialog.h
         ${SOURCEDIR}/gui/ServiceBaseFrame.h
         ${SOURCEDIR}/gui/ShortcutCustomizationDialog.h
@@ -954,6 +956,13 @@ add_executable(maintenance_config_test
 )
 target_link_libraries(maintenance_config_test ${wxWidgets_LIBRARIES})
 add_test(NAME maintenance_config_test COMMAND maintenance_config_test)
+
+add_executable(schema_visualization_test
+    ${SOURCEDIR}/gui/SchemaVisualizationTest.cpp
+    ${SOURCEDIR}/gui/SchemaHtmlGenerator.cpp
+)
+target_link_libraries(schema_visualization_test ${wxWidgets_LIBRARIES})
+add_test(NAME schema_visualization_test COMMAND schema_visualization_test)
 
 if (APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES
