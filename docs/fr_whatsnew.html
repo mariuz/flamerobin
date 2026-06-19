@@ -8,6 +8,23 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.6.17</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Database Connection Crash/Failure Fix for Firebird 3.x</B></font><br>
+<br>
+- <b>Fix uninitialized ODS version check when connecting (Issue #618, Commits #71f1b7a5)</b>: Fixed an issue where connecting to a Firebird 3.x database would sometimes fail or crash the application with a database error. An uninitialized <code>odsM</code> variable in <code>DatabaseInfo</code> led to querying Firebird 4-specific system columns (like <code>rdb$sql_security</code>) before the database version was fetched from the server. All primitive fields are now properly initialized inline, and <code>databaseInfoM.load</code> is executed before retrieving additional database properties.<br>
+<br>
+
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.6.16</font><br>
 <br><br>
 
