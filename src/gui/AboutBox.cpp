@@ -47,6 +47,103 @@
 
 #include "frversion.h"
 #include "gui/AboutBox.h"
+#include <firebird/Interface.h>
+
+#if defined(_WIN32) || defined(WIN32)
+#include <windows.h>
+static wxString getFbClientPath()
+{
+    HMODULE hMod = ::GetModuleHandleW(L"fbclient.dll");
+    if (!hMod)
+        hMod = ::GetModuleHandleW(L"fbclient");
+    if (hMod)
+    {
+        wchar_t path[32768];
+        if (::GetModuleFileNameW(hMod, path, 32768))
+        {
+            return wxString(path);
+        }
+    }
+    return wxEmptyString;
+}
+#else
+#include <dlfcn.h>
+static wxString getFbClientPath()
+{
+    Dl_info info;
+    if (dladdr((void*)&Firebird::fb_get_master_interface, &info) && info.dli_fname)
+    {
+        return wxString::FromUTF8(info.dli_fname);
+    }
+    return wxEmptyString;
+}
+#endif
+
+static wxString getLoadedPlugins()
+{
+    wxString pluginsList;
+    try
+    {
+        Firebird::IMaster* master = Firebird::fb_get_master_interface();
+        if (master)
+        {
+            Firebird::IStatus* status = master->getStatus();
+            if (status)
+            {
+                Firebird::IPluginManager* pm = master->getPluginManager();
+                if (pm && pm->cloopVTable)
+                {
+                    auto* pmVtable = static_cast<Firebird::IPluginManager::VTable*>(pm->cloopVTable);
+                    unsigned types[] = {
+                        Firebird::IPluginManager::TYPE_PROVIDER,
+                        Firebird::IPluginManager::TYPE_AUTH_SERVER,
+                        Firebird::IPluginManager::TYPE_AUTH_CLIENT,
+                        Firebird::IPluginManager::TYPE_AUTH_USER_MANAGEMENT,
+                        Firebird::IPluginManager::TYPE_EXTERNAL_ENGINE,
+                        Firebird::IPluginManager::TYPE_TRACE,
+                        Firebird::IPluginManager::TYPE_WIRE_CRYPT,
+                        Firebird::IPluginManager::TYPE_DB_CRYPT,
+                        Firebird::IPluginManager::TYPE_KEY_HOLDER,
+                        Firebird::IPluginManager::TYPE_REPLICATOR
+                    };
+
+                    for (unsigned type : types)
+                    {
+                        Firebird::IPluginSet* pluginSet = pmVtable->getPlugins(pm, status, type, nullptr, nullptr);
+                        if (pluginSet)
+                        {
+                            if (pluginSet->cloopVTable)
+                            {
+                                auto* psVtable = static_cast<Firebird::IPluginSet::VTable*>(pluginSet->cloopVTable);
+                                while (true)
+                                {
+                                    const char* name = psVtable->getName(pluginSet);
+                                    if (!name)
+                                        break;
+                                    const char* moduleName = psVtable->getModuleName(pluginSet);
+                                    if (!pluginsList.empty())
+                                        pluginsList += ", ";
+                                    pluginsList += wxString::FromUTF8(name);
+                                    if (moduleName && *moduleName)
+                                    {
+                                        pluginsList += " (" + wxString::FromUTF8(moduleName) + ")";
+                                    }
+                                    psVtable->next(pluginSet, status);
+                                }
+                            }
+                            pluginSet->release();
+                        }
+                    }
+                }
+                status->dispose();
+            }
+        }
+    }
+    catch (...)
+    {
+    }
+    return pluginsList;
+}
 
 void showAboutBox(wxWindow* parent)
 {
@@ -66,6 +163,18 @@ void showAboutBox(wxWindow* parent)
         wxMINOR_VERSION,
         wxRELEASE_NUMBER
     );
+
+    wxString clientPath = getFbClientPath();
+    wxString loadedPlugins = getLoadedPlugins();
+
+    if (!clientPath.empty())
+    {
+        libs += "\n" + wxString::Format(_("Firebird client loaded from: %s"), clientPath);
+    }
+    if (!loadedPlugins.empty())
+    {
+        libs += "\n" + wxString::Format(_("Loaded plugins: %s"), loadedPlugins);
+    }
 
     wxString ver;
 #if defined FR_GIT_HASH
