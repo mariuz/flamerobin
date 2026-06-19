@@ -16,6 +16,11 @@ http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issue
 - <b>Fix uninitialized ODS version check when connecting (Issue #618, Commits #71f1b7a5)</b>: Fixed an issue where connecting to a Firebird 3.x database would sometimes fail or crash the application with a database error. An uninitialized <code>odsM</code> variable in <code>DatabaseInfo</code> led to querying Firebird 4-specific system columns (like <code>rdb$sql_security</code>) before the database version was fetched from the server. All primitive fields are now properly initialized inline, and <code>databaseInfoM.load</code> is executed before retrieving additional database properties.<br>
 <br>
 
+<font size=+1 color="#AA0000"><B>128-bit Integer GCC/Linux Alignment Crash Fix</B></font><br>
+<br>
+- <b>Fix alignment crash on GCC/Linux for 128-bit integer parsing (Issue #596, Commit #71617e2a)</b>: Fixed a fatal exception/segmentation fault crash that occurred on GCC/Linux when executing queries containing aggregate functions (like <code>SUM()</code>) over large datasets. The compiler generated aligned SSE vector move instructions for native 128-bit integer types (<code>__int128</code>) which crashed when accessing unaligned fields inside packed double-dabble union structures. We replaced direct operations on unaligned memory addresses with safe <code>std::memcpy</code> calls and native 64-bit integer arithmetic.<br>
+<br>
+
 For more info please read commit history log<br>
 <br>
 <br>
