@@ -17,7 +17,7 @@
     <WixVariable Id="WixUILicenseRtf" Value="fr_license.rtf" />
 
     <!-- Directory structure -->
-    <StandardDirectory Id="ProgramFiles64Folder">
+    <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="FlameRobin">
         <Directory Id="DocsFolder" Name="docs" />
         <Directory Id="ConfDefsFolder" Name="conf-defs" />
