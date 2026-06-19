@@ -96,6 +96,8 @@ modules:
 
   - name: nlohmann-json
     buildsystem: cmake-ninja
+    config-opts:
+      - -DJSON_BuildTests=OFF
     sources:
       - type: archive
         url: https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
