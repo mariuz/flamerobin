@@ -1303,13 +1303,14 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
             try
             {
                 checkProgressIndicatorCanceled(indicator);
-                loadDatabaseInfo();
-                checkProgressIndicatorCanceled(indicator);
                 // load database information
                 setPropertiesLoaded(false);
                 dialectM = databaseDAL_M->getDialect();
                 databaseInfoM.load(databaseDAL_M);
                 setPropertiesLoaded(true);
+
+                loadDatabaseInfo();
+                checkProgressIndicatorCanceled(indicator);
 
                 // load default timezone
                 loadDefaultTimezone();

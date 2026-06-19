@@ -83,27 +83,27 @@ class DatabaseInfo
 {
     friend class Database;
 private:
-    int odsM;
-    int odsMinorM;
+    int odsM = 0;
+    int odsMinorM = 0;
 
-    int pageSizeM;
-    int buffersM;
-    int pagesM;
+    int pageSizeM = 0;
+    int buffersM = 0;
+    int pagesM = 0;
 
-    int oldestTransactionM;
-    int oldestActiveTransactionM;
-    int oldestSnapshotM;
-    int nextTransactionM;
+    int oldestTransactionM = 0;
+    int oldestActiveTransactionM = 0;
+    int oldestSnapshotM = 0;
+    int nextTransactionM = 0;
 
-    int cryptStateM;
+    int cryptStateM = 0;
 
     std::vector<fr::TransactionInfo> activeTransactionsM;
 
-    int sweepM;
+    int sweepM = 0;
 
-    bool readOnlyM;
-    bool forcedWritesM;
-    bool reserveM;
+    bool readOnlyM = false;
+    bool forcedWritesM = false;
+    bool reserveM = false;
 
     mutable wxLongLong loadTimeMillisM;
     void load(fr::IDatabasePtr database);
