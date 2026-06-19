@@ -32,6 +32,7 @@
 
 #include "core/FRInt128.h"
 #include <wx/numformatter.h>
+#include <cstring>
 
 // enable only for debugging
 //#define DEBUG_DDU
@@ -151,7 +152,7 @@ void DDUinitFromI128(DOUBLE_DABBLE_UNION& ddu, bool &isNegative, const int128_t 
     if (isNegative)
         src2 = -src2;
 
-    ddu.s.i128 = src2;
+    std::memcpy(&ddu.s.i128, &src2, 16);
 }
 
 void DDUshr(DOUBLE_DABBLE_UNION& ddu)
@@ -257,7 +258,12 @@ bool StringToInt128(const wxString& src, int128_t* dst, wxString& errMsg)
 
     if (isNegative)
     {
-        ddu.s.i128 = ddu.s.i128 - 1;
+        if (ddu.shift.lowPart == 0)
+        {
+            ddu.shift.highPart -= 1;
+        }
+        ddu.shift.lowPart -= 1;
+
         ddu.shift.highPart = ddu.shift.highPart ^ 0xFFFFFFFFFFFFFFFF;
         ddu.shift.lowPart = ddu.shift.lowPart ^ 0xFFFFFFFFFFFFFFFF;
         // value to small?
@@ -277,7 +283,7 @@ bool StringToInt128(const wxString& src, int128_t* dst, wxString& errMsg)
         }
     }
 
-    *dst = ddu.s.i128;
+    std::memcpy(dst, &ddu.s.i128, 16);
     return true;
 }
 
