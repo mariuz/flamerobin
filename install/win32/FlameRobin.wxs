@@ -4,7 +4,7 @@
 
   <Package Name="FlameRobin"
            Manufacturer="The FlameRobin Project"
-           Version="26.6.11"
+           Version="26.6.12"
            UpgradeCode="2364bd16-7a55-46d9-8809-b747dee99cda"
            Scope="perMachine">
 
