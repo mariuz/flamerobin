@@ -439,3 +439,47 @@ index 66d4594..092a2c2 100644
  		Client& client;
  		FbRef<fb::ITransaction> handle;
  		TransactionState state = TransactionState::ACTIVE;
+diff --git a/src/fb-cpp/Batch.cpp b/src/fb-cpp/Batch.cpp
+index ae0e2bf..2a2176a 100644
+--- a/src/fb-cpp/Batch.cpp
++++ b/src/fb-cpp/Batch.cpp
+@@ -283,6 +283,17 @@ std::vector<std::uint8_t> Batch::buildParametersBlock(const BatchOptions& option
+ 
+ std::vector<std::uint8_t> Batch::prepareBpb(const BlobOptions& bpb)
+ {
++	if (bpb.getBpb().empty() &&
++		!bpb.getType().has_value() &&
++		!bpb.getSourceType().has_value() &&
++		!bpb.getTargetType().has_value() &&
++		!bpb.getSourceCharSet().has_value() &&
++		!bpb.getTargetCharSet().has_value() &&
++		!bpb.getStorage().has_value())
++	{
++		return {};
++	}
++
+ 	auto builder = fbUnique(client->getUtil()->getXpbBuilder(&statusWrapper, fb::IXpbBuilder::BPB,
+ 		reinterpret_cast<const std::uint8_t*>(bpb.getBpb().data()), static_cast<unsigned>(bpb.getBpb().size())));
+ 
+diff --git a/src/fb-cpp/Blob.cpp b/src/fb-cpp/Blob.cpp
+index 4ef7e5c..aec2e48 100644
+--- a/src/fb-cpp/Blob.cpp
++++ b/src/fb-cpp/Blob.cpp
+@@ -66,6 +66,17 @@ Blob::Blob(Attachment& attachment, Transaction& transaction, const BlobId& blobI
+ 
+ std::vector<std::uint8_t> Blob::prepareBpb(const BlobOptions& options)
+ {
++	if (options.getBpb().empty() &&
++		!options.getType().has_value() &&
++		!options.getSourceType().has_value() &&
++		!options.getTargetType().has_value() &&
++		!options.getSourceCharSet().has_value() &&
++		!options.getTargetCharSet().has_value() &&
++		!options.getStorage().has_value())
++	{
++		return {};
++	}
++
+ 	const auto util = attachment.getClient().getUtil();
+ 
+ 	auto builder = fbUnique(util->getXpbBuilder(&statusWrapper, fb::IXpbBuilder::BPB,
