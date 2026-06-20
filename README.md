@@ -31,7 +31,7 @@ Now you can download latest Windows snapshot builds directly from the [Build Fla
 Building
 ---------------------------
 For detailed build instructions for all supported platforms (Windows, Linux, macOS), see the
-[BUILD.txt](https://github.com/mariuz/flamerobin/blob/master/BUILD.txt) file.
+[BUILD.md](https://github.com/mariuz/flamerobin/blob/master/BUILD.md) file.
 
 **Notice:** FlameRobin is currently undergoing a major migration to the `fb-cpp` database library and has been upgraded to **C++20**. Please ensure contributions are compatible with the C++20 standard.
 
