@@ -4,7 +4,7 @@ Section: database
 Priority: optional
 Architecture: amd64
 Maintainer: Baldé <baldeuniversel@protonmail.com>
-Depends: libc6, libstdc++6, bash, coreutils
+Depends: libc6, libstdc++6, bash, coreutils, libwebkit2gtk-4.1-0
 Description: FlameRobin is a lightweight, cross-platform software tool designed for the 
              administration of databases using the Firebird DBMS (Database Management System). 
              It allows developers and database administrators to easily interact with their Firebird 

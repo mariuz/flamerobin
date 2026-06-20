@@ -28,6 +28,20 @@
       "platform": "linux | freebsd | openbsd"
     },
     {
+      "name": "wayland",
+      "features": [
+        "force-build"
+      ],
+      "platform": "linux"
+    },
+    {
+      "name": "wayland-protocols",
+      "features": [
+        "force-build"
+      ],
+      "platform": "linux"
+    },
+    {
       "name": "wxwidgets",
       "features": [
         "webview",
