@@ -91,7 +91,7 @@ jobs:
           
           # Optional: bundle libraries if needed for portability
           mkdir -p templates/trees/deb/flamerobin/opt/flamerobin/lib
-          ldd Build/flamerobin | awk '{print $3}' | grep -E '/lib|/usr/lib' | grep -v "not found" | xargs -I {} cp -v {} templates/trees/deb/flamerobin/opt/flamerobin/lib/ || true
+          ldd Build/flamerobin | awk '{print $3}' | grep "vcpkg_installed" | grep -v "not found" | xargs -I {} cp -v {} templates/trees/deb/flamerobin/opt/flamerobin/lib/ || true
           
           sed -i "s/^Version: .*/Version: ${FLAMEROBIN_VERSION}/" templates/trees/deb/flamerobin/DEBIAN/control
           sed -i "s/^Architecture: .*/Architecture: amd64/" templates/trees/deb/flamerobin/DEBIAN/control
