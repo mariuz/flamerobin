@@ -45,6 +45,22 @@
     #define FBCPP_VERSION "unknown"
 #endif
 
+#if defined(__x86_64__) || defined(_M_X64) || defined(_M_AMD64)
+    #define FR_CPU_ARCH "x86-64"
+#elif defined(__i386__) || defined(_M_IX86) || defined(_X86_)
+    #define FR_CPU_ARCH "x86"
+#elif defined(__aarch64__) || defined(_M_ARM64) || defined(_M_ARM64EC)
+    #define FR_CPU_ARCH "arm64"
+#elif defined(__arm__) || defined(_M_ARM)
+    #define FR_CPU_ARCH "arm"
+#elif defined(__powerpc__) || defined(__ppc__)
+    #define FR_CPU_ARCH "ppc"
+#elif defined(__mips__)
+    #define FR_CPU_ARCH "mips"
+#elif defined(__riscv)
+    #define FR_CPU_ARCH "riscv"
+#endif
+
 #include "frversion.h"
 #include "gui/AboutBox.h"
 #include <firebird/Interface.h>
@@ -317,6 +333,11 @@ void showAboutBox(wxWindow* parent)
 #if wxUSE_UNICODE
     ver += " Unicode";
 #endif
+#if defined(FR_CPU_ARCH)
+    ver += " (";
+    ver += FR_CPU_ARCH;
+    ver += ")";
+#endif
 
 #if defined wxUSE_ABOUTDLG && (defined __WXMAC__ || defined __WXGTK__)
 
@@ -346,7 +367,7 @@ void showAboutBox(wxWindow* parent)
 
     wxString msg("FlameRobin " + ver);
 
-#if defined(_WIN64)
+#if defined(_WIN64) && !defined(FR_CPU_ARCH)
     msg += " (x64)";
 #endif
 
