@@ -24,6 +24,16 @@ To build FlameRobin, you need the following prerequisites installed on your syst
 *   [GitHub Desktop](https://github.com/) (for interacting with this project)
 *   [TortoiseGit](https://tortoisegit.org/) (shell extension for Windows)
 
+### Git Submodules
+
+FlameRobin uses Git submodules to manage some of its dependencies, including `vcpkg` and `src/fb-cpp`.
+
+If you did not clone the repository recursively (e.g., using `git clone --recursive`), or if you are updating an existing checkout, you must initialize and update all submodules recursively:
+
+```bash
+git submodule update --init --recursive
+```
+
 ### General Notes
 
 *   **C++20 Compatibility**: FlameRobin requires C++20 standard compliance. Please keep code contributions compatible with C++20.
