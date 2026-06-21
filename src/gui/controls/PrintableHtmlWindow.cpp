@@ -74,7 +74,11 @@ HtmlPrinter::~HtmlPrinter()
 PrintableHtmlWindow::PrintableHtmlWindow(wxWindow* parent, wxWindowID id)
     : wxPanel(parent, id)
 {
+#if wxUSE_WEBVIEW
     webViewM = wxWebView::New(this, wxID_ANY);
+#else
+    webViewM = new wxHtmlWindow(this, wxID_ANY);
+#endif
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(webViewM, 1, wxEXPAND);
     SetSizer(sizer);
@@ -82,11 +86,16 @@ PrintableHtmlWindow::PrintableHtmlWindow(wxWindow* parent, wxWindowID id)
 
     if (webViewM)
     {
+#if wxUSE_WEBVIEW
 #if wxCHECK_VERSION(3, 1, 5)
         webViewM->EnableAccessToDevTools(true);
 #endif
         webViewM->Bind(wxEVT_WEBVIEW_NAVIGATING, &PrintableHtmlWindow::OnWebViewNavigating, this);
         webViewM->Bind(wxEVT_RIGHT_UP, &PrintableHtmlWindow::OnRightUp, this);
+#else
+        webViewM->Bind(wxEVT_HTML_LINK_CLICKED, &PrintableHtmlWindow::OnHtmlLinkClicked, this);
+        webViewM->Bind(wxEVT_RIGHT_UP, &PrintableHtmlWindow::OnRightUp, this);
+#endif
     }
 }
 
@@ -104,7 +113,7 @@ BEGIN_EVENT_TABLE(PrintableHtmlWindow, wxPanel)
     #ifdef _DEBUG
         EVT_MENU(CmdCopyAllHtml, PrintableHtmlWindow::OnMenuCopyAllHtml)
     #endif
-#if wxCHECK_VERSION(3, 3, 0)
+#if wxCHECK_VERSION(3, 3, 0) && wxUSE_WEBVIEW
     EVT_MENU(CmdShowDevTools, PrintableHtmlWindow::OnMenuShowDevTools)
 #endif
     EVT_MENU(wxID_SAVE, PrintableHtmlWindow::OnMenuSave)
@@ -121,7 +130,7 @@ void PrintableHtmlWindow::OnRightUp(wxMouseEvent& WXUNUSED(event))
         m.Append(CmdCopyAllHtml, _("Copy &HTML code"));
     #endif
     m.AppendSeparator();
-#if wxCHECK_VERSION(3, 3, 0)
+#if wxCHECK_VERSION(3, 3, 0) && wxUSE_WEBVIEW
     m.Append(CmdShowDevTools, _("Developer &Tools"));
     m.AppendSeparator();
 #endif
@@ -129,8 +138,12 @@ void PrintableHtmlWindow::OnRightUp(wxMouseEvent& WXUNUSED(event))
     m.Append(wxID_PREVIEW, _("Print pre&view..."));
     m.Append(wxID_PRINT, _("&Print..."));
 
+#if wxUSE_WEBVIEW
     m.Enable(wxID_COPY, webViewM && webViewM->CanCopy());
-#if wxCHECK_VERSION(3, 3, 0)
+#else
+    m.Enable(wxID_COPY, webViewM != nullptr);
+#endif
+#if wxCHECK_VERSION(3, 3, 0) && wxUSE_WEBVIEW
     m.Enable(CmdShowDevTools, webViewM != nullptr);
 #endif
     PopupMenu(&m, ScreenToClient(::wxGetMousePosition()));
@@ -323,7 +336,11 @@ void PrintableHtmlWindow::setPageSource(const wxString& html)
         else
         {
             // Fallback to SetPage if file cannot be created
+#if wxUSE_WEBVIEW
             webViewM->SetPage(processedHtml, fileUrl);
+#else
+            webViewM->SetPage(processedHtml);
+#endif
         }
     }
 }
@@ -341,7 +358,11 @@ bool PrintableHtmlWindow::LoadFile(const wxString& filepath)
             else
                 url = "file:///" + url;
         }
+#if wxUSE_WEBVIEW
         webViewM->LoadURL(url);
+#else
+        webViewM->LoadPage(url);
+#endif
         return true;
     }
     return false;
@@ -360,7 +381,13 @@ void PrintableHtmlWindow::Scroll(int /*x*/, int /*y*/)
 wxString PrintableHtmlWindow::GetOpenedPageTitle()
 {
     if (webViewM)
+    {
+#if wxUSE_WEBVIEW
         return webViewM->GetCurrentTitle();
+#else
+        return webViewM->GetOpenedPageTitle();
+#endif
+    }
     return wxEmptyString;
 }
 
@@ -375,7 +402,11 @@ void PrintableHtmlWindow::SetRelatedStatusBar(int /*bar*/)
 void PrintableHtmlWindow::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
 {
     if (webViewM)
+    {
+#if wxUSE_WEBVIEW
         webViewM->Copy();
+#endif
+    }
 }
 
 void PrintableHtmlWindow::OnMenuCopyAllHtml(wxCommandEvent& WXUNUSED(event))
@@ -387,7 +418,7 @@ void PrintableHtmlWindow::OnMenuCopyAllHtml(wxCommandEvent& WXUNUSED(event))
     }
 }
 
-#if wxCHECK_VERSION(3, 3, 0)
+#if wxCHECK_VERSION(3, 3, 0) && wxUSE_WEBVIEW
 void PrintableHtmlWindow::OnMenuShowDevTools(wxCommandEvent& WXUNUSED(event))
 {
     if (webViewM)
@@ -449,6 +480,7 @@ void PrintableHtmlWindow::OnMenuPrint(wxCommandEvent& WXUNUSED(event))
     HtmlPrinter::getHEP()->PrintText(pageSourceM);
 }
 
+#if wxUSE_WEBVIEW
 //! Link is in format: "protocol://action?name=value&amp;name=value...etc.
 void PrintableHtmlWindow::OnWebViewNavigating(wxWebViewEvent& event)
 {
@@ -479,3 +511,34 @@ void PrintableHtmlWindow::OnWebViewNavigating(wxWebViewEvent& event)
     if (!getURIProcessor().handleURI(uri))
         notImplementedMessage(this);
 }
+#else
+void PrintableHtmlWindow::OnHtmlLinkClicked(wxHtmlLinkEvent& event)
+{
+    wxString addr = event.GetLinkInfo().GetHref();
+    URI uri(addr);
+    if (uri.protocol == "info")    // not really a link
+    {
+        return;
+    }
+    if (uri.protocol != "fr") // let default handler handle other protocols
+    {
+        event.Skip();
+        return;
+    }
+
+    // open in new tab if control/command key is down
+    // open in new window if shift key is down
+    bool openInTab;
+    if (wxPlatformInfo::Get().GetOperatingSystemId() & wxOS_MAC)
+        openInTab = ::wxGetKeyState(WXK_COMMAND);
+    else
+        openInTab = ::wxGetKeyState(WXK_CONTROL);
+    if (openInTab)
+        uri.addParam("target=new_tab");
+    else if (::wxGetKeyState(WXK_SHIFT))
+        uri.addParam("target=new");
+
+    if (!getURIProcessor().handleURI(uri))
+        notImplementedMessage(this);
+}
+#endif

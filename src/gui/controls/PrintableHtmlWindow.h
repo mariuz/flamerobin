@@ -25,7 +25,11 @@
 #define FR_PRINTABLE_HTML_WINDOW_H
 
 #include <wx/wx.h>
+#if wxUSE_WEBVIEW
 #include <wx/webview.h>
+#else
+#include <wx/html/htmlwin.h>
+#endif
 
 class wxHtmlEasyPrinting;
 
@@ -42,7 +46,11 @@ public:
 class PrintableHtmlWindow: public wxPanel
 {
 private:
+#if wxUSE_WEBVIEW
     wxWebView* webViewM;
+#else
+    wxHtmlWindow* webViewM;
+#endif
     wxString pageSourceM;
     wxString tempFileM;
 public:
@@ -57,12 +65,16 @@ public:
     void SetRelatedFrame(wxFrame* frame, const wxString& format);
     void SetRelatedStatusBar(int bar);
 protected:
+#if wxUSE_WEBVIEW
     void OnWebViewNavigating(wxWebViewEvent& event);
+#else
+    void OnHtmlLinkClicked(wxHtmlLinkEvent& event);
+#endif
 
     void OnRightUp(wxMouseEvent& event);
     void OnMenuCopy(wxCommandEvent& event);
     void OnMenuCopyAllHtml(wxCommandEvent& event);
-#if wxCHECK_VERSION(3, 3, 0)
+#if wxCHECK_VERSION(3, 3, 0) && wxUSE_WEBVIEW
     void OnMenuShowDevTools(wxCommandEvent& event);
 #endif
     void OnMenuSave(wxCommandEvent& event);

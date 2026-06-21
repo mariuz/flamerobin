@@ -142,10 +142,10 @@ On Debian-based systems, you can install compiler and GUI toolkits via the packa
 
 ### 1. Install System Tools and Libraries
 
-Install the compiler toolchain, CMake, and the wxWidgets development packages:
+Install the compiler toolchain, CMake, the wxWidgets development packages, and the WebKitGTK development packages (which are required for the webview component to render SVG icons and user templates correctly):
 ```bash
 sudo apt-get update
-sudo apt-get install build-essential git cmake libwxgtk3.2-dev
+sudo apt-get install build-essential git cmake libwxgtk3.2-dev libwebkit2gtk-4.1-dev
 ```
 
 ### 2. Clone and Build
