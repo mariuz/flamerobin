@@ -99,13 +99,15 @@ void FRStyleManager::assignWordStyle(wxStyledTextCtrl* text, FRStyle* style)
     // route the result through the shared FRStyle helper so the SQL
     // editor gets the same hi-DPI minimum lift as everything else.
     int size = style->getFontSize();
-    if (size == 0)
+    if ((size <= 0 || size == STYLE_NOT_USED) && style->getStyleDesc() != "Global override")
         size = getGlobalStyle()->getFontSize();
     size = FRStyle::liftToSystemMinimum(size);
 
     wxFontInfo fontInfo(size);
 
-    wxString fontName = style->getFontName().IsEmpty() ? getGlobalStyle()->getFontName() : style->getFontName();
+    wxString fontName = style->getFontName();
+    if (fontName.IsEmpty() && style->getStyleDesc() != "Global override")
+        fontName = getGlobalStyle()->getFontName();
     fontInfo.FaceName(fontName);
 
     if (style->getFontStyle() != STYLE_NOT_USED) {

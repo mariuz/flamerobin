@@ -37,6 +37,7 @@
 #include "wx/xml/xml.h"
 
 #include "FRStyle.h"
+#include "FRStyleManager.h"
 
 
 int RGB2int(_COLORREF color)
@@ -151,12 +152,9 @@ void FRStyle::write2Element(wxXmlNode* element)
                 lAttribute->SetValue(wxString::Format(wxT("%i"), colorStyleM));
         }
         if (lName == "fontName") {
-            if (!fontNameM.empty())
-            {
-                wxString oldFontName = element->GetAttribute(wxT("fontName"));
-                if (!oldFontName.IsEmpty() && oldFontName != fontNameM)
-                    lAttribute->SetValue(fontNameM);
-            }
+            wxString oldFontName = element->GetAttribute(wxT("fontName"));
+            if (oldFontName != fontNameM)
+                lAttribute->SetValue(fontNameM);
         }
         if (lName == "fontSize") {
             if (fontSizeM != STYLE_NOT_USED)
@@ -200,11 +198,27 @@ int FRStyle::liftToSystemMinimum(int size)
 
 wxFont FRStyle::getFont()
 {
-    int size = liftToSystemMinimum(getFontSize());
+    int size = getFontSize();
+    if ((size <= 0 || size == STYLE_NOT_USED) && getStyleDesc() != "Global override")
+    {
+        FRStyle* globalStyle = stylerManager().getGlobalStyle();
+        if (globalStyle)
+            size = globalStyle->getFontSize();
+    }
+
+    size = liftToSystemMinimum(size);
     wxFontInfo fontInfo(size);
 
-    if (!getFontName().IsEmpty())
-        fontInfo.FaceName(getFontName());
+    wxString fontName = getFontName();
+    if (fontName.IsEmpty() && getStyleDesc() != "Global override")
+    {
+        FRStyle* globalStyle = stylerManager().getGlobalStyle();
+        if (globalStyle)
+            fontName = globalStyle->getFontName();
+    }
+
+    if (!fontName.IsEmpty())
+        fontInfo.FaceName(fontName);
 
     fontInfo.Bold(getFontStyle() & FONTSTYLE_BOLD);
     fontInfo.Italic(getFontStyle() & FONTSTYLE_ITALIC);
