@@ -50,5 +50,10 @@ As a result, FlameRobin will construct a connection string with the `localhost:`
 ## 3. Requirements & Troubleshooting
 
 - **Direct DLL Placement**: Ensure that `fbclient.dll` (which acts as/or loads the embedded engine) is present in the same directory as the `flamerobin.exe` binary.
-- **Exclusive Access**: The Firebird Embedded engine opens database files directly on disk. If a Firebird SuperServer service or another process has already opened and locked the database file, the embedded connection will fail.
+- **Exclusive Access vs Shared Lock**: By default, the Firebird Embedded engine opens database files directly on disk and demands an exclusive file lock. If a Firebird SuperServer service or another process has already opened the database, the embedded connection will fail.
+  If you are using Firebird 3.0 or later and need multiple applications (or multiple instances of FlameRobin) to access the same local `.fdb` database file simultaneously without a centralized server, you can tell the embedded engine to use shared lock files.
+  To do this, create or edit the `firebird.conf` file in the same directory as `fbclient.dll` (FlameRobin portable releases include this pre-configured by default), and uncomment/add the `ServerMode` parameter set to either `SuperClassic` or `Classic`:
+  ```text
+  ServerMode = SuperClassic
+  ```
 - **Plugins Directory**: For Firebird 3.0+ and 5.0+, make sure that authentication plugins (e.g. `srp` or `legacy_auth` in `plugins/` directory) and Unicode/ICU libraries are distributed alongside the client DLL.

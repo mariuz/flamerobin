@@ -306,6 +306,16 @@ jobs:
           Copy-Item -Path "$fbExtractDir\fbclient.dll" -Destination "$stagingDir\" -Force
           Copy-Item -Path "$fbExtractDir\ib_util.dll" -Destination "$stagingDir\" -Force
           Copy-Item -Path "$fbExtractDir\firebird.conf" -Destination "$stagingDir\" -Force
+
+          # Force the embedded engine to use shared lock files (ServerMode = SuperClassic)
+          $confPath = "$stagingDir\firebird.conf"
+          $confContent = Get-Content $confPath
+          if ($confContent -match 'ServerMode') {
+              $confContent = $confContent -replace '^#?\s*ServerMode\s*=\s*\w+', 'ServerMode = SuperClassic'
+          } else {
+              $confContent += "`nServerMode = SuperClassic"
+          }
+          $confContent | Set-Content $confPath
           
           # Copy ICU files
           Get-ChildItem -Path $fbExtractDir -Filter "icu*.dll" | Copy-Item -Destination "$stagingDir\" -Force
