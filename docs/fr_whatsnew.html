@@ -8,6 +8,20 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.6.19</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>General Improvements & Bug Fixes</B></font><br>
+<br>
+- <b>CPU Architecture in About Box</b>: FlameRobin now detects and displays the CPU architecture (e.g., x86-64, x86, arm64, arm, ppc, mips, riscv) directly inside the About dialog box.<br>
+- <b>Style and Font Customization Save Fix</b>: Fixed a bug in the styling system where user changes to font size and font name were not saved properly and would fall back to the "Global override" style. Improved style resolution logic to ensure proper fallback chain inheritance without saving issues.<br>
+- <b>Portable Windows Build Enhancements</b>: Pre-configured portable Windows release builds to default to <code>ServerMode = SuperClassic</code> in <code>firebird.conf</code>. This allows the embedded Firebird engine to run with shared lock files and enables multiple instances/applications to access local databases concurrently without exclusive lock failures. Corresponding instructions were also added to the troubleshooting documentation.<br>
+- <b>Debian Packaging and SVG Rendering Fixes</b>: Fixed packaging logic to avoid bundling host libraries, and instead added <code>libsecret-1-0</code> alongside <code>libwebkit2gtk-4.1-0</code> as native package dependencies. This ensures that HTML templates and SVG icons render correctly on installation under Debian/Ubuntu systems.<br>
+- <b>Documentation & Submodule Updates</b>: Updated <code>BUILD.md</code> with explicit instructions for initializing and updating git submodules recursively (such as <code>vcpkg</code> and <code>src/fb-cpp</code>) during cloning/updating.<br>
+<br><br>
+
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.6.18</font><br>
 <br><br>
 
