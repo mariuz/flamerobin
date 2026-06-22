@@ -466,7 +466,7 @@ if (WIN32)
 	list(APPEND RESOURCE_LIST
 		res/flamerobin.rc
 	)
-	add_definitions(-DWINVER=0x500 -DWIN32_LEAN_AND_MEAN -DIBPP_WINDOWS)
+	add_definitions(-DWINVER=0x0a00 -D_WIN32_WINNT=0x0a00 -DWIN32_LEAN_AND_MEAN -DIBPP_WINDOWS)
 	remove_definitions(-DUNICODE -D_UNICODE) # IBPP doesn't like Unicode	
 
 	if (MSVC)
@@ -714,6 +714,12 @@ include_directories(BEFORE src src/ibpp src/firebird/include res)
 
 if (NOT APPLE)
     add_executable(${PROJECT_NAME} WIN32 ${SOURCE_LIST} ${HEADER_LIST} ${RESOURCE_LIST})
+    if (WIN32)
+        if (MSVC)
+            target_link_options(${PROJECT_NAME} PRIVATE "/MANIFEST:NO")
+            set_target_properties(${PROJECT_NAME} PROPERTIES VS_DPI_AWARE "PerMonitor")
+        endif (MSVC)
+    endif (WIN32)
 endif (NOT APPLE)
 
 #--------------------------------------
