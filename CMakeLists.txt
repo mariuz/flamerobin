@@ -871,6 +871,12 @@ add_executable(domain_is_system_test
 target_link_libraries(domain_is_system_test ${wxWidgets_LIBRARIES})
 add_test(NAME domain_is_system_test COMMAND domain_is_system_test)
 
+add_executable(trigger_alter_test
+    ${SOURCEDIR}/metadata/TriggerAlterTest.cpp
+)
+target_link_libraries(trigger_alter_test ${wxWidgets_LIBRARIES})
+add_test(NAME trigger_alter_test COMMAND trigger_alter_test)
+
 # Regression test for issue #436 (fatal crash when dropping a trigger).
 # Tests the Observer/Subject subjectRemoved() contract: observers must
 # receive subjectRemoved() when a Subject is destroyed so they can clear

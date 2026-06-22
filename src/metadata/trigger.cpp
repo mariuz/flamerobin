@@ -330,7 +330,38 @@ wxString Trigger::getAlterSql()
         << ' ' << kwPOSITION << ' ' << wxString::Format("%d", positionM)
         << StatementBuilder::NewLine;
     sb << getSqlSecurity() << StatementBuilder::NewLine;
-    sb << kwAS << StatementBuilder::NewLine;
+
+    wxString trimmedSource = sourceM;
+    trimmedSource.Trim(false);
+    wxString upperSource = trimmedSource.Upper();
+    bool needAS = true;
+    if (upperSource.StartsWith("AS"))
+    {
+        if (trimmedSource.length() == 2)
+            needAS = false;
+        else
+        {
+            wxChar c = trimmedSource[2];
+            bool isIdentifierChar = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_';
+            if (!isIdentifierChar)
+                needAS = false;
+        }
+    }
+    else if (upperSource.StartsWith("EXTERNAL"))
+    {
+        if (trimmedSource.length() == 8)
+            needAS = false;
+        else
+        {
+            wxChar c = trimmedSource[8];
+            bool isIdentifierChar = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_';
+            if (!isIdentifierChar)
+                needAS = false;
+        }
+    }
+
+    if (needAS)
+        sb << kwAS << StatementBuilder::NewLine;
 
     sb << sourceM + "^" << StatementBuilder::NewLine;
 
