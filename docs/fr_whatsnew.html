@@ -8,6 +8,18 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.6.20</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>General Improvements & Bug Fixes</B></font><br>
+<br>
+- <b>Named Query Parameter Mapping Fix</b>: Preprocess SQL statements to convert named query parameters (e.g., <code>:paramName</code>) to positional placeholders (<code>?</code>) and dynamically map their indices/names, resolving a regression where named query parameters did not work when using the <code>fb-cpp</code> backend (#627).<br>
+- <b>Statement Cursor Reuse Fix</b>: Automatically close statement cursors before executing statements, resolving a regression where Table and Column descriptions were missing in the Database Summary view due to statement reuse failing (#626).<br>
+- <b>Trigger Altering Fix</b>: Avoid duplicating the <code>AS</code> keyword when altering triggers whose source already starts with <code>AS</code> or represents an external trigger (#625).<br>
+<br><br>
+
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.6.19</font><br>
 <br><br>
 
