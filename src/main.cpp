@@ -81,7 +81,7 @@ bool startCrashpad()
     std::map<std::string, std::string> annotations;
     annotations["format"] = "minidump";
     annotations["prod"] = "FlameRobin";
-    annotations["ver"] = "26.6.20";
+    annotations["ver"] = "26.6.21";
 
     std::vector<std::string> arguments;
     arguments.push_back("--no-rate-limit");

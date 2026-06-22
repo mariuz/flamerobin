@@ -8,6 +8,18 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.6.21</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>General Improvements & Bug Fixes</B></font><br>
+<br>
+- <b>SQL Code Completion Fix</b>: Fixed code completion logic to ensure fields of referenced relations (tables, views, etc.) are correctly shown in the auto-complete dropdown inside the SQL editor.<br>
+- <b>Windows High DPI Scaling Fix</b>: Updated target Windows version definitions to Windows 10 (<code>0x0A00</code>), explicitly defined DPI-aware manifest configuration in <code>flamerobin.rc</code>, and disabled default MSVC linker manifest overriding to ensure FlameRobin is fully DPI-aware and renders crisp fonts and vector icons on Windows display scale settings above 100% (#629).<br>
+- <b>Disconnect Segfault Fix</b>: Fixed a segmentation fault that occurred inside <code>IbppDatabase::getInfo</code> when checking database info on a disconnected database connection.<br>
+<br><br>
+
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.6.20</font><br>
 <br><br>
 
