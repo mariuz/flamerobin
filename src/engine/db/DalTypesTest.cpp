@@ -271,8 +271,7 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& serverNa
         ok = fr_test::check(st->getParameterType(0) == fr::ColumnType::Integer, "getParameterType 0") && ok;
         ok = fr_test::check(st->getParameterType(1) == fr::ColumnType::Integer, "getParameterType 1") && ok;
 
-        // Named parameter simulation (IBPP supports it)
-        if (backend == fr::DatabaseBackend::IBPP)
+        // Named parameter simulation (IBPP and FbCpp support it)
         {
             st->prepare("UPDATE DAL_TEST SET ID = :newid WHERE ID = :oldid");
             ok = checkInt(st->getParameterCount(), 2, "getParameterCount (named)") && ok;

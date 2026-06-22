@@ -31,6 +31,9 @@
 #include <cstring>
 #include <stdexcept>
 #include <algorithm>
+#include <sstream>
+#include <array>
+#include <cctype>
 #include <firebird/Interface.h>
 #include <wx/log.h>
 
@@ -64,7 +67,8 @@ void FbCppStatement::prepare(const std::string& sql)
         {
             options.setDialect(static_cast<unsigned>(databasePtrM->getDialect()));
         }
-        statementM.emplace(attachmentM, transactionM, sql, options);
+        std::string processedSql = preprocessSql(sql);
+        statementM.emplace(attachmentM, transactionM, processedSql, options);
 
         columnTypesM.clear();
         const auto& outDescs = statementM->getOutputDescriptors();
@@ -825,6 +829,13 @@ int FbCppStatement::getParameterCount()
 
 std::string FbCppStatement::getParameterName(int index)
 {
+    if (!parameterNamesM.empty())
+    {
+        if (index < 0 || (unsigned)index >= parameterNamesM.size())
+            return "";
+        return parameterNamesM[index];
+    }
+
     if (!statementM)
         return "";
     const auto& descriptors = statementM->getInputDescriptors();
@@ -835,6 +846,23 @@ std::string FbCppStatement::getParameterName(int index)
 
 std::vector<int> FbCppStatement::findParameterIndicesByName(const std::string& name)
 {
+    if (!parameterNamesM.empty())
+    {
+        std::vector<int> result;
+        std::string upperName = name;
+        std::transform(upperName.begin(), upperName.end(), upperName.begin(), ::toupper);
+        for (size_t i = 0; i < parameterNamesM.size(); ++i)
+        {
+            std::string upperParam = parameterNamesM[i];
+            std::transform(upperParam.begin(), upperParam.end(), upperParam.begin(), ::toupper);
+            if (upperParam == upperName)
+            {
+                result.push_back((int)i);
+            }
+        }
+        return result;
+    }
+
     std::vector<int> result;
     if (!statementM)
         return result;
@@ -961,6 +989,227 @@ int FbCppStatement::getAffectedRows()
         }
     }
     return total;
+}
+
+namespace
+{
+
+void removeSqlComments(std::string& sql)
+{
+    bool in_single_comment = false;
+    bool in_multi_comment = false;
+    bool in_string = false;
+    char quote_char = 0;
+
+    for (size_t i = 0; i < sql.size(); ++i) {
+        char c = sql[i];
+
+        // Handle string entry/exit
+        if (!in_single_comment && !in_multi_comment) {
+            if (!in_string && (c == '\'' || c == '\"')) {
+                in_string = true;
+                quote_char = c;
+            }
+            else if (in_string && c == quote_char) {
+                // Handle escaped quote by doubling (e.g. 'O''Reilly')
+                if (i + 1 < sql.size() && sql[i + 1] == quote_char) {
+                    ++i;  // skip escaped quote
+                }
+                else {
+                    in_string = false;
+                }
+            }
+        }
+
+        // If inside string, skip all
+        if (in_string) continue;
+
+        // Handle comments
+        if (!in_single_comment && !in_multi_comment) {
+            if (c == '-' && i + 1 < sql.size() && sql[i + 1] == '-') {
+                in_single_comment = true;
+                sql[i] = sql[i + 1] = ' ';
+                ++i;
+            }
+            else if (c == '/' && i + 1 < sql.size() && sql[i + 1] == '*') {
+                in_multi_comment = true;
+                sql[i] = sql[i + 1] = ' ';
+                ++i;
+            }
+        }
+        else if (in_single_comment) {
+            if (c != '\n') {
+                sql[i] = ' ';
+            }
+            else {
+                in_single_comment = false;
+            }
+        }
+        else if (in_multi_comment) {
+            sql[i] = ' ';
+            if (c == '*' && i + 1 < sql.size() && sql[i + 1] == '/') {
+                sql[i + 1] = ' ';
+                ++i;
+                in_multi_comment = false;
+            }
+        }
+    }
+}
+
+} // namespace
+
+std::string FbCppStatement::preprocessSql(const std::string& sql)
+{
+    parameterNamesM.clear();
+
+    bool isDMLcheck = false;
+    bool isExecuteBlock = false;
+    size_t executeBlockBeginPos = std::string::npos;
+
+    std::string isDML(sql);
+    removeSqlComments(isDML);
+
+    isDML.erase(isDML.begin(), std::find_if(isDML.begin(), isDML.end(), [](unsigned char c) { return !std::isspace(c); })); //lTrim
+
+    std::transform(isDML.begin(), isDML.end(), isDML.begin(), [](unsigned char c) { return (char)std::toupper(c); }); //UpperCase
+
+    std::string isDML4 = isDML.substr(0, std::min<size_t>(isDML.size(), 4));
+    std::string isDML6 = isDML.substr(0, std::min<size_t>(isDML.size(), 6));
+    std::string isDML7 = isDML.substr(0, std::min<size_t>(isDML.size(), 7));
+
+    std::array<std::string, 6> dml = {
+        "INSERT",
+        "UPDATE",
+        "DELETE",
+        "SELECT",
+        "EXECUTE",
+        "WITH"
+    };
+    std::array<std::string, 6> check = {
+        isDML6,
+        isDML6,
+        isDML6,
+        isDML6,
+        isDML7,
+        isDML4
+    };
+
+    for (size_t i = 0; i < dml.size(); ++i) {
+        if (check[i] == dml[i]) {
+            if (dml[i] == "EXECUTE") {
+                size_t x = dml[i].size();
+                while (x < isDML.size() && std::isspace((unsigned char)isDML[x])) {
+                    x++;
+                }
+                if (x < isDML.size() && isDML.compare(x, 5, "BLOCK") == 0) {
+                    isExecuteBlock = true;
+                    executeBlockBeginPos = isDML.find("BEGIN", 0);
+                }
+                else {
+                    if (x >= isDML.size() || isDML[x] != 'P') {
+                        break;
+                    }
+                }
+            }
+            isDMLcheck = true;
+            break;
+        }
+    }
+
+    if (!isDMLcheck) {
+        return sql;
+    }
+
+    bool comment = false, blockComment = false, palavra = false, quote = false, doubleQuote = false;
+    std::ostringstream temp, paramName, sProcessedSQL;
+
+    for (size_t i = 0; i < sql.length(); i++) {
+        char nextChar = 0;
+        char previousChar = 0;
+        char currentChar = sql[i];
+        if (i + 1 < sql.length())
+            nextChar = sql[i + 1];
+        if (i > 0)
+            previousChar = sql[i - 1];
+
+        if (isExecuteBlock && i > executeBlockBeginPos) {
+            sProcessedSQL << currentChar;
+            continue;
+        }
+
+        if (currentChar == '\n' || currentChar == '\r') {
+            comment = false;
+        }
+        else if (currentChar == '-' && nextChar == '-' && !quote && !doubleQuote && !blockComment) {
+            comment = true;
+            sProcessedSQL << currentChar;
+        }
+        else if (currentChar == '/' && nextChar == '*' && !quote && !doubleQuote && !blockComment) {
+            blockComment = true;
+            sProcessedSQL << currentChar;
+        }
+        else if (previousChar == '*' && currentChar == '/' && blockComment) {
+            blockComment = false;
+            sProcessedSQL << currentChar;
+            continue;
+        }
+        else if (currentChar == '\'' && !doubleQuote && !quote && !comment && !blockComment) {
+            quote = true;
+            sProcessedSQL << currentChar;
+        }
+        else if (currentChar == '\'' && quote && !comment && !blockComment) {
+            quote = false;
+        }
+        else if (currentChar == '\"' && !quote && !doubleQuote && !comment && !blockComment) {
+            doubleQuote = true;
+            sProcessedSQL << currentChar;
+        }
+        else if (currentChar == '\"' && doubleQuote) {
+            doubleQuote = false;
+        }
+        else if (quote || doubleQuote) {
+            sProcessedSQL << currentChar;
+        }
+        else if (comment || blockComment) {
+            sProcessedSQL << currentChar;
+        }
+
+        if (!(comment || blockComment || quote || doubleQuote) || palavra || currentChar == '\n' || currentChar == '\r') {
+            comment = false;
+            if (currentChar == '?') {
+                parameterNamesM.push_back("?");
+            }
+
+            if (currentChar == ':') {
+                palavra = true;
+            }
+            else if (palavra) {
+                if (std::isalnum((unsigned char)currentChar) || currentChar == '_' || currentChar == '$') {
+                    temp << (char)std::toupper((unsigned char)currentChar);
+                    paramName << currentChar;
+                    if (i == sql.length() - 1) {
+                        goto fimPalavra;
+                    }
+                }
+                else {
+                fimPalavra:
+                    palavra = false;
+                    sProcessedSQL << "?" << "/*:" << paramName.str() << "*/";
+                    if (!(std::isalnum((unsigned char)currentChar) || currentChar == '_' || currentChar == '$')) {
+                        sProcessedSQL << currentChar;
+                    }
+                    parameterNamesM.push_back(temp.str());
+                    temp.str(std::string()); temp.clear();
+                    paramName.str(std::string()); paramName.clear();
+                }
+            }
+            else {
+                sProcessedSQL << currentChar;
+            }
+        }
+    }
+
+    return sProcessedSQL.str();
 }
 
 } // namespace fr

@@ -116,6 +116,9 @@ private:
     bool rowAvailableM;
     std::vector<ColumnType> columnTypesM;
     std::vector<ColumnType> parameterTypesM;
+    std::vector<std::string> parameterNamesM;
+
+    std::string preprocessSql(const std::string& sql);
 };
 
 } // namespace fr
