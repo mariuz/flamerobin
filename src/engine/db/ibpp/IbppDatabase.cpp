@@ -194,6 +194,9 @@ void IbppDatabase::getInfo(DatabaseInfoData* data)
 {
     if (!data)
         return;
+    *data = {};
+    if (!isConnected())
+        return;
     databaseM->Info(&data->ods, &data->odsMinor, &data->pageSize, &data->pages,
         &data->buffers, &data->sweep, &data->forcedWrites, &data->reserve, &data->readOnly);
     databaseM->TransactionInfo(&data->oldestTransaction, &data->oldestActiveTransaction,
