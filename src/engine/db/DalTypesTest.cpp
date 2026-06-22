@@ -284,6 +284,16 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& serverNa
                 ok = checkInt(indices[0], 1, "findParameterIndicesByName[0]") && ok;
         }
 
+        // Repeated statement execution (verifies that reuse/cache does not fail with open cursor)
+        std::cout << "  Testing repeated execution of statement without re-preparing...\n";
+        st->prepare("SELECT RDB$RELATION_NAME FROM RDB$RELATIONS WHERE RDB$RELATION_NAME = ?");
+        st->setString(0, "RDB$DATABASE");
+        st->execute();
+        ok = fr_test::check(st->fetch(), "fetch first execution") && ok;
+        st->setString(0, "RDB$DATABASE");
+        st->execute();
+        ok = fr_test::check(st->fetch(), "fetch second execution (repeated)") && ok;
+
         // Typed parameter setting
         std::cout << "  Testing typed parameter setting...\n";
         st->prepare("INSERT INTO DAL_TEST (ID) VALUES (?)");

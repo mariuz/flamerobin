@@ -153,6 +153,9 @@ void FbCppStatement::execute()
         throw std::runtime_error("Transaction not active");
 
     wxLogDebug("FbCppStatement::execute() for SQL: %s", sqlM.c_str());
+
+    close();
+
     firstRowFetchedM.reset();
     eofReachedM = false;
     rowAvailableM = false;
