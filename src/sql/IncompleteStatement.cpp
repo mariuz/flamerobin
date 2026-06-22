@@ -300,6 +300,53 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
                 tokenizer.jumpToken(false);
         }
 
+        if (objectAlias.empty())
+        {
+            std::list<wxString> cols;
+            for (IdAliasMap::iterator it = aliases.begin(); it != aliases.end(); ++it)
+            {
+                Relation* rel = dynamic_cast<Relation*>(databaseM->findByNameAndType(ntTable, it->second));
+                if (!rel)
+                    rel = dynamic_cast<Relation*>(databaseM->findByNameAndType(ntView, it->second));
+                if (!rel)
+                    rel = dynamic_cast<Relation*>(databaseM->findByNameAndType(ntSysTable, it->second));
+
+                if (rel)
+                {
+                    if (rel->begin() == rel->end())
+                    {
+                        if (config().get("autoCompleteLoadColumns", true))
+                            rel->ensureChildrenLoaded();
+                    }
+                    for (ColumnPtrs::const_iterator c = rel->begin(); c != rel->end(); ++c)
+                        cols.push_back((*c)->getQuotedName());
+                }
+                else
+                {
+                    Procedure* proc = dynamic_cast<Procedure*>(databaseM->findByNameAndType(ntProcedure, it->second));
+                    if (proc)
+                    {
+                        if (proc->begin() == proc->end())
+                        {
+                            if (config().get("autoCompleteLoadColumns", true))
+                                proc->ensureChildrenLoaded();
+                        }
+                        for (ParameterPtrs::const_iterator c = proc->begin(); c != proc->end(); ++c)
+                        {
+                            if ((*c)->isOutputParameter())
+                                cols.push_back((*c)->getQuotedName());
+                        }
+                    }
+                }
+            }
+            if (sortColums)
+                cols.sort();
+            wxString columns;
+            for (std::list<wxString>::iterator i = cols.begin(); i != cols.end(); ++i)
+                columns += (*i) + " ";
+            return columns.Strip();
+        }
+
         // find TABLE or VIEW in list of ALIASES
         r = findObject<Relation>(aliases, objectAlias, ntTable);
         if (!r)

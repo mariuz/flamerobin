@@ -94,6 +94,8 @@
 
 #include "gui/FRStyle.h"
 
+static int CaseUnsensitiveCompare(const wxString& one, const wxString& two);
+
 class SqlEditorDropTarget : public wxDropTarget
 {
 public:
@@ -1404,10 +1406,36 @@ void ExecuteSqlFrame::autoComplete(bool force)
 
     if (start != -1 && pos - start >= autoCompleteChars)
     {
+        IncompleteStatement is(databaseM, styled_text_ctrl_sql->GetText());
+        wxString queryCols = is.getObjectColumns("", pos, true);
+        wxArrayString as;
+        wxStringTokenizer tkz1(queryCols, " ");
+        while (tkz1.HasMoreTokens())
+            as.Add(tkz1.GetNextToken());
+        wxStringTokenizer tkz2(keywordsM, " ");
+        while (tkz2.HasMoreTokens())
+            as.Add(tkz2.GetNextToken());
+
+        as.Sort(CaseUnsensitiveCompare);
+
+        wxString combinedList;
+        wxString lastWordUpper;
+        for (size_t i = 0; i < as.GetCount(); ++i)
+        {
+            wxString currentUpper = as.Item(i).Upper();
+            if (currentUpper != lastWordUpper)
+            {
+                combinedList += as.Item(i) + " ";
+                lastWordUpper = currentUpper;
+            }
+        }
+        if (!combinedList.IsEmpty())
+            combinedList.RemoveLast();
+
         // GTK version crashes if nothing matches, so this check must be made for GTK
         // For MSW, it doesn't crash but it flashes on the screen (also not very nice)
-        if (HasWord(styled_text_ctrl_sql->GetTextRange(start, pos), keywordsM))
-            styled_text_ctrl_sql->AutoCompShow(pos-start, keywordsM);
+        if (HasWord(styled_text_ctrl_sql->GetTextRange(start, pos), combinedList))
+            styled_text_ctrl_sql->AutoCompShow(pos-start, combinedList);
     }
 }
 
