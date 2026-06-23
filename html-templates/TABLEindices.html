@@ -25,15 +25,15 @@
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
       {%ifeq:{%parent:{%is_system%}%}:false:
       <td valign="top" nowrap>
-          <a href="fr://index_action?type=DROP&amp;parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}drop.svg" height="16" width="16"></a>
-          <a href="fr://index_action?type=RECOMPUTE&amp;parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}compute.svg" height="16" width="16"></a>
+          <a href="fr{%colon%}//index_action?type=DROP&amp;parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}drop.svg" height="16" width="16"></a>
+          <a href="fr{%colon%}//index_action?type=RECOMPUTE&amp;parent_window={%parent_window%}&amp;object_handle={%object_handle%}"><img src="{%template_root%}compute.svg" height="16" width="16"></a>
       </td>
       %}
       <td nowrap valign="top">{%object_name%}</td>
       <td nowrap valign="top" align="center">{%indexinfo:type%}</td>
       <td nowrap valign="top" align="center">
       {%ifeq:{%parent:{%is_system%}%}:false:
-        <a href="fr://index_action?type=TOGGLE_ACTIVE&amp;parent_window={%parent_window%}&amp;object_handle={%object_handle%}">
+        <a href="fr{%colon%}//index_action?type=TOGGLE_ACTIVE&amp;parent_window={%parent_window%}&amp;object_handle={%object_handle%}">
       %}
       <img src="{%template_root%}{%ifeq:{%indexinfo:is_active%}:true:ok.svg:redx.svg%}" height="16" width="16">{%ifeq:{%parent:{%is_system%}%}:false:</a>
       %}
@@ -42,7 +42,7 @@
       <td valign="top">{%indexinfo:fields%}</td>
       <td nowrap valign="top" align="right">{%indexinfo:stats%}</td>
       <td nowrap valign="top"><font size=-1>{%object_description%} {%parent:{%ifeq:{%is_system%}:false:[<a
-        href="fr://edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=INDEX&amp;object_name={%object_name%}">edit</a>]%}%}</font></td>
+        href="fr{%colon%}//edit_description?parent_window={%parent_window%}&amp;object_handle={%object_handle%}&amp;object_type=INDEX&amp;object_name={%object_name%}">edit</a>]%}%}</font></td>
     </tr>
     %}
   </tbody>
@@ -50,8 +50,8 @@
 <br><br>
 {%ifeq:{%is_system%}:false:
 <a
-href="fr://add_index?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Create new index</a> | <a
-href="fr://recompute_all?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Recompute
+href="fr{%colon%}//add_index?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Create new index</a> | <a
+href="fr{%colon%}//recompute_all?parent_window={%parent_window%}&amp;object_handle={%object_handle%}">Recompute
 statistics for all indexes</a>
 <br><br>
 <table border=0 cellspacing=1 cellpadding=3 bgcolor="#999999">

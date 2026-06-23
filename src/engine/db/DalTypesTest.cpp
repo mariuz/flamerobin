@@ -351,6 +351,65 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& serverNa
             b->close();
         }
 
+        // Test description loading
+        std::cout << "  Testing description loading...\n";
+        st->prepare("COMMENT ON TABLE BLOB_TEST IS 'Test Table Description'");
+        st->execute();
+        tr->commitRetain();
+
+        st->prepare("COMMENT ON COLUMN BLOB_TEST.B IS 'Test Column Description'");
+        st->execute();
+        tr->commitRetain();
+
+        st->prepare("select RDB$DESCRIPTION from RDB$RELATIONS where RDB$RELATION_NAME = ?");
+        st->setString(0, "BLOB_TEST");
+        st->execute();
+        if (fr_test::check(st->fetch(), "fetch table description row"))
+        {
+            ok = fr_test::check(!st->isNull(0), "table description is not null") && ok;
+            std::string desc = st->getString(0);
+            ok = fr_test::check(desc == "Test Table Description", "table description matches") && ok;
+        }
+        else
+        {
+            ok = false;
+        }
+
+        st->prepare("select RDB$DESCRIPTION from RDB$RELATION_FIELDS where RDB$FIELD_NAME = ? and RDB$RELATION_NAME = ?");
+        st->setString(0, "B");
+        st->setString(1, "BLOB_TEST");
+        st->execute();
+        if (fr_test::check(st->fetch(), "fetch column description row"))
+        {
+            ok = fr_test::check(!st->isNull(0), "column description is not null") && ok;
+            std::string desc = st->getString(0);
+            ok = fr_test::check(desc == "Test Column Description", "column description matches") && ok;
+        }
+        else
+        {
+            ok = false;
+        }
+
+        // Query column using the exact query from relation.cpp
+        std::cout << "  Testing exact query from relation.cpp...\n";
+        st->prepare("select r.rdb$field_name, r.rdb$null_flag, r.rdb$field_source, "
+                    "l.rdb$collation_name, f.rdb$computed_source, r.rdb$default_source, "
+                    "r.rdb$description from rdb$fields f "
+                    "join rdb$relation_fields r on f.rdb$field_name=r.rdb$field_source "
+                    "left outer join rdb$collations l on l.rdb$collation_id = coalesce(r.rdb$collation_id, f.rdb$collation_id) "
+                    "and l.rdb$character_set_id = f.rdb$character_set_id "
+                    "where r.rdb$relation_name = ?");
+        st->setString(0, "BLOB_TEST");
+        st->execute();
+        while (st->fetch())
+        {
+            std::string colName = st->getString(0);
+            if (colName.find("B") != std::string::npos)
+            {
+                ok = fr_test::check(!st->isNull(6), "isNull(6) is false for column B description") && ok;
+            }
+        }
+
         // Transaction configuration
         std::cout << "  Testing transaction configuration...\n";
         fr::ITransactionPtr tr2 = db->createTransaction();
