@@ -90,6 +90,7 @@ enum {
     Menu_URLProjectPage,
     Menu_URLFeatureRequest,
     Menu_URLBugReport,
+    Menu_URLCopilot,
     Menu_CheckForUpdates,
     Menu_NewObject,
     Menu_DatabaseRegistrationInfo,

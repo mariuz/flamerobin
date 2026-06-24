@@ -57,6 +57,7 @@ public:
     void OnMenuURLProjectPage(wxCommandEvent& event);
     void OnMenuURLFeatureRequest(wxCommandEvent& event);
     void OnMenuURLBugReport(wxCommandEvent& event);
+    void OnMenuURLCopilot(wxCommandEvent& event);
     void OnMenuCheckForUpdates(wxCommandEvent& event);
     void OnMenuConfigure(wxCommandEvent& event);
     void OnMenuNewVolatileSQLEditor(wxCommandEvent& event);

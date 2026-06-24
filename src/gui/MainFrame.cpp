@@ -271,6 +271,7 @@ void MainFrame::buildMainMenu()
     helpMenu->Append(Cmds::Menu_URLProjectPage, _("Github &project page"));
     helpMenu->Append(Cmds::Menu_URLFeatureRequest, _("Github &feature requests"));
     helpMenu->Append(Cmds::Menu_URLBugReport, _("Github &bug reports"));
+    helpMenu->Append(Cmds::Menu_URLCopilot, _("Chat with &Copilot (AI)..."));
     helpMenu->Append(Cmds::Menu_CheckForUpdates, _("&Check for updates..."));
 #ifndef __WXMAC__
     helpMenu->AppendSeparator();
@@ -388,6 +389,7 @@ EVT_MENU(Cmds::Menu_URLHomePage, MainFrame::OnMenuURLHomePage)
 EVT_MENU(Cmds::Menu_URLProjectPage, MainFrame::OnMenuURLProjectPage)
 EVT_MENU(Cmds::Menu_URLFeatureRequest, MainFrame::OnMenuURLFeatureRequest)
 EVT_MENU(Cmds::Menu_URLBugReport, MainFrame::OnMenuURLBugReport)
+EVT_MENU(Cmds::Menu_URLCopilot, MainFrame::OnMenuURLCopilot)
 EVT_MENU(Cmds::Menu_CheckForUpdates, MainFrame::OnMenuCheckForUpdates)
 EVT_MENU(wxID_PREFERENCES, MainFrame::OnMenuConfigure)
 EVT_MENU(Cmds::Menu_NewVolatileSQLEditor, MainFrame::OnMenuNewVolatileSQLEditor)
@@ -824,6 +826,11 @@ void MainFrame::OnMenuURLFeatureRequest(wxCommandEvent& WXUNUSED(event))
 void MainFrame::OnMenuURLBugReport(wxCommandEvent& WXUNUSED(event))
 {
     showUrl("https://github.com/mariuz/flamerobin/issues");
+}
+
+void MainFrame::OnMenuURLCopilot(wxCommandEvent& WXUNUSED(event))
+{
+    showUrl("https://copilot.microsoft.com/");
 }
 
 void MainFrame::OnMenuCheckForUpdates(wxCommandEvent& WXUNUSED(event))
