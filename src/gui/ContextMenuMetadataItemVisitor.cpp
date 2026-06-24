@@ -86,6 +86,7 @@ void MainObjectMenuMetadataItemVisitor::visitDatabase(Database& database)
     menuM->Append(Cmds::Menu_Reconnect, _("Reconnec&t"));
     addSeparator();
     menuM->Append(Cmds::Menu_ExecuteStatements, _("Execute &SQL statements"));
+    menuM->Append(Cmds::Menu_IsqlTerminal, _("Connect with &ISQL Terminal"));
     menuM->Append(Cmds::Menu_VisualizeSchema, _("Visualize Schema"));
     addGenerateCodeMenu(database);
     addSeparator();

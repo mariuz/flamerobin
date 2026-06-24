@@ -422,6 +422,8 @@ EVT_MENU(Cmds::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuDatabaseRegistrat
 EVT_UPDATE_UI(Cmds::Menu_DatabaseRegistrationInfo, MainFrame::OnMenuUpdateIfDatabaseSelected)
 EVT_MENU(Cmds::Menu_Backup, MainFrame::OnMenuBackup)
 EVT_UPDATE_UI(Cmds::Menu_Backup, MainFrame::OnMenuUpdateIfDatabaseSelected)
+EVT_MENU(Cmds::Menu_IsqlTerminal, MainFrame::OnMenuIsqlTerminal)
+EVT_UPDATE_UI(Cmds::Menu_IsqlTerminal, MainFrame::OnMenuUpdateIfDatabaseSelected)
 EVT_MENU(Cmds::Menu_SetReplicaMode, MainFrame::OnMenuSetReplicaMode)
 EVT_UPDATE_UI(Cmds::Menu_SetReplicaMode, MainFrame::OnMenuUpdateIfDatabaseSelected)
 EVT_MENU(Cmds::Menu_ReplicationStatus, MainFrame::OnMenuReplicationStatus)
@@ -1506,6 +1508,54 @@ void MainFrame::OnMenuBackup(wxCommandEvent& WXUNUSED(event))
     bf = new BackupFrame(this, db);
     bf->Show();
 }
+
+void MainFrame::OnMenuIsqlTerminal(wxCommandEvent& WXUNUSED(event))
+{
+    DatabasePtr db = getDatabase(treeMainM->getSelectedMetadataItem());
+    if (!checkValidDatabase(db))
+        return;
+
+    wxString connStr = db->getConnectionString();
+    wxString user = db->getUsername();
+    wxString password = db->getDecryptedPassword();
+    wxString role = db->getRole();
+
+    wxString args;
+    if (!user.empty())
+        args << " -u " << user;
+    if (!password.empty())
+        args << " -p " << password;
+    if (!role.empty())
+        args << " -role " << role;
+    
+    args << " \"" << connStr << "\"";
+
+    wxString isqlCmd = "isql";
+#ifdef __WXGTK__
+    isqlCmd = "isql-fb";
+#endif
+
+#if defined(__WXMSW__)
+    wxExecute("cmd.exe /k " + isqlCmd + args, wxEXEC_ASYNC);
+#elif defined(__WXMAC__)
+    wxString cmdLine = "osascript -e \"tell application \\\"Terminal\\\" to do script \\\"" + isqlCmd + args + "\\\"\"";
+    wxExecute(cmdLine, wxEXEC_ASYNC);
+#else
+    wxString terminalCmd = "xterm";
+    if (wxFileExists("/usr/bin/x-terminal-emulator"))
+        terminalCmd = "x-terminal-emulator";
+    else if (wxFileExists("/usr/bin/gnome-terminal"))
+        terminalCmd = "gnome-terminal";
+    else if (wxFileExists("/usr/bin/konsole"))
+        terminalCmd = "konsole";
+    else if (wxFileExists("/usr/bin/xfce4-terminal"))
+        terminalCmd = "xfce4-terminal";
+
+    wxString cmdLine = terminalCmd + " -e \"" + isqlCmd + args + "\"";
+    wxExecute(cmdLine, wxEXEC_ASYNC);
+#endif
+}
+
 
 void MainFrame::OnMenuMaintenance(wxCommandEvent& WXUNUSED(event))
 {
