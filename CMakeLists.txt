@@ -883,6 +883,13 @@ add_executable(trigger_alter_test
 target_link_libraries(trigger_alter_test ${wxWidgets_LIBRARIES})
 add_test(NAME trigger_alter_test COMMAND trigger_alter_test)
 
+add_executable(udf_cstring_length_test
+    ${SOURCEDIR}/metadata/UdfCstringLengthTest.cpp
+)
+target_link_libraries(udf_cstring_length_test ${wxWidgets_LIBRARIES})
+add_test(NAME udf_cstring_length_test COMMAND udf_cstring_length_test)
+
+
 # Regression test for issue #436 (fatal crash when dropping a trigger).
 # Tests the Observer/Subject subjectRemoved() contract: observers must
 # receive subjectRemoved() when a Subject is destroyed so they can clear

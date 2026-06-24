@@ -89,11 +89,12 @@ void Function::loadChildren()
         "f.rdb$return_argument, a.rdb$argument_position, "; //9..10
     
     if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
-        sql += "rdb$default_source, rdb$null_flag, rdb$argument_mechanism, rdb$field_name, rdb$relation_name, a.rdb$description "; //11..16
+        sql += "rdb$default_source, rdb$null_flag, rdb$argument_mechanism, rdb$field_name, rdb$relation_name, a.rdb$description, c.rdb$bytes_per_character "; //11..17
     else
-        sql += "null, null, -1, null, null, null";
+        sql += "null, null, -1, null, null, null, c.rdb$bytes_per_character";
     sql += " from rdb$function_arguments a "
-        " join rdb$functions f on f.rdb$function_name = a.rdb$function_name ";
+        " join rdb$functions f on f.rdb$function_name = a.rdb$function_name "
+        " left outer join rdb$character_sets c on a.rdb$character_set_id = c.rdb$character_set_id ";
     sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)  ? " and ((f.rdb$package_name = a.rdb$package_name) or (a.rdb$package_name is null)) " : "";
     sql += "where a.rdb$function_name = ? ";
     if (getParent()->getType() == ntDatabase) {
@@ -138,6 +139,11 @@ void Function::loadChildren()
                 short length = (short)st1->getInt32(5);
                 short subtype = (short)st1->getInt32(6);
                 short precision = (short)st1->getInt32(7);
+                if (!st1->isNull(16)) {
+                    short bpc = (short)st1->getInt32(16);
+                    if (bpc > 1 && (type == 14 || type == 37 || type == 40))
+                        length /= bpc;
+                }
                 s = Domain::dataTypeToString(type, scale, precision, subtype, length);
             }
         }
@@ -719,9 +725,10 @@ void UDF::loadProperties()
 			" a.RDB$FIELD_LENGTH, a.RDB$FIELD_SUB_TYPE, a.RDB$FIELD_PRECISION,"
 			" f.RDB$MODULE_NAME, f.RDB$ENTRYPOINT, c.RDB$CHARACTER_SET_NAME, ";
 		if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
-			stmt += " f.RDB$LEGACY_FLAG ";
+			stmt += " f.RDB$LEGACY_FLAG, ";
 		else
-			stmt += "null ";
+			stmt += "null, ";
+		stmt += " c.RDB$BYTES_PER_CHARACTER ";
 
 		stmt += " FROM RDB$FUNCTIONS f"
 			" LEFT OUTER JOIN RDB$FUNCTION_ARGUMENTS a"
@@ -747,6 +754,12 @@ void UDF::loadProperties()
 			short length = (short)st1->getInt32(5);
 			short subtype = (short)st1->getInt32(6);
 			short precision = (short)st1->getInt32(7);
+			if (!st1->isNull(12))
+			{
+				short bpc = (short)st1->getInt32(12);
+				if (bpc > 1 && (type == 14 || type == 37 || type == 40))
+					length /= bpc;
+			}
 			std::string libraryName = st1->getString(8);
 			libraryNameM = wxString(libraryName.c_str(), *converter).Strip();
 			std::string entryPoint = st1->getString(9);
