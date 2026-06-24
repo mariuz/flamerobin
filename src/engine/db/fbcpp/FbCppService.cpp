@@ -94,6 +94,8 @@ void FbCppService::connect()
         .setServer(connStrM)
         .setUserName(userM)
         .setPassword(passwordM);
+    if (!roleM.empty())
+        options.setRole(roleM);
 
     serviceM.emplace(*clientM, options);
 }
@@ -171,10 +173,13 @@ void FbCppService::backup(const BackupConfig& config)
     runService([this, options]() {
         try
         {
-            fbcpp::BackupManager manager(*clientM, fbcpp::ServiceManagerOptions()
+            auto svcOptions = fbcpp::ServiceManagerOptions()
                 .setServer(connStrM)
                 .setUserName(userM)
-                .setPassword(passwordM));
+                .setPassword(passwordM);
+            if (!roleM.empty())
+                svcOptions.setRole(roleM);
+            fbcpp::BackupManager manager(*clientM, svcOptions);
             manager.backup(options);
         }
         catch (const std::exception& e)
@@ -202,10 +207,13 @@ void FbCppService::restore(const RestoreConfig& config)
     runService([this, options]() {
         try
         {
-            fbcpp::BackupManager manager(*clientM, fbcpp::ServiceManagerOptions()
+            auto svcOptions = fbcpp::ServiceManagerOptions()
                 .setServer(connStrM)
                 .setUserName(userM)
-                .setPassword(passwordM));
+                .setPassword(passwordM);
+            if (!roleM.empty())
+                svcOptions.setRole(roleM);
+            fbcpp::BackupManager manager(*clientM, svcOptions);
             manager.restore(options);
         }
         catch (const std::exception& e)
