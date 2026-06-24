@@ -241,6 +241,8 @@ private:
     void OnMenuUpdateShowProfiler(wxUpdateUIEvent& event);
     void OnMenuExecuteSelection(wxCommandEvent& event);
     void OnMenuExecuteFromCursor(wxCommandEvent& event);
+    void OnMenuFormatSql(wxCommandEvent& event);
+
     void OnMenuCommit(wxCommandEvent& event);
     void OnMenuRollback(wxCommandEvent& event);
     void OnMenuUpdateWhenInTransaction(wxUpdateUIEvent& event);

@@ -629,6 +629,34 @@
         </setting>
     </node>
     <node>
+        <caption>SQL Formatter</caption>
+        <image>5</image>
+        <setting type="radiobox">
+            <caption>Keyword Case</caption>
+            <key>FormatterKeywordCase</key>
+            <default>0</default>
+            <option>
+                <caption>UPPERCASE</caption>
+            </option>
+            <option>
+                <caption>lowercase</caption>
+            </option>
+            <option>
+                <caption>No change</caption>
+            </option>
+        </setting>
+        <setting type="int">
+            <caption>Indentation Spaces</caption>
+            <key>FormatterIndentSpaces</key>
+            <default>4</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>One column per line in SELECT clause</caption>
+            <key>FormatterOneColumnPerLine</key>
+            <default>1</default>
+        </setting>
+    </node>
+    <node>
         <caption>Fields</caption>
         <image>5</image>
         <setting type="radiobox">

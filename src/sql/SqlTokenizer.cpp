@@ -258,6 +258,26 @@ bool SqlTokenizer::isReservedWord(const wxString& word, int odsMajor,
 }
 
 /*static*/
+bool SqlTokenizer::isKeyword(const wxString& word, int odsMajor, int odsMinor)
+{
+    if (word.IsEmpty())
+        return false;
+
+    const FirebirdKeywordVersion version(
+        normalizeKeywordVersion(odsMajor, odsMinor));
+    const FirebirdKeywordSetData& keywordSet(
+        getKeywordSetForVersion(version.major));
+    const wxString searchWord(word.Upper());
+    for (size_t i = 0; i < keywordSet.keywordsCount; ++i)
+    {
+        if (searchWord == wxString::FromUTF8(keywordSet.keywords[i]).Upper())
+            return true;
+    }
+    return false;
+}
+
+
+/*static*/
 SqlTokenizer::FirebirdKeywordVersion SqlTokenizer::normalizeKeywordVersion(
     int odsMajor, int odsMinor)
 {

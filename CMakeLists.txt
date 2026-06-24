@@ -250,6 +250,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/sql/SelectStatement.cpp
         ${SOURCEDIR}/sql/SqlStatement.cpp
         ${SOURCEDIR}/sql/SqlTokenizer.cpp
+        ${SOURCEDIR}/sql/SqlFormatter.cpp
         ${SOURCEDIR}/sql/StatementBuilder.cpp
 )
 list(APPEND HEADER_LIST
@@ -396,6 +397,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/sql/SelectStatement.h
         ${SOURCEDIR}/sql/SqlStatement.h
         ${SOURCEDIR}/sql/SqlTokenizer.h
+        ${SOURCEDIR}/sql/SqlFormatter.h
         ${SOURCEDIR}/sql/StatementBuilder.h
 )
 
@@ -830,6 +832,15 @@ add_executable(sql_tokenizer_test
 )
 target_link_libraries(sql_tokenizer_test ${wxWidgets_LIBRARIES})
 add_test(NAME sql_tokenizer_test COMMAND sql_tokenizer_test)
+
+add_executable(sql_formatter_test
+    ${SOURCEDIR}/sql/SqlFormatterTest.cpp
+    ${SOURCEDIR}/sql/SqlFormatter.cpp
+    ${SQL_TEST_COMMON_SOURCES}
+)
+target_link_libraries(sql_formatter_test ${wxWidgets_LIBRARIES})
+add_test(NAME sql_formatter_test COMMAND sql_formatter_test)
+
 
 add_executable(merge_repro_test
     ${SOURCEDIR}/sql/MERGE_Repro.cpp

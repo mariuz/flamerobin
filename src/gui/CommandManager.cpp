@@ -188,6 +188,7 @@ void CommandManager::getCustomizableCommands(CommandInfoVector& commands)
     ci.id = Cmds::Query_Rollback; ci.name = _("Rollback Transaction"); commands.push_back(ci);
     ci.id = Cmds::Query_Show_plan; ci.name = _("Show Execution Plan"); commands.push_back(ci);
     ci.id = Cmds::Query_Explain; ci.name = _("Explain Statement (FB 6.0+)"); commands.push_back(ci);
+    ci.id = Cmds::Query_Format; ci.name = _("Format SQL"); commands.push_back(ci);
 
     // View commands
     ci.id = Cmds::View_Editor; ci.name = _("View Editor"); commands.push_back(ci);
@@ -264,6 +265,10 @@ void CommandManager::init()
     shortcutsM.insert(ShortCutDataPair(Cmds::Query_Commit, scd));
     scd.keyCode = WXK_F8;
     shortcutsM.insert(ShortCutDataPair(Cmds::Query_Rollback, scd));
+
+    scd.flags = wxACCEL_CTRL | wxACCEL_SHIFT;
+    scd.keyCode = 'F';
+    shortcutsM.insert(ShortCutDataPair(Cmds::Query_Format, scd));
 
     // view commands
     scd.flags = wxACCEL_CTRL | wxACCEL_ALT;

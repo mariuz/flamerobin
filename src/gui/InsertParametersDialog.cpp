@@ -962,6 +962,17 @@ void InsertParametersDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
                 }
                 break;
             case IBPP::SDT::sdSmallint:
+                if (scale != 0)
+                {
+                    double d3;
+                    if (!value.ToDouble(&d3))
+                        throw FRError(_("Invalid float numeric value"));
+                    if (statementDALM)
+                        statementDALM->setDouble(row, d3);
+                    else
+                        statementM->Set(row + 1, (float)d3);
+                    break;
+                }
                 long d;
                 if (!value.ToLong(&d))
                     throw FRError(_("Invalid integer value"));
@@ -971,6 +982,17 @@ void InsertParametersDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
                     statementM->Set(row + 1, (int)d);
                 break;
             case IBPP::SDT::sdInteger:
+                if (scale != 0)
+                {
+                    double d3;
+                    if (!value.ToDouble(&d3))
+                        throw FRError(_("Invalid float numeric value"));
+                    if (statementDALM)
+                        statementDALM->setDouble(row, d3);
+                    else
+                        statementM->Set(row + 1, (float)d3);
+                    break;
+                }
                 long d1;
                 if (!value.ToLong(&d1))
                     throw FRError(_("Invalid integer value"));

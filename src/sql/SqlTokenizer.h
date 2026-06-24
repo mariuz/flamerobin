@@ -220,6 +220,7 @@ public:
     static bool isReservedWord(const wxString& word);
     static bool isReservedWord(const wxString& word, int odsMajor,
         int odsMinor);
+    static bool isKeyword(const wxString& word, int odsMajor, int odsMinor);
 };
 
 #endif // FR_SQLTOKENIZER_H

@@ -90,6 +90,7 @@
 #include "sql/SelectStatement.h"
 #include "sql/SqlStatement.h"
 #include "sql/StatementBuilder.h"
+#include "sql/SqlFormatter.h"
 #include "statementHistory.h"
 
 #include "gui/FRStyle.h"
@@ -400,6 +401,9 @@ void SqlEditor::OnContextMenu(wxContextMenuEvent& event)
     m.Append(wxID_SELECTALL,       _("Select &All"));
     m.Append(Cmds::Query_Execute_selection,
         _("E&xecute selected"));
+    m.AppendSeparator();
+    m.Append(Cmds::Query_Format, _("Format &SQL"));
+
 
     int slen = GetSelectionEnd() - GetSelectionStart();
     if (slen && slen < 50)     // something (small) is selected
@@ -818,7 +822,11 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
     editMenu->AppendSeparator();
     editMenu->Append(wxID_REPLACE,
         cm.getMainMenuItemText(_("Fi&nd and replace"), wxID_REPLACE));
+    editMenu->AppendSeparator();
+    editMenu->Append(Cmds::Query_Format,
+        cm.getMainMenuItemText(_("Format &SQL"), Cmds::Query_Format));
     menuBarM->Append(editMenu, _("&Edit"));
+
 
     wxMenu* viewMenu = new wxMenu();
     viewMenu->AppendRadioItem(Cmds::View_Editor,
@@ -1093,6 +1101,8 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_UPDATE_UI(Cmds::Query_Show_Profiler,   ExecuteSqlFrame::OnMenuUpdateShowProfiler)
     EVT_MENU(Cmds::Query_Execute_selection,   ExecuteSqlFrame::OnMenuExecuteSelection)
     EVT_MENU(Cmds::Query_Execute_from_cursor, ExecuteSqlFrame::OnMenuExecuteFromCursor)
+    EVT_MENU(Cmds::Query_Format,              ExecuteSqlFrame::OnMenuFormatSql)
+
     EVT_UPDATE_UI(Cmds::Query_Execute,             ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
     EVT_UPDATE_UI(Cmds::Query_Execute_and_Fetch_All, ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
     EVT_UPDATE_UI(Cmds::Query_Show_plan,           ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
@@ -1903,6 +1913,32 @@ void ExecuteSqlFrame::OnMenuExecuteSelection(wxCommandEvent& WXUNUSED(event))
             styled_text_ctrl_sql->GetSelectionStart()
             );
 }
+
+void ExecuteSqlFrame::OnMenuFormatSql(wxCommandEvent& WXUNUSED(event))
+{
+    int odsMajor = -1;
+    int odsMinor = -1;
+    if (databaseM && databaseM->isConnected())
+    {
+        odsMajor = databaseM->getODSMajor();
+        odsMinor = databaseM->getODSMinor();
+    }
+
+    styled_text_ctrl_sql->BeginUndoAction();
+    wxString text = styled_text_ctrl_sql->GetSelectedText();
+    if (!text.IsEmpty())
+    {
+        wxString formatted = SqlFormatter::format(text, odsMajor, odsMinor);
+        styled_text_ctrl_sql->ReplaceSelection(formatted);
+    }
+    else
+    {
+        wxString formatted = SqlFormatter::format(styled_text_ctrl_sql->GetText(), odsMajor, odsMinor);
+        styled_text_ctrl_sql->SetText(formatted);
+    }
+    styled_text_ctrl_sql->EndUndoAction();
+}
+
 
 void ExecuteSqlFrame::OnMenuGridFetchAll(wxCommandEvent& WXUNUSED(event))
 {
