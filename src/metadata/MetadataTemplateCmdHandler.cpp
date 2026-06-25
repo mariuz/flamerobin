@@ -1087,6 +1087,8 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             processedText << u->getUserId();
         else if (cmdParams[0] == "unix_group")
             processedText << u->getGroupId();
+        else if (cmdParams[0] == "plugin")
+            processedText += tp->escapeChars(u->getPlugin());
     }
     // {%sql_security%}
     // If the current object is a data base, procedure, relation, 

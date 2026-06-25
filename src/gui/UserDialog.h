@@ -52,6 +52,8 @@ private:
     wxSpinCtrl* spinctrlUserIdM;
     wxStaticText* labelGroupIdM;
     wxSpinCtrl* spinctrlGroupIdM;
+    wxStaticText* labelPluginM;
+    wxTextCtrl* textPluginM;
     wxButton* buttonOkM;
     wxButton* buttonCancelM;
 

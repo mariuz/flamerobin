@@ -87,6 +87,10 @@ void UserDialog::createControls()
         "Unix group ID:");
     spinctrlGroupIdM = new wxSpinCtrl(getControlsPanel(), wxID_ANY, "0",
         wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 30000, 0);
+    labelPluginM = new wxStaticText(getControlsPanel(), wxID_ANY,
+        "Plugin:");
+    textPluginM = new wxTextCtrl(getControlsPanel(), wxID_ANY,
+        wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY);
 
     buttonOkM = new wxButton(getControlsPanel(), wxID_SAVE,
         (isNewUserM) ? _("Create") : _("Save"));
@@ -143,6 +147,10 @@ void UserDialog::layoutControls()
         wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
     controlsSizer->Add(spinctrlGroupIdM, wxGBPosition(3, 3),
         wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+    controlsSizer->Add(labelPluginM, wxGBPosition(4, 0), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL);
+    controlsSizer->Add(textPluginM, wxGBPosition(4, 1), wxDefaultSpan,
+        wxALIGN_CENTER_VERTICAL | wxEXPAND);
 
     controlsSizer->AddGrowableCol(1);
 
@@ -173,6 +181,7 @@ void UserDialog::setUser(UserPtr user)
         textConfirmPasswordM->SetValue(user->getPassword());
         spinctrlGroupIdM->SetValue(user->getGroupId());
         spinctrlUserIdM->SetValue(user->getUserId());
+        textPluginM->SetValue(user->getPlugin());
     }
 
     updateButtons();

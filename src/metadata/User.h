@@ -41,6 +41,7 @@ private:
     wxString lastnameM;
     uint32_t useridM;
     uint32_t groupidM;
+    wxString pluginM;
 public:
     User(ServerPtr server);
     User(ServerPtr server, const fr::UserData& src);
@@ -56,6 +57,7 @@ public:
     wxString getLastName() const;
     uint32_t getUserId() const;
     uint32_t getGroupId() const;
+    wxString getPlugin() const;
 
     void setUsername(const wxString& value);
     void setPassword(const wxString& value);
@@ -64,6 +66,7 @@ public:
     void setLastName(const wxString& value);
     void setUserId(uint32_t value);
     void setGroupId(uint32_t value);
+    void setPlugin(const wxString& value);
 
     void assignTo(fr::UserData& dest) const;
     virtual void acceptVisitor(MetadataItemVisitor* visitor);

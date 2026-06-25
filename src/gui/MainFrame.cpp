@@ -85,6 +85,7 @@
 #include "metadata/table.h"
 #include "metadata/trigger.h"
 #include "metadata/view.h"
+#include "metadata/User.h"
 
 
 bool checkValidDatabase(DatabasePtr database)
@@ -2055,6 +2056,16 @@ void MainFrame::OnMenuAlterObject(wxCommandEvent& WXUNUSED(event))
         URI uri("fr://edit_procedure");
         uri.addParam(wxString::Format("parent_window=%p", this));
         uri.addParam(wxString::Format("object_handle=%lu", p->getHandle()));
+        getURIProcessor().handleURI(uri);
+        return;
+    }
+
+    User* u = dynamic_cast<User*>(mi);
+    if (u)
+    {
+        URI uri("fr://edit_user");
+        uri.addParam(wxString::Format("parent_window=%p", this));
+        uri.addParam(wxString::Format("object_handle=%lu", u->getHandle()));
         getURIProcessor().handleURI(uri);
         return;
     }

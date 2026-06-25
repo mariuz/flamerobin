@@ -136,6 +136,7 @@ struct UserData
     std::string lastName;
     uint32_t userId;
     uint32_t groupId;
+    std::string plugin;
 };
 
 enum class BackupFlags

@@ -13,6 +13,7 @@
       <td><b><font color=white>First name</font></b></td>
       <td><b><font color=white>Middle name</font></b></td>
       <td><b><font color=white>Last name</font></b></td>
+      <td><b><font color=white>Plugin</font></b></td>
     </tr>
     {%foreach:user::
     <tr bgcolor="{%alternate:#DDDDFF:#CCCCFF%}">
@@ -24,6 +25,7 @@
       <td nowrap valign="top">{%userinfo:first_name%}</td>
       <td nowrap valign="top">{%userinfo:middle_name%}</td>
       <td nowrap valign="top">{%userinfo:last_name%}</td>
+      <td nowrap valign="top">{%userinfo:plugin%}</td>
     </tr>%}
   </tbody>
 </table>

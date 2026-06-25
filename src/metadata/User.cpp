@@ -53,6 +53,7 @@ User::User(ServerPtr server, const fr::UserData& src)
     firstnameM = src.firstName;
     middlenameM = src.middleName;
     lastnameM = src.lastName;
+    pluginM = src.plugin;
 }
 
 User::User(DatabasePtr database, const wxString& name)
@@ -171,6 +172,20 @@ void User::setGroupId(uint32_t value)
     }
 }
 
+wxString User::getPlugin() const
+{
+    return pluginM;
+}
+
+void User::setPlugin(const wxString& value)
+{
+    if (pluginM != value)
+    {
+        pluginM = value;
+        notifyObservers();
+    }
+}
+
 void User::assignTo(fr::UserData& dest) const
 {
     dest.username = wx2std(usernameM);
@@ -180,6 +195,7 @@ void User::assignTo(fr::UserData& dest) const
     dest.middleName = wx2std(middlenameM);
     dest.userId = useridM;
     dest.groupId = groupidM;
+    dest.plugin = wx2std(pluginM);
 }
 
 void User::acceptVisitor(MetadataItemVisitor* visitor)
@@ -222,7 +238,7 @@ void Users::load(ProgressIndicator* progressIndicator)
         wxMBConv* converter = db->getCharsetConverter();
 
         std::string stmt = "select sec$user_name, sec$first_name, sec$middle_name, "
-            "sec$last_name from sec$users order by 1";
+            "sec$last_name, sec$plugin from sec$users order by 1";
         fr::IStatementPtr& st1 = loader->getStatement(stmt);
         st1->execute();
 
@@ -238,6 +254,8 @@ void Users::load(ProgressIndicator* progressIndicator)
                 u->setMiddleName(std2wxIdentifier(st1->getString(2), converter));
             if (!st1->isNull(3))
                 u->setLastName(std2wxIdentifier(st1->getString(3), converter));
+            if (!st1->isNull(4))
+                u->setPlugin(std2wxIdentifier(st1->getString(4), converter));
             users.push_back(u);
         }
         setItems(users);
