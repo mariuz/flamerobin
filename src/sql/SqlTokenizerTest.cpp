@@ -261,6 +261,14 @@ int main()
         "isReservedWord FROM") && ok;
     ok = check(SqlTokenizer::isReservedWord("WHERE"),
         "isReservedWord WHERE") && ok;
+    ok = check(SqlTokenizer::isReservedWord("TERM"),
+        "isReservedWord TERM") && ok;
+    ok = check(SqlTokenizer::isReservedWord("TERMINATOR"),
+        "isReservedWord TERMINATOR") && ok;
+    ok = check(SqlTokenizer::isKeyword("TERM", -1, -1),
+        "isKeyword TERM") && ok;
+    ok = check(SqlTokenizer::isKeyword("TERMINATOR", -1, -1),
+        "isKeyword TERMINATOR") && ok;
     ok = check(!SqlTokenizer::isReservedWord("MYTABLE"),
         "isReservedWord MYTABLE false") && ok;
     ok = check(!SqlTokenizer::isReservedWord(""),

@@ -687,6 +687,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
 
     setViewMode(false, vmEditor);
     loadingM = false;
+    setupStyles();
 }
 
 Database* ExecuteSqlFrame::getDatabase() const
@@ -2447,7 +2448,16 @@ void ExecuteSqlFrame::setupStyles()
 
     grid_data->SetBackgroundColour(stylerManager().getDefaultStyle()->getbgColor());
     grid_data->setupStyles();
-
+    if (grid_profiler_psql)
+    {
+        grid_profiler_psql->SetBackgroundColour(stylerManager().getDefaultStyle()->getbgColor());
+        grid_profiler_psql->setupStyles();
+    }
+    if (grid_profiler_rs)
+    {
+        grid_profiler_rs->SetBackgroundColour(stylerManager().getDefaultStyle()->getbgColor());
+        grid_profiler_rs->setupStyles();
+    }
 }
 
 void ExecuteSqlFrame::clearLogBeforeExecution()

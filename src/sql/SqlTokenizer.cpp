@@ -182,7 +182,7 @@ wxArrayString SqlTokenizer::getKeywords(KeywordCase kwc, int odsMajor,
         normalizeKeywordVersion(odsMajor, odsMinor));
     const FirebirdKeywordSetData& keywordSet(
         getKeywordSetForVersion(version.major));
-    keywords.Alloc(keywordSet.keywordsCount);
+    keywords.Alloc(keywordSet.keywordsCount + 2);
 
     // Use the cached config value so we do not hit the config map on
     // every getKeywords call. The cache invalidates itself when the
@@ -193,6 +193,8 @@ wxArrayString SqlTokenizer::getKeywords(KeywordCase kwc, int odsMajor,
     {
         appendCaseKeyword(keywords, keywordSet.keywords[i], upperCase);
     }
+    appendCaseKeyword(keywords, "TERM", upperCase);
+    appendCaseKeyword(keywords, "TERMINATOR", upperCase);
     keywords.Sort();
     return keywords;
 }
@@ -244,11 +246,14 @@ bool SqlTokenizer::isReservedWord(const wxString& word, int odsMajor,
     if (word.IsEmpty())
         return false;
 
+    const wxString searchWord(word.Upper());
+    if (searchWord == "TERM" || searchWord == "TERMINATOR")
+        return true;
+
     const FirebirdKeywordVersion version(
         normalizeKeywordVersion(odsMajor, odsMinor));
     const FirebirdKeywordSetData& keywordSet(
         getKeywordSetForVersion(version.major));
-    const wxString searchWord(word.Upper());
     for (size_t i = 0; i < keywordSet.reservedCount; ++i)
     {
         if (searchWord == wxString::FromUTF8(keywordSet.reserved[i]).Upper())
@@ -263,11 +268,14 @@ bool SqlTokenizer::isKeyword(const wxString& word, int odsMajor, int odsMinor)
     if (word.IsEmpty())
         return false;
 
+    const wxString searchWord(word.Upper());
+    if (searchWord == "TERM" || searchWord == "TERMINATOR")
+        return true;
+
     const FirebirdKeywordVersion version(
         normalizeKeywordVersion(odsMajor, odsMinor));
     const FirebirdKeywordSetData& keywordSet(
         getKeywordSetForVersion(version.major));
-    const wxString searchWord(word.Upper());
     for (size_t i = 0; i < keywordSet.keywordsCount; ++i)
     {
         if (searchWord == wxString::FromUTF8(keywordSet.keywords[i]).Upper())

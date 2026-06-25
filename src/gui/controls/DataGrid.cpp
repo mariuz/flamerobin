@@ -132,6 +132,7 @@ void DataGrid::fetchData(bool readonly)
 
     wxBusyCursor bc;
     BeginBatch();
+    updateRowHeights();
     table->initialFetch(readonly);
 
     for (int i = 0; i < table->GetNumberCols(); i++)
