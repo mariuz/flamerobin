@@ -32,6 +32,7 @@
 
 #include <wx/settings.h>
 
+#include "config/Config.h"
 #include "core/StringUtils.h"
 #include "frutils.h"
 #include "gui/HtmlHeaderMetadataItemVisitor.h"
@@ -104,9 +105,14 @@ wxString HtmlTemplateProcessor::escapeChars(const wxString& input, bool processN
 /*static*/
 void HtmlTemplateProcessor::applyDarkModeIfNeeded(wxString& html)
 {
-    // wxSystemAppearance::IsDark is the right check on every platform that
-    // exposes a dark mode (macOS Mojave+, Win10+, GTK with dark theme).
-    if (!wxSystemSettings::GetAppearance().IsDark())
+    bool useDark = false;
+    int theme = config().get("darkMode", 0);
+    if (theme == 2)
+        useDark = true;
+    else if (theme == 0 && wxSystemSettings::GetAppearance().IsDark())
+        useDark = true;
+
+    if (!useDark)
         return;
 
     // Replace the legacy hard-coded bgcolor= attributes from the metadata

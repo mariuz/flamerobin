@@ -353,16 +353,11 @@ void FRStyleManager::loadConfig()
     // otherwise dark window. The user's explicit Preferences choice still wins.
     
     bool useDark = false;
-#if wxCHECK_VERSION(3, 3, 0)
     int theme = config().get(_DARKMODE_KEY, (int)ThemeSystem);
     if (theme == ThemeDark)
         useDark = true;
     else if (theme == ThemeSystem && wxSystemSettings::GetAppearance().IsDark())
         useDark = true;
-#else
-    if (wxSystemSettings::GetAppearance().IsDark())
-        useDark = true;
-#endif
 
     const wxString systemDefault = useDark ? _DARKMODEDEFAULT : _default;
 

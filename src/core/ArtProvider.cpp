@@ -59,7 +59,12 @@ wxBitmapBundle ArtProvider::loadBitmapBundleFromFile(const wxArtID& id)
 
     bool useClassic = config().getClassicIcons();
     wxString folder = useClassic ? "svg_classic/" : "svg/";
-    bool isDarkMode = wxSystemSettings::GetAppearance().IsDark();
+    bool isDarkMode = false;
+    int theme = config().get("darkMode", 0);
+    if (theme == 2)
+        isDarkMode = true;
+    else if (theme == 0 && wxSystemSettings::GetAppearance().IsDark())
+        isDarkMode = true;
 
     if (isDarkMode)
     {
