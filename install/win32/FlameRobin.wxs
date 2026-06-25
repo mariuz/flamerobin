@@ -25,6 +25,8 @@
         <Directory Id="HtmlTemplatesFolder" Name="html-templates" />
         <Directory Id="SysTemplatesFolder" Name="sys-templates" />
         <Directory Id="XmlStylesFolder" Name="xml-styles" />
+        <Directory Id="PluginsFolder" Name="plugins" />
+        <Directory Id="IntlFolder" Name="intl" />
       </Directory>
     </StandardDirectory>
 
@@ -86,6 +88,41 @@
       <Files Include="..\..\xml-styles\**" />
     </ComponentGroup>
 
+    <ComponentGroup Id="FirebirdClientFiles" Directory="INSTALLFOLDER">
+      <Component Id="fbclient_dll" Guid="f6e39c81-8c43-4318-ae31-89e4312ab62a">
+        <File Id="fbclient.dll" Source="$(var.FirebirdClientDir)\fbclient.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="ib_util_dll" Guid="f6e39c81-8c43-4318-ae31-89e4312ab62b">
+        <File Id="ib_util.dll" Source="$(var.FirebirdClientDir)\ib_util.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="firebird_conf" Guid="f6e39c81-8c43-4318-ae31-89e4312ab62c">
+        <File Id="firebird.conf" Source="$(var.FirebirdClientDir)\firebird.conf" KeyPath="yes" />
+      </Component>
+      <Files Include="$(var.FirebirdClientDir)\icu*.dll" />
+      <Files Include="$(var.FirebirdClientDir)\icu*.dat" />
+    </ComponentGroup>
+
+    <ComponentGroup Id="FirebirdPluginsFiles" Directory="PluginsFolder">
+      <Component Id="srp_dll" Guid="f6e39c81-8c43-4318-ae31-89e4312ab62d">
+        <File Id="srp.dll" Source="$(var.FirebirdClientDir)\plugins\srp.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="legacy_auth_dll" Guid="f6e39c81-8c43-4318-ae31-89e4312ab62e">
+        <File Id="legacy_auth.dll" Source="$(var.FirebirdClientDir)\plugins\legacy_auth.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="legacy_usermanager_dll" Guid="f6e39c81-8c43-4318-ae31-89e4312ab62f">
+        <File Id="legacy_usermanager.dll" Source="$(var.FirebirdClientDir)\plugins\legacy_usermanager.dll" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="FirebirdIntlFiles" Directory="IntlFolder">
+      <Component Id="fbintl_dll" Guid="f6e39c81-8c43-4318-ae31-89e4312ab63a">
+        <File Id="fbintl.dll" Source="$(var.FirebirdClientDir)\intl\fbintl.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="fbintl_conf" Guid="f6e39c81-8c43-4318-ae31-89e4312ab63b">
+        <File Id="fbintl.conf" Source="$(var.FirebirdClientDir)\intl\fbintl.conf" KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
     <!-- Firewall Exception Component -->
     <ComponentGroup Id="FirewallComponents" Directory="INSTALLFOLDER">
       <Component Id="FlameRobinFWExceptionComponent" Guid="72e39c81-8c43-4318-ae31-89e4312ab62a" Condition="ADD_FIREWALL_EXCEPTION = 1">
@@ -145,6 +182,9 @@
       <ComponentGroupRef Id="HtmlTemplatesFiles" />
       <ComponentGroupRef Id="SysTemplatesFiles" />
       <ComponentGroupRef Id="XmlStylesFiles" />
+      <ComponentGroupRef Id="FirebirdClientFiles" />
+      <ComponentGroupRef Id="FirebirdPluginsFiles" />
+      <ComponentGroupRef Id="FirebirdIntlFiles" />
       <ComponentGroupRef Id="FirewallComponents" />
       <ComponentGroupRef Id="ShortcutsComponents" />
     </Feature>

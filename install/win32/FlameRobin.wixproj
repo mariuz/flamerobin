@@ -5,7 +5,8 @@
     <Platforms>x64;x86</Platforms>
     <Platform Condition="'$(Platform)' == ''">x64</Platform>
     <FlameRobinExeSource Condition="'$(FlameRobinExeSource)' == ''">..\..\build\Debug\flamerobin.exe</FlameRobinExeSource>
-    <DefineConstants>FlameRobinExeSource=$(FlameRobinExeSource)</DefineConstants>
+    <FirebirdClientDir Condition="'$(FirebirdClientDir)' == ''">..\..\firebird-$(Platform)-extracted</FirebirdClientDir>
+    <DefineConstants>FlameRobinExeSource=$(FlameRobinExeSource);FirebirdClientDir=$(FirebirdClientDir)</DefineConstants>
     <AcceptEula>wix7</AcceptEula>
   </PropertyGroup>
   <ItemGroup>

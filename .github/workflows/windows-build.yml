@@ -125,10 +125,40 @@ jobs:
       run: >
         cmake --build .\${{ matrix.build_dir }} --config Release --target flamerobin -j 8 --verbose
 
+    - name: Download and Extract Firebird Client
+      shell: pwsh
+      run: |
+        $arch = "${{ matrix.arch }}"
+        $fbArch = if ($arch -eq "x86") { "x86" } else { "x64" }
+        $fbUrl = "https://github.com/FirebirdSQL/firebird/releases/download/v5.0.4/Firebird-5.0.4.1812-0-windows-$fbArch.zip"
+        $fbZip = "firebird-$arch.zip"
+        $fbExtractDir = "firebird-$arch-extracted"
+        
+        # Download Firebird client ZIP
+        Write-Host "Downloading Firebird client from $fbUrl ..."
+        [System.Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        Invoke-WebRequest -Uri $fbUrl -OutFile $fbZip
+        
+        # Extract Firebird client ZIP
+        Write-Host "Extracting Firebird client ZIP ..."
+        Expand-Archive -Path $fbZip -DestinationPath $fbExtractDir -Force
+        
+        # Force the embedded engine to use shared lock files (ServerMode = SuperClassic)
+        $confPath = "$fbExtractDir\firebird.conf"
+        if (Test-Path $confPath) {
+            $confContent = Get-Content $confPath
+            if ($confContent -match 'ServerMode') {
+                $confContent = $confContent -replace '^#?\s*ServerMode\s*=\s*\w+', 'ServerMode = SuperClassic'
+            } else {
+                $confContent += "`nServerMode = SuperClassic"
+            }
+            $confContent | Set-Content $confPath
+        }
+
     - name: Build MSI Installer
       shell: pwsh
       run: |
-        dotnet build install/win32/FlameRobin.wixproj -c Release -p:Platform=${{ matrix.arch }} -p:FlameRobinExeSource=..\..\${{ matrix.build_dir }}\Release\flamerobin.exe
+        dotnet build install/win32/FlameRobin.wixproj -c Release -p:Platform=${{ matrix.arch }} -p:FlameRobinExeSource=..\..\${{ matrix.build_dir }}\Release\flamerobin.exe -p:FirebirdClientDir=..\..\firebird-${{ matrix.arch }}-extracted
         $versionFile = Get-Content src/frversion.h -Raw
         $major = [regex]::Match($versionFile, '#define\s+FR_VERSION_MAJOR\s+(\d+)').Groups[1].Value
         $minor = [regex]::Match($versionFile, '#define\s+FR_VERSION_MINOR\s+(\d+)').Groups[1].Value
@@ -147,20 +177,7 @@ jobs:
         
         $arch = "${{ matrix.arch }}"
         $buildDir = "${{ matrix.build_dir }}"
-        $fbArch = if ($arch -eq "x86") { "x86" } else { "x64" }
-        
-        $fbUrl = "https://github.com/FirebirdSQL/firebird/releases/download/v5.0.4/Firebird-5.0.4.1812-0-windows-$fbArch.zip"
-        $fbZip = "firebird-$arch.zip"
         $fbExtractDir = "firebird-$arch-extracted"
-        
-        # Download Firebird client ZIP
-        Write-Host "Downloading Firebird client from $fbUrl ..."
-        [System.Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-        Invoke-WebRequest -Uri $fbUrl -OutFile $fbZip
-        
-        # Extract Firebird client ZIP
-        Write-Host "Extracting Firebird client ZIP ..."
-        Expand-Archive -Path $fbZip -DestinationPath $fbExtractDir -Force
         
         # Create portable staging directory
         $stagingDir = "flamerobin-portable-$version-$arch"
@@ -183,16 +200,6 @@ jobs:
         Copy-Item -Path "$fbExtractDir\ib_util.dll" -Destination "$stagingDir\" -Force
         Copy-Item -Path "$fbExtractDir\firebird.conf" -Destination "$stagingDir\" -Force
 
-        # Force the embedded engine to use shared lock files (ServerMode = SuperClassic)
-        $confPath = "$stagingDir\firebird.conf"
-        $confContent = Get-Content $confPath
-        if ($confContent -match 'ServerMode') {
-            $confContent = $confContent -replace '^#?\s*ServerMode\s*=\s*\w+', 'ServerMode = SuperClassic'
-        } else {
-            $confContent += "`nServerMode = SuperClassic"
-        }
-        $confContent | Set-Content $confPath
-        
         # Copy ICU files
         Get-ChildItem -Path $fbExtractDir -Filter "icu*.dll" | Copy-Item -Destination "$stagingDir\" -Force
         Get-ChildItem -Path $fbExtractDir -Filter "icu*.dat" | Copy-Item -Destination "$stagingDir\" -Force
