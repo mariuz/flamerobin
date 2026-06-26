@@ -1147,12 +1147,17 @@ void Database::drop()
 
 void Database::reconnect()
 {
-    // must recreate, because IBPP::Database member will become invalid
-    delete metadataLoaderM;
-    metadataLoaderM = 0;
-
-    databaseDAL_M->disconnect();
-    databaseDAL_M->connect();
+    // Fully tear down the existing connection state first so that connect()
+    // does not early-return because connectedM is still true.  setDisconnected()
+    // resets connectedM, clears all metadata collections and notifies observers,
+    // so the tree collapses cleanly before the new connection is established.
+    // We also attempt a low-level disconnect to release the stale handle on the
+    // server side (it may fail if the network is already gone – that is fine).
+    try { databaseDAL_M->disconnect(); } catch (...) {}
+    setDisconnected();
+    // connect() checks connectedM, which is now false, so it will proceed with
+    // a full connection including reinitialising all metadata collections.
+    connect(getDecryptedPassword());
 }
 
 // the caller of this function should check whether the database object has the

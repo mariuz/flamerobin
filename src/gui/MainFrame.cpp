@@ -441,7 +441,7 @@ EVT_UPDATE_UI(Cmds::Menu_ConnectAs, MainFrame::OnMenuUpdateIfDatabaseNotConnecte
 EVT_MENU(Cmds::Menu_Disconnect, MainFrame::OnMenuDisconnect)
 EVT_UPDATE_UI(Cmds::Menu_Disconnect, MainFrame::OnMenuUpdateIfDatabaseConnected)
 EVT_MENU(Cmds::Menu_Reconnect, MainFrame::OnMenuReconnect)
-EVT_UPDATE_UI(Cmds::Menu_Reconnect, MainFrame::OnMenuUpdateIfDatabaseConnected)
+EVT_UPDATE_UI(Cmds::Menu_Reconnect, MainFrame::OnMenuUpdateIfDatabaseSelected)
 EVT_MENU(Cmds::Menu_RecreateDatabase, MainFrame::OnMenuRecreateDatabase)
 EVT_UPDATE_UI(Cmds::Menu_RecreateDatabase, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
 EVT_MENU(Cmds::Menu_DropDatabase, MainFrame::OnMenuDropDatabase)
@@ -1596,8 +1596,18 @@ void MainFrame::OnMenuReconnect(wxCommandEvent& WXUNUSED(event))
     if (!checkValidDatabase(db))
         return;
 
+    // Force disconnect first so that Database::connect() will not early-return
+    // due to connectedM still being true after a silent network drop.  Wrap in
+    // try/catch because the handle may already be invalid.
+    treeMainM->Freeze();
+    try { db->disconnect(); } catch (...) {}
+    treeMainM->Thaw();
+
+    // Now reconnect using the same full pathway as a normal connect:
+    // connectDatabase() handles password prompts and the progress dialog.
     wxBusyCursor bc;
-    db->reconnect();
+    connectDatabase(db.get(), this);
+    updateStatusbarText();
 }
 
 void MainFrame::OnMenuConnectAs(wxCommandEvent& WXUNUSED(event))
