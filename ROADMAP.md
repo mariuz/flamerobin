@@ -98,3 +98,4 @@ These items apply across Firebird versions and support the feature phases above.
 - [ ] **System Table Query Audit** — Audit all `MON$*` and `RDB$*` queries to add newly available columns from FB4/5/6 where the ODS version allows.
 - [x] **SVG Icon System & HiDPI Support** — Replace legacy XPM icons with scalable vector graphics (SVG) and modernize `ArtProvider` to use `wxBitmapBundle` for crisp rendering on 4K and high-resolution displays.
 - [x] **Documentation / What's New Page** — Update `docs/fr_whatsnew.html` with entries for each Firebird version's newly supported FlameRobin features.
+- [x] **Memory Leak Detection Roadmap** — Added a comprehensive [C++ Memory Leak Detection Roadmap & Best Practices guide](file:///C:/Work/flamerobin/devdocs/memory_leaks_roadmap.md) based on Microsoft and Google guidelines.
