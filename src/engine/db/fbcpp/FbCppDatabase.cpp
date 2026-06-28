@@ -419,6 +419,46 @@ void FbCppDatabase::getStatistics(int* fetch, int* mark, int* read, int* write, 
     if (read) *read = 0;
     if (write) *write = 0;
     if (mem) *mem = 0;
+
+    if (!attachmentM)
+        return;
+
+    auto& client = attachmentM->getClient();
+    fbcpp::impl::StatusWrapper status(client);
+
+    unsigned char items[] = {
+        isc_info_fetches,
+        isc_info_marks,
+        isc_info_reads,
+        isc_info_writes,
+        isc_info_current_memory
+    };
+    unsigned char buffer[256];
+    attachmentM->getHandle()->getInfo(&status, sizeof(items), items, sizeof(buffer), buffer);
+    if (!(status.getState() & Firebird::IStatus::STATE_ERRORS))
+    {
+        unsigned char* p = buffer;
+        while (*p != isc_info_end && p < buffer + sizeof(buffer))
+        {
+            unsigned char item = *p++;
+            unsigned short len = p[0] | (p[1] << 8);
+            p += 2;
+            int64_t value = 0;
+            if (len == 1) value = *p;
+            else if (len == 2) value = p[0] | (p[1] << 8);
+            else if (len == 4) value = p[0] | (p[1] << 8) | (p[2] << 16) | (p[3] << 24);
+            else if (len == 8) value = (int64_t)p[0] | ((int64_t)p[1] << 8) | ((int64_t)p[2] << 16) | ((int64_t)p[3] << 24)
+                                    | ((int64_t)p[4] << 32) | ((int64_t)p[5] << 40) | ((int64_t)p[6] << 48) | ((int64_t)p[7] << 56);
+
+            if (item == isc_info_fetches && fetch) *fetch = (int)value;
+            else if (item == isc_info_marks && mark) *mark = (int)value;
+            else if (item == isc_info_reads && read) *read = (int)value;
+            else if (item == isc_info_writes && write) *write = (int)value;
+            else if (item == isc_info_current_memory && mem) *mem = (int)value;
+
+            p += len;
+        }
+    }
 }
 
 void FbCppDatabase::getCounts(int* ins, int* upd, int* del, int* ridx, int* rseq)
@@ -428,10 +468,98 @@ void FbCppDatabase::getCounts(int* ins, int* upd, int* del, int* ridx, int* rseq
     if (del) *del = 0;
     if (ridx) *ridx = 0;
     if (rseq) *rseq = 0;
+
+    if (!attachmentM)
+        return;
+
+    auto& client = attachmentM->getClient();
+    fbcpp::impl::StatusWrapper status(client);
+
+    unsigned char items[] = {
+        isc_info_insert_count,
+        isc_info_update_count,
+        isc_info_delete_count,
+        isc_info_read_idx_count,
+        isc_info_read_seq_count
+    };
+    unsigned char buffer[1024];
+    attachmentM->getHandle()->getInfo(&status, sizeof(items), items, sizeof(buffer), buffer);
+    if (!(status.getState() & Firebird::IStatus::STATE_ERRORS))
+    {
+        unsigned char* p = buffer;
+        while (*p != isc_info_end && p < buffer + sizeof(buffer))
+        {
+            unsigned char item = *p++;
+            unsigned short len = p[0] | (p[1] << 8);
+            p += 2;
+            
+            int total = 0;
+            unsigned char* end_ptr = p + len;
+            while (p + 6 <= end_ptr)
+            {
+                int val = p[2] | (p[3] << 8) | (p[4] << 16) | (p[5] << 24);
+                total += val;
+                p += 6;
+            }
+
+            if (item == isc_info_insert_count && ins) *ins = total;
+            else if (item == isc_info_update_count && upd) *upd = total;
+            else if (item == isc_info_delete_count && del) *del = total;
+            else if (item == isc_info_read_idx_count && ridx) *ridx = total;
+            else if (item == isc_info_read_seq_count && rseq) *rseq = total;
+
+            p = end_ptr;
+        }
+    }
 }
 
-void FbCppDatabase::getDetailedCounts(std::map<int, CountInfo>& /*counts*/)
+void FbCppDatabase::getDetailedCounts(std::map<int, CountInfo>& counts)
 {
+    counts.clear();
+
+    if (!attachmentM)
+        return;
+
+    auto& client = attachmentM->getClient();
+    fbcpp::impl::StatusWrapper status(client);
+
+    unsigned char items[] = {
+        isc_info_insert_count,
+        isc_info_update_count,
+        isc_info_delete_count,
+        isc_info_read_idx_count,
+        isc_info_read_seq_count
+    };
+    unsigned char buffer[2048];
+    attachmentM->getHandle()->getInfo(&status, sizeof(items), items, sizeof(buffer), buffer);
+    if (!(status.getState() & Firebird::IStatus::STATE_ERRORS))
+    {
+        unsigned char* p = buffer;
+        while (*p != isc_info_end && p < buffer + sizeof(buffer))
+        {
+            unsigned char item = *p++;
+            unsigned short len = p[0] | (p[1] << 8);
+            p += 2;
+            
+            unsigned char* end_ptr = p + len;
+            while (p + 6 <= end_ptr)
+            {
+                int relId = p[0] | (p[1] << 8);
+                int val = p[2] | (p[3] << 8) | (p[4] << 16) | (p[5] << 24);
+
+                CountInfo& info = counts[relId];
+                if (item == isc_info_insert_count) info.inserts = val;
+                else if (item == isc_info_update_count) info.updates = val;
+                else if (item == isc_info_delete_count) info.deletes = val;
+                else if (item == isc_info_read_idx_count) info.readIndex = val;
+                else if (item == isc_info_read_seq_count) info.readSequence = val;
+
+                p += 6;
+            }
+
+            p = end_ptr;
+        }
+    }
 }
 
 IBlobPtr FbCppDatabase::createBlob(ITransactionPtr tr)

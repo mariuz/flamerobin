@@ -719,7 +719,10 @@ if (NOT APPLE)
     if (WIN32)
         if (MSVC)
             target_link_options(${PROJECT_NAME} PRIVATE "/MANIFEST:NO")
-            set_target_properties(${PROJECT_NAME} PROPERTIES VS_DPI_AWARE "PerMonitor")
+            set_target_properties(${PROJECT_NAME} PROPERTIES 
+                GENERATE_MANIFEST OFF
+                VS_DPI_AWARE "PerMonitor"
+            )
         endif (MSVC)
     endif (WIN32)
 endif (NOT APPLE)
