@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.18)
 
 option(ENABLE_VCPKG "Enable vcpkg for dependency management" ON)
+option(ENABLE_ASAN "Enable AddressSanitizer (ASan) for memory error detection" OFF)
+option(ENABLE_CRT_LEAK_CHECK "Enable CRT Debug Heap leak reporting on exit (MSVC Debug builds only)" OFF)
 set(VCPKG_ROOT "${CMAKE_SOURCE_DIR}/vcpkg")
 if(ENABLE_VCPKG AND EXISTS "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
     set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
@@ -36,6 +38,37 @@ if(MSVC)
   else()
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
   endif()
+endif()
+
+#--------------------------------------
+# AddressSanitizer (ASan) support
+# Enable with: cmake -DENABLE_ASAN=ON ..
+# Microsoft docs: https://learn.microsoft.com/cpp/sanitizers/asan
+if(ENABLE_ASAN)
+    message(STATUS "AddressSanitizer (ASan) ENABLED")
+    if(MSVC)
+        # MSVC: /fsanitize=address requires Debug or RelWithDebInfo builds.
+        # Note: incompatible with /RTC1 – CMake's Debug flags include /RTC1 by default;
+        # we strip it here to avoid the cl.exe D9025 override warning.
+        string(REPLACE "/RTC1" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+        string(REPLACE "/RTC1" "" CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG}")
+        add_compile_options(/fsanitize=address)
+        # Disable incremental linking – required by ASan on MSVC
+        add_link_options(/INCREMENTAL:NO)
+    else()
+        # GCC / Clang: enable ASan + LeakSanitizer together
+        add_compile_options(-fsanitize=address,leak -fno-omit-frame-pointer -g)
+        add_link_options(-fsanitize=address,leak)
+    endif()
+endif()
+
+#--------------------------------------
+# CRT Debug Heap leak reporting (MSVC Debug builds)
+# Enable with: cmake -DENABLE_CRT_LEAK_CHECK=ON ..
+# Microsoft docs: https://learn.microsoft.com/cpp/c-runtime-library/reference/crtsetdbgflag
+if(ENABLE_CRT_LEAK_CHECK AND MSVC)
+    message(STATUS "CRT Debug Heap leak check ENABLED")
+    add_compile_definitions($<$<CONFIG:Debug>:FR_CRT_LEAK_CHECK>)
 endif()
 
 # Don't allow in-source builds. Keeps things nice and tidy

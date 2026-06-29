@@ -47,6 +47,20 @@
 #include "main.h"
 #include "mcp/McpServer.h"
 
+//----------------------------------------------------------------------
+// CRT Debug Heap (MSVC Debug builds)
+// Activated by building with -DENABLE_CRT_LEAK_CHECK=ON.
+// _CRTDBG_MAP_ALLOC must be defined BEFORE any CRT header to redirect
+// malloc/free to their debug variants, enabling source-location reporting.
+// See: https://learn.microsoft.com/cpp/c-runtime-library/find-memory-leaks-using-the-crt-library
+//----------------------------------------------------------------------
+#if defined(FR_CRT_LEAK_CHECK) && defined(_MSC_VER) && defined(_DEBUG)
+    #define _CRTDBG_MAP_ALLOC
+    #include <cstdlib>
+    #include <crtdbg.h>
+    #define FR_CRT_LEAK_CHECK_ACTIVE 1
+#endif
+
 #ifdef FR_USE_CRASHPAD
 #include "client/crashpad_client.h"
 #include "client/crash_report_database.h"
@@ -159,6 +173,26 @@ bool Application::OnInit()
 #endif
 
     std::set_terminate(parachute);
+
+//----------------------------------------------------------------------
+// CRT Debug Heap: arm the allocator debug flags.
+//   _CRTDBG_ALLOC_MEM_DF  – turns on debug heap block tracking
+//   _CRTDBG_LEAK_CHECK_DF – calls _CrtDumpMemoryLeaks() automatically
+//                            when the CRT shuts down (belt-and-braces;
+//                            we also call it explicitly in OnExit).
+// Output appears in the Visual Studio "Output" window while debugging.
+//----------------------------------------------------------------------
+#ifdef FR_CRT_LEAK_CHECK_ACTIVE
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+    // Route all CRT debug output to the VS Output window AND stderr
+    _CrtSetReportMode(_CRT_WARN,  _CRTDBG_MODE_DEBUG | _CRTDBG_MODE_FILE);
+    _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_DEBUG | _CRTDBG_MODE_FILE);
+    _CrtSetReportMode(_CRT_ASSERT,_CRTDBG_MODE_DEBUG | _CRTDBG_MODE_FILE);
+    _CrtSetReportFile(_CRT_WARN,  _CRTDBG_FILE_STDERR);
+    _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
+    _CrtSetReportFile(_CRT_ASSERT,_CRTDBG_FILE_STDERR);
+    wxLogDebug("[FlameRobin] CRT Debug Heap activated - memory leak check ON");
+#endif
     checkEnvironment();
     LocaleManager::get().initFromConfig();
     parseCommandLine();
@@ -240,6 +274,20 @@ void Application::HandleEvent(wxEvtHandler* handler, wxEventFunction func,
 
 int Application::OnExit()
 {
+//----------------------------------------------------------------------
+// CRT Debug Heap: dump all still-reachable allocations to the Output
+// window and stderr.  Each leaked block prints:
+//   {filename}({line}): {bytes} bytes at 0x{address}
+// (source-location info is only available when _CRTDBG_MAP_ALLOC was
+//  defined before the first CRT header – which we do above).
+// See: https://learn.microsoft.com/cpp/c-runtime-library/reference/crtdumpmemoryleaks
+//----------------------------------------------------------------------
+#ifdef FR_CRT_LEAK_CHECK_ACTIVE
+    if (_CrtDumpMemoryLeaks())
+        wxLogDebug("[FlameRobin] CRT leak check: memory leaks detected (see Output / stderr)");
+    else
+        wxLogDebug("[FlameRobin] CRT leak check: no memory leaks detected");
+#endif
     return 0;
 }
 
