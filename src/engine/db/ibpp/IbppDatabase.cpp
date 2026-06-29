@@ -291,6 +291,40 @@ void IbppDatabase::getDetailedCounts(std::map<int, CountInfo>& counts)
     }
 }
 
+void IbppDatabase::getCompiledStatementInfo(std::vector<CompiledStatementInfo>& statements)
+{
+    statements.clear();
+    if (!databaseM.intf())
+        return;
+
+    try
+    {
+        auto tr = createTransaction();
+        tr->setAccessMode(TransactionAccessMode::Read);
+        tr->start();
+        {
+            auto st = createStatement(tr);
+            st->prepare("SELECT MON$COMPILED_STATEMENT_ID, MON$SQL_TEXT, MON$CACHE_HIT, MON$CACHE_MISS "
+                        "FROM MON$COMPILED_STATEMENTS "
+                        "ORDER BY MON$COMPILED_STATEMENT_ID");
+            st->execute();
+            while (st->fetch())
+            {
+                CompiledStatementInfo info;
+                info.id = st->getInt64(0);
+                info.sqlText = st->getString(1);
+                info.cacheHit = st->getInt32(2);
+                info.cacheMiss = st->getInt32(3);
+                statements.push_back(info);
+            }
+        }
+        try { tr->commit(); } catch (...) {}
+    }
+    catch (...)
+    {
+    }
+}
+
 IBlobPtr IbppDatabase::createBlob(ITransactionPtr tr)
 {
     auto ibppTr = std::dynamic_pointer_cast<IbppTransaction>(tr);

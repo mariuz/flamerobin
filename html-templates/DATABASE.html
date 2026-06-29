@@ -145,6 +145,36 @@
   </tbody>
 </table>
 
+{%ifeq:{%dbinfo:show_compiled_statement_cache%}:true:<br>
+<table cellspacing=1 cellpadding=2 border=0 bgcolor="black">
+  <tbody>
+    <tr bgcolor="navy">
+       <td nowrap colspan=4><b><font color=white>Compiled Statement Cache Statistics</font></b></td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+       <td nowrap colspan=2>Total Hits&#58; <b>{%dbinfo:compiled_statement_cache_hits%}</b></td>
+       <td nowrap colspan=2>Total Misses&#58; <b>{%dbinfo:compiled_statement_cache_misses%}</b></td>
+    </tr>
+    <tr bgcolor="#DDDDFF">
+       <td nowrap colspan=4>Cache Hit Ratio&#58; <b>{%dbinfo:compiled_statement_cache_ratio%}</b></td>
+    </tr>
+    <tr bgcolor="navy">
+       <td nowrap><b><font color=white>Statement ID</font></b></td>
+       <td nowrap><b><font color=white>SQL Statement</font></b></td>
+       <td nowrap><b><font color=white>Hits</font></b></td>
+       <td nowrap><b><font color=white>Misses</font></b></td>
+    </tr>
+    {%foreach:compiled_statement::
+    <tr bgcolor="#DDDDFF">
+        <td bgcolor="#CCCCFF" align="right" nowrap>{%compiledstatementinfo:id%}</td>
+        <td bgcolor="#CCCCFF" nowrap>{%compiledstatementinfo:sql_text_short%}</td>
+        <td bgcolor="#CCCCFF" align="right" nowrap>{%compiledstatementinfo:cache_hit%}</td>
+        <td bgcolor="#CCCCFF" align="right" nowrap>{%compiledstatementinfo:cache_miss%}</td>
+    </tr>
+    %}
+  </tbody>
+</table>:%}
+
 </body>
 </html>
 

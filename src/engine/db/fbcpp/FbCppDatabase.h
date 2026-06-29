@@ -68,6 +68,7 @@ public:
     virtual void getStatistics(int* fetch, int* mark, int* read, int* write, int* mem) override;
     virtual void getCounts(int* ins, int* upd, int* del, int* ridx, int* rseq) override;
     virtual void getDetailedCounts(std::map<int, CountInfo>& counts) override;
+    virtual void getCompiledStatementInfo(std::vector<CompiledStatementInfo>& statements) override;
 
     virtual IBlobPtr createBlob(ITransactionPtr tr) override;
 

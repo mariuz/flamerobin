@@ -94,6 +94,14 @@ struct TransactionInfo
     bool wait;
 };
 
+struct CompiledStatementInfo
+{
+    int64_t id;
+    std::string sqlText;
+    int cacheHit;
+    int cacheMiss;
+};
+
 struct DatabaseInfoData
 {
     int ods;

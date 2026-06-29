@@ -2460,6 +2460,15 @@ void Database::getConnectedUsers(wxArrayString& users) const
     }
 }
 
+void Database::getCompiledStatementInfo(std::vector<fr::CompiledStatementInfo>& statements) const
+{
+    statements.clear();
+    if (databaseDAL_M && databaseDAL_M->isConnected())
+    {
+        databaseDAL_M->getCompiledStatementInfo(statements);
+    }
+}
+
 int Database::getLinger() const
 {
     return lingerM;

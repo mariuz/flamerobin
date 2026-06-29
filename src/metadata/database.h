@@ -401,6 +401,7 @@ public:
     int getODSMinor() const;
 
     void getConnectedUsers(wxArrayString& users) const;
+    void getCompiledStatementInfo(std::vector<fr::CompiledStatementInfo>& statements) const;
     int getLinger() const; // ODS:12
     wxString getSqlSecurity(); // ODS:13
 

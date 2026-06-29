@@ -52,6 +52,8 @@
 #include "metadata/view.h"
 #include "metadata/package.h"
 #include "metadata/TransactionInfoObject.h"
+#include "metadata/CompiledStatementInfoObject.h"
+#include "config/Config.h"
 #include "firebird/constants.h"
 
 
@@ -498,6 +500,23 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
                     cmdParams.from(2), &tio);
             }
         }
+        // {%foreach:compiled_statement:<separator>:<text>%}
+        else if (cmdParams[0] == "compiled_statement")
+        {
+            Database* db = dynamic_cast<Database*>(object);
+            if (!db)
+                return;
+
+            std::vector<fr::CompiledStatementInfo> statements;
+            db->getCompiledStatementInfo(statements);
+            bool firstItem = true;
+            for (const auto& info : statements)
+            {
+                CompiledStatementInfoObject csio(info);
+                Local::foreachIteration(firstItem, tp, processedText, sep,
+                    cmdParams.from(2), &csio);
+            }
+        }
         // add more collections here.
         else
             return;
@@ -519,6 +538,33 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             processedText += getBooleanAsString(info.readOnly);
         else if (cmdParams[0] == "wait")
             processedText += getBooleanAsString(info.wait);
+    }
+    // {%compiledstatementinfo:<property>%}
+    else if (cmdName == "compiledstatementinfo" && !cmdParams.IsEmpty())
+    {
+        CompiledStatementInfoObject* csio = dynamic_cast<CompiledStatementInfoObject*>(object);
+        if (!csio)
+            return;
+
+        const fr::CompiledStatementInfo& info = csio->getInfo();
+        if (cmdParams[0] == "id")
+            processedText += wxString::Format("%lld", (long long)info.id);
+        else if (cmdParams[0] == "sql_text")
+            processedText += wxString(info.sqlText.c_str(), wxConvUTF8);
+        else if (cmdParams[0] == "sql_text_short")
+        {
+            wxString sql(info.sqlText.c_str(), wxConvUTF8);
+            sql.Replace("\n", " ");
+            sql.Replace("\r", " ");
+            sql.Replace("\t", " ");
+            if (sql.Length() > 80)
+                sql = sql.Left(77) + "...";
+            processedText += sql;
+        }
+        else if (cmdParams[0] == "cache_hit")
+            processedText += wxString::Format("%d", info.cacheHit);
+        else if (cmdParams[0] == "cache_miss")
+            processedText += wxString::Format("%d", info.cacheMiss);
     }
 
     // {%owner_name%}
@@ -990,6 +1036,50 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             processedText += wxString() << db->getLinger();
         else if (cmdParams[0] == "sql_security")
             processedText += wxString() << db->getSqlSecurity();
+        else if (cmdParams[0] == "show_compiled_statement_cache")
+        {
+            bool show = config().get("ShowCompiledStatementCache", false)
+                && db->getInfo().getODSVersionIsHigherOrEqualTo(13, 1);
+            processedText += getBooleanAsString(show);
+        }
+        else if (cmdParams[0] == "compiled_statement_cache_hits")
+        {
+            std::vector<fr::CompiledStatementInfo> statements;
+            db->getCompiledStatementInfo(statements);
+            int64_t totalHits = 0;
+            for (const auto& info : statements)
+                totalHits += info.cacheHit;
+            processedText += wxString::Format("%lld", (long long)totalHits);
+        }
+        else if (cmdParams[0] == "compiled_statement_cache_misses")
+        {
+            std::vector<fr::CompiledStatementInfo> statements;
+            db->getCompiledStatementInfo(statements);
+            int64_t totalMisses = 0;
+            for (const auto& info : statements)
+                totalMisses += info.cacheMiss;
+            processedText += wxString::Format("%lld", (long long)totalMisses);
+        }
+        else if (cmdParams[0] == "compiled_statement_cache_ratio")
+        {
+            std::vector<fr::CompiledStatementInfo> statements;
+            db->getCompiledStatementInfo(statements);
+            int64_t totalHits = 0;
+            int64_t totalMisses = 0;
+            for (const auto& info : statements)
+            {
+                totalHits += info.cacheHit;
+                totalMisses += info.cacheMiss;
+            }
+            int64_t total = totalHits + totalMisses;
+            if (total == 0)
+                processedText += "N/A";
+            else
+            {
+                double ratio = (double)totalHits / total * 100.0;
+                processedText += wxString::Format("%0.1f%%", ratio);
+            }
+        }
     }
 
     // {%publicationinfo:<property>%}
