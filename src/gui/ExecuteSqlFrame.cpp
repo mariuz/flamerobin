@@ -505,19 +505,12 @@ void SqlEditor::setFont()
 
 void SqlEditor::setupStyles()
 {
-    // 1) Set STYLE_DEFAULT (fg/bg) from the theme.
-    stylerManager().assignGlobal(this);
-    // 2) Propagate STYLE_DEFAULT to every token ID (fixes unspecified tokens
-    //    like identifiers that would otherwise inherit system dark defaults).
-    StyleClearAll();
-    // 3) Re-apply global styles that StyleClearAll just wiped (brace highlight, etc.).
-    stylerManager().assignGlobal(this);
-    stylerManager().assignLexer(this);
     SetLexer(wxSTC_LEX_SQL);
+    stylerManager().assignGlobal(this);   // sets slot 32, then StyleClearAll → all slots = theme bg
+    stylerManager().assignLexer(this);    // overrides SQL token slots with theme colors
     stylerManager().assignMargin(this);
     setKeywords(-1, -1);
     setChars(false);
-
 }
 
 class ScrollAtEnd
@@ -607,8 +600,6 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
         wxDefaultPosition, wxDefaultSize, wxBORDER_THEME);
     stylerManager().attachObserver(this, false);
     stylerManager().assignGlobal(styled_text_ctrl_stats);
-
-    styled_text_ctrl_stats->StyleClearAll();
     styled_text_ctrl_stats->SetWrapMode(wxSTC_WRAP_WORD);
     
     {
@@ -2410,13 +2401,9 @@ bool ExecuteSqlFrame::setSql(wxString sql)
 
 void ExecuteSqlFrame::setupStyles()
 {
-    stylerManager().loadConfig();
-
     styled_text_ctrl_sql->setupStyles();
 
     stylerManager().assignGlobal(styled_text_ctrl_stats);
-
-    styled_text_ctrl_stats->StyleClearAll();
     styled_text_ctrl_stats->SetWrapMode(wxSTC_WRAP_WORD);
     
     {

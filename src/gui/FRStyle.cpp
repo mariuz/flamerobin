@@ -62,6 +62,8 @@ FRStyle::FRStyle(const FRStyle& style)
     fgColorM = style.fgColorM;
     bgColorM = style.bgColorM;
     colorStyleM = style.colorStyleM;
+    fgColorSetM = style.fgColorSetM;
+    bgColorSetM = style.bgColorSetM;
     
     isFontEnabledM = style.isFontEnabledM;
     fontNameM = style.fontNameM;
@@ -87,6 +89,8 @@ FRStyle& FRStyle::operator=(const FRStyle& style)
     fgColorM = style.fgColorM;
     bgColorM = style.bgColorM;
     colorStyleM = style.colorStyleM;
+    fgColorSetM = style.fgColorSetM;
+    bgColorSetM = style.bgColorSetM;
 
     isFontEnabledM = style.isFontEnabledM;
     fontNameM = style.fontNameM;

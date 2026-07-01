@@ -73,6 +73,8 @@ protected:
     wxColour fgColorM;
     wxColour bgColorM;
     int colorStyleM;
+    bool fgColorSetM = false;
+    bool bgColorSetM = false;
 
     bool isFontEnabledM;
     wxString fontNameM;
@@ -104,10 +106,12 @@ public:
 
 
     wxColour getfgColor() { return fgColorM; };
-    void setfgColor(wxColour color) { fgColorM = color; };
-    
+    void setfgColor(wxColour color) { fgColorM = color; fgColorSetM = true; };
+    bool hasFgColor() const { return fgColorSetM; };
+
     wxColour getbgColor() { return bgColorM; };
-    void setbgColor(wxColour color) { bgColorM = color; };
+    void setbgColor(wxColour color) { bgColorM = color; bgColorSetM = true; };
+    bool hasBgColor() const { return bgColorSetM; };
     
     int getColorStyle() { return colorStyleM; };
     void setColorStyle(int color) { colorStyleM = color; };

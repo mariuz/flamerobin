@@ -83,13 +83,10 @@ void FRStyleManager::loadGlobalStyles(wxXmlNode* node)
 
 void FRStyleManager::assignWordStyle(wxStyledTextCtrl* text, FRStyle* style)
 {
-    //if (style->getbgColour() & COLORSTYLE_BACKGROUND){
-    text->StyleSetBackground(style->getStyleID(), style->getbgColor());
-    //}
-
-    //if (style->getfgColour() & COLORSTYLE_FOREGROUND) {
-    text->StyleSetForeground(style->getStyleID(), style->getfgColor());
-    //}
+    if (style->hasBgColor())
+        text->StyleSetBackground(style->getStyleID(), style->getbgColor());
+    if (style->hasFgColor())
+        text->StyleSetForeground(style->getStyleID(), style->getfgColor());
 
 
     text->StyleSetCase(style->getStyleID(), style->getCaseVisible());
@@ -193,12 +190,9 @@ void FRStyleManager::assignGlobal(wxStyledTextCtrl* text)
         assignWordStyle(text, style);
         //}
         if (style->getStyleDesc() == "Global override") {
-            //globalStyleM = style;
             globalOverrideStyle = style;
-            text->StyleResetDefault();
             text->SetBackgroundColour(style->getbgColor());
             text->SetForegroundColour(style->getfgColor());
-
             assignWordStyle(text, style);
         }
         if (style->getStyleDesc() == "Default Style") {
