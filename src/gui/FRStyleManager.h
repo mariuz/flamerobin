@@ -97,6 +97,12 @@ public:
     void loadStyle();
     void saveStyle();
 
+    ///
+    /// Returns true when the effective theme is dark, honouring the user's
+    /// darkMode preference (ThemeLight / ThemeDark / ThemeSystem).
+    ///
+    static bool isEffectivelyDark();
+
 };
 
 FRStyleManager& stylerManager();

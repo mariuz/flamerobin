@@ -345,19 +345,18 @@ void FRStyleManager::assignMargin(wxStyledTextCtrl* text)
 
 }
 
+/*static*/
+bool FRStyleManager::isEffectivelyDark()
+{
+    int theme = config().get(_DARKMODE_KEY, (int)ThemeSystem);
+    if (theme == ThemeDark) return true;
+    if (theme == ThemeLight) return false;
+    return wxSystemSettings::GetAppearance().IsDark();
+}
+
 void FRStyleManager::loadConfig()
 {
-    // If no theme has been picked yet, fall back to the dark-mode default
-    // when the system is in dark mode (or forced by user) so the SQL editor 
-    // and data grid don't render as a bright white panel inside an 
-    // otherwise dark window. The user's explicit Preferences choice still wins.
-    
-    bool useDark = false;
-    int theme = config().get(_DARKMODE_KEY, (int)ThemeSystem);
-    if (theme == ThemeDark)
-        useDark = true;
-    else if (theme == ThemeSystem && wxSystemSettings::GetAppearance().IsDark())
-        useDark = true;
+    bool useDark = isEffectivelyDark();
 
     const wxString systemDefault = useDark ? _DARKMODEDEFAULT : _default;
 

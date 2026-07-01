@@ -623,7 +623,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
         }
         else
         {
-            isDark = wxSystemSettings::GetAppearance().IsDark();
+            isDark = FRStyleManager::isEffectivelyDark();
         }
 
         if (isDark)
@@ -637,7 +637,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
             styled_text_ctrl_stats->StyleSetForeground(2, *wxBLUE);
         }
     }
-    
+
     notebook_1->AddPage(notebook_pane_1, _("Statistics"));
 
     notebook_pane_2 = new wxPanel(notebook_1, -1);
@@ -2431,7 +2431,7 @@ void ExecuteSqlFrame::setupStyles()
         }
         else
         {
-            isDark = wxSystemSettings::GetAppearance().IsDark();
+            isDark = FRStyleManager::isEffectivelyDark();
         }
 
         if (isDark)

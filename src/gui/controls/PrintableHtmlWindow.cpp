@@ -43,6 +43,7 @@
 #include "core/URIProcessor.h"
 #include "core/FRError.h"
 #include "config/Config.h"
+#include "gui/FRStyleManager.h"
 #include "gui/controls/PrintableHtmlWindow.h"
 
 enum {
@@ -179,7 +180,7 @@ void PrintableHtmlWindow::setPageSource(const wxString& html)
         processedHtml.Replace(templatesPathForward, fileUrl);
 
         // Construct and inject a modern, responsive CSS stylesheet
-        bool isDark = wxSystemSettings::GetAppearance().IsDark();
+        bool isDark = FRStyleManager::isEffectivelyDark();
         wxString bgColor = isDark ? "#1e1e1e" : "#ffffff";
         wxString textColor = isDark ? "#e0e0e0" : "#2d3748";
         wxString borderColor = isDark ? "#3d3d3d" : "#e2e8f0";
