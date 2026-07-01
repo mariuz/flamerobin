@@ -8,6 +8,51 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.7.1</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Dark Mode & Theme Fixes</B></font><br>
+<br>
+- <b>SQL Editor Unreadable in Dark Mode Fix (#615)</b>: Fixed four root causes that made the SQL editor unreadable when using a dark theme.
+  (1) <code>assignWordStyle()</code> was unconditionally applying background/foreground colours from XML style entries even when no colour attribute was present, allowing a white sentinel value to contaminate every style slot — guarded by new <code>hasBgColor()</code>/<code>hasFgColor()</code> flags.
+  (2) <code>assignGlobal()</code> called <code>StyleResetDefault()</code> mid-loop which temporarily reset Scintilla slot 32 to system-light defaults — removed the call.
+  (3) <code>SqlEditor::setupStyles()</code> called <code>assignGlobal()</code> twice and <code>StyleClearAll()</code> between them out of order — corrected to: <code>SetLexer</code> first, then <code>assignGlobal</code> (which ends with <code>StyleClearAll</code>), then <code>assignLexer</code>, then <code>assignMargin</code>.
+  (4) <code>ExecuteSqlFrame::setupStyles()</code> called <code>stylerManager().loadConfig()</code> which was a no-op for in-memory styles and risked infinite observer recursion — removed the redundant call.<br>
+- <b>Light Theme Ignored When System Is in Dark Mode Fix (#633)</b>: Added <code>FRStyleManager::isEffectivelyDark()</code> which honours the user's explicit theme preference (<code>ThemeLight=1</code> / <code>ThemeDark=2</code> / <code>ThemeSystem=0</code>) rather than querying <code>wxSystemSettings::GetAppearance().IsDark()</code> directly. Replaced all three direct appearance checks in <code>PrintableHtmlWindow.cpp</code> and <code>ExecuteSqlFrame.cpp</code> that bypassed the user's setting.<br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Service Manager Enhancements</B></font><br>
+<br>
+- <b>Implement Database Shutdown and Startup in FbCppService (Issue #639)</b>: Replaced stub implementations that previously raised <em>"not implemented yet"</em> errors with proper Firebird Service API calls using <code>isc_action_svc_properties</code>.
+  <code>shutdown()</code> builds an SPB (Service Parameter Buffer) with the correct shutdown mode flag (<code>Forced</code>, <code>DenyTransactions</code>, or <code>DenyAttachments</code>) and the specified timeout, then waits for service completion.
+  <code>startup()</code> brings a database back online using <code>isc_spb_prp_db_online</code>, matching the equivalent IBPP <code>Restart()</code> behaviour.<br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Firebird 5 Features</B></font><br>
+<br>
+- <b>Compiled Statement Cache Visibility</b>: Implemented display of the Firebird 5 Compiled Statement Cache statistics in the database properties view, giving DBAs direct visibility into the server-side compiled plan cache hit/miss metrics.<br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Query Statistics & Diagnostics</B></font><br>
+<br>
+- <b>Database Query Statistics and Counts for FbCpp Backend (Issue #638)</b>: Implemented full query execution statistics and row-count reporting in the <code>fb-cpp</code> backend, matching the diagnostics previously available only via the legacy IBPP backend. Users can now see per-query statistics (reads, writes, fetches, marks) and affected-row counts in the SQL editor results panel.<br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Developer Tools & Documentation</B></font><br>
+<br>
+- <b>Memory Diagnostics Support</b>: Added two optional CMake build flags for developer builds:
+  <code>ENABLE_ASAN=ON</code> enables AddressSanitizer (ASan) for runtime memory error detection (leaks, use-after-free, buffer overflows) on GCC/Clang.
+  <code>ENABLE_CRT_LEAK_CHECK=ON</code> enables the MSVC CRT debug heap leak checker on Windows.
+  A detailed leak detection guide was added to the developer documentation (<code>devdocs/</code>) covering best practices, tool comparisons, and platform-specific configuration.<br>
+<br><br>
+
+For more info please read commit history log<br>
+<br>
+<br>
+<br>
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.6.21</font><br>
 <br><br>
 
