@@ -11,6 +11,26 @@ http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issue
 <font size=+2>Changes in FlameRobin 26.7.1</font><br>
 <br><br>
 
+<font size=+1 color="#AA0000"><B>Default Light Theme Colour Redesign (#642)</B></font><br>
+<br>
+- <b>Readable Default Palette (fixes #642 "Hex-rated Crisis")</b>: Replaced the neon, low-contrast hex codes in <code>stylers.xml</code> with a calm, professional palette inspired by GitHub Light / VS Code Light+. All foreground colours meet WCAG AA contrast (≥4.5:1) on white.<br>
+  Key changes in the SQL lexer:<br>
+  &nbsp;&nbsp;• <b>Keywords</b> <code>SELECT / FROM / WHERE</code>: <code>0000FF</code> (harsh pure blue) → <code>0550AE</code> (deep blue-indigo, bold)<br>
+  &nbsp;&nbsp;• <b>Numbers</b>: <code>FF8000</code> (neon orange) → <code>0E7C5F</code> (calm teal-green)<br>
+  &nbsp;&nbsp;• <b>Strings</b>: <code>808080</code> (flat grey, low contrast) → <code>953800</code> (earthy sienna-brown)<br>
+  &nbsp;&nbsp;• <b>Secondary keywords / types</b>: <code>800080</code> (saturated magenta) → <code>6639BA</code> (muted purple-indigo)<br>
+  &nbsp;&nbsp;• <b>Operators</b>: <code>000080</code> (navy) → <code>393A34</code> (dark charcoal, bold)<br>
+  &nbsp;&nbsp;• <b>Comments</b>: <code>008000</code> (bright green) → <code>57606A</code> (slate grey)<br>
+  Global style improvements:<br>
+  &nbsp;&nbsp;• Default font changed from <code>Courier New</code> to <code>Consolas</code> (cleaner rendering)<br>
+  &nbsp;&nbsp;• Current-line highlight: <code>E8E8FF</code> → <code>F0F6FF</code> (subtler blue wash)<br>
+  &nbsp;&nbsp;• Selection colour: <code>C0C0C0</code> (flat silver) → <code>BDD7F5</code> (soft sky blue)<br>
+  &nbsp;&nbsp;• Caret: <code>8000FF</code> (neon violet) → <code>0550AE</code> (deep blue)<br>
+  &nbsp;&nbsp;• Fold markers, indent guides, whitespace dots all softened to harmonious greys<br>
+  &nbsp;&nbsp;• All mark/highlight styles replaced with accessible, pastel variants<br>
+  &nbsp;&nbsp;• Diff lexer: DELETED now shows on a pale-red tint, ADDED on a pale-green tint<br>
+<br><br>
+
 <font size=+1 color="#AA0000"><B>Dark Mode & Theme Fixes</B></font><br>
 <br>
 - <b>SQL Editor Unreadable in Dark Mode Fix (#615)</b>: Fixed four root causes that made the SQL editor unreadable when using a dark theme.
