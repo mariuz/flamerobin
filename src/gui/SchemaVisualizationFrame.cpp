@@ -33,6 +33,7 @@
 #include "config/Config.h"
 #include "core/ArtProvider.h"
 #include "gui/controls/PrintableHtmlWindow.h"
+#include "gui/FRStyleManager.h"
 #include "gui/SchemaVisualizationFrame.h"
 #include "gui/SchemaHtmlGenerator.h"
 #include "metadata/table.h"
@@ -56,16 +57,8 @@ static wxString getDatabaseSchemaAsJson(Database* db)
     wxString json = "{\n";
     json += "  \"databaseName\": \"" + escapeJsonString(db->getName_()) + "\",\n";
 
-    // Resolve theme setting
-    bool isDark = false;
-    int activeStyle = 0;
-    config().getValue("StyleActive", activeStyle);
-    if (activeStyle == 1) // ThemeLight
-        isDark = false;
-    else if (activeStyle == 2) // ThemeDark
-        isDark = true;
-    else // ThemeSystem (0)
-        isDark = wxSystemSettings::GetAppearance().IsDark();
+    // Honour the user's explicit theme preference (fixes #633)
+    bool isDark = FRStyleManager::isEffectivelyDark();
 
     json += wxString::Format("  \"isDark\": %s,\n", isDark ? "true" : "false");
     json += "  \"tables\": [\n";
