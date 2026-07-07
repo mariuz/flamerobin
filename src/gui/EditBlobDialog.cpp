@@ -45,6 +45,7 @@
 #include "engine/db/IBlob.h"
 #include "gui/EditBlobDialog.h"
 #include "gui/FRLayoutConfig.h"
+#include "gui/FRStyleManager.h"
 #include "gui/StyleGuide.h"
 
 // Static members
@@ -951,6 +952,8 @@ void EditBlobDialog::do_layout()
         wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL,
         false);
     blob_text->StyleSetFont(0, fTxt);
+    // Apply the active theme to the blob text editor (fixes dark-mode gap, #615)
+    stylerManager().assignGlobal(blob_text);
     // numbering on text should be usefull
     blob_text->SetMarginType(0, wxSTC_MARGIN_NUMBER);
     blob_text->SetMarginWidth(0, marginCharWidth * 5);
@@ -1299,8 +1302,14 @@ void EditBlobDialog::blob_textSetReadonly(bool readonly)
     }
     else
     {
-        blob_text->StyleSetBackground(0, "WHITE");
-        blob_text->StyleResetDefault();
+        // Restore the theme background instead of hard-coding white (fixes dark-mode gap, #615)
+        FRStyle* globalStyle = stylerManager().getGlobalStyle();
+        wxColour bg = globalStyle ? globalStyle->getbgColor() : *wxWHITE;
+        blob_text->StyleSetBackground(0, bg);
+        blob_text->StyleSetBackground(wxSTC_STYLE_DEFAULT, bg);
+        // Re-apply full theme colours — do NOT call StyleResetDefault() which
+        // wipes them back to Scintilla's hard-coded light defaults.
+        stylerManager().assignGlobal(blob_text);
     }
     blob_text->SetReadOnly(readonly);
 }
