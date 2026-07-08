@@ -8,6 +8,22 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.7.3</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Database Connection & Menu Fixes</B></font><br>
+<br>
+- <b>Reconnect Menu Enablement (#636)</b>: Fixed an issue where a database connection loss left the database in a disconnected state (where <code>isConnected()</code> returned false), causing the Reconnect menu item to be disabled because it was gated by the connected-only check. Clicking the Database menu in this state triggered other connected-database handlers, causing an "Error writing data to the connection" popup. The Reconnect menu item's UI update handler is now bound to the appropriate disconnected state check, ensuring it remains enabled so users can reconnect smoothly.<br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Theme & Appearance Improvements</B></font><br>
+<br>
+- <b>Windows 11 Light Theme Fix (#643)</b>: Fixed a bug on Windows 11 where the Light theme preference was ignored when the operating system was configured for Dark mode. The application initialization now correctly respects explicit light appearance settings and avoids enabling dark mode when the light theme is selected by the user.<br>
+<br><br>
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.7.1</font><br>
 <br><br>
 
