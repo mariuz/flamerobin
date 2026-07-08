@@ -206,15 +206,20 @@ bool Application::OnInit()
 #if wxCHECK_VERSION(3, 3, 0)
     int theme = config().get(FRStyleManager::_DARKMODE_KEY, (int)FRStyleManager::ThemeSystem);
     if (theme == FRStyleManager::ThemeLight)
+    {
         SetAppearance(wxApp::Appearance::Light);
-    else if (theme == FRStyleManager::ThemeDark)
-        SetAppearance(wxApp::Appearance::Dark);
-    else if (theme == FRStyleManager::ThemeSystem)
-        SetAppearance(wxApp::Appearance::System);
+    }
+    else
+    {
+        if (theme == FRStyleManager::ThemeDark)
+            SetAppearance(wxApp::Appearance::Dark);
+        else if (theme == FRStyleManager::ThemeSystem)
+            SetAppearance(wxApp::Appearance::System);
 
 #ifdef __WXMSW__
-    MSWEnableDarkMode();
+        MSWEnableDarkMode();
 #endif
+    }
 #endif
 
 #if defined(__WXOSX_COCOA__)
