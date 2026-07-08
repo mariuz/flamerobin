@@ -442,6 +442,7 @@ EVT_MENU(Cmds::Menu_Disconnect, MainFrame::OnMenuDisconnect)
 EVT_UPDATE_UI(Cmds::Menu_Disconnect, MainFrame::OnMenuUpdateIfDatabaseConnected)
 EVT_MENU(Cmds::Menu_Reconnect, MainFrame::OnMenuReconnect)
 EVT_UPDATE_UI(Cmds::Menu_Reconnect, MainFrame::OnMenuUpdateIfDatabaseSelected)
+
 EVT_MENU(Cmds::Menu_RecreateDatabase, MainFrame::OnMenuRecreateDatabase)
 EVT_UPDATE_UI(Cmds::Menu_RecreateDatabase, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
 EVT_MENU(Cmds::Menu_DropDatabase, MainFrame::OnMenuDropDatabase)
