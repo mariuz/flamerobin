@@ -99,7 +99,7 @@ wxString SqlFormatter::format(const wxString& sql, int odsMajor, int odsMinor)
     auto indent = [&]() {
         if (startOfLine)
         {
-            formattedSql += wxString(L' ', indentSpaces * indentLevel);
+            formattedSql += wxString(L' ', static_cast<size_t>(indentSpaces) * static_cast<size_t>(indentLevel));
             startOfLine = false;
         }
     };
