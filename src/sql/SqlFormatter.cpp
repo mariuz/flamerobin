@@ -68,7 +68,7 @@ bool isOperatorToken(SqlTokenType type, const wxString& text)
 /*static*/
 wxString SqlFormatter::format(const wxString& sql, int odsMajor, int odsMinor)
 {
-    int indentSpaces = config().get("FormatterIndentSpaces", 4);
+    int indentSpaces = std::max(0, config().get("FormatterIndentSpaces", 4));
     int keywordCase = config().get("FormatterKeywordCase", 0);
     bool oneColumnPerLine = config().get("FormatterOneColumnPerLine", true);
 
