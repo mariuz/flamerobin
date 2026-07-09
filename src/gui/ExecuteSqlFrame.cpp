@@ -572,7 +572,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     if (db->getIsVolative())
         prepareVolatileDatabase();
 
-    transactionIsolationLevelM = static_cast<fr::TransactionIsolationLevel>(config().get("transactionIsolationLevel", 3));
+    transactionIsolationLevelM = static_cast<fr::TransactionIsolationLevel>(config().get("transactionIsolationLevel", 1));
     transactionLockResolutionM = config().get("transactionLockResolution", true) ? fr::TransactionLockResolution::Wait : fr::TransactionLockResolution::NoWait;
     transactionAccessModeM = config().get("transactionAccessMode", false) ? fr::TransactionAccessMode::Read : fr::TransactionAccessMode::Write;
     showStatisticsM = config().get("SQLEditorShowStats", true);
