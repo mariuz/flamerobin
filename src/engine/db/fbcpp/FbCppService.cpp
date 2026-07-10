@@ -26,8 +26,9 @@
 #include <cstdio>
 #include <chrono>
 #include <thread>
+#include <fb-cpp/BackupManager.h>
+#include <fb-cpp/DatabaseManager.h>
 #include <fb-cpp/Exception.h>
-#include <firebird/Interface.h>
 #if FB_CPP_USE_BOOST_DLL != 0
 #include <boost/dll.hpp>
 #endif
@@ -226,7 +227,54 @@ void FbCppService::restore(const RestoreConfig& config)
 
 void FbCppService::maintain(const MaintenanceConfig& config)
 {
-    throw std::runtime_error("Maintenance not implemented yet in FbCppService");
+    if (!clientM)
+        connect();
+
+    runService([this, config]() {
+        try
+        {
+            pushLine("Running maintenance on " + config.dbPath + "...");
+
+            auto svcOptions = fbcpp::ServiceManagerOptions()
+                .setServer(connStrM)
+                .setUserName(userM)
+                .setPassword(passwordM);
+            if (!roleM.empty())
+                svcOptions.setRole(roleM);
+
+            auto repairOptions = fbcpp::DatabaseRepairOptions()
+                .setDatabase(config.dbPath)
+                .setVerboseOutput([this](std::string_view line) { pushLine(line); });
+
+            if ((int)config.flags & (int)MaintenanceFlags::Sweep)
+                repairOptions.setSweep(true);
+            if ((int)config.flags & (int)MaintenanceFlags::Validate)
+                repairOptions.setValidate(true);
+            if ((int)config.flags & (int)MaintenanceFlags::Mend)
+                repairOptions.setMend(true);
+            if ((int)config.flags & (int)MaintenanceFlags::IgnoreChecksums)
+                repairOptions.setIgnoreChecksum(true);
+            if ((int)config.flags & (int)MaintenanceFlags::KillShadows)
+                repairOptions.setKillShadows(true);
+            if ((int)config.flags & (int)MaintenanceFlags::Full)
+                repairOptions.setFull(true);
+            if ((int)config.flags & (int)MaintenanceFlags::UpgradeODS)
+                repairOptions.setUpgradeDb(true);
+
+            if (config.parallel > 0)
+                repairOptions.setParallelWorkers(static_cast<uint32_t>(config.parallel));
+
+            fbcpp::DatabaseManager manager(*clientM, svcOptions);
+            manager.repair(repairOptions);
+
+            pushLine("Maintenance done.");
+        }
+        catch (const std::exception& e)
+        {
+            pushLine(std::string("Error during maintenance: ") + e.what());
+        }
+        pushLine(""); // EOF marker
+    });
 }
 
 void FbCppService::setReplicaMode(const std::string& dbPath, int mode)
@@ -239,42 +287,29 @@ void FbCppService::setReplicaMode(const std::string& dbPath, int mode)
         {
             pushLine("Setting replica mode for " + dbPath + "...");
 
-            // Access low-level Firebird API via fb-cpp
-            Firebird::IMaster* master = clientM->getMaster();
-            Firebird::IUtil* utl = clientM->getUtil();
-            auto svc = serviceM->getHandle();
+            auto svcOptions = fbcpp::ServiceManagerOptions()
+                .setServer(connStrM)
+                .setUserName(userM)
+                .setPassword(passwordM);
+            if (!roleM.empty())
+                svcOptions.setRole(roleM);
 
-            // Create a StatusWrapper for error handling
-            fbcpp::impl::StatusWrapper status(*clientM);
-
-            // Construct the Service Parameter Block (SPB) for the action
-            // Kind 3 is IXpbBuilder::SPB_START
-            Firebird::IXpbBuilder* spb = utl->getXpbBuilder(&status, 3, nullptr, 0);
-            if (status.isDirty())
-                fbcpp::impl::StatusWrapper::checkException(&status);
-
-            try
+            fbcpp::ReplicaMode fbMode;
+            switch (mode)
             {
-                spb->insertTag(&status, isc_action_svc_properties);
-                spb->insertString(&status, isc_spb_dbname, dbPath.c_str());
-                spb->insertInt(&status, isc_spb_prp_replica_mode, mode);
-
-                if (status.isDirty())
-                    fbcpp::impl::StatusWrapper::checkException(&status);
-
-                // Start the service action
-                svc->start(&status, spb->getBufferLength(&status), spb->getBuffer(&status));
-                if (status.isDirty())
-                    fbcpp::impl::StatusWrapper::checkException(&status);
-
-                pushLine("Replica mode successfully set to " + std::to_string(mode));
+                case 1:  fbMode = fbcpp::ReplicaMode::READ_ONLY;  break;
+                case 2:  fbMode = fbcpp::ReplicaMode::READ_WRITE; break;
+                default: fbMode = fbcpp::ReplicaMode::NONE;       break;
             }
-            catch (...)
-            {
-                spb->dispose();
-                throw;
-            }
-            spb->dispose();
+
+            auto propOptions = fbcpp::DatabasePropertiesOptions()
+                .setDatabase(dbPath)
+                .setReplicaMode(fbMode);
+
+            fbcpp::DatabaseManager manager(*clientM, svcOptions);
+            manager.setProperties(propOptions);
+
+            pushLine("Replica mode successfully set to " + std::to_string(mode));
         }
         catch (const std::exception& e)
         {
@@ -294,58 +329,37 @@ void FbCppService::shutdown(const ShutdownConfig& config)
         {
             pushLine("Shutting down database " + config.dbPath + "...");
 
-            Firebird::IUtil* utl = clientM->getUtil();
-            fbcpp::impl::StatusWrapper status(*clientM);
-
             auto svcOptions = fbcpp::ServiceManagerOptions()
                 .setServer(connStrM)
                 .setUserName(userM)
                 .setPassword(passwordM);
             if (!roleM.empty())
                 svcOptions.setRole(roleM);
-            fbcpp::ServiceManager svcMgr(*clientM, svcOptions);
-            auto svc = svcMgr.getHandle();
 
-            Firebird::IXpbBuilder* spb = utl->getXpbBuilder(&status, Firebird::IXpbBuilder::SPB_START, nullptr, 0);
-            if (status.isDirty())
-                fbcpp::impl::StatusWrapper::checkException(&status);
-
-            try
+            fbcpp::ShutdownType fbShutdownType;
+            switch (config.mode)
             {
-                spb->insertTag(&status, isc_action_svc_properties);
-                spb->insertString(&status, isc_spb_dbname, config.dbPath.c_str());
-
-                switch (config.mode)
-                {
-                    case ShutdownMode::DenyTransactions:
-                        spb->insertInt(&status, isc_spb_prp_deny_new_transactions, config.timeout);
-                        break;
-                    case ShutdownMode::DenyAttachments:
-                        spb->insertInt(&status, isc_spb_prp_deny_new_attachments, config.timeout);
-                        break;
-                    case ShutdownMode::Forced:
-                    default:
-                        spb->insertInt(&status, isc_spb_prp_force_shutdown, config.timeout);
-                        break;
-                }
-
-                if (status.isDirty())
-                    fbcpp::impl::StatusWrapper::checkException(&status);
-
-                svc->start(&status, spb->getBufferLength(&status), spb->getBuffer(&status));
-                if (status.isDirty())
-                    fbcpp::impl::StatusWrapper::checkException(&status);
-
-                waitService(svc.get(), &status);
-
-                pushLine("Shutdown done.");
+                case ShutdownMode::DenyTransactions:
+                    fbShutdownType = fbcpp::ShutdownType::DENY_TRANSACTIONS;
+                    break;
+                case ShutdownMode::DenyAttachments:
+                    fbShutdownType = fbcpp::ShutdownType::DENY_ATTACHMENTS;
+                    break;
+                case ShutdownMode::Forced:
+                default:
+                    fbShutdownType = fbcpp::ShutdownType::FORCED;
+                    break;
             }
-            catch (...)
-            {
-                spb->dispose();
-                throw;
-            }
-            spb->dispose();
+
+            auto propOptions = fbcpp::DatabasePropertiesOptions()
+                .setDatabase(config.dbPath)
+                .setShutdownType(fbShutdownType)
+                .setShutdownTimeout(config.timeout);
+
+            fbcpp::DatabaseManager manager(*clientM, svcOptions);
+            manager.setProperties(propOptions);
+
+            pushLine("Shutdown done.");
         }
         catch (const std::exception& e)
         {
@@ -365,45 +379,21 @@ void FbCppService::startup(const std::string& dbPath)
         {
             pushLine("Starting up database " + dbPath + "...");
 
-            Firebird::IUtil* utl = clientM->getUtil();
-            fbcpp::impl::StatusWrapper status(*clientM);
-
             auto svcOptions = fbcpp::ServiceManagerOptions()
                 .setServer(connStrM)
                 .setUserName(userM)
                 .setPassword(passwordM);
             if (!roleM.empty())
                 svcOptions.setRole(roleM);
-            fbcpp::ServiceManager svcMgr(*clientM, svcOptions);
-            auto svc = svcMgr.getHandle();
 
-            Firebird::IXpbBuilder* spb = utl->getXpbBuilder(&status, Firebird::IXpbBuilder::SPB_START, nullptr, 0);
-            if (status.isDirty())
-                fbcpp::impl::StatusWrapper::checkException(&status);
+            auto propOptions = fbcpp::DatabasePropertiesOptions()
+                .setDatabase(dbPath)
+                .setOnline(true);
 
-            try
-            {
-                spb->insertTag(&status, isc_action_svc_properties);
-                spb->insertString(&status, isc_spb_dbname, dbPath.c_str());
-                spb->insertInt(&status, isc_spb_options, isc_spb_prp_db_online);
+            fbcpp::DatabaseManager manager(*clientM, svcOptions);
+            manager.setProperties(propOptions);
 
-                if (status.isDirty())
-                    fbcpp::impl::StatusWrapper::checkException(&status);
-
-                svc->start(&status, spb->getBufferLength(&status), spb->getBuffer(&status));
-                if (status.isDirty())
-                    fbcpp::impl::StatusWrapper::checkException(&status);
-
-                waitService(svc.get(), &status);
-
-                pushLine("Startup done.");
-            }
-            catch (...)
-            {
-                spb->dispose();
-                throw;
-            }
-            spb->dispose();
+            pushLine("Startup done.");
         }
         catch (const std::exception& e)
         {

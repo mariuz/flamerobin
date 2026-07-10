@@ -1,8 +1,24 @@
+From c196e72f9d90142b81d890fa89eaa1ad4907b719 Mon Sep 17 00:00:00 2001
+From: Popa Adrian Marius <mapopa@gmail.com>
+Date: Fri, 10 Jul 2026 16:07:37 +0000
+Subject: [PATCH] Apply flamerobin patches to upstream b5fec85
+
+---
+ src/fb-cpp/Attachment.h    | 10 ++++----
+ src/fb-cpp/BackupManager.h |  8 +++----
+ src/fb-cpp/Blob.h          | 12 +++++-----
+ src/fb-cpp/Statement.cpp   | 47 ++++++++++++++++++++++++++++++--------
+ src/fb-cpp/Statement.h     | 11 +++++----
+ src/fb-cpp/Transaction.cpp | 25 +++++++++++++++++++-
+ src/fb-cpp/Transaction.h   | 20 ++++++++++++----
+ vcpkg                      |  2 +-
+ 8 files changed, 100 insertions(+), 35 deletions(-)
+
 diff --git a/src/fb-cpp/Attachment.h b/src/fb-cpp/Attachment.h
-index 0f98a61..c45887c 100644
+index 128ed91..86c78aa 100644
 --- a/src/fb-cpp/Attachment.h
 +++ b/src/fb-cpp/Attachment.h
-@@ -45,7 +45,7 @@ namespace fbcpp
+@@ -50,7 +50,7 @@ namespace fbcpp
  	///
  	/// Represents options used when creating an Attachment object.
  	///
@@ -11,7 +27,7 @@ index 0f98a61..c45887c 100644
  	{
  	public:
  		///
-@@ -193,7 +193,7 @@ namespace fbcpp
+@@ -198,7 +198,7 @@ namespace fbcpp
  			return *this;
  		}
  
@@ -20,7 +36,7 @@ index 0f98a61..c45887c 100644
  		std::optional<std::string> connectionCharSet;
  		std::optional<std::string> userName;
  		std::optional<std::string> password;
-@@ -209,7 +209,7 @@ namespace fbcpp
+@@ -214,7 +214,7 @@ namespace fbcpp
  	/// The Attachment must exist and remain valid while there are other objects using it, such as Transaction and
  	/// Statement.
  	///
@@ -29,13 +45,14 @@ index 0f98a61..c45887c 100644
  	{
  	public:
  		///
-@@ -301,10 +301,10 @@ namespace fbcpp
- 		///
- 		void dropDatabase();
+@@ -400,11 +400,11 @@ namespace fbcpp
+ 		std::optional<T> queryFirstRowAs(
+ 			Transaction& transaction, std::string_view sql, const StatementOptions& options, const Params& params);
  
 -	private:
 +	protected:
  		void disconnectOrDrop(bool drop);
+ 		RowSet queryPreparedRowSet(Statement& statement, Transaction& transaction, unsigned maxRows);
  
 -	private:
 +	protected:
@@ -43,7 +60,7 @@ index 0f98a61..c45887c 100644
  		FbRef<fb::IAttachment> handle;
  	};
 diff --git a/src/fb-cpp/BackupManager.h b/src/fb-cpp/BackupManager.h
-index 137c3d9..9692e3e 100644
+index 89b3bb1..957d5cc 100644
 --- a/src/fb-cpp/BackupManager.h
 +++ b/src/fb-cpp/BackupManager.h
 @@ -81,7 +81,7 @@ namespace fbcpp
@@ -136,7 +153,7 @@ index 3464819..7dbdf73 100644
  		Transaction& transaction;
  		BlobId id;
 diff --git a/src/fb-cpp/Statement.cpp b/src/fb-cpp/Statement.cpp
-index 28564b1..9f63c40 100644
+index 6c9ac0c..959dc10 100644
 --- a/src/fb-cpp/Statement.cpp
 +++ b/src/fb-cpp/Statement.cpp
 @@ -31,6 +31,15 @@ using namespace fbcpp;
@@ -217,7 +234,7 @@ index 28564b1..9f63c40 100644
  
  				*reinterpret_cast<std::int16_t*>(&message[descriptor.nullOffset]) = FB_TRUE;
  			}
-@@ -185,28 +203,37 @@ void Statement::free()
+@@ -231,28 +249,37 @@ void Statement::free()
  {
  	assert(isValid());
  
@@ -261,28 +278,10 @@ index 28564b1..9f63c40 100644
  
  bool Statement::execute(Transaction& transaction)
 diff --git a/src/fb-cpp/Statement.h b/src/fb-cpp/Statement.h
-index 7ae32eb..91aa374 100644
+index 05faa8a..61c0458 100644
 --- a/src/fb-cpp/Statement.h
 +++ b/src/fb-cpp/Statement.h
-@@ -86,7 +86,7 @@ namespace fbcpp
- 	///
- 	/// Represents options used when preparing a Statement.
- 	///
--	class StatementOptions final
-+	class StatementOptions
- 	{
- 	public:
- 		///
-@@ -184,7 +184,7 @@ namespace fbcpp
- 			return *this;
- 		}
- 
--	private:
-+	protected:
- 		bool prefetchLegacyPlan = false;
- 		bool prefetchPlan = false;
- 		std::optional<std::string> cursorName;
-@@ -258,8 +258,10 @@ namespace fbcpp
+@@ -134,8 +134,10 @@ namespace fbcpp
  	///
  	/// Prepares, executes, and fetches SQL statements against a Firebird attachment.
  	///
@@ -294,7 +293,7 @@ index 7ae32eb..91aa374 100644
  	public:
  		///
  		/// Prepares an SQL statement.
-@@ -462,6 +464,7 @@ namespace fbcpp
+@@ -296,6 +298,7 @@ namespace fbcpp
  		/// @brief Releases the prepared handle and any associated result set.
  		///
  		void free();
@@ -302,7 +301,7 @@ index 7ae32eb..91aa374 100644
  
  		///
  		/// @brief Retrieves the textual legacy plan if the server produced one.
-@@ -1290,7 +1293,7 @@ namespace fbcpp
+@@ -1124,7 +1127,7 @@ namespace fbcpp
  #endif
  
  				case DescriptorAdjustedType::STRING:
@@ -311,7 +310,7 @@ index 7ae32eb..91aa374 100644
  					{
  						static constexpr std::intptr_t STATUS_STRING_TRUNCATION[] = {
  							isc_arith_except,
-@@ -2003,7 +2006,7 @@ namespace fbcpp
+@@ -1837,7 +1840,7 @@ namespace fbcpp
  				value);
  		}
  
@@ -320,9 +319,9 @@ index 7ae32eb..91aa374 100644
  		///
  		/// @brief Validates and returns the descriptor for the given input parameter index.
  		///
-@@ -2191,7 +2194,7 @@ namespace fbcpp
- 			}
- 		}
+@@ -2028,7 +2031,7 @@ namespace fbcpp
+ 	private:
+ 		Client& getClient() noexcept;
  
 -	private:
 +	protected:
@@ -439,3 +438,13 @@ index 66d4594..092a2c2 100644
  		Client& client;
  		FbRef<fb::ITransaction> handle;
  		TransactionState state = TransactionState::ACTIVE;
+diff --git a/vcpkg b/vcpkg
+index 522253c..8fbf295 160000
+--- a/vcpkg
++++ b/vcpkg
+@@ -1 +1 @@
+-Subproject commit 522253caf47268c1724f486a035e927a42a90092
++Subproject commit 8fbf295ab5283313932f65a597a2c1f09a73fafd
+-- 
+2.43.0
+
