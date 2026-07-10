@@ -438,13 +438,7 @@ index 66d4594..092a2c2 100644
  		Client& client;
  		FbRef<fb::ITransaction> handle;
  		TransactionState state = TransactionState::ACTIVE;
-diff --git a/vcpkg b/vcpkg
-index 522253c..8fbf295 160000
---- a/vcpkg
-+++ b/vcpkg
-@@ -1 +1 @@
--Subproject commit 522253caf47268c1724f486a035e927a42a90092
-+Subproject commit 8fbf295ab5283313932f65a597a2c1f09a73fafd
 -- 
 2.43.0
+
 
