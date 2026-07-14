@@ -43,7 +43,7 @@
             <WordsStyle name="OPERATOR"     styleID="10" fgColor="393A34" bgColor="FFFFFF" fontName="" fontStyle="1" fontSize="" caseVisible="0"/>
             <!-- Block comments: medium slate-green -->
             <WordsStyle name="COMMENT"      styleID="1"  fgColor="57606A" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
-            <!-- Line comments (--): same slate-green -->
+            <!-- Line comments (double hyphen): same slate-green -->
             <WordsStyle name="COMMENT LINE" styleID="2"  fgColor="57606A" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
             <!-- Doc comments: slightly warmer slate -->
             <WordsStyle name="COMMENT DOC"  styleID="3"  fgColor="57606A" bgColor="FFFFFF" fontName="" fontStyle="0" fontSize="" caseVisible="0"/>
