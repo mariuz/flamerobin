@@ -81,13 +81,13 @@ bool startCrashpad()
     wxFileName dbPath(wxStandardPaths::Get().GetUserLocalDataDir(), "");
     dbPath.AppendDir("crashes");
     if (!wxDirExists(dbPath.GetPath()))
-        wxMkdir(dbPath.GetPath());
+        wxFileName::Mkdir(dbPath.GetPath(), wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
     base::FilePath database(dbPath.GetPath().ToStdWstring());
 
     wxFileName metricsPath(wxStandardPaths::Get().GetUserLocalDataDir(), "");
     metricsPath.AppendDir("crashes_metrics");
     if (!wxDirExists(metricsPath.GetPath()))
-        wxMkdir(metricsPath.GetPath());
+        wxFileName::Mkdir(metricsPath.GetPath(), wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
     base::FilePath metrics(metricsPath.GetPath().ToStdWstring());
 
     std::string url = "";

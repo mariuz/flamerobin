@@ -68,7 +68,7 @@ wxFileConfig* Config::getConfig() const
     {
         wxFileName configFileName = getConfigFileName();
         if (!wxDirExists(configFileName.GetPath()))
-            wxMkdir(configFileName.GetPath());
+            wxFileName::Mkdir(configFileName.GetPath(), wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
         configM = new wxFileConfig("", "",
             configFileName.GetFullPath(), "", wxCONFIG_USE_LOCAL_FILE);
         configM->SetExpandEnvVars(false);

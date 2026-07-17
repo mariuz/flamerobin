@@ -273,7 +273,7 @@ bool Root::save()
     // create directory if it doesn't exist yet.
     wxString dir = wxPathOnly(getFileName());
     if (!wxDirExists(dir))
-        wxMkdir(dir);
+        wxFileName::Mkdir(dir, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 
     wxXmlDocument doc;
     wxXmlNode* rn = new wxXmlNode(wxXML_ELEMENT_NODE, "root");

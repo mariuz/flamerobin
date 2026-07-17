@@ -32,6 +32,7 @@
 
 #include <wx/ffile.h>
 #include <wx/filefn.h>
+#include <wx/filename.h>
 #include <map>
 
 #include "config/Config.h"
@@ -42,7 +43,7 @@ wxString StatementHistory::getFilename(StatementHistory::Position item)
 {
     wxString fn = config().getUserHomePath() + "history/";
     if (!wxDirExists(fn))
-        wxMkdir(fn);
+        wxFileName::Mkdir(fn, wxS_DIR_DEFAULT, wxPATH_MKDIR_FULL);
 
     for (Position i=0; i<storageNameM.Length(); ++i)
         fn += wxString::Format("%04x", storageNameM[i]);
