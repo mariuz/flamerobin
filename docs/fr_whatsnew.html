@@ -14,6 +14,7 @@ http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issue
 <font size=+1 color="#AA0000"><B>Directory & Configuration Fixes</B></font><br>
 <br>
 - <b>Recursive Directory Creation on First Run (#647)</b>: Fixed a critical startup error <code>crashes_metrics could not be created (error 3)</code> that occurred when running FlameRobin on a new system for the first time. The application now recursively creates all parent folders (e.g. <code>%AppData%\Local\flamerobin</code>) using <code>wxFileName::Mkdir</code> with the <code>wxPATH_MKDIR_FULL</code> flag. This also ensures that statement history, metadata registration, and XML styling directories can be created successfully without failing due to missing parent folders.<br>
+- <b>Classic Icons Staging Fix for Portable Releases</b>: Fixed a packaging bug in the GitHub Actions workflows (<code>release.yml</code> and <code>windows-build.yml</code>) where the <code>images/</code> assets directory (containing <code>svg/</code> and <code>svg_classic/</code> subdirectories) was omitted from the staging setup for portable ZIP packages. This omission caused the "Classic icons" preference setting to be ignored (falling back to modern embedded icons instead). The build workflow now correctly bundles the build's <code>images/</code> assets inside the portable ZIP package.<br>
 <br><br>
 
 <font size=+1 color="#AA0000"><B>Theme & XML Parsing Fixes</B></font><br>

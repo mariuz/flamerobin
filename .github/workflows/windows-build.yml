@@ -195,6 +195,11 @@ jobs:
             }
         }
         
+        # Copy images (icons)
+        $imagesDir = Join-Path $stagingDir "images"
+        New-Item -ItemType Directory -Path $imagesDir -Force
+        Copy-Item -Path "$buildDir\images\*" -Destination "$imagesDir\" -Recurse -Force
+        
         # Copy Firebird client DLLs and config
         Copy-Item -Path "$fbExtractDir\fbclient.dll" -Destination "$stagingDir\" -Force
         Copy-Item -Path "$fbExtractDir\ib_util.dll" -Destination "$stagingDir\" -Force
