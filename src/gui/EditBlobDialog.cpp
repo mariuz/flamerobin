@@ -79,6 +79,8 @@ EditBlobDialogSTC::EditBlobDialogSTC(wxWindow *parent, wxWindowID id)
     : wxStyledTextCtrl(parent, id, wxDefaultPosition, wxDefaultSize,
         wxBORDER_THEME), isNullM(false)
 {
+    stylerManager().assignGlobal(this);
+
     wxFont fontNull(frlayoutconfig().getEditorFontSize(),
         wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL,
         false);
