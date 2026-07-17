@@ -36,8 +36,8 @@
 #include "core/StringUtils.h"
 #include "frutils.h"
 #include "gui/HtmlHeaderMetadataItemVisitor.h"
-#include "metadata/metadataitem.h"
 #include "HtmlTemplateProcessor.h"
+#include "gui/FRStyleManager.h"
 
 
 class ProcessableObject;
@@ -105,12 +105,7 @@ wxString HtmlTemplateProcessor::escapeChars(const wxString& input, bool processN
 /*static*/
 void HtmlTemplateProcessor::applyDarkModeIfNeeded(wxString& html)
 {
-    bool useDark = false;
-    int theme = config().get("darkMode", 0);
-    if (theme == 2)
-        useDark = true;
-    else if (theme == 0 && wxSystemSettings::GetAppearance().IsDark())
-        useDark = true;
+    bool useDark = FRStyleManager::isEffectivelyDark();
 
     if (!useDark)
         return;

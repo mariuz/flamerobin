@@ -37,21 +37,20 @@
 
 #include "config/Config.h"
 #include "core/ArtProvider.h"
+#include "gui/FRStyleManager.h"
 
 #include "core/EmbeddedSVGs.h"
 
 wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
     const wxArtClient& client, const wxSize& size)
 {
-    wxBitmapBundle bundle = CreateBitmapBundle(id, client, size);
-    if (bundle.IsOk())
-        return bundle.GetBitmap(size);
-    return wxNullBitmap;
+    // Implementation is in CreateBitmapBundle
+    return CreateBitmapBundle(id, client, size).GetBitmap(size);
 }
 
 wxBitmapBundle ArtProvider::loadBitmapBundleFromFile(const wxArtID& id)
 {
-    wxString name(id.Lower());
+    wxString name = id;
     if (name.substr(0, 4) == "art_")
         name.erase(0, 4);
     else if (name.substr(0, 6) == "wxart_")
@@ -59,12 +58,7 @@ wxBitmapBundle ArtProvider::loadBitmapBundleFromFile(const wxArtID& id)
 
     bool useClassic = config().getClassicIcons();
     wxString folder = useClassic ? "svg_classic/" : "svg/";
-    bool isDarkMode = false;
-    int theme = config().get("darkMode", 0);
-    if (theme == 2)
-        isDarkMode = true;
-    else if (theme == 0 && wxSystemSettings::GetAppearance().IsDark())
-        isDarkMode = true;
+    bool isDarkMode = FRStyleManager::isEffectivelyDark();
 
     if (isDarkMode)
     {
@@ -127,7 +121,7 @@ wxBitmapBundle ArtProvider::CreateBitmapBundle(const wxArtID& id,
 
     // Special case for FlameRobin icon: pick light vs dark SVG variant.
     if (id == ART_FlameRobin) {
-        bool dark = wxSystemSettings::GetAppearance().IsDark();
+        bool dark = FRStyleManager::isEffectivelyDark();
         return fromSVG(dark ? svg_flamerobin_dark : svg_flamerobin);
     }
 
