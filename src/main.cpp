@@ -45,6 +45,7 @@
 #include "gui/FRStyleManager.h"
 #include "gui/MainFrame.h"
 #include "main.h"
+#include "frversion.h"
 #include "mcp/McpServer.h"
 
 //----------------------------------------------------------------------
@@ -95,7 +96,7 @@ bool startCrashpad()
     std::map<std::string, std::string> annotations;
     annotations["format"] = "minidump";
     annotations["prod"] = "FlameRobin";
-    annotations["ver"] = "26.6.21";
+    annotations["ver"] = std::to_string(FR_VERSION_MAJOR) + "." + std::to_string(FR_VERSION_MINOR) + "." + std::to_string(FR_VERSION_RLS);
 
     std::vector<std::string> arguments;
     arguments.push_back("--no-rate-limit");
