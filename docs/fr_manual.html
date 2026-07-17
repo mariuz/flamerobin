@@ -27,26 +27,14 @@
     of FlameRobin to be bundled with the Firebird server to serve as a
     starting kit for new users. This bundle may be distributed by the Firebird
     Project itself or by some third party.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="frrelnotes-who-we-are"></a>Who we are</h2></div></div></div><p>The home page of the FlameRobin project is located at <a href="http://www.flamerobin.org" target="_top">http://www.flamerobin.org</a>. The
-    project itself is hosted on <a href="http://sourceforge.net/projects/flamerobin" target="_top">SourceForge</a>.
-    Please use our mailing list (flamerobin-devel) to contact the developers.
-    Details and archives available <a href="http://sourceforge.net/mail/?group_id=124340" target="_top">here</a>. You are
-    also encouraged to use our <a href="http://sourceforge.net/tracker/?group_id=124340&amp;atid=699234" target="_top">bugs</a>
-    and <a href="http://sourceforge.net/tracker/?group_id=124340&amp;atid=699237" target="_top">feature
-    requests</a> trackers to report back to us the results of your alpha
-    testing. If you are a developer interested in joining the FlameRobin
-    project, let us know. We always welcome contributors.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="frrelnotes-license"></a>License</h2></div></div></div><p>FlameRobin is released under the Expat License. You can find the
+    project itself is hosted on <a href="https://github.com/mariuz/flamerobin" target="_top">GitHub</a>.
+    Please use our GitHub issues and pull requests to contact the developers, report bugs, and suggest features. 
+    If you are interested in joining the FlameRobin development team or contributing to the project, please submit pull requests or open discussions. We always welcome contributors!</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="frrelnotes-license"></a>License</h2></div></div></div><p>FlameRobin is released under the Expat License. You can find the
     complete license text in the file fr_license.html, or <a href="http://www.flamerobin.org/license.html" target="_top">here</a>.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="frrelnotes-changes"></a>What's new?</h2></div></div></div><p>Please refer to fr_whatsnew.html for a detailed history of all the
     changes since the previous release.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="frrelnotes-installation"></a>Installation</h2></div></div></div><p>If you want to build FlameRobin from sources, please find
-    instructions on our web site or Subversion repository. In this section we
-    talk about installing the pre-built version of FlameRobin under all
-    currently supported platforms.</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e81"></a>General information</h3></div></div></div><p>If you have installed a previous ALPHA version of FlameRobin which
-      is <span class="emphasis"><em>less than 0.4.0</em></span>, it is recommended that you
-      remove it before installing this version.</p><p>You won't be able to keep a config.ini file from an earlier
-      version, because the name and file format have changed in version
-      0.4.0.</p><p>You might be able to keep your servers.xml file, provided that you
-      rename it to fr_databases.conf and move it to your data folder.
-      FlameRobin will tell you the exact path of this file (which changes with
-      the platform) upon first startup, when it cannot find the file.</p><p>Here are the files used by FlameRobin to store configuration
+    instructions in the <span class="emphasis"><em>BUILD.md</em></span> file inside the root of the source tree on our GitHub repository. In this section we
+    talk about installing the pre-built and portable versions of FlameRobin under all
+    currently supported platforms.</p><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e81"></a>General information</h3></div></div></div><p>Here are the files used by FlameRobin to store configuration
       information:</p><div class="itemizedlist"><ul type="disc"><li><p>fr_databases.conf is the list of Firebird servers and
           databases you work with; FlameRobin will create it (and
           automatically add the "localhost" server) when you run it for the
@@ -54,26 +42,7 @@
           information, like the position and size of the main program window.
           You don't need to edit it by hand.</p></li></ul></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>The location of these files changes with the platform, and it's
         usually a directory owned by the current user. FlameRobin needs write
-        access to that folder.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e105"></a>Windows (Win32)</h3></div></div></div><p>To install FlameRobin under Windows you need the Firebird client
-      (gds32.dll for Firebird 1.0, fbclient.dll for Firebird 1.5 and up)
-      installed and available, then just run the automatic installer of
-      FlameRobin which will copy all required files in a directory of your
-      choice and optionally create desktop and start menu shortcuts.</p><p>If you need to uninstall FlameRobin you can do so from the start
-      menu icon (unless you told the installation program not to create one)
-      or from the Control Panel.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e112"></a>Linux</h3></div></div></div><p>While some Linux distributions might provide installation packages
-      suitable for specific versions of that distribuion, FlameRobin project
-      provides generic compressed archives containing the executable and all
-      needed files. There are two flavors, depending of your preferences. You
-      can use Gtk1 version, which runs faster and has less dependencies. It is
-      suitable for slower computers and should run out-of-the-box on most
-      distributions. Gtk2 version uses Gtk2 toolkit, so it looks nicer on the
-      screen and it also has Unicode support.</p><p>To install FlameRobin, just unpack the chosen .tar.bz2 archive, cd
-      into that directory and type "make install" as root. This will install
-      FlameRobin and all the needed files to appropriate locations. After
-      that, any user can type "flamerobin" to run the program.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e119"></a>MacOS X</h3></div></div></div><p>Installation on Mac OS X is an absolute no-brainer: just drag the
-      icon from the installation package to the folder you want the
-      application to live in. Unpacking is handled via double clicking the
-      downloaded file.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="frrelnotes-getting-started"></a>Getting started / basic features</h2></div></div></div><p>Upon first startup, FlameRobin will show a "Home" tree containing
+        access to that folder. When using FlameRobin in portable mode, both configuration files are located inside the directory specified by the <span class="emphasis"><em>/uh</em></span> command-line switch or environment variable.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e105"></a>Windows (Win32 &amp; x64)</h3></div></div></div><p>To install FlameRobin under Windows, you can either run the automatic installer (MSI) which copies the executable and support files and creates desktop shortcuts, or extract the portable ZIP package directly into any directory of your choice (perfect for USB stick usage).</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e112"></a>Linux</h3></div></div></div><p>FlameRobin packages are available in many Linux distribution repositories (e.g. Debian, Fedora, Arch, Ubuntu). You can also run the precompiled binary directly or build from source using CMake.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e119"></a>MacOS X</h3></div></div></div><p>Drag the FlameRobin application bundle from the DMG/package to your Applications folder.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="frrelnotes-getting-started"></a>Getting started / basic features</h2></div></div></div><p>Upon first startup, FlameRobin will show a "Home" tree containing
     only the local server (localhost), and will invite you to create new
     servers and databases as required. You'll also see a menu bar at the top
     of the window, and a search bar and status bar at the bottom. Here is a
@@ -181,7 +150,7 @@
       and more.</p><p>To execute a script (meaning a sequence of more than one SQL
       statements), just load it (or drag and drop a file, or type it in) and
       run it. To execute a single statement when more statements are present
-      in the editor, select it before clicking the Run button.</p><p>You can use the drop-down menus or the context menu in the SQL
+      in the editor, select it before clicking the Run button.</p><p>For importing very large SQL files (e.g., database dumps, massive bulk INSERT scripts), you can use the **Batch SQL Import** feature by selecting **Statement -&gt; Batch SQL Import...** from the SQL Editor menu. This utilizes the Firebird 4.0+ Batch API to automatically group consecutive insert statements and execute them in fast transactional blocks, providing a significant performance boost for bulk data loads.</p><p>You can use the drop-down menus or the context menu in the SQL
       editor as well as the buttons.</p><p>Auto-completion can be invoked automatically or manually (see the
       rich set of configuration options about it), and supports table and
       column names, procedure and function parameters, and so on.</p><p>To activate the data export tool, right click on the data grid.
@@ -240,15 +209,7 @@
       connect to the database first). This window allows you to monitor one or
       more events, save the received events to a text file and load them back.
       Events are posted from the database when the POST_EVENT statement is
-      called (and the transaction is committed).</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e252"></a>User management</h3></div></div></div><p>Current versions of Firebird use a central server-wide user
-      repository. FlameRobin allows you to add, modify and delete user
-      accounts (but it will not allow you to delete the SYSDBA predefined
-      user) by means of the "Manage users..." option in the Server menu (or
-      the server's context menu item, or the Object menu item with the same
-      caption). It is Firebird's security policy that you need to be SYSDBA to
-      use this feature.</p><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>The proper way to change the SYSDBA password on LInux is to run
-        the changeDBAPassword.sh script in Firebird's bin directory. Otherwise
-        Firebird's startup and shutdown scripts won't be updated.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e260"></a>Grant and revoke privileges</h3></div></div></div><p>Every object in the database has a list of privileges that
+      called (and the transaction is committed).</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e252"></a>User management</h3></div></div></div><p>FlameRobin supports two different modes of user management depending on the database and Firebird server version:</p><div class="itemizedlist"><ul type="disc"><li><p>**Server-Wide User Management:** In Firebird 2.5 and below, and for traditional configurations, users are managed globally on the server. FlameRobin allows you to add, modify, and delete user accounts via the **Manage users...** command in the Server or server's context menus (requires SYSDBA privileges).</p></li><li><p>**Per-Database User Management (Users Node):** In Firebird 3.0+ (ODS 12.0+), users can also be managed directly within individual databases. A **Users** collection node is displayed directly under the database in the main tree view. Right-clicking a user lets you select **Alter** or **Drop**, and you can view authentication plugin information (like `Srp` or `Legacy_UserManager`) associated with each account.</p></li></ul></div><div class="note" style="margin-left: 0.5in; margin-right: 0.5in;"><h3 class="title">Note</h3><p>The proper way to change the SYSDBA password on Linux is to run the changeDBAPassword.sh script in Firebird's bin directory. Otherwise Firebird's startup and shutdown scripts won't be updated.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="d0e260"></a>Grant and revoke privileges</h3></div></div></div><p>Every object in the database has a list of privileges that
       identify the users and roles that can work with that object. On an
       object's property page (in the "Privileges" subpage) you can view the
       privleges associated with that object, and if you hover the mouse over
@@ -313,7 +274,7 @@
       behaviour of FlameRobin. You can choose whether FlameRobin will remember
       the size and position of opened windows between sessions or not, whether
       FlameRobin will ask for quit confirmation or not, and other such
-      things.</p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e320"></a>Center dialogs on their parent window</h4></div></div></div><p>Set this option to always have dialogs displayed at the center
+      things.</p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e321_theme"></a>Dark Mode and Style Sheet Theme</h4></div></div></div><p>You can choose the display style theme: **System Default**, **Always Light**, or **Always Dark**. FlameRobin will dynamically adjust colors, text controls (including SQL and Blob editors), and UI elements to respect this preference.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e321_icons"></a>Icon Style</h4></div></div></div><p>FlameRobin allows selecting between **Material Icons (Modern)** and **Classic Icons (Legacy)**. The selected theme will load high-resolution SVG icons from the corresponding resources folder.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e320"></a>Center dialogs on their parent window</h4></div></div></div><p>Set this option to always have dialogs displayed at the center
         of their parent window. Otherwise dialogs are displayed at a
         system-defined position.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="d0e325"></a>Remember window positions and sizes</h4></div></div></div><p>If you enable this option, FlameRobin will remember the position
         and size of each window you open and will open the same window at the
