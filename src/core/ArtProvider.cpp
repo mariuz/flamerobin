@@ -48,13 +48,58 @@ wxBitmap ArtProvider::CreateBitmap(const wxArtID& id,
     return CreateBitmapBundle(id, client, size).GetBitmap(size);
 }
 
+namespace {
+wxString getSVGFileName(const wxArtID& id)
+{
+    if (id == ART_ExecuteSqlFrame) return "sqlicon";
+    if (id == ART_DatabaseServer || id == ART_Server) return "server";
+    if (id == ART_DBTrigger || id == ART_DBTriggers || id == ART_DMLTrigger || id == ART_DMLTriggers || id == ART_DDLTrigger || id == ART_DDLTriggers)
+        return "trigger";
+    if (id == ART_CharacterSets) return "characterset";
+    if (id == ART_Collations) return "collation";
+    if (id == ART_Computed) return "function";
+    if (id == ART_ForeignKey) return "fk";
+    if (id == ART_PrimaryKey) return "pk";
+    if (id == ART_PrimaryAndForeignKey) return "pkfk";
+    
+    if (id == ART_GlobalTemporary || id == ART_GlobalTemporaries) return "table";
+    if (id == ART_History || id == ART_ShowProfiler) return "history";
+    if (id == ART_Object) return "package";
+    if (id == ART_Output || id == ART_ParameterOutput) return "go_back";
+    if (id == ART_ParameterInput || id == ART_Input) return "go_forward";
+    if (id == ART_Packages) return "package";
+    if (id == ART_Publication) return "table";
+    if (id == ART_Publications) return "tables";
+    if (id == ART_Replication) return "database";
+    if (id == ART_Role || id == ART_Roles || id == ART_SystemRole || id == ART_SystemRoles) return "role";
+    if (id == ART_Root) return "home";
+    if (id == ART_ShowExecutionPlan || id == ART_Explain) return "plan";
+    if (id == ART_SystemIndex) return "index";
+    if (id == ART_SystemIndices) return "indices";
+    if (id == ART_SystemDomain) return "domain";
+    if (id == ART_SystemDomains) return "domains";
+    if (id == ART_SystemPackage || id == ART_SystemPackages) return "package";
+    if (id == ART_SystemTable) return "table";
+    if (id == ART_SystemTables) return "tables";
+    if (id == ART_UDF) return "function";
+    if (id == ART_UDFs) return "functions";
+    if (id == ART_User || id == ART_Users) return "user";
+    if (id == ART_DeleteRow) return "redx";
+    if (id == ART_InsertRow) return "new";
+    if (id == ART_ToggleView) return "view";
+    
+    wxString name = id.Lower();
+    if (name.Left(4) == "art_")
+        name = name.Mid(4);
+    else if (name.Left(6) == "wxart_")
+        name = name.Mid(6);
+    return name;
+}
+} // namespace
+
 wxBitmapBundle ArtProvider::loadBitmapBundleFromFile(const wxArtID& id)
 {
-    wxString name = id;
-    if (name.substr(0, 4) == "art_")
-        name.erase(0, 4);
-    else if (name.substr(0, 6) == "wxart_")
-        name.erase(0, 6);
+    wxString name = getSVGFileName(id);
 
     bool useClassic = config().getClassicIcons();
     wxString folder = useClassic ? "svg_classic/" : "svg/";
