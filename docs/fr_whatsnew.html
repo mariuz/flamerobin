@@ -8,6 +8,17 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.7.6</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Database Connection & Menu Fixes</B></font><br>
+<br>
+- <b>Reconnect Failure After Connection Loss (#636)</b>: Fixed a bug where a silent connection loss (such as a VPN drop or network timeout) prevented the Database and Context menus from opening, instead immediately triggering an <code>Error writing data to the connection</code> popup and blocking users from selecting the Reconnect menu item. This occurred because UI update handlers and metadata menu visitors query database capabilities via <code>Database::getInfo()</code>, which executed queries over the dead connection socket. <code>Database::getInfo()</code> now catches and suppresses connection exceptions during <code>reloadIfNecessary()</code>, returning cached info so menus render cleanly, allowing users to successfully select <b>Database -&gt; Reconnect</b> to resume their session.<br>
+<br><br>
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.7.5</font><br>
 <br><br>
 

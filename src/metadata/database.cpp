@@ -2281,7 +2281,17 @@ void Database::setUIDGeneratorValue(unsigned value)
 
 const DatabaseInfo& Database::getInfo()
 {
-    databaseInfoM.reloadIfNecessary(databaseDAL_M);
+    try
+    {
+        databaseInfoM.reloadIfNecessary(databaseDAL_M);
+    }
+    catch (...)
+    {
+        // Suppress errors during reloadIfNecessary (e.g. silent connection loss).
+        // Returning the cached databaseInfoM allows UI menu updates and checks
+        // (like ODS version checks) to complete successfully so the Reconnect menu
+        // item can be displayed and selected.
+    }
     return databaseInfoM;
 }
 
