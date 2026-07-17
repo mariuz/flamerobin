@@ -292,11 +292,15 @@ wxString Config::getUserLocalDataDir() const
 void Config::setHomePath(const wxString& homePath)
 {
     homePathM = homePath;
+    delete configM;
+    configM = nullptr;
 }
 
 void Config::setUserHomePath(const wxString& userHomePath)
 {
     userHomePathM = userHomePath;
+    delete configM;
+    configM = nullptr;
 }
 
 // class ConfigCache
