@@ -63,6 +63,9 @@
 #include "gui/EditBlobDialog.h"
 #include "gui/ExecuteSql.h"
 #include "gui/ExecuteSqlFrame.h"
+#include "sql/SqlTokenizer.h"
+#include "engine/db/fbcpp/FbCppDatabase.h"
+#include "engine/db/fbcpp/FbCppTransaction.h"
 #include "gui/FRLayoutConfig.h"
 #include "gui/InsertDialog.h"
 #include "gui/InsertParametersDialog.h"
@@ -862,6 +865,8 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
         cm.getMainMenuItemText(_("Execute &selection"), Cmds::Query_Execute_selection));
     statementMenu->Append(Cmds::Query_Execute_from_cursor,
         cm.getMainMenuItemText(_("Exec&ute from cursor"), Cmds::Query_Execute_from_cursor));
+    statementMenu->Append(Cmds::Query_BatchImport,
+        cm.getMainMenuItemText(_("Batch SQL &Import..."), Cmds::Query_BatchImport));
     statementMenu->AppendSeparator();
 
     wxMenu* stmtPropMenu = new wxMenu();
@@ -1094,6 +1099,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_MENU(Cmds::Query_Execute_selection,   ExecuteSqlFrame::OnMenuExecuteSelection)
     EVT_MENU(Cmds::Query_Execute_from_cursor, ExecuteSqlFrame::OnMenuExecuteFromCursor)
     EVT_MENU(Cmds::Query_Format,              ExecuteSqlFrame::OnMenuFormatSql)
+    EVT_MENU(Cmds::Query_BatchImport,         ExecuteSqlFrame::OnMenuBatchImport)
 
     EVT_UPDATE_UI(Cmds::Query_Execute,             ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
     EVT_UPDATE_UI(Cmds::Query_Execute_and_Fetch_All, ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
@@ -1101,6 +1107,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_UPDATE_UI(Cmds::Query_Explain,             ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
     EVT_UPDATE_UI(Cmds::Query_Execute_selection,   ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
     EVT_UPDATE_UI(Cmds::Query_Execute_from_cursor, ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
+    EVT_UPDATE_UI(Cmds::Query_BatchImport,         ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible)
     EVT_MENU(Cmds::Query_Commit,              ExecuteSqlFrame::OnMenuCommit)
     EVT_MENU(Cmds::Query_Rollback,            ExecuteSqlFrame::OnMenuRollback)
     EVT_UPDATE_UI(Cmds::Query_Commit,         ExecuteSqlFrame::OnMenuUpdateWhenInTransaction)
@@ -1857,6 +1864,407 @@ void ExecuteSqlFrame::OnMenuExplain(wxCommandEvent& WXUNUSED(event))
     // Execute with EXPLAIN prefix. 
     // This will return a result set which FlameRobin will display in the grid.
     execute("EXPLAIN (FORMAT TREE) " + sql, ";");
+}
+
+namespace {
+struct ParsedInsert
+{
+    bool isValid = false;
+    wxString tableName;
+    wxArrayString columns;
+    wxArrayString values;
+    std::vector<SqlTokenType> valueTypes;
+};
+
+ParsedInsert parseInsertStatement(const wxString& sql)
+{
+    ParsedInsert pi;
+    SqlTokenizer tokenizer(sql);
+    
+    if (tokenizer.getCurrentToken() != kwINSERT)
+        return pi;
+    if (!tokenizer.jumpToken(false)) return pi;
+    
+    if (tokenizer.getCurrentToken() != kwINTO)
+        return pi;
+    if (!tokenizer.jumpToken(false)) return pi;
+    
+    if (tokenizer.getCurrentToken() != tkIDENTIFIER && !tokenizer.isKeywordToken())
+        return pi;
+    pi.tableName = tokenizer.getCurrentTokenString();
+    if (!tokenizer.jumpToken(false)) return pi;
+    
+    if (tokenizer.getCurrentToken() == tkPARENOPEN)
+    {
+        if (!tokenizer.jumpToken(false)) return pi;
+        while (true)
+        {
+            if (tokenizer.getCurrentToken() != tkIDENTIFIER && !tokenizer.isKeywordToken())
+                return pi;
+            pi.columns.Add(tokenizer.getCurrentTokenString());
+            if (!tokenizer.jumpToken(false)) return pi;
+            
+            if (tokenizer.getCurrentToken() == tkPARENCLOSE)
+            {
+                if (!tokenizer.jumpToken(false)) return pi;
+                break;
+            }
+            if (tokenizer.getCurrentToken() == tkCOMMA)
+            {
+                if (!tokenizer.jumpToken(false)) return pi;
+                continue;
+            }
+            return pi;
+        }
+    }
+    
+    if (tokenizer.getCurrentToken() != kwVALUES)
+        return pi;
+    if (!tokenizer.jumpToken(false)) return pi;
+    
+    if (tokenizer.getCurrentToken() != tkPARENOPEN)
+        return pi;
+    if (!tokenizer.jumpToken(false)) return pi;
+    
+    while (true)
+    {
+        SqlTokenType tType = tokenizer.getCurrentToken();
+        wxString tStr = tokenizer.getCurrentTokenString();
+        
+        if (tStr == "-" || tStr == "+")
+        {
+            if (!tokenizer.jumpToken(false)) return pi;
+            tStr += tokenizer.getCurrentTokenString();
+            tType = tkIDENTIFIER;
+        }
+        
+        pi.values.Add(tStr);
+        pi.valueTypes.push_back(tType);
+        if (!tokenizer.jumpToken(false)) return pi;
+        
+        if (tokenizer.getCurrentToken() == tkPARENCLOSE)
+        {
+            break;
+        }
+        if (tokenizer.getCurrentToken() == tkCOMMA)
+        {
+            if (!tokenizer.jumpToken(false)) return pi;
+            continue;
+        }
+        return pi;
+    }
+    
+    pi.isValid = true;
+    return pi;
+}
+
+std::string unescapeSqlString(const std::string& s)
+{
+    if (s.size() >= 2 && s.front() == '\'' && s.back() == '\'')
+    {
+        std::string res;
+        res.reserve(s.size() - 2);
+        for (size_t i = 1; i < s.size() - 1; ++i)
+        {
+            if (s[i] == '\'' && i + 1 < s.size() - 1 && s[i+1] == '\'')
+            {
+                res.push_back('\'');
+                ++i;
+            }
+            else
+            {
+                res.push_back(s[i]);
+            }
+        }
+        return res;
+    }
+    return s;
+}
+} // namespace
+
+void ExecuteSqlFrame::OnMenuBatchImport(wxCommandEvent& WXUNUSED(event))
+{
+    if (!databaseM)
+        return;
+
+    if (databaseM->getDALDatabase()->getBackendType() != fr::DatabaseBackend::FbCpp)
+    {
+        wxMessageBox(_("Batch SQL Import is only supported on the modern Firebird C++ (fb-cpp) backend."),
+            _("Not Supported"), wxOK | wxICON_INFORMATION, this);
+        return;
+    }
+
+    wxFileDialog fd(this, _("Select SQL File to Import"), wxEmptyString, wxEmptyString,
+        _("SQL files (*.sql)|*.sql|All files (*.*)|*.*"), wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+
+    if (fd.ShowModal() != wxID_OK)
+        return;
+
+    wxString filePath = fd.GetPath();
+
+    wxFile file;
+    if (!file.Open(filePath))
+    {
+        wxMessageBox(_("Failed to open the selected file."), _("Error"), wxOK | wxICON_ERROR, this);
+        return;
+    }
+
+    wxString fileContent;
+    if (!file.ReadAll(&fileContent))
+    {
+        wxMessageBox(_("Failed to read the file content."), _("Error"), wxOK | wxICON_ERROR, this);
+        return;
+    }
+    file.Close();
+
+    ProgressDialog pd(this, _("Batch SQL Import"), 1);
+    pd.doShow();
+    pd.initProgressIndeterminate(_("Parsing SQL file..."));
+    wxYield();
+
+    MultiStatement ms(fileContent);
+    std::vector<wxString> statements;
+    while (true)
+    {
+        SingleStatement ss = ms.getNextStatement();
+        if (!ss.isValid())
+            break;
+        if (!ss.isEmptyStatement())
+            statements.push_back(ss.getSql());
+    }
+
+    if (statements.empty())
+    {
+        wxMessageBox(_("The selected file contains no SQL statements."), _("Information"), wxOK | wxICON_INFORMATION, this);
+        return;
+    }
+
+    pd.initProgress(_("Importing statements..."), statements.size(), 0);
+    wxYield();
+
+    fr::FbCppDatabase* dbExt = static_cast<fr::FbCppDatabase*>(databaseM->getDALDatabase().get());
+    fbcpp::Attachment& attachment = dbExt->getAttachment();
+
+    if (transactionM == nullptr)
+        transactionM = databaseM->getDALDatabase()->createTransaction();
+    if (!transactionM->isActive())
+        transactionM->start();
+
+    fr::FbCppTransaction* trExt = static_cast<fr::FbCppTransaction*>(transactionM.get());
+    fbcpp::Transaction& transaction = trExt->getFbCppTransaction();
+
+    size_t stmtIndex = 0;
+    size_t totalInserted = 0;
+    size_t totalIndividual = 0;
+    
+    struct BatchGroup {
+        wxString prepSql;
+        wxString tableName;
+        wxArrayString columns;
+        std::vector<std::vector<wxString>> rowsValues;
+        std::vector<std::vector<SqlTokenType>> rowsValueTypes;
+    } currentGroup;
+
+    auto executeCurrentGroup = [&]() -> bool {
+        if (currentGroup.rowsValues.empty())
+            return true;
+
+        try
+        {
+            fbcpp::StatementOptions options;
+            fbcpp::StatementExt stmt(attachment, transaction, wx2std(currentGroup.prepSql, databaseM->getCharsetConverter()), options);
+
+            fbcpp::BatchOptions batchOptions;
+            batchOptions.setMultiError(true);
+            fbcpp::Batch batch(stmt, transaction, batchOptions);
+
+            for (size_t r = 0; r < currentGroup.rowsValues.size(); ++r)
+            {
+                const auto& vals = currentGroup.rowsValues[r];
+                const auto& types = currentGroup.rowsValueTypes[r];
+
+                for (size_t c = 0; c < vals.size(); ++c)
+                {
+                    if (types[c] == kwNULL)
+                    {
+                        stmt.setNull((unsigned)c);
+                    }
+                    else if (types[c] == tkSTRING)
+                    {
+                        std::string unescaped = unescapeSqlString(wx2std(vals[c], databaseM->getCharsetConverter()));
+                        stmt.set((unsigned)c, unescaped);
+                    }
+                    else
+                    {
+                        std::string rawVal = wx2std(vals[c], databaseM->getCharsetConverter());
+                        stmt.set((unsigned)c, rawVal);
+                    }
+                }
+                batch.addMessage();
+            }
+
+            auto completionState = batch.execute();
+            std::optional<unsigned> errPos = completionState.findError(0);
+            if (errPos.has_value())
+            {
+                auto statusVec = completionState.getStatus(errPos.value());
+                throw fbcpp::DatabaseException(fr::FbCppDatabase::getClient(), statusVec.data());
+            }
+
+            totalInserted += currentGroup.rowsValues.size();
+            currentGroup.rowsValues.clear();
+            currentGroup.rowsValueTypes.clear();
+            return true;
+        }
+        catch (const std::exception& e)
+        {
+            wxString errMsg = wxString::FromUTF8(e.what());
+            wxMessageBox(wxString::Format(_("Batch execution failed:\n%s"), errMsg),
+                _("Error"), wxOK | wxICON_ERROR, this);
+            return false;
+        }
+    };
+
+    bool ok = true;
+    for (stmtIndex = 0; stmtIndex < statements.size(); ++stmtIndex)
+    {
+        if (pd.isCanceled())
+        {
+            ok = false;
+            break;
+        }
+
+        wxString sql = statements[stmtIndex];
+        ParsedInsert pi = parseInsertStatement(sql);
+
+        if (pi.isValid)
+        {
+            wxString prepSql = "INSERT INTO " + pi.tableName;
+            if (!pi.columns.IsEmpty())
+            {
+                prepSql += " (";
+                for (size_t i = 0; i < pi.columns.size(); ++i)
+                {
+                    if (i > 0) prepSql += ", ";
+                    prepSql += pi.columns[i];
+                }
+                prepSql += ")";
+            }
+            prepSql += " VALUES (";
+            for (size_t i = 0; i < pi.values.size(); ++i)
+            {
+                if (i > 0) prepSql += ", ";
+                prepSql += "?";
+            }
+            prepSql += ")";
+
+            if (currentGroup.tableName == pi.tableName && currentGroup.columns.size() == pi.columns.size())
+            {
+                bool columnsMatch = true;
+                for (size_t i = 0; i < pi.columns.size(); ++i)
+                {
+                    if (currentGroup.columns[i] != pi.columns[i])
+                    {
+                        columnsMatch = false;
+                        break;
+                    }
+                }
+
+                if (columnsMatch && currentGroup.rowsValues.size() < 5000)
+                {
+                    currentGroup.rowsValues.push_back(std::vector<wxString>(pi.values.begin(), pi.values.end()));
+                    currentGroup.rowsValueTypes.push_back(pi.valueTypes);
+                }
+                else
+                {
+                    if (!executeCurrentGroup())
+                    {
+                        ok = false;
+                        break;
+                    }
+                    currentGroup.prepSql = prepSql;
+                    currentGroup.tableName = pi.tableName;
+                    currentGroup.columns = pi.columns;
+                    currentGroup.rowsValues.push_back(std::vector<wxString>(pi.values.begin(), pi.values.end()));
+                    currentGroup.rowsValueTypes.push_back(pi.valueTypes);
+                }
+            }
+            else
+            {
+                if (!executeCurrentGroup())
+                {
+                    ok = false;
+                    break;
+                }
+                currentGroup.prepSql = prepSql;
+                currentGroup.tableName = pi.tableName;
+                currentGroup.columns = pi.columns;
+                currentGroup.rowsValues.push_back(std::vector<wxString>(pi.values.begin(), pi.values.end()));
+                currentGroup.rowsValueTypes.push_back(pi.valueTypes);
+            }
+        }
+        else
+        {
+            if (!executeCurrentGroup())
+            {
+                ok = false;
+                break;
+            }
+
+            try
+            {
+                fr::IStatementPtr st = databaseM->getDALDatabase()->createStatement(transactionM);
+                st->prepare(wx2std(sql, databaseM->getCharsetConverter()));
+                st->execute();
+                totalIndividual++;
+            }
+            catch (const std::exception& e)
+            {
+                wxString errMsg = wxString::FromUTF8(e.what());
+                wxMessageBox(wxString::Format(_("Statement execution failed:\nStatement: %s\nError: %s"), sql, errMsg),
+                    _("Error"), wxOK | wxICON_ERROR, this);
+                ok = false;
+                break;
+            }
+        }
+
+        pd.setProgressPosition(stmtIndex + 1);
+        if (stmtIndex % 50 == 0)
+        {
+            wxYield();
+        }
+    }
+
+    if (ok)
+    {
+        ok = executeCurrentGroup();
+    }
+
+    pd.doHide();
+
+    if (ok)
+    {
+        if (transactionM != nullptr && transactionM->isActive())
+        {
+            transactionM->commit();
+            transactionM = nullptr;
+        }
+
+        wxMessageBox(wxString::Format(_("Batch SQL Import completed successfully.\n\nTotal Batched Inserts: %lu\nTotal Individual Statements: %lu"),
+            (unsigned long)totalInserted, (unsigned long)totalIndividual),
+            _("Success"), wxOK | wxICON_INFORMATION, this);
+    }
+    else
+    {
+        if (transactionM != nullptr && transactionM->isActive())
+        {
+            transactionM->rollback();
+            transactionM = nullptr;
+        }
+
+        wxMessageBox(_("Batch SQL Import was aborted. All changes have been rolled back."),
+            _("Aborted"), wxOK | wxICON_WARNING, this);
+    }
 }
 
 void ExecuteSqlFrame::OnMenuShowStatistics(wxCommandEvent& event)

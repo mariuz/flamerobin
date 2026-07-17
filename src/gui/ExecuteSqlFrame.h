@@ -235,6 +235,7 @@ private:
     void OnMenuExecuteAndFetchAll(wxCommandEvent& event);
     void OnMenuShowPlan(wxCommandEvent& event);
     void OnMenuExplain(wxCommandEvent& event);
+    void OnMenuBatchImport(wxCommandEvent& event);
     void OnMenuShowStatistics(wxCommandEvent& event);
     void OnMenuUpdateShowStatistics(wxUpdateUIEvent& event);
     void OnMenuShowProfiler(wxCommandEvent& event);

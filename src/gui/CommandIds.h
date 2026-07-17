@@ -51,6 +51,7 @@ enum {
     Query_Commit,
     Query_Rollback,
     Query_Format,
+    Query_BatchImport,
     // next 4: order is important, because EVT_MENU_RANGE is used
     Query_TransactionConcurrency,
     Query_TransactionReadDirty,
