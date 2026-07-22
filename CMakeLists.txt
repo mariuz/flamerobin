@@ -745,7 +745,7 @@ add_library(IBPP STATIC ${IBPP_SOURCE_LIST} ${IBPP_HEADER_LIST})
 
 #--------------------------------------
 # FlameRobin app
-include_directories(BEFORE src src/ibpp src/firebird/include res)
+include_directories(BEFORE src src/ibpp res)
 
 if (NOT APPLE)
     add_executable(${PROJECT_NAME} WIN32 ${SOURCE_LIST} ${HEADER_LIST} ${RESOURCE_LIST})
