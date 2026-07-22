@@ -34,6 +34,13 @@ jobs:
             ' src/frversion.h)
           echo "FLAMEROBIN_VERSION=$FLAMEROBIN_VERSION" >> $GITHUB_ENV
 
+      - name: Pre-install Flatpak dependencies (with retry)
+        run: |
+          flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo || true
+          for i in {1..5}; do
+            flatpak install -y --noninteractive flathub org.gnome.Platform/x86_64/46 org.gnome.Sdk/x86_64/46 && break || sleep 10
+          done
+
       - name: Build Flatpak
         uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
