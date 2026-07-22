@@ -118,6 +118,7 @@ void HtmlTemplateProcessor::applyDarkModeIfNeeded(wxString& html)
     static const ColorMap mapping[] = {
         { wxT("bgcolor=\"white\""),   wxT("bgcolor=\"#1e1e1e\"") }, // outer wrapper
         { wxT("bgcolor=\"black\""),   wxT("bgcolor=\"#3a3a3a\"") }, // table border
+        { wxT("bgcolor=black"),       wxT("bgcolor=\"#3a3a3a\"") }, // unquoted table border
         { wxT("bgcolor=\"silver\""),  wxT("bgcolor=\"#3a3a3a\"") }, // = #C0C0C0
         { wxT("bgcolor=\"#999999\""), wxT("bgcolor=\"#3a3a3a\"") }, // dark legend border
         { wxT("bgcolor=\"#CCCCCC\""), wxT("bgcolor=\"#2c2c2c\"") }, // legend row

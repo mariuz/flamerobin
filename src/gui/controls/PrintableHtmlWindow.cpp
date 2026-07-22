@@ -191,7 +191,6 @@ void PrintableHtmlWindow::setPageSource(const wxString& html)
         wxString linkHoverColor = isDark ? "#6ba4e8" : "#2b6cb0";
 
         wxString css = wxString::Format(
-            "<link href=\"https://fonts.googleapis.com/icon?family=Material+Icons\" rel=\"stylesheet\">\n"
             "<style>\n"
             "html, body {\n"
             "    margin: 0 !important;\n"
@@ -202,36 +201,42 @@ void PrintableHtmlWindow::setPageSource(const wxString& html)
             "    background-color: %s !important;\n"
             "    color: %s !important;\n"
             "}\n"
-            "table {\n"
-            "    width: 100%% !important;\n"
-            "    max-width: 100%% !important;\n"
+            "/* Data tables */\n"
+            "table[bgcolor=\"black\"], table[bgcolor=\"#3a3a3a\"], table[bgcolor=\"silver\"], table[bgcolor=\"#999999\"] {\n"
             "    border-collapse: separate !important;\n"
             "    border-spacing: 0 !important;\n"
             "    border: 1px solid %s !important;\n"
             "    border-radius: 6px !important;\n"
-            "    margin: 12px 0 !important;\n"
+            "    margin: 8px 0 !important;\n"
             "    overflow: hidden !important;\n"
             "    background-color: transparent !important;\n"
             "}\n"
-            "tr[bgcolor=\"navy\"], tr[bgcolor=\"#CCCCFF\"] {\n"
+            "/* Layout tables containing sub-tables */\n"
+            "table[bgcolor=\"white\"], table[bgcolor=\"#1e1e1e\"] {\n"
+            "    border: none !important;\n"
+            "    margin: 0 !important;\n"
+            "    background-color: transparent !important;\n"
+            "}\n"
+            "tr[bgcolor=\"navy\"] {\n"
             "    background-color: %s !important;\n"
             "    color: %s !important;\n"
             "}\n"
-            "tr[bgcolor=\"navy\"] td, tr[bgcolor=\"#CCCCFF\"] td {\n"
+            "tr[bgcolor=\"navy\"] td, tr[bgcolor=\"navy\"] th {\n"
             "    color: %s !important;\n"
             "    font-weight: 600 !important;\n"
             "}\n"
-            "tr[bgcolor=\"#DDDDFF\"] {\n"
+            "tr[bgcolor=\"#DDDDFF\"], tr[bgcolor=\"#2c2c40\"], tr[bgcolor=\"#DDDDDD\"], tr[bgcolor=\"#34343c\"] {\n"
             "    background-color: %s !important;\n"
             "}\n"
-            "tr[bgcolor=\"#DDDDDD\"] {\n"
+            "tr[bgcolor=\"#CCCCFF\"], tr[bgcolor=\"#23233a\"], tr[bgcolor=\"#CCCCCC\"], tr[bgcolor=\"#2c2c2c\"],\n"
+            "td[bgcolor=\"#CCCCFF\"], td[bgcolor=\"#23233a\"], td[bgcolor=\"#CCCCCC\"], td[bgcolor=\"#2c2c2c\"] {\n"
             "    background-color: %s !important;\n"
             "}\n"
-            "td {\n"
-            "    padding: 8px 12px !important;\n"
+            "td, th {\n"
+            "    padding: 6px 10px !important;\n"
             "    border-bottom: 1px solid %s !important;\n"
             "}\n"
-            "tr:last-child td {\n"
+            "tr:last-child td, tr:last-child th {\n"
             "    border-bottom: none !important;\n"
             "}\n"
             "a {\n"
@@ -245,38 +250,8 @@ void PrintableHtmlWindow::setPageSource(const wxString& html)
             "img {\n"
             "    vertical-align: middle !important;\n"
             "}\n"
-            ".material-icons {\n"
-            "    font-size: 16px !important;\n"
-            "    width: 16px !important;\n"
-            "    height: 16px !important;\n"
-            "    display: inline-block !important;\n"
-            "    vertical-align: middle !important;\n"
-            "    text-align: center !important;\n"
-            "    line-height: 16px !important;\n"
-            "}\n"
-            ".icon-ok {\n"
-            "    color: #4caf50 !important;\n"
-            "    font-size: 18px !important;\n"
-            "}\n"
-            ".icon-ok2 {\n"
-            "    color: #00bcd4 !important;\n"
-            "    font-size: 18px !important;\n"
-            "}\n"
-            ".icon-redx {\n"
-            "    color: #f44336 !important;\n"
-            "    font-size: 18px !important;\n"
-            "}\n"
-            ".icon-drop {\n"
-            "    color: #f44336 !important;\n"
-            "}\n"
-            ".icon-view {\n"
-            "    color: #2196f3 !important;\n"
-            "}\n"
-            ".icon-compute {\n"
-            "    color: #ff9800 !important;\n"
-            "}\n"
             "</style>\n",
-            bgColor, textColor, borderColor, headerBgColor, headerTextColor, headerTextColor, altRowBgColor, altRowBgColor, borderColor, linkColor, linkHoverColor
+            bgColor, textColor, borderColor, headerBgColor, headerTextColor, headerTextColor, altRowBgColor, bgColor, borderColor, linkColor, linkHoverColor
         );
 
         wxString::size_type headPos = processedHtml.Lower().find("</head>");
@@ -284,32 +259,6 @@ void PrintableHtmlWindow::setPageSource(const wxString& html)
             processedHtml.insert(headPos, css);
         else
             processedHtml.insert(0, css);
-
-        // Replace vector SVG img tags with Google Material Icons dynamically
-        wxRegEx imgRegex("<img[^>]*src=\"" + fileUrl + "([^/\"\\?#]+)\\.svg\"[^>]*>");
-        while (imgRegex.Matches(processedHtml))
-        {
-            size_t start, len;
-            imgRegex.GetMatch(&start, &len, 0);
-            wxString iconName = imgRegex.GetMatch(processedHtml, 1);
-            wxString spanTag;
-            if (iconName == "ok")
-                spanTag = "<span class=\"material-icons icon-ok\">check_circle</span>";
-            else if (iconName == "ok2")
-                spanTag = "<span class=\"material-icons icon-ok2\">done_all</span>";
-            else if (iconName == "redx")
-                spanTag = "<span class=\"material-icons icon-redx\">cancel</span>";
-            else if (iconName == "drop")
-                spanTag = "<span class=\"material-icons icon-drop\">delete</span>";
-            else if (iconName == "view")
-                spanTag = "<span class=\"material-icons icon-view\">visibility</span>";
-            else if (iconName == "compute")
-                spanTag = "<span class=\"material-icons icon-compute\">build</span>";
-            else
-                spanTag = "<span class=\"material-icons\">help</span>";
-
-            processedHtml.replace(start, len, spanTag);
-        }
 
         // Remove old temp file if it exists
         if (!tempFileM.IsEmpty() && wxFileExists(tempFileM))

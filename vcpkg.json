@@ -58,7 +58,10 @@
       "platform": "windows"
     },
     "nlohmann-json",
-    "crashpad"
+    {
+      "name": "crashpad",
+      "platform": "windows"
+    }
   ],
   "overrides": [
     {
