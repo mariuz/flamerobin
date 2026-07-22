@@ -47,7 +47,8 @@ perl -i -0777 -pe 's/void Transaction::rollbackRetaining\(\)\n\{\n\tassert\(isVa
 perl -i -pe 's/static FbUniquePtr<fb::IXpbBuilder> buildTpb/FbUniquePtr<fb::IXpbBuilder> Transaction::buildTpb/g' "$PATCH_SRC_DIR/Transaction.cpp"
 perl -i -0777 -pe 's/void start\(Attachment& attachment, const TransactionOptions& options = \{\}\);\n\n\tprotected:/void start(Attachment& attachment, const TransactionOptions& options = {});\n\n\t\tstatic FbUniquePtr<fb::IXpbBuilder> buildTpb(fb::IMaster* master, impl::StatusWrapper& statusWrapper, const TransactionOptions& options);\n\n\tprotected:/g' "$PATCH_SRC_DIR/Transaction.h"
 
-# 3. Statement.h - Add closeCursor(), fix truncation check, and add Attachment constructor
+# 3. Statement.h - Add closeCursor(), fix truncation check, add Attachment constructor, and undef DELETE macro
+perl -i -0777 -pe 's/enum class StatementType : unsigned/#ifdef DELETE\n#undef DELETE\n#endif\n\n\tenum class StatementType : unsigned/g' "$PATCH_SRC_DIR/Statement.h"
 perl -i -pe 's/(\t+)void free\(\);/$1void free();\n$1void closeCursor();/g' "$PATCH_SRC_DIR/Statement.h"
 perl -i -pe 's/if \(value.length\(\) > descriptor.length\)/if (value.length() > descriptor.length - sizeof(std::uint16_t))/g' "$PATCH_SRC_DIR/Statement.h"
 perl -i -0777 -pe 's/class Statement\n\t\{/class Statement\n\t\{\n\tpublic:\n\t\texplicit Statement(Attachment& attachment);/g' "$PATCH_SRC_DIR/Statement.h"
