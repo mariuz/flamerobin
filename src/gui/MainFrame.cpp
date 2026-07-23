@@ -60,6 +60,7 @@
 #include "gui/MainFrame.h"
 #include "gui/SchemaCompareDialog.h"
 #include "gui/SessionMonitorFrame.h"
+#include "gui/DatabaseMaintenanceDialog.h"
 #include "metadata/RoutineHelper.h"
 #include "gui/MaintenanceFrame.h"
 #include "gui/MetadataItemPropertiesFrame.h"
@@ -217,6 +218,7 @@ void MainFrame::buildMainMenu()
     databaseMenuM->Append(Cmds::Menu_RestoreIntoNew, _("Restore bac&kup into new database..."));
     databaseMenuM->Append(Cmds::Menu_CompareSchemas, _("Compare database &schemas..."));
     databaseMenuM->Append(Cmds::Menu_SessionMonitor, _("Live Session & Transaction Monitor..."));
+    databaseMenuM->Append(Cmds::Menu_DatabaseMaintenanceDashboard, _("Maintenance & Health Dashboard..."));
     databaseMenuM->AppendSeparator();
     menuBarM->Append(databaseMenuM, _("&Database"));
 
@@ -411,6 +413,7 @@ EVT_UPDATE_UI(Cmds::Menu_CreateDatabase, MainFrame::OnMenuUpdateIfServerSelected
     EVT_UPDATE_UI(Cmds::Menu_RestoreIntoNew, MainFrame::OnMenuUpdateIfServerSelected)
     EVT_MENU(Cmds::Menu_CompareSchemas, MainFrame::OnMenuCompareSchemas)
     EVT_MENU(Cmds::Menu_SessionMonitor, MainFrame::OnMenuSessionMonitor)
+    EVT_MENU(Cmds::Menu_DatabaseMaintenanceDashboard, MainFrame::OnMenuDatabaseMaintenanceDashboard)
     EVT_MENU(Cmds::Menu_CopyCallSignature, MainFrame::OnMenuCopyCallSignature)
     EVT_MENU(Cmds::Menu_GenerateExecuteTemplate, MainFrame::OnMenuGenerateExecuteTemplate)
 EVT_MENU(Cmds::Menu_ManageUsers, MainFrame::OnMenuManageUsers)
@@ -2778,6 +2781,15 @@ void MainFrame::OnMenuSessionMonitor(wxCommandEvent& WXUNUSED(event))
         return;
     SessionMonitorFrame* f = new SessionMonitorFrame(this, db);
     f->Show(true);
+}
+
+void MainFrame::OnMenuDatabaseMaintenanceDashboard(wxCommandEvent& WXUNUSED(event))
+{
+    DatabasePtr db = getDatabase(treeMainM->getSelectedMetadataItem());
+    if (!db)
+        return;
+    DatabaseMaintenanceDialog dmd(this, db.get());
+    dmd.ShowModal();
 }
 
 void MainFrame::OnMenuCopyCallSignature(wxCommandEvent& WXUNUSED(event))

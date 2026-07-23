@@ -114,6 +114,7 @@ enum {
     Menu_ExecuteStatements,
     Menu_CompareSchemas,
     Menu_SessionMonitor,
+    Menu_DatabaseMaintenanceDashboard,
     Menu_CopyCallSignature,
     Menu_GenerateExecuteTemplate,
     Menu_IsqlTerminal,

@@ -90,6 +90,7 @@ void MainObjectMenuMetadataItemVisitor::visitDatabase(Database& database)
     menuM->Append(Cmds::Menu_VisualizeSchema, _("Visualize Schema"));
     menuM->Append(Cmds::Menu_CompareSchemas, _("Compare &Schema..."));
     menuM->Append(Cmds::Menu_SessionMonitor, _("Live Session & Transaction Monitor..."));
+    menuM->Append(Cmds::Menu_DatabaseMaintenanceDashboard, _("Maintenance & Health Dashboard..."));
     addGenerateCodeMenu(database);
     addSeparator();
 

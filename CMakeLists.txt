@@ -194,6 +194,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/CreateIndexDialog.cpp
         ${SOURCEDIR}/gui/CreateDockerFirebirdDialog.cpp
         ${SOURCEDIR}/gui/DatabaseRegistrationDialog.cpp
+        ${SOURCEDIR}/gui/DatabaseMaintenanceDialog.cpp
         ${SOURCEDIR}/gui/DataGeneratorFrame.cpp
         ${SOURCEDIR}/gui/EditBlobDialog.cpp
         ${SOURCEDIR}/gui/EventWatcherFrame.cpp
