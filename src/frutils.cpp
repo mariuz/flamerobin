@@ -79,7 +79,7 @@ void readBlob(fr::IStatementPtr& st, int column, wxString& result,
 wxString selectRelationColumns(Relation* t, wxWindow* parent)
 {
     std::vector<wxString> list;
-    if (!selectRelationColumnsIntoVector(t, parent, list))
+    if (!selectRelationColumnsIntoVector(t, parent, list) || list.empty())
         return wxEmptyString;
 
     std::vector<wxString>::iterator it = list.begin();

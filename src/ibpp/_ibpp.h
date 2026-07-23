@@ -1256,7 +1256,6 @@ public:
     bool Get(const std::string&, IBPP::Array&);
 
     int ColumnNum(const std::string&);
-    int ColumnNumAlias(const std::string&);
     const char* ColumnName(int);
     const char* ColumnAlias(int);
     const char* ColumnTable(int);

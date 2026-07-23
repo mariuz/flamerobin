@@ -80,7 +80,6 @@ public:
     void OnMenuBackup(wxCommandEvent& event);
     void OnMenuMaintenance(wxCommandEvent& event);
     void OnMenuExecuteStatements(wxCommandEvent& event);
-    void OnMenuInsert(wxCommandEvent& event);
     void OnMenuBrowseData(wxCommandEvent& event);
     void OnMenuRestore(wxCommandEvent& event);
     void OnMenuShowAllGeneratorValues(wxCommandEvent& event);
@@ -97,7 +96,6 @@ public:
     void OnMenuDropObject(wxCommandEvent& event);
     void OnMenuAlterObject(wxCommandEvent& event);
     void OnMenRebuildObject(wxCommandEvent& event);
-    void OnMenuCreateTriggerForTable(wxCommandEvent& event);
     void OnMenuGenerateCode(wxCommandEvent& event);
     void OnMenuExecuteProcedure(wxCommandEvent& event);
     void OnMenuDisconnect(wxCommandEvent& event);

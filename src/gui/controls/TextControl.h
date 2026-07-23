@@ -51,7 +51,6 @@ protected:
     void OnCommandUpdateCopy(wxUpdateUIEvent& event);
     void OnCommandUpdatePaste(wxUpdateUIEvent& event);
     void OnCommandUpdateDelete(wxUpdateUIEvent& event);
-    void OnCommandUpdateSelectAll(wxUpdateUIEvent& event);
 
     void OnContextMenu(wxContextMenuEvent& event);
 

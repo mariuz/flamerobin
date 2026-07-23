@@ -53,9 +53,7 @@ protected:
 
     virtual void addControlsToSizer(wxSizer* sizer);
     virtual void enableControls(bool enabled);
-    //virtual wxStaticText* getLabel();
     virtual bool hasControls() const;
-    //virtual void setDefault(const wxString& defValue);*/
     virtual wxArrayString getComboBoxItems();
     void loadStylers(const wxString& styleFileName);
     void loadStyles(const wxString& language);

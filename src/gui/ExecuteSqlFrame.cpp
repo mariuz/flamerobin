@@ -2863,15 +2863,6 @@ void ExecuteSqlFrame::clearLogBeforeExecution()
 
 void ExecuteSqlFrame::prepareVolatileDatabase(wxString hostname, wxString port, wxString path, wxString user, wxString password, wxString role, wxString charset)
 {
-    /*DatabasePtr dbM = std::make_shared<Database>();
-    ServerPtr serverPtrM = std::make_shared<Server>();
-    dbM->setServer(serverPtrM);
-    databaseM = dbM.get();*/
-    //databaseM = new Database();
-    //databaseM = std::make_shared<Database>();
-    //databaseM->setId(UINT_MAX-30);
-    //this->serverM = new Server();
-    //serverPtrM = ServerPtr(serverM);
     ServerPtr serverPtrM = databaseM->getServer();
     if (!serverPtrM->getHostname().compare(hostname) || !serverPtrM->getPort().compare(port) || !databaseM->getPath().compare(path) || !databaseM->getUsername().compare(user) || !databaseM->getRawPassword().compare(password) || !databaseM->getRole().compare(role) || !databaseM->getDatabaseCharset().compare(charset))
     {

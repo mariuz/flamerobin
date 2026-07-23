@@ -238,7 +238,6 @@ private:
 
     void setDisconnected();
 
-    //std::multimap<CharacterSet, wxString> collationsM;
     void loadCollations();
 
     void loadCollections(ProgressIndicator* progressIndicator);

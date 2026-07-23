@@ -170,7 +170,6 @@ public:
     void write2Element(wxXmlNode* element);
 
     int getNbStyler() const { return styleVectorM.size(); };
-    //void setNbStyler(int nb) { nbStylerM = nb; };
 
     FRStyle* getStyle(size_t index);
     FRStyle* getStyleByName(wxString styleName);
@@ -224,7 +223,6 @@ public:
     void write2Element(wxXmlNode* element);
 
     int getNbLexerStyler() const { return stylerVectorM.size(); };
-    //void setNbLexerStyler(int nbLexer) { nbLexerStylerM = nbLexer; };
     bool hasEnoughSpace() { return (getNbLexerStyler() < MAX_LEXER_STYLE); };
 
 

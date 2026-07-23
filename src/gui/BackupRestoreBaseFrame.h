@@ -49,7 +49,6 @@ public:
 protected:
 
     void cancelBackupRestore();
-    //void clearLog();
     virtual void doReadConfigSettings(const wxString& prefix);
     virtual void doWriteConfigSettings(const wxString& prefix) const;
     virtual const wxString getStorageName() const;

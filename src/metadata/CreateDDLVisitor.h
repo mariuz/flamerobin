@@ -55,13 +55,9 @@ public:
     virtual void visitColumn(Column& column);
     virtual void visitDatabase(Database& database);
     virtual void visitDomain(Domain& domain);
-//    virtual void visitDomains(Domains& domains);
-    //virtual void visitSysDomains(SysDomains& domains);
     virtual void visitException(Exception& exception);
-//    virtual void visitExceptions(Exceptions& exceptions);
     virtual void visitForeignKey(ForeignKey& fk);
     virtual void visitFunctionSQL(FunctionSQL& function);
-//    virtual void visitFunctionSQLs(FunctionSQLs& functions);
     virtual void visitUDF(UDF& function);
 //    virtual void visitUDFs(UDFs& functions);
     virtual void visitGenerator(Generator& generator);
