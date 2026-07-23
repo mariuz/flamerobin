@@ -117,6 +117,7 @@ enum {
     Menu_DatabaseMaintenanceDashboard,
     Menu_CopyCallSignature,
     Menu_GenerateExecuteTemplate,
+    Menu_InteractiveExecuteRoutine,
     Menu_IsqlTerminal,
     Menu_CreateObject,
     Menu_CreateCSVExternalTable,

@@ -61,6 +61,7 @@
 #include "gui/SchemaCompareDialog.h"
 #include "gui/SessionMonitorFrame.h"
 #include "gui/DatabaseMaintenanceDialog.h"
+#include "gui/ExecuteRoutineDialog.h"
 #include "metadata/RoutineHelper.h"
 #include "gui/MaintenanceFrame.h"
 #include "gui/MetadataItemPropertiesFrame.h"
@@ -416,6 +417,7 @@ EVT_UPDATE_UI(Cmds::Menu_CreateDatabase, MainFrame::OnMenuUpdateIfServerSelected
     EVT_MENU(Cmds::Menu_DatabaseMaintenanceDashboard, MainFrame::OnMenuDatabaseMaintenanceDashboard)
     EVT_MENU(Cmds::Menu_CopyCallSignature, MainFrame::OnMenuCopyCallSignature)
     EVT_MENU(Cmds::Menu_GenerateExecuteTemplate, MainFrame::OnMenuGenerateExecuteTemplate)
+    EVT_MENU(Cmds::Menu_InteractiveExecuteRoutine, MainFrame::OnMenuInteractiveExecuteRoutine)
 EVT_MENU(Cmds::Menu_ManageUsers, MainFrame::OnMenuManageUsers)
 EVT_UPDATE_UI(Cmds::Menu_ManageUsers, MainFrame::OnMenuUpdateIfServerSelected)
 EVT_MENU(Cmds::Menu_UnRegisterServer, MainFrame::OnMenuUnRegisterServer)
@@ -2818,4 +2820,13 @@ void MainFrame::OnMenuGenerateExecuteTemplate(wxCommandEvent& WXUNUSED(event))
         eff->setSql(sql);
         eff->Show(true);
     }
+}
+
+void MainFrame::OnMenuInteractiveExecuteRoutine(wxCommandEvent& WXUNUSED(event))
+{
+    MetadataItem* item = treeMainM->getSelectedMetadataItem();
+    if (!item) return;
+
+    ExecuteRoutineDialog erd(this, item);
+    erd.ShowModal();
 }

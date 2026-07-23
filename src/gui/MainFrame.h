@@ -102,6 +102,7 @@ public:
     void OnMenuDatabaseMaintenanceDashboard(wxCommandEvent& event);
     void OnMenuCopyCallSignature(wxCommandEvent& event);
     void OnMenuGenerateExecuteTemplate(wxCommandEvent& event);
+    void OnMenuInteractiveExecuteRoutine(wxCommandEvent& event);
     void OnMenuScriptAsSelect(wxCommandEvent& event);
     void OnMenuScriptAsInsert(wxCommandEvent& event);
     void OnMenuScriptAsUpdate(wxCommandEvent& event);

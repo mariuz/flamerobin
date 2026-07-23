@@ -308,6 +308,7 @@ void MainObjectMenuMetadataItemVisitor::visitSysPackages(SysPackages& packages)
 void MainObjectMenuMetadataItemVisitor::visitProcedure(Procedure& procedure)
 {
     menuM->Append(Cmds::Menu_ExecuteProcedure, _("&Execute"));
+    menuM->Append(Cmds::Menu_InteractiveExecuteRoutine, _("Interactive &Execute Routine..."));
     if (procedure.getParent()->getType() == ntDatabase) {
         addAlterItem(procedure);
         addDropItem(procedure);

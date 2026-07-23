@@ -200,6 +200,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/EventWatcherFrame.cpp
         ${SOURCEDIR}/gui/ExecuteSql.cpp
         ${SOURCEDIR}/gui/ExecuteSqlFrame.cpp
+        ${SOURCEDIR}/gui/ExecuteRoutineDialog.cpp
         ${SOURCEDIR}/gui/FieldPropertiesDialog.cpp
         ${SOURCEDIR}/gui/FindDialog.cpp
         ${SOURCEDIR}/gui/FRLayoutConfig.cpp
