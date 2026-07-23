@@ -32,6 +32,7 @@
 
 #include <algorithm>
 #include "config/Config.h"
+#include "metadata/ODSVersion.h"
 #include "firebird_ods.h"
 #include "sql/firebird_keyword_sets.hpp"
 #include "sql/SqlTokenizer.h"
@@ -292,18 +293,18 @@ SqlTokenizer::FirebirdKeywordVersion SqlTokenizer::normalizeKeywordVersion(
     if (odsMajor <= 0)
         return FirebirdKeywordVersion{2, 5};
 
-    if (odsMajor <= ODS_MAJOR_FB25)
+    if (odsMajor <= fr::ODSVersion::ODS_FB25_MAJOR)
         return FirebirdKeywordVersion{2, 5};
-    if (odsMajor == ODS_MAJOR_FB30)
+    if (odsMajor == fr::ODSVersion::ODS_FB30_MAJOR)
         return FirebirdKeywordVersion{3, 0};
-    if (odsMajor == ODS_MAJOR_FB40) // also ODS_MAJOR_FB50
+    if (odsMajor == fr::ODSVersion::ODS_FB40_MAJOR) // ODS 13 (FB4 / FB5)
     {
-        if (odsMinor <= ODS_MINOR_FB40)
+        if (odsMinor <= fr::ODSVersion::ODS_FB40_MINOR)
             return FirebirdKeywordVersion{4, 0};
         return FirebirdKeywordVersion{5, 0};
     }
 
-    if (odsMajor >= ODS_MAJOR_FB60)
+    if (odsMajor >= fr::ODSVersion::ODS_FB60_MAJOR)
         return FirebirdKeywordVersion{6, 0};
 
     return FirebirdKeywordVersion{5, 0};
