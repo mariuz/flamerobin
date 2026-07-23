@@ -127,7 +127,7 @@ Key database management, query diagnostic, and monitoring capabilities adapted f
 
 These items apply across Firebird versions and support the feature phases above.
 
-- [ ] **Version Detection Improvement** — Replace scattered hard-coded ODS comparisons with named constants (e.g., `ODS_FB4 = 13.0`, `ODS_FB5 = 13.1`, `ODS_FB6 = 14.0`) so version gates are readable and easy to update.
+- [x] **Version Detection Improvement** — Replace scattered hard-coded ODS comparisons with named constants (e.g., `ODS_FB4 = 13.0`, `ODS_FB5 = 13.1`, `ODS_FB6 = 14.0`) so version gates are readable and easy to update.
 - [ ] **Keyword-Set Selection by Server Version** — Wire the existing per-version keyword sets (`fb25_keywords`, `fb40_keywords`, `fb50_keywords`, `fb60_keywords` in `firebird_keyword_sets.hpp`) to the detected connected server version for accurate syntax highlighting and auto-complete.
 - [ ] **System Table Query Audit** — Audit all `MON$*` and `RDB$*` queries to add newly available columns from FB4/5/6 where the ODS version allows.
 - [x] **SVG Icon System & HiDPI Support** — Replace legacy XPM icons with scalable vector graphics (SVG) and modernize `ArtProvider` to use `wxBitmapBundle` for crisp rendering on 4K and high-resolution displays.
