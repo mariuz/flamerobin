@@ -134,6 +134,20 @@ SessionMonitorFrame::SessionMonitorFrame(wxWindow* parent, DatabasePtr db)
     panelTransactions->SetSizer(sizerTx);
     notebookM->AddPage(panelTransactions, _("Active Transactions"));
 
+    // --- Tab 4: Compiled Statement Cache (MON$COMPILED_STATEMENTS) ---
+    panelCompiledStatements = new wxPanel(notebookM, -1);
+    wxBoxSizer* sizerComp = new wxBoxSizer(wxVERTICAL);
+    list_compiled_statements = new wxListCtrl(panelCompiledStatements, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL);
+    list_compiled_statements->InsertColumn(0, _("Statement ID"), wxLIST_FORMAT_LEFT, 110);
+    list_compiled_statements->InsertColumn(1, _("Cache Hits"), wxLIST_FORMAT_LEFT, 90);
+    list_compiled_statements->InsertColumn(2, _("Cache Misses"), wxLIST_FORMAT_LEFT, 90);
+    list_compiled_statements->InsertColumn(3, _("Hit Ratio"), wxLIST_FORMAT_LEFT, 90);
+    list_compiled_statements->InsertColumn(4, _("SQL Statement"), wxLIST_FORMAT_LEFT, 350);
+
+    sizerComp->Add(list_compiled_statements, 1, wxEXPAND | wxALL, 4);
+    panelCompiledStatements->SetSizer(sizerComp);
+    notebookM->AddPage(panelCompiledStatements, _("Compiled Statement Cache"));
+
     sizerMain->Add(notebookM, 1, wxEXPAND | wxALL, 6);
 
     mainPanel->SetSizer(sizerMain);
@@ -269,6 +283,13 @@ void SessionMonitorFrame::loadMonitoringData()
             }
         } catch (...) {}
 
+        // 4. Compiled Statements Cache (MON$COMPILED_STATEMENTS)
+        compiledStatementsM.clear();
+        try
+        {
+            dalDb->getCompiledStatementInfo(compiledStatementsM);
+        } catch (...) {}
+
         tr->commit();
     }
     catch (...) {}
@@ -276,6 +297,7 @@ void SessionMonitorFrame::loadMonitoringData()
     updateAttachmentsUI();
     updateStatementsUI();
     updateTransactionsUI();
+    updateCompiledStatementsUI();
 }
 
 void SessionMonitorFrame::updateAttachmentsUI()
@@ -322,6 +344,23 @@ void SessionMonitorFrame::updateTransactionsUI()
         list_transactions->SetItem(idx, 4, wxString::Format("%d", tx.lockTimeout));
         list_transactions->SetItem(idx, 5, tx.readOnly ? _("Yes") : _("No"));
         list_transactions->SetItem(idx, 6, tx.timestamp);
+    }
+}
+
+void SessionMonitorFrame::updateCompiledStatementsUI()
+{
+    list_compiled_statements->DeleteAllItems();
+    for (size_t i = 0; i < compiledStatementsM.size(); ++i)
+    {
+        const auto& cs = compiledStatementsM[i];
+        long idx = list_compiled_statements->InsertItem(i, wxString::Format("%lld", (long long)cs.id));
+        list_compiled_statements->SetItem(idx, 1, wxString::Format("%d", cs.cacheHit));
+        list_compiled_statements->SetItem(idx, 2, wxString::Format("%d", cs.cacheMiss));
+
+        double total = cs.cacheHit + cs.cacheMiss;
+        double ratio = (total > 0) ? ((double)cs.cacheHit / total * 100.0) : 0.0;
+        list_compiled_statements->SetItem(idx, 3, wxString::Format("%.1f%%", ratio));
+        list_compiled_statements->SetItem(idx, 4, wxString::FromUTF8(cs.sqlText.c_str()).Mid(0, 100));
     }
 }
 

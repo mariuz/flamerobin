@@ -92,17 +92,23 @@ private:
     wxListCtrl* list_transactions;
     std::vector<SessionTransactionInfo> transactionsM;
 
+    // Compiled Statements Cache tab
+    wxPanel* panelCompiledStatements;
+    wxListCtrl* list_compiled_statements;
+    std::vector<fr::CompiledStatementInfo> compiledStatementsM;
+
     wxCheckBox* check_auto_refresh;
     wxButton* button_refresh_now;
     wxButton* button_close;
 
-    virtual void subjectRemoved(Subject* subject);
-    virtual void update();
+    virtual void subjectRemoved(Subject* subject) override;
+    virtual void update() override;
 
     void loadMonitoringData();
     void updateAttachmentsUI();
     void updateStatementsUI();
     void updateTransactionsUI();
+    void updateCompiledStatementsUI();
 
     void OnTimer(wxTimerEvent& event);
     void OnRefreshClick(wxCommandEvent& event);
