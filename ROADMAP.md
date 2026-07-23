@@ -116,7 +116,7 @@ Key database management, query diagnostic, and monitoring capabilities adapted f
 - [x] **Query Execution Statistics & Buffer Metrics** — Detailed breakdown of page reads/writes, non-indexed reads, indexed fetches, and memory usage per execution in the SQL Execution Frame results tab.
 - [x] **Wire Encryption & Security Protocol Status** — Display active wire encryption status (`WireCrypt`), authentication plugin (SRP, Legacy), and TLS/SSL security settings in database properties and status bars.
 - [x] **Interactive Parameterized Routine Executor** — GUI dialog allowing developers to execute stored procedures and functions by filling input parameter fields with type validation and structured result grid output.
-- [ ] **Expanded MCP Monitoring & Session Tools**:
+- [x] **Expanded MCP Monitoring & Session Tools**:
   - `list_active_sessions` — List active database connections, running queries, and memory footprints via `MON$` tables.
   - `cancel_statement` — Cancel running SQL statements by ID (`MON$STATEMENT_ID`).
   - `recalculate_index_stats` — Recalculate index selectivities for optimized query planning.
