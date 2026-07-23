@@ -223,6 +223,8 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/RestoreFrame.cpp
         ${SOURCEDIR}/gui/SchemaVisualizationFrame.cpp
         ${SOURCEDIR}/gui/SchemaHtmlGenerator.cpp
+        ${SOURCEDIR}/gui/SchemaDiff.cpp
+        ${SOURCEDIR}/gui/SchemaCompareDialog.cpp
         ${SOURCEDIR}/gui/ServerRegistrationDialog.cpp
         ${SOURCEDIR}/gui/ServiceBaseFrame.cpp
         ${SOURCEDIR}/gui/ShortcutCustomizationDialog.cpp

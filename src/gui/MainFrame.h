@@ -97,6 +97,7 @@ public:
     void OnMenuAlterObject(wxCommandEvent& event);
     void OnMenRebuildObject(wxCommandEvent& event);
     void OnMenuGenerateCode(wxCommandEvent& event);
+    void OnMenuCompareSchemas(wxCommandEvent& event);
     void OnMenuScriptAsSelect(wxCommandEvent& event);
     void OnMenuScriptAsInsert(wxCommandEvent& event);
     void OnMenuScriptAsUpdate(wxCommandEvent& event);

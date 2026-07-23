@@ -58,6 +58,7 @@
 #include "gui/ExecuteSql.h"
 #include "gui/ExecuteSqlFrame.h"
 #include "gui/MainFrame.h"
+#include "gui/SchemaCompareDialog.h"
 #include "gui/MaintenanceFrame.h"
 #include "gui/MetadataItemPropertiesFrame.h"
 #include "gui/PreferencesDialog.h"
@@ -212,6 +213,7 @@ void MainFrame::buildMainMenu()
     databaseMenuM->Append(Cmds::Menu_RegisterDatabase, _("R&egister existing database..."));
     databaseMenuM->Append(Cmds::Menu_CreateDatabase, _("Create &new database..."));
     databaseMenuM->Append(Cmds::Menu_RestoreIntoNew, _("Restore bac&kup into new database..."));
+    databaseMenuM->Append(Cmds::Menu_CompareSchemas, _("Compare database &schemas..."));
     databaseMenuM->AppendSeparator();
     menuBarM->Append(databaseMenuM, _("&Database"));
 
@@ -402,8 +404,9 @@ EVT_MENU(Cmds::Menu_RegisterDatabase, MainFrame::OnMenuRegisterDatabase)
 EVT_UPDATE_UI(Cmds::Menu_RegisterDatabase, MainFrame::OnMenuUpdateIfServerSelected)
 EVT_MENU(Cmds::Menu_CreateDatabase, MainFrame::OnMenuCreateDatabase)
 EVT_UPDATE_UI(Cmds::Menu_CreateDatabase, MainFrame::OnMenuUpdateIfServerSelected)
-EVT_MENU(Cmds::Menu_RestoreIntoNew, MainFrame::OnMenuRestoreIntoNewDatabase)
-EVT_UPDATE_UI(Cmds::Menu_RestoreIntoNew, MainFrame::OnMenuUpdateIfServerSelected)
+    EVT_MENU(Cmds::Menu_RestoreIntoNew, MainFrame::OnMenuRestoreIntoNewDatabase)
+    EVT_UPDATE_UI(Cmds::Menu_RestoreIntoNew, MainFrame::OnMenuUpdateIfServerSelected)
+    EVT_MENU(Cmds::Menu_CompareSchemas, MainFrame::OnMenuCompareSchemas)
 EVT_MENU(Cmds::Menu_ManageUsers, MainFrame::OnMenuManageUsers)
 EVT_UPDATE_UI(Cmds::Menu_ManageUsers, MainFrame::OnMenuUpdateIfServerSelected)
 EVT_MENU(Cmds::Menu_UnRegisterServer, MainFrame::OnMenuUnRegisterServer)
@@ -2753,4 +2756,11 @@ bool MainFrame::handleURI(URI& uri)
     }
     else
         return false;
+}
+
+void MainFrame::OnMenuCompareSchemas(wxCommandEvent& WXUNUSED(event))
+{
+    DatabasePtr db = getDatabase(treeMainM->getSelectedMetadataItem());
+    SchemaCompareDialog scd(this, db.get());
+    scd.ShowModal();
 }

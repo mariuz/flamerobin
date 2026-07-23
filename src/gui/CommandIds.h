@@ -112,6 +112,7 @@ enum {
     Menu_Connect,
     Menu_Disconnect,
     Menu_ExecuteStatements,
+    Menu_CompareSchemas,
     Menu_IsqlTerminal,
     Menu_CreateObject,
     Menu_CreateCSVExternalTable,
