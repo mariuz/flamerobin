@@ -59,6 +59,7 @@
 #include "gui/ExecuteSqlFrame.h"
 #include "gui/MainFrame.h"
 #include "gui/SchemaCompareDialog.h"
+#include "gui/SessionMonitorFrame.h"
 #include "gui/MaintenanceFrame.h"
 #include "gui/MetadataItemPropertiesFrame.h"
 #include "gui/PreferencesDialog.h"
@@ -214,6 +215,7 @@ void MainFrame::buildMainMenu()
     databaseMenuM->Append(Cmds::Menu_CreateDatabase, _("Create &new database..."));
     databaseMenuM->Append(Cmds::Menu_RestoreIntoNew, _("Restore bac&kup into new database..."));
     databaseMenuM->Append(Cmds::Menu_CompareSchemas, _("Compare database &schemas..."));
+    databaseMenuM->Append(Cmds::Menu_SessionMonitor, _("Live Session & Transaction Monitor..."));
     databaseMenuM->AppendSeparator();
     menuBarM->Append(databaseMenuM, _("&Database"));
 
@@ -407,6 +409,7 @@ EVT_UPDATE_UI(Cmds::Menu_CreateDatabase, MainFrame::OnMenuUpdateIfServerSelected
     EVT_MENU(Cmds::Menu_RestoreIntoNew, MainFrame::OnMenuRestoreIntoNewDatabase)
     EVT_UPDATE_UI(Cmds::Menu_RestoreIntoNew, MainFrame::OnMenuUpdateIfServerSelected)
     EVT_MENU(Cmds::Menu_CompareSchemas, MainFrame::OnMenuCompareSchemas)
+    EVT_MENU(Cmds::Menu_SessionMonitor, MainFrame::OnMenuSessionMonitor)
 EVT_MENU(Cmds::Menu_ManageUsers, MainFrame::OnMenuManageUsers)
 EVT_UPDATE_UI(Cmds::Menu_ManageUsers, MainFrame::OnMenuUpdateIfServerSelected)
 EVT_MENU(Cmds::Menu_UnRegisterServer, MainFrame::OnMenuUnRegisterServer)
@@ -2763,4 +2766,13 @@ void MainFrame::OnMenuCompareSchemas(wxCommandEvent& WXUNUSED(event))
     DatabasePtr db = getDatabase(treeMainM->getSelectedMetadataItem());
     SchemaCompareDialog scd(this, db.get());
     scd.ShowModal();
+}
+
+void MainFrame::OnMenuSessionMonitor(wxCommandEvent& WXUNUSED(event))
+{
+    DatabasePtr db = getDatabase(treeMainM->getSelectedMetadataItem());
+    if (!db)
+        return;
+    SessionMonitorFrame* f = new SessionMonitorFrame(this, db);
+    f->Show(true);
 }

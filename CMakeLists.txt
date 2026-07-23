@@ -225,6 +225,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/SchemaHtmlGenerator.cpp
         ${SOURCEDIR}/gui/SchemaDiff.cpp
         ${SOURCEDIR}/gui/SchemaCompareDialog.cpp
+        ${SOURCEDIR}/gui/SessionMonitorFrame.cpp
         ${SOURCEDIR}/gui/ServerRegistrationDialog.cpp
         ${SOURCEDIR}/gui/ServiceBaseFrame.cpp
         ${SOURCEDIR}/gui/ShortcutCustomizationDialog.cpp

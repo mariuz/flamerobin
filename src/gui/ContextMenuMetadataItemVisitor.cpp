@@ -89,6 +89,7 @@ void MainObjectMenuMetadataItemVisitor::visitDatabase(Database& database)
     menuM->Append(Cmds::Menu_IsqlTerminal, _("Connect with &ISQL Terminal"));
     menuM->Append(Cmds::Menu_VisualizeSchema, _("Visualize Schema"));
     menuM->Append(Cmds::Menu_CompareSchemas, _("Compare &Schema..."));
+    menuM->Append(Cmds::Menu_SessionMonitor, _("Live Session & Transaction Monitor..."));
     addGenerateCodeMenu(database);
     addSeparator();
 
