@@ -87,6 +87,25 @@ The following phases track FlameRobin UI/metadata support for features introduce
 - [x] **CSV External Tables** — UI support for defining external tables backed by CSV files when the engine supports it.
 - [x] **Enhanced Security: Owner Assignment on CREATE DATABASE** — Expose ownership and initial-user options in the Create Database dialog.
 
+### Phase 8: IDE & SQL Experience Enhancements (Inspired by vscode-mssql)
+
+Key developer productivity features adapted from modern database extension capabilities (such as `vscode-mssql`) for Firebird SQL:
+
+- [ ] **"Script as ..." Context Actions** — Right-click shortcuts to instantly script objects into the SQL editor:
+  - `Script as SELECT (FIRST 100)` — Generate `SELECT FIRST 100 * FROM <table>`.
+  - `Script as INSERT / UPDATE / DELETE / MERGE` — Generate DML statements with parameter placeholders.
+  - `Script as CREATE / ALTER / DROP` — Instant DDL generation for tables, views, procedures, packages, and triggers.
+- [ ] **Multi-Format Result Set Export** — Expand DataGrid export capabilities beyond CSV/HTML to include **JSON**, **Excel (XLSX)**, **Markdown tables**, and **TSV**.
+- [ ] **Query Result Filtering & Search** — Add an in-memory client-side filter bar and column sorting for query execution result grids without re-executing queries against the database.
+- [ ] **Environment Color Coding & Connection Profiles** — Tag connections with environment profiles (*Production*, *Staging*, *Development*) and display color-coded warning headers/title bars to prevent unintended modifications to live production databases.
+- [ ] **Quick Connection Switcher in Editor** — Dropdown menu in the SQL Execution Frame to switch active database connections for open scripts without reopening tabs.
+- [ ] **Visual / Tree Query Execution Plan** — Render Firebird query execution plans (`PLAN` and `EXPLAIN`) in an interactive tree view highlighting full-table scans (`NATURAL`), index usage (`INDEX`), and join order.
+- [ ] **Database Schema Comparison & Migration Generator** — Compare two Firebird database schemas (or a database against a DDL script) and generate executable migration scripts (`ALTER TABLE`, `CREATE INDEX`, `DROP COLUMN`).
+- [ ] **Enhanced Model Context Protocol (MCP) Tools** — Expand FlameRobin's built-in MCP server:
+  - `explain_query` — Retrieve and analyze Firebird execution plans.
+  - `compare_schemas` — Automated schema diffing and DDL migration generation.
+  - `get_performance_stats` — Fetch active session metrics, lock wait status, and I/O statistics.
+
 ---
 
 ## Cross-Cutting Work
