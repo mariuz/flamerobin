@@ -141,7 +141,7 @@ void MaintenanceFrame::updateControls()
     checkbox_kill_shadows->Enable(!running);
 
     DatabasePtr db = getDatabase();
-    bool canUpgrade = db && ((db->getODSMajor() > 13) || (db->getODSMajor() == 13 && db->getODSMinor() >= 1));
+    bool canUpgrade = db && db->getInfo().isFB50OrHigher();
     checkbox_upgrade->Enable(!running && canUpgrade);
 
     spinctrl_parallelworkers->Enable(!running);

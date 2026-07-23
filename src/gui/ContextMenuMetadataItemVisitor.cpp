@@ -731,7 +731,7 @@ void MainObjectMenuMetadataItemVisitor::addPropertiesItem()
 void MainObjectMenuMetadataItemVisitor::addSqlSecurityItem(MetadataItem& item)
 {
     DatabasePtr db = item.getDatabase();
-    if (db && db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
+    if (db && db->getInfo().isFB40OrHigher())
     {
         menuM->Append(Cmds::Menu_SetSqlSecurity, _("Set SQL Security..."));
     }

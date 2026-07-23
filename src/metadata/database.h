@@ -28,6 +28,7 @@
 #include <wx/colour.h>
 
 #include <map>
+#include "metadata/ODSVersion.h"
 #include <mutex>
 #include <unordered_map>
 
@@ -114,6 +115,13 @@ public:
     int getODSMinor() const;
     bool getODSVersionIsHigherOrEqualTo(int versionMajor) const;
     bool getODSVersionIsHigherOrEqualTo(int versionMajor, int versionMinor) const;
+
+    bool isFB21OrHigher() const { return getODSVersionIsHigherOrEqualTo(fr::ODSVersion::ODS_FB21_MAJOR, fr::ODSVersion::ODS_FB21_MINOR); }
+    bool isFB25OrHigher() const { return getODSVersionIsHigherOrEqualTo(fr::ODSVersion::ODS_FB25_MAJOR, fr::ODSVersion::ODS_FB25_MINOR); }
+    bool isFB30OrHigher() const { return getODSVersionIsHigherOrEqualTo(fr::ODSVersion::ODS_FB30_MAJOR, fr::ODSVersion::ODS_FB30_MINOR); }
+    bool isFB40OrHigher() const { return getODSVersionIsHigherOrEqualTo(fr::ODSVersion::ODS_FB40_MAJOR, fr::ODSVersion::ODS_FB40_MINOR); }
+    bool isFB50OrHigher() const { return getODSVersionIsHigherOrEqualTo(fr::ODSVersion::ODS_FB50_MAJOR, fr::ODSVersion::ODS_FB50_MINOR); }
+    bool isFB60OrHigher() const { return getODSVersionIsHigherOrEqualTo(fr::ODSVersion::ODS_FB60_MAJOR, fr::ODSVersion::ODS_FB60_MINOR); }
 
     int getPageSize() const;
     int getBuffers() const;
