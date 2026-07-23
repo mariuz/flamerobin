@@ -46,7 +46,7 @@
 
 void initializeLockCount(MetadataItem* item, unsigned count)
 {
-    if (item != 0 && count > 0)
+    if (item != nullptr && count > 0)
     {
         for (unsigned i = 0; i < count; ++i)
             item->lockSubject();
@@ -59,7 +59,7 @@ void initializeLockCount(MetadataItemPtr item, unsigned count)
 }
 
 MetadataItem::MetadataItem()
-    : Subject(), typeM(ntUnknown), parentM(0), metadataIdM(-1), childrenLoadedM(lsNotLoaded),
+    : Subject(), typeM(ntUnknown), parentM(nullptr), metadataIdM(-1), childrenLoadedM(lsNotLoaded),
         descriptionLoadedM(lsNotLoaded), propertiesLoadedM(lsNotLoaded)
 {
 }

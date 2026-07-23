@@ -147,7 +147,7 @@ Generator *findAutoincGenerator(std::vector<Trigger *>& triggers, Column *c)
 class GridCellEditorWithProperColor: public wxGridCellTextEditor
 {
 public:
-    virtual void Show(bool show, wxGridCellAttr *attr = (wxGridCellAttr *)NULL)
+    void Show(bool show, wxGridCellAttr *attr = nullptr) override
     {
         wxGridCellTextEditor::Show(show, attr);
         GetControl()->SetForegroundColour(

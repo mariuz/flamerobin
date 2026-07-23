@@ -488,16 +488,14 @@ void FRStylers::write2Element(wxXmlNode* element)
 
 FRStyler* FRStylers::getStylerByName(wxString lexerName)
 {
-    if (!lexerName) 
-        return NULL;
+    if (lexerName.IsEmpty()) 
+        return nullptr;
 
-    std::vector<FRStyler*>::iterator it;
-    it = std::find_if(stylerVectorM.begin(), stylerVectorM.end(), [lexerName](FRStyler* style)->bool {return style->getStylerName() == lexerName; });
+    auto it = std::find_if(stylerVectorM.begin(), stylerVectorM.end(), [lexerName](FRStyler* style) { return style->getStylerName() == lexerName; });
 
     if (it == stylerVectorM.end())
-        return NULL;
-    else
-        return (FRStyler*)*it;
+        return nullptr;
+    return *it;
 }
 
 int FRStylers::getStylerIndexByName(wxString lexerName)
@@ -515,16 +513,14 @@ int FRStylers::getStylerIndexByName(wxString lexerName)
 
 FRStyler* FRStylers::getStylerByDesc(wxString lexerDesc)
 {
-    if (!lexerDesc)
-        return NULL;
+    if (lexerDesc.IsEmpty())
+        return nullptr;
 
-    std::vector<FRStyler*>::iterator it;
-    it = std::find_if(stylerVectorM.begin(), stylerVectorM.end(), [lexerDesc](FRStyler* style)->bool {return style->getStylerDesc() == lexerDesc; });
+    auto it = std::find_if(stylerVectorM.begin(), stylerVectorM.end(), [lexerDesc](FRStyler* style) { return style->getStylerDesc() == lexerDesc; });
 
     if (it == stylerVectorM.end())
-        return NULL;
-    else
-        return (FRStyler*)*it;
+        return nullptr;
+    return *it;
 }
 
 int FRStylers::getStylerIndexByDesc(wxString lexerDesc)

@@ -499,7 +499,7 @@ ResultsetColumnDef::~ResultsetColumnDef()
 // needed to avoid strange date&time formatting if such column is PK/UNQ
 wxString ResultsetColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
 {
-    return getAsString(buffer, NULL);
+    return getAsString(buffer, nullptr);
 }
 
 wxString ResultsetColumnDef::getName()
@@ -1228,7 +1228,7 @@ void TimeColumnDef::setFromString(DataGridRowBuffer* buffer,
         int hr = 0, mn = 0, sc = 0, ms = 0;
         if (!GridCellFormats::get().parseTime(it, temp.end(), hr, mn, sc, ms))
             throw FRError(_("Cannot parse time"));
-        itm.SetTime(IBPP::Time::tmNone, hr, mn, sc, 10 * ms, IBPP::Time::TZ_NONE, NULL);
+        itm.SetTime(IBPP::Time::tmNone, hr, mn, sc, 10 * ms, IBPP::Time::TZ_NONE, nullptr);
     }
     writeToBuffer(buffer, itm);
 }
@@ -1411,7 +1411,7 @@ void TimestampColumnDef::setFromString(DataGridRowBuffer* buffer,
             throw FRError(_("Cannot parse timestamp"));
         }
         its.SetDate(y, m, d);
-        its.SetTime(IBPP::Time::tmNone, hr, mn, sc, 10 * ms, IBPP::Time::TZ_NONE, NULL);
+        its.SetTime(IBPP::Time::tmNone, hr, mn, sc, 10 * ms, IBPP::Time::TZ_NONE, nullptr);
     }
 
     writeToBuffer(buffer, its);

@@ -200,16 +200,15 @@ void iterateit(CreateDDLVisitor* v, C mc, ProgressIndicator* pi)
         pi->initProgress(wxEmptyString, mc->getChildrenCount(), 0, 2);
     }
 
-    for (typename MetadataCollection<M>::iterator it = mc->begin();
-        it != mc->end(); ++it)
+    for (const auto& item : *mc)
     {
         if (pi)
         {
             checkProgressIndicatorCanceled(pi);
-            pi->setProgressMessage(_("Extracting ") + (*it)->getName_(), 2);
+            pi->setProgressMessage(_("Extracting ") + item->getName_(), 2);
             pi->stepProgress(1, 2);
         }
-        (*it)->acceptVisitor(v);
+        item->acceptVisitor(v);
     }
 }
 
@@ -391,22 +390,18 @@ void CreateDDLVisitor::visitFunctionSQL(FunctionSQL& f)
     temp += "\n";
 
     // grant execute on [name] to [user/role]
-    const std::vector<Privilege>* priv = f.getPrivileges();
-    if (priv)
+    if (const std::vector<Privilege>* priv = f.getPrivileges())
     {
-        for (std::vector<Privilege>::const_iterator ci = priv->begin();
-            ci != priv->end(); ++ci)
-        {
-            grantSqlM += (*ci).getSql() + "\n";
-        }
+        for (const auto& p : *priv)
+            grantSqlM += p.getSql() + "\n";
     }
 
     /* description of function and parameters */
     postSqlM << getCommentOn(f);
     
-    for (ParameterPtrs::iterator it = f.begin(); it != f.end(); ++it)
+    for (const auto& param : f)
     {
-        temp << getCommentOn(*(*it));
+        temp << getCommentOn(*param);
     }
 
     postSqlM << temp << "\n";
@@ -432,14 +427,10 @@ void CreateDDLVisitor::visitGenerator(Generator& g)
     preSqlM += "CREATE " + g.getSource() + ";\n";
 
     // grant usage on [name] to [user/role]
-    const std::vector<Privilege>* priv = g.getPrivileges();
-    if (priv)
+    if (const std::vector<Privilege>* priv = g.getPrivileges())
     {
-        for (std::vector<Privilege>::const_iterator ci = priv->begin();
-            ci != priv->end(); ++ci)
-        {
-            grantSqlM += (*ci).getSql() + "\n";
-        }
+        for (const auto& p : *priv)
+            grantSqlM += p.getSql() + "\n";
     }
 
     postSqlM << getCommentOn(g);

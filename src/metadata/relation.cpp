@@ -79,11 +79,10 @@ ColumnPtrs::const_iterator Relation::end() const
 
 ColumnPtr Relation::findColumn(const wxString& name) const
 {
-    for (ColumnPtrs::const_iterator it = columnsM.begin();
-        it != columnsM.end(); ++it)
+    for (const auto& col : columnsM)
     {
-        if ((*it)->getName_() == name)
-            return *it;
+        if (col->getName_() == name)
+            return col;
     }
     return ColumnPtr();
 }
@@ -91,11 +90,10 @@ ColumnPtr Relation::findColumn(const wxString& name) const
 int Relation::findColumnPosition(const wxString& name) const
 {
     int pos = 0;
-    for (ColumnPtrs::const_iterator it = columnsM.begin();
-        it != columnsM.end(); ++it)
+    for (const auto& col : columnsM)
     {
         pos++;
-        if ((*it)->getName_() == name)
+        if (col->getName_() == name)
             return pos;
     }
     return -1;
