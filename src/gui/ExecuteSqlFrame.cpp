@@ -3754,15 +3754,22 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
                 &fetch2, &mark2, &read2, &write2, &mem2);
             databaseM->getDALDatabase()->getCounts(
                 &ins2, &upd2, &del2, &ridx2, &rseq2);
+
+            log(_("--- Execution Statistics & Buffer Metrics ---"), ttSql);
             log(wxString::Format(
-                _("%d fetches, %d marks, %d reads, %d writes."),
-                fetch2-fetch1, mark2-mark1, read2-read1, write2-write1));
+                _("Page Buffer Metrics -> Fetches: %d | Reads: %d | Writes: %d | Marks: %d"),
+                fetch2-fetch1, read2-read1, write2-write1, mark2-mark1));
             log(wxString::Format(
-                _("%d inserts, %d updates, %d deletes, %d index, %d seq."),
-                ins2-ins1, upd2-upd1, del2-del1, ridx2-ridx1, rseq2-rseq1));
-            log(wxString::Format(_("Delta memory: %d bytes."), mem2-mem1));
+                _("Record I/O Metrics  -> Indexed Reads (ridx): %d | Sequential Scans (rseq): %d"),
+                ridx2-ridx1, rseq2-rseq1));
+            log(wxString::Format(
+                _("DML Modifications   -> Inserts: %d | Updates: %d | Deletes: %d"),
+                ins2-ins1, upd2-upd1, del2-del1));
+            log(wxString::Format(_("Memory Consumption  -> Delta Memory: %d bytes"), mem2-mem1));
+
             databaseM->getDALDatabase()->getDetailedCounts(counts2);
             compareCounts(counts1, counts2);
+            log(_("----------------------------------------------"), ttSql);
         }
 
         if (type != fr::StatementType::Select && !hasColumns) // for other statements: show rows affected
