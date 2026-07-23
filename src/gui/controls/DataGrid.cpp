@@ -210,8 +210,10 @@ void DataGrid::showPopupMenu(wxPoint cursorPos)
     m.Append(Cmds::DataGrid_Copy_as_inList, _("Copy as IN list"));
     m.Append(Cmds::DataGrid_Save_as_html, _("Save as HTML file..."));
     m.Append(Cmds::DataGrid_Save_as_csv, _("Save as CSV file..."));
+    m.Append(Cmds::DataGrid_Save_as_tsv, _("Save as TSV file..."));
     m.Append(Cmds::DataGrid_Save_as_json, _("Save as JSON file..."));
     m.Append(Cmds::DataGrid_Save_as_excel, _("Save as Excel XML file..."));
+    m.Append(Cmds::DataGrid_Save_as_markdown, _("Save as Markdown table..."));
     m.AppendSeparator();
 
     m.Append(Cmds::DataGrid_EditBlob, _("Edit BLOB..."));
@@ -910,6 +912,75 @@ void DataGrid::saveAsExcel(const wxString& fileName)
             " </Worksheet>\n"
             "</Workbook>\n"
         );
+    }
+    if (all)
+        notifyIfUnfetchedData();
+}
+
+void DataGrid::saveAsTSV(const wxString& fileName)
+{
+    saveAsCSV(fileName, '\t', '"');
+}
+
+void DataGrid::saveAsMarkdown(const wxString& fileName)
+{
+    DataGridTable* table = getDataGridTable();
+    if (!table || fileName.empty())
+        return;
+
+    bool all = true;
+    {
+        wxBusyCursor cr;
+        std::vector<bool> selCols(getColumnsWithSelectedCells());
+        if (std::find(selCols.begin(), selCols.end(), false) != selCols.end())
+            all = false;
+
+        wxFileOutputStream fos(fileName);
+        if (!fos.Ok())
+            return;
+        wxTextOutputStream outStr(fos);
+
+        auto escapeMd = [](const wxString& str) -> wxString {
+            wxString res = str;
+            res.Replace("|", "\\|");
+            res.Replace("\r\n", "<br>");
+            res.Replace("\n", "<br>");
+            return res;
+        };
+
+        // Header line
+        wxString sHeader = "| ";
+        wxString sSep = "| ";
+        for (size_t col = 0; col < selCols.size(); col++)
+        {
+            if (selCols[col])
+            {
+                sHeader += escapeMd(GetColLabelValue(col)) + " | ";
+                sSep += "--- | ";
+            }
+        }
+        outStr.WriteString(sHeader + "\n");
+        outStr.WriteString(sSep + "\n");
+
+        std::vector<bool> selRows(getRowsWithSelectedCells());
+        if (std::find(selRows.begin(), selRows.end(), false) != selRows.end())
+            all = false;
+
+        for (size_t row = 0; row < selRows.size(); row++)
+        {
+            if (!selRows[row])
+                continue;
+
+            wxString sRow = "| ";
+            for (size_t col = 0; col < selCols.size(); col++)
+            {
+                if (selCols[col])
+                {
+                    sRow += escapeMd(table->GetValue(row, col)) + " | ";
+                }
+            }
+            outStr.WriteString(sRow + "\n");
+        }
     }
     if (all)
         notifyIfUnfetchedData();

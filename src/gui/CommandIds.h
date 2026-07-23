@@ -78,8 +78,10 @@ enum {
     DataGrid_Copy_as_upins,
     DataGrid_Save_as_html,
     DataGrid_Save_as_csv,
+    DataGrid_Save_as_tsv,
     DataGrid_Save_as_json,
     DataGrid_Save_as_excel,
+    DataGrid_Save_as_markdown,
     DataGrid_Log_changes,
     DataGrid_AutofitColumns,
 
