@@ -91,7 +91,7 @@ The following phases track FlameRobin UI/metadata support for features introduce
 
 Key developer productivity features adapted from modern database extension capabilities (such as `vscode-mssql`) for Firebird SQL:
 
-- [ ] **"Script as ..." Context Actions** — Right-click shortcuts to instantly script objects into the SQL editor:
+- [x] **"Script as ..." Context Actions** — Right-click shortcuts to instantly script objects into the SQL editor:
   - `Script as SELECT (FIRST 100)` — Generate `SELECT FIRST 100 * FROM <table>`.
   - `Script as INSERT / UPDATE / DELETE / MERGE` — Generate DML statements with parameter placeholders.
   - `Script as CREATE / ALTER / DROP` — Instant DDL generation for tables, views, procedures, packages, and triggers.
