@@ -180,6 +180,17 @@ enum {
         BlobEditor_Menu_BLOBLoadFromFile,
         BlobEditor_ProgressCancel,
 
+        // Script As menu actions
+        Menu_ScriptAsSelect,
+        Menu_ScriptAsInsert,
+        Menu_ScriptAsUpdate,
+        Menu_ScriptAsDelete,
+        Menu_ScriptAsMerge,
+        Menu_ScriptAsCreate,
+        Menu_ScriptAsAlter,
+        Menu_ScriptAsDrop,
+        Menu_ScriptAsExecute,
+
         // 100 templates
         Menu_TemplateFirst = 700, 
         Menu_TemplateLast = 799,

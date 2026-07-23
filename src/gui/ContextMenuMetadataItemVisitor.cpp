@@ -131,6 +131,7 @@ void MainObjectMenuMetadataItemVisitor::visitDomain(Domain& domain)
     addAlterItem(domain);
     addDropItem(domain);
     addSeparator();
+    addScriptAsMenu(domain);
     addGenerateCodeMenu(domain);
     addSeparator();
     addRefreshItem();
@@ -150,6 +151,7 @@ void MainObjectMenuMetadataItemVisitor::visitException(Exception& exception)
 {
     addDropItem(exception);
     addSeparator();
+    addScriptAsMenu(exception);
     addGenerateCodeMenu(exception);
     addSeparator();
     addRefreshItem();
@@ -173,6 +175,7 @@ void MainObjectMenuMetadataItemVisitor::visitFunctionSQL(FunctionSQL& function)
         addDropItem(function);
     }
     addSeparator();
+    addScriptAsMenu(function);
     addGenerateCodeMenu(function);
     addSeparator();
     if (function.getParent()->getType() == ntDatabase)
@@ -236,6 +239,7 @@ void MainObjectMenuMetadataItemVisitor::visitGenerator(Generator& generator)
     addSeparator();
     addDropItem(generator);
     addSeparator();
+    addScriptAsMenu(generator);
     addGenerateCodeMenu(generator);
     addSeparator();
     addRefreshItem();
@@ -256,6 +260,7 @@ void MainObjectMenuMetadataItemVisitor::visitGenerators(Generators& generators)
 void MainObjectMenuMetadataItemVisitor::visitGTTable(GTTable& table)
 {
     addBrowseDataItem();
+    addScriptAsMenu(table);
     addGenerateCodeMenu(table);
     addSeparator();
     if (!table.isSystem())
@@ -271,6 +276,7 @@ void MainObjectMenuMetadataItemVisitor::visitPackage(Package& package)
     addAlterItem(package);
     addDropItem(package);
     addSeparator();
+    addScriptAsMenu(package);
     addGenerateCodeMenu(package);
     addSeparator();
     addRefreshItem();
@@ -302,6 +308,7 @@ void MainObjectMenuMetadataItemVisitor::visitProcedure(Procedure& procedure)
         addDropItem(procedure);
     }
     addSeparator();
+    addScriptAsMenu(procedure);
     addGenerateCodeMenu(procedure);
     addSeparator();
     if (procedure.getParent()->getType() == ntDatabase)
@@ -352,6 +359,7 @@ void MainObjectMenuMetadataItemVisitor::visitRole(Role& role)
 {
     addDropItem(role);
     addSeparator();
+    addScriptAsMenu(role);
     addGenerateCodeMenu(role);
     addSeparator();
     addRefreshItem();
@@ -409,6 +417,7 @@ void MainObjectMenuMetadataItemVisitor::visitServer(Server& server)
 void MainObjectMenuMetadataItemVisitor::visitTable(Table& table)
 {
     addBrowseDataItem();
+    addScriptAsMenu(table);
     addGenerateCodeMenu(table);
     addSeparator();
     if (!table.isSystem())
@@ -517,6 +526,7 @@ void MainObjectMenuMetadataItemVisitor::visitDDLTriggers(DDLTriggers& triggers)
 void MainObjectMenuMetadataItemVisitor::visitView(View& view)
 {
     addBrowseDataItem();
+    addScriptAsMenu(view);
     addGenerateCodeMenu(view);
     addSeparator();
     addAlterItem(view);
@@ -665,6 +675,44 @@ void MainObjectMenuMetadataItemVisitor::addGenerateCodeMenu(
     if (!parent)
         parent = menuM;
     parent->Append(Cmds::Menu_TemplateMenu, _("&Generate code"), templateMenu);
+}
+
+void MainObjectMenuMetadataItemVisitor::addScriptAsMenu(
+    MetadataItem& metadataItem, wxMenu* parent)
+{
+    wxMenu* scriptMenu = new wxMenu();
+    NodeType type = metadataItem.getType();
+
+    if (type == ntTable || type == ntGTT || type == ntSysTable || type == ntView)
+    {
+        scriptMenu->Append(Cmds::Menu_ScriptAsSelect, _("SELECT (FIRST 100)"));
+        scriptMenu->Append(Cmds::Menu_ScriptAsInsert, _("INSERT"));
+        scriptMenu->Append(Cmds::Menu_ScriptAsUpdate, _("UPDATE"));
+        scriptMenu->Append(Cmds::Menu_ScriptAsDelete, _("DELETE"));
+        scriptMenu->Append(Cmds::Menu_ScriptAsMerge, _("MERGE"));
+        scriptMenu->AppendSeparator();
+        scriptMenu->Append(Cmds::Menu_ScriptAsCreate, _("CREATE"));
+        scriptMenu->Append(Cmds::Menu_ScriptAsAlter, _("ALTER"));
+        scriptMenu->Append(Cmds::Menu_ScriptAsDrop, _("DROP"));
+    }
+    else if (type == ntProcedure || type == ntFunctionSQL || type == ntUDF)
+    {
+        scriptMenu->Append(Cmds::Menu_ScriptAsExecute, _("EXECUTE"));
+        scriptMenu->AppendSeparator();
+        scriptMenu->Append(Cmds::Menu_ScriptAsCreate, _("CREATE"));
+        scriptMenu->Append(Cmds::Menu_ScriptAsAlter, _("ALTER"));
+        scriptMenu->Append(Cmds::Menu_ScriptAsDrop, _("DROP"));
+    }
+    else
+    {
+        scriptMenu->Append(Cmds::Menu_ScriptAsCreate, _("CREATE"));
+        scriptMenu->Append(Cmds::Menu_ScriptAsAlter, _("ALTER"));
+        scriptMenu->Append(Cmds::Menu_ScriptAsDrop, _("DROP"));
+    }
+
+    if (!parent)
+        parent = menuM;
+    parent->Append(0, _("Script &as..."), scriptMenu);
 }
 
 void MainObjectMenuMetadataItemVisitor::addPropertiesItem()

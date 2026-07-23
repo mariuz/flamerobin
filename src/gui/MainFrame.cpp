@@ -72,13 +72,17 @@
 #include "gui/StartupFrame.h"
 #include "gui/UpdateChecker.h"
 #include "main.h"
+#include <set>
 #include "metadata/column.h"
+#include "metadata/constraints.h"
+#include "metadata/CreateDDLVisitor.h"
 #include "metadata/domain.h"
 #include "metadata/generator.h"
 #include "metadata/function.h"
 #include "metadata/MetadataItemCreateStatementVisitor.h"
 #include "metadata/MetadataTemplateManager.h"
 #include "metadata/package.h"
+#include "metadata/parameter.h"
 #include "metadata/procedure.h"
 #include "metadata/root.h"
 #include "metadata/server.h"
@@ -465,6 +469,16 @@ EVT_UPDATE_UI(Cmds::Menu_StartupDatabase, MainFrame::OnMenuUpdateIfDatabaseNotCo
     EVT_MENU(Cmds::Menu_AddColumn, MainFrame::OnMenuAddColumn)
     EVT_MENU(Cmds::Menu_ExecuteProcedure, MainFrame::OnMenuExecuteProcedure)
     EVT_MENU(Cmds::Menu_ExecuteFunction, MainFrame::OnMenuExecuteFunction)
+
+    EVT_MENU(Cmds::Menu_ScriptAsSelect, MainFrame::OnMenuScriptAsSelect)
+    EVT_MENU(Cmds::Menu_ScriptAsInsert, MainFrame::OnMenuScriptAsInsert)
+    EVT_MENU(Cmds::Menu_ScriptAsUpdate, MainFrame::OnMenuScriptAsUpdate)
+    EVT_MENU(Cmds::Menu_ScriptAsDelete, MainFrame::OnMenuScriptAsDelete)
+    EVT_MENU(Cmds::Menu_ScriptAsMerge, MainFrame::OnMenuScriptAsMerge)
+    EVT_MENU(Cmds::Menu_ScriptAsCreate, MainFrame::OnMenuScriptAsCreate)
+    EVT_MENU(Cmds::Menu_ScriptAsAlter, MainFrame::OnMenuScriptAsAlter)
+    EVT_MENU(Cmds::Menu_ScriptAsDrop, MainFrame::OnMenuScriptAsDrop)
+    EVT_MENU(Cmds::Menu_ScriptAsExecute, MainFrame::OnMenuScriptAsExecute)
 
     EVT_MENU(Cmds::Menu_ShowAllGeneratorValues, MainFrame::OnMenuShowAllGeneratorValues)
     EVT_UPDATE_UI(Cmds::Menu_ShowAllGeneratorValues, MainFrame::OnMenuUpdateIfMetadataItemHasChildren)
@@ -1154,6 +1168,384 @@ void MainFrame::OnMenuBrowseData(wxCommandEvent& WXUNUSED(event))
 {
     executeSysTemplate("browse_data",
         treeMainM->getSelectedMetadataItem(), this);
+}
+
+void MainFrame::OnMenuScriptAsSelect(wxCommandEvent& WXUNUSED(event))
+{
+    MetadataItem* item = treeMainM->getSelectedMetadataItem();
+    if (!item)
+        return;
+    DatabasePtr db = getDatabase(item);
+    if (!checkValidDatabase(db) || !tryAutoConnectDatabase(db))
+        return;
+
+    wxString sql = "SELECT FIRST 100 ";
+    Relation* rel = dynamic_cast<Relation*>(item);
+    if (rel)
+    {
+        rel->ensureChildrenLoaded();
+        wxString cols;
+        for (const auto& col : *rel)
+        {
+            if (!cols.IsEmpty())
+                cols += ", ";
+            cols += col->getQuotedName();
+        }
+        if (!cols.IsEmpty())
+            sql += cols;
+        else
+            sql += "*";
+    }
+    else
+    {
+        sql += "*";
+    }
+    sql += "\nFROM " + item->getQuotedName() + ";\n";
+
+    showSql(this, wxString::Format(_("SELECT - %s"), item->getName_().c_str()), db, sql);
+}
+
+void MainFrame::OnMenuScriptAsInsert(wxCommandEvent& WXUNUSED(event))
+{
+    MetadataItem* item = treeMainM->getSelectedMetadataItem();
+    if (!item)
+        return;
+    DatabasePtr db = getDatabase(item);
+    if (!checkValidDatabase(db) || !tryAutoConnectDatabase(db))
+        return;
+
+    Relation* rel = dynamic_cast<Relation*>(item);
+    wxString colList, valList;
+    if (rel)
+    {
+        rel->ensureChildrenLoaded();
+        for (const auto& col : *rel)
+        {
+            if (col->getComputedSource().empty())
+            {
+                if (!colList.IsEmpty())
+                {
+                    colList += ",\n  ";
+                    valList += ",\n  ";
+                }
+                else
+                {
+                    colList += "\n  ";
+                    valList += "\n  ";
+                }
+                colList += col->getQuotedName();
+                valList += ":" + col->getName_();
+            }
+        }
+    }
+
+    wxString sql;
+    if (!colList.IsEmpty())
+    {
+        sql = "INSERT INTO " + item->getQuotedName() + " (" + colList + "\n)\nVALUES (" + valList + "\n);\n";
+    }
+    else
+    {
+        sql = "INSERT INTO " + item->getQuotedName() + " VALUES (...);\n";
+    }
+
+    showSql(this, wxString::Format(_("INSERT - %s"), item->getName_().c_str()), db, sql);
+}
+
+void MainFrame::OnMenuScriptAsUpdate(wxCommandEvent& WXUNUSED(event))
+{
+    MetadataItem* item = treeMainM->getSelectedMetadataItem();
+    if (!item)
+        return;
+    DatabasePtr db = getDatabase(item);
+    if (!checkValidDatabase(db) || !tryAutoConnectDatabase(db))
+        return;
+
+    Table* tab = dynamic_cast<Table*>(item);
+    Relation* rel = dynamic_cast<Relation*>(item);
+
+    wxString setList, whereList;
+    std::set<wxString> pkCols;
+    if (tab)
+    {
+        if (PrimaryKeyConstraint* pk = tab->getPrimaryKey())
+        {
+            for (const auto& colName : *pk)
+                pkCols.insert(colName);
+        }
+    }
+
+    if (rel)
+    {
+        rel->ensureChildrenLoaded();
+        for (const auto& col : *rel)
+        {
+            if (col->getComputedSource().empty())
+            {
+                if (pkCols.count(col->getName_()))
+                {
+                    if (!whereList.IsEmpty())
+                        whereList += "\n  AND ";
+                    else
+                        whereList += "\n  ";
+                    whereList += col->getQuotedName() + " = :" + col->getName_();
+                }
+                else
+                {
+                    if (!setList.IsEmpty())
+                        setList += ",\n  ";
+                    else
+                        setList += "\n  ";
+                    setList += col->getQuotedName() + " = :" + col->getName_();
+                }
+            }
+        }
+    }
+
+    if (setList.IsEmpty())
+        setList = "\n  /* specify SET columns */";
+
+    if (whereList.IsEmpty())
+        whereList = "\n  /* specify WHERE condition */";
+
+    wxString sql = "UPDATE " + item->getQuotedName() + "\nSET " + setList + "\nWHERE " + whereList + ";\n";
+
+    showSql(this, wxString::Format(_("UPDATE - %s"), item->getName_().c_str()), db, sql);
+}
+
+void MainFrame::OnMenuScriptAsDelete(wxCommandEvent& WXUNUSED(event))
+{
+    MetadataItem* item = treeMainM->getSelectedMetadataItem();
+    if (!item)
+        return;
+    DatabasePtr db = getDatabase(item);
+    if (!checkValidDatabase(db) || !tryAutoConnectDatabase(db))
+        return;
+
+    Table* tab = dynamic_cast<Table*>(item);
+    wxString whereList;
+    if (tab)
+    {
+        if (PrimaryKeyConstraint* pk = tab->getPrimaryKey())
+        {
+            for (const auto& colName : *pk)
+            {
+                if (!whereList.IsEmpty())
+                    whereList += "\n  AND ";
+                else
+                    whereList += "\n  ";
+                Identifier id(colName, tab->getDatabase() ? tab->getDatabase()->getSqlDialect() : 3);
+                whereList += id.getQuoted() + " = :" + colName;
+            }
+        }
+    }
+
+    if (whereList.IsEmpty())
+        whereList = "\n  /* specify WHERE condition */";
+
+    wxString sql = "DELETE FROM " + item->getQuotedName() + "\nWHERE " + whereList + ";\n";
+
+    showSql(this, wxString::Format(_("DELETE - %s"), item->getName_().c_str()), db, sql);
+}
+
+void MainFrame::OnMenuScriptAsMerge(wxCommandEvent& WXUNUSED(event))
+{
+    MetadataItem* item = treeMainM->getSelectedMetadataItem();
+    if (!item)
+        return;
+    DatabasePtr db = getDatabase(item);
+    if (!checkValidDatabase(db) || !tryAutoConnectDatabase(db))
+        return;
+
+    Table* tab = dynamic_cast<Table*>(item);
+    Relation* rel = dynamic_cast<Relation*>(item);
+
+    std::set<wxString> pkCols;
+    if (tab)
+    {
+        if (PrimaryKeyConstraint* pk = tab->getPrimaryKey())
+        {
+            for (const auto& colName : *pk)
+                pkCols.insert(colName);
+        }
+    }
+
+    wxString onClause, updateSet, insertCols, insertVals;
+    if (rel)
+    {
+        rel->ensureChildrenLoaded();
+        for (const auto& col : *rel)
+        {
+            if (col->getComputedSource().empty())
+            {
+                if (pkCols.count(col->getName_()))
+                {
+                    if (!onClause.IsEmpty())
+                        onClause += " AND ";
+                    onClause += "target." + col->getQuotedName() + " = source." + col->getQuotedName();
+                }
+                else
+                {
+                    if (!updateSet.IsEmpty())
+                        updateSet += ",\n    ";
+                    else
+                        updateSet += "\n    ";
+                    updateSet += "target." + col->getQuotedName() + " = source." + col->getQuotedName();
+                }
+
+                if (!insertCols.IsEmpty())
+                {
+                    insertCols += ", ";
+                    insertVals += ", ";
+                }
+                insertCols += col->getQuotedName();
+                insertVals += "source." + col->getQuotedName();
+            }
+        }
+    }
+
+    if (onClause.IsEmpty())
+        onClause = "target./* pk_col */ = source./* pk_col */";
+
+    wxString sql = "MERGE INTO " + item->getQuotedName() + " AS target\n"
+        "USING (<source_query>) AS source\n"
+        "ON (" + onClause + ")\n"
+        "WHEN MATCHED THEN\n"
+        "  UPDATE SET " + (updateSet.IsEmpty() ? "target./* col */ = source./* col */" : updateSet) + "\n"
+        "WHEN NOT MATCHED THEN\n"
+        "  INSERT (" + insertCols + ")\n"
+        "  VALUES (" + insertVals + ");\n";
+
+    showSql(this, wxString::Format(_("MERGE - %s"), item->getName_().c_str()), db, sql);
+}
+
+void MainFrame::OnMenuScriptAsCreate(wxCommandEvent& WXUNUSED(event))
+{
+    MetadataItem* item = treeMainM->getSelectedMetadataItem();
+    if (!item)
+        return;
+    DatabasePtr db = getDatabase(item);
+    if (!checkValidDatabase(db) || !tryAutoConnectDatabase(db))
+        return;
+
+    CreateDDLVisitor v;
+    item->acceptVisitor(&v);
+    wxString sql = v.getSql();
+    if (sql.IsEmpty())
+        sql = "/* Unable to generate CREATE DDL for " + item->getName_() + " */\n";
+
+    showSql(this, wxString::Format(_("CREATE DDL - %s"), item->getName_().c_str()), db, sql);
+}
+
+void MainFrame::OnMenuScriptAsAlter(wxCommandEvent& WXUNUSED(event))
+{
+    MetadataItem* item = treeMainM->getSelectedMetadataItem();
+    if (!item)
+        return;
+    DatabasePtr db = getDatabase(item);
+    if (!checkValidDatabase(db) || !tryAutoConnectDatabase(db))
+        return;
+
+    wxString sql;
+    if (Procedure* p = dynamic_cast<Procedure*>(item))
+        sql = p->getAlterSql();
+    else if (FunctionSQL* f = dynamic_cast<FunctionSQL*>(item))
+        sql = f->getAlterSql();
+    else if (Package* pkg = dynamic_cast<Package*>(item))
+        sql = pkg->getAlterSql();
+    else if (Trigger* tr = dynamic_cast<Trigger*>(item))
+        sql = tr->getAlterSql();
+    else if (Table* tab = dynamic_cast<Table*>(item))
+        sql = "ALTER TABLE " + tab->getQuotedName() + "\n  /* ADD column_name data_type */;\n";
+    else if (View* v = dynamic_cast<View*>(item))
+        sql = v->getAlterSql();
+    else if (Domain* d = dynamic_cast<Domain*>(item))
+        sql = "ALTER DOMAIN " + d->getQuotedName() + "\n  /* SET DEFAULT value | DROP DEFAULT */;\n";
+    else
+        sql = "ALTER " + item->getTypeName() + " " + item->getQuotedName() + " ...;\n";
+
+    showSql(this, wxString::Format(_("ALTER - %s"), item->getName_().c_str()), db, sql);
+}
+
+void MainFrame::OnMenuScriptAsDrop(wxCommandEvent& WXUNUSED(event))
+{
+    MetadataItem* item = treeMainM->getSelectedMetadataItem();
+    if (!item)
+        return;
+    DatabasePtr db = getDatabase(item);
+    if (!checkValidDatabase(db) || !tryAutoConnectDatabase(db))
+        return;
+
+    wxString typeName = item->getTypeName().Upper();
+    if (typeName == "TABLEGTT")
+        typeName = "TABLE";
+
+    wxString sql = "DROP " + typeName + " " + item->getQuotedName() + ";\n";
+    showSql(this, wxString::Format(_("DROP - %s"), item->getName_().c_str()), db, sql);
+}
+
+void MainFrame::OnMenuScriptAsExecute(wxCommandEvent& WXUNUSED(event))
+{
+    MetadataItem* item = treeMainM->getSelectedMetadataItem();
+    if (!item)
+        return;
+    DatabasePtr db = getDatabase(item);
+    if (!checkValidDatabase(db) || !tryAutoConnectDatabase(db))
+        return;
+
+    wxString sql;
+    if (Procedure* p = dynamic_cast<Procedure*>(item))
+    {
+        p->ensureChildrenLoaded();
+        wxString inParams, outParams;
+        bool hasOutput = false;
+        for (const auto& param : *p)
+        {
+            if (!param->isOutputParameter())
+            {
+                if (!inParams.IsEmpty())
+                    inParams += ", ";
+                inParams += ":" + param->getName_();
+            }
+            else
+            {
+                hasOutput = true;
+                if (!outParams.IsEmpty())
+                    outParams += ", ";
+                outParams += param->getQuotedName();
+            }
+        }
+
+        if (hasOutput)
+        {
+            sql = "SELECT " + (outParams.IsEmpty() ? "*" : outParams) + "\nFROM " + p->getQuotedName() + "(" + inParams + ");\n";
+        }
+        else
+        {
+            sql = "EXECUTE PROCEDURE " + p->getQuotedName() + "(" + inParams + ");\n";
+        }
+    }
+    else if (FunctionSQL* f = dynamic_cast<FunctionSQL*>(item))
+    {
+        f->ensureChildrenLoaded();
+        wxString inParams;
+        for (const auto& param : *f)
+        {
+            if (!param->isOutputParameter())
+            {
+                if (!inParams.IsEmpty())
+                    inParams += ", ";
+                inParams += ":" + param->getName_();
+            }
+        }
+        sql = "SELECT " + f->getQuotedName() + "(" + inParams + ")\nFROM RDB$DATABASE;\n";
+    }
+    else
+    {
+        sql = "/* Execute script for " + item->getName_() + " */\n";
+    }
+
+    showSql(this, wxString::Format(_("EXECUTE - %s"), item->getName_().c_str()), db, sql);
 }
 
 void MainFrame::OnMenuNewVolatileSQLEditor(wxCommandEvent& WXUNUSED(event))

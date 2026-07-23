@@ -97,6 +97,15 @@ public:
     void OnMenuAlterObject(wxCommandEvent& event);
     void OnMenRebuildObject(wxCommandEvent& event);
     void OnMenuGenerateCode(wxCommandEvent& event);
+    void OnMenuScriptAsSelect(wxCommandEvent& event);
+    void OnMenuScriptAsInsert(wxCommandEvent& event);
+    void OnMenuScriptAsUpdate(wxCommandEvent& event);
+    void OnMenuScriptAsDelete(wxCommandEvent& event);
+    void OnMenuScriptAsMerge(wxCommandEvent& event);
+    void OnMenuScriptAsCreate(wxCommandEvent& event);
+    void OnMenuScriptAsAlter(wxCommandEvent& event);
+    void OnMenuScriptAsDrop(wxCommandEvent& event);
+    void OnMenuScriptAsExecute(wxCommandEvent& event);
     void OnMenuExecuteProcedure(wxCommandEvent& event);
     void OnMenuDisconnect(wxCommandEvent& event);
     void OnMenuConnect(wxCommandEvent& event);
