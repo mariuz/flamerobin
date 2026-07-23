@@ -286,6 +286,10 @@ private:
 
     void OnMenuFindSelectedObject(wxCommandEvent& event);
 
+    void OnFilterTextChange(wxCommandEvent& event);
+    void OnFilterClearClick(wxCommandEvent& event);
+    void updateFilterCountLabel();
+
     void set_properties();
     void do_layout();
 
@@ -297,7 +301,9 @@ private:
 protected:
     enum {
         ID_grid_data = 101,
-        ID_stc_sql
+        ID_stc_sql,
+        ID_text_ctrl_filter,
+        ID_button_clear_filter
     };
 
     bool closeWhenTransactionDoneM;
@@ -311,6 +317,9 @@ protected:
     wxNotebook* notebook_1;
     wxPanel* notebook_pane_1;
     wxPanel* notebook_pane_2;
+    wxTextCtrl* text_ctrl_filter;
+    wxStaticText* label_filter_count;
+    wxButton* button_clear_filter;
     wxPanel* notebook_pane_3;
     wxPanel* notebook_pane_plan;
     wxTreeCtrl* tree_query_plan;

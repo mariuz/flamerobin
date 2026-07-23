@@ -240,8 +240,9 @@ void DataGridTable::addRow(DataGridRowBuffer *buffer, const wxString& sql)
 wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
     wxGridCellAttr::wxAttrKind kind)
 {
+    int realRow = getRealRowIndex(row);
     DataGridFieldInfo info;
-    if (!rowsM.getFieldInfo(row, col, info))
+    if (!rowsM.getFieldInfo(realRow, col, info))
         return wxGridTableBase::GetAttr(row, col, kind);
 
     bool useAttri = readOnlyM || info.rowInserted || info.rowDeleted
@@ -293,22 +294,27 @@ wxString DataGridTable::getCellValue(int row, int col)
     if (!isValidCellPos(row, col))
         return wxEmptyString;
 
-    if (rowsM.isFieldNA(row, col))
+    int realRow = getRealRowIndex(row);
+    if (rowsM.isFieldNA(realRow, col))
         return "N/A";
-    if (rowsM.isFieldNull(row, col))
+    if (rowsM.isFieldNull(realRow, col))
         return "[null]";
-    return rowsM.getFieldValue(row, col);
+    return rowsM.getFieldValue(realRow, col);
 }
 
 wxString DataGridTable::getCellValueForInsert(int row, int col)
 {
-    if (!isValidCellPos(row, col) || rowsM.isFieldNA(row, col))
+    if (!isValidCellPos(row, col))
         return wxEmptyString;
 
-    if (rowsM.isFieldNull(row, col))
+    int realRow = getRealRowIndex(row);
+    if (rowsM.isFieldNA(realRow, col))
+        return wxEmptyString;
+
+    if (rowsM.isFieldNull(realRow, col))
         return "NULL";
     // return quoted text, but escape embedded quotes
-    wxString s(rowsM.getFieldValue(row, col));
+    wxString s(rowsM.getFieldValue(realRow, col));
     // Normalize decimal separator for SQL: Firebird always uses dot.
     // If the display value uses comma as decimal separator (locale-
     // dependent formatting) and has no dot, replace comma with dot.
@@ -324,15 +330,19 @@ wxString DataGridTable::getCellValueForInsert(int row, int col)
 wxString DataGridTable::getCellValueForCSV(int row, int col,
     const wxChar& textDelimiter)
 {
-    if (!isValidCellPos(row, col) || rowsM.isFieldNA(row, col))
+    if (!isValidCellPos(row, col))
+        return wxEmptyString;
+
+    int realRow = getRealRowIndex(row);
+    if (rowsM.isFieldNA(realRow, col))
         return wxEmptyString;
 
     const wxString sTextDelim =
         (textDelimiter != '\0') ? wxString(textDelimiter) : wxString("");
 
-    if (rowsM.isFieldNull(row, col))
+    if (rowsM.isFieldNull(realRow, col))
         return sTextDelim + "NULL" + sTextDelim;
-    wxString s(rowsM.getFieldValue(row, col));
+    wxString s(rowsM.getFieldValue(realRow, col));
     if (rowsM.isColumnNumeric(col))
         return s;
 
@@ -365,6 +375,8 @@ int DataGridTable::GetNumberCols()
 
 int DataGridTable::GetNumberRows()
 {
+    if (filterOrSortActiveM)
+        return (int)rowMappingM.size();
     return rowsM.getRowCount();
 }
 
@@ -514,18 +526,20 @@ wxString DataGridTable::GetValue(int row, int col)
     if (!isValidCellPos(row, col))
         return wxEmptyString;
 
+    int realRow = getRealRowIndex(row);
+
     // keep between 200 and 250 more rows fetched for better responsiveness
     // (but make the count of fetched rows a multiple of 50)
-    unsigned maxRowToFetch = 50 * (row / 50 + 5);
+    unsigned maxRowToFetch = 50 * (realRow / 50 + 5);
     if (maxRowToFetchM < maxRowToFetch)
         maxRowToFetchM = maxRowToFetch;
 
-    if (rowsM.isFieldNA(row, col))
+    if (rowsM.isFieldNA(realRow, col))
         return "N/A";
-    if (rowsM.isFieldNull(row, col))
+    if (rowsM.isFieldNull(realRow, col))
         return "[null]";
     // limit returned string to first line (speeds up output in grid)
-    wxString s(rowsM.getFieldValue(row, col));
+    wxString s(rowsM.getFieldValue(realRow, col));
     size_t eol = s.find_first_of("\r\n");
     if (eol != wxString::npos)
         s.erase(eol);
@@ -608,7 +622,7 @@ bool DataGridTable::isNullableColumn(int col)
 
 bool DataGridTable::isNullCell(int row, int col)
 {
-    return rowsM.isFieldNull(row, col);
+    return rowsM.isFieldNull(getRealRowIndex(row), col);
 }
 
 bool DataGridTable::isNumericColumn(int col)
@@ -623,7 +637,7 @@ bool DataGridTable::isReadonlyColumn(int col)
 
 bool DataGridTable::isValidCellPos(int row, int col)
 {
-    return (row >= 0 && col >= 0 && row < (int)rowsM.getRowCount()
+    return (row >= 0 && col >= 0 && row < GetNumberRows()
         && col < (int)rowsM.getRowFieldCount());
 }
 
@@ -790,4 +804,139 @@ bool DataGridTable::DeleteRows(size_t pos, size_t numRows)
 DEFINE_EVENT_TYPE(wxEVT_FRDG_ROWCOUNT_CHANGED)
 DEFINE_EVENT_TYPE(wxEVT_FRDG_STATEMENT)
 DEFINE_EVENT_TYPE(wxEVT_FRDG_INVALIDATEATTR)
+
+int DataGridTable::getRealRowIndex(int row) const
+{
+    if (filterOrSortActiveM && row >= 0 && row < (int)rowMappingM.size())
+        return (int)rowMappingM[row];
+    return row;
+}
+
+void DataGridTable::updateRowMapping()
+{
+    size_t count = rowsM.getRowCount();
+    rowMappingM.clear();
+
+    wxString query = currentFilterTextM.Lower();
+    for (size_t r = 0; r < count; ++r)
+    {
+        if (query.IsEmpty())
+        {
+            rowMappingM.push_back(r);
+        }
+        else
+        {
+            bool match = false;
+            size_t cols = GetNumberCols();
+            for (size_t c = 0; c < cols; ++c)
+            {
+                wxString val = rowsM.getFieldValue(r, c);
+                if (val.Lower().Contains(query))
+                {
+                    match = true;
+                    break;
+                }
+            }
+            if (match)
+                rowMappingM.push_back(r);
+        }
+    }
+
+    if (sortedColM >= 0 && sortedColM < GetNumberCols())
+    {
+        int col = sortedColM;
+        bool asc = sortAscendingM;
+        std::stable_sort(rowMappingM.begin(), rowMappingM.end(), [this, col, asc](size_t a, size_t b) {
+            wxString valA = rowsM.getFieldValue(a, col);
+            wxString valB = rowsM.getFieldValue(b, col);
+
+            double numA = 0, numB = 0;
+            bool isNumA = valA.ToDouble(&numA);
+            bool isNumB = valB.ToDouble(&numB);
+
+            if (isNumA && isNumB)
+            {
+                return asc ? (numA < numB) : (numA > numB);
+            }
+
+            int cmp = valA.CmpNoCase(valB);
+            return asc ? (cmp < 0) : (cmp > 0);
+        });
+    }
+
+    filterOrSortActiveM = (!query.IsEmpty() || sortedColM >= 0);
+}
+
+void DataGridTable::filterRows(const wxString& filterText)
+{
+    currentFilterTextM = filterText;
+    updateRowMapping();
+}
+
+void DataGridTable::sortColumn(int col, bool ascending)
+{
+    sortedColM = col;
+    sortAscendingM = ascending;
+    updateRowMapping();
+
+    if (GetView() && col >= 0 && col < GetNumberCols())
+    {
+        if (originalColLabelsM.size() < (size_t)GetNumberCols())
+        {
+            originalColLabelsM.resize(GetNumberCols());
+            for (int c = 0; c < GetNumberCols(); ++c)
+                originalColLabelsM[c] = GetView()->GetColLabelValue(c);
+        }
+
+        for (int c = 0; c < GetNumberCols(); ++c)
+        {
+            if (c == sortedColM)
+                GetView()->SetColLabelValue(c, originalColLabelsM[c] + (sortAscendingM ? " [▲]" : " [▼]"));
+            else
+                GetView()->SetColLabelValue(c, originalColLabelsM[c]);
+        }
+    }
+}
+
+void DataGridTable::toggleSortColumn(int col)
+{
+    if (sortedColM == col)
+    {
+        if (sortAscendingM)
+            sortColumn(col, false);
+        else
+            clearFilterAndSort();
+    }
+    else
+    {
+        sortColumn(col, true);
+    }
+}
+
+void DataGridTable::clearFilterAndSort()
+{
+    currentFilterTextM.Clear();
+    sortedColM = -1;
+    sortAscendingM = true;
+    filterOrSortActiveM = false;
+    rowMappingM.clear();
+
+    if (GetView() && !originalColLabelsM.empty())
+    {
+        for (int c = 0; c < GetNumberCols() && c < (int)originalColLabelsM.size(); ++c)
+            GetView()->SetColLabelValue(c, originalColLabelsM[c]);
+    }
+}
+
+int DataGridTable::getFilteredRowCount()
+{
+    if (filterOrSortActiveM)
+        return (int)rowMappingM.size();
+    return rowsM.getRowCount();
+}
+
+int DataGridTable::getTotalRowCount()
+{
+    return rowsM.getRowCount();
+}
 

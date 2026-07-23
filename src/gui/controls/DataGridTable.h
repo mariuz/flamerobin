@@ -71,10 +71,29 @@ private:
 
     int getStatementColCount();
     bool isValidCellPos(int row, int col);
+
+    std::vector<size_t> rowMappingM;
+    bool filterOrSortActiveM = false;
+    int sortedColM = -1;
+    bool sortAscendingM = true;
+    wxString currentFilterTextM;
+    std::vector<wxString> originalColLabelsM;
+
+    void updateRowMapping();
+    int getRealRowIndex(int row) const;
 public:
     DataGridTable(IBPP::Statement& s, Database* db);
     DataGridTable(fr::IStatementPtr s, Database* db);
     ~DataGridTable();
+
+    void filterRows(const wxString& filterText);
+    void sortColumn(int col, bool ascending = true);
+    void toggleSortColumn(int col);
+    void clearFilterAndSort();
+    int getFilteredRowCount();
+    int getTotalRowCount();
+    int getSortedColumn() const { return sortedColM; }
+    bool isSortAscending() const { return sortAscendingM; }
 
     void setStatement(IBPP::Statement s) { statementM = s; }
     void setStatement(fr::IStatementPtr s) { statementDALM = s; }

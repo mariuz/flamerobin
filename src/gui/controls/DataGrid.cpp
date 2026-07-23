@@ -1215,6 +1215,7 @@ wxGridCellCoordsArray DataGrid::getSelectedCells()
 BEGIN_EVENT_TABLE(DataGrid, wxGrid)
     EVT_CONTEXT_MENU(DataGrid::OnContextMenu)
     EVT_GRID_CELL_RIGHT_CLICK(DataGrid::OnGridCellRightClick)
+    EVT_GRID_LABEL_LEFT_CLICK(DataGrid::OnGridLabelLeftClick)
     EVT_GRID_LABEL_RIGHT_CLICK(DataGrid::OnGridLabelRightClick)
     EVT_GRID_EDITOR_CREATED(DataGrid::OnEditorCreated)
     EVT_GRID_SELECT_CELL(DataGrid::OnGridCellSelected)
@@ -1227,6 +1228,21 @@ BEGIN_EVENT_TABLE(DataGrid, wxGrid)
     EVT_SCROLLWIN_THUMBRELEASE(DataGrid::OnThumbRelease)
 #endif
 END_EVENT_TABLE()
+
+void DataGrid::OnGridLabelLeftClick(wxGridEvent& event)
+{
+    int col = event.GetCol();
+    if (col >= 0)
+    {
+        DataGridTable* table = getDataGridTable();
+        if (table)
+        {
+            table->toggleSortColumn(col);
+            ForceRefresh();
+        }
+    }
+    event.Skip();
+}
 
 void DataGrid::OnGridCellSelected(wxGridEvent& event)
 {

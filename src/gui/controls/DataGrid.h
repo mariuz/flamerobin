@@ -59,6 +59,7 @@ private:
     void OnContextMenu(wxContextMenuEvent& event);
     void OnGridCellRightClick(wxGridEvent& event);
     void OnGridCellSelected(wxGridEvent& event);
+    void OnGridLabelLeftClick(wxGridEvent& event);
     void OnGridLabelRightClick(wxGridEvent& event);
     void OnGridRangeSelected(wxGridRangeSelectEvent& event);
     void OnIdle(wxIdleEvent& event);

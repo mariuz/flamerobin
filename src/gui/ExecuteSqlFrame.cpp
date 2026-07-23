@@ -635,7 +635,25 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     notebook_1->AddPage(notebook_pane_1, _("Statistics"));
 
     notebook_pane_2 = new wxPanel(notebook_1, -1);
+    wxBoxSizer* sizer_data_pane = new wxBoxSizer(wxVERTICAL);
+
+    wxBoxSizer* sizer_filter = new wxBoxSizer(wxHORIZONTAL);
+    sizer_filter->Add(new wxStaticText(notebook_pane_2, -1, _("Filter:")), 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
+
+    text_ctrl_filter = new wxTextCtrl(notebook_pane_2, ID_text_ctrl_filter, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+    text_ctrl_filter->SetHint(_("Type to filter results in real-time..."));
+    sizer_filter->Add(text_ctrl_filter, 1, wxEXPAND | wxRIGHT, 5);
+
+    button_clear_filter = new wxButton(notebook_pane_2, ID_button_clear_filter, _("Clear"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+    sizer_filter->Add(button_clear_filter, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
+
+    label_filter_count = new wxStaticText(notebook_pane_2, -1, _("0 rows"));
+    sizer_filter->Add(label_filter_count, 0, wxALIGN_CENTER_VERTICAL);
+
+    sizer_data_pane->Add(sizer_filter, 0, wxEXPAND | wxALL, 4);
     grid_data = new DataGrid(notebook_pane_2, ID_grid_data);
+    sizer_data_pane->Add(grid_data, 1, wxEXPAND);
+    notebook_pane_2->SetSizer(sizer_data_pane);
     notebook_1->AddPage(notebook_pane_2, _("Data"));
 
     notebook_pane_plan = new wxPanel(notebook_1, -1);
@@ -1167,9 +1185,13 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_UPDATE_UI(Cmds::DataGrid_FetchAll,       ExecuteSqlFrame::OnMenuUpdateGridFetchAll)
     EVT_UPDATE_UI(Cmds::DataGrid_CancelFetchAll, ExecuteSqlFrame::OnMenuUpdateGridCancelFetchAll)
 
-
     EVT_COMMAND(ExecuteSqlFrame::ID_grid_data, wxEVT_FRDG_ROWCOUNT_CHANGED, \
         ExecuteSqlFrame::OnGridRowCountChanged)
+
+    EVT_TEXT(ExecuteSqlFrame::ID_text_ctrl_filter, ExecuteSqlFrame::OnFilterTextChange)
+    EVT_TEXT_ENTER(ExecuteSqlFrame::ID_text_ctrl_filter, ExecuteSqlFrame::OnFilterTextChange)
+    EVT_BUTTON(ExecuteSqlFrame::ID_button_clear_filter, ExecuteSqlFrame::OnFilterClearClick)
+
     EVT_COMMAND(ExecuteSqlFrame::ID_grid_data, wxEVT_FRDG_STATEMENT, \
         ExecuteSqlFrame::OnGridStatementExecuted)
     EVT_COMMAND(ExecuteSqlFrame::ID_grid_data, wxEVT_FRDG_INVALIDATEATTR, \
@@ -2743,6 +2765,52 @@ void ExecuteSqlFrame::OnMenuGridSaveAsMarkdown(wxCommandEvent& WXUNUSED(event))
     }
 }
 
+void ExecuteSqlFrame::OnFilterTextChange(wxCommandEvent& WXUNUSED(event))
+{
+    if (!grid_data)
+        return;
+    DataGridTable* table = grid_data->getDataGridTable();
+    if (table)
+    {
+        wxString query = text_ctrl_filter->GetValue();
+        table->filterRows(query);
+        grid_data->ForceRefresh();
+        updateFilterCountLabel();
+    }
+}
+
+void ExecuteSqlFrame::OnFilterClearClick(wxCommandEvent& WXUNUSED(event))
+{
+    if (text_ctrl_filter)
+        text_ctrl_filter->Clear();
+    if (grid_data)
+    {
+        DataGridTable* table = grid_data->getDataGridTable();
+        if (table)
+        {
+            table->clearFilterAndSort();
+            grid_data->ForceRefresh();
+            updateFilterCountLabel();
+        }
+    }
+}
+
+void ExecuteSqlFrame::updateFilterCountLabel()
+{
+    if (!grid_data || !label_filter_count)
+        return;
+    DataGridTable* table = grid_data->getDataGridTable();
+    if (table)
+    {
+        int filtered = table->GetNumberRows();
+        int total = table->getTotalRowCount();
+        if (filtered == total)
+            label_filter_count->SetLabel(wxString::Format(_("Rows: %d"), total));
+        else
+            label_filter_count->SetLabel(wxString::Format(_("Filtered: %d / %d rows"), filtered, total));
+    }
+}
+
 
 void ExecuteSqlFrame::OnMenuUpdateGridHasSelection(wxUpdateUIEvent& event)
 {
@@ -3978,6 +4046,7 @@ void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent& event)
     long rowsFetched = event.GetExtraLong();
     s.Printf(_("%ld row(s) fetched"), rowsFetched);
     statusbar_1->SetStatusText(s, 1);
+    updateFilterCountLabel();
 
     // TODO: we could make some bool flag, so that this happens only once per execute()
     //       to fix the problem when user does the select, unsplits the window
