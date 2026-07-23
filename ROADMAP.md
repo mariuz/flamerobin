@@ -65,7 +65,7 @@ The following phases track FlameRobin UI/metadata support for features introduce
 - [x] **Multiple-Row DML `RETURNING`** — Support displaying multi-row results from `INSERT … RETURNING`, `UPDATE … RETURNING`, and `DELETE … RETURNING` in the results grid.
 - [x] **SQL / PSQL Profiler Integration** — Add a UI panel or menu option to run and display output from the Firebird 5 built-in profiler (`RDB$PROFILER` package).
 - [x] **Inline ODS Upgrade Option** — Expose the *upgrade ODS without backup/restore* option in the database maintenance dialogs.
-- [ ] **Compiled Statement Cache Visibility** — Optionally display cache hit/miss statistics from `MON$COMPILED_STATEMENTS`.
+- [x] **Compiled Statement Cache Visibility** — Optionally display cache hit/miss statistics from `MON$COMPILED_STATEMENTS`.
 
 ### Phase 7: Firebird 6.0 Feature Support (ODS 14.x, planned ~2026)
 
