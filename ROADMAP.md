@@ -114,7 +114,7 @@ Key database management, query diagnostic, and monitoring capabilities adapted f
 - [x] **PSQL Routine Parameter Helper & Template Generator** — Autocomplete tooltips and call signature generators for stored procedures and packaged functions, showing input/output parameters, data types, and default values.
 - [x] **Database Maintenance & Health Dashboard** — Centralized maintenance dialog to trigger index selectivity updates (`SET STATISTICS INDEX`), index rebuilds (`ALTER INDEX ... ACTIVE`), database sweep operations, and garbage collection tracking.
 - [x] **Query Execution Statistics & Buffer Metrics** — Detailed breakdown of page reads/writes, non-indexed reads, indexed fetches, and memory usage per execution in the SQL Execution Frame results tab.
-- [ ] **Wire Encryption & Security Protocol Status** — Display active wire encryption status (`WireCrypt`), authentication plugin (SRP, Legacy), and TLS/SSL security settings in database properties and status bars.
+- [x] **Wire Encryption & Security Protocol Status** — Display active wire encryption status (`WireCrypt`), authentication plugin (SRP, Legacy), and TLS/SSL security settings in database properties and status bars.
 - [ ] **Interactive Parameterized Routine Executor** — GUI dialog allowing developers to execute stored procedures and functions by filling input parameter fields with type validation and structured result grid output.
 - [ ] **Expanded MCP Monitoring & Session Tools**:
   - `list_active_sessions` — List active database connections, running queries, and memory footprints via `MON$` tables.
