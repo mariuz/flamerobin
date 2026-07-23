@@ -106,6 +106,21 @@ Key developer productivity features adapted from modern database extension capab
   - `compare_schemas` — Automated schema diffing and DDL migration generation.
   - `get_performance_stats` — Fetch active session metrics, lock wait status, and I/O statistics.
 
+### Phase 9: PostgreSQL-Inspired Developer Tools & Monitoring (Inspired by vscode-pgsql)
+
+Key database management, query diagnostic, and monitoring capabilities adapted from modern PostgreSQL developer tools (such as `vscode-pgsql` and `pgAdmin`) for Firebird SQL:
+
+- [ ] **Live Session & Transaction Lock Monitor** — Interactive real-time monitoring dashboard inspecting active attachments (`MON$ATTACHMENTS`), executing statements (`MON$STATEMENTS`), and transactions (`MON$TRANSACTIONS`), with **Cancel Query** and **Disconnect Attachment** options.
+- [ ] **PSQL Routine Parameter Helper & Template Generator** — Autocomplete tooltips and call signature generators for stored procedures and packaged functions, showing input/output parameters, data types, and default values.
+- [ ] **Database Maintenance & Health Dashboard** — Centralized maintenance dialog to trigger index selectivity updates (`SET STATISTICS INDEX`), index rebuilds (`ALTER INDEX ... ACTIVE`), database sweep operations, and garbage collection tracking.
+- [ ] **Query Execution Statistics & Buffer Metrics** — Detailed breakdown of page reads/writes, non-indexed reads, indexed fetches, and memory usage per execution in the SQL Execution Frame results tab.
+- [ ] **Wire Encryption & Security Protocol Status** — Display active wire encryption status (`WireCrypt`), authentication plugin (SRP, Legacy), and TLS/SSL security settings in database properties and status bars.
+- [ ] **Interactive Parameterized Routine Executor** — GUI dialog allowing developers to execute stored procedures and functions by filling input parameter fields with type validation and structured result grid output.
+- [ ] **Expanded MCP Monitoring & Session Tools**:
+  - `list_active_sessions` — List active database connections, running queries, and memory footprints via `MON$` tables.
+  - `cancel_statement` — Cancel running SQL statements by ID (`MON$STATEMENT_ID`).
+  - `recalculate_index_stats` — Recalculate index selectivities for optimized query planning.
+
 ---
 
 ## Cross-Cutting Work
