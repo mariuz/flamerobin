@@ -638,6 +638,14 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     grid_data = new DataGrid(notebook_pane_2, ID_grid_data);
     notebook_1->AddPage(notebook_pane_2, _("Data"));
 
+    notebook_pane_plan = new wxPanel(notebook_1, -1);
+    wxBoxSizer* sizer_plan = new wxBoxSizer(wxVERTICAL);
+    tree_query_plan = new wxTreeCtrl(notebook_pane_plan, -1, wxDefaultPosition, wxDefaultSize,
+        wxTR_HAS_BUTTONS | wxTR_LINES_AT_ROOT | wxTR_DEFAULT_STYLE);
+    sizer_plan->Add(tree_query_plan, 1, wxEXPAND);
+    notebook_pane_plan->SetSizer(sizer_plan);
+    notebook_1->AddPage(notebook_pane_plan, _("Query Plan"));
+
     if ((databaseM->getODSMajor() > 13) || (databaseM->getODSMajor() == 13 && databaseM->getODSMinor() >= 1))
     {
         notebook_pane_3 = new wxPanel(notebook_1, -1);
@@ -1843,6 +1851,12 @@ void ExecuteSqlFrame::OnMenuExecuteAndFetchAll(wxCommandEvent& WXUNUSED(event))
 void ExecuteSqlFrame::OnMenuShowPlan(wxCommandEvent& WXUNUSED(event))
 {
     prepareAndExecute(true);
+    if (notebook_1 && notebook_pane_plan)
+    {
+        int pageIdx = notebook_1->FindPage(notebook_pane_plan);
+        if (pageIdx != wxNOT_FOUND)
+            notebook_1->SetSelection(pageIdx);
+    }
 }
 
 void ExecuteSqlFrame::OnMenuExplain(wxCommandEvent& WXUNUSED(event))
@@ -3304,7 +3318,9 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         try
         {
             std::string plan = statementM->getPlan();
-            log(wxString(plan.c_str(), *databaseM->getCharsetConverter()));
+            wxString planStr(plan.c_str(), *databaseM->getCharsetConverter());
+            log(planStr);
+            updateQueryPlanTree(planStr);
         }
         catch(std::exception&)
         {
@@ -4953,4 +4969,226 @@ bool EditCollationHandler::handleURI(URI& uri)
     showSql(w->GetParent(), _("Editing Collation"), c->getDatabase(),
         c->getAlterSql());
     return true;
+}
+
+namespace {
+inline wxString trimmed(wxString s)
+{
+    s.Trim(true);
+    s.Trim(false);
+    return s;
+}
+
+struct PlanNode
+{
+    wxString label;
+    wxString detail;
+    bool isNaturalScan = false;
+    bool isIndexScan = false;
+    bool isJoinOrSort = false;
+    std::vector<PlanNode> children;
+};
+
+PlanNode parsePlanText(const wxString& rawPlan)
+{
+    PlanNode root;
+    root.label = _("Query Execution Plan");
+
+    wxString plan = trimmed(rawPlan);
+    if (plan.StartsWith("PLAN "))
+    {
+        plan = plan.Mid(5);
+        plan = trimmed(plan);
+    }
+    else if (plan.StartsWith("plan "))
+    {
+        plan = plan.Mid(5);
+        plan = trimmed(plan);
+    }
+
+    auto parseTokens = [](auto& self, const wxString& text) -> std::vector<PlanNode> {
+        std::vector<PlanNode> nodes;
+        wxString s = trimmed(text);
+        if (s.IsEmpty())
+            return nodes;
+
+        if (s.StartsWith("(") && s.EndsWith(")"))
+        {
+            int depth = 0;
+            bool entireWrapped = true;
+            for (size_t i = 0; i < s.length() - 1; ++i)
+            {
+                if (s[i] == '(') depth++;
+                else if (s[i] == ')') depth--;
+                if (depth == 0 && i > 0)
+                {
+                    entireWrapped = false;
+                    break;
+                }
+            }
+            if (entireWrapped)
+                s = trimmed(s.Mid(1, s.length() - 2));
+        }
+
+        std::vector<wxString> parts;
+        wxString current;
+        int depth = 0;
+        for (size_t i = 0; i < s.length(); ++i)
+        {
+            wxChar ch = s[i];
+            if (ch == '(') depth++;
+            else if (ch == ')') depth--;
+
+            if (ch == ',' && depth == 0)
+            {
+                wxString item = trimmed(current);
+                if (!item.IsEmpty())
+                    parts.push_back(item);
+                current.Clear();
+            }
+            else
+            {
+                current += ch;
+            }
+        }
+        wxString lastItem = trimmed(current);
+        if (!lastItem.IsEmpty())
+            parts.push_back(lastItem);
+
+        for (const auto& part : parts)
+        {
+            PlanNode node;
+            wxString p = trimmed(part);
+
+            if (p.StartsWith("JOIN") || p.StartsWith("join"))
+            {
+                node.label = "JOIN (Nested Loop)";
+                node.isJoinOrSort = true;
+                node.children = self(self, trimmed(p.Mid(4)));
+            }
+            else if (p.StartsWith("MERGE") || p.StartsWith("merge"))
+            {
+                node.label = "MERGE (Sort Merge Join)";
+                node.isJoinOrSort = true;
+                node.children = self(self, trimmed(p.Mid(5)));
+            }
+            else if (p.StartsWith("HASH") || p.StartsWith("hash"))
+            {
+                node.label = "HASH Join";
+                node.isJoinOrSort = true;
+                node.children = self(self, trimmed(p.Mid(4)));
+            }
+            else if (p.StartsWith("SORT") || p.StartsWith("sort"))
+            {
+                node.label = "SORT Operation";
+                node.isJoinOrSort = true;
+                node.children = self(self, trimmed(p.Mid(4)));
+            }
+            else
+            {
+                if (p.Contains("NATURAL") || p.Contains("natural"))
+                {
+                    node.isNaturalScan = true;
+                    wxString tbl = trimmed(p.BeforeFirst(' '));
+                    if (tbl.IsEmpty()) tbl = p;
+                    node.label = wxString::Format(_("[!] Full Table Scan (NATURAL): %s"), tbl.c_str());
+                    node.detail = p;
+                }
+                else if (p.Contains("INDEX") || p.Contains("index"))
+                {
+                    node.isIndexScan = true;
+                    wxString tbl = trimmed(p.BeforeFirst(' '));
+                    if (tbl.IsEmpty()) tbl = p;
+                    wxString idx = trimmed(p.AfterFirst('(').BeforeLast(')'));
+                    if (idx.IsEmpty()) idx = p.AfterFirst(' ');
+                    node.label = wxString::Format(_("[IDX] Index Scan: %s (%s)"), tbl.c_str(), idx.c_str());
+                    node.detail = p;
+                }
+                else
+                {
+                    node.label = p;
+                }
+            }
+            nodes.push_back(node);
+        }
+        return nodes;
+    };
+
+    if (rawPlan.Contains("\n") && !rawPlan.StartsWith("PLAN") && !rawPlan.StartsWith("plan"))
+    {
+        wxArrayString lines = wxStringTokenize(rawPlan, "\r\n");
+        for (const auto& line : lines)
+        {
+            if (trimmed(line).IsEmpty()) continue;
+            size_t firstChar = line.find_first_not_of(" \t->+|");
+            wxString text = (firstChar != wxString::npos) ? trimmed(line.Mid(firstChar)) : trimmed(line);
+            PlanNode node;
+            if (text.Contains("NATURAL") || text.Contains("Table Scan"))
+            {
+                node.isNaturalScan = true;
+                node.label = "[!] " + text;
+            }
+            else if (text.Contains("INDEX") || text.Contains("Index Scan"))
+            {
+                node.isIndexScan = true;
+                node.label = "[IDX] " + text;
+            }
+            else
+            {
+                node.label = text;
+            }
+            root.children.push_back(node);
+        }
+    }
+    else
+    {
+        root.children = parseTokens(parseTokens, plan);
+    }
+
+    return root;
+}
+} // namespace
+
+void ExecuteSqlFrame::updateQueryPlanTree(const wxString& planText)
+{
+    if (!tree_query_plan)
+        return;
+
+    tree_query_plan->DeleteAllItems();
+    if (trimmed(planText).IsEmpty())
+        return;
+
+    PlanNode rootNode = parsePlanText(planText);
+
+    wxTreeItemId rootId = tree_query_plan->AddRoot(rootNode.label);
+    tree_query_plan->SetItemBold(rootId, true);
+
+    auto populateTree = [this](auto& self, wxTreeItemId parentId, const std::vector<PlanNode>& children) -> void {
+        for (const auto& child : children)
+        {
+            wxTreeItemId itemId = tree_query_plan->AppendItem(parentId, child.label);
+            if (child.isNaturalScan)
+            {
+                tree_query_plan->SetItemTextColour(itemId, *wxRED);
+                tree_query_plan->SetItemBold(itemId, true);
+            }
+            else if (child.isIndexScan)
+            {
+                tree_query_plan->SetItemTextColour(itemId, wxColour(0, 128, 0));
+            }
+            else if (child.isJoinOrSort)
+            {
+                tree_query_plan->SetItemBold(itemId, true);
+            }
+
+            if (!child.children.empty())
+            {
+                self(self, itemId, child.children);
+                tree_query_plan->Expand(itemId);
+            }
+        }
+    };
+
+    populateTree(populateTree, rootId, rootNode.children);
+    tree_query_plan->ExpandAll();
 }

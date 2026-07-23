@@ -31,6 +31,7 @@
 #include <wx/notebook.h>
 #include <wx/splitter.h>
 #include <wx/stc/stc.h>
+#include <wx/treectrl.h>
 
 #include <ibpp.h>
 
@@ -309,6 +310,9 @@ protected:
     wxPanel* notebook_pane_1;
     wxPanel* notebook_pane_2;
     wxPanel* notebook_pane_3;
+    wxPanel* notebook_pane_plan;
+    wxTreeCtrl* tree_query_plan;
+    void updateQueryPlanTree(const wxString& planText);
     DataGrid* grid_data;
     DataGrid* grid_profiler_psql;
     DataGrid* grid_profiler_rs;
