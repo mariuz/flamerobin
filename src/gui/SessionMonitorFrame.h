@@ -45,6 +45,7 @@ struct SessionAttachmentInfo
     wxString remoteAddress;
     wxString remoteProcess;
     wxString timestamp;
+    wxString wireCrypt;
 };
 
 struct SessionStatementInfo

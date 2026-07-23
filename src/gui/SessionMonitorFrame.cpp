@@ -88,6 +88,7 @@ SessionMonitorFrame::SessionMonitorFrame(wxWindow* parent, DatabasePtr db)
     list_attachments->InsertColumn(4, _("Remote Process"), wxLIST_FORMAT_LEFT, 180);
     list_attachments->InsertColumn(5, _("State"), wxLIST_FORMAT_LEFT, 80);
     list_attachments->InsertColumn(6, _("Connected Since"), wxLIST_FORMAT_LEFT, 150);
+    list_attachments->InsertColumn(7, _("Wire Crypt"), wxLIST_FORMAT_LEFT, 100);
 
     button_disconnect_attachment = new wxButton(panelAttachments, ID_button_disconnect_attachment, _("Disconnect Attachment"));
     sizerAtt->Add(list_attachments, 1, wxEXPAND | wxALL, 4);
@@ -106,6 +107,8 @@ SessionMonitorFrame::SessionMonitorFrame(wxWindow* parent, DatabasePtr db)
     list_statements->InsertColumn(4, _("SQL Snippet"), wxLIST_FORMAT_LEFT, 300);
 
     editor_sql_preview = new SqlEditor(panelStatements, wxID_ANY);
+    if (databaseM)
+        editor_sql_preview->setKeywords(databaseM->getODSMajor(), databaseM->getODSMinor());
     button_cancel_statement = new wxButton(panelStatements, ID_button_cancel_statement, _("Cancel Query Statement"));
 
     sizerStmt->Add(list_statements, 1, wxEXPAND | wxALL, 4);
@@ -166,23 +169,18 @@ void SessionMonitorFrame::update()
 
 void SessionMonitorFrame::loadMonitoringData()
 {
-    if (!databaseM) return;
-
-    if (!databaseM->isConnected())
-    {
-        try { databaseM->connect(databaseM->getRawPassword()); }
-        catch (...) { return; }
-    }
-
-    auto dalDb = databaseM->getDALDatabase();
-    if (!dalDb || !dalDb->isConnected()) return;
-
     attachmentsM.clear();
     statementsM.clear();
     transactionsM.clear();
 
+    if (!databaseM || !databaseM->isConnected())
+        return;
+
     try
     {
+        auto dalDb = databaseM->getDALDatabase();
+        if (!dalDb || !dalDb->isConnected()) return;
+
         auto tr = dalDb->createTransaction();
         tr->start();
 
@@ -190,8 +188,17 @@ void SessionMonitorFrame::loadMonitoringData()
         try
         {
             auto st = dalDb->createStatement(tr);
-            st->prepare("SELECT MON$ATTACHMENT_ID, MON$STATE, MON$USER, MON$ROLE, MON$REMOTE_ADDRESS, MON$REMOTE_PROCESS, MON$TIMESTAMP "
-                        "FROM MON$ATTACHMENTS ORDER BY MON$ATTACHMENT_ID");
+            bool isFb4 = databaseM->getInfo().isFB40OrHigher();
+            if (isFb4)
+            {
+                st->prepare("SELECT MON$ATTACHMENT_ID, MON$STATE, MON$USER, MON$ROLE, MON$REMOTE_ADDRESS, MON$REMOTE_PROCESS, MON$TIMESTAMP, MON$WIRE_CRYPT "
+                            "FROM MON$ATTACHMENTS ORDER BY MON$ATTACHMENT_ID");
+            }
+            else
+            {
+                st->prepare("SELECT MON$ATTACHMENT_ID, MON$STATE, MON$USER, MON$ROLE, MON$REMOTE_ADDRESS, MON$REMOTE_PROCESS, MON$TIMESTAMP "
+                            "FROM MON$ATTACHMENTS ORDER BY MON$ATTACHMENT_ID");
+            }
             st->execute();
             while (st->fetch())
             {
@@ -203,6 +210,14 @@ void SessionMonitorFrame::loadMonitoringData()
                 att.remoteAddress = wxString::FromUTF8(st->getString(4).c_str());
                 att.remoteProcess = wxString::FromUTF8(st->getString(5).c_str());
                 att.timestamp = wxString::FromUTF8(st->getTimestamp(6).c_str());
+                if (isFb4 && !st->isNull(7))
+                {
+                    att.wireCrypt = st->getBool(7) ? _("Enabled") : _("Disabled");
+                }
+                else
+                {
+                    att.wireCrypt = _("N/A");
+                }
                 attachmentsM.push_back(att);
             }
         } catch (...) {}
@@ -276,6 +291,7 @@ void SessionMonitorFrame::updateAttachmentsUI()
         list_attachments->SetItem(idx, 4, att.remoteProcess);
         list_attachments->SetItem(idx, 5, att.state == 1 ? _("Active") : _("Idle"));
         list_attachments->SetItem(idx, 6, att.timestamp);
+        list_attachments->SetItem(idx, 7, att.wireCrypt.IsEmpty() ? _("N/A") : att.wireCrypt);
     }
 }
 
