@@ -95,7 +95,7 @@ Key developer productivity features adapted from modern database extension capab
   - `Script as SELECT (FIRST 100)` — Generate `SELECT FIRST 100 * FROM <table>`.
   - `Script as INSERT / UPDATE / DELETE / MERGE` — Generate DML statements with parameter placeholders.
   - `Script as CREATE / ALTER / DROP` — Instant DDL generation for tables, views, procedures, packages, and triggers.
-- [ ] **Multi-Format Result Set Export** — Expand DataGrid export capabilities beyond CSV/HTML to include **JSON**, **Excel (XLSX)**, **Markdown tables**, and **TSV**.
+- [x] **Multi-Format Result Set Export** — Expand DataGrid export capabilities beyond CSV/HTML to include **JSON**, **Excel (XLSX)**, **Markdown tables**, and **TSV**.
 - [ ] **Query Result Filtering & Search** — Add an in-memory client-side filter bar and column sorting for query execution result grids without re-executing queries against the database.
 - [ ] **Environment Color Coding & Connection Profiles** — Tag connections with environment profiles (*Production*, *Staging*, *Development*) and display color-coded warning headers/title bars to prevent unintended modifications to live production databases.
 - [ ] **Quick Connection Switcher in Editor** — Dropdown menu in the SQL Execution Frame to switch active database connections for open scripts without reopening tabs.
