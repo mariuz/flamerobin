@@ -44,6 +44,8 @@ private:
     wxListBox* listbox_columns;
     wxStaticText* label_condition;
     wxTextCtrl* textctrl_condition;
+    wxStaticText* label_tablespace;
+    wxTextCtrl* textctrl_tablespace;
 
     wxButton* button_ok;
 

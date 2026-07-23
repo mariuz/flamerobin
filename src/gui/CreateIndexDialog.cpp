@@ -80,6 +80,11 @@ void CreateIndexDialog::createControls()
     textctrl_condition = new wxTextCtrl(getControlsPanel(), -1,
         wxEmptyString);
 
+    label_tablespace = new wxStaticText(getControlsPanel(), -1,
+        _("Tablespace:"));
+    textctrl_tablespace = new wxTextCtrl(getControlsPanel(), -1,
+        wxEmptyString);
+
     button_ok = new wxButton(getControlsPanel(), wxID_OK, _("Create"));
     button_cancel = new wxButton(getControlsPanel(), wxID_CANCEL, _("Cancel"));
 }
@@ -122,6 +127,21 @@ void CreateIndexDialog::layoutControls()
     {
         label_condition->Hide();
         textctrl_condition->Hide();
+    }
+
+    if (db && db->getInfo().isFB60OrHigher())
+    {
+        sizerControls->Add(label_tablespace, 0, wxEXPAND);
+        sizerControls->AddSpacer(
+            styleguide().getRelatedControlMargin(wxVERTICAL));
+        sizerControls->Add(textctrl_tablespace, 0, wxEXPAND);
+        sizerControls->AddSpacer(
+            styleguide().getUnrelatedControlMargin(wxVERTICAL));
+    }
+    else
+    {
+        label_tablespace->Hide();
+        textctrl_tablespace->Hide();
     }
 
     // create sizer for buttons -> styleguide class will align it correctly
@@ -237,6 +257,10 @@ const wxString CreateIndexDialog::getStatementsToExecute()
     wxString condition = textctrl_condition->GetValue();
     if (!condition.Trim().IsEmpty())
         sql += "\n  WHERE " + condition;
+
+    wxString tablespace = textctrl_tablespace->GetValue();
+    if (!tablespace.Trim().IsEmpty())
+        sql += "\n  TABLESPACE " + Identifier::userString(tablespace.Trim());
     sql += ";\n";
     return sql;
 }

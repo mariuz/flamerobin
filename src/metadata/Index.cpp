@@ -58,6 +58,7 @@ void Index::loadProperties()
     );
     sql += db->getInfo().isFB50OrHigher() ? " i.rdb$condition_source " : " null ";
     sql += ", i.rdb$relation_name ";
+    sql += db->getInfo().isFB60OrHigher() ? ", i.rdb$tablespace_name " : ", null ";
     sql +=
         " from rdb$indices i "
         " left join rdb$index_segments s on i.rdb$index_name = s.rdb$index_name "
@@ -105,23 +106,17 @@ void Index::loadProperties()
         s = st1->getString(9);
         relationNameM = std2wxIdentifier(s, converter);
 
+        if (!st1->isNull(10))
+        {
+            s = st1->getString(10);
+            tablespaceM = std2wxIdentifier(s, converter);
+        }
+
         if (i && i->getName_() == ixname)
             i->getSegments()->push_back(fname);
         else
         {
-            /*Index x(
-                unq == 1,
-                inactive == 0,
-                type == 0,
-                statistics,
-                !st1->IsNull(7),
-                expression
-            );
-            indicesM.push_back(x);*/
-            //i = &indicesM.back();
-            //i->setName_(ixname);
-            /*i->*/getSegments()->push_back(fname);
-            //i->setParent(this);
+            getSegments()->push_back(fname);
         }
 
     }
@@ -135,11 +130,11 @@ Index::Index(DatabasePtr database, const wxString& name)
 }
 
 Index::Index(bool unique, bool active, bool ascending, double statistics,
-        bool system, wxString expression, wxString condition, wxString relationName)
+        bool system, wxString expression, wxString condition, wxString relationName, wxString tablespace)
     : MetadataItem(ntIndex), isSystemM(system), uniqueFlagM(unique),
         activeM(active), indexTypeM(ascending ? itAscending : itDescending),
         statisticsM(statistics), segmentsM(), expressionM(expression),
-        conditionM(condition), relationNameM(relationName)
+        conditionM(condition), relationNameM(relationName), tablespaceM(tablespace)
 {
 }
 
@@ -171,6 +166,11 @@ bool Index::isUnique() const
 double Index::getStatistics()
 {
     return statisticsM;
+}
+
+wxString Index::getTablespace() const
+{
+    return tablespaceM;
 }
 
 std::vector<wxString> *Index::getSegments()

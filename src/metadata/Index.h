@@ -46,13 +46,14 @@ private:
     wxString expressionM;
     wxString conditionM;
     wxString relationNameM;
+    wxString tablespaceM;
 protected:
     virtual void loadProperties();
 public:
     Index(DatabasePtr database, const wxString& name);
     Index(bool unique, bool active, bool ascending, double statistics,
         bool system, wxString expression, wxString condition = wxEmptyString,
-        wxString relationName = wxEmptyString);
+        wxString relationName = wxEmptyString, wxString tablespace = wxEmptyString);
 
     virtual bool isSystem() const;
     void setActive(bool active);
@@ -63,6 +64,7 @@ public:
     wxString getExpression() const;
     wxString getCondition() const;
     wxString getRelationName() const;
+    wxString getTablespace() const;
     IndexType getIndexType();
     virtual const wxString getTypeName() const;
     bool hasColumn(wxString segment) const;

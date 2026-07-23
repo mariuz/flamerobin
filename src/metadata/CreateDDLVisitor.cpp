@@ -456,6 +456,11 @@ void CreateDDLVisitor::visitIndex(Index& i)
         quotedSegments.push_back(id.getQuoted());
     }
     preSqlM += buildIndexBodySql(i.getExpression(), quotedSegments, i.getCondition());
+    if (!i.getTablespace().IsEmpty())
+    {
+        Identifier tsId(i.getTablespace());
+        preSqlM += "\n  TABLESPACE " + tsId.getQuoted();
+    }
     preSqlM += ";\n";
 
 
