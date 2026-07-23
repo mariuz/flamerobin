@@ -68,6 +68,8 @@
 #include "engine/db/fbcpp/FbCppTransaction.h"
 #include "gui/FRLayoutConfig.h"
 #include "gui/InsertDialog.h"
+#include "metadata/root.h"
+#include "metadata/server.h"
 #include "gui/InsertParametersDialog.h"
 #include "gui/StatementHistoryDialog.h"
 #include "gui/StyleGuide.h"
@@ -721,6 +723,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     loadingM = false;
     setupStyles();
     updateEnvironmentBanner();
+    populateConnectionSwitcher();
 }
 
 Database* ExecuteSqlFrame::getDatabase() const
@@ -814,6 +817,10 @@ void ExecuteSqlFrame::buildToolbar(CommandManager& cm)
         wxArtProvider::GetBitmapBundle(ART_ToggleView, wxART_TOOLBAR),
         cm.getToolbarHint(_("Toggle split view"), Cmds::View_SplitView),
         wxITEM_CHECK);
+
+    toolBarM->AddSeparator();
+    choice_connection_switcher = new wxChoice(toolBarM, ID_choice_connection_switcher);
+    toolBarM->AddControl(choice_connection_switcher, _("Database Connection"));
 
     toolBarM->Realize();
 }
@@ -1232,6 +1239,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_TEXT(ExecuteSqlFrame::ID_text_ctrl_filter, ExecuteSqlFrame::OnFilterTextChange)
     EVT_TEXT_ENTER(ExecuteSqlFrame::ID_text_ctrl_filter, ExecuteSqlFrame::OnFilterTextChange)
     EVT_BUTTON(ExecuteSqlFrame::ID_button_clear_filter, ExecuteSqlFrame::OnFilterClearClick)
+    EVT_CHOICE(ExecuteSqlFrame::ID_choice_connection_switcher, ExecuteSqlFrame::OnConnectionSwitcherSelect)
 
     EVT_COMMAND(ExecuteSqlFrame::ID_grid_data, wxEVT_FRDG_STATEMENT, \
         ExecuteSqlFrame::OnGridStatementExecuted)
@@ -2850,6 +2858,118 @@ void ExecuteSqlFrame::updateFilterCountLabel()
         else
             label_filter_count->SetLabel(wxString::Format(_("Filtered: %d / %d rows"), filtered, total));
     }
+}
+
+void ExecuteSqlFrame::populateConnectionSwitcher()
+{
+    if (!choice_connection_switcher)
+        return;
+
+    choice_connection_switcher->Clear();
+    availableDatabasesM.clear();
+
+    if (!databaseM || !databaseM->getServer())
+        return;
+
+    MetadataItem* parent = databaseM->getServer()->getParent();
+    Root* root = dynamic_cast<Root*>(parent);
+    if (!root)
+        return;
+
+    int selectedIdx = -1;
+    ServerPtrs servers(root->getServers());
+    for (ServerPtrs::iterator its = servers.begin(); its != servers.end(); ++its)
+    {
+        DatabasePtrs databases((*its)->getDatabases());
+        for (DatabasePtrs::iterator itdb = databases.begin(); itdb != databases.end(); ++itdb)
+        {
+            DatabasePtr dbPtr = *itdb;
+            if (!dbPtr)
+                continue;
+
+            wxString label = dbPtr->getName_() + " (" + (*its)->getHostname() + ")";
+            wxString env = dbPtr->getEnvironmentProfile();
+            if (env == "production")
+                label += " [PROD]";
+            else if (env == "staging")
+                label += " [STAGING]";
+
+            choice_connection_switcher->Append(label);
+            availableDatabasesM.push_back(dbPtr);
+
+            if (dbPtr.get() == databaseM)
+                selectedIdx = (int)availableDatabasesM.size() - 1;
+        }
+    }
+
+    if (selectedIdx >= 0)
+        choice_connection_switcher->SetSelection(selectedIdx);
+}
+
+void ExecuteSqlFrame::OnConnectionSwitcherSelect(wxCommandEvent& WXUNUSED(event))
+{
+    if (!choice_connection_switcher)
+        return;
+
+    int sel = choice_connection_switcher->GetSelection();
+    if (sel < 0 || sel >= (int)availableDatabasesM.size())
+        return;
+
+    DatabasePtr newDbPtr = availableDatabasesM[sel];
+    if (!newDbPtr || newDbPtr.get() == databaseM)
+        return;
+
+    if (isTransactionStarted())
+    {
+        int res = ::wxMessageBox(
+            _("You have an active transaction on the current database connection. Do you want to commit changes before switching connections?"),
+            _("Switch Database Connection"),
+            wxYES_NO | wxCANCEL | wxICON_QUESTION, this);
+        if (res == wxCANCEL)
+        {
+            populateConnectionSwitcher(); // Revert selection
+            return;
+        }
+        if (res == wxYES)
+        {
+            commitTransaction();
+        }
+        else
+        {
+            rollbackTransaction();
+        }
+    }
+
+    if (databaseM && !databaseM->getIsVolative())
+        databaseM->detachObserver(this);
+
+    databasePtrM = newDbPtr;
+    databaseM = newDbPtr.get();
+    serverPtrM = databaseM->getServer();
+
+    if (!databaseM->isConnected())
+    {
+        try
+        {
+            databaseM->connect(databaseM->getRawPassword());
+        }
+        catch (const std::exception& e)
+        {
+            ::wxMessageBox(wxString::FromUTF8(e.what()), _("Connection Failed"), wxOK | wxICON_ERROR, this);
+            populateConnectionSwitcher();
+            return;
+        }
+    }
+
+    if (!databaseM->getIsVolative())
+        databaseM->attachObserver(this, false);
+
+    updateEnvironmentBanner();
+    setKeywords();
+    updateFilterCountLabel();
+
+    if (tree_query_plan)
+        tree_query_plan->DeleteAllItems();
 }
 
 

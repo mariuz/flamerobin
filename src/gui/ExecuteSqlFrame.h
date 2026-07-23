@@ -303,7 +303,8 @@ protected:
         ID_grid_data = 101,
         ID_stc_sql,
         ID_text_ctrl_filter,
-        ID_button_clear_filter
+        ID_button_clear_filter,
+        ID_choice_connection_switcher
     };
 
     bool closeWhenTransactionDoneM;
@@ -314,6 +315,11 @@ protected:
     wxPanel* panel_env_banner;
     wxStaticText* label_env_banner;
     void updateEnvironmentBanner();
+
+    wxChoice* choice_connection_switcher;
+    std::vector<DatabasePtr> availableDatabasesM;
+    void populateConnectionSwitcher();
+    void OnConnectionSwitcherSelect(wxCommandEvent& event);
 
     wxSplitterWindow* splitter_window_1;
     SqlEditor* styled_text_ctrl_sql;
