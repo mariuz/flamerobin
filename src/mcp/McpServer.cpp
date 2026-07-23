@@ -55,6 +55,7 @@
 #include "metadata/function.h"
 #include "metadata/package.h"
 #include "metadata/CreateDDLVisitor.h"
+#include "gui/SchemaDiff.h"
 #include "core/StringUtils.h"
 
 using json = nlohmann::json;
@@ -305,6 +306,82 @@ void McpServer::run()
                 {"required", json::array({"database_name"})}
             };
             tools.push_back(getDbInfo);
+
+            // explain_query tool
+            json explainQuery;
+            explainQuery["name"] = "explain_query";
+            explainQuery["description"] = "Retrieve and analyze Firebird query execution plan (PLAN) and detailed tree explain (EXPLAIN).";
+            explainQuery["inputSchema"] = {
+                {"type", "object"},
+                {"properties", {
+                    {"database_name", {
+                        {"type", "string"},
+                        {"description", "The name of the database as registered in FlameRobin."}
+                    }},
+                    {"sql", {
+                        {"type", "string"},
+                        {"description", "The SQL query to explain."}
+                    }},
+                    {"password", {
+                        {"type", "string"},
+                        {"description", "Optional connection password if not saved."}
+                    }}
+                }},
+                {"required", json::array({"database_name", "sql"})}
+            };
+            tools.push_back(explainQuery);
+
+            // compare_schemas tool
+            json compareSchemasTool;
+            compareSchemasTool["name"] = "compare_schemas";
+            compareSchemasTool["description"] = "Compare two Firebird database schemas and generate executable migration DDL script.";
+            compareSchemasTool["inputSchema"] = {
+                {"type", "object"},
+                {"properties", {
+                    {"source_database_name", {
+                        {"type", "string"},
+                        {"description", "The name of the source (reference) database."}
+                    }},
+                    {"target_database_name", {
+                        {"type", "string"},
+                        {"description", "The name of the target database to migrate."}
+                    }},
+                    {"source_password", {
+                        {"type", "string"},
+                        {"description", "Optional password for source database."}
+                    }},
+                    {"target_password", {
+                        {"type", "string"},
+                        {"description", "Optional password for target database."}
+                    }},
+                    {"generate_drop_statements", {
+                        {"type", "boolean"},
+                        {"description", "Set true to generate DROP statements for extra columns/objects in target."}
+                    }}
+                }},
+                {"required", json::array({"source_database_name", "target_database_name"})}
+            };
+            tools.push_back(compareSchemasTool);
+
+            // get_performance_stats tool
+            json getPerfStats;
+            getPerfStats["name"] = "get_performance_stats";
+            getPerfStats["description"] = "Fetch active session metrics, statement counts, active transactions, and memory/page allocations from Firebird MON$ tables.";
+            getPerfStats["inputSchema"] = {
+                {"type", "object"},
+                {"properties", {
+                    {"database_name", {
+                        {"type", "string"},
+                        {"description", "The name of the database as registered in FlameRobin."}
+                    }},
+                    {"password", {
+                        {"type", "string"},
+                        {"description", "Optional connection password if not saved."}
+                    }}
+                }},
+                {"required", json::array({"database_name"})}
+            };
+            tools.push_back(getPerfStats);
 
             response["result"] = {
                 {"tools", tools}
@@ -655,6 +732,177 @@ void McpServer::run()
                     dbInfo["active_transactions"] = activeTxs;
 
                     toolResult = dbInfo;
+                }
+                else if (toolName == "explain_query")
+                {
+                    std::string dbName = args.value("database_name", "");
+                    std::string sqlStr = args.value("sql", "");
+                    std::string password = args.value("password", "");
+
+                    std::shared_ptr<Root> root(new Root());
+                    root->load();
+                    DatabasePtr targetDb;
+                    for (const auto& server : root->getServers())
+                    {
+                        for (const auto& db : server->getDatabases())
+                        {
+                            if (wx2std(db->getName_()) == dbName)
+                            {
+                                targetDb = db;
+                                break;
+                            }
+                        }
+                        if (targetDb) break;
+                    }
+
+                    if (!targetDb)
+                        throw std::runtime_error("Database '" + dbName + "' not found in FlameRobin configuration.");
+
+                    wxString pwd = targetDb->getDecryptedPassword();
+                    if (!password.empty())
+                        pwd = wxString::FromUTF8(password.c_str());
+
+                    targetDb->connect(pwd, nullptr);
+
+                    auto dalDb = targetDb->getDALDatabase();
+                    auto tr = dalDb->createTransaction();
+                    tr->start();
+                    auto st = dalDb->createStatement(tr);
+                    st->prepare(sqlStr);
+
+                    std::string plan = st->getPlan();
+                    tr->rollback();
+
+                    toolResult["plan"] = plan;
+                }
+                else if (toolName == "compare_schemas")
+                {
+                    std::string srcDbName = args.value("source_database_name", "");
+                    std::string tgtDbName = args.value("target_database_name", "");
+                    std::string srcPwdStr = args.value("source_password", "");
+                    std::string tgtPwdStr = args.value("target_password", "");
+                    bool genDrop = args.value("generate_drop_statements", false);
+
+                    std::shared_ptr<Root> root(new Root());
+                    root->load();
+
+                    DatabasePtr srcDb;
+                    DatabasePtr tgtDb;
+                    for (const auto& server : root->getServers())
+                    {
+                        for (const auto& db : server->getDatabases())
+                        {
+                            if (wx2std(db->getName_()) == srcDbName)
+                                srcDb = db;
+                            if (wx2std(db->getName_()) == tgtDbName)
+                                tgtDb = db;
+                        }
+                    }
+
+                    if (!srcDb)
+                        throw std::runtime_error("Source database '" + srcDbName + "' not found.");
+                    if (!tgtDb)
+                        throw std::runtime_error("Target database '" + tgtDbName + "' not found.");
+
+                    wxString srcPwd = srcDb->getDecryptedPassword();
+                    if (!srcPwdStr.empty()) srcPwd = wxString::FromUTF8(srcPwdStr.c_str());
+                    srcDb->connect(srcPwd, nullptr);
+
+                    wxString tgtPwd = tgtDb->getDecryptedPassword();
+                    if (!tgtPwdStr.empty()) tgtPwd = wxString::FromUTF8(tgtPwdStr.c_str());
+                    tgtDb->connect(tgtPwd, nullptr);
+
+                    SchemaDiffOptions opts;
+                    opts.generateDropStatements = genDrop;
+
+                    auto diffs = SchemaDiff::compareDatabases(srcDb.get(), tgtDb.get(), opts);
+                    std::string migrationScript = wx2std(SchemaDiff::generateMigrationScript(diffs, srcDb.get(), tgtDb.get()));
+
+                    json diffList = json::array();
+                    for (const auto& item : diffs)
+                    {
+                        json d;
+                        d["object_type"] = wx2std(item.objectType);
+                        d["object_name"] = wx2std(item.objectName);
+                        d["description"] = wx2std(item.description);
+                        d["migration_sql"] = wx2std(item.migrationSql);
+                        diffList.push_back(d);
+                    }
+
+                    toolResult["differences_count"] = diffs.size();
+                    toolResult["migration_sql"] = migrationScript;
+                    toolResult["differences"] = diffList;
+                }
+                else if (toolName == "get_performance_stats")
+                {
+                    std::string dbName = args.value("database_name", "");
+                    std::string password = args.value("password", "");
+
+                    std::shared_ptr<Root> root(new Root());
+                    root->load();
+                    DatabasePtr targetDb;
+                    for (const auto& server : root->getServers())
+                    {
+                        for (const auto& db : server->getDatabases())
+                        {
+                            if (wx2std(db->getName_()) == dbName)
+                            {
+                                targetDb = db;
+                                break;
+                            }
+                        }
+                        if (targetDb) break;
+                    }
+
+                    if (!targetDb)
+                        throw std::runtime_error("Database '" + dbName + "' not found in FlameRobin configuration.");
+
+                    wxString pwd = targetDb->getDecryptedPassword();
+                    if (!password.empty())
+                        pwd = wxString::FromUTF8(password.c_str());
+
+                    targetDb->connect(pwd, nullptr);
+
+                    auto dalDb = targetDb->getDALDatabase();
+                    json perf;
+
+                    try
+                    {
+                        auto tr = dalDb->createTransaction();
+                        tr->start();
+                        auto st = dalDb->createStatement(tr);
+                        std::string monSql = "SELECT (SELECT COUNT(*) FROM MON$ATTACHMENTS WHERE MON$ATTACHMENT_ID <> CURRENT_ATTACHMENT_ID) AS active_attachments, "
+                            "(SELECT COUNT(*) FROM MON$STATEMENTS WHERE MON$STATE = 1) AS active_statements, "
+                            "(SELECT COUNT(*) FROM MON$TRANSACTIONS WHERE MON$STATE = 1) AS active_transactions "
+                            "FROM RDB$DATABASE;";
+                        st->prepare(monSql);
+                        st->execute();
+
+                        if (st->fetch())
+                        {
+                            perf["active_attachments"] = st->getInt32(0);
+                            perf["active_statements"] = st->getInt32(1);
+                            perf["active_transactions"] = st->getInt32(2);
+                        }
+                        tr->commit();
+                    }
+                    catch (const std::exception&)
+                    {
+                        perf["active_attachments"] = 0;
+                        perf["active_statements"] = 0;
+                        perf["active_transactions"] = 0;
+                    }
+
+                    fr::DatabaseInfoData info;
+                    dalDb->getInfo(&info);
+                    perf["page_size"] = info.pageSize;
+                    perf["pages_allocated"] = info.pages;
+                    perf["buffers"] = info.buffers;
+                    perf["oldest_transaction"] = info.oldestTransaction;
+                    perf["oldest_active_transaction"] = info.oldestActiveTransaction;
+                    perf["next_transaction"] = info.nextTransaction;
+
+                    toolResult = perf;
                 }
                 else
                 {
