@@ -2751,3 +2751,45 @@ wxString Database::getTimezoneName(int timezone)
     // not found
     return wxString::Format("TZ %d", timezone);
 }
+
+DatabaseSecurityStatus Database::getSecurityProtocolStatus()
+{
+    DatabaseSecurityStatus status;
+    status.wireEncryption = _("Disabled / Standard");
+    status.authPlugin = _("SRP / Legacy");
+    status.remoteProtocol = _("TCPv4");
+    status.remoteAddress = _("Local / Connected");
+
+    if (!isConnected())
+        return status;
+
+    try
+    {
+        auto dalDb = getDALDatabase();
+        if (dalDb && dalDb->isConnected())
+        {
+            auto tr = dalDb->createTransaction();
+            tr->start();
+            auto st = dalDb->createStatement(tr);
+            st->prepare("SELECT MON$REMOTE_PROTOCOL, MON$REMOTE_ADDRESS, MON$WIRE_CRYPT, MON$AUTH_METHOD "
+                        "FROM MON$ATTACHMENTS WHERE MON$ATTACHMENT_ID = CURRENT_ATTACHMENT;");
+            st->execute();
+            if (st->fetch())
+            {
+                if (!st->isNull(0)) status.remoteProtocol = wxString::FromUTF8(st->getString(0).c_str());
+                if (!st->isNull(1)) status.remoteAddress = wxString::FromUTF8(st->getString(1).c_str());
+                if (!st->isNull(2))
+                {
+                    bool crypt = st->getBool(2);
+                    status.wireEncryption = crypt ? _("Enabled") : _("Disabled");
+                }
+                if (!st->isNull(3)) status.authPlugin = wxString::FromUTF8(st->getString(3).c_str());
+            }
+            tr->commit();
+        }
+    }
+    catch (...) {}
+
+    return status;
+}
+

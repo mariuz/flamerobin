@@ -982,9 +982,12 @@ void ExecuteSqlFrame::set_properties()
     statusbar_1->SetStatusWidths(4, statusbar_widths);
 
     if ( ! databaseM->getIsVolative() )
+    {
         statusbar_1->SetStatusText(databaseM->getConnectionInfoString(), 0);
+        DatabaseSecurityStatus sec = databaseM->getSecurityProtocolStatus();
+        statusbar_1->SetStatusText(wxString::Format("WireCrypt: %s (%s)", sec.wireEncryption.c_str(), sec.authPlugin.c_str()), 2);
+    }
     statusbar_1->SetStatusText("Rows fetched", 1);
-    statusbar_1->SetStatusText("Cursor position", 2);
     statusbar_1->SetStatusText("Transaction status", 3);
 
     grid_data->SetTable(new DataGridTable(statementM, databaseM), true);

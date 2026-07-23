@@ -169,6 +169,14 @@ public:
     uint16_t id;
 };
 
+struct DatabaseSecurityStatus
+{
+    wxString wireEncryption;
+    wxString authPlugin;
+    wxString remoteProtocol;
+    wxString remoteAddress;
+};
+
 class Database: public MetadataItem,
     public std::enable_shared_from_this<Database>
 {
@@ -365,6 +373,7 @@ public:
     DatabaseAuthenticationMode& getAuthenticationMode();
     wxString getRole() const;
     wxString getCryptKeyData() const;
+    DatabaseSecurityStatus getSecurityProtocolStatus();
     IBPP::Database getIBPPDatabase();
     fr::IDatabasePtr getDALDatabase() const override;
     void setIsVolatile(const bool isVolatile);

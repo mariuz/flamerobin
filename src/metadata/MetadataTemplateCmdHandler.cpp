@@ -983,6 +983,16 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
                 processedText += wxString() << db->getInfo().getODSMinor();
             }
         }
+        else if (cmdParams[0] == "crypt_state")
+            processedText += wxString() << db->getInfo().getCryptState();
+        else if (cmdParams[0] == "wire_encryption")
+            processedText += db->getSecurityProtocolStatus().wireEncryption;
+        else if (cmdParams[0] == "auth_plugin")
+            processedText += db->getSecurityProtocolStatus().authPlugin;
+        else if (cmdParams[0] == "remote_protocol")
+            processedText += db->getSecurityProtocolStatus().remoteProtocol;
+        else if (cmdParams[0] == "remote_address")
+            processedText += db->getSecurityProtocolStatus().remoteAddress;
         else if (cmdParams[0] == "page_size")
             processedText += wxString() << db->getInfo().getPageSize();
         else if (cmdParams[0] == "pages")
