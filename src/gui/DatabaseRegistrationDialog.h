@@ -69,6 +69,9 @@ private:
     wxStaticText* label_dialect;
     wxChoice* choice_dialect;
 
+    wxStaticText* label_environment;
+    wxChoice* choice_environment;
+
     wxStaticText* label_owner;
     wxTextCtrl* text_ctrl_owner;
 

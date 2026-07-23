@@ -311,6 +311,9 @@ protected:
     int sashPositionM;
 
     wxPanel* panel_contents;
+    wxPanel* panel_env_banner;
+    wxStaticText* label_env_banner;
+    void updateEnvironmentBanner();
 
     wxSplitterWindow* splitter_window_1;
     SqlEditor* styled_text_ctrl_sql;

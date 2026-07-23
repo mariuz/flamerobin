@@ -95,6 +95,14 @@ void DatabaseRegistrationDialog::createControls()
 
     label_role = new wxStaticText(getControlsPanel(), -1, _("Role:"));
     text_ctrl_role = new wxTextCtrl(getControlsPanel(), -1, "");
+
+    label_environment = new wxStaticText(getControlsPanel(), -1, _("Environment:"));
+    wxArrayString envChoices;
+    envChoices.Add(_("Development (Green)"));
+    envChoices.Add(_("Staging (Orange)"));
+    envChoices.Add(_("Production (Red)"));
+    choice_environment = new wxChoice(getControlsPanel(), -1, wxDefaultPosition, wxDefaultSize, envChoices);
+
     label_keydata = new wxStaticText(getControlsPanel(), -1,
         _("Encryption key data:"));
     text_ctrl_keydata = new wxTextCtrl(getControlsPanel(),
@@ -313,8 +321,12 @@ void DatabaseRegistrationDialog::layoutControls()
     sizerControls->Add(combobox_charset, wxGBPosition(4, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
     sizerControls->Add(label_role, wxGBPosition(4, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
     sizerControls->Add(text_ctrl_role, wxGBPosition(4, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
-    sizerControls->Add(label_keydata, wxGBPosition(5, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-    sizerControls->Add(text_ctrl_keydata, wxGBPosition(5, 1), wxGBSpan(1, 3), wxALIGN_CENTER_VERTICAL | wxEXPAND);
+
+    sizerControls->Add(label_environment, wxGBPosition(5, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
+    sizerControls->Add(choice_environment, wxGBPosition(5, 1), wxGBSpan(1, 3), wxALIGN_CENTER_VERTICAL | wxEXPAND);
+
+    sizerControls->Add(label_keydata, wxGBPosition(6, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
+    sizerControls->Add(text_ctrl_keydata, wxGBPosition(6, 1), wxGBSpan(1, 3), wxALIGN_CENTER_VERTICAL | wxEXPAND);
     
     /*
     * Todo: Implement FB library per conexion
@@ -403,6 +415,14 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
         savedRole = config().get("databaseDefaultRole", wxString());
     text_ctrl_role->SetValue(savedRole);
     text_ctrl_keydata->SetValue(databaseM->getCryptKeyData());
+
+    wxString env = databaseM->getEnvironmentProfile();
+    if (env == "production")
+        choice_environment->SetSelection(2);
+    else if (env == "staging")
+        choice_environment->SetSelection(1);
+    else
+        choice_environment->SetSelection(0);
     /*
     * Todo: Implement FB library per conexion
     text_ctrl_library->SetValue(databaseM->getClientLibrary());
@@ -689,6 +709,14 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
     wxBusyCursor wait;
     databaseM->setConnectionCharset(combobox_charset->GetValue());
     databaseM->setRole(text_ctrl_role->GetValue());
+
+    int envSel = choice_environment->GetSelection();
+    if (envSel == 2)
+        databaseM->setEnvironmentProfile("production");
+    else if (envSel == 1)
+        databaseM->setEnvironmentProfile("staging");
+    else
+        databaseM->setEnvironmentProfile("development");
 
     try
     {

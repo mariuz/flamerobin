@@ -472,6 +472,12 @@ void DBHTreeItemVisitor::visitDatabase(Database& database)
         ART_DatabaseConnected : ART_DatabaseDisconnected;
     setNodeProperties(&database, artId);
 
+    wxString env = database.getEnvironmentProfile();
+    if (env == "production")
+        nodeTextM += " [PROD]";
+    else if (env == "staging")
+        nodeTextM += " [STAGING]";
+
     // hide disconnected databases
     if (DBHTreeConfigCache::get().getHideDisconnectedDatabases())
         nodeVisibleM = connected;

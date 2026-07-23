@@ -2230,6 +2230,34 @@ wxString Database::getConnectionString() const
         return pathM;
 }
 
+wxString Database::getEnvironmentProfile() const
+{
+    if (environmentProfileM.IsEmpty())
+        return "development";
+    return environmentProfileM;
+}
+
+void Database::setEnvironmentProfile(const wxString& profile)
+{
+    environmentProfileM = profile.Lower();
+    notifyObservers();
+}
+
+wxColour Database::getEnvironmentColor() const
+{
+    wxString env = getEnvironmentProfile();
+    if (env == "production")
+        return wxColour(215, 45, 45);
+    if (env == "staging")
+        return wxColour(230, 140, 0);
+    return wxColour(46, 125, 50);
+}
+
+bool Database::isProductionEnvironment() const
+{
+    return getEnvironmentProfile() == "production";
+}
+
 /* static */
 wxString Database::extractNameFromConnectionString(const wxString& path)
 {

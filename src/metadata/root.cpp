@@ -162,6 +162,8 @@ bool Root::parseDatabase(ServerPtr server, wxXmlNode* xmln)
         }
         else if (xmln->GetName() == "fbclient")
             database->setClientLibrary(value);
+        else if (xmln->GetName() == "environment")
+            database->setEnvironmentProfile(value);
     }
 
     // make sure the database has an Id before Root::save() is called,
@@ -315,6 +317,7 @@ bool Root::save()
             rsAddChildNode(dbn, "role", (*itdb)->getRole());
             rsAddChildNode(dbn, "cryptkeydata", (*itdb)->getCryptKeyData());
             rsAddChildNode(dbn, "fbclient", (*itdb)->getClientLibrary());
+            rsAddChildNode(dbn, "environment", (*itdb)->getEnvironmentProfile());
             rsAddChildNode(dbn, "authentication",
                 (*itdb)->getAuthenticationMode().getConfigValue());
         }

@@ -589,6 +589,18 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
 
     panel_contents = new wxPanel(this, -1, wxDefaultPosition, wxDefaultSize,
         wxTAB_TRAVERSAL);
+
+    panel_env_banner = new wxPanel(panel_contents, -1);
+    wxBoxSizer* sizer_banner = new wxBoxSizer(wxHORIZONTAL);
+    label_env_banner = new wxStaticText(panel_env_banner, -1, wxEmptyString);
+    wxFont font = label_env_banner->GetFont();
+    font.SetWeight(wxFONTWEIGHT_BOLD);
+    label_env_banner->SetFont(font);
+    label_env_banner->SetForegroundColour(*wxWHITE);
+    sizer_banner->Add(label_env_banner, 1, wxALL | wxALIGN_CENTER, 4);
+    panel_env_banner->SetSizer(sizer_banner);
+    panel_env_banner->Hide();
+
     splitter_window_1 = new wxSplitterWindow(panel_contents, -1);
     styled_text_ctrl_sql = new SqlEditor(splitter_window_1, ID_stc_sql);
 
@@ -708,6 +720,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     setViewMode(false, vmEditor);
     loadingM = false;
     setupStyles();
+    updateEnvironmentBanner();
 }
 
 Database* ExecuteSqlFrame::getDatabase() const
@@ -990,11 +1003,39 @@ void ExecuteSqlFrame::do_layout()
     notebook_pane_2->SetSizer(sizerPane2);
 
     // splitter is only control in panel_contents
-    wxBoxSizer* sizerContents = new wxBoxSizer(wxHORIZONTAL);
+    wxBoxSizer* sizerContents = new wxBoxSizer(wxVERTICAL);
+    sizerContents->Add(panel_env_banner, 0, wxEXPAND);
     sizerContents->Add(splitter_window_1, 1, wxEXPAND);
     panel_contents->SetSizer(sizerContents);
     sizerContents->Fit(this);
     sizerContents->SetSizeHints(this);
+}
+
+void ExecuteSqlFrame::updateEnvironmentBanner()
+{
+    if (!databaseM || !panel_env_banner || !label_env_banner)
+        return;
+
+    wxString env = databaseM->getEnvironmentProfile();
+    wxColour bgCol = databaseM->getEnvironmentColor();
+
+    if (env == "production")
+    {
+        panel_env_banner->SetBackgroundColour(bgCol);
+        label_env_banner->SetLabel(wxString::Format(_("[!] WARNING: PRODUCTION DATABASE (%s) - EXECUTE WITH CAUTION"), databaseM->getName_().c_str()));
+        panel_env_banner->Show();
+    }
+    else if (env == "staging")
+    {
+        panel_env_banner->SetBackgroundColour(bgCol);
+        label_env_banner->SetLabel(wxString::Format(_("[STAGING] Database: %s"), databaseM->getName_().c_str()));
+        panel_env_banner->Show();
+    }
+    else
+    {
+        panel_env_banner->Hide();
+    }
+    panel_contents->Layout();
 }
 
 bool ExecuteSqlFrame::doCanClose()
@@ -2997,6 +3038,30 @@ void ExecuteSqlFrame::prepareVolatileDatabase(wxString hostname, wxString port, 
 
 void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly, bool fetchAll)
 {
+    if (!prepareOnly && databaseM && databaseM->isProductionEnvironment())
+    {
+        wxString sqlText = styled_text_ctrl_sql->GetSelectedText();
+        if (sqlText.Trim().IsEmpty())
+            sqlText = styled_text_ctrl_sql->GetText();
+
+        wxString cleanSql = sqlText.Upper();
+        cleanSql.Trim(false);
+        if (cleanSql.StartsWith("INSERT") || cleanSql.StartsWith("UPDATE") ||
+            cleanSql.StartsWith("DELETE") || cleanSql.StartsWith("DROP") ||
+            cleanSql.StartsWith("ALTER") || cleanSql.StartsWith("TRUNCATE") ||
+            cleanSql.StartsWith("CREATE") || cleanSql.StartsWith("RECREATE") ||
+            cleanSql.StartsWith("EXECUTE PROCEDURE"))
+        {
+            int res = ::wxMessageBox(
+                wxString::Format(_("ATTENTION: You are about to execute a modification query on PRODUCTION database '%s'.\n\nStatement snippet:\n%s\n\nAre you sure you want to proceed?"),
+                    databaseM->getName_().c_str(), sqlText.Mid(0, 150).c_str()),
+                _("Confirm Execution on Production Database"),
+                wxYES_NO | wxNO_DEFAULT | wxICON_WARNING, this);
+            if (res != wxYES)
+                return;
+        }
+    }
+
     bool hasSelection = styled_text_ctrl_sql->GetSelectionStart()
         != styled_text_ctrl_sql->GetSelectionEnd();
     bool ok;

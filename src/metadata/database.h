@@ -25,6 +25,7 @@
 #define FR_DATABASE_H
 
 #include <wx/strconv.h>
+#include <wx/colour.h>
 
 #include <map>
 #include <mutex>
@@ -181,6 +182,7 @@ private:
     wxString databaseCharsetM;
     wxString connectionUserM;
     wxString connectionRoleM;
+    wxString environmentProfileM;
 
     int lingerM; // ODS 12
     wxString sqlSecurityM; // ODS 13
@@ -374,6 +376,10 @@ public:
     void setEncryptedPassword(const wxString& value);
     void setRole(const wxString& value);
     void setCryptKeyData(const wxString& value);
+    wxString getEnvironmentProfile() const;
+    void setEnvironmentProfile(const wxString& profile);
+    wxColour getEnvironmentColor() const;
+    bool isProductionEnvironment() const;
     virtual const wxString getTypeName() const;
     ServerPtr getServer() const;
     void setServer(ServerPtr server);
