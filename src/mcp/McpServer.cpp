@@ -383,6 +383,74 @@ void McpServer::run()
             };
             tools.push_back(getPerfStats);
 
+            // list_active_sessions tool
+            json listActiveSessionsTool;
+            listActiveSessionsTool["name"] = "list_active_sessions";
+            listActiveSessionsTool["description"] = "List active database connections, running queries, and remote attachment details via MON$ system tables.";
+            listActiveSessionsTool["inputSchema"] = {
+                {"type", "object"},
+                {"properties", {
+                    {"database_name", {
+                        {"type", "string"},
+                        {"description", "The name of the database as registered in FlameRobin."}
+                    }},
+                    {"password", {
+                        {"type", "string"},
+                        {"description", "Optional connection password if not saved."}
+                    }}
+                }},
+                {"required", json::array({"database_name"})}
+            };
+            tools.push_back(listActiveSessionsTool);
+
+            // cancel_statement tool
+            json cancelStatementTool;
+            cancelStatementTool["name"] = "cancel_statement";
+            cancelStatementTool["description"] = "Cancel an actively executing SQL statement by statement ID (MON$STATEMENT_ID).";
+            cancelStatementTool["inputSchema"] = {
+                {"type", "object"},
+                {"properties", {
+                    {"database_name", {
+                        {"type", "string"},
+                        {"description", "The name of the database as registered in FlameRobin."}
+                    }},
+                    {"statement_id", {
+                        {"type", "integer"},
+                        {"description", "The MON$STATEMENT_ID of the SQL query to cancel."}
+                    }},
+                    {"password", {
+                        {"type", "string"},
+                        {"description", "Optional connection password if not saved."}
+                    }}
+                }},
+                {"required", json::array({"database_name", "statement_id"})}
+            };
+            tools.push_back(cancelStatementTool);
+
+            // recalculate_index_stats tool
+            json recalculateIndexStatsTool;
+            recalculateIndexStatsTool["name"] = "recalculate_index_stats";
+            recalculateIndexStatsTool["description"] = "Recalculate index selectivities (SET STATISTICS INDEX) for all user indices or a specific index.";
+            recalculateIndexStatsTool["inputSchema"] = {
+                {"type", "object"},
+                {"properties", {
+                    {"database_name", {
+                        {"type", "string"},
+                        {"description", "The name of the database as registered in FlameRobin."}
+                    }},
+                    {"index_name", {
+                        {"type", "string"},
+                        {"description", "Optional name of a specific index. If omitted, recalculates all user indices."}
+                    }},
+                    {"password", {
+                        {"type", "string"},
+                        {"description", "Optional connection password if not saved."}
+                    }}
+                }},
+                {"required", json::array({"database_name"})}
+            };
+            tools.push_back(recalculateIndexStatsTool);
+
             response["result"] = {
                 {"tools", tools}
             };
@@ -903,6 +971,197 @@ void McpServer::run()
                     perf["next_transaction"] = info.nextTransaction;
 
                     toolResult = perf;
+                }
+                else if (toolName == "list_active_sessions")
+                {
+                    std::string dbName = args.value("database_name", "");
+                    std::string password = args.value("password", "");
+
+                    std::shared_ptr<Root> root(new Root());
+                    root->load();
+                    DatabasePtr targetDb;
+                    for (const auto& server : root->getServers())
+                    {
+                        for (const auto& db : server->getDatabases())
+                        {
+                            if (wx2std(db->getName_()) == dbName)
+                            {
+                                targetDb = db;
+                                break;
+                            }
+                        }
+                        if (targetDb) break;
+                    }
+
+                    if (!targetDb)
+                        throw std::runtime_error("Database '" + dbName + "' not found in FlameRobin configuration.");
+
+                    wxString pwd = targetDb->getDecryptedPassword();
+                    if (!password.empty()) pwd = wxString::FromUTF8(password.c_str());
+                    targetDb->connect(pwd, nullptr);
+
+                    auto dalDb = targetDb->getDALDatabase();
+                    auto tr = dalDb->createTransaction();
+                    tr->start();
+
+                    json attList = json::array();
+                    try
+                    {
+                        auto st = dalDb->createStatement(tr);
+                        st->prepare("SELECT MON$ATTACHMENT_ID, MON$STATE, MON$USER, MON$ROLE, MON$REMOTE_ADDRESS, MON$REMOTE_PROCESS, MON$TIMESTAMP FROM MON$ATTACHMENTS ORDER BY MON$ATTACHMENT_ID;");
+                        st->execute();
+                        while (st->fetch())
+                        {
+                            json att;
+                            att["attachment_id"] = st->getInt64(0);
+                            att["state"] = st->isNull(1) ? 0 : st->getInt32(1);
+                            att["user"] = st->getString(2);
+                            att["role"] = st->getString(3);
+                            att["remote_address"] = st->getString(4);
+                            att["remote_process"] = st->getString(5);
+                            att["timestamp"] = st->getTimestamp(6);
+                            attList.push_back(att);
+                        }
+                    } catch (...) {}
+
+                    json stmtList = json::array();
+                    try
+                    {
+                        auto st = dalDb->createStatement(tr);
+                        st->prepare("SELECT MON$STATEMENT_ID, MON$ATTACHMENT_ID, MON$STATE, MON$SQL_TEXT, MON$TIMESTAMP FROM MON$STATEMENTS WHERE MON$SQL_TEXT IS NOT NULL ORDER BY MON$STATEMENT_ID;");
+                        st->execute();
+                        while (st->fetch())
+                        {
+                            json stmt;
+                            stmt["statement_id"] = st->getInt64(0);
+                            stmt["attachment_id"] = st->getInt64(1);
+                            stmt["state"] = st->isNull(2) ? 0 : st->getInt32(2);
+                            stmt["sql_text"] = st->getString(3);
+                            stmt["timestamp"] = st->getTimestamp(4);
+                            stmtList.push_back(stmt);
+                        }
+                    } catch (...) {}
+
+                    tr->commit();
+
+                    toolResult["active_attachments"] = attList;
+                    toolResult["active_statements"] = stmtList;
+                }
+                else if (toolName == "cancel_statement")
+                {
+                    std::string dbName = args.value("database_name", "");
+                    int64_t stmtId = args.value("statement_id", (int64_t)0);
+                    std::string password = args.value("password", "");
+
+                    std::shared_ptr<Root> root(new Root());
+                    root->load();
+                    DatabasePtr targetDb;
+                    for (const auto& server : root->getServers())
+                    {
+                        for (const auto& db : server->getDatabases())
+                        {
+                            if (wx2std(db->getName_()) == dbName)
+                            {
+                                targetDb = db;
+                                break;
+                            }
+                        }
+                        if (targetDb) break;
+                    }
+
+                    if (!targetDb)
+                        throw std::runtime_error("Database '" + dbName + "' not found in FlameRobin configuration.");
+
+                    wxString pwd = targetDb->getDecryptedPassword();
+                    if (!password.empty()) pwd = wxString::FromUTF8(password.c_str());
+                    targetDb->connect(pwd, nullptr);
+
+                    auto dalDb = targetDb->getDALDatabase();
+                    auto tr = dalDb->createTransaction();
+                    tr->start();
+                    auto st = dalDb->createStatement(tr);
+                    std::string cancelSql = "DELETE FROM MON$STATEMENTS WHERE MON$STATEMENT_ID = " + std::to_string(stmtId) + ";";
+                    st->prepare(cancelSql);
+                    st->execute();
+                    tr->commit();
+
+                    toolResult["success"] = true;
+                    toolResult["message"] = "Statement ID " + std::to_string(stmtId) + " cancel signal sent successfully.";
+                }
+                else if (toolName == "recalculate_index_stats")
+                {
+                    std::string dbName = args.value("database_name", "");
+                    std::string targetIdx = args.value("index_name", "");
+                    std::string password = args.value("password", "");
+
+                    std::shared_ptr<Root> root(new Root());
+                    root->load();
+                    DatabasePtr targetDb;
+                    for (const auto& server : root->getServers())
+                    {
+                        for (const auto& db : server->getDatabases())
+                        {
+                            if (wx2std(db->getName_()) == dbName)
+                            {
+                                targetDb = db;
+                                break;
+                            }
+                        }
+                        if (targetDb) break;
+                    }
+
+                    if (!targetDb)
+                        throw std::runtime_error("Database '" + dbName + "' not found in FlameRobin configuration.");
+
+                    wxString pwd = targetDb->getDecryptedPassword();
+                    if (!password.empty()) pwd = wxString::FromUTF8(password.c_str());
+                    targetDb->connect(pwd, nullptr);
+
+                    auto dalDb = targetDb->getDALDatabase();
+                    std::vector<std::string> indexNames;
+
+                    if (!targetIdx.empty())
+                    {
+                        indexNames.push_back(targetIdx);
+                    }
+                    else
+                    {
+                        auto tr = dalDb->createTransaction();
+                        tr->start();
+                        auto st = dalDb->createStatement(tr);
+                        st->prepare("SELECT RDB$INDEX_NAME FROM RDB$INDICES WHERE (RDB$SYSTEM_FLAG = 0 OR RDB$SYSTEM_FLAG IS NULL);");
+                        st->execute();
+                        while (st->fetch())
+                        {
+                            std::string idx = st->getString(0);
+                            size_t end = idx.find_last_not_of(" \t\r\n");
+                            if (end != std::string::npos) idx = idx.substr(0, end + 1);
+                            indexNames.push_back(idx);
+                        }
+                        tr->commit();
+                    }
+
+                    int count = 0;
+                    json idxList = json::array();
+                    for (const auto& idx : indexNames)
+                    {
+                        try
+                        {
+                            auto tr = dalDb->createTransaction();
+                            tr->start();
+                            auto st = dalDb->createStatement(tr);
+                            std::string sql = "SET STATISTICS INDEX \"" + idx + "\";";
+                            st->prepare(sql);
+                            st->execute();
+                            tr->commit();
+                            count++;
+                            idxList.push_back(idx);
+                        }
+                        catch (...) {}
+                    }
+
+                    toolResult["recalculated_count"] = count;
+                    toolResult["indices"] = idxList;
                 }
                 else
                 {
