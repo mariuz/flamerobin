@@ -101,7 +101,7 @@ Key developer productivity features adapted from modern database extension capab
 - [x] **Quick Connection Switcher in Editor** — Dropdown menu in the SQL Execution Frame to switch active database connections for open scripts without reopening tabs.
 - [x] **Visual / Tree Query Execution Plan** — Render Firebird query execution plans (`PLAN` and `EXPLAIN`) in an interactive tree view highlighting full-table scans (`NATURAL`), index usage (`INDEX`), and join order.
 - [x] **Database Schema Comparison & Migration Generator** — Compare two Firebird database schemas (or a database against a DDL script) and generate executable migration scripts (`ALTER TABLE`, `CREATE INDEX`, `DROP COLUMN`).
-- [ ] **Enhanced Model Context Protocol (MCP) Tools** — Expand FlameRobin's built-in MCP server:
+- [x] **Enhanced Model Context Protocol (MCP) Tools** — Expand FlameRobin's built-in MCP server:
   - `explain_query` — Retrieve and analyze Firebird execution plans.
   - `compare_schemas` — Automated schema diffing and DDL migration generation.
   - `get_performance_stats` — Fetch active session metrics, lock wait status, and I/O statistics.
