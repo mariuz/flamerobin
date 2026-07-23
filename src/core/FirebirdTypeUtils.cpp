@@ -108,6 +108,7 @@ wxString DALtype2string(Database* db, fr::ColumnType t, int subtype, int size,
     case fr::ColumnType::Int128:    return "INT128";
     case fr::ColumnType::Decfloat16:     return "DECFLOAT(16)";
     case fr::ColumnType::Decfloat34:     return "DECFLOAT(34)";
+    case fr::ColumnType::Row:            return "ROW";
     default:                return "UNKNOWN";
     }
 }

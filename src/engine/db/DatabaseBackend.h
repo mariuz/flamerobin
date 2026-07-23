@@ -62,7 +62,8 @@ enum class ColumnType
     Decfloat34,
     Int128,
     TimeTz,
-    TimestampTz
+    TimestampTz,
+    Row
 };
 
 enum class StatementType
