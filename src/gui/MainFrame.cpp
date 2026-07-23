@@ -60,6 +60,7 @@
 #include "gui/MainFrame.h"
 #include "gui/SchemaCompareDialog.h"
 #include "gui/SessionMonitorFrame.h"
+#include "metadata/RoutineHelper.h"
 #include "gui/MaintenanceFrame.h"
 #include "gui/MetadataItemPropertiesFrame.h"
 #include "gui/PreferencesDialog.h"
@@ -410,6 +411,8 @@ EVT_UPDATE_UI(Cmds::Menu_CreateDatabase, MainFrame::OnMenuUpdateIfServerSelected
     EVT_UPDATE_UI(Cmds::Menu_RestoreIntoNew, MainFrame::OnMenuUpdateIfServerSelected)
     EVT_MENU(Cmds::Menu_CompareSchemas, MainFrame::OnMenuCompareSchemas)
     EVT_MENU(Cmds::Menu_SessionMonitor, MainFrame::OnMenuSessionMonitor)
+    EVT_MENU(Cmds::Menu_CopyCallSignature, MainFrame::OnMenuCopyCallSignature)
+    EVT_MENU(Cmds::Menu_GenerateExecuteTemplate, MainFrame::OnMenuGenerateExecuteTemplate)
 EVT_MENU(Cmds::Menu_ManageUsers, MainFrame::OnMenuManageUsers)
 EVT_UPDATE_UI(Cmds::Menu_ManageUsers, MainFrame::OnMenuUpdateIfServerSelected)
 EVT_MENU(Cmds::Menu_UnRegisterServer, MainFrame::OnMenuUnRegisterServer)
@@ -2775,4 +2778,32 @@ void MainFrame::OnMenuSessionMonitor(wxCommandEvent& WXUNUSED(event))
         return;
     SessionMonitorFrame* f = new SessionMonitorFrame(this, db);
     f->Show(true);
+}
+
+void MainFrame::OnMenuCopyCallSignature(wxCommandEvent& WXUNUSED(event))
+{
+    MetadataItem* item = treeMainM->getSelectedMetadataItem();
+    if (!item) return;
+
+    wxString sig = RoutineHelper::getRoutineCalltip(item);
+    if (!sig.IsEmpty() && wxTheClipboard->Open())
+    {
+        wxTheClipboard->SetData(new wxTextDataObject(sig));
+        wxTheClipboard->Close();
+    }
+}
+
+void MainFrame::OnMenuGenerateExecuteTemplate(wxCommandEvent& WXUNUSED(event))
+{
+    MetadataItem* item = treeMainM->getSelectedMetadataItem();
+    if (!item) return;
+
+    wxString sql = RoutineHelper::getRoutineExecutionTemplate(item);
+    if (!sql.IsEmpty())
+    {
+        DatabasePtr db = getDatabase(item);
+        ExecuteSqlFrame* eff = new ExecuteSqlFrame(this, -1, _("Routine Template"), db);
+        eff->setSql(sql);
+        eff->Show(true);
+    }
 }

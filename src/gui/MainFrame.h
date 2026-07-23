@@ -99,6 +99,8 @@ public:
     void OnMenuGenerateCode(wxCommandEvent& event);
     void OnMenuCompareSchemas(wxCommandEvent& event);
     void OnMenuSessionMonitor(wxCommandEvent& event);
+    void OnMenuCopyCallSignature(wxCommandEvent& event);
+    void OnMenuGenerateExecuteTemplate(wxCommandEvent& event);
     void OnMenuScriptAsSelect(wxCommandEvent& event);
     void OnMenuScriptAsInsert(wxCommandEvent& event);
     void OnMenuScriptAsUpdate(wxCommandEvent& event);

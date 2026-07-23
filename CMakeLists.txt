@@ -275,6 +275,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/metadata/relation.cpp
         ${SOURCEDIR}/metadata/role.cpp
         ${SOURCEDIR}/metadata/root.cpp
+        ${SOURCEDIR}/metadata/RoutineHelper.cpp
         ${SOURCEDIR}/metadata/server.cpp
         ${SOURCEDIR}/metadata/table.cpp
         ${SOURCEDIR}/metadata/trigger.cpp

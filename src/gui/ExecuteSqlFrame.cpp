@@ -70,6 +70,7 @@
 #include "gui/InsertDialog.h"
 #include "metadata/root.h"
 #include "metadata/server.h"
+#include "metadata/RoutineHelper.h"
 #include "gui/InsertParametersDialog.h"
 #include "gui/StatementHistoryDialog.h"
 #include "gui/StyleGuide.h"
@@ -1379,19 +1380,10 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& event)
             {
                 wxString word = styled_text_ctrl_sql->GetTextRange(start, pos - 1).Upper();
                 wxString calltip;
-                Procedure* p = dynamic_cast<Procedure*>(databaseM->findByNameAndType(ntProcedure, word));
-                if (p)
-                    calltip = p->getDefinition();
-// TODO: review tip for package, function and udf
-                /*
-                UDF* f = dynamic_cast<UDF*>(databaseM->findByNameAndType(ntUDF, word)); 
-                if (f)
-                    calltip = f->getDefinition();
-                
-                FunctionSQL* f = dynamic_cast<FunctionSQL*>(databaseM->findByNameAndType(ntFunctionSQL, word));
-                if (f)
-                    calltip = f->getDefinition();
-                 */ 
+                MetadataItem* item = databaseM->findByName(word);
+                if (item)
+                    calltip = RoutineHelper::getRoutineCalltip(item);
+
                 if (!calltip.empty())
                 {
                     styled_text_ctrl_sql->CallTipShow(start, calltip);

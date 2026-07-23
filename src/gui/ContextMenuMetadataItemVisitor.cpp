@@ -278,6 +278,8 @@ void MainObjectMenuMetadataItemVisitor::visitPackage(Package& package)
     addAlterItem(package);
     addDropItem(package);
     addSeparator();
+    menuM->Append(Cmds::Menu_CopyCallSignature, _("Copy Call &Signature"));
+    menuM->Append(Cmds::Menu_GenerateExecuteTemplate, _("Generate &Execution Template"));
     addScriptAsMenu(package);
     addGenerateCodeMenu(package);
     addSeparator();
@@ -310,6 +312,8 @@ void MainObjectMenuMetadataItemVisitor::visitProcedure(Procedure& procedure)
         addDropItem(procedure);
     }
     addSeparator();
+    menuM->Append(Cmds::Menu_CopyCallSignature, _("Copy Call &Signature"));
+    menuM->Append(Cmds::Menu_GenerateExecuteTemplate, _("Generate &Execution Template"));
     addScriptAsMenu(procedure);
     addGenerateCodeMenu(procedure);
     addSeparator();
