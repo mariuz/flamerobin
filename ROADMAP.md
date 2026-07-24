@@ -82,7 +82,7 @@ The following phases track FlameRobin UI/metadata support for features introduce
 - [x] **Underscores in Numeric Literals** — Support for `1_000_000` style numeric literals and non-decimal integer literals (SQL:2023) in the SQL editor.
 - [x] **Collation as Data Type Property** — Display and manage collation defined directly on table columns as part of the data type (SQL:2023).
 - [x] **Enhanced SQL Security Management** — UI for `ALTER ... SQL SECURITY {DEFINER | INVOKER}` across all applicable metadata objects.
-- [ ] Optional String Max Lengths — Ensure `VARCHAR` / `CHAR` column DDL handles implicit-length syntax per SQL:2023.
+- [x] **Optional String Max Lengths** — Ensure `VARCHAR` / `CHAR` column DDL handles implicit-length syntax per SQL:2023.
 
 - [x] **CSV External Tables** — UI support for defining external tables backed by CSV files when the engine supports it.
 - [x] **Enhanced Security: Owner Assignment on CREATE DATABASE** — Expose ownership and initial-user options in the Create Database dialog.
