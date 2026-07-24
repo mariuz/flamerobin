@@ -69,7 +69,7 @@ The following phases track FlameRobin UI/metadata support for features introduce
 
 ### Phase 7: Firebird 6.0 Feature Support (ODS 14.x, planned ~2026)
 
-- [ ] **SQL Schemas** — Restructure the metadata tree to show schemas as a first-class container; generate schema-qualified DDL (`SCHEMA.OBJECT`); add CREATE / ALTER / DROP SCHEMA management dialogs.
+- [x] **SQL Schemas** — Restructure the metadata tree to show schemas as a first-class container; generate schema-qualified DDL (`SCHEMA.OBJECT`); add CREATE / ALTER / DROP SCHEMA management dialogs.
 - [x] **JSON Functions** — Add keyword highlighting and code completion for native JSON functions (`JSON_VALUE`, `JSON_QUERY`, `JSON_OBJECT`, `JSON_ARRAY`, etc.).
 - [x] **Tablespaces** — Display tablespace assignments in table and index properties; expose tablespace selection in CREATE TABLE / CREATE INDEX dialogs.
 - [x] **`EXPLAIN` Statement** — Show query execution plans from the new `EXPLAIN` statement (distinct from the `PLAN` clause) in the SQL execution frame.
