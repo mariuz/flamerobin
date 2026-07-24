@@ -196,6 +196,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/CreateSchemaDialog.cpp
         ${SOURCEDIR}/gui/CreateDockerFirebirdDialog.cpp
         ${SOURCEDIR}/gui/JsonFieldEditorDialog.cpp
+        ${SOURCEDIR}/gui/TemporalTableDialog.cpp
         ${SOURCEDIR}/gui/DatabaseRegistrationDialog.cpp
         ${SOURCEDIR}/gui/DatabaseMaintenanceDialog.cpp
         ${SOURCEDIR}/gui/DataGeneratorFrame.cpp
@@ -283,6 +284,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/metadata/RoutineHelper.cpp
         ${SOURCEDIR}/metadata/schema.cpp
         ${SOURCEDIR}/metadata/SchemaRefactoringHelper.cpp
+        ${SOURCEDIR}/metadata/TemporalTableHelper.cpp
         ${SOURCEDIR}/metadata/server.cpp
         ${SOURCEDIR}/metadata/table.cpp
         ${SOURCEDIR}/metadata/trigger.cpp
@@ -1088,6 +1090,14 @@ add_executable(json_expression_test
 )
 target_link_libraries(json_expression_test ${wxWidgets_LIBRARIES} nlohmann_json::nlohmann_json)
 add_test(NAME json_expression_test COMMAND json_expression_test)
+
+add_executable(temporal_table_test
+    ${SOURCEDIR}/metadata/TemporalTableHelperTest.cpp
+    ${SOURCEDIR}/metadata/TemporalTableHelper.cpp
+    ${SQL_TEST_STUB_SOURCES}
+)
+target_link_libraries(temporal_table_test ${wxWidgets_LIBRARIES})
+add_test(NAME temporal_table_test COMMAND temporal_table_test)
 
 if (APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES
