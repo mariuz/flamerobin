@@ -8,6 +8,36 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.7.7</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Milestone Release: Complete FlameRobin Roadmap Implementation</B></font><br>
+<br>
+- <b>Full Roadmap Completion</b>: FlameRobin 26.7.7 marks the 100% completion of all phases in the FlameRobin Development Roadmap, delivering full Firebird 4.0, 5.0, and 6.0 engine support, SQL:2023 compliance, enhanced MCP monitoring, and advanced IDE/developer productivity features.<br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Firebird 6.0 & SQL:2023 Features</B></font><br>
+<br>
+- <b>SQL Schemas Metadata Support</b>: Added a first-class <code>Schemas</code> metadata tree container under Database nodes. Automatically loads database schemas from <code>RDB$SCHEMAS</code> on Firebird 6.0+ engines with visitor pattern and DDL support.<br>
+- <b>Tablespaces (Firebird 6.0)</b>: Table and Index properties now read and display <code>RDB$TABLESPACE_NAME</code> assignments. Exposed Tablespace selection in <b>Create Index</b> and <b>Create Table</b> dialogs for Firebird 6.0+.<br>
+- <b>Collation as Data Type Property (SQL:2023)</b>: Enhanced column DDL generation and field properties editing to support direct inline <code>COLLATE</code> clause definitions on string data types. Added <code>{%columninfo:collation%}</code> metadata template property tag.<br>
+- <b>Optional String Max Lengths (SQL:2023)</b>: Formatted DDL templates for <code>VARCHAR</code> and <code>CHAR</code> data types to handle implicit-length syntax cleanly without unnecessary empty parentheses.<br>
+- <b>Underscores in Numeric Literals (SQL:2023)</b>: Updated the SQL editor tokenizer to parse numeric literals with underscores (e.g. <code>1_000_000</code>), as well as non-decimal integer literals (<code>0x1F_4A</code>, <code>0b1010_1100</code>, <code>0o755_000</code>, and <code>x'1F4A'</code>).<br>
+- <b>SQL-Standard ROW Data Type</b>: Added native engine and DAL support for the SQL-standard <code>ROW</code> data type across type utilities and PSQL parsing.<br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Monitoring, Security & Session Diagnostics</B></font><br>
+<br>
+- <b>Compiled Statement Cache Visibility</b>: Added a dedicated <b>Compiled Statement Cache</b> tab (<code>MON$COMPILED_STATEMENTS</code>) in the Session Monitor Frame displaying statement ID, cache hits, misses, hit ratio %, and statement text.<br>
+- <b>Wire Encryption & Security Status</b>: Integrated <code>DatabaseSecurityStatus</code> into database properties and statusbar badges, displaying <code>MON$WIRE_CRYPT</code> wire encryption status on Firebird 4.0+ connections.<br>
+- <b>Interactive Parameterized Routine Executor</b>: Built an interactive <code>ExecuteRoutineDialog</code> with parameter input controls, NULL checkboxes, execution engine, and structured result grid output.<br>
+- <b>Expanded Model Context Protocol (MCP) Tools</b>: Extended the built-in MCP server with new tools including <code>list_active_sessions</code>, <code>cancel_statement</code>, and <code>recalculate_index_stats</code>.<br>
+- <b>Version Detection Refactoring</b>: Replaced scattered hard-coded ODS version numbers with named constants (<code>fr::ODSVersion</code>) and connected per-version keyword sets for syntax highlighting.<br>
+<br><br>
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.7.6</font><br>
 <br><br>
 
