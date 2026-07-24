@@ -74,6 +74,7 @@ typedef enum { ntUnknown, ntRoot, ntServer, ntDatabase,
     ntCollation, ntCollations,
     ntPublication, ntPublications,
     ntReplication,
+    ntSchema, ntSchemas,
     ntLastType
 } NodeType;
 

@@ -156,6 +156,8 @@ void MetadataItemVisitor::visitUsers(Users&) {}
 void MetadataItemVisitor::visitUniqueConstraint(UniqueConstraint&) {}
 void MetadataItemVisitor::visitView(View&) {}
 void MetadataItemVisitor::visitViews(Views&) {}
+void MetadataItemVisitor::visitSchema(Schema&) {}
+void MetadataItemVisitor::visitSchemas(Schemas&) {}
 
 // --- Relation Stubs ---
 Relation::Relation(NodeType type, DatabasePtr database, const wxString& name) 

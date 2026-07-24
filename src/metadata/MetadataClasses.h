@@ -209,4 +209,10 @@ typedef std::vector<ViewPtr> ViewPtrs;
 class Views;
 typedef std::shared_ptr<Views> ViewsPtr;
 
+class Schema;
+typedef std::shared_ptr<Schema> SchemaPtr;
+typedef std::vector<SchemaPtr> SchemaPtrs;
+class Schemas;
+typedef std::shared_ptr<Schemas> SchemasPtr;
+
 #endif // FR_METADATACLASSES_H

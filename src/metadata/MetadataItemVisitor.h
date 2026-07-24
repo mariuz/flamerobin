@@ -63,6 +63,8 @@ public:
     virtual void visitIndex(Index& index);
     virtual void visitIndices(Indices& indices);
     virtual void visitMetadataItem(MetadataItem& metadataItem);
+    virtual void visitSchema(Schema& schema);
+    virtual void visitSchemas(Schemas& schemas);
     virtual void visitMethod(Method& method);
     virtual void visitParameter(Parameter& parameter);
     virtual void visitPrimaryKeyConstraint(PrimaryKeyConstraint& pk);

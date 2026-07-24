@@ -245,6 +245,7 @@ private:
     SysTablesPtr sysTablesM;
     TablesPtr tablesM;
     ReplicationPtr replicationM;
+    SchemasPtr schemasM;
     UDFsPtr UDFsM;
     UsersPtr usersM;
     UsrIndicesPtr usrIndicesM;
@@ -315,6 +316,7 @@ public:
     SysTablesPtr getSysTables();
     TablesPtr getTables();
     ReplicationPtr getReplication();
+    SchemasPtr getSchemas();
     UDFsPtr getUDFs();
     UsersPtr getUsers();
     UsrIndicesPtr getUsrIndices();

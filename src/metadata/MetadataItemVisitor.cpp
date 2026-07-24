@@ -207,6 +207,16 @@ void MetadataItemVisitor::visitReplication(Replication&)
     defaultAction();
 }
 
+void MetadataItemVisitor::visitSchema(Schema&)
+{
+    defaultAction();
+}
+
+void MetadataItemVisitor::visitSchemas(Schemas&)
+{
+    defaultAction();
+}
+
 void MetadataItemVisitor::visitRole(Role&)
 {
     defaultAction();
