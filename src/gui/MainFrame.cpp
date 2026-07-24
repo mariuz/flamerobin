@@ -1425,7 +1425,7 @@ void MainFrame::OnMenuScriptAsMerge(wxCommandEvent& WXUNUSED(event))
         "USING (<source_query>) AS source\n"
         "ON (" + onClause + ")\n"
         "WHEN MATCHED THEN\n"
-        "  UPDATE SET " + (updateSet.IsEmpty() ? "target./* col */ = source./* col */" : updateSet) + "\n"
+        "  UPDATE SET " + (updateSet.IsEmpty() ? wxString("target./* col */ = source./* col */") : updateSet) + "\n"
         "WHEN NOT MATCHED THEN\n"
         "  INSERT (" + insertCols + ")\n"
         "  VALUES (" + insertVals + ");\n";
@@ -1532,7 +1532,7 @@ void MainFrame::OnMenuScriptAsExecute(wxCommandEvent& WXUNUSED(event))
 
         if (hasOutput)
         {
-            sql = "SELECT " + (outParams.IsEmpty() ? "*" : outParams) + "\nFROM " + p->getQuotedName() + "(" + inParams + ");\n";
+            sql = "SELECT " + (outParams.IsEmpty() ? wxString("*") : outParams) + "\nFROM " + p->getQuotedName() + "(" + inParams + ");\n";
         }
         else
         {
