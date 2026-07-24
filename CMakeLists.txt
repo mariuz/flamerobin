@@ -192,6 +192,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/ConfdefTemplateProcessor.cpp
         ${SOURCEDIR}/gui/ContextMenuMetadataItemVisitor.cpp
         ${SOURCEDIR}/gui/CreateIndexDialog.cpp
+        ${SOURCEDIR}/gui/CreateSchemaDialog.cpp
         ${SOURCEDIR}/gui/CreateDockerFirebirdDialog.cpp
         ${SOURCEDIR}/gui/DatabaseRegistrationDialog.cpp
         ${SOURCEDIR}/gui/DatabaseMaintenanceDialog.cpp
@@ -279,6 +280,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/metadata/root.cpp
         ${SOURCEDIR}/metadata/RoutineHelper.cpp
         ${SOURCEDIR}/metadata/schema.cpp
+        ${SOURCEDIR}/metadata/SchemaRefactoringHelper.cpp
         ${SOURCEDIR}/metadata/server.cpp
         ${SOURCEDIR}/metadata/table.cpp
         ${SOURCEDIR}/metadata/trigger.cpp
@@ -1067,6 +1069,14 @@ add_executable(schema_visualization_test
 )
 target_link_libraries(schema_visualization_test ${wxWidgets_LIBRARIES})
 add_test(NAME schema_visualization_test COMMAND schema_visualization_test)
+
+add_executable(schema_refactoring_test
+    ${SOURCEDIR}/metadata/SchemaRefactoringHelperTest.cpp
+    ${SOURCEDIR}/metadata/SchemaRefactoringHelper.cpp
+    ${SQL_TEST_STUB_SOURCES}
+)
+target_link_libraries(schema_refactoring_test ${wxWidgets_LIBRARIES})
+add_test(NAME schema_refactoring_test COMMAND schema_refactoring_test)
 
 if (APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES
