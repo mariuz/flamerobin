@@ -73,21 +73,21 @@ wxString JsonExpressionHelper::formatJson(const wxString& jsonText, int indent)
 wxString JsonExpressionHelper::generateJsonValue(const wxString& columnName, const wxString& jsonPath, const wxString& returnType)
 {
     Identifier idCol(columnName);
-    wxString path = jsonPath.IsEmpty() ? "$.key" : jsonPath;
-    wxString ret = returnType.IsEmpty() ? "VARCHAR(255)" : returnType;
+    wxString path = jsonPath.IsEmpty() ? wxString("$.key") : jsonPath;
+    wxString ret = returnType.IsEmpty() ? wxString("VARCHAR(255)") : returnType;
     return "JSON_VALUE(" + idCol.getQuoted() + ", '" + path + "' RETURNING " + ret + ")";
 }
 
 wxString JsonExpressionHelper::generateJsonQuery(const wxString& columnName, const wxString& jsonPath)
 {
     Identifier idCol(columnName);
-    wxString path = jsonPath.IsEmpty() ? "$.key" : jsonPath;
+    wxString path = jsonPath.IsEmpty() ? wxString("$.key") : jsonPath;
     return "JSON_QUERY(" + idCol.getQuoted() + ", '" + path + "')";
 }
 
 wxString JsonExpressionHelper::generateJsonExists(const wxString& columnName, const wxString& jsonPath)
 {
     Identifier idCol(columnName);
-    wxString path = jsonPath.IsEmpty() ? "$.key" : jsonPath;
+    wxString path = jsonPath.IsEmpty() ? wxString("$.key") : jsonPath;
     return "JSON_EXISTS(" + idCol.getQuoted() + ", '" + path + "')";
 }

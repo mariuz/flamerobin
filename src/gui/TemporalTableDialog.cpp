@@ -121,7 +121,7 @@ const wxString TemporalTableDialog::getName() const
 
 wxString TemporalTableDialog::getGeneratedSql() const
 {
-    wxString tableName = tableM ? tableM->getName_() : "TABLE_NAME";
+    wxString tableName = tableM ? tableM->getName_() : wxString("TABLE_NAME");
     int mode = choice_mode->GetSelection();
 
     if (mode == 0)

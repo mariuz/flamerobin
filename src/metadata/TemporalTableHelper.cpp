@@ -35,9 +35,9 @@ wxString TemporalTableHelper::generateTemporalTableDDL(const wxString& tableName
     const wxString& periodName)
 {
     Identifier idTable(tableName);
-    Identifier idStart(sysStartCol.IsEmpty() ? "SYS_START" : sysStartCol);
-    Identifier idEnd(sysEndCol.IsEmpty() ? "SYS_END" : sysEndCol);
-    Identifier idPeriod(periodName.IsEmpty() ? "SYSTEM_TIME" : periodName);
+    Identifier idStart(sysStartCol.IsEmpty() ? wxString("SYS_START") : sysStartCol);
+    Identifier idEnd(sysEndCol.IsEmpty() ? wxString("SYS_END") : sysEndCol);
+    Identifier idPeriod(periodName.IsEmpty() ? wxString("SYSTEM_TIME") : periodName);
 
     wxString ddl = "ALTER TABLE " + idTable.getQuoted() + "\n"
         "  ADD " + idStart.getQuoted() + " TIMESTAMP WITH TIME ZONE GENERATED ALWAYS AS ROW START,\n"
@@ -50,14 +50,14 @@ wxString TemporalTableHelper::generateTemporalTableDDL(const wxString& tableName
 wxString TemporalTableHelper::generateHistoricalAsOfQuery(const wxString& tableName, const wxString& asOfTimestamp)
 {
     Identifier idTable(tableName);
-    wxString ts = asOfTimestamp.IsEmpty() ? "2026-01-01 00:00:00" : asOfTimestamp;
+    wxString ts = asOfTimestamp.IsEmpty() ? wxString("2026-01-01 00:00:00") : asOfTimestamp;
     return "SELECT * FROM " + idTable.getQuoted() + " FOR SYSTEM_TIME AS OF '" + ts + "';";
 }
 
 wxString TemporalTableHelper::generateHistoricalBetweenQuery(const wxString& tableName, const wxString& startTime, const wxString& endTime)
 {
     Identifier idTable(tableName);
-    wxString t1 = startTime.IsEmpty() ? "2026-01-01 00:00:00" : startTime;
-    wxString t2 = endTime.IsEmpty() ? "2026-12-31 23:59:59" : endTime;
+    wxString t1 = startTime.IsEmpty() ? wxString("2026-01-01 00:00:00") : startTime;
+    wxString t2 = endTime.IsEmpty() ? wxString("2026-12-31 23:59:59") : endTime;
     return "SELECT * FROM " + idTable.getQuoted() + " FOR SYSTEM_TIME BETWEEN '" + t1 + "' AND '" + t2 + "';";
 }
