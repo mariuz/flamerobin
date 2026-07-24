@@ -33,7 +33,7 @@ enum SqlTokenType {
      */
     tkEOF, tkUNKNOWN, tkWHITESPACE, tkCOMMENT,
     tkTERM, tkPARENOPEN, tkPARENCLOSE, tkEQUALS, tkCOMMA,
-    tkSTRING, tkIDENTIFIER,
+    tkSTRING, tkIDENTIFIER, tkNUMBER,
 
     tk_KEYWORDS_START_HERE,
     /*
@@ -184,6 +184,8 @@ private:
     void defaultToken();
     void keywordIdentifierToken();
     void multilineCommentToken();
+    void numberToken();
+    void hexStringToken();
     void quotedIdentifierToken();
     void singleLineCommentToken();
     void stringToken();

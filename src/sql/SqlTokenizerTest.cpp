@@ -577,5 +577,28 @@ int main()
         ok = checkToken(t9.getCurrentToken(), kwNOT_GTR, "!>: kwNOT_GTR") && ok;
     }
 
+    // Test: Numeric Literals with Underscores and Non-Decimal Bases (SQL:2023 / FB6)
+    {
+        SqlTokenizer t1("1_000_000");
+        ok = checkToken(t1.getCurrentToken(), tkNUMBER, "1_000_000: tkNUMBER") && ok;
+        ok = checkStr(t1.getCurrentTokenString(), "1_000_000", "1_000_000 token string") && ok;
+
+        SqlTokenizer t2("0x1F_4A");
+        ok = checkToken(t2.getCurrentToken(), tkNUMBER, "0x1F_4A: tkNUMBER") && ok;
+        ok = checkStr(t2.getCurrentTokenString(), "0x1F_4A", "0x1F_4A token string") && ok;
+
+        SqlTokenizer t3("0b1010_1100");
+        ok = checkToken(t3.getCurrentToken(), tkNUMBER, "0b1010_1100: tkNUMBER") && ok;
+        ok = checkStr(t3.getCurrentTokenString(), "0b1010_1100", "0b1010_1100 token string") && ok;
+
+        SqlTokenizer t4("0o755_000");
+        ok = checkToken(t4.getCurrentToken(), tkNUMBER, "0o755_000: tkNUMBER") && ok;
+        ok = checkStr(t4.getCurrentTokenString(), "0o755_000", "0o755_000 token string") && ok;
+
+        SqlTokenizer t5("3.141_592_653");
+        ok = checkToken(t5.getCurrentToken(), tkNUMBER, "3.141_592_653: tkNUMBER") && ok;
+        ok = checkStr(t5.getCurrentTokenString(), "3.141_592_653", "3.141_592_653 token string") && ok;
+    }
+
     return ok ? 0 : 1;
 }

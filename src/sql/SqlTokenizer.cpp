@@ -369,8 +369,12 @@ bool SqlTokenizer::nextToken()
     }
     // use wxChar* member to scan
     wxChar c = *sqlTokenEndM;
-    if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
+    if ((c == 'x' || c == 'X') && *(sqlTokenEndM + 1) == '\'')
+        hexStringToken();
+    else if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
         keywordIdentifierToken();
+    else if (c >= '0' && c <= '9')
+        numberToken();
     else if (c == '"')
         quotedIdentifierToken();
     else if (c == '\'')
@@ -573,4 +577,105 @@ void SqlTokenizer::whitespaceToken()
     // scan until non-whitespace, or until "\0" found
     while (*sqlTokenEndM != 0 && wxIsspace(*sqlTokenEndM))
         sqlTokenEndM++;
+}
+
+void SqlTokenizer::hexStringToken()
+{
+    sqlTokenTypeM = tkNUMBER;
+    // scan x'...' or X'...'
+    sqlTokenEndM += 2;
+    while (*sqlTokenEndM != 0)
+    {
+        if (*sqlTokenEndM == '\'')
+        {
+            sqlTokenEndM++;
+            break;
+        }
+        sqlTokenEndM++;
+    }
+}
+
+void SqlTokenizer::numberToken()
+{
+    sqlTokenTypeM = tkNUMBER;
+    wxChar c = *sqlTokenEndM;
+    wxChar next = *(sqlTokenEndM + 1);
+
+    // Check for 0x (hex), 0b (binary), 0o (octal) prefixes
+    if (c == '0' && (next == 'x' || next == 'X'))
+    {
+        sqlTokenEndM += 2;
+        while (*sqlTokenEndM != 0)
+        {
+            wxChar ch = *sqlTokenEndM;
+            if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F') || ch == '_')
+                sqlTokenEndM++;
+            else
+                break;
+        }
+        return;
+    }
+    if (c == '0' && (next == 'b' || next == 'B'))
+    {
+        sqlTokenEndM += 2;
+        while (*sqlTokenEndM != 0)
+        {
+            wxChar ch = *sqlTokenEndM;
+            if (ch == '0' || ch == '1' || ch == '_')
+                sqlTokenEndM++;
+            else
+                break;
+        }
+        return;
+    }
+    if (c == '0' && (next == 'o' || next == 'O'))
+    {
+        sqlTokenEndM += 2;
+        while (*sqlTokenEndM != 0)
+        {
+            wxChar ch = *sqlTokenEndM;
+            if ((ch >= '0' && ch <= '7') || ch == '_')
+                sqlTokenEndM++;
+            else
+                break;
+        }
+        return;
+    }
+
+    // Standard decimal / floating point with underscores
+    bool hasDot = false;
+    bool hasExp = false;
+    while (*sqlTokenEndM != 0)
+    {
+        wxChar ch = *sqlTokenEndM;
+        if ((ch >= '0' && ch <= '9') || ch == '_')
+        {
+            sqlTokenEndM++;
+        }
+        else if (ch == '.' && !hasDot && !hasExp)
+        {
+            wxChar nextCh = *(sqlTokenEndM + 1);
+            if (nextCh >= '0' && nextCh <= '9')
+            {
+                hasDot = true;
+                sqlTokenEndM++;
+            }
+            else
+            {
+                break;
+            }
+        }
+        else if ((ch == 'e' || ch == 'E') && !hasExp)
+        {
+            hasExp = true;
+            sqlTokenEndM++;
+            wxChar nextCh = *sqlTokenEndM;
+            if (nextCh == '+' || nextCh == '-')
+                sqlTokenEndM++;
+        }
+        else
+        {
+            break;
+        }
+    }
 }
