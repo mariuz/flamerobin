@@ -133,3 +133,17 @@ These items apply across Firebird versions and support the feature phases above.
 - [x] **SVG Icon System & HiDPI Support** — Replace legacy XPM icons with scalable vector graphics (SVG) and modernize `ArtProvider` to use `wxBitmapBundle` for crisp rendering on 4K and high-resolution displays.
 - [x] **Documentation / What's New Page** — Update `docs/fr_whatsnew.html` with entries for each Firebird version's newly supported FlameRobin features.
 - [x] **Memory Leak Detection Roadmap** — Added a comprehensive [C++ Memory Leak Detection Roadmap & Best Practices guide](file:///C:/Work/flamerobin/devdocs/memory_leaks_roadmap.md) based on Microsoft and Google guidelines.
+
+---
+
+### Phase 10: Next-Gen Firebird Engine Features & Advanced GUI Roadmap
+
+Future features aligned with upcoming Firebird engine master developments and advanced administration tooling:
+
+- [ ] **Interactive Schema DDL Generator & Qualified Object Refactoring** — Visual dialogs for `CREATE SCHEMA`, `ALTER SCHEMA`, and `DROP SCHEMA`, with automated refactoring to schema-qualify object references (`SCHEMA_NAME.TABLE_NAME`) across views, triggers, and PSQL routines.
+- [ ] **JSON & Document Field Editor** — Dedicated visual JSON tree viewer, format validator, and editor for `BLOB SUB_TYPE TEXT / JSON` columns supporting Firebird 6 native JSON expressions (`JSON_VALUE`, `JSON_QUERY`, `JSON_EXISTS`).
+- [ ] **Vector & AI Embedding Support** — Native data grid, viewer, and query helpers for high-dimensional vector data types (`VECTOR` / similarity search syntax) as Firebird AI extensions evolve.
+- [ ] **Temporal Tables & System-Time Versioning** — GUI metadata display and historical query generator for SQL-standard temporal tables (`PERIOD FOR SYSTEM_TIME`, `FOR SYSTEM_TIME AS OF`).
+- [ ] **Connection Pool & Memory Diagnostics Dashboard** — Visual monitoring graph for Firebird server memory pools (`MON$MEMORY_USAGE`, `MON$POOLS`) and external connection pool states.
+- [ ] **Granular System Privilege Security Matrix** — Interactive user & role permission matrix for managing granular system privileges (`RDB$SYSTEM_PRIVILEGES`) beyond database owner rights.
+- [ ] **Automated Database Backup Schedule & Cloud Sync Manager** — Graphical backup scheduler using Firebird services API with optional compressed archive generation (`nbackup` / `gbak` stream encryption).
