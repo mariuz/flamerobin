@@ -8,6 +8,20 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.7.8</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Next-Gen Firebird Engine Features & Advanced Refactoring</B></font><br>
+<br>
+- <b>Interactive Schema DDL Generator & Qualified Object Refactoring</b>: Added visual dialogs for <code>CREATE SCHEMA</code>, <code>ALTER SCHEMA</code>, and <code>DROP SCHEMA</code>, alongside an automated refactoring engine (<code>SchemaRefactoringHelper</code>) that schema-qualifies object references (<code>SCHEMA_NAME.OBJECT_NAME</code>) across views, triggers, and PSQL routines.<br>
+- <b>JSON & Document Field Editor</b>: Integrated a visual JSON tree viewer, format pretty-printer, syntax validator, and Firebird 6 native JSON expression builder for <code>BLOB SUB_TYPE TEXT / JSON</code> columns supporting <code>JSON_VALUE</code>, <code>JSON_QUERY</code>, and <code>JSON_EXISTS</code>.<br>
+- <b>Temporal Tables & System-Time Versioning</b>: Added a dedicated visual dialog and helper for system-versioned temporal tables (<code>PERIOD FOR SYSTEM_TIME</code>) and point-in-time historical query generation (<code>FOR SYSTEM_TIME AS OF</code> and <code>FOR SYSTEM_TIME BETWEEN</code>).<br>
+- <b>MSVC Compatibility & Stability Fixes</b>: Resolved Visual C++ ternary type ambiguities (`error C2445`) across GUI components.<br>
+<br><br>
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.7.7</font><br>
 <br><br>
 
