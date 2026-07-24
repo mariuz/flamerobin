@@ -173,6 +173,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/core/FRError.cpp
         ${SOURCEDIR}/core/FRInt128.cpp
         ${SOURCEDIR}/core/FirebirdTypeUtils.cpp
+        ${SOURCEDIR}/core/JsonExpressionHelper.cpp
         ${SOURCEDIR}/core/Observer.cpp
         ${SOURCEDIR}/core/ProgressIndicator.cpp
         ${SOURCEDIR}/core/StringUtils.cpp
@@ -194,6 +195,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/CreateIndexDialog.cpp
         ${SOURCEDIR}/gui/CreateSchemaDialog.cpp
         ${SOURCEDIR}/gui/CreateDockerFirebirdDialog.cpp
+        ${SOURCEDIR}/gui/JsonFieldEditorDialog.cpp
         ${SOURCEDIR}/gui/DatabaseRegistrationDialog.cpp
         ${SOURCEDIR}/gui/DatabaseMaintenanceDialog.cpp
         ${SOURCEDIR}/gui/DataGeneratorFrame.cpp
@@ -1077,6 +1079,15 @@ add_executable(schema_refactoring_test
 )
 target_link_libraries(schema_refactoring_test ${wxWidgets_LIBRARIES})
 add_test(NAME schema_refactoring_test COMMAND schema_refactoring_test)
+
+add_executable(json_expression_test
+    ${SOURCEDIR}/core/JsonExpressionHelperTest.cpp
+    ${SOURCEDIR}/core/JsonExpressionHelper.cpp
+    ${SOURCEDIR}/sql/Identifier.cpp
+    ${SQL_TEST_STUB_SOURCES}
+)
+target_link_libraries(json_expression_test ${wxWidgets_LIBRARIES} nlohmann_json::nlohmann_json)
+add_test(NAME json_expression_test COMMAND json_expression_test)
 
 if (APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES
