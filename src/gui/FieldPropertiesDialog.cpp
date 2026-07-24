@@ -485,11 +485,9 @@ bool FieldPropertiesDialog::getStatementsToExecute(wxString& statements,
                 wxString charset = choice_charset->GetStringSelection();
                 wxString collate = choice_collate->GetStringSelection();
                 if (!charset.IsEmpty())
-                {
                     statements += " CHARACTER SET " + charset;
-                    if (!collate.IsEmpty())
-                        addCollate = " COLLATE " + collate;
-                }
+                if (!collate.IsEmpty())
+                    addCollate = " COLLATE " + collate;
             }
         }
         else

@@ -756,6 +756,12 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             if (col && col->isIdentity())
                 processedText += tp->escapeChars(col->getSource(true).Trim());
         }
+        else if (cmdParams[0] == "collation")
+        {
+            Column* col = dynamic_cast<Column*>(object);
+            if (col && !col->getCollation().IsEmpty())
+                processedText += tp->escapeChars(col->getCollation());
+        }
     }
 
     // {%viewinfo:<property>%}
