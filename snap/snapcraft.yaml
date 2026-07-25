@@ -130,7 +130,7 @@ parts:
       - -DFB_CPP_BUILD_TESTS=OFF
       - -Dfirebird_DIR=$SNAPCRAFT_STAGE/usr/lib/cmake/firebird
       - -Dfb-cpp_DIR=$SNAPCRAFT_STAGE/usr/lib/cmake/fb-cpp
-      - -DCMAKE_EXE_LINKER_FLAGS="-Wl,--no-as-needed -Wl,-rpath-link,$SNAPCRAFT_STAGE/usr/lib -L/snap/gnome-46-2404-sdk/current/usr/lib/x86_64-linux-gnu"
+      - -DCMAKE_EXE_LINKER_FLAGS="-Wl,--no-as-needed -Wl,-rpath-link,$SNAPCRAFT_STAGE/usr/lib -L$SNAPCRAFT_STAGE/usr/lib"
     override-build: |
       craftctl default
       # Extract version for adopt-info
