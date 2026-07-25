@@ -1658,7 +1658,10 @@ void Database::setDisconnected()
     clearTimezones(true);
 
     if (config().get("HideDisconnectedDatabases", false))
-        getServer()->notifyObservers();
+    {
+        if (ServerPtr s = getServer())
+            s->notifyObservers();
+    }
     notifyObservers();
 }
 
@@ -2235,11 +2238,14 @@ void Database::setServer(ServerPtr server)
 
 wxString Database::getConnectionString() const
 {
-    wxString serverConnStr = getServer()->getConnectionString();
-    if (!serverConnStr.empty())
-        return serverConnStr + ":" + pathM;
-    else
-        return pathM;
+    ServerPtr s = getServer();
+    if (s)
+    {
+        wxString serverConnStr = s->getConnectionString();
+        if (!serverConnStr.empty())
+            return serverConnStr + ":" + pathM;
+    }
+    return pathM;
 }
 
 wxString Database::getEnvironmentProfile() const

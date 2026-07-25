@@ -1627,13 +1627,16 @@ void MainFrame::OnMenuCloneDatabase(wxCommandEvent& WXUNUSED(event))
         return;
 
     DatabasePtr db(new Database());
+    db->setServer(s);
     db->setName_(d->getName_()+_(" clone"));
-    db->getAuthenticationMode().setMode(db->getAuthenticationMode().getMode());
+    db->getAuthenticationMode().setMode(d->getAuthenticationMode().getMode());
     db->setPath(d->getPath());
     db->setUsername(d->getUsername());
     db->setEncryptedPassword(d->getDecryptedPassword());
     db->setConnectionCharset(d->getConnectionCharset());
     db->setRole(d->getRole());
+    db->setCryptKeyData(d->getCryptKeyData());
+    db->setEnvironmentProfile(d->getEnvironmentProfile());
 
     DatabaseRegistrationDialog drd(this, _("Clone Registration Info"));
     drd.setDatabase(db);
