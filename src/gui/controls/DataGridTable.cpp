@@ -538,11 +538,14 @@ wxString DataGridTable::GetValue(int row, int col)
         return "N/A";
     if (rowsM.isFieldNull(realRow, col))
         return "[null]";
-    // limit returned string to first line (speeds up output in grid)
+    // limit returned string to first line (speeds up output in grid) unless multiline display is enabled
     wxString s(rowsM.getFieldValue(realRow, col));
-    size_t eol = s.find_first_of("\r\n");
-    if (eol != wxString::npos)
-        s.erase(eol);
+    if (!config().get("gridShowMultilineText", false))
+    {
+        size_t eol = s.find_first_of("\r\n");
+        if (eol != wxString::npos)
+            s.erase(eol);
+    }
     return s;
 }
 

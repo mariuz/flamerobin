@@ -147,6 +147,12 @@ void DataGrid::fetchData(bool readonly)
             ca->SetBackgroundColour(frlayoutconfig().getReadonlyColour());
         }
         ca->SetOverflow(false);
+        if (config().get("gridShowMultilineText", false) && !table->isNumericColumn(i))
+        {
+            ca->SetRenderer(new wxGridCellAutoWrapStringRenderer());
+            if (!ca->IsReadOnly())
+                ca->SetEditor(new wxGridCellAutoWrapStringEditor());
+        }
         SetColAttr(i, ca);
     }
     // Gate the initial autofit on the same preference as the post-execute
