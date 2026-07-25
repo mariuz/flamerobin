@@ -798,11 +798,17 @@ if (APPLE)
     )
 endif (APPLE)
 
+find_package(nlohmann_json CONFIG QUIET)
+if (NOT nlohmann_json_FOUND)
+    find_package(nlohmann_json QUIET)
+endif ()
+if (TARGET nlohmann_json::nlohmann_json)
+    list(APPEND FR_LIBS nlohmann_json::nlohmann_json)
+endif ()
+
 if (ENABLE_VCPKG)
     find_package(Boost REQUIRED COMPONENTS filesystem)
     list(APPEND FR_LIBS Boost::filesystem)
-    find_package(nlohmann_json CONFIG REQUIRED)
-    list(APPEND FR_LIBS nlohmann_json::nlohmann_json)
     if (WIN32)
         find_package(crashpad CONFIG REQUIRED)
         list(APPEND FR_LIBS crashpad::crashpad)
@@ -1088,7 +1094,11 @@ add_executable(json_expression_test
     ${SOURCEDIR}/sql/Identifier.cpp
     ${SQL_TEST_STUB_SOURCES}
 )
-target_link_libraries(json_expression_test ${wxWidgets_LIBRARIES} nlohmann_json::nlohmann_json)
+if (TARGET nlohmann_json::nlohmann_json)
+    target_link_libraries(json_expression_test ${wxWidgets_LIBRARIES} nlohmann_json::nlohmann_json)
+else()
+    target_link_libraries(json_expression_test ${wxWidgets_LIBRARIES})
+endif()
 add_test(NAME json_expression_test COMMAND json_expression_test)
 
 add_executable(temporal_table_test
