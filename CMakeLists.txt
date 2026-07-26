@@ -187,6 +187,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/AdvancedMessageDialog.cpp
         ${SOURCEDIR}/gui/AdvancedSearchFrame.cpp
         ${SOURCEDIR}/gui/BackupFrame.cpp
+        ${SOURCEDIR}/gui/BackupSchedulerDialog.cpp
         ${SOURCEDIR}/gui/BackupRestoreBaseFrame.cpp
         ${SOURCEDIR}/gui/BaseDialog.cpp
         ${SOURCEDIR}/gui/BaseFrame.cpp
@@ -244,6 +245,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/StartupFrame.cpp
         ${SOURCEDIR}/gui/StatementHistoryDialog.cpp
         ${SOURCEDIR}/gui/StyleGuide.cpp
+        ${SOURCEDIR}/gui/SystemPrivilegeMatrixDialog.cpp
         ${SOURCEDIR}/gui/UpdateChecker.cpp
         ${SOURCEDIR}/gui/UserDialog.cpp
         ${SOURCEDIR}/gui/UsernamePasswordDialog.cpp

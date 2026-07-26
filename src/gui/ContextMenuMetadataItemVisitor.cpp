@@ -98,6 +98,7 @@ void MainObjectMenuMetadataItemVisitor::visitDatabase(Database& database)
     menuM->Append(0, _("&Tools"), toolsMenu);
     // Tools submenu
     toolsMenu->Append(Cmds::Menu_Backup, _("&Backup database"));
+    toolsMenu->Append(Cmds::Menu_BackupScheduler, _("&Automated Backup Schedule & Cloud Sync..."));
     toolsMenu->Append(Cmds::Menu_Restore, _("Rest&ore database"));
     addSeparator();
     toolsMenu->Append(Cmds::Menu_RecreateDatabase, _("Recreate empty database"));
@@ -106,6 +107,7 @@ void MainObjectMenuMetadataItemVisitor::visitDatabase(Database& database)
     toolsMenu->Append(Cmds::Menu_StartupDatabase, _("Startup database"));
     addSeparator();
     toolsMenu->Append(Cmds::Menu_VectorInstallerWizard, _("Firebird AI & Vector Installer Wizard..."));
+    toolsMenu->Append(Cmds::Menu_SystemPrivilegeMatrix, _("Granular System Privilege Security Matrix..."));
     toolsMenu->Append(Cmds::Menu_SetReplicaMode, _("Set replication &mode..."));
     toolsMenu->Append(Cmds::Menu_ReplicationStatus, _("Replication &status..."));
     addSeparator();
@@ -222,6 +224,8 @@ void MainObjectMenuMetadataItemVisitor::visitUser(User& user)
 {
     addAlterItem(user);
     addDropItem(user);
+    addSeparator();
+    menuM->Append(Cmds::Menu_SystemPrivilegeMatrix, _("System Privilege Security Matrix..."));
     addSeparator();
     addGenerateCodeMenu(user);
     addSeparator();
@@ -367,6 +371,8 @@ void MainObjectMenuMetadataItemVisitor::visitReplication(Replication& replicatio
 void MainObjectMenuMetadataItemVisitor::visitRole(Role& role)
 {
     addDropItem(role);
+    addSeparator();
+    menuM->Append(Cmds::Menu_SystemPrivilegeMatrix, _("System Privilege Security Matrix..."));
     addSeparator();
     addScriptAsMenu(role);
     addGenerateCodeMenu(role);

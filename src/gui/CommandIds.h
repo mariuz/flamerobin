@@ -157,6 +157,8 @@ enum {
     Menu_VisualizeSchema,
     Menu_CreateDockerFirebird,
     Menu_VectorInstallerWizard,
+    Menu_SystemPrivilegeMatrix,
+    Menu_BackupScheduler,
 
         // view menu
         Menu_ToggleStatusBar, 

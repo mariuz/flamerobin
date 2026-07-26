@@ -49,6 +49,7 @@
 #include "gui/AdvancedMessageDialog.h"
 #include "gui/AdvancedSearchFrame.h"
 #include "gui/BackupFrame.h"
+#include "gui/BackupSchedulerDialog.h"
 #include "gui/CommandIds.h"
 #include "gui/ContextMenuMetadataItemVisitor.h"
 #include "gui/controls/DBHTreeControl.h"
@@ -76,6 +77,7 @@
 #include "gui/SimpleHtmlFrame.h"
 #include "gui/ShutdownFrame.h"
 #include "gui/StartupFrame.h"
+#include "gui/SystemPrivilegeMatrixDialog.h"
 #include "gui/UpdateChecker.h"
 #include "main.h"
 #include <set>
@@ -417,6 +419,8 @@ EVT_UPDATE_UI(Cmds::Menu_CreateDatabase, MainFrame::OnMenuUpdateIfServerSelected
     EVT_MENU(Cmds::Menu_SessionMonitor, MainFrame::OnMenuSessionMonitor)
     EVT_MENU(Cmds::Menu_DatabaseMaintenanceDashboard, MainFrame::OnMenuDatabaseMaintenanceDashboard)
     EVT_MENU(Cmds::Menu_VectorInstallerWizard, MainFrame::OnMenuVectorInstallerWizard)
+    EVT_MENU(Cmds::Menu_SystemPrivilegeMatrix, MainFrame::OnMenuSystemPrivilegeMatrix)
+    EVT_MENU(Cmds::Menu_BackupScheduler, MainFrame::OnMenuBackupScheduler)
     EVT_MENU(Cmds::Menu_CopyCallSignature, MainFrame::OnMenuCopyCallSignature)
     EVT_MENU(Cmds::Menu_GenerateExecuteTemplate, MainFrame::OnMenuGenerateExecuteTemplate)
     EVT_MENU(Cmds::Menu_InteractiveExecuteRoutine, MainFrame::OnMenuInteractiveExecuteRoutine)
@@ -2806,6 +2810,24 @@ void MainFrame::OnMenuVectorInstallerWizard(wxCommandEvent& WXUNUSED(event))
         return;
     VectorInstallerWizard viw(this, db.get());
     viw.ShowModal();
+}
+
+void MainFrame::OnMenuSystemPrivilegeMatrix(wxCommandEvent& WXUNUSED(event))
+{
+    DatabasePtr db = getDatabase(treeMainM->getSelectedMetadataItem());
+    if (!db)
+        return;
+    SystemPrivilegeMatrixDialog spmd(this, db);
+    spmd.ShowModal();
+}
+
+void MainFrame::OnMenuBackupScheduler(wxCommandEvent& WXUNUSED(event))
+{
+    DatabasePtr db = getDatabase(treeMainM->getSelectedMetadataItem());
+    if (!db)
+        return;
+    BackupSchedulerDialog bsd(this, db);
+    bsd.ShowModal();
 }
 
 void MainFrame::OnMenuCopyCallSignature(wxCommandEvent& WXUNUSED(event))

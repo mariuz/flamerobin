@@ -101,6 +101,8 @@ public:
     void OnMenuSessionMonitor(wxCommandEvent& event);
     void OnMenuDatabaseMaintenanceDashboard(wxCommandEvent& event);
     void OnMenuVectorInstallerWizard(wxCommandEvent& event);
+    void OnMenuSystemPrivilegeMatrix(wxCommandEvent& event);
+    void OnMenuBackupScheduler(wxCommandEvent& event);
     void OnMenuCopyCallSignature(wxCommandEvent& event);
     void OnMenuGenerateExecuteTemplate(wxCommandEvent& event);
     void OnMenuInteractiveExecuteRoutine(wxCommandEvent& event);
