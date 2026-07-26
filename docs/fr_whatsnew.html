@@ -11,8 +11,12 @@ http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issue
 <font size=+2>Changes in FlameRobin 26.7.10</font><br>
 <br><br>
 
-<font size=+1 color="#AA0000"><B>Data Grid Multiline Text Display Support (#648)</B></font><br>
+<font size=+1 color="#AA0000"><B>Vector & AI Embedding Support</B></font><br>
 <br>
+- <b>Vector & AI Embedding Support</b>: Introduced native support for high-dimensional vector data types (<code>VECTOR</code>) and AI similarity search syntax (<code>COSINE_DISTANCE</code>, <code>L2_DISTANCE</code>, <code>INNER_PRODUCT</code>). Integrated a visual Vector Data Editor (<code>VectorDataEditorDialog</code>), similarity SQL query builder, and an interactive <b>Firebird AI & Vector Installer Wizard</b> (<code>VectorInstallerWizard</code>) for auto-deploying the <a href="https://github.com/mariuz/fbvector">fbvector extension package</a>.<br>
+- <b>Connection Pool & Memory Diagnostics Dashboard</b>: Extended the Session Monitor with dedicated <b>Memory Diagnostics</b> (inspecting <code>MON$MEMORY_USAGE</code> and <code>MON$POOLS</code> memory allocations and usage) and <b>Connection Pool</b> statistics tabs. Added matching MCP server diagnostic tools (<code>get_memory_diagnostics</code>).<br>
+- <b>Fix Database Creation Page Size Parameter Propagation (#655)</b>: Resolved an issue in the <code>fb-cpp</code> database backend where creating a new Firebird database with a custom page size selection (e.g. 8192, 16384, or 32768) ignored the requested page size parameter and defaulted to the engine's standard page size. Updated <code>FbCppDatabase::buildDpb()</code> to insert <code>isc_dpb_page_size</code> into the Database Parameter Block when creating a database.<br>
+- <b>Fix Missing Application Icon on Debian/Linux (#656)</b>: Fixed an issue where FlameRobin installed without desktop application icons on Debian, Ubuntu, and Freedesktop-compliant Linux distributions. Added CMake install directives for <code>share/icons/hicolor/48x48/apps/flamerobin.png</code> and <code>share/icons/hicolor/scalable/apps/flamerobin.svg</code> alongside standard <code>share/pixmaps</code>.<br>
 - <b>Multiline Text Grid Display (#648)</b>: Added opt-in support for multiline text display and auto-wrapping in data grid cells (<code>gridShowMultilineText</code>), utilizing <code>wxGridCellAutoWrapStringRenderer</code> and <code>wxGridCellAutoWrapStringEditor</code> to preserve line breaks and facilitate inline multiline editing.<br>
 <br><br>
 

@@ -105,6 +105,7 @@ void MainObjectMenuMetadataItemVisitor::visitDatabase(Database& database)
     toolsMenu->Append(Cmds::Menu_ShutdownDatabase, _("Shutdown database"));
     toolsMenu->Append(Cmds::Menu_StartupDatabase, _("Startup database"));
     addSeparator();
+    toolsMenu->Append(Cmds::Menu_VectorInstallerWizard, _("Firebird AI & Vector Installer Wizard..."));
     toolsMenu->Append(Cmds::Menu_SetReplicaMode, _("Set replication &mode..."));
     toolsMenu->Append(Cmds::Menu_ReplicationStatus, _("Replication &status..."));
     addSeparator();

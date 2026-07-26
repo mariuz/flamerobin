@@ -451,6 +451,26 @@ void McpServer::run()
             };
             tools.push_back(recalculateIndexStatsTool);
 
+            // get_memory_diagnostics tool
+            json getMemoryDiagTool;
+            getMemoryDiagTool["name"] = "get_memory_diagnostics";
+            getMemoryDiagTool["description"] = "Retrieve Firebird memory pool allocations (MON$POOLS), memory usage stats (MON$MEMORY_USAGE), and connection pool metrics.";
+            getMemoryDiagTool["inputSchema"] = {
+                {"type", "object"},
+                {"properties", {
+                    {"database_name", {
+                        {"type", "string"},
+                        {"description", "The name of the database as registered in FlameRobin."}
+                    }},
+                    {"password", {
+                        {"type", "string"},
+                        {"description", "Optional connection password if not saved."}
+                    }}
+                }},
+                {"required", json::array({"database_name"})}
+            };
+            tools.push_back(getMemoryDiagTool);
+
             response["result"] = {
                 {"tools", tools}
             };
@@ -1162,6 +1182,88 @@ void McpServer::run()
 
                     toolResult["recalculated_count"] = count;
                     toolResult["indices"] = idxList;
+                }
+                else if (toolName == "get_memory_diagnostics")
+                {
+                    std::string dbName = args.value("database_name", "");
+                    std::string password = args.value("password", "");
+
+                    std::shared_ptr<Root> root(new Root());
+                    root->load();
+                    DatabasePtr targetDb;
+                    for (const auto& server : root->getServers())
+                    {
+                        for (const auto& db : server->getDatabases())
+                        {
+                            if (wx2std(db->getName_()) == dbName)
+                            {
+                                targetDb = db;
+                                break;
+                            }
+                        }
+                        if (targetDb) break;
+                    }
+
+                    if (!targetDb)
+                        throw std::runtime_error("Database '" + dbName + "' not found in FlameRobin configuration.");
+
+                    wxString pwd = targetDb->getDecryptedPassword();
+                    if (!password.empty()) pwd = wxString::FromUTF8(password.c_str());
+                    targetDb->connect(pwd, nullptr);
+
+                    auto dalDb = targetDb->getDALDatabase();
+
+                    std::vector<fr::MemoryPoolInfo> pools;
+                    dalDb->getMemoryPoolInfo(pools);
+
+                    std::vector<fr::MemoryUsageInfo> memUsage;
+                    dalDb->getMemoryUsageInfo(memUsage);
+
+                    std::vector<fr::ConnectionPoolInfo> connPools;
+                    dalDb->getConnectionPoolInfo(connPools);
+
+                    json poolsJson = json::array();
+                    for (const auto& p : pools)
+                    {
+                        poolsJson.push_back({
+                            {"pool_id", p.poolId},
+                            {"attachment_id", p.attachmentId},
+                            {"memory_allocated_bytes", p.memoryAllocated},
+                            {"memory_used_bytes", p.memoryUsed},
+                            {"name", p.name}
+                        });
+                    }
+
+                    json memJson = json::array();
+                    for (const auto& m : memUsage)
+                    {
+                        memJson.push_back({
+                            {"memory_id", m.memoryId},
+                            {"stat_group", m.statGroup},
+                            {"memory_allocated_bytes", m.memoryAllocated},
+                            {"memory_used_bytes", m.memoryUsed},
+                            {"max_allocated_bytes", m.maxAllocated},
+                            {"max_used_bytes", m.maxUsed}
+                        });
+                    }
+
+                    json connPoolsJson = json::array();
+                    for (const auto& cp : connPools)
+                    {
+                        connPoolsJson.push_back({
+                            {"pool_id", cp.poolId},
+                            {"database_name", cp.dbName},
+                            {"active_connections", cp.activeConnections},
+                            {"idle_connections", cp.idleConnections},
+                            {"max_connections", cp.maxConnections},
+                            {"min_connections", cp.minConnections},
+                            {"waiting_requests", cp.waitingRequests}
+                        });
+                    }
+
+                    toolResult["memory_pools"] = poolsJson;
+                    toolResult["memory_usage"] = memJson;
+                    toolResult["connection_pools"] = connPoolsJson;
                 }
                 else
                 {

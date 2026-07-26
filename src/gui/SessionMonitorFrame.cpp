@@ -148,6 +148,48 @@ SessionMonitorFrame::SessionMonitorFrame(wxWindow* parent, DatabasePtr db)
     panelCompiledStatements->SetSizer(sizerComp);
     notebookM->AddPage(panelCompiledStatements, _("Compiled Statement Cache"));
 
+    // --- Tab 5: Memory Diagnostics (MON$MEMORY_USAGE & MON$POOLS) ---
+    panelMemoryDiagnostics = new wxPanel(notebookM, -1);
+    wxBoxSizer* sizerMem = new wxBoxSizer(wxVERTICAL);
+
+    sizerMem->Add(new wxStaticText(panelMemoryDiagnostics, -1, _("Memory Pools (MON$POOLS):")), 0, wxLEFT | wxTOP, 4);
+    list_memory_pools = new wxListCtrl(panelMemoryDiagnostics, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL);
+    list_memory_pools->InsertColumn(0, _("Pool ID"), wxLIST_FORMAT_LEFT, 90);
+    list_memory_pools->InsertColumn(1, _("Attachment ID"), wxLIST_FORMAT_LEFT, 110);
+    list_memory_pools->InsertColumn(2, _("Allocated (KB)"), wxLIST_FORMAT_LEFT, 110);
+    list_memory_pools->InsertColumn(3, _("Used (KB)"), wxLIST_FORMAT_LEFT, 110);
+    list_memory_pools->InsertColumn(4, _("Pool Name"), wxLIST_FORMAT_LEFT, 200);
+    sizerMem->Add(list_memory_pools, 1, wxEXPAND | wxALL, 4);
+
+    sizerMem->Add(new wxStaticText(panelMemoryDiagnostics, -1, _("Memory Usage Statistics (MON$MEMORY_USAGE):")), 0, wxLEFT | wxTOP, 4);
+    list_memory_usage = new wxListCtrl(panelMemoryDiagnostics, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL);
+    list_memory_usage->InsertColumn(0, _("Stat ID"), wxLIST_FORMAT_LEFT, 80);
+    list_memory_usage->InsertColumn(1, _("Stat Group"), wxLIST_FORMAT_LEFT, 90);
+    list_memory_usage->InsertColumn(2, _("Allocated (KB)"), wxLIST_FORMAT_LEFT, 110);
+    list_memory_usage->InsertColumn(3, _("Used (KB)"), wxLIST_FORMAT_LEFT, 110);
+    list_memory_usage->InsertColumn(4, _("Max Allocated (KB)"), wxLIST_FORMAT_LEFT, 130);
+    list_memory_usage->InsertColumn(5, _("Max Used (KB)"), wxLIST_FORMAT_LEFT, 130);
+    sizerMem->Add(list_memory_usage, 1, wxEXPAND | wxALL, 4);
+
+    panelMemoryDiagnostics->SetSizer(sizerMem);
+    notebookM->AddPage(panelMemoryDiagnostics, _("Memory Diagnostics"));
+
+    // --- Tab 6: Connection Pool ---
+    panelConnectionPool = new wxPanel(notebookM, -1);
+    wxBoxSizer* sizerPool = new wxBoxSizer(wxVERTICAL);
+    list_connection_pools = new wxListCtrl(panelConnectionPool, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL);
+    list_connection_pools->InsertColumn(0, _("Pool ID"), wxLIST_FORMAT_LEFT, 80);
+    list_connection_pools->InsertColumn(1, _("Database Connection"), wxLIST_FORMAT_LEFT, 220);
+    list_connection_pools->InsertColumn(2, _("Active Connections"), wxLIST_FORMAT_LEFT, 130);
+    list_connection_pools->InsertColumn(3, _("Idle Connections"), wxLIST_FORMAT_LEFT, 120);
+    list_connection_pools->InsertColumn(4, _("Max Connections"), wxLIST_FORMAT_LEFT, 120);
+    list_connection_pools->InsertColumn(5, _("Min Connections"), wxLIST_FORMAT_LEFT, 120);
+    list_connection_pools->InsertColumn(6, _("Waiting Requests"), wxLIST_FORMAT_LEFT, 120);
+
+    sizerPool->Add(list_connection_pools, 1, wxEXPAND | wxALL, 4);
+    panelConnectionPool->SetSizer(sizerPool);
+    notebookM->AddPage(panelConnectionPool, _("Connection Pool"));
+
     sizerMain->Add(notebookM, 1, wxEXPAND | wxALL, 6);
 
     mainPanel->SetSizer(sizerMain);
@@ -290,6 +332,22 @@ void SessionMonitorFrame::loadMonitoringData()
             dalDb->getCompiledStatementInfo(compiledStatementsM);
         } catch (...) {}
 
+        // 5. Memory Usage & Pools
+        memoryUsageM.clear();
+        memoryPoolsM.clear();
+        try
+        {
+            dalDb->getMemoryUsageInfo(memoryUsageM);
+            dalDb->getMemoryPoolInfo(memoryPoolsM);
+        } catch (...) {}
+
+        // 6. Connection Pool
+        connPoolsM.clear();
+        try
+        {
+            dalDb->getConnectionPoolInfo(connPoolsM);
+        } catch (...) {}
+
         tr->commit();
     }
     catch (...) {}
@@ -298,6 +356,50 @@ void SessionMonitorFrame::loadMonitoringData()
     updateStatementsUI();
     updateTransactionsUI();
     updateCompiledStatementsUI();
+    updateMemoryDiagnosticsUI();
+    updateConnectionPoolUI();
+}
+
+void SessionMonitorFrame::updateMemoryDiagnosticsUI()
+{
+    list_memory_pools->DeleteAllItems();
+    for (size_t i = 0; i < memoryPoolsM.size(); ++i)
+    {
+        const auto& pool = memoryPoolsM[i];
+        long idx = list_memory_pools->InsertItem(i, wxString::Format("%lld", (long long)pool.poolId));
+        list_memory_pools->SetItem(idx, 1, wxString::Format("%lld", (long long)pool.attachmentId));
+        list_memory_pools->SetItem(idx, 2, wxString::Format("%lld KB", (long long)(pool.memoryAllocated / 1024)));
+        list_memory_pools->SetItem(idx, 3, wxString::Format("%lld KB", (long long)(pool.memoryUsed / 1024)));
+        list_memory_pools->SetItem(idx, 4, wxString::FromUTF8(pool.name.c_str()));
+    }
+
+    list_memory_usage->DeleteAllItems();
+    for (size_t i = 0; i < memoryUsageM.size(); ++i)
+    {
+        const auto& mem = memoryUsageM[i];
+        long idx = list_memory_usage->InsertItem(i, wxString::Format("%lld", (long long)mem.memoryId));
+        list_memory_usage->SetItem(idx, 1, wxString::Format("%d", mem.statGroup));
+        list_memory_usage->SetItem(idx, 2, wxString::Format("%lld KB", (long long)(mem.memoryAllocated / 1024)));
+        list_memory_usage->SetItem(idx, 3, wxString::Format("%lld KB", (long long)(mem.memoryUsed / 1024)));
+        list_memory_usage->SetItem(idx, 4, wxString::Format("%lld KB", (long long)(mem.maxAllocated / 1024)));
+        list_memory_usage->SetItem(idx, 5, wxString::Format("%lld KB", (long long)(mem.maxUsed / 1024)));
+    }
+}
+
+void SessionMonitorFrame::updateConnectionPoolUI()
+{
+    list_connection_pools->DeleteAllItems();
+    for (size_t i = 0; i < connPoolsM.size(); ++i)
+    {
+        const auto& pool = connPoolsM[i];
+        long idx = list_connection_pools->InsertItem(i, wxString::Format("%lld", (long long)pool.poolId));
+        list_connection_pools->SetItem(idx, 1, wxString::FromUTF8(pool.dbName.c_str()));
+        list_connection_pools->SetItem(idx, 2, wxString::Format("%d", pool.activeConnections));
+        list_connection_pools->SetItem(idx, 3, wxString::Format("%d", pool.idleConnections));
+        list_connection_pools->SetItem(idx, 4, wxString::Format("%d", pool.maxConnections));
+        list_connection_pools->SetItem(idx, 5, wxString::Format("%d", pool.minConnections));
+        list_connection_pools->SetItem(idx, 6, wxString::Format("%d", pool.waitingRequests));
+    }
 }
 
 void SessionMonitorFrame::updateAttachmentsUI()

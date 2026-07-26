@@ -97,6 +97,18 @@ private:
     wxListCtrl* list_compiled_statements;
     std::vector<fr::CompiledStatementInfo> compiledStatementsM;
 
+    // Memory Diagnostics tab (MON$MEMORY_USAGE & MON$POOLS)
+    wxPanel* panelMemoryDiagnostics;
+    wxListCtrl* list_memory_usage;
+    wxListCtrl* list_memory_pools;
+    std::vector<fr::MemoryUsageInfo> memoryUsageM;
+    std::vector<fr::MemoryPoolInfo> memoryPoolsM;
+
+    // Connection Pool tab
+    wxPanel* panelConnectionPool;
+    wxListCtrl* list_connection_pools;
+    std::vector<fr::ConnectionPoolInfo> connPoolsM;
+
     wxCheckBox* check_auto_refresh;
     wxButton* button_refresh_now;
     wxButton* button_close;
@@ -109,6 +121,8 @@ private:
     void updateStatementsUI();
     void updateTransactionsUI();
     void updateCompiledStatementsUI();
+    void updateMemoryDiagnosticsUI();
+    void updateConnectionPoolUI();
 
     void OnTimer(wxTimerEvent& event);
     void OnRefreshClick(wxCommandEvent& event);

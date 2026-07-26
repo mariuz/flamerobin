@@ -174,6 +174,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/core/FRInt128.cpp
         ${SOURCEDIR}/core/FirebirdTypeUtils.cpp
         ${SOURCEDIR}/core/JsonExpressionHelper.cpp
+        ${SOURCEDIR}/core/VectorHelper.cpp
         ${SOURCEDIR}/core/Observer.cpp
         ${SOURCEDIR}/core/ProgressIndicator.cpp
         ${SOURCEDIR}/core/StringUtils.cpp
@@ -196,6 +197,8 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/CreateSchemaDialog.cpp
         ${SOURCEDIR}/gui/CreateDockerFirebirdDialog.cpp
         ${SOURCEDIR}/gui/JsonFieldEditorDialog.cpp
+        ${SOURCEDIR}/gui/VectorInstallerWizard.cpp
+        ${SOURCEDIR}/gui/VectorDataEditorDialog.cpp
         ${SOURCEDIR}/gui/TemporalTableDialog.cpp
         ${SOURCEDIR}/gui/DatabaseRegistrationDialog.cpp
         ${SOURCEDIR}/gui/DatabaseMaintenanceDialog.cpp
@@ -1109,6 +1112,14 @@ add_executable(temporal_table_test
 target_link_libraries(temporal_table_test ${wxWidgets_LIBRARIES})
 add_test(NAME temporal_table_test COMMAND temporal_table_test)
 
+add_executable(vector_helper_test
+    ${SOURCEDIR}/core/VectorHelperTest.cpp
+    ${SOURCEDIR}/core/VectorHelper.cpp
+    ${SQL_TEST_STUB_SOURCES}
+)
+target_link_libraries(vector_helper_test ${wxWidgets_LIBRARIES})
+add_test(NAME vector_helper_test COMMAND vector_helper_test)
+
 if (APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES
                 BUILD_WITH_INSTALL_RPATH FALSE
@@ -1144,6 +1155,14 @@ if (UNIX AND NOT APPLE)
 	install(
 		FILES res/flamerobin.png
 		DESTINATION share/pixmaps
+	)
+	install(
+		FILES res/flamerobin.png
+		DESTINATION share/icons/hicolor/48x48/apps
+	)
+	install(
+		FILES res/svg/flamerobin.svg
+		DESTINATION share/icons/hicolor/scalable/apps
 	)
 	install(
 		FILES res/flamerobin.desktop

@@ -67,6 +67,9 @@ public:
     virtual void getCounts(int* ins, int* upd, int* del, int* ridx, int* rseq) = 0;
     virtual void getDetailedCounts(std::map<int, CountInfo>& counts) = 0;
     virtual void getCompiledStatementInfo(std::vector<CompiledStatementInfo>& statements) = 0;
+    virtual void getMemoryUsageInfo(std::vector<MemoryUsageInfo>& memoryUsage) = 0;
+    virtual void getMemoryPoolInfo(std::vector<MemoryPoolInfo>& memoryPools) = 0;
+    virtual void getConnectionPoolInfo(std::vector<ConnectionPoolInfo>& connPools) = 0;
 
     virtual IBlobPtr createBlob(ITransactionPtr tr) = 0;
 

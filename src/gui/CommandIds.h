@@ -156,6 +156,7 @@ enum {
     Menu_ReplicationStatus,
     Menu_VisualizeSchema,
     Menu_CreateDockerFirebird,
+    Menu_VectorInstallerWizard,
 
         // view menu
         Menu_ToggleStatusBar, 

@@ -95,6 +95,36 @@ struct TransactionInfo
     bool wait;
 };
 
+struct MemoryUsageInfo
+{
+    int64_t memoryId;
+    int statGroup;
+    int64_t memoryAllocated;
+    int64_t memoryUsed;
+    int64_t maxAllocated;
+    int64_t maxUsed;
+};
+
+struct MemoryPoolInfo
+{
+    int64_t poolId;
+    int64_t attachmentId;
+    int64_t memoryAllocated;
+    int64_t memoryUsed;
+    std::string name;
+};
+
+struct ConnectionPoolInfo
+{
+    int64_t poolId;
+    std::string dbName;
+    int activeConnections;
+    int idleConnections;
+    int maxConnections;
+    int minConnections;
+    int waitingRequests;
+};
+
 struct CompiledStatementInfo
 {
     int64_t id;

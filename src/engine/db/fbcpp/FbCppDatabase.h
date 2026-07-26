@@ -69,6 +69,9 @@ public:
     virtual void getCounts(int* ins, int* upd, int* del, int* ridx, int* rseq) override;
     virtual void getDetailedCounts(std::map<int, CountInfo>& counts) override;
     virtual void getCompiledStatementInfo(std::vector<CompiledStatementInfo>& statements) override;
+    virtual void getMemoryUsageInfo(std::vector<MemoryUsageInfo>& memoryUsage) override;
+    virtual void getMemoryPoolInfo(std::vector<MemoryPoolInfo>& memoryPools) override;
+    virtual void getConnectionPoolInfo(std::vector<ConnectionPoolInfo>& connPools) override;
 
     virtual IBlobPtr createBlob(ITransactionPtr tr) override;
 
@@ -88,7 +91,7 @@ private:
     static std::optional<fbcpp::Client> clientM;
 
 private:
-    std::vector<uint8_t> buildDpb(bool creating, const std::string& owner = "",
+    std::vector<uint8_t> buildDpb(bool creating, int pagesize = 0, const std::string& owner = "",
         const std::string& initialUser = "");
 
     std::optional<fbcpp::Attachment> attachmentM;
