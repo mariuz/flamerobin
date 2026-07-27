@@ -160,6 +160,8 @@ void DataGrid::fetchData(bool readonly)
     // existing behaviour (this call was previously unconditional).
     if (config().get("autofitColumnsOnExecute", true))
         AutoSizeColumns(false);
+    if (config().get("gridShowMultilineText", false))
+        AutoSizeRows(false);
     EndBatch();
 
     // event handler is only needed if not all rows have already been
@@ -1402,6 +1404,8 @@ void DataGrid::OnIdle(wxIdleEvent& event)
     if (table->needsMoreRowsFetched())
     {
         table->fetch();
+        if (config().get("gridShowMultilineText", false))
+            AutoSizeRows(false);
         if (table->needsMoreRowsFetched())
             event.RequestMore();
         AdjustScrollbars();
