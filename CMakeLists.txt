@@ -1159,8 +1159,8 @@ if (UNIX AND NOT APPLE)
 		DESTINATION share/pixmaps
 	)
 	install(
-		FILES res/flamerobin.png
-		DESTINATION share/icons/hicolor/48x48/apps
+		DIRECTORY res/icons/hicolor/
+		DESTINATION share/icons/hicolor
 	)
 	install(
 		FILES res/svg/flamerobin.svg

@@ -13,9 +13,10 @@ http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issue
 
 <font size=+1 color="#AA0000"><B>General Improvements & Bug Fixes</B></font><br>
 <br>
+- <b>Data Grid Single-Click Multiline View & Best Fit Rows (#648)</b>: Enabled multiline text display by default (<code>gridShowMultilineText</code>) and added a "Best fit all rows" menu action to both the DataGrid context menu and the main Grid menu bar. Double-clicking row labels or headers dynamically resizes row heights to display all lines at once without scrolling, and double-clicking BLOB cells opens the BLOB viewer.<br>
 - <b>Trigger/Procedure DDL & Source Code Font Size Fix (#661)</b>: Fixed an issue where trigger and stored procedure source code and DDL views were rendered in a tiny font size in property windows. Removed legacy <code>&lt;font size=-1&gt;</code> HTML wrappers across property templates and configured uniform 1em font sizing with clean monospace styling for <code>&lt;pre&gt;</code> blocks.<br>
 - <b>Data Grid Multiline Auto-Row Height Fix (#662)</b>: Resolved visual cell text overlap issues when <code>gridShowMultilineText</code> option is enabled. Automatically calculates and scales row heights dynamically via <code>AutoSizeRows()</code> during initial and background data fetching.<br>
-- <b>Debian Package Desktop Icon Resolution Fix (#656)</b>: Fixed desktop application icon resolution on Debian 13/Linux installations by installing icons into standard Freedesktop icon paths (<code>/usr/share/pixmaps/</code> and <code>/usr/share/icons/hicolor/48x48/apps/</code>) and configuring <code>Icon=flamerobin</code> in <code>flamerobin.desktop</code>.<br>
+- <b>Debian Package Desktop Icon Resolution Fix (#656)</b>: Fixed desktop application icon resolution on Debian 13/Linux installations by rendering crisp high-resolution icon assets (48x48, 64x64, 128x128, 256x256, 512x512 PNGs and vector SVG) directly from vector sources into standard Freedesktop icon theme paths (<code>/usr/share/pixmaps/</code> and <code>/usr/share/icons/hicolor/</code>).<br>
 <br><br>
 
 

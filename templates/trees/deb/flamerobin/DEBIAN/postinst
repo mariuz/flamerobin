@@ -45,12 +45,15 @@ if [[ -f "/opt/flamerobin/share/pixmaps/flamerobin.png" ]]
 then
     mkdir -p /usr/share/pixmaps/ &> /dev/null || true
     cp /opt/flamerobin/share/pixmaps/flamerobin.png /usr/share/pixmaps/ 2> /dev/null || true
+fi
 
-    mkdir -p /usr/share/icons/hicolor/48x48/apps/ &> /dev/null || true
-    cp /opt/flamerobin/share/pixmaps/flamerobin.png /usr/share/icons/hicolor/48x48/apps/ 2> /dev/null || true
+if [[ -d "/opt/flamerobin/share/icons/hicolor" ]]
+then
+    mkdir -p /usr/share/icons/hicolor/ &> /dev/null || true
+    cp -r /opt/flamerobin/share/icons/hicolor/* /usr/share/icons/hicolor/ 2> /dev/null || true
 
-    mkdir -p /usr/local/share/icons/hicolor/48x48/apps/ &> /dev/null || true
-    cp /opt/flamerobin/share/pixmaps/flamerobin.png /usr/local/share/icons/hicolor/48x48/apps/ 2> /dev/null || true
+    mkdir -p /usr/local/share/icons/hicolor/ &> /dev/null || true
+    cp -r /opt/flamerobin/share/icons/hicolor/* /usr/local/share/icons/hicolor/ 2> /dev/null || true
 
     if command -v gtk-update-icon-cache &> /dev/null; then
         gtk-update-icon-cache -f -t /usr/share/icons/hicolor &> /dev/null || true
