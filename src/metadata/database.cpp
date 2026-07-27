@@ -2502,7 +2502,8 @@ void Database::getConnectedUsers(wxArrayString& users) const
         for (std::vector<std::string>::const_iterator it = userNames.begin();
             it != userNames.end(); ++it)
         {
-            counts[*it] += 1;
+            if (!it->empty() && *it != "Cache Writer" && *it != "Garbage Collector")
+                counts[*it] += 1;
         }
 
         for (std::map<std::string, size_t>::iterator it = counts.begin();

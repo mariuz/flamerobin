@@ -228,7 +228,15 @@ void FbCppDatabase::getConnectedUsers(std::vector<std::string>& users)
         tr->start();
         {
             auto st = createStatement(tr);
-            st->prepare("SELECT DISTINCT MON$USER FROM MON$ATTACHMENTS");
+            try
+            {
+                st->prepare("SELECT MON$USER FROM MON$ATTACHMENTS "
+                            "WHERE (MON$SYSTEM_FLAG IS NULL OR MON$SYSTEM_FLAG = 0)");
+            }
+            catch (...)
+            {
+                st->prepare("SELECT MON$USER FROM MON$ATTACHMENTS");
+            }
             st->execute();
             while (st->fetch())
             {
@@ -239,7 +247,8 @@ void FbCppDatabase::getConnectedUsers(std::vector<std::string>& users)
                     user.erase(last + 1);
                 else if (user.size() > 0 && user[0] == ' ')
                     user.clear();
-                users.push_back(user);
+                if (!user.empty() && user != "Cache Writer" && user != "Garbage Collector")
+                    users.push_back(user);
             }
         }
         try { tr->commit(); } catch (...) {}
