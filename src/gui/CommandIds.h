@@ -84,6 +84,7 @@ enum {
     DataGrid_Save_as_markdown,
     DataGrid_Log_changes,
     DataGrid_AutofitColumns,
+    DataGrid_AutofitRows,
 
     Menu_RegisterServer = 600,
     Menu_Manual,

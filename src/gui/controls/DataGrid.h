@@ -57,6 +57,7 @@ public:
     void fetchData(bool readonly);
 private:
     void OnContextMenu(wxContextMenuEvent& event);
+    void OnGridCellLeftDClick(wxGridEvent& event);
     void OnGridCellRightClick(wxGridEvent& event);
     void OnGridCellSelected(wxGridEvent& event);
     void OnGridLabelLeftClick(wxGridEvent& event);
@@ -84,6 +85,7 @@ public:
     void saveAsExcel(const wxString& fileName);
     void saveAsMarkdown(const wxString& fileName);
 
+    void autofitRows();
     void refreshAndInvalidateAttributes();
 
     void cancelFetchAll();

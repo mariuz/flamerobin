@@ -960,6 +960,9 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
     gridMenu->Append(Cmds::DataGrid_FetchAll,        _("&Fetch all records"));
     gridMenu->Append(Cmds::DataGrid_CancelFetchAll,  _("&Stop fetching all records"));
     gridMenu->AppendSeparator();
+    gridMenu->Append(Cmds::DataGrid_AutofitColumns,  _("Best fit all &columns"));
+    gridMenu->Append(Cmds::DataGrid_AutofitRows,     _("Best fit all &rows"));
+    gridMenu->AppendSeparator();
     gridMenu->Append(Cmds::DataGrid_Save_as_html,    _("Save as &html"));
     gridMenu->Append(Cmds::DataGrid_Save_as_csv,     _("Save as cs&v"));
     gridMenu->Append(Cmds::DataGrid_Save_as_json,    _("Save as &json"));
@@ -1217,8 +1220,10 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_MENU(Cmds::DataGrid_FetchAll,        ExecuteSqlFrame::OnMenuGridFetchAll)
     EVT_MENU(Cmds::DataGrid_CancelFetchAll,  ExecuteSqlFrame::OnMenuGridCancelFetchAll)
     EVT_MENU(Cmds::DataGrid_AutofitColumns,  ExecuteSqlFrame::OnMenuGridAutofitColumns)
+    EVT_MENU(Cmds::DataGrid_AutofitRows,     ExecuteSqlFrame::OnMenuGridAutofitRows)
 
     EVT_UPDATE_UI(Cmds::DataGrid_AutofitColumns, ExecuteSqlFrame::OnMenuUpdateGridHasData)
+    EVT_UPDATE_UI(Cmds::DataGrid_AutofitRows,    ExecuteSqlFrame::OnMenuUpdateGridHasData)
     EVT_UPDATE_UI(Cmds::DataGrid_Insert_row,     ExecuteSqlFrame::OnMenuUpdateGridInsertRow)
     EVT_UPDATE_UI(Cmds::DataGrid_Delete_row,     ExecuteSqlFrame::OnMenuUpdateGridDeleteRow)
     EVT_UPDATE_UI(Cmds::DataGrid_SetFieldToNULL, ExecuteSqlFrame::OnMenuUpdateGridCanSetFieldToNULL)
@@ -2440,6 +2445,11 @@ void ExecuteSqlFrame::OnMenuGridAutofitColumns(wxCommandEvent& WXUNUSED(event))
     // measures the visible / fetched cells; on very large data sets this can
     // be expensive, but it is initiated by the user so the cost is acceptable.
     grid_data->AutoSizeColumns(false);
+}
+
+void ExecuteSqlFrame::OnMenuGridAutofitRows(wxCommandEvent& WXUNUSED(event))
+{
+    grid_data->autofitRows();
 }
 
 void ExecuteSqlFrame::OnMenuUpdateGridCellIsBlob(wxUpdateUIEvent& event)
@@ -4278,7 +4288,17 @@ void ExecuteSqlFrame::OnGridLabelLeftDClick(wxGridEvent& event)
 
     int column = 1 + event.GetCol();
     if (column < 1 || column > table->GetNumberCols())
+    {
+        if (event.GetCol() == -1 && event.GetRow() >= 0)
+        {
+            grid_data->AutoSizeRow(event.GetRow(), false);
+        }
+        else if (event.GetCol() == -1 && event.GetRow() == -1)
+        {
+            grid_data->autofitRows();
+        }
         return;
+    }
     SelectStatement sstm(wxString(statementM->getSql().c_str(),
         *databaseM->getCharsetConverter()));
 

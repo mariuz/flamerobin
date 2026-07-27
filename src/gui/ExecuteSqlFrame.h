@@ -278,6 +278,7 @@ private:
     void OnMenuGridFetchAll(wxCommandEvent& event);
     void OnMenuGridCancelFetchAll(wxCommandEvent& event);
     void OnMenuGridAutofitColumns(wxCommandEvent& event);
+    void OnMenuGridAutofitRows(wxCommandEvent& event);
     void OnMenuUpdateGridHasSelection(wxUpdateUIEvent& event);
     void OnMenuUpdateGridHasData(wxUpdateUIEvent& event);
     void OnMenuUpdateGridFetchAll(wxUpdateUIEvent& event);
