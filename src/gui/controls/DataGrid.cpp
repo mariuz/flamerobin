@@ -208,6 +208,7 @@ void DataGrid::showPopupMenu(wxPoint cursorPos)
     // available as an automatic step after query execution via the
     // "autofitColumnsOnExecute" Preference.
     m.Append(Cmds::DataGrid_AutofitColumns, _("Best fit all columns"));
+    m.Append(Cmds::DataGrid_AutofitRows, _("Best fit all rows"));
     m.AppendSeparator();
 
     m.Append(wxID_COPY, _("Copy"));
@@ -1222,6 +1223,7 @@ wxGridCellCoordsArray DataGrid::getSelectedCells()
 
 BEGIN_EVENT_TABLE(DataGrid, wxGrid)
     EVT_CONTEXT_MENU(DataGrid::OnContextMenu)
+    EVT_GRID_CELL_LEFT_DCLICK(DataGrid::OnGridCellLeftDClick)
     EVT_GRID_CELL_RIGHT_CLICK(DataGrid::OnGridCellRightClick)
     EVT_GRID_LABEL_LEFT_CLICK(DataGrid::OnGridLabelLeftClick)
     EVT_GRID_LABEL_RIGHT_CLICK(DataGrid::OnGridLabelRightClick)
@@ -1236,6 +1238,55 @@ BEGIN_EVENT_TABLE(DataGrid, wxGrid)
     EVT_SCROLLWIN_THUMBRELEASE(DataGrid::OnThumbRelease)
 #endif
 END_EVENT_TABLE()
+
+void DataGrid::OnGridCellLeftDClick(wxGridEvent& event)
+{
+    DataGridTable* table = getDataGridTable();
+    if (table)
+    {
+        int col = event.GetCol();
+        int row = event.GetRow();
+        if (col >= 0 && row >= 0)
+        {
+            if (table->isBlobColumn(col))
+            {
+                wxCommandEvent cmdEvent(wxEVT_COMMAND_MENU_SELECTED, Cmds::DataGrid_EditBlob);
+                GetEventHandler()->ProcessEvent(cmdEvent);
+                return;
+            }
+        }
+    }
+    event.Skip();
+}
+
+void DataGrid::autofitRows()
+{
+    DataGridTable* table = getDataGridTable();
+    if (!table)
+        return;
+
+    config().setValue("gridShowMultilineText", true);
+    for (int i = 0; i < table->GetNumberCols(); i++)
+    {
+        if (!table->isNumericColumn(i))
+        {
+            wxGridCellAttr* ca = new wxGridCellAttr;
+            ca->SetAlignment(wxALIGN_LEFT, wxALIGN_TOP);
+            if (table->isReadonlyColumn(i) || table->isBlobColumn(i))
+            {
+                ca->SetReadOnly(true);
+                ca->SetBackgroundColour(frlayoutconfig().getReadonlyColour());
+            }
+            ca->SetOverflow(false);
+            ca->SetRenderer(new wxGridCellAutoWrapStringRenderer());
+            if (!ca->IsReadOnly())
+                ca->SetEditor(new wxGridCellAutoWrapStringEditor());
+            SetColAttr(i, ca);
+        }
+    }
+    AutoSizeRows(false);
+    Refresh();
+}
 
 void DataGrid::OnGridLabelLeftClick(wxGridEvent& event)
 {
