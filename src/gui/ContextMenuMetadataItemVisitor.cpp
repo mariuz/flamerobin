@@ -181,6 +181,8 @@ void MainObjectMenuMetadataItemVisitor::visitFunctionSQL(FunctionSQL& function)
         addDropItem(function);
     }
     addSeparator();
+    menuM->Append(Cmds::Menu_CopyCallSignature, _("Copy Call &Signature"));
+    menuM->Append(Cmds::Menu_GenerateExecuteTemplate, _("Generate &Execution Template"));
     addScriptAsMenu(function);
     addGenerateCodeMenu(function);
     addSeparator();
@@ -313,7 +315,6 @@ void MainObjectMenuMetadataItemVisitor::visitSysPackages(SysPackages& packages)
 void MainObjectMenuMetadataItemVisitor::visitProcedure(Procedure& procedure)
 {
     menuM->Append(Cmds::Menu_ExecuteProcedure, _("&Execute"));
-    menuM->Append(Cmds::Menu_InteractiveExecuteRoutine, _("Interactive &Execute Routine..."));
     if (procedure.getParent()->getType() == ntDatabase) {
         addAlterItem(procedure);
         addDropItem(procedure);

@@ -46,8 +46,8 @@ int main()
     // Existing tests
     ok = check(isolationLevelToString(fr::TransactionIsolationLevel::Consistency) == "Consistency", "Consistency isolation level string") && ok;
     ok = check(isolationLevelToString(fr::TransactionIsolationLevel::Concurrency) == "Concurrency", "Concurrency isolation level string") && ok;
-    ok = check(isolationLevelToString(fr::TransactionIsolationLevel::ReadDirty) == "Read Dirty", "Read Dirty isolation level string") && ok;
-    ok = check(isolationLevelToString(fr::TransactionIsolationLevel::ReadCommitted) == "Read Committed", "Read Committed isolation level string") && ok;
+    ok = check(isolationLevelToString(fr::TransactionIsolationLevel::ReadDirty) == "Read Committed (record version)", "Read Committed (record version) isolation level string") && ok;
+    ok = check(isolationLevelToString(fr::TransactionIsolationLevel::ReadCommitted) == "Read Committed (no record version)", "Read Committed (no record version) isolation level string") && ok;
     ok = check(isolationLevelToString(fr::TransactionIsolationLevel::ReadConsistency) == "Read Consistency", "Read Consistency isolation level string") && ok;
 
     ok = check(cryptStateToString(0) == "Not encrypted", "Not encrypted state") && ok;

@@ -8,6 +8,19 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.8.0</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>General Improvements & Bug Fixes</B></font><br>
+<br>
+- <b>Corrected Transaction Settings Terminology (#667)</b>: Renamed the misleading "Dirty read" label (since Firebird does not support read uncommitted isolation levels) to the accurate "Read committed (record version)" isolation mode. Renamed the basic "Read committed" option to "Read committed (no record version)" for full clarity. Status bars and unit tests have been updated accordingly.<br>
+- <b>Streamlined Stored Procedure & Stored Function UI (#668)</b>: Streamlined and cleaned up the UI for executing database routines. Right-clicking and selecting "Execute" (or double-clicking when configured to execute) now directly launches the interactive executor dialog (which validates types, supports NULLs, and displays results in a structured grid). Added missing "Copy Call Signature" and "Generate Execution Template" options to Stored Functions to achieve complete feature parity with Stored Procedures, and removed redundant "Interactive Execute Routine..." items from context menus to reduce clutter.<br>
+<br><br>
+
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.7.13</font><br>
 <br><br>
 

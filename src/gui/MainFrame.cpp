@@ -699,7 +699,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
     config().getValue("OnTreeActivate", treeActivateAction);
 
     if (treeActivateAction == showColumnInfo && (nt == ntTable
-        || nt == ntSysTable || nt == ntView || nt == ntProcedure))
+        || nt == ntSysTable || nt == ntView || nt == ntProcedure || nt == ntFunctionSQL))
     {
         m->ensureChildrenLoaded();
     }
@@ -710,10 +710,10 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
             Cmds::Menu_BrowseData);
         AddPendingEvent(evt);
     }
-    else if (treeActivateAction == selectFromOrExecute && (nt == ntProcedure))
+    else if (treeActivateAction == selectFromOrExecute && (nt == ntProcedure || nt == ntFunctionSQL))
     {
         wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED,
-            Cmds::Menu_ExecuteProcedure);
+            (nt == ntProcedure) ? Cmds::Menu_ExecuteProcedure : Cmds::Menu_ExecuteFunction);
         AddPendingEvent(evt);
     }
     else
@@ -900,11 +900,17 @@ void MainFrame::OnMenuDatabaseProperties(wxCommandEvent& WXUNUSED(event))
     MetadataItemPropertiesFrame::showPropertyPage(db.get());
 }
 
-void MainFrame::OnMenuExecuteFunction(wxCommandEvent& WXUNUSED(event))
+void MainFrame::OnMenuExecuteFunction(wxCommandEvent& event)
 {
-    executeSysTemplate("execute_function",
-        treeMainM->getSelectedMetadataItem(), this);
-
+    MetadataItem* item = treeMainM->getSelectedMetadataItem();
+    if (dynamic_cast<Function*>(item))
+    {
+        OnMenuInteractiveExecuteRoutine(event);
+    }
+    else
+    {
+        executeSysTemplate("execute_function", item, this);
+    }
 }
 
 void MainFrame::OnMenActiveObject(wxCommandEvent& WXUNUSED(event))
@@ -1178,10 +1184,17 @@ void MainFrame::OnMenuGenerateCode(wxCommandEvent& event)
     }
 }
 
-void MainFrame::OnMenuExecuteProcedure(wxCommandEvent& WXUNUSED(event))
+void MainFrame::OnMenuExecuteProcedure(wxCommandEvent& event)
 {
-    executeSysTemplate("execute_procedure",
-        treeMainM->getSelectedMetadataItem(), this);
+    MetadataItem* item = treeMainM->getSelectedMetadataItem();
+    if (dynamic_cast<Procedure*>(item))
+    {
+        OnMenuInteractiveExecuteRoutine(event);
+    }
+    else
+    {
+        executeSysTemplate("execute_procedure", item, this);
+    }
 }
 
 void MainFrame::OnMenuBrowseData(wxCommandEvent& WXUNUSED(event))

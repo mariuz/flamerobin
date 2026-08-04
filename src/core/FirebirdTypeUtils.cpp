@@ -119,8 +119,8 @@ wxString isolationLevelToString(fr::TransactionIsolationLevel level)
     {
     case fr::TransactionIsolationLevel::Consistency:     return _("Consistency");
     case fr::TransactionIsolationLevel::Concurrency:     return _("Concurrency");
-    case fr::TransactionIsolationLevel::ReadCommitted:   return _("Read Committed");
-    case fr::TransactionIsolationLevel::ReadDirty:       return _("Read Dirty");
+    case fr::TransactionIsolationLevel::ReadCommitted:   return _("Read Committed (no record version)");
+    case fr::TransactionIsolationLevel::ReadDirty:       return _("Read Committed (record version)");
     case fr::TransactionIsolationLevel::ReadConsistency: return _("Read Consistency");
     default:                                             return _("Unknown");
     }

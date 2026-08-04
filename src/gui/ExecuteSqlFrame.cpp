@@ -920,9 +920,9 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
     stmtPropMenu->AppendRadioItem(Cmds::Query_TransactionConcurrency,
         cm.getMainMenuItemText(_("Concurrency isolation mode"), Cmds::Query_TransactionConcurrency));
     stmtPropMenu->AppendRadioItem(Cmds::Query_TransactionReadDirty,
-        cm.getMainMenuItemText(_("Dirty read isolation mode"), Cmds::Query_TransactionReadDirty));
+        cm.getMainMenuItemText(_("Read committed (record version) isolation mode"), Cmds::Query_TransactionReadDirty));
     stmtPropMenu->AppendRadioItem(Cmds::Query_TransactionReadCommitted,
-        cm.getMainMenuItemText(_("Read committed isolation mode"), Cmds::Query_TransactionReadCommitted));
+        cm.getMainMenuItemText(_("Read committed (no record version) isolation mode"), Cmds::Query_TransactionReadCommitted));
     stmtPropMenu->AppendRadioItem(Cmds::Query_TransactionReadConsistency,
         cm.getMainMenuItemText(_("Read consistency isolation mode"), Cmds::Query_TransactionReadConsistency));
     stmtPropMenu->AppendRadioItem(Cmds::Query_TransactionConsistency,
