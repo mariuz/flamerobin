@@ -24,8 +24,8 @@ index 128ed91..86c78aa 100644
  	/// The Attachment must exist and remain valid while there are other objects using it, such as Transaction and
  	/// Statement.
  	///
--	class Attachment final
-+	class Attachment
+-	class FB_CPP_EXPORT Attachment final
++	class FB_CPP_EXPORT Attachment
  	{
  	public:
  		///
@@ -118,8 +118,8 @@ index 3464819..7dbdf73 100644
  	///
  	/// Provides read and write access to Firebird blobs.
  	///
--	class Blob final
-+	class Blob
+-	class FB_CPP_EXPORT Blob final
++	class FB_CPP_EXPORT Blob
  	{
  	public:
  		///
@@ -280,8 +280,8 @@ index 05faa8a..8e9a69f 100644
  	///
  	/// Prepares, executes, and fetches SQL statements against a Firebird attachment.
  	///
--	class Statement final
-+	class Statement
+-	class FB_CPP_EXPORT Statement final
++	class FB_CPP_EXPORT Statement
  	{
 +	public:
 +		explicit Statement(Attachment& attachment);
@@ -416,8 +416,8 @@ index 66d4594..092a2c2 100644
  	/// being committed or rolled back (and not prepared), it will be automatically
  	/// rolled back.
  	///
--	class Transaction final
-+	class Transaction
+-	class FB_CPP_EXPORT Transaction final
++	class FB_CPP_EXPORT Transaction
  	{
 +	public:
 +		explicit Transaction(Client& client);

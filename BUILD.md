@@ -52,7 +52,7 @@ The current list of requirements and overrides defined in the project:
 | :--- | :--- | :--- | :--- |
 | **Boost Libraries** | All | `1.90.0` | Includes `boost-dll`, `boost-filesystem`, `boost-multiprecision`, and `boost-test` |
 | **firebird** | All | `5.0.4` | Firebird database client and development library |
-| **fb-cpp** | All | `0.0.4` | FlameRobin's C++20 Firebird API wrapper (provided as a local vcpkg overlay port in `./ports/fb-cpp`) |
+| **fb-cpp** | All | `0.0.5` | FlameRobin's C++20 Firebird API wrapper (provided as a local vcpkg overlay port in `./ports/fb-cpp`) |
 | **icu** | All | `78.1` | International Components for Unicode |
 | **gtk3** | Linux, FreeBSD, OpenBSD | *System/vcpkg* | Configured with `wayland` feature support |
 | **wxwidgets** | All | *vcpkg/System* | Unicode build with `webview` and `secretstore` features enabled |

@@ -1,6 +1,6 @@
 {
   "name": "fb-cpp",
-  "version-semver": "0.0.4",
+  "version-semver": "0.0.5",
   "description": "C++20 Firebird API wrapper",
   "homepage": "https://github.com/asfernandes/fb-cpp",
   "license": "MIT",
