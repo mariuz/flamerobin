@@ -77,6 +77,7 @@ protected:
     virtual bool getConfigStoresHeight() const;
 private:
     wxPanel* panel_controls;
+    void OnCloseButtonClick(wxCommandEvent& event);
 };
 
 #endif // BASEDIALOG_H

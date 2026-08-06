@@ -40,6 +40,9 @@ BaseDialog::BaseDialog(wxWindow* parent, int id, const wxString& title,
 {
     panel_controls = new wxPanel(this, wxID_ANY, wxDefaultPosition,
         wxDefaultSize, wxTAB_TRAVERSAL | wxCLIP_CHILDREN | wxNO_BORDER);
+
+    Connect(wxID_CLOSE, wxEVT_COMMAND_BUTTON_CLICKED,
+        wxCommandEventHandler(BaseDialog::OnCloseButtonClick));
 }
 
 wxPanel* BaseDialog::getControlsPanel()
@@ -206,5 +209,10 @@ bool BaseDialog::getConfigStoresWidth() const
 bool BaseDialog::getConfigStoresHeight() const
 {
     return true;
+}
+
+void BaseDialog::OnCloseButtonClick(wxCommandEvent& WXUNUSED(event))
+{
+    Close();
 }
 
