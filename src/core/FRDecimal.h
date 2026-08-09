@@ -25,11 +25,23 @@
 #define FR_FRDECIMAL_H
 
 #include <wx/wx.h>
-#include <ibpp.h>
+#include <cstdint>
 
-// Base class for Flamerobin int128 type.
-typedef IBPP::ibpp_dec16_t dec16_t;
-typedef IBPP::ibpp_dec34_t dec34_t;
+#ifdef HAVE_DECIMAL128
+#include <decimal/decimal>
+typedef std::decimal::decimal64 dec16_t;
+typedef std::decimal::decimal128 dec34_t;
+#else
+struct dec16_t
+{
+    int64_t lowPart;
+};
+struct dec34_t
+{
+    uint64_t lowPart;
+    uint64_t highPart;
+};
+#endif
 
 wxString Dec34DPDToString(dec34_t value);
 bool StringToDec34DPD(const wxString& src, dec34_t* dst, wxString& errMsg);

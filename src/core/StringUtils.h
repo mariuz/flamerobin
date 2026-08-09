@@ -65,7 +65,6 @@ wxString wrapText(const wxString& text, size_t maxWidth, size_t indent);
 
 #include "engine/db/ITransaction.h"
 
-wxString IBPPtype2string(Database* db, IBPP::SDT t, int subtype, int size, int scale);
 wxString DALtype2string(Database* db, fr::ColumnType t, int subtype, int size, int scale);
 wxString isolationLevelToString(fr::TransactionIsolationLevel level);
 wxString cryptStateToString(int state);

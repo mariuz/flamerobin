@@ -24,7 +24,6 @@
 #ifndef FR_DATAGRIDROWBUFFER_H
 #define FR_DATAGRIDROWBUFFER_H
 
-#include <ibpp.h>
 #include "engine/db/IBlob.h"
 #include <core/FRInt128.h>
 #include <core/FRDecimal.h>

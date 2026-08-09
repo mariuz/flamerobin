@@ -40,16 +40,24 @@
 #include "logger.h"
 #include "sql/SqlStatement.h"
 #include "metadata/database.h"
+#include "engine/db/IDatabase.h"
+#include "engine/db/ITransaction.h"
+#include "engine/db/IStatement.h"
+#include "engine/db/IBlob.h"
 
 bool Logger::log2database(Config *cfg, const SqlStatement& stm, Database* db)
 {
     wxMBConv* conv = db->getCharsetConverter();
 
-    IBPP::Transaction tr = IBPP::TransactionFactory(db->getIBPPDatabase());
+    fr::IDatabasePtr dalDb = db->getDALDatabase();
+    if (!dalDb)
+        return false;
+
+    fr::ITransactionPtr tr = dalDb->createTransaction();
     try
     {
-        tr->Start();
-        IBPP::Statement st = IBPP::StatementFactory(db->getIBPPDatabase(), tr);
+        tr->start();
+        fr::IStatementPtr st = dalDb->createStatement(tr);
 
         // find next id
         wxString sql = "SELECT gen_id(FLAMEROBIN$LOG_GEN, 1) FROM rdb$database";
@@ -58,33 +66,37 @@ bool Logger::log2database(Config *cfg, const SqlStatement& stm, Database* db)
             sql = cfg->get("LoggingCustomSelect",
                 wxString("SELECT 1+MAX(ID) FROM FLAMEROBIN$LOG"));
         }
-        st->Prepare(wx2std(sql, conv));
-        st->Execute();
+        st->prepare(wx2std(sql, conv));
+        st->execute();
         int cnt = 1;
-        if (st->Fetch() && !st->IsNull(1))
-            st->Get(1, cnt);
+        if (st->fetch() && !st->isNull(0))
+            cnt = st->getInt32(0);
 
-        st->Prepare("INSERT INTO FLAMEROBIN$LOG (id, object_type, \
+        st->prepare("INSERT INTO FLAMEROBIN$LOG (id, object_type, \
             object_name, sql_statement) values (?,?,?,?)");
-        st->Set(1, cnt);
+        st->setInt32(0, cnt);
         if (stm.isDDL())
         {
-            st->Set(2, wx2std(getNameOfType(stm.getObjectType()), conv));
-            st->Set(3, wx2std(stm.getName(), conv));
+            st->setString(1, wx2std(getNameOfType(stm.getObjectType()), conv));
+            st->setString(2, wx2std(stm.getName(), conv));
         }
         else
         {
-            st->SetNull(2);
-            st->SetNull(3);
+            st->setNull(1);
+            st->setNull(2);
         }
-        IBPP::Blob bl = IBPP::BlobFactory(st->DatabasePtr(), tr);
-        bl->Save(wx2std(stm.getStatement(), conv));
-        st->Set(4, bl);
-        st->Execute();
-        tr->Commit();
+        fr::IBlobPtr bl = dalDb->createBlob(tr);
+        bl->create();
+        std::string statementStr = wx2std(stm.getStatement(), conv);
+        bl->write(statementStr.data(), statementStr.length());
+        bl->close();
+
+        st->setBlob(3, bl);
+        st->execute();
+        tr->commit();
         return true;
     }
-    catch (IBPP::Exception &e)
+    catch (const std::exception &e)
     {
         showWarningDialog(0, _("Logging to database failed"),
             wxString(e.what(), *conv), AdvancedMessageDialogButtonsOk());
@@ -201,42 +213,46 @@ bool Logger::logStatement(const SqlStatement& st, Database* db)
 
 bool Logger::prepareDatabase(Database *db)
 {
-    IBPP::Transaction tr = IBPP::TransactionFactory(db->getIBPPDatabase());
+    fr::IDatabasePtr dalDb = db->getDALDatabase();
+    if (!dalDb)
+        return false;
+
+    fr::ITransactionPtr tr = dalDb->createTransaction();
     try
     {
         // create table
         if (db->findByNameAndType(ntTable, "FLAMEROBIN$LOG") == 0)
         {
-            tr->Start();
-            IBPP::Statement st = IBPP::StatementFactory(db->getIBPPDatabase(), tr);
-            st->Prepare("create table FLAMEROBIN$LOG ( \
+            tr->start();
+            fr::IStatementPtr st = dalDb->createStatement(tr);
+            st->prepare("create table FLAMEROBIN$LOG ( \
                 id integer not null, \
                 object_type varchar(10), \
                 object_name char(63), \
                 sql_statement blob sub_type 1, \
                 executed_at timestamp default current_timestamp, \
                 user_name char(63) default current_user )");
-            st->Execute();
-            tr->Commit();
+            st->execute();
+            tr->commit();
             db->addObject(ntTable, "FLAMEROBIN$LOG");
         }
 
         // create generator
         if (db->findByNameAndType(ntGenerator, "FLAMEROBIN$LOG_GEN") == 0)
         {
-            tr->Start();
-            IBPP::Statement st = IBPP::StatementFactory(db->getIBPPDatabase(), tr);
-            st->Prepare("create generator FLAMEROBIN$LOG_GEN");
-            st->Execute();
-            tr->Commit();
+            tr->start();
+            fr::IStatementPtr st = dalDb->createStatement(tr);
+            st->prepare("create generator FLAMEROBIN$LOG_GEN");
+            st->execute();
+            tr->commit();
             db->addObject(ntGenerator, "FLAMEROBIN$LOG_GEN");
         }
         return true;
     }
-    catch (IBPP::Exception &e)
+    catch (const std::exception &e)
     {
         showWarningDialog(0, _("Creation of logging objects failed"),
-            e.what(), AdvancedMessageDialogButtonsOk());
+            wxString(e.what()), AdvancedMessageDialogButtonsOk());
     }
     catch (...)
     {

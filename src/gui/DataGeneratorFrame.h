@@ -29,8 +29,6 @@
 
 #include <map>
 
-#include <ibpp.h>
-
 #include "core/Observer.h"
 #include "core/StringUtils.h"
 #include "gui/BaseFrame.h"

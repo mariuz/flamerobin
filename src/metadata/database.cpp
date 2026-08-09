@@ -49,7 +49,6 @@
 #include "core/ProgressIndicator.h"
 #include "core/StringUtils.h"
 #include "engine/MetadataLoader.h"
-#include "engine/db/ibpp/IbppDatabase.h"
 #include "MasterPassword.h"
 #include "SecretStore.h"
 #include "metadata/CharacterSet.h"
@@ -75,7 +74,7 @@
 #include "sql/SqlStatement.h"
 #include "sql/SqlTokenizer.h"
 #include "firebird/constants.h"
-#include "ibpp/_ibpp.h"
+
 
 // Credentials class
 void Credentials::setCharset(const wxString& value)
@@ -2116,16 +2115,6 @@ wxString Database::getCryptKeyData() const
         return credentialsM.getCryptKeyData();
 }
 
-IBPP::Database Database::getIBPPDatabase()
-{
-    if (databaseDAL_M->getBackendType() == fr::DatabaseBackend::IBPP)
-    {
-        auto ibppDb = std::dynamic_pointer_cast<fr::IbppDatabase>(databaseDAL_M);
-        if (ibppDb)
-            return ibppDb->getIBPPDatabase();
-    }
-    return IBPP::Database();
-}
 
 fr::IDatabasePtr Database::getDALDatabase() const
 {
@@ -2750,12 +2739,16 @@ wxString Database::getTimezoneName(int timezone)
     try
     {
         std::string tzName;
-        if (ibpp_internals::getTimezoneNameById(timezone, tzName))
+        if (auto dalDb = getDALDatabase())
         {
-            wxString result = wxString::FromUTF8(tzName.c_str());
-            std::lock_guard<std::mutex> lock(timezoneDataMutexM);
-            timezonesCacheM[timezone] = result;
-            return result;
+            tzName = dalDb->getTimezoneName(timezone);
+            if (!tzName.empty())
+            {
+                wxString result = wxString::FromUTF8(tzName.c_str());
+                std::lock_guard<std::mutex> lock(timezoneDataMutexM);
+                timezonesCacheM[timezone] = result;
+                return result;
+            }
         }
     }
     catch (const std::exception& ex)

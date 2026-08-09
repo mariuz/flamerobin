@@ -27,7 +27,7 @@
 #include <wx/wx.h>
 #include <wx/image.h>
 
-#include <ibpp.h>
+
 
 #include "gui/BaseDialog.h"
 #include <map>
@@ -55,7 +55,6 @@ public:
 class InsertParametersDialog: public BaseDialog
 {
 public:
-    InsertParametersDialog(wxWindow* parent, IBPP::Statement& st, Database *db, std::map<std::string, wxString>& pParameterSaveList, std::map<std::string, wxString>& pParameterSaveListOptionNull);
     InsertParametersDialog(wxWindow* parent, fr::IStatementPtr st, Database *db, std::map<std::string, wxString>& pParameterSaveList, std::map<std::string, wxString>& pParameterSaveListOptionNull);
     virtual ~InsertParametersDialog();
     void OnOkButtonClick(wxCommandEvent& event);
@@ -74,7 +73,6 @@ private:
     void storeValues();
     void preloadSpecialColumns();
     void createGrid();
-    IBPP::Statement statementM;
     fr::IStatementPtr statementDALM;
     std::vector<InsertParametersColumnInfo> columnsM;
     std::map<std::string, wxString>& parameterSaveList;

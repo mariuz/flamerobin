@@ -733,10 +733,6 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
         }
         EndModal(wxID_OK);
     }
-    catch (IBPP::Exception &e)
-    {
-        wxMessageBox(e.what(), _("Error"), wxOK|wxICON_ERROR);
-    }
     catch (const std::exception& e)
     {
         wxMessageBox(wxString::FromUTF8(e.what()), _("Error"), wxOK|wxICON_ERROR);

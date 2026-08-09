@@ -21,7 +21,6 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "ibpp/ibpp.h"
 #include "engine/db/DatabaseFactory.h"
 #include "engine/db/IDatabase.h"
 #include "engine/db/ITransaction.h"
@@ -484,21 +483,21 @@ int main()
     const std::string dbName = fr_test::getTestDbPath("dal_types_test");
     std::cout << "Creating test database: " << dbName << "\n";
 
-    // Create DB using IBPP
+    // Create DB using FbCpp
     try 
     {
-        IBPP::Database db = IBPP::DatabaseFactory(serverName, dbName, "SYSDBA", "masterkey");
-        db->Create(3);
+        fr::IDatabasePtr db = fr::DatabaseFactory::createDatabase(fr::DatabaseBackend::FbCpp);
+        db->setConnectionString(serverName + ":" + dbName);
+        db->setCredentials("SYSDBA", "masterkey");
+        db->create(8192, 3);
     }
-    catch (const IBPP::Exception& e)
+    catch (const std::exception& e)
     {
         fr_test::printException(e, "create test database");
         return 1;
     }
 
     bool all_ok = true;
-    all_ok = runTestsForBackend(fr::DatabaseBackend::IBPP, serverName, dbName) && all_ok;
-    
     try 
     {
         all_ok = runTestsForBackend(fr::DatabaseBackend::FbCpp, serverName, dbName) && all_ok;
@@ -512,9 +511,11 @@ int main()
     // Cleanup
     try 
     {
-        IBPP::Database db = IBPP::DatabaseFactory(serverName, dbName, "SYSDBA", "masterkey");
-        db->Connect();
-        db->Drop();
+        fr::IDatabasePtr db = fr::DatabaseFactory::createDatabase(fr::DatabaseBackend::FbCpp);
+        db->setConnectionString(serverName + ":" + dbName);
+        db->setCredentials("SYSDBA", "masterkey");
+        db->connect();
+        db->drop();
     }
     catch (...) {}
 

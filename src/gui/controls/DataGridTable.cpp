@@ -50,22 +50,8 @@
 #include "metadata/database.h"
 #include "metadata/table.h"
 
-DataGridTable::DataGridTable(IBPP::Statement& s, Database* db)
-    : wxGridTableBase(), statementM(s), statementDALM(), databaseM(db),
-        nullFlagM(false), rowsM(db)
-{
-    allRowsFetchedM = false;
-    fetchAllRowsM = false;
-    readOnlyM = false;
-    canInsertRowsIsSetM = false;
-    canInsertRowsM = false;
-    config().getValue("GridFetchAllRecords", fetchAllRowsM);
-    maxRowToFetchM = 100;
-    cellAttriM = new wxGridCellAttr();
-}
-
 DataGridTable::DataGridTable(fr::IStatementPtr s, Database* db)
-    : wxGridTableBase(), statementM(), statementDALM(s), databaseM(db),
+    : wxGridTableBase(), statementDALM(s), databaseM(db),
         nullFlagM(false), rowsM(db)
 {
     allRowsFetchedM = false;
@@ -127,10 +113,7 @@ void DataGridTable::fetchOne()
 {
     try
     {
-        if (statementDALM)
-            rowsM.addRow(statementDALM);
-        else
-            rowsM.addRow(statementM);
+        rowsM.addRow(statementDALM);
         allRowsFetchedM = true;
 
         if (GetView())   // notify the grid
@@ -167,16 +150,8 @@ void DataGridTable::fetch()
     {
         try
         {
-            if (statementDALM)
-            {
-                if (!statementDALM->fetch())
-                    allRowsFetchedM = true;
-            }
-            else
-            {
-                if (!statementM->Fetch())
-                    allRowsFetchedM = true;
-            }
+            if (!statementDALM->fetch())
+                allRowsFetchedM = true;
         }
         catch (const std::exception& e)
         {
@@ -195,10 +170,7 @@ void DataGridTable::fetch()
         if (allRowsFetchedM)
             break;
 
-        if (statementDALM)
-            rowsM.addRow(statementDALM);
-        else
-            rowsM.addRow(statementM);
+        rowsM.addRow(statementDALM);
 
         if (!initial && (::wxGetLocalTimeMillis() - startms > 100))
             break;
@@ -387,29 +359,14 @@ int DataGridTable::getStatementColCount()
         // Support any statement that returns columns (Select, Insert/Update/Delete Returning, ExecProcedure)
         return statementDALM->getColumnCount();
     }
-
-    if (statementM == 0)
-        return 0;
-    switch (statementM->Type())
-    {
-        case IBPP::stSelect:
-        case IBPP::stSelectUpdate:
-            return statementM->Columns();
-        default:
-            return 0;
-    }
+    return 0;
 }
 
 wxString DataGridTable::getTableName()
 {
     if (getStatementColCount() == 0)
         return wxEmptyString;
-    if (statementDALM)
-    {
-        return std2wxIdentifier(statementDALM->getColumnTable(0),
-            databaseM->getCharsetConverter());
-    }
-    return std2wxIdentifier(statementM->ColumnTable(1),
+    return std2wxIdentifier(statementDALM->getColumnTable(0),
         databaseM->getCharsetConverter());
 }
 
@@ -423,22 +380,10 @@ void DataGridTable::getTableNames(wxArrayString& tables)
     }
     for (int i = 0; i < colCount; i++)
     {
-        wxString tn;
-        wxString cn;
-        if (statementDALM)
-        {
-            tn = std2wxIdentifier(statementDALM->getColumnTable(i),
-                databaseM->getCharsetConverter());
-            cn = std2wxIdentifier(statementDALM->getColumnName(i),
-                databaseM->getCharsetConverter());
-        }
-        else
-        {
-            tn = std2wxIdentifier(statementM->ColumnTable(i + 1),
-                databaseM->getCharsetConverter());
-            cn = std2wxIdentifier(statementM->ColumnName(i + 1),
-                databaseM->getCharsetConverter());
-        }
+        wxString tn = std2wxIdentifier(statementDALM->getColumnTable(i),
+            databaseM->getCharsetConverter());
+        wxString cn = std2wxIdentifier(statementDALM->getColumnName(i),
+            databaseM->getCharsetConverter());
 
         if (wxNOT_FOUND == tables.Index(tn))
         {
@@ -477,22 +422,10 @@ void DataGridTable::getFields(const wxString& table,
     TempMap fields;
     for (int i = 0; i < colCount; i++)
     {
-        wxString tn;
-        wxString cn;
-        if (statementDALM)
-        {
-            tn = std2wxIdentifier(statementDALM->getColumnTable(i),
-                databaseM->getCharsetConverter());
-            cn = std2wxIdentifier(statementDALM->getColumnName(i),
-                databaseM->getCharsetConverter());
-        }
-        else
-        {
-            tn = std2wxIdentifier(statementM->ColumnTable(i + 1),
-                databaseM->getCharsetConverter());
-            cn = std2wxIdentifier(statementM->ColumnName(i + 1),
-                databaseM->getCharsetConverter());
-        }
+        wxString tn = std2wxIdentifier(statementDALM->getColumnTable(i),
+            databaseM->getCharsetConverter());
+        wxString cn = std2wxIdentifier(statementDALM->getColumnName(i),
+            databaseM->getCharsetConverter());
 
         if (tn != table)
             continue;
@@ -561,18 +494,9 @@ void DataGridTable::initialFetch(bool readonly)
 
     try
     {
-        if (statementDALM)
-        {
-            wxLogDebug("DataGridTable::initialFetch() initializing rowsM with statementDALM. Col count: %d", statementDALM->getColumnCount());
-            rowsM.initialize(statementDALM);
-            wxLogDebug("DataGridTable::initialFetch() rowsM initialized.");
-        }
-        else
-        {
-            wxLogDebug("DataGridTable::initialFetch() initializing rowsM with statementM.");
-            rowsM.initialize(statementM);
-            wxLogDebug("DataGridTable::initialFetch() rowsM initialized.");
-        }
+        wxLogDebug("DataGridTable::initialFetch() initializing rowsM with statementDALM. Col count: %d", statementDALM->getColumnCount());
+        rowsM.initialize(statementDALM);
+        wxLogDebug("DataGridTable::initialFetch() rowsM initialized.");
     }
     catch (std::exception& e)
     {
@@ -594,11 +518,7 @@ void DataGridTable::initialFetch(bool readonly)
         GetView()->ProcessTableMessage(msg);
     }
 
-    bool execProc = false;
-    if (statementDALM)
-        execProc = (statementDALM->getType() == fr::StatementType::ExecProcedure);
-    else
-        execProc = (statementM->Type() == IBPP::stExecProcedure);
+    bool execProc = (statementDALM->getType() == fr::StatementType::ExecProcedure);
 
     if (execProc)
     {
@@ -764,7 +684,7 @@ void DataGridTable::setValueToNull(int row, int col)
         b.blob = 0;
         b.col  = col;
         b.row  = row;
-        b.st   = statementM;
+        b.stDAL = statementDALM;
         rowsM.setBlob(b);
     }
 }

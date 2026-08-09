@@ -31,8 +31,7 @@
 #include <wx/panel.h>
 
 #include <string>
-
-#include <ibpp.h>
+#include <memory>
 
 #include "core/Observer.h"
 #include "controls/LogTextControl.h"
@@ -42,13 +41,14 @@
 
 class EventLogControl;
 
-class EventWatcherFrame : public BaseFrame, public Observer,
-    public IBPP::EventInterface
+namespace fbcpp { class EventListener; }
+
+class EventWatcherFrame : public BaseFrame, public Observer
 {
 private:
     DatabaseWeakPtr databaseM;
     wxTimer timerM;
-    IBPP::Events eventsM;
+    std::unique_ptr<fbcpp::EventListener> eventListenerM;
 
     wxPanel* panel_controls;
     wxStaticText* static_text_monitored;
@@ -69,11 +69,9 @@ private:
     void addEvents(wxString& s);    // multiline allowed
     void defineMonitoredEvents();
     DatabasePtr getDatabase() const;
-    bool setTimerActive(bool active);
     void updateMonitoringActive();
 
-    virtual void ibppEventHandler(IBPP::Events events,
-        const std::string& name, int count);
+
 
     // observer stuff
     virtual void subjectRemoved(Subject* subject);

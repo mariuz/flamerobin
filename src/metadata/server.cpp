@@ -34,7 +34,6 @@
 
 #include "config/Config.h"
 #include "engine/db/DatabaseFactory.h"
-#include "engine/db/ibpp/IbppService.h"
 #include "core/ProgressIndicator.h"
 #include "core/StringUtils.h"
 #include "frutils.h"
@@ -349,18 +348,5 @@ fr::IServicePtr Server::getDALService(ProgressIndicator* progressind, bool sysdb
     return nullptr;
 }
 
-bool Server::getService(IBPP::Service& svc, ProgressIndicator* progressind,
-    bool sysdba)
-{
-    fr::IServicePtr dalSvc = getDALService(progressind, sysdba);
-    if (!dalSvc)
-        return false;
 
-    if (auto ibppSvc = std::dynamic_pointer_cast<fr::IbppService>(dalSvc))
-    {
-        svc = ibppSvc->getIBPPService();
-        return true;
-    }
-    return false;
-}
 

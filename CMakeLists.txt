@@ -156,11 +156,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/config/LocaleManager.cpp
         ${SOURCEDIR}/config/LocalSettings.cpp
         ${SOURCEDIR}/engine/db/DatabaseFactory.cpp
-        ${SOURCEDIR}/engine/db/ibpp/IbppDatabase.cpp
-        ${SOURCEDIR}/engine/db/ibpp/IbppTransaction.cpp
-        ${SOURCEDIR}/engine/db/ibpp/IbppStatement.cpp
-        ${SOURCEDIR}/engine/db/ibpp/IbppService.cpp
-        ${SOURCEDIR}/engine/db/ibpp/IbppBlob.cpp
+
         ${SOURCEDIR}/engine/db/fbcpp/FbCppDatabase.cpp
         ${SOURCEDIR}/engine/db/fbcpp/FbCppTransaction.cpp
         ${SOURCEDIR}/engine/db/fbcpp/FbCppStatement.cpp
@@ -324,10 +320,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/engine/db/IStatement.h
         ${SOURCEDIR}/engine/db/IService.h
         ${SOURCEDIR}/engine/db/DatabaseFactory.h
-        ${SOURCEDIR}/engine/db/ibpp/IbppDatabase.h
-        ${SOURCEDIR}/engine/db/ibpp/IbppTransaction.h
-        ${SOURCEDIR}/engine/db/ibpp/IbppStatement.h
-        ${SOURCEDIR}/engine/db/ibpp/IbppService.h
+
         ${SOURCEDIR}/engine/db/fbcpp/FbCppDatabase.h
         ${SOURCEDIR}/engine/db/fbcpp/FbCppTransaction.h
         ${SOURCEDIR}/engine/db/fbcpp/FbCppStatement.h
@@ -452,61 +445,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/sql/StatementBuilder.h
 )
 
-# IBPP static lib source files
-list(APPEND IBPP_SOURCE_LIST
-        ${SOURCEDIR}/ibpp/_dpb.cpp
-        ${SOURCEDIR}/ibpp/_ibpp.cpp
-        ${SOURCEDIR}/ibpp/_ibs.cpp
-        ${SOURCEDIR}/ibpp/_rb.cpp
-        ${SOURCEDIR}/ibpp/_spb.cpp
-        ${SOURCEDIR}/ibpp/_tpb.cpp
-        ${SOURCEDIR}/ibpp/array.cpp
-        ${SOURCEDIR}/ibpp/blob.cpp
-        ${SOURCEDIR}/ibpp/database.cpp
-        ${SOURCEDIR}/ibpp/date.cpp
-        ${SOURCEDIR}/ibpp/dbkey.cpp
-        ${SOURCEDIR}/ibpp/events.cpp
-        ${SOURCEDIR}/ibpp/exception.cpp
-        ${SOURCEDIR}/ibpp/fbinterfaces.cpp
-        ${SOURCEDIR}/ibpp/ibint128.cpp
-        ${SOURCEDIR}/ibpp/row.cpp
-        ${SOURCEDIR}/ibpp/service.cpp
-        ${SOURCEDIR}/ibpp/statement.cpp
-        ${SOURCEDIR}/ibpp/time.cpp
-        ${SOURCEDIR}/ibpp/transaction.cpp
-        ${SOURCEDIR}/ibpp/user.cpp
-)
-list(APPEND IBPP_HEADER_LIST
-        ${SOURCEDIR}/firebird/include/ibase.h
-        ${SOURCEDIR}/firebird/include/iberror.h
-        ${SOURCEDIR}/firebird/include/firebird/impl/blr.h
-        ${SOURCEDIR}/firebird/include/firebird/impl/consts_pub.h
-        ${SOURCEDIR}/firebird/include/firebird/impl/dsc_pub.h
-        ${SOURCEDIR}/firebird/include/firebird/impl/inf_pub.h
-        ${SOURCEDIR}/firebird/include/firebird/impl/msg_helper.h
-        ${SOURCEDIR}/firebird/include/firebird/impl/sqlda_pub.h
-        ${SOURCEDIR}/firebird/include/firebird/impl/types_pub.h        
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/all.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/dsql.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/dyn.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/fbsvcmgr.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/fbtracemgr.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/gbak.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/gfix.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/gsec.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/gstat.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/isql.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/jrd.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/jrd_bugchk.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/nbackup.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/sqlerr.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/sqlwarn.h
-		${SOURCEDIR}/firebird/include/firebird/impl/msg/utl.h		
-		${SOURCEDIR}/firebird/include/firebird/Interface.h
-		${SOURCEDIR}/firebird/include/firebird/IdlFbInterfaces.h
-        ${SOURCEDIR}/ibpp/_ibpp.h
-        ${SOURCEDIR}/ibpp/ibpp.h
-)
+
 
 #--------------------------------------
 # Platform specific options
@@ -753,17 +692,14 @@ endif (APPLE)
 source_group("Source Files" FILES ${SOURCE_LIST})
 source_group("Header Files" FILES ${HEADER_LIST})
 source_group("Resource Files" FILES ${RESOURCE_LIST})
-source_group("Source Files" FILES ${IBPP_SOURCE_LIST})
-source_group("Header Files" FILES ${IBPP_HEADER_LIST})
+
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT flamerobin)
 
-#--------------------------------------
-# IBPP lib
-add_library(IBPP STATIC ${IBPP_SOURCE_LIST} ${IBPP_HEADER_LIST})
+
 
 #--------------------------------------
 # FlameRobin app
-include_directories(BEFORE src src/ibpp res)
+include_directories(BEFORE src res)
 
 if (NOT APPLE)
     add_executable(${PROJECT_NAME} WIN32 ${SOURCE_LIST} ${HEADER_LIST} ${RESOURCE_LIST})
@@ -820,7 +756,7 @@ if (ENABLE_VCPKG)
     endif ()
 endif ()
 
-target_link_libraries(${PROJECT_NAME} IBPP fb-cpp::fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
+target_link_libraries(${PROJECT_NAME} fb-cpp::fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
 target_compile_definitions(${PROJECT_NAME} PRIVATE FBCPP_VERSION="${FBCPP_VERSION_STR}")
 
 if (ENABLE_VCPKG AND WIN32)
@@ -912,20 +848,12 @@ add_executable(merge_repro_test
 target_link_libraries(merge_repro_test ${wxWidgets_LIBRARIES})
 add_test(NAME merge_repro_test COMMAND merge_repro_test)
 
-add_executable(ibpp_row_metadata_test
-    ${SOURCEDIR}/ibpp/RowMetadataTest.cpp
-)
-target_link_libraries(ibpp_row_metadata_test IBPP ${FR_LIBS})
-add_test(NAME ibpp_row_metadata_test COMMAND ibpp_row_metadata_test)
+
 
 add_executable(dal_types_test
     ${SOURCEDIR}/engine/db/DalTypesTest.cpp
     ${SOURCEDIR}/engine/db/DatabaseFactory.cpp
-    ${SOURCEDIR}/engine/db/ibpp/IbppDatabase.cpp
-    ${SOURCEDIR}/engine/db/ibpp/IbppTransaction.cpp
-    ${SOURCEDIR}/engine/db/ibpp/IbppStatement.cpp
-    ${SOURCEDIR}/engine/db/ibpp/IbppService.cpp
-    ${SOURCEDIR}/engine/db/ibpp/IbppBlob.cpp
+
     ${SOURCEDIR}/engine/db/fbcpp/FbCppDatabase.cpp
     ${SOURCEDIR}/engine/db/fbcpp/FbCppTransaction.cpp
     ${SOURCEDIR}/engine/db/fbcpp/FbCppStatement.cpp
@@ -937,7 +865,7 @@ add_executable(dal_types_test
     ${SOURCEDIR}/core/FRDecimal.cpp
     ${SOURCEDIR}/core/StringUtils.cpp
 )
-target_link_libraries(dal_types_test IBPP fb-cpp::fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
+target_link_libraries(dal_types_test fb-cpp::fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
 add_test(NAME dal_types_test COMMAND dal_types_test)
 
 # Regression test for issue #78 (EXECUTE BLOCK / Selectable SP emitting
@@ -990,11 +918,7 @@ add_test(NAME command_manager_test COMMAND command_manager_test)
 add_executable(fbcpp_service_test
     ${SOURCEDIR}/engine/db/fbcpp/FbCppServiceTest.cpp
     ${SOURCEDIR}/engine/db/DatabaseFactory.cpp
-    ${SOURCEDIR}/engine/db/ibpp/IbppDatabase.cpp
-    ${SOURCEDIR}/engine/db/ibpp/IbppTransaction.cpp
-    ${SOURCEDIR}/engine/db/ibpp/IbppStatement.cpp
-    ${SOURCEDIR}/engine/db/ibpp/IbppService.cpp
-    ${SOURCEDIR}/engine/db/ibpp/IbppBlob.cpp
+
     ${SOURCEDIR}/engine/db/fbcpp/FbCppDatabase.cpp
     ${SOURCEDIR}/engine/db/fbcpp/FbCppTransaction.cpp
     ${SOURCEDIR}/engine/db/fbcpp/FbCppStatement.cpp
@@ -1006,17 +930,13 @@ add_executable(fbcpp_service_test
     ${SOURCEDIR}/core/FRDecimal.cpp
     ${SOURCEDIR}/core/StringUtils.cpp
 )
-target_link_libraries(fbcpp_service_test IBPP fb-cpp::fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
+target_link_libraries(fbcpp_service_test fb-cpp::fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
 add_test(NAME fbcpp_service_test COMMAND fbcpp_service_test)
 
 add_executable(dml_returning_test
     ${SOURCEDIR}/engine/db/fbcpp/DmlReturningTest.cpp
     ${SOURCEDIR}/engine/db/DatabaseFactory.cpp
-    ${SOURCEDIR}/engine/db/ibpp/IbppDatabase.cpp
-    ${SOURCEDIR}/engine/db/ibpp/IbppTransaction.cpp
-    ${SOURCEDIR}/engine/db/ibpp/IbppStatement.cpp
-    ${SOURCEDIR}/engine/db/ibpp/IbppService.cpp
-    ${SOURCEDIR}/engine/db/ibpp/IbppBlob.cpp
+
     ${SOURCEDIR}/engine/db/fbcpp/FbCppDatabase.cpp
     ${SOURCEDIR}/engine/db/fbcpp/FbCppTransaction.cpp
     ${SOURCEDIR}/engine/db/fbcpp/FbCppStatement.cpp
@@ -1028,17 +948,13 @@ add_executable(dml_returning_test
     ${SOURCEDIR}/core/FRDecimal.cpp
     ${SOURCEDIR}/core/StringUtils.cpp
 )
-target_link_libraries(dml_returning_test IBPP fb-cpp::fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
+target_link_libraries(dml_returning_test fb-cpp::fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
 add_test(NAME dml_returning_test COMMAND dml_returning_test)
 
 add_executable(profiler_test
     ${SOURCEDIR}/engine/db/fbcpp/ProfilerTest.cpp
     ${SOURCEDIR}/engine/db/DatabaseFactory.cpp
-    ${SOURCEDIR}/engine/db/ibpp/IbppDatabase.cpp
-    ${SOURCEDIR}/engine/db/ibpp/IbppTransaction.cpp
-    ${SOURCEDIR}/engine/db/ibpp/IbppStatement.cpp
-    ${SOURCEDIR}/engine/db/ibpp/IbppService.cpp
-    ${SOURCEDIR}/engine/db/ibpp/IbppBlob.cpp
+
     ${SOURCEDIR}/engine/db/fbcpp/FbCppDatabase.cpp
     ${SOURCEDIR}/engine/db/fbcpp/FbCppTransaction.cpp
     ${SOURCEDIR}/engine/db/fbcpp/FbCppStatement.cpp
@@ -1050,7 +966,7 @@ add_executable(profiler_test
     ${SOURCEDIR}/core/FRDecimal.cpp
     ${SOURCEDIR}/core/StringUtils.cpp
 )
-target_link_libraries(profiler_test IBPP fb-cpp::fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
+target_link_libraries(profiler_test fb-cpp::fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
 add_test(NAME profiler_test COMMAND profiler_test)
 
 add_executable(firebird_type_utils_test

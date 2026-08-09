@@ -37,6 +37,7 @@
 #include "metadata/server.h"
 #include "metadata/database.h"
 #include "metadata/MetadataItemURIHandlerHelper.h"
+#include "engine/db/DatabaseFactory.h"
 
 class DatabaseInfoHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
@@ -79,12 +80,13 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
     if (!d || !w || !d->isConnected())
          return true;
 
-    IBPP::Database db = d->getIBPPDatabase();
-    IBPP::Service svc = IBPP::ServiceFactory(
-        wx2std(d->getServer()->getConnectionString()),
-        db->Username(), db->UserPassword(), db->RoleName(), db->CharSet()
-    );
-    svc->Connect();
+    fr::IServicePtr svc = fr::DatabaseFactory::createService();
+    svc->setConnectionString(wx2std(d->getServer()->getConnectionString()));
+    svc->setCredentials(wx2std(d->getUsername()), wx2std(d->getDecryptedPassword()));
+    svc->setRole(wx2std(d->getRole()));
+    svc->setCharset(wx2std(d->getConnectionCharset()));
+    svc->setClientLibrary(wx2std(d->getClientLibrary()));
+    svc->connect();
 
     if (isEditSweep || isEditPageBuffers || isEditLinger)
     {
@@ -128,16 +130,15 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
                 break;
 
             if (isEditSweep)
-                svc->SetSweepInterval(wx2std(d->getPath()), value);
+                svc->setSweepInterval(wx2std(d->getPath()), value);
             else if (isEditPageBuffers)
-                svc->SetPageBuffers(wx2std(d->getPath()), value);
+                svc->setPageBuffers(wx2std(d->getPath()), value);
             else if (isEditLinger)
                 execSql(nullptr, wxString(_("Alter database")), d, wxString::Format("ALTER DATABASE SET LINGER TO %d ; commit; ", value, w), true);
             // Before reloading the info, re-attach to the database
             // otherwise the sweep interval won't be changed for FB Classic
             // Server.
-            db->Disconnect();
-            db->Connect();
+            d->reconnect();
             d->loadInfo();
             break;
         }
@@ -151,22 +152,22 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
 
         // setting these properties requires that the database is
         // disconnected.
-        db->Disconnect();
+        d->disconnect();
 
         if (isEditForcedWrites)
-            svc->SetSyncWrite(wx2std(d->getPath()), fw);
+            svc->setSyncWrite(wx2std(d->getPath()), fw);
         if (isEditReserve)
-            svc->SetReserveSpace(wx2std(d->getPath()), reserve);
+            svc->setReserveSpace(wx2std(d->getPath()), reserve);
         if (isEditReadOnly)
-            svc->SetReadOnly(wx2std(d->getPath()), ro);
+            svc->setReadOnly(wx2std(d->getPath()), ro);
 
-        db->Connect();
+        d->reconnect();
 
         // load the database info because the info values are changed.
         d->loadInfo();
     }
 
-    svc->Disconnect();
+    svc->disconnect();
     return true;
 }
 

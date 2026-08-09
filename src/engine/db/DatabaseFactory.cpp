@@ -22,8 +22,6 @@
 */
 
 #include "engine/db/DatabaseFactory.h"
-#include "engine/db/ibpp/IbppDatabase.h"
-#include "engine/db/ibpp/IbppService.h"
 #include "engine/db/fbcpp/FbCppDatabase.h"
 #include "engine/db/fbcpp/FbCppService.h"
 #include <stdexcept>
@@ -52,7 +50,7 @@ IDatabasePtr DatabaseFactory::createDatabase(DatabaseBackend backend)
 
     if (backend == DatabaseBackend::IBPP)
     {
-        return std::make_shared<IbppDatabase>();
+        throw std::runtime_error("IBPP backend is no longer available");
     }
     else if (backend == DatabaseBackend::FbCpp)
     {
@@ -70,7 +68,7 @@ IServicePtr DatabaseFactory::createService(DatabaseBackend backend)
 
     if (backend == DatabaseBackend::IBPP)
     {
-        return std::make_shared<IbppService>();
+        throw std::runtime_error("IBPP backend is no longer available");
     }
     else if (backend == DatabaseBackend::FbCpp)
     {

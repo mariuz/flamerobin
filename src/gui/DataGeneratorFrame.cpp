@@ -57,6 +57,74 @@
 #include "metadata/domain.h"
 #include "metadata/table.h"
 
+namespace IBPP
+{
+    const int MinDate = -693958;
+    const int MaxDate = 2958463;
+    const int Dec31_1899 = 693959;
+
+    inline bool dtoi(int date, int* y, int* m, int* d)
+    {
+        if (date < MinDate || date > MaxDate)
+            return false;
+
+        int RataDie = date + Dec31_1899;
+        int Z = RataDie + 306;
+        int H = 100 * Z - 25;
+        int A = H / 3652425;
+        int B = A - A / 4;
+        int year = (100 * B + H) / 36525;
+        int C = B + Z - 365 * year - year / 4;
+        int month = (5 * C + 456) / 153;
+        int day = C - (153 * month - 457) / 5;
+        if (month > 12) { year += 1; month -= 12; }
+
+        if (y != nullptr) *y = year;
+        if (m != nullptr) *m = month;
+        if (d != nullptr) *d = day;
+
+        return true;
+    }
+
+    inline bool itod(int* pdate, int year, int month, int day)
+    {
+        if (month < 1 || month > 12 || day < 1 || day > 31)
+            return false;
+
+        int y = year;
+        int m = month;
+        if (m <= 2) { y -= 1; m += 12; }
+
+        int RataDie = day + (153 * m - 457) / 5 + 365 * y + y / 4 - y / 100 + y / 400 - 306;
+        int date = RataDie - Dec31_1899;
+
+        if (date < MinDate || date > MaxDate)
+            return false;
+
+        if (pdate != nullptr) *pdate = date;
+        return true;
+    }
+
+    inline void ttoi(int itime, int* h, int* m, int* s, int* t)
+    {
+        int hh = itime / 36000000;   itime = itime - hh * 36000000;
+        int mm = itime / 600000;     itime = itime - mm * 600000;
+        int ss = itime / 10000;
+        int tt = itime - ss * 10000;
+
+        if (h != nullptr) *h = hh;
+        if (m != nullptr) *m = mm;
+        if (s != nullptr) *s = ss;
+        if (t != nullptr) *t = tt;
+    }
+
+    inline void itot(int* ptime, int hour, int minute, int second, int tenthousandths)
+    {
+        if (ptime != nullptr)
+            *ptime = hour * 36000000 + minute * 600000 + second * 10000 + tenthousandths;
+    }
+}
+
 // returns a value between 0 and (maxval-1)
 // I wrote this as I don't know how much is rand from stdlib portable
 int frRandom(double maxval)

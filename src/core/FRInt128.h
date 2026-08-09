@@ -25,10 +25,17 @@
 #define FR_FRINT128_H
 
 #include <wx/wx.h>
-#include <ibpp.h>
+#include <cstdint>
 
-// Base class for Flamerobin int128 type.
-typedef IBPP::ibpp_int128_t int128_t;
+#ifdef HAVE_INT128
+typedef __int128 int128_t;
+#else
+struct int128_t
+{
+    uint64_t lowPart;
+    int64_t highPart;
+};
+#endif
 
 wxString Int128ToString(int128_t value);
 bool StringToInt128(const wxString& src, int128_t* dst, wxString& errMsg);

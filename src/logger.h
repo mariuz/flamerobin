@@ -26,7 +26,6 @@
 
 // Functions used to log successfully executed statements
 // in database or textual files
-#include <ibpp.h>
 class SqlStatement;
 
 class Database;

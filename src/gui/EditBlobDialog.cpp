@@ -397,10 +397,8 @@ EditBlobDialog::EditBlobDialog(wxWindow* parent, wxMBConv* converterM)
     fieldNameM = "";
     rowM = 0;
     colM = 0;
-    blobM = 0;
     blobDALM = nullptr;
     loadingM = false;
-    statementM = 0;
     statementDALM = nullptr;
     readonlyM = false;
 
@@ -535,34 +533,6 @@ void EditBlobDialog::closeDontSave()
 }
 
 bool EditBlobDialog::setBlob(DataGrid* dg, DataGridTable* dgt,
-    IBPP::Statement* st, unsigned row, unsigned col, bool saveOldValue)
-{
-    // cancel load progress or wait for save progress
-    progressCancel();
-
-    // Save last blob value if modified
-    if (saveOldValue)
-        saveBlob();
-    dataGridTableM = dgt;
-    dataGridM = dg;
-    statementM = st;
-    statementDALM = nullptr;
-    rowM = row;
-    colM = col;
-    readonlyM = dataGridTableM->isReadonlyColumn(colM);
-
-    // generator blob fieldname
-    wxString tableName = dgt->getTableName();
-    wxString fieldName = dg->GetColLabelValue(dg->GetGridCursorCol());
-    fieldNameM = tableName + "." + fieldName;
-
-    dialogCaptionM = wxString::Format(_("Edit BLOB: %s #%i"), fieldNameM.c_str(), rowM + 1);
-    SetTitle(dialogCaptionM);
-
-    return loadBlob();
-}
-
-bool EditBlobDialog::setBlob(DataGrid* dg, DataGridTable* dgt,
     fr::IStatementPtr st, unsigned row, unsigned col, bool saveOldValue)
 {
     // cancel load progress or wait for save progress
@@ -573,7 +543,6 @@ bool EditBlobDialog::setBlob(DataGrid* dg, DataGridTable* dgt,
         saveBlob();
     dataGridTableM = dgt;
     dataGridM = dg;
-    statementM = nullptr;
     statementDALM = st;
     rowM = row;
     colM = col;
@@ -639,7 +608,6 @@ bool EditBlobDialog::loadBlob()
     else
     {
         blobDALM = nullptr;
-        blobM = 0;
         notebookAddPageById(noData);
         notebookRemovePageById(binary);
         notebookRemovePageById(text);
@@ -1084,7 +1052,6 @@ void EditBlobDialog::saveBlob()
         dataGridTableM->setBlob(b);
     }
     blobDALM = b.blob;
-    blobM = 0; // Clear IBPP blob if any
 
     // update datagrid to force an update (in GUI) of the changed blob-value
     dataGridM->refreshAndInvalidateAttributes();

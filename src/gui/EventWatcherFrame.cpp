@@ -43,6 +43,8 @@
 #include "gui/MultilineEnterDialog.h"
 #include "gui/StyleGuide.h"
 #include "metadata/database.h"
+#include "engine/db/fbcpp/FbCppDatabase.h"
+#include <fb-cpp/EventListener.h>
 
 class EventLogControl: public LogTextControl
 {
@@ -73,7 +75,7 @@ void EventLogControl::logEvent(const wxString& name, int count)
 }
 
 EventWatcherFrame::EventWatcherFrame(wxWindow* parent, DatabasePtr db)
-    : BaseFrame(parent, -1, wxEmptyString), databaseM(db), eventsM(0)
+    : BaseFrame(parent, -1, wxEmptyString), databaseM(db), eventListenerM(nullptr)
 {
     wxASSERT(db);
     timerM.SetOwner(this, ID_timer);
@@ -207,30 +209,45 @@ void EventWatcherFrame::addEvents(wxString& s)
 
 void EventWatcherFrame::defineMonitoredEvents()
 {
-    if (eventsM != 0)
+    if (eventListenerM)
     {
-        // prevent timer from messing our business
-        bool timerRunning = timerM.IsRunning();
-        setTimerActive(false);
+        eventListenerM.reset();
 
-        // get a list of events to be monitored
+        DatabasePtr database = getDatabase();
+        if (!database)
+            return;
+        auto dalDb = std::dynamic_pointer_cast<fr::FbCppDatabase>(database->getDALDatabase());
+        if (!dalDb || !dalDb->isConnected())
+            return;
+
         std::vector<std::string> events;
         for (int i = 0; i < (int)listbox_monitored->GetCount(); i++)
             events.push_back(wx2std(listbox_monitored->GetString(i)));
 
-        eventsM->Clear();
-        std::vector<std::string>::const_iterator it;
-        for (it = events.begin(); it != events.end(); it++)
+        try
         {
-            eventsM->Add(*it, this);
-            // make IBPP::Events pick up the initial event count
-            eventsM->Dispatch();
+            eventListenerM = std::make_unique<fbcpp::EventListener>(
+                dalDb->getAttachment(),
+                events,
+                [this](const std::vector<fbcpp::EventCount>& counts) {
+                    for (const auto& count : counts)
+                    {
+                        std::string name = count.name;
+                        unsigned c = count.count;
+                        this->CallAfter([this, name, c]() {
+                            wxString n = wxString::FromUTF8(name.c_str());
+                            eventlog_received->logEvent(n, c);
+                        });
+                    }
+                }
+            );
         }
-
-        updateControls();
-        if (timerRunning)
-            setTimerActive(true);
+        catch (...)
+        {
+            eventListenerM.reset();
+        }
     }
+    updateControls();
 }
 
 DatabasePtr EventWatcherFrame::getDatabase() const
@@ -238,40 +255,19 @@ DatabasePtr EventWatcherFrame::getDatabase() const
     return databaseM.lock();
 }
 
-bool EventWatcherFrame::setTimerActive(bool active)
-{
-    if (active && !timerM.Start(100))
-        wxMessageBox(_("Can not start timer"), _("Error"), wxOK | wxICON_ERROR);
-        
-    if (!active && timerM.IsRunning())
-    {
-        timerM.Stop();
-        wxSafeYield();
-    }
-    return active == timerM.IsRunning();
-}
-
 void EventWatcherFrame::updateMonitoringActive()
 {
-    if (eventsM != 0)
+    if (eventListenerM)
     {
-        setTimerActive(true);
         button_monitor->SetLabel(_("Stop &Monitoring"));
         eventlog_received->logAction(_("Monitoring started"));
     }
     else
     {
-        timerM.Stop();
         button_monitor->SetLabel(_("Start &Monitoring"));
         eventlog_received->logAction(_("Monitoring stopped"));
     }
     updateControls();
-}
-
-void EventWatcherFrame::ibppEventHandler(IBPP::Events events,
-    const std::string& name, int count)
-{
-    eventlog_received->logEvent(name, count);
 }
 
 //! closes window if database is removed (unregistered)
@@ -333,7 +329,6 @@ BEGIN_EVENT_TABLE(EventWatcherFrame, wxFrame)
     EVT_BUTTON(EventWatcherFrame::ID_button_save, EventWatcherFrame::OnButtonSaveClick)
     EVT_BUTTON(EventWatcherFrame::ID_button_monitor, EventWatcherFrame::OnButtonStartStopClick)
     EVT_LISTBOX(EventWatcherFrame::ID_listbox_monitored, EventWatcherFrame::OnListBoxSelected)
-    EVT_TIMER(EventWatcherFrame::ID_timer, EventWatcherFrame::OnTimer)
 END_EVENT_TABLE()
 
 void EventWatcherFrame::OnButtonLoadClick(wxCommandEvent& WXUNUSED(event))
@@ -409,8 +404,8 @@ void EventWatcherFrame::OnButtonRemoveClick(wxCommandEvent& WXUNUSED(event))
 
 void EventWatcherFrame::OnButtonStartStopClick(wxCommandEvent& WXUNUSED(event))
 {
-    if (eventsM != 0)
-        eventsM.clear();
+    if (eventListenerM)
+        eventListenerM.reset();
     else
     {
         DatabasePtr database = getDatabase();
@@ -419,9 +414,41 @@ void EventWatcherFrame::OnButtonStartStopClick(wxCommandEvent& WXUNUSED(event))
             Close();
             return;
         }
-        IBPP::Database db(database->getIBPPDatabase());
-        eventsM = IBPP::EventsFactory(db);
-        defineMonitoredEvents();
+        auto dalDb = std::dynamic_pointer_cast<fr::FbCppDatabase>(database->getDALDatabase());
+        if (!dalDb || !dalDb->isConnected())
+        {
+            wxMessageBox(_("Database is not connected"), _("Error"), wxOK | wxICON_ERROR);
+            return;
+        }
+
+        std::vector<std::string> events;
+        for (int i = 0; i < (int)listbox_monitored->GetCount(); i++)
+            events.push_back(wx2std(listbox_monitored->GetString(i)));
+
+        try
+        {
+            eventListenerM = std::make_unique<fbcpp::EventListener>(
+                dalDb->getAttachment(),
+                events,
+                [this](const std::vector<fbcpp::EventCount>& counts) {
+                    for (const auto& count : counts)
+                    {
+                        std::string name = count.name;
+                        unsigned c = count.count;
+                        this->CallAfter([this, name, c]() {
+                            wxString n = wxString::FromUTF8(name.c_str());
+                            eventlog_received->logEvent(n, c);
+                        });
+                    }
+                }
+            );
+        }
+        catch (const std::exception& e)
+        {
+            wxMessageBox(wxString::FromUTF8(e.what()), _("Error starting event listener"), wxOK | wxICON_ERROR);
+            eventListenerM.reset();
+            return;
+        }
     }
     updateMonitoringActive();
 }
@@ -431,11 +458,4 @@ void EventWatcherFrame::OnListBoxSelected(wxCommandEvent& WXUNUSED(event))
     updateControls();
 }
 
-void EventWatcherFrame::OnTimer(wxTimerEvent& WXUNUSED(event))
-{
-    if (eventsM != 0)
-        eventsM->Dispatch();
-    else // stop timer, update UI
-        updateMonitoringActive();
-}
 

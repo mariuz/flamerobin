@@ -27,8 +27,6 @@
 #include <wx/wx.h>
 #include <wx/grid.h>
 
-#include <ibpp.h>
-
 #include "gui/controls/DataGridRows.h"
 #include "gui/FRStyleManager.h"
 
@@ -65,7 +63,6 @@ private:
     bool nullFlagM;
 
     Database *databaseM;
-    IBPP::Statement statementM;
     fr::IStatementPtr statementDALM;
     wxMBConv* charsetConverterM;
 
@@ -82,7 +79,6 @@ private:
     void updateRowMapping();
     int getRealRowIndex(int row) const;
 public:
-    DataGridTable(IBPP::Statement& s, Database* db);
     DataGridTable(fr::IStatementPtr s, Database* db);
     ~DataGridTable();
 
@@ -95,7 +91,6 @@ public:
     int getSortedColumn() const { return sortedColM; }
     bool isSortAscending() const { return sortAscendingM; }
 
-    void setStatement(IBPP::Statement s) { statementM = s; }
     void setStatement(fr::IStatementPtr s) { statementDALM = s; }
 
     bool canFetchMoreRows();

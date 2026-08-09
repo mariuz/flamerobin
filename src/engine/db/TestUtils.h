@@ -30,7 +30,6 @@
 #include <ctime>
 #include <iomanip>
 
-#include <ibpp.h>
 #include "fb-cpp/fb-cpp.h"
 
 namespace fr_test
@@ -87,20 +86,7 @@ inline void printException(const std::exception& e, const char* context = nullpt
 
     printFbEnv();
     
-    // Try to cast to IBPP::Exception
-    const IBPP::Exception* ibppE = dynamic_cast<const IBPP::Exception*>(&e);
-    if (ibppE)
-    {
-        std::cerr << "  IBPP::Exception details:\n";
-        std::cerr << "    Origin:  " << ibppE->Origin() << "\n";
-        
-        const IBPP::SQLException* ibppSqlE = dynamic_cast<const IBPP::SQLException*>(ibppE);
-        if (ibppSqlE)
-        {
-            std::cerr << "    SQLCode: " << ibppSqlE->SqlCode() << "\n";
-            std::cerr << "    EngineCode: " << ibppSqlE->EngineCode() << "\n";
-        }
-    }
+
 
     // Try to cast to fbcpp::DatabaseException
     const fbcpp::DatabaseException* fbcppE = dynamic_cast<const fbcpp::DatabaseException*>(&e);

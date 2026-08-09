@@ -51,7 +51,6 @@
 #include "engine/db/ITransaction.h"
 #include "engine/db/IStatement.h"
 #include "engine/db/IBlob.h"
-#include "engine/db/ibpp/IbppBlob.h"
 #include "metadata/CharacterSet.h"
 #include "metadata/column.h"
 #include "metadata/database.h"
@@ -1883,14 +1882,6 @@ unsigned BlobColumnDef::getBufferSize()
 void BlobColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     const IBPP::Statement& statement, wxMBConv*, Database* /*db*/)
 {
-    wxASSERT(buffer);
-    IBPP::Blob ibppBlob = IBPP::BlobFactory(statement->DatabasePtr(),
-        statement->TransactionPtr());
-    statement->Get(col, ibppBlob);
-    fr::IBlobPtr b = std::make_shared<fr::IbppBlob>(statement->DatabasePtr(),
-        statement->TransactionPtr());
-    std::dynamic_pointer_cast<fr::IbppBlob>(b)->getIBPPBlob() = ibppBlob;
-    buffer->setBlob(indexM, b);
 }
 
 void BlobColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
@@ -2072,36 +2063,7 @@ void DataGridRows::addRow(DataGridRowBuffer* buffer)
     buffersM.push_back(buffer);
 }
 
-void DataGridRows::addRow(const IBPP::Statement& statement)
-{
-    DataGridRowBuffer* buffer = new DataGridRowBuffer(columnDefsM.size());
-    // if anything fails, make sure we release the memory
-    try
-    {
-        // starts with last column -> with highest buffer offset and
-        // string array index to allocate all needed memory at once
-        unsigned col = columnDefsM.size();
-        do
-        {
-            // IBPP column counts are 1-based, not 0-based...
-            unsigned colIBPP = col--;
-            bool isNull = statement->IsNull(colIBPP);
-            buffer->setFieldNull(col, isNull);
-            if (!isNull)
-            {
-                columnDefsM[col]->setValue(buffer, colIBPP, statement,
-                    databaseM->getCharsetConverter(), databaseM);
-            }
-        }
-        while (col > 0);
-    }
-    catch(...)
-    {
-        delete buffer;
-        throw;
-    }
-    addRow(buffer);
-}
+
 
 void DataGridRows::addRow(fr::IStatementPtr statement)
 {
@@ -2166,12 +2128,7 @@ bool DataGridRows::canRemoveRow(size_t row)
     if (row >= buffersM.size())
         return false;
     
-    if (statementDALM)
-    {
-        if (statementDALM->getType() == fr::StatementType::Unknown)
-            return false;
-    }
-    else if (statementM->Type() == IBPP::stUnknown)
+    if (statementDALM->getType() == fr::StatementType::Unknown)
         return false;
 
     if (!buffersM[row]->isDeletableIsSet())
@@ -2189,28 +2146,14 @@ bool DataGridRows::canRemoveRow(size_t row)
             for (ColumnConstraint::const_iterator ci = (*it).second->begin();
                 ci != (*it).second->end(); ++ci)
             {
-                int colCount = 0;
-                if (statementDALM) colCount = statementDALM->getColumnCount();
-                else colCount = statementM->Columns();
+                int colCount = statementDALM->getColumnCount();
 
                 for (int c2 = 0; c2 < colCount; ++c2)
                 {
-                    wxString cn;
-                    wxString tn;
-                    if (statementDALM)
-                    {
-                        cn = std2wxIdentifier(statementDALM->getColumnName(c2),
-                            databaseM->getCharsetConverter());
-                        tn = std2wxIdentifier(statementDALM->getColumnTable(c2),
-                            databaseM->getCharsetConverter());
-                    }
-                    else
-                    {
-                        cn = std2wxIdentifier(statementM->ColumnName(c2 + 1),
-                            databaseM->getCharsetConverter());
-                        tn = std2wxIdentifier(statementM->ColumnTable(c2 + 1),
-                            databaseM->getCharsetConverter());
-                    }
+                    wxString cn = std2wxIdentifier(statementDALM->getColumnName(c2),
+                        databaseM->getCharsetConverter());
+                    wxString tn = std2wxIdentifier(statementDALM->getColumnTable(c2),
+                        databaseM->getCharsetConverter());
 
                     if ((*ci) != cn)
                         continue;
@@ -2263,18 +2206,9 @@ bool DataGridRows::removeRows(size_t from, size_t count, wxString& stm)
         wxString s = "DELETE FROM "
             + Identifier((*deleteFromM).first).getQuoted() + " WHERE ";
         
-        if (statementDALM)
-        {
-            fr::IStatementPtr st = addWhereDAL((*deleteFromM).second, s,
-                (*deleteFromM).first, buffersM[from+pos]);
-            st->execute();
-        }
-        else
-        {
-            IBPP::Statement st = addWhere((*deleteFromM).second, s,
-                (*deleteFromM).first, buffersM[from+pos]);
-            st->Execute();
-        }
+        fr::IStatementPtr st = addWhereDAL((*deleteFromM).second, s,
+            (*deleteFromM).first, buffersM[from+pos]);
+        st->execute();
         stm += s + ";";
     }
 
@@ -2312,33 +2246,7 @@ wxString DataGridRows::getRowFieldName(unsigned col)
     return wxEmptyString;
 }
 
-void checkColumnsPresent(const Database* database,
-    const IBPP::Statement& statement, UniqueConstraint** locator)
-{
-    wxString tableName = (*locator)->getTable()->getName_();
-    for (ColumnConstraint::const_iterator ci = (*locator)->begin(); ci !=
-        (*locator)->end(); ++ci)
-    {
-        bool found = false;
-        for (int c2 = 1; c2 <= statement->Columns(); ++c2)
-        {
-            wxString cn(std2wxIdentifier(statement->ColumnName(c2),
-                database->getCharsetConverter()));
-            wxString tn(std2wxIdentifier(statement->ColumnTable(c2),
-                database->getCharsetConverter()));
-            if (cn == (*ci) && tn == tableName)
-            {
-                found = true;
-                break;
-            }
-        }
-        if (!found)     // some columns missing
-        {
-            *locator = 0;
-            break;
-        }
-    }
-}
+
 
 void checkColumnsPresent(const Database* database,
     fr::IStatementPtr statement, UniqueConstraint** locator)
@@ -2385,24 +2293,12 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
     wxString colName;
     bool isOctets = false;
 
-    if (statementDALM)
-    {
-        isOctets = (statementDALM->getColumnType(col - 1) == fr::ColumnType::Varchar
-            && statementDALM->getColumnSubtype(col - 1) == 1);
-        tabName = wxString(statementDALM->getColumnTable(col - 1).c_str(),
-            *databaseM->getCharsetConverter());
-        colName = wxString(statementDALM->getColumnName(col - 1).c_str(),
-            *databaseM->getCharsetConverter());
-    }
-    else
-    {
-        isOctets = (statementM->ColumnType(col) == IBPP::sdString
-            && statementM->ColumnSubtype(col) == 1);
-        tabName = std2wxIdentifier(statementM->ColumnTable(col),
-            databaseM->getCharsetConverter());
-        colName = std2wxIdentifier(statementM->ColumnName(col),
-            databaseM->getCharsetConverter());
-    }
+    isOctets = (statementDALM->getColumnType(col - 1) == fr::ColumnType::Varchar
+        && statementDALM->getColumnSubtype(col - 1) == 1);
+    tabName = wxString(statementDALM->getColumnTable(col - 1).c_str(),
+        *databaseM->getCharsetConverter());
+    colName = wxString(statementDALM->getColumnName(col - 1).c_str(),
+        *databaseM->getCharsetConverter());
 
     if (isOctets)
     {                       // TODO: to make those editable, we need to
@@ -2427,10 +2323,7 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
         locator = t->getPrimaryKey();
         if (locator)    // check if this PK is usable (all fields present)
         {
-            if (statementDALM)
-                checkColumnsPresent(databaseM, statementDALM, &locator);
-            else
-                checkColumnsPresent(databaseM, statementM, &locator);
+            checkColumnsPresent(databaseM, statementDALM, &locator);
         }
         if (!locator)   // PK not present or not usable, try UNQ
         {
@@ -2443,8 +2336,6 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
                     locator = &(*ui);
                     if (statementDALM)
                         checkColumnsPresent(databaseM, statementDALM, &locator);
-                    else
-                        checkColumnsPresent(databaseM, statementM, &locator);
                     if (locator)
                         break;
                 }
@@ -2456,10 +2347,7 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
             uc.getColumns().push_back("DB_KEY");
             uc.setParent(t);
             locator = &uc;
-            if (statementDALM)
-                checkColumnsPresent(databaseM, statementDALM, &locator);
-            else
-                checkColumnsPresent(databaseM, statementM, &locator);
+            checkColumnsPresent(databaseM, statementDALM, &locator);
             if (locator)    // DB_KEY present
             {
                 dbKeysM.push_back(uc);
@@ -2482,126 +2370,7 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
     }
 }
 
-bool DataGridRows::initialize(const IBPP::Statement& statement)
-{
-    statementM = statement;
 
-    clear();
-    // column definitions may have an index into the string array,
-    // an offset into the buffer, or use no data at all
-    unsigned colCount = statement->Columns();
-    columnDefsM.reserve(colCount);
-    bufferSizeM = 0;
-    unsigned stringIndex = 0;
-    unsigned blobIndex = 0;
-
-    // Create column definitions and compute the necessary buffer size
-    // and string array length when all fields contain data
-    for (unsigned col = 1; col <= colCount; ++col)
-    {
-        bool readOnly, nullable;
-        getColumnInfo(databaseM, col, readOnly, nullable);
-
-        wxString colName(statement->ColumnAlias(col),
-            *databaseM->getCharsetConverter());
-        if (colName.empty())
-        {
-            colName = wxString(statement->ColumnName(col),
-                *databaseM->getCharsetConverter());
-        }
-
-        IBPP::SDT type = statement->ColumnType(col);
-        short scale = statement->ColumnScale(col);
-        if ((scale > 0) &&
-            (type != IBPP::sdSmallint) &&
-            (type != IBPP::sdInteger) &&
-            (type != IBPP::sdLargeint) &&
-            (type != IBPP::sdInt128) &&
-            (type != IBPP::sdDec16) &&
-            (type != IBPP::sdDec34))
-            type = IBPP::sdDouble;
-
-        ResultsetColumnDef* columnDef = 0;
-        if (std::string(statement->ColumnName(col)) == "DB_KEY")
-            columnDef = new DBKeyColumnDef(colName, bufferSizeM, statement->ColumnSize(col));
-        else
-        {
-            switch (type)
-            {
-                case IBPP::sdBoolean: // Firebird v3
-                    columnDef = new BooleanColumnDef(colName, stringIndex, readOnly, nullable);
-                    ++stringIndex;
-                    break;
-                case IBPP::sdDate:
-                    columnDef = new DateColumnDef(colName, bufferSizeM, readOnly, nullable);
-                    break;
-                case IBPP::sdTime:
-                    columnDef = new TimeColumnDef(colName, bufferSizeM, readOnly, nullable, false);
-                    break;
-                case IBPP::sdTimeTz:
-                    columnDef = new TimeColumnDef(colName, bufferSizeM, readOnly, nullable, true);
-                    break;
-                case IBPP::sdTimestamp:
-                    columnDef = new TimestampColumnDef(colName, bufferSizeM, readOnly, nullable, false);
-                    break;
-                case IBPP::sdTimestampTz:
-                    columnDef = new TimestampColumnDef(colName, bufferSizeM, readOnly, nullable, true);
-                    break;
-
-                case IBPP::sdSmallint:
-                case IBPP::sdInteger:
-                    columnDef = new IntegerColumnDef(colName, bufferSizeM, readOnly, nullable, scale);
-                    break;
-                case IBPP::sdLargeint:
-                    columnDef = new Int64ColumnDef(colName, bufferSizeM, readOnly, nullable, scale);
-                    break;
-                case IBPP::sdInt128:
-                    columnDef = new Int128ColumnDef(colName, bufferSizeM, readOnly, nullable, scale);
-                    break;
-
-                case IBPP::sdFloat:
-                    columnDef = new FloatColumnDef(colName, bufferSizeM, readOnly, nullable);
-                    break;
-                case IBPP::sdDouble:
-                    columnDef = new DoubleColumnDef(colName, bufferSizeM, readOnly, nullable, scale);
-                    break;
-                case IBPP::sdDec16:
-                    columnDef = new Dec16ColumnDef(colName, bufferSizeM, readOnly, nullable);
-                    break;
-                case IBPP::sdDec34:
-                    columnDef = new Dec34ColumnDef(colName, bufferSizeM, readOnly, nullable);
-                    break;
-
-                case IBPP::sdString:
-                {
-                    int bpc = 1;
-                    CharacterSetPtr cs = databaseM->getCharsetById(statement->ColumnSubtype(col));
-                    if (cs)
-                        bpc = cs->getBytesPerChar();
-                    int size = statement->ColumnSize(col);
-                    if (bpc)
-                        size /= bpc;
-                    columnDef = new StringColumnDef(colName, stringIndex, readOnly, nullable, size);
-                    ++stringIndex;
-                    break;
-                }
-                case IBPP::sdBlob:
-                    columnDef = new BlobColumnDef(colName, readOnly, nullable, stringIndex, blobIndex, statement->ColumnSubtype(col) == 1, this->databaseM->getCharsetConverter());
-                    ++blobIndex;    // stores blob handle
-                    ++stringIndex;  // stored blob data (fetched on demand)
-                    break;
-                default:
-                    // IBPP::sdArray not really handled ATM
-                    columnDef = new DummyColumnDef(colName);
-                    break;
-            }
-        }
-        wxASSERT(columnDef);
-        bufferSizeM += columnDef->getBufferSize();
-        columnDefsM.push_back(columnDef);
-    }
-    return true;
-}
 
 bool DataGridRows::initialize(fr::IStatementPtr statement)
 {
@@ -2776,20 +2545,9 @@ bool DataGridRows::isFieldReadonly(unsigned row, unsigned col)
     if (!buffersM[row]->isInserted())
         return false;
 
-    wxString table;
-    int colCount = 0;
-    if (statementDALM)
-    {
-        table = std2wxIdentifier(statementDALM->getColumnTable(col),
-            databaseM->getCharsetConverter());
-        colCount = statementDALM->getColumnCount();
-    }
-    else
-    {
-        table = std2wxIdentifier(statementM->ColumnTable(col + 1),
-            databaseM->getCharsetConverter());
-        colCount = statementM->Columns();
-    }
+    wxString table = std2wxIdentifier(statementDALM->getColumnTable(col),
+        databaseM->getCharsetConverter());
+    int colCount = statementDALM->getColumnCount();
 
     std::map<wxString, UniqueConstraint *>::iterator it =
         statementTablesM.find(table);
@@ -2802,22 +2560,10 @@ bool DataGridRows::isFieldReadonly(unsigned row, unsigned col)
     {
         for (int c2 = 0; c2 < colCount; ++c2)
         {
-            wxString cn;
-            wxString tn;
-            if (statementDALM)
-            {
-                cn = std2wxIdentifier(statementDALM->getColumnName(c2),
-                    databaseM->getCharsetConverter());
-                tn = std2wxIdentifier(statementDALM->getColumnTable(c2),
-                    databaseM->getCharsetConverter());
-            }
-            else
-            {
-                cn = std2wxIdentifier(statementM->ColumnName(c2 + 1),
-                    databaseM->getCharsetConverter());
-                tn = std2wxIdentifier(statementM->ColumnTable(c2 + 1),
-                    databaseM->getCharsetConverter());
-            }
+            wxString cn = std2wxIdentifier(statementDALM->getColumnName(c2),
+                databaseM->getCharsetConverter());
+            wxString tn = std2wxIdentifier(statementDALM->getColumnTable(c2),
+                databaseM->getCharsetConverter());
 
             if ((*ci) != cn)
                 continue;
@@ -2849,71 +2595,7 @@ bool DataGridRows::isFieldNA(unsigned row, unsigned col)
     return buffersM[row]->isFieldNA(col);
 }
 
-IBPP::Statement DataGridRows::addWhere(UniqueConstraint* uq, wxString& stm,
-    const wxString& table, DataGridRowBuffer *buffer)
-{
-    bool have_dbkey = false;
-    for (ColumnConstraint::const_iterator ci = uq->begin(); ci !=
-        uq->end(); ++ci)
-    {
-        if ((*ci) == "DB_KEY")
-        {
-            stm += " RDB$DB_KEY = ?";
-            have_dbkey = true;
-            break;
-        }
-        for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
-        {
-            wxString cn(std2wxIdentifier(statementM->ColumnName(c2),
-                databaseM->getCharsetConverter()));
-            wxString tn(std2wxIdentifier(statementM->ColumnTable(c2),
-                databaseM->getCharsetConverter()));
-            if (cn == (*ci) && tn == table) // found it, add to WHERE list
-            {
-                if (buffer->isFieldNA(c2-1))
-                    throw FRError(_("N/A value in key column."));
-                if (ci != uq->begin())
-                    stm += " AND ";
-                if ((statementM->ColumnType(c2) == IBPP::sdString) && (statementM->ColumnSubtype(c2) == 1) ) //OCTET
-                    stm += Identifier(cn).getQuoted() + " = x'";
-                else
-                    stm += Identifier(cn).getQuoted() + " = '";
 
-                stm += columnDefsM[c2-1]->getAsFirebirdString(buffer);
-                stm += "'";
-                break;
-            }
-        }
-    }
-
-    IBPP::Statement st = IBPP::StatementFactory(statementM->DatabasePtr(),
-        statementM->TransactionPtr());
-    st->Prepare(wx2std(stm, databaseM->getCharsetConverter()));
-    if (have_dbkey)  // find the column and set the parameter
-    {
-        for (int c2 = 1; c2 <= statementM->Columns(); ++c2)
-        {
-            wxString cn(std2wxIdentifier(statementM->ColumnName(c2),
-                databaseM->getCharsetConverter()));
-            wxString tn(std2wxIdentifier(statementM->ColumnTable(c2),
-                databaseM->getCharsetConverter()));
-            if (cn == "DB_KEY" && tn == table)
-            {
-                DBKeyColumnDef *dbk =
-                    dynamic_cast<DBKeyColumnDef *>(columnDefsM[c2-1]);
-                if (!dbk)
-                    throw FRError(_("Invalid Column"));
-                if (buffer->isFieldNA(c2-1))
-                    throw FRError(_("N/A value in DB_KEY column."));
-                IBPP::DBKey dbkey;
-                dbk->getDBKey(dbkey, buffer);
-                // if updating BLOB, param = 2, else param = 1
-                st->Set(st->Parameters(), dbkey);
-            }
-        }
-    }
-    return st;
-}
 
 fr::IStatementPtr DataGridRows::addWhereDAL(UniqueConstraint* uq, wxString& stm,
     const wxString& table, DataGridRowBuffer *buffer)
@@ -2929,28 +2611,16 @@ fr::IStatementPtr DataGridRows::addWhereDAL(UniqueConstraint* uq, wxString& stm,
             break;
         }
         
-        int colCount = 0;
-        if (statementDALM) colCount = statementDALM->getColumnCount();
-        else colCount = statementM->Columns();
+        int colCount = statementDALM->getColumnCount();
 
         for (int c2 = 0; c2 < colCount; ++c2)
         {
             wxString cn;
             wxString tn;
-            if (statementDALM)
-            {
-                cn = std2wxIdentifier(statementDALM->getColumnName(c2),
-                    databaseM->getCharsetConverter());
-                tn = std2wxIdentifier(statementDALM->getColumnTable(c2),
-                    databaseM->getCharsetConverter());
-            }
-            else
-            {
-                cn = std2wxIdentifier(statementM->ColumnName(c2 + 1),
-                    databaseM->getCharsetConverter());
-                tn = std2wxIdentifier(statementM->ColumnTable(c2 + 1),
-                    databaseM->getCharsetConverter());
-            }
+            cn = std2wxIdentifier(statementDALM->getColumnName(c2),
+                databaseM->getCharsetConverter());
+            tn = std2wxIdentifier(statementDALM->getColumnTable(c2),
+                databaseM->getCharsetConverter());
 
             if (cn == (*ci) && tn == table) // found it, add to WHERE list
             {
@@ -2959,18 +2629,8 @@ fr::IStatementPtr DataGridRows::addWhereDAL(UniqueConstraint* uq, wxString& stm,
                 if (ci != uq->begin())
                     stm += " AND ";
                 
-                fr::ColumnType type;
-                int subtype;
-                if (statementDALM)
-                {
-                    type = statementDALM->getColumnType(c2);
-                    subtype = statementDALM->getColumnSubtype(c2);
-                }
-                else
-                {
-                    type = (fr::ColumnType)statementM->ColumnType(c2 + 1);
-                    subtype = statementM->ColumnSubtype(c2 + 1);
-                }
+                fr::ColumnType type = statementDALM->getColumnType(c2);
+                int subtype = statementDALM->getColumnSubtype(c2);
 
                 if ((type == fr::ColumnType::Char || type == fr::ColumnType::Varchar) && (subtype == 1) ) //OCTET
                     stm += Identifier(cn).getQuoted() + " = x'";
@@ -2991,10 +2651,7 @@ fr::IStatementPtr DataGridRows::addWhereDAL(UniqueConstraint* uq, wxString& stm,
         for (int c2 = 0; c2 < (int)columnDefsM.size(); ++c2)
         {
             wxString cn;
-            if (statementDALM)
-                cn = std2wxIdentifier(statementDALM->getColumnName(c2), databaseM->getCharsetConverter());
-            else
-                cn = std2wxIdentifier(statementM->ColumnName(c2 + 1), databaseM->getCharsetConverter());
+            cn = std2wxIdentifier(statementDALM->getColumnName(c2), databaseM->getCharsetConverter());
 
             if (cn == "DB_KEY")
             {
@@ -3036,22 +2693,10 @@ fr::IBlobPtr DataGridRows::getBlob(unsigned row, unsigned col, bool validateBlob
 // Finally the BLOB will be set with setBlob(...)
 DataGridRowsBlob DataGridRows::setBlobPrepare(unsigned row, unsigned col)
 {
-    wxString tn;
-    wxString cn;
-    if (statementDALM)
-    {
-        tn = std2wxIdentifier(statementDALM->getColumnTable(col),
-            databaseM->getCharsetConverter());
-        cn = std2wxIdentifier(statementDALM->getColumnName(col),
-            databaseM->getCharsetConverter());
-    }
-    else
-    {
-        tn = std2wxIdentifier(statementM->ColumnTable(col + 1),
-            databaseM->getCharsetConverter());
-        cn = std2wxIdentifier(statementM->ColumnName(col + 1),
-            databaseM->getCharsetConverter());
-    }
+    wxString tn = std2wxIdentifier(statementDALM->getColumnTable(col),
+        databaseM->getCharsetConverter());
+    wxString cn = std2wxIdentifier(statementDALM->getColumnName(col),
+        databaseM->getCharsetConverter());
 
     Identifier iTn(tn, databaseM->getSqlDialect());
     Identifier iCn(cn, databaseM->getSqlDialect());
@@ -3067,42 +2712,20 @@ DataGridRowsBlob DataGridRows::setBlobPrepare(unsigned row, unsigned col)
     DataGridRowsBlob b;
     b.row = row;
     b.col = col;
-    if (statementDALM)
-    {
-        b.stDAL = addWhereDAL((*it).second, stm, tn, buffersM[row]);
-        b.blob = b.stDAL->getDatabase()->createBlob(b.stDAL->getTransaction());
-    }
-    else
-    {
-        b.st = addWhere((*it).second, stm, tn, buffersM[row]);
-        b.blob = std::make_shared<fr::IbppBlob>(b.st->DatabasePtr(), b.st->TransactionPtr());
-    }
+    b.stDAL = addWhereDAL((*it).second, stm, tn, buffersM[row]);
+    b.blob = b.stDAL->getDatabase()->createBlob(b.stDAL->getTransaction());
     return b;
 }
 
 void DataGridRows::setBlob(DataGridRowsBlob &b)
 {
-    if (statementDALM)
+    if (b.blob != nullptr)
     {
-        if (b.blob != nullptr)
-        {
-            b.stDAL->setBlob(0, b.blob);
-            b.stDAL->execute();
-        }
-        
-        buffersM[b.row]->setBlob(columnDefsM[b.col]->getIndex(), b.blob);
+        b.stDAL->setBlob(0, b.blob);
+        b.stDAL->execute();
     }
-    else
-    {
-        if (b.blob != nullptr) // b.blob is 0 if the blob is null
-        {   
-            auto ibppBlob = std::dynamic_pointer_cast<fr::IbppBlob>(b.blob);
-            b.st->Set(1, ibppBlob->getIBPPBlob());
-            b.st->Execute();  // we execute before updating internal storage
-        }
-        
-        buffersM[b.row]->setBlob(columnDefsM[b.col]->getIndex(), b.blob);
-    }
+    
+    buffersM[b.row]->setBlob(columnDefsM[b.col]->getIndex(), b.blob);
     
     buffersM[b.row]->setFieldNull(b.col, (b.blob == nullptr));
     buffersM[b.row]->setFieldNA(b.col, false);
@@ -3180,16 +2803,8 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
 {
     wxString localValue = value;
 
-    bool isRational = false;
-    if (statementDALM)
-    {
-        fr::ColumnType t = statementDALM->getColumnType(col);
-        isRational = (t == fr::ColumnType::Float || t == fr::ColumnType::Double || t == fr::ColumnType::Numeric || t == fr::ColumnType::Decimal);
-    }
-    else
-    {
-        isRational = IBPP::isRationalNumber(statementM->ColumnType(col + 1));
-    }
+    fr::ColumnType t = statementDALM->getColumnType(col);
+    bool isRational = (t == fr::ColumnType::Float || t == fr::ColumnType::Double || t == fr::ColumnType::Numeric || t == fr::ColumnType::Decimal);
 
     if (isRational)
     {
@@ -3233,22 +2848,10 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
         }
 
         // run the UPDATE statement
-        wxString tn;
-        wxString cn;
-        if (statementDALM)
-        {
-            tn = std2wxIdentifier(statementDALM->getColumnTable(col),
-                databaseM->getCharsetConverter());
-            cn = std2wxIdentifier(statementDALM->getColumnName(col),
-                databaseM->getCharsetConverter());
-        }
-        else
-        {
-            tn = std2wxIdentifier(statementM->ColumnTable(col + 1),
-                databaseM->getCharsetConverter());
-            cn = std2wxIdentifier(statementM->ColumnName(col + 1),
-                databaseM->getCharsetConverter());
-        }
+        wxString tn = std2wxIdentifier(statementDALM->getColumnTable(col),
+            databaseM->getCharsetConverter());
+        wxString cn = std2wxIdentifier(statementDALM->getColumnName(col),
+            databaseM->getCharsetConverter());
 
         Identifier iTn(tn, databaseM->getSqlDialect());
         Identifier iCn(cn, databaseM->getSqlDialect());
@@ -3259,18 +2862,8 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
             stm += " = NULL WHERE ";
         else
         {
-            fr::ColumnType type;
-            int subtype;
-            if (statementDALM)
-            {
-                type = statementDALM->getColumnType(col);
-                subtype = statementDALM->getColumnSubtype(col);
-            }
-            else
-            {
-                type = (fr::ColumnType)statementM->ColumnType(col + 1);
-                subtype = statementM->ColumnSubtype(col + 1);
-            }
+            fr::ColumnType type = statementDALM->getColumnType(col);
+            int subtype = statementDALM->getColumnSubtype(col);
 
             if ((type == fr::ColumnType::Char || type == fr::ColumnType::Varchar) && (subtype == 1)) //OCTET
                 stm += " = x'";
@@ -3291,16 +2884,8 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
         if (it == statementTablesM.end() || (*it).second == 0)
             throw FRError(_("This column should not be editable"));
 
-        if (statementDALM)
-        {
-            fr::IStatementPtr st = addWhereDAL((*it).second, stm, tn, oldRecord);
-            st->execute();
-        }
-        else
-        {
-            IBPP::Statement st = addWhere((*it).second, stm, tn, oldRecord);
-            st->Execute();
-        }
+        fr::IStatementPtr st = addWhereDAL((*it).second, stm, tn, oldRecord);
+        st->execute();
         delete oldRecord;
 
         return stm;

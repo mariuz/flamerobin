@@ -33,7 +33,6 @@
 // needed for platform independent EOL
 #include <wx/textbuf.h>
 
-#include <ibpp.h>
 
 #include "core/StringUtils.h"
 #include "engine/MetadataLoader.h"

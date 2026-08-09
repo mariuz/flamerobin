@@ -711,4 +711,238 @@ std::string FbCppService::getVersion()
     return "Firebird (fb-cpp)";
 }
 
+class CustomDatabaseManager : public fbcpp::ServiceManager
+{
+public:
+    using fbcpp::ServiceManager::ServiceManager;
+
+    void setSweepInterval(const std::string& dbPath, int sweep)
+    {
+        fbcpp::impl::StatusWrapper statusWrapper{getClient()};
+        auto builder = fbcpp::fbUnique(getClient().getUtil()->getXpbBuilder(&statusWrapper, Firebird::IXpbBuilder::SPB_START, nullptr, 0));
+        builder->insertTag(&statusWrapper, isc_action_svc_properties);
+        builder->insertString(&statusWrapper, isc_spb_dbname, dbPath.c_str());
+        builder->insertInt(&statusWrapper, isc_spb_prp_sweep_interval, sweep);
+
+        const auto buffer = builder->getBuffer(&statusWrapper);
+        const auto length = builder->getBufferLength(&statusWrapper);
+
+        startAction(std::vector<std::uint8_t>(buffer, buffer + length));
+        waitForCompletion();
+    }
+
+    void setPageBuffers(const std::string& dbPath, int buffers)
+    {
+        fbcpp::impl::StatusWrapper statusWrapper{getClient()};
+        auto builder = fbcpp::fbUnique(getClient().getUtil()->getXpbBuilder(&statusWrapper, Firebird::IXpbBuilder::SPB_START, nullptr, 0));
+        builder->insertTag(&statusWrapper, isc_action_svc_properties);
+        builder->insertString(&statusWrapper, isc_spb_dbname, dbPath.c_str());
+        builder->insertInt(&statusWrapper, isc_spb_prp_page_buffers, buffers);
+
+        const auto buffer = builder->getBuffer(&statusWrapper);
+        const auto length = builder->getBufferLength(&statusWrapper);
+
+        startAction(std::vector<std::uint8_t>(buffer, buffer + length));
+        waitForCompletion();
+    }
+
+    void setSyncWrite(const std::string& dbPath, bool sync)
+    {
+        fbcpp::impl::StatusWrapper statusWrapper{getClient()};
+        auto builder = fbcpp::fbUnique(getClient().getUtil()->getXpbBuilder(&statusWrapper, Firebird::IXpbBuilder::SPB_START, nullptr, 0));
+        builder->insertTag(&statusWrapper, isc_action_svc_properties);
+        builder->insertString(&statusWrapper, isc_spb_dbname, dbPath.c_str());
+        std::uint8_t val = sync ? isc_spb_prp_wm_sync : isc_spb_prp_wm_async;
+        builder->insertBytes(&statusWrapper, isc_spb_prp_write_mode, &val, 1u);
+
+        const auto buffer = builder->getBuffer(&statusWrapper);
+        const auto length = builder->getBufferLength(&statusWrapper);
+
+        startAction(std::vector<std::uint8_t>(buffer, buffer + length));
+        waitForCompletion();
+    }
+
+    void setReserveSpace(const std::string& dbPath, bool reserve)
+    {
+        fbcpp::impl::StatusWrapper statusWrapper{getClient()};
+        auto builder = fbcpp::fbUnique(getClient().getUtil()->getXpbBuilder(&statusWrapper, Firebird::IXpbBuilder::SPB_START, nullptr, 0));
+        builder->insertTag(&statusWrapper, isc_action_svc_properties);
+        builder->insertString(&statusWrapper, isc_spb_dbname, dbPath.c_str());
+        std::uint8_t val = reserve ? isc_spb_prp_res : isc_spb_prp_res_use_full;
+        builder->insertBytes(&statusWrapper, isc_spb_prp_reserve_space, &val, 1u);
+
+        const auto buffer = builder->getBuffer(&statusWrapper);
+        const auto length = builder->getBufferLength(&statusWrapper);
+
+        startAction(std::vector<std::uint8_t>(buffer, buffer + length));
+        waitForCompletion();
+    }
+
+    void setReadOnly(const std::string& dbPath, bool readonly)
+    {
+        fbcpp::impl::StatusWrapper statusWrapper{getClient()};
+        auto builder = fbcpp::fbUnique(getClient().getUtil()->getXpbBuilder(&statusWrapper, Firebird::IXpbBuilder::SPB_START, nullptr, 0));
+        builder->insertTag(&statusWrapper, isc_action_svc_properties);
+        builder->insertString(&statusWrapper, isc_spb_dbname, dbPath.c_str());
+        std::uint8_t val = readonly ? isc_spb_prp_am_readonly : isc_spb_prp_am_readwrite;
+        builder->insertBytes(&statusWrapper, isc_spb_prp_access_mode, &val, 1u);
+
+        const auto buffer = builder->getBuffer(&statusWrapper);
+        const auto length = builder->getBufferLength(&statusWrapper);
+
+        startAction(std::vector<std::uint8_t>(buffer, buffer + length));
+        waitForCompletion();
+    }
+};
+
+void FbCppService::setSweepInterval(const std::string& dbPath, int sweep)
+{
+    if (!clientM)
+        connect();
+
+    runService([this, dbPath, sweep]() {
+        try
+        {
+            pushLine("Setting sweep interval to " + std::to_string(sweep) + "...");
+
+            auto svcOptions = fbcpp::ServiceManagerOptions()
+                .setServer(connStrM)
+                .setUserName(userM)
+                .setPassword(passwordM);
+            if (!roleM.empty())
+                svcOptions.setRole(roleM);
+
+            CustomDatabaseManager manager(*clientM, svcOptions);
+            manager.setSweepInterval(dbPath, sweep);
+
+            pushLine("Sweep interval successfully set to " + std::to_string(sweep));
+        }
+        catch (const std::exception& e)
+        {
+            pushLine(std::string("Error setting sweep interval: ") + e.what());
+        }
+        pushLine(""); // EOF marker
+    });
+}
+
+void FbCppService::setPageBuffers(const std::string& dbPath, int buffers)
+{
+    if (!clientM)
+        connect();
+
+    runService([this, dbPath, buffers]() {
+        try
+        {
+            pushLine("Setting page buffers to " + std::to_string(buffers) + "...");
+
+            auto svcOptions = fbcpp::ServiceManagerOptions()
+                .setServer(connStrM)
+                .setUserName(userM)
+                .setPassword(passwordM);
+            if (!roleM.empty())
+                svcOptions.setRole(roleM);
+
+            CustomDatabaseManager manager(*clientM, svcOptions);
+            manager.setPageBuffers(dbPath, buffers);
+
+            pushLine("Page buffers successfully set to " + std::to_string(buffers));
+        }
+        catch (const std::exception& e)
+        {
+            pushLine(std::string("Error setting page buffers: ") + e.what());
+        }
+        pushLine(""); // EOF marker
+    });
+}
+
+void FbCppService::setSyncWrite(const std::string& dbPath, bool sync)
+{
+    if (!clientM)
+        connect();
+
+    runService([this, dbPath, sync]() {
+        try
+        {
+            pushLine(std::string("Setting forced writes to ") + (sync ? "ON" : "OFF") + "...");
+
+            auto svcOptions = fbcpp::ServiceManagerOptions()
+                .setServer(connStrM)
+                .setUserName(userM)
+                .setPassword(passwordM);
+            if (!roleM.empty())
+                svcOptions.setRole(roleM);
+
+            CustomDatabaseManager manager(*clientM, svcOptions);
+            manager.setSyncWrite(dbPath, sync);
+
+            pushLine(std::string("Forced writes successfully set to ") + (sync ? "ON" : "OFF"));
+        }
+        catch (const std::exception& e)
+        {
+            pushLine(std::string("Error setting forced writes: ") + e.what());
+        }
+        pushLine(""); // EOF marker
+    });
+}
+
+void FbCppService::setReserveSpace(const std::string& dbPath, bool reserve)
+{
+    if (!clientM)
+        connect();
+
+    runService([this, dbPath, reserve]() {
+        try
+        {
+            pushLine(std::string("Setting reserve space to ") + (reserve ? "ON" : "OFF") + "...");
+
+            auto svcOptions = fbcpp::ServiceManagerOptions()
+                .setServer(connStrM)
+                .setUserName(userM)
+                .setPassword(passwordM);
+            if (!roleM.empty())
+                svcOptions.setRole(roleM);
+
+            CustomDatabaseManager manager(*clientM, svcOptions);
+            manager.setReserveSpace(dbPath, reserve);
+
+            pushLine(std::string("Reserve space successfully set to ") + (reserve ? "ON" : "OFF"));
+        }
+        catch (const std::exception& e)
+        {
+            pushLine(std::string("Error setting reserve space: ") + e.what());
+        }
+        pushLine(""); // EOF marker
+    });
+}
+
+void FbCppService::setReadOnly(const std::string& dbPath, bool readonly)
+{
+    if (!clientM)
+        connect();
+
+    runService([this, dbPath, readonly]() {
+        try
+        {
+            pushLine(std::string("Setting access mode to ") + (readonly ? "READ ONLY" : "READ WRITE") + "...");
+
+            auto svcOptions = fbcpp::ServiceManagerOptions()
+                .setServer(connStrM)
+                .setUserName(userM)
+                .setPassword(passwordM);
+            if (!roleM.empty())
+                svcOptions.setRole(roleM);
+
+            CustomDatabaseManager manager(*clientM, svcOptions);
+            manager.setReadOnly(dbPath, readonly);
+
+            pushLine(std::string("Access mode successfully set to ") + (readonly ? "READ ONLY" : "READ WRITE"));
+        }
+        catch (const std::exception& e)
+        {
+            pushLine(std::string("Error setting access mode: ") + e.what());
+        }
+        pushLine(""); // EOF marker
+    });
+}
+
 } // namespace fr

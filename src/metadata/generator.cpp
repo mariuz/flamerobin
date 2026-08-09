@@ -31,7 +31,6 @@
 #endif
 
 
-#include <ibpp.h>
 
 #include "core/FRError.h"
 #include "core/StringUtils.h"

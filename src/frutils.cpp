@@ -34,7 +34,6 @@
 #include <wx/tokenzr.h>
 
 #include "core/StringUtils.h"
-#include "engine/db/ibpp/IbppService.h"
 #include "frutils.h"
 #include "gui/ProgressDialog.h"
 #include "gui/UsernamePasswordDialog.h"
@@ -199,20 +198,7 @@ fr::IServicePtr getDALService(Server* s, ProgressIndicator* p, bool sysdba)
     return dalSvc;
 }
 
-bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
-    bool sysdba)
-{
-    fr::IServicePtr dalSvc = getDALService(s, p, sysdba);
-    if (!dalSvc)
-        return false;
 
-    if (auto ibppSvc = std::dynamic_pointer_cast<fr::IbppService>(dalSvc))
-    {
-        svc = ibppSvc->getIBPPService();
-        return true;
-    }
-    return false;
-}
 
 wxString unquote(const wxString& input, const wxString& quoteChar)
 {

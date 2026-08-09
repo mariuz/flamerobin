@@ -33,8 +33,6 @@
 #include <wx/stc/stc.h>
 #include <wx/treectrl.h>
 
-#include <ibpp.h>
-
 #include "core/Observer.h"
 #include "core/StringUtils.h"
 #include "engine/db/ITransaction.h"

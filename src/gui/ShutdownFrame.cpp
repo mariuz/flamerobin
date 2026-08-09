@@ -36,7 +36,6 @@
 
 #include <algorithm>
 
-#include <ibpp.h>
 #include "core/StringUtils.h"
 #include "config/Config.h"
 #include "gui/ShutdownFrame.h"

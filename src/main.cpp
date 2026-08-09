@@ -35,8 +35,6 @@
 
 #include <exception>
 
-#include <ibpp.h>
-
 #include "config/Config.h"
 #include "config/LocaleManager.h"
 #include "core/FRError.h"
@@ -198,11 +196,7 @@ bool Application::OnInit()
     LocaleManager::get().initFromConfig();
     parseCommandLine();
 
-    int backend = config().get("databaseBackend", static_cast<int>(fr::DatabaseBackend::FbCpp));
-    if (backend == static_cast<int>(fr::DatabaseBackend::IBPP))
-        fr::DatabaseFactory::setDefaultBackend(fr::DatabaseBackend::IBPP);
-    else
-        fr::DatabaseFactory::setDefaultBackend(fr::DatabaseBackend::FbCpp);
+    fr::DatabaseFactory::setDefaultBackend(fr::DatabaseBackend::FbCpp);
 
 #if wxCHECK_VERSION(3, 3, 0)
     int theme = config().get(FRStyleManager::_DARKMODE_KEY, (int)FRStyleManager::ThemeSystem);
@@ -227,20 +221,7 @@ bool Application::OnInit()
     std::locale::global(std::locale(""));
 #endif
 
-    // initialize IBPP library - if it fails: exit
-    try
-    {
-        if (! IBPP::CheckVersion(IBPP::Version))
-        {
-            wxMessageBox(_("Wrong IBPP version."), _("Error."), wxOK | wxICON_ERROR);
-            return false;
-        }
-    }
-    catch (IBPP::Exception &e)
-    {
-        wxMessageBox(e.what(), _("Error initializing IBPP library."), wxOK | wxICON_ERROR);
-        return false;
-    }
+    // IBPP library no longer used
 
     if (mcpModeM)
     {

@@ -54,6 +54,11 @@ public:
     virtual void restore(const RestoreConfig& config) override;
     virtual void maintain(const MaintenanceConfig& config) override;
     virtual void setReplicaMode(const std::string& dbPath, int mode) override;
+    virtual void setSweepInterval(const std::string& dbPath, int sweep) override;
+    virtual void setPageBuffers(const std::string& dbPath, int buffers) override;
+    virtual void setSyncWrite(const std::string& dbPath, bool sync) override;
+    virtual void setReserveSpace(const std::string& dbPath, bool reserve) override;
+    virtual void setReadOnly(const std::string& dbPath, bool readonly) override;
 
     virtual void shutdown(const ShutdownConfig& config) override;
     virtual void startup(const std::string& dbPath) override;

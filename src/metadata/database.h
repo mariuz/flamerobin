@@ -32,7 +32,7 @@
 #include <mutex>
 #include <unordered_map>
 
-#include <ibpp.h>
+
 
 #include "engine/db/IDatabase.h"
 #include "metadata/MetadataClasses.h"
@@ -384,7 +384,7 @@ public:
     wxString getRole() const;
     wxString getCryptKeyData() const;
     DatabaseSecurityStatus getSecurityProtocolStatus();
-    IBPP::Database getIBPPDatabase();
+
     fr::IDatabasePtr getDALDatabase() const override;
     void setIsVolatile(const bool isVolatile);
     void setPath(const wxString& value);

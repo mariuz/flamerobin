@@ -27,7 +27,7 @@
 #include <wx/wx.h>
 #include <wx/image.h>
 
-#include <ibpp.h>
+
 
 #include "gui/BaseDialog.h"
 
@@ -55,8 +55,6 @@ class InsertDialog: public BaseDialog
 {
 public:
     InsertDialog(wxWindow* parent, const wxString& tableName, DataGridTable *,
-        IBPP::Statement& st, Database *db);
-    InsertDialog(wxWindow* parent, const wxString& tableName, DataGridTable *,
         fr::IStatementPtr st, Database *db);
     virtual ~InsertDialog();
     void OnOkButtonClick(wxCommandEvent& event);
@@ -74,7 +72,6 @@ private:
     void storeValues();
     void preloadSpecialColumns();
     void createGrid(DataGridTable *gridTable);
-    IBPP::Statement statementM;
     fr::IStatementPtr statementDALM;
     std::vector<InsertColumnInfo> columnsM;
     DataGridTable *gridTableM;

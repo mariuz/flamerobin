@@ -49,6 +49,11 @@ public:
     virtual void restore(const RestoreConfig& config) = 0;
     virtual void maintain(const MaintenanceConfig& config) = 0;
     virtual void setReplicaMode(const std::string& dbPath, int mode) = 0;
+    virtual void setSweepInterval(const std::string& dbPath, int sweep) = 0;
+    virtual void setPageBuffers(const std::string& dbPath, int buffers) = 0;
+    virtual void setSyncWrite(const std::string& dbPath, bool sync) = 0;
+    virtual void setReserveSpace(const std::string& dbPath, bool reserve) = 0;
+    virtual void setReadOnly(const std::string& dbPath, bool readonly) = 0;
 
     virtual void shutdown(const ShutdownConfig& config) = 0;
     virtual void startup(const std::string& dbPath) = 0;

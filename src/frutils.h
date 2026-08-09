@@ -29,7 +29,7 @@
 
 #include <list>
 
-#include <ibpp.h>
+
 
 #include "engine/db/IStatement.h"
 #include "engine/db/DatabaseBackend.h"
@@ -56,8 +56,7 @@ bool connectDatabase(Database *db, wxWindow* parent,
 
 fr::IServicePtr getDALService(Server* s, ProgressIndicator* p, bool sysdba);
 
-bool getService(Server* s, IBPP::Service& svc, ProgressIndicator* p,
-    bool sysdba);
+
 
 wxString unquote(const wxString& input, const wxString& quoteChar = "\"");
 
