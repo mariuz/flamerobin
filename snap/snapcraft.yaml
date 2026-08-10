@@ -69,6 +69,8 @@ parts:
       - autoconf-archive
       - automake
       - libtool
+      - bison
+      - flex
     stage-packages:
       - libtommath1
       - libsecret-1-0
