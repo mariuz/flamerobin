@@ -34,6 +34,111 @@ struct int128_t
 {
     uint64_t lowPart;
     int64_t highPart;
+
+    int128_t() : lowPart(0), highPart(0) {}
+    int128_t(int64_t val)
+    {
+        if (val >= 0)
+        {
+            lowPart = val;
+            highPart = 0;
+        }
+        else
+        {
+            lowPart = (uint64_t)val;
+            highPart = -1;
+        }
+    }
+    int128_t(int val) : int128_t((int64_t)val) {}
+
+    bool operator<(const int128_t& other) const
+    {
+        if (highPart != other.highPart)
+            return highPart < other.highPart;
+        return lowPart < other.lowPart;
+    }
+
+    bool operator>(const int128_t& other) const
+    {
+        return other < *this;
+    }
+
+    bool operator==(const int128_t& other) const
+    {
+        return lowPart == other.lowPart && highPart == other.highPart;
+    }
+
+    bool operator!=(const int128_t& other) const
+    {
+        return !(*this == other);
+    }
+
+    bool operator>=(const int128_t& other) const
+    {
+        return !(*this < other);
+    }
+
+    bool operator<=(const int128_t& other) const
+    {
+        return !(other < *this);
+    }
+
+    int128_t operator-() const
+    {
+        int128_t res;
+        res.lowPart = ~lowPart;
+        res.highPart = ~highPart;
+        res.lowPart++;
+        if (res.lowPart == 0)
+        {
+            res.highPart++;
+        }
+        return res;
+    }
+
+    int128_t operator+(const int128_t& other) const
+    {
+        int128_t res;
+        res.lowPart = lowPart + other.lowPart;
+        res.highPart = highPart + other.highPart;
+        if (res.lowPart < lowPart)
+        {
+            res.highPart++;
+        }
+        return res;
+    }
+
+    int128_t operator-(const int128_t& other) const
+    {
+        return *this + (-other);
+    }
+
+    int128_t operator<<(int shift) const
+    {
+        if (shift <= 0) return *this;
+        if (shift >= 128) return int128_t(0);
+        
+        int128_t res;
+        if (shift >= 64)
+        {
+            res.highPart = (int64_t)(lowPart << (shift - 64));
+            res.lowPart = 0;
+        }
+        else
+        {
+            res.highPart = (highPart << shift) | (int64_t)(lowPart >> (64 - shift));
+            res.lowPart = lowPart << shift;
+        }
+        return res;
+    }
+
+    int128_t operator&(const int128_t& other) const
+    {
+        int128_t res;
+        res.lowPart = lowPart & other.lowPart;
+        res.highPart = highPart & other.highPart;
+        return res;
+    }
 };
 #endif
 
