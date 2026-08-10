@@ -24,44 +24,28 @@ apps:
       - network
 
 parts:
-  firebird-client:
-    plugin: nil
-    source: https://github.com/FirebirdSQL/firebird/releases/download/v5.0.4/Firebird-5.0.4.1812-0-linux-x64.tar.gz
-    source-checksum: sha256/ab6a15a0258f38b022be496bb5e038c14e8628ce9acd0f9a06288a3baedd917b
-    override-build: |
-      tar -xzf buildroot.tar.gz
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/lib
-      cp -av opt/firebird/lib/*.so* $SNAPCRAFT_PART_INSTALL/usr/lib/
-      # Ensure libfbclient.so symlinks exist for development and runtime
-      cd $SNAPCRAFT_PART_INSTALL/usr/lib
-      if [ -f libfbclient.so.5.0.4 ]; then
-        ln -sf libfbclient.so.5.0.4 libfbclient.so
-        ln -sf libfbclient.so.5.0.4 libfbclient.so.2
-      fi
-      # Firebird 5.0 client depends on libtommath.so.1
-      if [ -f libtommath.so.1.0.1 ]; then
-        ln -sf libtommath.so.1.0.1 libtommath.so.1
-        ln -sf libtommath.so.1.0.1 libtommath.so
-      fi
-      cd -
-      mkdir -p $SNAPCRAFT_PART_INSTALL/usr/include
-      cp -rv opt/firebird/include/* $SNAPCRAFT_PART_INSTALL/usr/include/
-      install -Dm644 $SNAPCRAFT_PROJECT_DIR/cmake/firebirdConfig.cmake $SNAPCRAFT_PART_INSTALL/usr/lib/cmake/firebird/firebirdConfig.cmake
-
-  wxwidgets:
+  flamerobin:
     plugin: cmake
-    source: https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.6/wxWidgets-3.2.6.tar.bz2
-    source-checksum: sha256/939e5b77ddc5b6092d1d7d29491fe67010a2433cf9b9c0d841ee4d04acb9dce7
+    source: .
+    source-depth: 0
     cmake-parameters:
       - -DCMAKE_INSTALL_PREFIX=/usr
       - -DCMAKE_BUILD_TYPE=Release
-      - -DwxBUILD_SHARED=OFF
-      - -DwxBUILD_TOOLKIT=gtk3
-      - -DwxUSE_STC=ON
-      - -DwxUSE_AUI=ON
-      - -DwxUSE_WEBVIEW=ON
-      - -DwxUSE_SECRETSTORE=ON
-      - -DwxUSE_OPENGL=OFF
+      - -DENABLE_VCPKG=ON
+      - -DFB_CPP_BUILD_TESTS=OFF
+    override-pull: |
+      craftctl default
+      # Bootstrap vcpkg
+      ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
+    override-build: |
+      export VCPKG_ROOT="$SNAPCRAFT_PART_SRC/vcpkg"
+      craftctl default
+      
+      # Extract version for adopt-info
+      MAJOR=$(grep FR_VERSION_MAJOR $SNAPCRAFT_PART_SRC/src/frversion.h | awk '{print $3}')
+      MINOR=$(grep FR_VERSION_MINOR $SNAPCRAFT_PART_SRC/src/frversion.h | awk '{print $3}')
+      RLS=$(grep FR_VERSION_RLS $SNAPCRAFT_PART_SRC/src/frversion.h | awk '{print $3}')
+      craftctl set version="$MAJOR.$MINOR.$RLS"
     build-packages:
       - libgtk-3-dev
       - libnotify-dev
@@ -72,84 +56,15 @@ parts:
       - libwebkit2gtk-4.1-dev
       - libpango1.0-dev
       - libglib2.0-dev
-      - ninja-build
-    cmake-generator: Ninja
-
-  fb-cpp:
-    after: [firebird-client]
-    plugin: cmake
-    source: .
-    source-subdir: src/fb-cpp
-    cmake-parameters:
-      - -DCMAKE_INSTALL_PREFIX=/usr
-      - -DCMAKE_BUILD_TYPE=Release
-      - -DBUILD_TESTING=OFF
-      - -DFB_CPP_USE_BOOST_DLL=OFF
-      - -DFB_CPP_USE_BOOST_MULTIPRECISION=OFF
-      - -DFB_CPP_USE_BOOST_DECIMAL=OFF
-      - -DENABLE_VCPKG=OFF
-      - -Dfirebird_DIR=$SNAPCRAFT_STAGE/usr/lib/cmake/firebird
-    override-pull: |
-      craftctl default
-      cd src/fb-cpp
-      patch -p1 < ../../ports/fb-cpp/fb-cpp-flamerobin.patch
-      rm -rf vcpkg vcpkg.json CMakePresets.json
-      sed -i '/set(VCPKG_ROOT/d' CMakeLists.txt
-      sed -i '/set(CMAKE_TOOLCHAIN_FILE/d' CMakeLists.txt
-      sed -i "1i set(firebird_DIR \"$SNAPCRAFT_STAGE/usr/lib/cmake/firebird\" CACHE PATH \"\" FORCE)" CMakeLists.txt
-      find . -name CMakeLists.txt -exec sed -i 's|fb-cpp/cmake|lib/cmake|g' {} +
-      
-      # Prepare firebird include as expected by fb-cpp
-      mkdir -p src/firebird
-      cp -r ../../src/firebird/include src/firebird/
-      cp ../../cmake/firebirdConfig.cmake cmake/
-    build-packages:
-      - libboost-all-dev
-      - ninja-build
-    cmake-generator: Ninja
-
-  nlohmann-json:
-    plugin: cmake
-    source: https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
-    source-checksum: sha256/d6c65aca6b1ed68e7a182f4757257b107ae403032760ed6ef121c9d55e81757d
-    cmake-parameters:
-      - -DCMAKE_INSTALL_PREFIX=/usr
-      - -DCMAKE_BUILD_TYPE=Release
-      - -DJSON_BuildTests=OFF
-    cmake-generator: Ninja
-    build-packages:
-      - ninja-build
-
-  flamerobin:
-    after: [wxwidgets, fb-cpp, nlohmann-json]
-    plugin: cmake
-    source: .
-    cmake-parameters:
-      - -DCMAKE_INSTALL_PREFIX=/usr
-      - -DCMAKE_BUILD_TYPE=Release
-      - -DENABLE_VCPKG=OFF
-      - -DFB_CPP_BUILD_TESTS=OFF
-      - -Dfirebird_DIR=$SNAPCRAFT_STAGE/usr/lib/cmake/firebird
-      - -Dfb-cpp_DIR=$SNAPCRAFT_STAGE/usr/lib/cmake/fb-cpp
-      - -DCMAKE_EXE_LINKER_FLAGS="-Wl,--no-as-needed -Wl,-rpath-link,$SNAPCRAFT_STAGE/usr/lib -L$SNAPCRAFT_STAGE/usr/lib"
-    override-build: |
-      craftctl default
-      # Extract version for adopt-info
-      MAJOR=$(grep FR_VERSION_MAJOR $SNAPCRAFT_PART_SRC/src/frversion.h | awk '{print $3}')
-      MINOR=$(grep FR_VERSION_MINOR $SNAPCRAFT_PART_SRC/src/frversion.h | awk '{print $3}')
-      RLS=$(grep FR_VERSION_RLS $SNAPCRAFT_PART_SRC/src/frversion.h | awk '{print $3}')
-      craftctl set version="$MAJOR.$MINOR.$RLS"
-    build-packages:
-      - libgtk-3-dev
-      - libnotify-dev
       - libicu-dev
       - libboost-all-dev
-      - libsecret-1-dev
-      - libpango1.0-dev
-      - libglib2.0-dev
-      - libtommath-dev
       - gettext
       - ninja-build
+      - curl
+      - zip
+      - unzip
+      - tar
+      - pkg-config
     stage-packages:
       - libtommath1
       - libsecret-1-0
