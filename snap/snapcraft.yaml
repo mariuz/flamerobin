@@ -71,6 +71,7 @@ parts:
       - libtool
       - bison
       - flex
+      - python3-venv
     stage-packages:
       - libtommath1
       - libsecret-1-0
