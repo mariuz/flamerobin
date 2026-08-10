@@ -86,6 +86,7 @@ parts:
       - -DBUILD_TESTING=OFF
       - -DFB_CPP_USE_BOOST_DLL=OFF
       - -DFB_CPP_USE_BOOST_MULTIPRECISION=OFF
+      - -DFB_CPP_USE_BOOST_DECIMAL=OFF
       - -DENABLE_VCPKG=OFF
       - -Dfirebird_DIR=$SNAPCRAFT_STAGE/usr/lib/cmake/firebird
     override-pull: |
