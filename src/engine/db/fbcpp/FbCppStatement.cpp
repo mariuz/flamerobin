@@ -479,7 +479,7 @@ int32_t FbCppStatement::getInt32(int index)
 #ifdef HAVE_INT128
         return (int32_t)i128;
 #else
-        return (int32_t)i128.data.us2.lowPart;
+        return (int32_t)i128.lowPart;
 #endif
     }
 
@@ -513,7 +513,7 @@ int64_t FbCppStatement::getInt64(int index)
 #ifdef HAVE_INT128
         return (int64_t)i128;
 #else
-        return (int64_t)i128.data.us2.lowPart;
+        return (int64_t)i128.lowPart;
 #endif
     }
 
