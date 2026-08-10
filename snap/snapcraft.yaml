@@ -65,6 +65,10 @@ parts:
       - unzip
       - tar
       - pkg-config
+      - autoconf
+      - autoconf-archive
+      - automake
+      - libtool
     stage-packages:
       - libtommath1
       - libsecret-1-0
