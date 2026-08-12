@@ -8,6 +8,21 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.8.1</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>General Improvements & Bug Fixes</B></font><br>
+<br>
+- <b>Firebird DDL Privilege Generation Fix (#671)</b>: Fixed an issue where FlameRobin generated invalid <code>GRANT USAGE</code> DDL statements for Generators (Sequences), Domains, and Exceptions by omitting the object type keyword (e.g. <code>GRANT USAGE ON CUST_NO_GEN2...</code> instead of <code>GRANT USAGE ON SEQUENCE CUST_NO_GEN2...</code>), causing Firebird SQL parser error <code>-104: Token unknown</code>. Added comprehensive unit tests in <code>PrivilegeTest</code>.<br>
+- <b>Verbose Log Streaming & Truncation Fix (#672)</b>: Resolved an issue in <code>FbCppService::getNextLine()</code> where long-running background service logs (e.g. database backup, restore, repair, gstat) were prematurely truncated due to transient empty output queues. Added thread-safe condition variable synchronization to stream log lines until service completion.<br>
+- <b>Complete IBPP Removal & Full Migration to `fb-cpp` DAL</b>: Fully removed legacy IBPP library source files and migrated all remaining database engine operations to the modern <code>fb-cpp</code> Data Access Layer. Updated <code>fb-cpp</code> submodule and vcpkg overlay port to release <code>v0.0.5</code>.<br>
+- <b>Build System & Cross-Platform Enhancements</b>: Resolved MSVC 128-bit integer compatibility issues in <code>FbCppStatement</code> and updated build manifests (Snapcraft, Flatpak, vcpkg 2026.07.29) with required build dependencies (autotools, bison, flex, python3-venv). Fixed dialog close handling for <code>wxCLOSE</code> button sizers.<br>
+<br><br>
+
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.8.0</font><br>
 <br><br>
 
