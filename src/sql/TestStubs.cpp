@@ -37,6 +37,11 @@
 #include "metadata/package.h"
 #include "metadata/column.h"
 #include "metadata/parameter.h"
+#include "metadata/generator.h"
+#include "metadata/domain.h"
+#include "metadata/exception.h"
+#include "metadata/function.h"
+#include "metadata/role.h"
 #include "engine/MetadataLoader.h"
 #include "config/Config.h"
 
@@ -193,6 +198,8 @@ void View::setSource(const wxString&) {}
 // --- Procedure Stubs ---
 Procedure::Procedure(DatabasePtr database, const wxString& name) 
     : MetadataItem(ntProcedure, (MetadataItem*)database.get(), name, 0) {}
+Procedure::Procedure(MetadataItem* parent, const wxString& name) 
+    : MetadataItem(ntProcedure, parent, name, 0) {}
 ParameterPtr Procedure::findParameter(const wxString&) const { return ParameterPtr(); }
 const wxString Procedure::getTypeName() const { return ""; }
 void Procedure::acceptVisitor(MetadataItemVisitor*) {}
@@ -202,6 +209,65 @@ void Procedure::unlockChildren() {}
 bool Procedure::getChildren(std::vector<MetadataItem *>&) { return false; }
 wxString Procedure::getQuotedName() const { return getIdentifier().getQuoted(); }
 wxString Procedure::getSqlSecurity() { return ""; }
+
+Generator::Generator(DatabasePtr database, const wxString& name)
+    : MetadataItem(ntGenerator, (MetadataItem*)database.get(), name, 0), initialValueM(0), incrementalValueM(0) {}
+void Generator::loadProperties() {}
+const wxString Generator::getTypeName() const { return "SEQUENCE"; }
+void Generator::acceptVisitor(MetadataItemVisitor*) {}
+
+Domain::Domain(DatabasePtr database, const wxString& name)
+    : MetadataItem(ntDomain, (MetadataItem*)database.get(), name, 0) {}
+void Domain::loadProperties() {}
+const wxString Domain::getTypeName() const { return "DOMAIN"; }
+bool Domain::isSystem() const { return false; }
+void Domain::acceptVisitor(MetadataItemVisitor*) {}
+
+Exception::Exception(DatabasePtr database, const wxString& name)
+    : MetadataItem(ntException, (MetadataItem*)database.get(), name, 0) {}
+void Exception::loadProperties() {}
+const wxString Exception::getTypeName() const { return "EXCEPTION"; }
+void Exception::acceptVisitor(MetadataItemVisitor*) {}
+
+Package::Package(DatabasePtr database, const wxString& name)
+    : MetadataItem(ntPackage, (MetadataItem*)database.get(), name, 0) {}
+void Package::loadChildren() {}
+void Package::lockChildren() {}
+void Package::unlockChildren() {}
+bool Package::getChildren(std::vector<MetadataItem*>&) { return false; }
+wxString Package::getSqlSecurity() { return ""; }
+const wxString Package::getTypeName() const { return "PACKAGE"; }
+void Package::acceptVisitor(MetadataItemVisitor*) {}
+
+Function::Function(DatabasePtr database, const wxString& name)
+    : MetadataItem(ntFunctionSQL, (MetadataItem*)database.get(), name, 0) {}
+Function::Function(MetadataItem* parent, const wxString& name)
+    : MetadataItem(ntFunctionSQL, parent, name, 0) {}
+void Function::loadChildren() {}
+void Function::lockChildren() {}
+void Function::unlockChildren() {}
+bool Function::getChildren(std::vector<MetadataItem*>&) { return false; }
+wxString Function::getSqlSecurity() { return ""; }
+wxString Function::getDefinition() { return ""; }
+void Function::checkDependentFunction() {}
+const wxString Function::getTypeName() const { return "FUNCTION"; }
+void Function::acceptVisitor(MetadataItemVisitor*) {}
+
+FunctionSQL::FunctionSQL(DatabasePtr database, const wxString& name)
+    : Function(database, name) {}
+FunctionSQL::FunctionSQL(MetadataItem* parent, const wxString& name)
+    : Function(parent, name) {}
+void FunctionSQL::loadProperties() {}
+void FunctionSQL::acceptVisitor(MetadataItemVisitor*) {}
+wxString FunctionSQL::getQuotedName() const { return getIdentifier().getQuoted(); }
+const wxString FunctionSQL::getTypeName() const { return "FUNCTION"; }
+wxString FunctionSQL::getDefinition() { return ""; }
+wxString FunctionSQL::getSource() { return ""; }
+
+Role::Role(DatabasePtr database, const wxString& name)
+    : MetadataItem(ntRole, (MetadataItem*)database.get(), name, 0) {}
+const wxString Role::getTypeName() const { return "ROLE"; }
+void Role::acceptVisitor(MetadataItemVisitor*) {}
 
 // --- Trigger Stubs ---
 Trigger::Trigger(NodeType type, DatabasePtr database, const wxString& name)

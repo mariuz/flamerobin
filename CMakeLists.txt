@@ -1038,6 +1038,14 @@ add_executable(vector_helper_test
 target_link_libraries(vector_helper_test ${wxWidgets_LIBRARIES})
 add_test(NAME vector_helper_test COMMAND vector_helper_test)
 
+add_executable(privilege_test
+    ${SOURCEDIR}/metadata/PrivilegeTest.cpp
+    ${SOURCEDIR}/metadata/privilege.cpp
+    ${SQL_TEST_STUB_SOURCES}
+)
+target_link_libraries(privilege_test ${wxWidgets_LIBRARIES})
+add_test(NAME privilege_test COMMAND privilege_test)
+
 if (APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES
                 BUILD_WITH_INSTALL_RPATH FALSE

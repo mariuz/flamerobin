@@ -37,6 +37,9 @@
 #include "metadata/function.h"
 #include "metadata/relation.h"
 #include "metadata/role.h"
+#include "metadata/generator.h"
+#include "metadata/domain.h"
+#include "metadata/exception.h"
 
 
 PrivilegeItem::PrivilegeItem(const wxString& grantorName,
@@ -143,10 +146,16 @@ wxString Privilege::getSql(bool withGrantOption) const
     ret = "GRANT " + ret + "\n ON ";
     if (dynamic_cast<Procedure *>(parentObjectM))
         ret += "PROCEDURE ";
-    if (dynamic_cast<Package *>(parentObjectM))
+    else if (dynamic_cast<Package *>(parentObjectM))
         ret += "PACKAGE ";
-    if (dynamic_cast<FunctionSQL *>(parentObjectM))
+    else if (dynamic_cast<FunctionSQL *>(parentObjectM))
         ret += "FUNCTION ";
+    else if (dynamic_cast<Generator *>(parentObjectM))
+        ret += "SEQUENCE ";
+    else if (dynamic_cast<Domain *>(parentObjectM))
+        ret += "DOMAIN ";
+    else if (dynamic_cast<Exception *>(parentObjectM))
+        ret += "EXCEPTION ";
     Identifier id(granteeM);
     ret += parentObjectM->getQuotedName() + " TO "
         + granteeTypeToString(granteeTypeM) + " " + id.getQuoted();
