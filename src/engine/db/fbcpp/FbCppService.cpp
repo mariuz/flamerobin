@@ -140,8 +140,9 @@ FbCppService::~FbCppService()
 
 void FbCppService::pushLine(std::string_view line)
 {
-    std::lock_guard<std::mutex> lock(queueMutexM);
+    std::unique_lock<std::mutex> lock(queueMutexM);
     outputQueueM.push(std::string(line));
+    queueCvM.notify_one();
 }
 
 void FbCppService::runService(std::function<void()> func)
@@ -166,7 +167,7 @@ void FbCppService::backup(const BackupConfig& config)
     auto options = fbcpp::BackupOptions()
         .setDatabase(config.dbPath)
         .addBackupFile(config.backupPath)
-        .setVerboseOutput([this](std::string_view line) { pushLine(line); });
+        .setVerboseOutput([this](std::string_view line) { pushLine(line.empty() ? " " : line); });
     
     if (config.parallel > 0)
         options.setParallelWorkers(static_cast<uint32_t>(config.parallel));
@@ -200,7 +201,7 @@ void FbCppService::restore(const RestoreConfig& config)
         .setDatabase(config.dbPath)
         .addBackupFile(config.backupPath)
         .setReplace((int)config.flags & (int)RestoreFlags::Replace)
-        .setVerboseOutput([this](std::string_view line) { pushLine(line); });
+        .setVerboseOutput([this](std::string_view line) { pushLine(line.empty() ? " " : line); });
 
     if (config.parallel > 0)
         options.setParallelWorkers(static_cast<uint32_t>(config.parallel));
@@ -244,7 +245,7 @@ void FbCppService::maintain(const MaintenanceConfig& config)
 
             auto repairOptions = fbcpp::DatabaseRepairOptions()
                 .setDatabase(config.dbPath)
-                .setVerboseOutput([this](std::string_view line) { pushLine(line); });
+                .setVerboseOutput([this](std::string_view line) { pushLine(line.empty() ? " " : line); });
 
             if ((int)config.flags & (int)MaintenanceFlags::Sweep)
                 repairOptions.setSweep(true);
@@ -405,7 +406,10 @@ void FbCppService::startup(const std::string& dbPath)
 
 std::string FbCppService::getNextLine()
 {
-    std::lock_guard<std::mutex> lock(queueMutexM);
+    std::unique_lock<std::mutex> lock(queueMutexM);
+    queueCvM.wait(lock, [this] {
+        return !outputQueueM.empty() || !serviceThreadM.joinable();
+    });
     if (outputQueueM.empty())
         return "";
     std::string line = outputQueueM.front();

@@ -32,6 +32,8 @@
 #include <thread>
 #include <functional>
 
+#include <condition_variable>
+
 namespace fr
 {
 
@@ -88,6 +90,7 @@ private:
 
     std::queue<std::string> outputQueueM;
     std::mutex queueMutexM;
+    std::condition_variable queueCvM;
     std::thread serviceThreadM;
 };
 

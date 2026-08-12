@@ -109,6 +109,17 @@ int main()
         std::cout << "    Dialect: " << dialect << "\n";
         ok = fr_test::check(dialect == 3, "getDialect returns 3") && ok;
 
+        std::cout << "  Testing getNextLine log streaming...\n";
+        svc->setSweepInterval(dbName, 20000);
+        std::vector<std::string> logLines;
+        std::string logLine;
+        while (!(logLine = svc->getNextLine()).empty())
+        {
+            logLines.push_back(logLine);
+        }
+        std::cout << "    Fetched " << logLines.size() << " log lines.\n";
+        ok = fr_test::check(!logLines.empty(), "getNextLine streamed log lines successfully") && ok;
+
         std::cout << "  Disconnecting...\n";
         db->disconnect();
         std::cout << "    Disconnected successfully.\n";
