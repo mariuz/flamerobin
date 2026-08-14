@@ -8,6 +8,19 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.8.2</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>General Improvements & Bug Fixes</B></font><br>
+<br>
+- <b>Data Grid DATE / TIME / TIMESTAMP Display Fix (#675)</b>: Resolved an issue where date, time, and timestamp values in table data previews rendered as <code>00.00.0000</code> due to decoupled integer/component representations in the compatibility temporal classes. Implemented bidirectional encoding and decoding in <code>IBPP::Date</code>, <code>IBPP::Time</code>, and <code>IBPP::Timestamp</code>, and connected <code>DateColumnDef</code>, <code>TimeColumnDef</code>, and <code>TimestampColumnDef</code> directly to typed DAL statement getters (<code>getDate</code>, <code>getTime</code>, <code>getTimestamp</code>). Added comprehensive unit tests in <code>data_grid_date_test</code>.<br>
+- <b>Execute SQL Frame Data Tab Filter Search Bar Overlap Fix (#662)</b>: Fixed an issue where the real-time Filter search bar in the Execute SQL window's Data tab overlapped the grid headers and top rows on Windows (wxMSW). Resolved the layout sizer conflict in <code>ExecuteSqlFrame::do_layout()</code> so the search filter panel is cleanly positioned above the data grid across all platforms.<br>
+<br><br>
+
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.8.1</font><br>
 <br><br>
 

@@ -614,8 +614,11 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     notebook_1 = new wxNotebook(splitter_window_1, -1, wxDefaultPosition,
         wxDefaultSize, 0);
     notebook_pane_1 = new wxPanel(notebook_1, -1);
+    wxBoxSizer* sizerPane1 = new wxBoxSizer(wxHORIZONTAL);
     styled_text_ctrl_stats = new wxStyledTextCtrl(notebook_pane_1, wxID_ANY,
         wxDefaultPosition, wxDefaultSize, wxBORDER_THEME);
+    sizerPane1->Add(styled_text_ctrl_stats, 1, wxEXPAND);
+    notebook_pane_1->SetSizer(sizerPane1);
     stylerManager().attachObserver(this, false);
     stylerManager().assignGlobal(styled_text_ctrl_stats);
     styled_text_ctrl_stats->SetWrapMode(wxSTC_WRAP_WORD);
@@ -1006,16 +1009,6 @@ void ExecuteSqlFrame::set_properties()
 
 void ExecuteSqlFrame::do_layout()
 {
-    // log control notebook pane
-    wxBoxSizer* sizerPane1 = new wxBoxSizer(wxHORIZONTAL);
-    sizerPane1->Add(styled_text_ctrl_stats, 1, wxEXPAND);
-    notebook_pane_1->SetSizer(sizerPane1);
-
-    // data grid notebook pane
-    wxBoxSizer* sizerPane2 = new wxBoxSizer(wxHORIZONTAL);
-    sizerPane2->Add(grid_data, 1, wxEXPAND);
-    notebook_pane_2->SetSizer(sizerPane2);
-
     // splitter is only control in panel_contents
     wxBoxSizer* sizerContents = new wxBoxSizer(wxVERTICAL);
     sizerContents->Add(panel_env_banner, 0, wxEXPAND);

@@ -1046,6 +1046,17 @@ add_executable(privilege_test
 target_link_libraries(privilege_test ${wxWidgets_LIBRARIES})
 add_test(NAME privilege_test COMMAND privilege_test)
 
+add_executable(data_grid_date_test
+    ${SOURCEDIR}/gui/controls/DataGridDateTest.cpp
+    ${SOURCEDIR}/gui/controls/DataGridRowBuffer.cpp
+    ${SOURCEDIR}/core/FRInt128.cpp
+    ${SOURCEDIR}/core/FRDecimal.cpp
+    ${SOURCEDIR}/core/FRError.cpp
+    ${SOURCEDIR}/core/StringUtils.cpp
+)
+target_link_libraries(data_grid_date_test ${wxWidgets_LIBRARIES} ${FR_LIBS})
+add_test(NAME data_grid_date_test COMMAND data_grid_date_test)
+
 if (APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES
                 BUILD_WITH_INSTALL_RPATH FALSE

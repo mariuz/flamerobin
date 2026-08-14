@@ -30,6 +30,8 @@
 
 #include "engine/db/IStatement.h"
 
+#include <chrono>
+#include <ctime>
 #include <cstring>
 #include <string>
 #include <memory>
@@ -64,15 +66,46 @@ namespace IBPP {
     class Date {
     private:
         int yearM, monthM, dayM;
-        int rawVal;
+        static int encode(int y, int m, int d)
+        {
+            if (y == 0 && m == 0 && d == 0)
+                return 0;
+            if (y >= 0)
+                return y * 10000 + m * 100 + d;
+            else
+                return y * 10000 - (m * 100 + d);
+        }
+        static void decode(int val, int& y, int& m, int& d)
+        {
+            if (val == 0)
+            {
+                y = 0; m = 0; d = 0;
+                return;
+            }
+            if (val >= 0)
+            {
+                y = val / 10000;
+                int rem = val % 10000;
+                m = rem / 100;
+                d = rem % 100;
+            }
+            else
+            {
+                y = -((-val) / 10000);
+                int rem = (-val) % 10000;
+                m = rem / 100;
+                d = rem % 100;
+            }
+        }
     public:
-        Date() : yearM(0), monthM(0), dayM(0), rawVal(0) {}
-        Date(int val) : yearM(0), monthM(0), dayM(0), rawVal(val) {}
-        Date(int y, int m, int d) : yearM(y), monthM(m), dayM(d), rawVal(0) {}
-        operator int() const { return rawVal; }
-        int GetDate() const { return rawVal; }
+        Date() : yearM(0), monthM(0), dayM(0) {}
+        Date(int val) { decode(val, yearM, monthM, dayM); }
+        Date(int y, int m, int d) : yearM(y), monthM(m), dayM(d) {}
+        operator int() const { return encode(yearM, monthM, dayM); }
+        int GetDate() const { return encode(yearM, monthM, dayM); }
         void GetDate(int& y, int& m, int& d) const { y = yearM; m = monthM; d = dayM; }
         void SetDate(int y, int m, int d_val) { yearM = y; monthM = m; dayM = d_val; }
+        void SetDate(int val) { decode(val, yearM, monthM, dayM); }
         void Today()
         {
             time_t t = ::time(nullptr);
@@ -83,11 +116,25 @@ namespace IBPP {
         }
         void Add(int days)
         {
-            time_t t = ::time(nullptr) + days * 24 * 3600;
-            tm* lt = ::localtime(&t);
-            yearM = lt->tm_year + 1900;
-            monthM = lt->tm_mon + 1;
-            dayM = lt->tm_mday;
+            if (yearM == 0 && monthM == 0 && dayM == 0)
+                Today();
+            std::chrono::year_month_day ymd{std::chrono::year{yearM}, std::chrono::month{(unsigned)monthM}, std::chrono::day{(unsigned)dayM}};
+            if (ymd.ok())
+            {
+                auto sd = std::chrono::sys_days{ymd} + std::chrono::days{days};
+                std::chrono::year_month_day res{sd};
+                yearM = (int)res.year();
+                monthM = (unsigned)res.month();
+                dayM = (unsigned)res.day();
+            }
+            else
+            {
+                time_t t = ::time(nullptr) + days * 24 * 3600;
+                tm* lt = ::localtime(&t);
+                yearM = lt->tm_year + 1900;
+                monthM = lt->tm_mon + 1;
+                dayM = lt->tm_mday;
+            }
         }
         int Year() const { return yearM; }
         int Month() const { return monthM; }
@@ -98,8 +145,21 @@ namespace IBPP {
     private:
         int hr, mn, sc, ms;
         int tz;
-        int rawVal;
         bool fallback;
+        static int encode(int h, int m, int s, int f)
+        {
+            return (h * 3600 + m * 60 + s) * 10000 + f;
+        }
+        static void decode(int val, int& h, int& m, int& s, int& f)
+        {
+            if (val < 0) val = 0;
+            f = val % 10000;
+            int totalSec = val / 10000;
+            s = totalSec % 60;
+            int totalMin = totalSec / 60;
+            m = totalMin % 60;
+            h = totalMin / 60;
+        }
     public:
         enum TimezoneMode {
             tmNone = 0,
@@ -107,18 +167,19 @@ namespace IBPP {
             tmTimezoneGmtFallback = 2
         };
         enum { TZ_NONE = 0 };
-        Time() : hr(0), mn(0), sc(0), ms(0), tz(0), rawVal(0), fallback(false) {}
-        Time(int val) : hr(0), mn(0), sc(0), ms(0), tz(0), rawVal(val), fallback(false) {}
-        Time(int h, int m_val, int s, int f = 0, Timezone z = TZ_NONE) : hr(h), mn(m_val), sc(s), ms(f), tz(z), rawVal(0), fallback(false) {}
-        operator int() const { return rawVal; }
-        int GetTime() const { return rawVal; }
+        Time() : hr(0), mn(0), sc(0), ms(0), tz(0), fallback(false) {}
+        Time(int val) : tz(0), fallback(false) { decode(val, hr, mn, sc, ms); }
+        Time(int h, int m_val, int s, int f = 0, Timezone z = TZ_NONE) : hr(h), mn(m_val), sc(s), ms(f), tz(z), fallback(false) {}
+        operator int() const { return encode(hr, mn, sc, ms); }
+        int GetTime() const { return encode(hr, mn, sc, ms); }
         void GetTime(int& h, int& m, int& s, int& f) const { h = hr; m = mn; s = sc; f = ms; }
         void SetTime(TimezoneMode m, int h, int m_val, int s, int f, Timezone z, const void*) {
             hr = h; mn = m_val; sc = s; ms = f; tz = z;
             fallback = (m == tmTimezoneGmtFallback);
         }
         void SetTime(TimezoneMode m, int time, int timezone) {
-            rawVal = time; tz = timezone;
+            decode(time, hr, mn, sc, ms);
+            tz = timezone;
             fallback = (m == tmTimezoneGmtFallback);
         }
         Timezone GetTimezone() const { return tz; }
@@ -148,6 +209,7 @@ namespace IBPP {
         void GetTime(int& hour, int& minute, int& second, int& tenththousands) const { t.GetTime(hour, minute, second, tenththousands); }
         void SetDate(const Date& val) { d = val; }
         void SetDate(int y, int m, int d_val) { d.SetDate(y, m, d_val); }
+        void SetDate(int val) { d.SetDate(val); }
         void SetTime(Time::TimezoneMode m, int hour, int minute, int second, int tenththousands, Timezone tz, const void* tzName) {
             t.SetTime(m, hour, minute, second, tenththousands, tz, tzName);
         }
