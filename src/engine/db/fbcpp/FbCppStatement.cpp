@@ -185,23 +185,16 @@ void FbCppStatement::execute()
 bool FbCppStatement::fetch()
 {
     if (!statementM)
-    {
-        wxLogDebug("FbCppStatement::fetch() - no statement.");
         return false;
-    }
 
     if (!transactionPtrM || !transactionPtrM->isActive())
-    {
-        wxLogDebug("FbCppStatement::fetch() - transaction not active.");
         return false;
-    }
 
     if (firstRowFetchedM.has_value())
     {
         bool res = *firstRowFetchedM;
         firstRowFetchedM.reset();
         rowAvailableM = res;
-        wxLogDebug("FbCppStatement::fetch() returning pre-fetched row: %d", (int)res);
         return res;
     }
 
@@ -209,18 +202,10 @@ bool FbCppStatement::fetch()
         return false;
 
     try {
-        wxLogDebug("FbCppStatement::fetch() calling library fetchNext().");
         bool res = statementM->fetchNext();
         rowAvailableM = res;
         if (!res)
-        {
-            wxLogDebug("FbCppStatement::fetch() - library EOF.");
             eofReachedM = true;
-        }
-        else
-        {
-            wxLogDebug("FbCppStatement::fetch() - library row fetched.");
-        }
         return res;
     } catch (const std::exception& e) {
         wxLogDebug("FbCppStatement::fetch() failed: %s", e.what());

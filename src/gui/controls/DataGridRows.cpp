@@ -1993,9 +1993,11 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     else
     {
         wxString val = wxString(statement->getString(col - 1).c_str(), *converter);
-        size_t trimLen = val.Strip().Length();
         if (val.Length() > size_t(charSizeM))
+        {
+            size_t trimLen = val.Strip().Length();
             val.Truncate(trimLen > size_t(charSizeM) ? trimLen : charSizeM);
+        }
         buffer->setString(indexM, val);
     }
 }
@@ -2052,7 +2054,10 @@ ResultsetColumnDef* DataGridRows::getColumnDef(unsigned col)
 void DataGridRows::addRow(DataGridRowBuffer* buffer)
 {
     if (buffersM.size() == buffersM.capacity())
-        buffersM.reserve(buffersM.capacity() + 1024);
+    {
+        size_t newCap = buffersM.capacity() < 1024 ? 1024 : buffersM.capacity() * 2;
+        buffersM.reserve(newCap);
+    }
     buffersM.push_back(buffer);
 }
 

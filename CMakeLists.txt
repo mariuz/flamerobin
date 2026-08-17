@@ -1057,6 +1057,17 @@ add_executable(data_grid_date_test
 target_link_libraries(data_grid_date_test ${wxWidgets_LIBRARIES} ${FR_LIBS})
 add_test(NAME data_grid_date_test COMMAND data_grid_date_test)
 
+add_executable(data_grid_fetch_test
+    ${SOURCEDIR}/gui/controls/DataGridFetchTest.cpp
+    ${SOURCEDIR}/gui/controls/DataGridRowBuffer.cpp
+    ${SOURCEDIR}/core/FRInt128.cpp
+    ${SOURCEDIR}/core/FRDecimal.cpp
+    ${SOURCEDIR}/core/FRError.cpp
+    ${SOURCEDIR}/core/StringUtils.cpp
+)
+target_link_libraries(data_grid_fetch_test ${wxWidgets_LIBRARIES} ${FR_LIBS})
+add_test(NAME data_grid_fetch_test COMMAND data_grid_fetch_test)
+
 if (APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES
                 BUILD_WITH_INSTALL_RPATH FALSE

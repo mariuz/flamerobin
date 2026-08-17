@@ -1455,10 +1455,15 @@ void DataGrid::OnIdle(wxIdleEvent& event)
     if (table->needsMoreRowsFetched())
     {
         table->fetch();
-        if (config().get("gridShowMultilineText", false))
-            AutoSizeRows(false);
         if (table->needsMoreRowsFetched())
+        {
             event.RequestMore();
+        }
+        else
+        {
+            if (config().get("gridShowMultilineText", false))
+                AutoSizeRows(false);
+        }
         AdjustScrollbars();
     }
 }

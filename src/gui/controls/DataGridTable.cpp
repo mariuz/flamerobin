@@ -144,8 +144,9 @@ void DataGridTable::fetch()
     // fetch the first 100 rows no matter how long it takes
     unsigned oldRows = rowsM.getRowCount();
     bool initial = oldRows == 0;
-    // fetch more rows until maxRowToFetchM reached or 100 ms elapsed
+    // fetch more rows until maxRowToFetchM reached or 50 ms elapsed
     wxLongLong startms = ::wxGetLocalTimeMillis();
+    unsigned rowCountInBatch = 0;
     do
     {
         try
@@ -171,8 +172,9 @@ void DataGridTable::fetch()
             break;
 
         rowsM.addRow(statementDALM);
+        ++rowCountInBatch;
 
-        if (!initial && (::wxGetLocalTimeMillis() - startms > 100))
+        if (!initial && (rowCountInBatch % 64 == 0) && (::wxGetLocalTimeMillis() - startms > 50))
             break;
     }
     while ((fetchAllRowsM && !initial) || rowsM.getRowCount() < maxRowToFetchM);
