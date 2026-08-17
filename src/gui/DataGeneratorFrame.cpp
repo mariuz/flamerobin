@@ -255,6 +255,7 @@ public:
 };
 
 GeneratorSettings::GeneratorSettings()
+    : valueType(vtRange), randomValues(true), nullPercent(0)
 {
 }
 
@@ -577,6 +578,9 @@ bool DataGeneratorFrame::loadColumns(const wxString& tableName, wxChoice* c)
 // prehaps using values from config() would be nice
 wxString getDefaultRange(Domain *d)
 {
+    if (!d)
+        return wxEmptyString;
+
     wxString dt, size, scale;
     d->getDatatypeParts(dt, size, scale);
 
@@ -584,7 +588,8 @@ wxString getDefaultRange(Domain *d)
         return "0-100";
 
     if (   dt == "Numeric" || dt == "Integer" || dt == "Bigint"
-        || dt == "Decimal" || dt == "Double precision")
+        || dt == "Decimal" || dt == "Double precision"
+        || dt == "Int128" || dt == "Decfloat16" || dt == "Decfloat34")
     {
         return "0-2000000";
     }
@@ -596,19 +601,19 @@ wxString getDefaultRange(Domain *d)
 
     if (dt == "Char" || dt == "Varchar")
     {
-        if (size == "1")
-            return "[az,AZ]";
-        else
-            return size + "[az,AZ]";
+        long sz = 1;
+        if (size.ToLong(&sz) && sz > 1)
+            return wxString::Format("%ld[az,AZ]", sz);
+        return "[az,AZ]";
     }
 
-    if (dt == "Timestamp")
-        return "01.01.1980 00:00:00-31.12.2005 23:59:59";
+    if (dt == "Timestamp" || dt == "Timestamp with time zone")
+        return "01.01.1980 00:00:00-31.12.2025 23:59:59";
 
     if (dt == "Date")
-        return "01.01.1980-31.12.2005";
+        return "01.01.1980-31.12.2025";
 
-    if (dt == "Time")
+    if (dt == "Time" || dt == "Time with time zone")
         return "00:00:00-23:59:59";
 
     return wxEmptyString;
@@ -991,41 +996,54 @@ void DataGeneratorFrame::OnSaveButtonClick(wxCommandEvent& WXUNUSED(event))
 
 void DataGeneratorFrame::OnCopyButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    MetadataItem *m = mainTree->getMetadataItem(mainTree->GetSelection());
-    Column *col = dynamic_cast<Column *>(m);
-    if (!col)   // this should never happen as the Copy button should not
-        return; // be visible if column is not selected
-    Table *tab = col->getTable();
-    if (!tab)
-        throw FRError(_("Table not found."));
-
-    // copy settings
-    wxString name = copyChoice->GetStringSelection() + "." +
-        copyColumnChoice->GetStringSelection();
-    std::map<wxString, GeneratorSettings *>::iterator it =
-        settingsM.find(name);
-    if (it == settingsM.end())  // no settings
+    try
     {
-        showWarningDialog(this, _("Nothing to copy"),
-            _("That column doesn't have any settings defined."),
+        MetadataItem *m = mainTree->getMetadataItem(mainTree->GetSelection());
+        Column *col = dynamic_cast<Column *>(m);
+        if (!col)   // this should never happen as the Copy button should not
+            return; // be visible if column is not selected
+        Table *tab = col->getTable();
+        if (!tab)
+            throw FRError(_("Table not found."));
+
+        // copy settings
+        wxString name = copyChoice->GetStringSelection() + "." +
+            copyColumnChoice->GetStringSelection();
+        std::map<wxString, GeneratorSettings *>::iterator it =
+            settingsM.find(name);
+        if (it == settingsM.end())  // no settings
+        {
+            showWarningDialog(this, _("Nothing to copy"),
+                _("That column doesn't have any settings defined."),
+                AdvancedMessageDialogButtonsOk());
+            return;
+        }
+
+        GeneratorSettings *n = new GeneratorSettings((*it).second);
+
+        wxString c = tab->getQuotedName() + "." + col->getQuotedName();
+        it = settingsM.find(c);
+        if (it == settingsM.end())  // this should not happen either, but still
+            settingsM.insert(std::pair<wxString, GeneratorSettings *>(c, n));
+        else
+        {
+            delete (*it).second;
+            (*it).second = n;
+        }
+
+        // update the current node
+        loadSetting(mainTree->GetSelection());
+    }
+    catch (const FRError& e)
+    {
+        showErrorDialog(this, _("Data Generator Error"), e.what(),
             AdvancedMessageDialogButtonsOk());
-        return;
     }
-
-    GeneratorSettings *n = new GeneratorSettings((*it).second);
-
-    wxString c = tab->getQuotedName() + "." + col->getQuotedName();
-    it = settingsM.find(c);
-    if (it == settingsM.end())  // this should not happen either, but still
-        settingsM.insert(std::pair<wxString, GeneratorSettings *>(c, n));
-    else
+    catch (const std::exception& e)
     {
-        delete (*it).second;
-        (*it).second = n;
+        showErrorDialog(this, _("Error"), wxString::FromUTF8(e.what()),
+            AdvancedMessageDialogButtonsOk());
     }
-
-    // update the current node
-    loadSetting(mainTree->GetSelection());
 }
 
 void DataGeneratorFrame::OnFileButtonClick(wxCommandEvent& WXUNUSED(event))
@@ -1046,12 +1064,39 @@ void DataGeneratorFrame::OnGenerateButtonClick(wxCommandEvent& WXUNUSED(event))
 
     std::list<Table *> order;
     if (sortTables(order))
-        generateData(order);
+    {
+        if (order.empty())
+        {
+            showInformationDialog(this, _("Nothing to generate"),
+                _("No tables configured with records to create (> 0)."),
+                AdvancedMessageDialogButtonsOk());
+            return;
+        }
 
-    // perhaps add a comment like: "A total of XYZ records were inserted."
-    showInformationDialog(this, _("Generator done"),
-        _("Data generation completed."),
-        AdvancedMessageDialogButtonsOk());
+        try
+        {
+            generateData(order);
+            showInformationDialog(this, _("Generator done"),
+                _("Data generation completed successfully."),
+                AdvancedMessageDialogButtonsOk());
+        }
+        catch (const FRError& e)
+        {
+            showErrorDialog(this, _("Data Generator Error"), e.what(),
+                AdvancedMessageDialogButtonsOk());
+        }
+        catch (const std::exception& e)
+        {
+            showErrorDialog(this, _("Database Error"), wxString::FromUTF8(e.what()),
+                AdvancedMessageDialogButtonsOk());
+        }
+        catch (...)
+        {
+            showErrorDialog(this, _("Error"),
+                _("An unexpected error occurred during data generation."),
+                AdvancedMessageDialogButtonsOk());
+        }
+    }
 }
 
 bool DataGeneratorFrame::sortTables(std::list<Table *>& order)
@@ -1355,6 +1400,19 @@ void setFromOther(fr::IStatementPtr st, int param,
 void DataGeneratorFrame::setString(fr::IStatementPtr st, int param,
     GeneratorSettings* gs, int recNo)
 {
+    if (gs->range.IsEmpty())
+    {
+        st->setString(param, "");
+        return;
+    }
+
+    // If mask does not contain brackets [], treat it as a literal string
+    if (gs->range.find("[") == wxString::npos)
+    {
+        st->setString(param, wx2std(gs->range, databaseM->getCharsetConverter()));
+        return;
+    }
+
     wxString value;
     long chars = 1;
     size_t start = 0;
@@ -1368,7 +1426,7 @@ void DataGeneratorFrame::setString(fr::IStatementPtr st, int param,
             for (int i = 0; i < chars; i++)
             {
                 value += getCharFromRange(gs->range.Mid(start+1,
-                    p-start-1), gs->randomValues, recNo, i, chars);
+                    p-start-1), gs->randomValues, recNo, i, (int)chars);
             }
             start = p+1;
             chars = 1;
@@ -1407,6 +1465,10 @@ void setNumber(fr::IStatementPtr st, int param, GeneratorSettings* gs, int recNo
         else
             start = gs->range.Length(); // exit on next loop
 
+        one.Trim(true).Trim(false);
+        if (one.IsEmpty())
+            continue;
+
         p = one.find("-");
         if (p == wxString::npos)
         {
@@ -1424,6 +1486,17 @@ void setNumber(fr::IStatementPtr st, int param, GeneratorSettings* gs, int recNo
             ranges.push_back(std::pair<long,long>(l1, l2));
             rangesize += (l2-l1+1);
         }
+    }
+
+    if (ranges.empty() || rangesize <= 0)
+    {
+        if constexpr (std::is_same_v<T, float> || std::is_same_v<T, double>)
+            st->setDouble(param, 0.0);
+        else if constexpr (std::is_same_v<T, int64_t>)
+            st->setInt64(param, 0);
+        else
+            st->setInt32(param, 0);
+        return;
     }
 
     long toget = (gs->randomValues ?
@@ -1470,8 +1543,12 @@ void setDatetime(fr::IStatementPtr st, int param, GeneratorSettings* gs,
         else
             start = gs->range.Length(); // exit on next loop
 
+        one.Trim(true).Trim(false);
+        if (one.IsEmpty())
+            continue;
+
         // convert first value
-        int date, time;
+        int date = 0, time = 0;
         if ((dt == fr::ColumnType::Date || dt == fr::ColumnType::Timestamp || dt == fr::ColumnType::TimestampTz))
             str2date(one.Mid(0,10), date);
         if (dt == fr::ColumnType::Time || dt == fr::ColumnType::TimeTz)
@@ -1495,7 +1572,7 @@ void setDatetime(fr::IStatementPtr st, int param, GeneratorSettings* gs,
         }
         else    // range, convert second date/time
         {
-            int date2, time2;
+            int date2 = 0, time2 = 0;
             if (dt == fr::ColumnType::Date)
                 str2date(one.Mid(11,10), date2);
             if (dt == fr::ColumnType::Timestamp || dt == fr::ColumnType::TimestampTz)
@@ -1516,6 +1593,12 @@ void setDatetime(fr::IStatementPtr st, int param, GeneratorSettings* gs,
                 timeRangesize += ((time2-time) / 10000 + 1);
             }
         }
+    }
+
+    if (dateRanges.empty() && timeRanges.empty())
+    {
+        st->setNull(param);
+        return;
     }
 
     int dateToGet, timeToGet;
@@ -1591,33 +1674,38 @@ void DataGeneratorFrame::setParam(fr::IStatementPtr st, int param,
         {
             case fr::ColumnType::Boolean:
                 setFromOther(st, param, gs, recNo, databaseM);
-  break;
+                break;
+            case fr::ColumnType::Char:
             case fr::ColumnType::Varchar:
                 setFromOther(st, param, gs, recNo, databaseM);
-  break;
+                break;
             case fr::ColumnType::Integer:
+            case fr::ColumnType::Numeric:
                 setFromOther(st, param, gs, recNo, databaseM);
-      break;
+                break;
             case fr::ColumnType::BigInt:
+            case fr::ColumnType::Int128:
                 setFromOther(st, param, gs, recNo, databaseM);
-      break;
+                break;
             case fr::ColumnType::Float:
                 setFromOther(st, param, gs, recNo, databaseM);
-        break;
+                break;
             case fr::ColumnType::Double:
+            case fr::ColumnType::Decfloat16:
+            case fr::ColumnType::Decfloat34:
                 setFromOther(st, param, gs, recNo, databaseM);
-       break;
+                break;
             case fr::ColumnType::Date:
                 setFromOther(st, param, gs, recNo, databaseM);
-               break;
+                break;
             case fr::ColumnType::Time:
             case fr::ColumnType::TimeTz:
                 setFromOther(st, param, gs, recNo, databaseM);
-               break;
+                break;
             case fr::ColumnType::Timestamp:
             case fr::ColumnType::TimestampTz:
                 setFromOther(st, param, gs, recNo, databaseM);
-               break;
+                break;
             case fr::ColumnType::Blob:
                 throw FRError(_("Blob datatype not supported"));
             default:
@@ -1631,16 +1719,31 @@ void DataGeneratorFrame::setParam(fr::IStatementPtr st, int param,
         switch (st->getParameterType(param))
         {
             case fr::ColumnType::Boolean:
-                setString(st, param, gs, recNo);          break;
+            {
+                bool b = false;
+                if (gs->range.CmpNoCase("true") == 0 || gs->range == "1")
+                    b = true;
+                else if (gs->range.CmpNoCase("false") == 0 || gs->range == "0")
+                    b = false;
+                else
+                    b = gs->randomValues ? (frRandom(2) == 1) : ((recNo % 2) == 1);
+                st->setBool(param, b);
+                break;
+            }
+            case fr::ColumnType::Char:
             case fr::ColumnType::Varchar:
                 setString(st, param, gs, recNo);          break;
             case fr::ColumnType::Integer:
                 setNumber<int32_t>(st, param, gs, recNo); break;
             case fr::ColumnType::BigInt:
+            case fr::ColumnType::Numeric:
+            case fr::ColumnType::Int128:
                 setNumber<int64_t>(st, param, gs, recNo); break;
             case fr::ColumnType::Float:
                 setNumber<float>  (st, param, gs, recNo); break;
             case fr::ColumnType::Double:
+            case fr::ColumnType::Decfloat16:
+            case fr::ColumnType::Decfloat34:
                 setNumber<double> (st, param, gs, recNo); break;
             case fr::ColumnType::Date:
             case fr::ColumnType::Time:
@@ -1670,61 +1773,76 @@ void DataGeneratorFrame::generateData(std::list<Table *>& order)
     fr::ITransactionPtr tr = databaseM->getDALDatabase()->createTransaction();
     tr->start();
 
-    for (std::list<Table *>::iterator it = order.begin();
-        it != order.end(); ++it)
+    try
     {
-        pd.setProgressMessage((*it)->getName_(), 1);
-        pd.stepProgress();
-
-        std::map<wxString, int>::iterator i2 =
-            tableRecordsM.find((*it)->getQuotedName());
-        int records = (*i2).second;
-
-        pd.initProgress(wxString::Format(_("Inserting %d records."), records),
-            records, 0, 2);
-
-        // collect columns + create insert statement
-        wxString ins = "INSERT INTO " + (*it)->getQuotedName()
-            + " (";
-        wxString params(") VALUES (");
-        (*it)->ensureChildrenLoaded();
-        bool first = true;
-        std::vector<GeneratorSettings *> colSet;
-        for (ColumnPtrs::iterator col = (*it)->begin();
-            col != (*it)->end(); ++col)
+        for (std::list<Table *>::iterator it = order.begin();
+            it != order.end(); ++it)
         {
-            GeneratorSettings *gs = getSettings((*col).get());   // load or create
-            if (gs->valueType == GeneratorSettings::vtSkip)
+            pd.setProgressMessage((*it)->getName_(), 1);
+            pd.stepProgress();
+
+            std::map<wxString, int>::iterator i2 =
+                tableRecordsM.find((*it)->getQuotedName());
+            if (i2 == tableRecordsM.end())
+                continue;
+            int records = (*i2).second;
+            if (records <= 0)
                 continue;
 
-            if (first)
-                first = false;
-            else
+            pd.initProgress(wxString::Format(_("Inserting %d records."), records),
+                records, 0, 2);
+
+            // collect columns + create insert statement
+            wxString ins = "INSERT INTO " + (*it)->getQuotedName()
+                + " (";
+            wxString params(") VALUES (");
+            (*it)->ensureChildrenLoaded();
+            bool first = true;
+            std::vector<GeneratorSettings *> colSet;
+            for (ColumnPtrs::iterator col = (*it)->begin();
+                col != (*it)->end(); ++col)
             {
-                ins += ", ";
-                params += ",";
+                GeneratorSettings *gs = getSettings((*col).get());   // load or create
+                if (gs->valueType == GeneratorSettings::vtSkip)
+                    continue;
+
+                if (first)
+                    first = false;
+                else
+                {
+                    ins += ", ";
+                    params += ",";
+                }
+                ins += (*col)->getQuotedName();
+                params += "?";
+                colSet.push_back(gs);
             }
-            ins += (*col)->getQuotedName();
-            params += "?";
-            colSet.push_back(gs);
-        }
-        if (first)  // no columns
-            continue;
+            if (first)  // no columns
+                continue;
 
-        fr::IStatementPtr st = databaseM->getDALDatabase()->createStatement(tr);
-        st->prepare(wx2std(ins + params + ")", databaseM->getCharsetConverter()));
+            fr::IStatementPtr st = databaseM->getDALDatabase()->createStatement(tr);
+            st->prepare(wx2std(ins + params + ")", databaseM->getCharsetConverter()));
 
-        for (int i = 0; i < records; i++)
-        {
-            if (pd.isCanceled())
-                return;
-            pd.stepProgress(1, 2);
-            for (int p = 0; p < st->getParameterCount(); ++p)
-                setParam(st, p, colSet[p], i);
-            st->execute();
+            for (int i = 0; i < records; i++)
+            {
+                if (pd.isCanceled())
+                {
+                    tr->rollback();
+                    return;
+                }
+                pd.stepProgress(1, 2);
+                for (int p = 0; p < (int)colSet.size() && p < st->getParameterCount(); ++p)
+                    setParam(st, p, colSet[p], i);
+                st->execute();
+            }
         }
+
+        tr->commit();
     }
-
-    tr->commit();
+    catch (...)
+    {
+        try { tr->rollback(); } catch (...) {}
+        throw;
+    }
 }
 
