@@ -1,4 +1,4 @@
 [templateInfo]
-menuCaption=Create selectable stored procedure
+menuCaption=Create selectable stored procedure for {%object_name%}
 menuPosition=50
 matchesType=^TABLE$|^VIEW$

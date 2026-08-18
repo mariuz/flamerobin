@@ -1,5 +1,5 @@
 [templateInfo]
-menuCaption=Create selectable EXECUTE BLOCK statement
+menuCaption=Create selectable EXECUTE BLOCK statement for {%object_name%}
 menuPosition=60
 matchesType=^TABLE$|^VIEW$
 
