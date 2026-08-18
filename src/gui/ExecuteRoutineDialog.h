@@ -52,10 +52,15 @@ private:
     wxGrid* grid_results;
     wxButton* button_execute;
     wxButton* button_open_editor;
+    wxButton* button_close;
 
     void buildParameterInputs(wxPanel* parentPanel, wxBoxSizer* targetSizer);
     void OnExecuteClick(wxCommandEvent& event);
     void OnOpenEditorClick(wxCommandEvent& event);
+    void OnCloseButtonClick(wxCommandEvent& event);
+    void OnCloseWindow(wxCloseEvent& event);
+
+    virtual const wxString getName() const override;
 
     DECLARE_EVENT_TABLE()
 public:

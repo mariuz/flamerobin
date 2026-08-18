@@ -46,6 +46,9 @@ enum {
 BEGIN_EVENT_TABLE(ExecuteRoutineDialog, BaseDialog)
     EVT_BUTTON(ID_button_execute_routine, ExecuteRoutineDialog::OnExecuteClick)
     EVT_BUTTON(ID_button_open_in_editor, ExecuteRoutineDialog::OnOpenEditorClick)
+    EVT_BUTTON(wxID_CLOSE, ExecuteRoutineDialog::OnCloseButtonClick)
+    EVT_BUTTON(wxID_CANCEL, ExecuteRoutineDialog::OnCloseButtonClick)
+    EVT_CLOSE(ExecuteRoutineDialog::OnCloseWindow)
 END_EVENT_TABLE()
 
 ExecuteRoutineDialog::ExecuteRoutineDialog(wxWindow* parent, MetadataItem* routineItem)
@@ -57,40 +60,65 @@ ExecuteRoutineDialog::ExecuteRoutineDialog(wxWindow* parent, MetadataItem* routi
     if (routineM)
         SetTitle(wxString::Format(_("Interactive Routine Executor - %s"), routineM->getName_().c_str()));
 
-    wxBoxSizer* sizerMain = new wxBoxSizer(wxVERTICAL);
+    wxPanel* panel = getControlsPanel();
+
+    wxBoxSizer* sizerControls = new wxBoxSizer(wxVERTICAL);
 
     // Input parameters panel
-    wxStaticBoxSizer* sizerParamsBox = new wxStaticBoxSizer(wxVERTICAL, this, _("Input Parameters"));
-    wxPanel* panelParams = new wxPanel(this, -1);
+    wxStaticBoxSizer* sizerParamsBox = new wxStaticBoxSizer(wxVERTICAL, panel, _("Input Parameters"));
+    wxPanel* panelParams = new wxPanel(panel, -1);
     wxBoxSizer* sizerParams = new wxBoxSizer(wxVERTICAL);
 
     buildParameterInputs(panelParams, sizerParams);
     panelParams->SetSizer(sizerParams);
     sizerParamsBox->Add(panelParams, 1, wxEXPAND | wxALL, 4);
 
-    sizerMain->Add(sizerParamsBox, 0, wxEXPAND | wxALL, 6);
+    sizerControls->Add(sizerParamsBox, 0, wxEXPAND | wxALL, 6);
 
     // Action buttons
     wxBoxSizer* sizerBtns = new wxBoxSizer(wxHORIZONTAL);
-    button_execute = new wxButton(this, ID_button_execute_routine, _("Execute Routine"));
-    button_open_editor = new wxButton(this, ID_button_open_in_editor, _("Open in SQL Editor"));
+    button_execute = new wxButton(panel, ID_button_execute_routine, _("Execute Routine"));
+    button_open_editor = new wxButton(panel, ID_button_open_in_editor, _("Open in SQL Editor"));
 
     sizerBtns->Add(button_execute, 0, wxRIGHT, 6);
     sizerBtns->Add(button_open_editor, 0);
-    sizerMain->Add(sizerBtns, 0, wxLEFT | wxRIGHT | wxBOTTOM | wxALIGN_RIGHT, 6);
+    sizerControls->Add(sizerBtns, 0, wxLEFT | wxRIGHT | wxBOTTOM | wxALIGN_RIGHT, 6);
 
     // Output Result Grid
-    sizerMain->Add(new wxStaticText(this, -1, _("Execution Result Set:")), 0, wxLEFT | wxTOP, 6);
-    grid_results = new wxGrid(this, -1, wxDefaultPosition, wxSize(-1, 200));
+    sizerControls->Add(new wxStaticText(panel, -1, _("Execution Result Set:")), 0, wxLEFT | wxTOP, 6);
+    grid_results = new wxGrid(panel, -1, wxDefaultPosition, wxSize(-1, 220));
     grid_results->CreateGrid(0, 0);
     grid_results->EnableEditing(false);
-    sizerMain->Add(grid_results, 1, wxEXPAND | wxALL, 6);
+    grid_results->SetRowLabelSize(30);
+    grid_results->SetColLabelSize(24);
+    sizerControls->Add(grid_results, 1, wxEXPAND | wxALL, 6);
 
-    wxSizer* sizerButtons = CreateButtonSizer(wxCLOSE);
-    sizerMain->Add(sizerButtons, 0, wxEXPAND | wxALL, 6);
+    button_close = new wxButton(panel, wxID_CANCEL, _("&Close"));
+    wxSizer* sizerButtons = styleguide().createButtonSizer(nullptr, button_close);
 
-    SetSizerAndFit(sizerMain);
-    SetSize(wxSize(680, 580));
+    layoutSizers(sizerControls, sizerButtons, true);
+    SetSize(wxSize(720, 580));
+}
+
+const wxString ExecuteRoutineDialog::getName() const
+{
+    return "ExecuteRoutineDialog";
+}
+
+void ExecuteRoutineDialog::OnCloseButtonClick(wxCommandEvent& WXUNUSED(event))
+{
+    if (IsModal())
+        EndModal(wxID_CANCEL);
+    else
+        Close();
+}
+
+void ExecuteRoutineDialog::OnCloseWindow(wxCloseEvent& WXUNUSED(event))
+{
+    if (IsModal())
+        EndModal(wxID_CANCEL);
+    else
+        Destroy();
 }
 
 ExecuteRoutineDialog::~ExecuteRoutineDialog()
@@ -194,7 +222,55 @@ void ExecuteRoutineDialog::OnExecuteClick(wxCommandEvent& WXUNUSED(event))
         }
     }
 
-    wxString sql = RoutineHelper::getRoutineExecutionTemplate(routineM);
+    Procedure* p = dynamic_cast<Procedure*>(routineM);
+    Function* f = dynamic_cast<Function*>(routineM);
+
+    wxString sql;
+    if (p)
+    {
+        p->ensureChildrenLoaded();
+        wxString outCols;
+        for (auto it = p->begin(); it != p->end(); ++it)
+        {
+            Parameter* param = (*it).get();
+            if (param && param->isOutputParameter())
+            {
+                if (!outCols.IsEmpty()) outCols << ", ";
+                outCols << param->getQuotedName();
+            }
+        }
+
+        wxString inPlaceholders;
+        for (size_t i = 0; i < paramCtrlsM.size(); ++i)
+        {
+            if (!inPlaceholders.IsEmpty()) inPlaceholders << ", ";
+            inPlaceholders << "?";
+        }
+
+        if (!outCols.IsEmpty())
+        {
+            sql << "SELECT " << outCols << "\nFROM " << p->getQuotedName();
+            if (!inPlaceholders.IsEmpty())
+                sql << "(" << inPlaceholders << ")";
+        }
+        else
+        {
+            sql << "EXECUTE PROCEDURE " << p->getQuotedName();
+            if (!inPlaceholders.IsEmpty())
+                sql << "(" << inPlaceholders << ")";
+        }
+    }
+    else if (f)
+    {
+        wxString inPlaceholders;
+        for (size_t i = 0; i < paramCtrlsM.size(); ++i)
+        {
+            if (!inPlaceholders.IsEmpty()) inPlaceholders << ", ";
+            inPlaceholders << "?";
+        }
+        sql << "SELECT " << f->getQuotedName() << "(" << inPlaceholders << ")\nFROM RDB$DATABASE";
+    }
+
     if (sql.IsEmpty()) return;
 
     try
@@ -232,28 +308,39 @@ void ExecuteRoutineDialog::OnExecuteClick(wxCommandEvent& WXUNUSED(event))
             grid_results->DeleteCols(0, grid_results->GetNumberCols());
 
         int colCount = st->getColumnCount();
-        grid_results->AppendCols(colCount);
-        for (int c = 0; c < colCount; ++c)
+        if (colCount > 0)
         {
-            grid_results->SetColLabelValue(c, wxString::FromUTF8(st->getColumnName(c).c_str()));
-        }
-
-        int rowIdx = 0;
-        while (st->fetch())
-        {
-            grid_results->AppendRows(1);
+            grid_results->AppendCols(colCount);
             for (int c = 0; c < colCount; ++c)
             {
-                if (st->isNull(c))
-                    grid_results->SetCellValue(rowIdx, c, "<NULL>");
-                else
-                    grid_results->SetCellValue(rowIdx, c, wxString::FromUTF8(st->getString(c).c_str()));
+                grid_results->SetColLabelValue(c, wxString::FromUTF8(st->getColumnName(c).c_str()));
             }
-            rowIdx++;
+
+            int rowIdx = 0;
+            while (st->fetch())
+            {
+                grid_results->AppendRows(1);
+                for (int c = 0; c < colCount; ++c)
+                {
+                    if (st->isNull(c))
+                        grid_results->SetCellValue(rowIdx, c, "<NULL>");
+                    else
+                        grid_results->SetCellValue(rowIdx, c, wxString::FromUTF8(st->getString(c).c_str()));
+                }
+                rowIdx++;
+            }
+            grid_results->AutoSizeColumns();
+        }
+        else
+        {
+            grid_results->AppendCols(1);
+            grid_results->SetColLabelValue(0, _("Status"));
+            grid_results->AppendRows(1);
+            grid_results->SetCellValue(0, 0, _("Procedure executed successfully."));
+            grid_results->AutoSizeColumns();
         }
 
         tr->commit();
-        grid_results->AutoSizeColumns();
     }
     catch (const std::exception& e)
     {
@@ -271,6 +358,9 @@ void ExecuteRoutineDialog::OnOpenEditorClick(wxCommandEvent& WXUNUSED(event))
         ExecuteSqlFrame* eff = new ExecuteSqlFrame(GetParent(), -1, _("Routine Execution"), databasePtrM);
         eff->setSql(sql);
         eff->Show(true);
-        Close();
+        if (IsModal())
+            EndModal(wxID_OK);
+        else
+            Close();
     }
 }

@@ -173,7 +173,10 @@ void FbCppStatement::execute()
         if (getColumnCount() > 0)
         {
             firstRowFetchedM = hasRow;
-            eofReachedM = !hasRow;
+            if (getType() == StatementType::ExecProcedure)
+                eofReachedM = true;
+            else
+                eofReachedM = !hasRow;
             wxLogDebug("FbCppStatement::execute() - statement with output. hasRow: %d", (int)hasRow);
         }
     } catch (const std::exception& e) {
@@ -1194,7 +1197,11 @@ std::string FbCppStatement::preprocessSql(const std::string& sql)
         }
     }
 
-    return sProcessedSQL.str();
+    std::string res = sProcessedSQL.str();
+    while (!res.empty() && (std::isspace(static_cast<unsigned char>(res.back())) || res.back() == ';')) {
+        res.pop_back();
+    }
+    return res;
 }
 
 } // namespace fr
