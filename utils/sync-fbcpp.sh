@@ -29,14 +29,14 @@ echo "Re-applying FlameRobin patches to temporary directory..."
 
 # 0. Enable inheritance and extensions (remove final and change private to protected)
 for f in Attachment.h Blob.h Statement.h Transaction.h; do
-    perl -i -pe 's/class ([A-Za-z]+) final/class $1/g' "$PATCH_SRC_DIR/$f"
+    perl -i -pe 's/class (FB_CPP_EXPORT\s+)?([A-Za-z]+)\s+final/class $1$2/g' "$PATCH_SRC_DIR/$f"
     perl -i -pe 's/private:/protected:/g' "$PATCH_SRC_DIR/$f"
 done
 
 # 1. Transaction.h - Add Client constructor and start()
 perl -i -pe 's/#include <span>/#include <cstdint>\n#include <span>/g' "$PATCH_SRC_DIR/Transaction.h"
 perl -i -0777 -pe 's/namespace fbcpp\n\{\n\tclass Attachment;/namespace fbcpp\n{\n\tclass Attachment;\n\n\tnamespace impl\n\t{\n\t\tclass StatusWrapper;\n\t}/g' "$PATCH_SRC_DIR/Transaction.h"
-perl -i -0777 -pe 's/class Transaction\n\t\{/class Transaction\n\t\{\n\tpublic:\n\t\texplicit Transaction(Client& client);/g' "$PATCH_SRC_DIR/Transaction.h"
+perl -i -0777 -pe 's/class (FB_CPP_EXPORT\s+)?Transaction\n\t\{/class $1Transaction\n\t\{\n\tpublic:\n\t\texplicit Transaction(Client& client);/g' "$PATCH_SRC_DIR/Transaction.h"
 perl -i -0777 -pe 's/void rollbackRetaining\(\);\n\n\tprotected:/void rollbackRetaining();\n\n\t\tvoid start(Attachment& attachment, const TransactionOptions& options = {});\n\n\tprotected:/g' "$PATCH_SRC_DIR/Transaction.h"
 
 # 2. Transaction.cpp - Implementations
@@ -51,7 +51,7 @@ perl -i -0777 -pe 's/void start\(Attachment& attachment, const TransactionOption
 perl -i -0777 -pe 's/enum class StatementType : unsigned/#ifdef DELETE\n#undef DELETE\n#endif\n\n\tenum class StatementType : unsigned/g' "$PATCH_SRC_DIR/Statement.h"
 perl -i -pe 's/(\t+)void free\(\);/$1void free();\n$1void closeCursor();/g' "$PATCH_SRC_DIR/Statement.h"
 perl -i -pe 's/if \(value.length\(\) > descriptor.length\)/if (value.length() > descriptor.length - sizeof(std::uint16_t))/g' "$PATCH_SRC_DIR/Statement.h"
-perl -i -0777 -pe 's/class Statement\n\t\{/class Statement\n\t\{\n\tpublic:\n\t\texplicit Statement(Attachment& attachment);/g' "$PATCH_SRC_DIR/Statement.h"
+perl -i -0777 -pe 's/class (FB_CPP_EXPORT\s+)?Statement\n\t\{/class $1Statement\n\t\{\n\tpublic:\n\t\texplicit Statement(Attachment& attachment);/g' "$PATCH_SRC_DIR/Statement.h"
 
 # 4. Statement.cpp - Implementations, prepare() decouple, and charset/length fix
 perl -i -0777 -pe 's/using namespace fbcpp::impl;\n\n\nStatement::Statement/using namespace fbcpp::impl;\n\n\nStatement::Statement(Attachment& attachment)\n\t: attachment{&attachment},\n\t  statusWrapper{attachment.getClient()},\n\t  calendarConverter{attachment.getClient()},\n\t  numericConverter{attachment.getClient()}\n{\n}\n\n\nStatement::Statement/g' "$PATCH_SRC_DIR/Statement.cpp"

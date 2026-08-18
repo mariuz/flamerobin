@@ -1,8 +1,8 @@
 diff --git a/src/fb-cpp/Attachment.h b/src/fb-cpp/Attachment.h
-index 128ed91..86c78aa 100644
+index d22bdbb..1c9b8eb 100644
 --- a/src/fb-cpp/Attachment.h
 +++ b/src/fb-cpp/Attachment.h
-@@ -50,7 +50,7 @@ namespace fbcpp
+@@ -51,7 +51,7 @@ namespace fbcpp
  	///
  	/// Represents options used when creating an Attachment object.
  	///
@@ -11,7 +11,7 @@ index 128ed91..86c78aa 100644
  	{
  	public:
  		///
-@@ -198,7 +198,7 @@ namespace fbcpp
+@@ -199,7 +199,7 @@ namespace fbcpp
  			return *this;
  		}
  
@@ -20,7 +20,7 @@ index 128ed91..86c78aa 100644
  		std::optional<std::string> connectionCharSet;
  		std::optional<std::string> userName;
  		std::optional<std::string> password;
-@@ -214,7 +214,7 @@ namespace fbcpp
+@@ -215,7 +215,7 @@ namespace fbcpp
  	/// The Attachment must exist and remain valid while there are other objects using it, such as Transaction and
  	/// Statement.
  	///
@@ -29,7 +29,7 @@ index 128ed91..86c78aa 100644
  	{
  	public:
  		///
-@@ -400,11 +400,11 @@ namespace fbcpp
+@@ -401,11 +401,11 @@ namespace fbcpp
  		std::optional<T> queryFirstRowAs(
  			Transaction& transaction, std::string_view sql, const StatementOptions& options, const Params& params);
  
@@ -44,10 +44,10 @@ index 128ed91..86c78aa 100644
  		FbRef<fb::IAttachment> handle;
  	};
 diff --git a/src/fb-cpp/BackupManager.h b/src/fb-cpp/BackupManager.h
-index 89b3bb1..957d5cc 100644
+index 1f0ba9b..679f20b 100644
 --- a/src/fb-cpp/BackupManager.h
 +++ b/src/fb-cpp/BackupManager.h
-@@ -81,7 +81,7 @@ namespace fbcpp
+@@ -82,7 +82,7 @@ namespace fbcpp
  		///
  		BackupOptions& addBackupFile(const std::string& value)
  		{
@@ -56,7 +56,7 @@ index 89b3bb1..957d5cc 100644
  			return *this;
  		}
  
-@@ -93,7 +93,7 @@ namespace fbcpp
+@@ -94,7 +94,7 @@ namespace fbcpp
  			if (!backupFiles.empty() && !backupFiles.back().length)
  				throw std::invalid_argument{"Cannot add a backup file with length after a backup file without length"};
  
@@ -65,7 +65,7 @@ index 89b3bb1..957d5cc 100644
  			return *this;
  		}
  
-@@ -200,7 +200,7 @@ namespace fbcpp
+@@ -201,7 +201,7 @@ namespace fbcpp
  		///
  		RestoreOptions& addDatabaseFile(const std::string& value)
  		{
@@ -74,7 +74,7 @@ index 89b3bb1..957d5cc 100644
  			return *this;
  		}
  
-@@ -215,7 +215,7 @@ namespace fbcpp
+@@ -216,7 +216,7 @@ namespace fbcpp
  					"Cannot add a database file with length after a database file without length"};
  			}
  
@@ -84,10 +84,10 @@ index 89b3bb1..957d5cc 100644
  		}
  
 diff --git a/src/fb-cpp/Blob.h b/src/fb-cpp/Blob.h
-index 3464819..7dbdf73 100644
+index a3a4407..a521597 100644
 --- a/src/fb-cpp/Blob.h
 +++ b/src/fb-cpp/Blob.h
-@@ -48,7 +48,7 @@ namespace fbcpp
+@@ -49,7 +49,7 @@ namespace fbcpp
  	///
  	/// Represents a Firebird blob identifier.
  	///
@@ -96,7 +96,7 @@ index 3464819..7dbdf73 100644
  	{
  	public:
  		/// Returns whether this blob identifier is empty.
-@@ -99,7 +99,7 @@ namespace fbcpp
+@@ -100,7 +100,7 @@ namespace fbcpp
  	///
  	/// Additional options used when creating or opening blobs.
  	///
@@ -105,7 +105,7 @@ index 3464819..7dbdf73 100644
  	{
  	public:
  		///
-@@ -230,7 +230,7 @@ namespace fbcpp
+@@ -231,7 +231,7 @@ namespace fbcpp
  			return *this;
  		}
  
@@ -114,7 +114,7 @@ index 3464819..7dbdf73 100644
  		std::vector<std::uint8_t> bpb;
  		std::optional<BlobType> type;
  		std::optional<BlobType> sourceType;
-@@ -264,7 +264,7 @@ namespace fbcpp
+@@ -265,7 +265,7 @@ namespace fbcpp
  	///
  	/// Provides read and write access to Firebird blobs.
  	///
@@ -123,7 +123,7 @@ index 3464819..7dbdf73 100644
  	{
  	public:
  		///
-@@ -419,10 +419,10 @@ namespace fbcpp
+@@ -420,10 +420,10 @@ namespace fbcpp
  		///
  		void close();
  
@@ -262,10 +262,10 @@ index 6c9ac0c..959dc10 100644
  
  bool Statement::execute(Transaction& transaction)
 diff --git a/src/fb-cpp/Statement.h b/src/fb-cpp/Statement.h
-index 05faa8a..8e9a69f 100644
+index aa5616c..f737539 100644
 --- a/src/fb-cpp/Statement.h
 +++ b/src/fb-cpp/Statement.h
-@@ -71,6 +71,10 @@ namespace fbcpp
+@@ -76,6 +76,10 @@ namespace fbcpp
  	///
  	/// @brief Distinguishes the semantic category of the prepared SQL statement.
  	///
@@ -276,7 +276,7 @@ index 05faa8a..8e9a69f 100644
  	enum class StatementType : unsigned
  	{
  		///
-@@ -134,8 +138,10 @@ namespace fbcpp
+@@ -139,8 +143,10 @@ namespace fbcpp
  	///
  	/// Prepares, executes, and fetches SQL statements against a Firebird attachment.
  	///
@@ -288,7 +288,7 @@ index 05faa8a..8e9a69f 100644
  	public:
  		///
  		/// Prepares an SQL statement.
-@@ -296,6 +302,7 @@ namespace fbcpp
+@@ -301,6 +307,7 @@ namespace fbcpp
  		/// @brief Releases the prepared handle and any associated result set.
  		///
  		void free();
@@ -296,8 +296,8 @@ index 05faa8a..8e9a69f 100644
  
  		///
  		/// @brief Retrieves the textual legacy plan if the server produced one.
-@@ -1124,7 +1131,7 @@ namespace fbcpp
- #endif
+@@ -1213,7 +1220,7 @@ namespace fbcpp
+ 				}
  
  				case DescriptorAdjustedType::STRING:
 -					if (value.length() > descriptor.length)
@@ -305,7 +305,7 @@ index 05faa8a..8e9a69f 100644
  					{
  						static constexpr std::intptr_t STATUS_STRING_TRUNCATION[] = {
  							isc_arith_except,
-@@ -1837,7 +1844,7 @@ namespace fbcpp
+@@ -1993,7 +2000,7 @@ namespace fbcpp
  				value);
  		}
  
@@ -314,7 +314,7 @@ index 05faa8a..8e9a69f 100644
  		///
  		/// @brief Validates and returns the descriptor for the given input parameter index.
  		///
-@@ -2025,10 +2032,10 @@ namespace fbcpp
+@@ -2257,10 +2264,10 @@ namespace fbcpp
  			}
  		}
  
@@ -371,10 +371,10 @@ index de8e6f4..233e1ce 100644
  {
  	prepare(std::span<const std::uint8_t>{});
 diff --git a/src/fb-cpp/Transaction.h b/src/fb-cpp/Transaction.h
-index 66d4594..092a2c2 100644
+index 13ce6ac..ef535a0 100644
 --- a/src/fb-cpp/Transaction.h
 +++ b/src/fb-cpp/Transaction.h
-@@ -29,6 +29,7 @@
+@@ -30,6 +30,7 @@
  #include "SmartPtrs.h"
  #include <memory>
  #include <optional>
@@ -382,7 +382,7 @@ index 66d4594..092a2c2 100644
  #include <span>
  #include <stdexcept>
  #include <string>
-@@ -44,6 +45,11 @@ namespace fbcpp
+@@ -45,6 +46,11 @@ namespace fbcpp
  {
  	class Attachment;
  
@@ -394,7 +394,7 @@ index 66d4594..092a2c2 100644
  	///
  	/// Transaction isolation level.
  	///
-@@ -116,7 +122,7 @@ namespace fbcpp
+@@ -117,7 +123,7 @@ namespace fbcpp
  	///
  	/// Represents options used when creating a Transaction object.
  	///
@@ -403,7 +403,7 @@ index 66d4594..092a2c2 100644
  	{
  	public:
  		///
-@@ -286,7 +292,7 @@ namespace fbcpp
+@@ -287,7 +293,7 @@ namespace fbcpp
  			return *this;
  		}
  
@@ -412,7 +412,7 @@ index 66d4594..092a2c2 100644
  		std::vector<std::uint8_t> tpb;
  		std::optional<TransactionIsolationLevel> isolationLevel;
  		std::optional<TransactionReadCommittedMode> readCommittedMode;
-@@ -347,8 +353,10 @@ namespace fbcpp
+@@ -348,8 +354,10 @@ namespace fbcpp
  	/// being committed or rolled back (and not prepared), it will be automatically
  	/// rolled back.
  	///
@@ -424,7 +424,7 @@ index 66d4594..092a2c2 100644
  	public:
  		///
  		/// Constructs a Transaction object that starts a transaction in the specified
-@@ -492,7 +500,11 @@ namespace fbcpp
+@@ -493,7 +501,11 @@ namespace fbcpp
  		///
  		void rollbackRetaining();
  
