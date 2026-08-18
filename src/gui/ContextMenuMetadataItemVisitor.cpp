@@ -728,7 +728,7 @@ void MainObjectMenuMetadataItemVisitor::addScriptAsMenu(
 
     if (!parent)
         parent = menuM;
-    parent->Append(0, _("Script &as..."), scriptMenu);
+    parent->Append(Cmds::Menu_ScriptAsMenu, _("Script &as..."), scriptMenu);
 }
 
 void MainObjectMenuMetadataItemVisitor::addPropertiesItem()

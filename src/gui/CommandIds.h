@@ -193,6 +193,7 @@ enum {
         BlobEditor_ProgressCancel,
 
         // Script As menu actions
+        Menu_ScriptAsMenu,
         Menu_ScriptAsSelect,
         Menu_ScriptAsInsert,
         Menu_ScriptAsUpdate,
@@ -204,8 +205,8 @@ enum {
         Menu_ScriptAsExecute,
 
         // 100 templates
-        Menu_TemplateFirst = 700, 
-        Menu_TemplateLast = 799,
+        Menu_TemplateFirst = 800, 
+        Menu_TemplateLast = 899,
         Menu_TemplateMenu,
 
         // for easier copy/paste of above items (no need to mess with comma)
