@@ -1,5 +1,5 @@
 Package: flamerobin
-Version: 26.6.21
+Version: 26.8.2
 Section: database
 Priority: optional
 Architecture: amd64

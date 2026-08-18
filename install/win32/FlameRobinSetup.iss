@@ -35,9 +35,11 @@
 #ifdef X64VERSION
 AppName=FlameRobin (x64)
 AppVerName=FlameRobin {#FR_VERSION_STRING} (x64)
+AppVersion={#FR_VERSION_STRING}
 #else
 AppName=FlameRobin
 AppVerName=FlameRobin {#FR_VERSION_STRING}
+AppVersion={#FR_VERSION_STRING}
 #endif
 AppPublisher=The FlameRobin Project
 AppPublisherURL=http://www.flamerobin.org
