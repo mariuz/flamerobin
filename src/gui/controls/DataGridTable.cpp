@@ -667,6 +667,12 @@ void DataGridTable::SetValue(int row, int col, const wxString& value)
             _("Database error"), e.what(),
             AdvancedMessageDialogButtonsOk());
     }
+    catch (const std::exception& e)
+    {
+        showErrorDialog(wxGetTopLevelParent(wxGetActiveWindow()),
+            _("Database error"), wxString::FromUTF8(e.what()),
+            AdvancedMessageDialogButtonsOk());
+    }
     catch (...)
     {
         showErrorDialog(wxGetTopLevelParent(wxGetActiveWindow()),
@@ -715,6 +721,12 @@ bool DataGridTable::DeleteRows(size_t pos, size_t numRows)
     {
         showErrorDialog(wxGetTopLevelParent(wxGetActiveWindow()),
             _("Database error"), e.what(),
+            AdvancedMessageDialogButtonsOk());
+    }
+    catch (const std::exception& e)
+    {
+        showErrorDialog(wxGetTopLevelParent(wxGetActiveWindow()),
+            _("Database error"), wxString::FromUTF8(e.what()),
             AdvancedMessageDialogButtonsOk());
     }
     catch (...)
