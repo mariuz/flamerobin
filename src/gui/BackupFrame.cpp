@@ -69,6 +69,8 @@ void BackupFrame::createControls()
 {
     BackupRestoreBaseFrame::createControls();
 
+    button_start->SetLabel(_("&Start Backup"));
+
     checkbox_checksum = new wxCheckBox(panel_controls, wxID_ANY,
         _("Ignore checksums"));
     checkbox_limbo = new wxCheckBox(panel_controls, wxID_ANY,

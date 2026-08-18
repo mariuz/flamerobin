@@ -169,7 +169,7 @@ void ServiceBaseFrame::createControls()
         wxDefaultSize, wxTAB_TRAVERSAL | wxCLIP_CHILDREN);
 
     button_start = new wxButton(panel_controls, ID_button_start,
-        _("&Start Backup"));
+        _("&Start"));
 
     text_ctrl_log = new LogTextControl(this, ID_text_ctrl_log);
 

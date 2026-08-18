@@ -62,6 +62,8 @@ void MaintenanceFrame::createControls()
 {
     ServiceBaseFrame::createControls();
 
+    button_start->SetLabel(_("&Start Maintenance"));
+
     checkbox_sweep = new wxCheckBox(panel_controls, wxID_ANY,
         _("Sweep (Force garbage collection)"));
     checkbox_validate = new wxCheckBox(panel_controls, wxID_ANY,

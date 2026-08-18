@@ -66,7 +66,7 @@ void StartupFrame::createControls()
 {
     ShutdownStartupBaseFrame::createControls();
 
-    button_start->SetLabelText(_("Startup Start"));
+    button_start->SetLabel(_("&Start Startup"));
 
 }
 

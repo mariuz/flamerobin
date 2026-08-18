@@ -67,7 +67,7 @@ void ShutdownFrame::createControls()
 {
     ShutdownStartupBaseFrame::createControls();
 
-    button_start->SetLabelText(_("Start Shutdown"));
+    button_start->SetLabel(_("&Start Shutdown"));
 
     checkbox_tran = new wxCheckBox(panel_controls, wxID_ANY,
         _("Prevents any new transactions"));
