@@ -4,7 +4,7 @@
     <OutputType>Package</OutputType>
     <Platforms>x64;x86</Platforms>
     <Platform Condition="'$(Platform)' == ''">x64</Platform>
-    <FlameRobinVersion Condition="'$(FlameRobinVersion)' == ''">26.8.2</FlameRobinVersion>
+    <FlameRobinVersion Condition="'$(FlameRobinVersion)' == ''">26.8.3</FlameRobinVersion>
     <FlameRobinExeSource Condition="'$(FlameRobinExeSource)' == ''">..\..\build\Debug\flamerobin.exe</FlameRobinExeSource>
     <FirebirdClientDir Condition="'$(FirebirdClientDir)' == ''">..\..\firebird-$(Platform)-extracted</FirebirdClientDir>
     <DefineConstants>FlameRobinVersion=$(FlameRobinVersion);FlameRobinExeSource=$(FlameRobinExeSource);FirebirdClientDir=$(FirebirdClientDir)</DefineConstants>
