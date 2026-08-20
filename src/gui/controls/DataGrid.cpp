@@ -132,7 +132,7 @@ void DataGrid::fetchData(bool readonly)
 
     wxBusyCursor bc;
     BeginBatch();
-    updateRowHeights();
+    ClearSelection();
     table->initialFetch(readonly);
 
     for (int i = 0; i < table->GetNumberCols(); i++)
@@ -162,17 +162,23 @@ void DataGrid::fetchData(bool readonly)
         AutoSizeColumns(false);
     if (config().get("gridShowMultilineText", false))
         AutoSizeRows(false);
+
+    if (GetNumberRows() > 0 && GetNumberCols() > 0)
+    {
+        SetGridCursor(0, 0);
+        MakeCellVisible(0, 0);
+    }
     EndBatch();
+
+    AdjustScrollbars();
+    ForceRefresh();
 
     // event handler is only needed if not all rows have already been
     // fetched
     if (table->canFetchMoreRows())
         Connect(wxID_ANY, wxEVT_IDLE, wxIdleEventHandler(DataGrid::OnIdle));
 
-#ifdef __WXGTK__
-    // needed to make scrollbars show on large datasets
     Layout();
-#endif
 }
 
 DataGridTable* DataGrid::getDataGridTable()

@@ -91,6 +91,13 @@ void DataGridTable::Clear()
     canInsertRowsIsSetM = false;
     config().getValue("GridFetchAllRecords", fetchAllRowsM);
 
+    sortedColM = -1;
+    sortAscendingM = true;
+    filterOrSortActiveM = false;
+    currentFilterTextM.Clear();
+    originalColLabelsM.clear();
+    rowMappingM.clear();
+
     unsigned oldCols = rowsM.getRowFieldCount();
     unsigned oldRows = rowsM.getRowCount();
     rowsM.clear();

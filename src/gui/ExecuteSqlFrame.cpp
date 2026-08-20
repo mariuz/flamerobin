@@ -3745,13 +3745,22 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         fr::StatementType type = statementM->getType();
         if (hasColumns)            // for select statements: show data
         {
+            if (text_ctrl_filter && !text_ctrl_filter->IsEmpty())
+                text_ctrl_filter->ChangeValue(wxEmptyString);
+            updateFilterCountLabel();
+
             DataGridTable* tb = grid_data->getDataGridTable();
             if (tb)
+            {
+                tb->clearFilterAndSort();
                 tb->setStatement(statementM);
+            }
             grid_data->fetchData(transactionAccessModeM == fr::TransactionAccessMode::Read);
             if (fetchAll)
                 grid_data->fetchAll();
             setViewMode(vmGrid);
+            grid_data->AdjustScrollbars();
+            grid_data->ForceRefresh();
         }
 
         if (doShowStats)
@@ -4539,7 +4548,11 @@ void ExecuteSqlFrame::setViewMode(bool splitView, ViewMode mode)
     else if (mode == vmLogCtrl)
         styled_text_ctrl_stats->SetFocus();
     else if (mode == vmGrid)
+    {
         grid_data->SetFocus();
+        grid_data->AdjustScrollbars();
+        grid_data->ForceRefresh();
+    }
 }
 
 void ExecuteSqlFrame::updateViewMode()
