@@ -68,6 +68,9 @@ DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
     setupStyles();
 
     updateRowHeights();
+
+    Connect(wxID_ANY, wxEVT_FRDG_BATCH_READY, wxCommandEventHandler(DataGrid::OnBatchReady));
+    Connect(wxID_ANY, wxEVT_FRDG_FETCH_DONE, wxCommandEventHandler(DataGrid::OnFetchDone));
 }
 
 DataGrid::~DataGrid()
@@ -176,7 +179,11 @@ void DataGrid::fetchData(bool readonly)
     // event handler is only needed if not all rows have already been
     // fetched
     if (table->canFetchMoreRows())
+    {
+        if (table->getFetchAllRows())
+            table->startBackgroundFetch();
         Connect(wxID_ANY, wxEVT_IDLE, wxIdleEventHandler(DataGrid::OnIdle));
+    }
 
     Layout();
 }
@@ -1081,14 +1088,21 @@ void DataGrid::fetchAll()
 {
     DataGridTable* table = getDataGridTable();
     if (table)
+    {
         table->setFetchAllRecords(true);
+        table->startBackgroundFetch();
+        Connect(wxID_ANY, wxEVT_IDLE, wxIdleEventHandler(DataGrid::OnIdle));
+    }
 }
 
 void DataGrid::cancelFetchAll()
 {
     DataGridTable* table = getDataGridTable();
     if (table)
+    {
         table->setFetchAllRecords(false);
+        table->stopBackgroundFetch();
+    }
 }
 
 std::vector<bool> DataGrid::getColumnsWithSelectedCells()
@@ -1453,18 +1467,57 @@ void DataGrid::OnGridSelectCell(wxGridEvent& event)
     event.Skip();
 }*/
 
+void DataGrid::OnBatchReady(wxCommandEvent& WXUNUSED(event))
+{
+    DataGridTable* table = getDataGridTable();
+    if (table)
+    {
+        table->processPendingBatches();
+        AdjustScrollbars();
+    }
+}
+
+void DataGrid::OnFetchDone(wxCommandEvent& WXUNUSED(event))
+{
+    DataGridTable* table = getDataGridTable();
+    if (table)
+    {
+        table->processPendingBatches();
+        if (config().get("gridShowMultilineText", false))
+            AutoSizeRows(false);
+        AdjustScrollbars();
+        Disconnect(wxID_ANY, wxEVT_IDLE);
+    }
+}
+
 void DataGrid::OnIdle(wxIdleEvent& event)
 {
     DataGridTable* table = getDataGridTable();
-    // disconnect event handler if nothing more to be done, will be
-    // re-registered on next successfull execution of select statement
-    if (!table || !table->canFetchMoreRows())
+    if (!table)
     {
         Disconnect(wxID_ANY, wxEVT_IDLE);
         return;
     }
-    // fetch more rows until row cache is filled or timeslice is spent, and
-    // request another wxEVT_IDLE event if row cache has not been filled
+
+    if (table->isBackgroundFetching())
+    {
+        table->processPendingBatches();
+        AdjustScrollbars();
+        return;
+    }
+
+    if (!table->canFetchMoreRows())
+    {
+        Disconnect(wxID_ANY, wxEVT_IDLE);
+        return;
+    }
+
+    if (table->getFetchAllRows())
+    {
+        table->startBackgroundFetch();
+        return;
+    }
+
     if (table->needsMoreRowsFetched())
     {
         table->fetch();

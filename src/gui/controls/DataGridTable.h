@@ -27,6 +27,11 @@
 #include <wx/wx.h>
 #include <wx/grid.h>
 
+#include <thread>
+#include <mutex>
+#include <atomic>
+#include <vector>
+
 #include "gui/controls/DataGridRows.h"
 #include "gui/FRStyleManager.h"
 
@@ -45,6 +50,10 @@ BEGIN_DECLARE_EVENT_TYPES()
     // this event is sent to cause the attribute cache to be invalidated
     // after a field value has changed
     DECLARE_LOCAL_EVENT_TYPE(wxEVT_FRDG_INVALIDATEATTR, 44)
+    // sent when background batch is ready to be appended on UI thread
+    DECLARE_LOCAL_EVENT_TYPE(wxEVT_FRDG_BATCH_READY, 45)
+    // sent when background fetch finishes
+    DECLARE_LOCAL_EVENT_TYPE(wxEVT_FRDG_FETCH_DONE, 46)
 END_DECLARE_EVENT_TYPES()
 
 class DataGridTable: public wxGridTableBase
@@ -65,6 +74,14 @@ private:
     Database *databaseM;
     fr::IStatementPtr statementDALM;
     wxMBConv* charsetConverterM;
+
+    std::thread backgroundFetchThreadM;
+    std::atomic<bool> fetchThreadRunningM{false};
+    std::atomic<bool> cancelFetchM{false};
+    std::mutex pendingBatchesMutexM;
+    std::vector<std::vector<DataGridRowBuffer*>> pendingBatchesM;
+
+    void backgroundFetchWorker();
 
     int getStatementColCount();
     bool isValidCellPos(int row, int col);
@@ -91,11 +108,16 @@ public:
     int getSortedColumn() const { return sortedColM; }
     bool isSortAscending() const { return sortAscendingM; }
 
-    void setStatement(fr::IStatementPtr s) { statementDALM = s; }
+    void setStatement(fr::IStatementPtr s);
 
     bool canFetchMoreRows();
     void fetch();
     void fetchOne();
+    void startBackgroundFetch();
+    void stopBackgroundFetch();
+    bool isBackgroundFetching() const { return fetchThreadRunningM.load(); }
+    unsigned processPendingBatches();
+
     void addRow(DataGridRowBuffer *buffer, const wxString& sql);
     wxString getCellValue(int row, int col);
     wxString getCellValueForInsert(int row, int col);

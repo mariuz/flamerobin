@@ -70,6 +70,8 @@ private:
     void OnEditorCreated(wxGridEditorCreatedEvent& event);
     void OnEditorKeyDown(wxKeyEvent& event);
     void OnTimer(wxTimerEvent& event);
+    void OnBatchReady(wxCommandEvent& event);
+    void OnFetchDone(wxCommandEvent& event);
     DECLARE_EVENT_TABLE()
 public:
     void copyToClipboard(bool headers);

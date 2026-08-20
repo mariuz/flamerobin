@@ -2061,9 +2061,21 @@ void DataGridRows::addRow(DataGridRowBuffer* buffer)
     buffersM.push_back(buffer);
 }
 
+void DataGridRows::addRows(const std::vector<DataGridRowBuffer*>& rowBuffers)
+{
+    if (rowBuffers.empty())
+        return;
+    if (buffersM.size() + rowBuffers.size() > buffersM.capacity())
+    {
+        size_t newCap = std::max(buffersM.capacity() * 2, buffersM.size() + rowBuffers.size());
+        if (newCap < 1024)
+            newCap = 1024;
+        buffersM.reserve(newCap);
+    }
+    buffersM.insert(buffersM.end(), rowBuffers.begin(), rowBuffers.end());
+}
 
-
-void DataGridRows::addRow(fr::IStatementPtr statement)
+DataGridRowBuffer* DataGridRows::fetchRowBuffer(fr::IStatementPtr statement)
 {
     DataGridRowBuffer* buffer = new DataGridRowBuffer(columnDefsM.size());
     // if anything fails, make sure we release the memory
@@ -2084,19 +2096,24 @@ void DataGridRows::addRow(fr::IStatementPtr statement)
             }
         }
     }
-    catch(const std::exception& e)
+    catch (const std::exception& e)
     {
-        wxLogDebug("DataGridRows::addRow() error: %s", e.what());
+        wxLogDebug("DataGridRows::fetchRowBuffer() error: %s", e.what());
         delete buffer;
         throw;
     }
-    catch(...)
+    catch (...)
     {
-        wxLogDebug("DataGridRows::addRow() unknown error.");
+        wxLogDebug("DataGridRows::fetchRowBuffer() unknown error.");
         delete buffer;
         throw;
     }
-    addRow(buffer);
+    return buffer;
+}
+
+void DataGridRows::addRow(fr::IStatementPtr statement)
+{
+    addRow(fetchRowBuffer(statement));
 }
 
     void freeBuffer(DataGridRowBuffer* buffer) { delete buffer; }

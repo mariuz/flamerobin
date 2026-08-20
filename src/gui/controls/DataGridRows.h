@@ -421,6 +421,8 @@ public:
     ~DataGridRows();
 
     void addRow(fr::IStatementPtr statement);
+    DataGridRowBuffer* fetchRowBuffer(fr::IStatementPtr statement);
+    void addRows(const std::vector<DataGridRowBuffer*>& rowBuffers);
     void clear();
     unsigned getRowCount();
     unsigned getRowFieldCount();

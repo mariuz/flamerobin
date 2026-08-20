@@ -66,8 +66,15 @@ DataGridTable::DataGridTable(fr::IStatementPtr s, Database* db)
 
 DataGridTable::~DataGridTable()
 {
+    stopBackgroundFetch();
     Clear();
     cellAttriM->DecRef();
+}
+
+void DataGridTable::setStatement(fr::IStatementPtr s)
+{
+    stopBackgroundFetch();
+    statementDALM = s;
 }
 
 void DataGridTable::setNullFlag(bool isNull)
@@ -84,6 +91,7 @@ bool DataGridTable::canFetchMoreRows()
 
 void DataGridTable::Clear()
 {
+    stopBackgroundFetch();
     nullFlagM = false;
 
     allRowsFetchedM = true;
@@ -113,6 +121,131 @@ void DataGridTable::Clear()
         wxGridTableMessage colMsg(this, wxGRIDTABLE_NOTIFY_COLS_DELETED,
             0, oldCols);
         GetView()->ProcessTableMessage(colMsg);
+    }
+}
+
+void DataGridTable::startBackgroundFetch()
+{
+    stopBackgroundFetch();
+    if (!canFetchMoreRows())
+        return;
+
+    cancelFetchM = false;
+    fetchThreadRunningM = true;
+    backgroundFetchThreadM = std::thread([this]() {
+        backgroundFetchWorker();
+    });
+}
+
+void DataGridTable::stopBackgroundFetch()
+{
+    cancelFetchM = true;
+    if (backgroundFetchThreadM.joinable())
+    {
+        backgroundFetchThreadM.join();
+    }
+    fetchThreadRunningM = false;
+    processPendingBatches();
+}
+
+unsigned DataGridTable::processPendingBatches()
+{
+    std::vector<std::vector<DataGridRowBuffer*>> batches;
+    {
+        std::lock_guard<std::mutex> lock(pendingBatchesMutexM);
+        batches.swap(pendingBatchesM);
+    }
+
+    unsigned totalNew = 0;
+    for (auto& b : batches)
+    {
+        if (!b.empty())
+        {
+            totalNew += b.size();
+            rowsM.addRows(b);
+        }
+    }
+
+    if (totalNew > 0 && GetView())
+    {
+        wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, totalNew);
+        GetView()->ProcessTableMessage(msg);
+        wxCommandEvent evt(wxEVT_FRDG_ROWCOUNT_CHANGED, GetView()->GetId());
+        evt.SetExtraLong(rowsM.getRowCount());
+        wxPostEvent(GetView(), evt);
+    }
+
+    return totalNew;
+}
+
+void DataGridTable::backgroundFetchWorker()
+{
+    std::vector<DataGridRowBuffer*> batch;
+    batch.reserve(500);
+    bool eof = false;
+
+    while (!cancelFetchM && statementDALM)
+    {
+        bool hasRow = false;
+        try
+        {
+            hasRow = statementDALM->fetch();
+        }
+        catch (...)
+        {
+            hasRow = false;
+        }
+
+        if (!hasRow)
+        {
+            eof = true;
+            break;
+        }
+
+        try
+        {
+            DataGridRowBuffer* buf = rowsM.fetchRowBuffer(statementDALM);
+            batch.push_back(buf);
+        }
+        catch (...)
+        {
+            eof = true;
+            break;
+        }
+
+        if (batch.size() >= 500)
+        {
+            {
+                std::lock_guard<std::mutex> lock(pendingBatchesMutexM);
+                pendingBatchesM.push_back(std::move(batch));
+            }
+            batch.clear();
+            batch.reserve(500);
+
+            if (GetView())
+            {
+                wxCommandEvent evt(wxEVT_FRDG_BATCH_READY, GetView()->GetId());
+                wxPostEvent(GetView(), evt);
+            }
+        }
+    }
+
+    if (!batch.empty())
+    {
+        std::lock_guard<std::mutex> lock(pendingBatchesMutexM);
+        pendingBatchesM.push_back(std::move(batch));
+        batch.clear();
+    }
+
+    if (eof)
+        allRowsFetchedM = true;
+
+    fetchThreadRunningM = false;
+
+    if (GetView())
+    {
+        wxCommandEvent evt(wxEVT_FRDG_FETCH_DONE, GetView()->GetId());
+        wxPostEvent(GetView(), evt);
     }
 }
 
@@ -470,11 +603,15 @@ wxString DataGridTable::GetValue(int row, int col)
 
     int realRow = getRealRowIndex(row);
 
-    // keep between 200 and 250 more rows fetched for better responsiveness
-    // (but make the count of fetched rows a multiple of 50)
-    unsigned maxRowToFetch = 50 * (realRow / 50 + 5);
-    if (maxRowToFetchM < maxRowToFetch)
-        maxRowToFetchM = maxRowToFetch;
+    // On-demand fetching: Only request more rows when scrolling near the loaded boundary
+    if (!allRowsFetchedM && !fetchAllRowsM)
+    {
+        if ((unsigned)realRow + 20 >= rowsM.getRowCount())
+        {
+            if (maxRowToFetchM <= rowsM.getRowCount())
+                maxRowToFetchM = rowsM.getRowCount() + 100;
+        }
+    }
 
     if (rowsM.isFieldNA(realRow, col))
         return "N/A";
@@ -756,6 +893,8 @@ bool DataGridTable::DeleteRows(size_t pos, size_t numRows)
 DEFINE_EVENT_TYPE(wxEVT_FRDG_ROWCOUNT_CHANGED)
 DEFINE_EVENT_TYPE(wxEVT_FRDG_STATEMENT)
 DEFINE_EVENT_TYPE(wxEVT_FRDG_INVALIDATEATTR)
+DEFINE_EVENT_TYPE(wxEVT_FRDG_BATCH_READY)
+DEFINE_EVENT_TYPE(wxEVT_FRDG_FETCH_DONE)
 
 int DataGridTable::getRealRowIndex(int row) const
 {

@@ -120,6 +120,35 @@ int main()
         ok = check(buf.getString(0) == "test_value   ", "String buffer storage holds string") && ok;
     }
 
+    // Test 3: Batch row addition (DataGridRows batch buffering pattern)
+    {
+        std::vector<DataGridRowBuffer*> batch;
+        const size_t BATCH_SIZE = 500;
+        for (size_t i = 0; i < BATCH_SIZE; ++i)
+        {
+            DataGridRowBuffer* buf = new DataGridRowBuffer(1);
+            buf->setFieldNull(0, false);
+            buf->setValue(0, (int)(i + 1000));
+            batch.push_back(buf);
+        }
+        ok = check(batch.size() == BATCH_SIZE, "500-row batch constructed successfully") && ok;
+
+        std::vector<DataGridRowBuffer*> mainBuffers;
+        mainBuffers.reserve(1024);
+        mainBuffers.insert(mainBuffers.end(), batch.begin(), batch.end());
+        ok = check(mainBuffers.size() == BATCH_SIZE, "500-row batch appended to main buffers") && ok;
+
+        int firstVal = 0, lastVal = 0;
+        mainBuffers[0]->getValue(0, firstVal);
+        mainBuffers[BATCH_SIZE - 1]->getValue(0, lastVal);
+        ok = check(firstVal == 1000, "First batch item matches") && ok;
+        ok = check(lastVal == 1499, "Last batch item matches") && ok;
+
+        for (auto b : mainBuffers)
+            delete b;
+        mainBuffers.clear();
+    }
+
     std::cout << "DataGrid Large Fetch Regression Tests completed: "
               << (ok ? "ALL PASSED" : "SOME FAILED") << "\n";
     return ok ? 0 : 1;
