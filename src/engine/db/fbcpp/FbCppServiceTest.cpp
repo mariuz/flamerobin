@@ -89,7 +89,14 @@ int main()
         db->getInfo(&info);
         std::cout << "    ODS Version: " << info.ods << "." << info.odsMinor << "\n";
         std::cout << "    Page Size: " << info.pageSize << ", Pages: " << info.pages << "\n";
+        std::cout << "    Forced Writes: " << (info.forcedWrites ? "ON" : "OFF") << "\n";
+        std::cout << "    Reserve Space: " << (info.reserve ? "ON" : "OFF") << "\n";
+        std::cout << "    Sweep Interval: " << info.sweep << "\n";
+        std::cout << "    Page Buffers: " << info.buffers << "\n";
         std::cout << "    Next Transaction: " << info.nextTransaction << "\n";
+
+        ok = fr_test::check(info.pageSize > 0, "pageSize > 0") && ok;
+        ok = fr_test::check(info.sweep >= 0, "sweep >= 0") && ok;
         
         std::cout << "    Fetching connected users...\n";
         std::vector<std::string> users;
@@ -109,7 +116,7 @@ int main()
         std::cout << "    Dialect: " << dialect << "\n";
         ok = fr_test::check(dialect == 3, "getDialect returns 3") && ok;
 
-        std::cout << "  Testing getNextLine log streaming...\n";
+        std::cout << "  Testing database property modifications via Service...\n";
         svc->setSweepInterval(dbName, 20000);
         std::vector<std::string> logLines;
         std::string logLine;
@@ -117,8 +124,22 @@ int main()
         {
             logLines.push_back(logLine);
         }
-        std::cout << "    Fetched " << logLines.size() << " log lines.\n";
+        std::cout << "    Fetched " << logLines.size() << " log lines for sweep interval.\n";
         ok = fr_test::check(!logLines.empty(), "getNextLine streamed log lines successfully") && ok;
+
+        svc->setPageBuffers(dbName, 2500);
+        svc->setSyncWrite(dbName, true);
+        svc->setReserveSpace(dbName, true);
+
+        // Reconnect and check updated properties
+        db->disconnect();
+        db->connect();
+        fr::DatabaseInfoData updatedInfo;
+        db->getInfo(&updatedInfo);
+        std::cout << "    Updated Sweep: " << updatedInfo.sweep << ", ForcedWrites: " << (updatedInfo.forcedWrites ? "ON" : "OFF") << "\n";
+        ok = fr_test::check(updatedInfo.sweep == 20000, "updated sweep interval is 20000") && ok;
+        ok = fr_test::check(updatedInfo.forcedWrites == true, "updated forced writes is true") && ok;
+        ok = fr_test::check(updatedInfo.reserve == true, "updated reserve space is true") && ok;
 
         std::cout << "  Disconnecting...\n";
         db->disconnect();

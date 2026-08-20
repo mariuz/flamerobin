@@ -382,9 +382,14 @@ void FbCppDatabase::getInfo(DatabaseInfoData* data)
         isc_info_oldest_active,
         isc_info_oldest_snapshot,
         isc_info_next_transaction,
-        fb_info_crypt_state
+        fb_info_crypt_state,
+        isc_info_forced_writes,
+        isc_info_no_reserve,
+        isc_info_sweep_interval,
+        isc_info_num_buffers,
+        isc_info_set_page_buffers
     };
-    unsigned char buffer[256];
+    unsigned char buffer[1024];
     attachmentM->getHandle()->getInfo(&status, sizeof(items), items, sizeof(buffer), buffer);
     if (!(status.getState() & Firebird::IStatus::STATE_ERRORS))
     {
@@ -411,6 +416,11 @@ void FbCppDatabase::getInfo(DatabaseInfoData* data)
             else if (item == isc_info_oldest_snapshot) data->oldestSnapshot = (int)value;
             else if (item == isc_info_next_transaction) data->nextTransaction = (int)value;
             else if (item == fb_info_crypt_state) data->cryptState = (int)value;
+            else if (item == isc_info_forced_writes) data->forcedWrites = (value != 0);
+            else if (item == isc_info_no_reserve) data->reserve = (value == 0); // 0 means reserve space is ON
+            else if (item == isc_info_sweep_interval) data->sweep = (int)value;
+            else if (item == isc_info_set_page_buffers) data->buffers = (int)value;
+            else if (item == isc_info_num_buffers && data->buffers == 0) data->buffers = (int)value;
 
             p += len;
         }

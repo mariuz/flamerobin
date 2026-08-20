@@ -81,12 +81,25 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
          return true;
 
     fr::IServicePtr svc = fr::DatabaseFactory::createService();
-    svc->setConnectionString(wx2std(d->getServer()->getConnectionString()));
-    svc->setCredentials(wx2std(d->getUsername()), wx2std(d->getDecryptedPassword()));
-    svc->setRole(wx2std(d->getRole()));
-    svc->setCharset(wx2std(d->getConnectionCharset()));
-    svc->setClientLibrary(wx2std(d->getClientLibrary()));
-    svc->connect();
+    try
+    {
+        svc->setConnectionString(wx2std(d->getServer()->getConnectionString()));
+        svc->setCredentials(wx2std(d->getUsername()), wx2std(d->getDecryptedPassword()));
+        svc->setRole(wx2std(d->getRole()));
+        svc->setCharset(wx2std(d->getConnectionCharset()));
+        svc->setClientLibrary(wx2std(d->getClientLibrary()));
+        svc->connect();
+    }
+    catch (const std::exception& e)
+    {
+        wxMessageBox(wxString::FromUTF8(e.what()), _("Service Connection Error"), wxOK | wxICON_ERROR, w);
+        return true;
+    }
+    catch (...)
+    {
+        wxMessageBox(_("Failed to connect to the Firebird Service Manager."), _("Error"), wxOK | wxICON_ERROR, w);
+        return true;
+    }
 
     if (isEditSweep || isEditPageBuffers || isEditLinger)
     {
@@ -109,7 +122,6 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
             oldValue = d->getLinger();
             title = _("Enter the new value for Linger");
             label = _("Linger Value");
-
         }
 
         while (true)
@@ -117,7 +129,7 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
             wxString s;
             long value = oldValue;
             s = ::wxGetTextFromUser(title, label,
-                wxString::Format("%d", value), w);
+                wxString::Format("%ld", value), w);
 
             // return from the iteration when the entered string is empty, in
             // case of cancelling the operation.
@@ -129,45 +141,82 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
             if (value == oldValue)
                 break;
 
-            if (isEditSweep)
-                svc->setSweepInterval(wx2std(d->getPath()), value);
-            else if (isEditPageBuffers)
-                svc->setPageBuffers(wx2std(d->getPath()), value);
-            else if (isEditLinger)
-                execSql(nullptr, wxString(_("Alter database")), d, wxString::Format("ALTER DATABASE SET LINGER TO %d ; commit; ", value, w), true);
-            // Before reloading the info, re-attach to the database
-            // otherwise the sweep interval won't be changed for FB Classic
-            // Server.
-            d->reconnect();
-            d->loadInfo();
+            try
+            {
+                if (isEditSweep)
+                    svc->setSweepInterval(wx2std(d->getPath()), value);
+                else if (isEditPageBuffers)
+                    svc->setPageBuffers(wx2std(d->getPath()), value);
+                else if (isEditLinger)
+                    execSql(w, _("Alter database"), d, wxString::Format("ALTER DATABASE SET LINGER TO %ld", value), true);
+            }
+            catch (const std::exception& e)
+            {
+                wxMessageBox(wxString::FromUTF8(e.what()), _("Error Changing Database Property"), wxOK | wxICON_ERROR, w);
+            }
+            catch (...)
+            {
+                wxMessageBox(_("An unknown error occurred."), _("Error"), wxOK | wxICON_ERROR, w);
+            }
+
+            try
+            {
+                // Before reloading the info, re-attach to the database
+                // otherwise the sweep interval won't be changed for FB Classic Server.
+                d->reconnect();
+                d->loadInfo();
+            }
+            catch (...)
+            {
+            }
             break;
         }
     }
 
     else if (isEditForcedWrites || isEditReserve || isEditReadOnly)
     {
-        bool fw = !d->getInfo().getForcedWrites();
-        bool reserve = !d->getInfo().getReserve();
-        bool ro = !d->getInfo().getReadOnly();
+        try
+        {
+            bool fw = !d->getInfo().getForcedWrites();
+            bool reserve = !d->getInfo().getReserve();
+            bool ro = !d->getInfo().getReadOnly();
 
-        // setting these properties requires that the database is
-        // disconnected.
-        d->disconnect();
+            // setting these properties requires that the database is disconnected.
+            d->disconnect();
 
-        if (isEditForcedWrites)
-            svc->setSyncWrite(wx2std(d->getPath()), fw);
-        if (isEditReserve)
-            svc->setReserveSpace(wx2std(d->getPath()), reserve);
-        if (isEditReadOnly)
-            svc->setReadOnly(wx2std(d->getPath()), ro);
+            if (isEditForcedWrites)
+                svc->setSyncWrite(wx2std(d->getPath()), fw);
+            else if (isEditReserve)
+                svc->setReserveSpace(wx2std(d->getPath()), reserve);
+            else if (isEditReadOnly)
+                svc->setReadOnly(wx2std(d->getPath()), ro);
+        }
+        catch (const std::exception& e)
+        {
+            wxMessageBox(wxString::FromUTF8(e.what()), _("Error Changing Database Properties"), wxOK | wxICON_ERROR, w);
+        }
+        catch (...)
+        {
+            wxMessageBox(_("An unknown error occurred while changing database properties."), _("Error"), wxOK | wxICON_ERROR, w);
+        }
 
-        d->reconnect();
-
-        // load the database info because the info values are changed.
-        d->loadInfo();
+        try
+        {
+            d->reconnect();
+            d->loadInfo();
+        }
+        catch (...)
+        {
+        }
     }
 
-    svc->disconnect();
+    try
+    {
+        svc->disconnect();
+    }
+    catch (...)
+    {
+    }
     return true;
 }
 

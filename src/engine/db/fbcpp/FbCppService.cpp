@@ -804,29 +804,18 @@ void FbCppService::setSweepInterval(const std::string& dbPath, int sweep)
     if (!clientM)
         connect();
 
-    runService([this, dbPath, sweep]() {
-        try
-        {
-            pushLine("Setting sweep interval to " + std::to_string(sweep) + "...");
+    auto svcOptions = fbcpp::ServiceManagerOptions()
+        .setServer(connStrM)
+        .setUserName(userM)
+        .setPassword(passwordM);
+    if (!roleM.empty())
+        svcOptions.setRole(roleM);
 
-            auto svcOptions = fbcpp::ServiceManagerOptions()
-                .setServer(connStrM)
-                .setUserName(userM)
-                .setPassword(passwordM);
-            if (!roleM.empty())
-                svcOptions.setRole(roleM);
-
-            CustomDatabaseManager manager(*clientM, svcOptions);
-            manager.setSweepInterval(dbPath, sweep);
-
-            pushLine("Sweep interval successfully set to " + std::to_string(sweep));
-        }
-        catch (const std::exception& e)
-        {
-            pushLine(std::string("Error setting sweep interval: ") + e.what());
-        }
-        pushLine(""); // EOF marker
-    });
+    pushLine("Setting sweep interval to " + std::to_string(sweep) + "...");
+    CustomDatabaseManager manager(*clientM, svcOptions);
+    manager.setSweepInterval(dbPath, sweep);
+    pushLine("Sweep interval successfully set to " + std::to_string(sweep));
+    pushLine(""); // EOF marker
 }
 
 void FbCppService::setPageBuffers(const std::string& dbPath, int buffers)
@@ -834,29 +823,18 @@ void FbCppService::setPageBuffers(const std::string& dbPath, int buffers)
     if (!clientM)
         connect();
 
-    runService([this, dbPath, buffers]() {
-        try
-        {
-            pushLine("Setting page buffers to " + std::to_string(buffers) + "...");
+    auto svcOptions = fbcpp::ServiceManagerOptions()
+        .setServer(connStrM)
+        .setUserName(userM)
+        .setPassword(passwordM);
+    if (!roleM.empty())
+        svcOptions.setRole(roleM);
 
-            auto svcOptions = fbcpp::ServiceManagerOptions()
-                .setServer(connStrM)
-                .setUserName(userM)
-                .setPassword(passwordM);
-            if (!roleM.empty())
-                svcOptions.setRole(roleM);
-
-            CustomDatabaseManager manager(*clientM, svcOptions);
-            manager.setPageBuffers(dbPath, buffers);
-
-            pushLine("Page buffers successfully set to " + std::to_string(buffers));
-        }
-        catch (const std::exception& e)
-        {
-            pushLine(std::string("Error setting page buffers: ") + e.what());
-        }
-        pushLine(""); // EOF marker
-    });
+    pushLine("Setting page buffers to " + std::to_string(buffers) + "...");
+    CustomDatabaseManager manager(*clientM, svcOptions);
+    manager.setPageBuffers(dbPath, buffers);
+    pushLine("Page buffers successfully set to " + std::to_string(buffers));
+    pushLine(""); // EOF marker
 }
 
 void FbCppService::setSyncWrite(const std::string& dbPath, bool sync)
@@ -864,29 +842,18 @@ void FbCppService::setSyncWrite(const std::string& dbPath, bool sync)
     if (!clientM)
         connect();
 
-    runService([this, dbPath, sync]() {
-        try
-        {
-            pushLine(std::string("Setting forced writes to ") + (sync ? "ON" : "OFF") + "...");
+    auto svcOptions = fbcpp::ServiceManagerOptions()
+        .setServer(connStrM)
+        .setUserName(userM)
+        .setPassword(passwordM);
+    if (!roleM.empty())
+        svcOptions.setRole(roleM);
 
-            auto svcOptions = fbcpp::ServiceManagerOptions()
-                .setServer(connStrM)
-                .setUserName(userM)
-                .setPassword(passwordM);
-            if (!roleM.empty())
-                svcOptions.setRole(roleM);
-
-            CustomDatabaseManager manager(*clientM, svcOptions);
-            manager.setSyncWrite(dbPath, sync);
-
-            pushLine(std::string("Forced writes successfully set to ") + (sync ? "ON" : "OFF"));
-        }
-        catch (const std::exception& e)
-        {
-            pushLine(std::string("Error setting forced writes: ") + e.what());
-        }
-        pushLine(""); // EOF marker
-    });
+    pushLine(std::string("Setting forced writes to ") + (sync ? "ON" : "OFF") + "...");
+    CustomDatabaseManager manager(*clientM, svcOptions);
+    manager.setSyncWrite(dbPath, sync);
+    pushLine(std::string("Forced writes successfully set to ") + (sync ? "ON" : "OFF"));
+    pushLine(""); // EOF marker
 }
 
 void FbCppService::setReserveSpace(const std::string& dbPath, bool reserve)
@@ -894,29 +861,18 @@ void FbCppService::setReserveSpace(const std::string& dbPath, bool reserve)
     if (!clientM)
         connect();
 
-    runService([this, dbPath, reserve]() {
-        try
-        {
-            pushLine(std::string("Setting reserve space to ") + (reserve ? "ON" : "OFF") + "...");
+    auto svcOptions = fbcpp::ServiceManagerOptions()
+        .setServer(connStrM)
+        .setUserName(userM)
+        .setPassword(passwordM);
+    if (!roleM.empty())
+        svcOptions.setRole(roleM);
 
-            auto svcOptions = fbcpp::ServiceManagerOptions()
-                .setServer(connStrM)
-                .setUserName(userM)
-                .setPassword(passwordM);
-            if (!roleM.empty())
-                svcOptions.setRole(roleM);
-
-            CustomDatabaseManager manager(*clientM, svcOptions);
-            manager.setReserveSpace(dbPath, reserve);
-
-            pushLine(std::string("Reserve space successfully set to ") + (reserve ? "ON" : "OFF"));
-        }
-        catch (const std::exception& e)
-        {
-            pushLine(std::string("Error setting reserve space: ") + e.what());
-        }
-        pushLine(""); // EOF marker
-    });
+    pushLine(std::string("Setting reserve space to ") + (reserve ? "ON" : "OFF") + "...");
+    CustomDatabaseManager manager(*clientM, svcOptions);
+    manager.setReserveSpace(dbPath, reserve);
+    pushLine(std::string("Reserve space successfully set to ") + (reserve ? "ON" : "OFF"));
+    pushLine(""); // EOF marker
 }
 
 void FbCppService::setReadOnly(const std::string& dbPath, bool readonly)
@@ -924,29 +880,18 @@ void FbCppService::setReadOnly(const std::string& dbPath, bool readonly)
     if (!clientM)
         connect();
 
-    runService([this, dbPath, readonly]() {
-        try
-        {
-            pushLine(std::string("Setting access mode to ") + (readonly ? "READ ONLY" : "READ WRITE") + "...");
+    auto svcOptions = fbcpp::ServiceManagerOptions()
+        .setServer(connStrM)
+        .setUserName(userM)
+        .setPassword(passwordM);
+    if (!roleM.empty())
+        svcOptions.setRole(roleM);
 
-            auto svcOptions = fbcpp::ServiceManagerOptions()
-                .setServer(connStrM)
-                .setUserName(userM)
-                .setPassword(passwordM);
-            if (!roleM.empty())
-                svcOptions.setRole(roleM);
-
-            CustomDatabaseManager manager(*clientM, svcOptions);
-            manager.setReadOnly(dbPath, readonly);
-
-            pushLine(std::string("Access mode successfully set to ") + (readonly ? "READ ONLY" : "READ WRITE"));
-        }
-        catch (const std::exception& e)
-        {
-            pushLine(std::string("Error setting access mode: ") + e.what());
-        }
-        pushLine(""); // EOF marker
-    });
+    pushLine(std::string("Setting access mode to ") + (readonly ? "READ ONLY" : "READ WRITE") + "...");
+    CustomDatabaseManager manager(*clientM, svcOptions);
+    manager.setReadOnly(dbPath, readonly);
+    pushLine(std::string("Access mode successfully set to ") + (readonly ? "READ ONLY" : "READ WRITE"));
+    pushLine(""); // EOF marker
 }
 
 } // namespace fr
