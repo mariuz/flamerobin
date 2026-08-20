@@ -1075,6 +1075,13 @@ add_executable(execute_routine_dialog_test
 target_link_libraries(execute_routine_dialog_test ${wxWidgets_LIBRARIES} ${FR_LIBS})
 add_test(NAME execute_routine_dialog_test COMMAND execute_routine_dialog_test)
 
+add_executable(data_grid_null_sort_test
+    ${SOURCEDIR}/gui/controls/DataGridNullSortTest.cpp
+    ${SQL_TEST_STUB_SOURCES}
+)
+target_link_libraries(data_grid_null_sort_test ${wxWidgets_LIBRARIES} ${FR_LIBS})
+add_test(NAME data_grid_null_sort_test COMMAND data_grid_null_sort_test)
+
 if (APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES
                 BUILD_WITH_INSTALL_RPATH FALSE

@@ -580,7 +580,7 @@ bool DataGridTable::canInsertRows()
 
 bool DataGridTable::canRemoveRow(size_t row)
 {
-    return rowsM.canRemoveRow(row);
+    return rowsM.canRemoveRow(getRealRowIndex((int)row));
 }
 
 bool DataGridTable::needsMoreRowsFetched()
@@ -599,12 +599,12 @@ void DataGridTable::setFetchAllRecords(bool fetchall)
 
 fr::IBlobPtr DataGridTable::getBlob(unsigned row, unsigned col, bool validateBlob)
 {
-    return rowsM.getBlob(row, col, validateBlob);
+    return rowsM.getBlob(getRealRowIndex((int)row), col, validateBlob);
 }
 
 DataGridRowsBlob DataGridTable::setBlobPrepare(unsigned row, unsigned col)
 {
-    return rowsM.setBlobPrepare(row, col);
+    return rowsM.setBlobPrepare(getRealRowIndex((int)row), col);
 }
 
 void DataGridTable::setBlob(DataGridRowsBlob &b)
@@ -615,13 +615,13 @@ void DataGridTable::setBlob(DataGridRowsBlob &b)
 void DataGridTable::importBlobFile(const wxString& filename, int row, int col,
     ProgressIndicator *pi)
 {
-    rowsM.importBlobFile(filename, row, col, pi);
+    rowsM.importBlobFile(filename, getRealRowIndex(row), col, pi);
 }
 
 void DataGridTable::exportBlobFile(const wxString& filename, int row, int col,
     ProgressIndicator *pi)
 {
-    rowsM.exportBlobFile(filename, row, col, pi);
+    rowsM.exportBlobFile(filename, getRealRowIndex(row), col, pi);
 }
 
 bool DataGridTable::isBlobColumn(int col, bool* pIsTextual)
@@ -639,9 +639,16 @@ void DataGridTable::SetValue(int row, int col, const wxString& value)
     // UPDATE statement. See bug report #1882666 at sf.net.
     try
     {
-        wxString statement = rowsM.setFieldValue(row, col, value,
+        int realRow = getRealRowIndex(row);
+        if (realRow < 0 || realRow >= (int)rowsM.getRowCount() || col < 0 || col >= (int)rowsM.getRowFieldCount())
+            return;
+
+        wxString statement = rowsM.setFieldValue(realRow, col, value,
             nullFlagM);
         nullFlagM = false;  // reset
+
+        if (statement.IsEmpty())
+            return;
 
         if (wxGrid* grid = GetView())
         {
@@ -683,6 +690,7 @@ void DataGridTable::SetValue(int row, int col, const wxString& value)
 
 void DataGridTable::setValueToNull(int row, int col)
 {
+    int realRow = getRealRowIndex(row);
     setNullFlag(true);
     SetValue(row, col, "[null]");
     if (isBlobColumn(col,0))
@@ -691,7 +699,7 @@ void DataGridTable::setValueToNull(int row, int col)
         DataGridRowsBlob b;
         b.blob = 0;
         b.col  = col;
-        b.row  = row;
+        b.row  = realRow;
         b.stDAL = statementDALM;
         rowsM.setBlob(b);
     }
@@ -784,6 +792,17 @@ void DataGridTable::updateRowMapping()
         int col = sortedColM;
         bool asc = sortAscendingM;
         std::stable_sort(rowMappingM.begin(), rowMappingM.end(), [this, col, asc](size_t a, size_t b) {
+            bool nullA = rowsM.isFieldNull(a, col);
+            bool nullB = rowsM.isFieldNull(b, col);
+            if (nullA != nullB)
+            {
+                // In ascending sort, NULL values sort last
+                // In descending sort, NULL values sort first
+                return asc ? !nullA : nullA;
+            }
+            if (nullA && nullB)
+                return false;
+
             wxString valA = rowsM.getFieldValue(a, col);
             wxString valB = rowsM.getFieldValue(b, col);
 

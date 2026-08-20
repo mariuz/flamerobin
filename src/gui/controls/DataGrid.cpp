@@ -1290,6 +1290,13 @@ void DataGrid::autofitRows()
 
 void DataGrid::OnGridLabelLeftClick(wxGridEvent& event)
 {
+    if (IsCellEditControlEnabled())
+    {
+        HideCellEditControl();
+        SaveEditControlValue();
+        DisableCellEditControl();
+    }
+
     int col = event.GetCol();
     if (col >= 0)
     {

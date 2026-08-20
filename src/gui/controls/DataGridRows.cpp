@@ -2813,15 +2813,33 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
             localValue.Replace(",", ".", true);
     }
 
+    if (row >= buffersM.size() || col >= columnDefsM.size())
+        return wxEmptyString;
+
     if (columnDefsM[col]->isReadOnly())
         throw FRError(_("This column is not editable."));
 
+    bool isNullString = (localValue == "[null]" || localValue.Strip(wxString::both).Lower() == "[null]");
+
     // user wants to store null
     bool newIsNull = (
-        (!dynamic_cast<StringColumnDef*>(columnDefsM[col]) && localValue.IsEmpty())
-        || (setNull && localValue == "[null]") );
+        (!dynamic_cast<StringColumnDef*>(columnDefsM[col]) && (localValue.IsEmpty() || isNullString))
+        || (setNull && isNullString)
+        || isNullString);
+
     if (newIsNull && !columnDefsM[col]->isNullable())
         throw FRError(_("This column does not accept NULLs."));
+
+    // If cell was already NULL and remains NULL, no update needed
+    if (buffersM[row]->isFieldNull(col) && newIsNull)
+        return wxEmptyString;
+
+    // If cell was not NULL and value is unchanged, no update needed
+    if (!buffersM[row]->isFieldNull(col) && !newIsNull
+        && getFieldValue(row, col) == localValue)
+    {
+        return wxEmptyString;
+    }
 
     // to ensure atomicity, we create a temporary buffer, try to store value
     // in it and also in database. if anything fails, we revert to the values
