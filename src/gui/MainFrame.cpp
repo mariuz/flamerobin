@@ -2873,6 +2873,12 @@ void MainFrame::OnMenuGenerateExecuteTemplate(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::OnMenuInteractiveExecuteRoutine(wxCommandEvent& WXUNUSED(event))
 {
+    DatabasePtr db = getDatabase(treeMainM->getSelectedMetadataItem());
+    if (!checkValidDatabase(db))
+        return;
+    if (!tryAutoConnectDatabase())
+        return;
+
     MetadataItem* item = treeMainM->getSelectedMetadataItem();
     if (!item) return;
 

@@ -64,6 +64,11 @@ private:
 
     DECLARE_EVENT_TABLE()
 public:
+    enum {
+        ID_button_execute_routine = 1001,
+        ID_button_open_in_editor
+    };
+
     ExecuteRoutineDialog(wxWindow* parent, MetadataItem* routineItem);
     virtual ~ExecuteRoutineDialog();
 };

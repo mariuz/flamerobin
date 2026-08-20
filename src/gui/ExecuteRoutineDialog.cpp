@@ -38,15 +38,9 @@
 #include "engine/db/IStatement.h"
 #include "core/StringUtils.h"
 
-enum {
-    ID_button_execute_routine = 5001,
-    ID_button_open_in_editor
-};
-
 BEGIN_EVENT_TABLE(ExecuteRoutineDialog, BaseDialog)
-    EVT_BUTTON(ID_button_execute_routine, ExecuteRoutineDialog::OnExecuteClick)
-    EVT_BUTTON(ID_button_open_in_editor, ExecuteRoutineDialog::OnOpenEditorClick)
-    EVT_BUTTON(wxID_CLOSE, ExecuteRoutineDialog::OnCloseButtonClick)
+    EVT_BUTTON(ExecuteRoutineDialog::ID_button_execute_routine, ExecuteRoutineDialog::OnExecuteClick)
+    EVT_BUTTON(ExecuteRoutineDialog::ID_button_open_in_editor, ExecuteRoutineDialog::OnOpenEditorClick)
     EVT_BUTTON(wxID_CANCEL, ExecuteRoutineDialog::OnCloseButtonClick)
     EVT_CLOSE(ExecuteRoutineDialog::OnCloseWindow)
 END_EVENT_TABLE()
@@ -226,10 +220,12 @@ void ExecuteRoutineDialog::OnExecuteClick(wxCommandEvent& WXUNUSED(event))
     Function* f = dynamic_cast<Function*>(routineM);
 
     wxString sql;
+    wxString outCols;
+    wxString inPlaceholders;
+
     if (p)
     {
         p->ensureChildrenLoaded();
-        wxString outCols;
         for (auto it = p->begin(); it != p->end(); ++it)
         {
             Parameter* param = (*it).get();
@@ -240,7 +236,6 @@ void ExecuteRoutineDialog::OnExecuteClick(wxCommandEvent& WXUNUSED(event))
             }
         }
 
-        wxString inPlaceholders;
         for (size_t i = 0; i < paramCtrlsM.size(); ++i)
         {
             if (!inPlaceholders.IsEmpty()) inPlaceholders << ", ";
@@ -262,7 +257,6 @@ void ExecuteRoutineDialog::OnExecuteClick(wxCommandEvent& WXUNUSED(event))
     }
     else if (f)
     {
-        wxString inPlaceholders;
         for (size_t i = 0; i < paramCtrlsM.size(); ++i)
         {
             if (!inPlaceholders.IsEmpty()) inPlaceholders << ", ";
@@ -329,6 +323,43 @@ void ExecuteRoutineDialog::OnExecuteClick(wxCommandEvent& WXUNUSED(event))
                 }
                 rowIdx++;
             }
+
+            // If a procedure with output parameters was called via SELECT but returned 0 rows,
+            // it may be an executable procedure (non-selectable / no SUSPEND). Fall back to EXECUTE PROCEDURE.
+            if (rowIdx == 0 && p && !outCols.IsEmpty())
+            {
+                wxString execSql;
+                execSql << "EXECUTE PROCEDURE " << p->getQuotedName();
+                if (!inPlaceholders.IsEmpty())
+                    execSql << "(" << inPlaceholders << ")";
+
+                auto stExec = dalDb->createStatement(tr);
+                stExec->prepare(wx2std(execSql));
+                for (size_t i = 0; i < paramCtrlsM.size(); ++i)
+                {
+                    const auto& ctrlInfo = paramCtrlsM[i];
+                    int paramIndex = (int)i;
+                    if (ctrlInfo.nullCheckBox->IsChecked())
+                        stExec->setNull(paramIndex);
+                    else
+                        stExec->setString(paramIndex, wx2std(ctrlInfo.textCtrl->GetValue()));
+                }
+                stExec->execute();
+
+                if (stExec->fetch())
+                {
+                    grid_results->AppendRows(1);
+                    int execCols = stExec->getColumnCount();
+                    for (int c = 0; c < execCols && c < colCount; ++c)
+                    {
+                        if (stExec->isNull(c))
+                            grid_results->SetCellValue(0, c, "<NULL>");
+                        else
+                            grid_results->SetCellValue(0, c, wxString::FromUTF8(stExec->getString(c).c_str()));
+                    }
+                }
+            }
+
             grid_results->AutoSizeColumns();
         }
         else
