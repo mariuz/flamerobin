@@ -8,6 +8,19 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.8.5</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>General Improvements & Bug Fixes</B></font><br>
+<br>
+- <b>Data Grid Sorting on Partially Fetched Results Fix (#689)</b>: Fixed an issue where sorting a column on a partially fetched query result set caused subsequent rows (e.g. rows 201 to 300) to render blank/empty and permanently halted scrolling and background data retrieval. Implemented dynamic row mapping rebuilds on subsequent batch arrivals during active sort/filter modes, synchronized <code>wxGrid</code> view row count via <code>wxGRIDTABLE_NOTIFY_ROWS_APPENDED</code> and <code>wxGRIDTABLE_NOTIFY_ROWS_DELETED</code> events, and corrected the on-demand scrolling proximity check in <code>DataGridTable::GetValue()</code> to test view row positions instead of mapped buffer indices. Added comprehensive regression tests in <code>data_grid_sort_partial_fetch_test</code>.<br>
+- <b>Database Maintenance & Health Dashboard Dialog Close Fix (#690)</b>: Resolved an issue where the Database Maintenance & Health Dashboard window could not be dismissed using the Close button, Escape key, or window titlebar 'X' button (requiring Task Manager to terminate the application). Properly routed all dialog child controls to <code>BaseDialog::getControlsPanel()</code>, formatted with <code>styleguide().createButtonSizer()</code> and <code>layoutSizers()</code>, and updated <code>BaseDialog::OnCloseButtonClick</code> and <code>BaseDialog::OnClose</code> to call <code>EndModal(wxID_CANCEL)</code> when modal to terminate the wxWidgets modal event message loop cleanly.<br>
+- <b>Database Properties Settings Modification Fatal Crash Fix (#686)</b>: Resolved a fatal crash / use-after-free error when changing Settings in Database Properties (Forced Writes, Reserve Space, Read-Only, Page Buffers, Sweep Interval). Eliminated unnecessary <code>d->disconnect()</code> and <code>d->reconnect()</code> calls in <code>DatabaseInfoHandler</code> which triggered <code>setDisconnected()</code> and caused <code>MetadataItemPropertiesPanel</code> to close its parent frame while the click event handler was actively executing on the stack. Directly reloads database header properties via <code>d->loadInfo()</code> for clean, live in-place HTML re-rendering without dropping the active database connection.<br>
+<br><br>
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.8.4</font><br>
 <br><br>
 
