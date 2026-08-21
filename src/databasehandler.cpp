@@ -161,9 +161,6 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
 
             try
             {
-                // Before reloading the info, re-attach to the database
-                // otherwise the sweep interval won't be changed for FB Classic Server.
-                d->reconnect();
                 d->loadInfo();
             }
             catch (...)
@@ -180,9 +177,6 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
             bool fw = !d->getInfo().getForcedWrites();
             bool reserve = !d->getInfo().getReserve();
             bool ro = !d->getInfo().getReadOnly();
-
-            // setting these properties requires that the database is disconnected.
-            d->disconnect();
 
             if (isEditForcedWrites)
                 svc->setSyncWrite(wx2std(d->getPath()), fw);
@@ -202,7 +196,6 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
 
         try
         {
-            d->reconnect();
             d->loadInfo();
         }
         catch (...)
