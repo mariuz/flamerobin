@@ -56,7 +56,7 @@ DatabaseMaintenanceDialog::DatabaseMaintenanceDialog(wxWindow* parent, Database*
 
     wxBoxSizer* sizerMain = new wxBoxSizer(wxVERTICAL);
 
-    wxNotebook* notebook = new wxNotebook(this, -1);
+    wxNotebook* notebook = new wxNotebook(getControlsPanel(), -1);
 
     // --- Tab 1: Index Maintenance ---
     wxPanel* panelIndices = new wxPanel(notebook, -1);
@@ -114,17 +114,17 @@ DatabaseMaintenanceDialog::DatabaseMaintenanceDialog(wxWindow* parent, Database*
     sizerMain->Add(notebook, 1, wxEXPAND | wxALL, 6);
 
     // Bottom Execution Log Console
-    sizerMain->Add(new wxStaticText(this, -1, _("Maintenance Console Output:")), 0, wxLEFT | wxTOP, 6);
-    text_log = new wxTextCtrl(this, -1, wxEmptyString, wxDefaultPosition, wxSize(-1, 140), wxTE_MULTILINE | wxTE_READONLY);
+    sizerMain->Add(new wxStaticText(getControlsPanel(), -1, _("Maintenance Console Output:")), 0, wxLEFT | wxTOP, 6);
+    text_log = new wxTextCtrl(getControlsPanel(), -1, wxEmptyString, wxDefaultPosition, wxSize(-1, 140), wxTE_MULTILINE | wxTE_READONLY);
     sizerMain->Add(text_log, 0, wxEXPAND | wxALL, 6);
 
-    progress_gauge = new wxGauge(this, -1, 100, wxDefaultPosition, wxSize(-1, 14));
+    progress_gauge = new wxGauge(getControlsPanel(), -1, 100, wxDefaultPosition, wxSize(-1, 14));
     sizerMain->Add(progress_gauge, 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM, 6);
 
-    wxSizer* sizerButtons = CreateButtonSizer(wxCLOSE);
-    sizerMain->Add(sizerButtons, 0, wxEXPAND | wxALL, 6);
+    wxButton* button_close = new wxButton(getControlsPanel(), wxID_CANCEL, _("&Close"));
+    wxSizer* sizerButtons = styleguide().createButtonSizer(nullptr, button_close);
 
-    SetSizerAndFit(sizerMain);
+    layoutSizers(sizerMain, sizerButtons, true);
     SetSize(wxSize(680, 560));
 
     loadIndicesInfo();
@@ -133,6 +133,11 @@ DatabaseMaintenanceDialog::DatabaseMaintenanceDialog(wxWindow* parent, Database*
 
 DatabaseMaintenanceDialog::~DatabaseMaintenanceDialog()
 {
+}
+
+const wxString DatabaseMaintenanceDialog::getName() const
+{
+    return "DatabaseMaintenanceDialog";
 }
 
 void DatabaseMaintenanceDialog::logMessage(const wxString& msg)

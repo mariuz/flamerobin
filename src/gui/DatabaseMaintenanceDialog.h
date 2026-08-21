@@ -73,6 +73,9 @@ private:
     void OnRunSweep(wxCommandEvent& event);
 
     DECLARE_EVENT_TABLE()
+protected:
+    virtual const wxString getName() const override;
+
 public:
     DatabaseMaintenanceDialog(wxWindow* parent, Database* db);
     virtual ~DatabaseMaintenanceDialog();

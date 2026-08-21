@@ -43,6 +43,8 @@ BaseDialog::BaseDialog(wxWindow* parent, int id, const wxString& title,
 
     Connect(wxID_CLOSE, wxEVT_COMMAND_BUTTON_CLICKED,
         wxCommandEventHandler(BaseDialog::OnCloseButtonClick));
+    Connect(wxEVT_CLOSE_WINDOW,
+        wxCloseEventHandler(BaseDialog::OnClose));
 }
 
 wxPanel* BaseDialog::getControlsPanel()
@@ -213,6 +215,17 @@ bool BaseDialog::getConfigStoresHeight() const
 
 void BaseDialog::OnCloseButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    Close();
+    if (IsModal())
+        EndModal(wxID_CANCEL);
+    else
+        Close();
+}
+
+void BaseDialog::OnClose(wxCloseEvent& event)
+{
+    if (IsModal())
+        EndModal(wxID_CANCEL);
+    else
+        event.Skip();
 }
 

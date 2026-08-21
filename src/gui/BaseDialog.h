@@ -78,6 +78,7 @@ protected:
 private:
     wxPanel* panel_controls;
     void OnCloseButtonClick(wxCommandEvent& event);
+    void OnClose(wxCloseEvent& event);
 };
 
 #endif // BASEDIALOG_H
