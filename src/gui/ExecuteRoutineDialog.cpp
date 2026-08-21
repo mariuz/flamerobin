@@ -242,7 +242,21 @@ void ExecuteRoutineDialog::OnExecuteClick(wxCommandEvent& WXUNUSED(event))
             inPlaceholders << "?";
         }
 
+        bool isSelectable = false;
         if (!outCols.IsEmpty())
+        {
+            try
+            {
+                wxString src = p->getSource().Upper();
+                isSelectable = src.Contains("SUSPEND");
+            }
+            catch (...)
+            {
+                isSelectable = true;
+            }
+        }
+
+        if (isSelectable)
         {
             sql << "SELECT " << outCols << "\nFROM " << p->getQuotedName();
             if (!inPlaceholders.IsEmpty())
@@ -346,7 +360,7 @@ void ExecuteRoutineDialog::OnExecuteClick(wxCommandEvent& WXUNUSED(event))
                 }
                 stExec->execute();
 
-                if (stExec->fetch())
+                if (stExec->fetch() || stExec->getColumnCount() > 0)
                 {
                     grid_results->AppendRows(1);
                     int execCols = stExec->getColumnCount();

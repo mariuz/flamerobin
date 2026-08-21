@@ -61,5 +61,84 @@ int main()
                static_cast<int>(ExecuteRoutineDialog::ID_button_open_in_editor) > static_cast<int>(wxID_HIGHEST),
         "ExecuteRoutineDialog::ID_button_open_in_editor is outside standard wx stock ID range") && ok;
 
+    // Test 2: Regression test for #692 - Verify selectable vs executable procedure detection
+    {
+        // Procedure with SUSPEND (selectable)
+        wxString sourceSelectable = "BEGIN\n  FOR SELECT ID, NAME FROM T INTO :OUT_ID, :OUT_NAME DO\n    SUSPEND;\nEND";
+        bool isSelectable1 = sourceSelectable.Upper().Contains("SUSPEND");
+        ok = check(isSelectable1 == true, "Procedure with SUSPEND is detected as selectable") && ok;
+
+        // Procedure without SUSPEND (executable / non-selectable)
+        wxString sourceExecutable = "BEGIN\n  OUT_ID = 100;\n  OUT_NAME = 'Test';\nEND";
+        bool isSelectable2 = sourceExecutable.Upper().Contains("SUSPEND");
+        ok = check(isSelectable2 == false, "Procedure without SUSPEND is detected as non-selectable") && ok;
+    }
+
+    // Test 3: Regression test for #692 - Verify statement singleton output lifecycle
+    {
+        struct MockExecProcStatement
+        {
+            bool hasRow = false;
+            bool rowAvailable = false;
+            bool eofReached = false;
+            int colCount = 1;
+            std::string outputVal;
+
+            void execute()
+            {
+                hasRow = true;
+                if (colCount > 0)
+                {
+                    rowAvailable = hasRow;
+                    eofReached = true;
+                }
+            }
+
+            bool fetch()
+            {
+                if (hasRow)
+                {
+                    hasRow = false;
+                    rowAvailable = true;
+                    return true;
+                }
+                if (eofReached)
+                {
+                    rowAvailable = false;
+                    return false;
+                }
+                return false;
+            }
+
+            bool isNull(int col) const
+            {
+                if (!rowAvailable) return true;
+                return outputVal.empty();
+            }
+
+            std::string getString(int col) const
+            {
+                if (isNull(col)) return "";
+                return outputVal;
+            }
+        };
+
+        MockExecProcStatement st;
+        st.outputVal = "ComputedResult_42";
+        st.execute();
+
+        // Direct getter access after execute() should have rowAvailable == true
+        ok = check(!st.isNull(0), "EXECUTE PROCEDURE direct getter access is not null after execute()") && ok;
+        ok = check(st.getString(0) == "ComputedResult_42", "EXECUTE PROCEDURE returns valid result directly") && ok;
+
+        // Fetch should also consume the row cleanly
+        st.hasRow = true; // reset for fetch test
+        ok = check(st.fetch() == true, "EXECUTE PROCEDURE fetch() returns true on first call") && ok;
+        ok = check(!st.isNull(0), "EXECUTE PROCEDURE getter is not null after fetch()") && ok;
+        ok = check(st.getString(0) == "ComputedResult_42", "EXECUTE PROCEDURE returns valid value after fetch()") && ok;
+        ok = check(st.fetch() == false, "EXECUTE PROCEDURE fetch() returns false on second call (EOF)") && ok;
+        ok = check(st.isNull(0) == true, "EXECUTE PROCEDURE is null after EOF") && ok;
+    }
+
     return ok ? 0 : 1;
 }

@@ -260,19 +260,22 @@ void DataGridTable::fetchOne()
     try
     {
         int oldViewRows = GetNumberRows();
-        rowsM.addRow(statementDALM);
-        allRowsFetchedM = true;
-
-        if (filterOrSortActiveM)
-            updateRowMapping();
-        notifyViewRowsChanged(oldViewRows);
-
-        if (GetView())   // notify the grid
+        if (statementDALM->fetch() || (statementDALM->getColumnCount() > 0))
         {
-            // used in frame to update status bar
-            wxCommandEvent evt(wxEVT_FRDG_ROWCOUNT_CHANGED, GetView()->GetId());
-            evt.SetExtraLong(1);
-            wxPostEvent(GetView(), evt);
+            rowsM.addRow(statementDALM);
+            allRowsFetchedM = true;
+
+            if (filterOrSortActiveM)
+                updateRowMapping();
+            notifyViewRowsChanged(oldViewRows);
+
+            if (GetView())   // notify the grid
+            {
+                // used in frame to update status bar
+                wxCommandEvent evt(wxEVT_FRDG_ROWCOUNT_CHANGED, GetView()->GetId());
+                evt.SetExtraLong(1);
+                wxPostEvent(GetView(), evt);
+            }
         }
     }
     catch (std::exception& e)

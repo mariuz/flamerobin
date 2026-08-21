@@ -173,6 +173,7 @@ void FbCppStatement::execute()
         if (getColumnCount() > 0)
         {
             firstRowFetchedM = hasRow;
+            rowAvailableM = hasRow;
             if (getType() == StatementType::ExecProcedure)
                 eofReachedM = true;
             else
@@ -202,7 +203,10 @@ bool FbCppStatement::fetch()
     }
 
     if (eofReachedM)
+    {
+        rowAvailableM = false;
         return false;
+    }
 
     try {
         bool res = statementM->fetchNext();
@@ -213,6 +217,7 @@ bool FbCppStatement::fetch()
     } catch (const std::exception& e) {
         wxLogDebug("FbCppStatement::fetch() failed: %s", e.what());
         eofReachedM = true;
+        rowAvailableM = false;
         throw;
     }
 }

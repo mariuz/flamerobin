@@ -138,8 +138,22 @@ wxString RoutineHelper::getRoutineExecutionTemplate(MetadataItem* item)
             }
         }
 
-        wxString sql;
+        bool isSelectable = false;
         if (!outCols.IsEmpty())
+        {
+            try
+            {
+                wxString src = p->getSource().Upper();
+                isSelectable = src.Contains("SUSPEND");
+            }
+            catch (...)
+            {
+                isSelectable = true;
+            }
+        }
+
+        wxString sql;
+        if (isSelectable)
         {
             sql << "SELECT " << outCols << "\nFROM " << p->getQuotedName();
             if (!inPlaceholders.IsEmpty())
