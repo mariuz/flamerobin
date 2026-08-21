@@ -131,15 +131,31 @@ int main()
         svc->setSyncWrite(dbName, true);
         svc->setReserveSpace(dbName, true);
 
-        // Reconnect and check updated properties
+        // Setting database to READ ONLY requires exclusive access (no active attachments)
+        std::cout << "  Disconnecting db to test setReadOnly(true)...\n";
         db->disconnect();
+        std::cout << "  Testing setReadOnly(true)...\n";
+        svc->setReadOnly(dbName, true);
+
+        // Reconnect and check updated properties
         db->connect();
         fr::DatabaseInfoData updatedInfo;
         db->getInfo(&updatedInfo);
-        std::cout << "    Updated Sweep: " << updatedInfo.sweep << ", ForcedWrites: " << (updatedInfo.forcedWrites ? "ON" : "OFF") << "\n";
+        std::cout << "    Updated Sweep: " << updatedInfo.sweep << ", ForcedWrites: " << (updatedInfo.forcedWrites ? "ON" : "OFF") << ", ReadOnly: " << (updatedInfo.readOnly ? "ON" : "OFF") << "\n";
         ok = fr_test::check(updatedInfo.sweep == 20000, "updated sweep interval is 20000") && ok;
         ok = fr_test::check(updatedInfo.forcedWrites == true, "updated forced writes is true") && ok;
         ok = fr_test::check(updatedInfo.reserve == true, "updated reserve space is true") && ok;
+        ok = fr_test::check(updatedInfo.readOnly == true, "updated read-only is true") && ok;
+
+        // Disconnect to restore READ WRITE mode
+        std::cout << "  Disconnecting db to test setReadOnly(false)...\n";
+        db->disconnect();
+        std::cout << "  Testing setReadOnly(false)...\n";
+        svc->setReadOnly(dbName, false);
+        db->connect();
+        db->getInfo(&updatedInfo);
+        std::cout << "    Restored ReadOnly: " << (updatedInfo.readOnly ? "ON" : "OFF") << "\n";
+        ok = fr_test::check(updatedInfo.readOnly == false, "restored read-only is false") && ok;
 
         std::cout << "  Disconnecting...\n";
         db->disconnect();

@@ -38,6 +38,7 @@
 #include "metadata/database.h"
 #include "metadata/MetadataItemURIHandlerHelper.h"
 #include "engine/db/DatabaseFactory.h"
+#include "engine/MetadataLoader.h"
 
 class DatabaseInfoHandler: public URIHandler,
     private MetadataItemURIHandlerHelper, private GUIURIHandlerHelper
@@ -179,19 +180,60 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
             bool ro = !d->getInfo().getReadOnly();
 
             if (isEditForcedWrites)
+            {
                 svc->setSyncWrite(wx2std(d->getPath()), fw);
+            }
             else if (isEditReserve)
+            {
                 svc->setReserveSpace(wx2std(d->getPath()), reserve);
+            }
             else if (isEditReadOnly)
-                svc->setReadOnly(wx2std(d->getPath()), ro);
+            {
+                MetadataLoader* loader = d->getMetadataLoader();
+                if (loader)
+                    loader->releaseStatements();
+
+                if (d->getDALDatabase() && d->getDALDatabase()->isConnected())
+                    d->getDALDatabase()->disconnect();
+
+                try
+                {
+                    svc->setReadOnly(wx2std(d->getPath()), ro);
+                }
+                catch (const std::exception& e)
+                {
+                    if (d->getDALDatabase() && !d->getDALDatabase()->isConnected())
+                    {
+                        try { d->getDALDatabase()->connect(); } catch (...) {}
+                    }
+                    wxString errStr = wxString::FromUTF8(e.what());
+                    wxString msg = _("Failed to change database access mode to ") +
+                        (ro ? _("Read-Only") : _("Read-Write")) + _(".\n\n") +
+                        _("Changing database access mode requires exclusive access (no other active connections or transactions).\n\n") +
+                        _("Details: ") + errStr;
+                    wxMessageBox(msg, _("Error Changing Database Properties"), wxOK | wxICON_ERROR, w);
+                    throw;
+                }
+
+                if (d->getDALDatabase() && !d->getDALDatabase()->isConnected())
+                {
+                    d->getDALDatabase()->connect();
+                }
+            }
         }
         catch (const std::exception& e)
         {
-            wxMessageBox(wxString::FromUTF8(e.what()), _("Error Changing Database Properties"), wxOK | wxICON_ERROR, w);
+            if (!isEditReadOnly)
+                wxMessageBox(wxString::FromUTF8(e.what()), _("Error Changing Database Properties"), wxOK | wxICON_ERROR, w);
         }
         catch (...)
         {
-            wxMessageBox(_("An unknown error occurred while changing database properties."), _("Error"), wxOK | wxICON_ERROR, w);
+            if (d->getDALDatabase() && !d->getDALDatabase()->isConnected())
+            {
+                try { d->getDALDatabase()->connect(); } catch (...) {}
+            }
+            if (!isEditReadOnly)
+                wxMessageBox(_("An unknown error occurred while changing database properties."), _("Error"), wxOK | wxICON_ERROR, w);
         }
 
         try
