@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
   "name": "flamerobin",
-  "version-semver": "26.8.3",
+  "version-semver": "26.8.6",
   "description": "FlameRobin is a database administration tool for Firebird DBMS",
   "homepage": "https://www.flamerobin.org",
   "license": "MIT",
@@ -65,32 +65,12 @@
   ],
   "overrides": [
     {
-      "name": "boost-dll",
-      "version": "1.90.0"
-    },
-    {
-      "name": "boost-filesystem",
-      "version": "1.90.0"
-    },
-    {
-      "name": "boost-multiprecision",
-      "version": "1.90.0"
-    },
-    {
-      "name": "boost-test",
-      "version": "1.90.0"
-    },
-    {
       "name": "firebird",
       "version": "5.0.4"
     },
     {
       "name": "fb-cpp",
       "version": "0.0.6"
-    },
-    {
-      "name": "icu",
-      "version": "78.1"
     }
   ]
 }
