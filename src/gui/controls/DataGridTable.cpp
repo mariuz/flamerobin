@@ -104,10 +104,10 @@ void DataGridTable::Clear()
     filterOrSortActiveM = false;
     currentFilterTextM.Clear();
     originalColLabelsM.clear();
-    rowMappingM.clear();
 
     unsigned oldCols = rowsM.getRowFieldCount();
-    unsigned oldRows = rowsM.getRowCount();
+    unsigned oldRows = (unsigned)GetNumberRows();
+    rowMappingM.clear();
     rowsM.clear();
 
     if (GetView() && oldRows > 0)
@@ -166,13 +166,19 @@ unsigned DataGridTable::processPendingBatches()
         }
     }
 
-    if (totalNew > 0 && GetView())
+    if (totalNew > 0)
     {
-        wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, totalNew);
-        GetView()->ProcessTableMessage(msg);
-        wxCommandEvent evt(wxEVT_FRDG_ROWCOUNT_CHANGED, GetView()->GetId());
-        evt.SetExtraLong(rowsM.getRowCount());
-        wxPostEvent(GetView(), evt);
+        int oldViewRows = GetNumberRows();
+        if (filterOrSortActiveM)
+            updateRowMapping();
+        notifyViewRowsChanged(oldViewRows);
+
+        if (GetView())
+        {
+            wxCommandEvent evt(wxEVT_FRDG_ROWCOUNT_CHANGED, GetView()->GetId());
+            evt.SetExtraLong(rowsM.getRowCount());
+            wxPostEvent(GetView(), evt);
+        }
     }
 
     return totalNew;
@@ -253,13 +259,16 @@ void DataGridTable::fetchOne()
 {
     try
     {
+        int oldViewRows = GetNumberRows();
         rowsM.addRow(statementDALM);
         allRowsFetchedM = true;
 
+        if (filterOrSortActiveM)
+            updateRowMapping();
+        notifyViewRowsChanged(oldViewRows);
+
         if (GetView())   // notify the grid
         {
-            wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, 1);
-            GetView()->ProcessTableMessage(msg);
             // used in frame to update status bar
             wxCommandEvent evt(wxEVT_FRDG_ROWCOUNT_CHANGED, GetView()->GetId());
             evt.SetExtraLong(1);
@@ -281,7 +290,7 @@ void DataGridTable::fetch()
     if (!canFetchMoreRows())
         return;
 
-    // fetch the first 100 rows no matter how long it takes
+    int oldViewRows = GetNumberRows();
     unsigned oldRows = rowsM.getRowCount();
     bool initial = oldRows == 0;
     // fetch more rows until maxRowToFetchM reached or 50 ms elapsed
@@ -320,25 +329,32 @@ void DataGridTable::fetch()
     while ((fetchAllRowsM && !initial) || rowsM.getRowCount() < maxRowToFetchM);
 
     unsigned newRows = rowsM.getRowCount() - oldRows;
-    if (newRows > 0 && GetView())   // notify the grid
+    if (newRows > 0)
     {
-        wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED,
-            newRows);
-        GetView()->ProcessTableMessage(msg);
-        // used in frame to update status bar
-        wxCommandEvent evt(wxEVT_FRDG_ROWCOUNT_CHANGED, GetView()->GetId());
-        evt.SetExtraLong(rowsM.getRowCount());
-        wxPostEvent(GetView(), evt);
+        if (filterOrSortActiveM)
+            updateRowMapping();
+        notifyViewRowsChanged(oldViewRows);
+
+        if (GetView())   // notify the grid
+        {
+            // used in frame to update status bar
+            wxCommandEvent evt(wxEVT_FRDG_ROWCOUNT_CHANGED, GetView()->GetId());
+            evt.SetExtraLong(rowsM.getRowCount());
+            wxPostEvent(GetView(), evt);
+        }
     }
 }
 
 void DataGridTable::addRow(DataGridRowBuffer *buffer, const wxString& sql)
 {
+    int oldViewRows = GetNumberRows();
     rowsM.addRow(buffer);
+    if (filterOrSortActiveM)
+        updateRowMapping();
+    notifyViewRowsChanged(oldViewRows);
+
     if (GetView())  // notify the grid
     {
-        wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, 1);
-        GetView()->ProcessTableMessage(msg);
         // used in frame to update status bar
         wxCommandEvent evt(wxEVT_FRDG_ROWCOUNT_CHANGED, GetView()->GetId());
         evt.SetExtraLong(rowsM.getRowCount());
@@ -355,6 +371,9 @@ wxGridCellAttr* DataGridTable::GetAttr(int row, int col,
     wxGridCellAttr::wxAttrKind kind)
 {
     int realRow = getRealRowIndex(row);
+    if (realRow < 0)
+        return wxGridTableBase::GetAttr(row, col, kind);
+
     DataGridFieldInfo info;
     if (!rowsM.getFieldInfo(realRow, col, info))
         return wxGridTableBase::GetAttr(row, col, kind);
@@ -409,6 +428,8 @@ wxString DataGridTable::getCellValue(int row, int col)
         return wxEmptyString;
 
     int realRow = getRealRowIndex(row);
+    if (realRow < 0)
+        return wxEmptyString;
     if (rowsM.isFieldNA(realRow, col))
         return "N/A";
     if (rowsM.isFieldNull(realRow, col))
@@ -422,6 +443,8 @@ wxString DataGridTable::getCellValueForInsert(int row, int col)
         return wxEmptyString;
 
     int realRow = getRealRowIndex(row);
+    if (realRow < 0)
+        return wxEmptyString;
     if (rowsM.isFieldNA(realRow, col))
         return wxEmptyString;
 
@@ -448,6 +471,8 @@ wxString DataGridTable::getCellValueForCSV(int row, int col,
         return wxEmptyString;
 
     int realRow = getRealRowIndex(row);
+    if (realRow < 0)
+        return wxEmptyString;
     if (rowsM.isFieldNA(realRow, col))
         return wxEmptyString;
 
@@ -602,11 +627,13 @@ wxString DataGridTable::GetValue(int row, int col)
         return wxEmptyString;
 
     int realRow = getRealRowIndex(row);
+    if (realRow < 0)
+        return wxEmptyString;
 
     // On-demand fetching: Only request more rows when scrolling near the loaded boundary
     if (!allRowsFetchedM && !fetchAllRowsM)
     {
-        if ((unsigned)realRow + 20 >= rowsM.getRowCount())
+        if ((unsigned)row + 20 >= (unsigned)GetNumberRows())
         {
             if (maxRowToFetchM <= rowsM.getRowCount())
                 maxRowToFetchM = rowsM.getRowCount() + 100;
@@ -691,7 +718,10 @@ bool DataGridTable::isNullableColumn(int col)
 
 bool DataGridTable::isNullCell(int row, int col)
 {
-    return rowsM.isFieldNull(getRealRowIndex(row), col);
+    int realRow = getRealRowIndex(row);
+    if (realRow < 0)
+        return true;
+    return rowsM.isFieldNull(realRow, col);
 }
 
 bool DataGridTable::isNumericColumn(int col)
@@ -724,7 +754,10 @@ bool DataGridTable::canInsertRows()
 
 bool DataGridTable::canRemoveRow(size_t row)
 {
-    return rowsM.canRemoveRow(getRealRowIndex((int)row));
+    int realRow = getRealRowIndex((int)row);
+    if (realRow < 0)
+        return false;
+    return rowsM.canRemoveRow(realRow);
 }
 
 bool DataGridTable::needsMoreRowsFetched()
@@ -743,12 +776,25 @@ void DataGridTable::setFetchAllRecords(bool fetchall)
 
 fr::IBlobPtr DataGridTable::getBlob(unsigned row, unsigned col, bool validateBlob)
 {
-    return rowsM.getBlob(getRealRowIndex((int)row), col, validateBlob);
+    int realRow = getRealRowIndex((int)row);
+    if (realRow < 0)
+        return fr::IBlobPtr();
+    return rowsM.getBlob(realRow, col, validateBlob);
 }
 
 DataGridRowsBlob DataGridTable::setBlobPrepare(unsigned row, unsigned col)
 {
-    return rowsM.setBlobPrepare(getRealRowIndex((int)row), col);
+    int realRow = getRealRowIndex((int)row);
+    if (realRow < 0)
+    {
+        DataGridRowsBlob b;
+        b.blob = 0;
+        b.col = 0;
+        b.row = 0;
+        b.stDAL = 0;
+        return b;
+    }
+    return rowsM.setBlobPrepare(realRow, col);
 }
 
 void DataGridTable::setBlob(DataGridRowsBlob &b)
@@ -759,13 +805,17 @@ void DataGridTable::setBlob(DataGridRowsBlob &b)
 void DataGridTable::importBlobFile(const wxString& filename, int row, int col,
     ProgressIndicator *pi)
 {
-    rowsM.importBlobFile(filename, getRealRowIndex(row), col, pi);
+    int realRow = getRealRowIndex(row);
+    if (realRow >= 0)
+        rowsM.importBlobFile(filename, realRow, col, pi);
 }
 
 void DataGridTable::exportBlobFile(const wxString& filename, int row, int col,
     ProgressIndicator *pi)
 {
-    rowsM.exportBlobFile(filename, getRealRowIndex(row), col, pi);
+    int realRow = getRealRowIndex(row);
+    if (realRow >= 0)
+        rowsM.exportBlobFile(filename, realRow, col, pi);
 }
 
 bool DataGridTable::isBlobColumn(int col, bool* pIsTextual)
@@ -835,6 +885,8 @@ void DataGridTable::SetValue(int row, int col, const wxString& value)
 void DataGridTable::setValueToNull(int row, int col)
 {
     int realRow = getRealRowIndex(row);
+    if (realRow < 0)
+        return;
     setNullFlag(true);
     SetValue(row, col, "[null]");
     if (isBlobColumn(col,0))
@@ -898,9 +950,31 @@ DEFINE_EVENT_TYPE(wxEVT_FRDG_FETCH_DONE)
 
 int DataGridTable::getRealRowIndex(int row) const
 {
-    if (filterOrSortActiveM && row >= 0 && row < (int)rowMappingM.size())
-        return (int)rowMappingM[row];
+    if (filterOrSortActiveM)
+    {
+        if (row >= 0 && row < (int)rowMappingM.size())
+            return (int)rowMappingM[row];
+        return -1;
+    }
     return row;
+}
+
+void DataGridTable::notifyViewRowsChanged(int oldViewRows)
+{
+    if (!GetView())
+        return;
+    int newViewRows = GetNumberRows();
+    if (newViewRows > oldViewRows)
+    {
+        wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, newViewRows - oldViewRows);
+        GetView()->ProcessTableMessage(msg);
+    }
+    else if (newViewRows < oldViewRows)
+    {
+        wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED, newViewRows, oldViewRows - newViewRows);
+        GetView()->ProcessTableMessage(msg);
+    }
+    GetView()->ForceRefresh();
 }
 
 void DataGridTable::updateRowMapping()
@@ -971,15 +1045,19 @@ void DataGridTable::updateRowMapping()
 
 void DataGridTable::filterRows(const wxString& filterText)
 {
+    int oldViewRows = GetNumberRows();
     currentFilterTextM = filterText;
     updateRowMapping();
+    notifyViewRowsChanged(oldViewRows);
 }
 
 void DataGridTable::sortColumn(int col, bool ascending)
 {
+    int oldViewRows = GetNumberRows();
     sortedColM = col;
     sortAscendingM = ascending;
     updateRowMapping();
+    notifyViewRowsChanged(oldViewRows);
 
     if (GetView() && col >= 0 && col < GetNumberCols())
     {
@@ -987,7 +1065,7 @@ void DataGridTable::sortColumn(int col, bool ascending)
         {
             originalColLabelsM.resize(GetNumberCols());
             for (int c = 0; c < GetNumberCols(); ++c)
-                originalColLabelsM[c] = GetView()->GetColLabelValue(c);
+                originalColLabelsM[c] = rowsM.getRowFieldName(c);
         }
 
         for (int c = 0; c < GetNumberCols(); ++c)
@@ -1017,16 +1095,18 @@ void DataGridTable::toggleSortColumn(int col)
 
 void DataGridTable::clearFilterAndSort()
 {
+    int oldViewRows = GetNumberRows();
     currentFilterTextM.Clear();
     sortedColM = -1;
     sortAscendingM = true;
     filterOrSortActiveM = false;
     rowMappingM.clear();
+    notifyViewRowsChanged(oldViewRows);
 
-    if (GetView() && !originalColLabelsM.empty())
+    if (GetView())
     {
-        for (int c = 0; c < GetNumberCols() && c < (int)originalColLabelsM.size(); ++c)
-            GetView()->SetColLabelValue(c, originalColLabelsM[c]);
+        for (int c = 0; c < GetNumberCols(); ++c)
+            GetView()->SetColLabelValue(c, rowsM.getRowFieldName(c));
     }
 }
 

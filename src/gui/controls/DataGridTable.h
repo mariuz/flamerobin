@@ -95,6 +95,7 @@ private:
 
     void updateRowMapping();
     int getRealRowIndex(int row) const;
+    void notifyViewRowsChanged(int oldViewRows);
 public:
     DataGridTable(fr::IStatementPtr s, Database* db);
     ~DataGridTable();

@@ -1318,12 +1318,14 @@ void DataGrid::OnGridLabelLeftClick(wxGridEvent& event)
     }
 
     int col = event.GetCol();
-    if (col >= 0)
+    int row = event.GetRow();
+    if (row == -1 && col >= 0)
     {
         DataGridTable* table = getDataGridTable();
         if (table)
         {
             table->toggleSortColumn(col);
+            AdjustScrollbars();
             ForceRefresh();
         }
     }
