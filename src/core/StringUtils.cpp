@@ -276,3 +276,196 @@ wxString wrapText(const wxString& text, size_t maxWidth, size_t indent)
     }
     return wrappedText;
 }
+
+wxString normalizeNumericInput(const wxString& source, bool isInteger)
+{
+    wxString s(source);
+    s.Trim(true).Trim(false);
+    if (s.empty())
+        return s;
+
+    // Check special values
+    wxString lower = s.Lower();
+    if (lower == "nan" || lower == "infinity" || lower == "+infinity" || lower == "-infinity")
+        return s;
+
+    // Check for sign prefix
+    wxString sign;
+    if (s[0] == '+' || s[0] == '-')
+    {
+        sign = s[0];
+        s.erase(0, 1);
+        s.Trim(false);
+    }
+
+    if (s.empty())
+        return sign;
+
+    // Check for exponent (e.g. 1.23e-4 or 1,23E+10)
+    wxString mantissa = s;
+    wxString exponent;
+    if (!isInteger)
+    {
+        int expIdx = -1;
+        for (int i = (int)s.Length() - 1; i >= 0; --i)
+        {
+            if (s[i] == 'e' || s[i] == 'E')
+            {
+                expIdx = i;
+                break;
+            }
+        }
+        if (expIdx != -1)
+        {
+            mantissa = s.substr(0, expIdx);
+            exponent = s.substr(expIdx);
+            exponent.Replace(" ", "");
+        }
+    }
+
+    // Remove all whitespace in mantissa (including standard spaces, tabs, NBSP, etc.)
+    wxString cleanMantissa;
+    for (size_t i = 0; i < mantissa.Length(); ++i)
+    {
+        wxChar ch = mantissa[i];
+        if (ch != ' ' && ch != '\t' && ch != '\r' && ch != '\n'
+            && ch != (wxChar)0x00A0 && ch != (wxChar)0x202F)
+        {
+            cleanMantissa += ch;
+        }
+    }
+
+    if (cleanMantissa.empty())
+        return sign + exponent;
+
+    int dotCount = 0;
+    int commaCount = 0;
+    int lastDot = -1;
+    int lastComma = -1;
+
+    for (size_t i = 0; i < cleanMantissa.Length(); ++i)
+    {
+        if (cleanMantissa[i] == '.')
+        {
+            dotCount++;
+            lastDot = (int)i;
+        }
+        else if (cleanMantissa[i] == ',')
+        {
+            commaCount++;
+            lastComma = (int)i;
+        }
+    }
+
+    wxString resultMantissa;
+
+    if (dotCount > 0 && commaCount > 0)
+    {
+        // Both dot and comma present
+        if (lastComma > lastDot)
+        {
+            // European format: "1.234.567,89" -> dots are thousands, comma is decimal
+            for (size_t i = 0; i < cleanMantissa.Length(); ++i)
+            {
+                if (cleanMantissa[i] == '.')
+                    continue; // drop thousand dot
+                else if (cleanMantissa[i] == ',')
+                {
+                    if ((int)i == lastComma)
+                        resultMantissa += (isInteger ? "" : ".");
+                }
+                else
+                    resultMantissa += cleanMantissa[i];
+            }
+        }
+        else
+        {
+            // US format: "1,234,567.89" -> commas are thousands, dot is decimal
+            for (size_t i = 0; i < cleanMantissa.Length(); ++i)
+            {
+                if (cleanMantissa[i] == ',')
+                    continue; // drop thousand comma
+                else if (cleanMantissa[i] == '.')
+                {
+                    if ((int)i == lastDot)
+                        resultMantissa += (isInteger ? "" : ".");
+                }
+                else
+                    resultMantissa += cleanMantissa[i];
+            }
+        }
+    }
+    else if (commaCount > 0)
+    {
+        // Only commas present (no dots)
+        if (isInteger)
+        {
+            // All commas are thousand separators
+            for (size_t i = 0; i < cleanMantissa.Length(); ++i)
+            {
+                if (cleanMantissa[i] != ',')
+                    resultMantissa += cleanMantissa[i];
+            }
+        }
+        else
+        {
+            if (commaCount == 1)
+            {
+                // Single comma is decimal separator: "3,14" -> "3.14"
+                for (size_t i = 0; i < cleanMantissa.Length(); ++i)
+                {
+                    if (cleanMantissa[i] == ',')
+                        resultMantissa += '.';
+                    else
+                        resultMantissa += cleanMantissa[i];
+                }
+            }
+            else
+            {
+                // Multiple commas: treat as thousand separators
+                for (size_t i = 0; i < cleanMantissa.Length(); ++i)
+                {
+                    if (cleanMantissa[i] != ',')
+                        resultMantissa += cleanMantissa[i];
+                }
+            }
+        }
+    }
+    else if (dotCount > 0)
+    {
+        // Only dots present (no commas)
+        if (isInteger)
+        {
+            // All dots are thousand separators
+            for (size_t i = 0; i < cleanMantissa.Length(); ++i)
+            {
+                if (cleanMantissa[i] != '.')
+                    resultMantissa += cleanMantissa[i];
+            }
+        }
+        else
+        {
+            if (dotCount == 1)
+            {
+                // Single dot is decimal separator: "3.14"
+                resultMantissa = cleanMantissa;
+            }
+            else
+            {
+                // Multiple dots: e.g. "1.234.567" -> treat as thousand separators
+                for (size_t i = 0; i < cleanMantissa.Length(); ++i)
+                {
+                    if (cleanMantissa[i] != '.')
+                        resultMantissa += cleanMantissa[i];
+                }
+            }
+        }
+    }
+    else
+    {
+        // No dots or commas
+        resultMantissa = cleanMantissa;
+    }
+
+    return sign + resultMantissa + exponent;
+}

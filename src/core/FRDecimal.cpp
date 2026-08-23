@@ -34,6 +34,7 @@
 
 #include "core/FRInt128.h"
 #include "core/FRDecimal.h"
+#include "core/StringUtils.h"
 
 #pragma pack(push)
 #pragma pack(1)
@@ -498,17 +499,18 @@ bool StringToDecParse(const DECFLOAT_DEFINITION& def,
     int DecimalSeparatorPos;
     int DecimalDigits;
     bool NeedExponent;
-    wxChar DecimalSeparator = wxNumberFormatter::GetDecimalSeparator();
+    wxString normStr = normalizeNumericInput(srcStr, false);
+    wxChar DecimalSeparator = '.';
 
     *dstInfo = {0};
 
-    if (srcStr.IsEmpty())
+    if (normStr.IsEmpty())
     {
         errMsg = _("SrcStr is empty!");
         return false;
     }
 
-    srcStrL = srcStr.Lower();
+    srcStrL = normStr.Lower();
     if (srcStrL == _("nan"))
     {
         dstInfo->isNaN = true;
@@ -521,7 +523,7 @@ bool StringToDecParse(const DECFLOAT_DEFINITION& def,
     }
 
     dstInfo->negative = false;
-    ch = srcStr.GetChar(0);
+    ch = normStr.GetChar(0);
     iStart = 0;
     if ((ch == '+') || (ch == '-'))
     {
@@ -533,9 +535,9 @@ bool StringToDecParse(const DECFLOAT_DEFINITION& def,
     DecimalSeparatorPos = -1;
     valueStr = _("");
     NeedExponent = false;
-    for (i1 = iStart; i1 < srcStr.Length(); i1++)
+    for (i1 = iStart; i1 < normStr.Length(); i1++)
     {
-        ch = srcStr.GetChar(i1);
+        ch = normStr.GetChar(i1);
         if (ch == DecimalSeparator)
         {
             // more than one dot?

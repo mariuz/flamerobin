@@ -830,13 +830,13 @@ void InsertParametersDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
                 if (scale != 0)
                 {
                     double d3;
-                    if (!value.ToDouble(&d3))
+                    if (!normalizeNumericInput(value, false).ToDouble(&d3))
                         throw FRError(_("Invalid float numeric value"));
                     statementDALM->setDouble(row, d3);
                     break;
                 }
                 long d;
-                if (!value.ToLong(&d))
+                if (!normalizeNumericInput(value, true).ToLong(&d))
                     throw FRError(_("Invalid integer value"));
                 statementDALM->setInt32(row, (int)d);
                 break;
@@ -844,13 +844,13 @@ void InsertParametersDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
                 if (scale != 0)
                 {
                     double d3;
-                    if (!value.ToDouble(&d3))
+                    if (!normalizeNumericInput(value, false).ToDouble(&d3))
                         throw FRError(_("Invalid float numeric value"));
                     statementDALM->setDouble(row, d3);
                     break;
                 }
                 long d1;
-                if (!value.ToLong(&d1))
+                if (!normalizeNumericInput(value, true).ToLong(&d1))
                     throw FRError(_("Invalid integer value"));
                 statementDALM->setInt32(row, (int)d1);
                 break;
@@ -858,25 +858,25 @@ void InsertParametersDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
                 if (scale != 0)
                 {
                     double d3;
-                    if (!value.ToDouble(&d3))
+                    if (!normalizeNumericInput(value, false).ToDouble(&d3))
                         throw FRError(_("Invalid float numeric value"));
                     statementDALM->setDouble(row, d3);
                     break;
                 }
                 wxLongLong_t d2;
-                if (!value.ToLongLong(&d2))
+                if (!normalizeNumericInput(value, true).ToLongLong(&d2))
                     throw FRError(_("Invalid large integer value"));
                 statementDALM->setInt64(row, (int64_t)d2);
                 break;
             case IBPP::SDT::sdFloat:
                 double d3;
-                if (!value.ToDouble(&d3))
+                if (!normalizeNumericInput(value, false).ToDouble(&d3))
                     throw FRError(_("Invalid float numeric value"));
                 statementDALM->setDouble(row, d3);
                 break;
             case IBPP::SDT::sdDouble:
                 double d4;
-                if (!value.ToDouble(&d4))
+                if (!normalizeNumericInput(value, false).ToDouble(&d4))
                     throw FRError(_("Invalid double numeric value"));
                 statementDALM->setDouble(row, d4);
                 break;

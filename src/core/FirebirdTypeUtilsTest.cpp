@@ -55,6 +55,22 @@ int main()
     ok = check(cryptStateToString(fb_info_crypt_process) == "Encryption in progress", "Encryption in progress state") && ok;
     ok = check(cryptStateToString(fb_info_crypt_encrypted | fb_info_crypt_process) == "Decryption in progress", "Decryption in progress state") && ok;
 
+    // normalizeNumericInput tests (Hu/EU decimal comma vs dot, thousand grouping, scientific notation)
+    ok = check(normalizeNumericInput("3,14", false) == "3.14", "Decimal comma 3,14 -> 3.14") && ok;
+    ok = check(normalizeNumericInput("3.14", false) == "3.14", "Decimal point 3.14 -> 3.14") && ok;
+    ok = check(normalizeNumericInput("-3,14", false) == "-3.14", "Negative decimal comma -3,14 -> -3.14") && ok;
+    ok = check(normalizeNumericInput("+42,5", false) == "+42.5", "Positive decimal comma +42,5 -> +42.5") && ok;
+    ok = check(normalizeNumericInput("123 456,78", false) == "123456.78", "Hu space grouping 123 456,78 -> 123456.78") && ok;
+    ok = check(normalizeNumericInput("1 234 567.89", false) == "1234567.89", "Space grouping with dot 1 234 567.89 -> 1234567.89") && ok;
+    ok = check(normalizeNumericInput("1.234.567,89", false) == "1234567.89", "EU dot thousands + comma decimal 1.234.567,89 -> 1234567.89") && ok;
+    ok = check(normalizeNumericInput("1,234,567.89", false) == "1234567.89", "US comma thousands + dot decimal 1,234,567.89 -> 1234567.89") && ok;
+    ok = check(normalizeNumericInput("1 234 567", true) == "1234567", "Integer space grouping 1 234 567 -> 1234567") && ok;
+    ok = check(normalizeNumericInput("1,234,567", true) == "1234567", "Integer comma grouping 1,234,567 -> 1234567") && ok;
+    ok = check(normalizeNumericInput("1.234.567", true) == "1234567", "Integer dot grouping 1.234.567 -> 1234567") && ok;
+    ok = check(normalizeNumericInput("1,23e-4", false) == "1.23e-4", "Scientific notation 1,23e-4 -> 1.23e-4") && ok;
+    ok = check(normalizeNumericInput("2,5E+10", false) == "2.5E+10", "Scientific notation 2,5E+10 -> 2.5E+10") && ok;
+    ok = check(normalizeNumericInput("  3,14  ", false) == "3.14", "Whitespace trimmed 3,14 -> 3.14") && ok;
+
     if (ok)
     {
         wxPrintf("All tests PASSED\n");

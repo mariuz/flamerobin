@@ -63,6 +63,9 @@ wxString loadEntireFile(const wxFileName& filename);
 wxString wrapText(const wxString& text, size_t maxWidth, size_t indent);
 
 
+// Normalizes numeric strings (handling locale decimal points/commas and thousand separators).
+wxString normalizeNumericInput(const wxString& source, bool isInteger = false);
+
 #include "engine/db/ITransaction.h"
 
 wxString DALtype2string(Database* db, fr::ColumnType t, int subtype, int size, int scale);

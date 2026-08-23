@@ -30,6 +30,7 @@
     #include <wx/wx.h>
 #endif
 
+#include "core/StringUtils.h"
 #include "gui/controls/DataGridRows.h"
 #include "gui/controls/DataGridRowBuffer.h"
 
@@ -197,6 +198,17 @@ int main()
             day, month, year, hour, minute, second, tenththousands / 10);
         ok = check(!displayString.Contains(","), "Display timestamp format (D.N.Y H:M:S.T) has no comma (Issue #694)") && ok;
         ok = check(displayString == "01.01.2021 00:00:00.000", "Display timestamp matches '01.01.2021 00:00:00.000'") && ok;
+    }
+
+    // Test 9: Decimal-point vs Decimal-comma input normalization (Issue #697)
+    {
+        ok = check(normalizeNumericInput("3,14", false) == "3.14", "Normalize 3,14 -> 3.14") && ok;
+        ok = check(normalizeNumericInput("3.14", false) == "3.14", "Normalize 3.14 -> 3.14") && ok;
+        ok = check(normalizeNumericInput("-123 456,78", false) == "-123456.78", "Normalize -123 456,78 -> -123456.78") && ok;
+        ok = check(normalizeNumericInput("1.234.567,89", false) == "1234567.89", "Normalize 1.234.567,89 -> 1234567.89") && ok;
+        ok = check(normalizeNumericInput("1,234,567.89", false) == "1234567.89", "Normalize 1,234,567.89 -> 1234567.89") && ok;
+        ok = check(normalizeNumericInput("1 234 567", true) == "1234567", "Normalize integer 1 234 567 -> 1234567") && ok;
+        ok = check(normalizeNumericInput("1,23e-4", false) == "1.23e-4", "Normalize scientific 1,23e-4 -> 1.23e-4") && ok;
     }
 
     if (ok)

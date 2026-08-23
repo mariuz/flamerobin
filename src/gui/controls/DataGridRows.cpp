@@ -640,14 +640,12 @@ void IntegerColumnDef::setFromString(DataGridRowBuffer* buffer,
         const wxString& source)
 {
     wxASSERT(buffer);
-    int decimalSeparatorIdx, localSourceScale;
-    wxString localSource = source;
-    wxChar decimalSeparator;
+    wxString localSource = normalizeNumericInput(source, scaleM == 0);
 
     if (scaleM > 0)
     {
-        decimalSeparator = wxNumberFormatter::GetDecimalSeparator();
-        decimalSeparatorIdx = localSource.rfind(decimalSeparator);
+        int decimalSeparatorIdx = localSource.rfind('.');
+        int localSourceScale;
 
         if (decimalSeparatorIdx != wxString::npos)
         {
@@ -754,14 +752,12 @@ void Int64ColumnDef::setFromString(DataGridRowBuffer* buffer,
     const wxString& source)
 {
     wxASSERT(buffer);
-    int decimalSeparatorIdx, localSourceScale;
-    wxString localSource = source;
-    wxChar decimalSeparator;
+    wxString localSource = normalizeNumericInput(source, scaleM == 0);
 
     if (scaleM > 0)
     {
-        decimalSeparator = wxNumberFormatter::GetDecimalSeparator();
-        decimalSeparatorIdx = localSource.rfind(decimalSeparator);
+        int decimalSeparatorIdx = localSource.rfind('.');
+        int localSourceScale;
 
         if (decimalSeparatorIdx != wxString::npos)
         {
@@ -879,17 +875,15 @@ void Int128ColumnDef::setFromString(DataGridRowBuffer* buffer,
     int128_t v128 = 0;
     int decimalSeparatorIdx, localSourceScale;
     wxString errMsg;
-    wxString localSource = source;
-    wxChar decimalSeparator;
+    wxString localSource = normalizeNumericInput(source, scaleM == 0);
 
     if (scaleM > 0)
     {
-        decimalSeparator = wxNumberFormatter::GetDecimalSeparator();
-        decimalSeparatorIdx = localSource.rfind(decimalSeparator);
+        decimalSeparatorIdx = localSource.rfind('.');
 
-        if (decimalSeparatorIdx > -1)
+        if (decimalSeparatorIdx != wxString::npos)
         {
-            localSource.erase(decimalSeparatorIdx,1);
+            localSource.erase(decimalSeparatorIdx, 1);
             localSourceScale = localSource.Length() - decimalSeparatorIdx;
         }
         else
@@ -1511,8 +1505,9 @@ void FloatColumnDef::setFromString(DataGridRowBuffer* buffer,
     const wxString& source)
 {
     wxASSERT(buffer);
+    wxString norm = normalizeNumericInput(source, false);
     double d;
-    if (!source.ToDouble(&d))
+    if (!norm.ToDouble(&d))
         throw FRError(_("Invalid float numeric value"));
     buffer->setValue(offsetM, (float)d);
 }
@@ -1586,8 +1581,9 @@ void DoubleColumnDef::setFromString(DataGridRowBuffer* buffer,
     const wxString& source)
 {
     wxASSERT(buffer);
+    wxString norm = normalizeNumericInput(source, false);
     double d;
-    if (!source.ToDouble(&d))
+    if (!norm.ToDouble(&d))
         throw FRError(_("Invalid double numeric value"));
     buffer->setValue(offsetM, d);
 }
@@ -1658,7 +1654,7 @@ void Dec16ColumnDef::setFromString(DataGridRowBuffer* buffer,
     wxASSERT(buffer);
     dec16_t value;
     wxString errMsg;
-    if (!StringToDec16DPD(source, &value, errMsg))
+    if (!StringToDec16DPD(normalizeNumericInput(source, false), &value, errMsg))
         throw FRError(errMsg);
     buffer->setValue(offsetM, value);
 }
@@ -1732,7 +1728,7 @@ void Dec34ColumnDef::setFromString(DataGridRowBuffer* buffer,
     wxASSERT(buffer);
     dec34_t value;
     wxString errMsg;
-    if (!StringToDec34DPD(source, &value, errMsg))
+    if (!StringToDec34DPD(normalizeNumericInput(source, false), &value, errMsg))
         throw FRError(errMsg);
     buffer->setValue(offsetM, value);
 }
