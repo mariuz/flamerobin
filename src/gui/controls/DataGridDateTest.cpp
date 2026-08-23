@@ -181,6 +181,24 @@ int main()
         ok = check(h == 23 && mi == 59 && s == 58 && f == 9990, "Timestamp buffer read time components") && ok;
     }
 
+    // Test 8: Firebird timestamp string format and D.N.Y H:M:S.T format have no comma (Issue #694)
+    {
+        IBPP::Timestamp ts(2021, 1, 1, 0, 0, 0, 0);
+        int year, month, day, hour, minute, second, tenththousands;
+        ts.GetDate(year, month, day);
+        ts.GetTime(hour, minute, second, tenththousands);
+
+        wxString fbString = wxString::Format("%d-%d-%d %d:%d:%d.%d", year, month, day,
+            hour, minute, second, tenththousands / 10);
+        ok = check(!fbString.Contains(","), "Firebird timestamp format has no comma (Issue #694)") && ok;
+        ok = check(fbString == "2021-1-1 0:0:0.0", "Firebird timestamp format matches '2021-1-1 0:0:0.0'") && ok;
+
+        wxString displayString = wxString::Format("%02d.%02d.%04d %02d:%02d:%02d.%03d",
+            day, month, year, hour, minute, second, tenththousands / 10);
+        ok = check(!displayString.Contains(","), "Display timestamp format (D.N.Y H:M:S.T) has no comma (Issue #694)") && ok;
+        ok = check(displayString == "01.01.2021 00:00:00.000", "Display timestamp matches '01.01.2021 00:00:00.000'") && ok;
+    }
+
     if (ok)
     {
         std::cout << "\nALL DATAGRID DATE TESTS PASSED!\n";

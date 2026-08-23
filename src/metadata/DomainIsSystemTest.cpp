@@ -118,5 +118,10 @@ int main()
     ok = check(!isSystemDomainName("RDB"), "3-char RDB is not system") && ok;
     ok = check(!isSystemDomainName("R"),   "single char is not system") && ok;
 
+    // -- Issue #695: System Domain Dependencies type resolution --
+    // Verify that system domain names (e.g. RDB$1 created by legacy tools)
+    // are correctly identified as system domains.
+    ok = check(isSystemDomainName("RDB$1"), "Legacy RDB$1 domain is system domain") && ok;
+
     return ok ? 0 : 1;
 }

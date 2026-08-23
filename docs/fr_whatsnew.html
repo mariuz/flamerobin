@@ -8,6 +8,20 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.8.7</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>General Improvements & Bug Fixes</B></font><br>
+<br>
+- <b>Unexpected Comma on Timestamp Copy Operations Fix (#694)</b>: Fixed an issue where copying data as <code>INSERT</code>, <code>INSERT OR UPDATE</code>, <code>UPDATE</code>, or <code>IN</code> list inserted an unexpected comma between the date and time parts of timestamps (e.g. <code>'01.01.2021, 00:00:00.000'</code>), causing SQL execution errors in Firebird. Corrected default <code>TimestampFormat</code> in settings configuration to <code>D.N.Y H:M:S.T</code>, added automatic legacy format migration in <code>GridCellFormats</code>, updated <code>DataGridTable::getCellValueForInsert()</code> to use Firebird-formatted SQL literals via <code>DataGridRows::getFieldFirebirdValue()</code>, and made timestamp parsing tolerant to space and comma separators.<br>
+- <b>System Domain Dependencies & Double-Click Navigation Fix (#695)</b>: Resolved an <code>Unsupported type</code> error popup when viewing Dependencies for system domains (e.g. <code>RDB$1</code> created by older database tools). Mapped <code>ntSysDomain</code>, <code>ntSysRole</code>, <code>ntSysPackage</code>, and <code>ntSysIndices</code> in <code>MetadataItem::getDependencies()</code>, and added dependency query resolution for domain references in relation fields (<code>RDB$RELATION_FIELDS</code>), procedure parameters (<code>RDB$PROCEDURE_PARAMETERS</code>), and function arguments (<code>RDB$FUNCTION_ARGUMENTS</code>) so all referencing tables, columns, and parameters are properly displayed. Also enabled double-clicking on system domains in the tree to automatically open their properties.<br>
+- <b>System Indices & User Indices Dependencies Resolution (#696)</b>: Fixed an issue where the Dependencies lists for System Indices and User Indices were completely empty. Added full dependency resolution in <code>MetadataItem::getDependencies()</code> linking indices to their underlying table and column segments (<code>RDB$INDICES</code> + <code>RDB$INDEX_SEGMENTS</code>), table constraints (<code>RDB$RELATION_CONSTRAINTS</code>), and foreign key partner indices / target tables (<code>RDB$INDICES.RDB$FOREIGN_KEY</code>). Updated <code>Database::findByNameAndType()</code> to search across all index collections.<br>
+- <b>Boolean Column Definition Character Set / Collation Syntax Error Fix (#698)</b>: Fixed an issue in the "Add column" / "Field Properties" dialog where selecting the <code>Boolean</code> datatype left Character Set and Collation choices enabled and generated invalid SQL statements with <code>CHARACTER SET ... COLLATE ...</code> clauses on <code>BOOLEAN</code> columns. Corrected the datatype metadata in <code>FieldPropertiesDialog</code> so <code>isChar</code> is false for <code>Boolean</code>.<br>
+<br><br>
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.8.6</font><br>
 <br><br>
 

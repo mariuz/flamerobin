@@ -404,6 +404,8 @@ wxIcon getMetadataItemIcon(NodeType type)
             return wxArtProvider::GetIcon(ART_DatabaseConnected, wxART_OTHER, sz);
         case ntDomain:
             return wxArtProvider::GetIcon(ART_Domain, wxART_OTHER, sz);
+        case ntSysDomain:
+            return wxArtProvider::GetIcon(ART_SystemDomain, wxART_OTHER, sz);
         case ntFunctionSQL:
             return wxArtProvider::GetIcon(ART_Function, wxART_OTHER, sz);
         case ntUDF:

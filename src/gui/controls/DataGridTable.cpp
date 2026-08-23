@@ -453,8 +453,8 @@ wxString DataGridTable::getCellValueForInsert(int row, int col)
 
     if (rowsM.isFieldNull(realRow, col))
         return "NULL";
-    // return quoted text, but escape embedded quotes
-    wxString s(rowsM.getFieldValue(realRow, col));
+    // return quoted text with Firebird-formatted value
+    wxString s(rowsM.getFieldFirebirdValue(realRow, col));
     // Normalize decimal separator for SQL: Firebird always uses dot.
     // If the display value uses comma as decimal separator (locale-
     // dependent formatting) and has no dot, replace comma with dot.
@@ -463,7 +463,6 @@ wxString DataGridTable::getCellValueForInsert(int row, int col)
     if (rowsM.isColumnNumeric(col)
             && s.Contains(",") && !s.Contains("."))
         s.Replace(",", ".");
-    s.Replace("'", "''");
     return "'" + s + "'";
 }
 

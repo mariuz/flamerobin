@@ -733,14 +733,17 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
                 showGeneratorValue(dynamic_cast<Generator*>(m));
                 break;
             case ntCollation:
+            case ntSysCollation:
             case ntColumn:
             case ntTable:
             case ntSysTable:
+            case ntGTT:
             case ntView:
             case ntPackage:
             case ntSysPackage:
             case ntProcedure:
             case ntDomain:
+            case ntSysDomain:
             case ntFunction:
             case ntFunctionSQL:
             case ntUDF:
@@ -756,6 +759,7 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
             case ntUsers:
             case ntIndex:
             case ntSysIndices:
+            case ntUsrIndices:
                 {
                     wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED,
                         Cmds::Menu_ObjectProperties);

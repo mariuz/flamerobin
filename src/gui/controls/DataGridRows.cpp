@@ -80,6 +80,11 @@ void GridCellFormats::loadFromConfig()
     timeFormatM = config().get("TimeFormat", wxString("H:M:S.T"));
     timestampFormatM = config().get("TimestampFormat",
         wxString("D.N.Y H:M:S.T"));
+    if (timestampFormatM == "D.N.Y, H:M:S.T")
+    {
+        timestampFormatM = "D.N.Y H:M:S.T";
+        config().setValue("TimestampFormat", timestampFormatM);
+    }
     showTimezoneInfoM = (ShowTimezoneInfoType)config().get("ShowTimezoneInfo", int(tzName));
 
     maxBlobKBytesM = config().get("DataGridFetchBlobAmount", 1);
@@ -464,7 +469,17 @@ bool GridCellFormats::parseTimestamp(wxString::iterator& start,
                 break;
             default:        // other characters must match
                 if (*c != *start)
+                {
+                    if ((*c == ' ' || *c == ',') && (*start == ' ' || *start == ','))
+                    {
+                        while (start != end && (*start == ' ' || *start == ','))
+                            ++start;
+                        while ((c + 1) != timestampFormatM.end() && (*(c + 1) == ' ' || *(c + 1) == ','))
+                            ++c;
+                        break;
+                    }
                     return false;
+                }
                 ++start;
                 break;
         }
@@ -1763,6 +1778,7 @@ public:
         unsigned stringIndex, unsigned blobIndex, bool textual, wxMBConv* converterM = 0);
     void reset(DataGridRowBuffer* buffer);
     virtual unsigned getIndex();
+    virtual wxString getAsFirebirdString(DataGridRowBuffer* buffer);
     virtual wxString getAsString(DataGridRowBuffer* buffer, Database* db);
     virtual unsigned getBufferSize();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
@@ -1858,6 +1874,14 @@ wxString BlobColumnDef::getAsString(DataGridRowBuffer* grid_buffer, Database*)
     }
     grid_buffer->setString(stringIndexM, wxs);
     return wxs;
+}
+
+wxString BlobColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
+{
+    wxASSERT(buffer);
+    wxString s(getAsString(buffer, nullptr));
+    s.Replace("'", "''");
+    return s;
 }
 
 void BlobColumnDef::setFromString(DataGridRowBuffer* /*buffer*/,
@@ -2594,6 +2618,13 @@ wxString DataGridRows::getFieldValue(unsigned row, unsigned col)
     if (row >= buffersM.size() || col >= columnDefsM.size())
         return wxEmptyString;
     return columnDefsM[col]->getAsString(buffersM[row], databaseM);
+}
+
+wxString DataGridRows::getFieldFirebirdValue(unsigned row, unsigned col)
+{
+    if (row >= buffersM.size() || col >= columnDefsM.size())
+        return wxEmptyString;
+    return columnDefsM[col]->getAsFirebirdString(buffersM[row]);
 }
 
 bool DataGridRows::isFieldNull(unsigned row, unsigned col)

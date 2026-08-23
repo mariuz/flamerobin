@@ -385,10 +385,20 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
         mytype = 2;
     if (typeM == ntFunctionSQL || typeM == ntUDF)
         mytype = 13;
+    if (typeM == ntSysDomain)
+        mytype = 9;
+    if (typeM == ntSysRole)
+        mytype = 15;
+    if (typeM == ntSysPackage)
+        mytype = 17;
+    if (typeM == ntSysIndices || typeM == ntUsrIndices)
+    {
+        mytype = 6;
+    }
 
     int mytype2 = mytype;
     // For indexes, search for both expression (6) and normal (10) types
-    if (typeM == ntIndex)
+    if (typeM == ntIndex || typeM == ntSysIndices || typeM == ntUsrIndices)
     {
         mytype = 6;
         mytype2 = 10;
@@ -397,7 +407,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
     if (mytype == 1 && !ofObject)
         mytype2 = 0;
     // package header and package body
-    if (typeM == ntPackage)
+    if (typeM == ntPackage || typeM == ntSysPackage)
         mytype2 = 18;
 
     if (typeM == ntUnknown || mytype == -1)
@@ -433,6 +443,65 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
             " left join rdb$dependencies d on d.rdb$dependent_name = f.rdb$field_source \n"
             " where d.rdb$dependent_type = 3 and d.rdb$depended_on_name = ? ";
         params++;
+    }
+    if (!ofObject && (typeM == ntDomain || typeM == ntSysDomain))
+    {
+        sql += " union \n"
+            " select distinct cast(0 as smallint), f.rdb$relation_name, f.rdb$field_name \n"
+            " from rdb$relation_fields f \n"
+            " where f.rdb$field_source = ? \n"
+            " union \n"
+            " select distinct cast(5 as smallint), pp.rdb$procedure_name, pp.rdb$parameter_name \n"
+            " from rdb$procedure_parameters pp \n"
+            " where pp.rdb$field_source = ? ";
+        params += 2;
+        if (d->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        {
+            sql += " union \n"
+                " select distinct cast(13 as smallint), fa.rdb$function_name, fa.rdb$argument_name \n"
+                " from rdb$function_arguments fa \n"
+                " where fa.rdb$field_source = ? ";
+            params++;
+        }
+    }
+    if (ofObject && (typeM == ntIndex || typeM == ntSysIndices || typeM == ntUsrIndices))
+    {
+        sql += " union \n"
+            " select distinct cast(0 as smallint), i.rdb$relation_name, s.rdb$field_name \n"
+            " from rdb$indices i \n"
+            " left join rdb$index_segments s on s.rdb$index_name = i.rdb$index_name \n"
+            " where i.rdb$index_name = ? \n"
+            " union \n"
+            " select distinct cast(10 as smallint), i.rdb$foreign_key, s.rdb$field_name \n"
+            " from rdb$indices i \n"
+            " left join rdb$index_segments s on 1 = 0 \n"
+            " where i.rdb$index_name = ? and i.rdb$foreign_key is not null \n"
+            " union \n"
+            " select distinct cast(0 as smallint), i2.rdb$relation_name, s2.rdb$field_name \n"
+            " from rdb$indices i \n"
+            " join rdb$indices i2 on i2.rdb$index_name = i.rdb$foreign_key \n"
+            " left join rdb$index_segments s2 on s2.rdb$index_name = i2.rdb$index_name \n"
+            " where i.rdb$index_name = ? and i.rdb$foreign_key is not null ";
+        params += 3;
+    }
+    if (!ofObject && (typeM == ntIndex || typeM == ntSysIndices || typeM == ntUsrIndices))
+    {
+        sql += " union \n"
+            " select distinct cast(0 as smallint), rc.rdb$relation_name, s.rdb$field_name \n"
+            " from rdb$relation_constraints rc \n"
+            " left join rdb$index_segments s on 1 = 0 \n"
+            " where rc.rdb$index_name = ? \n"
+            " union \n"
+            " select distinct cast(0 as smallint), i_fk.rdb$relation_name, s_fk.rdb$field_name \n"
+            " from rdb$indices i_fk \n"
+            " left join rdb$index_segments s_fk on s_fk.rdb$index_name = i_fk.rdb$index_name \n"
+            " where i_fk.rdb$foreign_key = ? \n"
+            " union \n"
+            " select distinct cast(10 as smallint), i_fk.rdb$index_name, s.rdb$field_name \n"
+            " from rdb$indices i_fk \n"
+            " left join rdb$index_segments s on 1 = 0 \n"
+            " where i_fk.rdb$foreign_key = ? ";
+        params += 3;
     }
     // get the exact table and fields for views
     // rdb$dependencies covers deps. for WHERE clauses in SELECTs in VIEW body
@@ -490,7 +559,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
         MetadataItem* current = d->findByNameAndType(t, objname);
         if (!current)
         {
-            if (!current && t == ntDomain)
+            if (t == ntDomain)
             {
                 // Dependencies can refer to both user and system domains.
                 current = d->findByNameAndType(ntSysDomain, objname);
@@ -501,6 +570,19 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
                 // or possibly a system table
                 if (!current)
                     current = d->findByNameAndType(ntSysTable, objname);
+                // or possibly a GTT
+                if (!current)
+                    current = d->findByNameAndType(ntGTT, objname);
+            }
+            if (t == ntRole)
+                current = d->findByNameAndType(ntSysRole, objname);
+            if (t == ntPackage)
+                current = d->findByNameAndType(ntSysPackage, objname);
+            if (t == ntIndex)
+            {
+                current = d->findByNameAndType(ntSysIndices, objname);
+                if (!current)
+                    current = d->findByNameAndType(ntUsrIndices, objname);
             }
             if (!ofObject && (t == ntDMLTrigger || t == ntDBTrigger || t == ntTrigger))
             {

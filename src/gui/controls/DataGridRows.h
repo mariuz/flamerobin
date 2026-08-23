@@ -439,6 +439,7 @@ public:
     bool isFieldNA(unsigned row, unsigned col);
 
     wxString getFieldValue(unsigned row, unsigned col);
+    wxString getFieldFirebirdValue(unsigned row, unsigned col);
     wxString setFieldValue(unsigned row, unsigned col,
         const wxString& value, bool setNull = false);
     void importBlobFile(const wxString& filename, unsigned row, unsigned col,

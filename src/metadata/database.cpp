@@ -691,13 +691,28 @@ MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
             return sysPackagesM->findByName(name).get();
             break;
         case ntIndex:
-            return indicesM->findByName(name).get();
+            if (indicesM)
+            {
+                if (IndexPtr i = indicesM->findByName(name))
+                    return i.get();
+            }
+            if (sysIndicesM)
+            {
+                if (IndexPtr i = sysIndicesM->findByName(name))
+                    return i.get();
+            }
+            if (usrIndicesM)
+            {
+                if (IndexPtr i = usrIndicesM->findByName(name))
+                    return i.get();
+            }
+            return 0;
             break;
         case ntSysIndices:
-            return sysIndicesM->findByName(name).get();
+            return sysIndicesM ? sysIndicesM->findByName(name).get() : 0;
             break;
         case ntUsrIndices:
-            return usrIndicesM->findByName(name).get();
+            return usrIndicesM ? usrIndicesM->findByName(name).get() : 0;
             break;
         default:
             return 0;
