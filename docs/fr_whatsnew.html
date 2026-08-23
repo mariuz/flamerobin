@@ -8,6 +8,17 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.8.8</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>General Improvements & Bug Fixes</B></font><br>
+<br>
+- <b>Decimal Point vs Decimal Comma & Thousand Grouping Input Error Fix (#697)</b>: Fixed an issue where typing decimal values with either a comma (e.g. <code>3,14</code> from Hungarian/European locales or numpad) or a dot (<code>3.14</code>) failed with <code>Invalid float numeric value</code> or <code>Invalid integer numeric value</code> error popups across result grids and dialogs. Implemented a universal numeric normalizer (<code>normalizeNumericInput()</code> in <code>StringUtils</code>) supporting both decimal comma and point conventions, thousand-grouping separators (spaces, dots, commas), signs, and scientific notation (<code>e</code>/<code>E</code>). Applied across all grid column editors (<code>FloatColumnDef</code>, <code>DoubleColumnDef</code>, <code>IntegerColumnDef</code>, <code>Int64ColumnDef</code>, <code>Int128ColumnDef</code>, <code>Dec16ColumnDef</code>, <code>Dec34ColumnDef</code> in <code>DataGridRows</code>), parameter dialogs (<code>InsertParametersDialog</code>), and DECFLOAT parser (<code>FRDecimal</code>). Added automated test suites in <code>firebird_type_utils_test</code> and <code>data_grid_date_test</code>.<br>
+<br><br>
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.8.7</font><br>
 <br><br>
 
