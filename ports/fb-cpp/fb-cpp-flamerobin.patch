@@ -190,35 +190,7 @@ index 6c9ac0c..959dc10 100644
  				.charSetId = metadata->getCharSet(&statusWrapper, index),
  				.subType = metadata->getSubType(&statusWrapper, index),
  			};
-@@ -122,7 +134,11 @@ Statement::Statement(
- 						builder.reset(metadata->getBuilder(&statusWrapper));
- 
- 					builder->setType(&statusWrapper, index, SQL_VARYING);
-+					builder->setLength(&statusWrapper, index, descriptor.length + 2);
-+					builder->setCharSet(&statusWrapper, index, 127); // CS_dynamic
- 					descriptor.adjustedType = DescriptorAdjustedType::STRING;
-+					descriptor.length += 2;
-+					descriptor.charSetId = 127;
- 					break;
- 
- 				case DescriptorOriginalType::TIME_TZ_EX:
-@@ -149,6 +165,7 @@ Statement::Statement(
- 			{
- 				descriptor.offset = metadata->getOffset(&statusWrapper, index);
- 				descriptor.nullOffset = metadata->getNullOffset(&statusWrapper, index);
-+				descriptor.length = metadata->getLength(&statusWrapper, index);
- 
- 				*reinterpret_cast<std::int16_t*>(&message[descriptor.nullOffset]) = FB_TRUE;
- 			}
-@@ -166,6 +183,7 @@ Statement::Statement(
- 				auto& descriptor = descriptors[index];
- 				descriptor.offset = metadata->getOffset(&statusWrapper, index);
- 				descriptor.nullOffset = metadata->getNullOffset(&statusWrapper, index);
-+				descriptor.length = metadata->getLength(&statusWrapper, index);
- 
- 				*reinterpret_cast<std::int16_t*>(&message[descriptor.nullOffset]) = FB_TRUE;
- 			}
-@@ -231,28 +249,37 @@ void Statement::free()
+@@ -231,28 +239,37 @@ void Statement::free()
  {
  	assert(isValid());
  
@@ -296,15 +268,6 @@ index aa5616c..f737539 100644
  
  		///
  		/// @brief Retrieves the textual legacy plan if the server produced one.
-@@ -1213,7 +1220,7 @@ namespace fbcpp
- 				}
- 
- 				case DescriptorAdjustedType::STRING:
--					if (value.length() > descriptor.length)
-+					if (value.length() > descriptor.length - sizeof(std::uint16_t))
- 					{
- 						static constexpr std::intptr_t STATUS_STRING_TRUNCATION[] = {
- 							isc_arith_except,
 @@ -1993,7 +2000,7 @@ namespace fbcpp
  				value);
  		}

@@ -292,6 +292,113 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& serverNa
         st->execute();
         ok = fr_test::check(st->fetch(), "fetch second execution (repeated)") && ok;
 
+        // String parameter test with table and view
+        {
+            std::cout << "  Testing string parameters with CHAR(2) and VARCHAR(2)...\n";
+            try {
+                st->prepare("DROP VIEW VIEW_TRIBUTACAO_TEST");
+                st->execute();
+                tr->commitRetain();
+            } catch (...) {}
+            try {
+                st->prepare("DROP TABLE TABLE_TRIBUTACAO_TEST");
+                st->execute();
+                tr->commitRetain();
+            } catch (...) {}
+
+            st->prepare("CREATE TABLE TABLE_TRIBUTACAO_TEST (ID_TRIBUT_OPERACAO INTEGER, ID_TRIBUT_GRUPO INTEGER, UF CHAR(2))");
+            st->execute();
+            tr->commitRetain();
+
+            st->prepare("CREATE VIEW VIEW_TRIBUTACAO_TEST AS SELECT ID_TRIBUT_OPERACAO, ID_TRIBUT_GRUPO, UF FROM TABLE_TRIBUTACAO_TEST");
+            st->execute();
+            tr->commitRetain();
+
+            st->prepare("INSERT INTO TABLE_TRIBUTACAO_TEST (ID_TRIBUT_OPERACAO, ID_TRIBUT_GRUPO, UF) VALUES (2, 27, 'MG')");
+            st->execute();
+            tr->commitRetain();
+
+            // Parameterized query on table
+            std::cout << "    Testing parameterized query on table with CHAR(2)...\n";
+            st->prepare("SELECT * FROM TABLE_TRIBUTACAO_TEST WHERE ID_TRIBUT_OPERACAO = :id_tribut_operacao AND ID_TRIBUT_GRUPO = :id_tribut_grupo AND UF = :uf");
+            std::cout << "    Param count: " << st->getParameterCount() << "\n";
+            for (int p = 0; p < st->getParameterCount(); ++p)
+            {
+                std::cout << "    Param " << p << ": name=" << st->getParameterName(p) 
+                          << " type=" << (int)st->getParameterType(p)
+                          << " subtype=" << st->getParameterSubtype(p)
+                          << " size=" << st->getParameterSize(p)
+                          << " scale=" << st->getParameterScale(p) << "\n";
+            }
+            st->setInt32(0, 2);
+            st->setInt32(1, 27);
+            st->setString(2, "MG");
+            st->execute();
+            ok = fr_test::check(st->fetch(), "fetch parameterized table row") && ok;
+            if (st->fetch())
+            {
+                std::cout << "    Extra row fetched\n";
+            }
+
+            // Parameterized query on view
+            std::cout << "    Testing parameterized query on view with CHAR(2)...\n";
+            st->prepare("SELECT * FROM VIEW_TRIBUTACAO_TEST WHERE ID_TRIBUT_OPERACAO = :id_tribut_operacao AND ID_TRIBUT_GRUPO = :id_tribut_grupo AND UF = :uf");
+            std::cout << "    Param count: " << st->getParameterCount() << "\n";
+            for (int p = 0; p < st->getParameterCount(); ++p)
+            {
+                std::cout << "    Param " << p << ": name=" << st->getParameterName(p) 
+                          << " type=" << (int)st->getParameterType(p)
+                          << " subtype=" << st->getParameterSubtype(p)
+                          << " size=" << st->getParameterSize(p)
+                          << " scale=" << st->getParameterScale(p) << "\n";
+            }
+            st->setInt32(0, 2);
+            st->setInt32(1, 27);
+            st->setString(2, "MG");
+            st->execute();
+            ok = fr_test::check(st->fetch(), "fetch parameterized view row") && ok;
+
+            // What if UF is VARCHAR(2)?
+            try {
+                st->prepare("DROP VIEW VIEW_TRIBUTACAO_TEST");
+                st->execute();
+                tr->commitRetain();
+            } catch (...) {}
+            try {
+                st->prepare("DROP TABLE TABLE_TRIBUTACAO_TEST");
+                st->execute();
+                tr->commitRetain();
+            } catch (...) {}
+
+            st->prepare("CREATE TABLE TABLE_TRIBUTACAO_TEST (ID_TRIBUT_OPERACAO INTEGER, ID_TRIBUT_GRUPO INTEGER, UF VARCHAR(2))");
+            st->execute();
+            tr->commitRetain();
+
+            st->prepare("CREATE VIEW VIEW_TRIBUTACAO_TEST AS SELECT ID_TRIBUT_OPERACAO, ID_TRIBUT_GRUPO, UF FROM TABLE_TRIBUTACAO_TEST");
+            st->execute();
+            tr->commitRetain();
+
+            st->prepare("INSERT INTO TABLE_TRIBUTACAO_TEST (ID_TRIBUT_OPERACAO, ID_TRIBUT_GRUPO, UF) VALUES (2, 27, 'MG')");
+            st->execute();
+            tr->commitRetain();
+
+            st->prepare("SELECT * FROM VIEW_TRIBUTACAO_TEST WHERE ID_TRIBUT_OPERACAO = :id_tribut_operacao AND ID_TRIBUT_GRUPO = :id_tribut_grupo AND UF = :uf");
+            std::cout << "    VARCHAR Param count: " << st->getParameterCount() << "\n";
+            for (int p = 0; p < st->getParameterCount(); ++p)
+            {
+                std::cout << "    Param " << p << ": name=" << st->getParameterName(p) 
+                          << " type=" << (int)st->getParameterType(p)
+                          << " subtype=" << st->getParameterSubtype(p)
+                          << " size=" << st->getParameterSize(p)
+                          << " scale=" << st->getParameterScale(p) << "\n";
+            }
+            st->setInt32(0, 2);
+            st->setInt32(1, 27);
+            st->setString(2, "MG");
+            st->execute();
+            ok = fr_test::check(st->fetch(), "fetch parameterized view row (varchar)") && ok;
+        }
+
         // Typed parameter setting
         std::cout << "  Testing typed parameter setting...\n";
         st->prepare("INSERT INTO DAL_TEST (ID) VALUES (?)");

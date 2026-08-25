@@ -895,6 +895,12 @@ int FbCppStatement::getParameterSubtype(int index)
     const auto& descriptors = statementM->getInputDescriptors();
     if ((unsigned)index >= descriptors.size())
         return 0;
+    // For string parameters (CHAR/VARCHAR), Firebird stores the character set ID
+    // in the sqlsubtype field of XSQLVAR. The fb-cpp library separates this into
+    // charSetId and subType, so we return charSetId here to match IBPP behavior
+    // and enable proper character set resolution (e.g., OCTETS detection in InsertParametersDialog).
+    if (descriptors[index].adjustedType == fbcpp::DescriptorAdjustedType::STRING)
+        return (int)descriptors[index].charSetId;
     return descriptors[index].subType;
 }
 

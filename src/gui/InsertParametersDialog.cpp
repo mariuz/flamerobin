@@ -797,6 +797,7 @@ void InsertParametersDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
                 parseTimeStamp(row, value);
                 break;
             case IBPP::SDT::sdString:
+                // Subtype 1 indicates CharacterSet OCTETS (binary hex string)
                 if (subtype == 1) {
 
                     if (value.length() % 2 == 1)
@@ -823,6 +824,7 @@ void InsertParametersDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
                 }
                 else
                 {
+                    // Regular string parameter (CHAR / VARCHAR)
                     statementDALM->setString(row, wx2std(value, databaseM->getCharsetConverter()));
                 }
                 break;
