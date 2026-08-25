@@ -74,7 +74,7 @@ private:
     virtual void subjectRemoved(Subject* subject);
     virtual void update();
 public:
-    MetadataItemPropertiesPanel(MetadataItemPropertiesFrame* parent,
+    MetadataItemPropertiesPanel(wxWindow* parent,
         MetadataItem* object);
     virtual ~MetadataItemPropertiesPanel();
 
@@ -94,8 +94,11 @@ typedef std::list<MetadataItemPropertiesPanel*> MIPPanels;
 
 static MIPPanels mipPanels;
 
+// MetadataItemPropertiesPanel is hosted inside a wxAuiNotebook (notebookM of MetadataItemPropertiesFrame).
+// The parent passed to wxPanel MUST be the wxAuiNotebook (or reparented to it) so that wxAuiNotebook
+// can properly manage tab pages, layouts, and display without 0x0 clipping.
 MetadataItemPropertiesPanel::MetadataItemPropertiesPanel(
-        MetadataItemPropertiesFrame* parent, MetadataItem* object)
+        wxWindow* parent, MetadataItem* object)
     : wxPanel(parent, wxID_ANY), pageTypeM(ptSummary), objectM(object),
         htmlReloadRequestedM(false)
 {
@@ -103,7 +106,8 @@ MetadataItemPropertiesPanel::MetadataItemPropertiesPanel(
     mipPanels.push_back(this);
 
     html_window = new PrintableHtmlWindow(this, wxID_ANY);
-    parent->SetTitle(object->getName_());
+    if (MetadataItemPropertiesFrame* pf = getParentFrame())
+        pf->SetTitle(object->getName_());
 
     wxBoxSizer* bSizer2 = new wxBoxSizer( wxVERTICAL );
     bSizer2->Add(html_window, 1, wxEXPAND, 0 );
@@ -487,7 +491,7 @@ MetadataItemPropertiesFrame::openNewPropertyPageInFrame(MetadataItem* object)
 {
     MetadataItemPropertiesFrame* mf = new MetadataItemPropertiesFrame(
         wxTheApp->GetTopWindow(), object);
-    MetadataItemPropertiesPanel* mpp = new MetadataItemPropertiesPanel(mf,
+    MetadataItemPropertiesPanel* mpp = new MetadataItemPropertiesPanel(mf->notebookM,
         object);
 
     mf->showPanel(mpp, object->getName_());
@@ -521,7 +525,7 @@ MetadataItemPropertiesFrame::openNewPropertyPageInTab(MetadataItem* object,
     if (!mf)
         return openNewPropertyPageInFrame(object);
 
-    MetadataItemPropertiesPanel* mpp = new MetadataItemPropertiesPanel(mf,
+    MetadataItemPropertiesPanel* mpp = new MetadataItemPropertiesPanel(mf->notebookM,
         object);
     mf->showPanel(mpp, object->getName_());
     return mpp;
@@ -615,6 +619,9 @@ void MetadataItemPropertiesFrame::setTabTitle(
 void MetadataItemPropertiesFrame::showPanel(MetadataItemPropertiesPanel* panel,
     const wxString& title)
 {
+    if (panel && panel->GetParent() != notebookM)
+        panel->Reparent(notebookM);
+
     int pg = notebookM->GetPageIndex(panel);
     if (pg == wxNOT_FOUND)
         notebookM->AddPage(panel, title, true);
