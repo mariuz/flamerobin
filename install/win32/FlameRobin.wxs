@@ -100,6 +100,9 @@
       </Component>
       <Files Include="$(var.FirebirdClientDir)\icu*.dll" />
       <Files Include="$(var.FirebirdClientDir)\icu*.dat" />
+      <Files Include="$(var.FirebirdClientDir)\msvcp140*.dll" />
+      <Files Include="$(var.FirebirdClientDir)\vcruntime140*.dll" />
+      <Files Include="$(var.FirebirdClientDir)\vcomp140*.dll" />
     </ComponentGroup>
 
     <ComponentGroup Id="FirebirdPluginsFiles" Directory="PluginsFolder">

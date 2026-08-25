@@ -340,6 +340,11 @@ jobs:
           Get-ChildItem -Path $fbExtractDir -Filter "icu*.dll" | Copy-Item -Destination "$stagingDir\" -Force
           Get-ChildItem -Path $fbExtractDir -Filter "icu*.dat" | Copy-Item -Destination "$stagingDir\" -Force
           
+          # Copy MSVC runtime libraries
+          Get-ChildItem -Path $fbExtractDir -Filter "msvcp140*.dll" | Copy-Item -Destination "$stagingDir\" -Force
+          Get-ChildItem -Path $fbExtractDir -Filter "vcruntime140*.dll" | Copy-Item -Destination "$stagingDir\" -Force
+          Get-ChildItem -Path $fbExtractDir -Filter "vcomp140*.dll" | Copy-Item -Destination "$stagingDir\" -Force
+          
           # Plugins directory
           $pluginsDir = Join-Path $stagingDir "plugins"
           New-Item -ItemType Directory -Path $pluginsDir -Force
