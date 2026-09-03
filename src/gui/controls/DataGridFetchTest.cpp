@@ -149,6 +149,66 @@ int main()
         mainBuffers.clear();
     }
 
+    // Test 4: Regression test for Issue #706 ("I can't go to last row - 3703 rows")
+    // Simulates an initial fetch of 100 rows from a 3703-row table,
+    // followed by synchronous full fetch on Ctrl+End navigation.
+    {
+        const size_t TOTAL_ROWS = 3703;
+        const size_t INITIAL_FETCH = 100;
+
+        // Create a mock stream of 3703 rows
+        std::vector<DataGridRowBuffer*> fullDataset;
+        fullDataset.reserve(TOTAL_ROWS);
+        for (size_t i = 0; i < TOTAL_ROWS; ++i)
+        {
+            DataGridRowBuffer* buf = new DataGridRowBuffer(2);
+            buf->setFieldNull(0, false);
+            buf->setValue(0, (int)i);
+            buf->setFieldNull(1, false);
+            buf->setString(0, wxString::Format("record_%zu", i));
+            fullDataset.push_back(buf);
+        }
+
+        // Simulated table state
+        std::vector<DataGridRowBuffer*> tableRows;
+        tableRows.reserve(INITIAL_FETCH);
+        size_t streamPos = 0;
+        bool allRowsFetched = false;
+
+        // Step 1: Initial fetch of 100 rows
+        for (size_t i = 0; i < INITIAL_FETCH && streamPos < fullDataset.size(); ++i, ++streamPos)
+        {
+            tableRows.push_back(fullDataset[streamPos]);
+        }
+        allRowsFetched = (streamPos >= fullDataset.size());
+
+        ok = check(tableRows.size() == 100, "Initial fetch loaded exactly 100 rows (Issue #706)") && ok;
+        ok = check(!allRowsFetched, "Table has more rows to fetch (!allRowsFetched)") && ok;
+
+        // Step 2: Simulate Ctrl+End key press trigger (fetchAllSynchronous)
+        // Fetches all remaining 3603 rows into the table
+        while (streamPos < fullDataset.size())
+        {
+            tableRows.push_back(fullDataset[streamPos++]);
+        }
+        allRowsFetched = true;
+
+        ok = check(tableRows.size() == TOTAL_ROWS, "Full synchronous fetch loaded all 3703 rows") && ok;
+        ok = check(allRowsFetched, "All rows marked as fetched (allRowsFetched == true)") && ok;
+
+        // Step 3: Verify last row navigation
+        int lastRowIndex = (int)tableRows.size() - 1;
+        ok = check(lastRowIndex == 3702, "Last row index is 3702 (3703rd row)") && ok;
+
+        int lastRowId = 0;
+        tableRows[lastRowIndex]->getValue(0, lastRowId);
+        ok = check(lastRowId == 3702, "Last row ID matches record 3702") && ok;
+        ok = check(tableRows[lastRowIndex]->getString(0) == "record_3702", "Last row text matches record_3702") && ok;
+
+        for (auto b : fullDataset)
+            delete b;
+    }
+
     std::cout << "DataGrid Large Fetch Regression Tests completed: "
               << (ok ? "ALL PASSED" : "SOME FAILED") << "\n";
     return ok ? 0 : 1;

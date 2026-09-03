@@ -1552,14 +1552,30 @@ void DataGrid::OnKeyDown(wxKeyEvent& event)
         }
     }
 
-    if ((event.GetKeyCode() == WXK_HOME || event.GetKeyCode() == WXK_END)
-        && !event.ControlDown())
+    int keyCode = event.GetKeyCode();
+    bool isHome = (keyCode == WXK_HOME || keyCode == WXK_NUMPAD_HOME);
+    bool isEnd = (keyCode == WXK_END || keyCode == WXK_NUMPAD_END);
+
+    if ((isHome || isEnd) && !event.ControlDown())
     {
         wxGridCellCoords c(GetGridCursorRow(),
-            (event.GetKeyCode() == WXK_END) ? GetNumberCols() - 1 : 0);
+            isEnd ? GetNumberCols() - 1 : 0);
         SetCurrentCell(c);
         MakeCellVisible(c);
         return;
+    }
+
+    if (isEnd && event.ControlDown())
+    {
+        DataGridTable* table = getDataGridTable();
+        if (table && (table->canFetchMoreRows() || table->isBackgroundFetching()))
+        {
+            wxBusyCursor bc;
+            table->fetchAllSynchronous();
+            if (config().get("gridShowMultilineText", false))
+                AutoSizeRows(false);
+            AdjustScrollbars();
+        }
     }
 
     event.Skip();

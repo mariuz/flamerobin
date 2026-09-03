@@ -114,6 +114,7 @@ public:
     bool canFetchMoreRows();
     void fetch();
     void fetchOne();
+    void fetchAllSynchronous();
     void startBackgroundFetch();
     void stopBackgroundFetch();
     bool isBackgroundFetching() const { return fetchThreadRunningM.load(); }

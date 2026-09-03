@@ -348,6 +348,60 @@ void DataGridTable::fetch()
     }
 }
 
+void DataGridTable::fetchAllSynchronous()
+{
+    stopBackgroundFetch();
+    if (!canFetchMoreRows())
+        return;
+
+    int oldViewRows = GetNumberRows();
+    unsigned oldRows = rowsM.getRowCount();
+
+    while (canFetchMoreRows())
+    {
+        try
+        {
+            if (!statementDALM->fetch())
+            {
+                allRowsFetchedM = true;
+                break;
+            }
+            rowsM.addRow(statementDALM);
+        }
+        catch (const std::exception& e)
+        {
+            allRowsFetchedM = true;
+            wxLogError("Error fetching row %u: %s", rowsM.getRowCount(), e.what());
+            ::wxMessageBox(wxString::FromUTF8(e.what()),
+                _("A database error occurred."), wxOK | wxICON_ERROR);
+            break;
+        }
+        catch (...)
+        {
+            allRowsFetchedM = true;
+            wxLogError("Unknown error fetching row %u.", rowsM.getRowCount());
+            ::wxMessageBox(_("A system error occurred!"), _("Error"),
+                wxOK | wxICON_ERROR);
+            break;
+        }
+    }
+
+    unsigned newRows = rowsM.getRowCount() - oldRows;
+    if (newRows > 0)
+    {
+        if (filterOrSortActiveM)
+            updateRowMapping();
+        notifyViewRowsChanged(oldViewRows);
+
+        if (GetView())
+        {
+            wxCommandEvent evt(wxEVT_FRDG_ROWCOUNT_CHANGED, GetView()->GetId());
+            evt.SetExtraLong(rowsM.getRowCount());
+            wxPostEvent(GetView(), evt);
+        }
+    }
+}
+
 void DataGridTable::addRow(DataGridRowBuffer *buffer, const wxString& sql)
 {
     int oldViewRows = GetNumberRows();
