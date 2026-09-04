@@ -1542,9 +1542,47 @@ bool DBHTreeControl::selectMetadataItem(MetadataItem* item)
     return item && findMetadataItem(item, GetRootItem());
 }
 
+void DBHTreeControl::ensureNodeChildrenCreated(wxTreeItemId item)
+{
+    if (!item.IsOk() || !ItemHasChildren(item))
+        return;
+
+    wxTreeItemIdValue cookie;
+    if (GetFirstChild(item, cookie).IsOk())
+        return;
+
+    MetadataItem* mi = getMetadataItem(item);
+    if (!mi)
+        return;
+
+    // Do not auto-connect to disconnected databases during search
+    if (Database* db = dynamic_cast<Database*>(mi))
+    {
+        if (!db->isConnected())
+            return;
+    }
+
+    g_expandingItem = item;
+    try
+    {
+        mi->ensureChildrenLoaded();
+        mi->notifyObservers();
+    }
+    catch (...)
+    {
+        g_expandingItem = wxTreeItemId();
+        return;
+    }
+    g_expandingItem = wxTreeItemId();
+}
+
 //! recursively get the last child of item
 wxTreeItemId DBHTreeControl::getLastItem(wxTreeItemId id)
 {
+    if (!id.IsOk())
+        return wxTreeItemId();
+
+    ensureNodeChildrenCreated(id);
     wxTreeItemId temp = GetLastChild(id);
     if (temp.IsOk())
         return getLastItem(temp);
@@ -1555,6 +1593,9 @@ wxTreeItemId DBHTreeControl::getLastItem(wxTreeItemId id)
 //! get the previous item vertically
 wxTreeItemId DBHTreeControl::getPreviousItem(wxTreeItemId current)
 {
+    if (!current.IsOk())
+        return GetRootItem();
+
     wxTreeItemId temp = current;
     temp = GetPrevSibling(temp);
     if (!temp.IsOk())
@@ -1572,9 +1613,13 @@ wxTreeItemId DBHTreeControl::getPreviousItem(wxTreeItemId current)
 //! get the next item vertically
 wxTreeItemId DBHTreeControl::getNextItem(wxTreeItemId current)
 {
+    if (!current.IsOk())
+        return GetRootItem();
+
     wxTreeItemId temp = current;
+    ensureNodeChildrenCreated(temp);
     wxTreeItemIdValue cookie;   // dummy - not really used
-    if (((ItemHasChildren(temp)) && (GetFirstChild(temp, cookie).IsOk()))) //It tries to read de node content, but for FB objects not loaded, it raises error, the ideal is to skip, or to load (all) the database content?
+    if (ItemHasChildren(temp) && GetFirstChild(temp, cookie).IsOk())
         temp = GetFirstChild(temp, cookie);
     else
     {
@@ -1597,10 +1642,18 @@ wxTreeItemId DBHTreeControl::getNextItem(wxTreeItemId current)
 //! where "text" can contain wildcards: * and ?
 bool DBHTreeControl::findText(const wxString& text, bool forward)
 {
+    if (text.empty())
+        return true;
+
     wxString searchString = text.Upper() + "*";
     // start from the current position in tree and look forward
     // for item that starts with that name
     wxTreeItemId start = GetSelection();
+    if (!start.IsOk())
+        start = GetRootItem();
+    if (!start.IsOk())
+        return false;
+
     wxTreeItemId temp = start;
     while (true)
     {
@@ -1617,8 +1670,9 @@ bool DBHTreeControl::findText(const wxString& text, bool forward)
             temp = getNextItem(temp);
         else
             temp = getPreviousItem(temp);
-        if (temp == start)  // not found (we wrapped around completely)
+        if (!temp.IsOk() || temp == start)  // not found (we wrapped around completely)
             return false;
     }
 }
+
 

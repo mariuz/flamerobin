@@ -63,6 +63,7 @@ public:
     wxTreeItemId getLastItem(wxTreeItemId id);
     wxTreeItemId getNextItem(wxTreeItemId current);
     wxTreeItemId getPreviousItem(wxTreeItemId current);
+    void ensureNodeChildrenCreated(wxTreeItemId item);
     bool findText(const wxString& text, bool forward = true);
 
     void allowContextMenu(bool doAllow = true);
