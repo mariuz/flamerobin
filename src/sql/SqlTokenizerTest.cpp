@@ -267,8 +267,18 @@ int main()
         "isReservedWord TERMINATOR") && ok;
     ok = check(SqlTokenizer::isKeyword("TERM", -1, -1),
         "isKeyword TERM") && ok;
-    ok = check(SqlTokenizer::isKeyword("TERMINATOR", -1, -1),
-        "isKeyword TERMINATOR") && ok;
+    ok = check(SqlTokenizer::isReservedWord("OFFSET"),
+        "isReservedWord OFFSET (default version)") && ok;
+    ok = check(SqlTokenizer::isReservedWord("OFFSET", 12, 0),
+        "isReservedWord OFFSET (FB 3.0)") && ok;
+    ok = check(SqlTokenizer::isReservedWord("OFFSET", 13, 0),
+        "isReservedWord OFFSET (FB 4.0)") && ok;
+    ok = check(SqlTokenizer::isReservedWord("OFFSET", 13, 1),
+        "isReservedWord OFFSET (FB 5.0)") && ok;
+    ok = check(SqlTokenizer::isReservedWord("OFFSET", 14, 0),
+        "isReservedWord OFFSET (FB 6.0)") && ok;
+    ok = check(!SqlTokenizer::isReservedWord("OFFSET", 11, 1),
+        "isReservedWord OFFSET (FB 2.5 false)") && ok;
     ok = check(!SqlTokenizer::isReservedWord("MYTABLE"),
         "isReservedWord MYTABLE false") && ok;
     ok = check(!SqlTokenizer::isReservedWord(""),

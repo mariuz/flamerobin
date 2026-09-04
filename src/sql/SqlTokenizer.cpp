@@ -291,7 +291,7 @@ SqlTokenizer::FirebirdKeywordVersion SqlTokenizer::normalizeKeywordVersion(
     int odsMajor, int odsMinor)
 {
     if (odsMajor <= 0)
-        return FirebirdKeywordVersion{2, 5};
+        return FirebirdKeywordVersion{5, 0};
 
     if (odsMajor <= fr::ODSVersion::ODS_FB25_MAJOR)
         return FirebirdKeywordVersion{2, 5};
