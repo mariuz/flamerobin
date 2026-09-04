@@ -471,7 +471,7 @@ bool PrefDlgRadioboxSetting::saveToTargetConfig(Config& config)
 void PrefDlgRadioboxSetting::setDefault(const wxString& defValue)
 {
     long l;
-    if (defValue.ToLong(&l) && l >= 0 && l < long(choicesM.GetCount()))
+    if (defValue.ToLong(&l) && l >= 0)
         defaultM = l;
 }
 
