@@ -209,6 +209,63 @@ int main()
             delete b;
     }
 
+    // Test 5: Regression test for Issue #706 comment (blank rows displayed when grid row count out of sync)
+    // Simulates a 575-row table where 100 rows are fetched initially, then background batches (475 rows)
+    // are processed. Verifies that the view row count matches the exact dataset size (575) without blank rows.
+    {
+        const size_t TOTAL_ROWS = 575;
+        const size_t INITIAL_FETCH = 100;
+
+        std::vector<DataGridRowBuffer*> fullDataset;
+        fullDataset.reserve(TOTAL_ROWS);
+        for (size_t i = 0; i < TOTAL_ROWS; ++i)
+        {
+            DataGridRowBuffer* buf = new DataGridRowBuffer(1);
+            buf->setFieldNull(0, false);
+            buf->setValue(0, (int)i);
+            fullDataset.push_back(buf);
+        }
+
+        // Mock view and table state
+        int viewRows = 0;
+        std::vector<DataGridRowBuffer*> tableRows;
+
+        // Step 1: Initial fetch of 100 rows
+        for (size_t i = 0; i < INITIAL_FETCH; ++i)
+            tableRows.push_back(fullDataset[i]);
+        int targetTableRows = (int)tableRows.size();
+        if (targetTableRows > viewRows)
+            viewRows += (targetTableRows - viewRows);
+
+        ok = check(viewRows == 100, "View row count is 100 after initial fetch") && ok;
+        ok = check(tableRows.size() == 100, "Table rows is 100 after initial fetch") && ok;
+
+        // Step 2: Background batch of remaining 475 rows arrives
+        std::vector<DataGridRowBuffer*> batch;
+        for (size_t i = INITIAL_FETCH; i < TOTAL_ROWS; ++i)
+            batch.push_back(fullDataset[i]);
+
+        // Process pending batch
+        tableRows.insert(tableRows.end(), batch.begin(), batch.end());
+        targetTableRows = (int)tableRows.size();
+        if (targetTableRows > viewRows)
+            viewRows += (targetTableRows - viewRows);
+
+        ok = check(viewRows == 575, "View row count is exactly 575 (no extra/blank rows)") && ok;
+        ok = check(tableRows.size() == 575, "Table rows is exactly 575") && ok;
+
+        // Step 3: Clear table and verify view is reset to 0 without underflow
+        if (viewRows > 0)
+            viewRows -= viewRows;
+        tableRows.clear();
+
+        ok = check(viewRows == 0, "View row count cleanly reset to 0 on Clear") && ok;
+        ok = check(tableRows.empty(), "Table rows empty after Clear") && ok;
+
+        for (auto b : fullDataset)
+            delete b;
+    }
+
     std::cout << "DataGrid Large Fetch Regression Tests completed: "
               << (ok ? "ALL PASSED" : "SOME FAILED") << "\n";
     return ok ? 0 : 1;

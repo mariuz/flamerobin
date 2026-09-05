@@ -106,21 +106,24 @@ void DataGridTable::Clear()
     originalColLabelsM.clear();
 
     unsigned oldCols = rowsM.getRowFieldCount();
-    unsigned oldRows = (unsigned)GetNumberRows();
     rowMappingM.clear();
     rowsM.clear();
 
-    if (GetView() && oldRows > 0)
+    if (GetView())
     {
-        wxGridTableMessage rowMsg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED,
-            0, oldRows);
-        GetView()->ProcessTableMessage(rowMsg);
-    }
-    if (GetView() && oldCols > 0)
-    {
-        wxGridTableMessage colMsg(this, wxGRIDTABLE_NOTIFY_COLS_DELETED,
-            0, oldCols);
-        GetView()->ProcessTableMessage(colMsg);
+        int currentGridRows = GetView()->GetNumberRows();
+        if (currentGridRows > 0)
+        {
+            wxGridTableMessage rowMsg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED,
+                0, currentGridRows);
+            GetView()->ProcessTableMessage(rowMsg);
+        }
+        if (oldCols > 0)
+        {
+            wxGridTableMessage colMsg(this, wxGRIDTABLE_NOTIFY_COLS_DELETED,
+                0, oldCols);
+            GetView()->ProcessTableMessage(colMsg);
+        }
     }
 }
 
@@ -168,10 +171,9 @@ unsigned DataGridTable::processPendingBatches()
 
     if (totalNew > 0)
     {
-        int oldViewRows = GetNumberRows();
         if (filterOrSortActiveM)
             updateRowMapping();
-        notifyViewRowsChanged(oldViewRows);
+        notifyViewRowsChanged();
 
         if (GetView())
         {
@@ -259,7 +261,6 @@ void DataGridTable::fetchOne()
 {
     try
     {
-        int oldViewRows = GetNumberRows();
         if (statementDALM->fetch() || (statementDALM->getColumnCount() > 0))
         {
             rowsM.addRow(statementDALM);
@@ -267,7 +268,7 @@ void DataGridTable::fetchOne()
 
             if (filterOrSortActiveM)
                 updateRowMapping();
-            notifyViewRowsChanged(oldViewRows);
+            notifyViewRowsChanged();
 
             if (GetView())   // notify the grid
             {
@@ -293,7 +294,6 @@ void DataGridTable::fetch()
     if (!canFetchMoreRows())
         return;
 
-    int oldViewRows = GetNumberRows();
     unsigned oldRows = rowsM.getRowCount();
     bool initial = oldRows == 0;
     // fetch more rows until maxRowToFetchM reached or 50 ms elapsed
@@ -336,7 +336,7 @@ void DataGridTable::fetch()
     {
         if (filterOrSortActiveM)
             updateRowMapping();
-        notifyViewRowsChanged(oldViewRows);
+        notifyViewRowsChanged();
 
         if (GetView())   // notify the grid
         {
@@ -354,7 +354,6 @@ void DataGridTable::fetchAllSynchronous()
     if (!canFetchMoreRows())
         return;
 
-    int oldViewRows = GetNumberRows();
     unsigned oldRows = rowsM.getRowCount();
 
     while (canFetchMoreRows())
@@ -391,7 +390,7 @@ void DataGridTable::fetchAllSynchronous()
     {
         if (filterOrSortActiveM)
             updateRowMapping();
-        notifyViewRowsChanged(oldViewRows);
+        notifyViewRowsChanged();
 
         if (GetView())
         {
@@ -404,11 +403,10 @@ void DataGridTable::fetchAllSynchronous()
 
 void DataGridTable::addRow(DataGridRowBuffer *buffer, const wxString& sql)
 {
-    int oldViewRows = GetNumberRows();
     rowsM.addRow(buffer);
     if (filterOrSortActiveM)
         updateRowMapping();
-    notifyViewRowsChanged(oldViewRows);
+    notifyViewRowsChanged();
 
     if (GetView())  // notify the grid
     {
@@ -1019,15 +1017,16 @@ void DataGridTable::notifyViewRowsChanged(int oldViewRows)
 {
     if (!GetView())
         return;
-    int newViewRows = GetNumberRows();
-    if (newViewRows > oldViewRows)
+    int currentGridRows = (oldViewRows >= 0) ? oldViewRows : GetView()->GetNumberRows();
+    int targetTableRows = GetNumberRows();
+    if (targetTableRows > currentGridRows)
     {
-        wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, newViewRows - oldViewRows);
+        wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, targetTableRows - currentGridRows);
         GetView()->ProcessTableMessage(msg);
     }
-    else if (newViewRows < oldViewRows)
+    else if (targetTableRows < currentGridRows)
     {
-        wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED, newViewRows, oldViewRows - newViewRows);
+        wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED, targetTableRows, currentGridRows - targetTableRows);
         GetView()->ProcessTableMessage(msg);
     }
     GetView()->ForceRefresh();
@@ -1101,19 +1100,17 @@ void DataGridTable::updateRowMapping()
 
 void DataGridTable::filterRows(const wxString& filterText)
 {
-    int oldViewRows = GetNumberRows();
     currentFilterTextM = filterText;
     updateRowMapping();
-    notifyViewRowsChanged(oldViewRows);
+    notifyViewRowsChanged();
 }
 
 void DataGridTable::sortColumn(int col, bool ascending)
 {
-    int oldViewRows = GetNumberRows();
     sortedColM = col;
     sortAscendingM = ascending;
     updateRowMapping();
-    notifyViewRowsChanged(oldViewRows);
+    notifyViewRowsChanged();
 
     if (GetView() && col >= 0 && col < GetNumberCols())
     {
@@ -1151,13 +1148,12 @@ void DataGridTable::toggleSortColumn(int col)
 
 void DataGridTable::clearFilterAndSort()
 {
-    int oldViewRows = GetNumberRows();
     currentFilterTextM.Clear();
     sortedColM = -1;
     sortAscendingM = true;
     filterOrSortActiveM = false;
     rowMappingM.clear();
-    notifyViewRowsChanged(oldViewRows);
+    notifyViewRowsChanged();
 
     if (GetView())
     {
