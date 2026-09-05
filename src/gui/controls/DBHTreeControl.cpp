@@ -52,6 +52,7 @@ namespace {
 }
 
 #include "metadata/CharacterSet.h"
+#include "metadata/collection.h"
 #include "metadata/Collation.h"
 #include "metadata/database.h"
 #include "metadata/domain.h"
@@ -1554,6 +1555,18 @@ void DBHTreeControl::ensureNodeChildrenCreated(wxTreeItemId item)
     MetadataItem* mi = getMetadataItem(item);
     if (!mi)
         return;
+
+    // Only load children of container/collection nodes during search traversal.
+    // Individual database objects (tables, views, procedures, packages, etc.) should not
+    // have their fields/columns/parameters auto-loaded while navigating/searching in the tree
+    // unless explicitly expanded by the user.
+    if (!dynamic_cast<MetadataCollectionBase*>(mi)
+        && !dynamic_cast<Database*>(mi)
+        && !dynamic_cast<Server*>(mi)
+        && !dynamic_cast<Root*>(mi))
+    {
+        return;
+    }
 
     // Do not auto-connect to disconnected databases during search
     if (Database* db = dynamic_cast<Database*>(mi))
