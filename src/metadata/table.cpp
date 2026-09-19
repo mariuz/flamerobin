@@ -525,7 +525,7 @@ bool Table::tablesRelate(const std::vector<wxString>& tables, Table* table,
                 {
                     // find foreign keys for that table
                     DatabasePtr db = table->getDatabase();
-                    Table* other_table = dynamic_cast<Table*>(db->findByNameAndType(ntTable, tab));
+                    Table* other_table = dynamic_cast<Table*>(db->findRelation(Identifier(tab)));
                     if (!other_table)
                         break;
 

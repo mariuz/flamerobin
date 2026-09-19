@@ -188,6 +188,15 @@ void Table::acceptVisitor(MetadataItemVisitor*) {}
 void Table::loadChildren() {}
 void Table::setExternalFilePath(const wxString&) {}
 
+// --- GTTable & SysTable Stubs ---
+GTTable::GTTable(DatabasePtr database, const wxString& name)
+    : Table(database, name) { setType(ntGTT); }
+void GTTable::acceptVisitor(MetadataItemVisitor*) {}
+
+SysTable::SysTable(DatabasePtr database, const wxString& name)
+    : Table(database, name) { setType(ntSysTable); }
+void SysTable::acceptVisitor(MetadataItemVisitor*) {}
+
 // --- View Stubs ---
 View::View(DatabasePtr database, const wxString& name) 
     : Relation(ntView, database, name) {}

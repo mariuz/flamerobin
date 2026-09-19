@@ -30,6 +30,8 @@
     #include "wx/wx.h"
 #endif
 
+#include "wx/display.h"
+
 #include "config/Config.h"
 #include "gui/BaseDialog.h"
 #include "gui/StyleGuide.h"
@@ -142,7 +144,36 @@ void BaseDialog::readConfigSettings()
             {
                 config().getValue(itemPrefix + Config::pathSeparator + "x", r.x);
                 config().getValue(itemPrefix + Config::pathSeparator + "y", r.y);
-                SetSize(r);
+
+                // check whether rect intersects at least one monitor rect
+                // otherwise (for example because monitor is not attached any more
+                // or a remote desktop connection is active) center the dialog
+                bool onScreen = false;
+                for (unsigned i = 0; i < wxDisplay::GetCount(); ++i)
+                {
+                    wxDisplay dsp(i);
+                    if (dsp.IsOk())
+                    {
+                        wxRect ca = dsp.GetClientArea();
+                        if (r.Intersects(ca))
+                        {
+                            if (r.y < ca.y)
+                                r.y = ca.y;
+                            if (r.x + r.width < ca.x + 50)
+                                r.x = ca.x;
+                            if (r.x > ca.GetRight() - 50)
+                                r.x = ca.GetRight() - r.width;
+                            if (r.y > ca.GetBottom() - 50)
+                                r.y = ca.GetBottom() - r.height;
+
+                            SetSize(r);
+                            onScreen = true;
+                            break;
+                        }
+                    }
+                }
+                if (!onScreen)
+                    centered = true;
             }
         }
     }

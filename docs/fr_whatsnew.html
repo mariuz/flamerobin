@@ -8,6 +8,18 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.9.2</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>General Improvements & Bug Fixes</B></font><br>
+<br>
+- <b>Global Temporary Table Index and DDL UI Synchronization Fix (#715)</b>: Fixed an issue where creating or dropping indexes on Global Temporary Tables (GTTs) did not update in the database tree or table properties until manual reconnect. Updated committed SQL DDL parsing to resolve all relation types (tables, GTTs, and views) via <code>Database::findRelation()</code>, synchronized database-level index lookup collections (<code>usrIndicesM</code> and <code>sysIndicesM</code>), properly classified <code>CREATE GLOBAL TEMPORARY TABLE</code> DDL statements as <code>ntGTT</code>, and extended dependency tracking and data grid helpers to support GTTs.<br>
+- <b>Preferences and Dialog Window Multi-Monitor Recovery Fix (#716)</b>: Fixed an issue where the Preferences window (and other dialogs/frames) became invisible when opening after disconnecting from a dual-screen or multi-monitor setup to a single screen. Implemented multi-monitor geometry validation with <code>wxDisplay</code> to detect off-screen coordinates, automatic centering fallback, and boundary clamping across all display edges to ensure window title bars and controls always remain accessible on the active screen.<br>
+<br><br>
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.9.1</font><br>
 <br><br>
 

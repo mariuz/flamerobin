@@ -602,7 +602,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
                     std::string s = st2->getString(0);
                     wxString tablecheck(std2wxIdentifier(s, d->getCharsetConverter()));
                     if (getName_() != tablecheck)    // avoid self-reference
-                        current = d->findByNameAndType(ntTable, tablecheck);
+                        current = d->findRelation(Identifier(tablecheck));
                 }
             }
             if (!current)
@@ -626,13 +626,13 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
 
     // TODO: perhaps this could be moved to Table?
     //       call MetadataItem::getDependencies() and then add this
-    if ((typeM == ntTable || typeM == ntSysTable) && ofObject)   // foreign keys of this table + computed columns
+    if ((typeM == ntTable || typeM == ntSysTable || typeM == ntGTT) && ofObject)   // foreign keys of this table + computed columns
     {
         Table *tab = dynamic_cast<Table *>(this);
         for (const auto iter : *(tab->getForeignKeys()))
         {
-            MetadataItem *table = d->findByNameAndType(ntTable,
-                iter.getReferencedTable());
+            MetadataItem *table = d->findRelation(
+                Identifier(iter.getReferencedTable()));
             if (!table)
             {
                 throw FRError(wxString::Format(_("Table %s not found."),
@@ -718,7 +718,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
 
             if (table_name != lasttable)    // new
             {
-                MetadataItem* table = d->findByNameAndType(ntTable, table_name);
+                MetadataItem* table = d->findRelation(Identifier(table_name));
 
                 if (!table)
                     continue;           // dummy check

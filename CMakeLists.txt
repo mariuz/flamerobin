@@ -848,6 +848,15 @@ add_executable(merge_repro_test
 target_link_libraries(merge_repro_test ${wxWidgets_LIBRARIES})
 add_test(NAME merge_repro_test COMMAND merge_repro_test)
 
+# Regression test for issue #715 (Global Temporary Table: new index not showing up in UI).
+add_executable(gtt_index_test
+    ${SOURCEDIR}/metadata/GTTIndexTest.cpp
+    ${SOURCEDIR}/sql/SqlStatement.cpp
+    ${SQL_TEST_STUB_SOURCES}
+)
+target_link_libraries(gtt_index_test ${wxWidgets_LIBRARIES})
+add_test(NAME gtt_index_test COMMAND gtt_index_test)
+
 
 
 add_executable(dal_types_test

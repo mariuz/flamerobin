@@ -816,7 +816,12 @@ void Database::dropObject(MetadataItem* object)
             DDLTriggersM->remove((DDLTrigger*)object);
             break;
         case ntIndex:
-            indicesM->remove((Index*)object);
+            if (indicesM)
+                indicesM->remove((Index*)object);
+            if (usrIndicesM)
+                usrIndicesM->remove((Index*)object);
+            if (sysIndicesM)
+                sysIndicesM->remove((Index*)object);
             break;
         default:
             return;
@@ -888,7 +893,10 @@ void Database::addObject(NodeType type, const wxString& name)
             DDLTriggersM->insert(name);
             break;
         case ntIndex:
-            indicesM->insert(name);
+            if (indicesM)
+                indicesM->insert(name);
+            if (usrIndicesM)
+                usrIndicesM->insert(name);
             break;
         default:
             break;
@@ -919,9 +927,43 @@ void Database::parseCommitedSql(const SqlStatement& stm)
     if (stm.actionIs(actDROP, ntIndex))
     {
         // the affected table will recognize its index (if loaded)
-        Tables::iterator it;
-        for (it = tablesM->begin(); it != tablesM->end(); ++it)
+        for (Tables::iterator it = tablesM->begin(); it != tablesM->end(); ++it)
             (*it)->invalidateIndices(stm.getName());
+        if (GTTablesM)
+        {
+            for (GTTables::iterator it = GTTablesM->begin(); it != GTTablesM->end(); ++it)
+                (*it)->invalidateIndices(stm.getName());
+        }
+        if (sysTablesM)
+        {
+            for (SysTables::iterator it = sysTablesM->begin(); it != sysTablesM->end(); ++it)
+                (*it)->invalidateIndices(stm.getName());
+        }
+
+        MetadataItem* object = stm.getObject();
+        if (!object)
+            object = findByNameAndType(ntIndex, stm.getName());
+        if (object)
+            dropObject(object);
+        else
+        {
+            if (indicesM)
+            {
+                if (IndexPtr i = indicesM->findByName(stm.getName()))
+                    indicesM->remove(i.get());
+            }
+            if (usrIndicesM)
+            {
+                if (IndexPtr i = usrIndicesM->findByName(stm.getName()))
+                    usrIndicesM->remove(i.get());
+            }
+            if (sysIndicesM)
+            {
+                if (IndexPtr i = sysIndicesM->findByName(stm.getName()))
+                    sysIndicesM->remove(i.get());
+            }
+        }
+        notifyObservers();
         return;
     }
 
@@ -930,9 +972,12 @@ void Database::parseCommitedSql(const SqlStatement& stm)
         || stm.actionIs(actALTER) || stm.actionIs(actSET)))
     {
         wxString tableName = getTableForIndex(stm.getName());
-        MetadataItem* m = findByNameAndType(ntTable, tableName);
-        if (Table* t = dynamic_cast<Table*>(m))
+        Relation* r = findRelation(Identifier(tableName));
+        if (Table* t = dynamic_cast<Table*>(r))
             t->invalidateIndices();
+
+        if (stm.actionIs(actCREATE))
+            addObject(ntIndex, stm.getName());
 
         if (Index* i = dynamic_cast<Index*>(stm.getObject())) {
             i->invalidate();
@@ -1118,6 +1163,32 @@ void Database::parseCommitedSql(const SqlStatement& stm)
                         {
                             if ((*itColumn)->getSource() == stm.getName())
                                 (*itColumn)->invalidate();
+                        }
+                    }
+                    if (GTTablesM)
+                    {
+                        for (GTTables::iterator it = GTTablesM->begin();
+                            it != GTTablesM->end(); ++it)
+                        {
+                            for (ColumnPtrs::iterator itColumn = (*it)->begin();
+                                itColumn != (*it)->end(); ++itColumn)
+                            {
+                                if ((*itColumn)->getSource() == stm.getName())
+                                    (*itColumn)->invalidate();
+                            }
+                        }
+                    }
+                    if (sysTablesM)
+                    {
+                        for (SysTables::iterator it = sysTablesM->begin();
+                            it != sysTablesM->end(); ++it)
+                        {
+                            for (ColumnPtrs::iterator itColumn = (*it)->begin();
+                                itColumn != (*it)->end(); ++itColumn)
+                            {
+                                if ((*itColumn)->getSource() == stm.getName())
+                                    (*itColumn)->invalidate();
+                            }
                         }
                     }
                 }

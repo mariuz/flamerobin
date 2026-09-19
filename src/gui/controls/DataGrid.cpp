@@ -520,7 +520,7 @@ void DataGrid::copyToClipboardAsUpdate()
                     if (db)
                     {
                         t = dynamic_cast<Table*>(
-                            db->findByNameAndType(ntTable, tableId.get()));
+                            db->findRelation(tableId));
                     }
                     if (!t)
                     {
@@ -618,7 +618,7 @@ void DataGrid::copyToClipboardAsUpdateInsert()
             if (db)
             {
                 t = dynamic_cast<Table*>(
-                    db->findByNameAndType(ntTable, tableId.get()));
+                    db->findRelation(tableId));
             }
 
             if (!t)

@@ -305,11 +305,7 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
             std::list<wxString> cols;
             for (IdAliasMap::iterator it = aliases.begin(); it != aliases.end(); ++it)
             {
-                Relation* rel = dynamic_cast<Relation*>(databaseM->findByNameAndType(ntTable, it->second));
-                if (!rel)
-                    rel = dynamic_cast<Relation*>(databaseM->findByNameAndType(ntView, it->second));
-                if (!rel)
-                    rel = dynamic_cast<Relation*>(databaseM->findByNameAndType(ntSysTable, it->second));
+                Relation* rel = databaseM->findRelation(Identifier(it->second));
 
                 if (rel)
                 {

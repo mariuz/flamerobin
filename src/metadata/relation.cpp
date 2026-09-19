@@ -354,8 +354,8 @@ void Relation::getDependentChecks(std::vector<CheckConstraint>& checks)
 
         wxString source = wxString(st1->getString(2).c_str(), *converter);
 
-        Table* tab = dynamic_cast<Table*>(db->findByNameAndType(ntTable,
-            table));
+        Table* tab = dynamic_cast<Table*>(db->findRelation(
+            Identifier(table)));
         if (!tab)
             continue;
 

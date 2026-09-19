@@ -298,6 +298,14 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
             break;
         case kwTABLE:
             objectTypeM = ntTable;
+            for (size_t k = 0; k < typeTokenIndex; ++k)
+            {
+                if (tokensM[k] == kwGLOBAL || tokensM[k] == kwTEMPORARY)
+                {
+                    objectTypeM = ntGTT;
+                    break;
+                }
+            }
             break;
         case kwTRIGGER:
             if (actionM == actCREATE || actionM == actALTER || 
@@ -367,7 +375,16 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
         return; // false;
 
     if ( actionM != actCONNECT )
-        objectM = databaseM->findByNameAndType(objectTypeM, nameM.get());
+    {
+        if (objectTypeM == ntTable || objectTypeM == ntGTT)
+        {
+            objectM = databaseM->findRelation(nameM);
+            if (objectM)
+                objectTypeM = objectM->getType();
+        }
+        else
+            objectM = databaseM->findByNameAndType(objectTypeM, nameM.get());
+    }
 
 
     // map "CREATE OR ALTER" and "RECREATE" to correct action
@@ -416,7 +433,9 @@ SqlStatement::SqlStatement(const wxString& sql, Database *db, const wxString&
                 if (tokensM[i + 1] == tkEQUALS && tokensM[i + 2] == tkSTRING)
                 {
                     nameM.setFromSql(tokenStringsM[i + 2]);
-                    objectM = databaseM->findByNameAndType(ntTable, nameM.get());
+                    objectM = databaseM->findRelation(nameM);
+                    if (objectM)
+                        objectTypeM = objectM->getType();
                     break;
                 }
             }

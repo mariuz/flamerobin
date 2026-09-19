@@ -120,11 +120,27 @@ void BaseFrame::readConfigSettings()
         wxDisplay dsp(i);
         if (dsp.IsOk() && rc.Intersects(dsp.GetClientArea()))
         {
+            wxRect ca = dsp.GetClientArea();
+            if (rc.y < ca.y)
+                rc.y = ca.y;
+            if (rc.x + rc.width < ca.x + 50)
+                rc.x = ca.x;
+            if (rc.x > ca.GetRight() - 50)
+                rc.x = ca.GetRight() - rc.width;
+            if (rc.y > ca.GetBottom() - 50)
+                rc.y = ca.GetBottom() - rc.height;
+
             SetSize(rc);
             return;
         }
     }
-    SetSize(rcDefault);
+    if (rc.width > 0 && rc.height > 0)
+    {
+        SetSize(rc.width, rc.height);
+        Centre();
+    }
+    else
+        SetSize(rcDefault);
 }
 void BaseFrame::doReadConfigSettings(const wxString& WXUNUSED(prefix))
 {
