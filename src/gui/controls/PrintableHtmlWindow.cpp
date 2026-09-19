@@ -97,7 +97,12 @@ PrintableHtmlWindow::PrintableHtmlWindow(wxWindow* parent, wxWindowID id)
         webViewM->Bind(wxEVT_HTML_LINK_CLICKED, &PrintableHtmlWindow::OnHtmlLinkClicked, this);
         webViewM->Bind(wxEVT_RIGHT_UP, &PrintableHtmlWindow::OnRightUp, this);
 #endif
+        webViewM->Bind(wxEVT_CHAR_HOOK, &PrintableHtmlWindow::OnCharHook, this);
+        webViewM->Bind(wxEVT_KEY_DOWN, &PrintableHtmlWindow::OnKeyDown, this);
     }
+
+    Bind(wxEVT_CHAR_HOOK, &PrintableHtmlWindow::OnCharHook, this);
+    Bind(wxEVT_KEY_DOWN, &PrintableHtmlWindow::OnKeyDown, this);
 }
 
 PrintableHtmlWindow::~PrintableHtmlWindow()
@@ -110,6 +115,7 @@ PrintableHtmlWindow::~PrintableHtmlWindow()
 
 BEGIN_EVENT_TABLE(PrintableHtmlWindow, wxPanel)
     EVT_RIGHT_UP(PrintableHtmlWindow::OnRightUp)
+    EVT_MENU(wxID_REFRESH, PrintableHtmlWindow::OnMenuRefresh)
     EVT_MENU(wxID_COPY, PrintableHtmlWindow::OnMenuCopy)
     #ifdef _DEBUG
         EVT_MENU(CmdCopyAllHtml, PrintableHtmlWindow::OnMenuCopyAllHtml)
@@ -125,6 +131,8 @@ END_EVENT_TABLE()
 void PrintableHtmlWindow::OnRightUp(wxMouseEvent& WXUNUSED(event))
 {
     wxMenu m;
+    m.Append(wxID_REFRESH, _("&Refresh\tCtrl+R"));
+    m.AppendSeparator();
     m.Append(wxID_COPY, _("&Copy"));
     #ifdef _DEBUG
         m.AppendSeparator();
@@ -148,6 +156,48 @@ void PrintableHtmlWindow::OnRightUp(wxMouseEvent& WXUNUSED(event))
     m.Enable(CmdShowDevTools, webViewM != nullptr);
 #endif
     PopupMenu(&m, ScreenToClient(::wxGetMousePosition()));
+}
+
+void PrintableHtmlWindow::OnMenuRefresh(wxCommandEvent& WXUNUSED(event))
+{
+    wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED, wxID_REFRESH);
+    if (GetParent())
+        GetParent()->ProcessWindowEvent(evt);
+    else
+        ProcessWindowEvent(evt);
+}
+
+void PrintableHtmlWindow::OnCharHook(wxKeyEvent& event)
+{
+    int key = event.GetKeyCode();
+    int mods = event.GetModifiers();
+
+    if ((key == WXK_F5 && (mods == wxMOD_NONE || mods == wxMOD_CONTROL || mods == wxMOD_CMD)) ||
+        ((key == 'R' || key == 'r') && (mods == wxMOD_CMD || mods == wxMOD_CONTROL)))
+    {
+        wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED, wxID_REFRESH);
+        if (GetParent())
+            GetParent()->ProcessWindowEvent(evt);
+        else
+            ProcessWindowEvent(evt);
+        return;
+    }
+    else if (((key == 'W' || key == 'w') && (mods == wxMOD_CMD || mods == wxMOD_CONTROL)) ||
+             (key == WXK_F4 && mods == wxMOD_CONTROL))
+    {
+        wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED, wxID_CLOSE_FRAME);
+        if (GetParent())
+            GetParent()->ProcessWindowEvent(evt);
+        else
+            ProcessWindowEvent(evt);
+        return;
+    }
+    event.Skip();
+}
+
+void PrintableHtmlWindow::OnKeyDown(wxKeyEvent& event)
+{
+    OnCharHook(event);
 }
 
 void PrintableHtmlWindow::setPageSource(const wxString& html)

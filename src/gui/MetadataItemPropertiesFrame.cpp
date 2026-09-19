@@ -82,6 +82,7 @@ public:
     MetadataItemPropertiesFrame* getParentFrame();
 
     void setPage(const wxString& type);
+    void refresh();
 private:
     // event handling
     void OnCloseFrame(wxCommandEvent& event);
@@ -117,13 +118,10 @@ MetadataItemPropertiesPanel::MetadataItemPropertiesPanel(
     wxAcceleratorEntry entries[4];
     entries[0].Set(wxACCEL_CMD, (int) 'W', wxID_CLOSE_FRAME);
     entries[1].Set(wxACCEL_CMD, (int) 'R', wxID_REFRESH);
-    // MSW only
     entries[2].Set(wxACCEL_CTRL, WXK_F4, wxID_CLOSE_FRAME);
     entries[3].Set(wxACCEL_NORMAL, WXK_F5, wxID_REFRESH);
 
-    bool isMSW =
-        (wxPlatformInfo::Get().GetOperatingSystemId() & wxOS_WINDOWS) != 0;
-    wxAcceleratorTable acct(isMSW ? 4 : 2, entries);
+    wxAcceleratorTable acct(4, entries);
     SetAcceleratorTable(acct);
 
     Connect(wxID_CLOSE_FRAME, wxEVT_COMMAND_MENU_SELECTED,
@@ -162,6 +160,7 @@ void MetadataItemPropertiesPanel::requestLoadPage(bool showLoadingPage)
         Connect(wxID_ANY, wxEVT_IDLE,
             wxIdleEventHandler(MetadataItemPropertiesPanel::OnIdle));
         htmlReloadRequestedM = true;
+        ::wxWakeUpIdle();
     }
 }
 
@@ -385,7 +384,7 @@ void MetadataItemPropertiesPanel::OnIdle(wxIdleEvent& WXUNUSED(event))
     htmlReloadRequestedM = false;
 }
 
-void MetadataItemPropertiesPanel::OnRefresh(wxCommandEvent& WXUNUSED(event))
+void MetadataItemPropertiesPanel::refresh()
 {
     if (objectM)
         objectM->invalidate();
@@ -393,6 +392,11 @@ void MetadataItemPropertiesPanel::OnRefresh(wxCommandEvent& WXUNUSED(event))
     // "Please wait while the data is being loaded..." temporary page
     // this results in less flicker, but may also seem less responsive
     requestLoadPage(false);
+}
+
+void MetadataItemPropertiesPanel::OnRefresh(wxCommandEvent& WXUNUSED(event))
+{
+    refresh();
     SetFocus();
 }
 
@@ -475,10 +479,26 @@ MetadataItemPropertiesFrame::MetadataItemPropertiesFrame(wxWindow* parent,
         wxAuiPaneInfo().CenterPane().PaneBorder(false));
     auiManagerM.Update();
 
+    wxAcceleratorEntry entries[4];
+    entries[0].Set(wxACCEL_CMD, (int) 'W', wxID_CLOSE_FRAME);
+    entries[1].Set(wxACCEL_CMD, (int) 'R', wxID_REFRESH);
+    entries[2].Set(wxACCEL_CTRL, WXK_F4, wxID_CLOSE_FRAME);
+    entries[3].Set(wxACCEL_NORMAL, WXK_F5, wxID_REFRESH);
+    wxAcceleratorTable acct(4, entries);
+    SetAcceleratorTable(acct);
+
     Connect(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CLOSE, wxAuiNotebookEventHandler(
         MetadataItemPropertiesFrame::OnNotebookPageClose), NULL, this);
     Connect(wxEVT_COMMAND_AUINOTEBOOK_PAGE_CHANGED, wxAuiNotebookEventHandler(
         MetadataItemPropertiesFrame::OnNotebookPageChanged), NULL, this);
+    Connect(wxID_CLOSE_FRAME, wxEVT_COMMAND_MENU_SELECTED,
+        wxCommandEventHandler(MetadataItemPropertiesFrame::OnClosePage), NULL, this);
+    Connect(wxID_CLOSE, wxEVT_COMMAND_MENU_SELECTED,
+        wxCommandEventHandler(MetadataItemPropertiesFrame::OnClosePage), NULL, this);
+    Connect(wxID_REFRESH, wxEVT_COMMAND_MENU_SELECTED,
+        wxCommandEventHandler(MetadataItemPropertiesFrame::OnRefresh), NULL, this);
+    Connect(wxEVT_CHAR_HOOK,
+        wxKeyEventHandler(MetadataItemPropertiesFrame::OnCharHook), NULL, this);
 }
 
 MetadataItemPropertiesFrame::~MetadataItemPropertiesFrame()
@@ -656,6 +676,59 @@ void MetadataItemPropertiesFrame::OnNotebookPageChanged(
         SetTitle(notebookM->GetPageText(sel));
     else
         SetTitle(databaseNameM + " - " + notebookM->GetPageText(sel));
+}
+
+MetadataItemPropertiesPanel* MetadataItemPropertiesFrame::getActivePanel() const
+{
+    if (!notebookM)
+        return 0;
+    int sel = notebookM->GetSelection();
+    if (sel == wxNOT_FOUND)
+        return 0;
+    return dynamic_cast<MetadataItemPropertiesPanel*>(notebookM->GetPage(sel));
+}
+
+void MetadataItemPropertiesFrame::refreshActivePage()
+{
+    if (MetadataItemPropertiesPanel* panel = getActivePanel())
+        panel->refresh();
+}
+
+void MetadataItemPropertiesFrame::closeActivePage()
+{
+    if (MetadataItemPropertiesPanel* panel = getActivePanel())
+        removePanel(panel);
+}
+
+void MetadataItemPropertiesFrame::OnRefresh(wxCommandEvent& WXUNUSED(event))
+{
+    refreshActivePage();
+}
+
+void MetadataItemPropertiesFrame::OnClosePage(wxCommandEvent& WXUNUSED(event))
+{
+    closeActivePage();
+}
+
+void MetadataItemPropertiesFrame::OnCharHook(wxKeyEvent& event)
+{
+    int key = event.GetKeyCode();
+    int mods = event.GetModifiers();
+
+    if ((key == WXK_F5 && (mods == wxMOD_NONE || mods == wxMOD_CONTROL || mods == wxMOD_CMD)) ||
+        ((key == 'R' || key == 'r') && (mods == wxMOD_CMD || mods == wxMOD_CONTROL)))
+    {
+        refreshActivePage();
+        return;
+    }
+    else if (((key == 'W' || key == 'w') && (mods == wxMOD_CMD || mods == wxMOD_CONTROL)) ||
+             (key == WXK_F4 && mods == wxMOD_CONTROL))
+    {
+        closeActivePage();
+        return;
+    }
+
+    event.Skip();
 }
 
 //! PageHandler class

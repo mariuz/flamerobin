@@ -857,6 +857,16 @@ add_executable(gtt_index_test
 target_link_libraries(gtt_index_test ${wxWidgets_LIBRARIES})
 add_test(NAME gtt_index_test COMMAND gtt_index_test)
 
+# Regression test for issue #717 (Database properties form refreshing via Ctrl+R / F5).
+add_executable(database_properties_refresh_test
+    ${SOURCEDIR}/metadata/DatabasePropertiesRefreshTest.cpp
+    ${SOURCEDIR}/core/Observer.cpp
+    ${SOURCEDIR}/core/Subject.cpp
+    ${SQL_TEST_STUB_SOURCES}
+)
+target_link_libraries(database_properties_refresh_test ${wxWidgets_LIBRARIES})
+add_test(NAME database_properties_refresh_test COMMAND database_properties_refresh_test)
+
 
 
 add_executable(dal_types_test

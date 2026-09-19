@@ -46,9 +46,9 @@
 #include "config/Config.h"
 
 // --- MetadataItem Stubs ---
-MetadataItem::MetadataItem() : parentM(0), typeM(ntUnknown), metadataIdM(-1) {}
+MetadataItem::MetadataItem() : parentM(0), typeM(ntUnknown), propertiesLoadedM(lsNotLoaded), childrenLoadedM(lsNotLoaded), metadataIdM(-1) {}
 MetadataItem::MetadataItem(NodeType type, MetadataItem* parent, const wxString& name, int id) 
-    : parentM(parent), typeM(type), identifierM(name), metadataIdM(id) {}
+    : parentM(parent), typeM(type), identifierM(name), propertiesLoadedM(lsNotLoaded), childrenLoadedM(lsNotLoaded), metadataIdM(id) {}
 MetadataItem::~MetadataItem() {}
 
 wxString MetadataItem::getName_() const { return identifierM.get(); }
@@ -76,9 +76,11 @@ void MetadataItem::loadProperties() {}
 void MetadataItem::loadChildren() {}
 void MetadataItem::lockChildren() {}
 void MetadataItem::unlockChildren() {}
-void MetadataItem::doSetChildrenLoaded(bool) {}
-bool MetadataItem::childrenLoaded() const { return false; }
-void MetadataItem::setChildrenLoaded(bool) {}
+void MetadataItem::doSetChildrenLoaded(bool loaded) { childrenLoadedM = (loaded ? lsLoaded : lsNotLoaded); }
+bool MetadataItem::childrenLoaded() const { return childrenLoadedM == lsLoaded; }
+void MetadataItem::setChildrenLoaded(bool loaded) { childrenLoadedM = (loaded ? lsLoaded : lsNotLoaded); }
+bool MetadataItem::propertiesLoaded() const { return propertiesLoadedM == lsLoaded; }
+void MetadataItem::setPropertiesLoaded(bool loaded) { propertiesLoadedM = (loaded ? lsLoaded : lsNotLoaded); }
 bool MetadataItem::getChildren(std::vector<MetadataItem *>&) { return false; }
 void MetadataItem::ensureChildrenLoaded() {}
 
@@ -87,7 +89,12 @@ void initializeLockCount(MetadataItemPtr, unsigned) {}
 
 void MetadataItem::lockSubject() {}
 void MetadataItem::unlockSubject() {}
-void MetadataItem::invalidate() {}
+void MetadataItem::invalidate()
+{
+    setChildrenLoaded(false);
+    setPropertiesLoaded(false);
+    notifyObservers();
+}
 
 DatabasePtr MetadataItem::getDatabase() const { return DatabasePtr(); }
 fr::IDatabasePtr MetadataItem::getDALDatabase() const { return fr::IDatabasePtr(); }
@@ -319,6 +326,8 @@ void Database::loadChildren() {}
 void Database::lockChildren() {}
 void Database::unlockChildren() {}
 bool Database::getChildren(std::vector<MetadataItem *>&) { return false; }
+void Database::loadProperties() {}
+void Database::invalidate() { MetadataItem::invalidate(); }
 
 // --- MetadataLoader Stubs ---
 MetadataLoaderTransaction::MetadataLoaderTransaction(MetadataLoader*) {}

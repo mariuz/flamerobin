@@ -73,9 +73,16 @@ private:
     void showPanel(MetadataItemPropertiesPanel* panel,
         const wxString& title);
 
+    MetadataItemPropertiesPanel* getActivePanel() const;
+    void refreshActivePage();
+    void closeActivePage();
+
     // event handling
     void OnNotebookPageClose(wxAuiNotebookEvent& event);
     void OnNotebookPageChanged(wxAuiNotebookEvent& event);
+    void OnRefresh(wxCommandEvent& event);
+    void OnClosePage(wxCommandEvent& event);
+    void OnCharHook(wxKeyEvent& event);
 };
 
 #endif // FR_METADATAITEMPROPERTIESFRAME_H

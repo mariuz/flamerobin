@@ -2416,6 +2416,38 @@ const DatabaseInfo& Database::getInfo()
     return databaseInfoM;
 }
 
+void Database::invalidate()
+{
+    if (isConnected() && databaseDAL_M)
+    {
+        try
+        {
+            databaseInfoM.load(databaseDAL_M);
+            loadDatabaseInfo();
+        }
+        catch (...)
+        {
+        }
+    }
+    MetadataItem::invalidate();
+}
+
+void Database::loadProperties()
+{
+    if (isConnected() && databaseDAL_M)
+    {
+        try
+        {
+            databaseInfoM.load(databaseDAL_M);
+            loadDatabaseInfo();
+        }
+        catch (...)
+        {
+        }
+    }
+    MetadataItem::loadProperties();
+}
+
 void Database::loadInfo()
 {
     databaseInfoM.load(databaseDAL_M);

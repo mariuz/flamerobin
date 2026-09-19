@@ -72,6 +72,9 @@ protected:
 #endif
 
     void OnRightUp(wxMouseEvent& event);
+    void OnMenuRefresh(wxCommandEvent& event);
+    void OnCharHook(wxKeyEvent& event);
+    void OnKeyDown(wxKeyEvent& event);
     void OnMenuCopy(wxCommandEvent& event);
     void OnMenuCopyAllHtml(wxCommandEvent& event);
 #if wxCHECK_VERSION(3, 3, 0) && wxUSE_WEBVIEW

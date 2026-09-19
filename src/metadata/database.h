@@ -418,6 +418,8 @@ public:
     static void setUIDGeneratorValue(unsigned value);
 
     virtual void acceptVisitor(MetadataItemVisitor* visitor);
+    virtual void invalidate() override;
+    virtual void loadProperties() override;
 
     const DatabaseInfo& getInfo();
     void loadInfo();
