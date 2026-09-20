@@ -8,6 +8,18 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.9.4</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>General Improvements & Bug Fixes</B></font><br>
+<br>
+- <b>Database & Metadata Properties Form Live Refresh Fix (#717)</b>: Fixed an issue where pressing <kbd>Ctrl+R</kbd> or <kbd>F5</kbd> did not refresh Connected Users, Transaction Info, or active transaction metrics in the Database Properties form. Injected a DOM <code>keydown</code> listener in <code>PrintableHtmlWindow</code> to capture <kbd>F5</kbd>, <kbd>Ctrl+R</kbd> / <kbd>Cmd+R</kbd>, and <kbd>Ctrl+W</kbd> / <kbd>Ctrl+F4</kbd> directly when keyboard focus is inside the embedded HTML/browser window (WebView2 / WebKit), added unique sequence numbers and timestamps to generated temporary HTML URLs to prevent browser caching from serving stale pages, ensured <code>Database::loadProperties()</code> is called before template rendering in <code>loadPage()</code>, and populated <code>activeTransactions</code> in <code>FbCppDatabase::getInfo()</code> from <code>MON$TRANSACTIONS</code>.<br>
+- <b>OCTET <code>CHAR(16)</code> / UUID Display Formatting in DataGrid (#714)</b>: Fixed an issue where 16-byte binary/OCTET character columns representing UUIDs were rendered in the query DataGrid and export as unprintable characters or raw hex escapes. Implemented automatic UUID canonical format (8-4-4-4-12 hex string with hyphens) detection and formatting for 16-byte OCTET fields while preserving raw binary export.<br>
+<br><br>
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.9.3</font><br>
 <br><br>
 
