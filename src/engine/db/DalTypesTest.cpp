@@ -110,16 +110,17 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& serverNa
         
         // Subtype test (OCTETS)
         std::cout << "  Testing BLOB/String subtypes...\n";
-        st->prepare("SELECT CAST('abc' AS VARCHAR(10) CHARACTER SET OCTETS) FROM RDB$DATABASE");
+        st->prepare("SELECT CAST('abc' AS VARCHAR(10) CHARACTER SET OCTETS), GEN_UUID() FROM RDB$DATABASE");
         st->execute();
         st->fetch();
         int subtype = st->getColumnSubtype(0);
         std::cout << "    Debug: Subtype for OCTETS string = " << subtype << "\n";
-        if (subtype != 1)
-        {
-            std::cout << "    INFO: Subtype reported as " << subtype << " (expected 1 for OCTETS)\n";
-        }
-        ok = fr_test::check(subtype != 0, "getColumnSubtype (non-zero for OCTETS)") && ok;
+        ok = fr_test::check(subtype == 1, "getColumnSubtype (expected 1 for OCTETS VARCHAR)") && ok;
+        int uuidSubtype = st->getColumnSubtype(1);
+        std::cout << "    Debug: Subtype for GEN_UUID() = " << uuidSubtype << "\n";
+        ok = fr_test::check(uuidSubtype == 1, "getColumnSubtype (expected 1 for GEN_UUID() CHAR(16) OCTETS)") && ok;
+        std::string uuidRaw = st->getString(1);
+        ok = fr_test::check(uuidRaw.length() == 16, "GEN_UUID() raw length is 16 bytes") && ok;
 
         // Table name test
         std::cout << "  Testing table name metadata...\n";

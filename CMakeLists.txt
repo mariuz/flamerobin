@@ -1108,6 +1108,17 @@ add_executable(data_grid_sort_partial_fetch_test
 target_link_libraries(data_grid_sort_partial_fetch_test ${wxWidgets_LIBRARIES} ${FR_LIBS})
 add_test(NAME data_grid_sort_partial_fetch_test COMMAND data_grid_sort_partial_fetch_test)
 
+add_executable(data_grid_octets_test
+    ${SOURCEDIR}/gui/controls/DataGridOctetsTest.cpp
+    ${SOURCEDIR}/gui/controls/DataGridRowBuffer.cpp
+    ${SOURCEDIR}/core/FRInt128.cpp
+    ${SOURCEDIR}/core/FRDecimal.cpp
+    ${SOURCEDIR}/core/FRError.cpp
+    ${SOURCEDIR}/core/StringUtils.cpp
+)
+target_link_libraries(data_grid_octets_test ${wxWidgets_LIBRARIES} ${FR_LIBS})
+add_test(NAME data_grid_octets_test COMMAND data_grid_octets_test)
+
 if (APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES
                 BUILD_WITH_INSTALL_RPATH FALSE

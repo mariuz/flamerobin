@@ -797,25 +797,23 @@ void InsertParametersDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
                 parseTimeStamp(row, value);
                 break;
             case IBPP::SDT::sdString:
-                // Subtype 1 indicates CharacterSet OCTETS (binary hex string)
+                // Subtype 1 indicates CharacterSet OCTETS (binary hex string or UUID)
                 if (subtype == 1) {
+                    wxString hexVal = value;
+                    hexVal.Replace("-", "");
+                    hexVal.Replace("{", "");
+                    hexVal.Replace("}", "");
+                    hexVal.Replace(" ", "");
 
-                    if (value.length() % 2 == 1)
-                        throw FRError(_("Invalid HEX value value"));
-                    std::vector<char> octet = std::vector<char>();
-                    wxString::iterator ci = value.begin();
-                    wxString::iterator end = value.end();
-
-                    wxString num;
-                    while (ci != end)
+                    if (hexVal.length() % 2 == 1)
+                        throw FRError(_("Invalid HEX value"));
+                    std::vector<char> octet;
+                    for (size_t i = 0; i < hexVal.length(); i += 2)
                     {
-                        wxChar c = (wxChar)*ci;
-                        num = c;
-                        ++ci;
-                        c = (wxChar)*ci;
-                        num += c;
-                        ++ci;
-                        octet.push_back(std::stoi(wx2std(num, databaseM->getCharsetConverter()), nullptr, 16));
+                        if (!wxIsxdigit(hexVal[i]) || !wxIsxdigit(hexVal[i + 1]))
+                            throw FRError(_("Invalid HEX value"));
+                        wxString num = hexVal.Mid(i, 2);
+                        octet.push_back(static_cast<char>(std::stoi(wx2std(num, databaseM->getCharsetConverter()), nullptr, 16)));
                     }
                     int paramSize = statementDALM->getParameterSize(row);
                     while (octet.size() < (size_t)paramSize)

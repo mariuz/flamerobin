@@ -97,20 +97,30 @@ StatementExt::StatementExt(Attachment& attachment, Transaction& transaction, std
 
                     builder->setType(&statusWrapper, index, static_cast<unsigned>(DescriptorOriginalType::VARYING));
                     builder->setLength(&statusWrapper, index, descriptor.length + 2);
-                    builder->setCharSet(&statusWrapper, index, 127); // CS_dynamic
+                    if (descriptor.charSetId != 1)
+                    {
+                        builder->setCharSet(&statusWrapper, index, 127); // CS_dynamic
+                        descriptor.charSetId = 127;
+                    }
+                    else
+                    {
+                        builder->setCharSet(&statusWrapper, index, 1);
+                    }
 
                     descriptor.adjustedType = DescriptorAdjustedType::STRING;
                     descriptor.length += 2;
-                    descriptor.charSetId = 127;
                     break;
 
                 case DescriptorOriginalType::VARYING:
-                    if (!builder)
-                        builder.reset(metadata->getBuilder(&statusWrapper));
+                    if (descriptor.charSetId != 1)
+                    {
+                        if (!builder)
+                            builder.reset(metadata->getBuilder(&statusWrapper));
 
-                    builder->setCharSet(&statusWrapper, index, 127); // CS_dynamic
+                        builder->setCharSet(&statusWrapper, index, 127); // CS_dynamic
+                        descriptor.charSetId = 127;
+                    }
                     descriptor.adjustedType = DescriptorAdjustedType::STRING;
-                    descriptor.charSetId = 127;
                     break;
 
                 case DescriptorOriginalType::SHORT:

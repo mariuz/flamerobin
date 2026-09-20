@@ -1981,8 +1981,18 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
         std::string value;
         statement->Get(col, value);
         wxString val;
-        for (std::string::size_type p = 0; p < value.length(); p++)
-            val += wxString::Format("%02x", uint8_t(value[p]));
+        if (value.length() == 16)
+        {
+            const uint8_t* b = reinterpret_cast<const uint8_t*>(value.data());
+            val = wxString::Format("%02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X",
+                b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7],
+                b[8], b[9], b[10], b[11], b[12], b[13], b[14], b[15]);
+        }
+        else
+        {
+            for (std::string::size_type p = 0; p < value.length(); p++)
+                val += wxString::Format("%02X", uint8_t(value[p]));
+        }
         buffer->setString(indexM, val);
     }
     else
@@ -2006,8 +2016,18 @@ void StringColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     {
         std::string value = statement->getString(col - 1);
         wxString val;
-        for (std::string::size_type p = 0; p < value.length(); p++)
-            val += wxString::Format("%02x", uint8_t(value[p]));
+        if (value.length() == 16)
+        {
+            const uint8_t* b = reinterpret_cast<const uint8_t*>(value.data());
+            val = wxString::Format("%02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X",
+                b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7],
+                b[8], b[9], b[10], b[11], b[12], b[13], b[14], b[15]);
+        }
+        else
+        {
+            for (std::string::size_type p = 0; p < value.length(); p++)
+                val += wxString::Format("%02X", uint8_t(value[p]));
+        }
         buffer->setString(indexM, val);
     }
     else
@@ -2328,7 +2348,8 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
     wxString colName;
     bool isOctets = false;
 
-    isOctets = (statementDALM->getColumnType(col - 1) == fr::ColumnType::Varchar
+    isOctets = ((statementDALM->getColumnType(col - 1) == fr::ColumnType::Varchar
+        || statementDALM->getColumnType(col - 1) == fr::ColumnType::Char)
         && statementDALM->getColumnSubtype(col - 1) == 1);
     tabName = wxString(statementDALM->getColumnTable(col - 1).c_str(),
         *databaseM->getCharsetConverter());
@@ -2502,12 +2523,17 @@ bool DataGridRows::initialize(fr::IStatementPtr statement)
                 case fr::ColumnType::Varchar:
                 {
                     int bpc = 1;
-                    CharacterSetPtr cs = databaseM->getCharsetById(statement->getColumnSubtype(col - 1));
+                    int subtype = statement->getColumnSubtype(col - 1);
+                    CharacterSetPtr cs = databaseM->getCharsetById(subtype);
                     if (cs)
                         bpc = cs->getBytesPerChar();
                     int size = statement->getColumnSize(col - 1);
                     if (bpc)
                         size /= bpc;
+                    if (subtype == 1) // OCTETS
+                    {
+                        size = (size == 16) ? 36 : (size * 2);
+                    }
                     columnDef = new StringColumnDef(colName, stringIndex, readOnly, nullable, size);
                     ++stringIndex;
                     break;
@@ -2675,12 +2701,22 @@ fr::IStatementPtr DataGridRows::addWhereDAL(UniqueConstraint* uq, wxString& stm,
                 int subtype = statementDALM->getColumnSubtype(c2);
 
                 if ((type == fr::ColumnType::Char || type == fr::ColumnType::Varchar) && (subtype == 1) ) //OCTET
+                {
                     stm += Identifier(cn).getQuoted() + " = x'";
+                    wxString hexVal = columnDefsM[c2]->getAsFirebirdString(buffer);
+                    hexVal.Replace("-", "");
+                    hexVal.Replace("{", "");
+                    hexVal.Replace("}", "");
+                    hexVal.Replace(" ", "");
+                    stm += hexVal;
+                    stm += "'";
+                }
                 else
+                {
                     stm += Identifier(cn).getQuoted() + " = '";
-
-                stm += columnDefsM[c2]->getAsFirebirdString(buffer);
-                stm += "'";
+                    stm += columnDefsM[c2]->getAsFirebirdString(buffer);
+                    stm += "'";
+                }
                 break;
             }
         }
@@ -2926,14 +2962,24 @@ wxString DataGridRows::setFieldValue(unsigned row, unsigned col,
             int subtype = statementDALM->getColumnSubtype(col);
 
             if ((type == fr::ColumnType::Char || type == fr::ColumnType::Varchar) && (subtype == 1)) //OCTET
+            {
                 stm += " = x'";
+                wxString lval = columnDefsM[col]->getAsFirebirdString(buffersM[row]);
+                lval.Replace("-", "");
+                lval.Replace("{", "");
+                lval.Replace("}", "");
+                lval.Replace(" ", "");
+                stm += lval + "' WHERE ";
+            }
             else
+            {
                 stm += " = '";
-            wxString lval = columnDefsM[col]->getAsFirebirdString(buffersM[row]);
-            if (isRational) //Fix locale problem for "," as decimal separator
-                lval.Replace(",", ".");
-            stm += lval
-                + "' WHERE ";
+                wxString lval = columnDefsM[col]->getAsFirebirdString(buffersM[row]);
+                if (isRational) //Fix locale problem for "," as decimal separator
+                    lval.Replace(",", ".");
+                stm += lval
+                    + "' WHERE ";
+            }
         }
 
         std::map<wxString, UniqueConstraint *>::iterator it =
