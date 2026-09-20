@@ -109,6 +109,15 @@ int main()
         ok = check(entries[2].GetCommand() == wxID_CLOSE_FRAME, "Ctrl+F4 maps to wxID_CLOSE_FRAME") && ok;
     }
 
+    // Test 4: Database loadProperties marks properties as loaded
+    {
+        DatabasePtr db(new Database());
+        db->invalidate();
+        ok = check(!db->propertiesLoaded(), "Properties initially not loaded after invalidation") && ok;
+        db->loadProperties();
+        ok = check(db->propertiesLoaded(), "Database::loadProperties() marks properties as loaded") && ok;
+    }
+
     if (ok)
         std::cout << "\nAll Database properties refresh tests passed.\n";
     else

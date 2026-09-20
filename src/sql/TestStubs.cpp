@@ -72,7 +72,7 @@ void MetadataItem::saveDescription(const wxString&, const wxString&) {}
 wxString MetadataItem::getDescription() { return ""; }
 bool MetadataItem::getDescription(wxString&) { return false; }
 
-void MetadataItem::loadProperties() {}
+void MetadataItem::loadProperties() { propertiesLoadedM = lsLoaded; }
 void MetadataItem::loadChildren() {}
 void MetadataItem::lockChildren() {}
 void MetadataItem::unlockChildren() {}
@@ -326,7 +326,7 @@ void Database::loadChildren() {}
 void Database::lockChildren() {}
 void Database::unlockChildren() {}
 bool Database::getChildren(std::vector<MetadataItem *>&) { return false; }
-void Database::loadProperties() {}
+void Database::loadProperties() { MetadataItem::loadProperties(); }
 void Database::invalidate() { MetadataItem::invalidate(); }
 
 // --- MetadataLoader Stubs ---

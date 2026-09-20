@@ -197,6 +197,8 @@ void MetadataItemPropertiesPanel::loadPage()
 
     // start a transaction for metadata loading and lock the object
     DatabasePtr db = objectM->getDatabase();
+    if (Database* d = dynamic_cast<Database*>(objectM))
+        d->loadProperties();
     MetadataLoaderTransaction tr((db) ? db->getMetadataLoader() : 0);
     SubjectLocker lock(objectM);
 
@@ -812,5 +814,44 @@ bool PropertiesHandler::handleURI(URI& uri)
     else 
         MetadataItemPropertiesFrame::showPropertyPage(object);
     return true;
+}
+
+//! RefreshPageHandler class
+class RefreshPageHandler: public URIHandler, private GUIURIHandlerHelper
+{
+public:
+    RefreshPageHandler() {};
+    bool handleURI(URI& uri);
+private:
+    static const RefreshPageHandler handlerInstance;
+};
+const RefreshPageHandler RefreshPageHandler::handlerInstance;
+
+bool RefreshPageHandler::handleURI(URI& uri)
+{
+    if (uri.action == "refresh")
+    {
+        MetadataItemPropertiesPanel* mpp = dynamic_cast<
+            MetadataItemPropertiesPanel*>(getParentWindow(uri));
+        if (mpp)
+        {
+            mpp->refresh();
+            return true;
+        }
+        return false;
+    }
+    else if (uri.action == "close_frame" || uri.action == "close_page")
+    {
+        MetadataItemPropertiesPanel* mpp = dynamic_cast<
+            MetadataItemPropertiesPanel*>(getParentWindow(uri));
+        if (mpp)
+        {
+            wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED, wxID_CLOSE_FRAME);
+            mpp->ProcessWindowEvent(evt);
+            return true;
+        }
+        return false;
+    }
+    return false;
 }
 

@@ -426,9 +426,34 @@ void FbCppDatabase::getInfo(DatabaseInfoData* data)
         }
     }
 
-    // Get active transactions
-    // Bypassed for now because it causes hangs with the fb-cpp backend
-    // due to monitoring tables interaction issues.
+    // Get active transactions (current connection)
+    try
+    {
+        auto st = createStatement(tr);
+        st->prepare("SELECT MON$TRANSACTION_ID, MON$ISOLATION_MODE, MON$READ_ONLY, MON$LOCK_TIMEOUT "
+                    "FROM MON$TRANSACTIONS "
+                    "WHERE MON$ATTACHMENT_ID = CURRENT_CONNECTION "
+                    "ORDER BY MON$TRANSACTION_ID");
+        st->execute();
+        while (st->fetch())
+        {
+            TransactionInfo txInfo;
+            txInfo.id = st->getInt32(0);
+            int iso = st->isNull(1) ? 1 : st->getInt32(1);
+            switch (iso) {
+                case 0: txInfo.isolationLevel = TransactionIsolationLevel::Consistency; break;
+                case 1: txInfo.isolationLevel = TransactionIsolationLevel::Concurrency; break;
+                case 2: txInfo.isolationLevel = TransactionIsolationLevel::ReadCommitted; break;
+                case 3: txInfo.isolationLevel = TransactionIsolationLevel::ReadDirty; break;
+                default: txInfo.isolationLevel = TransactionIsolationLevel::Concurrency; break;
+            }
+            txInfo.readOnly = st->isNull(2) ? false : (st->getInt32(2) != 0);
+            int timeout = st->isNull(3) ? -1 : st->getInt32(3);
+            txInfo.wait = (timeout != 0);
+            data->activeTransactions.push_back(txInfo);
+        }
+    }
+    catch (...) {}
 
     try { tr->commit(); } catch (...) {}
 }

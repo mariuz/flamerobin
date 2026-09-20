@@ -311,11 +311,41 @@ void PrintableHtmlWindow::setPageSource(const wxString& html)
             bgColor, textColor, borderColor, headerBgColor, headerTextColor, headerTextColor, altRowBgColor, bgColor, borderColor, linkColor, linkHoverColor
         );
 
+        wxString jsScript =
+            "<script>\n"
+            "document.addEventListener('keydown', function(e) {\n"
+            "    var key = e.key || '';\n"
+            "    var code = e.keyCode || 0;\n"
+            "    var isR = (key === 'r' || key === 'R' || code === 82);\n"
+            "    var isW = (key === 'w' || key === 'W' || code === 87);\n"
+            "    var isF5 = (key === 'F5' || code === 116);\n"
+            "    var isF4 = (key === 'F4' || code === 115);\n"
+            "    var ctrlOrCmd = e.ctrlKey || e.metaKey;\n"
+            "\n"
+            "    if (isF5 || (ctrlOrCmd && isR)) {\n"
+            "        e.preventDefault();\n"
+            "        e.stopPropagation();\n"
+            "        window.location.href = 'fr://refresh';\n"
+            "    } else if ((ctrlOrCmd && isW) || (e.ctrlKey && isF4)) {\n"
+            "        e.preventDefault();\n"
+            "        e.stopPropagation();\n"
+            "        window.location.href = 'fr://close_frame';\n"
+            "    }\n"
+            "}, true);\n"
+            "</script>\n";
+
         wxString::size_type headPos = processedHtml.Lower().find("</head>");
         if (headPos != wxString::npos)
+        {
+            processedHtml.insert(headPos, jsScript);
+            headPos = processedHtml.Lower().find("</head>");
             processedHtml.insert(headPos, css);
+        }
         else
+        {
+            processedHtml.insert(0, jsScript);
             processedHtml.insert(0, css);
+        }
 
         // Remove old temp file if it exists
         if (!tempFileM.IsEmpty() && wxFileExists(tempFileM))
@@ -324,14 +354,15 @@ void PrintableHtmlWindow::setPageSource(const wxString& html)
             tempFileM.Clear();
         }
 
-        // Generate a unique temp file in the user-writable temp directory
-        // (e.g. %TEMP% on Windows) so that the file can always be written even
-        // when the application is installed in a read-only location such as
-        // Program Files.  All resource references in the HTML have already been
-        // rewritten to absolute file:// URLs above, so the WebView can load
-        // them regardless of where this temp file lives.
+        // Generate a unique temp file with timestamp and counter in the user-writable temp directory
+        // so that reloads always have a distinct file:// URL and are never served stale from browser caches.
+        static unsigned long long s_pageCounter = 0;
         tempFileM = wxFileName(wxFileName::GetTempDir(),
-            wxString::Format("fr_temp_%p.html", this)).GetFullPath();
+            wxString::Format("fr_temp_%p_%llu_%lld.html",
+                this,
+                (unsigned long long)(++s_pageCounter),
+                (long long)::wxGetLocalTimeMillis().GetValue())
+        ).GetFullPath();
 
         wxFile file(tempFileM, wxFile::write);
         if (file.IsOpened())
@@ -503,6 +534,25 @@ void PrintableHtmlWindow::OnWebViewNavigating(wxWebViewEvent& event)
 
     event.Veto();
 
+    if (uri.action == "refresh")
+    {
+        wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED, wxID_REFRESH);
+        if (GetParent())
+            GetParent()->ProcessWindowEvent(evt);
+        else
+            ProcessWindowEvent(evt);
+        return;
+    }
+    if (uri.action == "close_frame" || uri.action == "close_page")
+    {
+        wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED, wxID_CLOSE_FRAME);
+        if (GetParent())
+            GetParent()->ProcessWindowEvent(evt);
+        else
+            ProcessWindowEvent(evt);
+        return;
+    }
+
     // open in new tab if control/command key is down
     // open in new window if shift key is down
     bool openInTab;
@@ -530,6 +580,25 @@ void PrintableHtmlWindow::OnHtmlLinkClicked(wxHtmlLinkEvent& event)
     if (uri.protocol != "fr") // let default handler handle other protocols
     {
         event.Skip();
+        return;
+    }
+
+    if (uri.action == "refresh")
+    {
+        wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED, wxID_REFRESH);
+        if (GetParent())
+            GetParent()->ProcessWindowEvent(evt);
+        else
+            ProcessWindowEvent(evt);
+        return;
+    }
+    if (uri.action == "close_frame" || uri.action == "close_page")
+    {
+        wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED, wxID_CLOSE_FRAME);
+        if (GetParent())
+            GetParent()->ProcessWindowEvent(evt);
+        else
+            ProcessWindowEvent(evt);
         return;
     }
 
