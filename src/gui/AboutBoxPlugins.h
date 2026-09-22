@@ -26,11 +26,27 @@
 
 #include <wx/string.h>
 
-// Returns the comma separated list of the Firebird plugins configured for this
-// client, each followed by the module it lives in, for display in the About
-// box.  Returns an empty string when nothing could be queried.
+// What the About box reports about the Firebird client in use.
 //
-// The Firebird client library has to be loaded before this is called.
-wxString getFirebirdLoadedPlugins();
+// None of this loads a plugin module, and that is deliberate.  Asking the
+// plugin manager to enumerate a plugin type loads every module it names, and
+// releasing the set unloads them again - which runs the engine's shutdown
+// path, and that throws out of a destructor when the lock directory is not
+// accessible, taking the whole application down with it.  Reading the
+// configuration and looking at the plugins directory answers the same question
+// without ever calling into a plugin.
+
+// The plugin names this client is configured to use, comma separated and in
+// configuration order, for example "Remote, Engine13, Loopback, Srp256, ...".
+wxString getFirebirdConfiguredPlugins();
+
+// The directory the client loads plugin modules from, or an empty string.
+wxString getFirebirdPluginDirectory();
+
+// The plugin modules present in that directory, comma separated and with the
+// platform's library prefix and extension removed, for example
+// "ChaCha, Engine13, Srp".  An Engine* entry here is what makes an embedded
+// connection possible.
+wxString getFirebirdPluginModules();
 
 #endif // FR_ABOUTBOXPLUGINS_H

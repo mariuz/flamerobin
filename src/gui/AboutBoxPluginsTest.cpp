@@ -21,14 +21,18 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-// Regression test for GitHub issue #722:
-// "Fatal error on help -> about"
+// Regression tests for GitHub issues #722 and #721.
 //
-// Once a database had been opened the About box enumerated the Firebird
-// plugins by asking the plugin manager for every plugin type with a null
-// names list.  fbclient takes that list by value and calls strlen() on it,
-// so the null pointer crashed the whole application.  The enumeration must
-// read the configured list for each plugin type first.
+// #722: the About box enumerated the Firebird plugins by asking the plugin
+// manager for every plugin type with a null names list.  fbclient takes that
+// list by value and calls strlen() on it, so the null pointer crashed the
+// whole application once a database had been opened.
+//
+// #721: once the package started shipping an engine plugin, that enumeration
+// became fatal for a second reason - it loads every module it names and
+// unloads them again, and unloading the engine runs its shutdown path, which
+// throws out of a destructor when the lock directory is not accessible.
+// Nothing here may load a plugin module.
 
 #include <iostream>
 
@@ -36,6 +40,7 @@
 #ifndef WX_PRECOMP
     #include <wx/wx.h>
 #endif
+#include <wx/dir.h>
 
 #include <firebird/Interface.h>
 
@@ -44,16 +49,16 @@
 namespace
 {
 
-static bool check(bool condition, const char* testName)
+bool check(bool condition, const char* testName)
 {
     std::cout << (condition ? "  PASSED: " : "  FAILED: ") << testName << "\n";
     return condition;
 }
 
-// The plugin types the About box enumerates, with the firebird.conf key that
+// The plugin types the About box reports, with the firebird.conf key that
 // holds the list of plugin names for each of them.  Kept in sync with
-// AboutBoxPlugins.cpp - a type without a key would make the query fall back to
-// a null names list again.
+// AboutBoxPlugins.cpp - a type without a key would make a query fall back to a
+// null names list again.
 struct TypeAndKey
 {
     unsigned type;
@@ -74,7 +79,7 @@ const TypeAndKey typesAndKeys[] = {
 
 int main()
 {
-    std::cout << "Running About box plugin enumeration tests (issue #722)...\n";
+    std::cout << "Running About box plugin reporting tests (issues #722, #721)...\n";
     bool ok = true;
 
     Firebird::IMaster* master = Firebird::fb_get_master_interface();
@@ -84,8 +89,8 @@ int main()
         return 0;
     }
 
-    // Test 1: every plugin type the About box asks about resolves to a real
-    // names list, so that a null pointer never reaches fbclient.
+    // Test 1: every plugin type the About box reports resolves to a real names
+    // list, so that a null pointer never reaches fbclient.
     {
         Firebird::IConfigManager* cm = master->getConfigManager();
         Firebird::IFirebirdConf* conf = cm ? cm->getFirebirdConf() : nullptr;
@@ -103,13 +108,39 @@ int main()
         conf->release();
     }
 
-    // Test 2: the enumeration itself must complete without crashing, and the
-    // provider list configured by every Firebird installation must show up.
+    // Test 2: the configured plugin list is read without loading a module, and
+    // contains the providers every Firebird installation configures.
     {
-        wxString plugins = getFirebirdLoadedPlugins();
-        std::cout << "  plugins: " << plugins.ToStdString() << "\n";
-        ok = check(plugins.Contains("Remote") || plugins.Contains("Loopback"),
-            "Enumeration returns the configured providers") && ok;
+        wxString configured = getFirebirdConfiguredPlugins();
+        std::cout << "  configured: " << configured.ToStdString() << "\n";
+        ok = check(configured.Contains("Remote") || configured.Contains("Loopback"),
+            "Configured plugins include the providers") && ok;
+    }
+
+    // Test 3: the plugin directory is reported, and the modules in it are
+    // listed by reading the directory - never by loading them.  Loading and
+    // then unloading the engine module aborts the process when the lock
+    // directory is not accessible, which is how this used to fail.
+    {
+        wxString directory = getFirebirdPluginDirectory();
+        std::cout << "  plugin directory: " << directory.ToStdString() << "\n";
+
+        wxString modules = getFirebirdPluginModules();
+        std::cout << "  modules: " << modules.ToStdString() << "\n";
+
+        if (directory.empty() || !wxDir::Exists(directory))
+        {
+            std::cout << "  SKIPPED: no plugin directory on this machine\n";
+            ok = check(modules.empty(),
+                "No modules are reported without a plugin directory") && ok;
+        }
+        else
+        {
+            ok = check(!modules.empty(),
+                "Plugin modules are listed from the plugin directory") && ok;
+            ok = check(!modules.Contains("lib"),
+                "Module names carry no library prefix") && ok;
+        }
     }
 
     std::cout << "\nAll About box plugin tests " << (ok ? "PASSED" : "FAILED") << ".\n";

@@ -28,19 +28,18 @@
   #include "wx/wx.h"
 #endif
 
+#include <wx/arrstr.h>
+#include <wx/dir.h>
+#include <wx/filename.h>
+#include <wx/tokenzr.h>
+
 #include "gui/AboutBoxPlugins.h"
 
 #include <firebird/Interface.h>
 
-// Firebird's plugin manager takes the list of plugin names to enumerate as a
-// plain string and unconditionally does the equivalent of strlen() on it, so
-// passing a null pointer for "use the configured default" crashes inside
-// fbclient.  The configured list for each plugin type therefore has to be read
-// from firebird.conf first, exactly like Firebird itself does internally.
-//
-// Only the types that own a configuration key can be listed this way; external
-// engines, database encryption and replication plugins are named at the point
-// of use (in DDL or per-database settings) and have no global list.
+// The plugin types with a configuration key of their own, and that key.  The
+// other types - external engines, database encryption, replication - are named
+// at the point of use and have no global list.
 struct PluginTypeConfig
 {
     unsigned type;
@@ -57,179 +56,127 @@ static const PluginTypeConfig pluginTypeConfigs[] = {
     { Firebird::IPluginManager::TYPE_KEY_HOLDER,           "KeyHolderPlugin" }
 };
 
-#if defined(_WIN32) || defined(WIN32)
-#include <excpt.h>
-#include <stdio.h>
-#include <string.h>
-
-static bool queryPluginsSEH(char* buffer, size_t bufferSize)
+namespace
 {
-    bool success = false;
-    __try
-    {
-        Firebird::IMaster* master = Firebird::fb_get_master_interface();
-        if (master)
-        {
-            Firebird::IStatus* status = master->getStatus();
-            if (status)
-            {
-                Firebird::IPluginManager* pm = master->getPluginManager();
-                Firebird::IConfigManager* cm = master->getConfigManager();
-                if (pm && pm->cloopVTable && cm && cm->cloopVTable)
-                {
-                    auto* pmVtable = static_cast<Firebird::IPluginManager::VTable*>(pm->cloopVTable);
-                    auto* cmVtable = static_cast<Firebird::IConfigManager::VTable*>(cm->cloopVTable);
 
-                    Firebird::IFirebirdConf* conf = cmVtable->getFirebirdConf(cm);
-                    if (conf && conf->cloopVTable)
-                    {
-                        auto* confVtable = static_cast<Firebird::IFirebirdConf::VTable*>(conf->cloopVTable);
+Firebird::IConfigManager* getConfigManager()
+{
+    Firebird::IMaster* master = Firebird::fb_get_master_interface();
+    if (!master)
+        return nullptr;
 
-                        size_t offset = 0;
-                        buffer[0] = '\0';
-
-                        for (size_t i = 0; i < sizeof(pluginTypeConfigs)/sizeof(pluginTypeConfigs[0]); ++i)
-                        {
-                            const PluginTypeConfig& ptc = pluginTypeConfigs[i];
-                            const char* names = confVtable->asString(conf,
-                                confVtable->getKey(conf, ptc.configKey));
-                            if (!names || !*names)
-                                continue;
-
-                            Firebird::IPluginSet* pluginSet = pmVtable->getPlugins(pm, status,
-                                ptc.type, names, conf);
-                            if (pluginSet)
-                            {
-                                if (pluginSet->cloopVTable)
-                                {
-                                    auto* psVtable = static_cast<Firebird::IPluginSet::VTable*>(pluginSet->cloopVTable);
-                                    while (true)
-                                    {
-                                        const char* name = psVtable->getName(pluginSet);
-                                        if (!name)
-                                            break;
-                                        const char* moduleName = psVtable->getModuleName(pluginSet);
-
-                                        char temp[512];
-                                        if (moduleName && *moduleName)
-                                        {
-                                            _snprintf(temp, sizeof(temp), "%s (%s)", name, moduleName);
-                                        }
-                                        else
-                                        {
-                                            _snprintf(temp, sizeof(temp), "%s", name);
-                                        }
-                                        temp[sizeof(temp) - 1] = '\0';
-
-                                        size_t tempLen = strlen(temp);
-                                        if (offset + tempLen + 3 < bufferSize)
-                                        {
-                                            if (offset > 0)
-                                            {
-                                                strcat(buffer, ", ");
-                                                offset += 2;
-                                            }
-                                            strcat(buffer, temp);
-                                            offset += tempLen;
-                                        }
-                                        psVtable->next(pluginSet, status);
-                                    }
-                                }
-                                pluginSet->release();
-                            }
-                        }
-                        success = true;
-                    }
-                    if (conf)
-                        conf->release();
-                }
-                status->dispose();
-            }
-        }
-    }
-    __except (EXCEPTION_EXECUTE_HANDLER)
-    {
-        success = false;
-    }
-    return success;
+    Firebird::IConfigManager* cm = master->getConfigManager();
+    return (cm && cm->cloopVTable) ? cm : nullptr;
 }
-#endif
 
-wxString getFirebirdLoadedPlugins()
+void appendUnique(wxArrayString& names, const wxString& name)
 {
-    wxString pluginsList;
-#if defined(_WIN32) || defined(WIN32)
-    char buffer[4096];
-    if (queryPluginsSEH(buffer, sizeof(buffer)))
-    {
-        pluginsList = wxString::FromUTF8(buffer);
-    }
-#else
+    if (!name.empty() && names.Index(name) == wxNOT_FOUND)
+        names.Add(name);
+}
+
+} // namespace
+
+wxString getFirebirdConfiguredPlugins()
+{
+    wxArrayString names;
     try
     {
-        Firebird::IMaster* master = Firebird::fb_get_master_interface();
-        if (master)
+        Firebird::IConfigManager* cm = getConfigManager();
+        if (!cm)
+            return wxEmptyString;
+
+        auto* cmVtable = static_cast<Firebird::IConfigManager::VTable*>(cm->cloopVTable);
+        Firebird::IFirebirdConf* conf = cmVtable->getFirebirdConf(cm);
+        if (conf && conf->cloopVTable)
         {
-            Firebird::IStatus* status = master->getStatus();
-            if (status)
+            auto* confVtable = static_cast<Firebird::IFirebirdConf::VTable*>(conf->cloopVTable);
+            for (const PluginTypeConfig& ptc : pluginTypeConfigs)
             {
-                Firebird::IPluginManager* pm = master->getPluginManager();
-                Firebird::IConfigManager* cm = master->getConfigManager();
-                if (pm && pm->cloopVTable && cm && cm->cloopVTable)
-                {
-                    auto* pmVtable = static_cast<Firebird::IPluginManager::VTable*>(pm->cloopVTable);
-                    auto* cmVtable = static_cast<Firebird::IConfigManager::VTable*>(cm->cloopVTable);
+                const char* list = confVtable->asString(conf,
+                    confVtable->getKey(conf, ptc.configKey));
+                if (!list || !*list)
+                    continue;
 
-                    Firebird::IFirebirdConf* conf = cmVtable->getFirebirdConf(cm);
-                    if (conf && conf->cloopVTable)
-                    {
-                        auto* confVtable = static_cast<Firebird::IFirebirdConf::VTable*>(conf->cloopVTable);
-
-                        for (const PluginTypeConfig& ptc : pluginTypeConfigs)
-                        {
-                            const char* names = confVtable->asString(conf,
-                                confVtable->getKey(conf, ptc.configKey));
-                            if (!names || !*names)
-                                continue;
-
-                            Firebird::IPluginSet* pluginSet = pmVtable->getPlugins(pm, status,
-                                ptc.type, names, conf);
-                            if (pluginSet)
-                            {
-                                if (pluginSet->cloopVTable)
-                                {
-                                    auto* psVtable = static_cast<Firebird::IPluginSet::VTable*>(pluginSet->cloopVTable);
-                                    while (true)
-                                    {
-                                        const char* name = psVtable->getName(pluginSet);
-                                        if (!name)
-                                            break;
-                                        const char* moduleName = psVtable->getModuleName(pluginSet);
-                                        if (!pluginsList.empty())
-                                            pluginsList += ", ";
-                                        pluginsList += wxString::FromUTF8(name);
-                                        if (moduleName && *moduleName)
-                                        {
-                                            pluginsList += " (" + wxString::FromUTF8(moduleName) + ")";
-                                        }
-                                        psVtable->next(pluginSet, status);
-                                    }
-                                }
-                                pluginSet->release();
-                            }
-                        }
-                    }
-                    if (conf)
-                        conf->release();
-                }
-                status->dispose();
+                wxStringTokenizer tokens(wxString::FromUTF8(list), ",;");
+                while (tokens.HasMoreTokens())
+                    appendUnique(names, tokens.GetNextToken().Trim(true).Trim(false));
             }
+            conf->release();
         }
     }
     catch (...)
     {
     }
-#endif
-    return pluginsList;
+
+    wxString result;
+    for (const wxString& name : names)
+    {
+        if (!result.empty())
+            result += ", ";
+        result += name;
+    }
+    return result;
 }
 
+wxString getFirebirdPluginDirectory()
+{
+    try
+    {
+        Firebird::IConfigManager* cm = getConfigManager();
+        if (!cm)
+            return wxEmptyString;
+
+        auto* cmVtable = static_cast<Firebird::IConfigManager::VTable*>(cm->cloopVTable);
+        const char* dir = cmVtable->getDirectory(cm,
+            Firebird::IConfigManager::DIR_PLUGINS);
+        if (dir && *dir)
+            return wxString::FromUTF8(dir);
+    }
+    catch (...)
+    {
+    }
+    return wxEmptyString;
+}
+
+wxString getFirebirdPluginModules()
+{
+    const wxString directory = getFirebirdPluginDirectory();
+    if (directory.empty() || !wxDir::Exists(directory))
+        return wxEmptyString;
+
+#if defined(_WIN32) || defined(WIN32)
+    const wxString filter = "*.dll";
+#elif defined(__WXMAC__)
+    const wxString filter = "*.dylib";
+#else
+    const wxString filter = "*.so";
+#endif
+
+    wxArrayString modules;
+    wxString filename;
+    wxDir dir(directory);
+    bool found = dir.IsOpened() && dir.GetFirst(&filename, filter, wxDIR_FILES);
+    while (found)
+    {
+        // libEngine13.so -> Engine13, ChaCha.dll -> ChaCha
+        wxString name = wxFileName(filename).GetName();
+#if !defined(_WIN32) && !defined(WIN32)
+        if (name.StartsWith("lib"))
+            name = name.Mid(3);
+#endif
+        appendUnique(modules, name);
+        found = dir.GetNext(&filename);
+    }
+
+    modules.Sort();
+
+    wxString result;
+    for (const wxString& module : modules)
+    {
+        if (!result.empty())
+            result += ", ";
+        result += module;
+    }
+    return result;
+}

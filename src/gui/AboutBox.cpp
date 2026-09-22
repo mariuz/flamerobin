@@ -95,15 +95,6 @@ static wxString getFbClientPath()
 }
 #endif
 
-extern "C" bool fbcpp_is_client_initialized();
-
-static wxString getLoadedPlugins()
-{
-    if (!fbcpp_is_client_initialized())
-        return wxEmptyString;
-
-    return getFirebirdLoadedPlugins();
-}
 
 void showAboutBox(wxWindow* parent)
 {
@@ -120,15 +111,25 @@ void showAboutBox(wxWindow* parent)
     );
 
     wxString clientPath = getFbClientPath();
-    wxString loadedPlugins = getLoadedPlugins();
+    wxString configuredPlugins = getFirebirdConfiguredPlugins();
+    wxString pluginDirectory = getFirebirdPluginDirectory();
+    wxString pluginModules = getFirebirdPluginModules();
 
     if (!clientPath.empty())
     {
         libs += "\n" + wxString::Format(_("Firebird client loaded from: %s"), clientPath);
     }
-    if (!loadedPlugins.empty())
+    if (!configuredPlugins.empty())
     {
-        libs += "\n" + wxString::Format(_("Loaded plugins: %s"), loadedPlugins);
+        libs += "\n" + wxString::Format(_("Configured plugins: %s"), configuredPlugins);
+    }
+    if (!pluginDirectory.empty())
+    {
+        libs += "\n" + wxString::Format(_("Plugin directory: %s"), pluginDirectory);
+    }
+    if (!pluginModules.empty())
+    {
+        libs += "\n" + wxString::Format(_("Installed plugin modules: %s"), pluginModules);
     }
 
     wxString ver;

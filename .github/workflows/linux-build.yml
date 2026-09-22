@@ -102,7 +102,13 @@ jobs:
         test -d "${FB_ROOT}/intl"
 
         mkdir -p "${DEB_TREE}/plugins/firebird"
-        cp -v "${FB_ROOT}"/plugins/firebird/* "${DEB_TREE}/plugins/firebird/"
+        # Everything but Firebird's sample plugins, which are of no use here.
+        for plugin in "${FB_ROOT}"/plugins/firebird/*; do
+          case "$(basename "${plugin}")" in
+            fbSample*|libfbSample*) continue ;;
+          esac
+          cp -rv "${plugin}" "${DEB_TREE}/plugins/firebird/"
+        done
         mkdir -p "${DEB_TREE}/intl"
         cp -v "${FB_ROOT}"/intl/* "${DEB_TREE}/intl/"
         mkdir -p "${DEB_TREE}/share/firebird"
