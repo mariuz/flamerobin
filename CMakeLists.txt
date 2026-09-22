@@ -180,6 +180,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/core/Visitor.cpp
         ${SOURCEDIR}/engine/MetadataLoader.cpp
         ${SOURCEDIR}/gui/AboutBox.cpp
+        ${SOURCEDIR}/gui/AboutBoxPlugins.cpp
         ${SOURCEDIR}/gui/AdvancedMessageDialog.cpp
         ${SOURCEDIR}/gui/AdvancedSearchFrame.cpp
         ${SOURCEDIR}/gui/BackupFrame.cpp
@@ -341,6 +342,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/core/Visitor.h
         ${SOURCEDIR}/engine/MetadataLoader.h
         ${SOURCEDIR}/gui/AboutBox.h
+        ${SOURCEDIR}/gui/AboutBoxPlugins.h
         ${SOURCEDIR}/gui/AdvancedMessageDialog.h
         ${SOURCEDIR}/gui/AdvancedSearchFrame.h
         ${SOURCEDIR}/gui/BackupFrame.h
@@ -1107,6 +1109,13 @@ add_executable(data_grid_sort_partial_fetch_test
 )
 target_link_libraries(data_grid_sort_partial_fetch_test ${wxWidgets_LIBRARIES} ${FR_LIBS})
 add_test(NAME data_grid_sort_partial_fetch_test COMMAND data_grid_sort_partial_fetch_test)
+
+add_executable(about_box_plugins_test
+    ${SOURCEDIR}/gui/AboutBoxPluginsTest.cpp
+    ${SOURCEDIR}/gui/AboutBoxPlugins.cpp
+)
+target_link_libraries(about_box_plugins_test ${wxWidgets_LIBRARIES} ${FR_LIBS})
+add_test(NAME about_box_plugins_test COMMAND about_box_plugins_test)
 
 add_executable(data_grid_octets_test
     ${SOURCEDIR}/gui/controls/DataGridOctetsTest.cpp
