@@ -1433,8 +1433,66 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
         catch (...) // we don't care as we already have an error to report
         {
         }
+        // Replace the error with a more helpful one when it is the embedded
+        // fallback described below; anything else is rethrown untouched.
+        try
+        {
+            throw;
+        }
+        catch (const std::exception& e)
+        {
+            explainEmbeddedFallback(e);
+        }
+        catch (...)
+        {
+        }
         throw;
     }
+}
+
+// A database registered without a server host name is an embedded connection.
+// When the Firebird client library in use has no embedded engine - a client
+// only build, which is what most packages ship - the provider chain falls
+// through to the Loopback provider, which quietly turns the request into a
+// network connection to "localhost".  The resulting error says nothing about
+// the missing engine, so spell it out.  See GitHub issue #721.
+void Database::explainEmbeddedFallback(const std::exception& e) const
+{
+    ServerPtr s = getServer();
+    if (!s || !s->getHostname().IsEmpty())
+        return;
+
+    // isc_network_error and isc_net_connect_err, by text and by number: with no
+    // firebird.msg at hand the client reports the bare error code instead.
+    wxString msg(e.what(), wxConvUTF8);
+    if (!msg.Contains("Unable to complete network request")
+        && !msg.Contains("Failed to establish a connection")
+        && !msg.Contains("335544721")
+        && !msg.Contains("335544722"))
+    {
+        return;
+    }
+
+    wxString hint = _("This database is registered without a server host name, "
+        "so FlameRobin asked Firebird for an embedded connection. The Firebird "
+        "client library in use has no embedded engine, so Firebird fell back to "
+        "a network connection to \"localhost\" instead.");
+    hint += "\n\n";
+#if defined(__WXMSW__)
+    hint += _("Point the \"Client library\" of this database at the fbclient.dll "
+        "of a full Firebird installation (the one next to the plugins directory "
+        "holding Engine13.dll), or start a Firebird server and register the "
+        "database with a host name.");
+#else
+    hint += _("Install the Firebird server package of your distribution, which "
+        "provides the engine plugin, and point the \"Client library\" of this "
+        "database at its client library (for example "
+        "/usr/lib/x86_64-linux-gnu/libfbclient.so.2 or "
+        "/opt/firebird/lib/libfbclient.so), or start a Firebird server and "
+        "register the database with a host name.");
+#endif
+
+    throw std::runtime_error(wx2std(msg + "\n\n" + hint));
 }
 
 void Database::loadRelationCollections(ProgressIndicator* progressIndicator)

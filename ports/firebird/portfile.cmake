@@ -12,6 +12,7 @@ vcpkg_from_github(
         windows-timeout.patch
         osx-icu-rpath.patch
         osx-unvcpkg.patch
+        posix-static-tomcrypt-link.patch
 )
 
 if(VCPKG_TARGET_IS_WINDOWS)

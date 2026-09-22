@@ -12,9 +12,11 @@ if(VCPKG_TARGET_IS_OSX)
 endif()
 
 set(FIREBIRD_CONFIGURE_OPTIONS
-    --enable-client-only
     --enable-binreloc
-    --with-termlib=:libncurses.a
+    # vcpkg's ncurses provides the wide character archive, and on Linux the
+    # narrow one from the system carries no terminfo symbols at all - those
+    # live in libtinfo there - so linking isql fails without this.
+    --with-termlib=:libncursesw.a
     --with-atomiclib=:libatomic.a
     --with-fbplugins=plugins/${PORT}
     --with-fbmsg=share/${PORT}
@@ -23,6 +25,15 @@ set(FIREBIRD_CONFIGURE_OPTIONS
     "CXXFLAGS=-I${CURRENT_HOST_INSTALLED_DIR}/include"
     "LDFLAGS=-L${CURRENT_HOST_INSTALLED_DIR}/lib"
 )
+
+# On Linux the engine plugin is built as well, so that the client bundled with
+# the .deb can open a database in embedded mode.  Without it Firebird has no
+# engine provider and silently falls back to a network connection to
+# "localhost" - GitHub issue #721.  macOS keeps the client only build, where
+# FlameRobin uses the Firebird client of the official .pkg instead.
+if(VCPKG_TARGET_IS_OSX)
+    list(APPEND FIREBIRD_CONFIGURE_OPTIONS --enable-client-only)
+endif()
 
 vcpkg_configure_make(
     SOURCE_PATH "${SOURCE_PATH}"
@@ -75,6 +86,29 @@ if(NOT VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL "release")
         USE_SOURCE_PERMISSIONS
     )
 
+    # The international module, which the engine needs for every character set
+    # and collation that is not built in.  Only a build that includes the engine
+    # produces it.
+    file(GLOB INTL_FILES_RELEASE "${SOURCE_COPY_REL_PATH}/gen/Release/firebird/intl/*")
+
+    if(NOT VCPKG_TARGET_IS_OSX)
+        foreach(intl ${INTL_FILES_RELEASE})
+            if(NOT intl MATCHES "\\.conf$")
+                execute_process(
+                    COMMAND "${PATCHELF}" --set-rpath "$ORIGIN/../lib" ${intl}
+                )
+            endif()
+        endforeach()
+    endif()
+
+    if(INTL_FILES_RELEASE)
+        file(
+            INSTALL ${INTL_FILES_RELEASE}
+            DESTINATION "${CURRENT_PACKAGES_DIR}/intl"
+            USE_SOURCE_PERMISSIONS
+        )
+    endif()
+
     file(
         INSTALL "${SOURCE_COPY_REL_PATH}/gen/Release/firebird/firebird.msg"
         DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}"
@@ -119,6 +153,26 @@ if(NOT VCPKG_BUILD_TYPE OR VCPKG_BUILD_TYPE STREQUAL "debug")
         DESTINATION "${CURRENT_PACKAGES_DIR}/debug/plugins/${PORT}"
         USE_SOURCE_PERMISSIONS
     )
+
+    file(GLOB INTL_FILES_DEBUG "${SOURCE_COPY_DBG_PATH}/gen/Debug/firebird/intl/*")
+
+    if(NOT VCPKG_TARGET_IS_OSX)
+        foreach(intl ${INTL_FILES_DEBUG})
+            if(NOT intl MATCHES "\\.conf$")
+                execute_process(
+                    COMMAND "${PATCHELF}" --set-rpath "$ORIGIN/../lib" ${intl}
+                )
+            endif()
+        endforeach()
+    endif()
+
+    if(INTL_FILES_DEBUG)
+        file(
+            INSTALL ${INTL_FILES_DEBUG}
+            DESTINATION "${CURRENT_PACKAGES_DIR}/debug/intl"
+            USE_SOURCE_PERMISSIONS
+        )
+    endif()
 
     file(
         INSTALL "${SOURCE_COPY_DBG_PATH}/gen/Debug/firebird/firebird.msg"

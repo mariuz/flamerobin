@@ -871,6 +871,27 @@ add_test(NAME database_properties_refresh_test COMMAND database_properties_refre
 
 
 
+# Regression test for issue #721: a database registered with its own
+# "Client library" must get that library, not the one loaded by whichever
+# database connected first.
+add_executable(fbcpp_client_cache_test
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppClientCacheTest.cpp
+    ${SOURCEDIR}/engine/db/DatabaseFactory.cpp
+
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppDatabase.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppTransaction.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppStatement.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppService.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppBlob.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppExtensions.cpp
+    ${SOURCEDIR}/core/FRError.cpp
+    ${SOURCEDIR}/core/FRInt128.cpp
+    ${SOURCEDIR}/core/FRDecimal.cpp
+    ${SOURCEDIR}/core/StringUtils.cpp
+)
+target_link_libraries(fbcpp_client_cache_test fb-cpp::fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
+add_test(NAME fbcpp_client_cache_test COMMAND fbcpp_client_cache_test)
+
 add_executable(dal_types_test
     ${SOURCEDIR}/engine/db/DalTypesTest.cpp
     ${SOURCEDIR}/engine/db/DatabaseFactory.cpp

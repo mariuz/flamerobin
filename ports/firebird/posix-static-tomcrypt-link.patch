@@ -1,0 +1,20 @@
+Repeat libtommath after libtomcrypt when linking against the Firebird library.
+
+vcpkg builds libtomcrypt as a static archive, and an archive is scanned only
+once, at the position it appears on the link line. libtomcrypt's math
+descriptor calls into libtommath, so with the upstream order (-ltommath
+-ltomcrypt) every one of those calls is left undefined and libEngine13.so
+fails to link. Distributions do not hit this because they ship libtomcrypt as
+a shared object, which carries its own DT_NEEDED on libtommath.
+
+--- a/builds/posix/make.defaults
++++ b/builds/posix/make.defaults
+@@ -362,7 +362,7 @@
+ LIB_PATH_OPTS = $(call LIB_LINK_RPATH,lib) $(call LIB_LINK_RPATH,intl)
+ LIB_LINK_SONAME= -Wl,-soname,$(1)
+ LIB_LINK_MAPFILE= -Wl,--version-script,$(1)
+-FIREBIRD_LIBRARY_LINK= -L$(LIB) -L$(STATIC_LIB) -lfbclient $(MATHLIB) $(CRYPTLIB)
++FIREBIRD_LIBRARY_LINK= -L$(LIB) -L$(STATIC_LIB) -lfbclient $(MATHLIB) $(CRYPTLIB) $(MATHLIB)
+ 
+ EXE_LINK_OPTIONS= $(LDFLAGS) $(THR_FLAGS) $(UNDEF_FLAGS) $(LIB_PATH_OPTS) $(call LINK_DARWIN_RPATH,..) $(LINK_EMPTY_SYMBOLS)
+ LIB_LINK_OPTIONS= $(LDFLAGS) $(THR_FLAGS) -shared $(call LINK_DARWIN_RPATH,..)

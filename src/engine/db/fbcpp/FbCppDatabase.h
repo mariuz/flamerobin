@@ -26,6 +26,7 @@
 
 #include "engine/db/IDatabase.h"
 #include <fb-cpp/fb-cpp.h>
+#include <map>
 #include <optional>
 #include <stdexcept>
 
@@ -84,11 +85,19 @@ public:
         return *attachmentM; 
     }
 
+    // Returns the Firebird client library with the given path, loading it on
+    // first use.  An empty path means the client library FlameRobin is linked
+    // against.  Clients are cached per path: a database registered with its own
+    // client library must not be silently served by the one some other database
+    // happened to load first (GitHub issue #721).
+    static fbcpp::Client& getClient(const std::string& clientLib);
     static fbcpp::Client& getClient();
     static bool isClientInitialized();
 
 private:
-    static std::optional<fbcpp::Client> clientM;
+    fbcpp::Client& getOwnClient();
+
+    static std::map<std::string, fbcpp::Client> clientsM;
 
 private:
     std::vector<uint8_t> buildDpb(bool creating, int pagesize = 0, const std::string& owner = "",
@@ -102,8 +111,6 @@ private:
     std::string charsetM;
     std::string clientLibM;
     std::string cryptKeyDataM;
-
-    static std::string clientLibStaticM;
 };
 
 } // namespace fr

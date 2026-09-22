@@ -84,6 +84,44 @@ jobs:
         mkdir -p templates/trees/deb/flamerobin/opt/flamerobin/lib 2> /dev/null
         ldd Build/flamerobin | awk '{print $3}' | grep "vcpkg_installed" | grep -v "not found" | xargs -I {} cp -v {} templates/trees/deb/flamerobin/opt/flamerobin/lib/
         
+    # The bundled Firebird client resolves its plugins, its international
+    # module and its message file relative to its own location (binreloc), so
+    # /opt/flamerobin/lib/libfbclient.so.2 looks for them under
+    # /opt/flamerobin.  Without the engine plugin there is no embedded mode and
+    # Firebird silently falls back to a network connection to "localhost" -
+    # GitHub issue #721.
+    - name: Add the bundled Firebird plugins, intl and message file to "templates/trees/deb/flamerobin/opt/flamerobin/"
+      run: |
+        set -e
+        DEB_TREE=templates/trees/deb/flamerobin/opt/flamerobin
+        # Take the Firebird tree from the client the executable actually links,
+        # wherever vcpkg installed it.
+        FB_ROOT=$(ldd Build/flamerobin | awk '{print $3}' | grep -m1 "vcpkg_installed.*libfbclient" | sed 's#/lib/libfbclient.*##')
+        echo "Firebird tree: ${FB_ROOT}"
+        test -d "${FB_ROOT}/plugins/firebird"
+        test -d "${FB_ROOT}/intl"
+
+        mkdir -p "${DEB_TREE}/plugins/firebird"
+        cp -v "${FB_ROOT}"/plugins/firebird/* "${DEB_TREE}/plugins/firebird/"
+        mkdir -p "${DEB_TREE}/intl"
+        cp -v "${FB_ROOT}"/intl/* "${DEB_TREE}/intl/"
+        mkdir -p "${DEB_TREE}/share/firebird"
+        cp -rv "${FB_ROOT}"/share/firebird/firebird.msg "${FB_ROOT}"/share/firebird/tzdata "${DEB_TREE}/share/firebird/"
+
+        # The engine plugin needs the libraries it was built against, which the
+        # ldd of flamerobin alone does not pull in.
+        ldd "${FB_ROOT}"/plugins/firebird/* "${FB_ROOT}"/intl/* 2>/dev/null \
+          | awk '{print $3}' | grep "vcpkg_installed" | grep -v "not found" | sort -u \
+          | xargs -I {} cp -v -n {} "${DEB_TREE}/lib/"
+
+        # The engine is ~200 MB with its debug info, and 12 MB without.
+        find "${DEB_TREE}/plugins/firebird" "${DEB_TREE}/intl" -name "*.so" \
+          -exec strip --strip-unneeded {} +
+
+        # The engine must actually be there, or the .deb is no better than before.
+        test -f "${DEB_TREE}/plugins/firebird/libEngine13.so"
+        du -sh "${DEB_TREE}/plugins/firebird" "${DEB_TREE}/intl"
+
     # Set the version of the flamerobin program and move its executable to -> templates/trees/deb/flamerobin/opt/flamerobin/bin/ 
     - name: Set the version of the Flamerobin program and move its executable to "templates/trees/deb/flamerobin/opt/flamerobin/bin/"
       run: |

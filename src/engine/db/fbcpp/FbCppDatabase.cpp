@@ -50,46 +50,55 @@ extern "C" Firebird::IMaster* ISC_EXPORT fb_get_master_interface();
 namespace fr
 {
 
-std::string FbCppDatabase::clientLibStaticM;
-
 FbCppDatabase::FbCppDatabase()
 {
 }
 
-std::optional<fbcpp::Client> FbCppDatabase::clientM;
+std::map<std::string, fbcpp::Client> FbCppDatabase::clientsM;
 
 bool FbCppDatabase::isClientInitialized()
 {
-    return clientM.has_value();
+    return !clientsM.empty();
+}
+
+fbcpp::Client& FbCppDatabase::getClient(const std::string& clientLib)
+{
+    // std::map keeps references to its elements valid, which matters because
+    // attachments hold on to the client for as long as they live.
+    auto it = clientsM.find(clientLib);
+    if (it != clientsM.end())
+        return it->second;
+
+#if FB_CPP_USE_BOOST_DLL != 0
+    if (!clientLib.empty())
+    {
+        return clientsM.emplace(clientLib,
+            fbcpp::Client(boost::dll::fs::path(clientLib))).first->second;
+    }
+#endif
+
+    Firebird::IMaster* master = fb_get_master_interface();
+    if (!master)
+        throw std::runtime_error("Failed to get Firebird master interface");
+    return clientsM.emplace(clientLib, fbcpp::Client(master)).first->second;
 }
 
 fbcpp::Client& FbCppDatabase::getClient()
 {
-    if (!clientM)
-    {
-#if FB_CPP_USE_BOOST_DLL != 0
-        if (!clientLibStaticM.empty())
-        {
-            clientM.emplace(boost::dll::fs::path(clientLibStaticM));
-        }
-        else
-#endif
-        {
-            Firebird::IMaster* master = fb_get_master_interface();
-            if (!master)
-                throw std::runtime_error("Failed to get Firebird master interface");
-            clientM.emplace(master);
-        }
-    }
-    return *clientM;
+    return getClient(std::string());
+}
+
+fbcpp::Client& FbCppDatabase::getOwnClient()
+{
+    return getClient(clientLibM);
 }
 
 std::vector<uint8_t> FbCppDatabase::buildDpb(bool creating, int pagesize, const std::string& owner,
     const std::string& initialUser)
 {
-    auto status = getClient().newStatus();
-    fbcpp::impl::StatusWrapper statusWrapper(getClient(), status.get());
-    auto dpbBuilder = fbcpp::fbUnique(getClient().getUtil()->getXpbBuilder(&statusWrapper, 
+    auto status = getOwnClient().newStatus();
+    fbcpp::impl::StatusWrapper statusWrapper(getOwnClient(), status.get());
+    auto dpbBuilder = fbcpp::fbUnique(getOwnClient().getUtil()->getXpbBuilder(&statusWrapper, 
         Firebird::IXpbBuilder::DPB, nullptr, 0));
 
     // Force UTF8 for filenames
@@ -125,7 +134,7 @@ void FbCppDatabase::connect()
     if (!roleM.empty())
         options.setRole(roleM);
 
-    attachmentM.emplace(getClient(), connStrM, options);
+    attachmentM.emplace(getOwnClient(), connStrM, options);
     wxLogDebug("FbCppDatabase::connect() finished.");
 }
 
@@ -156,7 +165,7 @@ void FbCppDatabase::create(int pagesize, int dialect, const std::string& owner,
     options.setCreateDatabase(true);
     options.setDpb(buildDpb(true, pagesize, owner, initialUser));
 
-    attachmentM.emplace(getClient(), connStrM, options);
+    attachmentM.emplace(getOwnClient(), connStrM, options);
     wxLogDebug("FbCppDatabase::create() finished.");
 }
 
@@ -308,8 +317,6 @@ void FbCppDatabase::setCharset(const std::string& charset)
 void FbCppDatabase::setClientLibrary(const std::string& clientLib)
 {
     clientLibM = clientLib;
-    if (!clientLib.empty())
-        clientLibStaticM = clientLib;
 }
 
 void FbCppDatabase::setCryptKeyData(const std::string& cryptKeyData)
@@ -343,9 +350,9 @@ std::string FbCppDatabase::getTimezoneName(int timezoneId)
         char tzBuf[64] = {}; // FB_MAX_TIME_ZONE_NAME_LENGTH is 64
         unsigned dummyHour = 0, dummyMinute = 0, dummySecond = 0, dummyFractions = 0;
         
-        auto status = getClient().newStatus();
-        fbcpp::impl::StatusWrapper statusWrapper(getClient(), status.get());
-        getClient().getUtil()->decodeTimeTz(&statusWrapper, &iscTmTz,
+        auto status = getOwnClient().newStatus();
+        fbcpp::impl::StatusWrapper statusWrapper(getOwnClient(), status.get());
+        getOwnClient().getUtil()->decodeTimeTz(&statusWrapper, &iscTmTz,
             &dummyHour, &dummyMinute, &dummySecond, &dummyFractions,
             sizeof(tzBuf), tzBuf);
         

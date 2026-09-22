@@ -27,6 +27,7 @@
 #include <wx/strconv.h>
 #include <wx/colour.h>
 
+#include <exception>
 #include <map>
 #include "metadata/ODSVersion.h"
 #include <mutex>
@@ -283,6 +284,11 @@ private:
     bool showOneNodeIndices();
 
     inline void checkConnected(const wxString& operation) const;
+    // Adds an explanation to a failed embedded connection that Firebird turned
+    // into a network connection to "localhost" (GitHub issue #721).  Throws a
+    // std::runtime_error with the enriched message, or returns and leaves the
+    // original exception to be rethrown.
+    void explainEmbeddedFallback(const std::exception& e) const;
 protected:
     virtual void loadChildren() override;
     virtual void lockChildren() override;
