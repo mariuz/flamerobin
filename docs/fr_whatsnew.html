@@ -8,6 +8,21 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.9.5</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>General Improvements &amp; Bug Fixes</B></font><br>
+<br>
+- <b>Firebird Embedded on Linux (#721)</b>: The Firebird client bundled with the Linux <code>.deb</code> was built with <code>--enable-client-only</code> and therefore had no engine plugin, so a database registered without a server host name fell through Firebird's provider chain to the <code>Loopback</code> provider, which turns a local path into a network connection to <code>localhost</code> and fails with <i>"Unable to complete network request to host localhost"</i> when no server is running. The Linux build now builds the engine and the package ships <code>plugins/firebird</code>, <code>intl</code> and <code>share/firebird</code> under <code>/opt/flamerobin</code>, where the client's binreloc looks for them, so embedded works out of the box for ODS 13.0 and 13.1 databases. Two vcpkg static-linking breakages had to be fixed to build the engine at all: <code>libtommath</code> is now repeated after <code>libtomcrypt</code> on the link line, and <code>--with-termlib</code> names the <code>libncursesw.a</code> archive that vcpkg provides. The package also carries a documented <code>/opt/flamerobin/firebird.conf</code> explaining how to add <code>Engine12</code> for an ODS 12 database.<br>
+- <b>Per-database Client Library (#721)</b>: The <i>Client library</i> setting of a registered database was kept in a process-wide static that was only consulted the first time any database connected, so whichever database connected first decided the client library for the whole application. Clients are now cached per library path, so an embedded database pointed at a full Firebird installation and a remote database on the bundled client can be used side by side.<br>
+- <b>Embedded Connection Diagnostics (#721)</b>: A connection that Firebird silently turned into a <code>localhost</code> network connection now explains that the client library has no embedded engine, and how to fix it, instead of reporting a bare network error.<br>
+- <b>Plugin Reporting in Help -&gt; About</b>: The About box no longer asks the plugin manager to enumerate plugins, because doing so loads every module it names and unloads them again - and unloading an engine plugin runs its shutdown path, which throws out of a destructor and terminates the process when the Firebird lock directory (<code>/tmp/firebird</code>) belongs to a Firebird server package and the current user has no access to it. The configured plugin names are now read from <code>firebird.conf</code> and the installed modules are listed from the plugin directory, neither of which calls into a plugin. About now also names the plugin directory, so an <code>Engine*</code> entry tells you at a glance whether an embedded connection is possible.<br>
+- <b>Fatal Error in Help -&gt; About After Opening a Database (#722)</b>: Fixed a crash when opening <i>Help -&gt; About</i> once a database had been opened. The plugin list was queried by asking the Firebird plugin manager for every plugin type with a null names list, and <code>fbclient</code> takes that list by value and calls <code>strlen()</code> on it, so the null pointer took the whole application down. The configured list for each plugin type is now read from <code>IFirebirdConf</code> first, exactly as Firebird itself does internally. The crash only appeared after a database had been opened, because the enumeration is skipped while the Firebird client is not initialised, and only on Linux and macOS, because the Windows code path wrapped the same call in <code>__try</code>/<code>__except</code> and silently swallowed the access violation.<br>
+<br><br>
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.9.4</font><br>
 <br><br>
 
