@@ -4,7 +4,7 @@ This document outlines the active roadmap and pending tasks for FlameRobin devel
 
 ## 📊 Status Summary
 - **Core Feature Roadmap (Phases 1-10):** **100% Completed** (Archived in [ROADMAP_DONE.md](file:///home/ubuntu/work/flamerobin/ROADMAP_DONE.md))
-- **Security & Distribution Integrity Roadmap:** **0% Completed** (Outstanding / Active TODOs listed below)
+- **Security & Distribution Integrity Roadmap:** **0% Completed** (Outstanding / Active TODOs listed below, including a signed apt repository)
 
 ---
 
@@ -49,3 +49,11 @@ This section tracks security-focused work inspired by [discussion #591](https://
 - [ ] Document the current update model (manual download/install, no in-app auto-updater).
 - [ ] Add a "How to verify a release" section to project documentation.
 - [ ] Add a short security FAQ based on recurring community questions.
+
+### 8) Signed apt Repository for Debian and Ubuntu
+Today the `.deb` is installed from a file downloaded from GitHub Releases (see [docs/install_linux.md](docs/install_linux.md)), so users have to download and install every new version by hand. [Claude's Debian page](https://code.claude.com/docs/en/desktop-linux) centres on a signed apt repository instead, so updates arrive with the system's regular `apt update && apt upgrade`. FlameRobin could have that too, hosted on GitHub Pages and filled by the release workflow.
+- [ ] **Maintainer:** create a dedicated GPG signing key for the repository, publish its fingerprint, and store the private key and passphrase as GitHub Actions secrets.
+- [ ] Publish the repository on GitHub Pages (a `gh-pages` branch or Pages deployment): `dists/stable/…` with a signed `InRelease`/`Release.gpg`, the `pool/` of `.deb` files, and the public key as `key.asc`.
+- [ ] Extend `release.yml` to add each new `.deb` to the pool, regenerate the indexes (`dpkg-scanpackages` / `apt-ftparchive`) and sign them with the key from the secrets.
+- [ ] Optionally let the `.deb` register the repository on install, as Claude Desktop's does, so a `.deb` installed from a downloaded file also receives updates.
+- [ ] Document it in `docs/install_linux.md`: add the key, verify its fingerprint, register the repository with `signed-by=`, `apt install flamerobin`; update with `apt upgrade`; uninstall including the repository entry and key.
