@@ -74,6 +74,23 @@ Build Status
 Notice:
 Now you can download latest Windows snapshot builds directly from the [Build Flamerobin for Windows](https://github.com/mariuz/flamerobin/actions/workflows/windows-build.yml) Action
 
+Installing on Linux
+---------------------------
+On **Ubuntu 24.04+ / Debian 13+**, download the latest `.deb` and install it with apt:
+
+```bash
+curl -fLO "$(curl -fsSL https://api.github.com/repos/mariuz/flamerobin/releases/latest | grep -o 'https://[^"]*/flamerobin-[0-9.]*\.deb' | head -n 1)"
+sudo apt install ./flamerobin-*.deb
+```
+
+On **any other x86_64 distribution** with glibc 2.39+ (Fedora 40+, Arch, openSUSE Tumbleweed, ...), install for the current user without root:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/mariuz/flamerobin/master/install.sh | bash
+```
+
+Both include the Firebird embedded engine. See [docs/install_linux.md](docs/install_linux.md) for requirements, installing a specific version or for all users, updating, uninstalling and troubleshooting.
+
 Building
 ---------------------------
 For detailed build instructions for all supported platforms (Windows, Linux, macOS), see the

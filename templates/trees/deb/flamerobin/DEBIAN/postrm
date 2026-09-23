@@ -1,0 +1,41 @@
+#!/bin/sh
+
+#####
+# postrm script
+#
+# Removes what postinst put outside /opt/flamerobin: the flamerobin
+# command, the menu entry and the icons.  dpkg removes /opt/flamerobin
+# itself.  Nothing is done on upgrade, where postinst puts them back.
+####
+
+set -e
+
+case "$1" in
+    remove|purge) ;;
+    *) exit 0 ;;
+esac
+
+# The command, but only while it is still FlameRobin's.
+for link in /usr/local/bin/flamerobin /usr/bin/flamerobin
+do
+    if [ -L "${link}" ] && [ "$(readlink "${link}")" = "/opt/flamerobin/bin/flamerobin-launcher" ]
+    then
+        rm -f "${link}"
+    fi
+done
+
+rm -f /usr/local/share/applications/flamerobin.desktop
+rm -f /usr/share/pixmaps/flamerobin.png
+
+for icons in /usr/share/icons/hicolor /usr/local/share/icons/hicolor
+do
+    rm -f "${icons}"/*/apps/flamerobin.png "${icons}"/*/apps/flamerobin.svg
+done
+
+if command -v gtk-update-icon-cache > /dev/null 2>&1
+then
+    gtk-update-icon-cache -f -t /usr/share/icons/hicolor > /dev/null 2>&1 || true
+fi
+update-desktop-database /usr/local/share/applications/ > /dev/null 2>&1 || true
+
+exit 0

@@ -178,7 +178,9 @@ jobs:
 
           mkdir -p templates/trees/tar-out
           tar -C tar-staging --owner=0 --group=0 -czf "templates/trees/tar-out/${TAR_NAME}.tar.gz" "${TAR_NAME}"
-          ls -lh "templates/trees/tar-out/${TAR_NAME}.tar.gz"
+          # Verified by install.sh at the top of the repository before installing.
+          (cd templates/trees/tar-out && sha256sum "${TAR_NAME}.tar.gz" > "${TAR_NAME}.tar.gz.sha256")
+          ls -lh templates/trees/tar-out/
 
       - name: Upload Linux Artifacts to Release
         uses: softprops/action-gh-release@v2
@@ -186,6 +188,7 @@ jobs:
           files: |
             templates/trees/deb/flamerobin-*.deb
             templates/trees/tar-out/flamerobin-*-linux-x64.tar.gz
+            templates/trees/tar-out/flamerobin-*-linux-x64.tar.gz.sha256
 
   build-flatpak:
     runs-on: ubuntu-latest
