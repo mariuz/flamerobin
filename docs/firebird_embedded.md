@@ -131,6 +131,7 @@ installation brings its own engine along.
 | --- | --- | --- | --- |
 | Linux `.deb` (26.9.5 and later) | bundled, in `/opt/flamerobin/lib` | yes, `/opt/flamerobin/plugins/firebird/libEngine13.so` | yes, for ODS 13.0 / 13.1 |
 | Linux `.deb` (26.9.4 and earlier) | bundled, client only | **no** | no - falls back to `localhost` |
+| Linux `.tar.gz` (26.9.7 and later) | bundled, in `lib/` of the extracted tree | yes, `plugins/firebird/libEngine13.so` | yes, for ODS 13.0 / 13.1 |
 | Windows portable | bundled | yes | yes |
 | Linux snap | bundled, client only | **no** | no - connect through a Firebird server |
 | Linux Flatpak | bundled, client only | **no** | no - connect through a Firebird server |
@@ -138,7 +139,9 @@ installation brings its own engine along.
 | distribution packages | the distribution's `libfbclient` | only with the server package installed | install `firebird3.0-server`, `firebird4.0-server` or similar |
 
 The Linux `.deb` lays the Firebird tree out the way the client expects to find it,
-because `libfbclient` resolves everything relative to its own location:
+because `libfbclient` resolves everything relative to its own location. The
+`.tar.gz` contains the same tree, rooted wherever you extract it instead of at
+`/opt/flamerobin`:
 
 ```text
 /opt/flamerobin/lib/libfbclient.so.2        the client

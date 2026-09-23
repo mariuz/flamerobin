@@ -137,10 +137,107 @@ jobs:
           
           dpkg-deb --build templates/trees/deb/flamerobin templates/trees/deb/flamerobin-${FLAMEROBIN_VERSION}.deb
 
-      - name: Upload Linux Artifact to Release
+      # The same tree as the .deb, as a tarball that can be extracted anywhere
+      # and run without root.  FlameRobin finds its templates through FR_HOME
+      # and the bundled Firebird client finds its plugins, intl and
+      # firebird.msg relative to itself, so only the launcher has to know
+      # where the tree was extracted.
+      - name: Prepare .tar.gz package
+        run: |
+          TAR_NAME=flamerobin-${FLAMEROBIN_VERSION}-linux-x64
+          TAR_ROOT=templates/trees/tar/${TAR_NAME}
+          mkdir -p "${TAR_ROOT}"
+          cp -a templates/trees/deb/flamerobin/opt/flamerobin/. "${TAR_ROOT}/"
+          # The .deb launcher and its bookkeeping files assume /opt/flamerobin.
+          rm -f "${TAR_ROOT}/bin/flamerobin-launcher" "${TAR_ROOT}/bin/.flamerobin_exec" "${TAR_ROOT}/lib/.flamerobin_lib_depends"
+
+          cat > "${TAR_ROOT}/flamerobin" <<'EOF'
+          #!/bin/sh
+          # Starts FlameRobin from wherever this tree was extracted.  Resolves
+          # symlinks, so it can be linked into ~/.local/bin or /usr/local/bin.
+          HERE=$(dirname "$(readlink -f "$0")")
+          export FR_HOME="${FR_HOME:-${HERE}/share/flamerobin}"
+          export LD_LIBRARY_PATH="${HERE}/lib${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+          exec "${HERE}/bin/flamerobin" "$@"
+          EOF
+
+          cat > "${TAR_ROOT}/install-desktop-entry.sh" <<'EOF'
+          #!/bin/sh
+          # Adds FlameRobin to the application menu of the current user,
+          # pointing at this extracted tree.  Run it again after moving the tree.
+          HERE=$(dirname "$(readlink -f "$0")")
+          APPS="${XDG_DATA_HOME:-${HOME}/.local/share}/applications"
+          mkdir -p "${APPS}"
+          cat > "${APPS}/flamerobin.desktop" <<DESKTOP
+          [Desktop Entry]
+          Name=FlameRobin
+          GenericName=Database administration tool
+          Comment=Administration Tool for Firebird DBMS
+          Exec="${HERE}/flamerobin" %F
+          Icon=${HERE}/share/icons/hicolor/256x256/apps/flamerobin.png
+          Type=Application
+          Terminal=false
+          Categories=Development;Database;GTK;
+          Keywords=flamerobin;firebird;
+          DESKTOP
+          update-desktop-database "${APPS}" >/dev/null 2>&1 || true
+          echo "Installed ${APPS}/flamerobin.desktop"
+          EOF
+
+          cat > "${TAR_ROOT}/README.txt" <<EOF
+          FlameRobin ${FLAMEROBIN_VERSION} for Linux x86_64
+          ==========================================
+
+          Extract anywhere and run:
+
+              tar xzf ${TAR_NAME}.tar.gz
+              ./${TAR_NAME}/flamerobin
+
+          No root access is needed. To add FlameRobin to your application menu:
+
+              ./${TAR_NAME}/install-desktop-entry.sh
+
+          To start it from a terminal as "flamerobin":
+
+              ln -s "\$PWD/${TAR_NAME}/flamerobin" ~/.local/bin/flamerobin
+
+          System requirements
+          -------------------
+          GTK 3, WebKitGTK 4.1 and libsecret must be installed, as for the .deb:
+
+              Debian/Ubuntu: sudo apt install libwebkit2gtk-4.1-0 libsecret-1-0
+              Fedora:        sudo dnf install webkit2gtk4.1 libsecret
+
+          Firebird
+          --------
+          The Firebird 5 client is bundled in lib/, together with the
+          embedded engine in plugins/firebird/, so a database registered without a
+          server host name opens in embedded mode with no Firebird server running
+          (ODS 13.0 and 13.1, i.e. Firebird 4 and 5 databases). firebird.conf in
+          this directory documents how to add Engine12 for Firebird 3 databases.
+          See https://github.com/mariuz/flamerobin/blob/master/docs/firebird_embedded.md
+
+          Your settings are kept in ~/.flamerobin, shared with any other FlameRobin
+          installation.
+          EOF
+
+          chmod 755 "${TAR_ROOT}/flamerobin" "${TAR_ROOT}/install-desktop-entry.sh"
+
+          # The tarball must be usable on its own.
+          test -x "${TAR_ROOT}/bin/flamerobin"
+          test -f "${TAR_ROOT}/lib/libfbclient.so.2"
+          test -f "${TAR_ROOT}/plugins/firebird/libEngine13.so"
+          test -d "${TAR_ROOT}/share/flamerobin/html-templates"
+
+          tar -C templates/trees/tar --owner=0 --group=0 -czf "templates/trees/${TAR_NAME}.tar.gz" "${TAR_NAME}"
+          ls -lh "templates/trees/${TAR_NAME}.tar.gz"
+
+      - name: Upload Linux Artifacts to Release
         uses: softprops/action-gh-release@v2
         with:
-          files: templates/trees/deb/flamerobin-*.deb
+          files: |
+            templates/trees/deb/flamerobin-*.deb
+            templates/trees/flamerobin-*-linux-x64.tar.gz
 
   build-flatpak:
     runs-on: ubuntu-latest
