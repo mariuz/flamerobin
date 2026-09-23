@@ -1,8 +1,8 @@
 diff --git a/src/fb-cpp/Attachment.h b/src/fb-cpp/Attachment.h
-index d22bdbb..1c9b8eb 100644
+index 957b6b5..26587a3 100644
 --- a/src/fb-cpp/Attachment.h
 +++ b/src/fb-cpp/Attachment.h
-@@ -51,7 +51,7 @@ namespace fbcpp
+@@ -52,7 +52,7 @@ namespace fbcpp
  	///
  	/// Represents options used when creating an Attachment object.
  	///
@@ -11,7 +11,7 @@ index d22bdbb..1c9b8eb 100644
  	{
  	public:
  		///
-@@ -199,7 +199,7 @@ namespace fbcpp
+@@ -200,7 +200,7 @@ namespace fbcpp
  			return *this;
  		}
  
@@ -20,7 +20,7 @@ index d22bdbb..1c9b8eb 100644
  		std::optional<std::string> connectionCharSet;
  		std::optional<std::string> userName;
  		std::optional<std::string> password;
-@@ -215,7 +215,7 @@ namespace fbcpp
+@@ -216,7 +216,7 @@ namespace fbcpp
  	/// The Attachment must exist and remain valid while there are other objects using it, such as Transaction and
  	/// Statement.
  	///
@@ -29,7 +29,7 @@ index d22bdbb..1c9b8eb 100644
  	{
  	public:
  		///
-@@ -401,11 +401,11 @@ namespace fbcpp
+@@ -426,11 +426,11 @@ namespace fbcpp
  		std::optional<T> queryFirstRowAs(
  			Transaction& transaction, std::string_view sql, const StatementOptions& options, const Params& params);
  
@@ -137,7 +137,7 @@ index a3a4407..a521597 100644
  		Transaction& transaction;
  		BlobId id;
 diff --git a/src/fb-cpp/Statement.cpp b/src/fb-cpp/Statement.cpp
-index 6c9ac0c..959dc10 100644
+index 6db794e..98d671e 100644
 --- a/src/fb-cpp/Statement.cpp
 +++ b/src/fb-cpp/Statement.cpp
 @@ -31,6 +31,15 @@ using namespace fbcpp;
@@ -190,7 +190,7 @@ index 6c9ac0c..959dc10 100644
  				.charSetId = metadata->getCharSet(&statusWrapper, index),
  				.subType = metadata->getSubType(&statusWrapper, index),
  			};
-@@ -231,28 +239,37 @@ void Statement::free()
+@@ -235,6 +247,16 @@ void Statement::free()
  {
  	assert(isValid());
  
@@ -207,9 +207,10 @@ index 6c9ac0c..959dc10 100644
  	if (resultSetHandle)
  	{
  		resultSetHandle->close(&statusWrapper);
- 		resultSetHandle.reset();
+@@ -242,22 +264,22 @@ void Statement::free()
  	}
--
+ 
+ 	currentRow = false;
 -	statementHandle->free(&statusWrapper);
 -	statementHandle.reset();
  }
@@ -234,10 +235,10 @@ index 6c9ac0c..959dc10 100644
  
  bool Statement::execute(Transaction& transaction)
 diff --git a/src/fb-cpp/Statement.h b/src/fb-cpp/Statement.h
-index aa5616c..f737539 100644
+index 1cf1d38..2254ea5 100644
 --- a/src/fb-cpp/Statement.h
 +++ b/src/fb-cpp/Statement.h
-@@ -76,6 +76,10 @@ namespace fbcpp
+@@ -79,6 +79,10 @@ namespace fbcpp
  	///
  	/// @brief Distinguishes the semantic category of the prepared SQL statement.
  	///
@@ -248,19 +249,22 @@ index aa5616c..f737539 100644
  	enum class StatementType : unsigned
  	{
  		///
-@@ -139,8 +143,10 @@ namespace fbcpp
+@@ -142,11 +146,13 @@ namespace fbcpp
  	///
  	/// Prepares, executes, and fetches SQL statements against a Firebird attachment.
  	///
--	class FB_CPP_EXPORT Statement final
-+	class FB_CPP_EXPORT Statement
+-	class FB_CPP_EXPORT Statement final : private impl::ParameterSetter<Statement, false>
++	class FB_CPP_EXPORT Statement : private impl::ParameterSetter<Statement, false>
  	{
+ 		friend class RowSet;
+ 		friend class impl::ParameterSetter<Statement, false>;
+ 
 +	public:
 +		explicit Statement(Attachment& attachment);
  	public:
  		///
  		/// Prepares an SQL statement.
-@@ -301,6 +307,7 @@ namespace fbcpp
+@@ -318,6 +324,7 @@ namespace fbcpp
  		/// @brief Releases the prepared handle and any associated result set.
  		///
  		void free();
@@ -268,22 +272,18 @@ index aa5616c..f737539 100644
  
  		///
  		/// @brief Retrieves the textual legacy plan if the server produced one.
-@@ -1993,7 +2000,7 @@ namespace fbcpp
- 				value);
+@@ -802,7 +809,7 @@ namespace fbcpp
+ 			return outRow->get<V>(index);
  		}
  
 -	private:
 +	protected:
- 		///
- 		/// @brief Validates and returns the descriptor for the given input parameter index.
- 		///
-@@ -2257,10 +2264,10 @@ namespace fbcpp
- 			}
+ 		const std::vector<Descriptor>& getSetterDescriptors() const noexcept
+ 		{
+ 			return inDescriptors;
+@@ -830,7 +837,7 @@ namespace fbcpp
+ 			currentRow = false;
  		}
- 
--	private:
-+	protected:
- 		Client& getClient() noexcept;
  
 -	private:
 +	protected:
@@ -334,7 +334,7 @@ index de8e6f4..233e1ce 100644
  {
  	prepare(std::span<const std::uint8_t>{});
 diff --git a/src/fb-cpp/Transaction.h b/src/fb-cpp/Transaction.h
-index 13ce6ac..ef535a0 100644
+index 6e9b2f3..e9914b3 100644
 --- a/src/fb-cpp/Transaction.h
 +++ b/src/fb-cpp/Transaction.h
 @@ -30,6 +30,7 @@
@@ -345,7 +345,7 @@ index 13ce6ac..ef535a0 100644
  #include <span>
  #include <stdexcept>
  #include <string>
-@@ -45,6 +46,11 @@ namespace fbcpp
+@@ -46,6 +47,11 @@ namespace fbcpp
  {
  	class Attachment;
  
@@ -357,7 +357,7 @@ index 13ce6ac..ef535a0 100644
  	///
  	/// Transaction isolation level.
  	///
-@@ -117,7 +123,7 @@ namespace fbcpp
+@@ -118,7 +124,7 @@ namespace fbcpp
  	///
  	/// Represents options used when creating a Transaction object.
  	///
@@ -366,7 +366,7 @@ index 13ce6ac..ef535a0 100644
  	{
  	public:
  		///
-@@ -287,7 +293,7 @@ namespace fbcpp
+@@ -288,7 +294,7 @@ namespace fbcpp
  			return *this;
  		}
  
@@ -375,7 +375,7 @@ index 13ce6ac..ef535a0 100644
  		std::vector<std::uint8_t> tpb;
  		std::optional<TransactionIsolationLevel> isolationLevel;
  		std::optional<TransactionReadCommittedMode> readCommittedMode;
-@@ -348,8 +354,10 @@ namespace fbcpp
+@@ -349,8 +355,10 @@ namespace fbcpp
  	/// being committed or rolled back (and not prepared), it will be automatically
  	/// rolled back.
  	///
@@ -387,7 +387,7 @@ index 13ce6ac..ef535a0 100644
  	public:
  		///
  		/// Constructs a Transaction object that starts a transaction in the specified
-@@ -493,7 +501,11 @@ namespace fbcpp
+@@ -494,7 +502,11 @@ namespace fbcpp
  		///
  		void rollbackRetaining();
  
