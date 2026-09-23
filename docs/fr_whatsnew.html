@@ -8,6 +8,20 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.9.6</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>General Improvements &amp; Bug Fixes</B></font><br>
+<br>
+- <b>Invalid DDL for BINARY Columns (#725)</b>: A column declared as <code>BINARY(n)</code> was extracted as <code>BINARY(n) CHARACTER SET OCTETS</code>, which Firebird rejects with <i>"Token unknown - CHARACTER"</i>, so the DDL of any table, domain, procedure or function using <code>BINARY</code> could not be run again. <code>BINARY</code> is an alias for <code>CHAR(n) CHARACTER SET OCTETS</code> and does not accept an explicit character set, so the clause is now left out for it in the DDL of tables, domains, procedure and function parameters and UDF declarations. Columns declared as <code>CHAR(n) CHARACTER SET OCTETS</code> are stored differently by Firebird and keep their explicit character set.<br>
+- <b>Snap Build (Firebird Engine Made Optional)</b>: Building the Firebird engine plugin for every Linux target in 26.9.5 broke the snap package build. The engine is now an optional <code>firebird-engine</code> vcpkg feature that only the <code>.deb</code> build turns on, so the <code>.deb</code> keeps embedded support and the snap and Flatpak go back to the client-only Firebird build. To build FlameRobin with the engine yourself, configure with <code>-DVCPKG_MANIFEST_FEATURES=firebird-engine</code>; see <code>docs/firebird_embedded.md</code>.<br>
+- <b>fb-cpp 1.0.0</b>: FlameRobin now uses fb-cpp 1.0.0, the first stable release of the C++ Firebird API wrapper it is built on (previously 0.0.6). The FlameRobin patch set for fb-cpp was rebased onto it.<br>
+- <b>Dependency Updates</b>: The vcpkg registry baseline moved to 2026-09-23, which brings Boost 1.92.0, OpenSSL 3.6.4 and curl 8.22.0. Firebird stays at 5.0.4.<br>
+<br><br>
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.9.5</font><br>
 <br><br>
 

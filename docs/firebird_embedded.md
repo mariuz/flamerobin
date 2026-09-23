@@ -132,6 +132,8 @@ installation brings its own engine along.
 | Linux `.deb` (26.9.5 and later) | bundled, in `/opt/flamerobin/lib` | yes, `/opt/flamerobin/plugins/firebird/libEngine13.so` | yes, for ODS 13.0 / 13.1 |
 | Linux `.deb` (26.9.4 and earlier) | bundled, client only | **no** | no - falls back to `localhost` |
 | Windows portable | bundled | yes | yes |
+| Linux snap | bundled, client only | **no** | no - connect through a Firebird server |
+| Linux Flatpak | bundled, client only | **no** | no - connect through a Firebird server |
 | macOS | the client of the official Firebird `.pkg` | from that installation | yes, if the `.pkg` is installed |
 | distribution packages | the distribution's `libfbclient` | only with the server package installed | install `firebird3.0-server`, `firebird4.0-server` or similar |
 
@@ -146,6 +148,33 @@ because `libfbclient` resolves everything relative to its own location:
 /opt/flamerobin/share/firebird/tzdata/      time zone database
 /opt/flamerobin/firebird.conf               documented, everything commented out
 ```
+
+### Building FlameRobin with the engine
+
+Since 26.9.6 the engine is an optional vcpkg feature, `firebird-engine`, because it
+roughly triples the time it takes to build Firebird. Only the `.deb` jobs turn it
+on; a plain vcpkg build, the snap and the Flatpak get the client only.
+
+To build a Linux FlameRobin that can open databases in embedded mode, ask for the
+feature when configuring:
+
+```bash
+cmake -S . -B build -DENABLE_VCPKG=ON -DVCPKG_MANIFEST_FEATURES=firebird-engine
+```
+
+or, when installing the dependencies with vcpkg directly:
+
+```bash
+./vcpkg/vcpkg install --x-feature=firebird-engine
+```
+
+The engine, its plugins and the `intl` module then end up in `plugins/firebird` and
+`intl` under `vcpkg_installed/x64-linux` - in the build directory when CMake runs
+vcpkg, in the source directory when you run `vcpkg install` yourself.
+Copy them next to the client library in the layout shown above, as the
+`build-linux` job in `.github/workflows/release.yml` does, or the client will not
+find them. The feature has no effect on macOS, where FlameRobin uses the client of
+the official Firebird `.pkg`.
 
 ---
 

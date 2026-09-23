@@ -166,6 +166,9 @@ sudo apt-get install build-essential git cmake libwxgtk3.2-dev libwebkit2gtk-4.1
     > `vcpkg` is enabled by default. If you need to disable vcpkg and build using entirely system/distro packages, use `-DENABLE_VCPKG=OFF`.
     > Note that you will need to manually provide and build all dependencies, including the patched `fb-cpp` package.
 
+    > [!TIP]
+    > The bundled Firebird client is built without the embedded engine by default. To build FlameRobin that can open a local database without a Firebird server (embedded mode), configure with `cmake -DVCPKG_MANIFEST_FEATURES=firebird-engine ..`. See [docs/firebird_embedded.md](docs/firebird_embedded.md#building-flamerobin-with-the-engine).
+
 ### 3. Run FlameRobin
 
 Use the supplied helper script to start the application with its configuration paths set up:
