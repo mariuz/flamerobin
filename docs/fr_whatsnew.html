@@ -8,6 +8,21 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.9.7</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Linux Installation</B></font><br>
+<br>
+- <b>Linux Tarball for Any Distribution</b>: Releases now include <code>flamerobin-VERSION-linux-x64.tar.gz</code>, the same build as the <code>.deb</code> - FlameRobin with its own Firebird 5 client and the Firebird embedded engine - packed so that it can be extracted anywhere and run without root. A <code>flamerobin</code> launcher at the top of the tree finds the templates and libraries relative to itself, so it also works when linked into <code>~/.local/bin</code>. A <code>.sha256</code> checksum is published next to it.<br>
+- <b>install.sh</b>: The tarball contains an installer. <code>./install.sh</code> installs for the current user into <code>~/.local/opt/flamerobin</code>, with the <code>flamerobin</code> command in <code>~/.local/bin</code>, a menu entry and icons; <code>sudo ./install.sh --system</code> installs for all users into <code>/opt/flamerobin-VERSION</code>; <code>--prefix DIR</code> chooses the directory. Everything installed is recorded, and the generated <code>uninstall.sh</code> removes exactly that. It never overwrites a FlameRobin it did not install, such as the <code>.deb</code>, and warns if GTK, WebKitGTK 4.1 or libsecret are missing.<br>
+- <b>One-line Installer</b>: <code>curl -fsSL https://raw.githubusercontent.com/mariuz/flamerobin/master/install.sh | bash</code> installs the latest release on any x86_64 distribution with glibc 2.39 or later (Fedora 40+, Arch, openSUSE Tumbleweed, Ubuntu 24.04+, Debian 13+). It checks the platform, downloads the tarball, verifies its checksum and runs the tarball's installer. <code>bash -s VERSION</code> installs a specific release, and <code>sudo bash -s -- --system</code> installs for all users.<br>
+- <b>.deb Requirements and Uninstall</b>: The <code>.deb</code> now depends on <code>libc6 (&gt;= 2.39)</code> and <code>libstdc++6 (&gt;= 13)</code>, the versions its binaries need, so apt refuses it on Ubuntu 22.04 and Debian 12 instead of installing a FlameRobin that cannot start. <code>apt remove flamerobin</code> now also removes the <code>flamerobin</code> command, the menu entry and the icons the package created outside <code>/opt/flamerobin</code>.<br>
+- <b>Documentation</b>: The new <code>docs/install_linux.md</code> covers installing, updating, uninstalling and troubleshooting FlameRobin on Debian/Ubuntu and on other distributions, and the README has a short <i>Installing on Linux</i> section. A signed apt repository, so that updates arrive with <code>apt upgrade</code>, has been added to the roadmap.<br>
+<br><br>
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.9.6</font><br>
 <br><br>
 
