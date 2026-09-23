@@ -320,7 +320,8 @@ wxString Domain::dataTypeToString(short datatype, short scale, short precision,
 
         // add length for char, varchar and cstring
         case 14:
-            retval = SqlTokenizer::getKeyword(subtype == 0 ? kwCHAR : kwBINARY);
+            retval = SqlTokenizer::getKeyword(
+                isBinaryDatatype(datatype, subtype) ? kwBINARY : kwCHAR);
             break;
         case 37:
             retval = SqlTokenizer::getKeyword(kwVARCHAR);
@@ -394,6 +395,18 @@ wxString Domain::getCharset()
 {
     ensurePropertiesLoaded();
     return charsetM;
+}
+
+/* static*/
+bool Domain::isBinaryDatatype(short datatype, short subtype)
+{
+    return datatype == 14 && subtype != 0;
+}
+
+bool Domain::isBinary()
+{
+    ensurePropertiesLoaded();
+    return isBinaryDatatype(datatypeM, subtypeM);
 }
 
 wxString Domain::getAlterSqlTemplate() const

@@ -51,6 +51,9 @@ public:
 
     static wxString dataTypeToString(short datatype, short scale,
         short precision, short subtype, short length);
+    // true for the types dataTypeToString() writes as BINARY(n), whose
+    // character set OCTETS is implied and must not be given explicitly
+    static bool isBinaryDatatype(short datatype, short subtype);
 
     static wxString trimDefaultValue(const wxString& value);
 
@@ -59,6 +62,7 @@ public:
     wxString getCollation();
     wxString getCheckConstraint();
     wxString getCharset();
+    bool isBinary();
     bool getDefault(wxString& value);
     bool isNullable();
     bool isString();

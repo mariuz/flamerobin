@@ -161,8 +161,11 @@ void CreateDDLVisitor::visitColumn(Column& c)
             DatabasePtr db = d->getDatabase();
             if (!charset.IsEmpty())
             {
-                if (!db || db->getDatabaseCharset() != charset)
+                if (!d->isBinary()
+                    && (!db || db->getDatabaseCharset() != charset))
+                {
                     preSqlM << " CHARACTER SET " << charset;
+                }
                 if (db && db->isDefaultCollation(charset, collate))
                     collate.clear();    // don't show default collations
             }
@@ -308,8 +311,11 @@ void CreateDDLVisitor::visitDomain(Domain& d)
             d.getDatatypeAsString();
     wxString charset = d.getCharset();
     DatabasePtr db = d.getDatabase();
-    if (!charset.IsEmpty() && (!db || db->getDatabaseCharset() != charset))
+    if (!charset.IsEmpty() && !d.isBinary()
+        && (!db || db->getDatabaseCharset() != charset))
+    {
         preSqlM += " CHARACTER SET " + charset;
+    }
     preSqlM += "\n";
     wxString defaultValue;
     if (d.getDefault(defaultValue))
