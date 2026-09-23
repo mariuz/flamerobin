@@ -26,12 +26,14 @@ set(FIREBIRD_CONFIGURE_OPTIONS
     "LDFLAGS=-L${CURRENT_HOST_INSTALLED_DIR}/lib"
 )
 
-# On Linux the engine plugin is built as well, so that the client bundled with
-# the .deb can open a database in embedded mode.  Without it Firebird has no
-# engine provider and silently falls back to a network connection to
-# "localhost" - GitHub issue #721.  macOS keeps the client only build, where
-# FlameRobin uses the Firebird client of the official .pkg instead.
-if(VCPKG_TARGET_IS_OSX)
+# The engine plugin is what makes an embedded connection possible: without it
+# Firebird has no engine provider and silently falls back to a network
+# connection to "localhost" - GitHub issue #721.  It is built only for the
+# packages that ship it, because it roughly triples the build, and never on
+# macOS, where FlameRobin uses the client of the official Firebird .pkg.
+if("engine" IN_LIST FEATURES AND NOT VCPKG_TARGET_IS_OSX)
+    message(STATUS "Building Firebird with the engine plugin (embedded support)")
+else()
     list(APPEND FIREBIRD_CONFIGURE_OPTIONS --enable-client-only)
 endif()
 

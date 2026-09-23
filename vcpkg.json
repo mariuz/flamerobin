@@ -72,5 +72,18 @@
       "name": "fb-cpp",
       "version": "0.0.6"
     }
-  ]
+  ],
+  "features": {
+    "firebird-engine": {
+      "description": "Bundle the Firebird engine plugin, so that a database registered without a server host name opens in embedded mode",
+      "dependencies": [
+        {
+          "name": "firebird",
+          "features": [
+            "engine"
+          ]
+        }
+      ]
+    }
+  }
 }

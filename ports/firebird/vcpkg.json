@@ -29,5 +29,10 @@
       "host": true,
       "platform": "linux"
     }
-  ]
+  ],
+  "features": {
+    "engine": {
+      "description": "Build the Firebird engine plugin, which is what makes an embedded connection possible"
+    }
+  }
 }

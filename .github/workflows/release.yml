@@ -47,7 +47,7 @@ jobs:
           mkdir -p vcpkg_archives
           success=0
           for i in {1..3}; do
-            ./vcpkg/vcpkg install && { success=1; break; }
+            ./vcpkg/vcpkg install --x-feature=firebird-engine && { success=1; break; }
             echo "vcpkg install failed, retrying in 10 seconds..."
             sleep 10
           done
@@ -63,7 +63,7 @@ jobs:
           mkdir -p vcpkg_archives
           export PATH="/usr/local/bin:/opt/firebird/bin:${PATH:-}"
           export LD_LIBRARY_PATH="/usr/local/lib:/usr/lib/x86_64-linux-gnu:/opt/firebird/lib:${LD_LIBRARY_PATH:-}"
-          cmake -S . -B Build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/flamerobin/ -DBUILD_TESTING=OFF -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DENABLE_VCPKG=ON
+          cmake -S . -B Build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/opt/flamerobin/ -DBUILD_TESTING=OFF -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DENABLE_VCPKG=ON -DVCPKG_MANIFEST_FEATURES=firebird-engine
 
       - name: Build Flamerobin
         run: |
@@ -92,6 +92,45 @@ jobs:
           # Optional: bundle libraries if needed for portability
           mkdir -p templates/trees/deb/flamerobin/opt/flamerobin/lib
           ldd Build/flamerobin | awk '{print $3}' | grep "vcpkg_installed" | grep -v "not found" | xargs -I {} cp -v {} templates/trees/deb/flamerobin/opt/flamerobin/lib/ || true
+
+          # The bundled Firebird client resolves its plugins, its international
+          # module and its message file relative to its own location (binreloc),
+          # so /opt/flamerobin/lib/libfbclient.so.2 looks for them under
+          # /opt/flamerobin.  Without the engine plugin there is no embedded
+          # mode and Firebird silently falls back to a network connection to
+          # "localhost" - GitHub issue #721.
+          DEB_TREE=templates/trees/deb/flamerobin/opt/flamerobin
+          FB_ROOT=$(ldd Build/flamerobin | awk '{print $3}' | grep -m1 "vcpkg_installed.*libfbclient" | sed 's#/lib/libfbclient.*##')
+          echo "Firebird tree: ${FB_ROOT}"
+          test -d "${FB_ROOT}/plugins/firebird"
+          test -d "${FB_ROOT}/intl"
+
+          mkdir -p "${DEB_TREE}/plugins/firebird"
+          # Everything but Firebird's sample plugins, which are of no use here.
+          for plugin in "${FB_ROOT}"/plugins/firebird/*; do
+            case "$(basename "${plugin}")" in
+              fbSample*|libfbSample*) continue ;;
+            esac
+            cp -rv "${plugin}" "${DEB_TREE}/plugins/firebird/"
+          done
+          mkdir -p "${DEB_TREE}/intl"
+          cp -v "${FB_ROOT}"/intl/* "${DEB_TREE}/intl/"
+          mkdir -p "${DEB_TREE}/share/firebird"
+          cp -rv "${FB_ROOT}"/share/firebird/firebird.msg "${FB_ROOT}"/share/firebird/tzdata "${DEB_TREE}/share/firebird/"
+
+          # The engine plugin needs the libraries it was built against, which
+          # the ldd of flamerobin alone does not pull in.
+          ldd "${FB_ROOT}"/plugins/firebird/* "${FB_ROOT}"/intl/* 2>/dev/null \
+            | awk '{print $3}' | grep "vcpkg_installed" | grep -v "not found" | sort -u \
+            | xargs -I {} cp -v -n {} "${DEB_TREE}/lib/"
+
+          # The engine is ~200 MB with its debug info, and 12 MB without.
+          find "${DEB_TREE}/plugins/firebird" "${DEB_TREE}/intl" -name "*.so" \
+            -exec strip --strip-unneeded {} +
+
+          # The engine must actually be there, or the .deb is no better than before.
+          test -f "${DEB_TREE}/plugins/firebird/libEngine13.so"
+          du -sh "${DEB_TREE}/plugins/firebird" "${DEB_TREE}/intl"
           
           sed -i "s/^Version: .*/Version: ${FLAMEROBIN_VERSION}/" templates/trees/deb/flamerobin/DEBIAN/control
           sed -i "s/^Architecture: .*/Architecture: amd64/" templates/trees/deb/flamerobin/DEBIAN/control
