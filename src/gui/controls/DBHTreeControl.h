@@ -27,17 +27,27 @@
 #include <wx/wx.h>
 #include <wx/treectrl.h>
 
+#include "config/Config.h"
+
 class MetadataItem;
 
-class DBHTreeControl: public wxTreeCtrl
+class DBHTreeControl: public wxTreeCtrl, public ConfigCache
 {
 private:
     // recursive function used by selectMetadataItem
     bool findMetadataItem(MetadataItem *item, wxTreeItemId parent);
     bool allowContextMenuM;
+    // font used when no custom tree font is configured
+    wxFont defaultFontM;
+    // native font description of the currently applied custom font
+    wxString fontDescM;
+    void applyFont(const wxString& fontDesc);
 
 protected:
     short m_spacing;    // fix wxWidgets bug (or lack of feature)
+
+    virtual void loadFromConfig();
+    virtual void update();
 
 public:
     enum { ID_tree_ctrl = 101 };
