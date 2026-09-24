@@ -1464,7 +1464,7 @@ void DBHTreeControl::OnTreeItemExpanding(wxTreeEvent& event)
 
 DBHTreeControl::DBHTreeControl(wxWindow* parent, const wxPoint& pos,
         const wxSize& size, long style)
-    : wxTreeCtrl(parent, ID_tree_ctrl, pos, size, style)
+    : wxTreeCtrl(parent, ID_tree_ctrl, pos, size, style), ConfigCache(config())
 {
     allowContextMenuM = true;
 /*  FIXME: dows not play nice with wxGenericImageList...
@@ -1474,6 +1474,35 @@ DBHTreeControl::DBHTreeControl(wxWindow* parent, const wxPoint& pos,
     AssignImageList(new wxImageList(DBHTreeImageList::get()));
 */
     SetImageList(&DBHTreeImageList::get());
+
+    defaultFontM = GetFont();
+    loadFromConfig();
+}
+
+void DBHTreeControl::loadFromConfig()
+{
+    applyFont(config().get("TreeFont", wxString()));
+}
+
+void DBHTreeControl::update()
+{
+    ConfigCache::update();
+    // apply a changed tree font immediately, not on next use
+    loadFromConfig();
+}
+
+void DBHTreeControl::applyFont(const wxString& fontDesc)
+{
+    if (fontDesc == fontDescM)
+        return;
+    fontDescM = fontDesc;
+
+    wxFont font;
+    if (!fontDesc.empty())
+        font.SetNativeFontInfo(fontDesc);
+    // an empty or invalid description restores the default font
+    SetFont(font.IsOk() ? font : defaultFontM);
+    Refresh();
 }
 
 void DBHTreeControl::allowContextMenu(bool doAllow)
