@@ -206,6 +206,11 @@
             <key>ShowCompiledStatementCache</key>
             <default>0</default>
         </setting>
+        <setting type="font">
+            <caption>Tree font:</caption>
+            <description>Font used for the items of the main tree view. Leave blank to use the system default font.</description>
+            <key>TreeFont</key>
+        </setting>
     </node>
     <node>
         <caption>Database Registration Defaults</caption>
