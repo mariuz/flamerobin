@@ -1149,6 +1149,14 @@ add_executable(data_grid_octets_test
 target_link_libraries(data_grid_octets_test ${wxWidgets_LIBRARIES} ${FR_LIBS})
 add_test(NAME data_grid_octets_test COMMAND data_grid_octets_test)
 
+add_executable(uri_processor_test
+    ${SOURCEDIR}/core/URIProcessorTest.cpp
+    ${SOURCEDIR}/core/URIProcessor.cpp
+)
+target_link_libraries(uri_processor_test ${wxWidgets_LIBRARIES} ${FR_LIBS})
+add_test(NAME uri_processor_test COMMAND uri_processor_test)
+
+
 if (APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES
                 BUILD_WITH_INSTALL_RPATH FALSE

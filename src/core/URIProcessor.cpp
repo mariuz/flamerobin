@@ -74,11 +74,15 @@ bool URI::parseURI(const wxString& uri)
     if (p2 == wxString::npos)
     {
         action = uri.substr(p + 3);
+        while (action.EndsWith("/"))
+            action.RemoveLast();
         params.clear();
         return true;
     }
 
     action = uri.substr(p + 3, p2 - p - 3);
+    while (action.EndsWith("/"))
+        action.RemoveLast();
     wxString par = uri.substr(p2 + 1);
     while (true)
     {
