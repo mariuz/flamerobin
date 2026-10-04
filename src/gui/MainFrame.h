@@ -100,6 +100,7 @@ public:
     void OnMenuCompareSchemas(wxCommandEvent& event);
     void OnMenuSessionMonitor(wxCommandEvent& event);
     void OnMenuDatabaseMaintenanceDashboard(wxCommandEvent& event);
+    void OnMenuBenchmarkTest(wxCommandEvent& event);
     void OnMenuVectorInstallerWizard(wxCommandEvent& event);
     void OnMenuSystemPrivilegeMatrix(wxCommandEvent& event);
     void OnMenuBackupScheduler(wxCommandEvent& event);
