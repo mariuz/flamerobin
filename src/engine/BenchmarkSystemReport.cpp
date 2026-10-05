@@ -785,8 +785,12 @@ BenchmarkReport BenchmarkReport::anonymized() const
         hide(utf8(p.name), _("Firebird service"));
         hide(utf8(p.detail), path);
     }
-    for (const auto& p : s.otherDatabaseServers)
+    for (auto& p : s.otherDatabaseServers)
+    {
+        hide(utf8(p.name), _("Other database server"));
         hide(utf8(p.detail), path);
+        p.name = std::string(_("Other database server").utf8_str());
+    }
     for (const auto& kv : m.serverConfig)
     {
         // directories and file names in firebird.conf
