@@ -45,6 +45,8 @@ namespace fr
 namespace
 {
 
+// The style sheet is split into several literals, because MSVC limits a
+// single string literal to about 16 KB.
 const char* const styleSheet = R"CSS(
 :root {
   --bg: #ffffff; --ink: #2d3748; --muted: #718096; --line: #e2e8f0; --head: #edf2f7;
@@ -170,7 +172,8 @@ tr.change td { background: var(--warn-bg) !important; }
 .notes { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 4px; }
 .notes li { display: flex; gap: 8px; align-items: baseline; }
 
-/* triangles of the collapsible parts */
+)CSS"
+R"CSS(/* triangles of the collapsible parts */
 details > summary { list-style: none; cursor: pointer; }
 details > summary::-webkit-details-marker { display: none; }
 .chev { width: 7px; height: 7px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(-45deg); transition: transform .12s; justify-self: end; margin-top: 4px; }
@@ -467,7 +470,7 @@ wxString legend(const std::vector<std::pair<int, wxString>>& entries)
     wxString html = "<div class=\"legend\">";
     for (const auto& e : entries)
     {
-        html += e.first == 0 ? "<span><i class=\"dash\"></i>"
+        html += e.first == 0 ? wxString("<span><i class=\"dash\"></i>")
             : wxString::Format("<span><i class=\"c%d\"></i>", e.first);
         html += esc(e.second) + "</span>";
     }

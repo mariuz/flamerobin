@@ -162,9 +162,9 @@ wxString storageText(const BenchmarkSystemInfo& s, const BenchmarkMetrics& m)
     if (!s.storageMedia.empty())
         kind += (kind.empty() ? "" : " ") + utf8(s.storageMedia);
     if (!kind.empty())
-        text += (text.empty() ? "" : separator()) + kind;
+        text += (text.empty() ? wxString() : separator()) + kind;
     if (m.databaseDiskFreeBytes)
-        text += (text.empty() ? "" : separator())
+        text += (text.empty() ? wxString() : separator())
             + wxString::Format(_("%s free"), gigabytes(*m.databaseDiskFreeBytes));
     return text;
 }
@@ -197,7 +197,7 @@ wxString powerText(const BenchmarkMetrics& m)
     if (m.localOnBattery)
         text = *m.localOnBattery ? _("battery") : _("mains");
     if (!m.system.powerPlan.empty())
-        text += (text.empty() ? "" : separator()) + utf8(m.system.powerPlan);
+        text += (text.empty() ? wxString() : separator()) + utf8(m.system.powerPlan);
     return text;
 }
 
@@ -358,7 +358,7 @@ wxString getBenchmarkSystemSpecs(const BenchmarkReport& report)
     }
     wxString text;
     for (const auto& p : parts)
-        text += (text.empty() ? "" : separator()) + p;
+        text += (text.empty() ? wxString() : separator()) + p;
     return text;
 }
 
@@ -1010,7 +1010,7 @@ std::vector<BenchmarkFact> getBenchmarkFacts(const BenchmarkReport& report)
         if (!s.storageMedia.empty())
             kind += (kind.empty() ? "" : " ") + utf8(s.storageMedia);
         if (!kind.empty())
-            storage += (storage.empty() ? "" : separator()) + kind;
+            storage += (storage.empty() ? wxString() : separator()) + kind;
         add("storage", storage);
     }
     add("power", powerText(m));
