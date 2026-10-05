@@ -793,9 +793,16 @@ BenchmarkReport BenchmarkReport::anonymized() const
     }
     for (const auto& kv : m.serverConfig)
     {
-        // directories and file names in firebird.conf
+        // directories, file names and addresses in firebird.conf
         if (kv.second.Contains("/") || kv.second.Contains("\\"))
             hide(kv.second, path);
+        else if (isBenchmarkAddressSetting(kv.first, kv.second))
+            hide(kv.second, address);
+    }
+    for (const auto& l : s.listeningPorts)
+    {
+        if (isBenchmarkPrivateAddress(utf8(l.address)))
+            hide(utf8(l.address), address);
     }
     std::stable_sort(privateTexts.begin(), privateTexts.end(),
         [](const auto& a, const auto& b) { return a.first.length() > b.first.length(); });
@@ -826,7 +833,12 @@ BenchmarkReport BenchmarkReport::anonymized() const
     for (auto& v : m.versionList)
         scrub(v);
     for (auto& kv : m.serverConfig)
-        scrub(kv.second);
+    {
+        if (isBenchmarkAddressSetting(kv.first, kv.second))
+            kv.second = address;
+        else
+            scrub(kv.second);
+    }
     for (auto& skipped : m.skippedTests)
         scrub(skipped.second);
     scrub(m.firebirdUser);
@@ -845,6 +857,9 @@ BenchmarkReport BenchmarkReport::anonymized() const
         scrubUtf8(p.detail);
     for (auto& l : s.listeningPorts)
     {
+        // "all addresses" and the loopback address stay
+        if (isBenchmarkPrivateAddress(utf8(l.address)))
+            l.address = std::string(address.utf8_str());
         // firewall rules have names of companies and products
         if (l.firewall.rfind("allowed by", 0) == 0)
             l.firewall = "allowed by a rule";
@@ -864,7 +879,8 @@ BenchmarkReport BenchmarkReport::anonymized() const
     // computer name goes, paths in its settings as well
     if (r.earlier)
     {
-        r.earlier->host.clear();
+        // first on its own, because it may describe another machine
+        *r.earlier = anonymizeBenchmarkSnapshot(*r.earlier);
         scrub(r.earlier->title);
         for (auto& f : r.earlier->facts)
         {

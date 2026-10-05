@@ -640,11 +640,11 @@ private:
         // NAT, VPN or a proxy between client and server
         if (!m.remoteAddress.empty() && !m.system.addresses.empty())
         {
-            const wxString seen = m.remoteAddress.BeforeLast('/').empty()
-                ? m.remoteAddress : m.remoteAddress.BeforeLast('/');
+            // complete addresses: 10.0.0.1 is not 10.0.0.10
+            const wxString seen = normalizeBenchmarkAddress(m.remoteAddress);
             const bool own = std::any_of(m.system.addresses.begin(), m.system.addresses.end(),
                 [&seen](const BenchmarkNetworkAddress& a)
-                { return seen.Contains(wxString::FromUTF8(a.address.c_str())); });
+                { return normalizeBenchmarkAddress(wxString::FromUTF8(a.address.c_str())) == seen; });
             if (!own)
             {
                 add(C::Network, _("A router or VPN sits between this computer and the server"),

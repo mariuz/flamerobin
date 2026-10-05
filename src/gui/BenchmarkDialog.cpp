@@ -93,7 +93,6 @@ BEGIN_EVENT_TABLE(BenchmarkDialog, BaseDialog)
     EVT_CHOICE(ID_choice_install, BenchmarkDialog::OnTargetChanged)
     EVT_COLLAPSIBLEPANE_CHANGED(ID_collapse_advanced, BenchmarkDialog::OnAdvancedToggled)
     EVT_BUTTON(wxID_CANCEL, BenchmarkDialog::OnCloseButton)
-    EVT_CLOSE(BenchmarkDialog::OnClose)
     EVT_RADIOBOX(ID_radio_target, BenchmarkDialog::OnTargetChanged)
     EVT_TIMER(ID_timer, BenchmarkDialog::OnTimer)
 END_EVENT_TABLE()
@@ -106,6 +105,10 @@ BenchmarkDialog::BenchmarkDialog(wxWindow* parent, Database* db)
         databaseM->getName_()) : _("Performance Benchmark & Diagnosis"));
     createControls();
     updateControls();
+    // BaseDialog connects its own close handler dynamically, which ends a
+    // modal dialog at once; this one is bound later, so it runs first and
+    // can wait for the cleanup of a running test
+    Bind(wxEVT_CLOSE_WINDOW, &BenchmarkDialog::OnClose, this);
     CallAfter([this]() { dropPendingDatabases(); });
 }
 
@@ -519,7 +522,7 @@ bool BenchmarkDialog::buildParams(fr::BenchmarkConnectionParams& params)
     if (!serverPart.empty())
         params.connectionPrefix = wx2std(serverPart + ":");
 
-    fillCredentials(params);
+    fillCredentials(params, target == TargetRegistered);
     if (target == TargetThisComputer)
     {
         // the engine inside FlameRobin checks no password; the database
@@ -539,17 +542,19 @@ bool BenchmarkDialog::buildParams(fr::BenchmarkConnectionParams& params)
     return true;
 }
 
-void BenchmarkDialog::fillCredentials(fr::BenchmarkConnectionParams& params)
+void BenchmarkDialog::fillCredentials(fr::BenchmarkConnectionParams& params,
+    bool fromRegistration)
 {
-    // credentials of the registration (or of the current connection)
-    // unless the user entered others
+    // the credentials the user entered; those of the registration (or of
+    // its current connection) are only sent to the server of the
+    // registration
     params.clientLibrary = wx2std(text_clientlib->GetValue().Trim().Trim(false));
     if (!text_user->IsEmpty())
     {
         params.username = wx2std(text_user->GetValue());
         params.password = wx2std(text_password->GetValue());
     }
-    if (!databaseM)
+    if (!databaseM || !fromRegistration)
         return;
     if (text_user->IsEmpty()
         && !databaseM->getAuthenticationMode().getIgnoreUsernamePassword())
@@ -605,7 +610,10 @@ void BenchmarkDialog::dropPendingDatabases()
             continue;
         }
         const fr::BenchmarkPendingDatabase& pending = *parsed;
-        if (pending.registrationId != registrationId())
+        const bool ownServer = !pending.registrationId.empty()
+            && pending.registrationId == registrationId()
+            && isOnRegistrationServer(pending.connectionString);
+        if (!pending.embedded && !ownServer)
         {
             otherRegistrations.Add(pending.connectionString);
             otherEntries.push_back(entry);
@@ -620,7 +628,7 @@ void BenchmarkDialog::dropPendingDatabases()
             continue;
         }
         fr::BenchmarkConnectionParams params;
-        fillCredentials(params);
+        fillCredentials(params, !pending.embedded);
         params.forceEmbedded = pending.embedded;
         params.clientLibrary = wx2std(pending.clientLibrary);
         if (pending.embedded)
@@ -652,12 +660,13 @@ void BenchmarkDialog::dropPendingDatabases()
     }
 
     // the credentials of this registration are not sent to the servers of
-    // benchmarks that were started from other registrations
+    // benchmarks that were started from other registrations or for another
+    // server
     if (!otherRegistrations.empty() && wxMessageBox(wxString::Format(
-        _("Earlier benchmark runs that were started from other database "
-          "registrations may have left these temporary databases behind:"
+        _("Earlier benchmark runs on other servers may have left these "
+          "temporary databases behind:"
           "\n\n%s\n\nTo drop them, open the benchmark test of the "
-          "database they were started from, or delete the files manually."
+          "database of that server, or delete the files manually."
           "\n\nRemove them from this list?"),
         wxJoin(otherRegistrations, '\n', '\0')), _("Performance Benchmark & Diagnosis"),
         wxYES_NO | wxNO_DEFAULT | wxICON_INFORMATION, this) == wxYES)
@@ -699,7 +708,10 @@ void BenchmarkDialog::OnStart(wxCommandEvent& WXUNUSED(event))
     {
         fr::BenchmarkPendingDatabase pending;
         pending.embedded = params.forceEmbedded;
-        pending.registrationId = registrationId();
+        // only a run on the server of the registration may use its
+        // credentials for the cleanup
+        pending.registrationId = radio_target->GetSelection() == TargetRegistered
+            ? registrationId() : wxString();
         pending.clientLibrary = toWxString(params.clientLibrary);
         pending.connectionString = toWxString(connectionString);
         pendingEntriesM.push_back(pending.toString());
@@ -995,6 +1007,17 @@ void BenchmarkDialog::OnSaveReport(wxCommandEvent& WXUNUSED(event))
 wxString BenchmarkDialog::registrationId() const
 {
     return databaseM ? databaseM->getId() : wxString();
+}
+
+bool BenchmarkDialog::isOnRegistrationServer(const wxString& connectionString) const
+{
+    ServerPtr server = databaseM ? databaseM->getServer() : ServerPtr();
+    const wxString serverPart = server ? server->getConnectionString() : wxString();
+    if (!serverPart.empty())
+        return connectionString.StartsWith(serverPart + ":");
+    // a local path: no server in front of it, at most a drive letter
+    const wxString before = connectionString.BeforeFirst(':');
+    return before == connectionString || before.length() <= 1;
 }
 
 std::optional<fr::BenchmarkSnapshot> BenchmarkDialog::readSnapshot(const wxString& path,

@@ -2692,6 +2692,7 @@ std::vector<BenchmarkPortCheck> checkBenchmarkPorts(const std::string& host,
             BenchmarkPortCheck check;
             Socket socket;
             bool done;
+            size_t port;    // index in ports
         };
         std::vector<Attempt> attempts;
         const auto start = std::chrono::steady_clock::now();
@@ -2700,11 +2701,15 @@ std::vector<BenchmarkPortCheck> checkBenchmarkPorts(const std::string& host,
             return std::chrono::duration<double, std::milli>(
                 std::chrono::steady_clock::now() - start).count();
         };
-        // all connections are started at once, without waiting
-        for (int port : ports)
+        // all connections are started at once, without waiting, to every
+        // address of the host: a host name can have several (IPv4 and IPv6),
+        // and Firebird uses the first one that answers
+        for (const addrinfo* ai = address; ai; ai = ai->ai_next)
+        for (size_t i = 0; i < ports.size(); ++i)
         {
+            const int port = ports[i];
             Attempt a{ { port, State::Filtered, 0.0 },
-                socket(address->ai_family, SOCK_STREAM, IPPROTO_TCP), false };
+                socket(ai->ai_family, SOCK_STREAM, IPPROTO_TCP), false, i };
             if (a.socket == invalid)
                 continue;
 #if defined(_WIN32)
@@ -2714,14 +2719,14 @@ std::vector<BenchmarkPortCheck> checkBenchmarkPorts(const std::string& host,
             fcntl(a.socket, F_SETFL, fcntl(a.socket, F_GETFL, 0) | O_NONBLOCK);
 #endif
             sockaddr_storage target{};
-            std::memcpy(&target, address->ai_addr, std::min(sizeof(target),
-                size_t(address->ai_addrlen)));
+            std::memcpy(&target, ai->ai_addr, std::min(sizeof(target),
+                size_t(ai->ai_addrlen)));
             if (target.ss_family == AF_INET)
                 reinterpret_cast<sockaddr_in*>(&target)->sin_port = htons(uint16_t(port));
             else
                 reinterpret_cast<sockaddr_in6*>(&target)->sin6_port = htons(uint16_t(port));
             if (connect(a.socket, reinterpret_cast<sockaddr*>(&target),
-                socklen_t(address->ai_addrlen)) == 0)
+                socklen_t(ai->ai_addrlen)) == 0)
             {
                 a.check.state = State::Open;
                 a.done = true;
@@ -2782,6 +2787,12 @@ std::vector<BenchmarkPortCheck> checkBenchmarkPorts(const std::string& host,
                 a.done = true;
             }
         }
+        // per port the best answer of all addresses: open, closed, filtered
+        auto rank = [](State state)
+        {
+            return state == State::Open ? 0 : state == State::Closed ? 1 : 2;
+        };
+        std::vector<std::optional<BenchmarkPortCheck>> best(ports.size());
         for (Attempt& a : attempts)
         {
             if (!a.done)
@@ -2793,7 +2804,14 @@ std::vector<BenchmarkPortCheck> checkBenchmarkPorts(const std::string& host,
             shutdown(a.socket, SHUT_RDWR);
             close(a.socket);
 #endif
-            results.push_back(a.check);
+            std::optional<BenchmarkPortCheck>& b = best[a.port];
+            if (!b || rank(a.check.state) < rank(b->state))
+                b = a.check;
+        }
+        for (const auto& b : best)
+        {
+            if (b)
+                results.push_back(*b);
         }
         freeaddrinfo(address);
     }

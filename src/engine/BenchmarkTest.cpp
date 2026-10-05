@@ -516,6 +516,21 @@ void testHints()
         expectHint(m, "A router or VPN sits between", C::Network, "network address translation");
         m.system.addresses = { { "WLAN", "Wi-Fi", "10.0.0.5" } };
         expectNoHint(m, "A router or VPN sits between", "the own address");
+        m.remoteAddress = "10.0.0.10";
+        m.system.addresses = { { "WLAN", "Wi-Fi", "10.0.0.1" } };
+        expectHint(m, "A router or VPN sits between", C::Network,
+            "complete addresses are compared, not parts of them");
+        m.remoteAddress = "fe80::1";
+        m.system.addresses = { { "WLAN", "Wi-Fi", "[FE80::1%7]" } };
+        expectNoHint(m, "A router or VPN sits between", "the own IPv6 address");
+        check(normalizeBenchmarkAddress("10.0.0.5/51234") == "10.0.0.5"
+            && normalizeBenchmarkAddress("::ffff:10.0.0.5") == "10.0.0.5"
+            && isBenchmarkIpAddress("192.168.1.20") && isBenchmarkIpAddress("fe80::1")
+            && !isBenchmarkIpAddress("256.1.1.1") && !isBenchmarkIpAddress("dbserver")
+            && !isBenchmarkIpAddress("all addresses")
+            && isBenchmarkPrivateAddress("10.1.2.3") && !isBenchmarkPrivateAddress("127.0.0.1")
+            && !isBenchmarkPrivateAddress("0.0.0.0") && !isBenchmarkPrivateAddress("::1"),
+            "IP addresses are recognized");
         m.serverPorts = { { 3050, BenchmarkPortCheck::State::Open, 2.0 } };
         m.serverPort = 3050;
         m.connectMs = 400.0;
@@ -1177,6 +1192,8 @@ void testAnonymized()
     m.firebirdRole = "BUCHHALTUNG";
     m.serverConfig["TempDirectories"] = "E:\\FirebirdTemp";
     m.serverConfigExplicit.insert("TempDirectories");
+    m.serverConfig["RemoteBindAddress"] = "172.20.1.9";
+    m.serverConfigExplicit.insert("RemoteBindAddress");
     m.versionList = { "WI-V5.0.4.1812 Firebird 5.0",
         "WI-V5.0.4.1812 Firebird 5.0/tcp (DBSERVER01)/P19:C" };
     m.system.fullHostName = "PC-MUELLER.kunde.local";
@@ -1186,7 +1203,9 @@ void testAnonymized()
     m.system.firebirdServers = { { "FirebirdServerKundeX", "C:\\Program Files\\KundeX\\fb",
         true } };
     m.system.listeningPorts = { { 3050, "all addresses", "firebird.exe",
-        "allowed by \"Kunde X Firebird\"" } };
+        "allowed by \"Kunde X Firebird\"" }, { 3051, "10.77.1.2", "firebird.exe", "" },
+        { 3052, "127.0.0.1", "firebird.exe", "" } };
+    m.system.otherDatabaseServers = { { "MSSQL$KUNDEDB", "", true } };
     m.networkPath = BenchmarkNetworkPath();
     m.networkPath->serverHost = "dbserver01";
     m.networkPath->serverAddress = "192.168.10.5";
@@ -1197,6 +1216,16 @@ void testAnonymized()
     report.evaluate();
     check(findHint(report.hints, "A router or VPN sits between") != nullptr,
         "the test has a hint that names an address");
+    // an earlier run of another machine
+    BenchmarkSnapshot earlier = makeBenchmarkSnapshot(report);
+    earlier.kind = "local";
+    earlier.host = "SRV-ALT";
+    earlier.title = "SRV-ALT";
+    earlier.facts.push_back({ "system", "SRV-ALT" });
+    earlier.facts.push_back({ "conf.RemoteBindAddress", "172.31.5.6" });
+    earlier.hints.push_back({ BenchmarkCategory::Network, "A router or VPN sits between "
+        "this computer and the server", "The server sees this machine as 172.31.5.7", "" });
+    report.earlier = earlier;
 
     const BenchmarkReport shared = report.anonymized();
     const wxString html = shared.toHtml();
@@ -1204,7 +1233,8 @@ void testAnonymized()
     bool clean = true;
     for (const char* secret : { "dbserver01", "DBSERVER01", "PC-MUELLER", "mueller",
         "MUELLER", "kunde.local", "KUNDE", "Kunde", "192.168.10", "BUCHHALTUNG",
-        "FirebirdTemp", "AppData" })
+        "FirebirdTemp", "AppData", "172.20.1.9", "10.77.1.2", "KUNDEDB", "SRV-ALT",
+        "172.31.5.6", "172.31.5.7" })
     {
         if (html.Contains(secret) || md.Contains(secret))
         {
@@ -1220,6 +1250,7 @@ void testAnonymized()
         && shared.parts.size() == report.parts.size()
         && shared.results.size() == report.results.size(),
         "hardware, versions, measurements and hints stay");
+    check(html.Contains("127.0.0.1"), "the loopback address stays");
     check(shared.benchmarkDatabasePath == "FR_BENCHMARK_20261004_102138_189ABC.FDB",
         "the temporary database keeps only its file name");
     check(!report.anonymous && report.metrics.connectionHost == "dbserver01",

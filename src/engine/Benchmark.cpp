@@ -141,6 +141,63 @@ wxString formatBenchmarkBitRate(double bitsPerSecond)
     return wxString::Format(_("%.0f Mbit/s"), bitsPerSecond / 1e6);
 }
 
+wxString normalizeBenchmarkAddress(const wxString& text)
+{
+    wxString a = text;
+    a.Trim().Trim(false);
+    // Firebird adds the port of the client after a slash
+    a = a.BeforeFirst('/');
+    if (a.StartsWith("["))
+        a = a.Mid(1).BeforeFirst(']');
+    a = a.BeforeFirst('%');
+    a.MakeLower();
+    if (a.StartsWith("::ffff:") && a.Mid(7).Contains("."))
+        a = a.Mid(7);
+    return a;
+}
+
+bool isBenchmarkIpAddress(const wxString& text)
+{
+    const wxString a = normalizeBenchmarkAddress(text);
+    if (a.empty())
+        return false;
+    if (!a.Contains(":"))
+    {
+        // IPv4: four numbers from 0 to 255
+        const wxArrayString parts = wxSplit(a, '.', '\0');
+        if (parts.size() != 4)
+            return false;
+        for (const wxString& part : parts)
+        {
+            unsigned long n = 0;
+            if (part.empty() || part.length() > 3 || !part.ToULong(&n) || n > 255)
+                return false;
+        }
+        return true;
+    }
+    // IPv6: hexadecimal groups, possibly with an IPv4 address at the end
+    for (wxUniChar c : a)
+    {
+        if (!wxIsxdigit(c) && c != ':' && c != '.')
+            return false;
+    }
+    return a.Freq(':') >= 2;
+}
+
+bool isBenchmarkPrivateAddress(const wxString& text)
+{
+    if (!isBenchmarkIpAddress(text))
+        return false;
+    const wxString a = normalizeBenchmarkAddress(text);
+    return !a.StartsWith("127.") && a != "::1" && a != "0.0.0.0" && a != "::";
+}
+
+bool isBenchmarkAddressSetting(const wxString& name, const wxString& value)
+{
+    return isBenchmarkPrivateAddress(value)
+        || (name.CmpNoCase("RemoteBindAddress") == 0 && !value.empty());
+}
+
 double getBenchmarkDriveOpsPerSecond(const BenchmarkMetrics& m)
 {
     // all operations of the drive test in their actual time

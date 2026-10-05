@@ -111,7 +111,7 @@ private:
     void createControls();
     void updateControls();
     bool buildParams(fr::BenchmarkConnectionParams& params);
-    void fillCredentials(fr::BenchmarkConnectionParams& params);
+    void fillCredentials(fr::BenchmarkConnectionParams& params, bool fromRegistration);
 
     // temporary databases are remembered in the configuration until they
     // are dropped, so that a crash cannot leave them behind unnoticed
@@ -134,6 +134,8 @@ private:
     std::optional<fr::BenchmarkSnapshot> readSnapshot(const wxString& path, bool showErrors);
     // the registration of the selected database, empty without one
     wxString registrationId() const;
+    // whether a temporary database is on the server of the registration
+    bool isOnRegistrationServer(const wxString& connectionString) const;
 
     // called on the GUI thread; aborted means that run() itself failed, so
     // nothing is known about the temporary databases

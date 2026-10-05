@@ -769,6 +769,16 @@ wxString formatBenchmarkCount(double value);
 wxString formatBenchmarkAverage(double milliseconds);
 /// e.g. "1 Gbit/s", "100 Mbit/s"
 wxString formatBenchmarkBitRate(double bitsPerSecond);
+/// an IP address without brackets, port, zone or IPv4-mapped prefix, in
+/// lower case: "[FE80::1%3]" -> "fe80::1", "10.0.0.5/51234" -> "10.0.0.5"
+wxString normalizeBenchmarkAddress(const wxString& text);
+/// whether a text is an IPv4 or IPv6 address (see normalizeBenchmarkAddress())
+bool isBenchmarkIpAddress(const wxString& text);
+/// an IP address that identifies a machine: not the loopback address and not
+/// the address that stands for all addresses
+bool isBenchmarkPrivateAddress(const wxString& text);
+/// a firebird.conf setting whose value is an address of a machine
+bool isBenchmarkAddressSetting(const wxString& name, const wxString& value);
 /// all operations of the drive test (insert, read, update, delete with the
 /// minimal page cache) per second; 0 if not measured
 double getBenchmarkDriveOpsPerSecond(const BenchmarkMetrics& m);

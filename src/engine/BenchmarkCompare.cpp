@@ -220,6 +220,8 @@ BenchmarkSnapshot anonymizeBenchmarkSnapshot(const BenchmarkSnapshot& snapshot)
             f.second = s.title;
         else if (f.first.StartsWith("conf.") && (f.second.Contains("/") || f.second.Contains("\\")))
             f.second = _("<path>");
+        else if (f.first.StartsWith("conf.") && isBenchmarkAddressSetting(f.first.Mid(5), f.second))
+            f.second = _("<address>");
     }
     // the details name adapters, addresses and drives
     for (auto& h : s.hints)
