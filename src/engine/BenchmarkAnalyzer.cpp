@@ -1373,34 +1373,40 @@ private:
     void checkEvents()
     {
         categoryM = BenchmarkCategory::Network;
-        if (m.eventMs || m.eventStatus.empty())
-            return;
-        if (m.eventStatus.StartsWith("not tested: RemoteAuxPort is 0"))
+        switch (m.eventResult)
         {
-            add(Sev::Warning, Side::Server, Who::Administrator,
-                _("Events use a random port that firewalls block"),
-                _("RemoteAuxPort is 0, so the server opens a random port for every "
-                  "event connection. Firewalls between client and server usually "
-                  "block it, and applications then never receive their events."),
-                _("Set RemoteAuxPort in firebird.conf to a fixed port (e.g. 3051), "
-                  "restart the server and allow the port in the firewalls."));
-        }
-        else if (m.eventStatus.StartsWith("not tested"))
-        {
-            add(Sev::Info, Side::Server, Who::Administrator,
-                _("Event delivery was not tested"), m.eventStatus,
-                unverified(_("set RemoteAuxPort to a fixed port and allow it in the "
-                    "firewalls, if applications use events (POST_EVENT).")));
-        }
-        else
-        {
-            add(Sev::Problem, Side::Network, Who::Administrator,
-                _("Events do not reach this computer"),
-                wxString::Format(_("Event delivery: %s. Applications that wait for "
-                    "events (POST_EVENT) do not react."), m.eventStatus),
-                _("Allow the RemoteAuxPort of the server in all firewalls between "
-                  "client and server; with network address translation the server "
-                  "needs a fixed RemoteAuxPort that is forwarded as well."));
+            case BenchmarkEventResult::NotTestedRandomPort:
+                add(Sev::Warning, Side::Server, Who::Administrator,
+                    _("Events use a random port that firewalls block"),
+                    _("RemoteAuxPort is 0, so the server opens a random port for "
+                      "every event connection. Firewalls between client and server "
+                      "usually block it, and applications then never receive their "
+                      "events."),
+                    _("Set RemoteAuxPort in firebird.conf to a fixed port (e.g. "
+                      "3051), restart the server and allow the port in the "
+                      "firewalls."));
+                break;
+            case BenchmarkEventResult::NotTestedUnknownPort:
+                add(Sev::Info, Side::Server, Who::Administrator,
+                    _("Event delivery was not tested"), m.eventStatus,
+                    unverified(_("set RemoteAuxPort to a fixed port and allow it in "
+                        "the firewalls, if applications use events (POST_EVENT).")));
+                break;
+            case BenchmarkEventResult::NotReceived:
+            case BenchmarkEventResult::PortFiltered:
+            case BenchmarkEventResult::Failed:
+                add(Sev::Problem, Side::Network, Who::Administrator,
+                    _("Events do not reach this computer"),
+                    wxString::Format(_("Event delivery: %s. Applications that wait "
+                        "for events (POST_EVENT) do not react."), m.eventStatus),
+                    _("Allow the RemoteAuxPort of the server in all firewalls "
+                      "between client and server; with network address translation "
+                      "the server needs a fixed RemoteAuxPort that is forwarded as "
+                      "well."));
+                break;
+            case BenchmarkEventResult::NotRun:
+            case BenchmarkEventResult::Received:
+                break;
         }
     }
 

@@ -1882,6 +1882,52 @@ BenchmarkRunLocation determineBenchmarkRunLocation(BenchmarkConnectionKind kind,
     }
 }
 
+bool prepareBenchmarkEventTest(BenchmarkMetrics& m)
+{
+    // A remote client receives events through a second connection to
+    // RemoteAuxPort of the server. When a firewall drops it, the client
+    // waits for the TCP timeout of the operating system (up to minutes), so
+    // the test only runs where it cannot hang.
+    if (m.connectionKind != BenchmarkConnectionKind::TcpRemote)
+        return true;
+    auto aux = m.serverConfig.find("RemoteAuxPort");
+    long port = 0;
+    if (aux == m.serverConfig.end() || !aux->second.ToLong(&port))
+    {
+        m.eventResult = BenchmarkEventResult::NotTestedUnknownPort;
+        // RDB$CONFIG exists from Firebird 4 on
+        if (m.serverMajorVersion > 0 && m.serverMajorVersion < 4)
+        {
+            m.eventStatus = _("not tested: RemoteAuxPort is unknown, because "
+                "Firebird 3 cannot report its configuration");
+        }
+        else
+        {
+            m.eventStatus = _("not tested: RemoteAuxPort is unknown, because "
+                "only administrators can read the configuration");
+        }
+        return false;
+    }
+    if (port == 0)
+    {
+        m.eventResult = BenchmarkEventResult::NotTestedRandomPort;
+        m.eventStatus = _("not tested: RemoteAuxPort is 0, so events use a "
+            "random port that firewalls usually block");
+        return false;
+    }
+    auto check = std::find_if(m.serverPorts.begin(), m.serverPorts.end(),
+        [port](const BenchmarkPortCheck& c) { return c.port == port; });
+    if (check != m.serverPorts.end()
+        && check->state == BenchmarkPortCheck::State::Filtered)
+    {
+        m.eventResult = BenchmarkEventResult::PortFiltered;
+        m.eventStatus = wxString::Format(_("not received: RemoteAuxPort %ld "
+            "does not answer, a firewall drops the connection"), port);
+        return false;
+    }
+    return true;
+}
+
 std::vector<wxString> parseBenchmarkVersionList(const std::string& infoVersion)
 {
     const std::string& s = infoVersion;

@@ -97,6 +97,19 @@ enum class BenchmarkRunLocation
     Client
 };
 
+/// Outcome of the event test (POST_EVENT, delivered through RemoteAuxPort)
+enum class BenchmarkEventResult
+{
+    NotRun,
+    Received,
+    NotReceived,            // no notification within the time limit
+    PortFiltered,           // RemoteAuxPort does not answer from this machine
+    Failed,
+    // not tested, because the test could wait for the TCP timeout
+    NotTestedRandomPort,    // RemoteAuxPort is 0
+    NotTestedUnknownPort    // RemoteAuxPort cannot be read
+};
+
 ///
 /// Header information of a database (isc_info_* and MON$DATABASE).
 ///
@@ -179,6 +192,7 @@ struct BenchmarkMetrics
     std::vector<BenchmarkPortCheck> serverPorts;
     // events (POST_EVENT) arrive through RemoteAuxPort on remote connections
     std::optional<double> eventMs;      // from posting to the notification
+    BenchmarkEventResult eventResult = BenchmarkEventResult::NotRun;
     wxString eventStatus;               // why events were not tested or not received
 
     // server and connection
@@ -815,6 +829,10 @@ BenchmarkConnectionKind classifyBenchmarkConnection(const wxString& protocol,
 BenchmarkRunLocation determineBenchmarkRunLocation(BenchmarkConnectionKind kind,
     const wxString& connectionHost, const wxString& localHostName,
     bool databaseFileIsLocal);
+/// whether the event test can run without waiting for the TCP timeout of
+/// the operating system; if not, sets eventResult and eventStatus. Uses
+/// connectionKind, serverMajorVersion, serverConfig and serverPorts.
+bool prepareBenchmarkEventTest(BenchmarkMetrics& m);
 /// every entry of an isc_info_version answer, which is a counted list of
 /// strings ("\x02\x1bLI-V6.3.4.1812 Firebird 5.0..."); a plain string is
 /// returned as the only entry

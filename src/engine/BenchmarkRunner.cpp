@@ -1026,36 +1026,8 @@ void BenchmarkRunner::checkNetwork(BenchmarkMetrics& m)
 
 void BenchmarkRunner::measureEvents(BenchmarkMetrics& m)
 {
-    // A remote client receives events through a second connection to
-    // RemoteAuxPort of the server. When a firewall drops it, the client
-    // waits for the TCP timeout of the operating system (up to minutes), so
-    // the test only runs where it cannot hang.
-    if (m.connectionKind == BenchmarkConnectionKind::TcpRemote)
-    {
-        auto aux = m.serverConfig.find("RemoteAuxPort");
-        long port = 0;
-        if (aux == m.serverConfig.end() || !aux->second.ToLong(&port))
-        {
-            m.eventStatus = _("not tested: RemoteAuxPort is unknown (only "
-                "administrators can read it, on Firebird 4 and later)");
-            return;
-        }
-        if (port == 0)
-        {
-            m.eventStatus = _("not tested: RemoteAuxPort is 0, so events use a "
-                "random port that firewalls usually block");
-            return;
-        }
-        auto check = std::find_if(m.serverPorts.begin(), m.serverPorts.end(),
-            [port](const BenchmarkPortCheck& c) { return c.port == port; });
-        if (check != m.serverPorts.end()
-            && check->state == BenchmarkPortCheck::State::Filtered)
-        {
-            m.eventStatus = wxString::Format(_("not received: RemoteAuxPort %ld "
-                "does not answer, a firewall drops the connection"), port);
-            return;
-        }
-    }
+    if (!prepareBenchmarkEventTest(m))
+        return;
 
     IDatabasePtr db = openConnection();
     try
@@ -1093,6 +1065,8 @@ void BenchmarkRunner::measureEvents(BenchmarkMetrics& m)
                 }
             }
         }
+        m.eventResult = m.eventMs ? BenchmarkEventResult::Received
+            : BenchmarkEventResult::NotReceived;
         if (!m.eventMs)
         {
             m.eventStatus = wxString::Format(_("not received within %d seconds"),
@@ -1111,6 +1085,7 @@ void BenchmarkRunner::measureEvents(BenchmarkMetrics& m)
             close(db);
             throw;
         }
+        m.eventResult = BenchmarkEventResult::Failed;
         m.eventStatus = wxString::Format(_("failed: %s"), wxString::FromUTF8(e.what()));
     }
     close(db);

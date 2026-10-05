@@ -1481,15 +1481,55 @@ void testStateAwareAdvice()
     check(f && f->recommendation.Contains("already excluded"),
         "an existing exclusion is respected");
 
-    // events, timeouts and keepalive
+    // events, timeouts and keepalive; a remote event test only runs with a
+    // fixed RemoteAuxPort that answers, and the advice follows the result
+    // of the test, not its (translated) status text
     BenchmarkMetrics events = healthyMetrics();
-    events.eventStatus = "not tested: RemoteAuxPort is 0, so events use a random port";
+    events.serverConfig["RemoteAuxPort"] = "0";
+    check(!prepareBenchmarkEventTest(events)
+        && events.eventResult == BenchmarkEventResult::NotTestedRandomPort,
+        "no event test with a random RemoteAuxPort");
+    events.eventStatus = "(translated text)";
     check(findingIn(events, "Events use a random port", findings)
         && findFinding(findings, "Events use a random port")->severity == S::Warning,
         "a random RemoteAuxPort");
+    BenchmarkMetrics unknownPort = healthyMetrics();
+    unknownPort.serverConfig.clear();
+    unknownPort.serverMajorVersion = 3;
+    check(!prepareBenchmarkEventTest(unknownPort)
+        && unknownPort.eventResult == BenchmarkEventResult::NotTestedUnknownPort
+        && unknownPort.eventStatus.Contains("Firebird 3")
+        && !unknownPort.eventStatus.Contains("administrators"),
+        "Firebird 3 cannot report RemoteAuxPort");
+    f = findingIn(unknownPort, "Event delivery was not tested", findings);
+    check(f && f->severity == S::Info && f->detail.Contains("Firebird 3"),
+        "an unknown RemoteAuxPort is a tip");
+    unknownPort.serverMajorVersion = 4;
+    check(!prepareBenchmarkEventTest(unknownPort)
+        && unknownPort.eventStatus.Contains("only administrators"),
+        "RemoteAuxPort of Firebird 4 needs an administrator");
+    events.serverConfig["RemoteAuxPort"] = "3051";
+    events.serverPorts = { { 3051, BenchmarkPortCheck::State::Filtered, 0.0 } };
+    events.eventStatus.clear();
+    check(!prepareBenchmarkEventTest(events)
+        && events.eventResult == BenchmarkEventResult::PortFiltered
+        && events.eventStatus.Contains("3051"), "a filtered RemoteAuxPort");
+    f = findingIn(events, "Events do not reach", findings);
+    check(f && f->severity == S::Problem, "events that cannot arrive");
+    events.serverPorts = { { 3051, BenchmarkPortCheck::State::Open, 1.0 } };
+    events.eventResult = BenchmarkEventResult::NotRun;
+    events.eventStatus.clear();
+    check(prepareBenchmarkEventTest(events) && events.eventStatus.empty(),
+        "events are tested with an open RemoteAuxPort");
+    BenchmarkMetrics localEvents = healthyMetrics();
+    localEvents.connectionKind = BenchmarkConnectionKind::Embedded;
+    localEvents.serverConfig.clear();
+    check(prepareBenchmarkEventTest(localEvents), "local events are always tested");
+    events.eventResult = BenchmarkEventResult::NotReceived;
     events.eventStatus = "not received within 5 seconds";
     f = findingIn(events, "Events do not reach", findings);
     check(f && f->severity == S::Problem, "events that do not arrive");
+    events.eventResult = BenchmarkEventResult::Received;
     events.eventStatus.clear();
     events.eventMs = 2.0;
     check(!findingIn(events, "Events", findings), "delivered events are fine");

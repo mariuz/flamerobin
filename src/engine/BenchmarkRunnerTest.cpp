@@ -190,8 +190,21 @@ int main(int argc, char** argv)
                     return c.port == m.serverPort
                         && c.state == fr::BenchmarkPortCheck::State::Open;
                 }), "network path and the open port of the server");
-        // the test server sets RemoteAuxPort, so events can be tested
-        ok &= fr_test::check(m.eventMs.has_value(), "events are delivered");
+        // Events are only tested with a fixed RemoteAuxPort; the Firebird
+        // container of the CI keeps the default 0, and Firebird 3 cannot
+        // report it, so the runner skips the test there. Set
+        // FR_TEST_REMOTE_AUX_PORT=1 when the test server has a fixed
+        // RemoteAuxPort that this machine can reach, so that the event
+        // delivery must be measured.
+        const char* auxPortEnv = std::getenv("FR_TEST_REMOTE_AUX_PORT");
+        const bool eventsRequired = auxPortEnv && std::string(auxPortEnv) == "1";
+        const bool eventsSkipped =
+            m.eventResult == fr::BenchmarkEventResult::NotTestedRandomPort
+            || m.eventResult == fr::BenchmarkEventResult::NotTestedUnknownPort;
+        ok &= fr_test::check(m.eventMs.has_value()
+            || (eventsSkipped && !eventsRequired && !m.eventStatus.empty()),
+            eventsRequired ? "events are delivered"
+                : "events are delivered or not testable on this server");
         if (!m.eventMs)
             std::cout << "    events: " << m.eventStatus.utf8_str() << "\n";
         ok &= fr_test::check(report.score.total > 0.0
