@@ -115,6 +115,25 @@ std::vector<uint8_t> FbCppDatabase::buildDpb(bool creating, int pagesize, const 
         if (!initialUser.empty())
             dpbBuilder->insertString(&statusWrapper, isc_dpb_initial_user, initialUser.c_str());
     }
+    if (!configM.empty())
+        dpbBuilder->insertString(&statusWrapper, isc_dpb_config, configM.c_str());
+
+    std::vector<uint8_t> dpb(dpbBuilder->getBufferLength(&statusWrapper));
+    memcpy(dpb.data(), dpbBuilder->getBuffer(&statusWrapper), dpb.size());
+    return dpb;
+}
+
+// items for connect() that AttachmentOptions does not provide
+std::vector<uint8_t> FbCppDatabase::buildConnectDpb()
+{
+    auto status = getOwnClient().newStatus();
+    fbcpp::impl::StatusWrapper statusWrapper(getOwnClient(), status.get());
+    auto dpbBuilder = fbcpp::fbUnique(getOwnClient().getUtil()->getXpbBuilder(&statusWrapper,
+        Firebird::IXpbBuilder::DPB, nullptr, 0));
+    if (!configM.empty())
+        dpbBuilder->insertString(&statusWrapper, isc_dpb_config, configM.c_str());
+    if (headerPageBuffersM)
+        dpbBuilder->insertInt(&statusWrapper, isc_dpb_set_page_buffers, *headerPageBuffersM);
 
     std::vector<uint8_t> dpb(dpbBuilder->getBufferLength(&statusWrapper));
     memcpy(dpb.data(), dpbBuilder->getBuffer(&statusWrapper), dpb.size());
@@ -125,6 +144,8 @@ void FbCppDatabase::connect()
 {
     wxLogDebug("FbCppDatabase::connect() called for: %s", connStrM.c_str());
     auto options = fbcpp::AttachmentOptions();
+    if (!configM.empty() || headerPageBuffersM)
+        options.setDpb(buildConnectDpb());
     if (!charsetM.empty())
         options.setConnectionCharSet(charsetM);
     if (!userM.empty())
@@ -322,6 +343,33 @@ void FbCppDatabase::setClientLibrary(const std::string& clientLib)
 void FbCppDatabase::setCryptKeyData(const std::string& cryptKeyData)
 {
     cryptKeyDataM = cryptKeyData;
+}
+
+void FbCppDatabase::setConfig(const std::string& config)
+{
+    configM = config;
+}
+
+void FbCppDatabase::setHeaderPageBuffers(int buffers)
+{
+    headerPageBuffersM = buffers;
+}
+
+void FbCppDatabase::cancelOperation()
+{
+    if (!attachmentM)
+        return;
+
+    auto& client = attachmentM->getClient();
+    fbcpp::impl::StatusWrapper status(client);
+    try
+    {
+        attachmentM->getHandle()->cancelOperation(&status, fb_cancel_raise);
+    }
+    catch (...)
+    {
+        // nothing is running or the connection is already gone
+    }
 }
 
 ITransactionPtr FbCppDatabase::createTransaction()
