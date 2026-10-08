@@ -178,6 +178,15 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/core/TemplateProcessor.cpp
         ${SOURCEDIR}/core/URIProcessor.cpp
         ${SOURCEDIR}/core/Visitor.cpp
+        ${SOURCEDIR}/engine/Benchmark.cpp
+        ${SOURCEDIR}/engine/BenchmarkAnalyzer.cpp
+        ${SOURCEDIR}/engine/BenchmarkCompare.cpp
+        ${SOURCEDIR}/engine/BenchmarkHtml.cpp
+        ${SOURCEDIR}/engine/BenchmarkRunner.cpp
+        ${SOURCEDIR}/engine/BenchmarkSql.cpp
+        ${SOURCEDIR}/engine/BenchmarkSystemInfo.cpp
+        ${SOURCEDIR}/engine/BenchmarkSystemReport.cpp
+        ${SOURCEDIR}/engine/BenchmarkValues.cpp
         ${SOURCEDIR}/engine/MetadataLoader.cpp
         ${SOURCEDIR}/gui/AboutBox.cpp
         ${SOURCEDIR}/gui/AboutBoxPlugins.cpp
@@ -188,6 +197,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/BackupRestoreBaseFrame.cpp
         ${SOURCEDIR}/gui/BaseDialog.cpp
         ${SOURCEDIR}/gui/BaseFrame.cpp
+        ${SOURCEDIR}/gui/BenchmarkDialog.cpp
         ${SOURCEDIR}/gui/CommandManager.cpp
         ${SOURCEDIR}/gui/ConfdefTemplateProcessor.cpp
         ${SOURCEDIR}/gui/ContextMenuMetadataItemVisitor.cpp
@@ -340,6 +350,9 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/core/TemplateProcessor.h
         ${SOURCEDIR}/core/URIProcessor.h
         ${SOURCEDIR}/core/Visitor.h
+        ${SOURCEDIR}/engine/Benchmark.h
+        ${SOURCEDIR}/engine/BenchmarkRunner.h
+        ${SOURCEDIR}/engine/BenchmarkSystemInfo.h
         ${SOURCEDIR}/engine/MetadataLoader.h
         ${SOURCEDIR}/gui/AboutBox.h
         ${SOURCEDIR}/gui/AboutBoxPlugins.h
@@ -349,6 +362,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/gui/BackupRestoreBaseFrame.h
         ${SOURCEDIR}/gui/BaseDialog.h
         ${SOURCEDIR}/gui/BaseFrame.h
+        ${SOURCEDIR}/gui/BenchmarkDialog.h
         ${SOURCEDIR}/gui/CommandIds.h
         ${SOURCEDIR}/gui/CommandManager.h
         ${SOURCEDIR}/gui/ConfdefTemplateProcessor.h
@@ -1109,6 +1123,47 @@ add_executable(data_grid_fetch_test
 )
 target_link_libraries(data_grid_fetch_test ${wxWidgets_LIBRARIES} ${FR_LIBS})
 add_test(NAME data_grid_fetch_test COMMAND data_grid_fetch_test)
+
+add_executable(benchmark_test
+    ${SOURCEDIR}/engine/BenchmarkTest.cpp
+    ${SOURCEDIR}/engine/Benchmark.cpp
+    ${SOURCEDIR}/engine/BenchmarkAnalyzer.cpp
+    ${SOURCEDIR}/engine/BenchmarkCompare.cpp
+    ${SOURCEDIR}/engine/BenchmarkHtml.cpp
+    ${SOURCEDIR}/engine/BenchmarkSql.cpp
+    ${SOURCEDIR}/engine/BenchmarkSystemInfo.cpp
+    ${SOURCEDIR}/engine/BenchmarkSystemReport.cpp
+    ${SOURCEDIR}/engine/BenchmarkValues.cpp
+)
+# the system information uses the Windows libraries of FlameRobin
+target_link_libraries(benchmark_test ${wxWidgets_LIBRARIES} ${FR_LIBS})
+add_test(NAME benchmark_test COMMAND benchmark_test)
+
+add_executable(benchmark_runner_test
+    ${SOURCEDIR}/engine/BenchmarkRunnerTest.cpp
+    ${SOURCEDIR}/engine/Benchmark.cpp
+    ${SOURCEDIR}/engine/BenchmarkAnalyzer.cpp
+    ${SOURCEDIR}/engine/BenchmarkCompare.cpp
+    ${SOURCEDIR}/engine/BenchmarkHtml.cpp
+    ${SOURCEDIR}/engine/BenchmarkRunner.cpp
+    ${SOURCEDIR}/engine/BenchmarkSql.cpp
+    ${SOURCEDIR}/engine/BenchmarkSystemInfo.cpp
+    ${SOURCEDIR}/engine/BenchmarkSystemReport.cpp
+    ${SOURCEDIR}/engine/BenchmarkValues.cpp
+    ${SOURCEDIR}/engine/db/DatabaseFactory.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppDatabase.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppTransaction.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppStatement.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppService.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppBlob.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppExtensions.cpp
+    ${SOURCEDIR}/core/FRError.cpp
+    ${SOURCEDIR}/core/FRInt128.cpp
+    ${SOURCEDIR}/core/FRDecimal.cpp
+    ${SOURCEDIR}/core/StringUtils.cpp
+)
+target_link_libraries(benchmark_runner_test fb-cpp::fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
+add_test(NAME benchmark_runner_test COMMAND benchmark_runner_test)
 
 add_executable(execute_routine_dialog_test
     ${SOURCEDIR}/gui/ExecuteRoutineDialogTest.cpp

@@ -116,6 +116,7 @@ void MainObjectMenuMetadataItemVisitor::visitDatabase(Database& database)
     toolsMenu->Append(Cmds::Menu_MonitorEvents, _("&Monitor events"));
     toolsMenu->Append(Cmds::Menu_MonitorTransactions, _("Monitor &transactions"));
     toolsMenu->Append(Cmds::Menu_GenerateData, _("&Test data generator"));
+    toolsMenu->Append(Cmds::Menu_BenchmarkTest, _("Performance &Benchmark && Diagnosis..."));
 
     menuM->Append(Cmds::Menu_DropDatabase, _("Dr&op database"));
     addSeparator();

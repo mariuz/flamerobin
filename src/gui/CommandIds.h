@@ -160,6 +160,7 @@ enum {
     Menu_VectorInstallerWizard,
     Menu_SystemPrivilegeMatrix,
     Menu_BackupScheduler,
+    Menu_BenchmarkTest,
 
         // view menu
         Menu_ToggleStatusBar, 

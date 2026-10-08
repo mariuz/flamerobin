@@ -56,6 +56,17 @@ public:
     virtual void setCharset(const std::string& charset) = 0;
     virtual void setClientLibrary(const std::string& clientLib) = 0;
     virtual void setCryptKeyData(const std::string& cryptKeyData) = 0;
+    // Firebird configuration entries sent with isc_dpb_config, for example
+    // "Providers = Engine13" to force the embedded engine; used by the next
+    // connect() or create()
+    virtual void setConfig(const std::string& config) = 0;
+    // writes the page buffers into the database header on the next
+    // connect(), like gfix -buffers (0 = server default); they apply when
+    // the database is opened the next time
+    virtual void setHeaderPageBuffers(int buffers) = 0;
+    // cancels the operation currently running on this attachment; may be
+    // called from another thread
+    virtual void cancelOperation() = 0;
 
     virtual ITransactionPtr createTransaction() = 0;
     virtual IStatementPtr createStatement(ITransactionPtr tr) = 0;

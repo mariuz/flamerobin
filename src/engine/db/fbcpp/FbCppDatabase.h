@@ -59,6 +59,9 @@ public:
     virtual void setCharset(const std::string& charset) override;
     virtual void setClientLibrary(const std::string& clientLib) override;
     virtual void setCryptKeyData(const std::string& cryptKeyData) override;
+    virtual void setConfig(const std::string& config) override;
+    virtual void setHeaderPageBuffers(int buffers) override;
+    virtual void cancelOperation() override;
 
     virtual ITransactionPtr createTransaction() override;
     virtual IStatementPtr createStatement(ITransactionPtr tr) override;
@@ -102,6 +105,7 @@ private:
 private:
     std::vector<uint8_t> buildDpb(bool creating, int pagesize = 0, const std::string& owner = "",
         const std::string& initialUser = "");
+    std::vector<uint8_t> buildConnectDpb();
 
     std::optional<fbcpp::Attachment> attachmentM;
     std::string connStrM;
@@ -111,6 +115,8 @@ private:
     std::string charsetM;
     std::string clientLibM;
     std::string cryptKeyDataM;
+    std::string configM;
+    std::optional<int> headerPageBuffersM;
 };
 
 } // namespace fr

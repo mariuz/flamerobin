@@ -50,6 +50,7 @@
 #include "gui/AdvancedSearchFrame.h"
 #include "gui/BackupFrame.h"
 #include "gui/BackupSchedulerDialog.h"
+#include "gui/BenchmarkDialog.h"
 #include "gui/CommandIds.h"
 #include "gui/ContextMenuMetadataItemVisitor.h"
 #include "gui/controls/DBHTreeControl.h"
@@ -223,6 +224,7 @@ void MainFrame::buildMainMenu()
     databaseMenuM->Append(Cmds::Menu_CompareSchemas, _("Compare database &schemas..."));
     databaseMenuM->Append(Cmds::Menu_SessionMonitor, _("Live Session & Transaction Monitor..."));
     databaseMenuM->Append(Cmds::Menu_DatabaseMaintenanceDashboard, _("Maintenance & Health Dashboard..."));
+    databaseMenuM->Append(Cmds::Menu_BenchmarkTest, _("Performance &Benchmark && Diagnosis..."));
     databaseMenuM->AppendSeparator();
     menuBarM->Append(databaseMenuM, _("&Database"));
 
@@ -421,6 +423,7 @@ EVT_UPDATE_UI(Cmds::Menu_CreateDatabase, MainFrame::OnMenuUpdateIfServerSelected
     EVT_MENU(Cmds::Menu_VectorInstallerWizard, MainFrame::OnMenuVectorInstallerWizard)
     EVT_MENU(Cmds::Menu_SystemPrivilegeMatrix, MainFrame::OnMenuSystemPrivilegeMatrix)
     EVT_MENU(Cmds::Menu_BackupScheduler, MainFrame::OnMenuBackupScheduler)
+    EVT_MENU(Cmds::Menu_BenchmarkTest, MainFrame::OnMenuBenchmarkTest)
     EVT_MENU(Cmds::Menu_CopyCallSignature, MainFrame::OnMenuCopyCallSignature)
     EVT_MENU(Cmds::Menu_GenerateExecuteTemplate, MainFrame::OnMenuGenerateExecuteTemplate)
     EVT_MENU(Cmds::Menu_InteractiveExecuteRoutine, MainFrame::OnMenuInteractiveExecuteRoutine)
@@ -2818,6 +2821,16 @@ void MainFrame::OnMenuDatabaseMaintenanceDashboard(wxCommandEvent& WXUNUSED(even
         return;
     DatabaseMaintenanceDialog dmd(this, db.get());
     dmd.ShowModal();
+}
+
+void MainFrame::OnMenuBenchmarkTest(wxCommandEvent& WXUNUSED(event))
+{
+    // no connection to the selected database is needed: the benchmark
+    // works in its own temporary database. Without a selected database,
+    // this computer can be tested without a login.
+    DatabasePtr db = getDatabase(treeMainM->getSelectedMetadataItem());
+    BenchmarkDialog bd(this, db.get());
+    bd.ShowModal();
 }
 
 void MainFrame::OnMenuVectorInstallerWizard(wxCommandEvent& WXUNUSED(event))
