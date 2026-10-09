@@ -161,6 +161,7 @@ enum {
     Menu_SystemPrivilegeMatrix,
     Menu_BackupScheduler,
     Menu_BenchmarkTest,
+    Menu_ClearMasterPassword,
 
         // view menu
         Menu_ToggleStatusBar, 

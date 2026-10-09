@@ -41,6 +41,7 @@
 #include "metadata/relation.h"
 #include "metadata/server.h"
 #include "config/Config.h"
+#include "MasterPassword.h"
 
 void adjustControlsMinWidth(std::list<wxWindow*> controls)
 {
@@ -136,19 +137,36 @@ bool connectDatabase(Database* db, wxWindow* parent,
             return false;
         pass = upd.getPassword();
     }
+    else if (db->getAuthenticationMode().getUseEncryptedPassword()
+        && !db->getRawPassword().IsEmpty() && pass.IsEmpty())
+    {
+        return false;
+    }
 
     wxString caption(wxString::Format(_("Connecting to Database \"%s\""),
         db->getName_().c_str()));
-    if (progressdialog)
+    try
     {
-        progressdialog->setProgressMessage(caption);
-        db->connect(pass, progressdialog);
+        if (progressdialog)
+        {
+            progressdialog->setProgressMessage(caption);
+            db->connect(pass, progressdialog);
+        }
+        else
+        {
+            ProgressDialog pd(0, caption, 1);
+            pd.setProgressMessage(caption);
+            db->connect(pass, &pd);
+        }
     }
-    else
+    catch (...)
     {
-        ProgressDialog pd(0, caption, 1);
-        pd.setProgressMessage(caption);
-        db->connect(pass, &pd);
+        if (db->getAuthenticationMode().getUseEncryptedPassword()
+            && !MasterPassword::isVerified())
+        {
+            MasterPassword::reset();
+        }
+        throw;
     }
     return true;
 }

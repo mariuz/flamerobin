@@ -60,6 +60,7 @@
 #include "gui/ExecuteSql.h"
 #include "gui/ExecuteSqlFrame.h"
 #include "gui/MainFrame.h"
+#include "MasterPassword.h"
 #include "gui/SchemaCompareDialog.h"
 #include "gui/SessionMonitorFrame.h"
 #include "gui/DatabaseMaintenanceDialog.h"
@@ -241,6 +242,8 @@ void MainFrame::buildMainMenu()
     viewMenu->AppendCheckItem(Cmds::Menu_ToggleStatusBar, _("&Status bar"));
     viewMenu->AppendCheckItem(Cmds::Menu_ToggleSearchBar, _("S&earch bar"));
     viewMenu->AppendCheckItem(Cmds::Menu_ToggleDisconnected, _("&Disconnected databases"));
+    viewMenu->AppendSeparator();
+    viewMenu->Append(Cmds::Menu_ClearMasterPassword, _("Clear cached &master password"));
     viewMenu->AppendSeparator();
     viewMenu->Append(wxID_PREFERENCES, _("P&references..."));
     menuBarM->Append(viewMenu, _("&View"));
@@ -458,6 +461,8 @@ EVT_MENU(Cmds::Menu_ReplicationStatus, MainFrame::OnMenuReplicationStatus)
 EVT_UPDATE_UI(Cmds::Menu_ReplicationStatus, MainFrame::OnMenuUpdateIfDatabaseSelected)
 EVT_MENU(Cmds::Menu_VisualizeSchema, MainFrame::OnMenuVisualizeSchema)
 EVT_UPDATE_UI(Cmds::Menu_VisualizeSchema, MainFrame::OnMenuUpdateIfDatabaseConnectedOrAutoConnect)
+EVT_MENU(Cmds::Menu_ClearMasterPassword, MainFrame::OnMenuClearMasterPassword)
+EVT_UPDATE_UI(Cmds::Menu_ClearMasterPassword, MainFrame::OnMenuUpdateIfMasterPasswordCached)
 EVT_MENU(Cmds::Menu_Maintenance, MainFrame::OnMenuMaintenance)
 EVT_UPDATE_UI(Cmds::Menu_Maintenance, MainFrame::OnMenuUpdateIfDatabaseSelected)
 EVT_MENU(Cmds::Menu_Restore, MainFrame::OnMenuRestore)EVT_UPDATE_UI(Cmds::Menu_Restore, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
@@ -1147,6 +1152,13 @@ void MainFrame::OnMenuVisualizeSchema(wxCommandEvent& WXUNUSED(event))
     {
         SchemaVisualizationFrame::showFrame(this, db);
     }
+}
+
+void MainFrame::OnMenuClearMasterPassword(wxCommandEvent& WXUNUSED(event))
+{
+    MasterPassword::reset();
+    wxMessageBox(_("Cached master password has been cleared."),
+        _("Master Password"), wxOK | wxICON_INFORMATION, this);
 }
 
 
@@ -2687,6 +2699,11 @@ void MainFrame::OnMenuUpdateIfMetadataItemHasChildren(wxUpdateUIEvent& event)
 {
     MetadataItem* mi = treeMainM->getSelectedMetadataItem();
     event.Enable(mi != 0 && mi->getChildrenCount());
+}
+
+void MainFrame::OnMenuUpdateIfMasterPasswordCached(wxUpdateUIEvent& event)
+{
+    event.Enable(MasterPassword::hasMasterPassword());
 }
 
 bool MainFrame::confirmDropItem(MetadataItem* item)

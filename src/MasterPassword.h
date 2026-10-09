@@ -27,19 +27,27 @@
 wxString encryptPassword(const wxString& password, const wxString& context);
 wxString decryptPassword(const wxString& cipher, const wxString& context);
 
+typedef wxString (*PasswordPromptFn)(const wxString& message, const wxString& caption);
+
 class MasterPassword
 {
 private:
     static MasterPassword& getInstance();
     wxString mpw;
+    bool isVerifiedM;
     MasterPassword();
 
 public:
     static wxString getMasterPassword();
+    static bool hasMasterPassword();
 
     // before doing this you may want to decrypt passwords for all
     // databases and change them as well
     static void setMasterPassword(const wxString& str);
+    static bool isVerified();
+    static void setVerified(bool verified = true);
+    static void reset();
+    static void setPasswordPromptFunction(PasswordPromptFn fn);
 };
 
 #endif

@@ -1211,6 +1211,18 @@ add_executable(uri_processor_test
 target_link_libraries(uri_processor_test ${wxWidgets_LIBRARIES} ${FR_LIBS})
 add_test(NAME uri_processor_test COMMAND uri_processor_test)
 
+add_executable(master_password_test
+    ${SOURCEDIR}/metadata/MasterPasswordTest.cpp
+    ${SOURCEDIR}/MasterPassword.cpp
+    ${SOURCEDIR}/config/Config.cpp
+    ${SOURCEDIR}/core/Observer.cpp
+    ${SOURCEDIR}/core/Subject.cpp
+    ${SOURCEDIR}/core/FRError.cpp
+    ${SOURCEDIR}/sql/TestStringUtils.cpp
+)
+target_link_libraries(master_password_test ${wxWidgets_LIBRARIES} ${FR_LIBS})
+add_test(NAME master_password_test COMMAND master_password_test)
+
 
 if (APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES

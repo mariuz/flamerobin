@@ -136,6 +136,7 @@ public:
     void OnMenuSetReplicaMode(wxCommandEvent& event);
     void OnMenuReplicationStatus(wxCommandEvent& event);
     void OnMenuVisualizeSchema(wxCommandEvent& event);
+    void OnMenuClearMasterPassword(wxCommandEvent& event);
 
     // create new object
     void showCreateTemplate(const wxString& statement);
@@ -165,6 +166,7 @@ public:
     void OnMenuUpdateIfDatabaseNotConnected(wxUpdateUIEvent& event);
     void OnMenuUpdateIfDatabaseSelected(wxUpdateUIEvent& event);
     void OnMenuUpdateIfMetadataItemHasChildren(wxUpdateUIEvent& event);
+    void OnMenuUpdateIfMasterPasswordCached(wxUpdateUIEvent& event);
 
     // other events
     void OnMainMenuOpen(wxMenuEvent& event);

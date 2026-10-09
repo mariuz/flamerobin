@@ -53,7 +53,20 @@ wxString decryptPassword(const wxString& cipher, const wxString& context)
     return isc.deCipher(cipher);
 }
 
+static wxString defaultPasswordPrompt(const wxString& message, const wxString& caption)
+{
+    return wxGetPasswordFromUser(message, caption);
+}
+
+static PasswordPromptFn s_passwordPromptFn = &defaultPasswordPrompt;
+
+void MasterPassword::setPasswordPromptFunction(PasswordPromptFn fn)
+{
+    s_passwordPromptFn = (fn ? fn : &defaultPasswordPrompt);
+}
+
 MasterPassword::MasterPassword()
+    : isVerifiedM(false)
 {
 }
 
@@ -76,16 +89,37 @@ wxString MasterPassword::getMasterPassword()
         showInformationDialog(0, _("Master Password is required."), msg,
             AdvancedMessageDialogButtonsOk(), config(), "DIALOG_MasterPasswordNotice",
             _("Do not show this information again"));
-        mp = wxGetPasswordFromUser(
+        mp = s_passwordPromptFn(
             _("Please enter the master password"),
             _("Enter master password"));
     }
     return mp;
 }
 
+bool MasterPassword::hasMasterPassword()
+{
+    return !getInstance().mpw.IsEmpty();
+}
+
 void MasterPassword::setMasterPassword(const wxString& str)
 {
-    wxString& mp = getInstance().mpw;
-    mp = str;
+    MasterPassword& inst = getInstance();
+    inst.mpw = str;
+    inst.isVerifiedM = false;
+}
+
+bool MasterPassword::isVerified()
+{
+    return getInstance().isVerifiedM;
+}
+
+void MasterPassword::setVerified(bool verified)
+{
+    getInstance().isVerifiedM = verified;
+}
+
+void MasterPassword::reset()
+{
+    setMasterPassword(wxEmptyString);
 }
 

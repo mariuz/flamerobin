@@ -1243,7 +1243,13 @@ void Database::reconnect()
     setDisconnected();
     // connect() checks connectedM, which is now false, so it will proceed with
     // a full connection including reinitialising all metadata collections.
-    connect(getDecryptedPassword());
+    wxString pass = getDecryptedPassword();
+    if (authenticationModeM.getUseEncryptedPassword()
+        && !getRawPassword().IsEmpty() && pass.IsEmpty())
+    {
+        return;
+    }
+    connect(pass);
 }
 
 // the caller of this function should check whether the database object has the
@@ -1326,6 +1332,11 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
         if (databaseDAL_M->isConnected())
         {
             connectedM = true;
+            if (authenticationModeM.getUseEncryptedPassword()
+                && !connectionCredentialsM && !credentialsM.getPassword().IsEmpty())
+            {
+                MasterPassword::setVerified(true);
+            }
 
             createCharsetConverter();
 
@@ -1439,12 +1450,28 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
         {
             throw;
         }
+        catch (const CancelProgressException&)
+        {
+            throw;
+        }
         catch (const std::exception& e)
         {
+            if (authenticationModeM.getUseEncryptedPassword()
+                && !connectionCredentialsM && !MasterPassword::isVerified())
+            {
+                MasterPassword::reset();
+            }
             explainEmbeddedFallback(e);
+            throw;
         }
         catch (...)
         {
+            if (authenticationModeM.getUseEncryptedPassword()
+                && !connectionCredentialsM && !MasterPassword::isVerified())
+            {
+                MasterPassword::reset();
+            }
+            throw;
         }
         throw;
     }
