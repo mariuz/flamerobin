@@ -267,15 +267,37 @@ void PrintableHtmlWindow::setPageSource(const wxString& html)
             "    margin: 0 !important;\n"
             "    background-color: transparent !important;\n"
             "}\n"
-            "tr[bgcolor=\"navy\"] {\n"
+            "tr[bgcolor=\"navy\"], td[bgcolor=\"navy\"] {\n"
             "    background-color: %s !important;\n"
             "    color: %s !important;\n"
             "}\n"
-            "tr[bgcolor=\"navy\"] td, tr[bgcolor=\"navy\"] th {\n"
+            "tr[bgcolor=\"navy\"] td, tr[bgcolor=\"navy\"] th, td[bgcolor=\"navy\"] {\n"
             "    color: %s !important;\n"
             "    font-weight: 600 !important;\n"
             "}\n"
-            "tr[bgcolor=\"#DDDDFF\"], tr[bgcolor=\"#2c2c40\"], tr[bgcolor=\"#DDDDDD\"], tr[bgcolor=\"#34343c\"] {\n"
+            "tr[bgcolor=\"navy\"] font, td[bgcolor=\"navy\"] font,\n"
+            "tr[bgcolor=\"navy\"] b, td[bgcolor=\"navy\"] b,\n"
+            "tr[bgcolor=\"navy\"] strong, td[bgcolor=\"navy\"] strong,\n"
+            "font[color=\"white\"], font[color=white] {\n"
+            "    color: %s !important;\n"
+            "}\n"
+            "tr[bgcolor=\"navy\"] a, td[bgcolor=\"navy\"] a,\n"
+            "tr[bgcolor=\"navy\"] a font, td[bgcolor=\"navy\"] a font {\n"
+            "    color: %s !important;\n"
+            "}\n"
+            "tr[bgcolor=\"navy\"] a:hover, td[bgcolor=\"navy\"] a:hover,\n"
+            "tr[bgcolor=\"navy\"] a:hover font, td[bgcolor=\"navy\"] a:hover font {\n"
+            "    text-decoration: underline !important;\n"
+            "    color: %s !important;\n"
+            "}\n"
+            "font[color=\"yellow\"], font[color=yellow] {\n"
+            "    color: inherit !important;\n"
+            "}\n"
+            "font[color=\"black\"], font[color=black] {\n"
+            "    color: %s !important;\n"
+            "}\n"
+            "tr[bgcolor=\"#DDDDFF\"], tr[bgcolor=\"#2c2c40\"], tr[bgcolor=\"#DDDDDD\"], tr[bgcolor=\"#34343c\"],\n"
+            "td[bgcolor=\"#DDDDFF\"], td[bgcolor=\"#2c2c40\"], td[bgcolor=\"#DDDDDD\"], td[bgcolor=\"#34343c\"] {\n"
             "    background-color: %s !important;\n"
             "}\n"
             "tr[bgcolor=\"#CCCCFF\"], tr[bgcolor=\"#23233a\"], tr[bgcolor=\"#CCCCCC\"], tr[bgcolor=\"#2c2c2c\"],\n"
@@ -308,7 +330,10 @@ void PrintableHtmlWindow::setPageSource(const wxString& html)
             "    vertical-align: middle !important;\n"
             "}\n"
             "</style>\n",
-            bgColor, textColor, borderColor, headerBgColor, headerTextColor, headerTextColor, altRowBgColor, bgColor, borderColor, linkColor, linkHoverColor
+            bgColor, textColor, borderColor,
+            headerBgColor, headerTextColor, headerTextColor, headerTextColor,
+            linkColor, linkHoverColor, textColor,
+            altRowBgColor, bgColor, borderColor, linkColor, linkHoverColor
         );
 
         wxString jsScript =
