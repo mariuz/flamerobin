@@ -1528,10 +1528,14 @@ void Database::loadRelationCollections(ProgressIndicator* progressIndicator)
     MetadataLoaderTransaction tr(loader);
     wxMBConv* converter = getCharsetConverter();
 
+    bool hasRelationType = getInfo().getODSVersionIsHigherOrEqualTo(11, 1);
+
     // Combined query for tables, views, system tables and GTTs
     // rdb$relation_type: 0=table, 1=view, 2=external, 3=monitoring, 4=GTT preserve, 5=GTT delete
-    std::string sql = "select rdb$relation_name, rdb$relation_type, rdb$view_source, rdb$system_flag "
-                      "from rdb$relations order by 1";
+    // rdb$relation_type was introduced in Firebird 2.1 (ODS 11.1)
+    std::string sql = "select rdb$relation_name, ";
+    sql += hasRelationType ? "rdb$relation_type" : "0";
+    sql += ", rdb$view_source, rdb$system_flag from rdb$relations order by 1";
 
     fr::IStatementPtr& st = loader->getStatement(sql);
     st->execute();
@@ -1541,7 +1545,7 @@ void Database::loadRelationCollections(ProgressIndicator* progressIndicator)
     {
         checkProgressIndicatorCanceled(progressIndicator);
         wxString name = std2wxIdentifier(st->getString(0), converter);
-        int type = st->getInt32(1);
+        int type = st->isNull(1) ? 0 : st->getInt32(1);
         bool isView = !st->isNull(2);
         int sysFlag = st->isNull(3) ? 0 : st->getInt32(3);
 
