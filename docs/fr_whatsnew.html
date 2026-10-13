@@ -8,6 +8,29 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.10.0</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Performance Benchmark & Diagnosis (#641, #734, #737, #738, #740)</B></font><br>
+<br>
+- <b>New Performance Benchmark &amp; Diagnosis Engine</b>: Measure a Firebird system to determine why it is slower than expected or compare performance between systems. Benchmarks CPU (PSQL single-threaded and parallel connections), commit latency, bulk writes, minimal-cache disk reads/writes (50 page cache), memory-cached reads, sort performance with temporary files, network round trips, single-row inserts, name resolution, and concurrent workloads (1 to 32, optionally up to 250 users).<br>
+- <b>System Diagnostics &amp; Environment Inspection</b>: Gathers non-invasive system metrics on Windows, Linux, and macOS (SMBIOS, CPU cache sizes, memory modules, disk health/IO, power profile settings, antivirus detectors, listening ports, firewall rules, and network path).<br>
+- <b>Comprehensive Reports &amp; Differential Comparison</b>: Generates interactive HTML reports (with property-page styling) and compact Markdown summaries. Compares two runs or reports, scoring components out of 1000 and highlighting specific configuration or hardware bottlenecks. Includes privacy filtering to strip sensitive hostnames, IP addresses, and user credentials for public sharing.<br>
+- <b>UI &amp; Usability Enhancements</b>: Accessible via <code>Database -&gt; Performance Benchmark &amp; Diagnosis</code> (retained in menu even without an active database connection, and added to server/root context menus). Adds an "Open in browser" option, proper authentication prompt handling when registrations lack saved credentials, and full fallback compatibility with Microsoft Edge and Internet Explorer/MSHTML.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>General Improvements &amp; Bug Fixes</B></font><br>
+<br>
+- <b>Firebird 1.5 and 2.0 Database Connection Compatibility (#732)</b>: Fixed an issue where connecting to legacy Firebird 1.5 (ODS 10.1) and Firebird 2.0 (ODS 11.0) databases failed with error <i>"-206: Column unknown RDB$RELATION_TYPE"</i>. The relation type query is now guarded to check for ODS &gt;= 11.1 (introduced with Global Temporary Tables in Firebird 2.1).<br>
+- <b>Code Generation Templates Table Alias (#731)</b>: Code generation dialogs (SELECT, INSERT, UPDATE) now feature an editable table alias field with default focus, speeding up query template generation.<br>
+- <b>Master Password Caching &amp; Cancellation Fixes (#735)</b>: Abort database connections cleanly when the master password dialog is cancelled instead of attempting to connect with an empty password. Invalid or unverified cached master passwords are automatically cleared on failure so users can re-prompt without restarting. Added a <i>"Clear cached master password"</i> action to the View menu and extensive automated unit test coverage.<br>
+- <b>Light Mode Table Header &amp; Link Contrast (#736)</b>: Fixed unreadable white header text on light gray backgrounds and low-contrast header links in light theme mode.<br>
+- <b>SVG Icons in Table Properties on Windows without Edge (#730)</b>: Fixed missing icons on Table Properties tabs (Summary, Constraints, Triggers, Indexes, Privileges) on systems without Edge WebView2 where MSHTML/IE is used as the web view backend.<br>
+<br><br>
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.9.8</font><br>
 <br><br>
 
