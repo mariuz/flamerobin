@@ -21,10 +21,12 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#include <wx/arrstr.h>
 #include <wx/intl.h>
 
 #include <algorithm>
 #include <cmath>
+#include <map>
 #include <vector>
 
 #include "engine/Benchmark.h"
@@ -58,6 +60,7 @@ const char* const styleSheet = R"CSS(
   --c1: #3182ce; --c2: #dd6b20; --c3: #a0aec0;
   --body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --mono: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  --no-gap: 0;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -239,7 +242,18 @@ td.n .tip-box, th.n .tip-box { left: auto; right: -8px; }
 
 /* two runs side by side */
 .runs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.runs .box { margin: 0; }
+.runs .box { margin: 0 0 10px; margin: var(--no-gap); }
+
+/* Internet Explorer 11 knows neither gap nor grid, its grids are blocks (see
+   addBenchmarkCssFallbacks()): margins instead, which every browser with
+   var() sets back to 0 */
+.tiles > *, .sys-grid > *, .charts > * { margin-bottom: 8px; margin-bottom: var(--no-gap); }
+.points-grid > * { margin-bottom: 10px; margin-bottom: var(--no-gap); }
+.hbars > * { margin-bottom: 6px; margin-bottom: var(--no-gap); }
+.tile > * { margin-bottom: 4px; margin-bottom: var(--no-gap); }
+.row > * { display: inline-block; margin-right: 12px; margin-right: var(--no-gap); }
+.block > summary > *, .deeper > summary > * { margin-left: 10px; margin-left: var(--no-gap); }
+.legend > * + *, .tile .key > * + * { margin-left: 14px; margin-left: var(--no-gap); }
 
 footer { margin-top: 16px; color: var(--muted); font-size: 12px; max-width: 100ch; }
 
@@ -1274,19 +1288,135 @@ wxString comparisonView(const BenchmarkComparison& c)
     return comparisonPointsBox(c) + comparisonParts(c) + differencesBox(c);
 }
 
+std::map<wxString, wxString> readCssTokens(const wxString& css, const wxString& selector)
+{
+    std::map<wxString, wxString> tokens;
+    size_t start = css.find(selector + " {");
+    if (start == wxString::npos)
+        return tokens;
+    start += selector.length() + 2;
+    const size_t end = css.find('}', start);
+    for (const wxString& declaration : wxSplit(css.substr(start, end - start), ';', '\0'))
+    {
+        wxString name = declaration.BeforeFirst(':');
+        name.Trim().Trim(false);
+        wxString value = declaration.AfterFirst(':');
+        value.Trim().Trim(false);
+        if (name.StartsWith("--") && !value.empty())
+            tokens[name] = value;
+    }
+    return tokens;
+}
+
+wxString cssProperty(const wxString& declaration)
+{
+    wxString property = declaration.BeforeFirst(':');
+    property.Trim().Trim(false);
+    return property;
+}
+
+// the declaration that Internet Explorer 11 understands instead of this
+// one, or nothing
+wxString legacyDeclaration(const wxString& declaration,
+    const std::map<wxString, wxString>& tokens)
+{
+    const wxString property = cssProperty(declaration);
+    wxString value = declaration.AfterFirst(':');
+    value.Trim().Trim(false);
+    if (property.empty() || property.StartsWith("--") || value.empty()
+        || property.find_first_not_of("abcdefghijklmnopqrstuvwxyz-") != wxString::npos)
+    {
+        return wxString();
+    }
+    if (property == "display" && value == "grid")
+        return "display: block";
+    if (property == "display" && value == "inline-grid")
+        return "display: inline-block";
+    if (property == "overflow-wrap" && value == "anywhere")
+        return "word-wrap: break-word";
+    if (!value.Contains("var(--"))
+        return wxString();
+    for (size_t pos = value.find("var(--"); pos != wxString::npos; pos = value.find("var(--"))
+    {
+        const size_t close = value.find(')', pos);
+        if (close == wxString::npos)
+            return wxString();
+        wxString name = value.substr(pos + 4, close - pos - 4).BeforeFirst(',');
+        name.Trim();
+        auto it = tokens.find(name);
+        if (it == tokens.end())
+            return wxString();
+        value = value.substr(0, pos) + it->second + value.substr(close + 1);
+    }
+    return property + ": " + value;
+}
+
 // the start of a page: head, styles and the opened <main>
 wxString pageStart(const wxString& theme, const wxString& extraStyles)
 {
     wxString html = "<!doctype html>\n<html lang=\"en\"";
     if (theme == "dark" || theme == "light")
         html += " data-theme=\"" + theme + "\"";
-    return html + "><head><meta charset=\"utf-8\"><meta name=\"viewport\" "
+    // X-UA-Compatible has to come first: without it, the Internet Explorer
+    // control and intranet pages use the mode of Internet Explorer 7
+    return html + "><head><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">"
+        "<meta charset=\"utf-8\"><meta name=\"viewport\" "
         "content=\"width=device-width, initial-scale=1\"><title>"
         + esc(_("Performance Benchmark & Diagnosis")) + "</title><style>"
-        + wxString::FromUTF8(styleSheet) + extraStyles + "</style></head><body><main>\n";
+        + addBenchmarkCssFallbacks(wxString::FromUTF8(styleSheet) + extraStyles,
+            theme == "dark")
+        + "</style></head><body><main>\n";
 }
 
 } // namespace
+
+wxString addBenchmarkCssFallbacks(const wxString& css, bool dark)
+{
+    std::map<wxString, wxString> tokens = readCssTokens(css, ":root");
+    if (dark)
+    {
+        for (const auto& token : readCssTokens(css, ":root[data-theme=\"dark\"]"))
+            tokens[token.first] = token.second;
+    }
+
+    wxString result;
+    size_t pos = 0;
+    for (size_t open = css.find('{'); open != wxString::npos; open = css.find('{', pos))
+    {
+        const size_t next = css.find_first_of("{}", open + 1);
+        if (next == wxString::npos)
+            break;
+        result += css.substr(pos, open + 1 - pos);
+        pos = open + 1;
+        // the rules of @media follow
+        if (css[next] == '{')
+            continue;
+        // a block of declarations; a pair written for Internet Explorer
+        // already has its own fallback
+        const wxArrayString declarations = wxSplit(css.substr(pos, next - pos), ';', '\0');
+        wxString previous;
+        for (size_t i = 0; i < declarations.size(); ++i)
+        {
+            const wxString& declaration = declarations[i];
+            const wxString property = cssProperty(declaration);
+            const wxString fallback = property == previous ? wxString()
+                : legacyDeclaration(declaration, tokens);
+            if (fallback.empty())
+                result += declaration;
+            else
+            {
+                const size_t start = declaration.find_first_not_of(" \t\r\n");
+                result += declaration.substr(0, start) + fallback + "; "
+                    + declaration.substr(start);
+            }
+            if (i + 1 < declarations.size())
+                result += ";";
+            previous = property;
+        }
+        pos = next;
+    }
+    return result + css.substr(pos);
+}
 
 wxString BenchmarkComparison::toHtml(const wxString& theme) const
 {

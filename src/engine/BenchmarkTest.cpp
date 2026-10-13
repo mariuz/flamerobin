@@ -1072,6 +1072,98 @@ void testSystemInfoParsers()
         "no host name for embedded connections");
 }
 
+// what keeps a page from working in Internet Explorer 11, empty if nothing:
+// every declaration it does not understand needs one before it that it
+// does, and the page must not depend on a script or a browser switch
+wxString findLegacyProblem(const wxString& html)
+{
+    if (!html.StartsWith("<!doctype html>\n"))
+        return "no doctype";
+    // X-UA-Compatible only works before every other element but the title
+    const int ua = html.Find("<head><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">");
+    if (ua == wxNOT_FOUND || ua > html.Find("<meta charset=\"utf-8\">")
+        || html.Find("<meta charset=\"utf-8\">") > html.Find("<style>"))
+    {
+        return "X-UA-Compatible missing or not first";
+    }
+    for (const char* forbidden : { "<script", "@import", "@supports", "-ms-high-contrast",
+        "expression(" })
+    {
+        if (html.Contains(forbidden))
+            return wxString("contains ") + forbidden;
+    }
+    const int styleStart = html.Find("<style>") + 7;
+    const wxString css = html.Mid(styleStart, html.Find("</style>") - styleStart);
+    int pairs = 0;
+    size_t pos = 0;
+    for (size_t open = css.find('{'); open != wxString::npos; open = css.find('{', pos))
+    {
+        const size_t next = css.find_first_of("{}", open + 1);
+        pos = open + 1;
+        if (next == wxString::npos || css[next] == '{')
+            continue;
+        wxString previousProperty, previousValue;
+        for (const wxString& declaration : wxSplit(css.Mid(pos, next - pos), ';', '\0'))
+        {
+            wxString property = declaration.BeforeFirst(':');
+            property.Trim().Trim(false);
+            wxString value = declaration.AfterFirst(':');
+            value.Trim().Trim(false);
+            wxString expected;
+            if (value.Contains("var(") && !property.StartsWith("--"))
+            {
+                if (previousProperty != property || previousValue.Contains("var("))
+                    return "no fallback for: " + declaration;
+                ++pairs;
+            }
+            else if (property == "display" && value == "grid")
+                expected = "display:block";
+            else if (property == "display" && value == "inline-grid")
+                expected = "display:inline-block";
+            else if (property == "overflow-wrap" && value == "anywhere")
+                expected = "word-wrap:break-word";
+            if (!expected.empty())
+            {
+                if (previousProperty + ":" + previousValue != expected)
+                    return "no fallback for: " + declaration;
+                ++pairs;
+            }
+            previousProperty = property;
+            previousValue = value;
+        }
+    }
+    return pairs > 100 ? wxString() : wxString("too few fallbacks");
+}
+
+void testCssFallbacks()
+{
+    std::cout << "Internet Explorer 11\n";
+    const wxString css = ":root { --ink: #111; --gap: 4px; }\n"
+        ":root[data-theme=\"dark\"] { --ink: #eee; }\n"
+        "a { color: var(--ink); margin: var(--gap) 0; }\n"
+        "@media (max-width: 640px) { .x { display: grid; gap: 4px; } }\n"
+        ".y{overflow-wrap:anywhere}\n"
+        ".z { margin-left: 8px; margin-left: var(--gap); }\n"
+        ".t { display: inline-grid; color: var(--unknown); }\n";
+    const wxString light = addBenchmarkCssFallbacks(css, false);
+    check(light.Contains("a { color: #111; color: var(--ink); margin: 4px 0; "
+        "margin: var(--gap) 0; }"), "variables get a fixed value before them");
+    check(addBenchmarkCssFallbacks(css, true).Contains("color: #eee; color: var(--ink);")
+        && addBenchmarkCssFallbacks(css, true).Contains("margin: 4px 0; margin: var(--gap) 0;"),
+        "the values of the dark theme, the light ones where it has none");
+    check(light.Contains("{ display: block; display: grid; gap: 4px; }")
+        && light.Contains(".y{word-wrap: break-word; overflow-wrap:anywhere}")
+        && light.Contains("{ display: inline-block; display: inline-grid;"),
+        "grid becomes a block, overflow-wrap: anywhere breaks words, also in @media");
+    check(light.Contains(".z { margin-left: 8px; margin-left: var(--gap); }"),
+        "a pair written for Internet Explorer is kept");
+    check(light.Contains("color: var(--unknown); }") && !light.Contains("color: ; "),
+        "an unknown variable is left alone");
+    check(light.Contains(":root { --ink: #111; --gap: 4px; }")
+        && addBenchmarkCssFallbacks("p { margin: 0; }", false) == "p { margin: 0; }",
+        "everything else stays as it is");
+}
+
 void testHtml()
 {
     std::cout << "HTML report\n";
@@ -1165,6 +1257,14 @@ void testHtml()
         "connection</dt>"), "the glossary explains terms and tests");
     check(!html.Contains("http://") && !html.Contains("https://")
         && !html.Contains("<script"), "no external resources and no scripts");
+    const wxString legacyDark = findLegacyProblem(html);
+    const wxString legacyLight = findLegacyProblem(report.toHtml());
+    if (!legacyDark.empty() || !legacyLight.empty())
+        std::cerr << "    " << (legacyDark + legacyLight).ToStdString() << "\n";
+    check(legacyDark.empty() && legacyLight.empty()
+        && html.Contains("html, body { margin: 0; background: #1e1e1e; background: var(--bg);")
+        && report.toHtml().Contains("background: #ffffff; background: var(--bg);"),
+        "a page for Internet Explorer 11 as well, in the theme of FlameRobin");
     // SVG coordinates and CSS widths must not use a decimal comma
     check(!html.Contains("width:0,") && !html.Contains("y=\"0,")
         && !html.Contains("% \""), "locale independent numbers");
@@ -1375,6 +1475,8 @@ void testComparison()
     // two saved reports
     BenchmarkComparison files = compareBenchmarkSnapshots(
         *parseBenchmarkSnapshot(fasterMd), *earlier);
+    check(findLegacyProblem(html).empty() && findLegacyProblem(files.toHtml("dark")).empty(),
+        "comparisons for Internet Explorer 11 as well");
     check(files.toHtml().Contains("Comparison of two benchmark runs")
         && files.toMarkdown().Contains("| **All parts** |")
         && files.toMarkdown().Contains("Later run")
@@ -1438,6 +1540,7 @@ int main(int argc, char** argv)
     testValueAdvice();
     testParts();
     testReport();
+    testCssFallbacks();
     testHtml();
     testSql();
     testSystemInfoParsers();
