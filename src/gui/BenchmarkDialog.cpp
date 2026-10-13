@@ -29,6 +29,7 @@
 #include <wx/arrstr.h>
 #include <wx/clipbrd.h>
 #include <wx/collpane.h>
+#include <wx/dir.h>
 #include <wx/ffile.h>
 #include <wx/filename.h>
 #if wxUSE_WEBVIEW
@@ -55,6 +56,7 @@ enum
     ID_button_cancel,
     ID_button_copy,
     ID_button_save,
+    ID_button_browser,
     ID_button_earlier_browse,
     ID_button_compare,
     ID_check_private,
@@ -73,6 +75,8 @@ enum
 const wxString pendingDatabasesKey = "BenchmarkPendingDatabases";
 const wxString earlierFileKey = "BenchmarkCompareWithFile";
 const wxString hidePrivateKey = "BenchmarkHidePrivateInformation";
+// the pages for "Open in browser" in the temporary directory
+const wxString browserFilePrefix = "flamerobin-benchmark-";
 
 // the inverse of wx2std()
 wxString toWxString(const std::string& s)
@@ -87,6 +91,7 @@ BEGIN_EVENT_TABLE(BenchmarkDialog, BaseDialog)
     EVT_BUTTON(ID_button_cancel, BenchmarkDialog::OnCancel)
     EVT_BUTTON(ID_button_copy, BenchmarkDialog::OnCopyMarkdown)
     EVT_BUTTON(ID_button_save, BenchmarkDialog::OnSaveReport)
+    EVT_BUTTON(ID_button_browser, BenchmarkDialog::OnOpenInBrowser)
     EVT_BUTTON(ID_button_earlier_browse, BenchmarkDialog::OnBrowseEarlier)
     EVT_BUTTON(ID_button_compare, BenchmarkDialog::OnCompareReports)
     EVT_CHECKBOX(ID_check_private, BenchmarkDialog::OnPrivateChanged)
@@ -379,6 +384,10 @@ void BenchmarkDialog::createControls()
     button_compare->SetToolTip(_("Compares two saved reports, without a new test."));
     button_copy = new wxButton(panel, ID_button_copy, _("Copy as &Markdown"));
     button_save = new wxButton(panel, ID_button_save, _("Sa&ve report..."));
+    button_browser = new wxButton(panel, ID_button_browser, _("Open in &browser"));
+    button_browser->SetToolTip(_("Shows the report in the web browser of this computer. "
+        "The page is written to the temporary directory; without \"Hide private "
+        "information\" it contains the names of computers and paths."));
     button_close = new wxButton(panel, wxID_CANCEL, _("&Close"));
 
     wxBoxSizer* sizerButtons = new wxBoxSizer(wxHORIZONTAL);
@@ -389,6 +398,7 @@ void BenchmarkDialog::createControls()
     sizerButtons->Add(check_private, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 12);
     sizerButtons->Add(button_copy, 0, wxRIGHT, 6);
     sizerButtons->Add(button_save, 0, wxRIGHT, 6);
+    sizerButtons->Add(button_browser, 0, wxRIGHT, 6);
     sizerButtons->Add(button_close, 0);
 
     layoutSizers(sizerMain, sizerButtons, true);
@@ -432,6 +442,7 @@ void BenchmarkDialog::updateControls()
     button_compare->Enable(idle);
     button_copy->Enable(idle && (hasReportM || comparisonM));
     button_save->Enable(idle && (hasReportM || comparisonM));
+    button_browser->Enable(idle && (hasReportM || comparisonM));
 }
 
 void BenchmarkDialog::OnAdvancedToggled(wxCollapsiblePaneEvent& WXUNUSED(event))
@@ -982,24 +993,57 @@ void BenchmarkDialog::OnSaveReport(wxCommandEvent& WXUNUSED(event))
         wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
     if (fd.ShowModal() != wxID_OK)
         return;
-    // the saved page follows the theme of the browser that opens it
     const bool markdown = fd.GetFilterIndex() == 1
         || fd.GetPath().Lower().EndsWith(".md");
-    wxString text;
+    wxFFile file(fd.GetPath(), "w");
+    if (!file.IsOpened() || !file.Write(displayedText(markdown), wxConvUTF8))
+    {
+        wxMessageBox(_("The report could not be saved."), _("Performance Benchmark & Diagnosis"),
+            wxOK | wxICON_ERROR, this);
+    }
+}
+
+wxString BenchmarkDialog::displayedText(bool markdown) const
+{
+    // the saved page follows the theme of the browser that opens it
     if (comparisonM)
     {
         const fr::BenchmarkComparison comparison = displayedComparison();
-        text = markdown ? comparison.toMarkdown() : comparison.toHtml();
+        return markdown ? comparison.toMarkdown() : comparison.toHtml();
     }
-    else
+    const fr::BenchmarkReport report = displayedReport();
+    return markdown ? report.toMarkdown() : report.toHtml();
+}
+
+void BenchmarkDialog::OnOpenInBrowser(wxCommandEvent& WXUNUSED(event))
+{
+    if (!hasReportM && !comparisonM)
+        return;
+    // the browser may still read the page after the dialog is closed, so
+    // the pages are only removed a day later
+    const wxString tempDir = wxFileName::GetTempDir();
     {
-        const fr::BenchmarkReport report = displayedReport();
-        text = markdown ? report.toMarkdown() : report.toHtml();
+        wxLogNull noErrors;
+        wxArrayString oldFiles;
+        wxDir::GetAllFiles(tempDir, &oldFiles, browserFilePrefix + "*.html", wxDIR_FILES);
+        const wxDateTime yesterday = wxDateTime::Now() - wxTimeSpan::Day();
+        for (const wxString& oldFile : oldFiles)
+        {
+            const wxDateTime modified = wxFileName(oldFile).GetModificationTime();
+            if (modified.IsValid() && modified < yesterday)
+                wxRemoveFile(oldFile);
+        }
     }
-    wxFFile file(fd.GetPath(), "w");
-    if (!file.IsOpened() || !file.Write(text, wxConvUTF8))
+
+    wxFileName path(tempDir, browserFilePrefix
+        + wxDateTime::Now().Format("%Y%m%d-%H%M%S-")
+        + wxString::Format("%lu.html", wxGetProcessId()));
+    wxFFile file(path.GetFullPath(), "w");
+    if (!file.IsOpened() || !file.Write(displayedText(false), wxConvUTF8) || !file.Close()
+        || !wxLaunchDefaultBrowser(wxFileName::FileNameToURL(path)))
     {
-        wxMessageBox(_("The report could not be saved."), _("Performance Benchmark & Diagnosis"),
+        wxMessageBox(_("The report could not be opened in the web browser. Please save "
+            "it and open the file."), _("Performance Benchmark & Diagnosis"),
             wxOK | wxICON_ERROR, this);
     }
 }
