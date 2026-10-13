@@ -1223,6 +1223,19 @@ add_executable(master_password_test
 target_link_libraries(master_password_test ${wxWidgets_LIBRARIES} ${FR_LIBS})
 add_test(NAME master_password_test COMMAND master_password_test)
 
+add_executable(code_template_alias_test
+    ${SOURCEDIR}/core/CodeTemplateAliasTest.cpp
+    ${SOURCEDIR}/core/TemplateProcessor.cpp
+    ${SOURCEDIR}/core/ProgressIndicator.cpp
+    ${SOURCEDIR}/config/Config.cpp
+    ${SOURCEDIR}/core/Observer.cpp
+    ${SOURCEDIR}/core/Subject.cpp
+    ${SOURCEDIR}/core/FRError.cpp
+    ${SOURCEDIR}/core/StringUtils.cpp
+)
+target_link_libraries(code_template_alias_test ${wxWidgets_LIBRARIES} ${FR_LIBS})
+add_test(NAME code_template_alias_test COMMAND code_template_alias_test)
+
 
 if (APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES

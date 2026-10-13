@@ -761,10 +761,28 @@ void PreferencesDialog::OnTreeSelChanged(wxTreeEvent& event)
 bool PreferencesDialog::Show(bool show)
 {
     bool r = BaseDialog::Show(show);
-    if (show && bookctrl_1->GetPageCount() <= 1)
-        treectrl_1->Hide();
-    if (bookctrl_1->GetPageCount())
-        static_text_categ->SetLabel(bookctrl_1->GetPageText(0));
+    if (show)
+    {
+        if (bookctrl_1->GetPageCount() <= 1)
+            treectrl_1->Hide();
+        if (bookctrl_1->GetPageCount())
+            static_text_categ->SetLabel(bookctrl_1->GetPageText(0));
+
+        auto applyFocus = [this]() {
+            wxWindow* currentPage = bookctrl_1 ? bookctrl_1->GetCurrentPage() : 0;
+            for (std::list<PrefDlgSetting*>::iterator it = settingsM.begin();
+                it != settingsM.end(); ++it)
+            {
+                if ((*it)->hasFocus() && (!currentPage || (*it)->getPage() == currentPage))
+                {
+                    (*it)->setFocus();
+                    break;
+                }
+            }
+        };
+        applyFocus();
+        CallAfter(applyFocus);
+    }
     return r;
 }
 

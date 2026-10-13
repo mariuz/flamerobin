@@ -74,7 +74,7 @@ static const wxString getNodeContent(wxXmlNode* node, const wxString& defvalue)
 // PrefDlgSetting class
 PrefDlgSetting::PrefDlgSetting(wxPanel* page, PrefDlgSetting* parent)
     : pageM(page), parentM(parent), relatedM(false), alignmentGroupM(-1),
-        sizerProportionM(0)
+        sizerProportionM(0), focusM(false)
 {
     if (parent)
         parent->addEnabledSetting(this);
@@ -192,6 +192,15 @@ PrefDlgSetting* PrefDlgSetting::getParent() const
     return parentM;
 }
 
+bool PrefDlgSetting::hasFocus() const
+{
+    return focusM;
+}
+
+void PrefDlgSetting::setFocus()
+{
+}
+
 int PrefDlgSetting::getSizerProportion() const
 {
     return sizerProportionM;
@@ -237,6 +246,10 @@ bool PrefDlgSetting::parseProperty(wxXmlNode* xmln)
             long l;
             if (value.ToLong(&l) && l >= 0)
                 sizerProportionM = l;
+        }
+        else if (name == "focus")
+        {
+            focusM = (value == "1" || value.CmpNoCase("true") == 0);
         }
     }
     return true;
@@ -637,6 +650,7 @@ class PrefDlgStringEditSetting: public PrefDlgSetting
 public:
     PrefDlgStringEditSetting(wxPanel* page, PrefDlgSetting* parent);
 
+    virtual void setFocus();
     virtual bool createControl(bool ignoreerrors);
     virtual bool loadFromTargetConfig(Config& config);
     virtual bool parseProperty(wxXmlNode* xmln);
@@ -722,6 +736,15 @@ void PrefDlgStringEditSetting::enableControls(bool enabled)
 {
     if (textCtrlM)
         textCtrlM->Enable(enabled);
+}
+
+void PrefDlgStringEditSetting::setFocus()
+{
+    if (textCtrlM)
+    {
+        textCtrlM->SetFocus();
+        textCtrlM->SelectAll();
+    }
 }
 
 wxStaticText* PrefDlgStringEditSetting::getLabel()

@@ -64,6 +64,8 @@ public:
     // parent for created controls
     wxPanel* getPage() const;
     PrefDlgSetting* getParent() const;
+    bool hasFocus() const;
+    virtual void setFocus();
     virtual bool loadFromTargetConfig(Config& targetConfig) = 0;
     virtual bool parseProperty(wxXmlNode* xmln);
     virtual bool saveToTargetConfig(Config& targetConfig) = 0;
@@ -92,6 +94,7 @@ private:
     bool relatedM;
     int alignmentGroupM;
     int sizerProportionM;
+    bool focusM;
 };
 
 class PreferencesDialog: public BaseDialog

@@ -2,11 +2,19 @@
 <root>
     <node>
         <caption>Create selectable block</caption>
+        <setting type="string">
+            <caption>Table &amp;alias:</caption>
+            <key>{%object_path%}/tableAlias</key>
+            <default>{%lowercase:{%substr:{%object_name%}:0:1%}%}</default>
+            <aligngroup>1</aligngroup>
+            <focus>1</focus>
+        </setting>
         <setting type="relation_columns" style="list">
             <caption>Selected columns</caption>
             <key>{%object_path%}/columnNames</key>
             <default>{%foreach:column:, :{%object_name%}%}</default>
             <relation>{%object_handle%}</relation>
+            <aligngroup>1</aligngroup>
             <proportion>1</proportion>
         </setting>
     </node>

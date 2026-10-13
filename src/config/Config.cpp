@@ -272,6 +272,8 @@ wxFileName Config::getConfigFileName() const
 void Config::setConfigFileName(const wxFileName& fileName)
 {
     configFileNameM = fileName;
+    delete configM;
+    configM = nullptr;
 }
 
 wxString Config::getDataDir() const
