@@ -84,6 +84,34 @@ wxString toWxString(const std::string& s)
     return wxString(s.c_str(), *wxConvCurrent);
 }
 
+#if wxUSE_WEBVIEW
+// on Windows Edge (WebView2) where its runtime is installed, then Internet
+// Explorer, which shows the report in a simpler form; nullptr if there is no
+// web view, the report is shown as text then
+wxWebView* createReportView(wxWindow* parent, wxString& backend)
+{
+    const char* const backends[] = {
+#ifdef __WXMSW__
+        wxWebViewBackendEdge, wxWebViewBackendIE
+#else
+        wxWebViewBackendDefault
+#endif
+    };
+    for (const char* b : backends)
+    {
+        if (!wxWebView::IsBackendAvailable(b))
+            continue;
+        if (wxWebView* view = wxWebView::New(parent, wxID_ANY, wxWebViewDefaultURLStr,
+            wxDefaultPosition, wxDefaultSize, b))
+        {
+            backend = b;
+            return view;
+        }
+    }
+    return nullptr;
+}
+#endif
+
 } // namespace
 
 BEGIN_EVENT_TABLE(BenchmarkDialog, BaseDialog)
@@ -354,13 +382,28 @@ void BenchmarkDialog::createControls()
     notebook_results->AddPage(text_log, _("Progress"));
 
 #if wxUSE_WEBVIEW
-    // New() returns nothing when no backend (e.g. WebView2) is available
-    webview_report = wxWebView::New(notebook_results, wxID_ANY);
+    wxString backend;
+    webview_report = createReportView(notebook_results, backend);
     if (webview_report)
+    {
         notebook_results->AddPage(webview_report, _("Report"));
+        if (backend == wxWebViewBackendIE)
+        {
+            reportViewM = "Internet Explorer";
+            wxStaticText* hint = new wxStaticText(panel, wxID_ANY,
+                _("The Microsoft Edge WebView2 Runtime is not installed on this "
+                  "computer, so the report is shown with Internet Explorer in a "
+                  "simpler form. \"Open in browser\" shows it in your web browser."));
+            hint->Wrap(900);
+            sizerMain->Add(hint, 0, wxEXPAND | wxBOTTOM, 4);
+        }
+        else
+            reportViewM = wxWebView::GetBackendVersionInfo(backend).GetVersionString();
+    }
 #endif
     if (!webview_report)
     {
+        reportViewM = _("text, no web view is available");
         text_report = new wxTextCtrl(notebook_results, wxID_ANY, wxEmptyString,
             wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
         notebook_results->AddPage(text_report, _("Report"));
@@ -744,6 +787,7 @@ void BenchmarkDialog::OnStart(wxCommandEvent& WXUNUSED(event))
     appendLog(wxString::Format(_("Target: %s"), params.targetDescription));
     appendLog(wxString::Format(_("Intensity: %s, page size %d"),
         fr::getBenchmarkIntensityName(intensity), params.pageSize));
+    appendLog(wxString::Format(_("Report view: %s"), reportViewM));
     updateControls();
 
     fr::BenchmarkRunner* runner = runnerM.get();

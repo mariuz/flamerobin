@@ -100,6 +100,8 @@ private:
     // the HTML report, or the Markdown text where no web view is available
     wxWebView* webview_report = nullptr;
     wxTextCtrl* text_report = nullptr;
+    // which of them shows the report, for the log
+    wxString reportViewM;
     wxButton* button_start;
     wxButton* button_cancel;
     wxButton* button_copy;
