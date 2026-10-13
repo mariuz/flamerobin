@@ -21,10 +21,12 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#include <wx/arrstr.h>
 #include <wx/intl.h>
 
 #include <algorithm>
 #include <cmath>
+#include <map>
 #include <vector>
 
 #include "engine/Benchmark.h"
@@ -56,8 +58,7 @@ const char* const styleSheet = R"CSS(
   --ok: #2f855a; --ok-bg: #e6f4ea; --warn: #b7791f; --warn-bg: #fdf3dc;
   --bad: #c53030; --bad-bg: #fde8e8; --info-bg: #ebf4ff;
   --c1: #3182ce; --c2: #dd6b20; --c3: #a0aec0;
-  --body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --mono: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  --no-gap: 0;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -79,9 +80,11 @@ const char* const styleSheet = R"CSS(
   color-scheme: dark;
 }
 
-/* the look of the FlameRobin property pages */
+/* the look of the FlameRobin property pages; the fonts are written out and
+   not taken from var(), because Internet Explorer takes "font: 13px var(--x)"
+   for the name of a font and falls back to a serif font */
 * { box-sizing: border-box; }
-html, body { margin: 0; background: var(--bg); color: var(--ink); font: 13px/1.5 var(--body); }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font-size: 13px; line-height: 1.5; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
 main { max-width: 1100px; padding: 12px; }
 a, .link { color: var(--link); text-decoration: none; cursor: pointer; }
 a:hover, .link:hover { color: var(--link-hover); text-decoration: underline; }
@@ -96,12 +99,17 @@ h4 { font-size: 13px; margin: 14px 0 6px; }
 .notice.bad { background: var(--bad-bg); }
 .notice.warn { background: var(--warn-bg); }
 .notice.info { background: var(--info-bg); }
-code { font-family: var(--mono); font-size: 12px; overflow-wrap: anywhere; }
+code { font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace; font-size: 12px; overflow-wrap: anywhere; }
 p { max-width: 100ch; }
 
-/* page navigation like on the property pages: Overview | Detailed report */
-.view-toggle { position: fixed; top: 0; left: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-.pages { margin: 10px 0 4px; }
+/* page navigation like on the property pages: Overview | Detailed report.
+   What hides something depends on :checked, which the Internet Explorer
+   control knows only in the mode of Internet Explorer 9 and later: in an
+   older mode both views and every panel are shown, and the links that would
+   not work are not */
+.view-toggle { position: fixed; top: 0; left: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; clip: rect(0 0 0 0); }
+.pages { display: none; margin: 10px 0 4px; }
+.view-toggle:checked ~ .pages { display: block; }
 .pages label { color: var(--link); cursor: pointer; }
 .pages label:hover { text-decoration: underline; }
 #v1:checked ~ .pages label[for="v1"], #v2:checked ~ .pages label[for="v2"] { color: var(--ink); font-weight: 600; cursor: default; text-decoration: none; }
@@ -184,7 +192,7 @@ summary:focus-visible { outline: 2px solid var(--link); outline-offset: -2px; }
 .sys-more { margin-top: 10px; }
 
 /* detailed report: one tile per part, a click opens its panel */
-.cats > .toggle { position: fixed; top: 0; left: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.toggle { position: fixed; top: 0; left: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; clip: rect(0 0 0 0); }
 .tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; grid-auto-flow: row dense; }
 .tile { display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--line); border-top: 3px solid var(--line); border-radius: 6px; padding: 8px 10px; cursor: pointer; min-width: 0; }
 .tile:hover { background: var(--alt); }
@@ -194,18 +202,20 @@ summary:focus-visible { outline: 2px solid var(--link); outline-offset: -2px; }
 .tile .key b { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .tile .more-link { margin-top: auto; color: var(--link); }
 .tile .more-link .shut { display: none; }
-.panel { display: none; grid-column: 1 / -1; border: 1px solid var(--line); border-top: 3px solid var(--link); border-radius: 6px; padding: 8px 10px; min-width: 0; }
+.panel { display: block; grid-column: 1 / -1; border: 1px solid var(--line); border-top: 3px solid var(--link); border-radius: 6px; padding: 8px 10px; min-width: 0; }
 .panel-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .panel-head h3 { margin: 0; font-size: 15px; }
 .panel-head .close { margin-left: auto; color: var(--link); cursor: pointer; }
+.tile .more-link, .panel-head .close { display: none; }
+.view-toggle:checked ~ .details .more-link, .view-toggle:checked ~ .details .close { display: inline; }
 .where { color: var(--muted); margin: 0 0 8px; overflow-wrap: anywhere; }
 .explain dt { font-weight: 600; margin-top: 8px; }
 .explain dd { margin: 2px 0 0; color: var(--muted); max-width: 90ch; }
 .explain dd b { color: var(--ink); font-weight: 600; }
 
 /* tooltips: a small question mark, the text on hover or focus */
-.tip { position: relative; display: inline-grid; place-items: center; width: 14px; height: 14px; margin-left: 4px; border-radius: 50%; border: 1px solid var(--line); color: var(--muted); font: 600 10px/1 var(--body); cursor: help; vertical-align: 1px; }
-.tip-box { display: none; position: absolute; z-index: 20; top: calc(100% + 5px); left: -8px; width: max-content; max-width: 280px; padding: 6px 9px; border-radius: 4px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); box-shadow: 0 3px 10px rgba(0,0,0,.18); font: 400 12px/1.4 var(--body); text-align: left; white-space: normal; text-transform: none; }
+.tip { position: relative; display: inline-grid; place-items: center; width: 14px; height: 14px; margin-left: 4px; border-radius: 50%; border: 1px solid var(--line); color: var(--muted); font-style: normal; font-variant: normal; font-weight: 600; font-size: 10px; line-height: 1; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; cursor: help; vertical-align: 1px; }
+.tip-box { display: none; position: absolute; z-index: 20; top: calc(100% + 5px); left: -8px; width: max-content; max-width: 280px; padding: 6px 9px; border-radius: 4px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); box-shadow: 0 3px 10px rgba(0,0,0,.18); font-style: normal; font-variant: normal; font-weight: 400; font-size: 12px; line-height: 1.4; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; text-align: left; white-space: normal; text-transform: none; }
 td.n .tip-box, th.n .tip-box { left: auto; right: -8px; }
 .tip:hover .tip-box, .tip:focus .tip-box { display: block; }
 
@@ -215,7 +225,7 @@ td.n .tip-box, th.n .tip-box { left: auto; right: -8px; }
 .chart h5 { font-size: 13px; margin: 0; }
 .chart .chart-sub { color: var(--muted); font-size: 12px; margin: 2px 0 8px; overflow-wrap: anywhere; }
 .chart svg { width: 100%; height: auto; display: block; }
-.chart svg text { font-family: var(--mono); }
+.chart svg text { font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace; }
 .axis { fill: var(--muted); font-size: 10px; }
 .gridline { stroke: var(--line); stroke-width: 1; }
 .c1 { fill: var(--c1); background: var(--c1); }
@@ -230,7 +240,7 @@ td.n .tip-box, th.n .tip-box { left: auto; right: -8px; }
 .hb-label { color: var(--muted); overflow-wrap: anywhere; }
 .hb-track { height: 9px; background: var(--alt); border-radius: 3px; overflow: hidden; }
 .hb-fill { display: block; height: 100%; border-radius: 3px; min-width: 2px; }
-.hb-val { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.hb-val { font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .stack { display: flex; height: 18px; border-radius: 4px; overflow: hidden; background: var(--alt); }
 .stack span { display: block; height: 100%; min-width: 2px; }
 .legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted); margin-top: 8px; }
@@ -239,7 +249,18 @@ td.n .tip-box, th.n .tip-box { left: auto; right: -8px; }
 
 /* two runs side by side */
 .runs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.runs .box { margin: 0; }
+.runs .box { margin: 0 0 10px; margin: var(--no-gap); }
+
+/* Internet Explorer 11 knows neither gap nor grid, its grids are blocks (see
+   addBenchmarkCssFallbacks()): margins instead, which every browser with
+   var() sets back to 0 */
+.tiles > *, .sys-grid > *, .charts > * { margin-bottom: 8px; margin-bottom: var(--no-gap); }
+.points-grid > * { margin-bottom: 10px; margin-bottom: var(--no-gap); }
+.hbars > * { margin-bottom: 6px; margin-bottom: var(--no-gap); }
+.tile > * { margin-bottom: 4px; margin-bottom: var(--no-gap); }
+.row > * { display: inline-block; margin-right: 12px; margin-right: var(--no-gap); }
+.block > summary > *, .deeper > summary > * { margin-left: 10px; margin-left: var(--no-gap); }
+.legend > * + *, .tile .key > * + * { margin-left: 14px; margin-left: var(--no-gap); }
 
 footer { margin-top: 16px; color: var(--muted); font-size: 12px; max-width: 100ch; }
 
@@ -271,7 +292,7 @@ footer { margin-top: 16px; color: var(--muted); font-size: 12px; max-width: 100c
   table.cards td:empty { display: none; }
   .tip-box { max-width: 70vw; }
 }
-@media print { .panel { display: block !important; } details > div { display: block !important; } .view-toggle, .pages { display: none; } }
+@media print { .panel { display: block !important; } details > div { display: block !important; } .view-toggle, .pages { display: none !important; } }
 )CSS";
 
 wxString esc(const wxString& text)
@@ -1274,19 +1295,135 @@ wxString comparisonView(const BenchmarkComparison& c)
     return comparisonPointsBox(c) + comparisonParts(c) + differencesBox(c);
 }
 
+std::map<wxString, wxString> readCssTokens(const wxString& css, const wxString& selector)
+{
+    std::map<wxString, wxString> tokens;
+    size_t start = css.find(selector + " {");
+    if (start == wxString::npos)
+        return tokens;
+    start += selector.length() + 2;
+    const size_t end = css.find('}', start);
+    for (const wxString& declaration : wxSplit(css.substr(start, end - start), ';', '\0'))
+    {
+        wxString name = declaration.BeforeFirst(':');
+        name.Trim().Trim(false);
+        wxString value = declaration.AfterFirst(':');
+        value.Trim().Trim(false);
+        if (name.StartsWith("--") && !value.empty())
+            tokens[name] = value;
+    }
+    return tokens;
+}
+
+wxString cssProperty(const wxString& declaration)
+{
+    wxString property = declaration.BeforeFirst(':');
+    property.Trim().Trim(false);
+    return property;
+}
+
+// the declaration that Internet Explorer 11 understands instead of this
+// one, or nothing
+wxString legacyDeclaration(const wxString& declaration,
+    const std::map<wxString, wxString>& tokens)
+{
+    const wxString property = cssProperty(declaration);
+    wxString value = declaration.AfterFirst(':');
+    value.Trim().Trim(false);
+    if (property.empty() || property.StartsWith("--") || value.empty()
+        || property.find_first_not_of("abcdefghijklmnopqrstuvwxyz-") != wxString::npos)
+    {
+        return wxString();
+    }
+    if (property == "display" && value == "grid")
+        return "display: block";
+    if (property == "display" && value == "inline-grid")
+        return "display: inline-block";
+    if (property == "overflow-wrap" && value == "anywhere")
+        return "word-wrap: break-word";
+    if (!value.Contains("var(--"))
+        return wxString();
+    for (size_t pos = value.find("var(--"); pos != wxString::npos; pos = value.find("var(--"))
+    {
+        const size_t close = value.find(')', pos);
+        if (close == wxString::npos)
+            return wxString();
+        wxString name = value.substr(pos + 4, close - pos - 4).BeforeFirst(',');
+        name.Trim();
+        auto it = tokens.find(name);
+        if (it == tokens.end())
+            return wxString();
+        value = value.substr(0, pos) + it->second + value.substr(close + 1);
+    }
+    return property + ": " + value;
+}
+
 // the start of a page: head, styles and the opened <main>
 wxString pageStart(const wxString& theme, const wxString& extraStyles)
 {
     wxString html = "<!doctype html>\n<html lang=\"en\"";
     if (theme == "dark" || theme == "light")
         html += " data-theme=\"" + theme + "\"";
-    return html + "><head><meta charset=\"utf-8\"><meta name=\"viewport\" "
+    // X-UA-Compatible has to come first: without it, the Internet Explorer
+    // control and intranet pages use the mode of Internet Explorer 7
+    return html + "><head><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">"
+        "<meta charset=\"utf-8\"><meta name=\"viewport\" "
         "content=\"width=device-width, initial-scale=1\"><title>"
         + esc(_("Performance Benchmark & Diagnosis")) + "</title><style>"
-        + wxString::FromUTF8(styleSheet) + extraStyles + "</style></head><body><main>\n";
+        + addBenchmarkCssFallbacks(wxString::FromUTF8(styleSheet) + extraStyles,
+            theme == "dark")
+        + "</style></head><body><main>\n";
 }
 
 } // namespace
+
+wxString addBenchmarkCssFallbacks(const wxString& css, bool dark)
+{
+    std::map<wxString, wxString> tokens = readCssTokens(css, ":root");
+    if (dark)
+    {
+        for (const auto& token : readCssTokens(css, ":root[data-theme=\"dark\"]"))
+            tokens[token.first] = token.second;
+    }
+
+    wxString result;
+    size_t pos = 0;
+    for (size_t open = css.find('{'); open != wxString::npos; open = css.find('{', pos))
+    {
+        const size_t next = css.find_first_of("{}", open + 1);
+        if (next == wxString::npos)
+            break;
+        result += css.substr(pos, open + 1 - pos);
+        pos = open + 1;
+        // the rules of @media follow
+        if (css[next] == '{')
+            continue;
+        // a block of declarations; a pair written for Internet Explorer
+        // already has its own fallback
+        const wxArrayString declarations = wxSplit(css.substr(pos, next - pos), ';', '\0');
+        wxString previous;
+        for (size_t i = 0; i < declarations.size(); ++i)
+        {
+            const wxString& declaration = declarations[i];
+            const wxString property = cssProperty(declaration);
+            const wxString fallback = property == previous ? wxString()
+                : legacyDeclaration(declaration, tokens);
+            if (fallback.empty())
+                result += declaration;
+            else
+            {
+                const size_t start = declaration.find_first_not_of(" \t\r\n");
+                result += declaration.substr(0, start) + fallback + "; "
+                    + declaration.substr(start);
+            }
+            if (i + 1 < declarations.size())
+                result += ";";
+            previous = property;
+        }
+        pos = next;
+    }
+    return result + css.substr(pos);
+}
 
 wxString BenchmarkComparison::toHtml(const wxString& theme) const
 {
@@ -1318,7 +1455,7 @@ wxString BenchmarkReport::toHtml(const wxString& theme) const
     wxString tileStyles;
     for (const Section& s : sections)
     {
-        tileStyles += wxString::Format("#c%d:checked~.tiles .p%d{display:block}"
+        tileStyles += wxString::Format("#c%d:not(:checked)~.tiles .p%d{display:none}"
             "#c%d:checked~.tiles .t%d{border-color:var(--link)}"
             "#c%d:checked~.tiles .t%d .open{display:none}"
             "#c%d:checked~.tiles .t%d .shut{display:inline}",
@@ -1359,9 +1496,10 @@ wxString BenchmarkReport::toHtml(const wxString& theme) const
             "%s could not be dropped. FlameRobin offers to drop it the next time the "
             "dialog opens."), benchmarkDatabasePath)) + "</p>";
     }
-    // the navigation of the property pages: Overview | Detailed report
-    html += "</header>\n<nav class=\"pages\"><label for=\"v1\">" + esc(_("Overview"))
-        + "</label> | <label for=\"v2\">" + esc(_("Detailed report")) + "</label></nav>\n";
+    // the navigation of the property pages: Overview | Detailed report; no
+    // <nav>, the mode of Internet Explorer 8 cannot style it
+    html += "</header>\n<div class=\"pages\"><label for=\"v1\">" + esc(_("Overview"))
+        + "</label> | <label for=\"v2\">" + esc(_("Detailed report")) + "</label></div>\n";
 
     // the overview: the values of every part, or the comparison with an
     // earlier run

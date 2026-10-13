@@ -718,6 +718,11 @@ BenchmarkSnapshot anonymizeBenchmarkSnapshot(const BenchmarkSnapshot& snapshot);
 /// different kinds measure different things
 wxString getBenchmarkKindId(const BenchmarkMetrics& m);
 wxString getBenchmarkKindName(const wxString& kindId);
+/// the style sheet of the HTML report for Internet Explorer 11 as well:
+/// before every declaration with var(), grid or overflow-wrap: anywhere one
+/// that it understands, with the values of the light or the dark theme;
+/// the other browsers take the later declaration, as before
+wxString addBenchmarkCssFallbacks(const wxString& css, bool dark);
 /// whether a fact (see getBenchmarkFacts()) can influence a part of the
 /// system, e.g. the power plan the processor; the facts of the machine
 /// running FlameRobin belong to the server only on a run on the server
