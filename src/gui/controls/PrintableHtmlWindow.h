@@ -58,6 +58,9 @@ public:
     virtual ~PrintableHtmlWindow();
     void setPageSource(const wxString& html);
 
+    static wxString prepareHtmlForDisplay(const wxString& html);
+    static wxString embedSvgIconsInHtml(const wxString& html);
+
     bool LoadFile(const wxString& filepath);
     void GetViewStart(int* x, int* y);
     void Scroll(int x, int y);

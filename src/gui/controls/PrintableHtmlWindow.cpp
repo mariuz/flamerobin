@@ -39,6 +39,7 @@
 #include <wx/filename.h>
 #include <wx/settings.h>
 #include <wx/regex.h>
+#include <wx/base64.h>
 
 #include "core/URIProcessor.h"
 #include "core/FRError.h"
@@ -76,7 +77,24 @@ PrintableHtmlWindow::PrintableHtmlWindow(wxWindow* parent, wxWindowID id)
     : wxPanel(parent, id)
 {
 #if wxUSE_WEBVIEW
+#ifdef __WXMSW__
+    if (wxWebView::IsBackendAvailable(wxWebViewBackendEdge))
+    {
+        webViewM = wxWebView::New(this, wxID_ANY, wxWebViewDefaultURLStr,
+            wxDefaultPosition, wxDefaultSize, wxWebViewBackendEdge);
+    }
+    else if (wxWebView::IsBackendAvailable(wxWebViewBackendIE))
+    {
+        webViewM = wxWebView::New(this, wxID_ANY, wxWebViewDefaultURLStr,
+            wxDefaultPosition, wxDefaultSize, wxWebViewBackendIE);
+    }
+    else
+    {
+        webViewM = wxWebView::New(this, wxID_ANY);
+    }
+#else
     webViewM = wxWebView::New(this, wxID_ANY);
+#endif
 #else
     webViewM = new wxHtmlWindow(this, wxID_ANY);
 #endif
@@ -200,14 +218,253 @@ void PrintableHtmlWindow::OnKeyDown(wxKeyEvent& event)
     OnCharHook(event);
 }
 
+wxString PrintableHtmlWindow::embedSvgIconsInHtml(const wxString& html)
+{
+    wxString result = html;
+    wxString templatesPath = config().getHtmlTemplatesPath();
+    wxString templatesPathForward = templatesPath;
+    templatesPathForward.Replace("\\", "/");
+    while (templatesPathForward.EndsWith("/"))
+        templatesPathForward.RemoveLast();
+
+    static const char* const svgFiles[] = {
+        "ok2.svg", "ok.svg", "redx.svg", "drop.svg", "view.svg", "compute.svg"
+    };
+
+    for (const char* iconName : svgFiles)
+    {
+        wxString iconFileName = wxString::FromUTF8(iconName);
+        wxString iconPath = wxFileName(templatesPath, iconFileName).GetFullPath();
+
+        wxFile f(iconPath, wxFile::read);
+        if (!f.IsOpened())
+            continue;
+
+        wxFileOffset len = f.Length();
+        if (len <= 0)
+            continue;
+
+        wxCharBuffer buf(len);
+        if (f.Read(buf.data(), len) != len)
+            continue;
+
+        wxString b64 = wxBase64Encode(buf.data(), len);
+        wxString dataUri = "data:image/svg+xml;base64," + b64;
+
+        // Replace all variants of the icon URL pointing to this SVG
+        // 1. file:///path/to/templates/icon.svg
+        // 2. file://path/to/templates/icon.svg
+        // 3. /path/to/templates/icon.svg or C:/path/to/templates/icon.svg
+        // 4. Raw template path with backslashes
+        wxString rawPathBackslash = templatesPath;
+        if (!rawPathBackslash.EndsWith("\\") && !rawPathBackslash.EndsWith("/"))
+            rawPathBackslash += "\\";
+        rawPathBackslash += iconFileName;
+
+        wxString forwardPath = templatesPathForward + "/" + iconFileName;
+
+        result.Replace("file:///" + forwardPath, dataUri);
+        result.Replace("file://" + forwardPath, dataUri);
+        result.Replace(forwardPath, dataUri);
+        result.Replace(rawPathBackslash, dataUri);
+    }
+
+    return result;
+}
+
+wxString PrintableHtmlWindow::prepareHtmlForDisplay(const wxString& html)
+{
+    wxString processedHtml = html;
+
+    // Convert templates path to a file:// URL format
+    wxString templatesPath = config().getHtmlTemplatesPath();
+    wxString fileUrl = templatesPath;
+    fileUrl.Replace("\\", "/");
+    if (!fileUrl.StartsWith("/"))
+        fileUrl = "file:///" + fileUrl;
+    else
+        fileUrl = "file://" + fileUrl;
+
+    wxString templatesPathForward = templatesPath;
+    templatesPathForward.Replace("\\", "/");
+
+    // Standardize all template path separators in the HTML to forward slashes
+    processedHtml.Replace(templatesPath, templatesPathForward);
+
+    // Strip any existing file:// or file:/// prefixes to prevent double prefixing
+    processedHtml.Replace("file:///" + templatesPathForward, templatesPathForward);
+    processedHtml.Replace("file://" + templatesPathForward, templatesPathForward);
+
+    // Convert all raw template paths to file:// URLs
+    processedHtml.Replace(templatesPathForward, fileUrl);
+
+    // Embed SVG icons as data:image/svg+xml;base64 URIs so that Internet Explorer /
+    // MSHTML webviews and systems without Edge WebView2 can reliably render SVG icons
+    // without security zone blocks on local file:// SVG references in <img> tags.
+    processedHtml = embedSvgIconsInHtml(processedHtml);
+
+    // Ensure X-UA-Compatible IE=edge is present in <head> for MSHTML/IE compatibility
+    const wxString xUaCompatible = "<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n";
+    wxString::size_type headTagPos = processedHtml.Lower().find("<head>");
+    if (headTagPos != wxString::npos)
+    {
+        headTagPos += 6;
+        if (!processedHtml.Lower().Contains("x-ua-compatible"))
+            processedHtml.insert(headTagPos, "\n" + xUaCompatible);
+    }
+
+    // Construct and inject a modern, responsive CSS stylesheet
+    bool isDark = FRStyleManager::isEffectivelyDark();
+    wxString bgColor = isDark ? "#1e1e1e" : "#ffffff";
+    wxString textColor = isDark ? "#e0e0e0" : "#2d3748";
+    wxString borderColor = isDark ? "#3d3d3d" : "#e2e8f0";
+    wxString headerBgColor = isDark ? "#2c2c3e" : "#edf2f7";
+    wxString headerTextColor = isDark ? "#ffffff" : "#1a202c";
+    wxString altRowBgColor = isDark ? "#252535" : "#f7fafc";
+    wxString linkColor = isDark ? "#4a90e2" : "#3182ce";
+    wxString linkHoverColor = isDark ? "#6ba4e8" : "#2b6cb0";
+
+    wxString css = wxString::Format(
+        "<style>\n"
+        "html, body {\n"
+        "    margin: 0 !important;\n"
+        "    padding: 12px !important;\n"
+        "    font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif !important;\n"
+        "    font-size: 13px !important;\n"
+        "    line-height: 1.5 !important;\n"
+        "    background-color: %s !important;\n"
+        "    color: %s !important;\n"
+        "}\n"
+        "/* Data tables */\n"
+        "table[bgcolor=\"black\"], table[bgcolor=\"#3a3a3a\"], table[bgcolor=\"silver\"], table[bgcolor=\"#999999\"] {\n"
+        "    border-collapse: separate !important;\n"
+        "    border-spacing: 0 !important;\n"
+        "    border: 1px solid %s !important;\n"
+        "    border-radius: 6px !important;\n"
+        "    margin: 8px 0 !important;\n"
+        "    overflow: hidden !important;\n"
+        "    background-color: transparent !important;\n"
+        "}\n"
+        "/* Layout tables containing sub-tables */\n"
+        "table[bgcolor=\"white\"], table[bgcolor=\"#1e1e1e\"] {\n"
+        "    border: none !important;\n"
+        "    margin: 0 !important;\n"
+        "    background-color: transparent !important;\n"
+        "}\n"
+        "tr[bgcolor=\"navy\"], td[bgcolor=\"navy\"] {\n"
+        "    background-color: %s !important;\n"
+        "    color: %s !important;\n"
+        "}\n"
+        "tr[bgcolor=\"navy\"] td, tr[bgcolor=\"navy\"] th, td[bgcolor=\"navy\"] {\n"
+        "    color: %s !important;\n"
+        "    font-weight: 600 !important;\n"
+        "}\n"
+        "tr[bgcolor=\"navy\"] font, td[bgcolor=\"navy\"] font,\n"
+        "tr[bgcolor=\"navy\"] b, td[bgcolor=\"navy\"] b,\n"
+        "tr[bgcolor=\"navy\"] strong, td[bgcolor=\"navy\"] strong,\n"
+        "font[color=\"white\"], font[color=white] {\n"
+        "    color: %s !important;\n"
+        "}\n"
+        "tr[bgcolor=\"navy\"] a, td[bgcolor=\"navy\"] a,\n"
+        "tr[bgcolor=\"navy\"] a font, td[bgcolor=\"navy\"] a font {\n"
+        "    color: %s !important;\n"
+        "}\n"
+        "tr[bgcolor=\"navy\"] a:hover, td[bgcolor=\"navy\"] a:hover,\n"
+        "tr[bgcolor=\"navy\"] a:hover font, td[bgcolor=\"navy\"] a:hover font {\n"
+        "    text-decoration: underline !important;\n"
+        "    color: %s !important;\n"
+        "}\n"
+        "font[color=\"yellow\"], font[color=yellow] {\n"
+        "    color: inherit !important;\n"
+        "}\n"
+        "font[color=\"black\"], font[color=black] {\n"
+        "    color: %s !important;\n"
+        "}\n"
+        "tr[bgcolor=\"#DDDDFF\"], tr[bgcolor=\"#2c2c40\"], tr[bgcolor=\"#DDDDDD\"], tr[bgcolor=\"#34343c\"],\n"
+        "td[bgcolor=\"#DDDDFF\"], td[bgcolor=\"#2c2c40\"], td[bgcolor=\"#DDDDDD\"], td[bgcolor=\"#34343c\"] {\n"
+        "    background-color: %s !important;\n"
+        "}\n"
+        "tr[bgcolor=\"#CCCCFF\"], tr[bgcolor=\"#23233a\"], tr[bgcolor=\"#CCCCCC\"], tr[bgcolor=\"#2c2c2c\"],\n"
+        "td[bgcolor=\"#CCCCFF\"], td[bgcolor=\"#23233a\"], td[bgcolor=\"#CCCCCC\"], td[bgcolor=\"#2c2c2c\"] {\n"
+        "    background-color: %s !important;\n"
+        "}\n"
+        "td, th {\n"
+        "    padding: 6px 10px !important;\n"
+        "    border-bottom: 1px solid %s !important;\n"
+        "}\n"
+        "tr:last-child td, tr:last-child th {\n"
+        "    border-bottom: none !important;\n"
+        "}\n"
+        "pre {\n"
+        "    font-family: SFMono-Regular, Consolas, \"Liberation Mono\", Menlo, Courier, monospace !important;\n"
+        "    font-size: 1em !important;\n"
+        "    margin: 0 !important;\n"
+        "    white-space: pre-wrap !important;\n"
+        "    word-wrap: break-word !important;\n"
+        "}\n"
+        "a {\n"
+        "    color: %s !important;\n"
+        "    text-decoration: none !important;\n"
+        "}\n"
+        "a:hover {\n"
+        "    text-decoration: underline !important;\n"
+        "    color: %s !important;\n"
+        "}\n"
+        "img {\n"
+        "    vertical-align: middle !important;\n"
+        "}\n"
+        "</style>\n",
+        bgColor, textColor, borderColor,
+        headerBgColor, headerTextColor, headerTextColor, headerTextColor,
+        linkColor, linkHoverColor, textColor,
+        altRowBgColor, bgColor, borderColor, linkColor, linkHoverColor
+    );
+
+    wxString jsScript =
+        "<script>\n"
+        "document.addEventListener('keydown', function(e) {\n"
+        "    var key = e.key || '';\n"
+        "    var code = e.keyCode || 0;\n"
+        "    var isR = (key === 'r' || key === 'R' || code === 82);\n"
+        "    var isW = (key === 'w' || key === 'W' || code === 87);\n"
+        "    var isF5 = (key === 'F5' || code === 116);\n"
+        "    var isF4 = (key === 'F4' || code === 115);\n"
+        "    var ctrlOrCmd = e.ctrlKey || e.metaKey;\n"
+        "\n"
+        "    if (isF5 || (ctrlOrCmd && isR)) {\n"
+        "        e.preventDefault();\n"
+        "        e.stopPropagation();\n"
+        "        window.location.href = 'fr://refresh';\n"
+        "    } else if ((ctrlOrCmd && isW) || (e.ctrlKey && isF4)) {\n"
+        "        e.preventDefault();\n"
+        "        e.stopPropagation();\n"
+        "        window.location.href = 'fr://close_frame';\n"
+        "    }\n"
+        "}, true);\n"
+        "</script>\n";
+
+    wxString::size_type headPos = processedHtml.Lower().find("</head>");
+    if (headPos != wxString::npos)
+    {
+        processedHtml.insert(headPos, jsScript);
+        headPos = processedHtml.Lower().find("</head>");
+        processedHtml.insert(headPos, css);
+    }
+    else
+    {
+        processedHtml.insert(0, jsScript);
+        processedHtml.insert(0, css);
+    }
+
+    return processedHtml;
+}
+
 void PrintableHtmlWindow::setPageSource(const wxString& html)
 {
     pageSourceM = html;
     if (webViewM)
     {
-        wxString processedHtml = html;
-
-        // Convert templates path to a file:// URL format
+        wxString processedHtml = prepareHtmlForDisplay(html);
         wxString templatesPath = config().getHtmlTemplatesPath();
         wxString fileUrl = templatesPath;
         fileUrl.Replace("\\", "/");
@@ -215,163 +472,6 @@ void PrintableHtmlWindow::setPageSource(const wxString& html)
             fileUrl = "file:///" + fileUrl;
         else
             fileUrl = "file://" + fileUrl;
-
-        wxString templatesPathForward = templatesPath;
-        templatesPathForward.Replace("\\", "/");
-
-        // Standardize all template path separators in the HTML to forward slashes
-        processedHtml.Replace(templatesPath, templatesPathForward);
-
-        // Strip any existing file:// or file:/// prefixes to prevent double prefixing
-        processedHtml.Replace("file:///" + templatesPathForward, templatesPathForward);
-        processedHtml.Replace("file://" + templatesPathForward, templatesPathForward);
-
-        // Convert all raw template paths to file:// URLs
-        processedHtml.Replace(templatesPathForward, fileUrl);
-
-        // Construct and inject a modern, responsive CSS stylesheet
-        bool isDark = FRStyleManager::isEffectivelyDark();
-        wxString bgColor = isDark ? "#1e1e1e" : "#ffffff";
-        wxString textColor = isDark ? "#e0e0e0" : "#2d3748";
-        wxString borderColor = isDark ? "#3d3d3d" : "#e2e8f0";
-        wxString headerBgColor = isDark ? "#2c2c3e" : "#edf2f7";
-        wxString headerTextColor = isDark ? "#ffffff" : "#1a202c";
-        wxString altRowBgColor = isDark ? "#252535" : "#f7fafc";
-        wxString linkColor = isDark ? "#4a90e2" : "#3182ce";
-        wxString linkHoverColor = isDark ? "#6ba4e8" : "#2b6cb0";
-
-        wxString css = wxString::Format(
-            "<style>\n"
-            "html, body {\n"
-            "    margin: 0 !important;\n"
-            "    padding: 12px !important;\n"
-            "    font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif !important;\n"
-            "    font-size: 13px !important;\n"
-            "    line-height: 1.5 !important;\n"
-            "    background-color: %s !important;\n"
-            "    color: %s !important;\n"
-            "}\n"
-            "/* Data tables */\n"
-            "table[bgcolor=\"black\"], table[bgcolor=\"#3a3a3a\"], table[bgcolor=\"silver\"], table[bgcolor=\"#999999\"] {\n"
-            "    border-collapse: separate !important;\n"
-            "    border-spacing: 0 !important;\n"
-            "    border: 1px solid %s !important;\n"
-            "    border-radius: 6px !important;\n"
-            "    margin: 8px 0 !important;\n"
-            "    overflow: hidden !important;\n"
-            "    background-color: transparent !important;\n"
-            "}\n"
-            "/* Layout tables containing sub-tables */\n"
-            "table[bgcolor=\"white\"], table[bgcolor=\"#1e1e1e\"] {\n"
-            "    border: none !important;\n"
-            "    margin: 0 !important;\n"
-            "    background-color: transparent !important;\n"
-            "}\n"
-            "tr[bgcolor=\"navy\"], td[bgcolor=\"navy\"] {\n"
-            "    background-color: %s !important;\n"
-            "    color: %s !important;\n"
-            "}\n"
-            "tr[bgcolor=\"navy\"] td, tr[bgcolor=\"navy\"] th, td[bgcolor=\"navy\"] {\n"
-            "    color: %s !important;\n"
-            "    font-weight: 600 !important;\n"
-            "}\n"
-            "tr[bgcolor=\"navy\"] font, td[bgcolor=\"navy\"] font,\n"
-            "tr[bgcolor=\"navy\"] b, td[bgcolor=\"navy\"] b,\n"
-            "tr[bgcolor=\"navy\"] strong, td[bgcolor=\"navy\"] strong,\n"
-            "font[color=\"white\"], font[color=white] {\n"
-            "    color: %s !important;\n"
-            "}\n"
-            "tr[bgcolor=\"navy\"] a, td[bgcolor=\"navy\"] a,\n"
-            "tr[bgcolor=\"navy\"] a font, td[bgcolor=\"navy\"] a font {\n"
-            "    color: %s !important;\n"
-            "}\n"
-            "tr[bgcolor=\"navy\"] a:hover, td[bgcolor=\"navy\"] a:hover,\n"
-            "tr[bgcolor=\"navy\"] a:hover font, td[bgcolor=\"navy\"] a:hover font {\n"
-            "    text-decoration: underline !important;\n"
-            "    color: %s !important;\n"
-            "}\n"
-            "font[color=\"yellow\"], font[color=yellow] {\n"
-            "    color: inherit !important;\n"
-            "}\n"
-            "font[color=\"black\"], font[color=black] {\n"
-            "    color: %s !important;\n"
-            "}\n"
-            "tr[bgcolor=\"#DDDDFF\"], tr[bgcolor=\"#2c2c40\"], tr[bgcolor=\"#DDDDDD\"], tr[bgcolor=\"#34343c\"],\n"
-            "td[bgcolor=\"#DDDDFF\"], td[bgcolor=\"#2c2c40\"], td[bgcolor=\"#DDDDDD\"], td[bgcolor=\"#34343c\"] {\n"
-            "    background-color: %s !important;\n"
-            "}\n"
-            "tr[bgcolor=\"#CCCCFF\"], tr[bgcolor=\"#23233a\"], tr[bgcolor=\"#CCCCCC\"], tr[bgcolor=\"#2c2c2c\"],\n"
-            "td[bgcolor=\"#CCCCFF\"], td[bgcolor=\"#23233a\"], td[bgcolor=\"#CCCCCC\"], td[bgcolor=\"#2c2c2c\"] {\n"
-            "    background-color: %s !important;\n"
-            "}\n"
-            "td, th {\n"
-            "    padding: 6px 10px !important;\n"
-            "    border-bottom: 1px solid %s !important;\n"
-            "}\n"
-            "tr:last-child td, tr:last-child th {\n"
-            "    border-bottom: none !important;\n"
-            "}\n"
-            "pre {\n"
-            "    font-family: SFMono-Regular, Consolas, \"Liberation Mono\", Menlo, Courier, monospace !important;\n"
-            "    font-size: 1em !important;\n"
-            "    margin: 0 !important;\n"
-            "    white-space: pre-wrap !important;\n"
-            "    word-wrap: break-word !important;\n"
-            "}\n"
-            "a {\n"
-            "    color: %s !important;\n"
-            "    text-decoration: none !important;\n"
-            "}\n"
-            "a:hover {\n"
-            "    text-decoration: underline !important;\n"
-            "    color: %s !important;\n"
-            "}\n"
-            "img {\n"
-            "    vertical-align: middle !important;\n"
-            "}\n"
-            "</style>\n",
-            bgColor, textColor, borderColor,
-            headerBgColor, headerTextColor, headerTextColor, headerTextColor,
-            linkColor, linkHoverColor, textColor,
-            altRowBgColor, bgColor, borderColor, linkColor, linkHoverColor
-        );
-
-        wxString jsScript =
-            "<script>\n"
-            "document.addEventListener('keydown', function(e) {\n"
-            "    var key = e.key || '';\n"
-            "    var code = e.keyCode || 0;\n"
-            "    var isR = (key === 'r' || key === 'R' || code === 82);\n"
-            "    var isW = (key === 'w' || key === 'W' || code === 87);\n"
-            "    var isF5 = (key === 'F5' || code === 116);\n"
-            "    var isF4 = (key === 'F4' || code === 115);\n"
-            "    var ctrlOrCmd = e.ctrlKey || e.metaKey;\n"
-            "\n"
-            "    if (isF5 || (ctrlOrCmd && isR)) {\n"
-            "        e.preventDefault();\n"
-            "        e.stopPropagation();\n"
-            "        window.location.href = 'fr://refresh';\n"
-            "    } else if ((ctrlOrCmd && isW) || (e.ctrlKey && isF4)) {\n"
-            "        e.preventDefault();\n"
-            "        e.stopPropagation();\n"
-            "        window.location.href = 'fr://close_frame';\n"
-            "    }\n"
-            "}, true);\n"
-            "</script>\n";
-
-        wxString::size_type headPos = processedHtml.Lower().find("</head>");
-        if (headPos != wxString::npos)
-        {
-            processedHtml.insert(headPos, jsScript);
-            headPos = processedHtml.Lower().find("</head>");
-            processedHtml.insert(headPos, css);
-        }
-        else
-        {
-            processedHtml.insert(0, jsScript);
-            processedHtml.insert(0, css);
-        }
-
         // Remove old temp file if it exists
         if (!tempFileM.IsEmpty() && wxFileExists(tempFileM))
         {

@@ -345,7 +345,9 @@ bool FRStyleManager::isEffectivelyDark()
     int theme = config().get(_DARKMODE_KEY, (int)ThemeSystem);
     if (theme == ThemeDark) return true;
     if (theme == ThemeLight) return false;
-    return wxSystemSettings::GetAppearance().IsDark();
+    if (wxTheApp && wxTheApp->IsGUI())
+        return wxSystemSettings::GetAppearance().IsDark();
+    return false;
 }
 
 void FRStyleManager::loadConfig()

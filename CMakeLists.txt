@@ -1236,6 +1236,21 @@ add_executable(code_template_alias_test
 target_link_libraries(code_template_alias_test ${wxWidgets_LIBRARIES} ${FR_LIBS})
 add_test(NAME code_template_alias_test COMMAND code_template_alias_test)
 
+add_executable(printable_html_window_test
+    ${SOURCEDIR}/gui/controls/PrintableHtmlWindowTest.cpp
+    ${SOURCEDIR}/gui/controls/PrintableHtmlWindow.cpp
+    ${SOURCEDIR}/gui/FRStyleManager.cpp
+    ${SOURCEDIR}/gui/FRStyle.cpp
+    ${SOURCEDIR}/config/Config.cpp
+    ${SOURCEDIR}/core/Observer.cpp
+    ${SOURCEDIR}/core/Subject.cpp
+    ${SOURCEDIR}/core/FRError.cpp
+    ${SOURCEDIR}/core/StringUtils.cpp
+    ${SOURCEDIR}/core/URIProcessor.cpp
+)
+target_link_libraries(printable_html_window_test ${wxWidgets_LIBRARIES} ${FR_LIBS})
+add_test(NAME printable_html_window_test COMMAND printable_html_window_test)
+
 
 if (APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES
