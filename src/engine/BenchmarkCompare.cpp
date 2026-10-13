@@ -229,6 +229,24 @@ BenchmarkSnapshot anonymizeBenchmarkSnapshot(const BenchmarkSnapshot& snapshot)
     return s;
 }
 
+BenchmarkComparison anonymizeBenchmarkComparison(const BenchmarkComparison& comparison)
+{
+    BenchmarkComparison c = compareBenchmarkSnapshots(
+        anonymizeBenchmarkSnapshot(comparison.newer),
+        anonymizeBenchmarkSnapshot(comparison.older));
+    c.newerIsCurrentRun = comparison.newerIsCurrentRun;
+    for (const BenchmarkSnapshot* s : { &comparison.newer, &comparison.older })
+    {
+        wxString host = s->host;
+        host.Trim().Trim(false);
+        if (host.length() >= 3)
+            c.hiddenTexts.push_back({ host, _("<hidden>") });
+    }
+    std::stable_sort(c.hiddenTexts.begin(), c.hiddenTexts.end(),
+        [](const auto& a, const auto& b) { return a.first.length() > b.first.length(); });
+    return c;
+}
+
 wxString formatBenchmarkSnapshot(const BenchmarkSnapshot& s)
 {
     // an HTML comment: invisible in Markdown viewers and in the browser,
@@ -737,7 +755,8 @@ wxString formatBenchmarkComparisonMarkdown(const BenchmarkComparison& c, bool st
 
 wxString BenchmarkComparison::toMarkdown() const
 {
-    return formatBenchmarkComparisonMarkdown(*this, true);
+    return hideBenchmarkTexts(formatBenchmarkComparisonMarkdown(*this, true), hiddenTexts,
+        false);
 }
 
 } // namespace fr

@@ -1131,6 +1131,106 @@ void testSystemInfoParsers()
         "no host name for embedded connections");
 }
 
+// what keeps a page from working in Internet Explorer 11, empty if nothing:
+// every declaration it does not understand needs one before it that it
+// does, and the page must not depend on a script or a browser switch
+wxString findLegacyProblem(const wxString& html)
+{
+    if (!html.StartsWith("<!doctype html>\n"))
+        return "no doctype";
+    // X-UA-Compatible only works before every other element but the title
+    const int ua = html.Find("<head><meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">");
+    if (ua == wxNOT_FOUND || ua > html.Find("<meta charset=\"utf-8\">")
+        || html.Find("<meta charset=\"utf-8\">") > html.Find("<style>"))
+    {
+        return "X-UA-Compatible missing or not first";
+    }
+    // <nav> cannot be styled in the mode of Internet Explorer 8
+    for (const char* forbidden : { "<script", "@import", "@supports", "-ms-high-contrast",
+        "expression(", "<nav" })
+    {
+        if (html.Contains(forbidden))
+            return wxString("contains ") + forbidden;
+    }
+    const int styleStart = html.Find("<style>") + 7;
+    const wxString css = html.Mid(styleStart, html.Find("</style>") - styleStart);
+    int pairs = 0;
+    size_t pos = 0;
+    for (size_t open = css.find('{'); open != wxString::npos; open = css.find('{', pos))
+    {
+        const size_t next = css.find_first_of("{}", open + 1);
+        pos = open + 1;
+        if (next == wxString::npos || css[next] == '{')
+            continue;
+        wxString previousProperty, previousValue;
+        for (const wxString& declaration : wxSplit(css.Mid(pos, next - pos), ';', '\0'))
+        {
+            wxString property = declaration.BeforeFirst(':');
+            property.Trim().Trim(false);
+            wxString value = declaration.AfterFirst(':');
+            value.Trim().Trim(false);
+            // Internet Explorer takes "font: 13px var(--x)" for the name of
+            // a font, the fallback before it would not help; it drops a
+            // font shorthand with -apple-system
+            if ((property == "font" || property == "font-family") && value.Contains("var("))
+                return "a font from a variable: " + declaration;
+            if (property == "font" && value.Contains("-apple-system"))
+                return "a font shorthand that Internet Explorer drops: " + declaration;
+            wxString expected;
+            if (value.Contains("var(") && !property.StartsWith("--"))
+            {
+                if (previousProperty != property || previousValue.Contains("var("))
+                    return "no fallback for: " + declaration;
+                ++pairs;
+            }
+            else if (property == "display" && value == "grid")
+                expected = "display:block";
+            else if (property == "display" && value == "inline-grid")
+                expected = "display:inline-block";
+            else if (property == "overflow-wrap" && value == "anywhere")
+                expected = "word-wrap:break-word";
+            if (!expected.empty())
+            {
+                if (previousProperty + ":" + previousValue != expected)
+                    return "no fallback for: " + declaration;
+                ++pairs;
+            }
+            previousProperty = property;
+            previousValue = value;
+        }
+    }
+    return pairs > 100 ? wxString() : wxString("too few fallbacks");
+}
+
+void testCssFallbacks()
+{
+    std::cout << "Internet Explorer 11\n";
+    const wxString css = ":root { --ink: #111; --gap: 4px; }\n"
+        ":root[data-theme=\"dark\"] { --ink: #eee; }\n"
+        "a { color: var(--ink); margin: var(--gap) 0; }\n"
+        "@media (max-width: 640px) { .x { display: grid; gap: 4px; } }\n"
+        ".y{overflow-wrap:anywhere}\n"
+        ".z { margin-left: 8px; margin-left: var(--gap); }\n"
+        ".t { display: inline-grid; color: var(--unknown); }\n";
+    const wxString light = addBenchmarkCssFallbacks(css, false);
+    check(light.Contains("a { color: #111; color: var(--ink); margin: 4px 0; "
+        "margin: var(--gap) 0; }"), "variables get a fixed value before them");
+    check(addBenchmarkCssFallbacks(css, true).Contains("color: #eee; color: var(--ink);")
+        && addBenchmarkCssFallbacks(css, true).Contains("margin: 4px 0; margin: var(--gap) 0;"),
+        "the values of the dark theme, the light ones where it has none");
+    check(light.Contains("{ display: block; display: grid; gap: 4px; }")
+        && light.Contains(".y{word-wrap: break-word; overflow-wrap:anywhere}")
+        && light.Contains("{ display: inline-block; display: inline-grid;"),
+        "grid becomes a block, overflow-wrap: anywhere breaks words, also in @media");
+    check(light.Contains(".z { margin-left: 8px; margin-left: var(--gap); }"),
+        "a pair written for Internet Explorer is kept");
+    check(light.Contains("color: var(--unknown); }") && !light.Contains("color: ; "),
+        "an unknown variable is left alone");
+    check(light.Contains(":root { --ink: #111; --gap: 4px; }")
+        && addBenchmarkCssFallbacks("p { margin: 0; }", false) == "p { margin: 0; }",
+        "everything else stays as it is");
+}
+
 void testHtml()
 {
     std::cout << "HTML report\n";
@@ -1152,7 +1252,7 @@ void testHtml()
         "saved page follows the system theme");
     check(html.Contains("Server &lt;b&gt;x&lt;/b&gt; &amp; &quot;y&quot;")
         && !html.Contains("<b>x</b>"), "text is escaped");
-    check(html.Find("<nav class=\"pages\">") < html.Find("<div class=\"overview\">")
+    check(html.Find("<div class=\"pages\">") < html.Find("<div class=\"overview\">")
         && html.Find("<div class=\"overview\">") < html.Find("id=\"intro\"")
         && html.Find("id=\"intro\"") < html.Find("id=\"key-values\"")
         && html.Find("id=\"key-values\"") < html.Find("id=\"parts\"")
@@ -1201,12 +1301,21 @@ void testHtml()
             "id=\"c%d\">", i));
         tiles += html.Contains(wxString::Format("<label class=\"tile t%d\" for=\"c%d\">", i, i));
         panels += html.Contains(wxString::Format("<div class=\"panel p%d\">", i))
-            && html.Contains(wxString::Format("#c%d:checked~.tiles .p%d{display:block}", i, i));
+            && html.Contains(wxString::Format("#c%d:not(:checked)~.tiles .p%d{display:none}", i, i));
     }
     check(toggles == sections && tiles == sections && panels == sections,
         "one tile, one panel and one toggle per part");
-    check(html.Contains(".cats > .toggle { position: fixed;"),
+    check(html.Contains(".toggle { position: fixed;"),
         "the toggles do not scroll the page when a tile is clicked");
+    // the mode of Internet Explorer 8, which knows no :checked, shows
+    // everything and no link that does not work
+    check(html.Contains(".pages { display: none;")
+        && html.Contains(".view-toggle:checked ~ .pages { display: block; }")
+        && html.Contains(".panel { display: block;")
+        && html.Contains(".tile .more-link, .panel-head .close { display: none; }")
+        && html.Contains(".view-toggle:checked ~ .details .more-link, "
+            ".view-toggle:checked ~ .details .close { display: inline; }"),
+        "without :checked both views and every panel are shown");
     check(html.Contains("Server disk") && html.Contains("Settings")
         && html.Contains("Programming patterns"), "every part");
     check(html.Contains("<code>DefaultDbCachePages</code>") && html.Contains("What it does"),
@@ -1224,6 +1333,18 @@ void testHtml()
         "connection</dt>"), "the glossary explains terms and tests");
     check(!html.Contains("http://") && !html.Contains("https://")
         && !html.Contains("<script"), "no external resources and no scripts");
+    const wxString legacyDark = findLegacyProblem(html);
+    const wxString legacyLight = findLegacyProblem(report.toHtml());
+    if (!legacyDark.empty() || !legacyLight.empty())
+        std::cerr << "    " << (legacyDark + legacyLight).ToStdString() << "\n";
+    check(legacyDark.empty() && legacyLight.empty()
+        && html.Contains("html, body { margin: 0; background: #1e1e1e; background: var(--bg);")
+        && report.toHtml().Contains("background: #ffffff; background: var(--bg);"),
+        "a page for Internet Explorer 11 as well, in the theme of FlameRobin");
+    check(html.Contains("html, body { margin: 0; background: #1e1e1e; background: var(--bg); "
+        "color: #e0e0e0; color: var(--ink); font-size: 13px; line-height: 1.5; font-family: "
+        "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif; }"),
+        "the font without a variable, so that Internet Explorer finds it");
     // SVG coordinates and CSS widths must not use a decimal comma
     check(!html.Contains("width:0,") && !html.Contains("y=\"0,")
         && !html.Contains("% \""), "locale independent numbers");
@@ -1254,7 +1375,8 @@ void testAnonymized()
     m.serverConfig["RemoteBindAddress"] = "172.20.1.9";
     m.serverConfigExplicit.insert("RemoteBindAddress");
     m.versionList = { "WI-V5.0.4.1812 Firebird 5.0",
-        "WI-V5.0.4.1812 Firebird 5.0/tcp (DBSERVER01)/P19:C" };
+        "WI-V5.0.4.1812 Firebird 5.0/tcp (DbServer01.kunde.local)/P19:C" };
+    m.securityDatabase = "D:\\Kunde\\Sicher\\security5.fdb";
     m.system.fullHostName = "PC-MUELLER.kunde.local";
     m.system.osUser = "KUNDE\\mueller";
     m.system.cpuName = "Intel Core i7-13800H";
@@ -1271,6 +1393,12 @@ void testAnonymized()
     m.networkPath->serverAddresses = { "192.168.10.5" };
     m.networkPath->localAddress = "192.168.10.77";
     m.networkPath->adapterType = "Ethernet";
+    // free texts, in another case than the names
+    m.system.firewallNote = "rule Allow dbServer01 is off";
+    m.system.mountOptions = "addr=192.168.10.5";
+    m.system.osSettings = { { "Shares", "\\\\pc-mueller\\daten" } };
+    // a field that anonymized() does not know
+    m.system.virtualization = "Hyper-V on Pc-Mueller";
     m.tempDirFileMs = 4.0;
     report.evaluate();
     check(findHint(report.hints, "A router or VPN sits between") != nullptr,
@@ -1290,12 +1418,14 @@ void testAnonymized()
     const wxString html = shared.toHtml();
     const wxString md = shared.toMarkdown();
     bool clean = true;
-    for (const char* secret : { "dbserver01", "DBSERVER01", "PC-MUELLER", "mueller",
-        "MUELLER", "kunde.local", "KUNDE", "Kunde", "192.168.10", "BUCHHALTUNG",
-        "FirebirdTemp", "AppData", "172.20.1.9", "10.77.1.2", "KUNDEDB", "SRV-ALT",
-        "172.31.5.6", "172.31.5.7" })
+    // without regard to case
+    const wxString lowerHtml = html.Lower();
+    const wxString lowerMd = md.Lower();
+    for (const char* secret : { "dbserver01", "pc-mueller", "mueller", "kunde.local", "kunde",
+        "192.168.10", "buchhaltung", "firebirdtemp", "appdata", "172.20.1.9", "10.77.1.2",
+        "kundedb", "srv-alt", "172.31.5.6", "172.31.5.7", "sicher", "security5.fdb" })
     {
-        if (html.Contains(secret) || md.Contains(secret))
+        if (lowerHtml.Contains(secret) || lowerMd.Contains(secret))
         {
             std::cerr << "    still contains: " << secret << "\n";
             clean = false;
@@ -1314,6 +1444,39 @@ void testAnonymized()
         "the temporary database keeps only its file name");
     check(!report.anonymous && report.metrics.connectionHost == "dbserver01",
         "the original report is unchanged");
+    check(shared.metrics.system.virtualization == "Hyper-V on Pc-Mueller"
+        && html.Contains("Hyper-V on " + shared.metrics.localHostName)
+        && md.Contains("Hyper-V on " + shared.metrics.localHostName),
+        "a name in a field that anonymized() does not know goes from the finished report");
+
+    // names that the report uses as words stay out of the finished report
+    BenchmarkReport common = report;
+    common.metrics.system.osUser = "WORKGROUP\\Administrator";
+    const BenchmarkReport sharedCommon = common.anonymized();
+    check(std::none_of(sharedCommon.hiddenTexts.begin(), sharedCommon.hiddenTexts.end(),
+        [](const auto& h) { return h.first.CmpNoCase("Administrator") == 0
+            || h.first.CmpNoCase("WORKGROUP") == 0; })
+        && std::any_of(sharedCommon.hiddenTexts.begin(), sharedCommon.hiddenTexts.end(),
+            [](const auto& h) { return h.first == "WORKGROUP\\Administrator"; }),
+        "common words such as Administrator are not replaced in the whole report");
+}
+
+void testHiddenTexts()
+{
+    std::cout << "Private texts in a finished report\n";
+    const std::vector<std::pair<wxString, wxString>> hidden = { { "server01", "server" },
+        { "A&B-PC", "<hidden>" }, { "DEV", "client" } };
+    const wxString html = hideBenchmarkTexts("<p class=\"server01\" aria-label=\"Server01 "
+        "chart\">SERVER01 and a&amp;b-pc</p><style>.server01 { color: red; }</style>"
+        "<!-- host = Server01 -->", hidden, true);
+    check(html == "<p class=\"server01\" aria-label=\"server chart\">server and &lt;hidden&gt;"
+        "</p><style>.server01 { color: red; }</style><!-- host = server -->",
+        "in texts, attribute values and comments, without regard to case, not in classes "
+        "and styles");
+    check(hideBenchmarkTexts("dev, DEV-PC, devices, Dev_1", hidden, false)
+        == "client, client-PC, devices, Dev_1", "short names only as words of their own");
+    check(hideBenchmarkTexts("Server01.local", hidden, false) == "server.local"
+        && hideBenchmarkTexts("text", {}, true) == "text", "longer names also within words");
 }
 
 void testComparison()
@@ -1434,6 +1597,8 @@ void testComparison()
     // two saved reports
     BenchmarkComparison files = compareBenchmarkSnapshots(
         *parseBenchmarkSnapshot(fasterMd), *earlier);
+    check(findLegacyProblem(html).empty() && findLegacyProblem(files.toHtml("dark")).empty(),
+        "comparisons for Internet Explorer 11 as well");
     check(files.toHtml().Contains("Comparison of two benchmark runs")
         && files.toMarkdown().Contains("| **All parts** |")
         && files.toMarkdown().Contains("Later run")
@@ -1475,6 +1640,22 @@ void testComparison()
     const wxString sharedHtml = sharedReport.anonymized().toHtml();
     check(!sharedHtml.Contains("PC-MUELLER") && !sharedHtml.Contains("E:\\Temp")
         && !sharedHtml.Contains("10.1.2.3"), "the shared report hides the earlier run as well");
+
+    // two saved reports compared: the computer names go everywhere, also
+    // where a run names its computer in another case
+    BenchmarkSnapshot named = *earlier;
+    named.host = "PC-MUELLER";
+    named.facts.push_back({ "virtual", "Hyper-V on pc-mueller" });
+    BenchmarkComparison twoFiles = compareBenchmarkSnapshots(named, *earlier);
+    twoFiles.newerIsCurrentRun = true;
+    const BenchmarkComparison sharedFiles = anonymizeBenchmarkComparison(twoFiles);
+    check(twoFiles.toMarkdown().Contains("Hyper-V on pc-mueller")
+        && twoFiles.toHtml().Contains("Hyper-V on pc-mueller")
+        && !sharedFiles.toHtml().Lower().Contains("pc-mueller")
+        && !sharedFiles.toMarkdown().Lower().Contains("pc-mueller")
+        && sharedFiles.toMarkdown().Contains("Hyper-V on <hidden>")
+        && sharedFiles.newerIsCurrentRun && sharedFiles.newer.host.empty(),
+        "a shared comparison of two files hides their computer names");
 }
 
 } // namespace
@@ -1498,10 +1679,12 @@ int main(int argc, char** argv)
     testValueAdvice();
     testParts();
     testReport();
+    testCssFallbacks();
     testHtml();
     testSql();
     testSystemInfoParsers();
     testAnonymized();
+    testHiddenTexts();
     testComparison();
 
     std::cout << (ok ? "ALL BENCHMARK TESTS PASSED\n" : "SOME BENCHMARK TESTS FAILED\n");

@@ -303,6 +303,84 @@ wxString directoryOf(const wxString& path)
     return slash == wxString::npos ? wxString() : path.Left(slash);
 }
 
+// the name of a computer without its domain; empty for an address
+wxString shortHostName(const wxString& name)
+{
+    if (name.Contains(":") || !name.Contains(".")
+        || name.find_first_not_of("0123456789.") == wxString::npos)
+    {
+        return wxString();
+    }
+    return name.BeforeFirst('.');
+}
+
+// names that are no secret and that the text of the report uses as well,
+// e.g. a computer named FIREBIRD, the user Administrator or the loopback
+// address: they are only replaced in the same case and not in the finished
+// report
+bool isCommonBenchmarkWord(const wxString& text)
+{
+    for (const char* word : { "admin", "administrator", "client", "database", "default",
+        "domain", "firebird", "guest", "home", "local", "localhost", "public", "root",
+        "server", "system", "test", "user", "users", "workgroup", "127.0.0.1", "::1" })
+    {
+        if (text.CmpNoCase(word) == 0)
+            return true;
+    }
+    return false;
+}
+
+bool isWordCharacter(wxUniChar c)
+{
+    if (!c.IsAscii())
+        return true;
+    const char a = char(c.GetValue());
+    return (a >= '0' && a <= '9') || (a >= 'a' && a <= 'z') || (a >= 'A' && a <= 'Z')
+        || a == '_';
+}
+
+// replaces every occurrence of text, without regard to case unless
+// matchCase; a text shorter than 6 characters only as a word of its own,
+// so that it does not change parts of other words
+void replaceHiddenText(wxString& s, const wxString& text, const wxString& replacement,
+    bool matchCase)
+{
+    if (text.empty())
+        return;
+    const bool wholeWord = text.length() < 6;
+    const wxString haystack = matchCase ? s : s.Lower();
+    const wxString needle = matchCase ? text : text.Lower();
+    wxString result;
+    size_t done = 0;
+    size_t pos = haystack.find(needle);
+    while (pos != wxString::npos)
+    {
+        const size_t end = pos + needle.length();
+        if (wholeWord && ((pos > 0 && isWordCharacter(s[pos - 1]))
+            || (end < s.length() && isWordCharacter(s[end]))))
+        {
+            pos = haystack.find(needle, pos + 1);
+            continue;
+        }
+        result += s.substr(done, pos - done) + replacement;
+        done = end;
+        pos = haystack.find(needle, end);
+    }
+    if (done > 0)
+        s = result + s.substr(done);
+}
+
+wxString escapeHtml(const wxString& text)
+{
+    wxString s = text;
+    s.Replace("&", "&amp;");
+    s.Replace("<", "&lt;");
+    s.Replace(">", "&gt;");
+    s.Replace("\"", "&quot;");
+    s.Replace("'", "&#39;");
+    return s;
+}
+
 void addRow(BenchmarkInfoGroup& group, const wxString& name, const wxString& value)
 {
     if (!value.empty())
@@ -727,7 +805,9 @@ BenchmarkReport BenchmarkReport::anonymized() const
     BenchmarkSystemInfo& s = m.system;
 
     // every private text and what replaces it; longer texts are replaced
-    // first, so that a host name inside a full name is handled correctly
+    // first, so that a host name inside a full name is handled correctly.
+    // Without regard to case: Firebird and Windows may write the same name
+    // in different ways.
     std::vector<std::pair<wxString, wxString>> privateTexts;
     auto hide = [&privateTexts](const wxString& text, const wxString& replacement)
     {
@@ -737,6 +817,12 @@ BenchmarkReport BenchmarkReport::anonymized() const
         if (t.length() >= 3 && t != replacement)
             privateTexts.push_back({ t, replacement });
     };
+    // a host name, its name without the domain as well
+    auto hideHost = [&hide](const wxString& name, const wxString& replacement)
+    {
+        hide(name, replacement);
+        hide(shortHostName(name), replacement);
+    };
     const wxString thisMachine = m.runLocation == BenchmarkRunLocation::Client
         ? _("client") : _("server");
     const wxString path = _("<path>");
@@ -744,11 +830,11 @@ BenchmarkReport BenchmarkReport::anonymized() const
     const wxString user = _("<user>");
     const wxString hidden = _("<hidden>");
 
-    hide(utf8(s.fullHostName), thisMachine);
-    hide(m.localHostName, thisMachine);
-    hide(m.connectionHost, _("server"));
-    hide(m.serverHostName, _("server"));
-    hide(m.clientHostSeenByServer, _("client"));
+    hideHost(utf8(s.fullHostName), thisMachine);
+    hideHost(m.localHostName, thisMachine);
+    hideHost(m.connectionHost, _("server"));
+    hideHost(m.serverHostName, _("server"));
+    hideHost(m.clientHostSeenByServer, _("client"));
     // the domain of the computer name
     if (s.fullHostName.find('.') != std::string::npos)
         hide(utf8(s.fullHostName.substr(s.fullHostName.find('.') + 1)), hidden);
@@ -768,7 +854,8 @@ BenchmarkReport BenchmarkReport::anonymized() const
         : m.remoteAddress.BeforeLast('/'), address);
     if (m.networkPath)
     {
-        hide(utf8(m.networkPath->serverHost), _("server"));
+        hideHost(utf8(m.networkPath->serverHost), _("server"));
+        hide(utf8(m.networkPath->serverAddress), address);
         hide(utf8(m.networkPath->localAddress), address);
         for (const auto& a : m.networkPath->serverAddresses)
             hide(utf8(a), address);
@@ -780,6 +867,15 @@ BenchmarkReport BenchmarkReport::anonymized() const
     if (m.inspectedDatabase)
         hide(m.inspectedDatabase->fileName, path);
     hide(benchmarkDatabasePath, path);
+    // "Default" and "Self" stay, a file is a path
+    if (m.securityDatabase.Contains("/") || m.securityDatabase.Contains("\\"))
+    {
+        hide(m.securityDatabase, path);
+        hide(directoryOf(m.securityDatabase), path);
+    }
+    // the computer of an earlier run
+    if (earlier)
+        hideHost(earlier->host, hidden);
     for (const auto& p : s.firebirdServers)
     {
         hide(utf8(p.name), _("Firebird service"));
@@ -809,8 +905,17 @@ BenchmarkReport BenchmarkReport::anonymized() const
     auto scrub = [&privateTexts](wxString& text)
     {
         for (const auto& p : privateTexts)
-            text.Replace(p.first, p.second);
+            replaceHiddenText(text, p.first, p.second, isCommonBenchmarkWord(p.first));
     };
+    // what the report does not know as a field, e.g. a name in a note, is
+    // replaced in its finished text: toMarkdown(), toHtml()
+    for (const auto& p : privateTexts)
+    {
+        if (!isCommonBenchmarkWord(p.first))
+            r.hiddenTexts.push_back(p);
+    }
+    std::stable_sort(r.hiddenTexts.begin(), r.hiddenTexts.end(),
+        [](const auto& a, const auto& b) { return a.first.length() > b.first.length(); });
     auto scrubUtf8 = [&scrub](std::string& text)
     {
         wxString t = utf8(text);
@@ -843,11 +948,26 @@ BenchmarkReport BenchmarkReport::anonymized() const
         scrub(skipped.second);
     scrub(m.firebirdUser);
     scrub(m.firebirdRole);
+    scrub(m.securityDatabase);
+    scrub(m.eventStatus);
     s.fullHostName.clear();
     s.osUser = s.osUser.empty() ? std::string() : std::string(user.utf8_str());
     for (auto& a : s.addresses)
         a.address = std::string(address.utf8_str());
     scrubUtf8(s.storagePath);
+    // notes and settings of the system are free texts
+    for (std::string* text : { &s.kernel, &s.mountOptions, &s.firewallNote, &s.antivirusNote,
+        &s.storageHealthNote, &s.memoryModulesNote })
+    {
+        scrubUtf8(*text);
+    }
+    for (auto& a : s.antivirus)
+        scrubUtf8(a);
+    for (auto& setting : s.osSettings)
+    {
+        scrubUtf8(setting.first);
+        scrubUtf8(setting.second);
+    }
     for (auto& p : s.firebirdServers)
     {
         scrubUtf8(p.name);
@@ -869,10 +989,14 @@ BenchmarkReport BenchmarkReport::anonymized() const
     if (m.networkPath)
     {
         m.networkPath->serverHost = std::string(_("server").utf8_str());
+        if (!m.networkPath->serverAddress.empty())
+            m.networkPath->serverAddress = std::string(address.utf8_str());
         m.networkPath->localAddress = std::string(address.utf8_str());
         for (auto& a : m.networkPath->serverAddresses)
             a = std::string(address.utf8_str());
         scrubUtf8(m.networkPath->note);
+        scrubUtf8(m.networkPath->adapterName);
+        scrubUtf8(m.networkPath->adapterDescription);
     }
 
     // the earlier run of a comparison may come from another machine: its
@@ -906,6 +1030,9 @@ BenchmarkReport BenchmarkReport::anonymized() const
         scrub(result.test);
         scrub(result.value);
         scrub(result.details);
+        scrub(result.explanation);
+        scrub(result.hint);
+        scrub(result.amount);
     }
     for (auto& h : r.hints)
     {
@@ -916,12 +1043,104 @@ BenchmarkReport BenchmarkReport::anonymized() const
     for (auto& s : r.settings)
     {
         scrub(s.value);
+        scrub(s.meaning);
         if (s.value.Contains("/") || s.value.Contains("\\"))
             s.value = path;
     }
     for (auto& p : r.parts)
+    {
+        scrub(p.name);
         scrub(p.machine);
+        for (auto& v : p.values)
+        {
+            scrub(v.title);
+            scrub(v.valueText);
+            scrub(v.amountText);
+        }
+    }
     return r;
+}
+
+wxString hideBenchmarkTexts(const wxString& text,
+    const std::vector<std::pair<wxString, wxString>>& hidden, bool html)
+{
+    auto hide = [&hidden](wxString part, bool escaped)
+    {
+        for (const auto& h : hidden)
+        {
+            if (escaped)
+                replaceHiddenText(part, escapeHtml(h.first), escapeHtml(h.second), false);
+            else
+                replaceHiddenText(part, h.first, h.second, false);
+        }
+        return part;
+    };
+    if (hidden.empty())
+        return text;
+    if (!html)
+        return hide(text, false);
+
+    // HTML: the texts, the comments (the snapshot) and the values of
+    // attributes such as aria-label; the style sheet, the names of elements
+    // and the values of class, id and similar attributes stay as they are
+    wxString result;
+    result.reserve(text.length());
+    size_t pos = 0;
+    while (pos < text.length())
+    {
+        const size_t tag = text.find('<', pos);
+        if (tag == wxString::npos)
+        {
+            result += hide(text.substr(pos), true);
+            break;
+        }
+        result += hide(text.substr(pos, tag - pos), true);
+        if (text.compare(tag, 4, "<!--") == 0)
+        {
+            const size_t end = text.find("-->", tag + 4);
+            const size_t stop = end == wxString::npos ? text.length() : end;
+            result += "<!--" + hide(text.substr(tag + 4, stop - tag - 4), false);
+            pos = stop;
+            continue;
+        }
+        if (text.compare(tag, 7, "<style>") == 0)
+        {
+            const size_t end = text.find("</style>", tag);
+            const size_t stop = end == wxString::npos ? text.length() : end;
+            result += text.substr(tag, stop - tag);
+            pos = stop;
+            continue;
+        }
+        const size_t close = text.find('>', tag);
+        const size_t stop = close == wxString::npos ? text.length() : close + 1;
+        const wxString element = text.substr(tag, stop - tag);
+        size_t done = 0;
+        for (size_t quote = element.find("=\""); quote != wxString::npos;
+            quote = element.find("=\"", done))
+        {
+            const size_t valueEnd = element.find('"', quote + 2);
+            if (valueEnd == wxString::npos)
+                break;
+            const size_t space = element.find_last_of(" \t\r\n", quote);
+            const wxString name = space == wxString::npos ? wxString()
+                : element.substr(space + 1, quote - space - 1);
+            const wxString value = element.substr(quote + 2, valueEnd - quote - 2);
+            result += element.substr(done, quote + 2 - done);
+            if (name == "class" || name == "id" || name == "for" || name == "name"
+                || name == "type" || name == "role" || name == "lang" || name == "style"
+                || name == "content" || name == "charset" || name == "http-equiv"
+                || name == "data-theme")
+            {
+                result += value;
+            }
+            else
+                result += hide(value, true);
+            done = valueEnd;
+        }
+        result += element.substr(done);
+        pos = stop;
+    }
+    return result;
 }
 
 wxString getBenchmarkUnitHint(const wxString& value)

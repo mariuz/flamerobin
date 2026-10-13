@@ -40,6 +40,7 @@
 #include "gui/BaseDialog.h"
 #include "metadata/database.h"
 
+class BenchmarkReportPage;
 class wxCollapsiblePane;
 class wxCollapsiblePaneEvent;
 class wxWebView;
@@ -100,10 +101,17 @@ private:
     // the HTML report, or the Markdown text where no web view is available
     wxWebView* webview_report = nullptr;
     wxTextCtrl* text_report = nullptr;
+#if wxUSE_WEBVIEW
+    // how the report gets into webview_report
+    std::unique_ptr<BenchmarkReportPage> reportPageM;
+#endif
+    // which of them shows the report, for the log
+    wxString reportViewM;
     wxButton* button_start;
     wxButton* button_cancel;
     wxButton* button_copy;
     wxButton* button_save;
+    wxButton* button_browser;
     wxButton* button_compare;
     wxCheckBox* check_private;
     wxButton* button_close;
@@ -136,6 +144,8 @@ private:
     // information if that is selected: what is shown, copied and saved
     fr::BenchmarkReport displayedReport() const;
     fr::BenchmarkComparison displayedComparison() const;
+    // the shown report or comparison as a saved file contains it
+    wxString displayedText(bool markdown) const;
     void showComparison();
     std::optional<fr::BenchmarkSnapshot> readSnapshot(const wxString& path, bool showErrors);
     // the registration of the selected database, empty without one
@@ -153,6 +163,7 @@ private:
     void OnCancel(wxCommandEvent& event);
     void OnCopyMarkdown(wxCommandEvent& event);
     void OnSaveReport(wxCommandEvent& event);
+    void OnOpenInBrowser(wxCommandEvent& event);
     void OnPrivateChanged(wxCommandEvent& event);
     void OnBrowseEarlier(wxCommandEvent& event);
     void OnCompareReports(wxCommandEvent& event);

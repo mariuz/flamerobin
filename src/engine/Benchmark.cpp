@@ -1409,7 +1409,8 @@ wxString BenchmarkReport::toMarkdown() const
             md << "- " << skipped.first << ": " << skipped.second << "\n";
     }
     md << "\n" << formatBenchmarkSnapshot(snapshot);
-    return md;
+    // what anonymized() could not replace in a field of its own
+    return hideBenchmarkTexts(md, hiddenTexts, false);
 }
 
 wxString getBenchmarkIntensityName(BenchmarkIntensity intensity)
