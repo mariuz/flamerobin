@@ -232,6 +232,7 @@ protected:
     wxMenu* windowMenuM;        // dynamic menu
     wxMenu* objectMenuM;
     wxMenu* databaseMenuM;
+    size_t databaseMenuFixedItemsM;
     wxPanel* mainPanelM;
     wxPanel* searchPanelM;
     wxBoxSizer* searchPanelSizerM;

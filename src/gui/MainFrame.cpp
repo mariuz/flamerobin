@@ -159,7 +159,7 @@ public:
 MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title,
         const wxPoint& pos, const wxSize& size, long style)
     : BaseFrame(parent, id, title, pos, size, style, "FlameRobin_main"),
-        rootM(new Root())
+        rootM(new Root()), databaseMenuFixedItemsM(0)
 {
     wxArtProvider::Push(new ArtProvider);
 
@@ -222,10 +222,14 @@ void MainFrame::buildMainMenu()
     databaseMenuM->Append(Cmds::Menu_RegisterDatabase, _("R&egister existing database..."));
     databaseMenuM->Append(Cmds::Menu_CreateDatabase, _("Create &new database..."));
     databaseMenuM->Append(Cmds::Menu_RestoreIntoNew, _("Restore bac&kup into new database..."));
+    // the benchmark needs no registered database
+    databaseMenuM->Append(Cmds::Menu_BenchmarkTest, _("Performance &Benchmark && Diagnosis..."));
+    databaseMenuM->AppendSeparator();
+    // the items above stay, OnMainMenuOpen() rebuilds the ones below
+    databaseMenuFixedItemsM = databaseMenuM->GetMenuItemCount();
     databaseMenuM->Append(Cmds::Menu_CompareSchemas, _("Compare database &schemas..."));
     databaseMenuM->Append(Cmds::Menu_SessionMonitor, _("Live Session & Transaction Monitor..."));
     databaseMenuM->Append(Cmds::Menu_DatabaseMaintenanceDashboard, _("Maintenance & Health Dashboard..."));
-    databaseMenuM->Append(Cmds::Menu_BenchmarkTest, _("Performance &Benchmark && Diagnosis..."));
     databaseMenuM->AppendSeparator();
     menuBarM->Append(databaseMenuM, _("&Database"));
 
@@ -615,8 +619,11 @@ void MainFrame::OnMainMenuOpen(wxMenuEvent& event)
     else if (event.GetMenu() == databaseMenuM)
     {
         // rebuild database menu
-        while (databaseMenuM->GetMenuItemCount() > 4)
-            databaseMenuM->Destroy(databaseMenuM->FindItemByPosition(4));
+        while (databaseMenuM->GetMenuItemCount() > databaseMenuFixedItemsM)
+        {
+            databaseMenuM->Destroy(
+                databaseMenuM->FindItemByPosition(databaseMenuFixedItemsM));
+        }
         // current object has to be subitem of database
         DatabasePtr db = m->getDatabase();
         if (db && db.get())
