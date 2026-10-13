@@ -553,6 +553,32 @@ struct BenchmarkPendingDatabase
     static std::optional<BenchmarkPendingDatabase> parse(const wxString& entry);
 };
 
+/// What the benchmark does about the login of the selected registration
+/// when a test on its server starts
+enum class BenchmarkLoginAction
+{
+    None,           // trusted authentication, or the user entered a login
+    UseStored,      // the login of the connection or of the registration
+    Ask,            // ask for user name and password, only for this run
+    Abort           // the master password was not entered: do not start
+};
+
+/// The state of the registration that decides the login; the password is
+/// the decrypted one, which needs the master password in the encrypted mode
+struct BenchmarkLoginState
+{
+    bool userEntered = false;       // a user name in the benchmark dialog
+    bool trustedUser = false;
+    bool connected = false;
+    bool alwaysAsk = false;
+    bool encryptedPassword = false;
+    bool hasStoredPassword = false; // saved, maybe encrypted
+    bool hasUsername = false;
+    bool hasPassword = false;       // after decryption
+};
+
+BenchmarkLoginAction getBenchmarkLoginAction(const BenchmarkLoginState& state);
+
 /// One fact of the environment, e.g. the CPU or a firebird.conf setting;
 /// the key identifies it in saved reports, the label is translated
 struct BenchmarkFact

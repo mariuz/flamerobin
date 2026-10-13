@@ -43,6 +43,8 @@
 #include "gui/BenchmarkDialog.h"
 #include "gui/FRStyleManager.h"
 #include "gui/StyleGuide.h"
+#include "gui/UsernamePasswordDialog.h"
+#include "MasterPassword.h"
 #include "metadata/server.h"
 
 namespace
@@ -203,7 +205,7 @@ void BenchmarkDialog::createControls()
     text_user = new wxTextCtrl(panel, wxID_ANY, wxEmptyString);
     text_password = new wxTextCtrl(panel, wxID_ANY, wxEmptyString,
         wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
-    text_user->SetHint(databaseM ? _("from the registration") : wxString());
+    text_user->SetHint(databaseM ? _("from the registration or asked at start") : wxString());
     sizerGrid->Add(new wxStaticText(panel, wxID_ANY, _("User:")), 0,
         wxALIGN_CENTER_VERTICAL);
     sizerGrid->Add(text_user, 1, wxEXPAND);
@@ -545,8 +547,8 @@ bool BenchmarkDialog::buildParams(fr::BenchmarkConnectionParams& params)
 void BenchmarkDialog::fillCredentials(fr::BenchmarkConnectionParams& params,
     bool fromRegistration)
 {
-    // the credentials the user entered; those of the registration (or of
-    // its current connection) are only sent to the server of the
+    // the credentials the user entered; the settings of the registration
+    // and its login (resolveLogin()) are only sent to the server of the
     // registration
     params.clientLibrary = wx2std(text_clientlib->GetValue().Trim().Trim(false));
     if (!text_user->IsEmpty())
@@ -556,24 +558,67 @@ void BenchmarkDialog::fillCredentials(fr::BenchmarkConnectionParams& params,
     }
     if (!databaseM || !fromRegistration)
         return;
-    if (text_user->IsEmpty()
-        && !databaseM->getAuthenticationMode().getIgnoreUsernamePassword())
-    {
-        fr::IDatabasePtr dal = databaseM->getDALDatabase();
-        if (databaseM->isConnected() && dal)
-        {
-            params.username = dal->getUsername();
-            params.password = dal->getUserPassword();
-        }
-        else
-        {
-            params.username = wx2std(databaseM->getUsername());
-            params.password = wx2std(databaseM->getDecryptedPassword());
-        }
-    }
     params.role = wx2std(databaseM->getRole());
     params.charset = wx2std(databaseM->getConnectionCharset());
     params.cryptKeyData = wx2std(databaseM->getCryptKeyData());
+}
+
+bool BenchmarkDialog::resolveLogin(fr::BenchmarkConnectionParams& params)
+{
+    encryptedLoginM = false;
+    if (!databaseM)
+        return true;
+    DatabaseAuthenticationMode& mode = databaseM->getAuthenticationMode();
+    fr::IDatabasePtr dal = databaseM->getDALDatabase();
+    fr::BenchmarkLoginState state;
+    state.userEntered = !text_user->IsEmpty();
+    state.trustedUser = mode.getIgnoreUsernamePassword();
+    state.connected = databaseM->isConnected() && dal;
+    state.alwaysAsk = mode.getAlwaysAskForPassword();
+    state.encryptedPassword = mode.getUseEncryptedPassword();
+    state.hasStoredPassword = !databaseM->getRawPassword().empty();
+    wxString username = databaseM->getUsername();
+    wxString password;
+    // may ask for the master password, which neither a login entered in
+    // this dialog nor trusted authentication needs
+    if (!state.userEntered && !state.trustedUser)
+        password = databaseM->getDecryptedPassword();
+    state.hasUsername = !username.empty();
+    state.hasPassword = !password.empty();
+
+    switch (fr::getBenchmarkLoginAction(state))
+    {
+        case fr::BenchmarkLoginAction::None:
+            return true;
+        case fr::BenchmarkLoginAction::Abort:
+            return false;
+        case fr::BenchmarkLoginAction::UseStored:
+            if (state.connected)
+            {
+                params.username = dal->getUsername();
+                params.password = dal->getUserPassword();
+            }
+            else
+            {
+                params.username = wx2std(username);
+                params.password = wx2std(password);
+                encryptedLoginM = state.encryptedPassword;
+            }
+            return true;
+        case fr::BenchmarkLoginAction::Ask:
+            break;
+    }
+    // the benchmark creates a database, so another user may be needed
+    if (!getConnectionCredentials(this, wxString::Format(_("Login for the server "
+        "of %s.\nIt is only used for this test and is not saved."),
+        databaseM->getName_()), username, password,
+        UsernamePasswordDialog::AllowOtherUsername | UsernamePasswordDialog::AllowTrustedUser))
+    {
+        return false;
+    }
+    params.username = wx2std(username);
+    params.password = wx2std(password);
+    return true;
 }
 
 void BenchmarkDialog::addPendingDatabase(const wxString& entry)
@@ -629,6 +674,9 @@ void BenchmarkDialog::dropPendingDatabases()
         }
         fr::BenchmarkConnectionParams params;
         fillCredentials(params, !pending.embedded);
+        // without a login the entry stays for the next time
+        if (!pending.embedded && !resolveLogin(params))
+            continue;
         params.forceEmbedded = pending.embedded;
         params.clientLibrary = wx2std(pending.clientLibrary);
         if (pending.embedded)
@@ -699,6 +747,9 @@ void BenchmarkDialog::OnStart(wxCommandEvent& WXUNUSED(event))
             return;
         }
     }
+    // asked for only now, after every other check
+    if (radio_target->GetSelection() == TargetRegistered && !resolveLogin(params))
+        return;
 
     fr::BenchmarkIntensity intensity =
         fr::BenchmarkIntensity(radio_intensity->GetSelection());
@@ -849,12 +900,23 @@ void BenchmarkDialog::onFinished(const fr::BenchmarkReport& report,
 {
     if (workerM.joinable())
         workerM.join();
+    // the runner holds the login of this run, which is not kept
+    runnerM.reset();
     timerM.Stop();
     runningM = false;
     reportM = report;
     hasReportM = true;
     label_elapsed->SetLabel(formatElapsed());
     gauge_progress->SetValue(100);
+    // like connectDatabase(): a master password that did not work is asked
+    // for again at the next start
+    if (encryptedLoginM)
+    {
+        if (report.benchmarkDatabaseCreated)
+            MasterPassword::setVerified(true);
+        else if (!report.errorMessage.empty() && !MasterPassword::isVerified())
+            MasterPassword::reset();
+    }
 
     if (report.cancelled)
         label_status->SetLabel(_("Cancelled. The results are incomplete."));

@@ -112,6 +112,12 @@ private:
     void updateControls();
     bool buildParams(fr::BenchmarkConnectionParams& params);
     void fillCredentials(fr::BenchmarkConnectionParams& params, bool fromRegistration);
+    // the login for the server of the registration: the saved one, or asked
+    // for (only for this run, nothing is saved); false if the user cancelled
+    bool resolveLogin(fr::BenchmarkConnectionParams& params);
+    // the run uses the saved encrypted password, so its result tells whether
+    // the master password is right
+    bool encryptedLoginM = false;
 
     // temporary databases are remembered in the configuration until they
     // are dropped, so that a crash cannot leave them behind unnoticed
