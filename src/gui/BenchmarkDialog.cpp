@@ -1316,14 +1316,9 @@ fr::BenchmarkReport BenchmarkDialog::displayedReport() const
 
 fr::BenchmarkComparison BenchmarkDialog::displayedComparison() const
 {
-    fr::BenchmarkComparison comparison = *comparisonM;
     if (check_private->GetValue())
-    {
-        comparison = fr::compareBenchmarkSnapshots(
-            fr::anonymizeBenchmarkSnapshot(comparison.newer),
-            fr::anonymizeBenchmarkSnapshot(comparison.older));
-    }
-    return comparison;
+        return fr::anonymizeBenchmarkComparison(*comparisonM);
+    return *comparisonM;
 }
 
 void BenchmarkDialog::showComparison()

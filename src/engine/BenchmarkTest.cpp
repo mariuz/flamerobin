@@ -1316,7 +1316,8 @@ void testAnonymized()
     m.serverConfig["RemoteBindAddress"] = "172.20.1.9";
     m.serverConfigExplicit.insert("RemoteBindAddress");
     m.versionList = { "WI-V5.0.4.1812 Firebird 5.0",
-        "WI-V5.0.4.1812 Firebird 5.0/tcp (DBSERVER01)/P19:C" };
+        "WI-V5.0.4.1812 Firebird 5.0/tcp (DbServer01.kunde.local)/P19:C" };
+    m.securityDatabase = "D:\\Kunde\\Sicher\\security5.fdb";
     m.system.fullHostName = "PC-MUELLER.kunde.local";
     m.system.osUser = "KUNDE\\mueller";
     m.system.cpuName = "Intel Core i7-13800H";
@@ -1333,6 +1334,12 @@ void testAnonymized()
     m.networkPath->serverAddresses = { "192.168.10.5" };
     m.networkPath->localAddress = "192.168.10.77";
     m.networkPath->adapterType = "Ethernet";
+    // free texts, in another case than the names
+    m.system.firewallNote = "rule Allow dbServer01 is off";
+    m.system.mountOptions = "addr=192.168.10.5";
+    m.system.osSettings = { { "Shares", "\\\\pc-mueller\\daten" } };
+    // a field that anonymized() does not know
+    m.system.virtualization = "Hyper-V on Pc-Mueller";
     m.tempDirFileMs = 4.0;
     report.evaluate();
     check(findHint(report.hints, "A router or VPN sits between") != nullptr,
@@ -1352,12 +1359,14 @@ void testAnonymized()
     const wxString html = shared.toHtml();
     const wxString md = shared.toMarkdown();
     bool clean = true;
-    for (const char* secret : { "dbserver01", "DBSERVER01", "PC-MUELLER", "mueller",
-        "MUELLER", "kunde.local", "KUNDE", "Kunde", "192.168.10", "BUCHHALTUNG",
-        "FirebirdTemp", "AppData", "172.20.1.9", "10.77.1.2", "KUNDEDB", "SRV-ALT",
-        "172.31.5.6", "172.31.5.7" })
+    // without regard to case
+    const wxString lowerHtml = html.Lower();
+    const wxString lowerMd = md.Lower();
+    for (const char* secret : { "dbserver01", "pc-mueller", "mueller", "kunde.local", "kunde",
+        "192.168.10", "buchhaltung", "firebirdtemp", "appdata", "172.20.1.9", "10.77.1.2",
+        "kundedb", "srv-alt", "172.31.5.6", "172.31.5.7", "sicher", "security5.fdb" })
     {
-        if (html.Contains(secret) || md.Contains(secret))
+        if (lowerHtml.Contains(secret) || lowerMd.Contains(secret))
         {
             std::cerr << "    still contains: " << secret << "\n";
             clean = false;
@@ -1376,6 +1385,39 @@ void testAnonymized()
         "the temporary database keeps only its file name");
     check(!report.anonymous && report.metrics.connectionHost == "dbserver01",
         "the original report is unchanged");
+    check(shared.metrics.system.virtualization == "Hyper-V on Pc-Mueller"
+        && html.Contains("Hyper-V on " + shared.metrics.localHostName)
+        && md.Contains("Hyper-V on " + shared.metrics.localHostName),
+        "a name in a field that anonymized() does not know goes from the finished report");
+
+    // names that the report uses as words stay out of the finished report
+    BenchmarkReport common = report;
+    common.metrics.system.osUser = "WORKGROUP\\Administrator";
+    const BenchmarkReport sharedCommon = common.anonymized();
+    check(std::none_of(sharedCommon.hiddenTexts.begin(), sharedCommon.hiddenTexts.end(),
+        [](const auto& h) { return h.first.CmpNoCase("Administrator") == 0
+            || h.first.CmpNoCase("WORKGROUP") == 0; })
+        && std::any_of(sharedCommon.hiddenTexts.begin(), sharedCommon.hiddenTexts.end(),
+            [](const auto& h) { return h.first == "WORKGROUP\\Administrator"; }),
+        "common words such as Administrator are not replaced in the whole report");
+}
+
+void testHiddenTexts()
+{
+    std::cout << "Private texts in a finished report\n";
+    const std::vector<std::pair<wxString, wxString>> hidden = { { "server01", "server" },
+        { "A&B-PC", "<hidden>" }, { "DEV", "client" } };
+    const wxString html = hideBenchmarkTexts("<p class=\"server01\" aria-label=\"Server01 "
+        "chart\">SERVER01 and a&amp;b-pc</p><style>.server01 { color: red; }</style>"
+        "<!-- host = Server01 -->", hidden, true);
+    check(html == "<p class=\"server01\" aria-label=\"server chart\">server and &lt;hidden&gt;"
+        "</p><style>.server01 { color: red; }</style><!-- host = server -->",
+        "in texts, attribute values and comments, without regard to case, not in classes "
+        "and styles");
+    check(hideBenchmarkTexts("dev, DEV-PC, devices, Dev_1", hidden, false)
+        == "client, client-PC, devices, Dev_1", "short names only as words of their own");
+    check(hideBenchmarkTexts("Server01.local", hidden, false) == "server.local"
+        && hideBenchmarkTexts("text", {}, true) == "text", "longer names also within words");
 }
 
 void testComparison()
@@ -1539,6 +1581,22 @@ void testComparison()
     const wxString sharedHtml = sharedReport.anonymized().toHtml();
     check(!sharedHtml.Contains("PC-MUELLER") && !sharedHtml.Contains("E:\\Temp")
         && !sharedHtml.Contains("10.1.2.3"), "the shared report hides the earlier run as well");
+
+    // two saved reports compared: the computer names go everywhere, also
+    // where a run names its computer in another case
+    BenchmarkSnapshot named = *earlier;
+    named.host = "PC-MUELLER";
+    named.facts.push_back({ "virtual", "Hyper-V on pc-mueller" });
+    BenchmarkComparison twoFiles = compareBenchmarkSnapshots(named, *earlier);
+    twoFiles.newerIsCurrentRun = true;
+    const BenchmarkComparison sharedFiles = anonymizeBenchmarkComparison(twoFiles);
+    check(twoFiles.toMarkdown().Contains("Hyper-V on pc-mueller")
+        && twoFiles.toHtml().Contains("Hyper-V on pc-mueller")
+        && !sharedFiles.toHtml().Lower().Contains("pc-mueller")
+        && !sharedFiles.toMarkdown().Lower().Contains("pc-mueller")
+        && sharedFiles.toMarkdown().Contains("Hyper-V on <hidden>")
+        && sharedFiles.newerIsCurrentRun && sharedFiles.newer.host.empty(),
+        "a shared comparison of two files hides their computer names");
 }
 
 } // namespace
@@ -1566,6 +1624,7 @@ int main(int argc, char** argv)
     testSql();
     testSystemInfoParsers();
     testAnonymized();
+    testHiddenTexts();
     testComparison();
 
     std::cout << (ok ? "ALL BENCHMARK TESTS PASSED\n" : "SOME BENCHMARK TESTS FAILED\n");

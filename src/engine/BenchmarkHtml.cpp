@@ -1443,7 +1443,7 @@ wxString BenchmarkComparison::toHtml(const wxString& theme) const
         + runBox(newer, newerLabel(*this)) + "</div>\n" + comparisonView(*this);
     html += "<footer>" + esc(_("Created by FlameRobin from two saved benchmark reports."))
         + "</footer>\n</main></body></html>\n";
-    return html;
+    return hideBenchmarkTexts(html, hiddenTexts, true);
 }
 
 wxString BenchmarkReport::toHtml(const wxString& theme) const
@@ -1550,7 +1550,8 @@ wxString BenchmarkReport::toHtml(const wxString& theme) const
         "database was changed.")) + "</footer>\n</main>\n"
         // the results for later comparisons, see parseBenchmarkSnapshot()
         + formatBenchmarkSnapshot(snapshot) + "</body></html>\n";
-    return html;
+    // what anonymized() could not replace in a field of its own
+    return hideBenchmarkTexts(html, hiddenTexts, true);
 }
 
 } // namespace fr

@@ -516,6 +516,10 @@ struct BenchmarkReport
     wxString errorMessage;
     // names, addresses, user names and paths are removed (anonymized())
     bool anonymous = false;
+    // the private texts that anonymized() replaced, the longest first, and
+    // what replaces them: toMarkdown() and toHtml() replace them in their
+    // whole text as well, see hideBenchmarkTexts()
+    std::vector<std::pair<wxString, wxString>> hiddenTexts;
     // a saved run the user compares this run with
     std::optional<BenchmarkSnapshot> earlier;
 
@@ -663,6 +667,9 @@ struct BenchmarkComparison
     bool sameKind = true;
     // the newer run is the one of the report, not a saved one
     bool newerIsCurrentRun = false;
+    // the computer names of anonymizeBenchmarkComparison(), replaced in the
+    // whole text of toMarkdown() and toHtml()
+    std::vector<std::pair<wxString, wxString>> hiddenTexts;
 
     static constexpr double earlierPoints = 1000.0;
 
@@ -714,6 +721,16 @@ bool parseBenchmarkValue(BenchmarkValues& values, const wxString& key,
 /// a copy to share in public: without the computer name, server names and
 /// paths
 BenchmarkSnapshot anonymizeBenchmarkSnapshot(const BenchmarkSnapshot& snapshot);
+/// a comparison to share in public: both runs anonymized, and their computer
+/// names replaced in the whole text
+BenchmarkComparison anonymizeBenchmarkComparison(const BenchmarkComparison& comparison);
+/// replaces private texts in a finished report (Markdown or HTML) without
+/// regard to case, in the given order; a text shorter than 6 characters only
+/// as a word of its own. In HTML the texts, comments and the values of
+/// attributes such as aria-label, not the style sheet, the elements and the
+/// values of class, id and similar attributes.
+wxString hideBenchmarkTexts(const wxString& text,
+    const std::vector<std::pair<wxString, wxString>>& hidden, bool html);
 /// "embedded", "local" or "client": how the run was made; runs of
 /// different kinds measure different things
 wxString getBenchmarkKindId(const BenchmarkMetrics& m);
