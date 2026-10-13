@@ -403,6 +403,7 @@ void MainObjectMenuMetadataItemVisitor::visitRoot(Root& root)
 {
     menuM->Append(Cmds::Menu_RegisterServer, _("&Register server"));
     menuM->Append(Cmds::Menu_CreateDockerFirebird, _("Create Firebird in Docker..."));
+    menuM->Append(Cmds::Menu_BenchmarkTest, _("Performance &Benchmark && Diagnosis..."));
     addSeparator();
     addGenerateCodeMenu(root);
     addSeparator();
@@ -425,6 +426,7 @@ void MainObjectMenuMetadataItemVisitor::visitServer(Server& server)
     addSeparator();
     menuM->Append(Cmds::Menu_GetServerVersion, _("Retrieve server &version"));
     menuM->Append(Cmds::Menu_ManageUsers, _("&Manage users"));
+    menuM->Append(Cmds::Menu_BenchmarkTest, _("Performance &Benchmark && Diagnosis..."));
     addSeparator();
     menuM->Append(Cmds::Menu_UnRegisterServer, _("&Unregister server"));
     menuM->Append(Cmds::Menu_ServerProperties,
