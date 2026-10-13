@@ -33,7 +33,14 @@
 #include <wx/ffile.h>
 #include <wx/filename.h>
 #if wxUSE_WEBVIEW
+#include <wx/fs_mem.h>
 #include <wx/webview.h>
+#include <wx/webviewfshandler.h>
+#ifdef __WXMSW__
+// WIN32_LEAN_AND_MEAN leaves out the COM declarations that exdisp.h needs
+#include <ole2.h>
+#include <exdisp.h>
+#endif
 #endif
 
 #include <algorithm>
@@ -84,7 +91,194 @@ wxString toWxString(const std::string& s)
     return wxString(s.c_str(), *wxConvCurrent);
 }
 
+#if wxUSE_WEBVIEW
+// on Windows Edge (WebView2) where its runtime is installed, then Internet
+// Explorer, which shows the report in a simpler form; nullptr if there is no
+// web view, the report is shown as text then
+wxWebView* createReportView(wxWindow* parent, wxString& backend)
+{
+    const char* const backends[] = {
+#ifdef __WXMSW__
+        wxWebViewBackendEdge, wxWebViewBackendIE
+#else
+        wxWebViewBackendDefault
+#endif
+    };
+    for (const char* b : backends)
+    {
+        if (!wxWebView::IsBackendAvailable(b))
+            continue;
+        if (wxWebView* view = wxWebView::New(parent, wxID_ANY, wxWebViewDefaultURLStr,
+            wxDefaultPosition, wxDefaultSize, b))
+        {
+            backend = b;
+            return view;
+        }
+    }
+    return nullptr;
+}
+#endif
+
 } // namespace
+
+#if wxUSE_WEBVIEW
+// Internet Explorer chooses the mode of a page, and with it how much of the
+// style sheet it knows, when it loads the page. SetPage() writes into the
+// blank page that was loaded before, which stays in the mode of Internet
+// Explorer 7 or 8, whatever the page says. So that the report gets the mode
+// of Internet Explorer 11, it is loaded from memory, if that fails from a
+// temporary file, and only then written with SetPage(); no setting of the
+// system is changed. The other web views simply get the page.
+class BenchmarkReportPage
+{
+public:
+    BenchmarkReportPage(wxWebView* view, bool internetExplorer);
+    // removes the pages from memory and disk
+    ~BenchmarkReportPage();
+    void show(const wxString& html);
+
+private:
+    wxWebView* viewM;
+    bool loadM;
+    // the page that is shown and the file name in its URL
+    wxString htmlM;
+    wxString nameM;
+    bool fromFileM = false;
+    // the earlier pages stay until the end: Internet Explorer may still be
+    // reading one, and wxMemoryFSHandler lends it the memory of the page
+    std::vector<wxString> memoryFilesM;
+    std::vector<wxString> tempFilesM;
+
+    void showFromFile();
+    bool load(const wxString& url);
+    void OnNavigating(wxWebViewEvent& event);
+    void OnError(wxWebViewEvent& event);
+};
+
+BenchmarkReportPage::BenchmarkReportPage(wxWebView* view, bool internetExplorer)
+    : viewM(view), loadM(internetExplorer)
+{
+    if (!loadM)
+        return;
+    // one handler for the whole program, like the other file systems
+    if (!wxFileSystem::HasHandlerForPath("memory:report.html"))
+        wxFileSystem::AddHandler(new wxMemoryFSHandler);
+    viewM->RegisterHandler(wxSharedPtr<wxWebViewHandler>(new wxWebViewFSHandler("memory")));
+    viewM->Bind(wxEVT_WEBVIEW_NAVIGATING, &BenchmarkReportPage::OnNavigating, this);
+    viewM->Bind(wxEVT_WEBVIEW_ERROR, &BenchmarkReportPage::OnError, this);
+}
+
+BenchmarkReportPage::~BenchmarkReportPage()
+{
+    if (!loadM)
+        return;
+    viewM->Unbind(wxEVT_WEBVIEW_NAVIGATING, &BenchmarkReportPage::OnNavigating, this);
+    viewM->Unbind(wxEVT_WEBVIEW_ERROR, &BenchmarkReportPage::OnError, this);
+    for (const wxString& name : memoryFilesM)
+        wxMemoryFSHandler::RemoveFile(name);
+    wxLogNull noErrors;
+    for (const wxString& path : tempFilesM)
+        wxRemoveFile(path);
+}
+
+void BenchmarkReportPage::show(const wxString& html)
+{
+    if (!loadM)
+    {
+        viewM->SetPage(html, wxEmptyString);
+        return;
+    }
+    // a new name for every page, so that no cached page is shown
+    static int pageCount = 0;
+    htmlM = html;
+    nameM = wxString::Format("flamerobin-benchmark-%d.html", ++pageCount);
+    fromFileM = false;
+    const wxScopedCharBuffer utf8 = html.utf8_str();
+    wxMemoryFSHandler::AddFileWithMimeType(nameM, utf8.data(), utf8.length(), "text/html");
+    memoryFilesM.push_back(nameM);
+    if (!load("memory:" + nameM))
+        showFromFile();
+}
+
+void BenchmarkReportPage::showFromFile()
+{
+    // the same names as the pages for "Open in browser", so that pages
+    // left by a crash are removed as well
+    static int fileCount = 0;
+    const wxFileName path(wxFileName::GetTempDir(), browserFilePrefix
+        + wxString::Format("view-%lu-%d.html", wxGetProcessId(), ++fileCount));
+    fromFileM = true;
+    wxLogNull noErrors;
+    wxFFile file(path.GetFullPath(), "w");
+    if (file.IsOpened())
+    {
+        tempFilesM.push_back(path.GetFullPath());
+        if (file.Write(htmlM, wxConvUTF8) && file.Close())
+        {
+            nameM = path.GetFullName();
+            if (load(wxFileName::FileNameToURL(path)))
+                return;
+        }
+    }
+    nameM.clear();
+    viewM->SetPage(htmlM, wxEmptyString);
+}
+
+// false if Internet Explorer refuses to load the page
+bool BenchmarkReportPage::load(const wxString& url)
+{
+#ifdef __WXMSW__
+    // as wxWebViewIE::LoadURL(), which cannot tell whether it worked
+    IWebBrowser2* browser = static_cast<IWebBrowser2*>(viewM->GetNativeBackend());
+    if (!browser)
+        return false;
+    BSTR target = ::SysAllocString(url.wc_str());
+    VARIANT none;
+    ::VariantInit(&none);
+    const HRESULT result = browser->Navigate(target, &none, &none, &none, &none);
+    ::SysFreeString(target);
+    return SUCCEEDED(result);
+#else
+    viewM->LoadURL(url);
+    return true;
+#endif
+}
+
+void BenchmarkReportPage::OnNavigating(wxWebViewEvent& event)
+{
+    // only to the page that is shown now: the back key would show an
+    // earlier page, maybe one with the private information
+    if (nameM.empty() || !event.GetURL().Contains(nameM))
+        event.Veto();
+    else
+        event.Skip();
+}
+
+void BenchmarkReportPage::OnError(wxWebViewEvent& event)
+{
+    // only for the page that is shown now; it replaces the error page
+    if (nameM.empty() || !event.GetURL().Contains(nameM))
+    {
+        event.Skip();
+        return;
+    }
+    // Internet Explorer does not navigate from within this event
+    const wxString name = nameM;
+    viewM->CallAfter([this, name]()
+    {
+        // unless another page was shown in the meantime
+        if (name != nameM)
+            return;
+        if (!fromFileM)
+            showFromFile();
+        else
+        {
+            nameM.clear();
+            viewM->SetPage(htmlM, wxEmptyString);
+        }
+    });
+}
+#endif
 
 BEGIN_EVENT_TABLE(BenchmarkDialog, BaseDialog)
     EVT_BUTTON(ID_button_start, BenchmarkDialog::OnStart)
@@ -354,13 +548,30 @@ void BenchmarkDialog::createControls()
     notebook_results->AddPage(text_log, _("Progress"));
 
 #if wxUSE_WEBVIEW
-    // New() returns nothing when no backend (e.g. WebView2) is available
-    webview_report = wxWebView::New(notebook_results, wxID_ANY);
+    wxString backend;
+    webview_report = createReportView(notebook_results, backend);
     if (webview_report)
+    {
         notebook_results->AddPage(webview_report, _("Report"));
+        reportPageM.reset(new BenchmarkReportPage(webview_report,
+            backend == wxWebViewBackendIE));
+        if (backend == wxWebViewBackendIE)
+        {
+            reportViewM = "Internet Explorer";
+            wxStaticText* hint = new wxStaticText(panel, wxID_ANY,
+                _("The Microsoft Edge WebView2 Runtime is not installed on this "
+                  "computer, so the report is shown with Internet Explorer in a "
+                  "simpler form. \"Open in browser\" shows it in your web browser."));
+            hint->Wrap(900);
+            sizerMain->Add(hint, 0, wxEXPAND | wxBOTTOM, 4);
+        }
+        else
+            reportViewM = wxWebView::GetBackendVersionInfo(backend).GetVersionString();
+    }
 #endif
     if (!webview_report)
     {
+        reportViewM = _("text, no web view is available");
         text_report = new wxTextCtrl(notebook_results, wxID_ANY, wxEmptyString,
             wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
         notebook_results->AddPage(text_report, _("Report"));
@@ -744,6 +955,7 @@ void BenchmarkDialog::OnStart(wxCommandEvent& WXUNUSED(event))
     appendLog(wxString::Format(_("Target: %s"), params.targetDescription));
     appendLog(wxString::Format(_("Intensity: %s, page size %d"),
         fr::getBenchmarkIntensityName(intensity), params.pageSize));
+    appendLog(wxString::Format(_("Report view: %s"), reportViewM));
     updateControls();
 
     fr::BenchmarkRunner* runner = runnerM.get();
@@ -960,9 +1172,9 @@ void BenchmarkDialog::showReport(const fr::BenchmarkReport& report)
 #if wxUSE_WEBVIEW
     if (webview_report)
     {
-        webview_report->SetPage(hasData
+        reportPageM->show(hasData
             ? report.toHtml(FRStyleManager::isEffectivelyDark() ? "dark" : "light")
-            : wxString("<html><body></body></html>"), wxEmptyString);
+            : wxString("<html><body></body></html>"));
         return;
     }
 #endif
@@ -1119,8 +1331,8 @@ void BenchmarkDialog::showComparison()
 #if wxUSE_WEBVIEW
     if (webview_report)
     {
-        webview_report->SetPage(displayedComparison().toHtml(
-            FRStyleManager::isEffectivelyDark() ? "dark" : "light"), wxEmptyString);
+        reportPageM->show(displayedComparison().toHtml(
+            FRStyleManager::isEffectivelyDark() ? "dark" : "light"));
         return;
     }
 #endif

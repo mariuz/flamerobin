@@ -40,6 +40,7 @@
 #include "gui/BaseDialog.h"
 #include "metadata/database.h"
 
+class BenchmarkReportPage;
 class wxCollapsiblePane;
 class wxCollapsiblePaneEvent;
 class wxWebView;
@@ -100,6 +101,12 @@ private:
     // the HTML report, or the Markdown text where no web view is available
     wxWebView* webview_report = nullptr;
     wxTextCtrl* text_report = nullptr;
+#if wxUSE_WEBVIEW
+    // how the report gets into webview_report
+    std::unique_ptr<BenchmarkReportPage> reportPageM;
+#endif
+    // which of them shows the report, for the log
+    wxString reportViewM;
     wxButton* button_start;
     wxButton* button_cancel;
     wxButton* button_copy;
