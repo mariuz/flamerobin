@@ -53,7 +53,7 @@ UsernamePasswordDialog::UsernamePasswordDialog(wxWindow* parentWindow,
     textPasswordM = new wxTextCtrl(panel, wxID_ANY, wxEmptyString,
         wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
     radioTrustedUserM = new wxRadioButton(panel, wxID_ANY,
-        _("Connect as me (&trusted user authentication"));
+        _("Connect as me (&trusted user authentication)"));
     radioTrustedUserM->Enable((flags & AllowTrustedUser) != 0);
     buttonOkM = new wxButton(panel, wxID_OK, _("Connect"));
     buttonCancelM = new wxButton(panel, wxID_CANCEL, _("Cancel"));
