@@ -301,6 +301,65 @@ void testPendingDatabases()
     check(!BenchmarkPendingDatabase::parse("S|1|lib|"), "missing connection string");
 }
 
+void testLoginAction()
+{
+    std::cout << "Login for the server of the registration\n";
+    // a registration with a saved user name and password
+    BenchmarkLoginState saved;
+    saved.hasStoredPassword = true;
+    saved.hasUsername = true;
+    saved.hasPassword = true;
+    check(getBenchmarkLoginAction(saved) == BenchmarkLoginAction::UseStored,
+        "a saved login is used without asking");
+
+    BenchmarkLoginState s = saved;
+    s.hasStoredPassword = false;
+    s.hasPassword = false;
+    check(getBenchmarkLoginAction(s) == BenchmarkLoginAction::Ask,
+        "no saved password: ask");
+    s = saved;
+    s.hasUsername = false;
+    check(getBenchmarkLoginAction(s) == BenchmarkLoginAction::Ask,
+        "no saved user name: ask");
+    s = saved;
+    s.alwaysAsk = true;
+    check(getBenchmarkLoginAction(s) == BenchmarkLoginAction::Ask,
+        "\"always ask for password\" asks even with a saved password");
+    // a secret store without an entry gives no password
+    s = saved;
+    s.hasPassword = false;
+    check(getBenchmarkLoginAction(s) == BenchmarkLoginAction::Ask,
+        "a saved password that gives none (secret store): ask");
+
+    s = saved;
+    s.encryptedPassword = true;
+    check(getBenchmarkLoginAction(s) == BenchmarkLoginAction::UseStored,
+        "a decrypted password is used");
+    s.hasPassword = false;
+    check(getBenchmarkLoginAction(s) == BenchmarkLoginAction::Abort,
+        "a cancelled master password prompt does not start and does not ask");
+    s.hasStoredPassword = false;
+    check(getBenchmarkLoginAction(s) == BenchmarkLoginAction::Ask,
+        "encrypted mode without a saved password: ask");
+
+    s = BenchmarkLoginState();
+    s.trustedUser = true;
+    check(getBenchmarkLoginAction(s) == BenchmarkLoginAction::None,
+        "trusted authentication needs no login");
+    s = BenchmarkLoginState();
+    s.userEntered = true;
+    s.alwaysAsk = true;
+    check(getBenchmarkLoginAction(s) == BenchmarkLoginAction::None,
+        "a login entered in the dialog is not asked for again");
+    s = BenchmarkLoginState();
+    s.connected = true;
+    s.alwaysAsk = true;
+    s.encryptedPassword = true;
+    s.hasStoredPassword = true;
+    check(getBenchmarkLoginAction(s) == BenchmarkLoginAction::UseStored,
+        "a connected database uses the login of its connection");
+}
+
 // a run on the server itself with the embedded engine
 BenchmarkMetrics serverMetrics()
 {
@@ -1432,6 +1491,7 @@ int main(int argc, char** argv)
     testHelpers();
     testSafetyCheck();
     testPendingDatabases();
+    testLoginAction();
     testHints();
     testEventTest();
     testSettings();

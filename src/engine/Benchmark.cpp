@@ -1787,6 +1787,24 @@ std::optional<BenchmarkPendingDatabase> BenchmarkPendingDatabase::parse(
     return result;
 }
 
+BenchmarkLoginAction getBenchmarkLoginAction(const BenchmarkLoginState& state)
+{
+    if (state.userEntered || state.trustedUser)
+        return BenchmarkLoginAction::None;
+    // the login of the current connection, also one of "Connect as..."
+    if (state.connected)
+        return BenchmarkLoginAction::UseStored;
+    if (state.alwaysAsk)
+        return BenchmarkLoginAction::Ask;
+    // like connectDatabase(): a cancelled master password prompt leaves the
+    // saved password undecrypted, which must not lead to another prompt
+    if (state.encryptedPassword && state.hasStoredPassword && !state.hasPassword)
+        return BenchmarkLoginAction::Abort;
+    if (!state.hasUsername || !state.hasPassword)
+        return BenchmarkLoginAction::Ask;
+    return BenchmarkLoginAction::UseStored;
+}
+
 bool isBenchmarkDatabaseName(const wxString& fileName)
 {
     const wxString prefix = "FR_BENCHMARK_";
