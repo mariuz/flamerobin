@@ -1018,6 +1018,12 @@ BenchmarkReport BenchmarkReport::anonymized() const
             scrub(h.detail);
             scrub(h.advice);
         }
+        // the texts only: the ids, numbers and units are not private
+        for (auto& x : r.earlier->measurements)
+        {
+            scrub(x.title);
+            scrub(x.text);
+        }
     }
     r.target = hidden;
     r.benchmarkDatabasePath = fileNameOf(benchmarkDatabasePath);
@@ -1077,8 +1083,28 @@ wxString hideBenchmarkTexts(const wxString& text,
     };
     if (hidden.empty())
         return text;
+    // in the results of the run only the texts: a name must not change an
+    // id or a unit, e.g. a computer called "storage"
+    const size_t snapshot = findBenchmarkSnapshot(text);
+    auto hideComment = [&](size_t start, size_t length)
+    {
+        const wxString comment = text.substr(start, length);
+        if (snapshot != wxString::npos && start == snapshot + 4)
+        {
+            return hideBenchmarkSnapshotTexts(comment, [&](const wxString& t)
+                { return hide(t, false); });
+        }
+        return hide(comment, false);
+    };
     if (!html)
-        return hide(text, false);
+    {
+        if (snapshot == wxString::npos)
+            return hide(text, false);
+        const size_t end = text.find("-->", snapshot);
+        const size_t stop = end == wxString::npos ? text.length() : end;
+        return hide(text.substr(0, snapshot), false) + "<!--"
+            + hideComment(snapshot + 4, stop - snapshot - 4) + hide(text.substr(stop), false);
+    }
 
     // HTML: the texts, the comments (the snapshot) and the values of
     // attributes such as aria-label; the style sheet, the names of elements
@@ -1099,7 +1125,7 @@ wxString hideBenchmarkTexts(const wxString& text,
         {
             const size_t end = text.find("-->", tag + 4);
             const size_t stop = end == wxString::npos ? text.length() : end;
-            result += "<!--" + hide(text.substr(tag + 4, stop - tag - 4), false);
+            result += "<!--" + hideComment(tag + 4, stop - tag - 4);
             pos = stop;
             continue;
         }

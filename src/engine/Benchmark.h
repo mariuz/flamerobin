@@ -29,6 +29,7 @@
 #include "engine/BenchmarkSystemInfo.h"
 
 #include <cstdint>
+#include <functional>
 #include <map>
 #include <optional>
 #include <set>
@@ -366,6 +367,10 @@ struct BenchmarkResult
     wxString average;       // per operation
     wxString rate;          // per second
     double durationMs = 0.0;    // the duration as a number; 0: none
+    // the amount as a number and its unit, untranslated ("rows", "bytes"),
+    // as saved in the snapshot; 0 and empty where it does not apply
+    double amountValue = 0.0;
+    wxString amountUnit;
 };
 
 ///
@@ -506,34 +511,68 @@ wxString formatBenchmarkValue(double value, const BenchmarkMeasurementDef& def);
 bool isBenchmarkKeyValueSource(const BenchmarkResult& result);
 
 ///
+/// One measurement of a run as it is saved: the numbers in the same form in
+/// every language, the texts only to show it.
+///
+struct BenchmarkMeasurement
+{
+    wxString id;            // see the register
+    double value = 0.0;     // in unit; 0: no number, only the text
+    wxString unit;
+    int version = 0;        // of the test that measured it
+    // the work behind the value: this amount of amountUnit ("rows",
+    // "bytes", untranslated) in ms; 0 and empty where it does not apply
+    double amount = 0.0;
+    wxString amountUnit;
+    double ms = 0.0;
+    // in the language of the run, never used to find a measurement
+    wxString title;
+    wxString text;          // the value as the report showed it
+};
+
+///
 /// The results of one run in a compact form. Every report (HTML and
 /// Markdown) contains it as a hidden comment, so that a saved report can be
-/// compared with a new run or with another saved report later.
+/// compared with a new run or with another saved report later; see
+/// devdocs/Benchmark_report_format.md.
 ///
 struct BenchmarkSnapshot
 {
+    wxString program;       // the version of FlameRobin that made the run
     wxString title;         // the tested system, e.g. the model of the server
     wxString host;          // the computer that ran the test; empty if hidden
     wxString date;          // start of the run, "yyyy-mm-dd hh:mm:ss"
     wxString kind;          // embedded, local or client: see getBenchmarkKindId()
     wxString intensity;     // quick, standard or deep
-    BenchmarkValues values{};   // 0: not measured
-    // the work behind every key value by its key: amount and milliseconds
-    std::map<wxString, std::pair<wxString, double>> work;
-    // every measured value of the statistics
-    struct Stat
-    {
-        BenchmarkCategory section;
-        wxString key;       // the key value it is the source of
-        wxString test;
-        wxString value;
-        wxString amount;
-        double ms = 0.0;
-    };
-    std::vector<Stat> stats;
+    // every measurement of the run in the order of the report, also those
+    // that this version does not know
+    std::vector<BenchmarkMeasurement> measurements;
     // hardware, software and settings by key (see getBenchmarkFacts())
     std::vector<std::pair<wxString, wxString>> facts;
     std::vector<BenchmarkHint> hints;
+
+    /// the measurement with this id; nullptr if the run has none
+    const BenchmarkMeasurement* findMeasurement(const wxString& id) const;
+};
+
+/// whether a saved report can be read
+enum class BenchmarkSnapshotStatus
+{
+    Ok,
+    NotAReport,     // the text contains no results
+    TooOld,         // made by an older version of FlameRobin (format 1)
+    TooNew,         // made by a newer version with another major format
+    Damaged         // the results are incomplete or cannot be read
+};
+
+/// the results of a saved report and whether they could be read
+struct BenchmarkSnapshotResult
+{
+    BenchmarkSnapshotStatus status = BenchmarkSnapshotStatus::NotAReport;
+    wxString format;        // as written in the report, e.g. "1" or "2.0"
+    BenchmarkSnapshot snapshot;     // only with Ok
+
+    bool ok() const { return status == BenchmarkSnapshotStatus::Ok; }
 };
 
 ///
@@ -572,6 +611,8 @@ struct BenchmarkReport
     bool benchmarkDatabaseDropped = false;
     // temporary databases that were created but could not be dropped
     std::vector<wxString> undroppedDatabases;
+    // the level is stored in the snapshot; the name is translated, for display
+    BenchmarkIntensity intensity = BenchmarkIntensity::Standard;
     wxString intensityName;
     wxString startedAt;
     double durationSeconds = 0.0;
@@ -777,9 +818,25 @@ struct BenchmarkComparison
 BenchmarkSnapshot makeBenchmarkSnapshot(const BenchmarkReport& report);
 /// the hidden comment with the snapshot that every report contains
 wxString formatBenchmarkSnapshot(const BenchmarkSnapshot& snapshot);
-/// the snapshot of a saved report (Markdown or HTML); nothing if the text
-/// contains none
-std::optional<BenchmarkSnapshot> parseBenchmarkSnapshot(const wxString& text);
+/// the snapshot of a saved report (Markdown or HTML), or why it cannot be
+/// read: lines and fields that this version does not know are skipped
+BenchmarkSnapshotResult parseBenchmarkSnapshot(const wxString& text);
+/// why the results of a saved report cannot be compared, in one or two
+/// sentences; empty if they can
+wxString getBenchmarkSnapshotProblem(const BenchmarkSnapshotResult& result);
+/// where the snapshot comment of a finished report starts ("<!--"); npos if
+/// the text has none
+size_t findBenchmarkSnapshot(const wxString& text);
+/// the comment that marks a saved comparison of two runs (HTML or
+/// Markdown). A comparison holds no results of its own: it cannot be compared
+/// again, but FlameRobin can show it
+wxString getBenchmarkComparisonMarker();
+bool isBenchmarkComparisonPage(const wxString& text);
+/// applies hide to the private texts of a snapshot comment line by line:
+/// the keys, ids, numbers and units stay as they are, so that a private
+/// name cannot change them
+wxString hideBenchmarkSnapshotTexts(const wxString& comment,
+    const std::function<wxString(const wxString&)>& hide);
 BenchmarkComparison compareBenchmarkSnapshots(const BenchmarkSnapshot& newer,
     const BenchmarkSnapshot& older);
 /// "This run is 35 % faster overall than the earlier run."
@@ -792,11 +849,20 @@ wxString getBenchmarkReasonsTitle(const BenchmarkComparison& comparison,
 /// is part of a report
 wxString formatBenchmarkComparisonMarkdown(const BenchmarkComparison& comparison,
     bool standalone);
-/// every key value of two runs; ratio > 1: newer is faster
-std::vector<BenchmarkComparedValue> compareBenchmarkValues(
-    const BenchmarkValues& newer, const BenchmarkValues& older);
-/// the work behind a key value by its id: amount and milliseconds
-std::map<wxString, std::pair<wxString, double>> getBenchmarkWork(const BenchmarkMetrics& m);
+/// the work behind a key value: this amount of unit in ms, and how the
+/// report shows the amount
+struct BenchmarkWork
+{
+    double amount = 0.0;
+    wxString unit;          // untranslated: "rows", "bytes", ...
+    double ms = 0.0;
+    wxString text;          // e.g. "30,000 transactions of 8 users"
+};
+/// the work behind every key value by its id
+std::map<wxString, BenchmarkWork> getBenchmarkWork(const BenchmarkMetrics& m);
+/// "50,000 rows", "49.6 MB": an amount with its untranslated unit, in the
+/// language of the user; empty without a unit
+wxString formatBenchmarkAmount(double amount, const wxString& unit);
 /// "200 commits in 88 ms"
 wxString formatBenchmarkWork(const wxString& amount, double ms);
 /// 0: within the normal variation of a measurement (less than 15 %),
@@ -804,12 +870,6 @@ wxString formatBenchmarkWork(const wxString& amount, double ms);
 int getBenchmarkChangeLevel(double ratio);
 /// "about the same", "18 % faster", "2.3 times as fast", "35 % slower"
 wxString formatBenchmarkChange(double ratio);
-/// the key values with their ids, as saved in a snapshot
-std::vector<std::pair<wxString, wxString>> formatBenchmarkValues(
-    const BenchmarkValues& values);
-/// sets one value of a snapshot; false for an unknown id
-bool parseBenchmarkValue(BenchmarkValues& values, const wxString& id,
-    const wxString& text);
 /// a copy to share in public: without the computer name, server names and
 /// paths
 BenchmarkSnapshot anonymizeBenchmarkSnapshot(const BenchmarkSnapshot& snapshot);

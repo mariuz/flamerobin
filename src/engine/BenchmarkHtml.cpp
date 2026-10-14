@@ -1442,7 +1442,7 @@ wxString BenchmarkComparison::toHtml(const wxString& theme) const
     html += "<div class=\"runs\">" + runBox(older, _("Earlier run"))
         + runBox(newer, newerLabel(*this)) + "</div>\n" + comparisonView(*this);
     html += "<footer>" + esc(_("Created by FlameRobin from two saved benchmark reports."))
-        + "</footer>\n</main></body></html>\n";
+        + "</footer>\n" + getBenchmarkComparisonMarker() + "</main></body></html>\n";
     return hideBenchmarkTexts(html, hiddenTexts, true);
 }
 

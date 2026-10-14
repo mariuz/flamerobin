@@ -238,9 +238,9 @@ int main(int argc, char** argv)
             * m.settings.scanPayloadLength + int64_t(m.settings.commitCount)
             * 19, "scan saw all payload bytes");
         ok &= fr_test::check(!report.settings.empty(), "settings listed");
-        ok &= fr_test::check(report.toMarkdown().Contains("<!-- FlameRobin benchmark results"),
+        ok &= fr_test::check(report.toMarkdown().Contains("<!-- FlameRobin benchmark snapshot"),
             "markdown report with the results for comparisons");
-        ok &= fr_test::check(fr::parseBenchmarkSnapshot(report.toHtml()).has_value(),
+        ok &= fr_test::check(fr::parseBenchmarkSnapshot(report.toHtml()).ok(),
             "a saved report can be compared later");
     }
 

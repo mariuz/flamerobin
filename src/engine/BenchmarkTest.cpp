@@ -25,6 +25,7 @@
 #include <wx/init.h>
 
 #include <algorithm>
+#include <clocale>
 #include <cmath>
 #include <functional>
 #include <iostream>
@@ -696,13 +697,13 @@ void testSettings()
 void testValueAdvice()
 {
     std::cout << "Typical causes of slower values\n";
-    const BenchmarkValues values = getBenchmarkValues(healthyMetrics());
     bool all = true;
-    for (const auto& v : formatBenchmarkValues(values))
+    for (const BenchmarkMeasurementDef& def : getBenchmarkMeasurementDefs())
     {
-        if (getBenchmarkValueAdvice(v.first).empty())
+        if (def.kind == BenchmarkMeasurementKind::Key
+            && getBenchmarkValueAdvice(def.id).empty())
         {
-            std::cerr << "    no advice for " << v.first.utf8_str() << "\n";
+            std::cerr << "    no advice for " << def.id << "\n";
             all = false;
         }
     }
@@ -755,12 +756,6 @@ void testParts()
             check(p.values.size() == 3, "no drive test values without the minimal cache");
     }
     check(getBenchmarkParts(BenchmarkMetrics()).empty(), "nothing measured, no parts");
-
-    BenchmarkValues parsed{};
-    check(parseBenchmarkValue(parsed, "storage.commit", "1.5") && parsed.commitMs == 1.5
-        && !parseBenchmarkValue(parsed, "nonsense", "1")
-        && !parseBenchmarkValue(parsed, "storage.update", "1"),
-        "key values are read back by their id");
 }
 
 // a run with every measurement and every option, so that buildBenchmarkResults()
@@ -1001,17 +996,18 @@ void testReport()
 
     // the Markdown report has the values only, without judging them
     const wxString md = report.toMarkdown();
-    const wxString visible = md.Left(md.Find("<!-- FlameRobin benchmark results"));
+    const wxString visible = md.Left(md.Find("<!-- FlameRobin benchmark snapshot"));
     check(md.Find("## Performance Benchmark & Diagnosis") == 0
         && md.Find("### Key values") < md.Find("### System")
         && md.Find("### System") < md.Find("### All measured values")
-        && md.Find("### All measured values") < md.Find("<!-- FlameRobin benchmark results"),
+        && md.Find("### All measured values") < md.Find("<!-- FlameRobin benchmark snapshot"),
         "key values, system, all measured values, then the results for comparisons");
     check(md.Contains("| Part | Value | Result | Work |") && md.Contains("200 commits in "),
         "the key values with the work behind them");
     check(!visible.Contains("Points") && !visible.Contains("What could make")
         && !visible.Contains("Power saving slows"), "a single run is not judged");
-    check(md.Contains("value.storage.commit = ") && md.Contains("hint = computer | Power saving"),
+    check(md.Contains("\nm.storage.commit = 1.5 | ms | v1 | 200 | commits | 300 | ")
+        && md.Contains("\nnote.power.saving = computer | Power saving"),
         "the snapshot keeps the values and the hints for a comparison");
     {   // scope
         BenchmarkReport local;
@@ -1420,7 +1416,7 @@ void testHtml()
                                  { 16384, 2048, 1.0, 1000.0, 30.0, 45.0, 3800.0 } };
     report.evaluate();
     wxString html = report.toHtml("dark");
-    const wxString page = html.Left(html.Find("<!-- FlameRobin benchmark results"));
+    const wxString page = html.Left(html.Find("<!-- FlameRobin benchmark snapshot"));
     check(html.StartsWith("<!doctype html>") && html.Contains("</html>"), "complete page");
     check(html.Contains("data-theme=\"dark\""), "theme of FlameRobin");
     check(report.toHtml().Contains("<html lang=\"en\">"),
@@ -1464,7 +1460,7 @@ void testHtml()
         }
     }
     check(unjudged, "no points, no changes and no reasons in a single run");
-    check(html.Contains("hint = computer | Power saving"),
+    check(html.Contains("note.power.saving = computer | Power saving"),
         "the hints are kept for a comparison");
 
     // one check box, one tile and one panel per part with values
@@ -1655,6 +1651,250 @@ void testHiddenTexts()
         && hideBenchmarkTexts("text", {}, true) == "text", "longer names also within words");
 }
 
+BenchmarkReport makeReport(const BenchmarkMetrics& m, const wxString& date)
+{
+    BenchmarkReport report;
+    report.target = "Server of TEST";
+    report.intensityName = "Standard";
+    report.startedAt = date;
+    report.metrics = m;
+    report.evaluate();
+    return report;
+}
+
+bool sameMeasurements(const BenchmarkSnapshot& a, const BenchmarkSnapshot& b)
+{
+    if (a.measurements.size() != b.measurements.size())
+        return false;
+    for (size_t i = 0; i < a.measurements.size(); ++i)
+    {
+        const BenchmarkMeasurement& x = a.measurements[i];
+        const BenchmarkMeasurement& y = b.measurements[i];
+        if (x.id != y.id || x.unit != y.unit || x.version != y.version
+            || x.amountUnit != y.amountUnit || x.title != y.title || x.text != y.text
+            || std::abs(x.value - y.value) > 1e-6 * x.value
+            || std::abs(x.amount - y.amount) > 1e-6 * x.amount
+            || std::abs(x.ms - y.ms) > 1e-6 * x.ms)
+        {
+            std::cerr << "    differs: " << x.id.utf8_str() << " / " << y.id.utf8_str() << "\n";
+            return false;
+        }
+    }
+    return true;
+}
+
+const BenchmarkComparedValue* findCompared(const BenchmarkComparison& c, const wxString& id)
+{
+    for (const auto* list : { &c.values, &c.stats })
+    {
+        for (const BenchmarkComparedValue& v : *list)
+        {
+            if (v.id == id)
+                return &v;
+        }
+    }
+    return nullptr;
+}
+
+void testSnapshotFormat()
+{
+    std::cout << "Saved results (format 2)\n";
+    using C = BenchmarkCategory;
+    BenchmarkSnapshot s;
+    s.program = "26.10.0";
+    s.title = "HP ZBook";
+    s.host = "workstation";
+    s.date = "2026-10-04 12:00:00";
+    s.kind = "client";
+    s.intensity = "standard";
+    BenchmarkMeasurement insert;
+    insert.id = "storage.insert";
+    insert.value = 1234.5;
+    insert.unit = "rows/s";
+    insert.version = 1;
+    insert.amount = 1234567;
+    insert.amountUnit = "rows";
+    insert.ms = 0.0125;
+    insert.title = "Writing rows";
+    insert.text = "1,235 rows/s";
+    BenchmarkMeasurement dns;
+    dns.id = "network.dns";
+    dns.version = 2;
+    dns.title = "Finding the server by its name (DNS)";
+    dns.text = "1.00 ms";
+    BenchmarkMeasurement level = insert;
+    level.id = "users.tx.8";
+    level.value = 1234567.5;
+    level.unit = "tx/s";
+    s.measurements = { insert, dns, level };
+    s.facts = { { "os", "Windows 11" } };
+    s.hints = { { "power.saving", C::ServerCpu, "Power saving", "detail", "advice" } };
+    const wxString text = formatBenchmarkSnapshot(s);
+    check(text.Contains("\nformat = 2.0\nprogram = 26.10.0\nrun.title = HP ZBook\n")
+        && text.Contains("\nm.storage.insert = 1234.5 | rows/s | v1 | 1234567 | rows | 0.0125 | "
+            "Writing rows | 1,235 rows/s\n")
+        && text.Contains("\nm.network.dns =  |  | v2 |  |  |  | Finding the server by its "
+            "name (DNS) | 1.00 ms\n")
+        && text.Contains("\nm.users.tx.8 = 1234568 | tx/s | v1 | 1234567 | ")
+        && text.Contains("\nnote.power.saving = cpu | Power saving | detail | advice\n"),
+        "numbers with a point, without thousands separators and exponent, at most six digits");
+    const BenchmarkSnapshotResult back = parseBenchmarkSnapshot("# report\n\n" + text);
+    BenchmarkSnapshot rounded = s;
+    rounded.measurements[2].value = 1234568;
+    check(back.ok() && back.format == "2.0" && back.snapshot.program == "26.10.0"
+        && back.snapshot.host == "workstation" && back.snapshot.kind == "client"
+        && back.snapshot.intensity == "standard" && sameMeasurements(back.snapshot, rounded)
+        && back.snapshot.facts == s.facts && back.snapshot.hints.size() == 1
+        && back.snapshot.hints[0].id == "power.saving"
+        && back.snapshot.hints[0].category == C::ServerCpu,
+        "the snapshot is read back as it was written");
+    check(formatBenchmarkSnapshot(back.snapshot) == formatBenchmarkSnapshot(rounded),
+        "writing it again gives the same text");
+    {   // scope
+        // the decimal separator of the language must not matter
+        const char* const german[] = { "de_DE.UTF-8", "de_DE", "German_Germany.1252" };
+        bool set = false;
+        for (const char* locale : german)
+            set = set || std::setlocale(LC_NUMERIC, locale) != nullptr;
+        const wxString localized = formatBenchmarkSnapshot(s);
+        std::setlocale(LC_NUMERIC, "C");
+        if (!set)
+            std::cout << "    (no German locale to test with)\n";
+        check(localized == text, "the same numbers in a German locale");
+    }
+    BenchmarkSnapshot dirty = s;
+    dirty.title = "A | B -- C\nD";
+    check(formatBenchmarkSnapshot(dirty).Contains("\nrun.title = A / B - - C D\n")
+        && formatBenchmarkSnapshot(dirty).Freq('\n') == text.Freq('\n'),
+        "a text never ends a line, a field or the comment");
+
+    // versions of the format
+    const wxString head = "<!-- FlameRobin benchmark snapshot (used by FlameRobin to "
+        "compare reports)\n";
+    const wxString oldHead = "<!-- FlameRobin benchmark results (used by FlameRobin to "
+        "compare reports)\n";
+    const BenchmarkSnapshotResult first = parseBenchmarkSnapshot(oldHead
+        + "format = 1\ntitle = old\nvalue.commitMs = 1.5\nstat = storage |  | Saving | "
+        "1.50 ms | 200 transactions | 300.000\n-->\n");
+    check(first.status == BenchmarkSnapshotStatus::TooOld && first.format == "1"
+        && getBenchmarkSnapshotProblem(first).Contains("older version")
+        && getBenchmarkSnapshotProblem(first).Contains("format 1"),
+        "a report of FlameRobin 26.10.0 (format 1) is refused with a message");
+    const BenchmarkSnapshotResult future = parseBenchmarkSnapshot(head + "format = 3.0\n"
+        "run.title = new\nm.storage.commit = 1.5 | ms | v1\n-->\n");
+    check(future.status == BenchmarkSnapshotStatus::TooNew && future.format == "3.0"
+        && getBenchmarkSnapshotProblem(future).Contains("newer version")
+        && getBenchmarkSnapshotProblem(future).Contains("3.0")
+        && future.snapshot.measurements.empty(),
+        "a report of a newer major format is refused with a message");
+    const BenchmarkSnapshotResult minor = parseBenchmarkSnapshot(head + "format = 2.5\n"
+        "run.title = later\nrun.weather = sunny\nnew.kind.of.line = 1\n"
+        "m.storage.commit = 1.5 | ms | v1 | 200 | commits | 300 | Saving | 1.50 ms | x | y\n"
+        "m.gpu.render = 60 | frames/s | v1 |  |  |  | Rendering | 60 frames/s\n"
+        "note.new.kind = cpu | Title | Detail | Advice | Extra\n"
+        "a line without equals sign\n-->\n");
+    const BenchmarkMeasurement* commit = minor.snapshot.findMeasurement("storage.commit");
+    const BenchmarkMeasurement* render = minor.snapshot.findMeasurement("gpu.render");
+    check(minor.ok() && minor.snapshot.title == "later" && commit && commit->value == 1.5
+        && commit->amount == 200 && commit->amountUnit == "commits" && commit->ms == 300
+        && commit->text == "1.50 ms" && render && render->title == "Rendering"
+        && minor.snapshot.hints.size() == 1 && minor.snapshot.hints[0].advice == "Advice",
+        "a newer minor format: unknown lines and fields are skipped, unknown ids kept");
+    check(parseBenchmarkSnapshot(head + "run.title = x\n-->\n").status
+            == BenchmarkSnapshotStatus::Damaged
+        && parseBenchmarkSnapshot(head + "format = two\n-->\n").status
+            == BenchmarkSnapshotStatus::Damaged
+        && parseBenchmarkSnapshot(head + "format = 2.0\nrun.title = cut off\n").status
+            == BenchmarkSnapshotStatus::Damaged
+        && !getBenchmarkSnapshotProblem(parseBenchmarkSnapshot(head + "-->")).empty()
+        && parseBenchmarkSnapshot("# notes").status == BenchmarkSnapshotStatus::NotAReport,
+        "results without a format or without an end are damaged");
+    const BenchmarkSnapshotResult invalid = parseBenchmarkSnapshot(head + "format = 2.0\n"
+        "m.storage..insert = 1 | rows/s | v1\nm.storage.insert = abc | rows/s | v1\n"
+        "m.storage.update = 1 | rows/s | 1\nm.storage.delete = -5 | rows/s | v1\n"
+        "m.storage.gc = 1 | ms | v0\nm.storage.create = 2 | ms | v1\n"
+        "m.storage.create = 3 | ms | v1\nnote.x = cpu | a | b | c\n-->\n");
+    check(invalid.ok() && invalid.snapshot.measurements.size() == 1
+        && invalid.snapshot.measurements[0].value == 2 && invalid.snapshot.hints.empty(),
+        "lines that cannot be read are skipped, an id counts once");
+
+    // a real report, also with Windows line ends
+    BenchmarkMetrics metrics = healthyMetrics();
+    metrics.clientBurstIdleMs = 25.0;
+    metrics.skippedTests.push_back({ "application.blob", "Writing / reading large data "
+        "(BLOBs)", "not supported" });
+    metrics.blobReadMs.reset();
+    const BenchmarkReport report = makeReport(metrics, "2026-10-04 12:00:00");
+    const wxString md = report.toMarkdown();
+    const BenchmarkSnapshotResult fromMd = parseBenchmarkSnapshot(md);
+    const BenchmarkSnapshotResult fromHtml = parseBenchmarkSnapshot(report.toHtml("dark"));
+    wxString crlf = md;
+    crlf.Replace("\n", "\r\n");
+    check(fromMd.ok() && fromHtml.ok() && sameMeasurements(fromMd.snapshot, fromHtml.snapshot)
+        && sameMeasurements(fromMd.snapshot, parseBenchmarkSnapshot(crlf).snapshot)
+        && fromMd.snapshot.measurements.size() > 30,
+        "Markdown and HTML carry the same results, also with Windows line ends");
+    const BenchmarkSnapshot& saved = fromMd.snapshot;
+    const BenchmarkMeasurement* oltp = saved.findMeasurement("users.oltp");
+    const BenchmarkMeasurement* blob = saved.findMeasurement("application.blob");
+    const BenchmarkMeasurement* update = saved.findMeasurement("storage.update");
+    check(oltp && oltp->value == 6000 && oltp->amount == 30000 && oltp->ms == 5000
+        && oltp->amountUnit == "transactions" && oltp->title == "Transactions, up to 8 users"
+        && update && std::abs(update->value / (50000 * 1000.0 / 650.0) - 1.0) < 1e-5
+        && update->amount == 50000 && update->amountUnit == "rows" && update->ms == 650
+        && blob && blob->value == 0 && blob->text == "not measured"
+        && saved.findMeasurement("users.tx.8") && !saved.findMeasurement("settings.runsOn"),
+        "key values, other values with their work, skipped tests; no settings");
+
+    // a computer or user name in a shared report never changes the results
+    const std::vector<std::pair<wxString, wxString>> names = { { "STORAGE", "<hidden>" },
+        { "rows", "<hidden>" }, { "ms", "<user>" } };
+    const BenchmarkSnapshotResult hiddenMd = parseBenchmarkSnapshot(
+        hideBenchmarkTexts(md, names, false));
+    const BenchmarkSnapshotResult hiddenHtml = parseBenchmarkSnapshot(
+        hideBenchmarkTexts(report.toHtml(), names, true));
+    bool numbersKept = hiddenMd.ok() && hiddenHtml.ok()
+        && hiddenMd.snapshot.measurements.size() == saved.measurements.size();
+    for (size_t i = 0; numbersKept && i < saved.measurements.size(); ++i)
+    {
+        for (const BenchmarkSnapshot* other : { &hiddenMd.snapshot, &hiddenHtml.snapshot })
+        {
+            const BenchmarkMeasurement& x = saved.measurements[i];
+            const BenchmarkMeasurement& y = other->measurements[i];
+            numbersKept = numbersKept && x.id == y.id && x.value == y.value
+                && x.unit == y.unit && x.amountUnit == y.amountUnit && x.ms == y.ms;
+        }
+    }
+    check(numbersKept && hiddenMd.snapshot.findMeasurement("storage.update")->title
+        == "Changing many <hidden>", "names are hidden in the texts, not in ids and units");
+
+    // measurements are matched by their ids, never by their titles
+    BenchmarkSnapshot translated = saved;
+    for (BenchmarkMeasurement& x : translated.measurements)
+    {
+        x.title = "Titel " + x.id;
+        x.text = "anders";
+    }
+    const BenchmarkComparison other = compareBenchmarkSnapshots(translated, saved);
+    const BenchmarkComparedValue* updated = findCompared(other, "storage.update");
+    check(std::abs(other.ratio - 1.0) < 1e-9 && updated
+        && std::abs(updated->ratio - 1.0) < 1e-9 && updated->title == "Titel storage.update",
+        "the same ids with other titles (another language) are compared");
+    BenchmarkSnapshot renamed = saved;
+    for (BenchmarkMeasurement& x : renamed.measurements)
+    {
+        if (x.id == "storage.update")
+            x.id = "storage.rewrite";
+    }
+    const BenchmarkComparison moved = compareBenchmarkSnapshots(renamed, saved);
+    const BenchmarkComparedValue* gone = findCompared(moved, "storage.update");
+    const BenchmarkComparedValue* added = findCompared(moved, "storage.rewrite");
+    check(gone && added && gone->ratio == 0.0 && added->ratio == 0.0
+        && gone->newerText == wxString(wxUniChar(0x2013)) && gone->title == added->title
+        && added->olderText == wxString(wxUniChar(0x2013)),
+        "another id with the same title is another measurement");
+}
+
 void testComparison()
 {
     std::cout << "Comparison of two runs\n";
@@ -1669,15 +1909,18 @@ void testComparison()
     report.metrics.system.storagePathExcluded = false;
     report.evaluate();
     const wxString md = report.toMarkdown();
-    std::optional<BenchmarkSnapshot> earlier = parseBenchmarkSnapshot(md);
+    std::optional<BenchmarkSnapshot> earlier;
+    if (parseBenchmarkSnapshot(md).ok())
+        earlier = parseBenchmarkSnapshot(md).snapshot;
     check(earlier && earlier->date == report.startedAt && earlier->kind == "embedded"
         && earlier->intensity == "standard" && earlier->hints.size() == report.hints.size()
         && !earlier->hints.empty(), "a saved report can be read back");
-    check(earlier && std::abs(earlier->values.commitMs
-        - getBenchmarkValues(report.metrics).commitMs) < 0.001, "with its values");
-    check(parseBenchmarkSnapshot(report.toHtml()).has_value(), "the HTML report as well");
-    check(!parseBenchmarkSnapshot("# notes\nvalue.commitMs = 1\n"),
-        "other files contain no results");
+    check(earlier && earlier->findMeasurement("storage.commit")
+        && std::abs(earlier->findMeasurement("storage.commit")->value
+            - getBenchmarkValues(report.metrics).commitMs) < 0.001, "with its values");
+    check(parseBenchmarkSnapshot(report.toHtml()).ok(), "the HTML report as well");
+    check(parseBenchmarkSnapshot("# notes\nm.storage.commit = 1\n").status
+        == BenchmarkSnapshotStatus::NotAReport, "other files contain no results");
     if (!earlier)
         return;
 
@@ -1772,19 +2015,26 @@ void testComparison()
 
     // two saved reports
     BenchmarkComparison files = compareBenchmarkSnapshots(
-        *parseBenchmarkSnapshot(fasterMd), *earlier);
+        parseBenchmarkSnapshot(fasterMd).snapshot, *earlier);
     check(findLegacyProblem(html).empty() && findLegacyProblem(files.toHtml("dark")).empty(),
         "comparisons for Internet Explorer 11 as well");
     check(files.toHtml().Contains("Comparison of two benchmark runs")
         && files.toMarkdown().Contains("| **All parts** |")
         && files.toMarkdown().Contains("Later run")
         && files.toMarkdown().Contains("| Writing many rows | "), "two saved reports");
-    check(std::any_of(files.stats.begin(), files.stats.end(),
-        [](const BenchmarkComparedValue& v) { return v.title == "Changing many rows"; })
-        && std::none_of(files.stats.begin(), files.stats.end(),
+    std::map<wxString, int> rows;
+    for (const auto* list : { &files.values, &files.stats })
+    {
+        for (const BenchmarkComparedValue& v : *list)
+            ++rows[v.id];
+    }
+    check(std::all_of(rows.begin(), rows.end(), [](const auto& row) { return row.second == 1; })
+        && std::any_of(files.stats.begin(), files.stats.end(),
             [](const BenchmarkComparedValue& v)
-            { return v.title == "Saving a small change (commit)"; }),
-        "every other measurement is compared once");
+            { return v.id == "storage.update" && v.title == "Changing many rows"; })
+        && std::none_of(files.stats.begin(), files.stats.end(),
+            [](const BenchmarkComparedValue& v) { return v.id == "storage.commit"; }),
+        "every measurement is compared once, the key values with the key values");
 
     // which facts can explain which part
     check(isBenchmarkFactOfPart("power", C::LocalMachine, false)
@@ -1863,6 +2113,7 @@ int main(int argc, char** argv)
     testSystemInfoParsers();
     testAnonymized();
     testHiddenTexts();
+    testSnapshotFormat();
     testComparison();
 
     std::cout << (ok ? "ALL BENCHMARK TESTS PASSED\n" : "SOME BENCHMARK TESTS FAILED\n");

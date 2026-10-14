@@ -413,8 +413,8 @@ std::vector<BenchmarkPart> getBenchmarkParts(const BenchmarkMetrics& m)
             auto w = work.find(def.id);
             if (w != work.end())
             {
-                v.amountText = w->second.first;
-                v.durationMs = w->second.second;
+                v.amountText = w->second.text;
+                v.durationMs = w->second.ms;
             }
             part.values.push_back(v);
         }
@@ -422,63 +422,6 @@ std::vector<BenchmarkPart> getBenchmarkParts(const BenchmarkMetrics& m)
             parts.push_back(part);
     }
     return parts;
-}
-
-std::vector<std::pair<wxString, wxString>> formatBenchmarkValues(
-    const BenchmarkValues& values)
-{
-    std::vector<std::pair<wxString, wxString>> list;
-    for (const BenchmarkMeasurementDef& def : getBenchmarkMeasurementDefs())
-    {
-        if (def.kind != K::Key || !def.value)
-            continue;
-        const double value = values.*def.value;
-        list.push_back({ def.id, value > 0.0
-            ? wxString::FromCDouble(value, def.higherIsBetter ? 1 : 4)
-            : wxString("0") });
-    }
-    return list;
-}
-
-bool parseBenchmarkValue(BenchmarkValues& values, const wxString& id,
-    const wxString& text)
-{
-    const BenchmarkMeasurementDef* def = findBenchmarkMeasurementDef(id);
-    double number = 0.0;
-    if (!def || def->kind != K::Key || !def->value || !text.ToCDouble(&number)
-        || number < 0.0)
-    {
-        return false;
-    }
-    values.*def->value = number;
-    return true;
-}
-
-std::vector<BenchmarkComparedValue> compareBenchmarkValues(
-    const BenchmarkValues& newer, const BenchmarkValues& older)
-{
-    std::vector<BenchmarkComparedValue> list;
-    for (const BenchmarkMeasurementDef& def : getBenchmarkMeasurementDefs())
-    {
-        if (def.kind != K::Key || !def.value)
-            continue;
-        const double value = newer.*def.value;
-        const double base = older.*def.value;
-        if (value <= 0.0 && base <= 0.0)
-            continue;
-        BenchmarkComparedValue c;
-        c.category = def.section;
-        c.id = def.id;
-        c.title = wxGetTranslation(def.title);
-        c.newerText = value > 0.0 ? formatBenchmarkValue(value, def)
-            : wxString(wxUniChar(0x2013));
-        c.olderText = base > 0.0 ? formatBenchmarkValue(base, def)
-            : wxString(wxUniChar(0x2013));
-        if (value > 0.0 && base > 0.0)
-            c.ratio = def.higherIsBetter ? value / base : base / value;
-        list.push_back(c);
-    }
-    return list;
 }
 
 wxString getBenchmarkKindId(const BenchmarkMetrics& m)

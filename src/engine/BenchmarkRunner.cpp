@@ -638,6 +638,7 @@ BenchmarkReport BenchmarkRunner::run(const ProgressCallback& progress)
     BenchmarkReport report;
     report.target = paramsM.targetDescription;
     report.benchmarkDatabasePath = databasePathM;
+    report.intensity = intensityM;
     report.intensityName = getBenchmarkIntensityName(intensityM);
     report.startedAt = wxDateTime::Now().FormatISOCombined(' ');
     BenchmarkMetrics& m = report.metrics;

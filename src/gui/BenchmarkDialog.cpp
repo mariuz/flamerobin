@@ -93,6 +93,16 @@ wxString toWxString(const std::string& s)
     return wxString(s.c_str(), *wxConvCurrent);
 }
 
+// the results in a saved report (Markdown or HTML), or why there are none
+fr::BenchmarkSnapshotResult readReportFile(const wxString& path)
+{
+    wxFFile file(path, "r");
+    wxString text;
+    if (file.IsOpened() && file.ReadAll(&text, wxConvUTF8))
+        return fr::parseBenchmarkSnapshot(text);
+    return fr::BenchmarkSnapshotResult();
+}
+
 #if wxUSE_WEBVIEW
 // on Windows Edge (WebView2) where its runtime is installed, then Internet
 // Explorer, which shows the report in a simpler form; nullptr if there is no
@@ -1141,11 +1151,28 @@ void BenchmarkDialog::onFinished(const fr::BenchmarkReport& report,
             MasterPassword::reset();
     }
 
+    // an earlier report that cannot be compared, e.g. of an older version
+    const wxString earlierFile = text_earlier->GetValue().Trim().Trim(false);
+    wxString earlierProblem;
+    if (!earlierFile.empty())
+    {
+        earlierProblem = wxFileExists(earlierFile)
+            ? fr::getBenchmarkSnapshotProblem(readReportFile(earlierFile))
+            : wxString(_("The file does not exist."));
+        if (!earlierProblem.empty())
+            appendLog(earlierFile + ": " + earlierProblem);
+    }
+
     if (report.cancelled)
         label_status->SetLabel(_("Cancelled. The results are incomplete."));
     else if (!report.errorMessage.empty())
         label_status->SetLabel(_("Failed. See the log for details."));
-    else if (!text_earlier->GetValue().Trim().Trim(false).empty())
+    else if (!earlierFile.empty() && !earlierProblem.empty())
+    {
+        label_status->SetLabel(_("Finished. The earlier report cannot be compared, see "
+            "the log."));
+    }
+    else if (!earlierFile.empty())
     {
         label_status->SetLabel(_("Finished. The overview compares this run with the "
             "earlier report."));
@@ -1341,19 +1368,14 @@ bool BenchmarkDialog::isOnRegistrationServer(const wxString& connectionString) c
 std::optional<fr::BenchmarkSnapshot> BenchmarkDialog::readSnapshot(const wxString& path,
     bool showErrors)
 {
-    wxFFile file(path, "r");
-    wxString text;
-    if (file.IsOpened() && file.ReadAll(&text, wxConvUTF8))
-    {
-        if (std::optional<fr::BenchmarkSnapshot> snapshot = fr::parseBenchmarkSnapshot(text))
-            return snapshot;
-    }
+    const fr::BenchmarkSnapshotResult result = readReportFile(path);
+    if (result.ok())
+        return result.snapshot;
     if (showErrors)
     {
-        wxMessageBox(wxString::Format(_("%s contains no benchmark results.\n\nPlease "
-            "select a report that was saved or copied with this version of FlameRobin "
-            "(HTML or Markdown)."), path), _("Performance Benchmark & Diagnosis"),
-            wxOK | wxICON_INFORMATION, this);
+        // older reports are refused with a message, never compared wrongly
+        wxMessageBox(path + "\n\n" + fr::getBenchmarkSnapshotProblem(result),
+            _("Performance Benchmark & Diagnosis"), wxOK | wxICON_INFORMATION, this);
     }
     return std::nullopt;
 }
@@ -1366,10 +1388,10 @@ fr::BenchmarkReport BenchmarkDialog::displayedReport() const
     const wxString earlierFile = text_earlier->GetValue().Trim().Trim(false);
     if (!earlierFile.empty() && wxFileExists(earlierFile))
     {
-        wxFFile file(earlierFile, "r");
-        wxString text;
-        if (file.IsOpened() && file.ReadAll(&text, wxConvUTF8))
-            report.earlier = fr::parseBenchmarkSnapshot(text);
+        // a report that cannot be compared is named in the log, see onFinished()
+        const fr::BenchmarkSnapshotResult earlier = readReportFile(earlierFile);
+        if (earlier.ok())
+            report.earlier = earlier.snapshot;
     }
     if (check_private->GetValue())
         report = report.anonymized();
