@@ -670,8 +670,13 @@ BenchmarkComparison compareBenchmarkSnapshots(const BenchmarkSnapshot& newer,
     c.older = older;
     c.sameKind = newer.kind == older.kind && newer.intensity == older.intensity;
 
-    // a measurement of both runs, matched by its id
-    auto compare = [](const wxString& id, BenchmarkCategory section,
+    // a measurement of both runs, matched by its id; it is compared only if
+    // both runs have it from the same version of the test and, where every
+    // run of an intensity does the same work, with the same work. The key
+    // values of runs of different intensities are compared as well, roughly
+    // (see sameKind).
+    const bool sameIntensity = newer.intensity == older.intensity;
+    auto compare = [sameIntensity](const wxString& id, BenchmarkCategory section,
         const BenchmarkMeasurement* n, const BenchmarkMeasurement* o)
     {
         const BenchmarkMeasurementDef* def = findBenchmarkMeasurementDef(id);
@@ -700,19 +705,33 @@ BenchmarkComparison compareBenchmarkSnapshots(const BenchmarkSnapshot& newer,
         v.olderText = text(o);
         v.newerWork = work(n);
         v.olderWork = work(o);
-        if (n && o && def && def->kind == BenchmarkMeasurementKind::Key)
+        v.newerVersion = n ? n->version : 0;
+        v.olderVersion = o ? o->version : 0;
+        if (!o)
+            v.state = BenchmarkCompareState::OnlyNewer;
+        else if (!n)
+            v.state = BenchmarkCompareState::OnlyOlder;
+        else if (n->version != o->version)
+            v.state = BenchmarkCompareState::TestChanged;
+        // information, an id this version does not know, or a test that did
+        // not run in one of the runs: shown, not compared
+        else if (def && def->kind != BenchmarkMeasurementKind::Info && n->value > 0.0
+            && o->value > 0.0)
         {
-            if (n->value > 0.0 && o->value > 0.0)
+            // a value without its work (e.g. a commit faster than the round
+            // trips it was corrected by) cannot differ in its work
+            const bool sameWork = n->amountUnit.empty() || o->amountUnit.empty()
+                || (n->amount == o->amount && n->amountUnit == o->amountUnit);
+            if (!sameWork && def->amountFixed
+                && (def->kind == BenchmarkMeasurementKind::Measure || sameIntensity))
+            {
+                v.state = BenchmarkCompareState::WorkChanged;
+            }
+            else
             {
                 v.ratio = roundRatio(def->higherIsBetter ? n->value / o->value
                     : o->value / n->value);
             }
-        }
-        // the same work in less time is faster
-        else if (n && o && n->ms > 0.0 && o->ms > 0.0 && n->amount == o->amount
-            && n->amountUnit == o->amountUnit)
-        {
-            v.ratio = roundRatio(o->ms / n->ms);
         }
         return v;
     };

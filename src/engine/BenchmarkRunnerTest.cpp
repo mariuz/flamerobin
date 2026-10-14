@@ -126,6 +126,8 @@ int main(int argc, char** argv)
     }
 
     bool ok = true;
+    // the results of the first run, compared with the page size run below
+    fr::BenchmarkSnapshot firstRun;
     std::cout << "Complete Quick run\n";
     {   // scope
         fr::BenchmarkConnectionParams params = makeParams(server);
@@ -242,6 +244,20 @@ int main(int argc, char** argv)
             "markdown report with the results for comparisons");
         ok &= fr_test::check(fr::parseBenchmarkSnapshot(report.toHtml()).ok(),
             "a saved report can be compared later");
+        const fr::BenchmarkSnapshotResult saved = fr::parseBenchmarkSnapshot(report.toMarkdown());
+        bool registered = saved.ok() && !saved.snapshot.measurements.empty();
+        for (const fr::BenchmarkMeasurement& x : saved.snapshot.measurements)
+        {
+            const fr::BenchmarkMeasurementDef* def = fr::findBenchmarkMeasurementDef(x.id);
+            if (!def || (def->kind != fr::BenchmarkMeasurementKind::Info && x.value <= 0.0
+                && x.text != "not measured"))
+            {
+                std::cout << "    not registered or without a value: " << x.id.utf8_str() << "\n";
+                registered = false;
+            }
+        }
+        ok &= fr_test::check(registered, "every saved measurement is registered, with a value");
+        firstRun = saved.snapshot;
     }
 
     std::cout << "Cancelled run\n";
@@ -323,6 +339,27 @@ int main(int argc, char** argv)
             }), "all page size measurements present");
         ok &= fr_test::check(report.undroppedDatabases.empty(),
             "no comparison database left behind");
+        // two real runs of the same intensity: no test does other work, so
+        // the fixed amounts of the register are really fixed
+        const fr::BenchmarkSnapshotResult second = fr::parseBenchmarkSnapshot(report.toHtml());
+        const fr::BenchmarkComparison c = fr::compareBenchmarkSnapshots(second.snapshot,
+            firstRun);
+        bool comparable = second.ok() && !c.values.empty() && c.ratio > 0.0;
+        for (const auto* list : { &c.values, &c.stats })
+        {
+            for (const fr::BenchmarkComparedValue& v : *list)
+            {
+                if (v.state == fr::BenchmarkCompareState::WorkChanged
+                    || v.state == fr::BenchmarkCompareState::TestChanged)
+                {
+                    std::cout << "    not comparable: " << v.id.utf8_str() << ": "
+                        << v.olderWork.utf8_str() << " / " << v.newerWork.utf8_str() << "\n";
+                    comparable = false;
+                }
+            }
+        }
+        ok &= fr_test::check(comparable, "two runs of the same intensity are compared "
+            "value by value");
         bool anyExists = false;
         for (const auto& connectionString : runner.getAllConnectionStrings())
             anyExists = anyExists || databaseExists(connectionString);

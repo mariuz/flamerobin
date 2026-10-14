@@ -1891,8 +1891,155 @@ void testSnapshotFormat()
     const BenchmarkComparedValue* added = findCompared(moved, "storage.rewrite");
     check(gone && added && gone->ratio == 0.0 && added->ratio == 0.0
         && gone->newerText == wxString(wxUniChar(0x2013)) && gone->title == added->title
-        && added->olderText == wxString(wxUniChar(0x2013)),
+        && added->olderText == wxString(wxUniChar(0x2013))
+        && gone->state == BenchmarkCompareState::OnlyOlder
+        && added->state == BenchmarkCompareState::OnlyNewer,
         "another id with the same title is another measurement");
+}
+
+void testCompareStates()
+{
+    std::cout << "Comparison by id and test version\n";
+    using S = BenchmarkCompareState;
+    const BenchmarkSnapshot older = makeBenchmarkSnapshot(makeReport(healthyMetrics(),
+        "2026-10-04 12:00:00"));
+    const BenchmarkComparison same = compareBenchmarkSnapshots(older, older);
+    bool allCompared = !same.values.empty() && !same.stats.empty();
+    for (const auto* list : { &same.values, &same.stats })
+    {
+        for (const BenchmarkComparedValue& v : *list)
+        {
+            const BenchmarkMeasurementDef* def = findBenchmarkMeasurementDef(v.id);
+            const bool number = def && def->kind != BenchmarkMeasurementKind::Info;
+            allCompared = allCompared && v.state == S::Compared && v.newerVersion == 1
+                && v.olderVersion == 1 && (number ? v.ratio == 1.0 : v.ratio == 0.0);
+        }
+    }
+    check(allCompared, "a run compared with itself: every value compared, ratios 1");
+
+    auto change = [](BenchmarkSnapshot s, const wxString& id,
+        const std::function<void(BenchmarkMeasurement&)>& edit)
+    {
+        for (BenchmarkMeasurement& x : s.measurements)
+        {
+            if (x.id == id)
+                edit(x);
+        }
+        return s;
+    };
+    // a new version of the commit test: not comparable, not in the points
+    BenchmarkSnapshot newer = change(older, "storage.commit", [](BenchmarkMeasurement& x)
+        {
+            x.version = 2;
+            x.value /= 4.0;
+        });
+    newer = change(newer, "storage.update", [](BenchmarkMeasurement& x)
+        {
+            x.version = 2;
+            x.value *= 4.0;
+        });
+    const BenchmarkComparison changed = compareBenchmarkSnapshots(newer, older);
+    const BenchmarkComparedValue* commit = findCompared(changed, "storage.commit");
+    const BenchmarkComparedValue* update = findCompared(changed, "storage.update");
+    check(commit && commit->state == S::TestChanged && commit->ratio == 0.0
+        && commit->newerVersion == 2 && commit->olderVersion == 1
+        && update && update->state == S::TestChanged && update->ratio == 0.0
+        && std::abs(changed.findPart(BenchmarkCategory::ServerStorage)->ratio - 1.0) < 1e-9
+        && std::abs(changed.ratio - 1.0) < 1e-9,
+        "another version of a test: not comparable, not in the points");
+
+    // the same intensity with other work: the table of the intensities
+    // changed without a new version of the test
+    newer = change(older, "storage.insert", [](BenchmarkMeasurement& x)
+        {
+            x.amount = 60000;
+            x.ms *= 1.2;
+        });
+    newer = change(newer, "storage.delete", [](BenchmarkMeasurement& x) { x.amount = 60000; });
+    newer = change(newer, "storage.driveInsert", [](BenchmarkMeasurement& x)
+        {
+            x.amount *= 2.0;
+            x.value *= 2.0;
+        });
+    newer = change(newer, "users.tx.8", [](BenchmarkMeasurement& x)
+        {
+            x.amount *= 1.5;
+            x.value *= 1.5;
+        });
+    const BenchmarkComparison work = compareBenchmarkSnapshots(newer, older);
+    const BenchmarkComparedValue* insert = findCompared(work, "storage.insert");
+    const BenchmarkComparedValue* removed = findCompared(work, "storage.delete");
+    const BenchmarkComparedValue* drive = findCompared(work, "storage.driveInsert");
+    const BenchmarkComparedValue* level = findCompared(work, "users.tx.8");
+    check(insert && insert->state == S::WorkChanged && insert->ratio == 0.0
+        && removed && removed->state == S::WorkChanged && removed->ratio == 0.0,
+        "other work of a test with fixed work: not comparable");
+    // a commit faster than the round trips it was corrected by has no work
+    const BenchmarkSnapshot instant = change(older, "storage.commit",
+        [](BenchmarkMeasurement& x)
+        {
+            x.value = 0.01;
+            x.amount = 0.0;
+            x.amountUnit.clear();
+            x.ms = 0.0;
+        });
+    const BenchmarkComparison faster = compareBenchmarkSnapshots(instant, older);
+    const BenchmarkComparedValue* fast = findCompared(faster, "storage.commit");
+    check(fast && fast->state == S::Compared && fast->ratio == 150.0,
+        "a value without its work is compared by its value");
+    check(drive && drive->state == S::Compared && std::abs(drive->ratio - 2.0) < 1e-9
+        && level && level->state == S::Compared && std::abs(level->ratio - 1.5) < 1e-9,
+        "the tests with a time limit are compared by their rate");
+    // another intensity: the key values roughly, the other values not
+    BenchmarkSnapshot quick = newer;
+    quick.intensity = "quick";
+    const BenchmarkComparison intensities = compareBenchmarkSnapshots(quick, older);
+    const BenchmarkComparedValue* quickInsert = findCompared(intensities, "storage.insert");
+    const BenchmarkComparedValue* quickDelete = findCompared(intensities, "storage.delete");
+    check(!intensities.sameKind && quickInsert && quickInsert->state == S::Compared
+        && quickInsert->ratio > 0.0 && quickDelete && quickDelete->state == S::WorkChanged,
+        "another intensity: key values compared roughly, other values not");
+
+    // new and no longer measured
+    newer = older;
+    newer.measurements.erase(std::remove_if(newer.measurements.begin(),
+        newer.measurements.end(), [](const BenchmarkMeasurement& x)
+        { return x.id == "storage.gc" || x.id == "cpu.parallel"; }), newer.measurements.end());
+    BenchmarkMeasurement future;
+    future.id = "storage.trim";
+    future.value = 12;
+    future.unit = "ms";
+    future.version = 1;
+    future.title = "Trimming the disk";
+    future.text = "12.00 ms";
+    newer.measurements.push_back(future);
+    const BenchmarkComparison gone = compareBenchmarkSnapshots(newer, older);
+    const BenchmarkComparedValue* gc = findCompared(gone, "storage.gc");
+    const BenchmarkComparedValue* parallel = findCompared(gone, "cpu.parallel");
+    const BenchmarkComparedValue* trim = findCompared(gone, "storage.trim");
+    check(gc && gc->state == S::OnlyOlder && gc->ratio == 0.0
+        && parallel && parallel->state == S::OnlyOlder
+        && trim && trim->state == S::OnlyNewer && trim->title == "Trimming the disk"
+        && trim->category == BenchmarkCategory::ServerStorage && trim->newerText == "12.00 ms",
+        "new and no longer measured values are listed, an unknown id with its title");
+    const BenchmarkComparedValue* factor = findCompared(same, "memory.coldVsWarm");
+    check(factor && factor->state == S::Compared && factor->ratio == 0.0
+        && factor->newerText == "1.1x", "information is shown, not compared");
+
+    // anonymized runs give the same ratios and states
+    BenchmarkSnapshot hostNewer = newer;
+    hostNewer.host = "PC-MUELLER";
+    const BenchmarkComparison plain = compareBenchmarkSnapshots(hostNewer, older);
+    const BenchmarkComparison shared = anonymizeBenchmarkComparison(plain);
+    bool unchanged = plain.values.size() == shared.values.size()
+        && plain.stats.size() == shared.stats.size() && plain.ratio == shared.ratio;
+    for (size_t i = 0; unchanged && i < plain.stats.size(); ++i)
+    {
+        unchanged = plain.stats[i].id == shared.stats[i].id
+            && plain.stats[i].ratio == shared.stats[i].ratio
+            && plain.stats[i].state == shared.stats[i].state;
+    }
+    check(unchanged, "hiding private information changes no ratio and no state");
 }
 
 void testComparison()
@@ -2114,6 +2261,7 @@ int main(int argc, char** argv)
     testAnonymized();
     testHiddenTexts();
     testSnapshotFormat();
+    testCompareStates();
     testComparison();
 
     std::cout << (ok ? "ALL BENCHMARK TESTS PASSED\n" : "SOME BENCHMARK TESTS FAILED\n");

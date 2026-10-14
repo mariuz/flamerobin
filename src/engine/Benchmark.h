@@ -741,6 +741,18 @@ BenchmarkValues getBenchmarkValues(const BenchmarkMetrics& m);
 /// report; without the network for the embedded engine
 std::vector<BenchmarkPart> getBenchmarkParts(const BenchmarkMetrics& m);
 
+/// whether a measurement of two runs could be compared
+enum class BenchmarkCompareState
+{
+    // both runs have it from the same test; it has a ratio when both have
+    // a number that is compared (not for information)
+    Compared,
+    OnlyNewer,      // new: only the newer run has it
+    OnlyOlder,      // no longer measured: only the older run has it
+    TestChanged,    // not comparable: the test changed (another version)
+    WorkChanged     // not comparable: the test did other work, e.g. more rows
+};
+
 /// One value of two runs; ratio > 1: the newer run is faster
 struct BenchmarkComparedValue
 {
@@ -749,7 +761,11 @@ struct BenchmarkComparedValue
     wxString title;
     wxString newerText;
     wxString olderText;
-    double ratio = 0.0;     // 0: not measured in one of the runs
+    double ratio = 0.0;     // 0: not compared, see state
+    BenchmarkCompareState state = BenchmarkCompareState::Compared;
+    // the versions of the test; 0 in the run that does not have it
+    int newerVersion = 0;
+    int olderVersion = 0;
     // the work and its duration, e.g. "200 commits in 88 ms"
     wxString newerWork;
     wxString olderWork;
@@ -794,8 +810,10 @@ struct BenchmarkComparison
     // all parts; > 1: the newer run is faster, 0: no common key values
     double ratio = 0.0;
     std::vector<BenchmarkComparedPart> parts;
+    // the key values in the order of the register
     std::vector<BenchmarkComparedValue> values;
-    // the other measured values; ratio from the durations of the same work
+    // the other measurements in the order of the newer run, then those that
+    // only the older run has
     std::vector<BenchmarkComparedValue> stats;
     std::vector<BenchmarkComparedFact> differences;
     // both runs were made the same way and with the same intensity
