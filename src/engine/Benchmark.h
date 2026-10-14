@@ -316,7 +316,13 @@ struct BenchmarkMetrics
     // storage and cache tests repeated for every supported page size
     std::vector<BenchmarkPageSizeResult> pageSizes;
     // optional tests that could not run, with the reason
-    std::vector<std::pair<wxString, wxString>> skippedTests;
+    struct SkippedTest
+    {
+        wxString id;        // of the measurement, see the register
+        wxString name;
+        wxString reason;
+    };
+    std::vector<SkippedTest> skippedTests;
 
     // engine statistics (MON$IO_STATS / MON$RECORD_STATS)
     std::optional<int64_t> pageReads;
@@ -344,6 +350,9 @@ enum class BenchmarkCategory
 
 struct BenchmarkResult
 {
+    // identifies the measurement in saved reports, in every language and
+    // version; see the register in BenchmarkValues.cpp
+    wxString id;
     BenchmarkCategory category;
     wxString machine;   // which machine (or link) the value belongs to
     wxString test;
@@ -357,8 +366,6 @@ struct BenchmarkResult
     wxString average;       // per operation
     wxString rate;          // per second
     double durationMs = 0.0;    // the duration as a number; 0: none
-    // the key value this result is the source of; empty if none
-    wxString valueKey;
 };
 
 ///
@@ -371,6 +378,9 @@ struct BenchmarkResult
 ///
 struct BenchmarkHint
 {
+    // the kind of hint, e.g. "power.saving"; the same for every part it is
+    // given for, never translated
+    wxString id;
     BenchmarkCategory category;     // the part it can slow down
     wxString title;     // the possible cause in plain words
     wxString detail;    // what was measured or read
@@ -397,7 +407,7 @@ struct BenchmarkSetting
 ///
 struct BenchmarkKeyValue
 {
-    wxString key;           // see BenchmarkValues.cpp
+    wxString id;            // see the register in BenchmarkValues.cpp
     wxString title;
     wxString valueText;     // with unit
     // the work behind the value, e.g. "200 commits" in 88 ms
@@ -436,6 +446,64 @@ struct BenchmarkValues
     double oltpTransactionsPerSecond;   // best level with up to 8 clients
     double clientCpuBurstMs;
 };
+
+/// how a measurement is compared between two runs
+enum class BenchmarkMeasurementKind
+{
+    Key,        // a key value: compared, and the points come from it
+    Measure,    // compared by its value
+    Info        // only shown, never compared
+};
+
+///
+/// An entry of the register of measurements (BenchmarkValues.cpp). The id
+/// identifies a measurement in saved reports, in every language and in every
+/// later version of FlameRobin; devdocs/Benchmark_report_format.md explains
+/// what may be changed.
+///
+struct BenchmarkMeasurementDef
+{
+    // the part of the system (see getBenchmarkSectionId()) and a name, e.g.
+    // "storage.commit"; a family ends before its parameter: "users.tx" for
+    // "users.tx.8"
+    const char* id;
+    // raised whenever the work of the test changes, so that runs with
+    // different work are not compared
+    int version;
+    BenchmarkCategory section;
+    BenchmarkMeasurementKind kind;
+    const char* unit;           // of the value; empty for information
+    bool higherIsBetter;
+    // every run of an intensity does the same work; false for the tests
+    // with a time limit
+    bool amountFixed;
+    // the work of the test, checked by the unit test of the register: the
+    // fields of BenchmarkSettings, and the statements of BenchmarkSql and
+    // objects of its DDL that it uses, separated by spaces
+    const char* settings;
+    const char* sql;
+    // of a key value: its title, translated with _(), and its member
+    const char* title;
+    double BenchmarkValues::*value;
+    bool family;
+    // no longer measured; kept so that older reports can still be compared
+    bool retired;
+};
+
+/// every measurement, in the order of the report
+const std::vector<BenchmarkMeasurementDef>& getBenchmarkMeasurementDefs();
+/// the entry of an id, also of a member of a family ("users.tx.8"); nullptr
+/// for an id that this version does not know
+const BenchmarkMeasurementDef* findBenchmarkMeasurementDef(const wxString& id);
+/// whether a text can be an id: letters and digits, parts separated by dots
+bool isBenchmarkMeasurementId(const wxString& text);
+/// the id of a member of a family: "users.tx" and "8" give "users.tx.8"
+wxString makeBenchmarkMeasurementId(const char* family, const wxString& parameter);
+/// a value in the unit of a measurement: "1,389 it/ms", "0.44 ms"
+wxString formatBenchmarkValue(double value, const BenchmarkMeasurementDef& def);
+/// whether a result is the one a key value is calculated from; a skipped
+/// test is not, it is listed with the programming patterns
+bool isBenchmarkKeyValueSource(const BenchmarkResult& result);
 
 ///
 /// The results of one run in a compact form. Every report (HTML and
@@ -636,7 +704,7 @@ std::vector<BenchmarkPart> getBenchmarkParts(const BenchmarkMetrics& m);
 struct BenchmarkComparedValue
 {
     BenchmarkCategory category;
-    wxString key;           // of a key value; empty for other measurements
+    wxString id;            // of the measurement, see the register
     wxString title;
     wxString newerText;
     wxString olderText;
@@ -727,9 +795,7 @@ wxString formatBenchmarkComparisonMarkdown(const BenchmarkComparison& comparison
 /// every key value of two runs; ratio > 1: newer is faster
 std::vector<BenchmarkComparedValue> compareBenchmarkValues(
     const BenchmarkValues& newer, const BenchmarkValues& older);
-/// the key of a key value by its title; empty if unknown
-wxString getBenchmarkValueKey(const wxString& title);
-/// the work behind a key value: amount and milliseconds
+/// the work behind a key value by its id: amount and milliseconds
 std::map<wxString, std::pair<wxString, double>> getBenchmarkWork(const BenchmarkMetrics& m);
 /// "200 commits in 88 ms"
 wxString formatBenchmarkWork(const wxString& amount, double ms);
@@ -738,11 +804,11 @@ wxString formatBenchmarkWork(const wxString& amount, double ms);
 int getBenchmarkChangeLevel(double ratio);
 /// "about the same", "18 % faster", "2.3 times as fast", "35 % slower"
 wxString formatBenchmarkChange(double ratio);
-/// the key values with their keys, as saved in a snapshot
+/// the key values with their ids, as saved in a snapshot
 std::vector<std::pair<wxString, wxString>> formatBenchmarkValues(
     const BenchmarkValues& values);
-/// sets one value of a snapshot; false for an unknown key
-bool parseBenchmarkValue(BenchmarkValues& values, const wxString& key,
+/// sets one value of a snapshot; false for an unknown id
+bool parseBenchmarkValue(BenchmarkValues& values, const wxString& id,
     const wxString& text);
 /// a copy to share in public: without the computer name, server names and
 /// paths
@@ -778,7 +844,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m);
 /// what could slow down each part of the system in this run
 std::vector<BenchmarkHint> findBenchmarkHints(const BenchmarkMetrics& m);
 /// the typical causes when a key value is slower than in another run
-wxString getBenchmarkValueAdvice(const wxString& key);
+wxString getBenchmarkValueAdvice(const wxString& id);
 /// the settings of Firebird and of the inspected database that influence
 /// the results
 std::vector<BenchmarkSetting> getBenchmarkSettings(const BenchmarkMetrics& m);
@@ -791,6 +857,10 @@ std::vector<BenchmarkCategory> getBenchmarkReportSections();
 /// statistics: configuration)
 BenchmarkCategory getBenchmarkReportSection(BenchmarkCategory category);
 wxString getBenchmarkReportSectionName(BenchmarkCategory section);
+/// "cpu", "storage", "memory", "network", "users", "computer",
+/// "application" or "settings": the first part of the ids of a section,
+/// the same in every language
+wxString getBenchmarkSectionId(BenchmarkCategory section);
 wxString getBenchmarkConnectionKindName(BenchmarkConnectionKind kind);
 wxString getBenchmarkRunLocationName(BenchmarkRunLocation location);
 BenchmarkConnectionKind classifyBenchmarkConnection(const wxString& protocol,

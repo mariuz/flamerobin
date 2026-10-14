@@ -139,7 +139,8 @@ private:
     void step(const wxString& message);
     void publish(const wxString& message, bool cleaningUp = false);
     void checkCancel() const;
-    void runOptional(const wxString& name, BenchmarkMetrics& m,
+    // id: the measurement of the test (see the register in BenchmarkValues.cpp)
+    void runOptional(const char* id, const wxString& name, BenchmarkMetrics& m,
         const std::function<void()>& test);
     wxString getPageSizeName(int pageSize) const;
     std::string getPageSizeConnectionString(int pageSize) const;

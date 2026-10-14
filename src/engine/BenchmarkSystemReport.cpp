@@ -945,7 +945,7 @@ BenchmarkReport BenchmarkReport::anonymized() const
             scrub(kv.second);
     }
     for (auto& skipped : m.skippedTests)
-        scrub(skipped.second);
+        scrub(skipped.reason);
     scrub(m.firebirdUser);
     scrub(m.firebirdRole);
     scrub(m.securityDatabase);

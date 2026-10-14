@@ -470,8 +470,8 @@ void BenchmarkRunner::checkCancel() const
         throw BenchmarkCancelled();
 }
 
-void BenchmarkRunner::runOptional(const wxString& name, BenchmarkMetrics& m,
-    const std::function<void()>& test)
+void BenchmarkRunner::runOptional(const char* id, const wxString& name,
+    BenchmarkMetrics& m, const std::function<void()>& test)
 {
     // a failing optional test (e.g. a feature the client library does not
     // support) is reported but does not end the benchmark
@@ -487,7 +487,7 @@ void BenchmarkRunner::runOptional(const wxString& name, BenchmarkMetrics& m,
     {
         if (cancelM)
             throw;
-        m.skippedTests.push_back({ name, wxString::FromUTF8(e.what()) });
+        m.skippedTests.push_back({ id, name, wxString::FromUTF8(e.what()) });
     }
 }
 
@@ -733,7 +733,7 @@ BenchmarkReport BenchmarkRunner::run(const ProgressCallback& progress)
 
         step(wxString::Format(_("Sorting %d MB, more than the sort memory "
             "(temporary files)..."), settingsM.tempSortMegabytes));
-        runOptional(_("Sorting large data (temporary files)"), m,
+        runOptional("storage.tempSort", _("Sorting large data (temporary files)"), m,
             [&]() { measureTempSort(db, m); });
 
         step(_("Streaming a large result set..."));
@@ -744,19 +744,20 @@ BenchmarkReport BenchmarkRunner::run(const ProgressCallback& progress)
         measureWideInserts(db, m);
 
         step(_("Comparing row-by-row inserts with a server-side batch..."));
-        runOptional(_("Rows one by one compared with in one go"), m,
+        runOptional("application.rowByRow", _("Rows one by one compared with in one go"), m,
             [&]() { measureRowByRow(db, m); });
 
         step(_("Measuring statement preparation..."));
-        runOptional(_("Preparing a typical query"), m,
+        runOptional("application.prepare", _("Preparing a typical query"), m,
             [&]() { measurePrepare(db, m); });
 
         step(_("Writing and reading BLOBs..."));
-        runOptional(_("Writing / reading large data (BLOBs)"), m, [&]() { measureBlob(db, m); });
+        runOptional("application.blob", _("Writing / reading large data (BLOBs)"), m,
+            [&]() { measureBlob(db, m); });
 
         step(_("Measuring record versions and long running transactions..."));
-        runOptional(_("Reading while an old transaction is open"), m,
-            [&]() { measureVersions(db, m); });
+        runOptional("application.versions", _("Reading while an old transaction is open"),
+            m, [&]() { measureVersions(db, m); });
 
         addEngineStatistics(db, m);
         measureOltp(m);  // one step per level

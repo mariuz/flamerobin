@@ -27,7 +27,6 @@
 #include <algorithm>
 #include <cmath>
 #include <numeric>
-#include <tuple>
 
 #include "engine/Benchmark.h"
 
@@ -228,14 +227,14 @@ wxString formatBenchmarkWork(const wxString& amount, double ms)
 
 std::map<wxString, std::pair<wxString, double>> getBenchmarkWork(const BenchmarkMetrics& m)
 {
-    // the keys of BenchmarkValues.cpp; every value is the amount of work
+    // by the ids of the register; every key value is the amount of work
     // divided by its time, so the time shows how long the test took
     const BenchmarkSettings& s = m.settings;
     std::map<wxString, std::pair<wxString, double>> work;
-    auto add = [&work](const char* key, const wxString& amount, double ms)
+    auto add = [&work](const char* id, const wxString& amount, double ms)
     {
         if (ms > 0.0)
-            work[key] = { amount, ms };
+            work[id] = { amount, ms };
     };
     auto count = [](double n, const wxString& unit)
     {
@@ -243,51 +242,51 @@ std::map<wxString, std::pair<wxString, double>> getBenchmarkWork(const Benchmark
     };
     if (m.cpuMs)
     {
-        add("cpuIterationsPerMs", count(s.cpuIterations, _("iterations")),
+        add("cpu.single", count(s.cpuIterations, _("iterations")),
             m.cpuServerMs.value_or(*m.cpuMs));
     }
     if (m.parallelCpuMs)
     {
-        add("parallelIterationsPerMs", count(double(s.cpuIterations) * s.parallelConnections,
+        add("cpu.parallel", count(double(s.cpuIterations) * s.parallelConnections,
             _("iterations")), *m.parallelCpuMs);
     }
     if (m.commitMs)
-        add("commitMs", count(s.commitCount, _("commits")), *m.commitMs * s.commitCount);
+        add("storage.commit", count(s.commitCount, _("commits")), *m.commitMs * s.commitCount);
     if (m.insertMs)
-        add("insertRowsPerSecond", count(s.diskRows, _("rows")), *m.insertMs);
+        add("storage.insert", count(s.diskRows, _("rows")), *m.insertMs);
     const double driveOps = getBenchmarkDriveOpsPerSecond(m);
     if (driveOps > 0.0 && m.smallCacheRows)
     {
         const double operations = double(*m.smallCacheRows) + m.smallCacheLookups
             + m.smallCacheUpdates + m.smallCacheDeletes;
-        add("driveOperationsPerSecond", count(operations, _("operations")),
+        add("storage.drive", count(operations, _("operations")),
             operations * 1000.0 / driveOps);
     }
     if (m.parallelDriveMs && m.parallelDriveRows > 0)
     {
-        add("parallelDriveRowsPerSecond", count(double(m.parallelDriveRows), _("rows")),
+        add("storage.driveParallel", count(double(m.parallelDriveRows), _("rows")),
             *m.parallelDriveMs);
     }
     if (m.tempSortMs && m.tempSortBytes > 0)
-        add("tempSortMBPerSecond", formatMegabytes(double(m.tempSortBytes)), *m.tempSortMs);
+        add("storage.tempSort", formatMegabytes(double(m.tempSortBytes)), *m.tempSortMs);
     if (m.warmScanMs && m.scanBytes > 0)
-        add("scanMBPerSecond", formatMegabytes(double(m.scanBytes)), *m.warmScanMs);
+        add("memory.scan", formatMegabytes(double(m.scanBytes)), *m.warmScanMs);
     if (m.serverSortMs && m.scanBytes > 0)
-        add("sortMBPerSecond", formatMegabytes(double(m.scanBytes)), *m.serverSortMs);
+        add("memory.sort", formatMegabytes(double(m.scanBytes)), *m.serverSortMs);
     if (m.latencyAvgMs)
     {
-        add("roundTripMs", count(s.latencyQueries, _("requests")),
+        add("network.roundTrip", count(s.latencyQueries, _("requests")),
             *m.latencyAvgMs * s.latencyQueries);
     }
     if (m.streamMs && m.streamBytes > 0)
-        add("transferMBPerSecond", formatMegabytes(double(m.streamBytes)), *m.streamMs);
+        add("network.transfer", formatMegabytes(double(m.streamBytes)), *m.streamMs);
     if (m.connectMs)
     {
-        add("connectMs", count(s.connectAttempts, _("connections")),
+        add("network.connect", count(s.connectAttempts, _("connections")),
             *m.connectMs * s.connectAttempts);
     }
     if (m.wideInsertMs && m.wideInsertRows > 0)
-        add("wideInsertsPerSecond", count(m.wideInsertRows, _("rows")), *m.wideInsertMs);
+        add("network.wideInsert", count(m.wideInsertRows, _("rows")), *m.wideInsertMs);
     const BenchmarkOltpResult* best = nullptr;
     for (const auto& o : m.oltp)
     {
@@ -299,13 +298,13 @@ std::map<wxString, std::pair<wxString, double>> getBenchmarkWork(const Benchmark
     }
     if (best)
     {
-        add("oltpTransactionsPerSecond", count(double(best->transactions),
+        add("users.oltp", count(double(best->transactions),
             wxString::Format(_("transactions of %d users"), best->clients)),
             best->seconds * 1000.0);
     }
     if (m.clientBurstHotMs)
     {
-        add("clientCpuBurstMs", count(s.bursts, _("calculations")),
+        add("computer.burst", count(s.bursts, _("calculations")),
             *m.clientBurstHotMs * s.bursts);
     }
     return work;
@@ -389,14 +388,16 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     std::vector<BenchmarkResult> r;
     const BenchmarkSettings& s = m.settings;
     using C = BenchmarkCategory;
-    // adds a result; the caller may fill the statistics columns of the
-    // returned entry right away (the reference is only valid until the
+    // adds a result with the id of its measurement (see the register in
+    // BenchmarkValues.cpp); the caller may fill the statistics columns of
+    // the returned entry right away (the reference is only valid until the
     // next add)
-    auto add = [&r](C c, const wxString& machine, const wxString& test,
-        const wxString& value, const wxString& details, const wxString& hint,
-        const wxString& explanation) -> BenchmarkResult&
+    auto add = [&r](const wxString& id, C c, const wxString& machine,
+        const wxString& test, const wxString& value, const wxString& details,
+        const wxString& hint, const wxString& explanation) -> BenchmarkResult&
     {
         BenchmarkResult result;
+        result.id = id;
         result.category = c;
         result.machine = machine;
         result.test = test;
@@ -435,7 +436,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     const wxString& both = machines.both;
 
     // configuration and environment
-    add(C::Environment, local, _("Benchmark runs on"),
+    add("settings.runsOn", C::Environment, local, _("Benchmark runs on"),
         getBenchmarkRunLocationName(m.runLocation),
         wxString::Format(_("connection: %s"),
             getBenchmarkConnectionKindName(m.connectionKind)),
@@ -447,7 +448,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
           "and client problems."));
     if (!m.serverVersion.empty())
     {
-        add(C::Environment, server, _("Firebird version / server OS"),
+        add("settings.firebird", C::Environment, server, _("Firebird version / server OS"),
             m.serverVersion + (m.serverPlatform.empty() ? wxString()
                 : " / " + m.serverPlatform),
             m.serverImplementation,
@@ -460,7 +461,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.serverProcesses)
     {
-        add(C::Environment, server, _("Server architecture"),
+        add("settings.architecture", C::Environment, server, _("Server architecture"),
             *m.serverProcesses > 1 ? _("Classic") : _("SuperServer or SuperClassic"),
             wxString::Format(_("%d server processes for %d connections"),
                 *m.serverProcesses, s.parallelConnections),
@@ -473,7 +474,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (!m.clientVersion.empty())
     {
-        add(C::Environment, local, _("Firebird client library"), m.clientVersion,
+        add("settings.client", C::Environment, local,
+            _("Firebird client library"), m.clientVersion,
             wxEmptyString, _("The fbclient library FlameRobin uses."),
             _("Version of the client library (MON$CLIENT_VERSION). An older "
               "client cannot use newer protocol features of the server, such "
@@ -491,7 +493,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
                     ? (m.wireCryptPlugin.empty() ? _("on") : m.wireCryptPlugin)
                     : _("off"));
         }
-        add(C::Environment, network, _("Network protocol"), m.remoteProtocol, details,
+        add("settings.protocol", C::Environment, network,
+            _("Network protocol"), m.remoteProtocol, details,
             _("Network protocol, its version, compression and encryption."),
             _("From MON$ATTACHMENTS of the benchmark connection. Compression "
               "helps on slow links and costs CPU on fast ones; encryption "
@@ -499,7 +502,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (!m.authMethod.empty())
     {
-        add(C::Environment, server, _("Login"), m.authMethod,
+        add("settings.login", C::Environment, server, _("Login"), m.authMethod,
             m.securityDatabase.empty() ? wxString()
                 : wxString::Format(_("security database: %s"), m.securityDatabase),
             _("How the benchmark connection logged in."),
@@ -510,7 +513,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.idleTimeoutSeconds || m.statementTimeoutMs)
     {
-        add(C::Environment, server, _("Connection timeouts"),
+        add("settings.timeouts", C::Environment, server, _("Connection timeouts"),
             wxString::Format(_("idle %s, statements %s"),
                 m.idleTimeoutSeconds.value_or(0) > 0
                     ? wxString::Format(_("%d min"), *m.idleTimeoutSeconds / 60)
@@ -528,7 +531,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     const BenchmarkDatabaseInfo& bdb = m.benchmarkDatabase;
     if (bdb.pageSize > 0)
     {
-        add(C::Environment, server, _("Test database"),
+        add("settings.testDatabase", C::Environment, server, _("Test database"),
             wxString::Format(_("page size %d"), bdb.pageSize),
             wxString::Format(_("in %s; ODS %d.%d, page cache %d pages (%s), "
                 "forced writes %s"), m.benchmarkDirectory,
@@ -547,19 +550,22 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
         const wxString why = _("Read from the header and MON$DATABASE of the "
             "selected database, only when asked for; nothing is changed. Used to "
             "judge its configuration.");
-        add(C::Environment, server, _("Selected database: size"),
+        add("settings.selectedSize", C::Environment, server, _("Selected database: size"),
             formatMegabytes(double(idb.pages) * idb.pageSize),
             wxString::Format(_("ODS %d.%d, page size %d"),
                 idb.odsMajor, idb.odsMinor, idb.pageSize), hint, why);
-        add(C::Environment, server, _("Selected database: page cache"),
+        add("settings.selectedCache", C::Environment, server,
+            _("Selected database: page cache"),
             wxString::Format(_("%d pages"), idb.cachePages),
             wxString::Format(_("%s; page buffers in the header: %d (0 = "
                 "DefaultDbCachePages)"),
                 formatMegabytes(double(idb.cachePages) * idb.pageSize),
                 idb.pageBuffers), hint, why);
-        add(C::Environment, server, _("Selected database: forced writes"),
+        add("settings.selectedForcedWrites", C::Environment, server,
+            _("Selected database: forced writes"),
             idb.forcedWrites ? _("ON") : _("OFF"), wxEmptyString, hint, why);
-        add(C::Environment, server, _("Selected database: transaction gap"),
+        add("settings.selectedTransactions", C::Environment, server,
+            _("Selected database: transaction gap"),
             wxString::Format("%lld",
                 (long long)(idb.nextTransaction - idb.oldestActiveTransaction)),
             wxString::Format(_("next - oldest active; sweep interval %d"),
@@ -568,7 +574,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
               "garbage collection."));
         if (idb.lingerSeconds)
         {
-            add(C::Environment, server, _("Selected database: LINGER"),
+            add("settings.selectedLinger", C::Environment, server,
+                _("Selected database: LINGER"),
                 wxString::Format(_("%d s"), *idb.lingerSeconds), wxEmptyString, hint,
                 _("How long SuperServer keeps the database and its page cache "
                   "open after the last connection closed."));
@@ -576,7 +583,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     for (const auto& kv : m.serverConfig)
     {
-        add(C::Environment, server, "firebird.conf: " + kv.first, kv.second,
+        add(makeBenchmarkMeasurementId("settings.conf", kv.first), C::Environment, server,
+            "firebird.conf: " + kv.first, kv.second,
             m.serverConfigExplicit.count(kv.first) ? _("set in firebird.conf")
                                                    : _("default value"),
             _("Effective server setting."),
@@ -590,7 +598,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
         const BenchmarkNetworkPath& p = *m.networkPath;
         if (p.resolveMs >= 0.0)
         {
-            add(C::Connection, local, _("Finding the server by its name (DNS)"),
+            add("network.dns", C::Connection, local,
+                _("Finding the server by its name (DNS)"),
                 formatBenchmarkMilliseconds(p.resolveMs),
                 wxString::Format(_("%s -> %s"), wxString::FromUTF8(p.serverHost.c_str()),
                     p.serverAddress.empty() ? _("not resolved")
@@ -619,7 +628,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
                 details += *p.sameSubnet ? _(", server in the same subnet")
                                          : _(", server reached through a router");
             }
-            add(C::Connection, local, _("Network adapter to the server"),
+            add("network.adapter", C::Connection, local, _("Network adapter to the server"),
                 type.empty() ? wxString::FromUTF8(p.adapterName.c_str())
                     : type + " (" + wxString::FromUTF8(p.adapterName.c_str()) + ")",
                 details,
@@ -651,7 +660,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
             details += (details.empty() ? "" : "; ")
                 + wxString::Format(_("no answer (firewall): %s"), filtered);
         }
-        add(C::Connection, local, _("Server ports reachable from here"),
+        add("network.ports", C::Connection, local, _("Server ports reachable from here"),
             open.empty() ? _("none") : open, details,
             _("Which Firebird ports of the server this machine can reach."),
             _("Opens a TCP connection to the ports 3050 to 3060, the port of "
@@ -662,7 +671,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
               "few seconds."));
         if (handshakeMs >= 0.0)
         {
-            add(C::Connection, network, _("Network part of a connection (TCP)"),
+            add("network.tcpConnect", C::Connection, network,
+                _("Network part of a connection (TCP)"),
                 formatBenchmarkMilliseconds(handshakeMs),
                 wxString::Format(_("to port %d, without login"), m.serverPort),
                 _("The network part of a new connection."),
@@ -674,7 +684,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.connectMs)
     {
-        add(C::Connection, network, _("Connecting with login"),
+        add("network.connect", C::Connection, network, _("Connecting with login"),
             formatBenchmarkMilliseconds(*m.connectMs),
             wxString::Format(_("average of %d connections"), s.connectAttempts),
             _("Time to open a complete Firebird connection with login."),
@@ -687,7 +697,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.eventMs || !m.eventStatus.empty())
     {
-        add(C::Connection, network, _("Events (notifications, POST_EVENT)"),
+        add("network.events", C::Connection, network,
+            _("Events (notifications, POST_EVENT)"),
             m.eventMs ? formatBenchmarkMilliseconds(*m.eventMs) : _("not received"),
             m.eventMs ? _("from posting until FlameRobin was notified") : m.eventStatus,
             _("Whether database events reach this machine."),
@@ -702,7 +713,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     // this machine
     if (m.tempDirFileMs)
     {
-        add(C::LocalMachine, local, _("Creating and deleting small files"),
+        add("computer.files", C::LocalMachine, local,
+            _("Creating and deleting small files"),
             formatBenchmarkMilliseconds(*m.tempDirFileMs),
             wxString::Format(_("per file, in %s"), m.tempDirectory),
             _("File handling speed; on-access virus scanners slow it down."),
@@ -715,7 +727,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.clientBurstIdleMs && m.clientBurstHotMs)
     {
-        add(C::LocalMachine, local, _("Short calculation after a pause / without a pause"),
+        add("computer.burst", C::LocalMachine, local,
+            _("Short calculation after a pause / without a pause"),
             formatBenchmarkMilliseconds(*m.clientBurstIdleMs) + " / "
                 + formatBenchmarkMilliseconds(*m.clientBurstHotMs),
             _("a large difference points to power saving"),
@@ -728,7 +741,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.localOnBattery)
     {
-        add(C::LocalMachine, local, _("Power supply"),
+        add("computer.power", C::LocalMachine, local, _("Power supply"),
             *m.localOnBattery ? _("battery") : _("mains"),
             wxString::FromUTF8(m.system.powerPlan.c_str()),
             _("Mains or battery; notebooks are slower on battery."),
@@ -739,7 +752,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.system.tcpKeepAliveSeconds)
     {
-        add(C::LocalMachine, local, _("TCP keepalive"),
+        add("computer.keepalive", C::LocalMachine, local, _("TCP keepalive"),
             wxString::Format(_("after %d min idle"), *m.system.tcpKeepAliveSeconds / 60),
             wxEmptyString,
             _("When the operating system checks idle connections."),
@@ -754,7 +767,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     if (m.cpuMs)
     {
         const double ms = m.cpuServerMs.value_or(*m.cpuMs);
-        add(C::ServerCpu, server, _("Calculation, one connection"),
+        add("cpu.single", C::ServerCpu, server, _("Calculation, one connection"),
             formatBenchmarkMilliseconds(ms),
             wxString::Format(_("%s iterations"), formatBenchmarkCount(s.cpuIterations)),
             _("Pure CPU work of one connection inside Firebird."),
@@ -768,7 +781,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     if (m.parallelCpuMs && m.cpuMs)
     {
         double scaling = *m.cpuMs * s.parallelConnections / *m.parallelCpuMs;
-        add(C::ServerCpu, server,
+        add("cpu.parallel", C::ServerCpu, server,
             wxString::Format(_("Calculation, %d connections at once"),
                 s.parallelConnections),
             formatBenchmarkMilliseconds(*m.parallelCpuMs),
@@ -785,7 +798,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.serverBurstIdleMs && m.serverBurstHotMs)
     {
-        add(C::ServerCpu, server, _("Short calculation after a pause / without a pause"),
+        add("cpu.burst", C::ServerCpu, server,
+            _("Short calculation after a pause / without a pause"),
             formatBenchmarkMilliseconds(*m.serverBurstIdleMs) + " / "
                 + formatBenchmarkMilliseconds(*m.serverBurstHotMs),
             _("measured inside the server"),
@@ -800,7 +814,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     const wxString storage = wxString::Format(_("storage of %s"), m.benchmarkDirectory);
     if (m.createDatabaseMs)
     {
-        add(C::ServerStorage, server, _("Creating the test database"),
+        add("storage.create", C::ServerStorage, server, _("Creating the test database"),
             formatBenchmarkMilliseconds(*m.createDatabaseMs), storage,
             _("Time to create an empty database."),
             _("Creating the database writes and flushes its first pages; "
@@ -810,7 +824,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.commitMs)
     {
-        add(C::ServerStorage, server, _("Saving a small change (commit)"),
+        add("storage.commit", C::ServerStorage, server, _("Saving a small change (commit)"),
             formatBenchmarkMilliseconds(*m.commitMs),
             _("network round trips subtracted"),
             _("How long the storage needs to make a change permanent."),
@@ -823,7 +837,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.osSyncWriteMs)
     {
-        add(C::ServerStorage, server, _("Writing a file directly, without Firebird"),
+        add("storage.syncWrite", C::ServerStorage, server,
+            _("Writing a file directly, without Firebird"),
             formatBenchmarkMilliseconds(*m.osSyncWriteMs), storage,
             _("A synchronous write outside Firebird, for comparison."),
             _("Writes 4 KB to a file in the database directory and flushes it, "
@@ -835,7 +850,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.databaseDirFileMs)
     {
-        add(C::ServerStorage, server, _("Creating and deleting small files"),
+        add("storage.files", C::ServerStorage, server,
+            _("Creating and deleting small files"),
             formatBenchmarkMilliseconds(*m.databaseDirFileMs),
             wxString::Format(_("per file, in %s"), m.benchmarkDirectory),
             _("File handling in the database directory."),
@@ -846,14 +862,15 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.databaseDiskFreeBytes)
     {
-        add(C::ServerStorage, server, _("Free disk space"),
+        add("storage.freeSpace", C::ServerStorage, server, _("Free disk space"),
             formatMegabytes(double(*m.databaseDiskFreeBytes)), storage,
             _("Free space on the drive of the database."),
             _("Database growth, sort files and backups need free space."));
     }
     if (m.insertMs)
     {
-        add(C::ServerStorage, server, _("Writing rows (table with 5 indexes)"),
+        add("storage.insert", C::ServerStorage, server,
+            _("Writing rows (table with 5 indexes)"),
             formatRate(s.diskRows, *m.insertMs, _("rows/s")), _("normal page cache"),
             _("Bulk insert into a table with 5 indexes."),
             _("Rows are generated inside the server (no network) into a "
@@ -864,7 +881,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.updateMs)
     {
-        add(C::ServerStorage, server, _("Changing many rows"),
+        add("storage.update", C::ServerStorage, server, _("Changing many rows"),
             formatRate(s.diskRows, *m.updateMs, _("rows/s")), _("normal page cache"),
             _("Changes every row and all its indexed columns."),
             _("Updates every row and changes all indexed columns: Firebird "
@@ -875,7 +892,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.deleteMs)
     {
-        add(C::ServerStorage, server, _("Deleting many rows"),
+        add("storage.delete", C::ServerStorage, server, _("Deleting many rows"),
             formatRate(s.diskRows, *m.deleteMs, _("rows/s")), _("normal page cache"),
             _("Deletes every row."),
             _("Deletes all rows; the space is only freed by garbage "
@@ -885,7 +902,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.garbageCollectMs)
     {
-        add(C::ServerStorage, server, _("Cleaning up deleted rows (garbage collection)"),
+        add("storage.gc", C::ServerStorage, server,
+            _("Cleaning up deleted rows (garbage collection)"),
             formatBenchmarkMilliseconds(*m.garbageCollectMs),
             _("first full scan after the delete"),
             _("Removing the deleted rows."),
@@ -909,7 +927,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     const double driveOps = getBenchmarkDriveOpsPerSecond(m);
     if (driveOps > 0.0)
     {
-        add(C::ServerStorage, server, _("Disk test with a small cache"),
+        add("storage.drive", C::ServerStorage, server, _("Disk test with a small cache"),
             count(driveOps, _("operations/s")),
             _("insert, read, update and delete with the minimal cache"),
             _("All operations of the drive test together."),
@@ -922,7 +940,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     {
         const int rows = *m.smallCacheRows;
         const double ms = *m.smallCacheInsertMs * rows / s.diskRows;
-        add(C::ServerStorage, server, _("Disk test: writing"),
+        add("storage.driveInsert", C::ServerStorage, server, _("Disk test: writing"),
             formatRate(rows, ms, _("rows/s")), cacheInfo,
             _("Inserts with a minimal page cache."),
             driveWhy + " " + _("Like the insert with the normal cache, the rows "
@@ -931,7 +949,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.smallCacheScanMs)
     {
-        add(C::ServerStorage, server, _("Disk test: reading everything"),
+        add("storage.driveScan", C::ServerStorage, server,
+            _("Disk test: reading everything"),
             formatBenchmarkMilliseconds(*m.smallCacheScanMs), cacheInfo,
             _("A full table scan with the minimal page cache."),
             driveWhy + " " + _("Reads are usually still served by the "
@@ -942,7 +961,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.smallCacheLookupMs && m.smallCacheLookups > 0)
     {
-        add(C::ServerStorage, server, _("Disk test: reading single rows"),
+        add("storage.driveLookup", C::ServerStorage, server,
+            _("Disk test: reading single rows"),
             formatRate(m.smallCacheLookups, *m.smallCacheLookupMs, _("rows/s")),
             cacheInfo, _("Random primary key lookups with the minimal cache."),
             driveWhy + " " + _("The lookups jump through the table inside a "
@@ -952,7 +972,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.smallCacheUpdateMs && m.smallCacheUpdates > 0)
     {
-        add(C::ServerStorage, server, _("Disk test: changing"),
+        add("storage.driveUpdate", C::ServerStorage, server, _("Disk test: changing"),
             formatRate(m.smallCacheUpdates, *m.smallCacheUpdateMs, _("rows/s")),
             cacheInfo, _("Updates of all indexed columns with the minimal cache."),
             driveWhy);
@@ -961,7 +981,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.smallCacheDeleteMs && m.smallCacheDeletes > 0)
     {
-        add(C::ServerStorage, server, _("Disk test: deleting"),
+        add("storage.driveDelete", C::ServerStorage, server, _("Disk test: deleting"),
             formatRate(m.smallCacheDeletes, *m.smallCacheDeleteMs, _("rows/s")),
             cacheInfo, _("Deletes with the minimal cache."), driveWhy);
         stats(r.back(), count(m.smallCacheDeletes, _("rows")), m.smallCacheDeletes,
@@ -969,7 +989,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.parallelDriveMs && m.parallelDriveRows > 0)
     {
-        add(C::ServerStorage, server,
+        add("storage.driveParallel", C::ServerStorage, server,
             wxString::Format(_("Disk test, %d connections at once"),
                 s.parallelConnections),
             formatRate(double(m.parallelDriveRows), *m.parallelDriveMs, _("rows/s")),
@@ -982,7 +1002,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     if (m.tempSortMs && m.tempSortBytes > 0)
     {
         auto limit = m.serverConfig.find("TempCacheLimit");
-        add(C::ServerStorage, server, _("Sorting large data (temporary files)"),
+        add("storage.tempSort", C::ServerStorage, server,
+            _("Sorting large data (temporary files)"),
             formatMegabytesPerSecond(double(m.tempSortBytes), *m.tempSortMs),
             limit == m.serverConfig.end() ? _("sort memory of the server unknown")
                 : wxString::Format(_("sort memory (TempCacheLimit) %s"),
@@ -1001,7 +1022,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     // server RAM / cache
     if (m.coldScanMs && m.warmScanMs)
     {
-        add(C::ServerCache, server, _("Reading all rows, first time"),
+        add("memory.scanCold", C::ServerCache, server, _("Reading all rows, first time"),
             formatMegabytesPerSecond(double(m.scanBytes), *m.coldScanMs),
             wxString::Format(_("%s scanned"), formatMegabytes(double(m.scanBytes))),
             _("Reading all rows right after a new connection."),
@@ -1012,7 +1033,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
         r.back().duration = formatBenchmarkMilliseconds(*m.coldScanMs);
         r.back().durationMs = *m.coldScanMs;
         r.back().rate = formatMegabytesPerSecond(double(m.scanBytes), *m.coldScanMs);
-        add(C::ServerCache, server, _("Reading all rows again (from memory)"),
+        add("memory.scan", C::ServerCache, server,
+            _("Reading all rows again (from memory)"),
             formatMegabytesPerSecond(double(m.scanBytes), *m.warmScanMs),
             wxString::Format(_("%s scanned"), formatMegabytes(double(m.scanBytes))),
             _("The same scan again, now from the cache."),
@@ -1024,7 +1046,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
         r.back().rate = formatMegabytesPerSecond(double(m.scanBytes), *m.warmScanMs);
         if (*m.warmScanMs > 0.0)
         {
-            add(C::ServerCache, server, _("First time compared with again"),
+            add("memory.coldVsWarm", C::ServerCache, server,
+                _("First time compared with again"),
                 formatFactor(*m.coldScanMs / *m.warmScanMs),
                 _("the operating system file cache may already hold the data"),
                 _("How much faster cached data is."),
@@ -1035,7 +1058,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.serverReadMs && m.serverSortMs)
     {
-        add(C::ServerCache, server, _("Sorting in memory"),
+        add("memory.sort", C::ServerCache, server, _("Sorting in memory"),
             formatMegabytesPerSecond(double(m.scanBytes), *m.serverSortMs),
             wxString::Format(_("measured inside the server; unsorted read: %s"),
                 formatBenchmarkMilliseconds(*m.serverReadMs)),
@@ -1061,7 +1084,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
             details += wxString::Format(_(", %d over %.0f ms"), m.latencyOutliers,
                 std::max(150.0, 10.0 * m.latencyMedianMs.value_or(0.0)));
         }
-        add(C::Network, network, _("Response time of a request (round trip)"),
+        add("network.roundTrip", C::Network, network,
+            _("Response time of a request (round trip)"),
             formatBenchmarkMilliseconds(m.latencyMedianMs.value_or(*m.latencyAvgMs)),
             details, _("Time of a query without any server work."),
             _("A query without server work, many times: the time is the pure "
@@ -1074,7 +1098,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.latencySparseMs)
     {
-        add(C::Network, network, _("Response time after short pauses"),
+        add("network.roundTripSparse", C::Network, network,
+            _("Response time after short pauses"),
             formatBenchmarkMilliseconds(*m.latencySparseMs), _("median"),
             _("The same query with pauses, like a user working."),
             _("The same query with short pauses in between, like a user "
@@ -1084,7 +1109,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.largeRoundTripMs)
     {
-        add(C::Network, network, _("Response time with a larger answer (8 KB)"),
+        add("network.roundTripLarge", C::Network, network,
+            _("Response time with a larger answer (8 KB)"),
             formatBenchmarkMilliseconds(*m.largeRoundTripMs), _("median"),
             _("A query whose answer needs several network packets."),
             _("A larger answer needs several network packets; compared with "
@@ -1093,7 +1119,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.streamMs)
     {
-        add(C::Network, network, _("Transferring a large result"),
+        add("network.transfer", C::Network, network, _("Transferring a large result"),
             formatMegabytesPerSecond(double(m.streamBytes), *m.streamMs),
             wxString::Format(_("%s rows, %s"), formatBenchmarkCount(double(m.streamRows)),
                 formatMegabytes(double(m.streamBytes))),
@@ -1108,7 +1134,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
                 - m.streamClientMs.value_or(0.0);
             if (transfer < 0.0)
                 transfer = 0.0;
-            add(C::Network, both, _("Time split: server / transfer / FlameRobin"),
+            add("network.timeSplit", C::Network, both,
+                _("Time split: server / transfer / FlameRobin"),
                 formatBenchmarkMilliseconds(*m.serverReadMs) + " / "
                     + formatBenchmarkMilliseconds(transfer) + " / "
                     + formatBenchmarkMilliseconds(m.streamClientMs.value_or(0.0)),
@@ -1122,8 +1149,9 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.wideInsertMs && m.wideInsertRows > 0)
     {
-        add(C::Network, network, wxString::Format(_("Small writes, one request each "
-            "(%d columns)"), BenchmarkSql::wideColumns),
+        add("network.wideInsert", C::Network, network,
+            wxString::Format(_("Small writes, one request each (%d columns)"),
+                BenchmarkSql::wideColumns),
             count(m.wideInsertRows * 1000.0 / *m.wideInsertMs, _("writes/s")),
             _("one round trip per row"),
             _("Many single rows with 100 values, each sent to the server on its own."),
@@ -1137,7 +1165,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     // application patterns
     if (m.rowByRowMs && m.batchMs)
     {
-        add(C::Application, both, _("Rows one by one compared with in one go"),
+        add("application.rowByRow", C::Application, both,
+            _("Rows one by one compared with in one go"),
             formatBenchmarkMilliseconds(*m.rowByRowMs) + " / "
                 + formatBenchmarkMilliseconds(*m.batchMs),
             wxString::Format(_("%s vs. %s"),
@@ -1154,7 +1183,7 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.prepareMs)
     {
-        add(C::Application, server, _("Preparing a typical query"),
+        add("application.prepare", C::Application, server, _("Preparing a typical query"),
             formatBenchmarkMilliseconds(*m.prepareMs), _("per prepare"),
             _("Compiling a query on the server."),
             _("Compiles a query with a subquery, ORDER BY and ROWS again and "
@@ -1166,7 +1195,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.blobWriteMs && m.blobReadMs && m.blobBytes > 0)
     {
-        add(C::Application, both, _("Writing / reading large data (BLOBs)"),
+        add("application.blob", C::Application, both,
+            _("Writing / reading large data (BLOBs)"),
             formatMegabytesPerSecond(double(m.blobBytes), *m.blobWriteMs) + " / "
                 + formatMegabytesPerSecond(double(m.blobBytes), *m.blobReadMs),
             wxString::Format(_("%d BLOBs of 64 KB"), s.blobCount),
@@ -1181,7 +1211,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.versionReadBeforeMs && m.versionReadWithOldTxMs)
     {
-        add(C::Application, server, _("Reading while an old transaction is open"),
+        add("application.versions", C::Application, server,
+            _("Reading while an old transaction is open"),
             formatBenchmarkMilliseconds(*m.versionReadBeforeMs) + " -> "
                 + formatBenchmarkMilliseconds(*m.versionReadWithOldTxMs),
             wxString::Format(_("first read after the old transaction ended: %s"),
@@ -1197,7 +1228,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     for (const auto& o : m.oltp)
     {
-        add(C::MultiUser, both,
+        add(makeBenchmarkMeasurementId("users.tx", wxString::Format("%d", o.clients)),
+            C::MultiUser, both,
             wxString::Format(_("Transactions with %d users at once"), o.clients),
             count(o.seconds > 0.0 ? o.transactions / o.seconds : 0.0, _("tx/s")),
             wxString::Format(_("95%% %s, %lld conflicts"),
@@ -1217,7 +1249,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
 
     for (const auto& p : m.pageSizes)
     {
-        add(C::ServerStorage, server,
+        add(makeBenchmarkMeasurementId("storage.pageSize",
+            wxString::Format("%d", p.pageSize)), C::ServerStorage, server,
             wxString::Format(_("Page size %d"), p.pageSize),
             wxString::Format(_("insert %s, scan %s"),
                 formatBenchmarkMilliseconds(p.insertMs),
@@ -1235,40 +1268,11 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
               "page larger to write; the comparison shows which page size "
               "suits this storage."));
     }
-    // the results the key values are calculated from
-    const std::tuple<C, wxString, const char*> sources[] = {
-        { C::ServerCpu, _("Calculation, one connection"), "cpuIterationsPerMs" },
-        { C::ServerCpu, wxString::Format(_("Calculation, %d connections at once"),
-            s.parallelConnections), "parallelIterationsPerMs" },
-        { C::ServerStorage, _("Saving a small change (commit)"), "commitMs" },
-        { C::ServerStorage, _("Writing rows (table with 5 indexes)"), "insertRowsPerSecond" },
-        { C::ServerStorage, _("Disk test with a small cache"), "driveOperationsPerSecond" },
-        { C::ServerStorage, wxString::Format(_("Disk test, %d connections at once"),
-            s.parallelConnections), "parallelDriveRowsPerSecond" },
-        { C::ServerStorage, _("Sorting large data (temporary files)"), "tempSortMBPerSecond" },
-        { C::ServerCache, _("Reading all rows again (from memory)"), "scanMBPerSecond" },
-        { C::ServerCache, _("Sorting in memory"), "sortMBPerSecond" },
-        { C::Network, _("Response time of a request (round trip)"), "roundTripMs" },
-        { C::Network, _("Transferring a large result"), "transferMBPerSecond" },
-        { C::Connection, _("Connecting with login"), "connectMs" },
-        { C::Network, wxString::Format(_("Small writes, one request each (%d columns)"),
-            BenchmarkSql::wideColumns), "wideInsertsPerSecond" },
-        { C::LocalMachine, _("Short calculation after a pause / without a pause"),
-            "clientCpuBurstMs" }
-    };
-    for (auto& result : r)
-    {
-        for (const auto& source : sources)
-        {
-            if (result.category == std::get<0>(source) && result.test == std::get<1>(source))
-                result.valueKey = std::get<2>(source);
-        }
-    }
 
     for (const auto& skipped : m.skippedTests)
     {
-        add(C::Application, both, skipped.first, _("not measured"),
-            skipped.second, _("This optional test could not run."),
+        add(skipped.id, C::Application, both, skipped.name, _("not measured"),
+            skipped.reason, _("This optional test could not run."),
             _("This optional test could not run with this server or client "
               "library; the other results are not affected."));
     }
@@ -1280,11 +1284,11 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
         const wxString why = _("Counters of the benchmark connections from "
             "MON$IO_STATS: reads/writes are physical page I/O, fetches/marks "
             "are page accesses in the cache.");
-        add(C::Engine, server, _("Page reads / writes"),
+        add("settings.pageIo", C::Engine, server, _("Page reads / writes"),
             wxString::Format("%s / %s", formatBenchmarkCount(double(*m.pageReads)),
                 formatBenchmarkCount(double(m.pageWrites.value_or(0)))),
             wxEmptyString, hint, why);
-        add(C::Engine, server, _("Page fetches / marks"),
+        add("settings.pageAccess", C::Engine, server, _("Page fetches / marks"),
             wxString::Format("%s / %s",
                 formatBenchmarkCount(double(m.pageFetches.value_or(0))),
                 formatBenchmarkCount(double(m.pageMarks.value_or(0)))),
@@ -1292,7 +1296,8 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m)
     }
     if (m.recordPurges)
     {
-        add(C::Engine, server, _("Back-outs / purges / expunges"),
+        add("settings.recordVersions", C::Engine, server,
+            _("Back-outs / purges / expunges"),
             wxString::Format("%s / %s / %s",
                 formatBenchmarkCount(double(m.recordBackouts.value_or(0))),
                 formatBenchmarkCount(double(*m.recordPurges)),
@@ -1406,7 +1411,7 @@ wxString BenchmarkReport::toMarkdown() const
     {
         md << "\n" << _("Not measured:") << "\n\n";
         for (const auto& skipped : m.skippedTests)
-            md << "- " << skipped.first << ": " << skipped.second << "\n";
+            md << "- " << skipped.name << ": " << skipped.reason << "\n";
     }
     md << "\n" << formatBenchmarkSnapshot(snapshot);
     // what anonymized() could not replace in a field of its own

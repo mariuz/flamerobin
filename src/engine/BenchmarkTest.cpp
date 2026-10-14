@@ -28,9 +28,12 @@
 #include <cmath>
 #include <functional>
 #include <iostream>
+#include <map>
 #include <optional>
 #include <regex>
+#include <set>
 #include <string>
+#include <vector>
 
 #include "engine/Benchmark.h"
 
@@ -704,7 +707,8 @@ void testValueAdvice()
         }
     }
     check(all, "every key value has its typical causes");
-    check(getBenchmarkValueAdvice("commitMs").Contains("disk"), "commits wait for the disk");
+    check(getBenchmarkValueAdvice("storage.commit").Contains("disk"),
+        "commits wait for the disk");
     check(getBenchmarkValueAdvice("unknownKey").empty(), "unknown keys have no advice");
 }
 
@@ -730,7 +734,7 @@ void testParts()
     check(part(C::LocalMachine) && part(C::LocalMachine)->values.size() == 1,
         "this computer: the short calculation");
     const BenchmarkKeyValue& commit = part(C::ServerStorage)->values.front();
-    check(commit.key == "commitMs" && commit.valueText == "1.50 ms"
+    check(commit.id == "storage.commit" && commit.valueText == "1.50 ms"
         && formatBenchmarkWork(commit.amountText, commit.durationMs).StartsWith("200 commits in "),
         "a key value with the work behind it");
     check(part(C::ServerCpu)->machine.Contains("dbserver")
@@ -753,10 +757,172 @@ void testParts()
     check(getBenchmarkParts(BenchmarkMetrics()).empty(), "nothing measured, no parts");
 
     BenchmarkValues parsed{};
-    check(parseBenchmarkValue(parsed, "commitMs", "1.5") && parsed.commitMs == 1.5
-        && !parseBenchmarkValue(parsed, "nonsense", "1"), "key values are read back by key");
-    check(getBenchmarkValueKey("Saving a change (commit)") == "commitMs",
-        "the key of a key value");
+    check(parseBenchmarkValue(parsed, "storage.commit", "1.5") && parsed.commitMs == 1.5
+        && !parseBenchmarkValue(parsed, "nonsense", "1")
+        && !parseBenchmarkValue(parsed, "storage.update", "1"),
+        "key values are read back by their id");
+}
+
+// a run with every measurement and every option, so that buildBenchmarkResults()
+// gives every result it knows
+BenchmarkMetrics fullMetrics()
+{
+    BenchmarkMetrics m = healthyMetrics();
+    m.serverProcesses = 1;
+    m.remoteProtocol = "TCPv4";
+    m.protocolVersion = "P19";
+    m.wireCompressed = false;
+    m.wireEncrypted = true;
+    m.authMethod = "Srp256";
+    m.securityDatabase = "Default";
+    m.idleTimeoutSeconds = 3600;
+    m.statementTimeoutMs = 0;
+    BenchmarkDatabaseInfo inspected;
+    inspected.pageSize = 8192;
+    inspected.pages = 1000;
+    inspected.lingerSeconds = 60;
+    m.inspectedDatabase = inspected;
+    m.serverConfig["TempCacheLimit"] = "67108864";
+    m.serverConfig["ServerMode"] = "Super";
+    m.networkPath = BenchmarkNetworkPath();
+    m.networkPath->serverHost = "dbserver";
+    m.networkPath->serverAddress = "10.0.0.5";
+    m.networkPath->resolveMs = 1.0;
+    m.networkPath->adapterName = "eth0";
+    m.networkPath->adapterType = "Ethernet";
+    m.serverPort = 3050;
+    m.serverPorts = { { 3050, BenchmarkPortCheck::State::Open, 0.4 } };
+    m.eventMs = 2.0;
+    m.localOnBattery = false;
+    m.system.tcpKeepAliveSeconds = 7200;
+    m.createDatabaseMs = 300.0;
+    m.osSyncWriteMs = 0.3;
+    m.databaseDirFileMs = 0.25;
+    m.databaseDiskFreeBytes = int64_t(100) * 1024 * 1024 * 1024;
+    m.largeRoundTripMs = 0.5;
+    m.pageSizes = { { 8192, 2048, 1.0, 900.0, 50.0, 40.0, 3500.0 } };
+    m.oltp.push_back({ 50, 60000, 50, 5.0, 4.0, 9.0 });
+    m.oltp.push_back({ 250, 50000, 400, 5.0, 25.0, 60.0 });
+    m.skippedTests.push_back({ "application.versions", "Reading while an old transaction "
+        "is open", "unsupported" });
+    m.pageReads = 1000;
+    m.pageWrites = 500;
+    m.pageFetches = 90000;
+    m.pageMarks = 4000;
+    m.recordPurges = 30;
+    return m;
+}
+
+void testRegister()
+{
+    std::cout << "Register of the measurements\n";
+    using K = BenchmarkMeasurementKind;
+    const std::vector<BenchmarkMeasurementDef>& defs = getBenchmarkMeasurementDefs();
+    bool wellFormed = true;
+    std::set<wxString> ids;
+    std::vector<double BenchmarkValues::*> members;
+    for (const BenchmarkMeasurementDef& def : defs)
+    {
+        const wxString id = def.id;
+        const wxString unit = def.unit;
+        const bool compared = def.kind != K::Info;
+        wxString problem;
+        if (!isBenchmarkMeasurementId(id) || id.Freq('.') != 1)
+            problem = "not an id of two parts";
+        else if (!ids.insert(id).second)
+            problem = "twice in the register";
+        else if (id.BeforeFirst('.') != getBenchmarkSectionId(def.section))
+            problem = "does not start with its section";
+        else if (def.version < 1)
+            problem = "no version";
+        else if ((def.kind == K::Key) != (def.title != nullptr && def.value != nullptr))
+            problem = "a key value needs a title and a member, nothing else";
+        else if (compared && (unit.empty() || (unit == "ms") == def.higherIsBetter))
+            problem = "a time is lower is better, a rate higher is better";
+        else if (!compared && !unit.empty())
+            problem = "information has no unit";
+        else if (def.value
+            && std::find(members.begin(), members.end(), def.value) != members.end())
+        {
+            problem = "a member of BenchmarkValues twice";
+        }
+        if (def.value)
+            members.push_back(def.value);
+        if (!problem.empty())
+        {
+            std::cerr << "    " << id.utf8_str() << ": " << problem.utf8_str() << "\n";
+            wellFormed = false;
+        }
+    }
+    check(wellFormed, "every id is unique, starts with its section and has a version");
+    check(members.size() * sizeof(double) == sizeof(BenchmarkValues),
+        "every key value of BenchmarkValues is in the register");
+    check(findBenchmarkMeasurementDef("users.tx.8")
+        && findBenchmarkMeasurementDef("users.tx.8") == findBenchmarkMeasurementDef("users.tx.250")
+        && !findBenchmarkMeasurementDef("users.tx") && !findBenchmarkMeasurementDef("users.tx.8.1")
+        && !findBenchmarkMeasurementDef("cpu.single.2")
+        && !findBenchmarkMeasurementDef("Saving a change (commit)")
+        && findBenchmarkMeasurementDef("storage.commit")->kind == K::Key,
+        "ids and families are found, titles are no ids");
+    check(makeBenchmarkMeasurementId("settings.conf", "Temp-Cache Limit")
+            == "settings.conf.TempCacheLimit"
+        && isBenchmarkMeasurementId("users.tx.8") && !isBenchmarkMeasurementId("users..tx")
+        && !isBenchmarkMeasurementId("users.tx.") && !isBenchmarkMeasurementId("commit")
+        && !isBenchmarkMeasurementId("storage.commit ms"), "the characters of an id");
+
+    // every result has a registered id, and every registered id a result
+    std::set<wxString> found;
+    bool registered = true;
+    for (const BenchmarkMetrics& m : { fullMetrics(), serverMetrics() })
+    {
+        for (const BenchmarkResult& r : buildBenchmarkResults(m))
+        {
+            const BenchmarkMeasurementDef* def = findBenchmarkMeasurementDef(r.id);
+            const bool skipped = r.value == "not measured";
+            if (!def || def->retired
+                || (!skipped && def->section != getBenchmarkReportSection(r.category)))
+            {
+                std::cerr << "    not registered in its section: " << r.id.utf8_str() << " ("
+                    << r.test.utf8_str() << ")\n";
+                registered = false;
+            }
+            else
+                found.insert(def->id);
+        }
+    }
+    check(registered, "every result has the id of a measurement of its section");
+    bool allFound = true;
+    for (const BenchmarkMeasurementDef& def : defs)
+    {
+        // the best OLTP level is a key value without a result of its own
+        if (!def.retired && !found.count(def.id) && wxString(def.id) != "users.oltp")
+        {
+            std::cerr << "    no result: " << def.id << "\n";
+            allFound = false;
+        }
+    }
+    check(allFound, "every measurement of the register has a result");
+
+    // the hints have ids as well, the same for every part they are given for
+    BenchmarkMetrics noisy = fullMetrics();
+    noisy.localOnBattery = true;
+    noisy.clientBurstIdleMs = 50.0;
+    noisy.system.antivirus = { "Windows Defender (on)" };
+    noisy.system.virtualization = "Hyper-V";
+    noisy.runLocation = BenchmarkRunLocation::Server;
+    noisy.serverConfig["ServerMode"] = "Classic";
+    std::map<wxString, wxString> titles;
+    bool hintIds = true;
+    for (const BenchmarkHint& h : findBenchmarkHints(noisy))
+    {
+        auto title = titles.insert({ h.id, h.title });
+        if (!isBenchmarkMeasurementId(h.id) || title.first->second != h.title)
+        {
+            std::cerr << "    hint " << h.id.utf8_str() << ": " << h.title.utf8_str() << "\n";
+            hintIds = false;
+        }
+    }
+    check(hintIds && titles.size() >= 5, "every hint has an id, the same in every part");
 }
 
 void testReport()
@@ -795,18 +961,27 @@ void testReport()
         [](const BenchmarkResult& r) { return r.test.Contains("users at once"); }) == 4,
         "one result per OLTP level");
     check(std::count_if(report.results.begin(), report.results.end(),
-        [](const BenchmarkResult& r) { return !r.valueKey.empty(); }) == 14,
+        [](const BenchmarkResult& r) { return isBenchmarkKeyValueSource(r); }) == 14,
         "every key value but the best of the OLTP levels has the result it comes from");
     {   // scope
         BenchmarkMetrics m = healthyMetrics();
-        m.skippedTests.push_back({ "BLOB write / read", "Wrong parameters block kind 6" });
+        m.skippedTests.push_back({ "application.blob", "BLOB write / read",
+            "Wrong parameters block kind 6" });
+        m.skippedTests.push_back({ "storage.tempSort", "Sorting large data", "unsupported" });
         auto results = buildBenchmarkResults(m);
         check(std::any_of(results.begin(), results.end(),
             [](const BenchmarkResult& r)
             {
-                return r.test == "BLOB write / read" && r.value == "not measured"
-                    && r.details.Contains("block kind 6");
+                return r.id == "application.blob" && r.test == "BLOB write / read"
+                    && r.value == "not measured" && r.details.Contains("block kind 6");
             }), "skipped optional tests are listed with the reason");
+        check(std::any_of(results.begin(), results.end(),
+            [](const BenchmarkResult& r)
+            {
+                return r.id == "storage.tempSort" && r.value == "not measured"
+                    && r.category == BenchmarkCategory::Application
+                    && !isBenchmarkKeyValueSource(r);
+            }), "a skipped test is no key value");
     }
     {   // scope
         auto results = buildBenchmarkResults(serverMetrics());
@@ -836,7 +1011,7 @@ void testReport()
         "the key values with the work behind them");
     check(!visible.Contains("Points") && !visible.Contains("What could make")
         && !visible.Contains("Power saving slows"), "a single run is not judged");
-    check(md.Contains("value.commitMs = ") && md.Contains("hint = computer | Power saving"),
+    check(md.Contains("value.storage.commit = ") && md.Contains("hint = computer | Power saving"),
         "the snapshot keeps the values and the hints for a comparison");
     {   // scope
         BenchmarkReport local;
@@ -1410,8 +1585,9 @@ void testAnonymized()
     earlier.title = "SRV-ALT";
     earlier.facts.push_back({ "system", "SRV-ALT" });
     earlier.facts.push_back({ "conf.RemoteBindAddress", "172.31.5.6" });
-    earlier.hints.push_back({ BenchmarkCategory::Network, "A router or VPN sits between "
-        "this computer and the server", "The server sees this machine as 172.31.5.7", "" });
+    earlier.hints.push_back({ "network.nat", BenchmarkCategory::Network, "A router or VPN "
+        "sits between this computer and the server", "The server sees this machine as "
+        "172.31.5.7", "" });
     report.earlier = earlier;
 
     const BenchmarkReport shared = report.anonymized();
@@ -1626,8 +1802,9 @@ void testComparison()
     client.title = "Server dbserver01";
     client.host = "PC-MUELLER";
     client.facts.push_back({ "conf.TempDirectories", "E:\\Temp" });
-    client.hints.push_back({ C::Network, "A router or VPN sits between this computer and the "
-        "server", "The server sees this machine as 10.1.2.3", "Devices add latency." });
+    client.hints.push_back({ "network.nat", C::Network, "A router or VPN sits between this "
+        "computer and the server", "The server sees this machine as 10.1.2.3",
+        "Devices add latency." });
     const BenchmarkSnapshot hidden = anonymizeBenchmarkSnapshot(client);
     check(hidden.host.empty() && hidden.title == "Firebird server"
         && std::none_of(hidden.facts.begin(), hidden.facts.end(),
@@ -1678,6 +1855,7 @@ int main(int argc, char** argv)
     testSettings();
     testValueAdvice();
     testParts();
+    testRegister();
     testReport();
     testCssFallbacks();
     testHtml();

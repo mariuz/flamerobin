@@ -70,16 +70,6 @@ const std::pair<BenchmarkIntensity, const char*> intensityIds[] = {
     { BenchmarkIntensity::Deep, "deep" }
 };
 
-wxString sectionId(BenchmarkCategory section)
-{
-    for (const auto& id : sectionIds)
-    {
-        if (id.first == section)
-            return id.second;
-    }
-    return "settings";
-}
-
 bool parseSection(const wxString& id, BenchmarkCategory* section)
 {
     if (id == "settings")
@@ -177,6 +167,17 @@ wxString pointsText(double ratio)
 
 } // namespace
 
+wxString getBenchmarkSectionId(BenchmarkCategory section)
+{
+    const BenchmarkCategory reportSection = getBenchmarkReportSection(section);
+    for (const auto& id : sectionIds)
+    {
+        if (id.first == reportSection)
+            return id.second;
+    }
+    return "settings";
+}
+
 BenchmarkSnapshot makeBenchmarkSnapshot(const BenchmarkReport& report)
 {
     BenchmarkSnapshot s;
@@ -196,7 +197,10 @@ BenchmarkSnapshot makeBenchmarkSnapshot(const BenchmarkReport& report)
         // the configuration is compared as facts
         const BenchmarkCategory section = getBenchmarkReportSection(r.category);
         if (section != BenchmarkCategory::Environment)
-            s.stats.push_back({ section, r.valueKey, r.test, r.value, r.amount, r.durationMs });
+        {
+            s.stats.push_back({ section, isBenchmarkKeyValueSource(r) ? r.id : wxString(),
+                r.test, r.value, r.amount, r.durationMs });
+        }
     }
     for (const auto& f : getBenchmarkFacts(report))
         s.facts.push_back({ f.key, f.value });
@@ -272,7 +276,7 @@ wxString formatBenchmarkSnapshot(const BenchmarkSnapshot& s)
     }
     for (const auto& st : s.stats)
     {
-        text += "stat = " + sectionId(st.section) + " | " + st.key + " | "
+        text += "stat = " + getBenchmarkSectionId(st.section) + " | " + st.key + " | "
             + clean(st.test) + " | " + clean(st.value) + " | " + clean(st.amount)
             + " | " + wxString::FromCDouble(st.ms, 3) + "\n";
     }
@@ -280,7 +284,7 @@ wxString formatBenchmarkSnapshot(const BenchmarkSnapshot& s)
         text += "fact." + f.first + " = " + clean(f.second) + "\n";
     for (const auto& h : s.hints)
     {
-        text += "hint = " + sectionId(h.category) + " | " + clean(h.title) + " | "
+        text += "hint = " + getBenchmarkSectionId(h.category) + " | " + clean(h.title) + " | "
             + clean(h.detail) + " | " + clean(h.advice) + "\n";
     }
     return text + "-->\n";
@@ -412,16 +416,16 @@ BenchmarkComparison compareBenchmarkSnapshots(const BenchmarkSnapshot& newer,
     c.sameKind = newer.kind == older.kind && newer.intensity == older.intensity;
 
     c.values = compareBenchmarkValues(newer.values, older.values);
-    auto workOf = [](const BenchmarkSnapshot& s, const wxString& key)
+    auto workOf = [](const BenchmarkSnapshot& s, const wxString& id)
     {
-        auto w = s.work.find(key);
+        auto w = s.work.find(id);
         return w == s.work.end() ? wxString()
             : formatBenchmarkWork(w->second.first, w->second.second);
     };
     for (auto& v : c.values)
     {
-        v.newerWork = workOf(newer, v.key);
-        v.olderWork = workOf(older, v.key);
+        v.newerWork = workOf(newer, v.id);
+        v.olderWork = workOf(older, v.id);
     }
 
     // the other measurements by part and test; the same work in less time
@@ -541,7 +545,7 @@ BenchmarkComparison compareBenchmarkSnapshots(const BenchmarkSnapshot& newer,
             {
                 if (v.category == section && getBenchmarkChangeLevel(v.ratio) > 0
                     && (v.ratio < 1.0) == newerSlower
-                    && !getBenchmarkValueAdvice(v.key).empty())
+                    && !getBenchmarkValueAdvice(v.id).empty())
                 {
                     slowerValues.push_back(&v);
                 }
@@ -554,7 +558,7 @@ BenchmarkComparison compareBenchmarkSnapshots(const BenchmarkSnapshot& newer,
             if (slowerValues.size() > maximumAdvice)
                 slowerValues.resize(maximumAdvice);
             for (const BenchmarkComparedValue* v : slowerValues)
-                part.advice.push_back({ v->title, getBenchmarkValueAdvice(v->key) });
+                part.advice.push_back({ v->title, getBenchmarkValueAdvice(v->id) });
         }
         c.parts.push_back(part);
     }

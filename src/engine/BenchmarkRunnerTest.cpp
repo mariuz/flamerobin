@@ -227,8 +227,8 @@ int main(int argc, char** argv)
             "optional tests measured");
         for (const auto& skipped : m.skippedTests)
         {
-            std::cout << "    skipped: " << skipped.first.utf8_str() << ": "
-                << skipped.second.utf8_str() << "\n";
+            std::cout << "    skipped: " << skipped.name.utf8_str() << " ("
+                << skipped.id.utf8_str() << "): " << skipped.reason.utf8_str() << "\n";
         }
         ok &= fr_test::check(m.streamRows == m.settings.scanRows
             + m.settings.commitCount, "all rows streamed");

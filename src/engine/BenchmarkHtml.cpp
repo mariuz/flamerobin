@@ -846,6 +846,17 @@ wxString valueCell(const wxString& label, const wxString& text, const wxString& 
         + (work.empty() ? wxString() : "<small>" + esc(work) + "</small>") + "</td>";
 }
 
+// the tooltip of a key value: the hint of the result it comes from
+wxString keyValueHint(const BenchmarkKeyValue& v, const Section& s)
+{
+    for (const BenchmarkResult* r : s.results)
+    {
+        if (r->id == v.id && isBenchmarkKeyValueSource(*r))
+            return r->hint;
+    }
+    return wxEmptyString;
+}
+
 // the key values of a part with the work behind them, then its other
 // measurements, and for the settings the settings of Firebird
 wxString partValues(const Section& s, const BenchmarkReport& report)
@@ -856,13 +867,7 @@ wxString partValues(const Section& s, const BenchmarkReport& report)
     {
         for (const auto& v : s.part->values)
         {
-            wxString hint;
-            for (const BenchmarkResult* r : s.results)
-            {
-                if (r->valueKey == v.key)
-                    hint = r->hint;
-            }
-            rows += "<tr><td>" + esc(v.title) + tip(hint) + "</td>"
+            rows += "<tr><td>" + esc(v.title) + tip(keyValueHint(v, s)) + "</td>"
                 + valueCell(result, v.valueText, formatBenchmarkWork(v.amountText,
                     v.durationMs)) + "</tr>";
         }
@@ -870,7 +875,7 @@ wxString partValues(const Section& s, const BenchmarkReport& report)
     wxString further;
     for (const BenchmarkResult* r : s.results)
     {
-        if (!r->valueKey.empty() || (r->durationMs <= 0.0 && r->rate.empty()
+        if (isBenchmarkKeyValueSource(*r) || (r->durationMs <= 0.0 && r->rate.empty()
             && s.category != BenchmarkCategory::Application))
         {
             continue;
@@ -1031,7 +1036,7 @@ wxString runDetails(const BenchmarkReport& report)
     for (const auto& path : report.undroppedDatabases)
         rows.push_back({ _("Not dropped"), path });
     for (const auto& skipped : m.skippedTests)
-        rows.push_back({ _("Not measured"), skipped.first + ": " + skipped.second });
+        rows.push_back({ _("Not measured"), skipped.name + ": " + skipped.reason });
     return facts(rows);
 }
 
@@ -1062,14 +1067,9 @@ wxString keyValuesBox(const BenchmarkReport& report, const std::vector<Section>&
             + tip(getBenchmarkSectionDescription(s.category, report.metrics)) + "</td></tr>";
         for (const auto& v : s.part->values)
         {
-            wxString hint;
-            for (const BenchmarkResult* r : s.results)
-            {
-                if (r->valueKey == v.key)
-                    hint = r->hint;
-            }
             const wxString work = formatBenchmarkWork(v.amountText, v.durationMs);
-            rows += "<tr><td>" + esc(v.title) + tip(hint) + "</td>" + cellLabel(_("Result"), "n")
+            rows += "<tr><td>" + esc(v.title) + tip(keyValueHint(v, s)) + "</td>"
+                + cellLabel(_("Result"), "n")
                 + "<b>" + value(v.valueText) + "</b></td>" + cellLabel(_("Work"), wxEmptyString,
                     work) + esc(work) + "</td></tr>";
         }
