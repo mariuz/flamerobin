@@ -22,6 +22,8 @@
 */
 
 #include <wx/arrstr.h>
+#include <wx/ffile.h>
+#include <wx/filename.h>
 #include <wx/init.h>
 
 #include <algorithm>
@@ -2232,16 +2234,537 @@ void testComparison()
         "a shared comparison of two files hides their computer names");
 }
 
+// ---------------------------------------------- registry.golden and fixtures
+
+// The register is checked against src/engine/testdata/benchmark/registry.golden:
+// one line per measurement with its unit, direction, version and the
+// signature of its work (the settings of the three intensities it uses and
+// a hash of its SQL). When the work of a test changes but its version does
+// not, the test fails; see devdocs/Benchmark_report_format.md.
+
+const std::pair<const char*, int BenchmarkSettings::*> settingsFields[] = {
+    { "connectAttempts", &BenchmarkSettings::connectAttempts },
+    { "localFiles", &BenchmarkSettings::localFiles },
+    { "cpuIterations", &BenchmarkSettings::cpuIterations },
+    { "parallelConnections", &BenchmarkSettings::parallelConnections },
+    { "commitCount", &BenchmarkSettings::commitCount },
+    { "diskRows", &BenchmarkSettings::diskRows },
+    { "diskPayloadLength", &BenchmarkSettings::diskPayloadLength },
+    { "scanRows", &BenchmarkSettings::scanRows },
+    { "scanPayloadLength", &BenchmarkSettings::scanPayloadLength },
+    { "latencyQueries", &BenchmarkSettings::latencyQueries },
+    { "sparseQueries", &BenchmarkSettings::sparseQueries },
+    { "bursts", &BenchmarkSettings::bursts },
+    { "oltpSeconds", &BenchmarkSettings::oltpSeconds },
+    { "rowByRowRows", &BenchmarkSettings::rowByRowRows },
+    { "prepareCount", &BenchmarkSettings::prepareCount },
+    { "blobCount", &BenchmarkSettings::blobCount },
+    { "versionRounds", &BenchmarkSettings::versionRounds },
+    { "driveSeconds", &BenchmarkSettings::driveSeconds },
+    { "tempSortMegabytes", &BenchmarkSettings::tempSortMegabytes },
+    { "wideRows", &BenchmarkSettings::wideRows },
+    { "oltpMaxClients", &BenchmarkSettings::oltpMaxClients }
+};
+
+// every statement of BenchmarkSql by its name in the register
+std::map<std::string, std::string> namedStatements()
+{
+    namespace S = BenchmarkSql;
+    return { { "engineVersion", S::engineVersion }, { "attachmentInfo", S::attachmentInfo },
+        { "attachmentWireInfo", S::attachmentWireInfo }, { "sessionUser", S::sessionUser },
+        { "attachmentDetails", S::attachmentDetails },
+        { "attachmentTimeouts", S::attachmentTimeouts },
+        { "securityDatabase", S::securityDatabase }, { "databaseInfo", S::databaseInfo },
+        { "databaseLinger", S::databaseLinger }, { "serverConfig", S::serverConfig },
+        { "postEvent", S::postEvent }, { "driveLookups", S::driveLookups },
+        { "tempSort", S::tempSort }, { "cpuTest", S::cpuTest },
+        { "commitInsert", S::commitInsert }, { "fillTable", S::fillTable },
+        { "bulkUpdate", S::bulkUpdate }, { "bulkDelete", S::bulkDelete },
+        { "garbageCollect", S::garbageCollect }, { "scan", S::scan },
+        { "serverRead", S::serverRead }, { "latency", S::latency },
+        { "largeRoundTrip", S::largeRoundTrip }, { "throughput", S::throughput },
+        { "ioStats", S::ioStats }, { "recordStats", S::recordStats },
+        { "rowInsert", S::rowInsert }, { "fillRows", S::fillRows },
+        { "prepareProbe", S::prepareProbe }, { "oltpPointSelect", S::oltpPointSelect },
+        { "oltpRangeSelect", S::oltpRangeSelect }, { "oltpUpdate", S::oltpUpdate },
+        { "oltpInsert", S::oltpInsert }, { "blobInsert", S::blobInsert },
+        { "blobRead", S::blobRead }, { "hotFill", S::hotFill }, { "hotUpdate", S::hotUpdate },
+        { "hotRead", S::hotRead }, { "serverProcesses", S::serverProcesses },
+        { "wideInsert", S::getWideInsertStatement() } };
+}
+
+// the object a DDL statement creates; an index belongs to its table
+std::string ddlObject(const std::string& sql)
+{
+    std::smatch match;
+    static const std::regex index(R"(INDEX\s+\w+\s+ON\s+(\w+))", std::regex::icase);
+    static const std::regex object(
+        R"(CREATE\s+(?:GLOBAL\s+TEMPORARY\s+)?(?:TABLE|PROCEDURE)\s+(\w+))", std::regex::icase);
+    if (std::regex_search(sql, match, index) || std::regex_search(sql, match, object))
+        return match[1].str();
+    return std::string();
+}
+
+std::vector<std::string> words(const char* text)
+{
+    std::vector<std::string> list;
+    for (const wxString& w : wxSplit(wxString(text), ' ', '\0'))
+    {
+        if (!w.empty())
+            list.push_back(std::string(w.utf8_str()));
+    }
+    return list;
+}
+
+uint32_t fnv1a(const std::string& text)
+{
+    uint32_t hash = 2166136261u;
+    for (unsigned char c : text)
+    {
+        hash ^= c;
+        hash *= 16777619u;
+    }
+    return hash;
+}
+
+// the line of registry.golden for an entry; problems gets the names of the
+// settings and statements that are not known
+wxString goldenLine(const BenchmarkMeasurementDef& def, const BenchmarkSettings (&intensities)[3],
+    const std::map<std::string, std::string>& statements, std::vector<wxString>& problems)
+{
+    using K = BenchmarkMeasurementKind;
+    const bool info = def.kind == K::Info;
+    wxString settings;
+    for (const std::string& name : words(def.settings))
+    {
+        auto field = std::find_if(std::begin(settingsFields), std::end(settingsFields),
+            [&name](const auto& f) { return name == f.first; });
+        if (field == std::end(settingsFields))
+        {
+            problems.push_back(wxString(def.id) + ": unknown setting " + name);
+            continue;
+        }
+        settings += (settings.empty() ? "" : " ") + wxString::Format("%s=%d/%d/%d",
+            name.c_str(), intensities[0].*field->second, intensities[1].*field->second,
+            intensities[2].*field->second);
+    }
+    std::string sql;
+    for (const std::string& name : words(def.sql))
+    {
+        std::string text;
+        auto statement = statements.find(name);
+        if (statement != statements.end())
+            text = statement->second;
+        for (const char* create : BenchmarkSql::getCreateStatements())
+        {
+            if (ddlObject(create) == name)
+                text += std::string(create) + "\n";
+        }
+        if (text.empty())
+            problems.push_back(wxString(def.id) + ": unknown statement " + name);
+        sql += name + ":" + text + "\n";
+    }
+    const wxString kind = def.kind == K::Key ? "key" : def.kind == K::Measure ? "measure" : "info";
+    return wxString(def.id) + (def.family ? ".*" : "") + " | " + getBenchmarkSectionId(def.section)
+        + " | " + (info ? wxString("-") : wxString(def.unit)) + " | "
+        + (info ? "-" : def.higherIsBetter ? "higher" : "lower")
+        + wxString::Format(" | v%d | ", def.version) + kind + (def.retired ? " retired" : "")
+        + " | " + (info ? "-" : def.amountFixed ? "fixed" : "time-limited") + " | "
+        + (settings.empty() ? wxString("-") : settings) + " | "
+        + (sql.empty() ? wxString("-") : wxString::Format("sql %08x", unsigned(fnv1a(sql))));
+}
+
+std::vector<wxString> goldenLines(const std::vector<BenchmarkMeasurementDef>& defs,
+    const BenchmarkSettings (&intensities)[3], const std::map<std::string, std::string>& statements,
+    std::vector<wxString>& problems)
+{
+    std::vector<wxString> lines;
+    for (const BenchmarkMeasurementDef& def : defs)
+        lines.push_back(goldenLine(def, intensities, statements, problems));
+    return lines;
+}
+
+const BenchmarkSettings currentIntensities[3] = {
+    BenchmarkSettings::forIntensity(BenchmarkIntensity::Quick),
+    BenchmarkSettings::forIntensity(BenchmarkIntensity::Standard),
+    BenchmarkSettings::forIntensity(BenchmarkIntensity::Deep) };
+
+wxString goldenText()
+{
+    std::vector<wxString> problems;
+    wxString text = "# The register of the benchmark measurements (src/engine/BenchmarkValues.cpp):\n"
+        "# id | part | unit | direction | version | kind | work | settings quick/standard/deep "
+        "| hash of the SQL\n"
+        "# Checked by benchmark_test. Never remove or rename an id, never change its unit or\n"
+        "# direction; when the work of a test changes, raise its version. Then write this file\n"
+        "# again with: benchmark_test --print-golden > registry.golden\n"
+        "# See devdocs/Benchmark_report_format.md.\n";
+    for (const wxString& line : goldenLines(getBenchmarkMeasurementDefs(), currentIntensities,
+        namedStatements(), problems))
+    {
+        text += line + "\n";
+    }
+    return text;
+}
+
+// what differs between registry.golden and the register, with what to do
+std::vector<wxString> compareGolden(const wxString& golden, const std::vector<wxString>& lines)
+{
+    auto fields = [](const wxString& line)
+    {
+        wxArrayString parts = wxSplit(line, '|', '\0');
+        for (auto& part : parts)
+            part.Trim().Trim(false);
+        return parts;
+    };
+    std::map<wxString, wxArrayString> current;
+    for (const wxString& line : lines)
+        current[fields(line)[0]] = fields(line);
+    std::vector<wxString> problems;
+    std::set<wxString> known;
+    for (wxString line : wxSplit(golden, '\n', '\0'))
+    {
+        line.Replace("\r", "");
+        if (line.empty() || line.StartsWith("#"))
+            continue;
+        const wxArrayString old = fields(line);
+        if (old.size() != 9)
+        {
+            problems.push_back("registry.golden: a line that cannot be read: " + line);
+            continue;
+        }
+        const wxString& id = old[0];
+        known.insert(id);
+        auto now = current.find(id);
+        if (now == current.end())
+        {
+            problems.push_back(id + ": removed from the register; never remove an id, mark "
+                "it retired");
+            continue;
+        }
+        const wxArrayString& f = now->second;
+        long oldVersion = 0, newVersion = 0;
+        old[4].Mid(1).ToLong(&oldVersion);
+        f[4].Mid(1).ToLong(&newVersion);
+        if (old[2] != f[2] || old[3] != f[3])
+            problems.push_back(id + ": unit or direction changed; use a new id instead");
+        else if (newVersion < oldVersion)
+            problems.push_back(id + ": the version of the test went down");
+        else if (newVersion == oldVersion && (old[7] != f[7] || old[8] != f[8]))
+        {
+            problems.push_back(id + ": the work of the test changed, but its version was not "
+                "raised; raise the version in BenchmarkValues.cpp, then write registry.golden "
+                "again");
+        }
+        else if (wxJoin(old, '|', '\0') != wxJoin(f, '|', '\0'))
+            problems.push_back(id + ": changed; write registry.golden again");
+    }
+    for (const auto& line : current)
+    {
+        if (!known.count(line.first))
+            problems.push_back(line.first + ": new; write registry.golden again");
+    }
+    return problems;
+}
+
+wxString readFile(const wxString& path)
+{
+    wxFFile file(path, "r");
+    wxString text;
+    if (!file.IsOpened() || !file.ReadAll(&text, wxConvUTF8))
+        return wxEmptyString;
+    return text;
+}
+
+bool hasProblem(const std::vector<wxString>& problems, const wxString& start,
+    const wxString& part)
+{
+    return std::any_of(problems.begin(), problems.end(), [&](const wxString& p)
+        { return p.StartsWith(start) && p.Contains(part); });
+}
+
+void testGolden(const wxString& dir)
+{
+    std::cout << "Register against registry.golden\n";
+    std::vector<wxString> unknown;
+    const std::vector<wxString> lines = goldenLines(getBenchmarkMeasurementDefs(),
+        currentIntensities, namedStatements(), unknown);
+    for (const wxString& p : unknown)
+        std::cerr << "    " << p.utf8_str() << "\n";
+    check(unknown.empty(), "the register names only known settings and statements");
+
+    // every setting and every statement belongs to a measurement, so that
+    // a change of it reaches registry.golden
+    std::set<std::string> used;
+    for (const BenchmarkMeasurementDef& def : getBenchmarkMeasurementDefs())
+    {
+        for (const char* list : { def.settings, def.sql })
+        {
+            for (const std::string& name : words(list))
+                used.insert(name);
+        }
+    }
+    bool covered = sizeof(BenchmarkSettings) == sizeof(settingsFields) / sizeof(settingsFields[0])
+        * sizeof(int);
+    for (const auto& field : settingsFields)
+        covered = covered && used.count(field.first);
+    for (const auto& statement : namedStatements())
+        covered = covered && used.count(statement.first);
+    for (const char* create : BenchmarkSql::getCreateStatements())
+        covered = covered && used.count(ddlObject(create));
+    check(covered, "every setting, statement and object of the DDL belongs to a measurement");
+
+    if (dir.empty())
+    {
+        check(false, "the directory of the test data is given as argument "
+            "(src/engine/testdata/benchmark)");
+        return;
+    }
+    const wxString golden = readFile(dir + "/registry.golden");
+    const std::vector<wxString> problems = compareGolden(golden, lines);
+    for (const wxString& p : problems)
+        std::cerr << "    " << p.utf8_str() << "\n";
+    check(!golden.empty() && problems.empty(), "the register is the one of registry.golden "
+        "(benchmark_test --print-golden writes it)");
+
+    // what the check finds: other work without a new version, ...
+    BenchmarkSettings changed[3] = { currentIntensities[0], currentIntensities[1],
+        currentIntensities[2] };
+    changed[1].diskRows += 1;
+    std::vector<wxString> ignored;
+    const std::vector<wxString> rows = compareGolden(golden,
+        goldenLines(getBenchmarkMeasurementDefs(), changed, namedStatements(), ignored));
+    std::map<std::string, std::string> statements = namedStatements();
+    statements["cpuTest"] += " ";
+    const std::vector<wxString> sql = compareGolden(golden,
+        goldenLines(getBenchmarkMeasurementDefs(), currentIntensities, statements, ignored));
+    check(hasProblem(rows, "storage.insert:", "version was not raised")
+        && hasProblem(rows, "storage.update:", "version was not raised")
+        && !hasProblem(rows, "cpu.single:", "")
+        && hasProblem(sql, "cpu.single:", "version was not raised")
+        && hasProblem(sql, "cpu.burst:", "version was not raised")
+        && !hasProblem(sql, "storage.insert:", ""),
+        "other settings or SQL of a test without a new version are found");
+    // ... a new version, a removed id, a new unit and a new measurement
+    std::vector<BenchmarkMeasurementDef> defs = getBenchmarkMeasurementDefs();
+    for (BenchmarkMeasurementDef& def : defs)
+    {
+        if (wxString(def.id) == "storage.insert")
+            def.version = 2;
+        if (wxString(def.id) == "storage.update")
+            def.unit = "rows/min";
+    }
+    defs.erase(std::remove_if(defs.begin(), defs.end(), [](const BenchmarkMeasurementDef& d)
+        { return wxString(d.id) == "storage.gc"; }), defs.end());
+    BenchmarkMeasurementDef added = defs.front();
+    added.id = "cpu.vector";
+    defs.push_back(added);
+    const std::vector<wxString> edited = compareGolden(golden,
+        goldenLines(defs, changed, namedStatements(), ignored));
+    check(hasProblem(edited, "storage.insert:", "write registry.golden again")
+        && !hasProblem(edited, "storage.insert:", "version was not raised")
+        && hasProblem(edited, "storage.update:", "unit or direction")
+        && hasProblem(edited, "storage.gc:", "never remove an id")
+        && hasProblem(edited, "cpu.vector:", "new"),
+        "a new version, a removed id, another unit and a new id are found");
+    wxString crlf = golden;
+    crlf.Replace("\n", "\r\n");
+    check(compareGolden(crlf, lines).empty(), "registry.golden with Windows line ends");
+}
+
+// the reports of the fixtures; a fixed date, so that they can be written again
+BenchmarkReport fixtureReport(const BenchmarkMetrics& m, const char* date)
+{
+    BenchmarkReport report = makeReport(m, date);
+    report.benchmarkDatabasePath = "FR_BENCHMARK_20261014_090000_ABCDEF.FDB";
+    report.benchmarkDatabaseCreated = true;
+    report.benchmarkDatabaseDropped = true;
+    report.durationSeconds = 131.0;
+    return report;
+}
+
+BenchmarkReport clientFixture()
+{
+    BenchmarkMetrics m = fullMetrics();
+    m.skippedTests.clear();
+    m.clientBurstIdleMs = 25.0;
+    m.system.powerPlan = "Balanced";
+    m.system.antivirus = { "Windows Defender (on)" };
+    return fixtureReport(m, "2026-10-14 11:00:00");
+}
+
+// the files of the fixtures of this format, see devdocs/Benchmark_report_format.md
+std::vector<std::pair<wxString, wxString>> fixtureFiles()
+{
+    BenchmarkMetrics embedded = serverMetrics();
+    embedded.system.powerPlan = "Balanced";
+    embedded.system.antivirus = { "Windows Defender (on)" };
+    embedded.system.storagePathExcluded = false;
+    embedded.skippedTests.push_back({ "application.blob", "Writing / reading large data "
+        "(BLOBs)", "Wrong parameters block kind 6" });
+    embedded.blobReadMs.reset();
+    BenchmarkMetrics server = healthyMetrics();
+    server.runLocation = BenchmarkRunLocation::Server;
+    server.connectionKind = BenchmarkConnectionKind::LocalXnet;
+    server.connectionHost.clear();
+    server.latencyMedianMs = 0.02;
+    server.latencyAvgMs = 0.025;
+    BenchmarkReport client = clientFixture();
+    client.metrics.localHostName = "PC-MUELLER";
+    client.metrics.connectionHost = "dbserver01";
+    const wxString clientMd = clientFixture().toMarkdown();
+    // a later minor format: lines, fields and a measurement this version
+    // does not know
+    wxString unknown = clientMd;
+    unknown.Replace("\nformat = 2.0\n", "\nformat = 2.9\n");
+    unknown.Replace("\nrun.intensity = standard\n", "\nrun.intensity = standard\n"
+        "run.operator = night shift\nfuture.section.value = 1\n");
+    unknown.Replace(" | Saving a change (commit) | 1.50 ms\n",
+        " | Saving a change (commit) | 1.50 ms | a later field\n");
+    unknown.Replace("\nfact.system = ", "\nm.cpu.vector = 812 | it/ms | v1 | 100000 | "
+        "iterations | 123 | Vector calculation | 812 it/ms\nm.gpu.render = 60 | frames/s | v1 "
+        "|  |  |  | Rendering | 60 frames/s\nfact.system = ");
+    wxString future = clientMd;
+    future.Replace("\nformat = 2.0\n", "\nformat = 9.0\n");
+    return { { "format2-embedded.md", fixtureReport(embedded, "2026-10-14 09:00:00").toMarkdown() },
+        { "format2-server.md", fixtureReport(server, "2026-10-14 10:00:00").toMarkdown() },
+        { "format2-client.html", clientFixture().toHtml() },
+        { "format2-anonymized.md", client.anonymized().toMarkdown() },
+        { "format2.9-unknown.md", unknown }, { "format9-future.md", future } };
+}
+
+BenchmarkSnapshotResult readFixture(const wxString& dir, const char* name)
+{
+    return parseBenchmarkSnapshot(readFile(dir + "/" + name));
+}
+
+void testFixtures(const wxString& dir)
+{
+    std::cout << "Saved reports of this and other versions (fixtures)\n";
+    using S = BenchmarkCompareState;
+    if (dir.empty())
+    {
+        check(false, "the directory of the test data is given as argument");
+        return;
+    }
+    // every report of this format can be read and compared, also by later
+    // versions
+    std::map<wxString, BenchmarkSnapshot> reports;
+    bool readable = true;
+    for (const char* name : { "format2-embedded.md", "format2-server.md",
+        "format2-client.html", "format2-anonymized.md" })
+    {
+        const BenchmarkSnapshotResult r = readFixture(dir, name);
+        if (!r.ok() || r.snapshot.measurements.size() < 30)
+        {
+            std::cerr << "    cannot read " << name << "\n";
+            readable = false;
+        }
+        reports[name] = r.snapshot;
+    }
+    check(readable, "the reports of format 2 can be read");
+    bool same = readable;
+    for (const auto& report : reports)
+    {
+        const BenchmarkComparison c = compareBenchmarkSnapshots(report.second, report.second);
+        same = same && std::abs(c.ratio - 1.0) < 1e-12;
+        for (const auto* list : { &c.values, &c.stats })
+        {
+            for (const BenchmarkComparedValue& v : *list)
+                same = same && v.state == S::Compared && (v.ratio == 0.0 || v.ratio == 1.0);
+        }
+    }
+    check(same, "every report compared with itself: all values compared, ratios 1");
+    const BenchmarkComparison kinds = compareBenchmarkSnapshots(reports["format2-server.md"],
+        reports["format2-embedded.md"]);
+    const BenchmarkComparison shared = compareBenchmarkSnapshots(
+        reports["format2-anonymized.md"], reports["format2-client.html"]);
+    bool anonymous = std::abs(shared.ratio - 1.0) < 1e-12
+        && reports["format2-anonymized.md"].host.empty();
+    for (const BenchmarkComparedValue& v : shared.stats)
+        anonymous = anonymous && v.state == S::Compared && (v.ratio == 0.0 || v.ratio == 1.0);
+    check(kinds.ratio > 0.0 && !kinds.sameKind && kinds.findPart(BenchmarkCategory::ServerStorage)
+        && anonymous, "reports of different runs and an anonymized report are compared");
+
+    // older and newer formats
+    const BenchmarkSnapshotResult first = readFixture(dir, "format1-v26.10.0.md");
+    const BenchmarkSnapshotResult future = readFixture(dir, "format9-future.md");
+    const BenchmarkSnapshotResult later = readFixture(dir, "format2.9-unknown.md");
+    check(first.status == BenchmarkSnapshotStatus::TooOld && first.format == "1"
+        && future.status == BenchmarkSnapshotStatus::TooNew && future.format == "9.0",
+        "a report of FlameRobin 26.10.0 and one of a newer major format are refused");
+    const BenchmarkComparison minor = compareBenchmarkSnapshots(later.snapshot,
+        reports["format2-client.html"]);
+    const BenchmarkComparedValue* vector = findCompared(minor, "cpu.vector");
+    const BenchmarkComparedValue* commit = findCompared(minor, "storage.commit");
+    check(later.ok() && later.format == "2.9" && vector && vector->state == S::OnlyNewer
+        && vector->title == "Vector calculation" && vector->ratio == 0.0
+        && vector->category == BenchmarkCategory::ServerCpu
+        && later.snapshot.findMeasurement("gpu.render") && !findCompared(minor, "gpu.render")
+        && commit && commit->state == S::Compared && commit->ratio == 1.0
+        && std::abs(minor.ratio - 1.0) < 1e-12,
+        "a report of a later minor format: unknown lines skipped, unknown values listed "
+        "in their part");
+
+    // two saved reports, like "Compare two reports..."
+    BenchmarkMetrics faster = clientFixture().metrics;
+    faster.commitMs = 0.75;
+    faster.insertMs = 425.0;
+    const wxString files[] = { wxFileName::CreateTempFileName("frbench"),
+        wxFileName::CreateTempFileName("frbench") };
+    {   // scope
+        wxFFile older(files[0], "w");
+        wxFFile newer(files[1], "w");
+        older.Write(clientFixture().toHtml(), wxConvUTF8);
+        newer.Write(fixtureReport(faster, "2026-10-15 08:00:00").toMarkdown(), wxConvUTF8);
+    }
+    const BenchmarkSnapshotResult a = parseBenchmarkSnapshot(readFile(files[0]));
+    const BenchmarkSnapshotResult b = parseBenchmarkSnapshot(readFile(files[1]));
+    wxRemoveFile(files[0]);
+    wxRemoveFile(files[1]);
+    const BenchmarkComparison two = compareBenchmarkSnapshots(b.snapshot, a.snapshot);
+    const BenchmarkComparedValue* saved = findCompared(two, "storage.commit");
+    check(a.ok() && b.ok() && a.snapshot.date < b.snapshot.date && saved
+        && std::abs(saved->ratio - 2.0) < 1e-9 && two.ratio > 1.0
+        && two.toMarkdown().Contains("| **All parts** |"), "two saved files are compared");
+}
+
+void writeFixtures(const wxString& dir)
+{
+    for (const auto& file : fixtureFiles())
+    {
+        wxFFile out(dir + "/" + file.first, "w");
+        out.Write(file.second, wxConvUTF8);
+        std::cout << dir.utf8_str() << "/" << file.first.utf8_str() << "\n";
+    }
+}
+
 } // namespace
 
+// benchmark_test <directory of the test data>: all tests
+// benchmark_test --print-golden: the register for registry.golden
+// benchmark_test --write-fixtures <directory>: the reports of this format
 int main(int argc, char** argv)
 {
+    const std::string first = argc > 1 ? argv[1] : "";
+    const std::string second = argc > 2 ? argv[2] : "";
     wxInitializer initializer(argc, argv);
     if (!initializer.IsOk())
     {
         std::cerr << "Failed to initialize wxWidgets\n";
         return 1;
     }
+    if (first == "--print-golden")
+    {
+        std::cout << goldenText().utf8_str();
+        return 0;
+    }
+    if (first == "--write-fixtures" && !second.empty())
+    {
+        writeFixtures(wxString::FromUTF8(second.c_str()));
+        return 0;
+    }
+    const wxString dataDirectory = wxString::FromUTF8(first.c_str());
 
     testHelpers();
     testSafetyCheck();
@@ -2263,6 +2786,8 @@ int main(int argc, char** argv)
     testSnapshotFormat();
     testCompareStates();
     testComparison();
+    testGolden(dataDirectory);
+    testFixtures(dataDirectory);
 
     std::cout << (ok ? "ALL BENCHMARK TESTS PASSED\n" : "SOME BENCHMARK TESTS FAILED\n");
     return ok ? 0 : 1;

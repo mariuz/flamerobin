@@ -1159,7 +1159,9 @@ add_executable(benchmark_test
 )
 # the system information uses the Windows libraries of FlameRobin
 target_link_libraries(benchmark_test ${wxWidgets_LIBRARIES} ${FR_LIBS})
-add_test(NAME benchmark_test COMMAND benchmark_test)
+# registry.golden and the saved reports of every format (fixtures)
+add_test(NAME benchmark_test COMMAND benchmark_test
+    ${CMAKE_SOURCE_DIR}/src/engine/testdata/benchmark)
 
 add_executable(benchmark_runner_test
     ${SOURCEDIR}/engine/BenchmarkRunnerTest.cpp
