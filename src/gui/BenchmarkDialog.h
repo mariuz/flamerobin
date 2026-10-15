@@ -63,6 +63,7 @@ public:
 
 protected:
     virtual const wxString getName() const override;
+    virtual const wxString getStorageName() const override;
 
 private:
     Database* databaseM;
@@ -130,6 +131,8 @@ private:
     wxButton* button_browser;
     wxButton* button_compare;
     wxCheckBox* check_private;
+    // messages about the report outside of a run, e.g. that it was copied
+    wxStaticText* label_report_status;
     wxButton* button_close;
 
     void createControls();
@@ -148,6 +151,7 @@ private:
     void layoutAdvanced();
     // how long the test takes, shown before the start
     wxString getReadyHint() const;
+    void setReportStatus(const wxString& message);
     bool buildParams(fr::BenchmarkConnectionParams& params);
     void fillCredentials(fr::BenchmarkConnectionParams& params, bool fromRegistration);
     // the login for the server of the registration: the saved one, or asked

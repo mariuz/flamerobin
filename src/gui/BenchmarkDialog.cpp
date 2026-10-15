@@ -169,6 +169,12 @@ wxStaticText* createHintText(wxWindow* parent, const wxString& text, bool ellips
     return label;
 }
 
+// the message after "Copy as Markdown"
+wxString getCopiedMessage()
+{
+    return _("Copied as Markdown.");
+}
+
 // the explanation behind a "?": a small window below it with a title and
 // paragraphs of wrapped text, each with an optional term in bold above it,
 // in the colours of the text fields of the system (so it is readable in
@@ -503,6 +509,13 @@ BenchmarkDialog::~BenchmarkDialog()
 const wxString BenchmarkDialog::getName() const
 {
     return "BenchmarkDialog";
+}
+
+const wxString BenchmarkDialog::getStorageName() const
+{
+    // the size saved before the settings were compact is at least that of
+    // the old layout (1104 x 880), which is too large for small screens
+    return "BenchmarkDialogCompact";
 }
 
 wxButton* BenchmarkDialog::createHelpButton(wxWindow* parent, const wxString& title,
@@ -922,35 +935,69 @@ void BenchmarkDialog::createControls()
         wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
     notebook_results->AddPage(text_log, _("Progress"));
 
+    // the report, with what can be done with it above it
+    wxPanel* pageReport = new wxPanel(notebook_results);
+    wxBoxSizer* sizerReport = new wxBoxSizer(wxVERTICAL);
+    check_private = new wxCheckBox(pageReport, ID_check_private,
+        _("&Hide private information"));
+    check_private->SetToolTip(_("Removes computer and host names, IP addresses, "
+        "user names, paths and service names from the report, the copy and the "
+        "saved file, so that it can be shared in public. Hardware, versions and "
+        "all measurements stay."));
+    bool hidePrivate = false;
+    config().getValue(hidePrivateKey, hidePrivate);
+    check_private->SetValue(hidePrivate);
+    label_report_status = createHintText(pageReport, wxEmptyString, true);
+    // the answer to a copy is never cut
+    label_report_status->SetMinSize(wxSize(
+        label_report_status->GetTextExtent(getCopiedMessage()).x, -1));
+    button_copy = new wxButton(pageReport, ID_button_copy, _("Copy as &Markdown"));
+    button_save = new wxButton(pageReport, ID_button_save, _("Sa&ve report..."));
+    button_browser = new wxButton(pageReport, ID_button_browser, _("Open in &browser"));
+    button_browser->SetToolTip(_("Shows the report in the web browser of this computer. "
+        "The page is written to the temporary directory; without \"Hide private "
+        "information\" it contains the names of computers and paths."));
+    wxBoxSizer* sizerActions = new wxBoxSizer(wxHORIZONTAL);
+    sizerActions->Add(check_private, 0, wxALIGN_CENTER_VERTICAL);
+    sizerActions->Add(label_report_status, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT,
+        FromDIP(12));
+    sizerActions->Add(button_copy, 0, wxRIGHT, gap);
+    sizerActions->Add(button_save, 0, wxRIGHT, gap);
+    sizerActions->Add(button_browser, 0);
+    sizerReport->Add(sizerActions, 0, wxEXPAND | wxALL, gap);
+    sizerReport->Add(new wxStaticLine(pageReport), 0, wxEXPAND);
+
 #if wxUSE_WEBVIEW
     wxString backend;
-    webview_report = createReportView(notebook_results, backend);
+    webview_report = createReportView(pageReport, backend);
     if (webview_report)
     {
-        notebook_results->AddPage(webview_report, _("Report"));
         reportPageM.reset(new BenchmarkReportPage(webview_report,
             backend == wxWebViewBackendIE));
         if (backend == wxWebViewBackendIE)
         {
             reportViewM = "Internet Explorer";
-            wxStaticText* hint = new wxStaticText(panel, wxID_ANY,
+            wxStaticText* hint = new wxStaticText(pageReport, wxID_ANY,
                 _("The Microsoft Edge WebView2 Runtime is not installed on this "
                   "computer, so the report is shown with Internet Explorer in a "
                   "simpler form. \"Open in browser\" shows it in your web browser."));
-            hint->Wrap(900);
-            sizerMain->Add(hint, 0, wxEXPAND | wxBOTTOM, 4);
+            hint->Wrap(FromDIP(600));
+            sizerReport->Add(hint, 0, wxEXPAND | wxALL, gap);
         }
         else
             reportViewM = wxWebView::GetBackendVersionInfo(backend).GetVersionString();
+        sizerReport->Add(webview_report, 1, wxEXPAND);
     }
 #endif
     if (!webview_report)
     {
         reportViewM = _("text, no web view is available");
-        text_report = new wxTextCtrl(notebook_results, wxID_ANY, wxEmptyString,
+        text_report = new wxTextCtrl(pageReport, wxID_ANY, wxEmptyString,
             wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
-        notebook_results->AddPage(text_report, _("Report"));
+        sizerReport->Add(text_report, 1, wxEXPAND);
     }
+    pageReport->SetSizer(sizerReport);
+    notebook_results->AddPage(pageReport, _("Report"));
 
     sizerMain->Add(notebook_results, 1, wxEXPAND);
 
@@ -960,38 +1007,22 @@ void BenchmarkDialog::createControls()
     // does not start a test
     button_start->SetFont(button_start->GetFont().Bold());
     button_cancel = new wxButton(panel, ID_button_cancel, _("C&ancel test"));
-    check_private = new wxCheckBox(panel, ID_check_private,
-        _("&Hide private information"));
-    check_private->SetToolTip(_("Removes computer and host names, IP addresses, "
-        "user names, paths and service names from the report, the copy and the "
-        "saved file, so that it can be shared in public. Hardware, versions and "
-        "all measurements stay."));
-    bool hidePrivate = false;
-    config().getValue(hidePrivateKey, hidePrivate);
-    check_private->SetValue(hidePrivate);
     button_compare = new wxButton(panel, ID_button_compare, _("Compare t&wo reports..."));
     button_compare->SetToolTip(_("Compares two saved reports, without a new test."));
-    button_copy = new wxButton(panel, ID_button_copy, _("Copy as &Markdown"));
-    button_save = new wxButton(panel, ID_button_save, _("Sa&ve report..."));
-    button_browser = new wxButton(panel, ID_button_browser, _("Open in &browser"));
-    button_browser->SetToolTip(_("Shows the report in the web browser of this computer. "
-        "The page is written to the temporary directory; without \"Hide private "
-        "information\" it contains the names of computers and paths."));
     button_close = new wxButton(panel, wxID_CANCEL, _("&Close"));
 
     wxBoxSizer* sizerButtons = new wxBoxSizer(wxHORIZONTAL);
-    sizerButtons->Add(button_start, 0, wxRIGHT, 6);
-    sizerButtons->Add(button_cancel, 0, wxRIGHT, 6);
-    sizerButtons->Add(button_compare, 0, wxRIGHT, 6);
+    sizerButtons->Add(button_start, 0, wxRIGHT, gap);
+    sizerButtons->Add(button_cancel, 0, wxRIGHT, gap);
     sizerButtons->AddStretchSpacer(1);
-    sizerButtons->Add(check_private, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 12);
-    sizerButtons->Add(button_copy, 0, wxRIGHT, 6);
-    sizerButtons->Add(button_save, 0, wxRIGHT, 6);
-    sizerButtons->Add(button_browser, 0, wxRIGHT, 6);
+    sizerButtons->Add(button_compare, 0, wxRIGHT, gap);
     sizerButtons->Add(button_close, 0);
 
     layoutSizers(sizerMain, sizerButtons, true);
-    SetSize(wxSize(980, 880));
+    // narrow and low enough for a small screen, the report gets the rest
+    const wxRect area = wxDisplay(this).GetClientArea();
+    SetSize(std::max(GetMinSize().x, std::min(FromDIP(900), area.width)),
+        std::max(GetMinSize().y, std::min(FromDIP(560), area.height)));
 
     // the first target: the server of the selected database, without a
     // registration this computer
@@ -1053,6 +1084,13 @@ void BenchmarkDialog::OnDurationChanged(wxCommandEvent& event)
     // after a run the settings are hidden and the status is the result
     if (!runningM && settingsShownM)
         label_status->SetLabel(getReadyHint());
+}
+
+void BenchmarkDialog::setReportStatus(const wxString& message)
+{
+    label_report_status->SetLabel(message);
+    // the whole message where it is cut
+    label_report_status->SetToolTip(message);
 }
 
 void BenchmarkDialog::OnAdvancedToggled(wxCommandEvent& WXUNUSED(event))
@@ -1687,6 +1725,8 @@ void BenchmarkDialog::showSettings(bool show)
 
 void BenchmarkDialog::showReport(const fr::BenchmarkReport& report)
 {
+    // a message such as "copied" was about the report shown before
+    setReportStatus(wxEmptyString);
     // an empty report (before a run) shows an empty page
     const bool hasData = report.metrics.settings.connectAttempts > 0;
 #if wxUSE_WEBVIEW
@@ -1711,7 +1751,7 @@ void BenchmarkDialog::OnCopyMarkdown(wxCommandEvent& WXUNUSED(event))
         wxTheClipboard->SetData(new wxTextDataObject(comparisonM
             ? displayedComparison().toMarkdown() : displayedReport().toMarkdown()));
         wxTheClipboard->Close();
-        label_status->SetLabel(_("Report copied to the clipboard as Markdown."));
+        setReportStatus(getCopiedMessage());
     }
 }
 
@@ -1838,6 +1878,7 @@ fr::BenchmarkComparison BenchmarkDialog::displayedComparison() const
 
 void BenchmarkDialog::showComparison()
 {
+    setReportStatus(wxEmptyString);
 #if wxUSE_WEBVIEW
     if (webview_report)
     {
@@ -1900,6 +1941,10 @@ void BenchmarkDialog::OnCompareReports(wxCommandEvent& WXUNUSED(event))
     showComparison();
     showSettings(false);
     notebook_results->SetSelection(notebook_results->GetPageCount() - 1);
-    label_status->SetLabel(_("Comparison of two saved reports."));
+    setReportStatus(_("Comparison of two saved reports."));
+    // the progress is about a run, which is not shown now
+    label_status->SetLabel(wxEmptyString);
+    label_elapsed->SetLabel(wxEmptyString);
+    gauge_progress->SetValue(0);
     updateControls();
 }
