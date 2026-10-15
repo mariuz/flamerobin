@@ -181,6 +181,42 @@ wxString pointsText(double ratio)
         : dash();
 }
 
+wxString join(const std::vector<wxString>& items, const wxString& with)
+{
+    wxString text;
+    for (const wxString& item : items)
+        text += (text.empty() ? wxString() : with) + item;
+    return text;
+}
+
+// a change as a triangle (no emoji) and words, in bold when it is large
+wxString changeMark(double ratio)
+{
+    const int level = getBenchmarkChangeLevel(ratio);
+    wxString text = level == 0 ? wxString("=")
+        : wxString(wxUniChar(ratio > 1.0 ? 0x25B2 : 0x25BC));
+    text += " " + formatBenchmarkChange(ratio);
+    return level == 2 ? "**" + text + "**" : text;
+}
+
+// the change of a value, or why it was not compared
+wxString stateText(double ratio, BenchmarkCompareState state)
+{
+    switch (state)
+    {
+        case BenchmarkCompareState::TestChanged:
+            return _("not comparable (test changed)");
+        case BenchmarkCompareState::WorkChanged:
+            return _("not comparable (other work)");
+        case BenchmarkCompareState::OnlyNewer:
+        case BenchmarkCompareState::OnlyOlder:
+            return getBenchmarkCompareStateName(state);
+        case BenchmarkCompareState::Compared:
+        default:
+            return ratio > 0.0 ? changeMark(ratio) : wxString();
+    }
+}
+
 // a number of the snapshot, the same in every language: a point as the
 // decimal separator, no thousands separators, no exponent, at most six
 // significant digits but every digit before the point; empty for 0
@@ -1173,11 +1209,6 @@ wxString formatBenchmarkComparedWork(const BenchmarkComparison& comparison,
 
 wxString formatBenchmarkComparisonMarkdown(const BenchmarkComparison& c, bool standalone)
 {
-    auto changeText = [](double ratio)
-    {
-        const wxString change = formatBenchmarkChange(ratio);
-        return getBenchmarkChangeLevel(ratio) == 2 ? "**" + change + "**" : change;
-    };
     const wxString older = olderLabel();
     const wxString newer = newerLabel(c);
 
@@ -1203,41 +1234,99 @@ wxString formatBenchmarkComparisonMarkdown(const BenchmarkComparison& c, bool st
         md << "### " << wxString::Format(_("Compared with %s (%s)"), c.older.title,
             c.older.date) << "\n\n";
     }
-    md << "**" << describeBenchmarkComparison(c) << "**\n\n";
+    // the main statement: the key figures by their change, the points, and
+    // what one run did not measure
+    const wxString dot = wxString(" ") + wxUniChar(0x00B7) + " ";
+    std::vector<wxString> counts;
+    for (const auto& count : describeBenchmarkVerdict(getBenchmarkVerdict(c)))
+        counts.push_back(count.second);
+    if (!counts.empty())
+        md << "**" << join(counts, dot) << "**\n\n";
+    std::vector<wxString> notes;
+    if (c.ratio > 0.0)
+    {
+        notes.push_back(wxString::Format(_("Overall %s points; the earlier run has %s"),
+            pointsText(c.ratio), pointsText(1.0)));
+    }
+    else
+        notes.push_back(describeBenchmarkComparison(c));
+    for (const wxString& note : getBenchmarkVerdictNotes(c))
+        notes.push_back(note);
+    md << join(notes, dot) << "\n\n";
+    if (c.ratio > 0.0)
+        md << _("Differences of less than 15 % are normal between two runs.") << "\n\n";
     if (!c.sameKind)
     {
         md << "> " << wxString::Format(_("The runs were made in different ways (%s and %s) "
             "and are only roughly comparable."), runText(c.older), runText(c.newer)) << "\n\n";
     }
 
-    // the points of every part: the earlier run has 1000
-    md << "| " << _("Part") << " | " << older << " | " << newer << " | " << _("Change")
-       << " |\n|---|---:|---:|---|\n";
-    md << "| **" << _("All parts") << "** | **" << pointsText(c.ratio > 0.0 ? 1.0 : 0.0)
-       << "** | **" << pointsText(c.ratio) << "** | " << changeText(c.ratio) << " |\n";
-    for (const auto& p : c.parts)
+    // one line per key figure
+    const std::vector<BenchmarkHeadlineChange> figures = getBenchmarkHeadlineChanges(c);
+    if (!figures.empty())
     {
-        if (p.ratio <= 0.0)
-            continue;
-        md << "| " << cell(getBenchmarkReportSectionName(p.category)) << " | "
-           << pointsText(1.0) << " | " << pointsText(p.ratio) << " | " << changeText(p.ratio)
-           << " |\n";
+        md << "| " << _("Part") << " | " << _("Key figure") << " | " << older << " | " << newer
+           << " | " << _("Change") << " | " << _("Points") << " |\n|---|---|---:|---:|---|---:|\n";
+        for (const BenchmarkHeadlineChange& h : figures)
+        {
+            auto number = [&h](const wxString& text)
+            {
+                return text.empty() ? dash() : text + " " + h.unit;
+            };
+            wxString points = dash();
+            if (h.state == BenchmarkCompareState::Compared && h.ratio > 0.0)
+            {
+                const long delta = std::lround(h.ratio * BenchmarkComparison::earlierPoints)
+                    - long(BenchmarkComparison::earlierPoints);
+                points = pointsText(h.ratio) + " (" + (delta == 0
+                    ? wxString(wxUniChar(0x00B1)) + "0" : wxString::Format("%+ld", delta)) + ")";
+            }
+            md << "| " << cell(getBenchmarkReportSectionWord(h.section)) << " | "
+               << cell(h.name) << " | " << cell(number(h.olderNumber)) << " | "
+               << cell(number(h.newerNumber)) << " | " << stateText(h.ratio, h.state)
+               << " | " << points << " |\n";
+        }
+        md << "\n";
     }
-    md << "\n";
 
-    // what could make the slower run slower, by part
-    for (const auto& p : c.parts)
+    // the parts that differ clearly, with every possible reason
+    const std::vector<const BenchmarkComparedPart*> standOut = getBenchmarkStandOut(c, 5);
+    if (!standOut.empty())
     {
-        if (p.differences.empty() && p.hints.empty() && p.advice.empty())
-            continue;
-        md << "**" << getBenchmarkReportSectionName(p.category) << ": "
-           << getBenchmarkReasonsTitle(c, p) << "**\n\n";
-        for (const auto& d : p.differences)
-            md << "- " << d.label << ": " << d.olderText << arrow() << d.newerText << "\n";
-        for (const auto& h : p.hints)
-            md << "- " << h.title << "\n";
-        for (const auto& a : p.advice)
-            md << "- " << a.first << ": " << a.second << "\n";
+        md << "**" << _("What stands out") << "**\n\n";
+        for (const BenchmarkComparedPart* p : standOut)
+        {
+            md << "- **" << getBenchmarkReportSectionWord(p->category) << "** "
+               << changeMark(p->ratio) << dot << getBenchmarkReportSectionName(p->category)
+               << "\n";
+            const wxString likely = getBenchmarkLikelyReason(*p);
+            const wxString advice = getBenchmarkTryAdvice(*p);
+            if (!likely.empty())
+                md << "  - " << _("Likely") << ": " << likely << "\n";
+            if (!advice.empty())
+                md << "  - " << _("What to try") << ": " << advice << "\n";
+            if (p->differences.empty() && p->hints.empty() && p->advice.empty())
+            {
+                md << "  - " << _("No difference was found in the facts and notes of the two "
+                    "runs.") << "\n";
+                continue;
+            }
+            md << "  - " << getBenchmarkReasonsTitle(c, *p) << ":\n";
+            for (const auto& d : p->differences)
+                md << "    - " << d.label << ": " << d.olderText << arrow() << d.newerText << "\n";
+            // the same advice of two hints once
+            std::vector<wxString> shown;
+            for (const auto& h : p->hints)
+            {
+                const bool repeated = std::find(shown.begin(), shown.end(), h.advice)
+                    != shown.end();
+                shown.push_back(h.advice);
+                md << "    - " << h.title << (h.detail.empty() ? wxString() : ". " + h.detail)
+                   << (h.advice.empty() || repeated ? wxString() : " " + h.advice) << "\n";
+            }
+            for (const auto& a : p->advice)
+                md << "    - " << a.first << ": " << a.second << "\n";
+        }
         md << "\n";
     }
 
@@ -1253,29 +1342,43 @@ wxString formatBenchmarkComparisonMarkdown(const BenchmarkComparison& c, bool st
         md << "\n";
     }
 
-    // every value with the work behind it, by part
-    md << "| " << _("Test") << " | " << older << " | " << _("Work") << " | " << newer
-       << " | " << _("Work") << " | " << _("Change") << " |\n|---|---:|---|---:|---|---|\n";
+    // every value of both runs, one table per part
     for (BenchmarkCategory section : getBenchmarkReportSections())
     {
-        const BenchmarkComparedPart* part = c.findPart(section);
-        if (!part)
-            continue;
-        md << "| **" << cell(getBenchmarkReportSectionName(section)) << "** | "
-           << (part->ratio > 0.0 ? pointsText(1.0) : wxString()) << " | | "
-           << (part->ratio > 0.0 ? pointsText(part->ratio) : wxString()) << " | | "
-           << (part->ratio > 0.0 ? changeText(part->ratio) : wxString()) << " |\n";
+        wxString rows;
         for (const auto* list : { &c.values, &c.stats })
         {
             for (const auto& v : *list)
             {
                 if (v.category != section)
                     continue;
-                md << "| " << cell(v.title) << " | " << cell(v.olderText) << " | "
-                   << cell(v.olderWork) << " | " << cell(v.newerText) << " | "
-                   << cell(v.newerWork) << " | " << changeText(v.ratio) << " |\n";
+                const wxString note = describeBenchmarkCompareState(c, v);
+                rows << "| " << cell(v.title + (note.empty() ? wxString() : " (" + note + ")"))
+                     << " | " << cell(v.olderText) << " | " << cell(v.newerText) << " | "
+                     << stateText(v.ratio, v.state) << " | "
+                     << cell(formatBenchmarkComparedWork(c, v)) << " |\n";
             }
         }
+        if (rows.empty())
+            continue;
+        const BenchmarkComparedPart* part = c.findPart(section);
+        wxString head = getBenchmarkReportSectionWord(section) + dot
+            + getBenchmarkReportSectionName(section);
+        if (part && part->ratio > 0.0)
+        {
+            head += ": " + wxString::Format(_("%s points"), pointsText(part->ratio)) + " ("
+                + formatBenchmarkChange(part->ratio) + ")";
+        }
+        else if (getBenchmarkPartState(c, section) == BenchmarkCompareState::OnlyNewer)
+        {
+            head += " (" + (c.newerIsCurrentRun ? _("only in this run")
+                : _("only in the later run")) + ")";
+        }
+        else if (getBenchmarkPartState(c, section) == BenchmarkCompareState::OnlyOlder)
+            head += " (" + _("only in the earlier run") + ")";
+        md << "#### " << head << "\n\n| " << _("Test") << " | " << older << " | " << newer
+           << " | " << _("Change") << " | " << _("Work") << " |\n|---|---:|---:|---|---|\n"
+           << rows << "\n";
     }
     return md;
 }

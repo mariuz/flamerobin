@@ -1375,16 +1375,51 @@ wxString BenchmarkReport::toMarkdown() const
     }
     else
     {
-        // the key values by part, with the work behind them
-        md << "### " << _("Key values") << "\n\n| " << _("Part") << " | " << _("Value")
-           << " | " << _("Result") << " | " << _("Work") << " |\n|---|---|---:|---|\n";
-        for (const auto& part : parts)
+        // the key figures with the work behind them, and what was noticed;
+        // every value is in the table of all measured values
+        const std::vector<BenchmarkHeadline> figures = getBenchmarkHeadlineValues(snapshot);
+        if (!figures.empty())
         {
-            for (const auto& v : part.values)
+            md << "### " << _("Key figures") << "\n\n| " << _("Part") << " | "
+               << _("Key figure") << " | " << _("Result") << " | " << _("Work")
+               << " |\n|---|---|---:|---|\n";
+            for (const auto& f : figures)
             {
-                md << "| " << cell(part.name) << " | " << cell(v.title) << " | "
-                   << cell(v.valueText) << " | "
-                   << cell(formatBenchmarkWork(v.amountText, v.durationMs)) << " |\n";
+                md << "| " << cell(getBenchmarkReportSectionWord(f.section)) << " | "
+                   << cell(f.name) << " | " << cell(f.number + " " + f.unit) << " | "
+                   << cell(f.work) << " |\n";
+            }
+        }
+        const size_t shown = 3;
+        const std::vector<BenchmarkHint> notes = getBenchmarkTopHints(*this, shown);
+        if (!notes.empty())
+        {
+            md << (figures.empty() ? "" : "\n") << "### " << _("Noticed") << "\n\n"
+               << _("States and ratios within this run, not rated.") << "\n\n";
+            for (const auto& h : notes)
+            {
+                // the short words of every part the hint was given for
+                wxString words;
+                for (const auto& other : hints)
+                {
+                    const wxString word = getBenchmarkReportSectionWord(other.category);
+                    if (other.id == h.id && !(", " + words + ",").Contains(" " + word + ","))
+                        words += (words.empty() ? wxString() : wxString(", ")) + word;
+                }
+                md << "- **" << words << "** " << (h.noticed.empty() ? h.title : h.noticed)
+                   << "\n";
+                // the details name adapters, addresses and drives
+                if (!anonymous && !h.detail.empty())
+                    md << "  - " << h.detail << "\n";
+                if (!h.advice.empty())
+                    md << "  - " << _("What can help:") << " " << h.advice << "\n";
+            }
+            const int more = int(getBenchmarkTopHints(*this, hints.size()).size()
+                - notes.size());
+            if (more > 0)
+            {
+                md << "\n" << wxString::Format(wxPLURAL("%d more note is in the HTML report.",
+                    "%d more notes are in the HTML report.", more), more) << "\n";
             }
         }
     }

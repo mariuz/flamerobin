@@ -1001,12 +1001,13 @@ void testReport()
     const wxString md = report.toMarkdown();
     const wxString visible = md.Left(md.Find("<!-- FlameRobin benchmark snapshot"));
     check(md.Find("## Performance Benchmark & Diagnosis") == 0
-        && md.Find("### Key values") < md.Find("### System")
+        && md.Find("### Key figures") < md.Find("### System")
         && md.Find("### System") < md.Find("### All measured values")
         && md.Find("### All measured values") < md.Find("<!-- FlameRobin benchmark snapshot"),
-        "key values, system, all measured values, then the results for comparisons");
-    check(md.Contains("| Part | Value | Result | Work |") && md.Contains("200 commits in "),
-        "the key values with the work behind them");
+        "key figures, system, all measured values, then the results for comparisons");
+    check(md.Contains("| Part | Key figure | Result | Work |")
+        && md.Contains("| DISK | Saving a change (commit) | 1.50 ms | 200 commits in 300 ms |")
+        && !md.Contains("### Key values"), "the key figures with the work behind them");
     check(!visible.Contains("Points") && !visible.Contains("What could make")
         && !visible.Contains("Power saving slows"), "a single run is not judged");
     check(md.Contains("\nm.storage.commit = 1.5 | ms | v1 | 200 | commits | 300 | ")
@@ -2530,9 +2531,10 @@ void testComparison()
     check(html.Find("id=\"differences\"") < html.Find("<div class=\"details\">"),
         "the comparison is the overview");
     bool markdown = true;
-    for (const char* part : { "### Compared with ", "| **All parts** | **1,000** |",
-        "| Server disk | 1,000 | 2,000 | **",
-        "**Server disk: What could make the earlier run slower**" })
+    for (const char* part : { "### Compared with ", "key figures faster", "Overall ",
+        " points; the earlier run has 1,000\n", "| DISK | Saving a change (commit) | ",
+        "**What stands out**", "Server disk: 2,000 points (2.0 times as fast)",
+        "  - What could make the earlier run slower:\n" })
     {
         if (!fasterMd.Contains(part))
         {
@@ -2548,7 +2550,7 @@ void testComparison()
     check(findLegacyProblem(html).empty() && findLegacyProblem(files.toHtml("dark")).empty(),
         "comparisons for Internet Explorer 11 as well");
     check(files.toHtml().Contains("Comparison of two benchmark runs")
-        && files.toMarkdown().Contains("| **All parts** |")
+        && files.toMarkdown().Contains("Server disk: 2,000 points")
         && files.toMarkdown().Contains("Later run")
         && files.toMarkdown().Contains("| Writing many rows | "), "two saved reports");
     std::map<wxString, int> rows;
@@ -2612,6 +2614,87 @@ void testComparison()
         && sharedFiles.toMarkdown().Contains("Hyper-V on <hidden>")
         && sharedFiles.newerIsCurrentRun && sharedFiles.newer.host.empty(),
         "a shared comparison of two files hides their computer names");
+}
+
+// the Markdown report shows what the HTML report shows
+void testMarkdown()
+{
+    std::cout << "Markdown and HTML\n";
+    // a single run: the key figures and the notes
+    const BenchmarkReport report = makeReport(noticedMetrics()[0], "2026-10-04 12:00:00");
+    const wxString html = report.toHtml();
+    const wxString md = report.toMarkdown();
+    bool same = true;
+    for (const BenchmarkHeadline& f : getBenchmarkHeadlineValues(makeBenchmarkSnapshot(report)))
+    {
+        same = same && md.Contains("| " + getBenchmarkReportSectionWord(f.section) + " | "
+            + f.name + " | " + f.number + " " + f.unit + " | " + f.work + " |")
+            && html.Contains("<span class=\"fig-num\">" + f.number + "</span><span "
+                "class=\"fig-unit\">" + f.unit + "</span>")
+            && html.Contains("<span class=\"fig-work\">" + f.work + "</span>");
+    }
+    for (const BenchmarkHint& h : getBenchmarkTopHints(report, 3))
+    {
+        const wxString title = h.noticed.empty() ? h.title : h.noticed;
+        same = same && md.Contains("** " + title + "\n")
+            && html.Contains("<span class=\"note-title\">" + title + "</span>")
+            && md.Contains("  - What can help: " + h.advice + "\n");
+    }
+    const int more = int(getBenchmarkTopHints(report, 100).size()) - 3;
+    check(same && more > 0 && md.Contains(wxString::Format("%d more notes are in the HTML "
+        "report.", more)) && md.Find("### Key figures") < md.Find("### Noticed")
+        && md.Find("### Noticed") < md.Find("### System"),
+        "a single run: the same key figures and notes");
+    const BenchmarkReport shared = report.anonymized();
+    const wxString sharedMd = shared.toMarkdown();
+    bool hidden = true;
+    for (const BenchmarkHint& h : getBenchmarkTopHints(shared, 3))
+        hidden = hidden && sharedMd.Contains(h.noticed.empty() ? h.title : h.noticed)
+            && !sharedMd.Contains("  - " + h.detail);
+    check(hidden, "a shared report: the notes without what was measured");
+
+    // a comparison: the main statement, the key figures, what stands out
+    // and every value
+    const BenchmarkComparison c = everyStateComparison();
+    const wxString cHtml = c.toHtml();
+    const wxString cMd = c.toMarkdown();
+    bool compared = true;
+    for (const auto& count : describeBenchmarkVerdict(getBenchmarkVerdict(c)))
+        compared = compared && cMd.Contains(count.second) && cHtml.Contains(count.second);
+    for (const wxString& note : getBenchmarkVerdictNotes(c))
+        compared = compared && cMd.Contains(note);
+    for (const BenchmarkHeadlineChange& h : getBenchmarkHeadlineChanges(c))
+    {
+        compared = compared && cMd.Contains(" | " + h.name + " | ")
+            && cHtml.Contains("<td class=\"area\">" + h.name + "</td>");
+    }
+    for (const auto* list : { &c.values, &c.stats })
+    {
+        for (const BenchmarkComparedValue& v : *list)
+        {
+            const bool found = cMd.Contains("\n| " + escapeMarkdownTableCell(v.title))
+                && cHtml.Contains("<td>" + v.title);
+            if (!found)
+                std::cerr << "    not in both: " << v.id << "\n";
+            compared = compared && found;
+        }
+    }
+    for (const BenchmarkComparedPart* p : getBenchmarkStandOut(c, 5))
+    {
+        compared = compared && cMd.Contains("- **" + getBenchmarkReportSectionWord(p->category)
+            + "** ") && (getBenchmarkLikelyReason(*p).empty()
+                || cMd.Contains("  - Likely: " + getBenchmarkLikelyReason(*p) + "\n"))
+            && cMd.Contains("  - What to try: " + getBenchmarkTryAdvice(*p) + "\n");
+    }
+    check(compared, "a comparison: the same statement, key figures, reasons and values");
+    check(cMd.Contains(" | not comparable (test changed) | ")
+        && cMd.Contains(" | not comparable (other work) | ")
+        && cMd.Contains("| Trimming the disk | ") && cMd.Contains(" | new | ")
+        && cMd.Contains(" | no longer measured | ")
+        && cMd.Contains("(The test changed (version 2, earlier version 1).)")
+        && cMd.Contains(" (only in the earlier run)\n")
+        && cMd.Contains("| Points |\n|---|---|---:|---:|---|---:|\n"),
+        "the states in words, also in Markdown");
 }
 
 void testKeyFigures()
@@ -3684,7 +3767,8 @@ void testFixtures(const wxString& dir)
     const BenchmarkComparedValue* saved = findCompared(two, "storage.commit");
     check(a.ok() && b.ok() && a.snapshot.date < b.snapshot.date && saved
         && std::abs(saved->ratio - 2.0) < 1e-9 && two.ratio > 1.0
-        && two.toMarkdown().Contains("| **All parts** |"), "two saved files are compared");
+        && two.toMarkdown().Contains("| DISK | Saving a change (commit) | "),
+        "two saved files are compared");
 }
 
 void writeFixtures(const wxString& dir)
@@ -3746,6 +3830,7 @@ int main(int argc, char** argv)
     testComparison();
     testHtmlParts();
     testComparisonHtml();
+    testMarkdown();
     testKeyFigures();
     testNeutralNotes();
     testVerdict();
