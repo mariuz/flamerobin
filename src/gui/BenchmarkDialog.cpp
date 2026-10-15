@@ -54,7 +54,6 @@
 #include "core/StringUtils.h"
 #include "engine/db/IDatabase.h"
 #include "gui/BenchmarkDialog.h"
-#include "gui/FRStyleManager.h"
 #include "gui/StyleGuide.h"
 #include "gui/UsernamePasswordDialog.h"
 #include "MasterPassword.h"
@@ -167,6 +166,14 @@ wxStaticText* createHintText(wxWindow* parent, const wxString& text, bool ellips
     if (ellipsize)
         label->SetMinSize(wxSize(parent->FromDIP(40), -1));
     return label;
+}
+
+// the style of the report in the dialog: dark where the system colours of
+// the dialog are dark, also when FlameRobin chose its dark mode itself
+// (wxWidgets 3.3 and later), so that the report looks like the dialog
+const char* getReportStyle()
+{
+    return wxSystemSettings::GetAppearance().IsUsingDarkBackground() ? "dark" : "light";
 }
 
 // the message after "Copy as Markdown"
@@ -1733,7 +1740,7 @@ void BenchmarkDialog::showReport(const fr::BenchmarkReport& report)
     if (webview_report)
     {
         reportPageM->show(hasData
-            ? report.toHtml(FRStyleManager::isEffectivelyDark() ? "dark" : "light")
+            ? report.toHtml(getReportStyle())
             : wxString("<html><body></body></html>"));
         return;
     }
@@ -1882,8 +1889,7 @@ void BenchmarkDialog::showComparison()
 #if wxUSE_WEBVIEW
     if (webview_report)
     {
-        reportPageM->show(displayedComparison().toHtml(
-            FRStyleManager::isEffectivelyDark() ? "dark" : "light"));
+        reportPageM->show(displayedComparison().toHtml(getReportStyle()));
         return;
     }
 #endif
