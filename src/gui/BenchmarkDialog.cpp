@@ -28,11 +28,14 @@
 
 #include <wx/arrstr.h>
 #include <wx/clipbrd.h>
-#include <wx/collpane.h>
+#include <wx/collheaderctrl.h>
 #include <wx/dir.h>
+#include <wx/display.h>
 #include <wx/ffile.h>
 #include <wx/filename.h>
+#include <wx/popupwin.h>
 #include <wx/simplebook.h>
+#include <wx/statline.h>
 #if wxUSE_WEBVIEW
 #include <wx/fs_mem.h>
 #include <wx/webview.h>
@@ -45,6 +48,7 @@
 #endif
 
 #include <algorithm>
+#include <cmath>
 
 #include "config/Config.h"
 #include "core/StringUtils.h"
@@ -71,7 +75,7 @@ enum
     ID_button_compare,
     ID_check_private,
     ID_choice_install,
-    ID_collapse_advanced,
+    ID_header_advanced,
     ID_timer
 };
 
@@ -91,42 +95,154 @@ wxString getTargetName(BenchmarkTarget target)
     }
 }
 
-// the line next to the list of targets
+// the short line next to the list of targets
 wxString getTargetHint(BenchmarkTarget target)
 {
     switch (target)
     {
         case BenchmarkTarget::Registered:
-            return _("Runs on the server of the registration; its login is used.");
+            return _("Uses the login of the registration.");
         case BenchmarkTarget::ThisComputer:
-            return _("Runs Firebird inside FlameRobin; no login, the network is not tested.");
+            return _("No server or login needed.");
         case BenchmarkTarget::OtherServer:
         default:
-            return _("Runs on the server below; a login with the right to create a "
-                "database is needed.");
+            return _("Needs a login that may create databases.");
     }
 }
 
-// the colour of the secondary text of the report (BenchmarkHtml.cpp), on
-// a light or a dark background
-wxColour getMutedColour()
+// a mix of two colours, with this share of the first one; the colours of
+// the dialog come from the system, so that they follow its dark mode and
+// its high contrast
+wxColour mixColours(const wxColour& first, const wxColour& second, double share)
 {
-    return wxSystemSettings::GetAppearance().IsUsingDarkBackground()
-        ? wxColour(0x95, 0x9e, 0xab) : wxColour(0x66, 0x71, 0x83);
+    return wxColour(wxColour::AlphaBlend(first.Red(), second.Red(), share),
+        wxColour::AlphaBlend(first.Green(), second.Green(), share),
+        wxColour::AlphaBlend(first.Blue(), second.Blue(), share));
 }
 
-// a text in the secondary colour; one that is cut with an ellipsis where
-// the dialog is narrow does not make the dialog wider
-wxStaticText* createMutedText(wxWindow* parent, const wxString& text, bool ellipsize = false)
+// the relative luminance and the contrast ratio of WCAG 2
+double getLuminance(const wxColour& colour)
+{
+    auto channel = [](unsigned char value)
+    {
+        const double share = value / 255.0;
+        return share <= 0.03928 ? share / 12.92 : std::pow((share + 0.055) / 1.055, 2.4);
+    };
+    return 0.2126 * channel(colour.Red()) + 0.7152 * channel(colour.Green())
+        + 0.0722 * channel(colour.Blue());
+}
+
+double getContrast(const wxColour& first, const wxColour& second)
+{
+    const double a = getLuminance(first);
+    const double b = getLuminance(second);
+    return (std::max(a, b) + 0.05) / (std::min(a, b) + 0.05);
+}
+
+// the colour, moved towards the text colour until it can be read on the
+// background (4.5:1); a theme may have a link colour that is too pale
+wxColour getReadableColour(const wxColour& colour, const wxColour& text,
+    const wxColour& background)
+{
+    for (int step = 0; step < 10; ++step)
+    {
+        const wxColour mixed = mixColours(text, colour, step / 10.0);
+        if (getContrast(mixed, background) >= 4.5)
+            return mixed;
+    }
+    return text;
+}
+
+// an explaining text, quieter than a label; one that is cut with an
+// ellipsis where the dialog is narrow does not make the dialog wider
+wxStaticText* createHintText(wxWindow* parent, const wxString& text, bool ellipsize = false)
 {
     wxStaticText* label = new wxStaticText(parent, wxID_ANY, text, wxDefaultPosition,
         wxDefaultSize, ellipsize ? wxST_ELLIPSIZE_END | wxST_NO_AUTORESIZE : 0);
-    label->SetForegroundColour(getMutedColour());
+    // between the text and the background, nearer to the text
+    const wxColour foreground = parent->GetForegroundColour();
+    const wxColour background = parent->GetBackgroundColour();
+    label->SetForegroundColour(getReadableColour(mixColours(foreground, background, 0.68),
+        foreground, background));
     if (ellipsize)
         label->SetMinSize(wxSize(parent->FromDIP(40), -1));
     return label;
 }
 
+// the explanation behind a "?": a small window below it with a title and
+// paragraphs of wrapped text, each with an optional term in bold above it,
+// in the colours of the text fields of the system (so it is readable in
+// light and dark mode) with a quiet frame. It closes with a click
+// elsewhere, and with Escape and Tab (BenchmarkDialog::OnCharHook()).
+class HelpPopup : public wxPopupTransientWindow
+{
+public:
+    HelpPopup(wxWindow* parent, wxWindow* button, const wxString& title,
+        const std::vector<std::pair<wxString, wxString>>& items);
+    wxWindow* getButton() const { return buttonM; }
+    // whether it was closed just now: the click on its "?" that closed it
+    // must not open it again
+    bool closedJustNow() const;
+
+protected:
+    virtual void OnDismiss() override;
+
+private:
+    wxWindow* buttonM;
+    wxLongLong closedM = 0;
+};
+
+HelpPopup::HelpPopup(wxWindow* parent, wxWindow* button, const wxString& title,
+    const std::vector<std::pair<wxString, wxString>>& items)
+    : wxPopupTransientWindow(parent, wxBORDER_NONE), buttonM(button)
+{
+    // on the screen of the "?" before anything is laid out: with another
+    // resolution than the first screen its texts would be wrapped too wide
+    Move(button->GetScreenPosition());
+    const wxColour background = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
+    const wxColour foreground = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT);
+    // the frame is the popup itself, one pixel around its panel
+    SetBackgroundColour(mixColours(foreground, background, 0.4));
+    wxPanel* panel = new wxPanel(this);
+    panel->SetBackgroundColour(background);
+    panel->SetForegroundColour(foreground);
+    const wxFont bold = panel->GetFont().Bold();
+    wxBoxSizer* sizerText = new wxBoxSizer(wxVERTICAL);
+    auto addText = [this, panel, &foreground, sizerText](const wxString& text,
+        const wxFont& font, int below)
+    {
+        wxStaticText* label = new wxStaticText(panel, wxID_ANY, text);
+        if (font.IsOk())
+            label->SetFont(font);
+        label->SetForegroundColour(foreground);
+        label->Wrap(FromDIP(360));
+        sizerText->Add(label, 0, wxBOTTOM, below);
+    };
+    addText(title, bold.Larger(), FromDIP(8));
+    for (size_t i = 0; i < items.size(); ++i)
+    {
+        if (!items[i].first.empty())
+            addText(items[i].first, bold, FromDIP(1));
+        addText(items[i].second, wxNullFont,
+            i + 1 < items.size() ? FromDIP(8) : 0);
+    }
+    wxBoxSizer* sizerPanel = new wxBoxSizer(wxVERTICAL);
+    sizerPanel->Add(sizerText, 1, wxEXPAND | wxALL, FromDIP(12));
+    panel->SetSizer(sizerPanel);
+    wxBoxSizer* sizerFrame = new wxBoxSizer(wxVERTICAL);
+    sizerFrame->Add(panel, 1, wxEXPAND | wxALL, 1);
+    SetSizerAndFit(sizerFrame);
+}
+
+bool HelpPopup::closedJustNow() const
+{
+    return !IsShown() && closedM != 0 && wxGetUTCTimeMillis() - closedM < 300;
+}
+
+void HelpPopup::OnDismiss()
+{
+    closedM = wxGetUTCTimeMillis();
+}
 
 const wxString pendingDatabasesKey = "BenchmarkPendingDatabases";
 const wxString earlierFileKey = "BenchmarkCompareWithFile";
@@ -349,7 +465,7 @@ BEGIN_EVENT_TABLE(BenchmarkDialog, BaseDialog)
     EVT_BUTTON(ID_button_compare, BenchmarkDialog::OnCompareReports)
     EVT_CHECKBOX(ID_check_private, BenchmarkDialog::OnPrivateChanged)
     EVT_CHOICE(ID_choice_install, BenchmarkDialog::OnTargetChanged)
-    EVT_COLLAPSIBLEPANE_CHANGED(ID_collapse_advanced, BenchmarkDialog::OnAdvancedToggled)
+    EVT_COLLAPSIBLEHEADER_CHANGED(ID_header_advanced, BenchmarkDialog::OnAdvancedToggled)
     EVT_BUTTON(wxID_CANCEL, BenchmarkDialog::OnCloseButton)
     EVT_CHOICE(ID_choice_target, BenchmarkDialog::OnTargetChanged)
     EVT_TIMER(ID_timer, BenchmarkDialog::OnTimer)
@@ -367,6 +483,9 @@ BenchmarkDialog::BenchmarkDialog(wxWindow* parent, Database* db)
     // modal dialog at once; this one is bound later, so it runs first and
     // can wait for the cleanup of a running test
     Bind(wxEVT_CLOSE_WINDOW, &BenchmarkDialog::OnClose, this);
+    Bind(wxEVT_CHAR_HOOK, &BenchmarkDialog::OnCharHook, this);
+    // the settings start with the target, not with the first text field
+    CallAfter([this]() { choice_target->SetFocus(); });
     CallAfter([this]() { dropPendingDatabases(); });
 }
 
@@ -386,42 +505,172 @@ const wxString BenchmarkDialog::getName() const
     return "BenchmarkDialog";
 }
 
+wxButton* BenchmarkDialog::createHelpButton(wxWindow* parent, const wxString& title,
+    const HelpItems& items)
+{
+    // a click, Space or Enter opens the explanation; a tool tip could not be
+    // reached with the keyboard or by touch
+    wxButton* button = new wxButton(parent, wxID_ANY, "?", wxDefaultPosition,
+        wxDefaultSize, wxBU_EXACTFIT | wxBORDER_NONE);
+    button->SetFont(button->GetFont().Bold());
+    // the colour of links, as readable as a label
+    const wxColour text = parent->GetForegroundColour();
+    const wxColour background = parent->GetBackgroundColour();
+    button->SetForegroundColour(getReadableColour(
+        wxSystemSettings::GetColour(wxSYS_COLOUR_HOTLIGHT), text, background));
+    // large enough to be hit
+    button->SetMinSize(wxSize(std::max(button->GetBestSize().x, FromDIP(24)), -1));
+    button->SetToolTip(title);
+    button->Bind(wxEVT_BUTTON, [this, button, title, items](wxCommandEvent&)
+    {
+        showHelp(button, title, items);
+    });
+    return button;
+}
+
+void BenchmarkDialog::showHelp(wxWindow* button, const wxString& title,
+    const HelpItems& items)
+{
+    if (HelpPopup* last = static_cast<HelpPopup*>(popup_help))
+    {
+        // a click on the "?" of the open explanation closes it: the click
+        // has already done that when it gets here
+        if (last->IsShown())
+            last->Dismiss();
+        else if (last->getButton() == button && last->closedJustNow())
+            return;
+        last->Destroy();
+        popup_help = nullptr;
+    }
+    HelpPopup* popup = new HelpPopup(this, button, title, items);
+    popup_help = popup;
+    // below the "?"; its right edge at the right edge of the "?" if it would
+    // stand out of the dialog on the right
+    const wxRect rectButton = button->GetScreenRect();
+    const wxRect rectDialog = GetScreenRect();
+    const int width = popup->GetSize().x;
+    int x = rectButton.x;
+    if (x + width > rectDialog.GetRight())
+        x = std::max(rectDialog.x, rectButton.GetRight() + 1 - width);
+    popup->Position(wxPoint(x, rectButton.y), wxSize(0, rectButton.height));
+    popup->Popup();
+}
+
+void BenchmarkDialog::OnCharHook(wxKeyEvent& event)
+{
+    // Escape closes an open explanation, not the dialog; Tab closes it and
+    // moves on
+    const int key = event.GetKeyCode();
+    if (!popup_help || !popup_help->IsShown() || (key != WXK_ESCAPE && key != WXK_TAB))
+    {
+        event.Skip();
+        return;
+    }
+    popup_help->Dismiss();
+    wxWindow* button = static_cast<HelpPopup*>(popup_help)->getButton();
+    // the "?" keeps the focus (Windows), or the popup took it (GTK)
+    if (wxWindow::FindFocus() == button)
+    {
+        if (key == WXK_TAB)
+            event.Skip();
+        return;
+    }
+    button->SetFocus();
+    if (key == WXK_TAB)
+    {
+        // once the focus is back
+        const int direction = event.ShiftDown() ? wxNavigationKeyEvent::IsBackward
+            : wxNavigationKeyEvent::IsForward;
+        CallAfter([button, direction]() { button->Navigate(direction); });
+    }
+}
+
 void BenchmarkDialog::createControls()
 {
     wxPanel* panel = getControlsPanel();
     wxBoxSizer* sizerMain = new wxBoxSizer(wxVERTICAL);
     const int gap = FromDIP(6);
+    // between the lines of the settings
+    const int lineGap = FromDIP(8);
 
     // the settings; after a run they make room for the report
     wxBoxSizer* sizerSettings = new wxBoxSizer(wxVERTICAL);
     sizerSettingsM = sizerSettings;
-    wxStaticText* info = new wxStaticText(panel, wxID_ANY,
-        _("The test creates a temporary database (FR_BENCHMARK_*.FDB) in the "
-          "directory below, runs all tests in it and deletes it afterwards. No "
-          "other database is changed. The tests put load on the server for a "
-          "few minutes."));
-    info->Wrap(640);
-    sizerSettings->Add(info, 0, wxEXPAND | wxBOTTOM, 8);
+    // what happens, in one sentence; the details are behind the "?" of the
+    // target
+    sizerSettings->Add(new wxStaticText(panel, wxID_ANY, _("Creates a temporary "
+        "database in the directory below and drops it afterwards; no other database "
+        "is changed.")), 0, wxBOTTOM, FromDIP(14));
 
-    // a label and a field in every line
-    wxFlexGridSizer* sizerGrid = new wxFlexGridSizer(2, FromDIP(4), FromDIP(10));
-    sizerGrid->AddGrowableCol(1, 1);
+    // the "?" of the target first, for the width of the column of the "?";
+    // in the order of the tab key it follows the list of targets
+    wxButton* helpTarget = createHelpButton(panel, _("Where the test runs"), {
+        { getTargetName(BenchmarkTarget::Registered), _("The server of the registration, "
+            "with its login. Also measures the network to the server.") },
+        { getTargetName(BenchmarkTarget::ThisComputer), _("Runs Firebird inside FlameRobin "
+            "with the engine of an installation on this computer; no server, no login. "
+            "The network is not tested: run it on the server itself.") },
+        { getTargetName(BenchmarkTarget::OtherServer), _("A server you enter below. Its "
+            "login must be allowed to create databases.") },
+        { wxString(), _("The test creates a temporary database (FR_BENCHMARK_*.FDB), runs "
+            "in it and drops it afterwards. No other database is changed, but the server "
+            "is under load while the test runs.") } });
+
+    // every line has a column of labels, the fields, and a column for the
+    // "?" at the right edge: all fields start and end at the same place
+    int labelWidth = 0;
+    for (const wxString& label : { _("&Test:"), _("Host:"), _("User:"), _("&Firebird:"),
+        _("&Directory:"), _("Compa&re with:"), _("Intensity:"), _("Client library:"),
+        _("Page size:"), _("Also:") })
+    {
+        labelWidth = std::max(labelWidth,
+            panel->GetTextExtent(wxControl::RemoveMnemonics(label)).x);
+    }
+    const int helpWidth = helpTarget->GetMinSize().x;
+    // the label is created before its fields, so that its mnemonic selects them
+    auto createLabel = [labelWidth](wxWindow* parent, const wxString& text)
+    {
+        wxStaticText* label = new wxStaticText(parent, wxID_ANY, text);
+        label->SetMinSize(wxSize(labelWidth, -1));
+        return label;
+    };
+    // the label stands next to the first of several lines of fields
+    auto createLine = [this, labelWidth, helpWidth](wxWindow* label, wxSizer* fields,
+        wxWindow* help, bool labelOnTop = false)
+    {
+        wxBoxSizer* line = new wxBoxSizer(wxHORIZONTAL);
+        if (label)
+        {
+            line->Add(label, 0, (labelOnTop ? wxALIGN_TOP : wxALIGN_CENTER_VERTICAL)
+                | wxRIGHT, FromDIP(10));
+        }
+        else
+            line->AddSpacer(labelWidth + FromDIP(10));
+        line->Add(fields, 1, wxALIGN_CENTER_VERTICAL);
+        if (help)
+            line->Add(help, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(4));
+        else
+            line->AddSpacer(helpWidth + FromDIP(4));
+        return line;
+    };
 
     // where to test: a list with short names, the details on a page below
-    sizerGrid->Add(new wxStaticText(panel, wxID_ANY, _("&Test:")), 0,
-        wxALIGN_CENTER_VERTICAL);
+    wxStaticText* labelTarget = createLabel(panel, _("&Test:"));
     choice_target = new wxChoice(panel, ID_choice_target);
     for (BenchmarkTarget target : fr::getBenchmarkTargets(databaseM != nullptr))
         choice_target->Append(getTargetName(target));
     choice_target->SetSelection(0);
-    label_target_hint = createMutedText(panel, wxEmptyString, true);
+    helpTarget->MoveAfterInTabOrder(choice_target);
+    label_target_hint = createHintText(panel, wxEmptyString, true);
     wxBoxSizer* sizerTarget = new wxBoxSizer(wxHORIZONTAL);
     sizerTarget->Add(choice_target, 0, wxALIGN_CENTER_VERTICAL);
     sizerTarget->Add(label_target_hint, 1, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(10));
-    sizerGrid->Add(sizerTarget, 1, wxEXPAND);
+    sizerSettings->Add(createLine(labelTarget, sizerTarget, helpTarget), 0,
+        wxEXPAND | wxBOTTOM, lineGap);
 
     // one page per target, in the order of BenchmarkTarget: the pages are as
-    // high as the highest, so nothing moves when the target changes
+    // high as the highest, so nothing moves when the target changes; each
+    // page is a line with its own label
     book_target = new wxSimplebook(panel, wxID_ANY);
     installationsM = fr::findBenchmarkFirebirdInstallations();
     for (BenchmarkTarget target : { BenchmarkTarget::Registered,
@@ -435,9 +684,10 @@ void BenchmarkDialog::createControls()
             sizerPage->Add(new wxStaticText(page, wxID_ANY, label), 0,
                 wxALIGN_CENTER_VERTICAL | wxRIGHT, gap);
         };
+        wxStaticText* labelPage = nullptr;
         if (details.hostAndPort)
         {
-            addLabel(_("Host:"));
+            labelPage = createLabel(page, _("Host:"));
             text_host = new wxTextCtrl(page, wxID_ANY, wxEmptyString);
             text_host->SetMinSize(wxSize(FromDIP(110), -1));
             sizerPage->Add(text_host, 3, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(12));
@@ -450,7 +700,10 @@ void BenchmarkDialog::createControls()
         }
         if (details.login)
         {
-            addLabel(_("User:"));
+            if (labelPage)
+                addLabel(_("User:"));
+            else
+                labelPage = createLabel(page, _("User:"));
             wxTextCtrl* user = new wxTextCtrl(page, wxID_ANY, wxEmptyString);
             user->SetMinSize(wxSize(FromDIP(80), -1));
             sizerPage->Add(user, 3, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(12));
@@ -462,7 +715,7 @@ void BenchmarkDialog::createControls()
             if (details.loginOptional)
             {
                 user->SetHint(_("from the registration or asked at start"));
-                sizerPage->Add(createMutedText(page, _("optional")), 0,
+                sizerPage->Add(createHintText(page, _("optional")), 0,
                     wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(10));
             }
             if (target == BenchmarkTarget::Registered)
@@ -479,7 +732,7 @@ void BenchmarkDialog::createControls()
         if (details.installation)
         {
             // the Firebird installations of this computer, for a test without login
-            addLabel(_("&Firebird:"));
+            labelPage = createLabel(page, _("&Firebird:"));
             wxArrayString installations;
             for (const auto& i : installationsM)
             {
@@ -498,95 +751,122 @@ void BenchmarkDialog::createControls()
             choice_install = new wxChoice(page, ID_choice_install, wxDefaultPosition,
                 wxDefaultSize, installations);
             choice_install->SetSelection(0);
-            choice_install->SetToolTip(_("The engine of this installation runs the test, with "
-                "its firebird.conf. The installed server keeps running and is not changed."));
             // GTK makes a list as wide as its longest entry
             choice_install->SetMinSize(wxSize(FromDIP(260), -1));
             sizerPage->Add(choice_install, 1, wxALIGN_CENTER_VERTICAL);
         }
-        page->SetSizer(sizerPage);
+        page->SetSizer(createLine(labelPage, sizerPage, nullptr));
         book_target->AddPage(page, wxEmptyString);
     }
-    sizerGrid->AddSpacer(0);
-    sizerGrid->Add(book_target, 1, wxEXPAND);
+    sizerSettings->Add(book_target, 0, wxEXPAND | wxBOTTOM, lineGap);
 
-    sizerSettings->Add(sizerGrid, 0, wxEXPAND | wxBOTTOM, 6);
-
-    wxBoxSizer* sizerDir = new wxBoxSizer(wxHORIZONTAL);
-    sizerDir->Add(new wxStaticText(panel, wxID_ANY,
-        _("Directory for the temporary database (as seen by the server):")),
-        0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 6);
+    wxStaticText* labelDirectory = createLabel(panel, _("&Directory:"));
     // the directory of the selected database, so that its drive is tested
     wxString directory = databaseM ? fr::getBenchmarkDirectoryFromPath(databaseM->getPath())
         : wxString();
     text_directory = new wxTextCtrl(panel, wxID_ANY, directory.empty()
         ? wxFileName::GetTempDir() + wxFileName::GetPathSeparator() : directory);
-    text_directory->SetToolTip(_("The disk of this directory is tested. Use the "
-        "directory of your databases, so that their disk is measured."));
-    sizerDir->Add(text_directory, 1, wxEXPAND);
-    sizerSettings->Add(sizerDir, 0, wxEXPAND | wxBOTTOM, 6);
+    wxBoxSizer* sizerDir = new wxBoxSizer(wxHORIZONTAL);
+    sizerDir->Add(text_directory, 1, wxALIGN_CENTER_VERTICAL);
+    sizerSettings->Add(createLine(labelDirectory, sizerDir, createHelpButton(panel,
+        _("Directory"), { { wxString(), _("The directory of the temporary database, "
+            "as the server sees it (a path on the server). Its disk is tested, so choose "
+            "the directory of your databases.") } })), 0,
+        wxEXPAND | wxBOTTOM, lineGap);
+
+    // the intensities in one line, each with its duration
+    wxStaticText* labelIntensity = createLabel(panel, _("Intensity:"));
+    const wxString intensityHelp[] = {
+        _("A first impression."),
+        _("The usual choice."),
+        _("More data and up to 32 users: a thorough look at a server.")
+    };
+    HelpItems intensityItems;
+    wxBoxSizer* sizerIntensity = new wxBoxSizer(wxHORIZONTAL);
+    for (int i = 0; i < 3; ++i)
+    {
+        const fr::BenchmarkIntensity intensity = fr::BenchmarkIntensity(i);
+        radio_intensity[i] = new wxRadioButton(panel, wxID_ANY,
+            fr::getBenchmarkIntensityName(intensity), wxDefaultPosition, wxDefaultSize,
+            i == 0 ? wxRB_GROUP : 0);
+        radio_intensity[i]->Bind(wxEVT_RADIOBUTTON, &BenchmarkDialog::OnDurationChanged, this);
+        sizerIntensity->Add(radio_intensity[i], 0, wxALIGN_CENTER_VERTICAL);
+        sizerIntensity->Add(createHintText(panel,
+            fr::getBenchmarkIntensityDuration(intensity)), 0,
+            wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(6));
+        if (i < 2)
+            sizerIntensity->AddSpacer(FromDIP(24));
+        intensityItems.push_back({ wxString::Format("%s (%s)",
+            fr::getBenchmarkIntensityName(intensity),
+            fr::getBenchmarkIntensityDuration(intensity)), intensityHelp[i] });
+    }
+    intensityItems.push_back({ wxString(), _("Compare only runs of the same "
+        "intensity.") });
+    radio_intensity[int(fr::BenchmarkIntensity::Standard)]->SetValue(true);
+    sizerSettings->Add(createLine(labelIntensity, sizerIntensity,
+        createHelpButton(panel, _("Intensity"), intensityItems)), 0,
+        wxEXPAND | wxBOTTOM, lineGap);
 
     // a saved report to compare the new run with: a single run is not
     // judged, the comparison shows what is faster or slower and why
-    wxBoxSizer* sizerEarlier = new wxBoxSizer(wxHORIZONTAL);
-    sizerEarlier->Add(new wxStaticText(panel, wxID_ANY, _("Compare with an earlier report:")),
-        0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 6);
+    wxStaticText* labelEarlier = createLabel(panel, _("Compa&re with:"));
     wxString earlierFile;
     config().getValue(earlierFileKey, earlierFile);
     text_earlier = new wxTextCtrl(panel, wxID_ANY, earlierFile);
-    text_earlier->SetHint(_("optional: a saved report (Markdown or HTML)"));
-    text_earlier->SetToolTip(_("A report saved after an earlier run, e.g. before a "
-        "change on the server, or the report of another server. The new report then "
-        "shows what got faster or slower, what is different and what could be the "
-        "reason."));
-    sizerEarlier->Add(text_earlier, 1, wxALIGN_CENTER_VERTICAL | wxRIGHT, 6);
-    sizerEarlier->Add(new wxButton(panel, ID_button_earlier_browse, _("Bro&wse...")),
+    text_earlier->SetHint(_("optional: a saved report"));
+    wxBoxSizer* sizerEarlier = new wxBoxSizer(wxHORIZONTAL);
+    sizerEarlier->Add(text_earlier, 1, wxALIGN_CENTER_VERTICAL | wxRIGHT, gap);
+    sizerEarlier->Add(new wxButton(panel, ID_button_earlier_browse, _("Browse...")),
         0, wxALIGN_CENTER_VERTICAL);
-    sizerSettings->Add(sizerEarlier, 0, wxEXPAND | wxBOTTOM, 6);
+    sizerSettings->Add(createLine(labelEarlier, sizerEarlier, createHelpButton(panel,
+        _("Compare with an earlier report"), { { wxString(), _("A report saved from "
+            "an earlier run (Markdown or HTML), for example before a change on the "
+            "server, or from another server.") },
+        { wxString(), _("The new report then shows what got faster or slower, what "
+            "differs and possible reasons. Leave it empty for no comparison.") } })),
+        0, wxEXPAND | wxBOTTOM, lineGap);
 
-    wxString intensities[] = {
-        fr::getBenchmarkIntensityName(fr::BenchmarkIntensity::Quick),
-        fr::getBenchmarkIntensityName(fr::BenchmarkIntensity::Standard),
-        fr::getBenchmarkIntensityName(fr::BenchmarkIntensity::Deep)
-    };
-    radio_intensity = new wxRadioBox(panel, wxID_ANY, _("Intensity"),
-        wxDefaultPosition, wxDefaultSize, 3, intensities, 3, wxRA_SPECIFY_COLS);
-    radio_intensity->SetSelection(1);
-    radio_intensity->Bind(wxEVT_RADIOBOX, &BenchmarkDialog::OnDurationChanged, this);
-    radio_intensity->SetItemToolTip(0, _("Less than a minute: a first impression."));
-    radio_intensity->SetItemToolTip(1, _("About two minutes: the usual choice. Compare "
-        "runs of the same intensity."));
-    radio_intensity->SetItemToolTip(2, _("Several minutes with more data and up to 32 "
-        "users: for a thorough look at a server."));
-    sizerSettings->Add(radio_intensity, 0, wxEXPAND | wxBOTTOM, 6);
-
-    // rarely needed settings, collapsed at first
-    collapse_advanced = new wxCollapsiblePane(panel, ID_collapse_advanced,
-        _("Advanced settings"), wxDefaultPosition, wxDefaultSize,
-        wxCP_DEFAULT_STYLE | wxCP_NO_TLW_RESIZE);
-    wxWindow* advanced = collapse_advanced->GetPane();
+    // rarely needed settings, closed at first, below a line that sets them
+    // apart; the "?" next to the heading explains all of them
+    sizerSettings->Add(new wxStaticLine(panel), 0, wxEXPAND | wxTOP | wxBOTTOM,
+        FromDIP(4));
+    header_advanced = new wxCollapsibleHeaderCtrl(panel, ID_header_advanced,
+        _("Advanced settings"));
+    wxBoxSizer* sizerAdvancedLine = new wxBoxSizer(wxHORIZONTAL);
+    sizerAdvancedLine->Add(header_advanced, 0, wxALIGN_CENTER_VERTICAL);
+    sizerAdvancedLine->Add(createHelpButton(panel, _("Advanced settings"), {
+        { _("Client library"), _("The Firebird client (fbclient) FlameRobin uses. To "
+            "test this computer without an installation, it selects the Firebird version "
+            "and needs the engine plugin next to it.") },
+        { _("Page size"), _("Of the temporary database; only the storage and cache tests "
+            "depend on it. Automatic uses the page size of the selected database, "
+            "otherwise 8192 (Firebird 3: at most 16384). Comparing all page sizes "
+            "repeats these tests for each one: a few minutes more.") },
+        { _("Read the settings of the selected database"), _("Reads its header, "
+            "MON$DATABASE and RDB$DATABASE, on its own server only. Nothing is "
+            "written.") },
+        { _("Test 50 and 250 users at once"), _("Two more rounds with that many "
+            "connections at once: about half a minute more.") } }), 0,
+        wxALIGN_CENTER_VERTICAL);
+    sizerSettings->Add(sizerAdvancedLine, 0, wxEXPAND | wxBOTTOM, gap);
+    panel_advanced = new wxPanel(panel);
+    wxWindow* advanced = panel_advanced;
     wxBoxSizer* sizerAdvanced = new wxBoxSizer(wxVERTICAL);
 
     // the client library decides the Firebird version of a test of this
     // computer without login
-    wxBoxSizer* sizerLib = new wxBoxSizer(wxHORIZONTAL);
-    sizerLib->Add(new wxStaticText(advanced, wxID_ANY, _("Client library:")),
-        0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 6);
+    wxStaticText* labelLibrary = createLabel(advanced, _("Client library:"));
     text_clientlib = new wxTextCtrl(advanced, wxID_ANY, databaseM
         ? databaseM->getClientLibrary() : wxString());
     text_clientlib->SetHint(_("default client library"));
-    text_clientlib->SetToolTip(_("The Firebird client library (fbclient) FlameRobin "
-        "uses. For a test of this computer without login it needs the engine plugin "
-        "next to it, and it selects the Firebird version (3, 4, 5 or 6)."));
-    sizerLib->Add(text_clientlib, 1, wxEXPAND);
-    sizerAdvanced->Add(sizerLib, 0, wxEXPAND | wxTOP | wxBOTTOM, 6);
+    wxBoxSizer* sizerLibrary = new wxBoxSizer(wxHORIZONTAL);
+    sizerLibrary->Add(text_clientlib, 1, wxALIGN_CENTER_VERTICAL);
+    sizerAdvanced->Add(createLine(labelLibrary, sizerLibrary, nullptr), 0,
+        wxEXPAND | wxBOTTOM, lineGap);
 
     // the page size influences the storage and cache tests; default to the
     // one of the selected database when FlameRobin already knows it
-    wxBoxSizer* sizerPageSize = new wxBoxSizer(wxHORIZONTAL);
-    sizerPageSize->Add(new wxStaticText(advanced, wxID_ANY,
-        _("Page size of the temporary database:")),
-        0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 6);
+    wxStaticText* labelPageSize = createLabel(advanced, _("Page size:"));
     int knownPageSize = databaseM && databaseM->isConnected()
         ? databaseM->getInfo().getPageSize() : 0;
     if (knownPageSize >= 4096)
@@ -597,52 +877,43 @@ void BenchmarkDialog::createControls()
     };
     choice_pagesize = new wxChoice(advanced, wxID_ANY, wxDefaultPosition,
         wxDefaultSize, 5, pageSizes);
-    choice_pagesize->SetToolTip(_("The page size only affects the storage "
-        "and cache tests; CPU, network and connection tests do not depend on "
-        "it. Automatic uses the page size of the selected database when it "
-        "is known, otherwise 8192. Firebird 3 supports up to 16384; a larger "
-        "value is reduced automatically."));
     choice_pagesize->SetSelection(0);
-    sizerPageSize->Add(choice_pagesize, 0, wxRIGHT, 12);
-    check_comparepages = new wxCheckBox(advanced, wxID_ANY,
-        _("Compare all page sizes (storage and cache tests only)"));
-    check_comparepages->SetToolTip(_("Repeats the storage and cache tests in "
-        "a separate temporary database for every page size the server "
-        "supports, and shows them side by side."));
+    check_comparepages = new wxCheckBox(advanced, wxID_ANY, _("Compare all page sizes"));
     check_comparepages->Bind(wxEVT_CHECKBOX, &BenchmarkDialog::OnDurationChanged, this);
+    wxBoxSizer* sizerPageSize = new wxBoxSizer(wxHORIZONTAL);
+    sizerPageSize->Add(choice_pagesize, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(24));
     sizerPageSize->Add(check_comparepages, 0, wxALIGN_CENTER_VERTICAL);
-    sizerAdvanced->Add(sizerPageSize, 0, wxBOTTOM, 6);
+    sizerAdvanced->Add(createLine(labelPageSize, sizerPageSize, nullptr), 0,
+        wxEXPAND | wxBOTTOM, lineGap);
 
+    wxStaticText* labelAlso = createLabel(advanced, _("Also:"));
     check_inspect = new wxCheckBox(advanced, wxID_ANY,
-        _("Also read the configuration of the selected database (read-only: "
-          "page buffers, forced writes, transaction state)"));
-    check_inspect->SetToolTip(_("Only for the server of the selected "
-        "database: connects to it and reads its header, MON$DATABASE and "
-        "RDB$DATABASE. Nothing is written."));
+        _("Read the settings of the selected database (read-only)"));
     check_inspect->SetValue(false);
-    sizerAdvanced->Add(check_inspect, 0, wxBOTTOM, 6);
-
     check_manyusers = new wxCheckBox(advanced, wxID_ANY,
-        _("Also test 50 and 250 users at once (puts a heavy load on the server)"));
-    check_manyusers->SetToolTip(_("Adds two rounds with 50 and 250 connections "
-        "working at the same time. Shows whether the server keeps up with many "
-        "users; takes about half a minute more."));
+        _("Test 50 and 250 users at once (heavy load)"));
     check_manyusers->Bind(wxEVT_CHECKBOX, &BenchmarkDialog::OnDurationChanged, this);
-    sizerAdvanced->Add(check_manyusers, 0, wxBOTTOM, 6);
-    advanced->SetSizer(sizerAdvanced);
-    sizerSettings->Add(collapse_advanced, 0, wxEXPAND | wxBOTTOM, 6);
-    sizerMain->Add(sizerSettings, 0, wxEXPAND);
+    // one below the other: side by side they would be the widest line
+    wxBoxSizer* sizerAlso = new wxBoxSizer(wxVERTICAL);
+    sizerAlso->Add(check_inspect, 0, wxBOTTOM, gap);
+    sizerAlso->Add(check_manyusers, 0);
+    sizerAdvanced->Add(createLine(labelAlso, sizerAlso, nullptr, true), 0,
+        wxEXPAND | wxBOTTOM, gap);
+    panel_advanced->SetSizer(sizerAdvanced);
+    panel_advanced->Hide();
+    sizerSettings->Add(panel_advanced, 0, wxEXPAND);
+    sizerMain->Add(sizerSettings, 0, wxEXPAND | wxBOTTOM, gap);
 
     // progress
     wxBoxSizer* sizerStatus = new wxBoxSizer(wxHORIZONTAL);
     label_status = new wxStaticText(panel, wxID_ANY, wxEmptyString);
     label_elapsed = new wxStaticText(panel, wxID_ANY, wxEmptyString);
     sizerStatus->Add(label_status, 1, wxALIGN_CENTER_VERTICAL);
-    sizerStatus->Add(label_elapsed, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 12);
-    sizerMain->Add(sizerStatus, 0, wxEXPAND | wxBOTTOM, 4);
+    sizerStatus->Add(label_elapsed, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(12));
+    sizerMain->Add(sizerStatus, 0, wxEXPAND | wxBOTTOM, FromDIP(4));
     gauge_progress = new wxGauge(panel, wxID_ANY, 100, wxDefaultPosition,
-        wxSize(-1, 14));
-    sizerMain->Add(gauge_progress, 0, wxEXPAND | wxBOTTOM, 6);
+        wxSize(-1, FromDIP(14)));
+    sizerMain->Add(gauge_progress, 0, wxEXPAND | wxBOTTOM, gap);
 
     // results
     notebook_results = new wxNotebook(panel, wxID_ANY);
@@ -685,6 +956,9 @@ void BenchmarkDialog::createControls()
 
     // buttons
     button_start = new wxButton(panel, ID_button_start, _("&Start"));
+    // the main action; not the default button, so that Enter in a field
+    // does not start a test
+    button_start->SetFont(button_start->GetFont().Bold());
     button_cancel = new wxButton(panel, ID_button_cancel, _("C&ancel test"));
     check_private = new wxCheckBox(panel, ID_check_private,
         _("&Hide private information"));
@@ -731,6 +1005,16 @@ fr::BenchmarkTarget BenchmarkDialog::getTarget() const
     return fr::getBenchmarkTarget(databaseM != nullptr, choice_target->GetSelection());
 }
 
+fr::BenchmarkIntensity BenchmarkDialog::getIntensity() const
+{
+    for (int i = 0; i < 3; ++i)
+    {
+        if (radio_intensity[i]->GetValue())
+            return fr::BenchmarkIntensity(i);
+    }
+    return fr::BenchmarkIntensity::Standard;
+}
+
 void BenchmarkDialog::updateControls()
 {
     bool idle = !runningM;
@@ -747,7 +1031,8 @@ void BenchmarkDialog::updateControls()
     check_inspect->Enable(idle && details.readDatabase && databaseM);
     check_manyusers->Enable(idle);
     text_earlier->Enable(idle);
-    radio_intensity->Enable(idle);
+    for (wxRadioButton* radio : radio_intensity)
+        radio->Enable(idle);
     button_start->Enable(idle);
     button_cancel->Enable(runningM && !runnerM->isCancelRequested());
     button_compare->Enable(idle);
@@ -759,8 +1044,7 @@ void BenchmarkDialog::updateControls()
 wxString BenchmarkDialog::getReadyHint() const
 {
     return wxString::Format(_("Ready. The test takes %s."), fr::getBenchmarkDurationHint(
-        fr::BenchmarkIntensity(radio_intensity->GetSelection()),
-        check_comparepages->GetValue(), check_manyusers->GetValue()));
+        getIntensity(), check_comparepages->GetValue(), check_manyusers->GetValue()));
 }
 
 void BenchmarkDialog::OnDurationChanged(wxCommandEvent& event)
@@ -771,9 +1055,37 @@ void BenchmarkDialog::OnDurationChanged(wxCommandEvent& event)
         label_status->SetLabel(getReadyHint());
 }
 
-void BenchmarkDialog::OnAdvancedToggled(wxCollapsiblePaneEvent& WXUNUSED(event))
+void BenchmarkDialog::OnAdvancedToggled(wxCommandEvent& WXUNUSED(event))
 {
-    getControlsPanel()->Layout();
+    layoutAdvanced();
+}
+
+void BenchmarkDialog::showAdvanced(bool show)
+{
+    if (header_advanced->IsCollapsed() != show)
+        return;
+    header_advanced->SetCollapsed(!show);
+    layoutAdvanced();
+}
+
+void BenchmarkDialog::layoutAdvanced()
+{
+    panel_advanced->Show(!header_advanced->IsCollapsed());
+    // the open settings needs more room: the dialog does not get lower than the
+    // settings and the progress need, as far as the screen allows
+    wxPanel* panel = getControlsPanel();
+    const wxRect area = wxDisplay(this).GetClientArea();
+    const int needed = std::min(ClientToWindowSize(panel->GetSizer()->CalcMin()).y,
+        area.height);
+    SetMinSize(wxSize(GetMinSize().x, needed));
+    if (GetSize().y < needed)
+    {
+        wxRect rect = GetRect();
+        rect.height = needed;
+        rect.y = std::max(area.y, std::min(rect.y, area.GetBottom() + 1 - needed));
+        SetSize(rect);
+    }
+    panel->Layout();
 }
 
 void BenchmarkDialog::OnTargetChanged(wxCommandEvent& WXUNUSED(event))
@@ -781,19 +1093,11 @@ void BenchmarkDialog::OnTargetChanged(wxCommandEvent& WXUNUSED(event))
     const BenchmarkTarget target = getTarget();
     book_target->ChangeSelection(size_t(target));
     label_target_hint->SetLabel(getTargetHint(target));
-    label_target_hint->SetToolTip(target == BenchmarkTarget::ThisComputer
-        ? _("Runs Firebird directly inside FlameRobin with the engine of a Firebird "
-            "installation on this computer. No server connection, no user name and no "
-            "password are needed. Tests the hardware, the operating system and the "
-            "Firebird configuration of this computer; the network is not tested. Run it "
-            "on the server itself.") : getTargetHint(target));
-    choice_target->SetToolTip(label_target_hint->GetToolTipText());
+    // the client library is in the advanced settings
     if (target == BenchmarkTarget::ThisComputer
-        && choice_install->GetSelection() == int(installationsM.size())
-        && collapse_advanced->IsCollapsed())
+        && choice_install->GetSelection() == int(installationsM.size()))
     {
-        collapse_advanced->Expand();
-        getControlsPanel()->Layout();
+        showAdvanced(true);
     }
     if (target == BenchmarkTarget::OtherServer && text_host->IsEmpty() && databaseM)
     {
@@ -1098,8 +1402,7 @@ void BenchmarkDialog::OnStart(wxCommandEvent& WXUNUSED(event))
     if (registered && !resolveLogin(params))
         return;
 
-    fr::BenchmarkIntensity intensity =
-        fr::BenchmarkIntensity(radio_intensity->GetSelection());
+    const fr::BenchmarkIntensity intensity = getIntensity();
     runnerM = std::make_unique<fr::BenchmarkRunner>(params, intensity);
     pendingEntriesM.clear();
     for (const auto& connectionString : runnerM->getAllConnectionStrings())
@@ -1124,6 +1427,9 @@ void BenchmarkDialog::OnStart(wxCommandEvent& WXUNUSED(event))
     showReport(fr::BenchmarkReport());
     gauge_progress->SetValue(0);
     notebook_results->SetSelection(0);
+    // the settings cannot be changed during the run; the progress gets
+    // their room
+    showAdvanced(false);
     startTimeM = std::chrono::steady_clock::now();
     label_elapsed->SetLabel(formatElapsed());
     timerM.Start(1000);
@@ -1371,8 +1677,12 @@ void BenchmarkDialog::showSettings(bool show)
         label_status->SetLabel(getReadyHint());
         label_elapsed->SetLabel(wxEmptyString);
         gauge_progress->SetValue(0);
+        // the hint of the advanced settings is only shown next to the
+        // closed pane
+        layoutAdvanced();
     }
-    getControlsPanel()->Layout();
+    else
+        getControlsPanel()->Layout();
 }
 
 void BenchmarkDialog::showReport(const fr::BenchmarkReport& report)

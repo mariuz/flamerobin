@@ -34,6 +34,8 @@
 #include <optional>
 #include <set>
 #include <thread>
+#include <utility>
+#include <vector>
 
 #include "engine/Benchmark.h"
 #include "engine/BenchmarkRunner.h"
@@ -41,8 +43,8 @@
 #include "metadata/database.h"
 
 class BenchmarkReportPage;
-class wxCollapsiblePane;
-class wxCollapsiblePaneEvent;
+class wxCollapsibleHeaderCtrl;
+class wxPopupTransientWindow;
 class wxSimplebook;
 class wxWebView;
 
@@ -85,7 +87,9 @@ private:
     wxSimplebook* book_target;
     fr::BenchmarkTarget getTarget() const;
     wxChoice* choice_install;
-    wxCollapsiblePane* collapse_advanced;
+    // the advanced settings below their heading, closed at first
+    wxCollapsibleHeaderCtrl* header_advanced;
+    wxPanel* panel_advanced;
     wxTextCtrl* text_host = nullptr;
     wxTextCtrl* text_port = nullptr;
     wxTextCtrl* text_directory;
@@ -102,7 +106,9 @@ private:
     wxCheckBox* check_inspect;
     wxCheckBox* check_manyusers;
     wxTextCtrl* text_earlier;
-    wxRadioBox* radio_intensity;
+    wxRadioButton* radio_intensity[3];
+    fr::BenchmarkIntensity getIntensity() const;
+
     wxStaticText* label_status;
     wxStaticText* label_elapsed;
     wxGauge* gauge_progress;
@@ -127,7 +133,19 @@ private:
     wxButton* button_close;
 
     void createControls();
+    // a small "?" that shows a longer explanation next to it on a click,
+    // also with the keyboard: paragraphs, each with an optional term
+    typedef std::vector<std::pair<wxString, wxString>> HelpItems;
+    wxButton* createHelpButton(wxWindow* parent, const wxString& title,
+        const HelpItems& items);
+    void showHelp(wxWindow* button, const wxString& title, const HelpItems& items);
+    // the last explanation, open or closed; one at a time
+    wxPopupTransientWindow* popup_help = nullptr;
     void updateControls();
+    // opens or closes the advanced settings; the dialog grows for the open
+    // ones if the screen has room
+    void showAdvanced(bool show);
+    void layoutAdvanced();
     // how long the test takes, shown before the start
     wxString getReadyHint() const;
     bool buildParams(fr::BenchmarkConnectionParams& params);
@@ -183,7 +201,8 @@ private:
     void OnClose(wxCloseEvent& event);
     void OnTargetChanged(wxCommandEvent& event);
     void OnDurationChanged(wxCommandEvent& event);
-    void OnAdvancedToggled(wxCollapsiblePaneEvent& event);
+    void OnAdvancedToggled(wxCommandEvent& event);
+    void OnCharHook(wxKeyEvent& event);
     void OnTimer(wxTimerEvent& event);
 
     DECLARE_EVENT_TABLE()
