@@ -210,7 +210,9 @@ int main(int argc, char** argv)
         if (!m.eventMs)
             std::cout << "    events: " << m.eventStatus.utf8_str() << "\n";
         ok &= fr_test::check(report.parts.size() == 6, "key values of six parts");
-        ok &= fr_test::check(report.toHtml().Contains("id=\"parts\""), "HTML report");
+        const wxString html = report.toHtml();
+        ok &= fr_test::check(html.Contains("id=\"figures\"") && html.Contains("id=\"categories\""),
+            "HTML report");
         // Quick runs 1, 2 and 4 clients
         ok &= fr_test::check(m.oltp.size() == 3 && std::all_of(m.oltp.begin(),
             m.oltp.end(), [](const fr::BenchmarkOltpResult& o)

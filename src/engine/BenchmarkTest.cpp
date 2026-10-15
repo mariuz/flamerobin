@@ -1305,8 +1305,55 @@ void testSystemInfoParsers()
         "no host name for embedded connections");
 }
 
-// what keeps a page from working in Internet Explorer 11, empty if nothing:
-// every declaration it does not understand needs one before it that it
+// the rules of a style sheet with their selectors, and whether they are
+// inside @media, which the mode of Internet Explorer 7 and 8 ignores
+struct CssRule
+{
+    wxString selector;
+    wxString body;
+    bool media;
+};
+
+std::vector<CssRule> cssRules(const wxString& css)
+{
+    std::vector<CssRule> rules;
+    int depth = 0;
+    size_t start = 0;
+    for (size_t i = 0; i < css.length(); ++i)
+    {
+        if (css[i] == '{')
+        {
+            const size_t next = css.find_first_of("{}", i + 1);
+            if (next != wxString::npos && css[next] == '{')
+            {
+                // @media: the rules follow
+                ++depth;
+                start = i + 1;
+                continue;
+            }
+            if (next == wxString::npos)
+                break;
+            wxString selector = css.Mid(start, i - start);
+            // comments before the selector
+            if (selector.Contains("*/"))
+                selector = selector.AfterLast('/');
+            selector.Trim().Trim(false);
+            rules.push_back({ selector, css.Mid(i + 1, next - i - 1), depth > 0 });
+            i = next;
+            start = next + 1;
+        }
+        else if (css[i] == '}')
+        {
+            depth = std::max(0, depth - 1);
+            start = i + 1;
+        }
+    }
+    return rules;
+}
+
+// what keeps a page from working in Internet Explorer 11, or from being
+// readable in its modes of Internet Explorer 7 and 8; empty if nothing.
+// Every declaration it does not understand needs one before it that it
 // does, and the page must not depend on a script or a browser switch
 wxString findLegacyProblem(const wxString& html)
 {
@@ -1319,25 +1366,48 @@ wxString findLegacyProblem(const wxString& html)
     {
         return "X-UA-Compatible missing or not first";
     }
-    // <nav> cannot be styled in the mode of Internet Explorer 8
+    // <nav> and <section> cannot be styled in the mode of Internet Explorer 8
     for (const char* forbidden : { "<script", "@import", "@supports", "-ms-high-contrast",
-        "expression(", "<nav" })
+        "expression(", "<nav", "<section" })
     {
         if (html.Contains(forbidden))
             return wxString("contains ") + forbidden;
     }
+    // pictograms: Internet Explorer 11 draws a <use> with xlink:href only,
+    // an <svg> without a size is 300 x 150 px and focusable by default
+    const int uses = html.Freq('<') == 0 ? 0 : int(wxSplit(html, '<', '\0').size());
+    (void)uses;
+    size_t count = 0;
+    for (size_t pos = html.find("<use "); pos != wxString::npos; pos = html.find("<use ", pos + 1))
+    {
+        ++count;
+        if (html.compare(pos, 18, "<use xlink:href=\"#") != 0)
+            return "a <use> without xlink:href";
+    }
+    for (size_t pos = html.find("<svg class=\"ico"); pos != wxString::npos;
+        pos = html.find("<svg class=\"ico", pos + 1))
+    {
+        const wxString element = html.Mid(pos, html.find('>', pos) - pos);
+        if (!element.Contains(" width=\"") || !element.Contains(" height=\"")
+            || !element.Contains(" focusable=\"false\""))
+        {
+            return "a pictogram without its size or with a tab stop: " + element;
+        }
+    }
+    const int sprite = html.Find("<body><svg class=\"sprite\"");
+    if (count > 0 && (sprite == wxNOT_FOUND
+        || html.find("<svg class=\"sprite\"", sprite + 7) != wxString::npos))
+    {
+        return "the pictograms are not defined once at the start of the page";
+    }
+
     const int styleStart = html.Find("<style>") + 7;
     const wxString css = html.Mid(styleStart, html.Find("</style>") - styleStart);
     int pairs = 0;
-    size_t pos = 0;
-    for (size_t open = css.find('{'); open != wxString::npos; open = css.find('{', pos))
+    for (const CssRule& rule : cssRules(css))
     {
-        const size_t next = css.find_first_of("{}", open + 1);
-        pos = open + 1;
-        if (next == wxString::npos || css[next] == '{')
-            continue;
         wxString previousProperty, previousValue;
-        for (const wxString& declaration : wxSplit(css.Mid(pos, next - pos), ';', '\0'))
+        for (const wxString& declaration : wxSplit(rule.body, ';', '\0'))
         {
             wxString property = declaration.BeforeFirst(':');
             property.Trim().Trim(false);
@@ -1350,6 +1420,24 @@ wxString findLegacyProblem(const wxString& html)
                 return "a font from a variable: " + declaration;
             if (property == "font" && value.Contains("-apple-system"))
                 return "a font shorthand that Internet Explorer drops: " + declaration;
+            // the mode of Internet Explorer 7 and 8 makes an element with an
+            // unknown display value inline, also after a known one
+            if (property == "display" && previousProperty == "display"
+                && (value == "flex" || value == "inline-flex")
+                && (previousValue == "block" || previousValue == "inline-block"))
+            {
+                return "display: flex after display: block in " + rule.selector;
+            }
+            // without :checked (Internet Explorer 8) nothing may stay hidden
+            // but what only works with it
+            if (property == "display" && value.StartsWith("none") && !rule.media
+                && !rule.selector.Contains(":checked") && rule.selector != ".pages"
+                && rule.selector != ".filter" && rule.selector != "label.more"
+                && rule.selector != ".tip-box"
+                && !rule.selector.Contains("::-webkit-details-marker"))
+            {
+                return "hidden without :checked: " + rule.selector;
+            }
             wxString expected;
             if (value.Contains("var(") && !property.StartsWith("--"))
             {
@@ -1405,6 +1493,41 @@ void testCssFallbacks()
         "everything else stays as it is");
 }
 
+std::vector<BenchmarkMetrics> noticedMetrics();
+BenchmarkReport makeReport(const BenchmarkMetrics& m, const wxString& date);
+
+// how often a text occurs
+int countOf(const wxString& text, const wxString& part)
+{
+    int n = 0;
+    for (size_t pos = text.find(part); pos != wxString::npos; pos = text.find(part, pos + 1))
+        ++n;
+    return n;
+}
+
+// a page that differs from a correct one only where the check must find it
+void testLegacyRules(const wxString& html)
+{
+    auto broken = [&html](const wxString& from, const wxString& to)
+    {
+        wxString page = html;
+        page.Replace(from, to, false);
+        return findLegacyProblem(page);
+    };
+    check(broken("<use xlink:href=", "<use href=").Contains("xlink:href")
+        && broken("<svg class=\"ico\" width=\"20\"", "<svg class=\"ico\"").Contains("size")
+        && broken("aria-hidden=\"true\" focusable=\"false\"><use", "aria-hidden=\"true\"><use")
+            .Contains("tab stop")
+        && broken("<main>", "<main><svg class=\"sprite\"></svg>").Contains("once")
+        && broken("<div class=\"overview\">", "<section class=\"overview\">").Contains("section")
+        && broken(".so-line { display: block; }", ".so-line { display: block; display: flex; }")
+            .Contains("display: flex after display: block")
+        && broken(".pages { display: none;", ".pages, .notes { display: none;")
+            .Contains("hidden without :checked")
+        && broken("<style>", "<style>.x { color: var(--ink); }").Contains("no fallback"),
+        "the check finds what Internet Explorer 7, 8 or 11 cannot show");
+}
+
 void testHtml()
 {
     std::cout << "HTML report\n";
@@ -1420,6 +1543,8 @@ void testHtml()
     report.evaluate();
     wxString html = report.toHtml("dark");
     const wxString page = html.Left(html.Find("<!-- FlameRobin benchmark snapshot"));
+    const wxString overview = html.Mid(html.Find("<div class=\"overview\">"),
+        html.Find("<div class=\"details\">") - html.Find("<div class=\"overview\">"));
     check(html.StartsWith("<!doctype html>") && html.Contains("</html>"), "complete page");
     check(html.Contains("data-theme=\"dark\""), "theme of FlameRobin");
     check(report.toHtml().Contains("<html lang=\"en\">"),
@@ -1427,34 +1552,47 @@ void testHtml()
     check(html.Contains("Server &lt;b&gt;x&lt;/b&gt; &amp; &quot;y&quot;")
         && !html.Contains("<b>x</b>"), "text is escaped");
     check(html.Find("<div class=\"pages\">") < html.Find("<div class=\"overview\">")
-        && html.Find("<div class=\"overview\">") < html.Find("id=\"intro\"")
-        && html.Find("id=\"intro\"") < html.Find("id=\"key-values\"")
-        && html.Find("id=\"key-values\"") < html.Find("id=\"parts\"")
-        && html.Find("id=\"parts\"") < html.Find("<div class=\"details\">")
-        && html.Find("<div class=\"details\">") < html.Find("id=\"system\"")
-        && html.Find("id=\"system\"") < html.Find("id=\"categories\"")
-        && html.Find("id=\"categories\"") < html.Find("id=\"values\""),
+        && html.Find("<div class=\"overview\">") < html.Find("id=\"figures\"")
+        && html.Find("id=\"figures\"") < html.Find("id=\"noticed\"")
+        && html.Find("id=\"noticed\"") < html.Find("id=\"key-values\"")
+        && html.Find("id=\"key-values\"") < html.Find("<div class=\"details\">")
+        && html.Find("<div class=\"details\">") < html.Find("id=\"categories\"")
+        && html.Find("id=\"categories\"") < html.Find("id=\"system\"")
+        && html.Find("id=\"system\"") < html.Find("id=\"values\""),
         "the overview, then the detailed report");
     check(html.Contains("id=\"v1\" checked>")
-        && html.Find("\" checked") == html.Find("id=\"v1\" checked") + 6,
-        "the overview is shown first");
+        && html.Find("\" checked") == html.Find("id=\"v1\" checked") + 6
+        && !html.Contains("id=\"v3\""), "the overview is shown first");
     check(!html.Contains("<details open") && !html.Contains("details open"),
-        "all details and panels are closed at first");
-    check(html.Contains("#v1:checked ~ .details, #v2:checked ~ .overview { display: none; }")
-        && html.Contains("<label for=\"v1\">Overview</label> | <label for=\"v2\">Detailed "
-            "report</label>"),
+        "all details are closed at first");
+    check(html.Contains("#v1:checked ~ .details, #v1:checked ~ .cmp-details, #v2:checked ~ "
+            ".overview, #v2:checked ~ .cmp-details, #v3:checked ~ .overview, #v3:checked ~ "
+            ".details { display: none; }")
+        && html.Contains("<div class=\"pages\"><label for=\"v1\">Overview</label><label "
+            "for=\"v2\">Detailed report</label></div>"),
         "the views switch without a script");
 
-    // a single run shows its values without judging them
-    check(page.Contains("a single run is not judged")
-        && page.Contains("<summary class=\"row plain\">")
-        && page.Contains("<th>Test</th><th class=\"n\">Result</th>")
-        && page.Contains("200 commits in ")
-        && page.Contains("<tr class=\"group\"><td colspan=\"3\">Server disk"),
-        "the key values at a glance and the parts with all their values");
+    // a single run: key figures and notes, without judging them
+    check(countOf(overview, "<div class=\"fig ") == 6
+        && countOf(overview, "<span class=\"tag-word\">") >= 6
+        && overview.Contains("<span class=\"fig-num\">1.50</span><span class=\"fig-unit\">ms"
+            "</span></span><span class=\"fig-text\"><span class=\"fig-name\">Saving a change "
+            "(commit)</span><span class=\"fig-work\">200 commits in 300 ms</span>")
+        && overview.Contains("Key figures <span class=\"quiet\">measured values of this run, "
+            "not rated</span>"),
+        "six key figures with their work, not rated");
+    check(countOf(overview, "<details class=\"note\">") == 1
+        && overview.Contains("<span class=\"note-title\">A short CPU burst after an idle "
+            "pause takes 2.5x as long</span><span class=\"note-where\">LOCAL</span>")
+        && overview.Contains("<b>What can help:</b> "),
+        "a note: what was noticed, where, and on a click what can help");
+    check(overview.Contains("<details class=\"more\" id=\"key-values\">")
+        && overview.Contains("<small>200 commits in 300 ms</small>")
+        && overview.Contains("<label class=\"more\" for=\"v2\">"),
+        "all key values, the run and the detailed report one click away");
     bool unjudged = true;
     for (const char* judgement : { "Power saving slows", "What could make",
-        "<span class=\"chg", "<span class=\"points-num" })
+        "<span class=\"dir", "class=\"verdict", "points; the earlier run" })
     {
         if (page.Contains(judgement))
         {
@@ -1462,34 +1600,28 @@ void testHtml()
             unjudged = false;
         }
     }
-    check(unjudged, "no points, no changes and no reasons in a single run");
+    check(unjudged, "no points, no changes and no causes in a single run");
     check(html.Contains("note.power.saving = computer | Power saving"),
         "the hints are kept for a comparison");
 
-    // one check box, one tile and one panel per part with values
-    int toggles = 0, tiles = 0, panels = 0;
-    const int sections = int(getBenchmarkReportSections().size());
-    for (int i = 0; i < sections; ++i)
+    // the detailed report: one line per part, opened by a click
+    int sections = 0;
+    for (BenchmarkCategory section : getBenchmarkReportSections())
     {
-        toggles += html.Contains(wxString::Format("<input type=\"checkbox\" class=\"toggle\" "
-            "id=\"c%d\">", i));
-        tiles += html.Contains(wxString::Format("<label class=\"tile t%d\" for=\"c%d\">", i, i));
-        panels += html.Contains(wxString::Format("<div class=\"panel p%d\">", i))
-            && html.Contains(wxString::Format("#c%d:not(:checked)~.tiles .p%d{display:none}", i, i));
+        sections += std::any_of(report.results.begin(), report.results.end(),
+            [section](const BenchmarkResult& r)
+            { return getBenchmarkReportSection(r.category) == section; });
     }
-    check(toggles == sections && tiles == sections && panels == sections,
-        "one tile, one panel and one toggle per part");
-    check(html.Contains(".toggle { position: fixed;"),
-        "the toggles do not scroll the page when a tile is clicked");
-    // the mode of Internet Explorer 8, which knows no :checked, shows
-    // everything and no link that does not work
-    check(html.Contains(".pages { display: none;")
-        && html.Contains(".view-toggle:checked ~ .pages { display: block; }")
-        && html.Contains(".panel { display: block;")
-        && html.Contains(".tile .more-link, .panel-head .close { display: none; }")
-        && html.Contains(".view-toggle:checked ~ .details .more-link, "
-            ".view-toggle:checked ~ .details .close { display: inline; }"),
-        "without :checked both views and every panel are shown");
+    check(countOf(html, "<details class=\"area ") == sections
+        && countOf(html, "<summary class=\"fig ") == sections
+        && !html.Contains("class=\"tile") && !html.Contains("class=\"toggle"),
+        "one line per part with values");
+    check(html.Contains("<details class=\"area disk\"><summary class=\"fig disk\">")
+        && html.Contains("<span class=\"fig-name\">Server disk</span><span class=\"fig-work\">"
+            "Saving a change (commit) "),
+        "a part shows its first key value in large");
+    check(html.Contains("id=\"notes\"") && html.Contains("1 note, by part"),
+        "every note in the detailed report");
     check(html.Contains("Server disk") && html.Contains("Settings")
         && html.Contains("Programming patterns"), "every part");
     check(html.Contains("<code>DefaultDbCachePages</code>") && html.Contains("What it does"),
@@ -1497,6 +1629,13 @@ void testHtml()
     check(html.Contains("id=\"glossary\"") && html.Contains("id=\"values\"")
         && html.Contains("id=\"run\""),
         "background information at the end");
+    // the mode of Internet Explorer 8, which knows no :checked, shows
+    // every view and part, and no link that does not work
+    check(html.Contains(".pages { display: none;")
+        && html.Contains(".view-toggle:checked ~ .pages { display: block; }")
+        && html.Contains("label.more { display: none; }")
+        && html.Contains(".view-toggle:checked ~ .overview label.more { display: flex; }"),
+        "without :checked every view is shown");
     // tooltips for units and tests
     check(html.Contains("<span class=\"tip-box\" role=\"tooltip\">Transactions per second"),
         "units are explained in tooltips");
@@ -1507,21 +1646,239 @@ void testHtml()
         "connection</dt>"), "the glossary explains terms and tests");
     check(!html.Contains("http://") && !html.Contains("https://")
         && !html.Contains("<script"), "no external resources and no scripts");
+    check(countOf(html, "<svg class=\"sprite\"") == 1
+        && html.Contains("<body><svg class=\"sprite\" aria-hidden=\"true\" focusable=\"false\">"
+            "<symbol id=\"i-cpu\" viewBox=\"0 0 24 24\">")
+        && html.Contains("<use xlink:href=\"#i-write\"/>") && !html.Contains("<use href"),
+        "the pictograms once per page, used with xlink:href");
     const wxString legacyDark = findLegacyProblem(html);
     const wxString legacyLight = findLegacyProblem(report.toHtml());
     if (!legacyDark.empty() || !legacyLight.empty())
         std::cerr << "    " << (legacyDark + legacyLight).ToStdString() << "\n";
     check(legacyDark.empty() && legacyLight.empty()
-        && html.Contains("html, body { margin: 0; background: #1e1e1e; background: var(--bg);")
+        && html.Contains("html, body { margin: 0; background: #1c1e22; background: var(--bg);")
         && report.toHtml().Contains("background: #ffffff; background: var(--bg);"),
         "a page for Internet Explorer 11 as well, in the theme of FlameRobin");
-    check(html.Contains("html, body { margin: 0; background: #1e1e1e; background: var(--bg); "
-        "color: #e0e0e0; color: var(--ink); font-size: 13px; line-height: 1.5; font-family: "
+    check(html.Contains("html, body { margin: 0; background: #1c1e22; background: var(--bg); "
+        "color: #e8eaed; color: var(--ink); font-size: 14px; line-height: 1.5; font-family: "
         "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif; }"),
         "the font without a variable, so that Internet Explorer finds it");
+    testLegacyRules(html);
     // SVG coordinates and CSS widths must not use a decimal comma
     check(!html.Contains("width:0,") && !html.Contains("y=\"0,")
         && !html.Contains("% \""), "locale independent numbers");
+}
+
+// reports without key figures or notes: nothing measured, a cancelled or a
+// failed run, a run without hints
+void testHtmlParts()
+{
+    std::cout << "HTML report of incomplete runs\n";
+    BenchmarkReport cancelled;
+    cancelled.cancelled = true;
+    cancelled.evaluate();
+    const wxString empty = cancelled.toHtml();
+    check(!empty.Contains("id=\"figures\"") && !empty.Contains("id=\"noticed\"")
+        && !empty.Contains("id=\"key-values\"") && !empty.Contains("class=\"split\"")
+        && empty.Contains("<div class=\"label first\">More</div><div class=\"rows\">")
+        && empty.Contains("The run was cancelled") && findLegacyProblem(empty).empty(),
+        "a run without values: no empty key figures, notes or tables");
+
+    BenchmarkReport failed;
+    failed.errorMessage = "connection lost";
+    failed.metrics.settings = BenchmarkSettings::forIntensity(BenchmarkIntensity::Standard);
+    failed.metrics.cpuMs = 70.0;
+    failed.metrics.cpuServerMs = 65.0;
+    failed.evaluate();
+    const wxString partial = failed.toHtml();
+    check(countOf(partial, "<div class=\"fig ") == 1 && partial.Contains("id=\"figures\"")
+        && !partial.Contains("id=\"noticed\"") && partial.Contains("connection lost")
+        && findLegacyProblem(partial).empty(),
+        "a failed run: the key figures it measured");
+
+    const wxString quiet = makeReport(healthyMetrics(), "2026-10-04 12:00:00").toHtml();
+    check(countOf(quiet, "<div class=\"fig ") == 6 && !quiet.Contains("id=\"noticed\"")
+        && !quiet.Contains("id=\"notes\"")
+        && quiet.Contains("<div class=\"side\"><div class=\"label first\">More</div>"),
+        "a run without hints has no notes");
+
+    // many hints: three notes, the others in the detailed report
+    const BenchmarkReport noticed = makeReport(noticedMetrics()[0], "2026-10-04 12:00:00");
+    const wxString html = noticed.toHtml();
+    const wxString overview = html.Mid(html.Find("<div class=\"overview\">"),
+        html.Find("<div class=\"details\">") - html.Find("<div class=\"overview\">"));
+    const size_t kinds = getBenchmarkTopHints(noticed, noticed.hints.size()).size();
+    bool everyNote = true;
+    for (const BenchmarkHint& h : getBenchmarkTopHints(noticed, kinds))
+    {
+        everyNote = everyNote
+            && html.Contains("<li><b>" + (h.noticed.empty() ? h.title : h.noticed));
+    }
+    check(countOf(overview, "<details class=\"note\">") == 3
+        && overview.Contains(wxString::Format("%d more notes in the detailed report",
+            int(kinds) - 3))
+        && overview.Contains("A short CPU burst after an idle pause takes 2.5x as long")
+        && !overview.Contains("Power saving slows") && everyNote,
+        "at most three notes with neutral titles, all of them in the detailed report");
+    check(overview.Contains("<span class=\"note-where\">LOCAL, CPU</span>"),
+        "a note names every part it was given for once");
+}
+
+// the comparison in HTML: the main statement, a line per key figure, what
+// stands out and every value of both runs
+// a run of a client with many hints
+BenchmarkSnapshot olderClientRun()
+{
+    return makeBenchmarkSnapshot(makeReport(noticedMetrics()[2], "2026-10-04 12:00:00"));
+}
+
+// a comparison with every state: faster, slower, about the same, another
+// test version, other work, new and no longer measured
+BenchmarkComparison everyStateComparison()
+{
+    BenchmarkSnapshot newer = makeBenchmarkSnapshot(makeReport(healthyMetrics(),
+        "2026-10-05 12:00:00"));
+    for (BenchmarkMeasurement& x : newer.measurements)
+    {
+        if (x.id == "cpu.single")
+            x.value *= 1.5;
+        else if (x.id == "storage.commit")
+            x.version = 2;
+        else if (x.id == "storage.insert")
+            x.amount = 60000;
+        else if (x.id == "users.oltp")
+            x.value /= 2.0;
+    }
+    newer.measurements.erase(std::remove_if(newer.measurements.begin(),
+        newer.measurements.end(), [](const BenchmarkMeasurement& x)
+        { return x.id == "network.roundTrip" || x.id.StartsWith("application."); }),
+        newer.measurements.end());
+    BenchmarkMeasurement trim;
+    trim.id = "storage.trim";
+    trim.value = 12;
+    trim.unit = "ms";
+    trim.version = 1;
+    trim.title = "Trimming the disk";
+    trim.text = "12.00 ms";
+    newer.measurements.push_back(trim);
+    return compareBenchmarkSnapshots(newer, olderClientRun());
+}
+
+void testComparisonHtml()
+{
+    std::cout << "HTML comparison\n";
+    const wxString separator = wxString("<span class=\"sep\"> ") + wxUniChar(0x00B7)
+        + " </span>";
+    const BenchmarkSnapshot older = olderClientRun();
+    BenchmarkComparison c = everyStateComparison();
+    const wxString html = c.toHtml();
+    const wxString dark = c.toHtml("dark");
+    const wxString overview = html.Mid(html.Find("<div class=\"overview\">"),
+        html.Find("<div class=\"cmp-details\">") - html.Find("<div class=\"overview\">"));
+    const wxString details = html.Mid(html.Find("<div class=\"cmp-details\">"));
+
+    check(findLegacyProblem(html).empty() && findLegacyProblem(dark).empty(),
+        "a comparison for Internet Explorer 11 as well, light and dark");
+    check(html.Find("id=\"comparison\"") < html.Find("id=\"areas\"")
+        && html.Find("id=\"areas\"") < html.Find("id=\"changes\"")
+        && html.Find("id=\"changes\"") < html.Find("id=\"differences\"")
+        && html.Find("id=\"differences\"") < html.Find("<div class=\"cmp-details\">")
+        && html.Contains("<div class=\"pages\"><label for=\"v1\">Overview</label><label "
+            "for=\"v3\">Detailed comparison</label></div>")
+        && !html.Contains("id=\"v2\"") && html.Contains("<label class=\"more\" for=\"v3\">"),
+        "the main statement first, then the key figures, what stands out and the rest");
+
+    // the main statement counts the lines of the key figures
+    const BenchmarkVerdict verdict = getBenchmarkVerdict(c);
+    check(verdict.faster == 1 && verdict.slower == 1 && verdict.same == 1
+        && verdict.notComparable == 3
+        && overview.Contains("<p class=\"verdict\"><span class=\"v-faster\">1 key figure "
+            "faster</span>" + separator + "<span class=\"v-slower\">1 slower</span>"
+            + separator + "<span class=\"v-same\">1 about the same</span></p>")
+        && countOf(overview, "<tr><td class=\"tagcol ") == 6
+        && countOf(overview, "<span class=\"dir faster") == 1 + countOf(overview,
+            "<span class=\"so-dir\"><span class=\"dir faster")
+        && overview.Contains("3 key figures not compared")
+        && overview.Contains("<span class=\"tag-word\">APP</span> measured in the earlier "
+            "run only"),
+        "the counters agree with the lines; what one run did not measure is named");
+    check(overview.Contains("<td class=\"n old\" data-label=\"Earlier run\">0.20</td>")
+        && overview.Contains("<td class=\"n new\" data-label=\"Later run\">"
+            + wxString(wxUniChar(0x2014)) + "<span class=\"unit\">ms</span>")
+        && overview.Contains("<span class=\"badge\">no longer measured</span>")
+        && countOf(overview, "<span class=\"badge nc\">not comparable</span>") == 2
+        && overview.Contains("1,500<span class=\"delta up-text\">+500</span>")
+        && overview.Contains("500<span class=\"delta down-text\">-500</span>")
+        && overview.Contains("1,000<span class=\"delta same-text\">" + wxString(wxUniChar(
+            0x00B1)) + "0</span>"),
+        "a line per key figure: both values, the change in words and the points");
+
+    // what stands out: the parts that differ clearly, the largest first
+    const std::vector<const BenchmarkComparedPart*> standOut = getBenchmarkStandOut(c, 5);
+    bool listed = !standOut.empty() && countOf(overview, "class=\"so\"") == int(standOut.size());
+    size_t previous = 0;
+    for (const BenchmarkComparedPart* p : standOut)
+    {
+        const size_t pos = overview.find(">" + getBenchmarkReportSectionName(p->category)
+            + "</span>", overview.find("id=\"changes\""));
+        listed = listed && pos != wxString::npos && pos > previous;
+        previous = pos;
+        for (const auto& d : p->differences)
+            listed = listed && overview.Contains("<li><b>" + d.label + "</b>: ");
+        for (const auto& h : p->hints)
+            listed = listed && overview.Contains("<li><b>" + h.title + "</b>");
+        for (const auto& a : p->advice)
+            listed = listed && overview.Contains("<li><b>" + a.first + "</b>: ");
+        if (!getBenchmarkTryAdvice(*p).empty())
+            listed = listed && overview.Contains("What to try</span>");
+    }
+    check(listed && standOut.size() <= 5,
+        "what stands out: in the order of the change, with every possible reason");
+    const BenchmarkComparedPart* users = c.findPart(BenchmarkCategory::MultiUser);
+    check(users && users->ratio < 1.0 && overview.Contains("<span class=\"so-key\">What to "
+            "try</span>")
+        && overview.Contains("What could make the later run slower"),
+        "a slower part: what could make it slower and what to try");
+
+    // every value of both runs, with its state
+    check(countOf(details, "<tr class=\"same\">") + countOf(details, "<tr class=\"chg\">")
+            == int(c.values.size() + c.stats.size())
+        && details.Contains("<span class=\"badge\">new</span>")
+        && details.Contains("Trimming the disk")
+        && details.Contains("<small>The test changed (version 2, earlier version 1).</small>")
+        && details.Contains("<small>Other work: 60,000 rows, earlier 50,000 rows.</small>")
+        && details.Contains("<span class=\"badge\">only in the earlier run</span>")
+        && details.Contains("id=\"f1\" checked>") && details.Contains("<label for=\"f2\">Only "
+            "changes</label>")
+        && countOf(details, "<div class=\"why-block\">") == int(std::count_if(c.parts.begin(),
+            c.parts.end(), [](const BenchmarkComparedPart& p)
+            { return p.differences.size() + p.hints.size() + p.advice.size() > 0; })),
+        "every value: new, no longer measured, test changed, other work");
+    const BenchmarkComparison same = compareBenchmarkSnapshots(older, older);
+    const wxString sameHtml = same.toHtml();
+    check(sameHtml.Contains("<p class=\"verdict\"><span class=\"v-same\">6 key figures about "
+            "the same</span></p>")
+        && !sameHtml.Contains("id=\"changes\"") && !sameHtml.Contains("<tr class=\"chg\">")
+        && countOf(sameHtml, " unchanged\">") > 0 && findLegacyProblem(sameHtml).empty(),
+        "a run compared with itself: nothing stands out, every part unchanged");
+
+    // a report with an earlier run: three views
+    BenchmarkReport report = makeReport(healthyMetrics(), "2026-10-05 12:00:00");
+    report.earlier = older;
+    const wxString withEarlier = report.toHtml();
+    check(withEarlier.Contains("<div class=\"pages\"><label for=\"v1\">Overview</label><label "
+            "for=\"v3\">Detailed comparison</label><label for=\"v2\">Detailed report</label>")
+        && withEarlier.Contains("id=\"v3\">") && withEarlier.Contains("Compared with the "
+            "earlier run ")
+        && withEarlier.Find("<div class=\"overview\">") < withEarlier.Find("<div "
+            "class=\"cmp-details\">")
+        && withEarlier.Find("<div class=\"cmp-details\">") < withEarlier.Find("<div "
+            "class=\"details\">")
+        && !withEarlier.Contains("id=\"figures\"") && withEarlier.Contains("This run")
+        && findLegacyProblem(withEarlier).empty(),
+        "a report with an earlier run: overview, detailed comparison, detailed report");
+    check(!c.toHtml().Contains("<use href") && countOf(html, "<svg class=\"sprite\"") == 1,
+        "the pictograms of a comparison");
 }
 
 void testAnonymized()
@@ -1607,6 +1964,27 @@ void testAnonymized()
         }
     }
     check(clean, "no names, addresses, users, paths, services or rule names");
+    // the notes of the overview name what was noticed, not what was measured
+    auto escaped = [](wxString text)
+    {
+        text.Replace("&", "&amp;");
+        text.Replace("<", "&lt;");
+        text.Replace(">", "&gt;");
+        text.Replace("\"", "&quot;");
+        text.Replace("'", "&#39;");
+        return text;
+    };
+    bool noDetails = !shared.hints.empty();
+    for (const BenchmarkHint& h : shared.hints)
+        noDetails = noDetails && (h.detail.empty() || !html.Contains(escaped(h.detail)));
+    BenchmarkReport single = shared;
+    single.earlier.reset();
+    const wxString singleHtml = single.toHtml();
+    for (const BenchmarkHint& h : shared.hints)
+        noDetails = noDetails && (h.detail.empty() || !singleHtml.Contains(escaped(h.detail)));
+    check(noDetails && html.Contains("<li><b>The server sees this computer under another "
+        "address</b>") && singleHtml.Contains("<span class=\"note-title\">The server sees "
+        "this computer under another address</span>"), "the notes without what was measured");
     check(shared.anonymous && html.Contains("have been removed from this report")
         && md.Contains("have been removed from this report"), "the report says so");
     check(html.Contains("Intel Core i7-13800H") && html.Contains("Firebird 5.0.4")
@@ -2142,9 +2520,10 @@ void testComparison()
     const wxString html = faster.toHtml();
     const wxString fasterMd = faster.toMarkdown();
     check(html.Contains("Compared with the earlier run")
-        && html.Contains("<span class=\"chg up2\">2.0 times as fast</span>")
-        && html.Contains("<th class=\"n\">Earlier run</th><th class=\"n\">This run</th>")
-        && html.Contains("<span class=\"points-num\">")
+        && html.Contains("<span class=\"dir faster\">2.0 times as fast</span>")
+        && html.Contains("<th class=\"n\">Earlier run</th><th></th><th class=\"n\">This "
+            "run</th>")
+        && html.Contains("<p class=\"verdict\">")
         && html.Contains("What could make the earlier run slower")
         && html.Contains("possible reasons</span>"),
         "the HTML report shows the comparison with its reasons");
@@ -3047,6 +3426,33 @@ wxString namespaceText(const wxString& text, const wxString& name)
     return text.substr(start, end - start);
 }
 
+// MSVC limits a string literal to 16380 bytes: the style sheet of the report
+// is split into several
+void testStyleSheetSource(const wxString& dir)
+{
+    std::cout << "Style sheet of the report\n";
+    if (dir.empty())
+        return;
+    const wxString source = readFile(dir + "/../../BenchmarkHtml.cpp");
+    int literals = 0;
+    bool small = !source.empty();
+    for (size_t start = source.find("R\"CSS("); start != wxString::npos;
+        start = source.find("R\"CSS(", start + 1))
+    {
+        const size_t end = source.find(")CSS\"", start);
+        ++literals;
+        const size_t bytes = std::string(source.Mid(start + 6,
+            end - start - 6).utf8_str()).size();
+        if (end == wxString::npos || bytes > 16000)
+        {
+            std::cerr << "    literal " << literals << ": " << bytes << " bytes\n";
+            small = false;
+        }
+    }
+    check(small && literals >= 2, "every literal of the style sheet stays below the limit of "
+        "MSVC");
+}
+
 void testWorkloadConstants(const wxString& dir)
 {
     std::cout << "Constants of the work of the tests\n";
@@ -3338,12 +3744,15 @@ int main(int argc, char** argv)
     testSnapshotFormat();
     testCompareStates();
     testComparison();
+    testHtmlParts();
+    testComparisonHtml();
     testKeyFigures();
     testNeutralNotes();
     testVerdict();
     testReasonLines();
     testGolden(dataDirectory);
     testWorkloadConstants(dataDirectory);
+    testStyleSheetSource(dataDirectory);
     testFixtures(dataDirectory);
 
     std::cout << (ok ? "ALL BENCHMARK TESTS PASSED\n" : "SOME BENCHMARK TESTS FAILED\n");

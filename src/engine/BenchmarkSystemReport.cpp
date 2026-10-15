@@ -1156,7 +1156,7 @@ wxString hideBenchmarkTexts(const wxString& text,
             if (name == "class" || name == "id" || name == "for" || name == "name"
                 || name == "type" || name == "role" || name == "lang" || name == "style"
                 || name == "content" || name == "charset" || name == "http-equiv"
-                || name == "data-theme")
+                || name == "data-theme" || name == "xlink:href")
             {
                 result += value;
             }
