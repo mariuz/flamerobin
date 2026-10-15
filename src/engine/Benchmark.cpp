@@ -1919,6 +1919,46 @@ BenchmarkLoginAction getBenchmarkLoginAction(const BenchmarkLoginState& state)
     return BenchmarkLoginAction::UseStored;
 }
 
+std::vector<BenchmarkTarget> getBenchmarkTargets(bool hasRegistration)
+{
+    std::vector<BenchmarkTarget> targets;
+    if (hasRegistration)
+        targets.push_back(BenchmarkTarget::Registered);
+    targets.push_back(BenchmarkTarget::ThisComputer);
+    targets.push_back(BenchmarkTarget::OtherServer);
+    return targets;
+}
+
+BenchmarkTarget getBenchmarkTarget(bool hasRegistration, int selection)
+{
+    const std::vector<BenchmarkTarget> targets = getBenchmarkTargets(hasRegistration);
+    if (selection < 0 || selection >= int(targets.size()))
+        return BenchmarkTarget::ThisComputer;
+    return targets[selection];
+}
+
+BenchmarkTargetDetails getBenchmarkTargetDetails(BenchmarkTarget target)
+{
+    BenchmarkTargetDetails details;
+    switch (target)
+    {
+        case BenchmarkTarget::Registered:
+            details.login = true;
+            details.loginOptional = true;
+            details.readDatabase = true;
+            break;
+        case BenchmarkTarget::ThisComputer:
+            // the engine inside FlameRobin needs no login
+            details.installation = true;
+            break;
+        case BenchmarkTarget::OtherServer:
+            details.hostAndPort = true;
+            details.login = true;
+            break;
+    }
+    return details;
+}
+
 bool isBenchmarkDatabaseName(const wxString& fileName)
 {
     const wxString prefix = "FR_BENCHMARK_";

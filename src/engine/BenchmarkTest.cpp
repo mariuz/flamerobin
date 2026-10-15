@@ -367,6 +367,36 @@ void testLoginAction()
         "a connected database uses the login of its connection");
 }
 
+void testTargets()
+{
+    using T = BenchmarkTarget;
+    std::cout << "Targets of the dialog\n";
+    check(getBenchmarkTargets(true) == std::vector<T>{ T::Registered, T::ThisComputer,
+        T::OtherServer }, "with a registration its server comes first");
+    check(getBenchmarkTargets(false) == std::vector<T>{ T::ThisComputer, T::OtherServer },
+        "without a registration only this computer and another server");
+    // the first entry of the list without a registration is this computer,
+    // not the server of the registration
+    check(getBenchmarkTarget(false, 0) == T::ThisComputer
+        && getBenchmarkTarget(false, 1) == T::OtherServer
+        && getBenchmarkTarget(true, 0) == T::Registered
+        && getBenchmarkTarget(true, 2) == T::OtherServer, "an entry of the list is its target");
+    check(getBenchmarkTarget(true, -1) == T::ThisComputer
+        && getBenchmarkTarget(false, 2) == T::ThisComputer,
+        "no entry, or one beyond the list: this computer");
+
+    const BenchmarkTargetDetails registered = getBenchmarkTargetDetails(T::Registered);
+    check(registered.login && registered.loginOptional && !registered.hostAndPort
+        && !registered.installation && registered.readDatabase,
+        "server of the registration: an optional login, no host");
+    const BenchmarkTargetDetails thisComputer = getBenchmarkTargetDetails(T::ThisComputer);
+    check(!thisComputer.login && !thisComputer.hostAndPort && thisComputer.installation
+        && !thisComputer.readDatabase, "this computer: no host field, no login");
+    const BenchmarkTargetDetails other = getBenchmarkTargetDetails(T::OtherServer);
+    check(other.login && !other.loginOptional && other.hostAndPort && !other.installation
+        && !other.readDatabase, "another server: host, port and login");
+}
+
 void testDurationHint()
 {
     using I = BenchmarkIntensity;
@@ -3886,6 +3916,7 @@ int main(int argc, char** argv)
     testSafetyCheck();
     testPendingDatabases();
     testLoginAction();
+    testTargets();
     testDurationHint();
     testHints();
     testEventTest();

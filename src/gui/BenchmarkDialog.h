@@ -43,6 +43,7 @@
 class BenchmarkReportPage;
 class wxCollapsiblePane;
 class wxCollapsiblePaneEvent;
+class wxSimplebook;
 class wxWebView;
 
 ///
@@ -77,14 +78,23 @@ private:
     std::optional<fr::BenchmarkComparison> comparisonM;
     std::vector<fr::BenchmarkFirebirdInstallation> installationsM;
 
-    wxRadioBox* radio_target;
+    // the targets of fr::getBenchmarkTargets(), and the details of every
+    // target on a page of its own
+    wxChoice* choice_target;
+    wxStaticText* label_target_hint;
+    wxSimplebook* book_target;
+    fr::BenchmarkTarget getTarget() const;
     wxChoice* choice_install;
     wxCollapsiblePane* collapse_advanced;
-    wxTextCtrl* text_host;
-    wxTextCtrl* text_port;
+    wxTextCtrl* text_host = nullptr;
+    wxTextCtrl* text_port = nullptr;
     wxTextCtrl* text_directory;
-    wxTextCtrl* text_user;
-    wxTextCtrl* text_password;
+    // the login for another server, and the optional one for the server of
+    // the registration
+    wxTextCtrl* text_user = nullptr;
+    wxTextCtrl* text_password = nullptr;
+    wxTextCtrl* text_user_registered = nullptr;
+    wxTextCtrl* text_password_registered = nullptr;
     wxTextCtrl* text_clientlib;
     wxChoice* choice_pagesize;
     wxCheckBox* check_comparepages;

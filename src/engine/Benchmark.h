@@ -699,6 +699,33 @@ struct BenchmarkLoginState
 
 BenchmarkLoginAction getBenchmarkLoginAction(const BenchmarkLoginState& state);
 
+/// Where the benchmark runs, as chosen in the dialog
+enum class BenchmarkTarget
+{
+    Registered,     // the server of the selected database
+    ThisComputer,   // embedded: no server connection, no login
+    OtherServer     // a server entered in the dialog
+};
+
+/// the targets the dialog lists, in this order; the server of the selected
+/// database only with a registration
+std::vector<BenchmarkTarget> getBenchmarkTargets(bool hasRegistration);
+/// the target of an entry of that list; this computer for no entry
+BenchmarkTarget getBenchmarkTarget(bool hasRegistration, int selection);
+
+/// What the dialog asks for on the page of a target
+struct BenchmarkTargetDetails
+{
+    bool hostAndPort = false;
+    bool login = false;             // user name and password
+    // without a user name the login of the registration is used
+    bool loginOptional = false;
+    bool installation = false;      // a Firebird installation of this computer
+    bool readDatabase = false;      // can read the settings of the selected database
+};
+
+BenchmarkTargetDetails getBenchmarkTargetDetails(BenchmarkTarget target);
+
 /// One fact of the environment, e.g. the CPU or a firebird.conf setting;
 /// the key identifies it in saved reports, the label is translated
 struct BenchmarkFact

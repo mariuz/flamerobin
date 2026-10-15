@@ -32,6 +32,7 @@
 #include <wx/dir.h>
 #include <wx/ffile.h>
 #include <wx/filename.h>
+#include <wx/simplebook.h>
 #if wxUSE_WEBVIEW
 #include <wx/fs_mem.h>
 #include <wx/webview.h>
@@ -60,7 +61,7 @@ namespace
 
 enum
 {
-    ID_radio_target = 4101,
+    ID_choice_target = 4101,
     ID_button_start,
     ID_button_cancel,
     ID_button_copy,
@@ -74,12 +75,58 @@ enum
     ID_timer
 };
 
-enum
+using fr::BenchmarkTarget;
+
+wxString getTargetName(BenchmarkTarget target)
 {
-    TargetRegistered = 0,
-    TargetThisComputer,     // embedded: no server connection, no login
-    TargetCustom
-};
+    switch (target)
+    {
+        case BenchmarkTarget::Registered:
+            return _("Server of the selected database");
+        case BenchmarkTarget::ThisComputer:
+            return _("This computer (embedded Firebird)");
+        case BenchmarkTarget::OtherServer:
+        default:
+            return _("Another Firebird server");
+    }
+}
+
+// the line next to the list of targets
+wxString getTargetHint(BenchmarkTarget target)
+{
+    switch (target)
+    {
+        case BenchmarkTarget::Registered:
+            return _("Runs on the server of the registration; its login is used.");
+        case BenchmarkTarget::ThisComputer:
+            return _("Runs Firebird inside FlameRobin; no login, the network is not tested.");
+        case BenchmarkTarget::OtherServer:
+        default:
+            return _("Runs on the server below; a login with the right to create a "
+                "database is needed.");
+    }
+}
+
+// the colour of the secondary text of the report (BenchmarkHtml.cpp), on
+// a light or a dark background
+wxColour getMutedColour()
+{
+    return wxSystemSettings::GetAppearance().IsUsingDarkBackground()
+        ? wxColour(0x95, 0x9e, 0xab) : wxColour(0x66, 0x71, 0x83);
+}
+
+// a text in the secondary colour; one that is cut with an ellipsis where
+// the dialog is narrow does not make the dialog wider
+wxStaticText* createMutedText(wxWindow* parent, const wxString& text, bool ellipsize = false)
+{
+    wxStaticText* label = new wxStaticText(parent, wxID_ANY, text, wxDefaultPosition,
+        wxDefaultSize, ellipsize ? wxST_ELLIPSIZE_END | wxST_NO_AUTORESIZE : 0);
+    label->SetForegroundColour(getMutedColour());
+    if (ellipsize)
+        label->SetMinSize(wxSize(parent->FromDIP(40), -1));
+    return label;
+}
+
 
 const wxString pendingDatabasesKey = "BenchmarkPendingDatabases";
 const wxString earlierFileKey = "BenchmarkCompareWithFile";
@@ -304,7 +351,7 @@ BEGIN_EVENT_TABLE(BenchmarkDialog, BaseDialog)
     EVT_CHOICE(ID_choice_install, BenchmarkDialog::OnTargetChanged)
     EVT_COLLAPSIBLEPANE_CHANGED(ID_collapse_advanced, BenchmarkDialog::OnAdvancedToggled)
     EVT_BUTTON(wxID_CANCEL, BenchmarkDialog::OnCloseButton)
-    EVT_RADIOBOX(ID_radio_target, BenchmarkDialog::OnTargetChanged)
+    EVT_CHOICE(ID_choice_target, BenchmarkDialog::OnTargetChanged)
     EVT_TIMER(ID_timer, BenchmarkDialog::OnTimer)
 END_EVENT_TABLE()
 
@@ -343,6 +390,7 @@ void BenchmarkDialog::createControls()
 {
     wxPanel* panel = getControlsPanel();
     wxBoxSizer* sizerMain = new wxBoxSizer(wxVERTICAL);
+    const int gap = FromDIP(6);
 
     // the settings; after a run they make room for the report
     wxBoxSizer* sizerSettings = new wxBoxSizer(wxVERTICAL);
@@ -355,72 +403,113 @@ void BenchmarkDialog::createControls()
     info->Wrap(640);
     sizerSettings->Add(info, 0, wxEXPAND | wxBOTTOM, 8);
 
-    // where to test
-    wxString targets[] = {
-        _("Server of the selected database (with the login of the registration)"),
-        _("This computer, without login (uses the Firebird installed here)"),
-        _("Another Firebird server")
-    };
-    radio_target = new wxRadioBox(panel, ID_radio_target, _("What to test"),
-        wxDefaultPosition, wxDefaultSize, 3, targets, 1, wxRA_SPECIFY_COLS);
-    radio_target->SetItemToolTip(TargetThisComputer, _("Runs Firebird directly inside "
-        "FlameRobin with the engine of a Firebird installation on this computer. No "
-        "server connection, no user name and no password are needed. Tests the "
-        "hardware, the operating system and the Firebird configuration of this "
-        "computer; the network is not tested. Run it on the server itself."));
-    sizerSettings->Add(radio_target, 0, wxEXPAND | wxBOTTOM, 6);
-
-    // the Firebird installations of this computer, for a test without login
-    wxBoxSizer* sizerInstall = new wxBoxSizer(wxHORIZONTAL);
-    sizerInstall->Add(new wxStaticText(panel, wxID_ANY, _("Firebird on this computer:")),
-        0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 6);
-    installationsM = fr::findBenchmarkFirebirdInstallations();
-    wxArrayString installations;
-    for (const auto& i : installationsM)
-    {
-        wxString label = i.version.empty() ? wxString("Firebird")
-            : "Firebird " + toWxString(i.version);
-        label += " (" + toWxString(i.directory);
-        if (!i.service.empty())
-        {
-            label += ", " + (i.running ? wxString::Format(_("service %s running"),
-                toWxString(i.service)) : wxString::Format(_("service %s"),
-                toWxString(i.service)));
-        }
-        installations.Add(label + ")");
-    }
-    installations.Add(_("the client library of the advanced settings"));
-    choice_install = new wxChoice(panel, ID_choice_install, wxDefaultPosition,
-        wxDefaultSize, installations);
-    choice_install->SetSelection(0);
-    choice_install->SetToolTip(_("The engine of this installation runs the test, with "
-        "its firebird.conf. The installed server keeps running and is not changed."));
-    sizerInstall->Add(choice_install, 1, wxEXPAND);
-    sizerSettings->Add(sizerInstall, 0, wxEXPAND | wxBOTTOM, 6);
-
-    wxFlexGridSizer* sizerGrid = new wxFlexGridSizer(4, 6, 8);
+    // a label and a field in every line
+    wxFlexGridSizer* sizerGrid = new wxFlexGridSizer(2, FromDIP(4), FromDIP(10));
     sizerGrid->AddGrowableCol(1, 1);
 
-    text_host = new wxTextCtrl(panel, wxID_ANY, wxEmptyString);
-    text_port = new wxTextCtrl(panel, wxID_ANY, wxEmptyString,
-        wxDefaultPosition, wxSize(70, -1));
-    sizerGrid->Add(new wxStaticText(panel, wxID_ANY, _("Host:")), 0,
+    // where to test: a list with short names, the details on a page below
+    sizerGrid->Add(new wxStaticText(panel, wxID_ANY, _("&Test:")), 0,
         wxALIGN_CENTER_VERTICAL);
-    sizerGrid->Add(text_host, 1, wxEXPAND);
-    sizerGrid->Add(new wxStaticText(panel, wxID_ANY, _("Port:")), 0,
-        wxALIGN_CENTER_VERTICAL);
-    sizerGrid->Add(text_port, 0);
+    choice_target = new wxChoice(panel, ID_choice_target);
+    for (BenchmarkTarget target : fr::getBenchmarkTargets(databaseM != nullptr))
+        choice_target->Append(getTargetName(target));
+    choice_target->SetSelection(0);
+    label_target_hint = createMutedText(panel, wxEmptyString, true);
+    wxBoxSizer* sizerTarget = new wxBoxSizer(wxHORIZONTAL);
+    sizerTarget->Add(choice_target, 0, wxALIGN_CENTER_VERTICAL);
+    sizerTarget->Add(label_target_hint, 1, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(10));
+    sizerGrid->Add(sizerTarget, 1, wxEXPAND);
 
-    text_user = new wxTextCtrl(panel, wxID_ANY, wxEmptyString);
-    text_password = new wxTextCtrl(panel, wxID_ANY, wxEmptyString,
-        wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
-    text_user->SetHint(databaseM ? _("from the registration or asked at start") : wxString());
-    sizerGrid->Add(new wxStaticText(panel, wxID_ANY, _("User:")), 0,
-        wxALIGN_CENTER_VERTICAL);
-    sizerGrid->Add(text_user, 1, wxEXPAND);
-    sizerGrid->Add(new wxStaticText(panel, wxID_ANY, _("Password:")), 0,
-        wxALIGN_CENTER_VERTICAL);
-    sizerGrid->Add(text_password, 0, wxEXPAND);
+    // one page per target, in the order of BenchmarkTarget: the pages are as
+    // high as the highest, so nothing moves when the target changes
+    book_target = new wxSimplebook(panel, wxID_ANY);
+    installationsM = fr::findBenchmarkFirebirdInstallations();
+    for (BenchmarkTarget target : { BenchmarkTarget::Registered,
+        BenchmarkTarget::ThisComputer, BenchmarkTarget::OtherServer })
+    {
+        const fr::BenchmarkTargetDetails details = fr::getBenchmarkTargetDetails(target);
+        wxPanel* page = new wxPanel(book_target);
+        wxBoxSizer* sizerPage = new wxBoxSizer(wxHORIZONTAL);
+        auto addLabel = [page, sizerPage, gap](const wxString& label)
+        {
+            sizerPage->Add(new wxStaticText(page, wxID_ANY, label), 0,
+                wxALIGN_CENTER_VERTICAL | wxRIGHT, gap);
+        };
+        if (details.hostAndPort)
+        {
+            addLabel(_("Host:"));
+            text_host = new wxTextCtrl(page, wxID_ANY, wxEmptyString);
+            text_host->SetMinSize(wxSize(FromDIP(110), -1));
+            sizerPage->Add(text_host, 3, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(12));
+            addLabel(_("Port:"));
+            text_port = new wxTextCtrl(page, wxID_ANY, wxEmptyString);
+            text_port->SetHint("3050");
+            text_port->SetMinSize(text_port->GetSizeFromTextSize(
+                text_port->GetTextExtent("65535").x));
+            sizerPage->Add(text_port, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(12));
+        }
+        if (details.login)
+        {
+            addLabel(_("User:"));
+            wxTextCtrl* user = new wxTextCtrl(page, wxID_ANY, wxEmptyString);
+            user->SetMinSize(wxSize(FromDIP(80), -1));
+            sizerPage->Add(user, 3, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(12));
+            addLabel(_("Password:"));
+            wxTextCtrl* password = new wxTextCtrl(page, wxID_ANY, wxEmptyString,
+                wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
+            password->SetMinSize(wxSize(FromDIP(80), -1));
+            sizerPage->Add(password, 2, wxALIGN_CENTER_VERTICAL);
+            if (details.loginOptional)
+            {
+                user->SetHint(_("from the registration or asked at start"));
+                sizerPage->Add(createMutedText(page, _("optional")), 0,
+                    wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(10));
+            }
+            if (target == BenchmarkTarget::Registered)
+            {
+                text_user_registered = user;
+                text_password_registered = password;
+            }
+            else
+            {
+                text_user = user;
+                text_password = password;
+            }
+        }
+        if (details.installation)
+        {
+            // the Firebird installations of this computer, for a test without login
+            addLabel(_("&Firebird:"));
+            wxArrayString installations;
+            for (const auto& i : installationsM)
+            {
+                wxString label = i.version.empty() ? wxString("Firebird")
+                    : "Firebird " + toWxString(i.version);
+                label += " (" + toWxString(i.directory);
+                if (!i.service.empty())
+                {
+                    label += ", " + (i.running ? wxString::Format(_("service %s running"),
+                        toWxString(i.service)) : wxString::Format(_("service %s"),
+                        toWxString(i.service)));
+                }
+                installations.Add(label + ")");
+            }
+            installations.Add(_("the client library of the advanced settings"));
+            choice_install = new wxChoice(page, ID_choice_install, wxDefaultPosition,
+                wxDefaultSize, installations);
+            choice_install->SetSelection(0);
+            choice_install->SetToolTip(_("The engine of this installation runs the test, with "
+                "its firebird.conf. The installed server keeps running and is not changed."));
+            // GTK makes a list as wide as its longest entry
+            choice_install->SetMinSize(wxSize(FromDIP(260), -1));
+            sizerPage->Add(choice_install, 1, wxALIGN_CENTER_VERTICAL);
+        }
+        page->SetSizer(sizerPage);
+        book_target->AddPage(page, wxEmptyString);
+    }
+    sizerGrid->AddSpacer(0);
+    sizerGrid->Add(book_target, 1, wxEXPAND);
+
     sizerSettings->Add(sizerGrid, 0, wxEXPAND | wxBOTTOM, 6);
 
     wxBoxSizer* sizerDir = new wxBoxSizer(wxHORIZONTAL);
@@ -630,37 +719,32 @@ void BenchmarkDialog::createControls()
     layoutSizers(sizerMain, sizerButtons, true);
     SetSize(wxSize(980, 880));
 
-    // without a registration (or a server) only this computer can be tested
-    // without asking for a login
-    if (!databaseM)
-    {
-        radio_target->Enable(TargetRegistered, false);
-        radio_target->SetSelection(TargetThisComputer);
-    }
+    // the first target: the server of the selected database, without a
+    // registration this computer
+    wxCommandEvent dummy;
+    OnTargetChanged(dummy);
     label_status->SetLabel(getReadyHint());
+}
+
+fr::BenchmarkTarget BenchmarkDialog::getTarget() const
+{
+    return fr::getBenchmarkTarget(databaseM != nullptr, choice_target->GetSelection());
 }
 
 void BenchmarkDialog::updateControls()
 {
     bool idle = !runningM;
-    bool registered = radio_target->GetSelection() == TargetRegistered;
-    bool custom = radio_target->GetSelection() == TargetCustom;
-    bool thisComputer = radio_target->GetSelection() == TargetThisComputer;
+    const fr::BenchmarkTargetDetails details = fr::getBenchmarkTargetDetails(getTarget());
     bool ownLibrary = choice_install->GetSelection() == int(installationsM.size());
-    radio_target->Enable(idle);
-    if (!databaseM)
-        radio_target->Enable(TargetRegistered, false);
-    choice_install->Enable(idle && thisComputer);
-    text_host->Enable(idle && custom);
-    text_port->Enable(idle && custom);
-    // the engine inside FlameRobin needs no login
-    text_user->Enable(idle && !thisComputer);
-    text_password->Enable(idle && !thisComputer);
-    text_clientlib->Enable(idle && (!thisComputer || ownLibrary));
+    choice_target->Enable(idle);
+    // the host, the login and the installation
+    book_target->Enable(idle);
+    // the installation brings its own client library
+    text_clientlib->Enable(idle && (!details.installation || ownLibrary));
     text_directory->Enable(idle);
     choice_pagesize->Enable(idle);
     check_comparepages->Enable(idle);
-    check_inspect->Enable(idle && registered && databaseM);
+    check_inspect->Enable(idle && details.readDatabase && databaseM);
     check_manyusers->Enable(idle);
     text_earlier->Enable(idle);
     radio_intensity->Enable(idle);
@@ -694,14 +778,24 @@ void BenchmarkDialog::OnAdvancedToggled(wxCollapsiblePaneEvent& WXUNUSED(event))
 
 void BenchmarkDialog::OnTargetChanged(wxCommandEvent& WXUNUSED(event))
 {
-    if (radio_target->GetSelection() == TargetThisComputer
+    const BenchmarkTarget target = getTarget();
+    book_target->ChangeSelection(size_t(target));
+    label_target_hint->SetLabel(getTargetHint(target));
+    label_target_hint->SetToolTip(target == BenchmarkTarget::ThisComputer
+        ? _("Runs Firebird directly inside FlameRobin with the engine of a Firebird "
+            "installation on this computer. No server connection, no user name and no "
+            "password are needed. Tests the hardware, the operating system and the "
+            "Firebird configuration of this computer; the network is not tested. Run it "
+            "on the server itself.") : getTargetHint(target));
+    choice_target->SetToolTip(label_target_hint->GetToolTipText());
+    if (target == BenchmarkTarget::ThisComputer
         && choice_install->GetSelection() == int(installationsM.size())
         && collapse_advanced->IsCollapsed())
     {
         collapse_advanced->Expand();
         getControlsPanel()->Layout();
     }
-    if (radio_target->GetSelection() == TargetCustom && text_host->IsEmpty() && databaseM)
+    if (target == BenchmarkTarget::OtherServer && text_host->IsEmpty() && databaseM)
     {
         ServerPtr server = databaseM->getServer();
         if (server)
@@ -715,7 +809,7 @@ void BenchmarkDialog::OnTargetChanged(wxCommandEvent& WXUNUSED(event))
 
 bool BenchmarkDialog::buildParams(fr::BenchmarkConnectionParams& params)
 {
-    int target = radio_target->GetSelection();
+    const BenchmarkTarget target = getTarget();
     wxString directory = text_directory->GetValue().Trim().Trim(false);
     if (directory.empty())
     {
@@ -738,7 +832,7 @@ bool BenchmarkDialog::buildParams(fr::BenchmarkConnectionParams& params)
     wxString serverPart;
     switch (target)
     {
-        case TargetRegistered:
+        case BenchmarkTarget::Registered:
             if (server)
             {
                 serverPart = server->getConnectionString();
@@ -748,11 +842,11 @@ bool BenchmarkDialog::buildParams(fr::BenchmarkConnectionParams& params)
                 databaseM->getName_(),
                 serverPart.empty() ? _("local") : serverPart);
             break;
-        case TargetThisComputer:
+        case BenchmarkTarget::ThisComputer:
             params.forceEmbedded = true;
             params.targetDescription = _("This computer, without login");
             break;
-        case TargetCustom:
+        case BenchmarkTarget::OtherServer:
         {
             wxString host = text_host->GetValue().Trim().Trim(false);
             if (host.empty())
@@ -775,8 +869,8 @@ bool BenchmarkDialog::buildParams(fr::BenchmarkConnectionParams& params)
     if (!serverPart.empty())
         params.connectionPrefix = wx2std(serverPart + ":");
 
-    fillCredentials(params, target == TargetRegistered);
-    if (target == TargetThisComputer)
+    fillCredentials(params, target == BenchmarkTarget::Registered);
+    if (target == BenchmarkTarget::ThisComputer)
     {
         // the engine inside FlameRobin checks no password; the database
         // belongs to the user of this computer
@@ -790,7 +884,7 @@ bool BenchmarkDialog::buildParams(fr::BenchmarkConnectionParams& params)
     }
     // the settings of the selected database are shown with the tested
     // server, which only makes sense when it is the same server
-    if (target == TargetRegistered && databaseM && check_inspect->GetValue())
+    if (target == BenchmarkTarget::Registered && databaseM && check_inspect->GetValue())
         params.inspectConnectionString = wx2std(databaseM->getConnectionString());
     return true;
 }
@@ -802,10 +896,12 @@ void BenchmarkDialog::fillCredentials(fr::BenchmarkConnectionParams& params,
     // and its login (resolveLogin()) are only sent to the server of the
     // registration
     params.clientLibrary = wx2std(text_clientlib->GetValue().Trim().Trim(false));
-    if (!text_user->IsEmpty())
+    wxTextCtrl* user = fromRegistration ? text_user_registered : text_user;
+    if (!user->IsEmpty())
     {
-        params.username = wx2std(text_user->GetValue());
-        params.password = wx2std(text_password->GetValue());
+        params.username = wx2std(user->GetValue());
+        params.password = wx2std((fromRegistration ? text_password_registered
+            : text_password)->GetValue());
     }
     if (!databaseM || !fromRegistration)
         return;
@@ -822,7 +918,7 @@ bool BenchmarkDialog::resolveLogin(fr::BenchmarkConnectionParams& params)
     DatabaseAuthenticationMode& mode = databaseM->getAuthenticationMode();
     fr::IDatabasePtr dal = databaseM->getDALDatabase();
     fr::BenchmarkLoginState state;
-    state.userEntered = !text_user->IsEmpty();
+    state.userEntered = !text_user_registered->IsEmpty();
     state.trustedUser = mode.getIgnoreUsernamePassword();
     state.connected = databaseM->isConnected() && dal;
     state.alwaysAsk = mode.getAlwaysAskForPassword();
@@ -987,8 +1083,8 @@ void BenchmarkDialog::OnStart(wxCommandEvent& WXUNUSED(event))
     if (!buildParams(params))
         return;
 
-    if (radio_target->GetSelection() == TargetRegistered && databaseM
-        && databaseM->isProductionEnvironment())
+    const bool registered = getTarget() == BenchmarkTarget::Registered;
+    if (registered && databaseM && databaseM->isProductionEnvironment())
     {
         if (wxMessageBox(_("The selected database is marked as production "
             "environment. The benchmark puts heavy load on its server for a "
@@ -999,7 +1095,7 @@ void BenchmarkDialog::OnStart(wxCommandEvent& WXUNUSED(event))
         }
     }
     // asked for only now, after every other check
-    if (radio_target->GetSelection() == TargetRegistered && !resolveLogin(params))
+    if (registered && !resolveLogin(params))
         return;
 
     fr::BenchmarkIntensity intensity =
@@ -1012,8 +1108,7 @@ void BenchmarkDialog::OnStart(wxCommandEvent& WXUNUSED(event))
         pending.embedded = params.forceEmbedded;
         // only a run on the server of the registration may use its
         // credentials for the cleanup
-        pending.registrationId = radio_target->GetSelection() == TargetRegistered
-            ? registrationId() : wxString();
+        pending.registrationId = registered ? registrationId() : wxString();
         pending.clientLibrary = toWxString(params.clientLibrary);
         pending.connectionString = toWxString(connectionString);
         pendingEntriesM.push_back(pending.toString());
@@ -1205,7 +1300,7 @@ void BenchmarkDialog::onFinished(const fr::BenchmarkReport& report,
     if (!report.errorMessage.empty())
     {
         appendLog(_("Error:") + " " + report.errorMessage);
-        if (radio_target->GetSelection() == TargetThisComputer)
+        if (getTarget() == BenchmarkTarget::ThisComputer)
         {
             appendLog(_("Hint: a test of this computer needs a Firebird installation "
                 "with the engine plugin (engine12, engine13 or engine14 for Firebird "
