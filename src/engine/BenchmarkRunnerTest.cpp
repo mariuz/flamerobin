@@ -25,6 +25,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <iostream>
 #include <thread>
 
@@ -259,6 +260,31 @@ int main(int argc, char** argv)
             }
         }
         ok &= fr_test::check(registered, "every saved measurement is registered, with a value");
+        // a key value is the work saved with it per time, or its time per
+        // operation: the text "200 commits in 300 ms" says the same as the value
+        bool matching = saved.ok();
+        for (const fr::BenchmarkMeasurement& x : saved.snapshot.measurements)
+        {
+            const fr::BenchmarkMeasurementDef* def = fr::findBenchmarkMeasurementDef(x.id);
+            if (!def || def->kind != fr::BenchmarkMeasurementKind::Key || x.amount <= 0.0
+                || x.ms <= 0.0)
+            {
+                continue;
+            }
+            double fromWork = x.amount * 1000.0 / x.ms;
+            if (x.unit == "ms")
+                fromWork = x.ms / x.amount;
+            else if (x.unit == "it/ms")
+                fromWork = x.amount / x.ms;
+            else if (x.unit == "MB/s")
+                fromWork = x.amount / (1024.0 * 1024.0) / (x.ms / 1000.0);
+            if (std::abs(fromWork - x.value) > 1e-4 * x.value)
+            {
+                std::cout << "    the work does not give the value: " << x.id.utf8_str() << "\n";
+                matching = false;
+            }
+        }
+        ok &= fr_test::check(matching, "every key value matches the work saved with it");
         firstRun = saved.snapshot;
     }
 

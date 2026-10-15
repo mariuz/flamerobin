@@ -282,10 +282,13 @@ std::map<wxString, BenchmarkWork> getBenchmarkWork(const BenchmarkMetrics& m)
         add("memory.scan", double(m.scanBytes), "bytes", *m.warmScanMs);
     if (m.serverSortMs && m.scanBytes > 0)
         add("memory.sort", double(m.scanBytes), "bytes", *m.serverSortMs);
-    if (m.latencyAvgMs)
+    // the key value is the median round trip, which a few lost packets do
+    // not change: the work is the requests at that time, so that the value
+    // is its time divided by the requests, like every other key value
+    if (m.latencyMedianMs)
     {
         add("network.roundTrip", s.latencyQueries, wxTRANSLATE("requests"),
-            *m.latencyAvgMs * s.latencyQueries);
+            std::max(*m.latencyMedianMs, 0.001) * s.latencyQueries);
     }
     if (m.streamMs && m.streamBytes > 0)
         add("network.transfer", double(m.streamBytes), "bytes", *m.streamMs);

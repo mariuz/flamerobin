@@ -2842,6 +2842,61 @@ std::vector<BenchmarkMetrics> noticedMetrics()
     return { server, plan, client, vpn };
 }
 
+// a key value from the work saved with it: the work per time, or the time
+// of one operation
+double valueOfWork(const BenchmarkMeasurement& x)
+{
+    if (x.unit == "ms")
+        return x.ms / x.amount;
+    if (x.unit == "it/ms")
+        return x.amount / x.ms;
+    if (x.unit == "MB/s")
+        return x.amount / (1024.0 * 1024.0) / (x.ms / 1000.0);
+    return x.amount * 1000.0 / x.ms;
+}
+
+void testKeyValueWork()
+{
+    std::cout << "Key values and the work behind them\n";
+    // the saved results of runs with every key value, read back
+    bool matching = true;
+    int checked = 0;
+    for (const BenchmarkMetrics& m : { healthyMetrics(), fullMetrics(), serverMetrics() })
+    {
+        const BenchmarkSnapshotResult saved = parseBenchmarkSnapshot(makeReport(m,
+            "2026-10-04 12:00:00").toMarkdown());
+        for (const BenchmarkMeasurement& x : saved.snapshot.measurements)
+        {
+            const BenchmarkMeasurementDef* def = findBenchmarkMeasurementDef(x.id);
+            if (!def || def->kind != BenchmarkMeasurementKind::Key || x.amount <= 0.0
+                || x.ms <= 0.0)
+            {
+                continue;
+            }
+            ++checked;
+            if (std::abs(valueOfWork(x) - x.value) > 1e-4 * x.value)
+            {
+                std::cerr << "    the work does not give the value: " << x.id << "\n";
+                matching = false;
+            }
+        }
+    }
+    check(matching && checked >= 35, "every key value is the work saved with it per time");
+    // the round trip is the median: a few slow round trips change the mean
+    BenchmarkMetrics lost = healthyMetrics();
+    lost.latencyAvgMs = 2.0;
+    const BenchmarkSnapshot run = makeBenchmarkSnapshot(makeReport(lost, "2026-10-04 12:00:00"));
+    const BenchmarkMeasurement* roundTrip = run.findMeasurement("network.roundTrip");
+    const BenchmarkSnapshot embedded = makeBenchmarkSnapshot(makeReport(serverMetrics(),
+        "2026-10-04 12:00:00"));
+    check(roundTrip && roundTrip->value == 0.2 && roundTrip->amount == 2500
+        && std::abs(roundTrip->ms - 500.0) < 1e-9
+        && formatBenchmarkWork(formatBenchmarkAmount(roundTrip->amount, roundTrip->amountUnit),
+            roundTrip->ms) == "2,500 requests in 500 ms"
+        && !embedded.findMeasurement("network.roundTrip"),
+        "the work of the round trip is the median time of the requests");
+}
+
 void testNeutralNotes()
 {
     std::cout << "Notes of a single run without a judgement\n";
@@ -3832,6 +3887,7 @@ int main(int argc, char** argv)
     testComparisonHtml();
     testMarkdown();
     testKeyFigures();
+    testKeyValueWork();
     testNeutralNotes();
     testVerdict();
     testReasonLines();
