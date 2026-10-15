@@ -90,7 +90,7 @@ Every result of `buildBenchmarkResults()` gets the id of its measurement as the 
 | `kind` | `Key` (a key value, gives the points), `Measure` (compared) or `Info` (only shown) |
 | `unit`, `higherIsBetter` | of the value; a time is lower is better |
 | `amountFixed` | every run of an intensity does the same work; false for the tests with a time limit |
-| `settings`, `sql` | the work of the test: the fields of `BenchmarkSettings`, the statements of `BenchmarkSql` and the objects of its DDL that it uses |
+| `settings`, `constants`, `sql` | the work of the test: the fields of `BenchmarkSettings`, the values of `BenchmarkWorkload` (and the sizes of `BenchmarkSql`), the statements of `BenchmarkSql` and the objects of its DDL that it uses; see "The signature of the work" |
 | `title`, `value` | of a key value: its title and its member of `BenchmarkValues` |
 | `family`, `retired` | the id takes a parameter; the measurement is no longer made, the entry stays for older reports |
 
@@ -113,7 +113,8 @@ The direction comes from the register. Tests with a time limit are compared by t
 | Change | Allowed | What to do |
 |---|---|---|
 | A new test | yes | a new entry with version 1 and a new id, then write `registry.golden` again; older reports show it as new |
-| Other work of a test: settings of an intensity, SQL, the code of the runner | yes | raise its version, then write `registry.golden` again; runs of different versions are not compared |
+| Other work of a test: settings of an intensity, a value of `BenchmarkWorkload`, SQL, the code of the runner | yes | raise its version, then write `registry.golden` again; runs of different versions are not compared |
+| A new fixed value of the work of a test | yes | put it into `BenchmarkWorkload`, name it in the `constants` of its tests, raise their versions, then write `registry.golden` again |
 | A title, an explanation, a hint text | yes, freely | nothing; they are never used to match |
 | A test is dropped | yes | keep the entry and mark it `retired`; never remove an id |
 | Rename an id | no | a new id, and mark the old one `retired`; both runs then show "new" and "no longer measured" |
@@ -122,7 +123,21 @@ The direction comes from the register. Tests with a time limit are compared by t
 | A new field at the end of a line, a new kind of line | yes | raise the minor number of the format, add fixtures of it |
 | Another position or meaning of a field, a removed kind of line | only with a new major number | older reports are refused then |
 
-The unit test catches what it can: `registry.golden` holds every entry with its unit, direction, version, kind, work and a signature of its work (the values of its settings for the three intensities and an FNV-1a hash of its SQL). When the signature changes but the version does not, `benchmark_test` fails with "the work of the test changed, but its version was not raised". It also fails when an id disappears, when a unit or direction changes, and when a setting, a statement or an object of the DDL belongs to no measurement. Constants and code in `BenchmarkRunner.cpp` (pauses, the size of a burst, how a value is measured) are not part of the signature: raise the version yourself when they change.
+The unit test catches what it can: `registry.golden` holds every entry with its unit, direction, version, kind, work and the signature of its work (see below). When the signature changes but the version does not, `benchmark_test` fails with "the work of the test changed, but its version was not raised". It also fails when an id disappears, when a unit or direction changes, and when a setting, a value of the work, a statement or an object of the DDL belongs to no measurement.
+
+### The signature of the work
+
+The signature of a test is made of:
+
+- the values of the fields of `BenchmarkSettings` it uses, for the three intensities (rows, iterations, queries, seconds, clients);
+- the values of `BenchmarkWorkload` (in `Benchmark.h`) it uses, the fixed part of its work that is the same in every intensity: amounts and sizes (`localFileSize`, `blobSize`, `blobChunk`, `smallCachePages`), pauses (`idlePauseMs`, `sparsePauseMs`), the size of a burst (`serverBurstIterations`, `clientBurstIterations`), repetitions (`versionReads`, `oltpPointSelects`, `largeRoundTrips`, `minSyncWrites`), rows per server call (`chunkRows`, `driveChunkRows`, `driveLookupChunk`), shares of a time or an amount (`parallelDriveTimeShare`, `largeRoundTripShare`, `commitsPerSyncWrite`), limits that decide the work (`tempSortMaxCopies`), the numbers of users (`oltpClientCounts`, `manyUserClientCounts`, `oltpKeyClients`), the page sizes of the comparison, the checked ports, the retry of the event test, and the sizes `oltpRangeRows` and `wideColumns` of `BenchmarkSql`;
+- an FNV-1a hash of the SQL it uses: its statements and the DDL of its objects.
+
+Not part of it are values that change no result: the progress display (`fixedStepCount`), timeouts and limits that only end a test or a run (`portCheckTimeoutMs`, `eventTimeoutMs`, `oltpMaxFailuresInRow`), the ID ranges that keep the rows of the tests apart (`parallelDriveIdBase` and the like), how often a loop checks for a cancel request, and thresholds that only classify a value for its details or a hint (`latencyOutlierMs`). These stay in `BenchmarkRunner.cpp`; the unit test reads that file and fails for a numeric constant that is neither in `BenchmarkWorkload` nor in its list of such values (`notWorkload` in `BenchmarkTest.cpp`, with the reason). So a new constant always needs a decision: it changes a result, then it belongs to `BenchmarkWorkload` and the `constants` of its tests, or it does not, then it goes into that list.
+
+The code itself is not part of the signature: a new formula, another statistic (the median instead of the mean), another order of the steps. Raise the version of the tests yourself when it changes.
+
+All tests have version 1. The values of `BenchmarkWorkload` were added to the signature before any report of format 2 was published, so no version had to be raised; from now on every change of them needs one.
 
 ## Updating the test data
 

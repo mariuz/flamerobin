@@ -1,70 +1,70 @@
 # The register of the benchmark measurements (src/engine/BenchmarkValues.cpp):
-# id | part | unit | direction | version | kind | work | settings quick/standard/deep | hash of the SQL
+# id | part | unit | direction | version | kind | work | settings quick/standard/deep | constants | hash of the SQL
 # Checked by benchmark_test. Never remove or rename an id, never change its unit or
 # direction; when the work of a test changes, raise its version. Then write this file
 # again with: benchmark_test --print-golden > registry.golden
 # See devdocs/Benchmark_report_format.md.
-cpu.single | cpu | it/ms | higher | v1 | key | fixed | cpuIterations=50000/100000/500000 | sql c14f8107
-cpu.parallel | cpu | it/ms | higher | v1 | key | fixed | cpuIterations=50000/100000/500000 parallelConnections=4/4/4 | sql c14f8107
-cpu.burst | cpu | - | - | v1 | info | - | bursts=5/8/10 | sql c14f8107
-storage.create | storage | ms | lower | v1 | measure | fixed | - | -
-storage.commit | storage | ms | lower | v1 | key | fixed | commitCount=100/200/500 | sql fb8ae5fd
-storage.syncWrite | storage | ms | lower | v1 | measure | fixed | commitCount=100/200/500 | -
-storage.files | storage | ms | lower | v1 | measure | fixed | localFiles=100/200/500 | -
-storage.freeSpace | storage | - | - | v1 | info | - | - | -
-storage.insert | storage | rows/s | higher | v1 | key | fixed | diskRows=20000/50000/100000 diskPayloadLength=200/200/200 | sql 3fdb6f02
-storage.update | storage | rows/s | higher | v1 | measure | fixed | diskRows=20000/50000/100000 diskPayloadLength=200/200/200 | sql 2bdaa367
-storage.delete | storage | rows/s | higher | v1 | measure | fixed | diskRows=20000/50000/100000 diskPayloadLength=200/200/200 | sql 6b4b2195
-storage.gc | storage | ms | lower | v1 | measure | fixed | diskRows=20000/50000/100000 diskPayloadLength=200/200/200 | sql 14740aa9
-storage.drive | storage | operations/s | higher | v1 | key | time-limited | diskRows=20000/50000/100000 diskPayloadLength=200/200/200 driveSeconds=10/20/40 | sql aa1f5113
-storage.driveInsert | storage | rows/s | higher | v1 | measure | time-limited | diskRows=20000/50000/100000 diskPayloadLength=200/200/200 driveSeconds=10/20/40 | sql 3fdb6f02
-storage.driveScan | storage | ms | lower | v1 | measure | time-limited | diskRows=20000/50000/100000 diskPayloadLength=200/200/200 driveSeconds=10/20/40 | sql 84e682b4
-storage.driveLookup | storage | rows/s | higher | v1 | measure | time-limited | diskRows=20000/50000/100000 driveSeconds=10/20/40 | sql d362fb68
-storage.driveUpdate | storage | rows/s | higher | v1 | measure | time-limited | diskRows=20000/50000/100000 driveSeconds=10/20/40 | sql 2bdaa367
-storage.driveDelete | storage | rows/s | higher | v1 | measure | time-limited | diskRows=20000/50000/100000 driveSeconds=10/20/40 | sql 6b4b2195
-storage.driveParallel | storage | rows/s | higher | v1 | key | time-limited | diskRows=20000/50000/100000 diskPayloadLength=200/200/200 driveSeconds=10/20/40 parallelConnections=4/4/4 | sql 3fdb6f02
-storage.tempSort | storage | MB/s | higher | v1 | key | fixed | tempSortMegabytes=96/192/384 scanRows=10000/50000/100000 scanPayloadLength=1000/1000/1000 commitCount=100/200/500 | sql 75c6f04d
-storage.pageSize.* | storage | - | - | v1 | info | - | diskRows=20000/50000/100000 diskPayloadLength=200/200/200 | sql af19e4ef
-memory.scanCold | memory | MB/s | higher | v1 | measure | fixed | scanRows=10000/50000/100000 scanPayloadLength=1000/1000/1000 commitCount=100/200/500 | sql 4e57ffa5
-memory.scan | memory | MB/s | higher | v1 | key | fixed | scanRows=10000/50000/100000 scanPayloadLength=1000/1000/1000 commitCount=100/200/500 | sql 4e57ffa5
-memory.coldVsWarm | memory | - | - | v1 | info | - | scanRows=10000/50000/100000 scanPayloadLength=1000/1000/1000 | sql 84e682b4
-memory.sort | memory | MB/s | higher | v1 | key | fixed | scanRows=10000/50000/100000 scanPayloadLength=1000/1000/1000 commitCount=100/200/500 | sql c7855045
-network.dns | network | - | - | v1 | info | - | - | -
-network.adapter | network | - | - | v1 | info | - | - | -
-network.ports | network | - | - | v1 | info | - | - | -
-network.tcpConnect | network | - | - | v1 | info | - | - | -
-network.events | network | - | - | v1 | info | - | - | sql e641cbf4
-network.roundTrip | network | ms | lower | v1 | key | fixed | latencyQueries=1000/2500/5000 | sql 4c1fc857
-network.roundTripSparse | network | - | - | v1 | info | - | sparseQueries=15/30/50 | sql 4c1fc857
-network.roundTripLarge | network | - | - | v1 | info | - | latencyQueries=1000/2500/5000 | sql 0fe1bb21
-network.transfer | network | MB/s | higher | v1 | key | fixed | scanRows=10000/50000/100000 scanPayloadLength=1000/1000/1000 commitCount=100/200/500 | sql a46fe0a4
-network.timeSplit | network | - | - | v1 | info | - | scanRows=10000/50000/100000 scanPayloadLength=1000/1000/1000 commitCount=100/200/500 | sql 096333b6
-network.connect | network | ms | lower | v1 | key | fixed | connectAttempts=3/3/5 | -
-network.wideInsert | network | writes/s | higher | v1 | key | fixed | wideRows=500/2000/5000 | sql e93d37fd
-users.oltp | users | transactions/s | higher | v1 | key | time-limited | oltpSeconds=3/5/10 oltpMaxClients=4/8/32 scanRows=10000/50000/100000 | sql fe09bc78
-users.tx.* | users | tx/s | higher | v1 | measure | time-limited | oltpSeconds=3/5/10 scanRows=10000/50000/100000 | sql fe09bc78
-computer.files | computer | ms | lower | v1 | measure | fixed | localFiles=100/200/500 | -
-computer.burst | computer | ms | lower | v1 | key | fixed | bursts=5/8/10 | -
-computer.power | computer | - | - | v1 | info | - | - | -
-computer.keepalive | computer | - | - | v1 | info | - | - | -
-application.rowByRow | application | rows/s | higher | v1 | measure | fixed | rowByRowRows=500/2000/5000 | sql 69534b71
-application.prepare | application | ms | lower | v1 | measure | fixed | prepareCount=50/200/500 | sql e83679a3
-application.blob | application | - | - | v1 | info | - | blobCount=50/200/500 | sql d53ff366
-application.versions | application | - | - | v1 | info | - | versionRounds=20/50/100 | sql fe908723
-settings.runsOn | settings | - | - | v1 | info | - | - | -
-settings.firebird | settings | - | - | v1 | info | - | - | sql dbb66123
-settings.architecture | settings | - | - | v1 | info | - | parallelConnections=4/4/4 | sql ddc4646a
-settings.client | settings | - | - | v1 | info | - | - | sql 42cd48b7
-settings.protocol | settings | - | - | v1 | info | - | - | sql a864a36f
-settings.login | settings | - | - | v1 | info | - | - | sql 182426e5
-settings.timeouts | settings | - | - | v1 | info | - | - | sql 01fe4378
-settings.testDatabase | settings | - | - | v1 | info | - | - | sql b4f04ea7
-settings.selectedSize | settings | - | - | v1 | info | - | - | sql b4f04ea7
-settings.selectedCache | settings | - | - | v1 | info | - | - | sql b4f04ea7
-settings.selectedForcedWrites | settings | - | - | v1 | info | - | - | -
-settings.selectedTransactions | settings | - | - | v1 | info | - | - | -
-settings.selectedLinger | settings | - | - | v1 | info | - | - | sql fe5fb73b
-settings.conf.* | settings | - | - | v1 | info | - | - | sql 442ada86
-settings.pageIo | settings | - | - | v1 | info | - | - | sql d8086385
-settings.pageAccess | settings | - | - | v1 | info | - | - | sql d8086385
-settings.recordVersions | settings | - | - | v1 | info | - | - | sql 096d9588
+cpu.single | cpu | it/ms | higher | v1 | key | fixed | cpuIterations=50000/100000/500000 | - | sql c14f8107
+cpu.parallel | cpu | it/ms | higher | v1 | key | fixed | cpuIterations=50000/100000/500000 parallelConnections=4/4/4 | - | sql c14f8107
+cpu.burst | cpu | - | - | v1 | info | - | bursts=5/8/10 | serverBurstIterations=50000 idlePauseMs=500 | sql c14f8107
+storage.create | storage | ms | lower | v1 | measure | fixed | - | - | -
+storage.commit | storage | ms | lower | v1 | key | fixed | commitCount=100/200/500 | commitRoundTrips=2 | sql fb8ae5fd
+storage.syncWrite | storage | ms | lower | v1 | measure | fixed | commitCount=100/200/500 | localFileSize=4096 commitsPerSyncWrite=4 minSyncWrites=20 | -
+storage.files | storage | ms | lower | v1 | measure | fixed | localFiles=100/200/500 | localFileSize=4096 | -
+storage.freeSpace | storage | - | - | v1 | info | - | - | - | -
+storage.insert | storage | rows/s | higher | v1 | key | fixed | diskRows=20000/50000/100000 diskPayloadLength=200/200/200 | chunkRows=5000 | sql 3fdb6f02
+storage.update | storage | rows/s | higher | v1 | measure | fixed | diskRows=20000/50000/100000 diskPayloadLength=200/200/200 | chunkRows=5000 | sql 2bdaa367
+storage.delete | storage | rows/s | higher | v1 | measure | fixed | diskRows=20000/50000/100000 diskPayloadLength=200/200/200 | chunkRows=5000 | sql 6b4b2195
+storage.gc | storage | ms | lower | v1 | measure | fixed | diskRows=20000/50000/100000 diskPayloadLength=200/200/200 | - | sql 14740aa9
+storage.drive | storage | operations/s | higher | v1 | key | time-limited | diskRows=20000/50000/100000 diskPayloadLength=200/200/200 driveSeconds=10/20/40 | smallCachePages=50 driveChunkRows=500 driveLookupChunk=2000 | sql aa1f5113
+storage.driveInsert | storage | rows/s | higher | v1 | measure | time-limited | diskRows=20000/50000/100000 diskPayloadLength=200/200/200 driveSeconds=10/20/40 | smallCachePages=50 driveChunkRows=500 | sql 3fdb6f02
+storage.driveScan | storage | ms | lower | v1 | measure | time-limited | diskRows=20000/50000/100000 diskPayloadLength=200/200/200 driveSeconds=10/20/40 | smallCachePages=50 driveChunkRows=500 | sql 84e682b4
+storage.driveLookup | storage | rows/s | higher | v1 | measure | time-limited | diskRows=20000/50000/100000 driveSeconds=10/20/40 | smallCachePages=50 driveLookupChunk=2000 | sql d362fb68
+storage.driveUpdate | storage | rows/s | higher | v1 | measure | time-limited | diskRows=20000/50000/100000 driveSeconds=10/20/40 | smallCachePages=50 driveChunkRows=500 | sql 2bdaa367
+storage.driveDelete | storage | rows/s | higher | v1 | measure | time-limited | diskRows=20000/50000/100000 driveSeconds=10/20/40 | smallCachePages=50 driveChunkRows=500 | sql 6b4b2195
+storage.driveParallel | storage | rows/s | higher | v1 | key | time-limited | diskRows=20000/50000/100000 diskPayloadLength=200/200/200 driveSeconds=10/20/40 parallelConnections=4/4/4 | smallCachePages=50 driveChunkRows=500 parallelDriveTimeShare=2 | sql 3fdb6f02
+storage.tempSort | storage | MB/s | higher | v1 | key | fixed | tempSortMegabytes=96/192/384 scanRows=10000/50000/100000 scanPayloadLength=1000/1000/1000 commitCount=100/200/500 | tempSortMaxCopies=64 | sql 75c6f04d
+storage.pageSize.* | storage | - | - | v1 | info | - | diskRows=20000/50000/100000 diskPayloadLength=200/200/200 | comparedPageSizes=4096,8192,16384,32768 commitsPerPageSize=50 commitRoundTrips=2 smallCachePages=50 chunkRows=5000 driveChunkRows=500 | sql af19e4ef
+memory.scanCold | memory | MB/s | higher | v1 | measure | fixed | scanRows=10000/50000/100000 scanPayloadLength=1000/1000/1000 commitCount=100/200/500 | - | sql 4e57ffa5
+memory.scan | memory | MB/s | higher | v1 | key | fixed | scanRows=10000/50000/100000 scanPayloadLength=1000/1000/1000 commitCount=100/200/500 | - | sql 4e57ffa5
+memory.coldVsWarm | memory | - | - | v1 | info | - | scanRows=10000/50000/100000 scanPayloadLength=1000/1000/1000 | - | sql 84e682b4
+memory.sort | memory | MB/s | higher | v1 | key | fixed | scanRows=10000/50000/100000 scanPayloadLength=1000/1000/1000 commitCount=100/200/500 | - | sql c7855045
+network.dns | network | - | - | v1 | info | - | - | - | -
+network.adapter | network | - | - | v1 | info | - | - | - | -
+network.ports | network | - | - | v1 | info | - | - | checkedPortFirst=3050 checkedPortLast=3060 | -
+network.tcpConnect | network | - | - | v1 | info | - | - | - | -
+network.events | network | - | - | v1 | info | - | - | eventRetryMs=500 | sql e641cbf4
+network.roundTrip | network | ms | lower | v1 | key | fixed | latencyQueries=1000/2500/5000 | - | sql 4c1fc857
+network.roundTripSparse | network | - | - | v1 | info | - | sparseQueries=15/30/50 | sparsePauseMs=200 | sql 4c1fc857
+network.roundTripLarge | network | - | - | v1 | info | - | latencyQueries=1000/2500/5000 | largeRoundTrips=50 largeRoundTripShare=10 | sql 0fe1bb21
+network.transfer | network | MB/s | higher | v1 | key | fixed | scanRows=10000/50000/100000 scanPayloadLength=1000/1000/1000 commitCount=100/200/500 | - | sql a46fe0a4
+network.timeSplit | network | - | - | v1 | info | - | scanRows=10000/50000/100000 scanPayloadLength=1000/1000/1000 commitCount=100/200/500 | - | sql 096333b6
+network.connect | network | ms | lower | v1 | key | fixed | connectAttempts=3/3/5 | - | -
+network.wideInsert | network | writes/s | higher | v1 | key | fixed | wideRows=500/2000/5000 | wideColumns=100 | sql e93d37fd
+users.oltp | users | transactions/s | higher | v1 | key | time-limited | oltpSeconds=3/5/10 oltpMaxClients=4/8/32 scanRows=10000/50000/100000 | oltpClientCounts=1,2,4,8,16,32 oltpKeyClients=8 oltpPointSelects=5 oltpRangeRows=100 | sql fe09bc78
+users.tx.* | users | tx/s | higher | v1 | measure | time-limited | oltpSeconds=3/5/10 scanRows=10000/50000/100000 | oltpClientCounts=1,2,4,8,16,32 manyUserClientCounts=50,250 oltpPointSelects=5 oltpRangeRows=100 | sql fe09bc78
+computer.files | computer | ms | lower | v1 | measure | fixed | localFiles=100/200/500 | localFileSize=4096 | -
+computer.burst | computer | ms | lower | v1 | key | fixed | bursts=5/8/10 | clientBurstIterations=3000000 idlePauseMs=500 | -
+computer.power | computer | - | - | v1 | info | - | - | - | -
+computer.keepalive | computer | - | - | v1 | info | - | - | - | -
+application.rowByRow | application | rows/s | higher | v1 | measure | fixed | rowByRowRows=500/2000/5000 | - | sql 69534b71
+application.prepare | application | ms | lower | v1 | measure | fixed | prepareCount=50/200/500 | - | sql e83679a3
+application.blob | application | - | - | v1 | info | - | blobCount=50/200/500 | blobSize=65536 blobChunk=16384 | sql d53ff366
+application.versions | application | - | - | v1 | info | - | versionRounds=20/50/100 | versionReads=20 | sql fe908723
+settings.runsOn | settings | - | - | v1 | info | - | - | - | -
+settings.firebird | settings | - | - | v1 | info | - | - | - | sql dbb66123
+settings.architecture | settings | - | - | v1 | info | - | parallelConnections=4/4/4 | - | sql ddc4646a
+settings.client | settings | - | - | v1 | info | - | - | - | sql 42cd48b7
+settings.protocol | settings | - | - | v1 | info | - | - | - | sql a864a36f
+settings.login | settings | - | - | v1 | info | - | - | - | sql 182426e5
+settings.timeouts | settings | - | - | v1 | info | - | - | - | sql 01fe4378
+settings.testDatabase | settings | - | - | v1 | info | - | - | - | sql b4f04ea7
+settings.selectedSize | settings | - | - | v1 | info | - | - | - | sql b4f04ea7
+settings.selectedCache | settings | - | - | v1 | info | - | - | - | sql b4f04ea7
+settings.selectedForcedWrites | settings | - | - | v1 | info | - | - | - | -
+settings.selectedTransactions | settings | - | - | v1 | info | - | - | - | -
+settings.selectedLinger | settings | - | - | v1 | info | - | - | - | sql fe5fb73b
+settings.conf.* | settings | - | - | v1 | info | - | - | - | sql 442ada86
+settings.pageIo | settings | - | - | v1 | info | - | - | - | sql d8086385
+settings.pageAccess | settings | - | - | v1 | info | - | - | - | sql d8086385
+settings.recordVersions | settings | - | - | v1 | info | - | - | - | sql 096d9588

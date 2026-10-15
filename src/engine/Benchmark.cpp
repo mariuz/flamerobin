@@ -302,7 +302,7 @@ std::map<wxString, BenchmarkWork> getBenchmarkWork(const BenchmarkMetrics& m)
     const BenchmarkOltpResult* best = nullptr;
     for (const auto& o : m.oltp)
     {
-        if (o.seconds > 0.0 && o.clients <= 8 && (!best
+        if (o.seconds > 0.0 && o.clients <= BenchmarkWorkload::oltpKeyClients && (!best
             || o.transactions / o.seconds > best->transactions / best->seconds))
         {
             best = &o;

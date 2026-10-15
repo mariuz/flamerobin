@@ -483,9 +483,11 @@ struct BenchmarkMeasurementDef
     // with a time limit
     bool amountFixed;
     // the work of the test, checked by the unit test of the register: the
-    // fields of BenchmarkSettings, and the statements of BenchmarkSql and
+    // fields of BenchmarkSettings, the values of BenchmarkWorkload (and the
+    // sizes of BenchmarkSql), and the statements of BenchmarkSql and
     // objects of its DDL that it uses, separated by spaces
     const char* settings;
+    const char* constants;
     const char* sql;
     // of a key value: its title, translated with _(), and its member
     const char* title;
@@ -998,6 +1000,74 @@ std::vector<int> getSupportedPageSizes(int serverMajorVersion);
 /// of the sorted values) and average; both 0 for no values
 double getBenchmarkPercentile(std::vector<double> values, double p);
 double getBenchmarkAverage(const std::vector<double>& values);
+
+///
+/// The fixed part of the work of the tests, the same in every intensity
+/// (BenchmarkRunner.cpp). Every value belongs to the tests whose results it
+/// changes: the register (BenchmarkValues.cpp) names it with them, so that
+/// a change shows in registry.golden and needs a new version of the tests;
+/// see devdocs/Benchmark_report_format.md.
+///
+namespace BenchmarkWorkload
+{
+    // page sizes of the optional comparison, and the commits measured in
+    // each of their databases
+    const int comparedPageSizes[] = { 4096, 8192, 16384, 32768 };
+    const int commitsPerPageSize = 50;
+    // every commit of the commit test needs this many round trips, which
+    // are subtracted from its time (the execute and the commit)
+    const int commitRoundTrips = 2;
+    // page cache of the storage test that keeps the I/O subsystem busy
+    const int smallCachePages = 50;
+    // the pause before every burst of the power saving tests, and the pause
+    // before every query of the round trips after idle pauses
+    const int idlePauseMs = 500;
+    const int sparsePauseMs = 200;
+    // the work of one burst: iterations of the CPU procedure on the server,
+    // iterations of the loop in FlameRobin
+    const int serverBurstIterations = 50000;
+    const int clientBurstIterations = 3000000;
+    // the bytes of a file of the file tests and of a write of the
+    // synchronous write test, which writes commitCount / commitsPerSyncWrite
+    // times, at least minSyncWrites times
+    const int localFileSize = 4096;
+    const int commitsPerSyncWrite = 4;
+    const int minSyncWrites = 20;
+    // round trips with a larger answer: latencyQueries / largeRoundTripShare,
+    // at least largeRoundTrips
+    const int largeRoundTrips = 50;
+    const int largeRoundTripShare = 10;
+    // the size of a BLOB and of every part written and read
+    const int blobSize = 64 * 1024;
+    const int blobChunk = 16 * 1024;
+    // reads of the frequently updated rows before and while an old
+    // transaction is open
+    const int versionReads = 20;
+    // OLTP levels up to settings.oltpMaxClients, and the many users option
+    const int oltpClientCounts[] = { 1, 2, 4, 8, 16, 32 };
+    const int manyUserClientCounts[] = { 50, 250 };
+    // primary key lookups of every OLTP transaction
+    const int oltpPointSelects = 5;
+    // the multi-user key value is the best level with up to this many users,
+    // so that the intensities stay comparable
+    const int oltpKeyClients = 8;
+    // rows per server call of the inserts, updates and deletes; keeps every
+    // call short enough for a quick cancel
+    const int chunkRows = 5000;
+    // rows and lookups per server call of the time limited drive test
+    const int driveChunkRows = 500;
+    const int driveLookupChunk = 2000;
+    // the parallel drive test runs this share of driveSeconds
+    const int parallelDriveTimeShare = 2;
+    // the temporary file test sorts at most this many copies of the rows
+    const int tempSortMaxCopies = 64;
+    // ports of Firebird servers checked from a client
+    const int checkedPortFirst = 3050;
+    const int checkedPortLast = 3060;
+    // the event test posts again after this time without a notification;
+    // the first notification of a new listener carries no count
+    const int eventRetryMs = 500;
+} // namespace BenchmarkWorkload
 
 ///
 /// All SQL executed by the benchmark inside its own temporary database.

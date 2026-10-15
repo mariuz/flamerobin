@@ -31,6 +31,7 @@
 #include <cmath>
 #include <functional>
 #include <iostream>
+#include <iterator>
 #include <map>
 #include <optional>
 #include <regex>
@@ -2238,9 +2239,10 @@ void testComparison()
 
 // The register is checked against src/engine/testdata/benchmark/registry.golden:
 // one line per measurement with its unit, direction, version and the
-// signature of its work (the settings of the three intensities it uses and
-// a hash of its SQL). When the work of a test changes but its version does
-// not, the test fails; see devdocs/Benchmark_report_format.md.
+// signature of its work (the settings of the three intensities it uses, the
+// values of BenchmarkWorkload it uses and a hash of its SQL). When the work
+// of a test changes but its version does not, the test fails; see
+// devdocs/Benchmark_report_format.md.
 
 const std::pair<const char*, int BenchmarkSettings::*> settingsFields[] = {
     { "connectAttempts", &BenchmarkSettings::connectAttempts },
@@ -2293,6 +2295,81 @@ std::map<std::string, std::string> namedStatements()
         { "wideInsert", S::getWideInsertStatement() } };
 }
 
+wxString constantText(int value)
+{
+    return wxString::Format("%d", value);
+}
+
+template <size_t N>
+wxString constantText(const int (&values)[N])
+{
+    wxString text;
+    for (int value : values)
+        text += (text.empty() ? "" : ",") + constantText(value);
+    return text;
+}
+
+// every value of BenchmarkWorkload and the sizes of BenchmarkSql by their
+// names in the register
+std::map<std::string, wxString> workloadConstants()
+{
+    namespace W = BenchmarkWorkload;
+    return { { "comparedPageSizes", constantText(W::comparedPageSizes) },
+        { "commitsPerPageSize", constantText(W::commitsPerPageSize) },
+        { "commitRoundTrips", constantText(W::commitRoundTrips) },
+        { "smallCachePages", constantText(W::smallCachePages) },
+        { "idlePauseMs", constantText(W::idlePauseMs) },
+        { "sparsePauseMs", constantText(W::sparsePauseMs) },
+        { "serverBurstIterations", constantText(W::serverBurstIterations) },
+        { "clientBurstIterations", constantText(W::clientBurstIterations) },
+        { "localFileSize", constantText(W::localFileSize) },
+        { "commitsPerSyncWrite", constantText(W::commitsPerSyncWrite) },
+        { "minSyncWrites", constantText(W::minSyncWrites) },
+        { "largeRoundTrips", constantText(W::largeRoundTrips) },
+        { "largeRoundTripShare", constantText(W::largeRoundTripShare) },
+        { "blobSize", constantText(W::blobSize) },
+        { "blobChunk", constantText(W::blobChunk) },
+        { "versionReads", constantText(W::versionReads) },
+        { "oltpClientCounts", constantText(W::oltpClientCounts) },
+        { "manyUserClientCounts", constantText(W::manyUserClientCounts) },
+        { "oltpPointSelects", constantText(W::oltpPointSelects) },
+        { "oltpKeyClients", constantText(W::oltpKeyClients) },
+        { "chunkRows", constantText(W::chunkRows) },
+        { "driveChunkRows", constantText(W::driveChunkRows) },
+        { "driveLookupChunk", constantText(W::driveLookupChunk) },
+        { "parallelDriveTimeShare", constantText(W::parallelDriveTimeShare) },
+        { "tempSortMaxCopies", constantText(W::tempSortMaxCopies) },
+        { "checkedPortFirst", constantText(W::checkedPortFirst) },
+        { "checkedPortLast", constantText(W::checkedPortLast) },
+        { "eventRetryMs", constantText(W::eventRetryMs) },
+        { "oltpRangeRows", constantText(BenchmarkSql::oltpRangeRows) },
+        { "wideColumns", constantText(BenchmarkSql::wideColumns) } };
+}
+
+// the constants of BenchmarkRunner.cpp that change no result, and why; a
+// constant that changes one belongs to BenchmarkWorkload and the register
+const std::pair<const char*, const char*> notWorkload[] = {
+    { "fixedStepCount", "the progress display" },
+    { "oltpMaxFailuresInRow", "ends a run with an error, the work is the same" },
+    { "parallelDriveIdBase", "keeps the IDs of the tests apart" },
+    { "parallelDriveIdsPerConnection", "keeps the IDs of the tests apart" },
+    { "commitIdBase", "keeps the IDs of the tests apart" },
+    { "oltpIdBase", "keeps the IDs of the tests apart" },
+    { "oltpIdsPerClient", "keeps the IDs of the tests apart" },
+    { "portCheckTimeoutMs", "a timeout" },
+    { "eventTimeoutMs", "a timeout" },
+    { "latencyOutlierMs", "counts slow round trips for a detail and a hint, the value is "
+        "the median" } };
+
+// everything the signature of the work of a test is made of; the tests
+// change a copy of it
+struct Workload
+{
+    BenchmarkSettings intensities[3];
+    std::map<std::string, wxString> constants;
+    std::map<std::string, std::string> statements;
+};
+
 // the object a DDL statement creates; an index belongs to its table
 std::string ddlObject(const std::string& sql)
 {
@@ -2328,12 +2405,13 @@ uint32_t fnv1a(const std::string& text)
 }
 
 // the line of registry.golden for an entry; problems gets the names of the
-// settings and statements that are not known
-wxString goldenLine(const BenchmarkMeasurementDef& def, const BenchmarkSettings (&intensities)[3],
-    const std::map<std::string, std::string>& statements, std::vector<wxString>& problems)
+// settings, constants and statements that are not known
+wxString goldenLine(const BenchmarkMeasurementDef& def, const Workload& work,
+    std::vector<wxString>& problems)
 {
     using K = BenchmarkMeasurementKind;
     const bool info = def.kind == K::Info;
+    const BenchmarkSettings (&intensities)[3] = work.intensities;
     wxString settings;
     for (const std::string& name : words(def.settings))
     {
@@ -2348,12 +2426,21 @@ wxString goldenLine(const BenchmarkMeasurementDef& def, const BenchmarkSettings 
             name.c_str(), intensities[0].*field->second, intensities[1].*field->second,
             intensities[2].*field->second);
     }
+    wxString constants;
+    for (const std::string& name : words(def.constants))
+    {
+        auto constant = work.constants.find(name);
+        if (constant == work.constants.end())
+            problems.push_back(wxString(def.id) + ": unknown constant " + name);
+        else
+            constants += (constants.empty() ? "" : " ") + name + "=" + constant->second;
+    }
     std::string sql;
     for (const std::string& name : words(def.sql))
     {
         std::string text;
-        auto statement = statements.find(name);
-        if (statement != statements.end())
+        auto statement = work.statements.find(name);
+        if (statement != work.statements.end())
             text = statement->second;
         for (const char* create : BenchmarkSql::getCreateStatements())
         {
@@ -2371,36 +2458,39 @@ wxString goldenLine(const BenchmarkMeasurementDef& def, const BenchmarkSettings 
         + wxString::Format(" | v%d | ", def.version) + kind + (def.retired ? " retired" : "")
         + " | " + (info ? "-" : def.amountFixed ? "fixed" : "time-limited") + " | "
         + (settings.empty() ? wxString("-") : settings) + " | "
+        + (constants.empty() ? wxString("-") : constants) + " | "
         + (sql.empty() ? wxString("-") : wxString::Format("sql %08x", unsigned(fnv1a(sql))));
 }
 
 std::vector<wxString> goldenLines(const std::vector<BenchmarkMeasurementDef>& defs,
-    const BenchmarkSettings (&intensities)[3], const std::map<std::string, std::string>& statements,
-    std::vector<wxString>& problems)
+    const Workload& work, std::vector<wxString>& problems)
 {
     std::vector<wxString> lines;
     for (const BenchmarkMeasurementDef& def : defs)
-        lines.push_back(goldenLine(def, intensities, statements, problems));
+        lines.push_back(goldenLine(def, work, problems));
     return lines;
 }
 
-const BenchmarkSettings currentIntensities[3] = {
-    BenchmarkSettings::forIntensity(BenchmarkIntensity::Quick),
-    BenchmarkSettings::forIntensity(BenchmarkIntensity::Standard),
-    BenchmarkSettings::forIntensity(BenchmarkIntensity::Deep) };
+Workload currentWorkload()
+{
+    return { { BenchmarkSettings::forIntensity(BenchmarkIntensity::Quick),
+        BenchmarkSettings::forIntensity(BenchmarkIntensity::Standard),
+        BenchmarkSettings::forIntensity(BenchmarkIntensity::Deep) },
+        workloadConstants(), namedStatements() };
+}
 
 wxString goldenText()
 {
     std::vector<wxString> problems;
     wxString text = "# The register of the benchmark measurements (src/engine/BenchmarkValues.cpp):\n"
         "# id | part | unit | direction | version | kind | work | settings quick/standard/deep "
-        "| hash of the SQL\n"
+        "| constants | hash of the SQL\n"
         "# Checked by benchmark_test. Never remove or rename an id, never change its unit or\n"
         "# direction; when the work of a test changes, raise its version. Then write this file\n"
         "# again with: benchmark_test --print-golden > registry.golden\n"
         "# See devdocs/Benchmark_report_format.md.\n";
-    for (const wxString& line : goldenLines(getBenchmarkMeasurementDefs(), currentIntensities,
-        namedStatements(), problems))
+    for (const wxString& line : goldenLines(getBenchmarkMeasurementDefs(), currentWorkload(),
+        problems))
     {
         text += line + "\n";
     }
@@ -2428,7 +2518,7 @@ std::vector<wxString> compareGolden(const wxString& golden, const std::vector<wx
         if (line.empty() || line.StartsWith("#"))
             continue;
         const wxArrayString old = fields(line);
-        if (old.size() != 9)
+        if (old.size() != 10)
         {
             problems.push_back("registry.golden: a line that cannot be read: " + line);
             continue;
@@ -2450,7 +2540,8 @@ std::vector<wxString> compareGolden(const wxString& golden, const std::vector<wx
             problems.push_back(id + ": unit or direction changed; use a new id instead");
         else if (newVersion < oldVersion)
             problems.push_back(id + ": the version of the test went down");
-        else if (newVersion == oldVersion && (old[7] != f[7] || old[8] != f[8]))
+        else if (newVersion == oldVersion && (old[7] != f[7] || old[8] != f[8]
+            || old[9] != f[9]))
         {
             problems.push_back(id + ": the work of the test changed, but its version was not "
                 "raised; raise the version in BenchmarkValues.cpp, then write registry.golden "
@@ -2486,19 +2577,19 @@ bool hasProblem(const std::vector<wxString>& problems, const wxString& start,
 void testGolden(const wxString& dir)
 {
     std::cout << "Register against registry.golden\n";
+    const Workload work = currentWorkload();
     std::vector<wxString> unknown;
-    const std::vector<wxString> lines = goldenLines(getBenchmarkMeasurementDefs(),
-        currentIntensities, namedStatements(), unknown);
+    const std::vector<wxString> lines = goldenLines(getBenchmarkMeasurementDefs(), work, unknown);
     for (const wxString& p : unknown)
         std::cerr << "    " << p.utf8_str() << "\n";
-    check(unknown.empty(), "the register names only known settings and statements");
+    check(unknown.empty(), "the register names only known settings, constants and statements");
 
-    // every setting and every statement belongs to a measurement, so that
-    // a change of it reaches registry.golden
+    // every setting, constant and statement belongs to a measurement, so
+    // that a change of it reaches registry.golden
     std::set<std::string> used;
     for (const BenchmarkMeasurementDef& def : getBenchmarkMeasurementDefs())
     {
-        for (const char* list : { def.settings, def.sql })
+        for (const char* list : { def.settings, def.constants, def.sql })
         {
             for (const std::string& name : words(list))
                 used.insert(name);
@@ -2508,11 +2599,14 @@ void testGolden(const wxString& dir)
         * sizeof(int);
     for (const auto& field : settingsFields)
         covered = covered && used.count(field.first);
-    for (const auto& statement : namedStatements())
+    for (const auto& constant : work.constants)
+        covered = covered && used.count(constant.first);
+    for (const auto& statement : work.statements)
         covered = covered && used.count(statement.first);
     for (const char* create : BenchmarkSql::getCreateStatements())
         covered = covered && used.count(ddlObject(create));
-    check(covered, "every setting, statement and object of the DDL belongs to a measurement");
+    check(covered, "every setting, constant, statement and object of the DDL belongs to a "
+        "measurement");
 
     if (dir.empty())
     {
@@ -2528,19 +2622,18 @@ void testGolden(const wxString& dir)
         "(benchmark_test --print-golden writes it)");
 
     // what the check finds: other work without a new version, ...
-    BenchmarkSettings changed[3] = { currentIntensities[0], currentIntensities[1],
-        currentIntensities[2] };
-    changed[1].diskRows += 1;
+    Workload rows = work;
+    rows.intensities[1].diskRows += 1;
     std::vector<wxString> ignored;
-    const std::vector<wxString> rows = compareGolden(golden,
-        goldenLines(getBenchmarkMeasurementDefs(), changed, namedStatements(), ignored));
-    std::map<std::string, std::string> statements = namedStatements();
-    statements["cpuTest"] += " ";
+    const std::vector<wxString> settings = compareGolden(golden,
+        goldenLines(getBenchmarkMeasurementDefs(), rows, ignored));
+    Workload statements = work;
+    statements.statements["cpuTest"] += " ";
     const std::vector<wxString> sql = compareGolden(golden,
-        goldenLines(getBenchmarkMeasurementDefs(), currentIntensities, statements, ignored));
-    check(hasProblem(rows, "storage.insert:", "version was not raised")
-        && hasProblem(rows, "storage.update:", "version was not raised")
-        && !hasProblem(rows, "cpu.single:", "")
+        goldenLines(getBenchmarkMeasurementDefs(), statements, ignored));
+    check(hasProblem(settings, "storage.insert:", "version was not raised")
+        && hasProblem(settings, "storage.update:", "version was not raised")
+        && !hasProblem(settings, "cpu.single:", "")
         && hasProblem(sql, "cpu.single:", "version was not raised")
         && hasProblem(sql, "cpu.burst:", "version was not raised")
         && !hasProblem(sql, "storage.insert:", ""),
@@ -2559,8 +2652,7 @@ void testGolden(const wxString& dir)
     BenchmarkMeasurementDef added = defs.front();
     added.id = "cpu.vector";
     defs.push_back(added);
-    const std::vector<wxString> edited = compareGolden(golden,
-        goldenLines(defs, changed, namedStatements(), ignored));
+    const std::vector<wxString> edited = compareGolden(golden, goldenLines(defs, rows, ignored));
     check(hasProblem(edited, "storage.insert:", "write registry.golden again")
         && !hasProblem(edited, "storage.insert:", "version was not raised")
         && hasProblem(edited, "storage.update:", "unit or direction")
@@ -2570,6 +2662,107 @@ void testGolden(const wxString& dir)
     wxString crlf = golden;
     crlf.Replace("\n", "\r\n");
     check(compareGolden(crlf, lines).empty(), "registry.golden with Windows line ends");
+}
+
+// the names of the numeric constants that a source text declares with a
+// number: values of the work, not ones calculated from the settings
+std::set<std::string> declaredConstants(const wxString& text)
+{
+    static const std::regex constant(R"((?:^|\n)[ \t]*(?:static[ \t]+)?(?:constexpr|const)[ \t]+)"
+        R"((?:unsigned[ \t]+)?(?:int|long|short|double|float|size_t|int64_t)[ \t]+(\w+))"
+        R"([ \t]*(?:\[\])?[ \t]*=[ \t]*[-{0-9])");
+    const std::string source(text.utf8_str());
+    std::set<std::string> names;
+    for (std::sregex_iterator it(source.begin(), source.end(), constant), end; it != end; ++it)
+        names.insert((*it)[1].str());
+    return names;
+}
+
+// the text of a namespace of a header, up to its closing comment
+wxString namespaceText(const wxString& text, const wxString& name)
+{
+    const size_t start = text.find("namespace " + name + "\n");
+    const size_t end = text.find("} // namespace " + name, start);
+    if (start == wxString::npos || end == wxString::npos)
+        return wxEmptyString;
+    return text.substr(start, end - start);
+}
+
+void testWorkloadConstants(const wxString& dir)
+{
+    std::cout << "Constants of the work of the tests\n";
+    const Workload work = currentWorkload();
+    std::vector<wxString> ignored;
+    const std::vector<wxString> lines = goldenLines(getBenchmarkMeasurementDefs(), work, ignored);
+    wxString current;
+    for (const wxString& line : lines)
+        current += line + "\n";
+
+    // another pause of the power saving tests changes their work, nothing else
+    Workload pause = work;
+    pause.constants["idlePauseMs"] = "600";
+    const std::vector<wxString> paused = compareGolden(current,
+        goldenLines(getBenchmarkMeasurementDefs(), pause, ignored));
+    // a constant that changes no result is no part of any signature, e.g.
+    // the time after which a round trip counts as a retransmission
+    Workload outlier = work;
+    outlier.constants["latencyOutlierMs"] = "300";
+    const std::vector<wxString> display = goldenLines(getBenchmarkMeasurementDefs(), outlier,
+        ignored);
+    check(paused.size() == 2
+        && hasProblem(paused, "cpu.burst:", "version was not raised")
+        && hasProblem(paused, "computer.burst:", "version was not raised")
+        && display == lines,
+        "another value of a constant of the work changes the signature of its tests only");
+    BenchmarkMeasurementDef wrong = getBenchmarkMeasurementDefs().front();
+    wrong.constants = "latencyOutlierMs";
+    std::vector<wxString> notWork;
+    goldenLine(wrong, work, notWork);
+    check(notWork.size() == 1 && notWork[0].Contains("unknown constant latencyOutlierMs"),
+        "a test cannot name a constant that changes no result");
+
+    // every numeric constant of the runner and of BenchmarkWorkload is
+    // known: in the register, or as one that changes no result
+    if (dir.empty())
+        return;
+    const wxString engine = dir + "/../..";
+    wxString header = readFile(engine + "/Benchmark.h");
+    header.Replace("\r", "");
+    std::set<std::string> listed;
+    for (const char* name : { "BenchmarkWorkload", "BenchmarkSql" })
+    {
+        for (const std::string& constant : declaredConstants(namespaceText(header, name)))
+            listed.insert(constant);
+    }
+    bool registered = listed.size() > 20;
+    for (const std::string& name : listed)
+    {
+        if (!work.constants.count(name))
+        {
+            std::cerr << "    not in the list of the test: " << name << "\n";
+            registered = false;
+        }
+    }
+    for (const auto& constant : work.constants)
+        registered = registered && listed.count(constant.first);
+    check(registered, "every constant of BenchmarkWorkload is in the signature of its tests");
+    const std::set<std::string> runner = declaredConstants(readFile(engine
+        + "/BenchmarkRunner.cpp"));
+    bool known = runner.size() >= std::size(notWorkload);
+    for (const std::string& name : runner)
+    {
+        if (std::none_of(std::begin(notWorkload), std::end(notWorkload),
+            [&name](const auto& n) { return name == n.first; }))
+        {
+            std::cerr << "    a constant of BenchmarkRunner.cpp that belongs to "
+                "BenchmarkWorkload and its tests, or to notWorkload: " << name << "\n";
+            known = false;
+        }
+    }
+    for (const auto& n : notWorkload)
+        known = known && runner.count(n.first);
+    check(known, "every constant of BenchmarkRunner.cpp changes no result or is in "
+        "BenchmarkWorkload");
 }
 
 // the reports of the fixtures; a fixed date, so that they can be written again
@@ -2787,6 +2980,7 @@ int main(int argc, char** argv)
     testCompareStates();
     testComparison();
     testGolden(dataDirectory);
+    testWorkloadConstants(dataDirectory);
     testFixtures(dataDirectory);
 
     std::cout << (ok ? "ALL BENCHMARK TESTS PASSED\n" : "SOME BENCHMARK TESTS FAILED\n");

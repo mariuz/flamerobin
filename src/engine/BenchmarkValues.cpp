@@ -46,10 +46,6 @@ namespace
 using C = BenchmarkCategory;
 using K = BenchmarkMeasurementKind;
 
-// the multi-user value compares runs with the same number of clients, so
-// that the intensities stay comparable
-const int oltpKeyClients = 8;
-
 // whether a larger value is faster
 const bool higher = true;
 const bool lower = false;
@@ -58,26 +54,26 @@ const bool fixedWork = true;
 const bool timeLimited = false;
 
 BenchmarkMeasurementDef key(const char* id, int version, C section, const char* unit,
-    bool higherIsBetter, bool amountFixed, const char* settings, const char* sql,
-    const char* title, double BenchmarkValues::*value)
+    bool higherIsBetter, bool amountFixed, const char* settings, const char* constants,
+    const char* sql, const char* title, double BenchmarkValues::*value)
 {
     return { id, version, section, K::Key, unit, higherIsBetter, amountFixed, settings,
-        sql, title, value, false, false };
+        constants, sql, title, value, false, false };
 }
 
 BenchmarkMeasurementDef measure(const char* id, int version, C section,
     const char* unit, bool higherIsBetter, bool amountFixed, const char* settings,
-    const char* sql)
+    const char* constants, const char* sql)
 {
     return { id, version, section, K::Measure, unit, higherIsBetter, amountFixed,
-        settings, sql, nullptr, nullptr, false, false };
+        settings, constants, sql, nullptr, nullptr, false, false };
 }
 
 BenchmarkMeasurementDef info(const char* id, int version, C section,
-    const char* settings = "", const char* sql = "")
+    const char* settings = "", const char* constants = "", const char* sql = "")
 {
-    return { id, version, section, K::Info, "", false, false, settings, sql, nullptr,
-        nullptr, false, false };
+    return { id, version, section, K::Info, "", false, false, settings, constants, sql,
+        nullptr, nullptr, false, false };
 }
 
 // a measurement with a parameter after its id, e.g. "users.tx.8"
@@ -97,158 +93,176 @@ bool isIdCharacter(wxUniChar c)
 const std::vector<BenchmarkMeasurementDef>& getBenchmarkMeasurementDefs()
 {
     // The version of a test is raised whenever its work changes: other
-    // settings, SQL or code. The settings and the SQL are listed, so that
-    // the unit test of the register notices such a change; a change of the
-    // code it cannot notice.
+    // settings, other values of BenchmarkWorkload, other SQL or other code.
+    // The settings, the values and the SQL are listed (settings, constants,
+    // sql), so that the unit test of the register notices such a change; a
+    // change of the code itself it cannot notice.
     static const std::vector<BenchmarkMeasurementDef> defs = {
         // processor of the server
         key("cpu.single", 1, C::ServerCpu, "it/ms", higher, fixedWork,
-            "cpuIterations", "cpuTest FR_BENCHMARK_CPU FR_BENCHMARK_GTT",
+            "cpuIterations", "", "cpuTest FR_BENCHMARK_CPU FR_BENCHMARK_GTT",
             wxTRANSLATE("Calculating, one user"), &BenchmarkValues::cpuIterationsPerMs),
         key("cpu.parallel", 1, C::ServerCpu, "it/ms", higher, fixedWork,
-            "cpuIterations parallelConnections", "cpuTest FR_BENCHMARK_CPU FR_BENCHMARK_GTT",
+            "cpuIterations parallelConnections", "",
+            "cpuTest FR_BENCHMARK_CPU FR_BENCHMARK_GTT",
             wxTRANSLATE("Calculating, several users at once"),
             &BenchmarkValues::parallelIterationsPerMs),
-        info("cpu.burst", 1, C::ServerCpu, "bursts",
+        info("cpu.burst", 1, C::ServerCpu, "bursts", "serverBurstIterations idlePauseMs",
             "cpuTest FR_BENCHMARK_CPU FR_BENCHMARK_GTT"),
 
         // storage of the server
-        measure("storage.create", 1, C::ServerStorage, "ms", lower, fixedWork, "", ""),
+        measure("storage.create", 1, C::ServerStorage, "ms", lower, fixedWork, "", "", ""),
         key("storage.commit", 1, C::ServerStorage, "ms", lower, fixedWork, "commitCount",
-            "commitInsert latency FR_BENCHMARK_TEST",
+            "commitRoundTrips", "commitInsert latency FR_BENCHMARK_TEST",
             wxTRANSLATE("Saving a change (commit)"), &BenchmarkValues::commitMs),
         measure("storage.syncWrite", 1, C::ServerStorage, "ms", lower, fixedWork,
-            "commitCount", ""),
+            "commitCount", "localFileSize commitsPerSyncWrite minSyncWrites", ""),
         measure("storage.files", 1, C::ServerStorage, "ms", lower, fixedWork, "localFiles",
-            ""),
+            "localFileSize", ""),
         info("storage.freeSpace", 1, C::ServerStorage),
         key("storage.insert", 1, C::ServerStorage, "rows/s", higher, fixedWork,
-            "diskRows diskPayloadLength", "fillTable FR_BENCHMARK_TEST FR_BENCHMARK_FILL",
+            "diskRows diskPayloadLength", "chunkRows",
+            "fillTable FR_BENCHMARK_TEST FR_BENCHMARK_FILL",
             wxTRANSLATE("Writing many rows"), &BenchmarkValues::insertRowsPerSecond),
         measure("storage.update", 1, C::ServerStorage, "rows/s", higher, fixedWork,
-            "diskRows diskPayloadLength", "bulkUpdate FR_BENCHMARK_TEST"),
+            "diskRows diskPayloadLength", "chunkRows", "bulkUpdate FR_BENCHMARK_TEST"),
         measure("storage.delete", 1, C::ServerStorage, "rows/s", higher, fixedWork,
-            "diskRows diskPayloadLength", "bulkDelete FR_BENCHMARK_TEST"),
+            "diskRows diskPayloadLength", "chunkRows", "bulkDelete FR_BENCHMARK_TEST"),
         measure("storage.gc", 1, C::ServerStorage, "ms", lower, fixedWork,
-            "diskRows diskPayloadLength", "bulkDelete garbageCollect FR_BENCHMARK_TEST"),
+            "diskRows diskPayloadLength", "", "bulkDelete garbageCollect FR_BENCHMARK_TEST"),
         key("storage.drive", 1, C::ServerStorage, "operations/s", higher, timeLimited,
             "diskRows diskPayloadLength driveSeconds",
+            "smallCachePages driveChunkRows driveLookupChunk",
             "fillTable driveLookups bulkUpdate bulkDelete FR_BENCHMARK_TEST "
             "FR_BENCHMARK_FILL FR_BENCHMARK_LOOKUPS",
             wxTRANSLATE("Disk test with a small cache"),
             &BenchmarkValues::driveOperationsPerSecond),
         measure("storage.driveInsert", 1, C::ServerStorage, "rows/s", higher, timeLimited,
-            "diskRows diskPayloadLength driveSeconds",
+            "diskRows diskPayloadLength driveSeconds", "smallCachePages driveChunkRows",
             "fillTable FR_BENCHMARK_TEST FR_BENCHMARK_FILL"),
         measure("storage.driveScan", 1, C::ServerStorage, "ms", lower, timeLimited,
-            "diskRows diskPayloadLength driveSeconds", "scan FR_BENCHMARK_TEST"),
+            "diskRows diskPayloadLength driveSeconds", "smallCachePages driveChunkRows",
+            "scan FR_BENCHMARK_TEST"),
         measure("storage.driveLookup", 1, C::ServerStorage, "rows/s", higher, timeLimited,
-            "diskRows driveSeconds", "driveLookups FR_BENCHMARK_TEST FR_BENCHMARK_LOOKUPS"),
+            "diskRows driveSeconds", "smallCachePages driveLookupChunk",
+            "driveLookups FR_BENCHMARK_TEST FR_BENCHMARK_LOOKUPS"),
         measure("storage.driveUpdate", 1, C::ServerStorage, "rows/s", higher, timeLimited,
-            "diskRows driveSeconds", "bulkUpdate FR_BENCHMARK_TEST"),
+            "diskRows driveSeconds", "smallCachePages driveChunkRows",
+            "bulkUpdate FR_BENCHMARK_TEST"),
         measure("storage.driveDelete", 1, C::ServerStorage, "rows/s", higher, timeLimited,
-            "diskRows driveSeconds", "bulkDelete FR_BENCHMARK_TEST"),
+            "diskRows driveSeconds", "smallCachePages driveChunkRows",
+            "bulkDelete FR_BENCHMARK_TEST"),
         key("storage.driveParallel", 1, C::ServerStorage, "rows/s", higher, timeLimited,
             "diskRows diskPayloadLength driveSeconds parallelConnections",
+            "smallCachePages driveChunkRows parallelDriveTimeShare",
             "fillTable FR_BENCHMARK_TEST FR_BENCHMARK_FILL",
             wxTRANSLATE("Disk test, several users at once"),
             &BenchmarkValues::parallelDriveRowsPerSecond),
         key("storage.tempSort", 1, C::ServerStorage, "MB/s", higher, fixedWork,
-            "tempSortMegabytes scanRows scanPayloadLength commitCount",
+            "tempSortMegabytes scanRows scanPayloadLength commitCount", "tempSortMaxCopies",
             "tempSort FR_BENCHMARK_TEMP_SORT FR_BENCHMARK_TEST",
             wxTRANSLATE("Sorting large data on disk"), &BenchmarkValues::tempSortMBPerSecond),
         family(info("storage.pageSize", 1, C::ServerStorage, "diskRows diskPayloadLength",
+            "comparedPageSizes commitsPerPageSize commitRoundTrips smallCachePages "
+            "chunkRows driveChunkRows",
             "commitInsert fillTable scan FR_BENCHMARK_TEST FR_BENCHMARK_FILL")),
 
         // memory of the server
         measure("memory.scanCold", 1, C::ServerCache, "MB/s", higher, fixedWork,
-            "scanRows scanPayloadLength commitCount",
+            "scanRows scanPayloadLength commitCount", "",
             "fillTable scan FR_BENCHMARK_TEST FR_BENCHMARK_FILL"),
         key("memory.scan", 1, C::ServerCache, "MB/s", higher, fixedWork,
-            "scanRows scanPayloadLength commitCount",
+            "scanRows scanPayloadLength commitCount", "",
             "fillTable scan FR_BENCHMARK_TEST FR_BENCHMARK_FILL",
             wxTRANSLATE("Reading data from memory"), &BenchmarkValues::scanMBPerSecond),
-        info("memory.coldVsWarm", 1, C::ServerCache, "scanRows scanPayloadLength",
+        info("memory.coldVsWarm", 1, C::ServerCache, "scanRows scanPayloadLength", "",
             "scan FR_BENCHMARK_TEST"),
         key("memory.sort", 1, C::ServerCache, "MB/s", higher, fixedWork,
-            "scanRows scanPayloadLength commitCount",
+            "scanRows scanPayloadLength commitCount", "",
             "serverRead FR_BENCHMARK_READ FR_BENCHMARK_TEST",
             wxTRANSLATE("Sorting in memory"), &BenchmarkValues::sortMBPerSecond),
 
         // network and connection
         info("network.dns", 1, C::Network),
         info("network.adapter", 1, C::Network),
-        info("network.ports", 1, C::Network),
+        info("network.ports", 1, C::Network, "", "checkedPortFirst checkedPortLast"),
         info("network.tcpConnect", 1, C::Network),
-        info("network.events", 1, C::Network, "", "postEvent"),
-        key("network.roundTrip", 1, C::Network, "ms", lower, fixedWork, "latencyQueries",
+        info("network.events", 1, C::Network, "", "eventRetryMs", "postEvent"),
+        key("network.roundTrip", 1, C::Network, "ms", lower, fixedWork, "latencyQueries", "",
             "latency", wxTRANSLATE("Response time of a request"),
             &BenchmarkValues::roundTripMs),
-        info("network.roundTripSparse", 1, C::Network, "sparseQueries", "latency"),
-        info("network.roundTripLarge", 1, C::Network, "latencyQueries", "largeRoundTrip"),
+        info("network.roundTripSparse", 1, C::Network, "sparseQueries", "sparsePauseMs",
+            "latency"),
+        info("network.roundTripLarge", 1, C::Network, "latencyQueries",
+            "largeRoundTrips largeRoundTripShare", "largeRoundTrip"),
         key("network.transfer", 1, C::Network, "MB/s", higher, fixedWork,
-            "scanRows scanPayloadLength commitCount", "throughput FR_BENCHMARK_TEST",
+            "scanRows scanPayloadLength commitCount", "", "throughput FR_BENCHMARK_TEST",
             wxTRANSLATE("Transferring a large result"),
             &BenchmarkValues::transferMBPerSecond),
-        info("network.timeSplit", 1, C::Network, "scanRows scanPayloadLength commitCount",
+        info("network.timeSplit", 1, C::Network, "scanRows scanPayloadLength commitCount", "",
             "serverRead throughput FR_BENCHMARK_READ FR_BENCHMARK_TEST"),
         key("network.connect", 1, C::Network, "ms", lower, fixedWork, "connectAttempts", "",
-            wxTRANSLATE("Connecting"), &BenchmarkValues::connectMs),
+            "", wxTRANSLATE("Connecting"), &BenchmarkValues::connectMs),
         key("network.wideInsert", 1, C::Network, "writes/s", higher, fixedWork, "wideRows",
-            "wideInsert FR_BENCHMARK_WIDE", wxTRANSLATE("Small writes, one request each"),
+            "wideColumns", "wideInsert FR_BENCHMARK_WIDE",
+            wxTRANSLATE("Small writes, one request each"),
             &BenchmarkValues::wideInsertsPerSecond),
 
         // several users at once
         key("users.oltp", 1, C::MultiUser, "transactions/s", higher, timeLimited,
             "oltpSeconds oltpMaxClients scanRows",
+            "oltpClientCounts oltpKeyClients oltpPointSelects oltpRangeRows",
             "oltpPointSelect oltpRangeSelect oltpUpdate oltpInsert FR_BENCHMARK_POINT "
             "FR_BENCHMARK_RANGE FR_BENCHMARK_ROWS FR_BENCHMARK_TEST",
             wxTRANSLATE("Transactions, up to 8 users"),
             &BenchmarkValues::oltpTransactionsPerSecond),
         family(measure("users.tx", 1, C::MultiUser, "tx/s", higher, timeLimited,
             "oltpSeconds scanRows",
+            "oltpClientCounts manyUserClientCounts oltpPointSelects oltpRangeRows",
             "oltpPointSelect oltpRangeSelect oltpUpdate oltpInsert FR_BENCHMARK_POINT "
             "FR_BENCHMARK_RANGE FR_BENCHMARK_ROWS FR_BENCHMARK_TEST")),
 
         // the computer running FlameRobin
         measure("computer.files", 1, C::LocalMachine, "ms", lower, fixedWork, "localFiles",
-            ""),
-        key("computer.burst", 1, C::LocalMachine, "ms", lower, fixedWork, "bursts", "",
-            wxTRANSLATE("Short calculation"), &BenchmarkValues::clientCpuBurstMs),
+            "localFileSize", ""),
+        key("computer.burst", 1, C::LocalMachine, "ms", lower, fixedWork, "bursts",
+            "clientBurstIterations idlePauseMs", "", wxTRANSLATE("Short calculation"),
+            &BenchmarkValues::clientCpuBurstMs),
         info("computer.power", 1, C::LocalMachine),
         info("computer.keepalive", 1, C::LocalMachine),
 
         // programming patterns
         measure("application.rowByRow", 1, C::Application, "rows/s", higher, fixedWork,
-            "rowByRowRows", "rowInsert fillRows FR_BENCHMARK_ROWS FR_BENCHMARK_FILL_ROWS"),
+            "rowByRowRows", "",
+            "rowInsert fillRows FR_BENCHMARK_ROWS FR_BENCHMARK_FILL_ROWS"),
         measure("application.prepare", 1, C::Application, "ms", lower, fixedWork,
-            "prepareCount", "prepareProbe FR_BENCHMARK_TEST FR_BENCHMARK_ROWS"),
-        info("application.blob", 1, C::Application, "blobCount",
+            "prepareCount", "", "prepareProbe FR_BENCHMARK_TEST FR_BENCHMARK_ROWS"),
+        info("application.blob", 1, C::Application, "blobCount", "blobSize blobChunk",
             "blobInsert blobRead FR_BENCHMARK_BLOB"),
-        info("application.versions", 1, C::Application, "versionRounds",
+        info("application.versions", 1, C::Application, "versionRounds", "versionReads",
             "hotFill hotUpdate hotRead FR_BENCHMARK_HOT"),
 
         // settings and engine statistics, compared as facts
         info("settings.runsOn", 1, C::Environment),
-        info("settings.firebird", 1, C::Environment, "", "engineVersion"),
-        info("settings.architecture", 1, C::Environment, "parallelConnections",
+        info("settings.firebird", 1, C::Environment, "", "", "engineVersion"),
+        info("settings.architecture", 1, C::Environment, "parallelConnections", "",
             "serverProcesses"),
-        info("settings.client", 1, C::Environment, "", "attachmentInfo"),
-        info("settings.protocol", 1, C::Environment, "",
+        info("settings.client", 1, C::Environment, "", "", "attachmentInfo"),
+        info("settings.protocol", 1, C::Environment, "", "",
             "attachmentInfo attachmentWireInfo"),
-        info("settings.login", 1, C::Environment, "",
+        info("settings.login", 1, C::Environment, "", "",
             "attachmentDetails securityDatabase sessionUser"),
-        info("settings.timeouts", 1, C::Environment, "", "attachmentTimeouts"),
-        info("settings.testDatabase", 1, C::Environment, "", "databaseInfo"),
-        info("settings.selectedSize", 1, C::Environment, "", "databaseInfo"),
-        info("settings.selectedCache", 1, C::Environment, "", "databaseInfo"),
+        info("settings.timeouts", 1, C::Environment, "", "", "attachmentTimeouts"),
+        info("settings.testDatabase", 1, C::Environment, "", "", "databaseInfo"),
+        info("settings.selectedSize", 1, C::Environment, "", "", "databaseInfo"),
+        info("settings.selectedCache", 1, C::Environment, "", "", "databaseInfo"),
         info("settings.selectedForcedWrites", 1, C::Environment),
         info("settings.selectedTransactions", 1, C::Environment),
-        info("settings.selectedLinger", 1, C::Environment, "", "databaseLinger"),
-        family(info("settings.conf", 1, C::Environment, "", "serverConfig")),
-        info("settings.pageIo", 1, C::Environment, "", "ioStats"),
-        info("settings.pageAccess", 1, C::Environment, "", "ioStats"),
-        info("settings.recordVersions", 1, C::Environment, "", "recordStats")
+        info("settings.selectedLinger", 1, C::Environment, "", "", "databaseLinger"),
+        family(info("settings.conf", 1, C::Environment, "", "", "serverConfig")),
+        info("settings.pageIo", 1, C::Environment, "", "", "ioStats"),
+        info("settings.pageAccess", 1, C::Environment, "", "", "ioStats"),
+        info("settings.recordVersions", 1, C::Environment, "", "", "recordStats")
     };
     return defs;
 }
@@ -363,7 +377,7 @@ BenchmarkValues getBenchmarkValues(const BenchmarkMetrics& m)
     }
     for (const auto& o : m.oltp)
     {
-        if (o.seconds > 0.0 && o.clients <= oltpKeyClients)
+        if (o.seconds > 0.0 && o.clients <= BenchmarkWorkload::oltpKeyClients)
         {
             v.oltpTransactionsPerSecond = std::max(v.oltpTransactionsPerSecond,
                 o.transactions / o.seconds);
