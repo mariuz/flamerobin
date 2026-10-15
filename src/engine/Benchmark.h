@@ -390,6 +390,10 @@ struct BenchmarkHint
     wxString title;     // the possible cause in plain words
     wxString detail;    // what was measured or read
     wxString advice;    // what can be done about it
+    // what was noticed, as a state or a ratio without a cause or a judgement,
+    // for the report of a single run; empty where the title says it already.
+    // Not saved: a saved report has the title only
+    wxString noticed;
 };
 
 ///
@@ -414,6 +418,7 @@ struct BenchmarkKeyValue
 {
     wxString id;            // see the register in BenchmarkValues.cpp
     wxString title;
+    double value = 0.0;     // in the unit of the register
     wxString valueText;     // with unit
     // the work behind the value, e.g. "200 commits" in 88 ms
     wxString amountText;
@@ -743,6 +748,35 @@ BenchmarkValues getBenchmarkValues(const BenchmarkMetrics& m);
 /// report; without the network for the embedded engine
 std::vector<BenchmarkPart> getBenchmarkParts(const BenchmarkMetrics& m);
 
+///
+/// A key figure: one of the few key values that the overview of a report
+/// shows in large, with a short name. A single run is not judged, so a key
+/// figure is a measured value only.
+///
+struct BenchmarkHeadline
+{
+    wxString id;            // see the register
+    BenchmarkCategory section;
+    wxString name;          // short, e.g. "Writing rows"
+    wxString number;        // "40,613"
+    wxString unit;          // short, e.g. "rows/s"
+    wxString work;          // "50,000 rows in 1231 ms"
+};
+/// the ids of the key figures in the order of the report: processor, saving
+/// a change, writing rows, reading from memory, the network and several
+/// users; every one is a key value of the register
+const std::vector<const char*>& getBenchmarkHeadlineIds();
+/// the key figures that a run measured; the embedded engine has no network
+std::vector<BenchmarkHeadline> getBenchmarkHeadlineValues(const BenchmarkSnapshot& run);
+/// a value in large: its number and its short unit, e.g. "40,613" and
+/// "rows/s", "0.56" and "ms"
+std::pair<wxString, wxString> formatBenchmarkFigure(double value,
+    const BenchmarkMeasurementDef& def);
+/// the notes of a run: every kind of hint once, for the first part it was
+/// given for, in the order they were found; at most maximum
+std::vector<BenchmarkHint> getBenchmarkTopHints(const BenchmarkReport& report,
+    size_t maximum);
+
 /// whether a measurement of two runs could be compared
 enum class BenchmarkCompareState
 {
@@ -869,6 +903,69 @@ wxString getBenchmarkReasonsTitle(const BenchmarkComparison& comparison,
 /// is part of a report
 wxString formatBenchmarkComparisonMarkdown(const BenchmarkComparison& comparison,
     bool standalone);
+
+/// A key figure in two runs, see getBenchmarkHeadlineValues()
+struct BenchmarkHeadlineChange
+{
+    wxString id;
+    BenchmarkCategory section;
+    wxString name;
+    wxString unit;
+    wxString olderNumber;   // empty if the run has none
+    wxString newerNumber;
+    double ratio = 0.0;     // > 1: the newer run is faster, 0: not compared
+    BenchmarkCompareState state = BenchmarkCompareState::Compared;
+};
+/// every key figure that one of the runs measured
+std::vector<BenchmarkHeadlineChange> getBenchmarkHeadlineChanges(
+    const BenchmarkComparison& comparison);
+/// the key figures of a comparison counted by their change: the main
+/// statement of a comparison
+struct BenchmarkVerdict
+{
+    int faster = 0;
+    int slower = 0;
+    int same = 0;           // within the normal variation
+    int notComparable = 0;  // in one run only, or the test or its work changed
+};
+BenchmarkVerdict getBenchmarkVerdict(const BenchmarkComparison& comparison);
+/// the main statement in words, e.g. "4 key figures faster", "1 slower",
+/// "1 about the same", without the counts that are 0; with the direction of
+/// each: 1 faster, -1 slower, 0 about the same
+std::vector<std::pair<int, wxString>> describeBenchmarkVerdict(const BenchmarkVerdict& verdict);
+/// what the main statement leaves out: the parts that one run did not
+/// measure ("NET measured in this run only") and the key figures that were
+/// not compared
+std::vector<wxString> getBenchmarkVerdictNotes(const BenchmarkComparison& comparison);
+/// whether a part was measured in both runs: OnlyNewer or OnlyOlder when
+/// all its values are in one run only, TestChanged when none of them could
+/// be compared, otherwise Compared
+BenchmarkCompareState getBenchmarkPartState(const BenchmarkComparison& comparison,
+    BenchmarkCategory section);
+/// the parts that differ clearly, the largest change first; at most maximum
+std::vector<const BenchmarkComparedPart*> getBenchmarkStandOut(
+    const BenchmarkComparison& comparison, size_t maximum);
+/// the most likely reason why a part differs: the first fact that differs,
+/// otherwise the first hint of the slower run, otherwise the first typical
+/// cause; empty if there is none
+wxString getBenchmarkLikelyReason(const BenchmarkComparedPart& part);
+/// what to try about a part that differs, also when it got faster: the
+/// advice about the first fact that differs, otherwise the first sentence
+/// of the advice of the first hint or typical cause
+wxString getBenchmarkTryAdvice(const BenchmarkComparedPart& part);
+/// the first sentence of an advice, for one line
+wxString getBenchmarkShortAdvice(const wxString& advice);
+/// "new", "no longer measured" or "not comparable"; empty for a value that
+/// was compared
+wxString getBenchmarkCompareStateName(BenchmarkCompareState state);
+/// why a value of two runs was not compared, in one sentence; empty if it
+/// was
+wxString describeBenchmarkCompareState(const BenchmarkComparison& comparison,
+    const BenchmarkComparedValue& value);
+/// the work behind a value in both runs: "200 commits: 820 ms -> 240 ms",
+/// or both works where the amounts differ
+wxString formatBenchmarkComparedWork(const BenchmarkComparison& comparison,
+    const BenchmarkComparedValue& value);
 /// the work behind a key value: this amount of unit in ms, and how the
 /// report shows the amount
 struct BenchmarkWork
@@ -925,6 +1022,9 @@ std::vector<BenchmarkResult> buildBenchmarkResults(const BenchmarkMetrics& m);
 std::vector<BenchmarkHint> findBenchmarkHints(const BenchmarkMetrics& m);
 /// the typical causes when a key value is slower than in another run
 wxString getBenchmarkValueAdvice(const wxString& id);
+/// what to do when a fact (see getBenchmarkFacts()) differs between two
+/// runs, in one or two sentences; empty for a fact without advice
+wxString getBenchmarkFactAdvice(const wxString& key);
 /// the settings of Firebird and of the inspected database that influence
 /// the results
 std::vector<BenchmarkSetting> getBenchmarkSettings(const BenchmarkMetrics& m);
@@ -937,6 +1037,8 @@ std::vector<BenchmarkCategory> getBenchmarkReportSections();
 /// statistics: configuration)
 BenchmarkCategory getBenchmarkReportSection(BenchmarkCategory category);
 wxString getBenchmarkReportSectionName(BenchmarkCategory section);
+/// a short word for a section, e.g. "CPU", "DISK", "RAM", "NET"
+wxString getBenchmarkReportSectionWord(BenchmarkCategory section);
 /// "cpu", "storage", "memory", "network", "users", "computer",
 /// "application" or "settings": the first part of the ids of a section,
 /// the same in every language

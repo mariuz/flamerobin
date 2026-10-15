@@ -1586,7 +1586,7 @@ void testAnonymized()
     earlier.facts.push_back({ "conf.RemoteBindAddress", "172.31.5.6" });
     earlier.hints.push_back({ "network.nat", BenchmarkCategory::Network, "A router or VPN "
         "sits between this computer and the server", "The server sees this machine as "
-        "172.31.5.7", "" });
+        "172.31.5.7", "", "" });
     report.earlier = earlier;
 
     const BenchmarkReport shared = report.anonymized();
@@ -1731,7 +1731,7 @@ void testSnapshotFormat()
     level.unit = "tx/s";
     s.measurements = { insert, dns, level };
     s.facts = { { "os", "Windows 11" } };
-    s.hints = { { "power.saving", C::ServerCpu, "Power saving", "detail", "advice" } };
+    s.hints = { { "power.saving", C::ServerCpu, "Power saving", "detail", "advice", "" } };
     const wxString text = formatBenchmarkSnapshot(s);
     check(text.Contains("\nformat = 2.0\nprogram = 26.10.0\nrun.title = HP ZBook\n")
         && text.Contains("\nm.storage.insert = 1234.5 | rows/s | v1 | 1234567 | rows | 0.0125 | "
@@ -2204,7 +2204,7 @@ void testComparison()
     client.facts.push_back({ "conf.TempDirectories", "E:\\Temp" });
     client.hints.push_back({ "network.nat", C::Network, "A router or VPN sits between this "
         "computer and the server", "The server sees this machine as 10.1.2.3",
-        "Devices add latency." });
+        "Devices add latency.", "" });
     const BenchmarkSnapshot hidden = anonymizeBenchmarkSnapshot(client);
     check(hidden.host.empty() && hidden.title == "Firebird server"
         && std::none_of(hidden.facts.begin(), hidden.facts.end(),
@@ -2233,6 +2233,365 @@ void testComparison()
         && sharedFiles.toMarkdown().Contains("Hyper-V on <hidden>")
         && sharedFiles.newerIsCurrentRun && sharedFiles.newer.host.empty(),
         "a shared comparison of two files hides their computer names");
+}
+
+void testKeyFigures()
+{
+    std::cout << "Key figures and notes of a single run\n";
+    using C = BenchmarkCategory;
+    const std::vector<const char*>& ids = getBenchmarkHeadlineIds();
+    bool registered = ids.size() == 6;
+    BenchmarkCategory previous = C::ServerCpu;
+    for (const char* id : ids)
+    {
+        const BenchmarkMeasurementDef* def = findBenchmarkMeasurementDef(id);
+        registered = registered && def && def->kind == BenchmarkMeasurementKind::Key
+            && !def->family && !def->retired && def->value
+            && std::count(ids.begin(), ids.end(), id) == 1;
+        // in the order of the sections of the report
+        const auto sections = getBenchmarkReportSections();
+        registered = registered && def && std::find(sections.begin(), sections.end(),
+            def->section) >= std::find(sections.begin(), sections.end(), previous);
+        if (def)
+            previous = def->section;
+    }
+    check(registered, "every key figure is a key value of the register, once, in the "
+        "order of the report");
+
+    const BenchmarkSnapshot client = makeBenchmarkSnapshot(makeReport(healthyMetrics(),
+        "2026-10-04 12:00:00"));
+    const std::vector<BenchmarkHeadline> six = getBenchmarkHeadlineValues(client);
+    const std::vector<BenchmarkHeadline> five = getBenchmarkHeadlineValues(
+        makeBenchmarkSnapshot(makeReport(serverMetrics(), "2026-10-04 12:00:00")));
+    check(six.size() == 6 && five.size() == 5
+        && std::none_of(five.begin(), five.end(),
+            [](const BenchmarkHeadline& h) { return h.section == C::Network; }),
+        "six key figures over a network, five for the embedded engine");
+    auto figure = [&six](const char* id) -> const BenchmarkHeadline*
+    {
+        auto it = std::find_if(six.begin(), six.end(),
+            [id](const BenchmarkHeadline& h) { return h.id == id; });
+        return it == six.end() ? nullptr : &*it;
+    };
+    const BenchmarkHeadline* commit = figure("storage.commit");
+    const BenchmarkHeadline* users = figure("users.oltp");
+    const BenchmarkHeadline* insert = figure("storage.insert");
+    check(commit && commit->number == "1.50" && commit->unit == "ms"
+        && commit->name == "Saving a change (commit)"
+        && commit->work == "200 commits in 300 ms"
+        && insert && insert->number == "58,824" && insert->unit == "rows/s"
+        && insert->name == "Writing rows"
+        && users && users->unit == "tx/s" && users->number == "6,000"
+        && users->work.StartsWith("30,000 transactions in "),
+        "a key figure: a number, a short unit, a short name and the work behind it");
+    const BenchmarkMeasurementDef* scan = findBenchmarkMeasurementDef("memory.scan");
+    const BenchmarkMeasurementDef* drive = findBenchmarkMeasurementDef("storage.drive");
+    check(scan && formatBenchmarkFigure(3086.94, *scan) == std::make_pair(wxString("3,087"),
+            wxString("MB/s"))
+        && formatBenchmarkFigure(12.345, *scan).first == "12.3"
+        && formatBenchmarkFigure(1.5, *scan).first == "1.50"
+        && drive && formatBenchmarkFigure(9418.2, *drive).second == "ops/s",
+        "large numbers without decimals, small ones with");
+    check(getBenchmarkHeadlineValues(BenchmarkSnapshot()).empty(),
+        "no key figures without values");
+
+    // short words for the sections, the same in every report
+    std::set<wxString> words;
+    for (BenchmarkCategory section : getBenchmarkReportSections())
+        words.insert(getBenchmarkReportSectionWord(section));
+    check(words.size() == getBenchmarkReportSections().size() && !words.count(wxString())
+        && getBenchmarkReportSectionWord(C::ServerStorage) == "DISK"
+        && getBenchmarkReportSectionWord(C::Connection) == "NET"
+        && getBenchmarkReportSectionWord(C::Engine) == "CONFIG",
+        "every section has its own short word");
+
+    // the notes: every kind once, at most three in the overview
+    BenchmarkMetrics noticed = serverMetrics();
+    noticed.clientBurstIdleMs = 25.0;
+    noticed.system.antivirus = { "Windows Defender (on)" };
+    noticed.system.storagePathExcluded = false;
+    noticed.system.virtualization = "VMware";
+    noticed.benchmarkDatabase.cachePages = 2048;
+    BenchmarkReport report = makeReport(noticed, "2026-10-04 12:00:00");
+    const std::vector<BenchmarkHint> top = getBenchmarkTopHints(report, 3);
+    const std::vector<BenchmarkHint> all = getBenchmarkTopHints(report, 100);
+    std::set<wxString> kinds;
+    for (const BenchmarkHint& h : report.hints)
+        kinds.insert(h.id);
+    check(report.hints.size() > all.size() && all.size() == kinds.size() && top.size() == 3
+        && top[0].id == report.hints[0].id && top[0].id == "power.saving"
+        && top[1].id == all[1].id && top[2].id == all[2].id,
+        "every kind of note once, in the order found, at most three");
+}
+
+// metrics on which every check of BenchmarkAnalyzer.cpp finds something
+std::vector<BenchmarkMetrics> noticedMetrics()
+{
+    BenchmarkMetrics server = serverMetrics();
+    server.clientBurstIdleMs = 25.0;
+    server.localOnBattery = true;
+    server.serverBurstIdleMs = 75.0;
+    server.system.antivirus = { "Windows Defender (on)" };
+    server.databaseDirFileMs = 4.0;
+    server.system.storagePathExcluded = false;
+    server.parallelCpuMs = 280.0;
+    server.system.virtualization = "VMware";
+    server.system.firebirdServers = { { "A", "", true }, { "B", "", true } };
+    server.system.otherDatabaseServers = { { "MSSQLSERVER", "", true } };
+    server.commitMs = 20.0;
+    server.osSyncWriteMs = 0.5;
+    server.tempSortMs = 20000.0;
+    server.system.storagePath = "D:\\db";
+    server.system.storageHealthWarning = true;
+    server.system.storageHealth = { { "Media and data integrity errors", "12", true } };
+    server.system.storageMedia = "HDD";
+    server.system.writeCacheEnabled = false;
+    server.databaseDiskFreeBytes = int64_t(1) * 1024 * 1024 * 1024;
+    server.benchmarkDatabase.cachePages = 2048;
+    server.coldScanMs = 2000.0;
+    server.warmScanMs = 100.0;
+    server.serverSortMs = 800.0;
+    server.system.memoryTotalBytes = int64_t(32) * 1024 * 1024 * 1024;
+    server.system.memoryAvailableBytes = int64_t(1) * 1024 * 1024 * 1024;
+    server.oltp.back().transactions = 6000;
+    server.oltp.back().conflicts = 1000;
+    server.oltp.push_back({ 250, 4000, 0, 5.0, 300.0, 600.0 });
+    BenchmarkMetrics plan = healthyMetrics();
+    plan.system.powerPlan = "Balanced";
+    plan.serverConfig["ServerMode"] = "Classic";
+    plan.serverBurstIdleMs = 75.0;
+    BenchmarkMetrics client = healthyMetrics();
+    client.latencySparseMs = 1.2;
+    client.latencyP95Ms = 2.0;
+    client.streamClientMs = 500.0;
+    client.clientVersion = "WI-V3.0.10.33601 Firebird 3.0";
+    client.latencyOutliers = 10;
+    client.networkPath = BenchmarkNetworkPath();
+    client.networkPath->adapterType = "Wi-Fi";
+    client.networkPath->linkSpeedBitsPerSecond = 1000000000;
+    client.remoteAddress = "10.0.0.5/51234";
+    client.system.addresses = { { "WLAN", "Wi-Fi", "192.168.178.58" } };
+    client.serverPorts = { { 3050, BenchmarkPortCheck::State::Open, 2.0 } };
+    client.serverPort = 3050;
+    client.connectMs = 400.0;
+    BenchmarkMetrics vpn = client;
+    vpn.networkPath->adapterType = "VPN";
+    vpn.streamMs = 10000.0;
+    return { server, plan, client, vpn };
+}
+
+void testNeutralNotes()
+{
+    std::cout << "Notes of a single run without a judgement\n";
+    std::map<wxString, wxString> titles;
+    for (const BenchmarkMetrics& m : noticedMetrics())
+    {
+        for (const BenchmarkHint& h : findBenchmarkHints(m))
+            titles[h.id] = h.noticed.empty() ? h.title : h.noticed;
+    }
+    // every check of the analyzer: power and pauses (5), virus scanners (2),
+    // processor and other servers (4), storage (6), memory (5), network (9),
+    // users (3)
+    bool neutral = titles.size() == 34;
+    if (!neutral)
+        std::cerr << "    " << titles.size() << " kinds of notes\n";
+    for (const auto& t : titles)
+    {
+        const wxString lower = t.second.Lower();
+        for (const char* judgement : { "slow", "little", "much", "lost", "old ", "problem",
+            "do not", "too ", "most", "saves energy", "vary a lot", "may " })
+        {
+            if (lower.Contains(judgement))
+            {
+                std::cerr << "    " << t.first << ": " << t.second << "\n";
+                neutral = false;
+            }
+        }
+    }
+    check(neutral, "every note names a state or a ratio, no cause and no judgement");
+
+    // the neutral titles are not saved: the saved results stay as they were
+    BenchmarkReport report = makeReport(noticedMetrics()[0], "2026-10-04 12:00:00");
+    const wxString saved = formatBenchmarkSnapshot(makeBenchmarkSnapshot(report));
+    BenchmarkReport withoutTitles = report;
+    for (BenchmarkHint& h : withoutTitles.hints)
+        h.noticed.clear();
+    const bool hidden = saved == formatBenchmarkSnapshot(makeBenchmarkSnapshot(withoutTitles))
+        && std::any_of(report.hints.begin(), report.hints.end(),
+            [](const BenchmarkHint& h) { return !h.noticed.empty(); });
+    check(hidden && saved.Contains("note.power.saving = cpu | Power saving slows down the "
+        "server |"), "a saved report keeps the titles of the hints");
+}
+
+void testVerdict()
+{
+    std::cout << "Main statement of a comparison\n";
+    using C = BenchmarkCategory;
+    using S = BenchmarkCompareState;
+    const BenchmarkSnapshot older = makeBenchmarkSnapshot(makeReport(healthyMetrics(),
+        "2026-10-04 12:00:00"));
+    auto edit = [](BenchmarkSnapshot s, const std::function<bool(BenchmarkMeasurement&)>& keep)
+    {
+        s.measurements.erase(std::remove_if(s.measurements.begin(), s.measurements.end(),
+            [&keep](BenchmarkMeasurement& x) { return !keep(x); }), s.measurements.end());
+        return s;
+    };
+    // one key figure for every state
+    const BenchmarkSnapshot newer = edit(older, [](BenchmarkMeasurement& x)
+        {
+            if (x.id == "cpu.single")
+                x.value *= 1.5;
+            else if (x.id == "storage.commit")
+                x.version = 2;
+            else if (x.id == "storage.insert")
+                x.amount = 60000;
+            else if (x.id == "users.oltp")
+                x.value /= 2.0;
+            return x.id != "network.roundTrip";
+        });
+    const BenchmarkComparison c = compareBenchmarkSnapshots(newer, older);
+    const std::vector<BenchmarkHeadlineChange> changes = getBenchmarkHeadlineChanges(c);
+    auto change = [&changes](const char* id) -> const BenchmarkHeadlineChange*
+    {
+        auto it = std::find_if(changes.begin(), changes.end(),
+            [id](const BenchmarkHeadlineChange& h) { return h.id == id; });
+        return it == changes.end() ? nullptr : &*it;
+    };
+    const BenchmarkHeadlineChange* cpu = change("cpu.single");
+    const BenchmarkHeadlineChange* commit = change("storage.commit");
+    const BenchmarkHeadlineChange* insert = change("storage.insert");
+    const BenchmarkHeadlineChange* scan = change("memory.scan");
+    const BenchmarkHeadlineChange* roundTrip = change("network.roundTrip");
+    const BenchmarkHeadlineChange* users = change("users.oltp");
+    check(changes.size() == 6 && cpu && cpu->state == S::Compared
+        && std::abs(cpu->ratio - 1.5) < 1e-9 && commit && commit->state == S::TestChanged
+        && insert && insert->state == S::WorkChanged && scan && scan->ratio == 1.0
+        && roundTrip && roundTrip->state == S::OnlyOlder && roundTrip->newerNumber.empty()
+        && roundTrip->olderNumber == "0.20" && roundTrip->unit == "ms"
+        && users && std::abs(users->ratio - 0.5) < 1e-9 && users->newerNumber == "3,000"
+        && users->olderNumber == "6,000", "the key figures of both runs with their states");
+    const BenchmarkVerdict verdict = getBenchmarkVerdict(c);
+    check(verdict.faster == 1 && verdict.slower == 1 && verdict.same == 1
+        && verdict.notComparable == 3, "faster, slower, about the same and not comparable");
+    const BenchmarkComparison reverse = compareBenchmarkSnapshots(older, newer);
+    const std::vector<BenchmarkHeadlineChange> reverseChanges = getBenchmarkHeadlineChanges(
+        reverse);
+    check(std::any_of(reverseChanges.begin(), reverseChanges.end(),
+        [](const BenchmarkHeadlineChange& h)
+        { return h.id == "network.roundTrip" && h.state == S::OnlyNewer
+            && h.olderNumber.empty() && h.newerNumber == "0.20"; }),
+        "a key figure of the newer run only is new");
+
+    // the states of the parts
+    const BenchmarkSnapshot noNetwork = edit(older, [](BenchmarkMeasurement& x)
+        { return !x.id.StartsWith("network."); });
+    const BenchmarkSnapshot changedMemory = edit(older, [](BenchmarkMeasurement& x)
+        {
+            if (x.id.StartsWith("memory."))
+                x.version = 2;
+            return true;
+        });
+    const BenchmarkComparison lost = compareBenchmarkSnapshots(noNetwork, older);
+    const BenchmarkComparison gained = compareBenchmarkSnapshots(older, noNetwork);
+    const BenchmarkComparison memory = compareBenchmarkSnapshots(changedMemory, older);
+    check(getBenchmarkPartState(lost, C::Network) == S::OnlyOlder
+        && getBenchmarkPartState(gained, C::Network) == S::OnlyNewer
+        && getBenchmarkPartState(memory, C::ServerCache) == S::TestChanged
+        && getBenchmarkPartState(c, C::ServerCpu) == S::Compared
+        && getBenchmarkPartState(c, C::Application) == S::Compared
+        && c.findPart(C::Application) && c.findPart(C::Application)->ratio == 0.0,
+        "a part in one run only, a part that cannot be compared, a part without points");
+    const std::vector<std::pair<int, wxString>> words = describeBenchmarkVerdict(
+        getBenchmarkVerdict(c));
+    BenchmarkVerdict slowerOnly;
+    slowerOnly.slower = 2;
+    slowerOnly.same = 1;
+    const std::vector<wxString> lostNotes = getBenchmarkVerdictNotes(lost);
+    const std::vector<wxString> memoryNotes = getBenchmarkVerdictNotes(memory);
+    check(words.size() == 3 && words[0] == std::make_pair(1, wxString("1 key figure faster"))
+        && words[1] == std::make_pair(-1, wxString("1 slower"))
+        && words[2] == std::make_pair(0, wxString("1 about the same"))
+        && describeBenchmarkVerdict(slowerOnly).front().second == "2 key figures slower"
+        && describeBenchmarkVerdict(BenchmarkVerdict()).empty()
+        && getBenchmarkVerdictNotes(c) == std::vector<wxString>{ "3 key figures not compared" }
+        && lostNotes == std::vector<wxString>{ "NET measured in the earlier run only",
+            "1 key figure not compared" }
+        && getBenchmarkVerdictNotes(gained).front() == "NET measured in the later run only"
+        && std::count(memoryNotes.begin(), memoryNotes.end(), "RAM not comparable") == 1,
+        "the main statement and what it leaves out, in words");
+
+    // what stands out: the parts that differ clearly, the largest first
+    const std::vector<const BenchmarkComparedPart*> standOut = getBenchmarkStandOut(c, 5);
+    check(standOut.size() == 2 && standOut[0]->category == C::MultiUser
+        && standOut[1]->category == C::ServerCpu && getBenchmarkStandOut(c, 1).size() == 1,
+        "the parts that differ clearly, the largest change first");
+
+    // the states in words, and why a value is not comparable
+    const BenchmarkComparedValue* commitValue = findCompared(c, "storage.commit");
+    const BenchmarkComparedValue* insertValue = findCompared(c, "storage.insert");
+    const BenchmarkComparedValue* cpuValue = findCompared(c, "cpu.single");
+    check(getBenchmarkCompareStateName(S::OnlyNewer) == "new"
+        && getBenchmarkCompareStateName(S::OnlyOlder) == "no longer measured"
+        && getBenchmarkCompareStateName(S::WorkChanged) == "not comparable"
+        && getBenchmarkCompareStateName(S::Compared).empty()
+        && commitValue && describeBenchmarkCompareState(c, *commitValue)
+            == "The test changed (version 2, earlier version 1)."
+        && insertValue && describeBenchmarkCompareState(c, *insertValue)
+            == "Other work: 60,000 rows, earlier 50,000 rows."
+        && cpuValue && describeBenchmarkCompareState(c, *cpuValue).empty(),
+        "the states in words");
+    check(cpuValue && formatBenchmarkComparedWork(c, *cpuValue)
+            == "100,000 iterations: 65.00 ms " + wxString(wxUniChar(0x2192)) + " 65.00 ms"
+        && insertValue && formatBenchmarkComparedWork(c, *insertValue)
+            == "50,000 rows in 850 ms " + wxString(wxUniChar(0x2192)) + " 60,000 rows in 850 ms",
+        "the work of both runs");
+}
+
+void testReasonLines()
+{
+    std::cout << "Likely reason and what to try\n";
+    using C = BenchmarkCategory;
+    const wxString arrow = wxString(" ") + wxUniChar(0x2192) + " ";
+    BenchmarkComparedPart power;
+    power.category = C::ServerCpu;
+    power.ratio = 1.4;
+    power.differences.push_back({ "power", "Power plan", "High performance", "Balanced" });
+    power.hints.push_back({ "power.saving", C::ServerCpu, "Power saving slows down the "
+        "server", "detail", "Windows: select the power plan. And more.", "" });
+    power.advice.push_back({ "Calculating, one user", "A slower processor. Check it." });
+    check(getBenchmarkLikelyReason(power) == "Power plan: Balanced" + arrow + "High performance"
+        && getBenchmarkTryAdvice(power).Contains("powercfg"),
+        "a fact that differs comes first, with its advice");
+    BenchmarkComparedPart other = power;
+    other.differences.front().key = "os";
+    check(getBenchmarkTryAdvice(other) == "Windows: select the power plan.",
+        "a fact without advice: the first sentence of the advice of a hint");
+    BenchmarkComparedPart hint = power;
+    hint.differences.clear();
+    check(getBenchmarkLikelyReason(hint) == "Power saving slows down the server"
+        && getBenchmarkTryAdvice(hint) == "Windows: select the power plan.",
+        "otherwise the hint of the slower run");
+    BenchmarkComparedPart typical = hint;
+    typical.hints.clear();
+    check(getBenchmarkLikelyReason(typical).empty()
+        && getBenchmarkTryAdvice(typical).StartsWith("Repeat the slower run"),
+        "only typical causes: no likely reason, but what to try");
+    check(getBenchmarkLikelyReason(BenchmarkComparedPart()).empty()
+        && getBenchmarkTryAdvice(BenchmarkComparedPart()).empty(), "nothing without reasons");
+    check(getBenchmarkShortAdvice("Do this. Then that.") == "Do this."
+        && getBenchmarkShortAdvice("Just this.") == "Just this."
+        && getBenchmarkShortAdvice("Current setting: Balanced. Windows: select the power "
+            "plan. Also this.") == "Windows: select the power plan.",
+        "the first sentence that advises something");
+    bool facts = true;
+    for (const char* key : { "power", "access", "scanner", "pagecache",
+        "conf.DefaultDbCachePages", "firebird", "conf.ServerMode", "cores", "ram", "storage",
+        "virtual", "forcedwrites", "wire", "conf.WireCrypt", "conf.TempCacheLimit" })
+    {
+        facts = facts && !getBenchmarkFactAdvice(key).empty();
+    }
+    check(facts && getBenchmarkFactAdvice("scanner").Contains("on-access virus scanning")
+        && getBenchmarkFactAdvice("system").empty(), "advice for the facts that matter");
 }
 
 // ---------------------------------------------- registry.golden and fixtures
@@ -2979,6 +3338,10 @@ int main(int argc, char** argv)
     testSnapshotFormat();
     testCompareStates();
     testComparison();
+    testKeyFigures();
+    testNeutralNotes();
+    testVerdict();
+    testReasonLines();
     testGolden(dataDirectory);
     testWorkloadConstants(dataDirectory);
     testFixtures(dataDirectory);

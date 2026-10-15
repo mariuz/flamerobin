@@ -1045,6 +1045,7 @@ BenchmarkReport BenchmarkReport::anonymized() const
         scrub(h.title);
         scrub(h.detail);
         scrub(h.advice);
+        scrub(h.noticed);
     }
     for (auto& s : r.settings)
     {

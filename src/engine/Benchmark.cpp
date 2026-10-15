@@ -1508,6 +1508,32 @@ wxString getBenchmarkReportSectionName(BenchmarkCategory section)
     }
 }
 
+wxString getBenchmarkReportSectionWord(BenchmarkCategory section)
+{
+    // short words next to the pictograms of the report, so that it is clear
+    // at once what a part tests
+    switch (getBenchmarkReportSection(section))
+    {
+        case BenchmarkCategory::ServerCpu:
+            return _("CPU");
+        case BenchmarkCategory::ServerStorage:
+            return _("DISK");
+        case BenchmarkCategory::ServerCache:
+            return _("RAM");
+        case BenchmarkCategory::Network:
+            return _("NET");
+        case BenchmarkCategory::MultiUser:
+            return _("USERS");
+        case BenchmarkCategory::LocalMachine:
+            return _("LOCAL");
+        case BenchmarkCategory::Application:
+            return _("APP");
+        case BenchmarkCategory::Environment:
+        default:
+            return _("CONFIG");
+    }
+}
+
 wxString getBenchmarkConnectionKindName(BenchmarkConnectionKind kind)
 {
     switch (kind)

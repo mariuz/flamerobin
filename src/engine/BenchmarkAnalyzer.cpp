@@ -49,6 +49,13 @@ const double gigabyte = 1024.0 * megabyte;
 
 using C = BenchmarkCategory;
 
+wxString virusScanExclusions()
+{
+    return _("Exclude the database files (*.fdb, nbackup delta files), the Firebird "
+        "temporary directory and the Firebird server process from on-access virus "
+        "scanning.");
+}
+
 class HintFinder
 {
 public:
@@ -91,20 +98,21 @@ private:
         return it == m.serverConfig.end() ? wxString() : it->second;
     }
 
-    // id: the kind of hint, the same in every language
+    // id: the kind of hint, the same in every language; noticed: what was
+    // seen, as a state or a ratio, where the title names a possible cause
     void add(const char* id, C category, const wxString& title, const wxString& detail,
-        const wxString& advice)
+        const wxString& advice, const wxString& noticed = wxEmptyString)
     {
-        hints.push_back({ id, category, title, detail, advice });
+        hints.push_back({ id, category, title, detail, advice, noticed });
     }
 
     // a hint about this machine; on the server it is the server as well
     void addLocal(const char* id, const wxString& title, const wxString& detail,
-        const wxString& advice)
+        const wxString& advice, const wxString& noticed = wxEmptyString)
     {
-        add(id, C::LocalMachine, title, detail, advice);
+        add(id, C::LocalMachine, title, detail, advice, noticed);
         if (onServer())
-            add(id, C::ServerCpu, title, detail, advice);
+            add(id, C::ServerCpu, title, detail, advice, noticed);
     }
 
     static wxString ms(double value)
@@ -120,9 +128,7 @@ private:
 
     wxString antivirusAdvice(const wxString& os) const
     {
-        wxString common = _("Exclude the database files (*.fdb, nbackup "
-            "delta files), the Firebird temporary directory and the Firebird "
-            "server process from on-access virus scanning.");
+        wxString common = virusScanExclusions();
         if (os == "Windows")
         {
             return common + " " + _("On Windows add the exclusions in "
@@ -274,14 +280,16 @@ private:
                 wxString::Format(_("A short CPU burst after an idle pause takes "
                     "%.1fx as long as the same burst back to back; the CPU "
                     "clocks down when idle."), local),
-                localPowerAdvice());
+                localPowerAdvice(),
+                wxString::Format(_("A short CPU burst after an idle pause takes %.1fx as "
+                    "long"), local));
         }
         else if (powerAlreadyMaximum().has_value() && !*powerAlreadyMaximum())
         {
+            const wxString plan = wxString::FromUTF8(m.system.powerPlan.c_str());
             addLocal("power.plan", _("The power plan saves energy"),
-                wxString::Format(_("Current setting: %s."),
-                    wxString::FromUTF8(m.system.powerPlan.c_str())),
-                powerAdvice(localOs()));
+                wxString::Format(_("Current setting: %s."), plan), powerAdvice(localOs()),
+                wxString::Format(_("Power plan: %s"), plan));
         }
 
         const double server = ratioOf(m.serverBurstIdleMs, m.serverBurstHotMs);
@@ -291,7 +299,9 @@ private:
             add("power.serverSaving", C::ServerCpu, _("Power saving slows down the server"),
                 wxString::Format(_("Server-side CPU bursts after an idle pause "
                     "take %.1fx as long as back to back."), server),
-                onServer() ? localPowerAdvice() : unverified(powerAdvice(m.serverPlatform)));
+                onServer() ? localPowerAdvice() : unverified(powerAdvice(m.serverPlatform)),
+                wxString::Format(_("A short CPU burst on the server after an idle pause "
+                    "takes %.1fx as long"), server));
         }
 
         if (m.latencySparseMs && m.latencyMedianMs && *m.latencyMedianMs > 0.0)
@@ -310,7 +320,9 @@ private:
                     unverified(powerAdvice(m.serverPlatform) + " " + _("Also disable "
                         "\"Energy Efficient Ethernet\" and power saving of the "
                         "network adapters on client and server, and check "
-                        "interrupt moderation.")));
+                        "interrupt moderation.")),
+                    wxString::Format(_("A request after a short pause takes %.1fx as "
+                        "long"), ratio));
             }
         }
     }
@@ -331,7 +343,8 @@ private:
             detail, onServer() ? antivirusAdvice(localOs())
                 : _("Exclude the application directories and temporary files of "
                     "the database applications from on-access scanning on the "
-                    "client."));
+                    "client."),
+            _("A virus scanner is active on this computer"));
         if (!onServer())
             return;
 
@@ -353,7 +366,9 @@ private:
                 ? _("The database directory is not excluded from Microsoft Defender "
                     "yet.")
                 : _("FlameRobin can only read the exclusions with administrator "
-                    "rights.")));
+                    "rights.")),
+            excluded ? _("The database directory is not excluded from the virus scanner")
+                : _("A virus scanner is active, its exclusions are unknown"));
     }
 
     void checkProcessor()
@@ -377,7 +392,9 @@ private:
                     : _("Give the server enough CPU cores (virtual machines "
                         "often have too few vCPUs), check the CPU load caused "
                         "by other processes and CPU limits of the "
-                        "virtualization host."));
+                        "virtualization host."),
+                    wxString::Format(_("%d connections in parallel calculate %.1fx as "
+                        "fast as one"), s.parallelConnections, scaling));
             }
         }
 
@@ -440,7 +457,9 @@ private:
                     "directory takes only %s, so the storage itself is fast."),
                     ms(*m.commitMs), ms(*m.osSyncWriteMs)),
                 antivirusAdvice(m.serverPlatform) + " " + _("Also check the server load "
-                    "and whether nbackup is active."));
+                    "and whether nbackup is active."),
+                wxString::Format(_("A commit takes %.1fx as long as a synchronous write of "
+                    "the operating system"), *m.commitMs / *m.osSyncWriteMs));
         }
         if (m.tempSortMs && *m.tempSortMs > 0.0 && m.serverSortMs && *m.serverSortMs > 0.0
             && m.scanBytes > 0 && m.tempSortBytes > 0)
@@ -459,7 +478,9 @@ private:
                         : wxString::Format(_("Raise TempCacheLimit (now %s bytes) in "
                             "firebird.conf, e.g. to 1 GB with enough RAM."), limit))
                     + " " + _("Put TempDirectories on a fast local drive and exclude it "
-                        "from virus scanning."));
+                        "from virus scanning."),
+                    wxString::Format(_("A large sort on disk reaches %.0f %% of the speed of "
+                        "a sort in memory"), 100.0 * big / small));
             }
         }
 
@@ -484,7 +505,8 @@ private:
                     "the healthy range: %s."), wxString::FromUTF8(
                     sys.storageModel.c_str()), values),
                 _("Make a backup now and plan to replace the drive. Check the "
-                  "full SMART data with the tools of the manufacturer."));
+                  "full SMART data with the tools of the manufacturer."),
+                _("The health values (SMART) of the disk are outside the healthy range"));
         }
         if (sys.storageMedia == "HDD")
         {
@@ -514,7 +536,9 @@ private:
                         "of the database."), freeBytes / gigabyte),
                     _("Firebird needs free space for database growth, "
                       "temporary sort files and backups. Fragmented, nearly "
-                      "full file systems are slow."));
+                      "full file systems are slow."),
+                    wxString::Format(_("%.1f GB are free on the drive of the database"),
+                        freeBytes / gigabyte));
             }
         }
     }
@@ -546,7 +570,10 @@ private:
                 _("For SuperServer increase DefaultDbCachePages in "
                   "firebird.conf (e.g. 50000 pages) or the page buffers of "
                   "the database (gfix -buffers), keep UseFileSystemCache = "
-                  "true and FileSystemCacheThreshold above the cache size."));
+                  "true and FileSystemCacheThreshold above the cache size."),
+                wxString::Format(_("The page cache holds %.0f MB, the test data %.0f MB"),
+                    double(db.cachePages) * db.pageSize / megabyte,
+                    double(m.scanBytes) / megabyte));
         }
 
         if (m.coldScanMs && m.warmScanMs && *m.warmScanMs > 0.0
@@ -561,7 +588,9 @@ private:
                 _("Give the server enough RAM for the Firebird page cache "
                   "and the operating system file cache (as a rule of thumb "
                   "the frequently used part of the database), or use faster "
-                  "storage."));
+                  "storage."),
+                wxString::Format(_("The first scan takes %.1fx as long as the repeated "
+                    "scan"), *m.coldScanMs / *m.warmScanMs));
         }
 
         if (m.serverReadMs && m.serverSortMs && *m.serverReadMs > 0.0
@@ -577,7 +606,8 @@ private:
             add("memory.sort", C::ServerCache, _("Sorting takes much longer than reading"),
                 wxString::Format(_("Sorting the test data takes %.1fx as long "
                     "as reading it."), *m.serverSortMs / *m.serverReadMs),
-                advice);
+                advice, wxString::Format(_("Sorting the test data takes %.1fx as long as "
+                    "reading it"), *m.serverSortMs / *m.serverReadMs));
         }
 
         const BenchmarkSystemInfo& sys = m.system;
@@ -589,7 +619,9 @@ private:
                     "system has little room for its file cache."),
                     sys.memoryAvailableBytes / gigabyte, sys.memoryTotalBytes / gigabyte),
                 _("Check which processes use the memory, and size the page caches "
-                  "so that the operating system keeps some for its file cache."));
+                  "so that the operating system keeps some for its file cache."),
+                wxString::Format(_("%.1f of %.1f GB of RAM are free"),
+                    sys.memoryAvailableBytes / gigabyte, sys.memoryTotalBytes / gigabyte));
         }
     }
 
@@ -610,7 +642,9 @@ private:
                 _("Ship the client library of the server version with the "
                   "application; newer clients support faster protocol "
                   "features of the server (e.g. wire compression, Batch "
-                  "API)."));
+                  "API)."),
+                wxString::Format(_("Client library version %d, server version %d"),
+                    clientMajor, m.serverMajorVersion));
         }
 
         if (m.streamMs && m.streamBytes > 0 && *m.streamMs > 0.0)
@@ -622,7 +656,9 @@ private:
                     _("FlameRobin needs most of the time for the received data"),
                     wxString::Format(_("%s of %s are spent in FlameRobin itself."),
                         ms(clientMs), ms(*m.streamMs)),
-                    _("Check the CPU load of this machine.") + " " + powerAdvice(localOs()));
+                    _("Check the CPU load of this machine.") + " " + powerAdvice(localOs()),
+                    wxString::Format(_("FlameRobin itself takes %.0f %% of the time of a "
+                        "large result"), 100.0 * clientMs / *m.streamMs));
             }
         }
 
@@ -635,7 +671,9 @@ private:
                     "while the median is %s."), ms(*m.latencyP95Ms), ms(*m.latencyMedianMs)),
                 _("Typical for WLAN, overloaded network links or an "
                   "overloaded server. Check the network utilisation and "
-                  "the CPU load of the server and the client."));
+                  "the CPU load of the server and the client."),
+                wxString::Format(_("The 95th percentile of the round trips is %.1fx the "
+                    "median"), *m.latencyP95Ms / *m.latencyMedianMs));
         }
 
         if (!remote())
@@ -670,7 +708,8 @@ private:
                         "none of its own addresses: network address translation "
                         "(NAT), a VPN or a proxy is between them."), seen),
                     _("Devices between client and server add latency and often "
-                      "drop idle connections; see TCP keepalive."));
+                      "drop idle connections; see TCP keepalive."),
+                    _("The server sees this computer under another address"));
             }
         }
         // the share of the login in the connect time
@@ -689,7 +728,9 @@ private:
                     "complete connect %s."), ms(handshake), ms(*m.connectMs)),
                 _("Look at the authentication (order of AuthServer, Win_Sspi with "
                   "slow domain controllers, the SRP cost), the security database "
-                  "and reverse DNS lookups of the server."));
+                  "and reverse DNS lookups of the server."),
+                wxString::Format(_("The login takes %.0f %% of the connection time"),
+                    100.0 * (*m.connectMs - handshake) / *m.connectMs));
         }
         if (m.latencyOutliers > 0)
         {
@@ -698,7 +739,9 @@ private:
                     "a lost packet again only after such a timeout."),
                     m.latencyOutliers, s.latencyQueries),
                 _("Look for Wi-Fi interference, faulty cables or ports, duplex "
-                  "mismatches, overloaded switches, firewalls and VPNs."));
+                  "mismatches, overloaded switches, firewalls and VPNs."),
+                wxString::Format(_("%d of %d round trips took over 150 ms"),
+                    m.latencyOutliers, s.latencyQueries));
         }
         // the transfer compared with the link speed
         if (p.linkSpeedBitsPerSecond >= 100000000 && m.streamMs && *m.streamMs > 0.0
@@ -730,7 +773,8 @@ private:
                     wxString::Format(_("The transfer reaches %.1f MB/s on a %s "
                         "link (about %.0f MB/s)."), mbPerSecond,
                         formatBenchmarkBitRate(double(p.linkSpeedBitsPerSecond)), linkMB),
-                    advice);
+                    advice, wxString::Format(_("Large results reach %.0f %% of the speed of "
+                        "the link"), 100.0 * mbPerSecond / linkMB));
             }
         }
     }
@@ -761,7 +805,9 @@ private:
                       "Classic server check LockHashSlots (e.g. 30011) and "
                       "consider SuperServer.")
                         + (remote() ? " " + _("On a client run, also check "
-                            "the utilisation of the network link.") : wxString()));
+                            "the utilisation of the network link.") : wxString()),
+                    wxString::Format(_("%d clients complete %.1fx the transactions of %d"),
+                        last.clients, scaling, first.clients));
             }
         }
         double peak = 0.0;
@@ -782,7 +828,9 @@ private:
                 _("Look at the number of CPU cores, the server mode (SuperServer "
                   "scales with ParallelWorkers and cores, Classic with processes), "
                   "LockHashSlots and lock conflicts; applications should use "
-                  "connection pools instead of one connection per user."));
+                  "connection pools instead of one connection per user."),
+                wxString::Format(_("With %d users the server completes %.0f %% of its "
+                    "best level"), most->clients, 100.0 * tps(*most) / peak));
         }
         if (transactions > 0 && conflicts * 100 > transactions)
         {
@@ -793,7 +841,9 @@ private:
                 _("Keep write transactions short, update rows in a fixed "
                   "order, avoid frequently updated counter rows (use "
                   "sequences instead) and handle lock conflicts in the "
-                  "application."));
+                  "application."),
+                wxString::Format(_("%lld of %lld transactions ended with an update "
+                    "conflict"), (long long)conflicts, (long long)transactions));
         }
     }
 };
@@ -864,6 +914,85 @@ wxString getBenchmarkValueAdvice(const wxString& id)
             return wxGetTranslation(a.second);
     }
     return wxEmptyString;
+}
+
+wxString getBenchmarkFactAdvice(const wxString& key)
+{
+    // neutral: a fact that differs explains a difference of the results, so
+    // the advice is to compare runs that differ in one thing only
+    if (key == "scanner")
+        return virusScanExclusions();
+    static const std::pair<const char*, const char*> advice[] = {
+        { "power", wxTRANSLATE("Use the same power plan in both runs; for a server "
+            "\"High performance\" (powercfg /setactive SCHEME_MIN).") },
+        { "access", wxTRANSLATE("Compare runs over the same connection: both over XNET "
+            "or both over TCP/IP. Over TCP/IP check WireCrypt and WireCompression in "
+            "firebird.conf.") },
+        { "pagecache", wxTRANSLATE("Compare with the same page cache in both runs: "
+            "DefaultDbCachePages in firebird.conf or the page buffers of the "
+            "database.") },
+        { "conf.DefaultDbCachePages", wxTRANSLATE("Compare with the same page cache in "
+            "both runs: DefaultDbCachePages in firebird.conf or the page buffers of the "
+            "database.") },
+        { "firebird", wxTRANSLATE("Another Firebird version or server mode changes the "
+            "work itself; compare runs of the same version to see the effect of other "
+            "hardware or settings.") },
+        { "conf.ServerMode", wxTRANSLATE("Another server mode changes how the "
+            "connections share the cache and the processor cores; compare runs of the "
+            "same server mode.") },
+        { "cpu", wxTRANSLATE("Another processor changes every result; compare runs on "
+            "the same machine to see the effect of a setting.") },
+        { "cores", wxTRANSLATE("Another number of processor cores changes the results "
+            "with several users; compare runs with the same number of cores or "
+            "vCPUs.") },
+        { "ram", wxTRANSLATE("Another amount of memory changes what the caches can "
+            "hold; compare runs with the same RAM.") },
+        { "storage", wxTRANSLATE("Another disk changes every storage result; compare "
+            "runs on the same disk to see the effect of a setting.") },
+        { "virtual", wxTRANSLATE("A virtual machine shares its host; compare runs on "
+            "the same host with the same reservations for CPU, RAM and storage.") },
+        { "pagesize", wxTRANSLATE("Another page size changes the storage and cache "
+            "tests; compare databases with the same page size.") },
+        { "forcedwrites", wxTRANSLATE("Forced writes change the time of every commit; "
+            "compare runs with the same setting.") },
+        { "wire", wxTRANSLATE("Compression and encryption of the network traffic cost "
+            "time; compare runs with the same WireCompression and WireCrypt.") },
+        { "conf.WireCompression", wxTRANSLATE("Compression and encryption of the "
+            "network traffic cost time; compare runs with the same WireCompression and "
+            "WireCrypt.") },
+        { "conf.WireCrypt", wxTRANSLATE("Compression and encryption of the network "
+            "traffic cost time; compare runs with the same WireCompression and "
+            "WireCrypt.") },
+        { "network", wxTRANSLATE("Another network adapter changes every round trip; "
+            "compare runs over the same network connection.") },
+        { "conf.TempCacheLimit", wxTRANSLATE("TempCacheLimit decides which sorts are "
+            "written to temporary files; compare runs with the same value in "
+            "firebird.conf.") }
+    };
+    for (const auto& a : advice)
+    {
+        if (key == a.first)
+            return wxGetTranslation(a.second);
+    }
+    return wxEmptyString;
+}
+
+std::vector<BenchmarkHint> getBenchmarkTopHints(const BenchmarkReport& report,
+    size_t maximum)
+{
+    // a hint is given for every part it can slow down, with the same id
+    std::vector<BenchmarkHint> list;
+    for (const BenchmarkHint& h : report.hints)
+    {
+        if (list.size() >= maximum)
+            break;
+        if (std::none_of(list.begin(), list.end(),
+            [&h](const BenchmarkHint& shown) { return shown.id == h.id; }))
+        {
+            list.push_back(h);
+        }
+    }
+    return list;
 }
 
 std::vector<BenchmarkSetting> getBenchmarkSettings(const BenchmarkMetrics& m)

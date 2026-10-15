@@ -24,6 +24,7 @@
 #include <wx/intl.h>
 
 #include <algorithm>
+#include <cmath>
 
 #include "engine/Benchmark.h"
 
@@ -423,6 +424,7 @@ std::vector<BenchmarkPart> getBenchmarkParts(const BenchmarkMetrics& m)
             BenchmarkKeyValue v;
             v.id = def.id;
             v.title = wxGetTranslation(def.title);
+            v.value = value;
             v.valueText = formatBenchmarkValue(value, def);
             auto w = work.find(def.id);
             if (w != work.end())
@@ -436,6 +438,121 @@ std::vector<BenchmarkPart> getBenchmarkParts(const BenchmarkMetrics& m)
             parts.push_back(part);
     }
     return parts;
+}
+
+namespace
+{
+
+// the key figures with their short names, in the order of the report
+const std::pair<const char*, const char*> headlines[] = {
+    { "cpu.single", wxTRANSLATE("Calculation, one user") },
+    { "storage.commit", wxTRANSLATE("Saving a change (commit)") },
+    { "storage.insert", wxTRANSLATE("Writing rows") },
+    { "memory.scan", wxTRANSLATE("Reading from memory") },
+    { "network.roundTrip", wxTRANSLATE("Round trip") },
+    { "users.oltp", wxTRANSLATE("Transactions, up to 8 users") }
+};
+
+// the number and the short unit of a measurement of a run; empty if the
+// run has no number for it
+std::pair<wxString, wxString> figureOf(const BenchmarkSnapshot& run,
+    const BenchmarkMeasurementDef& def)
+{
+    const BenchmarkMeasurement* x = run.findMeasurement(def.id);
+    if (!x || x->value <= 0.0)
+        return {};
+    return formatBenchmarkFigure(x->value, def);
+}
+
+} // namespace
+
+const std::vector<const char*>& getBenchmarkHeadlineIds()
+{
+    static const std::vector<const char*> ids = []()
+    {
+        std::vector<const char*> list;
+        for (const auto& h : headlines)
+            list.push_back(h.first);
+        return list;
+    }();
+    return ids;
+}
+
+std::pair<wxString, wxString> formatBenchmarkFigure(double value,
+    const BenchmarkMeasurementDef& def)
+{
+    const wxString unit = def.unit;
+    if (unit == "ms")
+    {
+        // "0.56 ms", "112 ms", "12.3 s"
+        const wxString text = formatBenchmarkMilliseconds(value);
+        return { text.BeforeLast(' '), text.AfterLast(' ') };
+    }
+    wxString number;
+    if (value >= 100.0)
+        number = formatBenchmarkCount(std::round(value));
+    else
+        number = wxString::Format(value >= 10.0 ? "%.1f" : "%.2f", value);
+    wxString shortUnit = unit;
+    if (unit == "transactions/s")
+        shortUnit = "tx/s";
+    else if (unit == "operations/s")
+        shortUnit = "ops/s";
+    return { number, shortUnit };
+}
+
+std::vector<BenchmarkHeadline> getBenchmarkHeadlineValues(const BenchmarkSnapshot& run)
+{
+    std::vector<BenchmarkHeadline> list;
+    for (const auto& h : headlines)
+    {
+        const BenchmarkMeasurementDef* def = findBenchmarkMeasurementDef(h.first);
+        const BenchmarkMeasurement* x = run.findMeasurement(h.first);
+        if (!def || !x || x->value <= 0.0)
+            continue;
+        const auto figure = formatBenchmarkFigure(x->value, *def);
+        list.push_back({ h.first, def->section, wxGetTranslation(h.second), figure.first,
+            figure.second, formatBenchmarkWork(formatBenchmarkAmount(x->amount,
+                x->amountUnit), x->ms) });
+    }
+    return list;
+}
+
+std::vector<BenchmarkHeadlineChange> getBenchmarkHeadlineChanges(
+    const BenchmarkComparison& comparison)
+{
+    std::vector<BenchmarkHeadlineChange> list;
+    for (const auto& h : headlines)
+    {
+        const BenchmarkMeasurementDef* def = findBenchmarkMeasurementDef(h.first);
+        if (!def)
+            continue;
+        const auto newer = figureOf(comparison.newer, *def);
+        const auto older = figureOf(comparison.older, *def);
+        if (newer.first.empty() && older.first.empty())
+            continue;
+        BenchmarkHeadlineChange change;
+        change.id = h.first;
+        change.section = def->section;
+        change.name = wxGetTranslation(h.second);
+        change.unit = newer.first.empty() ? older.second : newer.second;
+        change.newerNumber = newer.first;
+        change.olderNumber = older.first;
+        auto value = std::find_if(comparison.values.begin(), comparison.values.end(),
+            [&h](const BenchmarkComparedValue& v) { return v.id == h.first; });
+        if (value != comparison.values.end())
+        {
+            change.ratio = value->ratio;
+            change.state = value->state;
+        }
+        else if (newer.first.empty() || older.first.empty())
+        {
+            change.state = newer.first.empty() ? BenchmarkCompareState::OnlyOlder
+                : BenchmarkCompareState::OnlyNewer;
+        }
+        list.push_back(change);
+    }
+    return list;
 }
 
 wxString getBenchmarkKindId(const BenchmarkMetrics& m)

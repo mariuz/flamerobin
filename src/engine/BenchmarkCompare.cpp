@@ -947,6 +947,230 @@ wxString getBenchmarkReasonsTitle(const BenchmarkComparison& c,
         : _("What could make the later run slower");
 }
 
+BenchmarkVerdict getBenchmarkVerdict(const BenchmarkComparison& comparison)
+{
+    BenchmarkVerdict verdict;
+    for (const BenchmarkHeadlineChange& change : getBenchmarkHeadlineChanges(comparison))
+    {
+        if (change.state != BenchmarkCompareState::Compared || change.ratio <= 0.0)
+            ++verdict.notComparable;
+        else if (getBenchmarkChangeLevel(change.ratio) == 0)
+            ++verdict.same;
+        else if (change.ratio > 1.0)
+            ++verdict.faster;
+        else
+            ++verdict.slower;
+    }
+    return verdict;
+}
+
+std::vector<std::pair<int, wxString>> describeBenchmarkVerdict(const BenchmarkVerdict& verdict)
+{
+    // the first count names what is counted
+    std::vector<std::pair<int, wxString>> list;
+    auto add = [&list](int direction, int count, const wxString& first, const wxString& next)
+    {
+        if (count > 0)
+            list.push_back({ direction, list.empty() ? first : next });
+    };
+    add(1, verdict.faster, wxString::Format(wxPLURAL("%d key figure faster",
+        "%d key figures faster", verdict.faster), verdict.faster),
+        wxString::Format(_("%d faster"), verdict.faster));
+    add(-1, verdict.slower, wxString::Format(wxPLURAL("%d key figure slower",
+        "%d key figures slower", verdict.slower), verdict.slower),
+        wxString::Format(_("%d slower"), verdict.slower));
+    add(0, verdict.same, wxString::Format(wxPLURAL("%d key figure about the same",
+        "%d key figures about the same", verdict.same), verdict.same),
+        wxString::Format(_("%d about the same"), verdict.same));
+    return list;
+}
+
+std::vector<wxString> getBenchmarkVerdictNotes(const BenchmarkComparison& comparison)
+{
+    std::vector<wxString> notes;
+    for (const BenchmarkComparedPart& p : comparison.parts)
+    {
+        const wxString word = getBenchmarkReportSectionWord(p.category);
+        switch (getBenchmarkPartState(comparison, p.category))
+        {
+            case BenchmarkCompareState::OnlyNewer:
+                notes.push_back(wxString::Format(comparison.newerIsCurrentRun
+                    ? _("%s measured in this run only")
+                    : _("%s measured in the later run only"), word));
+                break;
+            case BenchmarkCompareState::OnlyOlder:
+                notes.push_back(wxString::Format(_("%s measured in the earlier run only"),
+                    word));
+                break;
+            case BenchmarkCompareState::Compared:
+                break;
+            default:
+                notes.push_back(wxString::Format(_("%s not comparable"), word));
+                break;
+        }
+    }
+    const int notCompared = getBenchmarkVerdict(comparison).notComparable;
+    if (notCompared > 0)
+    {
+        notes.push_back(wxString::Format(wxPLURAL("%d key figure not compared",
+            "%d key figures not compared", notCompared), notCompared));
+    }
+    return notes;
+}
+
+BenchmarkCompareState getBenchmarkPartState(const BenchmarkComparison& comparison,
+    BenchmarkCategory section)
+{
+    using S = BenchmarkCompareState;
+    const BenchmarkComparedPart* part = comparison.findPart(section);
+    if (part && part->ratio > 0.0)
+        return S::Compared;
+    int newer = 0, older = 0, compared = 0, other = 0;
+    for (const auto* list : { &comparison.values, &comparison.stats })
+    {
+        for (const BenchmarkComparedValue& v : *list)
+        {
+            if (v.category != section)
+                continue;
+            if (v.state == S::OnlyNewer)
+                ++newer;
+            else if (v.state == S::OnlyOlder)
+                ++older;
+            else if (v.state == S::Compared)
+                ++compared;
+            else
+                ++other;
+        }
+    }
+    if (compared > 0 || newer + older + other == 0)
+        return S::Compared;
+    if (older + other == 0)
+        return S::OnlyNewer;
+    if (newer + other == 0)
+        return S::OnlyOlder;
+    return S::TestChanged;
+}
+
+std::vector<const BenchmarkComparedPart*> getBenchmarkStandOut(
+    const BenchmarkComparison& comparison, size_t maximum)
+{
+    std::vector<const BenchmarkComparedPart*> list;
+    for (const BenchmarkComparedPart& p : comparison.parts)
+    {
+        if (getBenchmarkChangeLevel(p.ratio) > 0)
+            list.push_back(&p);
+    }
+    std::stable_sort(list.begin(), list.end(),
+        [](const BenchmarkComparedPart* a, const BenchmarkComparedPart* b)
+        {
+            return std::abs(std::log(a->ratio)) > std::abs(std::log(b->ratio));
+        });
+    if (list.size() > maximum)
+        list.resize(maximum);
+    return list;
+}
+
+wxString getBenchmarkShortAdvice(const wxString& advice)
+{
+    // an advice can start with the current setting, which is no advice
+    const wxString current = wxString(_("Current setting: %s.")).BeforeFirst('%');
+    wxString text = advice;
+    if (!current.empty() && text.StartsWith(current) && text.find(". ") != wxString::npos)
+        text = text.Mid(text.find(". ") + 2);
+    const size_t end = text.find(". ");
+    return end == wxString::npos ? text : text.Left(end + 1);
+}
+
+wxString getBenchmarkLikelyReason(const BenchmarkComparedPart& part)
+{
+    // a fact that differs explains more than a note of one run; the
+    // typical causes are the list of reasons itself, not one of them
+    if (!part.differences.empty())
+    {
+        const BenchmarkComparedFact& d = part.differences.front();
+        return d.label + ": " + d.olderText + arrow() + d.newerText;
+    }
+    if (!part.hints.empty())
+        return part.hints.front().title;
+    return wxEmptyString;
+}
+
+wxString getBenchmarkTryAdvice(const BenchmarkComparedPart& part)
+{
+    if (!part.differences.empty())
+    {
+        const wxString advice = getBenchmarkFactAdvice(part.differences.front().key);
+        if (!advice.empty())
+            return advice;
+    }
+    for (const BenchmarkHint& h : part.hints)
+    {
+        if (!h.advice.empty())
+            return getBenchmarkShortAdvice(h.advice);
+    }
+    if (!part.differences.empty() || !part.advice.empty())
+    {
+        return _("Repeat the slower run under the same conditions; if the difference "
+            "stays, check the possible reasons one by one.");
+    }
+    return wxEmptyString;
+}
+
+wxString getBenchmarkCompareStateName(BenchmarkCompareState state)
+{
+    switch (state)
+    {
+        case BenchmarkCompareState::OnlyNewer:
+            return _("new");
+        case BenchmarkCompareState::OnlyOlder:
+            return _("no longer measured");
+        case BenchmarkCompareState::TestChanged:
+        case BenchmarkCompareState::WorkChanged:
+            return _("not comparable");
+        case BenchmarkCompareState::Compared:
+        default:
+            return wxEmptyString;
+    }
+}
+
+wxString describeBenchmarkCompareState(const BenchmarkComparison& comparison,
+    const BenchmarkComparedValue& value)
+{
+    if (value.state == BenchmarkCompareState::TestChanged)
+    {
+        return wxString::Format(_("The test changed (version %d, earlier version %d)."),
+            value.newerVersion, value.olderVersion);
+    }
+    if (value.state != BenchmarkCompareState::WorkChanged)
+        return wxEmptyString;
+    auto amount = [&value](const BenchmarkSnapshot& run)
+    {
+        const BenchmarkMeasurement* x = run.findMeasurement(value.id);
+        return x ? formatBenchmarkAmount(x->amount, x->amountUnit) : wxString();
+    };
+    return wxString::Format(_("Other work: %s, earlier %s."), amount(comparison.newer),
+        amount(comparison.older));
+}
+
+wxString formatBenchmarkComparedWork(const BenchmarkComparison& comparison,
+    const BenchmarkComparedValue& value)
+{
+    const BenchmarkMeasurement* n = comparison.newer.findMeasurement(value.id);
+    const BenchmarkMeasurement* o = comparison.older.findMeasurement(value.id);
+    // the same work: its amount once and both times
+    if (n && o && n->amount > 0.0 && n->amount == o->amount
+        && n->amountUnit == o->amountUnit && n->ms > 0.0 && o->ms > 0.0)
+    {
+        return formatBenchmarkAmount(n->amount, n->amountUnit) + ": "
+            + formatBenchmarkMilliseconds(o->ms) + arrow() + formatBenchmarkMilliseconds(n->ms);
+    }
+    if (value.olderWork.empty() || value.olderWork == value.newerWork)
+        return value.newerWork;
+    if (value.newerWork.empty())
+        return value.olderWork;
+    return value.olderWork + arrow() + value.newerWork;
+}
+
 wxString formatBenchmarkComparisonMarkdown(const BenchmarkComparison& c, bool standalone)
 {
     auto changeText = [](double ratio)
