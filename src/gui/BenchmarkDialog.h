@@ -118,6 +118,8 @@ private:
 
     void createControls();
     void updateControls();
+    // how long the test takes, shown before the start
+    wxString getReadyHint() const;
     bool buildParams(fr::BenchmarkConnectionParams& params);
     void fillCredentials(fr::BenchmarkConnectionParams& params, bool fromRegistration);
     // the login for the server of the registration: the saved one, or asked
@@ -170,6 +172,7 @@ private:
     void OnCloseButton(wxCommandEvent& event);
     void OnClose(wxCloseEvent& event);
     void OnTargetChanged(wxCommandEvent& event);
+    void OnDurationChanged(wxCommandEvent& event);
     void OnAdvancedToggled(wxCollapsiblePaneEvent& event);
     void OnTimer(wxTimerEvent& event);
 

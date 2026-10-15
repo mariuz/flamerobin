@@ -1487,6 +1487,33 @@ wxString getBenchmarkIntensityName(BenchmarkIntensity intensity)
     }
 }
 
+wxString getBenchmarkIntensityDuration(BenchmarkIntensity intensity)
+{
+    switch (intensity)
+    {
+        case BenchmarkIntensity::Quick:
+            return _("under a minute");
+        case BenchmarkIntensity::Deep:
+            return _("several minutes");
+        case BenchmarkIntensity::Standard:
+        default:
+            return _("about 2 minutes");
+    }
+}
+
+wxString getBenchmarkDurationHint(BenchmarkIntensity intensity, bool comparePageSizes,
+    bool manyUsers)
+{
+    // the storage and cache tests once more for every page size, and two
+    // more rounds of the OLTP test
+    wxString hint = getBenchmarkIntensityDuration(intensity);
+    if (comparePageSizes)
+        hint += _(", plus a few minutes for all page sizes");
+    if (manyUsers)
+        hint += _(", plus about half a minute for 50 and 250 users");
+    return hint;
+}
+
 wxString getBenchmarkCategoryName(BenchmarkCategory category)
 {
     switch (category)

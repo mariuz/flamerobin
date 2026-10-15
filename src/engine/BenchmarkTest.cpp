@@ -367,6 +367,25 @@ void testLoginAction()
         "a connected database uses the login of its connection");
 }
 
+void testDurationHint()
+{
+    using I = BenchmarkIntensity;
+    std::cout << "Duration before the start\n";
+    check(getBenchmarkDurationHint(I::Quick, false, false) == "under a minute"
+        && getBenchmarkDurationHint(I::Standard, false, false) == "about 2 minutes"
+        && getBenchmarkDurationHint(I::Deep, false, false) == "several minutes",
+        "without options only the duration of the intensity");
+    check(getBenchmarkDurationHint(I::Standard, true, false)
+        == "about 2 minutes, plus a few minutes for all page sizes",
+        "comparing all page sizes adds a few minutes");
+    check(getBenchmarkDurationHint(I::Quick, false, true)
+        == "under a minute, plus about half a minute for 50 and 250 users",
+        "50 and 250 users add about half a minute");
+    check(getBenchmarkDurationHint(I::Deep, true, true) == "several minutes, plus a few "
+        "minutes for all page sizes, plus about half a minute for 50 and 250 users",
+        "both options add both");
+}
+
 // a run on the server itself with the embedded engine
 BenchmarkMetrics serverMetrics()
 {
@@ -3867,6 +3886,7 @@ int main(int argc, char** argv)
     testSafetyCheck();
     testPendingDatabases();
     testLoginAction();
+    testDurationHint();
     testHints();
     testEventTest();
     testSettings();

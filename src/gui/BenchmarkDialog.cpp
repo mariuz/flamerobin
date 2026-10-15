@@ -463,6 +463,7 @@ void BenchmarkDialog::createControls()
     radio_intensity = new wxRadioBox(panel, wxID_ANY, _("Intensity"),
         wxDefaultPosition, wxDefaultSize, 3, intensities, 3, wxRA_SPECIFY_COLS);
     radio_intensity->SetSelection(1);
+    radio_intensity->Bind(wxEVT_RADIOBOX, &BenchmarkDialog::OnDurationChanged, this);
     radio_intensity->SetItemToolTip(0, _("Less than a minute: a first impression."));
     radio_intensity->SetItemToolTip(1, _("About two minutes: the usual choice. Compare "
         "runs of the same intensity."));
@@ -519,6 +520,7 @@ void BenchmarkDialog::createControls()
     check_comparepages->SetToolTip(_("Repeats the storage and cache tests in "
         "a separate temporary database for every page size the server "
         "supports, and shows them side by side."));
+    check_comparepages->Bind(wxEVT_CHECKBOX, &BenchmarkDialog::OnDurationChanged, this);
     sizerPageSize->Add(check_comparepages, 0, wxALIGN_CENTER_VERTICAL);
     sizerAdvanced->Add(sizerPageSize, 0, wxBOTTOM, 6);
 
@@ -536,6 +538,7 @@ void BenchmarkDialog::createControls()
     check_manyusers->SetToolTip(_("Adds two rounds with 50 and 250 connections "
         "working at the same time. Shows whether the server keeps up with many "
         "users; takes about half a minute more."));
+    check_manyusers->Bind(wxEVT_CHECKBOX, &BenchmarkDialog::OnDurationChanged, this);
     sizerAdvanced->Add(check_manyusers, 0, wxBOTTOM, 6);
     advanced->SetSizer(sizerAdvanced);
     sizerSettings->Add(collapse_advanced, 0, wxEXPAND | wxBOTTOM, 6);
@@ -543,7 +546,7 @@ void BenchmarkDialog::createControls()
 
     // progress
     wxBoxSizer* sizerStatus = new wxBoxSizer(wxHORIZONTAL);
-    label_status = new wxStaticText(panel, wxID_ANY, _("Ready."));
+    label_status = new wxStaticText(panel, wxID_ANY, wxEmptyString);
     label_elapsed = new wxStaticText(panel, wxID_ANY, wxEmptyString);
     sizerStatus->Add(label_status, 1, wxALIGN_CENTER_VERTICAL);
     sizerStatus->Add(label_elapsed, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 12);
@@ -634,6 +637,7 @@ void BenchmarkDialog::createControls()
         radio_target->Enable(TargetRegistered, false);
         radio_target->SetSelection(TargetThisComputer);
     }
+    label_status->SetLabel(getReadyHint());
 }
 
 void BenchmarkDialog::updateControls()
@@ -666,6 +670,21 @@ void BenchmarkDialog::updateControls()
     button_copy->Enable(idle && (hasReportM || comparisonM));
     button_save->Enable(idle && (hasReportM || comparisonM));
     button_browser->Enable(idle && (hasReportM || comparisonM));
+}
+
+wxString BenchmarkDialog::getReadyHint() const
+{
+    return wxString::Format(_("Ready. The test takes %s."), fr::getBenchmarkDurationHint(
+        fr::BenchmarkIntensity(radio_intensity->GetSelection()),
+        check_comparepages->GetValue(), check_manyusers->GetValue()));
+}
+
+void BenchmarkDialog::OnDurationChanged(wxCommandEvent& event)
+{
+    event.Skip();
+    // after a run the settings are hidden and the status is the result
+    if (!runningM && settingsShownM)
+        label_status->SetLabel(getReadyHint());
 }
 
 void BenchmarkDialog::OnAdvancedToggled(wxCollapsiblePaneEvent& WXUNUSED(event))
@@ -1251,6 +1270,13 @@ void BenchmarkDialog::showSettings(bool show)
     }
     sizerSettingsM->ShowItems(show);
     button_start->SetLabel(show ? _("&Start") : _("&New test"));
+    if (show)
+    {
+        // ready for the next run
+        label_status->SetLabel(getReadyHint());
+        label_elapsed->SetLabel(wxEmptyString);
+        gauge_progress->SetValue(0);
+    }
     getControlsPanel()->Layout();
 }
 

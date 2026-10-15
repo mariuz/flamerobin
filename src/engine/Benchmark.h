@@ -1030,6 +1030,12 @@ wxString getBenchmarkFactAdvice(const wxString& key);
 std::vector<BenchmarkSetting> getBenchmarkSettings(const BenchmarkMetrics& m);
 
 wxString getBenchmarkIntensityName(BenchmarkIntensity intensity);
+/// how long a run of an intensity takes, e.g. "about 2 minutes"
+wxString getBenchmarkIntensityDuration(BenchmarkIntensity intensity);
+/// the same with what the options add: "about 2 minutes, plus about half a
+/// minute for 50 and 250 users"
+wxString getBenchmarkDurationHint(BenchmarkIntensity intensity, bool comparePageSizes,
+    bool manyUsers);
 wxString getBenchmarkCategoryName(BenchmarkCategory category);
 /// the report shows the results in these sections, in this order
 std::vector<BenchmarkCategory> getBenchmarkReportSections();
