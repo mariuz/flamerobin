@@ -623,6 +623,85 @@ void testStageStates()
         && early.getEndStage() == 0, "an error before the first step is one of the first stage");
 }
 
+void testAnimation()
+{
+    std::cout << "Animation of the progress\n";
+    using A = BenchmarkAnimation;
+    BenchmarkAnimationContext normal;
+    normal.running = true;
+    check(getBenchmarkAnimation(normal) == A::Wave && getBenchmarkAnimationInterval(normal) == 250
+        && getBenchmarkTimerInterval(normal) == 250 && getBenchmarkBlinkInterval(normal) == 6000,
+        "a normal step moves the edge with 4 pictures a second, the robin blinks every 6 s");
+    BenchmarkAnimationContext quiet = normal;
+    quiet.quietStep = true;
+    check(getBenchmarkAnimation(quiet) == A::Breathe && getBenchmarkAnimationInterval(quiet)
+        == 1000 && getBenchmarkTimerInterval(quiet) == 1000 && getBenchmarkBlinkInterval(quiet)
+        == 0, "a quiet step only breathes with 1 picture a second and does not blink");
+    BenchmarkAnimationContext remote = normal;
+    remote.remoteSession = true;
+    BenchmarkAnimationContext remoteQuiet = quiet;
+    remoteQuiet.remoteSession = true;
+    check(getBenchmarkAnimation(remote) == A::Breathe && getBenchmarkAnimationInterval(remote)
+        == 1000 && getBenchmarkBlinkInterval(remote) == 0
+        && getBenchmarkAnimationInterval(remoteQuiet) == 1000,
+        "a remote session gets 1 picture a second, also in normal steps");
+    BenchmarkAnimationContext off = normal;
+    off.systemAnimations = false;
+    BenchmarkAnimationContext offQuiet = quiet;
+    offQuiet.systemAnimations = false;
+    check(getBenchmarkAnimation(off) == A::Still && getBenchmarkAnimation(offQuiet) == A::Still
+        && getBenchmarkTimerInterval(off) == benchmarkElapsedIntervalMs,
+        "without the animations of the system the logo is still, the timer shows the time");
+    BenchmarkAnimationContext after = normal;
+    after.running = false;
+    check(getBenchmarkAnimation(after) == A::Still && getBenchmarkTimerInterval(after) == 0,
+        "after the run the logo is still and the timer stops");
+    // every combination: never faster than 8 pictures a second, the timer
+    // runs only during a run, a quiet step never gets more than 1 picture a
+    // second and never stands still where the logo may move
+    bool limit = true, stops = true, modes = true, quietOnes = true, breathes = true;
+    for (int bits = 0; bits < 64; ++bits)
+    {
+        BenchmarkAnimationContext c;
+        c.running = bits & 1;
+        c.quietStep = bits & 2;
+        c.windowVisible = bits & 4;
+        c.remoteSession = bits & 8;
+        c.systemAnimations = bits & 16;
+        c.userDisabled = bits & 32;
+        const A mode = getBenchmarkAnimation(c);
+        const int animation = getBenchmarkAnimationInterval(c);
+        const int timer = getBenchmarkTimerInterval(c);
+        const int blink = getBenchmarkBlinkInterval(c);
+        limit &= animation == 0 || animation >= benchmarkMinAnimationIntervalMs;
+        limit &= timer == 0 || timer >= benchmarkMinAnimationIntervalMs;
+        stops &= (timer == 0) == !c.running;
+        // still only where something speaks against every movement
+        const bool allowed = c.running && c.windowVisible && c.systemAnimations
+            && !c.userDisabled;
+        modes &= (mode == A::Still) == !allowed && (animation == 0) == (mode == A::Still);
+        modes &= mode != A::Breathe || (c.quietStep || c.remoteSession);
+        // without the animation the timer only shows the elapsed time; the
+        // blink falls on a picture of the wave
+        modes &= animation > 0 || !c.running || timer == benchmarkElapsedIntervalMs;
+        modes &= blink == 0 || (mode == A::Wave && blink % animation == 0);
+        if (c.quietStep || c.remoteSession)
+        {
+            quietOnes &= blink == 0
+                && (animation == 0 || animation >= benchmarkBreathIntervalMs);
+        }
+        breathes &= !allowed || animation > 0;
+    }
+    check(limit && benchmarkMinAnimationIntervalMs >= 125, "the animation never has more "
+        "than 8 pictures a second");
+    check(stops, "the timer stops when no run is going on");
+    check(modes, "still only unseen, without system animations or when turned off, then only "
+        "the elapsed time once a second; the breath only in quiet steps and remote sessions");
+    check(quietOnes, "quiet steps and remote sessions never get more than 1 picture a second "
+        "and no blink");
+    check(breathes, "where the logo may move it never stands still, also in quiet steps");
+}
+
 // a run on the server itself with the embedded engine
 BenchmarkMetrics serverMetrics()
 {
@@ -4198,6 +4277,7 @@ int main(int argc, char** argv)
     testDurationHint();
     testStagePlan();
     testStageStates();
+    testAnimation();
     testHints();
     testEventTest();
     testSettings();

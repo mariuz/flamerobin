@@ -1825,6 +1825,49 @@ void BenchmarkStageTracker::finish(Outcome outcome, bool cleanupFailed)
         fractionM = 1.0;
 }
 
+BenchmarkAnimation getBenchmarkAnimation(const BenchmarkAnimationContext& context)
+{
+    // still where nobody looks and where the user or the system turned
+    // animations off; the filling shows the state all the same
+    if (!context.running || !context.windowVisible || !context.systemAnimations
+        || context.userDisabled)
+    {
+        return BenchmarkAnimation::Still;
+    }
+    // one picture a second in a quiet step, so that the logo does not look
+    // frozen, and in a remote session, which sends every picture
+    if (context.quietStep || context.remoteSession)
+        return BenchmarkAnimation::Breathe;
+    return BenchmarkAnimation::Wave;
+}
+
+int getBenchmarkAnimationInterval(const BenchmarkAnimationContext& context)
+{
+    switch (getBenchmarkAnimation(context))
+    {
+        case BenchmarkAnimation::Wave:
+            return std::max(benchmarkAnimationIntervalMs, benchmarkMinAnimationIntervalMs);
+        case BenchmarkAnimation::Breathe:
+            return std::max(benchmarkBreathIntervalMs, benchmarkMinAnimationIntervalMs);
+        default:
+            return 0;
+    }
+}
+
+int getBenchmarkBlinkInterval(const BenchmarkAnimationContext& context)
+{
+    return getBenchmarkAnimation(context) == BenchmarkAnimation::Wave
+        ? benchmarkBlinkIntervalMs : 0;
+}
+
+int getBenchmarkTimerInterval(const BenchmarkAnimationContext& context)
+{
+    if (!context.running)
+        return 0;
+    const int animation = getBenchmarkAnimationInterval(context);
+    return animation > 0 ? animation : benchmarkElapsedIntervalMs;
+}
+
 wxString getBenchmarkCategoryName(BenchmarkCategory category)
 {
     switch (category)

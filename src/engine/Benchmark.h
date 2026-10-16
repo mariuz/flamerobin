@@ -618,7 +618,7 @@ struct BenchmarkStepPlan
     // so that the progress moves evenly and does not stand for a minute
     double weight;
     // a short measurement that other work on the computer would disturb;
-    // the progress keeps still while it runs
+    // the logo of the progress only breathes while it runs
     bool quiet;
 };
 
@@ -708,6 +708,51 @@ private:
     int endM = -1;
     double fractionM = 0.0;
 };
+
+///
+/// What the animation of the progress depends on. It is small (4 pictures
+/// a second), but it must never take time from a measurement, and not
+/// send pictures over the network of a remote session.
+///
+struct BenchmarkAnimationContext
+{
+    bool running = false;           // a run is going on
+    bool quietStep = false;         // see BenchmarkStepPlan::quiet
+    bool windowVisible = true;      // the progress can be seen
+    bool remoteSession = false;     // e.g. Remote Desktop
+    bool systemAnimations = true;   // the system shows animations
+    bool userDisabled = false;      // FLAMEROBIN_NO_ANIMATION is set
+};
+
+/// how the logo of the progress moves
+enum class BenchmarkAnimation
+{
+    Still,      // one picture: no run, nobody looks, animations are off
+    Breathe,    // the filling rises and sinks a little, 1 picture a second
+    Wave        // the edge of the filling moves as a wave, the robin blinks
+};
+
+/// the pictures of the wave: 4 a second, never more than 8
+const int benchmarkAnimationIntervalMs = 250;
+const int benchmarkMinAnimationIntervalMs = 125;
+/// the pictures of the breath: 1 a second
+const int benchmarkBreathIntervalMs = 1000;
+/// the robin closes its eye once in this time, only with the wave
+const int benchmarkBlinkIntervalMs = 6000;
+/// without the animation the timer only shows the elapsed time
+const int benchmarkElapsedIntervalMs = 1000;
+
+/// the wave in normal steps; the breath in quiet steps and in a remote
+/// session; still without a run, while nobody looks, without the animations
+/// of the system and with FLAMEROBIN_NO_ANIMATION
+BenchmarkAnimation getBenchmarkAnimation(const BenchmarkAnimationContext& context);
+/// the interval of the pictures in ms, 0 for no animation
+int getBenchmarkAnimationInterval(const BenchmarkAnimationContext& context);
+/// the interval of the blink in ms, 0 for none
+int getBenchmarkBlinkInterval(const BenchmarkAnimationContext& context);
+/// the interval of the one timer of the progress: the animation, or once a
+/// second for the elapsed time; 0 when no run is going on (it stops)
+int getBenchmarkTimerInterval(const BenchmarkAnimationContext& context);
 
 ///
 /// Collected results of one benchmark run. A report can be partial when the
