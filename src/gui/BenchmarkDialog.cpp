@@ -36,9 +36,6 @@
 #include <wx/popupwin.h>
 #include <wx/simplebook.h>
 #include <wx/statline.h>
-#if wxUSE_WEBVIEW
-#include <wx/webview.h>
-#endif
 
 #include <algorithm>
 #include <cmath>
@@ -49,6 +46,7 @@
 #include "gui/BenchmarkDialog.h"
 #include "gui/BenchmarkProgressPanel.h"
 #include "gui/BenchmarkReportPage.h"
+#include "gui/BenchmarkResultsView.h"
 #include "gui/StyleGuide.h"
 #include "gui/UsernamePasswordDialog.h"
 #include "MasterPassword.h"
@@ -71,6 +69,8 @@ enum
     ID_choice_install,
     ID_header_advanced
 };
+
+using ResultsView = BenchmarkResultsView;
 
 using fr::BenchmarkTarget;
 
@@ -233,9 +233,11 @@ fr::BenchmarkSnapshotResult readReportFile(const wxString& path)
 BEGIN_EVENT_TABLE(BenchmarkDialog, BaseDialog)
     EVT_BUTTON(ID_button_start, BenchmarkDialog::OnStart)
     EVT_BUTTON(ID_button_cancel, BenchmarkDialog::OnCancel)
-    EVT_BUTTON(ID_button_copy, BenchmarkDialog::OnCopyMarkdown)
-    EVT_BUTTON(ID_button_save, BenchmarkDialog::OnSaveReport)
-    EVT_BUTTON(ID_button_browser, BenchmarkDialog::OnOpenInBrowser)
+    EVT_BUTTON(ResultsView::ID_button_copy, BenchmarkDialog::OnCopyMarkdown)
+    EVT_BUTTON(ResultsView::ID_button_save, BenchmarkDialog::OnSaveReport)
+    EVT_BUTTON(ResultsView::ID_button_browser, BenchmarkDialog::OnOpenInBrowser)
+    EVT_BUTTON(ResultsView::ID_button_close_result, BenchmarkDialog::OnCloseResult)
+    EVT_MENU(ResultsView::ID_button_close_result, BenchmarkDialog::OnCloseResult)
     EVT_BUTTON(ID_button_earlier_browse, BenchmarkDialog::OnBrowseEarlier)
     EVT_BUTTON(ID_button_compare, BenchmarkDialog::OnCompareReports)
     EVT_CHECKBOX(ID_check_private, BenchmarkDialog::OnPrivateChanged)
@@ -257,6 +259,11 @@ BenchmarkDialog::BenchmarkDialog(wxWindow* parent, Database* db)
     // can wait for the cleanup of a running test
     Bind(wxEVT_CLOSE_WINDOW, &BenchmarkDialog::OnClose, this);
     Bind(wxEVT_CHAR_HOOK, &BenchmarkDialog::OnCharHook, this);
+    // Ctrl+W closes the shown result, also from the report view
+    wxAcceleratorEntry keys[] = {
+        wxAcceleratorEntry(wxACCEL_CTRL, 'W', BenchmarkResultsView::ID_button_close_result)
+    };
+    SetAcceleratorTable(wxAcceleratorTable(1, keys));
     // the settings start with the target, not with the first text field
     CallAfter([this]() { choice_target->SetFocus(); });
     CallAfter([this]() { dropPendingDatabases(); });
@@ -338,9 +345,21 @@ void BenchmarkDialog::showHelp(wxWindow* button, const wxString& title,
 
 void BenchmarkDialog::OnCharHook(wxKeyEvent& event)
 {
+    const int key = event.GetKeyCode();
+    // the next or previous tab, also where the report view has the focus,
+    // which would keep these keys for itself
+    if (event.GetModifiers() == wxMOD_CONTROL || event.GetModifiers()
+        == (wxMOD_CONTROL | wxMOD_SHIFT))
+    {
+        const bool shift = event.ShiftDown();
+        if (key == WXK_TAB || ((key == WXK_PAGEUP || key == WXK_PAGEDOWN) && !shift))
+        {
+            view_results->selectNext(key == WXK_TAB ? !shift : key == WXK_PAGEDOWN);
+            return;
+        }
+    }
     // Escape closes an open explanation, not the dialog; Tab closes it and
     // moves on
-    const int key = event.GetKeyCode();
     if (!popup_help || !popup_help->IsShown() || (key != WXK_ESCAPE && key != WXK_TAB))
     {
         event.Skip();
@@ -684,86 +703,28 @@ void BenchmarkDialog::createControls()
     sizerSettings->Add(panel_advanced, 0, wxEXPAND);
     sizerMain->Add(sizerSettings, 0, wxEXPAND | wxBOTTOM, gap);
 
-    // the progress, the report and the log: the progress is there before
-    // the start, so that nothing moves when a test starts
-    notebook_results = new wxNotebook(panel, wxID_ANY);
-    panel_progress = new BenchmarkProgressPanel(notebook_results);
-    panel_progress->onShowLog = [this]()
+    // the strip of the progress, the log and the results, and what the
+    // selected tab shows: the progress is there before the start, so that
+    // nothing moves when a test starts
+    view_results = new BenchmarkResultsView(panel);
+    panel_progress = view_results->getProgress();
+    panel_progress->onShowLog = [this]() { view_results->select(ResultsView::logTab); };
+    text_log = view_results->getLog();
+    button_copy = view_results->getCopyButton();
+    button_save = view_results->getSaveButton();
+    button_browser = view_results->getBrowserButton();
+    button_close_result = view_results->getCloseButton();
+    view_results->setStatusWidth(getCopiedMessage());
+    view_results->makePage = [this](int id) { return makePage(id); };
+    view_results->onSelected = [this](int id) { onResultSelected(id); };
+    view_results->onCloseResult = [this](int id) { closeResult(id); };
+    view_results->onShortcut = [this](char key)
     {
-        notebook_results->SetSelection(notebook_results->GetPageCount() - 1);
+        wxCommandEvent dummy;
+        if (key == 'W')
+            OnCloseResult(dummy);
     };
-    notebook_results->AddPage(panel_progress, _("Progress"));
-
-    // the report, with what can be done with it above it
-    wxPanel* pageReport = new wxPanel(notebook_results);
-    wxBoxSizer* sizerReport = new wxBoxSizer(wxVERTICAL);
-    check_private = new wxCheckBox(pageReport, ID_check_private,
-        _("&Hide private information"));
-    check_private->SetToolTip(_("Removes computer and host names, IP addresses, "
-        "user names, paths and service names from the report, the copy and the "
-        "saved file, so that it can be shared in public. Hardware, versions and "
-        "all measurements stay."));
-    bool hidePrivate = false;
-    config().getValue(hidePrivateKey, hidePrivate);
-    check_private->SetValue(hidePrivate);
-    label_report_status = createHintText(pageReport, wxEmptyString, true);
-    // the answer to a copy is never cut
-    label_report_status->SetMinSize(wxSize(
-        label_report_status->GetTextExtent(getCopiedMessage()).x, -1));
-    button_copy = new wxButton(pageReport, ID_button_copy, _("Copy as &Markdown"));
-    button_save = new wxButton(pageReport, ID_button_save, _("Sa&ve report..."));
-    button_browser = new wxButton(pageReport, ID_button_browser, _("Open in &browser"));
-    button_browser->SetToolTip(_("Shows the report in the web browser of this computer. "
-        "The page is written to the temporary directory; without \"Hide private "
-        "information\" it contains the names of computers and paths."));
-    wxBoxSizer* sizerActions = new wxBoxSizer(wxHORIZONTAL);
-    sizerActions->Add(check_private, 0, wxALIGN_CENTER_VERTICAL);
-    sizerActions->Add(label_report_status, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT,
-        FromDIP(12));
-    sizerActions->Add(button_copy, 0, wxRIGHT, gap);
-    sizerActions->Add(button_save, 0, wxRIGHT, gap);
-    sizerActions->Add(button_browser, 0);
-    sizerReport->Add(sizerActions, 0, wxEXPAND | wxALL, gap);
-    sizerReport->Add(new wxStaticLine(pageReport), 0, wxEXPAND);
-
-#if wxUSE_WEBVIEW
-    wxString backend;
-    webview_report = createBenchmarkReportView(pageReport, backend);
-    if (webview_report)
-    {
-        reportPageM.reset(new BenchmarkReportPage(webview_report,
-            backend == wxWebViewBackendIE));
-        if (backend == wxWebViewBackendIE)
-        {
-            reportViewM = "Internet Explorer";
-            wxStaticText* hint = new wxStaticText(pageReport, wxID_ANY,
-                _("The Microsoft Edge WebView2 Runtime is not installed on this "
-                  "computer, so the report is shown with Internet Explorer in a "
-                  "simpler form. \"Open in browser\" shows it in your web browser."));
-            hint->Wrap(FromDIP(600));
-            sizerReport->Add(hint, 0, wxEXPAND | wxALL, gap);
-        }
-        else
-            reportViewM = wxWebView::GetBackendVersionInfo(backend).GetVersionString();
-        sizerReport->Add(webview_report, 1, wxEXPAND);
-    }
-#endif
-    if (!webview_report)
-    {
-        reportViewM = _("text, no web view is available");
-        text_report = new wxTextCtrl(pageReport, wxID_ANY, wxEmptyString,
-            wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
-        sizerReport->Add(text_report, 1, wxEXPAND);
-    }
-    pageReport->SetSizer(sizerReport);
-    notebook_results->AddPage(pageReport, _("Report"));
-
-    // every message of the run, also the measurements as they come
-    text_log = new wxTextCtrl(notebook_results, wxID_ANY, wxEmptyString,
-        wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
-    notebook_results->AddPage(text_log, _("Log"));
-
-    sizerMain->Add(notebook_results, 1, wxEXPAND);
+    sizerMain->Add(view_results, 1, wxEXPAND);
 
     // buttons
     button_start = new wxButton(panel, ID_button_start, _("&Start"));
@@ -773,13 +734,25 @@ void BenchmarkDialog::createControls()
     button_cancel = new wxButton(panel, ID_button_cancel, _("C&ancel test"));
     button_compare = new wxButton(panel, ID_button_compare, _("Compare t&wo reports..."));
     button_compare->SetToolTip(_("Compares two saved reports, without a new test."));
+    // what is shown, copied and saved of every result
+    check_private = new wxCheckBox(panel, ID_check_private,
+        _("&Hide private information"));
+    check_private->SetToolTip(_("Removes computer and host names, IP addresses, "
+        "user names, paths and service names from the report, the copy and the "
+        "saved file, so that it can be shared in public. Hardware, versions and "
+        "all measurements stay."));
+    bool hidePrivate = false;
+    config().getValue(hidePrivateKey, hidePrivate);
+    check_private->SetValue(hidePrivate);
+    view_results->setPageVariant(getPageVariant());
     button_close = new wxButton(panel, wxID_CANCEL, _("&Close"));
 
     wxBoxSizer* sizerButtons = new wxBoxSizer(wxHORIZONTAL);
     sizerButtons->Add(button_start, 0, wxRIGHT, gap);
     sizerButtons->Add(button_cancel, 0, wxRIGHT, gap);
-    sizerButtons->AddStretchSpacer(1);
     sizerButtons->Add(button_compare, 0, wxRIGHT, gap);
+    sizerButtons->AddStretchSpacer(1);
+    sizerButtons->Add(check_private, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(12));
     sizerButtons->Add(button_close, 0);
 
     layoutSizers(sizerMain, sizerButtons, true);
@@ -831,9 +804,14 @@ void BenchmarkDialog::updateControls()
     button_start->Enable(idle);
     button_cancel->Enable(runningM && !runnerM->isCancelRequested());
     button_compare->Enable(idle);
-    button_copy->Enable(idle && (hasReportM || comparisonM));
-    button_save->Enable(idle && (hasReportM || comparisonM));
-    button_browser->Enable(idle && (hasReportM || comparisonM));
+    // a saved file is shown as it is: it cannot be copied as Markdown or
+    // saved again
+    const fr::BenchmarkResultEntry* entry = getShownResult();
+    const bool own = entry && entry->kind != fr::BenchmarkResultKind::SavedReport;
+    button_copy->Enable(idle && own);
+    button_save->Enable(idle && own);
+    button_browser->Enable(idle && entry);
+    button_close_result->Enable(idle && entry);
 }
 
 wxString BenchmarkDialog::getReadyHint() const
@@ -864,9 +842,7 @@ void BenchmarkDialog::OnDurationChanged(wxCommandEvent& event)
 
 void BenchmarkDialog::setReportStatus(const wxString& message)
 {
-    label_report_status->SetLabel(message);
-    // the whole message where it is cut
-    label_report_status->SetToolTip(message);
+    view_results->setStatus(message);
 }
 
 void BenchmarkDialog::OnAdvancedToggled(wxCommandEvent& WXUNUSED(event))
@@ -1232,14 +1208,18 @@ void BenchmarkDialog::OnStart(wxCommandEvent& WXUNUSED(event))
         addPendingDatabase(pendingEntriesM.back());
     }
     runningM = true;
-    hasReportM = false;
-    comparisonM.reset();
+    // a new test replaces the results before it
+    for (const fr::BenchmarkResultEntry& e : std::vector<fr::BenchmarkResultEntry>(
+        resultsM.getEntries()))
+    {
+        view_results->removeResult(e.id);
+    }
+    resultsM.closeAll();
     closeRequestedM = false;
     loggedResultsM.clear();
     lastMessageM.clear();
     text_log->Clear();
-    showReport(fr::BenchmarkReport());
-    notebook_results->SetSelection(0);
+    view_results->select(ResultsView::progressTab);
     // the settings cannot be changed during the run; the progress gets
     // their room
     showAdvanced(false);
@@ -1248,7 +1228,7 @@ void BenchmarkDialog::OnStart(wxCommandEvent& WXUNUSED(event))
     appendLog(wxString::Format(_("Target: %s"), params.targetDescription));
     appendLog(wxString::Format(_("Intensity: %s, page size %d"),
         fr::getBenchmarkIntensityName(intensity), params.pageSize));
-    appendLog(wxString::Format(_("Report view: %s"), reportViewM));
+    appendLog(wxString::Format(_("Report view: %s"), view_results->getViewName()));
     updateControls();
 
     fr::BenchmarkRunner* runner = runnerM.get();
@@ -1347,8 +1327,6 @@ void BenchmarkDialog::onFinished(const fr::BenchmarkReport& report,
     // the runner holds the login of this run, which is not kept
     runnerM.reset();
     runningM = false;
-    reportM = report;
-    hasReportM = true;
     // like connectDatabase(): a master password that did not work is asked
     // for again at the next start
     if (encryptedLoginM)
@@ -1362,13 +1340,17 @@ void BenchmarkDialog::onFinished(const fr::BenchmarkReport& report,
     // an earlier report that cannot be compared, e.g. of an older version
     const wxString earlierFile = text_earlier->GetValue().Trim().Trim(false);
     wxString earlierProblem;
+    std::optional<fr::BenchmarkSnapshot> baseline;
     if (!earlierFile.empty())
     {
+        const fr::BenchmarkSnapshotResult earlier = readReportFile(earlierFile);
         earlierProblem = wxFileExists(earlierFile)
-            ? fr::getBenchmarkSnapshotProblem(readReportFile(earlierFile))
+            ? fr::getBenchmarkSnapshotProblem(earlier)
             : wxString(_("The file does not exist."));
         if (!earlierProblem.empty())
             appendLog(earlierFile + ": " + earlierProblem);
+        else
+            baseline = earlier.snapshot;
     }
 
     using Outcome = BenchmarkProgressPanel::Outcome;
@@ -1442,11 +1424,15 @@ void BenchmarkDialog::onFinished(const fr::BenchmarkReport& report,
     appendLog(wxString::Format(_("Done after %.0f seconds."),
         report.durationSeconds));
 
-    showReport(displayedReport());
+    // a test that measured nothing has only its message
+    const int id = resultsM.addRun(report, baseline);
+    if (id)
+        addResultTab(id);
     showSettings(false);
     // an error stays in sight, with the stage it happened in; the report of
-    // the steps before it is on its page
-    notebook_results->SetSelection(outcome == Outcome::Failed ? 0 : 1);
+    // the steps before it is on its tab
+    if (id && outcome != Outcome::Failed)
+        view_results->select(id);
     updateControls();
 
     if (closeRequestedM)
@@ -1456,18 +1442,13 @@ void BenchmarkDialog::onFinished(const fr::BenchmarkReport& report,
 void BenchmarkDialog::showSettings(bool show)
 {
     settingsShownM = show;
-    if (show && comparisonM)
-    {
-        comparisonM.reset();
-        showReport(hasReportM ? displayedReport() : fr::BenchmarkReport());
-    }
     sizerSettingsM->ShowItems(show);
     button_start->SetLabel(show ? _("&Start") : _("&New test"));
     if (show)
     {
         // ready for the next run
         showReady();
-        notebook_results->SetSelection(0);
+        view_results->select(ResultsView::progressTab);
         // the hint of the advanced settings is only shown next to the
         // closed pane
         layoutAdvanced();
@@ -1476,33 +1457,110 @@ void BenchmarkDialog::showSettings(bool show)
         getControlsPanel()->Layout();
 }
 
-void BenchmarkDialog::showReport(const fr::BenchmarkReport& report)
+void BenchmarkDialog::addResultTab(int id)
 {
-    // a message such as "copied" was about the report shown before
-    setReportStatus(wxEmptyString);
-    // an empty report (before a run) shows an empty page
-    const bool hasData = report.metrics.settings.connectAttempts > 0;
-#if wxUSE_WEBVIEW
-    if (webview_report)
+    if (const fr::BenchmarkResultEntry* entry = resultsM.find(id))
     {
-        reportPageM->show(hasData
-            ? report.toHtml(getReportStyle())
-            : wxString("<html><body></body></html>"));
-        return;
+        view_results->addResult(id, fr::getBenchmarkResultLabel(*entry),
+            fr::describeBenchmarkResult(*entry));
     }
-#endif
-    text_report->SetValue(hasData ? report.toMarkdown() : wxString());
-    text_report->ShowPosition(0);
+}
+
+void BenchmarkDialog::updateResultTab(int id)
+{
+    if (const fr::BenchmarkResultEntry* entry = resultsM.find(id))
+    {
+        view_results->setResultLabel(id, fr::getBenchmarkResultLabel(*entry),
+            fr::describeBenchmarkResult(*entry));
+        if (view_results->getSelection() == id)
+            view_results->setHeader(fr::getBenchmarkResultHeader(*entry));
+    }
+}
+
+const fr::BenchmarkResultEntry* BenchmarkDialog::getShownResult() const
+{
+    return resultsM.find(view_results->getSelection());
+}
+
+void BenchmarkDialog::onResultSelected(int id)
+{
+    resultsM.select(id > 0 ? id : 0);
+    if (const fr::BenchmarkResultEntry* entry = resultsM.find(id))
+    {
+        // the result needs the room of the settings
+        if (settingsShownM)
+            showSettings(false);
+        button_save->SetLabel(entry->kind == fr::BenchmarkResultKind::Comparison
+            ? _("Sa&ve comparison...") : _("Sa&ve report..."));
+        button_save->GetParent()->Layout();
+        view_results->setHeader(fr::getBenchmarkResultHeader(*entry));
+        // a message such as "copied" was about the result shown before
+        setReportStatus(entry->kind == fr::BenchmarkResultKind::SavedReport
+            ? _("\"Hide private information\" does not change a saved file.")
+            : wxString());
+    }
+    updateControls();
+}
+
+void BenchmarkDialog::closeResult(int id)
+{
+    if (runningM)
+        return;
+    const bool shown = view_results->getSelection() == id;
+    const int next = resultsM.close(id);
+    view_results->removeResult(id);
+    if (shown)
+        view_results->select(next > 0 ? next : ResultsView::progressTab);
+    updateControls();
+}
+
+void BenchmarkDialog::OnCloseResult(wxCommandEvent& WXUNUSED(event))
+{
+    if (const fr::BenchmarkResultEntry* entry = getShownResult())
+        closeResult(entry->id);
+}
+
+wxString BenchmarkDialog::getPageVariant() const
+{
+    return wxString(check_private->GetValue() ? "hidden," : "all,") + getReportStyle();
+}
+
+wxString BenchmarkDialog::makePage(int id) const
+{
+    const fr::BenchmarkResultEntry* entry = resultsM.find(id);
+    if (!entry)
+        return wxString();
+    const bool web = view_results->hasWebView();
+    switch (entry->kind)
+    {
+        case fr::BenchmarkResultKind::Run:
+        {
+            const fr::BenchmarkReport report = displayedReport(*entry);
+            return web ? report.toHtml(getReportStyle()) : report.toMarkdown();
+        }
+        case fr::BenchmarkResultKind::Comparison:
+        {
+            const fr::BenchmarkComparison comparison = displayedComparison(*entry);
+            return web ? comparison.toHtml(getReportStyle()) : comparison.toMarkdown();
+        }
+        case fr::BenchmarkResultKind::SavedReport:
+        default:
+            // as it was saved, in the style of the dialog
+            if (web)
+                return fr::applyBenchmarkReportTheme(entry->html, getReportStyle());
+            return _("A saved HTML report needs a web view. \"Open in browser\" shows "
+                "it in your web browser.");
+    }
 }
 
 void BenchmarkDialog::OnCopyMarkdown(wxCommandEvent& WXUNUSED(event))
 {
-    if (!hasReportM && !comparisonM)
+    const fr::BenchmarkResultEntry* entry = getShownResult();
+    if (!entry || entry->kind == fr::BenchmarkResultKind::SavedReport)
         return;
     if (wxTheClipboard->Open())
     {
-        wxTheClipboard->SetData(new wxTextDataObject(comparisonM
-            ? displayedComparison().toMarkdown() : displayedReport().toMarkdown()));
+        wxTheClipboard->SetData(new wxTextDataObject(displayedText(*entry, true)));
         wxTheClipboard->Close();
         setReportStatus(getCopiedMessage());
     }
@@ -1510,39 +1568,63 @@ void BenchmarkDialog::OnCopyMarkdown(wxCommandEvent& WXUNUSED(event))
 
 void BenchmarkDialog::OnSaveReport(wxCommandEvent& WXUNUSED(event))
 {
-    if (!hasReportM && !comparisonM)
-        return;
-    wxFileDialog fd(this, comparisonM ? _("Save comparison") : _("Save benchmark report"),
-        "", comparisonM ? "flamerobin-benchmark-comparison.html" : "flamerobin-benchmark.html",
+    if (const fr::BenchmarkResultEntry* entry = getShownResult())
+        saveResult(entry->id);
+}
+
+bool BenchmarkDialog::saveResult(int id)
+{
+    const fr::BenchmarkResultEntry* entry = resultsM.find(id);
+    if (!entry || entry->kind == fr::BenchmarkResultKind::SavedReport)
+        return false;
+    const bool comparison = entry->kind == fr::BenchmarkResultKind::Comparison;
+    wxFileDialog fd(this, comparison ? _("Save comparison") : _("Save benchmark report"),
+        "", comparison ? "flamerobin-benchmark-comparison.html" : "flamerobin-benchmark.html",
         _("HTML report (*.html)|*.html|Markdown (*.md)|*.md"),
         wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
     if (fd.ShowModal() != wxID_OK)
-        return;
+        return false;
     const bool markdown = fd.GetFilterIndex() == 1
         || fd.GetPath().Lower().EndsWith(".md");
     wxFFile file(fd.GetPath(), "w");
-    if (!file.IsOpened() || !file.Write(displayedText(markdown), wxConvUTF8))
+    if (!file.IsOpened() || !file.Write(displayedText(*entry, markdown), wxConvUTF8)
+        || !file.Close())
     {
         wxMessageBox(_("The report could not be saved."), _("Performance Benchmark & Diagnosis"),
             wxOK | wxICON_ERROR, this);
+        return false;
     }
+    resultsM.markSaved(id, fd.GetPath());
+    updateResultTab(id);
+    return true;
 }
 
-wxString BenchmarkDialog::displayedText(bool markdown) const
+wxString BenchmarkDialog::displayedText(const fr::BenchmarkResultEntry& entry,
+    bool markdown) const
 {
     // the saved page follows the theme of the browser that opens it
-    if (comparisonM)
+    switch (entry.kind)
     {
-        const fr::BenchmarkComparison comparison = displayedComparison();
-        return markdown ? comparison.toMarkdown() : comparison.toHtml();
+        case fr::BenchmarkResultKind::Run:
+        {
+            const fr::BenchmarkReport report = displayedReport(entry);
+            return markdown ? report.toMarkdown() : report.toHtml();
+        }
+        case fr::BenchmarkResultKind::Comparison:
+        {
+            const fr::BenchmarkComparison comparison = displayedComparison(entry);
+            return markdown ? comparison.toMarkdown() : comparison.toHtml();
+        }
+        case fr::BenchmarkResultKind::SavedReport:
+        default:
+            return entry.html;
     }
-    const fr::BenchmarkReport report = displayedReport();
-    return markdown ? report.toMarkdown() : report.toHtml();
 }
 
 void BenchmarkDialog::OnOpenInBrowser(wxCommandEvent& WXUNUSED(event))
 {
-    if (!hasReportM && !comparisonM)
+    const fr::BenchmarkResultEntry* entry = getShownResult();
+    if (!entry)
         return;
     // the browser may still read the page after the dialog is closed, so
     // the pages are only removed a day later
@@ -1565,7 +1647,8 @@ void BenchmarkDialog::OnOpenInBrowser(wxCommandEvent& WXUNUSED(event))
         + wxDateTime::Now().Format("%Y%m%d-%H%M%S-")
         + wxString::Format("%lu.html", wxGetProcessId()));
     wxFFile file(path.GetFullPath(), "w");
-    if (!file.IsOpened() || !file.Write(displayedText(false), wxConvUTF8) || !file.Close()
+    if (!file.IsOpened() || !file.Write(displayedText(*entry, false), wxConvUTF8)
+        || !file.Close()
         || !wxLaunchDefaultBrowser(wxFileName::FileNameToURL(path)))
     {
         wxMessageBox(_("The report could not be opened in the web browser. Please save "
@@ -1605,52 +1688,30 @@ std::optional<fr::BenchmarkSnapshot> BenchmarkDialog::readSnapshot(const wxStrin
     return std::nullopt;
 }
 
-fr::BenchmarkReport BenchmarkDialog::displayedReport() const
+fr::BenchmarkReport BenchmarkDialog::displayedReport(
+    const fr::BenchmarkResultEntry& entry) const
 {
     // the earlier report and the private information only change what is
     // shown, copied and saved; the measured report stays as it is
-    fr::BenchmarkReport report = reportM;
-    const wxString earlierFile = text_earlier->GetValue().Trim().Trim(false);
-    if (!earlierFile.empty() && wxFileExists(earlierFile))
-    {
-        // a report that cannot be compared is named in the log, see onFinished()
-        const fr::BenchmarkSnapshotResult earlier = readReportFile(earlierFile);
-        if (earlier.ok())
-            report.earlier = earlier.snapshot;
-    }
+    fr::BenchmarkReport report = *entry.report;
+    report.earlier = entry.baseline;
     if (check_private->GetValue())
         report = report.anonymized();
     return report;
 }
 
-fr::BenchmarkComparison BenchmarkDialog::displayedComparison() const
+fr::BenchmarkComparison BenchmarkDialog::displayedComparison(
+    const fr::BenchmarkResultEntry& entry) const
 {
     if (check_private->GetValue())
-        return fr::anonymizeBenchmarkComparison(*comparisonM);
-    return *comparisonM;
-}
-
-void BenchmarkDialog::showComparison()
-{
-    setReportStatus(wxEmptyString);
-#if wxUSE_WEBVIEW
-    if (webview_report)
-    {
-        reportPageM->show(displayedComparison().toHtml(getReportStyle()));
-        return;
-    }
-#endif
-    text_report->SetValue(displayedComparison().toMarkdown());
-    text_report->ShowPosition(0);
+        return fr::anonymizeBenchmarkComparison(*entry.comparison);
+    return *entry.comparison;
 }
 
 void BenchmarkDialog::OnPrivateChanged(wxCommandEvent& WXUNUSED(event))
 {
     config().setValue(hidePrivateKey, check_private->GetValue());
-    if (comparisonM)
-        showComparison();
-    else if (hasReportM)
-        showReport(displayedReport());
+    view_results->setPageVariant(getPageVariant());
 }
 
 void BenchmarkDialog::OnBrowseEarlier(wxCommandEvent& WXUNUSED(event))
@@ -1662,8 +1723,6 @@ void BenchmarkDialog::OnBrowseEarlier(wxCommandEvent& WXUNUSED(event))
         return;
     text_earlier->SetValue(fd.GetPath());
     config().setValue(earlierFileKey, fd.GetPath());
-    if (hasReportM && !comparisonM)
-        showReport(displayedReport());
 }
 
 void BenchmarkDialog::OnCompareReports(wxCommandEvent& WXUNUSED(event))
@@ -1687,13 +1746,21 @@ void BenchmarkDialog::OnCompareReports(wxCommandEvent& WXUNUSED(event))
         : std::nullopt;
     if (!first || !second)
         return;
+    // two files without a tab of their own
+    fr::BenchmarkResultEntry files[2];
+    for (int i = 0; i < 2; ++i)
+    {
+        files[i].kind = fr::BenchmarkResultKind::SavedReport;
+        files[i].snapshot = i == 0 ? *first : *second;
+        files[i].path = paths[i];
+    }
     // the run with the later date is the newer one
-    if (first->date > second->date)
-        std::swap(first, second);
-    comparisonM = fr::compareBenchmarkSnapshots(*second, *first);
-    showComparison();
-    showSettings(false);
-    notebook_results->SetSelection(1);  // the report
+    const fr::BenchmarkPair pair = fr::orderBenchmarkPair(files[0], files[1]);
+    const int id = resultsM.addComparison(*pair.older, *pair.newer);
+    if (!id)
+        return;
+    addResultTab(id);
+    view_results->select(id);
     setReportStatus(_("Comparison of two saved reports."));
     // the progress is about a run, which is not shown now
     panel_progress->showReady(getStagePlan(), wxEmptyString);

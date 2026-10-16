@@ -25,7 +25,6 @@
 #define FR_BENCHMARKDIALOG_H
 
 #include <wx/wx.h>
-#include <wx/notebook.h>
 
 #include <chrono>
 #include <memory>
@@ -36,16 +35,16 @@
 #include <vector>
 
 #include "engine/Benchmark.h"
+#include "engine/BenchmarkResults.h"
 #include "engine/BenchmarkRunner.h"
 #include "gui/BaseDialog.h"
 #include "metadata/database.h"
 
 class BenchmarkProgressPanel;
-class BenchmarkReportPage;
+class BenchmarkResultsView;
 class wxCollapsibleHeaderCtrl;
 class wxPopupTransientWindow;
 class wxSimplebook;
-class wxWebView;
 
 ///
 /// Database -> Performance Benchmark & Diagnosis. The benchmark runs on a
@@ -73,10 +72,9 @@ private:
     std::chrono::steady_clock::time_point startTimeM;
     std::set<wxString> loggedResultsM;
     wxString lastMessageM;
-    fr::BenchmarkReport reportM;
-    bool hasReportM = false;
-    // two saved reports compared without a run
-    std::optional<fr::BenchmarkComparison> comparisonM;
+    // the results of the dialog: the test, or two saved reports compared
+    // without a run
+    fr::BenchmarkResultStore resultsM;
     std::vector<fr::BenchmarkFirebirdInstallation> installationsM;
 
     // the targets of fr::getBenchmarkTargets(), and the details of every
@@ -108,29 +106,20 @@ private:
     wxRadioButton* radio_intensity[3];
     fr::BenchmarkIntensity getIntensity() const;
 
-    // the pages of the notebook: the progress in stages, the report, and
-    // the whole log of the run
+    // the strip of the progress in stages, the whole log of the run and
+    // the results, with what the selected tab shows
+    BenchmarkResultsView* view_results;
     BenchmarkProgressPanel* panel_progress;
-    wxNotebook* notebook_results;
     wxTextCtrl* text_log;
-    // the HTML report, or the Markdown text where no web view is available
-    wxWebView* webview_report = nullptr;
-    wxTextCtrl* text_report = nullptr;
-#if wxUSE_WEBVIEW
-    // how the report gets into webview_report
-    std::unique_ptr<BenchmarkReportPage> reportPageM;
-#endif
-    // which of them shows the report, for the log
-    wxString reportViewM;
     wxButton* button_start;
     wxButton* button_cancel;
+    // in the header of the shown result
     wxButton* button_copy;
     wxButton* button_save;
     wxButton* button_browser;
+    wxButton* button_close_result;
     wxButton* button_compare;
     wxCheckBox* check_private;
-    // messages about the report outside of a run, e.g. that it was copied
-    wxStaticText* label_report_status;
     wxButton* button_close;
 
     void createControls();
@@ -173,14 +162,25 @@ private:
     wxSizer* sizerSettingsM = nullptr;
     bool settingsShownM = true;
     void showSettings(bool show);
-    void showReport(const fr::BenchmarkReport& report);
-    // the report with the selected earlier report, without private
+    void addResultTab(int id);
+    // after the result was saved
+    void updateResultTab(int id);
+    // the result of the selected tab; nullptr for the progress and the log
+    const fr::BenchmarkResultEntry* getShownResult() const;
+    void onResultSelected(int id);
+    void closeResult(int id);
+    // false if it was not saved
+    bool saveResult(int id);
+    // the report of a test with its earlier report, without private
     // information if that is selected: what is shown, copied and saved
-    fr::BenchmarkReport displayedReport() const;
-    fr::BenchmarkComparison displayedComparison() const;
-    // the shown report or comparison as a saved file contains it
-    wxString displayedText(bool markdown) const;
-    void showComparison();
+    fr::BenchmarkReport displayedReport(const fr::BenchmarkResultEntry& entry) const;
+    fr::BenchmarkComparison displayedComparison(const fr::BenchmarkResultEntry& entry) const;
+    // a result as a saved file contains it
+    wxString displayedText(const fr::BenchmarkResultEntry& entry, bool markdown) const;
+    // the page in the view: HTML, or Markdown without a web view
+    wxString makePage(int id) const;
+    // what changes every page: the private information and the theme
+    wxString getPageVariant() const;
     std::optional<fr::BenchmarkSnapshot> readSnapshot(const wxString& path, bool showErrors);
     // the registration of the selected database, empty without one
     wxString registrationId() const;
@@ -198,6 +198,7 @@ private:
     void OnCopyMarkdown(wxCommandEvent& event);
     void OnSaveReport(wxCommandEvent& event);
     void OnOpenInBrowser(wxCommandEvent& event);
+    void OnCloseResult(wxCommandEvent& event);
     void OnPrivateChanged(wxCommandEvent& event);
     void OnBrowseEarlier(wxCommandEvent& event);
     void OnCompareReports(wxCommandEvent& event);

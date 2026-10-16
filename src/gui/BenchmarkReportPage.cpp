@@ -36,6 +36,7 @@
 // WIN32_LEAN_AND_MEAN leaves out the COM declarations that exdisp.h needs
 #include <ole2.h>
 #include <exdisp.h>
+#include <mshtml.h>
 #endif
 #endif
 
@@ -73,22 +74,25 @@ wxWebView* createBenchmarkReportView(wxWindow* parent, wxString& backend)
 BenchmarkReportPage::BenchmarkReportPage(wxWebView* view, bool internetExplorer)
     : viewM(view), loadM(internetExplorer)
 {
+    // no page leaves the view, whatever it contains
+    viewM->Bind(wxEVT_WEBVIEW_NAVIGATING, &BenchmarkReportPage::OnNavigating, this);
+    viewM->Bind(wxEVT_WEBVIEW_NEWWINDOW, &BenchmarkReportPage::OnNewWindow, this);
     if (!loadM)
         return;
     // one handler for the whole program, like the other file systems
     if (!wxFileSystem::HasHandlerForPath("memory:report.html"))
         wxFileSystem::AddHandler(new wxMemoryFSHandler);
     viewM->RegisterHandler(wxSharedPtr<wxWebViewHandler>(new wxWebViewFSHandler("memory")));
-    viewM->Bind(wxEVT_WEBVIEW_NAVIGATING, &BenchmarkReportPage::OnNavigating, this);
     viewM->Bind(wxEVT_WEBVIEW_ERROR, &BenchmarkReportPage::OnError, this);
     viewM->Bind(wxEVT_WEBVIEW_LOADED, &BenchmarkReportPage::OnLoaded, this);
 }
 
 BenchmarkReportPage::~BenchmarkReportPage()
 {
+    viewM->Unbind(wxEVT_WEBVIEW_NAVIGATING, &BenchmarkReportPage::OnNavigating, this);
+    viewM->Unbind(wxEVT_WEBVIEW_NEWWINDOW, &BenchmarkReportPage::OnNewWindow, this);
     if (!loadM)
         return;
-    viewM->Unbind(wxEVT_WEBVIEW_NAVIGATING, &BenchmarkReportPage::OnNavigating, this);
     viewM->Unbind(wxEVT_WEBVIEW_ERROR, &BenchmarkReportPage::OnError, this);
     viewM->Unbind(wxEVT_WEBVIEW_LOADED, &BenchmarkReportPage::OnLoaded, this);
     for (const wxString& name : memoryFilesM)
@@ -161,6 +165,101 @@ bool BenchmarkReportPage::load(const wxString& url)
 #endif
 }
 
+bool BenchmarkReportPage::isShownPage(const wxString& url) const
+{
+    // the other web views get the page directly
+    return !loadM || (!nameM.empty() && url.Contains(nameM));
+}
+
+bool BenchmarkReportPage::runScript(const wxString& expression, wxString* result)
+{
+#ifdef __WXMSW__
+    if (loadM)
+        return runScriptInExplorer(expression, result);
+#endif
+    return viewM->RunScript(expression, result);
+}
+
+#ifdef __WXMSW__
+namespace
+{
+
+// releases a COM interface at the end of the scope
+template<class T>
+class ComHolder
+{
+public:
+    ComHolder() = default;
+    ComHolder(const ComHolder&) = delete;
+    ComHolder& operator=(const ComHolder&) = delete;
+    ~ComHolder() { if (pointerM) pointerM->Release(); }
+    T* get() const { return pointerM; }
+    T** out() { return &pointerM; }
+    T* operator->() const { return pointerM; }
+private:
+    T* pointerM = nullptr;
+};
+
+// frees a BSTR at the end of the scope
+class BstrHolder
+{
+public:
+    explicit BstrHolder(const wchar_t* text = nullptr)
+        : textM(text ? ::SysAllocString(text) : nullptr) {}
+    BstrHolder(const BstrHolder&) = delete;
+    BstrHolder& operator=(const BstrHolder&) = delete;
+    ~BstrHolder() { if (textM) ::SysFreeString(textM); }
+    BSTR get() const { return textM; }
+    BSTR* out() { return &textM; }
+private:
+    BSTR textM;
+};
+
+// clears a VARIANT at the end of the scope
+class VariantHolder
+{
+public:
+    VariantHolder() { ::VariantInit(&valueM); }
+    VariantHolder(const VariantHolder&) = delete;
+    VariantHolder& operator=(const VariantHolder&) = delete;
+    ~VariantHolder() { ::VariantClear(&valueM); }
+    VARIANT* get() { return &valueM; }
+private:
+    VARIANT valueM;
+};
+
+} // namespace
+
+// the value of the expression comes back in the title of the document,
+// which the dialog does not show
+bool BenchmarkReportPage::runScriptInExplorer(const wxString& expression,
+    wxString* result)
+{
+    IWebBrowser2* browser = static_cast<IWebBrowser2*>(viewM->GetNativeBackend());
+    ComHolder<IDispatch> dispatch;
+    if (!browser || FAILED(browser->get_Document(dispatch.out())) || !dispatch.get())
+        return false;
+    ComHolder<IHTMLDocument2> document;
+    dispatch->QueryInterface(IID_IHTMLDocument2, reinterpret_cast<void**>(document.out()));
+    if (!document.get())
+        return false;
+    ComHolder<IHTMLWindow2> window;
+    if (FAILED(document->get_parentWindow(window.out())) || !window.get())
+        return false;
+    const wxString code = "document.title = (function() { try { return String("
+        + expression + "); } catch (e) { return ''; } })()";
+    BstrHolder codeText(code.wc_str());
+    BstrHolder language(L"JavaScript");
+    VariantHolder value;
+    const bool done = SUCCEEDED(window->execScript(codeText.get(), language.get(),
+        value.get()));
+    BstrHolder title;
+    if (done && result && SUCCEEDED(document->get_title(title.out())))
+        *result = title.get() ? wxString(title.get()) : wxString();
+    return done;
+}
+#endif
+
 void BenchmarkReportPage::removeOldPages()
 {
     // the page shown now and the two before it stay
@@ -184,12 +283,28 @@ void BenchmarkReportPage::removeOldPages()
 
 void BenchmarkReportPage::OnNavigating(wxWebViewEvent& event)
 {
+    // Edge and WebKit: only the pages of SetPage(), not a page elsewhere
+    // that a saved report could lead to
+    if (!loadM)
+    {
+        const wxString url = event.GetURL().Lower();
+        if (url.StartsWith("about:") || url.StartsWith("data:"))
+            event.Skip();
+        else
+            event.Veto();
+        return;
+    }
     // only to the page that is shown now: the back key would show an
     // earlier page, maybe one with the private information
     if (nameM.empty() || !event.GetURL().Contains(nameM))
         event.Veto();
     else
         event.Skip();
+}
+
+void BenchmarkReportPage::OnNewWindow(wxWebViewEvent& WXUNUSED(event))
+{
+    // a link or a script of the page opens no window
 }
 
 void BenchmarkReportPage::OnError(wxWebViewEvent& event)
