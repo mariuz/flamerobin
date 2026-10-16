@@ -50,8 +50,8 @@ class wxSimplebook;
 /// Database -> Performance Benchmark & Diagnosis. The benchmark runs on a
 /// worker thread in its own temporary database; all GUI updates are
 /// marshalled with CallAfter(). Without a database registration (db is
-/// nullptr) this computer and other servers can be tested, and saved
-/// reports compared.
+/// nullptr) this computer and other servers can be tested, saved reports
+/// opened and compared.
 ///
 class BenchmarkDialog : public BaseDialog
 {
@@ -103,7 +103,22 @@ private:
     int automaticPageSizeM = 8192;
     wxCheckBox* check_inspect;
     wxCheckBox* check_manyusers;
-    wxTextCtrl* text_earlier;
+    // what the next test is compared with: nothing, a result or a file
+    wxChoice* choice_earlier;
+    struct EarlierSource
+    {
+        int id = 0;         // a result
+        wxString path;      // else a file
+    };
+    std::vector<EarlierSource> earlierSourcesM;
+    // the last saved report chosen, remembered in the configuration
+    wxString earlierFileM;
+    void fillEarlier();
+    bool chooseEarlierFile();
+    // false if a file cannot be read: the test does not start then
+    bool readEarlier(std::optional<fr::BenchmarkSnapshot>& baseline);
+    // the earlier report of the running test, read at its start
+    std::optional<fr::BenchmarkSnapshot> baselineM;
     wxRadioButton* radio_intensity[3];
     fr::BenchmarkIntensity getIntensity() const;
 
@@ -120,6 +135,7 @@ private:
     wxButton* button_browser;
     wxButton* button_close_result;
     wxButton* button_compare;
+    wxButton* button_open;
     wxCheckBox* check_private;
     wxButton* button_close;
 
@@ -177,7 +193,8 @@ private:
         ID_menu_close = 4401,
         ID_menu_close_others,
         ID_menu_close_all,
-        ID_menu_save
+        ID_menu_save,
+        ID_menu_compare
     };
     // the result of the tab the menu belongs to
     int menuResultM = 0;
@@ -195,7 +212,8 @@ private:
     wxString makePage(int id) const;
     // what changes every page: the private information and the theme
     wxString getPageVariant() const;
-    std::optional<fr::BenchmarkSnapshot> readSnapshot(const wxString& path, bool showErrors);
+    // "Compare results" with these results chosen (0: none)
+    void compare(int first, int second);
     // the registration of the selected database, empty without one
     wxString registrationId() const;
     // whether a temporary database is on the server of the registration
@@ -216,7 +234,9 @@ private:
     void OnResultMenu(wxCommandEvent& event);
     void OnPrivateChanged(wxCommandEvent& event);
     void OnBrowseEarlier(wxCommandEvent& event);
-    void OnCompareReports(wxCommandEvent& event);
+    void OnEarlierChanged(wxCommandEvent& event);
+    void OnCompare(wxCommandEvent& event);
+    void OnOpen(wxCommandEvent& event);
     void OnCloseButton(wxCommandEvent& event);
     void OnClose(wxCloseEvent& event);
     // asks about tests that are not saved and drops them; false: stay open

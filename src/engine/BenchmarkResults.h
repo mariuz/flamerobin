@@ -75,6 +75,9 @@ struct BenchmarkResultEntry
     // saved with "Save report..." (a copy or "Open in browser" is not), or
     // opened from a file
     bool saved = false;
+    // SavedReport: a saved comparison (no results, the snapshot is empty): it
+    // cannot be compared again
+    bool comparisonPage = false;
     // the file it was opened from or saved to last
     wxString path;
 };
@@ -101,6 +104,8 @@ public:
     /// a saved HTML report; 0 if the store is full
     int addSavedReport(const BenchmarkSnapshot& snapshot, const wxString& html,
         const wxString& path);
+    /// a saved comparison page that was opened: shown, never compared
+    int addSavedComparison(const wxString& html, const wxString& path);
     /// the comparison of two results (copies of both); the number of the
     /// same comparison if there is one, 0 if the store is full
     int addComparison(const BenchmarkResultEntry& older, const BenchmarkResultEntry& newer);
@@ -195,6 +200,10 @@ bool isBenchmarkReportHtmlPlain(const wxString& html);
 /// the page with the theme of the dialog ("dark" or "light"; empty: the
 /// theme of the system), set in the data-theme attribute of <html>
 wxString applyBenchmarkReportTheme(const wxString& html, const wxString& theme);
+/// the page with a content security policy in front of everything else
+/// (after a doctype): no script of the page, nothing loaded from
+/// elsewhere, no form; the report view still runs its own scripts
+wxString addBenchmarkReportPolicy(const wxString& html);
 
 } // namespace fr
 

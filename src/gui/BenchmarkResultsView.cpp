@@ -432,10 +432,11 @@ void BenchmarkResultsView::setPageVariant(const wxString& variant)
     }
 }
 
-void BenchmarkResultsView::setHeader(const wxString& text)
+void BenchmarkResultsView::setHeader(const wxString& text, const wxString& toolTip)
 {
     headerM->SetLabel(text);
-    headerM->SetToolTip(text);
+    // the whole text where it is cut
+    headerM->SetToolTip(toolTip.empty() ? text : toolTip);
 }
 
 void BenchmarkResultsView::setStatus(const wxString& message)

@@ -2494,6 +2494,15 @@ void testSnapshotFormat()
     const BenchmarkSnapshotResult first = parseBenchmarkSnapshot(oldHead
         + "format = 1\ntitle = old\nvalue.commitMs = 1.5\nstat = storage |  | Saving | "
         "1.50 ms | 200 transactions | 300.000\n-->\n");
+    BenchmarkReport localized = makeReport(healthyMetrics(), "2026-10-04 12:00:00");
+    localized.intensity = BenchmarkIntensity::Quick;
+    localized.intensityName = "Schnell";
+    const wxString localizedMd = localized.toMarkdown();
+    check(!localizedMd.Contains("FlameRobin benchmark results")
+        && !localized.toHtml("dark").Contains("FlameRobin benchmark results")
+        && parseBenchmarkSnapshot(localizedMd).snapshot.intensity == "quick",
+        "no report contains the marker of format 1, so FlameRobin 26.10.0 finds no results; "
+        "the level comes from the enum, not from the translated name");
     check(first.status == BenchmarkSnapshotStatus::TooOld && first.format == "1"
         && getBenchmarkSnapshotProblem(first).Contains("older version")
         && getBenchmarkSnapshotProblem(first).Contains("format 1"),
@@ -4211,7 +4220,7 @@ void testFixtures(const wxString& dir)
         "a report of a later minor format: unknown lines skipped, unknown values listed "
         "in their part");
 
-    // two saved reports, like "Compare two reports..."
+    // two saved reports, like "Compare..."
     BenchmarkMetrics faster = clientFixture().metrics;
     faster.commitMs = 0.75;
     faster.insertMs = 425.0;
@@ -4311,6 +4320,26 @@ void testResults()
         && getBenchmarkResultLabel(*f) == "orders-before-the-u..."
         && getBenchmarkResultLabel(*f).length() == 22, "tab labels: unsaved test with "
         "its time, a file name cut to 22 characters");
+
+    // a saved comparison carries a mark; opened, it is shown but never compared
+    const BenchmarkComparison savedPage = everyStateComparison();
+    const wxString comparisonHtml = savedPage.toHtml();
+    check(isBenchmarkComparisonPage(comparisonHtml)
+        && isBenchmarkComparisonPage(savedPage.toMarkdown())
+        && parseBenchmarkSnapshot(comparisonHtml).status == BenchmarkSnapshotStatus::NotAReport
+        && parseBenchmarkSnapshot(savedPage.toMarkdown()).status == BenchmarkSnapshotStatus::NotAReport
+        && isBenchmarkReportHtmlPlain(comparisonHtml)
+        && !isBenchmarkComparisonPage(other.toHtml()),
+        "a saved comparison is marked, has no results and passes the check of the view");
+    BenchmarkResultStore pages;
+    const int file2 = pages.addSavedReport(otherSnapshot, other.toHtml(), "/home/user/r.html");
+    const int shown = pages.addSavedComparison(comparisonHtml, "/home/user/versus.html");
+    const std::vector<int> comparable = pages.getComparableIds();
+    check(shown != 0 && pages.find(shown)->comparisonPage
+        && std::find(comparable.begin(), comparable.end(), shown) == comparable.end()
+        && std::find(comparable.begin(), comparable.end(), file2) != comparable.end()
+        && getBenchmarkResultLabel(*pages.find(shown)) == "versus.html",
+        "an opened comparison is a tab, but not a source of comparisons");
     check(describeBenchmarkResult(*a).StartsWith("1  Run, 2026-10-14 09:55, Standard, client, ")
         && describeBenchmarkResult(*a).EndsWith(" (not saved)")
         && describeBenchmarkResult(*f).StartsWith("File orders-before-the-upgrade-of-the-"
@@ -4524,7 +4553,22 @@ void testPlainReport()
         "<style>body { background: url(https://example.com/x.png) }</style>",
         "<style>@import 'x.css';</style>", "<div style=\"width: expr/**/ession(alert(1))\">",
         "<div style=\"behavior: url(x.htc)\">", "<style>b { color: \\72 ed }</style>",
-        "<input type=\"image\" src=\"x\">", "<input type=text>" };
+        "<input type=\"image\" src=\"x\">", "<input type=text>",
+        // where a browser reads a page differently than a simple check
+        "<!--><script>alert(1)</script>-->", "<!--->\n<script>alert(1)</script>-->",
+        "<!-- x --!><script>alert(1)</script> -->",
+        "<svg><title><script>alert(1)</script></title></svg>",
+        "<svg><style><img src=x onerror=alert(1)></style></svg>",
+        "<svg><style><script>alert(1)</script></style></svg>",
+        "<svg><svg/><title><script>alert(1)</script></title></svg>",
+        "<meta http-equiv=\"refresh\" http-equiv=\"x-ua-compatible\" "
+            "content=\"0;url=https://example.com\">",
+        "<input type=\"image\" type=\"radio\">",
+        "<div style=\"background:u&#114;l(https://example.com/x)\">",
+        "<div style=\"width:e&#120;pression(alert(1))\">",
+        "<svg><use href=\"&#x6a;avascript:x\"/></svg>",
+        "<title></title ><script>alert(1)</script>",
+        "<style></style ><script>alert(1)</script>" };
     for (const char* addition : additions)
     {
         if (isBenchmarkReportHtmlPlain(with(addition)))
@@ -4537,6 +4581,7 @@ void testPlainReport()
         "a refresh, a conditional comment, a style that loads or runs something are refused");
     check(isBenchmarkReportHtmlPlain(with("<p>1 &lt; 2 and 3 < 4</p><!-- note -->"))
         && isBenchmarkReportHtmlPlain(with("<svg><use xlink:href=\"#i-cpu\"/></svg>"))
+        && isBenchmarkReportHtmlPlain(with("<svg><svg/></svg><svg/><style>b { }</style>"))
         && isBenchmarkReportHtmlPlain("<!doctype html><html lang=\"en\"><body>"
             "<p>text</p></body></html>"), "text, comments and links within the page are fine");
 
@@ -4561,6 +4606,19 @@ void testPlainReport()
         "light") == "<HTML data-theme=\"light\" lang=en><body>"
         && applyBenchmarkReportTheme("<p>no page</p>", "dark") == "<p>no page</p>",
         "twice in any case, and a text without <html>");
+
+    // the policy comes before anything of the page, after its doctype
+    const wxString policy = addBenchmarkReportPolicy(none);
+    const size_t meta = policy.find("<meta http-equiv=\"Content-Security-Policy\"");
+    check(meta == 15 && policy.StartsWith("<!doctype html><meta")
+        && policy.Contains("default-src 'none'; script-src 'unsafe-eval';")
+        && policy.substr(policy.find('>', meta) + 1) == none.substr(15),
+        "a saved page gets the policy right after its doctype");
+    check(addBenchmarkReportPolicy("text<p>x</p>").StartsWith("<meta http-equiv=\"Content")
+        && addBenchmarkReportPolicy("\n <!DOCTYPE html><html>").StartsWith(
+            "\n <!DOCTYPE html><meta http-equiv=")
+        && addBenchmarkReportPolicy("<!-- c --><head>").StartsWith("<meta"),
+        "the policy is in front of a page without a doctype or <head>, also before text");
 }
 
 void writeFixtures(const wxString& dir)

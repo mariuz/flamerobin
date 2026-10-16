@@ -206,6 +206,17 @@ int BenchmarkResultStore::addSavedReport(const BenchmarkSnapshot& snapshot,
     return add(std::move(entry));
 }
 
+int BenchmarkResultStore::addSavedComparison(const wxString& html, const wxString& path)
+{
+    BenchmarkResultEntry entry;
+    entry.kind = BenchmarkResultKind::SavedReport;
+    entry.comparisonPage = true;
+    entry.html = html;
+    entry.path = path;
+    entry.saved = true;
+    return add(std::move(entry));
+}
+
 int BenchmarkResultStore::addComparison(const BenchmarkResultEntry& older,
     const BenchmarkResultEntry& newer)
 {
@@ -331,7 +342,7 @@ std::vector<int> BenchmarkResultStore::getComparableIds() const
     std::vector<int> ids;
     for (const BenchmarkResultEntry& e : entriesM)
     {
-        if (e.kind != BenchmarkResultKind::Comparison)
+        if (e.kind != BenchmarkResultKind::Comparison && !e.comparisonPage)
             ids.push_back(e.id);
     }
     return ids;
@@ -398,6 +409,8 @@ wxString describeBenchmarkResult(const BenchmarkResultEntry& entry)
                 describeRun(entry.snapshot), state);
         }
         case BenchmarkResultKind::SavedReport:
+            if (entry.comparisonPage)
+                return wxString::Format(_("File %s, comparison (opened)"), getFileName(entry.path));
             return wxString::Format(_("File %s, %s (opened)"), getFileName(entry.path),
                 describeRun(entry.snapshot));
         case BenchmarkResultKind::Comparison:
@@ -612,6 +625,8 @@ bool isBenchmarkReportHtmlPlain(const wxString& html)
     const wxString text = html.Lower();
     const size_t length = text.length();
     size_t pos = 0;
+    // within <svg> <title> and <style> hold markup, not text
+    int svgDepth = 0;
     while ((pos = text.find('<', pos)) != wxString::npos)
     {
         if (text.compare(pos, 4, "<!--") == 0)
@@ -624,6 +639,12 @@ bool isBenchmarkReportHtmlPlain(const wxString& html)
             const wxString comment = text.substr(pos + 4, end - pos - 4);
             if (comment.StartsWith("[if") || comment.Contains("<![endif]"))
                 return false;
+            // a browser also ends a comment with "<!-->", "<!--->" or "--!>"
+            if (comment.StartsWith(">") || comment.StartsWith("->")
+                || comment.Contains("--!>"))
+            {
+                return false;
+            }
             pos = end + 3;
             continue;
         }
@@ -659,15 +680,19 @@ bool isBenchmarkReportHtmlPlain(const wxString& html)
         // the attributes up to the end of the tag
         bool httpEquiv = false;
         bool compatible = false;
+        bool selfClosing = false;
         wxString inputType;
+        std::vector<wxString> attributes;
         while (true)
         {
+            selfClosing = false;
             while (i < length && (wxIsspace(text[i]) || text[i] == '/'))
-                ++i;
+                selfClosing = text[i++] == '/';
             if (i >= length)
                 return false;
             if (text[i] == '>')
                 break;
+            selfClosing = false;
             const size_t attributeStart = i;
             while (i < length && !wxIsspace(text[i]) && text[i] != '=' && text[i] != '>'
                 && text[i] != '/')
@@ -675,6 +700,13 @@ bool isBenchmarkReportHtmlPlain(const wxString& html)
                 ++i;
             }
             const wxString attribute = text.substr(attributeStart, i - attributeStart);
+            // a browser takes the first of two, the checks below the last
+            if (std::find(attributes.begin(), attributes.end(), attribute)
+                != attributes.end())
+            {
+                return false;
+            }
+            attributes.push_back(attribute);
             while (i < length && wxIsspace(text[i]))
                 ++i;
             wxString value;
@@ -708,7 +740,9 @@ bool isBenchmarkReportHtmlPlain(const wxString& html)
             }
             if ((attribute == "href" || attribute == "xlink:href") && !value.StartsWith("#"))
                 return false;
-            if (attribute == "style" && !isPlainCss(value))
+            // a browser decodes character references in a value, which
+            // could hide a word
+            if (attribute == "style" && (value.Contains("&") || !isPlainCss(value)))
                 return false;
             if (attribute == "http-equiv")
             {
@@ -725,8 +759,18 @@ bool isBenchmarkReportHtmlPlain(const wxString& html)
         if (name == "input" && inputType != "radio" && inputType != "checkbox")
             return false;
         pos = i + 1;
+        if (name == "svg")
+        {
+            if (closing)
+                svgDepth = std::max(svgDepth - 1, 0);
+            else if (!selfClosing)
+                ++svgDepth;
+        }
         if (!closing && (name == "style" || name == "title"))
         {
+            // the reports have none within <svg>, where they hold markup
+            if (svgDepth > 0)
+                return false;
             const size_t end = text.find("</" + name, pos);
             if (end == wxString::npos)
                 return false;
@@ -780,6 +824,27 @@ wxString applyBenchmarkReportTheme(const wxString& html, const wxString& theme)
     if (theme == "dark" || theme == "light")
         tag = " data-theme=\"" + theme + "\"" + tag;
     return html.substr(0, start + 5) + tag + html.substr(end);
+}
+
+wxString addBenchmarkReportPolicy(const wxString& html)
+{
+    // 'unsafe-eval' only for the scripts of wxWebView::RunScript(); the
+    // page itself cannot start a script without inline or loaded ones
+    const wxString policy = "<meta http-equiv=\"Content-Security-Policy\" content=\""
+        "default-src 'none'; script-src 'unsafe-eval'; style-src 'unsafe-inline'; "
+        "img-src data:; font-src data:; base-uri 'none'; form-action 'none'\">";
+    // before the doctype the page would be shown in quirks mode
+    const wxString lower = html.Lower();
+    size_t start = 0;
+    while (start < lower.length() && wxIsspace(lower[start]))
+        ++start;
+    if (lower.compare(start, 9, "<!doctype") == 0)
+    {
+        const size_t end = lower.find('>', start);
+        if (end != wxString::npos)
+            return html.substr(0, end + 1) + policy + html.substr(end + 1);
+    }
+    return policy + html;
 }
 
 } // namespace fr

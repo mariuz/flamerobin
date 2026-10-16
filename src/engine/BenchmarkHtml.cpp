@@ -2177,10 +2177,9 @@ wxString BenchmarkReport::toHtml(const wxString& theme) const
         + chip("i-link", esc(getBenchmarkKindName(getBenchmarkKindId(metrics))));
     if (!comparison)
     {
-        html += askChip(_("Compare with another run"), _("Select this report under "
-            "\"Compare with an earlier report\" before the next run, or use \"Compare two "
-            "reports...\". The comparison shows what got faster or slower and what could be "
-            "the reason."));
+        html += askChip(_("Compare with another run"), _("Choose this result or "
+            "report under \"Compare with\" before the next run, or use \"Compare...\". The "
+            "comparison shows what got faster or slower and what could be the reason."));
     }
     html += "</div>";
     if (comparison)

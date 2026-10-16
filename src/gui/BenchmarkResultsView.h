@@ -92,7 +92,8 @@ public:
     /// what changes the page of every result (the private information, the
     /// theme): the pages made before are not used any more
     void setPageVariant(const wxString& variant);
-    void setHeader(const wxString& text);
+    /// what the shown result is, with a longer tool tip if wanted
+    void setHeader(const wxString& text, const wxString& toolTip = wxEmptyString);
     /// a message about the shown result, e.g. that it was copied
     void setStatus(const wxString& message);
     /// a message that is never cut

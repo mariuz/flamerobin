@@ -43,6 +43,7 @@
 #include "config/Config.h"
 #include "core/StringUtils.h"
 #include "engine/db/IDatabase.h"
+#include "gui/BenchmarkCompareDialog.h"
 #include "gui/BenchmarkDialog.h"
 #include "gui/BenchmarkProgressPanel.h"
 #include "gui/BenchmarkReportPage.h"
@@ -64,7 +65,9 @@ enum
     ID_button_save,
     ID_button_browser,
     ID_button_earlier_browse,
+    ID_choice_earlier,
     ID_button_compare,
+    ID_button_open,
     ID_check_private,
     ID_choice_install,
     ID_header_advanced
@@ -218,16 +221,6 @@ wxString toWxString(const std::string& s)
     return wxString(s.c_str(), *wxConvCurrent);
 }
 
-// the results in a saved report (Markdown or HTML), or why there are none
-fr::BenchmarkSnapshotResult readReportFile(const wxString& path)
-{
-    wxFFile file(path, "r");
-    wxString text;
-    if (file.IsOpened() && file.ReadAll(&text, wxConvUTF8))
-        return fr::parseBenchmarkSnapshot(text);
-    return fr::BenchmarkSnapshotResult();
-}
-
 } // namespace
 
 BEGIN_EVENT_TABLE(BenchmarkDialog, BaseDialog)
@@ -243,7 +236,11 @@ BEGIN_EVENT_TABLE(BenchmarkDialog, BaseDialog)
     EVT_MENU(BenchmarkDialog::ID_menu_close_all, BenchmarkDialog::OnResultMenu)
     EVT_MENU(BenchmarkDialog::ID_menu_save, BenchmarkDialog::OnResultMenu)
     EVT_BUTTON(ID_button_earlier_browse, BenchmarkDialog::OnBrowseEarlier)
-    EVT_BUTTON(ID_button_compare, BenchmarkDialog::OnCompareReports)
+    EVT_BUTTON(ID_button_compare, BenchmarkDialog::OnCompare)
+    EVT_BUTTON(ID_button_open, BenchmarkDialog::OnOpen)
+    EVT_MENU(ID_button_open, BenchmarkDialog::OnOpen)
+    EVT_CHOICE(ID_choice_earlier, BenchmarkDialog::OnEarlierChanged)
+    EVT_MENU(BenchmarkDialog::ID_menu_compare, BenchmarkDialog::OnResultMenu)
     EVT_CHECKBOX(ID_check_private, BenchmarkDialog::OnPrivateChanged)
     EVT_CHOICE(ID_choice_install, BenchmarkDialog::OnTargetChanged)
     EVT_COLLAPSIBLEHEADER_CHANGED(ID_header_advanced, BenchmarkDialog::OnAdvancedToggled)
@@ -269,11 +266,13 @@ BenchmarkDialog::BenchmarkDialog(wxWindow* parent, Database* db,
     // can wait for the cleanup of a running test
     Bind(wxEVT_CLOSE_WINDOW, &BenchmarkDialog::OnClose, this);
     Bind(wxEVT_CHAR_HOOK, &BenchmarkDialog::OnCharHook, this);
-    // Ctrl+W closes the shown result, also from the report view
+    // Ctrl+W closes the shown result, also from the report view; Ctrl+O
+    // opens a saved report
     wxAcceleratorEntry keys[] = {
-        wxAcceleratorEntry(wxACCEL_CTRL, 'W', BenchmarkResultsView::ID_button_close_result)
+        wxAcceleratorEntry(wxACCEL_CTRL, 'W', BenchmarkResultsView::ID_button_close_result),
+        wxAcceleratorEntry(wxACCEL_CTRL, 'O', ID_button_open)
     };
-    SetAcceleratorTable(wxAcceleratorTable(1, keys));
+    SetAcceleratorTable(wxAcceleratorTable(2, keys));
     // the settings start with the target, not with the first text field
     CallAfter([this]() { choice_target->SetFocus(); });
     CallAfter([this]() { dropPendingDatabases(); });
@@ -616,23 +615,26 @@ void BenchmarkDialog::createControls()
         createHelpButton(panel, _("Intensity"), intensityItems)), 0,
         wxEXPAND | wxBOTTOM, lineGap);
 
-    // a saved report to compare the new run with: a single run is not
-    // judged, the comparison shows what is faster or slower and why
+    // a result or a saved report to compare the new run with: a single run
+    // is not judged, the comparison shows what is faster or slower and why
     wxStaticText* labelEarlier = createLabel(panel, _("Compa&re with:"));
-    wxString earlierFile;
-    config().getValue(earlierFileKey, earlierFile);
-    text_earlier = new wxTextCtrl(panel, wxID_ANY, earlierFile);
-    text_earlier->SetHint(_("optional: a saved report"));
+    // the last file, as before
+    config().getValue(earlierFileKey, earlierFileM);
+    if (!earlierFileM.empty() && !wxFileExists(earlierFileM))
+        earlierFileM.clear();
+    choice_earlier = new wxChoice(panel, ID_choice_earlier);
+    // GTK makes a list as wide as its longest entry
+    choice_earlier->SetMinSize(wxSize(FromDIP(200), -1));
     wxBoxSizer* sizerEarlier = new wxBoxSizer(wxHORIZONTAL);
-    sizerEarlier->Add(text_earlier, 1, wxALIGN_CENTER_VERTICAL | wxRIGHT, gap);
+    sizerEarlier->Add(choice_earlier, 1, wxALIGN_CENTER_VERTICAL | wxRIGHT, gap);
     sizerEarlier->Add(new wxButton(panel, ID_button_earlier_browse, _("Browse...")),
         0, wxALIGN_CENTER_VERTICAL);
     sizerSettings->Add(createLine(labelEarlier, sizerEarlier, createHelpButton(panel,
-        _("Compare with an earlier report"), { { wxString(), _("A report saved from "
-            "an earlier run (Markdown or HTML), for example before a change on the "
-            "server, or from another server.") },
+        _("Compare with"), { { wxString(), _("A result of this session, or a report "
+            "saved from an earlier run (Markdown or HTML), for example before a change "
+            "on the server, or from another server. It is read when the test starts.") },
         { wxString(), _("The new report then shows what got faster or slower, what "
-            "differs and possible reasons. Leave it empty for no comparison.") } })),
+            "differs and possible reasons. Choose \"No comparison\" for none.") } })),
         0, wxEXPAND | wxBOTTOM, lineGap);
 
     // rarely needed settings, closed at first, below a line that sets them
@@ -734,6 +736,8 @@ void BenchmarkDialog::createControls()
         wxCommandEvent dummy;
         if (key == 'W')
             OnCloseResult(dummy);
+        else if (key == 'O')
+            OnOpen(dummy);
     };
     sizerMain->Add(view_results, 1, wxEXPAND);
 
@@ -743,8 +747,11 @@ void BenchmarkDialog::createControls()
     // does not start a test
     button_start->SetFont(button_start->GetFont().Bold());
     button_cancel = new wxButton(panel, ID_button_cancel, _("C&ancel test"));
-    button_compare = new wxButton(panel, ID_button_compare, _("Compare t&wo reports..."));
-    button_compare->SetToolTip(_("Compares two saved reports, without a new test."));
+    button_compare = new wxButton(panel, ID_button_compare, _("Com&pare..."));
+    button_compare->SetToolTip(_("Compares two results or saved reports, without a new "
+        "test."));
+    button_open = new wxButton(panel, ID_button_open, _("&Open..."));
+    button_open->SetToolTip(_("Shows a saved HTML report as it was saved (Ctrl+O)."));
     // what is shown, copied and saved of every result
     check_private = new wxCheckBox(panel, ID_check_private,
         _("&Hide private information"));
@@ -762,6 +769,7 @@ void BenchmarkDialog::createControls()
     sizerButtons->Add(button_start, 0, wxRIGHT, gap);
     sizerButtons->Add(button_cancel, 0, wxRIGHT, gap);
     sizerButtons->Add(button_compare, 0, wxRIGHT, gap);
+    sizerButtons->Add(button_open, 0, wxRIGHT, gap);
     sizerButtons->AddStretchSpacer(1);
     sizerButtons->Add(check_private, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(12));
     sizerButtons->Add(button_close, 0);
@@ -772,6 +780,7 @@ void BenchmarkDialog::createControls()
     SetSize(std::max(GetMinSize().x, std::min(FromDIP(900), area.width)),
         std::max(GetMinSize().y, std::min(FromDIP(560), area.height)));
 
+    fillEarlier();
     // the first target: the server of the selected database, without a
     // registration this computer
     wxCommandEvent dummy;
@@ -809,12 +818,13 @@ void BenchmarkDialog::updateControls()
     check_comparepages->Enable(idle);
     check_inspect->Enable(idle && details.readDatabase && databaseM);
     check_manyusers->Enable(idle);
-    text_earlier->Enable(idle);
+    choice_earlier->Enable(idle);
     for (wxRadioButton* radio : radio_intensity)
         radio->Enable(idle);
     button_start->Enable(idle);
     button_cancel->Enable(runningM && !runnerM->isCancelRequested());
     button_compare->Enable(idle);
+    button_open->Enable(idle);
     // a saved file is shown as it is: it cannot be copied as Markdown or
     // saved again
     const fr::BenchmarkResultEntry* entry = getShownResult();
@@ -931,7 +941,6 @@ bool BenchmarkDialog::buildParams(fr::BenchmarkConnectionParams& params)
     params.pageSize = pageSizeValues[selection >= 0 && selection < 5 ? selection : 0];
     params.comparePageSizes = check_comparepages->GetValue();
     params.manyUsers = check_manyusers->GetValue();
-    config().setValue(earlierFileKey, text_earlier->GetValue().Trim().Trim(false));
 
     ServerPtr server = databaseM ? databaseM->getServer() : ServerPtr();
     wxString serverPart;
@@ -1205,9 +1214,15 @@ void BenchmarkDialog::OnStart(wxCommandEvent& WXUNUSED(event))
             return;
         }
     }
+    // the earlier report is read now, once: a later change of the choice
+    // or of the file only concerns the next test
+    std::optional<fr::BenchmarkSnapshot> baseline;
+    if (!readEarlier(baseline))
+        return;
     // asked for only now, after every other check
     if (registered && !resolveLogin(params))
         return;
+    baselineM = baseline;
 
     const fr::BenchmarkIntensity intensity = getIntensity();
     runnerM = std::make_unique<fr::BenchmarkRunner>(params, intensity);
@@ -1375,24 +1390,8 @@ void BenchmarkDialog::onFinished(const fr::BenchmarkReport& report,
             MasterPassword::reset();
     }
 
-    // an earlier report that cannot be compared, e.g. of an older version
-    const wxString earlierFile = text_earlier->GetValue().Trim().Trim(false);
-    wxString earlierProblem;
-    std::optional<fr::BenchmarkSnapshot> baseline;
-    if (!earlierFile.empty())
-    {
-        const fr::BenchmarkSnapshotResult earlier = readReportFile(earlierFile);
-        earlierProblem = wxFileExists(earlierFile)
-            ? fr::getBenchmarkSnapshotProblem(earlier)
-            : wxString(_("The file does not exist."));
-        if (!earlierProblem.empty())
-            appendLog(earlierFile + ": " + earlierProblem);
-        else
-            baseline = earlier.snapshot;
-    }
-
     // a test that measured nothing has only its message
-    const int id = resultsM.addRun(report, baseline);
+    const int id = resultsM.addRun(report, baselineM);
     using Outcome = BenchmarkProgressPanel::Outcome;
     const Outcome outcome = report.cancelled ? Outcome::Cancelled
         : !report.errorMessage.empty() || aborted ? Outcome::Failed : Outcome::Finished;
@@ -1401,9 +1400,7 @@ void BenchmarkDialog::onFinished(const fr::BenchmarkReport& report,
         message = _("Cancelled. The results are incomplete.");
     else if (outcome == Outcome::Failed)
         message = _("Failed. See the log for details.");
-    else if (!earlierFile.empty() && !earlierProblem.empty())
-        message = _("Finished. The earlier report cannot be compared, see the log.");
-    else if (!earlierFile.empty())
+    else if (baselineM)
     {
         message = wxString::Format(_("Finished. Result %d compares this run with the "
             "earlier report."), id);
@@ -1490,8 +1487,9 @@ void BenchmarkDialog::showSettings(bool show)
     button_start->SetLabel(show ? _("&Start") : _("&New test"));
     if (show)
     {
-        // ready for the next run
+        // ready for the next run, with the results there are now
         showReady();
+        fillEarlier();
         view_results->select(ResultsView::progressTab);
         // the hint of the advanced settings is only shown next to the
         // closed pane
@@ -1508,6 +1506,8 @@ void BenchmarkDialog::addResultTab(int id)
         view_results->addResult(id, fr::getBenchmarkResultLabel(*entry),
             fr::describeBenchmarkResult(*entry));
     }
+    // it can be the earlier report of the next test
+    fillEarlier();
 }
 
 void BenchmarkDialog::updateResultTab(int id)
@@ -1537,11 +1537,18 @@ void BenchmarkDialog::onResultSelected(int id)
         button_save->SetLabel(entry->kind == fr::BenchmarkResultKind::Comparison
             ? _("Sa&ve comparison...") : _("Sa&ve report..."));
         button_save->GetParent()->Layout();
-        view_results->setHeader(fr::getBenchmarkResultHeader(*entry));
+        // a saved file has the texts it was saved with
+        if (entry->kind == fr::BenchmarkResultKind::SavedReport)
+        {
+            view_results->setHeader(fr::getBenchmarkResultHeader(*entry) + "; "
+                + _("\"Hide private information\" does not change it"),
+                _("Shown as it was saved. \"Hide private information\" does not change "
+                "files that were saved earlier; \"Open in browser\" shows the same page."));
+        }
+        else
+            view_results->setHeader(fr::getBenchmarkResultHeader(*entry));
         // a message such as "copied" was about the result shown before
-        setReportStatus(entry->kind == fr::BenchmarkResultKind::SavedReport
-            ? _("\"Hide private information\" does not change a saved file.")
-            : wxString());
+        setReportStatus(wxString());
     }
     updateControls();
 }
@@ -1571,6 +1578,7 @@ void BenchmarkDialog::closeResult(int id)
     view_results->removeResult(id);
     if (shown)
         view_results->select(next > 0 ? next : ResultsView::progressTab);
+    fillEarlier();
     updateControls();
 }
 
@@ -1602,6 +1610,7 @@ void BenchmarkDialog::closeResults(fr::BenchmarkCloseScope scope, int id)
     for (int closedId : closed)
         view_results->removeResult(closedId);
     view_results->select(next > 0 ? next : ResultsView::progressTab);
+    fillEarlier();
     updateControls();
 }
 
@@ -1617,9 +1626,11 @@ void BenchmarkDialog::showResultMenu(int id)
     menu.Append(ID_menu_close_others, _("Close &other results"));
     menu.Append(ID_menu_close_all, _("Close &all results"));
     menu.Enable(ID_menu_close_others, resultsM.getEntries().size() > 1);
+    menu.AppendSeparator();
+    if (entry->kind != fr::BenchmarkResultKind::Comparison)
+        menu.Append(ID_menu_compare, _("Compare &with..."));
     if (entry->kind != fr::BenchmarkResultKind::SavedReport)
     {
-        menu.AppendSeparator();
         menu.Append(ID_menu_save, entry->kind == fr::BenchmarkResultKind::Comparison
             ? _("Sa&ve comparison...") : _("Sa&ve report..."));
     }
@@ -1642,6 +1653,9 @@ void BenchmarkDialog::OnResultMenu(wxCommandEvent& event)
             break;
         case ID_menu_save:
             saveResult(id);
+            break;
+        case ID_menu_compare:
+            compare(id, 0);
             break;
     }
 }
@@ -1684,9 +1698,13 @@ wxString BenchmarkDialog::makePage(int id) const
         }
         case fr::BenchmarkResultKind::SavedReport:
         default:
-            // as it was saved, in the style of the dialog
+            // as it was saved, in the style of the dialog; the policy keeps
+            // a page that passed the check from running or loading anything
             if (web)
-                return fr::applyBenchmarkReportTheme(entry->html, getReportStyle());
+            {
+                return fr::addBenchmarkReportPolicy(
+                    fr::applyBenchmarkReportTheme(entry->html, getReportStyle()));
+            }
             return _("A saved HTML report needs a web view. \"Open in browser\" shows "
                 "it in your web browser.");
     }
@@ -1736,6 +1754,7 @@ bool BenchmarkDialog::saveResult(int id)
     }
     resultsM.markSaved(id, fd.GetPath());
     updateResultTab(id);
+    fillEarlier();
     return true;
 }
 
@@ -1813,21 +1832,6 @@ bool BenchmarkDialog::isOnRegistrationServer(const wxString& connectionString) c
     return before == connectionString || before.length() <= 1;
 }
 
-std::optional<fr::BenchmarkSnapshot> BenchmarkDialog::readSnapshot(const wxString& path,
-    bool showErrors)
-{
-    const fr::BenchmarkSnapshotResult result = readReportFile(path);
-    if (result.ok())
-        return result.snapshot;
-    if (showErrors)
-    {
-        // older reports are refused with a message, never compared wrongly
-        wxMessageBox(path + "\n\n" + fr::getBenchmarkSnapshotProblem(result),
-            _("Performance Benchmark & Diagnosis"), wxOK | wxICON_INFORMATION, this);
-    }
-    return std::nullopt;
-}
-
 fr::BenchmarkReport BenchmarkDialog::displayedReport(
     const fr::BenchmarkResultEntry& entry) const
 {
@@ -1854,60 +1858,199 @@ void BenchmarkDialog::OnPrivateChanged(wxCommandEvent& WXUNUSED(event))
     view_results->setPageVariant(getPageVariant());
 }
 
-void BenchmarkDialog::OnBrowseEarlier(wxCommandEvent& WXUNUSED(event))
+void BenchmarkDialog::fillEarlier()
+{
+    // what was chosen stays chosen, as far as it is there
+    EarlierSource chosen;
+    const int selection = choice_earlier->GetSelection();
+    if (selection >= 0 && selection < int(earlierSourcesM.size()))
+        chosen = earlierSourcesM[selection];
+    else
+        chosen.path = earlierFileM;
+    earlierSourcesM.clear();
+    choice_earlier->Clear();
+    earlierSourcesM.push_back(EarlierSource());
+    choice_earlier->Append(_("No comparison"));
+    for (int id : resultsM.getComparableIds())
+    {
+        const fr::BenchmarkResultEntry* entry = resultsM.find(id);
+        EarlierSource source;
+        source.id = id;
+        earlierSourcesM.push_back(source);
+        choice_earlier->Append(fr::describeBenchmarkResult(*entry));
+    }
+    if (!earlierFileM.empty())
+    {
+        EarlierSource source;
+        source.path = earlierFileM;
+        earlierSourcesM.push_back(source);
+        choice_earlier->Append(wxString::Format(_("Saved report: %s"),
+            wxFileName(earlierFileM).GetFullName()));
+    }
+    choice_earlier->Append(_("Choose a saved report..."));
+    int index = 0;
+    for (size_t i = 0; i < earlierSourcesM.size(); ++i)
+    {
+        const EarlierSource& source = earlierSourcesM[i];
+        if ((chosen.id != 0 && source.id == chosen.id)
+            || (chosen.id == 0 && !chosen.path.empty() && source.path == chosen.path))
+        {
+            index = int(i);
+        }
+    }
+    choice_earlier->SetSelection(index);
+    choice_earlier->SetToolTip(choice_earlier->GetString(index));
+}
+
+bool BenchmarkDialog::chooseEarlierFile()
 {
     wxFileDialog fd(this, _("Select an earlier report"), "", "",
         _("Benchmark reports (*.md;*.html)|*.md;*.html;*.htm|All files (*.*)|*.*"),
         wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-    if (fd.ShowModal() != wxID_OK || !readSnapshot(fd.GetPath(), true))
-        return;
-    text_earlier->SetValue(fd.GetPath());
-    config().setValue(earlierFileKey, fd.GetPath());
+    fr::BenchmarkSnapshot snapshot;
+    if (fd.ShowModal() != wxID_OK || !readBenchmarkReportFile(this, fd.GetPath(), snapshot))
+        return false;
+    earlierFileM = fd.GetPath();
+    config().setValue(earlierFileKey, earlierFileM);
+    // the file is the chosen one
+    choice_earlier->SetSelection(wxNOT_FOUND);
+    fillEarlier();
+    return true;
 }
 
-void BenchmarkDialog::OnCompareReports(wxCommandEvent& WXUNUSED(event))
+void BenchmarkDialog::OnBrowseEarlier(wxCommandEvent& WXUNUSED(event))
 {
-    wxFileDialog fd(this, _("Select two saved reports"), "", "",
-        _("Benchmark reports (*.md;*.html)|*.md;*.html;*.htm|All files (*.*)|*.*"),
-        wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_MULTIPLE);
-    if (fd.ShowModal() != wxID_OK)
-        return;
-    wxArrayString paths;
-    fd.GetPaths(paths);
-    if (paths.size() != 2)
+    chooseEarlierFile();
+}
+
+void BenchmarkDialog::OnEarlierChanged(wxCommandEvent& WXUNUSED(event))
+{
+    const int selection = choice_earlier->GetSelection();
+    if (selection == int(earlierSourcesM.size()) && !chooseEarlierFile())
     {
-        wxMessageBox(_("Please select exactly two reports (hold Ctrl while you "
-            "click the second one)."), _("Performance Benchmark & Diagnosis"),
-            wxOK | wxICON_INFORMATION, this);
+        // the choice before the file dialog
+        fillEarlier();
         return;
     }
-    std::optional<fr::BenchmarkSnapshot> first = readSnapshot(paths[0], true);
-    std::optional<fr::BenchmarkSnapshot> second = first ? readSnapshot(paths[1], true)
-        : std::nullopt;
-    if (!first || !second)
+    if (selection == 0)
+    {
+        // as an empty field before: no comparison next time either
+        earlierFileM.clear();
+        config().setValue(earlierFileKey, wxString());
+        fillEarlier();
+        choice_earlier->SetSelection(0);
+    }
+    choice_earlier->SetToolTip(choice_earlier->GetStringSelection());
+}
+
+bool BenchmarkDialog::readEarlier(std::optional<fr::BenchmarkSnapshot>& baseline)
+{
+    const int selection = choice_earlier->GetSelection();
+    if (selection <= 0 || selection >= int(earlierSourcesM.size()))
+        return true;
+    const EarlierSource& source = earlierSourcesM[selection];
+    if (source.id != 0)
+    {
+        // a copy: the result may be closed while the test runs
+        const fr::BenchmarkResultEntry* entry = resultsM.find(source.id);
+        if (entry)
+            baseline = entry->snapshot;
+        return entry != nullptr;
+    }
+    // a message now, not a report without its comparison afterwards
+    fr::BenchmarkSnapshot snapshot;
+    if (!readBenchmarkReportFile(this, source.path, snapshot))
+        return false;
+    baseline = snapshot;
+    return true;
+}
+
+void BenchmarkDialog::OnCompare(wxCommandEvent& WXUNUSED(event))
+{
+    // the shown result and the youngest other one
+    const fr::BenchmarkResultEntry* shown = getShownResult();
+    int first = shown && shown->kind != fr::BenchmarkResultKind::Comparison ? shown->id : 0;
+    int second = 0;
+    for (int id : resultsM.getComparableIds())
+    {
+        if (id != first)
+            second = id;
+    }
+    if (first == 0)
+        std::swap(first, second);
+    compare(first, second);
+}
+
+void BenchmarkDialog::compare(int first, int second)
+{
+    if (runningM)
         return;
     if (resultsM.isFull())
     {
         showFullMessage();
         return;
     }
-    // two files without a tab of their own
-    fr::BenchmarkResultEntry files[2];
-    for (int i = 0; i < 2; ++i)
-    {
-        files[i].kind = fr::BenchmarkResultKind::SavedReport;
-        files[i].snapshot = i == 0 ? *first : *second;
-        files[i].path = paths[i];
-    }
-    // the run with the later date is the newer one
-    const fr::BenchmarkPair pair = fr::orderBenchmarkPair(files[0], files[1]);
-    const int id = resultsM.addComparison(*pair.older, *pair.newer);
+    BenchmarkCompareDialog cd(this, resultsM, first, second);
+    if (cd.ShowModal() != wxID_OK)
+        return;
+    // the same comparison is selected, not made again
+    const size_t count = resultsM.getEntries().size();
+    const int id = resultsM.addComparison(cd.getOlder(), cd.getNewer());
     if (!id)
         return;
+    if (resultsM.getEntries().size() > count)
+        addResultTab(id);
+    view_results->select(id);
+}
+
+void BenchmarkDialog::OnOpen(wxCommandEvent& WXUNUSED(event))
+{
+    if (runningM)
+        return;
+    wxFileDialog fd(this, _("Open a saved report"), "", "",
+        _("Benchmark reports (*.html;*.md)|*.html;*.htm;*.md|All files (*.*)|*.*"),
+        wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+    if (fd.ShowModal() != wxID_OK)
+        return;
+    const wxString path = fd.GetPath();
+    // a file that is open already is shown
+    for (const fr::BenchmarkResultEntry& entry : resultsM.getEntries())
+    {
+        if (entry.kind == fr::BenchmarkResultKind::SavedReport && entry.path == path)
+        {
+            view_results->select(entry.id);
+            return;
+        }
+    }
+    if (path.Lower().EndsWith(".md"))
+    {
+        wxMessageBox(_("Markdown reports can only be used for comparisons. Choose "
+            "Compare... and then \"Choose a saved report...\"."),
+            _("Performance Benchmark & Diagnosis"), wxOK | wxICON_INFORMATION, this);
+        return;
+    }
+    if (resultsM.isFull())
+    {
+        showFullMessage();
+        return;
+    }
+    fr::BenchmarkSnapshot snapshot;
+    wxString html;
+    bool comparisonPage = false;
+    if (!readBenchmarkReportFile(this, path, snapshot, &html, &comparisonPage))
+        return;
+    // the view runs what a page contains: only what FlameRobin writes
+    if (!fr::isBenchmarkReportHtmlPlain(html))
+    {
+        wxMessageBox(wxString::Format(_("%s contains more than a FlameRobin report (for "
+            "example a script) and is not shown here. If you trust the file, open it in "
+            "your web browser."), path), _("Performance Benchmark & Diagnosis"),
+            wxOK | wxICON_WARNING, this);
+        return;
+    }
+    const int id = comparisonPage ? resultsM.addSavedComparison(html, path)
+        : resultsM.addSavedReport(snapshot, html, path);
     addResultTab(id);
     view_results->select(id);
-    setReportStatus(_("Comparison of two saved reports."));
-    // the progress is about a run, which is not shown now
-    panel_progress->showReady(getStagePlan(), wxEmptyString);
-    updateControls();
 }
+

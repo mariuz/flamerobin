@@ -202,6 +202,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/BackupRestoreBaseFrame.cpp
         ${SOURCEDIR}/gui/BaseDialog.cpp
         ${SOURCEDIR}/gui/BaseFrame.cpp
+        ${SOURCEDIR}/gui/BenchmarkCompareDialog.cpp
         ${SOURCEDIR}/gui/BenchmarkDialog.cpp
         ${SOURCEDIR}/gui/BenchmarkProgressPanel.cpp
         ${SOURCEDIR}/gui/BenchmarkReportPage.cpp
@@ -374,6 +375,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/gui/BackupRestoreBaseFrame.h
         ${SOURCEDIR}/gui/BaseDialog.h
         ${SOURCEDIR}/gui/BaseFrame.h
+        ${SOURCEDIR}/gui/BenchmarkCompareDialog.h
         ${SOURCEDIR}/gui/BenchmarkDialog.h
         ${SOURCEDIR}/gui/BenchmarkProgressPanel.h
         ${SOURCEDIR}/gui/BenchmarkReportPage.h
