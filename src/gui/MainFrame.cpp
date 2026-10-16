@@ -54,7 +54,9 @@
 #include "gui/CommandIds.h"
 #include "gui/ContextMenuMetadataItemVisitor.h"
 #include "gui/controls/DBHTreeControl.h"
+#include "gui/DataExportDialog.h"
 #include "gui/DataGeneratorFrame.h"
+#include "gui/DataImportDialog.h"
 #include "gui/DatabaseRegistrationDialog.h"
 #include "gui/EventWatcherFrame.h"
 #include "gui/ExecuteSql.h"
@@ -498,6 +500,8 @@ EVT_MENU(Cmds::Menu_StartupDatabase, MainFrame::OnMenuStartupDatabase)
 EVT_UPDATE_UI(Cmds::Menu_StartupDatabase, MainFrame::OnMenuUpdateIfDatabaseNotConnected)
 
     EVT_MENU(Cmds::Menu_BrowseData, MainFrame::OnMenuBrowseData)
+    EVT_MENU(Cmds::Menu_ExportData, MainFrame::OnMenuExportData)
+    EVT_MENU(Cmds::Menu_ImportData, MainFrame::OnMenuImportData)
     EVT_MENU(Cmds::Menu_AddColumn, MainFrame::OnMenuAddColumn)
     EVT_MENU(Cmds::Menu_ExecuteProcedure, MainFrame::OnMenuExecuteProcedure)
     EVT_MENU(Cmds::Menu_ExecuteFunction, MainFrame::OnMenuExecuteFunction)
@@ -1227,6 +1231,40 @@ void MainFrame::OnMenuBrowseData(wxCommandEvent& WXUNUSED(event))
 {
     executeSysTemplate("browse_data",
         treeMainM->getSelectedMetadataItem(), this);
+}
+
+void MainFrame::OnMenuExportData(wxCommandEvent& WXUNUSED(event))
+{
+    MetadataItem* item = treeMainM->getSelectedMetadataItem();
+    if (!item)
+        return;
+    Relation* rel = dynamic_cast<Relation*>(item);
+    if (!rel)
+        return;
+
+    DatabasePtr db = getDatabase(item);
+    if (!checkValidDatabase(db) || !tryAutoConnectDatabase(db))
+        return;
+
+    DataExportDialog dlg(this, db.get(), rel);
+    dlg.ShowModal();
+}
+
+void MainFrame::OnMenuImportData(wxCommandEvent& WXUNUSED(event))
+{
+    MetadataItem* item = treeMainM->getSelectedMetadataItem();
+    if (!item)
+        return;
+    Table* table = dynamic_cast<Table*>(item);
+    if (!table || table->isSystem())
+        return;
+
+    DatabasePtr db = getDatabase(item);
+    if (!checkValidDatabase(db) || !tryAutoConnectDatabase(db))
+        return;
+
+    DataImportDialog dlg(this, db.get(), table);
+    dlg.ShowModal();
 }
 
 void MainFrame::OnMenuScriptAsSelect(wxCommandEvent& WXUNUSED(event))

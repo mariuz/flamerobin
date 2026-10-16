@@ -271,8 +271,10 @@ private:
     void OnMenuGridSaveAsCsv(wxCommandEvent& event);
     void OnMenuGridSaveAsTsv(wxCommandEvent& event);
     void OnMenuGridSaveAsJson(wxCommandEvent& event);
+    void OnMenuGridSaveAsXml(wxCommandEvent& event);
     void OnMenuGridSaveAsExcel(wxCommandEvent& event);
     void OnMenuGridSaveAsMarkdown(wxCommandEvent& event);
+    void OnMenuGridExportData(wxCommandEvent& event);
     void OnMenuGridFetchAll(wxCommandEvent& event);
     void OnMenuGridCancelFetchAll(wxCommandEvent& event);
     void OnMenuGridAutofitColumns(wxCommandEvent& event);

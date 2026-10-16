@@ -436,6 +436,9 @@ void MainObjectMenuMetadataItemVisitor::visitServer(Server& server)
 void MainObjectMenuMetadataItemVisitor::visitTable(Table& table)
 {
     addBrowseDataItem();
+    menuM->Append(Cmds::Menu_ExportData, _("Export &data..."));
+    if (!table.isSystem())
+        menuM->Append(Cmds::Menu_ImportData, _("Import &data..."));
     addScriptAsMenu(table);
     addGenerateCodeMenu(table);
     addSeparator();
@@ -545,6 +548,7 @@ void MainObjectMenuMetadataItemVisitor::visitDDLTriggers(DDLTriggers& triggers)
 void MainObjectMenuMetadataItemVisitor::visitView(View& view)
 {
     addBrowseDataItem();
+    menuM->Append(Cmds::Menu_ExportData, _("Export &data..."));
     addScriptAsMenu(view);
     addGenerateCodeMenu(view);
     addSeparator();

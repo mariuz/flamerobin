@@ -109,20 +109,23 @@ set(wxWidgets_USE_UNICODE ON)
 
 # Find the wxWidgets library
 # Try CONFIG mode first (vcpkg provides this), then fall back to standard FindwxWidgets.cmake
-find_package(wxWidgets CONFIG QUIET COMPONENTS base core html xml aui stc adv net webview)
+find_package(wxWidgets CONFIG QUIET COMPONENTS base core html xml aui stc adv net OPTIONAL_COMPONENTS webview)
 if (wxWidgets_FOUND AND TARGET wx::base)
     message(STATUS "Found wxWidgets via CONFIG: ${wxWidgets_VERSION}")
-    set(wxWidgets_LIBRARIES wx::base wx::core wx::html wx::xml wx::aui wx::stc wx::adv wx::net wx::webview)
+    set(wxWidgets_LIBRARIES wx::base wx::core wx::html wx::xml wx::aui wx::stc wx::adv wx::net)
+    if (TARGET wx::webview)
+        list(APPEND wxWidgets_LIBRARIES wx::webview)
+    endif()
     set(wxWidgets_FOUND_VIA_CONFIG ON)
 else()
     message(STATUS "wxWidgets CONFIG not found, trying standard search")
     if (WIN32)
         set(wxWidgets_USE_STATIC ON)
-        find_package(wxWidgets REQUIRED core base html xml aui stc adv net webview)
+        find_package(wxWidgets REQUIRED core base html xml aui stc adv net OPTIONAL_COMPONENTS webview)
     elseif (UNIX AND NOT APPLE)
-        find_package(wxWidgets REQUIRED core base html xml aui stc adv net webview)
+        find_package(wxWidgets REQUIRED core base html xml aui stc adv net OPTIONAL_COMPONENTS webview)
     else()
-        find_package(wxWidgets REQUIRED core base html xml aui stc adv net webview)
+        find_package(wxWidgets REQUIRED core base html xml aui stc adv net OPTIONAL_COMPONENTS webview)
     endif()
     set(wxWidgets_FOUND_VIA_CONFIG OFF)
 endif()
@@ -169,6 +172,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/core/FRError.cpp
         ${SOURCEDIR}/core/FRInt128.cpp
         ${SOURCEDIR}/core/FirebirdTypeUtils.cpp
+        ${SOURCEDIR}/core/DataTransferHelper.cpp
         ${SOURCEDIR}/core/JsonExpressionHelper.cpp
         ${SOURCEDIR}/core/VectorHelper.cpp
         ${SOURCEDIR}/core/Observer.cpp
@@ -210,6 +214,8 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/TemporalTableDialog.cpp
         ${SOURCEDIR}/gui/DatabaseRegistrationDialog.cpp
         ${SOURCEDIR}/gui/DatabaseMaintenanceDialog.cpp
+        ${SOURCEDIR}/gui/DataExportDialog.cpp
+        ${SOURCEDIR}/gui/DataImportDialog.cpp
         ${SOURCEDIR}/gui/DataGeneratorFrame.cpp
         ${SOURCEDIR}/gui/EditBlobDialog.cpp
         ${SOURCEDIR}/gui/EventWatcherFrame.cpp
@@ -338,6 +344,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/engine/db/fbcpp/FbCppExtensions.h
         ${SOURCEDIR}/core/ArtProvider.h
         ${SOURCEDIR}/core/CodeTemplateProcessor.h
+        ${SOURCEDIR}/core/DataTransferHelper.h
         ${SOURCEDIR}/core/FRDecimal.h
         ${SOURCEDIR}/core/FRError.h
         ${SOURCEDIR}/core/FRInt128.h
@@ -370,6 +377,8 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/gui/CreateIndexDialog.h
         ${SOURCEDIR}/gui/CreateDockerFirebirdDialog.h
         ${SOURCEDIR}/gui/DatabaseRegistrationDialog.h
+        ${SOURCEDIR}/gui/DataExportDialog.h
+        ${SOURCEDIR}/gui/DataImportDialog.h
         ${SOURCEDIR}/gui/DataGeneratorFrame.h
         ${SOURCEDIR}/gui/EditBlobDialog.h
         ${SOURCEDIR}/gui/EventWatcherFrame.h
@@ -1077,6 +1086,19 @@ else()
     target_link_libraries(json_expression_test ${wxWidgets_LIBRARIES})
 endif()
 add_test(NAME json_expression_test COMMAND json_expression_test)
+
+add_executable(data_transfer_test
+    ${SOURCEDIR}/core/DataTransferHelperTest.cpp
+    ${SOURCEDIR}/core/DataTransferHelper.cpp
+    ${SOURCEDIR}/sql/Identifier.cpp
+    ${SQL_TEST_STUB_SOURCES}
+)
+if (TARGET nlohmann_json::nlohmann_json)
+    target_link_libraries(data_transfer_test ${wxWidgets_LIBRARIES} nlohmann_json::nlohmann_json)
+else()
+    target_link_libraries(data_transfer_test ${wxWidgets_LIBRARIES})
+endif()
+add_test(NAME data_transfer_test COMMAND data_transfer_test)
 
 add_executable(temporal_table_test
     ${SOURCEDIR}/metadata/TemporalTableHelperTest.cpp

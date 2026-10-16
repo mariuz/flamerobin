@@ -81,6 +81,8 @@ public:
     void OnMenuMaintenance(wxCommandEvent& event);
     void OnMenuExecuteStatements(wxCommandEvent& event);
     void OnMenuBrowseData(wxCommandEvent& event);
+    void OnMenuExportData(wxCommandEvent& event);
+    void OnMenuImportData(wxCommandEvent& event);
     void OnMenuRestore(wxCommandEvent& event);
     void OnMenuShowAllGeneratorValues(wxCommandEvent& event);
     void OnMenuShowGeneratorValue(wxCommandEvent& event);

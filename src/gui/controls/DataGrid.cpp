@@ -230,10 +230,12 @@ void DataGrid::showPopupMenu(wxPoint cursorPos)
     m.Append(Cmds::DataGrid_Copy_as_update, _("Copy as UPDATE statements"));
     m.Append(Cmds::DataGrid_Copy_as_upins, _("Copy as UPDATE INSERT statements"));
     m.Append(Cmds::DataGrid_Copy_as_inList, _("Copy as IN list"));
+    m.Append(Cmds::DataGrid_Export_data, _("Export data..."));
     m.Append(Cmds::DataGrid_Save_as_html, _("Save as HTML file..."));
     m.Append(Cmds::DataGrid_Save_as_csv, _("Save as CSV file..."));
     m.Append(Cmds::DataGrid_Save_as_tsv, _("Save as TSV file..."));
     m.Append(Cmds::DataGrid_Save_as_json, _("Save as JSON file..."));
+    m.Append(Cmds::DataGrid_Save_as_xml, _("Save as XML file..."));
     m.Append(Cmds::DataGrid_Save_as_excel, _("Save as Excel XML file..."));
     m.Append(Cmds::DataGrid_Save_as_markdown, _("Save as Markdown table..."));
     m.AppendSeparator();
@@ -835,6 +837,97 @@ void DataGrid::saveAsJSON(const wxString& fileName)
             outStr.WriteString("\n  }");
         }
         outStr.WriteString("\n]\n");
+    }
+    if (all)
+        notifyIfUnfetchedData();
+}
+
+void DataGrid::saveAsXML(const wxString& fileName)
+{
+    DataGridTable* table = getDataGridTable();
+    if (!table || fileName.empty())
+        return;
+
+    bool all = true;
+    {
+        wxBusyCursor cr;
+        std::vector<bool> selCols(getColumnsWithSelectedCells());
+        if (std::find(selCols.begin(), selCols.end(), false) != selCols.end())
+            all = false;
+
+        wxFileOutputStream fos(fileName);
+        if (!fos.Ok())
+            return;
+        wxTextOutputStream outStr(fos);
+
+        auto escapeXml = [](const wxString& str) -> wxString {
+            wxString res = str;
+            res.Replace("&", "&amp;");
+            res.Replace("<", "&lt;");
+            res.Replace(">", "&gt;");
+            res.Replace("\"", "&quot;");
+            res.Replace("'", "&apos;");
+            return res;
+        };
+
+        auto sanitizeTag = [](const wxString& str) -> wxString {
+            wxString res;
+            for (size_t i = 0; i < str.length(); ++i)
+            {
+                wxUniChar ch = str[i];
+                if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || ch == '_')
+                    res += ch;
+                else if (ch >= '0' && ch <= '9')
+                {
+                    if (res.empty())
+                        res += "_";
+                    res += ch;
+                }
+                else
+                    res += "_";
+            }
+            if (res.empty())
+                res = "col";
+            return res;
+        };
+
+        outStr.WriteString("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+        outStr.WriteString("<table xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n");
+
+        std::vector<bool> selRows(getRowsWithSelectedCells());
+        if (std::find(selRows.begin(), selRows.end(), false) != selRows.end())
+            all = false;
+
+        for (size_t row = 0; row < selRows.size(); row++)
+        {
+            if (!selRows[row])
+                continue;
+
+            outStr.WriteString("  <row>\n");
+            for (size_t col = 0; col < selCols.size(); col++)
+            {
+                if (selCols[col])
+                {
+                    wxString colName = sanitizeTag(GetColLabelValue(col));
+                    if (table->isNullCell(row, col))
+                    {
+                        outStr.WriteString(wxString::Format("    <%s xsi:nil=\"true\"/>\n", colName.c_str()));
+                    }
+                    else
+                    {
+                        wxString cellValue = table->GetValue(row, col);
+                        outStr.WriteString(wxString::Format(
+                            "    <%s>%s</%s>\n",
+                            colName.c_str(),
+                            escapeXml(cellValue).c_str(),
+                            colName.c_str()
+                        ));
+                    }
+                }
+            }
+            outStr.WriteString("  </row>\n");
+        }
+        outStr.WriteString("</table>\n");
     }
     if (all)
         notifyIfUnfetchedData();

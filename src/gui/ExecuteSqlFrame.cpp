@@ -57,6 +57,7 @@
 #include "gui/controls/ControlUtils.h"
 #include "gui/controls/DataGrid.h"
 #include "gui/controls/DataGridTable.h"
+#include "gui/DataExportDialog.h"
 #include "gui/GUIURIHandlerHelper.h"
 #include "gui/MetadataItemPropertiesFrame.h"
 #include "gui/ProgressDialog.h"
@@ -966,10 +967,14 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
     gridMenu->Append(Cmds::DataGrid_AutofitColumns,  _("Best fit all &columns"));
     gridMenu->Append(Cmds::DataGrid_AutofitRows,     _("Best fit all &rows"));
     gridMenu->AppendSeparator();
+    gridMenu->Append(Cmds::DataGrid_Export_data,     _("&Export data..."));
     gridMenu->Append(Cmds::DataGrid_Save_as_html,    _("Save as &html"));
     gridMenu->Append(Cmds::DataGrid_Save_as_csv,     _("Save as cs&v"));
+    gridMenu->Append(Cmds::DataGrid_Save_as_tsv,     _("Save as &tsv"));
     gridMenu->Append(Cmds::DataGrid_Save_as_json,    _("Save as &json"));
+    gridMenu->Append(Cmds::DataGrid_Save_as_xml,     _("Save as &xml"));
     gridMenu->Append(Cmds::DataGrid_Save_as_excel,   _("Save as &excel"));
+    gridMenu->Append(Cmds::DataGrid_Save_as_markdown,_("Save as &markdown"));
     gridMenu->AppendSeparator();
     gridMenu->AppendCheckItem(Cmds::DataGrid_Log_changes, _("&Log data changes"));
     menuBarM->Append(gridMenu, _("&Grid"));
@@ -1208,8 +1213,10 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_MENU(Cmds::DataGrid_Save_as_csv,     ExecuteSqlFrame::OnMenuGridSaveAsCsv)
     EVT_MENU(Cmds::DataGrid_Save_as_tsv,     ExecuteSqlFrame::OnMenuGridSaveAsTsv)
     EVT_MENU(Cmds::DataGrid_Save_as_json,    ExecuteSqlFrame::OnMenuGridSaveAsJson)
+    EVT_MENU(Cmds::DataGrid_Save_as_xml,     ExecuteSqlFrame::OnMenuGridSaveAsXml)
     EVT_MENU(Cmds::DataGrid_Save_as_excel,   ExecuteSqlFrame::OnMenuGridSaveAsExcel)
     EVT_MENU(Cmds::DataGrid_Save_as_markdown,ExecuteSqlFrame::OnMenuGridSaveAsMarkdown)
+    EVT_MENU(Cmds::DataGrid_Export_data,     ExecuteSqlFrame::OnMenuGridExportData)
     EVT_MENU(Cmds::DataGrid_FetchAll,        ExecuteSqlFrame::OnMenuGridFetchAll)
     EVT_MENU(Cmds::DataGrid_CancelFetchAll,  ExecuteSqlFrame::OnMenuGridCancelFetchAll)
     EVT_MENU(Cmds::DataGrid_AutofitColumns,  ExecuteSqlFrame::OnMenuGridAutofitColumns)
@@ -1226,10 +1233,12 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_UPDATE_UI(Cmds::DataGrid_EditBlob,       ExecuteSqlFrame::OnMenuUpdateGridCellIsBlob)
     EVT_UPDATE_UI(Cmds::DataGrid_ImportBlob,     ExecuteSqlFrame::OnMenuUpdateGridCellIsBlob)
     EVT_UPDATE_UI(Cmds::DataGrid_ExportBlob,     ExecuteSqlFrame::OnMenuUpdateGridCellIsBlob)
+    EVT_UPDATE_UI(Cmds::DataGrid_Export_data,    ExecuteSqlFrame::OnMenuUpdateGridHasData)
     EVT_UPDATE_UI(Cmds::DataGrid_Save_as_html,   ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
     EVT_UPDATE_UI(Cmds::DataGrid_Save_as_csv,    ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
     EVT_UPDATE_UI(Cmds::DataGrid_Save_as_tsv,    ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
     EVT_UPDATE_UI(Cmds::DataGrid_Save_as_json,   ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
+    EVT_UPDATE_UI(Cmds::DataGrid_Save_as_xml,    ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
     EVT_UPDATE_UI(Cmds::DataGrid_Save_as_excel,  ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
     EVT_UPDATE_UI(Cmds::DataGrid_Save_as_markdown,ExecuteSqlFrame::OnMenuUpdateGridHasSelection)
     EVT_UPDATE_UI(Cmds::DataGrid_FetchAll,       ExecuteSqlFrame::OnMenuUpdateGridFetchAll)
@@ -2776,6 +2785,18 @@ void ExecuteSqlFrame::OnMenuGridSaveAsJson(wxCommandEvent& WXUNUSED(event))
     }
 }
 
+void ExecuteSqlFrame::OnMenuGridSaveAsXml(wxCommandEvent& WXUNUSED(event))
+{
+    wxString fname = ::wxFileSelector(_("Save data in selected cells as XML"),
+        wxEmptyString, wxEmptyString, "*.xml",
+        _("XML files (*.xml)|*.xml|All files (*.*)|*.*"),
+        wxFD_SAVE | wxFD_CHANGE_DIR | wxFD_OVERWRITE_PROMPT, this);
+    if (!fname.empty())
+    {
+        grid_data->saveAsXML(fname);
+    }
+}
+
 void ExecuteSqlFrame::OnMenuGridSaveAsExcel(wxCommandEvent& WXUNUSED(event))
 {
     wxString fname = ::wxFileSelector(_("Save data in selected cells as Excel XML"),
@@ -2810,6 +2831,14 @@ void ExecuteSqlFrame::OnMenuGridSaveAsMarkdown(wxCommandEvent& WXUNUSED(event))
     {
         grid_data->saveAsMarkdown(fname);
     }
+}
+
+void ExecuteSqlFrame::OnMenuGridExportData(wxCommandEvent& WXUNUSED(event))
+{
+    if (!grid_data)
+        return;
+    DataExportDialog dlg(this, grid_data);
+    dlg.ShowModal();
 }
 
 void ExecuteSqlFrame::OnFilterTextChange(wxCommandEvent& WXUNUSED(event))

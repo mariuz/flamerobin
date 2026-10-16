@@ -436,3 +436,22 @@ bool Config::getValue(const wxString&, bool&) { return false; }
 
 // --- Utils Stubs ---
 wxString unquote(const wxString& s, const wxString&) { return s; }
+
+ColumnPtrs::iterator Relation::begin() { return columnsM.begin(); }
+ColumnPtrs::iterator Relation::end() { return columnsM.end(); }
+ColumnPtrs::const_iterator Relation::begin() const { return columnsM.begin(); }
+ColumnPtrs::const_iterator Relation::end() const { return columnsM.end(); }
+
+// --- DataGrid / DataGridTable Stubs for Tests ---
+#include "gui/controls/DataGrid.h"
+#include "gui/controls/DataGridTable.h"
+
+DataGridTable* DataGrid::getDataGridTable() { return nullptr; }
+std::vector<bool> DataGrid::getColumnsWithSelectedCells() { return {}; }
+std::vector<bool> DataGrid::getRowsWithSelectedCells() { return {}; }
+
+bool DataGridTable::isNullCell(int, int) { return false; }
+bool DataGridTable::isBlobColumn(int, bool*) { return false; }
+fr::IBlobPtr DataGridTable::getBlob(unsigned, unsigned, bool) { return nullptr; }
+bool DataGridTable::isNumericColumn(int) { return false; }
+
