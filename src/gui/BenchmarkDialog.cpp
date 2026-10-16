@@ -883,6 +883,10 @@ void BenchmarkDialog::createControls()
     // the start, so that nothing moves when a test starts
     notebook_results = new wxNotebook(panel, wxID_ANY);
     panel_progress = new BenchmarkProgressPanel(notebook_results);
+    panel_progress->onShowLog = [this]()
+    {
+        notebook_results->SetSelection(notebook_results->GetPageCount() - 1);
+    };
     notebook_results->AddPage(panel_progress, _("Progress"));
 
     // the report, with what can be done with it above it
@@ -1578,23 +1582,25 @@ void BenchmarkDialog::onFinished(const fr::BenchmarkReport& report,
         message = _("Finished. Save the report to compare it with later runs or other "
             "servers.");
 
-    const bool cleanupFailed = !aborted && report.benchmarkDatabaseCreated
-        && !report.benchmarkDatabaseDropped;
-    panel_progress->finish(outcome, cleanupFailed, message);
-
+    // the whole error below the stages, with the hint for this computer
+    wxString error = report.errorMessage;
     if (!report.errorMessage.empty())
     {
         appendLog(_("Error:") + " " + report.errorMessage);
         if (getTarget() == BenchmarkTarget::ThisComputer)
         {
-            appendLog(_("Hint: a test of this computer needs a Firebird installation "
-                "with the engine plugin (engine12, engine13 or engine14 for Firebird "
-                "3, 4/5 or 6 in its plugins folder), and the directory must be "
-                "writable for your user. If FlameRobin already used this client "
-                "library for another connection, restart FlameRobin and run the test "
-                "first."));
+            const wxString hint = _("Hint: a test of this computer needs a Firebird "
+                "installation with the engine plugin (engine12, engine13 or engine14 for "
+                "Firebird 3, 4/5 or 6 in its plugins folder), and the directory must be "
+                "writable for your user. If FlameRobin already used this client library "
+                "for another connection, restart FlameRobin and run the test first.");
+            appendLog(hint);
+            error += "\n\n" + hint;
         }
     }
+    const bool cleanupFailed = !aborted && report.benchmarkDatabaseCreated
+        && !report.benchmarkDatabaseDropped;
+    panel_progress->finish(outcome, cleanupFailed, message, error);
     // forget every temporary database that is gone; keep the others so
     // that the next start offers to drop them
     for (size_t i = 0; i < pendingEntriesM.size() && !aborted; ++i)
@@ -1633,7 +1639,9 @@ void BenchmarkDialog::onFinished(const fr::BenchmarkReport& report,
 
     showReport(displayedReport());
     showSettings(false);
-    notebook_results->SetSelection(1);  // the report
+    // an error stays in sight, with the stage it happened in; the report of
+    // the steps before it is on its page
+    notebook_results->SetSelection(outcome == Outcome::Failed ? 0 : 1);
     updateControls();
 
     if (closeRequestedM)

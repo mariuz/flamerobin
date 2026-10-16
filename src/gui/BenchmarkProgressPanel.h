@@ -29,6 +29,7 @@
 #include <wx/timer.h>
 
 #include <chrono>
+#include <functional>
 #include <vector>
 
 #include "engine/Benchmark.h"
@@ -49,9 +50,10 @@ wxColour getReadableBenchmarkColour(const wxColour& colour, const wxColour& text
 /// The progress of a benchmark run: the FlameRobin logo, which fills from
 /// the bottom with the share of the run, the share in percent, the step,
 /// and the stages in a row, each with a mark of its own shape and its word.
-/// Drawn from bitmaps
-/// with wxDC only; one timer moves the edge of the filling and lets the
-/// robin blink while nothing is measured that it could disturb.
+/// After an error the message stays below the stages. Drawn from bitmaps
+/// with wxDC only; one timer moves the edge of the filling as a wave and
+/// lets the robin blink, and only lets the filling breathe while something
+/// is measured that the pictures could disturb.
 ///
 class BenchmarkProgressPanel : public wxPanel
 {
@@ -68,8 +70,13 @@ public:
     void start(const std::vector<fr::BenchmarkStagePlan>& plan);
     void update(const fr::BenchmarkProgress& progress);
     void cancelRequested();
-    /// the end of a run: message is the line below the percentage
-    void finish(Outcome outcome, bool cleanupFailed, const wxString& message);
+    /// the end of a run: message is the line below the percentage, error the
+    /// whole message after an error, shown below the stages
+    void finish(Outcome outcome, bool cleanupFailed, const wxString& message,
+        const wxString& error);
+
+    /// "Show the log" after an error
+    std::function<void()> onShowLog;
 
 private:
     fr::BenchmarkStageTracker trackerM;
@@ -94,6 +101,8 @@ private:
     wxStaticText* wordM;
     wxStaticText* stepM;
     BenchmarkStageStrip* stripM;
+    wxTextCtrl* errorM;
+    wxButton* logButtonM;
 
     // the marks of the end of a run: finished, cancelled, failed
     wxBitmapBundle marksM[3];

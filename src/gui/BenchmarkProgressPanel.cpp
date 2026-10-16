@@ -792,6 +792,26 @@ BenchmarkProgressPanel::BenchmarkProgressPanel(wxWindow* parent)
     stepM->SetMinSize(wxSize(FromDIP(40), -1));
     stripM = new BenchmarkStageStrip(this);
 
+    // after an error: the message in full, readable and to be copied, and
+    // the way to the log
+    errorM = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition,
+        wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY | wxTE_NO_VSCROLL | wxBORDER_NONE);
+    errorM->SetBackgroundColour(GetBackgroundColour());
+    errorM->SetForegroundColour(GetForegroundColour());
+    logButtonM = new wxButton(this, wxID_ANY, _("Show the &log"));
+    logButtonM->Bind(wxEVT_BUTTON, [this](wxCommandEvent&)
+    {
+        if (onShowLog)
+            onShowLog();
+    });
+    // the error comes at the end of a run, when the settings are hidden and
+    // the page has room: no room is kept for it during the run, so that the
+    // dialog stays small; the rest of a long message scrolls
+    errorM->SetMinSize(wxSize(FromDIP(40), 2 * errorM->GetCharHeight()));
+    wxBoxSizer* sizerError = new wxBoxSizer(wxHORIZONTAL);
+    sizerError->Add(errorM, 1, wxEXPAND | wxRIGHT, FromDIP(12));
+    sizerError->Add(logButtonM, 0, wxALIGN_TOP);
+
     wxBoxSizer* sizerNumbers = new wxBoxSizer(wxHORIZONTAL);
     sizerNumbers->Add(percentM, 0, wxALIGN_BOTTOM);
     sizerNumbers->AddStretchSpacer(1);
@@ -811,8 +831,12 @@ BenchmarkProgressPanel::BenchmarkProgressPanel(wxWindow* parent)
     sizerTop->Add(logoM, 0, wxALIGN_TOP | wxRIGHT, FromDIP(28));
     sizerTop->Add(sizerRight, 1, wxEXPAND);
     wxBoxSizer* sizerMain = new wxBoxSizer(wxVERTICAL);
-    sizerMain->Add(sizerTop, 0, wxEXPAND | wxALL, FromDIP(12));
+    sizerMain->Add(sizerTop, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, FromDIP(12));
+    sizerMain->Add(sizerError, 1, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, FromDIP(12));
+    sizerMain->AddSpacer(FromDIP(12));
     SetSizer(sizerMain);
+    errorM->Hide();
+    logButtonM->Hide();
 
     Bind(wxEVT_TIMER, &BenchmarkProgressPanel::OnTimer, this);
     Bind(wxEVT_DPI_CHANGED, &BenchmarkProgressPanel::OnDPIChanged, this);
@@ -955,6 +979,8 @@ void BenchmarkProgressPanel::showReady(const std::vector<fr::BenchmarkStagePlan>
     percentM->SetForegroundColour(p.muted);
     elapsedM->SetLabel(wxEmptyString);
     setStepLine(-1, wxEmptyString, p.text, hint, p.text);
+    errorM->Hide();
+    logButtonM->Hide();
     setFraction(0.0);
     updateStages();
     Layout();
@@ -971,6 +997,8 @@ void BenchmarkProgressPanel::start(const std::vector<fr::BenchmarkStagePlan>& pl
     elapsedSecondsM = -1;
     percentM->SetForegroundColour(p.text);
     setStepLine(-1, wxEmptyString, p.text, _("Starting..."), p.text);
+    errorM->Hide();
+    logButtonM->Hide();
     setFraction(0.0);
     updateStages();
     animationM.quietStep = false;
@@ -1013,7 +1041,7 @@ void BenchmarkProgressPanel::cancelRequested()
 }
 
 void BenchmarkProgressPanel::finish(Outcome outcome, bool cleanupFailed,
-    const wxString& message)
+    const wxString& message, const wxString& error)
 {
     const Palette p = getPalette();
     // the time up to the end
@@ -1046,6 +1074,10 @@ void BenchmarkProgressPanel::finish(Outcome outcome, bool cleanupFailed,
             break;
         }
     }
+    const bool failed = outcome == Outcome::Failed && !error.empty();
+    errorM->ChangeValue(failed ? error : wxString());
+    errorM->Show(failed);
+    logButtonM->Show(failed);
     updateStages();
     Layout();
 }
