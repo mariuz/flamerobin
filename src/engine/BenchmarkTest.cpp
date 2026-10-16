@@ -41,6 +41,7 @@
 #include <vector>
 
 #include "engine/Benchmark.h"
+#include "engine/BenchmarkResults.h"
 
 using namespace fr;
 
@@ -4232,6 +4233,237 @@ void testFixtures(const wxString& dir)
         "two saved files are compared");
 }
 
+// the results of the benchmark dialog: tests, saved files and comparisons
+void testResults()
+{
+    std::cout << "Results of the dialog\n";
+    using K = BenchmarkResultKind;
+    auto run = [](const wxString& date)
+    {
+        BenchmarkReport report = makeReport(healthyMetrics(), date);
+        report.metrics.localHostName = "PC-MUELLER";
+        return report;
+    };
+
+    // numbers grow and are never given again
+    BenchmarkResultStore store;
+    for (int i = 0; i < 10; ++i)
+        store.addRun(run(wxString::Format("2026-10-14 09:%02d:00", 10 + i)), std::nullopt);
+    for (int id : { 2, 4, 6, 8 })
+        store.close(id);
+    const int eleventh = store.addRun(run("2026-10-14 10:00:00"), std::nullopt);
+    std::vector<int> order;
+    for (const BenchmarkResultEntry& e : store.getEntries())
+        order.push_back(e.id);
+    check(eleventh == 11 && order == std::vector<int>({ 1, 3, 5, 7, 9, 10, 11 }),
+        "ten tests, four closed: the next one is number 11, in the order of the tabs");
+
+    // the selection after closing
+    check(store.select(5) && store.close(5) == 7 && store.getSelected() == 7,
+        "closing the selected result selects its right neighbour");
+    check(store.select(11) && store.close(11) == 10, "the last one selects its left neighbour");
+    check(store.select(10) && store.close(3) == 10 && store.getSelected() == 10,
+        "closing another result keeps the selection");
+    check(!store.select(3) && store.getSelected() == 10 && store.select(0)
+        && store.getSelected() == 0, "a closed result cannot be selected, 0 selects none");
+    BenchmarkResultStore single;
+    const int only = single.addRun(run("2026-10-14 09:00:00"), std::nullopt);
+    check(single.select(only) && single.close(only) == 0 && single.getEntries().empty(),
+        "closing the only result selects none");
+    store.select(9);
+    check(store.closeOthers(9) == 9 && store.getEntries().size() == 1
+        && store.getEntries()[0].id == 9, "close other results");
+    check(store.closeAll() == 0 && store.getEntries().empty() && store.getSelected() == 0
+        && store.addRun(run("2026-10-14 11:00:00"), std::nullopt) == 12,
+        "close all results; the numbers go on");
+
+    // only tests that measured something
+    BenchmarkReport failed = makeReport(BenchmarkMetrics(), "2026-10-14 12:00:00");
+    failed.metrics.settings = BenchmarkSettings::forIntensity(BenchmarkIntensity::Standard);
+    failed.errorMessage = "I/O error during \"open\" operation";
+    failed.evaluate();
+    BenchmarkReport cancelled = run("2026-10-14 12:05:00");
+    cancelled.cancelled = true;
+    BenchmarkResultStore kept;
+    const int cancelledId = kept.addRun(cancelled, std::nullopt);
+    check(!hasBenchmarkData(failed) && !hasBenchmarkData(BenchmarkReport())
+        && kept.addRun(failed, std::nullopt) == 0 && cancelledId == 1
+        && kept.find(cancelledId)->incomplete, "a test without a value is not kept, a "
+        "cancelled one is kept as incomplete");
+
+    // the labels, the descriptions and the names of the files
+    BenchmarkResultStore results;
+    const int first = results.addRun(run("2026-10-14 09:55:12"), std::nullopt);
+    BenchmarkReport quick = run("2026-10-14 10:31:00");
+    quick.intensityName = getBenchmarkIntensityName(BenchmarkIntensity::Quick);
+    const int second = results.addRun(quick, std::nullopt);
+    BenchmarkReport other = clientFixture();
+    other.metrics.localHostName = "SRV-ALT";
+    const BenchmarkSnapshot otherSnapshot = makeBenchmarkSnapshot(other);
+    const int file = results.addSavedReport(otherSnapshot, other.toHtml(),
+        "/home/user/reports/orders-before-the-upgrade-of-the-server.html");
+    const BenchmarkResultEntry* a = results.find(first);
+    const BenchmarkResultEntry* f = results.find(file);
+    check(getBenchmarkResultLabel(*a) == "* 1  09:55"
+        && getBenchmarkResultLabel(*f) == "orders-before-the-u..."
+        && getBenchmarkResultLabel(*f).length() == 22, "tab labels: unsaved test with "
+        "its time, a file name cut to 22 characters");
+    check(describeBenchmarkResult(*a).StartsWith("1  Run, 2026-10-14 09:55, Standard, client, ")
+        && describeBenchmarkResult(*a).EndsWith(" (not saved)")
+        && describeBenchmarkResult(*f).StartsWith("File orders-before-the-upgrade-of-the-"
+            "server.html, 2026-10-14 11:00, Standard, ")
+        && getBenchmarkResultHeader(*a) == "Result 1 - not saved"
+        && getBenchmarkResultHeader(*f).EndsWith(" - shown as saved"),
+        "descriptions and the header of a test and of a file");
+    check(getBenchmarkResultFileName(*a) == "flamerobin-benchmark-1-20261014-0955.html",
+        "a test is saved with its number and time");
+
+    // saved and unsaved
+    check(results.getUnsavedIds() == std::vector<int>({ first, second }) && f->saved,
+        "tests are not saved, an opened file is");
+    results.markSaved(first, "/tmp/first.html");
+    check(results.getUnsavedIds() == std::vector<int>({ second })
+        && results.find(first)->saved && results.find(first)->path == "/tmp/first.html"
+        && getBenchmarkResultLabel(*results.find(first)) == "1  09:55"
+        && getBenchmarkResultHeader(*results.find(first)) == "Result 1 - saved",
+        "a saved test loses its star");
+    check(getBenchmarkCloseQuestion(results, BenchmarkCloseScope::One, first).empty()
+        && getBenchmarkCloseQuestion(results, BenchmarkCloseScope::One, second)
+            == std::vector<int>({ second })
+        && getBenchmarkCloseQuestion(results, BenchmarkCloseScope::Others, second).empty()
+        && getBenchmarkCloseQuestion(results, BenchmarkCloseScope::Others, file)
+            == std::vector<int>({ second })
+        && getBenchmarkCloseQuestion(results, BenchmarkCloseScope::All, file)
+            == std::vector<int>({ second })
+        && formatBenchmarkResultIds({ 3, 5, 6 }) == "3, 5, 6",
+        "a question only for tests that are not saved");
+
+    // comparisons hold copies
+    const BenchmarkPair pair = orderBenchmarkPair(*results.find(second), *results.find(first));
+    const int compared = results.addComparison(*pair.older, *pair.newer);
+    const BenchmarkResultEntry* c = results.find(compared);
+    check(pair.older->id == first && c && c->kind == K::Comparison
+        && getBenchmarkResultLabel(*c) == "1 vs 2" && c->comparison->older.date
+            == "2026-10-14 09:55:12" && c->comparison->newer.date == "2026-10-14 10:31:00"
+        && getBenchmarkResultHeader(*c) == "Comparison 1 vs 2 - result 1 is the reference"
+        && getBenchmarkResultFileName(*c) == "flamerobin-benchmark-comparison-1-vs-2.html",
+        "a comparison of two tests, the earlier one is the reference");
+    check(results.addComparison(*results.find(first), *results.find(second)) == compared
+        && results.getEntries().size() == 4, "the same comparison again selects it");
+    check(results.getComparableIds() == std::vector<int>({ first, second, file })
+        && results.getUnsavedIds() == std::vector<int>({ second }),
+        "comparisons are no source of comparisons and need no saving");
+    const double ratio = c->comparison->ratio;
+    const wxString markdown = c->comparison->toMarkdown();
+    results.close(first);
+    results.close(second);
+    c = results.find(compared);
+    check(c && c->comparison->ratio == ratio && c->comparison->toMarkdown() == markdown
+        && c->comparison->older.measurements.size() > 30,
+        "a comparison stays the same when both results are closed");
+
+    // the order and the checks of a pair
+    BenchmarkResultEntry early, late, undated;
+    early.id = 3;
+    early.snapshot.date = "2026-10-14 09:55:00";
+    early.snapshot.kind = "client";
+    early.snapshot.intensity = "quick";
+    late.id = 5;
+    late.snapshot.date = "2026-10-14 10:31:00";
+    late.snapshot.kind = "embedded";
+    late.snapshot.intensity = "standard";
+    undated.id = 7;
+    check(orderBenchmarkPair(late, early).older == &early
+        && orderBenchmarkPair(early, late).older == &early
+        && orderBenchmarkPair(late, undated).older == &late
+        && orderBenchmarkPair(undated, late).older == &undated
+        && orderBenchmarkPair(early, early).older == &early,
+        "the earlier date is the older run; without a date the order of the choice");
+    check(describeBenchmarkPairOrder(early, late) == "Earlier: result 3 (09:55)   Later: "
+        "result 5 (10:31)", "the order in words");
+    BenchmarkResultEntry fileA, fileB;
+    fileA.kind = fileB.kind = K::SavedReport;
+    fileA.path = fileB.path = "/tmp/orders.md";
+    fileA.id = 4;
+    using P = BenchmarkPairCheck;
+    const std::vector<P> different = checkBenchmarkPair(early, late);
+    late.incomplete = true;
+    check(checkBenchmarkPair(early, early) == std::vector<P>({ P::SameResult })
+        && checkBenchmarkPair(fileA, fileB) == std::vector<P>({ P::SameResult })
+        && different == std::vector<P>({ P::DifferentKind, P::DifferentIntensity })
+        && checkBenchmarkPair(early, late) == std::vector<P>({ P::DifferentKind,
+            P::DifferentIntensity, P::Incomplete })
+        && checkBenchmarkPair(*results.find(file), *results.find(file)).size() == 1,
+        "the checks of a pair: the same result, another kind or intensity, incomplete");
+    check(describeBenchmarkPairCheck(P::DifferentKind, early, late) == "Result 3 was made "
+        "over the network (client) and result 5 with the embedded engine: they measure "
+        "different things and are only roughly comparable. The comparison says so as well."
+        && describeBenchmarkPairCheck(P::DifferentIntensity, early, late) == "Result 3 is "
+        "a Quick run and result 5 a Standard run: the comparison is only roughly valid.",
+        "what the checks say");
+
+    // at most 30 results and comparisons
+    BenchmarkResultStore full;
+    for (size_t i = 0; i < BenchmarkResultStore::maximumEntries; ++i)
+        full.addRun(run("2026-10-14 09:00:00"), std::nullopt);
+    check(full.isFull() && full.addRun(run("2026-10-14 10:00:00"), std::nullopt) == 0
+        && full.addSavedReport(otherSnapshot, wxEmptyString, "/tmp/a.html") == 0
+        && full.addComparison(full.getEntries()[0], full.getEntries()[1]) == 0
+        && full.close(30) == 0 && !full.isFull()
+        && full.addRun(run("2026-10-14 10:00:00"), std::nullopt) == 31,
+        "at most 30 results; a closed one makes room");
+
+    // the measured report stays, the hidden one has no names
+    BenchmarkResultStore privacy;
+    BenchmarkReport mine = run("2026-10-14 09:00:00");
+    BenchmarkReport theirs = run("2026-10-14 10:00:00");
+    theirs.metrics.localHostName = "SRV-OTHER";
+    theirs.metrics.system.virtualization = "Hyper-V on SRV-OTHER";
+    const int mineId = privacy.addRun(mine, otherSnapshot);
+    const int theirsId = privacy.addRun(theirs, std::nullopt);
+    const BenchmarkResultEntry* m = privacy.find(mineId);
+    check(!m->report->anonymous && m->report->metrics.localHostName == "PC-MUELLER"
+        && !m->report->earlier && m->baseline && m->baseline->host == "SRV-ALT",
+        "the test is kept as measured, the earlier report as a copy of its own");
+    const int both = privacy.addComparison(*m, *privacy.find(theirsId));
+    const BenchmarkComparison hidden = anonymizeBenchmarkComparison(
+        *privacy.find(both)->comparison);
+    const wxString hiddenText = (hidden.toHtml() + hidden.toMarkdown()
+        + hidden.toHtml("dark")).Lower();
+    check(!hiddenText.Contains("pc-mueller") && !hiddenText.Contains("srv-other")
+        && privacy.find(both)->comparison->toMarkdown().Lower().Contains("pc-mueller"),
+        "a comparison of two computers without private information names neither");
+
+    // two saved files compare like the two tests
+    const wxString files[] = { wxFileName::CreateTempFileName("frbench"),
+        wxFileName::CreateTempFileName("frbench") };
+    {   // scope
+        wxFFile older(files[0], "w");
+        wxFFile newer(files[1], "w");
+        older.Write(mine.toHtml(), wxConvUTF8);
+        newer.Write(theirs.toMarkdown(), wxConvUTF8);
+    }
+    const BenchmarkSnapshotResult olderFile = parseBenchmarkSnapshot(readFile(files[0]));
+    const BenchmarkSnapshotResult newerFile = parseBenchmarkSnapshot(readFile(files[1]));
+    wxRemoveFile(files[0]);
+    wxRemoveFile(files[1]);
+    BenchmarkResultEntry olderSource, newerSource;
+    olderSource.kind = newerSource.kind = K::SavedReport;
+    olderSource.snapshot = olderFile.snapshot;
+    newerSource.snapshot = newerFile.snapshot;
+    olderSource.path = "/tmp/older.html";
+    newerSource.path = "/tmp/newer.md";
+    const int fromFiles = privacy.addComparison(olderSource, newerSource);
+    const BenchmarkComparison& runs = *privacy.find(both)->comparison;
+    const BenchmarkComparison& saved = *privacy.find(fromFiles)->comparison;
+    check(olderFile.ok() && newerFile.ok() && fromFiles != both
+        && std::abs(saved.ratio - runs.ratio) < 1e-9 && saved.values.size() == runs.values.size()
+        && getBenchmarkResultLabel(*privacy.find(fromFiles)) == "older.html vs newer.md"
+        && getBenchmarkResultFileName(*privacy.find(fromFiles))
+            == "flamerobin-benchmark-comparison-older-vs-newer.html",
+        "two saved files compare like the two tests");
+}
+
 void writeFixtures(const wxString& dir)
 {
     for (const auto& file : fixtureFiles())
@@ -4302,6 +4534,7 @@ int main(int argc, char** argv)
     testNeutralNotes();
     testVerdict();
     testReasonLines();
+    testResults();
     testGolden(dataDirectory);
     testWorkloadConstants(dataDirectory);
     testStyleSheetSource(dataDirectory);
