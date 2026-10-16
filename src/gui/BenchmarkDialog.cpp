@@ -54,6 +54,7 @@
 #include "core/StringUtils.h"
 #include "engine/db/IDatabase.h"
 #include "gui/BenchmarkDialog.h"
+#include "gui/BenchmarkProgressPanel.h"
 #include "gui/StyleGuide.h"
 #include "gui/UsernamePasswordDialog.h"
 #include "MasterPassword.h"
@@ -74,8 +75,7 @@ enum
     ID_button_compare,
     ID_check_private,
     ID_choice_install,
-    ID_header_advanced,
-    ID_timer
+    ID_header_advanced
 };
 
 using fr::BenchmarkTarget;
@@ -109,49 +109,6 @@ wxString getTargetHint(BenchmarkTarget target)
     }
 }
 
-// a mix of two colours, with this share of the first one; the colours of
-// the dialog come from the system, so that they follow its dark mode and
-// its high contrast
-wxColour mixColours(const wxColour& first, const wxColour& second, double share)
-{
-    return wxColour(wxColour::AlphaBlend(first.Red(), second.Red(), share),
-        wxColour::AlphaBlend(first.Green(), second.Green(), share),
-        wxColour::AlphaBlend(first.Blue(), second.Blue(), share));
-}
-
-// the relative luminance and the contrast ratio of WCAG 2
-double getLuminance(const wxColour& colour)
-{
-    auto channel = [](unsigned char value)
-    {
-        const double share = value / 255.0;
-        return share <= 0.03928 ? share / 12.92 : std::pow((share + 0.055) / 1.055, 2.4);
-    };
-    return 0.2126 * channel(colour.Red()) + 0.7152 * channel(colour.Green())
-        + 0.0722 * channel(colour.Blue());
-}
-
-double getContrast(const wxColour& first, const wxColour& second)
-{
-    const double a = getLuminance(first);
-    const double b = getLuminance(second);
-    return (std::max(a, b) + 0.05) / (std::min(a, b) + 0.05);
-}
-
-// the colour, moved towards the text colour until it can be read on the
-// background (4.5:1); a theme may have a link colour that is too pale
-wxColour getReadableColour(const wxColour& colour, const wxColour& text,
-    const wxColour& background)
-{
-    for (int step = 0; step < 10; ++step)
-    {
-        const wxColour mixed = mixColours(text, colour, step / 10.0);
-        if (getContrast(mixed, background) >= 4.5)
-            return mixed;
-    }
-    return text;
-}
-
 // an explaining text, quieter than a label; one that is cut with an
 // ellipsis where the dialog is narrow does not make the dialog wider
 wxStaticText* createHintText(wxWindow* parent, const wxString& text, bool ellipsize = false)
@@ -161,8 +118,8 @@ wxStaticText* createHintText(wxWindow* parent, const wxString& text, bool ellips
     // between the text and the background, nearer to the text
     const wxColour foreground = parent->GetForegroundColour();
     const wxColour background = parent->GetBackgroundColour();
-    label->SetForegroundColour(getReadableColour(mixColours(foreground, background, 0.68),
-        foreground, background));
+    label->SetForegroundColour(getReadableBenchmarkColour(mixBenchmarkColours(foreground,
+        background, 0.68), foreground, background));
     if (ellipsize)
         label->SetMinSize(wxSize(parent->FromDIP(40), -1));
     return label;
@@ -215,7 +172,7 @@ HelpPopup::HelpPopup(wxWindow* parent, wxWindow* button, const wxString& title,
     const wxColour background = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
     const wxColour foreground = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT);
     // the frame is the popup itself, one pixel around its panel
-    SetBackgroundColour(mixColours(foreground, background, 0.4));
+    SetBackgroundColour(mixBenchmarkColours(foreground, background, 0.4));
     wxPanel* panel = new wxPanel(this);
     panel->SetBackgroundColour(background);
     panel->SetForegroundColour(foreground);
@@ -481,12 +438,10 @@ BEGIN_EVENT_TABLE(BenchmarkDialog, BaseDialog)
     EVT_COLLAPSIBLEHEADER_CHANGED(ID_header_advanced, BenchmarkDialog::OnAdvancedToggled)
     EVT_BUTTON(wxID_CANCEL, BenchmarkDialog::OnCloseButton)
     EVT_CHOICE(ID_choice_target, BenchmarkDialog::OnTargetChanged)
-    EVT_TIMER(ID_timer, BenchmarkDialog::OnTimer)
 END_EVENT_TABLE()
 
 BenchmarkDialog::BenchmarkDialog(wxWindow* parent, Database* db)
-    : BaseDialog(parent, -1, wxEmptyString), databaseM(db),
-      timerM(this, ID_timer)
+    : BaseDialog(parent, -1, wxEmptyString), databaseM(db)
 {
     SetTitle(databaseM ? wxString::Format(_("Performance Benchmark & Diagnosis - %s"),
         databaseM->getName_()) : _("Performance Benchmark & Diagnosis"));
@@ -536,7 +491,7 @@ wxButton* BenchmarkDialog::createHelpButton(wxWindow* parent, const wxString& ti
     // the colour of links, as readable as a label
     const wxColour text = parent->GetForegroundColour();
     const wxColour background = parent->GetBackgroundColour();
-    button->SetForegroundColour(getReadableColour(
+    button->SetForegroundColour(getReadableBenchmarkColour(
         wxSystemSettings::GetColour(wxSYS_COLOUR_HOTLIGHT), text, background));
     // large enough to be hit
     button->SetMinSize(wxSize(std::max(button->GetBestSize().x, FromDIP(24)), -1));
@@ -924,23 +879,11 @@ void BenchmarkDialog::createControls()
     sizerSettings->Add(panel_advanced, 0, wxEXPAND);
     sizerMain->Add(sizerSettings, 0, wxEXPAND | wxBOTTOM, gap);
 
-    // progress
-    wxBoxSizer* sizerStatus = new wxBoxSizer(wxHORIZONTAL);
-    label_status = new wxStaticText(panel, wxID_ANY, wxEmptyString);
-    label_elapsed = new wxStaticText(panel, wxID_ANY, wxEmptyString);
-    sizerStatus->Add(label_status, 1, wxALIGN_CENTER_VERTICAL);
-    sizerStatus->Add(label_elapsed, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(12));
-    sizerMain->Add(sizerStatus, 0, wxEXPAND | wxBOTTOM, FromDIP(4));
-    gauge_progress = new wxGauge(panel, wxID_ANY, 100, wxDefaultPosition,
-        wxSize(-1, FromDIP(14)));
-    sizerMain->Add(gauge_progress, 0, wxEXPAND | wxBOTTOM, gap);
-
-    // results
+    // the progress, the report and the log: the progress is there before
+    // the start, so that nothing moves when a test starts
     notebook_results = new wxNotebook(panel, wxID_ANY);
-
-    text_log = new wxTextCtrl(notebook_results, wxID_ANY, wxEmptyString,
-        wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
-    notebook_results->AddPage(text_log, _("Progress"));
+    panel_progress = new BenchmarkProgressPanel(notebook_results);
+    notebook_results->AddPage(panel_progress, _("Progress"));
 
     // the report, with what can be done with it above it
     wxPanel* pageReport = new wxPanel(notebook_results);
@@ -1006,6 +949,11 @@ void BenchmarkDialog::createControls()
     pageReport->SetSizer(sizerReport);
     notebook_results->AddPage(pageReport, _("Report"));
 
+    // every message of the run, also the measurements as they come
+    text_log = new wxTextCtrl(notebook_results, wxID_ANY, wxEmptyString,
+        wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
+    notebook_results->AddPage(text_log, _("Log"));
+
     sizerMain->Add(notebook_results, 1, wxEXPAND);
 
     // buttons
@@ -1035,7 +983,7 @@ void BenchmarkDialog::createControls()
     // registration this computer
     wxCommandEvent dummy;
     OnTargetChanged(dummy);
-    label_status->SetLabel(getReadyHint());
+    showReady();
 }
 
 fr::BenchmarkTarget BenchmarkDialog::getTarget() const
@@ -1085,12 +1033,24 @@ wxString BenchmarkDialog::getReadyHint() const
         getIntensity(), check_comparepages->GetValue(), check_manyusers->GetValue()));
 }
 
+std::vector<fr::BenchmarkStagePlan> BenchmarkDialog::getStagePlan() const
+{
+    return fr::getBenchmarkStagePlan(getIntensity(), check_comparepages->GetValue(),
+        check_manyusers->GetValue());
+}
+
+void BenchmarkDialog::showReady()
+{
+    panel_progress->showReady(getStagePlan(), getReadyHint());
+}
+
 void BenchmarkDialog::OnDurationChanged(wxCommandEvent& event)
 {
     event.Skip();
-    // after a run the settings are hidden and the status is the result
-    if (!runningM && settingsShownM)
-        label_status->SetLabel(getReadyHint());
+    // after a run the settings are hidden and the progress shows the result;
+    // an error stays until the next start
+    if (!runningM && settingsShownM && panel_progress->isReady())
+        showReady();
 }
 
 void BenchmarkDialog::setReportStatus(const wxString& message)
@@ -1470,14 +1430,12 @@ void BenchmarkDialog::OnStart(wxCommandEvent& WXUNUSED(event))
     lastMessageM.clear();
     text_log->Clear();
     showReport(fr::BenchmarkReport());
-    gauge_progress->SetValue(0);
     notebook_results->SetSelection(0);
     // the settings cannot be changed during the run; the progress gets
     // their room
     showAdvanced(false);
     startTimeM = std::chrono::steady_clock::now();
-    label_elapsed->SetLabel(formatElapsed());
-    timerM.Start(1000);
+    panel_progress->start(runnerM->getStagePlan());
     appendLog(wxString::Format(_("Target: %s"), params.targetDescription));
     appendLog(wxString::Format(_("Intensity: %s, page size %d"),
         fr::getBenchmarkIntensityName(intensity), params.pageSize));
@@ -1512,7 +1470,7 @@ void BenchmarkDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
     if (!runningM)
         return;
     runnerM->requestCancel();
-    label_status->SetLabel(_("Cancelling, the temporary database is being dropped..."));
+    panel_progress->cancelRequested();
     appendLog(_("Cancel requested."));
     updateControls();
 }
@@ -1543,19 +1501,6 @@ void BenchmarkDialog::OnClose(wxCloseEvent& event)
     event.Skip();
 }
 
-wxString BenchmarkDialog::formatElapsed() const
-{
-    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(
-        std::chrono::steady_clock::now() - startTimeM).count();
-    return wxString::Format(_("Elapsed: %02d:%02d"), int(seconds / 60),
-        int(seconds % 60));
-}
-
-void BenchmarkDialog::OnTimer(wxTimerEvent& WXUNUSED(event))
-{
-    label_elapsed->SetLabel(formatElapsed());
-}
-
 void BenchmarkDialog::appendLog(const wxString& line)
 {
     auto seconds = std::chrono::duration_cast<std::chrono::seconds>(
@@ -1566,15 +1511,7 @@ void BenchmarkDialog::appendLog(const wxString& line)
 
 void BenchmarkDialog::onProgress(const fr::BenchmarkProgress& progress)
 {
-    if (progress.cleaningUp)
-        label_status->SetLabel(progress.message);
-    else
-    {
-        label_status->SetLabel(wxString::Format(_("Step %d of %d: %s"),
-            progress.step, progress.stepCount, progress.message));
-    }
-    if (progress.stepCount > 0)
-        gauge_progress->SetValue(progress.step * 100 / progress.stepCount);
+    panel_progress->update(progress);
     if (progress.message != lastMessageM)
     {
         lastMessageM = progress.message;
@@ -1600,12 +1537,9 @@ void BenchmarkDialog::onFinished(const fr::BenchmarkReport& report,
         workerM.join();
     // the runner holds the login of this run, which is not kept
     runnerM.reset();
-    timerM.Stop();
     runningM = false;
     reportM = report;
     hasReportM = true;
-    label_elapsed->SetLabel(formatElapsed());
-    gauge_progress->SetValue(100);
     // like connectDatabase(): a master password that did not work is asked
     // for again at the next start
     if (encryptedLoginM)
@@ -1628,25 +1562,25 @@ void BenchmarkDialog::onFinished(const fr::BenchmarkReport& report,
             appendLog(earlierFile + ": " + earlierProblem);
     }
 
-    if (report.cancelled)
-        label_status->SetLabel(_("Cancelled. The results are incomplete."));
-    else if (!report.errorMessage.empty())
-        label_status->SetLabel(_("Failed. See the log for details."));
+    using Outcome = BenchmarkProgressPanel::Outcome;
+    const Outcome outcome = report.cancelled ? Outcome::Cancelled
+        : !report.errorMessage.empty() || aborted ? Outcome::Failed : Outcome::Finished;
+    wxString message;
+    if (outcome == Outcome::Cancelled)
+        message = _("Cancelled. The results are incomplete.");
+    else if (outcome == Outcome::Failed)
+        message = _("Failed. See the log for details.");
     else if (!earlierFile.empty() && !earlierProblem.empty())
-    {
-        label_status->SetLabel(_("Finished. The earlier report cannot be compared, see "
-            "the log."));
-    }
+        message = _("Finished. The earlier report cannot be compared, see the log.");
     else if (!earlierFile.empty())
-    {
-        label_status->SetLabel(_("Finished. The overview compares this run with the "
-            "earlier report."));
-    }
+        message = _("Finished. The overview compares this run with the earlier report.");
     else
-    {
-        label_status->SetLabel(_("Finished. Save the report to compare it with later "
-            "runs or other servers."));
-    }
+        message = _("Finished. Save the report to compare it with later runs or other "
+            "servers.");
+
+    const bool cleanupFailed = !aborted && report.benchmarkDatabaseCreated
+        && !report.benchmarkDatabaseDropped;
+    panel_progress->finish(outcome, cleanupFailed, message);
 
     if (!report.errorMessage.empty())
     {
@@ -1719,9 +1653,8 @@ void BenchmarkDialog::showSettings(bool show)
     if (show)
     {
         // ready for the next run
-        label_status->SetLabel(getReadyHint());
-        label_elapsed->SetLabel(wxEmptyString);
-        gauge_progress->SetValue(0);
+        showReady();
+        notebook_results->SetSelection(0);
         // the hint of the advanced settings is only shown next to the
         // closed pane
         layoutAdvanced();
@@ -1946,11 +1879,9 @@ void BenchmarkDialog::OnCompareReports(wxCommandEvent& WXUNUSED(event))
     comparisonM = fr::compareBenchmarkSnapshots(*second, *first);
     showComparison();
     showSettings(false);
-    notebook_results->SetSelection(notebook_results->GetPageCount() - 1);
+    notebook_results->SetSelection(1);  // the report
     setReportStatus(_("Comparison of two saved reports."));
     // the progress is about a run, which is not shown now
-    label_status->SetLabel(wxEmptyString);
-    label_elapsed->SetLabel(wxEmptyString);
-    gauge_progress->SetValue(0);
+    panel_progress->showReady(getStagePlan(), wxEmptyString);
     updateControls();
 }

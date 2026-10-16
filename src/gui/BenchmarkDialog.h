@@ -25,9 +25,7 @@
 #define FR_BENCHMARKDIALOG_H
 
 #include <wx/wx.h>
-#include <wx/gauge.h>
 #include <wx/notebook.h>
-#include <wx/timer.h>
 
 #include <chrono>
 #include <memory>
@@ -42,6 +40,7 @@
 #include "gui/BaseDialog.h"
 #include "metadata/database.h"
 
+class BenchmarkProgressPanel;
 class BenchmarkReportPage;
 class wxCollapsibleHeaderCtrl;
 class wxPopupTransientWindow;
@@ -72,7 +71,6 @@ private:
     bool runningM = false;
     bool closeRequestedM = false;
     std::chrono::steady_clock::time_point startTimeM;
-    wxTimer timerM;
     std::set<wxString> loggedResultsM;
     wxString lastMessageM;
     fr::BenchmarkReport reportM;
@@ -110,9 +108,9 @@ private:
     wxRadioButton* radio_intensity[3];
     fr::BenchmarkIntensity getIntensity() const;
 
-    wxStaticText* label_status;
-    wxStaticText* label_elapsed;
-    wxGauge* gauge_progress;
+    // the pages of the notebook: the progress in stages, the report, and
+    // the whole log of the run
+    BenchmarkProgressPanel* panel_progress;
     wxNotebook* notebook_results;
     wxTextCtrl* text_log;
     // the HTML report, or the Markdown text where no web view is available
@@ -151,6 +149,9 @@ private:
     void layoutAdvanced();
     // how long the test takes, shown before the start
     wxString getReadyHint() const;
+    // the stages of a run with the selected settings, shown before the start
+    std::vector<fr::BenchmarkStagePlan> getStagePlan() const;
+    void showReady();
     void setReportStatus(const wxString& message);
     bool buildParams(fr::BenchmarkConnectionParams& params);
     void fillCredentials(fr::BenchmarkConnectionParams& params, bool fromRegistration);
@@ -168,7 +169,6 @@ private:
     static void removePendingDatabase(const wxString& entry);
     void dropPendingDatabases();
     void appendLog(const wxString& line);
-    wxString formatElapsed() const;
     // the settings are hidden after a run, so that the report has room
     wxSizer* sizerSettingsM = nullptr;
     bool settingsShownM = true;
@@ -207,7 +207,6 @@ private:
     void OnDurationChanged(wxCommandEvent& event);
     void OnAdvancedToggled(wxCommandEvent& event);
     void OnCharHook(wxKeyEvent& event);
-    void OnTimer(wxTimerEvent& event);
 
     DECLARE_EVENT_TABLE()
 };
