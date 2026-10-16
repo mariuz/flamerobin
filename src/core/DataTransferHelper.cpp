@@ -230,8 +230,8 @@ bool DataTransferHelper::exportDataset(const std::vector<wxString>& columnNames,
     }
     else // XML
     {
-        wxString rootTag = options.xmlRootTag.empty() ? "table" : sanitizeXmlTagName(options.xmlRootTag);
-        wxString rowTag = options.xmlRowTag.empty() ? "row" : sanitizeXmlTagName(options.xmlRowTag);
+        wxString rootTag = options.xmlRootTag.empty() ? wxString("table") : sanitizeXmlTagName(options.xmlRootTag);
+        wxString rowTag = options.xmlRowTag.empty() ? wxString("row") : sanitizeXmlTagName(options.xmlRowTag);
 
         writeUtf8(outStream, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
         writeUtf8(outStream, wxString::Format("<%s xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n", rootTag.c_str()));

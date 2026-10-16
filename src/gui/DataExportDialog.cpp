@@ -146,7 +146,7 @@ void DataExportDialog::createControls()
     choice_null_handling = new wxChoice(getControlsPanel(), ID_choice_null_handling, wxDefaultPosition, wxDefaultSize, nullOptions);
     choice_null_handling->SetSelection(0);
 
-    wxString defRoot = relationM ? fr::DataTransferHelper::sanitizeXmlTagName(relationM->getName_()) : "query_results";
+    wxString defRoot = relationM ? fr::DataTransferHelper::sanitizeXmlTagName(relationM->getName_()) : wxString("query_results");
     label_root_tag = new wxStaticText(getControlsPanel(), wxID_ANY, _("XML Root tag:"));
     textctrl_root_tag = new wxTextCtrl(getControlsPanel(), ID_textctrl_root_tag, defRoot);
 
