@@ -82,7 +82,10 @@ private:
     bool showColumnsM;
     int showComputedM;
     int showDomainsM;
+    bool showOneNodeIndicesM;
+    bool showSystemDomainsM;
     bool showSystemIndicesM;
+    bool showSystemPackagesM;
     bool showSystemRolesM;
     bool showSystemTablesM;
     bool sortDatabasesM;
@@ -133,17 +136,23 @@ void DBHTreeConfigCache::loadFromConfig()
     changes += setValue(showColumnsM,
         cfg.get("ShowColumnsInTree", true));
     changes += setValue(sortDatabasesM,
-        cfg.get("OrderDatabasesInTree", false));
+        cfg.get("OrderDatabasesInTree", true));
     changes += setValue(sortServersM,
-        cfg.get("OrderServersInTree", false));
+        cfg.get("OrderServersInTree", true));
     // these aren't surfaced by methods, but needed to cause observing tree
     // nodes to update themselves
+    changes += setValue(showOneNodeIndicesM,
+        cfg.get("ShowOneNodeIndices", true));
+    changes += setValue(showSystemDomainsM,
+        cfg.get("ShowSystemDomains", false));
     changes += setValue(showSystemIndicesM,
         cfg.get("ShowSystemIndices", false));
+    changes += setValue(showSystemPackagesM,
+        cfg.get("ShowSystemPackages", false));
     changes += setValue(showSystemRolesM,
         cfg.get("ShowSystemRoles", false));
     changes += setValue(showSystemTablesM,
-        cfg.get("ShowSystemTables", true));
+        cfg.get("ShowSystemTables", false));
     changes += setValue(showComputedM,
         cfg.get("ShowComputed", 1));
     changes += setValue(showDomainsM,

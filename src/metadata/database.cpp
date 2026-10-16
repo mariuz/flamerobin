@@ -257,7 +257,7 @@ void DatabaseInfo::reloadIfNecessary(fr::IDatabasePtr database)
 
 // DatabaseAuthenticationMode class
 DatabaseAuthenticationMode::DatabaseAuthenticationMode()
-    : modeM(UseSavedEncryptedPwd)
+    : modeM(UseSavedPassword)
 {
 }
 
@@ -2560,7 +2560,7 @@ bool Database::showSystemCharacterSet()
 
     bool b;
     if (!DatabaseConfig(this, config()).getValue(SHOW_SYSCHARACTERSET, b))
-        b = config().get(SHOW_SYSCHARACTERSET, true);
+        b = config().get(SHOW_SYSCHARACTERSET, false);
     
     return b;
 }
@@ -2571,7 +2571,7 @@ bool Database::showSystemIndices()
 
     bool b;
     if (!DatabaseConfig(this, config()).getValue(SHOW_SYSINDICES, b))
-        b = config().get(SHOW_SYSINDICES, true);
+        b = config().get(SHOW_SYSINDICES, false);
 
     return b;
 }
@@ -2582,7 +2582,7 @@ bool Database::showSystemDomains()
 
     bool b;
     if (!DatabaseConfig(this, config()).getValue(SHOW_SYSDOMAINS, b))
-        b = config().get(SHOW_SYSDOMAINS, true);
+        b = config().get(SHOW_SYSDOMAINS, false);
 
     return b;
 }
@@ -2596,7 +2596,7 @@ bool Database::showSystemPackages()
 
     bool b;
     if (!DatabaseConfig(this, config()).getValue(SHOW_SYSPACKAGES, b))
-        b = config().get(SHOW_SYSPACKAGES, true);
+        b = config().get(SHOW_SYSPACKAGES, false);
 
     return b;
 }
@@ -2610,7 +2610,7 @@ bool Database::showSystemRoles()
 
     bool b;
     if (!DatabaseConfig(this, config()).getValue(SHOW_SYSROLES, b))
-        b = config().get(SHOW_SYSROLES, true);
+        b = config().get(SHOW_SYSROLES, false);
 
     return b;
 }
@@ -2621,7 +2621,7 @@ bool Database::showSystemTables()
 
     bool b;
     if (!DatabaseConfig(this, config()).getValue(SHOW_SYSTABLES, b))
-        b = config().get(SHOW_SYSTABLES, true);
+        b = config().get(SHOW_SYSTABLES, false);
 
     return b;
 }
@@ -2632,7 +2632,7 @@ bool Database::showOneNodeIndices()
 
     bool b;
     if (!DatabaseConfig(this, config()).getValue(SHOW_ONENODEINDICES, b))
-        b = config().get(SHOW_ONENODEINDICES, false);
+        b = config().get(SHOW_ONENODEINDICES, true);
 
     return b;
 }
