@@ -810,14 +810,6 @@ void ExecuteSqlFrame::buildToolbar(CommandManager& cm)
         cm.getToolbarHint(_("Rollback transaction"), Cmds::Query_Rollback));
     toolBarM->AddSeparator();
 
-    toolBarM->AddTool(Cmds::DataGrid_Insert_row, _("Insert row(s)"),
-        wxArtProvider::GetBitmapBundle(ART_InsertRow, wxART_TOOLBAR),
-        cm.getToolbarHint(_("Insert row(s) into recordset"), Cmds::DataGrid_Insert_row));
-    toolBarM->AddTool(Cmds::DataGrid_Delete_row, _("Delete row(s)"),
-        wxArtProvider::GetBitmapBundle(ART_DeleteRow, wxART_TOOLBAR),
-        cm.getToolbarHint(_("Delete row(s) from recordset"), Cmds::DataGrid_Delete_row));
-    toolBarM->AddSeparator();
-
     toolBarM->AddTool(Cmds::View_SplitView, _("Toggle split view"),
         wxArtProvider::GetBitmapBundle(ART_ToggleView, wxART_TOOLBAR),
         cm.getToolbarHint(_("Toggle split view"), Cmds::View_SplitView),
@@ -826,6 +818,14 @@ void ExecuteSqlFrame::buildToolbar(CommandManager& cm)
     toolBarM->AddSeparator();
     choice_connection_switcher = new wxChoice(toolBarM, ID_choice_connection_switcher);
     toolBarM->AddControl(choice_connection_switcher, _("Database Connection"));
+
+    toolBarM->AddSeparator();
+    toolBarM->AddTool(Cmds::DataGrid_Insert_row, _("Insert row(s)"),
+        wxArtProvider::GetBitmapBundle(ART_InsertRow, wxART_TOOLBAR),
+        cm.getToolbarHint(_("Insert row(s) into recordset"), Cmds::DataGrid_Insert_row));
+    toolBarM->AddTool(Cmds::DataGrid_Delete_row, _("Delete row(s)"),
+        wxArtProvider::GetBitmapBundle(ART_DeleteRow, wxART_TOOLBAR),
+        cm.getToolbarHint(_("Delete row(s) from recordset"), Cmds::DataGrid_Delete_row));
 
     toolBarM->Realize();
 }

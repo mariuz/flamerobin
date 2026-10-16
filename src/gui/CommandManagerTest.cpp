@@ -27,6 +27,7 @@
 #ifndef WX_PRECOMP
     #include "wx/wx.h"
 #endif
+#include "core/EmbeddedSVGs.h"
 #include "gui/CommandManager.h"
 
 namespace
@@ -92,6 +93,14 @@ int main(int argc, char** argv)
     int k1 = WXK_WINDOWS_LEFT;
     int k2 = WXK_WINDOWS_RIGHT;
     ok = check(k1 != 0 && k2 != 0, "WXK_WINDOWS constants available") && ok;
+
+    // Test 6: Issue #743 - Rollback and Delete Row icons have distinct colors
+    std::cout << "Test 6: Rollback and Delete Row icon colors..." << std::endl;
+    wxString rollbackSvg(svg_rollbacktransaction);
+    wxString deleteRowSvg(svg_redx);
+    ok = check(rollbackSvg.Contains("#FF9800"), "Rollback SVG uses amber/orange fill (#FF9800)") && ok;
+    ok = check(!rollbackSvg.Contains("#F44336"), "Rollback SVG does not use Delete Row red (#F44336)") && ok;
+    ok = check(deleteRowSvg.Contains("#F44336"), "Delete Row SVG uses red fill (#F44336)") && ok;
 
     if (ok)
         std::cout << "All CommandManager tests PASSED." << std::endl;
