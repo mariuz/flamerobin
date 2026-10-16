@@ -56,7 +56,9 @@ class wxSimplebook;
 class BenchmarkDialog : public BaseDialog
 {
 public:
-    BenchmarkDialog(wxWindow* parent, Database* db);
+    // the results belong to the main window, so that they stay when the
+    // dialog is closed
+    BenchmarkDialog(wxWindow* parent, Database* db, fr::BenchmarkResultStore& results);
     ~BenchmarkDialog();
 
 protected:
@@ -72,9 +74,8 @@ private:
     std::chrono::steady_clock::time_point startTimeM;
     std::set<wxString> loggedResultsM;
     wxString lastMessageM;
-    // the results of the dialog: the test, or two saved reports compared
-    // without a run
-    fr::BenchmarkResultStore resultsM;
+    // the tests of this session, opened files and comparisons
+    fr::BenchmarkResultStore& resultsM;
     std::vector<fr::BenchmarkFirebirdInstallation> installationsM;
 
     // the targets of fr::getBenchmarkTargets(), and the details of every
@@ -168,7 +169,20 @@ private:
     // the result of the selected tab; nullptr for the progress and the log
     const fr::BenchmarkResultEntry* getShownResult() const;
     void onResultSelected(int id);
+    // asks before a test that is not saved is lost
     void closeResult(int id);
+    void closeResults(fr::BenchmarkCloseScope scope, int id);
+    enum
+    {
+        ID_menu_close = 4401,
+        ID_menu_close_others,
+        ID_menu_close_all,
+        ID_menu_save
+    };
+    // the result of the tab the menu belongs to
+    int menuResultM = 0;
+    void showResultMenu(int id);
+    void showFullMessage();
     // false if it was not saved
     bool saveResult(int id);
     // the report of a test with its earlier report, without private
@@ -199,11 +213,14 @@ private:
     void OnSaveReport(wxCommandEvent& event);
     void OnOpenInBrowser(wxCommandEvent& event);
     void OnCloseResult(wxCommandEvent& event);
+    void OnResultMenu(wxCommandEvent& event);
     void OnPrivateChanged(wxCommandEvent& event);
     void OnBrowseEarlier(wxCommandEvent& event);
     void OnCompareReports(wxCommandEvent& event);
     void OnCloseButton(wxCommandEvent& event);
     void OnClose(wxCloseEvent& event);
+    // asks about tests that are not saved and drops them; false: stay open
+    bool confirmDiscardUnsaved();
     void OnTargetChanged(wxCommandEvent& event);
     void OnDurationChanged(wxCommandEvent& event);
     void OnAdvancedToggled(wxCommandEvent& event);

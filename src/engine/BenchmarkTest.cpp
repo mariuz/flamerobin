@@ -4297,6 +4297,7 @@ void testResults()
     BenchmarkResultStore results;
     const int first = results.addRun(run("2026-10-14 09:55:12"), std::nullopt);
     BenchmarkReport quick = run("2026-10-14 10:31:00");
+    quick.intensity = BenchmarkIntensity::Quick;
     quick.intensityName = getBenchmarkIntensityName(BenchmarkIntensity::Quick);
     const int second = results.addRun(quick, std::nullopt);
     BenchmarkReport other = clientFixture();
@@ -4319,6 +4320,8 @@ void testResults()
         "descriptions and the header of a test and of a file");
     check(getBenchmarkResultFileName(*a) == "flamerobin-benchmark-1-20261014-0955.html",
         "a test is saved with its number and time");
+    check(getBenchmarkResultSummary(*results.find(second)) == "10:31, Quick, client",
+        "a test in a few words, for the question before it is closed");
 
     // saved and unsaved
     check(results.getUnsavedIds() == std::vector<int>({ first, second }) && f->saved,
@@ -4339,6 +4342,14 @@ void testResults()
             == std::vector<int>({ second })
         && formatBenchmarkResultIds({ 3, 5, 6 }) == "3, 5, 6",
         "a question only for tests that are not saved");
+    {
+        BenchmarkResultStore discarded = results;
+        discarded.discardUnsaved();
+        check(discarded.getUnsavedIds().empty() && !discarded.find(second)
+            && discarded.find(first) && discarded.find(file)
+            && discarded.getEntries().size() == results.getEntries().size() - 1,
+            "discarding drops only the tests that are not saved");
+    }
 
     // comparisons hold copies
     const BenchmarkPair pair = orderBenchmarkPair(*results.find(second), *results.find(first));

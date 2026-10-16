@@ -269,6 +269,12 @@ int BenchmarkResultStore::closeAll()
     return 0;
 }
 
+void BenchmarkResultStore::discardUnsaved()
+{
+    for (int id : getUnsavedIds())
+        close(id);
+}
+
 int BenchmarkResultStore::getSelected() const
 {
     return selectedM;
@@ -399,6 +405,18 @@ wxString describeBenchmarkResult(const BenchmarkResultEntry& entry)
             return wxString::Format(_("Comparison of %s (earlier) and %s (later)"),
                 getNameInSentence(entry.olderName), getNameInSentence(entry.newerName));
     }
+}
+
+wxString getBenchmarkResultSummary(const BenchmarkResultEntry& entry)
+{
+    wxString text;
+    for (const wxString& part : { getTime(entry.snapshot.date),
+        getIntensityName(entry.snapshot.intensity), getKindWord(entry.snapshot.kind) })
+    {
+        if (!part.empty())
+            text += (text.empty() ? "" : ", ") + part;
+    }
+    return text;
 }
 
 wxString getBenchmarkResultHeader(const BenchmarkResultEntry& entry)

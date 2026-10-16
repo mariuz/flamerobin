@@ -238,6 +238,10 @@ BEGIN_EVENT_TABLE(BenchmarkDialog, BaseDialog)
     EVT_BUTTON(ResultsView::ID_button_browser, BenchmarkDialog::OnOpenInBrowser)
     EVT_BUTTON(ResultsView::ID_button_close_result, BenchmarkDialog::OnCloseResult)
     EVT_MENU(ResultsView::ID_button_close_result, BenchmarkDialog::OnCloseResult)
+    EVT_MENU(BenchmarkDialog::ID_menu_close, BenchmarkDialog::OnResultMenu)
+    EVT_MENU(BenchmarkDialog::ID_menu_close_others, BenchmarkDialog::OnResultMenu)
+    EVT_MENU(BenchmarkDialog::ID_menu_close_all, BenchmarkDialog::OnResultMenu)
+    EVT_MENU(BenchmarkDialog::ID_menu_save, BenchmarkDialog::OnResultMenu)
     EVT_BUTTON(ID_button_earlier_browse, BenchmarkDialog::OnBrowseEarlier)
     EVT_BUTTON(ID_button_compare, BenchmarkDialog::OnCompareReports)
     EVT_CHECKBOX(ID_check_private, BenchmarkDialog::OnPrivateChanged)
@@ -247,12 +251,18 @@ BEGIN_EVENT_TABLE(BenchmarkDialog, BaseDialog)
     EVT_CHOICE(ID_choice_target, BenchmarkDialog::OnTargetChanged)
 END_EVENT_TABLE()
 
-BenchmarkDialog::BenchmarkDialog(wxWindow* parent, Database* db)
-    : BaseDialog(parent, -1, wxEmptyString), databaseM(db)
+BenchmarkDialog::BenchmarkDialog(wxWindow* parent, Database* db,
+    fr::BenchmarkResultStore& results)
+    : BaseDialog(parent, -1, wxEmptyString), databaseM(db), resultsM(results)
 {
     SetTitle(databaseM ? wxString::Format(_("Performance Benchmark & Diagnosis - %s"),
         databaseM->getName_()) : _("Performance Benchmark & Diagnosis"));
     createControls();
+    // the results of earlier tests stay until they are closed; the dialog
+    // opens with the settings, for a new test
+    for (const fr::BenchmarkResultEntry& entry : resultsM.getEntries())
+        addResultTab(entry.id);
+    resultsM.select(0);
     updateControls();
     // BaseDialog connects its own close handler dynamically, which ends a
     // modal dialog at once; this one is bound later, so it runs first and
@@ -718,6 +728,7 @@ void BenchmarkDialog::createControls()
     view_results->makePage = [this](int id) { return makePage(id); };
     view_results->onSelected = [this](int id) { onResultSelected(id); };
     view_results->onCloseResult = [this](int id) { closeResult(id); };
+    view_results->onResultMenu = [this](int id) { showResultMenu(id); };
     view_results->onShortcut = [this](char key)
     {
         wxCommandEvent dummy;
@@ -1173,6 +1184,12 @@ void BenchmarkDialog::OnStart(wxCommandEvent& WXUNUSED(event))
         showSettings(true);
         return;
     }
+    // before anything is asked: the result of the test needs a tab
+    if (resultsM.isFull())
+    {
+        showFullMessage();
+        return;
+    }
     fr::BenchmarkConnectionParams params;
     if (!buildParams(params))
         return;
@@ -1208,18 +1225,15 @@ void BenchmarkDialog::OnStart(wxCommandEvent& WXUNUSED(event))
         addPendingDatabase(pendingEntriesM.back());
     }
     runningM = true;
-    // a new test replaces the results before it
-    for (const fr::BenchmarkResultEntry& e : std::vector<fr::BenchmarkResultEntry>(
-        resultsM.getEntries()))
-    {
-        view_results->removeResult(e.id);
-    }
-    resultsM.closeAll();
     closeRequestedM = false;
     loggedResultsM.clear();
     lastMessageM.clear();
     text_log->Clear();
     view_results->select(ResultsView::progressTab);
+    // showing a result would disturb the measurement: making a report
+    // without private information takes up to a second, and Edge works in
+    // processes of its own
+    view_results->setLocked(true);
     // the settings cannot be changed during the run; the progress gets
     // their room
     showAdvanced(false);
@@ -1275,7 +1289,7 @@ void BenchmarkDialog::OnCloseButton(wxCommandEvent& event)
 {
     if (runningM)
         requestClose();
-    else
+    else if (confirmDiscardUnsaved())
         event.Skip();
 }
 
@@ -1287,7 +1301,30 @@ void BenchmarkDialog::OnClose(wxCloseEvent& event)
         requestClose();
         return;
     }
+    if (!runningM && !confirmDiscardUnsaved() && event.CanVeto())
+    {
+        event.Veto();
+        return;
+    }
     event.Skip();
+}
+
+bool BenchmarkDialog::confirmDiscardUnsaved()
+{
+    const std::vector<int> unsaved = resultsM.getUnsavedIds();
+    if (unsaved.empty())
+        return true;
+    // saved tests, opened files and comparisons stay until FlameRobin is quit
+    const int count = int(unsaved.size());
+    wxMessageDialog question(this, wxString::Format(wxPLURAL("%d result is not saved: "
+        "%s. Close it anyway?", "%d results are not saved: %s. Close them anyway?",
+        count), count, fr::formatBenchmarkResultIds(unsaved)),
+        _("Performance Benchmark & Diagnosis"), wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION);
+    question.SetYesNoLabels(_("Close &without saving"), _("Cancel"));
+    if (question.ShowModal() != wxID_YES)
+        return false;
+    resultsM.discardUnsaved();
+    return true;
 }
 
 void BenchmarkDialog::appendLog(const wxString& line)
@@ -1327,6 +1364,7 @@ void BenchmarkDialog::onFinished(const fr::BenchmarkReport& report,
     // the runner holds the login of this run, which is not kept
     runnerM.reset();
     runningM = false;
+    view_results->setLocked(false);
     // like connectDatabase(): a master password that did not work is asked
     // for again at the next start
     if (encryptedLoginM)
@@ -1353,6 +1391,8 @@ void BenchmarkDialog::onFinished(const fr::BenchmarkReport& report,
             baseline = earlier.snapshot;
     }
 
+    // a test that measured nothing has only its message
+    const int id = resultsM.addRun(report, baseline);
     using Outcome = BenchmarkProgressPanel::Outcome;
     const Outcome outcome = report.cancelled ? Outcome::Cancelled
         : !report.errorMessage.empty() || aborted ? Outcome::Failed : Outcome::Finished;
@@ -1364,10 +1404,15 @@ void BenchmarkDialog::onFinished(const fr::BenchmarkReport& report,
     else if (!earlierFile.empty() && !earlierProblem.empty())
         message = _("Finished. The earlier report cannot be compared, see the log.");
     else if (!earlierFile.empty())
-        message = _("Finished. The overview compares this run with the earlier report.");
+    {
+        message = wxString::Format(_("Finished. Result %d compares this run with the "
+            "earlier report."), id);
+    }
     else
-        message = _("Finished. Save the report to compare it with later runs or other "
-            "servers.");
+    {
+        message = wxString::Format(_("Finished. Result %d added; save it to keep it after "
+            "FlameRobin is closed."), id);
+    }
 
     // the whole error below the stages, with the hint for this computer
     wxString error = report.errorMessage;
@@ -1424,14 +1469,13 @@ void BenchmarkDialog::onFinished(const fr::BenchmarkReport& report,
     appendLog(wxString::Format(_("Done after %.0f seconds."),
         report.durationSeconds));
 
-    // a test that measured nothing has only its message
-    const int id = resultsM.addRun(report, baseline);
     if (id)
         addResultTab(id);
+    // the user may look at the log; an error stays in sight, with the stage
+    // it happened in, the values before it are on their tab
+    const bool follow = view_results->getSelection() <= 0;
     showSettings(false);
-    // an error stays in sight, with the stage it happened in; the report of
-    // the steps before it is on its tab
-    if (id && outcome != Outcome::Failed)
+    if (id && outcome != Outcome::Failed && follow)
         view_results->select(id);
     updateControls();
 
@@ -1504,14 +1548,109 @@ void BenchmarkDialog::onResultSelected(int id)
 
 void BenchmarkDialog::closeResult(int id)
 {
-    if (runningM)
+    const fr::BenchmarkResultEntry* entry = resultsM.find(id);
+    if (runningM || !entry)
         return;
+    // only a test that is not saved is lost: a file is saved, a comparison
+    // holds copies of its results
+    if (!fr::getBenchmarkCloseQuestion(resultsM, fr::BenchmarkCloseScope::One, id).empty())
+    {
+        wxMessageDialog question(this, wxString::Format(_("Result %d (%s) is not saved. "
+            "If you close it, its values are lost and it can no longer be compared."), id,
+            fr::getBenchmarkResultSummary(*entry)), _("Performance Benchmark & Diagnosis"),
+            wxYES_NO | wxCANCEL | wxICON_QUESTION);
+        question.SetYesNoCancelLabels(_("&Save..."), _("Close &without saving"),
+            _("Cancel"));
+        const int answer = question.ShowModal();
+        // a cancelled file dialog keeps the result
+        if (answer == wxID_CANCEL || (answer == wxID_YES && !saveResult(id)))
+            return;
+    }
     const bool shown = view_results->getSelection() == id;
     const int next = resultsM.close(id);
     view_results->removeResult(id);
     if (shown)
         view_results->select(next > 0 ? next : ResultsView::progressTab);
     updateControls();
+}
+
+void BenchmarkDialog::closeResults(fr::BenchmarkCloseScope scope, int id)
+{
+    if (runningM)
+        return;
+    const std::vector<int> unsaved = fr::getBenchmarkCloseQuestion(resultsM, scope, id);
+    if (!unsaved.empty())
+    {
+        // one question for all of them; to save them, close one by one
+        const int count = int(unsaved.size());
+        wxMessageDialog question(this, wxString::Format(wxPLURAL("%d result is not saved: "
+            "%s. Close it anyway?", "%d results are not saved: %s. Close them anyway?",
+            count), count, fr::formatBenchmarkResultIds(unsaved)),
+            _("Performance Benchmark & Diagnosis"), wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION);
+        question.SetYesNoLabels(_("Close &without saving"), _("Cancel"));
+        if (question.ShowModal() != wxID_YES)
+            return;
+    }
+    std::vector<int> closed;
+    for (const fr::BenchmarkResultEntry& entry : resultsM.getEntries())
+    {
+        if (scope == fr::BenchmarkCloseScope::All || entry.id != id)
+            closed.push_back(entry.id);
+    }
+    const int next = scope == fr::BenchmarkCloseScope::All ? resultsM.closeAll()
+        : resultsM.closeOthers(id);
+    for (int closedId : closed)
+        view_results->removeResult(closedId);
+    view_results->select(next > 0 ? next : ResultsView::progressTab);
+    updateControls();
+}
+
+void BenchmarkDialog::showResultMenu(int id)
+{
+    const fr::BenchmarkResultEntry* entry = resultsM.find(id);
+    if (runningM || !entry)
+        return;
+    // the tab under the mouse, also when another one is selected
+    menuResultM = id;
+    wxMenu menu;
+    menu.Append(ID_menu_close, _("&Close") + "\tCtrl+W");
+    menu.Append(ID_menu_close_others, _("Close &other results"));
+    menu.Append(ID_menu_close_all, _("Close &all results"));
+    menu.Enable(ID_menu_close_others, resultsM.getEntries().size() > 1);
+    if (entry->kind != fr::BenchmarkResultKind::SavedReport)
+    {
+        menu.AppendSeparator();
+        menu.Append(ID_menu_save, entry->kind == fr::BenchmarkResultKind::Comparison
+            ? _("Sa&ve comparison...") : _("Sa&ve report..."));
+    }
+    PopupMenu(&menu);
+}
+
+void BenchmarkDialog::OnResultMenu(wxCommandEvent& event)
+{
+    const int id = menuResultM;
+    switch (event.GetId())
+    {
+        case ID_menu_close:
+            closeResult(id);
+            break;
+        case ID_menu_close_others:
+            closeResults(fr::BenchmarkCloseScope::Others, id);
+            break;
+        case ID_menu_close_all:
+            closeResults(fr::BenchmarkCloseScope::All, id);
+            break;
+        case ID_menu_save:
+            saveResult(id);
+            break;
+    }
+}
+
+void BenchmarkDialog::showFullMessage()
+{
+    wxMessageBox(wxString::Format(_("%d results are open. Please close some before you "
+        "start another test or open a report."), int(fr::BenchmarkResultStore::maximumEntries)),
+        _("Performance Benchmark & Diagnosis"), wxOK | wxICON_INFORMATION, this);
 }
 
 void BenchmarkDialog::OnCloseResult(wxCommandEvent& WXUNUSED(event))
@@ -1578,8 +1717,9 @@ bool BenchmarkDialog::saveResult(int id)
     if (!entry || entry->kind == fr::BenchmarkResultKind::SavedReport)
         return false;
     const bool comparison = entry->kind == fr::BenchmarkResultKind::Comparison;
+    // with number and time, so that several results do not overwrite each other
     wxFileDialog fd(this, comparison ? _("Save comparison") : _("Save benchmark report"),
-        "", comparison ? "flamerobin-benchmark-comparison.html" : "flamerobin-benchmark.html",
+        "", fr::getBenchmarkResultFileName(*entry),
         _("HTML report (*.html)|*.html|Markdown (*.md)|*.md"),
         wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
     if (fd.ShowModal() != wxID_OK)
@@ -1746,6 +1886,11 @@ void BenchmarkDialog::OnCompareReports(wxCommandEvent& WXUNUSED(event))
         : std::nullopt;
     if (!first || !second)
         return;
+    if (resultsM.isFull())
+    {
+        showFullMessage();
+        return;
+    }
     // two files without a tab of their own
     fr::BenchmarkResultEntry files[2];
     for (int i = 0; i < 2; ++i)

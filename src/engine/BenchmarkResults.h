@@ -111,6 +111,8 @@ public:
     int close(int id);
     int closeOthers(int id);
     int closeAll();
+    /// closes the tests that were not saved; the selection moves like in close()
+    void discardUnsaved();
 
     int getSelected() const;
     bool select(int id);
@@ -147,6 +149,8 @@ wxString getBenchmarkResultLabel(const BenchmarkResultEntry& entry);
 /// one line for the tool tip and the lists: "3  Run, 2026-10-14 09:55,
 /// Quick, this computer, HP ZBook (not saved)"
 wxString describeBenchmarkResult(const BenchmarkResultEntry& entry);
+/// a test in a few words for a question: "09:55, Quick, this computer"
+wxString getBenchmarkResultSummary(const BenchmarkResultEntry& entry);
 /// above the shown result: "Result 5 - not saved"
 wxString getBenchmarkResultHeader(const BenchmarkResultEntry& entry);
 /// the name of a result in a sentence: "result 3" or the file name

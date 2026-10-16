@@ -29,12 +29,18 @@
 #include <wx/treectrl.h>
 #include <wx/aui/aui.h>
 
+#include <memory>
 #include <vector>
 
 #include "gui/BaseFrame.h"
 #include "gui/GUIURIHandlerHelper.h"
 #include "metadata/MetadataClasses.h"
 #include "metadata/MetadataItemURIHandlerHelper.h"
+
+namespace fr
+{
+class BenchmarkResultStore;
+}
 
 class DBHTreeControl;
 class LabelPanel;
@@ -193,11 +199,15 @@ public:
     DBHTreeControl* getTreeCtrl();
     MainFrame(wxWindow* parent, int id, const wxString& title, const wxPoint& pos = wxDefaultPosition,
         const wxSize& size = wxDefaultSize, long style = wxDEFAULT_FRAME_STYLE);
+    virtual ~MainFrame();
 
     bool openUnregisteredDatabase(const wxString& dbpath);
     bool handleURI(URI& uri);
 private:
     RootPtr rootM;
+    // the results of "Performance Benchmark & Diagnosis" until FlameRobin
+    // ends; they are never written to disk
+    std::unique_ptr<fr::BenchmarkResultStore> benchmarkResultsM;
 
     virtual bool doCanClose();
     virtual void doBeforeDestroy();
