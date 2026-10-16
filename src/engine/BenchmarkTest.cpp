@@ -4166,6 +4166,8 @@ void testFixtures(const wxString& dir)
         reports[name] = r.snapshot;
     }
     check(readable, "the reports of format 2 can be read");
+    check(isBenchmarkReportHtmlPlain(readFile(dir + "/format2-client.html")),
+        "a saved HTML report of format 2 can be shown as it was saved");
     bool same = readable;
     for (const auto& report : reports)
     {
@@ -4464,6 +4466,92 @@ void testResults()
         "two saved files compare like the two tests");
 }
 
+// a saved page is shown in the dialog only if it is a plain report
+void testPlainReport()
+{
+    std::cout << "Saved pages shown in the dialog\n";
+    BenchmarkReport report = clientFixture();
+    BenchmarkReport compared = report;
+    compared.earlier = makeBenchmarkSnapshot(makeReport(healthyMetrics(),
+        "2026-10-13 09:00:00"));
+    const BenchmarkComparison comparison = compareBenchmarkSnapshots(
+        makeBenchmarkSnapshot(report), *compared.earlier);
+    bool plain = true;
+    int pages = 0;
+    for (const wxString& page : { report.toHtml(), report.toHtml("light"),
+        report.toHtml("dark"), report.anonymized().toHtml(), compared.toHtml(),
+        compared.anonymized().toHtml("dark"), comparison.toHtml(), comparison.toHtml("dark"),
+        anonymizeBenchmarkComparison(comparison).toHtml("light"),
+        makeReport(serverMetrics(), "2026-10-14 10:00:00").toHtml() })
+    {
+        ++pages;
+        if (!isBenchmarkReportHtmlPlain(page))
+        {
+            std::cerr << "    page " << pages << " is not plain\n";
+            plain = false;
+        }
+    }
+    check(plain, "every page FlameRobin writes is a plain report: report, comparison, "
+        "light, dark, without private information, with an earlier run");
+
+    const wxString page = report.toHtml();
+    const size_t body = page.find("<body>") + 6;
+    auto with = [&page, body](const wxString& part)
+    {
+        return page.substr(0, body) + part + page.substr(body);
+    };
+    bool refused = true;
+    const char* const additions[] = { "<script>alert(1)</script>", "<SCRIPT SRC=x.js></SCRIPT>",
+        "<div onclick=\"alert(1)\">x</div>", "<details OnToggle=alert(1)>",
+        "<svg><use xlink:href=\"javascript:alert(1)\"/></svg>",
+        "<svg><use href=\"data:image/svg+xml;base64,AAAA#x\"/></svg>",
+        "<svg><use xlink:href=\"http://example.com/i.svg#a\"/></svg>",
+        "<iframe></iframe>", "<object data=\"x\"></object>", "<embed>", "<img src=x>",
+        "<link rel=stylesheet>", "<form>", "<base>", "<a href=\"https://example.com\">x</a>",
+        "<meta http-equiv=\"refresh\" content=\"0;url=https://example.com\">",
+        "<!--[if IE]><script>alert(1)</script><![endif]-->", "<![CDATA[x]]>",
+        "<style>body { background: url(https://example.com/x.png) }</style>",
+        "<style>@import 'x.css';</style>", "<div style=\"width: expr/**/ession(alert(1))\">",
+        "<div style=\"behavior: url(x.htc)\">", "<style>b { color: \\72 ed }</style>",
+        "<input type=\"image\" src=\"x\">", "<input type=text>" };
+    for (const char* addition : additions)
+    {
+        if (isBenchmarkReportHtmlPlain(with(addition)))
+        {
+            std::cerr << "    accepted: " << addition << "\n";
+            refused = false;
+        }
+    }
+    check(refused, "a script, a handler, an address, a frame, an object, a form, an image, "
+        "a refresh, a conditional comment, a style that loads or runs something are refused");
+    check(isBenchmarkReportHtmlPlain(with("<p>1 &lt; 2 and 3 < 4</p><!-- note -->"))
+        && isBenchmarkReportHtmlPlain(with("<svg><use xlink:href=\"#i-cpu\"/></svg>"))
+        && isBenchmarkReportHtmlPlain("<!doctype html><html lang=\"en\"><body>"
+            "<p>text</p></body></html>"), "text, comments and links within the page are fine");
+
+    // the start of the page up to its <html> tag; the style sheet names
+    // the themes as well
+    auto start = [](const wxString& html)
+    {
+        return html.Left(html.find('>', html.find("<html")) + 1);
+    };
+    const wxString light = report.toHtml("light");
+    const wxString none = report.toHtml();
+    const wxString dark = applyBenchmarkReportTheme(none, "dark");
+    check(start(none) == "<!doctype html>\n<html lang=\"en\">"
+        && start(dark) == "<!doctype html>\n<html data-theme=\"dark\" lang=\"en\">"
+        && dark.length() == none.length() + 18, "the theme is set where the page has none");
+    check(start(light) == "<!doctype html>\n<html lang=\"en\" data-theme=\"light\">"
+        && start(applyBenchmarkReportTheme(light, "dark"))
+            == "<!doctype html>\n<html data-theme=\"dark\" lang=\"en\">"
+        && applyBenchmarkReportTheme(light, wxEmptyString) == none,
+        "a theme is replaced, or removed for the theme of the system");
+    check(applyBenchmarkReportTheme("<HTML Data-Theme='light' data-theme=dark lang=en><body>",
+        "light") == "<HTML data-theme=\"light\" lang=en><body>"
+        && applyBenchmarkReportTheme("<p>no page</p>", "dark") == "<p>no page</p>",
+        "twice in any case, and a text without <html>");
+}
+
 void writeFixtures(const wxString& dir)
 {
     for (const auto& file : fixtureFiles())
@@ -4535,6 +4623,7 @@ int main(int argc, char** argv)
     testVerdict();
     testReasonLines();
     testResults();
+    testPlainReport();
     testGolden(dataDirectory);
     testWorkloadConstants(dataDirectory);
     testStyleSheetSource(dataDirectory);

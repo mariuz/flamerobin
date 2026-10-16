@@ -182,6 +182,16 @@ wxString describeBenchmarkPairCheck(BenchmarkPairCheck check,
 wxString describeBenchmarkPairOrder(const BenchmarkResultEntry& older,
     const BenchmarkResultEntry& newer);
 
+/// whether a saved page is no more than a FlameRobin report, so that it can
+/// be shown in the report view: no script, frame, object, form, image or
+/// style sheet of its own, no event handler, no address to load or run
+/// (links within the page are allowed), no conditional comment of Internet
+/// Explorer and no refresh; a file that someone changed is not shown
+bool isBenchmarkReportHtmlPlain(const wxString& html);
+/// the page with the theme of the dialog ("dark" or "light"; empty: the
+/// theme of the system), set in the data-theme attribute of <html>
+wxString applyBenchmarkReportTheme(const wxString& html, const wxString& theme);
+
 } // namespace fr
 
 #endif // FR_BENCHMARKRESULTS_H

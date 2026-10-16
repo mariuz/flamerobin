@@ -24,8 +24,10 @@
 #include <wx/intl.h>
 
 #include <wx/filename.h>
+#include <wx/wxcrt.h>
 
 #include <algorithm>
+#include <iterator>
 
 #include "engine/BenchmarkResults.h"
 
@@ -532,6 +534,234 @@ wxString describeBenchmarkPairOrder(const BenchmarkResultEntry& older,
             : getBenchmarkResultName(e) + " (" + when + ")";
     };
     return wxString::Format(_("Earlier: %s   Later: %s"), describe(older), describe(newer));
+}
+
+namespace
+{
+
+// the elements of a FlameRobin report; anything else (a script, a frame,
+// an object, a form, a link to a style sheet, an image) is not shown
+const char* const plainElements[] = { "html", "head", "meta", "title", "style", "body",
+    "main", "header", "footer", "nav", "section", "article", "aside", "div", "span", "p",
+    "b", "i", "u", "s", "small", "strong", "em", "code", "pre", "kbd", "mark", "abbr",
+    "sub", "sup", "br", "hr", "wbr", "h1", "h2", "h3", "h4", "h5", "h6", "ul", "ol",
+    "li", "dl", "dt", "dd", "table", "caption", "colgroup", "col", "thead", "tbody",
+    "tfoot", "tr", "th", "td", "details", "summary", "label", "input", "figure",
+    "figcaption", "svg", "g", "defs", "symbol", "use", "path", "circle", "ellipse",
+    "rect", "line", "polyline", "polygon", "text", "tspan", "desc", "lineargradient",
+    "radialgradient", "stop", "clippath" };
+
+// attributes that load or run something; href only as a link within the page
+const char* const loadingAttributes[] = { "src", "srcset", "action", "formaction",
+    "background", "poster", "data", "codebase", "dynsrc", "lowsrc", "longdesc",
+    "manifest", "ping", "cite", "usemap", "profile", "archive", "classid" };
+
+bool isNameChar(wxUniChar c)
+{
+    return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == ':'
+        || c == '_';
+}
+
+// a style sheet or a style attribute without anything that is loaded or
+// run: no address, no expression or behavior of Internet Explorer, no
+// import; escapes could hide a word, the reports have none
+bool isPlainCss(const wxString& lowerCss)
+{
+    wxString css = lowerCss;
+    // a comment could split a word
+    for (size_t start = css.find("/*"); start != wxString::npos; start = css.find("/*"))
+    {
+        const size_t end = css.find("*/", start + 2);
+        if (end == wxString::npos)
+            return false;
+        css.erase(start, end + 2 - start);
+    }
+    if (css.find('\\') != wxString::npos)
+        return false;
+    for (const char* word : { "url(", "expression", "behavior", "-moz-binding",
+        "@import", "javascript:", "vbscript:" })
+    {
+        if (css.Contains(word))
+            return false;
+    }
+    return true;
+}
+
+} // namespace
+
+bool isBenchmarkReportHtmlPlain(const wxString& html)
+{
+    const wxString text = html.Lower();
+    const size_t length = text.length();
+    size_t pos = 0;
+    while ((pos = text.find('<', pos)) != wxString::npos)
+    {
+        if (text.compare(pos, 4, "<!--") == 0)
+        {
+            const size_t end = text.find("-->", pos + 4);
+            if (end == wxString::npos)
+                return false;
+            // the conditional comments of Internet Explorer contain markup
+            // that it shows and runs
+            const wxString comment = text.substr(pos + 4, end - pos - 4);
+            if (comment.StartsWith("[if") || comment.Contains("<![endif]"))
+                return false;
+            pos = end + 3;
+            continue;
+        }
+        if (text.compare(pos, 9, "<!doctype") == 0)
+        {
+            pos = text.find('>', pos);
+            if (pos == wxString::npos)
+                return false;
+            continue;
+        }
+        // CDATA, processing instructions and the like
+        if (text.compare(pos, 2, "<!") == 0 || text.compare(pos, 2, "<?") == 0)
+            return false;
+        size_t i = pos + 1;
+        const bool closing = i < length && text[i] == '/';
+        if (closing)
+            ++i;
+        const size_t nameStart = i;
+        while (i < length && isNameChar(text[i]))
+            ++i;
+        const wxString name = text.substr(nameStart, i - nameStart);
+        if (name.empty())
+        {
+            // a '<' in the text
+            ++pos;
+            continue;
+        }
+        if (std::none_of(std::begin(plainElements), std::end(plainElements),
+            [&name](const char* e) { return name == e; }))
+        {
+            return false;
+        }
+        // the attributes up to the end of the tag
+        bool httpEquiv = false;
+        bool compatible = false;
+        wxString inputType;
+        while (true)
+        {
+            while (i < length && (wxIsspace(text[i]) || text[i] == '/'))
+                ++i;
+            if (i >= length)
+                return false;
+            if (text[i] == '>')
+                break;
+            const size_t attributeStart = i;
+            while (i < length && !wxIsspace(text[i]) && text[i] != '=' && text[i] != '>'
+                && text[i] != '/')
+            {
+                ++i;
+            }
+            const wxString attribute = text.substr(attributeStart, i - attributeStart);
+            while (i < length && wxIsspace(text[i]))
+                ++i;
+            wxString value;
+            if (i < length && text[i] == '=')
+            {
+                ++i;
+                while (i < length && wxIsspace(text[i]))
+                    ++i;
+                if (i < length && (text[i] == '"' || text[i] == '\''))
+                {
+                    const wxUniChar quote = text[i];
+                    const size_t end = text.find(quote, i + 1);
+                    if (end == wxString::npos)
+                        return false;
+                    value = text.substr(i + 1, end - i - 1);
+                    i = end + 1;
+                }
+                else
+                {
+                    const size_t valueStart = i;
+                    while (i < length && !wxIsspace(text[i]) && text[i] != '>')
+                        ++i;
+                    value = text.substr(valueStart, i - valueStart);
+                }
+            }
+            if (attribute.StartsWith("on") || std::any_of(std::begin(loadingAttributes),
+                std::end(loadingAttributes), [&attribute](const char* a)
+                    { return attribute == a; }))
+            {
+                return false;
+            }
+            if ((attribute == "href" || attribute == "xlink:href") && !value.StartsWith("#"))
+                return false;
+            if (attribute == "style" && !isPlainCss(value))
+                return false;
+            if (attribute == "http-equiv")
+            {
+                httpEquiv = true;
+                compatible = value == "x-ua-compatible";
+            }
+            if (attribute == "type")
+                inputType = value;
+        }
+        // only the mode of Internet Explorer, never a refresh to elsewhere
+        if (name == "meta" && httpEquiv && !compatible)
+            return false;
+        // the radio buttons and check boxes of the views, no image button
+        if (name == "input" && inputType != "radio" && inputType != "checkbox")
+            return false;
+        pos = i + 1;
+        if (!closing && (name == "style" || name == "title"))
+        {
+            const size_t end = text.find("</" + name, pos);
+            if (end == wxString::npos)
+                return false;
+            if (name == "style" && !isPlainCss(text.substr(pos, end - pos)))
+                return false;
+            pos = end;
+        }
+    }
+    return true;
+}
+
+wxString applyBenchmarkReportTheme(const wxString& html, const wxString& theme)
+{
+    const wxString lower = html.Lower();
+    const size_t start = lower.find("<html");
+    if (start == wxString::npos)
+        return html;
+    const size_t end = lower.find('>', start);
+    if (end == wxString::npos)
+        return html;
+    // the tag without its themes
+    wxString tag = html.substr(start + 5, end - start - 5);
+    for (size_t at = tag.Lower().find("data-theme"); at != wxString::npos;
+        at = tag.Lower().find("data-theme"))
+    {
+        size_t stop = at + 10;
+        while (stop < tag.length() && wxIsspace(tag[stop]))
+            ++stop;
+        if (stop < tag.length() && tag[stop] == '=')
+        {
+            ++stop;
+            while (stop < tag.length() && wxIsspace(tag[stop]))
+                ++stop;
+            if (stop < tag.length() && (tag[stop] == '"' || tag[stop] == '\''))
+            {
+                const size_t close = tag.find(wxUniChar(tag[stop]), stop + 1);
+                stop = close == wxString::npos ? tag.length() : close + 1;
+            }
+            else
+            {
+                while (stop < tag.length() && !wxIsspace(tag[stop]))
+                    ++stop;
+            }
+        }
+        // with the space in front of it
+        size_t from = at;
+        while (from > 0 && wxIsspace(tag[from - 1]))
+            --from;
+        tag.erase(from, stop - from);
+    }
+    if (theme == "dark" || theme == "light")
+        tag = " data-theme=\"" + theme + "\"" + tag;
+    return html.substr(0, start + 5) + tag + html.substr(end);
 }
 
 } // namespace fr
