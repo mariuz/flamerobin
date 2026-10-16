@@ -96,6 +96,8 @@ public:
 
     /// number of steps of a complete run (progress display)
     int getStepCount() const;
+    /// the stages of the run with their steps (progress display)
+    const std::vector<BenchmarkStagePlan>& getStagePlan() const { return planM; }
     static std::string getEmbeddedConfig();
 
     /// drops a temporary database left behind by an earlier run; refuses
@@ -111,7 +113,12 @@ private:
     std::atomic<bool> cancelM{ false };
     ProgressCallback progressM;
     BenchmarkMetrics* metricsM = nullptr;
+    std::vector<BenchmarkStagePlan> planM;
     int stepM = 0;
+    // the stage of the current step in planM, and the step within it
+    int stageIndexM = -1;
+    int stageStepM = 0;
+    bool skippedM = false;
     wxString uniqueNameM;
     wxString databasePathM;
     std::string connectionStringM;
@@ -136,7 +143,10 @@ private:
     std::vector<int> getOltpLevels() const;
     // TCP port of the connection string, 3050 if it has none
     int getServerPort() const;
-    void step(const wxString& message);
+    // the next step of the run, in a stage of planM; skipped: the step has
+    // nothing to do in this run
+    void step(BenchmarkStage stage, const wxString& message, bool skipped = false);
+    // a message within the current step
     void publish(const wxString& message, bool cleaningUp = false);
     void checkCancel() const;
     // id: the measurement of the test (see the register in BenchmarkValues.cpp)

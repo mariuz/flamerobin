@@ -27,7 +27,9 @@
 #include <chrono>
 #include <cmath>
 #include <iostream>
+#include <set>
 #include <thread>
+#include <vector>
 
 #include "engine/BenchmarkRunner.h"
 #include "engine/db/DatabaseFactory.h"
@@ -107,6 +109,47 @@ fr::BenchmarkConnectionParams makeParams(const std::string& server)
     return params;
 }
 
+// the progress of a run follows the plan of its stages: every step in a
+// stage of the plan, the stages in their order, each with all its steps
+// when the run was complete, the share growing, the cleanup last
+bool checkStages(const std::vector<fr::BenchmarkProgress>& list,
+    const fr::BenchmarkRunner& runner, bool complete)
+{
+    const std::vector<fr::BenchmarkStagePlan>& plan = runner.getStagePlan();
+    std::vector<std::set<int>> steps(plan.size());
+    int lastStage = 0;
+    double lastFraction = 0.0;
+    bool ok = !list.empty() && list.back().cleaningUp;
+    for (const fr::BenchmarkProgress& p : list)
+    {
+        const bool inPlan = p.stageIndex >= 0 && p.stageIndex < int(plan.size())
+            && p.stageCount == int(plan.size()) && p.stage == plan[p.stageIndex].stage;
+        if (!inPlan || p.stageIndex < lastStage || p.fraction < lastFraction
+            || p.cleaningUp != (p.stage == fr::BenchmarkStage::Finish)
+            || (!p.cleaningUp && p.stageStep >= p.stageSteps))
+        {
+            std::cerr << "    step " << p.step << " out of the plan: stage "
+                << p.stageIndex << " step " << p.stageStep << "\n";
+            ok = false;
+            continue;
+        }
+        lastStage = p.stageIndex;
+        lastFraction = p.fraction;
+        if (!p.cleaningUp)
+            steps[p.stageIndex].insert(p.stageStep);
+    }
+    for (size_t i = 0; complete && i < plan.size(); ++i)
+    {
+        if (steps[i].size() != plan[i].steps.size())
+        {
+            std::cerr << "    stage " << i << ": " << steps[i].size() << " of "
+                << plan[i].steps.size() << " steps reported\n";
+            ok = false;
+        }
+    }
+    return ok;
+}
+
 } // namespace
 
 int main(int argc, char** argv)
@@ -135,13 +178,18 @@ int main(int argc, char** argv)
         fr::BenchmarkRunner runner(params, fr::BenchmarkIntensity::Quick);
         int lastStep = 0;
         bool monotonic = true;
+        std::vector<fr::BenchmarkProgress> progress;
         fr::BenchmarkReport report = runner.run(
             [&](const fr::BenchmarkProgress& p)
             {
                 if (p.step < lastStep)
                     monotonic = false;
                 lastStep = p.step;
+                progress.push_back(p);
+                progress.back().results.clear();
                 std::cout << "    [" << p.step << "/" << p.stepCount << "] "
+                    << fr::getBenchmarkStageWord(p.stage).utf8_str() << " "
+                    << (p.skipped ? "(skipped) " : "") << (p.quiet ? "(quiet) " : "")
                     << p.message.utf8_str() << "\n";
             });
         const fr::BenchmarkMetrics& m = report.metrics;
@@ -152,6 +200,15 @@ int main(int argc, char** argv)
         ok &= fr_test::check(!report.cancelled, "not cancelled");
         ok &= fr_test::check(monotonic, "progress is monotonic");
         ok &= fr_test::check(lastStep == runner.getStepCount(), "all steps reported");
+        ok &= fr_test::check(checkStages(progress, runner, true),
+            "every step in its stage of the plan, every stage with all its steps");
+        // the selected database is not read in this run
+        ok &= fr_test::check(std::any_of(progress.begin(), progress.end(),
+            [](const fr::BenchmarkProgress& p)
+            {
+                return p.stage == fr::BenchmarkStage::Prepare && p.stageStep == 2
+                    && p.skipped;
+            }), "the step of the selected database is skipped when it is not read");
         ok &= fr_test::check(report.benchmarkDatabaseCreated
             && report.benchmarkDatabaseDropped,
             "temporary database reported as created and dropped");
@@ -293,6 +350,7 @@ int main(int argc, char** argv)
         fr::BenchmarkConnectionParams params = makeParams(server);
         fr::BenchmarkRunner runner(params, fr::BenchmarkIntensity::Quick);
         bool cleanupReported = false;
+        std::vector<fr::BenchmarkProgress> progress;
         fr::BenchmarkReport report = runner.run(
             [&](const fr::BenchmarkProgress& p)
             {
@@ -301,8 +359,12 @@ int main(int argc, char** argv)
                     runner.requestCancel();
                 if (p.cleaningUp)
                     cleanupReported = true;
+                progress.push_back(p);
+                progress.back().results.clear();
             });
         ok &= fr_test::check(report.cancelled, "run is cancelled");
+        ok &= fr_test::check(checkStages(progress, runner, false),
+            "the stages of a cancelled run follow the plan up to the cleanup");
         ok &= fr_test::check(!report.metrics.insertMs, "stopped before the disk test");
         ok &= fr_test::check(cleanupReported, "cleanup is reported");
         ok &= fr_test::check(report.benchmarkDatabaseDropped,
@@ -351,11 +413,21 @@ int main(int argc, char** argv)
         fr::BenchmarkConnectionParams params = makeParams(server);
         params.comparePageSizes = true;
         fr::BenchmarkRunner runner(params, fr::BenchmarkIntensity::Quick);
-        fr::BenchmarkReport report = runner.run(fr::BenchmarkRunner::ProgressCallback());
+        std::vector<fr::BenchmarkProgress> progress;
+        fr::BenchmarkReport report = runner.run([&](const fr::BenchmarkProgress& p)
+            {
+                progress.push_back(p);
+                progress.back().results.clear();
+            });
         const fr::BenchmarkMetrics& m = report.metrics;
         if (!report.errorMessage.empty())
             std::cerr << "    error: " << report.errorMessage.utf8_str() << "\n";
         ok &= fr_test::check(report.errorMessage.empty(), "comparison without error");
+        ok &= fr_test::check(checkStages(progress, runner, true) && std::any_of(
+            progress.begin(), progress.end(), [](const fr::BenchmarkProgress& p)
+            {
+                return p.stage == fr::BenchmarkStage::PageSizes;
+            }), "the page sizes are a stage of their own with a step per page size");
         ok &= fr_test::check(m.pageSizes.size()
             == fr::getSupportedPageSizes(m.serverMajorVersion).size(),
             "every supported page size measured");

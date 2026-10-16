@@ -27,6 +27,7 @@
 #include <wx/init.h>
 
 #include <algorithm>
+#include <cctype>
 #include <clocale>
 #include <cmath>
 #include <functional>
@@ -414,6 +415,212 @@ void testDurationHint()
     check(getBenchmarkDurationHint(I::Deep, true, true) == "several minutes, plus a few "
         "minutes for all page sizes, plus about half a minute for 50 and 250 users",
         "both options add both");
+}
+
+// the progress of a step of a plan as the runner sends it
+BenchmarkProgress stageProgress(const std::vector<BenchmarkStagePlan>& plan, int stage,
+    int step, bool skipped = false)
+{
+    BenchmarkProgress p;
+    p.stageIndex = stage;
+    p.stageCount = int(plan.size());
+    p.stage = plan[stage].stage;
+    p.stageStep = step;
+    p.stageSteps = int(plan[stage].steps.size());
+    p.cleaningUp = plan[stage].stage == BenchmarkStage::Finish;
+    p.fraction = getBenchmarkProgressFraction(plan, stage, step);
+    p.skipped = skipped;
+    return p;
+}
+
+// a tracker that saw every step up to a stage and a step of it
+BenchmarkStageTracker trackUntil(const std::vector<BenchmarkStagePlan>& plan, int stage,
+    int step)
+{
+    BenchmarkStageTracker tracker(plan);
+    for (int i = 0; i <= stage; ++i)
+    {
+        for (int j = 0; j < int(plan[i].steps.size()) && (i < stage || j <= step); ++j)
+            tracker.update(stageProgress(plan, i, j));
+    }
+    return tracker;
+}
+
+int stageIndex(const std::vector<BenchmarkStagePlan>& plan, BenchmarkStage stage)
+{
+    for (int i = 0; i < int(plan.size()); ++i)
+    {
+        if (plan[i].stage == stage)
+            return i;
+    }
+    return -1;
+}
+
+void testStagePlan()
+{
+    using I = BenchmarkIntensity;
+    using S = BenchmarkStage;
+    std::cout << "Stages of the progress\n";
+    // the steps of the stages that do not depend on the options, in the
+    // order of BenchmarkRunner::run(); testStepsHaveStages() counts them
+    const std::map<S, int> fixedSteps = { { S::Prepare, 4 }, { S::Connect, 7 }, { S::Cpu, 3 },
+        { S::Disk, 7 }, { S::Memory, 6 }, { S::Network, 6 } };
+    // the OLTP levels: 1, 2, 4 (Quick), 8 (Standard), 16 and 32 (Deep)
+    const std::map<I, int> levels = { { I::Quick, 3 }, { I::Standard, 4 }, { I::Deep, 6 } };
+    bool order = true, steps = true, count = true, fractions = true, quiet = true;
+    for (I intensity : { I::Quick, I::Standard, I::Deep })
+    {
+        for (int options = 0; options < 4; ++options)
+        {
+            const bool pages = options & 1, many = options & 2;
+            const std::vector<BenchmarkStagePlan> plan = getBenchmarkStagePlan(intensity,
+                pages, many);
+            // every stage once, in the order of the run; the page sizes only
+            // when they are compared, the cleanup last
+            std::vector<S> expected = { S::Prepare, S::Connect, S::Cpu, S::Disk, S::Memory,
+                S::Network, S::Users };
+            if (pages)
+                expected.push_back(S::PageSizes);
+            expected.push_back(S::Finish);
+            std::vector<S> stages;
+            for (const BenchmarkStagePlan& stage : plan)
+                stages.push_back(stage.stage);
+            order &= stages == expected;
+            for (const auto& fixed : fixedSteps)
+            {
+                const int index = stageIndex(plan, fixed.first);
+                steps &= index >= 0 && int(plan[index].steps.size()) == fixed.second;
+            }
+            const int users = levels.at(intensity) + (many ? 2 : 0);
+            steps &= int(plan[stageIndex(plan, S::Users)].steps.size()) == users
+                && int(getBenchmarkOltpLevels(BenchmarkSettings::forIntensity(intensity),
+                    many).size()) == users
+                && plan.back().steps.empty();
+            if (pages)
+                steps &= plan[stageIndex(plan, S::PageSizes)].steps.size() == 4;
+            count &= getBenchmarkStepCount(plan) == 33 + users + (pages ? 4 : 0);
+            // the share grows with every step, from above 0 to below 1, and
+            // the cleanup comes last
+            double last = 0.0;
+            for (int i = 0; i < int(plan.size()); ++i)
+            {
+                for (int j = 0; j < std::max(1, int(plan[i].steps.size())); ++j)
+                {
+                    const double f = getBenchmarkProgressFraction(plan, i, j);
+                    fractions &= f > last && f < 1.0
+                        && (plan[i].steps.empty() || plan[i].steps[size_t(j)].weight > 0);
+                    last = f;
+                }
+            }
+            for (const BenchmarkStagePlan& stage : plan)
+            {
+                for (const BenchmarkStepPlan& step : stage.steps)
+                {
+                    if (stage.stage == S::Users || stage.stage == S::Cpu)
+                        quiet &= step.quiet;
+                }
+            }
+        }
+    }
+    check(order, "every option mix has the stages in the order of the run, page sizes only "
+        "when compared, the cleanup last");
+    check(steps, "the stages have their steps, the users one per OLTP level, also with 50 "
+        "and 250 users, and the page sizes four");
+    check(count, "the number of steps is that of the runner: 33 and the levels and page sizes");
+    check(fractions, "the share of the run grows with every step and stays below 1 until the "
+        "end");
+    check(quiet, "the CPU tests and the OLTP levels keep the progress still");
+
+    // the long disk tests take the largest share, as of the time: with one
+    // share per step the bar would jump from 20 to 60 percent
+    const std::vector<BenchmarkStagePlan> standard = getBenchmarkStagePlan(I::Standard, false,
+        false);
+    const int disk = stageIndex(standard, S::Disk);
+    const double diskShare = getBenchmarkProgressFraction(standard, disk + 1, 0)
+        - getBenchmarkProgressFraction(standard, disk, 0);
+    check(diskShare > 0.4 && diskShare < 0.75, "the disk stage moves the progress by its "
+        "share of the time");
+    check(getBenchmarkStageWord(S::Prepare) == "Prepare" && getBenchmarkStageWord(S::Disk)
+        == "Disk" && getBenchmarkStageWord(S::PageSizes) == "Pages"
+        && getBenchmarkStageName(S::Memory) == "Memory and cache"
+        && getBenchmarkStageStateName(BenchmarkStageState::NotRun) == "not run",
+        "the stages have short words and names");
+}
+
+void testStageStates()
+{
+    using S = BenchmarkStage;
+    using St = BenchmarkStageState;
+    using O = BenchmarkStageTracker::Outcome;
+    std::cout << "States of the stages\n";
+    const std::vector<BenchmarkStagePlan> plan = getBenchmarkStagePlan(
+        BenchmarkIntensity::Quick, true, false);
+    const int connect = stageIndex(plan, S::Connect), disk = stageIndex(plan, S::Disk);
+    const int memory = stageIndex(plan, S::Memory), pages = stageIndex(plan, S::PageSizes);
+    const int finish = int(plan.size()) - 1;
+
+    BenchmarkStageTracker tracker(plan);
+    check(tracker.getCurrent() == -1 && tracker.getState(0) == St::Waiting
+        && tracker.getFraction() == 0.0, "before the start every stage waits");
+    // the selected database is not read: one step of the stage is skipped
+    tracker.update(stageProgress(plan, 0, 0));
+    tracker.update(stageProgress(plan, 0, 1));
+    tracker.update(stageProgress(plan, 0, 2, true));
+    tracker.update(stageProgress(plan, 0, 3));
+    tracker.update(stageProgress(plan, connect, 0));
+    check(tracker.getState(0) == St::Done && tracker.getState(connect) == St::Running
+        && tracker.getState(connect + 1) == St::Waiting && tracker.getCurrent() == connect
+        && tracker.getStageFraction(connect) > 0 && tracker.getStageFraction(connect) < 1,
+        "a stage is done when the next one runs, also with a skipped step");
+
+    // every page size is not supported: the stage did nothing
+    BenchmarkStageTracker all = trackUntil(plan, pages - 1, 1000);
+    for (int j = 0; j < 4; ++j)
+        all.update(stageProgress(plan, pages, j, true));
+    all.update(stageProgress(plan, finish, 0));
+    check(all.getState(pages) == St::Skipped && all.getState(pages - 1) == St::Done
+        && all.getState(finish) == St::Running, "a stage whose steps were all skipped is "
+        "skipped; the cleanup runs after the last step");
+    all.finish(O::Finished);
+    check(all.getState(pages) == St::Skipped && all.getState(0) == St::Done
+        && all.getState(finish) == St::Done && all.getFraction() == 1.0
+        && all.getEndStage() == -1, "a finished run: every stage done or skipped, 100 %");
+
+    // cancelled in the third disk test; the cleanup follows
+    BenchmarkStageTracker cancelled = trackUntil(plan, disk, 2);
+    const double fraction = cancelled.getFraction();
+    cancelled.update(stageProgress(plan, finish, 0));
+    check(cancelled.getState(disk) == St::Running && cancelled.getState(finish) == St::Running,
+        "the cleanup after a cancel leaves the stage to the end of the run");
+    cancelled.finish(O::Cancelled);
+    check(cancelled.getState(disk - 1) == St::Done && cancelled.getState(disk) == St::Cancelled
+        && cancelled.getState(memory) == St::NotRun && cancelled.getState(pages) == St::NotRun
+        && cancelled.getState(finish) == St::Done && cancelled.getEndStage() == disk
+        && cancelled.getFraction() == fraction && cancelled.getStageFraction(disk) > 0
+        && cancelled.getStageFraction(disk) < 1, "a cancel: the stage cancelled, the later ones "
+        "not run, the cleanup done, the share kept");
+
+    // an error in the memory tests
+    BenchmarkStageTracker failed = trackUntil(plan, memory, 0);
+    failed.update(stageProgress(plan, finish, 0));
+    failed.finish(O::Failed);
+    check(failed.getState(memory) == St::Failed && failed.getState(memory + 1) == St::NotRun
+        && failed.getState(disk) == St::Done && failed.getState(finish) == St::Done
+        && failed.getEndStage() == memory, "an error: the stage failed, the later ones not run");
+
+    // the temporary database could not be dropped after the last step
+    BenchmarkStageTracker cleanup = trackUntil(plan, pages, 3);
+    cleanup.update(stageProgress(plan, finish, 0));
+    cleanup.finish(O::Failed, true);
+    check(cleanup.getState(pages) == St::Done && cleanup.getState(finish) == St::Failed
+        && cleanup.getEndStage() == finish, "an error of the cleanup after the last step is "
+        "one of the cleanup");
+
+    // the run ended before its first step, e.g. without a client library
+    BenchmarkStageTracker early(plan);
+    early.finish(O::Failed);
+    check(early.getState(0) == St::Failed && early.getState(1) == St::NotRun
+        && early.getEndStage() == 0, "an error before the first step is one of the first stage");
 }
 
 // a run on the server itself with the embedded engine
@@ -3274,7 +3481,6 @@ std::map<std::string, wxString> workloadConstants()
 // the constants of BenchmarkRunner.cpp that change no result, and why; a
 // constant that changes one belongs to BenchmarkWorkload and the register
 const std::pair<const char*, const char*> notWorkload[] = {
-    { "fixedStepCount", "the progress display" },
     { "oltpMaxFailuresInRow", "ends a run with an error, the work is the same" },
     { "parallelDriveIdBase", "keeps the IDs of the tests apart" },
     { "parallelDriveIdsPerConnection", "keeps the IDs of the tests apart" },
@@ -3783,6 +3989,78 @@ BenchmarkSnapshotResult readFixture(const wxString& dir, const char* name)
     return parseBenchmarkSnapshot(readFile(dir + "/" + name));
 }
 
+// every step of the runner names its stage, and the plan has a weight for
+// each of them: a new step without a place in the plan fails here
+void testStepsHaveStages(const wxString& dir)
+{
+    std::cout << "Every step of the runner has a stage\n";
+    if (dir.empty())
+        return;
+    const std::string source(readFile(dir + "/../../BenchmarkRunner.cpp").utf8_str());
+    // the calls of step(), without the comments
+    std::string code;
+    for (size_t pos = 0; pos < source.size();)
+    {
+        const size_t comment = source.find("//", pos);
+        code += source.substr(pos, comment == std::string::npos ? std::string::npos
+            : comment - pos);
+        if (comment == std::string::npos)
+            break;
+        pos = source.find('\n', comment);
+    }
+    std::map<std::string, int> calls;
+    bool named = true;
+    int count = 0;
+    static const std::regex stage(R"(^\s*BenchmarkStage::(\w+))");
+    for (size_t pos = code.find("step("); pos != std::string::npos;
+        pos = code.find("step(", pos + 1))
+    {
+        const char before = pos > 0 ? code[pos - 1] : ' ';
+        // the definition BenchmarkRunner::step( and words such as stageStep(
+        if (std::isalnum(static_cast<unsigned char>(before)) || before == '_' || before == ':'
+            || before == '.')
+        {
+            continue;
+        }
+        ++count;
+        std::smatch match;
+        const std::string rest = code.substr(pos + 5, 80);
+        if (std::regex_search(rest, match, stage))
+            ++calls[match[1].str()];
+        else
+        {
+            std::cerr << "    a step without a stage: " << rest.substr(0, 50) << "\n";
+            named = false;
+        }
+    }
+    check(named && count > 30, "every call of step() names a stage");
+    // the steps of a stage that does not depend on the options are called
+    // once each; the OLTP levels in a loop, the page sizes in a loop with a
+    // call for a page size the server does not support
+    const std::vector<BenchmarkStagePlan> plan = getBenchmarkStagePlan(
+        BenchmarkIntensity::Standard, true, false);
+    const std::map<BenchmarkStage, std::string> names = { { BenchmarkStage::Prepare, "Prepare" },
+        { BenchmarkStage::Connect, "Connect" }, { BenchmarkStage::Cpu, "Cpu" },
+        { BenchmarkStage::Disk, "Disk" }, { BenchmarkStage::Memory, "Memory" },
+        { BenchmarkStage::Network, "Network" }, { BenchmarkStage::Users, "Users" },
+        { BenchmarkStage::PageSizes, "PageSizes" }, { BenchmarkStage::Finish, "Finish" } };
+    bool planned = calls.size() == 8;
+    for (const BenchmarkStagePlan& s : plan)
+    {
+        const std::string name = names.at(s.stage);
+        const int expected = s.stage == BenchmarkStage::Users ? 1
+            : s.stage == BenchmarkStage::PageSizes ? 2 : int(s.steps.size());
+        const int found = calls.count(name) ? calls[name] : 0;
+        if (found != expected)
+        {
+            std::cerr << "    stage " << name << ": " << found << " calls of step(), the plan "
+                "(getBenchmarkStagePlan()) has " << expected << "\n";
+            planned = false;
+        }
+    }
+    check(planned, "the plan of the stages has every step of the runner");
+}
+
 void testFixtures(const wxString& dir)
 {
     std::cout << "Saved reports of this and other versions (fixtures)\n";
@@ -3918,6 +4196,8 @@ int main(int argc, char** argv)
     testLoginAction();
     testTargets();
     testDurationHint();
+    testStagePlan();
+    testStageStates();
     testHints();
     testEventTest();
     testSettings();
@@ -3945,6 +4225,7 @@ int main(int argc, char** argv)
     testGolden(dataDirectory);
     testWorkloadConstants(dataDirectory);
     testStyleSheetSource(dataDirectory);
+    testStepsHaveStages(dataDirectory);
     testFixtures(dataDirectory);
 
     std::cout << (ok ? "ALL BENCHMARK TESTS PASSED\n" : "SOME BENCHMARK TESTS FAILED\n");

@@ -69,9 +69,6 @@ using Clock = std::chrono::steady_clock;
 // checks that every one of them is known as such.
 using namespace BenchmarkWorkload;
 
-// number of step() calls in a run without the OLTP levels and the page
-// size comparison, used for the progress display
-const int fixedStepCount = 33;
 // an OLTP client that fails this often in a row has a real error, not
 // just update conflicts with the other clients
 const int oltpMaxFailuresInRow = 20;
@@ -331,6 +328,7 @@ BenchmarkRunner::BenchmarkRunner(const BenchmarkConnectionParams& params,
     BenchmarkIntensity intensity)
     : paramsM(params), intensityM(intensity),
       settingsM(BenchmarkSettings::forIntensity(intensity)),
+      planM(getBenchmarkStagePlan(intensity, params.comparePageSizes, params.manyUsers)),
       uniqueNameM(makeUniqueName())
 {
     databasePathM = makeBenchmarkDatabasePath(paramsM.serverDirectory,
@@ -340,22 +338,12 @@ BenchmarkRunner::BenchmarkRunner(const BenchmarkConnectionParams& params,
 
 int BenchmarkRunner::getStepCount() const
 {
-    return fixedStepCount + int(getOltpLevels().size()) + (paramsM.comparePageSizes
-        ? int(std::size(comparedPageSizes)) : 0);
+    return getBenchmarkStepCount(planM);
 }
 
 std::vector<int> BenchmarkRunner::getOltpLevels() const
 {
-    std::vector<int> levels;
-    for (int clients : oltpClientCounts)
-    {
-        if (clients <= settingsM.oltpMaxClients)
-            levels.push_back(clients);
-    }
-    if (paramsM.manyUsers)
-        levels.insert(levels.end(), std::begin(manyUserClientCounts),
-            std::end(manyUserClientCounts));
-    return levels;
+    return getBenchmarkOltpLevels(settingsM, paramsM.manyUsers);
 }
 
 int BenchmarkRunner::getServerPort() const
@@ -481,13 +469,37 @@ void BenchmarkRunner::publish(const wxString& message, bool cleaningUp)
     p.cleaningUp = cleaningUp;
     if (metricsM)
         p.results = buildBenchmarkResults(*metricsM);
+    // the cleanup is the last stage; a message before the first step
+    // belongs to the first one
+    const int index = cleaningUp ? int(planM.size()) - 1 : std::max(stageIndexM, 0);
+    const int stageStep = cleaningUp ? 0 : std::max(stageStepM, 0);
+    p.stage = planM[index].stage;
+    p.stageIndex = index;
+    p.stageCount = int(planM.size());
+    p.stageStep = stageStep;
+    p.stageSteps = int(planM[index].steps.size());
+    p.fraction = getBenchmarkProgressFraction(planM, index, stageStep);
+    p.skipped = !cleaningUp && skippedM;
+    p.quiet = !cleaningUp && stageStep < p.stageSteps && planM[index].steps[stageStep].quiet;
     progressM(p);
 }
 
-void BenchmarkRunner::step(const wxString& message)
+void BenchmarkRunner::step(BenchmarkStage stage, const wxString& message, bool skipped)
 {
     checkCancel();
     ++stepM;
+    // the stages run in the order of the plan, each with its steps
+    if (stageIndexM < 0 || planM[stageIndexM].stage != stage)
+    {
+        int index = std::max(stageIndexM, 0);
+        while (index + 1 < int(planM.size()) && planM[index].stage != stage)
+            ++index;
+        stageIndexM = index;
+        stageStepM = 0;
+    }
+    else
+        ++stageStepM;
+    skippedM = skipped;
     publish(message);
 }
 
@@ -612,6 +624,9 @@ BenchmarkReport BenchmarkRunner::run(const ProgressCallback& progress)
 
     progressM = progress;
     stepM = 0;
+    stageIndexM = -1;
+    stageStepM = 0;
+    skippedM = false;
     databaseCreatedM = false;
 
     BenchmarkReport report;
@@ -641,101 +656,111 @@ BenchmarkReport BenchmarkRunner::run(const ProgressCallback& progress)
     IDatabasePtr db;
     try
     {
-        step(_("Creating the temporary benchmark database..."));
+        step(BenchmarkStage::Prepare, _("Creating the temporary benchmark database..."));
         db = createDatabase(m);
 
-        step(_("Reading server properties..."));
+        step(BenchmarkStage::Prepare, _("Reading server properties..."));
         readEnvironment(db, m);
 
-        step(paramsM.inspectConnectionString.empty()
+        step(BenchmarkStage::Prepare, paramsM.inspectConnectionString.empty()
             ? _("Skipping the selected database (not requested)...")
-            : _("Reading the configuration of the selected database (read-only)..."));
+            : _("Reading the configuration of the selected database (read-only)..."),
+            paramsM.inspectConnectionString.empty());
         inspectRegisteredDatabase(m);
 
-        step(_("Reading hardware and software of this machine..."));
+        step(BenchmarkStage::Prepare,
+            _("Reading hardware and software of this machine..."));
         readSystem(m);
 
-        step(m.connectionKind == BenchmarkConnectionKind::TcpRemote
+        const bool remote = m.connectionKind == BenchmarkConnectionKind::TcpRemote;
+        step(BenchmarkStage::Connect, remote
             ? _("Checking the network path and the ports of the server...")
-            : _("No network between FlameRobin and the server, skipping the port check..."));
+            : _("No network between FlameRobin and the server, skipping the port check..."),
+            !remote);
         checkNetwork(m);
 
-        step(_("Measuring connection setup..."));
+        step(BenchmarkStage::Connect, _("Measuring connection setup..."));
         measureConnect(m);
 
-        step(_("Testing file operations on this machine..."));
+        step(BenchmarkStage::Connect, _("Testing file operations on this machine..."));
         measureLocalFiles(m);
 
-        step(_("Testing power management of this machine..."));
+        step(BenchmarkStage::Connect,
+            _("Testing power management of this machine..."));
         measureClientBursts(m);
 
-        step(_("Creating the test tables and procedures..."));
+        step(BenchmarkStage::Connect,
+            _("Creating the test tables and procedures..."));
         for (const char* sql : BenchmarkSql::getCreateStatements())
             executeTimed(db, sql);
 
-        step(_("Testing event delivery (RemoteAuxPort)..."));
+        step(BenchmarkStage::Connect,
+            _("Testing event delivery (RemoteAuxPort)..."));
         measureEvents(m);
 
-        step(_("Measuring round trips..."));
+        step(BenchmarkStage::Connect, _("Measuring round trips..."));
         measureLatency(db, m);
 
-        step(_("Running the CPU test..."));
+        step(BenchmarkStage::Cpu, _("Running the CPU test..."));
         measureCpu(db, m);
 
-        step(_("Running the parallel CPU test..."));
+        step(BenchmarkStage::Cpu, _("Running the parallel CPU test..."));
         measureParallelCpu(m);
 
-        step(_("Testing power management of the server..."));
+        step(BenchmarkStage::Cpu, _("Testing power management of the server..."));
         measureServerBursts(db, m);
 
-        step(_("Measuring commit latency..."));
+        step(BenchmarkStage::Disk, _("Measuring commit latency..."));
         m.commitMs = measureCommitLatency(db, settingsM.commitCount,
             m.latencyMedianMs.value_or(0.0));
 
         measureDisk(db, m);  // six steps
 
-        step(_("Preparing data for the cache and network tests..."));
+        step(BenchmarkStage::Memory,
+            _("Preparing data for the cache and network tests..."));
         fillTable(db, 1, settingsM.scanRows, settingsM.scanPayloadLength);
         addEngineStatistics(db, m);
 
         // a fresh connection for the first, "cold" scan
-        step(_("Reconnecting..."));
+        step(BenchmarkStage::Memory, _("Reconnecting..."));
         close(db);
         db = openConnection();
 
-        step(_("Cache test: first scan..."));
+        step(BenchmarkStage::Memory, _("Cache test: first scan..."));
         m.coldScanMs = timedScan(db, &m.scanBytes);
-        step(_("Cache test: repeated scan..."));
+        step(BenchmarkStage::Memory, _("Cache test: repeated scan..."));
         m.warmScanMs = timedScan(db);
 
-        step(_("Reading and sorting on the server..."));
+        step(BenchmarkStage::Memory, _("Reading and sorting on the server..."));
         measureServerRead(db, m);
 
-        step(wxString::Format(_("Sorting %d MB, more than the sort memory "
-            "(temporary files)..."), settingsM.tempSortMegabytes));
+        step(BenchmarkStage::Memory, wxString::Format(_("Sorting %d MB, more than the "
+            "sort memory (temporary files)..."), settingsM.tempSortMegabytes));
         runOptional("storage.tempSort", _("Sorting large data (temporary files)"), m,
             [&]() { measureTempSort(db, m); });
 
-        step(_("Streaming a large result set..."));
+        step(BenchmarkStage::Network, _("Streaming a large result set..."));
         measureThroughput(db, m);
 
-        step(wxString::Format(_("Inserting %d rows with %d columns, one round "
-            "trip each..."), settingsM.wideRows, BenchmarkSql::wideColumns));
+        step(BenchmarkStage::Network, wxString::Format(_("Inserting %d rows with %d "
+            "columns, one round trip each..."), settingsM.wideRows, BenchmarkSql::wideColumns));
         measureWideInserts(db, m);
 
-        step(_("Comparing row-by-row inserts with a server-side batch..."));
+        step(BenchmarkStage::Network,
+            _("Comparing row-by-row inserts with a server-side batch..."));
         runOptional("application.rowByRow", _("Rows one by one compared with in one go"), m,
             [&]() { measureRowByRow(db, m); });
 
-        step(_("Measuring statement preparation..."));
+        step(BenchmarkStage::Network, _("Measuring statement preparation..."));
         runOptional("application.prepare", _("Preparing a typical query"), m,
             [&]() { measurePrepare(db, m); });
 
-        step(_("Writing and reading BLOBs..."));
+        step(BenchmarkStage::Network, _("Writing and reading BLOBs..."));
         runOptional("application.blob", _("Writing / reading large data (BLOBs)"), m,
             [&]() { measureBlob(db, m); });
 
-        step(_("Measuring record versions and long running transactions..."));
+        step(BenchmarkStage::Network,
+            _("Measuring record versions and long running transactions..."));
         runOptional("application.versions", _("Reading while an old transaction is open"),
             m, [&]() { measureVersions(db, m); });
 
@@ -1489,20 +1514,21 @@ double BenchmarkRunner::timedChunked(const IDatabasePtr& db, const char* sql,
 void BenchmarkRunner::measureDisk(IDatabasePtr& db, BenchmarkMetrics& m)
 {
     const int rows = settingsM.diskRows;
-    step(_("Disk test: inserting rows..."));
+    step(BenchmarkStage::Disk, _("Disk test: inserting rows..."));
     auto start = Clock::now();
     fillTable(db, 1, rows, settingsM.diskPayloadLength);
     m.insertMs = elapsedMs(start);
 
     // Before anything is deleted, so that both inserts get new pages and
     // are comparable; afterwards free pages would be reused.
-    step(_("Disk test with a small cache: writing, reading, changing, deleting..."));
+    step(BenchmarkStage::Disk,
+        _("Disk test with a small cache: writing, reading, changing, deleting..."));
     measureSmallCache(db, m, rows + 1);  // and one step
 
-    step(_("Disk test: updating rows..."));
+    step(BenchmarkStage::Disk, _("Disk test: updating rows..."));
     m.updateMs = executeChunked(db, BenchmarkSql::bulkUpdate, 1, rows);
 
-    step(_("Disk test: deleting rows..."));
+    step(BenchmarkStage::Disk, _("Disk test: deleting rows..."));
     // the commit latency rows are outside the ID ranges
     m.deleteMs = executeChunked(db, BenchmarkSql::bulkDelete, 1, rows);
     // what the time limited drive tests left behind (not measured)
@@ -1511,7 +1537,7 @@ void BenchmarkRunner::measureDisk(IDatabasePtr& db, BenchmarkMetrics& m)
         executeChunked(db, BenchmarkSql::bulkDelete, range.first, range.second);
     parallelDriveRangesM.clear();
 
-    step(_("Disk test: garbage collection..."));
+    step(BenchmarkStage::Disk, _("Disk test: garbage collection..."));
     m.garbageCollectMs = executeTimed(db, BenchmarkSql::garbageCollect);
 }
 
@@ -1543,8 +1569,8 @@ void BenchmarkRunner::measureSmallCache(IDatabasePtr& db, BenchmarkMetrics& m,
     m.smallCacheDeleteMs = timedChunked(db, BenchmarkSql::bulkDelete, firstId,
         firstId + rows - 1, &m.smallCacheDeletes);
 
-    step(wxString::Format(_("Disk test with %d connections at once..."),
-        settingsM.parallelConnections));
+    step(BenchmarkStage::Disk, wxString::Format(_("Disk test with %d connections at "
+        "once..."), settingsM.parallelConnections));
     measureParallelDrive(m);
 
     // back to the server default for the following tests
@@ -1933,8 +1959,8 @@ void BenchmarkRunner::measureOltp(BenchmarkMetrics& m)
     int firstInsertId = oltpIdBase;
     for (int clients : getOltpLevels())
     {
-        step(wxString::Format(_("OLTP workload, parallel clients: %d..."),
-            clients));
+        step(BenchmarkStage::Users, wxString::Format(_("OLTP workload, parallel "
+            "clients: %d..."), clients));
         m.oltp.push_back(runOltpLevel(clients, firstInsertId));
         firstInsertId += clients * oltpIdsPerClient;
     }
@@ -2088,11 +2114,13 @@ void BenchmarkRunner::comparePageSizes(BenchmarkReport& report)
     {
         if (std::find(supported.begin(), supported.end(), size) == supported.end())
         {
-            step(wxString::Format(_("Page size comparison: %d bytes is not "
-                "supported by Firebird %s, skipped..."), size, m.serverVersion));
+            step(BenchmarkStage::PageSizes, wxString::Format(_("Page size comparison: "
+                "%d bytes is not supported by Firebird %s, skipped..."), size,
+                m.serverVersion), true);
             continue;
         }
-        step(wxString::Format(_("Page size comparison: %d bytes..."), size));
+        step(BenchmarkStage::PageSizes, wxString::Format(_("Page size comparison: "
+            "%d bytes..."), size));
 
         const wxString name = getPageSizeName(size);
         const std::string connectionString = getPageSizeConnectionString(size);

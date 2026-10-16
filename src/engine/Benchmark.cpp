@@ -26,6 +26,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iterator>
 #include <numeric>
 
 #include "engine/Benchmark.h"
@@ -1512,6 +1513,316 @@ wxString getBenchmarkDurationHint(BenchmarkIntensity intensity, bool comparePage
     if (manyUsers)
         hint += _(", plus about half a minute for 50 and 250 users");
     return hint;
+}
+
+std::vector<int> getBenchmarkOltpLevels(const BenchmarkSettings& settings, bool manyUsers)
+{
+    std::vector<int> levels;
+    for (int clients : BenchmarkWorkload::oltpClientCounts)
+    {
+        if (clients <= settings.oltpMaxClients)
+            levels.push_back(clients);
+    }
+    if (manyUsers)
+    {
+        levels.insert(levels.end(), std::begin(BenchmarkWorkload::manyUserClientCounts),
+            std::end(BenchmarkWorkload::manyUserClientCounts));
+    }
+    return levels;
+}
+
+namespace
+{
+
+// The steps of the stages in the order of BenchmarkRunner::run(). The
+// weights are about the seconds of a Standard run against a server over TCP
+// (measured; a step below a second counts half a second). Quiet are the
+// short measurements that work on this computer would disturb: the power
+// management bursts, round trips, CPU, commits, cache scans and sorting in
+// memory, the result set and the wide rows that this computer receives and
+// sends as fast as it can, and the OLTP levels.
+const BenchmarkStepPlan prepareSteps[] = {
+    { 0.5, false },     // the temporary database
+    { 0.5, false },     // server properties
+    { 0.5, false },     // the selected database
+    { 0.5, false } };   // hardware and software of this computer
+const BenchmarkStepPlan connectSteps[] = {
+    { 0.5, false },     // network path and ports
+    { 0.5, false },     // connection setup
+    { 0.5, false },     // file operations of this computer
+    { 4.0, true },      // power management of this computer
+    { 1.5, false },     // test tables and procedures
+    { 0.5, false },     // events
+    { 6.5, true } };    // round trips
+const BenchmarkStepPlan cpuSteps[] = {
+    { 0.5, true },      // CPU
+    { 0.5, true },      // parallel CPU
+    { 4.5, true } };    // power management of the server
+const BenchmarkStepPlan diskSteps[] = {
+    { 4.0, true },      // commit latency
+    { 14.0, false },    // inserts
+    { 65.0, false },    // the small cache
+    { 15.5, false },    // parallel connections
+    { 18.0, false },    // updates
+    { 20.5, false },    // deletes
+    { 12.5, false } };  // garbage collection
+const BenchmarkStepPlan memorySteps[] = {
+    { 25.5, false },    // data for the cache tests
+    { 0.5, false },     // a new connection
+    { 0.5, true },      // first scan
+    { 0.5, true },      // repeated scan
+    { 0.5, true },      // reading and sorting on the server
+    { 0.5, false } };   // sorting with temporary files
+const BenchmarkStepPlan networkSteps[] = {
+    { 0.5, true },      // a large result set
+    { 0.5, true },      // wide rows
+    { 0.5, false },     // row by row and in one go
+    { 0.5, false },     // statement preparation
+    { 4.5, false },     // BLOBs
+    { 35.0, false } };  // record versions
+// the storage and cache tests in a database of every page size
+const double pageSizeStepWeight = 30.0;
+// 50 and 250 clients need longer to connect than they run
+const double manyUsersFactor = 3.0;
+// the cleanup, which has no step of its own
+const double finishWeight = 1.0;
+
+template <size_t n>
+BenchmarkStagePlan makeStage(BenchmarkStage stage, const BenchmarkStepPlan (&steps)[n])
+{
+    return { stage, std::vector<BenchmarkStepPlan>(std::begin(steps), std::end(steps)) };
+}
+
+} // namespace
+
+double BenchmarkStagePlan::getWeight() const
+{
+    double weight = 0.0;
+    for (const BenchmarkStepPlan& s : steps)
+        weight += s.weight;
+    return weight;
+}
+
+std::vector<BenchmarkStagePlan> getBenchmarkStagePlan(BenchmarkIntensity intensity,
+    bool comparePageSizes, bool manyUsers)
+{
+    using S = BenchmarkStage;
+    std::vector<BenchmarkStagePlan> plan = { makeStage(S::Prepare, prepareSteps),
+        makeStage(S::Connect, connectSteps), makeStage(S::Cpu, cpuSteps),
+        makeStage(S::Disk, diskSteps), makeStage(S::Memory, memorySteps),
+        makeStage(S::Network, networkSteps) };
+    // every OLTP level runs settings.oltpSeconds
+    const BenchmarkSettings settings = BenchmarkSettings::forIntensity(intensity);
+    BenchmarkStagePlan users = { S::Users, {} };
+    for (int clients : getBenchmarkOltpLevels(settings, manyUsers))
+    {
+        const bool many = std::find(std::begin(BenchmarkWorkload::manyUserClientCounts),
+            std::end(BenchmarkWorkload::manyUserClientCounts), clients)
+            != std::end(BenchmarkWorkload::manyUserClientCounts);
+        users.steps.push_back({ settings.oltpSeconds * (many ? manyUsersFactor : 1.0), true });
+    }
+    plan.push_back(users);
+    if (comparePageSizes)
+    {
+        plan.push_back({ S::PageSizes, std::vector<BenchmarkStepPlan>(
+            std::size(BenchmarkWorkload::comparedPageSizes), { pageSizeStepWeight, false }) });
+    }
+    plan.push_back({ S::Finish, {} });
+    return plan;
+}
+
+int getBenchmarkStepCount(const std::vector<BenchmarkStagePlan>& plan)
+{
+    int count = 0;
+    for (const BenchmarkStagePlan& stage : plan)
+        count += int(stage.steps.size());
+    return count;
+}
+
+double getBenchmarkProgressFraction(const std::vector<BenchmarkStagePlan>& plan,
+    int stageIndex, int stageStep)
+{
+    double total = finishWeight;
+    double done = 0.0;
+    for (int i = 0; i < int(plan.size()); ++i)
+    {
+        const BenchmarkStagePlan& stage = plan[i];
+        total += stage.getWeight();
+        if (i < stageIndex)
+            done += stage.getWeight();
+        else if (i == stageIndex && stage.stage == BenchmarkStage::Finish)
+            done += finishWeight / 2;
+        else if (i == stageIndex)
+        {
+            for (int j = 0; j < int(stage.steps.size()) && j <= stageStep; ++j)
+                done += stage.steps[j].weight / (j == stageStep ? 2 : 1);
+        }
+    }
+    return std::clamp(done / total, 0.0, 1.0);
+}
+
+wxString getBenchmarkStageWord(BenchmarkStage stage)
+{
+    // short words that can be read at once, the same as in the report where
+    // it has them
+    switch (stage)
+    {
+        case BenchmarkStage::Prepare:
+            return _("Prepare");
+        case BenchmarkStage::Connect:
+            return _("Connect");
+        case BenchmarkStage::Cpu:
+            return _("CPU");
+        case BenchmarkStage::Disk:
+            return _("Disk");
+        case BenchmarkStage::Memory:
+            return _("Memory");
+        case BenchmarkStage::Network:
+            return _("Network");
+        case BenchmarkStage::Users:
+            return _("Users");
+        case BenchmarkStage::PageSizes:
+            return _("Pages");
+        case BenchmarkStage::Finish:
+        default:
+            return _("Finish");
+    }
+}
+
+wxString getBenchmarkStageName(BenchmarkStage stage)
+{
+    switch (stage)
+    {
+        case BenchmarkStage::Prepare:
+            return _("Temporary database and system");
+        case BenchmarkStage::Connect:
+            return _("Connections and test data");
+        case BenchmarkStage::Cpu:
+            return _("Processor");
+        case BenchmarkStage::Disk:
+            return _("Disk");
+        case BenchmarkStage::Memory:
+            return _("Memory and cache");
+        case BenchmarkStage::Network:
+            return _("Network and applications");
+        case BenchmarkStage::Users:
+            return _("Several users at once");
+        case BenchmarkStage::PageSizes:
+            return _("Page sizes");
+        case BenchmarkStage::Finish:
+        default:
+            return _("Cleanup");
+    }
+}
+
+wxString getBenchmarkStageStateName(BenchmarkStageState state)
+{
+    switch (state)
+    {
+        case BenchmarkStageState::Running:
+            return _("running");
+        case BenchmarkStageState::Done:
+            return _("done");
+        case BenchmarkStageState::Skipped:
+            return _("skipped");
+        case BenchmarkStageState::Failed:
+            return _("failed");
+        case BenchmarkStageState::Cancelled:
+            return _("cancelled");
+        case BenchmarkStageState::NotRun:
+            return _("not run");
+        case BenchmarkStageState::Waiting:
+        default:
+            return _("waiting");
+    }
+}
+
+BenchmarkStageTracker::BenchmarkStageTracker(const std::vector<BenchmarkStagePlan>& plan)
+    : planM(plan), statesM(plan.size(), BenchmarkStageState::Waiting),
+      skippedM(plan.size(), true)
+{
+}
+
+BenchmarkStageState BenchmarkStageTracker::getState(size_t index) const
+{
+    return index < statesM.size() ? statesM[index] : BenchmarkStageState::Waiting;
+}
+
+double BenchmarkStageTracker::getStageFraction(size_t index) const
+{
+    using St = BenchmarkStageState;
+    if (index >= statesM.size())
+        return 0.0;
+    const St state = statesM[index];
+    if (state == St::Done || state == St::Skipped)
+        return 1.0;
+    const int steps = int(planM[index].steps.size());
+    if (steps == 0 || int(index) != workM || state == St::Waiting || state == St::NotRun)
+        return 0.0;
+    return std::clamp((stepM + 0.5) / steps, 0.0, 1.0);
+}
+
+void BenchmarkStageTracker::update(const BenchmarkProgress& progress)
+{
+    using St = BenchmarkStageState;
+    const int index = progress.stageIndex;
+    if (index < 0 || index >= int(planM.size()))
+        return;
+    if (!progress.cleaningUp)
+    {
+        if (!progress.skipped)
+            skippedM[index] = false;
+        workM = index;
+        stepM = progress.stageStep;
+    }
+    // the cleanup also follows a cancel or an error, which leave the stage
+    // they ended in to finish(); after the last step every stage is done
+    const bool complete = workM == int(planM.size()) - 2
+        && stepM + 1 >= int(planM[workM].steps.size());
+    const int passed = progress.cleaningUp && !complete ? workM : index;
+    for (int i = 0; i < passed; ++i)
+    {
+        if (statesM[i] == St::Waiting || statesM[i] == St::Running)
+            statesM[i] = skippedM[i] && !planM[i].steps.empty() ? St::Skipped : St::Done;
+    }
+    statesM[index] = St::Running;
+    currentM = index;
+    // the share stays where a cancel or an error stopped the run
+    if (passed == index)
+        fractionM = progress.fraction;
+}
+
+void BenchmarkStageTracker::finish(Outcome outcome, bool cleanupFailed)
+{
+    using St = BenchmarkStageState;
+    const int last = int(planM.size()) - 1;
+    if (last < 0)
+        return;
+    const bool complete = workM == last - 1
+        && stepM + 1 >= int(planM[workM].steps.size());
+    // an error after the last step is one of the cleanup
+    const bool workEnded = outcome == Outcome::Finished
+        || (outcome == Outcome::Failed && cleanupFailed && complete);
+    const int end = std::max(workM, 0);
+    for (int i = 0; i < last; ++i)
+    {
+        const St done = skippedM[i] && !planM[i].steps.empty() ? St::Skipped : St::Done;
+        if (workEnded || i < end)
+        {
+            if (statesM[i] != St::Done && statesM[i] != St::Skipped)
+                statesM[i] = done;
+        }
+        else if (i == end)
+            statesM[i] = outcome == Outcome::Cancelled ? St::Cancelled : St::Failed;
+        else
+            statesM[i] = St::NotRun;
+    }
+    // the cleanup runs after a cancel and after an error, too
+    statesM[last] = cleanupFailed ? St::Failed : St::Done;
+    endM = workEnded ? (outcome == Outcome::Finished ? -1 : last) : end;
+    currentM = workEnded ? last : end;
+    if (outcome == Outcome::Finished)
+        fractionM = 1.0;
 }
 
 wxString getBenchmarkCategoryName(BenchmarkCategory category)

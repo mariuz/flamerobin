@@ -595,6 +595,54 @@ struct BenchmarkMachines
 };
 
 ///
+/// The stages of a run, in the order in which they run. Every step of the
+/// runner belongs to one; the progress shows them.
+///
+enum class BenchmarkStage
+{
+    Prepare,    // the temporary database, the server, this computer
+    Connect,    // network path, connections, test tables, round trips
+    Cpu,
+    Disk,       // the commit latency and the disk tests
+    Memory,     // cache and sorting
+    Network,    // result sets, wide rows and the programming patterns
+    Users,      // one step per OLTP level
+    PageSizes,  // one step per page size, only with "Compare all page sizes"
+    Finish      // the temporary databases are dropped; no step of its own
+};
+
+/// one step of a stage in the plan of a run
+struct BenchmarkStepPlan
+{
+    // its share of the run, about its seconds in a Standard run (measured),
+    // so that the progress moves evenly and does not stand for a minute
+    double weight;
+    // a short measurement that other work on the computer would disturb;
+    // the progress keeps still while it runs
+    bool quiet;
+};
+
+struct BenchmarkStagePlan
+{
+    BenchmarkStage stage;
+    std::vector<BenchmarkStepPlan> steps;
+
+    double getWeight() const;
+};
+
+/// the state of a stage in the progress
+enum class BenchmarkStageState
+{
+    Waiting,
+    Running,
+    Done,
+    Skipped,    // every step of the stage had nothing to do in this run
+    Failed,     // the run ended with an error in this stage
+    Cancelled,  // the run was cancelled in this stage
+    NotRun      // a later stage after a cancel or an error
+};
+
+///
 /// Snapshot sent to the GUI while the benchmark runs.
 ///
 struct BenchmarkProgress
@@ -604,6 +652,61 @@ struct BenchmarkProgress
     wxString message;
     std::vector<BenchmarkResult> results;
     bool cleaningUp = false;
+    // the stage of the step in the plan of the run (Finish while cleaning up)
+    BenchmarkStage stage = BenchmarkStage::Prepare;
+    int stageIndex = 0;
+    int stageCount = 0;
+    // the step within the stage, from 0
+    int stageStep = 0;
+    int stageSteps = 0;
+    // the share of the run, by the weights of the steps (0 to 1)
+    double fraction = 0.0;
+    // the step has nothing to do in this run, e.g. the selected database
+    // that was not to be read
+    bool skipped = false;
+    // see BenchmarkStepPlan::quiet
+    bool quiet = false;
+};
+
+///
+/// Follows the progress of a run and knows the state of every stage, also
+/// after a cancel or an error.
+///
+class BenchmarkStageTracker
+{
+public:
+    enum class Outcome { Finished, Cancelled, Failed };
+
+    explicit BenchmarkStageTracker(const std::vector<BenchmarkStagePlan>& plan
+        = std::vector<BenchmarkStagePlan>());
+
+    void update(const BenchmarkProgress& progress);
+    /// the end of the run; cleanupFailed: the temporary database could not
+    /// be dropped
+    void finish(Outcome outcome, bool cleanupFailed = false);
+
+    const std::vector<BenchmarkStagePlan>& getPlan() const { return planM; }
+    BenchmarkStageState getState(size_t index) const;
+    /// the stage that runs (or ran last), -1 before the first step
+    int getCurrent() const { return currentM; }
+    /// the stage the run ended in after a cancel or an error, else -1
+    int getEndStage() const { return endM; }
+    /// the share of the run (0 to 1)
+    double getFraction() const { return fractionM; }
+    /// the share of the steps of a stage that are done (0 to 1)
+    double getStageFraction(size_t index) const;
+
+private:
+    std::vector<BenchmarkStagePlan> planM;
+    std::vector<BenchmarkStageState> statesM;
+    // whether every step of a stage so far was skipped
+    std::vector<bool> skippedM;
+    int currentM = -1;
+    int stepM = 0;
+    // the last stage before the cleanup, which an error belongs to
+    int workM = -1;
+    int endM = -1;
+    double fractionM = 0.0;
 };
 
 ///
@@ -1063,6 +1166,24 @@ wxString getBenchmarkIntensityDuration(BenchmarkIntensity intensity);
 /// minute for 50 and 250 users"
 wxString getBenchmarkDurationHint(BenchmarkIntensity intensity, bool comparePageSizes,
     bool manyUsers);
+/// the parallel clients of the OLTP levels of a run
+std::vector<int> getBenchmarkOltpLevels(const BenchmarkSettings& settings, bool manyUsers);
+/// the stages of a run with these options, in their order, each with its
+/// steps; the page sizes only when they are compared, Finish always last
+std::vector<BenchmarkStagePlan> getBenchmarkStagePlan(BenchmarkIntensity intensity,
+    bool comparePageSizes, bool manyUsers);
+/// the number of steps of a plan
+int getBenchmarkStepCount(const std::vector<BenchmarkStagePlan>& plan);
+/// the share of the run while a step runs (0 to 1): the steps before it and
+/// half of it, by their weights; Finish ends at 1
+double getBenchmarkProgressFraction(const std::vector<BenchmarkStagePlan>& plan,
+    int stageIndex, int stageStep);
+/// a short word for a stage, e.g. "Prepare", "Disk"
+wxString getBenchmarkStageWord(BenchmarkStage stage);
+/// what a stage does, e.g. "Memory and cache"
+wxString getBenchmarkStageName(BenchmarkStage stage);
+/// the state of a stage in words, e.g. "done", for screen readers
+wxString getBenchmarkStageStateName(BenchmarkStageState state);
 wxString getBenchmarkCategoryName(BenchmarkCategory category);
 /// the report shows the results in these sections, in this order
 std::vector<BenchmarkCategory> getBenchmarkReportSections();
