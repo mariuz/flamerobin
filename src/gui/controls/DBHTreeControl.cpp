@@ -91,6 +91,7 @@ private:
     bool sortDatabasesM;
     bool sortServersM;
     bool sqlKeywordsUpperCaseM;
+    int treeObjectOrderM;
     template<typename T>
     unsigned setValue(T& field, T newValue);
 protected:
@@ -153,6 +154,8 @@ void DBHTreeConfigCache::loadFromConfig()
         cfg.get("ShowSystemRoles", false));
     changes += setValue(showSystemTablesM,
         cfg.get("ShowSystemTables", false));
+    changes += setValue(treeObjectOrderM,
+        cfg.get("TreeObjectOrder", 0));
     changes += setValue(showComputedM,
         cfg.get("ShowComputed", 1));
     changes += setValue(showDomainsM,

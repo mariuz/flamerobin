@@ -616,9 +616,9 @@ const wxString Tables::getTypeName() const
     return "TABLE_COLLECTION";
 }
 
-// Global Teporal Tables collection
+// Global Temporary Tables collection
 GTTables::GTTables(DatabasePtr database)
-    : MetadataCollection<GTTable>(ntGTTs, database, _("Global Temporaries"))
+    : MetadataCollection<GTTable>(ntGTTs, database, _("Tables [Global Temporary]"))
 {
 }
 

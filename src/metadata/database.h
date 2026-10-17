@@ -282,6 +282,7 @@ private:
     bool showSystemRoles();
     bool showSystemTables();
     bool showOneNodeIndices();
+    int getTreeObjectOrder();
 
     inline void checkConnected(const wxString& operation) const;
     // Adds an explanation to a failed embedded connection that Firebird turned

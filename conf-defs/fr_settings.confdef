@@ -180,6 +180,18 @@
             <related /><!-- this moves the checkbox closer to the previous one -->
         </setting>
         <setting type="radiobox">
+            <caption>Database objects ordering in tree</caption>
+            <key>TreeObjectOrder</key>
+            <default>0</default>
+            <option>
+                <caption>Group by context alphabetically (Tables, Triggers, etc.)</caption>
+            </option>
+            <option>
+                <caption>Firebird DDL / logical order (Domains, Tables, Views, Triggers, Procedures, etc.)</caption>
+            </option>
+            <related />
+        </setting>
+        <setting type="radiobox">
             <caption>When table, view or stored procedure is activated</caption>
             <key>OnTreeActivate</key>
             <default>0</default>

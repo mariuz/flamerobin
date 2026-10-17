@@ -405,7 +405,7 @@ void Trigger::acceptVisitor(MetadataItemVisitor* visitor)
 
 // Triggers collection
 DMLTriggers::DMLTriggers(DatabasePtr database)
-    : MetadataCollection<DMLTrigger>(ntDMLTriggers, database, _("Triggers"))
+    : MetadataCollection<DMLTrigger>(ntDMLTriggers, database, _("Triggers [Table]"))
 {
 }
 
@@ -447,7 +447,7 @@ const wxString DMLTriggers::getTypeName() const
 
 // DB Triggers collection
 DBTriggers::DBTriggers(DatabasePtr database)
-    : MetadataCollection<DBTrigger>(ntDBTriggers, database, _("Database Triggers"))
+    : MetadataCollection<DBTrigger>(ntDBTriggers, database, _("Triggers [Database]"))
 {
 }
 
@@ -488,7 +488,7 @@ const wxString DBTriggers::getTypeName() const
 
 // DDL Triggers collection
 DDLTriggers::DDLTriggers(DatabasePtr database)
-    : MetadataCollection<DDLTrigger>(ntDDLTriggers, database, _("DDL Triggers"))
+    : MetadataCollection<DDLTrigger>(ntDDLTriggers, database, _("Triggers [DDL]"))
 {
 }
 

@@ -2047,56 +2047,126 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
         return;
 
     ensureChildrenLoaded();
-    //if (system && showSystemCharacterSet())
-    //    temp.push_back(characterSetsM.get());
-    
-    temp.push_back(collationsM.get());
 
-    if (getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) 
-        temp.push_back(DBTriggersM.get());
-    if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) 
-        temp.push_back(DDLTriggersM.get());
-    temp.push_back(userDomainsM.get());
-    temp.push_back(exceptionsM.get());
-    if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
-        temp.push_back(functionSQLsM.get());
-    temp.push_back(generatorsM.get());
-    if (getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) 
-        temp.push_back(GTTablesM.get());
-    
-    if (showOneNodeIndices() && showSystemIndices())
-        temp.push_back(indicesM.get());
-    else
-        temp.push_back(usrIndicesM.get());
+    auto setCaptionIfChanged = [](MetadataItem* item, const wxString& caption)
+    {
+        if (item && item->getName_() != caption)
+            item->setName_(caption);
+    };
 
-    if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) 
-        temp.push_back(packagesM.get());
-    temp.push_back(proceduresM.get());
-    temp.push_back(rolesM.get());
-    // Only push back system objects when they should be shown
-    if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
-        if (system && showSystemPackages())
-            temp.push_back(sysPackagesM.get());
+    if (getTreeObjectOrder() == 1)
+    {
+        // Firebird DDL / logical order
+        setCaptionIfChanged(GTTablesM.get(), _("Global Temporary Tables"));
+        setCaptionIfChanged(DMLtriggersM.get(), _("Table Triggers"));
+        setCaptionIfChanged(DDLTriggersM.get(), _("DDL Triggers"));
+        setCaptionIfChanged(DBTriggersM.get(), _("Database Triggers"));
+
+        if (getInfo().isFB60OrHigher())
+            temp.push_back(schemasM.get());
+        temp.push_back(userDomainsM.get());
+        temp.push_back(tablesM.get());
+        if (getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
+            temp.push_back(GTTablesM.get());
+
+        if (showOneNodeIndices() && showSystemIndices())
+            temp.push_back(indicesM.get());
+        else
+            temp.push_back(usrIndicesM.get());
+
+        temp.push_back(viewsM.get());
+        temp.push_back(DMLtriggersM.get());
+        if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+            temp.push_back(DDLTriggersM.get());
+        if (getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
+            temp.push_back(DBTriggersM.get());
+        temp.push_back(proceduresM.get());
+        if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+            temp.push_back(functionSQLsM.get());
+        temp.push_back(UDFsM.get());
+        if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+            temp.push_back(packagesM.get());
+        temp.push_back(generatorsM.get());
+        temp.push_back(exceptionsM.get());
+        temp.push_back(collationsM.get());
+        if (getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
+            temp.push_back(replicationM.get());
+        if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+            temp.push_back(usersM.get());
+        temp.push_back(rolesM.get());
+
+        // Only push back system objects when they should be shown
+        if (system && showSystemDomains())
+            temp.push_back(sysDomainsM.get());
+        if (system && showSystemTables())
+            temp.push_back(sysTablesM.get());
+        if (system && showSystemIndices() && !showOneNodeIndices())
+            temp.push_back(sysIndicesM.get());
+        if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        {
+            if (system && showSystemPackages())
+                temp.push_back(sysPackagesM.get());
+        }
+        if (system && showSystemRoles())
+            temp.push_back(sysRolesM.get());
     }
-    if (system && showSystemDomains())
-        temp.push_back(sysDomainsM.get());
-    if (system && showSystemIndices() && !showOneNodeIndices())
-        temp.push_back(sysIndicesM.get());
-    if (system && showSystemRoles())
-        temp.push_back(sysRolesM.get());
-    if (system && showSystemTables())
-        temp.push_back(sysTablesM.get());
-    temp.push_back(tablesM.get());
-    if (getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
-        temp.push_back(replicationM.get());
-    if (getInfo().isFB60OrHigher())
-        temp.push_back(schemasM.get());
-    temp.push_back(DMLtriggersM.get());
-    if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
-        temp.push_back(usersM.get());
-    temp.push_back(UDFsM.get());
-    temp.push_back(viewsM.get());
+    else
+    {
+        // Context-grouped alphabetical order
+        setCaptionIfChanged(GTTablesM.get(), _("Tables [Global Temporary]"));
+        setCaptionIfChanged(DBTriggersM.get(), _("Triggers [Database]"));
+        setCaptionIfChanged(DDLTriggersM.get(), _("Triggers [DDL]"));
+        setCaptionIfChanged(DMLtriggersM.get(), _("Triggers [Table]"));
 
+        temp.push_back(collationsM.get());
+        temp.push_back(userDomainsM.get());
+        temp.push_back(exceptionsM.get());
+        if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+            temp.push_back(functionSQLsM.get());
+
+        if (showOneNodeIndices() && showSystemIndices())
+            temp.push_back(indicesM.get());
+        else
+            temp.push_back(usrIndicesM.get());
+
+        if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+            temp.push_back(packagesM.get());
+        temp.push_back(proceduresM.get());
+        if (getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
+            temp.push_back(replicationM.get());
+        temp.push_back(rolesM.get());
+        if (getInfo().isFB60OrHigher())
+            temp.push_back(schemasM.get());
+        temp.push_back(generatorsM.get());
+
+        // Only push back system objects when they should be shown
+        if (system && showSystemDomains())
+            temp.push_back(sysDomainsM.get());
+        if (system && showSystemIndices() && !showOneNodeIndices())
+            temp.push_back(sysIndicesM.get());
+        if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        {
+            if (system && showSystemPackages())
+                temp.push_back(sysPackagesM.get());
+        }
+        if (system && showSystemRoles())
+            temp.push_back(sysRolesM.get());
+        if (system && showSystemTables())
+            temp.push_back(sysTablesM.get());
+
+        temp.push_back(tablesM.get());
+        if (getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
+            temp.push_back(GTTablesM.get());
+        if (getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
+            temp.push_back(DBTriggersM.get());
+        if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+            temp.push_back(DDLTriggersM.get());
+        temp.push_back(DMLtriggersM.get());
+        temp.push_back(UDFsM.get());
+        if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+            temp.push_back(usersM.get());
+        temp.push_back(viewsM.get());
+    }
 }
 
 void Database::loadChildren()
@@ -2635,6 +2705,17 @@ bool Database::showOneNodeIndices()
         b = config().get(SHOW_ONENODEINDICES, true);
 
     return b;
+}
+
+int Database::getTreeObjectOrder()
+{
+    const wxString TREE_OBJECT_ORDER = "TreeObjectOrder";
+
+    int order = 0;
+    if (!DatabaseConfig(this, config()).getValue(TREE_OBJECT_ORDER, order))
+        order = config().get(TREE_OBJECT_ORDER, 0);
+
+    return order;
 }
 
 wxString mapConnectionCharsetToSystemCharset(const wxString& connectionCharset)

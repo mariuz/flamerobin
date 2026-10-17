@@ -1185,7 +1185,8 @@ void MainFrame::OnMenuDatabasePreferences(wxCommandEvent& WXUNUSED(event))
     if (pd.isOk() && pd.loadFromTargetConfig())
     {
         pd.selectPage(0);
-        pd.ShowModal();
+        if (pd.ShowModal() == wxID_OK)
+            d->notifyObservers();
     }
 }
 
