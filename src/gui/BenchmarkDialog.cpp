@@ -106,6 +106,16 @@ wxString getTargetHint(BenchmarkTarget target)
     }
 }
 
+// repaints a window and all its children: a child that was shown or moved
+// after a layout keeps its old picture otherwise, until the mouse passes it
+void refreshTree(wxWindow* window)
+{
+    window->Refresh(true);
+    const wxWindowList& children = window->GetChildren();
+    for (wxWindowList::const_iterator it = children.begin(); it != children.end(); ++it)
+        refreshTree(*it);
+}
+
 // an explaining text, quieter than a label; one that is cut with an
 // ellipsis where the dialog is narrow does not make the dialog wider
 wxStaticText* createHintText(wxWindow* parent, const wxString& text, bool ellipsize = false)
@@ -897,6 +907,7 @@ void BenchmarkDialog::layoutAdvanced()
         SetSize(rect);
     }
     panel->Layout();
+    refreshTree(panel);
 }
 
 void BenchmarkDialog::OnTargetChanged(wxCommandEvent& WXUNUSED(event))
@@ -1252,6 +1263,8 @@ void BenchmarkDialog::OnStart(wxCommandEvent& WXUNUSED(event))
     // the settings cannot be changed during the run; the progress gets
     // their room
     showAdvanced(false);
+    // the settings make room for the progress, as the comment above says
+    showSettings(false);
     startTimeM = std::chrono::steady_clock::now();
     panel_progress->start(runnerM->getStagePlan());
     appendLog(wxString::Format(_("Target: %s"), params.targetDescription));
@@ -1497,6 +1510,7 @@ void BenchmarkDialog::showSettings(bool show)
     }
     else
         getControlsPanel()->Layout();
+    refreshTree(getControlsPanel());
 }
 
 void BenchmarkDialog::addResultTab(int id)
