@@ -43,6 +43,7 @@
 #include "core/Subject.h"
 #include "core/URIProcessor.h"
 #include "engine/db/DatabaseBackend.h"
+#include "engine/BenchmarkResults.h"
 #include "engine/db/DatabaseFactory.h"
 #include "frutils.h"
 #include "gui/AboutBox.h"
@@ -161,7 +162,8 @@ public:
 MainFrame::MainFrame(wxWindow* parent, int id, const wxString& title,
         const wxPoint& pos, const wxSize& size, long style)
     : BaseFrame(parent, id, title, pos, size, style, "FlameRobin_main"),
-        rootM(new Root()), databaseMenuFixedItemsM(0)
+        rootM(new Root()), benchmarkResultsM(new fr::BenchmarkResultStore()),
+        databaseMenuFixedItemsM(0)
 {
     wxArtProvider::Push(new ArtProvider);
 
@@ -802,6 +804,10 @@ void MainFrame::OnTreeItemActivate(wxTreeEvent& event)
             treeMainM->Expand(item);
     }
 #endif
+}
+
+MainFrame::~MainFrame()
+{
 }
 
 bool MainFrame::doCanClose()
@@ -2891,7 +2897,7 @@ void MainFrame::OnMenuBenchmarkTest(wxCommandEvent& WXUNUSED(event))
     // works in its own temporary database. Without a selected database,
     // this computer can be tested without a login.
     DatabasePtr db = getDatabase(treeMainM->getSelectedMetadataItem());
-    BenchmarkDialog bd(this, db.get());
+    BenchmarkDialog bd(this, db.get(), *benchmarkResultsM);
     bd.ShowModal();
 }
 

@@ -28,28 +28,26 @@
 
 #include <wx/arrstr.h>
 #include <wx/clipbrd.h>
-#include <wx/collpane.h>
+#include <wx/collheaderctrl.h>
 #include <wx/dir.h>
+#include <wx/display.h>
 #include <wx/ffile.h>
 #include <wx/filename.h>
-#if wxUSE_WEBVIEW
-#include <wx/fs_mem.h>
-#include <wx/webview.h>
-#include <wx/webviewfshandler.h>
-#ifdef __WXMSW__
-// WIN32_LEAN_AND_MEAN leaves out the COM declarations that exdisp.h needs
-#include <ole2.h>
-#include <exdisp.h>
-#endif
-#endif
+#include <wx/popupwin.h>
+#include <wx/simplebook.h>
+#include <wx/statline.h>
 
 #include <algorithm>
+#include <cmath>
 
 #include "config/Config.h"
 #include "core/StringUtils.h"
 #include "engine/db/IDatabase.h"
+#include "gui/BenchmarkCompareDialog.h"
 #include "gui/BenchmarkDialog.h"
-#include "gui/FRStyleManager.h"
+#include "gui/BenchmarkProgressPanel.h"
+#include "gui/BenchmarkReportPage.h"
+#include "gui/BenchmarkResultsView.h"
 #include "gui/StyleGuide.h"
 #include "gui/UsernamePasswordDialog.h"
 #include "MasterPassword.h"
@@ -60,32 +58,172 @@ namespace
 
 enum
 {
-    ID_radio_target = 4101,
+    ID_choice_target = 4101,
     ID_button_start,
     ID_button_cancel,
     ID_button_copy,
     ID_button_save,
     ID_button_browser,
     ID_button_earlier_browse,
+    ID_choice_earlier,
     ID_button_compare,
+    ID_button_open,
     ID_check_private,
     ID_choice_install,
-    ID_collapse_advanced,
-    ID_timer
+    ID_header_advanced
 };
 
-enum
+using ResultsView = BenchmarkResultsView;
+
+using fr::BenchmarkTarget;
+
+wxString getTargetName(BenchmarkTarget target)
 {
-    TargetRegistered = 0,
-    TargetThisComputer,     // embedded: no server connection, no login
-    TargetCustom
+    switch (target)
+    {
+        case BenchmarkTarget::Registered:
+            return _("Server of the selected database");
+        case BenchmarkTarget::ThisComputer:
+            return _("This computer (embedded Firebird)");
+        case BenchmarkTarget::OtherServer:
+        default:
+            return _("Another Firebird server");
+    }
+}
+
+// the short line next to the list of targets
+wxString getTargetHint(BenchmarkTarget target)
+{
+    switch (target)
+    {
+        case BenchmarkTarget::Registered:
+            return _("Uses the login of the registration.");
+        case BenchmarkTarget::ThisComputer:
+            return _("No server or login needed.");
+        case BenchmarkTarget::OtherServer:
+        default:
+            return _("Needs a login that may create databases.");
+    }
+}
+
+// repaints a window and all its children: a child that was shown or moved
+// after a layout keeps its old picture otherwise, until the mouse passes it
+void refreshTree(wxWindow* window)
+{
+    window->Refresh(true);
+    const wxWindowList& children = window->GetChildren();
+    for (wxWindowList::const_iterator it = children.begin(); it != children.end(); ++it)
+        refreshTree(*it);
+}
+
+// an explaining text, quieter than a label; one that is cut with an
+// ellipsis where the dialog is narrow does not make the dialog wider
+wxStaticText* createHintText(wxWindow* parent, const wxString& text, bool ellipsize = false)
+{
+    wxStaticText* label = new wxStaticText(parent, wxID_ANY, text, wxDefaultPosition,
+        wxDefaultSize, ellipsize ? wxST_ELLIPSIZE_END | wxST_NO_AUTORESIZE : 0);
+    // between the text and the background, nearer to the text
+    const wxColour foreground = parent->GetForegroundColour();
+    const wxColour background = parent->GetBackgroundColour();
+    label->SetForegroundColour(getReadableBenchmarkColour(mixBenchmarkColours(foreground,
+        background, 0.68), foreground, background));
+    if (ellipsize)
+        label->SetMinSize(wxSize(parent->FromDIP(40), -1));
+    return label;
+}
+
+// the style of the report in the dialog: dark where the system colours of
+// the dialog are dark, also when FlameRobin chose its dark mode itself
+// (wxWidgets 3.3 and later), so that the report looks like the dialog
+const char* getReportStyle()
+{
+    return wxSystemSettings::GetAppearance().IsUsingDarkBackground() ? "dark" : "light";
+}
+
+// the message after "Copy as Markdown"
+wxString getCopiedMessage()
+{
+    return _("Copied as Markdown.");
+}
+
+// the explanation behind a "?": a small window below it with a title and
+// paragraphs of wrapped text, each with an optional term in bold above it,
+// in the colours of the text fields of the system (so it is readable in
+// light and dark mode) with a quiet frame. It closes with a click
+// elsewhere, and with Escape and Tab (BenchmarkDialog::OnCharHook()).
+class HelpPopup : public wxPopupTransientWindow
+{
+public:
+    HelpPopup(wxWindow* parent, wxWindow* button, const wxString& title,
+        const std::vector<std::pair<wxString, wxString>>& items);
+    wxWindow* getButton() const { return buttonM; }
+    // whether it was closed just now: the click on its "?" that closed it
+    // must not open it again
+    bool closedJustNow() const;
+
+protected:
+    virtual void OnDismiss() override;
+
+private:
+    wxWindow* buttonM;
+    wxLongLong closedM = 0;
 };
+
+HelpPopup::HelpPopup(wxWindow* parent, wxWindow* button, const wxString& title,
+    const std::vector<std::pair<wxString, wxString>>& items)
+    : wxPopupTransientWindow(parent, wxBORDER_NONE), buttonM(button)
+{
+    // on the screen of the "?" before anything is laid out: with another
+    // resolution than the first screen its texts would be wrapped too wide
+    Move(button->GetScreenPosition());
+    const wxColour background = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
+    const wxColour foreground = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT);
+    // the frame is the popup itself, one pixel around its panel
+    SetBackgroundColour(mixBenchmarkColours(foreground, background, 0.4));
+    wxPanel* panel = new wxPanel(this);
+    panel->SetBackgroundColour(background);
+    panel->SetForegroundColour(foreground);
+    const wxFont bold = panel->GetFont().Bold();
+    wxBoxSizer* sizerText = new wxBoxSizer(wxVERTICAL);
+    auto addText = [this, panel, &foreground, sizerText](const wxString& text,
+        const wxFont& font, int below)
+    {
+        wxStaticText* label = new wxStaticText(panel, wxID_ANY, text);
+        if (font.IsOk())
+            label->SetFont(font);
+        label->SetForegroundColour(foreground);
+        label->Wrap(FromDIP(360));
+        sizerText->Add(label, 0, wxBOTTOM, below);
+    };
+    addText(title, bold.Larger(), FromDIP(8));
+    for (size_t i = 0; i < items.size(); ++i)
+    {
+        if (!items[i].first.empty())
+            addText(items[i].first, bold, FromDIP(1));
+        addText(items[i].second, wxNullFont,
+            i + 1 < items.size() ? FromDIP(8) : 0);
+    }
+    wxBoxSizer* sizerPanel = new wxBoxSizer(wxVERTICAL);
+    sizerPanel->Add(sizerText, 1, wxEXPAND | wxALL, FromDIP(12));
+    panel->SetSizer(sizerPanel);
+    wxBoxSizer* sizerFrame = new wxBoxSizer(wxVERTICAL);
+    sizerFrame->Add(panel, 1, wxEXPAND | wxALL, 1);
+    SetSizerAndFit(sizerFrame);
+}
+
+bool HelpPopup::closedJustNow() const
+{
+    return !IsShown() && closedM != 0 && wxGetUTCTimeMillis() - closedM < 300;
+}
+
+void HelpPopup::OnDismiss()
+{
+    closedM = wxGetUTCTimeMillis();
+}
 
 const wxString pendingDatabasesKey = "BenchmarkPendingDatabases";
 const wxString earlierFileKey = "BenchmarkCompareWithFile";
 const wxString hidePrivateKey = "BenchmarkHidePrivateInformation";
-// the pages for "Open in browser" in the temporary directory
-const wxString browserFilePrefix = "flamerobin-benchmark-";
 
 // the inverse of wx2std()
 wxString toWxString(const std::string& s)
@@ -93,223 +231,60 @@ wxString toWxString(const std::string& s)
     return wxString(s.c_str(), *wxConvCurrent);
 }
 
-#if wxUSE_WEBVIEW
-// on Windows Edge (WebView2) where its runtime is installed, then Internet
-// Explorer, which shows the report in a simpler form; nullptr if there is no
-// web view, the report is shown as text then
-wxWebView* createReportView(wxWindow* parent, wxString& backend)
-{
-    const char* const backends[] = {
-#ifdef __WXMSW__
-        wxWebViewBackendEdge, wxWebViewBackendIE
-#else
-        wxWebViewBackendDefault
-#endif
-    };
-    for (const char* b : backends)
-    {
-        if (!wxWebView::IsBackendAvailable(b))
-            continue;
-        if (wxWebView* view = wxWebView::New(parent, wxID_ANY, wxWebViewDefaultURLStr,
-            wxDefaultPosition, wxDefaultSize, b))
-        {
-            backend = b;
-            return view;
-        }
-    }
-    return nullptr;
-}
-#endif
-
 } // namespace
-
-#if wxUSE_WEBVIEW
-// Internet Explorer chooses the mode of a page, and with it how much of the
-// style sheet it knows, when it loads the page. SetPage() writes into the
-// blank page that was loaded before, which stays in the mode of Internet
-// Explorer 7 or 8, whatever the page says. So that the report gets the mode
-// of Internet Explorer 11, it is loaded from memory, if that fails from a
-// temporary file, and only then written with SetPage(); no setting of the
-// system is changed. The other web views simply get the page.
-class BenchmarkReportPage
-{
-public:
-    BenchmarkReportPage(wxWebView* view, bool internetExplorer);
-    // removes the pages from memory and disk
-    ~BenchmarkReportPage();
-    void show(const wxString& html);
-
-private:
-    wxWebView* viewM;
-    bool loadM;
-    // the page that is shown and the file name in its URL
-    wxString htmlM;
-    wxString nameM;
-    bool fromFileM = false;
-    // the earlier pages stay until the end: Internet Explorer may still be
-    // reading one, and wxMemoryFSHandler lends it the memory of the page
-    std::vector<wxString> memoryFilesM;
-    std::vector<wxString> tempFilesM;
-
-    void showFromFile();
-    bool load(const wxString& url);
-    void OnNavigating(wxWebViewEvent& event);
-    void OnError(wxWebViewEvent& event);
-};
-
-BenchmarkReportPage::BenchmarkReportPage(wxWebView* view, bool internetExplorer)
-    : viewM(view), loadM(internetExplorer)
-{
-    if (!loadM)
-        return;
-    // one handler for the whole program, like the other file systems
-    if (!wxFileSystem::HasHandlerForPath("memory:report.html"))
-        wxFileSystem::AddHandler(new wxMemoryFSHandler);
-    viewM->RegisterHandler(wxSharedPtr<wxWebViewHandler>(new wxWebViewFSHandler("memory")));
-    viewM->Bind(wxEVT_WEBVIEW_NAVIGATING, &BenchmarkReportPage::OnNavigating, this);
-    viewM->Bind(wxEVT_WEBVIEW_ERROR, &BenchmarkReportPage::OnError, this);
-}
-
-BenchmarkReportPage::~BenchmarkReportPage()
-{
-    if (!loadM)
-        return;
-    viewM->Unbind(wxEVT_WEBVIEW_NAVIGATING, &BenchmarkReportPage::OnNavigating, this);
-    viewM->Unbind(wxEVT_WEBVIEW_ERROR, &BenchmarkReportPage::OnError, this);
-    for (const wxString& name : memoryFilesM)
-        wxMemoryFSHandler::RemoveFile(name);
-    wxLogNull noErrors;
-    for (const wxString& path : tempFilesM)
-        wxRemoveFile(path);
-}
-
-void BenchmarkReportPage::show(const wxString& html)
-{
-    if (!loadM)
-    {
-        viewM->SetPage(html, wxEmptyString);
-        return;
-    }
-    // a new name for every page, so that no cached page is shown
-    static int pageCount = 0;
-    htmlM = html;
-    nameM = wxString::Format("flamerobin-benchmark-%d.html", ++pageCount);
-    fromFileM = false;
-    const wxScopedCharBuffer utf8 = html.utf8_str();
-    wxMemoryFSHandler::AddFileWithMimeType(nameM, utf8.data(), utf8.length(), "text/html");
-    memoryFilesM.push_back(nameM);
-    if (!load("memory:" + nameM))
-        showFromFile();
-}
-
-void BenchmarkReportPage::showFromFile()
-{
-    // the same names as the pages for "Open in browser", so that pages
-    // left by a crash are removed as well
-    static int fileCount = 0;
-    const wxFileName path(wxFileName::GetTempDir(), browserFilePrefix
-        + wxString::Format("view-%lu-%d.html", wxGetProcessId(), ++fileCount));
-    fromFileM = true;
-    wxLogNull noErrors;
-    wxFFile file(path.GetFullPath(), "w");
-    if (file.IsOpened())
-    {
-        tempFilesM.push_back(path.GetFullPath());
-        if (file.Write(htmlM, wxConvUTF8) && file.Close())
-        {
-            nameM = path.GetFullName();
-            if (load(wxFileName::FileNameToURL(path)))
-                return;
-        }
-    }
-    nameM.clear();
-    viewM->SetPage(htmlM, wxEmptyString);
-}
-
-// false if Internet Explorer refuses to load the page
-bool BenchmarkReportPage::load(const wxString& url)
-{
-#ifdef __WXMSW__
-    // as wxWebViewIE::LoadURL(), which cannot tell whether it worked
-    IWebBrowser2* browser = static_cast<IWebBrowser2*>(viewM->GetNativeBackend());
-    if (!browser)
-        return false;
-    BSTR target = ::SysAllocString(url.wc_str());
-    VARIANT none;
-    ::VariantInit(&none);
-    const HRESULT result = browser->Navigate(target, &none, &none, &none, &none);
-    ::SysFreeString(target);
-    return SUCCEEDED(result);
-#else
-    viewM->LoadURL(url);
-    return true;
-#endif
-}
-
-void BenchmarkReportPage::OnNavigating(wxWebViewEvent& event)
-{
-    // only to the page that is shown now: the back key would show an
-    // earlier page, maybe one with the private information
-    if (nameM.empty() || !event.GetURL().Contains(nameM))
-        event.Veto();
-    else
-        event.Skip();
-}
-
-void BenchmarkReportPage::OnError(wxWebViewEvent& event)
-{
-    // only for the page that is shown now; it replaces the error page
-    if (nameM.empty() || !event.GetURL().Contains(nameM))
-    {
-        event.Skip();
-        return;
-    }
-    // Internet Explorer does not navigate from within this event
-    const wxString name = nameM;
-    viewM->CallAfter([this, name]()
-    {
-        // unless another page was shown in the meantime
-        if (name != nameM)
-            return;
-        if (!fromFileM)
-            showFromFile();
-        else
-        {
-            nameM.clear();
-            viewM->SetPage(htmlM, wxEmptyString);
-        }
-    });
-}
-#endif
 
 BEGIN_EVENT_TABLE(BenchmarkDialog, BaseDialog)
     EVT_BUTTON(ID_button_start, BenchmarkDialog::OnStart)
     EVT_BUTTON(ID_button_cancel, BenchmarkDialog::OnCancel)
-    EVT_BUTTON(ID_button_copy, BenchmarkDialog::OnCopyMarkdown)
-    EVT_BUTTON(ID_button_save, BenchmarkDialog::OnSaveReport)
-    EVT_BUTTON(ID_button_browser, BenchmarkDialog::OnOpenInBrowser)
+    EVT_BUTTON(ResultsView::ID_button_copy, BenchmarkDialog::OnCopyMarkdown)
+    EVT_BUTTON(ResultsView::ID_button_save, BenchmarkDialog::OnSaveReport)
+    EVT_BUTTON(ResultsView::ID_button_browser, BenchmarkDialog::OnOpenInBrowser)
+    EVT_BUTTON(ResultsView::ID_button_close_result, BenchmarkDialog::OnCloseResult)
+    EVT_MENU(ResultsView::ID_button_close_result, BenchmarkDialog::OnCloseResult)
+    EVT_MENU(BenchmarkDialog::ID_menu_close, BenchmarkDialog::OnResultMenu)
+    EVT_MENU(BenchmarkDialog::ID_menu_close_others, BenchmarkDialog::OnResultMenu)
+    EVT_MENU(BenchmarkDialog::ID_menu_close_all, BenchmarkDialog::OnResultMenu)
+    EVT_MENU(BenchmarkDialog::ID_menu_save, BenchmarkDialog::OnResultMenu)
     EVT_BUTTON(ID_button_earlier_browse, BenchmarkDialog::OnBrowseEarlier)
-    EVT_BUTTON(ID_button_compare, BenchmarkDialog::OnCompareReports)
+    EVT_BUTTON(ID_button_compare, BenchmarkDialog::OnCompare)
+    EVT_BUTTON(ID_button_open, BenchmarkDialog::OnOpen)
+    EVT_MENU(ID_button_open, BenchmarkDialog::OnOpen)
+    EVT_CHOICE(ID_choice_earlier, BenchmarkDialog::OnEarlierChanged)
+    EVT_MENU(BenchmarkDialog::ID_menu_compare, BenchmarkDialog::OnResultMenu)
     EVT_CHECKBOX(ID_check_private, BenchmarkDialog::OnPrivateChanged)
     EVT_CHOICE(ID_choice_install, BenchmarkDialog::OnTargetChanged)
-    EVT_COLLAPSIBLEPANE_CHANGED(ID_collapse_advanced, BenchmarkDialog::OnAdvancedToggled)
+    EVT_COLLAPSIBLEHEADER_CHANGED(ID_header_advanced, BenchmarkDialog::OnAdvancedToggled)
     EVT_BUTTON(wxID_CANCEL, BenchmarkDialog::OnCloseButton)
-    EVT_RADIOBOX(ID_radio_target, BenchmarkDialog::OnTargetChanged)
-    EVT_TIMER(ID_timer, BenchmarkDialog::OnTimer)
+    EVT_CHOICE(ID_choice_target, BenchmarkDialog::OnTargetChanged)
 END_EVENT_TABLE()
 
-BenchmarkDialog::BenchmarkDialog(wxWindow* parent, Database* db)
-    : BaseDialog(parent, -1, wxEmptyString), databaseM(db),
-      timerM(this, ID_timer)
+BenchmarkDialog::BenchmarkDialog(wxWindow* parent, Database* db,
+    fr::BenchmarkResultStore& results)
+    : BaseDialog(parent, -1, wxEmptyString), databaseM(db), resultsM(results)
 {
     SetTitle(databaseM ? wxString::Format(_("Performance Benchmark & Diagnosis - %s"),
         databaseM->getName_()) : _("Performance Benchmark & Diagnosis"));
     createControls();
+    // the results of earlier tests stay until they are closed; the dialog
+    // opens with the settings, for a new test
+    for (const fr::BenchmarkResultEntry& entry : resultsM.getEntries())
+        addResultTab(entry.id);
+    resultsM.select(0);
     updateControls();
     // BaseDialog connects its own close handler dynamically, which ends a
     // modal dialog at once; this one is bound later, so it runs first and
     // can wait for the cleanup of a running test
     Bind(wxEVT_CLOSE_WINDOW, &BenchmarkDialog::OnClose, this);
+    Bind(wxEVT_CHAR_HOOK, &BenchmarkDialog::OnCharHook, this);
+    // Ctrl+W closes the shown result, also from the report view; Ctrl+O
+    // opens a saved report
+    wxAcceleratorEntry keys[] = {
+        wxAcceleratorEntry(wxACCEL_CTRL, 'W', BenchmarkResultsView::ID_button_close_result),
+        wxAcceleratorEntry(wxACCEL_CTRL, 'O', ID_button_open)
+    };
+    SetAcceleratorTable(wxAcceleratorTable(2, keys));
+    // the settings start with the target, not with the first text field
+    CallAfter([this]() { choice_target->SetFocus(); });
     CallAfter([this]() { dropPendingDatabases(); });
 }
 
@@ -329,164 +304,390 @@ const wxString BenchmarkDialog::getName() const
     return "BenchmarkDialog";
 }
 
+const wxString BenchmarkDialog::getStorageName() const
+{
+    // the size saved before the settings were compact is at least that of
+    // the old layout (1104 x 880), which is too large for small screens
+    return "BenchmarkDialogCompact";
+}
+
+wxButton* BenchmarkDialog::createHelpButton(wxWindow* parent, const wxString& title,
+    const HelpItems& items)
+{
+    // a click, Space or Enter opens the explanation; a tool tip could not be
+    // reached with the keyboard or by touch
+    wxButton* button = new wxButton(parent, wxID_ANY, "?", wxDefaultPosition,
+        wxDefaultSize, wxBU_EXACTFIT | wxBORDER_NONE);
+    button->SetFont(button->GetFont().Bold());
+    // the colour of links, as readable as a label
+    const wxColour text = parent->GetForegroundColour();
+    const wxColour background = parent->GetBackgroundColour();
+    button->SetForegroundColour(getReadableBenchmarkColour(
+        wxSystemSettings::GetColour(wxSYS_COLOUR_HOTLIGHT), text, background));
+    // large enough to be hit
+    button->SetMinSize(wxSize(std::max(button->GetBestSize().x, FromDIP(24)), -1));
+    button->SetToolTip(title);
+    button->Bind(wxEVT_BUTTON, [this, button, title, items](wxCommandEvent&)
+    {
+        showHelp(button, title, items);
+    });
+    return button;
+}
+
+void BenchmarkDialog::showHelp(wxWindow* button, const wxString& title,
+    const HelpItems& items)
+{
+    if (HelpPopup* last = static_cast<HelpPopup*>(popup_help))
+    {
+        // a click on the "?" of the open explanation closes it: the click
+        // has already done that when it gets here
+        if (last->IsShown())
+            last->Dismiss();
+        else if (last->getButton() == button && last->closedJustNow())
+            return;
+        last->Destroy();
+        popup_help = nullptr;
+    }
+    HelpPopup* popup = new HelpPopup(this, button, title, items);
+    popup_help = popup;
+    // below the "?"; its right edge at the right edge of the "?" if it would
+    // stand out of the dialog on the right
+    const wxRect rectButton = button->GetScreenRect();
+    const wxRect rectDialog = GetScreenRect();
+    const int width = popup->GetSize().x;
+    int x = rectButton.x;
+    if (x + width > rectDialog.GetRight())
+        x = std::max(rectDialog.x, rectButton.GetRight() + 1 - width);
+    popup->Position(wxPoint(x, rectButton.y), wxSize(0, rectButton.height));
+    popup->Popup();
+}
+
+void BenchmarkDialog::OnCharHook(wxKeyEvent& event)
+{
+    const int key = event.GetKeyCode();
+    // the next or previous tab, also where the report view has the focus,
+    // which would keep these keys for itself
+    if (event.GetModifiers() == wxMOD_CONTROL || event.GetModifiers()
+        == (wxMOD_CONTROL | wxMOD_SHIFT))
+    {
+        const bool shift = event.ShiftDown();
+        if (key == WXK_TAB || ((key == WXK_PAGEUP || key == WXK_PAGEDOWN) && !shift))
+        {
+            view_results->selectNext(key == WXK_TAB ? !shift : key == WXK_PAGEDOWN);
+            return;
+        }
+    }
+    // Escape closes an open explanation, not the dialog; Tab closes it and
+    // moves on
+    if (!popup_help || !popup_help->IsShown() || (key != WXK_ESCAPE && key != WXK_TAB))
+    {
+        event.Skip();
+        return;
+    }
+    popup_help->Dismiss();
+    wxWindow* button = static_cast<HelpPopup*>(popup_help)->getButton();
+    // the "?" keeps the focus (Windows), or the popup took it (GTK)
+    if (wxWindow::FindFocus() == button)
+    {
+        if (key == WXK_TAB)
+            event.Skip();
+        return;
+    }
+    button->SetFocus();
+    if (key == WXK_TAB)
+    {
+        // once the focus is back
+        const int direction = event.ShiftDown() ? wxNavigationKeyEvent::IsBackward
+            : wxNavigationKeyEvent::IsForward;
+        CallAfter([button, direction]() { button->Navigate(direction); });
+    }
+}
+
 void BenchmarkDialog::createControls()
 {
     wxPanel* panel = getControlsPanel();
     wxBoxSizer* sizerMain = new wxBoxSizer(wxVERTICAL);
+    const int gap = FromDIP(6);
+    // between the lines of the settings
+    const int lineGap = FromDIP(8);
 
     // the settings; after a run they make room for the report
     wxBoxSizer* sizerSettings = new wxBoxSizer(wxVERTICAL);
     sizerSettingsM = sizerSettings;
-    wxStaticText* info = new wxStaticText(panel, wxID_ANY,
-        _("The test creates a temporary database (FR_BENCHMARK_*.FDB) in the "
-          "directory below, runs all tests in it and deletes it afterwards. No "
-          "other database is changed. The tests put load on the server for a "
-          "few minutes."));
-    info->Wrap(640);
-    sizerSettings->Add(info, 0, wxEXPAND | wxBOTTOM, 8);
+    // what happens, in one sentence; the details are behind the "?" of the
+    // target
+    sizerSettings->Add(new wxStaticText(panel, wxID_ANY, _("Creates a temporary "
+        "database in the directory below and drops it afterwards; no other database "
+        "is changed.")), 0, wxBOTTOM, FromDIP(14));
 
-    // where to test
-    wxString targets[] = {
-        _("Server of the selected database (with the login of the registration)"),
-        _("This computer, without login (uses the Firebird installed here)"),
-        _("Another Firebird server")
-    };
-    radio_target = new wxRadioBox(panel, ID_radio_target, _("What to test"),
-        wxDefaultPosition, wxDefaultSize, 3, targets, 1, wxRA_SPECIFY_COLS);
-    radio_target->SetItemToolTip(TargetThisComputer, _("Runs Firebird directly inside "
-        "FlameRobin with the engine of a Firebird installation on this computer. No "
-        "server connection, no user name and no password are needed. Tests the "
-        "hardware, the operating system and the Firebird configuration of this "
-        "computer; the network is not tested. Run it on the server itself."));
-    sizerSettings->Add(radio_target, 0, wxEXPAND | wxBOTTOM, 6);
+    // the "?" of the target first, for the width of the column of the "?";
+    // in the order of the tab key it follows the list of targets
+    wxButton* helpTarget = createHelpButton(panel, _("Where the test runs"), {
+        { getTargetName(BenchmarkTarget::Registered), _("The server of the registration, "
+            "with its login. Also measures the network to the server.") },
+        { getTargetName(BenchmarkTarget::ThisComputer), _("Runs Firebird inside FlameRobin "
+            "with the engine of an installation on this computer; no server, no login. "
+            "The network is not tested: run it on the server itself.") },
+        { getTargetName(BenchmarkTarget::OtherServer), _("A server you enter below. Its "
+            "login must be allowed to create databases.") },
+        { wxString(), _("The test creates a temporary database (FR_BENCHMARK_*.FDB), runs "
+            "in it and drops it afterwards. No other database is changed, but the server "
+            "is under load while the test runs.") } });
 
-    // the Firebird installations of this computer, for a test without login
-    wxBoxSizer* sizerInstall = new wxBoxSizer(wxHORIZONTAL);
-    sizerInstall->Add(new wxStaticText(panel, wxID_ANY, _("Firebird on this computer:")),
-        0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 6);
-    installationsM = fr::findBenchmarkFirebirdInstallations();
-    wxArrayString installations;
-    for (const auto& i : installationsM)
+    // every line has a column of labels, the fields, and a column for the
+    // "?" at the right edge: all fields start and end at the same place
+    int labelWidth = 0;
+    for (const wxString& label : { _("&Test:"), _("Host:"), _("User:"), _("&Firebird:"),
+        _("&Directory:"), _("Compa&re with:"), _("Intensity:"), _("Client library:"),
+        _("Page size:"), _("Also:") })
     {
-        wxString label = i.version.empty() ? wxString("Firebird")
-            : "Firebird " + toWxString(i.version);
-        label += " (" + toWxString(i.directory);
-        if (!i.service.empty())
-        {
-            label += ", " + (i.running ? wxString::Format(_("service %s running"),
-                toWxString(i.service)) : wxString::Format(_("service %s"),
-                toWxString(i.service)));
-        }
-        installations.Add(label + ")");
+        labelWidth = std::max(labelWidth,
+            panel->GetTextExtent(wxControl::RemoveMnemonics(label)).x);
     }
-    installations.Add(_("the client library of the advanced settings"));
-    choice_install = new wxChoice(panel, ID_choice_install, wxDefaultPosition,
-        wxDefaultSize, installations);
-    choice_install->SetSelection(0);
-    choice_install->SetToolTip(_("The engine of this installation runs the test, with "
-        "its firebird.conf. The installed server keeps running and is not changed."));
-    sizerInstall->Add(choice_install, 1, wxEXPAND);
-    sizerSettings->Add(sizerInstall, 0, wxEXPAND | wxBOTTOM, 6);
+    const int helpWidth = helpTarget->GetMinSize().x;
+    // the label is created before its fields, so that its mnemonic selects them
+    auto createLabel = [labelWidth](wxWindow* parent, const wxString& text)
+    {
+        wxStaticText* label = new wxStaticText(parent, wxID_ANY, text);
+        label->SetMinSize(wxSize(labelWidth, -1));
+        return label;
+    };
+    // the label stands next to the first of several lines of fields
+    auto createLine = [this, labelWidth, helpWidth](wxWindow* label, wxSizer* fields,
+        wxWindow* help, bool labelOnTop = false)
+    {
+        wxBoxSizer* line = new wxBoxSizer(wxHORIZONTAL);
+        if (label)
+        {
+            line->Add(label, 0, (labelOnTop ? wxALIGN_TOP : wxALIGN_CENTER_VERTICAL)
+                | wxRIGHT, FromDIP(10));
+        }
+        else
+            line->AddSpacer(labelWidth + FromDIP(10));
+        line->Add(fields, 1, wxALIGN_CENTER_VERTICAL);
+        if (help)
+            line->Add(help, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(4));
+        else
+            line->AddSpacer(helpWidth + FromDIP(4));
+        return line;
+    };
 
-    wxFlexGridSizer* sizerGrid = new wxFlexGridSizer(4, 6, 8);
-    sizerGrid->AddGrowableCol(1, 1);
+    // where to test: a list with short names, the details on a page below
+    wxStaticText* labelTarget = createLabel(panel, _("&Test:"));
+    choice_target = new wxChoice(panel, ID_choice_target);
+    for (BenchmarkTarget target : fr::getBenchmarkTargets(databaseM != nullptr))
+        choice_target->Append(getTargetName(target));
+    choice_target->SetSelection(0);
+    helpTarget->MoveAfterInTabOrder(choice_target);
+    label_target_hint = createHintText(panel, wxEmptyString, true);
+    wxBoxSizer* sizerTarget = new wxBoxSizer(wxHORIZONTAL);
+    sizerTarget->Add(choice_target, 0, wxALIGN_CENTER_VERTICAL);
+    sizerTarget->Add(label_target_hint, 1, wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(10));
+    sizerSettings->Add(createLine(labelTarget, sizerTarget, helpTarget), 0,
+        wxEXPAND | wxBOTTOM, lineGap);
 
-    text_host = new wxTextCtrl(panel, wxID_ANY, wxEmptyString);
-    text_port = new wxTextCtrl(panel, wxID_ANY, wxEmptyString,
-        wxDefaultPosition, wxSize(70, -1));
-    sizerGrid->Add(new wxStaticText(panel, wxID_ANY, _("Host:")), 0,
-        wxALIGN_CENTER_VERTICAL);
-    sizerGrid->Add(text_host, 1, wxEXPAND);
-    sizerGrid->Add(new wxStaticText(panel, wxID_ANY, _("Port:")), 0,
-        wxALIGN_CENTER_VERTICAL);
-    sizerGrid->Add(text_port, 0);
+    // one page per target, in the order of BenchmarkTarget: the pages are as
+    // high as the highest, so nothing moves when the target changes; each
+    // page is a line with its own label
+    book_target = new wxSimplebook(panel, wxID_ANY);
+    installationsM = fr::findBenchmarkFirebirdInstallations();
+    for (BenchmarkTarget target : { BenchmarkTarget::Registered,
+        BenchmarkTarget::ThisComputer, BenchmarkTarget::OtherServer })
+    {
+        const fr::BenchmarkTargetDetails details = fr::getBenchmarkTargetDetails(target);
+        wxPanel* page = new wxPanel(book_target);
+        wxBoxSizer* sizerPage = new wxBoxSizer(wxHORIZONTAL);
+        auto addLabel = [page, sizerPage, gap](const wxString& label)
+        {
+            sizerPage->Add(new wxStaticText(page, wxID_ANY, label), 0,
+                wxALIGN_CENTER_VERTICAL | wxRIGHT, gap);
+        };
+        wxStaticText* labelPage = nullptr;
+        if (details.hostAndPort)
+        {
+            labelPage = createLabel(page, _("Host:"));
+            text_host = new wxTextCtrl(page, wxID_ANY, wxEmptyString);
+            text_host->SetMinSize(wxSize(FromDIP(110), -1));
+            sizerPage->Add(text_host, 3, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(12));
+            addLabel(_("Port:"));
+            text_port = new wxTextCtrl(page, wxID_ANY, wxEmptyString);
+            text_port->SetHint("3050");
+            text_port->SetMinSize(text_port->GetSizeFromTextSize(
+                text_port->GetTextExtent("65535").x));
+            sizerPage->Add(text_port, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(12));
+        }
+        if (details.login)
+        {
+            if (labelPage)
+                addLabel(_("User:"));
+            else
+                labelPage = createLabel(page, _("User:"));
+            wxTextCtrl* user = new wxTextCtrl(page, wxID_ANY, wxEmptyString);
+            user->SetMinSize(wxSize(FromDIP(80), -1));
+            sizerPage->Add(user, 3, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(12));
+            addLabel(_("Password:"));
+            wxTextCtrl* password = new wxTextCtrl(page, wxID_ANY, wxEmptyString,
+                wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
+            password->SetMinSize(wxSize(FromDIP(80), -1));
+            sizerPage->Add(password, 2, wxALIGN_CENTER_VERTICAL);
+            if (details.loginOptional)
+            {
+                user->SetHint(_("from the registration or asked at start"));
+                sizerPage->Add(createHintText(page, _("optional")), 0,
+                    wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(10));
+            }
+            if (target == BenchmarkTarget::Registered)
+            {
+                text_user_registered = user;
+                text_password_registered = password;
+            }
+            else
+            {
+                text_user = user;
+                text_password = password;
+            }
+        }
+        if (details.installation)
+        {
+            // the Firebird installations of this computer, for a test without login
+            labelPage = createLabel(page, _("&Firebird:"));
+            wxArrayString installations;
+            for (const auto& i : installationsM)
+            {
+                wxString label = i.version.empty() ? wxString("Firebird")
+                    : "Firebird " + toWxString(i.version);
+                label += " (" + toWxString(i.directory);
+                if (!i.service.empty())
+                {
+                    label += ", " + (i.running ? wxString::Format(_("service %s running"),
+                        toWxString(i.service)) : wxString::Format(_("service %s"),
+                        toWxString(i.service)));
+                }
+                installations.Add(label + ")");
+            }
+            installations.Add(_("the client library of the advanced settings"));
+            choice_install = new wxChoice(page, ID_choice_install, wxDefaultPosition,
+                wxDefaultSize, installations);
+            choice_install->SetSelection(0);
+            // GTK makes a list as wide as its longest entry
+            choice_install->SetMinSize(wxSize(FromDIP(260), -1));
+            sizerPage->Add(choice_install, 1, wxALIGN_CENTER_VERTICAL);
+        }
+        page->SetSizer(createLine(labelPage, sizerPage, nullptr));
+        book_target->AddPage(page, wxEmptyString);
+    }
+    sizerSettings->Add(book_target, 0, wxEXPAND | wxBOTTOM, lineGap);
 
-    text_user = new wxTextCtrl(panel, wxID_ANY, wxEmptyString);
-    text_password = new wxTextCtrl(panel, wxID_ANY, wxEmptyString,
-        wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
-    text_user->SetHint(databaseM ? _("from the registration or asked at start") : wxString());
-    sizerGrid->Add(new wxStaticText(panel, wxID_ANY, _("User:")), 0,
-        wxALIGN_CENTER_VERTICAL);
-    sizerGrid->Add(text_user, 1, wxEXPAND);
-    sizerGrid->Add(new wxStaticText(panel, wxID_ANY, _("Password:")), 0,
-        wxALIGN_CENTER_VERTICAL);
-    sizerGrid->Add(text_password, 0, wxEXPAND);
-    sizerSettings->Add(sizerGrid, 0, wxEXPAND | wxBOTTOM, 6);
-
-    wxBoxSizer* sizerDir = new wxBoxSizer(wxHORIZONTAL);
-    sizerDir->Add(new wxStaticText(panel, wxID_ANY,
-        _("Directory for the temporary database (as seen by the server):")),
-        0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 6);
+    wxStaticText* labelDirectory = createLabel(panel, _("&Directory:"));
     // the directory of the selected database, so that its drive is tested
     wxString directory = databaseM ? fr::getBenchmarkDirectoryFromPath(databaseM->getPath())
         : wxString();
     text_directory = new wxTextCtrl(panel, wxID_ANY, directory.empty()
         ? wxFileName::GetTempDir() + wxFileName::GetPathSeparator() : directory);
-    text_directory->SetToolTip(_("The disk of this directory is tested. Use the "
-        "directory of your databases, so that their disk is measured."));
-    sizerDir->Add(text_directory, 1, wxEXPAND);
-    sizerSettings->Add(sizerDir, 0, wxEXPAND | wxBOTTOM, 6);
+    wxBoxSizer* sizerDir = new wxBoxSizer(wxHORIZONTAL);
+    sizerDir->Add(text_directory, 1, wxALIGN_CENTER_VERTICAL);
+    sizerSettings->Add(createLine(labelDirectory, sizerDir, createHelpButton(panel,
+        _("Directory"), { { wxString(), _("The directory of the temporary database, "
+            "as the server sees it (a path on the server). Its disk is tested, so choose "
+            "the directory of your databases.") } })), 0,
+        wxEXPAND | wxBOTTOM, lineGap);
 
-    // a saved report to compare the new run with: a single run is not
-    // judged, the comparison shows what is faster or slower and why
-    wxBoxSizer* sizerEarlier = new wxBoxSizer(wxHORIZONTAL);
-    sizerEarlier->Add(new wxStaticText(panel, wxID_ANY, _("Compare with an earlier report:")),
-        0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 6);
-    wxString earlierFile;
-    config().getValue(earlierFileKey, earlierFile);
-    text_earlier = new wxTextCtrl(panel, wxID_ANY, earlierFile);
-    text_earlier->SetHint(_("optional: a saved report (Markdown or HTML)"));
-    text_earlier->SetToolTip(_("A report saved after an earlier run, e.g. before a "
-        "change on the server, or the report of another server. The new report then "
-        "shows what got faster or slower, what is different and what could be the "
-        "reason."));
-    sizerEarlier->Add(text_earlier, 1, wxALIGN_CENTER_VERTICAL | wxRIGHT, 6);
-    sizerEarlier->Add(new wxButton(panel, ID_button_earlier_browse, _("Bro&wse...")),
-        0, wxALIGN_CENTER_VERTICAL);
-    sizerSettings->Add(sizerEarlier, 0, wxEXPAND | wxBOTTOM, 6);
-
-    wxString intensities[] = {
-        fr::getBenchmarkIntensityName(fr::BenchmarkIntensity::Quick),
-        fr::getBenchmarkIntensityName(fr::BenchmarkIntensity::Standard),
-        fr::getBenchmarkIntensityName(fr::BenchmarkIntensity::Deep)
+    // the intensities in one line, each with its duration
+    wxStaticText* labelIntensity = createLabel(panel, _("Intensity:"));
+    const wxString intensityHelp[] = {
+        _("A first impression."),
+        _("The usual choice."),
+        _("More data and up to 32 users: a thorough look at a server.")
     };
-    radio_intensity = new wxRadioBox(panel, wxID_ANY, _("Intensity"),
-        wxDefaultPosition, wxDefaultSize, 3, intensities, 3, wxRA_SPECIFY_COLS);
-    radio_intensity->SetSelection(1);
-    radio_intensity->SetItemToolTip(0, _("Less than a minute: a first impression."));
-    radio_intensity->SetItemToolTip(1, _("About two minutes: the usual choice. Compare "
-        "runs of the same intensity."));
-    radio_intensity->SetItemToolTip(2, _("Several minutes with more data and up to 32 "
-        "users: for a thorough look at a server."));
-    sizerSettings->Add(radio_intensity, 0, wxEXPAND | wxBOTTOM, 6);
+    HelpItems intensityItems;
+    wxBoxSizer* sizerIntensity = new wxBoxSizer(wxHORIZONTAL);
+    for (int i = 0; i < 3; ++i)
+    {
+        const fr::BenchmarkIntensity intensity = fr::BenchmarkIntensity(i);
+        radio_intensity[i] = new wxRadioButton(panel, wxID_ANY,
+            fr::getBenchmarkIntensityName(intensity), wxDefaultPosition, wxDefaultSize,
+            i == 0 ? wxRB_GROUP : 0);
+        radio_intensity[i]->Bind(wxEVT_RADIOBUTTON, &BenchmarkDialog::OnDurationChanged, this);
+        sizerIntensity->Add(radio_intensity[i], 0, wxALIGN_CENTER_VERTICAL);
+        sizerIntensity->Add(createHintText(panel,
+            fr::getBenchmarkIntensityDuration(intensity)), 0,
+            wxALIGN_CENTER_VERTICAL | wxLEFT, FromDIP(6));
+        if (i < 2)
+            sizerIntensity->AddSpacer(FromDIP(24));
+        intensityItems.push_back({ wxString::Format("%s (%s)",
+            fr::getBenchmarkIntensityName(intensity),
+            fr::getBenchmarkIntensityDuration(intensity)), intensityHelp[i] });
+    }
+    intensityItems.push_back({ wxString(), _("Compare only runs of the same "
+        "intensity.") });
+    radio_intensity[int(fr::BenchmarkIntensity::Standard)]->SetValue(true);
+    sizerSettings->Add(createLine(labelIntensity, sizerIntensity,
+        createHelpButton(panel, _("Intensity"), intensityItems)), 0,
+        wxEXPAND | wxBOTTOM, lineGap);
 
-    // rarely needed settings, collapsed at first
-    collapse_advanced = new wxCollapsiblePane(panel, ID_collapse_advanced,
-        _("Advanced settings"), wxDefaultPosition, wxDefaultSize,
-        wxCP_DEFAULT_STYLE | wxCP_NO_TLW_RESIZE);
-    wxWindow* advanced = collapse_advanced->GetPane();
+    // a result or a saved report to compare the new run with: a single run
+    // is not judged, the comparison shows what is faster or slower and why
+    wxStaticText* labelEarlier = createLabel(panel, _("Compa&re with:"));
+    // the last file, as before
+    config().getValue(earlierFileKey, earlierFileM);
+    if (!earlierFileM.empty() && !wxFileExists(earlierFileM))
+        earlierFileM.clear();
+    choice_earlier = new wxChoice(panel, ID_choice_earlier);
+    // GTK makes a list as wide as its longest entry
+    choice_earlier->SetMinSize(wxSize(FromDIP(200), -1));
+    wxBoxSizer* sizerEarlier = new wxBoxSizer(wxHORIZONTAL);
+    sizerEarlier->Add(choice_earlier, 1, wxALIGN_CENTER_VERTICAL | wxRIGHT, gap);
+    sizerEarlier->Add(new wxButton(panel, ID_button_earlier_browse, _("Browse...")),
+        0, wxALIGN_CENTER_VERTICAL);
+    sizerSettings->Add(createLine(labelEarlier, sizerEarlier, createHelpButton(panel,
+        _("Compare with"), { { wxString(), _("A result of this session, or a report "
+            "saved from an earlier run (Markdown or HTML), for example before a change "
+            "on the server, or from another server. It is read when the test starts.") },
+        { wxString(), _("The new report then shows what got faster or slower, what "
+            "differs and possible reasons. Choose \"No comparison\" for none.") } })),
+        0, wxEXPAND | wxBOTTOM, lineGap);
+
+    // rarely needed settings, closed at first, below a line that sets them
+    // apart; the "?" next to the heading explains all of them
+    sizerSettings->Add(new wxStaticLine(panel), 0, wxEXPAND | wxTOP | wxBOTTOM,
+        FromDIP(4));
+    header_advanced = new wxCollapsibleHeaderCtrl(panel, ID_header_advanced,
+        _("Advanced settings"));
+    wxBoxSizer* sizerAdvancedLine = new wxBoxSizer(wxHORIZONTAL);
+    sizerAdvancedLine->Add(header_advanced, 0, wxALIGN_CENTER_VERTICAL);
+    sizerAdvancedLine->Add(createHelpButton(panel, _("Advanced settings"), {
+        { _("Client library"), _("The Firebird client (fbclient) FlameRobin uses. To "
+            "test this computer without an installation, it selects the Firebird version "
+            "and needs the engine plugin next to it.") },
+        { _("Page size"), _("Of the temporary database; only the storage and cache tests "
+            "depend on it. Automatic uses the page size of the selected database, "
+            "otherwise 8192 (Firebird 3: at most 16384). Comparing all page sizes "
+            "repeats these tests for each one: a few minutes more.") },
+        { _("Read the settings of the selected database"), _("Reads its header, "
+            "MON$DATABASE and RDB$DATABASE, on its own server only. Nothing is "
+            "written.") },
+        { _("Test 50 and 250 users at once"), _("Two more rounds with that many "
+            "connections at once: about half a minute more.") } }), 0,
+        wxALIGN_CENTER_VERTICAL);
+    sizerSettings->Add(sizerAdvancedLine, 0, wxEXPAND | wxBOTTOM, gap);
+    panel_advanced = new wxPanel(panel);
+    wxWindow* advanced = panel_advanced;
     wxBoxSizer* sizerAdvanced = new wxBoxSizer(wxVERTICAL);
 
     // the client library decides the Firebird version of a test of this
     // computer without login
-    wxBoxSizer* sizerLib = new wxBoxSizer(wxHORIZONTAL);
-    sizerLib->Add(new wxStaticText(advanced, wxID_ANY, _("Client library:")),
-        0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 6);
+    wxStaticText* labelLibrary = createLabel(advanced, _("Client library:"));
     text_clientlib = new wxTextCtrl(advanced, wxID_ANY, databaseM
         ? databaseM->getClientLibrary() : wxString());
     text_clientlib->SetHint(_("default client library"));
-    text_clientlib->SetToolTip(_("The Firebird client library (fbclient) FlameRobin "
-        "uses. For a test of this computer without login it needs the engine plugin "
-        "next to it, and it selects the Firebird version (3, 4, 5 or 6)."));
-    sizerLib->Add(text_clientlib, 1, wxEXPAND);
-    sizerAdvanced->Add(sizerLib, 0, wxEXPAND | wxTOP | wxBOTTOM, 6);
+    wxBoxSizer* sizerLibrary = new wxBoxSizer(wxHORIZONTAL);
+    sizerLibrary->Add(text_clientlib, 1, wxALIGN_CENTER_VERTICAL);
+    sizerAdvanced->Add(createLine(labelLibrary, sizerLibrary, nullptr), 0,
+        wxEXPAND | wxBOTTOM, lineGap);
 
     // the page size influences the storage and cache tests; default to the
     // one of the selected database when FlameRobin already knows it
-    wxBoxSizer* sizerPageSize = new wxBoxSizer(wxHORIZONTAL);
-    sizerPageSize->Add(new wxStaticText(advanced, wxID_ANY,
-        _("Page size of the temporary database:")),
-        0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 6);
+    wxStaticText* labelPageSize = createLabel(advanced, _("Page size:"));
     int knownPageSize = databaseM && databaseM->isConnected()
         ? databaseM->getInfo().getPageSize() : 0;
     if (knownPageSize >= 4096)
@@ -497,93 +698,71 @@ void BenchmarkDialog::createControls()
     };
     choice_pagesize = new wxChoice(advanced, wxID_ANY, wxDefaultPosition,
         wxDefaultSize, 5, pageSizes);
-    choice_pagesize->SetToolTip(_("The page size only affects the storage "
-        "and cache tests; CPU, network and connection tests do not depend on "
-        "it. Automatic uses the page size of the selected database when it "
-        "is known, otherwise 8192. Firebird 3 supports up to 16384; a larger "
-        "value is reduced automatically."));
     choice_pagesize->SetSelection(0);
-    sizerPageSize->Add(choice_pagesize, 0, wxRIGHT, 12);
-    check_comparepages = new wxCheckBox(advanced, wxID_ANY,
-        _("Compare all page sizes (storage and cache tests only)"));
-    check_comparepages->SetToolTip(_("Repeats the storage and cache tests in "
-        "a separate temporary database for every page size the server "
-        "supports, and shows them side by side."));
+    check_comparepages = new wxCheckBox(advanced, wxID_ANY, _("Compare all page sizes"));
+    check_comparepages->Bind(wxEVT_CHECKBOX, &BenchmarkDialog::OnDurationChanged, this);
+    wxBoxSizer* sizerPageSize = new wxBoxSizer(wxHORIZONTAL);
+    sizerPageSize->Add(choice_pagesize, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(24));
     sizerPageSize->Add(check_comparepages, 0, wxALIGN_CENTER_VERTICAL);
-    sizerAdvanced->Add(sizerPageSize, 0, wxBOTTOM, 6);
+    sizerAdvanced->Add(createLine(labelPageSize, sizerPageSize, nullptr), 0,
+        wxEXPAND | wxBOTTOM, lineGap);
 
+    wxStaticText* labelAlso = createLabel(advanced, _("Also:"));
     check_inspect = new wxCheckBox(advanced, wxID_ANY,
-        _("Also read the configuration of the selected database (read-only: "
-          "page buffers, forced writes, transaction state)"));
-    check_inspect->SetToolTip(_("Only for the server of the selected "
-        "database: connects to it and reads its header, MON$DATABASE and "
-        "RDB$DATABASE. Nothing is written."));
+        _("Read the settings of the selected database (read-only)"));
     check_inspect->SetValue(false);
-    sizerAdvanced->Add(check_inspect, 0, wxBOTTOM, 6);
-
     check_manyusers = new wxCheckBox(advanced, wxID_ANY,
-        _("Also test 50 and 250 users at once (puts a heavy load on the server)"));
-    check_manyusers->SetToolTip(_("Adds two rounds with 50 and 250 connections "
-        "working at the same time. Shows whether the server keeps up with many "
-        "users; takes about half a minute more."));
-    sizerAdvanced->Add(check_manyusers, 0, wxBOTTOM, 6);
-    advanced->SetSizer(sizerAdvanced);
-    sizerSettings->Add(collapse_advanced, 0, wxEXPAND | wxBOTTOM, 6);
-    sizerMain->Add(sizerSettings, 0, wxEXPAND);
+        _("Test 50 and 250 users at once (heavy load)"));
+    check_manyusers->Bind(wxEVT_CHECKBOX, &BenchmarkDialog::OnDurationChanged, this);
+    // one below the other: side by side they would be the widest line
+    wxBoxSizer* sizerAlso = new wxBoxSizer(wxVERTICAL);
+    sizerAlso->Add(check_inspect, 0, wxBOTTOM, gap);
+    sizerAlso->Add(check_manyusers, 0);
+    sizerAdvanced->Add(createLine(labelAlso, sizerAlso, nullptr, true), 0,
+        wxEXPAND | wxBOTTOM, gap);
+    panel_advanced->SetSizer(sizerAdvanced);
+    panel_advanced->Hide();
+    sizerSettings->Add(panel_advanced, 0, wxEXPAND);
+    sizerMain->Add(sizerSettings, 0, wxEXPAND | wxBOTTOM, gap);
 
-    // progress
-    wxBoxSizer* sizerStatus = new wxBoxSizer(wxHORIZONTAL);
-    label_status = new wxStaticText(panel, wxID_ANY, _("Ready."));
-    label_elapsed = new wxStaticText(panel, wxID_ANY, wxEmptyString);
-    sizerStatus->Add(label_status, 1, wxALIGN_CENTER_VERTICAL);
-    sizerStatus->Add(label_elapsed, 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 12);
-    sizerMain->Add(sizerStatus, 0, wxEXPAND | wxBOTTOM, 4);
-    gauge_progress = new wxGauge(panel, wxID_ANY, 100, wxDefaultPosition,
-        wxSize(-1, 14));
-    sizerMain->Add(gauge_progress, 0, wxEXPAND | wxBOTTOM, 6);
-
-    // results
-    notebook_results = new wxNotebook(panel, wxID_ANY);
-
-    text_log = new wxTextCtrl(notebook_results, wxID_ANY, wxEmptyString,
-        wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
-    notebook_results->AddPage(text_log, _("Progress"));
-
-#if wxUSE_WEBVIEW
-    wxString backend;
-    webview_report = createReportView(notebook_results, backend);
-    if (webview_report)
+    // the strip of the progress, the log and the results, and what the
+    // selected tab shows: the progress is there before the start, so that
+    // nothing moves when a test starts
+    view_results = new BenchmarkResultsView(panel);
+    panel_progress = view_results->getProgress();
+    panel_progress->onShowLog = [this]() { view_results->select(ResultsView::logTab); };
+    text_log = view_results->getLog();
+    button_copy = view_results->getCopyButton();
+    button_save = view_results->getSaveButton();
+    button_browser = view_results->getBrowserButton();
+    button_close_result = view_results->getCloseButton();
+    view_results->setStatusWidth(getCopiedMessage());
+    view_results->makePage = [this](int id) { return makePage(id); };
+    view_results->onSelected = [this](int id) { onResultSelected(id); };
+    view_results->onCloseResult = [this](int id) { closeResult(id); };
+    view_results->onResultMenu = [this](int id) { showResultMenu(id); };
+    view_results->onShortcut = [this](char key)
     {
-        notebook_results->AddPage(webview_report, _("Report"));
-        reportPageM.reset(new BenchmarkReportPage(webview_report,
-            backend == wxWebViewBackendIE));
-        if (backend == wxWebViewBackendIE)
-        {
-            reportViewM = "Internet Explorer";
-            wxStaticText* hint = new wxStaticText(panel, wxID_ANY,
-                _("The Microsoft Edge WebView2 Runtime is not installed on this "
-                  "computer, so the report is shown with Internet Explorer in a "
-                  "simpler form. \"Open in browser\" shows it in your web browser."));
-            hint->Wrap(900);
-            sizerMain->Add(hint, 0, wxEXPAND | wxBOTTOM, 4);
-        }
-        else
-            reportViewM = wxWebView::GetBackendVersionInfo(backend).GetVersionString();
-    }
-#endif
-    if (!webview_report)
-    {
-        reportViewM = _("text, no web view is available");
-        text_report = new wxTextCtrl(notebook_results, wxID_ANY, wxEmptyString,
-            wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
-        notebook_results->AddPage(text_report, _("Report"));
-    }
-
-    sizerMain->Add(notebook_results, 1, wxEXPAND);
+        wxCommandEvent dummy;
+        if (key == 'W')
+            OnCloseResult(dummy);
+        else if (key == 'O')
+            OnOpen(dummy);
+    };
+    sizerMain->Add(view_results, 1, wxEXPAND);
 
     // buttons
     button_start = new wxButton(panel, ID_button_start, _("&Start"));
+    // the main action; not the default button, so that Enter in a field
+    // does not start a test
+    button_start->SetFont(button_start->GetFont().Bold());
     button_cancel = new wxButton(panel, ID_button_cancel, _("C&ancel test"));
+    button_compare = new wxButton(panel, ID_button_compare, _("Com&pare..."));
+    button_compare->SetToolTip(_("Compares two results or saved reports, without a new "
+        "test."));
+    button_open = new wxButton(panel, ID_button_open, _("&Open..."));
+    button_open->SetToolTip(_("Shows a saved HTML report as it was saved (Ctrl+O)."));
+    // what is shown, copied and saved of every result
     check_private = new wxCheckBox(panel, ID_check_private,
         _("&Hide private information"));
     check_private->SetToolTip(_("Removes computer and host names, IP addresses, "
@@ -593,86 +772,156 @@ void BenchmarkDialog::createControls()
     bool hidePrivate = false;
     config().getValue(hidePrivateKey, hidePrivate);
     check_private->SetValue(hidePrivate);
-    button_compare = new wxButton(panel, ID_button_compare, _("Compare t&wo reports..."));
-    button_compare->SetToolTip(_("Compares two saved reports, without a new test."));
-    button_copy = new wxButton(panel, ID_button_copy, _("Copy as &Markdown"));
-    button_save = new wxButton(panel, ID_button_save, _("Sa&ve report..."));
-    button_browser = new wxButton(panel, ID_button_browser, _("Open in &browser"));
-    button_browser->SetToolTip(_("Shows the report in the web browser of this computer. "
-        "The page is written to the temporary directory; without \"Hide private "
-        "information\" it contains the names of computers and paths."));
+    view_results->setPageVariant(getPageVariant());
     button_close = new wxButton(panel, wxID_CANCEL, _("&Close"));
 
     wxBoxSizer* sizerButtons = new wxBoxSizer(wxHORIZONTAL);
-    sizerButtons->Add(button_start, 0, wxRIGHT, 6);
-    sizerButtons->Add(button_cancel, 0, wxRIGHT, 6);
-    sizerButtons->Add(button_compare, 0, wxRIGHT, 6);
+    sizerButtons->Add(button_start, 0, wxRIGHT, gap);
+    sizerButtons->Add(button_cancel, 0, wxRIGHT, gap);
+    sizerButtons->Add(button_compare, 0, wxRIGHT, gap);
+    sizerButtons->Add(button_open, 0, wxRIGHT, gap);
     sizerButtons->AddStretchSpacer(1);
-    sizerButtons->Add(check_private, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 12);
-    sizerButtons->Add(button_copy, 0, wxRIGHT, 6);
-    sizerButtons->Add(button_save, 0, wxRIGHT, 6);
-    sizerButtons->Add(button_browser, 0, wxRIGHT, 6);
+    sizerButtons->Add(check_private, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, FromDIP(12));
     sizerButtons->Add(button_close, 0);
 
     layoutSizers(sizerMain, sizerButtons, true);
-    SetSize(wxSize(980, 880));
+    // narrow and low enough for a small screen, the report gets the rest
+    const wxRect area = wxDisplay(this).GetClientArea();
+    SetSize(std::max(GetMinSize().x, std::min(FromDIP(900), area.width)),
+        std::max(GetMinSize().y, std::min(FromDIP(560), area.height)));
 
-    // without a registration (or a server) only this computer can be tested
-    // without asking for a login
-    if (!databaseM)
+    fillEarlier();
+    // the first target: the server of the selected database, without a
+    // registration this computer
+    wxCommandEvent dummy;
+    OnTargetChanged(dummy);
+    showReady();
+}
+
+fr::BenchmarkTarget BenchmarkDialog::getTarget() const
+{
+    return fr::getBenchmarkTarget(databaseM != nullptr, choice_target->GetSelection());
+}
+
+fr::BenchmarkIntensity BenchmarkDialog::getIntensity() const
+{
+    for (int i = 0; i < 3; ++i)
     {
-        radio_target->Enable(TargetRegistered, false);
-        radio_target->SetSelection(TargetThisComputer);
+        if (radio_intensity[i]->GetValue())
+            return fr::BenchmarkIntensity(i);
     }
+    return fr::BenchmarkIntensity::Standard;
 }
 
 void BenchmarkDialog::updateControls()
 {
     bool idle = !runningM;
-    bool registered = radio_target->GetSelection() == TargetRegistered;
-    bool custom = radio_target->GetSelection() == TargetCustom;
-    bool thisComputer = radio_target->GetSelection() == TargetThisComputer;
+    const fr::BenchmarkTargetDetails details = fr::getBenchmarkTargetDetails(getTarget());
     bool ownLibrary = choice_install->GetSelection() == int(installationsM.size());
-    radio_target->Enable(idle);
-    if (!databaseM)
-        radio_target->Enable(TargetRegistered, false);
-    choice_install->Enable(idle && thisComputer);
-    text_host->Enable(idle && custom);
-    text_port->Enable(idle && custom);
-    // the engine inside FlameRobin needs no login
-    text_user->Enable(idle && !thisComputer);
-    text_password->Enable(idle && !thisComputer);
-    text_clientlib->Enable(idle && (!thisComputer || ownLibrary));
+    choice_target->Enable(idle);
+    // the host, the login and the installation
+    book_target->Enable(idle);
+    // the installation brings its own client library
+    text_clientlib->Enable(idle && (!details.installation || ownLibrary));
     text_directory->Enable(idle);
     choice_pagesize->Enable(idle);
     check_comparepages->Enable(idle);
-    check_inspect->Enable(idle && registered && databaseM);
+    check_inspect->Enable(idle && details.readDatabase && databaseM);
     check_manyusers->Enable(idle);
-    text_earlier->Enable(idle);
-    radio_intensity->Enable(idle);
+    choice_earlier->Enable(idle);
+    for (wxRadioButton* radio : radio_intensity)
+        radio->Enable(idle);
     button_start->Enable(idle);
     button_cancel->Enable(runningM && !runnerM->isCancelRequested());
     button_compare->Enable(idle);
-    button_copy->Enable(idle && (hasReportM || comparisonM));
-    button_save->Enable(idle && (hasReportM || comparisonM));
-    button_browser->Enable(idle && (hasReportM || comparisonM));
+    button_open->Enable(idle);
+    // a saved file is shown as it is: it cannot be copied as Markdown or
+    // saved again
+    const fr::BenchmarkResultEntry* entry = getShownResult();
+    const bool own = entry && entry->kind != fr::BenchmarkResultKind::SavedReport;
+    button_copy->Enable(idle && own);
+    button_save->Enable(idle && own);
+    button_browser->Enable(idle && entry);
+    button_close_result->Enable(idle && entry);
 }
 
-void BenchmarkDialog::OnAdvancedToggled(wxCollapsiblePaneEvent& WXUNUSED(event))
+wxString BenchmarkDialog::getReadyHint() const
 {
-    getControlsPanel()->Layout();
+    return wxString::Format(_("Ready. The test takes %s."), fr::getBenchmarkDurationHint(
+        getIntensity(), check_comparepages->GetValue(), check_manyusers->GetValue()));
+}
+
+std::vector<fr::BenchmarkStagePlan> BenchmarkDialog::getStagePlan() const
+{
+    return fr::getBenchmarkStagePlan(getIntensity(), check_comparepages->GetValue(),
+        check_manyusers->GetValue());
+}
+
+void BenchmarkDialog::showReady()
+{
+    panel_progress->showReady(getStagePlan(), getReadyHint());
+}
+
+void BenchmarkDialog::OnDurationChanged(wxCommandEvent& event)
+{
+    event.Skip();
+    // after a run the settings are hidden and the progress shows the result;
+    // an error stays until the next start
+    if (!runningM && settingsShownM && panel_progress->isReady())
+        showReady();
+}
+
+void BenchmarkDialog::setReportStatus(const wxString& message)
+{
+    view_results->setStatus(message);
+}
+
+void BenchmarkDialog::OnAdvancedToggled(wxCommandEvent& WXUNUSED(event))
+{
+    layoutAdvanced();
+}
+
+void BenchmarkDialog::showAdvanced(bool show)
+{
+    if (header_advanced->IsCollapsed() != show)
+        return;
+    header_advanced->SetCollapsed(!show);
+    layoutAdvanced();
+}
+
+void BenchmarkDialog::layoutAdvanced()
+{
+    panel_advanced->Show(!header_advanced->IsCollapsed());
+    // the open settings needs more room: the dialog does not get lower than the
+    // settings and the progress need, as far as the screen allows
+    wxPanel* panel = getControlsPanel();
+    const wxRect area = wxDisplay(this).GetClientArea();
+    const int needed = std::min(ClientToWindowSize(panel->GetSizer()->CalcMin()).y,
+        area.height);
+    SetMinSize(wxSize(GetMinSize().x, needed));
+    if (GetSize().y < needed)
+    {
+        wxRect rect = GetRect();
+        rect.height = needed;
+        rect.y = std::max(area.y, std::min(rect.y, area.GetBottom() + 1 - needed));
+        SetSize(rect);
+    }
+    panel->Layout();
+    refreshTree(panel);
 }
 
 void BenchmarkDialog::OnTargetChanged(wxCommandEvent& WXUNUSED(event))
 {
-    if (radio_target->GetSelection() == TargetThisComputer
-        && choice_install->GetSelection() == int(installationsM.size())
-        && collapse_advanced->IsCollapsed())
+    const BenchmarkTarget target = getTarget();
+    book_target->ChangeSelection(size_t(target));
+    label_target_hint->SetLabel(getTargetHint(target));
+    // the client library is in the advanced settings
+    if (target == BenchmarkTarget::ThisComputer
+        && choice_install->GetSelection() == int(installationsM.size()))
     {
-        collapse_advanced->Expand();
-        getControlsPanel()->Layout();
+        showAdvanced(true);
     }
-    if (radio_target->GetSelection() == TargetCustom && text_host->IsEmpty() && databaseM)
+    if (target == BenchmarkTarget::OtherServer && text_host->IsEmpty() && databaseM)
     {
         ServerPtr server = databaseM->getServer();
         if (server)
@@ -686,7 +935,7 @@ void BenchmarkDialog::OnTargetChanged(wxCommandEvent& WXUNUSED(event))
 
 bool BenchmarkDialog::buildParams(fr::BenchmarkConnectionParams& params)
 {
-    int target = radio_target->GetSelection();
+    const BenchmarkTarget target = getTarget();
     wxString directory = text_directory->GetValue().Trim().Trim(false);
     if (directory.empty())
     {
@@ -703,13 +952,12 @@ bool BenchmarkDialog::buildParams(fr::BenchmarkConnectionParams& params)
     params.pageSize = pageSizeValues[selection >= 0 && selection < 5 ? selection : 0];
     params.comparePageSizes = check_comparepages->GetValue();
     params.manyUsers = check_manyusers->GetValue();
-    config().setValue(earlierFileKey, text_earlier->GetValue().Trim().Trim(false));
 
     ServerPtr server = databaseM ? databaseM->getServer() : ServerPtr();
     wxString serverPart;
     switch (target)
     {
-        case TargetRegistered:
+        case BenchmarkTarget::Registered:
             if (server)
             {
                 serverPart = server->getConnectionString();
@@ -719,11 +967,11 @@ bool BenchmarkDialog::buildParams(fr::BenchmarkConnectionParams& params)
                 databaseM->getName_(),
                 serverPart.empty() ? _("local") : serverPart);
             break;
-        case TargetThisComputer:
+        case BenchmarkTarget::ThisComputer:
             params.forceEmbedded = true;
             params.targetDescription = _("This computer, without login");
             break;
-        case TargetCustom:
+        case BenchmarkTarget::OtherServer:
         {
             wxString host = text_host->GetValue().Trim().Trim(false);
             if (host.empty())
@@ -746,8 +994,8 @@ bool BenchmarkDialog::buildParams(fr::BenchmarkConnectionParams& params)
     if (!serverPart.empty())
         params.connectionPrefix = wx2std(serverPart + ":");
 
-    fillCredentials(params, target == TargetRegistered);
-    if (target == TargetThisComputer)
+    fillCredentials(params, target == BenchmarkTarget::Registered);
+    if (target == BenchmarkTarget::ThisComputer)
     {
         // the engine inside FlameRobin checks no password; the database
         // belongs to the user of this computer
@@ -761,7 +1009,7 @@ bool BenchmarkDialog::buildParams(fr::BenchmarkConnectionParams& params)
     }
     // the settings of the selected database are shown with the tested
     // server, which only makes sense when it is the same server
-    if (target == TargetRegistered && databaseM && check_inspect->GetValue())
+    if (target == BenchmarkTarget::Registered && databaseM && check_inspect->GetValue())
         params.inspectConnectionString = wx2std(databaseM->getConnectionString());
     return true;
 }
@@ -773,10 +1021,12 @@ void BenchmarkDialog::fillCredentials(fr::BenchmarkConnectionParams& params,
     // and its login (resolveLogin()) are only sent to the server of the
     // registration
     params.clientLibrary = wx2std(text_clientlib->GetValue().Trim().Trim(false));
-    if (!text_user->IsEmpty())
+    wxTextCtrl* user = fromRegistration ? text_user_registered : text_user;
+    if (!user->IsEmpty())
     {
-        params.username = wx2std(text_user->GetValue());
-        params.password = wx2std(text_password->GetValue());
+        params.username = wx2std(user->GetValue());
+        params.password = wx2std((fromRegistration ? text_password_registered
+            : text_password)->GetValue());
     }
     if (!databaseM || !fromRegistration)
         return;
@@ -793,7 +1043,7 @@ bool BenchmarkDialog::resolveLogin(fr::BenchmarkConnectionParams& params)
     DatabaseAuthenticationMode& mode = databaseM->getAuthenticationMode();
     fr::IDatabasePtr dal = databaseM->getDALDatabase();
     fr::BenchmarkLoginState state;
-    state.userEntered = !text_user->IsEmpty();
+    state.userEntered = !text_user_registered->IsEmpty();
     state.trustedUser = mode.getIgnoreUsernamePassword();
     state.connected = databaseM->isConnected() && dal;
     state.alwaysAsk = mode.getAlwaysAskForPassword();
@@ -954,12 +1204,18 @@ void BenchmarkDialog::OnStart(wxCommandEvent& WXUNUSED(event))
         showSettings(true);
         return;
     }
+    // before anything is asked: the result of the test needs a tab
+    if (resultsM.isFull())
+    {
+        showFullMessage();
+        return;
+    }
     fr::BenchmarkConnectionParams params;
     if (!buildParams(params))
         return;
 
-    if (radio_target->GetSelection() == TargetRegistered && databaseM
-        && databaseM->isProductionEnvironment())
+    const bool registered = getTarget() == BenchmarkTarget::Registered;
+    if (registered && databaseM && databaseM->isProductionEnvironment())
     {
         if (wxMessageBox(_("The selected database is marked as production "
             "environment. The benchmark puts heavy load on its server for a "
@@ -969,12 +1225,17 @@ void BenchmarkDialog::OnStart(wxCommandEvent& WXUNUSED(event))
             return;
         }
     }
-    // asked for only now, after every other check
-    if (radio_target->GetSelection() == TargetRegistered && !resolveLogin(params))
+    // the earlier report is read now, once: a later change of the choice
+    // or of the file only concerns the next test
+    std::optional<fr::BenchmarkSnapshot> baseline;
+    if (!readEarlier(baseline))
         return;
+    // asked for only now, after every other check
+    if (registered && !resolveLogin(params))
+        return;
+    baselineM = baseline;
 
-    fr::BenchmarkIntensity intensity =
-        fr::BenchmarkIntensity(radio_intensity->GetSelection());
+    const fr::BenchmarkIntensity intensity = getIntensity();
     runnerM = std::make_unique<fr::BenchmarkRunner>(params, intensity);
     pendingEntriesM.clear();
     for (const auto& connectionString : runnerM->getAllConnectionStrings())
@@ -983,30 +1244,33 @@ void BenchmarkDialog::OnStart(wxCommandEvent& WXUNUSED(event))
         pending.embedded = params.forceEmbedded;
         // only a run on the server of the registration may use its
         // credentials for the cleanup
-        pending.registrationId = radio_target->GetSelection() == TargetRegistered
-            ? registrationId() : wxString();
+        pending.registrationId = registered ? registrationId() : wxString();
         pending.clientLibrary = toWxString(params.clientLibrary);
         pending.connectionString = toWxString(connectionString);
         pendingEntriesM.push_back(pending.toString());
         addPendingDatabase(pendingEntriesM.back());
     }
     runningM = true;
-    hasReportM = false;
-    comparisonM.reset();
     closeRequestedM = false;
     loggedResultsM.clear();
     lastMessageM.clear();
     text_log->Clear();
-    showReport(fr::BenchmarkReport());
-    gauge_progress->SetValue(0);
-    notebook_results->SetSelection(0);
+    view_results->select(ResultsView::progressTab);
+    // showing a result would disturb the measurement: making a report
+    // without private information takes up to a second, and Edge works in
+    // processes of its own
+    view_results->setLocked(true);
+    // the settings cannot be changed during the run; the progress gets
+    // their room
+    showAdvanced(false);
+    // the settings make room for the progress, as the comment above says
+    showSettings(false);
     startTimeM = std::chrono::steady_clock::now();
-    label_elapsed->SetLabel(formatElapsed());
-    timerM.Start(1000);
+    panel_progress->start(runnerM->getStagePlan());
     appendLog(wxString::Format(_("Target: %s"), params.targetDescription));
     appendLog(wxString::Format(_("Intensity: %s, page size %d"),
         fr::getBenchmarkIntensityName(intensity), params.pageSize));
-    appendLog(wxString::Format(_("Report view: %s"), reportViewM));
+    appendLog(wxString::Format(_("Report view: %s"), view_results->getViewName()));
     updateControls();
 
     fr::BenchmarkRunner* runner = runnerM.get();
@@ -1037,7 +1301,7 @@ void BenchmarkDialog::OnCancel(wxCommandEvent& WXUNUSED(event))
     if (!runningM)
         return;
     runnerM->requestCancel();
-    label_status->SetLabel(_("Cancelling, the temporary database is being dropped..."));
+    panel_progress->cancelRequested();
     appendLog(_("Cancel requested."));
     updateControls();
 }
@@ -1053,7 +1317,7 @@ void BenchmarkDialog::OnCloseButton(wxCommandEvent& event)
 {
     if (runningM)
         requestClose();
-    else
+    else if (confirmDiscardUnsaved())
         event.Skip();
 }
 
@@ -1065,20 +1329,30 @@ void BenchmarkDialog::OnClose(wxCloseEvent& event)
         requestClose();
         return;
     }
+    if (!runningM && !confirmDiscardUnsaved() && event.CanVeto())
+    {
+        event.Veto();
+        return;
+    }
     event.Skip();
 }
 
-wxString BenchmarkDialog::formatElapsed() const
+bool BenchmarkDialog::confirmDiscardUnsaved()
 {
-    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(
-        std::chrono::steady_clock::now() - startTimeM).count();
-    return wxString::Format(_("Elapsed: %02d:%02d"), int(seconds / 60),
-        int(seconds % 60));
-}
-
-void BenchmarkDialog::OnTimer(wxTimerEvent& WXUNUSED(event))
-{
-    label_elapsed->SetLabel(formatElapsed());
+    const std::vector<int> unsaved = resultsM.getUnsavedIds();
+    if (unsaved.empty())
+        return true;
+    // saved tests, opened files and comparisons stay until FlameRobin is quit
+    const int count = int(unsaved.size());
+    wxMessageDialog question(this, wxString::Format(wxPLURAL("%d result is not saved: "
+        "%s. Close it anyway?", "%d results are not saved: %s. Close them anyway?",
+        count), count, fr::formatBenchmarkResultIds(unsaved)),
+        _("Performance Benchmark & Diagnosis"), wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION);
+    question.SetYesNoLabels(_("Close &without saving"), _("Cancel"));
+    if (question.ShowModal() != wxID_YES)
+        return false;
+    resultsM.discardUnsaved();
+    return true;
 }
 
 void BenchmarkDialog::appendLog(const wxString& line)
@@ -1091,15 +1365,7 @@ void BenchmarkDialog::appendLog(const wxString& line)
 
 void BenchmarkDialog::onProgress(const fr::BenchmarkProgress& progress)
 {
-    if (progress.cleaningUp)
-        label_status->SetLabel(progress.message);
-    else
-    {
-        label_status->SetLabel(wxString::Format(_("Step %d of %d: %s"),
-            progress.step, progress.stepCount, progress.message));
-    }
-    if (progress.stepCount > 0)
-        gauge_progress->SetValue(progress.step * 100 / progress.stepCount);
+    panel_progress->update(progress);
     if (progress.message != lastMessageM)
     {
         lastMessageM = progress.message;
@@ -1125,12 +1391,8 @@ void BenchmarkDialog::onFinished(const fr::BenchmarkReport& report,
         workerM.join();
     // the runner holds the login of this run, which is not kept
     runnerM.reset();
-    timerM.Stop();
     runningM = false;
-    reportM = report;
-    hasReportM = true;
-    label_elapsed->SetLabel(formatElapsed());
-    gauge_progress->SetValue(100);
+    view_results->setLocked(false);
     // like connectDatabase(): a master password that did not work is asked
     // for again at the next start
     if (encryptedLoginM)
@@ -1141,34 +1403,46 @@ void BenchmarkDialog::onFinished(const fr::BenchmarkReport& report,
             MasterPassword::reset();
     }
 
-    if (report.cancelled)
-        label_status->SetLabel(_("Cancelled. The results are incomplete."));
-    else if (!report.errorMessage.empty())
-        label_status->SetLabel(_("Failed. See the log for details."));
-    else if (!text_earlier->GetValue().Trim().Trim(false).empty())
+    // a test that measured nothing has only its message
+    const int id = resultsM.addRun(report, baselineM);
+    using Outcome = BenchmarkProgressPanel::Outcome;
+    const Outcome outcome = report.cancelled ? Outcome::Cancelled
+        : !report.errorMessage.empty() || aborted ? Outcome::Failed : Outcome::Finished;
+    wxString message;
+    if (outcome == Outcome::Cancelled)
+        message = _("Cancelled. The results are incomplete.");
+    else if (outcome == Outcome::Failed)
+        message = _("Failed. See the log for details.");
+    else if (baselineM)
     {
-        label_status->SetLabel(_("Finished. The overview compares this run with the "
-            "earlier report."));
+        message = wxString::Format(_("Finished. Result %d compares this run with the "
+            "earlier report."), id);
     }
     else
     {
-        label_status->SetLabel(_("Finished. Save the report to compare it with later "
-            "runs or other servers."));
+        message = wxString::Format(_("Finished. Result %d added; save it to keep it after "
+            "FlameRobin is closed."), id);
     }
 
+    // the whole error below the stages, with the hint for this computer
+    wxString error = report.errorMessage;
     if (!report.errorMessage.empty())
     {
         appendLog(_("Error:") + " " + report.errorMessage);
-        if (radio_target->GetSelection() == TargetThisComputer)
+        if (getTarget() == BenchmarkTarget::ThisComputer)
         {
-            appendLog(_("Hint: a test of this computer needs a Firebird installation "
-                "with the engine plugin (engine12, engine13 or engine14 for Firebird "
-                "3, 4/5 or 6 in its plugins folder), and the directory must be "
-                "writable for your user. If FlameRobin already used this client "
-                "library for another connection, restart FlameRobin and run the test "
-                "first."));
+            const wxString hint = _("Hint: a test of this computer needs a Firebird "
+                "installation with the engine plugin (engine12, engine13 or engine14 for "
+                "Firebird 3, 4/5 or 6 in its plugins folder), and the directory must be "
+                "writable for your user. If FlameRobin already used this client library "
+                "for another connection, restart FlameRobin and run the test first.");
+            appendLog(hint);
+            error += "\n\n" + hint;
         }
     }
+    const bool cleanupFailed = !aborted && report.benchmarkDatabaseCreated
+        && !report.benchmarkDatabaseDropped;
+    panel_progress->finish(outcome, cleanupFailed, message, error);
     // forget every temporary database that is gone; keep the others so
     // that the next start offers to drop them
     for (size_t i = 0; i < pendingEntriesM.size() && !aborted; ++i)
@@ -1205,9 +1479,14 @@ void BenchmarkDialog::onFinished(const fr::BenchmarkReport& report,
     appendLog(wxString::Format(_("Done after %.0f seconds."),
         report.durationSeconds));
 
-    showReport(displayedReport());
+    if (id)
+        addResultTab(id);
+    // the user may look at the log; an error stays in sight, with the stage
+    // it happened in, the values before it are on their tab
+    const bool follow = view_results->getSelection() <= 0;
     showSettings(false);
-    notebook_results->SetSelection(1);  // the report
+    if (id && outcome != Outcome::Failed && follow)
+        view_results->select(id);
     updateControls();
 
     if (closeRequestedM)
@@ -1217,81 +1496,308 @@ void BenchmarkDialog::onFinished(const fr::BenchmarkReport& report,
 void BenchmarkDialog::showSettings(bool show)
 {
     settingsShownM = show;
-    if (show && comparisonM)
-    {
-        comparisonM.reset();
-        showReport(hasReportM ? displayedReport() : fr::BenchmarkReport());
-    }
     sizerSettingsM->ShowItems(show);
     button_start->SetLabel(show ? _("&Start") : _("&New test"));
-    getControlsPanel()->Layout();
+    if (show)
+    {
+        // ready for the next run, with the results there are now
+        showReady();
+        fillEarlier();
+        view_results->select(ResultsView::progressTab);
+        // the hint of the advanced settings is only shown next to the
+        // closed pane
+        layoutAdvanced();
+    }
+    else
+        getControlsPanel()->Layout();
+    refreshTree(getControlsPanel());
 }
 
-void BenchmarkDialog::showReport(const fr::BenchmarkReport& report)
+void BenchmarkDialog::addResultTab(int id)
 {
-    // an empty report (before a run) shows an empty page
-    const bool hasData = report.metrics.settings.connectAttempts > 0;
-#if wxUSE_WEBVIEW
-    if (webview_report)
+    if (const fr::BenchmarkResultEntry* entry = resultsM.find(id))
     {
-        reportPageM->show(hasData
-            ? report.toHtml(FRStyleManager::isEffectivelyDark() ? "dark" : "light")
-            : wxString("<html><body></body></html>"));
-        return;
+        view_results->addResult(id, fr::getBenchmarkResultLabel(*entry),
+            fr::describeBenchmarkResult(*entry));
     }
-#endif
-    text_report->SetValue(hasData ? report.toMarkdown() : wxString());
-    text_report->ShowPosition(0);
+    // it can be the earlier report of the next test
+    fillEarlier();
+}
+
+void BenchmarkDialog::updateResultTab(int id)
+{
+    if (const fr::BenchmarkResultEntry* entry = resultsM.find(id))
+    {
+        view_results->setResultLabel(id, fr::getBenchmarkResultLabel(*entry),
+            fr::describeBenchmarkResult(*entry));
+        if (view_results->getSelection() == id)
+            view_results->setHeader(fr::getBenchmarkResultHeader(*entry));
+    }
+}
+
+const fr::BenchmarkResultEntry* BenchmarkDialog::getShownResult() const
+{
+    return resultsM.find(view_results->getSelection());
+}
+
+void BenchmarkDialog::onResultSelected(int id)
+{
+    resultsM.select(id > 0 ? id : 0);
+    if (const fr::BenchmarkResultEntry* entry = resultsM.find(id))
+    {
+        // the result needs the room of the settings
+        if (settingsShownM)
+            showSettings(false);
+        button_save->SetLabel(entry->kind == fr::BenchmarkResultKind::Comparison
+            ? _("Sa&ve comparison...") : _("Sa&ve report..."));
+        button_save->GetParent()->Layout();
+        // a saved file has the texts it was saved with
+        if (entry->kind == fr::BenchmarkResultKind::SavedReport)
+        {
+            view_results->setHeader(fr::getBenchmarkResultHeader(*entry) + "; "
+                + _("\"Hide private information\" does not change it"),
+                _("Shown as it was saved. \"Hide private information\" does not change "
+                "files that were saved earlier; \"Open in browser\" shows the same page."));
+        }
+        else
+            view_results->setHeader(fr::getBenchmarkResultHeader(*entry));
+        // a message such as "copied" was about the result shown before
+        setReportStatus(wxString());
+    }
+    updateControls();
+}
+
+void BenchmarkDialog::closeResult(int id)
+{
+    const fr::BenchmarkResultEntry* entry = resultsM.find(id);
+    if (runningM || !entry)
+        return;
+    // only a test that is not saved is lost: a file is saved, a comparison
+    // holds copies of its results
+    if (!fr::getBenchmarkCloseQuestion(resultsM, fr::BenchmarkCloseScope::One, id).empty())
+    {
+        wxMessageDialog question(this, wxString::Format(_("Result %d (%s) is not saved. "
+            "If you close it, its values are lost and it can no longer be compared."), id,
+            fr::getBenchmarkResultSummary(*entry)), _("Performance Benchmark & Diagnosis"),
+            wxYES_NO | wxCANCEL | wxICON_QUESTION);
+        question.SetYesNoCancelLabels(_("&Save..."), _("Close &without saving"),
+            _("Cancel"));
+        const int answer = question.ShowModal();
+        // a cancelled file dialog keeps the result
+        if (answer == wxID_CANCEL || (answer == wxID_YES && !saveResult(id)))
+            return;
+    }
+    const bool shown = view_results->getSelection() == id;
+    const int next = resultsM.close(id);
+    view_results->removeResult(id);
+    if (shown)
+        view_results->select(next > 0 ? next : ResultsView::progressTab);
+    fillEarlier();
+    updateControls();
+}
+
+void BenchmarkDialog::closeResults(fr::BenchmarkCloseScope scope, int id)
+{
+    if (runningM)
+        return;
+    const std::vector<int> unsaved = fr::getBenchmarkCloseQuestion(resultsM, scope, id);
+    if (!unsaved.empty())
+    {
+        // one question for all of them; to save them, close one by one
+        const int count = int(unsaved.size());
+        wxMessageDialog question(this, wxString::Format(wxPLURAL("%d result is not saved: "
+            "%s. Close it anyway?", "%d results are not saved: %s. Close them anyway?",
+            count), count, fr::formatBenchmarkResultIds(unsaved)),
+            _("Performance Benchmark & Diagnosis"), wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION);
+        question.SetYesNoLabels(_("Close &without saving"), _("Cancel"));
+        if (question.ShowModal() != wxID_YES)
+            return;
+    }
+    std::vector<int> closed;
+    for (const fr::BenchmarkResultEntry& entry : resultsM.getEntries())
+    {
+        if (scope == fr::BenchmarkCloseScope::All || entry.id != id)
+            closed.push_back(entry.id);
+    }
+    const int next = scope == fr::BenchmarkCloseScope::All ? resultsM.closeAll()
+        : resultsM.closeOthers(id);
+    for (int closedId : closed)
+        view_results->removeResult(closedId);
+    view_results->select(next > 0 ? next : ResultsView::progressTab);
+    fillEarlier();
+    updateControls();
+}
+
+void BenchmarkDialog::showResultMenu(int id)
+{
+    const fr::BenchmarkResultEntry* entry = resultsM.find(id);
+    if (runningM || !entry)
+        return;
+    // the tab under the mouse, also when another one is selected
+    menuResultM = id;
+    wxMenu menu;
+    menu.Append(ID_menu_close, _("&Close") + "\tCtrl+W");
+    menu.Append(ID_menu_close_others, _("Close &other results"));
+    menu.Append(ID_menu_close_all, _("Close &all results"));
+    menu.Enable(ID_menu_close_others, resultsM.getEntries().size() > 1);
+    menu.AppendSeparator();
+    if (entry->kind != fr::BenchmarkResultKind::Comparison)
+        menu.Append(ID_menu_compare, _("Compare &with..."));
+    if (entry->kind != fr::BenchmarkResultKind::SavedReport)
+    {
+        menu.Append(ID_menu_save, entry->kind == fr::BenchmarkResultKind::Comparison
+            ? _("Sa&ve comparison...") : _("Sa&ve report..."));
+    }
+    PopupMenu(&menu);
+}
+
+void BenchmarkDialog::OnResultMenu(wxCommandEvent& event)
+{
+    const int id = menuResultM;
+    switch (event.GetId())
+    {
+        case ID_menu_close:
+            closeResult(id);
+            break;
+        case ID_menu_close_others:
+            closeResults(fr::BenchmarkCloseScope::Others, id);
+            break;
+        case ID_menu_close_all:
+            closeResults(fr::BenchmarkCloseScope::All, id);
+            break;
+        case ID_menu_save:
+            saveResult(id);
+            break;
+        case ID_menu_compare:
+            compare(id, 0);
+            break;
+    }
+}
+
+void BenchmarkDialog::showFullMessage()
+{
+    wxMessageBox(wxString::Format(_("%d results are open. Please close some before you "
+        "start another test or open a report."), int(fr::BenchmarkResultStore::maximumEntries)),
+        _("Performance Benchmark & Diagnosis"), wxOK | wxICON_INFORMATION, this);
+}
+
+void BenchmarkDialog::OnCloseResult(wxCommandEvent& WXUNUSED(event))
+{
+    if (const fr::BenchmarkResultEntry* entry = getShownResult())
+        closeResult(entry->id);
+}
+
+wxString BenchmarkDialog::getPageVariant() const
+{
+    return wxString(check_private->GetValue() ? "hidden," : "all,") + getReportStyle();
+}
+
+wxString BenchmarkDialog::makePage(int id) const
+{
+    const fr::BenchmarkResultEntry* entry = resultsM.find(id);
+    if (!entry)
+        return wxString();
+    const bool web = view_results->hasWebView();
+    switch (entry->kind)
+    {
+        case fr::BenchmarkResultKind::Run:
+        {
+            const fr::BenchmarkReport report = displayedReport(*entry);
+            return web ? report.toHtml(getReportStyle()) : report.toMarkdown();
+        }
+        case fr::BenchmarkResultKind::Comparison:
+        {
+            const fr::BenchmarkComparison comparison = displayedComparison(*entry);
+            return web ? comparison.toHtml(getReportStyle()) : comparison.toMarkdown();
+        }
+        case fr::BenchmarkResultKind::SavedReport:
+        default:
+            // as it was saved, in the style of the dialog; the policy keeps
+            // a page that passed the check from running or loading anything
+            if (web)
+            {
+                return fr::addBenchmarkReportPolicy(
+                    fr::applyBenchmarkReportTheme(entry->html, getReportStyle()));
+            }
+            return _("A saved HTML report needs a web view. \"Open in browser\" shows "
+                "it in your web browser.");
+    }
 }
 
 void BenchmarkDialog::OnCopyMarkdown(wxCommandEvent& WXUNUSED(event))
 {
-    if (!hasReportM && !comparisonM)
+    const fr::BenchmarkResultEntry* entry = getShownResult();
+    if (!entry || entry->kind == fr::BenchmarkResultKind::SavedReport)
         return;
     if (wxTheClipboard->Open())
     {
-        wxTheClipboard->SetData(new wxTextDataObject(comparisonM
-            ? displayedComparison().toMarkdown() : displayedReport().toMarkdown()));
+        wxTheClipboard->SetData(new wxTextDataObject(displayedText(*entry, true)));
         wxTheClipboard->Close();
-        label_status->SetLabel(_("Report copied to the clipboard as Markdown."));
+        setReportStatus(getCopiedMessage());
     }
 }
 
 void BenchmarkDialog::OnSaveReport(wxCommandEvent& WXUNUSED(event))
 {
-    if (!hasReportM && !comparisonM)
-        return;
-    wxFileDialog fd(this, comparisonM ? _("Save comparison") : _("Save benchmark report"),
-        "", comparisonM ? "flamerobin-benchmark-comparison.html" : "flamerobin-benchmark.html",
+    if (const fr::BenchmarkResultEntry* entry = getShownResult())
+        saveResult(entry->id);
+}
+
+bool BenchmarkDialog::saveResult(int id)
+{
+    const fr::BenchmarkResultEntry* entry = resultsM.find(id);
+    if (!entry || entry->kind == fr::BenchmarkResultKind::SavedReport)
+        return false;
+    const bool comparison = entry->kind == fr::BenchmarkResultKind::Comparison;
+    // with number and time, so that several results do not overwrite each other
+    wxFileDialog fd(this, comparison ? _("Save comparison") : _("Save benchmark report"),
+        "", fr::getBenchmarkResultFileName(*entry),
         _("HTML report (*.html)|*.html|Markdown (*.md)|*.md"),
         wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
     if (fd.ShowModal() != wxID_OK)
-        return;
+        return false;
     const bool markdown = fd.GetFilterIndex() == 1
         || fd.GetPath().Lower().EndsWith(".md");
     wxFFile file(fd.GetPath(), "w");
-    if (!file.IsOpened() || !file.Write(displayedText(markdown), wxConvUTF8))
+    if (!file.IsOpened() || !file.Write(displayedText(*entry, markdown), wxConvUTF8)
+        || !file.Close())
     {
         wxMessageBox(_("The report could not be saved."), _("Performance Benchmark & Diagnosis"),
             wxOK | wxICON_ERROR, this);
+        return false;
     }
+    resultsM.markSaved(id, fd.GetPath());
+    updateResultTab(id);
+    fillEarlier();
+    return true;
 }
 
-wxString BenchmarkDialog::displayedText(bool markdown) const
+wxString BenchmarkDialog::displayedText(const fr::BenchmarkResultEntry& entry,
+    bool markdown) const
 {
     // the saved page follows the theme of the browser that opens it
-    if (comparisonM)
+    switch (entry.kind)
     {
-        const fr::BenchmarkComparison comparison = displayedComparison();
-        return markdown ? comparison.toMarkdown() : comparison.toHtml();
+        case fr::BenchmarkResultKind::Run:
+        {
+            const fr::BenchmarkReport report = displayedReport(entry);
+            return markdown ? report.toMarkdown() : report.toHtml();
+        }
+        case fr::BenchmarkResultKind::Comparison:
+        {
+            const fr::BenchmarkComparison comparison = displayedComparison(entry);
+            return markdown ? comparison.toMarkdown() : comparison.toHtml();
+        }
+        case fr::BenchmarkResultKind::SavedReport:
+        default:
+            return entry.html;
     }
-    const fr::BenchmarkReport report = displayedReport();
-    return markdown ? report.toMarkdown() : report.toHtml();
 }
 
 void BenchmarkDialog::OnOpenInBrowser(wxCommandEvent& WXUNUSED(event))
 {
-    if (!hasReportM && !comparisonM)
+    const fr::BenchmarkResultEntry* entry = getShownResult();
+    if (!entry)
         return;
     // the browser may still read the page after the dialog is closed, so
     // the pages are only removed a day later
@@ -1299,7 +1805,8 @@ void BenchmarkDialog::OnOpenInBrowser(wxCommandEvent& WXUNUSED(event))
     {
         wxLogNull noErrors;
         wxArrayString oldFiles;
-        wxDir::GetAllFiles(tempDir, &oldFiles, browserFilePrefix + "*.html", wxDIR_FILES);
+        wxDir::GetAllFiles(tempDir, &oldFiles, getBenchmarkPagePrefix() + "*.html",
+            wxDIR_FILES);
         const wxDateTime yesterday = wxDateTime::Now() - wxTimeSpan::Day();
         for (const wxString& oldFile : oldFiles)
         {
@@ -1309,11 +1816,12 @@ void BenchmarkDialog::OnOpenInBrowser(wxCommandEvent& WXUNUSED(event))
         }
     }
 
-    wxFileName path(tempDir, browserFilePrefix
+    wxFileName path(tempDir, getBenchmarkPagePrefix()
         + wxDateTime::Now().Format("%Y%m%d-%H%M%S-")
         + wxString::Format("%lu.html", wxGetProcessId()));
     wxFFile file(path.GetFullPath(), "w");
-    if (!file.IsOpened() || !file.Write(displayedText(false), wxConvUTF8) || !file.Close()
+    if (!file.IsOpened() || !file.Write(displayedText(*entry, false), wxConvUTF8)
+        || !file.Close()
         || !wxLaunchDefaultBrowser(wxFileName::FileNameToURL(path)))
     {
         wxMessageBox(_("The report could not be opened in the web browser. Please save "
@@ -1338,115 +1846,225 @@ bool BenchmarkDialog::isOnRegistrationServer(const wxString& connectionString) c
     return before == connectionString || before.length() <= 1;
 }
 
-std::optional<fr::BenchmarkSnapshot> BenchmarkDialog::readSnapshot(const wxString& path,
-    bool showErrors)
-{
-    wxFFile file(path, "r");
-    wxString text;
-    if (file.IsOpened() && file.ReadAll(&text, wxConvUTF8))
-    {
-        if (std::optional<fr::BenchmarkSnapshot> snapshot = fr::parseBenchmarkSnapshot(text))
-            return snapshot;
-    }
-    if (showErrors)
-    {
-        wxMessageBox(wxString::Format(_("%s contains no benchmark results.\n\nPlease "
-            "select a report that was saved or copied with this version of FlameRobin "
-            "(HTML or Markdown)."), path), _("Performance Benchmark & Diagnosis"),
-            wxOK | wxICON_INFORMATION, this);
-    }
-    return std::nullopt;
-}
-
-fr::BenchmarkReport BenchmarkDialog::displayedReport() const
+fr::BenchmarkReport BenchmarkDialog::displayedReport(
+    const fr::BenchmarkResultEntry& entry) const
 {
     // the earlier report and the private information only change what is
     // shown, copied and saved; the measured report stays as it is
-    fr::BenchmarkReport report = reportM;
-    const wxString earlierFile = text_earlier->GetValue().Trim().Trim(false);
-    if (!earlierFile.empty() && wxFileExists(earlierFile))
-    {
-        wxFFile file(earlierFile, "r");
-        wxString text;
-        if (file.IsOpened() && file.ReadAll(&text, wxConvUTF8))
-            report.earlier = fr::parseBenchmarkSnapshot(text);
-    }
+    fr::BenchmarkReport report = *entry.report;
+    report.earlier = entry.baseline;
     if (check_private->GetValue())
         report = report.anonymized();
     return report;
 }
 
-fr::BenchmarkComparison BenchmarkDialog::displayedComparison() const
+fr::BenchmarkComparison BenchmarkDialog::displayedComparison(
+    const fr::BenchmarkResultEntry& entry) const
 {
     if (check_private->GetValue())
-        return fr::anonymizeBenchmarkComparison(*comparisonM);
-    return *comparisonM;
-}
-
-void BenchmarkDialog::showComparison()
-{
-#if wxUSE_WEBVIEW
-    if (webview_report)
-    {
-        reportPageM->show(displayedComparison().toHtml(
-            FRStyleManager::isEffectivelyDark() ? "dark" : "light"));
-        return;
-    }
-#endif
-    text_report->SetValue(displayedComparison().toMarkdown());
-    text_report->ShowPosition(0);
+        return fr::anonymizeBenchmarkComparison(*entry.comparison);
+    return *entry.comparison;
 }
 
 void BenchmarkDialog::OnPrivateChanged(wxCommandEvent& WXUNUSED(event))
 {
     config().setValue(hidePrivateKey, check_private->GetValue());
-    if (comparisonM)
-        showComparison();
-    else if (hasReportM)
-        showReport(displayedReport());
+    view_results->setPageVariant(getPageVariant());
 }
 
-void BenchmarkDialog::OnBrowseEarlier(wxCommandEvent& WXUNUSED(event))
+void BenchmarkDialog::fillEarlier()
+{
+    // what was chosen stays chosen, as far as it is there
+    EarlierSource chosen;
+    const int selection = choice_earlier->GetSelection();
+    if (selection >= 0 && selection < int(earlierSourcesM.size()))
+        chosen = earlierSourcesM[selection];
+    else
+        chosen.path = earlierFileM;
+    earlierSourcesM.clear();
+    choice_earlier->Clear();
+    earlierSourcesM.push_back(EarlierSource());
+    choice_earlier->Append(_("No comparison"));
+    for (int id : resultsM.getComparableIds())
+    {
+        const fr::BenchmarkResultEntry* entry = resultsM.find(id);
+        EarlierSource source;
+        source.id = id;
+        earlierSourcesM.push_back(source);
+        choice_earlier->Append(fr::describeBenchmarkResult(*entry));
+    }
+    if (!earlierFileM.empty())
+    {
+        EarlierSource source;
+        source.path = earlierFileM;
+        earlierSourcesM.push_back(source);
+        choice_earlier->Append(wxString::Format(_("Saved report: %s"),
+            wxFileName(earlierFileM).GetFullName()));
+    }
+    choice_earlier->Append(_("Choose a saved report..."));
+    int index = 0;
+    for (size_t i = 0; i < earlierSourcesM.size(); ++i)
+    {
+        const EarlierSource& source = earlierSourcesM[i];
+        if ((chosen.id != 0 && source.id == chosen.id)
+            || (chosen.id == 0 && !chosen.path.empty() && source.path == chosen.path))
+        {
+            index = int(i);
+        }
+    }
+    choice_earlier->SetSelection(index);
+    choice_earlier->SetToolTip(choice_earlier->GetString(index));
+}
+
+bool BenchmarkDialog::chooseEarlierFile()
 {
     wxFileDialog fd(this, _("Select an earlier report"), "", "",
         _("Benchmark reports (*.md;*.html)|*.md;*.html;*.htm|All files (*.*)|*.*"),
         wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-    if (fd.ShowModal() != wxID_OK || !readSnapshot(fd.GetPath(), true))
-        return;
-    text_earlier->SetValue(fd.GetPath());
-    config().setValue(earlierFileKey, fd.GetPath());
-    if (hasReportM && !comparisonM)
-        showReport(displayedReport());
+    fr::BenchmarkSnapshot snapshot;
+    if (fd.ShowModal() != wxID_OK || !readBenchmarkReportFile(this, fd.GetPath(), snapshot))
+        return false;
+    earlierFileM = fd.GetPath();
+    config().setValue(earlierFileKey, earlierFileM);
+    // the file is the chosen one
+    choice_earlier->SetSelection(wxNOT_FOUND);
+    fillEarlier();
+    return true;
 }
 
-void BenchmarkDialog::OnCompareReports(wxCommandEvent& WXUNUSED(event))
+void BenchmarkDialog::OnBrowseEarlier(wxCommandEvent& WXUNUSED(event))
 {
-    wxFileDialog fd(this, _("Select two saved reports"), "", "",
-        _("Benchmark reports (*.md;*.html)|*.md;*.html;*.htm|All files (*.*)|*.*"),
-        wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_MULTIPLE);
-    if (fd.ShowModal() != wxID_OK)
-        return;
-    wxArrayString paths;
-    fd.GetPaths(paths);
-    if (paths.size() != 2)
+    chooseEarlierFile();
+}
+
+void BenchmarkDialog::OnEarlierChanged(wxCommandEvent& WXUNUSED(event))
+{
+    const int selection = choice_earlier->GetSelection();
+    if (selection == int(earlierSourcesM.size()) && !chooseEarlierFile())
     {
-        wxMessageBox(_("Please select exactly two reports (hold Ctrl while you "
-            "click the second one)."), _("Performance Benchmark & Diagnosis"),
-            wxOK | wxICON_INFORMATION, this);
+        // the choice before the file dialog
+        fillEarlier();
         return;
     }
-    std::optional<fr::BenchmarkSnapshot> first = readSnapshot(paths[0], true);
-    std::optional<fr::BenchmarkSnapshot> second = first ? readSnapshot(paths[1], true)
-        : std::nullopt;
-    if (!first || !second)
-        return;
-    // the run with the later date is the newer one
-    if (first->date > second->date)
-        std::swap(first, second);
-    comparisonM = fr::compareBenchmarkSnapshots(*second, *first);
-    showComparison();
-    showSettings(false);
-    notebook_results->SetSelection(notebook_results->GetPageCount() - 1);
-    label_status->SetLabel(_("Comparison of two saved reports."));
-    updateControls();
+    if (selection == 0)
+    {
+        // as an empty field before: no comparison next time either
+        earlierFileM.clear();
+        config().setValue(earlierFileKey, wxString());
+        fillEarlier();
+        choice_earlier->SetSelection(0);
+    }
+    choice_earlier->SetToolTip(choice_earlier->GetStringSelection());
 }
+
+bool BenchmarkDialog::readEarlier(std::optional<fr::BenchmarkSnapshot>& baseline)
+{
+    const int selection = choice_earlier->GetSelection();
+    if (selection <= 0 || selection >= int(earlierSourcesM.size()))
+        return true;
+    const EarlierSource& source = earlierSourcesM[selection];
+    if (source.id != 0)
+    {
+        // a copy: the result may be closed while the test runs
+        const fr::BenchmarkResultEntry* entry = resultsM.find(source.id);
+        if (entry)
+            baseline = entry->snapshot;
+        return entry != nullptr;
+    }
+    // a message now, not a report without its comparison afterwards
+    fr::BenchmarkSnapshot snapshot;
+    if (!readBenchmarkReportFile(this, source.path, snapshot))
+        return false;
+    baseline = snapshot;
+    return true;
+}
+
+void BenchmarkDialog::OnCompare(wxCommandEvent& WXUNUSED(event))
+{
+    // the shown result and the youngest other one
+    const fr::BenchmarkResultEntry* shown = getShownResult();
+    int first = shown && shown->kind != fr::BenchmarkResultKind::Comparison ? shown->id : 0;
+    int second = 0;
+    for (int id : resultsM.getComparableIds())
+    {
+        if (id != first)
+            second = id;
+    }
+    if (first == 0)
+        std::swap(first, second);
+    compare(first, second);
+}
+
+void BenchmarkDialog::compare(int first, int second)
+{
+    if (runningM)
+        return;
+    if (resultsM.isFull())
+    {
+        showFullMessage();
+        return;
+    }
+    BenchmarkCompareDialog cd(this, resultsM, first, second);
+    if (cd.ShowModal() != wxID_OK)
+        return;
+    // the same comparison is selected, not made again
+    const size_t count = resultsM.getEntries().size();
+    const int id = resultsM.addComparison(cd.getOlder(), cd.getNewer());
+    if (!id)
+        return;
+    if (resultsM.getEntries().size() > count)
+        addResultTab(id);
+    view_results->select(id);
+}
+
+void BenchmarkDialog::OnOpen(wxCommandEvent& WXUNUSED(event))
+{
+    if (runningM)
+        return;
+    wxFileDialog fd(this, _("Open a saved report"), "", "",
+        _("Benchmark reports (*.html;*.md)|*.html;*.htm;*.md|All files (*.*)|*.*"),
+        wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+    if (fd.ShowModal() != wxID_OK)
+        return;
+    const wxString path = fd.GetPath();
+    // a file that is open already is shown
+    for (const fr::BenchmarkResultEntry& entry : resultsM.getEntries())
+    {
+        if (entry.kind == fr::BenchmarkResultKind::SavedReport && entry.path == path)
+        {
+            view_results->select(entry.id);
+            return;
+        }
+    }
+    if (path.Lower().EndsWith(".md"))
+    {
+        wxMessageBox(_("Markdown reports can only be used for comparisons. Choose "
+            "Compare... and then \"Choose a saved report...\"."),
+            _("Performance Benchmark & Diagnosis"), wxOK | wxICON_INFORMATION, this);
+        return;
+    }
+    if (resultsM.isFull())
+    {
+        showFullMessage();
+        return;
+    }
+    fr::BenchmarkSnapshot snapshot;
+    wxString html;
+    bool comparisonPage = false;
+    if (!readBenchmarkReportFile(this, path, snapshot, &html, &comparisonPage))
+        return;
+    // the view runs what a page contains: only what FlameRobin writes
+    if (!fr::isBenchmarkReportHtmlPlain(html))
+    {
+        wxMessageBox(wxString::Format(_("%s contains more than a FlameRobin report (for "
+            "example a script) and is not shown here. If you trust the file, open it in "
+            "your web browser."), path), _("Performance Benchmark & Diagnosis"),
+            wxOK | wxICON_WARNING, this);
+        return;
+    }
+    const int id = comparisonPage ? resultsM.addSavedComparison(html, path)
+        : resultsM.addSavedReport(snapshot, html, path);
+    addResultTab(id);
+    view_results->select(id);
+}
+
