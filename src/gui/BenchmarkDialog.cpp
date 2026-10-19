@@ -785,16 +785,15 @@ void BenchmarkDialog::createControls()
     sizerButtons->Add(button_close, 0);
 
     layoutSizers(sizerMain, sizerButtons, true);
+    fillEarlier();
+    // the first target: the server of the selected database, without a
+    // registration this computer; before the size, so that open advanced
+    // settings are part of the minimum size
+    applyTarget();
     // narrow and low enough for a small screen, the report gets the rest
     const wxRect area = wxDisplay(this).GetClientArea();
     SetSize(std::max(GetMinSize().x, std::min(FromDIP(900), area.width)),
         std::max(GetMinSize().y, std::min(FromDIP(560), area.height)));
-
-    fillEarlier();
-    // the first target: the server of the selected database, without a
-    // registration this computer
-    wxCommandEvent dummy;
-    OnTargetChanged(dummy);
     showReady();
 }
 
@@ -879,9 +878,16 @@ void BenchmarkDialog::setReportStatus(const wxString& message)
 void BenchmarkDialog::OnAdvancedToggled(wxCommandEvent& WXUNUSED(event))
 {
     layoutAdvanced();
+    growForAdvanced();
 }
 
 void BenchmarkDialog::showAdvanced(bool show)
+{
+    openAdvanced(show);
+    growForAdvanced();
+}
+
+void BenchmarkDialog::openAdvanced(bool show)
 {
     if (header_advanced->IsCollapsed() != show)
         return;
@@ -899,18 +905,33 @@ void BenchmarkDialog::layoutAdvanced()
     const int needed = std::min(ClientToWindowSize(panel->GetSizer()->CalcMin()).y,
         area.height);
     SetMinSize(wxSize(GetMinSize().x, needed));
-    if (GetSize().y < needed)
-    {
-        wxRect rect = GetRect();
-        rect.height = needed;
-        rect.y = std::max(area.y, std::min(rect.y, area.GetBottom() + 1 - needed));
-        SetSize(rect);
-    }
+    panel->Layout();
+    refreshTree(panel);
+}
+
+void BenchmarkDialog::growForAdvanced()
+{
+    // the minimum height of layoutAdvanced(), within the screen
+    const int needed = GetMinSize().y;
+    if (GetSize().y >= needed)
+        return;
+    const wxRect area = wxDisplay(this).GetClientArea();
+    wxRect rect = GetRect();
+    rect.height = needed;
+    rect.y = std::max(area.y, std::min(rect.y, area.GetBottom() + 1 - needed));
+    SetSize(rect);
+    wxPanel* panel = getControlsPanel();
     panel->Layout();
     refreshTree(panel);
 }
 
 void BenchmarkDialog::OnTargetChanged(wxCommandEvent& WXUNUSED(event))
+{
+    applyTarget();
+    growForAdvanced();
+}
+
+void BenchmarkDialog::applyTarget()
 {
     const BenchmarkTarget target = getTarget();
     book_target->ChangeSelection(size_t(target));
@@ -919,7 +940,7 @@ void BenchmarkDialog::OnTargetChanged(wxCommandEvent& WXUNUSED(event))
     if (target == BenchmarkTarget::ThisComputer
         && choice_install->GetSelection() == int(installationsM.size()))
     {
-        showAdvanced(true);
+        openAdvanced(true);
     }
     if (target == BenchmarkTarget::OtherServer && text_host->IsEmpty() && databaseM)
     {
@@ -1507,6 +1528,7 @@ void BenchmarkDialog::showSettings(bool show)
         // the hint of the advanced settings is only shown next to the
         // closed pane
         layoutAdvanced();
+        growForAdvanced();
     }
     else
         getControlsPanel()->Layout();

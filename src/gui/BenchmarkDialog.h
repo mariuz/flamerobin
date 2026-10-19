@@ -152,7 +152,16 @@ private:
     // opens or closes the advanced settings; the dialog grows for the open
     // ones if the screen has room
     void showAdvanced(bool show);
+    // the same without growing: the constructor sets the size once at its
+    // end. Reading the size of the dialog while it is constructed counts as
+    // a call of a pure virtual function for CodeQL (cpp/unsafe-use-of-this),
+    // so nothing that the constructor calls may call growForAdvanced().
+    void openAdvanced(bool show);
     void layoutAdvanced();
+    // the dialog as high as the minimum size of layoutAdvanced()
+    void growForAdvanced();
+    // the page and the hint of the selected target, without growing
+    void applyTarget();
     // how long the test takes, shown before the start
     wxString getReadyHint() const;
     // the stages of a run with the selected settings, shown before the start
