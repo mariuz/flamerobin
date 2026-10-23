@@ -16,6 +16,20 @@ The following people also made a significant non-coding contributions:
 * Alex Stanciu
 * Barbara Del Vecchio
 
+Screenshots
+---------------------------
+Main window with a connected database:
+
+![FlameRobin main window](docs/screenshots/main-window.png)
+
+Database tree with tables expanded:
+
+![FlameRobin database tree](docs/screenshots/database-tree.png)
+
+SQL editor with syntax highlighting and data grid results:
+
+![FlameRobin SQL editor](docs/screenshots/sql-editor.png)
+
 Key Features & Capabilities
 ---------------------------
 FlameRobin is a lightweight, cross-platform database administration tool for the **Firebird DBMS** (supporting Firebird 2.5, 3.0, 4.0, 5.0, and 6.0+).
