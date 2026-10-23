@@ -168,3 +168,40 @@ If you need to update the patches (e.g., after updating the submodule):
    ```
 2. The script will now automatically update `ports/fb-cpp/fb-cpp-flamerobin.patch`.
 3. Verify that the project still compiles and then commit the changes.
+
+Contributors
+---------------------------
+The following people have contributed code to FlameRobin (ordered by number of commits):
+
+* Marius Popa
+* Milan Babuskov
+* Michael Hieke
+* Lucas Rubian Schatz
+* jdochoa
+* Nando Dessena
+* Scott Morgan
+* Andre van Zuydam
+* Damyan Ivanov
+* Andreas Maier
+* Baldé
+* nLeonardt95
+* Bart Bakker
+* Tutul
+* Tomáš Dvořák
+* thankap
+* Anderson Rogerio
+* Fikret Hasovic
+* Markus Beth
+* Robert Al Lakis
+* Rudolf Grauberger
+* blumf
+* Radek Marek
+* Wolf-SO
+* Albertas Vyšniauskas
+* Khalyutin
+* Michele Abbrescia
+* Vincent Bermel
+* cbs-tt
+* lz1nwm
+
+See also the [contributors graph](https://github.com/mariuz/flamerobin/graphs/contributors) for the full history.
