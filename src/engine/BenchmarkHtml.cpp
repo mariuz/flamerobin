@@ -32,16 +32,19 @@
 #include "engine/Benchmark.h"
 
 // The HTML report: one self-contained page without scripts or external
-// resources, shown in the benchmark dialog and saved as a file. It has two
-// views. The overview is for everybody, also for administrators who know
-// neither Firebird nor databases: the measured values of every part of the
-// system in plain words, or, compared with another run, the points of both
-// runs, what got faster or slower and what could be the reason. A single
-// run is not judged, because whether a value is fast or slow depends on the
-// environment. The detailed report is for developers: one tile per part
-// whose panel opens on a click (a check box, so that no script is needed),
-// charts, every measured value and the explanations. Charts are inline SVG
-// or CSS bars drawn to scale; all colors are theme tokens.
+// resources, shown in the benchmark dialog and saved as a file. The
+// overview is for everybody, also for administrators who know neither
+// Firebird nor databases: a few key figures and what was noticed in the
+// run, or, compared with another run, how many key figures got faster or
+// slower, the parts that differ most with the likely reason and what to
+// try. A single run is not judged, because whether a value is fast or slow
+// depends on the environment. Everything else is one click away: the
+// detailed comparison with every value of both runs, and the detailed
+// report for developers with one line per part that opens its values and
+// charts, every measured value and the explanations. The views and the
+// parts open without a script (radio buttons and <details>); Internet
+// Explorer in an older mode shows all of them. Charts are inline SVG or CSS
+// bars drawn to scale; all colors are theme tokens.
 
 namespace fr
 {
@@ -53,246 +56,377 @@ namespace
 // single string literal to about 16 KB.
 const char* const styleSheet = R"CSS(
 :root {
-  --bg: #ffffff; --ink: #2d3748; --muted: #718096; --line: #e2e8f0; --head: #edf2f7;
-  --head-ink: #1a202c; --alt: #f7fafc; --link: #3182ce; --link-hover: #2b6cb0;
-  --ok: #2f855a; --ok-bg: #e6f4ea; --warn: #b7791f; --warn-bg: #fdf3dc;
-  --bad: #c53030; --bad-bg: #fde8e8; --info-bg: #ebf4ff;
-  --c1: #3182ce; --c2: #dd6b20; --c3: #a0aec0;
+  --bg: #ffffff; --ink: #1d2430; --ink-2: #4a5466; --muted: #667183; --line: #e4e8ee; --line-2: #c9d0da;
+  --head: #f3f5f8; --head-ink: #1d2430; --alt: #f7f8fa; --link: #1f62c0; --link-hover: #174d99;
+  --ok: #2f855a; --ok-bg: #e6f4ea; --warn: #b35c00; --warn-bg: #fdf3dc;
+  --bad: #c53030; --bad-bg: #fde8e8; --info-bg: #edf3fc;
+  --up: #2e9e5b; --up-ink: #1e7a43; --down: #b3261e; --down-ink: #b3261e;
+  --a-cpu: #6a4fd0; --a-disk: #00897b; --a-mem: #b06f00; --a-net: #c0397b; --a-users: #1d7fc0; --a-app: #667183;
+  --c1: #1f6fd1; --c2: #d0590b; --c3: #a9b2bf;
   --no-gap: 0;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #1e1e1e; --ink: #e0e0e0; --muted: #a0aec0; --line: #3d3d3d; --head: #2c2c3e;
-    --head-ink: #ffffff; --alt: #252535; --link: #4a90e2; --link-hover: #6ba4e8;
-    --ok: #68d391; --ok-bg: #1f3a2a; --warn: #f6c35b; --warn-bg: #3d3216;
-    --bad: #fc8181; --bad-bg: #3f2222; --info-bg: #1f2c40;
-    --c1: #4a90e2; --c2: #ed8936; --c3: #718096;
+    --bg: #1c1e22; --ink: #e8eaed; --ink-2: #b9c0cb; --muted: #959eab; --line: #32363d; --line-2: #4a505a;
+    --head: #24272c; --head-ink: #ffffff; --alt: #212428; --link: #6aa6f5; --link-hover: #8fbcf8;
+    --ok: #68d391; --ok-bg: #1f3a2a; --warn: #f0a04b; --warn-bg: #3d3216;
+    --bad: #fc8181; --bad-bg: #3f2222; --info-bg: #1f2b3d;
+    --up: #58c785; --up-ink: #58c785; --down: #e5534b; --down-ink: #f06a62;
+    --a-cpu: #8672e6; --a-disk: #16a08f; --a-mem: #c4861a; --a-net: #dc5a95; --a-users: #3896dc; --a-app: #959eab;
+    --c1: #5aa2f0; --c2: #f0913f; --c3: #5c6573;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #1e1e1e; --ink: #e0e0e0; --muted: #a0aec0; --line: #3d3d3d; --head: #2c2c3e;
-  --head-ink: #ffffff; --alt: #252535; --link: #4a90e2; --link-hover: #6ba4e8;
-  --ok: #68d391; --ok-bg: #1f3a2a; --warn: #f6c35b; --warn-bg: #3d3216;
-  --bad: #fc8181; --bad-bg: #3f2222; --info-bg: #1f2c40;
-  --c1: #4a90e2; --c2: #ed8936; --c3: #718096;
+  --bg: #1c1e22; --ink: #e8eaed; --ink-2: #b9c0cb; --muted: #959eab; --line: #32363d; --line-2: #4a505a;
+  --head: #24272c; --head-ink: #ffffff; --alt: #212428; --link: #6aa6f5; --link-hover: #8fbcf8;
+  --ok: #68d391; --ok-bg: #1f3a2a; --warn: #f0a04b; --warn-bg: #3d3216;
+  --bad: #fc8181; --bad-bg: #3f2222; --info-bg: #1f2b3d;
+  --up: #58c785; --up-ink: #58c785; --down: #e5534b; --down-ink: #f06a62;
+  --a-cpu: #8672e6; --a-disk: #16a08f; --a-mem: #c4861a; --a-net: #dc5a95; --a-users: #3896dc; --a-app: #959eab;
+  --c1: #5aa2f0; --c2: #f0913f; --c3: #5c6573;
   color-scheme: dark;
 }
 
-/* the look of the FlameRobin property pages; the fonts are written out and
-   not taken from var(), because Internet Explorer takes "font: 13px var(--x)"
+/* one family in two weights (400, 600), an 8 px grid, one corner radius
+   (8 px), hairlines instead of boxes. The fonts are written out and not
+   taken from var(), because Internet Explorer takes "font: 13px var(--x)"
    for the name of a font and falls back to a serif font */
 * { box-sizing: border-box; }
-html, body { margin: 0; background: var(--bg); color: var(--ink); font-size: 13px; line-height: 1.5; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-main { max-width: 1100px; padding: 12px; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font-size: 14px; line-height: 1.5; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+main { display: block; max-width: 1100px; padding: 24px 24px 32px; }
 a, .link { color: var(--link); text-decoration: none; cursor: pointer; }
 a:hover, .link:hover { color: var(--link-hover); text-decoration: underline; }
-h1 { font-size: 18px; line-height: 1.3; margin: 0 0 2px; overflow-wrap: anywhere; }
-h2 { font-size: 14px; margin: 18px 0 6px; }
-h4 { font-size: 13px; margin: 14px 0 6px; }
-.num, .n, .points-num { font-variant-numeric: tabular-nums; }
-.brand, .meta, .quiet, small, .muted { color: var(--muted); }
-.brand { font-size: 12px; }
-.specs, .meta { margin: 0; overflow-wrap: anywhere; }
-.notice { border: 1px solid var(--line); border-radius: 6px; padding: 6px 10px; margin-top: 8px; overflow-wrap: anywhere; }
-.notice.bad { background: var(--bad-bg); }
-.notice.warn { background: var(--warn-bg); }
-.notice.info { background: var(--info-bg); }
-code { font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace; font-size: 12px; overflow-wrap: anywhere; }
+h1 { font-size: 24px; font-weight: 600; line-height: 1.25; margin: 0; overflow-wrap: anywhere; }
+h2 { font-size: 16px; font-weight: 600; margin: 32px 0 8px; }
+h3, h4 { font-size: 14px; font-weight: 600; margin: 16px 0 8px; }
+b, strong, th { font-weight: 600; }
+.num, .n { font-variant-numeric: tabular-nums; }
+.quiet, small, .muted { color: var(--muted); }
 p { max-width: 100ch; }
+code { font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace; font-size: 12px; overflow-wrap: anywhere; }
 
-/* page navigation like on the property pages: Overview | Detailed report.
+/* pictograms: one <svg><symbol> block per page, every use draws in the
+   color of its text; the mode of Internet Explorer 8 shows none of them,
+   the short word next to them says the same */
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+.ico { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; vertical-align: middle; flex: none; }
+.ico.s { width: 16px; height: 16px; stroke-width: 2; }
+.cpu { color: var(--a-cpu); } .disk { color: var(--a-disk); } .mem { color: var(--a-mem); }
+.net { color: var(--a-net); } .users { color: var(--a-users); } .app { color: var(--a-app); }
+
+/* head: brand, the system as title, its specification, the run as chips */
+.brand { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+.specs { margin: 8px 0 0; max-width: none; color: var(--ink-2); overflow-wrap: anywhere; }
+.chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; }
+.chips > * { margin: 0 8px 8px 0; margin: var(--no-gap); }
+.chip { display: inline-flex; align-items: center; gap: 8px; min-height: 24px; padding: 0 8px; border: 1px solid var(--line); border-radius: 8px; font-size: 12px; color: var(--ink-2); white-space: nowrap; }
+.chip .ico { width: 14px; height: 14px; stroke-width: 2; color: var(--muted); }
+.chip > * + * { margin-left: 8px; margin-left: var(--no-gap); }
+.chip.ask { position: relative; color: var(--link); cursor: help; }
+.chip.ask .ico { color: var(--link); }
+.lead { font-size: 12px; color: var(--muted); margin: 8px 0 0; overflow-wrap: anywhere; }
+.notice { border-radius: 8px; padding: 8px 16px; margin-top: 16px; overflow-wrap: anywhere; }
+.notice.bad { background: var(--bad-bg); } .notice.warn { background: var(--warn-bg); } .notice.info { background: var(--info-bg); }
+
+/* Overview | Detailed comparison | Detailed report: tabs over a hairline.
    What hides something depends on :checked, which the Internet Explorer
    control knows only in the mode of Internet Explorer 9 and later: in an
-   older mode both views and every panel are shown, and the links that would
-   not work are not */
-.view-toggle { position: fixed; top: 0; left: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; clip: rect(0 0 0 0); }
-.pages { display: none; margin: 10px 0 4px; }
+   older mode every view and every part are shown, and the links that
+   would not work are not */
+.view-toggle, .filter-toggle { position: fixed; top: 0; left: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; clip: rect(0 0 0 0); }
+.pages { display: none; margin: 24px 0 0; border-bottom: 1px solid var(--line); }
 .view-toggle:checked ~ .pages { display: block; }
-.pages label { color: var(--link); cursor: pointer; }
-.pages label:hover { text-decoration: underline; }
-#v1:checked ~ .pages label[for="v1"], #v2:checked ~ .pages label[for="v2"] { color: var(--ink); font-weight: 600; cursor: default; text-decoration: none; }
-#v1:checked ~ .details, #v2:checked ~ .overview { display: none; }
+.pages label { display: inline-block; padding: 8px 0; margin-right: 24px; margin-bottom: -1px; border-bottom: 2px solid transparent; color: var(--ink-2); cursor: pointer; }
+.pages label:hover { color: var(--ink); }
+#v1:checked ~ .pages label[for="v1"], #v2:checked ~ .pages label[for="v2"], #v3:checked ~ .pages label[for="v3"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--ink); cursor: default; }
+#v1:checked ~ .details, #v1:checked ~ .cmp-details, #v2:checked ~ .overview, #v2:checked ~ .cmp-details, #v3:checked ~ .overview, #v3:checked ~ .details { display: none; }
 
-/* tables and boxes: a light header row, thin lines, rounded corners */
-table { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid var(--line); border-radius: 6px; margin: 6px 0; }
-thead th:first-child { border-top-left-radius: 5px; } thead th:last-child { border-top-right-radius: 5px; }
-tbody tr:last-child td:first-child { border-bottom-left-radius: 5px; } tbody tr:last-child td:last-child { border-bottom-right-radius: 5px; }
-th { background: var(--head); color: var(--head-ink); font-weight: 600; text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
-td { padding: 6px 10px; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
-tr:last-child td { border-bottom: none; }
-tbody tr:nth-child(even) td { background: var(--alt); }
-td.n, th.n { text-align: right; white-space: nowrap; }
-td small { display: block; font-size: 12px; white-space: normal; }
-tr.group td { background: var(--head) !important; color: var(--head-ink); font-weight: 600; }
-.box { border: 1px solid var(--line); border-radius: 6px; margin: 10px 0; }
-.box-head { background: var(--head); color: var(--head-ink); font-weight: 600; padding: 6px 10px; border-bottom: 1px solid var(--line); border-radius: 5px 5px 0 0; }
-.box > :last-child { border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; }
-.box-body { padding: 10px; }
-.box-body p { margin: 0 0 6px; } .box-body p:last-child { margin-bottom: 0; }
-.box-foot { padding: 6px 10px; border-top: 1px solid var(--line); background: var(--alt); }
-.box > table { border: none; border-radius: 0; margin: 0; }
-.box > table thead th { border-radius: 0; }
-
-/* faster and slower in a comparison: green, red, grey within the variation */
-.ok-text { color: var(--ok); } .warn-text { color: var(--warn); } .bad-text { color: var(--bad); } .info-text { color: var(--muted); }
-.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 7px; background: var(--line); vertical-align: 0; }
-.dot.ok { background: var(--ok); } .dot.bad { background: var(--bad); }
-.chg { display: inline-block; font-size: 12px; font-weight: 600; padding: 0 6px; border-radius: 4px; white-space: nowrap; }
-.chg.up2 { background: var(--ok); color: var(--bg); } .chg.up1 { background: var(--ok-bg); color: var(--ok); }
-.chg.down2 { background: var(--bad); color: var(--bg); } .chg.down1 { background: var(--bad-bg); color: var(--bad); }
-.chg.same { color: var(--muted); }
-
-/* the points of a comparison */
-.points-grid { display: grid; grid-template-columns: minmax(170px, auto) 1fr; gap: 10px 24px; align-items: center; }
-.points-num { font-size: 30px; font-weight: 700; line-height: 1.1; }
-.points-unit { color: var(--muted); margin-left: 4px; }
-.rating { font-weight: 600; }
-
-/* the parts of the system: one line each, a click shows the values */
-.part { border-bottom: 1px solid var(--line); }
-.part:last-child { border-bottom: none; }
-.row { display: grid; grid-template-columns: minmax(150px, 1.2fr) minmax(70px, .5fr) minmax(70px, .5fr) minmax(0, 2fr) 14px; gap: 4px 12px; align-items: baseline; padding: 6px 10px; }
-.row.plain { grid-template-columns: minmax(150px, 1fr) minmax(0, 3fr) 14px; }
-.parts-head { background: var(--head); color: var(--head-ink); font-weight: 600; border-bottom: 1px solid var(--line); border-radius: 5px 5px 0 0; }
-.part > summary { cursor: pointer; list-style: none; }
-.part > summary::-webkit-details-marker { display: none; }
-.part > summary:hover { background: var(--alt); }
-.part-name { font-weight: 600; }
-.part-text { color: var(--muted); }
-.part-body { padding: 0 10px 10px 26px; }
-.part-body table { margin-top: 0; }
-.reasons { border: 1px solid var(--line); border-left: 3px solid var(--warn); border-radius: 6px; padding: 6px 10px; margin-top: 8px; }
-.reasons h4 { margin: 0 0 4px; }
-.reasons ul { margin: 0; padding-left: 18px; }
-.reasons li { margin: 2px 0; }
-
+/* the key figures: one per line, the large number on the left, the
+   pictogram and a line in the color of the part; no rating */
+.fig { display: flex; align-items: center; gap: 16px; min-width: 0; border-top: 1px solid var(--line); border-left: 2px solid var(--line); padding: 16px 0 16px 16px; }
+.figs .fig:last-child { border-bottom: 1px solid var(--line); }
+.fig > * { margin-right: 16px; margin-right: var(--no-gap); }
+.fig.cpu { border-left-color: var(--a-cpu); } .fig.disk { border-left-color: var(--a-disk); } .fig.mem { border-left-color: var(--a-mem); }
+.fig.net { border-left-color: var(--a-net); } .fig.users { border-left-color: var(--a-users); } .fig.app { border-left-color: var(--a-app); }
+.tag { display: inline-flex; align-items: center; gap: 8px; width: 88px; flex: none; vertical-align: middle; }
+.tag .ico { width: 20px; height: 20px; }
+.tag > * + * { margin-left: 8px; margin-left: var(--no-gap); }
+.tag-word { font-size: 12px; font-weight: 600; line-height: 1; letter-spacing: .08em; color: var(--ink-2); white-space: nowrap; }
+.fig-val { flex: none; white-space: nowrap; }
+.fig-num { display: inline-block; width: 144px; color: var(--ink); font-size: 40px; font-weight: 600; line-height: 1.1; text-align: right; font-variant-numeric: tabular-nums; letter-spacing: -0.5px; white-space: nowrap; flex: none; }
+.fig-unit { display: inline-block; width: 56px; margin-left: 4px; font-size: 14px; font-weight: 400; letter-spacing: 0; color: var(--ink-2); text-align: left; }
+.fig-text { flex: 1 1 auto; min-width: 0; }
+.fig-name { display: block; color: var(--ink); }
+.fig-work { display: block; color: var(--muted); font-size: 12px; }
 )CSS"
-R"CSS(/* triangles of the collapsible parts */
+R"CSS(
+/* the overview: figures on the left, notes and the rows on the right */
+.split { display: flex; align-items: flex-start; gap: 48px; }
+.split > * { flex: 1 1 0%; min-width: 0; margin-right: 48px; margin-right: var(--no-gap); }
+.split > :first-child { flex: 0 1 576px; }
+
+/* section labels, notes, the rows that open */
+.label { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px; font-size: 12px; font-weight: 600; color: var(--ink-2); letter-spacing: .4px; text-transform: uppercase; margin: 0 0 8px; }
+.label.first { margin-top: 32px; margin-bottom: 16px; }
+.label .quiet { margin-left: 8px; margin-left: var(--no-gap); font-weight: 400; text-transform: none; letter-spacing: 0; }
+.label > * + * { margin-left: 8px; margin-left: var(--no-gap); }
+.notes { margin: 0 0 32px; border-top: 1px solid var(--line); }
+.notes-more { margin: -24px 0 32px; font-size: 12px; }
 details > summary { list-style: none; cursor: pointer; }
 details > summary::-webkit-details-marker { display: none; }
-.chev { width: 7px; height: 7px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(-45deg); transition: transform .12s; justify-self: end; margin-top: 4px; }
+.note { border-bottom: 1px solid var(--line); }
+.note > summary { display: flex; align-items: center; gap: 16px; padding: 12px 0; }
+.note > summary > * { margin-right: 16px; margin-right: var(--no-gap); }
+.note > summary:hover .note-title { color: var(--link); }
+.note .ico.s { color: var(--link); }
+.note-title { flex: 1 1 auto; min-width: 0; }
+.note-where { margin-left: 16px; margin-left: var(--no-gap); font-size: 12px; color: var(--muted); white-space: nowrap; }
+.note-body { padding: 0 32px 16px; color: var(--ink-2); }
+.note-body p { margin: 0 0 8px; }
+.note-body p:last-child { margin-bottom: 0; }
+.note-body b { color: var(--ink); }
+.chev { display: inline-block; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(-45deg); margin: 0 4px 0 auto; flex: none; }
 details[open] > summary .chev { transform: rotate(45deg); }
-.block > summary { display: flex; align-items: center; gap: 10px; padding: 6px 10px; background: var(--head); color: var(--head-ink); font-weight: 600; }
-.block > summary .chev { margin-left: auto; }
-.block > summary .hint { color: var(--muted); font-weight: 400; }
-.block-body { padding: 8px 10px; }
-.deeper { margin-top: 8px; }
-.deeper > summary { display: inline-flex; align-items: center; gap: 8px; color: var(--link); }
-summary:focus-visible { outline: 2px solid var(--link); outline-offset: -2px; }
+.more { border-bottom: 1px solid var(--line); }
+.rows { border-top: 1px solid var(--line); }
+.more > summary, label.more { display: flex; align-items: center; gap: 16px; padding: 16px 0; cursor: pointer; }
+.more > summary > *, label.more > * { margin-right: 16px; margin-right: var(--no-gap); }
+.more-title { font-weight: 600; white-space: nowrap; }
+.side .more > summary, .side label.more { flex-wrap: wrap; row-gap: 0; }
+.side .more-hint { order: 2; flex-basis: 100%; margin-left: 0; }
+.more-hint { margin-left: 16px; margin-left: var(--no-gap); color: var(--muted); font-size: 12px; }
+.more > summary:hover .more-title, label.more:hover .more-title { color: var(--link); }
+.more-body { padding: 0 0 24px; }
+.more-body .label { margin-top: 16px; }
+label.more .go { margin-left: auto; color: var(--link); font-weight: 600; }
+label.more { display: none; }
+.view-toggle:checked ~ .overview label.more { display: flex; }
+summary:focus-visible, label:focus-visible, .tip:focus, .chip.ask:focus { outline: 2px solid var(--link); outline-offset: 2px; }
 
-/* system details */
-.sys-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; }
-.sys-card { border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; min-width: 0; }
-.sys-card h3 { margin: 0 0 6px; font-size: 13px; }
-.facts { margin: 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 2px 14px; }
-.facts dt { color: var(--muted); }
-.facts dd { margin: 0; overflow-wrap: anywhere; }
-.sys-more { margin-top: 10px; }
+/* tables: hairlines, a quiet head, numbers on the right */
+table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+th { color: var(--muted); font-size: 12px; text-align: left; padding: 8px; border-bottom: 1px solid var(--line-2); white-space: nowrap; }
+td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
+th:first-child, td:first-child { padding-left: 0; }
+th:last-child, td:last-child { padding-right: 0; }
+td.n, th.n { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+td small { display: block; font-size: 12px; white-space: normal; }
+tr.group td { padding-top: 24px; font-weight: 600; border-bottom-color: var(--line-2); }
+tr.group .tag { width: auto; margin-right: 8px; }
+tr.group .tag .ico { width: 16px; height: 16px; }
 
-/* detailed report: one tile per part, a click opens its panel */
-.toggle { position: fixed; top: 0; left: 0; width: 1px; height: 1px; opacity: 0; pointer-events: none; clip: rect(0 0 0 0); }
-.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; grid-auto-flow: row dense; }
-.tile { display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--line); border-top: 3px solid var(--line); border-radius: 6px; padding: 8px 10px; cursor: pointer; min-width: 0; }
-.tile:hover { background: var(--alt); }
-.tile .name { font-weight: 600; }
-.tile .about { color: var(--muted); }
-.tile .key { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; }
-.tile .key b { font-variant-numeric: tabular-nums; white-space: nowrap; }
-.tile .more-link { margin-top: auto; color: var(--link); }
-.tile .more-link .shut { display: none; }
-.panel { display: block; grid-column: 1 / -1; border: 1px solid var(--line); border-top: 3px solid var(--link); border-radius: 6px; padding: 8px 10px; min-width: 0; }
-.panel-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-.panel-head h3 { margin: 0; font-size: 15px; }
-.panel-head .close { margin-left: auto; color: var(--link); cursor: pointer; }
-.tile .more-link, .panel-head .close { display: none; }
-.view-toggle:checked ~ .details .more-link, .view-toggle:checked ~ .details .close { display: inline; }
-.where { color: var(--muted); margin: 0 0 8px; overflow-wrap: anywhere; }
-.explain dt { font-weight: 600; margin-top: 8px; }
-.explain dd { margin: 2px 0 0; color: var(--muted); max-width: 90ch; }
-.explain dd b { color: var(--ink); font-weight: 600; }
+/* a comparison: the verdict first, one line per key figure */
+.runs { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; }
+.runs > * { margin: 0 8px 8px 0; margin: var(--no-gap); }
+.runs .to { color: var(--muted); }
+.verdict { margin: 40px 0 8px; font-size: 40px; font-weight: 600; line-height: 1.15; letter-spacing: -0.5px; }
+.verdict .v-faster, .verdict .v-slower, .verdict .v-same { white-space: nowrap; }
+.verdict .sep { color: var(--muted); font-weight: 400; }
+.verdict .v-faster { color: var(--up-ink); } .verdict .v-slower { color: var(--down-ink); } .verdict .v-same { color: var(--muted); font-weight: 400; }
+.verdict-sub { margin: 0 0 32px; color: var(--ink-2); }
+.verdict-sub b { font-variant-numeric: tabular-nums; }
+.verdict-sub .sep { color: var(--muted); }
+.verdict-note { margin: -24px 0 32px; color: var(--ink-2); }
+.verdict-note .ico { color: var(--warn); margin-right: 8px; }
+.cmp { margin: 0 0 40px; }
+.cmp td { padding-top: 16px; padding-bottom: 16px; vertical-align: middle; }
+.cmp td.tagcol { width: 104px; }
+.cmp .old { color: var(--muted); }
+.cmp .arrow { color: var(--muted); padding-left: 0; padding-right: 0; }
+.cmp .new { font-weight: 600; }
+.cmp .unit { color: var(--muted); font-size: 12px; font-weight: 400; margin-left: 4px; }
+.cmp .pts { font-size: 16px; font-weight: 600; }
+.cmp .delta { display: block; font-size: 12px; }
+.up-text { color: var(--up-ink); } .down-text { color: var(--down-ink); } .same-text { color: var(--muted); }
+.cmp th.bar-col, .cmp td.bar-col { width: 144px; }
+)CSS"
+R"CSS(
+/* the ratio as a bar from the middle: faster to the right (green), slower
+   to the left (red); the triangle and the words say the same, also for
+   readers who cannot tell red from green */
+.dbar { position: relative; display: block; width: 128px; height: 8px; margin: 0 auto; background: var(--alt); border-radius: 8px; }
+.dbar:after { content: ""; position: absolute; left: 50%; margin-left: -1px; top: -4px; width: 2px; height: 16px; background: var(--line-2); }
+.dbar .fill { position: absolute; top: 0; height: 8px; }
+.dbar .fill.faster { left: 50%; background: var(--up); border-radius: 0 8px 8px 0; }
+.dbar .fill.slower { right: 50%; background: var(--down); border-radius: 8px 0 0 8px; }
+.dir { font-weight: 600; white-space: nowrap; }
+.dir.faster { color: var(--up-ink); } .dir.slower { color: var(--down-ink); } .dir.same { color: var(--muted); font-weight: 400; }
+.dir:before { content: ""; display: inline-block; margin-right: 8px; vertical-align: 1px; }
+.dir.faster:before { border-left: 5px solid transparent; border-right: 5px solid transparent; border-bottom: 8px solid; }
+.dir.slower:before { border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 8px solid; }
+.dir.same:before { width: 10px; height: 6px; border-top: 2px solid; border-bottom: 2px solid; vertical-align: 2px; }
+.dir.l1 { font-weight: 400; }
 
-/* tooltips: a small question mark, the text on hover or focus */
-.tip { position: relative; display: inline-grid; place-items: center; width: 14px; height: 14px; margin-left: 4px; border-radius: 50%; border: 1px solid var(--line); color: var(--muted); font-style: normal; font-variant: normal; font-weight: 600; font-size: 10px; line-height: 1; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; cursor: help; vertical-align: 1px; }
-.tip-box { display: none; position: absolute; z-index: 20; top: calc(100% + 5px); left: -8px; width: max-content; max-width: 280px; padding: 6px 9px; border-radius: 4px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); box-shadow: 0 3px 10px rgba(0,0,0,.18); font-style: normal; font-variant: normal; font-weight: 400; font-size: 12px; line-height: 1.4; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; text-align: left; white-space: normal; text-transform: none; }
-td.n .tip-box, th.n .tip-box { left: auto; right: -8px; }
-.tip:hover .tip-box, .tip:focus .tip-box { display: block; }
+/* what stands out: the parts that differ clearly, the largest change
+   first, each with the likely reason and what to try; more on a click */
+.stand { margin: 0 0 32px; border-top: 1px solid var(--line); }
+.so { border-bottom: 1px solid var(--line); }
+.so > summary, .so > .so-head { display: flex; align-items: flex-start; gap: 16px; padding: 16px 0; }
+.so > summary > *, .so > .so-head > * { margin-right: 16px; margin-right: var(--no-gap); }
+.so > summary:hover .so-part { color: var(--link); }
+.so-dir { flex: none; width: 144px; margin-left: 8px; margin-left: var(--no-gap); }
+.so-text { flex: 1 1 auto; min-width: 0; }
+.so-part { display: block; font-weight: 600; margin-bottom: 4px; }
+.so-line { display: block; color: var(--ink-2); }
+/* only where :root is known: the mode of Internet Explorer 7 and 8 makes
+   an element with an unknown display value inline, also after a known one */
+:root .so-line { display: flex; align-items: baseline; gap: 8px; }
+.so-line > * + * { flex: 1 1 0%; min-width: 0; }
+.so-key { display: inline-block; flex: none; width: 104px; color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.so-more { flex: none; margin-left: 8px; margin-left: var(--no-gap); color: var(--muted); font-size: 12px; white-space: nowrap; }
+.so-body { padding: 0 0 16px 264px; }
+.reason-head { margin: 0 0 8px; color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.reason-list { margin: 0; padding-left: 16px; color: var(--ink-2); }
+.reason-list li { margin: 0 0 8px; }
+.reason-list b { color: var(--ink); }
+.why-more { margin-top: 8px; }
+.why-more > summary { display: inline-flex; align-items: center; gap: 8px; color: var(--link); font-size: 12px; }
+.why-more > summary > * { margin-left: 8px; margin-left: var(--no-gap); }
+.why-more .reason-head { margin-top: 8px; }
+.why-block { margin: 0 0 16px; padding: 0 0 16px; border-bottom: 1px solid var(--line); }
+
+/* the detailed comparison: every value of both runs, a filter without a
+   script; without :checked (Internet Explorer 8) every row is shown */
+.filter { display: none; margin: 0 0 16px; }
+.filter-toggle:checked ~ .filter { display: block; }
+.filter label { display: inline-block; padding: 4px 16px; border: 1px solid var(--line-2); color: var(--ink-2); font-size: 12px; cursor: pointer; }
+.filter label + label { margin-left: -1px; }
+.filter label:first-child { border-radius: 8px 0 0 8px; } .filter label:last-child { border-radius: 0 8px 8px 0; }
+#f1:checked ~ .filter label[for="f1"], #f2:checked ~ .filter label[for="f2"] { background: var(--head); color: var(--ink); font-weight: 600; }
+#f2:checked ~ .areas tr.same, #f2:checked ~ .areas .unchanged { display: none; }
+.badge { display: inline-block; padding: 0 8px; border: 1px solid var(--line-2); border-radius: 8px; font-size: 12px; font-weight: 400; line-height: 20px; color: var(--ink-2); white-space: nowrap; }
+.badge.nc { border-style: dashed; }
+table.dt .work { font-size: 12px; }
+.legend-note { font-size: 12px; margin-top: 16px; }
+
+/* tooltips: a small question mark or a chip, the text on hover or focus */
+.tip { position: relative; display: inline-block; width: 16px; height: 16px; margin-left: 4px; border-radius: 8px; border: 1px solid var(--line-2); color: var(--muted); font-style: normal; font-weight: 600; font-size: 10px; line-height: 14px; text-align: center; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; cursor: help; vertical-align: 1px; }
+.tip-box { display: none; position: absolute; z-index: 20; top: 100%; left: -8px; margin-top: 8px; width: 280px; padding: 8px 16px; border-radius: 8px; border: 1px solid var(--line-2); background: var(--bg); color: var(--ink); box-shadow: 0 4px 16px rgba(0,0,0,.12); font-style: normal; font-weight: 400; font-size: 12px; line-height: 1.5; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; text-align: left; white-space: normal; text-transform: none; letter-spacing: 0; }
+td.n .tip-box, th.n .tip-box, .chip.ask .tip-box { left: auto; right: -8px; }
+.tip:hover .tip-box, .tip:focus .tip-box, .chip.ask:hover .tip-box, .chip.ask:focus .tip-box { display: block; }
+)CSS"
+R"CSS(
+/* the detailed report: one line per part like the key figures, a click
+   opens its values and charts; Internet Explorer shows them all open */
+.areas { margin-top: 16px; border-bottom: 1px solid var(--line); }
+.area > summary:hover .fig-name { color: var(--link); }
+.area > summary .chev { margin-right: 8px; }
+.area-body { color: var(--ink); display: flex; flex-wrap: wrap; align-items: flex-start; gap: 32px; padding: 0 0 32px 56px; border-left: 2px solid var(--line); }
+.area-body > * { flex: 1 1 320px; min-width: 0; margin-right: 32px; margin-right: var(--no-gap); }
+.area.cpu .area-body { border-left-color: var(--a-cpu); } .area.disk .area-body { border-left-color: var(--a-disk); } .area.mem .area-body { border-left-color: var(--a-mem); }
+.area.net .area-body { border-left-color: var(--a-net); } .area.users .area-body { border-left-color: var(--a-users); } .area.app .area-body { border-left-color: var(--a-app); }
+.where { color: var(--muted); margin: 0 0 8px; font-size: 12px; overflow-wrap: anywhere; }
 
 /* charts */
-.charts { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
-.chart { border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; min-width: 0; }
-.chart h5 { font-size: 13px; margin: 0; }
-.chart .chart-sub { color: var(--muted); font-size: 12px; margin: 2px 0 8px; overflow-wrap: anywhere; }
+.charts { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+.charts > * { margin-bottom: 16px; margin-bottom: var(--no-gap); }
+.chart { min-width: 0; overflow: hidden; }
+.chart h5 { font-size: 14px; font-weight: 600; margin: 0; }
+.chart-sub { color: var(--muted); font-size: 12px; margin: 0 0 8px; overflow-wrap: anywhere; }
+.hbars > * { margin-bottom: 8px; }
+.hb { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.hb > * { margin-right: 8px; margin-right: var(--no-gap); }
+.hb-label { width: 40%; color: var(--ink-2); overflow-wrap: anywhere; }
+.hb-track { flex: 1 1 auto; height: 8px; background: var(--alt); border-radius: 8px; overflow: hidden; }
+.hb-fill { display: block; height: 100%; border-radius: 8px; min-width: 2px; }
+.hb-val { font-variant-numeric: tabular-nums; white-space: nowrap; width: 88px; text-align: right; }
 .chart svg { width: 100%; height: auto; display: block; }
 .chart svg text { font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace; }
 .axis { fill: var(--muted); font-size: 10px; }
 .gridline { stroke: var(--line); stroke-width: 1; }
-.c1 { fill: var(--c1); background: var(--c1); }
-.c2 { fill: var(--c2); background: var(--c2); }
-.c3 { fill: var(--c3); background: var(--c3); }
+.c1 { fill: var(--c1); background: var(--c1); } .c2 { fill: var(--c2); background: var(--c2); } .c3 { fill: var(--c3); background: var(--c3); }
 .ideal { stroke: var(--muted); stroke-width: 1.5; stroke-dasharray: 4 3; fill: none; }
 .ideal-dot { fill: var(--bg); stroke: var(--muted); stroke-width: 1.5; }
 .best { stroke: var(--ok); stroke-width: 1; stroke-dasharray: 3 3; }
 .vlabel { fill: var(--ink); font-size: 10px; paint-order: stroke; stroke: var(--bg); stroke-width: 3px; }
-.hbars { display: grid; gap: 6px; }
-.hb { display: grid; grid-template-columns: minmax(90px, 38%) 1fr auto; gap: 10px; align-items: center; font-size: 12px; }
-.hb-label { color: var(--muted); overflow-wrap: anywhere; }
-.hb-track { height: 9px; background: var(--alt); border-radius: 3px; overflow: hidden; }
-.hb-fill { display: block; height: 100%; border-radius: 3px; min-width: 2px; }
-.hb-val { font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, Courier, monospace; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.stack { display: flex; height: 18px; border-radius: 4px; overflow: hidden; background: var(--alt); }
+.stack { display: flex; height: 16px; border-radius: 8px; overflow: hidden; background: var(--alt); }
 .stack span { display: block; height: 100%; min-width: 2px; }
-.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--muted); margin-top: 8px; }
-.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
-.legend i.dash { height: 0; border-top: 2px dashed var(--muted); border-radius: 0; vertical-align: 3px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12px; color: var(--muted); margin-top: 8px; }
+.legend > * + * { margin-left: 16px; margin-left: var(--no-gap); }
+.legend i { display: inline-block; width: 8px; height: 8px; border-radius: 8px; margin-right: 8px; }
+.legend i.dash { width: 12px; height: 0; border-top: 2px dashed var(--muted); border-radius: 0; vertical-align: 3px; }
 
-/* two runs side by side */
-.runs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.runs .box { margin: 0 0 10px; margin: var(--no-gap); }
+/* system details, facts, explanations */
+.sys-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.sys-grid > * { margin-bottom: 16px; margin-bottom: var(--no-gap); }
+.sys-card { min-width: 0; }
+.sys-card h3 { margin: 0 0 8px; }
+.facts { margin: 0; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 16px; }
+.facts dt { color: var(--muted); }
+.facts dd { margin: 0; overflow-wrap: anywhere; }
+.explain dt { font-weight: 600; margin-top: 8px; }
+.explain dd { margin: 0; color: var(--ink-2); max-width: 90ch; }
+.explain dd b { color: var(--ink); }
+.deeper { margin-top: 16px; }
+.deeper > summary { display: inline-flex; align-items: center; gap: 8px; color: var(--link); }
+.deeper > summary > * { margin-left: 8px; margin-left: var(--no-gap); }
 
-/* Internet Explorer 11 knows neither gap nor grid, its grids are blocks (see
-   addBenchmarkCssFallbacks()): margins instead, which every browser with
-   var() sets back to 0 */
-.tiles > *, .sys-grid > *, .charts > * { margin-bottom: 8px; margin-bottom: var(--no-gap); }
-.points-grid > * { margin-bottom: 10px; margin-bottom: var(--no-gap); }
-.hbars > * { margin-bottom: 6px; margin-bottom: var(--no-gap); }
-.tile > * { margin-bottom: 4px; margin-bottom: var(--no-gap); }
-.row > * { display: inline-block; margin-right: 12px; margin-right: var(--no-gap); }
-.block > summary > *, .deeper > summary > * { margin-left: 10px; margin-left: var(--no-gap); }
-.legend > * + *, .tile .key > * + * { margin-left: 14px; margin-left: var(--no-gap); }
+.details, .cmp-details { padding-top: 8px; }
+footer { margin-top: 40px; color: var(--muted); font-size: 12px; max-width: 100ch; }
 
-footer { margin-top: 16px; color: var(--muted); font-size: 12px; max-width: 100ch; }
-
-@media (max-width: 860px) {
-  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 900px) {
+  .split { display: block; }
+  .side .label.first { margin-top: 40px; }
 }
 @media (max-width: 640px) {
-  .points-grid, .runs { grid-template-columns: 1fr; }
-  .tiles { grid-template-columns: 1fr; }
-  /* a part: name and points in one line, the text below */
-  .row { grid-template-columns: minmax(0, 1fr) auto auto 14px; }
-  .row.plain { grid-template-columns: minmax(0, 1fr) 14px; }
-  .row .part-text { grid-column: 1 / -1; grid-row: 2; }
-  .parts-head .part-text { display: none; }
-  .part-body { padding-left: 10px; }
-  .facts { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 3px 10px; }
-  .block > summary { flex-wrap: wrap; }
-  .block > summary .hint { flex-basis: 100%; order: 2; }
+  main { padding: 16px 16px 24px; }
+  h1 { font-size: 20px; }
+  /* the figures and the parts: the pictogram, the number, then the name */
+  .fig { display: block; padding: 16px 0 16px 16px; }
+  .fig > .tag { display: flex; width: auto; margin: 0 0 8px; }
+  .fig-val { display: block; }
+  .fig-num { width: auto; text-align: left; font-size: 32px; }
+  .fig-unit { width: auto; }
+  .fig-name { margin-top: 4px; }
+  .area > summary .chev { display: none; }
+  .area-body { display: block; padding: 0 0 24px 16px; }
+  .verdict { font-size: 28px; margin-top: 32px; }
+  .note-where { display: none; }
+  .so > summary, .so > .so-head { display: block; position: relative; }
+  .so > summary .tag, .so > .so-head .tag { display: flex; width: auto; margin: 0 0 8px; }
+  .so-dir { display: block; width: auto; margin: 0 0 4px; }
+  .so-more { position: absolute; right: 24px; top: 16px; }
+  .so > summary .chev { position: absolute; right: 4px; top: 22px; }
+  :root .so-line { display: block; }
+  .so-key { display: block; width: auto; }
+  .so-body { padding: 0 0 16px; }
+  .note-body { padding: 0 0 16px 32px; }
+  .more-hint { display: none; }
+  .facts { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 4px 8px; }
+  /* the comparison: one block per key figure */
+  .cmp thead { display: none; }
+  .cmp, .cmp tbody, .cmp tr { display: block; width: 100%; }
+  .cmp tr { position: relative; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .cmp td { display: inline-block; padding: 0; border: 0; }
+  .cmp td.area { display: block; font-weight: 600; }
+  .cmp td.tagcol { display: block; width: auto; margin-bottom: 8px; }
+  .cmp td.arrow { padding: 0 4px; }
+  .cmp td.bar-col { display: block; width: auto; margin: 8px 0 0; }
+  .cmp .dbar { margin: 0; width: 100%; }
+  .cmp td.pts { position: absolute; right: 0; top: 16px; }
+  .cmp td.dir-col { display: block; margin-top: 4px; }
+  .cmp .delta { display: none; }
   /* tables become cards: one row per block, every cell with its label */
   table.cards thead { display: none; }
   table.cards, table.cards tbody, table.cards tr, table.cards td { display: block; width: 100%; }
-  table.cards { border: 1px solid var(--line); }
-  table.cards tr { border-bottom: 1px solid var(--line); padding: 6px 10px; }
-  table.cards tr:last-child { border-bottom: none; }
-  table.cards td { border: 0; padding: 1px 0; text-align: left; white-space: normal; background: none !important; }
-  table.cards tr.group { background: var(--head); }
+  table.cards tr { border-bottom: 1px solid var(--line); padding: 8px 0; }
+  table.cards td { border: 0; padding: 0; text-align: left; white-space: normal; }
+  table.cards tr.group td { padding-top: 16px; }
   table.cards td:first-child { font-weight: 600; }
-  table.cards td[data-label]:not(:first-child)::before { content: attr(data-label) ": "; color: var(--muted); }
+  table.cards td[data-label]:not(:first-child):before { content: attr(data-label) ": "; color: var(--muted); }
   table.cards td:empty { display: none; }
-  .tip-box { max-width: 70vw; }
+  .tip-box { width: 240px; }
 }
-@media print { .panel { display: block !important; } details > div { display: block !important; } .view-toggle, .pages { display: none !important; } }
+@media print {
+  details > div { display: block !important; }
+  .view-toggle, .filter-toggle, .pages, .filter, label.more, .chip.ask { display: none !important; }
+  details::details-content { content-visibility: visible; }
+  .chev, .go { display: none !important; }
+  main { max-width: none; padding: 0; } .split { display: block; }
+  .fig-num { font-size: 28px; } .note, .more > summary, .cmp tr, .fig { break-inside: avoid; }
+}
 )CSS";
 
 wxString esc(const wxString& text)
@@ -379,9 +513,9 @@ struct Column
 };
 
 // the start of a table that becomes cards on small screens
-wxString tableStart(std::initializer_list<Column> columns)
+wxString tableStart(std::initializer_list<Column> columns, const wxString& cls = "cards")
 {
-    wxString html = "<table class=\"cards\"><thead><tr>";
+    wxString html = "<table class=\"" + cls + "\"><thead><tr>";
     for (const Column& c : columns)
         html += wxString(c.numeric ? "<th class=\"n\">" : "<th>") + esc(c.title) + "</th>";
     return html + "</tr></thead><tbody>";
@@ -393,6 +527,189 @@ wxString facts(const std::vector<std::pair<wxString, wxString>>& rows)
     for (const auto& row : rows)
         html += "<dt>" + esc(row.first) + "</dt><dd>" + esc(row.second) + "</dd>";
     return html + "</dl>";
+}
+
+wxString dash()
+{
+    return wxString(wxUniChar(0x2014));
+}
+
+wxString arrow()
+{
+    return wxString(" ") + wxUniChar(0x2192) + " ";
+}
+
+wxString separator()
+{
+    return wxString("<span class=\"sep\"> ") + wxUniChar(0x00B7) + " </span>";
+}
+
+// ------------------------------------------------------------ pictograms
+
+// 24 x 24, lines in the color of the text; Internet Explorer 11 draws a
+// <use> only with xlink:href
+const char* const symbols[][2] = {
+    { "i-cpu", "<rect x=\"6\" y=\"6\" width=\"12\" height=\"12\" rx=\"2\"/><rect x=\"9.5\" "
+        "y=\"9.5\" width=\"5\" height=\"5\" rx=\"1\"/><path d=\"M9 2.5V6M15 2.5V6M9 18v3.5M15 "
+        "18v3.5M2.5 9H6M2.5 15H6M18 9h3.5M18 15h3.5\"/>" },
+    { "i-commit", "<path d=\"M12 3v8.5M8.5 8 12 11.5 15.5 8\"/><rect x=\"3\" y=\"14.5\" "
+        "width=\"18\" height=\"6\" rx=\"2\"/><path d=\"M17 17.5h.01\"/>" },
+    { "i-write", "<path d=\"M4 6h16M4 11h16M4 16h7M17 13.5v7M13.5 17h7\"/>" },
+    { "i-mem", "<rect x=\"2.5\" y=\"6.5\" width=\"19\" height=\"10\" rx=\"1.5\"/><path "
+        "d=\"M7 10v3M12 10v3M17 10v3M6 16.5V19M10 16.5V19M14 16.5V19M18 16.5V19\"/>" },
+    { "i-net", "<path d=\"M4 8h14M14.5 4.5 18 8l-3.5 3.5M20 16H6M9.5 12.5 6 16l3.5 3.5\"/>" },
+    { "i-users", "<circle cx=\"9\" cy=\"8\" r=\"3.5\"/><path d=\"M2.5 20c0-3.6 2.9-6 6.5-6s6.5 "
+        "2.4 6.5 6M15.5 4.8a3.5 3.5 0 0 1 0 6.4M18 14.4c2.1.7 3.5 2.8 3.5 5.6\"/>" },
+    { "i-app", "<rect x=\"3\" y=\"4\" width=\"18\" height=\"12\" rx=\"2\"/><path d=\"M8 20h8M12 "
+        "16v4\"/>" },
+    { "i-code", "<path d=\"M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 5l-3 14\"/>" },
+    { "i-conf", "<path d=\"M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1\"/><circle cx=\"15\" "
+        "cy=\"6\" r=\"2\"/><circle cx=\"9\" cy=\"12\" r=\"2\"/><circle cx=\"17\" cy=\"18\" "
+        "r=\"2\"/>" },
+    { "i-info", "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 11v5.5M12 7.5h.01\"/>" },
+    { "i-warn", "<path d=\"M10.3 4.2 2.6 17.6a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.2a2 2 "
+        "0 0 0-3.4 0z\"/><path d=\"M12 9.5v4M12 17h.01\"/>" },
+    { "i-date", "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15.5\" rx=\"2\"/><path d=\"M3.5 "
+        "10h17M8 3v4M16 3v4\"/>" },
+    { "i-time", "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/>" },
+    { "i-load", "<path d=\"M4 17a8 8 0 1 1 16 0\"/><path d=\"M12 17l4-5\"/>" },
+    { "i-link", "<path d=\"M9 7H7a5 5 0 0 0 0 10h2M15 7h2a5 5 0 0 1 0 10h-2M8 12h8\"/>" },
+    { "i-help", "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M9.5 9.5a2.5 2.5 0 1 1 3.5 "
+        "2.3c-.6.3-1 .9-1 1.6v.4M12 17h.01\"/>" },
+    { "i-go", "<path d=\"M5 12h14M13 6l6 6-6 6\"/>" }
+};
+
+// the symbols, once per page right after <body> (see finishPage())
+wxString sprite()
+{
+    wxString html = "<svg class=\"sprite\" aria-hidden=\"true\" focusable=\"false\">";
+    for (const auto& s : symbols)
+    {
+        html += wxString("<symbol id=\"") + s[0] + "\" viewBox=\"0 0 24 24\">" + s[1]
+            + "</symbol>";
+    }
+    return html + "</svg>\n";
+}
+
+// a pictogram; the size as an attribute as well, in case the style sheet is
+// not applied, and no tab stop in Internet Explorer
+wxString icon(const char* symbol, const char* cls = "", int size = 24)
+{
+    return wxString::Format("<svg class=\"ico%s%s\" width=\"%d\" height=\"%d\" "
+        "aria-hidden=\"true\" focusable=\"false\"><use xlink:href=\"#%s\"/></svg>",
+        *cls ? " " : "", cls, size, size, symbol);
+}
+
+// the color class of a section
+const char* toneOf(BenchmarkCategory section)
+{
+    switch (getBenchmarkReportSection(section))
+    {
+        case BenchmarkCategory::ServerCpu:
+            return "cpu";
+        case BenchmarkCategory::ServerStorage:
+            return "disk";
+        case BenchmarkCategory::ServerCache:
+            return "mem";
+        case BenchmarkCategory::Network:
+            return "net";
+        case BenchmarkCategory::MultiUser:
+            return "users";
+        default:
+            return "app";
+    }
+}
+
+const char* symbolOf(BenchmarkCategory section)
+{
+    switch (getBenchmarkReportSection(section))
+    {
+        case BenchmarkCategory::ServerCpu:
+            return "i-cpu";
+        case BenchmarkCategory::ServerStorage:
+            return "i-commit";
+        case BenchmarkCategory::ServerCache:
+            return "i-mem";
+        case BenchmarkCategory::Network:
+            return "i-net";
+        case BenchmarkCategory::MultiUser:
+            return "i-users";
+        case BenchmarkCategory::LocalMachine:
+            return "i-app";
+        case BenchmarkCategory::Application:
+            return "i-code";
+        default:
+            return "i-conf";
+    }
+}
+
+// writing differs from saving a change within the same section
+const char* symbolOf(const wxString& id, BenchmarkCategory section)
+{
+    return id == "storage.insert" ? "i-write" : symbolOf(section);
+}
+
+// the pictogram and the short word of a section
+wxString sectionTag(BenchmarkCategory section, const char* symbol)
+{
+    return "<span class=\"tag\">" + icon(symbol, "", 20) + "<span class=\"tag-word\">"
+        + esc(getBenchmarkReportSectionWord(section)) + "</span></span>";
+}
+
+wxString sectionTag(BenchmarkCategory section)
+{
+    return sectionTag(section, symbolOf(section));
+}
+
+// a large number with its unit, a name and a small line, after the
+// pictogram of its part: a key figure, and the head of a part
+wxString figureRow(const wxString& element, BenchmarkCategory section,
+    const wxString& tag, const wxString& number, const wxString& unit,
+    const wxString& name, const wxString& lineHtml, const wxString& extra)
+{
+    return "<" + element + " class=\"fig " + toneOf(section) + "\">" + tag
+        + "<span class=\"fig-val\"><span class=\"fig-num\">" + esc(number)
+        + "</span><span class=\"fig-unit\">" + esc(unit) + "</span></span><span "
+        "class=\"fig-text\"><span class=\"fig-name\">" + esc(name) + "</span><span "
+        "class=\"fig-work\">" + lineHtml + "</span></span>" + extra + "</" + element + ">";
+}
+
+wxString chip(const char* symbol, const wxString& html)
+{
+    return "<span class=\"chip\">" + icon(symbol, "", 14) + "<span>" + html + "</span></span>";
+}
+
+// a chip that explains something on hover or focus
+wxString askChip(const wxString& text, const wxString& explanation)
+{
+    return "<span class=\"chip ask\" tabindex=\"0\">" + icon("i-help", "", 14) + "<span>"
+        + esc(text) + "</span><span class=\"tip-box\" role=\"tooltip\">" + esc(explanation)
+        + "</span></span>";
+}
+
+// a small heading in capitals with a quiet explanation
+wxString sectionLabel(const wxString& title, const wxString& hint)
+{
+    return "<div class=\"label first\">" + esc(title) + (hint.empty() ? wxString()
+        : " <span class=\"quiet\">" + esc(hint) + "</span>") + "</div>";
+}
+
+// a row that opens on a click
+wxString moreRow(const wxString& id, const wxString& title, const wxString& hint,
+    const wxString& body)
+{
+    return "<details class=\"more\" id=\"" + id + "\"><summary><span class=\"more-title\">"
+        + esc(title) + "</span><span class=\"more-hint\">" + esc(hint) + "</span><span "
+        "class=\"chev\"></span></summary><div class=\"more-body\">" + body
+        + "</div></details>\n";
+}
+
+// a row that shows another view; hidden where the views cannot switch
+wxString viewRow(const wxString& view, const wxString& title, const wxString& hint)
+{
+    return "<label class=\"more\" for=\"" + view + "\"><span class=\"more-title\">"
+        + esc(title) + "</span><span class=\"more-hint\">" + esc(hint) + "</span><span "
+        "class=\"go\">" + icon("i-go", "s", 16) + "</span></label>\n";
 }
 
 // ---------------------------------------------------------------- charts
@@ -846,6 +1163,17 @@ wxString valueCell(const wxString& label, const wxString& text, const wxString& 
         + (work.empty() ? wxString() : "<small>" + esc(work) + "</small>") + "</td>";
 }
 
+// the tooltip of a key value: the hint of the result it comes from
+wxString keyValueHint(const BenchmarkKeyValue& v, const Section& s)
+{
+    for (const BenchmarkResult* r : s.results)
+    {
+        if (r->id == v.id && isBenchmarkKeyValueSource(*r))
+            return r->hint;
+    }
+    return wxEmptyString;
+}
+
 // the key values of a part with the work behind them, then its other
 // measurements, and for the settings the settings of Firebird
 wxString partValues(const Section& s, const BenchmarkReport& report)
@@ -856,13 +1184,7 @@ wxString partValues(const Section& s, const BenchmarkReport& report)
     {
         for (const auto& v : s.part->values)
         {
-            wxString hint;
-            for (const BenchmarkResult* r : s.results)
-            {
-                if (r->valueKey == v.key)
-                    hint = r->hint;
-            }
-            rows += "<tr><td>" + esc(v.title) + tip(hint) + "</td>"
+            rows += "<tr><td>" + esc(v.title) + tip(keyValueHint(v, s)) + "</td>"
                 + valueCell(result, v.valueText, formatBenchmarkWork(v.amountText,
                     v.durationMs)) + "</tr>";
         }
@@ -870,7 +1192,7 @@ wxString partValues(const Section& s, const BenchmarkReport& report)
     wxString further;
     for (const BenchmarkResult* r : s.results)
     {
-        if (!r->valueKey.empty() || (r->durationMs <= 0.0 && r->rate.empty()
+        if (isBenchmarkKeyValueSource(*r) || (r->durationMs <= 0.0 && r->rate.empty()
             && s.category != BenchmarkCategory::Application))
         {
             continue;
@@ -898,54 +1220,53 @@ wxString partValues(const Section& s, const BenchmarkReport& report)
     return html;
 }
 
-wxString tile(const Section& s, const BenchmarkReport& report)
+// the head of a part: its first key value in large, or what it measures
+wxString partHead(const Section& s, const BenchmarkReport& report)
 {
-    wxString body = "<span class=\"name\">" + esc(getBenchmarkReportSectionName(s.category))
-        + "</span><span class=\"about\">"
-        + esc(getBenchmarkSectionDescription(s.category, report.metrics)) + "</span>";
-    if (s.part)
+    wxString number, unit, line;
+    if (s.part && !s.part->values.empty())
     {
-        for (const auto& v : s.part->values)
+        const BenchmarkKeyValue& lead = s.part->values.front();
+        const BenchmarkMeasurementDef* def = findBenchmarkMeasurementDef(lead.id);
+        if (def && lead.value > 0.0)
         {
-            body += "<span class=\"key\"><span>" + esc(v.title) + "</span><b>"
-                + esc(v.valueText) + "</b></span>";
+            const auto figure = formatBenchmarkFigure(lead.value, *def);
+            number = figure.first;
+            unit = figure.second;
         }
+        line = lead.title + " " + wxUniChar(0x00B7) + " " + wxString::Format(wxPLURAL(
+            "%d measurement", "%d measurements", int(s.results.size())), int(s.results.size()));
     }
-    body += "<span class=\"more-link\"><span class=\"open\">" + esc(_("Details"))
-        + "</span><span class=\"shut\">" + esc(_("Hide details")) + "</span></span>";
-    return wxString::Format("<label class=\"tile t%d\" for=\"c%d\">", s.index, s.index)
-        + body + "</label>";
+    else
+        line = getBenchmarkSectionDescription(s.category, report.metrics);
+    return figureRow("summary", s.category, sectionTag(s.category), number, unit,
+        getBenchmarkReportSectionName(s.category), esc(line), "<span class=\"chev\"></span>");
 }
 
-wxString panel(const Section& s, const BenchmarkReport& report)
+// one line per part like the key figures; a click shows its values and
+// charts, and on request every value and what each test does
+wxString areaRow(const Section& s, const BenchmarkReport& report)
 {
-    wxString html = wxString::Format("<div class=\"panel p%d\">", s.index)
-        + "<div class=\"panel-head\"><h3>" + esc(getBenchmarkReportSectionName(s.category))
-        + "</h3>" + wxString::Format("<label class=\"close\" for=\"c%d\">", s.index)
-        + esc(_("Close")) + " &#x2715;</label></div><p class=\"where\">"
+    wxString body = "<div><p class=\"where\">"
         + esc(wxString::Format(_("Measured on %s"), machineOf(s, report))) + "</p>"
         + partValues(s, report);
-
-    // everything else on request
-    wxString deeper;
-    const wxString charts = sectionCharts(s.category, report.metrics);
-    if (!charts.empty())
-        deeper += "<h4>" + esc(_("Charts")) + "</h4>" + charts;
     if (!s.results.empty())
     {
-        deeper += "<h4>" + esc(wxString::Format(_("All values (%d)"), int(s.results.size())))
-            + "</h4>" + valuesTable(s.results);
-        deeper += "<h4>" + esc(_("What is tested")) + "</h4>" + explanations(s.results);
+        body += "<details class=\"deeper\"><summary>" + esc(_("More details"))
+            + "<span class=\"chev\"></span></summary><h4>"
+            + esc(wxString::Format(_("All values (%d)"), int(s.results.size()))) + "</h4>"
+            + valuesTable(s.results) + "<h4>" + esc(_("What is tested")) + "</h4>"
+            + explanations(s.results) + "</details>";
     }
-    if (!deeper.empty())
-    {
-        html += "<details class=\"deeper\"><summary>" + esc(_("More details"))
-            + "<span class=\"chev\"></span></summary>" + deeper + "</details>";
-    }
-    return html + "</div>";
+    body += "</div>";
+    const wxString charts = sectionCharts(s.category, report.metrics);
+    if (!charts.empty())
+        body += "<div>" + charts + "</div>";
+    return wxString("<details class=\"area ") + toneOf(s.category) + "\">" + partHead(s, report)
+        + "<div class=\"area-body\">" + body + "</div></details>\n";
 }
 
-wxString systemBlock(const BenchmarkReport& report)
+wxString systemBody(const BenchmarkReport& report)
 {
     auto grid = [](const std::vector<BenchmarkInfoGroup>& groups)
     {
@@ -957,13 +1278,47 @@ wxString systemBlock(const BenchmarkReport& report)
         }
         return html + "</div>";
     };
-    const wxString cards = grid(getBenchmarkSystemOverview(report));
-    const wxString details = grid(getBenchmarkSystemDetails(report));
-    return "<details class=\"block\" id=\"system\"><summary>" + esc(_("System details"))
-        + " <span class=\"hint\">" + esc(_("hardware, software, network and the test database"))
-        + "</span><span class=\"chev\"></span></summary><div class=\"block-body\">" + cards
-        + "<details class=\"deeper sys-more\"><summary>" + esc(_("All system information"))
-        + "<span class=\"chev\"></span></summary>" + details + "</details></div></details>\n";
+    return grid(getBenchmarkSystemOverview(report)) + "<details class=\"deeper\"><summary>"
+        + esc(_("All system information")) + "<span class=\"chev\"></span></summary>"
+        + grid(getBenchmarkSystemDetails(report)) + "</details>";
+}
+
+// what was noticed: the neutral title; a saved report only has the title
+wxString noticedTitle(const BenchmarkHint& h)
+{
+    return h.noticed.empty() ? h.title : h.noticed;
+}
+
+// a note with what was measured and what can help; without the details
+// when the report hides private information
+wxString noteItem(const BenchmarkHint& h, bool anonymous)
+{
+    return "<li><b>" + esc(noticedTitle(h)) + "</b>" + (anonymous || h.detail.empty()
+        ? wxString() : ". " + esc(h.detail)) + (h.advice.empty() ? wxString()
+        : " <span class=\"quiet\">" + esc(_("What can help:")) + " " + esc(h.advice)
+            + "</span>") + "</li>";
+}
+
+// every note of the run by part
+wxString allNotes(const BenchmarkReport& report)
+{
+    wxString html;
+    for (BenchmarkCategory section : getBenchmarkReportSections())
+    {
+        wxString items;
+        for (const BenchmarkHint& h : report.hints)
+        {
+            if (getBenchmarkReportSection(h.category) == section)
+                items += noteItem(h, report.anonymous);
+        }
+        if (!items.empty())
+        {
+            html += wxString("<div class=\"label\"><span class=\"") + toneOf(section) + "\">"
+                + sectionTag(section) + "</span>" + esc(getBenchmarkReportSectionName(section))
+                + "</div><ul class=\"reason-list\">" + items + "</ul>";
+        }
+    }
+    return html;
 }
 
 wxString statisticsTable(const std::vector<Section>& sections)
@@ -1031,106 +1386,169 @@ wxString runDetails(const BenchmarkReport& report)
     for (const auto& path : report.undroppedDatabases)
         rows.push_back({ _("Not dropped"), path });
     for (const auto& skipped : m.skippedTests)
-        rows.push_back({ _("Not measured"), skipped.first + ": " + skipped.second });
+        rows.push_back({ _("Not measured"), skipped.name + ": " + skipped.reason });
     return facts(rows);
 }
 
 // ---------------------------------------------------------------- one run
 
-wxString introBox()
+// the notes in the overview of a single run
+const size_t maximumNotes = 3;
+
+wxString join(const std::vector<wxString>& items, const wxString& with)
 {
-    return "<section class=\"box\" id=\"intro\"><div class=\"box-body\"><p>"
-        + esc(_("These are the measured values of this run. Whether a value is fast "
-            "or slow depends on the environment, so a single run is not judged."))
-        + "</p><p>" + esc(_("Compare the report with another one, for example from "
-            "before a change or from another server: select it under \"Compare with "
-            "an earlier report\" before the next run, or use \"Compare two "
-            "reports...\". The comparison shows what got faster or slower and what "
-            "could be the reason.")) + "</p></div></section>\n";
+    wxString text;
+    for (const wxString& item : items)
+        text += (text.empty() ? wxString() : with) + item;
+    return text;
 }
 
-// the key values of every part at a glance, with the work behind them
-wxString keyValuesBox(const BenchmarkReport& report, const std::vector<Section>& sections)
+// the short words of every part a kind of hint was given for
+wxString hintParts(const BenchmarkHint& hint, const BenchmarkReport& report)
+{
+    std::vector<wxString> words;
+    for (const BenchmarkHint& h : report.hints)
+    {
+        const wxString word = getBenchmarkReportSectionWord(h.category);
+        if (h.id == hint.id && std::find(words.begin(), words.end(), word) == words.end())
+            words.push_back(word);
+    }
+    return join(words, ", ");
+}
+
+// the key figures in large, with the work behind them; no rating
+wxString figuresBox(const std::vector<BenchmarkHeadline>& figures)
+{
+    if (figures.empty())
+        return wxEmptyString;
+    wxString html = sectionLabel(_("Key figures"), _("measured values of this run, not rated"))
+        + "<div class=\"figs\" id=\"figures\">";
+    for (const BenchmarkHeadline& f : figures)
+    {
+        html += figureRow("div", f.section, sectionTag(f.section, symbolOf(f.id, f.section)),
+            f.number, f.unit, f.name, esc(f.work), wxEmptyString);
+    }
+    return html + "</div>\n";
+}
+
+// at most three things noticed in the run, as states or ratios; a click
+// shows what was measured and what can help
+wxString notesBox(const BenchmarkReport& report)
+{
+    const std::vector<BenchmarkHint> notes = getBenchmarkTopHints(report, maximumNotes);
+    if (notes.empty())
+        return wxEmptyString;
+    wxString html = sectionLabel(_("Noticed"), _("states and ratios within this run, not rated"))
+        + "<div class=\"notes\" id=\"noticed\">";
+    for (const BenchmarkHint& h : notes)
+    {
+        wxString body;
+        if (!report.anonymous && !h.detail.empty())
+            body += "<p>" + esc(h.detail) + "</p>";
+        if (!h.advice.empty())
+            body += "<p><b>" + esc(_("What can help:")) + "</b> " + esc(h.advice) + "</p>";
+        html += "<details class=\"note\"><summary>" + icon("i-info", "s", 16)
+            + "<span class=\"note-title\">" + esc(noticedTitle(h)) + "</span><span "
+            "class=\"note-where\">" + esc(hintParts(h, report)) + "</span><span "
+            "class=\"chev\"></span></summary><div class=\"note-body\">" + body
+            + "</div></details>";
+    }
+    html += "</div>\n";
+    const int more = int(getBenchmarkTopHints(report, report.hints.size()).size()
+        - notes.size());
+    if (more > 0)
+    {
+        html += "<p class=\"quiet notes-more\"><label class=\"link\" for=\"v2\">"
+            + esc(wxString::Format(wxPLURAL("%d more note in the detailed report",
+                "%d more notes in the detailed report", more), more)) + "</label></p>\n";
+    }
+    return html;
+}
+
+// the key values of every part with the work behind them
+wxString keyValuesTable(const BenchmarkReport& report, const std::vector<Section>& sections)
 {
     wxString rows;
     for (const Section& s : sections)
     {
         if (!s.part)
             continue;
-        rows += "<tr class=\"group\"><td colspan=\"3\">"
+        rows += wxString("<tr class=\"group\"><td colspan=\"2\"><span class=\"")
+            + toneOf(s.category) + "\">" + sectionTag(s.category) + "</span>"
             + esc(getBenchmarkReportSectionName(s.category))
             + tip(getBenchmarkSectionDescription(s.category, report.metrics)) + "</td></tr>";
         for (const auto& v : s.part->values)
         {
-            wxString hint;
-            for (const BenchmarkResult* r : s.results)
-            {
-                if (r->valueKey == v.key)
-                    hint = r->hint;
-            }
             const wxString work = formatBenchmarkWork(v.amountText, v.durationMs);
-            rows += "<tr><td>" + esc(v.title) + tip(hint) + "</td>" + cellLabel(_("Result"), "n")
-                + "<b>" + value(v.valueText) + "</b></td>" + cellLabel(_("Work"), wxEmptyString,
-                    work) + esc(work) + "</td></tr>";
+            rows += "<tr><td>" + esc(v.title) + tip(keyValueHint(v, s))
+                + (work.empty() ? wxString() : "<small>" + esc(work) + "</small>") + "</td>"
+                + cellLabel(_("Result"), "n") + "<b>" + value(v.valueText) + "</b></td></tr>";
         }
     }
     if (rows.empty())
         return wxEmptyString;
-    return "<section class=\"box\" id=\"key-values\"><div class=\"box-head\">"
-        + esc(_("Key values")) + tip(_("The most telling value of every test, as work per "
-            "second or as the time of one operation, with the work behind it."))
-        + "</div>" + tableStart({ { _("Test"), false }, { _("Result"), true },
-            { _("Work"), false } }) + rows + "</tbody></table></section>\n";
+    return tableStart({ { _("Test"), false }, { _("Result"), true } }) + rows
+        + "</tbody></table>";
 }
 
-wxString partRow(const Section& s, const BenchmarkReport& report)
+// a single run: the key figures on the left; what was noticed and the
+// rows that open on the right
+wxString singleOverview(const BenchmarkReport& report, const std::vector<Section>& sections,
+    const BenchmarkSnapshot& snapshot)
 {
-    return "<details class=\"part\"><summary class=\"row plain\"><span class=\"part-name\">"
-        + esc(getBenchmarkReportSectionName(s.category)) + "</span><span class=\"part-text\">"
-        + esc(getBenchmarkSectionDescription(s.category, report.metrics))
-        + "</span><span class=\"chev\"></span></summary><div class=\"part-body\">"
-        + partValues(s, report) + "</div></details>";
+    const wxString notes = notesBox(report);
+    wxString side = notes.empty() ? sectionLabel(_("More"), wxEmptyString) : notes;
+    side += "<div class=\"rows\">";
+    const wxString values = keyValuesTable(report, sections);
+    if (!values.empty())
+    {
+        side += moreRow("key-values", _("All key values"), _("the most telling value of "
+            "every test, with the work behind it"), values);
+    }
+    side += moreRow("run-summary", _("Run details"), _("target, intensity, temporary "
+        "database"), runDetails(report));
+    side += viewRow("v2", _("Detailed report"), _("every part with charts, every measured "
+        "value, glossary")) + "</div>";
+    const wxString figures = figuresBox(getBenchmarkHeadlineValues(snapshot));
+    if (figures.empty())
+        return "<div class=\"overview\"><div class=\"side\">" + side + "</div></div>\n";
+    return "<div class=\"overview\"><div class=\"split\"><div>" + figures
+        + "</div><div class=\"side\">" + side + "</div></div></div>\n";
 }
 
-wxString partsBox(const BenchmarkReport& report, const std::vector<Section>& sections)
+// the detailed report: one line per part, then everything else
+wxString detailsView(const BenchmarkReport& report, const std::vector<Section>& sections)
 {
-    wxString html = "<section class=\"box\" id=\"parts\"><div class=\"row plain parts-head\">"
-        "<span>" + esc(_("Part")) + "</span><span class=\"part-text\">"
-        + esc(_("What it shows")) + "</span><span></span></div>";
+    wxString html = "<div class=\"details\">" + sectionLabel(_("Parts of the system"),
+        _("a click opens the values and charts of a part"))
+        + "<div class=\"areas\" id=\"categories\">";
     for (const Section& s : sections)
     {
-        // the programming patterns are of interest to developers only
-        if (s.category != BenchmarkCategory::Application && !s.empty())
-            html += partRow(s, report);
+        if (!s.empty())
+            html += areaRow(s, report);
     }
-    return html + "<div class=\"box-foot\">" + esc(_("Click a part for all its values. "))
-        + "<label class=\"link\" for=\"v2\">" + esc(_("The detailed report has charts, "
-        "every measured value and what each test does.")) + "</label></div></section>\n";
+    html += "</div>\n" + sectionLabel(_("More"), wxEmptyString) + "<div class=\"rows\">";
+    html += moreRow("system", _("System details"), _("hardware, software, network and the "
+        "test database"), systemBody(report));
+    html += moreRow("values", _("All measured values"), _("every test with amount, time, "
+        "average and rate"), statisticsTable(sections));
+    const size_t notes = getBenchmarkTopHints(report, report.hints.size()).size();
+    if (notes > 0)
+    {
+        html += moreRow("notes", _("All notes"), wxString::Format(wxPLURAL("%d note, by part",
+            "%d notes, by part", int(notes)), int(notes)), allNotes(report));
+    }
+    html += moreRow("glossary", _("Glossary"), _("abbreviations, terms and what every test "
+        "does"), glossary(report));
+    html += moreRow("run", _("Run details"), _("target, intensity, temporary database"),
+        runDetails(report));
+    return html + "</div></div>\n";
 }
 
 // ---------------------------------------------------------------- two runs
 
-// green when faster, red when slower, grey within the normal variation
-wxString statusOf(double ratio)
-{
-    if (getBenchmarkChangeLevel(ratio) == 0)
-        return "info";
-    return ratio > 1.0 ? "ok" : "bad";
-}
-
-wxString changeClass(double ratio)
-{
-    const int level = getBenchmarkChangeLevel(ratio);
-    if (level == 0)
-        return "same";
-    return wxString(ratio > 1.0 ? "up" : "down") + wxString::Format("%d", level);
-}
-
-wxString changeChip(double ratio)
-{
-    return "<span class=\"chg " + changeClass(ratio) + "\">" + esc(formatBenchmarkChange(ratio))
-        + "</span>";
-}
+// the parts in "What stands out"
+const size_t maximumStandOut = 5;
 
 wxString newerLabel(const BenchmarkComparison& c)
 {
@@ -1142,157 +1560,412 @@ wxString pointsOf(double ratio)
     return formatBenchmarkPoints(BenchmarkComparison::earlierPoints * ratio);
 }
 
-// the first sentence of an advice, for one line in a list
-wxString shortTip(const wxString& advice)
+// faster, slower or about the same: a triangle and words, green and red;
+// a clear change in a lighter weight than a large one
+wxString direction(double ratio)
 {
-    const size_t end = advice.find(". ");
-    return end == wxString::npos ? advice : advice.Left(end + 1);
+    const int level = getBenchmarkChangeLevel(ratio);
+    const char* kind = level == 0 ? "same" : ratio > 1.0 ? "faster" : "slower";
+    return wxString("<span class=\"dir ") + kind + (level == 1 ? " l1" : "") + "\">"
+        + esc(formatBenchmarkChange(ratio)) + "</span>";
 }
 
-wxString comparisonPointsBox(const BenchmarkComparison& c)
+const char* directionText(double ratio)
 {
-    wxString html = "<section class=\"box\" id=\"comparison\"><div class=\"box-head\">"
-        + esc(_("Points")) + tip(getBenchmarkUnitHint("points")) + "</div>";
-    if (c.ratio <= 0.0)
+    if (getBenchmarkChangeLevel(ratio) == 0)
+        return "same-text";
+    return ratio > 1.0 ? "up-text" : "down-text";
+}
+
+// the ratio as a bar from the middle, logarithmic up to four times
+wxString ratioBar(double ratio)
+{
+    if (getBenchmarkChangeLevel(ratio) == 0)
+        return "<span class=\"dbar\"></span>";
+    const double share = std::min(std::abs(std::log2(ratio)) / 2.0, 1.0) * 50.0;
+    return wxString("<span class=\"dbar\"><span class=\"fill ") + (ratio > 1.0 ? "faster"
+        : "slower") + "\" style=\"width:" + num(share) + "%\"></span></span>";
+}
+
+// new, no longer measured, not comparable
+wxString badge(BenchmarkCompareState state)
+{
+    const bool changed = state == BenchmarkCompareState::TestChanged
+        || state == BenchmarkCompareState::WorkChanged;
+    return wxString("<span class=\"badge") + (changed ? " nc" : "") + "\">"
+        + esc(getBenchmarkCompareStateName(state)) + "</span>";
+}
+
+// the main statement: how many key figures got faster or slower, the
+// points of both runs, and what could not be compared
+wxString verdictBox(const BenchmarkComparison& c)
+{
+    std::vector<wxString> counts;
+    for (const auto& count : describeBenchmarkVerdict(getBenchmarkVerdict(c)))
     {
-        return html + "<div class=\"box-body quiet\">" + esc(describeBenchmarkComparison(c))
-            + "</div></section>\n";
+        const char* cls = count.first > 0 ? "v-faster"
+            : count.first < 0 ? "v-slower" : "v-same";
+        counts.push_back(wxString("<span class=\"") + cls + "\">" + esc(count.second)
+            + "</span>");
     }
-    const double earlier = BenchmarkComparison::earlierPoints;
-    const double newer = earlier * c.ratio;
-    html += "<div class=\"box-body points-grid\"><div><span class=\"muted\">"
-        + esc(newerLabel(c)) + "</span><br><span class=\"points-num\">"
-        + esc(formatBenchmarkPoints(newer)) + "</span><span class=\"points-unit\">"
-        + esc(_("points")) + "</span><br><span class=\"rating " + statusOf(c.ratio)
-        + "-text\">" + esc(describeBenchmarkComparison(c)) + "</span></div><div>"
-        + horizontalBars({ { _("Earlier run"), earlier, formatBenchmarkPoints(earlier), 3 },
-            { newerLabel(c), newer, formatBenchmarkPoints(newer), 1 } })
-        + "</div></div><div class=\"box-foot\">";
+    wxString html = "<div id=\"comparison\">";
+    if (!counts.empty())
+        html += "<p class=\"verdict\">" + join(counts, separator()) + "</p>";
+
+    std::vector<wxString> notes;
+    if (c.ratio > 0.0)
+    {
+        wxString points = esc(wxString::Format(_("Overall %s points; the earlier run has %s"),
+            "@points@", pointsOf(1.0)));
+        points.Replace("@points@", "<b>" + esc(pointsOf(c.ratio)) + "</b>");
+        notes.push_back(points + tip(getBenchmarkUnitHint("points") + " "
+            + _("Differences of less than 15 % are normal between two runs.")));
+    }
+    else
+        notes.push_back(esc(describeBenchmarkComparison(c)));
+    // the parts that one run did not measure, with their short word, and
+    // the key figures that were not compared
+    for (const wxString& note : getBenchmarkVerdictNotes(c))
+    {
+        wxString text = esc(note);
+        for (BenchmarkCategory section : getBenchmarkReportSections())
+        {
+            const wxString word = esc(getBenchmarkReportSectionWord(section));
+            if (text.StartsWith(word + " "))
+            {
+                text = "<span class=\"tag-word\">" + word + "</span>" + text.Mid(word.length());
+                break;
+            }
+        }
+        notes.push_back(text);
+    }
+    html += "<p class=\"verdict-sub\">" + join(notes, separator()) + "</p>";
     if (!c.sameKind)
     {
-        html += "<span class=\"warn-text\">" + esc(_("The two runs were made in different ways "
-            "(with or without a network, or with another intensity), so they are only roughly "
-            "comparable.")) + "</span> ";
+        html += "<p class=\"verdict-note\">" + icon("i-warn", "s", 16)
+            + esc(_("The two runs were made in different ways (with or without a network, "
+                "or with another intensity), so they are only roughly comparable.")) + "</p>";
     }
-    return html + esc(_("The earlier run has 1000 points. Differences of less than 15 % are "
-        "normal between two runs.")) + "</div></section>\n";
+    return html + "</div>\n";
 }
 
-// one row of a comparison table: the value with its work in both runs
-wxString comparedRow(const BenchmarkComparedValue& v, const wxString& older,
-    const wxString& newer)
+// one line per key figure: both values, the change and the points
+wxString keyFigureRows(const BenchmarkComparison& c)
 {
-    return "<tr><td>" + esc(v.title) + "</td>" + valueCell(older, v.olderText, v.olderWork)
-        + valueCell(newer, v.newerText, v.newerWork) + cellLabel(_("Change"), "n")
-        + changeChip(v.ratio) + "</td></tr>";
+    const std::vector<BenchmarkHeadlineChange> changes = getBenchmarkHeadlineChanges(c);
+    if (changes.empty())
+        return wxEmptyString;
+    const wxString older = _("Earlier run");
+    const wxString newer = newerLabel(c);
+    wxString rows;
+    for (const BenchmarkHeadlineChange& h : changes)
+    {
+        const bool compared = h.state == BenchmarkCompareState::Compared && h.ratio > 0.0;
+        wxString points = dash();
+        wxString change = badge(h.state);
+        wxString bar;
+        if (compared)
+        {
+            const long delta = std::lround(h.ratio * BenchmarkComparison::earlierPoints)
+                - long(BenchmarkComparison::earlierPoints);
+            wxString deltaText = wxString::Format("%+ld", delta);
+            if (delta == 0)
+                deltaText = wxString(wxUniChar(0x00B1)) + "0";
+            points = esc(pointsOf(h.ratio)) + "<span class=\"delta " + directionText(h.ratio)
+                + "\">" + esc(deltaText) + "</span>";
+            change = direction(h.ratio);
+            bar = ratioBar(h.ratio);
+        }
+        rows += wxString("<tr><td class=\"tagcol ") + toneOf(h.section) + "\">"
+            + sectionTag(h.section, symbolOf(h.id, h.section)) + "</td><td class=\"area\">"
+            + esc(h.name) + "</td>" + cellLabel(older, "n old")
+            + esc(h.olderNumber.empty() ? dash() : h.olderNumber) + "</td><td class=\"arrow\">"
+            + wxUniChar(0x2192) + "</td>" + cellLabel(newer, "n new")
+            + esc(h.newerNumber.empty() ? dash() : h.newerNumber) + "<span class=\"unit\">"
+            + esc(h.unit) + "</span></td><td class=\"bar-col\">" + bar + "</td>"
+            + cellLabel(_("Change"), "dir-col") + change + "</td>"
+            + cellLabel(_("Points"), "n pts") + points + "</td></tr>";
+    }
+    return "<table class=\"cmp\" id=\"areas\"><thead><tr><th colspan=\"2\">"
+        + esc(_("Key figure")) + "</th><th class=\"n\">" + esc(older) + "</th><th></th><th "
+        "class=\"n\">" + esc(newer) + "</th><th class=\"bar-col\"></th><th>"
+        + esc(_("Change")) + "</th><th class=\"n\">" + esc(_("Points")) + "</th></tr></thead>"
+        "<tbody>" + rows + "</tbody></table>\n";
 }
 
-// what could make the slower run of a part slower
-wxString reasons(const BenchmarkComparedPart& p, const BenchmarkComparison& c)
+size_t reasonCount(const BenchmarkComparedPart& p)
+{
+    return p.differences.size() + p.hints.size() + p.advice.size();
+}
+
+wxString reasonCountText(size_t count)
+{
+    return wxString::Format(wxPLURAL("%d possible reason", "%d possible reasons", int(count)),
+        int(count));
+}
+
+// the likely reason and what to try, one line each
+wxString reasonLines(const BenchmarkComparedPart& p)
+{
+    wxString html;
+    const wxString likely = getBenchmarkLikelyReason(p);
+    if (!likely.empty())
+    {
+        html += "<span class=\"so-line\"><span class=\"so-key\">" + esc(_("Likely"))
+            + "</span><span>" + esc(likely) + "</span></span>";
+    }
+    const wxString advice = getBenchmarkTryAdvice(p);
+    if (!advice.empty())
+    {
+        html += "<span class=\"so-line\"><span class=\"so-key\">" + esc(_("What to try"))
+            + "</span><span>" + esc(advice) + "</span></span>";
+    }
+    return html;
+}
+
+// every possible reason of a part: the facts that differ, the hints of the
+// slower run with what was measured and what can help, and the typical
+// causes of its slower values
+wxString reasonList(const BenchmarkComparedPart& p, const BenchmarkComparison& c)
 {
     wxString items;
     for (const auto& d : p.differences)
     {
-        items += "<li><b>" + esc(d.label) + "</b>: " + esc(d.olderText + " "
-            + wxUniChar(0x2192) + " " + d.newerText) + "</li>";
+        items += "<li><b>" + esc(d.label) + "</b>: " + esc(d.olderText + arrow() + d.newerText)
+            + "</li>";
     }
     // two hints can give the same advice, e.g. the exclusions of a virus
     // scanner; it is shown once
     std::vector<wxString> shown;
     for (const auto& h : p.hints)
     {
-        const wxString advice = shortTip(h.advice);
-        const bool repeated = std::find(shown.begin(), shown.end(), advice) != shown.end();
-        shown.push_back(advice);
-        items += "<li><b>" + esc(h.title) + "</b>" + tip(h.detail)
-            + (advice.empty() || repeated ? wxString() : " " + wxString(wxUniChar(0x2013))
-                + " " + esc(advice)) + "</li>";
+        const bool repeated = std::find(shown.begin(), shown.end(), h.advice) != shown.end();
+        shown.push_back(h.advice);
+        items += "<li><b>" + esc(h.title) + "</b>" + (h.detail.empty() ? wxString()
+            : ". " + esc(h.detail)) + (h.advice.empty() || repeated ? wxString()
+            : " <span class=\"quiet\">" + esc(h.advice) + "</span>") + "</li>";
     }
     for (const auto& a : p.advice)
         items += "<li><b>" + esc(a.first) + "</b>: " + esc(a.second) + "</li>";
     if (items.empty())
         return wxEmptyString;
-    return "<div class=\"reasons\"><h4>" + esc(getBenchmarkReasonsTitle(c, p)) + "</h4><ul>"
-        + items + "</ul></div>";
+    return "<p class=\"reason-head\">" + esc(getBenchmarkReasonsTitle(c, p))
+        + "</p><ul class=\"reason-list\">" + items + "</ul>";
 }
 
-wxString comparisonParts(const BenchmarkComparison& c)
+// the parts that differ clearly, the largest change first, each with the
+// likely reason and what to try; a click shows every possible reason
+wxString standOutBox(const BenchmarkComparison& c)
 {
-    const wxString older = _("Earlier run");
-    const wxString newer = newerLabel(c);
-    wxString html = "<section class=\"box\" id=\"parts\"><div class=\"row parts-head\"><span>"
-        + esc(_("Part")) + "</span><span class=\"n\">" + esc(older) + "</span><span class=\"n\">"
-        + esc(newer) + "</span><span class=\"part-text\">" + esc(_("Change"))
-        + "</span><span></span></div>";
-    for (const auto& p : c.parts)
+    const std::vector<const BenchmarkComparedPart*> parts = getBenchmarkStandOut(c,
+        maximumStandOut);
+    if (parts.empty())
+        return wxEmptyString;
+    wxString html = sectionLabel(_("What stands out"), _("the clearest changes, possible "
+        "reasons and what to try")) + "<div class=\"stand\" id=\"changes\">";
+    for (const BenchmarkComparedPart* p : parts)
     {
-        wxString rows;
-        for (const auto& v : c.values)
+        const wxString head = wxString("<span class=\"") + toneOf(p->category) + "\">"
+            + sectionTag(p->category) + "</span><span class=\"so-dir\">" + direction(p->ratio)
+            + "</span><span class=\"so-text\"><span class=\"so-part\">"
+            + esc(getBenchmarkReportSectionName(p->category)) + "</span>";
+        const size_t count = reasonCount(*p);
+        if (count == 0)
         {
-            if (v.category == p.category)
-                rows += comparedRow(v, older, newer);
+            html += "<div class=\"so\"><div class=\"so-head\">" + head + "<span class=\"so-line\">"
+                + esc(_("No difference was found in the facts and notes of the two runs."))
+                + "</span></span></div></div>";
+            continue;
         }
-        wxString further;
-        for (const auto& v : c.stats)
-        {
-            if (v.category == p.category)
-                further += comparedRow(v, older, newer);
-        }
-        if (!further.empty())
-        {
-            rows += (rows.empty() ? wxString() : "<tr class=\"group\"><td colspan=\"4\">"
-                + esc(_("Further measurements")) + "</td></tr>") + further;
-        }
-        const size_t reasonCount = p.differences.size() + p.hints.size() + p.advice.size();
-        wxString text = p.ratio > 0.0 ? changeChip(p.ratio) : wxString();
-        if (reasonCount > 0)
-        {
-            text += " <span class=\"muted\">" + esc(wxString::Format(wxPLURAL(
-                "%d possible reason", "%d possible reasons", int(reasonCount)),
-                int(reasonCount))) + "</span>";
-        }
-        html += "<details class=\"part\"><summary class=\"row\"><span class=\"part-name\">"
-            "<i class=\"dot " + statusOf(p.ratio) + "\"></i>"
-            + esc(getBenchmarkReportSectionName(p.category)) + "</span><span class=\"n\">"
-            + (p.ratio > 0.0 ? esc(pointsOf(1.0)) : wxString()) + "</span><span class=\"n\">"
-            + (p.ratio > 0.0 ? esc(pointsOf(p.ratio)) : wxString())
-            + "</span><span class=\"part-text\">" + text + "</span><span class=\"chev\"></span>"
-            "</summary><div class=\"part-body\">";
-        if (!rows.empty())
-        {
-            html += tableStart({ { _("Test"), false }, { older, true }, { newer, true },
-                { _("Change"), true } }) + rows + "</tbody></table>";
-        }
-        html += reasons(p, c) + "</div></details>";
+        html += "<details class=\"so\"><summary>" + head + reasonLines(*p)
+            + "</span><span class=\"so-more\">" + esc(reasonCountText(count))
+            + "</span><span class=\"chev\"></span></summary><div class=\"so-body\">"
+            + reasonList(*p, c) + "</div></details>";
     }
-    return html + "<div class=\"box-foot\">" + esc(_("Click a part for all its values and, "
-        "where it differs clearly, what could be the reason.")) + "</div></section>\n";
+    return html + "</div>\n";
 }
 
 // hardware, versions and settings that differ between the runs
-wxString differencesBox(const BenchmarkComparison& c)
+wxString differencesRow(const BenchmarkComparison& c)
 {
-    const wxString older = _("Earlier run");
-    const wxString newer = newerLabel(c);
-    wxString html = "<section class=\"box\" id=\"differences\"><div class=\"box-head\">"
-        + esc(_("What is different")) + "</div>";
     if (c.differences.empty())
     {
-        return html + "<div class=\"box-body quiet\">" + esc(_("Hardware, versions and "
-            "settings are the same.")) + "</div></section>\n";
+        return moreRow("differences", _("What is different"), _("hardware, versions and "
+            "settings are the same"), "<p class=\"quiet\">" + esc(_("Hardware, versions and "
+            "settings are the same.")) + "</p>");
     }
-    html += tableStart({ { wxString(), false }, { older, false }, { newer, false } });
+    const wxString older = _("Earlier run");
+    const wxString newer = newerLabel(c);
+    wxString html = tableStart({ { wxString(), false }, { older, false }, { newer, false } });
     for (const auto& d : c.differences)
     {
         html += "<tr><td>" + esc(d.label) + "</td>" + cellLabel(older) + esc(d.olderText)
             + "</td>" + cellLabel(newer) + esc(d.newerText) + "</td></tr>";
     }
-    return html + "</tbody></table></section>\n";
+    const int count = int(c.differences.size());
+    return moreRow("differences", _("What is different"), wxString::Format(wxPLURAL(
+        "%d difference in hardware, versions or settings",
+        "%d differences in hardware, versions or settings", count), count),
+        html + "</tbody></table>");
 }
 
-wxString comparisonView(const BenchmarkComparison& c)
+wxString comparisonOverview(const BenchmarkComparison& c)
 {
-    return comparisonPointsBox(c) + comparisonParts(c) + differencesBox(c);
+    return "<div class=\"overview\">" + verdictBox(c) + keyFigureRows(c) + standOutBox(c)
+        + "<div class=\"rows\">" + viewRow("v3", _("Detailed comparison"), _("every "
+            "measured value of both runs, by part, with the possible reasons"))
+        + differencesRow(c) + "</div></div>\n";
+}
+
+// every value of both runs by part, with a filter for the changes
+wxString comparisonDetails(const BenchmarkComparison& c)
+{
+    using S = BenchmarkCompareState;
+    const wxString older = _("Earlier run");
+    const wxString newer = newerLabel(c);
+    const wxString dot = wxString(" ") + wxUniChar(0x00B7) + " ";
+    wxString areas;
+    for (BenchmarkCategory section : getBenchmarkReportSections())
+    {
+        int count = 0, faster = 0, slower = 0, same = 0, added = 0, removed = 0, other = 0;
+        bool unchanged = true;
+        wxString rows;
+        for (const auto* list : { &c.values, &c.stats })
+        {
+            for (const BenchmarkComparedValue& v : *list)
+            {
+                if (v.category != section)
+                    continue;
+                ++count;
+                wxString change;
+                bool changed = true;
+                if (v.state == S::Compared && v.ratio > 0.0)
+                {
+                    change = direction(v.ratio);
+                    changed = getBenchmarkChangeLevel(v.ratio) > 0;
+                    if (!changed)
+                        ++same;
+                    else if (v.ratio > 1.0)
+                        ++faster;
+                    else
+                        ++slower;
+                }
+                else if (v.state == S::Compared)
+                    changed = v.olderText != v.newerText;
+                else
+                {
+                    change = badge(v.state);
+                    if (v.state == S::OnlyNewer)
+                        ++added;
+                    else if (v.state == S::OnlyOlder)
+                        ++removed;
+                    else
+                        ++other;
+                }
+                unchanged = unchanged && !changed;
+                const wxString note = describeBenchmarkCompareState(c, v);
+                const wxString work = formatBenchmarkComparedWork(c, v);
+                rows += wxString("<tr class=\"") + (changed ? "chg" : "same") + "\"><td>"
+                    + esc(v.title) + (note.empty() ? wxString() : "<small>" + esc(note)
+                        + "</small>") + "</td>" + cellLabel(older, "n") + esc(v.olderText)
+                    + "</td>" + cellLabel(newer, "n") + "<b>" + esc(v.newerText) + "</b></td>"
+                    + cellLabel(_("Change"), wxEmptyString, change) + change + "</td>"
+                    + cellLabel(_("Work"), "quiet work", work) + esc(work) + "</td></tr>";
+            }
+        }
+        if (count == 0)
+            continue;
+
+        // the head: the points of the part, how it changed and its values
+        std::vector<wxString> counts;
+        auto add = [&counts](int n, const wxString& text)
+        {
+            if (n > 0)
+                counts.push_back(text);
+        };
+        add(faster, wxString::Format(_("%d faster"), faster));
+        add(slower, wxString::Format(_("%d slower"), slower));
+        add(same, wxString::Format(_("%d about the same"), same));
+        add(added, wxString::Format(_("%d new"), added));
+        add(removed, wxString::Format(_("%d no longer measured"), removed));
+        add(other, wxString::Format(_("%d not comparable"), other));
+        wxString line = esc(wxString::Format(wxPLURAL("%d value", "%d values", count), count)
+            + (counts.empty() ? wxString() : ": " + join(counts, ", ")));
+        const BenchmarkComparedPart* part = c.findPart(section);
+        wxString number = dash();
+        wxString unit;
+        if (part && part->ratio > 0.0)
+        {
+            number = pointsOf(part->ratio);
+            unit = _("pts");
+            line = direction(part->ratio) + esc(dot) + line;
+        }
+        else if (getBenchmarkPartState(c, section) == S::OnlyNewer)
+        {
+            line = "<span class=\"badge\">" + esc(c.newerIsCurrentRun ? _("only in this run")
+                : _("only in the later run")) + "</span>" + esc(dot) + line;
+        }
+        else if (getBenchmarkPartState(c, section) == S::OnlyOlder)
+        {
+            line = "<span class=\"badge\">" + esc(_("only in the earlier run")) + "</span>"
+                + esc(dot) + line;
+        }
+        wxString body;
+        if (part && reasonCount(*part) > 0)
+        {
+            body += "<div class=\"why-block\">" + reasonLines(*part) + "<details "
+                "class=\"why-more\"><summary>" + esc(reasonCountText(reasonCount(*part)))
+                + "<span class=\"chev\"></span></summary>" + reasonList(*part, c)
+                + "</details></div>";
+        }
+        body += tableStart({ { _("Test"), false }, { older, true }, { newer, true },
+            { _("Change"), false }, { _("Work"), false } }, "cards dt") + rows
+            + "</tbody></table>";
+        areas += wxString("<details class=\"area ") + toneOf(section)
+            + (unchanged ? " unchanged" : "") + "\">" + figureRow("summary", section,
+                sectionTag(section), number, unit, getBenchmarkReportSectionName(section), line,
+                "<span class=\"chev\"></span>") + "<div class=\"area-body\"><div>" + body
+            + "</div></div></details>\n";
+    }
+    if (areas.empty())
+        return wxEmptyString;
+    // radio buttons before the filter and the parts, as for the views
+    return "<div class=\"cmp-details\"><input type=\"radio\" name=\"filter\" "
+        "class=\"filter-toggle\" id=\"f1\" checked><input type=\"radio\" name=\"filter\" "
+        "class=\"filter-toggle\" id=\"f2\">" + sectionLabel(_("Every measured value"),
+            _("a click opens a part; the earlier run is on the left"))
+        + "<div class=\"filter\"><label for=\"f1\">" + esc(_("All values"))
+        + "</label><label for=\"f2\">" + esc(_("Only changes")) + "</label></div>"
+        "<div class=\"areas\" id=\"all-values\">" + areas + "</div><p class=\"quiet "
+        "legend-note\">" + badge(S::OnlyNewer) + " " + esc(c.newerIsCurrentRun
+            ? _("only in this run") : _("only in the later run")) + esc(dot)
+        + badge(S::OnlyOlder) + " " + esc(_("only in the earlier run")) + esc(dot)
+        + badge(S::TestChanged) + " " + esc(_("the test or its work changed")) + esc(dot)
+        + esc(_("the same work in less time is faster.")) + "</p></div>\n";
+}
+
+// "a" or "a -> b"
+wxString both(const wxString& older, const wxString& newer)
+{
+    return older == newer ? older : older + arrow() + newer;
+}
+
+wxString intensityOf(const BenchmarkSnapshot& run)
+{
+    if (run.intensity == "quick")
+        return getBenchmarkIntensityName(BenchmarkIntensity::Quick);
+    if (run.intensity == "deep")
+        return getBenchmarkIntensityName(BenchmarkIntensity::Deep);
+    if (run.intensity == "standard")
+        return getBenchmarkIntensityName(BenchmarkIntensity::Standard);
+    return run.intensity;
+}
+
+// the date of a run without the seconds, and its computer
+wxString runChip(const BenchmarkSnapshot& run, const wxString& label)
+{
+    return chip("i-date", "<b>" + esc(label) + "</b> " + esc(run.date.Left(16)
+        + (run.host.empty() ? wxString() : wxString(" ") + wxUniChar(0x00B7) + " " + run.host)));
 }
 
 std::map<wxString, wxString> readCssTokens(const wxString& css, const wxString& selector)
@@ -1359,7 +2032,7 @@ wxString legacyDeclaration(const wxString& declaration,
 }
 
 // the start of a page: head, styles and the opened <main>
-wxString pageStart(const wxString& theme, const wxString& extraStyles)
+wxString pageStart(const wxString& theme)
 {
     wxString html = "<!doctype html>\n<html lang=\"en\"";
     if (theme == "dark" || theme == "light")
@@ -1370,9 +2043,45 @@ wxString pageStart(const wxString& theme, const wxString& extraStyles)
         "<meta charset=\"utf-8\"><meta name=\"viewport\" "
         "content=\"width=device-width, initial-scale=1\"><title>"
         + esc(_("Performance Benchmark & Diagnosis")) + "</title><style>"
-        + addBenchmarkCssFallbacks(wxString::FromUTF8(styleSheet) + extraStyles,
-            theme == "dark")
+        + addBenchmarkCssFallbacks(wxString::FromUTF8(styleSheet), theme == "dark")
         + "</style></head><body><main>\n";
+}
+
+// replaces the private texts that anonymized() could not replace in a field
+// of its own, then adds the pictograms, so that a name never changes them
+wxString finishPage(const wxString& html,
+    const std::vector<std::pair<wxString, wxString>>& hiddenTexts)
+{
+    wxString page = hideBenchmarkTexts(html, hiddenTexts, true);
+    const size_t body = page.find("<body>");
+    if (body != wxString::npos)
+        page.insert(body + 6, sprite());
+    return page;
+}
+
+// the radio buttons of the views: Overview (v1), Detailed report (v2),
+// Detailed comparison (v3); the overview is shown first
+wxString viewToggles(bool report, bool comparison)
+{
+    wxString html = "<input type=\"radio\" name=\"view\" class=\"view-toggle\" id=\"v1\" "
+        "checked>";
+    if (report)
+        html += "<input type=\"radio\" name=\"view\" class=\"view-toggle\" id=\"v2\">";
+    if (comparison)
+        html += "<input type=\"radio\" name=\"view\" class=\"view-toggle\" id=\"v3\">";
+    return html + "\n";
+}
+
+// the navigation of the views; no <nav>, the mode of Internet Explorer 8
+// cannot style it
+wxString viewTabs(bool report, bool comparison)
+{
+    wxString html = "<div class=\"pages\"><label for=\"v1\">" + esc(_("Overview")) + "</label>";
+    if (comparison)
+        html += "<label for=\"v3\">" + esc(_("Detailed comparison")) + "</label>";
+    if (report)
+        html += "<label for=\"v2\">" + esc(_("Detailed report")) + "</label>";
+    return html + "</div>\n";
 }
 
 } // namespace
@@ -1428,52 +2137,56 @@ wxString addBenchmarkCssFallbacks(const wxString& css, bool dark)
 wxString BenchmarkComparison::toHtml(const wxString& theme) const
 {
     const wxString dot = wxString(" ") + wxUniChar(0x00B7) + " ";
-    wxString html = pageStart(theme, wxEmptyString);
+    wxString html = pageStart(theme) + viewToggles(false, true);
     html += "<header><div class=\"brand\">" + esc("FlameRobin" + dot
         + _("Performance Benchmark & Diagnosis")) + "</div><h1>"
-        + esc(_("Comparison of two benchmark runs")) + "</h1></header>\n";
-    auto runBox = [](const BenchmarkSnapshot& run, const wxString& label)
-    {
-        return "<div class=\"box\"><div class=\"box-head\">" + esc(label) + "</div>"
-            "<div class=\"box-body\"><b>" + esc(run.title) + "</b><br><span class=\"muted\">"
-            + esc(run.date + (run.host.empty() ? wxString() : ", " + run.host)) + "<br>"
-            + esc(getBenchmarkKindName(run.kind)) + "</span></div></div>";
-    };
-    html += "<div class=\"runs\">" + runBox(older, _("Earlier run"))
-        + runBox(newer, newerLabel(*this)) + "</div>\n" + comparisonView(*this);
+        + esc(_("Comparison of two benchmark runs")) + "</h1><p class=\"specs\">"
+        + esc(both(older.title, newer.title) + dot + both(getBenchmarkKindName(older.kind),
+            getBenchmarkKindName(newer.kind)) + dot + both(intensityOf(older),
+            intensityOf(newer))) + "</p><div class=\"runs\">"
+        + runChip(older, _("Earlier run")) + "<span class=\"to\">" + wxUniChar(0x2192)
+        + "</span>" + runChip(newer, newerLabel(*this)) + "</div></header>\n";
+    html += viewTabs(false, true) + comparisonOverview(*this) + comparisonDetails(*this);
     html += "<footer>" + esc(_("Created by FlameRobin from two saved benchmark reports."))
-        + "</footer>\n</main></body></html>\n";
-    return hideBenchmarkTexts(html, hiddenTexts, true);
+        + "</footer>\n" + getBenchmarkComparisonMarker() + "</main></body></html>\n";
+    return finishPage(html, hiddenTexts);
 }
 
 wxString BenchmarkReport::toHtml(const wxString& theme) const
 {
     const std::vector<Section> sections = collectSections(*this);
     const BenchmarkSnapshot snapshot = makeBenchmarkSnapshot(*this);
-
-    // a click on a tile shows its panel
-    wxString tileStyles;
-    for (const Section& s : sections)
+    std::optional<BenchmarkComparison> comparison;
+    if (earlier)
     {
-        tileStyles += wxString::Format("#c%d:not(:checked)~.tiles .p%d{display:none}"
-            "#c%d:checked~.tiles .t%d{border-color:var(--link)}"
-            "#c%d:checked~.tiles .t%d .open{display:none}"
-            "#c%d:checked~.tiles .t%d .shut{display:inline}",
-            s.index, s.index, s.index, s.index, s.index, s.index, s.index, s.index);
+        comparison = compareBenchmarkSnapshots(snapshot, *earlier);
+        comparison->newerIsCurrentRun = true;
     }
-    wxString html = pageStart(theme, tileStyles);
-    // the two views: the overview is shown first
-    html += "<input type=\"radio\" name=\"view\" class=\"view-toggle\" id=\"v1\" checked>"
-        "<input type=\"radio\" name=\"view\" class=\"view-toggle\" id=\"v2\">\n";
+    wxString html = pageStart(theme) + viewToggles(true, comparison.has_value());
 
-    // header
+    // header: the tested system, its specification and the run
     const wxString dot = wxString(" ") + wxUniChar(0x00B7) + " ";
     html += "<header><div class=\"brand\">" + esc("FlameRobin" + dot
         + _("Performance Benchmark & Diagnosis")) + "</div><h1>"
         + esc(getBenchmarkSystemTitle(*this)) + "</h1><p class=\"specs\">"
-        + esc(getBenchmarkSystemSpecs(*this)) + "</p><p class=\"meta\">"
-        + esc(metrics.localHostName + dot + intensityName + dot + startedAt + dot
-            + wxString::Format(_("%.0f s"), durationSeconds)) + "</p>";
+        + esc(getBenchmarkSystemSpecs(*this)) + "</p><div class=\"chips\">";
+    if (!metrics.localHostName.empty())
+        html += chip("i-app", esc(metrics.localHostName));
+    html += chip("i-date", esc(startedAt.Left(16))) + chip("i-load", esc(intensityName))
+        + chip("i-time", esc(wxString::Format(_("%.0f s"), durationSeconds)))
+        + chip("i-link", esc(getBenchmarkKindName(getBenchmarkKindId(metrics))));
+    if (!comparison)
+    {
+        html += askChip(_("Compare with another run"), _("Choose this result or "
+            "report under \"Compare with\" before the next run, or use \"Compare...\". The "
+            "comparison shows what got faster or slower and what could be the reason."));
+    }
+    html += "</div>";
+    if (comparison)
+    {
+        html += "<p class=\"lead\">" + esc(wxString::Format(_("Compared with the earlier run "
+            "%s of %s."), earlier->title, earlier->date)) + "</p>";
+    }
     if (anonymous)
     {
         html += "<p class=\"notice info\">" + esc(_("Computer and host names, IP addresses, "
@@ -1496,62 +2209,22 @@ wxString BenchmarkReport::toHtml(const wxString& theme) const
             "%s could not be dropped. FlameRobin offers to drop it the next time the "
             "dialog opens."), benchmarkDatabasePath)) + "</p>";
     }
-    // the navigation of the property pages: Overview | Detailed report; no
-    // <nav>, the mode of Internet Explorer 8 cannot style it
-    html += "</header>\n<div class=\"pages\"><label for=\"v1\">" + esc(_("Overview"))
-        + "</label> | <label for=\"v2\">" + esc(_("Detailed report")) + "</label></div>\n";
+    html += "</header>\n" + viewTabs(true, comparison.has_value());
 
-    // the overview: the values of every part, or the comparison with an
-    // earlier run
-    html += "<div class=\"overview\">";
-    if (earlier)
-    {
-        BenchmarkComparison c = compareBenchmarkSnapshots(snapshot, *earlier);
-        c.newerIsCurrentRun = true;
-        html += "<p class=\"meta\">" + esc(wxString::Format(_("Compared with the earlier run "
-            "%s of %s."), earlier->title, earlier->date)) + "</p>" + comparisonView(c);
-    }
+    // the overview: the key figures and the notes of this run, or the
+    // comparison with an earlier run and every value of both
+    if (comparison)
+        html += comparisonOverview(*comparison) + comparisonDetails(*comparison);
     else
-        html += introBox() + keyValuesBox(*this, sections) + partsBox(*this, sections);
-    html += "</div>\n";
+        html += singleOverview(*this, sections, snapshot);
+    html += detailsView(*this, sections);
 
-    html += "<div class=\"details\">" + systemBlock(*this);
-    // the tiles; check boxes before them open the panels without a script
-    html += "<h2>" + esc(_("Parts of the system")) + "</h2><section class=\"cats\" id=\"categories\">";
-    for (const Section& s : sections)
-        html += wxString::Format("<input type=\"checkbox\" class=\"toggle\" id=\"c%d\">", s.index);
-    // every panel follows its tile in the grid: on a phone it opens right
-    // below the tile, on wider screens below the row of the tile
-    html += "<div class=\"tiles\">";
-    for (const Section& s : sections)
-    {
-        if (!s.empty())
-            html += tile(s, *this) + panel(s, *this);
-    }
-    html += "</div></section>\n";
-
-    auto block = [](const wxString& id, const wxString& title, const wxString& hint,
-        const wxString& body)
-    {
-        return "<details class=\"block\" id=\"" + id + "\"><summary>" + esc(title)
-            + (hint.empty() ? wxString() : " <span class=\"hint\">" + esc(hint) + "</span>")
-            + "<span class=\"chev\"></span></summary><div class=\"block-body\">" + body
-            + "</div></details>\n";
-    };
-    html += "<h2>" + esc(_("More")) + "</h2>";
-    html += block("values", _("All measured values"), _("every test with amount, time, "
-        "average and rate"), statisticsTable(sections));
-    html += block("glossary", _("Glossary"), _("abbreviations, terms and what every test "
-        "does"), glossary(*this));
-    html += block("run", _("Run details"), wxEmptyString, runDetails(*this));
-
-    html += "</div>\n<footer>" + esc(_("Created by FlameRobin. All tests ran in a temporary "
+    html += "<footer>" + esc(_("Created by FlameRobin. All tests ran in a temporary "
         "database that was created for the benchmark and dropped afterwards; no other "
         "database was changed.")) + "</footer>\n</main>\n"
         // the results for later comparisons, see parseBenchmarkSnapshot()
         + formatBenchmarkSnapshot(snapshot) + "</body></html>\n";
-    // what anonymized() could not replace in a field of its own
-    return hideBenchmarkTexts(html, hiddenTexts, true);
+    return finishPage(html, hiddenTexts);
 }
 
 } // namespace fr

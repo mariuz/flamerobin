@@ -29,13 +29,16 @@
 #include <cmath>
 
 #include "engine/Benchmark.h"
+#include "frversion.h"
 
 // Comparing two runs. A single run is not judged, because whether a value
 // is fast or slow depends on the environment; a comparison shows it. Every
 // report contains the results of its run as a hidden comment (the
 // snapshot), so a saved report can be compared with a new run, or two
-// saved reports with each other, without running a test. The earlier run
-// gets 1000 points for every part and in total, the later run
+// saved reports with each other, without running a test; its format is
+// described in devdocs/Benchmark_report_format.md. The measurements of
+// two runs are matched by their ids only, never by their titles. The
+// earlier run gets 1000 points for every part and in total, the later run
 // proportionally more or fewer. Where a part differs clearly, the
 // comparison names what could make the slower run slower: the facts of the
 // environment that differ, what was noticed on the slower run, and the
@@ -47,7 +50,14 @@ namespace fr
 namespace
 {
 
-const char* const snapshotMarker = "FlameRobin benchmark results";
+// format 1 (FlameRobin 26.10.0) used another marker; its parser accepts every
+// format line and so would compare a report of format 2 against nothing
+const char* const snapshotMarker = "FlameRobin benchmark snapshot";
+const char* const oldSnapshotMarker = "FlameRobin benchmark results";
+// the format of the snapshot: the major number changes when older versions
+// cannot read it any more, the minor number when lines or fields are added
+const int formatMajor = 2;
+const int formatMinor = 0;
 
 // a single value can neither dominate a part nor zero it
 const double maximumValueRatio = 5.0;
@@ -69,16 +79,6 @@ const std::pair<BenchmarkIntensity, const char*> intensityIds[] = {
     { BenchmarkIntensity::Standard, "standard" },
     { BenchmarkIntensity::Deep, "deep" }
 };
-
-wxString sectionId(BenchmarkCategory section)
-{
-    for (const auto& id : sectionIds)
-    {
-        if (id.first == section)
-            return id.second;
-    }
-    return "settings";
-}
 
 bool parseSection(const wxString& id, BenchmarkCategory* section)
 {
@@ -105,6 +105,12 @@ wxArrayString split(const wxString& value)
     for (auto& part : parts)
         part.Trim().Trim(false);
     return parts;
+}
+
+bool isDigits(const wxString& text)
+{
+    return !text.empty() && std::all_of(text.begin(), text.end(),
+        [](wxUniChar c) { return c >= '0' && c <= '9'; });
 }
 
 wxString intensityName(const wxString& id)
@@ -175,7 +181,135 @@ wxString pointsText(double ratio)
         : dash();
 }
 
+wxString join(const std::vector<wxString>& items, const wxString& with)
+{
+    wxString text;
+    for (const wxString& item : items)
+        text += (text.empty() ? wxString() : with) + item;
+    return text;
+}
+
+// a change as a triangle (no emoji) and words, in bold when it is large
+wxString changeMark(double ratio)
+{
+    const int level = getBenchmarkChangeLevel(ratio);
+    wxString text = level == 0 ? wxString("=")
+        : wxString(wxUniChar(ratio > 1.0 ? 0x25B2 : 0x25BC));
+    text += " " + formatBenchmarkChange(ratio);
+    return level == 2 ? "**" + text + "**" : text;
+}
+
+// the change of a value, or why it was not compared
+wxString stateText(double ratio, BenchmarkCompareState state)
+{
+    switch (state)
+    {
+        case BenchmarkCompareState::TestChanged:
+            return _("not comparable (test changed)");
+        case BenchmarkCompareState::WorkChanged:
+            return _("not comparable (other work)");
+        case BenchmarkCompareState::OnlyNewer:
+        case BenchmarkCompareState::OnlyOlder:
+            return getBenchmarkCompareStateName(state);
+        case BenchmarkCompareState::Compared:
+        default:
+            return ratio > 0.0 ? changeMark(ratio) : wxString();
+    }
+}
+
+// a number of the snapshot, the same in every language: a point as the
+// decimal separator, no thousands separators, no exponent, at most six
+// significant digits but every digit before the point; empty for 0
+wxString canonicalNumber(double value)
+{
+    if (!std::isfinite(value) || value == 0.0)
+        return wxEmptyString;
+    const int magnitude = int(std::floor(std::log10(std::abs(value))));
+    wxString text = wxString::FromCDouble(value, std::clamp(5 - magnitude, 0, 12));
+    if (text.Contains("."))
+    {
+        while (text.EndsWith("0"))
+            text.RemoveLast();
+        if (text.EndsWith("."))
+            text.RemoveLast();
+    }
+    return text;
+}
+
+// a number of the snapshot; empty is 0, anything else must be a number that
+// is not negative
+bool parseNumber(const wxString& text, double* value)
+{
+    *value = 0.0;
+    if (text.empty())
+        return true;
+    return text.ToCDouble(value) && std::isfinite(*value) && *value >= 0.0;
+}
+
+// the value of a measurement in the unit of the register, from the work
+// of its result: a rate, or the time of one operation
+double measuredValue(const BenchmarkMeasurementDef& def, double amount,
+    const wxString& amountUnit, double ms)
+{
+    if (ms <= 0.0)
+        return 0.0;
+    const wxString unit = def.unit;
+    if (unit == "ms")
+        return amount > 0.0 ? ms / amount : ms;
+    if (unit == "MB/s")
+        return amountUnit == "bytes" ? amount / (1024.0 * 1024.0) / (ms / 1000.0) : 0.0;
+    if (unit == "it/ms")
+        return amount / ms;
+    if (unit.EndsWith("/s"))
+        return amount * 1000.0 / ms;
+    return 0.0;
+}
+
+// a ratio of two saved values to five significant digits: the values have
+// six, so that an exact factor (twice as fast) stays exact and two equal
+// changes stay equal
+double roundRatio(double ratio)
+{
+    if (ratio <= 0.0 || !std::isfinite(ratio))
+        return 0.0;
+    const double scale = std::pow(10.0, 4.0 - std::floor(std::log10(ratio)));
+    return std::round(ratio * scale) / scale;
+}
+
+// the section of a measurement this version does not know, from its id
+bool sectionOfId(const wxString& id, BenchmarkCategory* section)
+{
+    const BenchmarkMeasurementDef* def = findBenchmarkMeasurementDef(id);
+    if (def)
+    {
+        *section = def->section;
+        return true;
+    }
+    return parseSection(id.BeforeFirst('.'), section);
+}
+
 } // namespace
+
+const BenchmarkMeasurement* BenchmarkSnapshot::findMeasurement(const wxString& id) const
+{
+    for (const auto& m : measurements)
+    {
+        if (m.id == id)
+            return &m;
+    }
+    return nullptr;
+}
+
+wxString getBenchmarkSectionId(BenchmarkCategory section)
+{
+    const BenchmarkCategory reportSection = getBenchmarkReportSection(section);
+    for (const auto& id : sectionIds)
+    {
+        if (id.first == reportSection)
+            return id.second;
+    }
+    return "settings";
+}
 
 BenchmarkSnapshot makeBenchmarkSnapshot(const BenchmarkReport& report)
 {
@@ -186,17 +320,76 @@ BenchmarkSnapshot makeBenchmarkSnapshot(const BenchmarkReport& report)
     s.kind = getBenchmarkKindId(report.metrics);
     for (const auto& i : intensityIds)
     {
-        if (report.intensityName == getBenchmarkIntensityName(i.first))
+        if (report.intensity == i.first)
             s.intensity = i.second;
     }
-    s.values = getBenchmarkValues(report.metrics);
-    s.work = getBenchmarkWork(report.metrics);
+    s.program = wxString::Format("%d.%d.%d", FR_VERSION_MAJOR, FR_VERSION_MINOR,
+        FR_VERSION_RLS);
+
+    const BenchmarkMetrics& m = report.metrics;
+    const BenchmarkValues values = getBenchmarkValues(m);
+    const std::map<wxString, BenchmarkWork> work = getBenchmarkWork(m);
+    // a key value with the work behind it
+    auto keyValue = [&values, &work](const BenchmarkMeasurementDef& def,
+        BenchmarkMeasurement& x)
+    {
+        x.value = values.*def.value;
+        x.title = wxGetTranslation(def.title);
+        x.text = formatBenchmarkValue(x.value, def);
+        auto w = work.find(def.id);
+        if (w != work.end())
+        {
+            x.amount = w->second.amount;
+            x.amountUnit = w->second.unit;
+            x.ms = w->second.ms;
+        }
+    };
     for (const auto& r : report.results)
     {
         // the configuration is compared as facts
-        const BenchmarkCategory section = getBenchmarkReportSection(r.category);
-        if (section != BenchmarkCategory::Environment)
-            s.stats.push_back({ section, r.valueKey, r.test, r.value, r.amount, r.durationMs });
+        const BenchmarkMeasurementDef* def = findBenchmarkMeasurementDef(r.id);
+        if (!def || def->section == BenchmarkCategory::Environment || s.findMeasurement(r.id))
+            continue;
+        const bool skipped = std::any_of(m.skippedTests.begin(), m.skippedTests.end(),
+            [&r](const BenchmarkMetrics::SkippedTest& t) { return t.id == r.id; });
+        BenchmarkMeasurement x;
+        x.id = r.id;
+        x.unit = def->unit;
+        x.version = def->version;
+        x.title = r.test;
+        x.text = r.value;
+        if (!skipped && def->kind == BenchmarkMeasurementKind::Key)
+        {
+            // e.g. the network of the embedded engine: no key value
+            if (values.*def->value <= 0.0)
+                continue;
+            keyValue(*def, x);
+        }
+        else if (!skipped && def->kind == BenchmarkMeasurementKind::Measure)
+        {
+            x.value = measuredValue(*def, r.amountValue, r.amountUnit, r.durationMs);
+            if (x.value > 0.0)
+            {
+                x.amount = r.amountValue;
+                x.amountUnit = r.amountUnit;
+                x.ms = r.durationMs;
+            }
+        }
+        s.measurements.push_back(x);
+    }
+    // the key values without a result of their own: the best OLTP level
+    for (const BenchmarkMeasurementDef& def : getBenchmarkMeasurementDefs())
+    {
+        if (def.kind == BenchmarkMeasurementKind::Key && def.value
+            && values.*def.value > 0.0 && !s.findMeasurement(def.id))
+        {
+            BenchmarkMeasurement x;
+            x.id = def.id;
+            x.unit = def.unit;
+            x.version = def.version;
+            keyValue(def, x);
+            s.measurements.push_back(x);
+        }
     }
     for (const auto& f : getBenchmarkFacts(report))
         s.facts.push_back({ f.key, f.value });
@@ -253,114 +446,216 @@ wxString formatBenchmarkSnapshot(const BenchmarkSnapshot& s)
     // kept when the report is saved, copied or pasted into a ticket
     wxString text = wxString("<!-- ") + snapshotMarker + " (used by FlameRobin to "
         "compare reports)\n";
-    text += "format = 1\n";
-    text += "title = " + clean(s.title) + "\n";
+    text += wxString::Format("format = %d.%d\n", formatMajor, formatMinor);
+    text += "program = " + clean(s.program) + "\n";
+    text += "run.title = " + clean(s.title) + "\n";
     if (!s.host.empty())
-        text += "host = " + clean(s.host) + "\n";
-    text += "date = " + clean(s.date) + "\n";
-    text += "kind = " + s.kind + "\n";
-    text += "intensity = " + s.intensity + "\n";
-    for (const auto& v : formatBenchmarkValues(s.values))
+        text += "run.host = " + clean(s.host) + "\n";
+    text += "run.date = " + clean(s.date) + "\n";
+    text += "run.kind = " + clean(s.kind) + "\n";
+    text += "run.intensity = " + clean(s.intensity) + "\n";
+    // value | unit | version | amount | unit of the amount | ms | title |
+    // text: the first six fields are read by their position, later minor
+    // formats may add fields at the end
+    for (const auto& m : s.measurements)
     {
-        if (v.second != "0")
-            text += "value." + v.first + " = " + v.second + "\n";
-    }
-    for (const auto& w : s.work)
-    {
-        text += "work." + w.first + " = " + clean(w.second.first) + " | "
-            + wxString::FromCDouble(w.second.second, 3) + "\n";
-    }
-    for (const auto& st : s.stats)
-    {
-        text += "stat = " + sectionId(st.section) + " | " + st.key + " | "
-            + clean(st.test) + " | " + clean(st.value) + " | " + clean(st.amount)
-            + " | " + wxString::FromCDouble(st.ms, 3) + "\n";
+        text += "m." + m.id + " = " + canonicalNumber(m.value) + " | " + clean(m.unit)
+            + wxString::Format(" | v%d | ", m.version) + canonicalNumber(m.amount) + " | "
+            + clean(m.amountUnit) + " | " + canonicalNumber(m.ms) + " | " + clean(m.title)
+            + " | " + clean(m.text) + "\n";
     }
     for (const auto& f : s.facts)
         text += "fact." + f.first + " = " + clean(f.second) + "\n";
     for (const auto& h : s.hints)
     {
-        text += "hint = " + sectionId(h.category) + " | " + clean(h.title) + " | "
-            + clean(h.detail) + " | " + clean(h.advice) + "\n";
+        text += "note." + h.id + " = " + getBenchmarkSectionId(h.category) + " | "
+            + clean(h.title) + " | " + clean(h.detail) + " | " + clean(h.advice) + "\n";
     }
     return text + "-->\n";
 }
 
-std::optional<BenchmarkSnapshot> parseBenchmarkSnapshot(const wxString& text)
+wxString getBenchmarkComparisonMarker()
 {
-    const size_t start = text.find(snapshotMarker);
-    if (start == wxString::npos)
-        return std::nullopt;
-    size_t end = text.find("-->", start);
-    if (end == wxString::npos)
-        end = text.length();
-    wxString rest = text.Mid(start, end - start).AfterFirst('\n');
+    return "<!-- FlameRobin benchmark comparison (a saved comparison of two runs; it has "
+        "no results of its own and cannot be compared again) -->\n";
+}
 
-    BenchmarkSnapshot s;
-    bool hasFormat = false;
-    while (!rest.empty())
+bool isBenchmarkComparisonPage(const wxString& text)
+{
+    return text.find("<!-- FlameRobin benchmark comparison (") != wxString::npos;
+}
+
+size_t findBenchmarkSnapshot(const wxString& text)
+{
+    const size_t start = text.find(wxString("<!-- ") + snapshotMarker);
+    if (start != wxString::npos)
+        return start;
+    return text.find(wxString("<!-- ") + oldSnapshotMarker);
+}
+
+BenchmarkSnapshotResult parseBenchmarkSnapshot(const wxString& text)
+{
+    BenchmarkSnapshotResult result;
+    size_t start = text.find(snapshotMarker);
+    if (start == wxString::npos)
+        start = text.find(oldSnapshotMarker);
+    if (start == wxString::npos)
+        return result;
+    // a report that was cut off, e.g. when it was copied
+    const size_t end = text.find("-->", start);
+    result.status = BenchmarkSnapshotStatus::Damaged;
+    if (end == wxString::npos)
+        return result;
+
+    // key = value; Windows line ends as well
+    std::vector<std::pair<wxString, wxString>> lines;
+    for (wxString line : wxSplit(text.Mid(start, end - start).AfterFirst('\n'), '\n', '\0'))
     {
-        wxString line = rest.BeforeFirst('\n');
-        rest = rest.AfterFirst('\n');
         line.Replace("\r", "");
-        if (!line.Contains("="))
-            continue;
-        const wxString key = line.BeforeFirst('=').Trim().Trim(false);
-        const wxString value = line.AfterFirst('=').Trim().Trim(false);
-        if (key == "format")
-            hasFormat = true;
-        else if (key == "title")
-            s.title = value;
-        else if (key == "host")
-            s.host = value;
-        else if (key == "date")
-            s.date = value;
-        else if (key == "kind")
-            s.kind = value;
-        else if (key == "intensity")
-            s.intensity = value;
-        else if (key.StartsWith("value."))
-            parseBenchmarkValue(s.values, key.Mid(6), value);
-        else if (key.StartsWith("work."))
+        if (line.Contains("="))
         {
-            double ms = 0.0;
-            value.AfterLast('|').Trim(false).ToCDouble(&ms);
-            s.work[key.Mid(5)] = { value.BeforeLast('|').Trim(), ms };
+            lines.push_back({ line.BeforeFirst('=').Trim().Trim(false),
+                line.AfterFirst('=').Trim().Trim(false) });
         }
-        else if (key == "stat")
+    }
+
+    // the format decides how the rest is read: a newer minor format only
+    // adds lines and fields, another major format is not compatible
+    auto format = std::find_if(lines.begin(), lines.end(),
+        [](const auto& line) { return line.first == "format"; });
+    if (format == lines.end())
+        return result;
+    result.format = format->second;
+    long major = 0;
+    const wxString majorText = result.format.BeforeFirst('.');
+    if (!isDigits(majorText) || !majorText.ToLong(&major)
+        || (result.format.Contains(".") && !isDigits(result.format.AfterFirst('.'))))
+    {
+        return result;
+    }
+    if (major < formatMajor)
+    {
+        result.status = BenchmarkSnapshotStatus::TooOld;
+        return result;
+    }
+    if (major > formatMajor)
+    {
+        result.status = BenchmarkSnapshotStatus::TooNew;
+        return result;
+    }
+
+    BenchmarkSnapshot& s = result.snapshot;
+    for (const auto& line : lines)
+    {
+        const wxString& key = line.first;
+        const wxString& value = line.second;
+        if (key == "program")
+            s.program = value;
+        else if (key == "run.title")
+            s.title = value;
+        else if (key == "run.host")
+            s.host = value;
+        else if (key == "run.date")
+            s.date = value;
+        else if (key == "run.kind")
+            s.kind = value;
+        else if (key == "run.intensity")
+            s.intensity = value;
+        else if (key.StartsWith("m."))
         {
-            const wxArrayString parts = split(value);
-            BenchmarkSnapshot::Stat st;
-            double ms = 0.0;
-            if (parts.size() == 6 && parseSection(parts[0], &st.section)
-                && parts[5].ToCDouble(&ms))
+            // a line that cannot be read is skipped like an unknown one
+            const wxString id = key.Mid(2);
+            wxArrayString fields = split(value);
+            while (fields.size() < 8)
+                fields.push_back(wxEmptyString);
+            BenchmarkMeasurement x;
+            x.id = id;
+            x.unit = fields[1];
+            x.amountUnit = fields[4];
+            x.title = fields[6];
+            x.text = fields[7];
+            long version = 0;
+            if (isBenchmarkMeasurementId(id) && !s.findMeasurement(id)
+                && parseNumber(fields[0], &x.value) && fields[2].StartsWith("v")
+                && isDigits(fields[2].Mid(1)) && fields[2].Mid(1).ToLong(&version)
+                && version >= 1 && parseNumber(fields[3], &x.amount)
+                && parseNumber(fields[5], &x.ms))
             {
-                st.key = parts[1];
-                st.test = parts[2];
-                st.value = parts[3];
-                st.amount = parts[4];
-                st.ms = ms;
-                s.stats.push_back(st);
+                x.version = int(version);
+                s.measurements.push_back(x);
             }
         }
         else if (key.StartsWith("fact."))
             s.facts.push_back({ key.Mid(5), value });
-        else if (key == "hint")
+        else if (key.StartsWith("note."))
         {
-            const wxArrayString parts = split(value);
+            const wxArrayString fields = split(value);
             BenchmarkHint h;
-            if (parts.size() == 4 && parseSection(parts[0], &h.category))
+            h.id = key.Mid(5);
+            if (fields.size() >= 4 && isBenchmarkMeasurementId(h.id)
+                && parseSection(fields[0], &h.category))
             {
-                h.title = parts[1];
-                h.detail = parts[2];
-                h.advice = parts[3];
+                h.title = fields[1];
+                h.detail = fields[2];
+                h.advice = fields[3];
                 s.hints.push_back(h);
             }
         }
     }
-    if (!hasFormat)
-        return std::nullopt;
-    return s;
+    result.status = BenchmarkSnapshotStatus::Ok;
+    return result;
+}
+
+wxString getBenchmarkSnapshotProblem(const BenchmarkSnapshotResult& result)
+{
+    switch (result.status)
+    {
+        case BenchmarkSnapshotStatus::Ok:
+            return wxEmptyString;
+        case BenchmarkSnapshotStatus::TooOld:
+            return wxString::Format(_("The report was made with an older version of "
+                "FlameRobin (report format %s) and cannot be compared. Run the test "
+                "again with this version."), result.format);
+        case BenchmarkSnapshotStatus::TooNew:
+            return wxString::Format(_("The report was made with a newer version of "
+                "FlameRobin (report format %s). Please update FlameRobin to compare "
+                "it."), result.format);
+        case BenchmarkSnapshotStatus::Damaged:
+            return _("The results in the report are incomplete or damaged and cannot "
+                "be read.");
+        case BenchmarkSnapshotStatus::NotAReport:
+        default:
+            return _("The file contains no benchmark results. Please select a report "
+                "that was saved or copied with FlameRobin (HTML or Markdown).");
+    }
+}
+
+wxString hideBenchmarkSnapshotTexts(const wxString& comment,
+    const std::function<wxString(const wxString&)>& hide)
+{
+    // only the texts: the key of every line, and the value, unit, version
+    // and work of a measurement and the section of a note stay
+    wxString result;
+    const wxArrayString lines = wxSplit(comment, '\n', '\0');
+    for (size_t i = 0; i < lines.size(); ++i)
+    {
+        const wxString& line = lines[i];
+        const int equals = line.Find(" = ");
+        if (equals == wxNOT_FOUND)
+            result += line;
+        else
+        {
+            const wxString key = line.Left(equals);
+            wxArrayString fields = wxSplit(line.Mid(equals + 3), '|', '\0');
+            const size_t kept = key.StartsWith("m.") ? 6 : key.StartsWith("note.") ? 1 : 0;
+            for (size_t f = kept; f < fields.size(); ++f)
+                fields[f] = hide(fields[f]);
+            result += key + " = " + wxJoin(fields, '|', '\0');
+        }
+        if (i + 1 < lines.size())
+            result += "\n";
+    }
+    return result;
 }
 
 bool isBenchmarkFactOfPart(const wxString& key, BenchmarkCategory part, bool serverRun)
@@ -411,54 +706,98 @@ BenchmarkComparison compareBenchmarkSnapshots(const BenchmarkSnapshot& newer,
     c.older = older;
     c.sameKind = newer.kind == older.kind && newer.intensity == older.intensity;
 
-    c.values = compareBenchmarkValues(newer.values, older.values);
-    auto workOf = [](const BenchmarkSnapshot& s, const wxString& key)
+    // a measurement of both runs, matched by its id; it is compared only if
+    // both runs have it from the same version of the test and, where every
+    // run of an intensity does the same work, with the same work. The key
+    // values of runs of different intensities are compared as well, roughly
+    // (see sameKind).
+    const bool sameIntensity = newer.intensity == older.intensity;
+    auto compare = [sameIntensity](const wxString& id, BenchmarkCategory section,
+        const BenchmarkMeasurement* n, const BenchmarkMeasurement* o)
     {
-        auto w = s.work.find(key);
-        return w == s.work.end() ? wxString()
-            : formatBenchmarkWork(w->second.first, w->second.second);
-    };
-    for (auto& v : c.values)
-    {
-        v.newerWork = workOf(newer, v.key);
-        v.olderWork = workOf(older, v.key);
-    }
-
-    // the other measurements by part and test; the same work in less time
-    // is faster
-    auto findStat = [](const BenchmarkSnapshot& s, const BenchmarkSnapshot::Stat& like)
-        -> const BenchmarkSnapshot::Stat*
-    {
-        for (const auto& st : s.stats)
+        const BenchmarkMeasurementDef* def = findBenchmarkMeasurementDef(id);
+        auto text = [def](const BenchmarkMeasurement* x)
         {
-            if (st.section == like.section && st.test == like.test)
-                return &st;
-        }
-        return nullptr;
-    };
-    auto addStat = [&c](const BenchmarkSnapshot::Stat& like,
-        const BenchmarkSnapshot::Stat* n, const BenchmarkSnapshot::Stat* o)
-    {
+            if (!x)
+                return dash();
+            if (def && def->kind == BenchmarkMeasurementKind::Key && x->value > 0.0)
+                return formatBenchmarkValue(x->value, *def);
+            return x->text.empty() ? dash() : x->text;
+        };
+        auto work = [](const BenchmarkMeasurement* x)
+        {
+            return x ? formatBenchmarkWork(formatBenchmarkAmount(x->amount, x->amountUnit),
+                x->ms) : wxString();
+        };
         BenchmarkComparedValue v;
-        v.category = like.section;
-        v.title = like.test;
-        v.newerText = n ? n->value : dash();
-        v.olderText = o ? o->value : dash();
-        v.newerWork = n ? formatBenchmarkWork(n->amount, n->ms) : wxString();
-        v.olderWork = o ? formatBenchmarkWork(o->amount, o->ms) : wxString();
-        if (n && o && n->ms > 0.0 && o->ms > 0.0 && n->amount == o->amount)
-            v.ratio = o->ms / n->ms;
-        c.stats.push_back(v);
+        v.category = section;
+        v.id = id;
+        v.title = n ? n->title : o->title;
+        if (def && def->kind == BenchmarkMeasurementKind::Key)
+            v.title = wxGetTranslation(def->title);
+        else if (v.title.empty())
+            v.title = id;
+        v.newerText = text(n);
+        v.olderText = text(o);
+        v.newerWork = work(n);
+        v.olderWork = work(o);
+        v.newerVersion = n ? n->version : 0;
+        v.olderVersion = o ? o->version : 0;
+        if (!o)
+            v.state = BenchmarkCompareState::OnlyNewer;
+        else if (!n)
+            v.state = BenchmarkCompareState::OnlyOlder;
+        else if (n->version != o->version)
+            v.state = BenchmarkCompareState::TestChanged;
+        // information, an id this version does not know, or a test that did
+        // not run in one of the runs: shown, not compared
+        else if (def && def->kind != BenchmarkMeasurementKind::Info && n->value > 0.0
+            && o->value > 0.0)
+        {
+            // a value without its work (e.g. a commit faster than the round
+            // trips it was corrected by) cannot differ in its work
+            const bool sameWork = n->amountUnit.empty() || o->amountUnit.empty()
+                || (n->amount == o->amount && n->amountUnit == o->amountUnit);
+            if (!sameWork && def->amountFixed
+                && (def->kind == BenchmarkMeasurementKind::Measure || sameIntensity))
+            {
+                v.state = BenchmarkCompareState::WorkChanged;
+            }
+            else
+            {
+                v.ratio = roundRatio(def->higherIsBetter ? n->value / o->value
+                    : o->value / n->value);
+            }
+        }
+        return v;
     };
-    for (const auto& st : newer.stats)
+
+    // the key values in the order of the register
+    for (const BenchmarkMeasurementDef& def : getBenchmarkMeasurementDefs())
     {
-        if (st.key.empty())
-            addStat(st, &st, findStat(older, st));
+        const BenchmarkMeasurement* n = newer.findMeasurement(def.id);
+        const BenchmarkMeasurement* o = older.findMeasurement(def.id);
+        if (def.kind == BenchmarkMeasurementKind::Key && (n || o))
+            c.values.push_back(compare(def.id, def.section, n, o));
     }
-    for (const auto& st : older.stats)
+    // the other measurements in the order of the newer run, then those that
+    // only the older one has
+    auto isKey = [](const wxString& id)
     {
-        if (st.key.empty() && !findStat(newer, st))
-            addStat(st, nullptr, &st);
+        const BenchmarkMeasurementDef* def = findBenchmarkMeasurementDef(id);
+        return def && def->kind == BenchmarkMeasurementKind::Key;
+    };
+    for (const auto& n : newer.measurements)
+    {
+        BenchmarkCategory section;
+        if (!isKey(n.id) && sectionOfId(n.id, &section))
+            c.stats.push_back(compare(n.id, section, &n, older.findMeasurement(n.id)));
+    }
+    for (const auto& o : older.measurements)
+    {
+        BenchmarkCategory section;
+        if (!isKey(o.id) && !newer.findMeasurement(o.id) && sectionOfId(o.id, &section))
+            c.stats.push_back(compare(o.id, section, nullptr, &o));
     }
 
     // the facts of both runs in the order of the newer one
@@ -541,7 +880,7 @@ BenchmarkComparison compareBenchmarkSnapshots(const BenchmarkSnapshot& newer,
             {
                 if (v.category == section && getBenchmarkChangeLevel(v.ratio) > 0
                     && (v.ratio < 1.0) == newerSlower
-                    && !getBenchmarkValueAdvice(v.key).empty())
+                    && !getBenchmarkValueAdvice(v.id).empty())
                 {
                     slowerValues.push_back(&v);
                 }
@@ -554,7 +893,7 @@ BenchmarkComparison compareBenchmarkSnapshots(const BenchmarkSnapshot& newer,
             if (slowerValues.size() > maximumAdvice)
                 slowerValues.resize(maximumAdvice);
             for (const BenchmarkComparedValue* v : slowerValues)
-                part.advice.push_back({ v->title, getBenchmarkValueAdvice(v->key) });
+                part.advice.push_back({ v->title, getBenchmarkValueAdvice(v->id) });
         }
         c.parts.push_back(part);
     }
@@ -644,13 +983,232 @@ wxString getBenchmarkReasonsTitle(const BenchmarkComparison& c,
         : _("What could make the later run slower");
 }
 
+BenchmarkVerdict getBenchmarkVerdict(const BenchmarkComparison& comparison)
+{
+    BenchmarkVerdict verdict;
+    for (const BenchmarkHeadlineChange& change : getBenchmarkHeadlineChanges(comparison))
+    {
+        if (change.state != BenchmarkCompareState::Compared || change.ratio <= 0.0)
+            ++verdict.notComparable;
+        else if (getBenchmarkChangeLevel(change.ratio) == 0)
+            ++verdict.same;
+        else if (change.ratio > 1.0)
+            ++verdict.faster;
+        else
+            ++verdict.slower;
+    }
+    return verdict;
+}
+
+std::vector<std::pair<int, wxString>> describeBenchmarkVerdict(const BenchmarkVerdict& verdict)
+{
+    // the first count names what is counted
+    std::vector<std::pair<int, wxString>> list;
+    auto add = [&list](int direction, int count, const wxString& first, const wxString& next)
+    {
+        if (count > 0)
+            list.push_back({ direction, list.empty() ? first : next });
+    };
+    add(1, verdict.faster, wxString::Format(wxPLURAL("%d key figure faster",
+        "%d key figures faster", verdict.faster), verdict.faster),
+        wxString::Format(_("%d faster"), verdict.faster));
+    add(-1, verdict.slower, wxString::Format(wxPLURAL("%d key figure slower",
+        "%d key figures slower", verdict.slower), verdict.slower),
+        wxString::Format(_("%d slower"), verdict.slower));
+    add(0, verdict.same, wxString::Format(wxPLURAL("%d key figure about the same",
+        "%d key figures about the same", verdict.same), verdict.same),
+        wxString::Format(_("%d about the same"), verdict.same));
+    return list;
+}
+
+std::vector<wxString> getBenchmarkVerdictNotes(const BenchmarkComparison& comparison)
+{
+    std::vector<wxString> notes;
+    for (const BenchmarkComparedPart& p : comparison.parts)
+    {
+        const wxString word = getBenchmarkReportSectionWord(p.category);
+        switch (getBenchmarkPartState(comparison, p.category))
+        {
+            case BenchmarkCompareState::OnlyNewer:
+                notes.push_back(wxString::Format(comparison.newerIsCurrentRun
+                    ? _("%s measured in this run only")
+                    : _("%s measured in the later run only"), word));
+                break;
+            case BenchmarkCompareState::OnlyOlder:
+                notes.push_back(wxString::Format(_("%s measured in the earlier run only"),
+                    word));
+                break;
+            case BenchmarkCompareState::Compared:
+                break;
+            default:
+                notes.push_back(wxString::Format(_("%s not comparable"), word));
+                break;
+        }
+    }
+    const int notCompared = getBenchmarkVerdict(comparison).notComparable;
+    if (notCompared > 0)
+    {
+        notes.push_back(wxString::Format(wxPLURAL("%d key figure not compared",
+            "%d key figures not compared", notCompared), notCompared));
+    }
+    return notes;
+}
+
+BenchmarkCompareState getBenchmarkPartState(const BenchmarkComparison& comparison,
+    BenchmarkCategory section)
+{
+    using S = BenchmarkCompareState;
+    const BenchmarkComparedPart* part = comparison.findPart(section);
+    if (part && part->ratio > 0.0)
+        return S::Compared;
+    int newer = 0, older = 0, compared = 0, other = 0;
+    for (const auto* list : { &comparison.values, &comparison.stats })
+    {
+        for (const BenchmarkComparedValue& v : *list)
+        {
+            if (v.category != section)
+                continue;
+            if (v.state == S::OnlyNewer)
+                ++newer;
+            else if (v.state == S::OnlyOlder)
+                ++older;
+            else if (v.state == S::Compared)
+                ++compared;
+            else
+                ++other;
+        }
+    }
+    if (compared > 0 || newer + older + other == 0)
+        return S::Compared;
+    if (older + other == 0)
+        return S::OnlyNewer;
+    if (newer + other == 0)
+        return S::OnlyOlder;
+    return S::TestChanged;
+}
+
+std::vector<const BenchmarkComparedPart*> getBenchmarkStandOut(
+    const BenchmarkComparison& comparison, size_t maximum)
+{
+    std::vector<const BenchmarkComparedPart*> list;
+    for (const BenchmarkComparedPart& p : comparison.parts)
+    {
+        if (getBenchmarkChangeLevel(p.ratio) > 0)
+            list.push_back(&p);
+    }
+    std::stable_sort(list.begin(), list.end(),
+        [](const BenchmarkComparedPart* a, const BenchmarkComparedPart* b)
+        {
+            return std::abs(std::log(a->ratio)) > std::abs(std::log(b->ratio));
+        });
+    if (list.size() > maximum)
+        list.resize(maximum);
+    return list;
+}
+
+wxString getBenchmarkShortAdvice(const wxString& advice)
+{
+    // an advice can start with the current setting, which is no advice
+    const wxString current = wxString(_("Current setting: %s.")).BeforeFirst('%');
+    wxString text = advice;
+    if (!current.empty() && text.StartsWith(current) && text.find(". ") != wxString::npos)
+        text = text.Mid(text.find(". ") + 2);
+    const size_t end = text.find(". ");
+    return end == wxString::npos ? text : text.Left(end + 1);
+}
+
+wxString getBenchmarkLikelyReason(const BenchmarkComparedPart& part)
+{
+    // a fact that differs explains more than a note of one run; the
+    // typical causes are the list of reasons itself, not one of them
+    if (!part.differences.empty())
+    {
+        const BenchmarkComparedFact& d = part.differences.front();
+        return d.label + ": " + d.olderText + arrow() + d.newerText;
+    }
+    if (!part.hints.empty())
+        return part.hints.front().title;
+    return wxEmptyString;
+}
+
+wxString getBenchmarkTryAdvice(const BenchmarkComparedPart& part)
+{
+    if (!part.differences.empty())
+    {
+        const wxString advice = getBenchmarkFactAdvice(part.differences.front().key);
+        if (!advice.empty())
+            return advice;
+    }
+    for (const BenchmarkHint& h : part.hints)
+    {
+        if (!h.advice.empty())
+            return getBenchmarkShortAdvice(h.advice);
+    }
+    if (!part.differences.empty() || !part.advice.empty())
+    {
+        return _("Repeat the slower run under the same conditions; if the difference "
+            "stays, check the possible reasons one by one.");
+    }
+    return wxEmptyString;
+}
+
+wxString getBenchmarkCompareStateName(BenchmarkCompareState state)
+{
+    switch (state)
+    {
+        case BenchmarkCompareState::OnlyNewer:
+            return _("new");
+        case BenchmarkCompareState::OnlyOlder:
+            return _("no longer measured");
+        case BenchmarkCompareState::TestChanged:
+        case BenchmarkCompareState::WorkChanged:
+            return _("not comparable");
+        case BenchmarkCompareState::Compared:
+        default:
+            return wxEmptyString;
+    }
+}
+
+wxString describeBenchmarkCompareState(const BenchmarkComparison& comparison,
+    const BenchmarkComparedValue& value)
+{
+    if (value.state == BenchmarkCompareState::TestChanged)
+    {
+        return wxString::Format(_("The test changed (version %d, earlier version %d)."),
+            value.newerVersion, value.olderVersion);
+    }
+    if (value.state != BenchmarkCompareState::WorkChanged)
+        return wxEmptyString;
+    auto amount = [&value](const BenchmarkSnapshot& run)
+    {
+        const BenchmarkMeasurement* x = run.findMeasurement(value.id);
+        return x ? formatBenchmarkAmount(x->amount, x->amountUnit) : wxString();
+    };
+    return wxString::Format(_("Other work: %s, earlier %s."), amount(comparison.newer),
+        amount(comparison.older));
+}
+
+wxString formatBenchmarkComparedWork(const BenchmarkComparison& comparison,
+    const BenchmarkComparedValue& value)
+{
+    const BenchmarkMeasurement* n = comparison.newer.findMeasurement(value.id);
+    const BenchmarkMeasurement* o = comparison.older.findMeasurement(value.id);
+    // the same work: its amount once and both times
+    if (n && o && n->amount > 0.0 && n->amount == o->amount
+        && n->amountUnit == o->amountUnit && n->ms > 0.0 && o->ms > 0.0)
+    {
+        return formatBenchmarkAmount(n->amount, n->amountUnit) + ": "
+            + formatBenchmarkMilliseconds(o->ms) + arrow() + formatBenchmarkMilliseconds(n->ms);
+    }
+    if (value.olderWork.empty() || value.olderWork == value.newerWork)
+        return value.newerWork;
+    if (value.newerWork.empty())
+        return value.olderWork;
+    return value.olderWork + arrow() + value.newerWork;
+}
+
 wxString formatBenchmarkComparisonMarkdown(const BenchmarkComparison& c, bool standalone)
 {
-    auto changeText = [](double ratio)
-    {
-        const wxString change = formatBenchmarkChange(ratio);
-        return getBenchmarkChangeLevel(ratio) == 2 ? "**" + change + "**" : change;
-    };
     const wxString older = olderLabel();
     const wxString newer = newerLabel(c);
 
@@ -676,41 +1234,99 @@ wxString formatBenchmarkComparisonMarkdown(const BenchmarkComparison& c, bool st
         md << "### " << wxString::Format(_("Compared with %s (%s)"), c.older.title,
             c.older.date) << "\n\n";
     }
-    md << "**" << describeBenchmarkComparison(c) << "**\n\n";
+    // the main statement: the key figures by their change, the points, and
+    // what one run did not measure
+    const wxString dot = wxString(" ") + wxUniChar(0x00B7) + " ";
+    std::vector<wxString> counts;
+    for (const auto& count : describeBenchmarkVerdict(getBenchmarkVerdict(c)))
+        counts.push_back(count.second);
+    if (!counts.empty())
+        md << "**" << join(counts, dot) << "**\n\n";
+    std::vector<wxString> notes;
+    if (c.ratio > 0.0)
+    {
+        notes.push_back(wxString::Format(_("Overall %s points; the earlier run has %s"),
+            pointsText(c.ratio), pointsText(1.0)));
+    }
+    else
+        notes.push_back(describeBenchmarkComparison(c));
+    for (const wxString& note : getBenchmarkVerdictNotes(c))
+        notes.push_back(note);
+    md << join(notes, dot) << "\n\n";
+    if (c.ratio > 0.0)
+        md << _("Differences of less than 15 % are normal between two runs.") << "\n\n";
     if (!c.sameKind)
     {
         md << "> " << wxString::Format(_("The runs were made in different ways (%s and %s) "
             "and are only roughly comparable."), runText(c.older), runText(c.newer)) << "\n\n";
     }
 
-    // the points of every part: the earlier run has 1000
-    md << "| " << _("Part") << " | " << older << " | " << newer << " | " << _("Change")
-       << " |\n|---|---:|---:|---|\n";
-    md << "| **" << _("All parts") << "** | **" << pointsText(c.ratio > 0.0 ? 1.0 : 0.0)
-       << "** | **" << pointsText(c.ratio) << "** | " << changeText(c.ratio) << " |\n";
-    for (const auto& p : c.parts)
+    // one line per key figure
+    const std::vector<BenchmarkHeadlineChange> figures = getBenchmarkHeadlineChanges(c);
+    if (!figures.empty())
     {
-        if (p.ratio <= 0.0)
-            continue;
-        md << "| " << cell(getBenchmarkReportSectionName(p.category)) << " | "
-           << pointsText(1.0) << " | " << pointsText(p.ratio) << " | " << changeText(p.ratio)
-           << " |\n";
+        md << "| " << _("Part") << " | " << _("Key figure") << " | " << older << " | " << newer
+           << " | " << _("Change") << " | " << _("Points") << " |\n|---|---|---:|---:|---|---:|\n";
+        for (const BenchmarkHeadlineChange& h : figures)
+        {
+            auto number = [&h](const wxString& text)
+            {
+                return text.empty() ? dash() : text + " " + h.unit;
+            };
+            wxString points = dash();
+            if (h.state == BenchmarkCompareState::Compared && h.ratio > 0.0)
+            {
+                const long delta = std::lround(h.ratio * BenchmarkComparison::earlierPoints)
+                    - long(BenchmarkComparison::earlierPoints);
+                points = pointsText(h.ratio) + " (" + (delta == 0
+                    ? wxString(wxUniChar(0x00B1)) + "0" : wxString::Format("%+ld", delta)) + ")";
+            }
+            md << "| " << cell(getBenchmarkReportSectionWord(h.section)) << " | "
+               << cell(h.name) << " | " << cell(number(h.olderNumber)) << " | "
+               << cell(number(h.newerNumber)) << " | " << stateText(h.ratio, h.state)
+               << " | " << points << " |\n";
+        }
+        md << "\n";
     }
-    md << "\n";
 
-    // what could make the slower run slower, by part
-    for (const auto& p : c.parts)
+    // the parts that differ clearly, with every possible reason
+    const std::vector<const BenchmarkComparedPart*> standOut = getBenchmarkStandOut(c, 5);
+    if (!standOut.empty())
     {
-        if (p.differences.empty() && p.hints.empty() && p.advice.empty())
-            continue;
-        md << "**" << getBenchmarkReportSectionName(p.category) << ": "
-           << getBenchmarkReasonsTitle(c, p) << "**\n\n";
-        for (const auto& d : p.differences)
-            md << "- " << d.label << ": " << d.olderText << arrow() << d.newerText << "\n";
-        for (const auto& h : p.hints)
-            md << "- " << h.title << "\n";
-        for (const auto& a : p.advice)
-            md << "- " << a.first << ": " << a.second << "\n";
+        md << "**" << _("What stands out") << "**\n\n";
+        for (const BenchmarkComparedPart* p : standOut)
+        {
+            md << "- **" << getBenchmarkReportSectionWord(p->category) << "** "
+               << changeMark(p->ratio) << dot << getBenchmarkReportSectionName(p->category)
+               << "\n";
+            const wxString likely = getBenchmarkLikelyReason(*p);
+            const wxString advice = getBenchmarkTryAdvice(*p);
+            if (!likely.empty())
+                md << "  - " << _("Likely") << ": " << likely << "\n";
+            if (!advice.empty())
+                md << "  - " << _("What to try") << ": " << advice << "\n";
+            if (p->differences.empty() && p->hints.empty() && p->advice.empty())
+            {
+                md << "  - " << _("No difference was found in the facts and notes of the two "
+                    "runs.") << "\n";
+                continue;
+            }
+            md << "  - " << getBenchmarkReasonsTitle(c, *p) << ":\n";
+            for (const auto& d : p->differences)
+                md << "    - " << d.label << ": " << d.olderText << arrow() << d.newerText << "\n";
+            // the same advice of two hints once
+            std::vector<wxString> shown;
+            for (const auto& h : p->hints)
+            {
+                const bool repeated = std::find(shown.begin(), shown.end(), h.advice)
+                    != shown.end();
+                shown.push_back(h.advice);
+                md << "    - " << h.title << (h.detail.empty() ? wxString() : ". " + h.detail)
+                   << (h.advice.empty() || repeated ? wxString() : " " + h.advice) << "\n";
+            }
+            for (const auto& a : p->advice)
+                md << "    - " << a.first << ": " << a.second << "\n";
+        }
         md << "\n";
     }
 
@@ -726,37 +1342,51 @@ wxString formatBenchmarkComparisonMarkdown(const BenchmarkComparison& c, bool st
         md << "\n";
     }
 
-    // every value with the work behind it, by part
-    md << "| " << _("Test") << " | " << older << " | " << _("Work") << " | " << newer
-       << " | " << _("Work") << " | " << _("Change") << " |\n|---|---:|---|---:|---|---|\n";
+    // every value of both runs, one table per part
     for (BenchmarkCategory section : getBenchmarkReportSections())
     {
-        const BenchmarkComparedPart* part = c.findPart(section);
-        if (!part)
-            continue;
-        md << "| **" << cell(getBenchmarkReportSectionName(section)) << "** | "
-           << (part->ratio > 0.0 ? pointsText(1.0) : wxString()) << " | | "
-           << (part->ratio > 0.0 ? pointsText(part->ratio) : wxString()) << " | | "
-           << (part->ratio > 0.0 ? changeText(part->ratio) : wxString()) << " |\n";
+        wxString rows;
         for (const auto* list : { &c.values, &c.stats })
         {
             for (const auto& v : *list)
             {
                 if (v.category != section)
                     continue;
-                md << "| " << cell(v.title) << " | " << cell(v.olderText) << " | "
-                   << cell(v.olderWork) << " | " << cell(v.newerText) << " | "
-                   << cell(v.newerWork) << " | " << changeText(v.ratio) << " |\n";
+                const wxString note = describeBenchmarkCompareState(c, v);
+                rows << "| " << cell(v.title + (note.empty() ? wxString() : " (" + note + ")"))
+                     << " | " << cell(v.olderText) << " | " << cell(v.newerText) << " | "
+                     << stateText(v.ratio, v.state) << " | "
+                     << cell(formatBenchmarkComparedWork(c, v)) << " |\n";
             }
         }
+        if (rows.empty())
+            continue;
+        const BenchmarkComparedPart* part = c.findPart(section);
+        wxString head = getBenchmarkReportSectionWord(section) + dot
+            + getBenchmarkReportSectionName(section);
+        if (part && part->ratio > 0.0)
+        {
+            head += ": " + wxString::Format(_("%s points"), pointsText(part->ratio)) + " ("
+                + formatBenchmarkChange(part->ratio) + ")";
+        }
+        else if (getBenchmarkPartState(c, section) == BenchmarkCompareState::OnlyNewer)
+        {
+            head += " (" + (c.newerIsCurrentRun ? _("only in this run")
+                : _("only in the later run")) + ")";
+        }
+        else if (getBenchmarkPartState(c, section) == BenchmarkCompareState::OnlyOlder)
+            head += " (" + _("only in the earlier run") + ")";
+        md << "#### " << head << "\n\n| " << _("Test") << " | " << older << " | " << newer
+           << " | " << _("Change") << " | " << _("Work") << " |\n|---|---:|---:|---|---|\n"
+           << rows << "\n";
     }
     return md;
 }
 
 wxString BenchmarkComparison::toMarkdown() const
 {
-    return hideBenchmarkTexts(formatBenchmarkComparisonMarkdown(*this, true), hiddenTexts,
-        false);
+    return hideBenchmarkTexts(formatBenchmarkComparisonMarkdown(*this, true)
+        + "\n" + getBenchmarkComparisonMarker(), hiddenTexts, false);
 }
 
 } // namespace fr

@@ -25,8 +25,11 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <iostream>
+#include <set>
 #include <thread>
+#include <vector>
 
 #include "engine/BenchmarkRunner.h"
 #include "engine/db/DatabaseFactory.h"
@@ -106,6 +109,47 @@ fr::BenchmarkConnectionParams makeParams(const std::string& server)
     return params;
 }
 
+// the progress of a run follows the plan of its stages: every step in a
+// stage of the plan, the stages in their order, each with all its steps
+// when the run was complete, the share growing, the cleanup last
+bool checkStages(const std::vector<fr::BenchmarkProgress>& list,
+    const fr::BenchmarkRunner& runner, bool complete)
+{
+    const std::vector<fr::BenchmarkStagePlan>& plan = runner.getStagePlan();
+    std::vector<std::set<int>> steps(plan.size());
+    int lastStage = 0;
+    double lastFraction = 0.0;
+    bool ok = !list.empty() && list.back().cleaningUp;
+    for (const fr::BenchmarkProgress& p : list)
+    {
+        const bool inPlan = p.stageIndex >= 0 && p.stageIndex < int(plan.size())
+            && p.stageCount == int(plan.size()) && p.stage == plan[p.stageIndex].stage;
+        if (!inPlan || p.stageIndex < lastStage || p.fraction < lastFraction
+            || p.cleaningUp != (p.stage == fr::BenchmarkStage::Finish)
+            || (!p.cleaningUp && p.stageStep >= p.stageSteps))
+        {
+            std::cerr << "    step " << p.step << " out of the plan: stage "
+                << p.stageIndex << " step " << p.stageStep << "\n";
+            ok = false;
+            continue;
+        }
+        lastStage = p.stageIndex;
+        lastFraction = p.fraction;
+        if (!p.cleaningUp)
+            steps[p.stageIndex].insert(p.stageStep);
+    }
+    for (size_t i = 0; complete && i < plan.size(); ++i)
+    {
+        if (steps[i].size() != plan[i].steps.size())
+        {
+            std::cerr << "    stage " << i << ": " << steps[i].size() << " of "
+                << plan[i].steps.size() << " steps reported\n";
+            ok = false;
+        }
+    }
+    return ok;
+}
+
 } // namespace
 
 int main(int argc, char** argv)
@@ -126,19 +170,26 @@ int main(int argc, char** argv)
     }
 
     bool ok = true;
+    // the results of the first run, compared with the page size run below
+    fr::BenchmarkSnapshot firstRun;
     std::cout << "Complete Quick run\n";
     {   // scope
         fr::BenchmarkConnectionParams params = makeParams(server);
         fr::BenchmarkRunner runner(params, fr::BenchmarkIntensity::Quick);
         int lastStep = 0;
         bool monotonic = true;
+        std::vector<fr::BenchmarkProgress> progress;
         fr::BenchmarkReport report = runner.run(
             [&](const fr::BenchmarkProgress& p)
             {
                 if (p.step < lastStep)
                     monotonic = false;
                 lastStep = p.step;
+                progress.push_back(p);
+                progress.back().results.clear();
                 std::cout << "    [" << p.step << "/" << p.stepCount << "] "
+                    << fr::getBenchmarkStageWord(p.stage).utf8_str() << " "
+                    << (p.skipped ? "(skipped) " : "") << (p.quiet ? "(quiet) " : "")
                     << p.message.utf8_str() << "\n";
             });
         const fr::BenchmarkMetrics& m = report.metrics;
@@ -149,6 +200,15 @@ int main(int argc, char** argv)
         ok &= fr_test::check(!report.cancelled, "not cancelled");
         ok &= fr_test::check(monotonic, "progress is monotonic");
         ok &= fr_test::check(lastStep == runner.getStepCount(), "all steps reported");
+        ok &= fr_test::check(checkStages(progress, runner, true),
+            "every step in its stage of the plan, every stage with all its steps");
+        // the selected database is not read in this run
+        ok &= fr_test::check(std::any_of(progress.begin(), progress.end(),
+            [](const fr::BenchmarkProgress& p)
+            {
+                return p.stage == fr::BenchmarkStage::Prepare && p.stageStep == 2
+                    && p.skipped;
+            }), "the step of the selected database is skipped when it is not read");
         ok &= fr_test::check(report.benchmarkDatabaseCreated
             && report.benchmarkDatabaseDropped,
             "temporary database reported as created and dropped");
@@ -208,7 +268,9 @@ int main(int argc, char** argv)
         if (!m.eventMs)
             std::cout << "    events: " << m.eventStatus.utf8_str() << "\n";
         ok &= fr_test::check(report.parts.size() == 6, "key values of six parts");
-        ok &= fr_test::check(report.toHtml().Contains("id=\"parts\""), "HTML report");
+        const wxString html = report.toHtml();
+        ok &= fr_test::check(html.Contains("id=\"figures\"") && html.Contains("id=\"categories\""),
+            "HTML report");
         // Quick runs 1, 2 and 4 clients
         ok &= fr_test::check(m.oltp.size() == 3 && std::all_of(m.oltp.begin(),
             m.oltp.end(), [](const fr::BenchmarkOltpResult& o)
@@ -227,8 +289,8 @@ int main(int argc, char** argv)
             "optional tests measured");
         for (const auto& skipped : m.skippedTests)
         {
-            std::cout << "    skipped: " << skipped.first.utf8_str() << ": "
-                << skipped.second.utf8_str() << "\n";
+            std::cout << "    skipped: " << skipped.name.utf8_str() << " ("
+                << skipped.id.utf8_str() << "): " << skipped.reason.utf8_str() << "\n";
         }
         ok &= fr_test::check(m.streamRows == m.settings.scanRows
             + m.settings.commitCount, "all rows streamed");
@@ -238,10 +300,49 @@ int main(int argc, char** argv)
             * m.settings.scanPayloadLength + int64_t(m.settings.commitCount)
             * 19, "scan saw all payload bytes");
         ok &= fr_test::check(!report.settings.empty(), "settings listed");
-        ok &= fr_test::check(report.toMarkdown().Contains("<!-- FlameRobin benchmark results"),
+        ok &= fr_test::check(report.toMarkdown().Contains("<!-- FlameRobin benchmark snapshot"),
             "markdown report with the results for comparisons");
-        ok &= fr_test::check(fr::parseBenchmarkSnapshot(report.toHtml()).has_value(),
+        ok &= fr_test::check(fr::parseBenchmarkSnapshot(report.toHtml()).ok(),
             "a saved report can be compared later");
+        const fr::BenchmarkSnapshotResult saved = fr::parseBenchmarkSnapshot(report.toMarkdown());
+        bool registered = saved.ok() && !saved.snapshot.measurements.empty();
+        for (const fr::BenchmarkMeasurement& x : saved.snapshot.measurements)
+        {
+            const fr::BenchmarkMeasurementDef* def = fr::findBenchmarkMeasurementDef(x.id);
+            if (!def || (def->kind != fr::BenchmarkMeasurementKind::Info && x.value <= 0.0
+                && x.text != "not measured"))
+            {
+                std::cout << "    not registered or without a value: " << x.id.utf8_str() << "\n";
+                registered = false;
+            }
+        }
+        ok &= fr_test::check(registered, "every saved measurement is registered, with a value");
+        // a key value is the work saved with it per time, or its time per
+        // operation: the text "200 commits in 300 ms" says the same as the value
+        bool matching = saved.ok();
+        for (const fr::BenchmarkMeasurement& x : saved.snapshot.measurements)
+        {
+            const fr::BenchmarkMeasurementDef* def = fr::findBenchmarkMeasurementDef(x.id);
+            if (!def || def->kind != fr::BenchmarkMeasurementKind::Key || x.amount <= 0.0
+                || x.ms <= 0.0)
+            {
+                continue;
+            }
+            double fromWork = x.amount * 1000.0 / x.ms;
+            if (x.unit == "ms")
+                fromWork = x.ms / x.amount;
+            else if (x.unit == "it/ms")
+                fromWork = x.amount / x.ms;
+            else if (x.unit == "MB/s")
+                fromWork = x.amount / (1024.0 * 1024.0) / (x.ms / 1000.0);
+            if (std::abs(fromWork - x.value) > 1e-4 * x.value)
+            {
+                std::cout << "    the work does not give the value: " << x.id.utf8_str() << "\n";
+                matching = false;
+            }
+        }
+        ok &= fr_test::check(matching, "every key value matches the work saved with it");
+        firstRun = saved.snapshot;
     }
 
     std::cout << "Cancelled run\n";
@@ -249,6 +350,7 @@ int main(int argc, char** argv)
         fr::BenchmarkConnectionParams params = makeParams(server);
         fr::BenchmarkRunner runner(params, fr::BenchmarkIntensity::Quick);
         bool cleanupReported = false;
+        std::vector<fr::BenchmarkProgress> progress;
         fr::BenchmarkReport report = runner.run(
             [&](const fr::BenchmarkProgress& p)
             {
@@ -257,8 +359,12 @@ int main(int argc, char** argv)
                     runner.requestCancel();
                 if (p.cleaningUp)
                     cleanupReported = true;
+                progress.push_back(p);
+                progress.back().results.clear();
             });
         ok &= fr_test::check(report.cancelled, "run is cancelled");
+        ok &= fr_test::check(checkStages(progress, runner, false),
+            "the stages of a cancelled run follow the plan up to the cleanup");
         ok &= fr_test::check(!report.metrics.insertMs, "stopped before the disk test");
         ok &= fr_test::check(cleanupReported, "cleanup is reported");
         ok &= fr_test::check(report.benchmarkDatabaseDropped,
@@ -307,11 +413,21 @@ int main(int argc, char** argv)
         fr::BenchmarkConnectionParams params = makeParams(server);
         params.comparePageSizes = true;
         fr::BenchmarkRunner runner(params, fr::BenchmarkIntensity::Quick);
-        fr::BenchmarkReport report = runner.run(fr::BenchmarkRunner::ProgressCallback());
+        std::vector<fr::BenchmarkProgress> progress;
+        fr::BenchmarkReport report = runner.run([&](const fr::BenchmarkProgress& p)
+            {
+                progress.push_back(p);
+                progress.back().results.clear();
+            });
         const fr::BenchmarkMetrics& m = report.metrics;
         if (!report.errorMessage.empty())
             std::cerr << "    error: " << report.errorMessage.utf8_str() << "\n";
         ok &= fr_test::check(report.errorMessage.empty(), "comparison without error");
+        ok &= fr_test::check(checkStages(progress, runner, true) && std::any_of(
+            progress.begin(), progress.end(), [](const fr::BenchmarkProgress& p)
+            {
+                return p.stage == fr::BenchmarkStage::PageSizes;
+            }), "the page sizes are a stage of their own with a step per page size");
         ok &= fr_test::check(m.pageSizes.size()
             == fr::getSupportedPageSizes(m.serverMajorVersion).size(),
             "every supported page size measured");
@@ -323,6 +439,27 @@ int main(int argc, char** argv)
             }), "all page size measurements present");
         ok &= fr_test::check(report.undroppedDatabases.empty(),
             "no comparison database left behind");
+        // two real runs of the same intensity: no test does other work, so
+        // the fixed amounts of the register are really fixed
+        const fr::BenchmarkSnapshotResult second = fr::parseBenchmarkSnapshot(report.toHtml());
+        const fr::BenchmarkComparison c = fr::compareBenchmarkSnapshots(second.snapshot,
+            firstRun);
+        bool comparable = second.ok() && !c.values.empty() && c.ratio > 0.0;
+        for (const auto* list : { &c.values, &c.stats })
+        {
+            for (const fr::BenchmarkComparedValue& v : *list)
+            {
+                if (v.state == fr::BenchmarkCompareState::WorkChanged
+                    || v.state == fr::BenchmarkCompareState::TestChanged)
+                {
+                    std::cout << "    not comparable: " << v.id.utf8_str() << ": "
+                        << v.olderWork.utf8_str() << " / " << v.newerWork.utf8_str() << "\n";
+                    comparable = false;
+                }
+            }
+        }
+        ok &= fr_test::check(comparable, "two runs of the same intensity are compared "
+            "value by value");
         bool anyExists = false;
         for (const auto& connectionString : runner.getAllConnectionStrings())
             anyExists = anyExists || databaseExists(connectionString);

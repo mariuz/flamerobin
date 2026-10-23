@@ -25,41 +25,45 @@
 #define FR_BENCHMARKDIALOG_H
 
 #include <wx/wx.h>
-#include <wx/gauge.h>
-#include <wx/notebook.h>
-#include <wx/timer.h>
 
 #include <chrono>
 #include <memory>
 #include <optional>
 #include <set>
 #include <thread>
+#include <utility>
+#include <vector>
 
 #include "engine/Benchmark.h"
+#include "engine/BenchmarkResults.h"
 #include "engine/BenchmarkRunner.h"
 #include "gui/BaseDialog.h"
 #include "metadata/database.h"
 
-class BenchmarkReportPage;
-class wxCollapsiblePane;
-class wxCollapsiblePaneEvent;
-class wxWebView;
+class BenchmarkProgressPanel;
+class BenchmarkResultsView;
+class wxCollapsibleHeaderCtrl;
+class wxPopupTransientWindow;
+class wxSimplebook;
 
 ///
 /// Database -> Performance Benchmark & Diagnosis. The benchmark runs on a
 /// worker thread in its own temporary database; all GUI updates are
 /// marshalled with CallAfter(). Without a database registration (db is
-/// nullptr) this computer and other servers can be tested, and saved
-/// reports compared.
+/// nullptr) this computer and other servers can be tested, saved reports
+/// opened and compared.
 ///
 class BenchmarkDialog : public BaseDialog
 {
 public:
-    BenchmarkDialog(wxWindow* parent, Database* db);
+    // the results belong to the main window, so that they stay when the
+    // dialog is closed
+    BenchmarkDialog(wxWindow* parent, Database* db, fr::BenchmarkResultStore& results);
     ~BenchmarkDialog();
 
 protected:
     virtual const wxString getName() const override;
+    virtual const wxString getStorageName() const override;
 
 private:
     Database* databaseM;
@@ -68,56 +72,102 @@ private:
     bool runningM = false;
     bool closeRequestedM = false;
     std::chrono::steady_clock::time_point startTimeM;
-    wxTimer timerM;
     std::set<wxString> loggedResultsM;
     wxString lastMessageM;
-    fr::BenchmarkReport reportM;
-    bool hasReportM = false;
-    // two saved reports compared without a run
-    std::optional<fr::BenchmarkComparison> comparisonM;
+    // the tests of this session, opened files and comparisons
+    fr::BenchmarkResultStore& resultsM;
     std::vector<fr::BenchmarkFirebirdInstallation> installationsM;
 
-    wxRadioBox* radio_target;
+    // the targets of fr::getBenchmarkTargets(), and the details of every
+    // target on a page of its own
+    wxChoice* choice_target;
+    wxStaticText* label_target_hint;
+    wxSimplebook* book_target;
+    fr::BenchmarkTarget getTarget() const;
     wxChoice* choice_install;
-    wxCollapsiblePane* collapse_advanced;
-    wxTextCtrl* text_host;
-    wxTextCtrl* text_port;
+    // the advanced settings below their heading, closed at first
+    wxCollapsibleHeaderCtrl* header_advanced;
+    wxPanel* panel_advanced;
+    wxTextCtrl* text_host = nullptr;
+    wxTextCtrl* text_port = nullptr;
     wxTextCtrl* text_directory;
-    wxTextCtrl* text_user;
-    wxTextCtrl* text_password;
+    // the login for another server, and the optional one for the server of
+    // the registration
+    wxTextCtrl* text_user = nullptr;
+    wxTextCtrl* text_password = nullptr;
+    wxTextCtrl* text_user_registered = nullptr;
+    wxTextCtrl* text_password_registered = nullptr;
     wxTextCtrl* text_clientlib;
     wxChoice* choice_pagesize;
     wxCheckBox* check_comparepages;
     int automaticPageSizeM = 8192;
     wxCheckBox* check_inspect;
     wxCheckBox* check_manyusers;
-    wxTextCtrl* text_earlier;
-    wxRadioBox* radio_intensity;
-    wxStaticText* label_status;
-    wxStaticText* label_elapsed;
-    wxGauge* gauge_progress;
-    wxNotebook* notebook_results;
+    // what the next test is compared with: nothing, a result or a file
+    wxChoice* choice_earlier;
+    struct EarlierSource
+    {
+        int id = 0;         // a result
+        wxString path;      // else a file
+    };
+    std::vector<EarlierSource> earlierSourcesM;
+    // the last saved report chosen, remembered in the configuration
+    wxString earlierFileM;
+    void fillEarlier();
+    bool chooseEarlierFile();
+    // false if a file cannot be read: the test does not start then
+    bool readEarlier(std::optional<fr::BenchmarkSnapshot>& baseline);
+    // the earlier report of the running test, read at its start
+    std::optional<fr::BenchmarkSnapshot> baselineM;
+    wxRadioButton* radio_intensity[3];
+    fr::BenchmarkIntensity getIntensity() const;
+
+    // the strip of the progress in stages, the whole log of the run and
+    // the results, with what the selected tab shows
+    BenchmarkResultsView* view_results;
+    BenchmarkProgressPanel* panel_progress;
     wxTextCtrl* text_log;
-    // the HTML report, or the Markdown text where no web view is available
-    wxWebView* webview_report = nullptr;
-    wxTextCtrl* text_report = nullptr;
-#if wxUSE_WEBVIEW
-    // how the report gets into webview_report
-    std::unique_ptr<BenchmarkReportPage> reportPageM;
-#endif
-    // which of them shows the report, for the log
-    wxString reportViewM;
     wxButton* button_start;
     wxButton* button_cancel;
+    // in the header of the shown result
     wxButton* button_copy;
     wxButton* button_save;
     wxButton* button_browser;
+    wxButton* button_close_result;
     wxButton* button_compare;
+    wxButton* button_open;
     wxCheckBox* check_private;
     wxButton* button_close;
 
     void createControls();
+    // a small "?" that shows a longer explanation next to it on a click,
+    // also with the keyboard: paragraphs, each with an optional term
+    typedef std::vector<std::pair<wxString, wxString>> HelpItems;
+    wxButton* createHelpButton(wxWindow* parent, const wxString& title,
+        const HelpItems& items);
+    void showHelp(wxWindow* button, const wxString& title, const HelpItems& items);
+    // the last explanation, open or closed; one at a time
+    wxPopupTransientWindow* popup_help = nullptr;
     void updateControls();
+    // opens or closes the advanced settings; the dialog grows for the open
+    // ones if the screen has room
+    void showAdvanced(bool show);
+    // the same without growing: the constructor sets the size once at its
+    // end. Reading the size of the dialog while it is constructed counts as
+    // a call of a pure virtual function for CodeQL (cpp/unsafe-use-of-this),
+    // so nothing that the constructor calls may call growForAdvanced().
+    void openAdvanced(bool show);
+    void layoutAdvanced();
+    // the dialog as high as the minimum size of layoutAdvanced()
+    void growForAdvanced();
+    // the page and the hint of the selected target, without growing
+    void applyTarget();
+    // how long the test takes, shown before the start
+    wxString getReadyHint() const;
+    // the stages of a run with the selected settings, shown before the start
+    std::vector<fr::BenchmarkStagePlan> getStagePlan() const;
+    void showReady();
+    void setReportStatus(const wxString& message);
     bool buildParams(fr::BenchmarkConnectionParams& params);
     void fillCredentials(fr::BenchmarkConnectionParams& params, bool fromRegistration);
     // the login for the server of the registration: the saved one, or asked
@@ -134,20 +184,45 @@ private:
     static void removePendingDatabase(const wxString& entry);
     void dropPendingDatabases();
     void appendLog(const wxString& line);
-    wxString formatElapsed() const;
     // the settings are hidden after a run, so that the report has room
     wxSizer* sizerSettingsM = nullptr;
     bool settingsShownM = true;
     void showSettings(bool show);
-    void showReport(const fr::BenchmarkReport& report);
-    // the report with the selected earlier report, without private
+    void addResultTab(int id);
+    // after the result was saved
+    void updateResultTab(int id);
+    // the result of the selected tab; nullptr for the progress and the log
+    const fr::BenchmarkResultEntry* getShownResult() const;
+    void onResultSelected(int id);
+    // asks before a test that is not saved is lost
+    void closeResult(int id);
+    void closeResults(fr::BenchmarkCloseScope scope, int id);
+    enum
+    {
+        ID_menu_close = 4401,
+        ID_menu_close_others,
+        ID_menu_close_all,
+        ID_menu_save,
+        ID_menu_compare
+    };
+    // the result of the tab the menu belongs to
+    int menuResultM = 0;
+    void showResultMenu(int id);
+    void showFullMessage();
+    // false if it was not saved
+    bool saveResult(int id);
+    // the report of a test with its earlier report, without private
     // information if that is selected: what is shown, copied and saved
-    fr::BenchmarkReport displayedReport() const;
-    fr::BenchmarkComparison displayedComparison() const;
-    // the shown report or comparison as a saved file contains it
-    wxString displayedText(bool markdown) const;
-    void showComparison();
-    std::optional<fr::BenchmarkSnapshot> readSnapshot(const wxString& path, bool showErrors);
+    fr::BenchmarkReport displayedReport(const fr::BenchmarkResultEntry& entry) const;
+    fr::BenchmarkComparison displayedComparison(const fr::BenchmarkResultEntry& entry) const;
+    // a result as a saved file contains it
+    wxString displayedText(const fr::BenchmarkResultEntry& entry, bool markdown) const;
+    // the page in the view: HTML, or Markdown without a web view
+    wxString makePage(int id) const;
+    // what changes every page: the private information and the theme
+    wxString getPageVariant() const;
+    // "Compare results" with these results chosen (0: none)
+    void compare(int first, int second);
     // the registration of the selected database, empty without one
     wxString registrationId() const;
     // whether a temporary database is on the server of the registration
@@ -164,14 +239,21 @@ private:
     void OnCopyMarkdown(wxCommandEvent& event);
     void OnSaveReport(wxCommandEvent& event);
     void OnOpenInBrowser(wxCommandEvent& event);
+    void OnCloseResult(wxCommandEvent& event);
+    void OnResultMenu(wxCommandEvent& event);
     void OnPrivateChanged(wxCommandEvent& event);
     void OnBrowseEarlier(wxCommandEvent& event);
-    void OnCompareReports(wxCommandEvent& event);
+    void OnEarlierChanged(wxCommandEvent& event);
+    void OnCompare(wxCommandEvent& event);
+    void OnOpen(wxCommandEvent& event);
     void OnCloseButton(wxCommandEvent& event);
     void OnClose(wxCloseEvent& event);
+    // asks about tests that are not saved and drops them; false: stay open
+    bool confirmDiscardUnsaved();
     void OnTargetChanged(wxCommandEvent& event);
-    void OnAdvancedToggled(wxCollapsiblePaneEvent& event);
-    void OnTimer(wxTimerEvent& event);
+    void OnDurationChanged(wxCommandEvent& event);
+    void OnAdvancedToggled(wxCommandEvent& event);
+    void OnCharHook(wxKeyEvent& event);
 
     DECLARE_EVENT_TABLE()
 };

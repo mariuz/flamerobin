@@ -186,6 +186,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/engine/BenchmarkAnalyzer.cpp
         ${SOURCEDIR}/engine/BenchmarkCompare.cpp
         ${SOURCEDIR}/engine/BenchmarkHtml.cpp
+        ${SOURCEDIR}/engine/BenchmarkResults.cpp
         ${SOURCEDIR}/engine/BenchmarkRunner.cpp
         ${SOURCEDIR}/engine/BenchmarkSql.cpp
         ${SOURCEDIR}/engine/BenchmarkSystemInfo.cpp
@@ -201,7 +202,11 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/BackupRestoreBaseFrame.cpp
         ${SOURCEDIR}/gui/BaseDialog.cpp
         ${SOURCEDIR}/gui/BaseFrame.cpp
+        ${SOURCEDIR}/gui/BenchmarkCompareDialog.cpp
         ${SOURCEDIR}/gui/BenchmarkDialog.cpp
+        ${SOURCEDIR}/gui/BenchmarkProgressPanel.cpp
+        ${SOURCEDIR}/gui/BenchmarkReportPage.cpp
+        ${SOURCEDIR}/gui/BenchmarkResultsView.cpp
         ${SOURCEDIR}/gui/CommandManager.cpp
         ${SOURCEDIR}/gui/ConfdefTemplateProcessor.cpp
         ${SOURCEDIR}/gui/ContextMenuMetadataItemVisitor.cpp
@@ -358,6 +363,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/core/URIProcessor.h
         ${SOURCEDIR}/core/Visitor.h
         ${SOURCEDIR}/engine/Benchmark.h
+        ${SOURCEDIR}/engine/BenchmarkResults.h
         ${SOURCEDIR}/engine/BenchmarkRunner.h
         ${SOURCEDIR}/engine/BenchmarkSystemInfo.h
         ${SOURCEDIR}/engine/MetadataLoader.h
@@ -369,7 +375,11 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/gui/BackupRestoreBaseFrame.h
         ${SOURCEDIR}/gui/BaseDialog.h
         ${SOURCEDIR}/gui/BaseFrame.h
+        ${SOURCEDIR}/gui/BenchmarkCompareDialog.h
         ${SOURCEDIR}/gui/BenchmarkDialog.h
+        ${SOURCEDIR}/gui/BenchmarkProgressPanel.h
+        ${SOURCEDIR}/gui/BenchmarkReportPage.h
+        ${SOURCEDIR}/gui/BenchmarkResultsView.h
         ${SOURCEDIR}/gui/CommandIds.h
         ${SOURCEDIR}/gui/CommandManager.h
         ${SOURCEDIR}/gui/ConfdefTemplateProcessor.h
@@ -1152,6 +1162,7 @@ add_executable(benchmark_test
     ${SOURCEDIR}/engine/BenchmarkAnalyzer.cpp
     ${SOURCEDIR}/engine/BenchmarkCompare.cpp
     ${SOURCEDIR}/engine/BenchmarkHtml.cpp
+    ${SOURCEDIR}/engine/BenchmarkResults.cpp
     ${SOURCEDIR}/engine/BenchmarkSql.cpp
     ${SOURCEDIR}/engine/BenchmarkSystemInfo.cpp
     ${SOURCEDIR}/engine/BenchmarkSystemReport.cpp
@@ -1159,7 +1170,9 @@ add_executable(benchmark_test
 )
 # the system information uses the Windows libraries of FlameRobin
 target_link_libraries(benchmark_test ${wxWidgets_LIBRARIES} ${FR_LIBS})
-add_test(NAME benchmark_test COMMAND benchmark_test)
+# registry.golden and the saved reports of every format (fixtures)
+add_test(NAME benchmark_test COMMAND benchmark_test
+    ${CMAKE_SOURCE_DIR}/src/engine/testdata/benchmark)
 
 add_executable(benchmark_runner_test
     ${SOURCEDIR}/engine/BenchmarkRunnerTest.cpp
