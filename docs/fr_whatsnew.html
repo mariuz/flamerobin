@@ -8,6 +8,29 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.10.1</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Performance Benchmark &amp; Diagnosis Redesign (#745)</B></font><br>
+<br>
+- <b>Versioned Report Format with Stable Measurement IDs</b>: Every measurement now has a stable <code>part.name</code> ID with unit, direction and test version. Comparisons match by ID instead of translated titles, and values that cannot be compared are marked as new, removed or changed instead of silently producing wrong ratios. Note: reports saved by 26.10.0 (format 1) can no longer be compared.<br>
+- <b>Clearer Reports</b>: HTML and Markdown reports now lead with key figures, neutral notes and a comparison verdict, with details collapsed. Useful for server administrators without Firebird experience.<br>
+- <b>Compact Dialog &amp; Live Progress</b>: The dialog fits 1366x768 screens, explains settings behind a "?", shows staged progress with the FlameRobin logo (no more frozen progress bar during disk tests), and keeps run errors visible.<br>
+- <b>Result History &amp; Comparison</b>: Every run of a session is kept in a strip of tabs with one shared report view. Any two results can be compared, saved reports can be reopened, and unsaved results ask before they are closed.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>New Features &amp; Improvements</B></font><br>
+<br>
+- <b>JSON &amp; XML Data Export/Import (#742)</b>: Export and import table data as JSON and XML.<br>
+- <b>Database Objects Grouped by Context in Tree View (#163)</b>: Tree objects can be grouped by context with configurable ordering.<br>
+- <b>Default Settings for General Users (#658)</b>: More sensible default settings for general users.<br>
+- <b>Rollback &amp; Delete Rows Icons (#743)</b>: Separate toolbar icons for Rollback and Delete Rows with differentiated colors.<br>
+- <b>MSVC Build Fix</b>: Fixed ambiguous conditional expression errors in DataTransferHelper and DataExportDialog with MSVC.<br>
+<br><br>
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.10.0</font><br>
 <br><br>
 
