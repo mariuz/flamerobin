@@ -32,15 +32,60 @@ jobs:
             build_dir: build64
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         submodules: recursive
         fetch-depth: 0
 
     - name: Set up MSVC environment
-      uses: ilammy/msvc-dev-cmd@v1
-      with:
-        arch: ${{ matrix.arch }}
+      shell: pwsh
+      run: |
+        # ilammy/msvc-dev-cmd still targets Node.js 20 with no Node 24 release
+        # available, so run VsDevCmd.bat directly and export its environment.
+        $vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -version "[17.0,18.0)" -latest -property installationPath
+        if (-not $vsPath) {
+            $vsPath = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath
+        }
+        if (-not $vsPath) {
+            Write-Error "Visual Studio installation not found"
+            exit 1
+        }
+        $devCmd = Join-Path $vsPath "Common7\Tools\VsDevCmd.bat"
+        if (-not (Test-Path $devCmd)) {
+            Write-Error "VsDevCmd.bat not found: $devCmd"
+            exit 1
+        }
+        # VsDevCmd -arch names: x86 stays x86, x64 is amd64
+        $archArg = if ("${{ matrix.arch }}" -eq "x86") { "x86" } else { "amd64" }
+        $before = @{}
+        Get-ChildItem env: | ForEach-Object { $before[$_.Name] = $_.Value }
+        $setOutput = cmd /c "`"$devCmd`" -arch=$archArg -no_logo >NUL && set" 2>&1 | ForEach-Object { "$_" }
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "VsDevCmd.bat failed with exit code $LASTEXITCODE"
+            exit 1
+        }
+        $count = 0
+        foreach ($line in $setOutput) {
+            $eq = $line.IndexOf('=')
+            if ($eq -le 0) { continue }
+            $name = $line.Substring(0, $eq)
+            # only real variable names; anything else is noise on stderr
+            if ($name -notmatch '^[A-Za-z_][A-Za-z0-9_]*$') { continue }
+            $value = $line.Substring($eq + 1)
+            if ($before.ContainsKey($name) -and $before[$name] -ceq $value) { continue }
+            if ($value -match "`r|`n") {
+                $eof = "MSVC_ENV_EOF_$count"
+                "$name<<$eof`n$value`n$eof" >> $env:GITHUB_ENV
+            } else {
+                "$name=$value" >> $env:GITHUB_ENV
+            }
+            $count++
+        }
+        if ($count -eq 0) {
+            Write-Error "VsDevCmd.bat changed no environment variables"
+            exit 1
+        }
+        Write-Host "Exported $count MSVC environment variables ($archArg)"
 
     - name: Get VS Path
       id: vs
@@ -72,7 +117,7 @@ jobs:
         echo "VCPKG_ROOT=${{ github.workspace }}\vcpkg" >> $env:GITHUB_ENV
     
     - name: Cache vcpkg binaries
-      uses: actions/cache@v4
+      uses: actions/cache@v6
       with:
         path: vcpkg_archives
         key: ${{ runner.os }}-vcpkg-bin-${{ matrix.arch }}-${{ hashFiles('vcpkg.json') }}
@@ -235,13 +280,13 @@ jobs:
         Write-Host "Portable package created successfully at $zipPath"
 
     - name: Upload installer
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
           name: ${{ matrix.artifact_name }}
           path: install/win32/bin/${{ matrix.arch }}/Release/FlameRobin-*.msi
 
     - name: Upload portable ZIP
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
           name: flamerobin-portable-${{ matrix.arch }}
           path: flamerobin-portable-*.zip
