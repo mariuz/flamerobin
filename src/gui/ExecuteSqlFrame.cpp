@@ -3562,6 +3562,8 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
                 transactionM->setIsolationLevel(level);
                 transactionM->setLockResolution(resolution);
             }
+            sae.scroll();
+            flushLogView();
             transactionM->start();
             inTransaction(true);
 
@@ -3583,6 +3585,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         statementM = databaseM->getDALDatabase()->createStatement(transactionM);
         log(_("Preparing statement: ") + sql, ttSql);
         sae.scroll();
+        flushLogView();
         {
             wxStopWatch sw;
             statementM->prepare(wx2std(sql, databaseM->getCharsetConverter()));
@@ -3634,6 +3637,11 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         {
             log(_("Plan not available."));
         }
+
+        // The "Statement prepared" text and the plan must be painted before
+        // the blocking execute() call below freezes the UI (#747).
+        sae.scroll();
+        flushLogView();
 
         if (prepareOnly)
             return true;
@@ -3711,6 +3719,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
 
         log(_("Executing statement..."));
         sae.scroll();
+        flushLogView();
         {
             wxStopWatch sw;
             statementM->execute();
@@ -3994,6 +4003,7 @@ bool ExecuteSqlFrame::commitTransaction()
     {
         log(_("Committing transaction..."));
         sae.scroll();
+        flushLogView();
         {
             wxStopWatch sw;
             if (statementM != 0)
@@ -4083,6 +4093,7 @@ bool ExecuteSqlFrame::rollbackTransaction()
     {
         log(_("Rolling back the transaction..."));
         sae.scroll();
+        flushLogView();
         {
             wxStopWatch sw;
             if (statementM != 0)
@@ -4440,6 +4451,26 @@ void ExecuteSqlFrame::log(wxString s, TextType type)
 
     styled_text_ctrl_stats->StartStyling(startpos);
     styled_text_ctrl_stats->SetStyling(endpos-startpos-1, style);
+}
+
+//! Synchronously repaints the log and plan views (issue #747).
+//! Call this after logging and before a blocking database call (prepare,
+//! execute, commit, ...) so the "Statement prepared" text and the plan are
+//! visible first instead of appearing only after the frozen UI unblocks.
+//! Unlike Yield(), Update() only processes pending paint events for the
+//! window itself, so it cannot re-enter event handlers or destroy this frame.
+void ExecuteSqlFrame::flushLogView()
+{
+    if (styled_text_ctrl_stats)
+    {
+        styled_text_ctrl_stats->Refresh();
+        styled_text_ctrl_stats->Update();
+    }
+    if (tree_query_plan)
+    {
+        tree_query_plan->Refresh();
+        tree_query_plan->Update();
+    }
 }
 
 const wxString ExecuteSqlFrame::getName() const
