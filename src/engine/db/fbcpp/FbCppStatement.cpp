@@ -785,7 +785,19 @@ std::string FbCppStatement::getPlan()
 {
     if (!statementM)
         return "";
-    return statementM->getPlan();
+
+    // The detailed plan is not available on older servers (e.g. Firebird 2.5),
+    // so fall back to the legacy plan.
+    try
+    {
+        std::string plan = statementM->getPlan();
+        if (!plan.empty())
+            return plan;
+    }
+    catch (const std::exception&)
+    {
+    }
+    return statementM->getLegacyPlan();
 }
 
 StatementType FbCppStatement::getType()
