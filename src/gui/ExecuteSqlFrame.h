@@ -66,6 +66,7 @@ public:
     bool hasSelection();
 
     void OnContextMenu(wxContextMenuEvent& event);
+    void OnKeyDown(wxKeyEvent& event);
     void OnKillFocus(wxFocusEvent& event);
     DECLARE_EVENT_TABLE()
 };

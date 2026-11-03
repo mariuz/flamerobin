@@ -386,9 +386,20 @@ void SqlEditor::setup()
 
 
 BEGIN_EVENT_TABLE(SqlEditor, wxStyledTextCtrl)
+    EVT_KEY_DOWN(SqlEditor::OnKeyDown)
     EVT_CONTEXT_MENU(SqlEditor::OnContextMenu)
     EVT_KILL_FOCUS(SqlEditor::OnKillFocus)
 END_EVENT_TABLE()
+
+void SqlEditor::OnKeyDown(wxKeyEvent& event)
+{
+    // Workaround for wxWidgets/Scintilla key-code collision where
+    // WXK_CAPITAL (311) equals wxSTC_KEY_SUBTRACT (311), causing
+    // Ctrl+Caps Lock to trigger zoom-out (#755).
+    if (event.ControlDown() && event.GetKeyCode() == WXK_CAPITAL)
+        return;
+    event.Skip();
+}
 
 void SqlEditor::OnContextMenu(wxContextMenuEvent& event)
 {
@@ -1546,6 +1557,9 @@ void ExecuteSqlFrame::OnMenuFindSelectedObject(wxCommandEvent& WXUNUSED(event))
 void ExecuteSqlFrame::OnKeyDown(wxKeyEvent& event)
 {
     int key = event.GetKeyCode();
+    if (event.ControlDown() && key == WXK_CAPITAL)
+        return;
+
     if (!event.HasModifiers() && key == WXK_F3)
     {
         styled_text_ctrl_sql->find(false);
