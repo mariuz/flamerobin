@@ -8,6 +8,24 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.11.0</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>SQL Editor &amp; Query Execution Improvements</B></font><br>
+<br>
+- <b>Legacy Query Plan Fallback for Firebird 2.5 and Earlier (#753, #754)</b>: Fixed missing query plans when connected to Firebird 2.5 and older servers where the detailed plan API is unavailable, automatically falling back to the legacy plan.<br>
+- <b>Immediate Prepared Statement &amp; Plan Display (#747)</b>: Synchronously repaints the statistics log and query plan tree before blocking database operations (prepare, execute, transaction start, commit, and rollback) so the prepared statement text and execution plan are visible immediately before long-running queries finish.<br>
+- <b>Prevent Unwanted Zoom-Out on Ctrl+Caps Lock (#755)</b>: Consumes <code>Ctrl+WXK_CAPITAL</code> key-down events in the SQL editor to work around the wxWidgets/Scintilla key-code collision between <code>WXK_CAPITAL</code> (311) and <code>wxSTC_KEY_SUBTRACT</code> (311), preserving normal <code>Ctrl+Numpad-Subtract</code> zooming.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>Tree View &amp; Metadata</B></font><br>
+<br>
+- <b>Consistent Collection Naming Across Tree Orderings (#756)</b>: Keeps collection captions (<code>Tables [Global Temporary]</code>, <code>Triggers [Table]</code>, <code>Triggers [DDL]</code>, and <code>Triggers [Database]</code>) consistent when database objects are sorted in Firebird DDL / logical order.<br>
+<br><br>
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.10.1</font><br>
 <br><br>
 
