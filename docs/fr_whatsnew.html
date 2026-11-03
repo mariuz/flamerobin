@@ -8,6 +8,24 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.11.1</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Asynchronous SQL Execution &amp; Query Cancellation (#752)</B></font><br>
+<br>
+- <b>Background Thread SQL Execution</b>: Non-DDL SQL statements (<code>SELECT</code>, <code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>, <code>MERGE</code>, <code>EXECUTE BLOCK</code>, and <code>EXECUTE PROCEDURE</code>) now execute on a dedicated background worker thread (<code>SqlExecutionWorker</code>) instead of blocking the wxWidgets main UI thread, keeping the application window responsive during long-running queries.<br>
+- <b>Live Elapsed Timer &amp; Responsive UI</b>: Displays a live <code>Executing... (MM:SS)</code> timer in the status bar while a background query is running and locks editor/transaction controls safely until completion.<br>
+- <b>Query Cancellation Support</b>: Added a <b>Cancel Execution</b> toolbar button, menu item (<code>Query -&gt; Cancel Execution</code>), and keyboard shortcut (<code>Shift+F4</code>) that cancels the in-flight statement via Firebird's <code>fb_cancel_operation(fb_cancel_raise)</code> API (with automatic <code>DELETE FROM MON$STATEMENTS</code> fallback on auxiliary attachment). Closing the SQL editor window while a query is running now safely cancels and waits for the worker thread before destruction.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>Server Administration &amp; User Management (#758)</B></font><br>
+<br>
+- <b>Fix Truncated User List Exceeding 64 KB</b>: Fixed <code>FbCppService::getUsers()</code> silently omitting users when the Firebird Service Manager reply exceeds the 64 KB buffer limit (around 1,800+ users). FlameRobin now loops calling <code>svc-&gt;query</code> with <code>isc_info_svc_get_users</code> whenever <code>isc_info_truncated</code> is returned, reassembling user records split across chunk boundaries.<br>
+<br><br>
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.11.0</font><br>
 <br><br>
 
