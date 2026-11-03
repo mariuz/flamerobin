@@ -203,6 +203,7 @@ wxBitmapBundle ArtProvider::CreateBitmapBundle(const wxArtID& id,
     if (id == ART_Exception || id == ART_Exceptions)
         return fromSVG(svg_exception);
     if (id == ART_ExecuteStatement) return fromSVG(svg_executestatement);
+    if (id == ART_CancelExecution) return fromSVG(svg_cancelexecution);
     if (id == ART_ForeignKey) return fromSVG(svg_fk);
     if (id == ART_Function) return fromSVG(svg_function);
     if (id == ART_Functions) return fromSVG(svg_functions);

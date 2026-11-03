@@ -28,6 +28,7 @@
     #include "wx/wx.h"
 #endif
 #include "core/EmbeddedSVGs.h"
+#include "gui/CommandIds.h"
 #include "gui/CommandManager.h"
 
 namespace
@@ -101,6 +102,12 @@ int main(int argc, char** argv)
     ok = check(rollbackSvg.Contains("#FF9800"), "Rollback SVG uses amber/orange fill (#FF9800)") && ok;
     ok = check(!rollbackSvg.Contains("#F44336"), "Rollback SVG does not use Delete Row red (#F44336)") && ok;
     ok = check(deleteRowSvg.Contains("#F44336"), "Delete Row SVG uses red fill (#F44336)") && ok;
+
+    // Test 7: Issue #752 - Query_Cancel shortcut and icon
+    std::cout << "Test 7: Query_Cancel shortcut and icon..." << std::endl;
+    ok = checkString(cm.getShortcutText(Cmds::Query_Cancel), "Shift+F8", "getShortcutText(Cmds::Query_Cancel)") && ok;
+    wxString cancelExecSvg(svg_cancelexecution);
+    ok = check(cancelExecSvg.Contains("#F44336"), "Cancel Execution SVG uses red fill (#F44336)") && ok;
 
     if (ok)
         std::cout << "All CommandManager tests PASSED." << std::endl;

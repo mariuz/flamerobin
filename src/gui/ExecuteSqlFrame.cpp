@@ -751,6 +751,8 @@ bool ExecuteSqlFrame::isTransactionStarted()
 {
     if (transactionM == nullptr)
         return false;
+    if (isExecutingM)
+        return inTransactionM;
     try
     {
         return transactionM->isActive();
@@ -803,6 +805,9 @@ void ExecuteSqlFrame::buildToolbar(CommandManager& cm)
     toolBarM->AddTool(Cmds::Query_Execute, _("Execute"),
         wxArtProvider::GetBitmapBundle(ART_ExecuteStatement, wxART_TOOLBAR),
         cm.getToolbarHint(_("Execute statement(s)"), Cmds::Query_Execute));
+    toolBarM->AddTool(Cmds::Query_Cancel, _("Cancel"),
+        wxArtProvider::GetBitmapBundle(ART_CancelExecution, wxART_TOOLBAR),
+        cm.getToolbarHint(_("Cancel execution"), Cmds::Query_Cancel));
     toolBarM->AddTool(Cmds::Query_Show_plan, _("Show plan"),
         wxArtProvider::GetBitmapBundle(ART_ShowExecutionPlan, wxART_TOOLBAR),
         cm.getToolbarHint(_("Show query execution plan"), Cmds::Query_Show_plan));
@@ -915,6 +920,8 @@ void ExecuteSqlFrame::buildMainMenu(CommandManager& cm)
         cm.getMainMenuItemText(_("&Execute"), Cmds::Query_Execute));
     statementMenu->Append(Cmds::Query_Execute_and_Fetch_All,
         cm.getMainMenuItemText(_("Execute and Fetch &All"), Cmds::Query_Execute_and_Fetch_All));
+    statementMenu->Append(Cmds::Query_Cancel,
+        cm.getMainMenuItemText(_("C&ancel execution"), Cmds::Query_Cancel));
     statementMenu->Append(Cmds::Query_Show_plan,
         cm.getMainMenuItemText(_("Show execution &plan"), Cmds::Query_Show_plan));
     statementMenu->Append(Cmds::Query_Explain,
@@ -1063,6 +1070,13 @@ void ExecuteSqlFrame::updateEnvironmentBanner()
 
 bool ExecuteSqlFrame::doCanClose()
 {
+    if (isExecutingM || inParseStatementsM)
+    {
+        closeRequestedM = true;
+        cancelExecution();
+        return false;
+    }
+
     bool saveFile = false;
     if (filenameM.IsOk() && styled_text_ctrl_sql->GetModify())
     {
@@ -1098,6 +1112,23 @@ bool ExecuteSqlFrame::doCanClose()
 
 void ExecuteSqlFrame::doBeforeDestroy()
 {
+    if (grid_data && grid_data->getDataGridTable())
+        grid_data->getDataGridTable()->stopBackgroundFetch();
+    if (executionWorkerM.joinable())
+    {
+        cancelExecutionM.store(true);
+        if (databaseM && databaseM->getDALDatabase())
+        {
+            try
+            {
+                databaseM->getDALDatabase()->cancelOperation();
+            }
+            catch (...)
+            {
+            }
+        }
+        executionWorkerM.join();
+    }
     // prevent editor from updating the invalid dataset
     if (grid_data->IsCellEditControlEnabled())
         grid_data->EnableCellEditControl(false);
@@ -1180,6 +1211,8 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
 
     EVT_MENU(Cmds::Query_Execute,             ExecuteSqlFrame::OnMenuExecute)
     EVT_MENU(Cmds::Query_Execute_and_Fetch_All, ExecuteSqlFrame::OnMenuExecuteAndFetchAll)
+    EVT_MENU(Cmds::Query_Cancel,              ExecuteSqlFrame::OnMenuCancel)
+    EVT_UPDATE_UI(Cmds::Query_Cancel,         ExecuteSqlFrame::OnMenuUpdateCancel)
     EVT_MENU(Cmds::Query_Show_plan,           ExecuteSqlFrame::OnMenuShowPlan)
     EVT_MENU(Cmds::Query_Explain,             ExecuteSqlFrame::OnMenuExplain)
     EVT_MENU(Cmds::Query_Show_Statistics,     ExecuteSqlFrame::OnMenuShowStatistics)
@@ -1394,7 +1427,7 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& event)
     }
     else if (c == '(')
     {
-        if (config().get("SQLEditorCalltips", true))
+        if (!isExecutingM && !inParseStatementsM && config().get("SQLEditorCalltips", true))
         {
             int start = styled_text_ctrl_sql->WordStartPosition(pos - 2, true);
             if (start != -1 && start != pos - 2)
@@ -1489,6 +1522,8 @@ void ExecuteSqlFrame::autoCompleteColumns(int pos, int len)
 
 void ExecuteSqlFrame::autoComplete(bool force)
 {
+    if (isExecutingM || inParseStatementsM)
+        return;
     if (styled_text_ctrl_sql->AutoCompActive())
         return;
 
@@ -1837,7 +1872,8 @@ void ExecuteSqlFrame::OnMenuReplace(wxCommandEvent &WXUNUSED(event))
 
 void ExecuteSqlFrame::OnMenuUpdateWhenInTransaction(wxUpdateUIEvent& event)
 {
-    event.Enable(inTransactionM && !grid_data->IsCellEditControlEnabled());
+    event.Enable(!isExecutingM && !inParseStatementsM
+        && inTransactionM && !grid_data->IsCellEditControlEnabled());
 }
 
 void ExecuteSqlFrame::OnMenuSelectView(wxCommandEvent& event)
@@ -1929,18 +1965,34 @@ void ExecuteSqlFrame::OnMenuUpdateHistoryPrev(wxUpdateUIEvent& event)
 
 void ExecuteSqlFrame::OnMenuExecute(wxCommandEvent& WXUNUSED(event))
 {
+    if (isExecutingM || inParseStatementsM)
+        return;
     clearLogBeforeExecution();
     prepareAndExecute(false);
 }
 
 void ExecuteSqlFrame::OnMenuExecuteAndFetchAll(wxCommandEvent& WXUNUSED(event))
 {
+    if (isExecutingM || inParseStatementsM)
+        return;
     clearLogBeforeExecution();
     prepareAndExecute(false, true);
 }
 
+void ExecuteSqlFrame::OnMenuCancel(wxCommandEvent& WXUNUSED(event))
+{
+    cancelExecution();
+}
+
+void ExecuteSqlFrame::OnMenuUpdateCancel(wxUpdateUIEvent& event)
+{
+    event.Enable((isExecutingM || inParseStatementsM) && !cancelExecutionM.load());
+}
+
 void ExecuteSqlFrame::OnMenuShowPlan(wxCommandEvent& WXUNUSED(event))
 {
+    if (isExecutingM || inParseStatementsM)
+        return;
     prepareAndExecute(true);
     if (notebook_1 && notebook_pane_plan)
     {
@@ -1952,6 +2004,8 @@ void ExecuteSqlFrame::OnMenuShowPlan(wxCommandEvent& WXUNUSED(event))
 
 void ExecuteSqlFrame::OnMenuExplain(wxCommandEvent& WXUNUSED(event))
 {
+    if (isExecutingM || inParseStatementsM)
+        return;
     if (databaseM && !databaseM->getInfo().getODSVersionIsHigherOrEqualTo(14))
     {
         wxMessageBox(_("The EXPLAIN statement is only supported by Firebird 6.0 and later (ODS 14+)."),
@@ -2089,7 +2143,7 @@ std::string unescapeSqlString(const std::string& s)
 
 void ExecuteSqlFrame::OnMenuBatchImport(wxCommandEvent& WXUNUSED(event))
 {
-    if (!databaseM)
+    if (isExecutingM || inParseStatementsM || !databaseM)
         return;
 
     if (databaseM->getDALDatabase()->getBackendType() != fr::DatabaseBackend::FbCpp)
@@ -2395,6 +2449,8 @@ void ExecuteSqlFrame::OnMenuUpdateShowProfiler(wxUpdateUIEvent& event)
 
 void ExecuteSqlFrame::OnMenuExecuteFromCursor(wxCommandEvent& WXUNUSED(event))
 {
+    if (isExecutingM || inParseStatementsM)
+        return;
     clearLogBeforeExecution();
 
     wxString sql(
@@ -2408,6 +2464,8 @@ void ExecuteSqlFrame::OnMenuExecuteFromCursor(wxCommandEvent& WXUNUSED(event))
 
 void ExecuteSqlFrame::OnMenuExecuteSelection(wxCommandEvent& WXUNUSED(event))
 {
+    if (isExecutingM || inParseStatementsM)
+        return;
     clearLogBeforeExecution();
     if (config().get("TreatAsSingleStatement", false))
         execute(styled_text_ctrl_sql->GetSelectedText(), ";");
@@ -2951,6 +3009,11 @@ void ExecuteSqlFrame::OnConnectionSwitcherSelect(wxCommandEvent& WXUNUSED(event)
 {
     if (!choice_connection_switcher)
         return;
+    if (isExecutingM || inParseStatementsM)
+    {
+        populateConnectionSwitcher();
+        return;
+    }
 
     int sel = choice_connection_switcher->GetSelection();
     if (sel < 0 || sel >= (int)availableDatabasesM.size())
@@ -3286,10 +3349,27 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
     // wxEVT_CATEGORY_UI (no user input), some UI paths (e.g. menu accelerator
     // synthesised events, idle events) can still re-enter this frame. If
     // we'd already begun parsing, return early rather than nesting.
-    if (inParseStatementsM)
+    if (inParseStatementsM || isExecutingM)
         return false;
     inParseStatementsM = true;
-    struct ResetGuard { bool& flag; ~ResetGuard() { flag = false; } } g{inParseStatementsM};
+    cancelExecutionM.store(false);
+    if (choice_connection_switcher)
+        choice_connection_switcher->Enable(false);
+    struct ResetGuard
+    {
+        ExecuteSqlFrame* frame;
+        ~ResetGuard()
+        {
+            frame->inParseStatementsM = false;
+            if (frame->choice_connection_switcher && !frame->isExecutingM)
+                frame->choice_connection_switcher->Enable(true);
+            if (frame->closeRequestedM && !frame->isExecutingM)
+            {
+                frame->closeRequestedM = false;
+                frame->CallAfter([f = frame]() { f->Close(); });
+            }
+        }
+    } g{this};
 
     // Hold a weak ref to ourselves so we can detect window destruction
     // across a Yield without deferencing a freed pointer in the loop body.
@@ -3300,6 +3380,15 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
     int statementsSinceYield = 0;
     while (true)
     {
+        if (cancelExecutionM.load())
+        {
+            ScrollAtEnd sae(styled_text_ctrl_stats);
+            log(_("Script execution cancelled by user."), ttError);
+            if (isTransactionStarted())
+                rollbackTransaction();
+            return false;
+        }
+
         SingleStatement ss = ms.getNextStatement();
         if (!ss.isValid())
             break;
@@ -3339,6 +3428,8 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
         else if (!ss.isEmptyStatement()
             && !execute(ss.getSql(), ms.getTerminator(), prepareOnly, fetchAll))
         {
+            if (!selfRef)
+                return false;
             int stmtStart = selectionOffset + ms.getStart();
             // STC uses UTF-8 internally in Unicode build
             // account for possible differences in string length
@@ -3349,6 +3440,9 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
             styled_text_ctrl_sql->SetFocus();
             return false;
         }
+
+        if (!selfRef)
+            return false;
 
         // Long scripts (hundreds-to-thousands of statements) blocked the UI
         // thread for so long that the OS marked the window as "Not
@@ -3387,7 +3481,7 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
 
 void ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible(wxUpdateUIEvent& event)
 {
-    event.Enable(!closeWhenTransactionDoneM);
+    event.Enable(!closeWhenTransactionDoneM && !isExecutingM && !inParseStatementsM);
 }
 
 void ExecuteSqlFrame::compareCounts(std::map<int, fr::CountInfo>& one,
@@ -3454,9 +3548,118 @@ wxString millisToTimeString(long millis)
         return wxString::Format("%.3fs", 0.001 * millis);
 }
 
+SqlWorkerResult ExecuteSqlFrame::runOnWorkerThread(const std::function<void()>& task)
+{
+    if (executionWorkerM.joinable())
+        executionWorkerM.join();
+
+    if (choice_connection_switcher)
+        choice_connection_switcher->Enable(false);
+
+    isExecutingM = true;
+    struct ExecutingGuard
+    {
+        ExecuteSqlFrame* frame;
+        ~ExecutingGuard()
+        {
+            frame->isExecutingM = false;
+            if (frame->choice_connection_switcher && !frame->inParseStatementsM)
+                frame->choice_connection_switcher->Enable(true);
+            frame->UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
+        }
+    } guard{this};
+
+    UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
+
+    auto result = std::make_shared<SqlWorkerResult>();
+    auto workerDone = std::make_shared<std::atomic<bool>>(false);
+    auto loop = std::make_shared<wxGUIEventLoop>();
+    wxEvtHandler* handler = GetEventHandler();
+
+    executionWorkerM = std::thread([task, this, result, workerDone, loop, handler]() {
+        *result = runSqlWorkerTask(task, cancelExecutionM);
+        workerDone->store(true);
+        if (handler)
+        {
+            handler->CallAfter([loop]() {
+                if (loop->IsRunning())
+                    loop->Exit(0);
+            });
+        }
+    });
+
+    if (!workerDone->load())
+    {
+        wxTimer pollTimer;
+        pollTimer.Bind(wxEVT_TIMER, [workerDone, loop](wxTimerEvent&) {
+            if (workerDone->load() && loop->IsRunning())
+                loop->Exit(0);
+        });
+        pollTimer.Start(15);
+        if (!workerDone->load())
+            loop->Run();
+        pollTimer.Stop();
+    }
+
+    if (executionWorkerM.joinable())
+        executionWorkerM.join();
+
+    return *result;
+}
+
+void ExecuteSqlFrame::cancelExecution()
+{
+    if (!isExecutingM && !inParseStatementsM)
+        return;
+
+    cancelExecutionM.store(true);
+    statusbar_1->SetStatusText(_("Cancelling execution..."), 3);
+    UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
+
+    if (isExecutingM && databaseM && databaseM->getDALDatabase())
+    {
+        try
+        {
+            databaseM->getDALDatabase()->cancelOperation();
+        }
+        catch (const std::exception& e)
+        {
+            ScrollAtEnd sae(styled_text_ctrl_stats);
+            log(wxString::Format(_("Cancel request failed: %s"),
+                wxString::FromUTF8(e.what())), ttError);
+        }
+        catch (...)
+        {
+        }
+    }
+}
+
 bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     bool prepareOnly, bool fetchAll)
 {
+    if (isExecutingM)
+        return false;
+    if (!inParseStatementsM)
+        cancelExecutionM.store(false);
+    else if (cancelExecutionM.load())
+        return false;
+
+    struct CloseAfterExecuteGuard
+    {
+        ExecuteSqlFrame* frame;
+        ~CloseAfterExecuteGuard()
+        {
+            if (!frame->inParseStatementsM && frame->closeRequestedM && !frame->isExecutingM)
+            {
+                frame->closeRequestedM = false;
+                frame->CallAfter([f = frame]() { f->Close(); });
+            }
+        }
+    } closeGuard{this};
+
+    if (grid_data && grid_data->getDataGridTable())
+        grid_data->getDataGridTable()->stopBackgroundFetch();
+
     ScrollAtEnd sae(styled_text_ctrl_stats);
 
     // check if sql only contains comments
@@ -3601,10 +3804,38 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         sae.scroll();
         flushLogView();
         {
-            wxStopWatch sw;
-            statementM->prepare(wx2std(sql, databaseM->getCharsetConverter()));
+            std::string stdSql = wx2std(sql, databaseM->getCharsetConverter());
+            SqlWorkerResult prepRes = runOnWorkerThread([this, &stdSql]() {
+                statementM->prepare(stdSql);
+            });
+            if (prepRes.outcome == SqlExecutionOutcome::Cancelled)
+            {
+                splitScreen();
+                log(_("Statement execution cancelled by user."), ttError);
+                statementM = nullptr;
+                if (isTransactionStarted())
+                    rollbackTransaction();
+                statusbar_1->SetStatusText(_("Execution cancelled"), 3);
+                retval = false;
+                log(wxString::Format(_("Total execution time: %s"),
+                    millisToTimeString(swTotal.Time() - waitForParameterInputTime).c_str()));
+                return retval;
+            }
+            else if (prepRes.outcome == SqlExecutionOutcome::Error)
+            {
+                throw std::runtime_error(prepRes.errorMessage);
+            }
+            else if (prepRes.outcome == SqlExecutionOutcome::SystemError)
+            {
+                splitScreen();
+                log(_("SYSTEM ERROR!"), ttError);
+                retval = false;
+                log(wxString::Format(_("Total execution time: %s"),
+                    millisToTimeString(swTotal.Time() - waitForParameterInputTime).c_str()));
+                return retval;
+            }
             log(wxString::Format(_("Statement prepared (elapsed time: %s)."),
-                millisToTimeString(sw.Time()).c_str()));
+                millisToTimeString(prepRes.elapsedMillis).c_str()));
         }
 
         bool hasColumns = false;
@@ -3735,10 +3966,37 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         sae.scroll();
         flushLogView();
         {
-            wxStopWatch sw;
-            statementM->execute();
+            SqlWorkerResult execRes = runOnWorkerThread([this]() {
+                statementM->execute();
+            });
+            if (execRes.outcome == SqlExecutionOutcome::Cancelled)
+            {
+                splitScreen();
+                log(_("Statement execution cancelled by user."), ttError);
+                statementM = nullptr;
+                if (isTransactionStarted())
+                    rollbackTransaction();
+                statusbar_1->SetStatusText(_("Execution cancelled"), 3);
+                retval = false;
+                log(wxString::Format(_("Total execution time: %s"),
+                    millisToTimeString(swTotal.Time() - waitForParameterInputTime).c_str()));
+                return retval;
+            }
+            else if (execRes.outcome == SqlExecutionOutcome::Error)
+            {
+                throw std::runtime_error(execRes.errorMessage);
+            }
+            else if (execRes.outcome == SqlExecutionOutcome::SystemError)
+            {
+                splitScreen();
+                log(_("SYSTEM ERROR!"), ttError);
+                retval = false;
+                log(wxString::Format(_("Total execution time: %s"),
+                    millisToTimeString(swTotal.Time() - waitForParameterInputTime).c_str()));
+                return retval;
+            }
             log(wxString::Format(_("Statement executed (elapsed time: %s)."),
-                millisToTimeString(sw.Time()).c_str()));
+                millisToTimeString(execRes.elapsedMillis).c_str()));
         }
 
         if (profilingStarted)
@@ -3944,7 +4202,7 @@ void ExecuteSqlFrame::OnMenuTransactionIsolationLevel(wxCommandEvent& event)
 void ExecuteSqlFrame::OnMenuUpdateTransactionIsolationLevel(
     wxUpdateUIEvent& event)
 {
-    event.Enable(!isTransactionStarted());
+    event.Enable(!isExecutingM && !inParseStatementsM && !isTransactionStarted());
     if (event.GetId() == Cmds::Query_TransactionConcurrency)
         event.Check(transactionIsolationLevelM == fr::TransactionIsolationLevel::Concurrency);
     else if (event.GetId() == Cmds::Query_TransactionConsistency)
@@ -3970,7 +4228,7 @@ void ExecuteSqlFrame::OnMenuTransactionLockResolution(wxCommandEvent& event)
 void ExecuteSqlFrame::OnMenuUpdateTransactionLockResolution(
     wxUpdateUIEvent& event)
 {
-    event.Enable(!isTransactionStarted());
+    event.Enable(!isExecutingM && !inParseStatementsM && !isTransactionStarted());
     event.Check(transactionLockResolutionM == fr::TransactionLockResolution::Wait);
 }
 
@@ -3985,12 +4243,14 @@ void ExecuteSqlFrame::OnMenuTransactionReadOnly(wxCommandEvent& event)
 
 void ExecuteSqlFrame::OnMenuUpdateTransactionReadOnly(wxUpdateUIEvent& event)
 {
-    event.Enable(!isTransactionStarted());
+    event.Enable(!isExecutingM && !inParseStatementsM && !isTransactionStarted());
     event.Check(transactionAccessModeM == fr::TransactionAccessMode::Read);
 }
 
 void ExecuteSqlFrame::OnMenuCommit(wxCommandEvent& WXUNUSED(event))
 {
+    if (isExecutingM || inParseStatementsM)
+        return;
     // we need this because sometimes, somehow, Close() which is called in
     // commitTransaction() can destroy the object (at least, with wxGTK 2.8.8)
     // before closeWhenTransactionDoneM is checked and if the dummy memory
@@ -4002,6 +4262,8 @@ void ExecuteSqlFrame::OnMenuCommit(wxCommandEvent& WXUNUSED(event))
 
 bool ExecuteSqlFrame::commitTransaction()
 {
+    if (grid_data && grid_data->getDataGridTable())
+        grid_data->getDataGridTable()->stopBackgroundFetch();
     if (!isTransactionStarted())    // check
     {
         inTransaction(false);
@@ -4083,6 +4345,8 @@ bool ExecuteSqlFrame::commitTransaction()
 
 void ExecuteSqlFrame::OnMenuRollback(wxCommandEvent& WXUNUSED(event))
 {
+    if (isExecutingM || inParseStatementsM)
+        return;
     wxBusyCursor cr;
     // see comments for OnMenuCommit to learn why this temp. variable is needed
     bool closeIt = closeWhenTransactionDoneM;
@@ -4092,6 +4356,8 @@ void ExecuteSqlFrame::OnMenuRollback(wxCommandEvent& WXUNUSED(event))
 
 bool ExecuteSqlFrame::rollbackTransaction()
 {
+    if (grid_data && grid_data->getDataGridTable())
+        grid_data->getDataGridTable()->stopBackgroundFetch();
     if (!isTransactionStarted())    // check
     {
         executedStatementsM.clear();
@@ -4225,7 +4491,8 @@ void ExecuteSqlFrame::toggleBlockComment()
 void ExecuteSqlFrame::OnMenuUpdateGridInsertRow(wxUpdateUIEvent& event)
 {
     DataGridTable* tb = grid_data->getDataGridTable();
-    event.Enable(inTransactionM && tb && tb->canInsertRows());
+    event.Enable(!isExecutingM && !inParseStatementsM
+        && inTransactionM && tb && tb->canInsertRows());
 }
 
 void ExecuteSqlFrame::OnMenuUpdateGridHasData(wxUpdateUIEvent& event)
@@ -4338,6 +4605,8 @@ void ExecuteSqlFrame::OnGridSum(wxCommandEvent& event)
 
 void ExecuteSqlFrame::OnGridLabelLeftDClick(wxGridEvent& event)
 {
+    if (isExecutingM || inParseStatementsM)
+        return;
     DataGridTable* table = grid_data->getDataGridTable();
     if (!table)
         return;

@@ -87,6 +87,7 @@ enum {
     DataGrid_Log_changes,
     DataGrid_AutofitColumns,
     DataGrid_AutofitRows,
+    Query_Cancel,
 
     Menu_RegisterServer = 600,
     Menu_Manual,

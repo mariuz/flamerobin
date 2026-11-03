@@ -40,9 +40,13 @@
 #include "gui/BaseFrame.h"
 #include "gui/EditBlobDialog.h"
 #include "gui/FindDialog.h"
+#include "sql/SqlExecutionWorker.h"
 #include "sql/SqlStatement.h"
 #include "statementHistory.h"
+#include <atomic>
+#include <functional>
 #include "map"
+#include <thread>
 
 class CommandManager;
 class Database;
@@ -131,6 +135,12 @@ private:
     bool highlightWordTextMatchCase = false; //use sensitive search?
     bool inHighlightUpdateM = false; // reentrancy guard for OnSqlEditUpdateUI
     bool inParseStatementsM = false; // reentrancy guard for parseStatements yields
+    std::thread executionWorkerM;
+    std::atomic<bool> cancelExecutionM{false};
+    bool isExecutingM = false;
+    bool closeRequestedM = false;
+    SqlWorkerResult runOnWorkerThread(const std::function<void()>& task);
+    void cancelExecution();
     bool autoCommitM;
     bool inTransactionM;
     fr::ITransactionPtr transactionM;
@@ -234,6 +244,8 @@ private:
 
     void OnMenuExecute(wxCommandEvent& event);
     void OnMenuExecuteAndFetchAll(wxCommandEvent& event);
+    void OnMenuCancel(wxCommandEvent& event);
+    void OnMenuUpdateCancel(wxUpdateUIEvent& event);
     void OnMenuShowPlan(wxCommandEvent& event);
     void OnMenuExplain(wxCommandEvent& event);
     void OnMenuBatchImport(wxCommandEvent& event);

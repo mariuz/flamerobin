@@ -474,6 +474,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/sql/IncompleteStatement.h
         ${SOURCEDIR}/sql/MultiStatement.h
         ${SOURCEDIR}/sql/SelectStatement.h
+        ${SOURCEDIR}/sql/SqlExecutionWorker.h
         ${SOURCEDIR}/sql/SqlStatement.h
         ${SOURCEDIR}/sql/SqlTokenizer.h
         ${SOURCEDIR}/sql/SqlFormatter.h
@@ -1285,6 +1286,11 @@ add_executable(printable_html_window_test
 )
 target_link_libraries(printable_html_window_test ${wxWidgets_LIBRARIES} ${FR_LIBS})
 add_test(NAME printable_html_window_test COMMAND printable_html_window_test)
+
+add_executable(sql_execution_worker_test
+    ${SOURCEDIR}/sql/SqlExecutionWorkerTest.cpp
+)
+add_test(NAME sql_execution_worker_test COMMAND sql_execution_worker_test)
 
 
 if (APPLE)
