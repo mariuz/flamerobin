@@ -2048,20 +2048,9 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
 
     ensureChildrenLoaded();
 
-    auto setCaptionIfChanged = [](MetadataItem* item, const wxString& caption)
-    {
-        if (item && item->getName_() != caption)
-            item->setName_(caption);
-    };
-
     if (getTreeObjectOrder() == 1)
     {
         // Firebird DDL / logical order
-        setCaptionIfChanged(GTTablesM.get(), _("Global Temporary Tables"));
-        setCaptionIfChanged(DMLtriggersM.get(), _("Table Triggers"));
-        setCaptionIfChanged(DDLTriggersM.get(), _("DDL Triggers"));
-        setCaptionIfChanged(DBTriggersM.get(), _("Database Triggers"));
-
         if (getInfo().isFB60OrHigher())
             temp.push_back(schemasM.get());
         temp.push_back(userDomainsM.get());
@@ -2113,11 +2102,6 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
     else
     {
         // Context-grouped alphabetical order
-        setCaptionIfChanged(GTTablesM.get(), _("Tables [Global Temporary]"));
-        setCaptionIfChanged(DBTriggersM.get(), _("Triggers [Database]"));
-        setCaptionIfChanged(DDLTriggersM.get(), _("Triggers [DDL]"));
-        setCaptionIfChanged(DMLtriggersM.get(), _("Triggers [Table]"));
-
         temp.push_back(collationsM.get());
         temp.push_back(userDomainsM.get());
         temp.push_back(exceptionsM.get());
