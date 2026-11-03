@@ -417,6 +417,158 @@ std::string FbCppService::getNextLine()
     return line;
 }
 
+bool parseUsersQueryReply(
+    const unsigned char* buffer,
+    size_t bufferSize,
+    UserData& currentUser,
+    std::vector<UserData>& users,
+    std::vector<unsigned char>& carryOver)
+{
+    if (!buffer || bufferSize == 0)
+        throw std::runtime_error("Service query returned empty buffer");
+
+    const unsigned char* p = buffer;
+    const unsigned char* const bufEnd = buffer + bufferSize;
+    bool needMore = false;
+    bool sawUsersTag = false;
+
+    while (p < bufEnd)
+    {
+        unsigned char topTag = *p;
+        if (topTag == isc_info_end || topTag == 0)
+            break;
+
+        if (topTag == isc_info_truncated ||
+            topTag == isc_info_data_not_ready ||
+            topTag == isc_info_svc_timeout)
+        {
+            needMore = true;
+            break;
+        }
+
+        if (topTag != isc_info_svc_get_users)
+            throw std::runtime_error("Service query returned unexpected answer");
+
+        sawUsersTag = true;
+        if (p + 3 > bufEnd)
+            throw std::runtime_error("Service query returned truncated header");
+
+        unsigned short totalLen = readVal16(p + 1);
+        p += 3;
+
+        if (p + totalLen > bufEnd)
+            throw std::runtime_error("Service query returned invalid length");
+
+        std::vector<unsigned char> combined;
+        const unsigned char* subP = p;
+        const unsigned char* subEnd = p + totalLen;
+        if (!carryOver.empty())
+        {
+            combined.reserve(carryOver.size() + totalLen);
+            combined.insert(combined.end(), carryOver.begin(), carryOver.end());
+            combined.insert(combined.end(), p, p + totalLen);
+            carryOver.clear();
+            subP = combined.data();
+            subEnd = subP + combined.size();
+        }
+
+        while (subP < subEnd)
+        {
+            unsigned char tag = *subP;
+            if (tag == isc_info_end || tag == 0)
+            {
+                subP = subEnd;
+                break;
+            }
+            if (tag == isc_info_truncated ||
+                tag == isc_info_data_not_ready ||
+                tag == isc_info_svc_timeout)
+            {
+                needMore = true;
+                subP = subEnd;
+                break;
+            }
+
+            if (tag == isc_spb_sec_userid ||
+                tag == isc_spb_sec_groupid ||
+                tag == isc_spb_sec_admin)
+            {
+                if (subP + 5 > subEnd)
+                {
+                    needMore = true;
+                    break;
+                }
+                uint32_t val = readVal32(subP + 1);
+                if (tag == isc_spb_sec_userid)
+                    currentUser.userId = static_cast<int>(val);
+                else if (tag == isc_spb_sec_groupid)
+                    currentUser.groupId = static_cast<int>(val);
+                subP += 5;
+            }
+            else if (tag == isc_spb_sec_username ||
+                     tag == isc_spb_sec_password ||
+                     tag == isc_spb_sec_groupname ||
+                     tag == isc_spb_sec_firstname ||
+                     tag == isc_spb_sec_middlename ||
+                     tag == isc_spb_sec_lastname)
+            {
+                if (subP + 3 > subEnd)
+                {
+                    needMore = true;
+                    break;
+                }
+                unsigned short len = readVal16(subP + 1);
+                if (subP + 3 + len > subEnd)
+                {
+                    needMore = true;
+                    break;
+                }
+                std::string val(reinterpret_cast<const char*>(subP + 3), len);
+                switch (tag)
+                {
+                    case isc_spb_sec_username:
+                        if (!currentUser.username.empty())
+                        {
+                            users.push_back(currentUser);
+                            currentUser = UserData();
+                        }
+                        currentUser.username = val;
+                        break;
+                    case isc_spb_sec_password:
+                        currentUser.password = val;
+                        break;
+                    case isc_spb_sec_firstname:
+                        currentUser.firstName = val;
+                        break;
+                    case isc_spb_sec_middlename:
+                        currentUser.middleName = val;
+                        break;
+                    case isc_spb_sec_lastname:
+                        currentUser.lastName = val;
+                        break;
+                    default:
+                        break;
+                }
+                subP += 3 + len;
+            }
+            else
+            {
+                throw std::runtime_error("Service query returned unexpected user attribute tag");
+            }
+        }
+
+        if (subP < subEnd)
+            carryOver.assign(subP, subEnd);
+
+        p += totalLen;
+    }
+
+    if (!sawUsersTag && !needMore)
+        throw std::runtime_error("Service query returned unexpected answer");
+
+    return needMore;
+}
+
 void FbCppService::getUsers(std::vector<UserData>& users)
 {
     users.clear();
@@ -450,62 +602,25 @@ void FbCppService::getUsers(std::vector<UserData>& users)
     unsigned char request[] = { isc_info_svc_get_users };
     std::vector<unsigned char> result(65535);
     auto svc = serviceM->getHandle();
-    svc->query(&status, 0, nullptr, sizeof(request), request, result.size(), result.data());
-    if (status.isDirty())
-        fbcpp::impl::StatusWrapper::checkException(&status);
-
-    if (result[0] != isc_info_svc_get_users)
-        throw std::runtime_error("Service query returned unexpected answer");
-
-    unsigned short totalLen = (unsigned short)(result[1] | (result[2] << 8));
-    const unsigned char* p = result.data();
-    const unsigned char* pEnd = p + 3 + totalLen;
-    p += 3; // Skip tag and length
 
     UserData user;
-    while (p < pEnd && *p != isc_info_end)
+    std::vector<unsigned char> carryOver;
+    bool needMore = true;
+    while (needMore)
     {
-        unsigned char tag = *p;
-        if (tag == isc_spb_sec_userid)
-        {
-            user.userId = (int)readVal32(p + 1);
-            p += 5;
-        }
-        else if (tag == isc_spb_sec_groupid)
-        {
-            user.groupId = (int)readVal32(p + 1);
-            p += 5;
-        }
-        else
-        {
-            unsigned short len = readVal16(p + 1);
-            std::string val((const char*)(p + 3), len);
-            switch (tag)
-            {
-                case isc_spb_sec_username:
-                    if (!user.username.empty())
-                    {
-                        users.push_back(user);
-                        user = UserData();
-                    }
-                    user.username = val;
-                    break;
-                case isc_spb_sec_password:
-                    user.password = val;
-                    break;
-                case isc_spb_sec_firstname:
-                    user.firstName = val;
-                    break;
-                case isc_spb_sec_middlename:
-                    user.middleName = val;
-                    break;
-                case isc_spb_sec_lastname:
-                    user.lastName = val;
-                    break;
-            }
-            p += 3 + len;
-        }
+        std::fill(result.begin(), result.end(), 0);
+        svc->query(&status, 0, nullptr, sizeof(request), request,
+            static_cast<unsigned>(result.size()), result.data());
+        if (status.isDirty())
+            fbcpp::impl::StatusWrapper::checkException(&status);
+
+        needMore = parseUsersQueryReply(
+            result.data(), result.size(), user, users, carryOver);
     }
+
+    if (!carryOver.empty())
+        throw std::runtime_error("Service query ended with incomplete user record");
+
     if (!user.username.empty())
         users.push_back(user);
 }

@@ -37,6 +37,13 @@
 namespace fr
 {
 
+bool parseUsersQueryReply(
+    const unsigned char* buffer,
+    size_t bufferSize,
+    UserData& currentUser,
+    std::vector<UserData>& users,
+    std::vector<unsigned char>& carryOver);
+
 class FbCppService : public IService
 {
 public:
