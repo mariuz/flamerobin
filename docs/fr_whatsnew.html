@@ -8,6 +8,27 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.11.3</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>DDL Generation (#761)</B></font><br>
+<br>
+- <b>Generate DDL for Domains and Sequences Before Functions</b>: Fixed full database DDL extraction in <code>CreateDDLVisitor::visitDatabase()</code> emitting <code>FUNCTIONS</code> before <code>DOMAINS</code> and <code>SEQUENCES</code>, ensuring user-defined domains referenced in stored function parameter or return types exist before function stub declarations are created.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>Database Registration &amp; Client Library Selection</B></font><br>
+<br>
+- <b>Per-Connection Firebird Client Library Selector</b>: Enabled the <b>Client library</b> field and browse button in the Database Registration Info dialog so each registered database can specify a custom <code>fbclient.dll</code> / <code>libfbclient.so</code> / <code>libfbclient.dylib</code> path (e.g., for connecting to or embedding specific Firebird 3.0, 4.0, 5.0, or 6.0 instances).<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>SQL Editor Status Bar &amp; Query Cancellation (#752)</B></font><br>
+<br>
+- <b>Status Bar Cancel / Force-Abort Button &amp; Escalation</b>: Added an embedded <b>Cancel</b> button in the SQL editor status bar alongside the live elapsed timer during background query execution, with two-stage escalation from <code>fb_cancel_operation(fb_cancel_raise)</code> to <code>fb_cancel_operation(fb_cancel_abort)</code> if the server does not respond to soft cancellation.<br>
+<br><br>
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.11.2</font><br>
 <br><br>
 
