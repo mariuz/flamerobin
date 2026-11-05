@@ -329,6 +329,22 @@ bool Database::getChildren(std::vector<MetadataItem *>&) { return false; }
 void Database::loadProperties() { MetadataItem::loadProperties(); }
 void Database::invalidate() { MetadataItem::invalidate(); }
 
+wxString Database::extractNameFromConnectionString(const wxString& path)
+{
+    wxString name = path;
+    wxString::size_type p = name.find_last_of("/\\:");
+    if (p != wxString::npos)
+        name.erase(0, p + 1);
+    p = name.find_last_of(".");
+    if (p != wxString::npos)
+    {
+        wxString ext = name.substr(p).Lower();
+        if (ext == ".fdb" || ext == ".gdb" || ext == ".ib")
+            name.erase(p);
+    }
+    return name;
+}
+
 // --- MetadataLoader Stubs ---
 MetadataLoaderTransaction::MetadataLoaderTransaction(MetadataLoader*) {}
 MetadataLoaderTransaction::~MetadataLoaderTransaction() {}

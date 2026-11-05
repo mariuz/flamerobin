@@ -2503,7 +2503,11 @@ wxString Database::extractNameFromConnectionString(const wxString& path)
         name.erase(0, p + 1);
     p = name.find_last_of(".");
     if (p != wxString::npos)
-        name.erase(p, name.length());
+    {
+        wxString ext = name.substr(p).Lower();
+        if (ext == ".fdb" || ext == ".gdb" || ext == ".ib")
+            name.erase(p);
+    }
     return name;
 }
 

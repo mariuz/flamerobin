@@ -118,6 +118,26 @@ int main()
         ok = check(db->propertiesLoaded(), "Database::loadProperties() marks properties as loaded") && ok;
     }
 
+    // Test 5: Database::extractNameFromConnectionString (issue #760)
+    {
+        ok = check(Database::extractNameFromConnectionString("C:\\data\\employee.fdb") == "employee",
+            "Windows path with .fdb extension strips directory and .fdb") && ok;
+        ok = check(Database::extractNameFromConnectionString("/var/db/EMPLOYEE.FDB") == "EMPLOYEE",
+            "Unix path with uppercase .FDB extension strips directory and .FDB") && ok;
+        ok = check(Database::extractNameFromConnectionString("localhost:/var/db/legacy.gdb") == "legacy",
+            "Connection string with .gdb extension strips host, directory and .gdb") && ok;
+        ok = check(Database::extractNameFromConnectionString("server:C:\\data\\archive.ib") == "archive",
+            "Connection string with .ib extension strips host, directory and .ib") && ok;
+        ok = check(Database::extractNameFromConnectionString("sales.archive") == "sales.archive",
+            "Dotted alias without known extension preserves full alias name") && ok;
+        ok = check(Database::extractNameFromConnectionString("localhost:sales.archive") == "sales.archive",
+            "Host-prefixed dotted alias preserves full alias name") && ok;
+        ok = check(Database::extractNameFromConnectionString("app.v2.prod") == "app.v2.prod",
+            "Multi-dot alias preserves full alias name") && ok;
+        ok = check(Database::extractNameFromConnectionString("/var/db/sales.archive.fdb") == "sales.archive",
+            "Dotted filename with .fdb extension only strips trailing .fdb") && ok;
+    }
+
     if (ok)
         std::cout << "\nAll Database properties refresh tests passed.\n";
     else
