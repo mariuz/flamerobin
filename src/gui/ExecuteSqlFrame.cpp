@@ -716,6 +716,12 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
 
     statusbar_1 = CreateStatusBar(4);
     SetStatusBarPane(-1);
+    button_status_cancel = new wxButton(statusbar_1, Cmds::Query_Cancel,
+        _("Cancel"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+    button_status_cancel->SetToolTip(_("Cancel running query (Shift+F4)"));
+    button_status_cancel->Hide();
+    button_status_cancel->Bind(wxEVT_BUTTON, &ExecuteSqlFrame::OnMenuCancel, this);
+    statusbar_1->Bind(wxEVT_SIZE, &ExecuteSqlFrame::OnStatusBarSize, this);
 
     editBlobDlgM = 0;
 
@@ -1028,6 +1034,29 @@ void ExecuteSqlFrame::set_properties()
 
     closeWhenTransactionDoneM = false;
     autoCommitM = config().get("autoCommitDDL", false);
+}
+
+void ExecuteSqlFrame::positionStatusBarCancelButton()
+{
+    if (!statusbar_1 || !button_status_cancel)
+        return;
+
+    wxRect rect;
+    if (!statusbar_1->GetFieldRect(3, rect) || rect.width <= 0 || rect.height <= 0)
+        return;
+
+    wxSize btnSize = button_status_cancel->GetBestSize();
+    int btnWidth = std::min(btnSize.GetWidth() + 8, std::max(40, rect.width / 2));
+    int btnHeight = std::max(16, rect.height - 2);
+    int x = rect.x + rect.width - btnWidth - 2;
+    int y = rect.y + (rect.height - btnHeight) / 2;
+    button_status_cancel->SetSize(x, y, btnWidth, btnHeight);
+}
+
+void ExecuteSqlFrame::OnStatusBarSize(wxSizeEvent& event)
+{
+    positionStatusBarCancelButton();
+    event.Skip();
 }
 
 void ExecuteSqlFrame::do_layout()
@@ -1986,7 +2015,7 @@ void ExecuteSqlFrame::OnMenuCancel(wxCommandEvent& WXUNUSED(event))
 
 void ExecuteSqlFrame::OnMenuUpdateCancel(wxUpdateUIEvent& event)
 {
-    event.Enable((isExecutingM || inParseStatementsM) && !cancelExecutionM.load());
+    event.Enable(isExecutingM || (inParseStatementsM && !cancelExecutionM.load()));
 }
 
 void ExecuteSqlFrame::OnMenuShowPlan(wxCommandEvent& WXUNUSED(event))
@@ -3556,18 +3585,44 @@ SqlWorkerResult ExecuteSqlFrame::runOnWorkerThread(const std::function<void()>& 
     if (choice_connection_switcher)
         choice_connection_switcher->Enable(false);
 
+    wxString prevStatusText;
+    if (statusbar_1)
+        prevStatusText = statusbar_1->GetStatusText(3);
+
     isExecutingM = true;
+    if (button_status_cancel)
+    {
+        positionStatusBarCancelButton();
+        button_status_cancel->Enable(!cancelExecutionM.load());
+        button_status_cancel->Show();
+    }
+    if (statusbar_1)
+    {
+        statusbar_1->SetStatusText(
+            wxString::Format(_("Executing... (%s)"),
+                wxString::FromUTF8(formatExecutionTimerText(0))), 3);
+    }
+
     struct ExecutingGuard
     {
         ExecuteSqlFrame* frame;
+        wxString savedStatusText;
         ~ExecutingGuard()
         {
             frame->isExecutingM = false;
+            if (frame->button_status_cancel)
+            {
+                frame->button_status_cancel->SetLabel(_("Cancel"));
+                frame->button_status_cancel->SetToolTip(_("Cancel running query (Shift+F4)"));
+                frame->button_status_cancel->Hide();
+            }
+            if (frame->statusbar_1 && !frame->cancelExecutionM.load())
+                frame->statusbar_1->SetStatusText(savedStatusText, 3);
             if (frame->choice_connection_switcher && !frame->inParseStatementsM)
                 frame->choice_connection_switcher->Enable(true);
             frame->UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
         }
-    } guard{this};
+    } guard{this, prevStatusText};
 
     UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
 
@@ -3575,6 +3630,8 @@ SqlWorkerResult ExecuteSqlFrame::runOnWorkerThread(const std::function<void()>& 
     auto workerDone = std::make_shared<std::atomic<bool>>(false);
     auto loop = std::make_shared<wxGUIEventLoop>();
     wxEvtHandler* handler = GetEventHandler();
+    wxStopWatch swElapsed;
+    long lastDisplayedSeconds = 0;
 
     executionWorkerM = std::thread([task, this, result, workerDone, loop, handler]() {
         *result = runSqlWorkerTask(task, cancelExecutionM);
@@ -3591,11 +3648,24 @@ SqlWorkerResult ExecuteSqlFrame::runOnWorkerThread(const std::function<void()>& 
     if (!workerDone->load())
     {
         wxTimer pollTimer;
-        pollTimer.Bind(wxEVT_TIMER, [workerDone, loop](wxTimerEvent&) {
-            if (workerDone->load() && loop->IsRunning())
-                loop->Exit(0);
+        pollTimer.Bind(wxEVT_TIMER, [this, workerDone, loop, &swElapsed, &lastDisplayedSeconds](wxTimerEvent&) {
+            if (workerDone->load())
+            {
+                if (loop->IsRunning())
+                    loop->Exit(0);
+                return;
+            }
+            long elapsedMs = swElapsed.Time();
+            long elapsedSec = elapsedMs / 1000;
+            if (elapsedSec != lastDisplayedSeconds && statusbar_1 && !cancelExecutionM.load())
+            {
+                lastDisplayedSeconds = elapsedSec;
+                statusbar_1->SetStatusText(
+                    wxString::Format(_("Executing... (%s)"),
+                        wxString::FromUTF8(formatExecutionTimerText(elapsedMs))), 3);
+            }
         });
-        pollTimer.Start(15);
+        pollTimer.Start(50);
         if (!workerDone->load())
             loop->Run();
         pollTimer.Stop();
@@ -3612,7 +3682,44 @@ void ExecuteSqlFrame::cancelExecution()
     if (!isExecutingM && !inParseStatementsM)
         return;
 
+    // If a graceful cancel (fb_cancel_raise) was already requested and the
+    // engine is still blocked (e.g. inside an uninterruptible sort/DISTINCT
+    // phase), offer to forcibly abort the connection via fb_cancel_abort.
+    if (cancelExecutionM.load() && isExecutingM && databaseM && databaseM->getDALDatabase())
+    {
+        int res = ::wxMessageBox(
+            _("The Firebird server has not responded to the graceful cancel request yet.\n\nDo you want to forcibly abort the database connection (fb_cancel_abort)?"),
+            _("Force Abort Connection"),
+            wxYES_NO | wxNO_DEFAULT | wxICON_WARNING, this);
+        if (res == wxYES)
+        {
+            statusbar_1->SetStatusText(_("Aborting connection..."), 3);
+            if (button_status_cancel)
+                button_status_cancel->Enable(false);
+            try
+            {
+                databaseM->getDALDatabase()->cancelOperation(true);
+            }
+            catch (const std::exception& e)
+            {
+                ScrollAtEnd sae(styled_text_ctrl_stats);
+                log(wxString::Format(_("Force abort failed: %s"),
+                    wxString::FromUTF8(e.what())), ttError);
+            }
+            catch (...)
+            {
+            }
+        }
+        return;
+    }
+
     cancelExecutionM.store(true);
+    if (button_status_cancel)
+    {
+        button_status_cancel->SetLabel(_("Abort"));
+        button_status_cancel->SetToolTip(_("Force abort connection (fb_cancel_abort) if server does not respond"));
+        positionStatusBarCancelButton();
+    }
     statusbar_1->SetStatusText(_("Cancelling execution..."), 3);
     UpdateWindowUI(wxUPDATE_UI_FROMIDLE);
 
@@ -3620,7 +3727,7 @@ void ExecuteSqlFrame::cancelExecution()
     {
         try
         {
-            databaseM->getDALDatabase()->cancelOperation();
+            databaseM->getDALDatabase()->cancelOperation(false);
         }
         catch (const std::exception& e)
         {

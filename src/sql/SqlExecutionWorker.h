@@ -28,6 +28,7 @@
 #include <atomic>
 #include <cctype>
 #include <chrono>
+#include <cstdio>
 #include <exception>
 #include <functional>
 #include <string>
@@ -58,6 +59,18 @@ inline bool isCancelledErrorMessage(const std::string& msg)
 
     return lower.find("operation was cancelled") != std::string::npos
         || lower.find("isc_cancelled") != std::string::npos;
+}
+
+inline std::string formatExecutionTimerText(long elapsedMillis)
+{
+    if (elapsedMillis < 0)
+        elapsedMillis = 0;
+    long totalSeconds = elapsedMillis / 1000;
+    long minutes = totalSeconds / 60;
+    long seconds = totalSeconds % 60;
+    char buf[32];
+    std::snprintf(buf, sizeof(buf), "%02ld:%02ld", minutes, seconds);
+    return std::string(buf);
 }
 
 inline SqlWorkerResult runSqlWorkerTask(

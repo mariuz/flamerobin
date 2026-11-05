@@ -354,6 +354,9 @@ protected:
     wxStyledTextCtrl* styled_text_ctrl_stats;
 
     wxStatusBar* statusbar_1;
+    wxButton* button_status_cancel = nullptr;
+    void positionStatusBarCancelButton();
+    void OnStatusBarSize(wxSizeEvent& event);
 
     wxMenuBar* menuBarM;
     wxToolBar* toolBarM;

@@ -61,7 +61,7 @@ public:
     virtual void setCryptKeyData(const std::string& cryptKeyData) override;
     virtual void setConfig(const std::string& config) override;
     virtual void setHeaderPageBuffers(int buffers) override;
-    virtual void cancelOperation() override;
+    virtual void cancelOperation(bool forceAbort = false) override;
 
     virtual ITransactionPtr createTransaction() override;
     virtual IStatementPtr createStatement(ITransactionPtr tr) override;

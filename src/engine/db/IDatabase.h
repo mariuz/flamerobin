@@ -66,7 +66,7 @@ public:
     virtual void setHeaderPageBuffers(int buffers) = 0;
     // cancels the operation currently running on this attachment; may be
     // called from another thread
-    virtual void cancelOperation() = 0;
+    virtual void cancelOperation(bool forceAbort = false) = 0;
 
     virtual ITransactionPtr createTransaction() = 0;
     virtual IStatementPtr createStatement(ITransactionPtr tr) = 0;

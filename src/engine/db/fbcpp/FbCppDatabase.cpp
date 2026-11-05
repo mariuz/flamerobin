@@ -355,7 +355,7 @@ void FbCppDatabase::setHeaderPageBuffers(int buffers)
     headerPageBuffersM = buffers;
 }
 
-void FbCppDatabase::cancelOperation()
+void FbCppDatabase::cancelOperation(bool forceAbort)
 {
     if (!attachmentM)
         return;
@@ -364,7 +364,8 @@ void FbCppDatabase::cancelOperation()
     fbcpp::impl::StatusWrapper status(client);
     try
     {
-        attachmentM->getHandle()->cancelOperation(&status, fb_cancel_raise);
+        attachmentM->getHandle()->cancelOperation(&status,
+            forceAbort ? fb_cancel_abort : fb_cancel_raise);
     }
     catch (...)
     {

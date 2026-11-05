@@ -82,7 +82,7 @@ Today the `.deb` is installed from a file downloaded from GitHub Releases (see [
 
 ### 3) SQL Editor & Autocomplete Responsiveness
 - [ ] **Incremental & Scoped SQL Tokenization:** Tokenize only the active statement or visible editor range during typing, brace matching, and autocomplete in `ExecuteSqlFrame` so multi-megabyte SQL scripts remain responsive with near-zero typing latency.
-- [ ] **Non-Blocking Query Cancellation:** Provide an immediate cancel action and elapsed timer in the SQL editor using Firebird's `fb_cancel_operation(fb_cancel_raise)` without freezing the UI thread.
+- [x] **Non-Blocking Query Cancellation & Status Bar Timer:** Provide an immediate cancel button and live elapsed timer in the SQL editor status bar using Firebird's `fb_cancel_operation(fb_cancel_raise)` without freezing the UI thread.
 
 ---
 

@@ -170,6 +170,26 @@ int main()
             "Test 8: background worker thread cancellation outcome is Cancelled") && ok;
     }
 
+    // Test 9: Status bar execution timer formatting (MM:SS)
+    {
+        ok = check(formatExecutionTimerText(-500) == "00:00",
+            "Test 9a: negative millis clamps to 00:00") && ok;
+        ok = check(formatExecutionTimerText(0) == "00:00",
+            "Test 9b: 0 ms formats as 00:00") && ok;
+        ok = check(formatExecutionTimerText(999) == "00:00",
+            "Test 9c: 999 ms formats as 00:00") && ok;
+        ok = check(formatExecutionTimerText(1000) == "00:01",
+            "Test 9d: 1000 ms formats as 00:01") && ok;
+        ok = check(formatExecutionTimerText(59999) == "00:59",
+            "Test 9e: 59999 ms formats as 00:59") && ok;
+        ok = check(formatExecutionTimerText(60000) == "01:00",
+            "Test 9f: 60000 ms formats as 01:00") && ok;
+        ok = check(formatExecutionTimerText(125400) == "02:05",
+            "Test 9g: 125400 ms formats as 02:05") && ok;
+        ok = check(formatExecutionTimerText(3661000) == "61:01",
+            "Test 9h: 3661000 ms formats as 61:01") && ok;
+    }
+
     if (ok)
         std::cout << "All SqlExecutionWorker tests PASSED." << std::endl;
     return ok ? 0 : 1;
