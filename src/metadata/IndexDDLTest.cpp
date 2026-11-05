@@ -21,7 +21,9 @@
   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
+#include <fstream>
 #include <iostream>
+#include <sstream>
 #include <vector>
 
 #include "metadata/IndexDDL.h"
@@ -78,6 +80,34 @@ int main()
         " (\"COL_A\",\"COL_B\") WHERE COL_A IN (1, 2, 3)",
         "partial index body with IN clause")
         && ok;
+
+    // Issue #761: Verify CreateDDLVisitor::visitDatabase emits DOMAINS before FUNCTIONS
+#ifdef FR_SOURCE_DIR
+    {
+        std::string visitorPath = std::string(FR_SOURCE_DIR) + "/src/metadata/CreateDDLVisitor.cpp";
+        std::ifstream ifs(visitorPath);
+        if (ifs.is_open())
+        {
+            std::ostringstream oss;
+            oss << ifs.rdbuf();
+            std::string content = oss.str();
+            size_t domainsPos = content.find("/******************** DOMAINS *********************/");
+            size_t functionsPos = content.find("/********************* FUNCTIONS ***********************/");
+            size_t proceduresPos = content.find("/******************* PROCEDURES ******************/");
+            if (domainsPos == std::string::npos || functionsPos == std::string::npos
+                || proceduresPos == std::string::npos || !(domainsPos < functionsPos && functionsPos < proceduresPos))
+            {
+                std::cerr << "CreateDDLVisitor database DDL section ordering test (#761) failed.\n";
+                ok = false;
+            }
+        }
+        else
+        {
+            std::cerr << "Failed to open " << visitorPath << " for #761 test.\n";
+            ok = false;
+        }
+    }
+#endif
 
     return ok ? 0 : 1;
 }

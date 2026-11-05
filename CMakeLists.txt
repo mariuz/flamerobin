@@ -825,6 +825,7 @@ add_executable(index_ddl_test
     ${SOURCEDIR}/metadata/IndexDDLTest.cpp
     ${SOURCEDIR}/metadata/IndexDDL.cpp
 )
+target_compile_definitions(index_ddl_test PRIVATE FR_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 target_link_libraries(index_ddl_test ${wxWidgets_LIBRARIES})
 add_test(NAME index_ddl_test COMMAND index_ddl_test)
 

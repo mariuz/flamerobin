@@ -235,12 +235,6 @@ void CreateDDLVisitor::visitDatabase(Database& d)
 
         preSqlM << "/********************* UDFS ***********************/\n\n";
         iterateit<UDFsPtr, UDF>(this, d.getUDFs(), progressIndicatorM);
-        
-        if (d.getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
-            preSqlM << "/********************* FUNCTIONS ***********************/\n\n";
-            iterateit<FunctionSQLsPtr, FunctionSQL>(this, d.getFunctionSQLs(),
-                progressIndicatorM);
-        }
 
         preSqlM << "/****************** SEQUENCES ********************/\n\n";
         iterateit<GeneratorsPtr, Generator>(this, d.getGenerators(),
@@ -249,6 +243,12 @@ void CreateDDLVisitor::visitDatabase(Database& d)
         preSqlM << "/******************** DOMAINS *********************/\n\n";
         iterateit<DomainsPtr, Domain>(this, d.getDomains(),
             progressIndicatorM);
+
+        if (d.getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
+            preSqlM << "/********************* FUNCTIONS ***********************/\n\n";
+            iterateit<FunctionSQLsPtr, FunctionSQL>(this, d.getFunctionSQLs(),
+                progressIndicatorM);
+        }
 
         preSqlM << "/******************* PROCEDURES ******************/\n\n";
         iterateit<ProceduresPtr, Procedure>(this, d.getProcedures(),
