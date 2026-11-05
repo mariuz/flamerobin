@@ -8,6 +8,17 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.11.2</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Database Registration &amp; Aliases (#760)</B></font><br>
+<br>
+- <b>Preserve Dots in Database Aliases When Auto-Filling Display Name</b>: Fixed <code>Database::extractNameFromConnectionString()</code> truncating the auto-filled Display Name at the last <code>.</code> for database aliases containing dots (such as <code>sales.archive</code> or <code>app.v2.prod</code>). FlameRobin now only strips known database file extensions (<code>.fdb</code>, <code>.gdb</code>, <code>.ib</code>, case-insensitively) while preserving full dotted alias names.<br>
+<br><br>
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.11.1</font><br>
 <br><br>
 
