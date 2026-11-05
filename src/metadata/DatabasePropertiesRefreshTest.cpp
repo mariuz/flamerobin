@@ -138,6 +138,19 @@ int main()
             "Dotted filename with .fdb extension only strips trailing .fdb") && ok;
     }
 
+    // Test 6: Per-connection Database::getClientLibrary / setClientLibrary
+    {
+        DatabasePtr db(new Database());
+        ok = check(db->getClientLibrary().IsEmpty(),
+            "Default Database::getClientLibrary() is empty when no library is configured") && ok;
+        db->setClientLibrary("/opt/firebird/lib/libfbclient.so");
+        ok = check(db->getClientLibrary() == "/opt/firebird/lib/libfbclient.so",
+            "Database::getClientLibrary() returns the per-database client library") && ok;
+        db->setClientLibrary(wxEmptyString);
+        ok = check(db->getClientLibrary().IsEmpty(),
+            "Clearing per-database client library reverts to default") && ok;
+    }
+
     if (ok)
         std::cout << "\nAll Database properties refresh tests passed.\n";
     else

@@ -2227,8 +2227,8 @@ wxString Database::getPath() const
 
 wxString Database::getClientLibrary() const
 {
-    /*Todo: Implement FB library per conexion */
-    //return clientLibraryM;
+    if (!clientLibraryM.IsEmpty())
+        return clientLibraryM;
 #if defined(_WIN64)
     return config().get("x64LibraryFile", wxString(""));
 #else

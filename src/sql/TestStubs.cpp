@@ -329,6 +329,22 @@ bool Database::getChildren(std::vector<MetadataItem *>&) { return false; }
 void Database::loadProperties() { MetadataItem::loadProperties(); }
 void Database::invalidate() { MetadataItem::invalidate(); }
 
+wxString Database::getClientLibrary() const
+{
+    if (!clientLibraryM.IsEmpty())
+        return clientLibraryM;
+#if defined(_WIN64)
+    return config().get("x64LibraryFile", wxString(""));
+#else
+    return config().get("x86LibraryFile", wxString(""));
+#endif
+}
+
+void Database::setClientLibrary(const wxString& value)
+{
+    clientLibraryM = value;
+}
+
 wxString Database::extractNameFromConnectionString(const wxString& path)
 {
     wxString name = path;

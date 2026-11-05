@@ -107,16 +107,14 @@ void DatabaseRegistrationDialog::createControls()
         _("Encryption key data:"));
     text_ctrl_keydata = new wxTextCtrl(getControlsPanel(),
         ID_textcontrol_keydata, wxEmptyString);
-    /*
-    Todo: Implement FB library per conexion
+
     label_library = new wxStaticText(getControlsPanel(), -1,
-        _("Library path:"));
+        _("Client library:"));
     text_ctrl_library = new FileTextControl(getControlsPanel(),
         ID_textcontrol_library, wxEmptyString);
+    text_ctrl_library->SetHint(_("Default client library"));
     button_browse_library = new wxButton(getControlsPanel(), ID_button_browse_library,
         "...", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-     */
-
 
     if (createM)
     {
@@ -327,27 +325,24 @@ void DatabaseRegistrationDialog::layoutControls()
 
     sizerControls->Add(label_keydata, wxGBPosition(6, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
     sizerControls->Add(text_ctrl_keydata, wxGBPosition(6, 1), wxGBSpan(1, 3), wxALIGN_CENTER_VERTICAL | wxEXPAND);
-    
-    /*
-    * Todo: Implement FB library per conexion
-    sizerControls->Add(label_library, wxGBPosition(5, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
+
+    sizerControls->Add(label_library, wxGBPosition(7, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
     wxBoxSizer* sizer_r1c1_4 = new wxBoxSizer(wxHORIZONTAL);
     sizer_r1c1_4->Add(text_ctrl_library, 1, wxALIGN_CENTER_VERTICAL);
     sizer_r1c1_4->Add(button_browse_library, 0, wxLEFT | wxALIGN_CENTER_VERTICAL, styleguide().getBrowseButtonMargin());
-    sizerControls->Add(sizer_r1c1_4, wxGBPosition(5, 1), wxGBSpan(1, 3), wxEXPAND);
-    */
+    sizerControls->Add(sizer_r1c1_4, wxGBPosition(7, 1), wxGBSpan(1, 3), wxEXPAND);
 
     if (createM)
     {
-        sizerControls->Add(label_pagesize, wxGBPosition(7, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-        sizerControls->Add(choice_pagesize, wxGBPosition(7, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
-        sizerControls->Add(label_dialect, wxGBPosition(7, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
-        sizerControls->Add(choice_dialect, wxGBPosition(7, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+        sizerControls->Add(label_pagesize, wxGBPosition(8, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
+        sizerControls->Add(choice_pagesize, wxGBPosition(8, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+        sizerControls->Add(label_dialect, wxGBPosition(8, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
+        sizerControls->Add(choice_dialect, wxGBPosition(8, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
 
-        sizerControls->Add(label_owner, wxGBPosition(8, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
-        sizerControls->Add(text_ctrl_owner, wxGBPosition(8, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
-        sizerControls->Add(label_initialuser, wxGBPosition(8, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
-        sizerControls->Add(text_ctrl_initialuser, wxGBPosition(8, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+        sizerControls->Add(label_owner, wxGBPosition(9, 0), wxDefaultSpan, wxALIGN_CENTER_VERTICAL);
+        sizerControls->Add(text_ctrl_owner, wxGBPosition(9, 1), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
+        sizerControls->Add(label_initialuser, wxGBPosition(9, 2), wxDefaultSpan, wxLEFT | wxALIGN_CENTER_VERTICAL, dx);
+        sizerControls->Add(text_ctrl_initialuser, wxGBPosition(9, 3), wxDefaultSpan, wxALIGN_CENTER_VERTICAL | wxEXPAND);
     }
 
     sizerControls->AddGrowableCol(1);
@@ -363,6 +358,7 @@ void DatabaseRegistrationDialog::setControlsProperties()
 {
     int wh = text_ctrl_dbpath->GetMinHeight();
     button_browse->SetSize(wh, wh);
+    button_browse_library->SetSize(wh, wh);
 
     choice_authentication->SetSelection(DatabaseAuthenticationMode::UseSavedPassword);
     combobox_charset->SetStringSelection("NONE");
@@ -423,10 +419,9 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
         choice_environment->SetSelection(1);
     else
         choice_environment->SetSelection(0);
-    /*
-    * Todo: Implement FB library per conexion
+
     text_ctrl_library->SetValue(databaseM->getClientLibrary());
-    */
+
     wxString charset(databaseM->getConnectionCharset());
     if (charset.IsEmpty())
     {
@@ -456,6 +451,8 @@ void DatabaseRegistrationDialog::setDatabase(DatabasePtr db)
     combobox_charset->Enable(!isConnected);
     text_ctrl_role->SetEditable(!isConnected);
     text_ctrl_keydata->SetEditable(!isConnected);
+    text_ctrl_library->SetEditable(!isConnected);
+    button_browse_library->Enable(!isConnected);
     if (connectAsM)
         button_ok->SetLabel(_("Connect"));
     else
@@ -670,14 +667,23 @@ void DatabaseRegistrationDialog::OnBrowseButtonClick(wxCommandEvent& WXUNUSED(ev
 
 void DatabaseRegistrationDialog::OnBrowseLibraryButtonClick(wxCommandEvent& WXUNUSED(event))
 {
-    /*
-    * Todo: Implement FB library per conexion
-    wxString path = ::wxFileSelector(_("Select library file"), "", "", "",
-        _("Firebird library files (*.dll)|*.dll|All files (*.*)|*.*"),
-        wxFD_OPEN, this);
+    wxFileName currentLib(text_ctrl_library->GetValue());
+    wxString defaultDir = currentLib.GetPath();
+    wxString defaultFile = currentLib.GetFullName();
+
+#if defined(__WXMSW__)
+    wxString wildcard = _("Firebird library files (*.dll)|*.dll|All files (*.*)|*.*");
+#elif defined(__WXMAC__)
+    wxString wildcard = _("Firebird library files (*.dylib;libfbclient*)|*.dylib;libfbclient*|All files (*)|*");
+#else
+    wxString wildcard = _("Firebird library files (libfbclient*.so*;*.so)|libfbclient*.so*;*.so|All files (*)|*");
+#endif
+
+    wxString path = ::wxFileSelector(_("Select Firebird client library"),
+        defaultDir, defaultFile, wxEmptyString,
+        wildcard, wxFD_OPEN | wxFD_FILE_MUST_EXIST, this);
     if (!path.empty())
         text_ctrl_library->SetValue(path);
-     */
 }
 
 void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
@@ -701,10 +707,7 @@ void DatabaseRegistrationDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event)
     databaseM->setUsername(text_ctrl_username->GetValue());
     databaseM->setEncryptedPassword(text_ctrl_password->GetValue());
     databaseM->setCryptKeyData(text_ctrl_keydata->GetValue());
-    /*
-    * Todo: Implement FB library per conexion
     databaseM->setClientLibrary(text_ctrl_library->GetValue());
-    */
 
     wxBusyCursor wait;
     databaseM->setConnectionCharset(combobox_charset->GetValue());

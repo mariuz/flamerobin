@@ -77,13 +77,10 @@ private:
 
     wxStaticText* label_initialuser;
     wxTextCtrl* text_ctrl_initialuser;
-    
-    /*
-    * Todo: Implement FB library per conexion
+
     wxStaticText* label_library;
     FileTextControl* text_ctrl_library;
     wxButton* button_browse_library;
-    */
 
     wxButton* button_ok;
     wxButton* button_cancel;
