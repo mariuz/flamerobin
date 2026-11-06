@@ -8,6 +8,21 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.11.4</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>SQL Editor Query Cancellation (#752)</B></font><br>
+<br>
+- <b>Connection Recovery After Cancel / Abort</b>: Fixed the SQL editor (and new editors on the same database) becoming unusable after cancelling or force-aborting a statement. Transactions now always start with a fresh handle, a failed rollback resets the editor's transaction state, and after <code>fb_cancel_abort</code> the connection is re-established automatically without closing other open editors.<br>
+<br>
+<font size=+1 color="#AA0000"><B>SQL Editor Autocomplete</B></font><br>
+<br>
+- <b>Package Member Autocomplete</b>: <code>PACKAGE.PROCEDURE</code> and <code>PACKAGE.FUNCTION</code> members are now resolved in autocomplete and calltips.<br>
+<br><br>
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.11.3</font><br>
 <br><br>
 
