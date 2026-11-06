@@ -59,12 +59,16 @@ protected:
     virtual void loadChildren();
     virtual void lockChildren();
     virtual void unlockChildren();
-    FunctionSQLPtr findFunctionSQL(const wxString& name) const;
-    ProcedurePtr findProcedure(const wxString& name) const;
 public:
     Package(DatabasePtr database, const wxString& name);
 
     bool getChildren(std::vector<MetadataItem *>& temp);
+
+    FunctionSQLPtr findFunctionSQL(const wxString& name) const;
+    ProcedurePtr findProcedure(const wxString& name) const;
+    const FunctionSQLPtrs& getFunctions() const { return functionsM; }
+    const ProcedurePtrs& getProcedures() const { return proceduresM; }
+    void setMethods(const FunctionSQLPtrs& functions, const ProcedurePtrs& procedures);
 
     MethodPtrs::iterator begin();
     MethodPtrs::iterator end();

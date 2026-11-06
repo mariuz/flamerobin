@@ -216,14 +216,37 @@ Procedure::Procedure(DatabasePtr database, const wxString& name)
     : MetadataItem(ntProcedure, (MetadataItem*)database.get(), name, 0) {}
 Procedure::Procedure(MetadataItem* parent, const wxString& name) 
     : MetadataItem(ntProcedure, parent, name, 0) {}
-ParameterPtr Procedure::findParameter(const wxString&) const { return ParameterPtr(); }
+ParameterPtr Procedure::findParameter(const wxString& name) const
+{
+    for (ParameterPtrs::const_iterator it = parametersM.begin();
+        it != parametersM.end(); ++it)
+    {
+        if ((*it)->getName_() == name)
+            return *it;
+    }
+    return ParameterPtr();
+}
+void Procedure::setParameters(const ParameterPtrs& parameters)
+{
+    parametersM = parameters;
+    setChildrenLoaded(true);
+}
+ParameterPtrs::iterator Procedure::begin() { return parametersM.begin(); }
+ParameterPtrs::iterator Procedure::end() { return parametersM.end(); }
+ParameterPtrs::const_iterator Procedure::begin() const { return parametersM.begin(); }
+ParameterPtrs::const_iterator Procedure::end() const { return parametersM.end(); }
 const wxString Procedure::getTypeName() const { return ""; }
 void Procedure::acceptVisitor(MetadataItemVisitor*) {}
 void Procedure::loadChildren() {}
 void Procedure::lockChildren() {}
 void Procedure::unlockChildren() {}
 bool Procedure::getChildren(std::vector<MetadataItem *>&) { return false; }
-wxString Procedure::getQuotedName() const { return getIdentifier().getQuoted(); }
+wxString Procedure::getQuotedName() const
+{
+    if (!getParent() || getParent()->getType() == ntDatabase)
+        return getIdentifier().getQuoted();
+    return getParent()->getQuotedName() + '.' + getIdentifier().getQuoted();
+}
 wxString Procedure::getSqlSecurity() { return ""; }
 
 Generator::Generator(DatabasePtr database, const wxString& name)
@@ -250,10 +273,64 @@ Package::Package(DatabasePtr database, const wxString& name)
 void Package::loadChildren() {}
 void Package::lockChildren() {}
 void Package::unlockChildren() {}
-bool Package::getChildren(std::vector<MetadataItem*>&) { return false; }
+bool Package::getChildren(std::vector<MetadataItem*>& temp)
+{
+    if (functionsM.empty() && proceduresM.empty())
+        return false;
+    std::transform(functionsM.begin(), functionsM.end(),
+        std::back_inserter(temp), std::mem_fn(&FunctionSQLPtr::get));
+    std::transform(proceduresM.begin(), proceduresM.end(),
+        std::back_inserter(temp), std::mem_fn(&ProcedurePtr::get));
+    return true;
+}
+FunctionSQLPtr Package::findFunctionSQL(const wxString& name) const
+{
+    for (FunctionSQLPtrs::const_iterator it = functionsM.begin();
+        it != functionsM.end(); ++it)
+    {
+        if ((*it)->getName_() == name)
+            return *it;
+    }
+    return FunctionSQLPtr();
+}
+ProcedurePtr Package::findProcedure(const wxString& name) const
+{
+    for (ProcedurePtrs::const_iterator it = proceduresM.begin();
+        it != proceduresM.end(); ++it)
+    {
+        if ((*it)->getName_() == name)
+            return *it;
+    }
+    return ProcedurePtr();
+}
+size_t Package::getMethodCount() const
+{
+    return functionsM.size() + proceduresM.size();
+}
+void Package::setMethods(const FunctionSQLPtrs& functions,
+    const ProcedurePtrs& procedures)
+{
+    functionsM = functions;
+    proceduresM = procedures;
+    setChildrenLoaded(true);
+}
 wxString Package::getSqlSecurity() { return ""; }
 const wxString Package::getTypeName() const { return "PACKAGE"; }
 void Package::acceptVisitor(MetadataItemVisitor*) {}
+
+Packages::Packages(DatabasePtr database)
+    : MetadataCollection<Package>(ntPackages, database, _("Packages")) {}
+void Packages::acceptVisitor(MetadataItemVisitor*) {}
+void Packages::load(ProgressIndicator*) {}
+void Packages::loadChildren() {}
+const wxString Packages::getTypeName() const { return "PACKAGE_COLLECTION"; }
+
+SysPackages::SysPackages(DatabasePtr database)
+    : MetadataCollection<Package>(ntSysPackages, database, _("System Packages")) {}
+void SysPackages::acceptVisitor(MetadataItemVisitor*) {}
+void SysPackages::load(ProgressIndicator*) {}
+void SysPackages::loadChildren() {}
+const wxString SysPackages::getTypeName() const { return "SYSPACKAGE_COLLECTION"; }
 
 Function::Function(DatabasePtr database, const wxString& name)
     : MetadataItem(ntFunctionSQL, (MetadataItem*)database.get(), name, 0) {}
@@ -292,6 +369,8 @@ const wxString Trigger::getTypeName() const { return ""; }
 void Trigger::acceptVisitor(MetadataItemVisitor*) {}
 void Trigger::loadProperties() {}
 wxString Trigger::getSqlSecurity() { return ""; }
+bool Trigger::isDMLTrigger() { return getType() == ntDMLTrigger; }
+wxString Trigger::getRelationName() { return relationNameM; }
 
 DMLTrigger::DMLTrigger(DatabasePtr database, const wxString& name) 
     : Trigger(ntDMLTrigger, database, name) {}
@@ -313,7 +392,80 @@ MetadataLoader* Database::getMetadataLoader() { return nullptr; }
 wxMBConv* Database::getCharsetConverter() const { return nullptr; }
 wxArrayString Database::loadIdentifiers(const wxString&, ProgressIndicator*) { return wxArrayString(); }
 int Database::getSqlDialect() const { return 3; }
-MetadataItem* Database::findByNameAndType(NodeType, const wxString&) { return nullptr; }
+MetadataItem* Database::findByNameAndType(NodeType nt, const wxString& name)
+{
+    if (nt == ntPackage && packagesM)
+        return packagesM->findByName(name).get();
+    if (nt == ntSysPackage && sysPackagesM)
+        return sysPackagesM->findByName(name).get();
+    if (nt == ntProcedure && proceduresM)
+        return proceduresM->findByName(name).get();
+    if (nt == ntTable && tablesM)
+        return tablesM->findByName(name).get();
+    return nullptr;
+}
+
+MetadataItem* Database::findByName(const wxString& name)
+{
+    for (int n = (int)ntTable; n < (int)ntLastType; n++)
+    {
+        MetadataItem* m = findByNameAndType((NodeType)n, name);
+        if (m)
+            return m;
+    }
+
+    bool inQuotes = false;
+    size_t dotPos = wxString::npos;
+    for (size_t i = 0; i < name.length(); ++i)
+    {
+        if (name[i] == '"')
+            inQuotes = !inQuotes;
+        else if (name[i] == '.' && !inQuotes)
+        {
+            dotPos = i;
+            break;
+        }
+    }
+    if (dotPos != wxString::npos && dotPos > 0 && dotPos + 1 < name.length())
+    {
+        Identifier pkgId;
+        pkgId.setFromSql(name.Left(dotPos).Strip(wxString::both));
+        Identifier memberId;
+        memberId.setFromSql(name.Mid(dotPos + 1).Strip(wxString::both));
+
+        Package* pkg = dynamic_cast<Package*>(
+            findByNameAndType(ntPackage, pkgId.get()));
+        if (!pkg)
+        {
+            pkg = dynamic_cast<Package*>(
+                findByNameAndType(ntSysPackage, pkgId.get()));
+        }
+        if (pkg)
+        {
+            if (pkg->getMethodCount() == 0)
+                pkg->ensureChildrenLoaded();
+            if (FunctionSQLPtr fn = pkg->findFunctionSQL(memberId.get()))
+                return fn.get();
+            if (ProcedurePtr pr = pkg->findProcedure(memberId.get()))
+                return pr.get();
+        }
+    }
+    return nullptr;
+}
+
+PackagesPtr Database::getPackages()
+{
+    if (!packagesM)
+        packagesM.reset(new Packages(getDatabase()));
+    return packagesM;
+}
+
+SysPackagesPtr Database::getSysPackages()
+{
+    if (!sysPackagesM)
+        sysPackagesM.reset(new SysPackages(getDatabase()));
+    return sysPackagesM;
+}
 Relation* Database::findRelation(const Identifier&) { return nullptr; }
 CharacterSetPtr Database::getCharsetById(int) { return CharacterSetPtr(); }
 DatabasePtr Database::getDatabase() const { return std::const_pointer_cast<Database>(shared_from_this()); }
@@ -436,7 +588,16 @@ wxString Column::getSource(bool) { return ""; }
 void Column::acceptVisitor(MetadataItemVisitor*) {}
 
 Parameter::Parameter(MetadataItem* parent, const wxString& name)
-    : ColumnBase(ntParameter, parent, name) {}
+    : ColumnBase(ntParameter, parent, name), outputParameterM(false), parameterMechanismM(-1) {}
+void Parameter::initialize(const wxString&, int parameterType, int mechanism,
+    bool, const wxString&, bool, bool, wxString& relation, wxString& field)
+{
+    outputParameterM = (parameterType == 1);
+    parameterMechanismM = mechanism;
+    relationM = relation;
+    fieldM = field;
+}
+bool Parameter::isOutputParameter() const { return outputParameterM; }
 const wxString Parameter::getTypeName() const { return ""; }
 wxString Parameter::getTypeOf(bool) { return ""; }
 bool Parameter::isTypeOf() { return false; }

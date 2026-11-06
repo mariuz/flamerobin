@@ -33,6 +33,8 @@
 #include "config/Config.h"
 #include "metadata/column.h"
 #include "metadata/database.h"
+#include "metadata/function.h"
+#include "metadata/package.h"
 #include "metadata/parameter.h"
 #include "metadata/procedure.h"
 #include "metadata/relation.h"
@@ -82,6 +84,57 @@ wxString IncompleteStatement::getObjectColumns(const wxString& table,
 
 typedef std::pair<wxString, wxString> IdAlias;
 typedef std::multimap<wxString, wxString> IdAliasMap;
+
+namespace
+{
+Procedure* findPackageProcedure(Database* db, const wxString& qualifiedName)
+{
+    if (!db)
+        return 0;
+
+    bool inQuotes = false;
+    size_t dotPos = wxString::npos;
+    for (size_t i = 0; i < qualifiedName.length(); ++i)
+    {
+        if (qualifiedName[i] == '"')
+            inQuotes = !inQuotes;
+        else if (qualifiedName[i] == '.' && !inQuotes)
+        {
+            dotPos = i;
+            break;
+        }
+    }
+    if (dotPos == wxString::npos || dotPos == 0
+        || dotPos + 1 >= qualifiedName.length())
+    {
+        return 0;
+    }
+
+    Identifier pkgId;
+    pkgId.setFromSql(qualifiedName.Left(dotPos).Strip(wxString::both));
+    Identifier procId;
+    procId.setFromSql(qualifiedName.Mid(dotPos + 1).Strip(wxString::both));
+
+    Package* pkg = dynamic_cast<Package*>(
+        db->findByNameAndType(ntPackage, pkgId.get()));
+    if (!pkg)
+    {
+        pkg = dynamic_cast<Package*>(
+            db->findByNameAndType(ntSysPackage, pkgId.get()));
+    }
+    if (!pkg)
+        return 0;
+
+    if (pkg->getMethodCount() == 0)
+    {
+        if (config().get("autoCompleteLoadColumns", true))
+            pkg->ensureChildrenLoaded();
+        else
+            return 0;
+    }
+    return pkg->findProcedure(procId.get()).get();
+}
+} // anonymous namespace
 
 template <class T>
 T* IncompleteStatement::findObject(IdAliasMap& aliases, const wxString& alias,
@@ -273,8 +326,21 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
                 {
                     Identifier id;
                     id.setFromSql(tokenizer.getCurrentTokenString());
+                    wxString targetName = id.get();
+                    wxString defaultAlias = id.get();
                     wxString alias;
                     tokenizer.jumpToken(true);
+                    if (tokenizer.getCurrentToken() == tkUNKNOWN
+                        && tokenizer.getCurrentTokenString().StartsWith(".")
+                        && tokenizer.getCurrentTokenString().length() > 1)
+                    {
+                        Identifier idMember;
+                        idMember.setFromSql(
+                            tokenizer.getCurrentTokenString().Mid(1));
+                        targetName = id.get() + "." + idMember.get();
+                        defaultAlias = idMember.get();
+                        tokenizer.jumpToken(true);
+                    }
                     if (tkIDENTIFIER == tokenizer.getCurrentToken() || tokenizer.isKeywordToken())
                     {   // aliases can also be quoted, and case insensitive
                         Identifier ida;
@@ -282,9 +348,13 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
                         alias = ida.get();
                     }
                     else
-                        alias = id.get();
+                    {
+                        alias = defaultAlias;
+                        if (targetName != defaultAlias)
+                            aliases.insert(IdAlias(targetName, targetName));
+                    }
                     //wxMessageBox(id.get()+" ")+alias);
-                    aliases.insert(IdAlias(alias, id.get()));
+                    aliases.insert(IdAlias(alias, targetName));
                     tokenizer.jumpToken(false);
                     // allow for SELECT ... FROM TBL_FOO f, TBL_BAR b
                     if (tkCOMMA != tokenizer.getCurrentToken())
@@ -320,6 +390,8 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
                 else
                 {
                     Procedure* proc = dynamic_cast<Procedure*>(databaseM->findByNameAndType(ntProcedure, it->second));
+                    if (!proc)
+                        proc = findPackageProcedure(databaseM, it->second);
                     if (proc)
                     {
                         if (proc->begin() == proc->end())
@@ -349,6 +421,8 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
             r = findObject<Relation>(aliases, objectAlias, ntView);
         if (!r)
             r = findObject<Relation>(aliases, objectAlias, ntSysTable);
+        if (!r)
+            r = findObject<Relation>(aliases, objectAlias, ntGTT);
     }
     std::list<wxString> cols;
     if (r)
@@ -366,24 +440,64 @@ wxString IncompleteStatement::getColumnsForObject(const wxString& sql,
             cols.push_back((*c)->getQuotedName());
         }
     }
-    else    // find STORED PROCEDURE in list of ALIASES
+    else    // find STORED PROCEDURE or PACKAGE in list of ALIASES / database
     {
         Procedure* p = findObject<Procedure>(aliases, objectAlias,
             ntProcedure);
-        if (!p) // give up, we couldn't match anything
-            return wxEmptyString;
-        if (p->begin() == p->end())
+        if (!p)
         {
-            if (config().get("autoCompleteLoadColumns", true))
-                p->ensureChildrenLoaded();
-            else
-                return wxEmptyString;
+            for (IdAliasMap::iterator i = aliases.lower_bound(objectAlias);
+                i != aliases.upper_bound(objectAlias); ++i)
+            {
+                p = findPackageProcedure(databaseM, (*i).second);
+                if (p)
+                    break;
+            }
         }
-        for (ParameterPtrs::const_iterator c = p->begin();
-            c != p->end(); ++c)
+        if (!p)
+            p = findPackageProcedure(databaseM, objectSqlAlias);
+
+        if (p)
         {
-            if ((*c)->isOutputParameter())
-                cols.push_back((*c)->getQuotedName());
+            if (p->begin() == p->end())
+            {
+                if (config().get("autoCompleteLoadColumns", true))
+                    p->ensureChildrenLoaded();
+                else
+                    return wxEmptyString;
+            }
+            for (ParameterPtrs::const_iterator c = p->begin();
+                c != p->end(); ++c)
+            {
+                if ((*c)->isOutputParameter())
+                    cols.push_back((*c)->getQuotedName());
+            }
+        }
+        else
+        {
+            Package* pkg = findObject<Package>(aliases, objectAlias, ntPackage);
+            if (!pkg)
+            {
+                pkg = findObject<Package>(
+                    aliases, objectAlias, ntSysPackage);
+            }
+            if (!pkg) // give up, we couldn't match anything
+                return wxEmptyString;
+            if (pkg->getMethodCount() == 0)
+            {
+                if (config().get("autoCompleteLoadColumns", true))
+                    pkg->ensureChildrenLoaded();
+                else
+                    return wxEmptyString;
+            }
+            std::vector<MetadataItem*> children;
+            pkg->getChildren(children);
+            for (std::vector<MetadataItem*>::const_iterator it = children.begin();
+                it != children.end(); ++it)
+            {
+                if (*it)
+                    cols.push_back((*it)->getIdentifier().getQuoted());
+            }
         }
     }
     if (sortColums)

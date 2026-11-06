@@ -220,6 +220,14 @@ size_t Package::getMethodCount() const
     return functionsM.size() + proceduresM.size();
 }
 
+void Package::setMethods(const FunctionSQLPtrs& functions,
+    const ProcedurePtrs& procedures)
+{
+    functionsM = functions;
+    proceduresM = procedures;
+    setChildrenLoaded(true);
+}
+
 wxString Package::getOwner()
 {
     DatabasePtr db = getDatabase();

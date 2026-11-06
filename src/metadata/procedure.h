@@ -54,6 +54,7 @@ public:
 
     size_t getParamCount() const;
     ParameterPtr findParameter(const wxString& name) const;
+    void setParameters(const ParameterPtrs& parameters);
 
     wxString getOwner();
     wxString getSource();

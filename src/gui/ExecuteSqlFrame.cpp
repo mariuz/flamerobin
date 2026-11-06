@@ -1458,19 +1458,30 @@ void ExecuteSqlFrame::OnSqlEditCharAdded(wxStyledTextEvent& event)
     {
         if (!isExecutingM && !inParseStatementsM && config().get("SQLEditorCalltips", true))
         {
+            styled_text_ctrl_sql->setChars(true);
             int start = styled_text_ctrl_sql->WordStartPosition(pos - 2, true);
+            int calltipStart = start;
+            if (start > 1 && styled_text_ctrl_sql->GetCharAt(start - 1) == '.')
+            {
+                int pkgStart = styled_text_ctrl_sql->WordStartPosition(start - 2, true);
+                if (pkgStart != -1 && pkgStart < start - 1)
+                    start = pkgStart;
+            }
+            styled_text_ctrl_sql->setChars(false);
             if (start != -1 && start != pos - 2)
             {
-                wxString word = styled_text_ctrl_sql->GetTextRange(start, pos - 1).Upper();
+                wxString word = styled_text_ctrl_sql->GetTextRange(start, pos - 1);
                 wxString calltip;
                 MetadataItem* item = databaseM->findByName(word);
+                if (!item)
+                    item = databaseM->findByName(word.Upper());
                 if (item)
                     calltip = RoutineHelper::getRoutineCalltip(item);
 
                 if (!calltip.empty())
                 {
-                    styled_text_ctrl_sql->CallTipShow(start, calltip);
-                    styled_text_ctrl_sql->CallTipSetHighlight(0, pos - 1 - start);    // start, end
+                    styled_text_ctrl_sql->CallTipShow(calltipStart, calltip);
+                    styled_text_ctrl_sql->CallTipSetHighlight(0, pos - 1 - calltipStart);    // start, end
                 }
             }
         }
@@ -1540,6 +1551,24 @@ void ExecuteSqlFrame::autoCompleteColumns(int pos, int len)
         if (start == -1)
             return;
     }
+    if (start > 1 && styled_text_ctrl_sql->GetCharAt(start - 1) == '.')
+    {
+        int pkgStart = -1;
+        if (start > 2 && styled_text_ctrl_sql->GetCharAt(start - 2) == '"')
+        {
+            pkgStart = start - 3;
+            while (pkgStart > -1 && styled_text_ctrl_sql->GetCharAt(pkgStart) != '"')
+                --pkgStart;
+        }
+        else
+        {
+            styled_text_ctrl_sql->setChars(true);
+            pkgStart = styled_text_ctrl_sql->WordStartPosition(start - 1, true);
+            styled_text_ctrl_sql->setChars(false);
+        }
+        if (pkgStart != -1 && pkgStart < start - 1)
+            start = pkgStart;
+    }
     wxString table = styled_text_ctrl_sql->GetTextRange(start, pos-1);
     IncompleteStatement is(databaseM, styled_text_ctrl_sql->GetText());
     wxString columns = is.getObjectColumns(table, pos, len>0 || config().get("autoCompleteLoadColumnsSort", false));//When the user are typing something, you need to sort de result, else intelisense won't work properly
@@ -1568,7 +1597,6 @@ void ExecuteSqlFrame::autoComplete(bool force)
     int start = styled_text_ctrl_sql->WordStartPosition(pos, true);
     if (start > 1 && styled_text_ctrl_sql->GetCharAt(start - 1) == '.')
     {
-// TODO: Autocomplete function/procedure for a package
         autoCompleteColumns(start, pos-start);
         return;
     }

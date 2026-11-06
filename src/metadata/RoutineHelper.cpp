@@ -75,10 +75,17 @@ wxString RoutineHelper::getRoutineCalltip(MetadataItem* item)
     {
         f->ensureChildrenLoaded();
         wxString inParams;
+        wxString outType;
         for (auto it = f->begin(); it != f->end(); ++it)
         {
             Parameter* param = (*it).get();
-            if (!param || param->isOutputParameter()) continue;
+            if (!param) continue;
+            if (param->isOutputParameter())
+            {
+                if (outType.IsEmpty())
+                    outType = param->getDatatype();
+                continue;
+            }
 
             if (!inParams.IsEmpty()) inParams << ", ";
             inParams << param->getName_() << " " << param->getDatatype();
@@ -87,7 +94,9 @@ wxString RoutineHelper::getRoutineCalltip(MetadataItem* item)
                 inParams << " DEFAULT " << defVal;
         }
 
-        return f->getName_() + "(" + inParams + ") RETURNS FUNCTION";
+        if (outType.IsEmpty())
+            outType = "FUNCTION";
+        return f->getName_() + "(" + inParams + ") RETURNS " + outType;
     }
 
     Package* pkg = dynamic_cast<Package*>(item);

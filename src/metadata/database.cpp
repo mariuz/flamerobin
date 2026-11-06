@@ -597,6 +597,44 @@ MetadataItem* Database::findByName(const wxString& name)
         if (m)
             return m;
     }
+
+    // Resolve qualified PACKAGE.PROCEDURE or PACKAGE.FUNCTION names
+    bool inQuotes = false;
+    size_t dotPos = wxString::npos;
+    for (size_t i = 0; i < name.length(); ++i)
+    {
+        if (name[i] == '"')
+            inQuotes = !inQuotes;
+        else if (name[i] == '.' && !inQuotes)
+        {
+            dotPos = i;
+            break;
+        }
+    }
+    if (dotPos != wxString::npos && dotPos > 0 && dotPos + 1 < name.length())
+    {
+        Identifier pkgId;
+        pkgId.setFromSql(name.Left(dotPos).Strip(wxString::both));
+        Identifier memberId;
+        memberId.setFromSql(name.Mid(dotPos + 1).Strip(wxString::both));
+
+        Package* pkg = dynamic_cast<Package*>(
+            findByNameAndType(ntPackage, pkgId.get()));
+        if (!pkg)
+        {
+            pkg = dynamic_cast<Package*>(
+                findByNameAndType(ntSysPackage, pkgId.get()));
+        }
+        if (pkg)
+        {
+            if (pkg->getMethodCount() == 0)
+                pkg->ensureChildrenLoaded();
+            if (FunctionSQLPtr fn = pkg->findFunctionSQL(memberId.get()))
+                return fn.get();
+            if (ProcedurePtr pr = pkg->findProcedure(memberId.get()))
+                return pr.get();
+        }
+    }
     return 0;
 }
 

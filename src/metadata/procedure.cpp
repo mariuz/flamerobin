@@ -214,6 +214,12 @@ size_t Procedure::getParamCount() const
     return parametersM.size();
 }
 
+void Procedure::setParameters(const ParameterPtrs& parameters)
+{
+    parametersM = parameters;
+    setChildrenLoaded(true);
+}
+
 wxString Procedure::getOwner()
 {
     DatabasePtr db = getDatabase();
