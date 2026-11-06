@@ -141,6 +141,8 @@ private:
     bool closeRequestedM = false;
     SqlWorkerResult runOnWorkerThread(const std::function<void()>& task);
     void cancelExecution();
+    bool abortRequestedM = false;
+    void recoverAfterCancel();
     bool autoCommitM;
     bool inTransactionM;
     fr::ITransactionPtr transactionM;

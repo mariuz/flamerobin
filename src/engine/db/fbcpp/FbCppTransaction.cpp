@@ -108,6 +108,9 @@ void FbCppTransaction::start()
         options.setWaitMode(fbcpp::TransactionWaitMode::NO_WAIT);
 
     wxLogDebug("FbCppTransaction::start() initializing fbcpp::Transaction.");
+    // Always begin with a fresh handle: a previous commit/rollback (possibly
+    // failed after fb_cancel_abort) may have left a stale valid handle behind.
+    transactionM = std::make_unique<fbcpp::TransactionExt>(attachmentM.getClient());
     transactionM->start(attachmentM, options);
     startedM = true;
     wxLogDebug("FbCppTransaction::start() finished.");
@@ -127,6 +130,9 @@ void FbCppTransaction::commit()
         catch (...)
         {
             startedM = false;
+            // the handle may be dead (e.g. attachment aborted): drop it
+            try { transactionM = std::make_unique<fbcpp::TransactionExt>(attachmentM.getClient()); }
+            catch (...) {}
             throw;
         }
     }
@@ -144,6 +150,9 @@ void FbCppTransaction::rollback()
         catch (...)
         {
             startedM = false;
+            // the handle may be dead (e.g. attachment aborted): drop it
+            try { transactionM = std::make_unique<fbcpp::TransactionExt>(attachmentM.getClient()); }
+            catch (...) {}
             throw;
         }
     }

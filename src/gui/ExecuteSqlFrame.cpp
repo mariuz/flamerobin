@@ -3441,8 +3441,7 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
         {
             ScrollAtEnd sae(styled_text_ctrl_stats);
             log(_("Script execution cancelled by user."), ttError);
-            if (isTransactionStarted())
-                rollbackTransaction();
+            recoverAfterCancel();
             return false;
         }
 
@@ -3721,6 +3720,7 @@ void ExecuteSqlFrame::cancelExecution()
             wxYES_NO | wxNO_DEFAULT | wxICON_WARNING, this);
         if (res == wxYES)
         {
+            abortRequestedM = true;
             statusbar_1->SetStatusText(_("Aborting connection..."), 3);
             if (button_status_cancel)
                 button_status_cancel->Enable(false);
@@ -3769,13 +3769,49 @@ void ExecuteSqlFrame::cancelExecution()
     }
 }
 
+void ExecuteSqlFrame::recoverAfterCancel()
+{
+    statementM = nullptr;
+    bool needReconnect = abortRequestedM;
+    if (isTransactionStarted())
+    {
+        if (!rollbackTransaction())
+            needReconnect = true;
+    }
+    transactionM = nullptr;
+    statementM = nullptr;
+    inTransaction(false);
+    executedStatementsM.clear();
+    abortRequestedM = false;
+
+    if (needReconnect && databaseM && databaseM->getDALDatabase())
+    {
+        // Re-establish the attachment at DAL level only, so that other open
+        // editors are not closed by a Database::setDisconnected() notification.
+        try
+        {
+            try { databaseM->getDALDatabase()->disconnect(); } catch (...) {}
+            databaseM->getDALDatabase()->connect();
+            log(_("Statement cancelled by user - connection re-established."));
+        }
+        catch (const std::exception& e)
+        {
+            log(wxString::Format(_("Could not re-establish connection: %s"),
+                wxString::FromUTF8(e.what())), ttError);
+        }
+    }
+}
+
 bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     bool prepareOnly, bool fetchAll)
 {
     if (isExecutingM)
         return false;
     if (!inParseStatementsM)
+    {
         cancelExecutionM.store(false);
+        abortRequestedM = false;
+    }
     else if (cancelExecutionM.load())
         return false;
 
@@ -3871,18 +3907,6 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         {
             log(_("Starting transaction..."));
 
-            if (transactionM != nullptr && !isTransactionStarted())
-            {
-                try
-                {
-                    transactionM->start();
-                }
-                catch (...)
-                {
-                    transactionM = nullptr;
-                }
-            }
-
             if (transactionM == nullptr)
                 transactionM = databaseM->getDALDatabase()->createTransaction();
 
@@ -3947,9 +3971,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             {
                 splitScreen();
                 log(_("Statement execution cancelled by user."), ttError);
-                statementM = nullptr;
-                if (isTransactionStarted())
-                    rollbackTransaction();
+                recoverAfterCancel();
                 statusbar_1->SetStatusText(_("Execution cancelled"), 3);
                 retval = false;
                 log(wxString::Format(_("Total execution time: %s"),
@@ -4108,9 +4130,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             {
                 splitScreen();
                 log(_("Statement execution cancelled by user."), ttError);
-                statementM = nullptr;
-                if (isTransactionStarted())
-                    rollbackTransaction();
+                recoverAfterCancel();
                 statusbar_1->SetStatusText(_("Execution cancelled"), 3);
                 retval = false;
                 log(wxString::Format(_("Total execution time: %s"),
@@ -4532,12 +4552,20 @@ bool ExecuteSqlFrame::rollbackTransaction()
     {
         splitScreen();
         log(wxString(e.what(), *databaseM->getCharsetConverter()), ttError);
+        transactionM = nullptr;
+        statementM = nullptr;
+        inTransaction(false);
+        executedStatementsM.clear();
         return false;
     }
     catch (...)
     {
         splitScreen();
         log(_("ERROR!\nA non-IBPP C++ runtime exception occurred !"), ttError);
+        transactionM = nullptr;
+        statementM = nullptr;
+        inTransaction(false);
+        executedStatementsM.clear();
         return false;
     }
 
