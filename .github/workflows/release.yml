@@ -505,7 +505,7 @@ jobs:
             flamerobin-portable-*.zip
 
   build-macos:
-    runs-on: macos-14
+    runs-on: macos-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7

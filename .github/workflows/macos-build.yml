@@ -6,6 +6,7 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "**" ]
     tags: [ "v*" ]
@@ -14,7 +15,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: macos-latest
     permissions:
       contents: read
     steps:
