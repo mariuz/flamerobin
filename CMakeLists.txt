@@ -793,6 +793,8 @@ if (ENABLE_VCPKG)
     endif ()
 endif ()
 
+target_precompile_headers(${PROJECT_NAME} PRIVATE <wx/wx.h> <fb-cpp/fb-cpp.h>)
+
 target_link_libraries(${PROJECT_NAME} fb-cpp::fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
 target_compile_definitions(${PROJECT_NAME} PRIVATE FBCPP_VERSION="${FBCPP_VERSION_STR}")
 
