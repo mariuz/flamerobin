@@ -494,8 +494,7 @@ if (WIN32)
 	list(APPEND RESOURCE_LIST
 		res/flamerobin.rc
 	)
-	add_definitions(-DWINVER=0x0a00 -D_WIN32_WINNT=0x0a00 -DWIN32_LEAN_AND_MEAN -DIBPP_WINDOWS)
-	remove_definitions(-DUNICODE -D_UNICODE) # IBPP doesn't like Unicode	
+	add_definitions(-DWINVER=0x0a00 -D_WIN32_WINNT=0x0a00 -DWIN32_LEAN_AND_MEAN)
 
 	if (MSVC)
 		# Visual Studio specific stuff
@@ -603,7 +602,6 @@ if (UNIX AND NOT APPLE)
 	list(APPEND SOURCE_LIST
 		${SOURCEDIR}/gui/gtk/StyleGuideGTK.cpp
 	)
-	add_definitions(-DIBPP_LINUX)
 	add_definitions(-DFR_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}")
 
 	find_package(firebird REQUIRED)
@@ -649,7 +647,6 @@ if(APPLE)
 	# TODO: Untested, if any Mac devs want to check, please get in touch
 	message(WARNING "MacOS build is untested.\n"
 	                "Please get in contact to tell us of your results.")
-	add_definitions(-DIBPP_DARWIN)
         set(FR_FIREBIRD_HINT_DIRS
                 "/Library/Frameworks/Firebird.framework/Resources/lib"
                 "/Library/Frameworks/Firebird.framework/Libraries"
