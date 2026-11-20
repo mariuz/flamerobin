@@ -499,6 +499,7 @@ if (WIN32)
 
 	if (MSVC)
 		# Visual Studio specific stuff
+    add_compile_options(/MP)
 	endif (MSVC)
 
 	# Create the revision include file
