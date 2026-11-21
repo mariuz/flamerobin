@@ -72,7 +72,7 @@ void Table::loadExternalCSVOptions()
     externalCSVOptionsM.clear();
 
     DatabasePtr db = getDatabase();
-    if (!db->getInfo().getODSVersionIsHigherOrEqualTo(14, 1))
+    if (!db->getODSVersion().isFB61OrHigher())
     {
         externalCSVOptionsLoadedM = true;
         return;
@@ -427,7 +427,7 @@ void Table::loadIndices()
         " i.rdb$index_type, i.rdb$statistics, "
         " s.rdb$field_name, rc.rdb$constraint_name, i.rdb$expression_source, "
     );
-    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(13, 1) ? " i.rdb$condition_source " : " null ";
+    sql += db->getODSVersion().isFB50OrHigher() ? " i.rdb$condition_source " : " null ";
     sql +=
         " from rdb$indices i "
         " left join rdb$index_segments s on i.rdb$index_name = s.rdb$index_name "
@@ -600,7 +600,7 @@ void Tables::load(ProgressIndicator* progressIndicator)
     
     wxString stmt = "select rdb$relation_name from rdb$relations "
         "where  (rdb$system_flag = 0 or rdb$system_flag is null) ";
-    if (getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
+    if (getDatabase()->getODSVersion().isFB21OrHigher())
         stmt += " and  (rdb$relation_type in (0, 2)  or rdb$relation_type is null)";
     stmt += " and rdb$view_source is null order by 1";
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
@@ -629,7 +629,7 @@ void GTTables::acceptVisitor(MetadataItemVisitor* visitor)
 
 void GTTables::load(ProgressIndicator* progressIndicator)
 {
-    if (getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) {
+    if (getDatabase()->getODSVersion().isFB21OrHigher()) {
         wxString stmt = "select rdb$relation_name from rdb$relations"
             " where rdb$relation_type in (4,5) "
             " and rdb$view_source is null order by 1";

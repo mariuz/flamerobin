@@ -108,7 +108,7 @@ SessionMonitorFrame::SessionMonitorFrame(wxWindow* parent, DatabasePtr db)
 
     editor_sql_preview = new SqlEditor(panelStatements, wxID_ANY);
     if (databaseM)
-        editor_sql_preview->setKeywords(databaseM->getODSMajor(), databaseM->getODSMinor());
+        editor_sql_preview->setKeywords(databaseM->getODSVersion().Major(), databaseM->getODSVersion().Minor());
     button_cancel_statement = new wxButton(panelStatements, ID_button_cancel_statement, _("Cancel Query Statement"));
 
     sizerStmt->Add(list_statements, 1, wxEXPAND | wxALL, 4);
@@ -244,7 +244,7 @@ void SessionMonitorFrame::loadMonitoringData()
         try
         {
             auto st = dalDb->createStatement(tr);
-            bool isFb4 = databaseM->getInfo().isFB40OrHigher();
+            bool isFb4 = databaseM->getODSVersion().isFB40OrHigher();
             if (isFb4)
             {
                 st->prepare("SELECT MON$ATTACHMENT_ID, MON$STATE, MON$USER, MON$ROLE, MON$REMOTE_ADDRESS, MON$REMOTE_PROCESS, MON$TIMESTAMP, MON$WIRE_CRYPT "

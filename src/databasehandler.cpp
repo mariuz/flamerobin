@@ -162,7 +162,7 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
 
             try
             {
-                d->loadInfo();
+                d->reloadInfo();
             }
             catch (...)
             {
@@ -238,7 +238,7 @@ bool DatabaseInfoHandler::handleURI(URI& uri)
 
         try
         {
-            d->loadInfo();
+            d->reloadInfo();
         }
         catch (...)
         {

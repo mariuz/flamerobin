@@ -229,8 +229,8 @@ void Trigger::loadProperties()
 	std::string sql("select t.rdb$relation_name, t.rdb$trigger_sequence, "
 		"t.rdb$trigger_inactive, t.rdb$trigger_type, rdb$trigger_source, "
 	);
-    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " rdb$entrypoint, rdb$engine_name,  ": " null, null, ";
-    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0) ? " rdb$sql_security " : " null ";
+    sql += db->getODSVersion().isFB30OrHigher() ? " rdb$entrypoint, rdb$engine_name,  ": " null, null, ";
+    sql += db->getODSVersion().isFB40OrHigher() ? " rdb$sql_security " : " null ";
 
     sql += "from rdb$triggers t where rdb$trigger_name = ? ";
 
@@ -419,7 +419,7 @@ void DMLTriggers::load(ProgressIndicator* progressIndicator)
     wxString stmt = "select rdb$trigger_name from rdb$triggers"
         " where (rdb$system_flag = 0 or rdb$system_flag is null) "
         " and rdb$relation_name is not null  ";
-    if (getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+    if (getDatabase()->getODSVersion().isFB30OrHigher())
         stmt += "and BIN_AND(rdb$trigger_type,"+ std::to_string(TRIGGER_TYPE_MASK)+") = "+ std::to_string(TRIGGER_TYPE_DML);
     stmt += " order by 1";
 
@@ -428,7 +428,7 @@ void DMLTriggers::load(ProgressIndicator* progressIndicator)
     stmt = "select rdb$trigger_name from rdb$triggers"
         " where (rdb$system_flag = 0 or rdb$system_flag is null)  and rdb$trigger_inactive = 1"
         " and rdb$relation_name is not null  ";
-    if (getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+    if (getDatabase()->getODSVersion().isFB30OrHigher())
         stmt += "and BIN_AND(rdb$trigger_type," + std::to_string(TRIGGER_TYPE_MASK) + ") = " + std::to_string(TRIGGER_TYPE_DML);
     stmt += " order by 1";
 

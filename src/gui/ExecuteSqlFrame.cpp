@@ -694,7 +694,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     notebook_pane_plan->SetSizer(sizer_plan);
     notebook_1->AddPage(notebook_pane_plan, _("Query Plan"));
 
-    if ((databaseM->getODSMajor() > 13) || (databaseM->getODSMajor() == 13 && databaseM->getODSMinor() >= 1))
+    if (databaseM->getODSVersion().isFB50OrHigher())
     {
         notebook_pane_3 = new wxPanel(notebook_1, -1);
         wxBoxSizer* sizer_profiler = new wxBoxSizer(wxVERTICAL);
@@ -2063,7 +2063,7 @@ void ExecuteSqlFrame::OnMenuExplain(wxCommandEvent& WXUNUSED(event))
 {
     if (isExecutingM || inParseStatementsM)
         return;
-    if (databaseM && !databaseM->getInfo().getODSVersionIsHigherOrEqualTo(14))
+    if (databaseM && !databaseM->getODSVersion().isFB60OrHigher())
     {
         wxMessageBox(_("The EXPLAIN statement is only supported by Firebird 6.0 and later (ODS 14+)."),
             _("Not Supported"), wxOK | wxICON_INFORMATION, this);
@@ -2540,8 +2540,8 @@ void ExecuteSqlFrame::OnMenuFormatSql(wxCommandEvent& WXUNUSED(event))
     int odsMinor = -1;
     if (databaseM && databaseM->isConnected())
     {
-        odsMajor = databaseM->getODSMajor();
-        odsMinor = databaseM->getODSMinor();
+        odsMajor = databaseM->getODSVersion().Major();
+        odsMinor = databaseM->getODSVersion().Minor();
     }
 
     styled_text_ctrl_sql->BeginUndoAction();
@@ -4065,7 +4065,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         int64_t profileSessionId = 0;
         bool profilingStarted = false;
         bool profilerEnabled = config().get("SQLEditorEnableProfiler", false);
-        if (profilerEnabled && showProfilerM && ((databaseM->getODSMajor() > 13) || (databaseM->getODSMajor() == 13 && databaseM->getODSMinor() >= 1)))
+        if (profilerEnabled && showProfilerM && databaseM->getODSVersion().isFB50OrHigher())
         {
             // Extra check to see if RDB$PROFILER package is actually available
             if (!profilerCheckedM)
@@ -4855,9 +4855,8 @@ void ExecuteSqlFrame::setKeywords()
     // we can also make ExecuteSqlFrame observer of YTables/YViews/... objects
     // so it can reload this list if something changes
 
-    const DatabaseInfo& dbInfo(databaseM->getInfo());
-    int odsMajor = dbInfo.getODS();
-    int odsMinor = dbInfo.getODSMinor();
+    int odsMajor = databaseM->getODSVersion().Major();
+    int odsMinor = databaseM->getODSVersion().Minor();
 
     wxArrayString as(SqlTokenizer::getKeywords(SqlTokenizer::kwDefaultCase,
         odsMajor, odsMinor));

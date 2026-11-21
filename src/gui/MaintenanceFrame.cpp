@@ -143,7 +143,7 @@ void MaintenanceFrame::updateControls()
     checkbox_kill_shadows->Enable(!running);
 
     DatabasePtr db = getDatabase();
-    bool canUpgrade = db && db->getInfo().isFB50OrHigher();
+    bool canUpgrade = db && db->getODSVersion().isFB50OrHigher();
     checkbox_upgrade->Enable(!running && canUpgrade);
 
     spinctrl_parallelworkers->Enable(!running);

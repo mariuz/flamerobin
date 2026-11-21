@@ -244,7 +244,7 @@ void CreateDDLVisitor::visitDatabase(Database& d)
         iterateit<DomainsPtr, Domain>(this, d.getDomains(),
             progressIndicatorM);
 
-        if (d.getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
+        if (d.getODSVersion().isFB30OrHigher()) {
             preSqlM << "/********************* FUNCTIONS ***********************/\n\n";
             iterateit<FunctionSQLsPtr, FunctionSQL>(this, d.getFunctionSQLs(),
                 progressIndicatorM);
@@ -254,7 +254,7 @@ void CreateDDLVisitor::visitDatabase(Database& d)
         iterateit<ProceduresPtr, Procedure>(this, d.getProcedures(),
             progressIndicatorM);
 
-        if (d.getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
+        if (d.getODSVersion().isFB30OrHigher()) {
             preSqlM << "/******************* PACKAGES ******************/\n\n";
             iterateit<PackagesPtr, Package>(this, d.getPackages(),
                 progressIndicatorM);
@@ -262,7 +262,7 @@ void CreateDDLVisitor::visitDatabase(Database& d)
       
         preSqlM << "/******************** TABLES **********************/\n\n";
         iterateit<TablesPtr, Table>(this, d.getTables(), progressIndicatorM);
-        if (d.getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) {
+        if (d.getODSVersion().isFB21OrHigher()) {
             iterateit<GTTablesPtr, GTTable>(this, d.getGTTables(), progressIndicatorM);
         }
 
@@ -279,12 +279,12 @@ void CreateDDLVisitor::visitDatabase(Database& d)
         iterateit<DMLTriggersPtr, DMLTrigger>(this, d.getDMLTriggers(),
             progressIndicatorM);
 
-        if (d.getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) {
+        if (d.getODSVersion().isFB21OrHigher()) {
             preSqlM << "/******************** DB TRIGGERS ********************/\n\n";
             iterateit<DBTriggersPtr, DBTrigger>(this, d.getDBTriggers(),
                 progressIndicatorM);
         }
-        if (d.getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
+        if (d.getODSVersion().isFB30OrHigher()) {
             preSqlM << "/******************** DDL TRIGGERS ********************/\n\n";
             iterateit<DDLTriggersPtr, DDLTrigger>(this, d.getDDLTriggers(),
                 progressIndicatorM);

@@ -46,7 +46,7 @@ void HtmlHeaderMetadataItemVisitor::visitDatabase(Database& database)
     emptyTitles();
     addSummary();
     // database triggers have been introduced in Firebird 2.1 (ODS 11.1)
-    if (database.getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
+    if (database.getODSVersion().isFB21OrHigher())
         addTriggers();
     addDDL();
 }

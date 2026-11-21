@@ -250,7 +250,8 @@ void SaveDescriptionVisitor::saveDescription(MetadataItem* object,
     tr1->start();
 
     fr::IStatementPtr st1 = db->createStatement(tr1);
-    if (d->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) {
+    if (d->getODSVersion().isFB21OrHigher())
+    {
         descriptionM.Replace("'", "''");
         wxString s;
         if (parent)
@@ -260,7 +261,8 @@ void SaveDescriptionVisitor::saveDescription(MetadataItem* object,
 
         st1->prepare(wx2std(s, csConverter));
     }
-    else {
+    else
+    {
         st1->prepare(statement);
 
         if (!descriptionM.empty())
@@ -284,7 +286,7 @@ void SaveDescriptionVisitor::visitCharacterSet(CharacterSet& /*charterSet*/)
 
 void SaveDescriptionVisitor::visitCollation(Collation& collation)
 {
-    if (collation.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+    if (collation.getDatabase()->getODSVersion().isFB21OrHigher()) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
         saveDescription(&collation, "comment on exception %s is '%s'");
         return;
     }
@@ -296,7 +298,7 @@ void SaveDescriptionVisitor::visitCollation(Collation& collation)
 
 void SaveDescriptionVisitor::visitColumn(Column& column)
 {
-	if (column.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11,1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+	if (column.getDatabase()->getODSVersion().isFB21OrHigher()) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
 		saveDescription(&column, column.getParent(), "comment on column %s.%s is '%s'");
 		return;
 	}
@@ -308,7 +310,7 @@ void SaveDescriptionVisitor::visitColumn(Column& column)
 
 void SaveDescriptionVisitor::visitDomain(Domain& domain)
 {
-	if (domain.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+	if (domain.getDatabase()->getODSVersion().isFB21OrHigher()) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
 		saveDescription(&domain, "comment on domain %s is '%s'");
 		return;
 	}
@@ -319,7 +321,7 @@ void SaveDescriptionVisitor::visitDomain(Domain& domain)
 
 void SaveDescriptionVisitor::visitException(Exception& exception)
 {
-	if (exception.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+	if (exception.getDatabase()->getODSVersion().isFB21OrHigher()) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
 		saveDescription(&exception, "comment on exception %s is '%s'");
 		return;
 	}
@@ -330,7 +332,7 @@ void SaveDescriptionVisitor::visitException(Exception& exception)
 
 void SaveDescriptionVisitor::visitFunctionSQL(FunctionSQL& function)
 {
-    if (function.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+    if (function.getDatabase()->getODSVersion().isFB21OrHigher()) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
         saveDescription(&function, "comment on function %s is '%s'");
         return;
     }
@@ -341,7 +343,7 @@ void SaveDescriptionVisitor::visitFunctionSQL(FunctionSQL& function)
 
 void SaveDescriptionVisitor::visitUDF(UDF& function)
 {
-	if (function.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+	if (function.getDatabase()->getODSVersion().isFB21OrHigher()) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
 		saveDescription(&function, "comment on function %s is '%s'");
 		return;
 	}
@@ -352,7 +354,7 @@ void SaveDescriptionVisitor::visitUDF(UDF& function)
 
 void SaveDescriptionVisitor::visitGenerator(Generator& generator)
 {
-	if (generator.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+	if (generator.getDatabase()->getODSVersion().isFB21OrHigher()) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
 		saveDescription(&generator, "comment on sequence %s is '%s'");
 		return;
 	}
@@ -363,7 +365,7 @@ void SaveDescriptionVisitor::visitGenerator(Generator& generator)
 
 void SaveDescriptionVisitor::visitIndex(Index& index)
 {
-	if (index.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+	if (index.getDatabase()->getODSVersion().isFB21OrHigher()) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
 		saveDescription(&index, "comment on index %s is '%s'");
 		return;
 	}
@@ -374,7 +376,7 @@ void SaveDescriptionVisitor::visitIndex(Index& index)
 
 void SaveDescriptionVisitor::visitParameter(Parameter& parameter)
 {
-	if (parameter.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+	if (parameter.getDatabase()->getODSVersion().isFB21OrHigher()) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
 		saveDescription(&parameter, parameter.getParent(), "comment on parameter %s.%s is '%s'");
 		return;
 	}
@@ -386,7 +388,7 @@ void SaveDescriptionVisitor::visitParameter(Parameter& parameter)
 
 void SaveDescriptionVisitor::visitProcedure(Procedure& procedure)
 {
-	if (procedure.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+	if (procedure.getDatabase()->getODSVersion().isFB21OrHigher()) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
 		saveDescription(&procedure, "comment on procedure %s is '%s'");
 		return;
 	}
@@ -402,7 +404,7 @@ void SaveDescriptionVisitor::visitPublication(Publication& publication)
 
 void SaveDescriptionVisitor::visitRelation(Relation& relation)
 {
-	if (relation.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+	if (relation.getDatabase()->getODSVersion().isFB21OrHigher()) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
 		if (relation.getRelationType() == 1)
 			saveDescription(&relation, "comment on view %s is '%s'");
 		else
@@ -416,7 +418,7 @@ void SaveDescriptionVisitor::visitRelation(Relation& relation)
 
 void SaveDescriptionVisitor::visitRole(Role& role)
 {
-	if (role.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+	if (role.getDatabase()->getODSVersion().isFB21OrHigher()) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
 		saveDescription(&role, "comment on role %s is '%s'");
 		return;
 	}
@@ -427,7 +429,7 @@ void SaveDescriptionVisitor::visitRole(Role& role)
 
 void SaveDescriptionVisitor::visitTrigger(Trigger& trigger)
 {
-	if (trigger.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(11, 1)) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
+	if (trigger.getDatabase()->getODSVersion().isFB21OrHigher()) { //Its available since FB 2.0, ODS 11.0 but I like to use "new" resources for safety
 		saveDescription(&trigger, "comment on trigger %s is '%s'");
 		return;
 	}

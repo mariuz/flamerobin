@@ -75,7 +75,7 @@ Schemas::Schemas(DatabasePtr database)
 void Schemas::loadChildren()
 {
     DatabasePtr db = getDatabase();
-    if (!db || !db->getInfo().isFB60OrHigher())
+    if (!db || !db->getODSVersion().isFB60OrHigher())
     {
         setChildrenLoaded(true);
         return;
