@@ -1145,6 +1145,23 @@ add_executable(privilege_test
 target_link_libraries(privilege_test ${wxWidgets_LIBRARIES})
 add_test(NAME privilege_test COMMAND privilege_test)
 
+# Regression test for issue #766 (Embedded connection failing in Users::load()
+# when UserManager plugins or SECURITY5.FDB are absent).
+add_executable(users_embedded_load_test
+    ${SOURCEDIR}/metadata/UsersEmbeddedLoadTest.cpp
+    ${SOURCEDIR}/metadata/User.cpp
+    ${SOURCEDIR}/metadata/MetadataItemVisitor.cpp
+    ${SOURCEDIR}/sql/Identifier.cpp
+    ${SOURCEDIR}/sql/SqlTokenizer.cpp
+    ${SOURCEDIR}/core/Observer.cpp
+    ${SOURCEDIR}/core/Subject.cpp
+    ${SOURCEDIR}/core/Visitor.cpp
+    ${SOURCEDIR}/core/ProgressIndicator.cpp
+    ${SOURCEDIR}/core/FRError.cpp
+)
+target_link_libraries(users_embedded_load_test ${wxWidgets_LIBRARIES})
+add_test(NAME users_embedded_load_test COMMAND users_embedded_load_test)
+
 add_executable(data_grid_date_test
     ${SOURCEDIR}/gui/controls/DataGridDateTest.cpp
     ${SOURCEDIR}/gui/controls/DataGridRowBuffer.cpp

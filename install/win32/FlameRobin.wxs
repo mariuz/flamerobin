@@ -27,6 +27,7 @@
         <Directory Id="XmlStylesFolder" Name="xml-styles" />
         <Directory Id="PluginsFolder" Name="plugins" />
         <Directory Id="IntlFolder" Name="intl" />
+        <Directory Id="TzdataFolder" Name="tzdata" />
       </Directory>
     </StandardDirectory>
 
@@ -98,6 +99,9 @@
       <Component Id="firebird_conf" Guid="f6e39c81-8c43-4318-ae31-89e4312ab62c">
         <File Id="firebird.conf" Source="$(var.FirebirdClientDir)\firebird.conf" KeyPath="yes" />
       </Component>
+      <Component Id="firebird_msg" Guid="f6e39c81-8c43-4318-ae31-89e4312ab63c">
+        <File Id="firebird.msg" Source="$(var.FirebirdClientDir)\firebird.msg" KeyPath="yes" />
+      </Component>
       <Files Include="$(var.FirebirdClientDir)\icu*.dll" />
       <Files Include="$(var.FirebirdClientDir)\icu*.dat" />
       <Files Include="$(var.FirebirdClientDir)\msvcp140*.dll" />
@@ -106,6 +110,15 @@
     </ComponentGroup>
 
     <ComponentGroup Id="FirebirdPluginsFiles" Directory="PluginsFolder">
+      <Component Id="engine13_dll" Guid="f6e39c81-8c43-4318-ae31-89e4312ab63d">
+        <File Id="engine13.dll" Source="$(var.FirebirdClientDir)\plugins\engine13.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="chacha_dll" Guid="f6e39c81-8c43-4318-ae31-89e4312ab63e">
+        <File Id="chacha.dll" Source="$(var.FirebirdClientDir)\plugins\chacha.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="default_profiler_dll" Guid="f6e39c81-8c43-4318-ae31-89e4312ab63f">
+        <File Id="default_profiler.dll" Source="$(var.FirebirdClientDir)\plugins\default_profiler.dll" KeyPath="yes" />
+      </Component>
       <Component Id="srp_dll" Guid="f6e39c81-8c43-4318-ae31-89e4312ab62d">
         <File Id="srp.dll" Source="$(var.FirebirdClientDir)\plugins\srp.dll" KeyPath="yes" />
       </Component>
@@ -124,6 +137,10 @@
       <Component Id="fbintl_conf" Guid="f6e39c81-8c43-4318-ae31-89e4312ab63b">
         <File Id="fbintl.conf" Source="$(var.FirebirdClientDir)\intl\fbintl.conf" KeyPath="yes" />
       </Component>
+    </ComponentGroup>
+
+    <ComponentGroup Id="FirebirdTzdataFiles" Directory="TzdataFolder">
+      <Files Include="$(var.FirebirdClientDir)\tzdata\**" />
     </ComponentGroup>
 
     <!-- Firewall Exception Component -->
@@ -188,6 +205,7 @@
       <ComponentGroupRef Id="FirebirdClientFiles" />
       <ComponentGroupRef Id="FirebirdPluginsFiles" />
       <ComponentGroupRef Id="FirebirdIntlFiles" />
+      <ComponentGroupRef Id="FirebirdTzdataFiles" />
       <ComponentGroupRef Id="FirewallComponents" />
       <ComponentGroupRef Id="ShortcutsComponents" />
     </Feature>

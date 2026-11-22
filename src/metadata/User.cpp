@@ -30,6 +30,8 @@
     #include "wx/wx.h"
 #endif
 
+#include <wx/log.h>
+
 #include "core/ProgressIndicator.h"
 #include "core/StringUtils.h"
 #include "engine/MetadataLoader.h"
@@ -231,39 +233,60 @@ void Users::acceptVisitor(MetadataItemVisitor* visitor)
 void Users::load(ProgressIndicator* progressIndicator)
 {
     DatabasePtr db = getDatabase();
-    if (db->getODSVersion().isFB30OrHigher())
+    try
     {
-        MetadataLoader* loader = db->getMetadataLoader();
-        MetadataLoaderTransaction tr(loader);
-        wxMBConv* converter = db->getCharsetConverter();
-
-        std::string stmt = "select sec$user_name, sec$first_name, sec$middle_name, "
-            "sec$last_name, sec$plugin from sec$users order by 1";
-        fr::IStatementPtr& st1 = loader->getStatement(stmt);
-        st1->execute();
-
-        std::vector<UserPtr> users;
-        while (st1->fetch())
+        if (db->getODSVersion().isFB30OrHigher())
         {
-            checkProgressIndicatorCanceled(progressIndicator);
-            wxString name = std2wxIdentifier(st1->getString(0), converter);
-            UserPtr u(new User(db, name));
-            if (!st1->isNull(1))
-                u->setFirstName(std2wxIdentifier(st1->getString(1), converter));
-            if (!st1->isNull(2))
-                u->setMiddleName(std2wxIdentifier(st1->getString(2), converter));
-            if (!st1->isNull(3))
-                u->setLastName(std2wxIdentifier(st1->getString(3), converter));
-            if (!st1->isNull(4))
-                u->setPlugin(std2wxIdentifier(st1->getString(4), converter));
-            users.push_back(u);
+            MetadataLoader* loader = db->getMetadataLoader();
+            MetadataLoaderTransaction tr(loader);
+            wxMBConv* converter = db->getCharsetConverter();
+
+            std::string stmt = "select sec$user_name, sec$first_name, sec$middle_name, "
+                "sec$last_name, sec$plugin from sec$users order by 1";
+            fr::IStatementPtr st1 = loader->createStatement(stmt);
+            st1->execute();
+
+            std::vector<UserPtr> users;
+            while (st1->fetch())
+            {
+                checkProgressIndicatorCanceled(progressIndicator);
+                wxString name = std2wxIdentifier(st1->getString(0), converter);
+                UserPtr u(new User(db, name));
+                if (!st1->isNull(1))
+                    u->setFirstName(std2wxIdentifier(st1->getString(1), converter));
+                if (!st1->isNull(2))
+                    u->setMiddleName(std2wxIdentifier(st1->getString(2), converter));
+                if (!st1->isNull(3))
+                    u->setLastName(std2wxIdentifier(st1->getString(3), converter));
+                if (!st1->isNull(4))
+                    u->setPlugin(std2wxIdentifier(st1->getString(4), converter));
+                users.push_back(u);
+            }
+            setItems(users);
         }
-        setItems(users);
+        else
+        {
+            wxString stmt = "select sec$user_name from sec$users a order by 1 ";
+            setItems(db->loadIdentifiers(stmt, progressIndicator));
+        }
     }
-    else
+    catch (CancelProgressException&)
     {
-        wxString stmt = "select sec$user_name from sec$users a order by 1 ";
-        setItems(db->loadIdentifiers(stmt, progressIndicator));
+        throw;
+    }
+    catch (const std::exception& e)
+    {
+        // Querying SEC$USERS requires UserManager plugins (e.g. Srp) and an
+        // accessible security database (e.g. security5.fdb). Minimal embedded
+        // deployments omit both (issue #766), so fall back to an empty Users
+        // collection rather than aborting Database::connect().
+        wxLogDebug("Users::load() failed: %s", e.what());
+        setItems(std::vector<UserPtr>());
+    }
+    catch (...)
+    {
+        wxLogDebug("Users::load() failed with unknown exception.");
+        setItems(std::vector<UserPtr>());
     }
 }
 

@@ -385,6 +385,40 @@ DBTrigger::DBTrigger(DatabasePtr database, const wxString& name)
 void DBTrigger::acceptVisitor(MetadataItemVisitor*) {}
 
 // --- Database Stubs ---
+void DatabaseODSVersion::load(const fr::DatabaseInfoData& infoData)
+{
+    if (odsMajorM != infoData.ods || odsMinorM != infoData.odsMinor)
+    {
+        odsMajorM = infoData.ods;
+        odsMinorM = infoData.odsMinor;
+        odsFB60OrHigher = checkVersionIsAtLeast(fr::ODSVersion::ODS_FB60_MAJOR, fr::ODSVersion::ODS_FB60_MINOR);
+        odsFB50OrHigher = odsFB60OrHigher
+            || checkVersionIsAtLeast(fr::ODSVersion::ODS_FB50_MAJOR, fr::ODSVersion::ODS_FB50_MINOR);
+        odsFB40OrHigher = odsFB50OrHigher
+            || checkVersionIsAtLeast(fr::ODSVersion::ODS_FB40_MAJOR, fr::ODSVersion::ODS_FB40_MINOR);
+        odsFB30OrHigher = odsFB40OrHigher
+            || checkVersionIsAtLeast(fr::ODSVersion::ODS_FB30_MAJOR, fr::ODSVersion::ODS_FB30_MINOR);
+        odsFB25OrHigher = odsFB30OrHigher
+            || checkVersionIsAtLeast(fr::ODSVersion::ODS_FB25_MAJOR, fr::ODSVersion::ODS_FB25_MINOR);
+        odsFB21OrHigher = odsFB25OrHigher
+            || checkVersionIsAtLeast(fr::ODSVersion::ODS_FB21_MAJOR, fr::ODSVersion::ODS_FB21_MINOR);
+        odsFB20OrHigher = odsFB21OrHigher
+            || checkVersionIsAtLeast(fr::ODSVersion::ODS_FB20_MAJOR, fr::ODSVersion::ODS_FB20_MINOR);
+        odsFB15OrHigher = odsFB20OrHigher
+            || checkVersionIsAtLeast(fr::ODSVersion::ODS_FB15_MAJOR, fr::ODSVersion::ODS_FB15_MINOR);
+    }
+}
+
+bool DatabaseODSVersion::checkVersionIsAtLeast(int major, int minor) const
+{
+    return odsMajorM > major || (odsMajorM == major && odsMinorM >= minor);
+}
+
+const DatabaseODSVersion& Database::getODSVersion() const
+{
+    return databaseODSVersionM;
+}
+
 DatabaseAuthenticationMode::DatabaseAuthenticationMode() {}
 Database::Database() : MetadataItem(ntDatabase, nullptr, "", 0) {}
 Database::~Database() {}

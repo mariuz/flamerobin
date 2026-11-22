@@ -463,10 +463,12 @@ jobs:
           New-Item -ItemType Directory -Path $imagesDir -Force
           Copy-Item -Path "$buildDir\images\*" -Destination "$imagesDir\" -Recurse -Force
           
-          # Copy Firebird client DLLs and config
+          # Copy Firebird client DLLs, message catalog, time zone data and config
           Copy-Item -Path "$fbExtractDir\fbclient.dll" -Destination "$stagingDir\" -Force
           Copy-Item -Path "$fbExtractDir\ib_util.dll" -Destination "$stagingDir\" -Force
           Copy-Item -Path "$fbExtractDir\firebird.conf" -Destination "$stagingDir\" -Force
+          Copy-Item -Path "$fbExtractDir\firebird.msg" -Destination "$stagingDir\" -Force
+          Copy-Item -Path "$fbExtractDir\tzdata" -Destination "$stagingDir\" -Recurse -Force
 
           # Copy ICU files
           Get-ChildItem -Path $fbExtractDir -Filter "icu*.dll" | Copy-Item -Destination "$stagingDir\" -Force
@@ -477,12 +479,19 @@ jobs:
           Get-ChildItem -Path $fbExtractDir -Filter "vcruntime140*.dll" | Copy-Item -Destination "$stagingDir\" -Force
           Get-ChildItem -Path $fbExtractDir -Filter "vcomp140*.dll" | Copy-Item -Destination "$stagingDir\" -Force
           
-          # Plugins directory
+          # Plugins directory (including engine13.dll for embedded mode - issue #766)
           $pluginsDir = Join-Path $stagingDir "plugins"
           New-Item -ItemType Directory -Path $pluginsDir -Force
+          Copy-Item -Path "$fbExtractDir\plugins\engine13.dll" -Destination "$pluginsDir\" -Force
+          Copy-Item -Path "$fbExtractDir\plugins\chacha.dll" -Destination "$pluginsDir\" -Force
+          Copy-Item -Path "$fbExtractDir\plugins\default_profiler.dll" -Destination "$pluginsDir\" -Force
           Copy-Item -Path "$fbExtractDir\plugins\srp.dll" -Destination "$pluginsDir\" -Force
           Copy-Item -Path "$fbExtractDir\plugins\legacy_auth.dll" -Destination "$pluginsDir\" -Force
           Copy-Item -Path "$fbExtractDir\plugins\legacy_usermanager.dll" -Destination "$pluginsDir\" -Force
+          if (-not (Test-Path "$pluginsDir\engine13.dll")) {
+              Write-Error "engine13.dll missing from portable release"
+              exit 1
+          }
           
           # Intl directory
           $intlDir = Join-Path $stagingDir "intl"
