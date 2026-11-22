@@ -231,7 +231,7 @@ void Users::acceptVisitor(MetadataItemVisitor* visitor)
 void Users::load(ProgressIndicator* progressIndicator)
 {
     DatabasePtr db = getDatabase();
-    if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+    if (db->getODSVersion().isFB30OrHigher())
     {
         MetadataLoader* loader = db->getMetadataLoader();
         MetadataLoaderTransaction tr(loader);

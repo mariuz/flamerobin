@@ -56,9 +56,9 @@ void Index::loadProperties()
         " i.rdb$index_type, i.rdb$statistics, "
         " s.rdb$field_name, rc.rdb$constraint_name, i.rdb$expression_source, "
     );
-    sql += db->getInfo().isFB50OrHigher() ? " i.rdb$condition_source " : " null ";
+    sql += db->getODSVersion().isFB50OrHigher() ? " i.rdb$condition_source " : " null ";
     sql += ", i.rdb$relation_name ";
-    sql += db->getInfo().isFB60OrHigher() ? ", i.rdb$tablespace_name " : ", null ";
+    sql += db->getODSVersion().isFB60OrHigher() ? ", i.rdb$tablespace_name " : ", null ";
     sql +=
         " from rdb$indices i "
         " left join rdb$index_segments s on i.rdb$index_name = s.rdb$index_name "

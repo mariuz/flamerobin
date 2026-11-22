@@ -982,11 +982,12 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
             processedText += db->getDatabaseTimezone().name;
         else if (cmdParams[0] == "ods_version")
         {
-            processedText += wxString() << db->getInfo().getODS();
-            if (db->getInfo().getODSMinor())
+            processedText += wxString() << db->getODSVersion().Major();
+            auto odsMinor = db->getODSVersion().Minor();
+            if (odsMinor)
             {
                 processedText += ".";
-                processedText += wxString() << db->getInfo().getODSMinor();
+                processedText += wxString() << odsMinor;
             }
         }
         else if (cmdParams[0] == "crypt_state")
@@ -1055,7 +1056,7 @@ void MetadataTemplateCmdHandler::handleTemplateCmd(TemplateProcessor *tp,
         else if (cmdParams[0] == "show_compiled_statement_cache")
         {
             bool show = config().get("ShowCompiledStatementCache", false)
-                && db->getInfo().getODSVersionIsHigherOrEqualTo(13, 1);
+                && db->getODSVersion().isFB50OrHigher();
             processedText += getBooleanAsString(show);
         }
         else if (cmdParams[0] == "compiled_statement_cache_hits")

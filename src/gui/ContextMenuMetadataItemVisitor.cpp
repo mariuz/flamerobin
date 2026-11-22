@@ -454,7 +454,7 @@ void MainObjectMenuMetadataItemVisitor::visitTable(Table& table)
 void MainObjectMenuMetadataItemVisitor::visitTables(Tables& tables)
 {
     addCreateItem();
-    if (tables.getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(14, 1))
+    if (tables.getDatabase()->getODSVersion().isFB61OrHigher())
     {
         menuM->Append(Cmds::Menu_CreateCSVExternalTable, _("Create new &CSV external table..."));
     }
@@ -746,7 +746,7 @@ void MainObjectMenuMetadataItemVisitor::addPropertiesItem()
 void MainObjectMenuMetadataItemVisitor::addSqlSecurityItem(MetadataItem& item)
 {
     DatabasePtr db = item.getDatabase();
-    if (db && db->getInfo().isFB40OrHigher())
+    if (db && db->getODSVersion().isFB40OrHigher())
     {
         menuM->Append(Cmds::Menu_SetSqlSecurity, _("Set SQL Security..."));
     }

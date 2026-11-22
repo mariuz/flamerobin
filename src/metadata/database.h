@@ -86,9 +86,6 @@ class DatabaseInfo
 {
     friend class Database;
 private:
-    int odsM = 0;
-    int odsMinorM = 0;
-
     int pageSizeM = 0;
     int buffersM = 0;
     int pagesM = 0;
@@ -108,22 +105,8 @@ private:
     bool forcedWritesM = false;
     bool reserveM = false;
 
-    mutable wxLongLong loadTimeMillisM;
-    void load(fr::IDatabasePtr database);
-    void reloadIfNecessary(fr::IDatabasePtr database);
+    void load(const fr::DatabaseInfoData& infoData);
 public:
-    int getODS() const;
-    int getODSMinor() const;
-    bool getODSVersionIsHigherOrEqualTo(int versionMajor) const;
-    bool getODSVersionIsHigherOrEqualTo(int versionMajor, int versionMinor) const;
-
-    bool isFB21OrHigher() const { return getODSVersionIsHigherOrEqualTo(fr::ODSVersion::ODS_FB21_MAJOR, fr::ODSVersion::ODS_FB21_MINOR); }
-    bool isFB25OrHigher() const { return getODSVersionIsHigherOrEqualTo(fr::ODSVersion::ODS_FB25_MAJOR, fr::ODSVersion::ODS_FB25_MINOR); }
-    bool isFB30OrHigher() const { return getODSVersionIsHigherOrEqualTo(fr::ODSVersion::ODS_FB30_MAJOR, fr::ODSVersion::ODS_FB30_MINOR); }
-    bool isFB40OrHigher() const { return getODSVersionIsHigherOrEqualTo(fr::ODSVersion::ODS_FB40_MAJOR, fr::ODSVersion::ODS_FB40_MINOR); }
-    bool isFB50OrHigher() const { return getODSVersionIsHigherOrEqualTo(fr::ODSVersion::ODS_FB50_MAJOR, fr::ODSVersion::ODS_FB50_MINOR); }
-    bool isFB60OrHigher() const { return getODSVersionIsHigherOrEqualTo(fr::ODSVersion::ODS_FB60_MAJOR, fr::ODSVersion::ODS_FB60_MINOR); }
-
     int getPageSize() const;
     int getBuffers() const;
     int getPages() const;
@@ -142,6 +125,39 @@ public:
     bool getForcedWrites() const;
     bool getReserve() const;
     
+};
+
+class DatabaseODSVersion
+{
+    friend class Database;
+private:
+    int odsMajorM = 0;
+    int odsMinorM = 0;
+
+    bool odsFB15OrHigher = false;
+    bool odsFB20OrHigher = false;
+    bool odsFB21OrHigher = false;
+    bool odsFB25OrHigher = false;
+    bool odsFB30OrHigher = false;
+    bool odsFB40OrHigher = false;
+    bool odsFB50OrHigher = false;
+    bool odsFB60OrHigher = false;
+
+    bool checkVersionIsAtLeast(int major, int minor) const;
+    void load(const fr::DatabaseInfoData& infoData);
+public:
+    int Major() const { return odsMajorM; }
+    int Minor() const { return odsMinorM; }
+
+    bool isFB15OrHigher() const { return odsFB15OrHigher; }
+    bool isFB20OrHigher() const { return odsFB20OrHigher; }
+    bool isFB21OrHigher() const { return odsFB21OrHigher; }
+    bool isFB25OrHigher() const { return odsFB25OrHigher; }
+    bool isFB30OrHigher() const { return odsFB30OrHigher; }
+    bool isFB40OrHigher() const { return odsFB40OrHigher; }
+    bool isFB50OrHigher() const { return odsFB50OrHigher; }
+    bool isFB60OrHigher() const { return odsFB60OrHigher; }
+    bool isFB61OrHigher() const { return false; }
 };
 
 class DatabaseAuthenticationMode
@@ -224,6 +240,8 @@ private:
     void createCharsetConverter();
 
     DatabaseInfo databaseInfoM;
+    wxLongLong databaseInfoLoadedM;
+    DatabaseODSVersion databaseODSVersionM;
 
     CharacterSetsPtr characterSetsM;
     CollationsPtr collationsM;
@@ -264,7 +282,8 @@ private:
     void loadRelationCollections(ProgressIndicator* progressIndicator);
     void loadTriggerCollections(ProgressIndicator* progressIndicator);
 
-    void loadDatabaseInfo();
+    void loadDatabaseInfoFromEngine();
+    void loadDatabaseInfoFromRDBDatabase();
 
     void loadDefaultTimezone();
     void loadTimezones();
@@ -376,7 +395,7 @@ public:
     //! gets the database triggers (FB2.1+)
     void getDatabaseTriggers(std::vector<Trigger *>& list);
 
-    bool getIsVolative();
+    bool getIsVolative() const;
     wxString getPath() const;
     wxString getClientLibrary() const;
     int getSqlDialect() const;
@@ -429,9 +448,8 @@ public:
     virtual void loadProperties() override;
 
     const DatabaseInfo& getInfo();
-    void loadInfo();
-    int getODSMajor() const;
-    int getODSMinor() const;
+    const DatabaseODSVersion& getODSVersion() const;
+    void reloadInfo();
 
     void getConnectedUsers(wxArrayString& users) const;
     void getCompiledStatementInfo(std::vector<fr::CompiledStatementInfo>& statements) const;

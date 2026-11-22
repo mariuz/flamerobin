@@ -72,7 +72,8 @@ void Generator::loadProperties()
     st1->execute();
     st1->fetch();
     valueM = st1->getInt64(0);
-    if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
+    if (db->getODSVersion().isFB30OrHigher())
+    {
         std::string sql("select RDB$INITIAL_VALUE, RDB$GENERATOR_INCREMENT from RDB$GENERATORS "
             "where RDB$GENERATOR_NAME = ? "
         );

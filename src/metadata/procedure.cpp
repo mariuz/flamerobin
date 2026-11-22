@@ -78,16 +78,16 @@ void Procedure::loadChildren()
         "select rdb$parameter_name, rdb$field_source, "
         "rdb$parameter_type, "
     );
-    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1) ? "rdb$default_source, rdb$null_flag, rdb$parameter_mechanism,  " : "null, null, -1, ";
-    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(11, 2) ? " rdb$field_name, rdb$relation_name, " : " null, null, ";
+    sql += db->getODSVersion().isFB21OrHigher() ? "rdb$default_source, rdb$null_flag, rdb$parameter_mechanism,  " : "null, null, -1, ";
+    sql += db->getODSVersion().isFB25OrHigher() ? " rdb$field_name, rdb$relation_name, " : " null, null, ";
 	sql += "rdb$description from rdb$procedure_parameters "
 		"where rdb$procedure_name = ? ";
     if (getParent()->getType() == ntDatabase) {
-        sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and rdb$package_name is null " : "";
+        sql += db->getODSVersion().isFB30OrHigher() ? " and rdb$package_name is null " : "";
     }
     else
         if (getParent()->getType() == ntPackage) {
-            sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and rdb$package_name = ? " : "";
+            sql += db->getODSVersion().isFB30OrHigher() ? " and rdb$package_name = ? " : "";
         }
     sql += "order by rdb$parameter_type, rdb$parameter_number";
 
@@ -245,9 +245,9 @@ wxString Procedure::getSource()
 	std::string sql(
 		"select rdb$procedure_source, "
 	);
-    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? "rdb$entrypoint, rdb$engine_name  " : "null, null ";
+    sql += db->getODSVersion().isFB30OrHigher() ? "rdb$entrypoint, rdb$engine_name  " : "null, null ";
 	sql += "from rdb$procedures where rdb$procedure_name = ?";
-	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+	if (db->getODSVersion().isFB30OrHigher())
 		sql += " and rdb$package_name is null ";
 	fr::IStatementPtr& st1 = loader->getStatement( sql );
 	st1->setString(0, wx2std(getName_(), converter));
@@ -328,7 +328,7 @@ wxString Procedure::getDefinition()
 wxString Procedure::getSqlSecurity()
 {
     DatabasePtr db = getDatabase();
-    if (db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
+    if (db->getODSVersion().isFB40OrHigher())
     {
         MetadataLoader* loader = db->getMetadataLoader();
         MetadataLoaderTransaction tr(loader);
@@ -593,7 +593,7 @@ void Procedures::load(ProgressIndicator* progressIndicator)
 {
     wxString stmt = "select rdb$procedure_name from rdb$procedures"
         " where (rdb$system_flag = 0 or rdb$system_flag is null)";
-    stmt += getDatabase()->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and rdb$package_name is null " : " ";
+    stmt += getDatabase()->getODSVersion().isFB30OrHigher() ? " and rdb$package_name is null " : " ";
     stmt += " order by 1";
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));
 }

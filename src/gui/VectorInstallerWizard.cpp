@@ -112,7 +112,7 @@ void VectorInstallerWizard::updateStatus()
         return;
     }
 
-    bool hasNative = databaseM->getODSMajor() >= 14; // Firebird 6 native
+    bool hasNative = databaseM->getODSVersion().isFB60OrHigher();
     if (hasNative)
     {
         labelStatusM->SetLabel(_("Status: Firebird engine supports native VECTOR data type and similarity search!"));

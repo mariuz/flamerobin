@@ -455,7 +455,7 @@ void MetadataItem::getDependencies(std::vector<Dependency>& list,
             " from rdb$procedure_parameters pp \n"
             " where pp.rdb$field_source = ? ";
         params += 2;
-        if (d->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        if (d->getODSVersion().isFB30OrHigher())
         {
             sql += " union \n"
                 " select distinct cast(13 as smallint), fa.rdb$function_name, fa.rdb$argument_name \n"

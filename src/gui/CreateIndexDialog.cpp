@@ -114,7 +114,7 @@ void CreateIndexDialog::layoutControls()
         styleguide().getUnrelatedControlMargin(wxVERTICAL));
 
     DatabasePtr db = tableM->getDatabase();
-    if (db && db->getInfo().isFB50OrHigher())
+    if (db && db->getODSVersion().isFB50OrHigher())
     {
         sizerControls->Add(label_condition, 0, wxEXPAND);
         sizerControls->AddSpacer(
@@ -129,7 +129,7 @@ void CreateIndexDialog::layoutControls()
         textctrl_condition->Hide();
     }
 
-    if (db && db->getInfo().isFB60OrHigher())
+    if (db && db->getODSVersion().isFB60OrHigher())
     {
         sizerControls->Add(label_tablespace, 0, wxEXPAND);
         sizerControls->AddSpacer(
@@ -172,7 +172,7 @@ void CreateIndexDialog::setControlsProperties()
     // assembled name still fits the maximum the connected ODS supports.
     int maxIdLen = 31;
     DatabasePtr db = tableM->getDatabase();
-    if (db && db->getInfo().isFB40OrHigher())
+    if (db && db->getODSVersion().isFB40OrHigher())
         maxIdLen = 63;     // Firebird 4+ (ODS 13.0)
     wxMBConv* conv = db ? db->getCharsetConverter() : wxConvCurrent;
 

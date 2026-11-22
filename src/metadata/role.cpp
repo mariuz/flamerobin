@@ -138,7 +138,7 @@ bool SysRoles::isSystem() const
 void SysRoles::load(ProgressIndicator* progressIndicator)
 {
     DatabasePtr db = getDatabase();
-    if (db && db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
+    if (db && db->getODSVersion().isFB21OrHigher())
     {
         wxString stmt = "select rdb$role_name from rdb$roles"
             " where (rdb$system_flag > 0) order by 1";
@@ -171,7 +171,7 @@ void Roles::load(ProgressIndicator* progressIndicator)
 {
     wxString stmt = "select rdb$role_name from rdb$roles";
     DatabasePtr db = getDatabase();
-    if (db && db->getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
+    if (db && db->getODSVersion().isFB21OrHigher())
         stmt += " where (rdb$system_flag = 0 or rdb$system_flag is null)";
     stmt += " order by 1";
     setItems(getDatabase()->loadIdentifiers(stmt, progressIndicator));

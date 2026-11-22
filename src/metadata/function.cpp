@@ -79,7 +79,7 @@ void Function::loadChildren()
 
 
     std::string sql("select");
-    if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+    if (db->getODSVersion().isFB30OrHigher())
         sql += " a.rdb$argument_name, a.rdb$field_source, "; //1..2
     else
         sql += " null rdb$argument_name, null rdb$field_source, "; //1..2
@@ -87,21 +87,21 @@ void Function::loadChildren()
         "a.rdb$field_sub_type, a.rdb$field_precision, "//7..8
         "f.rdb$return_argument, a.rdb$argument_position, "; //9..10
     
-    if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+    if (db->getODSVersion().isFB30OrHigher())
         sql += "rdb$default_source, rdb$null_flag, rdb$argument_mechanism, rdb$field_name, rdb$relation_name, a.rdb$description, c.rdb$bytes_per_character "; //11..17
     else
         sql += "null, null, -1, null, null, null, c.rdb$bytes_per_character";
     sql += " from rdb$function_arguments a "
         " join rdb$functions f on f.rdb$function_name = a.rdb$function_name "
         " left outer join rdb$character_sets c on a.rdb$character_set_id = c.rdb$character_set_id ";
-    sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0)  ? " and ((f.rdb$package_name = a.rdb$package_name) or (a.rdb$package_name is null)) " : "";
+    sql += db->getODSVersion().isFB30OrHigher() ? " and ((f.rdb$package_name = a.rdb$package_name) or (a.rdb$package_name is null)) " : "";
     sql += "where a.rdb$function_name = ? ";
     if (getParent()->getType() == ntDatabase) {
-        sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and a.rdb$package_name is null " : " ";
+        sql += db->getODSVersion().isFB30OrHigher() ? " and a.rdb$package_name is null " : " ";
     }
     else
         if (getParent()->getType() == ntPackage) {
-            sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " and a.rdb$package_name = ? " : "";
+            sql += db->getODSVersion().isFB30OrHigher() ? " and a.rdb$package_name = ? " : "";
         }
     sql += "order by iif(a.rdb$argument_name is null,255, a.rdb$argument_position) ";
  //    sql += "order by iif(a.rdb$argument_name is null, 2014, a.rdb$argument_position) ";
@@ -270,7 +270,7 @@ size_t Function::getParamCount() const
 wxString Function::getOwner()
 {
 	DatabasePtr db = getDatabase();
-	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+	if (db->getODSVersion().isFB30OrHigher())
 	{
 		MetadataLoader* loader = db->getMetadataLoader();
 		MetadataLoaderTransaction tr(loader);
@@ -294,7 +294,7 @@ wxString Function::getOwner()
 wxString Function::getSqlSecurity()
 {
 	DatabasePtr db = getDatabase();
-	if (db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
+	if (db->getODSVersion().isFB40OrHigher())
 	{
 		MetadataLoader* loader = db->getMetadataLoader();
 		MetadataLoaderTransaction tr(loader);
@@ -506,7 +506,7 @@ wxString FunctionSQL::getSource()
 	MetadataLoaderTransaction tr(loader);
 	wxMBConv* converter = db->getCharsetConverter();
 	std::string sql = "select rdb$function_source, ";
-	sql += db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? "rdb$entrypoint, rdb$engine_name, rdb$deterministic_flag  " : "null, null, null ";
+	sql += db->getODSVersion().isFB30OrHigher() ? "rdb$entrypoint, rdb$engine_name, rdb$deterministic_flag  " : "null, null, null ";
 	sql += "from rdb$functions where rdb$function_name = ?";
 	sql += " and rdb$package_name is null ";
 	fr::IStatementPtr st1 = loader->createStatement(sql);
@@ -678,7 +678,7 @@ void FunctionSQLs::acceptVisitor(MetadataItemVisitor* visitor)
 void FunctionSQLs::load(ProgressIndicator* progressIndicator)
 {
 	DatabasePtr db = getDatabase();
-	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+    if (db->getODSVersion().isFB30OrHigher())
 	{
 		wxString stmt = "select rdb$function_name from rdb$functions"
 		" where (rdb$system_flag = 0 or rdb$system_flag is null)";
@@ -723,7 +723,7 @@ void UDF::loadProperties()
 			" a.RDB$ARGUMENT_POSITION, a.RDB$FIELD_TYPE, a.RDB$FIELD_SCALE,"
 			" a.RDB$FIELD_LENGTH, a.RDB$FIELD_SUB_TYPE, a.RDB$FIELD_PRECISION,"
 			" f.RDB$MODULE_NAME, f.RDB$ENTRYPOINT, c.RDB$CHARACTER_SET_NAME, ";
-		if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+		if (db->getODSVersion().isFB30OrHigher())
 			stmt += " f.RDB$LEGACY_FLAG, ";
 		else
 			stmt += "null, ";
@@ -735,7 +735,7 @@ void UDF::loadProperties()
 			" LEFT OUTER JOIN RDB$CHARACTER_SETS c"
 			" ON a.RDB$CHARACTER_SET_ID = c.RDB$CHARACTER_SET_ID"
 			" WHERE f.RDB$FUNCTION_NAME = ? ";
-		if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        if (db->getODSVersion().isFB30OrHigher())
 			stmt += " and f.rdb$package_name is null";
 		stmt +=	" ORDER BY a.RDB$ARGUMENT_POSITION";
 
@@ -906,7 +906,7 @@ void UDFs::load(ProgressIndicator* progressIndicator)
 	DatabasePtr db = getDatabase();
 	wxString stmt = "select rdb$function_name from rdb$functions "
 		" where (rdb$system_flag = 0 or rdb$system_flag is null) ";
-	if (db->getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+    if (db->getODSVersion().isFB30OrHigher())
 		stmt += " and RDB$LEGACY_FLAG = 1 and rdb$package_name is null ";
 	stmt += " order by 1";
 	setItems(db->loadIdentifiers(stmt, progressIndicator));

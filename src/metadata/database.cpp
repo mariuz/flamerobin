@@ -142,32 +142,9 @@ bool DatabaseInfo::getReserve() const
     return reserveM;
 }
 
-
 int DatabaseInfo::getNextTransaction() const
 {
     return nextTransactionM;
-}
-
-int DatabaseInfo::getODS() const
-{
-    return odsM;
-}
-
-int DatabaseInfo::getODSMinor() const
-{
-    return odsMinorM;
-}
-
-bool DatabaseInfo::getODSVersionIsHigherOrEqualTo(int versionMajor) const
-{
-    return odsM >= versionMajor;
-}
-
-bool DatabaseInfo::getODSVersionIsHigherOrEqualTo(int versionMajor,
-    int versionMinor) const
-{
-    return odsM > versionMajor
-        || (odsM == versionMajor && odsMinorM >= versionMinor);
 }
 
 int DatabaseInfo::getOldestActiveTransaction() const
@@ -210,29 +187,22 @@ int DatabaseInfo::getSweep() const
     return sweepM;
 }
 
-void DatabaseInfo::load(fr::IDatabasePtr database)
+void DatabaseInfo::load(const fr::DatabaseInfoData& infoData)
 {
-    fr::DatabaseInfoData data;
-    database->getInfo(&data);
+    pageSizeM = infoData.pageSize;
+    pagesM = infoData.pages;
+    buffersM = infoData.buffers;
+    sweepM = infoData.sweep;
+    forcedWritesM = infoData.forcedWrites;
+    reserveM = infoData.reserve;
+    readOnlyM = infoData.readOnly;
 
-    odsM = data.ods;
-    odsMinorM = data.odsMinor;
-    pageSizeM = data.pageSize;
-    pagesM = data.pages;
-    buffersM = data.buffers;
-    sweepM = data.sweep;
-    forcedWritesM = data.forcedWrites;
-    reserveM = data.reserve;
-    readOnlyM = data.readOnly;
-
-    oldestTransactionM = data.oldestTransaction;
-    oldestActiveTransactionM = data.oldestActiveTransaction;
-    oldestSnapshotM = data.oldestSnapshot;
-    nextTransactionM = data.nextTransaction;
-    cryptStateM = data.cryptState;
-    activeTransactionsM = data.activeTransactions;
-
-    loadTimeMillisM = ::wxGetLocalTimeMillis();
+    oldestTransactionM = infoData.oldestTransaction;
+    oldestActiveTransactionM = infoData.oldestActiveTransaction;
+    oldestSnapshotM = infoData.oldestSnapshot;
+    nextTransactionM = infoData.nextTransaction;
+    cryptStateM = infoData.cryptState;
+    activeTransactionsM = infoData.activeTransactions;
 }
 
 int DatabaseInfo::getCryptState() const
@@ -245,14 +215,36 @@ const std::vector<fr::TransactionInfo>& DatabaseInfo::getActiveTransactions() co
     return activeTransactionsM;
 }
 
-void DatabaseInfo::reloadIfNecessary(fr::IDatabasePtr database)
+// DatabaseODSVersion class
+
+void DatabaseODSVersion::load(const fr::DatabaseInfoData& infoData)
 {
-    wxLongLong millisNow = ::wxGetLocalTimeMillis();
-    // value may jump or even actually decrease, for instance on timezone
-    // change or when daylight saving time ends...
-    wxLongLong millisDelta = millisNow - loadTimeMillisM;
-    if (millisDelta >= 1000 || millisDelta <= -1000)
-        load(database);
+    if (odsMajorM != infoData.ods || odsMinorM != infoData.odsMinor)
+    {
+        odsMajorM = infoData.ods;
+        odsMinorM = infoData.odsMinor;
+
+        odsFB60OrHigher = checkVersionIsAtLeast(fr::ODSVersion::ODS_FB60_MAJOR, fr::ODSVersion::ODS_FB60_MINOR);
+        odsFB50OrHigher = odsFB60OrHigher
+            || checkVersionIsAtLeast(fr::ODSVersion::ODS_FB50_MAJOR, fr::ODSVersion::ODS_FB50_MINOR);
+        odsFB40OrHigher = odsFB50OrHigher
+            || checkVersionIsAtLeast(fr::ODSVersion::ODS_FB40_MAJOR, fr::ODSVersion::ODS_FB40_MINOR);
+        odsFB30OrHigher = odsFB40OrHigher
+            || checkVersionIsAtLeast(fr::ODSVersion::ODS_FB30_MAJOR, fr::ODSVersion::ODS_FB30_MINOR);
+        odsFB25OrHigher = odsFB30OrHigher
+            || checkVersionIsAtLeast(fr::ODSVersion::ODS_FB25_MAJOR, fr::ODSVersion::ODS_FB25_MINOR);
+        odsFB21OrHigher = odsFB25OrHigher
+            || checkVersionIsAtLeast(fr::ODSVersion::ODS_FB21_MAJOR, fr::ODSVersion::ODS_FB21_MINOR);
+        odsFB20OrHigher = odsFB21OrHigher
+            || checkVersionIsAtLeast(fr::ODSVersion::ODS_FB20_MAJOR, fr::ODSVersion::ODS_FB20_MINOR);
+        odsFB15OrHigher = odsFB20OrHigher
+            || checkVersionIsAtLeast(fr::ODSVersion::ODS_FB15_MAJOR, fr::ODSVersion::ODS_FB15_MINOR);
+    }
+}
+
+bool DatabaseODSVersion::checkVersionIsAtLeast(int major, int minor) const
+{
+    return odsMajorM > major || (odsMajorM == major && odsMinorM >= minor);
 }
 
 // DatabaseAuthenticationMode class
@@ -346,7 +338,7 @@ bool DatabaseAuthenticationMode::getUseSecretStore() const
 Database::Database()
     : MetadataItem(ntDatabase), metadataLoaderM(0), connectedM(false),
         connectionCredentialsM(0), dialectM(3), idM(0), volatileM(false),
-        timezonesLoadedM(false), defaultTimezonesLoadedM(false)
+        lingerM(false), timezonesLoadedM(false), defaultTimezonesLoadedM(false)
 {
     databaseDAL_M = fr::DatabaseFactory::createDatabase();
     defaultTimezoneM.name = "";
@@ -451,7 +443,7 @@ void Database::getDatabaseTriggers(std::vector<Trigger *>& list)
         std::back_inserter(list), std::mem_fn(&DBTriggerPtr::get));
 }
 
-bool Database::getIsVolative()
+bool Database::getIsVolative() const
 {
     return volatileM;
 }
@@ -1448,10 +1440,10 @@ void Database::connect(const wxString& password, ProgressIndicator* indicator)
                 // load database information
                 setPropertiesLoaded(false);
                 dialectM = databaseDAL_M->getDialect();
-                databaseInfoM.load(databaseDAL_M);
+                loadDatabaseInfoFromEngine();
                 setPropertiesLoaded(true);
 
-                loadDatabaseInfo();
+                loadDatabaseInfoFromRDBDatabase();
                 checkProgressIndicatorCanceled(indicator);
 
                 // load default timezone
@@ -1566,7 +1558,7 @@ void Database::loadRelationCollections(ProgressIndicator* progressIndicator)
     MetadataLoaderTransaction tr(loader);
     wxMBConv* converter = getCharsetConverter();
 
-    bool hasRelationType = getInfo().getODSVersionIsHigherOrEqualTo(11, 1);
+    bool hasRelationType = getODSVersion().isFB21OrHigher();
 
     // Combined query for tables, views, system tables and GTTs
     // rdb$relation_type: 0=table, 1=view, 2=external, 3=monitoring, 4=GTT preserve, 5=GTT delete
@@ -1610,7 +1602,7 @@ void Database::loadTriggerCollections(ProgressIndicator* progressIndicator)
     MetadataLoaderTransaction tr(loader);
     wxMBConv* converter = getCharsetConverter();
 
-    bool hasBinAnd = getInfo().getODSVersionIsHigherOrEqualTo(11, 1); // FB 2.1+
+    bool hasBinAnd = getODSVersion().isFB21OrHigher();
 
     std::string sql = "select rdb$trigger_name, rdb$trigger_inactive, rdb$trigger_type from rdb$triggers ";
     sql += " where (rdb$system_flag = 0 or rdb$system_flag is null) ";
@@ -1719,7 +1711,7 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
     pih.init(_("domains"), collectionCount, 5);
     userDomainsM->load(progressIndicator);
 
-    if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
+    if (getODSVersion().isFB30OrHigher()) {
         pih.init(_("functions SQL"), collectionCount, 6);
         functionSQLsM->load(progressIndicator);
     }
@@ -1733,7 +1725,7 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
     pih.init(_("exceptions"), collectionCount, 9);
     exceptionsM->load(progressIndicator);
 
-    if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
+    if (getODSVersion().isFB30OrHigher()) {
         pih.init(_("packages"), collectionCount, 10);
         packagesM->load(progressIndicator);
 
@@ -1753,7 +1745,7 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
     pih.init(_("indexes"), collectionCount, 15);
     usrIndicesM->load(progressIndicator);
 
-    if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0)) {
+    if (getODSVersion().isFB30OrHigher()) {
         pih.init(_("users"), collectionCount, 16);
         usersM->load(progressIndicator);
     }
@@ -1766,15 +1758,24 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
 
 }
 
-void Database::loadDatabaseInfo()
+void Database::loadDatabaseInfoFromEngine()
+{
+    fr::DatabaseInfoData data;
+    databaseDAL_M->getInfo(&data);
+
+    databaseInfoM.load(data);
+    databaseODSVersionM.load(data);
+}
+
+void Database::loadDatabaseInfoFromRDBDatabase()
 {
     MetadataLoader* loader = getMetadataLoader();
     MetadataLoaderTransaction tr(loader);
 
     // load database charset
     std::string stmt = "select rdb$character_set_name, current_user, current_role, ";
-    stmt += getInfo().getODSVersionIsHigherOrEqualTo(12, 0) ? " rdb$linger, " : " null, ";
-    stmt += getInfo().getODSVersionIsHigherOrEqualTo(13, 0) ? " rdb$sql_security   " : " null  ";
+    stmt += getODSVersion().isFB30OrHigher() ? " rdb$linger, " : " null, ";
+    stmt += getODSVersion().isFB40OrHigher() ? " rdb$sql_security   " : " null  ";
     stmt += " from rdb$database ";
     fr::IStatementPtr& st1 = loader->getStatement(stmt);
 
@@ -2089,11 +2090,11 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
     if (getTreeObjectOrder() == 1)
     {
         // Firebird DDL / logical order
-        if (getInfo().isFB60OrHigher())
+        if (getODSVersion().isFB60OrHigher())
             temp.push_back(schemasM.get());
         temp.push_back(userDomainsM.get());
         temp.push_back(tablesM.get());
-        if (getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
+        if (getODSVersion().isFB21OrHigher())
             temp.push_back(GTTablesM.get());
 
         if (showOneNodeIndices() && showSystemIndices())
@@ -2103,22 +2104,22 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
 
         temp.push_back(viewsM.get());
         temp.push_back(DMLtriggersM.get());
-        if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        if (getODSVersion().isFB30OrHigher())
             temp.push_back(DDLTriggersM.get());
-        if (getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
+        if (getODSVersion().isFB21OrHigher())
             temp.push_back(DBTriggersM.get());
         temp.push_back(proceduresM.get());
-        if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        if (getODSVersion().isFB30OrHigher())
             temp.push_back(functionSQLsM.get());
         temp.push_back(UDFsM.get());
-        if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        if (getODSVersion().isFB30OrHigher())
             temp.push_back(packagesM.get());
         temp.push_back(generatorsM.get());
         temp.push_back(exceptionsM.get());
         temp.push_back(collationsM.get());
-        if (getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
+        if (getODSVersion().isFB40OrHigher())
             temp.push_back(replicationM.get());
-        if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        if (getODSVersion().isFB30OrHigher())
             temp.push_back(usersM.get());
         temp.push_back(rolesM.get());
 
@@ -2129,7 +2130,7 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
             temp.push_back(sysTablesM.get());
         if (system && showSystemIndices() && !showOneNodeIndices())
             temp.push_back(sysIndicesM.get());
-        if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        if (getODSVersion().isFB30OrHigher())
         {
             if (system && showSystemPackages())
                 temp.push_back(sysPackagesM.get());
@@ -2143,7 +2144,7 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
         temp.push_back(collationsM.get());
         temp.push_back(userDomainsM.get());
         temp.push_back(exceptionsM.get());
-        if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        if (getODSVersion().isFB30OrHigher())
             temp.push_back(functionSQLsM.get());
 
         if (showOneNodeIndices() && showSystemIndices())
@@ -2151,13 +2152,13 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
         else
             temp.push_back(usrIndicesM.get());
 
-        if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        if (getODSVersion().isFB30OrHigher())
             temp.push_back(packagesM.get());
         temp.push_back(proceduresM.get());
-        if (getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
+        if (getODSVersion().isFB40OrHigher())
             temp.push_back(replicationM.get());
         temp.push_back(rolesM.get());
-        if (getInfo().isFB60OrHigher())
+        if (getODSVersion().isFB60OrHigher())
             temp.push_back(schemasM.get());
         temp.push_back(generatorsM.get());
 
@@ -2166,7 +2167,7 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
             temp.push_back(sysDomainsM.get());
         if (system && showSystemIndices() && !showOneNodeIndices())
             temp.push_back(sysIndicesM.get());
-        if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        if (getODSVersion().isFB30OrHigher())
         {
             if (system && showSystemPackages())
                 temp.push_back(sysPackagesM.get());
@@ -2177,15 +2178,15 @@ void Database::getCollections(std::vector<MetadataItem*>& temp, bool system)
             temp.push_back(sysTablesM.get());
 
         temp.push_back(tablesM.get());
-        if (getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
+        if (getODSVersion().isFB21OrHigher())
             temp.push_back(GTTablesM.get());
-        if (getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
+        if (getODSVersion().isFB21OrHigher())
             temp.push_back(DBTriggersM.get());
-        if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        if (getODSVersion().isFB30OrHigher())
             temp.push_back(DDLTriggersM.get());
         temp.push_back(DMLtriggersM.get());
         temp.push_back(UDFsM.get());
-        if (getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+        if (getODSVersion().isFB30OrHigher())
             temp.push_back(usersM.get());
         temp.push_back(viewsM.get());
     }
@@ -2589,16 +2590,30 @@ const DatabaseInfo& Database::getInfo()
 {
     try
     {
-        databaseInfoM.reloadIfNecessary(databaseDAL_M);
+        wxLongLong millisNow = ::wxGetLocalTimeMillis();
+        // reload database information when it is older than 1000 milliseconds
+        // value may jump or even actually decrease, for instance on timezone
+        // change or when daylight saving time ends...
+        wxLongLong millisDelta = millisNow - databaseInfoLoadedM;
+        if (millisDelta >= 1000 || millisDelta <= -1000)
+        {
+            databaseInfoLoadedM = millisNow;
+            loadDatabaseInfoFromEngine();
+        }
     }
     catch (...)
     {
-        // Suppress errors during reloadIfNecessary (e.g. silent connection loss).
+        // Suppress errors (e.g. silent connection loss).
         // Returning the cached databaseInfoM allows UI menu updates and checks
         // (like ODS version checks) to complete successfully so the Reconnect menu
         // item can be displayed and selected.
     }
     return databaseInfoM;
+}
+
+const DatabaseODSVersion& Database::getODSVersion() const
+{
+    return databaseODSVersionM;
 }
 
 void Database::invalidate()
@@ -2607,8 +2622,8 @@ void Database::invalidate()
     {
         try
         {
-            databaseInfoM.load(databaseDAL_M);
-            loadDatabaseInfo();
+            loadDatabaseInfoFromEngine();
+            loadDatabaseInfoFromRDBDatabase();
         }
         catch (...)
         {
@@ -2623,8 +2638,8 @@ void Database::loadProperties()
     {
         try
         {
-            databaseInfoM.load(databaseDAL_M);
-            loadDatabaseInfo();
+            loadDatabaseInfoFromEngine();
+            loadDatabaseInfoFromRDBDatabase();
         }
         catch (...)
         {
@@ -2633,21 +2648,11 @@ void Database::loadProperties()
     MetadataItem::loadProperties();
 }
 
-void Database::loadInfo()
+void Database::reloadInfo()
 {
-    databaseInfoM.load(databaseDAL_M);
-    loadDatabaseInfo();
+    loadDatabaseInfoFromEngine();
+    loadDatabaseInfoFromRDBDatabase();
     notifyObservers();
-}
-
-int Database::getODSMajor() const
-{
-    return databaseInfoM.odsM;
-}
-
-int Database::getODSMinor() const
-{
-    return databaseInfoM.odsMinorM;
 }
 
 bool Database::showSystemCharacterSet()
@@ -2685,7 +2690,7 @@ bool Database::showSystemDomains()
 
 bool Database::showSystemPackages()
 {
-    if (!getInfo().getODSVersionIsHigherOrEqualTo(12, 0))
+    if (!getODSVersion().isFB30OrHigher())
         return false;
 
     const wxString SHOW_SYSPACKAGES = "ShowSystemPackages";
@@ -2699,7 +2704,7 @@ bool Database::showSystemPackages()
 
 bool Database::showSystemRoles()
 {
-    if (!getInfo().getODSVersionIsHigherOrEqualTo(11, 1))
+    if (!getODSVersion().isFB21OrHigher())
         return false;
 
     const wxString SHOW_SYSROLES = "ShowSystemRoles";
@@ -2862,7 +2867,7 @@ void Database::loadDefaultTimezone()
     int tzId;
 
     // RDB$TIME_ZONES is available on Firebird 4 (ODS Ver 13) or higher
-    if (!getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
+    if (!getODSVersion().isFB40OrHigher())
     {
         std::lock_guard<std::mutex> lock(timezoneDataMutexM);
         defaultTimezoneM.name.clear();
@@ -2962,7 +2967,7 @@ void Database::loadTimezones()
     TimezoneInfo* tzItm;
 
     // RDB$TIME_ZONES is available on Firebird 4 (ODS Ver 13) or higher
-    if (!getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
+    if (!getODSVersion().isFB40OrHigher())
     {
         clearTimezones(false);
         std::lock_guard<std::mutex> lock(timezoneDataMutexM);

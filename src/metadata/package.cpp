@@ -302,7 +302,7 @@ wxString Package::getDefinition()
 wxString Package::getSqlSecurity()
 {
     DatabasePtr db = getDatabase();
-    if (db->getInfo().getODSVersionIsHigherOrEqualTo(13, 0))
+    if (db->getODSVersion().isFB40OrHigher())
     {
         MetadataLoader* loader = db->getMetadataLoader();
         MetadataLoaderTransaction tr(loader);
