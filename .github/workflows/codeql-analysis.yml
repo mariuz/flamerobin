@@ -14,9 +14,15 @@ name: "CodeQL"
 on:
   push:
     branches: [ master ]
+    paths-ignore:
+      - 'vcpkg'
+      - 'vcpkg/**'
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ master ]
+    paths-ignore:
+      - 'vcpkg'
+      - 'vcpkg/**'
   schedule:
     - cron: '36 12 * * 4'
 
@@ -45,16 +51,6 @@ jobs:
         submodules: recursive
         fetch-depth: 0
 
-    # Initializes the CodeQL tools for scanning.
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
-      with:
-        languages: ${{ matrix.language }}
-        config-file: ./.github/codeql-config.yml
-        # If you wish to specify custom queries, you can do so here or in a config file.
-        # By default, queries listed here will override any specified in a config file.
-        # Prefix the list here with "+" to use these queries and those in the config file.
-        # queries: ./path/to/local/query, your-org/your-repo/queries@main
     - name: Install dependencies
       run: |
         sudo apt-get update
@@ -109,10 +105,79 @@ jobs:
       env:
         VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg_archives
       run: |
-        cmake -G Ninja -S . -B Build -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DENABLE_VCPKG=ON -DFB_CPP_BUILD_TESTS=OFF
+        cmake -G Ninja -S . -B Build -DCMAKE_TOOLCHAIN_FILE=vcpkg/scripts/buildsystems/vcpkg.cmake -DENABLE_VCPKG=ON -DVCPKG_INSTALLED_DIR="${{ github.workspace }}/vcpkg_installed" -DFB_CPP_BUILD_TESTS=OFF
+
+    # Initialize CodeQL after vcpkg bootstrap/install and CMake configuration so CodeQL
+    # only traces FlameRobin's own build instead of third-party vcpkg/buildtrees sources.
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        config-file: ./.github/codeql-config.yml
 
     - name: Build
       run: cmake --build Build -j $(nproc)
 
     - name: Perform CodeQL Analysis
+      id: analyze
       uses: github/codeql-action/analyze@v3
+      with:
+        upload: "failure-only"
+        output: sarif-results
+
+    - name: Filter out vcpkg paths from SARIF
+      env:
+        SARIF_DIR: ${{ steps.analyze.outputs.sarif-output }}
+      run: |
+        python3 - <<'PY'
+        import glob, json, os, urllib.parse
+
+        sarif_dir = os.environ["SARIF_DIR"]
+        workspace = os.path.realpath(os.environ["GITHUB_WORKSPACE"]).replace("\\", "/").rstrip("/") + "/"
+        ignored_prefixes = (
+            "vcpkg/",
+            "vcpkg_installed/",
+            "Build/vcpkg_installed/",
+            "build/vcpkg_installed/",
+        )
+
+        def is_ignored(uri: str) -> bool:
+            if not uri:
+                return False
+            if uri.startswith("file://"):
+                uri = urllib.parse.unquote(urllib.parse.urlparse(uri).path)
+            norm = uri.replace("\\", "/")
+            if norm.startswith(workspace):
+                norm = norm[len(workspace):]
+            norm = norm.lstrip("./")
+            return norm == "vcpkg" or norm.startswith(ignored_prefixes)
+
+        for path in glob.glob(os.path.join(sarif_dir, "*.sarif")):
+            with open(path, "r", encoding="utf-8") as f:
+                sarif = json.load(f)
+            removed = 0
+            for run in sarif.get("runs", []):
+                kept = []
+                for res in run.get("results", []):
+                    locs = res.get("locations", [])
+                    if any(
+                        is_ignored(
+                            loc.get("physicalLocation", {})
+                               .get("artifactLocation", {})
+                               .get("uri", "")
+                        )
+                        for loc in locs
+                    ):
+                        removed += 1
+                    else:
+                        kept.append(res)
+                run["results"] = kept
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(sarif, f)
+            print(f"{path}: filtered out {removed} vcpkg result(s)")
+        PY
+
+    - name: Upload SARIF
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ steps.analyze.outputs.sarif-output }}
