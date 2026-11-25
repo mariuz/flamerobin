@@ -8,6 +8,19 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.11.7</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Build System &amp; Dependency Updates (#770)</B></font><br>
+<br>
+- <b>Fix Windows vcpkg Build with Python 3.15</b>: Updated the bundled <code>vcpkg</code> submodule and <code>vcpkg-configuration.json</code> registry baseline so <code>vcpkg-get-python-packages</code> (<code>get-pip</code> 26.2.2) is compatible with Python 3.15.2 when building dependencies such as <code>crashpad</code> on Windows.<br>
+- <b>Default Static Library Linkage on x64 Windows</b>: Added an <code>x64-windows</code> overlay triplet (<code>triplets/x64-windows.cmake</code>, matching <code>x64-windows-static-md</code>) so new Windows CMake builds (<code>cmake -S . -B build -A x64</code>) link third-party libraries statically against the dynamic MSVC runtime out of the box without extra triplet flags.<br>
+- <b>Updated Build Documentation</b>: Clarified recursive submodule initialization (<code>git clone --recursive</code> / <code>git submodule update --init --recursive</code>) and simplified Windows build instructions in <code>README.md</code> and <code>BUILD.md</code>.<br>
+<br><br>
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.11.6</font><br>
 <br><br>
 
