@@ -50,10 +50,10 @@ The current list of requirements and overrides defined in the project:
 
 | Dependency | Platform / Scope | Version | Notes |
 | :--- | :--- | :--- | :--- |
-| **Boost Libraries** | All | `1.90.0` | Includes `boost-dll`, `boost-filesystem`, `boost-multiprecision`, and `boost-test` |
+| **Boost Libraries** | All | `1.92.0` | Includes `boost-dll`, `boost-filesystem`, `boost-multiprecision`, and `boost-test` |
 | **firebird** | All | `5.0.4` | Firebird database client and development library |
-| **fb-cpp** | All | `0.0.6` | FlameRobin's C++20 Firebird API wrapper (provided as a local vcpkg overlay port in `./ports/fb-cpp`) |
-| **icu** | All | `78.1` | International Components for Unicode |
+| **fb-cpp** | All | `1.0.0` | FlameRobin's C++20 Firebird API wrapper (provided as a local vcpkg overlay port in `./ports/fb-cpp`) |
+| **icu** | All | `79.1` | International Components for Unicode |
 | **gtk3** | Linux, FreeBSD, OpenBSD | *System/vcpkg* | Configured with `wayland` feature support |
 | **wxwidgets** | All | *vcpkg/System* | Unicode build with `webview` and `secretstore` features enabled |
 | **pcre2** | All | *vcpkg/System* | Perl Compatible Regular Expressions library |
@@ -73,26 +73,26 @@ The recommended build path for Windows is using **CMake** and **vcpkg** (manifes
 *   **Visual Studio 2022** (with *Desktop development with C++* workload)
 *   **CMake** (3.18+)
 *   **Git**
-*   **vcpkg**
+*   **vcpkg** (included as a Git submodule, or an external checkout)
 *   **Firebird Server** (for runtime testing)
 
 The build expects the repository root to contain `vcpkg.json`, `vcpkg-configuration.json`, and the local overlay port in `ports/fb-cpp` (which applies necessary patches to the `fb-cpp` library during the build).
 
 ### Initial Setup
 
-1.  **Clone the Repository**:
+1.  **Clone the Repository (with submodules)**:
     ```cmd
-    git clone https://github.com/mariuz/flamerobin.git
+    git clone --recursive https://github.com/mariuz/flamerobin.git
     cd flamerobin
     ```
+    *(If you already cloned without `--recursive`, or after pulling updates, run `git submodule update --init --recursive` so `vcpkg` and `src/fb-cpp` match the pinned baseline in `vcpkg-configuration.json`.)*
 
-2.  **Provide vcpkg**:
-    *   **Option A**: Clone vcpkg directly inside the FlameRobin repository root (CMake will detect it automatically):
+2.  **Bootstrap vcpkg**:
+    *   **Option A (Recommended — bundled submodule)**: Bootstrap the `vcpkg` submodule in the repository root (CMake detects it automatically):
         ```cmd
-        git clone https://github.com/microsoft/vcpkg vcpkg
         vcpkg\bootstrap-vcpkg.bat
         ```
-    *   **Option B**: Use an existing, external vcpkg checkout:
+    *   **Option B (External vcpkg checkout)**: Use an existing, up-to-date external `vcpkg` checkout:
         ```cmd
         git clone https://github.com/microsoft/vcpkg C:\src\vcpkg
         C:\src\vcpkg\bootstrap-vcpkg.bat
@@ -100,15 +100,15 @@ The build expects the repository root to contain `vcpkg.json`, `vcpkg-configurat
 
 ### Configure with CMake
 
-Always use a clean, out-of-source build directory.
+Always use a clean, out-of-source build directory. Using `-DVCPKG_TARGET_TRIPLET=x64-windows-static` matches the official Windows builds (omit it if you prefer dynamic `x64-windows` libraries):
 
-*   If you used **Option A** (`.\vcpkg` in repository root):
+*   If you used **Option A** (`.\vcpkg` submodule in repository root):
     ```cmd
-    cmake -S . -B build -A x64
+    cmake -S . -B build -A x64 -DVCPKG_TARGET_TRIPLET=x64-windows-static
     ```
 *   If you used **Option B** (external `vcpkg` directory):
     ```cmd
-    cmake -S . -B build -A x64 -DCMAKE_TOOLCHAIN_FILE=C:\src\vcpkg\scripts\buildsystems\vcpkg.cmake
+    cmake -S . -B build -A x64 -DVCPKG_TARGET_TRIPLET=x64-windows-static -DCMAKE_TOOLCHAIN_FILE=C:\src\vcpkg\scripts\buildsystems\vcpkg.cmake
     ```
 
 ### Build

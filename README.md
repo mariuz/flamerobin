@@ -107,8 +107,20 @@ Both include the Firebird embedded engine. See [docs/install_linux.md](docs/inst
 
 Building
 ---------------------------
-For detailed build instructions for all supported platforms (Windows, Linux, macOS), see the
-[BUILD.md](https://github.com/mariuz/flamerobin/blob/master/BUILD.md) file.
+FlameRobin uses Git submodules (`vcpkg` and `src/fb-cpp`) and `vcpkg` manifest mode (`vcpkg.json` + `vcpkg-configuration.json`) to manage dependencies. Always clone recursively (or run `git submodule update --init --recursive` after pulling) so the bundled `vcpkg` tools stay aligned with the pinned port baseline:
+
+```bash
+git clone --recursive https://github.com/mariuz/flamerobin.git
+cd flamerobin
+```
+
+- **Windows (MSVC + vcpkg):**
+  ```cmd
+  vcpkg\bootstrap-vcpkg.bat
+  cmake -S . -B build -A x64 -DVCPKG_TARGET_TRIPLET=x64-windows-static
+  cmake --build build --config Release
+  ```
+- **Linux / macOS & detailed instructions:** See [BUILD.md](https://github.com/mariuz/flamerobin/blob/master/BUILD.md) for full platform prerequisites, options, and troubleshooting.
 
 **Notice:** FlameRobin is built using modern **C++20** and uses the modern `fb-cpp` database library abstraction layer.
 
