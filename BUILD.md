@@ -100,15 +100,15 @@ The build expects the repository root to contain `vcpkg.json`, `vcpkg-configurat
 
 ### Configure with CMake
 
-Always use a clean, out-of-source build directory. Using `-DVCPKG_TARGET_TRIPLET=x64-windows-static` matches the official Windows builds (omit it if you prefer dynamic `x64-windows` libraries):
+Always use a clean, out-of-source build directory (the overlay triplet in `triplets/x64-windows.cmake` automatically configures static library linkage with the dynamic MSVC runtime by default):
 
 *   If you used **Option A** (`.\vcpkg` submodule in repository root):
     ```cmd
-    cmake -S . -B build -A x64 -DVCPKG_TARGET_TRIPLET=x64-windows-static
+    cmake -S . -B build -A x64
     ```
 *   If you used **Option B** (external `vcpkg` directory):
     ```cmd
-    cmake -S . -B build -A x64 -DVCPKG_TARGET_TRIPLET=x64-windows-static -DCMAKE_TOOLCHAIN_FILE=C:\src\vcpkg\scripts\buildsystems\vcpkg.cmake
+    cmake -S . -B build -A x64 -DCMAKE_TOOLCHAIN_FILE=C:\src\vcpkg\scripts\buildsystems\vcpkg.cmake
     ```
 
 ### Build

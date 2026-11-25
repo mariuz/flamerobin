@@ -117,7 +117,7 @@ cd flamerobin
 - **Windows (MSVC + vcpkg):**
   ```cmd
   vcpkg\bootstrap-vcpkg.bat
-  cmake -S . -B build -A x64 -DVCPKG_TARGET_TRIPLET=x64-windows-static
+  cmake -S . -B build -A x64
   cmake --build build --config Release
   ```
 - **Linux / macOS & detailed instructions:** See [BUILD.md](https://github.com/mariuz/flamerobin/blob/master/BUILD.md) for full platform prerequisites, options, and troubleshooting.
