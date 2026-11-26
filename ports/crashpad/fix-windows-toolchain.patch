@@ -1,0 +1,514 @@
+diff --git a/build/config/BUILD.gn b/build/config/BUILD.gn
+index 95c07f6..ce4ca5c 100644
+--- a/build/config/BUILD.gn
++++ b/build/config/BUILD.gn
+@@ -700,6 +700,7 @@ if (mini_chromium_is_win) {
+                                  "get-visual-studio-data",
+                                  rebase_path(root_build_dir),
+                                  rebase_path(win_toolchain_path),
++                                 target_cpu,
+                                ],
+                                "scope")
+ 
+@@ -772,7 +773,7 @@ if (mini_chromium_is_win) {
+       }
+ 
+       tool("alink") {
+-        command = "$python_path $helper_path link-wrapper $env $ar /nologo /out:{{output}} {{arflags}}${extra_arflags} {{inputs}}"
++        command = "\"$python_path\" \"$helper_path\" link-wrapper $env $ar /nologo /out:{{output}} {{arflags}}${extra_arflags} {{inputs}}"
+         description = "AR {{output}}"
+         outputs =
+             [ "{{output_dir}}/{{target_output_name}}{{output_extension}}" ]
+@@ -784,7 +785,7 @@ if (mini_chromium_is_win) {
+       tool("solink_module") {
+         outputs =
+             [ "{{output_dir}}/{{target_output_name}}{{output_extension}}" ]
+-        command = "$python_path $helper_path link-wrapper $env $ld /nologo /DLL /OUT:{{output}} {{ldflags}}${extra_ldflags} {{inputs}} {{solibs}} {{libs}}"
++        command = "\"$python_path\" \"$helper_path\" link-wrapper $env $ld /nologo /DLL /OUT:{{output}} {{ldflags}}${extra_ldflags} {{inputs}} {{solibs}} {{libs}}"
+         description = "SOLINK_MODULE {{output}}"
+         default_output_dir = "{{root_out_dir}}"
+         default_output_extension = ".dll"
+@@ -793,7 +794,7 @@ if (mini_chromium_is_win) {
+       tool("link") {
+         outputs =
+             [ "{{output_dir}}/{{target_output_name}}{{output_extension}}" ]
+-        command = "$python_path $helper_path link-wrapper $env $ld /nologo /OUT:{{output}} {{ldflags}}${extra_ldflags} {{inputs}} {{solibs}} {{libs}}"
++        command = "\"$python_path\" \"$helper_path\" link-wrapper $env $ld /nologo /OUT:{{output}} {{ldflags}}${extra_ldflags} {{inputs}} {{solibs}} {{libs}}"
+         description = "LINK {{output}}"
+         default_output_dir = "{{root_out_dir}}"
+         default_output_extension = ".exe"
+@@ -829,9 +830,9 @@ if (mini_chromium_is_win) {
+           ml += " /nologo /Fo{{output}}"
+ 
+           if (invoker.current_cpu == "arm64") {
+-            command = "\"$python_path\" $helper_path asm-wrapper $env $ml {{include_dirs}} {{asmflags}} {{source}}"
++            command = "\"$python_path\" \"$helper_path\" asm-wrapper $env $ml {{include_dirs}} {{asmflags}} {{source}}"
+           } else {
+-            command = "\"$python_path\" $helper_path asm-wrapper $env $ml {{defines}} {{include_dirs}} {{asmflags}} /c {{source}}"
++            command = "\"$python_path\" \"$helper_path\" asm-wrapper $env $ml {{defines}} {{include_dirs}} {{asmflags}} /c {{source}}"
+           }
+         } else {
+           command = "ninja -t msvc -e $env -- $ml {{defines}} {{include_dirs}} {{asmflags}} {{source}}"
+@@ -843,7 +844,7 @@ if (mini_chromium_is_win) {
+       }
+ 
+       tool("stamp") {
+-        command = "$python_path $helper_path stamp {{output}}"
++        command = "\"$python_path\" \"$helper_path\" stamp {{output}}"
+         description = "STAMP {{output}}"
+       }
+ 
+diff --git a/build/win_helper.py b/build/win_helper.py
+index 8f7b891..af0d679 100644
+--- a/build/win_helper.py
++++ b/build/win_helper.py
+@@ -2,13 +2,39 @@
+ # Use of this source code is governed by a BSD-style license that can be
+ # found in the LICENSE file.
+ 
+-import winreg
++try:
++    import winreg
++except ImportError:
++    winreg = None
+ import os
+ import re
++import shutil
+ import subprocess
+ import sys
+ 
+ 
++def _DecodeBytes(data):
++    """Decodes subprocess byte output without failing on localized Windows
++    OEM/ANSI code pages (e.g. CP850/CP1252 umlauts)."""
++    if isinstance(data, str):
++        return data
++    encodings = ['utf-8']
++    if sys.platform == 'win32':
++        encodings.extend(['mbcs', 'oem'])
++    for enc in encodings:
++        try:
++            return data.decode(enc)
++        except (UnicodeDecodeError, LookupError):
++            pass
++    return data.decode('utf-8', errors='replace')
++
++
++def _EnvFileEncoding():
++    """Encoding used for Ninja's -t msvc -e environment block files
++    (CreateProcessA ANSI block on Windows)."""
++    return 'mbcs' if sys.platform == 'win32' else 'utf-8'
++
++
+ def _RegistryGetValue(key, value):
+     """Use the winreg module to obtain the value of a registry key.
+ 
+@@ -18,12 +44,14 @@ def _RegistryGetValue(key, value):
+     Return:
+         contents of the registry key's value, or None on failure.
+     """
++    if winreg is None:
++        return None
+     try:
+         root, subkey = key.split('\\', 1)
+         assert root == 'HKLM'  # Only need HKLM for now.
+         with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, subkey) as hkey:
+             return winreg.QueryValueEx(hkey, value)[0]
+-    except WindowsError:
++    except OSError:
+         return None
+ 
+ 
+@@ -39,15 +67,18 @@ def _ExtractImportantEnvironment(output_of_set):
+         'systemroot',
+         'temp',
+         'tmp',
++        'vslang',
+     )
+     env = {}
+-    for line in output_of_set.splitlines():
+-        line = line.decode("utf-8")
++    for raw_line in output_of_set.splitlines():
++        line = _DecodeBytes(raw_line)
+         for envvar in envvars_to_save:
+             if re.match(envvar + '=', line.lower()):
+                 var, setting = line.split('=', 1)
+                 env[var.upper()] = setting
+                 break
++    if 'PATHEXT' not in env:
++        env['PATHEXT'] = os.environ.get('PATHEXT', '.COM;.EXE;.BAT;.CMD')
+     for required in ('SYSTEMROOT', 'TEMP', 'TMP'):
+         if required not in env:
+             raise Exception('Environment variable "%s" '
+@@ -55,66 +86,155 @@ def _ExtractImportantEnvironment(output_of_set):
+     return env
+ 
+ 
++def _ExtractCurrentEnvironment():
++    """Extracts the MSVC toolchain environment directly from os.environ when
++    already initialized by vcpkg."""
++    envvars_to_save = (
++        'include',
++        'lib',
++        'libpath',
++        'path',
++        'pathext',
++        'systemroot',
++        'temp',
++        'tmp',
++        'vslang',
++    )
++    env = {}
++    for key, value in os.environ.items():
++        if key.lower() in envvars_to_save and value:
++            env[key.upper()] = value
++    if 'PATHEXT' not in env:
++        env['PATHEXT'] = '.COM;.EXE;.BAT;.CMD'
++    for required in ('INCLUDE', 'LIB', 'PATH', 'SYSTEMROOT', 'TEMP', 'TMP'):
++        if required not in env:
++            return None
++    if (not shutil.which('cl.exe', path=env['PATH']) and
++            not shutil.which('cl', path=env['PATH'])):
++        return None
++    return env
++
++
+ def _FormatAsEnvironmentBlock(envvar_dict):
+     """Format as an 'environment block' directly suitable for CreateProcess.
+     Briefly this is a list of key=value\0, terminated by an additional \0. See
+     CreateProcess() documentation for more details."""
+     block = ''
+     nul = '\0'
+-    for key, value in envvar_dict.items():
++    for key, value in sorted(envvar_dict.items()):
+         block += key + '=' + value + nul
+     block += nul
+     return block
+ 
+ 
+-def _GenerateEnvironmentFiles(install_dir, out_dir, script_path):
+-    """It's not sufficient to have the absolute path to the compiler, linker,
+-    etc. on Windows, as those tools rely on .dlls being in the PATH. We also
+-    need to support both x86 and x64 compilers. Different architectures require
+-    a different compiler binary, and different supporting environment variables
+-    (INCLUDE, LIB, LIBPATH). So, we extract the environment here, wrap all
+-    invocations of compiler tools (cl, link, lib, rc, midl, etc.) to set up the
+-    environment, and then do not prefix the compiler with an absolute path,
+-    instead preferring something like "cl.exe" in the rule which will then run
+-    whichever the environment setup has put in the path."""
++def _WriteEnvironmentFiles(out_dir, env_by_arch):
+     archs = ('x86', 'amd64', 'arm64')
+     result = []
+     for arch in archs:
+-        # Extract environment variables for subprocesses.
+-        args = [os.path.join(install_dir, script_path)]
+-        script_arch_name = arch
+-        if script_path.endswith('SetEnv.cmd') and arch == 'amd64':
+-            script_arch_name = '/x64'
+-        if arch == 'arm64':
+-            script_arch_name = 'x86_arm64'
+-        args.extend((script_arch_name, '&&', 'set'))
+-        popen = subprocess.Popen(args,
+-                                 shell=True,
+-                                 stdout=subprocess.PIPE,
+-                                 stderr=subprocess.STDOUT)
+-        variables, _ = popen.communicate()
+-        if popen.returncode != 0:
+-            raise Exception('"%s" failed with error %d' %
+-                            (args, popen.returncode))
+-        env = _ExtractImportantEnvironment(variables)
+-
+-        env_block = _FormatAsEnvironmentBlock(env)
++        env_block = _FormatAsEnvironmentBlock(env_by_arch[arch])
+         basename = 'environment.' + arch
+         with open(os.path.join(out_dir, basename), 'wb') as f:
+-            f.write(env_block.encode())
++            f.write(env_block.encode(_EnvFileEncoding(), errors='replace'))
+         result.append(basename)
+     return result
+ 
+ 
++def _RunEnvScript(install_dir, script_path, script_arch_name):
++    full_script = os.path.normpath(os.path.join(install_dir, script_path))
++    if sys.platform == 'win32':
++        comspec = os.environ.get('COMSPEC', 'cmd.exe')
++        cmdline = '"%s" /d /s /c ""%s" %s && set"' % (
++            comspec, full_script, script_arch_name)
++        popen = subprocess.Popen(cmdline,
++                                 shell=False,
++                                 stdout=subprocess.PIPE,
++                                 stderr=subprocess.STDOUT)
++    else:
++        popen = subprocess.Popen([full_script, script_arch_name],
++                                 shell=False,
++                                 stdout=subprocess.PIPE,
++                                 stderr=subprocess.STDOUT)
++    variables, _ = popen.communicate()
++    return popen.returncode, variables
++
++
++def _GenerateEnvironmentFiles(install_dir, out_dir, script_path,
++                              target_cpu=None):
++    """Extracts MSVC environment variables for the requested target_cpu (or all
++    supported architectures when unspecified) without failing if optional
++    cross-architectures such as arm64 are not installed."""
++    all_archs = ('x86', 'amd64', 'arm64')
++    requested = (target_cpu or os.environ.get('VCPKG_CRASHPAD_TARGET_CPU') or
++                 '').lower()
++    if requested == 'x86':
++        archs_to_probe = ('x86',)
++    elif requested in ('x64', 'amd64'):
++        archs_to_probe = ('amd64',)
++    elif requested == 'arm64':
++        archs_to_probe = ('arm64',)
++    else:
++        archs_to_probe = all_archs
++
++    env_by_arch = {}
++    fallback_env = None
++    for arch in archs_to_probe:
++        if script_path.endswith('SetEnv.cmd'):
++            candidates = {
++                'x86': ['/x86'],
++                'amd64': ['/x64'],
++                'arm64': ['/arm64'],
++            }[arch]
++        else:
++            candidates = {
++                'x86': ['x86', 'amd64_x86'],
++                'amd64': ['amd64', 'x86_amd64'],
++                'arm64': ['amd64_arm64', 'arm64', 'x86_arm64'],
++            }[arch]
++
++        extracted = None
++        last_rc = 1
++        last_out = b''
++        for script_arch_name in candidates:
++            rc, variables = _RunEnvScript(install_dir, script_path,
++                                          script_arch_name)
++            last_rc = rc
++            last_out = variables
++            if rc == 0:
++                extracted = _ExtractImportantEnvironment(variables)
++                break
++
++        if extracted is None:
++            if not requested and fallback_env is not None and arch == 'arm64':
++                extracted = fallback_env
++            else:
++                raise Exception('"%s %s" failed with error %d:\n%s' %
++                                (os.path.join(install_dir, script_path),
++                                 candidates[0], last_rc,
++                                 _DecodeBytes(last_out)))
++
++        env_by_arch[arch] = extracted
++        if fallback_env is None:
++            fallback_env = extracted
++
++    for arch in all_archs:
++        if arch not in env_by_arch:
++            env_by_arch[arch] = fallback_env
++
++    return _WriteEnvironmentFiles(out_dir, env_by_arch)
++
++
+ def _GetEnvAsDict(arch):
+     """Gets the saved environment from a file for a given architecture."""
+-    # The environment is saved as an "environment block" (see CreateProcess()
+-    # for details, which is the format required for ninja). We convert to a dict
+-    # here. Drop last 2 NULs, one for list terminator, one for trailing vs.
+-    # separator.
+-    pairs = open(arch).read()[:-2].split('\0')
+-    kvs = [item.split('=', 1) for item in pairs]
+-    return dict(kvs)
++    with open(arch, 'rb') as f:
++        content = f.read().decode(_EnvFileEncoding(), errors='replace')
++    pairs = content.rstrip('\0').split('\0')
++    env = {}
++    for item in pairs:
++        if '=' in item:
++            key, value = item.split('=', 1)
++            if key:
++                env[key] = value
++    return env
+ 
+ 
+ def _SlashSlashes(args):
+@@ -124,6 +244,21 @@ def _SlashSlashes(args):
+     return args
+ 
+ 
++def _ResolveCommand(args, env):
++    args = _SlashSlashes(args)
++    exe = shutil.which(args[0], path=env.get('PATH') or env.get('Path'))
++    if exe:
++        args[0] = exe
++        return args, False
++    return args, (sys.platform == 'win32')
++
++
++def _FormatGnInstallDir(install_dir):
++    install_dir = install_dir.replace('\\', '/').rstrip('/')
++    install_dir = install_dir.replace('$', '\\$').replace('"', '\\"')
++    return install_dir
++
++
+ class WinTool(object):
+ 
+     def Dispatch(self, args):
+@@ -144,14 +279,14 @@ class WinTool(object):
+         This happens when there are exports from the dll or exe.
+         """
+         env = _GetEnvAsDict(arch)
+-        args = _SlashSlashes(args)
+-        link = subprocess.Popen(args,
++        cmd, use_shell = _ResolveCommand(args, env)
++        link = subprocess.Popen(cmd,
+                                 env=env,
+-                                shell=True,
++                                shell=use_shell,
+                                 stdout=subprocess.PIPE)
+         out, _ = link.communicate()
+-        for line in out.splitlines():
+-            line = line.decode("utf-8")
++        for raw_line in out.splitlines():
++            line = _DecodeBytes(raw_line)
+             if (not line.startswith('   Creating library ') and
+                     not line.startswith('Generating code') and
+                     not line.startswith('Finished generating code')):
+@@ -161,56 +296,103 @@ class WinTool(object):
+     def ExecAsmWrapper(self, arch, *args):
+         """Filter logo banner from invocations of asm.exe."""
+         env = _GetEnvAsDict(arch)
+-        args = _SlashSlashes(args)
+-        popen = subprocess.Popen(args,
++        cmd, use_shell = _ResolveCommand(args, env)
++        popen = subprocess.Popen(cmd,
+                                  env=env,
+-                                 shell=True,
++                                 shell=use_shell,
+                                  stdout=subprocess.PIPE,
+                                  stderr=subprocess.STDOUT)
+         out, _ = popen.communicate()
+-        for line in out.splitlines():
+-            line = line.decode("utf-8")
++        for raw_line in out.splitlines():
++            line = _DecodeBytes(raw_line)
+             if (not line.startswith('Copyright (C) Microsoft Corporation') and
+                     not line.startswith('Microsoft (R) Macro Assembler') and
+                     not line.startswith(' Assembling: ') and line):
+                 print(line)
+         return popen.returncode
+ 
+-    def ExecGetVisualStudioData(self, outdir, toolchain_path):
++    def ExecGetVisualStudioData(self, outdir, toolchain_path, target_cpu=None):
++        os.makedirs(outdir, exist_ok=True)
++
++        if os.environ.get('VCPKG_CRASHPAD_USE_CURRENT_ENV') == '1':
++            current_env = _ExtractCurrentEnvironment()
++            if current_env is not None:
++                install_dir = (os.environ.get('VSINSTALLDIR') or
++                               os.environ.get('VCINSTALLDIR') or '.')
++                install_dir = _FormatGnInstallDir(os.path.normpath(install_dir))
++                x86_file, x64_file, arm64_file = _WriteEnvironmentFiles(
++                    outdir, {
++                        'x86': current_env,
++                        'amd64': current_env,
++                        'arm64': current_env,
++                    })
++                result = '''install_dir = "%s"
++x86_environment_file = "%s"
++x64_environment_file = "%s"
++arm64_environment_file = "%s"''' % (install_dir, x86_file, x64_file, arm64_file)
++                print(result)
++                return 0
++
+         setenv_paths = [
+             # cipd packaged SDKs from 10.0.19041.0 onwards.
+             os.path.join('Windows Kits', '10', 'bin', 'SetEnv.cmd'),
+             # cipd packaged SDKs prior to 10.0.19041.0.
+             os.path.join('win_sdk', 'bin', 'SetEnv.cmd'),
+         ]
++        vcvars_paths = [
++            os.path.join('VC', 'Auxiliary', 'Build', 'vcvarsall.bat'),
++            os.path.join('VC', 'vcvarsall.bat'),
++        ]
+ 
+         def explicit():
+-            for setenv_path in setenv_paths:
++            for setenv_path in setenv_paths + vcvars_paths:
+                 if os.path.exists(os.path.join(toolchain_path, setenv_path)):
+                     return toolchain_path, setenv_path
+ 
+         def env():
+             from_env = os.environ.get('VSINSTALLDIR')
+-            for setenv_path in setenv_paths:
+-                if from_env and os.path.exists(
+-                        os.path.join(from_env, setenv_path)):
++            if not from_env:
++                return None
++            from_env = os.path.normpath(from_env)
++            for setenv_path in setenv_paths + vcvars_paths:
++                if os.path.exists(os.path.join(from_env, setenv_path)):
+                     return from_env, setenv_path
+ 
+         def autodetect():
+             # Try vswhere, which will find VS2017.2+. Note that earlier VS2017s
+-            # will not be found.
+-            vswhere_path = os.path.join(os.environ.get('ProgramFiles(x86)'),
++            # will not be found. Filter to installations that actually provide
++            # VC\Auxiliary\Build\vcvarsall.bat so non-C++ products (e.g. SSMS)
++            # are skipped.
++            program_files = (os.environ.get('ProgramFiles(x86)') or
++                             os.environ.get('ProgramFiles') or '')
++            vswhere_path = os.path.join(program_files,
+                                         'Microsoft Visual Studio', 'Installer',
+                                         'vswhere.exe')
+             if os.path.exists(vswhere_path):
+-                installation_path = subprocess.check_output([
+-                    vswhere_path, '-products', '*', '-latest', '-property',
+-                    'installationPath'
+-                ]).strip()
+-                if installation_path:
+-                    return (installation_path.decode("utf-8"),
+-                            os.path.join('VC', 'Auxiliary', 'Build',
+-                                         'vcvarsall.bat'))
++                queries = [
++                    [
++                        vswhere_path, '-utf8', '-products', '*', '-requires',
++                        'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
++                        '-latest', '-property', 'installationPath'
++                    ],
++                    [
++                        vswhere_path, '-utf8', '-products', '*', '-property',
++                        'installationPath'
++                    ],
++                ]
++                for query in queries:
++                    try:
++                        out = subprocess.check_output(query)
++                    except subprocess.CalledProcessError:
++                        continue
++                    for raw_line in out.splitlines():
++                        candidate = _DecodeBytes(raw_line).strip()
++                        if not candidate:
++                            continue
++                        for vcvars_rel in vcvars_paths:
++                            if os.path.exists(
++                                    os.path.join(candidate, vcvars_rel)):
++                                return candidate, vcvars_rel
+ 
+             # Otherwise, try VS2015.
+             version = '14.0'
+@@ -236,9 +418,8 @@ class WinTool(object):
+                                     fail())
+ 
+         x86_file, x64_file, arm64_file = _GenerateEnvironmentFiles(
+-            install_dir, outdir, script_path)
+-        # gn is unhappy with trailing backslashes.
+-        install_dir = install_dir.rstrip('\\')
++            install_dir, outdir, script_path, target_cpu)
++        install_dir = _FormatGnInstallDir(install_dir)
+         result = '''install_dir = "%s"
+ x86_environment_file = "%s"
+ x64_environment_file = "%s"
