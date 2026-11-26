@@ -8,6 +8,18 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.11.8</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Build System &amp; Code Scanning (#770)</B></font><br>
+<br>
+- <b>Fix Crashpad GN Toolchain Generation on Windows</b>: Added a local <code>ports/crashpad</code> overlay port that consumes <code>vcpkg</code>'s active MSVC environment directly, honors <code>VSINSTALLDIR</code> and <code>VC\Auxiliary\Build\vcvarsall.bat</code> when falling back to <code>vswhere</code> (skipping non-C++ installations such as SSMS), probes only the target CPU architecture instead of failing when optional ARM64 build tools are absent, and safely decodes localized non-UTF-8 Windows console output.<br>
+- <b>Exclude Third-Party vcpkg Sources from CodeQL</b>: Initialized CodeQL after <code>vcpkg</code> dependency builds and filtered third-party <code>vcpkg/</code> and <code>vcpkg_installed/</code> paths from SARIF results.<br>
+<br><br>
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.11.7</font><br>
 <br><br>
 
