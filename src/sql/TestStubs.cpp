@@ -661,9 +661,6 @@ void ConfigCache::loadFromConfig() {}
 
 bool Config::getValue(const wxString&, bool&) { return false; }
 
-// --- Utils Stubs ---
-wxString unquote(const wxString& s, const wxString&) { return s; }
-
 ColumnPtrs::iterator Relation::begin() { return columnsM.begin(); }
 ColumnPtrs::iterator Relation::end() { return columnsM.end(); }
 ColumnPtrs::const_iterator Relation::begin() const { return columnsM.begin(); }

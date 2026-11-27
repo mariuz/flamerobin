@@ -56,10 +56,6 @@ bool connectDatabase(Database *db, wxWindow* parent,
 
 fr::IServicePtr getDALService(Server* s, ProgressIndicator* p, bool sysdba);
 
-
-
-wxString unquote(const wxString& input, const wxString& quoteChar = "\"");
-
 wxString getClientLibrary();
 
 #endif // FRUTILS_H

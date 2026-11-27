@@ -119,12 +119,10 @@ private:
     void log(wxString s, TextType type = ttNormal);     // write messages to textbox
     void clearLogBeforeExecution();
     void flushLogView();    // repaint log + plan views before a blocking call (#747)
-    void prepareVolatileDatabase(wxString server = "", wxString port = "3050", wxString db = "", wxString user = "", wxString password = "", wxString role = "", wxString charset = "NONE");
 
     void splitScreen();
     Database* databaseM;
     DatabasePtr databasePtrM;
-    ServerPtr serverPtrM;
 
     StatementHistory::Position historyPositionM;
     wxString localBuffer;

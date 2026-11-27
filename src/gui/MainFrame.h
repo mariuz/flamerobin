@@ -66,7 +66,6 @@ public:
     void OnMenuURLCopilot(wxCommandEvent& event);
     void OnMenuCheckForUpdates(wxCommandEvent& event);
     void OnMenuConfigure(wxCommandEvent& event);
-    void OnMenuNewVolatileSQLEditor(wxCommandEvent& event);
     void OnMenuIsqlTerminal(wxCommandEvent& event);
     void OnMenuRegisterDatabase(wxCommandEvent& event);
     void OnMenuCloneDatabase(wxCommandEvent& event);

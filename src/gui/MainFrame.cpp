@@ -222,7 +222,6 @@ void MainFrame::buildMainMenu()
     menuBarM = new wxMenuBar();
 
     databaseMenuM = new wxMenu();
-    databaseMenuM->Append(Cmds::Menu_NewVolatileSQLEditor, _("Open new Volatile &SQL Editor..."));
     databaseMenuM->Append(Cmds::Menu_RegisterDatabase, _("R&egister existing database..."));
     databaseMenuM->Append(Cmds::Menu_CreateDatabase, _("Create &new database..."));
     databaseMenuM->Append(Cmds::Menu_RestoreIntoNew, _("Restore bac&kup into new database..."));
@@ -421,7 +420,6 @@ EVT_MENU(Cmds::Menu_URLBugReport, MainFrame::OnMenuURLBugReport)
 EVT_MENU(Cmds::Menu_URLCopilot, MainFrame::OnMenuURLCopilot)
 EVT_MENU(Cmds::Menu_CheckForUpdates, MainFrame::OnMenuCheckForUpdates)
 EVT_MENU(wxID_PREFERENCES, MainFrame::OnMenuConfigure)
-EVT_MENU(Cmds::Menu_NewVolatileSQLEditor, MainFrame::OnMenuNewVolatileSQLEditor)
 EVT_MENU(Cmds::Menu_RegisterDatabase, MainFrame::OnMenuRegisterDatabase)
 EVT_UPDATE_UI(Cmds::Menu_RegisterDatabase, MainFrame::OnMenuUpdateIfServerSelected)
 EVT_MENU(Cmds::Menu_CreateDatabase, MainFrame::OnMenuCreateDatabase)
@@ -1652,20 +1650,6 @@ void MainFrame::OnMenuScriptAsExecute(wxCommandEvent& WXUNUSED(event))
     showSql(this, wxString::Format(_("EXECUTE - %s"), item->getName_().c_str()), db, sql);
 }
 
-void MainFrame::OnMenuNewVolatileSQLEditor(wxCommandEvent& WXUNUSED(event))
-{
-    DatabasePtr db;
-    ServerPtr serverPtrM;
-
-    db = std::make_shared<Database>();
-    serverPtrM = std::make_shared<Server>();
-    db->setServer(serverPtrM);
-    db->setId(UINT_MAX-30);
-    db->setIsVolatile(true);
-
-    ExecuteSqlFrame* eff = new ExecuteSqlFrame(this, -1, _("Omni SQL Editor"), db);
-    eff->Show();
-}
 void MainFrame::OnMenuRegisterDatabase(wxCommandEvent& WXUNUSED(event))
 {
     ServerPtr s = getServer(treeMainM->getSelectedMetadataItem());

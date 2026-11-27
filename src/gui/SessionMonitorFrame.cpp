@@ -205,7 +205,7 @@ SessionMonitorFrame::~SessionMonitorFrame()
     if (timerRefreshM.IsRunning())
         timerRefreshM.Stop();
 
-    if (databaseM && !databaseM->getIsVolative())
+    if (databaseM)
         databaseM->detachObserver(this);
 }
 

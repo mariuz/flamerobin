@@ -337,7 +337,7 @@ bool DatabaseAuthenticationMode::getUseSecretStore() const
 // Database class
 Database::Database()
     : MetadataItem(ntDatabase), metadataLoaderM(0), connectedM(false),
-        connectionCredentialsM(0), dialectM(3), idM(0), volatileM(false),
+        connectionCredentialsM(0), dialectM(3), idM(0),
         lingerM(false), timezonesLoadedM(false), defaultTimezonesLoadedM(false)
 {
     databaseDAL_M = fr::DatabaseFactory::createDatabase();
@@ -441,11 +441,6 @@ void Database::getDatabaseTriggers(std::vector<Trigger *>& list)
 {
     std::transform(DBTriggersM->begin(), DBTriggersM->end(),
         std::back_inserter(list), std::mem_fn(&DBTriggerPtr::get));
-}
-
-bool Database::getIsVolative() const
-{
-    return volatileM;
 }
 
 CharacterSetPtr Database::getCharsetById(int id)
@@ -2387,11 +2382,6 @@ wxString Database::getCryptKeyData() const
 fr::IDatabasePtr Database::getDALDatabase() const
 {
     return databaseDAL_M;
-}
-
-void Database::setIsVolatile(const bool isVolatile)
-{
-    volatileM = isVolatile;
 }
 
 void Database::setPath(const wxString& value)

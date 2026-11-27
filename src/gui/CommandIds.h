@@ -101,7 +101,6 @@ enum {
     Menu_CheckForUpdates,
     Menu_NewObject,
     Menu_DatabaseRegistrationInfo,
-    Menu_NewVolatileSQLEditor,
     Menu_RegisterDatabase,
     Menu_CreateDatabase,
     Menu_ManageUsers,
