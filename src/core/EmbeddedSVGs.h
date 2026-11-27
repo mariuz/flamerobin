@@ -98,6 +98,8 @@ const char* const svg_view = R"svg(<svg width="16" height="16" viewBox="0 0 24 2
 
 const char* const svg_views = R"svg(<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill="#9C27B0" d="M12 6a9.77 9.77 0 0 1 8.82 5.5C19.17 14.87 15.79 17 12 17s-7.17-2.13-8.82-5.5A9.77 9.77 0 0 1 12 6m0-2C7 4 2.73 7.11 1 11.5 2.73 15.89 7 19 12 19s9.27-3.11 11-7.5C21.27 7.11 17 4 12 4zm0 5a2.5 2.5 0 0 1 0 5 2.5 2.5 0 0 1 0-5m0-2c-2.48 0-4.5 2.02-4.5 4.5S9.52 16 12 16s4.5-2.02 4.5-4.5S14.48 7 12 7z"/></svg>)svg";
 
+const char* const svg_toggleview = R"svg(<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="14" width="16" height="5" fill="#4A90E2" fill-opacity="0.28"/><path fill="#607D8B" d="M20 3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 9H4V7h16v5zm0 7H4v-5h16v5z"/><path fill="#4A90E2" d="M4 12h16v2H4z"/></svg>)svg";
+
 // Converted from frlogo_right.eps (Adobe Illustrator 12, 2006, by Stefano Pennuto).
 // Two variants for Windows light/dark mode. viewBox cropped to badge area (square).
 // Light mode: black badge on light backgrounds.

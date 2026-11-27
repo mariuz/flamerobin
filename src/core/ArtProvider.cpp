@@ -86,7 +86,7 @@ wxString getSVGFileName(const wxArtID& id)
     if (id == ART_User || id == ART_Users) return "user";
     if (id == ART_DeleteRow) return "redx";
     if (id == ART_InsertRow) return "new";
-    if (id == ART_ToggleView) return "view";
+    if (id == ART_ToggleView) return "toggleview";
     
     wxString name = id.Lower();
     if (name.Left(4) == "art_")
@@ -250,7 +250,7 @@ wxBitmapBundle ArtProvider::CreateBitmapBundle(const wxArtID& id,
     if (id == ART_Indices) return fromSVG(svg_indices);
     if (id == ART_DeleteRow) return fromSVG(svg_redx);
     if (id == ART_InsertRow) return fromSVG(svg_new);
-    if (id == ART_ToggleView) return fromSVG(svg_view);
+    if (id == ART_ToggleView) return fromSVG(svg_toggleview);
 
     return wxBitmapBundle();
 }

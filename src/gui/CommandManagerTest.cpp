@@ -109,6 +109,15 @@ int main(int argc, char** argv)
     wxString cancelExecSvg(svg_cancelexecution);
     ok = check(cancelExecSvg.Contains("#F44336"), "Cancel Execution SVG uses red fill (#F44336)") && ok;
 
+    // Test 8: Issue #777 - Toggle Split View uses dedicated split-window icon instead of eye icon
+    std::cout << "Test 8: Toggle Split View icon..." << std::endl;
+    wxString toggleViewSvg(svg_toggleview);
+    wxString dbViewSvg(svg_view);
+    ok = check(toggleViewSvg != dbViewSvg, "Toggle Split View SVG differs from Database View eye SVG") && ok;
+    ok = check(!toggleViewSvg.Contains("#9C27B0"), "Toggle Split View SVG does not use Database View purple eye color") && ok;
+    wxBitmapBundle toggleBundle = wxBitmapBundle::FromSVG(svg_toggleview, wxSize(16, 16));
+    ok = check(toggleBundle.IsOk(), "Toggle Split View embedded SVG parses into valid wxBitmapBundle") && ok;
+
     if (ok)
         std::cout << "All CommandManager tests PASSED." << std::endl;
     return ok ? 0 : 1;
