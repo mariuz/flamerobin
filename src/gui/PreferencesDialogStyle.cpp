@@ -53,10 +53,9 @@
 
 
 PrefDlgStyleSetting::PrefDlgStyleSetting(wxPanel* page, PrefDlgSetting* parent)
-    : PrefDlgSetting(page, parent), styleManagerM(0), fileComboBoxM(0), captionBeforeM(0),
+    : PrefDlgSetting(page, parent), fileComboBoxM(0), captionBeforeM(0),
     stylersListBoxM(0), styleListBoxM(0), fontNameComboBoxM(0), fontSizeComboBoxM(0)
 {
-    styleManagerM = new FRStyleManager; 
 }
 
 PrefDlgStyleSetting::~PrefDlgStyleSetting()

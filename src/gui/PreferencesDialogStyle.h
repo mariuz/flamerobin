@@ -61,8 +61,6 @@ protected:
 
     void saveStyle(const wxString& styleName);
 private:
-    FRStyleManager* styleManagerM;
-
     wxStaticText* captionBeforeM;
 
     wxComboBox* fileComboBoxM;
