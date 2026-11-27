@@ -673,7 +673,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     sizer_filter->Add(button_clear_filter, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
 
     label_filter_count = new wxStaticText(notebook_pane_2, -1, _("0 rows"));
-    sizer_filter->Add(label_filter_count, 0, wxALIGN_CENTER_VERTICAL);
+    sizer_filter->Add(label_filter_count, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 2);
 
     sizer_data_pane->Add(sizer_filter, 0, wxEXPAND | wxALL, 4);
     grid_data = new DataGrid(notebook_pane_2, ID_grid_data);
@@ -2994,15 +2994,13 @@ void ExecuteSqlFrame::updateFilterCountLabel()
     if (!grid_data || !label_filter_count)
         return;
     DataGridTable* table = grid_data->getDataGridTable();
-    if (table)
-    {
-        int filtered = table->GetNumberRows();
-        int total = table->getTotalRowCount();
-        if (filtered == total)
-            label_filter_count->SetLabel(wxString::Format(_("Rows: %d"), total));
-        else
-            label_filter_count->SetLabel(wxString::Format(_("Filtered: %d / %d rows"), filtered, total));
-    }
+    if (!table)
+        return;
+
+    int filtered = table->GetNumberRows();
+    int total = table->getTotalRowCount();
+    setStaticTextAndRelayout(label_filter_count,
+        formatFilterCountLabel(filtered, total), notebook_pane_2);
 }
 
 void ExecuteSqlFrame::populateConnectionSwitcher()
@@ -4148,7 +4146,6 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         {
             if (text_ctrl_filter && !text_ctrl_filter->IsEmpty())
                 text_ctrl_filter->ChangeValue(wxEmptyString);
-            updateFilterCountLabel();
 
             DataGridTable* tb = grid_data->getDataGridTable();
             if (tb)
@@ -4160,6 +4157,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             if (fetchAll)
                 grid_data->fetchAll();
             setViewMode(vmGrid);
+            updateFilterCountLabel();
             grid_data->AdjustScrollbars();
             grid_data->ForceRefresh();
         }
@@ -4990,6 +4988,8 @@ void ExecuteSqlFrame::setViewMode(bool splitView, ViewMode mode)
         styled_text_ctrl_stats->SetFocus();
     else if (mode == vmGrid)
     {
+        if (notebook_pane_2 && notebook_pane_2->GetSizer())
+            notebook_pane_2->Layout();
         grid_data->SetFocus();
         grid_data->AdjustScrollbars();
         grid_data->ForceRefresh();

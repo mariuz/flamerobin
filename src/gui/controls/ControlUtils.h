@@ -29,4 +29,8 @@
 
 wxPoint calcContextMenuPosition(const wxPoint& eventPos, wxControl* control);
 
+wxString formatFilterCountLabel(int filteredRows, int totalRows);
+bool setStaticTextAndRelayout(wxStaticText* label, const wxString& newLabel,
+    wxWindow* layoutContainer = nullptr);
+
 #endif

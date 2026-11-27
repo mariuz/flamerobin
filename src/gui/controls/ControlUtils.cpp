@@ -30,6 +30,8 @@
     #include "wx/wx.h"
 #endif
 
+#include "gui/controls/ControlUtils.h"
+
 
 wxPoint calcContextMenuPosition(const wxPoint& eventPos, wxControl* control)
 {
@@ -42,5 +44,32 @@ wxPoint calcContextMenuPosition(const wxPoint& eventPos, wxControl* control)
     if (!control->GetClientRect().Contains(menuPosClient))
         menuPosClient = wxPoint(0, 0);
     return menuPosClient;
+}
+
+wxString formatFilterCountLabel(int filteredRows, int totalRows)
+{
+    if (filteredRows == totalRows)
+        return wxString::Format(_("Rows: %d"), totalRows);
+    return wxString::Format(_("Filtered: %d / %d rows"), filteredRows, totalRows);
+}
+
+bool setStaticTextAndRelayout(wxStaticText* label, const wxString& newLabel,
+    wxWindow* layoutContainer)
+{
+    if (!label || label->GetLabel() == newLabel)
+        return false;
+
+    label->SetLabel(newLabel);
+    label->InvalidateBestSize();
+
+    wxWindow* container = layoutContainer ? layoutContainer : label->GetParent();
+    if (container)
+    {
+        if (container->GetSizer())
+            container->Layout();
+        else if (wxWindow* parent = label->GetParent())
+            parent->Layout();
+    }
+    return true;
 }
 

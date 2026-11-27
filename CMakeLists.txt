@@ -1319,6 +1319,14 @@ add_executable(sql_execution_worker_test
 )
 add_test(NAME sql_execution_worker_test COMMAND sql_execution_worker_test)
 
+# Regression test for issue #772 (Record count label next to filter field truncated until resize).
+add_executable(filter_count_label_test
+    ${SOURCEDIR}/gui/controls/FilterCountLabelTest.cpp
+    ${SOURCEDIR}/gui/controls/ControlUtils.cpp
+)
+target_link_libraries(filter_count_label_test ${wxWidgets_LIBRARIES})
+add_test(NAME filter_count_label_test COMMAND filter_count_label_test)
+
 
 if (APPLE)
         set_target_properties(${PROJECT_NAME} PROPERTIES
