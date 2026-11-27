@@ -78,8 +78,8 @@ PrefDlgStyleSetting::~PrefDlgStyleSetting()
     if (fontSizeComboBoxM && fontSizeComboBoxHandlerM.get())
         fontSizeComboBoxM->PopEventHandler();
 
-    if (blodCheckBoxM && blodCheckBoxHandlerM.get())
-        blodCheckBoxM->PopEventHandler();
+    if (boldCheckBoxM && boldCheckBoxHandlerM.get())
+        boldCheckBoxM->PopEventHandler();
     if (italicCheckBoxM && italicCheckBoxHandlerM.get())
         italicCheckBoxM->PopEventHandler();
     if (underlineCheckBoxM && underlineCheckBoxHandlerM.get())
@@ -88,8 +88,8 @@ PrefDlgStyleSetting::~PrefDlgStyleSetting()
     if (caseRadioBoxM && caseRadioBoxHandlerM.get())
         caseRadioBoxM->PopEventHandler();
 
-    if (styleAciveRadioBoxM && styleAciveRadioBoxHandlerM.get())
-        styleAciveRadioBoxM->PopEventHandler();
+    if (styleActiveRadioBoxM && styleActiveRadioBoxHandlerM.get())
+        styleActiveRadioBoxM->PopEventHandler();
 
 }
 
@@ -162,10 +162,10 @@ bool PrefDlgStyleSetting::createControl(bool WXUNUSED(ignoreerrors))
         wxCommandEventHandler(PrefDlgEventHandler::OnCommandEvent));
 
 
-    blodCheckBoxM = new wxCheckBox(getPage(), wxID_ANY, "Bold", wxDefaultPosition, wxDefaultSize);
-    blodCheckBoxHandlerM.reset(new PrefDlgEventHandler(std::bind(&PrefDlgStyleSetting::OnChangeStyle, this, std::placeholders::_1)));
-    blodCheckBoxM->PushEventHandler(blodCheckBoxHandlerM.get());
-    blodCheckBoxHandlerM->Connect(blodCheckBoxM->GetId(),
+    boldCheckBoxM = new wxCheckBox(getPage(), wxID_ANY, "Bold", wxDefaultPosition, wxDefaultSize);
+    boldCheckBoxHandlerM.reset(new PrefDlgEventHandler(std::bind(&PrefDlgStyleSetting::OnChangeStyle, this, std::placeholders::_1)));
+    boldCheckBoxM->PushEventHandler(boldCheckBoxHandlerM.get());
+    boldCheckBoxHandlerM->Connect(boldCheckBoxM->GetId(),
         wxEVT_COMMAND_CHECKBOX_CLICKED,
         wxCommandEventHandler(PrefDlgEventHandler::OnCommandEvent));
 
@@ -201,10 +201,10 @@ bool PrefDlgStyleSetting::createControl(bool WXUNUSED(ignoreerrors))
     caseChoices.Clear();
     caseChoices.Add("Primary");
     caseChoices.Add("Secondary");
-    styleAciveRadioBoxM = new wxRadioBox(getPage(), wxID_ANY, "Style Active", wxDefaultPosition, wxDefaultSize, caseChoices, 2);
-    styleAciveRadioBoxHandlerM.reset(new PrefDlgEventHandler(std::bind(&PrefDlgStyleSetting::OnChangeStyle, this, std::placeholders::_1)));
-    styleAciveRadioBoxM->PushEventHandler(styleAciveRadioBoxHandlerM.get());
-    styleAciveRadioBoxHandlerM->Connect(styleAciveRadioBoxM->GetId(),
+    styleActiveRadioBoxM = new wxRadioBox(getPage(), wxID_ANY, "Style Active", wxDefaultPosition, wxDefaultSize, caseChoices, 2);
+    styleActiveRadioBoxHandlerM.reset(new PrefDlgEventHandler(std::bind(&PrefDlgStyleSetting::OnChangeStyle, this, std::placeholders::_1)));
+    styleActiveRadioBoxM->PushEventHandler(styleActiveRadioBoxHandlerM.get());
+    styleActiveRadioBoxHandlerM->Connect(styleActiveRadioBoxM->GetId(),
         wxEVT_COMMAND_RADIOBOX_SELECTED,
         wxCommandEventHandler(PrefDlgEventHandler::OnCommandEvent));
 
@@ -237,11 +237,11 @@ bool PrefDlgStyleSetting::loadFromTargetConfig(Config& config)
         fileSecondaryComboBoxM->SetValue(value);
     }
 
-    if (styleAciveRadioBoxM)
+    if (styleActiveRadioBoxM)
     {
         int value = 0;
         config.getValue("StyleActive", value);
-        styleAciveRadioBoxM->SetSelection(value);
+        styleActiveRadioBoxM->SetSelection(value);
     }
 
 
@@ -280,7 +280,7 @@ bool PrefDlgStyleSetting::saveToTargetConfig(Config& config)
 {
     config.setValue(keyM, fileComboBoxM->GetValue());
     config.setValue("StyleThemeSecondary", fileSecondaryComboBoxM->GetValue());
-    config.setValue("StyleActive", styleAciveRadioBoxM->GetSelection());
+    config.setValue("StyleActive", styleActiveRadioBoxM->GetSelection());
 
     wxString userStyleFolder = config.getUserLocalDataDir() + wxFileName::GetPathSeparator() + "xml-styles" + wxFileName::GetPathSeparator();
     if (!wxDirExists(userStyleFolder))
@@ -417,7 +417,7 @@ void PrefDlgStyleSetting::addControlsToSizer(wxSizer* sizer)
                     styleguide().getCheckboxSpacing(),
                     styleguide().getUnrelatedControlMargin(wxHORIZONTAL));
 
-                gz->Add(blodCheckBoxM, 0, wxEXPAND);
+                gz->Add(boldCheckBoxM, 0, wxEXPAND);
                 gz->Add(italicCheckBoxM, 0, wxEXPAND);
                 gz->Add(underlineCheckBoxM, 0, wxEXPAND);
                 sbz->Add(gz, 0, wxEXPAND);
@@ -459,7 +459,7 @@ void PrefDlgStyleSetting::addControlsToSizer(wxSizer* sizer)
         wxSizer* sz = new wxBoxSizer(wxHORIZONTAL);
         sz->Add(styleguide().getFrameMargin(wxLEFT), 0);
         sz->Add(styleguide().getControlLabelMargin(), 0);
-        sz->Add(styleAciveRadioBoxM, 1, wxALIGN_CENTER_VERTICAL);
+        sz->Add(styleActiveRadioBoxM, 1, wxALIGN_CENTER_VERTICAL);
         sz->Add(styleguide().getFrameMargin(wxLEFT), 0);
         sizerV->Add(sz, 0, wxEXPAND);
 
@@ -557,7 +557,7 @@ void PrefDlgStyleSetting::loadStyle(const wxString& styleName)
     foregroundPickerM->SetColour(style->getfgColor());
     backgroundPickerM->SetColour(style->getbgColor());
 
-    blodCheckBoxM->SetValue(style->getFontStyle() & FONTSTYLE_BOLD);
+    boldCheckBoxM->SetValue(style->getFontStyle() & FONTSTYLE_BOLD);
     italicCheckBoxM->SetValue(style->getFontStyle() & FONTSTYLE_ITALIC);
     underlineCheckBoxM->SetValue(style->getFontStyle() & FONTSTYLE_UNDERLINE);
 
@@ -578,7 +578,7 @@ void PrefDlgStyleSetting::saveStyle(const wxString& styleName)
     style->setbgColor(backgroundPickerM->GetColour());
 
     int fontStyle = 0;
-    if (blodCheckBoxM->IsChecked())
+    if (boldCheckBoxM->IsChecked())
         fontStyle |= FONTSTYLE_BOLD;
     if (italicCheckBoxM->IsChecked())
         fontStyle |= FONTSTYLE_ITALIC;

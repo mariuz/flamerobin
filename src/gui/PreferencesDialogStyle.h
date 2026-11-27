@@ -88,8 +88,8 @@ private:
     wxComboBox* fontSizeComboBoxM;
     std::unique_ptr<wxEvtHandler> fontSizeComboBoxHandlerM;
 
-    wxCheckBox* blodCheckBoxM;
-    std::unique_ptr<wxEvtHandler> blodCheckBoxHandlerM;
+    wxCheckBox* boldCheckBoxM;
+    std::unique_ptr<wxEvtHandler> boldCheckBoxHandlerM;
     wxCheckBox* italicCheckBoxM;
     std::unique_ptr<wxEvtHandler> italicCheckBoxHandlerM;
     wxCheckBox* underlineCheckBoxM;
@@ -101,8 +101,8 @@ private:
     wxStaticText* captionSecondaryM;
     wxComboBox* fileSecondaryComboBoxM;
 
-    wxRadioBox* styleAciveRadioBoxM;
-    std::unique_ptr<wxEvtHandler> styleAciveRadioBoxHandlerM;
+    wxRadioBox* styleActiveRadioBoxM;
+    std::unique_ptr<wxEvtHandler> styleActiveRadioBoxHandlerM;
 
 
     void OnChangeStyle(wxCommandEvent& event);
