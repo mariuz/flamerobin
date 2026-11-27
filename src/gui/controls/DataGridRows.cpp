@@ -2515,9 +2515,9 @@ void DataGridRows::getColumnInfo(Database *db, unsigned col, bool& readOnly,
 
 bool DataGridRows::initialize(fr::IStatementPtr statement)
 {
+    clear();
     statementDALM = statement;
 
-    clear();
     // column definitions may have an index into the string array,
     // an offset into the buffer, or use no data at all
     unsigned colCount = statement->getColumnCount();
