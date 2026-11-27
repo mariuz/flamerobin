@@ -22,24 +22,38 @@
 */
 
 #include "engine/db/fbcpp/FbCppTransaction.h"
+#include "engine/db/fbcpp/FbCppDatabase.h"
 #include "firebird/constants.h"
 #include <wx/log.h>
 
 namespace fr
 {
-FbCppTransaction::FbCppTransaction(fbcpp::Attachment& attachment)
-    : attachmentM(attachment), 
-      transactionM(std::make_unique<fbcpp::TransactionExt>(attachment.getClient())),
+FbCppTransaction::FbCppTransaction(std::shared_ptr<FbCppDatabase> database)
+    : databaseM(std::move(database)),
       modeM(TransactionAccessMode::Write), 
       levelM(TransactionIsolationLevel::Concurrency),
       resolutionM(TransactionLockResolution::Wait)
 {
+    if (!databaseM)
+        throw std::runtime_error("Database is null");
+    attachmentSnapshotM = databaseM->getAttachmentPtr();
+    if (!attachmentSnapshotM || !attachmentSnapshotM->isValid())
+        throw std::runtime_error("Database not connected");
+    attachmentGenerationM = databaseM->getAttachmentGeneration();
+    transactionM = std::make_shared<fbcpp::TransactionExt>(attachmentSnapshotM->getClient());
 }
 
 void FbCppTransaction::start()
 {
-    if (startedM)
+    if (!databaseM)
+        throw std::runtime_error("Database is null");
+    std::lock_guard<std::recursive_mutex> lock(databaseM->getAttachmentMutex());
+    if (startedM.load(std::memory_order_acquire))
         return;
+
+    auto att = databaseM->getAttachmentPtr();
+    if (!att || !att->isValid())
+        throw std::runtime_error("Database not connected");
 
     wxLogDebug("FbCppTransaction::start() called. Mode: %d, Level: %d, Resolution: %d",
         (int)modeM, (int)levelM, (int)resolutionM);
@@ -74,11 +88,11 @@ void FbCppTransaction::start()
         int odsVersion = 0;
         try
         {
-            auto& client = attachmentM.getClient();
+            auto& client = att->getClient();
             fbcpp::impl::StatusWrapper status(client);
             unsigned char item = isc_info_ods_version;
             unsigned char buffer[256];
-            attachmentM.getHandle()->getInfo(&status, 1, &item, sizeof(buffer), buffer);
+            att->getHandle()->getInfo(&status, 1, &item, sizeof(buffer), buffer);
             if (!(status.getState() & Firebird::IStatus::STATE_ERRORS))
             {
                 if (buffer[0] == isc_info_ods_version)
@@ -108,30 +122,43 @@ void FbCppTransaction::start()
         options.setWaitMode(fbcpp::TransactionWaitMode::NO_WAIT);
 
     wxLogDebug("FbCppTransaction::start() initializing fbcpp::Transaction.");
-    // Always begin with a fresh handle: a previous commit/rollback (possibly
-    // failed after fb_cancel_abort) may have left a stale valid handle behind.
-    transactionM = std::make_unique<fbcpp::TransactionExt>(attachmentM.getClient());
-    transactionM->start(attachmentM, options);
-    startedM = true;
+    // Shared ownership ensures any older FbCppStatement / FbCppBlob holding a
+    // snapshot of the previous TransactionExt never sees a freed C++ reference (#779).
+    auto nextTx = std::make_shared<fbcpp::TransactionExt>(att->getClient());
+    nextTx->start(*att, options);
+    attachmentSnapshotM = std::move(att);
+    attachmentGenerationM = databaseM->getAttachmentGeneration();
+    transactionM = std::move(nextTx);
+    generationM.fetch_add(1, std::memory_order_release);
+    startedM.store(true, std::memory_order_release);
     wxLogDebug("FbCppTransaction::start() finished.");
 }
 
 void FbCppTransaction::commit()
 {
-    if (transactionM && startedM)
+    if (!databaseM)
+        return;
+    std::lock_guard<std::recursive_mutex> lock(databaseM->getAttachmentMutex());
+    if (transactionM && startedM.load(std::memory_order_acquire))
     {
         wxLogDebug("FbCppTransaction::commit() called.");
         try
         {
             transactionM->commit();
-            startedM = false;
+            startedM.store(false, std::memory_order_release);
+            generationM.fetch_add(1, std::memory_order_release);
             wxLogDebug("FbCppTransaction::commit() finished.");
         }
         catch (...)
         {
-            startedM = false;
-            // the handle may be dead (e.g. attachment aborted): drop it
-            try { transactionM = std::make_unique<fbcpp::TransactionExt>(attachmentM.getClient()); }
+            startedM.store(false, std::memory_order_release);
+            generationM.fetch_add(1, std::memory_order_release);
+            // the handle may be dead (e.g. attachment aborted): replace with fresh shared_ptr
+            try
+            {
+                if (attachmentSnapshotM)
+                    transactionM = std::make_shared<fbcpp::TransactionExt>(attachmentSnapshotM->getClient());
+            }
             catch (...) {}
             throw;
         }
@@ -140,18 +167,27 @@ void FbCppTransaction::commit()
 
 void FbCppTransaction::rollback()
 {
-    if (transactionM && startedM)
+    if (!databaseM)
+        return;
+    std::lock_guard<std::recursive_mutex> lock(databaseM->getAttachmentMutex());
+    if (transactionM && startedM.load(std::memory_order_acquire))
     {
         try
         {
             transactionM->rollback();
-            startedM = false;
+            startedM.store(false, std::memory_order_release);
+            generationM.fetch_add(1, std::memory_order_release);
         }
         catch (...)
         {
-            startedM = false;
-            // the handle may be dead (e.g. attachment aborted): drop it
-            try { transactionM = std::make_unique<fbcpp::TransactionExt>(attachmentM.getClient()); }
+            startedM.store(false, std::memory_order_release);
+            generationM.fetch_add(1, std::memory_order_release);
+            // the handle may be dead (e.g. attachment aborted): replace with fresh shared_ptr
+            try
+            {
+                if (attachmentSnapshotM)
+                    transactionM = std::make_shared<fbcpp::TransactionExt>(attachmentSnapshotM->getClient());
+            }
             catch (...) {}
             throw;
         }
@@ -160,19 +196,38 @@ void FbCppTransaction::rollback()
 
 void FbCppTransaction::commitRetain()
 {
-    if (transactionM && startedM)
+    if (!databaseM)
+        return;
+    std::lock_guard<std::recursive_mutex> lock(databaseM->getAttachmentMutex());
+    if (transactionM && startedM.load(std::memory_order_acquire))
         transactionM->commitRetaining();
 }
 
 void FbCppTransaction::rollbackRetain()
 {
-    if (transactionM && startedM)
+    if (!databaseM)
+        return;
+    std::lock_guard<std::recursive_mutex> lock(databaseM->getAttachmentMutex());
+    if (transactionM && startedM.load(std::memory_order_acquire))
         transactionM->rollbackRetaining();
 }
 
 bool FbCppTransaction::isActive()
 {
-    return startedM;
+    return startedM.load(std::memory_order_acquire);
+}
+
+bool FbCppTransaction::isValidForGeneration(uint64_t expectedGen) const
+{
+    if (!startedM.load(std::memory_order_acquire))
+        return false;
+    if (generationM.load(std::memory_order_acquire) != expectedGen)
+        return false;
+    if (!transactionM || !transactionM->isValid())
+        return false;
+    if (!databaseM || !attachmentSnapshotM || !attachmentSnapshotM->isValid())
+        return false;
+    return databaseM->getAttachmentGeneration() == attachmentGenerationM;
 }
 
 void FbCppTransaction::setAccessMode(TransactionAccessMode mode)

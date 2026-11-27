@@ -22,75 +22,177 @@
 */
 
 #include "engine/db/fbcpp/FbCppBlob.h"
+#include "engine/db/fbcpp/FbCppDatabase.h"
+#include "engine/db/fbcpp/FbCppTransaction.h"
 #include <stdexcept>
 
 namespace fr
 {
 
-FbCppBlob::FbCppBlob(fbcpp::Attachment& attachment, fbcpp::Transaction& transaction)
-    : attachmentM(attachment), transactionM(transaction)
+FbCppBlob::FbCppBlob(std::shared_ptr<FbCppDatabase> database,
+    std::shared_ptr<FbCppTransaction> transaction)
+    : databaseM(std::move(database)), transactionM(std::move(transaction))
 {
+    if (transactionM)
+    {
+        attachmentSnapshotM = transactionM->getAttachmentSnapshot();
+        transactionSnapshotM = transactionM->getFbCppTransactionPtr();
+        txGenerationM = transactionM->getGeneration();
+    }
 }
 
-FbCppBlob::FbCppBlob(fbcpp::Attachment& attachment, fbcpp::Transaction& transaction, const fbcpp::BlobId& blobId)
-    : attachmentM(attachment), transactionM(transaction), blobIdM(blobId)
+FbCppBlob::FbCppBlob(std::shared_ptr<FbCppDatabase> database,
+    std::shared_ptr<FbCppTransaction> transaction,
+    const fbcpp::BlobId& blobId)
+    : databaseM(std::move(database)), transactionM(std::move(transaction)),
+      blobIdM(blobId)
 {
+    if (transactionM)
+    {
+        attachmentSnapshotM = transactionM->getAttachmentSnapshot();
+        transactionSnapshotM = transactionM->getFbCppTransactionPtr();
+        txGenerationM = transactionM->getGeneration();
+    }
+}
+
+FbCppBlob::~FbCppBlob() noexcept
+{
+    if (!blobM)
+        return;
+    try
+    {
+        if (databaseM)
+        {
+            std::lock_guard<std::recursive_mutex> lock(databaseM->getAttachmentMutex());
+            blobM.reset();
+        }
+        else
+        {
+            blobM.reset();
+        }
+    }
+    catch (...)
+    {
+    }
+}
+
+void FbCppBlob::ensureContextValid() const
+{
+    if (!databaseM || !transactionM
+        || !transactionM->isValidForGeneration(txGenerationM)
+        || !attachmentSnapshotM || !transactionSnapshotM)
+    {
+        throw std::runtime_error("Blob transaction is no longer active");
+    }
 }
 
 void FbCppBlob::open()
 {
+    if (!databaseM)
+        throw std::runtime_error("Blob database is null");
+    std::lock_guard<std::recursive_mutex> lock(databaseM->getAttachmentMutex());
+    ensureContextValid();
     if (blobIdM.isEmpty())
         throw std::runtime_error("Blob ID is empty");
-    blobM.emplace(attachmentM, transactionM, blobIdM);
+    blobM.emplace(*attachmentSnapshotM, *transactionSnapshotM, blobIdM);
 }
 
 void FbCppBlob::create()
 {
-    blobM.emplace(attachmentM, transactionM);
+    if (!databaseM)
+        throw std::runtime_error("Blob database is null");
+    std::lock_guard<std::recursive_mutex> lock(databaseM->getAttachmentMutex());
+    ensureContextValid();
+    blobM.emplace(*attachmentSnapshotM, *transactionSnapshotM);
     blobIdM = blobM->getId();
 }
 
 void FbCppBlob::close()
 {
-    if (blobM)
+    if (!blobM)
+        return;
+    if (!databaseM)
     {
-        blobM->close();
         blobM.reset();
+        return;
     }
+    std::lock_guard<std::recursive_mutex> lock(databaseM->getAttachmentMutex());
+    try
+    {
+        if (transactionM && transactionM->isValidForGeneration(txGenerationM))
+            blobM->close();
+    }
+    catch (...)
+    {
+        blobM.reset();
+        throw;
+    }
+    blobM.reset();
 }
 
 void FbCppBlob::cancel()
 {
-    if (blobM)
+    if (!blobM)
+        return;
+    if (!databaseM)
     {
-        blobM->cancel();
         blobM.reset();
+        return;
     }
+    std::lock_guard<std::recursive_mutex> lock(databaseM->getAttachmentMutex());
+    try
+    {
+        if (transactionM && transactionM->isValidForGeneration(txGenerationM))
+            blobM->cancel();
+    }
+    catch (...)
+    {
+        blobM.reset();
+        throw;
+    }
+    blobM.reset();
 }
 
 int FbCppBlob::read(void* buffer, int size)
 {
-    if (!blobM)
+    if (!blobM || !databaseM)
         throw std::runtime_error("Blob not open");
+    std::lock_guard<std::recursive_mutex> lock(databaseM->getAttachmentMutex());
+    ensureContextValid();
     return (int)blobM->read(std::span<char>(static_cast<char*>(buffer), size));
 }
 
 void FbCppBlob::write(const void* buffer, int size)
 {
-    if (!blobM)
+    if (!blobM || !databaseM)
         throw std::runtime_error("Blob not open");
+    std::lock_guard<std::recursive_mutex> lock(databaseM->getAttachmentMutex());
+    ensureContextValid();
     blobM->write(std::span<const char>(static_cast<const char*>(buffer), size));
 }
 
 long FbCppBlob::getLength()
 {
+    if (!databaseM)
+        throw std::runtime_error("Blob database is null");
+    std::lock_guard<std::recursive_mutex> lock(databaseM->getAttachmentMutex());
     if (!blobM)
     {
         open();
-        long len = (long)blobM->getLength();
+        long len = 0;
+        try
+        {
+            len = (long)blobM->getLength();
+        }
+        catch (...)
+        {
+            try { close(); } catch (...) {}
+            throw;
+        }
         close();
         return len;
     }
+    ensureContextValid();
     return (long)blobM->getLength();
 }
 

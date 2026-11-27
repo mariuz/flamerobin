@@ -26,16 +26,24 @@
 
 #include "engine/db/IStatement.h"
 #include "engine/db/fbcpp/FbCppExtensions.h"
+#include <cstdint>
+#include <memory>
 #include <optional>
 
 namespace fr
 {
 
+class FbCppDatabase;
+class FbCppTransaction;
+
 class FbCppStatement : public IStatement
 {
 public:
-    FbCppStatement(IDatabasePtr db, ITransactionPtr tr, fbcpp::Attachment& attachment, fbcpp::Transaction& transaction);
+    FbCppStatement(std::shared_ptr<FbCppDatabase> db, std::shared_ptr<FbCppTransaction> tr);
     virtual ~FbCppStatement();
+
+    static std::string preprocessSqlForParameters(
+        const std::string& sql, std::vector<std::string>& outParameterNames);
 
     virtual void prepare(const std::string& sql) override;
     virtual std::string getSql() const override;
@@ -100,14 +108,15 @@ public:
 
     virtual int getAffectedRows() override;
 
-    virtual IDatabasePtr getDatabase() override { return databasePtrM; }
-    virtual ITransactionPtr getTransaction() override { return transactionPtrM; }
+    virtual IDatabasePtr getDatabase() override;
+    virtual ITransactionPtr getTransaction() override;
 
 private:
-    IDatabasePtr databasePtrM;
-    ITransactionPtr transactionPtrM;
-    fbcpp::Attachment& attachmentM;
-    fbcpp::Transaction& transactionM;
+    std::shared_ptr<FbCppDatabase> databasePtrM;
+    std::shared_ptr<FbCppTransaction> transactionPtrM;
+    std::shared_ptr<fbcpp::Attachment> attachmentSnapshotM;
+    std::shared_ptr<fbcpp::TransactionExt> transactionSnapshotM;
+    uint64_t txGenerationM = 0;
     std::string sqlM;
     std::optional<fbcpp::StatementExt> statementM;
     std::optional<fbcpp::RowSet> rowSetM;

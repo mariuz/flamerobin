@@ -62,22 +62,23 @@ public:
     DataGridRowBuffer(const DataGridRowBuffer* other);
     virtual ~DataGridRowBuffer() {}
 
-    wxString getString(unsigned index);
-    fr::IBlobPtr getBlob(unsigned index);
-    bool getValue(unsigned offset, double& value);
-    bool getValue(unsigned offset, float& value);
-    bool getValue(unsigned offset, dec16_t& value);
-    bool getValue(unsigned offset, dec34_t& value);
-    bool getValue(unsigned offset, int& value);
-    bool getValue(unsigned offset, int64_t& value);
-    bool getValue(unsigned offset, int128_t& value);
-    bool getValue(unsigned offset, fr::DBKey& value, unsigned size);
-    bool getValue32(unsigned offset, int& timeZone, bool& isGmtFallback);
-    bool isFieldNull(unsigned num);
+    wxString getString(unsigned index) const;
+    const wxString& getStringRef(unsigned index) const;
+    fr::IBlobPtr getBlob(unsigned index) const;
+    bool getValue(unsigned offset, double& value) const;
+    bool getValue(unsigned offset, float& value) const;
+    bool getValue(unsigned offset, dec16_t& value) const;
+    bool getValue(unsigned offset, dec34_t& value) const;
+    bool getValue(unsigned offset, int& value) const;
+    bool getValue(unsigned offset, int64_t& value) const;
+    bool getValue(unsigned offset, int128_t& value) const;
+    bool getValue(unsigned offset, fr::DBKey& value, unsigned size) const;
+    bool getValue32(unsigned offset, int& timeZone, bool& isGmtFallback) const;
+    bool isFieldNull(unsigned num) const;
     void setFieldNull(unsigned num, bool isNull);
-    virtual bool isFieldNA(unsigned num);
+    virtual bool isFieldNA(unsigned num) const;
     virtual void setFieldNA(unsigned num, bool isNA);
-    bool isStringLoaded(unsigned num);
+    bool isStringLoaded(unsigned num) const;
     void setStringLoaded(unsigned num, bool isLoaded);
     void setString(unsigned num, const wxString& value);
     void setBlob(unsigned num, fr::IBlobPtr b);
@@ -111,7 +112,7 @@ public:
     InsertedGridRowBuffer(const InsertedGridRowBuffer* other);
 
     virtual bool isInserted();
-    virtual bool isFieldNA(unsigned num);
+    virtual bool isFieldNA(unsigned num) const;
     virtual void setFieldNA(unsigned num, bool isNA);
 };
 

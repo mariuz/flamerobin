@@ -593,6 +593,7 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
     highlightWordText = config().get("highlightWordText", true);
 
     timerBlobEditorM.SetOwner(this, TIMER_ID_UPDATE_BLOB);
+    timerFilterDebounceM.SetOwner(this, TIMER_ID_FILTER_DEBOUNCE);
 
     buildToolbar(CommandManager::get());
     buildMainMenu(CommandManager::get());
@@ -1133,8 +1134,12 @@ bool ExecuteSqlFrame::doCanClose()
 
 void ExecuteSqlFrame::doBeforeDestroy()
 {
+    timerFilterDebounceM.Stop();
     if (grid_data && grid_data->getDataGridTable())
+    {
+        grid_data->getDataGridTable()->stopBackgroundFilter();
         grid_data->getDataGridTable()->stopBackgroundFetch();
+    }
     if (executionWorkerM.joinable())
     {
         cancelExecutionM.store(true);
@@ -1310,7 +1315,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
         ExecuteSqlFrame::OnGridRowCountChanged)
 
     EVT_TEXT(ExecuteSqlFrame::ID_text_ctrl_filter, ExecuteSqlFrame::OnFilterTextChange)
-    EVT_TEXT_ENTER(ExecuteSqlFrame::ID_text_ctrl_filter, ExecuteSqlFrame::OnFilterTextChange)
+    EVT_TEXT_ENTER(ExecuteSqlFrame::ID_text_ctrl_filter, ExecuteSqlFrame::OnFilterTextEnter)
     EVT_BUTTON(ExecuteSqlFrame::ID_button_clear_filter, ExecuteSqlFrame::OnFilterClearClick)
     EVT_CHOICE(ExecuteSqlFrame::ID_choice_connection_switcher, ExecuteSqlFrame::OnConnectionSwitcherSelect)
 
@@ -1325,6 +1330,7 @@ BEGIN_EVENT_TABLE(ExecuteSqlFrame, wxFrame)
     EVT_GRID_CMD_LABEL_LEFT_DCLICK(ExecuteSqlFrame::ID_grid_data, ExecuteSqlFrame::OnGridLabelLeftDClick)
 
     EVT_TIMER(ExecuteSqlFrame::TIMER_ID_UPDATE_BLOB, ExecuteSqlFrame::OnBlobEditorUpdate)
+    EVT_TIMER(ExecuteSqlFrame::TIMER_ID_FILTER_DEBOUNCE, ExecuteSqlFrame::OnFilterDebounceTimer)
 END_EVENT_TABLE()
 
 // Avoiding the annoying thing that you cannot click inside the selection and have it deselected and have caret there
@@ -2961,13 +2967,53 @@ void ExecuteSqlFrame::OnMenuGridExportData(wxCommandEvent& WXUNUSED(event))
 
 void ExecuteSqlFrame::OnFilterTextChange(wxCommandEvent& WXUNUSED(event))
 {
-    if (!grid_data)
+    if (!grid_data || !text_ctrl_filter)
+        return;
+
+    wxString query = text_ctrl_filter->GetValue();
+    if (query.IsEmpty())
+    {
+        timerFilterDebounceM.Stop();
+        triggerGridFilterNow();
+        return;
+    }
+
+    int debounceMs = config().get("DataGridFilterDebounceMs", 300);
+    if (debounceMs <= 0)
+    {
+        timerFilterDebounceM.Stop();
+        triggerGridFilterNow();
+        return;
+    }
+
+    if (DataGridTable* table = grid_data->getDataGridTable())
+        table->stopBackgroundFilter();
+
+    timerFilterDebounceM.StartOnce(debounceMs);
+    updateFilterCountLabel();
+}
+
+void ExecuteSqlFrame::OnFilterTextEnter(wxCommandEvent& WXUNUSED(event))
+{
+    timerFilterDebounceM.Stop();
+    triggerGridFilterNow();
+}
+
+void ExecuteSqlFrame::OnFilterDebounceTimer(wxTimerEvent& WXUNUSED(event))
+{
+    timerFilterDebounceM.Stop();
+    triggerGridFilterNow();
+}
+
+void ExecuteSqlFrame::triggerGridFilterNow()
+{
+    if (!grid_data || !text_ctrl_filter)
         return;
     DataGridTable* table = grid_data->getDataGridTable();
     if (table)
     {
-        wxString query = text_ctrl_filter->GetValue();
-        table->filterRows(query);
+        table->startFilterRowsAsync(text_ctrl_filter->GetValue());
+        grid_data->AdjustScrollbars();
         grid_data->ForceRefresh();
         updateFilterCountLabel();
     }
@@ -2975,14 +3021,16 @@ void ExecuteSqlFrame::OnFilterTextChange(wxCommandEvent& WXUNUSED(event))
 
 void ExecuteSqlFrame::OnFilterClearClick(wxCommandEvent& WXUNUSED(event))
 {
+    timerFilterDebounceM.Stop();
     if (text_ctrl_filter)
-        text_ctrl_filter->Clear();
+        text_ctrl_filter->ChangeValue(wxEmptyString);
     if (grid_data)
     {
         DataGridTable* table = grid_data->getDataGridTable();
         if (table)
         {
             table->clearFilterAndSort();
+            grid_data->AdjustScrollbars();
             grid_data->ForceRefresh();
             updateFilterCountLabel();
         }
@@ -2996,6 +3044,13 @@ void ExecuteSqlFrame::updateFilterCountLabel()
     DataGridTable* table = grid_data->getDataGridTable();
     if (!table)
         return;
+
+    if (table->isFiltering())
+    {
+        setStaticTextAndRelayout(label_filter_count,
+            _("Filtering..."), notebook_pane_2);
+        return;
+    }
 
     int filtered = table->GetNumberRows();
     int total = table->getTotalRowCount();
@@ -3790,7 +3845,10 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     } closeGuard{this};
 
     if (grid_data && grid_data->getDataGridTable())
+    {
+        grid_data->getDataGridTable()->stopBackgroundFilter();
         grid_data->getDataGridTable()->stopBackgroundFetch();
+    }
 
     ScrollAtEnd sae(styled_text_ctrl_stats);
 
@@ -3837,6 +3895,23 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     long waitForParameterInputTime = 0;
     try
     {
+        // Tear down any previous statement, open cursor, and row/BLOB buffers
+        // BEFORE starting a new transaction or preparing the next statement (#779).
+        timerFilterDebounceM.Stop();
+        if (text_ctrl_filter)
+            text_ctrl_filter->ChangeValue(wxEmptyString);
+        if (grid_data)
+        {
+            if (DataGridTable* prevTb = grid_data->getDataGridTable())
+                prevTb->setStatement(nullptr);
+            grid_data->ClearGrid();
+        }
+        if (statementM)
+        {
+            try { statementM->close(); } catch (...) {}
+            statementM = nullptr;
+        }
+
         if (!isTransactionStarted())
         {
             log(_("Starting transaction..."));
@@ -3891,7 +3966,6 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             databaseM->getDALDatabase()->getCounts(&ins1, &upd1, &del1, &ridx1, &rseq1);
             databaseM->getDALDatabase()->getDetailedCounts(counts1);
         }
-        grid_data->ClearGrid(); // statement object will be invalidated, so clear the grid
         statementM = databaseM->getDALDatabase()->createStatement(transactionM);
         log(_("Preparing statement: ") + sql, ttSql);
         sae.scroll();
@@ -4352,7 +4426,10 @@ void ExecuteSqlFrame::OnMenuCommit(wxCommandEvent& WXUNUSED(event))
 bool ExecuteSqlFrame::commitTransaction()
 {
     if (grid_data && grid_data->getDataGridTable())
+    {
+        grid_data->getDataGridTable()->stopBackgroundFilter();
         grid_data->getDataGridTable()->stopBackgroundFetch();
+    }
     if (!isTransactionStarted())    // check
     {
         inTransaction(false);
@@ -4371,8 +4448,13 @@ bool ExecuteSqlFrame::commitTransaction()
         flushLogView();
         {
             wxStopWatch sw;
+            if (grid_data && grid_data->getDataGridTable())
+                grid_data->getDataGridTable()->setStatement(nullptr);
             if (statementM != 0)
+            {
                 statementM->close();
+                statementM = nullptr;
+            }
             transactionM->commit();
             log(wxString::Format(_("Transaction committed (elapsed time: %s)."),
                 millisToTimeString(sw.Time()).c_str()));
@@ -4446,7 +4528,10 @@ void ExecuteSqlFrame::OnMenuRollback(wxCommandEvent& WXUNUSED(event))
 bool ExecuteSqlFrame::rollbackTransaction()
 {
     if (grid_data && grid_data->getDataGridTable())
+    {
+        grid_data->getDataGridTable()->stopBackgroundFilter();
         grid_data->getDataGridTable()->stopBackgroundFetch();
+    }
     if (!isTransactionStarted())    // check
     {
         executedStatementsM.clear();
@@ -4465,8 +4550,13 @@ bool ExecuteSqlFrame::rollbackTransaction()
         flushLogView();
         {
             wxStopWatch sw;
+            if (grid_data && grid_data->getDataGridTable())
+                grid_data->getDataGridTable()->setStatement(nullptr);
             if (statementM != 0)
+            {
                 statementM->close();
+                statementM = nullptr;
+            }
             transactionM->rollback();
             log(wxString::Format(_("Transaction rolled back (elapsed time: %s)."),
                 millisToTimeString(sw.Time()).c_str()));

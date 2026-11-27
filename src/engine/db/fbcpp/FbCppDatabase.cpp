@@ -142,6 +142,7 @@ std::vector<uint8_t> FbCppDatabase::buildConnectDpb()
 
 void FbCppDatabase::connect()
 {
+    std::lock_guard<std::recursive_mutex> lock(attachmentMutexM);
     wxLogDebug("FbCppDatabase::connect() called for: %s", connStrM.c_str());
     auto options = fbcpp::AttachmentOptions();
     if (!configM.empty() || headerPageBuffersM)
@@ -155,23 +156,46 @@ void FbCppDatabase::connect()
     if (!roleM.empty())
         options.setRole(roleM);
 
-    attachmentM.emplace(getOwnClient(), connStrM, options);
+    auto newAttachment = std::make_shared<fbcpp::Attachment>(getOwnClient(), connStrM, options);
+    {
+        std::lock_guard<std::mutex> cancelLk(cancelHandleMutexM);
+        attachmentM = std::move(newAttachment);
+    }
+    attachmentGenerationM.fetch_add(1, std::memory_order_release);
     wxLogDebug("FbCppDatabase::connect() finished.");
 }
 
 void FbCppDatabase::disconnect()
 {
-    attachmentM.reset();
+    std::lock_guard<std::recursive_mutex> lock(attachmentMutexM);
+    attachmentGenerationM.fetch_add(1, std::memory_order_release);
+    std::shared_ptr<fbcpp::Attachment> oldAttachment;
+    {
+        std::lock_guard<std::mutex> cancelLk(cancelHandleMutexM);
+        oldAttachment = std::move(attachmentM);
+    }
+    if (oldAttachment && oldAttachment->isValid())
+    {
+        try
+        {
+            oldAttachment->disconnect();
+        }
+        catch (...)
+        {
+        }
+    }
 }
 
 bool FbCppDatabase::isConnected()
 {
-    return attachmentM.has_value();
+    std::lock_guard<std::mutex> cancelLk(cancelHandleMutexM);
+    return attachmentM != nullptr && attachmentM->isValid();
 }
 
 void FbCppDatabase::create(int pagesize, int dialect, const std::string& owner,
     const std::string& initialUser)
 {
+    std::lock_guard<std::recursive_mutex> lock(attachmentMutexM);
     wxLogDebug("FbCppDatabase::create() called for: %s", connStrM.c_str());
     auto options = fbcpp::AttachmentOptions();
     if (!charsetM.empty())
@@ -186,16 +210,27 @@ void FbCppDatabase::create(int pagesize, int dialect, const std::string& owner,
     options.setCreateDatabase(true);
     options.setDpb(buildDpb(true, pagesize, owner, initialUser));
 
-    attachmentM.emplace(getOwnClient(), connStrM, options);
+    auto newAttachment = std::make_shared<fbcpp::Attachment>(getOwnClient(), connStrM, options);
+    {
+        std::lock_guard<std::mutex> cancelLk(cancelHandleMutexM);
+        attachmentM = std::move(newAttachment);
+    }
+    attachmentGenerationM.fetch_add(1, std::memory_order_release);
     wxLogDebug("FbCppDatabase::create() finished.");
 }
 
 void FbCppDatabase::drop()
 {
-    if (attachmentM)
+    std::lock_guard<std::recursive_mutex> lock(attachmentMutexM);
+    attachmentGenerationM.fetch_add(1, std::memory_order_release);
+    std::shared_ptr<fbcpp::Attachment> oldAttachment;
     {
-        attachmentM->dropDatabase();
-        attachmentM.reset();
+        std::lock_guard<std::mutex> cancelLk(cancelHandleMutexM);
+        oldAttachment = std::move(attachmentM);
+    }
+    if (oldAttachment)
+    {
+        oldAttachment->dropDatabase();
     }
 }
 
@@ -357,14 +392,17 @@ void FbCppDatabase::setHeaderPageBuffers(int buffers)
 
 void FbCppDatabase::cancelOperation(bool forceAbort)
 {
-    if (!attachmentM)
+    // Do NOT lock attachmentMutexM here: cancelOperation must be callable
+    // asynchronously while another thread is blocked inside execute/fetch.
+    std::shared_ptr<fbcpp::Attachment> att = getAttachmentPtr();
+    if (!att || !att->isValid())
         return;
 
-    auto& client = attachmentM->getClient();
+    auto& client = att->getClient();
     fbcpp::impl::StatusWrapper status(client);
     try
     {
-        attachmentM->getHandle()->cancelOperation(&status,
+        att->getHandle()->cancelOperation(&status,
             forceAbort ? fb_cancel_abort : fb_cancel_raise);
     }
     catch (...)
@@ -375,19 +413,23 @@ void FbCppDatabase::cancelOperation(bool forceAbort)
 
 ITransactionPtr FbCppDatabase::createTransaction()
 {
-    if (!attachmentM)
+    std::lock_guard<std::recursive_mutex> lock(attachmentMutexM);
+    if (!attachmentM || !attachmentM->isValid())
         throw std::runtime_error("Database not connected");
-    return std::make_shared<FbCppTransaction>(*attachmentM);
+    auto self = std::dynamic_pointer_cast<FbCppDatabase>(shared_from_this());
+    return std::make_shared<FbCppTransaction>(self);
 }
 
 IStatementPtr FbCppDatabase::createStatement(ITransactionPtr tr)
 {
-    if (!attachmentM)
+    std::lock_guard<std::recursive_mutex> lock(attachmentMutexM);
+    if (!attachmentM || !attachmentM->isValid())
         throw std::runtime_error("Database not connected");
     auto fbTr = std::dynamic_pointer_cast<FbCppTransaction>(tr);
     if (!fbTr)
         throw std::runtime_error("Invalid transaction type for fb-cpp backend");
-    return std::make_shared<FbCppStatement>(shared_from_this(), tr, *attachmentM, fbTr->getFbCppTransaction());
+    auto self = std::dynamic_pointer_cast<FbCppDatabase>(shared_from_this());
+    return std::make_shared<FbCppStatement>(self, fbTr);
 }
 
 std::string FbCppDatabase::getTimezoneName(int timezoneId)
@@ -808,12 +850,14 @@ void FbCppDatabase::getConnectionPoolInfo(std::vector<ConnectionPoolInfo>& connP
 
 IBlobPtr FbCppDatabase::createBlob(ITransactionPtr tr)
 {
-    if (!attachmentM)
+    std::lock_guard<std::recursive_mutex> lock(attachmentMutexM);
+    if (!attachmentM || !attachmentM->isValid())
         throw std::runtime_error("Database not connected");
     auto fbCppTr = std::dynamic_pointer_cast<FbCppTransaction>(tr);
     if (!fbCppTr)
         throw std::runtime_error("Invalid transaction type for fb-cpp backend");
-    return std::make_shared<FbCppBlob>(*attachmentM, fbCppTr->getFbCppTransaction());
+    auto self = std::dynamic_pointer_cast<FbCppDatabase>(shared_from_this());
+    return std::make_shared<FbCppBlob>(self, fbCppTr);
 }
 
 } // namespace fr

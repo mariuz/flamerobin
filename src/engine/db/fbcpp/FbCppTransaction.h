@@ -26,15 +26,19 @@
 
 #include "engine/db/ITransaction.h"
 #include "engine/db/fbcpp/FbCppExtensions.h"
+#include <atomic>
+#include <cstdint>
 #include <memory>
 
 namespace fr
 {
 
+class FbCppDatabase;
+
 class FbCppTransaction : public ITransaction
 {
 public:
-    FbCppTransaction(fbcpp::Attachment& attachment);
+    explicit FbCppTransaction(std::shared_ptr<FbCppDatabase> database);
     virtual ~FbCppTransaction() = default;
 
     virtual void start() override;
@@ -49,11 +53,18 @@ public:
     virtual void setLockResolution(TransactionLockResolution resolution) override;
 
     fbcpp::Transaction& getFbCppTransaction();
+    std::shared_ptr<fbcpp::TransactionExt> getFbCppTransactionPtr() const { return transactionM; }
+    std::shared_ptr<fbcpp::Attachment> getAttachmentSnapshot() const { return attachmentSnapshotM; }
+    uint64_t getGeneration() const { return generationM.load(std::memory_order_acquire); }
+    bool isValidForGeneration(uint64_t expectedGen) const;
 
 private:
-    fbcpp::Attachment& attachmentM;
-    std::unique_ptr<fbcpp::TransactionExt> transactionM;
-    bool startedM = false;
+    std::shared_ptr<FbCppDatabase> databaseM;
+    std::shared_ptr<fbcpp::Attachment> attachmentSnapshotM;
+    std::shared_ptr<fbcpp::TransactionExt> transactionM;
+    std::atomic<bool> startedM{false};
+    std::atomic<uint64_t> generationM{0};
+    uint64_t attachmentGenerationM = 0;
     TransactionAccessMode modeM;
     TransactionIsolationLevel levelM;
     TransactionLockResolution resolutionM;

@@ -269,6 +269,7 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/UsernamePasswordDialog.cpp
         ${SOURCEDIR}/gui/controls/ControlUtils.cpp
         ${SOURCEDIR}/gui/controls/DataGrid.cpp
+        ${SOURCEDIR}/gui/controls/DataGridFilterUtils.cpp
         ${SOURCEDIR}/gui/controls/DataGridRowBuffer.cpp
         ${SOURCEDIR}/gui/controls/DataGridRows.cpp
         ${SOURCEDIR}/gui/controls/DataGridTable.cpp
@@ -430,6 +431,7 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/gui/UsernamePasswordDialog.h
         ${SOURCEDIR}/gui/controls/ControlUtils.h
         ${SOURCEDIR}/gui/controls/DataGrid.h
+        ${SOURCEDIR}/gui/controls/DataGridFilterUtils.h
         ${SOURCEDIR}/gui/controls/DataGridRowBuffer.h
         ${SOURCEDIR}/gui/controls/DataGridRows.h
         ${SOURCEDIR}/gui/controls/DataGridTable.h
@@ -1326,6 +1328,33 @@ add_executable(filter_count_label_test
 )
 target_link_libraries(filter_count_label_test ${wxWidgets_LIBRARIES})
 add_test(NAME filter_count_label_test COMMAND filter_count_label_test)
+
+# Regression test for issue #773 (Debounced, cancellable background filtering for large result sets).
+add_executable(data_grid_async_filter_test
+    ${SOURCEDIR}/gui/controls/DataGridAsyncFilterTest.cpp
+    ${SOURCEDIR}/gui/controls/DataGridFilterUtils.cpp
+    ${SOURCEDIR}/gui/controls/DataGridRowBuffer.cpp
+)
+target_link_libraries(data_grid_async_filter_test ${wxWidgets_LIBRARIES})
+add_test(NAME data_grid_async_filter_test COMMAND data_grid_async_filter_test)
+
+# Regression test for issue #779 (EXECUTE BLOCK parameter preprocessing and BLOB/transaction lifetime safety).
+add_executable(fbcpp_execute_block_test
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppExecuteBlockTest.cpp
+    ${SOURCEDIR}/engine/db/DatabaseFactory.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppDatabase.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppTransaction.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppStatement.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppService.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppBlob.cpp
+    ${SOURCEDIR}/engine/db/fbcpp/FbCppExtensions.cpp
+    ${SOURCEDIR}/core/FRInt128.cpp
+    ${SOURCEDIR}/core/FRDecimal.cpp
+    ${SOURCEDIR}/core/FRError.cpp
+    ${SOURCEDIR}/core/StringUtils.cpp
+)
+target_link_libraries(fbcpp_execute_block_test fb-cpp::fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
+add_test(NAME fbcpp_execute_block_test COMMAND fbcpp_execute_block_test)
 
 
 if (APPLE)

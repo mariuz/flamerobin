@@ -892,6 +892,7 @@ void InsertParametersDialog::OnOkButtonClick(wxCommandEvent& WXUNUSED(event))
         }
     }
     {
+        delete bufferM;
         bufferM = 0;
         databaseM = 0;  // prevent other event handlers from making problems
         Close();

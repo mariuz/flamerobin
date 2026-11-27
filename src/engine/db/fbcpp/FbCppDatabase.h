@@ -26,7 +26,11 @@
 
 #include "engine/db/IDatabase.h"
 #include <fb-cpp/fb-cpp.h>
+#include <atomic>
+#include <cstdint>
 #include <map>
+#include <memory>
+#include <mutex>
 #include <optional>
 #include <stdexcept>
 
@@ -88,6 +92,22 @@ public:
         return *attachmentM; 
     }
 
+    std::shared_ptr<fbcpp::Attachment> getAttachmentPtr() const
+    {
+        std::lock_guard<std::mutex> lk(cancelHandleMutexM);
+        return attachmentM;
+    }
+
+    std::recursive_mutex& getAttachmentMutex() const
+    {
+        return attachmentMutexM;
+    }
+
+    uint64_t getAttachmentGeneration() const
+    {
+        return attachmentGenerationM.load(std::memory_order_acquire);
+    }
+
     // Returns the Firebird client library with the given path, loading it on
     // first use.  An empty path means the client library FlameRobin is linked
     // against.  Clients are cached per path: a database registered with its own
@@ -107,7 +127,10 @@ private:
         const std::string& initialUser = "");
     std::vector<uint8_t> buildConnectDpb();
 
-    std::optional<fbcpp::Attachment> attachmentM;
+    mutable std::recursive_mutex attachmentMutexM;
+    mutable std::mutex cancelHandleMutexM;
+    std::atomic<uint64_t> attachmentGenerationM{0};
+    std::shared_ptr<fbcpp::Attachment> attachmentM;
     std::string connStrM;
     std::string userM;
     std::string passwordM;

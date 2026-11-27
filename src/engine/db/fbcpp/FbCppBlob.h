@@ -26,17 +26,26 @@
 
 #include "engine/db/IBlob.h"
 #include <fb-cpp/fb-cpp.h>
+#include <cstdint>
+#include <memory>
 #include <optional>
 
 namespace fr
 {
 
+class FbCppDatabase;
+class FbCppTransaction;
+class FbCppTransactionExt;
+
 class FbCppBlob : public IBlob
 {
 public:
-    FbCppBlob(fbcpp::Attachment& attachment, fbcpp::Transaction& transaction);
-    FbCppBlob(fbcpp::Attachment& attachment, fbcpp::Transaction& transaction, const fbcpp::BlobId& blobId);
-    virtual ~FbCppBlob() = default;
+    FbCppBlob(std::shared_ptr<FbCppDatabase> database,
+        std::shared_ptr<FbCppTransaction> transaction);
+    FbCppBlob(std::shared_ptr<FbCppDatabase> database,
+        std::shared_ptr<FbCppTransaction> transaction,
+        const fbcpp::BlobId& blobId);
+    virtual ~FbCppBlob() noexcept;
 
     virtual void open() override;
     virtual void create() override;
@@ -54,8 +63,13 @@ public:
     void setBlobId(const fbcpp::BlobId& blobId) { blobIdM = blobId; }
 
 private:
-    fbcpp::Attachment& attachmentM;
-    fbcpp::Transaction& transactionM;
+    void ensureContextValid() const;
+
+    std::shared_ptr<FbCppDatabase> databaseM;
+    std::shared_ptr<FbCppTransaction> transactionM;
+    std::shared_ptr<fbcpp::Attachment> attachmentSnapshotM;
+    std::shared_ptr<fbcpp::Transaction> transactionSnapshotM;
+    uint64_t txGenerationM = 0;
     fbcpp::BlobId blobIdM;
     std::optional<fbcpp::Blob> blobM;
 };

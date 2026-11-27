@@ -585,6 +585,14 @@
             <key>GridFetchAllRecords</key>
             <default>0</default>
         </setting>
+        <setting type="int">
+            <caption>Filter debounce delay [VALUE] milliseconds</caption>
+            <description>Wait this long after typing stops before filtering the result set in the background. Set to 0 to trigger filtering immediately on each keystroke. Pressing Enter or Clear always applies immediately.</description>
+            <key>DataGridFilterDebounceMs</key>
+            <minvalue>0</minvalue>
+            <maxvalue>5000</maxvalue>
+            <default>300</default>
+        </setting>
         <setting type="checkbox">
             <caption>Show BLOB data in the grid</caption>
             <key>DataGridFetchBlobs</key>

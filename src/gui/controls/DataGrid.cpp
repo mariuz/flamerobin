@@ -71,6 +71,7 @@ DataGrid::DataGrid(wxWindow* parent, wxWindowID id)
 
     Connect(wxID_ANY, wxEVT_FRDG_BATCH_READY, wxCommandEventHandler(DataGrid::OnBatchReady));
     Connect(wxID_ANY, wxEVT_FRDG_FETCH_DONE, wxCommandEventHandler(DataGrid::OnFetchDone));
+    Connect(wxID_ANY, wxEVT_FRDG_FILTER_DONE, wxCommandEventHandler(DataGrid::OnFilterDone));
 }
 
 DataGrid::~DataGrid()
@@ -1582,6 +1583,17 @@ void DataGrid::OnFetchDone(wxCommandEvent& WXUNUSED(event))
             AutoSizeRows(false);
         AdjustScrollbars();
         Disconnect(wxID_ANY, wxEVT_IDLE);
+    }
+}
+
+void DataGrid::OnFilterDone(wxCommandEvent& WXUNUSED(event))
+{
+    DataGridTable* table = getDataGridTable();
+    if (table && table->applyCompletedFilter())
+    {
+        if (config().get("gridShowMultilineText", false))
+            AutoSizeRows(false);
+        AdjustScrollbars();
     }
 }
 

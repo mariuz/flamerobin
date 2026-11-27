@@ -30,8 +30,10 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include <functional>
 #include <vector>
 
+#include "gui/controls/DataGridFilterUtils.h"
 #include "gui/controls/DataGridRows.h"
 #include "gui/FRStyleManager.h"
 
@@ -54,12 +56,14 @@ BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_LOCAL_EVENT_TYPE(wxEVT_FRDG_BATCH_READY, 45)
     // sent when background fetch finishes
     DECLARE_LOCAL_EVENT_TYPE(wxEVT_FRDG_FETCH_DONE, 46)
+    // sent when background filter worker finishes
+    DECLARE_LOCAL_EVENT_TYPE(wxEVT_FRDG_FILTER_DONE, 47)
 END_DECLARE_EVENT_TYPES()
 
 class DataGridTable: public wxGridTableBase
 {
 private:
-    bool allRowsFetchedM;
+    std::atomic<bool> allRowsFetchedM{false};
     bool fetchAllRowsM;
     unsigned maxRowToFetchM;
     bool readOnlyM;
@@ -93,7 +97,26 @@ private:
     wxString currentFilterTextM;
     std::vector<wxString> originalColLabelsM;
 
+    struct CompletedFilterResult
+    {
+        uint64_t generation = 0;
+        wxString filterText;
+        int sortedCol = -1;
+        bool sortAsc = true;
+        size_t scannedRows = 0;
+        std::vector<size_t> mapping;
+        bool ready = false;
+    };
+    std::thread backgroundFilterThreadM;
+    FilterGenerationTracker filterTrackerM;
+    std::atomic<bool> filterInProgressM{false};
+    std::mutex filterResultMutexM;
+    CompletedFilterResult completedFilterM;
+
     void updateRowMapping();
+    void appendRowsToMapping(size_t startRow, size_t endRow);
+    bool compareRowIndices(size_t a, size_t b, int col, bool asc,
+        const std::vector<const DataGridRowBuffer*>* snapshot = nullptr) const;
     int getRealRowIndex(int row) const;
     void notifyViewRowsChanged(int oldViewRows = -1);
 public:
@@ -101,6 +124,11 @@ public:
     ~DataGridTable();
 
     void filterRows(const wxString& filterText);
+    void startFilterRowsAsync(const wxString& filterText);
+    void stopBackgroundFilter();
+    bool applyCompletedFilter();
+    bool isFiltering() const { return filterInProgressM.load(std::memory_order_relaxed); }
+    const wxString& getCurrentFilterText() const { return currentFilterTextM; }
     void sortColumn(int col, bool ascending = true);
     void toggleSortColumn(int col);
     void clearFilterAndSort();

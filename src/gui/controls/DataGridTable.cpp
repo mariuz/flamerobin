@@ -38,6 +38,7 @@
 #include "config/Config.h"
 #include "core/FRError.h"
 #include "core/StringUtils.h"
+#include "gui/controls/DataGridRowBuffer.h"
 #include "gui/controls/DataGridRows.h"
 #include "gui/controls/DataGridTable.h"
 #include "engine/db/IDatabase.h"
@@ -66,6 +67,7 @@ DataGridTable::DataGridTable(fr::IStatementPtr s, Database* db)
 
 DataGridTable::~DataGridTable()
 {
+    stopBackgroundFilter();
     stopBackgroundFetch();
     Clear();
     cellAttriM->DecRef();
@@ -73,6 +75,7 @@ DataGridTable::~DataGridTable()
 
 void DataGridTable::setStatement(fr::IStatementPtr s)
 {
+    stopBackgroundFilter();
     stopBackgroundFetch();
     statementDALM = s;
 }
@@ -91,6 +94,7 @@ bool DataGridTable::canFetchMoreRows()
 
 void DataGridTable::Clear()
 {
+    stopBackgroundFilter();
     stopBackgroundFetch();
     nullFlagM = false;
 
@@ -159,6 +163,7 @@ unsigned DataGridTable::processPendingBatches()
         batches.swap(pendingBatchesM);
     }
 
+    const size_t oldRows = rowsM.getRowCount();
     unsigned totalNew = 0;
     for (auto& b : batches)
     {
@@ -171,9 +176,12 @@ unsigned DataGridTable::processPendingBatches()
 
     if (totalNew > 0)
     {
-        if (filterOrSortActiveM)
-            updateRowMapping();
-        notifyViewRowsChanged();
+        if (!filterInProgressM.load(std::memory_order_relaxed))
+        {
+            if (filterOrSortActiveM)
+                appendRowsToMapping(oldRows, rowsM.getRowCount());
+            notifyViewRowsChanged();
+        }
 
         if (GetView())
         {
@@ -263,12 +271,16 @@ void DataGridTable::fetchOne()
     {
         if (statementDALM->fetch() || (statementDALM->getColumnCount() > 0))
         {
+            const size_t oldRows = rowsM.getRowCount();
             rowsM.addRow(statementDALM);
             allRowsFetchedM = true;
 
-            if (filterOrSortActiveM)
-                updateRowMapping();
-            notifyViewRowsChanged();
+            if (!filterInProgressM.load(std::memory_order_relaxed))
+            {
+                if (filterOrSortActiveM)
+                    appendRowsToMapping(oldRows, rowsM.getRowCount());
+                notifyViewRowsChanged();
+            }
 
             if (GetView())   // notify the grid
             {
@@ -334,9 +346,12 @@ void DataGridTable::fetch()
     unsigned newRows = rowsM.getRowCount() - oldRows;
     if (newRows > 0)
     {
-        if (filterOrSortActiveM)
-            updateRowMapping();
-        notifyViewRowsChanged();
+        if (!filterInProgressM.load(std::memory_order_relaxed))
+        {
+            if (filterOrSortActiveM)
+                appendRowsToMapping(oldRows, rowsM.getRowCount());
+            notifyViewRowsChanged();
+        }
 
         if (GetView())   // notify the grid
         {
@@ -388,9 +403,12 @@ void DataGridTable::fetchAllSynchronous()
     unsigned newRows = rowsM.getRowCount() - oldRows;
     if (newRows > 0)
     {
-        if (filterOrSortActiveM)
-            updateRowMapping();
-        notifyViewRowsChanged();
+        if (!filterInProgressM.load(std::memory_order_relaxed))
+        {
+            if (filterOrSortActiveM)
+                appendRowsToMapping(oldRows, rowsM.getRowCount());
+            notifyViewRowsChanged();
+        }
 
         if (GetView())
         {
@@ -403,10 +421,14 @@ void DataGridTable::fetchAllSynchronous()
 
 void DataGridTable::addRow(DataGridRowBuffer *buffer, const wxString& sql)
 {
+    const size_t oldRows = rowsM.getRowCount();
     rowsM.addRow(buffer);
-    if (filterOrSortActiveM)
-        updateRowMapping();
-    notifyViewRowsChanged();
+    if (!filterInProgressM.load(std::memory_order_relaxed))
+    {
+        if (filterOrSortActiveM)
+            appendRowsToMapping(oldRows, rowsM.getRowCount());
+        notifyViewRowsChanged();
+    }
 
     if (GetView())  // notify the grid
     {
@@ -677,36 +699,44 @@ Database *DataGridTable::getDatabase()
 
 wxString DataGridTable::GetValue(int row, int col)
 {
-    if (!isValidCellPos(row, col))
-        return wxEmptyString;
-
-    int realRow = getRealRowIndex(row);
-    if (realRow < 0)
-        return wxEmptyString;
-
-    // On-demand fetching: Only request more rows when scrolling near the loaded boundary
-    if (!allRowsFetchedM && !fetchAllRowsM)
+    try
     {
-        if ((unsigned)row + 20 >= (unsigned)GetNumberRows())
+        if (!isValidCellPos(row, col))
+            return wxEmptyString;
+
+        int realRow = getRealRowIndex(row);
+        if (realRow < 0)
+            return wxEmptyString;
+
+        // On-demand fetching: Only request more rows when scrolling near the loaded boundary
+        if (!allRowsFetchedM && !fetchAllRowsM)
         {
-            if (maxRowToFetchM <= rowsM.getRowCount())
-                maxRowToFetchM = rowsM.getRowCount() + 100;
+            if ((unsigned)row + 20 >= (unsigned)GetNumberRows())
+            {
+                if (maxRowToFetchM <= rowsM.getRowCount())
+                    maxRowToFetchM = rowsM.getRowCount() + 100;
+            }
         }
-    }
 
-    if (rowsM.isFieldNA(realRow, col))
-        return "N/A";
-    if (rowsM.isFieldNull(realRow, col))
-        return "[null]";
-    // limit returned string to first line (speeds up output in grid) unless multiline display is enabled
-    wxString s(rowsM.getFieldValue(realRow, col));
-    if (!config().get("gridShowMultilineText", false))
-    {
-        size_t eol = s.find_first_of("\r\n");
-        if (eol != wxString::npos)
-            s.erase(eol);
+        if (rowsM.isFieldNA(realRow, col))
+            return "N/A";
+        if (rowsM.isFieldNull(realRow, col))
+            return "[null]";
+        // limit returned string to first line (speeds up output in grid) unless multiline display is enabled
+        wxString s(rowsM.getFieldValue(realRow, col));
+        if (!config().get("gridShowMultilineText", false))
+        {
+            size_t eol = s.find_first_of("\r\n");
+            if (eol != wxString::npos)
+                s.erase(eol);
+        }
+        return s;
     }
-    return s;
+    catch (...)
+    {
+        // Never allow an exception to escape GetValue() across native GUI paint callbacks (#779).
+        return _("[ERROR]");
+    }
 }
 
 void DataGridTable::initialFetch(bool readonly)
@@ -853,6 +883,7 @@ DataGridRowsBlob DataGridTable::setBlobPrepare(unsigned row, unsigned col)
 
 void DataGridTable::setBlob(DataGridRowsBlob &b)
 {
+    stopBackgroundFilter();
     rowsM.setBlob(b);
 }
 
@@ -861,7 +892,10 @@ void DataGridTable::importBlobFile(const wxString& filename, int row, int col,
 {
     int realRow = getRealRowIndex(row);
     if (realRow >= 0)
+    {
+        stopBackgroundFilter();
         rowsM.importBlobFile(filename, realRow, col, pi);
+    }
 }
 
 void DataGridTable::exportBlobFile(const wxString& filename, int row, int col,
@@ -891,6 +925,7 @@ void DataGridTable::SetValue(int row, int col, const wxString& value)
         if (realRow < 0 || realRow >= (int)rowsM.getRowCount() || col < 0 || col >= (int)rowsM.getRowFieldCount())
             return;
 
+        stopBackgroundFilter();
         wxString statement = rowsM.setFieldValue(realRow, col, value,
             nullFlagM);
         nullFlagM = false;  // reset
@@ -960,10 +995,14 @@ bool DataGridTable::DeleteRows(size_t pos, size_t numRows)
     // Needs explicit exception handling (see comment for SetValue)
     try
     {
+        stopBackgroundFilter();
         // remove rows from internal storage
         wxString statement;
         if (!rowsM.removeRows(pos, numRows, statement))
             return false;
+
+        if (filterOrSortActiveM)
+            updateRowMapping();
 
         // used in frame to show executed statements
         wxGrid* grid = GetView();
@@ -1001,6 +1040,12 @@ DEFINE_EVENT_TYPE(wxEVT_FRDG_STATEMENT)
 DEFINE_EVENT_TYPE(wxEVT_FRDG_INVALIDATEATTR)
 DEFINE_EVENT_TYPE(wxEVT_FRDG_BATCH_READY)
 DEFINE_EVENT_TYPE(wxEVT_FRDG_FETCH_DONE)
+DEFINE_EVENT_TYPE(wxEVT_FRDG_FILTER_DONE)
+
+namespace
+{
+struct FilterSortCancelled {};
+}
 
 int DataGridTable::getRealRowIndex(int row) const
 {
@@ -1032,32 +1077,91 @@ void DataGridTable::notifyViewRowsChanged(int oldViewRows)
     GetView()->ForceRefresh();
 }
 
+bool DataGridTable::compareRowIndices(size_t a, size_t b, int col, bool asc,
+    const std::vector<const DataGridRowBuffer*>* snapshot) const
+{
+    const DataGridRowBuffer* bufA = snapshot
+        ? (*snapshot)[a] : rowsM.getRowBuffer(static_cast<unsigned>(a));
+    const DataGridRowBuffer* bufB = snapshot
+        ? (*snapshot)[b] : rowsM.getRowBuffer(static_cast<unsigned>(b));
+
+    bool nullA = !bufA || bufA->isFieldNull(static_cast<unsigned>(col));
+    bool nullB = !bufB || bufB->isFieldNull(static_cast<unsigned>(col));
+    if (nullA != nullB)
+    {
+        // In ascending sort, NULL values sort last
+        // In descending sort, NULL values sort first
+        return asc ? !nullA : nullA;
+    }
+    if (nullA && nullB)
+        return false;
+
+    wxString valA = rowsM.getCachedFieldValue(bufA, static_cast<unsigned>(col));
+    wxString valB = rowsM.getCachedFieldValue(bufB, static_cast<unsigned>(col));
+
+    double numA = 0, numB = 0;
+    bool isNumA = valA.ToDouble(&numA);
+    bool isNumB = valB.ToDouble(&numB);
+
+    if (isNumA && isNumB)
+        return asc ? (numA < numB) : (numA > numB);
+
+    int cmp = valA.CmpNoCase(valB);
+    return asc ? (cmp < 0) : (cmp > 0);
+}
+
+void DataGridTable::appendRowsToMapping(size_t startRow, size_t endRow)
+{
+    if (startRow >= endRow)
+        return;
+
+    rowsM.prepareForBackgroundFilter();
+    CaseInsensitiveNeedle needle(currentFilterTextM);
+    const size_t prevMappedSize = rowMappingM.size();
+
+    for (size_t r = startRow; r < endRow; ++r)
+    {
+        const DataGridRowBuffer* buf = rowsM.getRowBuffer(static_cast<unsigned>(r));
+        if (needle.empty() || rowsM.rowMatchesFilterCached(buf, needle))
+            rowMappingM.push_back(r);
+    }
+
+    if (rowMappingM.size() > prevMappedSize
+        && sortedColM >= 0 && sortedColM < GetNumberCols())
+    {
+        const int col = sortedColM;
+        const bool asc = sortAscendingM;
+        auto cmp = [this, col, asc](size_t a, size_t b) {
+            return compareRowIndices(a, b, col, asc, nullptr);
+        };
+        auto deltaBegin = rowMappingM.begin() + static_cast<std::ptrdiff_t>(prevMappedSize);
+        std::stable_sort(deltaBegin, rowMappingM.end(), cmp);
+        if (prevMappedSize > 0)
+            std::inplace_merge(rowMappingM.begin(), deltaBegin, rowMappingM.end(), cmp);
+    }
+
+    filterOrSortActiveM = (!needle.empty() || sortedColM >= 0);
+}
+
 void DataGridTable::updateRowMapping()
 {
+    rowsM.prepareForBackgroundFilter();
     size_t count = rowsM.getRowCount();
     rowMappingM.clear();
 
-    wxString query = currentFilterTextM.Lower();
-    for (size_t r = 0; r < count; ++r)
+    CaseInsensitiveNeedle needle(currentFilterTextM);
+    if (needle.empty())
     {
-        if (query.IsEmpty())
-        {
+        rowMappingM.reserve(count);
+        for (size_t r = 0; r < count; ++r)
             rowMappingM.push_back(r);
-        }
-        else
+    }
+    else
+    {
+        for (size_t r = 0; r < count; ++r)
         {
-            bool match = false;
-            size_t cols = GetNumberCols();
-            for (size_t c = 0; c < cols; ++c)
-            {
-                wxString val = rowsM.getFieldValue(r, c);
-                if (val.Lower().Contains(query))
-                {
-                    match = true;
-                    break;
-                }
-            }
-            if (match)
+            const DataGridRowBuffer* buf = rowsM.getRowBuffer(static_cast<unsigned>(r));
+            if (rowsM.rowMatchesFilterCached(buf, needle))
                 rowMappingM.push_back(r);
         }
     }
@@ -1066,40 +1170,169 @@ void DataGridTable::updateRowMapping()
     {
         int col = sortedColM;
         bool asc = sortAscendingM;
-        std::stable_sort(rowMappingM.begin(), rowMappingM.end(), [this, col, asc](size_t a, size_t b) {
-            bool nullA = rowsM.isFieldNull(a, col);
-            bool nullB = rowsM.isFieldNull(b, col);
-            if (nullA != nullB)
-            {
-                // In ascending sort, NULL values sort last
-                // In descending sort, NULL values sort first
-                return asc ? !nullA : nullA;
-            }
-            if (nullA && nullB)
-                return false;
-
-            wxString valA = rowsM.getFieldValue(a, col);
-            wxString valB = rowsM.getFieldValue(b, col);
-
-            double numA = 0, numB = 0;
-            bool isNumA = valA.ToDouble(&numA);
-            bool isNumB = valB.ToDouble(&numB);
-
-            if (isNumA && isNumB)
-            {
-                return asc ? (numA < numB) : (numA > numB);
-            }
-
-            int cmp = valA.CmpNoCase(valB);
-            return asc ? (cmp < 0) : (cmp > 0);
-        });
+        std::stable_sort(rowMappingM.begin(), rowMappingM.end(),
+            [this, col, asc](size_t a, size_t b) {
+                return compareRowIndices(a, b, col, asc, nullptr);
+            });
     }
 
-    filterOrSortActiveM = (!query.IsEmpty() || sortedColM >= 0);
+    filterOrSortActiveM = (!needle.empty() || sortedColM >= 0);
+}
+
+void DataGridTable::stopBackgroundFilter()
+{
+    filterTrackerM.cancelCurrent();
+    if (backgroundFilterThreadM.joinable())
+        backgroundFilterThreadM.join();
+    filterInProgressM.store(false, std::memory_order_relaxed);
+    {
+        std::lock_guard<std::mutex> lock(filterResultMutexM);
+        completedFilterM = CompletedFilterResult{};
+    }
+}
+
+void DataGridTable::startFilterRowsAsync(const wxString& filterText)
+{
+    stopBackgroundFilter();
+    currentFilterTextM = filterText;
+
+    const int numCols = GetNumberCols();
+    const bool hasSort = (sortedColM >= 0 && sortedColM < numCols);
+    if ((filterText.IsEmpty() && !hasSort) || rowsM.getRowCount() == 0)
+    {
+        rowMappingM.clear();
+        filterOrSortActiveM = (!filterText.IsEmpty() || hasSort);
+        notifyViewRowsChanged();
+        if (GetView())
+        {
+            wxCommandEvent evt(wxEVT_FRDG_ROWCOUNT_CHANGED, GetView()->GetId());
+            evt.SetExtraLong(rowsM.getRowCount());
+            wxPostEvent(GetView(), evt);
+        }
+        return;
+    }
+
+    rowsM.prepareForBackgroundFilter();
+    std::vector<const DataGridRowBuffer*> snapshot;
+    rowsM.snapshotBuffers(snapshot);
+
+    const uint64_t jobGen = filterTrackerM.startNewJob();
+    const int sortedCol = sortedColM;
+    const bool sortAsc = sortAscendingM;
+    wxGrid* view = GetView();
+    const int viewId = view ? view->GetId() : wxID_ANY;
+
+    filterInProgressM.store(true, std::memory_order_relaxed);
+
+    backgroundFilterThreadM = std::thread(
+        [this, jobGen, filterText, sortedCol, sortAsc, numCols, view, viewId,
+            snapshot = std::move(snapshot)]() mutable
+        {
+            auto shouldCancel = [this, jobGen]() {
+                return filterTrackerM.isCancelled(jobGen);
+            };
+
+            CaseInsensitiveNeedle needle(filterText);
+            std::vector<size_t> matches;
+            if (needle.empty())
+                matches.reserve(snapshot.size());
+
+            bool completed = filterRowRangeCancellable(
+                0,
+                snapshot.size(),
+                [this, &snapshot, &needle](size_t r) {
+                    return needle.empty()
+                        || rowsM.rowMatchesFilterCached(snapshot[r], needle);
+                },
+                shouldCancel,
+                matches,
+                256);
+
+            if (!completed)
+                return;
+
+            if (sortedCol >= 0 && sortedCol < numCols && matches.size() > 1)
+            {
+                try
+                {
+                    size_t cmpCounter = 0;
+                    std::stable_sort(matches.begin(), matches.end(),
+                        [this, &snapshot, sortedCol, sortAsc, &shouldCancel, &cmpCounter](
+                            size_t a, size_t b)
+                        {
+                            if (((++cmpCounter) & 0x3FF) == 0 && shouldCancel())
+                                throw FilterSortCancelled{};
+                            return compareRowIndices(a, b, sortedCol, sortAsc, &snapshot);
+                        });
+                }
+                catch (const FilterSortCancelled&)
+                {
+                    return;
+                }
+                if (shouldCancel())
+                    return;
+            }
+
+            {
+                std::lock_guard<std::mutex> lock(filterResultMutexM);
+                if (shouldCancel())
+                    return;
+                completedFilterM.generation = jobGen;
+                completedFilterM.filterText = filterText;
+                completedFilterM.sortedCol = sortedCol;
+                completedFilterM.sortAsc = sortAsc;
+                completedFilterM.scannedRows = snapshot.size();
+                completedFilterM.mapping = std::move(matches);
+                completedFilterM.ready = true;
+            }
+
+            if (view)
+            {
+                wxCommandEvent evt(wxEVT_FRDG_FILTER_DONE, viewId);
+                wxPostEvent(view, evt);
+            }
+        });
+}
+
+bool DataGridTable::applyCompletedFilter()
+{
+    CompletedFilterResult res;
+    {
+        std::lock_guard<std::mutex> lock(filterResultMutexM);
+        if (!completedFilterM.ready
+            || completedFilterM.generation != filterTrackerM.currentGeneration())
+        {
+            return false;
+        }
+        res = std::move(completedFilterM);
+        completedFilterM = CompletedFilterResult{};
+    }
+
+    if (backgroundFilterThreadM.joinable())
+        backgroundFilterThreadM.join();
+    filterInProgressM.store(false, std::memory_order_relaxed);
+
+    rowMappingM = std::move(res.mapping);
+    filterOrSortActiveM = (!currentFilterTextM.IsEmpty() || sortedColM >= 0);
+
+    const size_t totalNow = rowsM.getRowCount();
+    if (filterOrSortActiveM && totalNow > res.scannedRows)
+        appendRowsToMapping(res.scannedRows, totalNow);
+
+    notifyViewRowsChanged();
+
+    if (GetView())
+    {
+        wxCommandEvent evt(wxEVT_FRDG_ROWCOUNT_CHANGED, GetView()->GetId());
+        evt.SetExtraLong(rowsM.getRowCount());
+        wxPostEvent(GetView(), evt);
+    }
+    return true;
 }
 
 void DataGridTable::filterRows(const wxString& filterText)
 {
+    stopBackgroundFilter();
     currentFilterTextM = filterText;
     updateRowMapping();
     notifyViewRowsChanged();
@@ -1107,6 +1340,7 @@ void DataGridTable::filterRows(const wxString& filterText)
 
 void DataGridTable::sortColumn(int col, bool ascending)
 {
+    stopBackgroundFilter();
     sortedColM = col;
     sortAscendingM = ascending;
     updateRowMapping();
@@ -1148,6 +1382,7 @@ void DataGridTable::toggleSortColumn(int col)
 
 void DataGridTable::clearFilterAndSort()
 {
+    stopBackgroundFilter();
     currentFilterTextM.Clear();
     sortedColM = -1;
     sortAscendingM = true;

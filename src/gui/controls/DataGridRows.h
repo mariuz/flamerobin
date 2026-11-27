@@ -351,7 +351,10 @@ public:
         int& year, int& month, int& day, int& hr, int& mn, int& sc, int& ml);
     bool showBinaryBlobContent();
     bool showBlobContent();
+    void warmCache();
 };
+
+class CaseInsensitiveNeedle;
 
 class ResultsetColumnDef
 {
@@ -367,6 +370,10 @@ public:
 
     virtual wxString getAsFirebirdString(DataGridRowBuffer* buffer);
     virtual wxString getAsString(DataGridRowBuffer* buffer, Database* db) = 0;
+    virtual const wxString* getDirectCachedString(
+        const DataGridRowBuffer* buffer) const;
+    virtual wxString getAsCachedString(
+        const DataGridRowBuffer* buffer, Database* db) const;
     virtual void setFromString(DataGridRowBuffer* buffer,
         const wxString& source) = 0;
     virtual unsigned getBufferSize() = 0;
@@ -440,6 +447,13 @@ public:
 
     wxString getFieldValue(unsigned row, unsigned col);
     wxString getFieldFirebirdValue(unsigned row, unsigned col);
+    void prepareForBackgroundFilter();
+    void snapshotBuffers(std::vector<const DataGridRowBuffer*>& out) const;
+    const DataGridRowBuffer* getRowBuffer(unsigned row) const;
+    bool rowMatchesFilterCached(const DataGridRowBuffer* buffer,
+        const CaseInsensitiveNeedle& needle) const;
+    wxString getCachedFieldValue(const DataGridRowBuffer* buffer,
+        unsigned col) const;
     wxString setFieldValue(unsigned row, unsigned col,
         const wxString& value, bool setNull = false);
     void importBlobFile(const wxString& filename, unsigned row, unsigned col,

@@ -23,6 +23,8 @@
 
 #include "engine/db/fbcpp/FbCppStatement.h"
 #include "engine/db/fbcpp/FbCppBlob.h"
+#include "engine/db/fbcpp/FbCppDatabase.h"
+#include "engine/db/fbcpp/FbCppTransaction.h"
 #include "engine/db/IDatabase.h"
 #include "engine/db/ITransaction.h"
 #include "core/FRInt128.h"
@@ -40,16 +42,31 @@
 namespace fr
 {
 
-FbCppStatement::FbCppStatement(IDatabasePtr db, ITransactionPtr tr, fbcpp::Attachment& attachment, fbcpp::Transaction& transaction)
-    : databasePtrM(db), transactionPtrM(tr), attachmentM(attachment), transactionM(transaction), eofReachedM(false), rowAvailableM(false)
+FbCppStatement::FbCppStatement(std::shared_ptr<FbCppDatabase> db, std::shared_ptr<FbCppTransaction> tr)
+    : databasePtrM(std::move(db)), transactionPtrM(std::move(tr)), eofReachedM(false), rowAvailableM(false)
 {
+    if (!databasePtrM || !transactionPtrM)
+        throw std::runtime_error("Invalid database or transaction for FbCppStatement");
+    attachmentSnapshotM = transactionPtrM->getAttachmentSnapshot();
+    transactionSnapshotM = transactionPtrM->getFbCppTransactionPtr();
+    txGenerationM = transactionPtrM->getGeneration();
 }
 
 FbCppStatement::~FbCppStatement()
 {
     try
     {
-        close();
+        if (databasePtrM)
+        {
+            std::lock_guard<std::recursive_mutex> lock(databasePtrM->getAttachmentMutex());
+            close();
+            statementM.reset();
+        }
+        else
+        {
+            close();
+            statementM.reset();
+        }
     }
     catch (...)
     {
@@ -57,8 +74,31 @@ FbCppStatement::~FbCppStatement()
     }
 }
 
+IDatabasePtr FbCppStatement::getDatabase()
+{
+    return databasePtrM;
+}
+
+ITransactionPtr FbCppStatement::getTransaction()
+{
+    return transactionPtrM;
+}
+
 void FbCppStatement::prepare(const std::string& sql)
 {
+    if (!databasePtrM || !transactionPtrM)
+        throw std::runtime_error("Invalid database or transaction");
+    std::lock_guard<std::recursive_mutex> lock(databasePtrM->getAttachmentMutex());
+
+    attachmentSnapshotM = transactionPtrM->getAttachmentSnapshot();
+    transactionSnapshotM = transactionPtrM->getFbCppTransactionPtr();
+    txGenerationM = transactionPtrM->getGeneration();
+    if (!attachmentSnapshotM || !attachmentSnapshotM->isValid()
+        || !transactionSnapshotM || !transactionPtrM->isActive())
+    {
+        throw std::runtime_error("Transaction or connection is not active");
+    }
+
     sqlM = sql;
     wxLogDebug("FbCppStatement::prepare() for SQL: %s", sqlM.c_str());
     try {
@@ -68,7 +108,7 @@ void FbCppStatement::prepare(const std::string& sql)
             options.setDialect(static_cast<unsigned>(databasePtrM->getDialect()));
         }
         std::string processedSql = preprocessSql(sql);
-        statementM.emplace(attachmentM, transactionM, processedSql, options);
+        statementM.emplace(*attachmentSnapshotM, *transactionSnapshotM, processedSql, options);
 
         columnTypesM.clear();
         const auto& outDescs = statementM->getOutputDescriptors();
@@ -150,11 +190,15 @@ std::string FbCppStatement::getSql() const
 
 void FbCppStatement::execute()
 {
-    if (!statementM)
+    if (!statementM || !databasePtrM)
         throw std::runtime_error("Statement not prepared");
-    
-    if (!transactionPtrM || !transactionPtrM->isActive())
+    std::lock_guard<std::recursive_mutex> lock(databasePtrM->getAttachmentMutex());
+
+    if (!transactionPtrM || !transactionPtrM->isValidForGeneration(txGenerationM)
+        || !transactionSnapshotM)
+    {
         throw std::runtime_error("Transaction not active");
+    }
 
     wxLogDebug("FbCppStatement::execute() for SQL: %s", sqlM.c_str());
 
@@ -166,7 +210,7 @@ void FbCppStatement::execute()
 
     try {
         wxLogDebug("FbCppStatement::execute() calling library execute().");
-        bool hasRow = statementM->execute(transactionM);
+        bool hasRow = statementM->execute(*transactionSnapshotM);
         
         // If the statement has output columns, fb-cpp might already have the first row.
         // We must capture this result so that the first fetch() call returns it.
@@ -188,10 +232,11 @@ void FbCppStatement::execute()
 
 bool FbCppStatement::fetch()
 {
-    if (!statementM)
+    if (!statementM || !databasePtrM)
         return false;
+    std::lock_guard<std::recursive_mutex> lock(databasePtrM->getAttachmentMutex());
 
-    if (!transactionPtrM || !transactionPtrM->isActive())
+    if (!transactionPtrM || !transactionPtrM->isValidForGeneration(txGenerationM))
         return false;
 
     if (firstRowFetchedM.has_value())
@@ -226,8 +271,12 @@ void FbCppStatement::close()
 {
     try
     {
-        if (statementM)
-            statementM->closeCursor();
+        if (statementM && databasePtrM)
+        {
+            std::lock_guard<std::recursive_mutex> lock(databasePtrM->getAttachmentMutex());
+            if (transactionPtrM && transactionPtrM->isValidForGeneration(txGenerationM))
+                statementM->closeCursor();
+        }
     }
     catch (...)
     {
@@ -262,9 +311,8 @@ void FbCppStatement::setString(int index, const std::string& value)
     if (type == ColumnType::Blob)
     {
         wxLogDebug("FbCppStatement::setString(%d) - creating blob from string", index);
-        IBlobPtr b = std::make_shared<FbCppBlob>(attachmentM, transactionM);
+        IBlobPtr b = std::make_shared<FbCppBlob>(databasePtrM, transactionPtrM);
         b->create();
-        b->open();
         b->write(value.c_str(), (int)value.size());
         b->close();
         setBlob(index, b);
@@ -373,9 +421,8 @@ void FbCppStatement::setBytes(int index, const void* data, int size)
     ColumnType type = getParameterType(index);
     if (type == ColumnType::Blob)
     {
-        IBlobPtr b = std::make_shared<FbCppBlob>(attachmentM, transactionM);
+        IBlobPtr b = std::make_shared<FbCppBlob>(databasePtrM, transactionPtrM);
         b->create();
-        b->open();
         b->write(data, size);
         b->close();
         setBlob(index, b);
@@ -584,7 +631,7 @@ IBlobPtr FbCppStatement::getBlob(int index)
     auto blobId = statementM->get<std::optional<fbcpp::BlobId>>((unsigned)index);
     if (!blobId || blobId->isEmpty())
         return nullptr;
-    return std::make_shared<FbCppBlob>(attachmentM, transactionM, *blobId);
+    return std::make_shared<FbCppBlob>(databasePtrM, transactionPtrM, *blobId);
 }
 
 void FbCppStatement::setBlob(int index, IBlobPtr blob)
@@ -1005,226 +1052,309 @@ int FbCppStatement::getAffectedRows()
 namespace
 {
 
-void removeSqlComments(std::string& sql)
+bool isSqlIdentChar(char c)
 {
-    bool in_single_comment = false;
-    bool in_multi_comment = false;
-    bool in_string = false;
-    char quote_char = 0;
+    unsigned char uc = static_cast<unsigned char>(c);
+    return std::isalnum(uc) || c == '_' || c == '$';
+}
 
-    for (size_t i = 0; i < sql.size(); ++i) {
+size_t skipWhitespaceAndComments(const std::string& sql, size_t pos)
+{
+    const size_t n = sql.size();
+    while (pos < n)
+    {
+        unsigned char uc = static_cast<unsigned char>(sql[pos]);
+        if (std::isspace(uc))
+        {
+            ++pos;
+            continue;
+        }
+        if (sql[pos] == '-' && pos + 1 < n && sql[pos + 1] == '-')
+        {
+            pos += 2;
+            while (pos < n && sql[pos] != '\n')
+                ++pos;
+            continue;
+        }
+        if (sql[pos] == '/' && pos + 1 < n && sql[pos + 1] == '*')
+        {
+            pos += 2;
+            while (pos + 1 < n && !(sql[pos] == '*' && sql[pos + 1] == '/'))
+                ++pos;
+            pos = (pos + 1 < n) ? (pos + 2) : n;
+            continue;
+        }
+        break;
+    }
+    return pos;
+}
+
+bool matchKeywordCI(const std::string& sql, size_t pos, const char* kwUpper, size_t& afterPos)
+{
+    const size_t kwLen = std::strlen(kwUpper);
+    if (pos + kwLen > sql.size())
+        return false;
+    for (size_t k = 0; k < kwLen; ++k)
+    {
+        if (std::toupper(static_cast<unsigned char>(sql[pos + k])) != kwUpper[k])
+            return false;
+    }
+    if (pos + kwLen < sql.size() && isSqlIdentChar(sql[pos + kwLen]))
+        return false;
+    afterPos = pos + kwLen;
+    return true;
+}
+
+// Finds the exact byte index in `sql` where host parameter replacement must stop
+// for EXECUTE BLOCK: host parameters (:PARAM / ?) are ONLY legal inside the
+// optional `EXECUTE BLOCK ( ... )` input clause before RETURNS / AS (#779).
+// Returns true if `sql` starts with EXECUTE BLOCK, setting `paramScanEnd` to the
+// index one past the closing ')' of the input parameter list (or 0 if there is
+// no input parameter list).
+bool findExecuteBlockParamLimit(const std::string& sql, size_t& paramScanEnd)
+{
+    size_t pos = skipWhitespaceAndComments(sql, 0);
+    size_t afterExec = 0;
+    if (!matchKeywordCI(sql, pos, "EXECUTE", afterExec))
+        return false;
+
+    pos = skipWhitespaceAndComments(sql, afterExec);
+    size_t afterBlock = 0;
+    if (!matchKeywordCI(sql, pos, "BLOCK", afterBlock))
+        return false;
+
+    pos = skipWhitespaceAndComments(sql, afterBlock);
+    if (pos >= sql.size() || sql[pos] != '(')
+    {
+        // EXECUTE BLOCK without an input parameter list has zero host parameters.
+        paramScanEnd = 0;
+        return true;
+    }
+
+    // Walk balanced parentheses from '(' to its matching ')', skipping comments and quotes.
+    const size_t n = sql.size();
+    int depth = 0;
+    for (size_t i = pos; i < n; ++i)
+    {
         char c = sql[i];
-
-        // Handle string entry/exit
-        if (!in_single_comment && !in_multi_comment) {
-            if (!in_string && (c == '\'' || c == '\"')) {
-                in_string = true;
-                quote_char = c;
-            }
-            else if (in_string && c == quote_char) {
-                // Handle escaped quote by doubling (e.g. 'O''Reilly')
-                if (i + 1 < sql.size() && sql[i + 1] == quote_char) {
-                    ++i;  // skip escaped quote
+        if (c == '-' && i + 1 < n && sql[i + 1] == '-')
+        {
+            i += 2;
+            while (i < n && sql[i] != '\n')
+                ++i;
+            continue;
+        }
+        if (c == '/' && i + 1 < n && sql[i + 1] == '*')
+        {
+            i += 2;
+            while (i + 1 < n && !(sql[i] == '*' && sql[i + 1] == '/'))
+                ++i;
+            ++i; // loop ++i steps past '/'
+            continue;
+        }
+        if (c == '\'' || c == '"')
+        {
+            char q = c;
+            ++i;
+            while (i < n)
+            {
+                if (sql[i] == q)
+                {
+                    if (i + 1 < n && sql[i + 1] == q)
+                    {
+                        i += 2;
+                        continue;
+                    }
+                    break;
                 }
-                else {
-                    in_string = false;
-                }
-            }
-        }
-
-        // If inside string, skip all
-        if (in_string) continue;
-
-        // Handle comments
-        if (!in_single_comment && !in_multi_comment) {
-            if (c == '-' && i + 1 < sql.size() && sql[i + 1] == '-') {
-                in_single_comment = true;
-                sql[i] = sql[i + 1] = ' ';
                 ++i;
             }
-            else if (c == '/' && i + 1 < sql.size() && sql[i + 1] == '*') {
-                in_multi_comment = true;
-                sql[i] = sql[i + 1] = ' ';
-                ++i;
-            }
+            continue;
         }
-        else if (in_single_comment) {
-            if (c != '\n') {
-                sql[i] = ' ';
-            }
-            else {
-                in_single_comment = false;
-            }
+        if (c == '(')
+        {
+            ++depth;
         }
-        else if (in_multi_comment) {
-            sql[i] = ' ';
-            if (c == '*' && i + 1 < sql.size() && sql[i + 1] == '/') {
-                sql[i + 1] = ' ';
-                ++i;
-                in_multi_comment = false;
+        else if (c == ')')
+        {
+            --depth;
+            if (depth == 0)
+            {
+                paramScanEnd = i + 1;
+                return true;
             }
         }
     }
+
+    paramScanEnd = sql.size();
+    return true;
+}
+
+bool isParameterizableStatement(const std::string& sql, bool& isExecuteBlock, size_t& executeBlockParamEnd)
+{
+    isExecuteBlock = false;
+    executeBlockParamEnd = std::string::npos;
+
+    if (findExecuteBlockParamLimit(sql, executeBlockParamEnd))
+    {
+        isExecuteBlock = true;
+        return true;
+    }
+
+    size_t pos = skipWhitespaceAndComments(sql, 0);
+    size_t afterKw = 0;
+    if (matchKeywordCI(sql, pos, "SELECT", afterKw)
+        || matchKeywordCI(sql, pos, "INSERT", afterKw)
+        || matchKeywordCI(sql, pos, "UPDATE", afterKw)
+        || matchKeywordCI(sql, pos, "DELETE", afterKw)
+        || matchKeywordCI(sql, pos, "MERGE", afterKw)
+        || matchKeywordCI(sql, pos, "WITH", afterKw))
+    {
+        return true;
+    }
+
+    if (matchKeywordCI(sql, pos, "EXECUTE", afterKw))
+    {
+        size_t nextPos = skipWhitespaceAndComments(sql, afterKw);
+        size_t afterProc = 0;
+        if (matchKeywordCI(sql, nextPos, "PROCEDURE", afterProc))
+            return true;
+    }
+
+    return false;
+}
+
+std::string stripTrailingSemicolonAndSpace(std::string res)
+{
+    while (!res.empty()
+        && (std::isspace(static_cast<unsigned char>(res.back())) || res.back() == ';'))
+    {
+        res.pop_back();
+    }
+    return res;
 }
 
 } // namespace
 
+std::string FbCppStatement::preprocessSqlForParameters(
+    const std::string& sql, std::vector<std::string>& outParameterNames)
+{
+    outParameterNames.clear();
+
+    bool isExecuteBlock = false;
+    size_t executeBlockParamEnd = std::string::npos;
+    if (!isParameterizableStatement(sql, isExecuteBlock, executeBlockParamEnd))
+        return sql;
+
+    if (isExecuteBlock && executeBlockParamEnd == 0)
+        return stripTrailingSemicolonAndSpace(sql);
+
+    const size_t n = sql.length();
+    const size_t scanLimit = isExecuteBlock ? executeBlockParamEnd : n;
+
+    std::ostringstream sProcessedSQL;
+    size_t i = 0;
+    while (i < scanLimit)
+    {
+        char c = sql[i];
+
+        // Single-line comment --
+        if (c == '-' && i + 1 < scanLimit && sql[i + 1] == '-')
+        {
+            size_t start = i;
+            i += 2;
+            while (i < scanLimit && sql[i] != '\n')
+                ++i;
+            sProcessedSQL.write(&sql[start], static_cast<std::streamsize>(i - start));
+            continue;
+        }
+
+        // Block comment /* ... */
+        if (c == '/' && i + 1 < scanLimit && sql[i + 1] == '*')
+        {
+            size_t start = i;
+            i += 2;
+            while (i + 1 < scanLimit && !(sql[i] == '*' && sql[i + 1] == '/'))
+                ++i;
+            if (i + 1 < scanLimit)
+                i += 2;
+            else
+                i = scanLimit;
+            sProcessedSQL.write(&sql[start], static_cast<std::streamsize>(i - start));
+            continue;
+        }
+
+        // Quoted string '...' or delimited identifier "..."
+        if (c == '\'' || c == '"')
+        {
+            char q = c;
+            size_t start = i++;
+            while (i < scanLimit)
+            {
+                if (sql[i] == q)
+                {
+                    ++i;
+                    if (i < scanLimit && sql[i] == q)
+                    {
+                        ++i;
+                        continue;
+                    }
+                    break;
+                }
+                ++i;
+            }
+            sProcessedSQL.write(&sql[start], static_cast<std::streamsize>(i - start));
+            continue;
+        }
+
+        if (c == '?')
+        {
+            outParameterNames.push_back("?");
+            sProcessedSQL << '?';
+            ++i;
+            continue;
+        }
+
+        // Named parameter :PARAM (ignore Firebird/SQL '::' operator if ever present)
+        if (c == ':')
+        {
+            if (i + 1 < scanLimit && sql[i + 1] == ':')
+            {
+                sProcessedSQL << "::";
+                i += 2;
+                continue;
+            }
+            if (i + 1 < scanLimit && isSqlIdentChar(sql[i + 1]))
+            {
+                ++i; // consume ':'
+                std::string rawName;
+                std::string upperName;
+                while (i < scanLimit && isSqlIdentChar(sql[i]))
+                {
+                    rawName.push_back(sql[i]);
+                    upperName.push_back(
+                        static_cast<char>(std::toupper(static_cast<unsigned char>(sql[i]))));
+                    ++i;
+                }
+                sProcessedSQL << "?/*:" << rawName << "*/";
+                outParameterNames.push_back(std::move(upperName));
+                continue;
+            }
+        }
+
+        sProcessedSQL << c;
+        ++i;
+    }
+
+    if (scanLimit < n)
+        sProcessedSQL.write(&sql[scanLimit], static_cast<std::streamsize>(n - scanLimit));
+
+    return stripTrailingSemicolonAndSpace(sProcessedSQL.str());
+}
+
 std::string FbCppStatement::preprocessSql(const std::string& sql)
 {
-    parameterNamesM.clear();
-
-    bool isDMLcheck = false;
-    bool isExecuteBlock = false;
-    size_t executeBlockBeginPos = std::string::npos;
-
-    std::string isDML(sql);
-    removeSqlComments(isDML);
-
-    isDML.erase(isDML.begin(), std::find_if(isDML.begin(), isDML.end(), [](unsigned char c) { return !std::isspace(c); })); //lTrim
-
-    std::transform(isDML.begin(), isDML.end(), isDML.begin(), [](unsigned char c) { return (char)std::toupper(c); }); //UpperCase
-
-    std::string isDML4 = isDML.substr(0, std::min<size_t>(isDML.size(), 4));
-    std::string isDML6 = isDML.substr(0, std::min<size_t>(isDML.size(), 6));
-    std::string isDML7 = isDML.substr(0, std::min<size_t>(isDML.size(), 7));
-
-    std::array<std::string, 6> dml = {
-        "INSERT",
-        "UPDATE",
-        "DELETE",
-        "SELECT",
-        "EXECUTE",
-        "WITH"
-    };
-    std::array<std::string, 6> check = {
-        isDML6,
-        isDML6,
-        isDML6,
-        isDML6,
-        isDML7,
-        isDML4
-    };
-
-    for (size_t i = 0; i < dml.size(); ++i) {
-        if (check[i] == dml[i]) {
-            if (dml[i] == "EXECUTE") {
-                size_t x = dml[i].size();
-                while (x < isDML.size() && std::isspace((unsigned char)isDML[x])) {
-                    x++;
-                }
-                if (x < isDML.size() && isDML.compare(x, 5, "BLOCK") == 0) {
-                    isExecuteBlock = true;
-                    executeBlockBeginPos = isDML.find("BEGIN", 0);
-                }
-                else {
-                    if (x >= isDML.size() || isDML[x] != 'P') {
-                        break;
-                    }
-                }
-            }
-            isDMLcheck = true;
-            break;
-        }
-    }
-
-    if (!isDMLcheck) {
-        return sql;
-    }
-
-    bool comment = false, blockComment = false, palavra = false, quote = false, doubleQuote = false;
-    std::ostringstream temp, paramName, sProcessedSQL;
-
-    for (size_t i = 0; i < sql.length(); i++) {
-        char nextChar = 0;
-        char previousChar = 0;
-        char currentChar = sql[i];
-        if (i + 1 < sql.length())
-            nextChar = sql[i + 1];
-        if (i > 0)
-            previousChar = sql[i - 1];
-
-        if (isExecuteBlock && i > executeBlockBeginPos) {
-            sProcessedSQL << currentChar;
-            continue;
-        }
-
-        if (currentChar == '\n' || currentChar == '\r') {
-            comment = false;
-        }
-        else if (currentChar == '-' && nextChar == '-' && !quote && !doubleQuote && !blockComment) {
-            comment = true;
-            sProcessedSQL << currentChar;
-        }
-        else if (currentChar == '/' && nextChar == '*' && !quote && !doubleQuote && !blockComment) {
-            blockComment = true;
-            sProcessedSQL << currentChar;
-        }
-        else if (previousChar == '*' && currentChar == '/' && blockComment) {
-            blockComment = false;
-            sProcessedSQL << currentChar;
-            continue;
-        }
-        else if (currentChar == '\'' && !doubleQuote && !quote && !comment && !blockComment) {
-            quote = true;
-            sProcessedSQL << currentChar;
-        }
-        else if (currentChar == '\'' && quote && !comment && !blockComment) {
-            quote = false;
-        }
-        else if (currentChar == '\"' && !quote && !doubleQuote && !comment && !blockComment) {
-            doubleQuote = true;
-            sProcessedSQL << currentChar;
-        }
-        else if (currentChar == '\"' && doubleQuote) {
-            doubleQuote = false;
-        }
-        else if (quote || doubleQuote) {
-            sProcessedSQL << currentChar;
-        }
-        else if (comment || blockComment) {
-            sProcessedSQL << currentChar;
-        }
-
-        if (!(comment || blockComment || quote || doubleQuote) || palavra || currentChar == '\n' || currentChar == '\r') {
-            comment = false;
-            if (currentChar == '?') {
-                parameterNamesM.push_back("?");
-            }
-
-            if (currentChar == ':') {
-                palavra = true;
-            }
-            else if (palavra) {
-                if (std::isalnum((unsigned char)currentChar) || currentChar == '_' || currentChar == '$') {
-                    temp << (char)std::toupper((unsigned char)currentChar);
-                    paramName << currentChar;
-                    if (i == sql.length() - 1) {
-                        goto fimPalavra;
-                    }
-                }
-                else {
-                fimPalavra:
-                    palavra = false;
-                    sProcessedSQL << "?" << "/*:" << paramName.str() << "*/";
-                    if (!(std::isalnum((unsigned char)currentChar) || currentChar == '_' || currentChar == '$')) {
-                        sProcessedSQL << currentChar;
-                    }
-                    parameterNamesM.push_back(temp.str());
-                    temp.str(std::string()); temp.clear();
-                    paramName.str(std::string()); paramName.clear();
-                }
-            }
-            else {
-                sProcessedSQL << currentChar;
-            }
-        }
-    }
-
-    std::string res = sProcessedSQL.str();
-    while (!res.empty() && (std::isspace(static_cast<unsigned char>(res.back())) || res.back() == ';')) {
-        res.pop_back();
-    }
-    return res;
+    return preprocessSqlForParameters(sql, parameterNamesM);
 }
 
 } // namespace fr

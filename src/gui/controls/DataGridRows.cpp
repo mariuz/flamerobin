@@ -45,6 +45,7 @@
 #include "core/Observer.h"
 #include "core/ProgressIndicator.h"
 #include "core/StringUtils.h"
+#include "gui/controls/DataGridFilterUtils.h"
 #include "gui/controls/DataGridRowBuffer.h"
 #include "gui/controls/DataGridRows.h"
 #include "engine/db/IDatabase.h"
@@ -499,6 +500,11 @@ bool GridCellFormats::showBlobContent()
     return showBlobContentM;
 }
 
+void GridCellFormats::warmCache()
+{
+    ensureCacheValid();
+}
+
 // ResultsetColumnDef class
 ResultsetColumnDef::ResultsetColumnDef(const wxString& name, bool readonly,
     bool nullable)
@@ -508,6 +514,19 @@ ResultsetColumnDef::ResultsetColumnDef(const wxString& name, bool readonly,
 
 ResultsetColumnDef::~ResultsetColumnDef()
 {
+}
+
+const wxString* ResultsetColumnDef::getDirectCachedString(
+    const DataGridRowBuffer*) const
+{
+    return nullptr;
+}
+
+wxString ResultsetColumnDef::getAsCachedString(
+    const DataGridRowBuffer* buffer, Database* db) const
+{
+    return const_cast<ResultsetColumnDef*>(this)->getAsString(
+        const_cast<DataGridRowBuffer*>(buffer), db);
 }
 
 // needed to avoid strange date&time formatting if such column is PK/UNQ
@@ -1769,6 +1788,7 @@ private:
     unsigned indexM, stringIndexM;
     bool textualM;
     wxMBConv* converterM;
+    wxString readBlobPreview(fr::IBlobPtr b) const;
 public:
     BlobColumnDef(const wxString& name, bool readOnly, bool nullable,
         unsigned stringIndex, unsigned blobIndex, bool textual, wxMBConv* converterM = 0);
@@ -1776,6 +1796,10 @@ public:
     virtual unsigned getIndex();
     virtual wxString getAsFirebirdString(DataGridRowBuffer* buffer);
     virtual wxString getAsString(DataGridRowBuffer* buffer, Database* db);
+    virtual const wxString* getDirectCachedString(
+        const DataGridRowBuffer* buffer) const override;
+    virtual wxString getAsCachedString(
+        const DataGridRowBuffer* buffer, Database* db) const override;
     virtual unsigned getBufferSize();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter, Database* db);
@@ -1804,6 +1828,66 @@ unsigned BlobColumnDef::getIndex()
     return indexM;
 }
 
+wxString BlobColumnDef::readBlobPreview(fr::IBlobPtr b) const
+{
+    if (!b)
+        return wxEmptyString;
+
+    std::string result;
+    int bytesToFetch = GridCellFormats::get().maxBlobBytesToFetch();
+    try
+    {
+        b->open();
+        while (bytesToFetch > 0)
+        {
+            char buffer[1025];
+            int size = b->read((void*)buffer, 1024);
+            if (size < 1)
+                break;
+            bytesToFetch -= size;
+            if (textualM)
+            {
+                result.append(buffer, static_cast<size_t>(size));
+            }
+            else    // binary (show as hexadecimal)
+            {
+                for (int i = 0; i < size; i += 8)
+                {
+                    int last = 8;
+                    if (i + last >= size)
+                        last = size - i;
+                    for (int j = 0; j < last; j++)
+                    {
+                        result += wx2std(wxString::Format("%02X",
+                            (unsigned char)(buffer[i + j])));
+                    }
+                    result += " ";
+                    if (((i + 8) % 32) == 0)
+                        result += "\n";
+                }
+            }
+        }
+        b->close();
+    }
+    catch (...)
+    {
+        try { b->close(); } catch (...) {}
+        return _("[ERROR]");
+    }
+
+    wxMBConv& conv = converterM ? *converterM : wxConvUTF8;
+    wxString wxs(result.c_str(), conv);
+    if (bytesToFetch <= 0)    // there was more data to fetch
+    {               // incomplete strings might not get translated properly
+        while (wxs.IsEmpty() && !result.empty())
+        {
+            result.pop_back(); // remove last byte
+            wxs = wxString(result.c_str(), conv);   // try converting again
+        }
+    }
+    return wxs;
+}
+
 wxString BlobColumnDef::getAsString(DataGridRowBuffer* grid_buffer, Database*)
 {
     wxASSERT(grid_buffer);
@@ -1816,58 +1900,9 @@ wxString BlobColumnDef::getAsString(DataGridRowBuffer* grid_buffer, Database*)
 
     fr::IBlobPtr b = grid_buffer->getBlob(indexM);
     if (!b)
-        return "";
-    try
-    {
-        b->open();
-    }
-    catch(...)
-    {
-        return _("[ERROR]");
-    }
+        return wxEmptyString;
 
-    std::string result;
-    int bytesToFetch = GridCellFormats::get().maxBlobBytesToFetch();
-    while (bytesToFetch > 0)
-    {
-        char buffer[1025];
-        int size = b->read((void*)buffer, 1024);
-        if (size < 1)
-            break;
-        bytesToFetch -= size;
-        if (textualM)
-        {
-            std::string s(buffer, size);
-            result += s;    // we don't convert here due to incomplete strings
-        }
-        else    // binary (show as hexadecimal)
-        {
-            for (int i=0; i<size; i+=8)
-            {
-                int last = 8;
-                if (i+last >= size)
-                    last = size - i;
-                for (int j=0; j<last; j++)
-                {
-                    result += wx2std(wxString::Format("%02X",
-                        (unsigned char)(buffer[i+j])));
-                }
-                result += " ";
-                if (((i + 8) % 32) == 0)
-                    result += "\n";
-            }
-        }
-    }
-    b->close();
-    wxString wxs(result.c_str(), *converterM);
-    if (bytesToFetch <= 0)    // there was more data to fetch
-    {               // incomplete strings might not get translated properly
-        while (wxs.IsEmpty() && result.length() > 0)
-        {
-            result.erase(result.length()-1, 1); // remove last byte
-            wxs = wxString(result.c_str(), *converterM);   // try converting again
-        }
-    }
+    wxString wxs = readBlobPreview(b);
     grid_buffer->setString(stringIndexM, wxs);
     return wxs;
 }
@@ -1878,6 +1913,28 @@ wxString BlobColumnDef::getAsFirebirdString(DataGridRowBuffer* buffer)
     wxString s(getAsString(buffer, nullptr));
     s.Replace("'", "''");
     return s;
+}
+
+const wxString* BlobColumnDef::getDirectCachedString(
+    const DataGridRowBuffer* buffer) const
+{
+    wxASSERT(buffer);
+    if (buffer->isStringLoaded(stringIndexM))
+        return &buffer->getStringRef(stringIndexM);
+    return nullptr;
+}
+
+wxString BlobColumnDef::getAsCachedString(
+    const DataGridRowBuffer* buffer, Database*) const
+{
+    wxASSERT(buffer);
+    if (buffer->isStringLoaded(stringIndexM))
+        return buffer->getStringRef(stringIndexM);
+    if (!GridCellFormats::get().showBlobContent())
+        return _("[BLOB]");
+    if (!textualM && !GridCellFormats::get().showBinaryBlobContent())
+        return _("[BINARY]");
+    return wxEmptyString;
 }
 
 void BlobColumnDef::setFromString(DataGridRowBuffer* /*buffer*/,
@@ -1901,7 +1958,16 @@ void BlobColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     fr::IStatementPtr statement, wxMBConv*, Database*)
 {
     wxASSERT(buffer);
-    buffer->setBlob(indexM, statement->getBlob(col - 1));
+    fr::IBlobPtr b = statement->getBlob(col - 1);
+    buffer->setBlob(indexM, b);
+    // Pre-load grid preview on the fetch thread while the transaction and
+    // temporary PSQL BLOBs are active and serialized with fetchNext(), so UI
+    // paint events never race background fetching or fail after commit (#779).
+    if (b && GridCellFormats::get().showBlobContent()
+        && (textualM || GridCellFormats::get().showBinaryBlobContent()))
+    {
+        buffer->setString(stringIndexM, readBlobPreview(b));
+    }
 }
 
 // StringColumnDef class
@@ -1916,6 +1982,10 @@ public:
     virtual unsigned getIndex();
     virtual wxString getAsFirebirdString(DataGridRowBuffer* buffer);
     virtual wxString getAsString(DataGridRowBuffer* buffer, Database* db);
+    virtual const wxString* getDirectCachedString(
+        const DataGridRowBuffer* buffer) const override;
+    virtual wxString getAsCachedString(
+        const DataGridRowBuffer* buffer, Database* db) const override;
     virtual unsigned getBufferSize();
     virtual void setValue(DataGridRowBuffer* buffer, unsigned col,
         const IBPP::Statement& statement, wxMBConv* converter, Database* db);
@@ -1950,6 +2020,20 @@ wxString StringColumnDef::getAsString(DataGridRowBuffer* buffer, Database*)
 {
     wxASSERT(buffer);
     return buffer->getString(indexM);
+}
+
+const wxString* StringColumnDef::getDirectCachedString(
+    const DataGridRowBuffer* buffer) const
+{
+    wxASSERT(buffer);
+    return &buffer->getStringRef(indexM);
+}
+
+wxString StringColumnDef::getAsCachedString(
+    const DataGridRowBuffer* buffer, Database*) const
+{
+    wxASSERT(buffer);
+    return buffer->getStringRef(indexM);
 }
 
 void StringColumnDef::setFromString(DataGridRowBuffer* buffer,
@@ -2175,6 +2259,7 @@ void DataGridRows::clear()
     statementTablesM.clear();
     deleteFromM = statementTablesM.end();
     dbKeysM.clear();
+    statementDALM = nullptr;
     bufferSizeM = 0;
 }
 
@@ -2647,6 +2732,69 @@ wxString DataGridRows::getFieldFirebirdValue(unsigned row, unsigned col)
     if (row >= buffersM.size() || col >= columnDefsM.size())
         return wxEmptyString;
     return columnDefsM[col]->getAsFirebirdString(buffersM[row]);
+}
+
+void DataGridRows::prepareForBackgroundFilter()
+{
+    GridCellFormats::get().warmCache();
+}
+
+void DataGridRows::snapshotBuffers(
+    std::vector<const DataGridRowBuffer*>& out) const
+{
+    out.clear();
+    out.reserve(buffersM.size());
+    for (const DataGridRowBuffer* buf : buffersM)
+        out.push_back(buf);
+}
+
+const DataGridRowBuffer* DataGridRows::getRowBuffer(unsigned row) const
+{
+    if (row >= buffersM.size())
+        return nullptr;
+    return buffersM[row];
+}
+
+bool DataGridRows::rowMatchesFilterCached(const DataGridRowBuffer* buffer,
+    const CaseInsensitiveNeedle& needle) const
+{
+    if (needle.empty())
+        return true;
+    if (!buffer)
+        return false;
+
+    const size_t cols = columnDefsM.size();
+    for (size_t c = 0; c < cols; ++c)
+    {
+        if (buffer->isFieldNull(static_cast<unsigned>(c))
+            || buffer->isFieldNA(static_cast<unsigned>(c)))
+        {
+            continue;
+        }
+        if (const wxString* direct = columnDefsM[c]->getDirectCachedString(buffer))
+        {
+            if (needle.matches(*direct))
+                return true;
+        }
+        else
+        {
+            wxString formatted = columnDefsM[c]->getAsCachedString(buffer, databaseM);
+            if (needle.matches(formatted))
+                return true;
+        }
+    }
+    return false;
+}
+
+wxString DataGridRows::getCachedFieldValue(const DataGridRowBuffer* buffer,
+    unsigned col) const
+{
+    if (!buffer || col >= columnDefsM.size()
+        || buffer->isFieldNull(col) || buffer->isFieldNA(col))
+    {
+        return wxEmptyString;
+    }
+    return columnDefsM[col]->getAsCachedString(buffer, databaseM);
 }
 
 bool DataGridRows::isFieldNull(unsigned row, unsigned col)

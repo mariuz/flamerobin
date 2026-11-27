@@ -70,78 +70,86 @@ DataGridRowBuffer::DataGridRowBuffer(const DataGridRowBuffer* other)
     isDeletableM = other->isDeletableM;
 }
 
-wxString DataGridRowBuffer::getString(unsigned index)
+wxString DataGridRowBuffer::getString(unsigned index) const
 {
     if (index >= stringsM.size())
         return wxEmptyString;
     return stringsM[index];
 }
 
-fr::IBlobPtr DataGridRowBuffer::getBlob(unsigned index)
+const wxString& DataGridRowBuffer::getStringRef(unsigned index) const
+{
+    static const wxString emptyStr;
+    if (index >= stringsM.size())
+        return emptyStr;
+    return stringsM[index];
+}
+
+fr::IBlobPtr DataGridRowBuffer::getBlob(unsigned index) const
 {
     if (index >= blobsM.size())
         return nullptr;
     return blobsM[index];
 }
 
-bool DataGridRowBuffer::getValue(unsigned offset, double& value)
+bool DataGridRowBuffer::getValue(unsigned offset, double& value) const
 {
     if (offset + sizeof(double) > dataM.size())
         return false;
-    value = *((double*)&dataM[offset]);
+    memcpy(&value, &dataM[offset], sizeof(double));
     return true;
 }
 
-bool DataGridRowBuffer::getValue(unsigned offset, float& value)
+bool DataGridRowBuffer::getValue(unsigned offset, float& value) const
 {
     if (offset + sizeof(float) > dataM.size())
         return false;
-    value = *((float*)&dataM[offset]);
+    memcpy(&value, &dataM[offset], sizeof(float));
     return true;
 }
 
-bool DataGridRowBuffer::getValue(unsigned offset, dec16_t& value)
+bool DataGridRowBuffer::getValue(unsigned offset, dec16_t& value) const
 {
     if (offset + sizeof(dec16_t) > dataM.size())
         return false;
-    value = *((dec16_t*)&dataM[offset]);
+    memcpy(&value, &dataM[offset], sizeof(dec16_t));
     return true;
 }
 
-bool DataGridRowBuffer::getValue(unsigned offset, dec34_t& value)
+bool DataGridRowBuffer::getValue(unsigned offset, dec34_t& value) const
 {
     if (offset + sizeof(dec34_t) > dataM.size())
         return false;
-    value = *((dec34_t*)&dataM[offset]);
+    memcpy(&value, &dataM[offset], sizeof(dec34_t));
     return true;
 }
 
-bool DataGridRowBuffer::getValue(unsigned offset, int& value)
+bool DataGridRowBuffer::getValue(unsigned offset, int& value) const
 {
     if (offset + sizeof(int) > dataM.size())
         return false;
-    value = *((int*)&dataM[offset]);
+    memcpy(&value, &dataM[offset], sizeof(int));
     return true;
 }
 
-bool DataGridRowBuffer::getValue(unsigned offset, int64_t& value)
+bool DataGridRowBuffer::getValue(unsigned offset, int64_t& value) const
 {
     if (offset + sizeof(int64_t) > dataM.size())
         return false;
-    value = *((int64_t*)&dataM[offset]);
+    memcpy(&value, &dataM[offset], sizeof(int64_t));
     return true;
 }
 
-bool DataGridRowBuffer::getValue(unsigned offset, int128_t& value)
+bool DataGridRowBuffer::getValue(unsigned offset, int128_t& value) const
 {
     if (offset + sizeof(int128_t) > dataM.size())
         return false;
-    value = *((int128_t*)&dataM[offset]);
+    memcpy(&value, &dataM[offset], sizeof(int128_t));
     return true;
 }
 
 bool DataGridRowBuffer::getValue(unsigned offset, fr::DBKey& value,
-    unsigned size)
+    unsigned size) const
 {
     if (offset + size > dataM.size())
         return false;
@@ -149,7 +157,7 @@ bool DataGridRowBuffer::getValue(unsigned offset, fr::DBKey& value,
     return true;
 }
 
-bool DataGridRowBuffer::getValue32(unsigned offset, int& timeZone, bool& isGmtFallback)
+bool DataGridRowBuffer::getValue32(unsigned offset, int& timeZone, bool& isGmtFallback) const
 {
     TimeZoneBufferValue value;
     if (!getValue(offset, value.rawValue))
@@ -159,7 +167,7 @@ bool DataGridRowBuffer::getValue32(unsigned offset, int& timeZone, bool& isGmtFa
     return true;
 }
 
-bool DataGridRowBuffer::isFieldNA(unsigned /*num*/)
+bool DataGridRowBuffer::isFieldNA(unsigned /*num*/) const
 {
     return false;
 }
@@ -170,7 +178,7 @@ void DataGridRowBuffer::setFieldNA(unsigned /* num */, bool /* isNA */)
     invalidateIsDeletable();
 }
 
-bool DataGridRowBuffer::isFieldNull(unsigned num)
+bool DataGridRowBuffer::isFieldNull(unsigned num) const
 {
     return (num < fieldAttrM.size() && fieldAttrM[num].isNull);
 }
@@ -184,7 +192,7 @@ void DataGridRowBuffer::setFieldNull(unsigned num, bool isNull)
     }
 }
 
-bool DataGridRowBuffer::isStringLoaded(unsigned num)
+bool DataGridRowBuffer::isStringLoaded(unsigned num) const
 {
     return (num < fieldAttrM.size() && fieldAttrM[num].isStringLoaded);
 }
@@ -352,7 +360,7 @@ bool InsertedGridRowBuffer::isInserted()
     return true;
 }
 
-bool InsertedGridRowBuffer::isFieldNA(unsigned num)
+bool InsertedGridRowBuffer::isFieldNA(unsigned num) const
 {
     return (num < naFieldsM.size() && naFieldsM[num]);
 }
