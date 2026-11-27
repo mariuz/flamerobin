@@ -131,7 +131,16 @@ wxString getFirebirdPluginDirectory()
         const char* dir = cmVtable->getDirectory(cm,
             Firebird::IConfigManager::DIR_PLUGINS);
         if (dir && *dir)
+        {
+#if !defined(_WIN32) && !defined(WIN32)
             return wxString::FromUTF8(dir);
+#else
+            wxFileName path(wxString::FromUTF8(dir));
+            // fix path from "some\\path/plugins" to "some\\path\\plugins"
+            path.Normalize();
+            return path.GetAbsolutePath();
+#endif
+        }
     }
     catch (...)
     {
