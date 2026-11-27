@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2026 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -59,9 +59,9 @@ const int COLORSTYLE_ALL = COLORSTYLE_FOREGROUND | COLORSTYLE_BACKGROUND;
 
 const int MAX_LEXER_STYLE = 100;
 
-const int  FR_LINENUMBERNARGIN = 0;
-const int  FR_SYMBOLEMARGIN = 1;
-#define FR_FOLDMARGIN 2
+const int FR_LINENUMBERMARGIN = 0;
+const int FR_SYMBOLMARGIN = 1;
+const int FR_FOLDMARGIN = 2;
 
 // <WordsStyle> or <WidgetStyle>
 class FRStyle
@@ -101,7 +101,7 @@ public:
     int getStyleID() { return styleIDM; };
     void setStyleID(int id) { styleIDM = id; };
     
-    wxString getStyleDesc() { return styleDescM; };
+    wxString getStyleDesc() const { return styleDescM; };
     void setStyleDesc(wxString name) { styleDescM = name; };
 
 
@@ -159,7 +159,7 @@ class FRStyles
 {
     
 protected:
-    std::vector<FRStyle *> styleVectorM;
+    std::vector<FRStyle> styleVectorM;
     
 public:
     FRStyles();
@@ -173,13 +173,11 @@ public:
 
     FRStyle* getStyle(size_t index);
     FRStyle* getStyleByName(wxString styleName);
-    std::vector<FRStyle*> getStyles() { return styleVectorM; }
+    const std::vector<FRStyle> getStyles() const { return styleVectorM; }
 
     bool hasEnoughSpace() { return (getNbStyler() < wxSTC_STYLE_MAX); };
     void addStyler(int styleID, wxXmlNode* styleNode);
     void addStyler(int styleID, const wxString styleName);
-
-    int getStyleIndexByID(int id);
 
     int getStyleIndexByName(wxString styleName);
     void clear() { styleVectorM.clear(); };
@@ -213,7 +211,7 @@ public:
 class FRStylers
 {
 private:
-    std::vector<FRStyler*> stylerVectorM;
+    std::vector<FRStyler> stylerVectorM;
 protected:
 
 public:
@@ -227,11 +225,11 @@ public:
 
 
 
-    FRStyler* getLexerFromIndex(int index) { return stylerVectorM[index]; };
-    std::vector<FRStyler*> getStylers() { return stylerVectorM; };
+    FRStyler* getLexerFromIndex(int index) { return &stylerVectorM[index]; };
+    const std::vector<FRStyler> getStylers() const { return stylerVectorM; };
 
-    wxString getStylerNameFromIndex(int index) const { return stylerVectorM[index]->getStylerName(); };
-    wxString getStylerDescFromIndex(int index) const { return stylerVectorM[index]->getStylerDesc(); };
+    wxString getStylerNameFromIndex(int index) const { return stylerVectorM[index].getStylerName(); };
+    wxString getStylerDescFromIndex(int index) const { return stylerVectorM[index].getStylerDesc(); };
 
     FRStyler* getStylerByName(wxString lexerName);
     int getStylerIndexByName(wxString lexerName);

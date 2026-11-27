@@ -511,8 +511,8 @@ void PrefDlgStyleSetting::loadStylers(const wxString& styleFileName)
     //if (stylers) 
     {
         int i = 0;
-        for (FRStyler* styler : stylers.getStylers()) {
-            stylersListBoxM->Insert(styler->getStylerDesc(), ++i);
+        for (const auto& styler : stylers.getStylers()) {
+            stylersListBoxM->Insert(styler.getStylerDesc(), ++i);
         }
     }
 
@@ -535,8 +535,8 @@ void PrefDlgStyleSetting::loadStyles(const wxString& language)
 
     if (styles) {
         int i = 0;
-        for (FRStyle* style : styles->getStyles()) {
-            styleListBoxM->Insert(style->getStyleDesc(), i++);
+        for (const auto& style : styles->getStyles()) {
+            styleListBoxM->Insert(style.getStyleDesc(), i++);
         }
     }
     styleListBoxM->Select(0);

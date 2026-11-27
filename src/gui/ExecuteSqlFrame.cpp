@@ -366,8 +366,8 @@ void SqlEditor::setup()
     SetAdditionalSelectionTyping(true);
 
     SetMargins(0, 0);
-    SetMarginWidth(FR_LINENUMBERNARGIN, 40);
-    SetMarginType(FR_LINENUMBERNARGIN, wxSTC_MARGIN_NUMBER);
+    SetMarginWidth(FR_LINENUMBERMARGIN, 40);
+    SetMarginType(FR_LINENUMBERMARGIN, wxSTC_MARGIN_NUMBER);
     SetAutomaticFold(wxSTC_AUTOMATICFOLD_SHOW);
 
     if (config().get("sqlEditorShowEdge", false))
