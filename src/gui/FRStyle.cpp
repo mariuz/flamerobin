@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2021 The FlameRobin Development Team
+  Copyright (c) 2004-2026 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -268,17 +268,6 @@ void FRStyles::write2Element(wxXmlNode* element)
     }
 }
 
-int FRStyles::getStyleIndexByID(int id)
-{
-    std::vector<FRStyle*>::iterator it;
-    it = std::find_if(styleVectorM.begin(), styleVectorM.end(), [id](FRStyle* style)->bool {return style->getStyleID() == id; });
-   
-    if (it == styleVectorM.end())
-        return -1;
-    else
-        return std::distance(styleVectorM.begin(), it);
-}
-
 void FRStyles::addStyler(int styleID, wxXmlNode* styleNode)
 {
     /*bool isUser = styleID >> 16 == L_USER;
@@ -290,8 +279,8 @@ void FRStyles::addStyler(int styleID, wxXmlNode* styleNode)
             return;
     }*/
 
-    FRStyle* newStyle = new FRStyle();
-    newStyle->setStyleID(styleID);
+    FRStyle newStyle;
+    newStyle.setStyleID(styleID);
 
     if (styleNode)
     {
@@ -303,7 +292,7 @@ void FRStyles::addStyler(int styleID, wxXmlNode* styleNode)
             /*if (isUser)
                 _styleArray[index]._styleDesc = globalMappper().styleNameMapper[index].c_str();
             else*/
-            newStyle->setStyleDesc(str);
+            newStyle.setStyleDesc(str);
         }
 
         str = element->GetAttribute("fgColor");
@@ -312,11 +301,11 @@ void FRStyles::addStyler(int styleID, wxXmlNode* styleNode)
            
             long result; 
             str.ToLong(&result, 16);
-            //newStyle->setfgColour((_RGB((result >> 16) & 0xFF, (result >> 8) & 0xFF, result & 0xFF)) | (result & 0xFF000000));
+            //newStyle.setfgColour((_RGB((result >> 16) & 0xFF, (result >> 8) & 0xFF, result & 0xFF)) | (result & 0xFF000000));
 
             wxColour colour (result);
             colour.SetRGB((_RGB((result >> 16) & 0xFF, (result >> 8) & 0xFF, result & 0xFF)) | (result & 0xFF000000));
-            newStyle->setfgColor(colour);
+            newStyle.setfgColor(colour);
 
         }
 
@@ -325,11 +314,11 @@ void FRStyles::addStyler(int styleID, wxXmlNode* styleNode)
         {
             long result;
             str.ToLong(&result, 16);
-            //newStyle->setbgColour((_RGB((result >> 16) & 0xFF, (result >> 8) & 0xFF, result & 0xFF)) | (result & 0xFF000000));
+            //newStyle.setbgColour((_RGB((result >> 16) & 0xFF, (result >> 8) & 0xFF, result & 0xFF)) | (result & 0xFF000000));
 
             wxColour colour(result);
             colour.SetRGB((_RGB((result >> 16) & 0xFF, (result >> 8) & 0xFF, result & 0xFF)) | (result & 0xFF000000));
-            newStyle->setbgColor(colour);
+            newStyle.setbgColor(colour);
 
         }
 
@@ -338,13 +327,13 @@ void FRStyles::addStyler(int styleID, wxXmlNode* styleNode)
         {
             long temp;
             str.ToLong(&temp, 10);
-            newStyle->setColorStyle(temp);
+            newStyle.setColorStyle(temp);
         }
 
         str = element->GetAttribute("fontName");
         if (!str.IsEmpty()) {
-            newStyle->setFontName(str);
-            newStyle->setisFontEnable(TRUE);
+            newStyle.setFontName(str);
+            newStyle.setisFontEnable(TRUE);
         }
 
         str = element->GetAttribute("fontStyle");
@@ -352,7 +341,7 @@ void FRStyles::addStyler(int styleID, wxXmlNode* styleNode)
         {
             long temp;
             str.ToLong(&temp, 10);
-            newStyle->setFontStyle(temp);
+            newStyle.setFontStyle(temp);
         }
 
         str = element->GetAttribute("fontSize");
@@ -360,7 +349,7 @@ void FRStyles::addStyler(int styleID, wxXmlNode* styleNode)
         {
             long temp;
             str.ToLong(&temp, 10);
-            newStyle->setFontSize(temp);
+            newStyle.setFontSize(temp);
         }
         
         str = element->GetAttribute("caseVisible");
@@ -368,7 +357,7 @@ void FRStyles::addStyler(int styleID, wxXmlNode* styleNode)
         {
             long temp;
             str.ToLong(&temp, 10);
-            newStyle->setCaseVisible(temp);
+            newStyle.setCaseVisible(temp);
         }
 
         str = element->GetAttribute("nesting");
@@ -376,19 +365,19 @@ void FRStyles::addStyler(int styleID, wxXmlNode* styleNode)
         {
             long temp;
             str.ToLong(&temp, 10);
-            newStyle->setNesting(temp);
+            newStyle.setNesting(temp);
         }
 
         /*str = element->GetAttribute("keywordClass");
         if (!str.IsEmpty())
         {
-            newStyle->setKeywordClass(getKwClassFromName(str));
+            newStyle.setKeywordClass(getKwClassFromName(str));
         }*/
 
         wxXmlNode* v = styleNode->GetChildren();
         if (v)
         {
-            newStyle->setKeywords(v->GetContent());
+            newStyle.setKeywords(v->GetContent());
         }
     }
 
@@ -397,11 +386,11 @@ void FRStyles::addStyler(int styleID, wxXmlNode* styleNode)
 
 void FRStyles::addStyler(int styleID, const wxString styleName)
 {
-    FRStyle* newStyle = new FRStyle();
-    newStyle->setStyleID(styleID);
-    newStyle->setStyleDesc(styleName);
-    newStyle->setfgColor(wxBLACK->GetRGB());
-    newStyle->setbgColor(wxWHITE->GetRGB());
+    FRStyle newStyle;
+    newStyle.setStyleID(styleID);
+    newStyle.setStyleDesc(styleName);
+    newStyle.setfgColor(wxBLACK->GetRGB());
+    newStyle.setbgColor(wxWHITE->GetRGB());
 
     styleVectorM.push_back(newStyle);
 
@@ -412,8 +401,8 @@ int FRStyles::getStyleIndexByName(wxString styleName)
     if (styleName.IsEmpty())
         return -1;
 
-    std::vector<FRStyle*>::iterator it;
-    it = std::find_if(styleVectorM.begin(), styleVectorM.end(), [styleName](FRStyle* style)->bool {return style->getStyleDesc() == styleName; });
+    std::vector<FRStyle>::iterator it;
+    it = std::find_if(styleVectorM.begin(), styleVectorM.end(), [styleName](FRStyle& style)->bool {return style.getStyleDesc() == styleName; });
 
     if (it == styleVectorM.end())
         return -1;
@@ -424,7 +413,7 @@ int FRStyles::getStyleIndexByName(wxString styleName)
 FRStyle* FRStyles::getStyle(size_t index)
 {
     assert(index < wxSTC_STYLE_MAX);
-    return styleVectorM[index];
+    return &styleVectorM[index];
 }
 
 FRStyle* FRStyles::getStyleByName(wxString styleName)
@@ -491,11 +480,11 @@ FRStyler* FRStylers::getStylerByName(wxString lexerName)
     if (lexerName.IsEmpty()) 
         return nullptr;
 
-    auto it = std::find_if(stylerVectorM.begin(), stylerVectorM.end(), [lexerName](FRStyler* style) { return style->getStylerName() == lexerName; });
+    auto it = std::find_if(stylerVectorM.begin(), stylerVectorM.end(), [lexerName](FRStyler& style) { return style.getStylerName() == lexerName; });
 
     if (it == stylerVectorM.end())
         return nullptr;
-    return *it;
+    return &(*it);
 }
 
 int FRStylers::getStylerIndexByName(wxString lexerName)
@@ -503,8 +492,8 @@ int FRStylers::getStylerIndexByName(wxString lexerName)
     if (lexerName.IsEmpty())
         return -1;
 
-    std::vector<FRStyler*>::iterator it;
-    it = std::find_if(stylerVectorM.begin(), stylerVectorM.end(), [lexerName](FRStyler* style)->bool {return style->getStylerName() == lexerName; });
+    std::vector<FRStyler>::iterator it;
+    it = std::find_if(stylerVectorM.begin(), stylerVectorM.end(), [lexerName](FRStyler& style)->bool {return style.getStylerName() == lexerName; });
     if (it == stylerVectorM.end())
         return -1;
     else
@@ -516,11 +505,11 @@ FRStyler* FRStylers::getStylerByDesc(wxString lexerDesc)
     if (lexerDesc.IsEmpty())
         return nullptr;
 
-    auto it = std::find_if(stylerVectorM.begin(), stylerVectorM.end(), [lexerDesc](FRStyler* style) { return style->getStylerDesc() == lexerDesc; });
+    auto it = std::find_if(stylerVectorM.begin(), stylerVectorM.end(), [lexerDesc](FRStyler& style) { return style.getStylerDesc() == lexerDesc; });
 
     if (it == stylerVectorM.end())
         return nullptr;
-    return *it;
+    return &(*it);
 }
 
 int FRStylers::getStylerIndexByDesc(wxString lexerDesc)
@@ -528,8 +517,8 @@ int FRStylers::getStylerIndexByDesc(wxString lexerDesc)
     if (lexerDesc.IsEmpty())
         return -1;
 
-    std::vector<FRStyler*>::iterator it;
-    it = std::find_if(stylerVectorM.begin(), stylerVectorM.end(), [lexerDesc](FRStyler* style)->bool {return style->getStylerDesc() == lexerDesc; });
+    std::vector<FRStyler>::iterator it;
+    it = std::find_if(stylerVectorM.begin(), stylerVectorM.end(), [lexerDesc](FRStyler& style)->bool {return style.getStylerDesc() == lexerDesc; });
     if (it == stylerVectorM.end())
         return -1;
     else
@@ -538,21 +527,21 @@ int FRStylers::getStylerIndexByDesc(wxString lexerDesc)
 
 void FRStylers::addStyler(wxString lexerName, wxString lexerDesc, wxString lexerUserExt, wxXmlNode* lexerNode)
 {
-    FRStyler* ls = new FRStyler();
-    ls->setStylerName(lexerName);
+    FRStyler ls;
+    ls.setStylerName(lexerName);
 
     if (!lexerDesc.IsEmpty())
-        ls->setStylerDesc(lexerDesc);
+        ls.setStylerDesc(lexerDesc);
 
     if (!lexerUserExt.IsEmpty())
-        ls->setStylerUserExt(lexerUserExt);
+        ls.setStylerUserExt(lexerUserExt);
 
     wxXmlNode* child = lexerNode->GetChildren();
     while (child) {
         if (child->GetType() == wxXML_ELEMENT_NODE &&  child->GetName() == "WordsStyle") {
             long styleID = -1;
             if (child->GetAttribute("styleID").ToLong(&styleID)) {
-                ls->addStyler(styleID, child);
+                ls.addStyler(styleID, child);
             }
         }
         child = child->GetNext();

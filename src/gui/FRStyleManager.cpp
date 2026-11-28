@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2023-2023 The FlameRobin Development Team
+  Copyright (c) 2023-2026 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -66,14 +66,14 @@ void FRStyleManager::loadLexerStyles(wxXmlNode* node)
 
 void FRStyleManager::loadGlobalStyles(wxXmlNode* node)
 {
-    globalStylerM->clear();
+    globalStylerM.clear();
     wxXmlNode* child = node->GetChildren();
 
     while (child) {
         if (child->GetType() == wxXML_ELEMENT_NODE && child->GetName() == "WidgetStyle") {
             long styleID = -1;
             if (child->GetAttribute("styleID").ToLong(&styleID)) {
-                globalStylerM->addStyler(styleID, child);
+                globalStylerM.addStyler(styleID, child);
             }
         }
         child = child->GetNext();
@@ -126,7 +126,7 @@ void FRStyleManager::assignWordStyle(wxStyledTextCtrl* text, FRStyle* style)
 FRStyleManager::FRStyleManager()
 {
     loadConfig();
-    globalStylerM = new FRStyler();
+    globalStylerM = FRStyler();
 
     loadStyle();
 }
@@ -134,7 +134,7 @@ FRStyleManager::FRStyleManager()
 
 FRStyle* FRStyleManager::getStyleByName(wxString styleName)
 {
-    return globalStylerM->getStyleByName(styleName);
+    return globalStylerM.getStyleByName(styleName);
 }
 
 wxFileName FRStyleManager::getFileName()
@@ -184,8 +184,8 @@ void FRStyleManager::assignGlobal(wxStyledTextCtrl* text)
 
     FRStyle* globalOverrideStyle = nullptr;
 
-    for (int i = 0; i < globalStylerM->getNbStyler(); i++) {
-        FRStyle* style = globalStylerM->getStyle(i);
+    for (int i = 0; i < globalStylerM.getNbStyler(); i++) {
+        FRStyle* style = globalStylerM.getStyle(i);
         //if (style->getStyleID() != 0) {
         assignWordStyle(text, style);
         //}
@@ -265,7 +265,7 @@ void FRStyleManager::assignLexer(wxStyledTextCtrl* text)
             }
         }
     }
-    FRStyle* style = globalStylerM->getStyleByName("Line number margin");
+    FRStyle* style = globalStylerM.getStyleByName("Line number margin");
     if (style) {
         assignWordStyle(text, style);
     }
@@ -356,7 +356,7 @@ void FRStyleManager::loadConfig()
 
     const wxString systemDefault = useDark ? _DARKMODEDEFAULT : _default;
 
-    wxString fileName = config().get(_PRYMARY, systemDefault);
+    wxString fileName = config().get(_PRIMARY, systemDefault);
     if (fileName.IsEmpty()) {
         fileName = systemDefault;
     }
@@ -430,10 +430,8 @@ void FRStyleManager::saveStyle()
 
 void FRStyleManager::cleanStyles()
 {
-    if(globalStylerM)
-        globalStylerM->clear();
-    //if (stylersM)
-        stylersM.clear();
+    globalStylerM.clear();
+    stylersM.clear();
 }
 
 void FRStyleManager::saveLexerStyles(wxXmlNode* node)

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2023-2023 The FlameRobin Development Team
+  Copyright (c) 2023-2026 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -32,7 +32,7 @@
 class FRStyleManager : public Subject
 {
 private:
-    const wxString _PRYMARY = "StyleTheme";
+    const wxString _PRIMARY = "StyleTheme";
     const wxString _SECONDARY = "StyleThemeSecondary";
     const wxString _STYLEACTIVE = "StyleActive";
     const wxString _default = "stylers";
@@ -51,7 +51,7 @@ public:
     wxFileName fileNameM;
     int styleActiveM;
 
-    FRStyles* globalStylerM;
+    FRStyles globalStylerM;
     FRStylers stylersM;
     wxColor m_GCodecolor{ 255,130,0 };
 
@@ -68,13 +68,13 @@ public:
     FRStyleManager();
 
 
-    FRStyles* getGlobalStyler() { return globalStylerM; };
+    FRStyles* getGlobalStyler() { return &globalStylerM; };
     FRStylers getLexerStylers() { return stylersM; };
     FRStyles* getStylerByName(wxString stylerName) { return stylerName == "Global Styles" ? getGlobalStyler() : getLexerStylers().getStylerByName(stylerName); };
     FRStyles* getStylerByDesc(wxString stylerDesc) { return stylerDesc == "Global Styles" ? getGlobalStyler() : getLexerStylers().getStylerByDesc(stylerDesc); };
 
-    FRStyle* getGlobalStyle() { return globalStylerM->getStyleByName("Global override"); };
-    FRStyle* getDefaultStyle() { return globalStylerM->getStyleByName("Default Style"); };
+    FRStyle* getGlobalStyle() { return globalStylerM.getStyleByName("Global override"); };
+    FRStyle* getDefaultStyle() { return globalStylerM.getStyleByName("Default Style"); };
     FRStyle* getStyleByName(wxString styleName);
 
     wxFileName getFileName();
