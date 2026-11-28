@@ -159,11 +159,10 @@ Developer-focused documentation can be found in the [devdocs](https://github.com
 
 License
 ---------------------------
+Copyright (c) 2004-2026 The FlameRobin Development Team.
+
 FlameRobin code is licensed under the MIT license.
 A copy of the license can be found in the [LICENSE](https://github.com/mariuz/flamerobin/blob/master/LICENSE) file.
-
-Part of code covering IBPP library is licensed under IBPP license.
-A copy of IBPP license can be found in src/ibpp folder.
 
 Internal fb-cpp Library
 ---------------------------

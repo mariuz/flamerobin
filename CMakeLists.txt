@@ -91,6 +91,36 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(fb-cpp CONFIG REQUIRED)
 set(FBCPP_VERSION_STR "${fb-cpp_VERSION}")
 
+# Upstream fb-cpp v1.0.0 left project(fb-cpp-main VERSION 0.0.2) in its
+# CMakeLists.txt, so prebuilt or submodule fb-cppConfigVersion.cmake files
+# may still report "0.0.2". Resolve the installed package version from vcpkg
+# metadata or ports/fb-cpp/vcpkg.json when that placeholder is encountered.
+if (NOT FBCPP_VERSION_STR OR FBCPP_VERSION_STR STREQUAL "0.0.2")
+    foreach(_vcpkg_status_file
+            "${VCPKG_INSTALLED_DIR}/vcpkg/status"
+            "${_VCPKG_INSTALLED_DIR}/vcpkg/status"
+            "${CMAKE_BINARY_DIR}/vcpkg_installed/vcpkg/status"
+            "${CMAKE_SOURCE_DIR}/vcpkg_installed/vcpkg/status")
+        if (EXISTS "${_vcpkg_status_file}")
+            file(READ "${_vcpkg_status_file}" _vcpkg_status_contents)
+            if (_vcpkg_status_contents MATCHES "Package: fb-cpp\r?\nVersion: ([0-9]+\\.[0-9]+\\.[0-9]+)")
+                if (NOT CMAKE_MATCH_1 STREQUAL "0.0.2")
+                    set(FBCPP_VERSION_STR "${CMAKE_MATCH_1}")
+                    break()
+                endif()
+            endif()
+        endif()
+    endforeach()
+endif()
+
+if ((NOT FBCPP_VERSION_STR OR FBCPP_VERSION_STR STREQUAL "0.0.2")
+    AND EXISTS "${CMAKE_SOURCE_DIR}/ports/fb-cpp/vcpkg.json")
+    file(READ "${CMAKE_SOURCE_DIR}/ports/fb-cpp/vcpkg.json" _fbcpp_port_manifest)
+    if (_fbcpp_port_manifest MATCHES "\"version(-semver)?\"[ \t]*:[ \t]*\"([0-9]+\\.[0-9]+\\.[0-9]+)\"")
+        set(FBCPP_VERSION_STR "${CMAKE_MATCH_2}")
+    endif()
+endif()
+
 if (NOT FBCPP_VERSION_STR)
     set(FBCPP_VERSION_STR "unknown")
 endif()

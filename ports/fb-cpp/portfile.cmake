@@ -7,6 +7,13 @@ vcpkg_from_github(
         fb-cpp-flamerobin.patch
 )
 
+# Upstream fb-cpp v1.0.0 leaves project(fb-cpp-main VERSION 0.0.2) in CMakeLists.txt
+vcpkg_replace_string("${SOURCE_PATH}/CMakeLists.txt"
+    "VERSION 0.0.2"
+    "VERSION ${VERSION}"
+    IGNORE_UNCHANGED
+)
+
 # Force STATIC library build on Windows since fb-cpp has no exports for a DLL build
 if(VCPKG_TARGET_IS_WINDOWS)
     file(READ "${SOURCE_PATH}/src/fb-cpp/CMakeLists.txt" CONTENTS)

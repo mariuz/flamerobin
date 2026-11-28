@@ -92,6 +92,7 @@ modules:
           - rm -rf vcpkg vcpkg.json CMakePresets.json
           - sed -i '/set(VCPKG_ROOT/d' CMakeLists.txt
           - sed -i '/set(CMAKE_TOOLCHAIN_FILE/d' CMakeLists.txt
+          - sed -i 's/VERSION 0\.0\.2/VERSION 1.0.0/' CMakeLists.txt
           - sed -i '1i set(firebird_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake" CACHE PATH "" FORCE)' CMakeLists.txt
           - find . -name CMakeLists.txt -exec sed -i 's|fb-cpp/cmake|lib/cmake|g' {} +
 

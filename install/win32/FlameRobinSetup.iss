@@ -1,4 +1,4 @@
-;Copyright (c) 2004-2022 The FlameRobin Development Team
+;Copyright (c) 2004-2026 The FlameRobin Development Team
 ;
 ;Permission is hereby granted, free of charge, to any person obtaining
 ;a copy of this software and associated documentation files (the
@@ -42,6 +42,7 @@ AppVerName=FlameRobin {#FR_VERSION_STRING}
 AppVersion={#FR_VERSION_STRING}
 #endif
 AppPublisher=The FlameRobin Project
+AppCopyright=Copyright (c) 2004-2026 FlameRobin Development Team
 AppPublisherURL=http://www.flamerobin.org
 AppSupportURL=http://www.flamerobin.org
 AppUpdatesURL=http://www.flamerobin.org
