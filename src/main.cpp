@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2022 The FlameRobin Development Team
+  Copyright (c) 2004-2026 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -53,11 +53,13 @@
 // malloc/free to their debug variants, enabling source-location reporting.
 // See: https://learn.microsoft.com/cpp/c-runtime-library/find-memory-leaks-using-the-crt-library
 //----------------------------------------------------------------------
-#if defined(FR_CRT_LEAK_CHECK) && defined(_MSC_VER) && defined(_DEBUG)
-    #define _CRTDBG_MAP_ALLOC
+#if defined(_MSC_VER) && defined(_DEBUG)
+    #ifdef FR_CRT_LEAK_CHECK
+        #define _CRTDBG_MAP_ALLOC
+        #define FR_CRT_LEAK_CHECK_ACTIVE 1
+    #endif
     #include <cstdlib>
     #include <crtdbg.h>
-    #define FR_CRT_LEAK_CHECK_ACTIVE 1
 #endif
 
 #ifdef FR_USE_CRASHPAD
@@ -99,17 +101,41 @@ bool startCrashpad()
     std::vector<std::string> arguments;
     arguments.push_back("--no-rate-limit");
 
-    crashpad::CrashpadClient client;
-    bool status = client.StartHandler(
-        handler,
-        database,
-        metrics,
-        url,
-        annotations,
-        arguments,
-        true, // restartable
-        false // asynchronous_start
-    );
+    bool status = false;
+    {
+#if defined(_MSC_VER) && defined(_DEBUG)
+        // Crashpad's StartHandler() intentionally allocates a process-lifetime
+        // base::Lock (g_non_crash_dump_lock in client/crashpad_client_win.cc)
+        // that is never freed so DumpWithoutCrash() remains safe until exit.
+        // Temporarily clear _CRTDBG_ALLOC_MEM_DF so the MSVC CRT debug heap
+        // marks this intentional one-time allocation as _IGNORE_BLOCK instead
+        // of reporting a false-positive 48-byte leak on shutdown.
+        struct ScopedCrtIgnoreAllocations
+        {
+            int prevFlags;
+            ScopedCrtIgnoreAllocations()
+                : prevFlags(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG))
+            {
+                _CrtSetDbgFlag(prevFlags & ~_CRTDBG_ALLOC_MEM_DF);
+            }
+            ~ScopedCrtIgnoreAllocations()
+            {
+                _CrtSetDbgFlag(prevFlags);
+            }
+        } ignoreCrashpadIntentionalLeak;
+#endif
+        crashpad::CrashpadClient client;
+        status = client.StartHandler(
+            handler,
+            database,
+            metrics,
+            url,
+            annotations,
+            arguments,
+            true, // restartable
+            false // asynchronous_start
+        );
+    }
 
     if (status)
     {
