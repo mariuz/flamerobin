@@ -8,6 +8,35 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.11.9</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>Data Grid, Timezones &amp; Filtering (#781, #773, #772, #787)</B></font><br>
+<br>
+- <b>Fix Timezone Name Display for <code>TIME</code> / <code>TIMESTAMP WITH TIME ZONE</code> (#781)</b>: Preserved the 16-bit Firebird timezone ID and <code>GMT*</code> ICU-fallback flag when decoding <code>TIME WITH TIME ZONE</code> and <code>TIMESTAMP WITH TIME ZONE</code> columns (including <code>TIME_TZ_EX</code> / <code>TIMESTAMP_TZ_EX</code> coercion), fixing named and offset timezones (e.g. <code>Europe/Brussels</code>, <code>+02:00</code>, <code>UTC</code>) showing as <code>(-23:59)</code>.<br>
+- <b>Debounced Background Data Grid Filtering (#773)</b>: Moved result-set filtering onto a cancellable background thread with input debouncing so typing in the filter bar stays responsive on large datasets.<br>
+- <b>Fix Truncated Filter Record Count Label (#772)</b>: Triggered filter pane layout refresh when the record count label text changes so counts are never clipped prior to resizing the window.<br>
+- <b>Fix Crash in <code>DataGridRows</code> (#787)</b>: Resolved a crash in <code>DataGridRows</code> row handling.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>SQL Execution, Performance &amp; Memory Leak Fixes (#779, #791, #789, #790, #778)</B></font><br>
+<br>
+- <b>Fix <code>EXECUTE BLOCK</code> &amp; <code>BLOB</code> Crash (#779)</b>: Fixed crashes when fetching all rows or running subsequent statements after executing an <code>EXECUTE BLOCK</code> containing input parameters, nested <code>DECLARE PROCEDURE</code> sub-procedures, and <code>BLOB</code> output columns.<br>
+- <b>Avoid Redundant Database Property Reloads (#791)</b>: Removed unnecessary reloading of database properties when collapsing or expanding database nodes in the main tree.<br>
+- <b>Memory Leak Fixes on Windows (#789, #790)</b>: Fixed <code>FRStyleManager</code> and <code>PreferencesDialogStyle</code> leaks when opening the Preferences dialog or SQL editor, and suppressed Google Crashpad's intentional process-lifetime <code>base::Lock</code> allocation in MSVC CRT debug heap leak reports.<br>
+- <b>Remove Volatile SQL Editor (#778)</b>: Removed the unused Volatile SQL Editor feature.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>UI, Preferences &amp; About Dialog (#784, #786, #788, #783, #785, #777)</B></font><br>
+<br>
+- <b>Updated About Dialog &amp; Copyright Resources (#784, #786, #788)</b>: Fixed <code>fb-cpp</code> library version reporting to display <code>1.0.0</code> instead of <code>0.0.2</code>, normalized Firebird plugin directory paths on Windows in the About box, and updated copyright notices to <code>2004-2026</code> across the About dialog, Windows executable version info, installers, and license documentation.<br>
+- <b>Preferences Dialog Cleanup (#783, #785)</b>: Removed the obsolete Database backend setting, aligned controls in Database Registration Defaults, and fixed typos in <code>PreferencesDialogStyle</code>.<br>
+- <b>Improved Split View Toolbar Icon (#777)</b>: Replaced the misleading eye icon with a dedicated split-window icon for <b>Toggle Split View</b>.<br>
+<br><br>
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.11.8</font><br>
 <br><br>
 
