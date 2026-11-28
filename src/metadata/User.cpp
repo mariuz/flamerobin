@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2022 The FlameRobin Development Team
+  Copyright (c) 2004-2026 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -243,7 +243,7 @@ void Users::load(ProgressIndicator* progressIndicator)
 
             std::string stmt = "select sec$user_name, sec$first_name, sec$middle_name, "
                 "sec$last_name, sec$plugin from sec$users order by 1";
-            fr::IStatementPtr st1 = loader->createStatement(stmt);
+            fr::IStatementPtr& st1 = loader->getStatement(stmt);
             st1->execute();
 
             std::vector<UserPtr> users;

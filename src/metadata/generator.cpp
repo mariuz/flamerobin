@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2022 The FlameRobin Development Team
+  Copyright (c) 2004-2026 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -77,7 +77,7 @@ void Generator::loadProperties()
         std::string sql("select RDB$INITIAL_VALUE, RDB$GENERATOR_INCREMENT from RDB$GENERATORS "
             "where RDB$GENERATOR_NAME = ? "
         );
-        fr::IStatementPtr st2 = loader->createStatement(sql);
+        fr::IStatementPtr& st2 = loader->getStatement(sql);
         st2->setString(0, wx2std(getName_(), converter));
         st2->execute();
         if (st2->fetch()) {

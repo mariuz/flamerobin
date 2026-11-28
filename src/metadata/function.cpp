@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2022 The FlameRobin Development Team
+  Copyright (c) 2004-2026 The FlameRobin Development Team
 
   Permission is hereby granted, free of charge, to any person obtaining
   a copy of this software and associated documentation files (the
@@ -106,7 +106,7 @@ void Function::loadChildren()
     sql += "order by iif(a.rdb$argument_name is null,255, a.rdb$argument_position) ";
  //    sql += "order by iif(a.rdb$argument_name is null, 2014, a.rdb$argument_position) ";
 
-    fr::IStatementPtr st1 = loader->createStatement(sql);
+    fr::IStatementPtr& st1 = loader->getStatement(sql);
     st1->setString(0, wx2std(getName_(), converter));
     if (getParent()->getType() == ntPackage) {
         st1->setString(1, wx2std(getParent()->getName_(), converter));
@@ -278,7 +278,7 @@ wxString Function::getOwner()
 		std::string sql(
 			"select rdb$owner_name from rdb$functions where rdb$function_name = ?"
 		     " and rdb$package_name is null ");
-		fr::IStatementPtr st1 = loader->createStatement(sql);
+		fr::IStatementPtr& st1 = loader->getStatement(sql);
 		st1->setString(0, wx2std(getName_(), converter));
 		st1->execute();
 		st1->fetch();
@@ -302,7 +302,7 @@ wxString Function::getSqlSecurity()
 		std::string sql(
 			"select rdb$sql_security from rdb$functions where rdb$function_name = ?"
 			" and rdb$package_name is null ");
-		fr::IStatementPtr st1 = loader->createStatement(sql);
+		fr::IStatementPtr& st1 = loader->getStatement(sql);
 		st1->setString(0, wx2std(getName_(), converter));
 		st1->execute();
 		st1->fetch();
@@ -332,7 +332,7 @@ std::vector<Privilege>* Function::getPrivileges(bool splitPerGrantor)
 
 	privilegesM.clear();
 
-	fr::IStatementPtr st1 = loader->createStatement(
+	fr::IStatementPtr& st1 = loader->getStatement(
 		"select RDB$USER, RDB$USER_TYPE, RDB$GRANTOR, RDB$PRIVILEGE, "
 		"RDB$GRANT_OPTION, RDB$FIELD_NAME "
 		"from RDB$USER_PRIVILEGES "
@@ -509,7 +509,7 @@ wxString FunctionSQL::getSource()
 	sql += db->getODSVersion().isFB30OrHigher() ? "rdb$entrypoint, rdb$engine_name, rdb$deterministic_flag  " : "null, null, null ";
 	sql += "from rdb$functions where rdb$function_name = ?";
 	sql += " and rdb$package_name is null ";
-	fr::IStatementPtr st1 = loader->createStatement(sql);
+	fr::IStatementPtr& st1 = loader->getStatement(sql);
 	st1->setString(0, wx2std(getName_(), converter));
 	st1->execute();
 	st1->fetch();
