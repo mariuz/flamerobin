@@ -68,13 +68,15 @@ struct TestLoadState
 {
     int odsMajor = 13;
     int odsMinor = 1;
-    bool throwOnCreateStatement = false;
+    bool throwOnPrepare = false;
     bool throwOnExecute = false;
     bool throwOnLoadIdentifiers = false;
     std::string errorMessage = "I/O error during CreateFile (open) operation for file \"SECURITY5.FDB\"";
     std::vector<SecUserRow> rows;
     int createStatementCalls = 0;
     int getStatementCalls = 0;
+    int prepareCalls = 0;
+    fr::IStatementPtr cachedStatement;
 };
 
 TestLoadState gState;
@@ -379,16 +381,23 @@ MetadataLoaderTransaction::~MetadataLoaderTransaction() {}
 fr::IStatementPtr MetadataLoader::createStatement(const std::string& sql)
 {
     ++gState.createStatementCalls;
-    if (gState.throwOnCreateStatement)
+    if (gState.throwOnPrepare)
         throw std::runtime_error(gState.errorMessage);
+    ++gState.prepareCalls;
     return std::make_shared<FakeStatement>(sql);
 }
 
-fr::IStatementPtr& MetadataLoader::getStatement(const std::string&)
+fr::IStatementPtr& MetadataLoader::getStatement(const std::string& sql)
 {
     ++gState.getStatementCalls;
-    static fr::IStatementPtr dummy;
-    return dummy;
+    if (!gState.cachedStatement || gState.cachedStatement->getSql() != sql)
+    {
+        if (gState.throwOnPrepare)
+            throw std::runtime_error(gState.errorMessage);
+        ++gState.prepareCalls;
+        gState.cachedStatement = std::make_shared<FakeStatement>(sql);
+    }
+    return gState.cachedStatement;
 }
 
 wxString std2wxIdentifier(const std::string& str, wxMBConv* conv)
@@ -453,16 +462,16 @@ int main()
         ok = check(!threw, "FB 5.0: missing SECURITY5.FDB / UserManager plugin does not throw from Users::load()") && ok;
         ok = check(users->childrenLoaded(), "FB 5.0: Users collection is marked loaded after SEC$USERS failure") && ok;
         ok = check(users->empty(), "FB 5.0: Users collection is empty after SEC$USERS failure") && ok;
-        ok = check(gState.createStatementCalls == 1 && gState.getStatementCalls == 0,
-            "FB 5.0: Users::load() uses uncached createStatement() rather than caching failed statement") && ok;
+        ok = check(gState.getStatementCalls == 1 && gState.createStatementCalls == 0,
+            "FB 5.0: Users::load() uses cached getStatement() via MetadataLoader") && ok;
     }
 
-    // Test 2: FB 5.0 (ODS 13.1) prepare/createStatement throws (e.g. SEC$USERS unavailable)
+    // Test 2: FB 5.0 (ODS 13.1) prepare/getStatement throws (e.g. SEC$USERS unavailable)
     {
         gState = TestLoadState{};
         gState.odsMajor = 13;
         gState.odsMinor = 1;
-        gState.throwOnCreateStatement = true;
+        gState.throwOnPrepare = true;
 
         DatabasePtr db(new Database());
         UsersPtr users(new Users(db));
@@ -477,9 +486,9 @@ int main()
             threw = true;
         }
 
-        ok = check(!threw, "FB 5.0: createStatement failure on SEC$USERS does not throw") && ok;
+        ok = check(!threw, "FB 5.0: getStatement prepare failure on SEC$USERS does not throw") && ok;
         ok = check(users->childrenLoaded() && users->empty(),
-            "FB 5.0: createStatement failure leaves Users loaded and empty") && ok;
+            "FB 5.0: getStatement prepare failure leaves Users loaded and empty") && ok;
     }
 
     // Test 3: FB 2.5 (ODS 11.2) embedded / restricted SEC$USERS failure
@@ -531,6 +540,13 @@ int main()
             "FB 5.0: Loaded user attributes and plugin are preserved") && ok;
         ok = check(sysdba != nullptr && sysdba->getUsername() == "SYSDBA",
             "FB 5.0: SYSDBA row is loaded") && ok;
+
+        // Reloading reuses the cached statement without re-preparing
+        gState.rows.push_back({"BOB", false, "Bob", true, "", true, "", false, "Srp"});
+        users->load(nullptr);
+        ok = check(gState.getStatementCalls == 2 && gState.prepareCalls == 1
+            && users->findByName("BOB") != nullptr,
+            "FB 5.0: Reloading Users reuses cached statement without re-preparing") && ok;
     }
 
     // Test 5: CancelProgressException is still propagated (not swallowed)

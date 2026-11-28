@@ -77,7 +77,7 @@ void Generator::loadProperties()
         std::string sql("select RDB$INITIAL_VALUE, RDB$GENERATOR_INCREMENT from RDB$GENERATORS "
             "where RDB$GENERATOR_NAME = ? "
         );
-        fr::IStatementPtr st2 = loader->getStatement(sql);
+        fr::IStatementPtr& st2 = loader->getStatement(sql);
         st2->setString(0, wx2std(getName_(), converter));
         st2->execute();
         if (st2->fetch()) {

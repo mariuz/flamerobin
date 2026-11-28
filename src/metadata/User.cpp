@@ -243,7 +243,7 @@ void Users::load(ProgressIndicator* progressIndicator)
 
             std::string stmt = "select sec$user_name, sec$first_name, sec$middle_name, "
                 "sec$last_name, sec$plugin from sec$users order by 1";
-            fr::IStatementPtr st1 = loader->getStatement(stmt);
+            fr::IStatementPtr& st1 = loader->getStatement(stmt);
             st1->execute();
 
             std::vector<UserPtr> users;
