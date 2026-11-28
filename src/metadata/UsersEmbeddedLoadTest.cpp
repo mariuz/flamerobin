@@ -163,6 +163,8 @@ public:
     void getDate(int, int&, int&, int&) override {}
     void getTime(int, int&, int&, int&, int&) override {}
     void getTimestamp(int, int&, int&, int&, int&, int&, int&, int&) override {}
+    void getTimeTz(int, int&, int&, int&, int&, int&, std::string&) override {}
+    void getTimestampTz(int, int&, int&, int&, int&, int&, int&, int&, int&, std::string&) override {}
 
     int getColumnCount() override { return 5; }
     std::string getColumnName(int) override { return ""; }

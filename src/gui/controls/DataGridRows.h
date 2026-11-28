@@ -173,7 +173,9 @@ namespace IBPP {
         operator int() const { return encode(hr, mn, sc, ms); }
         int GetTime() const { return encode(hr, mn, sc, ms); }
         void GetTime(int& h, int& m, int& s, int& f) const { h = hr; m = mn; s = sc; f = ms; }
-        void SetTime(TimezoneMode m, int h, int m_val, int s, int f, Timezone z, const void*) {
+        void SetTime(TimezoneMode m, int h, int m_val, int s, int f, Timezone z, const char* fbTimezoneName = nullptr) {
+            if (m == tmTimezone && fbTimezoneName != nullptr && std::strcmp(fbTimezoneName, "GMT*") == 0)
+                m = tmTimezoneGmtFallback;
             hr = h; mn = m_val; sc = s; ms = f; tz = z;
             fallback = (m == tmTimezoneGmtFallback);
         }
@@ -210,7 +212,7 @@ namespace IBPP {
         void SetDate(const Date& val) { d = val; }
         void SetDate(int y, int m, int d_val) { d.SetDate(y, m, d_val); }
         void SetDate(int val) { d.SetDate(val); }
-        void SetTime(Time::TimezoneMode m, int hour, int minute, int second, int tenththousands, Timezone tz, const void* tzName) {
+        void SetTime(Time::TimezoneMode m, int hour, int minute, int second, int tenththousands, Timezone tz, const char* tzName = nullptr) {
             t.SetTime(m, hour, minute, second, tenththousands, tz, tzName);
         }
         void SetTime(Time::TimezoneMode m, int time, int timezone) {

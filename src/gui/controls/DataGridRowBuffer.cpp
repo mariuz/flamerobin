@@ -289,7 +289,7 @@ void DataGridRowBuffer::setValue(unsigned offset, fr::DBKey value)
 
 void DataGridRowBuffer::setValue32(unsigned offset, int timeZone, bool isGmtFallback)
 {
-    TimeZoneBufferValue value;
+    TimeZoneBufferValue value{};
     value.s.timeZone16 = (uint16_t)timeZone;
     value.s.isGmtFallback = isGmtFallback;
     setValue(offset, value.rawValue);

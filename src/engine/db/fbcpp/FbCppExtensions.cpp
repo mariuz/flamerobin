@@ -168,12 +168,26 @@ StatementExt::StatementExt(Attachment& attachment, Transaction& transaction, std
                     break;
 
                 case DescriptorOriginalType::TIMESTAMP_TZ:
+                    descriptor.adjustedType = DescriptorAdjustedType::TIMESTAMP_TZ;
+                    break;
+
                 case DescriptorOriginalType::TIMESTAMP_TZ_EX:
+                    if (!builder)
+                        builder.reset(metadata->getBuilder(&statusWrapper));
+
+                    builder->setType(&statusWrapper, index, SQL_TIMESTAMP_TZ);
                     descriptor.adjustedType = DescriptorAdjustedType::TIMESTAMP_TZ;
                     break;
 
                 case DescriptorOriginalType::TIME_TZ:
+                    descriptor.adjustedType = DescriptorAdjustedType::TIME_TZ;
+                    break;
+
                 case DescriptorOriginalType::TIME_TZ_EX:
+                    if (!builder)
+                        builder.reset(metadata->getBuilder(&statusWrapper));
+
+                    builder->setType(&statusWrapper, index, SQL_TIME_TZ);
                     descriptor.adjustedType = DescriptorAdjustedType::TIME_TZ;
                     break;
 

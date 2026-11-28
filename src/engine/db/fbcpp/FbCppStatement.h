@@ -86,6 +86,11 @@ public:
     virtual void getTime(int index, int& hour, int& minute, int& second, int& fraction) override;
     virtual void getTimestamp(int index, int& year, int& month, int& day,
         int& hour, int& minute, int& second, int& fraction) override;
+    virtual void getTimeTz(int index, int& hour, int& minute, int& second,
+        int& fraction, int& timezoneId, std::string& timezoneName) override;
+    virtual void getTimestampTz(int index, int& year, int& month, int& day,
+        int& hour, int& minute, int& second, int& fraction,
+        int& timezoneId, std::string& timezoneName) override;
 
     virtual int getColumnCount() override;
     virtual std::string getColumnName(int index) override;

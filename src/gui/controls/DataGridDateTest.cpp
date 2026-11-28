@@ -211,6 +211,42 @@ int main()
         ok = check(normalizeNumericInput("1,23e-4", false) == "1.23e-4", "Normalize scientific 1,23e-4 -> 1.23e-4") && ok;
     }
 
+    // Test 10: Timezone ID and GMT* fallback preservation in IBPP::Time/Timestamp and DataGridRowBuffer (Issue #781)
+    {
+        const int brusselsTzId = 65039; // > 32767 to verify unsigned 16-bit preservation
+        IBPP::Time tmNamed;
+        tmNamed.SetTime(IBPP::Time::tmTimezone, 10, 52, 26, 0, brusselsTzId, "Europe/Brussels");
+        ok = check(tmNamed.GetTimezone() == brusselsTzId, "IBPP::Time preserves named timezone ID (65039)") && ok;
+        ok = check(!tmNamed.IsTimeZoneGmtFallback(), "IBPP::Time Europe/Brussels is not GMT* fallback") && ok;
+
+        DataGridRowBuffer tzBuf(1);
+        tzBuf.setValue(0, tmNamed.GetTime());
+        tzBuf.setValue32(sizeof(int), tmNamed.GetTimezone(), tmNamed.IsTimeZoneGmtFallback());
+
+        int readTzId = 0;
+        bool readFallback = true;
+        ok = check(tzBuf.getValue32(sizeof(int), readTzId, readFallback), "DataGridRowBuffer getValue32 succeeds") && ok;
+        ok = check(readTzId == brusselsTzId, "DataGridRowBuffer roundtrips unsigned 16-bit timezone ID 65039 (not 0 / -23:59)") && ok;
+        ok = check(!readFallback, "DataGridRowBuffer roundtrips isGmtFallback == false") && ok;
+
+        // GMT* ICU-fallback detection
+        IBPP::Timestamp tsFallback;
+        tsFallback.SetDate(2026, 11, 28);
+        tsFallback.SetTime(IBPP::Time::tmTimezone, 9, 52, 26, 0, brusselsTzId, "GMT*");
+        ok = check(tsFallback.GetTimezone() == brusselsTzId, "IBPP::Timestamp preserves timezone ID on GMT* fallback") && ok;
+        ok = check(tsFallback.IsTimeZoneGmtFallback(), "IBPP::Timestamp detects GMT* fallback") && ok;
+
+        DataGridRowBuffer fallbackBuf(1);
+        fallbackBuf.setValue(0, tsFallback.GetDate().GetDate());
+        fallbackBuf.setValue(sizeof(int), tsFallback.GetTime().GetTime());
+        fallbackBuf.setValue32(sizeof(int) * 2, tsFallback.GetTimezone(), tsFallback.IsTimeZoneGmtFallback());
+
+        int fbTzId = 0;
+        bool fbFlag = false;
+        ok = check(fallbackBuf.getValue32(sizeof(int) * 2, fbTzId, fbFlag), "DataGridRowBuffer getValue32 for TimestampTz") && ok;
+        ok = check(fbTzId == brusselsTzId && fbFlag, "DataGridRowBuffer roundtrips GMT* fallback flag") && ok;
+    }
+
     if (ok)
     {
         std::cout << "\nALL DATAGRID DATE TESTS PASSED!\n";

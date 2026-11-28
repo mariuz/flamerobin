@@ -379,6 +379,20 @@ void GridCellFormats::formatAppendTz(wxString &s, IBPP::Time &t, bool hasTz,
         return;
 
     int timezone = t.GetTimezone();
+    if (!t.IsTimeZoneGmtFallback() && timezone == IBPP::Time::TZ_NONE)
+    {
+        if (db)
+        {
+            TimezoneInfo defTz = db->getDefaultTimezone();
+            if (defTz.id != 0)
+                timezone = defTz.id;
+            else
+                return;
+        }
+        else
+            return;
+    }
+
     if (showTimezoneInfoM == tzRawId)
     {
         if (t.IsTimeZoneGmtFallback())
@@ -390,8 +404,10 @@ void GridCellFormats::formatAppendTz(wxString &s, IBPP::Time &t, bool hasTz,
         wxString tzName;
         if (t.IsTimeZoneGmtFallback())
             tzName = "GMT*";
-        else
+        else if (db)
             tzName = db->getTimezoneName(timezone);
+        else
+            tzName = wxString::Format("TZ %d", timezone);
         s += wxString::Format(" (%s)", tzName);
     }
 }
@@ -1189,7 +1205,7 @@ bool TimeColumnDef::readFromBuffer(DataGridRowBuffer* buffer, IBPP::Time &t)
         bool vIsGmtFallback;
         if (!buffer->getValue32(offsetM + sizeof(int),
                                 vTimezone, vIsGmtFallback))
-            return wxEmptyString;
+            return false;
 
         tzMode = IBPP::Time::tmTimezone;
         if (vIsGmtFallback)
@@ -1280,16 +1296,13 @@ void TimeColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     wxASSERT(buffer);
     if (withTimezoneM)
     {
-        std::string tzStr = statement->getTimeTz(col - 1);
-        int h = 0, m = 0, s = 0, t = 0;
-        char tzBuf[64] = {0};
-        int res = sscanf(tzStr.c_str(), "%d:%d:%d.%d %63s", &h, &m, &s, &t, tzBuf);
-        if (res >= 4)
-        {
-            IBPP::Time value;
-            value.SetTime(res > 4 ? IBPP::Time::tmTimezone : IBPP::Time::tmNone, h, m, s, t, 0, res > 4 ? tzBuf : nullptr);
-            writeToBuffer(buffer, value);
-        }
+        int h = 0, m = 0, s = 0, t = 0, tzId = 0;
+        std::string tzName;
+        statement->getTimeTz(col - 1, h, m, s, t, tzId, tzName);
+        IBPP::Time value;
+        value.SetTime(IBPP::Time::tmTimezone, h, m, s, t, tzId,
+            tzName.empty() ? nullptr : tzName.c_str());
+        writeToBuffer(buffer, value);
     }
     else
     {
@@ -1358,7 +1371,7 @@ bool TimestampColumnDef::readFromBuffer(DataGridRowBuffer* buffer, IBPP::Timesta
         bool vIsGmtFallback;
         if (!buffer->getValue32(offsetM + sizeof(int) * 2,
                                 vTimezone, vIsGmtFallback))
-            return wxEmptyString;
+            return false;
 
         tzMode = IBPP::Time::tmTimezone;
         if (vIsGmtFallback)
@@ -1462,17 +1475,14 @@ void TimestampColumnDef::setValue(DataGridRowBuffer* buffer, unsigned col,
     wxASSERT(buffer);
     if (withTimezoneM)
     {
-        std::string tzStr = statement->getTimestampTz(col - 1);
-        int ye = 0, mo = 0, d = 0, h = 0, mi = 0, s = 0, t = 0;
-        char tzBuf[64] = {0};
-        int res = sscanf(tzStr.c_str(), "%d-%d-%d %d:%d:%d.%d %63s", &ye, &mo, &d, &h, &mi, &s, &t, tzBuf);
-        if (res >= 7)
-        {
-            IBPP::Timestamp value;
-            value.SetDate(ye, mo, d);
-            value.SetTime(res > 7 ? IBPP::Time::tmTimezone : IBPP::Time::tmNone, h, mi, s, t, 0, res > 7 ? tzBuf : nullptr);
-            writeToBuffer(buffer, value);
-        }
+        int ye = 0, mo = 0, d = 0, h = 0, mi = 0, s = 0, t = 0, tzId = 0;
+        std::string tzName;
+        statement->getTimestampTz(col - 1, ye, mo, d, h, mi, s, t, tzId, tzName);
+        IBPP::Timestamp value;
+        value.SetDate(ye, mo, d);
+        value.SetTime(IBPP::Time::tmTimezone, h, mi, s, t, tzId,
+            tzName.empty() ? nullptr : tzName.c_str());
+        writeToBuffer(buffer, value);
     }
     else
     {

@@ -58,6 +58,11 @@ bool checkStr(const std::string& actual, const std::string& expected, const char
     return false;
 }
 
+std::string makeConnString(const std::string& serverName, const std::string& dbName)
+{
+    return (serverName == "embedded") ? dbName : (serverName + ":" + dbName);
+}
+
 } // namespace
 
 bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& serverName, const std::string& dbName)
@@ -68,7 +73,7 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& serverNa
     try 
     {
         fr::IDatabasePtr db = fr::DatabaseFactory::createDatabase(backend);
-        std::string fullConnStr = serverName + ":" + dbName;
+        std::string fullConnStr = makeConnString(serverName, dbName);
         std::cout << "    Connection string: " << fullConnStr << "\n";
         db->setConnectionString(fullConnStr);
         db->setCredentials("SYSDBA", "masterkey");
@@ -171,12 +176,97 @@ bool runTestsForBackend(fr::DatabaseBackend backend, const std::string& serverNa
             ok = fr_test::check(st->getTimestampTz(1).find("2023-05-20 12:34:56") != std::string::npos, "getTimestampTz content") && ok;
             ok = fr_test::check(st->getTimestampTz(1).find("UTC") != std::string::npos, "getTimestampTz timezone content") && ok;
 
+            // Structured getTimeTz / getTimestampTz (Issue #781)
+            {
+                int th = 0, tmi = 0, ts = 0, tf = 0, tzId = 0;
+                std::string tzName;
+                st->getTimeTz(0, th, tmi, ts, tf, tzId, tzName);
+                ok = fr_test::check(th == 12 && tmi == 34 && ts == 56 && tf == 7890, "structured getTimeTz components") && ok;
+                ok = fr_test::check(tzId > 0, "structured getTimeTz non-zero timezoneId") && ok;
+                ok = checkStr(tzName, "UTC", "structured getTimeTz timezoneName") && ok;
+
+                int tsy = 0, tsmo = 0, tsd = 0;
+                st->getTimestampTz(1, tsy, tsmo, tsd, th, tmi, ts, tf, tzId, tzName);
+                ok = fr_test::check(tsy == 2023 && tsmo == 5 && tsd == 20 && th == 12 && tmi == 34 && ts == 56 && tf == 7890,
+                    "structured getTimestampTz components") && ok;
+                ok = fr_test::check(tzId > 0, "structured getTimestampTz non-zero timezoneId") && ok;
+                ok = checkStr(tzName, "UTC", "structured getTimestampTz timezoneName") && ok;
+            }
+
+            // Offset timezone structured test (+02:00 -> ID 1559)
+            {
+                st->prepare("SELECT CAST('10:52:26.0000 +02:00' AS TIME WITH TIME ZONE) FROM RDB$DATABASE");
+                st->execute();
+                st->fetch();
+                int th = 0, tmi = 0, ts = 0, tf = 0, tzId = 0;
+                std::string tzName;
+                st->getTimeTz(0, th, tmi, ts, tf, tzId, tzName);
+                ok = fr_test::check(th == 10 && tmi == 52 && ts == 26 && tf == 0, "offset getTimeTz components") && ok;
+                ok = fr_test::check(tzId == 1559, "offset getTimeTz timezoneId == 1559 (+02:00)") && ok;
+                ok = checkStr(tzName, "+02:00", "offset getTimeTz timezoneName") && ok;
+                ok = checkStr(db->getTimezoneName(tzId), "+02:00", "getTimezoneName(+02:00)") && ok;
+            }
+
             // Test Named Timezone support
             std::cout << "  Testing Named Timezone decoding...\n";
             fr::DatabaseInfoData dbInfo;
             db->getInfo(&dbInfo);
             if (dbInfo.ods >= 13)
             {
+                st->prepare("SET TIME ZONE 'Europe/Brussels'");
+                st->execute();
+
+                int expectedBrusselsId = 0;
+                st->prepare("SELECT RDB$TIME_ZONE_ID FROM RDB$TIME_ZONES WHERE RDB$TIME_ZONE_NAME = 'Europe/Brussels'");
+                st->execute();
+                if (st->fetch())
+                    expectedBrusselsId = st->getInt32(0);
+                ok = fr_test::check(expectedBrusselsId > 0, "Europe/Brussels RDB$TIME_ZONE_ID lookup") && ok;
+
+                st->prepare("SELECT CURRENT_TIME, CURRENT_TIMESTAMP FROM RDB$DATABASE");
+                st->execute();
+                st->fetch();
+                {
+                    int th = 0, tmi = 0, ts = 0, tf = 0, tzId = 0;
+                    std::string tzName;
+                    st->getTimeTz(0, th, tmi, ts, tf, tzId, tzName);
+                    ok = fr_test::check(tzId == expectedBrusselsId, "CURRENT_TIME timezoneId matches Europe/Brussels (Issue #781)") && ok;
+                    ok = checkStr(tzName, "Europe/Brussels", "CURRENT_TIME timezoneName is Europe/Brussels") && ok;
+                    ok = checkStr(db->getTimezoneName(tzId), "Europe/Brussels", "getTimezoneName(CURRENT_TIME tzId)") && ok;
+
+                    int tsy = 0, tsmo = 0, tsd = 0;
+                    st->getTimestampTz(1, tsy, tsmo, tsd, th, tmi, ts, tf, tzId, tzName);
+                    ok = fr_test::check(tzId == expectedBrusselsId, "CURRENT_TIMESTAMP timezoneId matches Europe/Brussels (Issue #781)") && ok;
+                    ok = checkStr(tzName, "Europe/Brussels", "CURRENT_TIMESTAMP timezoneName is Europe/Brussels") && ok;
+                }
+
+                // Extended timezone bind mode (TIME_TZ_EX / TIMESTAMP_TZ_EX)
+                st->prepare("SET BIND OF TIME WITH TIME ZONE TO EXTENDED");
+                st->execute();
+                st->prepare("SET BIND OF TIMESTAMP WITH TIME ZONE TO EXTENDED");
+                st->execute();
+
+                st->prepare("SELECT CURRENT_TIME, CURRENT_TIMESTAMP FROM RDB$DATABASE");
+                st->execute();
+                st->fetch();
+                {
+                    int th = 0, tmi = 0, ts = 0, tf = 0, tzId = 0;
+                    std::string tzName;
+                    st->getTimeTz(0, th, tmi, ts, tf, tzId, tzName);
+                    ok = fr_test::check(tzId == expectedBrusselsId, "EXTENDED bind CURRENT_TIME timezoneId matches Europe/Brussels") && ok;
+                    ok = checkStr(tzName, "Europe/Brussels", "EXTENDED bind CURRENT_TIME timezoneName") && ok;
+
+                    int tsy = 0, tsmo = 0, tsd = 0;
+                    st->getTimestampTz(1, tsy, tsmo, tsd, th, tmi, ts, tf, tzId, tzName);
+                    ok = fr_test::check(tzId == expectedBrusselsId, "EXTENDED bind CURRENT_TIMESTAMP timezoneId matches Europe/Brussels") && ok;
+                    ok = checkStr(tzName, "Europe/Brussels", "EXTENDED bind CURRENT_TIMESTAMP timezoneName") && ok;
+                }
+
+                st->prepare("SET BIND OF TIME WITH TIME ZONE TO NATIVE");
+                st->execute();
+                st->prepare("SET BIND OF TIMESTAMP WITH TIME ZONE TO NATIVE");
+                st->execute();
+
                 st->prepare("SET TIME ZONE 'Europe/Berlin'");
                 st->execute();
 
@@ -595,7 +685,7 @@ int main()
     try 
     {
         fr::IDatabasePtr db = fr::DatabaseFactory::createDatabase(fr::DatabaseBackend::FbCpp);
-        db->setConnectionString(serverName + ":" + dbName);
+        db->setConnectionString(makeConnString(serverName, dbName));
         db->setCredentials("SYSDBA", "masterkey");
         db->create(8192, 3);
     }
@@ -620,7 +710,7 @@ int main()
     try 
     {
         fr::IDatabasePtr db = fr::DatabaseFactory::createDatabase(fr::DatabaseBackend::FbCpp);
-        db->setConnectionString(serverName + ":" + dbName);
+        db->setConnectionString(makeConnString(serverName, dbName));
         db->setCredentials("SYSDBA", "masterkey");
         db->connect();
         db->drop();

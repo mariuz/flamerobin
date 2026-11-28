@@ -751,6 +751,75 @@ void FbCppStatement::getTimestamp(int index, int& year, int& month, int& day,
     fraction = (int)std::chrono::duration_cast<std::chrono::microseconds>(ts.time.subseconds()).count() / 100;
 }
 
+void FbCppStatement::getTimeTz(int index, int& hour, int& minute, int& second,
+    int& fraction, int& timezoneId, std::string& timezoneName)
+{
+    hour = 0; minute = 0; second = 0; fraction = 0; timezoneId = 0;
+    timezoneName.clear();
+    if (!statementM || !rowAvailableM || !attachmentSnapshotM)
+        return;
+    if (index < 0 || (unsigned)index >= statementM->getOutputDescriptors().size())
+        return;
+
+    auto optOpaque = statementM->get<std::optional<fbcpp::OpaqueTimeTz>>((unsigned)index);
+    if (!optOpaque.has_value())
+        return;
+
+    const ISC_TIME_TZ& iscTmTz = optOpaque->value;
+    timezoneId = static_cast<int>(iscTmTz.time_zone);
+
+    unsigned h = 0, m = 0, s = 0, f = 0;
+    char tzBuf[128] = {};
+    auto& client = attachmentSnapshotM->getClient();
+    auto status = client.newStatus();
+    fbcpp::impl::StatusWrapper statusWrapper(client, status.get());
+    client.getUtil()->decodeTimeTz(&statusWrapper, &iscTmTz,
+        &h, &m, &s, &f, sizeof(tzBuf), tzBuf);
+
+    hour = static_cast<int>(h);
+    minute = static_cast<int>(m);
+    second = static_cast<int>(s);
+    fraction = static_cast<int>(f);
+    timezoneName = tzBuf;
+}
+
+void FbCppStatement::getTimestampTz(int index, int& year, int& month, int& day,
+    int& hour, int& minute, int& second, int& fraction,
+    int& timezoneId, std::string& timezoneName)
+{
+    year = 0; month = 0; day = 0;
+    hour = 0; minute = 0; second = 0; fraction = 0; timezoneId = 0;
+    timezoneName.clear();
+    if (!statementM || !rowAvailableM || !attachmentSnapshotM)
+        return;
+    if (index < 0 || (unsigned)index >= statementM->getOutputDescriptors().size())
+        return;
+
+    auto optOpaque = statementM->get<std::optional<fbcpp::OpaqueTimestampTz>>((unsigned)index);
+    if (!optOpaque.has_value())
+        return;
+
+    const ISC_TIMESTAMP_TZ& iscTsTz = optOpaque->value;
+    timezoneId = static_cast<int>(iscTsTz.time_zone);
+
+    unsigned y = 0, mo = 0, d = 0, h = 0, m = 0, s = 0, f = 0;
+    char tzBuf[128] = {};
+    auto& client = attachmentSnapshotM->getClient();
+    auto status = client.newStatus();
+    fbcpp::impl::StatusWrapper statusWrapper(client, status.get());
+    client.getUtil()->decodeTimeStampTz(&statusWrapper, &iscTsTz,
+        &y, &mo, &d, &h, &m, &s, &f, sizeof(tzBuf), tzBuf);
+
+    year = static_cast<int>(y);
+    month = static_cast<int>(mo);
+    day = static_cast<int>(d);
+    hour = static_cast<int>(h);
+    minute = static_cast<int>(m);
+    second = static_cast<int>(s);
+    fraction = static_cast<int>(f);
+    timezoneName = tzBuf;
+}
+
 int FbCppStatement::getColumnCount()
 {
     return (int)columnTypesM.size();
