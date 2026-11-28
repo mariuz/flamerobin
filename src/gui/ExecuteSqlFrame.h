@@ -40,6 +40,7 @@
 #include "gui/BaseFrame.h"
 #include "gui/EditBlobDialog.h"
 #include "gui/FindDialog.h"
+#include "gui/StatsOutputCtrl.h"
 #include "sql/SqlExecutionWorker.h"
 #include "sql/SqlStatement.h"
 #include "statementHistory.h"
@@ -112,6 +113,8 @@ private:
     wxDateTime filenameModificationTimeM;
 
     void compareCounts(std::map<int, fr::CountInfo>& one, std::map<int, fr::CountInfo>& two);
+    std::vector<StatsTableActivityItem> collectTableActivity(
+        std::map<int, fr::CountInfo>& one, std::map<int, fr::CountInfo>& two);
 
     void showProperties(wxString objectName);
 
@@ -119,6 +122,24 @@ private:
     void log(wxString s, TextType type = ttNormal);     // write messages to textbox
     void clearLogBeforeExecution();
     void flushLogView();    // repaint log + plan views before a blocking call (#747)
+
+    int sessionStatsRunCounterM = 0;
+    int currentRunStatementIndexM = 0;
+    int currentRunStatementTotalM = 1;
+    bool executionRunStartedM = false;
+    bool statementStatsBlockOpenM = false;
+    SessionStatsHistoryIndex statsHistoryIndexM;
+    void forEachStatsCtrl(const std::function<void(StatsOutputCtrl*)>& fn);
+    StatsOutputCtrl* getActiveStatsCtrl() const;
+    void updateStatsHistoryTabVisibility();
+    void syncStatsHistoryWithStatementHistory(
+        StatementHistory::Position pos, const wxString& sql);
+    void clearStatsHistoryNavigationHighlight();
+    void OnStatsExpandAll(wxCommandEvent& event);
+    void OnStatsCollapseAll(wxCommandEvent& event);
+    void OnStatsHistoryExpandAll(wxCommandEvent& event);
+    void OnStatsHistoryCollapseAll(wxCommandEvent& event);
+    void OnStatsHistoryClear(wxCommandEvent& event);
 
     void splitScreen();
     Database* databaseM;
@@ -356,7 +377,10 @@ protected:
     DataGrid* grid_data;
     DataGrid* grid_profiler_psql;
     DataGrid* grid_profiler_rs;
-    wxStyledTextCtrl* styled_text_ctrl_stats;
+    StatsOutputCtrl* styled_text_ctrl_stats;
+    wxPanel* notebook_pane_stats_history = nullptr;
+    StatsOutputCtrl* styled_text_ctrl_stats_history = nullptr;
+    wxStaticText* label_stats_history_status = nullptr;
 
     wxStatusBar* statusbar_1;
     wxButton* button_status_cancel = nullptr;

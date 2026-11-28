@@ -267,6 +267,12 @@ void StatementHistoryDialog::OnButtonCopyClick(wxCommandEvent& WXUNUSED(event))
         return;
 
     sqlM.clear();
+    hasSelectedPositionM = (temp.GetCount() == 1);
+    if (hasSelectedPositionM)
+    {
+        selectedPositionM = (StatementHistory::Position)
+            listbox_search->GetClientData(temp.Item(0));
+    }
     for (size_t i=0; i<temp.GetCount(); ++i)
     {
         sqlM += historyM->get(
@@ -283,6 +289,8 @@ void StatementHistoryDialog::OnListBoxSearchDoubleClick(wxCommandEvent& event)
         (StatementHistory::Position)event.GetClientData();
     if ((int)item < 0)
         return;
+    hasSelectedPositionM = true;
+    selectedPositionM = item;
     sqlM = historyM->get(item);
     EndModal(wxID_OK);
 }
@@ -290,5 +298,15 @@ void StatementHistoryDialog::OnListBoxSearchDoubleClick(wxCommandEvent& event)
 wxString StatementHistoryDialog::getSql() const
 {
     return sqlM;
+}
+
+bool StatementHistoryDialog::hasSelectedPosition() const
+{
+    return hasSelectedPositionM;
+}
+
+StatementHistory::Position StatementHistoryDialog::getSelectedPosition() const
+{
+    return selectedPositionM;
 }
 

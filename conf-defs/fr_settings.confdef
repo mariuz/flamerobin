@@ -306,9 +306,16 @@
             <default>1</default>
         </setting>
         <setting type="checkbox">
-            <caption>Clear the messages when executing new statements</caption>
-            <key>SQLEditorExecuteClears</key>
-            <default>0</default>
+            <caption>Show only current execution in Statistics tab</caption>
+            <description>Clears previous executions in the Statistics tab when running a new statement (all session runs remain in Statistics History)</description>
+            <key>SQLEditorClearStatsOnExecute</key>
+            <default>1</default>
+        </setting>
+        <setting type="checkbox">
+            <caption>Show Statistics History tab</caption>
+            <description>Keeps a separate tab containing all execution statistics from the current SQL editor session</description>
+            <key>SQLEditorShowStatsHistory</key>
+            <default>1</default>
         </setting>
         <setting type="checkbox">
             <caption>Display detailed query statistics</caption>
@@ -408,6 +415,61 @@
 				<key>autoCompleteLoadColumnsSort</key>
 				<default>0</default>
 			</setting>
+        </node>
+        <node>
+            <caption>Statistics</caption>
+            <description>SQL Execution Statistics Sections Expanded by Default</description>
+            <image>0</image>
+            <setting type="checkbox">
+                <caption>Expand Prepare section (SQL text and prepare time)</caption>
+                <key>statsExpandPrepare</key>
+                <default>0</default>
+            </setting>
+            <setting type="checkbox">
+                <caption>Expand Fields section (result column list)</caption>
+                <key>statsExpandFields</key>
+                <default>0</default>
+            </setting>
+            <setting type="checkbox">
+                <caption>Expand Query Plan section</caption>
+                <key>statsExpandPlan</key>
+                <default>1</default>
+            </setting>
+            <setting type="checkbox">
+                <caption>Expand Parameters section</caption>
+                <key>statsExpandParameters</key>
+                <default>0</default>
+            </setting>
+            <setting type="checkbox">
+                <caption>Expand Execution details section</caption>
+                <key>statsExpandExecution</key>
+                <default>0</default>
+            </setting>
+            <setting type="checkbox">
+                <caption>Expand Page Buffer Metrics section</caption>
+                <key>statsExpandBufferMetrics</key>
+                <default>1</default>
+            </setting>
+            <setting type="checkbox">
+                <caption>Expand Record I/O Metrics section</caption>
+                <key>statsExpandRecordMetrics</key>
+                <default>1</default>
+            </setting>
+            <setting type="checkbox">
+                <caption>Expand DML Modifications section</caption>
+                <key>statsExpandDmlMetrics</key>
+                <default>1</default>
+            </setting>
+            <setting type="checkbox">
+                <caption>Expand Memory Consumption section</caption>
+                <key>statsExpandMemoryMetrics</key>
+                <default>1</default>
+            </setting>
+            <setting type="checkbox">
+                <caption>Expand Per-Table Activity section</caption>
+                <key>statsExpandTableReads</key>
+                <default>1</default>
+            </setting>
         </node>
         <node>
             <caption>Statement History</caption>

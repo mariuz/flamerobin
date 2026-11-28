@@ -26,8 +26,8 @@
 #define FR_STATEMENTHISTORYDIALOG_H
 
 #include "BaseDialog.h"
+#include "statementHistory.h"
 
-class StatementHistory;
 class wxStyledTextCtrl;
 class wxSplitter;
 
@@ -35,6 +35,8 @@ class StatementHistoryDialog : public BaseDialog
 {
 private:
     wxString sqlM;
+    bool hasSelectedPositionM = false;
+    StatementHistory::Position selectedPositionM = 0;
     bool isSearchingM;
     StatementHistory *historyM;
     wxStaticText *m_staticText2;
@@ -68,6 +70,8 @@ public:
     StatementHistoryDialog(wxWindow *parent, StatementHistory *history,
         const wxString& title = "SQL Statement History");
     wxString getSql() const;
+    bool hasSelectedPosition() const;
+    StatementHistory::Position getSelectedPosition() const;
 
     DECLARE_EVENT_TABLE()
 };

@@ -292,6 +292,8 @@ list(APPEND SOURCE_LIST
         ${SOURCEDIR}/gui/SimpleHtmlFrame.cpp
         ${SOURCEDIR}/gui/StartupFrame.cpp
         ${SOURCEDIR}/gui/StatementHistoryDialog.cpp
+        ${SOURCEDIR}/gui/StatsOutputCtrl.cpp
+        ${SOURCEDIR}/gui/StatsOutputModel.cpp
         ${SOURCEDIR}/gui/StyleGuide.cpp
         ${SOURCEDIR}/gui/SystemPrivilegeMatrixDialog.cpp
         ${SOURCEDIR}/gui/UpdateChecker.cpp
@@ -455,6 +457,8 @@ list(APPEND HEADER_LIST
         ${SOURCEDIR}/gui/SimpleHtmlFrame.h
         ${SOURCEDIR}/gui/StartupFrame.h
         ${SOURCEDIR}/gui/StatementHistoryDialog.h
+        ${SOURCEDIR}/gui/StatsOutputCtrl.h
+        ${SOURCEDIR}/gui/StatsOutputModel.h
         ${SOURCEDIR}/gui/StyleGuide.h
         ${SOURCEDIR}/gui/UpdateChecker.h
         ${SOURCEDIR}/gui/UserDialog.h
@@ -1385,6 +1389,15 @@ add_executable(fbcpp_execute_block_test
 )
 target_link_libraries(fbcpp_execute_block_test fb-cpp::fb-cpp ${wxWidgets_LIBRARIES} ${FR_LIBS})
 add_test(NAME fbcpp_execute_block_test COMMAND fbcpp_execute_block_test)
+
+# Unit and regression test for issue #780 (Current-statement Statistics tab,
+# Statistics History tab, collapsible formatting, and history sync).
+add_executable(stats_output_test
+    ${SOURCEDIR}/gui/StatsOutputTest.cpp
+    ${SOURCEDIR}/gui/StatsOutputModel.cpp
+)
+target_link_libraries(stats_output_test ${wxWidgets_LIBRARIES})
+add_test(NAME stats_output_test COMMAND stats_output_test)
 
 
 if (APPLE)

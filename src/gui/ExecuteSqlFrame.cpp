@@ -534,10 +534,11 @@ void SqlEditor::setupStyles()
 class ScrollAtEnd
 {
 private:
-    wxStyledTextCtrl *controlM;
+    wxStyledTextCtrl* controlM;
+    wxStyledTextCtrl* control2M;
 public:
-    ScrollAtEnd(wxStyledTextCtrl *c)
-        :controlM(c)
+    ScrollAtEnd(wxStyledTextCtrl* c, wxStyledTextCtrl* c2 = nullptr)
+        : controlM(c), control2M(c2)
     {
     }
     ~ScrollAtEnd()
@@ -546,12 +547,15 @@ public:
     }
     void cancel()
     {
-        controlM = 0;
+        controlM = nullptr;
+        control2M = nullptr;
     }
     void scroll()
     {
         if (controlM)
-            controlM->ScrollToLine(controlM->GetLineCount()-1);
+            controlM->ScrollToLine(controlM->GetLineCount() - 1);
+        if (control2M)
+            control2M->ScrollToLine(control2M->GetLineCount() - 1);
     }
 };
 
@@ -621,44 +625,63 @@ ExecuteSqlFrame::ExecuteSqlFrame(wxWindow* WXUNUSED(parent), int id,
 
     notebook_1 = new wxNotebook(splitter_window_1, -1, wxDefaultPosition,
         wxDefaultSize, 0);
+    stylerManager().attachObserver(this, false);
+
     notebook_pane_1 = new wxPanel(notebook_1, -1);
-    wxBoxSizer* sizerPane1 = new wxBoxSizer(wxHORIZONTAL);
-    styled_text_ctrl_stats = new wxStyledTextCtrl(notebook_pane_1, wxID_ANY,
-        wxDefaultPosition, wxDefaultSize, wxBORDER_THEME);
+    wxBoxSizer* sizerPane1 = new wxBoxSizer(wxVERTICAL);
+    wxBoxSizer* sizerStatsBar = new wxBoxSizer(wxHORIZONTAL);
+    sizerStatsBar->Add(new wxStaticText(notebook_pane_1, wxID_ANY,
+        _("Current execution")), 0, wxALIGN_CENTER_VERTICAL | wxLEFT, 2);
+    sizerStatsBar->AddStretchSpacer(1);
+    wxButton* btnStatsExpand = new wxButton(notebook_pane_1, wxID_ANY,
+        _("Expand All"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+    wxButton* btnStatsCollapse = new wxButton(notebook_pane_1, wxID_ANY,
+        _("Collapse All"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+    btnStatsExpand->Bind(wxEVT_BUTTON, &ExecuteSqlFrame::OnStatsExpandAll, this);
+    btnStatsCollapse->Bind(wxEVT_BUTTON, &ExecuteSqlFrame::OnStatsCollapseAll, this);
+    sizerStatsBar->Add(btnStatsExpand, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 4);
+    sizerStatsBar->Add(btnStatsCollapse, 0, wxALIGN_CENTER_VERTICAL);
+    sizerPane1->Add(sizerStatsBar, 0, wxEXPAND | wxALL, 4);
+
+    styled_text_ctrl_stats = new StatsOutputCtrl(notebook_pane_1, wxID_ANY, false);
     sizerPane1->Add(styled_text_ctrl_stats, 1, wxEXPAND);
     notebook_pane_1->SetSizer(sizerPane1);
-    stylerManager().attachObserver(this, false);
-    stylerManager().assignGlobal(styled_text_ctrl_stats);
-    styled_text_ctrl_stats->SetWrapMode(wxSTC_WRAP_WORD);
-    
-    {
-        bool isDark = false;
-        FRStyle* globalStyle = stylerManager().getGlobalStyle();
-        if (globalStyle)
-        {
-            wxColour bg = globalStyle->getbgColor();
-            double luminance = bg.Red() * 0.299 + bg.Green() * 0.587 + bg.Blue() * 0.114;
-            if (luminance < 128)
-                isDark = true;
-        }
-        else
-        {
-            isDark = FRStyleManager::isEffectivelyDark();
-        }
-
-        if (isDark)
-        {
-            styled_text_ctrl_stats->StyleSetForeground(1, wxColour(255, 110, 110));
-            styled_text_ctrl_stats->StyleSetForeground(2, wxColour(135, 206, 250));
-        }
-        else
-        {
-            styled_text_ctrl_stats->StyleSetForeground(1, *wxRED);
-            styled_text_ctrl_stats->StyleSetForeground(2, *wxBLUE);
-        }
-    }
-
     notebook_1->AddPage(notebook_pane_1, _("Statistics"));
+
+    notebook_pane_stats_history = new wxPanel(notebook_1, -1);
+    wxBoxSizer* sizerHistPane = new wxBoxSizer(wxVERTICAL);
+    wxBoxSizer* sizerHistBar = new wxBoxSizer(wxHORIZONTAL);
+    label_stats_history_status = new wxStaticText(
+        notebook_pane_stats_history, wxID_ANY, _("Session execution history"));
+    sizerHistBar->Add(label_stats_history_status, 0,
+        wxALIGN_CENTER_VERTICAL | wxLEFT, 2);
+    sizerHistBar->AddStretchSpacer(1);
+    wxButton* btnHistExpand = new wxButton(notebook_pane_stats_history, wxID_ANY,
+        _("Expand All"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+    wxButton* btnHistCollapse = new wxButton(notebook_pane_stats_history, wxID_ANY,
+        _("Collapse All"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+    wxButton* btnHistClear = new wxButton(notebook_pane_stats_history, wxID_ANY,
+        _("Clear"), wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
+    btnHistExpand->Bind(wxEVT_BUTTON, &ExecuteSqlFrame::OnStatsHistoryExpandAll, this);
+    btnHistCollapse->Bind(wxEVT_BUTTON, &ExecuteSqlFrame::OnStatsHistoryCollapseAll, this);
+    btnHistClear->Bind(wxEVT_BUTTON, &ExecuteSqlFrame::OnStatsHistoryClear, this);
+    sizerHistBar->Add(btnHistExpand, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 4);
+    sizerHistBar->Add(btnHistCollapse, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 4);
+    sizerHistBar->Add(btnHistClear, 0, wxALIGN_CENTER_VERTICAL);
+    sizerHistPane->Add(sizerHistBar, 0, wxEXPAND | wxALL, 4);
+
+    styled_text_ctrl_stats_history = new StatsOutputCtrl(
+        notebook_pane_stats_history, wxID_ANY, true);
+    styled_text_ctrl_stats_history->setClearHistoryCallback([this]() {
+        wxCommandEvent dummy;
+        OnStatsHistoryClear(dummy);
+    });
+    sizerHistPane->Add(styled_text_ctrl_stats_history, 1, wxEXPAND);
+    notebook_pane_stats_history->SetSizer(sizerHistPane);
+    if (config().get("SQLEditorShowStatsHistory", true))
+        notebook_1->AddPage(notebook_pane_stats_history, _("Statistics History"));
+    else
+        notebook_pane_stats_history->Hide();
 
     notebook_pane_2 = new wxPanel(notebook_1, -1);
     wxBoxSizer* sizer_data_pane = new wxBoxSizer(wxVERTICAL);
@@ -1849,7 +1872,10 @@ void ExecuteSqlFrame::OnMenuCopy(wxCommandEvent& WXUNUSED(event))
     if (viewModeM == vmEditor)
         styled_text_ctrl_sql->Copy();
     else if (viewModeM == vmLogCtrl)
-        styled_text_ctrl_stats->Copy();
+    {
+        if (StatsOutputCtrl* sc = getActiveStatsCtrl())
+            sc->Copy();
+    }
     else if (viewModeM == vmGrid)
         grid_data->copyToClipboard(false);
 }
@@ -1868,7 +1894,10 @@ void ExecuteSqlFrame::OnMenuUpdateCopy(wxUpdateUIEvent& event)
     if (viewModeM == vmEditor)
         enableCmd = styled_text_ctrl_sql->hasSelection();
     else if (viewModeM == vmLogCtrl)
-        enableCmd = styled_text_ctrl_stats->GetSelectionStart() != styled_text_ctrl_stats->GetSelectionEnd();
+    {
+        if (StatsOutputCtrl* sc = getActiveStatsCtrl())
+            enableCmd = sc->GetSelectionStart() != sc->GetSelectionEnd();
+    }
     else if (viewModeM == vmGrid)
         enableCmd = grid_data->getDataGridTable() && grid_data->GetNumberRows();
     event.Enable(enableCmd);
@@ -1912,7 +1941,10 @@ void ExecuteSqlFrame::OnMenuSelectAll(wxCommandEvent& WXUNUSED(event))
     if (viewModeM == vmEditor)
         styled_text_ctrl_sql->SelectAll();
     else if (viewModeM == vmLogCtrl)
-        styled_text_ctrl_stats->SelectAll();
+    {
+        if (StatsOutputCtrl* sc = getActiveStatsCtrl())
+            sc->SelectAll();
+    }
     else if (viewModeM == vmGrid)
         grid_data->SelectAll();
 }
@@ -1975,7 +2007,13 @@ void ExecuteSqlFrame::OnMenuHistoryNext(wxCommandEvent& WXUNUSED(event))
         StatementHistory::Position pos = historyPositionM + 1;
         wxString sql(pos == sh.size() ? localBuffer : sh.get(pos));
         if (setSql(sql))
+        {
             historyPositionM = pos;
+            if (pos == sh.size())
+                clearStatsHistoryNavigationHighlight();
+            else
+                syncStatsHistoryWithStatementHistory(pos, sql);
+        }
     }
 }
 
@@ -1990,17 +2028,34 @@ void ExecuteSqlFrame::OnMenuHistoryPrev(wxCommandEvent& WXUNUSED(event))
             localBuffer = styled_text_ctrl_sql->GetText();
         }
         StatementHistory::Position pos = historyPositionM - 1;
-        if (setSql(sh.get(pos)))
+        wxString sql = sh.get(pos);
+        if (setSql(sql))
+        {
             historyPositionM = pos;
+            syncStatsHistoryWithStatementHistory(pos, sql);
+        }
     }
 }
 
 void ExecuteSqlFrame::OnMenuHistorySearch(wxCommandEvent& WXUNUSED(event))
 {
     StatementHistory& sh = StatementHistory::get(databaseM);
-    StatementHistoryDialog *shf = new StatementHistoryDialog(this, &sh);
-    if (shf->ShowModal() == wxID_OK)
-        setSql(shf->getSql());
+    StatementHistoryDialog shf(this, &sh);
+    if (shf.ShowModal() == wxID_OK)
+    {
+        if (setSql(shf.getSql()))
+        {
+            if (shf.hasSelectedPosition())
+            {
+                historyPositionM = shf.getSelectedPosition();
+                syncStatsHistoryWithStatementHistory(historyPositionM, shf.getSql());
+            }
+            else
+            {
+                clearStatsHistoryNavigationHighlight();
+            }
+        }
+    }
 }
 
 void ExecuteSqlFrame::OnMenuUpdateHistoryNext(wxUpdateUIEvent& event)
@@ -2045,6 +2100,7 @@ void ExecuteSqlFrame::OnMenuShowPlan(wxCommandEvent& WXUNUSED(event))
 {
     if (isExecutingM || inParseStatementsM)
         return;
+    clearLogBeforeExecution();
     prepareAndExecute(true);
     if (notebook_1 && notebook_pane_plan)
     {
@@ -2072,6 +2128,7 @@ void ExecuteSqlFrame::OnMenuExplain(wxCommandEvent& WXUNUSED(event))
     if (sql.Trim().IsEmpty())
         return;
 
+    clearLogBeforeExecution();
     // Execute with EXPLAIN prefix. 
     // This will return a result set which FlameRobin will display in the grid.
     execute("EXPLAIN (FORMAT TREE) " + sql, ";");
@@ -3283,35 +3340,10 @@ void ExecuteSqlFrame::setupStyles()
 {
     styled_text_ctrl_sql->setupStyles();
 
-    stylerManager().assignGlobal(styled_text_ctrl_stats);
-    styled_text_ctrl_stats->SetWrapMode(wxSTC_WRAP_WORD);
-    
-    {
-        bool isDark = false;
-        FRStyle* globalStyle = stylerManager().getGlobalStyle();
-        if (globalStyle)
-        {
-            wxColour bg = globalStyle->getbgColor();
-            double luminance = bg.Red() * 0.299 + bg.Green() * 0.587 + bg.Blue() * 0.114;
-            if (luminance < 128)
-                isDark = true;
-        }
-        else
-        {
-            isDark = FRStyleManager::isEffectivelyDark();
-        }
-
-        if (isDark)
-        {
-            styled_text_ctrl_stats->StyleSetForeground(1, wxColour(255, 110, 110));
-            styled_text_ctrl_stats->StyleSetForeground(2, wxColour(135, 206, 250));
-        }
-        else
-        {
-            styled_text_ctrl_stats->StyleSetForeground(1, *wxRED);
-            styled_text_ctrl_stats->StyleSetForeground(2, *wxBLUE);
-        }
-    }
+    if (styled_text_ctrl_stats)
+        styled_text_ctrl_stats->setupStyles();
+    if (styled_text_ctrl_stats_history)
+        styled_text_ctrl_stats_history->setupStyles();
 
     grid_data->SetBackgroundColour(stylerManager().getDefaultStyle()->getbgColor());
     grid_data->setupStyles();
@@ -3327,10 +3359,136 @@ void ExecuteSqlFrame::setupStyles()
     }
 }
 
+void ExecuteSqlFrame::forEachStatsCtrl(
+    const std::function<void(StatsOutputCtrl*)>& fn)
+{
+    if (styled_text_ctrl_stats)
+        fn(styled_text_ctrl_stats);
+    if (styled_text_ctrl_stats_history)
+        fn(styled_text_ctrl_stats_history);
+}
+
+StatsOutputCtrl* ExecuteSqlFrame::getActiveStatsCtrl() const
+{
+    wxWindow* focused = FindFocus();
+    if (focused == styled_text_ctrl_stats_history)
+        return styled_text_ctrl_stats_history;
+    if (focused == styled_text_ctrl_stats)
+        return styled_text_ctrl_stats;
+    if (notebook_1 && notebook_pane_stats_history)
+    {
+        int histIdx = notebook_1->FindPage(notebook_pane_stats_history);
+        if (histIdx != wxNOT_FOUND && notebook_1->GetSelection() == histIdx)
+            return styled_text_ctrl_stats_history;
+    }
+    return styled_text_ctrl_stats;
+}
+
+void ExecuteSqlFrame::updateStatsHistoryTabVisibility()
+{
+    if (!notebook_1 || !notebook_pane_stats_history)
+        return;
+    bool showHist = config().get("SQLEditorShowStatsHistory", true);
+    int histIdx = notebook_1->FindPage(notebook_pane_stats_history);
+    if (showHist && histIdx == wxNOT_FOUND)
+    {
+        int statsIdx = notebook_1->FindPage(notebook_pane_1);
+        size_t insertPos = (statsIdx != wxNOT_FOUND)
+            ? static_cast<size_t>(statsIdx + 1) : 1;
+        notebook_1->InsertPage(insertPos, notebook_pane_stats_history,
+            _("Statistics History"));
+    }
+    else if (!showHist && histIdx != wxNOT_FOUND)
+    {
+        notebook_1->RemovePage(static_cast<size_t>(histIdx));
+        notebook_pane_stats_history->Hide();
+    }
+}
+
+void ExecuteSqlFrame::syncStatsHistoryWithStatementHistory(
+    StatementHistory::Position pos, const wxString& sql)
+{
+    if (!styled_text_ctrl_stats_history)
+        return;
+
+    const SessionStatsRunRecord* rec =
+        statsHistoryIndexM.findMatchingRun(pos, sql);
+    if (rec)
+    {
+        styled_text_ctrl_stats_history->highlightLineRange(
+            rec->startLine, rec->endLine);
+        if (label_stats_history_status)
+        {
+            label_stats_history_status->SetLabel(wxString::Format(
+                _("History match: #%d (%s)"),
+                rec->runId, rec->timeStr.c_str()));
+        }
+    }
+    else
+    {
+        styled_text_ctrl_stats_history->clearHistoryHighlight();
+        if (label_stats_history_status)
+        {
+            label_stats_history_status->SetLabel(
+                _("No statistics in current session for selected history item"));
+        }
+    }
+    if (notebook_pane_stats_history)
+        notebook_pane_stats_history->Layout();
+}
+
+void ExecuteSqlFrame::clearStatsHistoryNavigationHighlight()
+{
+    if (styled_text_ctrl_stats_history)
+        styled_text_ctrl_stats_history->clearHistoryHighlight();
+    if (label_stats_history_status)
+        label_stats_history_status->SetLabel(_("Session execution history"));
+    if (notebook_pane_stats_history)
+        notebook_pane_stats_history->Layout();
+}
+
+void ExecuteSqlFrame::OnStatsExpandAll(wxCommandEvent& WXUNUSED(event))
+{
+    if (styled_text_ctrl_stats)
+        styled_text_ctrl_stats->expandAll();
+}
+
+void ExecuteSqlFrame::OnStatsCollapseAll(wxCommandEvent& WXUNUSED(event))
+{
+    if (styled_text_ctrl_stats)
+        styled_text_ctrl_stats->collapseAll(currentRunStatementTotalM > 1);
+}
+
+void ExecuteSqlFrame::OnStatsHistoryExpandAll(wxCommandEvent& WXUNUSED(event))
+{
+    if (styled_text_ctrl_stats_history)
+        styled_text_ctrl_stats_history->expandAll();
+}
+
+void ExecuteSqlFrame::OnStatsHistoryCollapseAll(wxCommandEvent& WXUNUSED(event))
+{
+    if (styled_text_ctrl_stats_history)
+        styled_text_ctrl_stats_history->collapseAll(true);
+}
+
+void ExecuteSqlFrame::OnStatsHistoryClear(wxCommandEvent& WXUNUSED(event))
+{
+    if (styled_text_ctrl_stats_history)
+        styled_text_ctrl_stats_history->clearAllContent();
+    statsHistoryIndexM.clear();
+    clearStatsHistoryNavigationHighlight();
+}
+
 void ExecuteSqlFrame::clearLogBeforeExecution()
 {
-    if (config().get("SQLEditorExecuteClears", false))
-        styled_text_ctrl_stats->ClearAll();
+    ++sessionStatsRunCounterM;
+    currentRunStatementIndexM = 0;
+    currentRunStatementTotalM = 1;
+    executionRunStartedM = true;
+    clearStatsHistoryNavigationHighlight();
+
+    if (config().get("SQLEditorClearStatsOnExecute", true) && styled_text_ctrl_stats)
+        styled_text_ctrl_stats->clearAllContent();
 }
 
 void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly, bool fetchAll)
@@ -3385,9 +3543,16 @@ void ExecuteSqlFrame::prepareAndExecute(bool prepareOnly, bool fetchAll)
     {
         // add to history
         StatementHistory& sh = StatementHistory::get(databaseM);
-        sh.add(styled_text_ctrl_sql->GetText());
+        wxString histSql = styled_text_ctrl_sql->GetText();
+        sh.add(histSql);
         historyPositionM = sh.size();
+        if (historyPositionM > 0 && sessionStatsRunCounterM > 0)
+        {
+            statsHistoryIndexM.bindRunToHistory(
+                sessionStatsRunCounterM, historyPositionM - 1, histSql);
+        }
     }
+    executionRunStartedM = false;
 
     if (!inTransactionM)
         setViewMode(false, vmEditor);
@@ -3403,9 +3568,16 @@ void ExecuteSqlFrame::executeAllStatements(bool closeWhenDone)
     {
         // add buffer to history
         StatementHistory& sh = StatementHistory::get(databaseM);
-        sh.add(styled_text_ctrl_sql->GetText());
+        wxString histSql = styled_text_ctrl_sql->GetText();
+        sh.add(histSql);
         historyPositionM = sh.size();
+        if (historyPositionM > 0 && sessionStatsRunCounterM > 0)
+        {
+            statsHistoryIndexM.bindRunToHistory(
+                sessionStatsRunCounterM, historyPositionM - 1, histSql);
+        }
     }
+    executionRunStartedM = false;
 
     if (closeWhenDone && autoCommitM && !inTransactionM)
         Close();
@@ -3449,13 +3621,34 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
     wxWeakRef<wxWindow> selfRef(this);
 
     wxBusyCursor cr;
+    if (!executionRunStartedM)
+        clearLogBeforeExecution();
+    {
+        MultiStatement countMs(statements);
+        int totalStmts = 0;
+        while (true)
+        {
+            SingleStatement css = countMs.getNextStatement();
+            if (!css.isValid())
+                break;
+            wxString dummy;
+            if (!css.isCommitStatement() && !css.isRollbackStatement()
+                && !css.isSetTermStatement(dummy) && !css.isSetAutoDDLStatement(dummy)
+                && !css.isEmptyStatement())
+            {
+                ++totalStmts;
+            }
+        }
+        currentRunStatementTotalM = (totalStmts > 0) ? totalStmts : 1;
+    }
+
     MultiStatement ms(statements);
     int statementsSinceYield = 0;
     while (true)
     {
         if (cancelExecutionM.load())
         {
-            ScrollAtEnd sae(styled_text_ctrl_stats);
+            ScrollAtEnd sae(styled_text_ctrl_stats, styled_text_ctrl_stats_history);
             log(_("Script execution cancelled by user."), ttError);
             recoverAfterCancel();
             return false;
@@ -3546,8 +3739,9 @@ bool ExecuteSqlFrame::parseStatements(const wxString& statements,
         // TODO: HOWTO focus toolbar button? button_commit->SetFocus();
     }
 
-    ScrollAtEnd sae(styled_text_ctrl_stats);
-    log(_("Script execution finished."));
+    ScrollAtEnd sae(styled_text_ctrl_stats, styled_text_ctrl_stats_history);
+    if (currentRunStatementTotalM > 1)
+        log(_("Script execution finished."));
     return true;
 }
 
@@ -3556,30 +3750,33 @@ void ExecuteSqlFrame::OnMenuUpdateWhenExecutePossible(wxUpdateUIEvent& event)
     event.Enable(!closeWhenTransactionDoneM && !isExecutingM && !inParseStatementsM);
 }
 
-void ExecuteSqlFrame::compareCounts(std::map<int, fr::CountInfo>& one,
+std::vector<StatsTableActivityItem> ExecuteSqlFrame::collectTableActivity(
+    std::map<int, fr::CountInfo>& one,
     std::map<int, fr::CountInfo>& two)
 {
+    std::vector<StatsTableActivityItem> result;
     for (auto const& [relId, r1] : two)
     {
-        wxString str_log;
         auto i2 = one.find(relId);
         fr::CountInfo r2;
         if (i2 != one.end())
             r2 = i2->second;
 
+        StatsTableActivityItem item;
         if (r1.inserts > r2.inserts)
-            str_log += wxString::Format(_("%d inserts. "), r1.inserts - r2.inserts);
+            item.inserts = r1.inserts - r2.inserts;
         if (r1.updates > r2.updates)
-            str_log += wxString::Format(_("%d updates. "), r1.updates - r2.updates);
+            item.updates = r1.updates - r2.updates;
         if (r1.deletes > r2.deletes)
-            str_log += wxString::Format(_("%d deletes. "), r1.deletes - r2.deletes);
+            item.deletes = r1.deletes - r2.deletes;
         if (r1.readIndex > r2.readIndex)
-            str_log += wxString::Format(_("%d reads index. "), r1.readIndex - r2.readIndex);
+            item.indexedReads = r1.readIndex - r2.readIndex;
         if (r1.readSequence > r2.readSequence)
-            str_log += wxString::Format(_("%d reads sequence. "), r1.readSequence - r2.readSequence);
-        if (!str_log.IsEmpty())
+            item.sequentialReads = r1.readSequence - r2.readSequence;
+
+        if (item.inserts > 0 || item.updates > 0 || item.deletes > 0
+            || item.indexedReads > 0 || item.sequentialReads > 0)
         {
-            wxString relName;
             try
             {
                 fr::IStatementPtr st = databaseM->getDALDatabase()->createStatement(transactionM);
@@ -3590,16 +3787,33 @@ void ExecuteSqlFrame::compareCounts(std::map<int, fr::CountInfo>& one,
                 st->execute();
                 if (st->fetch())
                 {
-                    relName = std2wxIdentifier(st->getString(0), databaseM->getCharsetConverter());
+                    item.relationName = std2wxIdentifier(
+                        st->getString(0), databaseM->getCharsetConverter());
                 }
             }
             catch (...)
             {
             }
-            if (relName.IsEmpty())
-                relName.Format(_("Relation #%d"), relId);
-            log(relName + ": " + str_log, ttSql);
+            if (item.relationName.IsEmpty())
+                item.relationName.Format(_("Relation #%d"), relId);
+            result.push_back(item);
         }
+    }
+    return result;
+}
+
+void ExecuteSqlFrame::compareCounts(std::map<int, fr::CountInfo>& one,
+    std::map<int, fr::CountInfo>& two)
+{
+    auto items = collectTableActivity(one, two);
+    if (!items.empty())
+    {
+        StatsExpandPrefs prefs = loadStatsExpandPrefs(config());
+        auto groupLines = StatsFormatter::formatTableActivityGroup(
+            items, prefs.expandTableReads);
+        forEachStatsCtrl([&](StatsOutputCtrl* ctrl) {
+            ctrl->appendGroupLines(groupLines);
+        });
     }
 }
 
@@ -3850,7 +4064,10 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         grid_data->getDataGridTable()->stopBackgroundFetch();
     }
 
-    ScrollAtEnd sae(styled_text_ctrl_stats);
+    if (!inParseStatementsM && !executionRunStartedM)
+        clearLogBeforeExecution();
+
+    ScrollAtEnd sae(styled_text_ctrl_stats, styled_text_ctrl_stats_history);
 
     // check if sql only contains comments
     SqlTokenizer tk(sql);
@@ -3869,6 +4086,8 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     {
         log(_("Parsed statement: ") + sql, ttSql);
         log(_("Empty statement detected, bailing out..."));
+        if (!inParseStatementsM)
+            executionRunStartedM = false;
         return true;
     }
     
@@ -3879,20 +4098,94 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     {
         log(_("Cannot use 'CONNECT' or 'CREATE DATABASE' statement in a SQL script"), ttError);
         splitScreen();
+        if (!inParseStatementsM)
+            executionRunStartedM = false;
         return false;
     }
     else if (stm.getAction() == actDISCONNECT)
     {
         log(_("Cannot use 'DISCONNECT' statement in a SQL script"), ttError);
         splitScreen();
+        if (!inParseStatementsM)
+            executionRunStartedM = false;
         return false;
     }
     if (styled_text_ctrl_sql->AutoCompActive())
         styled_text_ctrl_sql->AutoCompCancel();    // remove the list if needed
-    notebook_1->SetSelection(0);
+    int statsPageIdx = notebook_1->FindPage(notebook_pane_1);
+    if (statsPageIdx != wxNOT_FOUND)
+        notebook_1->SetSelection(statsPageIdx);
+
+    const StatsExpandPrefs expandPrefs = loadStatsExpandPrefs(config());
+    ++currentRunStatementIndexM;
+    const wxString runLabel = StatsFormatter::formatRunLabel(
+        sessionStatsRunCounterM, currentRunStatementIndexM, currentRunStatementTotalM);
+    const wxString runTimeStr = wxDateTime::Now().Format("%H:%M:%S");
+    const wxString sqlPreview = StatsFormatter::extractSqlPreview(sql);
+
+    if (styled_text_ctrl_stats)
+        styled_text_ctrl_stats->beginStatementRun(runLabel, runTimeStr, sqlPreview);
+    if (styled_text_ctrl_stats_history)
+    {
+        int histStartLine = styled_text_ctrl_stats_history->beginStatementRun(
+            runLabel, runTimeStr, sqlPreview);
+        statsHistoryIndexM.startRun(
+            sessionStatsRunCounterM, runTimeStr, histStartLine);
+    }
+    statementStatsBlockOpenM = true;
+
     wxStopWatch swTotal;
     bool retval = true;
+    bool wasCancelled = false;
     long waitForParameterInputTime = 0;
+
+    struct StatementStatsGuard
+    {
+        ExecuteSqlFrame* frame;
+        wxStopWatch* sw;
+        long* waitTime;
+        bool* ok;
+        bool* cancelled;
+        bool prepareOnlyFlag;
+        ~StatementStatsGuard()
+        {
+            if (frame->statementStatsBlockOpenM)
+            {
+                wxString totalStr = millisToTimeString(sw->Time() - *waitTime);
+                wxString headerStatus = totalStr;
+                if (*cancelled)
+                    headerStatus += " - " + wxString(_("CANCELLED"));
+                else if (!*ok)
+                    headerStatus += " - " + wxString(_("ERROR"));
+                else if (prepareOnlyFlag)
+                    headerStatus += " - " + wxString(_("prepared"));
+
+                if (!prepareOnlyFlag)
+                {
+                    wxString totalLine = wxString::Format(
+                        _("  Total execution time: %s"), totalStr.c_str());
+                    frame->forEachStatsCtrl([&](StatsOutputCtrl* ctrl) {
+                        ctrl->appendStandaloneLine(
+                            totalLine, StatsStyle::GroupHeader, 1);
+                    });
+                }
+
+                frame->forEachStatsCtrl([&](StatsOutputCtrl* ctrl) {
+                    ctrl->finishStatementRun(headerStatus, !*ok || *cancelled);
+                });
+                frame->statementStatsBlockOpenM = false;
+            }
+            if (frame->styled_text_ctrl_stats_history && frame->sessionStatsRunCounterM > 0)
+            {
+                frame->statsHistoryIndexM.updateRunEndLine(
+                    frame->sessionStatsRunCounterM,
+                    frame->styled_text_ctrl_stats_history->getLastContentLine());
+            }
+            if (!frame->inParseStatementsM)
+                frame->executionRunStartedM = false;
+        }
+    } statsGuard{this, &swTotal, &waitForParameterInputTime, &retval, &wasCancelled, prepareOnly};
+
     try
     {
         // Tear down any previous statement, open cursor, and row/BLOB buffers
@@ -3912,9 +4205,10 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             statementM = nullptr;
         }
 
+        bool startedTransactionNow = false;
         if (!isTransactionStarted())
         {
-            log(_("Starting transaction..."));
+            startedTransactionNow = true;
 
             if (transactionM == nullptr)
                 transactionM = databaseM->getDALDatabase()->createTransaction();
@@ -3947,6 +4241,9 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
                 transactionM->setIsolationLevel(level);
                 transactionM->setLockResolution(resolution);
             }
+            forEachStatsCtrl([&](StatsOutputCtrl* ctrl) {
+                ctrl->beginPrepareGroup(sql, startedTransactionNow);
+            });
             sae.scroll();
             flushLogView();
             transactionM->start();
@@ -3967,9 +4264,14 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             databaseM->getDALDatabase()->getDetailedCounts(counts1);
         }
         statementM = databaseM->getDALDatabase()->createStatement(transactionM);
-        log(_("Preparing statement: ") + sql, ttSql);
-        sae.scroll();
-        flushLogView();
+        if (!startedTransactionNow)
+        {
+            forEachStatsCtrl([&](StatsOutputCtrl* ctrl) {
+                ctrl->beginPrepareGroup(sql, false);
+            });
+            sae.scroll();
+            flushLogView();
+        }
         {
             std::string stdSql = wx2std(sql, databaseM->getCharsetConverter());
             SqlWorkerResult prepRes = runOnWorkerThread([this, &stdSql]() {
@@ -3977,13 +4279,12 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             });
             if (prepRes.outcome == SqlExecutionOutcome::Cancelled)
             {
+                wasCancelled = true;
                 splitScreen();
                 log(_("Statement execution cancelled by user."), ttError);
                 recoverAfterCancel();
                 statusbar_1->SetStatusText(_("Execution cancelled"), 3);
                 retval = false;
-                log(wxString::Format(_("Total execution time: %s"),
-                    millisToTimeString(swTotal.Time() - waitForParameterInputTime).c_str()));
                 return retval;
             }
             else if (prepRes.outcome == SqlExecutionOutcome::Error)
@@ -3995,12 +4296,13 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
                 splitScreen();
                 log(_("SYSTEM ERROR!"), ttError);
                 retval = false;
-                log(wxString::Format(_("Total execution time: %s"),
-                    millisToTimeString(swTotal.Time() - waitForParameterInputTime).c_str()));
                 return retval;
             }
-            log(wxString::Format(_("Statement prepared (elapsed time: %s)."),
-                millisToTimeString(prepRes.elapsedMillis).c_str()));
+            wxString prepTimeStr = millisToTimeString(prepRes.elapsedMillis);
+            forEachStatsCtrl([&](StatsOutputCtrl* ctrl) {
+                ctrl->completePrepareGroup(
+                    sql, startedTransactionNow, prepTimeStr, expandPrefs.expandPrepare);
+            });
         }
 
         bool hasColumns = false;
@@ -4008,8 +4310,10 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         {
             int cols = statementM->getColumnCount();
             hasColumns = cols > 0;
-            if (doShowStats)
+            if (doShowStats && cols > 0)
             {
+                std::vector<wxString> fieldLines;
+                fieldLines.reserve(static_cast<size_t>(cols));
                 for (int i = 0; i < cols; i++)
                 {
                     wxString tablename(std2wxIdentifier(statementM->getColumnTable(i),
@@ -4018,7 +4322,8 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
                         databaseM->getCharsetConverter()));
                     wxString aliasname(std2wxIdentifier(statementM->getColumnAlias(i),
                         databaseM->getCharsetConverter()));
-                    log(wxString::Format(_("Field #%02d: %s.%s Alias:%s Type:%s len: %d scale: %d"),
+                    fieldLines.push_back(wxString::Format(
+                        _("Field #%02d: %s.%s Alias:%s Type:%s len: %d scale: %d"),
                         i + 1, tablename.c_str(), colname.c_str(), aliasname.c_str(),
                         DALtype2string(
                             databaseM,
@@ -4026,10 +4331,14 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
                             statementM->getColumnSubtype(i),
                             statementM->getColumnSize(i),
                             statementM->getColumnScale(i)).c_str(),
-                            statementM->getColumnSize(i),
-                            statementM->getColumnScale(i)
-                        ), ttSql);
+                        statementM->getColumnSize(i),
+                        statementM->getColumnScale(i)));
                 }
+                auto fldGroup = StatsFormatter::formatFieldsGroup(
+                    fieldLines, expandPrefs.expandFields);
+                forEachStatsCtrl([&](StatsOutputCtrl* ctrl) {
+                    ctrl->appendGroupLines(fldGroup);
+                });
             }
         }
         catch(std::exception&)    // reading column info might fail,
@@ -4040,12 +4349,20 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         {
             std::string plan = statementM->getPlan();
             wxString planStr(plan.c_str(), *databaseM->getCharsetConverter());
-            log(planStr);
+            auto planGroup = StatsFormatter::formatPlanGroup(
+                planStr, expandPrefs.expandPlan);
+            forEachStatsCtrl([&](StatsOutputCtrl* ctrl) {
+                ctrl->appendGroupLines(planGroup);
+            });
             updateQueryPlanTree(planStr);
         }
         catch(std::exception&)
         {
-            log(_("Plan not available."));
+            auto planGroup = StatsFormatter::formatPlanGroup(
+                _("Plan not available."), expandPrefs.expandPlan);
+            forEachStatsCtrl([&](StatsOutputCtrl* ctrl) {
+                ctrl->appendGroupLines(planGroup);
+            });
         }
 
         // The "Statement prepared" text and the plan must be painted before
@@ -4056,9 +4373,14 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         if (prepareOnly)
             return true;
 
-        log(wxString::Format(_("Parameters: %d"), statementM->getParameterCount() ));
+        int paramCount = statementM->getParameterCount();
+        auto paramGroup = StatsFormatter::formatParametersGroup(
+            paramCount, expandPrefs.expandParameters);
+        forEachStatsCtrl([&](StatsOutputCtrl* ctrl) {
+            ctrl->appendGroupLines(paramGroup);
+        });
         //Define parameters here:
-        if (statementM->getParameterCount() > 0)
+        if (paramCount > 0)
         {
             //Insert parameters here:
             InsertParametersDialog* id = new InsertParametersDialog(this, statementM,
@@ -4066,9 +4388,6 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             id->ShowModal();
             waitForParameterInputTime = id->swWaitForParameterInputTime.Time();
         }
-
-        log(wxEmptyString);
-        log(wxEmptyString);
 
         int64_t profileSessionId = 0;
         bool profilingStarted = false;
@@ -4127,22 +4446,24 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             wxLogDebug("ExecuteSqlFrame::execute() - Profiling disabled by configuration.");
         }
 
-        log(_("Executing statement..."));
+        forEachStatsCtrl([](StatsOutputCtrl* ctrl) {
+            ctrl->beginExecutionGroup();
+        });
         sae.scroll();
         flushLogView();
+        wxString execElapsedStr;
         {
             SqlWorkerResult execRes = runOnWorkerThread([this]() {
                 statementM->execute();
             });
             if (execRes.outcome == SqlExecutionOutcome::Cancelled)
             {
+                wasCancelled = true;
                 splitScreen();
                 log(_("Statement execution cancelled by user."), ttError);
                 recoverAfterCancel();
                 statusbar_1->SetStatusText(_("Execution cancelled"), 3);
                 retval = false;
-                log(wxString::Format(_("Total execution time: %s"),
-                    millisToTimeString(swTotal.Time() - waitForParameterInputTime).c_str()));
                 return retval;
             }
             else if (execRes.outcome == SqlExecutionOutcome::Error)
@@ -4154,12 +4475,9 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
                 splitScreen();
                 log(_("SYSTEM ERROR!"), ttError);
                 retval = false;
-                log(wxString::Format(_("Total execution time: %s"),
-                    millisToTimeString(swTotal.Time() - waitForParameterInputTime).c_str()));
                 return retval;
             }
-            log(wxString::Format(_("Statement executed (elapsed time: %s)."),
-                millisToTimeString(execRes.elapsedMillis).c_str()));
+            execElapsedStr = millisToTimeString(execRes.elapsedMillis);
         }
 
         if (profilingStarted)
@@ -4236,6 +4554,43 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             grid_data->ForceRefresh();
         }
 
+        wxString affectedRowsSummary;
+        if (type != fr::StatementType::Select && !hasColumns)
+        {
+            if (type == fr::StatementType::Insert || type == fr::StatementType::Delete
+                || type == fr::StatementType::ExecProcedure || type == fr::StatementType::Update
+                || type == fr::StatementType::Merge)
+            {
+                try
+                {
+                    int affectedRows = statementM->getAffectedRows();
+                    wxString addon = (affectedRows % 10 != 1) ? "s" : "";
+                    affectedRowsSummary = wxString::Format(
+                        _("%d row%s affected directly."), affectedRows, addon.c_str());
+                    statusbar_1->SetStatusText(affectedRowsSummary, 1);
+                }
+                catch (std::exception&)
+                {
+                }
+            }
+        }
+        else if (type != fr::StatementType::Select && hasColumns)
+        {
+            try
+            {
+                int affectedRows = statementM->getAffectedRows();
+                wxString addon = (affectedRows % 10 != 1) ? "s" : "";
+                affectedRowsSummary = wxString::Format(
+                    _("%d row%s affected directly."), affectedRows, addon.c_str());
+            }
+            catch (...) {}
+        }
+
+        forEachStatsCtrl([&](StatsOutputCtrl* ctrl) {
+            ctrl->completeExecutionGroup(
+                execElapsedStr, affectedRowsSummary, expandPrefs.expandExecution);
+        });
+
         if (doShowStats)
         {
             databaseM->getDALDatabase()->getStatistics(
@@ -4243,21 +4598,25 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             databaseM->getDALDatabase()->getCounts(
                 &ins2, &upd2, &del2, &ridx2, &rseq2);
 
-            log(_("--- Execution Statistics & Buffer Metrics ---"), ttSql);
-            log(wxString::Format(
-                _("Page Buffer Metrics -> Fetches: %d | Reads: %d | Writes: %d | Marks: %d"),
-                fetch2-fetch1, read2-read1, write2-write1, mark2-mark1));
-            log(wxString::Format(
-                _("Record I/O Metrics  -> Indexed Reads (ridx): %d | Sequential Scans (rseq): %d"),
-                ridx2-ridx1, rseq2-rseq1));
-            log(wxString::Format(
-                _("DML Modifications   -> Inserts: %d | Updates: %d | Deletes: %d"),
-                ins2-ins1, upd2-upd1, del2-del1));
-            log(wxString::Format(_("Memory Consumption  -> Delta Memory: %d bytes"), mem2-mem1));
+            auto bufGroup = StatsFormatter::formatBufferMetricsGroup(
+                fetch2 - fetch1, read2 - read1, write2 - write1, mark2 - mark1,
+                expandPrefs.expandBufferMetrics);
+            auto recGroup = StatsFormatter::formatRecordMetricsGroup(
+                ridx2 - ridx1, rseq2 - rseq1, expandPrefs.expandRecordMetrics);
+            auto dmlGroup = StatsFormatter::formatDmlMetricsGroup(
+                ins2 - ins1, upd2 - upd1, del2 - del1, expandPrefs.expandDmlMetrics);
+            auto memGroup = StatsFormatter::formatMemoryMetricsGroup(
+                mem2 - mem1, expandPrefs.expandMemoryMetrics);
+
+            forEachStatsCtrl([&](StatsOutputCtrl* ctrl) {
+                ctrl->appendGroupLines(bufGroup);
+                ctrl->appendGroupLines(recGroup);
+                ctrl->appendGroupLines(dmlGroup);
+                ctrl->appendGroupLines(memGroup);
+            });
 
             databaseM->getDALDatabase()->getDetailedCounts(counts2);
             compareCounts(counts1, counts2);
-            log(_("----------------------------------------------"), ttSql);
         }
 
         if (type != fr::StatementType::Select && !hasColumns) // for other statements: show rows affected
@@ -4265,27 +4624,6 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
             wxString::size_type p = sql.find_first_not_of(" \n\t\r");
             if (p != wxString::npos && p > 0)
                 sql.erase(0, p);
-            if (type == fr::StatementType::Insert || type == fr::StatementType::Delete
-                || type == fr::StatementType::ExecProcedure || type == fr::StatementType::Update
-                || type == fr::StatementType::Merge)
-            {
-                // INSERT INTO..RETURNING and EXECUTE PROCEDURE may throw
-                // when they return a single record
-                try
-                {
-                    wxString addon;
-                    int affectedRows = statementM->getAffectedRows();
-                    if (affectedRows % 10 != 1)
-                        addon = "s";
-                    wxString s = wxString::Format(_("%d row%s affected directly."),
-                        affectedRows, addon.c_str());
-                    log("" + s);
-                    statusbar_1->SetStatusText(s, 1);
-                }
-                catch (std::exception&)
-                {
-                }
-            }
             if (stm.isDDL())
                 type = fr::StatementType::DDL;
             executedStatementsM.push_back(stm);
@@ -4298,16 +4636,6 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         }
         else if (type != fr::StatementType::Select && hasColumns)
         {
-            // For DML with RETURNING, still show affected rows in the log
-            try
-            {
-                int affectedRows = statementM->getAffectedRows();
-                wxString addon = (affectedRows % 10 != 1) ? "s" : "";
-                wxString s = wxString::Format(_("%d row%s affected directly."),
-                    affectedRows, addon.c_str());
-                log("" + s);
-            }
-            catch (...) {}
             executedStatementsM.push_back(stm);
         }
     }
@@ -4315,7 +4643,7 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
     {
         splitScreen();
         wxString msg(wxString::FromUTF8(e.what()));
-        log(_("Error: ") + msg + "\n", ttError);
+        log(_("Error: ") + msg, ttError);
         retval = false;
     }
     catch (...)
@@ -4324,9 +4652,6 @@ bool ExecuteSqlFrame::execute(wxString sql, const wxString& terminator,
         log(_("SYSTEM ERROR!"), ttError);
         retval = false;
     }
-
-    log(wxString::Format(_("Total execution time: %s"),
-        millisToTimeString(swTotal.Time() - waitForParameterInputTime).c_str()));
 
     // Note: autofit-on-execute is handled inside DataGrid::fetchData,
     // which is the single place a fresh result set is rendered. A second
@@ -4439,7 +4764,7 @@ bool ExecuteSqlFrame::commitTransaction()
     closeBlobEditor(true);
 
     wxBusyCursor cr;
-    ScrollAtEnd sae(styled_text_ctrl_stats);
+    ScrollAtEnd sae(styled_text_ctrl_stats, styled_text_ctrl_stats_history);
 
     try
     {
@@ -4507,7 +4832,9 @@ bool ExecuteSqlFrame::commitTransaction()
         return false;
     }
 
-    notebook_1->SetSelection(0);
+    int statsIdx = notebook_1->FindPage(notebook_pane_1);
+    if (statsIdx != wxNOT_FOUND)
+        notebook_1->SetSelection(statsIdx);
 
     // apparently is has to be at the end to have any effect
     setViewMode(vmEditor);
@@ -4541,7 +4868,7 @@ bool ExecuteSqlFrame::rollbackTransaction()
 
     closeBlobEditor(false);
 
-    ScrollAtEnd sae(styled_text_ctrl_stats);
+    ScrollAtEnd sae(styled_text_ctrl_stats, styled_text_ctrl_stats_history);
 
     try
     {
@@ -4593,7 +4920,9 @@ bool ExecuteSqlFrame::rollbackTransaction()
         return false;
     }
 
-    notebook_1->SetSelection(0);
+    int statsIdx = notebook_1->FindPage(notebook_pane_1);
+    if (statsIdx != wxNOT_FOUND)
+        notebook_1->SetSelection(statsIdx);
     setViewMode(vmEditor);
     return true;
 }
@@ -4776,7 +5105,7 @@ void ExecuteSqlFrame::OnGridRowCountChanged(wxCommandEvent& event)
 
 void ExecuteSqlFrame::OnGridStatementExecuted(wxCommandEvent& event)
 {
-    ScrollAtEnd sae(styled_text_ctrl_stats);
+    ScrollAtEnd sae(styled_text_ctrl_stats, styled_text_ctrl_stats_history);
     log(event.GetString(), ttSql);
     if (menuBarM->IsChecked(Cmds::DataGrid_Log_changes))
     {
@@ -4817,6 +5146,7 @@ void ExecuteSqlFrame::OnGridLabelLeftDClick(wxGridEvent& event)
     // rebuild SQL statement with different ORDER BY clause
     sstm.orderBy(column);
 
+    clearLogBeforeExecution();
     execute(sstm.getStatement(), wxEmptyString);
 }
 
@@ -4827,10 +5157,11 @@ void ExecuteSqlFrame::OnSplitterUnsplit(wxSplitterEvent& WXUNUSED(event))
         setViewMode(vmEditor);
     else if (splitter_window_1->GetWindow1() == notebook_1)
     {
-        if (notebook_1->GetSelection() == 0)
-            setViewMode(vmLogCtrl);
-        else
+        int dataIdx = notebook_1->FindPage(notebook_pane_2);
+        if (notebook_1->GetSelection() == dataIdx)
             setViewMode(vmGrid);
+        else
+            setViewMode(vmLogCtrl);
     }
 }
 
@@ -4838,6 +5169,7 @@ void ExecuteSqlFrame::update()
 {
     if (databaseM && !databaseM->isConnected())
         Close();
+    updateStatsHistoryTabVisibility();
     setupStyles();
 }
 
@@ -4907,19 +5239,37 @@ void ExecuteSqlFrame::setKeywords()
 // or we can also log to some .txt file, etc.
 void ExecuteSqlFrame::log(wxString s, TextType type)
 {
-    int startpos = styled_text_ctrl_stats->GetLength();
-    styled_text_ctrl_stats->SetCurrentPos(startpos);
-    styled_text_ctrl_stats->AddText(s + "\n");
-    int endpos = styled_text_ctrl_stats->GetLength();
-
-    int style = 0;
+    StatsStyle style = StatsStyle::Default;
     if (type == ttError)
-        style = 1;
-    if (type == ttSql)
-        style = 2;
+        style = StatsStyle::Error;
+    else if (type == ttSql)
+        style = StatsStyle::Sql;
 
-    styled_text_ctrl_stats->StartStyling(startpos);
-    styled_text_ctrl_stats->SetStyling(endpos-startpos-1, style);
+    int foldDepth = statementStatsBlockOpenM ? 1 : 0;
+    wxString normalized = s;
+    normalized.Replace("\r\n", "\n");
+    normalized.Replace("\r", "\n");
+    if (normalized.EndsWith("\n"))
+        normalized.RemoveLast();
+
+    wxArrayString lines = wxSplit(normalized, '\n', '\0');
+    if (lines.empty())
+        lines.Add(wxEmptyString);
+
+    for (const wxString& line : lines)
+    {
+        wxString prefixed = (foldDepth > 0 && !line.empty()) ? ("  " + line) : line;
+        forEachStatsCtrl([&](StatsOutputCtrl* ctrl) {
+            ctrl->appendStandaloneLine(prefixed, style, foldDepth);
+        });
+    }
+    if (statementStatsBlockOpenM && styled_text_ctrl_stats_history
+        && sessionStatsRunCounterM > 0)
+    {
+        statsHistoryIndexM.updateRunEndLine(
+            sessionStatsRunCounterM,
+            styled_text_ctrl_stats_history->getLastContentLine());
+    }
 }
 
 //! Synchronously repaints the log and plan views (issue #747).
@@ -4934,6 +5284,11 @@ void ExecuteSqlFrame::flushLogView()
     {
         styled_text_ctrl_stats->Refresh();
         styled_text_ctrl_stats->Update();
+    }
+    if (styled_text_ctrl_stats_history)
+    {
+        styled_text_ctrl_stats_history->Refresh();
+        styled_text_ctrl_stats_history->Update();
     }
     if (tree_query_plan)
     {
@@ -5027,9 +5382,20 @@ void ExecuteSqlFrame::setViewMode(bool splitView, ViewMode mode)
 
     // select notebook pane first (could still be invisible)
     if (mode == vmLogCtrl)
-        notebook_1->SetSelection(0);
+    {
+        int curSel = notebook_1->GetSelection();
+        int histIdx = notebook_pane_stats_history
+            ? notebook_1->FindPage(notebook_pane_stats_history) : wxNOT_FOUND;
+        int statsIdx = notebook_1->FindPage(notebook_pane_1);
+        if (curSel != histIdx && statsIdx != wxNOT_FOUND)
+            notebook_1->SetSelection(statsIdx);
+    }
     else if (mode == vmGrid)
-        notebook_1->SetSelection(1);
+    {
+        int dataIdx = notebook_1->FindPage(notebook_pane_2);
+        if (dataIdx != wxNOT_FOUND)
+            notebook_1->SetSelection(dataIdx);
+    }
 
     // split if necessary
     if (splitView && !splitter_window_1->IsSplit())
@@ -5075,7 +5441,10 @@ void ExecuteSqlFrame::setViewMode(bool splitView, ViewMode mode)
     if (mode == vmEditor)
         styled_text_ctrl_sql->SetFocus();
     else if (mode == vmLogCtrl)
-        styled_text_ctrl_stats->SetFocus();
+    {
+        if (StatsOutputCtrl* sc = getActiveStatsCtrl())
+            sc->SetFocus();
+    }
     else if (mode == vmGrid)
     {
         if (notebook_pane_2 && notebook_pane_2->GetSizer())
@@ -5093,8 +5462,11 @@ void ExecuteSqlFrame::updateViewMode()
     wxWindow* focused = FindFocus();
     if (focused == styled_text_ctrl_sql)
         viewModeM = vmEditor;
-    else if (focused == styled_text_ctrl_stats)
+    else if (focused == styled_text_ctrl_stats
+        || focused == styled_text_ctrl_stats_history)
+    {
         viewModeM = vmLogCtrl;
+    }
     else if (focused == grid_data || grid_data->IsCellEditControlEnabled()
         || focused == grid_data->GetGridWindow()
         || focused == grid_data->GetGridColLabelWindow()
