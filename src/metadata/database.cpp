@@ -1751,6 +1751,7 @@ void Database::loadCollections(ProgressIndicator* progressIndicator)
     pih.init(_("User Collations"), collectionCount, 17);
     collationsM->load(progressIndicator);
 
+    setChildrenLoaded(true);
 }
 
 void Database::loadDatabaseInfoFromEngine()
@@ -2606,24 +2607,9 @@ const DatabaseODSVersion& Database::getODSVersion() const
     return databaseODSVersionM;
 }
 
-void Database::invalidate()
-{
-    if (isConnected() && databaseDAL_M)
-    {
-        try
-        {
-            loadDatabaseInfoFromEngine();
-            loadDatabaseInfoFromRDBDatabase();
-        }
-        catch (...)
-        {
-        }
-    }
-    MetadataItem::invalidate();
-}
-
 void Database::loadProperties()
 {
+    MetadataItem::loadProperties();
     if (isConnected() && databaseDAL_M)
     {
         try
@@ -2635,7 +2621,7 @@ void Database::loadProperties()
         {
         }
     }
-    MetadataItem::loadProperties();
+    setPropertiesLoaded(true);
 }
 
 void Database::reloadInfo()

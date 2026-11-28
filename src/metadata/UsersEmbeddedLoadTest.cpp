@@ -370,7 +370,6 @@ void Database::lockChildren() {}
 void Database::unlockChildren() {}
 bool Database::getChildren(std::vector<MetadataItem*>&) { return false; }
 void Database::loadProperties() { MetadataItem::loadProperties(); }
-void Database::invalidate() { MetadataItem::invalidate(); }
 
 MetadataLoaderTransaction::MetadataLoaderTransaction(MetadataLoader*) {}
 MetadataLoaderTransaction::~MetadataLoaderTransaction() {}
