@@ -48,6 +48,7 @@ private:
     void extendSelection(int direction);
     void notifyIfUnfetchedData();
     void showPopupMenu(wxPoint cursorPos);
+    void updatePrefetchFromViewport();
     void updateRowHeights();
 public:
     DataGrid(wxWindow* parent, wxWindowID id);
@@ -66,6 +67,7 @@ private:
     void OnIdle(wxIdleEvent& event);
     void OnKeyDown(wxKeyEvent& event);
     void OnMouseWheel(wxMouseEvent& event);
+    void OnScrollWin(wxScrollWinEvent& event);
     void OnThumbRelease(wxScrollWinEvent& event);
     void OnEditorCreated(wxGridEditorCreatedEvent& event);
     void OnEditorKeyDown(wxKeyEvent& event);

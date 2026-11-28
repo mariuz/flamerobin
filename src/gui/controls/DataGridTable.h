@@ -109,6 +109,7 @@ private:
     };
     std::thread backgroundFilterThreadM;
     FilterGenerationTracker filterTrackerM;
+    ViewportPrefetchTracker prefetchTrackerM;
     std::atomic<bool> filterInProgressM{false};
     std::mutex filterResultMutexM;
     CompletedFilterResult completedFilterM;
@@ -168,6 +169,8 @@ public:
     bool isReadonlyColumn(int col);
     bool isBlobColumn(int col, bool* pIsTextual = 0);
     bool needsMoreRowsFetched();
+    void updatePrefetchTargetForViewport(int firstVisibleRow, int lastVisibleRow, int cursorRow);
+    unsigned getMaxRowToFetch() const { return maxRowToFetchM; }
     void setFetchAllRecords(bool fetchall);
     bool canInsertRows();
     bool canRemoveRow(size_t row);

@@ -95,4 +95,70 @@ bool filterRowRangeCancellable(
     std::vector<size_t>& outMatches,
     size_t cancelCheckInterval = 256);
 
+// Tracks visible-viewport-driven on-demand row prefetching (#782).
+// Decoupling this from DataGridTable::GetValue() prevents non-scrolling callers
+// (AutoSizeColumns, AutoSizeRows, Windows UI Automation / IAccessible, copy,
+// sum timer) from triggering runaway fetch loops when GridFetchAllRecords is off.
+class ViewportPrefetchTracker
+{
+private:
+    int lastFilterTriggerBottomRowM = -1;
+    int lastFilterTriggerViewRowsM = -1;
+
+public:
+    static constexpr int kLookaheadRows = 20;
+    static constexpr unsigned kBatchSize = 100;
+
+    void reset()
+    {
+        lastFilterTriggerBottomRowM = -1;
+        lastFilterTriggerViewRowsM = -1;
+    }
+
+    unsigned evaluate(
+        int firstVisibleRow,
+        int lastVisibleRow,
+        int cursorRow,
+        int viewRowCount,
+        unsigned loadedRowCount,
+        unsigned currentMaxRowToFetch,
+        bool allRowsFetched,
+        bool fetchAllRows,
+        bool hasActiveFilter)
+    {
+        if (allRowsFetched || fetchAllRows || viewRowCount <= 0 || lastVisibleRow < 0)
+            return currentMaxRowToFetch;
+
+        if (currentMaxRowToFetch > loadedRowCount)
+            return currentMaxRowToFetch;
+
+        int bottomRow = lastVisibleRow;
+        if (cursorRow > bottomRow && cursorRow < viewRowCount)
+            bottomRow = cursorRow;
+
+        if (bottomRow + kLookaheadRows < viewRowCount)
+            return currentMaxRowToFetch;
+
+        if (hasActiveFilter)
+        {
+            if (firstVisibleRow <= 0)
+                return currentMaxRowToFetch;
+            if (bottomRow == lastFilterTriggerBottomRowM
+                && viewRowCount == lastFilterTriggerViewRowsM)
+            {
+                return currentMaxRowToFetch;
+            }
+            lastFilterTriggerBottomRowM = bottomRow;
+            lastFilterTriggerViewRowsM = viewRowCount;
+        }
+        else
+        {
+            lastFilterTriggerBottomRowM = -1;
+            lastFilterTriggerViewRowsM = -1;
+        }
+
+        return loadedRowCount + kBatchSize;
+    }
+};
+
 #endif // FR_DATAGRIDFILTERUTILS_H

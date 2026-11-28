@@ -32,6 +32,7 @@
     #include <wx/wx.h>
 #endif
 
+#include "gui/controls/DataGridFilterUtils.h"
 #include "gui/controls/DataGridRowBuffer.h"
 
 namespace
@@ -264,6 +265,78 @@ int main()
 
         for (auto b : fullDataset)
             delete b;
+    }
+
+    // Test 6: Regression test for Issue #782 ("All records are fetched")
+    // Simulates a 2,903-row query with GridFetchAllRecords = false where non-scrolling
+    // callers (AutoSizeColumns, AutoSizeRows with gridShowMultilineText = true, UIA)
+    // read all loaded cells while the viewport stays at the top (rows 0..24).
+    {
+        const unsigned TOTAL_ROWS = 2903;
+        unsigned loadedRows = 100;
+        unsigned maxRowToFetch = 100;
+        bool allRowsFetched = false;
+        const bool fetchAllRows = false;
+
+        ViewportPrefetchTracker tracker;
+
+        // Simulate repeated AutoSizeColumns / AutoSizeRows / UIA sweeps reading rows 0..99
+        // while the user has NOT scrolled (viewport shows rows 0..24, cursor at row 0).
+        for (int idlePass = 0; idlePass < 10; ++idlePass)
+        {
+            maxRowToFetch = tracker.evaluate(
+                0, 24, 0, (int)loadedRows, loadedRows, maxRowToFetch,
+                allRowsFetched, fetchAllRows, false);
+        }
+
+        ok = check(maxRowToFetch == 100,
+            "Non-scrolling AutoSize/UIA sweeps do not advance maxRowToFetch beyond 100 (Issue #782)") && ok;
+        ok = check(loadedRows == 100,
+            "Only initial 100 of 2,903 rows remain loaded without user scroll") && ok;
+
+        // User scrolls down so visible viewport is rows 60..85 (within 20 rows of 100).
+        maxRowToFetch = tracker.evaluate(
+            60, 85, 0, (int)loadedRows, loadedRows, maxRowToFetch,
+            allRowsFetched, fetchAllRows, false);
+        ok = check(maxRowToFetch == 200,
+            "Scrolling viewport to row 85 advances maxRowToFetch from 100 to 200") && ok;
+
+        // Next batch of 100 rows arrives (loadedRows becomes 200 < 2903).
+        // Even if AutoSizeRows(false) runs again on rows 0..199, viewport is still at 60..85.
+        loadedRows = 200;
+        allRowsFetched = (loadedRows >= TOTAL_ROWS);
+        for (int idlePass = 0; idlePass < 5; ++idlePass)
+        {
+            maxRowToFetch = tracker.evaluate(
+                60, 85, 0, (int)loadedRows, loadedRows, maxRowToFetch,
+                allRowsFetched, fetchAllRows, false);
+        }
+        ok = check(maxRowToFetch == 200,
+            "After loading second batch (200 rows), stationary viewport at 60..85 stops fetching") && ok;
+
+        // Active filter narrowing 200 loaded rows to 3 visible matches at top of viewport (0..2)
+        // must NOT trigger runaway fetching when un-scrolled at firstVisibleRow == 0.
+        tracker.reset();
+        maxRowToFetch = tracker.evaluate(
+            0, 2, 0, 3, loadedRows, maxRowToFetch,
+            allRowsFetched, fetchAllRows, true);
+        ok = check(maxRowToFetch == 200,
+            "Filtered view with 3 matches at top (firstVisibleRow == 0) does not runaway-fetch") && ok;
+
+        // Filtered view with 50 matches scrolled to 25..45 triggers one batch (200 -> 300),
+        // and does not loop if the new batch adds zero matching rows (viewRowCount stays 50).
+        maxRowToFetch = tracker.evaluate(
+            25, 45, 0, 50, loadedRows, maxRowToFetch,
+            allRowsFetched, fetchAllRows, true);
+        ok = check(maxRowToFetch == 300,
+            "Scrolling filtered view near bottom triggers one 100-row batch (maxRowToFetch == 300)") && ok;
+
+        loadedRows = 300;
+        maxRowToFetch = tracker.evaluate(
+            25, 45, 0, 50, loadedRows, maxRowToFetch,
+            allRowsFetched, fetchAllRows, true);
+        ok = check(maxRowToFetch == 300,
+            "Filtered view does not infinite-loop when newly fetched batch adds 0 matches") && ok;
     }
 
     std::cout << "DataGrid Large Fetch Regression Tests completed: "

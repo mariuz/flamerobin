@@ -33,6 +33,8 @@
     #include <wx/wx.h>
 #endif
 
+#include "gui/controls/DataGridFilterUtils.h"
+
 namespace
 {
 
@@ -68,6 +70,7 @@ private:
     unsigned maxRowToFetchM = 100;
     bool allRowsFetchedM = false;
     bool fetchAllRowsM = false;
+    ViewportPrefetchTracker prefetchTrackerM;
 
 public:
     void updateRowMapping()
@@ -186,19 +189,24 @@ public:
         if (realRow < 0)
             return wxEmptyString;
 
-        // On-demand fetching check using view row position
-        if (!allRowsFetchedM && !fetchAllRowsM)
-        {
-            if ((unsigned)row + 20 >= (unsigned)GetNumberRows())
-            {
-                if (maxRowToFetchM <= (unsigned)rowsM.size())
-                    maxRowToFetchM = (unsigned)rowsM.size() + 100;
-            }
-        }
-
         if (isInternalFieldNull(realRow, col))
             return "[null]";
         return getInternalFieldValue(realRow, col);
+    }
+
+    void updatePrefetchTargetForViewport(int firstVisibleRow,
+        int lastVisibleRow, int cursorRow)
+    {
+        maxRowToFetchM = prefetchTrackerM.evaluate(
+            firstVisibleRow,
+            lastVisibleRow,
+            cursorRow,
+            GetNumberRows(),
+            (unsigned)rowsM.size(),
+            maxRowToFetchM,
+            allRowsFetchedM,
+            fetchAllRowsM,
+            !currentFilterTextM.IsEmpty());
     }
 
     void sortColumn(int col, bool ascending = true)
@@ -211,6 +219,7 @@ public:
     void filterRows(const wxString& filterText)
     {
         currentFilterTextM = filterText;
+        prefetchTrackerM.reset();
         updateRowMapping();
     }
 
@@ -221,6 +230,7 @@ public:
         sortAscendingM = true;
         filterOrSortActiveM = false;
         rowMappingM.clear();
+        prefetchTrackerM.reset();
     }
 
     void appendBatch(const std::vector<RowData>& newRows)
@@ -356,11 +366,16 @@ int main()
         // View row 0 = "0" (database row 99), view row 85 = "85" (database row 14)
         table.sortColumn(0, true);
 
-        // In the bug, accessing view row 85 tested realRow (14) + 20 >= 100 (34 >= 100 -> FALSE),
-        // which caused maxRowToFetchM to stay 100 and halted further data retrieval!
-        // With the fix, view row 85 tests row (85) + 20 >= 100 (105 >= 100 -> TRUE),
-        // correctly updating maxRowToFetchM to 200!
-        table.GetValue(85, 0);
+        // Reading cells via GetValue (e.g. AutoSizeColumns / AutoSizeRows) without scrolling
+        // must NOT advance maxRowToFetchM (#782).
+        table.GetValue(99, 0);
+        table.updatePrefetchTargetForViewport(0, 24, 0);
+        ok = check(table.getMaxRowToFetch() == 100,
+            "Reading row 99 via GetValue while viewport is at 0..24 keeps maxRowToFetch == 100 (#782)") && ok;
+
+        // Scrolling viewport to view row 85 (where database realRow is 14) tests view row 85 + 20 >= 100,
+        // advancing maxRowToFetchM to 200 (#689 + #782).
+        table.updatePrefetchTargetForViewport(60, 85, 0);
 
         ok = check(table.getMaxRowToFetch() == 200,
             "Scrolling near boundary in sorted view triggers fetch boundary increase (maxRowToFetch == 200)") && ok;

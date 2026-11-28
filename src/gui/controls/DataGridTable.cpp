@@ -107,6 +107,7 @@ void DataGridTable::Clear()
     sortAscendingM = true;
     filterOrSortActiveM = false;
     currentFilterTextM.Clear();
+    prefetchTrackerM.reset();
     originalColLabelsM.clear();
 
     unsigned oldCols = rowsM.getRowFieldCount();
@@ -708,16 +709,6 @@ wxString DataGridTable::GetValue(int row, int col)
         if (realRow < 0)
             return wxEmptyString;
 
-        // On-demand fetching: Only request more rows when scrolling near the loaded boundary
-        if (!allRowsFetchedM && !fetchAllRowsM)
-        {
-            if ((unsigned)row + 20 >= (unsigned)GetNumberRows())
-            {
-                if (maxRowToFetchM <= rowsM.getRowCount())
-                    maxRowToFetchM = rowsM.getRowCount() + 100;
-            }
-        }
-
         if (rowsM.isFieldNA(realRow, col))
             return "N/A";
         if (rowsM.isFieldNull(realRow, col))
@@ -748,6 +739,7 @@ void DataGridTable::initialFetch(bool readonly)
     canInsertRowsIsSetM = false;
     canInsertRowsM = false;
     maxRowToFetchM = 100;
+    prefetchTrackerM.reset();
 
     try
     {
@@ -851,6 +843,21 @@ bool DataGridTable::needsMoreRowsFetched()
     // true if all rows are to be fetched, or more rows should be cached
     // for more responsive grid scrolling
     return (fetchAllRowsM || rowsM.getRowCount() < maxRowToFetchM);
+}
+
+void DataGridTable::updatePrefetchTargetForViewport(
+    int firstVisibleRow, int lastVisibleRow, int cursorRow)
+{
+    maxRowToFetchM = prefetchTrackerM.evaluate(
+        firstVisibleRow,
+        lastVisibleRow,
+        cursorRow,
+        GetNumberRows(),
+        rowsM.getRowCount(),
+        maxRowToFetchM,
+        allRowsFetchedM.load(std::memory_order_relaxed),
+        fetchAllRowsM,
+        !currentFilterTextM.IsEmpty());
 }
 
 void DataGridTable::setFetchAllRecords(bool fetchall)
@@ -1195,6 +1202,7 @@ void DataGridTable::startFilterRowsAsync(const wxString& filterText)
 {
     stopBackgroundFilter();
     currentFilterTextM = filterText;
+    prefetchTrackerM.reset();
 
     const int numCols = GetNumberCols();
     const bool hasSort = (sortedColM >= 0 && sortedColM < numCols);
@@ -1334,6 +1342,7 @@ void DataGridTable::filterRows(const wxString& filterText)
 {
     stopBackgroundFilter();
     currentFilterTextM = filterText;
+    prefetchTrackerM.reset();
     updateRowMapping();
     notifyViewRowsChanged();
 }
@@ -1384,6 +1393,7 @@ void DataGridTable::clearFilterAndSort()
 {
     stopBackgroundFilter();
     currentFilterTextM.Clear();
+    prefetchTrackerM.reset();
     sortedColM = -1;
     sortAscendingM = true;
     filterOrSortActiveM = false;

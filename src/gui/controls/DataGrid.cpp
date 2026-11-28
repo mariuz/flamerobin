@@ -1347,6 +1347,7 @@ BEGIN_EVENT_TABLE(DataGrid, wxGrid)
     //  EVT_GRID_EDITOR_HIDDEN( DataGrid::OnEditorHidden )
     EVT_KEY_DOWN(DataGrid::OnKeyDown)
     EVT_TIMER(DataGrid::TIMER_ID, DataGrid::OnTimer)
+    EVT_SCROLLWIN(DataGrid::OnScrollWin)
 #ifdef __WXGTK__
     EVT_MOUSEWHEEL(DataGrid::OnMouseWheel)
     EVT_SCROLLWIN_THUMBRELEASE(DataGrid::OnThumbRelease)
@@ -1597,6 +1598,41 @@ void DataGrid::OnFilterDone(wxCommandEvent& WXUNUSED(event))
     }
 }
 
+void DataGrid::updatePrefetchFromViewport()
+{
+    if (!IsShownOnScreen())
+        return;
+
+    DataGridTable* table = getDataGridTable();
+    if (!table || !table->canFetchMoreRows() || table->getFetchAllRows())
+        return;
+
+    int numRows = GetNumberRows();
+    if (numRows <= 0)
+        return;
+
+    wxWindow* gridWin = GetGridWindow();
+    if (!gridWin)
+        return;
+
+    wxSize clientSize = gridWin->GetClientSize();
+    if (clientSize.GetHeight() <= 0)
+        return;
+
+    int topUnscrolledY = 0;
+    int bottomUnscrolledY = 0;
+    CalcUnscrolledPosition(0, 0, nullptr, &topUnscrolledY);
+    CalcUnscrolledPosition(0, clientSize.GetHeight() - 1, nullptr, &bottomUnscrolledY);
+
+    int firstVisibleRow = YToRow(topUnscrolledY, true);
+    int lastVisibleRow = YToRow(bottomUnscrolledY, true);
+    if (lastVisibleRow < 0)
+        return;
+
+    table->updatePrefetchTargetForViewport(
+        firstVisibleRow, lastVisibleRow, GetGridCursorRow());
+}
+
 void DataGrid::OnIdle(wxIdleEvent& event)
 {
     DataGridTable* table = getDataGridTable();
@@ -1624,6 +1660,8 @@ void DataGrid::OnIdle(wxIdleEvent& event)
         table->startBackgroundFetch();
         return;
     }
+
+    updatePrefetchFromViewport();
 
     if (table->needsMoreRowsFetched())
     {
@@ -1697,6 +1735,12 @@ void DataGrid::OnMouseWheel(wxMouseEvent& event)
         y -= 5;
     Scroll(x,y);
     AdjustScrollbars();
+}
+
+void DataGrid::OnScrollWin(wxScrollWinEvent& event)
+{
+    wxWakeUpIdle();
+    event.Skip();
 }
 
 void DataGrid::OnThumbRelease(wxScrollWinEvent& event)
