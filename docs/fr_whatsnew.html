@@ -8,6 +8,24 @@
 http://www.flamerobin.org/bugs.php or https://github.com/mariuz/flamerobin/issues</font><br>
 <br><br>
 <!-- *********************** section starts here ************************ -->
+<font size=+2>Changes in FlameRobin 26.11.10</font><br>
+<br><br>
+
+<font size=+1 color="#AA0000"><B>SQL Editor Statistics &amp; History (#780)</B></font><br>
+<br>
+- <b>Current-Statement Statistics &amp; Dedicated Statistics History Tab (#780)</b>: Updated the <b>Statistics</b> tab to display only the current execution by default (keeping all <code>#N.1</code>, <code>#N.2</code>, ... sub-statements of a multi-statement script together), and added a separate <b>Statistics History</b> tab retaining all executions from the current SQL editor session with <b>Expand All</b>, <b>Collapse All</b>, and <b>Clear</b> actions.<br>
+- <b>Collapsible Sections, Highlighting &amp; Statement History Sync (#780)</b>: Replaced plain dashed separators with Scintilla-foldable execution banners and nested sections (<code>Prepare</code>, <code>Fields</code>, <code>Query Plan</code>, <code>Parameters</code>, <code>Execution</code>, <code>Page Buffer Metrics</code>, <code>Record I/O Metrics</code>, <code>DML Modifications</code>, <code>Memory Consumption</code>, and <code>Per-Table Activity</code>), theme-aware light/dark highlighting (including warning highlights for physical disk reads/writes, sequential scans, and natural/full scans), configurable default-expanded checkboxes under <b>Preferences -&gt; SQL Editor -&gt; Statistics</b>, and automatic jump-and-highlight in <b>Statistics History</b> when navigating Statement History.<br>
+<br>
+
+<font size=+1 color="#AA0000"><B>Data Grid &amp; Metadata Loading Performance (#782, #793)</B></font><br>
+<br>
+- <b>Fix On-Demand DataGrid Prefetching (#782)</b>: Tied on-demand row prefetching when <b>Automatically fetch all records in result set</b> (<code>GridFetchAllRecords</code>) is unchecked to actual visible scroll viewport rows instead of <code>DataGridTable::GetValue()</code>, preventing non-scrolling cell reads (<code>AutoSizeColumns</code>, <code>AutoSizeRows</code> with multiline display, and Windows UI Automation / <code>IAccessible</code>) from fetching the entire result set.<br>
+- <b>Use Cached Metadata Statements (#793)</b>: Switched metadata queries in <code>Users::load()</code>, <code>Function</code> (<code>loadChildren</code>, <code>getOwner</code>, <code>getSqlSecurity</code>, <code>getPrivileges</code>, <code>FunctionSQL::getSource</code>), and <code>Generator::loadProperties()</code> to <code>MetadataLoader::getStatement()</code>, saving statement re-prepare roundtrips on remote databases.<br>
+<br><br>
+
+<!-- ***************************** section ends here ******************* -->
+
+<!-- *********************** section starts here ************************ -->
 <font size=+2>Changes in FlameRobin 26.11.9</font><br>
 <br><br>
 
